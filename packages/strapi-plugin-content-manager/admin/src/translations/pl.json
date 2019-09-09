@@ -84,7 +84,7 @@
   "error.validation.required": "Wpisanie wartości dla tego atrybutu jest wymagane.",
   "form.Input.description": "Opis",
   "form.Input.description.placeholder": "Display name in the profile",
-  "form.Input.disabled": "Edytowalne pole",
+  "form.Input.editable": "Edytowalne pole",
   "form.Input.label": "Etykieta",
   "form.Input.placeholder": "Placeholder",
   "form.Input.placeholder.placeholder": "Moja wartość",

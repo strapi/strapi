@@ -16,6 +16,7 @@ import {
   split,
   includes,
 } from 'lodash';
+/* eslint-disable */
 
 import InputNumber from '../InputNumber';
 import InputText from '../InputText';
@@ -65,7 +66,7 @@ const WithFormSection = InnerComponent =>
       }
     }
 
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
       if (
         nextProps.section !== this.props.section ||
         nextProps.cancelAction !== this.props.cancelAction

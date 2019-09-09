@@ -17,6 +17,7 @@
   "main": "./lib",
   "dependencies": {
     "bookshelf": "^0.15.1",
+    "date-fns": "^1.30.1",
     "inquirer": "^6.3.1",
     "lodash": "^4.17.11",
     "pluralize": "^7.0.0",
@@ -30,7 +31,7 @@
     ]
   },
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "test": "echo not tests yet"
   },
   "author": {
     "email": "hi@strapi.io",

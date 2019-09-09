@@ -83,6 +83,14 @@ export class AuthPage extends React.Component {
     return get(formErrors, ['0', 'errors', '0', 'id']);
   };
 
+  getLogo = () => {
+    const {
+      assets: { loginLogo },
+    } = this.props;
+
+    return loginLogo || LogoStrapi;
+  };
+
   setForm = () => {
     const {
       location: { search },
@@ -202,7 +210,7 @@ export class AuthPage extends React.Component {
   renderLogo = () =>
     this.isAuthType('register') && (
       <div className={styles.logoContainer}>
-        <img src={LogoStrapi} alt="logo" />
+        <img src={this.getLogo()} alt="logo" />
       </div>
     );
 
@@ -246,12 +254,55 @@ export class AuthPage extends React.Component {
     const isForgotEmailSent =
       this.isAuthType('forgot-password') && submitSuccess;
     return map(inputs, (input, key) => {
-      const label = isForgotEmailSent
+      let label = isForgotEmailSent
         ? {
-          id:
+            id:
               'users-permissions.Auth.form.forgot-password.email.label.success',
-        }
+          }
         : get(input, 'label');
+
+      if (input.name === 'news') {
+        const handleClick = (e, to) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const win = window.open(`https://strapi.io/${to}`, '_blank');
+          win.focus();
+        };
+
+        const terms = (
+          <FormattedMessage
+            id={`${pluginId}.Auth.privacy-policy-agreement.terms`}
+          >
+            {content => (
+              <span
+                style={{ color: '#0097f7', cursor: 'pointer' }}
+                onClick={e => handleClick(e, 'terms')}
+              >
+                {content}
+              </span>
+            )}
+          </FormattedMessage>
+        );
+        const policy = (
+          <FormattedMessage
+            id={`${pluginId}.Auth.privacy-policy-agreement.policy`}
+          >
+            {content => (
+              <span
+                style={{ color: '#0097f7', cursor: 'pointer' }}
+                onClick={e => handleClick(e, 'policy')}
+              >
+                {content}
+              </span>
+            )}
+          </FormattedMessage>
+        );
+
+        label = () => (
+          <FormattedMessage id={input.label.id} values={{ terms, policy }} />
+        );
+      }
 
       return (
         <Input
@@ -278,6 +329,7 @@ export class AuthPage extends React.Component {
 
   render() {
     const { modifiedData, noErrorsDescription, submitSuccess } = this.props;
+
     let divStyle = this.isAuthType('register')
       ? { marginTop: '3.2rem' }
       : { marginTop: '.9rem' };
@@ -293,7 +345,7 @@ export class AuthPage extends React.Component {
             {this.isAuthType('register') ? (
               <FormattedMessage id="users-permissions.Auth.form.header.register" />
             ) : (
-              <img src={LogoStrapi} alt="logo" />
+              <img src={this.getLogo()} alt="logo" />
             )}
           </div>
           <div className={styles.headerDescription}>
@@ -307,7 +359,7 @@ export class AuthPage extends React.Component {
               styles.formContainer,
               this.isAuthType('forgot-password') && submitSuccess
                 ? styles.borderedSuccess
-                : styles.bordered,
+                : styles.bordered
             )}
             style={divStyle}
           >
@@ -346,7 +398,12 @@ AuthPage.contextTypes = {
   updatePlugin: PropTypes.func,
 };
 
+AuthPage.defaultProps = {
+  assets: { loginLogo: null },
+};
+
 AuthPage.propTypes = {
+  assets: PropTypes.object,
   didCheckErrors: PropTypes.bool.isRequired,
   formErrors: PropTypes.array.isRequired,
   hideLoginErrorsInput: PropTypes.func.isRequired,
@@ -373,13 +430,13 @@ function mapDispatchToProps(dispatch) {
       setForm,
       submit,
     },
-    dispatch,
+    dispatch
   );
 }
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 const withReducer = window.strapi.injectReducer({
   key: 'authPage',
@@ -391,5 +448,5 @@ const withSaga = window.strapi.injectSaga({ key: 'authPage', saga, pluginId });
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
+  withConnect
 )(AuthPage);

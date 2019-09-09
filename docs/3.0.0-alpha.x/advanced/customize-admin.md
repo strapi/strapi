@@ -7,6 +7,7 @@ See the [Contributing Guide](https://github.com/strapi/strapi/blob/master/CONTRI
 ## Files structure
 
 The entire logic of the admin panel is located in a single folder named `./admin/`. This directory contains the following structure:
+
 ```
 /admin
 └─── admin
@@ -31,7 +32,7 @@ The entire logic of the admin panel is located in a single folder named `./admin
 └─── packages.json // Admin's npm dependencies
 ```
 
-***
+---
 
 ## Customization
 
@@ -42,6 +43,7 @@ The administration panel can be customized according to your needs, so you can m
 By default, the administration panel is exposed via [http://localhost:1337/admin](http://localhost:1337/admin). However, for security reasons, you can easily update this path.
 
 **Path —** `./config/environment/**/server.json`.
+
 ```json
 {
   "host": "localhost",
@@ -89,9 +91,10 @@ The changes should be automatically visible.
 ### Fonts
 
 Fonts can also be overridden:
- - Add the fonts files you need in `./admin/admin/src/styles/fonts`.
- - Import them from `./admin/admin/src/styles/base/fonts.scss`.
- - Use them by replacing the variables' values in `./admin/admin/src/styles/variables/variables.bootstrap.scss`.
+
+- Add the fonts files you need in `./admin/admin/src/styles/fonts`.
+- Import them from `./admin/admin/src/styles/base/fonts.scss`.
+- Use them by replacing the variables' values in `./admin/admin/src/styles/variables/variables.bootstrap.scss`.
 
 ### Logo
 
@@ -101,7 +104,7 @@ To change the top-left displayed admin panel's logo, replace the image located a
 make sure the size of your image is the same as the existing one (434px x 120px).
 :::
 
-***
+---
 
 ## Build
 
@@ -119,7 +122,7 @@ After you have built the admininistration you can now create a new project to de
 You should now create a project without `--dev`
 :::
 
-***
+---
 
 ## Deployment
 
@@ -138,6 +141,7 @@ You don't need to touch anything in your configuration file. This is the default
 You might want to change the path to access to the administration panel. Here the required configurations to change the path:
 
 **Path —** `./config/environment/**/server.json`.
+
 ```js
 {
   "host": "localhost",
@@ -161,6 +165,7 @@ You might want to change the path to access to the administration panel. Here th
 It's very common to deploy the front-end and the back-end on different servers. Here the required configurations to handle this case:
 
 **Path —** `./config/environment/**/server.json`.
+
 ```js
 {
   "host": "localhost",
@@ -190,10 +195,10 @@ The administration URL will be http://yourfrontend.com and every request from th
 How it is possible? The API (the Strapi server) owns the plugin and these plugins are exposed through `http://yourbackend.com/admin/**/main.js`
 :::
 
-
 The DOM should look like this:
 
 **Path —** `./admin/admin/build/index.html`.
+
 ```html
 <html>
   <head></head>
@@ -217,6 +222,7 @@ The plugins are injected using the `./admin/admin/build/config/plugins.json`. To
 In this case, we suppose that you decided to put your administration and the plugins on the same server but on a different server as the API.
 
 **Path —** `./config/environment/**/server.json`.
+
 ```js
 {
   "host": "localhost",
@@ -243,6 +249,7 @@ In this case, we suppose that you decided to put your administration and the plu
 The administration URL will be http://yourfrontend.com/dashboard and every request from the panel will hit the backend at http://yourbackend.com. The plugins will be injected through the `host`. It means that the plugins URLs will use the host URL as the origin. So the plugins URLs will be `http://yourfrontend.com/dashboard/plugins/content-manager/main.js`.
 
 We also added a `folder` setting to separate the plugins from the administration build. In your server, the files structure should look like this:
+
 ```
 - src/
   - 0bd35bad03d09ca61ac6cce225112e36.svg
@@ -274,6 +281,7 @@ We also added a `folder` setting to separate the plugins from the administration
 The generated `index.html` will look like this:
 
 **Path —** `./admin/admin/build/index.html`.
+
 ```html
 <html>
   <head></head>
@@ -287,6 +295,7 @@ The generated `index.html` will look like this:
   </body>
 </html>
 ```
+
 ::: note
 The plugins are injected using the `./admin/admin/build/config/plugins.json`. To see the plugins URLs in the `index.html`, you need to launch the administration panel in the browser.
 :::

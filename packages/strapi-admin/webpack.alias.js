@@ -2,6 +2,7 @@ const alias = [
   'object-assign',
   'whatwg-fetch',
   '@babel/polyfill',
+  'buffetjs',
   'classnames',
   'history',
   'hoist-non-react-statics',
@@ -13,7 +14,6 @@ const alias = [
   'react-dnd',
   'react-dnd-html5-backend',
   'react-dom',
-  'react-ga',
   'react-helmet',
   'react-loadable',
   'react-redux',
@@ -26,6 +26,7 @@ const alias = [
   'remove-markdown',
   'reselect',
   'styled-components',
+  'yup',
 ];
 
 module.exports = alias.reduce((acc, curr) => {

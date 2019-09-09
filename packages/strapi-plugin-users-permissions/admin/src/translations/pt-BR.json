@@ -35,7 +35,7 @@
   "Auth.form.register.confirmPassword.label": "Senha de Confirmação",
   "Auth.form.register.email.label": "E-mail",
   "Auth.form.register.email.placeholder": "johndoe@gmail.com",
-  "Auth.form.register.news.label": "Mantenha-me atualizado sobre os novos recursos e melhorias futuras",
+
   "Auth.form.register.password.label": "Senha",
   "Auth.form.register.username.label": "Username",
   "Auth.form.register.username.placeholder": "John Doe",

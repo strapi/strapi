@@ -1,27 +1,16 @@
 /**
-*
-* Block
-*
-*/
+ *
+ * Block
+ *
+ */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import styles from './styles.scss';
+import styled from 'styled-components';
 
-function Block({ children }) {
-  return (
-    <div className={styles.block}>
-      {children}
-    </div>
-  );
-}
-
-Block.defaultProps = {
-  children: null,
-};
-
-Block.propTypes = {
-  children: PropTypes.node,
-};
+const Block = styled.div`
+  padding: 1.8rem 0 0 0;
+  border-radius: 0.2rem;
+  background-color: #ffffff;
+  box-shadow: 0 0.2rem 0.4rem 0 #e3e9f3;
+`;
 
 export default Block;

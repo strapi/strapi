@@ -27,7 +27,7 @@ class ConfigPage extends React.Component {
     this.getSettings(this.props);
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     // Get new settings on navigation change
     if (nextProps.match.params.env !== this.props.match.params.env) {
       this.getSettings(nextProps);
@@ -79,8 +79,8 @@ class ConfigPage extends React.Component {
       get(
         this.props.settings,
         ['providers', this.getSelectedProviderIndex(), 'auth'],
-        {},
-      ),
+        {}
+      )
     ).reduce((acc, current) => {
       if (isEmpty(get(this.props.modifiedData, current, ''))) {
         acc.push({
@@ -174,7 +174,7 @@ function mapDispatchToProps(dispatch) {
       setErrors,
       submit,
     },
-    dispatch,
+    dispatch
   );
 }
 
@@ -182,7 +182,7 @@ const mapStateToProps = selectConfigPage();
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 
 const withReducer = strapi.injectReducer({
@@ -195,5 +195,5 @@ const withSaga = strapi.injectSaga({ key: 'configPage', saga, pluginId });
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
+  withConnect
 )(ConfigPage);
