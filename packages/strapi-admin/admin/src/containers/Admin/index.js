@@ -301,7 +301,7 @@ Admin.propTypes = {
   getSecuredData: PropTypes.func.isRequired,
   global: PropTypes.shape({
     blockApp: PropTypes.bool,
-    currentEnvironment: PropTypes.string.isRequired,
+    currentEnvironment: PropTypes.string,
     overlayBlockerData: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
     plugins: PropTypes.object,
     showGlobalAppBlocker: PropTypes.bool,
