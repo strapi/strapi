@@ -38,7 +38,7 @@
   "Auth.form.register.confirmPassword.label": "Parola Tekrarı",
   "Auth.form.register.email.label": "E-posta",
   "Auth.form.register.email.placeholder": "johndoe@gmail.com",
-  "Auth.form.register.news.label": "Yeni özellikler ve yaklaşan iyileştirmeler hakkında beni haberdar edin.",
+
   "Auth.form.register.password.label": "Parola",
   "Auth.form.register.username.label": "Kullanıcı Adı",
   "Auth.form.register.username.placeholder": "John Doe",

@@ -8,9 +8,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
+import attributeIcons from '../../utils/attributeIcons';
 import pluginId from '../../pluginId';
 
-import assets from '../AttributeLi/assets';
 import styles from './styles.scss';
 
 class AttributeOption extends React.Component {
@@ -52,7 +52,7 @@ class AttributeOption extends React.Component {
           ref={this.button}
         >
           <div className={styles.card}>
-            <img src={assets[type]} alt="ico" />
+            <img src={attributeIcons[type]} alt="ico" />
             <FormattedMessage
               id={`${pluginId}.popUpForm.attributes.${type}.name`}
             >

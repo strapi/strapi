@@ -51,7 +51,7 @@ export class HomePage extends React.Component {
     deleteData: this.props.deleteData,
   });
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     if (!isEmpty(this.props.location.search)) {
       const _page = parseInt(this.getURLParams('_page'), 10);
       const _limit = parseInt(this.getURLParams('_limit'), 10);
@@ -64,7 +64,7 @@ export class HomePage extends React.Component {
     this.props.getData();
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.deleteSuccess !== this.props.deleteSuccess) {
       this.props.getData();
     }
@@ -97,9 +97,7 @@ export class HomePage extends React.Component {
     const search =
       e.target.name === 'params._limit'
         ? `_page=${params._page}&_limit=${e.target.value}&_sort=${params._sort}`
-        : `_page=${e.target.value}&_limit=${params._limit}&_sort=${
-          params._sort
-        }`;
+        : `_page=${e.target.value}&_limit=${params._limit}&_sort=${params._sort}`;
     this.props.history.push({
       pathname: history.pathname,
       search,
@@ -159,6 +157,7 @@ export class HomePage extends React.Component {
         <div className="col-md-12">
           <PageFooter
             count={this.props.entriesNumber}
+            context={{ emitEvent: () => {} }}
             onChangeParams={this.handleChangeParams}
             params={this.props.params}
           />
@@ -212,7 +211,7 @@ function mapDispatchToProps(dispatch) {
       onSearch,
       setParams,
     },
-    dispatch,
+    dispatch
   );
 }
 
@@ -220,7 +219,7 @@ const mapStateToProps = selectHomePage();
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 
 const withReducer = strapi.injectReducer({
@@ -233,5 +232,5 @@ const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
+  withConnect
 )(injectIntl(HomePage));

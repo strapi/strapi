@@ -74,8 +74,16 @@ module.exports = {
    * @return {Promise}
    */
 
-  create(values) {
-    return strapi.query(Product).create(values);
+  async create(data, { files } = {}) {
+    const entry = await strapi.query(model).create(data);
+
+    if (files) {
+      // automatically uploads the files based on the entry and the model
+      await this.uploadFiles(entry, files, { model });
+      return this.findOne({ id: entry.id });
+    }
+
+    return entry;
   },
 };
 ```
@@ -90,8 +98,16 @@ module.exports = {
    * @return {Promise}
    */
 
-  update(params, values) {
-    return strapi.query(Product).update(params, values);
+  async update(params, data, { files } = {}) {
+    const entry = await strapi.query(model).update(params, data);
+
+    if (files) {
+      // automatically uploads the files based on the entry and the model
+      await this.uploadFiles(entry, files, { model });
+      return this.findOne({ id: entry.id });
+    }
+
+    return entry;
   },
 };
 ```

@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const { models: utilsModels } = require('strapi-utils');
+const { singular } = require('pluralize');
 
 /* global StrapiConfigs */
 module.exports = async ({
@@ -9,35 +9,16 @@ module.exports = async ({
   connection,
   model,
 }) => {
-  const quote = definition.client === 'pg' ? '"' : '`';
+  const { hasTimestamps } = loadedModel;
+
+  let [createAtCol, updatedAtCol] = ['created_at', 'updated_at'];
+  if (Array.isArray(hasTimestamps)) {
+    [createAtCol, updatedAtCol] = hasTimestamps;
+  }
 
   // Equilize database tables
-  const handler = async (table, attributes) => {
+  const createOrUpdateTable = async (table, attributes) => {
     const tableExists = await ORM.knex.schema.hasTable(table);
-
-    // Apply field type of attributes definition
-    const generateColumns = (attrs, start, tableExists = false) => {
-      return Object.keys(attrs).reduce((acc, attr) => {
-        const attribute = attributes[attr];
-
-        const type = getType({
-          definition,
-          attribute,
-          name: attr,
-          tableExists,
-        });
-
-        if (type) {
-          acc.push(
-            `${quote}${attr}${quote} ${type} ${
-              attribute.required ? 'NOT NULL' : ''
-            }`
-          );
-        }
-
-        return acc;
-      }, start);
-    };
 
     const generateIndexes = async table => {
       try {
@@ -97,179 +78,214 @@ module.exports = async ({
       }
     };
 
-    const createTable = async table => {
-      const defaultAttributeDifinitions = {
-        mysql: ['id INT AUTO_INCREMENT NOT NULL PRIMARY KEY'],
-        pg: ['id SERIAL NOT NULL PRIMARY KEY'],
-        sqlite3: ['id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL'],
-      };
+    const buildColumns = (tbl, columns, opts = {}) => {
+      const { tableExists, alter = false } = opts;
 
-      let idAttributeBuilder = defaultAttributeDifinitions[definition.client];
-
-      if (definition.primaryKeyType === 'uuid' && definition.client === 'pg') {
-        idAttributeBuilder = [
-          'id uuid NOT NULL DEFAULT uuid_generate_v4() NOT NULL PRIMARY KEY',
-        ];
-      } else if (definition.primaryKeyType !== 'integer') {
+      Object.keys(columns).forEach(key => {
+        const attribute = columns[key];
         const type = getType({
           definition,
-          attribute: {
-            type: definition.primaryKeyType,
-          },
+          attribute,
+          name: key,
+          tableExists,
         });
 
-        idAttributeBuilder = [`id ${type} NOT NULL PRIMARY KEY`];
-      }
-      const columns = generateColumns(attributes, idAttributeBuilder).join(
-        ',\n\r'
-      );
+        if (type) {
+          const col = tbl.specificType(key, type);
 
-      // Create table
-      await ORM.knex.raw(`CREATE TABLE ${quote}${table}${quote} (${columns})`);
+          if (attribute.required === true) {
+            if (definition.client !== 'sqlite3' || !tableExists) {
+              col.notNullable();
+            }
+          } else {
+            col.nullable();
+          }
+
+          if (attribute.unique === true) {
+            if (definition.client !== 'sqlite3' || !tableExists) {
+              tbl.unique(key, uniqueColName(table, key));
+            }
+          }
+
+          if (alter) {
+            col.alter();
+          }
+        }
+      });
+    };
+
+    const createColumns = (tbl, columns, opts = {}) => {
+      return buildColumns(tbl, columns, opts);
+    };
+
+    const alterColumns = (tbl, columns, opts = {}) => {
+      return createColumns(tbl, columns, { ...opts, alter: true });
+    };
+
+    const createTable = (table, { trx = ORM.knex, ...opts } = {}) => {
+      return trx.schema.createTable(table, tbl => {
+        tbl.specificType('id', getIdType(definition));
+        createColumns(tbl, attributes, { ...opts, tableExists: false });
+      });
     };
 
     if (!tableExists) {
       await createTable(table);
-      await generateIndexes(table, attributes);
+      await generateIndexes(table);
       await storeTable(table, attributes);
-    } else {
-      const columns = Object.keys(attributes);
+      return;
+    }
 
-      // Fetch existing column
-      const columnsExist = await Promise.all(
-        columns.map(attribute => ORM.knex.schema.hasColumn(table, attribute))
+    const columns = Object.keys(attributes);
+
+    // Fetch existing column
+    const columnsExist = await Promise.all(
+      columns.map(attribute => ORM.knex.schema.hasColumn(table, attribute))
+    );
+
+    const columnsToAdd = {};
+
+    // Get columns to add
+    columnsExist.forEach((columnExist, index) => {
+      const attribute = attributes[columns[index]];
+
+      if (!columnExist) {
+        columnsToAdd[columns[index]] = attribute;
+      }
+    });
+
+    // Generate and execute query to add missing column
+    if (Object.keys(columnsToAdd).length > 0) {
+      await ORM.knex.schema.table(table, tbl => {
+        createColumns(tbl, columnsToAdd, { tableExists });
+      });
+    }
+
+    // Generate indexes for new attributes.
+    await generateIndexes(table, columnsToAdd);
+
+    let previousAttributes;
+    try {
+      previousAttributes = JSON.parse(
+        (await StrapiConfigs.forge({
+          key: `db_model_${table}`,
+        }).fetch()).toJSON().value
+      );
+    } catch (err) {
+      await storeTable(table, attributes);
+      previousAttributes = JSON.parse(
+        (await StrapiConfigs.forge({
+          key: `db_model_${table}`,
+        }).fetch()).toJSON().value
+      );
+    }
+
+    if (JSON.stringify(previousAttributes) === JSON.stringify(attributes)) {
+      return;
+    }
+
+    if (definition.client === 'sqlite3') {
+      const tmpTable = `tmp_${table}`;
+
+      const rebuildTable = async trx => {
+        await trx.schema.renameTable(table, tmpTable);
+
+        // drop possible conflicting indexes
+        await Promise.all(
+          columns.map(key =>
+            trx.raw('DROP INDEX IF EXISTS ??', uniqueColName(table, key))
+          )
+        );
+
+        // create the table
+        await createTable(table, { trx });
+
+        const attrs = Object.keys(attributes).filter(attribute =>
+          getType({
+            definition,
+            attribute: attributes[attribute],
+            name: attribute,
+          })
+        );
+
+        const allAttrs = ['id', ...attrs];
+
+        await trx.raw(`INSERT INTO ?? (${allAttrs.join(', ')}) ??`, [
+          table,
+          trx.select(allAttrs).from(tmpTable),
+        ]);
+
+        await trx.schema.dropTableIfExists(tmpTable);
+      };
+
+      try {
+        await ORM.knex.transaction(trx => rebuildTable(trx));
+        await generateIndexes(table);
+      } catch (err) {
+        if (err.message.includes('UNIQUE constraint failed')) {
+          strapi.log.error(
+            `Unique constraint fails, make sure to update your data and restart to apply the unique constraint.\n\t- ${err.stack}`
+          );
+        } else {
+          strapi.log.error(`Migration failed`);
+          strapi.log.error(err);
+        }
+
+        return false;
+      }
+    } else {
+      const columnsToAlter = columns.filter(
+        key =>
+          JSON.stringify(previousAttributes[key]) !==
+          JSON.stringify(attributes[key])
       );
 
-      const columnsToAdd = {};
-
-      // Get columns to add
-      columnsExist.forEach((columnExist, index) => {
-        const attribute = attributes[columns[index]];
-
-        if (!columnExist) {
-          columnsToAdd[columns[index]] = attribute;
-        }
-      });
-
-      // Generate indexes for new attributes.
-      await generateIndexes(table, columnsToAdd);
-
-      // Generate and execute query to add missing column
-      if (Object.keys(columnsToAdd).length > 0) {
-        await ORM.knex.schema.table(table, tbl => {
-          Object.keys(columnsToAdd).forEach(key => {
-            const attribute = columnsToAdd[key];
-            const type = getType({
-              definition,
-              attribute,
-              name: key,
-              tableExists,
-            });
-
-            if (type) {
-              const col = tbl.specificType(key, type);
-              if (attribute.required && definition.client !== 'sqlite3') {
-                col.notNullable();
-              }
-            }
+      const alterTable = async trx => {
+        await Promise.all(
+          columnsToAlter.map(col => {
+            return ORM.knex.schema
+              .alterTable(table, tbl => {
+                tbl.dropUnique(col, uniqueColName(table, col));
+              })
+              .catch(() => {});
+          })
+        );
+        await trx.schema.alterTable(table, tbl => {
+          alterColumns(tbl, _.pick(attributes, columnsToAlter), {
+            tableExists,
           });
         });
-      }
+      };
 
-      let previousAttributes;
       try {
-        previousAttributes = JSON.parse(
-          (await StrapiConfigs.forge({
-            key: `db_model_${table}`,
-          }).fetch()).toJSON().value
-        );
+        await ORM.knex.transaction(trx => alterTable(trx));
       } catch (err) {
-        await storeTable(table, attributes);
-        previousAttributes = JSON.parse(
-          (await StrapiConfigs.forge({
-            key: `db_model_${table}`,
-          }).fetch()).toJSON().value
-        );
-      }
-
-      if (JSON.stringify(previousAttributes) === JSON.stringify(attributes))
-        return;
-
-      if (definition.client === 'sqlite3') {
-        const tmpTable = `tmp_${table}`;
-        await createTable(tmpTable);
-
-        try {
-          const attrs = Object.keys(attributes).filter(attribute =>
-            getType({
-              definition,
-              attribute: attributes[attribute],
-              name: attribute,
-            })
+        if (err.code === '23505' && definition.client === 'pg') {
+          strapi.log.error(
+            `Unique constraint fails, make sure to update your data and restart to apply the unique constraint.\n\t- ${err.message}\n\t- ${err.detail}`
           );
-
-          await ORM.knex.raw(`INSERT INTO ?? (${attrs.join(', ')}) ??`, [
-            tmpTable,
-            ORM.knex.select(attrs).from(table),
-          ]);
-        } catch (err) {
-          strapi.log.error('Migration failed');
+        } else if (definition.client === 'mysql' && err.errno === 1062) {
+          strapi.log.error(
+            `Unique constraint fails, make sure to update your data and restart to apply the unique constraint.\n\t- ${err.sqlMessage}`
+          );
+        } else {
+          strapi.log.error(`Migration failed`);
           strapi.log.error(err);
-
-          await ORM.knex.schema.dropTableIfExists(tmpTable);
-          return false;
         }
 
-        await ORM.knex.schema.dropTableIfExists(table);
-        await ORM.knex.schema.renameTable(tmpTable, table);
-
-        await generateIndexes(table, attributes);
-      } else {
-        await ORM.knex.schema.alterTable(table, tbl => {
-          columns.forEach(key => {
-            if (
-              JSON.stringify(previousAttributes[key]) ===
-              JSON.stringify(attributes[key])
-            )
-              return;
-
-            const attribute = attributes[key];
-            const type = getType({
-              definition,
-              attribute,
-              name: key,
-              tableExists,
-            });
-
-            if (type) {
-              let col = tbl.specificType(key, type);
-              if (attribute.required) {
-                col = col.notNullable();
-              }
-              col.alter();
-            }
-          });
-        });
+        return false;
       }
-
-      await storeTable(table, attributes);
     }
+
+    await storeTable(table, attributes);
   };
 
   // Add created_at and updated_at field if timestamp option is true
-  if (loadedModel.hasTimestamps) {
-    definition.attributes[
-      _.isString(loadedModel.hasTimestamps[0])
-        ? loadedModel.hasTimestamps[0]
-        : 'created_at'
-    ] = {
+  if (hasTimestamps) {
+    definition.attributes[createAtCol] = {
       type: 'timestamp',
     };
-    definition.attributes[
-      _.isString(loadedModel.hasTimestamps[1])
-        ? loadedModel.hasTimestamps[1]
-        : 'updated_at'
-    ] = {
+    definition.attributes[updatedAtCol] = {
       type: 'timestampUpdate',
     };
   }
@@ -279,7 +295,7 @@ module.exports = async ({
 
   // Equilize tables
   if (connection.options && connection.options.autoMigration !== false) {
-    await handler(loadedModel.tableName, definition.attributes);
+    await createOrUpdateTable(loadedModel.tableName, definition.attributes);
   }
 
   // Equilize polymorphic releations
@@ -304,57 +320,50 @@ module.exports = async ({
     };
 
     if (connection.options && connection.options.autoMigration !== false) {
-      await handler(`${loadedModel.tableName}_morph`, attributes);
+      await createOrUpdateTable(`${loadedModel.tableName}_morph`, attributes);
     }
   }
 
   // Equilize many to many releations
-  const manyRelations = definition.associations.filter(association => {
-    return association.nature === 'manyToMany';
-  });
+  const manyRelations = definition.associations.filter(({ nature }) =>
+    ['manyToMany', 'manyWay'].includes(nature)
+  );
 
   for (const manyRelation of manyRelations) {
-    if (manyRelation && manyRelation.dominant) {
-      const collection = manyRelation.plugin
-        ? strapi.plugins[manyRelation.plugin].models[manyRelation.collection]
-        : strapi.models[manyRelation.collection];
+    const { plugin, collection, via, dominant, alias } = manyRelation;
+
+    if (dominant) {
+      const targetCollection = plugin
+        ? strapi.plugins[plugin].models[collection]
+        : strapi.models[collection];
+
+      const targetAttr = via
+        ? targetCollection.attributes[via]
+        : {
+            attribute: singular(definition.collectionName),
+            column: definition.primaryKey,
+          };
+
+      const defAttr = definition.attributes[alias];
 
       const attributes = {
-        [`${collection.attributes[manyRelation.via].attribute}_${
-          collection.attributes[manyRelation.via].column
-        }`]: {
-          type: collection.primaryKeyType,
+        [`${targetAttr.attribute}_${targetAttr.column}`]: {
+          type: targetCollection.primaryKeyType,
         },
-        [`${definition.attributes[manyRelation.alias].attribute}_${
-          definition.attributes[manyRelation.alias].column
-        }`]: {
+        [`${defAttr.attribute}_${defAttr.column}`]: {
           type: definition.primaryKeyType,
         },
       };
 
-      const table =
-        _.get(manyRelation, 'collectionName') ||
-        utilsModels.getCollectionName(
-          collection.attributes[manyRelation.via],
-          manyRelation
-        );
-
-      await handler(table, attributes);
+      const table = manyRelation.tableCollectionName;
+      await createOrUpdateTable(table, attributes);
     }
   }
 
   // Remove from attributes (auto handled by bookshlef and not displayed on ctb)
-  if (loadedModel.hasTimestamps) {
-    delete definition.attributes[
-      _.isString(loadedModel.hasTimestamps[0])
-        ? loadedModel.hasTimestamps[0]
-        : 'created_at'
-    ];
-    delete definition.attributes[
-      _.isString(loadedModel.hasTimestamps[1])
-        ? loadedModel.hasTimestamps[1]
-        : 'updated_at'
-    ];
+  if (hasTimestamps) {
+    delete definition.attributes[createAtCol];
+    delete definition.attributes[updatedAtCol];
   }
 };
 
@@ -380,6 +389,7 @@ const getType = ({ definition, attribute, name, tableExists = false }) => {
   switch (attribute.type) {
     case 'uuid':
       return client === 'pg' ? 'uuid' : 'varchar(36)';
+    case 'richtext':
     case 'text':
       return client === 'pg' ? 'text' : 'longtext';
     case 'json':
@@ -392,11 +402,13 @@ const getType = ({ definition, attribute, name, tableExists = false }) => {
     case 'integer':
       return client === 'pg' ? 'integer' : 'int';
     case 'biginteger':
-      return client === 'pg' ? 'bigint' : 'bigint(53)';
+      if (client === 'sqlite3') return 'bigint(53)'; // no choice until the sqlite3 package supports returning strings for big integers
+      return 'bigint';
     case 'float':
       return client === 'pg' ? 'double precision' : 'double';
     case 'decimal':
       return 'decimal(10,2)';
+    // TODO: split time types as they should be different
     case 'date':
     case 'time':
     case 'datetime':
@@ -412,6 +424,9 @@ const getType = ({ definition, attribute, name, tableExists = false }) => {
         case 'pg':
           return 'timestamp with time zone';
         case 'sqlite3':
+          if (tableExists) {
+            return 'timestamp DEFAULT NULL';
+          }
           return 'timestamp DEFAULT CURRENT_TIMESTAMP';
         default:
           return 'timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP';
@@ -441,3 +456,30 @@ const storeTable = async (table, attributes) => {
     value: JSON.stringify(attributes),
   }).save();
 };
+
+const defaultIdType = {
+  mysql: 'INT AUTO_INCREMENT NOT NULL PRIMARY KEY',
+  pg: 'SERIAL NOT NULL PRIMARY KEY',
+  sqlite3: 'INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL',
+};
+
+const getIdType = definition => {
+  if (definition.primaryKeyType === 'uuid' && definition.client === 'pg') {
+    return 'uuid NOT NULL DEFAULT uuid_generate_v4() NOT NULL PRIMARY KEY';
+  }
+
+  if (definition.primaryKeyType !== 'integer') {
+    const type = getType({
+      definition,
+      attribute: {
+        type: definition.primaryKeyType,
+      },
+    });
+
+    return `${type} NOT NULL PRIMARY KEY`;
+  }
+
+  return defaultIdType[definition.client];
+};
+
+const uniqueColName = (table, key) => `${table}_${key}_unique`;

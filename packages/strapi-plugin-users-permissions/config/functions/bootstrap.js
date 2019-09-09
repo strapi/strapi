@@ -10,12 +10,16 @@
 const _ = require('lodash');
 const uuid = require('uuid/v4');
 
-module.exports = async cb => {
+module.exports = async () => {
   if (!_.get(strapi.plugins['users-permissions'], 'config.jwtSecret')) {
     const jwtSecret = uuid();
     _.set(strapi.plugins['users-permissions'], 'config.jwtSecret', jwtSecret);
 
-    await strapi.fs.writePluginFile('users-permissions', 'config/jwt.json', JSON.stringify({ jwtSecret }, null, 2));
+    await strapi.fs.writePluginFile(
+      'users-permissions',
+      'config/jwt.json',
+      JSON.stringify({ jwtSecret }, null, 2)
+    );
   }
 
   const pluginStore = strapi.store({
@@ -151,14 +155,14 @@ module.exports = async cb => {
       unique_email: true,
       allow_register: true,
       email_confirmation: false,
-      email_confirmation_redirection: `http://${
-        strapi.config.currentEnvironment.server.host
-      }:${strapi.config.currentEnvironment.server.port}/admin`,
+      email_confirmation_redirection: `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}/admin`,
       default_role: 'authenticated',
     };
 
     await pluginStore.set({ key: 'advanced', value });
   }
 
-  strapi.plugins['users-permissions'].services.userspermissions.initialize(cb);
+  return strapi.plugins[
+    'users-permissions'
+  ].services.userspermissions.initialize();
 };

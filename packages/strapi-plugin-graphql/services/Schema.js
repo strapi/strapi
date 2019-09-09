@@ -134,21 +134,17 @@ const schemaBuilder = {
 
     // build defaults schemas if shadowCRUD is enabled
     if (strapi.plugins.graphql.config.shadowCRUD !== false) {
-      const models = Object.keys(strapi.models).filter(
-        model => model !== 'core_store'
+      const modelCruds = Resolvers.buildShadowCRUD(
+        _.omit(strapi.models, ['core_store'])
       );
 
-      const modelCruds = Resolvers.buildShadowCRUD(models);
       shadowCRUD = Object.keys(strapi.plugins).reduce((acc, plugin) => {
         const {
           definition,
           query,
           mutation,
           resolver,
-        } = Resolvers.buildShadowCRUD(
-          Object.keys(strapi.plugins[plugin].models),
-          plugin
-        );
+        } = Resolvers.buildShadowCRUD(strapi.plugins[plugin].models, plugin);
 
         // We cannot put this in the merge because it's a string.
         acc.definition += definition || '';
@@ -160,6 +156,23 @@ const schemaBuilder = {
         });
       }, modelCruds);
     }
+
+    let groups = Object.keys(strapi.groups)
+      .map(key =>
+        Resolvers.buildModel(strapi.groups[key], key, {
+          plugin: null,
+          isGroup: true,
+        })
+      )
+      .reduce(
+        (acc, group) => {
+          return {
+            definition: acc.definition + group.definition,
+            resolver: _.merge(acc.resolver, group.resolver),
+          };
+        },
+        { definition: '', resolver: {} }
+      );
 
     // Extract custom definition, query or resolver.
     const {
@@ -178,7 +191,12 @@ const schemaBuilder = {
     // Build resolvers.
     const resolvers =
       _.omitBy(
-        _.merge(shadowCRUD.resolver, resolver, polymorphicResolver),
+        _.merge(
+          shadowCRUD.resolver,
+          groups.resolver,
+          resolver,
+          polymorphicResolver
+        ),
         _.isEmpty
       ) || {};
 
@@ -243,6 +261,7 @@ const schemaBuilder = {
     let typeDefs = `
       ${definition}
       ${shadowCRUD.definition}
+      ${groups.definition}
       type Query {${shadowCRUD.query &&
         this.formatGQL(
           shadowCRUD.query,
@@ -273,7 +292,7 @@ const schemaBuilder = {
       this.writeGenerateSchema(graphql.printSchema(schema));
     }
 
-    // Remove custom scaler (like Upload);
+    // Remove custom scalar (like Upload);
     typeDefs = Types.removeCustomScalar(typeDefs, resolvers);
 
     return {

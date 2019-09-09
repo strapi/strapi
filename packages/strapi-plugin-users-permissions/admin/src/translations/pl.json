@@ -25,7 +25,7 @@
   "Auth.form.forgot-password.email.label": "Email",
   "Auth.form.forgot-password.email.label.success": "E-mail wysłany z powodzeniem do",
   "Auth.form.forgot-password.email.placeholder": "jannowak@gmail.com",
-  "Auth.form.register.news.label": "Chcę być na bieżąco informowany o nowych funkcjach i nadchodzących usprawnieniach.",
+
   "Auth.form.header.forgot-password": "strapi",
   "Auth.form.header.login": "strapi",
   "Auth.form.header.register": "Witaj!",
