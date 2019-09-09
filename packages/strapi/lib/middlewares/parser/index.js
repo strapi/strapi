@@ -13,12 +13,16 @@ module.exports = strapi => {
      */
 
     initialize() {
-      strapi.app.use(
-        body({
+      strapi.app.use((ctx, next) => {
+        // disable for graphql
+        // TODO: find a better way later
+        if (ctx.url === '/graphql') return next();
+
+        return body({
           patchKoa: true,
           ...strapi.config.middleware.settings.parser,
-        })
-      );
+        })(ctx, next);
+      });
 
       qs(strapi.app);
     },

@@ -1,0 +1,62 @@
+{
+  "connection": "default",
+  "collectionName": "restaurants",
+  "info": {
+    "name": "restaurant",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": ["created_at", "updated_at"],
+    "comment": ""
+  },
+  "attributes": {
+    "name": {
+      "maxLength": 50,
+      "required": true,
+      "minLength": 5,
+      "type": "string"
+    },
+    "cover": {
+      "model": "file",
+      "via": "related",
+      "plugin": "upload"
+    },
+    "menu": {
+      "model": "menu",
+      "via": "restaurant"
+    },
+    "categories": {
+      "collection": "category"
+    },
+    "address": {
+      "model": "address"
+    },
+    "price_range": {
+      "enum": ["very_cheap", "cheap", "average", "expensive", "very_expensive"],
+      "type": "enumeration"
+    },
+    "description": {
+      "type": "richtext",
+      "required": true
+    },
+    "opening_times": {
+      "group": "openingtimes",
+      "type": "group",
+      "required": true,
+      "repeatable": true,
+      "min": 1,
+      "max": 10
+    },
+    "closing_period": {
+      "group": "closingperiod",
+      "type": "group"
+    },
+    "services": {
+      "group": "restaurantservice",
+      "required": true,
+      "repeatable": true,
+      "type": "group"
+    }
+  }
+}

@@ -1,7 +1,3 @@
-// const { map, omit } = require('lodash');
-// const { request } = require('strapi-helper-plugin');
-// const pluginId = require('../pluginId');
-import { map, omit } from 'lodash';
 import { request } from 'strapi-helper-plugin';
 import pluginId from '../pluginId';
 
@@ -9,19 +5,15 @@ import pluginId from '../pluginId';
 
 async function didGetSecuredData() {
   const { updatePlugin } = this.props;
-  const requestURL = `/${pluginId}/models`;
+  const requestURL = `/${pluginId}/content-types`;
 
   try {
-    const {
-      models: { models },
-    } = await request(requestURL, { method: 'GET' });
+    const { data } = await request(requestURL, { method: 'GET' });
+
     const menu = [
       {
         name: 'Content Types',
-        links: map(omit(models, 'plugins'), (model, key) => ({
-          label: model.labelPlural || model.label || key,
-          destination: key,
-        })),
+        links: data,
       },
     ];
 

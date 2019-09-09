@@ -11,6 +11,7 @@ import pluginId from '../../../pluginId';
 import pluginTradsEn from '../../../translations/en.json';
 
 import CustomCheckbox from '../../../components/CustomCheckbox';
+import HeaderModalTitle from '../../../components/HeaderModalTitle';
 import AttributeForm from '../index';
 
 const messages = formatMessagesWithPluginId(pluginId, pluginTradsEn);
@@ -66,21 +67,27 @@ describe('<AttributeForm />', () => {
   it('should handle the title correctly with the activeTab', () => {
     props.actionType = null;
     props.isOpen = true;
+    props.attributeToEditName = 'test';
 
     wrapper = renderComponent(props);
-
-    const title = wrapper.find(FormattedMessage).at(0);
-
-    expect(title.prop('id')).toContain('create');
-
     wrapper.setProps({ actionType: 'edit' });
+
+    const title = wrapper
+      .find(HeaderModalTitle)
+      .last()
+      .find('span')
+      .last();
+
+    expect(title.text()).toContain('test');
+
+    wrapper.setProps({ actionType: 'create' });
 
     expect(
       wrapper
         .find(FormattedMessage)
         .at(0)
-        .prop('id'),
-    ).toContain('edit');
+        .prop('id')
+    ).toContain('create');
   });
 
   it('should use the defaultProps', () => {
@@ -101,7 +108,7 @@ describe('<AttributeForm />', () => {
 
   describe('instances', () => {
     describe('GetFormErrors', () => {
-      it('should return an empty object if there is not field that contain the created field\'s name', () => {
+      it("should return an empty object if there is not field that contain the created field's name", () => {
         props.modifiedData = { name: 'test' };
 
         wrapper = renderComponent(props);
@@ -111,13 +118,25 @@ describe('<AttributeForm />', () => {
         expect(getFormErrors()).toEqual({});
       });
 
-      it('should return an object with the input\'s name and an array of error if the name is empty', () => {
+      it("should return an object with the input's name and an array of error if the name is empty", () => {
         wrapper = renderComponent(props);
 
         const { getFormErrors } = wrapper.instance();
 
         expect(getFormErrors()).toEqual({
           name: [{ id: `${pluginId}.error.validation.required` }],
+        });
+      });
+
+      it('should return a unique error if the name begins with a special character', () => {
+        props.modifiedData = { name: '_test' };
+
+        wrapper = renderComponent(props);
+
+        const { getFormErrors } = wrapper.instance();
+
+        expect(getFormErrors()).toEqual({
+          name: [{ id: `${pluginId}.error.validation.regex.name` }],
         });
       });
 
@@ -200,7 +219,7 @@ describe('<AttributeForm />', () => {
             'modalType=attributeForm&attributeType=string&settingType=advanced&actionType=create',
         });
         expect(context.emitEvent).toHaveBeenCalledWith(
-          'didSelectContentTypeFieldSettings',
+          'didSelectContentTypeFieldSettings'
         );
       });
     });
@@ -292,11 +311,11 @@ describe('<AttributeForm />', () => {
 
         expect(props.onSubmitEdit).toHaveBeenCalledWith(true);
         expect(context.emitEvent).toHaveBeenCalledWith(
-          'willAddMoreFieldToContentType',
+          'willAddMoreFieldToContentType'
         );
       });
 
-      it('should not submit if thee form has an error', () => {
+      it('should not submit if the form has an error', () => {
         wrapper = renderComponent(props);
 
         const { handleSubmitAndContinue } = wrapper.instance();

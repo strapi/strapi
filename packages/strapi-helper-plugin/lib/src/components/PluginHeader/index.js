@@ -6,12 +6,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import cn from 'classnames';
 
 import PluginHeaderTitle from '../PluginHeaderTitle';
 import PluginHeaderActions from '../PluginHeaderActions';
 
-import styles from './styles.scss';
+import StyledPluginHeader from './StyledPluginHeader';
 
 function PluginHeader({
   actions,
@@ -25,27 +24,27 @@ function PluginHeader({
   withDescriptionAnim,
 }) {
   return (
-    <div className={cn(styles.pluginHeader, 'row')}>
-      <div className="col-lg-7">
-        <PluginHeaderTitle
-          icon={icon}
-          onClickIcon={onClickIcon}
-          title={title}
-          titleId={titleId}
-          description={description}
-          withDescriptionAnim={withDescriptionAnim}
-        />
+    <StyledPluginHeader>
+      <div className="row">
+        <div className="col-lg-6">
+          <PluginHeaderTitle
+            icon={icon}
+            onClickIcon={onClickIcon}
+            title={title}
+            titleId={titleId}
+            description={description}
+            withDescriptionAnim={withDescriptionAnim}
+          />
+        </div>
+        <div className="col-lg-6 justify-content-end">
+          <PluginHeaderActions actions={subActions} />
+          <PluginHeaderActions
+            actions={actions}
+            overrideRendering={overrideRendering}
+          />
+        </div>
       </div>
-      <div className="col-lg-2 justify-content-end">
-        <PluginHeaderActions actions={subActions} />
-      </div>
-      <div className="col-lg-3 justify-content">
-        <PluginHeaderActions
-          actions={actions}
-          overrideRendering={overrideRendering}
-        />
-      </div>
-    </div>
+    </StyledPluginHeader>
   );
 }
 

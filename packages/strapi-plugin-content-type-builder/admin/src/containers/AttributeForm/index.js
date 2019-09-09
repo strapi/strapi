@@ -16,14 +16,20 @@ import pluginId from '../../pluginId';
 import BodyModal from '../../components/BodyModal';
 import ButtonModalPrimary from '../../components/ButtonModalPrimary';
 import ButtonModalSecondary from '../../components/ButtonModalSecondary';
+import ButtonModalSuccess from '../../components/ButtonModalSuccess';
 import CustomCheckbox from '../../components/CustomCheckbox';
 import FooterModal from '../../components/FooterModal';
+import FormModal from '../../components/FormModal';
 import HeaderModal from '../../components/HeaderModal';
+import HeaderModalTitle from '../../components/HeaderModalTitle';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
 import HeaderNavLink from '../../components/HeaderNavLink';
 import WrapperModal from '../../components/WrapperModal';
 
-import supportedAttributes from './supportedAttributes.json';
+import Icon from '../../assets/icons/icon_type_ct.png';
+import IconGroup from '../../assets/icons/icon_type_groups.png';
+
+import supportedAttributes from './supportedAttributes';
 
 const NAVLINKS = [{ id: 'base' }, { id: 'advanced' }];
 
@@ -32,9 +38,23 @@ class AttributeForm extends React.Component {
   state = { didCheckErrors: false, formErrors: {}, showForm: false };
 
   getCurrentForm = () => {
-    const { activeTab, attributeType } = this.props;
+    const { activeTab, attributeType, modifiedData } = this.props;
+    const attributeConfig = get(supportedAttributes, [
+      attributeType,
+      activeTab,
+    ]);
+    const items =
+      typeof attributeConfig === 'function'
+        ? get(attributeConfig(modifiedData), 'items', [])
+        : get(attributeConfig, 'items', []);
 
-    return get(supportedAttributes, [attributeType, activeTab, 'items'], []);
+    return items;
+  };
+
+  getIcon = () => {
+    const { featureType } = this.props;
+
+    return featureType === 'model' ? Icon : IconGroup;
   };
 
   getFormErrors = () => {
@@ -47,7 +67,9 @@ class AttributeForm extends React.Component {
     let formErrors = {};
     const formValidations = this.getFormValidations();
     const alreadyTakenAttributesUpdated = alreadyTakenAttributes.filter(
-      attribute => attribute !== attributeToEditName,
+      attribute => {
+        return attribute !== attributeToEditName;
+      }
     );
 
     if (isEmpty(modifiedData.name)) {
@@ -58,9 +80,22 @@ class AttributeForm extends React.Component {
       formErrors = { name: [{ id: `${pluginId}.error.attribute.taken` }] };
     }
 
+    if (get(modifiedData, 'name', '') === 'id') {
+      formErrors = {
+        name: [{ id: `${pluginId}.error.attribute.forbidden` }],
+      };
+    }
+
     formErrors = Object.keys(formValidations).reduce((acc, current) => {
       const { custom, validations } = formValidations[current];
       const value = modifiedData[current];
+
+      if (
+        current === 'name' &&
+        !new RegExp('^[A-Za-z][_0-9A-Za-z]*$').test(value)
+      ) {
+        acc[current] = [{ id: `${pluginId}.error.validation.regex.name` }];
+      }
 
       if (!value && validations.required === true && custom !== true) {
         acc[current] = [{ id: `${pluginId}.error.validation.required` }];
@@ -68,6 +103,18 @@ class AttributeForm extends React.Component {
 
       if (custom === true && validations.required === true && value === '') {
         acc[current] = [{ id: `${pluginId}.error.validation.required` }];
+      }
+
+      if (current === 'enum' && !!value) {
+        const split = value.split('\n');
+
+        const hasEnumFormatError = split.filter(
+          v => !new RegExp('^[_A-Za-z][_0-9A-Za-z]*$').test(v)
+        );
+
+        if (hasEnumFormatError.length > 0) {
+          acc[current] = [{ id: `${pluginId}.error.validation.regex.values` }];
+        }
       }
 
       return acc;
@@ -81,9 +128,29 @@ class AttributeForm extends React.Component {
     return formErrors;
   };
 
-  getFormValidations = () => {
-    const { attributeType } = this.props;
+  getForm = () => {
+    const { attributeType, modifiedData } = this.props;
     const form = supportedAttributes[attributeType];
+
+    return Object.keys(form).reduce((acc, current) => {
+      const attributeConfig = get(supportedAttributes, [
+        attributeType,
+        current,
+      ]);
+
+      const items =
+        typeof form[current] === 'function'
+          ? attributeConfig(modifiedData)
+          : attributeConfig;
+
+      acc[current] = items;
+
+      return acc;
+    }, {});
+  };
+
+  getFormValidations = () => {
+    const form = this.getForm();
 
     return Object.keys(form).reduce((acc, current) => {
       return {
@@ -108,9 +175,17 @@ class AttributeForm extends React.Component {
 
   handleGoTo = to => {
     const { emitEvent } = this.context;
-    const { actionType, attributeToEditName, attributeType, push } = this.props;
+    const {
+      actionType,
+      attributeToEditIndex,
+      attributeToEditName,
+      attributeType,
+      push,
+    } = this.props;
     const attributeName =
-      actionType === 'edit' ? `&attributeName=${attributeToEditName}` : '';
+      actionType === 'edit'
+        ? `&attributeName=${attributeToEditIndex || attributeToEditName}`
+        : '';
 
     if (to === 'advanced') {
       emitEvent('didSelectContentTypeFieldSettings');
@@ -164,12 +239,36 @@ class AttributeForm extends React.Component {
   renderInput = (input, index) => {
     const { modifiedData, onChange } = this.props;
     const { didCheckErrors, formErrors } = this.state;
-    const { custom, defaultValue, name } = input;
+    const { custom, defaultValue, name, type } = input;
+
     const value = get(modifiedData, name, defaultValue);
 
     const errors = get(formErrors, name, []);
 
     if (custom) {
+      if (type === 'select') {
+        const { attributeOptions } = this.props;
+
+        const options = attributeOptions.map(option => {
+          return {
+            name: option.name,
+            value: option.uid,
+          };
+        });
+
+        return (
+          <Input
+            autoFocus={index === 0}
+            didCheckErrors={didCheckErrors}
+            errors={errors}
+            key={name}
+            {...input}
+            onChange={onChange}
+            selectOptions={options}
+            value={value}
+          />
+        );
+      }
       return (
         <CustomCheckbox
           didCheckErrors={didCheckErrors}
@@ -214,12 +313,11 @@ class AttributeForm extends React.Component {
       actionType,
       attributeToEditName,
       attributeType,
+      featureName,
       isOpen,
     } = this.props;
     const { showForm } = this.state;
     const currentForm = this.getCurrentForm();
-    const titleContent =
-      actionType === 'create' ? attributeType : attributeToEditName;
 
     return (
       <WrapperModal
@@ -229,38 +327,59 @@ class AttributeForm extends React.Component {
         onToggle={this.handleToggle}
       >
         <HeaderModal>
-          <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>
-            <FormattedMessage
-              id={`${pluginId}.popUpForm.${actionType || 'create'}`}
-            />
-            &nbsp;
-            <span style={{ fontStyle: 'italic', textTransform: 'capitalize' }}>
-              {titleContent}
-            </span>
-            &nbsp;
-            <FormattedMessage id={`${pluginId}.popUpForm.field`} />
-          </div>
-          <HeaderModalNavContainer>
-            {NAVLINKS.map(this.renderNavLink)}
-          </HeaderModalNavContainer>
+          <section>
+            <HeaderModalTitle>
+              <img src={this.getIcon()} alt="feature" />
+              <span>{featureName}</span>
+            </HeaderModalTitle>
+          </section>
+          <section>
+            <HeaderModalTitle>
+              {actionType === 'create' ? (
+                <>
+                  <FormattedMessage id={`${pluginId}.popUpForm.create`} />
+                  &nbsp;
+                  <FormattedMessage
+                    id={`${pluginId}.popUpForm.attributes.${attributeType}.name`}
+                  />
+                </>
+              ) : (
+                <span>{attributeToEditName}</span>
+              )}
+            </HeaderModalTitle>
+            <div className="settings-tabs">
+              <HeaderModalNavContainer>
+                {NAVLINKS.map(this.renderNavLink)}
+              </HeaderModalNavContainer>
+            </div>
+            <hr />
+          </section>
         </HeaderModal>
         <form onSubmit={this.handleSubmitAndContinue}>
-          <BodyModal>{showForm && currentForm.map(this.renderInput)}</BodyModal>
+          <FormModal>
+            <BodyModal>
+              {showForm && currentForm.map(this.renderInput)}
+            </BodyModal>
+          </FormModal>
           <FooterModal>
-            <ButtonModalSecondary
-              message={`${pluginId}.form.button.cancel`}
-              onClick={this.handleCancel}
-            />
-            <ButtonModalPrimary
-              message={`${pluginId}.form.button.continue`}
-              type="submit"
-              add
-            />
-            <ButtonModalPrimary
-              message={`${pluginId}.form.button.save`}
-              type="button"
-              onClick={this.handleSubmit}
-            />
+            <section>
+              <ButtonModalPrimary
+                message={`${pluginId}.form.button.add.field`}
+                type="submit"
+                add
+              />
+            </section>
+            <section>
+              <ButtonModalSecondary
+                message={`${pluginId}.form.button.cancel`}
+                onClick={this.handleCancel}
+              />
+              <ButtonModalSuccess
+                message={`${pluginId}.form.button.done`}
+                type="button"
+                onClick={this.handleSubmit}
+              />
+            </section>
           </FooterModal>
         </form>
       </WrapperModal>
@@ -275,13 +394,18 @@ AttributeForm.contextTypes = {
 AttributeForm.defaultProps = {
   actionType: 'create',
   activeTab: 'base',
+  attributeToEditIndex: null,
   attributeToEditName: '',
   alreadyTakenAttributes: [],
   attributeType: 'string',
+  attributeOptions: [],
+  featureName: null,
+  featureType: 'model',
   isOpen: false,
   modifiedData: {},
   onCancel: () => {},
   onChange: () => {},
+  onSubmit: () => {},
   push: () => {},
 };
 
@@ -289,13 +413,17 @@ AttributeForm.propTypes = {
   actionType: PropTypes.string,
   activeTab: PropTypes.string,
   alreadyTakenAttributes: PropTypes.array,
+  attributeToEditIndex: PropTypes.string,
   attributeToEditName: PropTypes.string,
   attributeType: PropTypes.string,
+  attributeOptions: PropTypes.array,
+  featureName: PropTypes.string,
+  featureType: PropTypes.string,
   isOpen: PropTypes.bool,
   modifiedData: PropTypes.object, // TODO: Clearly define this object (It's working without it though)
   onCancel: PropTypes.func,
   onChange: PropTypes.func,
-  onSubmit: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func,
   onSubmitEdit: PropTypes.func.isRequired,
   push: PropTypes.func,
 };
