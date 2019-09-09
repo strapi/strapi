@@ -86,7 +86,7 @@
   "form.Input.defaultSort": "سمة الفرز الافتراضي",
   "form.Input.description": "الوصف",
   "form.Input.description.placeholder": "عرض الإسم في الملف الشخصي",
-  "form.Input.disabled": "حقل قابل للتعديل",
+  "form.Input.editable": "حقل قابل للتعديل",
   "form.Input.filters": "تفعيل الترشيح",
   "form.Input.label": "تسميه",
   "form.Input.label.inputDescription": "تتجاوز هذه القيمة التسمية المعروضة في رأس الجدول",

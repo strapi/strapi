@@ -79,10 +79,16 @@
   "home.contentTypeBuilder.name": "Construtor de Tipos de Conteúdo",
   "home.emptyAttributes.description": "Adicione seu primeiro campo para seu novo Tipo de Conteúdo",
   "home.emptyAttributes.title": "Ainda não há campos",
-  "home.emptyContentType.description": "Cria seu primeiro Tipo de Conteúdo para poder recuperar dados de sua API.",
-  "home.emptyContentType.title": "Nenhum Tipo de Conteúdo disponível",
+  "home.empty.models.description": "Cria seu primeiro Tipo de Conteúdo para poder recuperar dados de sua API.",
+  "home.empty.models.title": "Nenhum Tipo de Conteúdo disponível",
   "menu.section.contentTypeBuilder.name.plural": "Tipos de Conteúdos",
   "menu.section.contentTypeBuilder.name.singular": "Tipo de Conteúdo",
+  "home.emptyContentType.description": "Cria seu primeiro Tipo de Conteúdo para poder recuperar dados de sua API.",
+  "home.emptyContentType.title": "Nenhum Tipo de Conteúdo disponível",
+  "menu.section.models.name.plural": "Tipos de Conteúdos",
+  "menu.section.models.name.singular": "Tipo de Conteúdo",
+  "menu.section.groups.name.plural": "Groups",
+  "menu.section.groups.name.singular": "Group",
   "menu.section.documentation.guide": "Leia mais sobre os Tipos De Conteúdos no nosso",
   "menu.section.documentation.guideLink": "guia.",
   "menu.section.documentation.name": "Documentação",
@@ -152,6 +158,6 @@
   "table.contentType.head.description": "Descrição",
   "table.contentType.head.fields": "Campos",
   "table.contentType.head.name": "Nome",
-  "table.contentType.title.plural": "Tipos de Conteúdos estão disponíveis",
-  "table.contentType.title.singular": "Tipo de Conteúdo está disponível"
+  "table.contentType.title.plural": "{number} Tipos de Conteúdos estão disponíveis",
+  "table.contentType.title.singular": "{number} Tipo de Conteúdo está disponível"
 }

@@ -193,7 +193,7 @@ module.exports = ({
           use: 'file-loader',
         },
         {
-          test: /\.(jpg|png|gif)$/,
+          test: /\.(jpg|png|gif|ico)$/,
           loaders: [
             require.resolve('file-loader'),
             {
@@ -241,7 +241,7 @@ module.exports = ({
       new HtmlWebpackPlugin({
         inject: true,
         template: path.resolve(__dirname, 'index.html'),
-        favicon: path.resolve(__dirname, 'admin/src/favicon.ico'),
+        // favicon: path.resolve(__dirname, 'admin/src/favicon.ico'),
       }),
       new webpack.DefinePlugin({
         'process.env.NODE_ENV': JSON.stringify(

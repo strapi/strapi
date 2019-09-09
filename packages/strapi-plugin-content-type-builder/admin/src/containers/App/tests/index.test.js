@@ -13,8 +13,36 @@ describe('<App />', () => {
     props = {
       addAttributeRelation: jest.fn(),
       cancelNewContentType: jest.fn(),
+      connections: [],
+      createTempContentType: jest.fn(),
+      createTempGroup: jest.fn(),
       deleteModel: jest.fn(),
+      history: {
+        push: jest.fn(),
+      },
+      location: {
+        pathname: '',
+        search: '',
+      },
       getData: jest.fn(),
+      groups: [
+        {
+          uid: 'ingredients',
+          name: 'Ingredients',
+          source: null,
+          description: 'Little description',
+          fields: 0,
+          isTemporary: false,
+        },
+        {
+          uid: 'fruits',
+          name: 'Fruits',
+          source: null,
+          description: 'Little description',
+          fields: 0,
+          isTemporary: false,
+        },
+      ],
       initialData: {},
       isLoading: true,
       models: [
@@ -42,16 +70,32 @@ describe('<App />', () => {
           source: 'users-permissions',
           isTemporary: false,
         },
-        { icon: 'fa-cube', name: 'product', description: 'super api', fields: 6, isTemporary: false },
+        {
+          icon: 'fa-cube',
+          name: 'product',
+          description: 'super api',
+          fields: 6,
+          isTemporary: false,
+        },
       ],
       modifiedData: {},
+      modifiedDataGroup: {},
+      newContentType: {},
+      newGroup: {},
       onChangeExistingContentTypeMainInfos: jest.fn(),
+      onChangeExistingGroupMainInfos: jest.fn(),
       onChangeNewContentTypeMainInfos: jest.fn(),
+      onChangeNewGroupMainInfos: jest.fn(),
       saveEditedAttribute: jest.fn(),
       saveEditedAttributeRelation: jest.fn(),
       setTemporaryAttribute: jest.fn(),
       setTemporaryAttributeRelation: jest.fn(),
       resetProps: jest.fn(),
+      resetExistingContentTypeMainInfos: jest.fn(),
+      resetExistingGroupMainInfos: jest.fn(),
+      resetNewContentTypeMainInfos: jest.fn(),
+      updateTempContentType: jest.fn(),
+      updateTempGroup: jest.fn(),
     };
   });
 
@@ -82,7 +126,7 @@ describe('<App />', () => {
 
   describe('<App />, instances', () => {
     describe('CanOpenModal', () => {
-      it('should return true if all models have isTemporary to false', () => {
+      it('should return true if all models and groups have isTemporary to false', () => {
         const wrapper = shallow(<App {...props} />);
         const { canOpenModal } = wrapper.instance();
 
@@ -101,6 +145,36 @@ describe('<App />', () => {
         const { canOpenModal } = wrapper.instance();
 
         expect(canOpenModal()).toBeFalsy();
+      });
+
+      it('should return false if at least group has isTemporary set to true', () => {
+        props.groups.push({
+          name: 'test',
+          description: 'super group',
+          fields: 6,
+          isTemporary: true,
+        });
+        const wrapper = shallow(<App {...props} />);
+        const { canOpenModal } = wrapper.instance();
+
+        expect(canOpenModal()).toBeFalsy();
+      });
+    });
+
+    describe('GetAllGroupsAndModelsNames', () => {
+      it('Should return an array of all groups and models names', () => {
+        const wrapper = shallow(<App {...props} />);
+        const { getAllGroupsAndModelsNames } = wrapper.instance();
+
+        const expected = [
+          'permission',
+          'user',
+          'role',
+          'product',
+          'ingredients',
+          'fruits',
+        ];
+        expect(getAllGroupsAndModelsNames()).toEqual(expected);
       });
     });
 

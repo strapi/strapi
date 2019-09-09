@@ -52,7 +52,7 @@ module.exports = strapi => {
       );
     },
 
-    initialize: function(cb) {
+    initialize: function() {
       const {
         typeDefs,
         resolvers,
@@ -63,7 +63,7 @@ module.exports = strapi => {
           'The GraphQL schema has not been generated because it is empty'
         );
 
-        return cb();
+        return;
       }
 
       const serverParams = {
@@ -81,6 +81,8 @@ module.exports = strapi => {
         validationRules: [depthLimit(strapi.plugins.graphql.config.depthLimit)],
         tracing: _.get(strapi.plugins.graphql, 'config.tracing', false),
         playground: false,
+        cors: false,
+        bodyParserConfig: true,
       };
 
       // Disable GraphQL Playground in production environment.
@@ -101,8 +103,6 @@ module.exports = strapi => {
         app: strapi.app,
         path: strapi.plugins.graphql.config.endpoint,
       });
-
-      cb();
     },
   };
 };

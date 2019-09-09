@@ -1,4 +1,5 @@
 import React from 'react';
+import { get } from 'lodash';
 import pluginPkg from '../../package.json';
 import App from './containers/App';
 import Initializer from './containers/Initializer';
@@ -41,6 +42,18 @@ const plugin = {
   mainComponent: Comp,
   name: pluginPkg.strapi.name,
   preventComponentRendering: false,
+  suffixUrl: plugins => {
+    const { uid, source } = get(
+      plugins,
+      ['content-manager', 'leftMenuSections', '0', 'links', '0'],
+      { uid: '', source: '' }
+    );
+
+    return source !== 'content-manager'
+      ? `/models/${uid}&source=${source}`
+      : `/models/${uid}`;
+  },
+
   trads,
 };
 

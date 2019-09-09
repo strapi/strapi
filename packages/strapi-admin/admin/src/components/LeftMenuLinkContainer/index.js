@@ -22,14 +22,16 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
         acc[snakeCase(section.name)] = {
           name: section.name,
           links: get(acc[snakeCase(section.name)], 'links', []).concat(
-            section.links.map(link => {
-              link.source = current;
-              link.plugin = !isEmpty(plugins[link.plugin])
-                ? link.plugin
-                : plugins[current].id;
+            section.links
+              .filter(link => link.isDisplayed !== false)
+              .map(link => {
+                link.source = link.source || current;
+                link.plugin = !isEmpty(plugins[link.plugin])
+                  ? link.plugin
+                  : plugins[current].id;
 
-              return link;
-            }),
+                return link;
+              })
           ),
         };
       }
@@ -51,7 +53,8 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
               key={`${i}-${link.label}`}
               icon={link.icon || 'caret-right'}
               label={link.label}
-              destination={`/plugins/${link.plugin}/${link.destination}`}
+              destination={`/plugins/${link.plugin}/${link.destination ||
+                link.uid}`}
               source={link.source}
             />
           ))}
@@ -64,12 +67,11 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
   const pluginsLinks = !isEmpty(plugins) ? (
     map(sortBy(plugins, 'name'), plugin => {
       if (plugin.id !== 'email' && plugin.id !== 'settings-manager') {
-        const basePath = `/plugins/${get(plugin, 'id')}`;
-        // NOTE: this should be dynamic
-        const destination =
-          plugin.id === 'content-manager'
-            ? `${basePath}/ctm-configurations`
-            : basePath;
+        const pluginSuffixUrl = plugin.suffixUrl
+          ? plugin.suffixUrl(plugins)
+          : '';
+
+        const destination = `/plugins/${get(plugin, 'id')}${pluginSuffixUrl}`;
 
         return (
           <LeftMenuLink
@@ -78,6 +80,10 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
             icon={get(plugin, 'icon') || 'plug'}
             label={get(plugin, 'name')}
             destination={destination}
+            pluginSuffixUrl={pluginSuffixUrl}
+            suffixUrlToReplaceForLeftMenuHighlight={
+              plugin.suffixUrlToReplaceForLeftMenuHighlight || ''
+            }
           />
         );
       }
