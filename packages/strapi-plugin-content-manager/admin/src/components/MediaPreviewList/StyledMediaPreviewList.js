@@ -42,7 +42,8 @@ const MediaPreviewItem = styled.div`
     height: 100%;
     overflow: hidden;
     border-radius: calc(${sizes.small} / 2);
-    background-color: #fafafb;
+    background-color: #f3f3f4;
+    border: 1px solid #f3f3f4;
   }
   &.hoverable {
     :hover {
@@ -59,20 +60,21 @@ const MediaPreviewFile = styled(MediaPreviewItem)`
   }
   div {
     position: relative;
-    background-color: #9fa7b6;
-    color: white;
+    background-color: #f3f3f4;
+    color: #333740;
     text-align: center;
     line-height: ${sizes.small};
-    font-size: 11px;
     span {
       display: block;
       padding: 0 3px;
       text-transform: uppercase;
+      font-size: 10px;
+      font-weight: 600;
     }
     i {
       position: absolute;
-      left: 0;
-      top: 0;
+      left: 1px;
+      top: -1px;
       font-size: 15px;
       width: 100%;
       height: 100%;
@@ -81,7 +83,7 @@ const MediaPreviewFile = styled(MediaPreviewItem)`
         height: 100%;
         padding: 10px;
         line-height: 35px;
-        background: #9fa7b6;
+        background: #f3f3f4;
       }
     }
   }
@@ -109,6 +111,7 @@ const MediaPreviewText = styled(MediaPreviewItem)`
     color: #333740;
     text-align: center;
     line-height: ${sizes.small};
+    font-weight: 600;
   }
 `;
 

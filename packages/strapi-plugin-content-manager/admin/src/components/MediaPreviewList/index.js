@@ -91,7 +91,7 @@ function MediaPreviewList({ hoverable, files }) {
   );
 }
 
-MediaPreviewList.default = {
+MediaPreviewList.defaultProps = {
   hoverable: true,
   files: null,
 };
