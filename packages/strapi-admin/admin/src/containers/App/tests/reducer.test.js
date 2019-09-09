@@ -16,13 +16,17 @@ describe('<App /> reducer', () => {
 
   beforeEach(() => {
     state = fromJS({
+      autoReload: false,
       blockApp: false,
-      overlayBlockerData: null,
-      hasUserPlugin: true,
+      currentEnvironment: 'development',
       hasAdminUser: false,
+      hasUserPlugin: true,
       isLoading: true,
+      overlayBlockerData: null,
       plugins: {},
       showGlobalAppBlocker: true,
+      strapiVersion: '3',
+      uuid: false,
     });
   });
 

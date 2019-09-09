@@ -37,7 +37,9 @@ function App(props) {
         const requestURL = '/users-permissions/init';
 
         const { hasAdmin } = await request(requestURL, { method: 'GET' });
-        getDataRef.current(hasAdmin);
+        const { data } = await request('/admin/init', { method: 'GET' });
+
+        getDataRef.current(hasAdmin, data);
       } catch (err) {
         strapi.notification.error('app.containers.App.notification.error.init');
       }

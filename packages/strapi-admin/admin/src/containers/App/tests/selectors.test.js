@@ -7,6 +7,7 @@ import makeSelectApp, {
   makeSelectBlockApp,
   makeSelectOverlayBlockerProps,
   makeSelectShowGlobalAppBlocker,
+  makeSelectUuid,
 } from '../selectors';
 
 describe('<App /> selectors', () => {
@@ -94,6 +95,18 @@ describe('<App /> selectors', () => {
       });
 
       expect(makeSelectShowGlobalAppBlocker()(mockedState)).toEqual(true);
+    });
+  });
+
+  describe('makeSelectUuid', () => {
+    it('should select the showGlobalAppBlocker', () => {
+      const mockedState = fromJS({
+        app: {
+          uuid: 'getstarted',
+        },
+      });
+
+      expect(makeSelectUuid()(mockedState)).toEqual('getstarted');
     });
   });
 });

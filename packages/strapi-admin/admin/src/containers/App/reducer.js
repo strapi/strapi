@@ -14,13 +14,17 @@ import {
 } from './constants';
 
 const initialState = fromJS({
+  autoReload: false,
   blockApp: false,
-  overlayBlockerData: null,
-  hasUserPlugin: true,
+  currentEnvironment: 'development',
   hasAdminUser: false,
+  hasUserPlugin: true,
   isLoading: true,
+  overlayBlockerData: null,
   plugins: {},
   showGlobalAppBlocker: true,
+  strapiVersion: '3',
+  uuid: false,
 });
 
 function appReducer(state = initialState, action) {
@@ -37,10 +41,20 @@ function appReducer(state = initialState, action) {
 
         return null;
       });
-    case GET_DATA_SUCCEEDED:
+    case GET_DATA_SUCCEEDED: {
+      const {
+        hasAdminUser,
+        data: { uuid, currentEnvironment, autoReload, strapiVersion },
+      } = action;
+
       return state
         .update('isLoading', () => false)
-        .update('hasAdminUser', () => action.hasAdminUser);
+        .update('hasAdminUser', () => hasAdminUser)
+        .update('uuid', () => uuid)
+        .update('autoReload', () => autoReload)
+        .update('currentEnvironment', () => currentEnvironment)
+        .update('strapiVersion', () => strapiVersion);
+    }
     case PLUGIN_LOADED:
       return state.setIn(['plugins', action.plugin.id], fromJS(action.plugin));
     case UPDATE_PLUGIN:

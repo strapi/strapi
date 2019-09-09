@@ -36,10 +36,11 @@ export function freezeApp(data) {
   };
 }
 
-export function getDataSucceeded(hasAdminUser) {
+export function getDataSucceeded(hasAdminUser, data) {
   return {
     type: GET_DATA_SUCCEEDED,
     hasAdminUser,
+    data,
   };
 }
 

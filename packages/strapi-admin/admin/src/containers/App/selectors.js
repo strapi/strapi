@@ -45,6 +45,12 @@ const makeSelectOverlayBlockerProps = () =>
     appState => appState.get('overlayBlockerData')
   );
 
+const makeSelectUuid = () =>
+  createSelector(
+    selectApp(),
+    appState => appState.get('uuid')
+  );
+
 export default makeSelectApp;
 export {
   selectApp,
@@ -53,4 +59,5 @@ export {
   makeSelectBlockApp,
   makeSelectOverlayBlockerProps,
   makeSelectShowGlobalAppBlocker,
+  makeSelectUuid,
 };

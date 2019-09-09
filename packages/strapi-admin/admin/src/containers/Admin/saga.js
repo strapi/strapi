@@ -4,7 +4,7 @@ import { request } from 'strapi-helper-plugin';
 
 import { getInitDataSucceeded, getSecuredDataSucceeded } from './actions';
 import { EMIT_EVENT, GET_INIT_DATA, GET_SECURED_DATA } from './constants';
-import { makeSelectUuid } from './selectors';
+import { makeSelectUuid } from '../App/selectors';
 
 export function* emitter(action) {
   try {
