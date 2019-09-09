@@ -83,9 +83,7 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
       const joinTableAlias = generateAlias(assoc.tableCollectionName);
 
       qb.leftJoin(
-        `${originInfo.model.databaseName}.${
-          assoc.tableCollectionName
-        } AS ${joinTableAlias}`,
+        `${originInfo.model.databaseName}.${assoc.tableCollectionName} AS ${joinTableAlias}`,
         `${joinTableAlias}.${singular(
           destinationInfo.model.attributes[assoc.via].attribute
         )}_${destinationInfo.model.attributes[assoc.via].column}`,
@@ -93,9 +91,7 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
       );
 
       qb.leftJoin(
-        `${destinationInfo.model.databaseName}.${
-          destinationInfo.model.collectionName
-        } AS ${destinationInfo.alias}`,
+        `${destinationInfo.model.databaseName}.${destinationInfo.model.collectionName} AS ${destinationInfo.alias}`,
         `${joinTableAlias}.${singular(
           originInfo.model.attributes[assoc.alias].attribute
         )}_${originInfo.model.attributes[assoc.alias].column}`,
@@ -115,9 +111,7 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
         : `${originInfo.alias}.${assoc.alias}`;
 
     qb.leftJoin(
-      `${destinationInfo.model.databaseName}.${
-        destinationInfo.model.collectionName
-      } AS ${destinationInfo.alias}`,
+      `${destinationInfo.model.databaseName}.${destinationInfo.model.collectionName} AS ${destinationInfo.alias}`,
       externalKey,
       internalKey
     );

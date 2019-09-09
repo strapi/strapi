@@ -15,7 +15,7 @@ await strapi.plugins['email'].services.email.send({
   replyTo: 'no-reply@strapi.io',
   subject: 'Use strapi email provider successfully',
   text: 'Hello world!',
-  html: 'Hello world!'
+  html: 'Hello world!',
 });
 ```
 

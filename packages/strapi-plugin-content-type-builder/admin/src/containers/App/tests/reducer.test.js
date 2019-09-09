@@ -31,7 +31,10 @@ import {
   updateTempContentType,
   setTemporaryAttributeRelation,
 } from '../actions';
-import appReducer, { shouldPluralizeKey, shouldPluralizeName } from '../reducer';
+import appReducer, {
+  shouldPluralizeKey,
+  shouldPluralizeName,
+} from '../reducer';
 
 describe('Reducer utils', () => {
   describe('ShouldPluralizeKey', () => {
@@ -65,6 +68,7 @@ describe('appReducer', () => {
   beforeEach(() => {
     state = fromJS({
       connections: List(['default']),
+      groups: List([]),
       initialData: {
         product: {
           name: 'product',
@@ -87,7 +91,7 @@ describe('appReducer', () => {
             fields: 1,
             isTemporary: false,
           },
-        ]),
+        ])
       ),
       modifiedData: {
         product: {
@@ -99,7 +103,7 @@ describe('appReducer', () => {
           attributes: OrderedMap(
             fromJS({
               name: { type: 'string' },
-            }),
+            })
           ),
         },
       },
@@ -120,7 +124,19 @@ describe('appReducer', () => {
         attributes: OrderedMap({}),
       },
       temporaryAttribute: {},
+      temporaryAttributeGroup: {},
       initialTemporaryAttributeRelation: {
+        name: '',
+        columnName: '',
+        dominant: false,
+        targetColumnName: '',
+        key: '-',
+        nature: 'oneWay',
+        plugin: '',
+        target: '',
+        unique: false,
+      },
+      initialTemporaryAttributeRelationGroup: {
         name: '',
         columnName: '',
         dominant: false,
@@ -142,7 +158,32 @@ describe('appReducer', () => {
         target: '',
         unique: false,
       },
+      temporaryAttributeRelationGroup: {
+        name: '',
+        columnName: '',
+        dominant: false,
+        targetColumnName: '',
+        key: '-',
+        nature: 'oneWay',
+        plugin: '',
+        target: '',
+        unique: false,
+      },
       shouldRefetchData: false,
+      newGroup: {
+        collectionName: '',
+        connection: '',
+        name: '',
+        attributes: [],
+        description: '',
+      },
+      newGroupClone: {
+        collectionName: '',
+        connection: '',
+        name: '',
+        attributes: [],
+        description: '',
+      },
     });
   });
 
@@ -150,8 +191,11 @@ describe('appReducer', () => {
     const expected = state
       .set('modifiedData', Map({}))
       .set('initialData', Map({}))
+      .set('modifiedDataGroup', Map({}))
+      .set('initialDataGroup', Map({}))
       .set('connections', List([]))
-      .set('models', List([]));
+      .set('models', List([]))
+      .set('groups', List([]));
 
     expect(appReducer(undefined, {})).toEqual(expected);
   });
@@ -172,10 +216,12 @@ describe('appReducer', () => {
         plugin: '',
         target: 'test1',
         unique: false,
-      }),
+      })
     );
 
-    expect(appReducer(state, addAttributeRelation(false, 'product'))).toEqual(expected);
+    expect(appReducer(state, addAttributeRelation(false, 'product'))).toEqual(
+      expected
+    );
   });
 
   it('should handle the addAttributeRelation action correctly if the target is different than the current model ', () => {
@@ -195,10 +241,12 @@ describe('appReducer', () => {
         plugin: '',
         target: 'test1',
         unique: false,
-      }),
+      })
     );
 
-    expect(appReducer(state, addAttributeRelation(true, null))).toEqual(expected);
+    expect(appReducer(state, addAttributeRelation(true, null))).toEqual(
+      expected
+    );
   });
 
   it('should handle the addAttributeRelation action correctly if the target is equal the current model and the relation is oneWay', () => {
@@ -218,10 +266,12 @@ describe('appReducer', () => {
         plugin: '',
         target: 'test1',
         unique: false,
-      }),
+      })
     );
 
-    expect(appReducer(state, addAttributeRelation(true, null))).toEqual(expected);
+    expect(appReducer(state, addAttributeRelation(true, null))).toEqual(
+      expected
+    );
   });
 
   it('should handle the addAttributeRelation action correctly if the target is equal the current model and the relation is manyToMany', () => {
@@ -245,7 +295,7 @@ describe('appReducer', () => {
           plugin: '',
           target: 'test',
           unique: false,
-        }),
+        })
       )
       .setIn(
         ['newContentType', 'attributes', 'notstrapi'],
@@ -258,10 +308,12 @@ describe('appReducer', () => {
           plugin: '',
           target: 'test',
           unique: false,
-        }),
+        })
       );
 
-    expect(appReducer(state, addAttributeRelation(true, 'test'))).toEqual(expected);
+    expect(appReducer(state, addAttributeRelation(true, 'test'))).toEqual(
+      expected
+    );
   });
 
   it('should handle the addAttributeRelation action correctly if the target is equal the current model and the relation is manyToOne', () => {
@@ -285,7 +337,7 @@ describe('appReducer', () => {
           plugin: '',
           target: 'test',
           unique: false,
-        }),
+        })
       )
       .setIn(
         ['newContentType', 'attributes', 'notstrapi'],
@@ -298,10 +350,12 @@ describe('appReducer', () => {
           plugin: '',
           target: 'test',
           unique: false,
-        }),
+        })
       );
 
-    expect(appReducer(state, addAttributeRelation(true, 'test'))).toEqual(expected);
+    expect(appReducer(state, addAttributeRelation(true, 'test'))).toEqual(
+      expected
+    );
   });
 
   it('should handle the addAttributeRelation action correctly if the target is equal the current model and the relation is oneToMany', () => {
@@ -325,7 +379,7 @@ describe('appReducer', () => {
           plugin: '',
           target: 'test',
           unique: false,
-        }),
+        })
       )
       .setIn(
         ['newContentType', 'attributes', 'notstrapi'],
@@ -338,10 +392,12 @@ describe('appReducer', () => {
           plugin: '',
           target: 'test',
           unique: false,
-        }),
+        })
       );
 
-    expect(appReducer(state, addAttributeRelation(true, 'test'))).toEqual(expected);
+    expect(appReducer(state, addAttributeRelation(true, 'test'))).toEqual(
+      expected
+    );
   });
 
   it('should handle the addAttributeToExistingContentType action correctly if the type is different than number', () => {
@@ -350,10 +406,15 @@ describe('appReducer', () => {
       .setIn(['temporaryAttribute', 'type'], 'string');
 
     const expected = state
-      .setIn(['modifiedData', 'product', 'attributes', 'test', 'type'], 'string')
+      .setIn(
+        ['modifiedData', 'product', 'attributes', 'test', 'type'],
+        'string'
+      )
       .set('temporaryAttribute', Map({}));
 
-    expect(appReducer(state, addAttributeToExistingContentType('product', 'string'))).toEqual(expected);
+    expect(
+      appReducer(state, addAttributeToExistingContentType('product', 'string'))
+    ).toEqual(expected);
   });
 
   it('should handle the addAttributeToExistingContentType action correctly if the type is number', () => {
@@ -365,7 +426,9 @@ describe('appReducer', () => {
       .setIn(['modifiedData', 'product', 'attributes', 'test', 'type'], 'float')
       .set('temporaryAttribute', Map({}));
 
-    expect(appReducer(state, addAttributeToExistingContentType('product', 'number'))).toEqual(expected);
+    expect(
+      appReducer(state, addAttributeToExistingContentType('product', 'number'))
+    ).toEqual(expected);
   });
 
   it('should handle the addAttributeToTempContentType action correctly if the type is different than number', () => {
@@ -377,7 +440,9 @@ describe('appReducer', () => {
       .setIn(['newContentType', 'attributes', 'test', 'type'], 'string')
       .set('temporaryAttribute', Map({}));
 
-    expect(appReducer(state, addAttributeToTempContentType('string'))).toEqual(expected);
+    expect(appReducer(state, addAttributeToTempContentType('string'))).toEqual(
+      expected
+    );
   });
 
   it('should handle the addAttributeToTempContentType action correctly if the type is number', () => {
@@ -389,7 +454,9 @@ describe('appReducer', () => {
       .setIn(['newContentType', 'attributes', 'test', 'type'], 'biginteger')
       .set('temporaryAttribute', Map({}));
 
-    expect(appReducer(state, addAttributeToTempContentType('number'))).toEqual(expected);
+    expect(appReducer(state, addAttributeToTempContentType('number'))).toEqual(
+      expected
+    );
   });
 
   it('should handle the cancelNewContentType action correctly', () => {
@@ -406,7 +473,7 @@ describe('appReducer', () => {
         mainField: '',
         name: '',
         attributes: OrderedMap({}),
-      }),
+      })
     );
 
     expect(appReducer(state, cancelNewContentType())).toEqual(expected);
@@ -442,7 +509,7 @@ describe('appReducer', () => {
           plugin: '',
           target: '',
           unique: false,
-        }),
+        })
       )
       .set(
         'initialTemporaryAttributeRelation',
@@ -456,10 +523,12 @@ describe('appReducer', () => {
           plugin: '',
           target: '',
           unique: false,
-        }),
+        })
       );
 
-    expect(appReducer(state, clearTemporaryAttributeRelation())).toEqual(expected);
+    expect(appReducer(state, clearTemporaryAttributeRelation())).toEqual(
+      expected
+    );
   });
 
   it('should handle the createTempContentType action correctly', () => {
@@ -490,7 +559,7 @@ describe('appReducer', () => {
             fields: 0,
             isTemporary: true,
           },
-        ]),
+        ])
       )
       .set('newContentTypeClone', Map(newContentType));
 
@@ -499,7 +568,12 @@ describe('appReducer', () => {
 
   it('should handle the deleteModelAttribute action correctly', () => {
     const keys = ['modifiedData', 'product', 'attributes', 'name'];
-    const expected = state.removeIn(['modifiedData', 'product', 'attributes', 'name']);
+    const expected = state.removeIn([
+      'modifiedData',
+      'product',
+      'attributes',
+      'name',
+    ]);
 
     expect(appReducer(state, deleteModelAttribute(keys))).toEqual(expected);
   });
@@ -518,7 +592,7 @@ describe('appReducer', () => {
           plugin: '',
           target: 'product',
           unique: false,
-        }),
+        })
       )
       .setIn(
         ['modifiedData', 'product', 'attributes', 'notstrapi'],
@@ -531,7 +605,7 @@ describe('appReducer', () => {
           plugin: '',
           target: 'product',
           unique: false,
-        }),
+        })
       );
     const expected = state
       .removeIn(['modifiedData', 'product', 'attributes', 'strapi'])
@@ -553,10 +627,15 @@ describe('appReducer', () => {
         plugin: '',
         target: 'product',
         unique: false,
-      }),
+      })
     );
 
-    const expected = state.removeIn(['modifiedData', 'product', 'attributes', 'strapi']);
+    const expected = state.removeIn([
+      'modifiedData',
+      'product',
+      'attributes',
+      'strapi',
+    ]);
 
     expect(appReducer(state, deleteModelAttribute(keys))).toEqual(expected);
   });
@@ -565,9 +644,12 @@ describe('appReducer', () => {
     const expected = state
       .set('modifiedData', Map({}))
       .set('initialData', Map({}))
-      .set('models', List([]));
+      .set('models', List([]))
+      .set('shouldRefetchData', true);
 
-    expect(appReducer(state, deleteModelSucceeded('product'))).toEqual(expected);
+    expect(appReducer(state, deleteModelSucceeded('product'))).toEqual(
+      expected
+    );
   });
 
   it('should handle the deleteTemporaryModel action correctly', () => {
@@ -597,7 +679,7 @@ describe('appReducer', () => {
             fields: 0,
             isTemporary: true,
           }),
-        ]),
+        ])
       )
       .set('newContentType', tempCt)
       .set('newContentTypeClone', tempCt);
@@ -620,7 +702,7 @@ describe('appReducer', () => {
             fields: 1,
             isTemporary: false,
           }),
-        ]),
+        ])
       )
       .set('newContentType', fromJS(emptyCt))
       .set('newContentTypeClone', fromJS(emptyCt));
@@ -660,11 +742,11 @@ describe('appReducer', () => {
     ];
     const initialData = {
       permission: {
+        name: 'permission',
         collectionName: 'users-permissions_permission',
         connection: 'default',
         description: '',
         mainField: '',
-        name: 'permission',
         attributes: OrderedMap(
           fromJS({
             type: {
@@ -677,35 +759,110 @@ describe('appReducer', () => {
               required: true,
               configurable: false,
             },
-          }),
+          })
         ),
       },
     };
+    const initialDataGroup = {
+      tests: {
+        uid: 'tests',
+        name: 'tests',
+        connection: 'default',
+        collectionName: 'tests',
+        description: '',
+        attributes: [
+          {
+            name: 'name',
+            type: 'string',
+            required: true,
+          },
+          {
+            name: 'quantity',
+            type: 'float',
+            required: true,
+          },
+        ],
+        isTemporary: false,
+      },
+    };
     const connections = ['default'];
+    const groupsData = {
+      data: [
+        {
+          uid: 'tests',
+          name: 'tests',
+          schema: {
+            connection: 'default',
+            collectionName: 'tests',
+            description: '',
+            attributes: {
+              name: {
+                type: 'string',
+                required: true,
+              },
+              quantity: {
+                type: 'float',
+                required: true,
+              },
+            },
+          },
+          isTemporary: false,
+        },
+      ],
+      error: {}, // to be defined I don't know yet | null when no error
+    };
 
     const expected = state
       .set('modifiedData', fromJS(initialData))
+      .set('modifiedDataGroup', fromJS(initialDataGroup))
       .set('initialData', fromJS(initialData))
+      .set('initialDataGroup', fromJS(initialDataGroup))
+      .set(
+        'groups',
+        List(
+          fromJS([
+            {
+              description: '',
+              fields: 2,
+              icon: 'fa-cube',
+              isTemporary: false,
+              name: 'tests',
+              source: null,
+              uid: 'tests',
+            },
+          ])
+        )
+      )
       .set('models', List(models))
       .set('isLoading', false)
       .setIn(['newContentType', 'connection'], 'default')
       .set('connections', List(connections));
 
-    expect(appReducer(state, getDataSucceeded({ allModels, models }, connections))).toEqual(expected);
+    // TODO
+    expect(
+      appReducer(
+        state,
+        getDataSucceeded({ allModels, models }, connections, groupsData)
+      )
+    ).toEqual(expected);
   });
 
   it('should handle the onChangeExistingContentTypeMainInfos action correctly', () => {
     const expected = state.setIn(['modifiedData', 'product', 'name'], 'test');
     const target = { name: 'product.name', value: 'test' };
 
-    expect(appReducer(state, onChangeExistingContentTypeMainInfos({ target }))).toEqual(expected);
+    expect(
+      appReducer(state, onChangeExistingContentTypeMainInfos({ target }))
+    ).toEqual(expected);
   });
 
   it('should handle the onChangeNewContentTypeMainInfos action correctly', () => {
     const expected = state.setIn(['newContentType', 'name'], 'test');
     const target = { name: 'name', value: 'test' };
 
-    expect(appReducer(state, onChangeNewContentTypeMainInfos({ target }))).toEqual(expected);
+    expect(
+      appReducer(state, onChangeNewContentTypeMainInfos({ target }))
+    ).toEqual(expected);
   });
 
   it('should handle the onChangeAttribute action correctly', () => {
@@ -716,7 +873,10 @@ describe('appReducer', () => {
   });
 
   it('should handle the onChangeRelation action correctly', () => {
-    const expected = state.setIn(['temporaryAttributeRelation', 'name'], 'test');
+    const expected = state.setIn(
+      ['temporaryAttributeRelation', 'name'],
+      'test'
+    );
     const target = { name: 'name', value: 'test' };
 
     expect(appReducer(state, onChangeRelation({ target }))).toEqual(expected);
@@ -733,7 +893,9 @@ describe('appReducer', () => {
       .setIn(['temporaryAttributeRelation', 'nature'], 'oneWay')
       .setIn(['temporaryAttributeRelation', 'key'], '-');
 
-    expect(appReducer(state, onChangeRelationNature('oneWay', null))).toEqual(expected);
+    expect(appReducer(state, onChangeRelationNature('oneWay', null))).toEqual(
+      expected
+    );
   });
 
   it('should handle the onChangeRelationNature action correctly for the manyToMany', () => {
@@ -745,7 +907,9 @@ describe('appReducer', () => {
       .setIn(['temporaryAttributeRelation', 'nature'], 'manyToMany')
       .setIn(['temporaryAttributeRelation', 'key'], 'strapis');
 
-    expect(appReducer(state, onChangeRelationNature('manyToMany', 'strapi'))).toEqual(expected);
+    expect(
+      appReducer(state, onChangeRelationNature('manyToMany', 'strapi'))
+    ).toEqual(expected);
   });
 
   it('should handle the onChangeRelationNature action correctly for the manyToOne', () => {
@@ -756,7 +920,9 @@ describe('appReducer', () => {
       .setIn(['temporaryAttributeRelation', 'nature'], 'manyToOne')
       .setIn(['temporaryAttributeRelation', 'key'], 'strapis');
 
-    expect(appReducer(state, onChangeRelationNature('manyToOne', 'strapi'))).toEqual(expected);
+    expect(
+      appReducer(state, onChangeRelationNature('manyToOne', 'strapi'))
+    ).toEqual(expected);
   });
 
   it('should handle the onChangeRelationNature action correctly for the oneToMany', () => {
@@ -767,7 +933,9 @@ describe('appReducer', () => {
       .setIn(['temporaryAttributeRelation', 'nature'], 'oneToMany')
       .setIn(['temporaryAttributeRelation', 'key'], 'strapi');
 
-    expect(appReducer(state, onChangeRelationNature('oneToMany', 'strapi'))).toEqual(expected);
+    expect(
+      appReducer(state, onChangeRelationNature('oneToMany', 'strapi'))
+    ).toEqual(expected);
   });
 
   it('should handle the onChangeRelationTarget action correctly for the manyToMany', () => {
@@ -783,7 +951,14 @@ describe('appReducer', () => {
       .setIn(['temporaryAttributeRelation', 'name'], 'strapis');
 
     expect(
-      appReducer(state, onChangeRelationTarget({ name: 'strapi', source: null }, 'soupette', false)),
+      appReducer(
+        state,
+        onChangeRelationTarget(
+          { name: 'strapi', source: null },
+          'soupette',
+          false
+        )
+      )
     ).toEqual(expected);
   });
 
@@ -797,7 +972,9 @@ describe('appReducer', () => {
       .removeIn(['modifiedData', 'product', 'attributes', 'test'])
       .set('temporaryAttribute', Map({}));
 
-    expect(appReducer(state, resetEditExistingContentType('product')).toJS()).toEqual(expected.toJS());
+    expect(
+      appReducer(state, resetEditExistingContentType('product')).toJS()
+    ).toEqual(expected.toJS());
   });
 
   it('should handle the resetExistingContentTypeMainInfos action correctly', () => {
@@ -806,9 +983,14 @@ describe('appReducer', () => {
         type: 'string',
       })
       .setIn(['modifiedData', 'product', 'name'], 'anothername');
-    const expected = state.setIn(['modifiedData', 'product', 'name'], 'product');
+    const expected = state.setIn(
+      ['modifiedData', 'product', 'name'],
+      'product'
+    );
 
-    expect(appReducer(state, resetExistingContentTypeMainInfos('product'))).toEqual(expected);
+    expect(
+      appReducer(state, resetExistingContentTypeMainInfos('product'))
+    ).toEqual(expected);
   });
 
   it('should handle the resetEditTempContentType action correctly', () => {
@@ -835,6 +1017,7 @@ describe('appReducer', () => {
       connections: List([]),
       initialData: {},
       isLoading: true,
+      groups: List([]),
       models: List([]),
       modifiedData: {},
       newContentType: {
@@ -854,7 +1037,19 @@ describe('appReducer', () => {
         attributes: OrderedMap({}),
       },
       temporaryAttribute: {},
+      temporaryAttributeGroup: {},
       initialTemporaryAttributeRelation: {
+        name: '',
+        columnName: '',
+        dominant: false,
+        targetColumnName: '',
+        key: '-',
+        nature: 'oneWay',
+        plugin: '',
+        target: '',
+        unique: false,
+      },
+      initialTemporaryAttributeRelationGroup: {
         name: '',
         columnName: '',
         dominant: false,
@@ -876,19 +1071,54 @@ describe('appReducer', () => {
         target: '',
         unique: false,
       },
+      temporaryAttributeRelationGroup: {
+        name: '',
+        columnName: '',
+        dominant: false,
+        targetColumnName: '',
+        key: '-',
+        nature: 'oneWay',
+        plugin: '',
+        target: '',
+        unique: false,
+      },
       shouldRefetchData: false,
+      newGroup: {
+        collectionName: '',
+        connection: '',
+        name: '',
+        attributes: [],
+        description: '',
+      },
+      newGroupClone: {
+        collectionName: '',
+        connection: '',
+        name: '',
+        attributes: [],
+        description: '',
+      },
+      initialDataGroup: {},
+      modifiedDataGroup: {},
     });
 
-    expect(appReducer(state, resetProps())).toEqual(expected);
+    expect(appReducer(state, resetProps()).toJS()).toEqual(expected.toJS());
   });
 
   it('should handle the saveEditedAttribute action correctly if the model is not temporary', () => {
-    state = state.set('temporaryAttribute', Map({ name: 'test', type: 'string' }));
+    state = state.set(
+      'temporaryAttribute',
+      Map({ name: 'test', type: 'string' })
+    );
     const expected = state
       .removeIn(['modifiedData', 'product', 'attributes', 'name'])
-      .setIn(['modifiedData', 'product', 'attributes', 'test', 'type'], 'string');
+      .setIn(
+        ['modifiedData', 'product', 'attributes', 'test', 'type'],
+        'string'
+      );
 
-    expect(appReducer(state, saveEditedAttribute('name', false, 'product'))).toEqual(expected);
+    expect(
+      appReducer(state, saveEditedAttribute('name', false, 'product'))
+    ).toEqual(expected);
   });
 
   it('should handle the saveEditedAttribute action correctly if the model is temporary', () => {
@@ -899,7 +1129,9 @@ describe('appReducer', () => {
       .removeIn(['newContentType', 'attributes', 'name'])
       .setIn(['newContentType', 'attributes', 'test', 'type'], 'string');
 
-    expect(appReducer(state, saveEditedAttribute('name', true, null))).toEqual(expected);
+    expect(appReducer(state, saveEditedAttribute('name', true, null))).toEqual(
+      expected
+    );
   });
 
   it('should handle the setTemporaryAttribute action correctly if the model is not temporary', () => {
@@ -907,42 +1139,57 @@ describe('appReducer', () => {
       .setIn(['temporaryAttribute', 'name'], 'name')
       .setIn(['temporaryAttribute', 'type'], 'string');
 
-    expect(appReducer(state, setTemporaryAttribute('name', false, 'product'))).toEqual(expected);
+    expect(
+      appReducer(state, setTemporaryAttribute('name', false, 'product'))
+    ).toEqual(expected);
   });
 
   it('should handle the setTemporaryAttribute action correctly if the model is temporary', () => {
-    state = state.setIn(['newContentType', 'attributes', 'name', 'type'], 'string');
+    state = state.setIn(
+      ['newContentType', 'attributes', 'name', 'type'],
+      'string'
+    );
     const expected = state
       .setIn(['temporaryAttribute', 'name'], 'name')
       .setIn(['temporaryAttribute', 'type'], 'string');
 
-    expect(appReducer(state, setTemporaryAttribute('name', true, undefined))).toEqual(expected);
+    expect(
+      appReducer(state, setTemporaryAttribute('name', true, undefined))
+    ).toEqual(expected);
   });
 
   it('should handle the submitContentTypeSucceded action correctly', () => {
-    const expected = state.set('isLoading', true).set('shouldRefetchData', true);
+    const expected = state
+      .set('isLoading', true)
+      .set('shouldRefetchData', true);
 
     expect(appReducer(state, submitContentTypeSucceeded())).toEqual(expected);
   });
 
   it('should handle the submitTempContentTypeSucceeded action correctly', () => {
-    const expected = state.set('isLoading', true).set('shouldRefetchData', true);
+    const expected = state
+      .set('isLoading', true)
+      .set('shouldRefetchData', true);
 
-    expect(appReducer(state, submitTempContentTypeSucceeded())).toEqual(expected);
+    expect(appReducer(state, submitTempContentTypeSucceeded())).toEqual(
+      expected
+    );
   });
 
   it('should handle the updateTempContentType action correctly', () => {
-    state = state.setIn(['newContentType', 'name'], 'test').updateIn(['models'], list =>
-      list.push(
-        fromJS({
-          icon: 'fa-cube',
-          name: 'test1',
-          description: '',
-          fields: 0,
-          isTemporary: true,
-        }),
-      ),
-    );
+    state = state
+      .setIn(['newContentType', 'name'], 'test')
+      .updateIn(['models'], list =>
+        list.push(
+          fromJS({
+            icon: 'fa-cube',
+            name: 'test1',
+            description: '',
+            fields: 0,
+            isTemporary: true,
+          })
+        )
+      );
 
     const expected = state
       .setIn(['newContentTypeClone', 'name'], 'test')
@@ -975,7 +1222,7 @@ describe('SavedEditedAttributeRelation with a temporary model', () => {
               target: 'test',
               unique: false,
             },
-          }),
+          })
         ),
       },
       initialTemporaryAttributeRelation: {
@@ -1001,6 +1248,20 @@ describe('SavedEditedAttributeRelation with a temporary model', () => {
         unique: false,
       },
       shouldRefetchData: false,
+      newGroup: {
+        collectionName: '',
+        connection: '',
+        description: '',
+        name: '',
+        attributes: [],
+      },
+      newGroupClone: {
+        collectionName: '',
+        connection: '',
+        description: '',
+        name: '',
+        attributes: [],
+      },
     });
   });
 
@@ -1031,14 +1292,25 @@ describe('SavedEditedAttributeRelation with a temporary model', () => {
 
     state = state
       .set('temporaryAttributeRelation', newRelation)
-      .set('initialTemporaryAttributeRelation', oldRelation.set('name', 'test'));
+      .set(
+        'initialTemporaryAttributeRelation',
+        oldRelation.set('name', 'test')
+      );
 
     const expected = state
       .removeIn(['newContentType', 'attributes', 'test'])
-      .setIn(['newContentType', 'attributes', 'tests'], newRelation.remove('name'))
-      .setIn(['newContentType', 'attributes', 'othertests'], otherRelation.remove('name'));
+      .setIn(
+        ['newContentType', 'attributes', 'tests'],
+        newRelation.remove('name')
+      )
+      .setIn(
+        ['newContentType', 'attributes', 'othertests'],
+        otherRelation.remove('name')
+      );
 
-    expect(appReducer(state, saveEditedAttributeRelation('test', true, 'test'))).toEqual(expected);
+    expect(
+      appReducer(state, saveEditedAttributeRelation('test', true, 'test'))
+    ).toEqual(expected);
   });
 
   it('should update the relation nature correctly for the test attribute (oneWay => manyToOne)', () => {
@@ -1068,14 +1340,25 @@ describe('SavedEditedAttributeRelation with a temporary model', () => {
 
     state = state
       .set('temporaryAttributeRelation', newRelation)
-      .set('initialTemporaryAttributeRelation', oldRelation.set('name', 'test'));
+      .set(
+        'initialTemporaryAttributeRelation',
+        oldRelation.set('name', 'test')
+      );
 
     const expected = state
       .removeIn(['newContentType', 'attributes', 'test'])
-      .setIn(['newContentType', 'attributes', 'test'], newRelation.remove('name'))
-      .setIn(['newContentType', 'attributes', 'othertests'], otherRelation.remove('name'));
+      .setIn(
+        ['newContentType', 'attributes', 'test'],
+        newRelation.remove('name')
+      )
+      .setIn(
+        ['newContentType', 'attributes', 'othertests'],
+        otherRelation.remove('name')
+      );
 
-    expect(appReducer(state, saveEditedAttributeRelation('test', true, 'test'))).toEqual(expected);
+    expect(
+      appReducer(state, saveEditedAttributeRelation('test', true, 'test'))
+    ).toEqual(expected);
   });
 
   it('should update the relation nature correctly for the test attribute (oneWay => oneToMany)', () => {
@@ -1105,14 +1388,25 @@ describe('SavedEditedAttributeRelation with a temporary model', () => {
 
     state = state
       .set('temporaryAttributeRelation', newRelation)
-      .set('initialTemporaryAttributeRelation', oldRelation.set('name', 'test'));
+      .set(
+        'initialTemporaryAttributeRelation',
+        oldRelation.set('name', 'test')
+      );
 
     const expected = state
       .removeIn(['newContentType', 'attributes', 'test'])
-      .setIn(['newContentType', 'attributes', 'tests'], newRelation.remove('name'))
-      .setIn(['newContentType', 'attributes', 'othertest'], otherRelation.remove('name'));
+      .setIn(
+        ['newContentType', 'attributes', 'tests'],
+        newRelation.remove('name')
+      )
+      .setIn(
+        ['newContentType', 'attributes', 'othertest'],
+        otherRelation.remove('name')
+      );
 
-    expect(appReducer(state, saveEditedAttributeRelation('test', true, 'test'))).toEqual(expected);
+    expect(
+      appReducer(state, saveEditedAttributeRelation('test', true, 'test'))
+    ).toEqual(expected);
   });
 
   it('should update the relation correctly if the relation is originally made within the model and the model changes', () => {
@@ -1151,17 +1445,28 @@ describe('SavedEditedAttributeRelation with a temporary model', () => {
     });
 
     state = state
-      .setIn(['newContentType', 'attributes', 'manys'], relationToSet.remove('name'))
-      .setIn(['newContentType', 'attributes', 'manys2'], otherRelationToSet.remove('name'))
+      .setIn(
+        ['newContentType', 'attributes', 'manys'],
+        relationToSet.remove('name')
+      )
+      .setIn(
+        ['newContentType', 'attributes', 'manys2'],
+        otherRelationToSet.remove('name')
+      )
       .set('temporaryAttributeRelation', newRelation)
       .set('initialTemporaryAttributeRelation', relationToSet);
 
     const expected = state
       .removeIn(['newContentType', 'attributes', 'manys'])
       .removeIn(['newContentType', 'attributes', 'manys2'])
-      .setIn(['newContentType', 'attributes', 'newrelation'], newRelation.remove('name'));
+      .setIn(
+        ['newContentType', 'attributes', 'newrelation'],
+        newRelation.remove('name')
+      );
 
-    expect(appReducer(state, saveEditedAttributeRelation('manys', true, 'test'))).toEqual(expected);
+    expect(
+      appReducer(state, saveEditedAttributeRelation('manys', true, 'test'))
+    ).toEqual(expected);
   });
 });
 
@@ -1251,12 +1556,17 @@ describe('SavedEditedAttributeRelation without a temporary model', () => {
           targetColumnName: '',
           unique: false,
         }),
-      }),
+      })
     );
 
-    expect(fromJS(appReducer(state, saveEditedAttributeRelation('article', false, 'article')))).toEqual(
-      fromJS(expected),
-    );
+    expect(
+      fromJS(
+        appReducer(
+          state,
+          saveEditedAttributeRelation('article', false, 'article')
+        )
+      )
+    ).toEqual(fromJS(expected));
   });
 
   it('should not modify the order of the attributes and a new one if the relation changes from manyToMany to oneWay', () => {
@@ -1289,7 +1599,7 @@ describe('SavedEditedAttributeRelation without a temporary model', () => {
             targetColumnName: '',
             unique: false,
           },
-        }),
+        })
       )
       .setIn(
         ['temporaryAttributeRelation'],
@@ -1303,7 +1613,7 @@ describe('SavedEditedAttributeRelation without a temporary model', () => {
           plugin: '',
           target: 'article',
           unique: false,
-        }),
+        })
       )
       .setIn(
         ['initialTemporaryAttributeRelation'],
@@ -1317,7 +1627,7 @@ describe('SavedEditedAttributeRelation without a temporary model', () => {
           plugin: '',
           target: 'article',
           unique: false,
-        }),
+        })
       );
     const expected = state.setIn(
       ['modifiedData', 'article', 'attributes'],
@@ -1337,10 +1647,15 @@ describe('SavedEditedAttributeRelation without a temporary model', () => {
           targetColumnName: '',
           unique: false,
         }),
-      }),
+      })
     );
 
-    expect(appReducer(state, saveEditedAttributeRelation('articles1', false, 'article'))).toEqual(expected);
+    expect(
+      appReducer(
+        state,
+        saveEditedAttributeRelation('articles1', false, 'article')
+      )
+    ).toEqual(expected);
   });
 
   it('should not modify the order of the attributes if the relation changes from something different than oneWay to something different than oneWay', () => {
@@ -1369,7 +1684,7 @@ describe('SavedEditedAttributeRelation without a temporary model', () => {
           unique: false,
         },
         lastname: { type: 'string' },
-      }),
+      })
     );
     const updatedAttributes = OrderedMap(
       fromJS({
@@ -1396,7 +1711,7 @@ describe('SavedEditedAttributeRelation without a temporary model', () => {
           unique: false,
         },
         lastname: { type: 'string' },
-      }),
+      })
     );
 
     state = state
@@ -1413,7 +1728,7 @@ describe('SavedEditedAttributeRelation without a temporary model', () => {
           target: 'article',
           targetColumnName: '',
           unique: false,
-        }),
+        })
       )
       .set(
         'temporaryAttributeRelation',
@@ -1427,12 +1742,17 @@ describe('SavedEditedAttributeRelation without a temporary model', () => {
           target: 'article',
           targetColumnName: '',
           unique: false,
-        }),
+        })
       );
 
-    const expected = state.setIn(['modifiedData', 'article', 'attributes'], updatedAttributes);
+    const expected = state.setIn(
+      ['modifiedData', 'article', 'attributes'],
+      updatedAttributes
+    );
 
-    expect(appReducer(state, saveEditedAttributeRelation('as', false, 'article'))).toEqual(expected);
+    expect(
+      appReducer(state, saveEditedAttributeRelation('as', false, 'article'))
+    ).toEqual(expected);
   });
 });
 
@@ -1517,29 +1837,74 @@ describe('SetTemporaryAttributeRelation', () => {
       .setIn(['temporaryAttributeRelation', 'plugin'], '');
 
     expect(
-      appReducer(state, setTemporaryAttributeRelation('supertest', true, undefined, undefined, false)),
+      appReducer(
+        state,
+        setTemporaryAttributeRelation(
+          'supertest',
+          true,
+          undefined,
+          undefined,
+          false
+        )
+      )
     ).toEqual(expected);
   });
 
   it('should handle the action correctly if the model is not temporary and the action is edit', () => {
-    const relationToSet = state.getIn(['modifiedData', 'article', 'attributes', 'products']);
+    const relationToSet = state.getIn([
+      'modifiedData',
+      'article',
+      'attributes',
+      'products',
+    ]);
     const expected = state
       .set('temporaryAttributeRelation', relationToSet.set('name', 'products'))
-      .set('initialTemporaryAttributeRelation', relationToSet.set('name', 'products'));
+      .set(
+        'initialTemporaryAttributeRelation',
+        relationToSet.set('name', 'products')
+      );
 
     expect(
-      appReducer(state, setTemporaryAttributeRelation('article', false, undefined, 'products', true)),
+      appReducer(
+        state,
+        setTemporaryAttributeRelation(
+          'article',
+          false,
+          undefined,
+          'products',
+          true
+        )
+      )
     ).toEqual(expected);
   });
 
   it('should handle the action correctly if the model is temporary and the action is edit', () => {
-    const relationToSet = state.getIn(['newContentType', 'attributes', 'products']);
+    const relationToSet = state.getIn([
+      'newContentType',
+      'attributes',
+      'products',
+    ]);
     const expected = state
-      .setIn(['temporaryAttributeRelation'], relationToSet.set('name', 'products'))
-      .setIn(['initialTemporaryAttributeRelation'], relationToSet.set('name', 'products'));
+      .setIn(
+        ['temporaryAttributeRelation'],
+        relationToSet.set('name', 'products')
+      )
+      .setIn(
+        ['initialTemporaryAttributeRelation'],
+        relationToSet.set('name', 'products')
+      );
 
     expect(
-      appReducer(state, setTemporaryAttributeRelation('supertest', true, 'test', 'products', true)),
+      appReducer(
+        state,
+        setTemporaryAttributeRelation(
+          'supertest',
+          true,
+          'test',
+          'products',
+          true
+        )
+      )
     ).toEqual(expected);
   });
 });

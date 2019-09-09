@@ -59,7 +59,7 @@ class InputNumber extends React.Component {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.errors !== nextProps.errors) {
       this.setState({
         errors: uniqBy(union(this.state.errors, nextProps.errors), 'id'),
@@ -126,7 +126,7 @@ class InputNumber extends React.Component {
     handleBlur,
     inputValue,
     placeholder,
-    marginBottom,
+    marginBottom
   ) => (
     <FormattedMessage id={`settings-manager.${placeholder}`}>
       {message => (
@@ -168,7 +168,7 @@ class InputNumber extends React.Component {
         handleBlur,
         inputValue,
         placeholder,
-        marginBottomInput,
+        marginBottomInput
       )
     ) : (
       <input
@@ -197,9 +197,7 @@ class InputNumber extends React.Component {
       marginTopSmall = '-1.2rem';
     return (
       <div
-        className={`${
-          this.props.styles.stminputNumber
-        } ${requiredClass} ${bootStrapClass} ${bootStrapClassDanger}`}
+        className={`${this.props.styles.stminputNumber} ${requiredClass} ${bootStrapClass} ${bootStrapClassDanger}`}
       >
         <label htmlFor={this.props.name}>
           <FormattedMessage id={`settings-manager.${this.props.name}`} />

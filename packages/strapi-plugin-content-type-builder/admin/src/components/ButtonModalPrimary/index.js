@@ -4,24 +4,20 @@
  *
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { Button } from 'reactstrap';
 
-import styles from './styles.scss';
+import StyledButtonModalPrimary from './StyledButtonModalPrimary';
 
 function ButtonModalPrimary({ add, message, onClick, type }) {
-  /* istanbul ignore next */
-  // Ignoring the style condition is intended...
-  const className = add
-    ? styles.buttonModalPrimaryAdd
-    : styles.buttonModalPrimary;
+  const icon = add ? <i className={`fa fa-plus`} /> : null;
 
   return (
-    <Button className={className} onClick={onClick} type={type}>
+    <StyledButtonModalPrimary onClick={onClick} type={type}>
+      {icon}
       <FormattedMessage id={message} />
-    </Button>
+    </StyledButtonModalPrimary>
   );
 }
 
@@ -39,4 +35,5 @@ ButtonModalPrimary.propTypes = {
   type: PropTypes.string,
 };
 
-export default ButtonModalPrimary;
+export default memo(ButtonModalPrimary);
+export { ButtonModalPrimary };

@@ -4,7 +4,7 @@
  *
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, ModalHeader } from 'reactstrap';
 import styles from './styles.scss';
@@ -12,7 +12,12 @@ import styles from './styles.scss';
 function WrapperModal({ children, isOpen, onToggle, ...rest }) {
   return (
     <div className={styles.wrapperModal}>
-      <Modal isOpen={isOpen} toggle={onToggle} className={styles.modal} {...rest}>
+      <Modal
+        isOpen={isOpen}
+        toggle={onToggle}
+        className={styles.modal}
+        {...rest}
+      >
         <ModalHeader className={styles.headerModalWrapper} toggle={onToggle} />
         {children}
       </Modal>
@@ -30,4 +35,5 @@ WrapperModal.propTypes = {
   onToggle: PropTypes.func.isRequired,
 };
 
-export default WrapperModal;
+export default memo(WrapperModal);
+export { WrapperModal };
