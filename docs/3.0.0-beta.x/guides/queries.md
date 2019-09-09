@@ -264,12 +264,14 @@ Documentation: [https://bookshelfjs.org/](https://bookshelfjs.org/)
 **Example**
 
 ```js
-strapi
+const result = await strapi
   .query('post')
   .model.query(qb => {
     qb.where('id', 1);
   })
   .fetch();
+
+const fields = result.toJSON();
 ```
 
 ### Mongoose
@@ -279,9 +281,9 @@ Documentation: [https://mongoosejs.com/](https://mongoosejs.com/)
 **Example**
 
 ```js
-strapi
-  .query('post')
-  .model.find({
-    { date: { $gte: '2019-01-01T00.00.00Z }
-  });
+const result = strapi.query('post').model.find({
+  date: { $gte: '2019-01-01T00.00.00Z' },
+});
+
+const fields = result.toObject();
 ```
