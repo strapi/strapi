@@ -89,7 +89,7 @@
   "PopUpForm.header.edit.email-templates": "تحرير قوالب البريد الإلكتروني",
   "PopUpForm.header.edit.providers": "تحرير موفر {provider}",
   "PopUpForm.inputSelect.providers.label": "اختر الموفر",
-  "components.Input.error.password.noMatch": "كلمات السر لا تتطابق",
+
   "notification.error.delete": "حدث خطأ أثناء محاولة حذف العنصر",
   "notification.error.fetch": "حدث خطأ أثناء محاولة جلب البيانات",
   "notification.error.fetchUser": "حدث خطأ أثناء محاولة جلب المستخدمين",

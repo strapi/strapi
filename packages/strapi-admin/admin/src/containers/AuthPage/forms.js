@@ -3,7 +3,6 @@ import { translatedErrors } from 'strapi-helper-plugin';
 
 const form = {
   'forgot-password': {
-    endPoint: '/auth/forgot-password',
     inputs: [
       [
         {
@@ -24,7 +23,6 @@ const form = {
     }),
   },
   login: {
-    endPoint: '/auth/local',
     inputs: [
       [
         {
@@ -62,7 +60,6 @@ const form = {
     }),
   },
   register: {
-    endPoint: '/auth/local/register',
     inputs: [
       [
         {
@@ -126,26 +123,14 @@ const form = {
       passwordConfirmation: yup
         .string()
         .min(6, translatedErrors.minLength)
-        .oneOf([yup.ref('password'), null])
-        .required({ id: 'components.Input.error.password.noMatch' }),
+        .oneOf(
+          [yup.ref('password'), null],
+          'components.Input.error.password.noMatch'
+        )
+        .required(translatedErrors.required),
     }),
   },
-  'register-success': {
-    inputs: [
-      [
-        {
-          name: 'email',
-          type: 'email',
-          label: {
-            id: 'Auth.form.register-success.email.label',
-          },
-          placeholder: 'Auth.form.register-success.email.placeholder',
-        },
-      ],
-    ],
-  },
   'reset-password': {
-    endPoint: '/auth/reset-password',
     inputs: [
       [
         {
@@ -175,8 +160,11 @@ const form = {
       passwordConfirmation: yup
         .string()
         .min(6, translatedErrors.required)
-        .oneOf([yup.ref('password'), null])
-        .required({ id: 'components.Input.error.password.noMatch' }),
+        .oneOf(
+          [yup.ref('password'), null],
+          'components.Input.error.password.noMatch'
+        )
+        .required(translatedErrors.required),
     }),
   },
 };

@@ -6,6 +6,7 @@ import {
   ENABLE_GLOBAL_OVERLAY_BLOCKER,
   FREEZE_APP,
   GET_APP_PLUGINS_SUCCEEDED,
+  GET_DATA_SUCCEEDED,
   PLUGIN_DELETED,
   PLUGIN_LOADED,
   UNFREEZE_APP,
@@ -17,8 +18,11 @@ const initialState = fromJS({
   appPlugins: List([]),
   blockApp: false,
   overlayBlockerData: null,
+  // TODO remove when new lifecycle
   hasUserPlugin: true,
+  hasAdminUser: false,
   isAppLoading: true,
+  isLoading: true,
   plugins: {},
   showGlobalAppBlocker: true,
 });
@@ -41,12 +45,16 @@ function appReducer(state = initialState, action) {
       return state
         .update('appPlugins', () => List(action.appPlugins))
         .update('isAppLoading', () => false);
+    case GET_DATA_SUCCEEDED:
+      return state
+        .update('isLoading', () => false)
+        .update('hasAdminUser', () => action.hasAdminUser);
     case PLUGIN_LOADED:
       return state.setIn(['plugins', action.plugin.id], fromJS(action.plugin));
     case UPDATE_PLUGIN:
       return state.setIn(
         ['plugins', action.pluginId, action.updatedKey],
-        fromJS(action.updatedValue),
+        fromJS(action.updatedValue)
       );
     case PLUGIN_DELETED:
       return state.deleteIn(['plugins', action.plugin]);

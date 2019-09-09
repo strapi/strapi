@@ -184,5 +184,6 @@
   "Auth.form.register.username.placeholder": "John Doe",
   "Auth.header.register.description": "Om de set-up af te maken en je app te beveiligen, maak a.u.b. een eerste gebruiker (root admin) door alle velden hier beneden in te vullen.",
   "Auth.link.forgot-password": "Wachtwoord vergeten?",
-  "Auth.link.ready": "Klaar om in te loggen?"
+  "Auth.link.ready": "Klaar om in te loggen?",
+  "components.Input.error.password.noMatch": "Wachtwoorden komen niet overeen"
 }

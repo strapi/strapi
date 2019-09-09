@@ -184,5 +184,6 @@
   "Auth.form.register.username.placeholder": "John Doe",
   "Auth.header.register.description": "セットアップを完了してアプリを保護するには、以下の情報を入力して最初のユーザー（ルート管理者）を作成してください。",
   "Auth.link.forgot-password": "パスワードをお忘れですか？",
-  "Auth.link.ready": "サインインする準備ができましたか？"
+  "Auth.link.ready": "サインインする準備ができましたか？",
+  "components.Input.error.password.noMatch": "パスワードが一致しません"
 }

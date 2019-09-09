@@ -176,5 +176,6 @@
   "Auth.form.register.username.placeholder": "John Doe",
   "Auth.header.register.description": "要完成安装并保护您的应用程序，请通过输入必要的信息来创建第一个用户（root管理员）。",
   "Auth.link.forgot-password": "忘记密码了吗？",
-  "Auth.link.ready": "准备好登陆？"
+  "Auth.link.ready": "准备好登陆？",
+  "components.Input.error.password.noMatch": "密码不匹配"
 }

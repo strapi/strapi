@@ -95,7 +95,7 @@
   "PopUpForm.header.edit.email-templates": "Editar Plantillas de Email",
   "PopUpForm.header.edit.providers": "Editar Proveedor {provider}",
   "PopUpForm.inputSelect.providers.label": "Elija el proveedor",
-  "components.Input.error.password.noMatch": "Las contraseñas no coinciden",
+
   "components.Input.error.password.length": "Contraseña muy corta",
   "notification.error.delete": "Se ha producido un error al intentar borrar el elemento",
   "notification.error.fetch": "Se ha producido un error al intentar recuperar los datos",

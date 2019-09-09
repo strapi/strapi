@@ -181,5 +181,6 @@
   "Auth.form.register.username.placeholder": "John Doe",
   "Auth.header.register.description": "Para concluir a configuração e proteger seu aplicativo, crie o primeiro usuário (administrador root), digitando as informações necessárias abaixo.",
   "Auth.link.forgot-password": "Esqueceu sua senha?",
-  "Auth.link.ready": "Pronto para entrar?"
+  "Auth.link.ready": "Pronto para entrar?",
+  "components.Input.error.password.noMatch": "As senhas não conferem"
 }

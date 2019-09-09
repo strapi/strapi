@@ -199,5 +199,6 @@
   "Auth.form.register.username.placeholder": "John Doe",
   "Auth.header.register.description": "Для завершения установки и обеспечения безопасности приложения, создайте вашего первого пользователя (root admin), заполнив форму ниже.",
   "Auth.link.forgot-password": "Забыли пароль?",
-  "Auth.link.ready": "Готовы войти?"
+  "Auth.link.ready": "Готовы войти?",
+  "components.Input.error.password.noMatch": "Пароль не совпадает"
 }

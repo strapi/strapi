@@ -195,5 +195,6 @@
   "Auth.form.register.username.placeholder": "JohnDoe",
   "Auth.header.register.description": "애플리케이션 설정 및 보안을 위해 첫 번째 사용자(root 관리자)를 생성하세요.",
   "Auth.link.forgot-password": "패스워드 재설정",
-  "Auth.link.ready": "로그인 하시겠습니까?"
+  "Auth.link.ready": "로그인 하시겠습니까?",
+  "components.Input.error.password.noMatch": "패스워드가 일치하지 않습니다."
 }

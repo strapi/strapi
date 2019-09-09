@@ -199,5 +199,6 @@
   "Auth.form.register.username.placeholder": "John Doe",
   "Auth.header.register.description": "Para terminar de configurar y asegurar su aplicación, por favor cree el primer usuario (administrador) ingresando a continuación la información necesaria.",
   "Auth.link.forgot-password": "¿Olvidó su contraseña?",
-  "Auth.link.ready": "¿Listo para iniciar sesión?"
+  "Auth.link.ready": "¿Listo para iniciar sesión?",
+  "components.Input.error.password.noMatch": "Las contraseñas no coinciden"
 }

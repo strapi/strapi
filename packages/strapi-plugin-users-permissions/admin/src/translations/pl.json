@@ -96,7 +96,7 @@
   "PopUpForm.header.edit.email-templates": "Zmień szablony e-mail",
   "PopUpForm.header.edit.providers": "Edytuj dostawcę {provider}",
   "PopUpForm.inputSelect.providers.label": "Dostawca",
-  "components.Input.error.password.noMatch": "Hasło nie pasuje",
+
   "components.Input.error.password.length": "Hasło jest za krótkie",
   "notification.error.delete": "Wystąpił błąd podczas usuwania pozycji",
   "notification.error.fetch": "Wystąpił błąd podczas pobierania danych",

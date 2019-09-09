@@ -11,9 +11,12 @@
  * the linting exception.
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
-import { LoadingIndicatorPage } from 'strapi-helper-plugin';
+import { connect } from 'react-redux';
+import { bindActionCreators, compose } from 'redux';
+import { LoadingIndicatorPage, request } from 'strapi-helper-plugin';
 
 import Admin from '../Admin';
 import NotFoundPage from '../NotFoundPage';
@@ -22,12 +25,32 @@ import AppLoader from '../AppLoader';
 import styles from './styles.scss';
 import AuthPage from '../AuthPage';
 
+import { getDataSucceeded } from './actions';
+
 function App(props) {
+  const getDataRef = useRef();
+  getDataRef.current = props.getDataSucceeded;
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const requestURL = '/users-permissions/init';
+
+        const { hasAdmin } = await request(requestURL, { method: 'GET' });
+        getDataRef.current(hasAdmin);
+      } catch (err) {
+        strapi.notification.error('app.containers.App.notification.error.init');
+      }
+    };
+
+    getData();
+  }, [getDataRef]);
+
   return (
     <div>
       <NotificationProvider />
       <AppLoader>
-        {({ shouldLoad }) => {
+        {({ hasAdminUser, shouldLoad }) => {
           if (shouldLoad) {
             return <LoadingIndicatorPage />;
           }
@@ -38,7 +61,11 @@ function App(props) {
                 <Route
                   path="/auth/:authType"
                   render={routerProps => (
-                    <AuthPage {...props} {...routerProps} />
+                    <AuthPage
+                      {...props}
+                      {...routerProps}
+                      hasAdminUser={hasAdminUser}
+                    />
                   )}
                   exact
                 />
@@ -56,6 +83,17 @@ function App(props) {
   );
 }
 
-App.propTypes = {};
+App.propTypes = {
+  getDataSucceeded: PropTypes.func.isRequired,
+};
 
-export default App;
+export function mapDispatchToProps(dispatch) {
+  return bindActionCreators({ getDataSucceeded }, dispatch);
+}
+
+const withConnect = connect(
+  null,
+  mapDispatchToProps
+);
+
+export default compose(withConnect)(App);

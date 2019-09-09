@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
+import { get } from 'lodash';
 
 import { InputsIndex as Inputs } from 'strapi-helper-plugin';
 import CustomLabel from './CustomLabel';
@@ -8,8 +9,11 @@ import CustomLabel from './CustomLabel';
 const Input = ({
   autoFocus,
   customBootstrapClass,
+  didCheckErrors,
+  errors,
   label,
   name,
+  noErrorsDescription,
   onChange,
   placeholder,
   type,
@@ -58,10 +62,11 @@ const Input = ({
     <Inputs
       autoFocus={autoFocus}
       customBootstrapClass={customBootstrapClass || 'col-12'}
-      didCheckErrors={false}
-      errors={{}}
+      didCheckErrors={didCheckErrors}
+      errors={get(errors, name, [])}
       label={inputLabel}
       name={name}
+      noErrorsDescription={noErrorsDescription}
       onChange={onChange}
       placeholder={placeholder}
       type={type}
@@ -74,8 +79,11 @@ const Input = ({
 Input.propTypes = {
   autoFocus: PropTypes.bool,
   customBootstrapClass: PropTypes.string,
+  didCheckErrors: PropTypes.bool.isRequired,
+  errors: PropTypes.object.isRequired,
   label: PropTypes.object,
   name: PropTypes.string.isRequired,
+  noErrorsDescription: PropTypes.bool.isRequired,
   onChange: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
   type: PropTypes.string.isRequired,

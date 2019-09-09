@@ -40,7 +40,9 @@ const Wrapper = styled.div`
     text-align: center;
     margin: auto;
     // padding: 13px 30px 0 30px;
-    padding: 8px 30px 0 30px;
+    padding: ${({ authType }) =>
+      authType === 'register' ? '13px 30px 17px 30px' : '8px 30px 0 30px'};
+
     line-height: 18px;
     color: #333740;
   }
@@ -85,7 +87,8 @@ const Wrapper = styled.div`
   }
 
   .bordered {
-    border-top: 2px solid #1c5de7;
+    border-top: 2px solid
+      ${({ withSucessBorder }) => (withSucessBorder ? '#5a9e06' : '#1c5de7')};
   }
 
   .borderedSuccess {

@@ -183,5 +183,6 @@
   "Auth.form.register.username.placeholder": "John Doe",
   "Auth.header.register.description": "Para terminar a configuração e melhorar a segurança da sua aplicação, por favor crie o primeiro utilizador (root admin) inserindo a informação necessária abaixo.",
   "Auth.link.forgot-password": "Esqueceu a palavra-passe?",
-  "Auth.link.ready": "Preparado para entrar?"
+  "Auth.link.ready": "Preparado para entrar?",
+  "components.Input.error.password.noMatch": "As passwords não coincidem"
 }

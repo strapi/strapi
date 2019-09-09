@@ -183,5 +183,6 @@
   "Auth.form.register.username.placeholder": "Jan Nowak",
   "Auth.header.register.description": "Aby zakończyć konfigurację i zabezpieczyć swoją aplikację, utwórz pierwszego użytkownika (administratora root), wypełniając poniższe informacje.",
   "Auth.link.forgot-password": "Nie pamiętasz hasła?",
-  "Auth.link.ready": "Zaczynamy?"
+  "Auth.link.ready": "Zaczynamy?",
+  "components.Input.error.password.noMatch": "Hasło nie pasuje"
 }

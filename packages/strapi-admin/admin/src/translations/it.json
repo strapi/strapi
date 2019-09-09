@@ -181,5 +181,6 @@
   "Auth.form.register.username.placeholder": "John Doe",
   "Auth.header.register.description": "Per terminare l'installazione e mettere in sicurezza la tua applicazione è necessario creare il primo utente (root admin) inserendo le informazioni necessarie di seguito riportate",
   "Auth.link.forgot-password": "Password dimenticata?",
-  "Auth.link.ready": "Sei pronto per accedere?"
+  "Auth.link.ready": "Sei pronto per accedere?",
+  "components.Input.error.password.noMatch": "La password non corrisponde"
 }

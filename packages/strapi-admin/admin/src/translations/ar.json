@@ -181,5 +181,6 @@
   "Auth.form.register.username.placeholder": "اكتب اسمك هنا (مثل: خالد سالم)",
   "Auth.header.register.description": "لإنهاء الإعداد وتأمين تطبيقك ، يرجى إنشاء أول مستخدم (مسؤول أساسي) عن طريق إدخال المعلومات الضرورية أدناه.",
   "Auth.link.forgot-password": "هل نسيت كلمة السر الخاصة بك؟",
-  "Auth.link.ready": "مستعد لتسجيل الدخول؟"
+  "Auth.link.ready": "مستعد لتسجيل الدخول؟",
+  "components.Input.error.password.noMatch": "كلمات السر لا تتطابق"
 }

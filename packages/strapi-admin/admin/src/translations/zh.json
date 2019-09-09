@@ -184,5 +184,6 @@
   "Auth.form.register.username.placeholder": "John Doe",
   "Auth.header.register.description": "為了完成設定，請填寫以下欄位以建立第一個最高權限管理者。",
   "Auth.link.forgot-password": "忘記密碼了嗎？",
-  "Auth.link.ready": "準備登入了嗎？"
+  "Auth.link.ready": "準備登入了嗎？",
+  "components.Input.error.password.noMatch": "密碼不符"
 }

@@ -184,5 +184,6 @@
   "Auth.form.register.username.placeholder": "John Doe",
   "Auth.header.register.description": "Kurulumu tamamlamak ve uygulamanızı güvence altına almak için, lütfen aşağıdaki gerekli bilgileri girerek ilk kullanıcıyı (root admin) oluşturun.",
   "Auth.link.forgot-password": "Parolanızı mı unuttunuz ?",
-  "Auth.link.ready": "Zaten kayıtlı mısınız?"
+  "Auth.link.ready": "Zaten kayıtlı mısınız?",
+  "components.Input.error.password.noMatch": "Şifreler uyuşmuyor"
 }

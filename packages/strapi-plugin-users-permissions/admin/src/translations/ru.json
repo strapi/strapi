@@ -97,7 +97,7 @@
   "PopUpForm.header.edit.email-templates": "Редактировать шаблон письма",
   "PopUpForm.header.edit.providers": "Редактирование провайдера {provider}",
   "PopUpForm.inputSelect.providers.label": "Выбрать провайдера",
-  "components.Input.error.password.noMatch": "Пароль не совпадает",
+
   "notification.error.delete": "Возникла ошибка в процессе удаления",
   "notification.error.fetch": "Возникла ошибка при загрузке данных",
   "notification.error.fetchUser": "Возникла ошибка при загрузке пользователей",

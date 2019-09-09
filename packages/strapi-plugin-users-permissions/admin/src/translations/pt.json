@@ -95,7 +95,7 @@
   "PopUpForm.header.edit.email-templates": "Editar Modelos de Email",
   "PopUpForm.header.edit.providers": "Editar o serviço de autenticação {provider}",
   "PopUpForm.inputSelect.providers.label": "Selecionar o serviço de autenticação",
-  "components.Input.error.password.noMatch": "As passwords não coincidem",
+
   "components.Input.error.password.length": "A password é demasiado curta",
   "notification.error.delete": "Ocorreu um erro a tentar eliminar o item",
   "notification.error.fetch": "Ocorreu um erro a tentar obter os dados",

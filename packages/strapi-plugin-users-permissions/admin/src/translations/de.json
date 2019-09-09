@@ -96,7 +96,7 @@
   "PopUpForm.header.edit.email-templates": "E-Mail-Templates bearbeiten",
   "PopUpForm.header.edit.providers": "Methode {provider} bearbeiten",
   "PopUpForm.inputSelect.providers.label": "Wähle die Methode aus",
-  "components.Input.error.password.noMatch": "Passwörter stimmen nicht überein",
+
   "components.Input.error.password.length": "Passwort ist zu kurz",
   "notification.error.delete": "Beim Löschen des Objekts ist ein Fehler aufgetreten",
   "notification.error.fetch": "Beim Abruf von Daten ist ein Fehler aufgetreten",

@@ -89,7 +89,7 @@
   "PopUpForm.header.edit.email-templates": "이메일 템플릿 수정",
   "PopUpForm.header.edit.providers": "{provider} 프로바이더(Provider) 설정",
   "PopUpForm.inputSelect.providers.label": "프로바이더(provider) 선택",
-  "components.Input.error.password.noMatch": "패스워드가 일치하지 않습니다.",
+
   "notification.error.delete": "항목을 삭제하는데 에러가 발생했습니다.",
   "notification.error.fetch": "데이터를 가져오는데 에러가 발생했습니다.",
   "notification.error.fetchUser": "사용자를 가져오는데 에러가 발생했습니다.",

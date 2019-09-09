@@ -16,3 +16,4 @@ export const DISABLE_GLOBAL_OVERLAY_BLOCKER =
   'app/App/OverlayBlocker/DISABLE_GLOBAL_OVERLAY_BLOCKER';
 export const ENABLE_GLOBAL_OVERLAY_BLOCKER =
   'app/App/OverlayBlocker/ENABLE_GLOBAL_OVERLAY_BLOCKER';
+export const GET_DATA_SUCCEEDED = 'app/App/OverlayBlocker/GET_DATA_SUCCEEDED';

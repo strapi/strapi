@@ -184,5 +184,6 @@
   "Auth.form.register.username.placeholder": "John Doe",
   "Auth.header.register.description": "Erstelle bitte einen Administrator durch Ausfüllen der folgenden Felder, um die Einrichtung deiner App abzuschließen.",
   "Auth.link.forgot-password": "Passwort vergessen?",
-  "Auth.link.ready": "Bereit für den Login?"
+  "Auth.link.ready": "Bereit für den Login?",
+  "components.Input.error.password.noMatch": "Passwörter stimmen nicht überein"
 }

@@ -87,7 +87,7 @@
   "PopUpForm.header.edit.email-templates": "Modifica il template delle Email",
   "PopUpForm.header.edit.providers": "Modifica {provider} Provider",
   "PopUpForm.inputSelect.providers.label": "Scegli il provider",
-  "components.Input.error.password.noMatch": "La password non corrisponde",
+
   "eaderNav.link.advancedSettings": "Impostazioni avanzate",
   "notification.error.delete": "Si è verificato un errore mentre si stava cercando di eliminare l'elemento",
   "notification.error.fetch": "Si è verificato un errore mentre si stava cercando di recuperare i dati",

@@ -210,5 +210,7 @@
   "Auth.form.register.username.placeholder": "John Doe",
   "Auth.header.register.description": "Pour finir le setup et sécuriser votre app, merci de créer le premier utilisateur (root admin) en remplissant le formulaire suivant.",
   "Auth.link.forgot-password": "Mot de passe oublié ?",
-  "Auth.link.ready": "Prêt à vous connecter ?"
+  "Auth.link.ready": "Prêt à vous connecter ?",
+  "app.containers.App.notification.error.init": "Une erreur est survenue en requêtant l'API",
+  "components.Input.error.password.noMatch": "Le mot de passe ne correspond pas"
 }

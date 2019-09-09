@@ -89,7 +89,7 @@
   "PopUpForm.header.edit.email-templates": "编辑电子邮件模版",
   "PopUpForm.header.edit.providers": "编译 {provider} 供应商",
   "PopUpForm.inputSelect.providers.label": "选择供应商",
-  "components.Input.error.password.noMatch": "密码不匹配",
+
   "notification.error.delete": "删除数据时出错",
   "notification.error.fetch": "获取数据时出错",
   "notification.error.fetchUser": "获取用户时出错",

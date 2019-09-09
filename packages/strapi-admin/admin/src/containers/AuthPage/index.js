@@ -1,9 +1,16 @@
-import React, { memo, useReducer } from 'react';
+import React, { memo, useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
+import { get, isEmpty, omit, set } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { upperFirst } from 'lodash';
 import { Link, Redirect } from 'react-router-dom';
-import { Button, getYupInnerErrors } from 'strapi-helper-plugin';
+import {
+  auth,
+  Button,
+  getQueryParameters,
+  getYupInnerErrors,
+  request,
+} from 'strapi-helper-plugin';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import LogoStrapi from '../../assets/images/logo_strapi.png';
 import PageTitle from '../../components/PageTitle';
@@ -12,14 +19,43 @@ import Wrapper from './Wrapper';
 import Input from './Input';
 import forms from './forms';
 import reducer, { initialState } from './reducer';
+import formatErrorFromRequest from './utils/formatErrorFromRequest';
 
 const AuthPage = ({
+  hasAdminUser,
+  history: { push },
+  location: { search },
   match: {
     params: { authType },
   },
 }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState);
-  const { modifiedData } = reducerState.toJS();
+  const codeRef = useRef();
+  codeRef.current = getQueryParameters(search, 'code');
+  useEffect(() => {
+    // Set the reset code provided by the url
+    if (authType === 'reset-password') {
+      dispatch({
+        type: 'ON_CHANGE',
+        keys: ['code'],
+        value: codeRef.current,
+      });
+    } else {
+      // Clean reducer upon navigation
+      dispatch({
+        type: 'RESET_PROPS',
+      });
+    }
+
+    return () => {};
+  }, [authType, codeRef]);
+  const {
+    didCheckErrors,
+    errors,
+    modifiedData,
+    submitSuccess,
+    userEmail,
+  } = reducerState.toJS();
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
       type: 'ON_CHANGE',
@@ -27,20 +63,63 @@ const AuthPage = ({
       value,
     });
   };
+
   const handleSubmit = async e => {
     e.preventDefault();
     const schema = forms[authType].schema;
-    let errors = {};
+    let formErrors = {};
 
     try {
       await schema.validate(modifiedData, { abortEarly: false });
+
+      try {
+        const requestEndPoint = authType === 'login' ? 'local' : authType;
+        const requestURL = `/admin/auth/${requestEndPoint}`;
+        const body = omit(modifiedData, 'news');
+
+        if (authType === 'forgot-password') {
+          set(body, 'url', `${strapi.backendURL}/admin/auth/reset-password`);
+        }
+
+        const { jwt, user, ok } = await request(requestURL, {
+          method: 'POST',
+          body,
+        });
+
+        if (authType === 'forgot-password' && ok === true) {
+          dispatch({
+            type: 'SUBMIT_SUCCESS',
+            email: modifiedData.email,
+          });
+        } else {
+          auth.setToken(jwt, modifiedData.rememberMe);
+          auth.setUserInfo(user, modifiedData.rememberMe);
+          push('/');
+        }
+      } catch (err) {
+        const formattedError = formatErrorFromRequest(err);
+
+        if (authType === 'login') {
+          formErrors = {
+            global: formattedError,
+            identifier: formattedError,
+            password: formattedError,
+          };
+        } else if (authType === 'forgot-password') {
+          formErrors = { email: formattedError };
+        } else {
+          strapi.notification.error(
+            get(formattedError, '0.id', 'notification.error')
+          );
+        }
+      }
     } catch (err) {
-      errors = getYupInnerErrors(err);
+      formErrors = getYupInnerErrors(err);
     }
 
     dispatch({
       type: 'SET_ERRORS',
-      errors,
+      formErrors,
     });
   };
 
@@ -49,13 +128,17 @@ const AuthPage = ({
     return <Redirect to="/" />;
   }
 
-  // TODO Remove temporary
-  const hasErrors = false;
+  if (hasAdminUser && authType === 'register') {
+    return <Redirect to="/auth/login" />;
+  }
+
+  const globalError = get(errors, 'global.0.id', '');
+  const shouldShowFormErrors = !isEmpty(globalError);
 
   return (
     <>
       <PageTitle title={upperFirst(authType)} />
-      <Wrapper>
+      <Wrapper authType={authType} withSucessBorder={submitSuccess}>
         <NavTopRightWrapper>
           <LocaleToggle isLogged className="localeDropdownMenuNotLogged" />
         </NavTopRightWrapper>
@@ -76,25 +159,36 @@ const AuthPage = ({
           <div className="formContainer bordered">
             <form onSubmit={handleSubmit}>
               <div className="container-fluid">
-                {/* TODO ERROR CONTAINER */}
-                {hasErrors && (
+                {shouldShowFormErrors && (
                   <div className="errorsContainer">
-                    {/* TODO DISPLAY ERRORS */}
+                    <FormattedMessage id={globalError} />
                   </div>
                 )}
                 <div className="row" style={{ textAlign: 'start' }}>
-                  {forms[authType].inputs.map(row => {
-                    return row.map(input => {
-                      return (
-                        <Input
-                          {...input}
-                          key={input.name}
-                          onChange={handleChange}
-                          value={modifiedData[input.name]}
-                        />
-                      );
-                    });
-                  })}
+                  {submitSuccess && (
+                    <div className="forgotSuccess">
+                      <FormattedMessage id="Auth.form.forgot-password.email.label.success" />
+                      <br />
+                      <p>{userEmail}</p>
+                    </div>
+                  )}
+                  {!submitSuccess &&
+                    forms[authType].inputs.map((row, index) => {
+                      return row.map(input => {
+                        return (
+                          <Input
+                            {...input}
+                            autoFocus={index === 0}
+                            didCheckErrors={didCheckErrors}
+                            errors={errors}
+                            key={input.name}
+                            noErrorsDescription={shouldShowFormErrors}
+                            onChange={handleChange}
+                            value={modifiedData[input.name]}
+                          />
+                        );
+                      });
+                    })}
                   <div
                     className={`${
                       authType === 'login'
@@ -103,12 +197,13 @@ const AuthPage = ({
                     }`}
                   >
                     <Button
+                      className={submitSuccess ? 'buttonForgotSuccess' : ''}
                       type="submit"
-                      label="Auth.form.button.login"
-                      primary
-                      style={
-                        authType === 'forgot-password' ? { width: '100%' } : {}
-                      }
+                      label={`Auth.form.button.${
+                        submitSuccess ? 'forgot-password.success' : authType
+                      }`}
+                      primary={!submitSuccess}
+                      style={authType === 'login' ? {} : { width: '100%' }}
                     />
                   </div>
                 </div>
@@ -142,6 +237,13 @@ const AuthPage = ({
 };
 
 AuthPage.propTypes = {
+  hasAdminUser: PropTypes.bool.isRequired,
+  history: PropTypes.shape({
+    push: PropTypes.func.isRequired,
+  }),
+  location: PropTypes.shape({
+    search: PropTypes.string.isRequired,
+  }),
   match: PropTypes.shape({
     params: PropTypes.shape({
       authType: PropTypes.string,

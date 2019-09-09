@@ -97,7 +97,7 @@
   "PopUpForm.header.edit.providers": "Leverancier {provider} aanpassen",
   "PopUpForm.inputSelect.providers.label": "Kies een leverancier",
   "components.Input.error.password.length": "Wachtwoord is te kort",
-  "components.Input.error.password.noMatch": "Wachtwoorden komen niet overeen",
+
   "notification.error.delete": "Er is een fout opgetreden tijdens het verwijderen van dit item",
   "notification.error.fetch": "Er is een fout opgetreden tijdens het ophalen van de data",
   "notification.error.fetchUser": "Er is een fout opgetreden tijdens het ophalen van de gebruikers",
