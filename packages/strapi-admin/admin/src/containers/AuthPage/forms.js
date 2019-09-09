@@ -3,6 +3,7 @@ import { translatedErrors } from 'strapi-helper-plugin';
 
 const form = {
   'forgot-password': {
+    endPoint: 'forgot-password',
     inputs: [
       [
         {
@@ -23,6 +24,7 @@ const form = {
     }),
   },
   login: {
+    endPoint: 'local',
     inputs: [
       [
         {
@@ -60,13 +62,14 @@ const form = {
     }),
   },
   register: {
+    endPoint: 'local/register',
     inputs: [
       [
         {
           label: {
             id: 'Auth.form.register.username.label',
           },
-          name: 'text',
+          name: 'username',
           type: 'text',
           placeholder: 'Auth.form.register.username.placeholder',
         },
@@ -131,6 +134,7 @@ const form = {
     }),
   },
   'reset-password': {
+    endPoint: 'reset-password',
     inputs: [
       [
         {

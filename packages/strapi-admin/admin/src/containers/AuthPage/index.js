@@ -73,7 +73,18 @@ const AuthPage = ({
       await schema.validate(modifiedData, { abortEarly: false });
 
       try {
-        const requestEndPoint = authType === 'login' ? 'local' : authType;
+        if (modifiedData.news === true) {
+          await request('https://analytics.strapi.io/register', {
+            method: 'POST',
+            body: omit(modifiedData, ['password', 'confirmPassword']),
+          });
+        }
+      } catch (err) {
+        // Do nothing
+      }
+
+      try {
+        const requestEndPoint = forms[authType].endPoint;
         const requestURL = `/admin/auth/${requestEndPoint}`;
         const body = omit(modifiedData, 'news');
 
@@ -126,6 +137,10 @@ const AuthPage = ({
   // Redirect the user to the login page
   if (!Object.keys(forms).includes(authType)) {
     return <Redirect to="/" />;
+  }
+
+  if (!hasAdminUser && authType !== 'register') {
+    return <Redirect to="/auth/register" />;
   }
 
   if (hasAdminUser && authType === 'register') {

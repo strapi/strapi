@@ -55,7 +55,8 @@ const Input = ({
       </FormattedMessage>
     );
 
-    inputLabel = <CustomLabel id={label.id} values={{ terms, policy }} />;
+    // eslint-disable-next-line react/display-name
+    inputLabel = () => <CustomLabel id={label.id} values={{ terms, policy }} />;
   }
 
   return (

@@ -38,7 +38,7 @@ const Logout = ({ history: { push } }) => {
   };
   const handleLogout = () => {
     auth.clearAppStorage();
-    push('/plugins/users-permissions/auth/login');
+    push('/auth/login');
   };
 
   return (
