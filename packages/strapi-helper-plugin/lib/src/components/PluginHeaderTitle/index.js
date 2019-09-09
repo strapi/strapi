@@ -4,42 +4,59 @@
  *
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty, isFunction, isObject } from 'lodash';
 
 import LoadingBar from '../LoadingBar';
 
-import styles from './styles.scss';
+import StyledPluginHeaderTitle from './StyledPluginHeaderTitle';
 
-function PluginHeaderTitle({ description, title, titleId, withDescriptionAnim, icon, onClickIcon }) {
+function PluginHeaderTitle({
+  description,
+  title,
+  titleId,
+  withDescriptionAnim,
+  icon,
+  onClickIcon,
+}) {
   const contentTitle = formatData(title);
   const contentDescription = formatData(description);
 
   return (
-    <div>
-      <div style={{ display: 'flex' }}>
-        <h1 className={styles.pluginHeaderTitleName} id={titleId}>
-          {contentTitle}&nbsp;
+    <StyledPluginHeaderTitle>
+      <div className="header-title">
+        <h1 id={titleId}>
+          {contentTitle}
+          {icon && (
+            <i
+              className={`${icon}`}
+              id="editCTName"
+              onClick={onClickIcon}
+              role="button"
+            />
+          )}
         </h1>
-        {icon && (
-          <i className={`${icon} ${styles.icon}`} id="editCTName" onClick={onClickIcon} role="button" />
-        )}
       </div>
       {withDescriptionAnim ? (
-        <LoadingBar />
+        <LoadingBar style={{ marginTop: '13px' }} />
       ) : (
-        <p className={styles.pluginHeaderTitleDescription}>{contentDescription}&nbsp;</p>
+        <p className="header-subtitle">{contentDescription}&nbsp;</p>
       )}
-    </div>
+    </StyledPluginHeaderTitle>
   );
 }
 
 const formatData = data => {
-
-  if (isObject(data)) {
-    return isEmpty(data.id) ? null : <FormattedMessage id={data.id} defaultMessage={data.id} values={data.values} />;
+  if (isObject(data) && !isEmpty(data.id)) {
+    return (
+      <FormattedMessage
+        id={data.id}
+        defaultMessage={data.id}
+        values={data.values}
+      />
+    );
   }
 
   if (isFunction(data)) {
@@ -81,4 +98,4 @@ PluginHeaderTitle.propTypes = {
   withDescriptionAnim: PropTypes.bool,
 };
 
-export default PluginHeaderTitle;
+export default memo(PluginHeaderTitle);

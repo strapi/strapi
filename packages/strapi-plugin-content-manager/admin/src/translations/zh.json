@@ -86,7 +86,7 @@
   "form.Input.defaultSort": "預設排序設定",
   "form.Input.description": "說明",
   "form.Input.description.placeholder": "描述這個欄位",
-  "form.Input.disabled": "可編輯欄位",
+  "form.Input.editable": "可編輯欄位",
   "form.Input.filters": "啟用過濾器",
   "form.Input.label": "標籤",
   "form.Input.label.inputDescription": "這個數值會顯示在表格的標題列名稱",

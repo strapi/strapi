@@ -2,8 +2,64 @@
   "routes": [
     {
       "method": "GET",
-      "path": "/models",
-      "handler": "ContentManager.models",
+      "path": "/general-settings",
+      "handler": "GeneralSettings.getGeneralSettings",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/general-settings",
+      "handler": "GeneralSettings.updateGeneralSettings",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/content-types",
+      "handler": "ContentTypes.listContentTypes",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/content-types/:uid",
+      "handler": "ContentTypes.findContentType",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/content-types/:uid",
+      "handler": "ContentTypes.updateContentType",
+      "config": {
+        "policies": ["routing"]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/groups",
+      "handler": "Groups.listGroups",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/groups/:uid",
+      "handler": "Groups.findGroup",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/groups/:uid",
+      "handler": "Groups.updateGroup",
       "config": {
         "policies": []
       }
@@ -25,21 +81,14 @@
       }
     },
     {
-      "method": "PUT",
-      "path": "/models",
-      "handler": "ContentManager.updateSettings",
-      "config": {
-        "policies": ["routing"]
-      }
-    },
-    {
       "method": "GET",
       "path": "/explorer/:model/:id",
       "handler": "ContentManager.findOne",
       "config": {
         "policies": ["routing"]
       }
-    },{
+    },
+    {
       "method": "POST",
       "path": "/explorer/:model",
       "handler": "ContentManager.create",
@@ -58,7 +107,7 @@
     {
       "method": "DELETE",
       "path": "/explorer/deleteAll/:model",
-      "handler": "ContentManager.deleteAll",
+      "handler": "ContentManager.deleteMany",
       "config": {
         "policies": ["routing"]
       }

@@ -63,7 +63,7 @@ const productFixtures = [
     price: 10.99,
     decimal_field: 42.43,
     rank: 42,
-    big_rank: 345678912983,
+    big_rank: '345678912983',
   },
   {
     name: 'Product 2',
@@ -71,7 +71,7 @@ const productFixtures = [
     price: 28.31,
     decimal_field: 91.22,
     rank: 82,
-    big_rank: 926371623421,
+    big_rank: '926371623421',
   },
   {
     name: 'Product 3',
@@ -79,7 +79,7 @@ const productFixtures = [
     price: 28.31,
     decimal_field: 12.22,
     rank: 91,
-    big_rank: 926372323421,
+    big_rank: '926372323421',
   },
   {
     name: 'Product 4',
@@ -87,7 +87,7 @@ const productFixtures = [
     price: null,
     decimal_field: 12.22,
     rank: 99,
-    big_rank: 999999999999,
+    big_rank: '999999999999',
   },
 ];
 
@@ -605,7 +605,7 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            big_rank_gte: 345678912983,
+            big_rank_gte: '345678912983',
           },
         });
 
@@ -753,7 +753,7 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            big_rank_lte: 345678912983,
+            big_rank_lte: '345678912983',
           },
         });
 

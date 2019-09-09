@@ -1,7 +1,11 @@
 const _ = require('lodash');
 
+const parseMultipartBody = require('../../utils/parse-multipart');
+const uploadFiles = require('../../utils/upload-files');
+
 module.exports = async (ctx, next) => {
   const { source } = ctx.request.query;
+  const { model } = ctx.params;
 
   const target = source === 'admin' ? strapi.admin : strapi.plugins[source];
 
@@ -10,7 +14,7 @@ module.exports = async (ctx, next) => {
     _.get(target, [
       'config',
       'layout',
-      ctx.params.model,
+      model,
       'actions',
       ctx.request.route.action,
     ])
@@ -24,55 +28,22 @@ module.exports = async (ctx, next) => {
         'actions',
         ctx.request.route.action,
       ],
-      [],
+      []
     ).split('.');
 
     if (controller && action) {
-      // Redirect to specific controller.
-      if (
-        ctx.request.body.hasOwnProperty('fields') &&
-        ctx.request.body.hasOwnProperty('files')
-      ) {
-        let { files, fields } = ctx.request.body;
-
-        const parser = value => {
-          try {
-            value = JSON.parse(value);
-          } catch (e) {
-            // Silent.
-          }
-
-          return _.isArray(value) ? value.map(obj => parser(obj)) : value;
-        };
-
-        fields = Object.keys(fields).reduce((acc, current) => {
-          acc[current] = parser(fields[current]);
-
-          return acc;
-        }, {});
-
-        ctx.request.body = fields;
+      // TODO: handle in the targeted controller directly
+      if (ctx.is('multipart')) {
+        const { data, files } = parseMultipartBody(ctx);
+        ctx.request.body = data;
+        ctx.request.files = {};
 
         await target.controllers[controller.toLowerCase()][action](ctx);
         const resBody = ctx.body;
 
-        await Promise.all(
-          Object.keys(files).map(async field => {
-            ctx.request.body = {
-              files: {
-                files: files[field],
-              },
-              fields: {
-                refId: resBody.id || resBody._id,
-                ref: ctx.params.model,
-                source,
-                field,
-              },
-            };
+        if (ctx.status >= 300) return;
 
-            return strapi.plugins.upload.controllers.upload.upload(ctx);
-          }),
-        );
+        await uploadFiles(resBody, files, { model, source });
 
         return ctx.send(resBody);
       }

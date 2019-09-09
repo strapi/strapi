@@ -3,22 +3,24 @@
   width: 100% !important;
   height: 4rem;
   padding: 0 1rem 0 1rem;
-  margin-top: .6rem;
-  margin-bottom: .8rem;
+  margin-top: 0.6rem;
+  margin-bottom: 0.8rem;
   align-items: center;
   justify-content: space-between;
   border-radius: 0.25rem;
-  border: 1px solid #E3E9F3;
-  background: #FFFFFF;
+  border: 1px solid #e3e9f3;
+  background: #ffffff;
   line-height: 4rem;
-  box-shadow: 1px 1px 1px rgba(104, 118,145, 0.05);
+  box-shadow: 1px 1px 1px rgba(104, 118, 145, 0.05);
   cursor: pointer;
 
-  &:hover, &:active, &:focus {
-    background: #F7F7F7;
+  &:hover,
+  &:active,
+  &:focus {
+    background: #f7f7f7;
     outline: 0;
     > div:after {
-      color: #0097F6;
+      color: #0097f6;
     }
   }
 
@@ -33,8 +35,6 @@
   }
 }
 
-
-
 .card {
   font-size: 1.3rem;
   display: flex;
@@ -46,7 +46,7 @@
     position: absolute;
     top: 7px;
     right: 26px;
-    color: #E3E9F3;
+    color: #e3e9f3;
     font-size: 1.4rem;
     font-family: 'FontAwesome';
     -webkit-font-smoothing: antialiased;
@@ -66,7 +66,7 @@
 
   > span {
     white-space: nowrap;
-    color: #9EA7B8;
+    color: #9ea7b8;
     font-size: 1.2rem;
     font-style: italic;
     font-weight: 400;
@@ -75,6 +75,7 @@
     &:last-child {
       text-overflow: ellipsis;
       overflow: hidden;
+      line-height: normal;
     }
   }
 }

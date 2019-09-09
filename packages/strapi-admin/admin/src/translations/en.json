@@ -124,6 +124,7 @@
   "components.Input.error.validation.minSupMax": "Can't be superior",
   "components.Input.error.validation.regex": "The value not match the regex.",
   "components.Input.error.validation.required": "This value is required.",
+  "components.InputSelect.option.placeholder": "Choose here",
   "components.ListRow.empty": "There is no data to be shown.",
   "components.OverlayBlocker.description": "You're using a feature that needs the server to restart. Please wait until the server is up.",
   "components.OverlayBlocker.description.serverError": "The server should have restarted, please check your logs in the terminal.",
@@ -153,5 +154,12 @@
   "notification.error": "An error occurred",
   "notification.error.layout": "Couldn't retrieve the layout",
   "request.error.model.unknown": "This model doesn't exist",
-  "app.utils.delete": "Delete"
+  "app.utils.delete": "Delete",
+  "HomePage.helmet.title": "Homepage",
+  "HomePage.welcome.congrats": "Congrats!",
+  "HomePage.welcome.congrats.content": "You are logged as the first administrator. To discover the powerful features provided by Strapi,",
+  "HomePage.welcome.congrats.content.bold": "we recommend you to create your first Content-Type.",
+  "HomePage.community": "Join the Community",
+  "HomePage.roadmap": "See our roadmap",
+  "HomePage.greetings": "Hi {name}!"
 }

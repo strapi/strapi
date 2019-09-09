@@ -1,27 +1,15 @@
 /**
-*
-* Flex
-*
-*/
+ *
+ * Flex
+ *
+ */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import styles from './styles.scss';
+import styled from 'styled-components';
 
-function Flex({ children }) {
-  return (
-    <div className={styles.flex}>
-      {children}
-    </div>
-  );
-}
-
-Flex.defaultProps = {
-  children: null,
-};
-
-Flex.propTypes = {
-  children: PropTypes.node,
-};
+const Flex = styled.div`
+  display: flex;
+  justify-content: space-between;
+  padding: 0 1rem 0 2.8rem;
+`;
 
 export default Flex;

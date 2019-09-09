@@ -240,7 +240,6 @@ Depending on the plugins you will find extension documentation directly in the p
 
 Extensions folder structure:
 
-
 - `extensions/`
   - `**`: Plugin Id
     - `config`: You can extend a plugin's configuration by add a settings.json file with your custom configuration
