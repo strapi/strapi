@@ -8,8 +8,8 @@ describe('<AppLoader />', () => {
 
   beforeEach(() => {
     props = {
-      appPlugins: [],
-      plugins: {},
+      hasAdminUser: false,
+      isLoading: true,
     };
   });
 

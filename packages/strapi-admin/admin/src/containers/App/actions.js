@@ -8,7 +8,6 @@ import {
   DISABLE_GLOBAL_OVERLAY_BLOCKER,
   ENABLE_GLOBAL_OVERLAY_BLOCKER,
   FREEZE_APP,
-  GET_APP_PLUGINS_SUCCEEDED,
   GET_DATA_SUCCEEDED,
   LOAD_PLUGIN,
   PLUGIN_DELETED,
@@ -41,13 +40,6 @@ export function getDataSucceeded(hasAdminUser) {
   return {
     type: GET_DATA_SUCCEEDED,
     hasAdminUser,
-  };
-}
-
-export function getAppPluginsSucceeded(plugins) {
-  return {
-    type: GET_APP_PLUGINS_SUCCEEDED,
-    appPlugins: plugins.map(plugin => plugin.id),
   };
 }
 

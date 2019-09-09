@@ -1,11 +1,10 @@
 // Shared constants
-import { fromJS, List } from 'immutable';
+import { fromJS } from 'immutable';
 
 import {
   DISABLE_GLOBAL_OVERLAY_BLOCKER,
   ENABLE_GLOBAL_OVERLAY_BLOCKER,
   FREEZE_APP,
-  GET_APP_PLUGINS_SUCCEEDED,
   GET_DATA_SUCCEEDED,
   PLUGIN_DELETED,
   PLUGIN_LOADED,
@@ -15,13 +14,10 @@ import {
 } from './constants';
 
 const initialState = fromJS({
-  appPlugins: List([]),
   blockApp: false,
   overlayBlockerData: null,
-  // TODO remove when new lifecycle
   hasUserPlugin: true,
   hasAdminUser: false,
-  isAppLoading: true,
   isLoading: true,
   plugins: {},
   showGlobalAppBlocker: true,
@@ -41,10 +37,6 @@ function appReducer(state = initialState, action) {
 
         return null;
       });
-    case GET_APP_PLUGINS_SUCCEEDED:
-      return state
-        .update('appPlugins', () => List(action.appPlugins))
-        .update('isAppLoading', () => false);
     case GET_DATA_SUCCEEDED:
       return state
         .update('isLoading', () => false)

@@ -134,8 +134,13 @@ const AuthPage = ({
     });
   };
 
-  // Redirect the user to the login page
+  // Redirect the user to the login page if the endpoint does not exist
   if (!Object.keys(forms).includes(authType)) {
+    return <Redirect to="/" />;
+  }
+
+  // Redirect the user to the homepage if he is logged in
+  if (auth.getToken()) {
     return <Redirect to="/" />;
   }
 
@@ -143,6 +148,7 @@ const AuthPage = ({
     return <Redirect to="/auth/register" />;
   }
 
+  // Prevent the user from registering to the admin
   if (hasAdminUser && authType === 'register') {
     return <Redirect to="/auth/login" />;
   }

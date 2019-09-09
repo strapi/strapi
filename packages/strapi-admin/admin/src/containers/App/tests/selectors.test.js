@@ -4,10 +4,8 @@ import makeSelectApp, {
   selectApp,
   selectHasUserPlugin,
   selectPlugins,
-  makeSelectAppPlugins,
   makeSelectBlockApp,
   makeSelectOverlayBlockerProps,
-  makeSelectIsAppLoading,
   makeSelectShowGlobalAppBlocker,
 } from '../selectors';
 
@@ -60,19 +58,6 @@ describe('<App /> selectors', () => {
     });
   });
 
-  describe('makeSelectAppPlugins', () => {
-    it('should select the appPlugins', () => {
-      const plugins = ['email'];
-      const mockedState = fromJS({
-        app: {
-          appPlugins: plugins,
-        },
-      });
-
-      expect(makeSelectAppPlugins()(mockedState)).toEqual(plugins);
-    });
-  });
-
   describe('makeSelectBlockApp', () => {
     it('should select the blockApp', () => {
       const mockedState = fromJS({
@@ -95,20 +80,8 @@ describe('<App /> selectors', () => {
       });
 
       expect(makeSelectOverlayBlockerProps()(mockedState)).toEqual(
-        overlayBlockerData,
+        overlayBlockerData
       );
-    });
-  });
-
-  describe('makeSelectIsAppLoading', () => {
-    it('should select the isAppLoading', () => {
-      const mockedState = fromJS({
-        app: {
-          isAppLoading: true,
-        },
-      });
-
-      expect(makeSelectIsAppLoading()(mockedState)).toEqual(true);
     });
   });
 

@@ -97,3 +97,4 @@ const withConnect = connect(
 );
 
 export default compose(withConnect)(App);
+export { App };

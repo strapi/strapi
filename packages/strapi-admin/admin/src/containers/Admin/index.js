@@ -170,14 +170,6 @@ export class Admin extends React.Component {
    * @returns {Boolean}
    */
   showLoader = () => {
-    const {
-      global: { isAppLoading },
-    } = this.props;
-
-    if (isAppLoading) {
-      return true;
-    }
-
     return this.hasApluginNotReady(this.props);
   };
 
@@ -306,10 +298,8 @@ Admin.propTypes = {
   getInitData: PropTypes.func.isRequired,
   getSecuredData: PropTypes.func.isRequired,
   global: PropTypes.shape({
-    appPlugins: PropTypes.array,
     blockApp: PropTypes.bool,
     overlayBlockerData: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
-    isAppLoading: PropTypes.bool,
     plugins: PropTypes.object,
     showGlobalAppBlocker: PropTypes.bool,
   }).isRequired,
@@ -359,15 +349,10 @@ const withConnect = connect(
 );
 const withReducer = injectReducer({ key: 'admin', reducer });
 const withSaga = injectSaga({ key: 'admin', saga });
-// const withLocaleToggleReducer = injectReducer({
-//   key: 'localeToggle',
-//   reducer: localeToggleReducer,
-// });
 const withHooks = injectHooks({ key: 'admin' });
 
 export default compose(
   withReducer,
-  // withLocaleToggleReducer,
   withSaga,
   withConnect,
   withHooks
