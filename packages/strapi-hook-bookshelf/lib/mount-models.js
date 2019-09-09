@@ -161,9 +161,9 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
           const FK = _.findKey(target.attributes, details => {
             if (
-              details.hasOwnProperty('model') &&
+              _.has(details, 'model') &&
               details.model === model &&
-              details.hasOwnProperty('via') &&
+              _.has(details, 'via') &&
               details.via === name
             ) {
               return details;
@@ -841,7 +841,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
         _.keyBy(
           _.filter(definition.attributes, (value, key) => {
             if (
-              value.hasOwnProperty('columnName') &&
+              _.has(value, 'columnName') &&
               !_.isEmpty(value.columnName) &&
               value.columnName !== key
             ) {
