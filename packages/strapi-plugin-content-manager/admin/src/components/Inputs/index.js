@@ -83,7 +83,6 @@ function Inputs({
     return null;
   }
   const inputErrors = get(errors, keys, []);
-  const withOptionPlaceholder = get(attribute, 'type', '') === 'enumeration';
 
   return (
     <InputsIndex
@@ -106,7 +105,7 @@ function Inputs({
       type={getInputType(type)}
       validations={validations}
       value={value}
-      withOptionPlaceholder={withOptionPlaceholder}
+      withOptionPlaceholder={false}
     />
   );
 }
