@@ -21,15 +21,10 @@ const initialState = fromJS({
   autoReload: false,
   appError: false,
   currentEnvironment: 'development',
-  didGetSecuredData: false,
-  isLoading: true,
-  isSecured: false,
   layout: Map({}),
   // NOTE: This should be the models and our stuffs
   // Since this api is not implemented yet I just set this vague key ATM
   securedData: {},
-  showMenu: true,
-  showLogoutComponent: false,
   strapiVersion: '3',
   uuid: false,
 });

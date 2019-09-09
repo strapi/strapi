@@ -81,37 +81,39 @@ export class Admin extends React.Component {
 
   componentDidMount() {
     /* istanbul ignore next */
+    // const { getHook } = this.props;
+    // getHook('didGetSecuredData');
     // Retrieve the main settings of the application
-    this.props.getInitData();
+    // this.props.getInitData();
   }
 
   /* istanbul ignore next */
-  componentDidUpdate(prevProps) {
-    const {
-      admin: { didGetSecuredData, isLoading, isSecured },
-      getHook,
-      getSecuredData,
-      location: { pathname },
-    } = this.props;
+  // componentDidUpdate(prevProps) {
+  //   const {
+  //     admin: { didGetSecuredData, isLoading, isSecured },
+  //     getHook,
+  //     getSecuredData,
+  //     location: { pathname },
+  //   } = this.props;
 
-    if (!isLoading && this.state.shouldSecureAfterAllPluginsAreMounted) {
-      if (!this.hasApluginNotReady(this.props)) {
-        getHook('willSecure');
-      }
-    }
+  //   if (!isLoading && this.state.shouldSecureAfterAllPluginsAreMounted) {
+  //     if (!this.hasApluginNotReady(this.props)) {
+  //       getHook('willSecure');
+  //     }
+  //   }
 
-    if (prevProps.location.pathname !== pathname) {
-      getHook('willSecure');
-    }
+  //   if (prevProps.location.pathname !== pathname) {
+  //     getHook('willSecure');
+  //   }
 
-    if (prevProps.admin.isSecured !== isSecured && isSecured) {
-      getSecuredData();
-    }
+  //   if (prevProps.admin.isSecured !== isSecured && isSecured) {
+  //     getSecuredData();
+  //   }
 
-    if (prevProps.admin.didGetSecuredData !== didGetSecuredData) {
-      getHook('didGetSecuredData');
-    }
-  }
+  //   if (prevProps.admin.didGetSecuredData !== didGetSecuredData) {
+  //     getHook('didGetSecuredData');
+  //   }
+  // }
 
   /* istanbul ignore next */
   componentDidCatch(error, info) {
@@ -129,13 +131,7 @@ export class Admin extends React.Component {
 
   // TODO remove
   getContentWrapperStyle = () => {
-    const {
-      admin: { showMenu },
-    } = this.props;
-
-    return showMenu
-      ? { main: {}, sub: styles.content }
-      : { main: { width: '100%' }, sub: styles.wrapper };
+    return { main: {}, sub: styles.content };
   };
 
   hasApluginNotReady = props => {
@@ -195,7 +191,6 @@ export class Admin extends React.Component {
 
   render() {
     const {
-      admin: { isLoading, showLogoutComponent, showMenu },
       global: {
         blockApp,
         overlayBlockerData,
@@ -204,10 +199,6 @@ export class Admin extends React.Component {
         strapiVersion,
       },
     } = this.props;
-
-    if (isLoading) {
-      return <LoadingIndicatorPage />;
-    }
 
     // We need the admin data in order to make the initializers work
     if (this.showLoader()) {
@@ -221,17 +212,17 @@ export class Admin extends React.Component {
 
     return (
       <div className={styles.adminPage}>
-        {showMenu && <LeftMenu version={strapiVersion} plugins={plugins} />}
+        <LeftMenu version={strapiVersion} plugins={plugins} />
         <NavTopRightWrapper>
           {/* Injection zone not ready yet */}
-          {showLogoutComponent && <Logout />}
+          <Logout />
           <LocaleToggle isLogged />
         </NavTopRightWrapper>
         <div
           className={styles.adminPageRightWrapper}
           style={this.getContentWrapperStyle().main}
         >
-          {showMenu ? <Header /> : ''}
+          <Header />
           <div className={this.getContentWrapperStyle().sub}>
             <Switch>
               <Route
@@ -266,7 +257,7 @@ export class Admin extends React.Component {
           isOpen={blockApp && showGlobalAppBlocker}
           {...overlayBlockerData}
         />
-        {showLogoutComponent && SHOW_TUTORIALS && <Onboarding />}
+        {SHOW_TUTORIALS && <Onboarding />}
       </div>
     );
   }

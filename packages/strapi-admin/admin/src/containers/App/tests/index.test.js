@@ -4,6 +4,7 @@ import { Route } from 'react-router-dom';
 
 import AppLoader from '../../AppLoader';
 import { App } from '../../App';
+import PrivateRoute from '../../PrivateRoute';
 
 describe('<App />', () => {
   it('should render the <AppLoader />', () => {
@@ -17,7 +18,8 @@ describe('<App />', () => {
       topComp.find(AppLoader).prop('children')({ shouldLoad: false })
     );
 
-    expect(insideAppLoaderNotLoading.find(Route).length).toBe(3);
+    expect(insideAppLoaderNotLoading.find(Route).length).toBe(2);
+    expect(insideAppLoaderNotLoading.find(PrivateRoute)).toHaveLength(1);
   });
 
   it('should not render the <Switch /> if the app is loading', () => {

@@ -23,7 +23,6 @@ import formatErrorFromRequest from './utils/formatErrorFromRequest';
 
 const AuthPage = ({
   hasAdminUser,
-  history: { push },
   location: { search },
   match: {
     params: { authType },
@@ -31,6 +30,9 @@ const AuthPage = ({
 }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const codeRef = useRef();
+  const aborController = new AbortController();
+
+  const { signal } = aborController;
   codeRef.current = getQueryParameters(search, 'code');
   useEffect(() => {
     // Set the reset code provided by the url
@@ -47,7 +49,10 @@ const AuthPage = ({
       });
     }
 
-    return () => {};
+    return () => {
+      aborController.abort();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authType, codeRef]);
   const {
     didCheckErrors,
@@ -77,6 +82,7 @@ const AuthPage = ({
           await request('https://analytics.strapi.io/register', {
             method: 'POST',
             body: omit(modifiedData, ['password', 'confirmPassword']),
+            signal,
           });
         }
       } catch (err) {
@@ -95,6 +101,7 @@ const AuthPage = ({
         const { jwt, user, ok } = await request(requestURL, {
           method: 'POST',
           body,
+          signal,
         });
 
         if (authType === 'forgot-password' && ok === true) {
@@ -105,7 +112,6 @@ const AuthPage = ({
         } else {
           auth.setToken(jwt, modifiedData.rememberMe);
           auth.setUserInfo(user, modifiedData.rememberMe);
-          push('/');
         }
       } catch (err) {
         const formattedError = formatErrorFromRequest(err);
@@ -259,9 +265,6 @@ const AuthPage = ({
 
 AuthPage.propTypes = {
   hasAdminUser: PropTypes.bool.isRequired,
-  history: PropTypes.shape({
-    push: PropTypes.func.isRequired,
-  }),
   location: PropTypes.shape({
     search: PropTypes.string.isRequired,
   }),

@@ -19,11 +19,11 @@ import { bindActionCreators, compose } from 'redux';
 import { LoadingIndicatorPage, request } from 'strapi-helper-plugin';
 
 import Admin from '../Admin';
+import AppLoader from '../AppLoader';
+import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
 import NotificationProvider from '../NotificationProvider';
-import AppLoader from '../AppLoader';
-import styles from './styles.scss';
-import AuthPage from '../AuthPage';
+import PrivateRoute from '../PrivateRoute';
 
 import { getDataSucceeded } from './actions';
 
@@ -58,7 +58,7 @@ function App(props) {
           }
 
           return (
-            <div className={styles.container}>
+            <div style={{ display: 'block' }}>
               <Switch>
                 <Route
                   path="/auth/:authType"
@@ -71,10 +71,7 @@ function App(props) {
                   )}
                   exact
                 />
-                <Route
-                  path="/"
-                  render={router => <Admin {...props} {...router} />}
-                />
+                <PrivateRoute {...props} path="/" component={Admin} />
                 <Route path="" component={NotFoundPage} />
               </Switch>
             </div>
