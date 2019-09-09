@@ -35,7 +35,7 @@ Use **only one** of the following commands to create a new Strapi project:
 
 ---
 
-- Use **yarn** to install the Strapi project (**recommended**). [Install yarn with these docs](https://yarnpkg.com/lang/en/docs/install/).
+- Use **yarn** to install the Strapi project (**recommended**). [Install yarn with these docs](https://yarnpkg.com/lang/en/docs/install/)
 
 ```bash
 yarn create strapi-app my-project --quickstart
@@ -43,7 +43,7 @@ yarn create strapi-app my-project --quickstart
 
 **or**
 
-- Use **npm/npx** to install the Strapi project.
+- Use **npm/npx** to install the Strapi project
 
 ```bash
 npx create-strapi-app my-project --quickstart
@@ -198,9 +198,9 @@ Additional **Restaurant** themed **Content Types** and fields can be seen in the
 
 ### The Restaurant Content Type
 
-- Go to the **Content Type Builder** plugin, located in the left menu: Under **PLUGINS**: --> **Content Type Builder**. You are now able to see the three available **Content Types**.
+- Go to the **Content Type Builder** plugin, located in the left menu: Under **PLUGINS**: --> **Content Type Builder**
 
-At this point, three Content Types are available `Permission`, `Role`, and `Users`.
+You are now able to see the three available **Content Types**. At this point, three Content Types are available `Permission`, `Role`, and `Users`.
 
 ![Content Type Dashboard](../assets/getting-started/tutorial/content-type-dashboard.png 'Content Type Dashboard')
 
@@ -227,7 +227,7 @@ You may add your first field, a **String** field for the **Restaurant** name.
 ![Field Section Panel](../assets/getting-started/tutorial/field-selection-panel.png 'Field Selection Panel')
 
 - Click on the `String` field
-- In the **Name** field, type `name`. This field is the name of the restaurant.
+- In the **Name** field, type `name`
 
 ![Restaurant Name Input Field](../assets/getting-started/tutorial/restaurant-name-input-field.png 'Restuarant Name Input Field')
 
@@ -245,7 +245,7 @@ You are now ready to add the second field, a **Rich Text** field for the **Resta
 
 - Click the `Rich Text` field
 
-- In the **Name** field, type `description`. This field is the description of the **Restaurant**.
+- In the **Name** field, type `description`
 
 ![Restaurant Rich Text Field](../assets/getting-started/tutorial/restaurant-rich-text-field.png 'Restuarant Rich Text Field')
 
@@ -290,19 +290,20 @@ The `Category` **Content Type** will have a **String** field named `category`, a
 
 1. Complete these steps to **add a Category Content Type**:
 
-- Click the `+ Add A Content Type` link.
-- Enter a **Name** for your new **Content Type** (call this `category`), and you can write `Restaurant Categories` for the **Description**.
+- Click the `+ Add A Content Type` link
+- Enter a **Name** for your new **Content Type** (call this `category`)
+- Enter `Restaurant Categories` for the **Description**
 
 ![Category Name Field](../assets/getting-started/tutorial/category-name-field.png 'Category Name Field')
 
-- Click the `Done` button.
+- Click the `Done` button
 
 2. Now, you are ready to add fields to your **Category**:
 
 ![Category Fields](../assets/getting-started/tutorial/category-fields.png 'Category Fields')
 
-- Click on the `String` field.
-- In the **Name** field, type `name`. This is the name of the category.
+- Click on the `String` field
+- In the **Name** field, type `name`
 
 ![Category Name Entry Field](../assets/getting-started/tutorial/category-name-entry-field.png 'Category Name Entry Fields')
 
@@ -316,7 +317,7 @@ The `Category` **Content Type** will have a **String** field named `category`, a
 
 You are now ready to add the second field, a **Relation** field for creating a **Many to Many** relationship between the **Category** and **Restaurant** Content Types.
 
-- Click on the `Relation` field.
+- Click on the `Relation` field
 
 ![Category Add Field Panel](../assets/getting-started/tutorial/category-add-field-panel.png 'Category Add Field Panel')
 
@@ -324,21 +325,21 @@ This brings you to the **Add New Relation** screen.
 
 ![Category New Relation Field](../assets/getting-started/tutorial/category-new-relation-field.png 'Category New Relation Field')
 
-- Click on _right dropdown_ with `Permission (Users-Permissions)` and change it to `Restaurant`.
+- Click on _right dropdown_ with `Permission (Users-Permissions)` and change it to `Restaurant`
 
 ![Category Relation Dropdown](../assets/getting-started/tutorial/category-relation-dropdown.png 'Category Relation Dropdown')
 
-- Click the `Many to Many` icon (from the middle icon choices). It should now read, **"Categories has and belongs to many Restaurants"**.
+- Click the `Many to Many` icon (from the middle icon choices). It should now read, **"Categories has and belongs to many Restaurants"**
 
 ![Category Relation Many to Many](../assets/getting-started/tutorial/category-relation-many-to-many.png 'Category Relation Many to Many')
 
-- Click the `Done` button.
+- Click the `Done` button
 
 ![Category Save](../assets/getting-started/tutorial/category-save.png 'Category Save')
 
-- Click the `Save` button.
+- Click the `Save` button
 
-- Wait for Strapi to restart.
+- Wait for Strapi to restart
 
 ![Category Save Strapi Restart](../assets/getting-started/tutorial/category-save-strapi-restart.png 'Category Save Strapi Restart')
 
@@ -352,8 +353,8 @@ The `Restaurant` Content Type has a **Group** field named `Hours_of_operation`. 
 
 1. Complete these steps to **add a new Group**:
 
-- Click the `+ Add A Group` link to add a new **Group**.
-- Enter a **Name** for your new **Group** (call this `hours_of_operation`), and you can write `Hours of Operation` for the **Description**.
+- Click the `+ Add A Group` link to add a new **Group**
+- Enter a **Name** for your new **Group** (call this `hours_of_operation`), and you can write `Hours of Operation` for the **Description**
 
 ![Hours of Operation Add Group](../assets/getting-started/tutorial/hours-of-operation-add-group.png 'Hours of Operation Add Group')
 
@@ -364,7 +365,7 @@ The `Restaurant` Content Type has a **Group** field named `Hours_of_operation`. 
 ![Hours of Operation Add Fields](../assets/getting-started/tutorial/hours-of-operation-add-fields.png 'Hours of Operation Add Fields')
 
 - Click on the `String` field
-- In the **Name** field, type `day_interval`. This is to enter the **Day (or Days)** with **Hours of Operation**.
+- In the **Name** field, type `day_interval`. This is to enter the **Day (or Days)** with **Hours of Operation**
 
 ![Hours of Operation Days](../assets/getting-started/tutorial/hours-of-operation-days.png 'Hours of Operation Days')
 
@@ -380,7 +381,7 @@ You are now ready to add a second field, another **String** field for the **Open
 ![Hours of Operation Opening Hours](../assets/getting-started/tutorial/hours-of-operation-opening-hours.png 'Hours of Operation Opening Hours')
 
 - Click on the `String` field
-- In the **Name** field, type `opening_hours`.
+- In the **Name** field, type `opening_hours`
 
 ![Hours of Operation Opening Hours Name](../assets/getting-started/tutorial/hours-of-operation-opening-hours-name.png 'Hours of Operation Opening Hours Name')
 
@@ -391,16 +392,16 @@ You are now ready to add a third field, another **String** field for the **Closi
 ![Hours of Operation Closing Hours](../assets/getting-started/tutorial/hours-of-operation-closing-hours.png 'Hours of Operation Closing Hours')
 
 - Click on the `String` field
-- In the **Name** field, type `closing_hours`. This is the time the **Restaurant** closes.
+- In the **Name** field, type `closing_hours`
 
 ![Hours of Operation Closing Hours Name](../assets/getting-started/tutorial/hours-of-operation-closing-hours-name.png 'Hours of Operation Closing Hours Name')
 
-- Click the `Done` button.
+- Click the `Done` button
 
 ![Hours of Operation Save](../assets/getting-started/tutorial/hours-of-operation-save.png 'Hours of Operation Save')
 
-- Click the `Save` button.
-- Wait for Strapi to restart.
+- Click the `Save` button
+- Wait for Strapi to restart
 
 ![Hours of Operation Strapi Restart](../assets/getting-started/tutorial/hours-of-operation-strapi-restart.png 'Hours of Operation Strapi Restart')
 
@@ -412,21 +413,21 @@ After Strapi has restarted, you are ready to assign this **Hours_of_operation** 
 
 To access the **Hours_of_operation** Group from within the **Restaurant** Content Type, you need to **edit** the **Restaurant** Content Type in the **Content Type Builder**.
 
-- If needed, navigate back to the **Content Type Builder**.
+- If needed, navigate back to the **Content Type Builder**
 
 ![Edit Restaurant Content Type](../assets/getting-started/tutorial/edit-restaurant-content-type.png 'Edit Restaurant Content Type')
 
-- Click on the `Restaurant` Content Type, under **CONTENT TYPES**.
+- Click on the `Restaurant` Content Type, under **CONTENT TYPES**
 
 ![Edit Restaurant Add Another Field](../assets/getting-started/tutorial/edit-restaurant-add-another-field.png 'Edit Restaurant Add Another Field')
 
-- Click one of the `+ Add Another Field` buttons, to add the **Group**.
+- Click one of the `+ Add Another Field` buttons, to add the **Group**
 
 ![Edit Restaurant Group Field](../assets/getting-started/tutorial/edit-restaurant-group-field.png 'Edit Restaurant Group Field')
 
 - Click on the `Group` field
 
-- Ensure `hours_of_operation` is displayed in the **Select a group** dropdown.
+- Ensure `hours_of_operation` is displayed in the **Select a group** dropdown
 - Provide a **name** for this group in the **Restaurant** Content Type. E.g., `restaurant_hours`
 - Check the `Repeatable field` box
 
@@ -443,7 +444,7 @@ To access the **Hours_of_operation** Group from within the **Restaurant** Conten
 
 - Click the `Save` button
 
-- Wait for Strapi to restart.
+- Wait for Strapi to restart
 
 ![Restaurant Group Strapi Restart](../assets/getting-started/tutorial/restaurant-group-strapi-restart.png 'Restaurant Group Strapi Restart')
 
@@ -465,7 +466,7 @@ You can _drag and drop_ fields into a different layout, as well as, _rename the 
 
 ![Content Manager Hoursofoperation](../assets/getting-started/tutorial/content-manager-hoursofoperation.png 'Content Manager Hoursofoperation')
 
-- Grab the `opening_hours` and slide it next to `closing_hour`. This will rearrange the fields and make them more user friendly.
+- Rearrange the fields and make them more user friendly. Grab the `opening_hours` and slide it next to `closing_hour`
 
 ![Content Manager Hoursofoperation Rearrange Fields](../assets/getting-started/tutorial/content-manager-hoursofoperation-rearrange-fields.png 'Content Manager Hoursofoperation Rearrange Fields')
 
@@ -473,7 +474,7 @@ Next, you will change the **field labels** to make them easier to understand:
 
 - Click on the `day_interval` field
 - Edit the **Label** to read, `Day (or Days)`
-- Add a **Description**, `You can type in one day or a series of days to complete this field. E.g. "Tuesday" or "Tues - Wed"`.
+- Add a **Description**, `You can type in one day or a series of days to complete this field. E.g. "Tuesday" or "Tues - Wed"`
 
 ![Content Manager Hoursofoperation Day Interval](../assets/getting-started/tutorial/content-manager-hoursofoperation-day-interval.png 'Content Manager Hoursofoperation Day Interval')
 
@@ -487,7 +488,7 @@ Next, you will change the **field labels** to make them easier to understand:
 
 ![Content Manager Hoursofoperation Closing Hours](../assets/getting-started/tutorial/content-manager-hoursofoperation-day-closing-hours.png 'Content Manager Hoursofoperation Day Closing Hours')
 
-- Click the `Save` button, and then the `Confirm` button to save your settings.
+- Click the `Save` button, and then the `Confirm` button to save your settings
 
 Your settings have now saved.
 
@@ -499,7 +500,7 @@ You are ready to start inputting actual content.
 
 You are now ready to add some **Restaurants** and **Categories**.
 
-1. You are now going to enter a new **Restaurant**.
+1. You are now going to enter a new **Restaurant**
 
 - Navigate to and click on the `Restaurants`, under **CONTENT TYPES** in the left-hand menu
 
@@ -510,7 +511,8 @@ You are now ready to add some **Restaurants** and **Categories**.
   - In the **Name** field, enter `Biscotte Restaurant`
   - In the **Description** field, enter `Welcome to Biscotte restaurant! Restaurant Biscotte offers a cuisine based on fresh, quality products, often local, organic when possible, and always produced by passionate producers.`
   - Upload an **Image** to represent the **Restaurant**
-  - **Note:** At this point, you would generally select the **Categories** for this **Restaurant**. You have not entered any **Categories**, so you do this part after entering this first **Restaurant**.
+
+**Note:** At this point, you would generally select the **Categories** for this **Restaurant**. You have not entered any **Categories**, so you do this step after entering this first **Restaurant**.
 
 ![Restaurant Content Type Basic Data](../assets/getting-started/tutorial/restaurant-content-type-basic-data.png 'Restaurant Content Type Basic Data')
 
@@ -518,12 +520,12 @@ You are now ready to add some **Restaurants** and **Categories**.
   - In the **Create an Entry** section, enter the following details:
     - In the **Days (or Days)** field, enter `Sun - Mon`
     - In the **Opening Hours** field, enter `Closed`
-    - **Skip** the **Closing Hours** field, as this **Restaurant** is closed all day.
-  - Click the `+ ADD NEW ENTRY` button to create another new entry.
+    - **Skip** the **Closing Hours** field, as this **Restaurant** is closed all day
+  - Click the `+ ADD NEW ENTRY` button to create another new entry
     - In the **Days (or Days)** field, enter `Tues - Fri`
     - In the **Opening Hours** field, enter `12:00`
     - In the **Closing Hours** field, enter `22:30`
-  - Click the `+ ADD NEW ENTRY` button to create the last entry.
+  - Click the `+ ADD NEW ENTRY` button to create the last entry
     - In the **Days (or Days)** field, enter `Sat`
     - In the **Opening Hours** field, enter `11:30`
     - In the **Closing Hours** field, enter `16:00`
@@ -532,7 +534,7 @@ You have now entered in all the information necessary, for your first **Restaura
 
 ![Restaurants Entry](../assets/getting-started/tutorial/restaurants-entry.png 'Restaurants Entry')
 
-- **Scroll up** and click the `Save` button.
+- **Scroll up** and click the `Save` button
 
 Next, you need to enter in some **Categories** that can relate to the above and other **Restaurants**.
 
@@ -566,22 +568,22 @@ You have now entered your first **Restaurant** Content Type. You have also assig
 
 By default, Strapi publishes all **Content Types** with restricted permissions. Which means you have to explicitly give permissions to each **Content Type** you create. You are going to give **Public** API (or URL) access to both the **Restaurant** Content Type and **Category** Content Type.
 
-- Click on the `Roles & Permissions` menu item, under **PLUGINS** in the left-hand-menu.
-  Locate and click on the **Roles & Permissions** menu item under **PLUGINS** on the left menu.
+- Click on the `Roles & Permissions` menu item, under **PLUGINS** in the left-hand-menu
+- Locate and click on the **Roles & Permissions** menu item under **PLUGINS** on the left menu
 
 ![Roles and Permissions](../assets/getting-started/tutorial/roles-and-permissions.png 'Roles And Permissions')
 
-- Next, click on the **Public** Role.
+- Next, click on the **Public** Role
 
 ![Roles and Permissions Public Role](../assets/getting-started/tutorial/roles-and-permissions-public-role.png 'Roles And Permissions Public Role')
 
 - Next, scroll down under **Permissions** and locate the **Restaurant** and **Category** Content Types
-- Click the checkbox for **find** and **findone** in the **Restaurant** Content Type.
-- Click the checkbox for **find** and **findone** in the **Category** Content Type.
+- Click the checkbox for **find** and **findone** in the **Restaurant** Content Type
+- Click the checkbox for **find** and **findone** in the **Category** Content Type
 
 ![Roles and Permissions Find Permissions](../assets/getting-started/tutorial/roles-and-permissions-find-permissions.png 'Roles And Permissions Find Permissions')
 
-- Scroll back to the top, and click the **Save** button.
+- Scroll back to the top, and click the **Save** button
 
 ![Roles and Permissions Save](../assets/getting-started/tutorial/roles-and-permissions-save.png 'Roles And Permissions Save')
 
@@ -593,11 +595,11 @@ Each of your **Content Types** are accessible by following their automatically g
 
 Both your **Restaurant** and **Category** Content Types can now be accessed:
 
-- In your browser, follow `http://localhost:1337/restaurants` to return the data for the allowed **Find** value of your **Restaurant** Content Type.
+- In your browser, follow `http://localhost:1337/restaurants` to return the data for the allowed **Find** value of your **Restaurant** Content Type
 
 ![Restaurant Api](../assets/getting-started/tutorial/restaurant-api.png 'Restaurant API')
 
-- In your browser, follow `http://localhost:1337/categories` to return the data for the allowed **Find** value of your **Category** Content Type.
+- In your browser, follow `http://localhost:1337/categories` to return the data for the allowed **Find** value of your **Category** Content Type
 
 ![Category Api](../assets/getting-started/tutorial/category-api.png 'Category API')
 
@@ -622,9 +624,9 @@ If you would like to see the route of any specific **Content Type**, you need to
 👏 Congratulations, you have now completed the **Strapi Getting Started Tutorial**. Where to go next?
 
 - Learn how to use Strapi with React ([Gatsby](https://blog.strapi.io/building-a-static-website-using-gatsby-and-strapi) or [Next.js](https://blog.strapi.io/strapi-next-setup/)) or Vue.js ([Nuxt.js](https://blog.strapi.io/cooking-a-deliveroo-clone-with-nuxt-vue-js-graphql-strapi-and-stripe-setup-part-1-7/)).
-- Read the [concepts](../concepts/concepts.html) to deep dive into Strapi.
-- Get help on [StackOverflow](https://stackoverflow.com/questions/tagged/strapi).
-- Read the [source code](https://github.com/strapi/strapi), [contribute](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) or [give a star](https://github.com/strapi/strapi) on GitHub.
-- Follow us on [Twitter](https://twitter.com/strapijs) to get the latest news.
-- [Join the vibrant and active Strapi community](https://slack.strapi.io) on Slack.
+- Read the [concepts](../concepts/concepts.html) to deep dive into Strapi
+- Get help on [StackOverflow](https://stackoverflow.com/questions/tagged/strapi)
+- Read the [source code](https://github.com/strapi/strapi), [contribute](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) or [give a star](https://github.com/strapi/strapi) on GitHub
+- Follow us on [Twitter](https://twitter.com/strapijs) to get the latest news
+- [Join the vibrant and active Strapi community](https://slack.strapi.io) on Slack
   :::
