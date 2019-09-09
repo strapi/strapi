@@ -27,7 +27,7 @@ You need to have **_Node.js and npm_** installed on your system before following
 
 - Navigate to your parent `Projects/` directory from your command line.
 
-(**Note:** In this tutorial, the example assumes a **Projects** folder on your **Desktop**. However, this is not required, and you may put your project where you want.)
+**Note:** In this tutorial, the example assumes a **Projects** folder on your **Desktop**. However, this is not required, and you may put your project where you want.
 
 Path: `~/Desktop/Projects/`
 
@@ -35,7 +35,7 @@ Use **only one** of the following commands to create a new Strapi project:
 
 ---
 
-- (Use **yarn** to install the Strapi project (**recommended**). [Install yarn with these docs](https://yarnpkg.com/lang/en/docs/install/).)
+- Use **yarn** to install the Strapi project (**recommended**). [Install yarn with these docs](https://yarnpkg.com/lang/en/docs/install/).
 
 ```bash
 yarn create strapi-app my-project --quickstart
@@ -43,7 +43,7 @@ yarn create strapi-app my-project --quickstart
 
 **or**
 
-- (Use **npm/npx** to install the Strapi project.)
+- Use **npm/npx** to install the Strapi project.
 
 ```bash
 npx create-strapi-app my-project --quickstart
@@ -134,7 +134,7 @@ Building your admin UI with development configuration ...
 ![Strapi Registration Page](../assets/getting-started/tutorial/strapi-beta-registration-page.png 'Strapi Registration Page')
 
 ::: tip NOTE
-Using the `--quickstart` flag installs Strapi using an [SQLite](https://www.sqlite.org/index.html) database. You may always leave off the **--flag**, but you need to follow a few configuration steps for your database choice. **You need to have your database choice installed and running locally before creating your project.**
+Using the `--quickstart` flag installs Strapi using an [SQLite](https://www.sqlite.org/index.html) database. You may, at any time, leave off the **--flag**, but you need to follow a few configuration steps for your database choice. **You need to have your database choice installed and running locally before creating your project.**
 
 **Note:** An **SQLite** database is an excellent database to use for prototyping and _developing_ Strapi projects. **SQLite** is a light database that ports effortlessly to the other relational databases (**MySQL**, **PostgreSQL**, and **MariaDB**). It is recommended to **develop** with SQLite and to use another relational database (MySQL, PostgreSQL or MariaDB) in production.
 
@@ -145,7 +145,7 @@ You are now ready to create a new **Administrator** and new front-end **User**.
 
 ## 2. Create an Adminstrator and front-end User
 
-The first step is to create an **Administrator** (or "root user") for your project. An **Administrator** has all administrator privileges and access rights. (You can read more about why **Administrators** and front-end **Users** are separate [here](https://blog.strapi.io/why-we-split-the-management-of-the-admin-users-and-end-users/).
+The first step is to create an **Administrator** (or "root user") for your project. An **Administrator** has all administrator privileges and access rights. (You can read more about why **Administrators** and front-end **Users** are separate [here](https://blog.strapi.io/why-we-split-the-management-of-the-admin-users-and-end-users/).)
 
 You need to complete the following fields:
 
@@ -165,9 +165,11 @@ After your **Administrator** registration is complete, you see the Strapi _Admin
 
 **A.** An **Administrator** has access and rights to the Administration Dashboard (or backend) of Strapi. **Administrators** can, for example, add content, add plugins, and upload images.
 
-**B.** A front-end **User** is someone who interacts with your project through the front-end. A front-end **User** can, for example, be the "Author" of an article, make a purchase, has an account, leaves a review, or leaves a comment.
+**B.** A front-end **User** is someone who interacts with your project through the front-end. A front-end **User** can, for example, be an "Author" of an article, make a purchase, has an account, leaves a review, or leaves a comment.
 
-Up until this point, you have created an **Administrator**, and now you want to create a front-end **User**.
+Up until this point, you have created an **Administrator**, and so you next want to create a front-end **User**.
+
+**Note:** It is not necessary to always create a front-end **User** for your **Administrators**; in this case, the **Administrator** is also a front-end **User** as an "Author" of content in the application.
 
 - Click on `Users` located under **CONTENT TYPES** in the left-hand menu
 - Click the blue **+ Add New User** button in the top right corner
@@ -196,7 +198,7 @@ Additional **Restaurant** themed **Content Types** and fields can be seen in the
 
 ### The Restaurant Content Type
 
-Go to the **Content Type Builder** plugin, located in the left menu: **PLUGINS** --> **Content Type Builder**. You are now able to see the three available **Content Types**.
+- Go to the **Content Type Builder** plugin, located in the left menu: Under **PLUGINS**: --> **Content Type Builder**. You are now able to see the three available **Content Types**.
 
 At this point, three Content Types are available `Permission`, `Role`, and `Users`.
 
@@ -206,7 +208,7 @@ You need to create a new **Content Type** for `Restaurants`.
 
 1. Complete these steps to **Add a Restaurant Content Type**:
 
-- Click the `+ Add a Content Type` link (under existing **CONTENT TYPES**)
+- Click the `+ Add A Content Type` link (under existing **CONTENT TYPES**)
 - Enter a **Name** for your new **Content Type** (call this `restaurant`), and you can write `Restaurant Listings` for the **Description**
 - Click the `Done` button
 
@@ -225,7 +227,7 @@ You may add your first field, a **String** field for the **Restaurant** name.
 ![Field Section Panel](../assets/getting-started/tutorial/field-selection-panel.png 'Field Selection Panel')
 
 - Click on the `String` field
-- In the **Name** field, type `Restaurant_Name`. This field is the name of the restaurant.
+- In the **Name** field, type `name`. This field is the name of the restaurant.
 
 ![Restaurant Name Input Field](../assets/getting-started/tutorial/restaurant-name-input-field.png 'Restuarant Name Input Field')
 
@@ -243,7 +245,7 @@ You are now ready to add the second field, a **Rich Text** field for the **Resta
 
 - Click the `Rich Text` field
 
-- In the **Name** field, type `Description`. This field is the description of the **Restaurant**.
+- In the **Name** field, type `description`. This field is the description of the **Restaurant**.
 
 ![Restaurant Rich Text Field](../assets/getting-started/tutorial/restaurant-rich-text-field.png 'Restuarant Rich Text Field')
 
@@ -255,7 +257,7 @@ You are now ready to add the third field, a **Media** field for the **Restaurant
 
 - Click the `Media` field
 
-- In the **Name** field, type `Image`
+- In the **Name** field, type `image`
 
 ![Restaurant Rich Image Field](../assets/getting-started/tutorial/restaurant-image-field.png 'Restuarant Rich Image Field')
 
@@ -266,7 +268,7 @@ You are now ready to add the third field, a **Media** field for the **Restaurant
 
 - Click the `Done` button
 
-Your new Content Type called **Restaurant** is ready to be `Saved`.
+Your new Content Type called **Restaurant** is ready to be **Saved**.
 
 ![Restaurant Save Screen](../assets/getting-started/tutorial/restaurant-save-screen.png 'Restuarant Save Screen')
 
@@ -282,13 +284,13 @@ After Strapi has restarted, you are ready to continue to create the `Category` *
 
 ### The Category Content Type
 
-(The `category` **Content Type** will have a **String** field named `category`, and a **Relation field** with a **Many to Many** relationship.)
+The `Category` **Content Type** will have a **String** field named `category`, and a **Relation field** with a **Many to Many** relationship.
 
 ![Category Add Content Type](../assets/getting-started/tutorial/category-add-content-type.png 'Category Add Content Type')
 
 1. Complete these steps to **add a Category Content Type**:
 
-- Click the `+ Add Content Type` link.
+- Click the `+ Add A Content Type` link.
 - Enter a **Name** for your new **Content Type** (call this `category`), and you can write `Restaurant Categories` for the **Description**.
 
 ![Category Name Field](../assets/getting-started/tutorial/category-name-field.png 'Category Name Field')
@@ -300,7 +302,7 @@ After Strapi has restarted, you are ready to continue to create the `Category` *
 ![Category Fields](../assets/getting-started/tutorial/category-fields.png 'Category Fields')
 
 - Click on the `String` field.
-- In the **Name** field, type `Category_Name`. This is the name of the category.
+- In the **Name** field, type `name`. This is the name of the category.
 
 ![Category Name Entry Field](../assets/getting-started/tutorial/category-name-entry-field.png 'Category Name Entry Fields')
 
@@ -332,9 +334,9 @@ This brings you to the **Add New Relation** screen.
 
 - Click the `Done` button.
 
-- Click the `Save` button.
-
 ![Category Save](../assets/getting-started/tutorial/category-save.png 'Category Save')
+
+- Click the `Save` button.
 
 - Wait for Strapi to restart.
 
@@ -346,12 +348,12 @@ After Strapi has restarted, you are ready to create a `Group and Repeatable Fiel
 
 ### The Hours of Operation Group
 
-( The `Restaurant` Content Type has a **Group** field named `Hoursofoperation`. This Group is repeatable and for displaying the **Opening hours** and **Closing Hours** of a **Restaurant**.)
+The `Restaurant` Content Type has a **Group** field named `Hours_of_operation`. This Group is **Repeatable** and for displaying the **Opening hours** and **Closing hours** of a **Restaurant**.
 
 1. Complete these steps to **add a new Group**:
 
 - Click the `+ Add A Group` link to add a new **Group**.
-- Enter a **Name** for your new **Group** (call this `hoursofoperation`), and you can write `Restaurant Hours of Operation` for the **Description**.
+- Enter a **Name** for your new **Group** (call this `hours_of_operation`), and you can write `Hours of Operation` for the **Description**.
 
 ![Hours of Operation Add Group](../assets/getting-started/tutorial/hours-of-operation-add-group.png 'Hours of Operation Add Group')
 
@@ -378,7 +380,7 @@ You are now ready to add a second field, another **String** field for the **Open
 ![Hours of Operation Opening Hours](../assets/getting-started/tutorial/hours-of-operation-opening-hours.png 'Hours of Operation Opening Hours')
 
 - Click on the `String` field
-- In the **Name** field, type `opening_hours`. This is the time the **Restaurant** opens.
+- In the **Name** field, type `opening_hours`.
 
 ![Hours of Operation Opening Hours Name](../assets/getting-started/tutorial/hours-of-operation-opening-hours-name.png 'Hours of Operation Opening Hours Name')
 
@@ -390,40 +392,42 @@ You are now ready to add a third field, another **String** field for the **Closi
 
 - Click on the `String` field
 - In the **Name** field, type `closing_hours`. This is the time the **Restaurant** closes.
-- Click the `Done` button.
 
 ![Hours of Operation Closing Hours Name](../assets/getting-started/tutorial/hours-of-operation-closing-hours-name.png 'Hours of Operation Closing Hours Name')
 
-- Click the `Save` button.
+- Click the `Done` button.
 
 ![Hours of Operation Save](../assets/getting-started/tutorial/hours-of-operation-save.png 'Hours of Operation Save')
 
+- Click the `Save` button.
 - Wait for Strapi to restart.
 
 ![Hours of Operation Strapi Restart](../assets/getting-started/tutorial/hours-of-operation-strapi-restart.png 'Hours of Operation Strapi Restart')
 
-After Strapi has restarted, you are ready to assign this **Hoursofoperation** group to the **Restaurant** Content Type.
+After Strapi has restarted, you are ready to assign this **Hours_of_operation** group to the **Restaurant** Content Type.
 
-(**Note:** It would be possible to assign the **Hoursofoperation** group to another **Content Type**, let's say, a **Cafe** Content Type. You have the option to reuse this group across your application.)
+**Note:** It would be possible to assign the **Hours_of_operation** group to another **Content Type**, let's say, a **Cafe** Content Type. You have the option to reuse this group across your application.
 
-3. Next, you need to assign the **Hoursofoperation** Group to the **Restaurant** Content Type.
+3. Next, you need to assign the **Hours_of_operation** Group to the **Restaurant** Content Type.
 
-To access the **Hoursofoperation** Group from within the **Restaurant** Content Type, you need to **edit** the **Restaurant** Content Type in the **Content Type Builder**.
+To access the **Hours_of_operation** Group from within the **Restaurant** Content Type, you need to **edit** the **Restaurant** Content Type in the **Content Type Builder**.
 
-- (If needed, navigate back to the **Content Type Builder**) Click on the `Restaurant` Content Type, under **CONTENT TYPES**.
+- If needed, navigate back to the **Content Type Builder**.
 
 ![Edit Restaurant Content Type](../assets/getting-started/tutorial/edit-restaurant-content-type.png 'Edit Restaurant Content Type')
 
-- Click one of the `+ Add Another Field` buttons, to add the **Group**.
+- Click on the `Restaurant` Content Type, under **CONTENT TYPES**.
 
 ![Edit Restaurant Add Another Field](../assets/getting-started/tutorial/edit-restaurant-add-another-field.png 'Edit Restaurant Add Another Field')
 
-- Click on the `Group` field
+- Click one of the `+ Add Another Field` buttons, to add the **Group**.
 
 ![Edit Restaurant Group Field](../assets/getting-started/tutorial/edit-restaurant-group-field.png 'Edit Restaurant Group Field')
 
-- Ensure `hoursofoperation` is displayed in the **Select a group** dropdown.
-- Provide a **name** for this group in the **Restaurant** Content Type. E.g. `RestaurantHours`
+- Click on the `Group` field
+
+- Ensure `hours_of_operation` is displayed in the **Select a group** dropdown.
+- Provide a **name** for this group in the **Restaurant** Content Type. E.g., `restaurant_hours`
 - Check the `Repeatable field` box
 
 ![Restaurant Group Inputs](../assets/getting-started/tutorial/restaurant-group-inputs.png 'Restaurant Group Inputs')
@@ -434,9 +438,10 @@ To access the **Hoursofoperation** Group from within the **Restaurant** Content 
 ![Restaurant Group Advanced Settings](../assets/getting-started/tutorial/restaurant-group-advanced-settings.png 'Restaurant Group Advanced Settings')
 
 - Click the `Done` button
-- Click the `Save` button
 
 ![Restaurant Group Save](../assets/getting-started/tutorial/restaurant-group-save.png 'Restaurant Group save')
+
+- Click the `Save` button
 
 - Wait for Strapi to restart.
 
@@ -444,7 +449,7 @@ To access the **Hoursofoperation** Group from within the **Restaurant** Content 
 
 After Strapi has restarted, you are ready to continue to the next section where you customize the user-interface of your **Restaurant** Content Type.
 
-4. Next, you edit the **View Settings** for the new **Hoursofoperation** Group from within the **Content Manager**.
+4. Next, you edit the **View Settings** for the new **Hoursofoperation Group** from within the **Content Manager**.
 
 You can _drag and drop_ fields into a different layout, as well as, _rename the labels_ as two examples of how you can customize the user interface for your **Content Types**.
 
@@ -456,7 +461,7 @@ You can _drag and drop_ fields into a different layout, as well as, _rename the 
 
 ![Content Manager Groups Tab](../assets/getting-started/tutorial/content-manager-groups-tab.png 'Content Manager Groups Tab')
 
-- Click on `Hoursofoperation` to modify the **View Settings**
+- Click on `Hours_of_operation` to modify the **View Settings**
 
 ![Content Manager Hoursofoperation](../assets/getting-started/tutorial/content-manager-hoursofoperation.png 'Content Manager Hoursofoperation')
 
@@ -472,12 +477,12 @@ Next, you will change the **field labels** to make them easier to understand:
 
 ![Content Manager Hoursofoperation Day Interval](../assets/getting-started/tutorial/content-manager-hoursofoperation-day-interval.png 'Content Manager Hoursofoperation Day Interval')
 
-- Click on the `opening_hour` field
+- Click on the `opening_hours` field
 - Edit the **Label** to read, `Opening Hours`
 
 ![Content Manager Hoursofoperation Opening Hours](../assets/getting-started/tutorial/content-manager-hoursofoperation-day-opening-hours.png 'Content Manager Hoursofoperation Day Opening Hours')
 
-- Click on `closing_hour` field
+- Click on `closing_hours` field
 - Edit the **Label** to read, `Closing Hours`
 
 ![Content Manager Hoursofoperation Closing Hours](../assets/getting-started/tutorial/content-manager-hoursofoperation-day-closing-hours.png 'Content Manager Hoursofoperation Day Closing Hours')
@@ -502,7 +507,7 @@ You are now ready to add some **Restaurants** and **Categories**.
 
 - Next, click on the **+ Add new Restaurant** button (in the top right corner)
 - Enter in the following information for your first **Restaurant** called **Biscotte Restaurant**
-  - In the **Restaurant Name** field, enter `Biscotte Restaurant`
+  - In the **Name** field, enter `Biscotte Restaurant`
   - In the **Description** field, enter `Welcome to Biscotte restaurant! Restaurant Biscotte offers a cuisine based on fresh, quality products, often local, organic when possible, and always produced by passionate producers.`
   - Upload an **Image** to represent the **Restaurant**
   - **Note:** At this point, you would generally select the **Categories** for this **Restaurant**. You have not entered any **Categories**, so you do this part after entering this first **Restaurant**.
@@ -535,10 +540,10 @@ Next, you need to enter in some **Categories** that can relate to the above and 
 
 ![Categories Entry](../assets/getting-started/tutorial/categories-content-type.png 'Categories Entry')
 
-You are going to enter two **Categories**, but you could add as many **Categories** as you need to. Later, if you need to, you can add additional **Categories** and assign them to existing and new **Restaurants**.
+You are going to enter two **Categories**, but you could add as many **Categories** as you need to. Later, you can add additional **Categories** and assign them to existing and new **Restaurants**.
 
 - Click on the `+ Add New Category` button
-  - In the **Category_Name** field, enter `French food`
+  - In the **Name** field, enter `French food`
   - In the **Restaurants(0)** dropdown, select `Biscotte Restaurant`
 
 ![Categories Entry 1](../assets/getting-started/tutorial/categories-entry-1.png 'Categories Entry 1')
@@ -548,7 +553,7 @@ You are going to enter two **Categories**, but you could add as many **Categorie
 You now enter your second **Category**.
 
 - Click on the `+ Add New Category` button
-  - In the **Category_Name** field, enter `Brunch`
+  - In the **Name** field, enter `Brunch`
   - In the **Restaurants(0)** dropdown, select `Biscotte Restaurant`
 
 ![Categories Entry 2](../assets/getting-started/tutorial/categories-entry-2.png 'Categories Entry 2')
@@ -617,7 +622,7 @@ If you would like to see the route of any specific **Content Type**, you need to
 👏 Congratulations, you have now completed the **Strapi Getting Started Tutorial**. Where to go next?
 
 - Learn how to use Strapi with React ([Gatsby](https://blog.strapi.io/building-a-static-website-using-gatsby-and-strapi) or [Next.js](https://blog.strapi.io/strapi-next-setup/)) or Vue.js ([Nuxt.js](https://blog.strapi.io/cooking-a-deliveroo-clone-with-nuxt-vue-js-graphql-strapi-and-stripe-setup-part-1-7/)).
-- Read the [concepts](../concepts/concepts.html) and [articles](../articles/) to deep dive into Strapi.
+- Read the [concepts](../concepts/concepts.html) to deep dive into Strapi.
 - Get help on [StackOverflow](https://stackoverflow.com/questions/tagged/strapi).
 - Read the [source code](https://github.com/strapi/strapi), [contribute](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) or [give a star](https://github.com/strapi/strapi) on GitHub.
 - Follow us on [Twitter](https://twitter.com/strapijs) to get the latest news.
