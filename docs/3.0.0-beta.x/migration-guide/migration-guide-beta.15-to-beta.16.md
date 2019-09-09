@@ -50,6 +50,44 @@ npm run build
 
 ## Updating your code
 
+### Wysiwyg
+
+Wysiwyg was previously an option of the `text` type that was stored in the database. When deploying to production for the first time you had to select again the option in the interface.
+
+To improve make sure a field stays the same when deploying we introduced the `richtext` type. This type is equivalent to the previous `text` type with `wysiwyg` option enabled.
+
+**Before**:
+
+```json
+{
+  //...
+  "attributes": {
+    "name": {
+      "type": "string"
+    }
+    "description": {
+      "type": "text"
+    }
+  }
+}
+```
+
+**After**:
+
+```json
+{
+  //...
+  "attributes": {
+    "name": {
+      "type": "string"
+    }
+    "description": {
+      "type": "richtext"
+    }
+  }
+}
+```
+
 ### Custom controllers and services
 
 If you are using [core services](../guides/services.md), you previously needed to call `result.toJSON()` or `result.toObject()` to get a plain javascript object. This is not the case anymore, you will now receive a simple object directly.
