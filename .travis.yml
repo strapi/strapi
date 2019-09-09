@@ -71,7 +71,7 @@ jobs:
     - <<: *e2e_tests
       name: 'E2E Mysql'
       before_install:
-        - mysql -e 'CREATE DATABASE strapi_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;'
+        - mysql -e 'CREATE DATABASE strapi_test;'
       env:
         - DB_STRING='--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=travis --dbpassword='
 
