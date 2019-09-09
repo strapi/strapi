@@ -2,11 +2,11 @@ const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
 
-module.exports = async cb => {
+module.exports = async () => {
   // Check if the plugin users-permissions is installed because the documentation needs it
   if (Object.keys(strapi.plugins).indexOf('users-permissions') === -1) {
     throw new Error(
-      'In order to make the documentation plugin works the users-permissions one is required',
+      'In order to make the documentation plugin works the users-permissions one is required'
     );
   }
 
@@ -26,16 +26,24 @@ module.exports = async cb => {
   // Generate plugins' documentation
   const pluginsWithDocumentationNeeded = services.getPluginsWithDocumentationNeeded();
   pluginsWithDocumentationNeeded.forEach(plugin => {
-    const isDocExisting = services.checkIfPluginDocumentationFolderExists(plugin);
+    const isDocExisting = services.checkIfPluginDocumentationFolderExists(
+      plugin
+    );
 
     if (!isDocExisting) {
-      services.createDocumentationDirectory(services.getPluginDocumentationPath(plugin));
+      services.createDocumentationDirectory(
+        services.getPluginDocumentationPath(plugin)
+      );
       // create the overrides directory
-      services.createDocumentationDirectory(services.getPluginOverrideDocumentationPath(plugin));
+      services.createDocumentationDirectory(
+        services.getPluginOverrideDocumentationPath(plugin)
+      );
       services.createPluginDocumentationFile(plugin);
       shouldUpdateFullDoc = true;
     } else {
-      const needToUpdatePluginDoc = services.checkIfPluginDocNeedsUpdate(plugin);
+      const needToUpdatePluginDoc = services.checkIfPluginDocNeedsUpdate(
+        plugin
+      );
 
       if (needToUpdatePluginDoc) {
         services.createPluginDocumentationFile(plugin);
@@ -54,7 +62,9 @@ module.exports = async cb => {
       // If the documentation directory doesn't exist create it
       services.createDocumentationDirectory(services.getDocumentationPath(api));
       // Create the overrides directory
-      services.createDocumentationDirectory(services.getDocumentationOverridesPath(api));
+      services.createDocumentationDirectory(
+        services.getDocumentationOverridesPath(api)
+      );
       // Create the documentation files per version
       services.createDocumentationFile(api); // Then create the {api}.json documentation file
       shouldUpdateFullDoc = true;
@@ -96,7 +106,10 @@ module.exports = async cb => {
         .sort((a, b) => a - b)
         .join('.');
     };
-    const oldDoc = require(path.resolve(documentationPath, 'full_documentation.json'));
+    const oldDoc = require(path.resolve(
+      documentationPath,
+      'full_documentation.json'
+    ));
     const oldDocTags = getDocTagsToString(oldDoc);
     const currentDocTags = getDocTagsToString(fullDoc);
 
@@ -113,8 +126,7 @@ module.exports = async cb => {
     fs.writeFileSync(
       path.resolve(documentationPath, 'full_documentation.json'),
       JSON.stringify(fullDoc, null, 2),
-      'utf8',
+      'utf8'
     );
   }
-  cb();
 };

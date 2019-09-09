@@ -61,8 +61,8 @@ const renderComponent = properties =>
           </IntlProvider>
         </Provider>
       ),
-      properties,
-    ),
+      properties
+    )
   );
 
 describe('<Admin />, (with Redux), React lifecycle', () => {
@@ -121,44 +121,31 @@ describe('<Admin />, (with Redux), React lifecycle', () => {
   describe('ComponentDidUpdate', () => {
     it('should call the getSecuredData if the app is secured', () => {
       const wrapper = renderComponent(props);
-
       expect(props.getSecuredData).not.toHaveBeenCalled();
-
       wrapper.setProps({
         admin: { isSecured: true },
       });
-
       expect(props.getSecuredData).toHaveBeenCalled();
-
       wrapper.unmount();
     });
-
     it('should call the getHook props with the willSecure arg if the pathname has changed', () => {
       props.admin.isLoading = false;
       props.global.isAppLoading = false;
-
       const renderedComponent = renderComponent(props);
       renderedComponent.setProps({
         admin: { isLoading: false },
         location: { pathname: '/admin/marketPlace' },
       });
-
       expect(props.getHook).toHaveBeenCalledWith('willSecure');
-
       renderedComponent.unmount();
     });
-
     it('should emit the didGetSecured hook event when the secured data has been retrieved', () => {
       const wrapper = renderComponent(props);
-
       expect(props.getHook).not.toHaveBeenCalled();
-
       wrapper.setProps({
         admin: { didGetSecuredData: true },
       });
-
       expect(props.getHook).toHaveBeenCalledWith('didGetSecuredData');
-
       wrapper.unmount();
     });
   });

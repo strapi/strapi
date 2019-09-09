@@ -13,15 +13,14 @@ import { differenceBy, isEmpty } from 'lodash';
 import Label from '../Label';
 import InputDescription from '../InputDescription';
 import InputFile from '../InputFile';
-import InputSpacer from '../InputSpacer';
 import InputErrors from '../InputErrors';
 
 // Styles
 import styles from './styles.scss';
 
 class InputFileWithErrors extends React.PureComponent {
-  state = {  errors: [], label: null, hasValue: false };
-  
+  state = { errors: [], label: null, hasValue: false };
+
   componentDidMount() {
     const { errors } = this.props;
     let newState = Object.assign({}, this.state);
@@ -38,9 +37,14 @@ class InputFileWithErrors extends React.PureComponent {
   }
 
   componentDidUpdate(prevProps) {
-    if (!this.state.hasValue && !isEmpty(this.props.value) && this.props.multiple && differenceBy(this.props.value, prevProps.value, 'name').length > 0) {
+    if (
+      !this.state.hasValue &&
+      !isEmpty(this.props.value) &&
+      this.props.multiple &&
+      differenceBy(this.props.value, prevProps.value, 'name').length > 0
+    ) {
       this.updateState({ label: 1, hasValue: true });
-    } else if(isEmpty(this.props.value)) {
+    } else if (isEmpty(this.props.value)) {
       this.updateState({ label: null });
     }
     // Check if errors have been updated during validations
@@ -51,13 +55,13 @@ class InputFileWithErrors extends React.PureComponent {
     }
   }
 
-  setLabel = (label) => {
+  setLabel = label => {
     this.setState({ label });
-  }
+  };
 
   updateState = state => {
     this.setState(state);
-  }
+  };
 
   // TODO handle errors lifecycle
   render() {
@@ -80,15 +84,16 @@ class InputFileWithErrors extends React.PureComponent {
       value,
     } = this.props;
 
-    const labelClass = labelClassName === '' ? styles.labelFile : labelClassName;
-    const spacer = isEmpty(inputDescription) ? <InputSpacer /> : <div />;
+    const labelClass =
+      labelClassName === '' ? styles.labelFile : labelClassName;
+    const height = isEmpty(value) ? '.4rem' : '.6rem';
 
     return (
       <div
         className={cn(
           styles.inputFileWithErrorsContainer,
           customBootstrapClass,
-          className !== '' && className,
+          className !== '' && className
         )}
         style={style}
       >
@@ -98,8 +103,10 @@ class InputFileWithErrors extends React.PureComponent {
           message={label}
           style={labelStyle}
         />
-        { this.state.label && (
-          <span className={styles.labelNumber}>&nbsp;({this.state.label}/{value.length})</span>
+        {this.state.label && (
+          <span className={styles.labelNumber}>
+            &nbsp;({this.state.label}/{value.length})
+          </span>
         )}
         <InputFile
           multiple={multiple}
@@ -116,11 +123,11 @@ class InputFileWithErrors extends React.PureComponent {
         />
         <InputErrors
           className={errorsClassName}
-          errors={!noErrorsDescription && this.state.errors || []}
+          errors={(!noErrorsDescription && this.state.errors) || []}
           name={name}
           style={errorsStyle}
         />
-        {spacer}
+        <div style={{ height }} />
       </div>
     );
   }

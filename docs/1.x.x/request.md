@@ -44,7 +44,7 @@ Get request original URL.
 Get origin of URL, include `protocol` and `host`.
 
 ```js
-this.request.origin
+this.request.origin;
 // => http://example.com
 ```
 
@@ -53,7 +53,7 @@ this.request.origin
 Get full request URL, include `protocol`, `host` and `url`.
 
 ```js
-this.request.href
+this.request.href;
 // => http://example.com/foo/bar?q=1
 ```
 
@@ -105,7 +105,7 @@ const ct = this.request.type;
 Get request charset when present, or `undefined`:
 
 ```js
-this.request.charset
+this.request.charset;
 // => "utf-8"
 ```
 
@@ -291,10 +291,14 @@ or use a switch:
 
 ```js
 switch (this.accepts('json', 'html', 'text')) {
-  case 'json': break;
-  case 'html': break;
-  case 'text': break;
-  default: this.throw(406, 'json, html, or text only');
+  case 'json':
+    break;
+  case 'html':
+    break;
+  case 'text':
+    break;
+  default:
+    this.throw(406, 'json, html, or text only');
 }
 ```
 

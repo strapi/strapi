@@ -34,6 +34,8 @@ module.exports = async function() {
 
   // Method to initialize middlewares and emit an event.
   const initialize = middlewareKey => {
+    if (this.middleware[middlewareKey].loaded === true) return;
+
     const module = this.middleware[middlewareKey].load;
 
     return new Promise((resolve, reject) => {

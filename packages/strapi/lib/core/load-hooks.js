@@ -57,6 +57,10 @@ const loadLocalPluginsHooks = async (appPath, hooks) => {
   const pluginsNames = await fs.readdir(pluginsDir);
 
   for (let pluginName of pluginsNames) {
+    // ignore files
+    const stat = await fs.stat(path.resolve(pluginsDir, pluginName));
+    if (!stat.isDirectory()) continue;
+
     const dir = path.resolve(pluginsDir, pluginName, 'hooks');
     await loadHooksInDir(dir, hooks);
   }
@@ -94,7 +98,7 @@ const mountHooks = (name, files, hooks) => {
       Object.defineProperty(hooks[name], 'load', {
         configurable: false,
         enumerable: true,
-        get: () => require(file),
+        get: () => require(file)(strapi),
       });
       hooks[name].dependencies = dependencies;
       return;
