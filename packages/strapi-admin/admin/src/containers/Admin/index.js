@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import ReactGA from 'react-ga';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
@@ -18,9 +17,7 @@ import {
   OverlayBlocker,
   injectHooks,
 } from 'strapi-helper-plugin';
-// import OverlayBlocker from 'components/OverlayBlocker';
-
-// import injectHooks from 'utils/injectHooks';
+import { SHOW_TUTORIALS } from '../../config';
 
 import Header from '../../components/Header/index';
 import Logout from '../../components/Logout';
@@ -85,12 +82,7 @@ export class Admin extends React.Component {
   });
 
   componentDidMount() {
-    // Initialize Google Analytics
-    // Refer to ../../../doc/disable-tracking.md for more information
     /* istanbul ignore next */
-    ReactGA.initialize('UA-54313258-9', {
-      testMode: process.env.NODE_ENV === 'test',
-    });
     // Retrieve the main settings of the application
     this.props.getInitData();
   }
@@ -112,13 +104,6 @@ export class Admin extends React.Component {
 
     if (prevProps.location.pathname !== pathname) {
       getHook('willSecure');
-
-      /* istanbul ignore if */
-      if (this.isAcceptingTracking()) {
-        ReactGA.pageview(pathname, {
-          testMode: process.env.NODE_ENV === 'test',
-        });
-      }
     }
 
     if (prevProps.admin.isSecured !== isSecured && isSecured) {
@@ -160,7 +145,7 @@ export class Admin extends React.Component {
     } = props;
 
     return !Object.keys(plugins).every(
-      plugin => plugins[plugin].isReady === true,
+      plugin => plugins[plugin].isReady === true
     );
   };
 
@@ -208,7 +193,7 @@ export class Admin extends React.Component {
       const key = plugins[current].id;
 
       acc.push(
-        <InitializerComponent key={key} {...this.props} {...this.helpers} />,
+        <InitializerComponent key={key} {...this.props} {...this.helpers} />
       );
 
       return acc;
@@ -222,6 +207,8 @@ export class Admin extends React.Component {
 
     return <PluginDispatcher {...this.props} {...props} {...this.helpers} />;
   };
+
+  renderRoute = (props, Component) => <Component {...this.props} {...props} />;
 
   render() {
     const {
@@ -258,7 +245,11 @@ export class Admin extends React.Component {
           {showMenu ? <Header /> : ''}
           <div className={this.getContentWrapperStyle().sub}>
             <Switch>
-              <Route path="/" component={HomePage} exact />
+              <Route
+                path="/"
+                render={props => this.renderRoute(props, HomePage)}
+                exact
+              />
               <Route
                 path="/plugins/:pluginId"
                 render={this.renderPluginDispatcher}
@@ -281,7 +272,7 @@ export class Admin extends React.Component {
           isOpen={blockApp && showGlobalAppBlocker}
           {...overlayBlockerData}
         />
-        {showLogoutComponent && <Onboarding />}
+        {showLogoutComponent && SHOW_TUTORIALS && <Onboarding />}
       </div>
     );
   }
@@ -360,13 +351,13 @@ export function mapDispatchToProps(dispatch) {
       unsetAppSecured,
       updatePlugin,
     },
-    dispatch,
+    dispatch
   );
 }
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 const withReducer = injectReducer({ key: 'admin', reducer });
 const withSaga = injectSaga({ key: 'admin', saga });
@@ -381,5 +372,5 @@ export default compose(
   withLocaleToggleReducer,
   withSaga,
   withConnect,
-  withHooks,
+  withHooks
 )(Admin);

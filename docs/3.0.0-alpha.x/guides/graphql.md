@@ -695,7 +695,6 @@ module.exports = {
 
 In this example, the policy `isAuthenticated` located in `./plugins/users-permissions/config/policies/isAuthenticated.js` will be executed first. Then, the `isOwner` policy located in the `Post` API `./api/post/config/policies/isOwner.js`. Next, it will execute the `logging` policy located in `./config/policies/logging.js`. Finally, the resolver will be executed.
 
-
 ::: note
 There is no custom resolver in that case, so it will execute the default resolver (Post.find) provided by the Shadow CRUD feature.
 :::

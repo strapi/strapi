@@ -40,11 +40,6 @@ module.exports = {
     register(input: UserInput): UsersPermissionsLoginPayload
   `,
   resolver: {
-    UsersPermissionsMe: {
-      id(obj) {
-        return obj.id || obj._id;
-      },
-    },
     Query: {
       me: {
         resolverOf: 'User.me',

@@ -1363,7 +1363,6 @@ heroku config:set DATABASE_NAME="my-database-name"
 
 **Note:** Please replace the `<password>` and `my-database-name` values with the your actual values.
 
-
 ##### 2. Update your database config file
 
 Replace the contents of `database.json` with the following:
