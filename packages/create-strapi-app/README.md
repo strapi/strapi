@@ -9,13 +9,13 @@ This package includes the `create-strapi-app` CLI to make the creation of a stra
 Using yarn create command
 
 ```
-yarn create strapi-app my-app
+yarn create strapi-app my-project
 ```
 
 Using npx
 
 ```
-npx create-strapi-app my-app
+npx create-strapi-app my-project
 ```
 
 ### Manual install

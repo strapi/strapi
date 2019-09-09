@@ -1,0 +1,33 @@
+{
+  "connection": "default",
+  "collectionName": "addresses",
+  "info": {
+    "name": "address",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": [
+      "created_at",
+      "updated_at"
+    ],
+    "comment": ""
+  },
+  "attributes": {
+    "full_name": {
+      "type": "string"
+    },
+    "postal_code": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "geolocation": {
+      "type": "json"
+    },
+    "country": {
+      "model": "country"
+    }
+  }
+}

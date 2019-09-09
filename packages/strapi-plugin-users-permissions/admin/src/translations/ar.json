@@ -35,7 +35,6 @@
   "Auth.form.register.confirmPassword.label": "تأكيد كلمة السر",
   "Auth.form.register.email.label": "البريد الإكتروني",
   "Auth.form.register.email.placeholder": "mysuperemail@example.com",
-  "Auth.form.register.news.label": "ابقيني محدّثًا عن الميزات الجديدة والتحسينات القادمة.",
   "Auth.form.register.password.label": "كلمة السر",
   "Auth.form.register.username.label": "اسم المستخدم",
   "Auth.form.register.username.placeholder": "اكتب اسمك هنا (مثل: خالد سالم)",

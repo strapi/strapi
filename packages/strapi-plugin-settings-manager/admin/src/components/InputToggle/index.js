@@ -31,7 +31,7 @@ class InputToggle extends React.Component {
     this.setState({ isChecked });
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.isChecked !== this.props.isChecked) {
       this.setState({ isChecked: nextProps.isChecked });
     }

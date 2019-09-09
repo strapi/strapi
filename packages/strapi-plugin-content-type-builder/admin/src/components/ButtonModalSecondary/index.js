@@ -1,25 +1,20 @@
 /**
-*
-* ButtonModalSecondary
-*
-*/
+ *
+ * ButtonModalSecondary
+ *
+ */
 
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { Button } from 'reactstrap';
 
-import styles from './styles.scss';
+import StyledButtonModalSecondary from './StyledButtonModalSecondary';
 
 function ButtonModalSecondary({ message, onClick, type }) {
   return (
-    <Button
-      className={styles.buttonModalSecondary}
-      onClick={onClick}
-      type={type}
-    >
+    <StyledButtonModalSecondary onClick={onClick} type={type}>
       <FormattedMessage id={message} />
-    </Button>
+    </StyledButtonModalSecondary>
   );
 }
 
@@ -33,4 +28,5 @@ ButtonModalSecondary.propTypes = {
   type: PropTypes.string,
 };
 
-export default ButtonModalSecondary;
+export default memo(ButtonModalSecondary);
+export { ButtonModalSecondary };

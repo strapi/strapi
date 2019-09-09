@@ -195,27 +195,49 @@ module.exports = {
 
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
-        context.params = Query.convertToParams(
-          options.input.where || {},
-          (plugin ? strapi.plugins[plugin].models[name] : strapi.models[name])
-            .primaryKey
-        );
-        context.request.body = options.input.data || {};
+        const normalizedName = _.toLower(name);
+
+        let primaryKey;
+
+        if (plugin) {
+          primaryKey = strapi.plugins[plugin].models[normalizedName].primaryKey;
+        } else {
+          primaryKey = strapi.models[normalizedName].primaryKey;
+        }
+
+        if (options.input && options.input.where) {
+          context.params = Query.convertToParams(
+            options.input.where || {},
+            primaryKey
+          );
+        } else {
+          context.params = {};
+        }
+
+        if (options.input && options.input.data) {
+          context.request.body = options.input.data || {};
+        } else {
+          context.request.body = options;
+        }
 
         if (isController) {
           const values = await resolver.call(null, context);
 
           if (ctx.body) {
-            return {
-              [pluralize.singular(name)]: ctx.body,
-            };
+            return options.input
+              ? {
+                  [pluralize.singular(normalizedName)]: ctx.body,
+                }
+              : ctx.body;
           }
 
           const body = values && values.toJSON ? values.toJSON() : values;
 
-          return {
-            [pluralize.singular(name)]: body,
-          };
+          return options.input
+            ? {
+                [pluralize.singular(normalizedName)]: body,
+              }
+            : body;
         }
 
         return resolver.call(null, obj, options, context);

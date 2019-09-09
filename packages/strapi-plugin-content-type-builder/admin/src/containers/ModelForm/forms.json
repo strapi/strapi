@@ -14,7 +14,7 @@
           "required": true
         },
         "inputDescription": {
-          "id": "content-type-builder.form.contentType.item.name.description"
+          "id": "content-type-builder.form.modelForm.item.name.description.featureType"
         },
         "inputDescriptionParams": {
           "id": "content-type-builder.form.contentType.item.name.link.description",
@@ -60,7 +60,10 @@
         "value": "",
         "validations": {},
         "inputDescription": {
-          "id": "content-type-builder.form.contentType.item.collectionName.inputDescription"
+          "id": "content-type-builder.form.modelForm.item.collectionName.inputDescription"
+        },
+        "inputDescriptionParams": {
+          "id": "content-type-builder.form.modelForm.item.name.description.featureType"
         }
       }
     ]

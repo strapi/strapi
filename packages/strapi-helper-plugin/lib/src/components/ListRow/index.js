@@ -24,7 +24,11 @@ function ListRow({ children, items, onClick, ...rest }) {
 
   return (
     <li className={styles.li} {...rest}>
-      <div className={cn(styles.container, 'row')} onClick={onClick} role="button">
+      <div
+        className={cn(styles.container, 'row')}
+        onClick={onClick}
+        role="button"
+      >
         {data}
       </div>
     </li>
