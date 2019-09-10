@@ -1,0 +1,121 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getData Saga should call the strapi.notification action if the response errors 1`] = `
+Object {
+  "@@redux-saga/IO": true,
+  "ALL": Array [
+    Object {
+      "@@redux-saga/IO": true,
+      "CALL": Object {
+        "args": Array [
+          "/admin/gaConfig",
+          Object {
+            "method": "GET",
+          },
+        ],
+        "context": null,
+        "fn": [Function],
+      },
+    },
+    Object {
+      "@@redux-saga/IO": true,
+      "CALL": Object {
+        "args": Array [
+          "/admin/strapiVersion",
+          Object {
+            "method": "GET",
+          },
+        ],
+        "context": null,
+        "fn": [Function],
+      },
+    },
+    Object {
+      "@@redux-saga/IO": true,
+      "CALL": Object {
+        "args": Array [
+          "/admin/currentEnvironment",
+          Object {
+            "method": "GET",
+          },
+        ],
+        "context": null,
+        "fn": [Function],
+      },
+    },
+    Object {
+      "@@redux-saga/IO": true,
+      "CALL": Object {
+        "args": Array [
+          "/admin/layout",
+          Object {
+            "method": "GET",
+          },
+        ],
+        "context": null,
+        "fn": [Function],
+      },
+    },
+  ],
+}
+`;
+
+exports[`getData Saga should dispatch the getInitDataSucceeded action if it requests the data successfully 1`] = `
+Object {
+  "@@redux-saga/IO": true,
+  "ALL": Array [
+    Object {
+      "@@redux-saga/IO": true,
+      "CALL": Object {
+        "args": Array [
+          "/admin/gaConfig",
+          Object {
+            "method": "GET",
+          },
+        ],
+        "context": null,
+        "fn": [Function],
+      },
+    },
+    Object {
+      "@@redux-saga/IO": true,
+      "CALL": Object {
+        "args": Array [
+          "/admin/strapiVersion",
+          Object {
+            "method": "GET",
+          },
+        ],
+        "context": null,
+        "fn": [Function],
+      },
+    },
+    Object {
+      "@@redux-saga/IO": true,
+      "CALL": Object {
+        "args": Array [
+          "/admin/currentEnvironment",
+          Object {
+            "method": "GET",
+          },
+        ],
+        "context": null,
+        "fn": [Function],
+      },
+    },
+    Object {
+      "@@redux-saga/IO": true,
+      "CALL": Object {
+        "args": Array [
+          "/admin/layout",
+          Object {
+            "method": "GET",
+          },
+        ],
+        "context": null,
+        "fn": [Function],
+      },
+    },
+  ],
+}
+`;

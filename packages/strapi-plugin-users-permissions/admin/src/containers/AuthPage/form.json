@@ -1,0 +1,116 @@
+{
+  "form": {
+    "forgot-password": [
+      {
+        "customBootstrapClass": "col-md-12",
+        "label": {
+          "id": "users-permissions.Auth.form.forgot-password.email.label"
+        },
+        "name": "email",
+        "type": "email",
+        "placeholder": "users-permissions.Auth.form.forgot-password.email.placeholder"
+      }
+    ],
+    "login": [
+      {
+        "customBootstrapClass": "col-md-12",
+        "label": {
+          "id":  "users-permissions.Auth.form.login.username.label"
+        },
+        "name": "identifier",
+        "type": "text",
+        "placeholder": "users-permissions.Auth.form.login.username.placeholder"
+      },
+      {
+        "customBootstrapClass": "col-md-12",
+        "label": {
+          "id": "users-permissions.Auth.form.login.password.label"
+        },
+        "name": "password",
+        "type": "password"
+      },
+      {
+        "customBootstrapClass": "col-md-6",
+        "label": {
+          "id": "users-permissions.Auth.form.login.rememberMe.label"
+        },
+        "name": "rememberMe",
+        "type": "checkbox"
+      }
+    ],
+    "register": [
+      {
+        "customBootstrapClass": "col-md-12",
+        "label": {
+          "id": "users-permissions.Auth.form.register.username.label"
+        },
+        "name": "username",
+        "type": "text",
+        "placeholder": "users-permissions.Auth.form.register.username.placeholder"
+      },
+      {
+        "customBootstrapClass": "col-md-12",
+        "label": {
+          "id": "users-permissions.Auth.form.register.password.label"
+        },
+        "name": "password",
+        "type": "password"
+      },
+      {
+        "customBootstrapClass": "col-md-12",
+        "label": {
+          "id": "users-permissions.Auth.form.register.confirmPassword.label"
+        },
+        "name": "confirmPassword",
+        "type": "password"
+      },
+      {
+        "customBootstrapClass": "col-md-12",
+        "label": {
+          "id": "users-permissions.Auth.form.register.email.label"
+        },
+        "name": "email",
+        "placeholder": "users-permissions.Auth.form.register.email.placeholder",
+        "type": "email"
+      },
+      {
+        "customBootstrapClass": "col-md-12",
+        "label": {
+          "id": "users-permissions.Auth.form.register.news.label"
+        },
+        "name": "news",
+        "type": "checkbox",
+        "value": false
+      }
+    ],
+    "register-success": [
+      {
+        "customBootstrapClass": "col-md-12",
+        "name": "email",
+        "type": "email",
+        "label": {
+          "id":  "users-permissions.Auth.form.register-success.email.label"
+        },
+        "placeholder": "users-permissions.Auth.form.register-success.email.placeholder"
+      }
+    ],
+    "reset-password": [
+      {
+        "customBootstrapClass": "col-md-12",
+        "name": "password",
+        "type": "password",
+        "label": {
+          "id": "users-permissions.Auth.form.register.password.label"
+        }
+      },
+      {
+        "customBootstrapClass": "col-md-12",
+        "name": "passwordConfirmation",
+        "type": "password",
+        "label": {
+          "id": "users-permissions.Auth.form.register.confirmPassword.label"
+        }
+      }
+    ]
+  }
+}

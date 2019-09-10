@@ -1,5 +1,6 @@
 import {
   FREEZE_APP,
+  GET_APP_PLUGINS_SUCCEEDED,
   LOAD_PLUGIN,
   PLUGIN_DELETED,
   PLUGIN_LOADED,
@@ -9,6 +10,7 @@ import {
 } from '../constants';
 import {
   freezeApp,
+  getAppPluginsSucceeded,
   loadPlugin,
   pluginDeleted,
   pluginLoaded,
@@ -37,6 +39,35 @@ describe('<App /> actions', () => {
       };
 
       expect(unfreezeApp()).toEqual(expected);
+    });
+  });
+
+  describe('getAppPluginsSucceeded', () => {
+    it('should return the correct type and an array containing the id of the plugins', () => {
+      const plugins = [
+        {
+          id: 'content-manager',
+          source: {
+            development: '/content-manager/main.js',
+            production: '/content-manager/main.js',
+            staging: '/content-manager/main.js',
+          },
+        },
+        {
+          id: 'content-type-builder',
+          source: {
+            development: '/content-type-builder/main.js',
+            production: '/content-type-builder/main.js',
+            staging: '/content-type-builder/main.js',
+          },
+        },
+      ];
+      const expected = {
+        type: GET_APP_PLUGINS_SUCCEEDED,
+        appPlugins: ['content-manager', 'content-type-builder'],
+      };
+
+      expect(getAppPluginsSucceeded(plugins)).toEqual(expected);
     });
   });
 
@@ -105,7 +136,7 @@ describe('<App /> actions', () => {
       };
 
       expect(updatePlugin(pluginId, updatedKey, updatedValue)).toEqual(
-        expected
+        expected,
       );
     });
   });

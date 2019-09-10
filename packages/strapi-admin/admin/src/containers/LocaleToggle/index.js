@@ -22,6 +22,7 @@ import makeSelectLocale from '../LanguageProvider/selectors';
 import { changeLocale } from '../LanguageProvider/actions';
 import { languages } from '../../i18n';
 
+import makeSelectLocaleToggle from './selectors';
 import styles from './styles.scss';
 
 export class LocaleToggle extends React.Component {
@@ -53,7 +54,7 @@ export class LocaleToggle extends React.Component {
   render() {
     const {
       currentLocale: { locale },
-      className,
+      localeToggle: { className },
     } = this.props;
     const style = cn(styles.localeDropdownMenu, styles[className]);
 
@@ -72,7 +73,7 @@ export class LocaleToggle extends React.Component {
                 onClick={() => this.props.changeLocale(language)}
                 className={cn(
                   styles.localeToggleItem,
-                  locale === language ? styles.localeToggleItemActive : ''
+                  locale === language ? styles.localeToggleItemActive : '',
                 )}
               >
                 {language.toUpperCase()}
@@ -85,18 +86,15 @@ export class LocaleToggle extends React.Component {
   }
 }
 
-LocaleToggle.defaultProps = {
-  className: null,
-};
-
 LocaleToggle.propTypes = {
-  className: PropTypes.string,
   changeLocale: PropTypes.func.isRequired,
   currentLocale: PropTypes.object.isRequired,
+  localeToggle: PropTypes.object.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
   currentLocale: makeSelectLocale(),
+  localeToggle: makeSelectLocaleToggle(),
 });
 
 export function mapDispatchToProps(dispatch) {
@@ -104,13 +102,13 @@ export function mapDispatchToProps(dispatch) {
     {
       changeLocale,
     },
-    dispatch
+    dispatch,
   );
 }
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
 );
 
 export default compose(withConnect)(LocaleToggle);

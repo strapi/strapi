@@ -10,6 +10,8 @@ import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
 import pluginId from '../../pluginId';
 
+// Containers
+import AuthPage from '../AuthPage';
 import EditPage from '../EditPage';
 import HomePage from '../HomePage';
 import NotFoundPage from '../NotFoundPage';
@@ -21,10 +23,17 @@ class App extends React.Component {
     }
   }
 
+  renderRoute = props => <AuthPage {...this.props} {...props} />;
+
   render() {
     return (
       <div className={pluginId}>
         <Switch>
+          <Route
+            path={`/plugins/${pluginId}/auth/:authType/:id?`}
+            render={this.renderRoute}
+            exact
+          />
           <Route
             path={`/plugins/${pluginId}/:settingType/:actionType/:id?`}
             component={EditPage}

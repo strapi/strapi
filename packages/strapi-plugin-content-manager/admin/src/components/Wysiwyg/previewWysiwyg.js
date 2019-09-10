@@ -153,7 +153,7 @@ class PreviewWysiwyg extends React.PureComponent {
   // NOTE: This is not optimal and this lifecycle should be removed
   // I couldn't find a better way to decrease the fullscreen preview's data conversion time
   // Trying with componentDidUpdate didn't work
-  UNSAFE_componentWillUpdate(nextProps, nextState) {
+  UNSAFE_UNSAFE_componentWillUpdate(nextProps, nextState) {
     if (nextProps.data !== this.props.data) {
       new Promise(resolve => {
         setTimeout(() => {
