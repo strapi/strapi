@@ -41,7 +41,21 @@ module.exports = strapi => {
 
       strapi.app.use(
         cors({
-          origin,
+          origin: function(ctx) {
+            const whitelist = Array.isArray(origin)
+              ? origin
+              : origin.split(/\s*,\s*/);
+
+            const requestOrigin = ctx.accept.headers.origin;
+            if (whitelist.includes('*')) {
+              return '*';
+            }
+
+            if (!whitelist.includes(requestOrigin)) {
+              return ctx.throw(`${requestOrigin} is not a valid origin`);
+            }
+            return requestOrigin;
+          },
           exposeHeaders: expose,
           maxAge,
           credentials,
