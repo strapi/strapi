@@ -656,6 +656,31 @@ module.exports = {
             default:
               acc.properties[current] = associationSchema;
           }
+        } else if (type === 'group') {
+          const { repeatable, group, min, max } = attribute;
+
+          const cmp = this.generateMainComponent(
+            strapi.groups[group].attributes
+          );
+
+          if (repeatable) {
+            acc.properties[current] = {
+              type: 'array',
+              items: {
+                type: 'object',
+                ...cmp,
+              },
+              minItems: min,
+              maxItems: max,
+              description,
+            };
+          } else {
+            acc.properties[current] = {
+              type: 'object',
+              ...cmp,
+              description,
+            };
+          }
         } else {
           acc.properties[current] = {
             type,
@@ -1573,6 +1598,8 @@ module.exports = {
       case 'biginteger':
       case 'long':
         return 'integer';
+      case 'json':
+        return 'object';
       default:
         return type;
     }
