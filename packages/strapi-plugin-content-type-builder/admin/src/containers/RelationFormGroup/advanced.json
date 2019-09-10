@@ -1,0 +1,36 @@
+[
+  {
+    "customBootstrapClass": "col-md-12",
+    "label": {
+      "id": "content-type-builder.form.attribute.item.uniqueField"
+    },
+    "name": "unique",
+    "type": "checkbox",
+    "value": false,
+    "validations": {},
+    "inputDescription": {
+      "id": "content-type-builder.form.attribute.item.uniqueField.description"
+    }
+  },
+  {
+    "addon": "name",
+    "label": {
+      "id": "content-type-builder.form.attribute.item.customColumnName"
+    },
+    "name": "columnName",
+    "type": "string",
+    "value": "",
+    "validations": {},
+    "inputDescription": {
+      "id": "content-type-builder.form.attribute.item.customColumnName.description"
+    }
+  },
+  {
+    "addon": "key",
+    "label": "",
+    "name": "targetColumnName",
+    "type": "string",
+    "value": "",
+    "validations": {}
+  }
+]
