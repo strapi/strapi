@@ -12,11 +12,7 @@ import { bindActionCreators, compose } from 'redux';
 import { Switch, Route } from 'react-router-dom';
 
 // Components from strapi-helper-plugin
-import {
-  LoadingIndicatorPage,
-  OverlayBlocker,
-  injectHooks,
-} from 'strapi-helper-plugin';
+import { LoadingIndicatorPage, OverlayBlocker } from 'strapi-helper-plugin';
 import { SHOW_TUTORIALS } from '../../config';
 
 import Header from '../../components/Header/index';
@@ -43,23 +39,7 @@ import makeSelecApp from '../App/selectors';
 import injectSaga from '../../utils/injectSaga';
 import injectReducer from '../../utils/injectReducer';
 
-import {
-  resetLocaleDefaultClassName,
-  setLocaleCustomClassName,
-} from '../LocaleToggle/actions';
-
-import {
-  emitEvent,
-  getInitData,
-  getSecuredData,
-  hideLeftMenu,
-  hideLogout,
-  setAppError,
-  setAppSecured,
-  showLeftMenu,
-  showLogout,
-  unsetAppSecured,
-} from './actions';
+import { emitEvent, setAppError } from './actions';
 import makeSelectAdmin from './selectors';
 import reducer from './reducer';
 import saga from './saga';
@@ -68,8 +48,6 @@ import styles from './styles.scss';
 
 export class Admin extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
-  state = { shouldSecureAfterAllPluginsAreMounted: true };
-
   getChildContext = () => ({
     emitEvent: this.props.emitEvent,
     currentEnvironment: this.props.global.currentEnvironment,
@@ -78,42 +56,6 @@ export class Admin extends React.Component {
     plugins: this.props.global.plugins,
     updatePlugin: this.props.updatePlugin,
   });
-
-  componentDidMount() {
-    /* istanbul ignore next */
-    // const { getHook } = this.props;
-    // getHook('didGetSecuredData');
-    // Retrieve the main settings of the application
-    // this.props.getInitData();
-  }
-
-  /* istanbul ignore next */
-  // componentDidUpdate(prevProps) {
-  //   const {
-  //     admin: { didGetSecuredData, isLoading, isSecured },
-  //     getHook,
-  //     getSecuredData,
-  //     location: { pathname },
-  //   } = this.props;
-
-  //   if (!isLoading && this.state.shouldSecureAfterAllPluginsAreMounted) {
-  //     if (!this.hasApluginNotReady(this.props)) {
-  //       getHook('willSecure');
-  //     }
-  //   }
-
-  //   if (prevProps.location.pathname !== pathname) {
-  //     getHook('willSecure');
-  //   }
-
-  //   if (prevProps.admin.isSecured !== isSecured && isSecured) {
-  //     getSecuredData();
-  //   }
-
-  //   if (prevProps.admin.didGetSecuredData !== didGetSecuredData) {
-  //     getHook('didGetSecuredData');
-  //   }
-  // }
 
   /* istanbul ignore next */
   componentDidCatch(error, info) {
@@ -129,11 +71,6 @@ export class Admin extends React.Component {
     this.props.setAppError();
   }
 
-  // TODO remove
-  getContentWrapperStyle = () => {
-    return { main: {}, sub: styles.content };
-  };
-
   hasApluginNotReady = props => {
     const {
       global: { plugins },
@@ -145,12 +82,6 @@ export class Admin extends React.Component {
   };
 
   helpers = {
-    hideLeftMenu: this.props.hideLeftMenu,
-    hideLogout: this.props.hideLogout,
-    setAppSecured: this.props.setAppSecured,
-    showLeftMenu: this.props.showLeftMenu,
-    showLogout: this.props.showLogout,
-    unsetAppSecured: this.props.unsetAppSecured,
     updatePlugin: this.props.updatePlugin,
   };
 
@@ -218,12 +149,9 @@ export class Admin extends React.Component {
           <Logout />
           <LocaleToggle isLogged />
         </NavTopRightWrapper>
-        <div
-          className={styles.adminPageRightWrapper}
-          style={this.getContentWrapperStyle().main}
-        >
+        <div className={styles.adminPageRightWrapper}>
           <Header />
-          <div className={this.getContentWrapperStyle().sub}>
+          <div className={styles.content}>
             <Switch>
               <Route
                 path="/"
@@ -274,22 +202,12 @@ Admin.childContextTypes = {
 
 Admin.propTypes = {
   admin: PropTypes.shape({
-    autoReload: PropTypes.bool,
     appError: PropTypes.bool,
-    currentEnvironment: PropTypes.string,
-    didGetSecuredData: PropTypes.bool,
-    isLoading: PropTypes.bool,
-    isSecured: PropTypes.bool,
-    layout: PropTypes.object,
-    showLogoutComponent: PropTypes.bool,
-    showMenu: PropTypes.bool,
   }).isRequired,
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,
   emitEvent: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
-  getHook: PropTypes.func.isRequired,
-  getInitData: PropTypes.func.isRequired,
-  getSecuredData: PropTypes.func.isRequired,
+  // getHook: PropTypes.func.isRequired,
   global: PropTypes.shape({
     blockApp: PropTypes.bool,
     currentEnvironment: PropTypes.string,
@@ -298,15 +216,8 @@ Admin.propTypes = {
     showGlobalAppBlocker: PropTypes.bool,
     strapiVersion: PropTypes.string,
   }).isRequired,
-  hideLeftMenu: PropTypes.func.isRequired,
-  hideLogout: PropTypes.func.isRequired,
   location: PropTypes.object.isRequired,
-  resetLocaleDefaultClassName: PropTypes.func.isRequired,
   setAppError: PropTypes.func.isRequired,
-  setAppSecured: PropTypes.func.isRequired,
-  showLeftMenu: PropTypes.func.isRequired,
-  showLogout: PropTypes.func.isRequired,
-  unsetAppSecured: PropTypes.func.isRequired,
   updatePlugin: PropTypes.func.isRequired,
 };
 
@@ -321,17 +232,7 @@ export function mapDispatchToProps(dispatch) {
       disableGlobalOverlayBlocker,
       emitEvent,
       enableGlobalOverlayBlocker,
-      getInitData,
-      getSecuredData,
-      hideLeftMenu,
-      hideLogout,
-      resetLocaleDefaultClassName,
       setAppError,
-      setAppSecured,
-      setLocaleCustomClassName,
-      showLeftMenu,
-      showLogout,
-      unsetAppSecured,
       updatePlugin,
     },
     dispatch
@@ -344,11 +245,11 @@ const withConnect = connect(
 );
 const withReducer = injectReducer({ key: 'admin', reducer });
 const withSaga = injectSaga({ key: 'admin', saga });
-const withHooks = injectHooks({ key: 'admin' });
+// const withHooks = injectHooks({ key: 'admin' });
 
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
-  withHooks
+  withConnect
+  // withHooks
 )(Admin);
