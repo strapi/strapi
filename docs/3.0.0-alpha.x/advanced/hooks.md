@@ -3,13 +3,13 @@
 The hooks are modules that add functionality to the core. They are loaded during the server boot. For example, if your project needs to work with a SQL database, you will have to add the hook `strapi-hook-bookshelf` to be able to connect your app with your database.
 
 **File structure**
+
 ```js
 const fs = require('fs');
 const path = require('path');
 
 module.exports = strapi => {
   const hook = {
-
     /**
      * Default options
      */
@@ -28,7 +28,7 @@ module.exports = strapi => {
       // this.defaults['your_config'] to access to your configs.
 
       cb();
-    }
+    },
   };
 
   return hook;
@@ -83,6 +83,7 @@ The framework allows to load hooks from the project directly without having to i
 ## Configuration and activation
 
 To activate and configure your hook with custom options, you need to edit your `./config/hook.json` file in your Strapi app.
+
 ```javascript
 {
   ...

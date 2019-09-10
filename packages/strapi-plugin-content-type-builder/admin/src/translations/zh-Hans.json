@@ -78,10 +78,16 @@
   "home.contentTypeBuilder.name": "Content Types",
   "home.emptyAttributes.description": "为你的新Content Type添加第一个字段",
   "home.emptyAttributes.title": "还没有字段",
-  "home.emptyContentType.description": "创建第一个Content Type，以便能够从API中检索数据。",
-  "home.emptyContentType.title": "没有可用的Content Types",
+  "home.empty.models.description": "创建第一个Content Type，以便能够从API中检索数据。",
+  "home.empty.models.title": "没有可用的Content Types",
   "menu.section.contentTypeBuilder.name.plural": "Content Types",
   "menu.section.contentTypeBuilder.name.singular": "Content Type",
+  "home.emptyContentType.description": "创建第一个Content Type，以便能够从API中检索数据。",
+  "home.emptyContentType.title": "没有可用的Content Types",
+  "menu.section.models.name.plural": "Content Types",
+  "menu.section.models.name.singular": "Content Type",
+  "menu.section.groups.name.plural": "Groups",
+  "menu.section.groups.name.singular": "Group",
   "menu.section.documentation.guide": "阅读更多关于我们的Content Types",
   "menu.section.documentation.guideLink": "guide.",
   "menu.section.documentation.name": "Documentation",
@@ -150,6 +156,6 @@
   "table.contentType.head.description": "描述",
   "table.contentType.head.fields": "字段",
   "table.contentType.head.name": "名称",
-  "table.contentType.title.plural": "Content Types 是可用的",
-  "table.contentType.title.singular": "Content Type 是可用的"
+  "table.contentType.title.plural": "{number} Content Types 是可用的",
+  "table.contentType.title.singular": "{number} Content Type 是可用的"
 }

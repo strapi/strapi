@@ -2,3 +2,4 @@
 **/build/**
 **/dist/**
 testApp/**
+.eslintrc.js

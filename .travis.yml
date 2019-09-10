@@ -2,14 +2,6 @@ services:
   - postgresql
   - mysql
 
-sudo: required
-dist: trusty
-
-language: node_js
-
-node_js:
-  - '10'
-
 addons:
   postgresql: '10'
   apt:
@@ -19,6 +11,14 @@ addons:
 env:
   global:
     - PGPORT=5433
+
+sudo: required
+dist: trusty
+
+language: node_js
+
+node_js:
+  - '10'
 
 cache:
   yarn: true
@@ -41,8 +41,8 @@ install_mongo: &install_mongo
     - mkdir -p ./data/db/27000
     - ./mongodb-linux-x86_64-3.6.6/bin/mongod --fork --dbpath ./data/db/27017 --syslog --port 27017
 
-install:
-  - yarn setup
+before_script:
+  - yarn build
   - yarn global add -g wait-on
 
 jobs:

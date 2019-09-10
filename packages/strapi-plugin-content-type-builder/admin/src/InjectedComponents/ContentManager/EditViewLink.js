@@ -21,10 +21,15 @@ function EditViewLink(props) {
     return null;
   }
 
-  return <LiLink {...props} url={url} />;
+  if (props.currentEnvironment === 'development') {
+    return <LiLink {...props} url={url} />;
+  }
+
+  return null;
 }
 
 EditViewLink.propTypes = {
+  currentEnvironment: PropTypes.string.isRequired,
   getContentTypeBuilderBaseUrl: PropTypes.func.isRequired,
   getModelName: PropTypes.func.isRequired,
   getSource: PropTypes.func.isRequired,

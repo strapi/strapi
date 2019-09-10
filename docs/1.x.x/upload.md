@@ -62,24 +62,24 @@ Response payload:
 ```js
 [
   {
-    "readable": true,
-    "domain": null,
-    "truncated": false,
-    "fieldname": "file",
-    "filename": "1445421755771-image.jpg",
-    "encoding": "7bit",
-    "transferEncoding": "7bit",
-    "mime": "image/jpeg",
-    "mimeType": "image/jpeg",
-    "originalFilenameFormatted": "image.jpg",
-    "originalFilename": "image.jpg",
-    "template": "default",
-    "lang": "en",
-    "createdAt": "2015-10-21T10:02:35.776Z",
-    "updatedAt": "2015-10-21T10:02:35.776Z",
-    "id": 2
-  }
-]
+    readable: true,
+    domain: null,
+    truncated: false,
+    fieldname: 'file',
+    filename: '1445421755771-image.jpg',
+    encoding: '7bit',
+    transferEncoding: '7bit',
+    mime: 'image/jpeg',
+    mimeType: 'image/jpeg',
+    originalFilenameFormatted: 'image.jpg',
+    originalFilename: 'image.jpg',
+    template: 'default',
+    lang: 'en',
+    createdAt: '2015-10-21T10:02:35.776Z',
+    updatedAt: '2015-10-21T10:02:35.776Z',
+    id: 2,
+  },
+];
 ```
 
 ## Upload model

@@ -19,6 +19,7 @@ The following properties can be specified at the top level of your model definit
 the defaults for that particular model.
 
 For example, this a basic model `Pet`:
+
 ```js
 {
   "identity": "pet",
@@ -99,8 +100,9 @@ is enabled). You should never change this property on your models.
 ```
 
 For example to access to your model function:
+
 ```js
-Pets.find().exec(function (error, pets) {
+Pets.find().exec(function(error, pets) {
   if (error) {
     console.log(error);
     return false;
@@ -173,6 +175,7 @@ Options can be used to enforce various constraints and add special enhancements 
 #### type
 
 Specifies the type of data that will be stored in this attribute. One of:
+
 - `string`
 - `text`
 - `integer`
@@ -637,8 +640,8 @@ Strapi exposes a handful of lifecycle callbacks by default.
 - `beforeDestroy`: `fn(criteria, cb)`
 - `afterDestroy`: `fn(deletedRecord, cb)`
 
-
 For example, this could be your `./api/pet/models/Pet.js` file:
+
 ```js
 module.exports = {
   /**

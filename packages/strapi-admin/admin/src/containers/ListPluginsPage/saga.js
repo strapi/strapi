@@ -30,7 +30,7 @@ export function* deletePlugin() {
   } catch (error) {
     yield put(deletePluginSucceeded(false));
     strapi.notification.error(
-      'app.components.listPluginsPage.deletePlugin.error',
+      'app.components.listPluginsPage.deletePlugin.error'
     );
   }
 }
@@ -61,7 +61,7 @@ export function* pluginsGet() {
       availablePlugins = yield call(
         request,
         'https://marketplace.strapi.io/plugins',
-        opts,
+        opts
       );
     } catch (e) {
       availablePlugins = [];
@@ -72,7 +72,7 @@ export function* pluginsGet() {
       response[0].plugins[name].logo = get(
         availablePlugins.find(plugin => plugin.id === name),
         'logo',
-        '',
+        ''
       );
     });
 
