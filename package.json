@@ -5,7 +5,6 @@
     "@testing-library/jest-dom": "^4.0.0",
     "@testing-library/react": "^9.1.1",
     "@testing-library/react-hooks": "^2.0.1",
-    "@types/react-test-renderer": "^16.9.0",
     "babel-eslint": "^10.0.1",
     "cross-env": "^5.2.0",
     "cypress": "3.1.2",
