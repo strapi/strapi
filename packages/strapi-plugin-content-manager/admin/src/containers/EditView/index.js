@@ -272,13 +272,10 @@ function EditView({
           ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
           'SERVER ERROR'
         );
-        const errorSuffix = error.includes('Auth.form')
-          ? 'users-permissions.'
-          : '';
 
         setIsSubmitting(false);
         emitEvent('didNotSaveEntry', { error: err });
-        strapi.notification.error(`${errorSuffix}${error}`);
+        strapi.notification.error(error);
       }
     } catch (err) {
       console.log({ formErrors: err });
