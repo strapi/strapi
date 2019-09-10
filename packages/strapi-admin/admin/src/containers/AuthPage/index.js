@@ -95,7 +95,7 @@ const AuthPage = ({
         const body = omit(modifiedData, 'news');
 
         if (authType === 'forgot-password') {
-          set(body, 'url', `${strapi.backendURL}/admin/auth/reset-password`);
+          set(body, 'url', `${strapi.remoteURL}/auth/reset-password`);
         }
 
         const { jwt, user, ok } = await request(requestURL, {
