@@ -7,7 +7,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Helmet } from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
@@ -15,6 +14,7 @@ import cn from 'classnames';
 import { LoadingIndicatorPage, PluginHeader } from 'strapi-helper-plugin';
 
 // Design
+import PageTitle from '../../components/PageTitle';
 import PluginCard from '../../components/PluginCard';
 
 import injectSaga from '../../utils/injectSaga';
@@ -46,12 +46,7 @@ class Marketplace extends React.Component {
     this.props.resetProps();
   }
 
-  renderHelmet = message => (
-    <Helmet>
-      <title>{message}</title>
-      <meta name="description" content="Description of InstallPluginPage" />
-    </Helmet>
-  );
+  renderHelmet = message => <PageTitle title={message} />;
 
   renderPluginCard = plugin => {
     const {

@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import { Switch, Route } from 'react-router-dom';
-
+import { isEmpty } from 'lodash';
 // Components from strapi-helper-plugin
 import { LoadingIndicatorPage, OverlayBlocker } from 'strapi-helper-plugin';
 import { SHOW_TUTORIALS } from '../../config';
@@ -38,6 +38,7 @@ import makeSelecApp from '../App/selectors';
 
 import injectSaga from '../../utils/injectSaga';
 import injectReducer from '../../utils/injectReducer';
+import difference from './utils/difference';
 
 import { emitEvent, setAppError } from './actions';
 import makeSelectAdmin from './selectors';
@@ -56,6 +57,10 @@ export class Admin extends React.Component {
     plugins: this.props.global.plugins,
     updatePlugin: this.props.updatePlugin,
   });
+
+  shouldComponentUpdate(prevProps) {
+    return !isEmpty(difference(prevProps, this.props));
+  }
 
   /* istanbul ignore next */
   componentDidCatch(error, info) {

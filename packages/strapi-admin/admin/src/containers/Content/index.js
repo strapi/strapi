@@ -13,14 +13,13 @@ import { selectPlugins } from '../App/selectors';
 
 import styles from './styles.scss';
 
-export class Content extends React.Component { // eslint-disable-line react/prefer-stateless-function
+export class Content extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   render() {
     const style = this.props.showLeftMenu ? styles.content : styles.wrapper;
-
+    console.log('lllk');
     return (
-      <div className={style}>
-        {React.Children.toArray(this.props.children)}
-      </div>
+      <div className={style}>{React.Children.toArray(this.props.children)}</div>
     );
   }
 }
@@ -32,7 +31,7 @@ Content.propTypes = {
 
 const mapStateToProps = createSelector(
   selectPlugins(),
-  (plugins) => ({ plugins })
+  plugins => ({ plugins })
 );
 
 function mapDispatchToProps(dispatch) {
@@ -41,4 +40,7 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Content);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Content);

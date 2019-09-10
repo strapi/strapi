@@ -1,33 +1,12 @@
 import React from 'react';
 import { shallow } from 'enzyme';
-import { Route } from 'react-router-dom';
+import { LoadingIndicatorPage } from 'strapi-helper-plugin';
 
-import AppLoader from '../../AppLoader';
 import { App } from '../../App';
-import PrivateRoute from '../../PrivateRoute';
 
 describe('<App />', () => {
   it('should render the <AppLoader />', () => {
     const renderedComponent = shallow(<App getDataSucceeded={jest.fn()} />);
-    expect(renderedComponent.find(AppLoader)).toHaveLength(1);
-  });
-
-  it('Should render the <Switch /> if the app is loading', () => {
-    const topComp = shallow(<App getDataSucceeded={jest.fn()} />);
-    const insideAppLoaderNotLoading = shallow(
-      topComp.find(AppLoader).prop('children')({ shouldLoad: false })
-    );
-
-    expect(insideAppLoaderNotLoading.find(Route).length).toBe(2);
-    expect(insideAppLoaderNotLoading.find(PrivateRoute)).toHaveLength(1);
-  });
-
-  it('should not render the <Switch /> if the app is loading', () => {
-    const topComp = shallow(<App getDataSucceeded={jest.fn()} />);
-
-    const insideAppLoaderLoading = shallow(
-      topComp.find(AppLoader).prop('children')({ shouldLoad: true })
-    );
-    expect(insideAppLoaderLoading.find(Route).length).toBe(0);
+    expect(renderedComponent.find(LoadingIndicatorPage)).toHaveLength(1);
   });
 });

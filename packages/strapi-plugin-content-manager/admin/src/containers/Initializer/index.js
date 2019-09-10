@@ -4,7 +4,7 @@
  *
  */
 
-import { memo, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { request } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
@@ -28,15 +28,13 @@ const Initializer = ({ updatePlugin }) => {
         ];
 
         ref.current(pluginId, 'leftMenuSections', menu);
+        ref.current(pluginId, 'isReady', true);
       } catch (err) {
         strapi.notification.error('content-manager.error.model.fetch');
       }
     };
 
     getData();
-    ref.current(pluginId, 'isReady', true);
-
-    return () => {};
   }, []);
 
   return null;
@@ -46,4 +44,4 @@ Initializer.propTypes = {
   updatePlugin: PropTypes.func.isRequired,
 };
 
-export default memo(Initializer);
+export default Initializer;

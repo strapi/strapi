@@ -11,7 +11,7 @@
  * the linting exception.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
 import { connect } from 'react-redux';
@@ -19,7 +19,6 @@ import { bindActionCreators, compose } from 'redux';
 import { LoadingIndicatorPage, request } from 'strapi-helper-plugin';
 
 import Admin from '../Admin';
-import AppLoader from '../AppLoader';
 import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
 import NotificationProvider from '../NotificationProvider';
@@ -29,6 +28,7 @@ import { getDataSucceeded } from './actions';
 
 function App(props) {
   const getDataRef = useRef();
+  const [state, setState] = useState({ hasAdmin: false, isLoading: true });
   getDataRef.current = props.getDataSucceeded;
 
   useEffect(() => {
@@ -40,6 +40,7 @@ function App(props) {
         const { data } = await request('/admin/init', { method: 'GET' });
 
         getDataRef.current(hasAdmin, data);
+        setState({ hasAdmin, isLoading: false });
       } catch (err) {
         strapi.notification.error('app.containers.App.notification.error.init');
       }
@@ -48,36 +49,26 @@ function App(props) {
     getData();
   }, [getDataRef]);
 
+  if (state.isLoading) {
+    return <LoadingIndicatorPage />;
+  }
+
   return (
     <div>
       <NotificationProvider />
-      <AppLoader>
-        {({ hasAdminUser, shouldLoad }) => {
-          if (shouldLoad) {
-            return <LoadingIndicatorPage />;
-          }
-
-          return (
-            <div style={{ display: 'block' }}>
-              <Switch>
-                <Route
-                  path="/auth/:authType"
-                  render={routerProps => (
-                    <AuthPage
-                      {...props}
-                      {...routerProps}
-                      hasAdminUser={hasAdminUser}
-                    />
-                  )}
-                  exact
-                />
-                <PrivateRoute {...props} path="/" component={Admin} />
-                <Route path="" component={NotFoundPage} />
-              </Switch>
-            </div>
-          );
-        }}
-      </AppLoader>
+      <div style={{ display: 'block' }}>
+        <Switch>
+          <Route
+            path="/auth/:authType"
+            render={routerProps => (
+              <AuthPage {...routerProps} hasAdminUser={state.hasAdmin} />
+            )}
+            exact
+          />
+          <PrivateRoute path="/" component={Admin} />
+          <Route path="" component={NotFoundPage} />
+        </Switch>
+      </div>
     </div>
   );
 }
