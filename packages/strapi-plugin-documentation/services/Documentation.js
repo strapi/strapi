@@ -1563,6 +1563,7 @@ module.exports = {
       case 'text':
       case 'enumeration':
       case 'date':
+      case 'richtext':
         return 'string';
       case 'float':
       case 'decimal':
