@@ -270,9 +270,11 @@ module.exports = {
                         : null
                     );
 
+                    const reverseAssoc = model.associations.find(assoc => assoc.alias === obj.field);
+
                     // Remove existing relationship because only one file
                     // can be related to this field.
-                    if (association.nature === 'manyMorphToOne') {
+                    if (reverseAssoc && reverseAssoc.nature === 'oneToManyMorph') {
                       relationUpdates.push(
                         module.exports.removeRelationMorph
                           .call(
