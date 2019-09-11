@@ -39,7 +39,7 @@ MenuSection.propTypes = {
   currentEnvironment: PropTypes.string,
   items: PropTypes.array.isRequired,
   name: PropTypes.string.isRequired,
-  withEnv: false,
+  withEnv: PropTypes.bool,
 };
 
 export default MenuSection;
