@@ -18,6 +18,8 @@ export { default as ErrorBoundary } from './components/ErrorBoundary';
 export { default as ExtendComponent } from './components/ExtendComponent';
 export { default as GlobalPagination } from './components/GlobalPagination';
 export { default as HeaderNav } from './components/HeaderNav';
+export { default as HeaderModal } from './components/HeaderModal';
+export { default as HeaderModalTitle } from './components/HeaderModalTitle';
 export { default as IcoContainer } from './components/IcoContainer';
 export { default as InputAddon } from './components/InputAddon';
 
@@ -87,6 +89,10 @@ export {
   default as LoadingIndicatorPage,
 } from './components/LoadingIndicatorPage';
 
+export { default as Modal } from './components/Modal';
+export { default as ModalBody } from './components/BodyModal';
+export { default as ModalFooter } from './components/FooterModal';
+export { default as ModalForm } from './components/FormModal';
 export { default as NotFound } from './components/NotFound';
 export { default as OverlayBlocker } from './components/OverlayBlocker';
 export { default as PageFooter } from './components/PageFooter';

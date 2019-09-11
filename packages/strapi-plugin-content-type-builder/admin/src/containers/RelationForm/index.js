@@ -9,19 +9,23 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, isEmpty } from 'lodash';
 
-import { ButtonModal, InputsIndex as Input } from 'strapi-helper-plugin';
+import {
+  ButtonModal,
+  HeaderModal,
+  HeaderModalTitle,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalForm,
+  InputsIndex as Input,
+} from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
-import BodyModal from '../../components/BodyModal';
 import ButtonModalPrimary from '../../components/ButtonModalPrimary';
-import FooterModal from '../../components/FooterModal';
-import FormModal from '../../components/FormModal';
-import HeaderModal from '../../components/HeaderModal';
+
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
-import HeaderModalTitle from '../../components/HeaderModalTitle';
 import HeaderNavLink from '../../components/HeaderNavLink';
-import WrapperModal from '../../components/WrapperModal';
 
 import NaturePicker from './NaturePicker';
 import RelationWrapper from './RelationWrapper';
@@ -287,7 +291,7 @@ class RelationForm extends React.Component {
         : this.renderAdvancedSettings();
 
     return (
-      <WrapperModal
+      <Modal
         isOpen={isOpen}
         onClosed={this.handleOnClosed}
         onOpened={this.handleOnOpened}
@@ -323,10 +327,10 @@ class RelationForm extends React.Component {
           </section>
         </HeaderModal>
         <form onSubmit={this.handleSubmitAndContinue}>
-          <FormModal>
-            <BodyModal>{showForm && content}</BodyModal>
-          </FormModal>
-          <FooterModal>
+          <ModalForm>
+            <ModalBody>{showForm && content}</ModalBody>
+          </ModalForm>
+          <ModalFooter>
             <section>
               <ButtonModalPrimary
                 message={`${pluginId}.form.button.add.field`}
@@ -346,9 +350,9 @@ class RelationForm extends React.Component {
                 onClick={this.handleSubmit}
               />
             </section>
-          </FooterModal>
+          </ModalFooter>
         </form>
-      </WrapperModal>
+      </Modal>
     );
   }
 }

@@ -9,17 +9,20 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, isEmpty, upperFirst } from 'lodash';
 
-import { ButtonModal, InputsIndex as Input } from 'strapi-helper-plugin';
+import {
+  ButtonModal,
+  HeaderModal,
+  HeaderModalTitle,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  InputsIndex as Input,
+} from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
-import BodyModal from '../../components/BodyModal';
-import FooterModal from '../../components/FooterModal';
-import HeaderModal from '../../components/HeaderModal';
-import HeaderModalTitle from '../../components/HeaderModalTitle';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
 import HeaderNavLink from '../../components/HeaderNavLink';
-import WrapperModal from '../../components/WrapperModal';
 
 import Icon from '../../assets/icons/icon_type_ct.png';
 import IconGroup from '../../assets/icons/icon_type_groups.png';
@@ -226,7 +229,7 @@ class ModelForm extends React.Component {
     const currentForm = get(forms, activeTab, forms.base);
 
     return (
-      <WrapperModal
+      <Modal
         isOpen={isOpen}
         onOpened={this.handleOnOpened}
         onClosed={this.handleOnClosed}
@@ -261,8 +264,8 @@ class ModelForm extends React.Component {
           </section>
         </HeaderModal>
         <form onSubmit={this.handleSubmit}>
-          <BodyModal>{currentForm.items.map(this.renderInput)}</BodyModal>
-          <FooterModal>
+          <ModalBody>{currentForm.items.map(this.renderInput)}</ModalBody>
+          <ModalFooter>
             <section>
               <ButtonModal
                 isSecondary
@@ -274,9 +277,9 @@ class ModelForm extends React.Component {
                 type="submit"
               />
             </section>
-          </FooterModal>
+          </ModalFooter>
         </form>
-      </WrapperModal>
+      </Modal>
     );
   }
 }

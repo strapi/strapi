@@ -4,14 +4,13 @@ import { FormattedMessage } from 'react-intl';
 import mountWithIntl from 'testUtils/mountWithIntl';
 import formatMessagesWithPluginId from 'testUtils/formatMessages';
 
-import { InputsIndex as Input } from 'strapi-helper-plugin';
+import { HeaderModalTitle, InputsIndex as Input } from 'strapi-helper-plugin';
 // This part is needed if you need to test the lifecycle of a container that contains FormattedMessages
 
 import pluginId from '../../../pluginId';
 import pluginTradsEn from '../../../translations/en.json';
 
 import CustomCheckbox from '../../../components/CustomCheckbox';
-import HeaderModalTitle from '../../../components/HeaderModalTitle';
 import AttributeForm from '../index';
 
 const messages = formatMessagesWithPluginId(pluginId, pluginTradsEn);

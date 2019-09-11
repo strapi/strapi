@@ -6,7 +6,8 @@
 
 import styled from 'styled-components';
 
-import { colors, sizes } from 'strapi-helper-plugin';
+import colors from '../../assets/styles/colors';
+import sizes from '../../assets/styles/sizes';
 
 const FooterModal = styled.div`
   padding-top: ${sizes.margin * 0.9}px;
