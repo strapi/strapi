@@ -1,16 +1,1 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="35px" height="35px" viewBox="0 0 35 35" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 57.1 (83088) - https://sketch.com -->
-    <title>na@2x</title>
-    <desc>Created with Sketch.</desc>
-    <g id="Page-2" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="4.4---Display-medias-preview-Hover" transform="translate(-1004.000000, -302.000000)">
-            <g id="na" transform="translate(1004.000000, 302.000000)">
-                <rect id="Rectangle-4" fill="#FAFAFB" x="0" y="0" width="35" height="35" rx="17.5"></rect>
-                <text id="N/A" font-family="Lato-Medium, Lato" font-size="12" font-weight="400" fill="#838383">
-                    <tspan x="6" y="22">N/A</tspan>
-                </text>
-            </g>
-        </g>
-    </g>
-</svg>
+<svg width="35" height="35" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><rect fill="#FAFAFB" width="35" height="35" rx="17.5"/><text font-family="Lato-Medium, Lato" font-size="12" font-weight="400" fill="#838383"><tspan x="6" y="22">N/A</tspan></text></g></svg>

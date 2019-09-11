@@ -13,8 +13,9 @@ import {
 } from './StyledMediaPreviewList';
 
 function MediaPreviewList({ hoverable, files }) {
-  const baseUrl = strapi.backendURL;
   const getFileType = fileName => fileName.split('.').slice(-1)[0];
+  const getSrc = fileURL =>
+    fileURL.startsWith('/') ? `${strapi.backendURL}${fileURL}` : fileURL;
 
   const renderImage = image => {
     const { name, size, url } = image;
@@ -26,9 +27,9 @@ function MediaPreviewList({ hoverable, files }) {
     return (
       <MediaPreviewImage className={hoverable ? 'hoverable' : ''}>
         <div>
-          <img src={`${baseUrl}${url}`} alt={`${name}`} />
+          <img src={getSrc(url)} alt={`${name}`} />
         </div>
-        <img src={`${baseUrl}${url}`} alt={`${name}`} />
+        <img src={getSrc(url)} alt={`${name}`} />
       </MediaPreviewImage>
     );
   };

@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { withRouter } from 'react-router';
 import PropTypes from 'prop-types';
 import { get, isEmpty, isNull, isObject, toLower, toString } from 'lodash';
@@ -64,9 +64,14 @@ function Row({ goTo, isBulkable, row, headers }) {
     schema,
   } = useListView();
 
-  const renderMediaList = files => {
-    return <MediaPreviewList files={files}></MediaPreviewList>;
-  };
+  const memoizedDisplayedValue = useCallback(
+    name => {
+      const type = get(schema, ['attributes', name, 'type'], 'string');
+
+      return getDisplayedValue(type, row[name], name);
+    },
+    [row, schema]
+  );
 
   return (
     <>
@@ -87,22 +92,12 @@ function Row({ goTo, isBulkable, row, headers }) {
           <td key={header.name}>
             {get(schema, ['attributes', header.name, 'type']) !== 'media' ? (
               <Truncate>
-                <Truncated>
-                  {getDisplayedValue(
-                    get(schema, ['attributes', header.name, 'type'], 'string'),
-                    row[header.name],
-                    header.name
-                  )}
-                </Truncated>
+                <Truncated>{memoizedDisplayedValue(header.name)}</Truncated>
               </Truncate>
             ) : (
-              renderMediaList(
-                getDisplayedValue(
-                  get(schema, ['attributes', header.name, 'type'], 'string'),
-                  row[header.name],
-                  header.name
-                )
-              )
+              <MediaPreviewList
+                files={memoizedDisplayedValue(header.name)}
+              ></MediaPreviewList>
             )}
           </td>
         );
