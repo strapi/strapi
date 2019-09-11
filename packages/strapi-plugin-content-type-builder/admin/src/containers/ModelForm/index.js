@@ -269,13 +269,10 @@ class ModelForm extends React.Component {
             <section>
               <ButtonModal
                 isSecondary
-                message={`${pluginId}.form.button.cancel`}
+                message="components.popUpWarning.button.cancel"
                 onClick={this.handleCancel}
               />
-              <ButtonModal
-                message={`${pluginId}.form.button.done`}
-                type="submit"
-              />
+              <ButtonModal message="form.button.done" type="submit" />
             </section>
           </ModalFooter>
         </form>

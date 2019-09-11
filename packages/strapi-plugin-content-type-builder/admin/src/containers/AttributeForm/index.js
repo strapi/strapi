@@ -372,12 +372,12 @@ class AttributeForm extends React.Component {
             </section>
             <section>
               <ButtonModal
-                message={`${pluginId}.form.button.cancel`}
+                message="components.popUpWarning.button.cancel"
                 onClick={this.handleCancel}
                 isSecondary
               />
               <ButtonModal
-                message={`${pluginId}.form.button.done`}
+                message="form.button.done"
                 type="button"
                 onClick={this.handleSubmit}
               />

@@ -341,11 +341,11 @@ class RelationForm extends React.Component {
             <section>
               <ButtonModal
                 isSecondary
-                message={`${pluginId}.form.button.cancel`}
+                message="components.popUpWarning.button.cancel"
                 onClick={this.handleCancel}
               />
               <ButtonModal
-                message={`${pluginId}.form.button.done`}
+                message="form.button.done"
                 type="button"
                 onClick={this.handleSubmit}
               />

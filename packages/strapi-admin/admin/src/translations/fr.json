@@ -212,5 +212,6 @@
   "Auth.link.forgot-password": "Mot de passe oublié ?",
   "Auth.link.ready": "Prêt à vous connecter ?",
   "app.containers.App.notification.error.init": "Une erreur est survenue en requêtant l'API",
-  "components.Input.error.password.noMatch": "Le mot de passe ne correspond pas"
+  "components.Input.error.password.noMatch": "Le mot de passe ne correspond pas",
+  "form.button.done": "Terminer"
 }
