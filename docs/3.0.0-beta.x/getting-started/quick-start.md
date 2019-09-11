@@ -3,7 +3,7 @@
 Get ready to get Strapi up and running in **less than 5 minutes** 🚀.
 
 <div class="video-container">
-<iframe width="853" height="480"  src="https://www.youtube.com/embed/_qlLobVjd9k" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="853" height="480" src="https://www.youtube.com/embed/4m1wKzzfs-M" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>
 
 _For a step-by-step guide, please take a look at the [detailed tutorial](quick-start-tutorial.html)._
