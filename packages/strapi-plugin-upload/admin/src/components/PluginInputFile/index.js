@@ -7,9 +7,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import cn from 'classnames';
-
-import styles from './styles.scss';
+import Label from './Label';
+import P from './P';
 
 /* eslint-disable react/no-string-refs */
 /* eslint-disable jsx-a11y/label-has-for */
@@ -37,17 +36,14 @@ class PluginInputFile extends React.PureComponent {
     const { isDraging } = this.state;
     const link = (
       <FormattedMessage id="upload.PluginInputFile.link">
-        {message => <span className={styles.underline}>{message}</span>}
+        {message => <span className="underline">{message}</span>}
       </FormattedMessage>
     );
 
     return (
-      <label
-        className={cn(
-          styles.pluginInputFile,
-          isDraging && styles.pluginInputFileHover,
-          showLoader && styles.quadrat
-        )}
+      <Label
+        showLoader={showLoader}
+        isDraging={isDraging}
         onDragEnter={this.handleDragEnter}
         onDragOver={e => {
           e.preventDefault();
@@ -56,7 +52,7 @@ class PluginInputFile extends React.PureComponent {
         onDrop={this.handleDrop}
       >
         <svg
-          className={styles.icon}
+          className="icon"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 104.40317 83.13328"
         >
@@ -115,7 +111,7 @@ class PluginInputFile extends React.PureComponent {
             />
           </g>
         </svg>
-        <p className={styles.textWrapper}>
+        <P>
           {!showLoader && (
             <FormattedMessage
               id="upload.PluginInputFile.text"
@@ -125,13 +121,10 @@ class PluginInputFile extends React.PureComponent {
           {showLoader && (
             <FormattedMessage id="upload.PluginInputFile.loading" />
           )}
-        </p>
-        <div
-          onDragLeave={this.handleDragLeave}
-          className={cn(isDraging && styles.isDraging)}
-        />
+        </P>
+        <div onDragLeave={this.handleDragLeave} className="isDraging" />
         <input multiple name={name} onChange={this.handleChange} type="file" />
-      </label>
+      </Label>
     );
   }
 }

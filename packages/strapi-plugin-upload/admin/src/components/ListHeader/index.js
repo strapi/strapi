@@ -20,21 +20,24 @@ function ListHeader({ changeSort, sort }) {
     '',
     '',
   ];
+  console.log(sort);
 
   const handleChangeSort = name => {
-    if (sort === name) {
-      changeSort(`-${name}`);
-    } else if (sort === `-${name}`) {
-      changeSort('hash');
+    if (sort === `${name}:ASC`) {
+      changeSort(`${name}:DESC`);
+    } else if (sort === `${name}:DESC`) {
+      changeSort('hash:ASC');
     } else if (name === 'updated' || name === 'related') {
-      changeSort('hash');
+      changeSort('hash:ASC');
     } else {
-      changeSort(name);
+      changeSort(`${name}:ASC`);
     }
   };
 
   const shouldDisplaySort = title =>
-    (sort === title && 'icon') || (sort === `-${title}` && 'iconDesc') || '';
+    (sort === `${title}:ASC` && 'icon') ||
+    (sort === `${title}:DESC` && 'iconDesc') ||
+    '';
 
   return (
     <StyledLi>
