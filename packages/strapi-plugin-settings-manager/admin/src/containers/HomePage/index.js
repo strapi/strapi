@@ -587,6 +587,7 @@ export class HomePage extends React.Component {
   toggle = () => this.setState({ modal: !this.state.modal });
 
   render() {
+    console.log(this.props);
     return (
       <div className="container-fluid">
         <div className="row">
