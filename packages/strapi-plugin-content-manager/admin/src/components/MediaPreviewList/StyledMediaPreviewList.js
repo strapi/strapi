@@ -64,6 +64,7 @@ const MediaPreviewFile = styled(MediaPreviewItem)`
     color: #333740;
     text-align: center;
     line-height: ${sizes.small};
+    border: 1px solid white;
     span {
       display: block;
       padding: 0 3px;
