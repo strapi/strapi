@@ -9,14 +9,12 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, isEmpty } from 'lodash';
 
-import { InputsIndex as Input } from 'strapi-helper-plugin';
+import { ButtonModal, InputsIndex as Input } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
 import BodyModal from '../../components/BodyModal';
 import ButtonModalPrimary from '../../components/ButtonModalPrimary';
-import ButtonModalSecondary from '../../components/ButtonModalSecondary';
-import ButtonModalSuccess from '../../components/ButtonModalSuccess';
 import CustomCheckbox from '../../components/CustomCheckbox';
 import FooterModal from '../../components/FooterModal';
 import FormModal from '../../components/FormModal';
@@ -370,11 +368,12 @@ class AttributeForm extends React.Component {
               />
             </section>
             <section>
-              <ButtonModalSecondary
+              <ButtonModal
                 message={`${pluginId}.form.button.cancel`}
                 onClick={this.handleCancel}
+                isSecondary
               />
-              <ButtonModalSuccess
+              <ButtonModal
                 message={`${pluginId}.form.button.done`}
                 type="button"
                 onClick={this.handleSubmit}

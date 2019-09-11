@@ -2,8 +2,7 @@ import styled from 'styled-components';
 import { Button } from 'reactstrap';
 
 import img from '../../assets/icons/icon_check.png';
-
-import { colors } from 'strapi-helper-plugin';
+import colors from '../../assets/styles/colors';
 
 const StyledButtonModalSuccess = styled(Button)`
   position: relative;

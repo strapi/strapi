@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { Button } from 'reactstrap';
 
-const StyledButtonModalSecondary = styled(Button)`
+const StyledButtonSecondary = styled(Button)`
   font-family: Lato;
   color: #f64d0a;
   border: 0.1rem solid #f64d0a;
@@ -22,4 +22,4 @@ const StyledButtonModalSecondary = styled(Button)`
   border-radius: 3px;
 `;
 
-export default StyledButtonModalSecondary;
+export default StyledButtonSecondary;

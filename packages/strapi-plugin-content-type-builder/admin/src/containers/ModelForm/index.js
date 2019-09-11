@@ -9,13 +9,11 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, isEmpty, upperFirst } from 'lodash';
 
-import { InputsIndex as Input } from 'strapi-helper-plugin';
+import { ButtonModal, InputsIndex as Input } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
 import BodyModal from '../../components/BodyModal';
-import ButtonModalSecondary from '../../components/ButtonModalSecondary';
-import ButtonModalSuccess from '../../components/ButtonModalSuccess';
 import FooterModal from '../../components/FooterModal';
 import HeaderModal from '../../components/HeaderModal';
 import HeaderModalTitle from '../../components/HeaderModalTitle';
@@ -266,11 +264,12 @@ class ModelForm extends React.Component {
           <BodyModal>{currentForm.items.map(this.renderInput)}</BodyModal>
           <FooterModal>
             <section>
-              <ButtonModalSecondary
+              <ButtonModal
+                isSecondary
                 message={`${pluginId}.form.button.cancel`}
                 onClick={this.handleCancel}
               />
-              <ButtonModalSuccess
+              <ButtonModal
                 message={`${pluginId}.form.button.done`}
                 type="submit"
               />
