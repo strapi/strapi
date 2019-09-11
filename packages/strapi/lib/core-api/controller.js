@@ -1,11 +1,21 @@
 'use strict';
 
+const parseMultipartData = require('./utils/parse-multipart');
+
+const proto = {
+  parseMultipartData,
+};
+
 /**
  * default bookshelf controller
  *
  */
 module.exports = ({ service }) => {
-  return {
+  return Object.assign(Object.create(proto), {
+    /**
+     * expose some utils so the end users can use them
+     */
+
     /**
      * Retrieve records.
      *
@@ -49,6 +59,11 @@ module.exports = ({ service }) => {
      */
 
     create(ctx) {
+      if (ctx.is('multipart')) {
+        const { data, files } = this.parseMultipartData(ctx);
+        return service.create(data, { files });
+      }
+
       return service.create(ctx.request.body);
     },
 
@@ -59,6 +74,11 @@ module.exports = ({ service }) => {
      */
 
     update(ctx) {
+      if (ctx.is('multipart')) {
+        const { data, files } = this.parseMultipartData(ctx);
+        return service.update(ctx.params, data, { files });
+      }
+
       return service.update(ctx.params, ctx.request.body);
     },
 
@@ -71,5 +91,5 @@ module.exports = ({ service }) => {
     delete(ctx) {
       return service.delete(ctx.params);
     },
-  };
+  });
 };

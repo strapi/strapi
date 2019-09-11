@@ -13,11 +13,7 @@ module.exports = strapi => {
 
     const endpoint = `${value.method} ${value.path}`;
 
-    const { policies, action, validate } = routerChecker(
-      value,
-      endpoint,
-      plugin
-    );
+    const { policies, action } = routerChecker(value, endpoint, plugin);
 
     if (_.isUndefined(action) || !_.isFunction(action)) {
       return strapi.log.warn(
@@ -25,16 +21,6 @@ module.exports = strapi => {
       );
     }
 
-    router.route(
-      _.omitBy(
-        {
-          method: value.method,
-          path: value.path,
-          handler: _.remove([compose(policies), action], o => _.isFunction(o)),
-          validate,
-        },
-        _.isEmpty
-      )
-    );
+    router[value.method.toLowerCase()](value.path, compose(policies), action);
   };
 };

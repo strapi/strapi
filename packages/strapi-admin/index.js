@@ -10,6 +10,8 @@ async function createPluginsJs(plugins, dest) {
   const content = `
     const injectReducer = require('./utils/injectReducer').default;
     const injectSaga = require('./utils/injectSaga').default;
+    const useInjectReducer = require('./utils/injectReducer').useInjectReducer;
+    const useInjectSaga = require('./utils/injectSaga').useInjectSaga;
     const { languages } = require('./i18n');
 
     window.strapi = Object.assign(window.strapi || {}, {
@@ -23,6 +25,8 @@ async function createPluginsJs(plugins, dest) {
       'en',
       injectReducer,
       injectSaga,
+      useInjectReducer,
+      useInjectSaga,
     });
 
     module.exports = {

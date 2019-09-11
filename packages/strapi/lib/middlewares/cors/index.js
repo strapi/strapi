@@ -3,59 +3,67 @@
 /**
  * Module dependencies
  */
+const cors = require('@koa/cors');
 
-/**
- * CORS hook
- */
-
-const defaults = require('./defaults.json');
-const kcors = require('kcors');
+const defaults = {
+  origin: '*',
+  maxAge: 31536000,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
+  headers: [
+    'Content-Type',
+    'Authorization',
+    'Origin',
+    'Accept',
+    'X-Forwarded-Host',
+  ],
+  keepHeadersOnError: false,
+};
 
 module.exports = strapi => {
   return {
     /**
      * Initialize the hook
      */
-
     initialize() {
-      strapi.app.use(async (ctx, next) => {
-        if (ctx.request.admin) {
-          return kcors({
-            origin: '*',
-            exposeHeaders: defaults.cors.expose,
-            maxAge: defaults.cors.maxAge,
-            credentials: defaults.cors.credentials,
-            allowMethods: defaults.cors.methods,
-            allowHeaders: defaults.cors.headers,
-            keepHeadersOnError: defaults.cors.keepHeadersOnError,
-          })(ctx, next);
-        } else if (strapi.config.currentEnvironment.security.cors.enabled) {
-          return kcors({
-            origin: function(ctx) {
-              const whitelist = strapi.config.middleware.settings.cors.origin.split(
-                /\s*,\s*/
-              );
-              const requestOrigin = ctx.accept.headers.origin;
-              if (whitelist.includes('*')) {
-                return '*';
-              }
-              if (!whitelist.includes(requestOrigin)) {
-                return ctx.throw(`${requestOrigin} is not a valid origin`);
-              }
-              return requestOrigin;
-            },
-            exposeHeaders: strapi.config.middleware.settings.cors.expose,
-            maxAge: strapi.config.middleware.settings.cors.maxAge,
-            credentials: strapi.config.middleware.settings.cors.credentials,
-            allowMethods: strapi.config.middleware.settings.cors.methods,
-            allowHeaders: strapi.config.middleware.settings.cors.headers,
-            keepHeadersOnError:
-              strapi.config.middleware.settings.cors.keepHeadersOnError,
-          })(ctx, next);
-        }
+      if (strapi.config.currentEnvironment.security.cors.enabled !== true)
+        return;
 
-        await next();
-      });
+      const {
+        origin,
+        expose,
+        maxAge,
+        credentials,
+        methods,
+        headers,
+        keepHeadersOnError,
+      } = Object.assign({}, defaults, strapi.config.middleware.settings.cors);
+
+      strapi.app.use(
+        cors({
+          origin: function(ctx) {
+            const whitelist = Array.isArray(origin)
+              ? origin
+              : origin.split(/\s*,\s*/);
+
+            const requestOrigin = ctx.accept.headers.origin;
+            if (whitelist.includes('*')) {
+              return '*';
+            }
+
+            if (!whitelist.includes(requestOrigin)) {
+              return ctx.throw(`${requestOrigin} is not a valid origin`);
+            }
+            return requestOrigin;
+          },
+          exposeHeaders: expose,
+          maxAge,
+          credentials,
+          allowMethods: methods,
+          allowHeaders: headers,
+          keepHeadersOnError,
+        })
+      );
     },
   };
 };

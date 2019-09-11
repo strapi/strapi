@@ -7,21 +7,24 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { get, isEmpty } from 'lodash';
+import { get, isEmpty, upperFirst } from 'lodash';
 
 import { InputsIndex as Input } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
 import BodyModal from '../../components/BodyModal';
-import ButtonModalPrimary from '../../components/ButtonModalPrimary';
 import ButtonModalSecondary from '../../components/ButtonModalSecondary';
+import ButtonModalSuccess from '../../components/ButtonModalSuccess';
 import FooterModal from '../../components/FooterModal';
 import HeaderModal from '../../components/HeaderModal';
 import HeaderModalTitle from '../../components/HeaderModalTitle';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
 import HeaderNavLink from '../../components/HeaderNavLink';
 import WrapperModal from '../../components/WrapperModal';
+
+import Icon from '../../assets/icons/icon_type_ct.png';
+import IconGroup from '../../assets/icons/icon_type_groups.png';
 
 import forms from './forms.json';
 
@@ -34,20 +37,20 @@ class ModelForm extends React.Component {
   handleCancel = () => {
     const {
       actionType,
-      cancelNewContentType,
-      isUpdatingTemporaryContentType,
-      modelToEditName,
+      cancelNewFeature,
+      isUpdatingTemporaryFeature,
+      featureToEditName,
       push,
-      resetExistingContentTypeMainInfos,
-      resetNewContentTypeMainInfos,
+      resetExistingFeatureMainInfos,
+      resetNewFeatureMainInfos,
     } = this.props;
 
     if (actionType === 'create') {
-      cancelNewContentType();
-    } else if (isUpdatingTemporaryContentType) {
-      resetNewContentTypeMainInfos();
+      cancelNewFeature();
+    } else if (isUpdatingTemporaryFeature) {
+      resetNewFeatureMainInfos();
     } else {
-      resetExistingContentTypeMainInfos(modelToEditName);
+      resetExistingFeatureMainInfos(featureToEditName);
     }
 
     push({ search: '' });
@@ -55,15 +58,16 @@ class ModelForm extends React.Component {
 
   handleGoTo = to => {
     const { emitEvent } = this.context;
-    const { actionType, modelToEditName, push } = this.props;
-    const model = actionType === 'edit' ? `&modelName=${modelToEditName}` : '';
+    const { actionType, featureType, featureToEditName, push } = this.props;
+    const model =
+      actionType === 'edit' ? `&${featureType}Name=${featureToEditName}` : '';
 
     if (to === 'advanced') {
       emitEvent('didSelectContentTypeSettings');
     }
 
     push({
-      search: `modalType=model&settingType=${to}&actionType=${actionType}${model}`,
+      search: `modalType=${featureType}&settingType=${to}&actionType=${actionType}${model}`,
     });
   };
 
@@ -75,23 +79,30 @@ class ModelForm extends React.Component {
     e.preventDefault();
 
     const {
-      currentData,
-      isUpdatingTemporaryContentType,
-      modifiedData,
+      allTakenNames,
       actionType,
-      createTempContentType,
-      modelToEditName,
+      createTempFeature,
+      featureType,
+      isUpdatingTemporaryFeature,
+      featureToEditName,
+      modifiedData,
       push,
-      updateTempContentType,
+      updateTempFeature,
     } = this.props;
-    const alreadyTakenContentTypeNames = Object.keys(currentData).filter(
-      name => name !== modelToEditName
+    const alreadyTakenContentTypeNames = allTakenNames.filter(
+      name => name !== featureToEditName
     );
     let formErrors = {};
 
     if (alreadyTakenContentTypeNames.includes(modifiedData.name)) {
       formErrors = {
         name: [{ id: `${pluginId}.error.contentTypeName.taken` }],
+      };
+    }
+
+    if (!new RegExp('^[A-Za-z][_0-9A-Za-z]*$').test(modifiedData.name)) {
+      formErrors = {
+        name: [{ id: `${pluginId}.error.validation.regex.name` }],
       };
     }
 
@@ -103,17 +114,17 @@ class ModelForm extends React.Component {
       formErrors,
       didCheckErrors: !prevState.didCheckErrors,
     }));
-    const pathname = `/plugins/${pluginId}/models/${modifiedData.name}`;
+    const pathname = `/plugins/${pluginId}/${featureType}s/${modifiedData.name}`;
 
     if (isEmpty(formErrors)) {
       if (actionType === 'create') {
-        createTempContentType();
+        createTempFeature();
         push({
           pathname,
           search: 'modalType=chooseAttributes',
         });
-      } else if (isUpdatingTemporaryContentType) {
-        updateTempContentType();
+      } else if (isUpdatingTemporaryFeature) {
+        updateTempFeature();
         push({ pathname, search: '' });
       } else {
         push({ search: '' });
@@ -121,15 +132,22 @@ class ModelForm extends React.Component {
     }
   };
 
+  getIcon = () => {
+    const { featureType } = this.props;
+
+    return featureType === 'model' ? Icon : IconGroup;
+  };
+
   renderInput = input => {
     const {
       actionType,
       connections,
-      isUpdatingTemporaryContentType,
-      modelToEditName,
+      isUpdatingTemporaryFeature,
+      featureToEditName,
+      featureType,
       modifiedData,
-      onChangeExistingContentTypeMainInfos,
-      onChangeNewContentTypeMainInfos,
+      onChangeExistingFeatureMainInfos,
+      onChangeNewFeatureMainInfos,
     } = this.props;
     const { didCheckErrors, formErrors, isVisible } = this.state;
 
@@ -155,19 +173,20 @@ class ModelForm extends React.Component {
               )}
             </FormattedMessage>
           ),
+          featureType: <FormattedMessage id={`${pluginId}.${featureType}`} />,
         },
       };
     }
 
     const errors = get(formErrors, input.name, []);
     const onChange =
-      actionType === 'create' || isUpdatingTemporaryContentType
-        ? onChangeNewContentTypeMainInfos
-        : onChangeExistingContentTypeMainInfos;
+      actionType === 'create' || isUpdatingTemporaryFeature
+        ? onChangeNewFeatureMainInfos
+        : onChangeExistingFeatureMainInfos;
     const name =
-      actionType === 'create' || isUpdatingTemporaryContentType
+      actionType === 'create' || isUpdatingTemporaryFeature
         ? input.name
-        : `${modelToEditName}.${input.name}`;
+        : `${featureToEditName}.${input.name}`;
 
     return (
       <Input
@@ -183,7 +202,7 @@ class ModelForm extends React.Component {
     );
   };
 
-  renderNavLinks = (link, index) => {
+  renderNavLink = (link, index) => {
     const { activeTab } = this.props;
 
     return (
@@ -198,7 +217,14 @@ class ModelForm extends React.Component {
   };
 
   render() {
-    const { actionType, activeTab, isOpen } = this.props;
+    const {
+      actionType,
+      activeTab,
+      featureToEditName,
+      featureType,
+      modifiedData,
+      isOpen,
+    } = this.props;
     const currentForm = get(forms, activeTab, forms.base);
 
     return (
@@ -209,25 +235,46 @@ class ModelForm extends React.Component {
         onToggle={this.handleCancel}
       >
         <HeaderModal>
-          <HeaderModalTitle
-            title={`${pluginId}.popUpForm.${actionType ||
-              'create'}.contentType.header.title`}
-          />
-          <HeaderModalNavContainer>
-            {NAVLINKS.map(this.renderNavLinks)}
-          </HeaderModalNavContainer>
+          <section>
+            <HeaderModalTitle>
+              <img src={this.getIcon()} alt="ct" />
+              <FormattedMessage
+                id={`${pluginId}.popUpForm.${actionType ||
+                  'create'}.${featureType}.header.title`}
+              />
+            </HeaderModalTitle>
+          </section>
+          <section>
+            <HeaderModalTitle>
+              <FormattedMessage
+                id={`${pluginId}.popUpForm.${actionType ||
+                  'create'}.${featureType}.header.subTitle`}
+                values={{
+                  name: upperFirst(modifiedData.name || featureToEditName),
+                }}
+              />
+            </HeaderModalTitle>
+            <div className="settings-tabs">
+              <HeaderModalNavContainer>
+                {NAVLINKS.map(this.renderNavLink)}
+              </HeaderModalNavContainer>
+            </div>
+            <hr />
+          </section>
         </HeaderModal>
         <form onSubmit={this.handleSubmit}>
           <BodyModal>{currentForm.items.map(this.renderInput)}</BodyModal>
           <FooterModal>
-            <ButtonModalSecondary
-              message={`${pluginId}.form.button.cancel`}
-              onClick={this.handleCancel}
-            />
-            <ButtonModalPrimary
-              message={`${pluginId}.form.button.save`}
-              type="submit"
-            />
+            <section>
+              <ButtonModalSecondary
+                message={`${pluginId}.form.button.cancel`}
+                onClick={this.handleCancel}
+              />
+              <ButtonModalSuccess
+                message={`${pluginId}.form.button.done`}
+                type="submit"
+              />
+            </section>
           </FooterModal>
         </form>
       </WrapperModal>
@@ -242,41 +289,42 @@ ModelForm.contextTypes = {
 ModelForm.defaultProps = {
   actionType: 'create',
   activeTab: 'base',
-  cancelNewContentType: () => {},
+  cancelNewFeature: () => {},
   connections: ['default'],
-  createTempContentType: () => {},
-  currentData: {},
+  createTempFeature: () => {},
   isOpen: false,
-  isUpdatingTemporaryContentType: false,
-  modelToEditName: '',
+  isUpdatingTemporaryFeature: false,
+  featureToEditName: '',
+  featureType: 'model',
   modifiedData: {},
-  onChangeExistingContentTypeMainInfos: () => {},
+  onChangeExistingFeatureMainInfos: () => {},
   onSubmit: e => {
     e.preventDefault();
   },
-  resetExistingContentTypeMainInfos: () => {},
-  resetNewContentTypeMainInfos: () => {},
-  updateTempContentType: () => {},
+  resetExistingFeatureMainInfos: () => {},
+  resetNewFeatureMainInfos: () => {},
+  updateTempFeature: () => {},
 };
 
 ModelForm.propTypes = {
   actionType: PropTypes.string,
   activeTab: PropTypes.string,
-  cancelNewContentType: PropTypes.func,
+  allTakenNames: PropTypes.arrayOf(PropTypes.string).isRequired,
+  cancelNewFeature: PropTypes.func,
   connections: PropTypes.arrayOf(PropTypes.string),
-  createTempContentType: PropTypes.func,
-  currentData: PropTypes.object,
+  createTempFeature: PropTypes.func,
   isOpen: PropTypes.bool,
-  isUpdatingTemporaryContentType: PropTypes.bool,
-  modelToEditName: PropTypes.string,
+  isUpdatingTemporaryFeature: PropTypes.bool,
+  featureToEditName: PropTypes.string,
+  featureType: PropTypes.string,
   modifiedData: PropTypes.object,
-  onChangeExistingContentTypeMainInfos: PropTypes.func,
-  onChangeNewContentTypeMainInfos: PropTypes.func.isRequired,
+  onChangeExistingFeatureMainInfos: PropTypes.func,
+  onChangeNewFeatureMainInfos: PropTypes.func.isRequired,
   onSubmit: PropTypes.func,
   push: PropTypes.func.isRequired,
-  resetExistingContentTypeMainInfos: PropTypes.func,
-  resetNewContentTypeMainInfos: PropTypes.func,
-  updateTempContentType: PropTypes.func,
+  resetExistingFeatureMainInfos: PropTypes.func,
+  resetNewFeatureMainInfos: PropTypes.func,
+  updateTempFeature: PropTypes.func,
 };
 
 export default ModelForm;

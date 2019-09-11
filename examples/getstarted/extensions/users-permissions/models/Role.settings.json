@@ -1,0 +1,40 @@
+{
+  "collectionName": "users-permissions_role",
+  "connection": "default",
+  "info": {
+    "name": "role",
+    "description": ""
+  },
+  "options": {
+    "timestamps": false
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "minLength": 3,
+      "required": true,
+      "configurable": false
+    },
+    "description": {
+      "type": "string",
+      "configurable": false
+    },
+    "type": {
+      "type": "string",
+      "unique": true,
+      "configurable": false
+    },
+    "permissions": {
+      "collection": "permission",
+      "via": "role",
+      "plugin": "users-permissions",
+      "configurable": false,
+      "isVirtual": true
+    },
+    "users": {
+      "collection": "user",
+      "via": "role",
+      "plugin": "users-permissions"
+    }
+  }
+}

@@ -1,5 +1,15 @@
 # Migrations guides
 
+## Migrating from Alpha ?
+
+Read the [Migration guide from alpha.26 to beta](migration-guide-alpha.26-to-beta.md) first then read the [Beta migration guides](#beta-guides)
+
+## Beta guides
+
+- [Migration guide from beta.15 to beta.16](migration-guide-beta.15-to-beta.16.md)
+
+## Alpha guides
+
 - [Migrating from v1 to v3](migration-guide-1-to-3.md)
 - [Migration guide from alpha.7.4 to alpha.8](migration-guide-alpha.7.4-to-alpha.8.md)
 - [Migration guide from alpha.8 to alpha.9](migration-guide-alpha.8-to-alpha.9.md)

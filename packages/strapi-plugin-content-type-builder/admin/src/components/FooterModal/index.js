@@ -1,28 +1,30 @@
 /**
-*
-* FooterModal
-*
-*/
+ *
+ * FooterModal
+ *
+ */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { ModalFooter } from 'reactstrap';
-import styles from './styles.scss';
+import styled from 'styled-components';
 
-function FooterModal({ children }) {
-  return (
-    <ModalFooter className={styles.footerModal}>
-      {children}
-    </ModalFooter>
-  );
-}
+import { colors, sizes } from 'strapi-helper-plugin';
 
-FooterModal.defaultProps = {
-  children: null,
-};
-
-FooterModal.propTypes = {
-  children: PropTypes.node,
-};
+const FooterModal = styled.div`
+  padding-top: ${sizes.margin * 0.9}px;
+  section {
+    padding: 0 ${sizes.margin * 3}px;
+    display: flex;
+    height: 72px;
+    &:not(:last-of-type) {
+      justify-content: flex-end;
+    }
+    &:last-of-type {
+      background-color: ${colors.beige};
+      justify-content: space-between;
+    }
+    button {
+      margin: auto 0;
+    }
+  }
+`;
 
 export default FooterModal;

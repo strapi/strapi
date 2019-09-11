@@ -10,19 +10,11 @@ import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
 import pluginId from '../../pluginId';
 
-// Containers
-import AuthPage from '../AuthPage';
 import EditPage from '../EditPage';
 import HomePage from '../HomePage';
 import NotFoundPage from '../NotFoundPage';
 
 class App extends React.Component {
-  componentDidMount() {
-    if (!this.props.location.pathname.split('/')[3]) {
-      this.props.history.push('/plugins/users-permissions/roles');
-    }
-  }
-
   componentDidUpdate() {
     if (!this.props.location.pathname.split('/')[3]) {
       this.props.history.push('/plugins/users-permissions/roles');
@@ -33,11 +25,6 @@ class App extends React.Component {
     return (
       <div className={pluginId}>
         <Switch>
-          <Route
-            path={`/plugins/${pluginId}/auth/:authType/:id?`}
-            component={AuthPage}
-            exact
-          />
           <Route
             path={`/plugins/${pluginId}/:settingType/:actionType/:id?`}
             component={EditPage}
