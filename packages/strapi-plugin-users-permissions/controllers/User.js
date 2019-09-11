@@ -170,10 +170,6 @@ module.exports = {
     const { id } = ctx.params;
     const { email, username, password } = ctx.request.body;
 
-    if (!email) return ctx.badRequest('missing.email');
-    if (!username) return ctx.badRequest('missing.username');
-    if (!password) return ctx.badRequest('missing.password');
-
     const userWithSameUsername = await strapi
       .query('user', 'users-permissions')
       .findOne({ username });
@@ -216,7 +212,7 @@ module.exports = {
       ...ctx.request.body,
     };
 
-    if (password === user.password) {
+    if (password != null && password === user.password) {
       delete updateData.password;
     }
 
