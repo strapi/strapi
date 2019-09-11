@@ -7,7 +7,10 @@
   },
   "options": {
     "increments": true,
-    "timestamps": ["created_at", "updated_at"],
+    "timestamps": [
+      "created_at",
+      "updated_at"
+    ],
     "comment": ""
   },
   "attributes": {
@@ -22,6 +25,11 @@
       "via": "related",
       "plugin": "upload"
     },
+    "images": {
+      "collection": "file",
+      "via": "related",
+      "plugin": "upload"
+    },
     "menu": {
       "model": "menu",
       "via": "restaurant"
@@ -33,7 +41,13 @@
       "model": "address"
     },
     "price_range": {
-      "enum": ["very_cheap", "cheap", "average", "expensive", "very_expensive"],
+      "enum": [
+        "very_cheap",
+        "cheap",
+        "average",
+        "expensive",
+        "very_expensive"
+      ],
       "type": "enumeration"
     },
     "description": {
