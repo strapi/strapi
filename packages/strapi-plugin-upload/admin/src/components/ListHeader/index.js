@@ -20,7 +20,6 @@ function ListHeader({ changeSort, sort }) {
     '',
     '',
   ];
-  console.log(sort);
 
   const handleChangeSort = name => {
     if (sort === `${name}:ASC`) {
