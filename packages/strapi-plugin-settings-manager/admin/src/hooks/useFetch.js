@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { request } from 'strapi-helper-plugin';
 import pluginId from '../pluginId';
 
-const useFetch = endPoints => {
+const useFetch = (endPoints, deps = []) => {
   const abortController = new AbortController();
   const { signal } = abortController;
   const [state, setState] = useState({ data: {}, isLoading: true });
@@ -24,13 +24,14 @@ const useFetch = endPoints => {
       }
     };
 
+    setState({ data: {}, isLoading: true });
     getData();
 
     return () => {
       abortController.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, deps);
 
   return { data: state.data, isLoading: state.isLoading };
 };

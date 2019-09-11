@@ -8,7 +8,7 @@ const ConfigPage = ({
     params: { slug },
   },
 }) => {
-  const { isLoading } = useFetch([`configurations/${slug}`]);
+  const { isLoading } = useFetch([`configurations/${slug}`], [slug]);
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
