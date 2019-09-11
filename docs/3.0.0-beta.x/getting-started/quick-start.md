@@ -8,7 +8,7 @@ Get ready to get Strapi up and running in **less than 5 minutes** 🚀.
 
 _For a step-by-step guide, please take a look at the [detailed tutorial](quick-start-tutorial.html)._
 
-(Before continuing, please make sure [Node.js and npm are properly installed](install-requirements.html) on your machine.)
+(Before continuing, please make sure [Node.js and npm are properly installed](install-requirements.html) on your machine. You can [install the Yarn v1.2.0+ package here](https://yarnpkg.com/en/).)
 
 ## 1. Install Strapi and Create a new project
 
@@ -31,7 +31,7 @@ Navigate to [**http://localhost:1337/admin**](http://localhost:1337/admin).
 - Complete the form to create the first **Administrator** user.
 - Click **Ready to start**.
 
-## 3. Create a new Content Type
+## 3. Create a Restaurant Content Type
 
 Navigate to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/admin/plugins/content-type-builder), in the left-hand menu.
 
@@ -47,7 +47,7 @@ Navigate to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/admin
   - Click `Done`
 - Click the **Save** button and wait for Strapi to restart
 
-## 4. Create another new Content type
+## 4. Create a Category Content type
 
 Navigate back to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/admin/plugins/content-type-builder), in the left-hand menu.
 
@@ -60,7 +60,7 @@ Navigate back to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/
   - Click the **"+ Add New Field"** button
   - Click the **Relation** field
   - On the right side, click the **Permissions** dropdown and select, `Restaurant`
-  - In the center, select the icon the represents `many-to-many`. The text should read, `Categories has and belongs to many Restaurants`
+  - In the center, select the icon that represents `many-to-many`. The text should read, `Categories has and belongs to many Restaurants`
   - Click `Done`
 - Click the **Save** button and wait for Strapi to restart
 
