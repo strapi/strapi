@@ -12,7 +12,7 @@ const useFetch = endPoints => {
       try {
         const data = await Promise.all(
           endPoints.map(endPoint =>
-            request(`/${pluginId}/configurations/${endPoint}`, {
+            request(`/${pluginId}/${endPoint}`, {
               method: 'GET',
               signal,
             })

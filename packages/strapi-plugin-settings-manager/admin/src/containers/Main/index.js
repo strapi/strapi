@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { get } from 'lodash';
 import { Switch, Route } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import {
   LoadingIndicatorPage,
-  request,
   StyledLeftMenu,
   ViewContainer,
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
+import useFetch from '../../hooks/useFetch';
 import MenuSection from '../../components/MenuSection';
+import ConfigPage from '../ConfigPage';
+import EnvConfigPage from '../EnvConfigPage';
 import LanguagePage from '../LanguagePage';
 /* eslint-disable */
 const Main = ({
@@ -17,65 +19,36 @@ const Main = ({
   history: { push },
   location: { pathname },
 }) => {
-  const [{ menuSections, environments, isLoading }, setState] = useState({
-    menuSections: [],
-    environments: [],
-    isLoading: true,
-  });
-  const abortController = new AbortController();
-  const { signal } = abortController;
+  const { data, isLoading } = useFetch(['menu', 'configurations/environments']);
 
   useEffect(() => {
-    const getData = async () => {
-      try {
-        const endPoints = ['menu', 'configurations/environments'];
-        const [
-          { sections: menuSections },
-          { environments },
-        ] = await Promise.all(
-          endPoints.map(endPoint =>
-            request(`/${pluginId}/${endPoint}`, { method: 'GET', signal })
-          )
-        );
-
-        // Redirect to first link item
-        if (pathname.split('/').length === 3) {
-          const firstLink = get(
-            menuSections,
-            [0, 'items', 0, 'slug'],
-            'application'
-          );
-
-          push(`/plugins/${pluginId}/${firstLink}`);
-        }
-
-        setState({ menuSections, environments, isLoading: false });
-      } catch (err) {
-        strapi.notification.error(`${pluginId}.strapi.notification.error`);
-      }
-    };
-
-    getData();
-
-    return () => {
-      abortController.abort();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (pathname.split('/').length === 3 && !isLoading) {
+      const firstLink = get(
+        data,
+        [0, 'sections', 0, 'items', 0, 'slug'],
+        'application'
+      );
+      push(`/plugins/${pluginId}/${firstLink}`);
+    }
+  }, [pathname, isLoading]);
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
   }
-
-  // console.log({ menuSections });
+  const [{ sections: menuSections }, { environments }] = data;
 
   return (
     <ViewContainer>
       <div className="container-fluid">
         <div className="row">
           <StyledLeftMenu className="col-3">
-            {menuSections.map(section => (
-              <MenuSection key={section.name} {...section} />
+            {menuSections.map((section, index) => (
+              <MenuSection
+                key={section.name}
+                currentEnvironment={currentEnvironment}
+                {...section}
+                withEnv={index > 0}
+              />
             ))}
           </StyledLeftMenu>
           <div className="col-9">
@@ -84,6 +57,16 @@ const Main = ({
                 <Route
                   path={`/plugins/${pluginId}/languages`}
                   component={LanguagePage}
+                  exact
+                />
+                <Route
+                  path={`/plugins/${pluginId}/:slug`}
+                  component={ConfigPage}
+                  exact
+                />
+                <Route
+                  path={`/plugins/${pluginId}/:slug/:env`}
+                  component={EnvConfigPage}
                   exact
                 />
               </Switch>

@@ -42,7 +42,10 @@ const LanguagePage = () => {
     selectOptions,
     selectedLanguage,
   } = reducerState.toJS();
-  const { data, isLoading } = useFetch(['languages', 'i18n']);
+  const { data, isLoading } = useFetch([
+    'configurations/languages',
+    'configurations/i18n',
+  ]);
   const findLangTrad = useCallback(
     lang => {
       const trad = get(allLanguages, [
