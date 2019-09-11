@@ -37,9 +37,6 @@
     "categories": {
       "collection": "category"
     },
-    "address": {
-      "model": "address"
-    },
     "price_range": {
       "enum": [
         "very_cheap",
@@ -71,6 +68,9 @@
       "required": true,
       "repeatable": true,
       "type": "group"
+    },
+    "address": {
+      "model": "address"
     }
   }
 }
