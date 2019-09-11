@@ -1,11 +1,11 @@
 // Shared constants
-import { fromJS, List } from 'immutable';
+import { fromJS } from 'immutable';
 
 import {
   DISABLE_GLOBAL_OVERLAY_BLOCKER,
   ENABLE_GLOBAL_OVERLAY_BLOCKER,
   FREEZE_APP,
-  GET_APP_PLUGINS_SUCCEEDED,
+  GET_DATA_SUCCEEDED,
   PLUGIN_DELETED,
   PLUGIN_LOADED,
   UNFREEZE_APP,
@@ -14,13 +14,17 @@ import {
 } from './constants';
 
 const initialState = fromJS({
-  appPlugins: List([]),
+  autoReload: false,
   blockApp: false,
-  overlayBlockerData: null,
+  currentEnvironment: 'development',
+  hasAdminUser: false,
   hasUserPlugin: true,
-  isAppLoading: true,
+  isLoading: true,
+  overlayBlockerData: null,
   plugins: {},
   showGlobalAppBlocker: true,
+  strapiVersion: '3',
+  uuid: false,
 });
 
 function appReducer(state = initialState, action) {
@@ -37,16 +41,26 @@ function appReducer(state = initialState, action) {
 
         return null;
       });
-    case GET_APP_PLUGINS_SUCCEEDED:
+    case GET_DATA_SUCCEEDED: {
+      const {
+        hasAdminUser,
+        data: { uuid, currentEnvironment, autoReload, strapiVersion },
+      } = action;
+
       return state
-        .update('appPlugins', () => List(action.appPlugins))
-        .update('isAppLoading', () => false);
+        .update('isLoading', () => false)
+        .update('hasAdminUser', () => hasAdminUser)
+        .update('uuid', () => uuid)
+        .update('autoReload', () => autoReload)
+        .update('currentEnvironment', () => currentEnvironment)
+        .update('strapiVersion', () => strapiVersion);
+    }
     case PLUGIN_LOADED:
       return state.setIn(['plugins', action.plugin.id], fromJS(action.plugin));
     case UPDATE_PLUGIN:
       return state.setIn(
         ['plugins', action.pluginId, action.updatedKey],
-        fromJS(action.updatedValue),
+        fromJS(action.updatedValue)
       );
     case PLUGIN_DELETED:
       return state.deleteIn(['plugins', action.plugin]);

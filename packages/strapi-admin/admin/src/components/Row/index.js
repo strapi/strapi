@@ -43,7 +43,7 @@ class Row extends React.Component {
 
     const settingsPath =
       name === 'content-manager'
-        ? '/plugins/content-manager/ctm-configurations'
+        ? '/plugins/content-manager/ctm-configurations/models'
         : `/plugins/${name}/configurations/${currentEnvironment}`;
 
     const icons = [];
