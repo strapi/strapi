@@ -19,7 +19,7 @@ module.exports = {
    * @return Promise or Error.
    */
 
-  composeMutationResolver: function(_schema, plugin, name, action) {
+  composeMutationResolver: function({ _schema, plugin, name, action }) {
     // Extract custom resolver or type description.
     const { resolver: handler = {} } = _schema;
 
