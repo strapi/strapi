@@ -6,7 +6,7 @@
 
 import styled from 'styled-components';
 
-import { sizes } from 'strapi-helper-plugin';
+import sizes from '../../assets/styles/sizes';
 
 const StyledViewContainer = styled.div`
   min-height: calc(100vh - ${sizes.header.height});

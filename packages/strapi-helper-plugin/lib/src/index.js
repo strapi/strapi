@@ -93,6 +93,7 @@ export { default as PluginHeader } from './components/PluginHeader';
 export { default as PopUpWarning } from './components/PopUpWarning';
 export { default as StyledLeftMenu } from './components/StyledLeftMenu';
 export { default as TrashButton } from './components/TrashButton';
+export { default as ViewContainer } from './components/ViewContainer';
 
 // Utils
 export { default as auth } from './utils/auth';

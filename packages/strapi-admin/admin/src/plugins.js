@@ -22,16 +22,16 @@ window.strapi = Object.assign(window.strapi || {}, {
 module.exports = {
   'strapi-plugin-users-permissions': require('../../../strapi-plugin-users-permissions/admin/src')
     .default,
-  'strapi-plugin-content-manager': require('../../../strapi-plugin-content-manager/admin/src')
-    .default,
+  // 'strapi-plugin-content-manager': require('../../../strapi-plugin-content-manager/admin/src')
+  //   .default,
   'strapi-plugin-content-type-builder': require('../../../strapi-plugin-content-type-builder/admin/src')
     .default,
-  'strapi-plugin-documentation': require('../../../strapi-plugin-documentation/admin/src')
-    .default,
+  // 'strapi-plugin-documentation': require('../../../strapi-plugin-documentation/admin/src')
+  //   .default,
   'strapi-plugin-settings-manager': require('../../../strapi-plugin-settings-manager/admin/src')
     .default,
-  'strapi-plugin-email': require('../../../strapi-plugin-email/admin/src')
-    .default,
-  'strapi-plugin-upload': require('../../../strapi-plugin-upload/admin/src')
-    .default,
+  // 'strapi-plugin-email': require('../../../strapi-plugin-email/admin/src')
+  //   .default,
+  // 'strapi-plugin-upload': require('../../../strapi-plugin-upload/admin/src')
+  //   .default,
 };
