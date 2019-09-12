@@ -4,6 +4,8 @@ This **tutorial** is written for developers to **teach and explain** a step-by-s
 
 You get a good overview of the features developers love found in Strapi.
 
+<iframe width="800" height="450" src="https://www.youtube.com/embed/vulcVRQ4X8A" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 By following this tutorial, you install and create your first Strapi project.
 
 ::: tip NOTE
@@ -466,7 +468,7 @@ You can _drag and drop_ fields into a different layout, as well as, _rename the 
 
 ![Content Manager Hoursofoperation](../assets/getting-started/tutorial/content-manager-hoursofoperation.png 'Content Manager Hoursofoperation')
 
-- Rearrange the fields and make them more user friendly. Grab the `opening_hours` and slide it next to `closing_hour`
+- Rearrange the fields and make them more user friendly. Grab the `opening_hours` and slide it next to `closing_hours`
 
 ![Content Manager Hoursofoperation Rearrange Fields](../assets/getting-started/tutorial/content-manager-hoursofoperation-rearrange-fields.png 'Content Manager Hoursofoperation Rearrange Fields')
 
