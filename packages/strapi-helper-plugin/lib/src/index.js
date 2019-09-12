@@ -96,6 +96,7 @@ export { default as TrashButton } from './components/TrashButton';
 // Utils
 export { default as auth } from './utils/auth';
 export { default as cleanData } from './utils/cleanData';
+export { default as translatedErrors } from './utils/translatedErrors';
 export { darken } from './utils/colors';
 export { default as getQueryParameters } from './utils/getQueryParameters';
 export { default as injectHooks } from './utils/injectHooks';
@@ -104,3 +105,4 @@ export { default as Manager } from './utils/Manager';
 export { default as request } from './utils/request';
 export { default as storeData } from './utils/storeData';
 export { default as templateObject } from './utils/templateObject';
+export { default as getYupInnerErrors } from './utils/getYupInnerErrors';

@@ -5,7 +5,7 @@ const InfoLabel = styled.div`
   top: 0;
   right: 40px;
   max-width: 80px;
-
+  white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
   font-weight: 400;

@@ -22,7 +22,6 @@ import saga from './saga';
 import makeSelectMain from './selectors';
 
 function Main({
-  admin: { currentEnvironment },
   emitEvent,
   getData,
   getLayout,
@@ -31,7 +30,7 @@ function Main({
   isLoading,
   layouts,
   location: { pathname, search },
-  global: { plugins },
+  global: { currentEnvironment, plugins },
   models,
   resetProps,
 }) {
@@ -107,13 +106,11 @@ function Main({
 }
 
 Main.propTypes = {
-  admin: PropTypes.shape({
-    currentEnvironment: PropTypes.string.isRequired,
-  }),
   emitEvent: PropTypes.func.isRequired,
   getData: PropTypes.func.isRequired,
   getLayout: PropTypes.func.isRequired,
   global: PropTypes.shape({
+    currentEnvironment: PropTypes.string.isRequired,
     plugins: PropTypes.object,
   }),
   groups: PropTypes.array.isRequired,
