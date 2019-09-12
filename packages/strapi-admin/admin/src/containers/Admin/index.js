@@ -173,7 +173,6 @@ export class Admin extends React.Component {
                 render={props => this.renderRoute(props, ListPluginsPage)}
                 exact
               />
-              {/* <Route path="/list-plugins" component={ListPluginsPage} exact /> */}
               <Route
                 path="/marketplace"
                 render={this.renderMarketPlace}
@@ -212,7 +211,6 @@ Admin.propTypes = {
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,
   emitEvent: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
-  // getHook: PropTypes.func.isRequired,
   global: PropTypes.shape({
     blockApp: PropTypes.bool,
     currentEnvironment: PropTypes.string,
@@ -250,11 +248,9 @@ const withConnect = connect(
 );
 const withReducer = injectReducer({ key: 'admin', reducer });
 const withSaga = injectSaga({ key: 'admin', saga });
-// const withHooks = injectHooks({ key: 'admin' });
 
 export default compose(
   withReducer,
   withSaga,
   withConnect
-  // withHooks
 )(Admin);

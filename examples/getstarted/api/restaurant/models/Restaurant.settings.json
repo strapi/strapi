@@ -25,6 +25,11 @@
       "via": "related",
       "plugin": "upload"
     },
+    "images": {
+      "collection": "file",
+      "via": "related",
+      "plugin": "upload"
+    },
     "menu": {
       "model": "menu",
       "via": "restaurant"
