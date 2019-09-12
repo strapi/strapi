@@ -26,7 +26,7 @@ const initialState = fromJS({
   search: '',
   uploadedFiles: List([]),
   params: Map({
-    _sort: 'hash',
+    _sort: 'hash:ASC',
     _limit: 10,
     _page: 1,
   }),
@@ -37,10 +37,11 @@ function homePageReducer(state = initialState, action) {
     case CHANGE_PARAMS:
       return state.updateIn(action.keys, () => action.value);
     case DELETE_SUCCESS:
-      return state.update('deleteSuccess', (v) => v = !v);
+      return state.update('deleteSuccess', v => (v = !v));
     case DROP_SUCCESS:
-      return state
-        .update('uploadedFiles', (list) => List(action.newFiles).concat(list));
+      return state.update('uploadedFiles', list =>
+        List(action.newFiles).concat(list)
+      );
     case GET_DATA_SUCCESS:
       return state
         .update('uploadedFiles', () => List(action.data))
