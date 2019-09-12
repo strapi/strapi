@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useReducer, useState } from 'react';
-// import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
 import {
@@ -18,6 +17,7 @@ import {
   ModalForm,
   InputsIndex,
   PopUpWarning,
+  request,
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import useFetch from '../../hooks/useFetch';
@@ -32,6 +32,7 @@ const getTrad = key => `${pluginId}.${key}`;
 
 const LanguagePage = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [shouldRefetch, setShouldRefetch] = useState(false);
   const [languageToDelete, setLanguageToDelete] = useState('');
   const [showWarningDelete, setWarningDelete] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState);
@@ -42,10 +43,10 @@ const LanguagePage = () => {
     selectOptions,
     selectedLanguage,
   } = reducerState.toJS();
-  const { data, isLoading } = useFetch([
-    'configurations/languages',
-    'configurations/i18n',
-  ]);
+  const { data, isLoading } = useFetch(
+    ['configurations/languages', 'configurations/i18n'],
+    [shouldRefetch]
+  );
   const findLangTrad = useCallback(
     lang => {
       const trad = get(allLanguages, [
@@ -95,18 +96,48 @@ const LanguagePage = () => {
   };
   const availableLanguagesLength = modifiedData.length;
   const listTitleSuffix = availableLanguagesLength > 1 ? 'plural' : 'singular';
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    // TODO POST Request
-    dispatch({
-      type: 'ADD_NEW_LANGUAGE',
-    });
-    handleToggle();
+
+    try {
+      handleToggle();
+      await request(
+        `/${pluginId}/configurations/languages`,
+        { method: 'POST', body: { name: selectedLanguage } },
+        true
+      );
+      setShouldRefetch(prev => !prev);
+    } catch (err) {
+      console.log(err);
+    }
   };
-  const handleDeleteLanguage = () => {
-    // TODO delete request
-    console.log(languageToDelete);
-    toggleWarningWarningDelete();
+  const handleClick = async lang => {
+    try {
+      const locale = findLangTrad(lang);
+
+      await request(
+        `/${pluginId}/configurations/i18n`,
+        { method: 'PUT', body: { 'language.defaultLocale': locale.value } },
+        true
+      );
+      setShouldRefetch(prev => !prev);
+    } catch (err) {
+      strapi.notification.error('notification.error');
+    }
+  };
+  const handleDeleteLanguage = async () => {
+    try {
+      toggleWarningWarningDelete();
+
+      await request(
+        `/${pluginId}/configurations/languages/${languageToDelete}`,
+        { method: 'DELETE' },
+        true
+      );
+      setShouldRefetch(prev => !prev);
+    } catch (err) {
+      strapi.notification.error('notification.error');
+    }
   };
 
   return (
@@ -145,9 +176,7 @@ const LanguagePage = () => {
                   <ListRow
                     key={lang.name}
                     className="clickable"
-                    onClick={() => {
-                      toggleWarningWarningDelete(lang.name);
-                    }}
+                    style={{ cursor: 'default' }}
                   >
                     <td>
                       <FormattedMessage
@@ -166,12 +195,20 @@ const LanguagePage = () => {
                     </td>
                     <td>{lang.name}</td>
                     <td>
-                      <Action isActive={lang.active} />
+                      <Action
+                        isActive={lang.active}
+                        onClick={() => handleClick(lang.name)}
+                      />
                     </td>
                     <td>
-                      <button type="button">
-                        <i className="fa fa-trash link-icon" />
-                      </button>
+                      {!lang.active && (
+                        <button
+                          type="button"
+                          onClick={() => toggleWarningWarningDelete(lang.name)}
+                        >
+                          <i className="fa fa-trash link-icon" />
+                        </button>
+                      )}
                     </td>
                   </ListRow>
                 );

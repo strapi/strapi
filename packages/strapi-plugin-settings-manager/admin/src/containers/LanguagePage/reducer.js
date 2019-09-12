@@ -1,6 +1,5 @@
 import { fromJS } from 'immutable';
 import { get } from 'lodash';
-import filterLanguages from './utils/filterLanguages';
 
 const initialState = fromJS({
   allLanguages: {},
@@ -14,28 +13,6 @@ const getSelectOptions = obj =>
 
 const reducer = (state, action) => {
   switch (action.type) {
-    case 'ADD_NEW_LANGUAGE': {
-      const languageToAdd = state.get('selectedLanguage');
-      const updatedModifiedData = state
-        .update('modifiedData', list =>
-          list.push(
-            fromJS({ name: languageToAdd.toLowerCase(), active: false })
-          )
-        )
-        .get('modifiedData');
-
-      const updatedSelectOptions = getSelectOptions(
-        filterLanguages(
-          updatedModifiedData.toJS(),
-          state.get('allLanguages').toJS()
-        )
-      );
-
-      return state
-        .update('modifiedData', () => updatedModifiedData)
-        .update('selectedLanguage', () => updatedSelectOptions[0].value)
-        .update('selectOptions', () => fromJS(updatedSelectOptions));
-    }
     case 'GET_DATA_SUCCEEDED': {
       const selectOptions = getSelectOptions(action.availableLanguages);
       return state
