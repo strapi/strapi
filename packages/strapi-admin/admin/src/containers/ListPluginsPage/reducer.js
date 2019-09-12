@@ -7,13 +7,11 @@
 import { fromJS, Map } from 'immutable';
 import {
   DELETE_PLUGIN_SUCCEEDED,
-  GET_APP_CURRENT_ENV_SUCCEEDED,
   GET_PLUGINS_SUCCEEDED,
   ON_DELETE_PLUGIN_CLICK,
 } from './constants';
 
 const initialState = fromJS({
-  currentEnvironment: 'development',
   deleteActionSucceeded: false,
   isLoading: true,
   plugins: Map({}),
@@ -29,18 +27,17 @@ function listPluginsPageReducer(state = initialState, action) {
           .set('deleteActionSucceeded', !state.get('deleteActionSucceeded'));
       }
 
-      return state
-        .set('deleteActionSucceeded', !state.get('deleteActionSucceeded'));
+      return state.set(
+        'deleteActionSucceeded',
+        !state.get('deleteActionSucceeded')
+      );
     }
-    case GET_APP_CURRENT_ENV_SUCCEEDED:
-      return state.update('currentEnvironment', () => action.currentEnvironment);
     case GET_PLUGINS_SUCCEEDED:
       return state
         .set('plugins', Map(action.plugins))
         .update('isLoading', () => false);
     case ON_DELETE_PLUGIN_CLICK:
-      return state
-        .set('pluginToDelete', action.pluginToDelete);
+      return state.set('pluginToDelete', action.pluginToDelete);
     default:
       return state;
   }
