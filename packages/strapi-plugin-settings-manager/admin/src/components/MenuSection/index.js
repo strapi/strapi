@@ -18,7 +18,10 @@ const MenuSection = ({ currentEnvironment, items, name, withEnv }) => {
             <li key={link.slug}>
               <NavLink to={to}>
                 <p>
-                  <i className={`fa fa-${link.icon}`} />
+                  <i
+                    style={{ fontSize: 13, lineHeight: '12px' }}
+                    className={`fa fa-${link.icon}`}
+                  />
                   <FormattedMessage id={`${pluginId}.${link.name}`} />
                 </p>
               </NavLink>

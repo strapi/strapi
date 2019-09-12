@@ -12,7 +12,11 @@ import { bindActionCreators, compose } from 'redux';
 import { Switch, Route } from 'react-router-dom';
 import { isEmpty } from 'lodash';
 // Components from strapi-helper-plugin
-import { LoadingIndicatorPage, OverlayBlocker } from 'strapi-helper-plugin';
+import {
+  difference,
+  LoadingIndicatorPage,
+  OverlayBlocker,
+} from 'strapi-helper-plugin';
 import { SHOW_TUTORIALS } from '../../config';
 
 import Header from '../../components/Header/index';
@@ -38,7 +42,6 @@ import makeSelecApp from '../App/selectors';
 
 import injectSaga from '../../utils/injectSaga';
 import injectReducer from '../../utils/injectReducer';
-import difference from './utils/difference';
 
 import { emitEvent, setAppError } from './actions';
 import makeSelectAdmin from './selectors';

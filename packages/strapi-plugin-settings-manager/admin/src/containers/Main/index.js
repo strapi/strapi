@@ -11,7 +11,6 @@ import pluginId from '../../pluginId';
 import useFetch from '../../hooks/useFetch';
 import MenuSection from '../../components/MenuSection';
 import ConfigPage from '../ConfigPage';
-import EnvConfigPage from '../EnvConfigPage';
 import LanguagePage from '../LanguagePage';
 /* eslint-disable */
 const Main = ({
@@ -62,11 +61,6 @@ const Main = ({
                 <Route
                   path={`/plugins/${pluginId}/:slug`}
                   component={ConfigPage}
-                  exact
-                />
-                <Route
-                  path={`/plugins/${pluginId}/:slug/:env`}
-                  component={EnvConfigPage}
                   exact
                 />
               </Switch>

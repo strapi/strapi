@@ -1,19 +1,149 @@
-import React from 'react';
+import React, { useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
-import { LoadingIndicatorPage } from 'strapi-helper-plugin';
+import { get, isEmpty } from 'lodash';
+import { Redirect } from 'react-router-dom';
+import {
+  difference,
+  getYupInnerErrors,
+  InputsIndex as Input,
+  LoadingIndicatorPage,
+  PluginHeader,
+  request,
+} from 'strapi-helper-plugin';
 import useFetch from '../../hooks/useFetch';
+import pluginId from '../../pluginId';
+
+import FormWrapper from '../../components/FormWrapper';
+import forms from './forms';
+import reducer, { initialState } from './reducer';
+
+const getTrad = key => `${pluginId}.${key}`;
 
 const ConfigPage = ({
   match: {
     params: { slug },
   },
 }) => {
-  const { isLoading } = useFetch([`configurations/${slug}`], [slug]);
+  const endPoint = `configurations/${slug}`;
+  const { data, isLoading } = useFetch([endPoint]);
+  const [reducerState, dispatch] = useReducer(reducer, initialState);
+
+  useEffect(() => {
+    if (!isLoading) {
+      const [response] = data;
+
+      dispatch({
+        type: 'GET_DATA_SUCCEEDED',
+        response,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading]);
+
+  const {
+    errors,
+    didCheckErrors,
+    initialData,
+    modifiedData,
+  } = reducerState.toJS();
+  const body = difference(modifiedData, initialData);
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    let formErrors = {};
+    const schema = forms[slug].schema;
+
+    try {
+      await schema.validate(modifiedData, { abortEarly: false });
+
+      if (!isEmpty(body)) {
+        try {
+          request(`/${pluginId}/${endPoint}`, { method: 'PUT', body }, true);
+        } catch (err) {
+          strapi.notification.error('notification.error');
+        }
+      }
+    } catch (err) {
+      formErrors = getYupInnerErrors(err);
+      strapi.notification.info('notification.form.error.fields');
+    } finally {
+      dispatch({
+        type: 'SET_ERRORS',
+        errors: formErrors,
+      });
+    }
+  };
+
+  if (!Object.keys(forms).includes(slug)) {
+    return <Redirect to="application" />;
+  }
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
   }
-  return <div>Coming soon</div>;
+
+  const pluginHeaderActions = isEmpty(body)
+    ? []
+    : [
+        {
+          label: `${pluginId}.form.button.cancel`,
+          onClick: () => {
+            dispatch({
+              type: 'RESET_FORM',
+            });
+          },
+          kind: 'secondary',
+          type: 'button',
+        },
+        {
+          label: `${pluginId}.form.button.save`,
+          onClick: handleSubmit,
+          kind: 'primary',
+          type: 'submit',
+          id: 'saveData',
+        },
+      ];
+
+  return (
+    <>
+      <form onSubmit={handleSubmit}>
+        <PluginHeader
+          description={{ id: getTrad(`form.${slug}.description`) }}
+          title={{ id: getTrad(`form.${slug}.name`) }}
+          actions={pluginHeaderActions}
+        />
+        <FormWrapper>
+          <div className="container">
+            {get(forms, slug, []).inputs.map((row, index) => {
+              return (
+                <div className="row" key={index}>
+                  {row.map((input, i) => {
+                    return (
+                      <Input
+                        {...input}
+                        autoFocus={index === 0 && i == 0}
+                        didCheckErrors={didCheckErrors}
+                        errors={get(errors, [input.name], [])}
+                        key={input.name}
+                        onChange={({ target: { name, value } }) => {
+                          dispatch({
+                            type: 'ON_CHANGE',
+                            keys: name,
+                            value,
+                          });
+                        }}
+                        value={get(modifiedData, [input.name], '')}
+                      />
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        </FormWrapper>
+      </form>
+    </>
+  );
 };
 
 ConfigPage.propTypes = {

@@ -105,6 +105,7 @@ export { default as ViewContainer } from './components/ViewContainer';
 // Utils
 export { default as auth } from './utils/auth';
 export { default as cleanData } from './utils/cleanData';
+export { default as difference } from './utils/difference';
 export { default as translatedErrors } from './utils/translatedErrors';
 export { darken } from './utils/colors';
 export { default as getQueryParameters } from './utils/getQueryParameters';
