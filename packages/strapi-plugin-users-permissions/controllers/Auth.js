@@ -10,6 +10,7 @@
 const crypto = require('crypto');
 const _ = require('lodash');
 const grant = require('grant-koa');
+const { sanitizeEntity } = require('strapi-utils');
 
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const formatError = error => [
@@ -133,10 +134,9 @@ module.exports = {
           jwt: strapi.plugins['users-permissions'].services.jwt.issue({
             id: user.id,
           }),
-          user: _.omit(user.toJSON ? user.toJSON() : user, [
-            'password',
-            'resetPasswordToken',
-          ]),
+          user: sanitizeEntity(user.toJSON ? user.toJSON() : user, {
+            model: strapi.query('user', 'users-permissions').model,
+          }),
         });
       }
     } else {
@@ -168,10 +168,9 @@ module.exports = {
         jwt: strapi.plugins['users-permissions'].services.jwt.issue({
           id: user.id,
         }),
-        user: _.omit(user.toJSON ? user.toJSON() : user, [
-          'password',
-          'resetPasswordToken',
-        ]),
+        user: sanitizeEntity(user.toJSON ? user.toJSON() : user, {
+          model: strapi.query('user', 'users-permissions').model,
+        }),
       });
     }
   },
@@ -215,10 +214,9 @@ module.exports = {
         jwt: strapi.plugins['users-permissions'].services.jwt.issue({
           id: user.id,
         }),
-        user: _.omit(user.toJSON ? user.toJSON() : user, [
-          'password',
-          'resetPasswordToken',
-        ]),
+        user: sanitizeEntity(user.toJSON ? user.toJSON() : user, {
+          model: strapi.query('user', 'users-permissions').model,
+        }),
       });
     } else if (
       params.password &&
@@ -535,10 +533,9 @@ module.exports = {
 
       ctx.send({
         jwt,
-        user: _.omit(user.toJSON ? user.toJSON() : user, [
-          'password',
-          'resetPasswordToken',
-        ]),
+        user: sanitizeEntity(user.toJSON ? user.toJSON() : user, {
+          model: strapi.query('user', 'users-permissions').model,
+        }),
       });
     } catch (err) {
       const adminError = _.includes(err.message, 'username')
