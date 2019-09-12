@@ -39,7 +39,7 @@ function InputDate(props) {
               'form-control',
               styles.inputDate,
               !props.deactivateErrorHighlight && props.error && 'is-invalid',
-              !isEmpty(props.className) && props.className,
+              !isEmpty(props.className) && props.className
             ),
             disabled: props.disabled,
             id: props.name,

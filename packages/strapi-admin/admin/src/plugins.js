@@ -1,5 +1,7 @@
 const injectReducer = require('./utils/injectReducer').default;
+const useInjectReducer = require('./utils/injectReducer').useInjectReducer;
 const injectSaga = require('./utils/injectSaga').default;
+const useInjectSaga = require('./utils/injectSaga').useInjectSaga;
 const { languages } = require('./i18n');
 
 window.strapi = Object.assign(window.strapi || {}, {
@@ -13,6 +15,8 @@ window.strapi = Object.assign(window.strapi || {}, {
     'en',
   injectReducer,
   injectSaga,
+  useInjectReducer,
+  useInjectSaga,
 });
 
 module.exports = {

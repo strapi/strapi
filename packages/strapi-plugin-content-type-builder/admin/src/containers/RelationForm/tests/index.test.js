@@ -56,7 +56,7 @@ describe('<RelationForm />', () => {
     const compo = wrapper.find(RelationForm);
     const spyOnRenderAdvancedSettings = jest.spyOn(
       compo.instance(),
-      'renderAdvancedSettings',
+      'renderAdvancedSettings'
     );
     compo.instance().forceUpdate();
 
@@ -137,7 +137,7 @@ describe('<RelationForm />', () => {
         expect(props.onChangeRelationTarget).toHaveBeenLastCalledWith(
           'strapi',
           'test',
-          false,
+          false
         );
       });
 
@@ -153,7 +153,7 @@ describe('<RelationForm />', () => {
         expect(props.onChangeRelationTarget).toHaveBeenLastCalledWith(
           'strapi',
           'test',
-          true,
+          true
         );
       });
     });
@@ -184,7 +184,7 @@ describe('<RelationForm />', () => {
           'modalType=attributeForm&attributeType=relation&settingType=advanced&actionType=create',
       });
       expect(context.emitEvent).toHaveBeenCalledWith(
-        'didSelectContentTypeFieldSettings',
+        'didSelectContentTypeFieldSettings'
       );
     });
 
@@ -202,7 +202,7 @@ describe('<RelationForm />', () => {
           'modalType=attributeForm&attributeType=relation&settingType=advanced&actionType=edit&attributeName=test',
       });
       expect(context.emitEvent).toHaveBeenCalledWith(
-        'didSelectContentTypeFieldSettings',
+        'didSelectContentTypeFieldSettings'
       );
     });
 
@@ -258,7 +258,7 @@ describe('<RelationForm />', () => {
         false,
         'test',
         '',
-        false,
+        false
       );
     });
 
@@ -282,7 +282,7 @@ describe('<RelationForm />', () => {
         false,
         undefined,
         'test',
-        true,
+        true
       );
     });
   });

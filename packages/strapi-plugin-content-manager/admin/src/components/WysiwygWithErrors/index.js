@@ -13,7 +13,6 @@ import {
   Label,
   InputDescription,
   InputErrors,
-  InputSpacer,
   validateInput,
 } from 'strapi-helper-plugin';
 
@@ -39,7 +38,7 @@ class WysiwygWithErrors extends React.Component {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     // Show required error if the input's value is received after the compo is mounted
     if (!isEmpty(nextProps.value) && !this.state.hasInitialValue) {
       this.setState({ hasInitialValue: true });
@@ -77,7 +76,6 @@ class WysiwygWithErrors extends React.Component {
       inputClassName,
       inputDescription,
       inputDescriptionClassName,
-      inputDescriptionStyle,
       inputStyle,
       label,
       labelClassName,
@@ -94,7 +92,11 @@ class WysiwygWithErrors extends React.Component {
     } = this.props;
     const handleBlur = isFunction(onBlur) ? onBlur : this.handleBlur;
 
-    let spacer = !isEmpty(inputDescription) ? <InputSpacer /> : <div />;
+    let spacer = !isEmpty(inputDescription) ? (
+      <div style={{ height: '.4rem' }} />
+    ) : (
+      <div />
+    );
 
     if (!noErrorsDescription && !isEmpty(this.state.errors)) {
       spacer = <div />;
@@ -105,7 +107,7 @@ class WysiwygWithErrors extends React.Component {
         className={cn(
           styles.containerWysiwyg,
           customBootstrapClass,
-          !isEmpty(className) && className,
+          !isEmpty(className) && className
         )}
         style={style}
       >
@@ -133,7 +135,7 @@ class WysiwygWithErrors extends React.Component {
         <InputDescription
           className={inputDescriptionClassName}
           message={inputDescription}
-          style={inputDescriptionStyle}
+          style={!isEmpty(inputDescription) ? { marginTop: '1.4rem' } : {}}
         />
         <InputErrors
           className={errorsClassName}
@@ -160,7 +162,6 @@ WysiwygWithErrors.defaultProps = {
   inputClassName: '',
   inputDescription: '',
   inputDescriptionClassName: '',
-  inputDescriptionStyle: {},
   inputStyle: {},
   label: '',
   labelClassName: '',
@@ -194,7 +195,6 @@ WysiwygWithErrors.propTypes = {
     }),
   ]),
   inputDescriptionClassName: PropTypes.string,
-  inputDescriptionStyle: PropTypes.object,
   inputStyle: PropTypes.object,
   label: PropTypes.oneOfType([
     PropTypes.string,
