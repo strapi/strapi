@@ -50,7 +50,7 @@ InputNumber.defaultProps = {
   onBlur: () => {},
   onFocus: () => {},
   placeholder: 'app.utils.placeholder.defaultMessage',
-  step: 1,
+  step: 'any',
   style: {},
   tabIndex: '0',
 };
