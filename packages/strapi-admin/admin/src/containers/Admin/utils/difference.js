@@ -11,6 +11,7 @@ function difference(object, base) {
       }
     });
   }
+
   return changes(object, base);
 }
 
