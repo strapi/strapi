@@ -8,6 +8,7 @@ import {
   LiLink,
   PluginHeader,
   PopUpWarning,
+  getYupInnerErrors,
   request,
   templateObject,
 } from 'strapi-helper-plugin';
@@ -202,18 +203,9 @@ function EditView({
       // Validate the form using yup
       await schema.validate(modifiedData, { abortEarly: false });
     } catch (err) {
-      errors = get(err, 'inner', []).reduce((acc, curr) => {
-        acc[
-          curr.path
-            .split('[')
-            .join('.')
-            .split(']')
-            .join('')
-        ] = [{ id: curr.message }];
-
-        return acc;
-      }, {});
+      errors = getYupInnerErrors(err);
     }
+
     dispatch({
       type: 'SET_ERRORS',
       errors,
@@ -280,13 +272,10 @@ function EditView({
           ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
           'SERVER ERROR'
         );
-        const errorSuffix = error.includes('Auth.form')
-          ? 'users-permissions.'
-          : '';
 
         setIsSubmitting(false);
         emitEvent('didNotSaveEntry', { error: err });
-        strapi.notification.error(`${errorSuffix}${error}`);
+        strapi.notification.error(error);
       }
     } catch (err) {
       console.log({ formErrors: err });

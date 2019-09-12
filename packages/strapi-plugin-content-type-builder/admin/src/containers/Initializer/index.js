@@ -13,7 +13,7 @@ class Initializer extends React.PureComponent {
   // eslint-disable-line react/prefer-stateless-function
   componentDidMount() {
     const {
-      admin: { autoReload, currentEnvironment },
+      global: { autoReload, currentEnvironment },
     } = this.props;
 
     let preventComponentRendering;
@@ -42,12 +42,12 @@ class Initializer extends React.PureComponent {
     this.props.updatePlugin(
       pluginId,
       'preventComponentRendering',
-      preventComponentRendering,
+      preventComponentRendering
     );
     this.props.updatePlugin(
       pluginId,
       'blockerComponentProps',
-      blockerComponentProps,
+      blockerComponentProps
     );
     // Emit the event plugin ready
     this.props.updatePlugin(pluginId, 'isReady', true);
@@ -59,7 +59,7 @@ class Initializer extends React.PureComponent {
 }
 
 Initializer.propTypes = {
-  admin: PropTypes.object.isRequired,
+  global: PropTypes.object.isRequired,
   updatePlugin: PropTypes.func.isRequired,
 };
 

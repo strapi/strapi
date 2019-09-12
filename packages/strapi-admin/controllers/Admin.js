@@ -8,6 +8,17 @@ const _ = require('lodash');
  */
 
 module.exports = {
+  async init(ctx) {
+    const uuid = _.get(strapi, ['config', 'uuid'], false);
+    const currentEnvironment = strapi.app.env;
+    const autoReload = _.get(strapi, ['config', 'autoReload'], false);
+    const strapiVersion = _.get(strapi.config, 'info.strapi', null);
+
+    return ctx.send({
+      data: { uuid, currentEnvironment, autoReload, strapiVersion },
+    });
+  },
+
   async getCurrentEnvironment(ctx) {
     try {
       const autoReload = strapi.config.autoReload;
