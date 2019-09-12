@@ -20,6 +20,7 @@ import reducer, { initialState } from './reducer';
 const getTrad = key => `${pluginId}.${key}`;
 
 const ConfigPage = ({
+  emitEvent,
   match: {
     params: { slug },
   },
@@ -58,7 +59,18 @@ const ConfigPage = ({
 
       if (!isEmpty(body)) {
         try {
-          request(`/${pluginId}/${endPoint}`, { method: 'PUT', body }, true);
+          await request(
+            `/${pluginId}/${endPoint}`,
+            { method: 'PUT', body, params: { source: 'db' } },
+            true
+          );
+          emitEvent('willEditSettings', { category: endPoint });
+          dispatch({
+            type: 'SUBMIT_SUCCEEDED',
+          });
+          strapi.notification.success(
+            getTrad('strapi.notification.success.settingsEdit')
+          );
         } catch (err) {
           strapi.notification.error('notification.error');
         }
@@ -86,7 +98,7 @@ const ConfigPage = ({
     ? []
     : [
         {
-          label: `${pluginId}.form.button.cancel`,
+          label: getTrad('form.button.cancel'),
           onClick: () => {
             dispatch({
               type: 'RESET_FORM',
@@ -96,7 +108,7 @@ const ConfigPage = ({
           type: 'button',
         },
         {
-          label: `${pluginId}.form.button.save`,
+          label: getTrad('form.button.save'),
           onClick: handleSubmit,
           kind: 'primary',
           type: 'submit',
@@ -147,6 +159,7 @@ const ConfigPage = ({
 };
 
 ConfigPage.propTypes = {
+  emitEvent: PropTypes.func.isRequired,
   match: PropTypes.shape({
     params: PropTypes.shape({
       slug: PropTypes.string.isRequired,

@@ -12,8 +12,8 @@ import useFetch from '../../hooks/useFetch';
 import MenuSection from '../../components/MenuSection';
 import ConfigPage from '../ConfigPage';
 import LanguagePage from '../LanguagePage';
-/* eslint-disable */
 const Main = ({
+  emitEvent,
   global: { currentEnvironment },
   history: { push },
   location: { pathname },
@@ -29,12 +29,13 @@ const Main = ({
       );
       push(`/plugins/${pluginId}/${firstLink}`);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, isLoading]);
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
   }
-  const [{ sections: menuSections }, { environments }] = data;
+  const [{ sections: menuSections }] = data;
 
   return (
     <ViewContainer>
@@ -55,12 +56,16 @@ const Main = ({
               <Switch>
                 <Route
                   path={`/plugins/${pluginId}/languages`}
-                  component={LanguagePage}
+                  render={routeProps => (
+                    <LanguagePage {...routeProps} emitEvent={emitEvent} />
+                  )}
                   exact
                 />
                 <Route
                   path={`/plugins/${pluginId}/:slug`}
-                  component={ConfigPage}
+                  render={routeProps => (
+                    <ConfigPage {...routeProps} emitEvent={emitEvent} />
+                  )}
                   exact
                 />
               </Switch>
@@ -73,6 +78,7 @@ const Main = ({
 };
 
 Main.propTypes = {
+  emitEvent: PropTypes.func.isRequired,
   global: PropTypes.shape({
     currentEnvironment: PropTypes.string.isRequired,
   }),

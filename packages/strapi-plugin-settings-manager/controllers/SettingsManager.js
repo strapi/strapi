@@ -5,6 +5,21 @@ const fs = require('fs');
 const _ = require('lodash');
 
 module.exports = {
+  application: async ctx => {
+    const application = await strapi
+      .store({
+        environment: '',
+        type: 'core',
+        key: 'application',
+      })
+      .get();
+
+    ctx.send({
+      'application.name': _.get(application, 'name', null),
+      'application.description': _.get(application, 'description', null),
+      'package.version': _.get(strapi.config, 'info.version', null),
+    });
+  },
   menu: async ctx => {
     const Service = strapi.plugins['settings-manager'].services.settingsmanager;
 

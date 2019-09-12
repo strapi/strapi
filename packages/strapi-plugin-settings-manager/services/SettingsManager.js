@@ -37,9 +37,47 @@ module.exports = {
       .get();
 
     return {
-      'application.name': _.get(application, 'name', null),
-      'application.description': _.get(application, 'description', null),
-      'package.version': _.get(strapi.config, 'info.version', null),
+      name: 'form.application.name',
+      description: 'form.application.description',
+      sections: [
+        {
+          name: '',
+          items: [
+            {
+              name: 'form.application.item.name',
+              target: 'application.name',
+              source: 'db',
+              type: 'string',
+              value: _.get(application, 'name', null),
+              validations: {
+                maxLength: 255,
+                required: true,
+              },
+            },
+            {
+              name: 'form.application.item.description',
+              target: 'application.description',
+              source: 'db',
+              type: 'string',
+              value: _.get(application, 'description', null),
+              validations: {
+                maxLength: 255,
+                required: true,
+              },
+            },
+            {
+              name: 'form.application.item.version',
+              target: 'package.version',
+              type: 'string',
+              value: _.get(strapi.config, 'info.version', null),
+              validations: {
+                regex: '^(\\d+\\.)?(\\d+\\.)?(\\*|\\d+)$',
+                required: true,
+              },
+            },
+          ],
+        },
+      ],
     };
   },
 

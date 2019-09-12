@@ -25,6 +25,14 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/configurations/application",
+      "handler": "SettingsManager.application",
+      "config": {
+        "policies": []
+      }
+    },
+    {
       "method": "POST",
       "path": "/configurations/languages",
       "handler": "SettingsManager.createLanguage",
