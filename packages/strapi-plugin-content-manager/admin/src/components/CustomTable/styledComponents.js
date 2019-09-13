@@ -32,7 +32,9 @@ const Thead = styled.thead`
     vertical-align: middle !important;
     > span {
       position: relative;
-      cursor: pointer;
+      &.sortable {
+        cursor: pointer;
+      }
     }
   }
   ${({ isBulkable }) => {

@@ -145,6 +145,7 @@ const MediaPreviewImage = styled(MediaPreviewItem)`
     border-radius: calc(${sizes.big} / 2);
     margin-top: calc(-${sizes.big} - ${sizes.small} - 5px);
     margin-left: calc((-${sizes.big} + ${sizes.small}) / 2);
+    box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.05);
   }
 
   &.hoverable {
