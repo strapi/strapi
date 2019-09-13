@@ -164,10 +164,6 @@ HomePage.childContextTypes = {
   deleteData: PropTypes.func.isRequired,
 };
 
-HomePage.contextTypes = {
-  router: PropTypes.object,
-};
-
 HomePage.defaultProps = {
   params: {
     _limit: 10,
