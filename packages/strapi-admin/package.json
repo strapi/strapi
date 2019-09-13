@@ -79,7 +79,7 @@
     "terser-webpack-plugin": "^1.2.3",
     "url-loader": "^1.1.2",
     "video-react": "^0.13.2",
-    "webpack": "^4.29.6",
+    "webpack": "^4.40.1",
     "webpackbar": "^3.2.0",
     "yup": "^0.27.0"
   },
@@ -102,7 +102,7 @@
   "license": "MIT",
   "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9",
   "devDependencies": {
-    "webpack": "^4.29.6",
+    "webpack": "^4.40.1",
     "webpack-cli": "^3.3.2",
     "webpack-dev-server": "^3.4.1"
   }
