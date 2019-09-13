@@ -8,13 +8,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
-import styles from './styles.scss';
-
 function EntriesNumber({ number }) {
   const id = number > 1 ? 'number.plural' : 'number';
 
   return (
-    <div className={styles.entriesNumberContainer}>
+    <div style={{ color: '#787E8F', fontSize: '13px' }}>
       <FormattedMessage id={`upload.EntriesNumber.${id}`} values={{ number }} />
     </div>
   );

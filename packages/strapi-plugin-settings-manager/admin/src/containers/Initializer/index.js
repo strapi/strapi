@@ -13,7 +13,7 @@ export class Initializer extends React.PureComponent {
   // eslint-disable-line react/prefer-stateless-function
   componentDidMount() {
     const {
-      admin: { autoReload, currentEnvironment },
+      global: { autoReload, currentEnvironment },
     } = this.props;
     let preventComponentRendering;
     let blockerComponentProps;
@@ -38,8 +38,16 @@ export class Initializer extends React.PureComponent {
     }
 
     // Prevent the plugin from being rendered if currentEnvironment === PRODUCTION
-    this.props.updatePlugin(pluginId, 'preventComponentRendering', preventComponentRendering);
-    this.props.updatePlugin(pluginId, 'blockerComponentProps', blockerComponentProps);
+    this.props.updatePlugin(
+      pluginId,
+      'preventComponentRendering',
+      preventComponentRendering
+    );
+    this.props.updatePlugin(
+      pluginId,
+      'blockerComponentProps',
+      blockerComponentProps
+    );
     // Emit the event plugin ready
     this.props.updatePlugin(pluginId, 'isReady', true);
   }
@@ -50,7 +58,7 @@ export class Initializer extends React.PureComponent {
 }
 
 Initializer.propTypes = {
-  admin: PropTypes.object.isRequired,
+  global: PropTypes.object.isRequired,
   updatePlugin: PropTypes.func.isRequired,
 };
 

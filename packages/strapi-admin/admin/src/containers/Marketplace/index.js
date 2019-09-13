@@ -7,7 +7,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Helmet } from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
@@ -15,6 +14,7 @@ import cn from 'classnames';
 import { LoadingIndicatorPage, PluginHeader } from 'strapi-helper-plugin';
 
 // Design
+import PageTitle from '../../components/PageTitle';
 import PluginCard from '../../components/PluginCard';
 
 import injectSaga from '../../utils/injectSaga';
@@ -46,16 +46,11 @@ class Marketplace extends React.Component {
     this.props.resetProps();
   }
 
-  renderHelmet = message => (
-    <Helmet>
-      <title>{message}</title>
-      <meta name="description" content="Description of InstallPluginPage" />
-    </Helmet>
-  );
+  renderHelmet = message => <PageTitle title={message} />;
 
   renderPluginCard = plugin => {
     const {
-      admin: { autoReload, currentEnvironment },
+      global: { autoReload, currentEnvironment },
       availablePlugins,
       downloadPlugin,
       history,
@@ -118,10 +113,13 @@ Marketplace.childContextTypes = {
 Marketplace.defaultProps = {};
 
 Marketplace.propTypes = {
-  admin: PropTypes.object.isRequired,
   availablePlugins: PropTypes.array.isRequired,
   downloadPlugin: PropTypes.func.isRequired,
   getAvailableAndInstalledPlugins: PropTypes.func.isRequired,
+  global: PropTypes.shape({
+    autoReload: PropTypes.bool.isRequired,
+    currentEnvironment: PropTypes.string.isRequired,
+  }),
   history: PropTypes.object.isRequired,
   installedPlugins: PropTypes.array.isRequired,
   isLoading: PropTypes.bool.isRequired,
@@ -137,13 +135,13 @@ function mapDispatchToProps(dispatch) {
       getAvailableAndInstalledPlugins,
       resetProps,
     },
-    dispatch,
+    dispatch
   );
 }
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 
 /* Remove this line if the container doesn't have a route and
@@ -159,5 +157,5 @@ const withSaga = injectSaga({ key: 'marketplace', saga });
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
+  withConnect
 )(Marketplace);
