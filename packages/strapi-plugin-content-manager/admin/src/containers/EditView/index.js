@@ -212,6 +212,22 @@ function EditView({
     });
   };
 
+  const handleChange = ({ target: { name, value, type } }) => {
+    let inputValue = value;
+
+    // Empty string is not a valid date,
+    // Set the date to null when it's empty
+    if (type === 'date' && value === '') {
+      inputValue = null;
+    }
+
+    dispatch({
+      type: 'ON_CHANGE',
+      keys: name.split('.'),
+      value: inputValue,
+    });
+  };
+
   const handleSubmit = async e => {
     e.preventDefault();
     const schema = createYupSchema(layout, { groups: groupLayoutsData });
@@ -278,7 +294,6 @@ function EditView({
         strapi.notification.error(error);
       }
     } catch (err) {
-      console.log({ formErrors: err });
       setIsSubmitting(false);
       const errors = get(err, 'inner', []).reduce((acc, curr) => {
         acc[
@@ -291,6 +306,7 @@ function EditView({
 
         return acc;
       }, {});
+
       dispatch({
         type: 'SET_ERRORS',
         errors,
@@ -322,13 +338,7 @@ function EditView({
           keys: name.split('.'),
         });
       }}
-      onChange={({ target: { name, value } }) => {
-        dispatch({
-          type: 'ON_CHANGE',
-          keys: name.split('.'),
-          value,
-        });
-      }}
+      onChange={handleChange}
       onRemove={keys => {
         dispatch({
           type: 'REMOVE_RELATION',
@@ -448,13 +458,7 @@ function EditView({
                             keys: name.split('.'),
                           });
                         }}
-                        onChange={({ target: { name, value } }) => {
-                          dispatch({
-                            type: 'ON_CHANGE',
-                            keys: name.split('.'),
-                            value,
-                          });
-                        }}
+                        onChange={handleChange}
                         layout={get(groupLayoutsData, group.group, {})}
                         pathname={pathname}
                         removeField={(keys, shouldAddEmptyField) => {
@@ -481,13 +485,7 @@ function EditView({
                             layout={layout}
                             modifiedData={modifiedData}
                             name={name}
-                            onChange={({ target: { name, value } }) => {
-                              dispatch({
-                                type: 'ON_CHANGE',
-                                keys: name.split('.'),
-                                value,
-                              });
-                            }}
+                            onChange={handleChange}
                           />
                         );
                       })}
