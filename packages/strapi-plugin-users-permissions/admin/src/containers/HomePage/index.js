@@ -9,11 +9,9 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
-import cn from 'classnames';
 import { clone, get, includes, isEqual, isEmpty } from 'lodash';
 
 import { HeaderNav, PluginHeader } from 'strapi-helper-plugin';
-// import PluginHeader from 'components/PluginHeader';
 
 import pluginId from '../../pluginId';
 
@@ -26,7 +24,7 @@ import PopUpForm from '../../components/PopUpForm';
 import selectHomePage from './selectors';
 
 // Styles
-import styles from './styles.scss';
+import Wrapper from './Wrapper';
 
 // Actions
 import {
@@ -241,32 +239,31 @@ export class HomePage extends React.Component {
       );
 
     return (
-      <div>
-        <form onSubmit={e => e.preventDefault()}>
-          <div className={cn('container-fluid', styles.containerFluid)}>
-            <PluginHeader
-              title={{ id: 'users-permissions.HomePage.header.title' }}
-              description={{
-                id: 'users-permissions.HomePage.header.description',
-              }}
-              actions={headerActions}
-            />
-            <HeaderNav links={this.headerNavLinks} />
-            {component}
-          </div>
-          <PopUpForm
-            actionType="edit"
-            isOpen={this.state.showModalEdit}
-            dataToEdit={dataToEdit}
-            didCheckErrors={didCheckErrors}
-            formErrors={formErrors}
-            onChange={this.props.onChange}
-            onSubmit={this.handleSubmit}
-            settingType={match.params.settingType}
-            values={get(modifiedData, [this.getEndPoint(), dataToEdit], {})}
+      <form onSubmit={e => e.preventDefault()}>
+        <Wrapper className="container-fluid">
+          <PluginHeader
+            title={{ id: 'users-permissions.HomePage.header.title' }}
+            description={{
+              id: 'users-permissions.HomePage.header.description',
+            }}
+            actions={headerActions}
           />
-        </form>
-      </div>
+          <HeaderNav links={this.headerNavLinks} />
+          {component}
+        </Wrapper>
+
+        <PopUpForm
+          actionType="edit"
+          isOpen={this.state.showModalEdit}
+          dataToEdit={dataToEdit}
+          didCheckErrors={didCheckErrors}
+          formErrors={formErrors}
+          onChange={this.props.onChange}
+          onSubmit={this.handleSubmit}
+          settingType={match.params.settingType}
+          values={get(modifiedData, [this.getEndPoint(), dataToEdit], {})}
+        />
+      </form>
     );
   }
 }

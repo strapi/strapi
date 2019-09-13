@@ -30,6 +30,8 @@ import en from '../../translations/en.json';
 
 import styles from './styles.scss';
 
+import { Wrapper } from './Components';
+
 class PopUpForm extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = { enabled: false, isEditing: false };
@@ -273,7 +275,13 @@ class PopUpForm extends React.Component {
 
   render() {
     const { display } = this.props.values;
-    const { actionType, dataToEdit, settingType } = this.props;
+    const {
+      actionType,
+      dataToEdit,
+      isOpen,
+      onSubmit,
+      settingType,
+    } = this.props;
 
     let header = <span>{dataToEdit}</span>;
 
@@ -290,10 +298,12 @@ class PopUpForm extends React.Component {
       header = <FormattedMessage id={`users-permissions.${display}`} />;
     }
 
+    console.log(actionType);
+
     return (
-      <div className={styles.popUpForm}>
+      <Wrapper>
         <Modal
-          isOpen={this.props.isOpen}
+          isOpen={isOpen}
           toggle={this.context.unsetDataToEdit}
           className={`${styles.modalPosition}`}
         >
@@ -304,7 +314,7 @@ class PopUpForm extends React.Component {
           <div className={styles.headerContainer}>
             <div>{header}</div>
           </div>
-          <form onSubmit={this.props.onSubmit}>
+          <form onSubmit={onSubmit}>
             <ModalBody className={styles.modalBody}>
               <div className="container-fluid">{this.renderForm()}</div>
             </ModalBody>
@@ -317,7 +327,7 @@ class PopUpForm extends React.Component {
               </Button>
               <Button
                 type="submit"
-                onClick={this.props.onSubmit}
+                onClick={onSubmit}
                 className={styles.primary}
               >
                 <FormattedMessage id="users-permissions.PopUpForm.button.save" />
@@ -325,7 +335,7 @@ class PopUpForm extends React.Component {
             </ModalFooter>
           </form>
         </Modal>
-      </div>
+      </Wrapper>
     );
   }
 }
@@ -336,7 +346,6 @@ PopUpForm.contextTypes = {
 
 PopUpForm.defaultProps = {
   settingType: 'providers',
-  // showLoader: false,
 };
 
 PopUpForm.propTypes = {
@@ -348,7 +357,6 @@ PopUpForm.propTypes = {
   onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   settingType: PropTypes.string,
-  // showLoader: PropTypes.bool,
   values: PropTypes.object.isRequired,
 };
 

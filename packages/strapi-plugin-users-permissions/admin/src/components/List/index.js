@@ -8,14 +8,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { map, omitBy, size } from 'lodash';
-import cn from 'classnames';
 
 // Components from strapi-helper-plugin
 import { Button, LoadingBar, LoadingIndicator } from 'strapi-helper-plugin';
 
 import ListRow from '../ListRow';
 
-import styles from './styles.scss';
+import { Flex, ListWrapper, Title, Wrapper } from './Components';
 
 const generateListTitle = (data, settingType) => {
   switch (settingType) {
@@ -100,16 +99,16 @@ function List({
   const object = omitBy(data, v => v.name === 'server'); // Remove the server key when displaying providers
 
   return (
-    <div className={styles.list}>
-      <div className={styles.flex}>
-        <div className={styles.titleContainer}>
+    <Wrapper>
+      <Flex>
+        <Title>
           {showLoaders ? (
             <LoadingBar style={{ marginTop: '0' }} />
           ) : (
             generateListTitle(data, settingType)
           )}
-        </div>
-        <div className={styles.buttonContainer}>
+        </Title>
+        <div>
           {noButton ? (
             ''
           ) : (
@@ -120,18 +119,17 @@ function List({
             </Button>
           )}
         </div>
-      </div>
-      <div
-        className={cn(
-          styles.ulContainer,
-          showLoaders && styles.loadingContainer,
-          showLoaders && settingType === 'roles' && styles.loadingContainerRole,
-        )}
+      </Flex>
+
+      <ListWrapper
+        className={`${showLoaders ? 'loading-container' : ''}${
+          showLoaders && settingType === 'roles-container' ? ' role' : ''
+        }`}
       >
         {showLoaders ? (
           <LoadingIndicator />
         ) : (
-          <ul className={noButton ? styles.listPadded : ''}>
+          <ul className={noButton ? 'padded-list' : ''}>
             {map(object, item => (
               <ListRow
                 deleteData={deleteData}
@@ -143,8 +141,8 @@ function List({
             ))}
           </ul>
         )}
-      </div>
-    </div>
+      </ListWrapper>
+    </Wrapper>
   );
 }
 
