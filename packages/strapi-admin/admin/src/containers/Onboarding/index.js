@@ -10,6 +10,7 @@ import cn from 'classnames';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
+import { GlobalContext } from 'strapi-helper-plugin';
 import injectSaga from '../../utils/injectSaga';
 import injectReducer from '../../utils/injectReducer';
 
@@ -30,6 +31,8 @@ import saga from './saga';
 import styles from './styles.scss';
 
 export class Onboarding extends React.Component {
+  static contextType = GlobalContext;
+
   state = { showVideos: false };
 
   componentDidMount() {
@@ -96,7 +99,6 @@ export class Onboarding extends React.Component {
   render() {
     const { videos, onClick, setVideoDuration } = this.props;
     const { showVideos } = this.state;
-
     const style = showVideos ? {} : { maxWidth: 0 };
 
     return (
@@ -104,14 +106,14 @@ export class Onboarding extends React.Component {
         style={style}
         className={cn(
           styles.videosWrapper,
-          videos.length > 0 ? styles.visible : styles.hidden,
+          videos.length > 0 ? styles.visible : styles.hidden
         )}
       >
         <div
           style={style}
           className={cn(
             styles.videosContent,
-            this.state.showVideos ? styles.shown : styles.hide,
+            this.state.showVideos ? styles.shown : styles.hide
           )}
         >
           <div className={styles.videosHeader}>
@@ -121,7 +123,7 @@ export class Onboarding extends React.Component {
             {videos.length && (
               <p>
                 {Math.floor(
-                  (videos.filter(v => v.end).length * 100) / videos.length,
+                  (videos.filter(v => v.end).length * 100) / videos.length
                 )}
                 <FormattedMessage id="app.components.Onboarding.label.completed" />
               </p>
@@ -159,9 +161,6 @@ export class Onboarding extends React.Component {
     );
   }
 }
-Onboarding.contextTypes = {
-  emitEvent: PropTypes.func,
-};
 
 Onboarding.defaultProps = {
   onClick: () => {},
@@ -196,13 +195,13 @@ function mapDispatchToProps(dispatch) {
       setVideoEnd,
       removeVideos,
     },
-    dispatch,
+    dispatch
   );
 }
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 
 /* Remove this line if the container doesn't have a route and
@@ -218,5 +217,5 @@ const withSaga = injectSaga({ key: 'onboarding', saga });
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
+  withConnect
 )(Onboarding);
