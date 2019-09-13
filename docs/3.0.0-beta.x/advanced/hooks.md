@@ -24,6 +24,7 @@ module.exports = strapi => {
 
     async initialize() {
       // await someAsyncCode()
+      // this().defaults['your_config'] to access to your configs.
     },
   };
 

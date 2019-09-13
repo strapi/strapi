@@ -6,12 +6,9 @@
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
-import cn from 'classnames';
 import PropTypes from 'prop-types';
 
-// import InputCheckBox from 'components/InputCheckbox';
-
-import styles from './styles.scss';
+import StyledLi from './StyledLi';
 
 function ListHeader({ changeSort, sort }) {
   const titles = [
@@ -24,26 +21,32 @@ function ListHeader({ changeSort, sort }) {
     '',
   ];
 
-  const handleChangeSort = (name) => {
-    if (sort === name) {
-      changeSort(`-${name}`);
-    } else if (sort === `-${name}`) {
-      changeSort('hash');
+  const handleChangeSort = name => {
+    if (sort === `${name}:ASC`) {
+      changeSort(`${name}:DESC`);
+    } else if (sort === `${name}:DESC`) {
+      changeSort('hash:ASC');
     } else if (name === 'updated' || name === 'related') {
-      changeSort('hash');
+      changeSort('hash:ASC');
     } else {
-      changeSort(name);
+      changeSort(`${name}:ASC`);
     }
   };
 
-  const shouldDisplaySort = (title) => sort === title && styles.icon || sort === `-${title}` && styles.iconDesc || '';
+  const shouldDisplaySort = title =>
+    (sort === `${title}:ASC` && 'icon') ||
+    (sort === `${title}:DESC` && 'iconDesc') ||
+    '';
 
   return (
-    <li className={styles.listheaderWrapper}>
-      <div className={cn(styles.listHeader)}>
+    <StyledLi>
+      <div className="listHeader">
         <div>
           <div />
-          <div className={shouldDisplaySort('type')} onClick={() => handleChangeSort('type')}>
+          <div
+            className={shouldDisplaySort('type')}
+            onClick={() => handleChangeSort('type')}
+          >
             <FormattedMessage id="upload.ListHeader.type" />
             <span />
           </div>
@@ -51,7 +54,11 @@ function ListHeader({ changeSort, sort }) {
         {titles.map((title, key) => {
           if (title !== '') {
             return (
-              <div key={key} className={shouldDisplaySort(title)} onClick={() => handleChangeSort(title)}>
+              <div
+                key={key}
+                className={shouldDisplaySort(title)}
+                onClick={() => handleChangeSort(title)}
+              >
                 <FormattedMessage id={`upload.ListHeader.${title}`} />
                 <span />
               </div>
@@ -61,7 +68,7 @@ function ListHeader({ changeSort, sort }) {
           return <div key={key} />;
         })}
       </div>
-    </li>
+    </StyledLi>
   );
 }
 
