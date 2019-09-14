@@ -170,23 +170,37 @@ module.exports = {
     const { id } = ctx.params;
     const { email, username, password } = ctx.request.body;
 
-    const userWithSameUsername = await strapi
-      .query('user', 'users-permissions')
-      .findOne({ username });
-
-    if (userWithSameUsername && userWithSameUsername.id != id) {
-      return ctx.badRequest(
-        null,
-        ctx.request.admin
-          ? adminError({
-              message: 'Auth.form.error.username.taken',
-              field: ['username'],
-            })
-          : 'username.alreadyTaken.'
-      );
+    if(ctx.request.body.hasOwnProperty('username') && !username) {
+      return ctx.badRequest('missing.username')
     }
 
-    if (advancedConfigs.unique_email) {
+    if(ctx.request.body.hasOwnProperty('email') && !email) {
+      return ctx.badRequest('missing.email')
+    }
+
+    if(ctx.request.body.hasOwnProperty('password') && !password) {
+      return ctx.badRequest('missing.password')
+    }
+
+    if (username) {
+      const userWithSameUsername = await strapi
+        .query('user', 'users-permissions')
+        .findOne({ username });
+
+      if (userWithSameUsername && userWithSameUsername.id != id) {
+        return ctx.badRequest(
+          null,
+          ctx.request.admin
+            ? adminError({
+                message: 'Auth.form.error.username.taken',
+                field: ['username'],
+              })
+            : 'username.alreadyTaken.'
+        );
+      }
+    }
+
+    if (email && advancedConfigs.unique_email) {
       const userWithSameEmail = await strapi
         .query('user', 'users-permissions')
         .findOne({ email });
@@ -212,7 +226,7 @@ module.exports = {
       ...ctx.request.body,
     };
 
-    if (password != null && password === user.password) {
+    if (password && password === user.password) {
       delete updateData.password;
     }
 
