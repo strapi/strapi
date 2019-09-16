@@ -228,22 +228,22 @@ const schemaBuilder = {
               const [name, action] = acc[type][resolver].split('.');
               const normalizedName = _.toLower(name);
 
-              acc[type][resolver] = Mutation.composeMutationResolver(
-                strapi.plugins.graphql.config._schema.graphql,
+              acc[type][resolver] = Mutation.composeMutationResolver({
+                _schema: strapi.plugins.graphql.config._schema.graphql,
                 plugin,
-                normalizedName,
-                action
-              );
+                name: normalizedName,
+                action,
+              });
               break;
             }
             case 'Query':
             default:
-              acc[type][resolver] = Query.composeQueryResolver(
-                strapi.plugins.graphql.config._schema.graphql,
+              acc[type][resolver] = Query.composeQueryResolver({
+                _schema: strapi.plugins.graphql.config._schema.graphql,
                 plugin,
-                resolver,
-                'force' // Avoid singular/pluralize and force query name.
-              );
+                name: resolver,
+                isSingular: 'force', // Avoid singular/pluralize and force query name.
+              });
               break;
           }
         }
