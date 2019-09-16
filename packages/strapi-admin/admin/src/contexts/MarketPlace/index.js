@@ -17,7 +17,7 @@ MarketPlaceContextProvider.defaultProps = {};
 
 MarketPlaceContextProvider.propTypes = {
   children: PropTypes.node.isRequired,
-  dowloadPlugin: PropTypes.func.isRequired,
+  downloadPlugin: PropTypes.func.isRequired,
 };
 
 export {
