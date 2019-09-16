@@ -208,10 +208,10 @@ const preProcessGroupByData = function({ result, fieldKey, filters, model }) {
         return {
           ...filters,
           where: {
-            ...filters.where || {},
-            [fieldKey]: value._id
-          }
-        }
+            ...(filters.where || {}),
+            [fieldKey]: value._id,
+          },
+        };
       },
     };
   });
@@ -244,7 +244,6 @@ const createGroupByFieldsResolver = function(model, fields, name) {
     fieldResolver,
     fieldKey
   ) => {
-  
     const params = {
       ...GraphQLQuery.convertToParams(_.omit(filters, 'where')),
       ...GraphQLQuery.convertToQuery(filters.where),
@@ -257,8 +256,6 @@ const createGroupByFieldsResolver = function(model, fields, name) {
     }).group({
       _id: `$${fieldKey}`,
     });
-
-    
 
     return preProcessGroupByData({
       result,
@@ -359,6 +356,9 @@ const formatConnectionAggregator = function(fields, model, modelName) {
       count(obj, options, context) {
         const opts = GraphQLQuery.convertToQuery(obj.where);
 
+        if (opts._q) { // allow search param
+          return strapi.query(modelName).countSearch(opts);
+        }
         return strapi.query(modelName).count(opts);
       },
       totalCount(obj, options, context) {
