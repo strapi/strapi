@@ -25,7 +25,6 @@ import {
   pluginLoaded,
   unfreezeApp,
   updatePlugin,
-  getAppPluginsSucceeded,
 } from './containers/App/actions';
 import { showNotification } from './containers/NotificationProvider/actions';
 
@@ -53,8 +52,6 @@ const store = configureStore(initialState, history);
 const { dispatch } = store;
 const MOUNT_NODE =
   document.getElementById('app') || document.createElement('div');
-
-dispatch(getAppPluginsSucceeded(Object.keys(plugins)));
 
 Object.keys(plugins).forEach(plugin => {
   const currentPlugin = plugins[plugin];

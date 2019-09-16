@@ -7,7 +7,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-// import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import { isEmpty } from 'lodash';
@@ -26,8 +25,8 @@ import pluginId from '../../pluginId';
 import EntriesNumber from '../../components/EntriesNumber';
 import List from '../../components/List';
 import PluginInputFile from '../../components/PluginInputFile';
+import { EntriesWrapper, Wrapper } from './components';
 
-// Actions
 import {
   changeParams,
   deleteData,
@@ -36,13 +35,7 @@ import {
   onSearch,
   setParams,
 } from './actions';
-
-// Selectors
 import selectHomePage from './selectors';
-
-// Styles
-import styles from './styles.scss';
-
 import reducer from './reducer';
 import saga from './saga';
 
@@ -120,7 +113,7 @@ export class HomePage extends React.Component {
   render() {
     return (
       <ContainerFluid>
-        <div className={styles.homePageUpload}>
+        <Wrapper>
           <PluginHeader
             title={{
               id: 'upload.HomePage.title',
@@ -130,13 +123,13 @@ export class HomePage extends React.Component {
             }}
             overrideRendering={this.renderInputSearch}
           />
-        </div>
+        </Wrapper>
         <PluginInputFile
           name="files"
           onDrop={this.props.onDrop}
           showLoader={this.props.uploadFilesLoading}
         />
-        <div className={styles.entriesWrapper}>
+        <EntriesWrapper>
           <div>
             {/* NOTE: Prepare for bulk actions}
               <InputSelect
@@ -148,7 +141,7 @@ export class HomePage extends React.Component {
             */}
           </div>
           <EntriesNumber number={this.props.entriesNumber} />
-        </div>
+        </EntriesWrapper>
         <List
           data={this.props.uploadedFiles}
           changeSort={this.changeSort}
