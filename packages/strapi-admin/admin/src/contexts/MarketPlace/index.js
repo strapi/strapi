@@ -1,0 +1,27 @@
+import React, { createContext, useContext } from 'react';
+import PropTypes from 'prop-types';
+
+const MarketPlaceContext = createContext({});
+
+const MarketPlaceContextProvider = ({ children, ...rest }) => {
+  return (
+    <MarketPlaceContext.Provider value={rest}>
+      {children}
+    </MarketPlaceContext.Provider>
+  );
+};
+
+const useMarketPlaceContext = () => useContext(MarketPlaceContext);
+
+MarketPlaceContextProvider.defaultProps = {};
+
+MarketPlaceContextProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+  dowloadPlugin: PropTypes.func.isRequired,
+};
+
+export {
+  MarketPlaceContext,
+  MarketPlaceContextProvider,
+  useMarketPlaceContext,
+};
