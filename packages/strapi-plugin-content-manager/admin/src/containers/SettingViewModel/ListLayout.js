@@ -32,7 +32,6 @@ function ListLayout({
 
     strapi.notification.info(`${pluginId}.notification.info.minimumFields`);
   };
-
   const fieldName = displayedData[fieldToEditIndex];
   const fieldPath = ['metadatas', fieldName, 'list'];
 
