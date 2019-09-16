@@ -29,7 +29,7 @@ function InputNumber(props) {
           onFocus={props.onFocus}
           placeholder={message}
           ref={props.inputRef}
-          step={!Number.isNaN(Number(props.step)) ? Number(props.step) : 'any'}
+          step={props.step}
           style={props.style}
           tabIndex={props.tabIndex}
           type="number"
