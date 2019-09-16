@@ -414,11 +414,11 @@ const getType = ({ definition, attribute, name, tableExists = false }) => {
     case 'datetime':
     case 'timestamp':
       if (client === 'pg') {
-        return 'timestamp with time zone';
+        return 'timestamp with time zone DEFAULT NULL';
       } else if (client === 'sqlite3' && tableExists) {
         return 'timestamp DEFAULT NULL';
       }
-      return 'timestamp DEFAULT CURRENT_TIMESTAMP';
+      return 'timestamp DEFAULT NULL';
     case 'timestampUpdate':
       switch (client) {
         case 'pg':
