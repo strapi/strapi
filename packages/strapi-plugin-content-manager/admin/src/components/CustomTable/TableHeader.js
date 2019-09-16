@@ -57,7 +57,7 @@ function TableHeader({ headers, isBulkable }) {
                 }
               }}
             >
-              <span>
+              <span className={header.sortable ? 'sortable' : ''}>
                 {header.label}
                 {sortBy === header.name && (
                   <Icon

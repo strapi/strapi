@@ -489,7 +489,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
  * @param {*} params
  */
 const buildSearchQuery = (qb, model, params) => {
-  const query = (params._q || '').replace(/[^a-zA-Z0-9.-\s]+/g, '');
+  const query = params._q;
 
   const associations = model.associations.map(x => x.alias);
 
@@ -549,7 +549,7 @@ const buildSearchQuery = (qb, model, params) => {
           : `to_tsvector('${attribute}')`
       );
 
-      qb.orWhereRaw(`${searchQuery.join(' || ')} @@ to_tsquery(?)`, query);
+      qb.orWhereRaw(`${searchQuery.join(' || ')} @@ plainto_tsquery(?)`, query);
       break;
     }
   }
