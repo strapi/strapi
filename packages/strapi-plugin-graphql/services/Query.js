@@ -69,7 +69,7 @@ module.exports = {
    * @return Promise or Error.
    */
 
-  composeQueryResolver: function(_schema, plugin, name, isSingular) {
+  composeQueryResolver: function({ _schema, plugin, name, isSingular }) {
     const params = {
       model: name,
     };
@@ -236,7 +236,7 @@ module.exports = {
     }
 
     if (strapi.plugins['users-permissions']) {
-      policies.push('plugins.users-permissions.permissions');
+      policies.unshift('plugins.users-permissions.permissions');
     }
 
     // Populate policies.

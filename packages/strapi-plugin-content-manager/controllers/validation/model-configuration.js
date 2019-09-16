@@ -45,12 +45,12 @@ const createSettingsSchema = (model, schema) => {
       // should be reset when the type changes
       mainField: yup
         .string()
-        .oneOf(validAttributes)
+        .oneOf(validAttributes.concat('id'))
         .default('id'),
       // should be reset when the type changes
       defaultSortBy: yup
         .string()
-        .oneOf(validAttributes)
+        .oneOf(validAttributes.concat('id'))
         .default('id'),
       defaultSortOrder: yup
         .string()

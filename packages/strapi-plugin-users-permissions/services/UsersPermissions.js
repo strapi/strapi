@@ -394,7 +394,7 @@ module.exports = {
       // We have to know the difference to add or remove
       // the permissions entries in the database.
       const toRemove = _.difference(stringActions, currentActions).map(
-        key => actionsMap[key]
+        splitted
       );
 
       const toAdd = (permissions < 1
@@ -419,7 +419,7 @@ module.exports = {
       // Execute request to update entries in database for each role.
       await Promise.all([
         Promise.all(roles.map(createActions)),
-        Promise.all(toRemove.map(id => query.delete({ id }))),
+        Promise.all(toRemove.map(action => query.delete(action))),
       ]);
     }
   },
