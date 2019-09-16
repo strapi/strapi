@@ -201,14 +201,6 @@ module.exports = {
       if (_.isFunction(resolver)) {
         const normalizedName = _.toLower(name);
 
-        let primaryKey;
-
-        if (plugin) {
-          primaryKey = strapi.plugins[plugin].models[normalizedName].primaryKey;
-        } else {
-          primaryKey = strapi.models[normalizedName].primaryKey;
-        }
-
         if (options.input && options.input.where) {
           context.params = Query.convertToParams(options.input.where || {});
         } else {

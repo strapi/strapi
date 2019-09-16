@@ -74,10 +74,6 @@ module.exports = {
       model: name,
     };
 
-    const model = plugin
-      ? strapi.plugins[plugin].models[name]
-      : strapi.models[name];
-
     // Extract custom resolver or type description.
     const { resolver: handler = {} } = _schema;
 
