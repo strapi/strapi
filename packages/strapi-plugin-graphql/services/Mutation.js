@@ -210,10 +210,7 @@ module.exports = {
         }
 
         if (options.input && options.input.where) {
-          context.params = Query.convertToParams(
-            options.input.where || {},
-            primaryKey
-          );
+          context.params = Query.convertToParams(options.input.where || {});
         } else {
           context.params = {};
         }

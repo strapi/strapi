@@ -18,9 +18,9 @@ module.exports = {
    * @return Object
    */
 
-  convertToParams: (params, primaryKey) => {
+  convertToParams: params => {
     return Object.keys(params).reduce((acc, current) => {
-      const key = current === 'id' ? primaryKey : `_${current}`;
+      const key = current === 'id' ? 'id' : `_${current}`;
       acc[key] = params[current];
       return acc;
     }, {});
@@ -190,7 +190,7 @@ module.exports = {
         return async (ctx, next) => {
           ctx.params = {
             ...params,
-            [model.primaryKey]: ctx.query[model.primaryKey],
+            id: ctx.query.id,
           };
 
           // Return the controller.
@@ -282,24 +282,12 @@ module.exports = {
         // cause a lost of the Object prototype.
         const opts = this.amountLimiting(_options);
 
-        Object.defineProperties(ctx, {
-          query: {
-            value: {
-              ...this.convertToParams(
-                _.omit(opts, 'where'),
-                model ? model.primaryKey : 'id'
-              ),
-              ...this.convertToQuery(opts.where),
-            },
-            writable: true,
-            configurable: true,
-          },
-          params: {
-            value: this.convertToParams(opts, model ? model.primaryKey : 'id'),
-            writable: true,
-            configurable: true,
-          },
-        });
+        ctx.query = {
+          ...this.convertToParams(_.omit(opts, 'where')),
+          ...this.convertToQuery(opts.where),
+        };
+
+        ctx.params = this.convertToParams(opts);
 
         if (isController) {
           const values = await resolver.call(null, ctx, null);
