@@ -56,7 +56,7 @@ import makeSelectEditPage from './selectors';
 import reducer from './reducer';
 import saga from './saga';
 
-import styles from './styles.scss';
+import { Loader, Title, Separator, Wrapper } from './Components';
 
 export class EditPage extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
@@ -132,7 +132,7 @@ export class EditPage extends React.Component {
   };
 
   renderFirstBlock = () => (
-    <React.Fragment>
+    <>
       <div className="col-md-6">
         <div className="row">
           <Input
@@ -190,9 +190,9 @@ export class EditPage extends React.Component {
         values={get(this.props.editPage, ['modifiedData', 'users'])}
       />
       <div className="col-md-12">
-        <div className={styles.separator} />
+        <Separator />
       </div>
-    </React.Fragment>
+    </>
   );
 
   render() {
@@ -228,9 +228,9 @@ export class EditPage extends React.Component {
     }
 
     return (
-      <div>
+      <Wrapper>
         <BackHeader onClick={() => this.props.history.goBack()} />
-        <div className={cn('container-fluid', styles.containerFluid)}>
+        <div className="container-fluid">
           <PluginHeader
             title={{
               id: pluginHeaderTitle,
@@ -247,30 +247,27 @@ export class EditPage extends React.Component {
             }}
             actions={pluginHeaderActions}
           />
-          <div className={cn('row', styles.container)}>
+          <div className="form-wrapper row">
             <div className="col-md-12">
-              <div className={styles.main_wrapper}>
-                <div className={styles.titleContainer}>
+              <div className="form-container">
+                <Title>
                   <FormattedMessage id="users-permissions.EditPage.form.roles" />
-                </div>
-                <form className={styles.form}>
+                </Title>
+                <form>
                   <div className="row">
                     {this.showLoaderForm() ? (
-                      <div className={styles.loaderWrapper}>
+                      <Loader>
                         <LoadingIndicator />
-                      </div>
+                      </Loader>
                     ) : (
                       this.renderFirstBlock()
                     )}
                   </div>
                   <div className="row" style={{ marginRight: '-30px' }}>
                     {this.showLoaderPermissions() && (
-                      <div
-                        className={styles.loaderWrapper}
-                        style={{ minHeight: '400px' }}
-                      >
+                      <Loader style={{ minHeight: '400px' }}>
                         <LoadingIndicator />
-                      </div>
+                      </Loader>
                     )}
                     {!this.showLoaderPermissions() && (
                       <Plugins
@@ -295,7 +292,7 @@ export class EditPage extends React.Component {
             </div>
           </div>
         </div>
-      </div>
+      </Wrapper>
     );
   }
 }

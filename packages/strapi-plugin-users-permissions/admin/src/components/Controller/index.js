@@ -14,6 +14,8 @@ import pluginId from '../../pluginId';
 import InputCheckbox from '../InputCheckboxPlugin';
 import styles from './styles.scss';
 
+import { Header, Label, Separator, Wrapper } from './Components';
+
 class Controller extends React.Component {
   state = { inputSelected: '' };
 
@@ -48,22 +50,18 @@ class Controller extends React.Component {
     const labelId = this.areAllActionsSelected() ? 'unselectAll' : 'selectAll';
 
     return (
-      <div className={styles.controller}>
-        <div className={styles.controllerHeader}>
+      <Wrapper>
+        <Header>
           <div>{this.props.name}</div>
-          <div className={styles.separator} />
+          <Separator />
           <div>
             <div className={cn(styles.inputCheckbox)}>
               <div className="form-check">
-                <label
-                  className={cn(
-                    'form-check-label',
-                    styles.label,
-                    this.areAllActionsSelected() && styles.checked,
-                    !this.areAllActionsSelected() &&
-                      this.hasSomeActionsSelected() &&
-                      styles.someChecked
-                  )}
+                <Label
+                  className={`${this.areAllActionsSelected() &&
+                    'checked'} ${!this.areAllActionsSelected() &&
+                    this.hasSomeActionsSelected() &&
+                    'some-checked'}`}
                   htmlFor={this.props.name}
                 >
                   <input
@@ -75,11 +73,11 @@ class Controller extends React.Component {
                     type="checkbox"
                   />
                   <FormattedMessage id={`${pluginId}.Controller.${labelId}`} />
-                </label>
+                </Label>
               </div>
             </div>
           </div>
-        </div>
+        </Header>
         <div className="row">
           {map(Object.keys(this.props.actions).sort(), actionKey => (
             <InputCheckbox
@@ -93,7 +91,7 @@ class Controller extends React.Component {
             />
           ))}
         </div>
-      </div>
+      </Wrapper>
     );
   }
 }

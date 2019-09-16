@@ -1,82 +1,66 @@
-.plugin {
+import styled from 'styled-components';
+
+const Wrapper = styled.div`
   min-height: 5.4rem;
-
   -webkit-font-smoothing: antialiased;
-}
+`;
 
-.banner {
+const Banner = styled.div`
   display: flex;
   justify-content: space-between;
-
   padding: 0 28px;
   padding-right: 43px;
-  color: #787E8F;
+  color: #787e8f;
   cursor: pointer;
   > div:first-child {
     display: flex;
     line-height: 5.3rem;
   }
-}
+`;
 
-.chevronDown {
+const Chevron = styled.div`
   margin: auto;
   margin-right: 0;
-  &:before {
-    content: '\F078';
-    display: block;
-    color: #787E8F;
-    font-family: 'FontAwesome';
-    font-size: 10px;
-  }
-}
+  color: #787e8f;
+  font-family: 'FontAwesome';
+  font-size: 10px;
+`;
 
-.chevronUp {
-  margin: auto;
-  margin-right: 0;
-  &:before {
-    content: '\F077';
-    display: block;
-    color: #787E8F;
-    font-family: 'FontAwesome';
-    font-size: 10px;
-  }
-}
-
-
-.controllerContainer {
+const ControllerWrapper = styled.div`
   > div:not(:first-child) {
     padding-top: 2.3rem;
   }
   > div:last-child {
     padding-bottom: 1.8rem;
   }
-}
+`;
 
-.description {
-  // width: 50%;
+const Description = styled.div`
   display: block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #8B91A0;
+  color: #8b91a0;
   font-size: 12px;
   font-weight: 400;
-}
+`;
 
-.iconContainer {
+const Icon = styled.div`
   height: 36px;
   width: 70px;
   margin: auto;
   margin-right: 14px;
   color: #333740;
-  border: 1px solid rgba(28,93,231,0.1);
+  border: 1px solid rgba(28, 93, 231, 0.1);
   border-radius: 3px;
   line-height: 36px;
   text-align: center;
-}
+`;
 
-.name {
+const Name = styled.div`
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
-}
+`;
+
+export { Banner, Chevron, ControllerWrapper, Description, Icon, Name, Wrapper };

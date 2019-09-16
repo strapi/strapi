@@ -28,9 +28,7 @@ import { InputsIndex as Input } from 'strapi-helper-plugin';
 // Translations
 import en from '../../translations/en.json';
 
-import styles from './styles.scss';
-
-import { Wrapper } from './Components';
+import { Header, ProviderContainer, Separator, Wrapper } from './Components';
 
 class PopUpForm extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
@@ -133,7 +131,7 @@ class PopUpForm extends React.Component {
 
     if (settingType === 'providers') {
       return (
-        <div className={`row ${styles.providerDisabled}`}>
+        <ProviderContainer className="row">
           <Input
             inputDescription={{
               id: 'users-permissions.PopUpForm.Providers.enabled.description',
@@ -148,7 +146,7 @@ class PopUpForm extends React.Component {
             value={get(values, 'enabled', this.state.enabled)}
           />
 
-          {form.length > 1 && <div className={styles.separator} />}
+          {form.length > 1 && <Separator />}
 
           {map(tail(form), (value, key) => (
             <Input
@@ -203,7 +201,7 @@ class PopUpForm extends React.Component {
               validations={{}}
             />
           )}
-        </div>
+        </ProviderContainer>
       );
     }
 
@@ -298,44 +296,36 @@ class PopUpForm extends React.Component {
       header = <FormattedMessage id={`users-permissions.${display}`} />;
     }
 
-    console.log(actionType);
-
     return (
-      <Wrapper>
-        <Modal
-          isOpen={isOpen}
-          toggle={this.context.unsetDataToEdit}
-          className={`${styles.modalPosition}`}
-        >
+      <Modal
+        isOpen={isOpen}
+        toggle={this.context.unsetDataToEdit}
+        style={{ marginTop: '16.2rem' }}
+      >
+        <Wrapper>
           <ModalHeader
             toggle={this.context.unsetDataToEdit}
-            className={styles.modalHeader}
+            className="modalHeader"
           />
-          <div className={styles.headerContainer}>
-            <div>{header}</div>
-          </div>
+          <Header>{header}</Header>
           <form onSubmit={onSubmit}>
-            <ModalBody className={styles.modalBody}>
+            <ModalBody className="modalBody">
               <div className="container-fluid">{this.renderForm()}</div>
             </ModalBody>
-            <ModalFooter className={styles.modalFooter}>
+            <ModalFooter className="modalFooter">
               <Button
                 onClick={() => this.context.unsetDataToEdit()}
-                className={styles.secondary}
+                className="secondary"
               >
                 <FormattedMessage id="users-permissions.PopUpForm.button.cancel" />
               </Button>
-              <Button
-                type="submit"
-                onClick={onSubmit}
-                className={styles.primary}
-              >
+              <Button type="submit" onClick={onSubmit} className="primary">
                 <FormattedMessage id="users-permissions.PopUpForm.button.save" />
               </Button>
             </ModalFooter>
           </form>
-        </Modal>
-      </Wrapper>
+        </Wrapper>
+      </Modal>
     );
   }
 }
