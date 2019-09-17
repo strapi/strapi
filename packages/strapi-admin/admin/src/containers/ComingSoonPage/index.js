@@ -5,41 +5,31 @@
  */
 
 import React from 'react';
-import { connect } from 'react-redux';
-import Helmet from 'react-helmet';
-
 import { PluginHeader } from 'strapi-helper-plugin';
+import PageTitle from '../../components/PageTitle';
 
-import styles from './styles.scss';
-
-export class ComingSoonPage extends React.Component {
-  // eslint-disable-line react/prefer-stateless-function
-  render() {
-    return (
+const ComingSoonPage = () => {
+  return (
+    <div>
+      <PageTitle title="Coming soon" />
       <div>
-        <Helmet title="Coming soon" />
-        <div>
-          <div className={`container-fluid ${styles.containerFluid}`}>
-            <PluginHeader
-              title={{
-                id: 'app.components.ComingSoonPage.comingSoon',
-              }}
-              description={{
-                id: 'app.components.ComingSoonPage.featuresNotAvailable',
-              }}
-              actions={[]}
-            />
-          </div>
+        <div
+          className="container-fluid"
+          style={{ padding: '18px 30px', overflow: 'hidden' }}
+        >
+          <PluginHeader
+            title={{
+              id: 'app.components.ComingSoonPage.comingSoon',
+            }}
+            description={{
+              id: 'app.components.ComingSoonPage.featuresNotAvailable',
+            }}
+            actions={[]}
+          />
         </div>
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
 
-function mapDispatchToProps(dispatch) {
-  return {
-    dispatch,
-  };
-}
-
-export default connect(mapDispatchToProps)(ComingSoonPage);
+export default ComingSoonPage;
