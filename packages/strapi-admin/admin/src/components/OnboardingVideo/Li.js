@@ -1,4 +1,6 @@
-li.listItem {
+import styled from 'styled-components';
+
+const Li = styled.li`
   display: block;
   padding: 17px 15px;
   cursor: pointer;
@@ -27,7 +29,7 @@ li.listItem {
       z-index: 1;
       width: 100%;
       height: 100%;
-      background-color: rgba(#0E7DE7, .8);
+      background-color: rgba(#0e7de7, 0.8);
     }
     img {
       position: relative;
@@ -100,45 +102,47 @@ li.listItem {
       line-height: 11px;
     }
   }
-}
 
-.hiddenPlayerWrapper {
-  display: none;
-}
+  .hiddenPlayerWrapper {
+    display: none;
+  }
 
-.videoModal {
-  margin-right: auto !important;
-  margin-left: auto !important;
-  .videoModalHeader {
-    padding-bottom: 0;
-    border-bottom: 0;
-    > h5 {
-      font-family: Lato;
-      font-weight: bold!important;
-      font-size: 1.8rem!important;
-      line-height: 3.1rem;
-      color: #333740;
+  .videoModal {
+    margin-right: auto !important;
+    margin-left: auto !important;
+    .videoModalHeader {
+      padding-bottom: 0;
+      border-bottom: 0;
+      > h5 {
+        font-family: Lato;
+        font-weight: bold !important;
+        font-size: 1.8rem !important;
+        line-height: 3.1rem;
+        color: #333740;
+      }
+      > button {
+        display: flex;
+        position: absolute;
+        right: 0;
+        top: 0;
+        margin-top: 0;
+        margin-right: 0;
+        padding: 10px;
+        cursor: pointer;
+        span {
+          line-height: 0.6em;
+        }
+      }
     }
-    > button {
-      display: flex;
-      position: absolute;
-      right: 0;
-      top: 0;
-      margin-top: 0;
-      margin-right: 0;
-      padding: 10px;
-      cursor: pointer;
-      span {
-        line-height: 0.6em;
+    .videoPlayer {
+      > button {
+        top: 50%;
+        margin-top: -0.75em;
+        left: 50%;
+        margin-left: -1.5em;
       }
     }
   }
-  .videoPlayer {
-    > button {
-      top: 50%;
-      margin-top: -0.75em;
-      left: 50%;
-      margin-left: -1.5em;
-    }
-  }
-}
+`;
+
+export default Li;

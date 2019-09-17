@@ -13,9 +13,8 @@ import { FormattedMessage } from 'react-intl';
 import { GlobalContext } from 'strapi-helper-plugin';
 import injectSaga from '../../utils/injectSaga';
 import injectReducer from '../../utils/injectReducer';
-
 import OnboardingVideo from '../../components/OnboardingVideo';
-
+import Wrapper from './Wrapper';
 import {
   getVideos,
   onClick,
@@ -27,8 +26,6 @@ import {
 import makeSelectOnboarding from './selectors';
 import reducer from './reducer';
 import saga from './saga';
-
-import styles from './styles.scss';
 
 export class Onboarding extends React.Component {
   static contextType = GlobalContext;
@@ -101,21 +98,18 @@ export class Onboarding extends React.Component {
     const style = showVideos ? {} : { maxWidth: 0 };
 
     return (
-      <div
+      <Wrapper
         style={style}
-        className={cn(
-          styles.videosWrapper,
-          videos.length > 0 ? styles.visible : styles.hidden
-        )}
+        className={cn(videos.length > 0 ? 'visible' : 'hidden')}
       >
         <div
           style={style}
           className={cn(
-            styles.videosContent,
-            this.state.showVideos ? styles.shown : styles.hide
+            'videosContent',
+            this.state.showVideos ? 'shown' : 'hide'
           )}
         >
-          <div className={styles.videosHeader}>
+          <div className="videosHeader">
             <p>
               <FormattedMessage id="app.components.Onboarding.title" />
             </p>
@@ -128,7 +122,7 @@ export class Onboarding extends React.Component {
               </p>
             )}
           </div>
-          <ul className={styles.onboardingList}>
+          <ul className="onboardingList">
             {videos.map((video, i) => {
               return (
                 <OnboardingVideo
@@ -146,17 +140,17 @@ export class Onboarding extends React.Component {
           </ul>
         </div>
 
-        <div className={styles.openBtn}>
+        <div className="openBtn">
           <button
             onClick={this.handleVideosToggle}
-            className={this.state.showVideos ? styles.active : ''}
+            className={this.state.showVideos ? 'active' : ''}
           >
             <i className="fa fa-question" />
             <i className="fa fa-times" />
             <span />
           </button>
         </div>
-      </div>
+      </Wrapper>
     );
   }
 }
