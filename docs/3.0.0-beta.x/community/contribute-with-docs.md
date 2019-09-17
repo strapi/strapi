@@ -4,6 +4,8 @@ All efforts to contribute to the [Docs](https://strapi.io/documentation/3.0.0-be
 
 You are welcome to create tutorials, articles, and videos for your blog or channels without speaking to a maintainer.
 
+If you have written a **Tutorial**, **How-to** or other teaching material that is _outside_ of the documentation. Then you may submit a pull request with a link to your guide on the [Articles](/3.0.0-beta.x/articles/) page.
+
 ## General Guidelines
 
 Please review the following guidelines and recommendations regarding contributing to the Docs.
@@ -122,15 +124,28 @@ You should now have a running instance of the documentation. The next section ex
 
 ### Understanding the Docs Structure
 
+#### VuePress location
+
 The Strapi docs are power by [VuePress](https://vuepress.vuejs.org/). The docs live in a folder called **docs**. `Path: ./strapi/docs`. The _VuePress_ installation lives in this folder. It has a separate installation and separate dependencies from the rest of the Strapi monorepository.
+
+#### Strapi Version Beta 3.0.0-beta.x maintained
 
 Only the version **3.0.0-beta.x** of Strapi and it's associated packages are currently maintained. So, therefore, only the documentation for this version is maintained. The documentation is located at `./strapi/docs/3.0.0-beta.x/`. Here you find all the content and assets for the documentation.
 
-The _folder names_ in the file directory correspond to the different sections in the left-hand menu. For example, the folder called, "Getting Started," corresponds to the section called, "Getting Started." However, the `h1` tag at the top of the files control the left-menu titles.
+#### Naming folders and left-hand menu items
 
-For example, if you add a page or folder, you do it in the `config.js` file of the Beta docs. `Path: ./strapi/docs/.vuepress/config.js`
+The _folder names_ in the file directory correspond to the different sections in the left-hand menu. For example, the folder called, "Getting Started," corresponds to the section called, "Getting Started."
 
-Let's say you wanted to add a page under `Getting Started` and the file is called `example-tutorial.md`, you would save the file in the folder called `/getting-started/`. Next, you would modify the `config.s` file like the example below:
+However, the `h1` tag at the top of the files control the left-menu names.
+
+#### VuePress config.js file
+
+If you add a page or folder, you do it in the `config.js` file of the Beta docs. `Path: ./strapi/docs/.vuepress/config.js`
+
+Let's say you wanted to add a page under `Getting Started` and the file is called `example-tutorial.md`, you would:
+
+- Save the file `example-tutorial.md` in the folder called `/getting-started/`
+- Modify the `config.s` file like the example below:
 
 `Path: ./strapi/docs/.vuepress/config.js`
 
@@ -149,19 +164,27 @@ module.exports = [
   },
 ```
 
-Next, if you now wanted the **left-hand** menu to have a link to **Example Tutorial**, you would need to add an `h1` tag with `Example Tutorial`, like the below example:
+- If you now wanted the **left-hand** menu to have a link to **Example Tutorial**, you would need to add an `h1` tag with `Example Tutorial`, like the below example:
 
 ```md
 # Example Tutorial
 
-This is an Example Tutorial....
+This is an Example Tutorial...
 ```
 
-You should understand that [VuePress]() automatically turns `h2` and `h3` tags into correctly formed **submenu items** and **nested submenu items**. These display in the left-hand navigation underneath the correct article heading as determined by the `h1` tag on the page.
+#### VuePress Submenus
 
-Now, if you need to add images to the file, there is a folder called `assets`, the `Path: ./docs/3.0.0-beta.x/assets`. When you add images, these images need are added to a new folder in the `assets` folder. The name of the folder, should match the name of the file and be placed in a matching directory to the directory of the file.
+[VuePress]() automatically turns `h2` and `h3` tags into correctly formed **submenu items** and **nested submenu items**. These display in the left-hand navigation underneath the correct article heading as determined by the `h1` tag (see above) on the page.
 
-For example, the `example-tutorial.md` file is located in the `/getting-started/` directory.
+#### Adding Images
+
+If you need to add images to the file, there is a folder called `assets`, the `Path: ./docs/3.0.0-beta.x/assets`.
+
+1. Each section should have a folder in the `assets` folder. For example, **Getting Started** is aa Section.
+2. Within the `.assets/section-name` folder, create another folder with the same name of your `.md` file
+3. Place images related to the new page in the correct folder with the same name.
+
+For example, the `example-tutorial` folder is located in the `/getting-started/` directory.
 
 ```js
 module.exports = [
@@ -193,9 +216,11 @@ DOCS
 │ └───etc
 ```
 
-**Note:** Images are not linked outside the documentation, but **can** link to an image saved in a different directory. Mainly if the image already exists.
+**Note:** Images **can** link to an image saved in a different directory. Especially if the image already exists. Images included in the documentation must not link to external images but be images downloaded into the appropriate folders (as above).
 
-These above guidelines illustrate how to add pages, images, and the structure of the documentation. The documentation is in a language called [Markdown](https://guides.github.com/features/mastering-markdown/), you can do this [Markdown Tutorial](https://www.markdowntutorial.com) to learn how to use Markdown.
+#### Summary
+
+These above guidelines illustrate how to add pages, images, and the structure of the documentation. The documentation is written in [Markdown](https://guides.github.com/features/mastering-markdown/), you can follow this [Markdown Tutorial](https://www.markdowntutorial.com) to learn more.
 
 ### Submitting new documentation
 
@@ -204,35 +229,29 @@ Submitting new documentation generally involves submitting new [Tutorials](/3.0.
 **NOTE:** If you are providing _new examples_ for existing [Reference Topics](http://localhost:8080/documentation/3.0.0-beta.x/community/contribute-with-docs.html#reference-topics), then the next section on [adding, modifying and deleting content](http://localhost:8080/documentation/3.0.0-beta.x/community/contribute-with-docs.html#adding-modifying-deleting-content-from-the-docs) applies.
 
 - Before you start to determine if you're writing a new **Tutorial** or a new **How-to**
-- Outline the **Tutorial** or a new **How-to**.
-- Speak to a Strapi Maintainer or open an issue on GitHub with the outline to receive feedback.
-- Create a GitHub repo with your app for the **Tutorial** or for the code for the **How-to**.
-- Show this code to the Strapi Maintainer and address any feedback
-- Following the [Docs Style Guide](http://localhost:8080/documentation/3.0.0-beta.x/community/contribute-with-docs.html#docs-style-guide) below, write your Tutorial and make a pull request.
+- Outline the **Tutorial** or a new **How-to**
+- Create a GitHub repo with your app for the **Tutorial** or for the code for the **How-to**
+- Following the [Docs Style Guide](http://localhost:8080/documentation/3.0.0-beta.x/community/contribute-with-docs.html#docs-style-guide) below, write your Tutorial and make a pull request
 
-The above steps allow proceeding confidently, knowing your contribution can be accepted.
+The above steps allow proceeding confidently and knowing your contribution can be accepted.
 
 #### Tips
 
 1. Make sure that following the steps results in a working app (for Tutorials) or working code (for How-tos).
-2. Smaller workable apps are better than large apps that have many moving parts.
-3. If you have any questions, please ask!
+2. Smaller workable and tested apps are better than large apps that have many moving parts.
+3. If you have any questions, please ask! You can ask in our [Slack Channel](strapi.slack.com) or in the comments in GitHub if there is a Pull Request or an open issue regarding the docs you are writing.
 
 ### Adding / Modifying / Deleting Content from the Docs
 
 _Adding, modifying, and deleting content_ from the documentation follows the [guidelines for making a Pull Request](/3.0.0-beta.x/community/contribute-with-code.html#before-submitting-a-pull-request) to the Strapi monorepo. For correcting typos, or clarifications, this is a relatively straightforward process.
 
-**Tutorials** and **How-tos** are sometimes by a members of the community. A byline appears towards the title with a **Written by: Paul Bocuse**. If you make _significant_ revisions to the **Tutorial** or **How-tos**, then the byline would change and include your name, like so: **Original Author: Paul Bocuse, Revised by: Your Name**. You should link to your GitHub from your name.
+**Tutorials** and **How-tos** are sometimes written by community members. A byline appears towards the title with a **Written by: Paul Bocuse**. If you make _significant_ revisions to the **Tutorial** or **How-tos**, then the byline would change and include your name, like so: **Original Author: Paul Bocuse, Revised by: Your Name**. You should link your GitHub account to your name.
 
 **Examples** are generally added to **Reference Topics** and **How-tos**. The examples are added directly in the existing content.
 
-### Submitting an Externally Hosted Tutorial
-
-If you have written a **Tutorial**, **How-to** or other teaching material that is _outside_ of the documentation. Then you may submit a pull request with a link to your guide on the [Articles](/3.0.0-beta.x/articles/) page.
-
 ### Docs Style Guide
 
-This style guide exists to show and explain the standards and style of how our documentation is written. We are offering this style guide to help you stay consistent with the existing documentation.
+This style guide exists to show and explain the standards and style of how our documentation is written. Its purpose is to help you stay consistent with the existing documentation.
 
 ---
 
