@@ -104,7 +104,7 @@ class InputSearchContainer extends React.Component {
           <Addon
             className={`input-group-addon ${this.state.isFocused && 'focus'}`}
           >
-            <i class="fas fa-search"></i>
+            <i className="fas fa-search"></i>
           </Addon>
           <FormattedMessage id="users-permissions.InputSearch.placeholder">
             {message => (

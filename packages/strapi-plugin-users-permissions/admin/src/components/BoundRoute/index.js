@@ -54,7 +54,11 @@ BoundRoute.defaultProps = {
 };
 
 BoundRoute.propTypes = {
-  route: PropTypes.object,
+  route: PropTypes.shape({
+    handler: PropTypes.string,
+    method: PropTypes.string,
+    path: PropTypes.string,
+  }),
 };
 
 export default BoundRoute;
