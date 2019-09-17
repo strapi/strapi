@@ -63,21 +63,50 @@ module.exports = {
     return entry;
   },
 
-  delete(params, { source }) {
-    return strapi.query(params.model, source).delete({ id: params.id });
+ async delete(params, { source }) {
+    const { primaryKey, associations } = strapi.query(params.model, source);
+     const uploadRelations = _.map(
+      associations.filter(obj => obj.plugin == 'upload'),
+      'alias'
+    );
+
+
+    if (uploadRelations.length > 0) {
+       const filter = { [`${primaryKey}_in`]: [params.id], _limit: 100 };
+    await this.deleteManyFiles(uploadRelations, filter, params.model, source, primaryKey);
+    
+    }
+      return strapi.query(params.model, source).delete({ id: params.id });
+    
+
+
+    
   },
 
-  deleteMany(params, query) {
+  async deleteMany(params, query) {
     const { source } = query;
     const { model } = params;
 
     const toRemove = Object.values(_.omit(query, 'source'));
-    const { primaryKey } = strapi.query(model, source);
+
+    const { primaryKey, associations } = strapi.query(model, source);
+
+    const uploadRelations = _.map(
+      associations.filter(obj => obj.plugin == 'upload'),
+      'alias'
+    );
+
     const filter = { [`${primaryKey}_in`]: toRemove, _limit: 100 };
 
-    return strapi.query(model, source).delete(filter);
+    if (uploadRelations.length > 0) {
+     await  this.deleteManyFiles(uploadRelations, filter, model, source, primaryKey);
+      
+    } 
+      return strapi.query(model, source).delete(filter);
+    
   },
 
+  
   search(params, query) {
     const { model } = params;
     const { source } = query;
@@ -89,5 +118,48 @@ module.exports = {
     const { model } = params;
     const { source, _q } = query;
     return strapi.query(model, source).countSearch({ _q });
+  },
+
+
+  async deleteManyFiles(uploadRelations, filter, model, source, primaryKey) {
+    const fields = await strapi.query(model, source).find(filter);
+    let ids = fields.map(field => {
+      return _.map(
+        uploadRelations.map(uploadRelation => field[`${uploadRelation}`]),
+        `${primaryKey}`
+      ).filter(e => e != null);
+    });
+    ids = [].concat(...ids);
+
+    const filterUpload = { [`${primaryKey}_in`]: ids, _limit: 100 };
+
+    const files = await strapi.query('file', 'upload').find(filterUpload);
+    const config = await strapi
+      .store({
+        environment: strapi.config.environment,
+        type: 'plugin',
+        name: 'upload'
+      })
+      .get({ key: 'provider' });
+
+    const provider = _.cloneDeep(
+      _.find(strapi.plugins.upload.config.providers, {
+        provider: config.provider
+      })
+    );
+    _.assign(provider, config);
+    const actions = provider.init(config);
+
+    let fileIds = files.map(file => file.id);
+
+    const deleteFile = async file => {
+      if (file.provider === provider.provider) {
+        await actions.delete(file);
+      }
+    };
+    Promise.all(files.map(file => deleteFile(file)));
+    await strapi
+      .query('file', 'upload')
+      .delete({ [`${primaryKey}_in`]: fileIds, _limit: 100 });
   },
 };
