@@ -381,8 +381,8 @@ module.exports = {
       (acc, curr) => {
         const attribute = attributes[curr];
         const isField =
-          !attribute.hasOwnProperty('model') &&
-          !attribute.hasOwnProperty('collection');
+          !_.has(attribute, 'model') &&
+          !_.has(attribute, 'collection');
 
         if (attribute.required) {
           acc.required.push(curr);
@@ -660,7 +660,8 @@ module.exports = {
           const { repeatable, group, min, max } = attribute;
 
           const cmp = this.generateMainComponent(
-            strapi.groups[group].attributes
+            strapi.groups[group].attributes,
+            strapi.groups[group].associations
           );
 
           if (repeatable) {
@@ -1550,8 +1551,8 @@ module.exports = {
       .map(attr => {
         const attribute = modelAttributes[attr];
         const isField =
-          !attribute.hasOwnProperty('model') &&
-          !attribute.hasOwnProperty('collection');
+          !_.has(attribute, 'model') &&
+          !_.has(attribute, 'collection');
 
         if (!isField) {
           const name = attribute.model || attribute.collection;
@@ -1758,7 +1759,7 @@ module.exports = {
   mergeComponents: (initObj, srcObj) => {
     const cleanedObj = Object.keys(_.get(initObj, 'schemas', {})).reduce(
       (acc, current) => {
-        const targetObj = _.get(srcObj, ['schemas'], {}).hasOwnProperty(current)
+        const targetObj = _.has(_.get(srcObj, ['schemas'], {}), current)
           ? srcObj
           : initObj;
 
@@ -1778,7 +1779,7 @@ module.exports = {
 
   mergePaths: function(initObj, srcObj) {
     return Object.keys(initObj.paths).reduce((acc, current) => {
-      if (_.get(srcObj, ['paths'], {}).hasOwnProperty(current)) {
+      if (_.has(_.get(srcObj, ['paths'], {}), current)) {
         const verbs = Object.keys(initObj.paths[current]).reduce(
           (acc1, curr) => {
             const verb = this.mergeVerbObject(

@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { has } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
 import pluginId from '../../pluginId';
@@ -53,7 +54,7 @@ class AttributesPickerModal extends React.Component {
     const appPlugins = plugins;
 
     return attributes.filter(attr => {
-      if (appPlugins.hasOwnProperty('upload')) {
+      if (has(appPlugins, 'upload')) {
         return true;
       }
 

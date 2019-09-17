@@ -42,6 +42,7 @@ module.exports = {
   rules: {
     'generator-star-spacing': 0,
     'no-console': 0,
+    'require-atomic-updates': 0,
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
   },
