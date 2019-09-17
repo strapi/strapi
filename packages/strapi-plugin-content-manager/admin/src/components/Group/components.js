@@ -36,9 +36,7 @@ const Button = styled.div`
 `;
 
 const FormWrapper = styled.div`
-  padding-top: 27px;
-  padding-left: 20px;
-  padding-right: 20px;
+  padding: 27px 20px 9px 20px;
   border-top: 1px solid
     ${({ hasErrors, isOpen }) => {
       if (hasErrors) {

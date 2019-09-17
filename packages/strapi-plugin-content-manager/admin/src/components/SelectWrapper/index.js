@@ -154,7 +154,6 @@ function SelectWrapper({
           </label>
           {isSingle && link}
         </div>
-        {!isEmpty(description) && <p className="description">{description}</p>}
       </Nav>
       <Component
         addRelation={value => {
@@ -188,7 +187,7 @@ function SelectWrapper({
         targetModel={targetModel}
         value={value}
       />
-      <div style={{ marginBottom: 18 }} />
+      {!isEmpty(description) && <p className="description">{description}</p>}
     </Wrapper>
   );
 }

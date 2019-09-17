@@ -2,8 +2,6 @@ import styled from 'styled-components';
 
 const Wrapper = styled.div`
   position: relative;
-  margin-bottom: 27px;
-
   label {
     width: 100%;
     overflow: hidden;
@@ -99,14 +97,21 @@ const Wrapper = styled.div`
       }
     }
   }
+  .description {
+    color: #9ea7b8;
+    font-family: 'Lato';
+    font-size: 1.2rem;
+    margin-top: 1.3rem;
+    margin-bottom: 0;
+    line-height: 1.2rem;
+    padding-bottom: 1.1rem;
+  }
 `;
 
 const Nav = styled.nav`
   > div {
     display: flex;
-
     justify-content: space-between;
-
     a {
       color: #007eff !important;
       font-size: 1.3rem;
@@ -116,12 +121,6 @@ const Nav = styled.nav`
         cursor: pointer;
       }
     }
-  }
-  .description {
-    color: #9ea7b8;
-    font-family: 'Lato';
-    font-size: 1.2rem;
-    margin-top: -5px;
   }
 `;
 
