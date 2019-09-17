@@ -30,7 +30,7 @@ import App from 'containers/App';
 
 const layout = (() => {
   try {
-    return require('../../../../config/layout.js'); // eslint-disable-line import/no-unresolved
+    return require('../../../../config/layout.js');
   } catch (err) {
     return null;
   }
@@ -38,7 +38,7 @@ const layout = (() => {
 
 const injectedComponents = (() => {
   try {
-    return require('injectedComponents').default; // eslint-disable-line import/no-unresolved
+    return require('injectedComponents').default;
   } catch (err) {
     return [];
   }
@@ -80,7 +80,7 @@ if (module.hot) {
 // Require the Initializer component
 const initializer = (() => {
   try {
-    return require('../../../../admin/src/initializer.js'); // eslint-disable-line import/no-unresolved
+    return require('../../../../admin/src/initializer.js');
   } catch (err) {
     return null;
   }
@@ -89,7 +89,7 @@ const initializer = (() => {
 // Require the plugin's lifecycle
 const lifecycles = (() => {
   try {
-    return require('../../../../admin/src/lifecycles.js'); // eslint-disable-line import/no-unresolved
+    return require('../../../../admin/src/lifecycles.js');
   } catch (err) {
     return null;
   }

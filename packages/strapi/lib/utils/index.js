@@ -1,12 +1,11 @@
 'use strict';
 
-/* eslint-disable import/order */
 /* eslint-disable no-unused-vars */
 /* eslint-disable prefer-template */
 // Dependencies.
 const fs = require('fs');
 const path = require('path');
-const { map } = require('async'); // eslint-disable-line import/order
+const { map } = require('async');
 const {
   setWith,
   merge,

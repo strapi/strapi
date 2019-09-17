@@ -11,7 +11,6 @@ import Label from './Label';
 import P from './P';
 
 /* eslint-disable react/no-string-refs */
-/* eslint-disable jsx-a11y/label-has-for */
 /* eslint-disable react/jsx-tag-spacing */
 class PluginInputFile extends React.PureComponent {
   state = { isDraging: false };

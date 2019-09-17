@@ -92,7 +92,6 @@ export class Onboarding extends React.Component {
     this.props.setVideoEnd(index, true);
   };
 
-  // eslint-disable-line jsx-handler-names
   render() {
     const { videos, onClick, setVideoDuration } = this.props;
     const { showVideos } = this.state;
