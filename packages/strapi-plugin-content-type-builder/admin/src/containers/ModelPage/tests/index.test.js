@@ -52,7 +52,6 @@ const renderComponent = (props = {}) => {
       </GlobalContextProvider>
     </BrowserRouter>,
     messages
-    // appContext
   );
 };
 
