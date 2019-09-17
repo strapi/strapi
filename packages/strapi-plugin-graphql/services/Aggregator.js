@@ -143,8 +143,8 @@ const extractType = function(_type, attributeType) {
   return isPrimitiveType(_type)
     ? _type.replace('!', '')
     : isEnumType(attributeType)
-      ? 'String'
-      : 'ID';
+    ? 'String'
+    : 'ID';
 };
 
 /**
@@ -169,11 +169,20 @@ const extractType = function(_type, attributeType) {
  *   age: function ageResolver() { .... }
  * }
  */
-const createAggregationFieldsResolver = function(model, fields, operation, typeCheck) {
+const createAggregationFieldsResolver = function(
+  model,
+  fields,
+  operation,
+  typeCheck
+) {
   return createFieldsResolver(
     fields,
-    async (filters, options, context, fieldResolver, fieldKey) => {
-      // eslint-disable-line no-unused-vars
+    async (obj, options, context, fieldResolver, fieldKey) => {
+      const filters = convertRestQueryParams({
+        ...GraphQLQuery.convertToParams(_.omit(obj, 'where')),
+        ...GraphQLQuery.convertToQuery(obj.where),
+      });
+
       return buildQuery({ model, filters, aggregate: true })
         .group({
           _id: null,
@@ -194,7 +203,16 @@ const preProcessGroupByData = function({ result, fieldKey, filters, model }) {
   return _.map(_result, value => {
     return {
       key: value._id,
-      connection: () => filters,
+      connection: () => {
+        // filter by the grouped by value in next connection
+        return {
+          ...filters,
+          where: {
+            ...(filters.where || {}),
+            [fieldKey]: value._id,
+          },
+        };
+      },
     };
   });
 };
@@ -219,7 +237,13 @@ const preProcessGroupByData = function({ result, fieldKey, filters, model }) {
  * }
  */
 const createGroupByFieldsResolver = function(model, fields, name) {
-  const resolver = async (filters, options, context, fieldResolver, fieldKey) => {
+  const resolver = async (
+    filters,
+    options,
+    context,
+    fieldResolver,
+    fieldKey
+  ) => {
     const params = {
       ...GraphQLQuery.convertToParams(_.omit(filters, 'where')),
       ...GraphQLQuery.convertToQuery(filters.where),
@@ -250,8 +274,10 @@ const createGroupByFieldsResolver = function(model, fields, name) {
  */
 const generateConnectionFieldsTypes = function(fields, model) {
   const { globalId, attributes } = model;
-  const primitiveFields = getFieldsByTypes(fields, isNotOfTypeArray, (type, name) =>
-    extractType(type, (attributes[name] || {}).type)
+  const primitiveFields = getFieldsByTypes(
+    fields,
+    isNotOfTypeArray,
+    (type, name) => extractType(type, (attributes[name] || {}).type)
   );
 
   const connectionFields = _.mapValues(primitiveFields, fieldType => ({
@@ -262,9 +288,9 @@ const generateConnectionFieldsTypes = function(fields, model) {
   return Object.keys(primitiveFields)
     .map(
       fieldKey =>
-        `type ${globalId}Connection${_.upperFirst(fieldKey)} {${Schema.formatGQL(
-          connectionFields[fieldKey]
-        )}}`
+        `type ${globalId}Connection${_.upperFirst(
+          fieldKey
+        )} {${Schema.formatGQL(connectionFields[fieldKey])}}`
     )
     .join('\n\n');
 };
@@ -277,23 +303,30 @@ const formatConnectionGroupBy = function(fields, model, name) {
   const groupByFields = getFieldsByTypes(
     fields,
     isNotOfTypeArray,
-    (fieldType, fieldName) => `[${globalId}Connection${_.upperFirst(fieldName)}]`
+    (fieldType, fieldName) =>
+      `[${globalId}Connection${_.upperFirst(fieldName)}]`
   );
 
   // Get the generated field types
-  let groupByTypes = `type ${groupByGlobalId} {${Schema.formatGQL(groupByFields)}}\n\n`;
+  let groupByTypes = `type ${groupByGlobalId} {${Schema.formatGQL(
+    groupByFields
+  )}}\n\n`;
   groupByTypes += generateConnectionFieldsTypes(fields, model);
 
   return {
     globalId: groupByGlobalId,
     type: groupByTypes,
     resolver: {
-      [groupByGlobalId]: createGroupByFieldsResolver(model, groupByFields, name),
+      [groupByGlobalId]: createGroupByFieldsResolver(
+        model,
+        groupByFields,
+        name
+      ),
     },
   };
 };
 
-const formatConnectionAggregator = function(fields, model) {
+const formatConnectionAggregator = function(fields, model, modelName) {
   const { globalId } = model;
 
   // Extract all fields of type Integer and Float and change their type to Float
@@ -314,26 +347,22 @@ const formatConnectionAggregator = function(fields, model) {
   }
 
   const gqlNumberFormat = Schema.formatGQL(numericFields);
-  let aggregatorTypes = `type ${aggregatorGlobalId} {${Schema.formatGQL(initialFields)}}\n\n`;
+  let aggregatorTypes = `type ${aggregatorGlobalId} {${Schema.formatGQL(
+    initialFields
+  )}}\n\n`;
 
   let resolvers = {
     [aggregatorGlobalId]: {
-      count: async (obj, options, context) => {
-        return buildQuery({
-          model,
-          filters: {
-            limit: obj.limit,
-            where: obj.where,
-          },
-        }).count();
+      count(obj, options, context) {
+        const opts = GraphQLQuery.convertToQuery(obj.where);
+
+        if (opts._q) { // allow search param
+          return strapi.query(modelName).countSearch(opts);
+        }
+        return strapi.query(modelName).count(opts);
       },
-      totalCount: async (obj, options, context) => {
-        return buildQuery({
-          model,
-          filters: {
-            where: obj.where,
-          },
-        }).count();
+      totalCount(obj, options, context) {
+        return strapi.query(modelName).count({});
       },
     },
   };
@@ -483,12 +512,7 @@ const formatModelConnectionsGQL = function(fields, model, name, modelResolver) {
           return obj;
         },
         aggregate(obj, options, context) {
-          const params = {
-            ...GraphQLQuery.convertToParams(_.omit(obj, 'where')),
-            ...GraphQLQuery.convertToQuery(obj.where),
-          };
-
-          return convertRestQueryParams(params);
+          return obj;
         },
       },
       ...aggregatorFormat.resolver,
