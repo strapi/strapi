@@ -6,9 +6,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import cn from 'classnames';
 
-import styles from './styles.scss';
+import { Label, Wrapper } from './Components';
 
 class InputCheckboxPlugin extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
@@ -65,8 +64,8 @@ class InputCheckboxPlugin extends React.Component {
 
   render() {
     return (
-      <div
-        className={cn(styles.inputCheckbox, 'col-md-4')}
+      <Wrapper
+        className="col-md-4"
         onMouseEnter={() => {
           if (this.props.value) {
             this.setState({ showCog: true });
@@ -75,17 +74,12 @@ class InputCheckboxPlugin extends React.Component {
         onMouseLeave={() => this.setState({ showCog: false })}
       >
         <div
-          className={cn(
-            'form-check',
-            this.state.showBackground ? styles.highlighted : ''
-          )}
+          className={`form-check ${
+            this.state.showBackground ? 'highlighted' : ''
+          }`}
         >
-          <label
-            className={cn(
-              'form-check-label',
-              styles.label,
-              this.props.value ? styles.checked : ''
-            )}
+          <Label
+            className={`form-check-label ${this.props.value ? 'checked' : ''}`}
             htmlFor={this.props.name}
           >
             <input
@@ -97,14 +91,14 @@ class InputCheckboxPlugin extends React.Component {
               type="checkbox"
             />
             {this.props.label}
-          </label>
+          </Label>
           {this.state.showCog || this.state.showBackground ? (
             <i className="fa fa-cog" onClick={this.handleClick} />
           ) : (
             ''
           )}
         </div>
-      </div>
+      </Wrapper>
     );
   }
 }

@@ -7,12 +7,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get, map } from 'lodash';
-import cn from 'classnames';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
 
 import InputCheckbox from '../InputCheckboxPlugin';
-import styles from './styles.scss';
 
 import { Header, Label, Separator, Wrapper } from './Components';
 
@@ -55,10 +53,10 @@ class Controller extends React.Component {
           <div>{this.props.name}</div>
           <Separator />
           <div>
-            <div className={cn(styles.inputCheckbox)}>
+            <div className="checkbox-wrapper">
               <div className="form-check">
                 <Label
-                  className={`${this.areAllActionsSelected() &&
+                  className={`form-check-label ${this.areAllActionsSelected() &&
                     'checked'} ${!this.areAllActionsSelected() &&
                     this.hasSomeActionsSelected() &&
                     'some-checked'}`}

@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, isEmpty, map, takeRight, toLower, without } from 'lodash';
@@ -13,7 +12,7 @@ import { get, isEmpty, map, takeRight, toLower, without } from 'lodash';
 import { InputsIndex as Input } from 'strapi-helper-plugin';
 import BoundRoute from '../BoundRoute';
 
-import styles from './styles.scss';
+import { Header, Wrapper } from './Components';
 
 class Policies extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
@@ -27,7 +26,7 @@ class Policies extends React.Component {
       this.props.inputSelectName.split('.'),
       'permissions',
       'controllers',
-      'policy',
+      'policy'
     );
     const controllerRoutes = get(
       this.props.routes,
@@ -35,22 +34,22 @@ class Policies extends React.Component {
         this.props.inputSelectName.split('.'),
         'permissions',
         'controllers',
-        'policy',
-      )[0],
+        'policy'
+      )[0]
     );
     const routes = isEmpty(controllerRoutes)
       ? []
       : controllerRoutes.filter(
-        o => toLower(o.handler) === toLower(takeRight(path, 2).join('.')),
-      );
+          o => toLower(o.handler) === toLower(takeRight(path, 2).join('.'))
+        );
 
     return (
-      <div className={cn('col-md-5', styles.policies)}>
+      <Wrapper className="col-md-5">
         <div className="container-fluid">
-          <div className={cn('row', styles.inputWrapper)}>
-            <div className={cn('col-md-12', styles.header)}>
+          <div className="row">
+            <Header className="col-md-12">
               <FormattedMessage id={`${baseTitle}.${title}`} />
-            </div>
+            </Header>
             {!this.props.shouldDisplayPoliciesHint ? (
               <Input
                 customBootstrapClass="col-md-12"
@@ -69,12 +68,12 @@ class Policies extends React.Component {
           <div className="row">
             {!this.props.shouldDisplayPoliciesHint
               ? map(routes, (route, key) => (
-                <BoundRoute key={key} route={route} />
-              ))
+                  <BoundRoute key={key} route={route} />
+                ))
               : ''}
           </div>
         </div>
-      </div>
+      </Wrapper>
     );
   }
 }

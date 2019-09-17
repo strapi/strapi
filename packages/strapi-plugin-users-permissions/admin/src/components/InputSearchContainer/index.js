@@ -15,6 +15,8 @@ import InputSearchLi from '../InputSearchLi';
 
 import styles from './styles.scss';
 
+import { Wrapper } from './Components';
+
 class InputSearchContainer extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = {
@@ -99,9 +101,9 @@ class InputSearchContainer extends React.Component {
 
   render() {
     return (
-      <div className={cn(styles.inputSearch, 'col-md-6')}>
+      <Wrapper className="col-md-6">
         <Label htmlFor={this.props.name} message={this.props.label} />
-        <div className={cn('input-group')}>
+        <div className="input-group">
           <span
             className={cn(
               'input-group-addon',
@@ -148,7 +150,7 @@ class InputSearchContainer extends React.Component {
             ))}
           </ul>
         </div>
-      </div>
+      </Wrapper>
     );
   }
 }

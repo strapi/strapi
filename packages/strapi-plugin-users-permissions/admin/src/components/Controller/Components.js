@@ -5,6 +5,12 @@ const Wrapper = styled.div`
   background: #ffffff;
   opacity: none;
   -webkit-font-smoothing: antialiased;
+  .checkbox-wrapper {
+    font-size: 13px;
+    > div {
+      margin-bottom: 0 !important;
+    }
+  }
 `;
 
 const Header = styled.div`
@@ -18,7 +24,6 @@ const Header = styled.div`
 `;
 
 const Label = styled.label`
-  position: relative;
   margin-right: 0px;
   margin-left: 10px;
   font-weight: 400 !important;
