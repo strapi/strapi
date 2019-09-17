@@ -10,8 +10,7 @@ import { FormattedMessage } from 'react-intl';
 import { get, snakeCase, isEmpty, map, sortBy } from 'lodash';
 
 import LeftMenuLink from '../LeftMenuLink';
-
-import styles from './styles.scss';
+import Wrapper from './Wrapper';
 import messages from './messages.json';
 
 function LeftMenuLinkContainer({ plugins, ...rest }) {
@@ -45,8 +44,8 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
 
     return (
       <div key={j}>
-        <p className={styles.title}>{pluginsSections[current].name}</p>
-        <ul className={styles.list}>
+        <p className="title">{pluginsSections[current].name}</p>
+        <ul className="list">
           {sortBy(contentTypes, 'label').map((link, i) => (
             <LeftMenuLink
               {...rest}
@@ -89,7 +88,7 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
       }
     })
   ) : (
-    <li key="emptyList" className={styles.noPluginsInstalled}>
+    <li key="emptyList" className="noPluginsInstalled">
       <FormattedMessage {...messages.noPluginsInstalled} key="noPlugins" />.
     </li>
   );
@@ -109,19 +108,19 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
   ];
 
   return (
-    <div className={styles.leftMenuLinkContainer}>
+    <Wrapper>
       {linkSections}
       <div>
-        <p className={styles.title}>
+        <p className="title">
           <FormattedMessage {...messages.plugins} />
         </p>
-        <ul className={styles.list}>{pluginsLinks}</ul>
+        <ul className="list">{pluginsLinks}</ul>
       </div>
       <div>
-        <p className={styles.title}>
+        <p className="title">
           <FormattedMessage {...messages.general} />
         </p>
-        <ul className={styles.list}>
+        <ul className="list">
           {staticLinks.map(link => (
             <LeftMenuLink {...rest} key={link.destination} {...link} />
           ))}
@@ -135,7 +134,7 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
           )}
         </ul>
       </div>
-    </div>
+    </Wrapper>
   );
 }
 

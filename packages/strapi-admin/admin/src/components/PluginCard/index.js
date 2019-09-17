@@ -11,7 +11,6 @@ import { isEmpty, replace } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
 import { Button, PopUpWarning } from 'strapi-helper-plugin';
-import InstallPluginPopup from '../InstallPluginPopup';
 
 import styles from './styles.scss';
 
@@ -193,19 +192,7 @@ class PluginCard extends React.Component {
             )}
           </div>
         </div>
-        <InstallPluginPopup
-          history={this.props.history}
-          isAlreadyInstalled={this.props.isAlreadyInstalled}
-          isOpen={
-            !isEmpty(this.props.history.location.hash) &&
-            replace(
-              this.props.history.location.hash.split('::')[0],
-              '#',
-              ''
-            ) === this.props.plugin.id
-          }
-          plugin={this.props.plugin}
-        />
+
         <PopUpWarning
           content={{
             message:

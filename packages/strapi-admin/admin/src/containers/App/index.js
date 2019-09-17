@@ -23,6 +23,7 @@ import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
 import NotificationProvider from '../NotificationProvider';
 import PrivateRoute from '../PrivateRoute';
+import Theme from '../Theme';
 
 import { getDataSucceeded } from './actions';
 
@@ -54,22 +55,24 @@ function App(props) {
   }
 
   return (
-    <div>
-      <NotificationProvider />
-      <div style={{ display: 'block' }}>
-        <Switch>
-          <Route
-            path="/auth/:authType"
-            render={routerProps => (
-              <AuthPage {...routerProps} hasAdminUser={state.hasAdmin} />
-            )}
-            exact
-          />
-          <PrivateRoute path="/" component={Admin} />
-          <Route path="" component={NotFoundPage} />
-        </Switch>
+    <Theme>
+      <div>
+        <NotificationProvider />
+        <div style={{ display: 'block' }}>
+          <Switch>
+            <Route
+              path="/auth/:authType"
+              render={routerProps => (
+                <AuthPage {...routerProps} hasAdminUser={state.hasAdmin} />
+              )}
+              exact
+            />
+            <PrivateRoute path="/" component={Admin} />
+            <Route path="" component={NotFoundPage} />
+          </Switch>
+        </div>
       </div>
-    </div>
+    </Theme>
   );
 }
 
