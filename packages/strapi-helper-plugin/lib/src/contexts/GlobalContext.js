@@ -26,6 +26,8 @@ GlobalContextProvider.propTypes = {
   disableGlobalOverlayBlocker: PropTypes.func,
   emitEvent: PropTypes.func,
   enableGlobalOverlayBlocker: PropTypes.func,
+  plugins: PropTypes.object,
+  updatePlugin: PropTypes.func,
 };
 
 export { GlobalContext, GlobalContextProvider, useGlobalContext };

@@ -11,8 +11,6 @@ const HomePageContextProvider = ({ children, ...rest }) => {
 
 const useHomePageContext = () => useContext(HomePageContext);
 
-HomePageContextProvider.defaultProps = {};
-
 HomePageContextProvider.propTypes = {
   children: PropTypes.node.isRequired,
   deleteData: PropTypes.func.isRequired,

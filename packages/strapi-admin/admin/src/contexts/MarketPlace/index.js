@@ -13,8 +13,6 @@ const MarketPlaceContextProvider = ({ children, ...rest }) => {
 
 const useMarketPlaceContext = () => useContext(MarketPlaceContext);
 
-MarketPlaceContextProvider.defaultProps = {};
-
 MarketPlaceContextProvider.propTypes = {
   children: PropTypes.node.isRequired,
   downloadPlugin: PropTypes.func.isRequired,
