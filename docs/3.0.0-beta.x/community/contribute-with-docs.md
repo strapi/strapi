@@ -2,20 +2,19 @@
 
 All efforts to contribute to the [Docs](https://strapi.io/documentation/3.0.0-beta.x/) are highly appreciated, we recommend [these guidelines](/3.0.0-beta.x/community/contribute-with-docs.html#the-workflow). We accept all kinds of Pull Requests, including bug fixes, documentation, and tutorials.
 
-**NOTE:** We encourage you to discuss your proposed Pull Request with maintainers or core team members before submitting new features. In this way, you may get tips and other useful information (e.g., upcoming breaking changes) and you ensure your pull request aligns with the project roadmap.
-
 You are welcome to create tutorials, articles, and videos for your blog or channels without speaking to a maintainer.
 
 ## General Guidelines
 
-Please review the following guidelines and recommendations regarding contributing to Docs.
+Please review the following guidelines and recommendations regarding contributing to the Docs.
 
-Broadly speaking, if you want to contribute documentation, you will either:
+Broadly speaking, if you want to contribute to the documentation, you can:
 
-1. Create **new** documentation for a topic not documented, or
-2. Improve existing documentation with additional examples, adding more context, fixing grammar and typos, or doing [translations](/3.0.0-beta.x/community/contribute-with-docs.html#translations).
+1. Create new documentation for an undocumented topic, or
+2. Improve existing documentation with additional examples, adding more context, or fixing grammar and typos.
+3. Adding (or improving) a new [locale](/3.0.0-beta.x/community/contribute-with-docs.html#translations) to the documentation.
 
-Each of the two ways above have specific [workflows](/3.0.0-beta.x/community/contribute-with-docs.html#the-workflow) which should be followed to ensure maximum efficiency in your contributions to the documentation.
+Each of the three ways above have a specific [workflow](/3.0.0-beta.x/community/contribute-with-docs.html#the-workflow) which should be followed to ensure maximum efficiency in your contributions to the documentation.
 
 ## Categories of Documentation
 
@@ -35,9 +34,9 @@ Below are explanations for each category of content. The keys are to **know your
 
 A **Tutorial** is a complete set of instructions that take the reader through to the completion of a specific end, such as a project or complete working application. The purpose of tutorials is to **teach** general concepts and show how to accomplish specific actions using Strapi.
 
-This _audience member_ can be a developer who is generally speaking is new to JavaScript programming or a developer who is new to programming with Strapi. **Tutorials** are for the newer programmer. More experienced developers, who are new to Strapi, find the **How-tos** better suited to their experience, but they can also follow tutorials.
+This _audience member_ can be a developer who is a new JavaScript programmer or a developer who is new to programming with Strapi. **Tutorials** are for the newer programmer. More experienced developers, who are new to Strapi, find the **How-tos** better suited to their experience, but they can also follow tutorials.
 
-Examples include the [Building a Static Blog using Gatsby and Strapi](https://blog.strapi.io/building-a-static-website-using-gatsby-and-strapi/) tutorial and the [Cooking a Deliveroo Clone](https://blog.strapi.io/strapi-next-setup/) tutorial.
+Examples include the [Building a Static Blog using Gatsby and Strapi](https://blog.strapi.io/building-a-static-website-using-gatsby-and-strapi/) and the [Cooking a Deliveroo Clone](https://blog.strapi.io/strapi-next-setup/) tutorials.
 
 ### How-to's
 
@@ -61,11 +60,11 @@ Examples include the [Models Guide](/3.0.0-beta.x/guides/models.html#how-to-crea
 
 This _audience member_ is a developer who is already developing projects with Strapi or who is studying whether Strapi is a good fit for their project(s). **Explanations** are meant to explain different choices in the Roadmap, overall direction, and how certain features generally work.
 
-Examples include [Why we split the management of the Admin user and the Front-end Users](https://blog.strapi.io/why-we-split-the-management-of-the-admin-users-and-end-users/) and [Restricting Permissions in Strapi Admin](https://blog.strapi.io/admin-permissions/).
+An example is [Why we split the management of the Admin user and the Front-end Users](https://blog.strapi.io/why-we-split-the-management-of-the-admin-users-and-end-users/).
 
 These four categories follow the recommendations found in this article about [documentation by Divio](https://www.divio.com/blog/documentation/). We recommend reading it to gain a complete understanding of each type of content contained in our documentation.
 
-## The Workflow
+## Contributing Workflow
 
 Please read the following sections before moving to create documentation. (Either new documentation or modifying existing documentation.)
 
@@ -75,16 +74,17 @@ Please read the following sections before moving to create documentation. (Eithe
 4. [Adding/modifying/deleting documentation](/3.0.0-beta.x/community/contribute-with-docs.html#adding-modifying-deleting-content)
 
 - How to [submit an externally hosted tutorial](/3.0.0-beta.x/community/contribute-with-docs.html#submitting-an-externally-hosted-tutorial).
-- How to use the [Docs Style Guide](/3.0.0-beta.x/community/contribute-with-docs.html#docs-style-guide) to write better Docs.
+- How to use the [Docs Style Guide](/3.0.0-beta.x/community/contribute-with-docs.html#docs-style-guide) to match our guidelines.
 
 ### Technical Requirements
 
 1. You have [Node v10.x.x](https://nodejs.org/en/download/) (LTS) or [Node v12.x.x](https://nodejs.org/en/download/current/) and [Yarn v1.2.0+](https://yarnpkg.com/en/).
 2. You are familiar with Git, and have it installed on your development environment.
 
-- Ensure you're using the [required versions of Node.js and npm](/3.0.0-beta.x/getting-started/install-requirements.html).
 - Fork the [Strapi repository](https://github.com/strapi/strapi) [to your own GitHub account](https://help.github.com/en/articles/fork-a-repo).
 - Clone your Strapi repository:
+
+**NOTE:** Throughout the documentation, it is assumed you have a `Projects` directory and that you will install Strapi there. You may install Strapi into any directory of your choice.
 
 `Path: ./Projects/`
 
@@ -118,21 +118,21 @@ npm run dev
 
 - Then, navigate to [http://localhost:8080/documentation/](http://localhost:8080/documentation/).
 
-You should now have a running instance of the documentation. The next section explains the organization and structure of the documentation.
+You should now have a running instance of the documentation. The next section explains files structure of the documentation.
 
 ### Understanding the Docs Structure
 
-The Strapi docs are power by [VuePress](https://vuepress.vuejs.org/). The docs live in a folder called **docs**. `Path: ./strapi/docs`. The _VuePress_ installation lives in this folder. It has a separate installation and separate dependencies from the rest of the Strapi monorepo.
+The Strapi docs are power by [VuePress](https://vuepress.vuejs.org/). The docs live in a folder called **docs**. `Path: ./strapi/docs`. The _VuePress_ installation lives in this folder. It has a separate installation and separate dependencies from the rest of the Strapi monorepository.
 
-Only version **3.0.0-beta.x** is currently maintained. So, therefore, only the documentation for this version is maintained. The documentation is located at `./strapi/docs/3.0.0-beta.x/`. Here you find all the content and assets for the documentation.
+Only the version **3.0.0-beta.x** of Strapi and it's associated packages are currently maintained. So, therefore, only the documentation for this version is maintained. The documentation is located at `./strapi/docs/3.0.0-beta.x/`. Here you find all the content and assets for the documentation.
 
 The _folder names_ in the file directory correspond to the different sections in the left-hand menu. For example, the folder called, "Getting Started," corresponds to the section called, "Getting Started." However, the `h1` tag at the top of the files control the left-menu titles.
 
-For example, if you add a page or folder, you do it in the config file of the Beta docs. `Path: ./strapi/docs/.versions/3.0.0-beta.x.js/`
+For example, if you add a page or folder, you do it in the `config.js` file of the Beta docs. `Path: ./strapi/docs/.vuepress/config.js`
 
-For example, if you wanted to add a page under `Getting Started` and the file is called `example-tutorial.md`, you would save the file in the folder called `/getting-started/`. Next, you would modify the config file like the example below:
+Let's say you wanted to add a page under `Getting Started` and the file is called `example-tutorial.md`, you would save the file in the folder called `/getting-started/`. Next, you would modify the `config.s` file like the example below:
 
-`Path: ./strapi/docs/.versions/3.0.0-beta.x.js/`
+`Path: ./strapi/docs/.vuepress/config.js`
 
 ```js
 module.exports = [
@@ -149,7 +149,7 @@ module.exports = [
   },
 ```
 
-For example, if you now wanted the **left-hand** menu to have a link to **Example Tutorial**, you would need to add an `h1` tag with `Example Tutorial`, like the below example:
+Next, if you now wanted the **left-hand** menu to have a link to **Example Tutorial**, you would need to add an `h1` tag with `Example Tutorial`, like the below example:
 
 ```md
 # Example Tutorial
@@ -159,7 +159,7 @@ This is an Example Tutorial....
 
 You should understand that [VuePress]() automatically turns `h2` and `h3` tags into correctly formed **submenu items** and **nested submenu items**. These display in the left-hand navigation underneath the correct article heading as determined by the `h1` tag on the page.
 
-Now, if you need to add images to the file, there is a folder called `assets`, the `Path: ./3.0.0-beta.x/assets`. When you add images, these images need are added to a new folder in the `assets` folder. The name of the folder, should match the name of the file and be placed in a matching directory to the directory of the file.
+Now, if you need to add images to the file, there is a folder called `assets`, the `Path: ./docs/3.0.0-beta.x/assets`. When you add images, these images need are added to a new folder in the `assets` folder. The name of the folder, should match the name of the file and be placed in a matching directory to the directory of the file.
 
 For example, the `example-tutorial.md` file is located in the `/getting-started/` directory.
 
@@ -174,7 +174,7 @@ module.exports = [
   },
 ```
 
-Therefore, images are placed in `./assets/getting-started/example-tuturial/image.png`, like this:
+Therefore, images are placed in `./docs/3.0.0-beta.x/assets/getting-started/example-tuturial/image.png`, like this:
 
 ```md
 DOCS
