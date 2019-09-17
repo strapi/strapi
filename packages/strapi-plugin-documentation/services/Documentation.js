@@ -660,7 +660,8 @@ module.exports = {
           const { repeatable, group, min, max } = attribute;
 
           const cmp = this.generateMainComponent(
-            strapi.groups[group].attributes
+            strapi.groups[group].attributes,
+            strapi.groups[group].associations
           );
 
           if (repeatable) {
