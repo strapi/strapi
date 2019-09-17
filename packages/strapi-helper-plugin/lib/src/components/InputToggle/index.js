@@ -9,7 +9,6 @@ import { isEmpty } from 'lodash';
 
 import styles from './styles.scss';
 
-/* eslint-disable jsx-a11y/no-autofocus */
 class InputToggle extends React.Component {
   handleClick = (e) => {
     const target = {

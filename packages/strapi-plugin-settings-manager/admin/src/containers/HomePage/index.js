@@ -153,7 +153,6 @@ export class HomePage extends React.Component {
   }
 
   /* eslint-disable react/sort-comp */
-  /* eslint-disable jsx-a11y/no-static-element-interactions */
   addConnection = e => {
     e.preventDefault();
     const newData = {};

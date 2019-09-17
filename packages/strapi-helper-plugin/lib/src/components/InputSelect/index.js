@@ -15,7 +15,6 @@ import SelectOption from '../SelectOption';
 
 import styles from './styles.scss';
 
-/* eslint-disable jsx-a11y/no-autofocus */
 function InputSelect(props) {
   return (
     <select
