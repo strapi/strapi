@@ -1,4 +1,36 @@
-.addon {
+import styled from 'styled-components';
+
+const Wrapper = styled.div`
+  min-width: 200px;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+
+  label {
+    margin-bottom: 0;
+    font-weight: 500;
+  }
+
+  input {
+    height: 3.4rem;
+    margin-top: 0.9rem;
+    padding-left: 1rem;
+    background-size: 0 !important;
+    border: 1px solid #e3e9f3;
+    border-left: 0;
+    border-bottom: 0px;
+    border-radius: 0.25rem;
+    border-bottom-right-radius: 0;
+    line-height: 3.4rem;
+    font-size: 1.3rem;
+    font-family: 'Lato' !important;
+    box-shadow: 0px 2px 1px rgba(104, 118, 142, 0.05);
+    &:focus {
+      border-color: #78caff;
+    }
+  }
+`;
+
+const Addon = styled.div`
   width: 3.2rem;
   height: 3.4rem;
   margin-top: 0.9rem;
@@ -18,50 +50,22 @@
   -moz-appearance: none;
   -webkit-appearance: none;
   box-shadow: 0px 2px 1px rgba(104, 118, 142, 0.05);
-  &:before {
-    content: '\F002';
-    display: inline-table;
-    margin-top: 0px;
+  i {
     margin-left: 2px;
     color: #b3b5b9;
     font-weight: 900;
     font-size: 14px;
     font-family: 'FontAwesome';
+    font-style: initial;
     -webkit-font-smoothing: antialiased;
   }
-}
+  &.focus {
+    border-color: #78caff;
+    border-right: 0;
+  }
+`;
 
-// .inputSearch {
-//   min-width: 200px;
-//   margin-bottom: 1.5rem;
-//   font-size: 1.3rem;
-
-//   label {
-//     margin-bottom: 0;
-//     font-weight: 500;
-//   }
-
-//   input {
-//     height: 3.4rem;
-//     margin-top: .9rem;
-//     padding-left: 1rem;
-//     background-size: 0 !important;
-//     border: 1px solid #E3E9F3;
-//     border-left: 0;
-//     border-bottom: 0px;
-//     border-radius: 0.25rem;
-//     border-bottom-right-radius: 0;
-//     line-height: 3.4rem;
-//     font-size: 1.3rem;
-//     font-family: 'Lato' !important;
-//     box-shadow: 0px 2px 1px rgba(104, 118, 142, 0.05);
-//     &:focus {
-//       border-color: #78caff;
-//     }
-//   }
-// }
-
-.ulContainer {
+const List = styled.div`
   height: 16.3rem;
   overflow: scroll;
   border: 1px solid #e3e9f3;
@@ -73,13 +77,9 @@
     list-style: none;
     padding: 1px 0;
   }
-}
+  &.focused {
+    border-color: #78caff;
+  }
+`;
 
-.addonFocus {
-  border-color: #78caff;
-  border-right: 0;
-}
-
-.ulFocused {
-  border-color: #78caff;
-}
+export { Addon, List, Wrapper };

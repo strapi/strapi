@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
-  .container-fluid {
+  > .container-fluid {
     padding: 18px 30px;
     > div:first-child {
       margin-bottom: 11px;

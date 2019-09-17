@@ -7,15 +7,12 @@
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import { findIndex, has, includes, isEmpty, map, toLower } from 'lodash';
-import cn from 'classnames';
 import PropTypes from 'prop-types';
 
 import { Label } from 'strapi-helper-plugin';
 import InputSearchLi from '../InputSearchLi';
 
-import styles from './styles.scss';
-
-import { Wrapper } from './Components';
+import { Addon, List, Wrapper } from './Components';
 
 class InputSearchContainer extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
@@ -104,20 +101,17 @@ class InputSearchContainer extends React.Component {
       <Wrapper className="col-md-6">
         <Label htmlFor={this.props.name} message={this.props.label} />
         <div className="input-group">
-          <span
-            className={cn(
-              'input-group-addon',
-              styles.addon,
-              this.state.isFocused && styles.addonFocus
-            )}
-          />
+          <Addon
+            className={`input-group-addon ${this.state.isFocused && 'focus'}`}
+          >
+            <i class="fas fa-search"></i>
+          </Addon>
           <FormattedMessage id="users-permissions.InputSearch.placeholder">
             {message => (
               <input
-                className={cn(
-                  'form-control',
+                className={`form-control ${
                   !isEmpty(this.state.errors) ? 'is-invalid' : ''
-                )}
+                }`}
                 id={this.props.name}
                 name={this.props.name}
                 onBlur={this.handleBlur}
@@ -133,12 +127,7 @@ class InputSearchContainer extends React.Component {
             )}
           </FormattedMessage>
         </div>
-        <div
-          className={cn(
-            styles.ulContainer,
-            this.state.isFocused && styles.ulFocused
-          )}
-        >
+        <List className={this.state.isFocused && 'focused'}>
           <ul>
             {map(this.state.filteredUsers, user => (
               <InputSearchLi
@@ -149,7 +138,7 @@ class InputSearchContainer extends React.Component {
               />
             ))}
           </ul>
-        </div>
+        </List>
       </Wrapper>
     );
   }
