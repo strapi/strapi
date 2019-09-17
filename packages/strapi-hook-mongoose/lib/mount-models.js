@@ -356,14 +356,56 @@ const createOnFetchPopulateFn = ({
     });
 
     groupAttributes.forEach(name => {
+      const attr = definition.attributes[name];
+
+      const group = strapi.groups[attr.group];
+
+      const assocs = (group.associations || []).filter(
+        assoc => assoc.autoPopulate === true
+      );
+
+      let subpopulates = [];
+
+      assocs.forEach(assoc => {
+        if (isPolymorphic({ assoc })) {
+          if (
+            assoc.nature === 'oneToManyMorph' ||
+            assoc.nature === 'manyToManyMorph'
+          ) {
+            subpopulates.push({
+              path: assoc.alias,
+              match: {
+                [`${assoc.via}.${assoc.filter}`]: assoc.alias,
+                [`${assoc.via}.kind`]: definition.globalId,
+              },
+              options: {
+                sort: '-createdAt',
+              },
+              select: undefined,
+              model: undefined,
+              _docs: {},
+            });
+          } else {
+            subpopulates.push({ path: `${assoc.alias}.ref`, _docs: {} });
+          }
+        } else {
+          subpopulates.push({
+            path: assoc.alias,
+            _docs: {},
+          });
+        }
+      });
+
       if (
         this._mongooseOptions.populate &&
         this._mongooseOptions.populate[name]
       ) {
         this._mongooseOptions.populate[name].path = `${name}.ref`;
+        this._mongooseOptions.populate[name].populate = subpopulates;
       } else {
         _.set(this._mongooseOptions, ['populate', name], {
           path: `${name}.ref`,
+          populate: subpopulates,
           _docs: {},
         });
       }
@@ -371,6 +413,10 @@ const createOnFetchPopulateFn = ({
 
     next();
   };
+};
+
+const isPolymorphic = ({ assoc }) => {
+  return assoc.nature.toLowerCase().indexOf('morph') !== -1;
 };
 
 const buildRelation = ({ definition, model, instance, attribute, name }) => {
