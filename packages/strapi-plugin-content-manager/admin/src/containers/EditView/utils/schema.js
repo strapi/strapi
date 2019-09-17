@@ -130,7 +130,7 @@ const createYupSchemaAttribute = (type, validations) => {
       .typeError();
   }
   if (['date', 'datetime'].includes(type)) {
-    schema = yup.date().typeError();
+    schema = yup.date();
   }
 
   Object.keys(validations).forEach(validation => {

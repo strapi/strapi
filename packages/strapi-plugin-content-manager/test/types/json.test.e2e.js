@@ -35,6 +35,27 @@ describe('Test type json', () => {
     });
   });
 
+  test('Create entry with array value input JSON', async () => {
+    const inputValue = [
+      {
+        key: 'value',
+      },
+      {
+        key: 'value',
+      },
+    ];
+    const res = await rq.post('/content-manager/explorer/withjson', {
+      body: {
+        field: inputValue,
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toMatchObject({
+      field: inputValue,
+    });
+  });
+
   test('Create entry with value input Formdata', async () => {
     const inputValue = {
       number: '12',

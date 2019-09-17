@@ -492,7 +492,7 @@ module.exports = {
     Query: {
       post: {
         description: 'Return a single post',
-        policy: ['plugins.users-permissions.isAuthenticated', 'isOwner'], // Apply the 'isAuthenticated' policy of the `Users & Permissions` plugin, then the 'isOwner' policy before executing the resolver.
+        policies: ['plugins.users-permissions.isAuthenticated', 'isOwner'], // Apply the 'isAuthenticated' policy of the `Users & Permissions` plugin, then the 'isOwner' policy before executing the resolver.
       },
       posts: {
         description: 'Return a list of posts', // Add a description to the query.
@@ -504,7 +504,7 @@ module.exports = {
       },
       postsByTags: {
         description: 'Return the posts published by the author',
-        resolverOf: 'Post.findByTags', // Will apply the same policy on the custom resolver than the controller's action `findByTags`.
+        resolverOf: 'Post.findByTags', // Will apply the same policy on the custom resolver as the controller's action `findByTags`.
         resolver: (obj, options, ctx) => {
           // ctx is the context of the Koa request.
           await strapi.controllers.posts.findByTags(ctx);
@@ -516,7 +516,7 @@ module.exports = {
     Mutation: {
       attachPostToAuthor: {
         description: 'Attach a post to an author',
-        policy: ['plugins.users-permissions.isAuthenticated', 'isOwner'],
+        policies: ['plugins.users-permissions.isAuthenticated', 'isOwner'],
         resolver: 'Post.attachToAuthor'
       }
     }
@@ -677,7 +677,7 @@ module.exports = {
     Query: {
       posts: {
         description: 'Return a list of posts',
-        policy: [
+        policies: [
           'plugins.users-permissions.isAuthenticated',
           'isOwner',
           'global.logging',
@@ -687,7 +687,10 @@ module.exports = {
     Mutation: {
       createPost: {
         description: 'Create a new post',
-        policy: ['plugins.users-permissions.isAuthenticated', 'global.logging'],
+        policies: [
+          'plugins.users-permissions.isAuthenticated',
+          'global.logging',
+        ],
       },
     },
   },
@@ -782,7 +785,7 @@ module.exports = {
     Query: {
       posts: {
         description: 'Return a list of posts by author',
-        resolverOf: 'Post.find', // Will apply the same policy on the custom resolver than the controller's action `find` located in `Post.js`.
+        resolverOf: 'Post.find', // Will apply the same policy on the custom resolver as the controller's action `find` located in `Post.js`.
         resolver: (obj, options, context) => {
           // You can return a raw JSON object or a promise.
 

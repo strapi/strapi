@@ -224,26 +224,32 @@ const schemaBuilder = {
 
           switch (type) {
             case 'Mutation': {
-              // TODO: Verify this...
-              const [name, action] = acc[type][resolver].split('.');
-              const normalizedName = _.toLower(name);
+              let name, action;
+              if (_.isString(acc[type][resolver])) {
+                [name, action] = acc[type][resolver].split('.');
+              } else if (
+                _.isPlainObject(acc[type][resolver]) &&
+                _.isString(acc[type][resolver].handler)
+              ) {
+                [name, action] = acc[type][resolver].handler.split('.');
+              }
 
-              acc[type][resolver] = Mutation.composeMutationResolver(
-                strapi.plugins.graphql.config._schema.graphql,
+              acc[type][resolver] = Mutation.composeMutationResolver({
+                _schema: strapi.plugins.graphql.config._schema.graphql,
                 plugin,
-                normalizedName,
-                action
-              );
+                name: _.toLower(name),
+                action,
+              });
               break;
             }
             case 'Query':
             default:
-              acc[type][resolver] = Query.composeQueryResolver(
-                strapi.plugins.graphql.config._schema.graphql,
+              acc[type][resolver] = Query.composeQueryResolver({
+                _schema: strapi.plugins.graphql.config._schema.graphql,
                 plugin,
-                resolver,
-                'force' // Avoid singular/pluralize and force query name.
-              );
+                name: resolver,
+                isSingular: 'force', // Avoid singular/pluralize and force query name.
+              });
               break;
           }
         }

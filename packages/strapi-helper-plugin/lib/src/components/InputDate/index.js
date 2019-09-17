@@ -60,6 +60,7 @@ function InputDate(props) {
               target: {
                 name: props.name,
                 value: moment,
+                type: 'date',
               },
             })
           }

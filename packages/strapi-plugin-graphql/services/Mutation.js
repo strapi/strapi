@@ -19,11 +19,16 @@ module.exports = {
    * @return Promise or Error.
    */
 
-  composeMutationResolver: function(_schema, plugin, name, action) {
+  composeMutationResolver: function({ _schema, plugin, name, action }) {
     // Extract custom resolver or type description.
     const { resolver: handler = {} } = _schema;
 
-    const queryName = `${action}${_.capitalize(name)}`;
+    let queryName;
+    if (_.has(handler, `Mutation.${action}`)) {
+      queryName = action;
+    } else {
+      queryName = `${action}${_.capitalize(name)}`;
+    }
 
     // Retrieve policies.
     const policies = _.get(handler, `Mutation.${queryName}.policies`, []);
@@ -155,7 +160,7 @@ module.exports = {
     }
 
     if (strapi.plugins['users-permissions']) {
-      policies.push('plugins.users-permissions.permissions');
+      policies.unshift('plugins.users-permissions.permissions');
     }
 
     // Populate policies.

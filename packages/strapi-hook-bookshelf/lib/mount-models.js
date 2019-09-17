@@ -887,17 +887,13 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
   return Promise.all(updates);
 };
 
-const castValueFromType = (type, value, definition) => {
+const castValueFromType = (type, value, /* definition */) => {
   // do not cast null values
   if (value === null) return null;
 
   switch (type) {
-    case 'json': {
-      if (definition.client === 'mysql' || definition.client === 'sqlite3') {
-        return JSON.stringify(value);
-      }
-      return value;
-    }
+    case 'json':
+      return JSON.stringify(value);
     // TODO: handle real date format 1970-01-01
     // TODO: handle real time format 12:00:00
     case 'time':
