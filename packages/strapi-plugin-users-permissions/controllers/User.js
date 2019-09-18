@@ -170,16 +170,17 @@ module.exports = {
     const { id } = ctx.params;
     const { email, username, password } = ctx.request.body;
 
-    // if (!email) return ctx.badRequest('missing.email');
-    // if (!username) return ctx.badRequest('missing.username');
-    // if (!password) return ctx.badRequest('missing.password');
-
-    if (_.has(ctx.request.body, 'email') && !email)
+    if (_.has(ctx.request.body, 'email') && !email) {
       return ctx.badRequest('email.notNull');
-    if (_.has(ctx.request.body, 'username') && !username)
+    }
+
+    if (_.has(ctx.request.body, 'username') && !username) {
       return ctx.badRequest('username.notNull');
-    if (_.has(ctx.request.body, 'password') && !password)
+    }
+
+    if (_.has(ctx.request.body, 'password') && !password) {
       return ctx.badRequest('password.notNull');
+    }
 
     if (_.has(ctx.request.body, 'username')) {
       const userWithSameUsername = await strapi
