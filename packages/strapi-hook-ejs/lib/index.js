@@ -9,7 +9,7 @@ const path = require('path');
 
 // Externals
 const co = require('co');
-const render = require('koa-ejs'); // eslint-disable-line import/no-unresolved
+const render = require('koa-ejs');
 
 /**
  * EJS hook

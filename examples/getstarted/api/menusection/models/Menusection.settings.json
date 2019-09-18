@@ -23,6 +23,10 @@
       "group": "dish",
       "type": "group",
       "repeatable": true
+    },
+    "menu": {
+      "model": "menu",
+      "via": "menusections"
     }
   }
 }
