@@ -199,9 +199,9 @@ module.exports = ({ model, modelKey, strapi }) => {
       model,
       filters,
       populate: populateOpt,
-    }).then(results => {
-      return results.map(result => (result ? result.toObject() : null));
-    });
+    }).then(results =>
+      results.map(result => (result ? result.toObject() : null))
+    );
   }
 
   async function findOne(params, populate) {
@@ -340,7 +340,10 @@ module.exports = ({ model, modelKey, strapi }) => {
       .sort(filters.sort)
       .skip(filters.start)
       .limit(filters.limit)
-      .populate(populate || defaultPopulate);
+      .populate(populate || defaultPopulate)
+      .then(results =>
+        results.map(result => (result ? result.toObject() : null))
+      );
   }
 
   function countSearch(params) {
