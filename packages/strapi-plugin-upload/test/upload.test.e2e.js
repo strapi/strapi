@@ -4,19 +4,8 @@ const fs = require('fs');
 
 // Helpers.
 const { registerAndLogin } = require('../../../test/helpers/auth');
-// const createModelsUtils = require('../../../test/helpers/models');
-// const form = require('../../../test/helpers/generators');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
-// const cleanDate = entry => {
-//   delete entry.updatedAt;
-//   delete entry.createdAt;
-//   delete entry.created_at;
-//   delete entry.updated_at;
-// };
-
-// let data;
-// let modelsUtils;
 let rq;
 
 const defaultProviderConfig = {
@@ -43,28 +32,6 @@ describe('Upload plugin end to end tests', () => {
   beforeAll(async () => {
     const token = await registerAndLogin();
     rq = createAuthRequest(token);
-
-    // modelsUtils = createModelsUtils({ rq });
-
-    // await modelsUtils.createModels([
-    //   form.article,
-    //   form.tag,
-    //   form.category,
-    //   form.reference,
-    //   form.product,
-    //   form.articlewithtag,
-    // ]);
-  }, 60000);
-
-  afterAll(() => {
-    // modelsUtils.deleteModels([
-    //   'article',
-    //   'tag',
-    //   'category',
-    //   'reference',
-    //   'product',
-    //   'articlewithtag',
-    // ]),
   }, 60000);
 
   afterEach(async () => {
