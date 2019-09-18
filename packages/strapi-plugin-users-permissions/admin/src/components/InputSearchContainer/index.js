@@ -4,86 +4,57 @@
  *
  */
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { findIndex, has, includes, isEmpty, map, toLower } from 'lodash';
 import PropTypes from 'prop-types';
+import { findIndex, has, includes, isEmpty, map, toLower } from 'lodash';
 
 import { Label } from 'strapi-helper-plugin';
 import InputSearchLi from '../InputSearchLi';
 
 import { Addon, List, Wrapper } from './Components';
 
-class InputSearchContainer extends React.Component {
-  // eslint-disable-line react/prefer-stateless-function
-  state = {
-    errors: [],
-    filteredUsers: this.props.values,
-    isAdding: false,
-    isFocused: false,
-    users: this.props.values,
-    value: '',
-  };
+function InputSearchContainer({
+  didDeleteUser,
+  label,
+  name,
+  onClickAdd,
+  onClickDelete,
+  values,
+}) {
+  const searchInput = useRef(null);
+  console.log(values);
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    if (nextProps.didDeleteUser !== this.props.didDeleteUser) {
-      this.setState({
-        users: nextProps.values,
-        filteredUsers: nextProps.values,
-      });
+  const [filteredUsers, setFilteredUsers] = useState(values);
+  const [isAdding, setIsAdding] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const [errors, setErrors] = useState([]);
+  const [value, setValue] = useState('');
+
+  useEffect(() => {
+    if (values !== filteredUsers) {
+      setFilteredUsers(values);
     }
+  }, [values]);
 
-    if (nextProps.didGetUsers !== this.props.didGetUsers) {
-      this.setState({
-        users: nextProps.values,
-        filteredUsers: nextProps.values,
-      });
-    }
+  const handleBlur = () => setIsFocused(prev => !prev);
 
-    if (nextProps.didFetchUsers !== this.props.didFetchUsers) {
-      this.setState({ filteredUsers: nextProps.users, isAdding: true });
-    }
-  }
+  const handleChange = () => {};
 
-  handleBlur = () => this.setState({ isFocused: !this.state.isFocused });
-
-  handleChange = ({ target }) => {
-    const filteredUsers = isEmpty(target.value)
-      ? this.state.users
-      : this.state.users.filter(user =>
-          includes(toLower(user.name), toLower(target.value))
-        );
-
-    if (isEmpty(filteredUsers) && !isEmpty(target.value)) {
-      this.props.getUser(target.value);
-    }
-
-    if (isEmpty(target.value)) {
-      return this.setState({
-        value: target.value,
-        isAdding: false,
-        users: this.props.values,
-        filteredUsers: this.props.values,
-      });
-    }
-
-    this.setState({ value: target.value, filteredUsers });
-  };
-
-  handleFocus = () => this.setState({ isFocused: !this.state.isFocused });
-
-  handleClick = item => {
-    if (this.state.isAdding) {
+  const handleClick = item => {
+    console.log(item);
+    console.log(isAdding);
+    if (isAdding) {
       const id = has(item, '_id') ? '_id' : 'id';
-      const users = this.props.values;
+      const users = values;
       // Check if user is already associated with this role
       if (findIndex(users, [id, item[id]]) === -1) {
-        this.props.onClickAdd(item);
+        onClickAdd(item);
         users.push(item);
       }
 
       // Reset the input focus
-      this.searchInput.focus();
+      searchInput.focus();
       // Empty the input and display users
       this.setState({
         value: '',
@@ -92,56 +63,50 @@ class InputSearchContainer extends React.Component {
         filteredUsers: users,
       });
     } else {
-      this.props.onClickDelete(item);
+      onClickDelete(item);
     }
   };
 
-  render() {
-    return (
-      <Wrapper className="col-md-6">
-        <Label htmlFor={this.props.name} message={this.props.label} />
-        <div className="input-group">
-          <Addon
-            className={`input-group-addon ${this.state.isFocused && 'focus'}`}
-          >
-            <i className="fas fa-search"></i>
-          </Addon>
-          <FormattedMessage id="users-permissions.InputSearch.placeholder">
-            {message => (
-              <input
-                className={`form-control ${
-                  !isEmpty(this.state.errors) ? 'is-invalid' : ''
-                }`}
-                id={this.props.name}
-                name={this.props.name}
-                onBlur={this.handleBlur}
-                onChange={this.handleChange}
-                onFocus={this.handleFocus}
-                value={this.state.value}
-                placeholder={message}
-                type="text"
-                ref={input => {
-                  this.searchInput = input;
-                }}
-              />
-            )}
-          </FormattedMessage>
-        </div>
-        <List className={this.state.isFocused && 'focused'}>
-          <ul>
-            {map(this.state.filteredUsers, user => (
-              <InputSearchLi
-                key={user.id || user._id}
-                item={user}
-                isAdding={this.state.isAdding}
-                onClick={this.handleClick}
-              />
-            ))}
-          </ul>
-        </List>
-      </Wrapper>
-    );
-  }
+  const handleFocus = () => setIsFocused(prev => !prev);
+
+  return (
+    <Wrapper className="col-md-6">
+      <Label htmlFor={name} message={label} />
+      <div className="input-group">
+        <Addon className={`input-group-addon ${isFocused && 'focus'}`}>
+          <i className="fas fa-search"></i>
+        </Addon>
+        <FormattedMessage id="users-permissions.InputSearch.placeholder">
+          {message => (
+            <input
+              className={`form-control ${!isEmpty(errors) ? 'is-invalid' : ''}`}
+              id={name}
+              name={name}
+              onBlur={handleBlur}
+              onChange={handleChange}
+              onFocus={handleFocus}
+              value={value}
+              placeholder={message}
+              type="text"
+              ref={searchInput}
+            />
+          )}
+        </FormattedMessage>
+      </div>
+      <List className={isFocused && 'focused'}>
+        <ul>
+          {map(filteredUsers, user => (
+            <InputSearchLi
+              key={user.id || user._id}
+              item={user}
+              isAdding={isAdding}
+              onClick={handleClick}
+            />
+          ))}
+        </ul>
+      </List>
+    </Wrapper>
+  );
 }
 
 InputSearchContainer.defaultProps = {

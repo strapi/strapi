@@ -9,12 +9,10 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { map, omitBy, size } from 'lodash';
 
-// Components from strapi-helper-plugin
 import { Button, LoadingBar, LoadingIndicator } from 'strapi-helper-plugin';
+import { Flex, ListWrapper, Title, Wrapper } from './Components';
 
 import ListRow from '../ListRow';
-
-import { Flex, ListWrapper, Title, Wrapper } from './Components';
 
 const generateListTitle = (data, settingType) => {
   switch (settingType) {

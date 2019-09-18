@@ -4,25 +4,26 @@ const Wrapper = styled.div`
   margin-bottom: 0.5rem;
   padding-left: 0;
   font-size: 13px;
-
-  > div {
+  div {
     height: 26px;
     padding-left: 15px;
     line-height: 26px;
-
-    > i {
+    i {
+      display: none;
       position: absolute;
       top: 8px;
       right: 10px;
       color: #787e8f;
       cursor: pointer;
     }
-  }
-
-  .highlighted {
-    border-radius: 3px;
-    background-color: #e9eaeb;
-    font-weight: 600;
+    &.highlighted {
+      border-radius: 3px;
+      background-color: #e9eaeb;
+      font-weight: 600;
+      > i {
+        display: block;
+      }
+    }
   }
 `;
 
@@ -33,7 +34,6 @@ const Label = styled.label`
     display: none;
     margin-right: 9px;
   }
-
   &:before {
     content: '';
     position: absolute;
