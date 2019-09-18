@@ -98,15 +98,14 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       // Create entry with no-relational data.
       const entry = await model.forge(data).save(null, { transacting: trx });
       await createGroups(entry, values, { transacting: trx });
-      return entry;
+
+      return model.updateRelations(
+        { id: entry.id, values: relations },
+        { transacting: trx }
+      );
     };
 
-    const entry = await wrapTransaction(runCreate, { transacting });
-
-    return model.updateRelations(
-      { id: entry.id, values: relations },
-      { transacting }
-    );
+    return wrapTransaction(runCreate, { transacting });
   }
 
   async function update(params, values, { transacting } = {}) {
@@ -132,19 +131,18 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
             })
           : entry;
       await updateGroups(updatedEntry, values, { transacting: trx });
-      return updatedEntry;
+
+      if (Object.keys(relations).length > 0) {
+        return model.updateRelations(
+          Object.assign(params, { values: relations }),
+          { transacting: trx }
+        );
+      }
+
+      return this.findOne(params, null, { transacting: trx });
     };
 
-    await wrapTransaction(runUpdate, { transacting });
-
-    if (Object.keys(relations).length > 0) {
-      return model.updateRelations(
-        Object.assign(params, { values: relations }),
-        { transacting }
-      );
-    }
-
-    return this.findOne(params, null, { transacting });
+    return wrapTransaction(runUpdate, { transacting });
   }
 
   async function deleteOne(params, { transacting } = {}) {
@@ -491,7 +489,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
  * @param {*} params
  */
 const buildSearchQuery = (qb, model, params) => {
-  const query = (params._q || '').replace(/[^a-zA-Z0-9.-\s]+/g, '');
+  const query = params._q;
 
   const associations = model.associations.map(x => x.alias);
 
@@ -551,7 +549,7 @@ const buildSearchQuery = (qb, model, params) => {
           : `to_tsvector('${attribute}')`
       );
 
-      qb.orWhereRaw(`${searchQuery.join(' || ')} @@ to_tsquery(?)`, query);
+      qb.orWhereRaw(`${searchQuery.join(' || ')} @@ plainto_tsquery(?)`, query);
       break;
     }
   }

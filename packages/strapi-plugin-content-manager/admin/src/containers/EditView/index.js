@@ -8,6 +8,7 @@ import {
   LiLink,
   PluginHeader,
   PopUpWarning,
+  getYupInnerErrors,
   request,
   templateObject,
 } from 'strapi-helper-plugin';
@@ -133,6 +134,9 @@ function EditView({
       }
     };
 
+    // Force state to be cleared when navigation from one entry to another
+    dispatch({ type: 'RESET_PROPS' });
+
     if (!isCreatingEntry) {
       fetchData();
     } else {
@@ -202,21 +206,28 @@ function EditView({
       // Validate the form using yup
       await schema.validate(modifiedData, { abortEarly: false });
     } catch (err) {
-      errors = get(err, 'inner', []).reduce((acc, curr) => {
-        acc[
-          curr.path
-            .split('[')
-            .join('.')
-            .split(']')
-            .join('')
-        ] = [{ id: curr.message }];
-
-        return acc;
-      }, {});
+      errors = getYupInnerErrors(err);
     }
+
     dispatch({
       type: 'SET_ERRORS',
       errors,
+    });
+  };
+
+  const handleChange = ({ target: { name, value, type } }) => {
+    let inputValue = value;
+
+    // Empty string is not a valid date,
+    // Set the date to null when it's empty
+    if (type === 'date' && value === '') {
+      inputValue = null;
+    }
+
+    dispatch({
+      type: 'ON_CHANGE',
+      keys: name.split('.'),
+      value: inputValue,
     });
   };
 
@@ -280,16 +291,12 @@ function EditView({
           ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
           'SERVER ERROR'
         );
-        const errorSuffix = error.includes('Auth.form')
-          ? 'users-permissions.'
-          : '';
 
         setIsSubmitting(false);
         emitEvent('didNotSaveEntry', { error: err });
-        strapi.notification.error(`${errorSuffix}${error}`);
+        strapi.notification.error(error);
       }
     } catch (err) {
-      console.log({ formErrors: err });
       setIsSubmitting(false);
       const errors = get(err, 'inner', []).reduce((acc, curr) => {
         acc[
@@ -302,6 +309,7 @@ function EditView({
 
         return acc;
       }, {});
+
       dispatch({
         type: 'SET_ERRORS',
         errors,
@@ -333,13 +341,7 @@ function EditView({
           keys: name.split('.'),
         });
       }}
-      onChange={({ target: { name, value } }) => {
-        dispatch({
-          type: 'ON_CHANGE',
-          keys: name.split('.'),
-          value,
-        });
-      }}
+      onChange={handleChange}
       onRemove={keys => {
         dispatch({
           type: 'REMOVE_RELATION',
@@ -459,13 +461,7 @@ function EditView({
                             keys: name.split('.'),
                           });
                         }}
-                        onChange={({ target: { name, value } }) => {
-                          dispatch({
-                            type: 'ON_CHANGE',
-                            keys: name.split('.'),
-                            value,
-                          });
-                        }}
+                        onChange={handleChange}
                         layout={get(groupLayoutsData, group.group, {})}
                         pathname={pathname}
                         removeField={(keys, shouldAddEmptyField) => {
@@ -492,13 +488,7 @@ function EditView({
                             layout={layout}
                             modifiedData={modifiedData}
                             name={name}
-                            onChange={({ target: { name, value } }) => {
-                              dispatch({
-                                type: 'ON_CHANGE',
-                                keys: name.split('.'),
-                                value,
-                              });
-                            }}
+                            onChange={handleChange}
                           />
                         );
                       })}

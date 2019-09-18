@@ -59,6 +59,7 @@ module.exports = {
 
     this.loaders[name] = new DataLoader(
       keys => {
+        // eslint-disable-next-line no-async-promise-executor
         return new Promise(async (resolve, reject) => {
           try {
             // Extract queries from keys and merge similar queries.
