@@ -134,6 +134,9 @@ function EditView({
       }
     };
 
+    // Force state to be cleared when navigation from one entry to another
+    dispatch({ type: 'RESET_PROPS' });
+
     if (!isCreatingEntry) {
       fetchData();
     } else {
