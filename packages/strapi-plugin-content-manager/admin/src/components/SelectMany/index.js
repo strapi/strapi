@@ -53,13 +53,6 @@ function SelectMany({
       <Select
         isDisabled={isDisabled}
         id={name}
-        filterOption={el => {
-          if (isEmpty(value)) {
-            return true;
-          }
-
-          return value.findIndex(obj => obj.id === el.value.id) === -1;
-        }}
         isLoading={isLoading}
         isMulti
         isSearchable
