@@ -1,6 +1,6 @@
 # Contribute with Docs
 
-All efforts to contribute to the [Docs](https://strapi.io/documentation/3.0.0-beta.x/) are highly appreciated, we recommend [these guidelines](/3.0.0-beta.x/community/contribute-with-docs.html#the-workflow). We accept all kinds of Pull Requests, including bug fixes, documentation, and tutorials.
+All efforts to contribute to the [Docs](https://strapi.io/documentation/3.0.0-beta.x/) are highly appreciated, we recommend [these guidelines](/3.0.0-beta.x/community/contribute-with-docs.html#contributing-workflow). We accept all kinds of Pull Requests, including bug fixes, documentation, and tutorials.
 
 You are welcome to create tutorials, articles, and videos for your blog or channels without speaking to a maintainer.
 
@@ -16,7 +16,7 @@ Broadly speaking, if you want to contribute to the documentation, you can:
 2. Improve existing documentation with additional examples, adding more context, or fixing grammar and typos.
 3. Adding (or improving) a new [locale](/3.0.0-beta.x/community/contribute-with-docs.html#translations) to the documentation.
 
-Each of the three ways above have a specific [workflow](/3.0.0-beta.x/community/contribute-with-docs.html#the-workflow) which should be followed to ensure maximum efficiency in your contributions to the documentation.
+Each of the three ways above have a specific [workflow](/3.0.0-beta.x/community/contribute-with-docs.html#contributing-workflow) which should be followed to ensure maximum efficiency in your contributions to the documentation.
 
 ## Categories of Documentation
 
@@ -72,11 +72,9 @@ Please read the following sections before moving to create documentation. (Eithe
 
 1. [Technical Requirements and the Installation of the Docs](/3.0.0-beta.x/community/contribute-with-docs.html#technical-requirements)
 2. [Understanding the Docs Structure](/3.0.0-beta.x/community/contribute-with-docs.html#understanding-the-docs-structure)
-3. [Submitting new documentation](/3.0.0-beta.x/community/contribute-with-docs.html#submitting-totally-new-documentation)
-4. [Adding/modifying/deleting documentation](/3.0.0-beta.x/community/contribute-with-docs.html#adding-modifying-deleting-content)
-
-- How to [submit an externally hosted tutorial](/3.0.0-beta.x/community/contribute-with-docs.html#submitting-an-externally-hosted-tutorial).
-- How to use the [Docs Style Guide](/3.0.0-beta.x/community/contribute-with-docs.html#docs-style-guide) to match our guidelines.
+3. [Submitting new documentation](/3.0.0-beta.x/community/contribute-with-docs.html#submitting-new-documentation)
+4. [Adding/modifying/deleting documentation](/3.0.0-beta.x/community/contribute-with-docs.html#adding-modifying-deleting-content-from-the-docs)
+5. How to use the [Docs Style Guide](/3.0.0-beta.x/community/contribute-with-docs.html#docs-style-guide) to match our guidelines.
 
 ### Technical Requirements
 
@@ -174,7 +172,7 @@ This is an Example Tutorial...
 
 #### VuePress Submenus
 
-[VuePress]() automatically turns `h2` and `h3` tags into correctly formed **submenu items** and **nested submenu items**. These display in the left-hand navigation underneath the correct article heading as determined by the `h1` tag (see above) on the page.
+VuePress automatically turns `h2` and `h3` tags into correctly formed **submenu items** and **nested submenu items**. These display in the left-hand navigation underneath the correct article heading as determined by the `h1` tag (see above) on the page.
 
 #### Adding Images
 
@@ -226,12 +224,12 @@ These above guidelines illustrate how to add pages, images, and the structure of
 
 Submitting new documentation generally involves submitting new [Tutorials](/3.0.0-beta.x/community/contribute-with-docs.html#tutorials) or new [How-tos](/3.0.0-beta.x/community/contribute-with-docs.html#how-to-s).
 
-**NOTE:** If you are providing _new examples_ for existing [Reference Topics](http://localhost:8080/documentation/3.0.0-beta.x/community/contribute-with-docs.html#reference-topics), then the next section on [adding, modifying and deleting content](http://localhost:8080/documentation/3.0.0-beta.x/community/contribute-with-docs.html#adding-modifying-deleting-content-from-the-docs) applies.
+**NOTE:** If you are providing _new examples_ for existing [Reference Topics](/3.0.0-beta.x/community/contribute-with-docs.html#reference-topics), then the next section on [adding, modifying and deleting content](/3.0.0-beta.x/community/contribute-with-docs.html#adding-modifying-deleting-content-from-the-docs) applies.
 
 - Before you start to determine if you're writing a new **Tutorial** or a new **How-to**
 - Outline the **Tutorial** or a new **How-to**
 - Create a GitHub repo with your app for the **Tutorial** or for the code for the **How-to**
-- Following the [Docs Style Guide](http://localhost:8080/documentation/3.0.0-beta.x/community/contribute-with-docs.html#docs-style-guide) below, write your Tutorial and make a pull request
+- Following the [Docs Style Guide](/3.0.0-beta.x/community/contribute-with-docs.html#docs-style-guide) below, write your Tutorial and make a pull request
 
 The above steps allow proceeding confidently and knowing your contribution can be accepted.
 
@@ -239,7 +237,7 @@ The above steps allow proceeding confidently and knowing your contribution can b
 
 1. Make sure that following the steps results in a working app (for Tutorials) or working code (for How-tos).
 2. Smaller workable and tested apps are better than large apps that have many moving parts.
-3. If you have any questions, please ask! You can ask in our [Slack Channel](strapi.slack.com) or in the comments in GitHub if there is a Pull Request or an open issue regarding the docs you are writing.
+3. If you have any questions, please ask! You can ask in our [Slack Channel](https://strapi.slack.com) or in the comments in GitHub if there is a Pull Request or an open issue regarding the docs you are writing.
 
 ### Adding / Modifying / Deleting Content from the Docs
 
@@ -304,20 +302,17 @@ Clear and concise instructions and language can help individuals to get the full
 
 In the above, the #1 phrase is precise, and the reader knows what is expected. In the #2 phrase, the additional words "we will" is needed to keep the sentence relatively clear. **Note:** "Then, we open a tab." - is awkward and unclear.
 
-**Example 2**
-
-1. **"Download Node.js and install it onto your computer."**
-2. **"We download Node.js, and then we install it onto our computers."**
-
-In the above, the #1 phrase is precise. #2 is actually confusing.
-
 Therefore, when you write instructions, use "you." This guide helps to keep the documentation clearly written.
 
 ---
 
-#### Ensure to use trade, project and service provider names correctly
+#### Ensure to use trademark, project and service provider names correctly
 
-Strapi is back-end and front-end agnostic. Many different front-ends and databases can (and will) be used. Also, to front-ends and back-ends, many packages, tools, and third-party service providers are often used with Strapi. Referring to the projects and services correctly is essential. If you use incorrect terms to refer to external services, users could get confused when further research outside the Strapi docs is required.
+Strapi is back-end and front-end agnostic.
+
+As a result, users can run their application with their preferred database. Likewise, they can connect with their preferred front-end framework or library. Additionally, several provider plugins are already supported and community members are often creating new provider plugins for their projects.
+
+Therefore, referring to the projects and services correctly is essential for users to research outside this documentation if needed.
 
 Common projects and how to refer to them:
 
@@ -343,13 +338,13 @@ Common projects and how to refer to them:
 
 If you use images in the documentation, it is a best practice to include both HTML **alt text** and **title text**. The **alt text** appears in place of a broken link, and the **title text** appears when someone hovers over the image. Both are used to help with _accessibility_.
 
-Markdown example,
+Images in Markdown,
 
 ```md
 ![alt-text](/src/of/the/image.png 'title of image')
 ```
 
-The following example generates the following logo.
+The following example generates the following logo:
 
 ```md
 ![The Strapi Logo](../assets/contribution-guide/contribute-with-docs/strapi-logo.png 'Strapi Logo')
@@ -359,7 +354,7 @@ The following example generates the following logo.
 
 ![The Strapi Logo](../assets/contribution-guide/contribute-with-docs/strapi-logo.png 'Strapi Logo')
 
-#### Use an unordered list for action steps, number the large sections
+#### Use an unordered list for action steps, an ordered list large sections
 
 There are several reasons for using an unordered list for the **actionable** steps in the documentation.
 
@@ -464,7 +459,7 @@ Never assume steps are apparent. Please make your documentation clear to follow 
 
 #### Emphasize concepts using "Note:"
 
-Occasionally, specific concepts or exceptions need to be pointed out _in context_ to the individual reading the documentation. The way to do this is using **Note:**. The markdown is as follows:
+Occasionally, specific concepts or exceptions need to be pointed out _in context_ to the individual reading the documentation. The way to do this is using **Note:**. The Markdown is as follows:
 
 ```md
 **Note:** Important point
