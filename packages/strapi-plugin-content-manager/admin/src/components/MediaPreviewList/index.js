@@ -13,7 +13,7 @@ import {
 } from './StyledMediaPreviewList';
 
 function MediaPreviewList({ hoverable, files }) {
-  const maxLength = 3;
+  const IMAGE_PREVIEW_COUNT = 3;
   const getFileType = fileName => fileName.split('.').slice(-1)[0];
   const getSrc = fileURL =>
     fileURL.startsWith('/') ? `${strapi.backendURL}${fileURL}` : fileURL;
@@ -74,8 +74,9 @@ function MediaPreviewList({ hoverable, files }) {
     return files.map((file, index) => {
       return (
         <React.Fragment key={JSON.stringify(file)}>
-          {index === maxLength && files.length - maxLength > 1
-            ? renderText(files.length - maxLength)
+          {index === IMAGE_PREVIEW_COUNT &&
+          files.length > IMAGE_PREVIEW_COUNT + 1
+            ? renderText(files.length - IMAGE_PREVIEW_COUNT)
             : renderItem(file)}
         </React.Fragment>
       );
