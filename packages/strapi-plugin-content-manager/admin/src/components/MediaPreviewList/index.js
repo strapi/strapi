@@ -74,7 +74,7 @@ function MediaPreviewList({ hoverable, files }) {
       return (
         <React.Fragment key={JSON.stringify(file)}>
           {index === 3 && files.length - 4 > 0
-            ? renderText(files.length - 4)
+            ? renderText(files.length - 3)
             : renderItem(file)}
         </React.Fragment>
       );
