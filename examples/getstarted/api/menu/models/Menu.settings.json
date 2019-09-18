@@ -17,6 +17,10 @@
     "restaurant": {
       "model": "restaurant",
       "via": "menu"
+    },
+    "menusections": {
+      "collection": "menusection",
+      "via": "menu"
     }
   }
 }
