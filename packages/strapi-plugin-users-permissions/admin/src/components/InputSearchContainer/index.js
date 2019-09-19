@@ -15,7 +15,8 @@ import InputSearchLi from '../InputSearchLi';
 import { Addon, List, Wrapper } from './Components';
 
 function InputSearchContainer({
-  didDeleteUser,
+  didFetchUsers,
+  getUser,
   label,
   name,
   onClickAdd,
@@ -23,27 +24,50 @@ function InputSearchContainer({
   values,
 }) {
   const searchInput = useRef(null);
-  console.log(values);
-
   const [filteredUsers, setFilteredUsers] = useState(values);
   const [isAdding, setIsAdding] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [errors, setErrors] = useState([]);
+  const [users, setUsers] = useState(values);
   const [value, setValue] = useState('');
 
   useEffect(() => {
     if (values !== filteredUsers) {
+      setUsers(values);
       setFilteredUsers(values);
     }
   }, [values]);
 
+  useEffect(() => {
+    if (users !== filteredUsers) {
+      setFilteredUsers(users);
+      setIsAdding(true);
+    }
+  }, [didFetchUsers]);
+
   const handleBlur = () => setIsFocused(prev => !prev);
 
-  const handleChange = () => {};
+  const handleChange = ({ target: value }) => {
+    const filteredUsers = isEmpty(value)
+      ? users
+      : users.filter(user => includes(toLower(user.name), toLower(value)));
+
+    if (isEmpty(filteredUsers) && !isEmpty(value)) {
+      getUser(value);
+    }
+
+    if (isEmpty(value)) {
+      setValue(value);
+      setFilteredUsers(values);
+      setIsAdding(false);
+      setUsers(values);
+    }
+
+    setValue(value);
+    setFilteredUsers(filteredUsers);
+  };
 
   const handleClick = item => {
-    console.log(item);
-    console.log(isAdding);
     if (isAdding) {
       const id = has(item, '_id') ? '_id' : 'id';
       const users = values;
@@ -115,7 +139,6 @@ InputSearchContainer.defaultProps = {
 };
 
 InputSearchContainer.propTypes = {
-  didDeleteUser: PropTypes.bool.isRequired,
   didFetchUsers: PropTypes.bool.isRequired,
   didGetUsers: PropTypes.bool.isRequired,
   getUser: PropTypes.func.isRequired,
