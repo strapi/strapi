@@ -25,7 +25,8 @@
       "repeatable": true
     },
     "menu": {
-      "model": "menu"
+      "model": "menu",
+      "via": "menusections"
     }
   }
 }
