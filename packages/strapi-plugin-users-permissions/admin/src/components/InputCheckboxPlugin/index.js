@@ -10,7 +10,14 @@ import PropTypes from 'prop-types';
 import { Label, Wrapper } from './Components';
 
 function InputCheckboxPlugin(
-  { inputSelected, label, name, setNewInputSelected, value },
+  {
+    inputSelected,
+    label,
+    name,
+    setNewInputSelected,
+    setShouldDisplayPolicieshint,
+    value,
+  },
   context
 ) {
   const isSelected = inputSelected === name;

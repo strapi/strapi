@@ -15,56 +15,57 @@ import InputSearchLi from '../InputSearchLi';
 import { Addon, List, Wrapper } from './Components';
 
 function InputSearchContainer({
+  didDeleteUser,
   didFetchUsers,
   getUser,
   label,
   name,
   onClickAdd,
   onClickDelete,
+  users,
   values,
 }) {
   const searchInput = useRef(null);
   const [filteredUsers, setFilteredUsers] = useState(values);
   const [isAdding, setIsAdding] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const [errors, setErrors] = useState([]);
-  const [users, setUsers] = useState(values);
+  const [currUsers, setCurrUsers] = useState(values);
   const [value, setValue] = useState('');
 
   useEffect(() => {
     if (values !== filteredUsers) {
-      setUsers(values);
       setFilteredUsers(values);
+      setCurrUsers(values);
     }
-  }, [values]);
+  }, [didDeleteUser]);
 
   useEffect(() => {
-    if (users !== filteredUsers) {
-      setFilteredUsers(users);
+    if (currUsers !== filteredUsers) {
       setIsAdding(true);
+      setFilteredUsers(users);
     }
   }, [didFetchUsers]);
 
   const handleBlur = () => setIsFocused(prev => !prev);
 
-  const handleChange = ({ target: value }) => {
+  const handleChange = ({ target: { value } }) => {
     const filteredUsers = isEmpty(value)
-      ? users
-      : users.filter(user => includes(toLower(user.name), toLower(value)));
+      ? currUsers
+      : currUsers.filter(user => includes(toLower(user.name), toLower(value)));
 
-    if (isEmpty(filteredUsers) && !isEmpty(value)) {
-      getUser(value);
-    }
+    if (!isEmpty(value)) {
+      if (isEmpty(filteredUsers)) {
+        getUser(value);
+      }
 
-    if (isEmpty(value)) {
+      setValue(value);
+      setFilteredUsers(filteredUsers);
+    } else {
       setValue(value);
       setFilteredUsers(values);
       setIsAdding(false);
-      setUsers(values);
+      setCurrUsers(values);
     }
-
-    setValue(value);
-    setFilteredUsers(filteredUsers);
   };
 
   const handleClick = item => {
@@ -76,16 +77,12 @@ function InputSearchContainer({
         onClickAdd(item);
         users.push(item);
       }
+      searchInput.current.focus();
 
-      // Reset the input focus
-      searchInput.focus();
-      // Empty the input and display users
-      this.setState({
-        value: '',
-        isAdding: false,
-        users,
-        filteredUsers: users,
-      });
+      setValue('');
+      setIsAdding(false);
+      setCurrUsers(users);
+      setFilteredUsers(users);
     } else {
       onClickDelete(item);
     }
@@ -103,7 +100,7 @@ function InputSearchContainer({
         <FormattedMessage id="users-permissions.InputSearch.placeholder">
           {message => (
             <input
-              className={`form-control ${!isEmpty(errors) ? 'is-invalid' : ''}`}
+              className={`form-control`}
               id={name}
               name={name}
               onBlur={handleBlur}
@@ -139,8 +136,8 @@ InputSearchContainer.defaultProps = {
 };
 
 InputSearchContainer.propTypes = {
+  didDeleteUser: PropTypes.bool.isRequired,
   didFetchUsers: PropTypes.bool.isRequired,
-  didGetUsers: PropTypes.bool.isRequired,
   getUser: PropTypes.func.isRequired,
   label: PropTypes.shape({
     id: PropTypes.string,
