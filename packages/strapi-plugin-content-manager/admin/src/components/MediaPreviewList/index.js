@@ -12,8 +12,9 @@ import {
   MediaPreviewText,
 } from './StyledMediaPreviewList';
 
+const IMAGE_PREVIEW_COUNT = 3;
+
 function MediaPreviewList({ hoverable, files }) {
-  const IMAGE_PREVIEW_COUNT = 3;
   const getFileType = fileName => fileName.split('.').slice(-1)[0];
   const getSrc = fileURL =>
     fileURL.startsWith('/') ? `${strapi.backendURL}${fileURL}` : fileURL;
