@@ -7,7 +7,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import { findIndex, has, includes, isEmpty, map, toLower } from 'lodash';
+import {
+  difference,
+  findIndex,
+  has,
+  includes,
+  isEmpty,
+  map,
+  toLower,
+} from 'lodash';
 
 import { Label } from 'strapi-helper-plugin';
 import InputSearchLi from '../InputSearchLi';
@@ -37,13 +45,15 @@ function InputSearchContainer({
       setFilteredUsers(values);
       setCurrUsers(values);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [didDeleteUser]);
 
   useEffect(() => {
-    if (currUsers !== filteredUsers) {
-      setIsAdding(true);
+    if (!isEmpty(difference(users, filteredUsers))) {
       setFilteredUsers(users);
+      setIsAdding(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [didFetchUsers]);
 
   const handleBlur = () => setIsFocused(prev => !prev);

@@ -10,14 +10,7 @@ import PropTypes from 'prop-types';
 import { Label, Wrapper } from './Components';
 
 function InputCheckboxPlugin(
-  {
-    inputSelected,
-    label,
-    name,
-    setNewInputSelected,
-    setShouldDisplayPolicieshint,
-    value,
-  },
+  { inputSelected, label, name, setNewInputSelected, value },
   context
 ) {
   const isSelected = inputSelected === name;
@@ -48,7 +41,7 @@ function InputCheckboxPlugin(
     if (isSelected) {
       context.resetShouldDisplayPoliciesHint();
     } else {
-      setShouldDisplayPolicieshint();
+      context.setShouldDisplayPolicieshint();
     }
   };
 
