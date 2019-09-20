@@ -131,6 +131,11 @@ module.exports = {
         },
         {
           collapsable: true,
+          title: '📦 Plugins',
+          children: ['/3.0.0-beta.x/plugins/documentation'],
+        },
+        {
+          collapsable: true,
           title: '🔌 Local plugins',
           children: [
             '/3.0.0-beta.x/plugin-development/quick-start',
