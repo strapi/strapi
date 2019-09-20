@@ -4,7 +4,6 @@ const _ = require('lodash');
 
 const { createController, createService } = require('../core-api');
 const getURLFromSegments = require('../utils/url-from-segments');
-const routerJoi = require('koa-joi-router');
 
 module.exports = function(strapi) {
   // Retrieve Strapi version.
@@ -38,8 +37,21 @@ module.exports = function(strapi) {
     );
   }
 
-  // Initialize main router to use it in middlewares.
-  strapi.router = routerJoi();
+  Object.keys(strapi.groups).forEach(key => {
+    const group = strapi.groups[key];
+
+    if (!group.connection)
+      throw new Error(`Group ${key} is missing a connection attribute`);
+
+    if (!group.collectionName)
+      throw new Error(`Group ${key} is missing a collectionName attribute`);
+
+    return Object.assign(group, {
+      uid: key,
+      modelType: 'group',
+      globalId: group.globalId || _.upperFirst(_.camelCase(`group_${key}`)),
+    });
+  });
 
   // Set models.
   strapi.models = Object.keys(strapi.api || []).reduce((acc, key) => {
@@ -47,6 +59,8 @@ module.exports = function(strapi) {
       let model = strapi.api[key].models[index];
 
       Object.assign(model, {
+        modelType: 'contentType',
+        uid: `app::${key}.${index}`,
         apiName: key,
         globalId: model.globalId || _.upperFirst(_.camelCase(index)),
         collectionName: model.collectionName || `${index}`.toLocaleLowerCase(),
@@ -113,6 +127,8 @@ module.exports = function(strapi) {
     let model = strapi.admin.models[key];
 
     Object.assign(model, {
+      modelType: 'contentType',
+      uid: `strapi::admin.${key}`,
       identity: model.identity || _.upperFirst(key),
       globalId: model.globalId || _.upperFirst(_.camelCase(`admin-${key}`)),
       connection:
@@ -120,10 +136,6 @@ module.exports = function(strapi) {
         strapi.config.currentEnvironment.database.defaultConnection,
     });
   });
-
-  strapi.admin.queries = (model, plugin) => {
-    return strapi.query(model, plugin, strapi.admin.config.queries);
-  };
 
   Object.keys(strapi.plugins).forEach(pluginName => {
     let plugin = strapi.plugins[pluginName];
@@ -145,6 +157,9 @@ module.exports = function(strapi) {
       let model = plugin.models[key];
 
       Object.assign(model, {
+        modelType: 'contentType',
+        uid: `plugins::${pluginName}.${key}`,
+        plugin: pluginName,
         collectionName:
           model.collectionName || `${pluginName}_${key}`.toLowerCase(),
         globalId:
@@ -154,10 +169,6 @@ module.exports = function(strapi) {
           strapi.config.currentEnvironment.database.defaultConnection,
       });
     });
-
-    plugin.queries = (model, pluginName) => {
-      return strapi.query(model, pluginName, plugin.config.queries);
-    };
   });
 
   // Define required middlewares categories.
@@ -258,7 +269,7 @@ module.exports = function(strapi) {
       );
       acc[current] = !_.isObject(currentSettings) ? {} : currentSettings;
 
-      if (!acc[current].hasOwnProperty('enabled')) {
+      if (!_.has(acc[current], 'enabled')) {
         strapi.log.warn(
           `(middleware:${current}) wasn't loaded due to missing key \`enabled\` in the configuration`
         );
@@ -284,7 +295,7 @@ module.exports = function(strapi) {
 
       acc[current] = !_.isObject(currentSettings) ? {} : currentSettings;
 
-      if (!acc[current].hasOwnProperty('enabled')) {
+      if (!_.has(acc[current], 'enabled')) {
         strapi.log.warn(
           `(hook:${current}) wasn't loaded due to missing key \`enabled\` in the configuration`
         );

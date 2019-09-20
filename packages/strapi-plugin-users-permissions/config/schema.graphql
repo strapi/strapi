@@ -2,7 +2,7 @@ const _ = require('lodash');
 
 module.exports = {
   type: {
-    UsersPermissionsPermission: false // Make this type NOT queriable.
+    UsersPermissionsPermission: false, // Make this type NOT queriable.
   },
   definition: `
     type UsersPermissionsMe {
@@ -25,115 +25,141 @@ module.exports = {
     me: UsersPermissionsMe
   `,
   resolver: {
-    UsersPermissionsMe: {
-      id(obj) {
-        return obj.id || obj._id;
-      },
-    },
     Query: {
       me: {
         resolverOf: 'User.me',
         resolver: {
           plugin: 'users-permissions',
-          handler: 'User.me'
-        }
+          handler: 'User.me',
+        },
       },
       role: {
+        plugin: 'users-permissions',
         resolverOf: 'UsersPermissions.getRole',
-        resolver: async (obj, options,  { context }) => {
-          await strapi.plugins['users-permissions'].controllers.userspermissions.getRole(context);
+        resolver: async (obj, options, { context }) => {
+          await strapi.plugins[
+            'users-permissions'
+          ].controllers.userspermissions.getRole(context);
 
           return context.body.role;
-        }
+        },
       },
       roles: {
         description: `Retrieve all the existing roles. You can't apply filters on this query.`,
+        plugin: 'users-permissions',
         resolverOf: 'UsersPermissions.getRoles', // Apply the `getRoles` permissions on the resolver.
-        resolver: async (obj, options,  { context }) => {
-          await strapi.plugins['users-permissions'].controllers.userspermissions.getRoles(context);
+        resolver: async (obj, options, { context }) => {
+          await strapi.plugins[
+            'users-permissions'
+          ].controllers.userspermissions.getRoles(context);
 
           return context.body.roles;
-        }
-      }
+        },
+      },
     },
     Mutation: {
       createRole: {
         description: 'Create a new role',
+        plugin: 'users-permissions',
         resolverOf: 'UsersPermissions.createRole',
-        resolver: async (obj, options,  { context }) => {
-          await strapi.plugins['users-permissions'].controllers.userspermissions.createRole(context);
+        resolver: async (obj, options, { context }) => {
+          await strapi.plugins[
+            'users-permissions'
+          ].controllers.userspermissions.createRole(context);
 
           return { ok: true };
-        }
+        },
       },
       updateRole: {
         description: 'Update an existing role',
+        plugin: 'users-permissions',
         resolverOf: 'UsersPermissions.updateRole',
-        resolver: async (obj, options,  { context }) => {
-          await strapi.plugins['users-permissions'].controllers.userspermissions.updateRole(context.params, context.body);
+        resolver: async (obj, options, { context }) => {
+          await strapi.plugins[
+            'users-permissions'
+          ].controllers.userspermissions.updateRole(
+            context.params,
+            context.body
+          );
 
           return { ok: true };
-        }
+        },
       },
       deleteRole: {
         description: 'Delete an existing role',
+        plugin: 'users-permissions',
         resolverOf: 'UsersPermissions.deleteRole',
-        resolver: async (obj, options,  { context }) => {
-          await strapi.plugins['users-permissions'].controllers.userspermissions.deleteRole(context);
+        resolver: async (obj, options, { context }) => {
+          await strapi.plugins[
+            'users-permissions'
+          ].controllers.userspermissions.deleteRole(context);
 
           return { ok: true };
-        }
+        },
       },
       createUser: {
         description: 'Create a new user',
+        plugin: 'users-permissions',
         resolverOf: 'User.create',
         resolver: async (obj, options, { context }) => {
-          context.params =  _.toPlainObject(options.input.where);
+          context.params = _.toPlainObject(options.input.where);
           context.request.body = _.toPlainObject(options.input.data);
 
-          await strapi.plugins['users-permissions'].controllers.user.create(context);
+          await strapi.plugins['users-permissions'].controllers.user.create(
+            context
+          );
 
           return {
-            user: context.body.toJSON ? context.body.toJSON() : context.body
+            user: context.body.toJSON ? context.body.toJSON() : context.body,
           };
-        }
+        },
       },
       updateUser: {
         description: 'Update an existing user',
+        plugin: 'users-permissions',
         resolverOf: 'User.update',
         resolver: async (obj, options, { context }) => {
-          context.params =  _.toPlainObject(options.input.where);
+          context.params = _.toPlainObject(options.input.where);
           context.request.body = _.toPlainObject(options.input.data);
 
-          await strapi.plugins['users-permissions'].controllers.user.update(context);
+          await strapi.plugins['users-permissions'].controllers.user.update(
+            context
+          );
 
-          return { 
-            user: context.body.toJSON ? context.body.toJSON() : context.body
+          return {
+            user: context.body.toJSON ? context.body.toJSON() : context.body,
           };
-        }
+        },
       },
       deleteUser: {
         description: 'Delete an existing user',
+        plugin: 'users-permissions',
         resolverOf: 'User.destroy',
         resolver: async (obj, options, { context }) => {
           // Set parameters to context.
-          context.params =  _.toPlainObject(options.input.where);
+          context.params = _.toPlainObject(options.input.where);
           context.request.body = _.toPlainObject(options.input.data);
 
-          // Retrieve user to be able to return it because 
+          // Retrieve user to be able to return it because
           // Bookshelf doesn't return the row once deleted.
-          await strapi.plugins['users-permissions'].controllers.user.findOne(context);
+          await strapi.plugins['users-permissions'].controllers.user.findOne(
+            context
+          );
           // Assign result to user.
-          const user = context.body.toJSON ? context.body.toJSON() : context.body;
+          const user = context.body.toJSON
+            ? context.body.toJSON()
+            : context.body;
 
           // Run destroy query.
-          await strapi.plugins['users-permissions'].controllers.user.destroy(context);
+          await strapi.plugins['users-permissions'].controllers.user.destroy(
+            context
+          );
 
           return {
-            user
+            user,
           };
-        }
-      }
-    }
-  }
+        },
+      },
+    },
+  },
 };

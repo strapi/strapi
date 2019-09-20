@@ -18,9 +18,9 @@ module.exports = {
    * @return Object
    */
 
-  convertToParams: (params, primaryKey) => {
+  convertToParams: params => {
     return Object.keys(params).reduce((acc, current) => {
-      const key = current === 'id' ? primaryKey : `_${current}`;
+      const key = current === 'id' ? 'id' : `_${current}`;
       acc[key] = params[current];
       return acc;
     }, {});
@@ -52,13 +52,13 @@ module.exports = {
   amountLimiting: (params = {}) => {
     const { amountLimit } = strapi.plugins.graphql.config;
 
-    if(!amountLimit) return params;
+    if (!amountLimit) return params;
 
     if (!params.limit || params.limit === -1 || params.limit > amountLimit) {
       params.limit = amountLimit;
     } else if (params.limit < 0) {
       params.limit = 0;
-    } 
+    }
 
     return params;
   },
@@ -69,14 +69,10 @@ module.exports = {
    * @return Promise or Error.
    */
 
-  composeQueryResolver: function(_schema, plugin, name, isSingular) {
+  composeQueryResolver: function({ _schema, plugin, name, isSingular }) {
     const params = {
       model: name,
     };
-
-    const model = plugin
-      ? strapi.plugins[plugin].models[name]
-      : strapi.models[name];
 
     // Extract custom resolver or type description.
     const { resolver: handler = {} } = _schema;
@@ -190,7 +186,7 @@ module.exports = {
         return async (ctx, next) => {
           ctx.params = {
             ...params,
-            [model.primaryKey]: ctx.query[model.primaryKey],
+            id: ctx.query.id,
           };
 
           // Return the controller.
@@ -236,7 +232,7 @@ module.exports = {
     }
 
     if (strapi.plugins['users-permissions']) {
-      policies.push('plugins.users-permissions.permissions');
+      policies.unshift('plugins.users-permissions.permissions');
     }
 
     // Populate policies.
@@ -282,24 +278,12 @@ module.exports = {
         // cause a lost of the Object prototype.
         const opts = this.amountLimiting(_options);
 
-        Object.defineProperties(ctx, {
-          query: {
-            value: {
-              ...this.convertToParams(
-                _.omit(opts, 'where'),
-                model ? model.primaryKey : 'id'
-              ),
-              ...this.convertToQuery(opts.where),
-            },
-            writable: true,
-            configurable: true,
-          },
-          params: {
-            value: this.convertToParams(opts, model ? model.primaryKey : 'id'),
-            writable: true,
-            configurable: true,
-          },
-        });
+        ctx.query = {
+          ...this.convertToParams(_.omit(opts, 'where')),
+          ...this.convertToQuery(opts.where),
+        };
+
+        ctx.params = this.convertToParams(opts);
 
         if (isController) {
           const values = await resolver.call(null, ctx, null);

@@ -15,8 +15,8 @@ import InputSpacer from '../InputSpacer';
 
 import styles from './styles.scss';
 
-/* eslint-disable jsx-a11y/no-autofocus */
-class InputTextWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class InputTextWithErrors extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   state = { errors: [], hasInitialValue: false };
 
   componentDidMount() {
@@ -33,7 +33,7 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     // Show required error if the input's value is received after the compo is mounted
     if (!isEmpty(nextProps.value) && !this.state.hasInitialValue) {
       this.setState({ hasInitialValue: true });
@@ -57,7 +57,7 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
       const errors = validateInput(target.value, this.props.validations);
       this.setState({ errors, hasInitialValue: true });
     }
-  }
+  };
 
   render() {
     const {
@@ -99,7 +99,7 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
         className={cn(
           styles.containerText,
           customBootstrapClass,
-          !isEmpty(className) && className,
+          !isEmpty(className) && className
         )}
         style={style}
       >
@@ -131,7 +131,7 @@ class InputTextWithErrors extends React.Component { // eslint-disable-line react
         />
         <InputErrors
           className={errorsClassName}
-          errors={!noErrorsDescription && this.state.errors || []}
+          errors={(!noErrorsDescription && this.state.errors) || []}
           name={name}
           style={errorsStyle}
         />
@@ -202,10 +202,7 @@ InputTextWithErrors.propTypes = {
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
   noErrorsDescription: PropTypes.bool,
-  onBlur: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.func,
-  ]),
+  onBlur: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
   placeholder: PropTypes.string,

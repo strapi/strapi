@@ -8,8 +8,10 @@ import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 
-import Helmet from 'react-helmet';
 import { BlockerComponent } from 'strapi-helper-plugin';
+import PageTitle from '../../components/PageTitle';
+
+import { LOGIN_LOGO } from '../../config';
 import ErrorBoundary from '../ErrorBoundary';
 
 export function PluginDispatcher(props) {
@@ -44,9 +46,13 @@ export function PluginDispatcher(props) {
 
   return (
     <div>
-      <Helmet title={`Strapi - ${name}`} />
+      <PageTitle title={`Strapi - ${name}`} />
       <ErrorBoundary>
-        <PluginEntryComponent {...props} {...blockerComponentProps} />
+        <PluginEntryComponent
+          {...props}
+          {...blockerComponentProps}
+          assets={{ loginLogo: LOGIN_LOGO }}
+        />
       </ErrorBoundary>
     </div>
   );

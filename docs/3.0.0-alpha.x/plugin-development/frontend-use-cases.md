@@ -15,10 +15,9 @@ The `ExtendComponent` allows you to inject design from one plugin into another.
 Let's say that you want to enable another plugin to inject a component into the top area of your plugin's container called `FooPage`;
 
 **Path —** `./plugins/my-plugin/admin/src/containers/FooPage/actions.js`.
+
 ```js
-import {
-  ON_TOGGLE_SHOW_LOREM,
-} from './constants';
+import { ON_TOGGLE_SHOW_LOREM } from './constants';
 
 export function onToggleShowLorem() {
   return {
@@ -28,6 +27,7 @@ export function onToggleShowLorem() {
 ```
 
 **Path —** `./plugins/my-plugin/admin/src/containers/FooPage/index.js`.
+
 ```js
 import React from 'react';
 import { connect } from 'react-redux';
@@ -42,7 +42,7 @@ import ExtendComponent from 'components/ExtendComponent';
 import injectReducer from 'utils/injectReducer';
 
 // Actions
-import { onToggleShowLorem } from './action'
+import { onToggleShowLorem } from './action';
 
 import reducer from './reducer';
 
@@ -51,7 +51,11 @@ import { makeSelectShowLorem } from './selectors';
 
 class FooPage extends React.Component {
   render() {
-    const lorem = this.props.showLorem ? <p>Lorem ipsum dolor sit amet, consectetur adipiscing</p> : '';
+    const lorem = this.props.showLorem ? (
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing</p>
+    ) : (
+      ''
+    );
     return (
       <div>
         <h1>This is FooPage container</h1>
@@ -77,7 +81,7 @@ function mapDispatchToProps(dispatch) {
     {
       onToggleShowLorem,
     },
-    dispatch,
+    dispatch
   );
 }
 
@@ -85,16 +89,20 @@ const mapStateToProps = createStructuredSelector({
   showLorem: makeSelectShowLorem(),
 });
 
-const withConnect = connect(mapDispatchToProps, mapDispatchToProps);
+const withConnect = connect(
+  mapDispatchToProps,
+  mapDispatchToProps
+);
 const withReducer = injectReducer({ key: 'fooPage', reducer });
 
 export default compose(
   withReducer,
-  withConnect,
+  withConnect
 )(FooPage);
 ```
 
 **Path —** `./plugins/my-plugin/admin/src/containers/FooPage/reducer.js`.
+
 ```js
 import { fromJS } from 'immutable';
 import { ON_TOGGLE_SHOW_LOREM } from './constants';
@@ -103,7 +111,7 @@ const initialState = fromJS({
   showLorem: false,
 });
 
-function fooPageReducer(state= initialState, action) {
+function fooPageReducer(state = initialState, action) {
   switch (action.type) {
     case ON_TOGGLE_SHOW_LOREM:
       return state.set('showLorem', !state.get('showLorem'));
@@ -116,23 +124,25 @@ export default fooPageReducer;
 ```
 
 **Path —** `./plugins/my-plugin/admin/src/containers/FooPage/selectors.js`.
+
 ```js
-import  { createSelector } from 'reselect';
+import { createSelector } from 'reselect';
 
 /**
-* Direct selector to the fooPage state domain
-*/
+ * Direct selector to the fooPage state domain
+ */
 
 const selectFooPageDomain = () => state => state.get('fooPage');
 
 /**
-* Other specific selectors
-*/
+ * Other specific selectors
+ */
 
-const makeSelectShowLorem = () => createSelector(
-  selectFooPageDomain(),
-  (substate) => substate.get('showLorem'),
-);
+const makeSelectShowLorem = () =>
+  createSelector(
+    selectFooPageDomain(),
+    substate => substate.get('showLorem')
+  );
 
 export { makeSelectShowLorem };
 ```
@@ -141,9 +151,10 @@ That's all now your plugin's container is injectable!
 
 Let's see how to inject a React Component from a plugin into another.
 
-
 ### Create your injectedComponent
+
 **Path -** `./plugins/another-plugin/admin/src/extendables/BarContainer/index.js`;
+
 ```js
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -181,6 +192,7 @@ export default BarContainer;
 You have to create a file called `injectedComponents.js` at the root of your `another-plugin` src folder.
 
 **Path —** `./plugins/another-plugin/admin/src/injectedComponents.js`.
+
 ```js
 import BarContainer from 'extendables/BarContainer';
 
@@ -194,15 +206,17 @@ export default [
   },
 ];
 ```
+
 Just by doing so, the `another-plugin` will add a `Button` which toggles the `lorem` paragraph in the `FooPage` view.
 
-***
+---
 
 ## Routeless container store injection
 
 If you have a container which can be a child of several other containers (i.e. it doesn't have a route); you'll have to inject it directly in the `./plugins/my-plugin/admin/src/containers/App/index.js` file as follows :
 
 **Path —** `./plugins/my-plugin/admin/src/containers/App/index.js`.
+
 ```js
 // ...
 import fooReducer from 'containers/Foo/reducer';
@@ -258,7 +272,7 @@ export default compose(
 )(App);
 ```
 
-***
+---
 
 ## Execute logic before mounting the plugin
 
@@ -274,24 +288,26 @@ This file must contains a default functions that returns a `Promise`.
 In this example, we want to populate the left menu with links that will refer to our Content Types.
 
 **Path —** `./app/plugins/content-manager/admin/src/bootstrap.js`.
+
 ```js
 import { generateMenu } from 'containers/App/sagas';
 
 // This method is executed before the load of the plugin
-const bootstrap = (plugin) => new Promise((resolve, reject) => {
-  generateMenu()
-    .then(menu => {
-      plugin.leftMenuSections = menu;
+const bootstrap = plugin =>
+  new Promise((resolve, reject) => {
+    generateMenu()
+      .then(menu => {
+        plugin.leftMenuSections = menu;
 
-      resolve(plugin);
-    })
-    .catch(e => reject(e));
-});
+        resolve(plugin);
+      })
+      .catch(e => reject(e));
+  });
 
 export default bootstrap;
 ```
 
-***
+---
 
 ## Prevent plugin rendering
 
@@ -307,6 +323,7 @@ This file must contain a default function that returns a `Promise`.
 Let's say that you want to disable your plugin if the server autoReload config is disabled in development mode.
 
 **Path —** `./app/config/environments/development/server.json`.
+
 ```
 {
   "host": "localhost",
@@ -323,6 +340,7 @@ Let's say that you want to disable your plugin if the server autoReload config i
 You'll first create a request to check if the `autoReload` config is enabled.
 
 **Path —** `./app/plugins/my-plugin/config/routes.json`.
+
 ```json
 {
   "routes": [
@@ -337,18 +355,24 @@ You'll first create a request to check if the `autoReload` config is enabled.
   ]
 }
 ```
+
 Then the associated handler:
 
 **Path —** `./app/plugins/my-plugin/controllers/MyPlugin.js`.
+
 ```js
 const _ = require('lodash');
 const send = require('koa-send');
 
 module.exports = {
   autoReload: async ctx => {
-    ctx.send({ autoReload: _.get(strapi.config.currentEnvironment, 'server.autoReload', { enabled: false }) });
-  }
-}
+    ctx.send({
+      autoReload: _.get(strapi.config.currentEnvironment, 'server.autoReload', {
+        enabled: false,
+      }),
+    });
+  },
+};
 ```
 
 Finally, you'll create a file called `requirements.js`at the root of your plugin's src folder.
@@ -356,6 +380,7 @@ Finally, you'll create a file called `requirements.js`at the root of your plugin
 The default function exported must return a `Promise`.
 If you wan't to prevent the plugin from being rendered you'll have to set `plugin.preventComponentRendering = true;`.
 In this case, you'll have to set:
+
 ```js
 plugin.blockerComponentProps = {
   blockerComponentTitle: 'my-plugin.blocker.title',
@@ -367,27 +392,29 @@ plugin.blockerComponentProps = {
 To follow the example above:
 
 **Path —** `./app/plugins/my-plugin/admin/src/requirements.js`.
+
 ```js
 // Use our request helper
 import request from 'utils/request';
 
-const shouldRenderCompo = (plugin) => new Promise((resolve, request) => {
-  request('/my-plugin/autoReload')
-    .then(response => {
-      // If autoReload is enabled the response is `{ autoReload: { enabled: true } }`
-      plugin.preventComponentRendering = !response.autoReload.enabled;
-      // Set the BlockerComponent props
-      plugin.blockerComponentProps = {
-        blockerComponentTitle: 'my-plugin.blocker.title',
-        blockerComponentDescription: 'my-plugin.blocker.description',
-        blockerComponentIcon: 'fa-refresh',
-        blockerComponentContent: 'renderIde', // renderIde will add an ide section that shows the development environment server.json config
-      };
+const shouldRenderCompo = plugin =>
+  new Promise((resolve, request) => {
+    request('/my-plugin/autoReload')
+      .then(response => {
+        // If autoReload is enabled the response is `{ autoReload: { enabled: true } }`
+        plugin.preventComponentRendering = !response.autoReload.enabled;
+        // Set the BlockerComponent props
+        plugin.blockerComponentProps = {
+          blockerComponentTitle: 'my-plugin.blocker.title',
+          blockerComponentDescription: 'my-plugin.blocker.description',
+          blockerComponentIcon: 'fa-refresh',
+          blockerComponentContent: 'renderIde', // renderIde will add an ide section that shows the development environment server.json config
+        };
 
-      return resolve(plugin);
-    })
-    .catch(err => reject(err));
-});
+        return resolve(plugin);
+      })
+      .catch(err => reject(err));
+  });
 
 export default shouldRenderCompo;
 ```
@@ -397,6 +424,7 @@ export default shouldRenderCompo;
 You can render your own custom blocker by doing as follows:
 
 **Path —** `./app/plugins/my-plugin/admin/src/requirements.js`.
+
 ```js
 // Use our request helper
 import request from 'utils/request';
@@ -404,24 +432,25 @@ import request from 'utils/request';
 // Your custom blockerComponentProps
 import MyCustomBlockerComponent from 'components/MyCustomBlockerComponent';
 
-const shouldRenderCompo = (plugin) => new Promise((resolve, request) => {
-  request('/my-plugin/autoReload')
-    .then(response => {
-      // If autoReload is enabled the response is `{ autoReload: { enabled: true } }`
-      plugin.preventComponentRendering = !response.autoReload.enabled;
+const shouldRenderCompo = plugin =>
+  new Promise((resolve, request) => {
+    request('/my-plugin/autoReload')
+      .then(response => {
+        // If autoReload is enabled the response is `{ autoReload: { enabled: true } }`
+        plugin.preventComponentRendering = !response.autoReload.enabled;
 
-      // Tell which component to be rendered instead
-      plugin.blockerComponent = MyCustomBlockerComponent;
+        // Tell which component to be rendered instead
+        plugin.blockerComponent = MyCustomBlockerComponent;
 
-      return resolve(plugin);
-    })
-    .catch(err => reject(err));
-});
+        return resolve(plugin);
+      })
+      .catch(err => reject(err));
+  });
 
 export default shouldRenderCompo;
 ```
 
-***
+---
 
 ## Using React/Redux and sagas
 
@@ -431,6 +460,7 @@ This short tutorial will show how to fetch data using actions/reducer/sagas.
 ### Constants declaration
 
 **Path —** `./plugins/my-plugin/admin/src/containers/FooPage/constants.js`
+
 ```js
 export const DATA_FETCH = 'MyPlugin/FooPage/DATA_FETCH';
 export const DATA_FETCH_ERROR = 'MyPlugin/FooPage/DATA_FETCH_ERROR';
@@ -440,6 +470,7 @@ export const DATA_FETCH_SUCCEEDED = 'MyPlugin/FooPage/DATA_FETCH_SUCCEEDED';
 ### Actions declaration
 
 **Path —** `./plugins/my-plugin/admin/src/containers/FooPage/actions.js`
+
 ```js
 import {
   DATA_FETCH,
@@ -474,12 +505,10 @@ export function dataFetchSucceeded(data) {
 We strongly recommend to use [Immutable.js](https://facebook.github.io/immutable-js/) to structure your data.
 
 **Path —** `./plugins/my-plugin/admin/src/containers/FooPage/reducer.js`
+
 ```js
 import { fromJS, Map } from 'immutable';
-import {
-  DATA_FETCH_ERROR,
-  DATA_FETCH_SUCCEEDED,
-} from './constants';
+import { DATA_FETCH_ERROR, DATA_FETCH_SUCCEEDED } from './constants';
 
 const initialState = fromJS({
   data: Map({}),
@@ -512,6 +541,7 @@ export default fooPageReducer;
 ### Sagas
 
 **Path —** `./plugins/my-plugin/admin/src/containers/FooPage/sagas.js`
+
 ```js
 import { LOCATION_CHANGE } from 'react-router-redux';
 import { takeLatest, put, fork, call, take, cancel } from 'redux-saga/effects';
@@ -535,8 +565,7 @@ export function* fetchData(action) {
 
     // Pass the response to the reducer
     yield put(dataFetchSucceeded(response));
-
-  } catch(error) {
+  } catch (error) {
     yield put(dataFetchError(error));
   }
 }
@@ -566,7 +595,7 @@ export function* foo() {
     const userName = yield select(makeSelectUserName());
 
     // ...
-  } catch(error) {
+  } catch (error) {
     // ...
   }
 }
@@ -578,53 +607,54 @@ function defaultSaga() {
 export default defaultSaga;
 ```
 
-
 ### Selectors
 
 [Reselect](https://github.com/reactjs/reselect) is a library used for slicing your redux state and providing only the relevant sub-tree to a react component. It has three key features:
 
-  1. Computational power
-  2. Memoization
-  3. Composability
+1. Computational power
+2. Memoization
+3. Composability
 
 Creating a selector:
 
 **Path —** `./plugins/my-plugin/admin/src/containers/FooPage/selectors.js`
+
 ```js
 import { createSelector } from 'reselect';
 
 /**
-* Direct selector to the fooPage state domain
-*/
+ * Direct selector to the fooPage state domain
+ */
 const selectFooPageDomain = () => state => state.get('fooPage');
 
 /**
  * Other specific selectors
  */
 
- const makeSelectLoading = () => createSelector(
-   selectFooPageDomain(),
-   (substate) => substate.get('loading'),
- );
+const makeSelectLoading = () =>
+  createSelector(
+    selectFooPageDomain(),
+    substate => substate.get('loading')
+  );
 
 /**
  * Default selector used by FooPage
  */
 
-const selectFooPage = () => createSelector(
-  selectFooDomain(),
-  (substate) => substate.toJS()
-);
+const selectFooPage = () =>
+  createSelector(
+    selectFooDomain(),
+    substate => substate.toJS()
+  );
 
 export default selectFooPage;
 export { makeSelectLoading };
-
 ```
-
 
 #### Example
 
 **Path —** `./plugins/my-plugin/admin/src/containers/FooPage/index.js`
+
 ```js
 import React from 'react';
 import { bindActionCreators } from 'redux';
@@ -648,7 +678,7 @@ import selectFooPage from './selectors';
 import reducer from './reducer';
 
 export class FooPage extends React.Component {
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.error !== nextProps.error && nextProps.error) {
       strapi.notification.error(nextProps.errorMessage);
     }

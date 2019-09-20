@@ -1,44 +1,123 @@
+const path = require('path');
 const _ = require('lodash');
+const crypto = require('crypto');
+const toArray = require('stream-to-array');
+const uuid = require('uuid/v4');
+
+function niceHash(buffer) {
+  return crypto
+    .createHash('sha256')
+    .update(buffer)
+    .digest('base64')
+    .replace(/=/g, '')
+    .replace(/\//g, '-')
+    .replace(/\+/, '_');
+}
 
 module.exports = {
   mutation: `
-    upload(refId: ID, ref: String, source: String, file: Upload!): UploadFile!
+    upload(refId: ID, ref: String, field: String, source: String, file: Upload!): UploadFile!
+    multipleUpload(refId: ID, ref: String, field: String, source: String, files: [Upload]!): [UploadFile]!
   `,
   resolver: {
     Query: {
       file: false,
       files: {
-        resolver: 'Upload.find'
-      }
+        resolver: {
+          plugin: 'upload',
+          handler: 'Upload.find'
+        }
+      },
     },
     Mutation: {
       createFile: false,
       updateFile: false,
       deleteFile: false,
       upload: {
-        description: 'Upload one or many files',
-        resolver: async (obj, { file, ...fields}, { context }) => {
-          // Construct context to fit with koa-parser guidelines
-          // and avoid to update our business logic too much.
-          context.request.body = {
-            files: {
-              files: await file
-            },
-            fields
-          };
+        description: 'Upload one file',
+        resolver: async (obj, { file: upload, ...fields }) => {
+          const file = await formatFile(upload, fields);
 
-          // Call controller action.
-          await strapi.plugins.upload.controllers.upload.upload(context);
+          const config = await strapi
+            .store({
+              environment: strapi.config.environment,
+              type: 'plugin',
+              name: 'upload',
+            })
+            .get({ key: 'provider' });
 
-          // Handle case when the user is uploading only one file.
-          if (_.isArray(context.body) && context.body.length === 1) {
-            return context.body[0];
-          }
+          const uploadedFiles = await strapi.plugins.upload.services.upload.upload(
+            [file],
+            config
+          );
 
           // Return response.
-          return context.body;
-        }
-      }
-    }
+          return uploadedFiles.length === 1 ? uploadedFiles[0] : uploadedFiles;
+        },
+      },
+      multipleUpload: {
+        description: 'Upload one file',
+        resolver: async (obj, { files: uploads, ...fields }) => {
+          const files = await Promise.all(
+            uploads.map(upload => formatFile(upload, fields))
+          );
+
+          const config = await strapi
+            .store({
+              environment: strapi.config.environment,
+              type: 'plugin',
+              name: 'upload',
+            })
+            .get({ key: 'provider' });
+
+          const uploadedFiles = await strapi.plugins.upload.services.upload.upload(
+            files,
+            config
+          );
+
+          // Return response.
+          return uploadedFiles;
+        },
+      },
+    },
+  },
+};
+
+const formatFile = async (upload, fields) => {
+  const { filename, mimetype, createReadStream } = await upload;
+
+  const stream = createReadStream();
+
+  const parts = await toArray(stream);
+  const buffers = parts.map(part =>
+    _.isBuffer(part) ? part : Buffer.from(part)
+  );
+
+  const buffer = Buffer.concat(buffers);
+
+  const fileData = {
+    name: filename,
+    sha256: niceHash(buffer),
+    hash: uuid().replace(/-/g, ''),
+    ext: path.extname(filename),
+    buffer,
+    mime: mimetype,
+    size: (buffer.length / 1000).toFixed(2),
+  };
+
+  const { refId, ref, source, field } = fields;
+
+  // Add details to the file to be able to create the relationships.
+  if (refId && ref && field) {
+    fileData.related = [
+      {
+        refId,
+        ref,
+        source,
+        field,
+      },
+    ];
   }
+
+  return fileData;
 };

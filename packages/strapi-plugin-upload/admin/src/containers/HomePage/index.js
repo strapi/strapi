@@ -7,7 +7,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-// import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import { isEmpty } from 'lodash';
@@ -26,8 +25,8 @@ import pluginId from '../../pluginId';
 import EntriesNumber from '../../components/EntriesNumber';
 import List from '../../components/List';
 import PluginInputFile from '../../components/PluginInputFile';
+import { EntriesWrapper, Wrapper } from './components';
 
-// Actions
 import {
   changeParams,
   deleteData,
@@ -36,13 +35,7 @@ import {
   onSearch,
   setParams,
 } from './actions';
-
-// Selectors
 import selectHomePage from './selectors';
-
-// Styles
-import styles from './styles.scss';
-
 import reducer from './reducer';
 import saga from './saga';
 
@@ -51,7 +44,7 @@ export class HomePage extends React.Component {
     deleteData: this.props.deleteData,
   });
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     if (!isEmpty(this.props.location.search)) {
       const _page = parseInt(this.getURLParams('_page'), 10);
       const _limit = parseInt(this.getURLParams('_limit'), 10);
@@ -64,7 +57,7 @@ export class HomePage extends React.Component {
     this.props.getData();
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.deleteSuccess !== this.props.deleteSuccess) {
       this.props.getData();
     }
@@ -97,9 +90,7 @@ export class HomePage extends React.Component {
     const search =
       e.target.name === 'params._limit'
         ? `_page=${params._page}&_limit=${e.target.value}&_sort=${params._sort}`
-        : `_page=${e.target.value}&_limit=${params._limit}&_sort=${
-          params._sort
-        }`;
+        : `_page=${e.target.value}&_limit=${params._limit}&_sort=${params._sort}`;
     this.props.history.push({
       pathname: history.pathname,
       search,
@@ -122,7 +113,7 @@ export class HomePage extends React.Component {
   render() {
     return (
       <ContainerFluid>
-        <div className={styles.homePageUpload}>
+        <Wrapper>
           <PluginHeader
             title={{
               id: 'upload.HomePage.title',
@@ -132,13 +123,13 @@ export class HomePage extends React.Component {
             }}
             overrideRendering={this.renderInputSearch}
           />
-        </div>
+        </Wrapper>
         <PluginInputFile
           name="files"
           onDrop={this.props.onDrop}
           showLoader={this.props.uploadFilesLoading}
         />
-        <div className={styles.entriesWrapper}>
+        <EntriesWrapper>
           <div>
             {/* NOTE: Prepare for bulk actions}
               <InputSelect
@@ -150,7 +141,7 @@ export class HomePage extends React.Component {
             */}
           </div>
           <EntriesNumber number={this.props.entriesNumber} />
-        </div>
+        </EntriesWrapper>
         <List
           data={this.props.uploadedFiles}
           changeSort={this.changeSort}
@@ -159,6 +150,7 @@ export class HomePage extends React.Component {
         <div className="col-md-12">
           <PageFooter
             count={this.props.entriesNumber}
+            context={{ emitEvent: () => {} }}
             onChangeParams={this.handleChangeParams}
             params={this.props.params}
           />
@@ -212,7 +204,7 @@ function mapDispatchToProps(dispatch) {
       onSearch,
       setParams,
     },
-    dispatch,
+    dispatch
   );
 }
 
@@ -220,7 +212,7 @@ const mapStateToProps = selectHomePage();
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 
 const withReducer = strapi.injectReducer({
@@ -233,5 +225,5 @@ const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
+  withConnect
 )(injectIntl(HomePage));

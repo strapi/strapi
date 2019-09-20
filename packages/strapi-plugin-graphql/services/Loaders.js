@@ -59,6 +59,7 @@ module.exports = {
 
     this.loaders[name] = new DataLoader(
       keys => {
+        // eslint-disable-next-line no-async-promise-executor
         return new Promise(async (resolve, reject) => {
           try {
             // Extract queries from keys and merge similar queries.
@@ -171,13 +172,9 @@ module.exports = {
       return [];
     }
 
-    // Retrieving referring model.
-    const ref = this.retrieveModel(model, query.options.source);
-    const ast = ref.associations.find(ast => ast.alias === query.alias);
-
     const params = {
       ...query.options,
-      populate: ast ? [query.alias] : [], // Avoid useless population for performance reason
+      populate: null,
       query: {},
       _start: 0, // Don't apply start or skip
       _limit: -1, // Don't apply a limit

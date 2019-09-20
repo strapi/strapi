@@ -1,7 +1,8 @@
 /* Import */
 @import '../../styles/variables/variables';
 
-.adminPage { /* stylelint-disable */
+.adminPage {
+  /* stylelint-disable */
   display: flex;
   overflow-x: hidden;
 }
@@ -17,22 +18,23 @@
   height: 6rem;
 }
 
-.content { /* stylelint-ignore */
+.content {
+  /* stylelint-ignore */
   min-height: calc(100vh - #{$header-height});
   width: calc(100vw - #{$left-menu-width});
   margin-top: $header-height;
   margin-left: $left-menu-width;
-  background: $content-background;
+  background: $content-background-alpha;
 }
 
-.wrapper { /* stylelint-ignore */
+.wrapper {
+  /* stylelint-ignore */
   width: 100%;
   min-height: 100%;
   background: $content-background;
 }
 
-
-.localeDropdownMenuNotLogged{
+.localeDropdownMenuNotLogged {
   background: transparent !important;
   box-shadow: none !important;
   border: 1px solid #e3e9f3 !important;
@@ -42,11 +44,11 @@
     padding-left: 17px;
 
     &:hover {
-      background-color: #F7F8F8 !important;
+      background-color: #f7f8f8 !important;
     }
   }
 
-  &:before{
+  &:before {
     box-shadow: none !important;
   }
 }

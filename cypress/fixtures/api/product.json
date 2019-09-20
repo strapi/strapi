@@ -13,10 +13,7 @@
     {
       "name": "description",
       "params": {
-        "type": "text",
-        "appearance": {
-          "WYSIWYG": false
-        }
+        "type": "text"
       }
     },
     {

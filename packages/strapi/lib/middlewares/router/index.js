@@ -6,7 +6,7 @@
 
 // Public node modules.
 const _ = require('lodash');
-const routerJoi = require('koa-joi-router');
+const Router = require('koa-router');
 
 /**
  * Router hook
@@ -32,31 +32,29 @@ module.exports = strapi => {
       if (!_.isEmpty(_.get(strapi.admin, 'config.routes', false))) {
         // Create router for admin.
         // Prefix router with the admin's name.
-        const router = routerJoi();
+        const router = new Router({
+          prefix: '/admin',
+        });
 
         _.forEach(strapi.admin.config.routes, value => {
           composeEndpoint(value, null, router);
         });
 
-        // router.prefix(strapi.config.admin.path || `/${strapi.config.paths.admin}`);
-        router.prefix('/admin');
-
-        // TODO:
-        // - Mount on main router `strapi.router.use(routerAdmin.middleware());`
-
         // Mount admin router on Strapi router
-        strapi.app.use(router.middleware());
+        strapi.app.use(router.routes()).use(router.allowedMethods());
       }
 
       if (strapi.plugins) {
         // Parse each plugin's routes.
         _.forEach(strapi.plugins, (plugin, name) => {
-          const router = routerJoi();
+          const router = new Router({
+            prefix: `/${name}`,
+          });
 
           // Exclude routes with prefix.
           const excludedRoutes = _.omitBy(
             plugin.config.routes,
-            o => !o.config.hasOwnProperty('prefix')
+            o => !_.has(o.config, 'prefix')
           );
 
           _.forEach(
@@ -66,8 +64,6 @@ module.exports = strapi => {
             }
           );
 
-          router.prefix(`/${name}`);
-
           // /!\ Could override main router's routes.
           if (!_.isEmpty(excludedRoutes)) {
             _.forEach(excludedRoutes, value => {
@@ -75,16 +71,10 @@ module.exports = strapi => {
             });
           }
 
-          // TODO:
-          // - Mount on main router `strapi.router.use(router.middleware());`
-
           // Mount plugin router
-          strapi.app.use(router.middleware());
+          strapi.app.use(router.routes()).use(router.allowedMethods());
         });
       }
-
-      // Let the router use our routes and allowed methods.
-      strapi.app.use(strapi.router.middleware());
     },
   };
 };

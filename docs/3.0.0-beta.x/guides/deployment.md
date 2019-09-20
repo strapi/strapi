@@ -38,8 +38,8 @@ If you are passing a number of configuration item values via environment variabl
 
 ```js
 {
-  "host": "${process.env.APP_HOST || '127.0.0.1'}"
-  "port": "${process.env.NODE_PORT || 1337}",
+  "host": "${process.env.APP_HOST || '127.0.0.1'}",
+  "port": "${process.env.NODE_PORT || 1337}"
 }
 ```
 
@@ -1362,7 +1362,6 @@ heroku config:set DATABASE_NAME="my-database-name"
 ```
 
 **Note:** Please replace the `<password>` and `my-database-name` values with the your actual values.
-
 
 ##### 2. Update your database config file
 

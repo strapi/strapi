@@ -109,7 +109,7 @@ export class HomePage extends React.Component {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     // check if params slug updated
     if (
       this.props.match.params.slug !== nextProps.match.params.slug &&
@@ -153,7 +153,6 @@ export class HomePage extends React.Component {
   }
 
   /* eslint-disable react/sort-comp */
-  /* eslint-disable jsx-a11y/no-static-element-interactions */
   addConnection = e => {
     e.preventDefault();
     const newData = {};

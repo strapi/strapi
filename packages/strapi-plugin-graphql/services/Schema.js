@@ -134,21 +134,17 @@ const schemaBuilder = {
 
     // build defaults schemas if shadowCRUD is enabled
     if (strapi.plugins.graphql.config.shadowCRUD !== false) {
-      const models = Object.keys(strapi.models).filter(
-        model => model !== 'core_store'
+      const modelCruds = Resolvers.buildShadowCRUD(
+        _.omit(strapi.models, ['core_store'])
       );
 
-      const modelCruds = Resolvers.buildShadowCRUD(models);
       shadowCRUD = Object.keys(strapi.plugins).reduce((acc, plugin) => {
         const {
           definition,
           query,
           mutation,
           resolver,
-        } = Resolvers.buildShadowCRUD(
-          Object.keys(strapi.plugins[plugin].models),
-          plugin
-        );
+        } = Resolvers.buildShadowCRUD(strapi.plugins[plugin].models, plugin);
 
         // We cannot put this in the merge because it's a string.
         acc.definition += definition || '';
@@ -160,6 +156,23 @@ const schemaBuilder = {
         });
       }, modelCruds);
     }
+
+    let groups = Object.keys(strapi.groups)
+      .map(key =>
+        Resolvers.buildModel(strapi.groups[key], key, {
+          plugin: null,
+          isGroup: true,
+        })
+      )
+      .reduce(
+        (acc, group) => {
+          return {
+            definition: acc.definition + group.definition,
+            resolver: _.merge(acc.resolver, group.resolver),
+          };
+        },
+        { definition: '', resolver: {} }
+      );
 
     // Extract custom definition, query or resolver.
     const {
@@ -178,56 +191,74 @@ const schemaBuilder = {
     // Build resolvers.
     const resolvers =
       _.omitBy(
-        _.merge(shadowCRUD.resolver, resolver, polymorphicResolver),
+        _.merge(
+          shadowCRUD.resolver,
+          groups.resolver,
+          resolver,
+          polymorphicResolver
+        ),
         _.isEmpty
       ) || {};
 
     // Transform object to only contain function.
     Object.keys(resolvers).reduce((acc, type) => {
-      return Object.keys(acc[type]).reduce((acc, resolver) => {
+      return Object.keys(acc[type]).reduce((acc, resolverName) => {
+        const resolverObj = acc[type][resolverName];
         // Disabled this query.
-        if (acc[type][resolver] === false) {
-          delete acc[type][resolver];
+        if (resolverObj === false) {
+          delete acc[type][resolverName];
 
           return acc;
         }
 
-        if (!_.isFunction(acc[type][resolver])) {
-          acc[type][resolver] = acc[type][resolver].resolver;
+        if (_.isFunction(resolverObj)) {
+          return acc;
         }
 
-        if (
-          _.isString(acc[type][resolver]) ||
-          _.isPlainObject(acc[type][resolver])
-        ) {
-          const { plugin = '' } = _.isPlainObject(acc[type][resolver])
-            ? acc[type][resolver]
-            : {};
+        let plugin;
+        if (_.has(resolverObj, ['plugin'])) {
+          plugin = resolverObj.plugin;
+        } else if (_.has(resolverObj, ['resolver', 'plugin'])) {
+          plugin = resolverObj.resolver.plugin;
+        }
 
-          switch (type) {
-            case 'Mutation': {
-              // TODO: Verify this...
-              const [name, action] = acc[type][resolver].split('.');
-              const normalizedName = _.toLower(name);
-
-              acc[type][resolver] = Mutation.composeMutationResolver(
-                strapi.plugins.graphql.config._schema.graphql,
-                plugin,
-                normalizedName,
-                action
-              );
-              break;
+        switch (type) {
+          case 'Mutation': {
+            let name, action;
+            if (
+              _.has(resolverObj, ['resolver']) &&
+              _.isString(resolverObj.resolver)
+            ) {
+              [name, action] = resolverObj.resolver.split('.');
+            } else if (
+              _.has(resolverObj, ['resolver', 'handler']) &&
+              _.isString(resolverObj.handler)
+            ) {
+              [name, action] = resolverObj.resolver.handler.split('.');
+            } else {
+              name = null;
+              action = resolverName;
             }
-            case 'Query':
-            default:
-              acc[type][resolver] = Query.composeQueryResolver(
-                strapi.plugins.graphql.config._schema.graphql,
-                plugin,
-                resolver,
-                'force' // Avoid singular/pluralize and force query name.
-              );
-              break;
+
+            const mutationResolver = Mutation.composeMutationResolver({
+              _schema: strapi.plugins.graphql.config._schema.graphql,
+              plugin,
+              name: _.toLower(name),
+              action,
+            });
+
+            acc[type][resolverName] = mutationResolver;
+            break;
           }
+          case 'Query':
+          default:
+            acc[type][resolverName] = Query.composeQueryResolver({
+              _schema: strapi.plugins.graphql.config._schema.graphql,
+              plugin,
+              name: resolverName,
+              isSingular: 'force', // Avoid singular/pluralize and force query name.
+            });
+            break;
         }
 
         return acc;
@@ -243,6 +274,7 @@ const schemaBuilder = {
     let typeDefs = `
       ${definition}
       ${shadowCRUD.definition}
+      ${groups.definition}
       type Query {${shadowCRUD.query &&
         this.formatGQL(
           shadowCRUD.query,
@@ -273,7 +305,7 @@ const schemaBuilder = {
       this.writeGenerateSchema(graphql.printSchema(schema));
     }
 
-    // Remove custom scaler (like Upload);
+    // Remove custom scalar (like Upload);
     typeDefs = Types.removeCustomScalar(typeDefs, resolvers);
 
     return {

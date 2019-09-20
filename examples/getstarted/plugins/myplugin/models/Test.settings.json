@@ -8,6 +8,7 @@
     "type": {
       "type": "string",
       "required": true,
+      "unique": true,
       "configurable": true
     }
   }

@@ -4,9 +4,10 @@ module.exports = {
     'eslint:recommended',
     'plugin:react/recommended',
     'plugin:redux-saga/recommended',
+
     'prettier',
   ],
-  plugins: ['react', 'redux-saga'],
+  plugins: ['react', 'redux-saga', 'react-hooks'],
   env: {
     browser: true,
     commonjs: true,
@@ -41,6 +42,9 @@ module.exports = {
   rules: {
     'generator-star-spacing': 0,
     'no-console': 0,
+    'require-atomic-updates': 0,
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': 'warn',
   },
   settings: {
     react: {
