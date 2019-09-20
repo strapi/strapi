@@ -91,7 +91,7 @@ Sort users by email.
 
 Sorting on multiple fileds
 
-- `GET /users?_sort=email:asc,createdAt:desc`
+- `GET /users?_sort=email:asc,dateField:desc`
 - `GET /users?_sort=email:DESC,username:ASC`
 
 ### Limit
