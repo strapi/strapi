@@ -28,7 +28,7 @@ function InputNumber(props) {
           onFocus={props.onFocus}
           placeholder={message}
           ref={props.inputRef}
-          step={!Number.isNaN(Number(props.step)) ? Number(props.step) : 1}
+          step={props.step}
           style={props.style}
           tabIndex={props.tabIndex}
           type="number"
@@ -49,7 +49,7 @@ InputNumber.defaultProps = {
   onBlur: () => {},
   onFocus: () => {},
   placeholder: 'app.utils.placeholder.defaultMessage',
-  step: 1,
+  step: 'any',
   style: {},
   tabIndex: '0',
 };
