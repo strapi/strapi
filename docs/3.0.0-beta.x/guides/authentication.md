@@ -101,6 +101,7 @@ Strapi comes with the following providers:
 - [Google](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/google_setup.md)
 - [Github](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/github_setup.md)
 - [Twitter](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/twitter_setup.md)
+- [Instagram](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/instagram_setup.md)
 
 [👀   See our complete example with detailed tutorials for each provider (with React)](https://github.com/strapi/strapi-examples/tree/master/login-react)
 
