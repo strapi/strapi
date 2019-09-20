@@ -34,7 +34,7 @@ const defaults = {
 };
 
 const isMongooseConnection = ({ connector }) =>
-  connector === 'strapi-hook-mongoose';
+  connector === 'mongoose';
 
 module.exports = function(strapi) {
   function initialize() {

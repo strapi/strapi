@@ -2,7 +2,7 @@
   "defaultConnection": "default",
   "connections": {
     "default": {
-      "connector": "strapi-hook-bookshelf",
+      "connector": "bookshelf",
       "settings": {
         "client": "sqlite",
         "host": "${process.env.DATABASE_HOST || '127.0.0.1'}",

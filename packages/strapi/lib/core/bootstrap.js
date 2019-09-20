@@ -128,7 +128,7 @@ module.exports = function(strapi) {
 
     Object.assign(model, {
       modelType: 'contentType',
-      uid: `strapi::admin.${key}`,
+      uid: `admin::${key}`,
       identity: model.identity || _.upperFirst(key),
       globalId: model.globalId || _.upperFirst(_.camelCase(`admin-${key}`)),
       connection:
@@ -347,12 +347,6 @@ const enableHookNestedDependencies = function(
   flattenHooksConfig,
   force = false
 ) {
-  if (!strapi.hook[name]) {
-    strapi.log.warn(
-      `(hook:${name}) \`strapi-hook-${name}\` is missing in your dependencies. Please run \`npm install strapi-hook-${name}\``
-    );
-  }
-
   // Couldn't find configurations for this hook.
   if (_.isEmpty(_.get(flattenHooksConfig, name, true))) {
     // Check if database connector is used

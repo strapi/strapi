@@ -1,5 +1,5 @@
 {
-  "name": "strapi-hook-mongoose",
+  "name": "strapi-connector-mongoose",
   "version": "3.0.0-beta.17.4",
   "description": "Mongoose hook for the Strapi framework",
   "homepage": "http://strapi.io",
