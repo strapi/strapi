@@ -9,7 +9,7 @@
     ]
   },
   "p3p": {
-    "enabled": true,
+    "enabled": false,
     "value": ""
   },
   "hsts": {
