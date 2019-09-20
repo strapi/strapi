@@ -24,6 +24,7 @@
     "autoprefixer": "^9.5.1",
     "babel-loader": "^8.0.5",
     "bcryptjs": "^2.4.3",
+    "bootstrap": "^4.3.1",
     "buffetjs": "^1.0.4",
     "chalk": "^2.4.2",
     "classnames": "^2.2.6",

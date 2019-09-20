@@ -11,6 +11,7 @@ import 'sanitize.css/sanitize.css';
 // Third party css library needed
 
 import 'react-datetime/css/react-datetime.css';
+import 'bootstrap/dist/css/bootstrap.css';
 
 import './styles/main.scss';
 
