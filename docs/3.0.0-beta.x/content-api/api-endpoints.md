@@ -1,4 +1,4 @@
-# API Endpoints
+# API endpoints
 
 When you create a `ContentType` you will have a certain number of REST API endpoints available to interact with it.
 
@@ -44,8 +44,6 @@ As an example let's consider the `Post` ContentType for the next steps.
     border-right 1px solid #dfe2e5
     &:last-child
       border-right none
-    
-
 </style>
 
 <div id="endpoint-table">
@@ -63,7 +61,7 @@ As an example let's consider the `Post` ContentType for the next steps.
 
 ## GET `/posts`
 
-Returns the posts matching the query filters. You can read more about filtering [here](./filters.md).
+Returns the posts matching the query params. You can read more about params [here](./parameters.md).
 
 **Example request**
 
@@ -101,7 +99,7 @@ GET http://localhost:1337/posts
 
 ## GET `/posts/count`
 
-Returns the count of posts matching the query filters. You can read more about filtering [here](./filters.md).
+Returns the count of posts matching the query filters. You can read more about filtering [here](#parameters).
 
 **Example response**
 
@@ -282,32 +280,6 @@ Whether you are using MongoDB or a SQL database you can use the field `id` as de
 
 ## GraphQL
 
-When you are using the GraphQL plugin, all your `ContentTypes` will be generated in your Graphql schema and made accessible through queries and mutations.
+When you are using the GraphQL plugin, Strapi expose a GraphQL API, all your `ContentTypes` will be generated in your Graphql schema and made accessible through queries and mutations.
 
-If you are using `Groups`, they will be available as fields in the `ContentTypes` they are used in.
-
-```graphql
-type Post {
-  title: String
-  cover: UploadFile
-  seo: [GroupSeo]
-}
-
-type GroupSeo {
-  name: String
-  content: String
-}
-
-type Query {
-  post(id: ID!): Post
-  posts(sort: String, limit: Int, start: Int, where: JSON): [Post]
-}
-
-type Mutation {
-  createPost(input: createPostInput): createPostPayload
-  updatePost(input: updatePostInput): updatePostPayload
-  deletePost(input: deletePostInput): deletePostPayload
-}
-```
-
-You can read more about the graphql plugin [here](./graphql.md).
+You can read more about the GraphQL plugin [here](../guides/graphql.md).
