@@ -210,7 +210,7 @@ class PopUpForm extends React.Component {
     const params = {
       link: (
         <a
-          href="https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-users-permissions/docs/email-templates.md"
+          href="https://github.com/strapi/strapi/blob/master/docs/3.0.0-beta.x/guides/authentication.md#templating-emails"
           target="_blank"
           rel="noopener noreferrer"
         >
