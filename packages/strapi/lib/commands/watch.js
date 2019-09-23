@@ -8,6 +8,7 @@ module.exports = async function() {
     path.dirname(require.resolve(`${name}/package.json`));
 
   const dir = process.cwd();
+  const cacheDir = path.join(dir, '.cache');
   const pkgJSON = require(path.join(dir, 'package.json'));
 
   const admin = path.join(dir, 'admin');
@@ -44,8 +45,8 @@ module.exports = async function() {
         : filePath.split('/admin')[1];
 
       const destFolder = isExtension
-        ? path.join(dir, '.cache', 'plugins', packageName, 'admin')
-        : path.join(dir, '.cache', 'admin');
+        ? path.join(cacheDir, 'plugins', packageName, 'admin')
+        : path.join(cacheDir, 'admin');
 
       const packagePath = require
         .resolve(path.join(packageName, 'package.json'))
@@ -59,6 +60,7 @@ module.exports = async function() {
         );
 
         // Remove the file or folder
+        // We need to copy the original files when deleting an override one
         try {
           fs.removeSync(path.join(destFolder, targetPath));
         } catch (err) {
@@ -67,7 +69,6 @@ module.exports = async function() {
 
         // Check if the file or folder exists in node_modules
         // If so copy the old one
-        // TODO recreate plugins.js file
         if (fs.pathExistsSync(path.resolve(originalFilePathInNodeModules))) {
           try {
             await fs.copy(
@@ -75,6 +76,11 @@ module.exports = async function() {
               path.join(destFolder, targetPath)
             );
 
+            // The plugins.js file needs to be recreated
+            // when we delete either the admin folder
+            // the admin/src folder
+            // or the plugins.js file
+            // since the path are different when developing inside the monorepository or inside an app
             const shouldCopyPluginsJSFile =
               filePath.split('/admin/src').filter(p => !!p).length === 1;
 
@@ -86,7 +92,7 @@ module.exports = async function() {
             ) {
               await strapiAdmin.createPluginsJs(
                 appPlugins,
-                path.join(dir, '.cache')
+                path.join(cacheDir)
               );
             }
           } catch (err) {
@@ -97,6 +103,7 @@ module.exports = async function() {
           }
         }
       } else {
+        // In any order cases just copy the file into the .cache folder
         try {
           await fs.copy(filePath, path.join(destFolder, targetPath));
         } catch (err) {
