@@ -3,14 +3,9 @@
 Strapi gives you the option to choose the most appropriate database for your project. It currently supports **PostgreSQL**, **MongoDB**, **SQLite**, **MySQL** and
 **MariaDB**. The following documentation covers how to install these databases locally (for development purposes) and on various hosted or cloud server solutions (for staging or production purposes).
 
-(Deploying **Strapi** itself is covered in the [Deployment Guide](/3.0.0-beta.x/guides/deployment.html).)
-
-**Table of contents:**
-
-- [SQLite Installation](#sqlite-installation)
-- [MongoDB Installation](#mongodb-installation)
-
----
+:::note
+Deploying **Strapi** itself is covered in the [Deployment Guide](/3.0.0-beta.x/guides/deployment.html).
+:::
 
 ## SQLite Installation
 
@@ -18,23 +13,39 @@ SQLite is the default ([Quick Start](/3.0.0-beta.x/getting-started/quick-start.h
 
 ### Install SQLite locally
 
-Simply use the `strapi new my-project --quickstart` command.
+Simply use one of the following commands.
 
-```bash
-strapi new my-project --quickstart
+:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+
+::: tab "yarn" id="yarn-create-qs"
+
+```
+yarn create strapi-app new my-project --quickstart
 ```
 
-This will create a new project and launch it in the browser. (The [Quick Start Guide](/3.0.0-beta.x/getting-started/quick-start.html) is a complete step-by-step tutorial.)
+:::
+
+::: tab "npx" id="npx-create-qs"
+
+```
+npx create-strapi-app my-project --quickstart
+```
+
+:::
+
+::::
+
+This will create a new project and launch it in the browser.
+
+::: note
+The [Quick Start Guide](/3.0.0-beta.x/getting-started/quick-start.html) is a complete step-by-step tutorial
+:::
 
 ## MongoDB Installation
 
 ### Install MongoDB locally
 
-In order to use Strapi with [MongoDB](https://www.mongodb.com/) in production, you must have and use MongoDB on your local development environment. These instructions show how to start using Strapi with a MongoDB database.
-
-- You must have [Strapi installed globally](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_1-install-strapi-globally).
-
-### 1. Install MongoDB on your development environment
+#### 1. Install MongoDB on your development environment
 
 If you already have MongoDB installed locally and running as a background service, you may skip to [Install Strapi locally with MongoDB](#install-strapi-locally-with-mongodb). (If you have additional questions, please see the official [MongoDB documentation](https://docs.mongodb.com/manual/installation/#tutorial-installation). )
 
@@ -44,7 +55,7 @@ Please complete the installation steps appropriate to your operating system.
 
 ::: tab "Windows 10" id="windows-mongodb"
 
-### Install MongoDB on Windows 10
+#### Install MongoDB on Windows 10
 
 Follow these steps to [install MongoDB onto your Windows 10](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/) environment (The Windows Sub-System for Linux (WSL) is unsupported by MongoDB):
 
@@ -64,7 +75,7 @@ You have now installed MongoDB for _Windows 10_. You are now ready to [install S
 
 ::: tab "Mac O/S 10.14 Mojave" id="mac-mongodb"
 
-### Install MongoDB on Mac
+#### Install MongoDB on Mac
 
 Follow these steps to [install MongoDB onto your Mac](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/) developer environment:
 
@@ -92,7 +103,7 @@ You have now installed MongoDB for _Mac_. You are now ready to [install Strapi w
 
 ::: tab "Ubuntu 18.04" id="ubuntu-mongodb"
 
-### Install MongoDB on Ubuntu
+#### Install MongoDB on Ubuntu
 
 Follow these steps to [install MongoDB onto your Ubuntu](https://docs.mongodb.com/manual/administration/install-on-linux/) environment:
 
@@ -146,19 +157,37 @@ You have now installed MongoDB for _Linux_. You are now ready to [install Strapi
 
 ::::
 
-### 2. Install Strapi locally with MongoDB
+#### 2. Install Strapi locally with MongoDB
 
 Follow these steps to create a Strapi project locally using the MongoDB database.
 
-**Note:** MongoDB must already be running in the background.
+::: note
+MongoDB must already be running in the background.
+:::
 
 1. Create a new Strapi project
 
 `Path: ./`
 
-```bash
-strapi new my-project
+:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+
+::: tab "yarn" id="yarn-create"
+
 ```
+yarn create strapi-app new my-project
+```
+
+:::
+
+::: tab "npx" id="npx-create"
+
+```
+npx create-strapi-app my-project
+```
+
+:::
+
+::::
 
 - Use your `down arrow` key and select `Custom (manual settings)` and press `enter`:
 
@@ -222,7 +251,7 @@ Follow these steps to configure a local Strapi project to use a [MongoDB Atlas](
 - You must have already [created your Strapi project using MongoDB](/3.0.0-beta.x/guides/databases.html#install-strapi-locally-with-mongodb).
 - You must have already created a [free MongoDB Atlas account](https://www.mongodb.com/cloud/atlas).
 
-1. Log in to your account to create a **Project** and a **Cluster**
+#### 1. Log in to your account to create a **Project** and a **Cluster**
 
 - First you need to `Create a new Project`.
 - Then click `Build a Cluster`, from the options page:
@@ -232,14 +261,14 @@ Follow these steps to configure a local Strapi project to use a [MongoDB Atlas](
   - In **Cluster Name**, name your cluster.
 - Click the green `Create Cluster` button. You will get a message that says, "_Your cluster is being created..._"
 
-2. Next, click on the `Database Access` in the left menu (under `Overview`):
+#### 2. Next, click on the `Database Access` in the left menu (under `Overview`):
 
 - Click the green `+ ADD NEW USER` button:
   - Enter a `username`.
   - Enter a `password`.
   - Under `User Privileges` ensure **`Read and write to any database`** is selected. Then click `Add User` to save.
 
-3. Then `whitelist` your IP address. Click into `Network Access`, under `Security` in the left menu:
+#### 3. Then `whitelist` your IP address. Click into `Network Access`, under `Security` in the left menu:
 
 - Click the green `+ ADD IP ADDRESS`
 
@@ -248,32 +277,41 @@ Follow these steps to configure a local Strapi project to use a [MongoDB Atlas](
   - Then click the green `Confirm` button.
   - Delete the `0.0.0.0/0` configuration after testing the connection.
 
-  **NOTE:** If for any reason you need to test the configuration or other aspect of your connection to the database, you may want to set back the `Allow Access from Anywhere`. Follow this steps:
+  ::: note
+  If for any reason you need to test the configuration or other aspect of your connection to the database, you may want to set back the `Allow Access from Anywhere`. Follow this steps:
+  :::
 
   - Click the green `+ ADD IP ADDRESS`
     - Next add `0.0.0.0/0` in the `Whitelist Entry`. **Note:** In permanent projects you would configure this with the appropriate IP addresses.
     - Leave a comment to label this IP Address. E.g. `Anywhere`.
     - Click `Confirm`. Then wait until the status turns from `Pending` to `Active`.
 
-  **OPTIONAL:** If you are serving you Strapi project from a known IP Address then follow the following steps to `allow Network Access`:
+  ::: note
+  If you are serving you Strapi project from a known IP Address then follow the following steps to `allow Network Access`.
+  :::
 
   - **Manually** enter in an IP address to `whitelist`, for your Strapi server.
   - Leave a comment to label this IP Address. E.g. `Heroku Server`
   - Then click the green `Confirm` button.
 
-4. Retrieve database credentials
+#### 4. Retrieve database credentials
 
 MongoDB Atlas automatically exposes the database credentials into a single environment variable accessible by your app. To locate it, follow these steps:
 
 - Under `Atlas` in the left-hand, click on `Clusters`. This should take you to your `cluster`. Next, click `CONNECT` and then `Connect Your Application`.
-- Under `1. Choose your driver version`, select **DRIVER** as `Node.js` and **VERSION** as `2.2.12 or later`. **IMPORTANT:** You **must** use `Version: 2.2.12 or later`.
+- Under `1. Choose your driver version`, select **DRIVER** as `Node.js` and **VERSION** as `2.2.12 or later`.
+  ::: warning
+  You **must** use `Version: 2.2.12 or later`.
+  :::
 - This should show a **Connection String Only** similar to this:
 
 `mongodb://paulbocuse:<password>@strapi-heroku-shard-00-00-oxxxo.mongodb.net:27017,strapi-heroku-shard-00-01-oxxxo.mongodb.net:27017,strapi-heroku-shard-00-02-oxxxo.mongodb.net:27017/test?ssl=true&replicaSet=Strapi-Heroku-shard-0&authSource=admin&retryWrites=true&w=majority`
 
-**IMPORTANT:** Please note the `<password>` after your `username`. In this example, after `mongodb://paulbocuse:`. You will need to replace the `<password>` with the password you created earlier for this user in your **MongoDB Atlas** account.
+::: warning
+Please note the `<password>` after your `username`. In this example, after `mongodb://paulbocuse:`. You will need to replace the `<password>` with the password you created earlier for this user in your **MongoDB Atlas** account.
+:::
 
-5. Update and replace your existing `/database.json` config file for the appropriate environment (development | production).
+#### 5. Update and replace your existing `/database.json` config file for the appropriate environment (development | production).
 
 Replace the contents of `/database.json` with the following and replace **< password >** with the password of the user of your database you created earlier:
 
@@ -296,14 +334,14 @@ Replace the contents of `/database.json` with the following and replace **< pass
 }
 ```
 
-::: warning Note
+::: warning NOTE
 The above configuration will create a database called `strapi`, the _default database_ Strapi sets for any **MongoDB** database. If you would like to name your database something else, add the following **key:value pair** into your **"settings":** located in your `database.json` file.
 
 `"database": "my-database-name"`
 
 :::
 
-::: danger Warning
+::: danger WARNING
 We recommend replacing sensitive (eg. "URI string" above) information in your database.json files before uploading your project to a public repository such as GitHub. For more information about using environment variables, please read [dynamic configurations](/3.0.0-beta.x/configurations/configurations.html#dynamic-configurations).
 
 :::
