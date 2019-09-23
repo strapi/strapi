@@ -190,6 +190,12 @@ program
   .option('-d, --delete-files', 'Delete files', false)
   .action(getLocalScript('uninstall'));
 
+//   `$ strapi watch`
+program
+  .command('watch')
+  .description('Starts the admin dev server')
+  .action(getLocalScript('watch'));
+
 /**
  * Normalize help argument
  */

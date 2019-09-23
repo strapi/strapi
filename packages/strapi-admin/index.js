@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs-extra');
 const webpack = require('webpack');
 const getWebpackConfig = require('./webpack.config.js');
+const WebpackDevServer = require('webpack-dev-server');
 
 const getPkgPath = name =>
   path.dirname(require.resolve(`${name}/package.json`));
@@ -176,8 +177,48 @@ async function build({ dir, env, options }) {
   });
 }
 
+async function watch(dir) {
+  console.log('Starting the dev web server...');
+  const port = 8000;
+  const entry = path.join(dir, '.cache', 'admin', 'src', 'app.js');
+  const dest = path.join(dir, 'build');
+  const env = 'development';
+  const options = {
+    backend: 'http://localhost:1337',
+    publicPath: '/admin/',
+  };
+
+  const args = {
+    entry,
+    dest,
+    env,
+    options,
+  };
+
+  const opts = {
+    // clientLogLevel: 'none',
+    hot: true,
+    quiet: true,
+    publicPath: '/admin/',
+    historyApiFallback: {
+      index: '/admin/',
+    },
+  };
+
+  const server = new WebpackDevServer(webpack(getWebpackConfig(args)), opts);
+
+  server.listen(port, 'localhost', function(err) {
+    if (err) {
+      console.log(err);
+    }
+    console.log('WebpackDevServer listening at localhost:', port);
+  });
+}
+
 module.exports = {
   build,
   createPluginsJs,
   createCacheDir,
+  watch,
+  copyCustomAdmin,
 };
