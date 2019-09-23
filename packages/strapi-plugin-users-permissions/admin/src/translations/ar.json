@@ -76,6 +76,7 @@
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "عنوان URL لإعادة التوجيه لإضافتة تكوين تطبيق Facebook",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "عنوان URL لإعادة التوجيه لإضافتة تكوين تطبيق Github",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "عنوان URL لإعادة التوجيه لإضافتة تكوين تطبيق Google",
+  "PopUpForm.Providers.instagram.providerConfig.redirectURL": "عنوان URL لإعادة التوجيه لإضافتة تكوين تطبيق Instagram",
   "PopUpForm.Providers.key.label": "معرف العميل",
   "PopUpForm.Providers.key.placeholder": "نص",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "عنوان URL لإعادة التوجيه لإضافتة تكوين تطبيق Linkedin",

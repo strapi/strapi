@@ -3,7 +3,6 @@ import styled, { css } from 'styled-components';
 const Table = styled.table`
   border-radius: 3px;
   border-collapse: initial;
-  overflow: hidden;
   box-shadow: 0 2px 4px #e3e9f3;
   table-layout: fixed;
   margin-bottom: 0;
@@ -33,7 +32,9 @@ const Thead = styled.thead`
     vertical-align: middle !important;
     > span {
       position: relative;
-      cursor: pointer;
+      &.sortable {
+        cursor: pointer;
+      }
     }
   }
   ${({ isBulkable }) => {

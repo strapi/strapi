@@ -3,9 +3,19 @@
 const _ = require('lodash');
 
 const NON_SORTABLES = ['group', 'json', 'relation', 'media'];
+const NON_LISTABLES = ['group', 'json', 'relation', 'password'];
 
 const isListable = (schema, name) => {
-  return isSortable(schema, name) && schema.attributes[name].type != 'password';
+  if (!_.has(schema.attributes, name)) {
+    return false;
+  }
+
+  const attribute = schema.attributes[name];
+  if (NON_LISTABLES.includes(attribute.type)) {
+    return false;
+  }
+
+  return true;
 };
 
 const isSortable = (schema, name) => {

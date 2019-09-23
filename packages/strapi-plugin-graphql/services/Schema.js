@@ -202,50 +202,63 @@ const schemaBuilder = {
 
     // Transform object to only contain function.
     Object.keys(resolvers).reduce((acc, type) => {
-      return Object.keys(acc[type]).reduce((acc, resolver) => {
+      return Object.keys(acc[type]).reduce((acc, resolverName) => {
+        const resolverObj = acc[type][resolverName];
         // Disabled this query.
-        if (acc[type][resolver] === false) {
-          delete acc[type][resolver];
+        if (resolverObj === false) {
+          delete acc[type][resolverName];
 
           return acc;
         }
 
-        if (!_.isFunction(acc[type][resolver])) {
-          acc[type][resolver] = acc[type][resolver].resolver;
+        if (_.isFunction(resolverObj)) {
+          return acc;
         }
 
-        if (
-          _.isString(acc[type][resolver]) ||
-          _.isPlainObject(acc[type][resolver])
-        ) {
-          const { plugin = '' } = _.isPlainObject(acc[type][resolver])
-            ? acc[type][resolver]
-            : {};
+        let plugin;
+        if (_.has(resolverObj, ['plugin'])) {
+          plugin = resolverObj.plugin;
+        } else if (_.has(resolverObj, ['resolver', 'plugin'])) {
+          plugin = resolverObj.resolver.plugin;
+        }
 
-          switch (type) {
-            case 'Mutation': {
-              // TODO: Verify this...
-              const [name, action] = acc[type][resolver].split('.');
-              const normalizedName = _.toLower(name);
-
-              acc[type][resolver] = Mutation.composeMutationResolver(
-                strapi.plugins.graphql.config._schema.graphql,
-                plugin,
-                normalizedName,
-                action
-              );
-              break;
+        switch (type) {
+          case 'Mutation': {
+            let name, action;
+            if (
+              _.has(resolverObj, ['resolver']) &&
+              _.isString(resolverObj.resolver)
+            ) {
+              [name, action] = resolverObj.resolver.split('.');
+            } else if (
+              _.has(resolverObj, ['resolver', 'handler']) &&
+              _.isString(resolverObj.handler)
+            ) {
+              [name, action] = resolverObj.resolver.handler.split('.');
+            } else {
+              name = null;
+              action = resolverName;
             }
-            case 'Query':
-            default:
-              acc[type][resolver] = Query.composeQueryResolver(
-                strapi.plugins.graphql.config._schema.graphql,
-                plugin,
-                resolver,
-                'force' // Avoid singular/pluralize and force query name.
-              );
-              break;
+
+            const mutationResolver = Mutation.composeMutationResolver({
+              _schema: strapi.plugins.graphql.config._schema.graphql,
+              plugin,
+              name: _.toLower(name),
+              action,
+            });
+
+            acc[type][resolverName] = mutationResolver;
+            break;
           }
+          case 'Query':
+          default:
+            acc[type][resolverName] = Query.composeQueryResolver({
+              _schema: strapi.plugins.graphql.config._schema.graphql,
+              plugin,
+              name: resolverName,
+              isSingular: 'force', // Avoid singular/pluralize and force query name.
+            });
+            break;
         }
 
         return acc;

@@ -117,7 +117,7 @@ class InputToggleWithErrors extends React.Component {
 InputToggleWithErrors.defaultProps = {
   autoFocus: false,
   className: '',
-  customBootstrapClass: 'col-md-6',
+  customBootstrapClass: 'col-md-4',
   deactivateErrorHighlight: false,
   didCheckErrors: false,
   disabled: false,

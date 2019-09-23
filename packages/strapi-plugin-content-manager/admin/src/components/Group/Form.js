@@ -30,6 +30,7 @@ const Form = ({
         <SelectWrapper
           {...currentFieldMeta}
           name={keys}
+          plugin={currentField.plugin}
           relationType={currentField.relationType}
           targetModel={currentField.targetModel}
           value={get(modifiedData, keys)}

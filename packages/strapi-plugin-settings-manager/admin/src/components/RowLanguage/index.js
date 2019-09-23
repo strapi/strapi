@@ -45,7 +45,7 @@ class RowLanguage extends React.Component {
         onClick={this.handleToggleWarning}
         id={this.props.name}
       />
-    ); // eslint-disable-line jsx-a11y/no-static-element-interactions
+    );
     // format the locale to
     const defaultLanguageArray = formatLanguageLocale(this.props.name);
     const flag = getFlag(defaultLanguageArray);
