@@ -165,7 +165,7 @@ InputNumberWithErrors.defaultProps = {
   labelStyle: {},
   noErrorsDescription: false,
   placeholder: 'app.utils.placeholder.defaultMessage',
-  step: 1,
+  step: 'any',
   style: {},
   tabIndex: '0',
   validations: {},
