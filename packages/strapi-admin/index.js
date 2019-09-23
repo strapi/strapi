@@ -83,7 +83,7 @@ async function copyCustomAdmin(src, dest) {
   await fs.copy(src, path.resolve(dest, 'admin'));
 }
 
-async function build({ dir, env, options }) {
+async function createCacheDir(dir) {
   const cacheDir = path.resolve(dir, '.cache');
 
   const pkgJSON = require(path.join(dir, 'package.json'));
@@ -132,6 +132,10 @@ async function build({ dir, env, options }) {
       )
     )
   );
+}
+
+async function build({ dir, env, options }) {
+  const cacheDir = path.resolve(dir, '.cache');
 
   const entry = path.resolve(cacheDir, 'admin', 'src', 'app.js');
   const dest = path.resolve(dir, 'build');
@@ -175,4 +179,5 @@ async function build({ dir, env, options }) {
 module.exports = {
   build,
   createPluginsJs,
+  createCacheDir,
 };
