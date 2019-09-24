@@ -137,10 +137,8 @@ async function createCacheDir(dir) {
 
 async function build({ dir, env, options }) {
   const cacheDir = path.resolve(dir, '.cache');
-
   const entry = path.resolve(cacheDir, 'admin', 'src', 'app.js');
   const dest = path.resolve(dir, 'build');
-
   const config = getWebpackConfig({ entry, dest, env, options });
 
   const compiler = webpack(config);
@@ -196,7 +194,6 @@ async function watch(dir) {
   };
 
   const opts = {
-    // clientLogLevel: 'none',
     hot: true,
     quiet: true,
     publicPath: '/admin/',
@@ -211,7 +208,8 @@ async function watch(dir) {
     if (err) {
       console.log(err);
     }
-    console.log('WebpackDevServer listening at localhost:', port);
+
+    console.log('Admin available at:', `http://localhost:${port}/admin`);
   });
 }
 

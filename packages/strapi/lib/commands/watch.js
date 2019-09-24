@@ -10,8 +10,8 @@ module.exports = async function() {
   const dir = process.cwd();
   const cacheDir = path.join(dir, '.cache');
   const pkgJSON = require(path.join(dir, 'package.json'));
-
   const admin = path.join(dir, 'admin');
+
   const appPlugins = Object.keys(pkgJSON.dependencies).filter(
     dep =>
       dep.startsWith('strapi-plugin') &&
@@ -25,9 +25,10 @@ module.exports = async function() {
       'admin'
     )
   );
+  const filesToWatch = [admin, ...pluginsToWatch];
 
   function watchFiles() {
-    const watcher = chokidar.watch([admin, ...pluginsToWatch], {
+    const watcher = chokidar.watch(filesToWatch, {
       ignoreInitial: true,
       ignorePermissionErrors: true,
     });
@@ -48,13 +49,9 @@ module.exports = async function() {
         ? path.join(cacheDir, 'plugins', packageName, 'admin')
         : path.join(cacheDir, 'admin');
 
-      const packagePath = require
-        .resolve(path.join(packageName, 'package.json'))
-        .replace('/package.json', '');
-
       if (event === 'unlink' || event === 'unlinkDir') {
         const originalFilePathInNodeModules = path.join(
-          packagePath,
+          getPkgPath(packageName),
           'admin',
           targetPath
         );
@@ -103,7 +100,7 @@ module.exports = async function() {
           }
         }
       } else {
-        // In any order cases just copy the file into the .cache folder
+        // In any other case just copy the file into the .cache folder
         try {
           await fs.copy(filePath, path.join(destFolder, targetPath));
         } catch (err) {
