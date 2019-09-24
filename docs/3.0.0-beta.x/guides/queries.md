@@ -2,7 +2,7 @@
 
 Strapi provides a utility function `strapi.query` to make database queries.
 
-You can just call `strapi.query(modelName, pluginName)` to access the query API for any model.
+You can just call `strapi.query('modelName', 'pluginName')` to access the query API for any model.
 
 These queries handle for you specific Strapi features like `groups`, `filters` and `search`.
 
@@ -18,27 +18,27 @@ You can also pass a populate option to specify which relations you want to be po
 **Find one by id**:
 
 ```js
-strapi.query('post').findOne({ id: 1 });
+strapi.query('restaurant').findOne({ id: 1 });
 ```
 
-**Find one by title**:
+**Find one by name**:
 
 ```js
-strapi.query('post').findOne({ title: 'my title' });
+strapi.query('restaurant').findOne({ name: 'restaurant name' });
 ```
 
-**Find one by title and creation_date**:
+**Find one by name and creation_date**:
 
 ```js
 strapi
-  .query('post')
-  .findOne({ title: 'my title', date: '2019-01-01T00:00:00Z' });
+  .query('restaurant')
+  .findOne({ name: 'restaurant name', date: '2019-01-01T00:00:00Z' });
 ```
 
 **Find one by id and populate a relation**
 
 ```js
-strapi.query('post').findOne({ id: 1 }, ['tag', 'tag.picture']);
+strapi.query('restaurant').findOne({ id: 1 }, ['category', 'category.name']);
 ```
 
 ### `find`
@@ -51,27 +51,29 @@ You can also pass a populate option to specify which relations you want to be po
 **Find by id**:
 
 ```js
-strapi.query('post').find({ id: 1 });
+strapi.query('restaurant').find({ id: 1 });
 ```
 
 **Find by in IN, with a limit**:
 
 ```js
-strapi.query('post').find({ _limit: 10, id_in: [1, 2] });
+strapi.query('restaurant').find({ _limit: 10, id_in: [1, 2] });
 ```
 
-**Find by date orderBy title**:
+**Find by date orderBy name**:
 
 ```js
 strapi
-  .query('post')
-  .find({ date_gt: '2019-01-01T00:00:00Z', _sort: 'title:desc' });
+  .query('restaurant')
+  .find({ date_gt: '2019-01-01T00:00:00Z', _sort: 'name:desc' });
 ```
 
 **Find by id not in and populate a relation. Skip the first ten results**
 
 ```js
-strapi.query('post').find({ id_nin: [1], _start: 10 }, ['tag', 'tag.picture']);
+strapi
+  .query('restaurant')
+  .find({ id_nin: [1], _start: 10 }, ['category', 'category.name']);
 ```
 
 ### `create`
@@ -81,23 +83,25 @@ Creates an entry in the database and returns the entry.
 #### Example
 
 ```js
-strapi.query('post').create({
-  title: 'Mytitle',
+strapi.query('restaurant').create({
+  name: 'restaurant name',
   // this is a group field. the order is persisted in db.
   seo: [
     {
-      metadata: 'description',
-      value: 'My description',
+      day_interval: 'Mon',
+      opening_hour: '7:00 PM',
+      closing_hour: '11:00 PM',
     },
     {
-      metadata: 'keywords',
-      value: 'someKeyword,otherKeyword',
+      day_interval: 'Tue',
+      opening_hour: '7:00 PM',
+      closing_hour: '11:00 PM',
     },
   ],
   // pass the id of a media to link it to the entry
-  picture: 1,
+  cover: 1,
   // automatically creates the relations when passing the ids in the field
-  tags: [1, 2, 3],
+  reviews: [1, 2, 3],
 });
 ```
 
@@ -110,24 +114,26 @@ Updates an entry in the database and returns the entry.
 **Update by id**
 
 ```js
-strapi.query('post').update(
+strapi.query('restaurant').update(
   { id: 1 },
   {
-    title: 'Mytitle',
+    name: 'restaurant name',
     seo: [
       {
-        metadata: 'description',
-        value: 'My description',
+        day_interval: 'Mon',
+        opening_hour: '7:00 PM',
+        closing_hour: '11:00 PM',
       },
       {
-        metadata: 'keywords',
-        value: 'someKeyword,otherKeyword',
+        day_interval: 'Tue',
+        opening_hour: '7:00 PM',
+        closing_hour: '11:00 PM',
       },
     ],
     // pass the id of a media to link it to the entry
-    picture: 1,
+    cover: 1,
     // automatically creates the relations when passing the ids in the field
-    tags: [1, 2, 3],
+    reviews: [1, 2, 3],
   }
 );
 ```
@@ -137,37 +143,39 @@ When updating an entry with its groups beware that if you send the groups withou
 **Update by id and update previous groups**
 
 ```js
-strapi.query('post').update(
+strapi.query('restaurant').update(
   { id: 1 },
   {
-    title: 'Mytitle',
+    name: 'Mytitle',
     seo: [
       {
-        id: 2
-        metadata: 'keywords',
-        value: 'someKeyword,otherKeyword',
+        id: 2,
+        day_interval: 'Mon',
+        opening_hour: '7:00 PM',
+        closing_hour: '11:00 PM',
       },
       {
-        id: 1
-        metadata: 'description',
-        value: 'My description',
-      }
+        id: 1,
+        day_interval: 'Tue',
+        opening_hour: '7:00 PM',
+        closing_hour: '11:00 PM',
+      },
     ],
     // pass the id of a media to link it to the entry
-    picture: 1,
+    cover: 1,
     // automatically creates the relations when passing the ids in the field
-    tags: [1, 2, 3],
+    reviews: [1, 2, 3],
   }
 );
 ```
 
-**Partial update by title**
+**Partial update by name**
 
 ```js
-strapi.query('post').update(
-  { title: 'specific title' },
+strapi.query('restaurant').update(
+  { title: 'specific name' },
   {
-    title: 'Mytitle',
+    title: 'restaurant name',
   }
 );
 ```
@@ -182,13 +190,13 @@ You can delete multiple entries at once with the passed params.
 **Delete one by id**
 
 ```js
-strapi.query('post').delete({ id: 1 });
+strapi.query('restaurant').delete({ id: 1 });
 ```
 
 **Delete multiple by field**
 
 ```js
-strapi.query('post').delete({ lang: 'en' });
+strapi.query('restaurant').delete({ district: '_18th' });
 ```
 
 ### `count`
@@ -197,22 +205,22 @@ Returns the count of entries matching Strapi filters.
 
 #### Examples
 
-**Count by lang**
+**Count by district**
 
 ```js
-strapi.query('post').count({ lang: 'en' });
+strapi.query('restaurant').count({ district: '_1st' });
 ```
 
-**Count by title contains**
+**Count by name contains**
 
 ```js
-strapi.query('post').count({ title_contains: 'food' });
+strapi.query('restaurant').count({ name_contains: 'food' });
 ```
 
 **Count by date less than**
 
 ```js
-strapi.query('post').count({ date_lt: '2019-08-01T00:00:00Z' });
+strapi.query('restaurant').count({ date_lt: '2019-08-01T00:00:00Z' });
 ```
 
 ### `search`
@@ -224,14 +232,16 @@ Returns entries based on a search on all fields allowing it. (this feature will 
 **Search first ten starting at 20**
 
 ```js
-strapi.query('post').search({ _q: 'my search query', _limit: 10, _start: 20 });
+strapi
+  .query('restaurant')
+  .search({ _q: 'my search query', _limit: 10, _start: 20 });
 ```
 
 **Search and sort**
 
 ```js
 strapi
-  .query('post')
+  .query('restaurant')
   .search({ _q: 'my search query', _limit: 100, _sort: 'date:desc' });
 ```
 
@@ -242,7 +252,7 @@ Returns the total count of entries based on a search. (this feature will return 
 #### Example
 
 ```js
-strapi.query('post').countSearch({ _q: 'my search query' });
+strapi.query('restaurant').countSearch({ _q: 'my search query' });
 ```
 
 ## Custom Queries
@@ -265,7 +275,7 @@ Documentation: [https://bookshelfjs.org/](https://bookshelfjs.org/)
 
 ```js
 const result = await strapi
-  .query('post')
+  .query('restaurant')
   .model.query(qb => {
     qb.where('id', 1);
   })
@@ -281,7 +291,7 @@ Documentation: [https://mongoosejs.com/](https://mongoosejs.com/)
 **Example**
 
 ```js
-const result = strapi.query('post').model.find({
+const result = strapi.query('restaurant').model.find({
   date: { $gte: '2019-01-01T00.00.00Z' },
 });
 
