@@ -77,7 +77,7 @@ module.exports = function(strapi) {
       );
 
       const controller = Object.assign(
-        createController({ service }),
+        createController({ service, model }),
         userController,
         { identity: userController.identity || _.upperFirst(index) }
       );
@@ -209,10 +209,6 @@ module.exports = function(strapi) {
     boom: {
       enabled: true,
     },
-    mask: {
-      enabled: true,
-    },
-    // Necessary middlewares for the administration panel.
     cors: {
       enabled: true,
     },
@@ -269,7 +265,7 @@ module.exports = function(strapi) {
       );
       acc[current] = !_.isObject(currentSettings) ? {} : currentSettings;
 
-      if (!acc[current].hasOwnProperty('enabled')) {
+      if (!_.has(acc[current], 'enabled')) {
         strapi.log.warn(
           `(middleware:${current}) wasn't loaded due to missing key \`enabled\` in the configuration`
         );
@@ -295,7 +291,7 @@ module.exports = function(strapi) {
 
       acc[current] = !_.isObject(currentSettings) ? {} : currentSettings;
 
-      if (!acc[current].hasOwnProperty('enabled')) {
+      if (!_.has(acc[current], 'enabled')) {
         strapi.log.warn(
           `(hook:${current}) wasn't loaded due to missing key \`enabled\` in the configuration`
         );

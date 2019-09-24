@@ -12,7 +12,6 @@ import cn from 'classnames';
 
 import styles from './styles.scss';
 
-/* eslint-disable jsx-a11y/no-autofocus */
 class InputPassword extends React.Component {
   state = { showPassword: false };
 

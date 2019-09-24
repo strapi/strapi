@@ -19,11 +19,16 @@ module.exports = {
    * @return Promise or Error.
    */
 
-  composeMutationResolver: function(_schema, plugin, name, action) {
+  composeMutationResolver: function({ _schema, plugin, name, action }) {
     // Extract custom resolver or type description.
     const { resolver: handler = {} } = _schema;
 
-    const queryName = `${action}${_.capitalize(name)}`;
+    let queryName;
+    if (_.has(handler, `Mutation.${action}`)) {
+      queryName = action;
+    } else {
+      queryName = `${action}${_.capitalize(name)}`;
+    }
 
     // Retrieve policies.
     const policies = _.get(handler, `Mutation.${queryName}.policies`, []);
@@ -155,7 +160,7 @@ module.exports = {
     }
 
     if (strapi.plugins['users-permissions']) {
-      policies.push('plugins.users-permissions.permissions');
+      policies.unshift('plugins.users-permissions.permissions');
     }
 
     // Populate policies.
@@ -169,7 +174,8 @@ module.exports = {
       )
     );
 
-    return async (obj, options, { context }) => {
+    return async (obj, options, graphqlCtx) => {
+      const { context } = graphqlCtx;
       // Hack to be able to handle permissions for each query.
       const ctx = Object.assign(_.clone(context), {
         request: Object.assign(_.clone(context.request), {
@@ -197,19 +203,8 @@ module.exports = {
       if (_.isFunction(resolver)) {
         const normalizedName = _.toLower(name);
 
-        let primaryKey;
-
-        if (plugin) {
-          primaryKey = strapi.plugins[plugin].models[normalizedName].primaryKey;
-        } else {
-          primaryKey = strapi.models[normalizedName].primaryKey;
-        }
-
         if (options.input && options.input.where) {
-          context.params = Query.convertToParams(
-            options.input.where || {},
-            primaryKey
-          );
+          context.params = Query.convertToParams(options.input.where || {});
         } else {
           context.params = {};
         }
@@ -240,7 +235,7 @@ module.exports = {
             : body;
         }
 
-        return resolver.call(null, obj, options, context);
+        return resolver.call(null, obj, options, graphqlCtx);
       }
 
       // Resolver can be a promise.

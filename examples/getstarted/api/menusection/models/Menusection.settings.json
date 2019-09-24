@@ -21,7 +21,12 @@
     },
     "dishes": {
       "group": "dish",
-      "type": "group"
+      "type": "group",
+      "repeatable": true
+    },
+    "menu": {
+      "model": "menu",
+      "via": "menusections"
     }
   }
 }

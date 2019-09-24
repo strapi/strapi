@@ -175,6 +175,8 @@ function reducer(state, action) {
         .update('errors', () => fromJS({}))
         .update('didCheckErrors', v => !v);
     }
+    case 'RESET_PROPS':
+      return initialState;
     case 'SET_COLLAPSES_COMPONENTS_STATE':
       return state.update('collapses', () => fromJS(action.collapses));
     case 'SET_ERRORS':
