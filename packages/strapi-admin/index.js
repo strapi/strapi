@@ -3,6 +3,7 @@ const fs = require('fs-extra');
 const webpack = require('webpack');
 const getWebpackConfig = require('./webpack.config.js');
 const WebpackDevServer = require('webpack-dev-server');
+const chalk = require('chalk');
 
 const getPkgPath = name =>
   path.dirname(require.resolve(`${name}/package.json`));
@@ -176,7 +177,6 @@ async function build({ dir, env, options }) {
 }
 
 async function watch({ dir, port, options }) {
-  console.log('Starting the dev web server...');
   const entry = path.join(dir, '.cache', 'admin', 'src', 'app.js');
   const dest = path.join(dir, 'build');
   const env = 'development';
@@ -185,10 +185,12 @@ async function watch({ dir, port, options }) {
     entry,
     dest,
     env,
+    port,
     options,
   };
 
   const opts = {
+    clientLogLevel: 'silent',
     hot: true,
     quiet: true,
     publicPath: '/admin/',
@@ -204,7 +206,11 @@ async function watch({ dir, port, options }) {
       console.log(err);
     }
 
-    console.log('Admin available at:', `http://localhost:${port}/admin`);
+    console.log(chalk.green('Starting the development server...'));
+    console.log();
+    console.log(
+      chalk.green(`Admin development at http://localhost:${port}/admin`)
+    );
   });
 }
 
