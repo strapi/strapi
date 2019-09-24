@@ -19,7 +19,7 @@ Simply use one of the following commands.
 
 ::: tab "yarn" id="yarn-create-qs"
 
-```
+```bash
 yarn create strapi-app new my-project --quickstart
 ```
 
@@ -27,7 +27,7 @@ yarn create strapi-app new my-project --quickstart
 
 ::: tab "npx" id="npx-create-qs"
 
-```
+```bash
 npx create-strapi-app my-project --quickstart
 ```
 
