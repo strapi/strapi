@@ -112,6 +112,7 @@ program
   .command('develop')
   .alias('dev')
   .option('--no-build', 'Disable build', false)
+  .option('--watch', 'Enable watch', true)
   .description('Start your Strapi application in development mode')
   .action(getLocalScript('develop'));
 

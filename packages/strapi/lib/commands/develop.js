@@ -7,16 +7,23 @@ const chokidar = require('chokidar');
 const execa = require('execa');
 
 const { logger } = require('strapi-utils');
+
+const strapiAdmin = require('strapi-admin');
+
 const strapi = require('../index');
 
 /**
  * `$ strapi develop`
  *
  */
-module.exports = async function({ build }) {
+module.exports = async function({ build, watch }) {
   const dir = process.cwd();
 
-  if (build && !fs.existsSync(path.join(dir, 'build'))) {
+  // Always create the .cache folder containing the front-end files
+  await strapiAdmin.createCacheDir(dir);
+
+  // Don't run the build process if the admin is in watch mode
+  if (build && !watch && !fs.existsSync(path.join(dir, 'build'))) {
     try {
       execa.shellSync('npm run -s build', {
         stdio: 'inherit',
@@ -30,6 +37,17 @@ module.exports = async function({ build }) {
     const strapiInstance = strapi({ dir, autoReload: true });
 
     if (cluster.isMaster) {
+      //  Start the front-end dev server
+      if (watch) {
+        try {
+          execa('npm', ['run', '-s', 'strapi', 'watch'], {
+            stdio: 'inherit',
+          });
+        } catch (err) {
+          process.exit(1);
+        }
+      }
+
       cluster.on('message', (worker, message) => {
         switch (message) {
           case 'reload':

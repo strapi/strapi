@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 const chokidar = require('chokidar');
 const fs = require('fs-extra');
 const path = require('path');
@@ -34,10 +35,11 @@ module.exports = async function() {
     });
 
     watcher.on('all', async (event, filePath) => {
-      const isExtension = filePath.includes('/extensions/');
-      const pluginName = isExtension
-        ? filePath.split('/extensions/')[1].split('/admin')[0]
-        : '';
+      const re = /\/extensions\/([^\/]*)\/.*$/gm;
+      const matched = re.exec(filePath);
+      const isExtension = matched !== null;
+      const pluginName = isExtension ? matched[1] : '';
+
       const packageName = isExtension
         ? `strapi-plugin-${pluginName}`
         : 'strapi-admin';
@@ -46,13 +48,13 @@ module.exports = async function() {
         : filePath.split('/admin')[1];
 
       const destFolder = isExtension
-        ? path.join(cacheDir, 'plugins', packageName, 'admin')
+        ? path.join(cacheDir, 'plugins', packageName)
         : path.join(cacheDir, 'admin');
 
       if (event === 'unlink' || event === 'unlinkDir') {
         const originalFilePathInNodeModules = path.join(
           getPkgPath(packageName),
-          'admin',
+          isExtension ? '' : 'admin',
           targetPath
         );
 
@@ -93,10 +95,7 @@ module.exports = async function() {
               );
             }
           } catch (err) {
-            console.log(
-              'An error occured while copying the original file',
-              err
-            );
+            // Do nothing
           }
         }
       } else {
