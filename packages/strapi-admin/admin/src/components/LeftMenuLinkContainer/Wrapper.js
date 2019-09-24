@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
-// background: ${props => props.theme.main.colors.leftMenu['link-hover']};
 const Wrapper = styled.div`
   padding-top: 0.6rem;
   position: absolute;

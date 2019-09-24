@@ -13,8 +13,6 @@ import 'react-datetime/css/react-datetime.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'font-awesome/css/font-awesome.min.css';
 
-// import './styles/main.scss';
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';

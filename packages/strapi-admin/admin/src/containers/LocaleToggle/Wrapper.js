@@ -2,6 +2,7 @@ import styled from 'styled-components';
 
 const Wrapper = styled.div`
   min-width: 90px;
+  -webkit-font-smoothing: antialiased;
 
   > div {
     height: 6rem;
@@ -37,9 +38,9 @@ const Wrapper = styled.div`
       }
     }
   }
-  -webkit-font-smoothing: antialiased;
 
   .localeDropdownContent {
+    -webkit-font-smoothing: antialiased;
     span {
       color: #333740;
       font-size: 11px;
@@ -56,8 +57,6 @@ const Wrapper = styled.div`
       border-radius: 1px;
       vertical-align: middle;
     }
-
-    -webkit-font-smoothing: antialiased;
   }
 
   .localeDropdownMenu {
@@ -103,7 +102,6 @@ const Wrapper = styled.div`
     }
 
     > button:first-child {
-      // height: 44px;
       line-height: 50px;
       margin-bottom: 4px;
       &:hover,
@@ -129,7 +127,6 @@ const Wrapper = styled.div`
 
     button {
       padding-left: 17px;
-
       &:hover {
         background-color: #f7f8f8 !important;
       }
