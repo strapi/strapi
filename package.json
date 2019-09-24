@@ -2,6 +2,7 @@
   "private": true,
   "dependencies": {},
   "devDependencies": {
+    "@fortawesome/fontawesome-free": "^5.11.2",
     "@testing-library/jest-dom": "^4.0.0",
     "@testing-library/react": "^9.1.0",
     "@testing-library/react-hooks": "^2.0.0",

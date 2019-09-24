@@ -97,6 +97,7 @@ const DropDownWrapper = styled.div`
           background: #ffffff !important;
           border: 1px solid #e3e9f3;
           border-radius: 2px !important;
+          font-size: 1.4rem;
 
           &:before {
             content: '\f0db';
