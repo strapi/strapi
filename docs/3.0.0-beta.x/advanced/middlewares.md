@@ -4,7 +4,7 @@ The middlewares are functions which are composed and executed in a stack-like ma
 
 Enable the middleware in environments settings
 
-**Path —** `config/environments/middleware.json`.
+**Path —** `config/environments/**/middleware.json`.
 
 ```json
 {
@@ -65,7 +65,7 @@ The core of Strapi embraces a small list of middlewares for performances, securi
 The following middlewares cannot be disabled: responses, router, logger and boom.
 :::
 
-## Structure
+## Node modules structure
 
 A middleware needs to follow the structure below:
 
@@ -80,7 +80,7 @@ A middleware needs to follow the structure below:
 
 The `index.js` is the entry point to your middleware. It should look like the example above.
 
-## Custom middlewares
+## Custom middlewares structure
 
 The framework allows the application to override the default middlewares and add new ones. You have to create a `./middlewares` folder at the root of your project and put the middlewares into it.
 
