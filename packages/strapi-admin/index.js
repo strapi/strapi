@@ -175,16 +175,11 @@ async function build({ dir, env, options }) {
   });
 }
 
-async function watch(dir) {
+async function watch({ dir, port, options }) {
   console.log('Starting the dev web server...');
-  const port = 8000;
   const entry = path.join(dir, '.cache', 'admin', 'src', 'app.js');
   const dest = path.join(dir, 'build');
   const env = 'development';
-  const options = {
-    backend: 'http://localhost:1337',
-    publicPath: '/admin/',
-  };
 
   const args = {
     entry,
