@@ -10,13 +10,7 @@ const defaults = {
   maxAge: 31536000,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
-  headers: [
-    'Content-Type',
-    'Authorization',
-    'Origin',
-    'Accept',
-    'X-Forwarded-Host',
-  ],
+  headers: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
   keepHeadersOnError: false,
 };
 

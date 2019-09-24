@@ -352,10 +352,6 @@ The session doesn't work with `mongo` as a client. The package that we should us
 
 **Path —** `./config/environments/**/security.json`.
 
-- [`csrf`](https://en.wikipedia.org/wiki/Cross-site_request_forgery)
-  - `enabled` (boolean): Enable or disable CSRF. Default value: depends on the environment.
-  - `key` (string): The name of the CSRF token added to the model. Default value: `_csrf`.
-  - `secret` (string): The key to place on the session object which maps to the server side token. Default value: `_csrfSecret`.
 - [`csp`](https://en.wikipedia.org/wiki/Content_Security_Policy)
   - `enabled` (boolean): Enable or disable CSP to avoid Cross Site Scripting (XSS) and data injection attacks.
 - [`p3p`](https://en.wikipedia.org/wiki/P3P)

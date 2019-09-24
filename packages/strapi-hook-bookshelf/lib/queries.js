@@ -178,7 +178,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     const runDelete = async trx => {
       await deleteGroups(entry, { transacting: trx });
       await model.forge(params).destroy({ transacting: trx, require: false });
-      return entry;
+      return entry.toJSON();
     };
 
     return wrapTransaction(runDelete, { transacting });
@@ -217,7 +217,8 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       })
       .fetchAll({
         withRelated: populate,
-      });
+      })
+      .then(results => results.toJSON());
   }
 
   function countSearch(params) {

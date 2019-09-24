@@ -44,7 +44,6 @@ The core of Strapi embraces a small list of middlewares for performances, securi
 - cors
 - cron
 - csp
-- csrf
 - favicon
 - gzip
 - hsts

@@ -25,9 +25,17 @@ module.exports = {
     if (config.enabled === false) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Upload.status.disabled' }] }]
-          : 'File upload is disabled'
+
+        [
+          {
+            messages: [
+              {
+                id: 'Upload.status.disabled',
+                message: 'File upload is disabled',
+              },
+            ],
+          },
+        ]
       );
     }
 
@@ -36,12 +44,11 @@ module.exports = {
     const { files = {} } = ctx.request.files || {};
 
     if (_.isEmpty(files)) {
-      return ctx.badRequest(
-        null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Upload.status.empty' }] }]
-          : 'Files are empty'
-      );
+      return ctx.badRequest(null, [
+        {
+          messages: [{ id: 'Upload.status.empty', message: 'Files are empty' }],
+        },
+      ]);
     }
 
     // Transform stream files to buffer
@@ -49,21 +56,17 @@ module.exports = {
 
     const enhancedFiles = buffers.map(file => {
       if (file.size > config.sizeLimit) {
-        return ctx.badRequest(
-          null,
-          ctx.request.admin
-            ? [
-                {
-                  messages: [
-                    {
-                      id: 'Upload.status.sizeLimit',
-                      values: { file: file.name },
-                    },
-                  ],
-                },
-              ]
-            : `${file.name} file is bigger than limit size!`
-        );
+        return ctx.badRequest(null, [
+          {
+            messages: [
+              {
+                id: 'Upload.status.sizeLimit',
+                message: `${file.name} file is bigger than limit size!`,
+                values: { file: file.name },
+              },
+            ],
+          },
+        ]);
       }
 
       // Add details to the file to be able to create the relationships.
