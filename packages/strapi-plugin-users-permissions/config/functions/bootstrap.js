@@ -80,6 +80,13 @@ module.exports = async () => {
       secret: '',
       callback: '/auth/twitter/callback',
     },
+    instagram: {
+      enabled: false,
+      icon: 'instagram',
+      key: '',
+      secret: '',
+      callback: '/auth/instagram/callback',
+    },
   };
   const prevGrantConfig = (await pluginStore.get({ key: 'grant' })) || {};
   // store grant auth config to db
