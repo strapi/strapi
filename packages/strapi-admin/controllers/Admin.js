@@ -3,6 +3,10 @@
 const execa = require('execa');
 const _ = require('lodash');
 
+const formatError = error => [
+  { messages: [{ id: error.id, message: error.message, field: error.field }] },
+];
+
 /**
  * A set of functions called "actions" for `Admin`
  */
@@ -121,9 +125,38 @@ module.exports = {
   async create(ctx) {
     const { email, username, password, blocked } = ctx.request.body;
 
-    if (!email) return ctx.badRequest('missing.email');
-    if (!username) return ctx.badRequest('missing.username');
-    if (!password) return ctx.badRequest('missing.password');
+    if (!email) {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'missing.email',
+          message: 'Missing email',
+          field: ['email'],
+        })
+      );
+    }
+
+    if (!username) {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'missing.username',
+          message: 'Missing username',
+          field: ['username'],
+        })
+      );
+    }
+
+    if (!password) {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'missing.password',
+          message: 'Missing password',
+          field: ['password'],
+        })
+      );
+    }
 
     const adminsWithSameEmail = await strapi
       .query('administrator', 'admin')
@@ -136,33 +169,22 @@ module.exports = {
     if (adminsWithSameEmail) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [
-              {
-                messages: [
-                  { id: 'Auth.form.error.email.taken', field: ['email'] },
-                ],
-              },
-            ]
-          : 'email.alreadyTaken'
+        formatError({
+          id: 'Auth.form.error.email.taken',
+          message: 'Email already taken',
+          field: ['email'],
+        })
       );
     }
 
     if (adminsWithSameUsername) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [
-              {
-                messages: [
-                  {
-                    id: 'Auth.form.error.username.taken',
-                    field: ['username'],
-                  },
-                ],
-              },
-            ]
-          : 'username.alreadyTaken.'
+        formatError({
+          id: 'Auth.form.error.username.taken',
+          message: 'Username already taken',
+          field: ['username'],
+        })
       );
     }
 
@@ -189,10 +211,38 @@ module.exports = {
     const { id } = ctx.params;
     const { email, username, password, blocked } = ctx.request.body;
 
-    if (!email) return ctx.badRequest('Missing email');
-    if (!username) return ctx.badRequest('Missing username');
-    if (!password) return ctx.badRequest('Missing password');
+    if (!email) {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'missing.email',
+          message: 'Missing email',
+          field: ['email'],
+        })
+      );
+    }
 
+    if (!username) {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'missing.username',
+          message: 'Missing username',
+          field: ['username'],
+        })
+      );
+    }
+
+    if (!password) {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'missing.password',
+          message: 'Missing password',
+          field: ['password'],
+        })
+      );
+    }
     const admin = await strapi
       .query('administrator', 'admin')
       .findOne(ctx.params);
@@ -209,15 +259,11 @@ module.exports = {
       if (adminsWithSameEmail && adminsWithSameEmail.id !== admin.id) {
         return ctx.badRequest(
           null,
-          ctx.request.admin
-            ? [
-                {
-                  messages: [
-                    { id: 'Auth.form.error.email.taken', field: ['email'] },
-                  ],
-                },
-              ]
-            : 'Email is already taken.'
+          formatError({
+            id: 'Auth.form.error.email.taken',
+            message: 'Email already taken',
+            field: ['email'],
+          })
         );
       }
     }
@@ -231,18 +277,11 @@ module.exports = {
       if (adminsWithSameUsername && adminsWithSameUsername.id !== admin.id) {
         return ctx.badRequest(
           null,
-          ctx.request.admin
-            ? [
-                {
-                  messages: [
-                    {
-                      id: 'Auth.form.error.username.taken',
-                      field: ['username'],
-                    },
-                  ],
-                },
-              ]
-            : 'Username is already taken.'
+          formatError({
+            id: 'Auth.form.error.username.taken',
+            message: 'Username already taken',
+            field: ['username'],
+          })
         );
       }
     }
