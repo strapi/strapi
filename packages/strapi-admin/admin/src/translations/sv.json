@@ -27,7 +27,7 @@
   "app.components.DownloadInfo.text": "Det kan ta en minut. Tack för ditt tålamod.",
   "app.components.EmptyAttributes.title": "Det finns inga fält än",
   "app.components.HomePage.button.blog": "SE MER PÅ BLOGGEN",
-  "app.components.HomePage.button.quickStart": "STARTA HURTIGT START TUTORIAL",
+  "app.components.HomePage.button.quickStart": "Snabb introduktion",
   "app.components.HomePage.community": "Hitta gemenskapen på webben",
   "app.components.HomePage.community.content": "Diskutera med teammedlemmar, bidragsgivare och utvecklare på olika kanaler.",
   "app.components.HomePage.create": "Skapa din första innehållstyp",
