@@ -34,6 +34,9 @@ module.exports = async () => {
 
   console.log(`Building your admin UI with ${green(env)} configuration ...`);
 
+  // Create the .cache folder containing the front-end files
+  await strapiAdmin.createCacheDir(dir);
+
   return strapiAdmin
     .build({
       dir,

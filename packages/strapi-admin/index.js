@@ -83,7 +83,7 @@ async function copyCustomAdmin(src, dest) {
   await fs.copy(src, path.resolve(dest, 'admin'));
 }
 
-async function build({ dir, env, options }) {
+async function createCacheDir(dir) {
   const cacheDir = path.resolve(dir, '.cache');
 
   const pkgJSON = require(path.join(dir, 'package.json'));
@@ -112,6 +112,30 @@ async function build({ dir, env, options }) {
   if (fs.pathExistsSync(path.join(dir, 'admin'))) {
     await copyCustomAdmin(path.join(dir, 'admin'), cacheDir);
   }
+
+  // override plugins' admin code with user customizations
+  const pluginsToOverride = pluginsToCopy.reduce((acc, current) => {
+    const pluginName = current.replace(/^strapi-plugin-/i, '');
+
+    if (fs.pathExistsSync(path.join(dir, 'extensions', pluginName, 'admin'))) {
+      acc.push(pluginName);
+    }
+
+    return acc;
+  }, []);
+
+  await Promise.all(
+    pluginsToOverride.map(plugin =>
+      copyCustomAdmin(
+        path.join(dir, 'extensions', plugin, 'admin'),
+        path.join(cacheDir, 'plugins', `strapi-plugin-${plugin}`)
+      )
+    )
+  );
+}
+
+async function build({ dir, env, options }) {
+  const cacheDir = path.resolve(dir, '.cache');
 
   const entry = path.resolve(cacheDir, 'admin', 'src', 'app.js');
   const dest = path.resolve(dir, 'build');
@@ -155,4 +179,5 @@ async function build({ dir, env, options }) {
 module.exports = {
   build,
   createPluginsJs,
+  createCacheDir,
 };
