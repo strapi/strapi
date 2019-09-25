@@ -96,7 +96,7 @@
   "app.components.PluginCard.PopUpWarning.install.impossible.autoReload.needed": "AutoReload-funktionen måste vara inaktiverad. Starta din app med `yarn develop`.",
   "app.components.PluginCard.PopUpWarning.install.impossible.environment": "Av säkerhetsskäl kan ett plugin bara laddas ner i en utvecklingsmiljö.",
   "app.components.PluginCard.PopUpWarning.install.impossible.confirm": "Jag förstår!",
-  "app.components.PluginCard.PopUpWarning.install.impossible.title": "Att ladda ner är omöjligt",
+  "app.components.PluginCard.PopUpWarning.install.impossible.title": "Nedladdning är inte möjlig",
   "app.components.PluginCard.price.free": "Gratis",
   "app.components.PluginCard.settings": "Inställningar",
   "app.components.listPlugins.button": "Lägg till nytt plugin",
