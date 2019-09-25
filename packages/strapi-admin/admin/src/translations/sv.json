@@ -33,7 +33,7 @@
   "app.components.HomePage.create": "Skapa din första innehållstyp",
   "app.components.HomePage.createBlock.content.first": "De",
   "app.components.HomePage.createBlock.content.second": "plugin hjälper dig att definiera datastrukturen för dina modeller. Om du är ny här rekommenderar vi dig starkt att följa vår",
-  "app.components.HomePage.createBlock.content.tutorial": "vägledning.",
+  "app.components.HomePage.createBlock.content.tutorial": "snabbguide.",
   "app.components.HomePage.cta": "BEKRÄFTA",
   "app.components.HomePage.newsLetter": "Prenumerera på nyhetsbrevet för att kontakta Strapi",
   "app.components.HomePage.support": "STÖD OSS",
