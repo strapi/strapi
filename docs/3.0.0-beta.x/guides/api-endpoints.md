@@ -44,7 +44,7 @@ As an example let's consider the `Post` ContentType for the next steps.
     border-right 1px solid #dfe2e5
     &:last-child
       border-right none
-    
+
 
 </style>
 
@@ -63,7 +63,7 @@ As an example let's consider the `Post` ContentType for the next steps.
 
 ## GET `/posts`
 
-Returns the posts matching the query filters. You can read more about filtering [here](./filters.md).
+Returns the posts matching the query filters. You can read more about parameters [here](./parameters.md).
 
 **Example request**
 
@@ -101,7 +101,7 @@ GET http://localhost:1337/posts
 
 ## GET `/posts/count`
 
-Returns the count of posts matching the query filters. You can read more about filtering [here](./filters.md).
+Returns the count of posts matching the query filters. You can read more about parameters [here](./parameters.md).
 
 **Example response**
 

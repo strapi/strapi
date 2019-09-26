@@ -12,7 +12,7 @@ Here are the core methods (and their current implementation).
 You can simply copy and paste this code in your own controller file to customize the methods.
 
 ::: warning
-In the following example we will consider your controller, service and model is named `product`
+In the following example we will consider your controller, service and model is named `restaurant`
 :::
 
 #### Utils
@@ -157,7 +157,7 @@ You can also create custom controllers to build your own business logic and API 
 
 There are two ways to create a controller:
 
-- Using the CLI `strapi generate:controller product`. Read the [CLI documentation](../cli/CLI.md#strapi-generatecontroller) for more information.
+- Using the CLI `strapi generate:controller restaurant`. Read the [CLI documentation](../cli/CLI.md#strapi-generatecontroller) for more information.
 - Manually create a JavaScript file in `./api/**/controllers`.
 
 ### Adding Endpoints
