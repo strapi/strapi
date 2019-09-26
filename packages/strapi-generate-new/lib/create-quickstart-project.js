@@ -1,5 +1,6 @@
 'use strict';
 
+const sentry = require('@sentry/node');
 const execa = require('execa');
 
 const { trackUsage } = require('./utils/usage');
@@ -30,6 +31,9 @@ module.exports = async function createQuickStartProject(scope) {
       env: {
         FORCE_COLOR: 1,
       },
-    }).catch(() => {});
+    }).catch(error => {
+      sentry.captureException(error);
+      return sentry.flush();
+    });
   }
 };

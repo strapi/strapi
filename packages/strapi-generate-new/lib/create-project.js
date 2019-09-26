@@ -1,5 +1,7 @@
 'use strict';
 
+const sentry = require('@sentry/node');
+
 const { join } = require('path');
 const fse = require('fs-extra');
 const chalk = require('chalk');
@@ -97,8 +99,11 @@ module.exports = async function createProject(
     await trackUsage({
       event: 'didNotInstallProjectDependencies',
       scope,
-      error,
+      error: error.stderr.slice(-1024),
     });
+
+    sentry.captureException(error);
+    await sentry.flush();
 
     stopProcess(
       `${chalk.red(

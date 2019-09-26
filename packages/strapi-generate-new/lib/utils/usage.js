@@ -28,7 +28,10 @@ function trackError({ scope, error }) {
       properties: {
         error: typeof error == 'string' ? error : error && error.message,
         os: os.type(),
+        platform: os.platform(),
+        release: os.release(),
         version: scope.strapiVersion,
+        nodeVersion: process.version,
       },
     });
   } catch (err) {
@@ -45,6 +48,9 @@ function trackUsage({ event, scope, error }) {
       properties: {
         error: typeof error == 'string' ? error : error && error.message,
         os: os.type(),
+        os_platform: os.platform(),
+        os_release: os.release(),
+        node_version: process.version,
         version: scope.strapiVersion,
       },
     });
