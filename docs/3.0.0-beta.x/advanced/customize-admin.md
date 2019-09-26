@@ -29,9 +29,101 @@ By default, the administration panel is exposed via [http://localhost:1337/admin
 
 The panel will be available through [http://localhost:1337/dashboard](http://localhost:1337/dashboard) with the configurations above.
 
+---
+
 ### Development mode
 
-**_Currently not available_**
+to enable the front-end development mode you need to start your application using the `--watch-admin` flag.
+
+```bash
+cd my-app
+strapi develop --watch-admin
+```
+
+With this option you can
+
+#### Customizing the `strapi-admin` package
+
+All files added in `my-app/admin/src/` will either be replaced or added
+
+**Example: Changing the available locales of your application**
+
+```bash
+# Create both the admin and admin/src folders
+cd my-app && mkdir -p admin/src
+# Change the available locales of the administration panel
+touch admin/src/i18n.js
+```
+
+**Path: `my-app/admin/src/i18n.js**
+
+```js
+import { addLocaleData } from 'react-intl';
+import { reduce } from 'lodash';
+import en from 'react-intl/locale-data/en';
+import fr from 'react-intl/locale-data/fr';
+
+// We dismiss pt-BR and zh-Hans locales since they are not supported by react-intl
+const locales = {
+  en,
+  fr,
+};
+const languages = Object.keys(trads);
+
+/**
+ * Dynamically generate `translationsMessages object`.
+ */
+const translationMessages = reduce(
+  languages,
+  (result, language) => {
+    const obj = result;
+    obj[language] = trads[language];
+
+    if (locales[language]) {
+      addLocaleData(locales[language]);
+    }
+
+    return obj;
+  },
+  {}
+);
+
+export { languages, translationMessages };
+```
+
+> With this modification only English and French will be available in your admin
+
+#### Customizing a plugin
+
+Similarly to the back-end override system any file added in `my-app/extensions/<plugin-name>/admin/` will be copied and used instead of the original one (use with care).
+
+**Example: Changing the current WYSIWYG**
+
+```bash
+cd my-app/extensions
+# Create the content manager folder
+mkdir content-manager && cd content-manager
+# Create the admin folder
+mkdir -p admin/src
+# Create the components folder and the WysiwygWithErrors one
+cd admin/src && mkdir -p components/WysiwygWithErrors
+# Create the index.js so the original file is overridden
+touch components/WysiwygWithErrors/index.js
+```
+
+**Path: `my-app/extensions/content-manager/admin/src/components/WysiwygWithErrors/index.js**
+
+```js
+import React from 'react';
+import MyNewWYSIWYG from 'my-awesome-lib';
+
+// This is a dummy example
+const WysiwygWithErrors = props => <MyNewWYSIWYG {...props} />;
+
+export default WysiwygWithErrors;
+```
+
+---
 
 ### Styles
 
@@ -46,6 +138,8 @@ To apply your changes you need to rebuild your admin panel
 ```
 npm run build
 ```
+
+---
 
 ### Logo
 

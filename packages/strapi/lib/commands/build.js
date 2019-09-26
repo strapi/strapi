@@ -6,7 +6,7 @@ const _ = require('lodash');
 const { green, yellow } = require('chalk');
 const strapiAdmin = require('strapi-admin');
 const loadConfigFile = require('../load/load-config-files');
-
+const addSlash = require('../utils/addSlash');
 /**
  * `$ strapi build`
  */
@@ -34,9 +34,6 @@ module.exports = async () => {
 
   console.log(`Building your admin UI with ${green(env)} configuration ...`);
 
-  // Create the .cache folder containing the front-end files
-  await strapiAdmin.createCacheDir(dir);
-
   return strapiAdmin
     .build({
       dir,
@@ -55,12 +52,3 @@ module.exports = async () => {
       process.exit(1);
     });
 };
-
-function addSlash(path) {
-  if (typeof path !== 'string') throw new Error('admin.path must be a string');
-  if (path === '' || path === '/') return '/';
-
-  if (path[0] != '/') path = '/' + path;
-  if (path[path.length - 1] != '/') path = path + '/';
-  return path;
-}
