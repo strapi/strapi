@@ -112,7 +112,7 @@ program
   .command('develop')
   .alias('dev')
   .option('--no-build', 'Disable build', false)
-  .option('--watch', 'Enable watch', true)
+  .option('--watch-admin', 'Enable watch', true)
   .description('Start your Strapi application in development mode')
   .action(getLocalScript('develop'));
 
@@ -191,11 +191,11 @@ program
   .option('-d, --delete-files', 'Delete files', false)
   .action(getLocalScript('uninstall'));
 
-//   `$ strapi watch`
+//   `$ strapi watch-admin`
 program
-  .command('watch')
+  .command('watch-admin')
   .description('Starts the admin dev server')
-  .action(getLocalScript('watch'));
+  .action(getLocalScript('watchAdmin'));
 
 /**
  * Normalize help argument

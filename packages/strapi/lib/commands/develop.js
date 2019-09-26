@@ -8,22 +8,17 @@ const execa = require('execa');
 
 const { logger } = require('strapi-utils');
 
-const strapiAdmin = require('strapi-admin');
-
 const strapi = require('../index');
 
 /**
  * `$ strapi develop`
  *
  */
-module.exports = async function({ build, watch }) {
+module.exports = async function({ build, watchAdmin }) {
   const dir = process.cwd();
 
-  // Always create the .cache folder containing the front-end files
-  await strapiAdmin.createCacheDir(dir);
-
   // Don't run the build process if the admin is in watch mode
-  if (build && !watch && !fs.existsSync(path.join(dir, 'build'))) {
+  if (build && !watchAdmin && !fs.existsSync(path.join(dir, 'build'))) {
     try {
       execa.shellSync('npm run -s build', {
         stdio: 'inherit',
@@ -38,9 +33,9 @@ module.exports = async function({ build, watch }) {
 
     if (cluster.isMaster) {
       //  Start the front-end dev server
-      if (watch) {
+      if (watchAdmin) {
         try {
-          execa('npm', ['run', '-s', 'strapi', 'watch'], {
+          execa('npm', ['run', '-s', 'strapi', 'watch-admin'], {
             stdio: 'inherit',
           });
         } catch (err) {

@@ -33,11 +33,11 @@ The panel will be available through [http://localhost:1337/dashboard](http://loc
 
 ### Development mode
 
-to enable the front-end development mode you need to start your application using the `--watch` flag.
+to enable the front-end development mode you need to start your application using the `--watch-admin` flag.
 
 ```bash
 cd my-app
-strapi develop --watch
+strapi develop --watch-admin
 ```
 
 With this option you can
@@ -50,9 +50,9 @@ All files added in `my-app/admin/src/` will either be replaced or added
 
 ```bash
 # Create both the admin and admin/src folders
-cd my-app && mkdir admin && mkdir admin/src
+cd my-app && mkdir -p admin/src
 # Change the available locales of the administration panel
-touch mkdir/src/i18n.js
+touch admin/src/i18n.js
 ```
 
 **Path: `my-app/admin/src/i18n.js**
@@ -104,9 +104,9 @@ cd my-app/extensions
 # Create the content manager folder
 mkdir content-manager && cd content-manager
 # Create the admin folder
-mkdir admin && mkdir admin/src
+mkdir -p admin/src
 # Create the components folder and the WysiwygWithErrors one
-cd admin/src && mkdir components && mkdir components/WysiwygWithErrors
+cd admin/src && mkdir -p components/WysiwygWithErrors
 # Create the index.js so the original file is overridden
 touch components/WysiwygWithErrors/index.js
 ```

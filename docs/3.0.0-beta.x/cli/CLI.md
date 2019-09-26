@@ -39,14 +39,14 @@ Strapi modifies/creates files at runtime and needs to restart when new files are
 
 ```
 strapi develop
-options: [--no-build |--watch ]
+options: [--no-build |--watch-admin ]
 ```
 
 - **strapi develop**<br/>
   Starts your application with the autoReload enabled
 - **strapi develop --no-build**<br/>
   Starts your application with the autoReload enabled and skip the administration panel build process
-- **strapi develop --watch**<br/>
+- **strapi develop --watch-admin**<br/>
   Starts your application with the autoReload enabled and the front-end development server. It allows you to customize the administration panel.
 
 ::: note
