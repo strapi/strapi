@@ -82,6 +82,7 @@
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "De doorstuur URL om in je Facebook applicatie configuratie te zetten",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "De doorstuur URL om in je GitHub applicatie configuratie te zetten",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "De doorstuur URL om in je Google applicatie configuratie te zetten",
+  "PopUpForm.Providers.instagram.providerConfig.redirectURL": "De doorstuur URL om in je Instagram applicatie configuratie te zetten",
   "PopUpForm.Providers.key.label": "Client ID",
   "PopUpForm.Providers.key.placeholder": "TEXT",
   "PopUpForm.Providers.microsoft.providerConfig.redirectURL": "De doorstuur URL om in je Microsoft applicatie configuratie te zetten",

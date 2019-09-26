@@ -75,6 +75,7 @@
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "L'URL di redirect per aggiungere la tua configurazione dell'applicazione Facebook",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "L'URL di redirect per aggiungere la tua configurazione dell'applicazione Github",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "L'URL di redirect per aggiungere la tua configurazione dell'applicazione Google",
+  "PopUpForm.Providers.instagram.providerConfig.redirectURL": "L'URL di redirect per aggiungere la tua configurazione dell'applicazione Instagram",
   "PopUpForm.Providers.key.placeholder": "TEXT",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "L'URL di redirect per aggiungere la tua configurazione dell'applicazione Linkdin",
   "PopUpForm.Providers.redirectURL.front-end.label": "L'URL di redirect per la tua app di front-end",

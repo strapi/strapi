@@ -82,6 +82,7 @@
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "Facebook uygulama yapılandırmalarınıza eklenecek yönlendirme URL'si",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "GitHub uygulama yapılandırmalarınıza eklenecek yönlendirme URL'si",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "Google uygulama yapılandırmalarınıza eklenecek yönlendirme URL'si",
+  "PopUpForm.Providers.instagram.providerConfig.redirectURL": "Instagram uygulama yapılandırmalarınıza eklenecek yönlendirme URL'si",
   "PopUpForm.Providers.key.label": "Web istemcisi ID",
   "PopUpForm.Providers.key.placeholder": "METİN",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "Linkedin uygulama yapılandırmalarınıza eklenecek yönlendirme URL'si",

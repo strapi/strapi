@@ -83,6 +83,7 @@
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "URL-адрес перенаправления, который необходимо добавить в настройки Facebook приложения",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "URL-адрес перенаправления, который необходимо добавить в настройки GitHub приложения",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "URL-адрес перенаправления, который необходимо добавить в настройки Google приложения",
+  "PopUpForm.Providers.instagram.providerConfig.redirectURL": "URL-адрес перенаправления, который необходимо добавить в настройки Instagram приложения",
   "PopUpForm.Providers.key.label": "Client ID",
   "PopUpForm.Providers.key.placeholder": "TEXT",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "URL-адрес перенаправления, который необходимо добавить в настройки Linkedin приложения",
