@@ -94,6 +94,12 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     const relations = pickRelations(values);
     const data = selectAttributes(values);
 
+    // Trim leading & trailing spaces.
+    Object.keys(data).map(key => {
+      if (typeof data[key] === 'string')
+        data[key] = data[key].trim();
+    });
+    
     const runCreate = async trx => {
       // Create entry with no-relational data.
       const entry = await model.forge(data).save(null, { transacting: trx });
@@ -121,6 +127,12 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     const relations = pickRelations(values);
     const data = selectAttributes(values);
 
+    // Trim leading & trailing spaces.
+    Object.keys(data).map(key => {
+      if (typeof data[key] === 'string')
+        data[key] = data[key].trim();
+    });
+    
     const runUpdate = async trx => {
       const updatedEntry =
         Object.keys(data).length > 0
