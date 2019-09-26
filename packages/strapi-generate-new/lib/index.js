@@ -9,7 +9,7 @@ const uuid = require('uuid/v4');
 const sentry = require('@sentry/node');
 
 const hasYarn = require('./utils/has-yarn');
-const { trackError } = require('./utils/usage');
+const { trackError, captureError } = require('./utils/usage');
 const parseDatabaseArguments = require('./utils/parse-db-arguments');
 const generateNew = require('./generate-new');
 
@@ -78,8 +78,7 @@ module.exports = (projectDirectory, cliArguments) => {
 
   return generateNew(scope).catch(error => {
     console.error(error);
-    sentry.captureException(error);
-    return sentry.flush().then(() => {
+    return captureError(error).then(() => {
       return trackError({ scope, error }).then(() => {
         process.exit(1);
       });

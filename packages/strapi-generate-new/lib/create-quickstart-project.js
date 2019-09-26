@@ -1,9 +1,8 @@
 'use strict';
 
-const sentry = require('@sentry/node');
 const execa = require('execa');
 
-const { trackUsage } = require('./utils/usage');
+const { trackUsage, captureError } = require('./utils/usage');
 const defaultConfigs = require('./utils/db-configs.js');
 const clientDependencies = require('./utils/db-client-dependencies.js');
 const createProject = require('./create-project');
@@ -31,9 +30,6 @@ module.exports = async function createQuickStartProject(scope) {
       env: {
         FORCE_COLOR: 1,
       },
-    }).catch(error => {
-      sentry.captureException(error);
-      return sentry.flush();
-    });
+    }).catch(error => captureError(error));
   }
 };

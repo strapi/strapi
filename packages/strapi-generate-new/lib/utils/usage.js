@@ -2,6 +2,17 @@
 
 const os = require('os');
 const fetch = require('node-fetch');
+const sentry = require('@sentry/node');
+
+async function captureError(error) {
+  try {
+    sentry.captureException(error);
+    await sentry.flush();
+  } catch (err) {
+    /** ignore errors*/
+    return Promise.resolve();
+  }
+}
 
 function trackEvent(event, body) {
   try {
@@ -63,4 +74,5 @@ function trackUsage({ event, scope, error }) {
 module.exports = {
   trackError,
   trackUsage,
+  captureError,
 };
