@@ -42,7 +42,7 @@ When your plugin is installed, you just have to start your application and it wi
 
 The administration panel lets you configure the basic settings of this plugin.
 
-![Access to the documentation](../assets/plugins/documentation/open-doc.gif 'Access to the documentation')
+![Accessing the documentation](../assets/plugins/documentation/open-doc.gif 'Accessing the documentation')
 
 ## Administration panel
 
@@ -52,28 +52,28 @@ This plugin comes with an interface that is available in your administration pan
 
 By default, your documentation will be accessible by anyone.
 
-If you want to make it accessible for restrected person, you will have to activate the **Restrected Access** option.
+If you want to restrict the access to the documentation you have to enable the **Restricted Access** option.
 
-- Click the `ON` of **Restrected Access**
+- Click the `ON` of **Restricted Access**
 - Select a password in the `password` input
-- Save your settings update
+- Save your settings
 
-Now if you try to access to your documentation, you will have to enter the password you set.
+Now if you try to access your documentation, you will have to enter the password you set.
 
 ### Retrieve your JWT token
 
-Strapi is secured by default which means that most of your end-points require your user to be authenticated. You will need to paste this token in your SWAGGER UI to try out your end-points.
+Strapi is secured by default which means that most of your end-points require your user to be authorized. You will need to paste this token in your SWAGGER UI to try out your end-points.
 
 - Click on the **Retrieve your jwt token** input to copy the token
 - Visit your documentation
-- Click on the **Authorize** button on right
-- Past you token in the `value` input
+- Click on the **Authorize** button on the right
+- Past your token in the `value` input
 
 ### Regenerate a documentation
 
-If you update you API, the documentation will not be updated automatically.
+If you update your API, the documentation will not be updated automatically.
 You will have to click on the **Regenerate** button of the documentation version you want to update.
-It will regenerated to specified version with your current application.
+It will regenerated to specified version with the current API documentation.
 
 ## Settings
 

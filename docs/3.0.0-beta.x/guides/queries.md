@@ -86,7 +86,7 @@ Creates an entry in the database and returns the entry.
 strapi.query('restaurant').create({
   name: 'restaurant name',
   // this is a group field. the order is persisted in db.
-  seo: [
+  opening_hours: [
     {
       day_interval: 'Mon',
       opening_hour: '7:00 PM',
@@ -118,7 +118,7 @@ strapi.query('restaurant').update(
   { id: 1 },
   {
     name: 'restaurant name',
-    seo: [
+    opening_hours: [
       {
         day_interval: 'Mon',
         opening_hour: '7:00 PM',
@@ -147,7 +147,7 @@ strapi.query('restaurant').update(
   { id: 1 },
   {
     name: 'Mytitle',
-    seo: [
+    opening_hours: [
       {
         id: 2,
         day_interval: 'Mon',
