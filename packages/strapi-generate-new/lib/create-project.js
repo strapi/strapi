@@ -93,6 +93,8 @@ module.exports = async function createProject(
     loader.stop();
     console.log(`Dependencies installed ${chalk.green('successfully')}.`);
   } catch (error) {
+    error.message = error.stderr;
+
     loader.stop();
     await trackUsage({
       event: 'didNotInstallProjectDependencies',
