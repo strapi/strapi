@@ -117,44 +117,42 @@ const ConfigPage = ({
       ];
 
   return (
-    <>
-      <form onSubmit={handleSubmit}>
-        <PluginHeader
-          description={{ id: getTrad(`form.${slug}.description`) }}
-          title={{ id: getTrad(`form.${slug}.name`) }}
-          actions={pluginHeaderActions}
-        />
-        <FormWrapper>
-          <div className="container">
-            {get(forms, slug, []).inputs.map((row, index) => {
-              return (
-                <div className="row" key={index}>
-                  {row.map((input, i) => {
-                    return (
-                      <Input
-                        {...input}
-                        autoFocus={index === 0 && i == 0}
-                        didCheckErrors={didCheckErrors}
-                        errors={get(errors, [input.name], [])}
-                        key={input.name}
-                        onChange={({ target: { name, value } }) => {
-                          dispatch({
-                            type: 'ON_CHANGE',
-                            keys: name,
-                            value,
-                          });
-                        }}
-                        value={get(modifiedData, [input.name], '')}
-                      />
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </div>
-        </FormWrapper>
-      </form>
-    </>
+    <form onSubmit={handleSubmit}>
+      <PluginHeader
+        description={{ id: getTrad(`form.${slug}.description`) }}
+        title={{ id: getTrad(`form.${slug}.name`) }}
+        actions={pluginHeaderActions}
+      />
+      <FormWrapper>
+        <div className="container">
+          {get(forms, slug, []).inputs.map((row, index) => {
+            return (
+              <div className="row" key={index}>
+                {row.map((input, i) => {
+                  return (
+                    <Input
+                      {...input}
+                      autoFocus={index === 0 && i == 0}
+                      didCheckErrors={didCheckErrors}
+                      errors={get(errors, [input.name], [])}
+                      key={input.name}
+                      onChange={({ target: { name, value } }) => {
+                        dispatch({
+                          type: 'ON_CHANGE',
+                          keys: name,
+                          value,
+                        });
+                      }}
+                      value={get(modifiedData, [input.name], '')}
+                    />
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+      </FormWrapper>
+    </form>
   );
 };
 

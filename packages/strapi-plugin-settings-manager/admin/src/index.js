@@ -1,7 +1,6 @@
 import React from 'react';
 import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
-// import App from './containers/App';
 import App from './containers/Main';
 import Initializer from './containers/Initializer';
 import lifecycles from './lifecycles';
@@ -28,12 +27,6 @@ const plugin = {
   mainComponent: Comp,
   name: pluginPkg.strapi.name,
   preventComponentRendering: false,
-  // suffixUrl: () => {
-  //   console.log('lll');
-  //   return '/application';
-  // },
-  suffixUrl: () => '/ctm-configurations/models',
-  suffixUrlToReplaceForLeftMenuHighlight: '/models',
   trads,
 };
 

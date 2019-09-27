@@ -88,7 +88,6 @@ const LanguagePage = () => {
     return <LoadingIndicatorPage />;
   }
 
-  // return null;
   const buttonProps = {
     kind: 'secondaryHotlineAdd',
     label: getTrad('list.languages.button.label'),

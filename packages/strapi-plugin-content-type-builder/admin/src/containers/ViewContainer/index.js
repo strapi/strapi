@@ -6,15 +6,12 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-
-// import StyledViewContainer from './StyledViewContainer';
-import LeftMenu from '../LeftMenu';
-
 import {
   PluginHeader,
   getQueryParameters,
   ViewContainer as StyledViewContainer,
 } from 'strapi-helper-plugin';
+import LeftMenu from '../LeftMenu';
 
 function ViewContainer({
   children,
