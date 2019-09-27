@@ -174,7 +174,8 @@ module.exports = {
       )
     );
 
-    return async (obj, options, { context }) => {
+    return async (obj, options, graphqlCtx) => {
+      const { context } = graphqlCtx;
       // Hack to be able to handle permissions for each query.
       const ctx = Object.assign(_.clone(context), {
         request: Object.assign(_.clone(context.request), {
@@ -234,7 +235,7 @@ module.exports = {
             : body;
         }
 
-        return resolver.call(null, obj, options, context);
+        return resolver.call(null, obj, options, graphqlCtx);
       }
 
       // Resolver can be a promise.

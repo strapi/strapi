@@ -80,7 +80,7 @@ Navigate to [**CONTENT TYPES** - **Categories**](http://localhost:1337/admin/plu
 - Click on **+ Add New Category** button. Type `French Food` in the **Category** field. Select `Biscotte Restaurant`, on the right, from **Restaurant (0)**
 - Click **Save**.
 
-You will see the **Convenient** category listed in the entries.
+You will see the **French Food** category listed in the entries.
 
 - Click on **+ Add New Category** button. Type `Brunch` in the **Category** field. **DO NOT ADD IT HERE** to `Biscotte Restaurant`.
 - Click **Save**.
