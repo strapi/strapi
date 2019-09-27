@@ -16,6 +16,10 @@ const URLs = {
   mode: 'host',
 };
 
+const imageInlineSizeLimit = parseInt(
+  process.env.IMAGE_INLINE_SIZE_LIMIT || '10000'
+);
+
 module.exports = ({
   entry,
   dest,
@@ -37,12 +41,15 @@ module.exports = ({
           filename: '[name].[chunkhash].css',
           chunkFilename: '[name].[chunkhash].chunkhash.css',
         }),
+        new WebpackBar(),
       ]
     : [
         new DuplicatePckgChecker({
           verbose: true,
         }),
-        new FriendlyErrorsWebpackPlugin(),
+        new FriendlyErrorsWebpackPlugin({
+          clearConsole: false,
+        }),
       ];
 
   const scssLoader = isProduction
@@ -194,27 +201,11 @@ module.exports = ({
         },
         {
           test: /\.(jpg|png|gif|ico)$/,
-          loaders: [
-            require.resolve('file-loader'),
-            {
-              loader: require.resolve('image-webpack-loader'),
-              query: {
-                mozjpeg: {
-                  progressive: true,
-                },
-                gifsicle: {
-                  interlaced: false,
-                },
-                optipng: {
-                  optimizationLevel: 4,
-                },
-                pngquant: {
-                  quality: '65-90',
-                  speed: 4,
-                },
-              },
-            },
-          ],
+          loader: require.resolve('url-loader'),
+          options: {
+            limit: imageInlineSizeLimit,
+            name: 'static/media/[name].[hash:8].[ext]',
+          },
         },
         {
           test: /\.html$/,
@@ -237,7 +228,6 @@ module.exports = ({
       mainFields: ['browser', 'jsnext:main', 'main'],
     },
     plugins: [
-      new WebpackBar(),
       new HtmlWebpackPlugin({
         inject: true,
         template: path.resolve(__dirname, 'index.html'),
