@@ -12,8 +12,19 @@ Here are the core methods (and their current implementation).
 You can simply copy and paste this code in your own controller file to customize the methods.
 
 ::: warning
-In the following example we will consider your controller, service and model is named `product`
+In the following example we will consider your controller, service and model is named `restaurant`
 :::
+
+#### Utils
+
+First require the utility functions
+
+```js
+const { parseMultipartData, sanitizeEntity } = require('strapi-utils');
+```
+
+- `parseMultipartData`: This function parses strapi's formData format.
+- `sanitizeEntity`: This function removes all private fields from the model and its relations.
 
 #### `find`
 
@@ -25,11 +36,15 @@ module.exports = {
    * @return {Array}
    */
 
-  find(ctx) {
+  async find(ctx) {
+    let entities;
     if (ctx.query._q) {
-      return strapi.services.product.search(ctx.query);
+      entities = await service.search(ctx.query);
+    } else {
+      entities = await service.find(ctx.query);
     }
-    return strapi.services.product.find(ctx.query);
+
+    return entities.map(entity => sanitizeEntity(entity, { model }));
   },
 };
 ```
@@ -44,8 +59,9 @@ module.exports = {
    * @return {Object}
    */
 
-  findOne(ctx) {
-    return strapi.services.product.findOne(ctx.params);
+  async findOne(ctx) {
+    const entity = await service.findOne(ctx.params);
+    return sanitizeEntity(entity, { model });
   },
 };
 ```
@@ -62,9 +78,9 @@ module.exports = {
 
   count(ctx) {
     if (ctx.query._q) {
-      return strapi.services.product.countSearch(ctx.query);
+      return service.countSearch(ctx.query);
     }
-    return strapi.services.product.count(ctx.query);
+    return service.count(ctx.query);
   },
 };
 ```
@@ -79,14 +95,15 @@ module.exports = {
    * @return {Object}
    */
 
-  create(ctx) {
+  async create(ctx) {
+    let entity;
     if (ctx.is('multipart')) {
-      // Parses strapi's formData format
-      const { data, files } = this.parseMultipartData(ctx);
-      return service.create(data, { files });
+      const { data, files } = parseMultipartData(ctx);
+      entity = await service.create(data, { files });
+    } else {
+      entity = await service.create(ctx.request.body);
     }
-
-    return service.create(ctx.request.body);
+    return sanitizeEntity(entity, { model });
   },
 };
 ```
@@ -101,14 +118,16 @@ module.exports = {
    * @return {Object}
    */
 
-  update(ctx) {
+  async update(ctx) {
+    let entity;
     if (ctx.is('multipart')) {
-      // Parses strapi's formData format
-      const { data, files } = this.parseMultipartData(ctx);
-      return service.update(ctx.params, data, { files });
+      const { data, files } = parseMultipartData(ctx);
+      entity = await service.update(ctx.params, data, { files });
+    } else {
+      entity = await service.update(ctx.params, ctx.request.body);
     }
 
-    return service.update(ctx.params, ctx.request.body);
+    return sanitizeEntity(entity, { model });
   },
 };
 ```
@@ -123,8 +142,9 @@ module.exports = {
    * @return {Object}
    */
 
-  delete(ctx) {
-    return strapi.services.product.delete(ctx.params);
+  async delete(ctx) {
+    const entity = await service.delete(ctx.params);
+    return sanitizeEntity(entity, { model });
   },
 };
 ```
@@ -137,7 +157,7 @@ You can also create custom controllers to build your own business logic and API 
 
 There are two ways to create a controller:
 
-- Using the CLI `strapi generate:controller product`. Read the [CLI documentation](../cli/CLI.md#strapi-generatecontroller) for more information.
+- Using the CLI `strapi generate:controller restaurant`. Read the [CLI documentation](../cli/CLI.md#strapi-generatecontroller) for more information.
 - Manually create a JavaScript file in `./api/**/controllers`.
 
 ### Adding Endpoints

@@ -6,7 +6,7 @@ import Initializer from '../index';
 describe('<Initializer />', () => {
   it('renders without crashing', () => {
     const props = {
-      admin: {
+      global: {
         autoReload: true,
         currentEnvironment: 'development',
       },
@@ -21,7 +21,7 @@ describe('<Initializer />', () => {
   it('should call the updatePlugin props to emit the event isReady with not prevent the component from being rendererd', () => {
     const updatePlugin = jest.fn();
     const props = {
-      admin: {
+      global: {
         autoReload: true,
         currentEnvironment: 'development',
       },
@@ -40,21 +40,26 @@ describe('<Initializer />', () => {
       1,
       'content-type-builder',
       'preventComponentRendering',
-      false,
+      false
     );
     expect(updatePlugin).toHaveBeenNthCalledWith(
       2,
       'content-type-builder',
       'blockerComponentProps',
-      blockerComponentProps,
+      blockerComponentProps
     );
-    expect(updatePlugin).toHaveBeenNthCalledWith(3, 'content-type-builder', 'isReady', true);
+    expect(updatePlugin).toHaveBeenNthCalledWith(
+      3,
+      'content-type-builder',
+      'isReady',
+      true
+    );
   });
 
   it('should call the updatePlugin props to emit the event isReady with prevent the component from being rendererd if the autoReaload is disabled', () => {
     const updatePlugin = jest.fn();
     const props = {
-      admin: {
+      global: {
         autoReload: false,
         currentEnvironment: 'development',
       },
@@ -73,21 +78,26 @@ describe('<Initializer />', () => {
       1,
       'content-type-builder',
       'preventComponentRendering',
-      true,
+      true
     );
     expect(updatePlugin).toHaveBeenNthCalledWith(
       2,
       'content-type-builder',
       'blockerComponentProps',
-      blockerComponentProps,
+      blockerComponentProps
     );
-    expect(updatePlugin).toHaveBeenNthCalledWith(3, 'content-type-builder', 'isReady', true);
+    expect(updatePlugin).toHaveBeenNthCalledWith(
+      3,
+      'content-type-builder',
+      'isReady',
+      true
+    );
   });
 
   it('should call the updatePlugin props to emit the event isReady with prevent the component from being rendererd if in PRODUCTION', () => {
     const updatePlugin = jest.fn();
     const props = {
-      admin: {
+      global: {
         autoReload: true,
         currentEnvironment: 'production',
       },
@@ -106,14 +116,19 @@ describe('<Initializer />', () => {
       1,
       'content-type-builder',
       'preventComponentRendering',
-      true,
+      true
     );
     expect(updatePlugin).toHaveBeenNthCalledWith(
       2,
       'content-type-builder',
       'blockerComponentProps',
-      blockerComponentProps,
+      blockerComponentProps
     );
-    expect(updatePlugin).toHaveBeenNthCalledWith(3, 'content-type-builder', 'isReady', true);
+    expect(updatePlugin).toHaveBeenNthCalledWith(
+      3,
+      'content-type-builder',
+      'isReady',
+      true
+    );
   });
 });

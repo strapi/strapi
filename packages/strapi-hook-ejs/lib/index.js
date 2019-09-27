@@ -9,7 +9,7 @@ const path = require('path');
 
 // Externals
 const co = require('co');
-const render = require('koa-ejs'); // eslint-disable-line import/no-unresolved
+const render = require('koa-ejs');
 
 /**
  * EJS hook
@@ -33,13 +33,13 @@ module.exports = function(strapi) {
      * Initialize the hook
      */
 
-    initialize: () => {
+    initialize () {
       // Force cache mode in production
       if (strapi.config.environment === 'production') {
         strapi.config.hook.settings.ejs.cache = true;
       }
 
-      render(strapi.app, strapi.config.hook.settings.ejs);
+      render(strapi.app, Object.assign(this.defaults, strapi.config.hook.settings.ejs));
 
       strapi.app.context.render = co.wrap(strapi.app.context.render);
     },

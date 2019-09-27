@@ -11,6 +11,9 @@ const crypto = require('crypto');
 const _ = require('lodash');
 
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+const formatError = error => [
+  { messages: [{ id: error.id, message: error.message, field: error.field }] },
+];
 
 module.exports = {
   async callback(ctx) {
@@ -20,9 +23,10 @@ module.exports = {
     if (!params.identifier) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.email.provide' }] }]
-          : 'Please provide your username or your e-mail.'
+        formatError({
+          id: 'Auth.form.error.email.provide',
+          message: 'Please provide your username or your e-mail.',
+        })
       );
     }
 
@@ -30,9 +34,10 @@ module.exports = {
     if (!params.password) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.password.provide' }] }]
-          : 'Please provide your password.'
+        formatError({
+          id: 'Auth.form.error.password.provide',
+          message: 'Please provide your password.',
+        })
       );
     }
 
@@ -54,18 +59,20 @@ module.exports = {
     if (!admin) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }]
-          : 'Identifier or password invalid.'
+        formatError({
+          id: 'Auth.form.error.invalid',
+          message: 'Identifier or password invalid.',
+        })
       );
     }
 
     if (admin.blocked === true) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.blocked' }] }]
-          : 'Your account has been blocked by the administrator.'
+        formatError({
+          id: 'Auth.form.error.blocked',
+          message: 'Your account has been blocked by the administrator.',
+        })
       );
     }
 
@@ -77,9 +84,10 @@ module.exports = {
     if (!validPassword) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }]
-          : 'Identifier or password invalid.'
+        formatError({
+          id: 'Auth.form.error.invalid',
+          message: 'Identifier or password invalid.',
+        })
       );
     } else {
       admin.isAdmin = true;
@@ -98,9 +106,10 @@ module.exports = {
     if (!params.username) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.username.provide' }] }]
-          : 'Please provide your username.'
+        formatError({
+          id: 'Auth.form.error.username.provide',
+          message: 'Please provide your username.',
+        })
       );
     }
 
@@ -108,9 +117,10 @@ module.exports = {
     if (!params.email) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.email.provide' }] }]
-          : 'Please provide your email.'
+        formatError({
+          id: 'Auth.form.error.email.provide',
+          message: 'Please provide your email.',
+        })
       );
     }
 
@@ -127,9 +137,10 @@ module.exports = {
     if (!params.password) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.password.provide' }] }]
-          : 'Please provide your password.'
+        formatError({
+          id: 'Auth.form.error.password.provide',
+          message: 'Please provide your password.',
+        })
       );
     }
 
@@ -141,9 +152,10 @@ module.exports = {
     if (admins.length > 0) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.admin.exist' }] }]
-          : "You can't register a new admin."
+        formatError({
+          id: 'Auth.form.error.admin.exist',
+          message: "You can't register a new admin",
+        })
       );
     }
 
@@ -158,9 +170,10 @@ module.exports = {
     if (admin) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.email.taken' }] }]
-          : 'Email is already taken.'
+        formatError({
+          id: 'Auth.form.error.email.taken',
+          message: 'Email is already taken',
+        })
       );
     }
 
@@ -180,13 +193,13 @@ module.exports = {
     } catch (err) {
       strapi.log.error(err);
       const adminError = _.includes(err.message, 'username')
-        ? 'Auth.form.error.username.taken'
-        : 'Auth.form.error.email.taken';
+        ? {
+            id: 'Auth.form.error.username.taken',
+            message: 'Username already taken',
+          }
+        : { id: 'Auth.form.error.email.taken', message: 'Email already taken' };
 
-      ctx.badRequest(
-        null,
-        ctx.request.admin ? [{ messages: [{ id: adminError }] }] : err.message
-      );
+      ctx.badRequest(null, formatError(adminError));
     }
   },
 
@@ -196,17 +209,42 @@ module.exports = {
       ...ctx.params,
     };
 
-    if (!password) return ctx.badRequest('Missing password');
-    if (!passwordConfirmation)
-      return ctx.badRequest('Missing passwordConfirmation');
-    if (!code) return ctx.badRequest('Missing code');
+    if (!password) {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'missing.password',
+          message: 'Missing password',
+        })
+      );
+    }
+
+    if (!passwordConfirmation) {
+      return ctx.badRequest(
+        formatError({
+          id: 'missing.passwordConfirmation',
+          message: 'Missing passwordConfirmation',
+        })
+      );
+    }
+
+    if (!code) {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'missing.code',
+          message: 'Missing code',
+        })
+      );
+    }
 
     if (password !== passwordConfirmation) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.password.matching' }] }]
-          : 'Passwords do not match.'
+        formatError({
+          id: 'Auth.form.error.password.matching',
+          message: 'Passwords do not match.',
+        })
       );
     }
 
@@ -217,9 +255,10 @@ module.exports = {
     if (!admin) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.code.provide' }] }]
-          : 'Incorrect code provided.'
+        formatError({
+          id: 'Auth.form.error.code.provide',
+          message: 'Incorrect code provided.',
+        })
       );
     }
 
@@ -241,8 +280,24 @@ module.exports = {
   async forgotPassword(ctx) {
     const { email, url } = ctx.request.body;
 
-    if (!email) return ctx.badRequest('Missing email');
-    if (!url) return ctx.badRequest('Missing url');
+    if (!email) {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'missing.email',
+          message: 'Missing email',
+        })
+      );
+    }
+    if (!url) {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'missing.url',
+          message: 'Missing url',
+        })
+      );
+    }
 
     // Find the admin thanks to his email.
     const admin = await strapi
@@ -253,9 +308,10 @@ module.exports = {
     if (!admin) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.user.not-exist' }] }]
-          : 'This email does not exist.'
+        formatError({
+          id: 'Auth.form.error.user.not-exist',
+          message: 'This email does not exit',
+        })
       );
     }
 
