@@ -1,6 +1,6 @@
 # GraphQL
 
-::: warning
+::: note
 This feature requires the GraphQL plugin (not installed by default).
 :::
 
@@ -8,9 +8,33 @@ This feature requires the GraphQL plugin (not installed by default).
 
 To get started with GraphQL in your app, please install the plugin first. To do that, open your terminal and run the following command:
 
+:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+
+::: tab "yarn" id="yarn"
+
 ```
-strapi install graphql
+yarn strapi install graphql
 ```
+
+:::
+
+::: tab "npm" id="npm"
+
+```
+npm run strapi install graphql
+```
+
+:::
+
+::: tab "strapi" id="strapi"
+
+```
+strapi install documentation
+```
+
+:::
+
+::::
 
 Then, start your app and open your browser at [http://localhost:1337/graphql](http://localhost:1337/graphql). You should see the interface (GraphQL Playground) that will help you to write GraphQL query to explore your data.
 
@@ -45,7 +69,7 @@ You can edit these configurations by creating following file.
 
 In the section, we assume that the [Shadow CRUD](#shadow-crud) feature is enabled. For each model, the plugin auto-generates queries and mutations which just fit to your needs.
 
-##### Fetch a single entry
+#### Fetch a single entry
 
 - `id`: String
 
@@ -58,7 +82,7 @@ query {
 }
 ```
 
-##### Fetch multiple entries
+#### Fetch multiple entries
 
 ```
 query {
@@ -69,7 +93,7 @@ query {
 }
 ```
 
-##### Create a new entry
+#### Create a new entry
 
 - `input`: Object
   - `data`: Object — Values to insert
@@ -114,7 +138,7 @@ mutation {
 }
 ```
 
-##### Update an existing entry
+#### Update an existing entry
 
 - `input`: Object
   - `where`: Object - Entry's ID to update
@@ -161,7 +185,7 @@ mutation {
 }
 ```
 
-##### Delete an entry
+#### Delete an entry
 
 - `input`: Object
   - `where`: Object - Entry's ID to delete
@@ -181,7 +205,7 @@ mutation {
 }
 ```
 
-**Filters**
+### Filters
 
 You can also apply different parameters to the query to make more complex queries.
 
@@ -235,7 +259,7 @@ query {
 
 To simplify and automate the build of the GraphQL schema, we introduced the Shadow CRUD feature. It automatically generates the type definition, queries, mutations and resolvers based on your models. The feature also lets you make complex query with many arguments such as `limit`, `sort`, `start` and `where`.
 
-#### Example
+### Example
 
 If you've generated an API called `Post` using the CLI `strapi generate:api post` or the administration panel, your model looks like this:
 
@@ -465,7 +489,7 @@ module.exports = {
   - `Query` (object): lets you define custom resolver, policies for a query.
   - `Mutation` (object): lets you define custom resolver, policies for a mutation.
 
-#### Example
+### Example
 
 Let say we are using the same previous `Post` model.
 

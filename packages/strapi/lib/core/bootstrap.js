@@ -77,7 +77,7 @@ module.exports = function(strapi) {
       );
 
       const controller = Object.assign(
-        createController({ service }),
+        createController({ service, model }),
         userController,
         { identity: userController.identity || _.upperFirst(index) }
       );
@@ -209,10 +209,6 @@ module.exports = function(strapi) {
     boom: {
       enabled: true,
     },
-    mask: {
-      enabled: true,
-    },
-    // Necessary middlewares for the administration panel.
     cors: {
       enabled: true,
     },
