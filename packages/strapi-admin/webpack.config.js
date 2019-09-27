@@ -219,6 +219,17 @@ module.exports = ({
             limit: 10000,
           },
         },
+        {
+          loader: require.resolve('file-loader'),
+          // Exclude `js` files to keep "css" loader working as it injects
+          // its runtime that would otherwise be processed through "file" loader.
+          // Also exclude `html` and `json` extensions so they get processed
+          // by webpacks internal loaders.
+          exclude: [/\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.json$/],
+          options: {
+            name: 'static/media/[name].[hash:8].[ext]',
+          },
+        },
       ],
     },
     resolve: {
