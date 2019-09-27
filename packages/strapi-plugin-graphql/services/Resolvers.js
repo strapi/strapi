@@ -172,9 +172,7 @@ const buildAssocResolvers = (model, name, { plugin }) => {
               _.set(
                 queryOpts,
                 ['query', ref.primaryKey],
-                obj[association.alias].map(val => val[ref.primaryKey] || val) ||
-                  []
-              );
+                (obj[association.alias] ? obj[association.alias].map(val => val[ref.primaryKey] || val) : []));
             } else {
               _.set(queryOpts, ['query', association.via], obj[ref.primaryKey]);
             }

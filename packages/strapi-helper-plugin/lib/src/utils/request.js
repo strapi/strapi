@@ -135,10 +135,7 @@ export default function request(...args) {
       {
         'Content-Type': 'application/json',
       },
-      options.headers,
-      {
-        'X-Forwarded-Host': 'strapi',
-      }
+      options.headers
     );
   }
 

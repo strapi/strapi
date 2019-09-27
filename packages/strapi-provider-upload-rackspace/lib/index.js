@@ -4,7 +4,6 @@
  * Module dependencies
  */
 
-/* eslint-disable import/no-unresolved */
 // Public node modules.
 const pkgcloud = require('pkgcloud');
 const streamifier = require('streamifier');

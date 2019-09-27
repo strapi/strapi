@@ -134,6 +134,9 @@ function EditView({
       }
     };
 
+    // Force state to be cleared when navigation from one entry to another
+    dispatch({ type: 'RESET_PROPS' });
+
     if (!isCreatingEntry) {
       fetchData();
     } else {
@@ -262,7 +265,7 @@ function EditView({
       });
 
       // Change the request helper default headers so we can pass a FormData
-      const headers = { 'X-Forwarded-Host': 'strapi' };
+      const headers = {};
       const method = isCreatingEntry ? 'POST' : 'PUT';
       const endPoint = isCreatingEntry ? slug : `${slug}/${id}`;
 
