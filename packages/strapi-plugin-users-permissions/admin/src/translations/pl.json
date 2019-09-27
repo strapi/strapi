@@ -81,6 +81,7 @@
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "Adres przekierowania do dodania w aplikacji Facebook",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "Adres przekierowania do dodania w aplikacji GitHub",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "Adres przekierowania do dodania w aplikacji Google",
+  "PopUpForm.Providers.instagram.providerConfig.redirectURL": "Adres przekierowania do dodania w aplikacji Instagram",
   "PopUpForm.Providers.key.label": "ID klienta",
   "PopUpForm.Providers.key.placeholder": "TEKST",
   "PopUpForm.Providers.discord.providerConfig.redirectURL": "Adres przekierowania do dodania w aplikacji Discord",

@@ -9,11 +9,11 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
 import styles from './styles.scss';
-/* eslint-disable jsx-a11y/label-has-for */
+
 const WysiwygBottomControls = ({ isPreviewMode, onChange, onClick }) => {
   const browse = (
     <FormattedMessage id="components.WysiwygBottomControls.uploadFiles.browse">
-      {(message) => <span className={styles.underline}>{message}</span>}
+      {message => <span className={styles.underline}>{message}</span>}
     </FormattedMessage>
   );
 
@@ -22,7 +22,7 @@ const WysiwygBottomControls = ({ isPreviewMode, onChange, onClick }) => {
       <div>
         <label
           className={styles.dropLabel}
-          onClick={(e) => {
+          onClick={e => {
             if (isPreviewMode) {
               e.preventDefault();
             }

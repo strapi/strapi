@@ -159,6 +159,12 @@ module.exports = () => {
 };
 ```
 
+**No Function**
+
+```js
+module.exports = () => {};
+```
+
 ### Custom hooks
 
 If you have custom [hooks](../advanced/hooks.md) in your project, the `initialize` function will not receive a callback anymore. You can either use an async function, return a promise or simply run a synchronous function.

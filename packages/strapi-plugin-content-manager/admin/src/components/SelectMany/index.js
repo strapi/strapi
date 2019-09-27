@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
 import { useDrop } from 'react-dnd';
 
-import Select from 'react-select';
+import Select, { createFilter } from 'react-select';
 import ItemTypes from '../../utils/ItemTypes';
 
 import { ListShadow, ListWrapper } from './components';
@@ -48,17 +48,32 @@ function SelectMany({
     [value]
   );
 
+  const filterConfig = {
+    ignoreCase: true,
+    ignoreAccents: true,
+    trim: false,
+    matchFrom: 'any',
+  };
+
   return (
     <>
       <Select
         isDisabled={isDisabled}
         id={name}
-        filterOption={el => {
-          if (isEmpty(value)) {
-            return true;
+        filterOption={(candidate, input) => {
+          if (!isEmpty(value)) {
+            const isSelected =
+              value.findIndex(item => item.id === candidate.value.id) !== -1;
+            if (isSelected) {
+              return false;
+            }
           }
 
-          return value.findIndex(obj => obj.id === el.value.id) === -1;
+          if (input) {
+            return createFilter(filterConfig)(candidate, input);
+          }
+
+          return true;
         }}
         isLoading={isLoading}
         isMulti

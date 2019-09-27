@@ -51,12 +51,6 @@ const Label = styled.label`
   ${({ showLoader }) => {
     if (showLoader) {
       return css`
-        -webkit-animation: ${smoothBlink('transparent', 'rgba(28,93,231,0.05)')}
-          2s linear infinite;
-        -moz-animation: ${smoothBlink('transparent', 'rgba(28,93,231,0.05)')} 2s
-          linear infinite;
-        -o-animation: ${smoothBlink('transparent', 'rgba(28,93,231,0.05)')} 2s
-          linear infinite;
         animation: ${smoothBlink('transparent', 'rgba(28,93,231,0.05)')} 2s
           linear infinite;
       `;

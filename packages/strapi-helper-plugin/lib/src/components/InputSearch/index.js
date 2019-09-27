@@ -12,71 +12,84 @@ import cn from 'classnames';
 
 import styles from './styles.scss';
 
-/* eslint-disable jsx-a11y/no-autofocus */
 class InputSearch extends React.Component {
- state = { isFocused: false };
+  state = { isFocused: false };
 
- handleBlur = (e) => {
-   this.setState({ isFocused: !this.state.isFocused });
-   this.props.onBlur(e);
- }
+  handleBlur = e => {
+    this.setState({ isFocused: !this.state.isFocused });
+    this.props.onBlur(e);
+  };
 
- handleFocus = (e) => {
-   this.setState({ isFocused: !this.state.isFocused });
-   this.props.onFocus(e);
- }
+  handleFocus = e => {
+    this.setState({ isFocused: !this.state.isFocused });
+    this.props.onFocus(e);
+  };
 
- render() {
-   const {
-     autoFocus,
-     className,
-     deactivateErrorHighlight,
-     disabled,
-     error,
-     name,
-     onChange,
-     placeholder,
-     style,
-     tabIndex,
-     value,
-   } = this.props;
-   const formattedPlaceholder = placeholder === '' ? 'app.utils.placeholder.defaultMessage' : placeholder;
+  render() {
+    const {
+      autoFocus,
+      className,
+      deactivateErrorHighlight,
+      disabled,
+      error,
+      name,
+      onChange,
+      placeholder,
+      style,
+      tabIndex,
+      value,
+    } = this.props;
+    const formattedPlaceholder =
+      placeholder === '' ? 'app.utils.placeholder.defaultMessage' : placeholder;
 
-   return (
-     <div className={cn(styles.inputSearch, 'input-group', !isEmpty(className) && className)} style={style}>
-       <span
-         className={cn(
-           'input-group-addon',
-           styles.addonSearch,
-           this.state.isFocused && styles.addonFocus,
-           !deactivateErrorHighlight && error && styles.errorAddon,
-         )}
-       />
-       <FormattedMessage id={formattedPlaceholder} defaultMessage={formattedPlaceholder}>
-         {(message) => (
-           <input
-             autoFocus={autoFocus}
-             className={cn(
-               'form-control',
-               !deactivateErrorHighlight && error && 'is-invalid',
-               !deactivateErrorHighlight && error && this.state.isFocused && styles.invalidSearch,
-             )}
-             disabled={disabled}
-             id={name}
-             name={name}
-             onBlur={this.handleBlur}
-             onChange={onChange}
-             onFocus={this.handleFocus}
-             placeholder={message}
-             tabIndex={tabIndex}
-             type="text"
-             value={value}
-           />
-         )}
-       </FormattedMessage>
-     </div>
-   );
- }
+    return (
+      <div
+        className={cn(
+          styles.inputSearch,
+          'input-group',
+          !isEmpty(className) && className
+        )}
+        style={style}
+      >
+        <span
+          className={cn(
+            'input-group-addon',
+            styles.addonSearch,
+            this.state.isFocused && styles.addonFocus,
+            !deactivateErrorHighlight && error && styles.errorAddon
+          )}
+        />
+        <FormattedMessage
+          id={formattedPlaceholder}
+          defaultMessage={formattedPlaceholder}
+        >
+          {message => (
+            <input
+              autoFocus={autoFocus}
+              className={cn(
+                'form-control',
+                !deactivateErrorHighlight && error && 'is-invalid',
+                !deactivateErrorHighlight &&
+                  error &&
+                  this.state.isFocused &&
+                  styles.invalidSearch
+              )}
+              disabled={disabled}
+              id={name}
+              name={name}
+              onBlur={this.handleBlur}
+              onChange={onChange}
+              onFocus={this.handleFocus}
+              placeholder={message}
+              tabIndex={tabIndex}
+              type="text"
+              value={value}
+            />
+          )}
+        </FormattedMessage>
+      </div>
+    );
+  }
 }
 
 InputSearch.defaultProps = {

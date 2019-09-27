@@ -6,16 +6,21 @@ import cn from 'classnames';
 
 import styles from './styles.scss';
 
-/* eslint-disable jsx-a11y/label-has-for */
 function Label(props) {
   let content = props.children;
 
-  if (typeof(props.message) === 'string') {
+  if (typeof props.message === 'string') {
     content = props.message;
   }
 
   if (isObject(props.message) && props.message.id) {
-    content = <FormattedMessage id={props.message.id} defaultMessage={props.message.id} values={props.message.params} />;
+    content = (
+      <FormattedMessage
+        id={props.message.id}
+        defaultMessage={props.message.id}
+        values={props.message.params}
+      />
+    );
   }
 
   if (isFunction(props.message)) {

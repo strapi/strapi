@@ -172,8 +172,11 @@ const buildAssocResolvers = (model, name, { plugin }) => {
               _.set(
                 queryOpts,
                 ['query', ref.primaryKey],
-                obj[association.alias].map(val => val[ref.primaryKey] || val) ||
-                  []
+                obj[association.alias]
+                  ? obj[association.alias].map(
+                      val => val[ref.primaryKey] || val
+                    )
+                  : []
               );
             } else {
               _.set(queryOpts, ['query', association.via], obj[ref.primaryKey]);
@@ -326,11 +329,21 @@ const buildShadowCRUD = (models, plugin) => {
     const queries = {
       singular:
         _.get(resolver, `Query.${singularName}`) !== false
-          ? Query.composeQueryResolver(_schema, plugin, name, true)
+          ? Query.composeQueryResolver({
+              _schema,
+              plugin,
+              name,
+              isSingular: true,
+            })
           : null,
       plural:
         _.get(resolver, `Query.${pluralName}`) !== false
-          ? Query.composeQueryResolver(_schema, plugin, name, false)
+          ? Query.composeQueryResolver({
+              _schema,
+              plugin,
+              name,
+              isSingular: false,
+            })
           : null,
     };
 
@@ -376,15 +389,30 @@ const buildShadowCRUD = (models, plugin) => {
     const mutations = {
       create:
         _.get(resolver, `Mutation.create${capitalizedName}`) !== false
-          ? Mutation.composeMutationResolver(_schema, plugin, name, 'create')
+          ? Mutation.composeMutationResolver({
+              _schema,
+              plugin,
+              name,
+              action: 'create',
+            })
           : null,
       update:
         _.get(resolver, `Mutation.update${capitalizedName}`) !== false
-          ? Mutation.composeMutationResolver(_schema, plugin, name, 'update')
+          ? Mutation.composeMutationResolver({
+              _schema,
+              plugin,
+              name,
+              action: 'update',
+            })
           : null,
       delete:
         _.get(resolver, `Mutation.delete${capitalizedName}`) !== false
-          ? Mutation.composeMutationResolver(_schema, plugin, name, 'delete')
+          ? Mutation.composeMutationResolver({
+              _schema,
+              plugin,
+              name,
+              action: 'delete',
+            })
           : null,
     };
 

@@ -5,7 +5,6 @@
  */
 
 // Public node modules.
-/* eslint-disable import/no-unresolved */
 /* eslint-disable prefer-template */
 const cloudinary = require('cloudinary').v2;
 const intoStream = require('into-stream');
@@ -46,7 +45,7 @@ module.exports = {
               file.public_id = image.public_id;
               file.url = image.secure_url;
               resolve();
-            },
+            }
           );
           intoStream(file.buffer).pipe(upload_stream);
         });

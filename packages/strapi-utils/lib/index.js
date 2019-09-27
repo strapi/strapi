@@ -6,6 +6,8 @@
 
 const convertRestQueryParams = require('./convertRestQueryParams');
 const buildQuery = require('./buildQuery');
+const parseMultipartData = require('./parse-multipart');
+const sanitizeEntity = require('./sanitize-entity');
 
 module.exports = {
   cli: require('./cli'),
@@ -21,4 +23,6 @@ module.exports = {
   templateConfiguration: require('./templateConfiguration'),
   convertRestQueryParams,
   buildQuery,
+  parseMultipartData,
+  sanitizeEntity,
 };

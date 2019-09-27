@@ -76,6 +76,7 @@
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "Facebook 애플리케이션 구성에 추가 할 리다이렉트 URL",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "Github 애플리케이션 구성에 추가 할 리다이렉트 URL",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "Google 애플리케이션 구성에 추가 할 리다이렉트 URL",
+  "PopUpForm.Providers.instagram.providerConfig.redirectURL": "Instagram 애플리케이션 구성에 추가 할 리다이렉트 URL",
   "PopUpForm.Providers.key.label": "클라이언트 ID(Client ID)",
   "PopUpForm.Providers.key.placeholder": "텍스트",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "Linkedin",

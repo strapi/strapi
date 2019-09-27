@@ -9,9 +9,8 @@ import { isEmpty } from 'lodash';
 
 import styles from './styles.scss';
 
-/* eslint-disable jsx-a11y/no-autofocus */
 class InputToggle extends React.Component {
-  handleClick = (e) => {
+  handleClick = e => {
     const target = {
       name: this.props.name,
       type: 'toggle',
@@ -19,7 +18,7 @@ class InputToggle extends React.Component {
     };
 
     this.props.onChange({ target });
-  }
+  };
 
   render() {
     const {
@@ -40,7 +39,7 @@ class InputToggle extends React.Component {
           'btn-group',
           styles.inputToggleContainer,
           !isEmpty(className) && className,
-          !deactivateErrorHighlight && error && styles.error,
+          !deactivateErrorHighlight && error && styles.error
         )}
         style={style}
       >
