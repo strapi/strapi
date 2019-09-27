@@ -217,6 +217,9 @@ packages/strapi-plugin-users-permissions/admin/src/components/PopUpForm/index.js
 packages/strapi-plugin-users-permissions/admin/src/translations/en.json
 ```
 
+**Note:** if your provider is not one of the providers already supported by [Grant](https://www.npmjs.com/package/grant#grant), also add your config to 
+```node_modules/grant/config/oauth.json```
+
 We will go step by step.
 
 ### Configure your Provider Request
