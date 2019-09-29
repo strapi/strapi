@@ -46,6 +46,8 @@ module.exports = async ({
           case 'pg': {
             // Enable extension to allow GIN indexes.
             await ORM.knex.raw('CREATE EXTENSION IF NOT EXISTS pg_trgm');
+            // Enable extension to allow UUID indexes.
+            await ORM.knex.raw('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
 
             // Create GIN indexes for every column.
             const indexes = columns.map(column => {
