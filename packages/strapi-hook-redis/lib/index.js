@@ -7,7 +7,6 @@
 // Core
 const util = require('util');
 /* eslint-disable prefer-template */
-/* eslint-disable import/no-unresolved */
 
 // Public node modules.
 const _ = require('lodash');

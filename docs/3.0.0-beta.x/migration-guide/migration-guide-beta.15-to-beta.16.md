@@ -32,7 +32,7 @@ Then run either `yarn install` or `npm install`.
 
 ## Building your administration panel
 
-This new release introduces changes to the administration panel than require rebuild it.
+This new release introduces changes to the administration panel that require a rebuild.
 
 Start by deleting your current build:
 
@@ -52,9 +52,9 @@ npm run build
 
 ### Wysiwyg
 
-Wysiwyg was previously an option of the `text` type that was stored in the database. When deploying to production for the first time you had to select again the option in the interface.
+Wysiwyg was previously an option of the `text` type that was stored in the database. When deploying to production for the first time you had to re-select the option in the interface.
 
-To improve make sure a field stays the same when deploying we introduced the `richtext` type. This type is equivalent to the previous `text` type with `wysiwyg` option enabled.
+To make sure a Wysiwyg field stays the same when deploying, we introduced the `richtext` type. This type is equivalent to the previous `text` type with `wysiwyg` option enabled.
 
 **Before**:
 
@@ -119,7 +119,7 @@ Keep in mind that if you are running custom ORM queries with Bookshelf or Mongoo
 
 ### Bootstrap function
 
-The function exported in `config/functions/bootstrap.js` previsouly received a callback. This is not the case anymore. You can either use an async function, return a promise or simply run a synchronous function.
+The function exported in `config/functions/bootstrap.js` previously received a callback. This is not the case anymore. You can either use an async function, return a promise or simply run a synchronous function.
 
 **Before**
 
@@ -157,6 +157,12 @@ module.exports = () => {
 module.exports = () => {
   someSyncCode();
 };
+```
+
+**No Function**
+
+```js
+module.exports = () => {};
 ```
 
 ### Custom hooks

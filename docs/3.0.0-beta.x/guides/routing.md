@@ -7,23 +7,24 @@ See the [routing's concept](../concepts/concepts.md#routing) for details.
 You have to edit the `routes.json` file in one of your APIs folders (`./api/**/config/routes.json`) and manually add a new route object into the `routes` array.
 
 **Path —** `./api/**/config/routes.json`.
+
 ```json
 {
   "routes": [
     {
       "method": "GET",
-      "path": "/products",
-      "handler": "Product.find",
+      "path": "/restaurants",
+      "handler": "Restaurant.find"
     },
     {
       "method": ["POST", "PUT"],
-      "path": "/products/:id",
-      "handler": "Product.createOrUpdate",
+      "path": "/restaurants/:id",
+      "handler": "Restaurant.createOrUpdate"
     },
     {
       "method": "POST",
-      "path": "/products/:id/buy",
-      "handler": "Product.buy",
+      "path": "/restaurants/:id/reservation",
+      "handler": "Restaurant.reservation",
       "config": {
         "policies": ["isAuthenticated", "hasCreditCard"]
       }
@@ -33,7 +34,7 @@ You have to edit the `routes.json` file in one of your APIs folders (`./api/**/c
 ```
 
 - `method` (string): Method or array of methods to hit the route (ex: `GET`, `POST`, `PUT`, `HEAD`, `DELETE`, `PATCH`)
-- `path` (string): URL starting with `/` (ex: `/products`)
+- `path` (string): URL starting with `/` (ex: `/restaurants`)
 - `handler` (string): Action to executed when the route is hit following this syntax `<Controller>.<action>`
 - `config`
   - `policies` (array): Array of policies names or path ([see more](../guides/policies.md))
@@ -48,13 +49,13 @@ The router used by Strapi allows you to create dynamic routes where you can use 
   "routes": [
     {
       "method": "GET",
-      "path": "/products/:category/:id",
-      "handler": "Product.findOneByCategory",
+      "path": "/restaurants/:category/:id",
+      "handler": "Restaurant.findOneByCategory"
     },
     {
       "method": "GET",
-      "path": "/products/:region(\\d{2}|\\d{3})/:id", // Only match when the first parameter contains 2 or 3 digits.
-      "handler": "Product.findOneByRegion",
+      "path": "/restaurants/:region(\\d{2}|\\d{3})/:id", // Only match when the first parameter contains 2 or 3 digits.
+      "handler": "Restaurant.findOneByRegion"
     }
   ]
 }
@@ -70,7 +71,7 @@ By default, the main route of the server `/` is pointed to the `/public/index.ht
     {
       "method": "GET",
       "path": "/",
-      "handler": "Controller.name",
+      "handler": "Controller.name"
     }
   ]
 }

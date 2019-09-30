@@ -159,7 +159,7 @@ module.exports = {
                     return _.set(
                       acc,
                       current,
-                      property.map(val => val[assocModel.primaryKey] || val)
+                      property ? property.map(val => val[assocModel.primaryKey] || val) : property
                     );
                   }
 
@@ -187,12 +187,12 @@ module.exports = {
                       return assocModel.updateMany(
                         {
                           [assocModel.primaryKey]: {
-                            $in: property.map(
+                            $in: property ? property.map(
                               val =>
                                 new mongoose.Types.ObjectId(
                                   val[assocModel.primaryKey] || val
                                 )
-                            ),
+                            ) : property,
                           },
                         },
                         {
@@ -211,7 +211,7 @@ module.exports = {
                     const refModel = strapi.getModel(obj.ref, obj.source);
                     return {
                       ref: new mongoose.Types.ObjectId(obj.refId),
-                      kind: refModel.globalId,
+                      kind: obj.kind || refModel.globalId,
                       [association.filter]: obj.field,
                     };
                   });
