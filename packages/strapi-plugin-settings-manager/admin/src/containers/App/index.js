@@ -31,7 +31,7 @@ class App extends React.Component {
     this.props.environmentsFetch();
   }
 
-  componentWillUpdate(nextProps) {
+  UNSAFE_componentWillUpdate(nextProps) {
     if (
       !isEmpty(nextProps.sections) &&
       nextProps.location.pathname !== '/plugins/settings-manager'

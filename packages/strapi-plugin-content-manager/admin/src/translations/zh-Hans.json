@@ -40,7 +40,7 @@
   "error.validation.required": "必填项",
   "form.Input.description": "Description",
   "form.Input.description.placeholder": "Display name in the profile",
-  "form.Input.disabled": "Editable field",
+  "form.Input.editable": "Editable field",
   "notification.error.relationship.fetch": "获取关联数据时发生错误",
   "pageNotFound": "页面未找到",
   "plugin.description.long": "快速查看、编辑和删除数据库中的数据。",

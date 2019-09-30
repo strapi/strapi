@@ -21,7 +21,8 @@ import InputSpacer from '../InputSpacer';
 
 import styles from './styles.scss';
 
-class InputAddonWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class InputAddonWithErrors extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   state = { errors: [], hasInitialValue: false };
 
   componentDidMount() {
@@ -38,7 +39,7 @@ class InputAddonWithErrors extends React.Component { // eslint-disable-line reac
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     // Show required error if the input's value is received after the compo is mounted
     if (!isEmpty(nextProps.value) && !this.state.hasInitialValue) {
       this.setState({ hasInitialValue: true });
@@ -62,7 +63,7 @@ class InputAddonWithErrors extends React.Component { // eslint-disable-line reac
       const errors = validateInput(target.value, this.props.validations);
       this.setState({ errors, hasInitialValue: true });
     }
-  }
+  };
 
   render() {
     const {
@@ -105,7 +106,7 @@ class InputAddonWithErrors extends React.Component { // eslint-disable-line reac
         className={cn(
           styles.containerAddon,
           customBootstrapClass,
-          !isEmpty(className) && className,
+          !isEmpty(className) && className
         )}
         style={style}
       >
@@ -138,7 +139,7 @@ class InputAddonWithErrors extends React.Component { // eslint-disable-line reac
         />
         <InputErrors
           className={errorsClassName}
-          errors={!noErrorsDescription && this.state.errors || []}
+          errors={(!noErrorsDescription && this.state.errors) || []}
           name={name}
           style={errorsStyle}
         />
@@ -211,10 +212,7 @@ InputAddonWithErrors.propTypes = {
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
   noErrorsDescription: PropTypes.bool,
-  onBlur: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.func,
-  ]),
+  onBlur: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
   placeholder: PropTypes.string,
