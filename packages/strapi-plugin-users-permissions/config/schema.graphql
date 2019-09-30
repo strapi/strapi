@@ -22,22 +22,23 @@ module.exports = {
     }
 
     input UsersPermissionsLoginInput {
-      identifier: String
-      password: String
+      identifier: String!
+      password: String!
       provider: String = "local"
     }
 
     type UsersPermissionsLoginPayload {
-      jwt: String
-      user: UsersPermissionsUser
+      jwt: String!
+      user: UsersPermissionsUser!
     }
   `,
   query: `
     me: UsersPermissionsMe
-    login(input: UsersPermissionsLoginInput): UsersPermissionsLoginPayload
   `,
   mutation: `
-    register(input: UserInput): UsersPermissionsLoginPayload
+    login(input: UsersPermissionsLoginInput!): UsersPermissionsLoginPayload!
+    register(input: UserInput!): UsersPermissionsLoginPayload!
+    
   `,
   resolver: {
     UsersPermissionsMe: {
@@ -68,20 +69,6 @@ module.exports = {
           await strapi.plugins['users-permissions'].controllers.userspermissions.getRoles(context);
 
           return context.body.roles;
-        }
-      },
-      login: {
-        resolverOf: 'Auth.callback',
-        resolver: async (obj, options, {context}) => {
-          context.params = {...context.params, provider: options.input.provider};
-          context.request.body = _.toPlainObject(options.input);
-
-          await strapi.plugins['users-permissions'].controllers.auth.callback(context);
-          let output = context.body.toJSON ? context.body.toJSON() : context.body;
-
-          return {
-            user: output.user || output, jwt: output.jwt
-          };
         }
       }
     },
@@ -171,7 +158,20 @@ module.exports = {
 
           await strapi.plugins['users-permissions'].controllers.auth.register(context);
           let output = context.body.toJSON ? context.body.toJSON() : context.body;
+          return {
+            user: output.user || output, jwt: output.jwt
+          };
+        }
+      },
+      login: {
+        resolverOf: 'Auth.callback',
+        resolver: async (obj, options, {context}) => {
+          context.params = {...context.params, provider: options.input.provider};
+          context.request.body = _.toPlainObject(options.input);
 
+          await strapi.plugins['users-permissions'].controllers.auth.callback(context);
+          let output = context.body.toJSON ? context.body.toJSON() : context.body;
+          console.log(output);
           return {
             user: output.user || output, jwt: output.jwt
           };
