@@ -197,7 +197,7 @@ module.exports = {
 
           await strapi.plugins['users-permissions'].controllers.auth.callback(context);
           let output = context.body.toJSON ? context.body.toJSON() : context.body;
-          console.log(output);
+
           return {
             user: output.user || output, jwt: output.jwt
           };
