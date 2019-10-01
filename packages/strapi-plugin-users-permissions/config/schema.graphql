@@ -38,7 +38,6 @@ module.exports = {
   mutation: `
     login(input: UsersPermissionsLoginInput!): UsersPermissionsLoginPayload!
     register(input: UserInput!): UsersPermissionsLoginPayload!
-    
   `,
   resolver: {
     Query: {
@@ -178,12 +177,14 @@ module.exports = {
       },
       register: {
         description: 'Register a user',
+        plugin: 'users-permissions',
         resolverOf: 'Auth.register',
         resolver: async (obj, options, {context}) => {
           context.request.body = _.toPlainObject(options.input);
-
+          strapi.log.info(context);
           await strapi.plugins['users-permissions'].controllers.auth.register(context);
           let output = context.body.toJSON ? context.body.toJSON() : context.body;
+          
           return {
             user: output.user || output, jwt: output.jwt
           };
@@ -191,6 +192,7 @@ module.exports = {
       },
       login: {
         resolverOf: 'Auth.callback',
+        plugin: 'users-permissions',
         resolver: async (obj, options, {context}) => {
           context.params = {...context.params, provider: options.input.provider};
           context.request.body = _.toPlainObject(options.input);
