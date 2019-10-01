@@ -29,7 +29,11 @@ module.exports = async function({ build, watchAdmin }) {
   }
 
   try {
-    const strapiInstance = strapi({ dir, autoReload: true });
+    const strapiInstance = strapi({
+      dir,
+      autoReload: true,
+      serveAdminPanel: watchAdmin ? false : true,
+    });
 
     if (cluster.isMaster) {
       //  Start the front-end dev server

@@ -201,6 +201,7 @@ async function watchAdmin({ dir, port, options }) {
     clientLogLevel: 'silent',
     hot: true,
     quiet: true,
+    open: true, 
     publicPath: options.publicPath,
     historyApiFallback: {
       index: options.publicPath,
@@ -217,7 +218,9 @@ async function watchAdmin({ dir, port, options }) {
     console.log(chalk.green('Starting the development server...'));
     console.log();
     console.log(
-      chalk.green(`Admin development at http://localhost:${port}/admin`)
+      chalk.green(
+        `Admin development at http://localhost:${port}${opts.publicPath}`
+      )
     );
   });
 
