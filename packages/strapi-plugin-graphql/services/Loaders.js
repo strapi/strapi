@@ -59,27 +59,15 @@ module.exports = {
 
     this.loaders[name] = new DataLoader(
       keys => {
-        // eslint-disable-next-line no-async-promise-executor
-        return new Promise(async (resolve, reject) => {
-          try {
-            // Extract queries from keys and merge similar queries.
-            const { queries, map } = this.extractQueries(
-              model,
-              _.cloneDeep(keys)
-            );
+        // Extract queries from keys and merge similar queries.
+        const { queries, map } = this.extractQueries(model, _.cloneDeep(keys));
 
-            // Run queries in parallel.
-            const results = await Promise.all(
-              queries.map(query => this.makeQuery(model, query))
-            );
-
-            // Use to match initial queries order.
-            const data = this.mapData(model, keys, map, results);
-
-            resolve(data);
-          } catch (e) {
-            reject(e);
-          }
+        // Run queries in parallel.
+        return Promise.all(
+          queries.map(query => this.makeQuery(model, query))
+        ).then(results => {
+          // Use to match initial queries order.
+          return this.mapData(model, keys, map, results);
         });
       },
       {
@@ -113,7 +101,7 @@ module.exports = {
 
       // Generate constant for skip parameters.
       // Note: we shouldn't support both way of doing this kind of things in the future.
-      const skip = query.options._start || query.options._skip || 0;
+      const skip = query.options._start || 0;
       const limit = _.get(query, 'options._limit', 100); // Take into account the limit if its equal 0
 
       // Extracting ids from original request to map with query results.
@@ -174,7 +162,7 @@ module.exports = {
 
     const params = {
       ...query.options,
-      populate: null,
+      populate: [query.alias],
       query: {},
       _start: 0, // Don't apply start or skip
       _limit: -1, // Don't apply a limit
@@ -187,11 +175,9 @@ module.exports = {
       .value();
 
     // Run query and remove duplicated ID.
-    const request = await strapi.plugins['content-manager'].services[
+    return strapi.plugins['content-manager'].services[
       'contentmanager'
     ].fetchAll({ model }, params);
-
-    return request && request.toJSON ? request.toJSON() : request;
   },
 
   retrieveModel: function(model, source) {
