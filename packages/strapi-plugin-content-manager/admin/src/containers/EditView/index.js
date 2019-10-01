@@ -265,7 +265,7 @@ function EditView({
       });
 
       // Change the request helper default headers so we can pass a FormData
-      const headers = { 'X-Forwarded-Host': 'strapi' };
+      const headers = {};
       const method = isCreatingEntry ? 'POST' : 'PUT';
       const endPoint = isCreatingEntry ? slug : `${slug}/${id}`;
 

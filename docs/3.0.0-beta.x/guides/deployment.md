@@ -2,21 +2,13 @@
 
 Strapi gives you many possible deployment options for your project or application. Strapi can be deployed on traditional hosting servers or services such as Heroku, AWS, Azure and others. The following documentation covers how to develop locally with Strapi and deploy Strapi with various hosting options.
 
-(Deploying **databases** along with Strapi is covered in the [Databases Guide](/3.0.0-beta.x/guides/databases.html).)
-
-**Table of contents:**
-
-- [Configuration](#configuration)
-- [Amazon AWS](#amazon-aws)
-- [Digital Ocean](#digital-ocean)
-- [Heroku](#heroku)
-- [Docker](#docker)
-
----
+::: note
+Deploying **databases** along with Strapi is covered in the [Databases Guide](/3.0.0-beta.x/guides/databases.html).
+:::
 
 ## Configuration
 
-#### #1 - Configure
+#### 1. Configure
 
 Update the `production` settings with the IP and domain name where the project will be running.
 
@@ -43,23 +35,63 @@ If you are passing a number of configuration item values via environment variabl
 }
 ```
 
-#### #3 - Launch the server
+#### 2. Launch the server
 
 Before running your server in production you need to build your admin panel for production
+
+:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+
+::: tab "yarn" id="yarn-build"
+
+```bash
+NODE_ENV=production yarn build
+```
+
+:::
+
+::: tab "npm" id="npm-build"
 
 ```bash
 NODE_ENV=production npm run build
 ```
 
+:::
+
+::::
+
 Run the server with the `production` settings.
 
+:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+
+::: tab "yarn" id="yarn-start"
+
 ```bash
-NODE_ENV=production npm run start
+NODE_ENV=production yarn start
 ```
+
+:::
+
+::: tab "npm" id="npm-start"
+
+```bash
+NODE_ENV=production npm start
+```
+
+:::
+
+::::
 
 ::: warning
 We highly recommend using [pm2](https://github.com/Unitech/pm2/) to manage your process.
 :::
+
+If you need a server.js file to be able to run `node server.js` instead of `npm run start` then create a `./server.js` file as follows:
+
+```js
+const strapi = require('strapi');
+
+strapi(/* {...} */).start();
+```
 
 ### Advanced configurations
 
@@ -75,12 +107,12 @@ This is a step-by-step guide for deploying a Strapi project to [Amazon AWS EC2](
 
 Best practices for using **AWS Amazon** services state to not use your root account user and to use instead the [IAM (AWS Identity and Access Management) service](https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html). Your root user is therefore only used for a very few [select tasks](https://docs.aws.amazon.com/general/latest/gr/aws_tasks-that-require-root.html). For example, for **billing**, you create an **Administrator user and Group** for such things. And other, more routine tasks are done with a **regular IAM User**.
 
-1. Follow these instructions for [creating your Administrator IAM Admin User and Group](https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started_create-admin-group.html).
+#### 1. Follow these instructions for [creating your Administrator IAM Admin User and Group](https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started_create-admin-group.html)
 
 - Login as **root**.
 - Create **Administrator** role.
 
-2. Next, create a **regular user** for the creation and management of your Strapi project.
+#### 2. Next, create a **regular user** for the creation and management of your Strapi project
 
 - Copy your **IAM Users sign-in link** found here: [IAM Console](https://console.aws.amazon.com/iam/home) and then log out of your **root user** and log in to your **administrator** user you just created.
 - Return to the IAM Console by `searching for IAM` and clicking or going here: [IAM Console](https://console.aws.amazon.com/iam/home).
@@ -111,7 +143,7 @@ Best practices for using **AWS Amazon** services state to not use your root acco
   - **OPTIONAL:** Add these credentials to your \*Password manager\*\*.
   - Click on the `AWS Management Console Access sign-in link`. This will log you out of `Administrator`.
 
-3. `Log into` your **AWS Management Console** as your `regular user`.
+#### 3. `Log into` your **AWS Management Console** as your `regular user`
 
 You may now proceed to the next steps.
 
@@ -124,15 +156,21 @@ You may now proceed to the next steps.
 
 Amazon calls a virtual private server, a **virtual server** or **Amazon EC2 instance**. To use this service you will `Launch Instance`. In this section, you will **establish IAM credentials**, **launch a new instance** and **set-up primary security rules**.
 
-1. From your **AWS Management Console** and as your **_regular_** user:
+#### 1. From your **AWS Management Console** and as your **_regular_** user
 
 - `Find Services`, seach for `ec2` and click on `EC2, Virtual Servers in the Cloud`
 
-2. **Select Appropriate Region**. In the top menu, near your IAM Account User name, select, from the dropdown, the most appropriate region to host your Strapi project. For example, `US East (N.Virginia)` or `Asia Pacific (Hong Kong)`. You will want to remember this region for configuring other services on AWS and serving these services from the same region.
-3. Click on the blue `Launch Instance` button.
+#### 2. **Select Appropriate Region**
+
+In the top menu, near your IAM Account User name, select, from the dropdown, the most appropriate region to host your Strapi project. For example, `US East (N.Virginia)` or `Asia Pacific (Hong Kong)`. You will want to remember this region for configuring other services on AWS and serving these services from the same region.
+
+#### 3. Click on the blue `Launch Instance` button
 
 - `Select` **Ubuntu Server 18.04 LTS (HVM), SSD Volume Type**
-- Ensure `General purpose` + `t2.small` is `checked`. **NOTE:** `t2.small` is the smallest instance type in which Strapi runs. `t2.nano` and `t2.micro` **DO NOT** work. At the moment, deploying the Strapi Admin interface requires more than 1g of RAM. Therefore, **t2.small** or larger instance is needed.
+- Ensure `General purpose` + `t2.small` is `checked`.
+  ::: note
+  `t2.small` is the smallest instance type in which Strapi runs. `t2.nano` and `t2.micro` **DO NOT** work. At the moment, deploying the Strapi Admin interface requires more than 1g of RAM. Therefore, **t2.small** or larger instance is needed.
+  :::
 - Click the grey `Next: Configure Instance Details` and `Next: Add Storage`
 - In the **Step 4: Add Storage** verify the `General Purpose SSD (gb2)`, then click `Next: Add tags`.
 - In the **Step 5: Add Tags**, add tags to suit your project or leave blank, then click `Next: Configure Security Group`.
@@ -146,12 +184,17 @@ Amazon calls a virtual private server, a **virtual server** or **Amazon EC2 inst
     - **Type:** `HTTP`, **Protocol:** `TCP`, **Port Range** `80`, **Source:** `0.0.0.0/0, ::/0`
     - **Type:** `HTTPS`, **Protocol:** `TCP`, **Port Range** `443`, **Source:** `0.0.0.0/0, ::/0`
     - **Type:** `Custom TCP Rule`, **Protocol:** `TCP`, **Port Range** `1337`, **Source:** `0.0.0.0/0` **Description:** `Strapi for Testing Port`
-      (These rules are basic configuration and security rules. You may want to tighten and limit these rules based on your own project and organizational policies. **Note:** After setting up your Nginx rules and domain name with the proper aliases, you will need to delete the rule regarding port 1337 as this is for testing and setting up the project - **not for production**.)
+      These rules are basic configuration and security rules. You may want to tighten and limit these rules based on your own project and organizational policies.
+      ::: note
+      After setting up your Nginx rules and domain name with the proper aliases, you will need to delete the rule regarding port 1337 as this is for testing and setting up the project - **not for production**.
+      :::
 - Click the blue `Review and Launch` button.
 - Review the details, in the **Step 7: Review Instance Launch**, then click the blue `Launch` button. Now, you need to **select an existing key pair** or **create a new key pair**. To create a new key pair, do the following:
   - Select the dropdown option `Create a new key pair`.
   - Name your the key pair name, e.g. `ec2-strapi-key-pair`
-  - **IMPORTANT** Download the **private key file** (.pem file). This file is needed, so note where it was downloaded.
+    ::: warning
+    Download the **private key file** (.pem file). This file is needed, so note where it was downloaded.
+    :::
   - After downloading the file, click the blue `Launch Instances` button.
 
 Your instance is now running. Continue to the next steps.
@@ -160,12 +203,22 @@ Your instance is now running. Continue to the next steps.
 
 Amazon calls their database hosting services **RDS**. Multiple database options exist and are available. In this guide, **PostgreSQL** is used as the example, and the steps are similar for each of the other database that are supported by Strapi. (**MySQL**, **MondoDB**, **PostgreSQL**, **MariaDB**, **SQLite**). You will set-up an **RDS instance** to host your `postgresql` database.
 
-**NOTE:** **Amazon RDS** does **NOT** have a completely free evaluation tier. After finishing this guide, if you are only testing, please remember to [delete the database](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_DeleteInstance.html). Otherwise, you will incur charges.
+::: note
+**Amazon RDS** does **NOT** have a completely free evaluation tier. After finishing this guide, if you are only testing, please remember to [delete the database](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_DeleteInstance.html). Otherwise, you will incur charges.
+:::
 
-1. Navigate to the `AWS RDS Service`. In the top menu, click on `Services` and do a search for `rds`, click on `RDS, Managed Relational Database Service`.
-2. In the top menu bar, select the region that is the same as the EC2 instance, e.g. `EU (Paris)` or `US East (N. Virgina)`.
+#### 1. Navigate to the `AWS RDS Service`
 
-3. Click the orange `Create database` button. Follow these steps to complete installation of a `PostgreSQL` database:
+In the top menu, click on `Services` and do a search for `rds`, click on `RDS, Managed Relational Database Service`.
+
+#### 2. Select your region
+
+In the top menu bar, select the region that is the same as the EC2 instance, e.g. `EU (Paris)` or `US East (N. Virgina)`.
+
+#### 3. Create the database
+
+Click the orange `Create database` button.
+Follow these steps to complete installation of a `PostgreSQL` database:
 
 - **Engine Options:** Click on `PostgreSQL`, version **PostgreSQL 10.x-R1**
 - **Templates:** Click on `Free Tier`.
@@ -186,8 +239,13 @@ After a few minutes, you may refresh your page and see that your database has be
 
 Amazon calls cloud storage services **S3**. You create a **bucket**, which holds the files, images, folders, etc... which then can be accessed and served by your application. This guide will show you have to use **Amazon S3** to host the images for your project.
 
-1. Navigate to the `Amazon S3`. In the top menu, click on `Services` and do a search for `s3`, click on `Scalable storage in the cloud`.
-2. Click on the blue `Create bucket` button:
+#### 1. Navigate to the `Amazon S3`
+
+In the top menu, click on `Services` and do a search for `s3`, click on `Scalable storage in the cloud`.
+
+#### 2. Create the bucket
+
+Click on the blue `Create bucket` button:
 
 - Give your bucket a unique name, under **Bucket name**, e.g. `my-project-name-images`.
 - Select the most appropriate region, under **Region**, e.g. `EU (Paris)` or `US East (N. Virgina)`.
@@ -207,16 +265,14 @@ Amazon calls cloud storage services **S3**. You create a **bucket**, which holds
 
 You will set-up your EC2 server as a Node.js server. Including basic configuration and Git.
 
-**Requirements:**
 You will need your **EC2** ip address:
 
 - In the `AWS Console`, navigate to the `AWS EC2`. In the top menu, click on `Services` and do a search for `ec2`, click on `Virtual Servers in the cloud`.
 - Click on `1 Running Instance` and note the `IPv4 Public OP` address. E.g. `34.182.83.134`.
 
-**On your local computer:**
+#### 1. Setup the `.pem` file
 
-1. You downloaded, in a previous step, your `User` .pem file. e.g. `ec2-strapi-key-pair.pem`. This needs to be included in each attempt to `SSH` into your `EC2 server`. Move your `.pem` file to `~/.ssh/`, follow these steps:
-
+- You downloaded, in a previous step, your `User` .pem file. e.g. `ec2-strapi-key-pair.pem`. This needs to be included in each attempt to `SSH` into your `EC2 server`. Move your `.pem` file to `~/.ssh/`, follow these steps:
 - On your local machine, navigate to the folder that contains your .pem file. e.g. `downloads`
 - Move the .pem file to `~/.ssh/` and set file permissions:
   `Path:./path-to/.pem-file/`
@@ -226,9 +282,11 @@ mv ec2-strapi-key-pair.pem ~/.ssh/
 chmod 400 ~/.ssh/ec2-strapi-key-pair.pem
 ```
 
-2. Log in to your server as the default `ubuntu` user:
+#### 2. Log in to your server as the default `ubuntu` user:
 
-**NOTE:** In the future, each time you log into your `EC2` server, you will need to add the path to the .pem file, e.g. `ssh -i ~/.ssh/ec2-strapi-key-pair.pem ubuntu@12.123.123.11`.
+::: note
+In the future, each time you log into your `EC2` server, you will need to add the path to the .pem file, e.g. `ssh -i ~/.ssh/ec2-strapi-key-pair.pem ubuntu@12.123.123.11`.
+:::
 
 ```bash
 ssh -i ~/.ssh/ec2-strapi-key-pair.pem ubuntu@12.123.123.11
@@ -244,7 +302,7 @@ ubuntu@ip-12.123.123.11:~$
 
 ```
 
-3. Install **Node.js** with **npm**:
+#### 3. Install **Node.js** with **npm**:
 
 Strapi currently supports `Node.js v10.x.x`. The following steps will install Node.js onto your EC2 server.
 
@@ -259,7 +317,9 @@ node -v && npm -v
 
 The last command `node -v && npm -v` should output two versions numbers, eg. `v10.x.x, 6.x.x`.
 
-4. Create and change npm's default directory. The following steps are based on [how to resolve access permissions from npmjs.com](https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally):
+#### 4. Create and change npm's default directory.
+
+The following steps are based on [how to resolve access permissions from npmjs.com](https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally):
 
 - Create a `.npm-global` directory and set the path to this directory for `node_modules`
 
@@ -296,15 +356,21 @@ A convenient way to maintain your Strapi application and update it during and af
 
 The next step is to configure Git on your server.
 
-1. Check to see if `Git` is installed, if you see a `git version 2.x.x` then you do have `Git` installed. Check with the following command:
+#### 1. Check to see if `Git` is installed
+
+If you see a `git version 2.x.x` then you do have `Git` installed. Check with the following command:
 
 ```bash
 git --version
 ```
 
-2. **OPTIONAL:** Install Git. **NOTE:** Only do if _not installed_, as above. Please follow these directions on [how to install Git on Ubuntu 18.04](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
+#### 2. **OPTIONAL:** Install Git.
 
-3. Configure the global **username** and **email** settings: [Setting up Git - Your Identity](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
+::: note
+Only do if _not installed_, as above. Please follow these directions on [how to install Git on Ubuntu 18.04](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
+:::
+
+#### 3. Configure the global **username** and **email** settings: [Setting up Git - Your Identity](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
 
 After installing and configuring Git on your EC2 instance. Please continue to the next step.
 
@@ -312,18 +378,23 @@ After installing and configuring Git on your EC2 instance. Please continue to th
 
 These instructions assume that you have already created a **Strapi** project, and have it in a **GitHub** repository.
 
-**On your local computer:**
+You will need to update the `database.json` file to configure Strapi to connect to the `RDS` database. And you will need to install an npm package called `pg` locally on your development server.
+::: note
+The `pg` package install is only necessary if you are using **PostgresSQL** as your database.
+:::
 
-You will need to update the `database.json` file to configure Strapi to connect to the `RDS` database. And you will need to install an npm package called `pg` locally on your development server. **NOTE:** The `pg` package install is only necessary if you are using **PostgresSQL** as your database.
+#### 1. Install `pg` in your Strapi project.
 
-1. Install `pg` in your Strapi project. On your development machine, navigate to your Strapi project root directory:
-   `Path: ./my-project/`
+On your development machine, navigate to your Strapi project root directory:
+`Path: ./my-project/`
 
 ```bash
 npm install pg
 ```
 
-2. Edit the `database.json` file. Copy/paste the following:
+#### 2. Edit the `database.json` file.
+
+Copy/paste the following:
 
 `Path: ./my-project/config/environments/production/database.json`:
 
@@ -349,13 +420,17 @@ npm install pg
 }
 ```
 
-3. Install the **Strapi Provider Upload AWS S3 Plugin**: `Path: ./my-project/`. This plugin will allow configurations for each active environment.
+#### 3. Install the **Strapi Provider Upload AWS S3 Plugin**:
+
+`Path: ./my-project/`.
+
+This plugin will allow configurations for each active environment.
 
 ```bash
 npm install strapi-provider-upload-aws-s3@beta
 ```
 
-4. Push your local changes to your project's GitHub repository.
+#### 4. Push your local changes to your project's GitHub repository.
 
 ```bash
 git add .
@@ -363,7 +438,7 @@ git commit -m 'installed pg, aws-S3 provider plugin and updated the production/d
 git push
 ```
 
-5. Deploy from GitHub
+#### 5. Deploy from GitHub
 
 You will next deploy your Strapi project to your EC2 instance by **cloning it from GitHub**.
 
@@ -386,7 +461,7 @@ NODE_ENV=production npm run build
 
 Next, you need to install **PM2 Runtime** and configure the `ecosystem.config.js` file
 
-5. Install **PM2 Runtime**
+#### 6. Install **PM2 Runtime**
 
 [PM2 Runtime](https://pm2.io/doc/en/runtime/overview/?utm_source=pm2&utm_medium=website&utm_campaign=rebranding) allows you to keep your Strapi project alive and to reload it without downtime.
 
@@ -434,11 +509,19 @@ cd ~
 pm2 start ecosystem.config.js
 ```
 
-Your Strapi project should now be available on `http://your-ip-address:1337/`. **NOTE:** Earlier, `Port 1337` was allowed access for **testing and setup** purposes. After setting up **NGINX**, the **Port 1337** needs to have access **denied**.
+Your Strapi project should now be available on `http://your-ip-address:1337/`.
 
-6. Configure **PM2 Runtime** to launch project on system startup.
+::: note
+Earlier, `Port 1337` was allowed access for **testing and setup** purposes. After setting up **NGINX**, the **Port 1337** needs to have access **denied**.
+:::
 
-Follow the steps below to have your app launch on system startup. (**NOTE:** These steps are based on the [PM2 Runtime Startup Hook Guide](https://pm2.io/doc/en/runtime/guide/startup-hook/).)
+#### 7. Configure **PM2 Runtime** to launch project on system startup.
+
+Follow the steps below to have your app launch on system startup.
+
+::: note
+These steps are based on the [PM2 Runtime Startup Hook Guide](https://pm2.io/doc/en/runtime/guide/startup-hook/).
+:::
 
 - Generate and configure a startup script to launch PM2, it will generate a Startup Script to copy/paste, do so:
 
@@ -487,23 +570,23 @@ pm2 save
 
 The next steps involve configuring Strapi to connect to the AWS S3 bucket.
 
-1. Locate your `IPv4 Public IP`:
+#### 1. Locate your `IPv4 Public IP`:
 
 - Login as your regular user to your `EC2 Dashboard`
 - Click on `1 Running Instances`.
 - Below, in the **Description** tab, locate your **IPv4 Public IP**
 
-2. Next, create your **Administrator** user, and login to Strapi:
+#### 2. Next, create your **Administrator** user, and login to Strapi:
 
 - Go to `http://your-ip-address:1337/`
 - Complete the registration form.
 - Click `Ready to Start`
 
-3. Configure the plugin with your bucket credentials:
+#### 3. Configure the plugin with your bucket credentials:
 
 - From the left-hand menu, click `Plugins` and then the `cog` wheel located to the right of `Files Upload`.
 - From the dropdown, under **Providers**, select `Amazon Web Service S3` and enter the configuration details:
-  **Note:** You can find the **Access API Token** and **Secret Access Token** in the **configuration.csv** file you downloaded earlier or if you saved them to your password manager.
+  You can find the **Access API Token** and **Secret Access Token** in the **configuration.csv** file you downloaded earlier or if you saved them to your password manager.
   - **Access API Token**: This is your _Access Key ID_
   - **Secret Access Token**: This is your _Secret Access Key_
     Navigate back to your **Amazon S3 Dashboard**:
@@ -614,7 +697,11 @@ echo $PATH
 sudo nano /etc/systemd/system/webhook.service
 ```
 
-- In the `nano` editor, copy/paste the following script, but make sure to replace `ubuntu` **in two places** if you changed the default `ubuntu` user, and `paste the $PATH` from above. **DELETE THE #COMMENTS BEFORE SAVING**, then save and exit:
+- In the `nano` editor, copy/paste the following script, but make sure to replace `ubuntu` **in two places** if you changed the default `ubuntu` user, and `paste the $PATH` from above.
+
+::: warning
+**DELETE THE #COMMENTS BEFORE SAVING**, then save and exit.
+:::
 
 ```bash
 [Unit]
@@ -650,7 +737,9 @@ sudo systemctl status webhook
 ### Further steps to take
 
 - You can **add a domain name** or **use a subdomain name** for your Strapi project, you will need to [install NGINX](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source/) and [configure it](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/nodejs-platform-proxy.html).
-  - **NOTE:** After setting up **NGINX**, for security purposes, you need to disable port access on `Port 1337`. You may do this easily from your **EC2 Dashboard**. In `Security Groups` (lefthand menu), click the checkbox of the group, eg. `strapi`, and below in the `inbound` tab, click `Edit`, and delete the rule for `Port Range` : `1337` by click the `x`.
+  ::: note
+  After setting up **NGINX**, for security purposes, you need to disable port access on `Port 1337`. You may do this easily from your **EC2 Dashboard**. In `Security Groups` (lefthand menu), click the checkbox of the group, eg. `strapi`, and below in the `inbound` tab, click `Edit`, and delete the rule for `Port Range` : `1337` by click the `x`.
+  :::
 - To **install SSL**, you will need to [install and run Certbot by Let's Encrypt](https://certbot.eff.org/docs/using.html).
 
 - Set-up [Nginx with HTTP/2 Support](https://www.digitalocean.com/community/tutorials/how-to-set-up-nginx-with-http-2-support-on-ubuntu-18-04) for Ubuntu 18.04.
@@ -669,15 +758,24 @@ This is a step-by-step guide for deploying a Strapi project to [Digital Ocean](h
 
 Digital Ocean calls a virtual private server, a [Droplet](https://www.digitalocean.com/docs/droplets/). You need to create a new `Droplet` to host your Strapi project.
 
-1. Log in to your [Digital Ocean account](https://cloud.digitalocean.com/login).
-2. `Create a Droplet` by clicking on `New Droplet`. Choose these options:
+#### 1. Log in to your [Digital Ocean account](https://cloud.digitalocean.com/login).
+
+#### 2. `Create a Droplet` by clicking on `New Droplet`.
+
+Choose these options:
 
 - Ubuntu 18.04 x64
 - STARTER `Standard`
-- Choose an appropriate pricing plan. For example, pricing: `$10/mo` _(Scroll to the left)_ **NOTE:** The \$5/mo plan is currently unsupported as Strapi will not build with 1G of RAM. At the moment, deploying the Strapi Admin interface requires more than 1g of RAM. Therefore, a minimum standard Droplet of **\$10/mo** or larger instance is needed.
+- Choose an appropriate pricing plan. For example, pricing: `$10/mo` _(Scroll to the left)_
+  ::: note
+  The \$5/mo plan is currently unsupported as Strapi will not build with 1G of RAM. At the moment, deploying the Strapi Admin interface requires more than 1g of RAM. Therefore, a minimum standard Droplet of **\$10/mo** or larger instance is needed.
+  :::
 - Choose a `datacenter` region nearest your audience, for example, `New York`.
 - **OPTIONAL:** Select additional options, for example, `[x] IPv6`.
-- Add your SSH key **NOTE:** We recommend you `add your SSH key` for better security.
+- Add your SSH key
+  ::: note
+  We recommend you `add your SSH key` for better security.
+  :::
   - In your terminal, use `pbcopy < ~/.ssh/id_rsa.pub` to copy your existing SSH public key, on your development computer, to the clipboard.
   - Click on `New SSH Key` and paste in your `SSH Key`. `Name` this SSH key and then `Save`.
     (Additional instructions on creating and using SSH Keys can be found [here](https://www.digitalocean.com/docs/droplets/how-to/add-ssh-keys/create-with-openssh/).)
@@ -692,15 +790,21 @@ These next steps will help you to _set up a production server_ and _set up a non
 
 Follow the official [Digital Ocean docs for initial server set-up using Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04). These docs will have you complete the following actions:
 
-1. [Logging and set up root user access to your server with SSH](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04#step-1-%E2%80%94-logging-in-as-root).
-2. [Creating a new user](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04#step-2-%E2%80%94-creating-a-new-user).
-3. [Granting Administrative Privileges to the new user](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04#step-3-%E2%80%94-granting-administrative-privileges).
-4. [Setting up a basic firewall](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04#step-4-%E2%80%94-setting-up-a-basic-firewall).
-5. [Giving your regular user access to the server](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04#step-5-%E2%80%94-enabling-external-access-for-your-regular-user) **with SSH key authentication**.
+#### 1. [Logging and set up root user access to your server with SSH](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04#step-1-%E2%80%94-logging-in-as-root).
+
+#### 2. [Creating a new user](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04#step-2-%E2%80%94-creating-a-new-user).
+
+#### 3. [Granting Administrative Privileges to the new user](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04#step-3-%E2%80%94-granting-administrative-privileges).
+
+#### 4. [Setting up a basic firewall](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04#step-4-%E2%80%94-setting-up-a-basic-firewall).
+
+#### 5. [Giving your regular user access to the server](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04#step-5-%E2%80%94-enabling-external-access-for-your-regular-user) **with SSH key authentication**.
 
 Next, install `Node.js`:
 
-6. You will install `Node.js` using the instructions in section **Install Node using a PPA** from the official [Digital Ocean docs for installing a production ready Node.js server](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-18-04#installing-using-a-ppa).
+#### 6. You will install `Node.js`.
+
+Use the instructions in section **Install Node using a PPA** from the official [Digital Ocean docs for installing a production ready Node.js server](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-18-04#installing-using-a-ppa).
 
 After completing the steps to **install Node.js, NPM and the "build-essential package"**, you will manually change npm's default directory. The following steps are based on [how to resolve access permissions from npmjs.com](https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally):
 
@@ -739,15 +843,21 @@ A convenient way to maintain your Strapi application and update it during and af
 
 The next step is to configure Git on your server.
 
-1. Check to see if `Git` is installed, if you see a `git version 2.x.x` then you do have `Git` installed. Check with the following command:
+#### 1. Check to see if `Git` is installed
+
+If you see a `git version 2.x.x` then you do have `Git` installed. Check with the following command:
 
 ```bash
 git --version
 ```
 
-2. **OPTIONAL:** Install Git. **NOTE:** Only do this step if _not installed_, as above. Please follow these directions on [how to install Git on Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/how-to-install-git-on-ubuntu-18-04).
+#### 2. **OPTIONAL:** Install Git.
 
-3. Complete the global **username** and **email** settings: [Setting up Git](https://www.digitalocean.com/community/tutorials/how-to-install-git-on-ubuntu-18-04#setting-up-git)
+:::note
+Only do this step if _not installed_, as above. Please follow these directions on [how to install Git on Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/how-to-install-git-on-ubuntu-18-04).
+:::
+
+#### 3. Complete the global **username** and **email** settings: [Setting up Git](https://www.digitalocean.com/community/tutorials/how-to-install-git-on-ubuntu-18-04#setting-up-git)
 
 After installing and configuring Git on your Droplet. Please continue to the next step, [installing a database](#install-the-database-for-your-project).
 
@@ -778,7 +888,7 @@ postgres=# \q
 exit
 ```
 
-- **Optional:** If in **Development**, your Strapi project is uses **SQLite**, you will need to install a dependency package called `pg`:
+- **OPTIONAL:** If in **Development**, your Strapi project is uses **SQLite**, you will need to install a dependency package called `pg`:
 
   - On your **Development** computer:
 
@@ -788,7 +898,7 @@ exit
   npm install pg --save
   ```
 
-  **Note:** The `pg` package is automatically installed locally if you choose `PostgreSQL` as the initial database choice when you first set-up Strapi.
+  The `pg` package is automatically installed locally if you choose `PostgreSQL` as the initial database choice when you first set-up Strapi.
 
 You will need the **database name**, **username** and **password** for later use, please note these down.
 
@@ -927,9 +1037,17 @@ pm2 start ecosystem.config.js
 
 `pm2` is now set-up to use an `ecosystem.config.js` to manage restarting your application upon changes. This is a recommended best practice.
 
-**OPTIONAL:** You may see your project and set-up your first administrator user, by [creating an admin user](https://strapi.io/documentation/3.0.0-beta.x/getting-started/quick-start.html#_3-create-an-admin-user). **NOTE:** Earlier, `Port 1337` was allowed access for **testing and setup** purposes. After setting up **NGINX**, the **Port 1337** needs to have access **denied**.
+**OPTIONAL:** You may see your project and set-up your first administrator user, by [creating an admin user](https://strapi.io/documentation/3.0.0-beta.x/getting-started/quick-start.html#_3-create-an-admin-user).
 
-Follow the steps below to have your app launch on system startup. (**NOTE:** These steps are modified from the Digital Ocean [documentation for setting up PM2](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-18-04#step-3-%E2%80%94-installing-pm2).)
+::: note
+Earlier, `Port 1337` was allowed access for **testing and setup** purposes. After setting up **NGINX**, the **Port 1337** needs to have access **denied**.
+:::
+
+Follow the steps below to have your app launch on system startup.
+
+::: note
+These steps are modified from the Digital Ocean [documentation for setting up PM2](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-18-04#step-3-%E2%80%94-installing-pm2).
+:::
 
 - Generate and configure a startup script to launch PM2, it will generate a Startup Script to copy/paste, do so:
 
@@ -1133,7 +1251,7 @@ This is a step-by-step guide for deploying a Strapi project on [Heroku](https://
 
 If you already have the Heroku CLI installed locally on your computer. Skip to [Login to Heroku](#_2-login-to-heroku-from-your-cli).
 
-### 1. Heroku CLI Installation
+#### 1. Heroku CLI Installation
 
 Download and install the `Heroku CLI` for your operating system:
 
@@ -1168,7 +1286,7 @@ Download the appropriate installer for your Windows installation:
 
 ::::
 
-### 2. Login to Heroku from your CLI
+#### 2. Login to Heroku from your CLI
 
 Next, you need to login to Heroku from your computer.
 
@@ -1178,7 +1296,7 @@ heroku login
 
 Follow the instructions and return to your command line.
 
-### 3. Create a new project (or use an existing one)
+#### 3. Create a new project (or use an existing one)
 
 Create a [new Strapi project](/3.0.0-beta.x/getting-started/quick-start.html) (if you want to deploy an existing project go to step 4).
 
@@ -1194,9 +1312,11 @@ If you plan to use **MongoDB** with your project, [refer to the create a Strapi 
 strapi new my-project --quickstart
 ```
 
-**Note:** When you use `--quickstart` to create a Strapi project locally, a **SQLite database** is used which is not compatible with Heroku. Therefore, another database option [must be chosen](#_6-heroku-database-set-up).
+::: note
+When you use `--quickstart` to create a Strapi project locally, a **SQLite database** is used which is not compatible with Heroku. Therefore, another database option [must be chosen](#_6-heroku-database-set-up).
+:::
 
-### 4. Update `.gitignore`
+#### 4. Update `.gitignore`
 
 Add the following line at end of `.gitignore`:
 
@@ -1208,7 +1328,7 @@ package-lock.json
 
 Even if it is usually recommended to version this file, it may create issues on Heroku.
 
-### 5. Init a Git repository and commit your project
+#### 5. Init a Git repository and commit your project
 
 Init the Git repository and commit your project.
 
@@ -1221,7 +1341,7 @@ git add .
 git commit -m "Initial Commit"
 ```
 
-### 6. Create a Heroku project
+#### 6. Create a Heroku project
 
 Create a new Heroku project.
 
@@ -1231,7 +1351,7 @@ Create a new Heroku project.
 heroku create
 ```
 
-(You can use `heroku create custom-project-name`, to have Heroku create a `custom-project-name.heroku.com` URL. Otherwise, Heroku will automatically generate a random project name (and URL) for you.)
+You can use `heroku create custom-project-name`, to have Heroku create a `custom-project-name.heroku.com` URL. Otherwise, Heroku will automatically generate a random project name (and URL) for you.
 
 ::: warning NOTE
 If you have a Heroku project app already created. You would use the following step to initialize your local project folder:
@@ -1246,7 +1366,7 @@ heroku git:remote -a your-heroku-app-name
 
 Your local development environment is now set-up and configured to work with Heroku. You have a new Strapi project and a new Heroku app ready to be configured to work with a database and with each other.
 
-### 7. Heroku Database set-up
+#### 7. Heroku Database set-up
 
 Below you will find database options when working with Heroku. Please choose the correct database (e.g. PostgreSQL, MongoDB, etc.) and follow those instructions.
 
@@ -1254,11 +1374,11 @@ Below you will find database options when working with Heroku. Please choose the
 
 ::: tab "PostgreSQL" id="heroku-postgresql"
 
-#### Heroku Postgres
+### Heroku Postgres
 
 Follow these steps to deploy your Strapi app to Heroku using **PostgreSQL**:
 
-##### 1. Install the [Heroku Postgres addon](https://elements.heroku.com/addons/heroku-postgresql) for using Postgres.
+#### 1. Install the [Heroku Postgres addon](https://elements.heroku.com/addons/heroku-postgresql) for using Postgres.
 
 To make things even easier, Heroku provides a powerful addon system. In this section, you are going to use the Heroku Postgres addon, which provides a free "Hobby Dev" plan. If you plan to deploy your app in production, it is highly recommended switching to a paid plan.
 
@@ -1268,7 +1388,7 @@ To make things even easier, Heroku provides a powerful addon system. In this sec
 heroku addons:create heroku-postgresql:hobby-dev
 ```
 
-##### 2. Retrieve database credentials
+#### 2. Retrieve database credentials
 
 The add-on automatically exposes the database credentials into a single environment variable accessible by your app. To retrieve it, type:
 
@@ -1282,7 +1402,7 @@ This should print something like this: `DATABASE_URL: postgres://ebitxebvixeeqd:
 
 (This url is read like so: \*postgres:// **USERNAME** : **PASSWORD** @ **HOST** : **PORT** : **DATABASE_NAME\***)
 
-##### 3. Set environment variables
+#### 3. Set environment variables
 
 Strapi expects a variable for each database connection configuration (host, username, etc.). So, from the url above, you have to set several environment variables in the Heroku config:
 
@@ -1294,9 +1414,9 @@ heroku config:set DATABASE_PORT=5432
 heroku config:set DATABASE_NAME=d516fp1u21ph7b
 ```
 
-**Note:** Please replace these above values with your actual values.
+Please replace these above values with your actual values.
 
-##### 4. Update your database config file
+#### 4. Update your database config file
 
 Replace the contents of `database.json` with the following:
 
@@ -1323,7 +1443,7 @@ Replace the contents of `database.json` with the following:
 }
 ```
 
-##### 5. Install the `pg` node module
+#### 5. Install the `pg` node module
 
 Unless you originally installed Strapi with PostgreSQL, you need to install the [pg](https://www.npmjs.com/package/pg) node module.
 
@@ -1337,7 +1457,7 @@ npm install pg --save
 
 ::: tab "MongoDB" id="heroku-mongodb"
 
-#### MongoDB Atlas
+### MongoDB Atlas
 
 (Using Strapi and MongoDB requires different set-up and different configuration steps. You cannot use `--quickstart` to develop a `MongoDB` Strapi project.)
 
@@ -1345,7 +1465,7 @@ Please follow these steps the **deploy a Strapi app with MongoDB on Heroku**.
 
 You must have completed the [steps to use Strapi with MongoDB Atlas](/3.0.0-beta.x/guides/databases.html#install-on-atlas-mongodb-atlas) - through **4. Retrieve database credentials**.
 
-##### 1. Set environment variables
+#### 1. Set environment variables
 
 When you [set-up your MongoDB Atlas database](/3.0.0-beta.x/guides/databases.html#install-on-atlas-mongodb-atlas) you noted a connection string. Similar to this:
 
@@ -1361,9 +1481,9 @@ heroku config:set DATABASE_URI="mongodb://paulbocuse:<password>@strapidatabase-s
 heroku config:set DATABASE_NAME="my-database-name"
 ```
 
-**Note:** Please replace the `<password>` and `my-database-name` values with the your actual values.
+Please replace the `<password>` and `my-database-name` values with the your actual values.
 
-##### 2. Update your database config file
+#### 2. Update your database config file
 
 Replace the contents of `database.json` with the following:
 
@@ -1387,9 +1507,11 @@ Replace the contents of `database.json` with the following:
 }
 ```
 
+:::
+
 ::::
 
-### 8. Commit your changes
+#### 8. Commit your changes
 
 `Path: ./my-project/`
 
@@ -1398,7 +1520,7 @@ git add .
 git commit -m "Update database config"
 ```
 
-### 9. Deploy
+#### 9. Deploy
 
 `Path: ./my-project/`
 
@@ -1418,7 +1540,7 @@ If you see the Strapi Welcome page, you have correctly set-up, configured and de
 
 You can now continue with the [Tutorial - Creating an Admin User](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_3-create-an-admin-user), if you have any questions on how to proceed.
 
-::: warning NOTE
+::: warning
 For security reasons, the Content Type Builder plugin is disabled in production. To update content structure, please make your changes locally and deploy again.
 :::
 
@@ -1440,11 +1562,3 @@ git commit -am "Changes to my-project noted"
 git push heroku master
 heroku open
 ```
-
-## Docker
-
-::: tip
-You can also deploy using [Docker](https://hub.docker.com/r/strapi/strapi)
-:::
-
-The method below describes regular deployment using the built-in mechanisms.

@@ -13,8 +13,8 @@ You can simply copy and paste this code to your own service file to customize th
 
 You can read about `strapi.query` calls [here](./queries.md)
 
-::: warning
-In the following example your controller, service and model is named `product`
+::: note
+In the following example your controller, service and model is named `restaurant`
 :::
 
 #### `find`
@@ -27,7 +27,7 @@ module.exports = {
    * @return {Promise}
    */
   find(params, populate) {
-    return strapi.query(Product).find(params, populate);
+    return strapi.query('restaurant').find(params, populate);
   },
 };
 ```
@@ -43,7 +43,7 @@ module.exports = {
    */
 
   findOne(params, populate) {
-    return strapi.query(Product).findOne(params, populate);
+    return strapi.query('restaurant').findOne(params, populate);
   },
 };
 ```
@@ -59,7 +59,7 @@ module.exports = {
    */
 
   count(params) {
-    return strapi.query(Product).count(params);
+    return strapi.query('restaurant').count(params);
   },
 };
 ```
@@ -123,7 +123,7 @@ module.exports = {
    */
 
   delete(params) {
-    return strapi.query(Product).delete(params);
+    return strapi.query('restaurant').delete(params);
   },
 };
 ```
@@ -139,7 +139,7 @@ module.exports = {
    */
 
   search(params) {
-    return strapi.query(Product).search(params);
+    return strapi.query('restaurant').search(params);
   },
 };
 ```
@@ -154,7 +154,7 @@ module.exports = {
    * @return {Promise}
    */
   countSearch(params) {
-    return strapi.query(Product).countSearch(params);
+    return strapi.query('restaurant').countSearch(params);
   },
 };
 ```
@@ -167,7 +167,7 @@ You can also create custom services to build your own business logic.
 
 There are two ways to create a service.
 
-- Using the CLI `strapi generate:service product`. Read the [CLI documentation](../cli/CLI.md) for more information.
+- Using the CLI `strapi generate:service restaurant`. Read the [CLI documentation](../cli/CLI.md) for more information.
 - Manually create a JavaScript file named in `./api/**/services/`.
 
 #### Example

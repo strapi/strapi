@@ -28,8 +28,6 @@ Contains the main configurations relative to your project.
   - `path` (string): Path to the public folder. Default value: `./public`.
   - `maxAge` (integer): Cache-control max-age directive in ms. Default value: `60000`.
 
----
-
 ## Custom
 
 Add custom configurations to the project. The content of this file is available through the `strapi.config` object.
@@ -47,11 +45,9 @@ Add custom configurations to the project. The content of this file is available 
 
 These configurations are accessible through `strapi.config.backendURL` and `strapi.config.mainColor`.
 
----
-
 ## Language
 
-As described in the [i18n documentation](../plugin-development/frontend-development.md#i18n), Strapi includes an internationalization system. This is especially useful to translate API messages (errors, etc.).
+As described in the [i18n documentation](../guides/i18n.md), Strapi includes an internationalization system. This is especially useful to translate API messages (errors, etc.).
 
 **Path —** `./config/language.json`.
 
@@ -68,8 +64,6 @@ As described in the [i18n documentation](../plugin-development/frontend-developm
 - `defaultLocale` (string): Default locale used by the application. Default value: `en_us`.
 - `modes` (array): Methods used to detect client language. Default value: `["query", "subdomain", "cookie", "header", "url", "tld"]`.
 - `cookieName` (string): Name of the cookie used to store the locale name. Default value: `locale`.
-
----
 
 ## Functions
 
@@ -119,7 +113,7 @@ module.exports = async () => {
 CRON tasks allow you to schedule jobs (arbitrary functions) for execution at specific dates, with optional recurrence rules. It only uses a single timer at any given time (rather than reevaluating upcoming jobs every second/minute).
 
 ::: note
-Make sure the `enabled` cron config is set to `true` in your environment's variables.
+Make sure the `enabled` cron config is set to `true` in `./config/environments/**/server.json` file.
 :::
 
 The cron format consists of:
@@ -186,8 +180,6 @@ module.exports = (bookshelf, connection) => {
 };
 ```
 
----
-
 ## Locales
 
 The `locales` directory contains the translations of your API.
@@ -204,9 +196,9 @@ Each JSON file located in the folder must have the name of its corresponding tra
 }
 ```
 
-> Take a look at the [internationalization's guide](../guides/i18n.md) for more details.
-
----
+::: note
+Take a look at the [internationalization's guide](../guides/i18n.md) for more details.
+:::
 
 ## Environments
 
@@ -215,8 +207,6 @@ Most of the application's configurations are defined by environment. It means th
 ::: note
 You can access the config of the current environment through `strapi.config.currentEnvironment`.
 :::
-
----
 
 ## Database
 
@@ -300,15 +290,14 @@ You can access the config of the current environment through `strapi.config.curr
       },
       "options": {}
     },
-    "redis": {
-      "connector": "strapi-redis",
+    "sqlite": {
+      "connector": "strapi-hook-bookshelf",
       "settings": {
-        "port": 6379,
-        "host": "localhost",
-        "password": ""
+        "client": "sqlite",
+        "filename": ".tmp/data.db"
       },
       "options": {
-        "debug": false
+        "useNullAsDefault": true
       }
     }
   }
@@ -319,38 +308,9 @@ You can access the config of the current environment through `strapi.config.curr
 Please refer to the [dynamic configurations section](#dynamic-configurations) to use global environment variable to configure the databases.
 :::
 
-#### MLab Example
-
-**Path —** `./config/environments/**/database.json`.
-
-```json
-{
-  "defaultConnection": "default",
-  "connections": {
-    "default": {
-      "connector": "strapi-hook-mongoose",
-      "settings": {
-        "client": "mongo",
-        "host": "ds123456.mlab.com",
-        "port": 12345,
-        "database": "mlab_db_name",
-        "username": "mlab_user_name",
-        "password": "mlab_pass"
-      },
-      "options": {
-        "authenticationDatabase": "mlab_db_name",
-        "ssl": false
-      }
-    }
-  }
-}
-```
-
 ::: note
-Please note that you must give your MLab database name as the authenticationDatabase and your password can not contain the "@" symbol.
+Take a look at the [database's guide](../guides/databases.md) for more details.
 :::
-
----
 
 ## Request
 
@@ -376,8 +336,6 @@ Please note that you must give your MLab database name as the authenticationData
 The session doesn't work with `mongo` as a client. The package that we should use is broken for now.
 :::
 
----
-
 ## Response
 
 **Path —** `./config/environments/**/response.json`.
@@ -390,16 +348,10 @@ The session doesn't work with `mongo` as a client. The package that we should us
   - `enabled` (boolean): Enable or not `X-Powered-By` header to response. Default value: `true`.
   - `value` (string): The value of the header. Default value: `Strapi <strapi.io>`
 
----
-
 ## Security
 
 **Path —** `./config/environments/**/security.json`.
 
-- [`csrf`](https://en.wikipedia.org/wiki/Cross-site_request_forgery)
-  - `enabled` (boolean): Enable or disable CSRF. Default value: depends on the environment.
-  - `key` (string): The name of the CSRF token added to the model. Default value: `_csrf`.
-  - `secret` (string): The key to place on the session object which maps to the server side token. Default value: `_csrfSecret`.
 - [`csp`](https://en.wikipedia.org/wiki/Content_Security_Policy)
   - `enabled` (boolean): Enable or disable CSP to avoid Cross Site Scripting (XSS) and data injection attacks.
 - [`p3p`](https://en.wikipedia.org/wiki/P3P)
@@ -425,8 +377,6 @@ The session doesn't work with `mongo` as a client. The package that we should us
   - `enabled` (boolean): Enable or disable IP blocker. Default value: `false`.
   - `whiteList` (array): Whitelisted IPs. Default value: `[]`.
   - `blackList` (array): Blacklisted IPs. Default value: `[]`.
-
----
 
 ## Server
 
@@ -472,8 +422,6 @@ As an example using this configuration with Nginx your server would respond to `
 }
 ```
 
----
-
 ## Dynamic configurations
 
 For security reasons, sometimes it's better to set variables through the server environment. It's also useful to push dynamics values into configurations files. To enable this feature into JSON files, Strapi embraces a JSON-file interpreter into his core to allow dynamic value in the JSON configurations files.
@@ -513,15 +461,11 @@ In any JSON configurations files in your project, you can inject dynamic values 
 You can't execute functions inside the curly braces. Only strings are allowed.
 :::
 
----
-
 ## Database configuration
 
-Configuration files are not multi server friendly. So we create a data store for config you will want to update in production.
+Configuration files are not multi server friendly. So we created a data store for config you will want to update in production.
 
-#### Usage
-
-## Get settings:
+### Get settings
 
 - `environment` (string): Sets the environment you want to store the data in. By default it's current environment (can be an empty string if your config is environment agnostic).
 - `type` (string): Sets if your config is for an `api`, `plugin` or `core`. By default it's `core`.
@@ -541,7 +485,7 @@ const pluginStore = strapi.store({
 await pluginStore.get({ key: 'grant' });
 ```
 
-## Set settings:
+### Set settings
 
 - `value` (any, required): The value you want to store.
 

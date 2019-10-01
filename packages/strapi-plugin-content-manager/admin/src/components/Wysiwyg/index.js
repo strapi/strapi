@@ -673,9 +673,7 @@ class Wysiwyg extends React.Component {
   uploadFile = files => {
     const formData = new FormData();
     formData.append('files', files[0]);
-    const headers = {
-      'X-Forwarded-Host': 'strapi',
-    };
+    const headers = {};
 
     let newEditorState = this.getEditorState();
 

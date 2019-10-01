@@ -153,7 +153,7 @@ describe('Upload plugin end to end tests', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
-        message: 'File upload is disabled',
+        message: [{ messages: [{ message: 'File upload is disabled' }] }],
       });
     });
 
@@ -164,7 +164,7 @@ describe('Upload plugin end to end tests', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
-        message: 'Files are empty',
+        message: [{ messages: [{ message: 'Files are empty' }] }],
       });
     });
 
@@ -181,7 +181,11 @@ describe('Upload plugin end to end tests', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
-        message: 'rec.jpg file is bigger than limit size!',
+        message: [
+          {
+            messages: [{ message: 'rec.jpg file is bigger than limit size!' }],
+          },
+        ],
       });
     });
   });

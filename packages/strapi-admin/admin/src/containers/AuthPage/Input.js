@@ -47,7 +47,7 @@ const Input = ({
         {content => (
           <span
             style={{ color: '#0097f7', cursor: 'pointer' }}
-            onClick={e => handleClick(e, 'policy')}
+            onClick={e => handleClick(e, 'privacy')}
           >
             {content}
           </span>
