@@ -33,16 +33,16 @@ The panel will be available through [http://localhost:1337/dashboard](http://loc
 
 ### Development mode
 
-to enable the front-end development mode you need to start your application using the `--watch-admin` flag.
+To enable the front-end development mode you need to start your application using the `--watch-admin` flag.
 
 ```bash
 cd my-app
 strapi develop --watch-admin
 ```
 
-With this option you can
+With this option you can do the following:
 
-#### Customizing the `strapi-admin` package
+#### Customize the `strapi-admin` package
 
 All files added in `my-app/admin/src/` will either be replaced or added
 
@@ -93,7 +93,7 @@ export { languages, translationMessages };
 
 > With this modification only English and French will be available in your admin
 
-#### Customizing a plugin
+#### Customize a plugin
 
 Similarly to the back-end override system any file added in `my-app/extensions/<plugin-name>/admin/` will be copied and used instead of the original one (use with care).
 
