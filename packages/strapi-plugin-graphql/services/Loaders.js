@@ -160,9 +160,12 @@ module.exports = {
       return [];
     }
 
+    const ref = this.retrieveModel(model, query.options.source);
+    const ast = ref.associations.find(ast => ast.alias === query.alias);
+
     const params = {
       ...query.options,
-      populate: [query.alias],
+      populate: ast ? [query.alias] : [],
       query: {},
       _start: 0, // Don't apply start or skip
       _limit: -1, // Don't apply a limit
