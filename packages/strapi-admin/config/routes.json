@@ -33,6 +33,12 @@
       "policies": []
     },
     {
+      "method": "GET",
+      "path": "/init",
+      "handler": "Admin.init",
+      "policies": []
+    },
+    {
       "method": "POST",
       "path": "/plugins/install",
       "handler": "Admin.installPlugin",

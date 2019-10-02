@@ -14,6 +14,14 @@ The core team and the contributors send pull requests which go through the same 
 
 Feature Requests by the community are highly encouraged. Please feel free to submit a [feature request](https://portal.productboard.com/strapi) or to upvote 👍 [an existing feature request](https://portal.productboard.com/strapi) in the ProductBoard.
 
+## RFCs
+
+Some important changes in Strapi require some thoughts to be put into the design phase before starting working on a PR.
+
+The RFC (Request For Comments) process will help us create consensus among the core team and include as much feedback as possible from the community, for these upcoming changes.
+
+Before contributing, you will probably have to create a RFC on this [strapi/rfcs](https://github.com/strapi/rfcs) repo.
+
 ## Code of Conduct
 
 This project and everyone participating in it are governed by the [Strapi Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please read the [full text](CODE_OF_CONDUCT.md) so that you can read which actions may or may not be tolerated.
@@ -21,12 +29,6 @@ This project and everyone participating in it are governed by the [Strapi Code o
 ## Bugs
 
 We are using [GitHub Issues](https://github.com/strapi/strapi/issues) to manage our public bugs. We keep a close eye on this so before filing a new issue, try to make sure the problem does not already exist.
-
-## Get in Touch
-
-- [Email](mailto:hi@strapi.io)
-- [Slack](https://slack.strapi.io/)
-- [Spectrum](https://spectrum.chat/strapi?tab=posts)
 
 ---
 
@@ -57,17 +59,17 @@ First of all, you need to check if you're using the [required versions of Node.j
 
 Then, please follow the instructions below:
 
-#### 1. ▪ Fork the [repository](https://github.com/strapi/strapi)
+#### 1. Fork the [repository](https://github.com/strapi/strapi)
 
 [Go to the repository](https://github.com/strapi/strapi) and fork it to your own GitHub account.
 
-#### 2. 💿 Clone from your repository
+#### 2. Clone from your repository
 
 ```bash
 git clone git@github.com:YOUR_USERNAME/strapi.git
 ```
 
-#### 3. ⏳ Install the dependencies
+#### 3. Install the dependencies
 
 Go to the root of the repository.
 
@@ -75,7 +77,7 @@ Go to the root of the repository.
 cd strapi && yarn setup
 ```
 
-#### 4. 🚀 Start the example application
+#### 4. Start the example application
 
 **Go to the getstarted application**
 
@@ -86,7 +88,7 @@ yarn develop
 
 The server (API) is available at http://localhost:1337
 
-> ⚠️  If you've followed the recommended setup, you should not be able to reach the administration panel at http://localhost:1337/admin.
+**WARNING** ⚠️ If you've followed the recommended setup, you should not be able to reach the administration panel at http://localhost:1337/admin.
 
 **Start the administration panel server**
 
@@ -153,6 +155,8 @@ Before submitting an issue you need to make sure:
 - You can and do provide steps to reproduce your issue.
 - You have tried all the following (if relevant) and your issue remains:
   - Make sure you have the right application started.
+  - Make sure the [issue template](.github/ISSUE_TEMPLATE) is respected.
+  - Make sure your issue body is readable and [well formated](https://guides.github.com/features/mastering-markdown).
   - Make sure you've killed the Strapi server with CTRL+C and started it again.
   - Make sure the application you are using to reproduce the issue has a clean `node_modules` directory, meaning:
     - no dependencies are linked (e.g. you haven't run `npm link`)

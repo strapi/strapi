@@ -177,7 +177,7 @@ function appReducer(state = initialState, action) {
         return newAttribute;
       });
 
-      if (target === modelName && nature !== 'oneWay') {
+      if (target === modelName && nature !== 'oneWay' && nature !== 'manyWay') {
         newState = newState.updateIn([...basePath, 'attributes', key], () => {
           const newAttribute = state
             .get('temporaryAttributeRelation')

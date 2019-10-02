@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
 import styles from './styles.scss';
-/* eslint-disable jsx-a11y/label-has-for */
+
 const WysiwygBottomControls = ({ isPreviewMode, onChange, onClick }) => {
   const browse = (
     <FormattedMessage id="components.WysiwygBottomControls.uploadFiles.browse">

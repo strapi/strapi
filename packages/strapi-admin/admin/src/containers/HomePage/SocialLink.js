@@ -15,7 +15,6 @@ import Reddit from '../../assets/images/social_reddit.png';
 
 import { SocialLinkWrapper } from './components';
 
-/* eslint-disable jsx-a11y/alt-text */
 function getSrc(name) {
   switch (name) {
     case 'GitHub':
