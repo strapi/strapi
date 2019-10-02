@@ -53,19 +53,36 @@ All files added in `my-app/admin/src/` will either be replaced or added
 **Example: Changing the available locales of your application**
 
 ```bash
-# Create both the admin and admin/src folders
-cd my-app && mkdir -p admin/src
+# Create both the admin and admin/src/translations folders
+cd my-app && mkdir -p admin/src/translations
 # Change the available locales of the administration panel
 touch admin/src/i18n.js
+# Change the import and exports of the translations files
+touch admin/src/translations/index.js
 ```
 
-**Path: `my-app/admin/src/i18n.js**
+**Path --** `my-app/admin/src/i18n.js`
+
+```js
+import en from './en.json';
+import fr from './fr.json';
+
+const trads = {
+  en,
+  fr,
+};
+
+export default trads;
+```
+
+**Path --** `my-app/admin/src/i18n.js`
 
 ```js
 import { addLocaleData } from 'react-intl';
 import { reduce } from 'lodash';
 import en from 'react-intl/locale-data/en';
 import fr from 'react-intl/locale-data/fr';
+import trads from './translations';
 
 // We dismiss pt-BR and zh-Hans locales since they are not supported by react-intl
 const locales = {
@@ -95,7 +112,9 @@ const translationMessages = reduce(
 export { languages, translationMessages };
 ```
 
-> With this modification only English and French will be available in your admin
+::: note
+With this modification only English and French will be available in your admin
+:::
 
 #### Customize a plugin
 
@@ -115,7 +134,7 @@ cd admin/src && mkdir -p components/WysiwygWithErrors
 touch components/WysiwygWithErrors/index.js
 ```
 
-**Path: `my-app/extensions/content-manager/admin/src/components/WysiwygWithErrors/index.js**
+**Path --** `my-app/extensions/content-manager/admin/src/components/WysiwygWithErrors/index.js`
 
 ```js
 import React from 'react';
