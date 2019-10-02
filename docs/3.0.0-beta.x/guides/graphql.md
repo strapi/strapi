@@ -29,7 +29,7 @@ npm run strapi install graphql
 ::: tab "strapi" id="strapi"
 
 ```
-strapi install documentation
+strapi install graphql
 ```
 
 :::
