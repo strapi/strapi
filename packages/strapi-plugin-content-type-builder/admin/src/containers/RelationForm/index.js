@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, isEmpty } from 'lodash';
 
-import { InputsIndex as Input } from 'strapi-helper-plugin';
+import { GlobalContext, InputsIndex as Input } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
@@ -40,6 +40,7 @@ const NAVLINKS = [{ id: 'base', custom: 'relation' }, { id: 'advanced' }];
 
 class RelationForm extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
+  static contextType = GlobalContext;
 
   state = { didCheckErrors: false, formErrors: {}, showForm: false };
 
@@ -353,10 +354,6 @@ class RelationForm extends React.Component {
     );
   }
 }
-
-RelationForm.contextTypes = {
-  emitEvent: PropTypes.func,
-};
 
 RelationForm.defaultProps = {
   actionType: 'create',

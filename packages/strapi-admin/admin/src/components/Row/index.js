@@ -10,6 +10,7 @@ import cn from 'classnames';
 import { withRouter } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty } from 'lodash';
+import { GlobalContext } from 'strapi-helper-plugin';
 
 // Design
 import { IcoContainer, ListRow, PopUpWarning } from 'strapi-helper-plugin';
@@ -19,10 +20,11 @@ import styles from './styles.scss';
 const PLUGINS_WITH_CONFIG = ['content-manager', 'email', 'upload'];
 
 class Row extends React.Component {
+  static contextType = GlobalContext;
   state = { showModal: false };
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    if (nextProps.pluginActionSucceeded !== this.props.pluginActionSucceeded) {
+  componentDidUpdate(prevProps) {
+    if (prevProps.pluginActionSucceeded !== this.props.pluginActionSucceeded) {
       this.setState({ showModal: false });
     }
   }
@@ -105,10 +107,6 @@ class Row extends React.Component {
     );
   }
 }
-
-Row.contextTypes = {
-  currentEnvironment: PropTypes.string,
-};
 
 Row.propTypes = {
   history: PropTypes.object.isRequired,
