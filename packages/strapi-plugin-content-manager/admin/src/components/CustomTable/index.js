@@ -17,6 +17,7 @@ function CustomTable({
     location: { pathname, search },
     push,
   },
+  idAttribute,
   isBulkable,
 }) {
   const {
@@ -58,11 +59,11 @@ function CustomTable({
       data.map(row => {
         return (
           <TableRow
-            key={row.id}
+            key={row[idAttribute]}
             onClick={e => {
               e.preventDefault();
               e.stopPropagation();
-              handleGoTo(row.id);
+              handleGoTo(row[idAttribute]);
             }}
           >
             <Row
@@ -70,6 +71,7 @@ function CustomTable({
               headers={headers}
               row={row}
               goTo={handleGoTo}
+              idAttribute={idAttribute}
             />
           </TableRow>
         );
@@ -78,7 +80,11 @@ function CustomTable({
 
   return (
     <Table className="table">
-      <TableHeader headers={headers} isBulkable={isBulkable} />
+      <TableHeader
+        headers={headers}
+        isBulkable={isBulkable}
+        idAttribute={idAttribute}
+      />
       <tbody>
         {entriesToDelete.length > 0 && (
           <ActionCollapse colSpan={colSpanLength} />
@@ -94,6 +100,7 @@ CustomTable.defaultProps = {
   headers: [],
   isBulkable: true,
   slug: '',
+  idAttribute: 'id',
 };
 
 CustomTable.propTypes = {
@@ -108,6 +115,7 @@ CustomTable.propTypes = {
   }).isRequired,
   isBulkable: PropTypes.bool,
   slug: PropTypes.string,
+  idAttribute: PropTypes.string,
 };
 
 export default withRouter(memo(CustomTable));

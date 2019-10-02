@@ -18,12 +18,16 @@ const isListable = (schema, name) => {
   return true;
 };
 
+const getIdAttribute = schema =>
+  _.get(schema, ['options', 'idAttribute'], 'id');
+const isIdAttribute = (schema, name) => name === getIdAttribute(schema);
+
 const isSortable = (schema, name) => {
   if (!_.has(schema.attributes, name)) {
     return false;
   }
 
-  if (schema.modelType === 'group' && name === 'id') return false;
+  if (schema.modelType === 'group' && isIdAttribute(schema, name)) return false;
 
   const attribute = schema.attributes[name];
   if (NON_SORTABLES.includes(attribute.type)) {
@@ -42,7 +46,7 @@ const isVisible = (schema, name) => {
     return false;
   }
 
-  if (isTimestamp(schema, name) || name === 'id') {
+  if (isTimestamp(schema, name) || isIdAttribute(schema, name)) {
     return false;
   }
 

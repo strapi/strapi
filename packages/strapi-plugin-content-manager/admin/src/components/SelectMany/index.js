@@ -23,13 +23,15 @@ function SelectMany({
   onRemove,
   options,
   placeholder,
+  source,
   targetModel,
   value,
+  idAttribute,
 }) {
   const [, drop] = useDrop({ accept: ItemTypes.RELATION });
   const findRelation = id => {
     const relation = value.filter(c => {
-      return `${c.id}` === `${id}`;
+      return `${c[idAttribute]}` === `${id}`;
     })[0];
 
     return {
@@ -62,7 +64,10 @@ function SelectMany({
         id={name}
         filterOption={(candidate, input) => {
           if (!isEmpty(value)) {
-            const isSelected = value.findIndex(item => item.id === candidate.value.id) !== -1;
+            const isSelected =
+              value.findIndex(
+                item => item[idAttribute] === candidate.value.id
+              ) !== -1;
             if (isSelected) {
               return false;
             }
@@ -91,7 +96,7 @@ function SelectMany({
           <ul>
             {value.map((data, index) => (
               <ListItem
-                key={data.id}
+                key={data[idAttribute]}
                 data={data}
                 findRelation={findRelation}
                 mainField={mainField}
@@ -112,6 +117,7 @@ function SelectMany({
 SelectMany.defaultProps = {
   move: () => {},
   value: null,
+  idAttribute: 'id',
 };
 
 SelectMany.propTypes = {
@@ -130,6 +136,7 @@ SelectMany.propTypes = {
   placeholder: PropTypes.node.isRequired,
   targetModel: PropTypes.string.isRequired,
   value: PropTypes.array,
+  idAttribute: PropTypes.string,
 };
 
 export default memo(SelectMany);

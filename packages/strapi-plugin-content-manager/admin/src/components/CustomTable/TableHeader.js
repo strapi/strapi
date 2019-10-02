@@ -5,7 +5,7 @@ import { useListView } from '../../contexts/ListView';
 import CustomInputCheckbox from '../CustomInputCheckbox';
 import { Icon, Thead } from './styledComponents';
 
-function TableHeader({ headers, isBulkable }) {
+function TableHeader({ headers, isBulkable, idAttribute }) {
   const {
     data,
     entriesToDelete,
@@ -15,6 +15,7 @@ function TableHeader({ headers, isBulkable }) {
     searchParams: { _sort },
   } = useListView();
   const [sortBy, sortOrder] = _sort.split(':');
+  const onChangeSelectAll = () => onChangeBulkSelectall({ idAttribute });
 
   return (
     <Thead isBulkable={isBulkable}>
@@ -25,7 +26,7 @@ function TableHeader({ headers, isBulkable }) {
               entriesToDelete={entriesToDelete}
               isAll
               name="all"
-              onChange={onChangeBulkSelectall}
+              onChange={onChangeSelectAll}
               value={
                 data.length === entriesToDelete.length &&
                 entriesToDelete.length > 0
@@ -78,11 +79,13 @@ function TableHeader({ headers, isBulkable }) {
 TableHeader.defaultProps = {
   isBulkable: true,
   headers: [],
+  idAttribute: 'id',
 };
 
 TableHeader.propTypes = {
   headers: PropTypes.array,
   isBulkable: PropTypes.bool,
+  idAttribute: PropTypes.string,
 };
 
 export default memo(TableHeader);

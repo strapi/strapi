@@ -2,6 +2,8 @@
 
 const _ = require('lodash');
 const uploadFiles = require('../utils/upload-files');
+const getIdAttribute = (model, source) =>
+  _.get(strapi.query(model, source), 'primaryKey', 'id');
 /**
  * A set of functions called "actions" for `ContentManager`
  */
@@ -33,31 +35,34 @@ module.exports = {
 
   async createMultipart(data, { files = {}, model, source } = {}) {
     const entry = await strapi.query(model, source).create(data);
+    const idAttribute = getIdAttribute(model, source);
 
     await uploadFiles(entry, files, { model, source });
 
-    return strapi.query(model, source).findOne({ id: entry.id });
+    return strapi.query(model, source).findOne({ id: entry[idAttribute] });
   },
 
   async create(data, { files, model, source } = {}) {
     const entry = await strapi.query(model, source).create(data);
+    const idAttribute = getIdAttribute(model, source);
 
     if (files) {
       await uploadFiles(entry, files, { model, source });
-      return strapi.query(model, source).findOne({ id: entry.id });
+      return strapi.query(model, source).findOne({ id: entry[idAttribute] });
     }
 
     return entry;
   },
 
   async edit(params, data, { model, source, files } = {}) {
+    const idAttribute = getIdAttribute(model, source);
     const entry = await strapi
       .query(model, source)
       .update({ id: params.id }, data);
 
     if (files) {
       await uploadFiles(entry, files, { model, source });
-      return strapi.query(model, source).findOne({ id: entry.id });
+      return strapi.query(model, source).findOne({ id: entry[idAttribute] });
     }
 
     return entry;
