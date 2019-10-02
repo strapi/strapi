@@ -208,7 +208,7 @@ module.exports = {
                 case 'manyMorphToOne': {
                   // Update the relational array.
                   acc[current] = property.map(obj => {
-                    const refModel = strapi.getModel(obj.ref, obj.source);
+                    const refModel = strapi.getModel(_.toLower(obj.ref), obj.source);
                     return {
                       ref: new mongoose.Types.ObjectId(obj.refId),
                       kind: obj.kind || refModel.globalId,
