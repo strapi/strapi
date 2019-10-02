@@ -46,7 +46,6 @@ module.exports = (projectDirectory, cliArguments) => {
       'strapi',
       'strapi-admin',
       'strapi-utils',
-      'strapi-plugin-settings-manager',
       'strapi-plugin-content-type-builder',
       'strapi-plugin-content-manager',
       'strapi-plugin-users-permissions',

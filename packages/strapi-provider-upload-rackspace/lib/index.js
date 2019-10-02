@@ -7,6 +7,7 @@
 // Public node modules.
 const pkgcloud = require('pkgcloud');
 const streamifier = require('streamifier');
+/* eslint-disable no-unused-vars */
 
 module.exports = {
   provider: 'rackspace-cloudfiles',
@@ -54,7 +55,6 @@ module.exports = {
       });
 
     const byteSize = bytes => {
-      // eslint-disable-line no-unused-vars
       if (bytes === 0) return 0;
       const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)), 10);
       return i === 0 ? bytes : `${(bytes / 1024 ** i).toFixed(1)}`;
