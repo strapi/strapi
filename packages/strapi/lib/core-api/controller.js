@@ -1,17 +1,13 @@
 'use strict';
 
-const parseMultipartData = require('./utils/parse-multipart');
-
-const proto = {
-  parseMultipartData,
-};
+const { parseMultipartData, sanitizeEntity } = require('strapi-utils');
 
 /**
  * default bookshelf controller
  *
  */
-module.exports = ({ service }) => {
-  return Object.assign(Object.create(proto), {
+module.exports = ({ service, model }) => {
+  return {
     /**
      * expose some utils so the end users can use them
      */
@@ -22,11 +18,15 @@ module.exports = ({ service }) => {
      * @return {Object|Array}
      */
 
-    find(ctx) {
+    async find(ctx) {
+      let entities;
       if (ctx.query._q) {
-        return service.search(ctx.query);
+        entities = await service.search(ctx.query);
+      } else {
+        entities = await service.find(ctx.query);
       }
-      return service.find(ctx.query);
+
+      return entities.map(entity => sanitizeEntity(entity, { model }));
     },
 
     /**
@@ -35,8 +35,9 @@ module.exports = ({ service }) => {
      * @return {Object}
      */
 
-    findOne(ctx) {
-      return service.findOne(ctx.params);
+    async findOne(ctx) {
+      const entity = await service.findOne(ctx.params);
+      return sanitizeEntity(entity, { model });
     },
 
     /**
@@ -58,13 +59,15 @@ module.exports = ({ service }) => {
      * @return {Object}
      */
 
-    create(ctx) {
+    async create(ctx) {
+      let entity;
       if (ctx.is('multipart')) {
-        const { data, files } = this.parseMultipartData(ctx);
-        return service.create(data, { files });
+        const { data, files } = parseMultipartData(ctx);
+        entity = await service.create(data, { files });
+      } else {
+        entity = await service.create(ctx.request.body);
       }
-
-      return service.create(ctx.request.body);
+      return sanitizeEntity(entity, { model });
     },
 
     /**
@@ -73,13 +76,16 @@ module.exports = ({ service }) => {
      * @return {Object}
      */
 
-    update(ctx) {
+    async update(ctx) {
+      let entity;
       if (ctx.is('multipart')) {
-        const { data, files } = this.parseMultipartData(ctx);
-        return service.update(ctx.params, data, { files });
+        const { data, files } = parseMultipartData(ctx);
+        entity = await service.update(ctx.params, data, { files });
+      } else {
+        entity = await service.update(ctx.params, ctx.request.body);
       }
 
-      return service.update(ctx.params, ctx.request.body);
+      return sanitizeEntity(entity, { model });
     },
 
     /**
@@ -88,8 +94,9 @@ module.exports = ({ service }) => {
      * @return {Object}
      */
 
-    delete(ctx) {
-      return service.delete(ctx.params);
+    async delete(ctx) {
+      const entity = await service.delete(ctx.params);
+      return sanitizeEntity(entity, { model });
     },
-  });
+  };
 };

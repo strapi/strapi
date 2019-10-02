@@ -42,7 +42,7 @@ describe('<LocaleToggle />', () => {
       const renderedComponent = shallow(<LocaleToggle {...props} />);
       const { getFlagUrl } = renderedComponent.instance();
   
-      expect(getFlagUrl('zh')).toEqual('https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/cn.svg');
+      expect(getFlagUrl('zh')).toEqual('https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/tw.svg');
       expect(getFlagUrl('zh-Hans')).toEqual('https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/cn.svg');
     });
 

@@ -97,12 +97,12 @@ Please refer to the [controllers' guide](../guides/controllers.md) for more info
 
 ---
 
-## Filters
+## Parameters
 
-Filters are a handy way to request data according to generic parameters. It makes filtering, sorting and paginating easy and reusable (eg. `GET /users?_limit=30&name=John`).
+Parameters are a handy way to request data according to generic parameters. It makes filtering, sorting and paginating easy and reusable (eg. `GET /users?_limit=30&name=John`).
 
 ::: note
-Please refer to the [filters' guide](../guides/filters.md) for more information.
+Please refer to the [parameters' guide](../guides/parameters.md) for more information.
 :::
 
 ---

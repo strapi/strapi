@@ -5,9 +5,16 @@ const lazyRateLimit = {
 };
 
 module.exports = async (ctx, next) => {
-  const message = ctx.request.admin
-    ? [{ messages: [{ id: 'Auth.form.error.ratelimit' }] }]
-    : 'Too many attempts, please try again in a minute.';
+  const message = [
+    {
+      messages: [
+        {
+          id: 'Auth.form.error.ratelimit',
+          message: 'Too many attempts, please try again in a minute.',
+        },
+      ],
+    },
+  ];
 
   return lazyRateLimit.RateLimit.middleware(
     Object.assign(

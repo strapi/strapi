@@ -8,14 +8,13 @@ const fs = require('fs');
 const path = require('path');
 
 module.exports = {
-
   /**
    * Retrieve app's folders.
    *
    * @return {Object|Array}
    */
 
-  findFolders: async (ctx) => {
+  findFolders: async ctx => {
     try {
       const folders = fs.readdirSync(path.resolve(process.cwd()));
 
@@ -26,8 +25,8 @@ module.exports = {
       strapi.log.fatal(error); // ctx.log.fatal(error);
       ctx.badImplementation(error.message);
     }
-  }
-}
+  },
+};
 ```
 
 ## Global logger configuration
@@ -41,8 +40,7 @@ The global logger is configured by environment variables.
 
 ## Request logging middleware
 
-To configure the request-logger middleware, you have to edit the following file `./config/environments/*/request.json`.
-
+To configure the request-logger middleware, you have to edit the following file `./config/environments/**/request.json`.
 
 ```json
 {
@@ -59,6 +57,5 @@ To configure the request-logger middleware, you have to edit the following file 
 - `level`: defines the desired logging level (fatal, error, warn, info, debug, trace).
 - `exposeInContext`: allows access to the logger through the context.
 - `requests`: incoming HTTP requests will be logged.
-
 
 To find more details about the logger API, please refer to the [Pino documentation](http://getpino.io/#/).

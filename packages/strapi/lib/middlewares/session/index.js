@@ -24,7 +24,7 @@ module.exports = strapi => {
         strapi.config.hooks.session.secretKeys;
 
       if (
-        strapi.config.middleware.settings.session.hasOwnProperty('client') &&
+        _.has(strapi.config.middleware.settings.session, 'client') &&
         _.isString(strapi.config.middleware.settings.session.client) &&
         strapi.config.middleware.settings.session.client !== 'cookie'
       ) {
@@ -52,7 +52,7 @@ module.exports = strapi => {
           });
         }
       } else if (
-        strapi.config.middleware.settings.session.hasOwnProperty('client') &&
+        _.has(strapi.config.middleware.settings.session, 'client') &&
         _.isString(strapi.config.middleware.settings.session.client) &&
         strapi.config.middleware.settings.session.client === 'cookie'
       ) {
@@ -159,6 +159,7 @@ module.exports = strapi => {
     },
 
     requireStore(store) {
+      // eslint-disable-next-line no-useless-catch
       try {
         return require(path.resolve(
           strapi.config.appPath,

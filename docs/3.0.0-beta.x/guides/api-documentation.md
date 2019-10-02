@@ -10,69 +10,72 @@ You'll be able to visualize all your end-points directly from the SWAGGER UI.
 
 As usual run the following in your terminal:
 
-```bash
-# Go to your strapi project
-$ cd my-strapi-project
+:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
 
-# Install the documentation plugin using the CLI
-$ strapi install documentation
+::: tab "yarn" id="yarn-install-documentation"
 
-# Start your server
-$ strapi develop
+```
+yarn strapi install documentation
 ```
 
-Once the plugin is installed it will create a `documentation` folder in each model of your project, so you can easily modify the default generated documentation. Then, each documentation file is merged into the `full_documentation.json` located in the plugin.
+:::
+
+::: tab "npm" id="npm-install-documentation"
+
+```
+npm run strapi install documentation
+```
+
+:::
+
+::: tab "strapi" id="strapi-install-documentation"
+
+```
+strapi install documentation
+```
+
+:::
+
+::::
+
+When your plugin is installed, you just have to start your application and it will generate your API documentation.
 
 The administration panel lets you configure the basic settings of this plugin.
 
-## Architecture and Generated Files
+![Accessing the documentation](../assets/plugins/documentation/open-doc.gif 'Accessing the documentation')
 
-This plugin follows the OpenApi Specifications ([0AS.3.0.2](https://swagger.io/specification/)) and generates an OpenAPI Document called `full_documentation.json`.
-
-### Plugin's architecture
-
-```
-./extensions
-└─── documentation
-    |
-    └─── documentation // Folder containing your OpenAPI Documents
-         └─── 1.0.0 // OpenAPI Document's version
-         | └─── full_documentation.json // OpenAPI Document used by SWAGGER UI
-         |
-         └─── 2.0.0
-           └─── full_documentation.json
-```
-
-### Generated files
-
-When you start your server with this plugin installed it will automatically create the following files in your APIs (we will see how it works for the plugins). The plugin scans all the routes available in your model to create the `paths` field.
-
-```
-/my-strapi-project
-  └─── api
-        └─── Foo
-            └── documentation // Folder added to your model
-                └── 1.0.0
-                    └── foo.json // File containing all the paths where the responses can be inferred
-                    └── unclassified.json // File containing the manually added route of your `routes.json` file
-                    |
-                    └── overrides // (Optional) Folder to override the generated documentation
-```
-
-## Basic Configurations
+## Administration panel
 
 This plugin comes with an interface that is available in your administration panel and a configuration file.
 
-### Administration Panel Settings
+### Restrict the access to your API's documentation
 
-From your administration panel you can:
+By default, your documentation will be accessible by anyone.
 
-- Retrieve your jwt token(1):
-- Restrict the access to your API's documentation
-- Regenerate or delete a documentation
-- Open/Update/Delete a specific documentation version
+If you want to restrict the access to the documentation you have to enable the **Restricted Access** option.
 
-### Manual Configurations
+- Click the `ON` of **Restricted Access**
+- Select a password in the `password` input
+- Save your settings
+
+Now if you try to access your documentation, you will have to enter the password you set.
+
+### Retrieve your JWT token
+
+Strapi is secured by default which means that most of your end-points require your user to be authorized. You will need to paste this token in your SWAGGER UI to try out your end-points.
+
+- Click on the **Retrieve your jwt token** input to copy the token
+- Visit your documentation
+- Click on the **Authorize** button on the right
+- Past your token in the `value` input
+
+### Regenerate a documentation
+
+If you update your API, the documentation will not be updated automatically.
+You will have to click on the **Regenerate** button of the documentation version you want to update.
+It will regenerated to specified version with the current API documentation.
+
+## Settings
 
 You need to create the `./extensions/documentation/config/settings.json` file manually to customize the swagger ui settings.
 
@@ -116,7 +119,7 @@ Here are the file that needs to be created in order to change the documentation 
   ],
   "externalDocs": {
     "description": "Find out more",
-    "url": "https://strapi.io/documentation/3.0.0-alpha.x/"
+    "url": "https://strapi.io/documentation/3.0.0-beta.x/"
   },
   "security": [
     {
@@ -132,62 +135,77 @@ Here are the file that needs to be created in order to change the documentation 
 The `openapi`, `info`, `x-strapi-config`, `servers`, `externalDocs` and `security` fields are located in the `./extensions/documentation/config/settings.json` file. Here you can specify all your environment variables, licenses, external documentation and so on...
 You can add all the entries listed in the [specification](https://swagger.io/specification/).
 
-#### Usage of the `settings.json` File
+::: danger
 
-**Do not change the `openapi` field of the `settings.json`.**
+Do not change the `openapi` field of the `settings.json`
 
-> **When you change a field in the settings.json file you need to manually restart your server.**
+:::
+
+::: tip NOTE
+
+When you change a field in the settings.json file you need to manually restart your server.
+
+:::
+
+### Create a new version of the documentation
+
+To create a new version of your documentation, you will have to update the `version` key.
 
 ```
 {
-  "openapi": "3.0.0" // Do not change this version
   "info": {
-    "version": "1.0.0" // Change this line to create a new version
-     "title": "DOCUMENTATION",
-    "description": "",
-    "termsOfService": "YOUR_TERMS_OF_SERVICE_URL",
-    "contact": {
-      "name": "TEAM",
-      "email": "contact-email@something.io",
-      "url": "mywebsite.io"
-    },
-    "license": {
-      "name": "Apache 2.0",
-      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
-    }
+    "version": "2.0.0"
   }
-  "x-strapi-config": {
-    "path": "/documentation", // Change this line to change to url of the doc
-    "showGeneratedFiles": true
-  },
-  "servers" [ // Your servers configuration you can add as many as you want
-    {
-      "url": "http://localhost:1337",
-      "description": "Development server"
-    },
-    {
-      "url": "YOUR_STAGING_SERVER",
-      "description": "Staging server"
-    },
-    {
-      "url": "YOUR_PRODUCTION_SERVER",
-      "description": "Production server"
-    }
-  ],
-  "externalDocs": {
-    "description": "Find out more",
-    "url": "https://strapi.io/documentation/3.0.0-beta.x/"
-  },
-  "security": [ // This field is important to add your jwt token in the SWAGGER UI
-    {
-      "bearerAuth": []
-    }
-  ]
+}
 ```
 
-(1) _Strapi is secured by default which means that most of your end-points require your user to be authenticated. You will need to paste this token in your SWAGGER UI to try out your end-points._
+### Change the documentation path
 
-## Overriding the Suggested Documentation
+To access your documentation on a custom path, you will have to update the `path` key.
+
+```
+{
+  "x-strapi-config": {
+    "path": "/documentation"
+  }
+}
+```
+
+## File structure
+
+This plugin follows the OpenApi Specifications ([0AS.3.0.2](https://swagger.io/specification/)) and generates an OpenAPI Document called `full_documentation.json`.
+
+### Plugin's architecture
+
+```
+./extensions
+└─── documentation
+    |
+    └─── documentation // Folder containing your OpenAPI Documents
+         └─── 1.0.0 // OpenAPI Document's version
+         | └─── full_documentation.json // OpenAPI Document used by SWAGGER UI
+         |
+         └─── 2.0.0
+           └─── full_documentation.json
+```
+
+### Generated files
+
+When you start your server with this plugin installed it will automatically create the following files in your APIs (we will see how it works for the plugins). The plugin scans all the routes available in your model to create the `paths` field.
+
+```
+/my-strapi-project
+  └─── api
+        └─── Foo
+            └── documentation // Folder added to your model
+                └── 1.0.0
+                    └── foo.json // File containing all the paths where the responses can be inferred
+                    └── unclassified.json // File containing the manually added route of your `routes.json` file
+                    |
+                    └── overrides // (Optional) Folder to override the generated documentation
+```
+
+## Overriding the suggested documentation
 
 Currently the plugin writes a json file for each API.
 
