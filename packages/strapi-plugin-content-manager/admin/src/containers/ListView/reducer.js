@@ -49,7 +49,9 @@ function listViewReducer(state = initialState, action) {
           return List([]);
         }
 
-        return state.get('data').map(value => toString(value.id));
+        return state
+          .get('data')
+          .map(value => toString(value[action.idAttribute]));
       });
     case ON_DELETE_DATA_SUCCEEDED:
       return state

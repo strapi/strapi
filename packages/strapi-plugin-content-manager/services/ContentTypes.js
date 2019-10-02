@@ -55,45 +55,42 @@ module.exports = {
 
   formatContentTypeSchema(contentType) {
     const { associations, allAttributes } = contentType;
-    return {
-      ...pickSchemaFields(contentType),
-      attributes: {
-        id: {
-          type: contentType.primaryKeyType,
-        },
-        ...Object.keys(allAttributes).reduce((acc, key) => {
-          const attribute = allAttributes[key];
-          const assoc = associations.find(assoc => assoc.alias === key);
+    const schemaFields = pickSchemaFields(contentType);
+    const attributes = Object.keys(allAttributes).reduce((acc, key) => {
+      const attribute = allAttributes[key];
+      const assoc = associations.find(assoc => assoc.alias === key);
 
-          if (assoc) {
-            const { plugin } = attribute;
-            let targetEntity = attribute.model || attribute.collection;
+      if (assoc) {
+        const { plugin } = attribute;
+        let targetEntity = attribute.model || attribute.collection;
 
-            if (plugin === 'upload' && targetEntity === 'file') {
-              acc[key] = {
-                type: 'media',
-                multiple: attribute.collection ? true : false,
-                required: attribute.required ? true : false,
-              };
-            } else {
-              acc[key] = {
-                ...attribute,
-                type: 'relation',
-                targetModel: targetEntity,
-                relationType: assoc.nature,
-              };
-            }
-          } else {
-            if (attribute.type === 'timestampUpdate') {
-              attribute.type = 'timestamp';
-            }
+        if (plugin === 'upload' && targetEntity === 'file') {
+          acc[key] = {
+            type: 'media',
+            multiple: attribute.collection ? true : false,
+            required: attribute.required ? true : false,
+          };
+        } else {
+          acc[key] = {
+            ...attribute,
+            type: 'relation',
+            targetModel: targetEntity,
+            relationType: assoc.nature,
+          };
+        }
+      } else {
+        if (attribute.type === 'timestampUpdate') {
+          attribute.type = 'timestamp';
+        }
 
-            acc[key] = attribute;
-          }
-          return acc;
-        }, {}),
-      },
+        acc[key] = attribute;
+      }
+      return acc;
+    }, {});
+    attributes[contentType.primaryKey] = {
+      type: contentType.primaryKeyType,
     };
+    return { ...schemaFields, attributes };
   },
 
   findContentTypeModel({ uid, source }) {

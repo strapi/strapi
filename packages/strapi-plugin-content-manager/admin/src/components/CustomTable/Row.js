@@ -56,7 +56,7 @@ const getDisplayedValue = (type, value, name) => {
   }
 };
 
-function Row({ goTo, isBulkable, row, headers }) {
+function Row({ goTo, isBulkable, row, headers, idAttribute }) {
   const {
     entriesToDelete,
     onChangeBulk,
@@ -78,11 +78,12 @@ function Row({ goTo, isBulkable, row, headers }) {
       {isBulkable && (
         <td key="i" onClick={e => e.stopPropagation()}>
           <CustomInputCheckbox
-            name={row.id}
+            name={row[idAttribute]}
             onChange={onChangeBulk}
             value={
-              entriesToDelete.filter(id => toString(id) === toString(row.id))
-                .length > 0
+              entriesToDelete.filter(
+                id => toString(id) === toString(row[idAttribute])
+              ).length > 0
             }
           />
         </td>
@@ -109,14 +110,14 @@ function Row({ goTo, isBulkable, row, headers }) {
             {
               icoType: 'pencil',
               onClick: () => {
-                goTo(row.id);
+                goTo(row[idAttribute]);
               },
             },
             {
               id: row.id,
               icoType: 'trash',
               onClick: () => {
-                onClickDelete(row.id);
+                onClickDelete(row[idAttribute]);
               },
             },
           ]}
@@ -126,11 +127,16 @@ function Row({ goTo, isBulkable, row, headers }) {
   );
 }
 
+Row.defaultProps = {
+  idAttribute: 'id',
+};
+
 Row.propTypes = {
   goTo: PropTypes.func.isRequired,
   headers: PropTypes.array.isRequired,
   isBulkable: PropTypes.bool.isRequired,
   row: PropTypes.object.isRequired,
+  idAttribute: PropTypes.string,
 };
 
 export default withRouter(memo(Row));

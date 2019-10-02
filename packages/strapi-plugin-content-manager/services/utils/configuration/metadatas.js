@@ -9,30 +9,39 @@ const {
 } = require('./attributes');
 const { formatContentTypeSchema } = require('../../ContentTypes');
 
+const getIdAttribute = schema =>
+  _.get(schema, ['options', 'idAttribute'], 'id');
+const isIdAttribute = (schema, name) => name === getIdAttribute(schema);
+
 function createDefaultMetadatas(schema) {
-  return {
-    ...Object.keys(schema.attributes).reduce((acc, name) => {
-      acc[name] = createDefaultMetadata(schema, name);
-      return acc;
-    }, {}),
-    id: {
-      edit: {},
-      list: {
-        label: 'Id',
-        searchable: true,
-        sortable: true,
-      },
+  const idAttribute = getIdAttribute(schema);
+  const metadatas = Object.keys(schema.attributes).reduce((acc, name) => {
+    const defaultMetadata = createDefaultMetadata(schema, name);
+    if (isIdAttribute(schema, name)) {
+      defaultMetadata.edit = {};
+    }
+    acc[name] = defaultMetadata;
+    return acc;
+  }, {});
+  metadatas[idAttribute] = {
+    edit: {},
+    list: {
+      label: _.get(metadatas[idAttribute], ['list', 'label'], 'Id'),
+      searchable: true,
+      sortable: true,
     },
   };
+  return metadatas;
 }
 
 function createDefaultMainField(schema) {
-  if (!schema) return 'id';
+  const idAttribute = getIdAttribute(schema);
+  if (!schema) return idAttribute;
 
   return (
     Object.keys(schema.attributes).find(
       key => schema.attributes[key].type === 'string'
-    ) || 'id'
+    ) || idAttribute
   );
 }
 
@@ -95,7 +104,6 @@ async function syncMetadatas(configuration, schema) {
     createDefaultMetadatas(schema),
     metasWithValidKeys
   );
-
   // clear the invalid mainFields
   const updatedMetas = Object.keys(metasWithDefaults).reduce((acc, key) => {
     const { edit, list } = metasWithDefaults[key];
@@ -123,7 +131,7 @@ async function syncMetadatas(configuration, schema) {
     }
 
     // if the mainField is id you can keep it
-    if (edit.mainField === 'id') return acc;
+    if (isIdAttribute(schema, edit.mainField)) return acc;
 
     // check the mainField in the targetModel
     const targetSchema = getTargetSchema(attr.targetModel, attr.plugin);
