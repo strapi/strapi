@@ -127,6 +127,8 @@ function ListView({
   const getMetaDatas = (path = []) =>
     get(layouts, [slug, 'metadatas', ...path], {});
   const getListLayout = () => get(layouts, [slug, 'layouts', 'list'], []);
+  const getIdAttribute = () =>
+    get(layouts, [slug, 'schema', 'options', 'idAttribute'], 'id');
   const getAllLabels = () => {
     return sortBy(
       Object.keys(getMetaDatas())
@@ -378,6 +380,7 @@ function ListView({
                   isBulkable={getLayoutSettingRef.current('bulkable')}
                   onChangeParams={handleChangeParams}
                   slug={slug}
+                  idAttribute={getIdAttribute()}
                 />
                 <Footer />
               </div>

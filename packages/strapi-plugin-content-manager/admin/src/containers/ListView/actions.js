@@ -36,9 +36,10 @@ export function onChangeBulk({ target: { name, value } }) {
   };
 }
 
-export function onChangeBulkSelectall() {
+export function onChangeBulkSelectall({ idAttribute }) {
   return {
     type: ON_CHANGE_BULK_SELECT_ALL,
+    idAttribute,
   };
 }
 
