@@ -9,12 +9,13 @@ import PropTypes from 'prop-types';
 import { get, map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
-
+import { useEditPageContext } from '../../contexts/EditPage';
 import InputCheckbox from '../InputCheckboxPlugin';
 
 import { Header, Label, Separator, Wrapper } from './Components';
 
-function Controller({ actions, inputNamePath, isOpen, name }, context) {
+function Controller({ actions, inputNamePath, isOpen, name }) {
+  const { selectAllActions } = useEditPageContext();
   const [inputSelected, setInputSelected] = useState('');
 
   const areAllActionsSelected = () => {
@@ -24,7 +25,7 @@ function Controller({ actions, inputNamePath, isOpen, name }, context) {
   };
 
   const handleChange = () => {
-    context.selectAllActions(
+    selectAllActions(
       `${inputNamePath}.controllers.${name}`,
       !areAllActionsSelected()
     );
@@ -85,10 +86,6 @@ function Controller({ actions, inputNamePath, isOpen, name }, context) {
     </Wrapper>
   );
 }
-
-Controller.contextTypes = {
-  selectAllActions: PropTypes.func.isRequired,
-};
 
 Controller.defaultProps = {
   actions: {},

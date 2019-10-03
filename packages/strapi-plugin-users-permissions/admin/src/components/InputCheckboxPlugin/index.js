@@ -6,13 +6,22 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-
+import { useEditPageContext } from '../../contexts/EditPage';
 import { Label, Wrapper } from './Components';
 
-function InputCheckboxPlugin(
-  { inputSelected, label, name, setNewInputSelected, value },
-  context
-) {
+function InputCheckboxPlugin({
+  inputSelected,
+  label,
+  name,
+  setNewInputSelected,
+  value,
+}) {
+  const {
+    onChange,
+    resetShouldDisplayPoliciesHint,
+    setInputPoliciesPath,
+    setShouldDisplayPolicieshint,
+  } = useEditPageContext();
   const isSelected = inputSelected === name;
 
   const handleChange = () => {
@@ -25,28 +34,28 @@ function InputCheckboxPlugin(
     if (!value) {
       setNewInputSelected(name);
 
-      context.setShouldDisplayPolicieshint();
-      context.setInputPoliciesPath(name);
+      setShouldDisplayPolicieshint();
+      setInputPoliciesPath(name);
     } else {
       setNewInputSelected('');
     }
 
-    context.onChange({ target });
+    onChange({ target });
   };
 
   const handleClick = () => {
     setNewInputSelected(name);
-    context.setInputPoliciesPath(name);
+    setInputPoliciesPath(name);
 
     if (isSelected) {
-      context.resetShouldDisplayPoliciesHint();
+      resetShouldDisplayPoliciesHint();
     } else {
-      context.setShouldDisplayPolicieshint();
+      setShouldDisplayPolicieshint();
     }
   };
 
   return (
-    <Wrapper className="col-md-4">
+    <Wrapper className="col-md-4" value={value}>
       <div className={`form-check ${isSelected ? 'highlighted' : ''}`}>
         <Label
           className={`form-check-label ${value ? 'checked' : ''}`}
@@ -67,13 +76,6 @@ function InputCheckboxPlugin(
     </Wrapper>
   );
 }
-
-InputCheckboxPlugin.contextTypes = {
-  onChange: PropTypes.func.isRequired,
-  resetShouldDisplayPoliciesHint: PropTypes.func.isRequired,
-  setInputPoliciesPath: PropTypes.func.isRequired,
-  setShouldDisplayPolicieshint: PropTypes.func.isRequired,
-};
 
 InputCheckboxPlugin.defaultProps = {
   label: '',

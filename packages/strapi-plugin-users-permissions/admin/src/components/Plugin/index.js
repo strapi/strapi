@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { Collapse } from 'reactstrap';
 import { capitalize, get, isEmpty, map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-
+import { EditPageContext } from '../../contexts/EditPage';
 import Controller from '../Controller';
 
 import {
@@ -25,6 +25,8 @@ import {
 class Plugin extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = { collapse: false };
+
+  static contextType = EditPageContext;
 
   componentDidMount() {
     // Open the application's permissions section if there are APIs
@@ -120,11 +122,6 @@ class Plugin extends React.Component {
     );
   }
 }
-
-Plugin.contextTypes = {
-  plugins: PropTypes.object.isRequired,
-  resetShouldDisplayPoliciesHint: PropTypes.func.isRequired,
-};
 
 Plugin.defaultProps = {
   name: '',

@@ -172,13 +172,6 @@ class ListRow extends React.Component {
   }
 }
 
-// ListRow.contextTypes = {
-//   emitEvent: PropTypes.func,
-//   pathname: PropTypes.string,
-//   push: PropTypes.func,
-//   setDataToEdit: PropTypes.func.isRequired,
-// };
-
 ListRow.defaultProps = {
   item: {
     name: 'Owner',
