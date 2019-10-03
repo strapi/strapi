@@ -23,7 +23,10 @@ module.exports = {
     Query: {
       file: false,
       files: {
-        resolver: 'Upload.find',
+        resolver: {
+          plugin: 'upload',
+          handler: 'Upload.find'
+        }
       },
     },
     Mutation: {

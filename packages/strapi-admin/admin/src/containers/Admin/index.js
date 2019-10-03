@@ -12,7 +12,11 @@ import { bindActionCreators, compose } from 'redux';
 import { Switch, Route } from 'react-router-dom';
 import { isEmpty } from 'lodash';
 // Components from strapi-helper-plugin
-import { LoadingIndicatorPage, OverlayBlocker } from 'strapi-helper-plugin';
+import {
+  GlobalContextProvider,
+  LoadingIndicatorPage,
+  OverlayBlocker,
+} from 'strapi-helper-plugin';
 import { SHOW_TUTORIALS } from '../../config';
 
 import Header from '../../components/Header/index';
@@ -49,14 +53,6 @@ import styles from './styles.scss';
 
 export class Admin extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
-  getChildContext = () => ({
-    emitEvent: this.props.emitEvent,
-    currentEnvironment: this.props.global.currentEnvironment,
-    disableGlobalOverlayBlocker: this.props.disableGlobalOverlayBlocker,
-    enableGlobalOverlayBlocker: this.props.enableGlobalOverlayBlocker,
-    plugins: this.props.global.plugins,
-    updatePlugin: this.props.updatePlugin,
-  });
 
   shouldComponentUpdate(prevProps) {
     return !isEmpty(difference(prevProps, this.props));
@@ -147,62 +143,62 @@ export class Admin extends React.Component {
     }
 
     return (
-      <div className={styles.adminPage}>
-        <LeftMenu version={strapiVersion} plugins={plugins} />
-        <NavTopRightWrapper>
-          {/* Injection zone not ready yet */}
-          <Logout />
-          <LocaleToggle isLogged />
-        </NavTopRightWrapper>
-        <div className={styles.adminPageRightWrapper}>
-          <Header />
-          <div className={styles.content}>
-            <Switch>
-              <Route
-                path="/"
-                render={props => this.renderRoute(props, HomePage)}
-                exact
-              />
-              <Route
-                path="/plugins/:pluginId"
-                render={this.renderPluginDispatcher}
-              />
-              <Route path="/plugins" component={ComingSoonPage} />
-              <Route
-                path="/list-plugins"
-                render={props => this.renderRoute(props, ListPluginsPage)}
-                exact
-              />
-              <Route
-                path="/marketplace"
-                render={this.renderMarketPlace}
-                exact
-              />
-              <Route path="/configuration" component={ComingSoonPage} exact />
-              <Route key="7" path="" component={NotFoundPage} />
-              <Route key="8" path="404" component={NotFoundPage} />
-            </Switch>
+      <GlobalContextProvider
+        emitEvent={this.props.emitEvent}
+        currentEnvironment={this.props.global.currentEnvironment}
+        disableGlobalOverlayBlocker={this.props.disableGlobalOverlayBlocker}
+        enableGlobalOverlayBlocker={this.props.enableGlobalOverlayBlocker}
+        plugins={this.props.global.plugins}
+        updatePlugin={this.props.updatePlugin}
+      >
+        <div className={styles.adminPage}>
+          <LeftMenu version={strapiVersion} plugins={plugins} />
+          <NavTopRightWrapper>
+            {/* Injection zone not ready yet */}
+            <Logout />
+            <LocaleToggle isLogged />
+          </NavTopRightWrapper>
+          <div className={styles.adminPageRightWrapper}>
+            <Header />
+            <div className={styles.content}>
+              <Switch>
+                <Route
+                  path="/"
+                  render={props => this.renderRoute(props, HomePage)}
+                  exact
+                />
+                <Route
+                  path="/plugins/:pluginId"
+                  render={this.renderPluginDispatcher}
+                />
+                <Route path="/plugins" component={ComingSoonPage} />
+                <Route
+                  path="/list-plugins"
+                  render={props => this.renderRoute(props, ListPluginsPage)}
+                  exact
+                />
+                <Route
+                  path="/marketplace"
+                  render={this.renderMarketPlace}
+                  exact
+                />
+                <Route path="/configuration" component={ComingSoonPage} exact />
+                <Route key="7" path="" component={NotFoundPage} />
+                <Route key="8" path="404" component={NotFoundPage} />
+              </Switch>
+            </div>
           </div>
+          <OverlayBlocker
+            key="overlayBlocker"
+            isOpen={blockApp && showGlobalAppBlocker}
+            {...overlayBlockerData}
+          />
+          {SHOW_TUTORIALS && <Onboarding />}
         </div>
-        <OverlayBlocker
-          key="overlayBlocker"
-          isOpen={blockApp && showGlobalAppBlocker}
-          {...overlayBlockerData}
-        />
-        {SHOW_TUTORIALS && <Onboarding />}
-      </div>
+      </GlobalContextProvider>
     );
   }
 }
-
-Admin.childContextTypes = {
-  emitEvent: PropTypes.func,
-  currentEnvironment: PropTypes.string,
-  disableGlobalOverlayBlocker: PropTypes.func,
-  enableGlobalOverlayBlocker: PropTypes.func,
-  plugins: PropTypes.object,
-  updatePlugin: PropTypes.func,
-};
 
 Admin.propTypes = {
   admin: PropTypes.shape({

@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { get, isEqual } from 'lodash';
 import { Prompt } from 'react-router';
+import { GlobalContext } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
@@ -53,6 +54,8 @@ import {
 
 /* eslint-disable no-extra-boolean-cast */
 export class GroupPage extends React.Component {
+  static contextType = GlobalContext;
+
   state = {
     attrToDelete: null,
     removePrompt: false,
@@ -688,10 +691,6 @@ export class GroupPage extends React.Component {
     );
   }
 }
-
-GroupPage.contextTypes = {
-  emitEvent: PropTypes.func,
-};
 
 GroupPage.defaultProps = {
   canOpenModal: true,

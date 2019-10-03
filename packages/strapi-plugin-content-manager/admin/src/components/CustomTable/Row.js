@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { withRouter } from 'react-router';
 import PropTypes from 'prop-types';
 import { get, isEmpty, isNull, isObject, toLower, toString } from 'lodash';
@@ -7,6 +7,7 @@ import { IcoContainer } from 'strapi-helper-plugin';
 import { useListView } from '../../contexts/ListView';
 
 import CustomInputCheckbox from '../CustomInputCheckbox';
+import MediaPreviewList from '../MediaPreviewList';
 
 import { ActionContainer, Truncate, Truncated } from './styledComponents';
 
@@ -46,6 +47,10 @@ const getDisplayedValue = (type, value, name) => {
     }
     case 'password':
       return '••••••••';
+    case 'media':
+    case 'file':
+    case 'files':
+      return value;
     default:
       return '-';
   }
@@ -58,6 +63,15 @@ function Row({ goTo, isBulkable, row, headers }) {
     onClickDelete,
     schema,
   } = useListView();
+
+  const memoizedDisplayedValue = useCallback(
+    name => {
+      const type = get(schema, ['attributes', name, 'type'], 'string');
+
+      return getDisplayedValue(type, row[name], name);
+    },
+    [row, schema]
+  );
 
   return (
     <>
@@ -76,20 +90,21 @@ function Row({ goTo, isBulkable, row, headers }) {
       {headers.map(header => {
         return (
           <td key={header.name}>
-            <Truncate>
-              <Truncated>
-                {getDisplayedValue(
-                  get(schema, ['attributes', header.name, 'type'], 'string'),
-                  row[header.name],
-                  header.name
-                )}
-              </Truncated>
-            </Truncate>
+            {get(schema, ['attributes', header.name, 'type']) !== 'media' ? (
+              <Truncate>
+                <Truncated>{memoizedDisplayedValue(header.name)}</Truncated>
+              </Truncate>
+            ) : (
+              <MediaPreviewList
+                files={memoizedDisplayedValue(header.name)}
+              ></MediaPreviewList>
+            )}
           </td>
         );
       })}
       <ActionContainer>
         <IcoContainer
+          style={{ minWidth: 'inherit', width: '100%' }}
           icons={[
             {
               icoType: 'pencil',

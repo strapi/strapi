@@ -15,7 +15,6 @@ import { NotFound, getQueryParameters } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
-import HomePage from '../HomePage';
 import ModelForm from '../ModelForm';
 import ModelPage from '../ModelPage';
 import MenuContext from '../MenuContext';
@@ -61,11 +60,6 @@ import saga from './saga';
 import makeSelectApp from './selectors';
 
 const ROUTES = [
-  {
-    component: HomePage,
-    to: `/plugins/${pluginId}/:type`,
-  },
-
   {
     component: ModelPage,
     to: `/plugins/${pluginId}/models/:modelName`,

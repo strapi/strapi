@@ -8,17 +8,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import cn from 'classnames';
 import moment from 'moment';
 
 import { IcoContainer, PopUpWarning } from 'strapi-helper-plugin';
-
+import { HomePageContext } from '../../contexts/HomePage';
 import FileIcon from '../FileIcon';
-
-import styles from './styles.scss';
+import { StyledLi, Truncate, Wrapper, Checked } from './components';
 
 /* eslint-disable react/no-string-refs */
 class Li extends React.Component {
+  static contextType = HomePageContext;
+
   state = { isOpen: false, copied: false };
 
   componentDidUpdate(prevProps, prevState) {
@@ -66,16 +66,16 @@ class Li extends React.Component {
   };
 
   renderLiCopied = () => (
-    <li className={cn(styles.liWrapper, styles.copied)}>
+    <StyledLi withCopyStyle>
       <div>
-        <div className={styles.checked}>
+        <Checked>
           <div />
-        </div>
+        </Checked>
         <div>
           <FormattedMessage id="upload.Li.linkCopied" />
         </div>
       </div>
-    </li>
+    </StyledLi>
   );
 
   render() {
@@ -105,7 +105,7 @@ class Li extends React.Component {
         text={item.url}
         onCopy={() => this.setState({ copied: true })}
       >
-        <li className={styles.liWrapper}>
+        <StyledLi>
           <a
             href={item.url}
             target="_blank"
@@ -115,7 +115,7 @@ class Li extends React.Component {
           >
             nothing
           </a>
-          <div className={styles.liContainer}>
+          <Wrapper>
             <div>
               <div />
               <FileIcon fileType={item.ext} />
@@ -124,11 +124,11 @@ class Li extends React.Component {
               (value, key) => {
                 if (value === 'updatedAt') {
                   return (
-                    <div key={key} className={styles.truncate}>
+                    <Truncate key={key}>
                       {moment(item.updatedAt || item.updated_at).format(
                         'YYYY/MM/DD - HH:mm'
                       )}
-                    </div>
+                    </Truncate>
                   );
                 }
 
@@ -137,38 +137,30 @@ class Li extends React.Component {
                   const size = item[value] / divider;
 
                   return (
-                    <div key={key} className={styles.truncate}>
+                    <Truncate key={key}>
                       {Math.round(size * 100) / 100}&nbsp;{unit}
-                    </div>
+                    </Truncate>
                   );
                 }
 
                 if (value !== '') {
-                  return (
-                    <div key={key} className={styles.truncate}>
-                      {item[value]}
-                    </div>
-                  );
+                  return <Truncate key={key}>{item[value]}</Truncate>;
                 }
 
                 return <IcoContainer key={key} icons={icons} />;
               }
             )}
-          </div>
+          </Wrapper>
           <PopUpWarning
             isOpen={this.state.isOpen}
             onConfirm={this.handleDelete}
             toggleModal={() => this.setState({ isOpen: false })}
           />
-        </li>
+        </StyledLi>
       </CopyToClipboard>
     );
   }
 }
-
-Li.contextTypes = {
-  deleteData: PropTypes.func.isRequired,
-};
 
 Li.defaultProps = {
   item: {

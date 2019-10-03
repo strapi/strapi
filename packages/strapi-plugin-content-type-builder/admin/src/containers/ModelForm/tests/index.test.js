@@ -3,7 +3,10 @@ import React from 'react';
 import mountWithIntl from 'testUtils/mountWithIntl';
 import formatMessagesWithPluginId from 'testUtils/formatMessages';
 
-import { InputsIndex as Input } from 'strapi-helper-plugin';
+import {
+  GlobalContextProvider,
+  InputsIndex as Input,
+} from 'strapi-helper-plugin';
 
 import pluginId from '../../../pluginId';
 import pluginTradsEn from '../../../translations/en.json';
@@ -11,9 +14,21 @@ import pluginTradsEn from '../../../translations/en.json';
 import ModelForm from '../index';
 
 const messages = formatMessagesWithPluginId(pluginId, pluginTradsEn);
-const context = { emitEvent: jest.fn() };
+const appContext = {
+  emitEvent: jest.fn(),
+  currentEnvironment: 'development',
+  disableGlobalOverlayBlocker: jest.fn(),
+  enableGlobalOverlayBlocker: jest.fn(),
+  plugins: {},
+  updatePlugin: jest.fn(),
+};
 const renderComponent = (props = {}) =>
-  mountWithIntl(<ModelForm {...props} />, messages, context);
+  mountWithIntl(
+    <GlobalContextProvider {...appContext}>
+      <ModelForm {...props} />
+    </GlobalContextProvider>,
+    messages
+  );
 
 describe('<ModelForm />', () => {
   let props;
@@ -105,7 +120,9 @@ describe('<ModelForm />', () => {
 
   it('should show the inputs if the modal is fully opened', () => {
     wrapper = renderComponent(props);
-    wrapper.setState({ isVisible: true });
+
+    const compo = wrapper.find(ModelForm);
+    compo.setState({ isVisible: true });
 
     const inputs = wrapper.find(Input);
 
@@ -117,7 +134,9 @@ describe('<ModelForm />', () => {
     props.isUpdatingTemporaryFeature = true;
 
     wrapper = renderComponent(props);
-    wrapper.setState({ isVisible: true });
+
+    const compo = wrapper.find(ModelForm);
+    compo.setState({ isVisible: true });
 
     const input = wrapper.find(Input).at(0);
     const { name } = input.props();
@@ -135,7 +154,9 @@ describe('<ModelForm />', () => {
     props.featureToEditName = 'test';
 
     wrapper = renderComponent(props);
-    wrapper.setState({ isVisible: true });
+
+    const compo = wrapper.find(ModelForm);
+    compo.setState({ isVisible: true });
 
     const input = wrapper.find(Input).at(0);
     const { name } = input.props();
@@ -151,25 +172,26 @@ describe('<ModelForm />', () => {
     describe('HandleOnOpened', () => {
       it('should set the isVisible state to true', () => {
         wrapper = renderComponent(props);
-
-        const { handleOnOpened } = wrapper.instance();
+        const compo = wrapper.find(ModelForm);
+        const { handleOnOpened } = compo.instance();
 
         handleOnOpened();
 
-        expect(wrapper.state('isVisible')).toBeTruthy();
+        expect(compo.state('isVisible')).toBeTruthy();
       });
     });
 
     describe('HandleOnClosed', () => {
       it('should set the isVisible state to true', () => {
         wrapper = renderComponent(props);
-        wrapper.setState({ isVisible: true });
+        const compo = wrapper.find(ModelForm);
+        compo.setState({ isVisible: true });
 
-        const { handleOnClosed } = wrapper.instance();
+        const { handleOnClosed } = compo.instance();
 
         handleOnClosed();
 
-        expect(wrapper.state('isVisible')).toBeFalsy();
+        expect(compo.state('isVisible')).toBeFalsy();
       });
     });
 
@@ -178,12 +200,12 @@ describe('<ModelForm />', () => {
         props.actionType = 'edit';
         props.featureToEditName = 'test';
         wrapper = renderComponent(props);
-
-        const { handleGoTo } = wrapper.instance();
+        const compo = wrapper.find(ModelForm);
+        const { handleGoTo } = compo.instance();
 
         handleGoTo('base');
 
-        expect(context.emitEvent).not.toHaveBeenCalled();
+        expect(appContext.emitEvent).not.toHaveBeenCalled();
         expect(props.push).toHaveBeenCalledWith({
           search:
             'modalType=model&settingType=base&actionType=edit&modelName=test',
@@ -193,12 +215,12 @@ describe('<ModelForm />', () => {
       it('should emit an event if the tab is advanced', () => {
         props.actionType = 'create';
         wrapper = renderComponent(props);
-
-        const { handleGoTo } = wrapper.instance();
+        const compo = wrapper.find(ModelForm);
+        const { handleGoTo } = compo.instance();
 
         handleGoTo('advanced');
 
-        expect(context.emitEvent).toHaveBeenCalledWith(
+        expect(appContext.emitEvent).toHaveBeenCalledWith(
           'didSelectContentTypeSettings'
         );
         expect(props.push).toHaveBeenCalledWith({
@@ -211,7 +233,8 @@ describe('<ModelForm />', () => {
       it('should call only the cancelNewFeature if the actionType is create', () => {
         wrapper = renderComponent(props);
 
-        const { handleCancel } = wrapper.instance();
+        const compo = wrapper.find(ModelForm);
+        const { handleCancel } = compo.instance();
 
         handleCancel();
 
@@ -225,8 +248,8 @@ describe('<ModelForm />', () => {
         props.actionType = 'edit';
         props.isUpdatingTemporaryFeature = true;
         wrapper = renderComponent(props);
-
-        const { handleCancel } = wrapper.instance();
+        const compo = wrapper.find(ModelForm);
+        const { handleCancel } = compo.instance();
 
         handleCancel();
 
@@ -241,7 +264,8 @@ describe('<ModelForm />', () => {
         props.isUpdatingTemporaryFeature = false;
         wrapper = renderComponent(props);
 
-        const { handleCancel } = wrapper.instance();
+        const compo = wrapper.find(ModelForm);
+        const { handleCancel } = compo.instance();
 
         handleCancel();
 
@@ -257,30 +281,31 @@ describe('<ModelForm />', () => {
         props.modifiedData.name = '';
 
         wrapper = renderComponent(props);
-
-        const { handleSubmit } = wrapper.instance();
+        const compo = wrapper.find(ModelForm);
+        const { handleSubmit } = compo.instance();
 
         handleSubmit({ preventDefault: jest.fn() });
 
-        expect(wrapper.state('formErrors')).toEqual({
+        expect(compo.state('formErrors')).toEqual({
           name: [{ id: `${pluginId}.error.validation.required` }],
         });
-        expect(wrapper.prop('push')).not.toHaveBeenCalled();
+        expect(compo.prop('push')).not.toHaveBeenCalled();
       });
 
       it('should not submit if the name of the CT begins with a special character', () => {
         props.modifiedData.name = '_test';
 
         wrapper = renderComponent(props);
+        const compo = wrapper.find(ModelForm);
 
-        const { handleSubmit } = wrapper.instance();
+        const { handleSubmit } = compo.instance();
 
         handleSubmit({ preventDefault: jest.fn() });
 
-        expect(wrapper.state('formErrors')).toEqual({
+        expect(compo.state('formErrors')).toEqual({
           name: [{ id: `${pluginId}.error.validation.regex.name` }],
         });
-        expect(wrapper.prop('push')).not.toHaveBeenCalled();
+        expect(compo.prop('push')).not.toHaveBeenCalled();
       });
 
       it('should not submit if the name of the CT is already taken', () => {
@@ -289,26 +314,26 @@ describe('<ModelForm />', () => {
         props.featureToEditName = '';
         props.actionType = 'create';
         wrapper = renderComponent(props);
-
-        const { handleSubmit } = wrapper.instance();
+        const compo = wrapper.find(ModelForm);
+        const { handleSubmit } = compo.instance();
 
         handleSubmit({ preventDefault: jest.fn() });
 
-        expect(wrapper.state('formErrors')).toEqual({
+        expect(compo.state('formErrors')).toEqual({
           name: [{ id: `${pluginId}.error.contentTypeName.taken` }],
         });
-        expect(wrapper.prop('push')).not.toHaveBeenCalled();
+        expect(compo.prop('push')).not.toHaveBeenCalled();
       });
 
       it('should submit if the form is not empty and the user is creating a CT', () => {
         props.modifiedData.name = 'test';
         wrapper = renderComponent(props);
-
-        const { handleSubmit } = wrapper.instance();
+        const compo = wrapper.find(ModelForm);
+        const { handleSubmit } = compo.instance();
 
         handleSubmit({ preventDefault: jest.fn() });
 
-        expect(wrapper.state('formErrors')).toEqual({});
+        expect(compo.state('formErrors')).toEqual({});
         expect(props.push).toHaveBeenCalledWith({
           pathname: `/plugins/${pluginId}/models/test`,
           search: 'modalType=chooseAttributes',
@@ -324,12 +349,12 @@ describe('<ModelForm />', () => {
         props.isUpdatingTemporaryFeature = true;
         props.featureToEditName = 'test';
         wrapper = renderComponent(props);
-
-        const { handleSubmit } = wrapper.instance();
+        const compo = wrapper.find(ModelForm);
+        const { handleSubmit } = compo.instance();
 
         handleSubmit({ preventDefault: jest.fn() });
 
-        expect(wrapper.state('formErrors')).toEqual({});
+        expect(compo.state('formErrors')).toEqual({});
         expect(props.push).toHaveBeenCalledWith({
           pathname: '/plugins/content-type-builder/models/test',
           search: '',
@@ -345,12 +370,13 @@ describe('<ModelForm />', () => {
         props.allTakenNames = ['test'];
         props.featureToEditName = 'test';
         wrapper = renderComponent(props);
+        const compo = wrapper.find(ModelForm);
 
-        const { handleSubmit } = wrapper.instance();
+        const { handleSubmit } = compo.instance();
 
         handleSubmit({ preventDefault: jest.fn() });
 
-        expect(wrapper.state('formErrors')).toEqual({});
+        expect(compo.state('formErrors')).toEqual({});
         expect(props.push).toHaveBeenCalledWith({
           search: '',
         });

@@ -9,6 +9,7 @@ import formatMessagesWithPluginId from 'testUtils/formatMessages';
 
 import {
   EmptyAttributesBlock,
+  GlobalContextProvider,
   ListHeader,
   ListWrapper,
 } from 'strapi-helper-plugin';
@@ -27,7 +28,14 @@ import ViewContainer from '../../ViewContainer';
 
 const messages = formatMessagesWithPluginId(pluginId, pluginTradsEn);
 
-const context = { emitEvent: jest.fn() };
+const appContext = {
+  emitEvent: jest.fn(),
+  currentEnvironment: 'development',
+  disableGlobalOverlayBlocker: jest.fn(),
+  enableGlobalOverlayBlocker: jest.fn(),
+  plugins: {},
+  updatePlugin: jest.fn(),
+};
 const renderComponent = (props = {}) => {
   const menuContext = {
     canOpenModal: true,
@@ -37,12 +45,13 @@ const renderComponent = (props = {}) => {
   };
   return mountWithIntl(
     <BrowserRouter>
-      <MenuContext.Provider value={menuContext}>
-        <ModelPage {...props} />
-      </MenuContext.Provider>
+      <GlobalContextProvider {...appContext}>
+        <MenuContext.Provider value={menuContext}>
+          <ModelPage {...props} />
+        </MenuContext.Provider>
+      </GlobalContextProvider>
     </BrowserRouter>,
-    messages,
-    context
+    messages
   );
 };
 
@@ -479,7 +488,7 @@ describe('<ModelPage /> lifecycle', () => {
 
       await wait();
 
-      expect(context.emitEvent).toHaveBeenCalledWith(
+      expect(appContext.emitEvent).toHaveBeenCalledWith(
         'willEditFieldOfContentType'
       );
       expect(props.history.push).toHaveBeenCalledWith({
@@ -501,7 +510,7 @@ describe('<ModelPage /> lifecycle', () => {
 
       await wait();
 
-      expect(context.emitEvent).toHaveBeenCalledWith(
+      expect(appContext.emitEvent).toHaveBeenCalledWith(
         'willEditFieldOfContentType'
       );
       expect(props.history.push).toHaveBeenCalledWith({
@@ -531,7 +540,7 @@ describe('<ModelPage /> lifecycle', () => {
 
       await wait();
 
-      expect(context.emitEvent).not.toHaveBeenCalledWith(
+      expect(appContext.emitEvent).not.toHaveBeenCalledWith(
         'willEditNameOfContentType'
       );
       expect(props.history.push).not.toHaveBeenCalled();
@@ -552,7 +561,7 @@ describe('<ModelPage /> lifecycle', () => {
 
       await wait();
 
-      expect(context.emitEvent).toHaveBeenCalledWith(
+      expect(appContext.emitEvent).toHaveBeenCalledWith(
         'willEditNameOfContentType'
       );
       expect(props.history.push).toHaveBeenCalledWith({
@@ -600,7 +609,7 @@ describe('<ModelPage /> lifecycle', () => {
 
       await wait();
 
-      expect(context.emitEvent).toHaveBeenCalledWith(
+      expect(appContext.emitEvent).toHaveBeenCalledWith(
         'willEditNameOfContentType'
       );
       expect(props.history.push).toHaveBeenCalledWith({
@@ -659,7 +668,7 @@ describe('<ModelPage /> lifecycle', () => {
       handleClickOnTrashIcon('username');
 
       expect(spyOnDisplayNotification).toHaveBeenCalled();
-      expect(context.emitEvent).not.toHaveBeenCalledWith(
+      expect(appContext.emitEvent).not.toHaveBeenCalledWith(
         'willDeleteFieldOfContentType'
       );
     });
@@ -679,7 +688,7 @@ describe('<ModelPage /> lifecycle', () => {
         removePrompt: false,
         attrToDelete: 'username',
       });
-      expect(context.emitEvent).toHaveBeenCalledWith(
+      expect(appContext.emitEvent).toHaveBeenCalledWith(
         'willDeleteFieldOfContentType'
       );
     });

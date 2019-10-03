@@ -40,7 +40,7 @@ class ConfigPage extends React.Component {
     // Redirect the user to the email list after modifying is provider
     if (prevProps.submitSuccess !== this.props.submitSuccess) {
       this.props.history.push(
-        `/plugins/email/configurations/${this.props.match.params.env}`,
+        `/plugins/email/configurations/${this.props.match.params.env}`
       );
     }
   }
@@ -85,8 +85,8 @@ class ConfigPage extends React.Component {
       get(
         this.props.settings,
         ['providers', this.getSelectedProviderIndex(), 'auth'],
-        {},
-      ),
+        {}
+      )
     ).reduce((acc, current) => {
       if (isEmpty(get(this.props.modifiedData, current, ''))) {
         acc.push({
@@ -145,8 +145,6 @@ class ConfigPage extends React.Component {
   }
 }
 
-ConfigPage.contextTypes = {};
-
 ConfigPage.defaultProps = {
   appEnvironments: [],
   formErrors: [],
@@ -180,7 +178,7 @@ function mapDispatchToProps(dispatch) {
       setErrors,
       submit,
     },
-    dispatch,
+    dispatch
   );
 }
 
@@ -188,7 +186,7 @@ const mapStateToProps = selectConfigPage();
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 
 const withReducer = strapi.injectReducer({
@@ -201,5 +199,5 @@ const withSaga = strapi.injectSaga({ key: 'configPage', saga, pluginId });
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
+  withConnect
 )(ConfigPage);
