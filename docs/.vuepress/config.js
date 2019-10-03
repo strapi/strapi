@@ -97,7 +97,6 @@ module.exports = {
             '/3.0.0-beta.x/concepts/concepts',
             '/3.0.0-beta.x/guides/api-endpoints',
             '/3.0.0-beta.x/guides/api-documentation',
-            '/3.0.0-beta.x/guides/authentication',
             '/3.0.0-beta.x/configurations/configurations',
             '/3.0.0-beta.x/guides/controllers',
             '/3.0.0-beta.x/guides/databases',
@@ -127,6 +126,13 @@ module.exports = {
             '/3.0.0-beta.x/advanced/logging',
             '/3.0.0-beta.x/advanced/middlewares',
             '/3.0.0-beta.x/advanced/usage-information',
+          ],
+        },
+        {
+          collapsable: true,
+          title: '📦 Plugins',
+          children: [
+            '/3.0.0-beta.x/plugins/users-permissions',
           ],
         },
         {
