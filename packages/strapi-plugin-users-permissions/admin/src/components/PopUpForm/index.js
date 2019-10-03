@@ -22,8 +22,8 @@ import {
   take,
   takeRight,
 } from 'lodash';
-
 import { InputsIndex as Input } from 'strapi-helper-plugin';
+import { HomePageContext } from '../../contexts/HomePage';
 
 // Translations
 import en from '../../translations/en.json';
@@ -33,6 +33,8 @@ import { Header, ProviderContainer, Separator, Wrapper } from './Components';
 class PopUpForm extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = { enabled: false, isEditing: false };
+
+  static contextType = HomePageContext;
 
   UNSAFE_componentWillReceiveProps(nextProps) {
     const { values } = nextProps;
@@ -331,10 +333,6 @@ class PopUpForm extends React.Component {
     );
   }
 }
-
-PopUpForm.contextTypes = {
-  unsetDataToEdit: PropTypes.func.isRequired,
-};
 
 PopUpForm.defaultProps = {
   settingType: 'providers',

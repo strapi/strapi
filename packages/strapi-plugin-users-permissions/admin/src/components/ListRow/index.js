@@ -10,6 +10,7 @@ import { FormattedMessage } from 'react-intl';
 import { capitalize, get, includes } from 'lodash';
 
 import { IcoContainer, PopUpWarning } from 'strapi-helper-plugin';
+import { HomePageContext } from '../../contexts/HomePage';
 import { Container, Flex, Row, Wrapper } from './Components';
 
 import en from '../../translations/en.json';
@@ -17,6 +18,8 @@ import en from '../../translations/en.json';
 class ListRow extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = { showModalDelete: false };
+
+  static contextType = HomePageContext;
 
   // Roles that can't be deleted && modified
   // Don't delete this line
@@ -169,12 +172,12 @@ class ListRow extends React.Component {
   }
 }
 
-ListRow.contextTypes = {
-  emitEvent: PropTypes.func,
-  pathname: PropTypes.string,
-  push: PropTypes.func,
-  setDataToEdit: PropTypes.func.isRequired,
-};
+// ListRow.contextTypes = {
+//   emitEvent: PropTypes.func,
+//   pathname: PropTypes.string,
+//   push: PropTypes.func,
+//   setDataToEdit: PropTypes.func.isRequired,
+// };
 
 ListRow.defaultProps = {
   item: {

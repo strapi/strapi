@@ -11,9 +11,11 @@ import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import { clone, get, includes, isEqual, isEmpty } from 'lodash';
 
-import { HeaderNav, PluginHeader } from 'strapi-helper-plugin';
+import { GlobalContext, HeaderNav, PluginHeader } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
+
+import { HomePageContextProvider } from '../../contexts/HomePage';
 
 // Design
 import EditForm from '../../components/EditForm';
@@ -49,12 +51,7 @@ const keyBoardShortCuts = [18, 78];
 export class HomePage extends React.Component {
   state = { mapKey: {}, showModalEdit: false };
 
-  getChildContext = () => ({
-    pathname: this.props.location.pathname,
-    push: this.props.history.push,
-    setDataToEdit: this.props.setDataToEdit,
-    unsetDataToEdit: this.props.unsetDataToEdit,
-  });
+  static contextType = GlobalContext;
 
   componentDidMount() {
     this.props.fetchData(this.props.match.params.settingType);
@@ -239,47 +236,42 @@ export class HomePage extends React.Component {
       );
 
     return (
-      <form onSubmit={e => e.preventDefault()}>
-        <Wrapper className="container-fluid">
-          <PluginHeader
-            title={{ id: 'users-permissions.HomePage.header.title' }}
-            description={{
-              id: 'users-permissions.HomePage.header.description',
-            }}
-            actions={headerActions}
-          />
-          <HeaderNav links={this.headerNavLinks} />
-          {component}
-        </Wrapper>
+      <HomePageContextProvider
+        emitEvent={this.context.emitEvent}
+        pathname={this.props.location.pathname}
+        push={this.props.history.push}
+        setDataToEdit={this.props.setDataToEdit}
+        unsetDataToEdit={this.props.unsetDataToEdit}
+      >
+        <form onSubmit={e => e.preventDefault()}>
+          <Wrapper className="container-fluid">
+            <PluginHeader
+              title={{ id: 'users-permissions.HomePage.header.title' }}
+              description={{
+                id: 'users-permissions.HomePage.header.description',
+              }}
+              actions={headerActions}
+            />
+            <HeaderNav links={this.headerNavLinks} />
+            {component}
+          </Wrapper>
 
-        <PopUpForm
-          actionType="edit"
-          isOpen={this.state.showModalEdit}
-          dataToEdit={dataToEdit}
-          didCheckErrors={didCheckErrors}
-          formErrors={formErrors}
-          onChange={this.props.onChange}
-          onSubmit={this.handleSubmit}
-          settingType={match.params.settingType}
-          values={get(modifiedData, [this.getEndPoint(), dataToEdit], {})}
-        />
-      </form>
+          <PopUpForm
+            actionType="edit"
+            isOpen={this.state.showModalEdit}
+            dataToEdit={dataToEdit}
+            didCheckErrors={didCheckErrors}
+            formErrors={formErrors}
+            onChange={this.props.onChange}
+            onSubmit={this.handleSubmit}
+            settingType={match.params.settingType}
+            values={get(modifiedData, [this.getEndPoint(), dataToEdit], {})}
+          />
+        </form>
+      </HomePageContextProvider>
     );
   }
 }
-
-HomePage.childContextTypes = {
-  pathname: PropTypes.string,
-  push: PropTypes.func,
-  setDataToEdit: PropTypes.func,
-  unsetDataToEdit: PropTypes.func,
-};
-
-HomePage.contextTypes = {
-  emitEvent: PropTypes.func,
-};
-
-HomePage.defaultProps = {};
 
 HomePage.propTypes = {
   cancelChanges: PropTypes.func.isRequired,
