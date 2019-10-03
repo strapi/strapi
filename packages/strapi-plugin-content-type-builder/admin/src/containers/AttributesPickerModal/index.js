@@ -8,6 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { has } from 'lodash';
 import { FormattedMessage } from 'react-intl';
+import { GlobalContext } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
@@ -25,6 +26,8 @@ import attributes from './attributes.json';
 
 class AttributesPickerModal extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
+  static contextType = GlobalContext;
+
   state = { isDisplayed: false, nodeToFocus: 0 };
 
   componentDidMount() {
@@ -194,11 +197,6 @@ class AttributesPickerModal extends React.Component {
     );
   }
 }
-
-AttributesPickerModal.contextTypes = {
-  emitEvent: PropTypes.func,
-  plugins: PropTypes.object,
-};
 
 AttributesPickerModal.defaultProps = {
   isOpen: false,
