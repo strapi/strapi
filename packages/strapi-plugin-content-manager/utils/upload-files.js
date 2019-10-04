@@ -3,6 +3,7 @@
 const _ = require('lodash');
 
 module.exports = async (entry, files, { model, source }) => {
+  const getIdAttribute = (model, source) => _.get(strapi.query(model, source), 'primaryKey', 'id')
   const entity = strapi.getModel(model, source);
 
   if (!_.has(strapi.plugins, 'upload')) return entry;
