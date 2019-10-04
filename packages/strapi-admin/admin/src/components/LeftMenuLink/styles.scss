@@ -20,7 +20,8 @@
     transition: right 1s ease-in-out;
 
     span {
-      display: inline-block;
+      display: flex;
+      align-items: center;
       overflow: hidden;
       width: auto;
       height: 20px;
@@ -70,7 +71,7 @@
   }
   span {
     display: flex;
-    align-content: center;
+    align-items: center;
     width: 100%;
     padding-right: 1rem;
     padding-left: 2.6rem;
