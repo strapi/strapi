@@ -61,7 +61,7 @@ touch admin/src/i18n.js
 touch admin/src/translations/index.js
 ```
 
-**Path --** `my-app/admin/src/i18n.js`
+**Path --** `my-app/admin/src/translations/index.js`
 
 ```js
 import en from './en.json';
