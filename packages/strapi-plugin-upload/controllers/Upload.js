@@ -182,7 +182,11 @@ module.exports = {
       return ctx.notFound('file.notFound');
     }
 
-    data.url = strapi.config.url + data.url;
+    // if is local server upload, add backend host as prefix
+    if (data.url[0] === '/') {
+      data.url = strapi.config.url + data.url;
+    }
+
     ctx.send(data);
   },
 
