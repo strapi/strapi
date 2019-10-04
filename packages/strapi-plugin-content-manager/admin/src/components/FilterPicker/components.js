@@ -5,14 +5,6 @@ const Wrapper = styled.div`
   > div {
     padding-bottom: 20px;
   }
-
-  //margin-top: -13px;
-  // > div:not(:first-child) {
-  //   padding-top: 10px;
-  // }
-  // > div:last-child {
-  //   margin-bottom: 2px;
-  // }
 `;
 
 const Span = styled.span`

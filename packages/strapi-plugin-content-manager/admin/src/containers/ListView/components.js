@@ -161,6 +161,7 @@ const DropDownWrapper = styled.div`
 
         &:not(:first-child) {
           padding: 0;
+          padding-top: 9px;
         }
 
         &:first-child {
