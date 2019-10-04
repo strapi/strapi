@@ -172,9 +172,9 @@ const buildAssocResolvers = (model, name, { plugin }) => {
                 queryOpts,
                 ['query', ref.primaryKey],
                 obj[association.alias]
-                  ? obj[association.alias].map(
-                      val => val[ref.primaryKey] || val
-                    ).sort()
+                  ? obj[association.alias]
+                      .map(val => val[ref.primaryKey] || val)
+                      .sort()
                   : []
               );
             } else {
