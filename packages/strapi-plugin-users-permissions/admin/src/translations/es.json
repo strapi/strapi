@@ -81,6 +81,7 @@
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "La URL de redirección que se debe agregar en la configuración de la aplicación Facebook",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "La URL de redirección que se debe agregar en la configuración de la aplicación GitHub",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "La URL de redirección que se debe agregar en la configuración de la aplicación Google",
+  "PopUpForm.Providers.instagram.providerConfig.redirectURL": "La URL de redirección que se debe agregar en la configuración de la aplicación Instagram",
   "PopUpForm.Providers.key.label": "ID de cliente",
   "PopUpForm.Providers.key.placeholder": "TEXTO",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "La URL de redirección que se debe agregar en la configuración de la aplicación Linkedin",

@@ -60,6 +60,8 @@ class PopUpForm extends React.Component {
         return `${strapi.backendURL}/connect/microsoft/callback`;
       case 'twitter':
         return `${strapi.backendURL}/connect/twitter/callback`;
+      case 'instagram':
+        return `${strapi.backendURL}/connect/instagram/callback`;
       default: {
         const value = get(this.props.values, 'callback', '');
 
@@ -208,7 +210,7 @@ class PopUpForm extends React.Component {
     const params = {
       link: (
         <a
-          href="https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-users-permissions/docs/email-templates.md"
+          href="https://github.com/strapi/strapi/blob/master/docs/3.0.0-beta.x/guides/authentication.md#templating-emails"
           target="_blank"
           rel="noopener noreferrer"
         >

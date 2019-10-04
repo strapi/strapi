@@ -412,6 +412,11 @@ const getType = ({ definition, attribute, name, tableExists = false }) => {
     case 'date':
     case 'time':
     case 'datetime':
+      if (client === 'pg') {
+        return 'timestamp with time zone';
+      }
+
+      return 'timestamp';
     case 'timestamp':
       if (client === 'pg') {
         return 'timestamp with time zone';

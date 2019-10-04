@@ -51,9 +51,7 @@ function* dataGet() {
 function* uploadFiles(action) {
   try {
     yield put(setLoading());
-    const headers = {
-      'X-Forwarded-Host': 'strapi',
-    };
+    const headers = {};
     const response = yield call(
       request,
       '/upload',

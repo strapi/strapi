@@ -10,8 +10,12 @@
 const crypto = require('crypto');
 const _ = require('lodash');
 const grant = require('grant-koa');
+const { sanitizeEntity } = require('strapi-utils');
 
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+const formatError = error => [
+  { messages: [{ id: error.id, message: error.message, field: error.field }] },
+];
 
 module.exports = {
   async callback(ctx) {
@@ -25,10 +29,7 @@ module.exports = {
     });
 
     if (provider === 'local') {
-      if (
-        !_.get(await store.get({ key: 'grant' }), 'email.enabled') &&
-        !ctx.request.admin
-      ) {
+      if (!_.get(await store.get({ key: 'grant' }), 'email.enabled')) {
         return ctx.badRequest(null, 'This provider is disabled.');
       }
 
@@ -36,9 +37,10 @@ module.exports = {
       if (!params.identifier) {
         return ctx.badRequest(
           null,
-          ctx.request.admin
-            ? [{ messages: [{ id: 'Auth.form.error.email.provide' }] }]
-            : 'Please provide your username or your e-mail.'
+          formatError({
+            id: 'Auth.form.error.email.provide',
+            message: 'Please provide your username or your e-mail.',
+          })
         );
       }
 
@@ -46,9 +48,10 @@ module.exports = {
       if (!params.password) {
         return ctx.badRequest(
           null,
-          ctx.request.admin
-            ? [{ messages: [{ id: 'Auth.form.error.password.provide' }] }]
-            : 'Please provide your password.'
+          formatError({
+            id: 'Auth.form.error.password.provide',
+            message: 'Please provide your password.',
+          })
         );
       }
 
@@ -72,9 +75,10 @@ module.exports = {
       if (!user) {
         return ctx.badRequest(
           null,
-          ctx.request.admin
-            ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }]
-            : 'Identifier or password invalid.'
+          formatError({
+            id: 'Auth.form.error.invalid',
+            message: 'Identifier or password invalid.',
+          })
         );
       }
 
@@ -84,18 +88,20 @@ module.exports = {
       ) {
         return ctx.badRequest(
           null,
-          ctx.request.admin
-            ? [{ messages: [{ id: 'Auth.form.error.confirmed' }] }]
-            : 'Your account email is not confirmed.'
+          formatError({
+            id: 'Auth.form.error.confirmed',
+            message: 'Your account email is not confirmed',
+          })
         );
       }
 
       if (user.blocked === true) {
         return ctx.badRequest(
           null,
-          ctx.request.admin
-            ? [{ messages: [{ id: 'Auth.form.error.blocked' }] }]
-            : 'Your account has been blocked by the administrator.'
+          formatError({
+            id: 'Auth.form.error.blocked',
+            message: 'Your account has been blocked by an administrator',
+          })
         );
       }
 
@@ -103,9 +109,11 @@ module.exports = {
       if (!user.password) {
         return ctx.badRequest(
           null,
-          ctx.request.admin
-            ? [{ messages: [{ id: 'Auth.form.error.password.local' }] }]
-            : 'This user never set a local password, please login thanks to the provider used during account creation.'
+          formatError({
+            id: 'Auth.form.error.password.local',
+            message:
+              'This user never set a local password, please login thanks to the provider used during account creation.',
+          })
         );
       }
 
@@ -116,24 +124,30 @@ module.exports = {
       if (!validPassword) {
         return ctx.badRequest(
           null,
-          ctx.request.admin
-            ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }]
-            : 'Identifier or password invalid.'
+          formatError({
+            id: 'Auth.form.error.invalid',
+            message: 'Identifier or password invalid.',
+          })
         );
       } else {
         ctx.send({
           jwt: strapi.plugins['users-permissions'].services.jwt.issue({
             id: user.id,
           }),
-          user: _.omit(user.toJSON ? user.toJSON() : user, [
-            'password',
-            'resetPasswordToken',
-          ]),
+          user: sanitizeEntity(user.toJSON ? user.toJSON() : user, {
+            model: strapi.query('user', 'users-permissions').model,
+          }),
         });
       }
     } else {
       if (!_.get(await store.get({ key: 'grant' }), [provider, 'enabled'])) {
-        return ctx.badRequest(null, 'This provider is disabled.');
+        return ctx.badRequest(
+          null,
+          formatError({
+            id: 'provider.disabled',
+            message: 'This provider is disabled.',
+          })
+        );
       }
 
       // Connect the user thanks to the third-party provider.
@@ -143,27 +157,20 @@ module.exports = {
           'users-permissions'
         ].services.providers.connect(provider, ctx.query);
       } catch ([user, error]) {
-        return ctx.badRequest(
-          null,
-          error === 'array' ? (ctx.request.admin ? error[0] : error[1]) : error
-        );
+        return ctx.badRequest(null, error === 'array' ? error[0] : error);
       }
 
       if (!user) {
-        return ctx.badRequest(
-          null,
-          error === 'array' ? (ctx.request.admin ? error[0] : error[1]) : error
-        );
+        return ctx.badRequest(null, error === 'array' ? error[0] : error);
       }
 
       ctx.send({
         jwt: strapi.plugins['users-permissions'].services.jwt.issue({
           id: user.id,
         }),
-        user: _.omit(user.toJSON ? user.toJSON() : user, [
-          'password',
-          'resetPasswordToken',
-        ]),
+        user: sanitizeEntity(user.toJSON ? user.toJSON() : user, {
+          model: strapi.query('user', 'users-permissions').model,
+        }),
       });
     }
   },
@@ -184,9 +191,10 @@ module.exports = {
       if (!user) {
         return ctx.badRequest(
           null,
-          ctx.request.admin
-            ? [{ messages: [{ id: 'Auth.form.error.code.provide' }] }]
-            : 'Incorrect code provided.'
+          formatError({
+            id: 'Auth.form.error.code.provide',
+            message: 'Incorrect code provided.',
+          })
         );
       }
 
@@ -206,10 +214,9 @@ module.exports = {
         jwt: strapi.plugins['users-permissions'].services.jwt.issue({
           id: user.id,
         }),
-        user: _.omit(user.toJSON ? user.toJSON() : user, [
-          'password',
-          'resetPasswordToken',
-        ]),
+        user: sanitizeEntity(user.toJSON ? user.toJSON() : user, {
+          model: strapi.query('user', 'users-permissions').model,
+        }),
       });
     } else if (
       params.password &&
@@ -218,16 +225,18 @@ module.exports = {
     ) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.password.matching' }] }]
-          : 'Passwords do not match.'
+        formatError({
+          id: 'Auth.form.error.password.matching',
+          message: 'Passwords do not match.',
+        })
       );
     } else {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.params.provide' }] }]
-          : 'Incorrect params provided.'
+        formatError({
+          id: 'Auth.form.error.params.provide',
+          message: 'Incorrect params provided.',
+        })
       );
     }
   },
@@ -271,9 +280,10 @@ module.exports = {
     if (!user) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.user.not-exist' }] }]
-          : 'This email does not exist.'
+        formatError({
+          id: 'Auth.form.error.user.not-exist',
+          message: 'This email does not exist.',
+        })
       );
     }
 
@@ -354,9 +364,10 @@ module.exports = {
     if (!settings.allow_register) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.advanced.allow_register' }] }]
-          : 'Register action is currently disabled.'
+        formatError({
+          id: 'Auth.advanced.allow_register',
+          message: 'Register action is currently disabled.',
+        })
       );
     }
 
@@ -368,9 +379,10 @@ module.exports = {
     if (!params.password) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.password.provide' }] }]
-          : 'Please provide your password.'
+        formatError({
+          id: 'Auth.form.error.password.provide',
+          message: 'Please provide your password.',
+        })
       );
     }
 
@@ -378,9 +390,10 @@ module.exports = {
     if (!params.email) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.email.provide' }] }]
-          : 'Please provide your email.'
+        formatError({
+          id: 'Auth.form.error.email.provide',
+          message: 'Please provide your email.',
+        })
       );
     }
 
@@ -393,9 +406,11 @@ module.exports = {
     ) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.password.format' }] }]
-          : 'Your password cannot contain more than three times the symbol `$`.'
+        formatError({
+          id: 'Auth.form.error.password.format',
+          message:
+            'Your password cannot contain more than three times the symbol `$`.',
+        })
       );
     }
 
@@ -406,9 +421,10 @@ module.exports = {
     if (!role) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.role.notFound' }] }]
-          : 'Impossible to find the default role.'
+        formatError({
+          id: 'Auth.form.error.role.notFound',
+          message: 'Impossible to find the default role.',
+        })
       );
     }
 
@@ -431,18 +447,20 @@ module.exports = {
     if (user && user.provider === params.provider) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.email.taken' }] }]
-          : 'Email is already taken.'
+        formatError({
+          id: 'Auth.form.error.email.taken',
+          message: 'Email is already taken.',
+        })
       );
     }
 
     if (user && user.provider !== params.provider && settings.unique_email) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.email.taken' }] }]
-          : 'Email is already taken.'
+        formatError({
+          id: 'Auth.form.error.email.taken',
+          message: 'Email is already taken.',
+        })
       );
     }
 
@@ -516,20 +534,19 @@ module.exports = {
 
       ctx.send({
         jwt,
-        user: _.omit(user.toJSON ? user.toJSON() : user, [
-          'password',
-          'resetPasswordToken',
-        ]),
+        user: sanitizeEntity(user.toJSON ? user.toJSON() : user, {
+          model: strapi.query('user', 'users-permissions').model,
+        }),
       });
     } catch (err) {
       const adminError = _.includes(err.message, 'username')
-        ? 'Auth.form.error.username.taken'
-        : 'Auth.form.error.email.taken';
+        ? {
+            id: 'Auth.form.error.username.taken',
+            message: 'Username already taken',
+          }
+        : { id: 'Auth.form.error.email.taken', message: 'Email already taken' };
 
-      ctx.badRequest(
-        null,
-        ctx.request.admin ? [{ messages: [{ id: adminError }] }] : err.message
-      );
+      ctx.badRequest(null, formatError(adminError));
     }
   },
 
