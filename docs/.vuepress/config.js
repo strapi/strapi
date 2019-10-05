@@ -96,7 +96,6 @@ module.exports = {
           children: [
             '/3.0.0-beta.x/concepts/concepts',
             '/3.0.0-beta.x/guides/api-endpoints',
-            '/3.0.0-beta.x/guides/api-documentation',
             '/3.0.0-beta.x/configurations/configurations',
             '/3.0.0-beta.x/guides/controllers',
             '/3.0.0-beta.x/guides/databases',
@@ -133,6 +132,7 @@ module.exports = {
           title: '📦 Plugins',
           children: [
             '/3.0.0-beta.x/plugins/users-permissions',
+            '/3.0.0-beta.x/plugins/documentation'
           ],
         },
         {
