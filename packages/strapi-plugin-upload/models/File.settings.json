@@ -13,6 +13,10 @@
       "configurable": false,
       "required": true
     },
+    "bucketPath": {
+      "type": "string",
+      "configurable": false
+    },
     "hash": {
       "type": "string",
       "configurable": false,
