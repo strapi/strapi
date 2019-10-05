@@ -1,29 +1,29 @@
 # Users & Permissions
 
-This plugin provide a way to protect your API with a full authentication process based on JWT. This plugin comes also with an ACL strategy that allows you to manage the permissions between the groups of users.
+This plugin provides a way to protect your API with a full authentication process based on JWT. This plugin comes also with an ACL strategy that allows you to manage the permissions between the groups of users.
 
-To acccess to the plugin admin pannel to manage the plugin, click on the **Users & Pemissions** link in the left menu.
+To access the plugin admin panel, click on the **Users & Pemissions** link in the left menu.
 
 ## Concept
 
 When this plugin is installed, it adds an access layer on your application.
-The plugin use [`jwt`](https://fr.wikipedia.org/wiki/JSON_Web_Token) system to authenticate users.
+The plugin uses [`jwt token`](https://fr.wikipedia.org/wiki/JSON_Web_Token) to authenticate users.
 
-Each time an API request is made, we are checking if an `Authorization` header is set and strapi verify is you can acces or not to this URL.
+Each time an API request is sent, the server checks if an `Authorization` header is present and verifies if the user making the request has acces to the resource..
 
-To do so, your JWT contain your user ID and we are able to match the group your user is in and at the end to know if the goup allow to acces to the route.
+To do so, your JWT contain your user ID and we are able to match the group your user is in and at the end to know if the group allows access to the route.
 
 ## Manage roles permissions
 
 ### Public role
 
 This role is used when you receive a request that don't have `Authorization` header.
-If you allow some permissions in this role, everybody will be able to access to the endpoints you opened.
-It's a good point if you want to let your front-end application access freely to your content.
+If you allow some permissions in this role, everybody will be able to access the endpoints you selected.
+This is common practice to select `find` / `findOne` endpoints when you want your front-end application to access all the content without developing user authentication and authorization.
 
 ### Authenticated role
 
-This role is the default one that is apply by default to your **Users**. In this role you will be able to define routes that a user can access.
+This is the default role that is given to every **new user** if no role is provided at creation. In this role you will be able to define routes that a user can access.
 
 ### Permissions management
 
@@ -34,10 +34,9 @@ On the right sidebar you will be able to see the URL related to this function.
 
 ### Update the default role
 
-When you create a user without role or if you use the register route, strapi apply the default role to this new user.
-By default the default role is `authenticated`.
+When you create a user without a role or if you use the `/auth/local/register` route, the `authenticated` role is given to the user.
 
-To modify the default role, you will have to go in the `Advanced settings` tab and update the `Default role for authenticated users` option.
+To change the default role, go to the `Advanced settings` tab and update the `Default role for authenticated users` option.
 
 ## Authentication
 
@@ -141,7 +140,7 @@ Strapi comes with the following providers:
 - [Github](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/github_setup.md)
 - [Twitter](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/twitter_setup.md)
 
-[👀   See our complete example with detailed tutorials for each provider (with React)](https://github.com/strapi/strapi-examples/tree/master/login-react)
+[👀 See our complete example with detailed tutorials for each provider (with React)](https://github.com/strapi/strapi-examples/tree/master/login-react)
 
 ---
 
