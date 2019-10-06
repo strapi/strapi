@@ -26,3 +26,9 @@
   height: auto;
   margin: auto;
 }
+
+// SVG's width must be specified separately to allow .leftMenuHeaderLogo
+// styles to work for any size PNG, in case user supplies PNGs instead of SVG.
+.leftMenuHeaderLogo.SVG {
+  width: 108px;
+}
