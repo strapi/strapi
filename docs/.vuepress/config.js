@@ -92,10 +92,17 @@ module.exports = {
         },
         {
           collapsable: true,
+          title: '📄 Content API',
+          children: [
+            '/3.0.0-beta.x/content-api/api-endpoints',
+            '/3.0.0-beta.x/content-api/parameters',
+          ],
+        },
+        {
+          collapsable: true,
           title: '💡 Guides',
           children: [
             '/3.0.0-beta.x/concepts/concepts',
-            '/3.0.0-beta.x/guides/api-endpoints',
             '/3.0.0-beta.x/configurations/configurations',
             '/3.0.0-beta.x/guides/controllers',
             '/3.0.0-beta.x/guides/databases',
@@ -154,8 +161,8 @@ module.exports = {
         },
         {
           collapsable: true,
-          title: '🏗 API Reference',
-          children: ['/3.0.0-beta.x/api-reference/reference'],
+          title: '🏗 Global strapi',
+          children: ['/3.0.0-beta.x/global-strapi/reference'],
         },
         {
           collapsable: false,
