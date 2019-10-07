@@ -1,5 +1,6 @@
-.popUpWarningHelper { /* stylelint-disable */
-  width: 37.5rem!important;
+.popUpWarningHelper {
+  /* stylelint-disable */
+  width: 37.5rem !important;
   -webkit-font-smoothing: antialiased !important;
 }
 
@@ -7,18 +8,18 @@
   margin-left: 30px;
   margin-right: 30px;
   padding-bottom: 11px !important;
-  border-bottom: 1px solid #F6F6F6;
+  border-bottom: 1px solid #f6f6f6;
 
   > h5 {
     width: 100%;
     text-align: center;
     font-family: Lato;
-    font-weight: bold!important;
-    font-size: 1.8rem!important;
+    font-weight: bold !important;
+    font-size: 1.8rem !important;
   }
 
   > button {
-    color: #C3C5C8;
+    color: #c3c5c8;
     opacity: 1;
     font-size: 1.8rem;
     font-weight: 100;
@@ -29,10 +30,11 @@
       display: none;
     }
 
-    &:hover, &:focus {
-      color: #C3C5C8;
+    &:hover,
+    &:focus {
+      color: #c3c5c8;
       opacity: 1;
-      outline: 0!important;
+      outline: 0 !important;
     }
 
     &:before {
@@ -49,18 +51,18 @@
 
 .modalPosition {
   max-width: 37.5rem !important;
-  margin: 16rem auto !important;
+  margin: 16.2rem auto !important;
   > div {
     width: 37.5rem;
     padding: 0 !important;
-    border:none;
+    border: none;
     border-radius: 2px;
   }
 }
 
 .modalBodyContainerHelper {
-  padding: .1rem;
-  color: #F64D0A;
+  padding: 0.1rem;
+  color: #f64d0a;
   text-align: center;
   font-family: Lato;
   font-size: 1.3rem;
@@ -78,7 +80,6 @@
 .modalBodyHelper {
   padding: 16px 30px 15px 30px !important;
 }
-
 
 .popUpWarningButtonContainer {
   display: flex;
@@ -112,7 +113,7 @@
         width: 100%;
         height: 100%;
         border-radius: 0.3rem;
-        background: #FFFFFF;
+        background: #ffffff;
         opacity: 0.1;
       }
     }
@@ -121,33 +122,36 @@
 
 .primary {
   border: none !important;
-  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  background: linear-gradient(315deg, #0097f6 0%, #005eea 100%);
   color: white !important;
   font-weight: 500;
 
-  &:active, &:focus, &:hover {
+  &:active,
+  &:focus,
+  &:hover {
     border: none;
     background-color: transparent;
-    background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
-    box-shadow: inset 1px 1px 3px rgba(0,0,0,.15);
+    background: linear-gradient(315deg, #0097f6 0%, #005eea 100%);
+    box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.15);
   }
   -webkit-font-smoothing: antialiased;
 }
 
 .secondary {
   position: relative;
-  border: 0.1rem solid #F64D0A !important;
+  border: 0.1rem solid #f64d0a !important;
   border-radius: 3px;
-  color: #F64D0A !important;
+  color: #f64d0a !important;
   overflow: hidden;
 
   &:active {
-    border: 0.15rem solid #F64D0A;
+    border: 0.15rem solid #f64d0a;
   }
 
-  &:focus, &:hover {
-    border: 0.1rem solid #F64D0A;
+  &:focus,
+  &:hover {
+    border: 0.1rem solid #f64d0a;
     background-color: transparent !important;
-    color: #F64D0A;
+    color: #f64d0a;
   }
 }

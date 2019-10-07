@@ -4,7 +4,7 @@
  *
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
 import { Label, Wrapper } from './Components';
@@ -14,6 +14,7 @@ function InputCheckboxPlugin(
   context
 ) {
   const isSelected = inputSelected === name;
+  const [policiesShown, setPoliciesShow] = useState(false);
 
   const handleChange = () => {
     const target = {
@@ -23,6 +24,7 @@ function InputCheckboxPlugin(
     };
 
     if (!value) {
+      setPoliciesShow(true);
       setNewInputSelected(name);
 
       context.setShouldDisplayPolicieshint();
@@ -38,16 +40,22 @@ function InputCheckboxPlugin(
     setNewInputSelected(name);
     context.setInputPoliciesPath(name);
 
-    if (isSelected) {
+    if (policiesShown && isSelected) {
       context.resetShouldDisplayPoliciesHint();
+      setPoliciesShow(false);
     } else {
       context.setShouldDisplayPolicieshint();
+      setPoliciesShow(true);
     }
   };
 
   return (
     <Wrapper className="col-md-4">
-      <div className={`form-check ${isSelected ? 'highlighted' : ''}`}>
+      <div
+        className={`form-check ${isSelected ? 'highlighted' : ''}  ${
+          value ? 'is-checked' : ''
+        }`}
+      >
         <Label
           className={`form-check-label ${value ? 'checked' : ''}`}
           htmlFor={name}

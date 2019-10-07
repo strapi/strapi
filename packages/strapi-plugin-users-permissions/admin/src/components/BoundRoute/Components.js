@@ -10,6 +10,7 @@ const Wrapper = styled.div`
 
 const Header = styled.div`
   margin-bottom: 3rem;
+  padding-top: 1.1rem;
   color: #333740;
   font-size: 18px;
   font-weight: 600;

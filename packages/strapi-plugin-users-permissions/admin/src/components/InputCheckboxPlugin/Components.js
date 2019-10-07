@@ -20,6 +20,9 @@ const Wrapper = styled.div`
       border-radius: 3px;
       background-color: #e9eaeb;
       font-weight: 600;
+    }
+    &.highlighted,
+    &.is-checked:hover {
       > i {
         display: block;
       }
@@ -56,6 +59,9 @@ const Label = styled.label`
       font-weight: 100;
       color: #1c5de7;
       transition: all 0.2s;
+    }
+    &:hover + i {
+      display: block;
     }
   }
 `;
