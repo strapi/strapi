@@ -41,14 +41,15 @@ module.exports = {
             replyTo: options.replyTo,
             subject: options.subject,
             text: options.text,
-            html: options.html
+            html: options.html,
+            attachments: options.attachments
           }, function (err) {
             if (err) {
               reject([{ messages: [{ id: 'Auth.form.error.email.invalid' }] }]);
             } else {
               resolve();
             }
-          }); 
+          });
         });
       }
     };

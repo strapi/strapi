@@ -5,6 +5,8 @@ module.exports = function sanitizeEntity(data, { model, withPrivate = false }) {
 
   let plainData = typeof data.toJSON === 'function' ? data.toJSON() : data;
 
+  if (typeof plainData !== 'object') return plainData;
+
   const attributes = model.attributes;
   return Object.keys(plainData).reduce((acc, key) => {
     const attribute = attributes[key];

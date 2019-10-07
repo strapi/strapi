@@ -413,11 +413,12 @@ class Strapi extends EventEmitter {
   }
 
   getModel(modelKey, plugin) {
+    let key = modelKey.toLowerCase();
     return plugin === 'admin'
-      ? _.get(strapi.admin, ['models', modelKey], undefined)
-      : _.get(strapi.plugins, [plugin, 'models', modelKey]) ||
-          _.get(strapi, ['models', modelKey]) ||
-          _.get(strapi, ['groups', modelKey]) ||
+      ? _.get(strapi.admin, ['models', key], undefined)
+      : _.get(strapi.plugins, [plugin, 'models', key]) ||
+          _.get(strapi, ['models', key]) ||
+          _.get(strapi, ['groups', key]) ||
           undefined;
   }
 
