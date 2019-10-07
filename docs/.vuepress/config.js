@@ -139,7 +139,8 @@ module.exports = {
           title: '📦 Plugins',
           children: [
             '/3.0.0-beta.x/plugins/users-permissions',
-            '/3.0.0-beta.x/plugins/documentation'
+            '/3.0.0-beta.x/plugins/documentation',
+            '/3.0.0-beta.x/plugins/upload',
           ],
         },
         {
