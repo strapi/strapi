@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const uploadFiles = require('./utils/upload-files');
+const getIdAttribute = model => _.get(strapi.query(model), 'primaryKey', 'id');
 const resolveParams = (params, idAttribute) => params.id ? { ..._.omit(params, 'id'), [idAttribute]: params.id } : params
 
 /**
