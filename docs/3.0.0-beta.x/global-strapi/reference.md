@@ -1,4 +1,4 @@
-# API Reference
+# Reference
 
 - strapi
   - [.admin](#strapi-admin)
