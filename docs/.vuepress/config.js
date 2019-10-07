@@ -110,7 +110,6 @@ module.exports = {
             '/3.0.0-beta.x/guides/email',
             '/3.0.0-beta.x/guides/upload',
             '/3.0.0-beta.x/guides/parameters',
-            '/3.0.0-beta.x/guides/graphql',
             '/3.0.0-beta.x/guides/i18n',
             '/3.0.0-beta.x/guides/models',
             '/3.0.0-beta.x/guides/policies',
@@ -141,6 +140,7 @@ module.exports = {
             '/3.0.0-beta.x/plugins/users-permissions',
             '/3.0.0-beta.x/plugins/documentation',
             '/3.0.0-beta.x/plugins/upload',
+            '/3.0.0-beta.x/plugins/graphql',
           ],
         },
         {
