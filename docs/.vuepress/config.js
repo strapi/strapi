@@ -108,7 +108,6 @@ module.exports = {
             '/3.0.0-beta.x/guides/databases',
             '/3.0.0-beta.x/guides/deployment',
             '/3.0.0-beta.x/guides/email',
-            '/3.0.0-beta.x/guides/upload',
             '/3.0.0-beta.x/guides/parameters',
             '/3.0.0-beta.x/guides/i18n',
             '/3.0.0-beta.x/guides/models',
