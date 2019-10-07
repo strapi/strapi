@@ -225,11 +225,17 @@ const schemaBuilder = {
         switch (type) {
           case 'Mutation': {
             let name, action;
+
             if (
               _.has(resolverObj, ['resolver']) &&
               _.isString(resolverObj.resolver)
             ) {
               [name, action] = resolverObj.resolver.split('.');
+            } else if (
+              _.has(resolverObj, ['resolverOf']) &&
+              _.isString(resolverObj.resolverOf)
+            ) {
+              [name, action] = resolverObj.resolverOf.split('.');
             } else if (
               _.has(resolverObj, ['resolver', 'handler']) &&
               _.isString(resolverObj.handler)
