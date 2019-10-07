@@ -1,12 +1,11 @@
 # Email
 
-::: note
-This feature requires the Email plugin (installed by default).
-:::
-
-Thanks to the plugin `Email`, you can send email on your server or externals providers such as Sendgrid.
+Thanks to the plugin `Email`, you can send email from your server or externals providers such as **Sendgrid**.
 
 ## Programmatic usage
+
+In your custom controllers or services you may want to send email.
+By using the following function, strapi will use the configured provider to send an email.
 
 ```js
 await strapi.plugins['email'].services.email.send({
@@ -18,6 +17,14 @@ await strapi.plugins['email'].services.email.send({
   html: 'Hello world!',
 });
 ```
+
+## Configure the plugin
+
+The plugin provide you a setting page to be able to define the email provider you want to use.
+You will also be able to add some configuration.
+
+- Click on **Plugins** in the left menu
+- Click on the cog button on the **Email** plugin line
 
 ## Install new providers
 
@@ -51,13 +58,7 @@ npm install strapi-provider-email-sendgrid@beta --save
 If the provider is not in the mono repo, you probably don't need `@beta` depending if the creator published it with this tag or not.
 :::
 
-## Configure the plugin
-
-The plugin provide you a setting page to be able to define the email provider you want to use.
-You will also be able to add some configuration.
-
-- Click on **Plugins** in the left menu
-- Click on the cog button on the **Email** plugin line
+Then, visit [http://localhost:1337/admin/plugins/email/configurations/development](http://localhost:1337/admin/plugins/email/configurations/development) on your web browser and configure the provider.
 
 ## Create new provider
 

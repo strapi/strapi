@@ -107,7 +107,6 @@ module.exports = {
             '/3.0.0-beta.x/guides/controllers',
             '/3.0.0-beta.x/guides/databases',
             '/3.0.0-beta.x/guides/deployment',
-            '/3.0.0-beta.x/guides/email',
             '/3.0.0-beta.x/guides/parameters',
             '/3.0.0-beta.x/guides/i18n',
             '/3.0.0-beta.x/guides/models',
@@ -138,6 +137,7 @@ module.exports = {
           children: [
             '/3.0.0-beta.x/plugins/users-permissions',
             '/3.0.0-beta.x/plugins/documentation',
+            '/3.0.0-beta.x/plugins/email',
             '/3.0.0-beta.x/plugins/upload',
             '/3.0.0-beta.x/plugins/graphql',
           ],
