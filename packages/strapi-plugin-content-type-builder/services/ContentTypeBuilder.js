@@ -66,6 +66,7 @@ module.exports = {
             type: 'media',
             multiple: params.collection ? true : false,
             required: params.required,
+            configurable: params.configurable,
           };
         } else {
           params = _.omit(params, ['collection', 'model', 'via']);
