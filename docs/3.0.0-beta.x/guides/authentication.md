@@ -110,7 +110,9 @@ Strapi comes with the following providers:
 Set your providers credentials in the admin interface (Plugin Users & Permissions > Providers).
 Then update and enable the provider you want use.
 
-To authenticate the user, use the GET method to request the url, `/connect/:provider`. eg: `GET /connect/facebook`
+To authenticate the user, use the GET method to request the url, `/connect/:provider`. eg: `GET /connect/facebook`.
+
+You can also pass a custom callback url instead of using the default registered provider callback, by passing `callback` in the query. eg: `GET /connect/facebook?callback=https://my-frontend.com/en/auth/facebook`.
 
 After authentication, create and customize your own redirect callback at `/auth/:provider/callback`. The `jwt` and `user` data will be available in a .json response.
 
