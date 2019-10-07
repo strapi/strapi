@@ -6,7 +6,7 @@ You can use `strapi-utils` to parse the query params to Strapi's standards filte
 
 ### Extracting requests filters
 
-To transform the query params to Strapi's standard filters a request, you can use the `convertRestQueryParams` function from [strapi-utils](../strapi-reference/reference.md#strapiutils).
+To transform the query params to Strapi's standard filters a request, you can use the `convertRestQueryParams` function from [strapi-utils](../global-strapi/reference.md#strapiutils).
 
 ```js
 const { convertRestQueryParams } = require('strapi-utils');
