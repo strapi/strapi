@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 const Wrapper = styled.div`
   margin-bottom: 0.5rem;
@@ -16,6 +16,18 @@ const Wrapper = styled.div`
       color: #787e8f;
       cursor: pointer;
     }
+    ${({ value }) => {
+      if (value) {
+        return css`
+          &:hover {
+            > i {
+              display: block;
+            }
+          }
+        `;
+      }
+    }}
+
     &.highlighted {
       border-radius: 3px;
       background-color: #e9eaeb;

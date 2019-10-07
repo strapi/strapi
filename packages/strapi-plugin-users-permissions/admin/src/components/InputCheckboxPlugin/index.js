@@ -6,13 +6,22 @@
 
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-
+import { useEditPageContext } from '../../contexts/EditPage';
 import { Label, Wrapper } from './Components';
 
-function InputCheckboxPlugin(
-  { inputSelected, label, name, setNewInputSelected, value },
-  context
-) {
+function InputCheckboxPlugin({
+  inputSelected,
+  label,
+  name,
+  setNewInputSelected,
+  value,
+}) {
+  const {
+    onChange,
+    resetShouldDisplayPoliciesHint,
+    setInputPoliciesPath,
+    setShouldDisplayPolicieshint,
+  } = useEditPageContext();
   const isSelected = inputSelected === name;
   const [policiesShown, setPoliciesShow] = useState(false);
 
@@ -27,24 +36,24 @@ function InputCheckboxPlugin(
       setPoliciesShow(true);
       setNewInputSelected(name);
 
-      context.setShouldDisplayPolicieshint();
-      context.setInputPoliciesPath(name);
+      setShouldDisplayPolicieshint();
+      setInputPoliciesPath(name);
     } else {
       setNewInputSelected('');
     }
 
-    context.onChange({ target });
+    onChange({ target });
   };
 
   const handleClick = () => {
     setNewInputSelected(name);
-    context.setInputPoliciesPath(name);
+    setInputPoliciesPath(name);
 
     if (policiesShown && isSelected) {
-      context.resetShouldDisplayPoliciesHint();
+      resetShouldDisplayPoliciesHint();
       setPoliciesShow(false);
     } else {
-      context.setShouldDisplayPolicieshint();
+      setShouldDisplayPolicieshint();
       setPoliciesShow(true);
     }
   };
@@ -75,13 +84,6 @@ function InputCheckboxPlugin(
     </Wrapper>
   );
 }
-
-InputCheckboxPlugin.contextTypes = {
-  onChange: PropTypes.func.isRequired,
-  resetShouldDisplayPoliciesHint: PropTypes.func.isRequired,
-  setInputPoliciesPath: PropTypes.func.isRequired,
-  setShouldDisplayPolicieshint: PropTypes.func.isRequired,
-};
 
 InputCheckboxPlugin.defaultProps = {
   label: '',

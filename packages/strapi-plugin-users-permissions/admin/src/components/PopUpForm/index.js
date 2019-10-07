@@ -22,8 +22,8 @@ import {
   take,
   takeRight,
 } from 'lodash';
-
 import { InputsIndex as Input } from 'strapi-helper-plugin';
+import { HomePageContext } from '../../contexts/HomePage';
 
 // Translations
 import en from '../../translations/en.json';
@@ -33,6 +33,8 @@ import { Header, ProviderContainer, Separator, Wrapper } from './Components';
 class PopUpForm extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = { enabled: false, isEditing: false };
+
+  static contextType = HomePageContext;
 
   UNSAFE_componentWillReceiveProps(nextProps) {
     const { values } = nextProps;
@@ -60,6 +62,8 @@ class PopUpForm extends React.Component {
         return `${strapi.backendURL}/connect/microsoft/callback`;
       case 'twitter':
         return `${strapi.backendURL}/connect/twitter/callback`;
+      case 'instagram':
+        return `${strapi.backendURL}/connect/instagram/callback`;
       default: {
         const value = get(this.props.values, 'callback', '');
 
@@ -208,7 +212,7 @@ class PopUpForm extends React.Component {
     const params = {
       link: (
         <a
-          href="https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-users-permissions/docs/email-templates.md"
+          href="https://github.com/strapi/strapi/blob/master/docs/3.0.0-beta.x/guides/authentication.md#templating-emails"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -329,10 +333,6 @@ class PopUpForm extends React.Component {
     );
   }
 }
-
-PopUpForm.contextTypes = {
-  unsetDataToEdit: PropTypes.func.isRequired,
-};
 
 PopUpForm.defaultProps = {
   settingType: 'providers',

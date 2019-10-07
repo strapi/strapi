@@ -97,31 +97,15 @@ This project is currently in **Beta**. Significant breaking changes are unlikely
 
 ## Features
 
-- **Modern Admin Panel:** Elegant, entirely customizable, and a fully extensible admin panel.
-- **Secure by default:** Reusable policies, CSRF, CORS, P3P, Xframe, XSS, and more.
-- **Plugins Oriented:** Install auth systems, content management, custom plugins, and more, in seconds.
-- **Blazing Fast:** Built on top of Node.js, Strapi delivers impressive performance.
-- **Front-end Agnostic:** Use any front-end framework, for example, React, Vue, Angular, mobile apps, or even IoT.
+- **Modern Admin Panel:** Elegant, entirely customizable and a fully extensible admin panel.
+- **Secure by default:** Reusable policies, CORS, CSP, P3P, Xframe, XSS, and more.
+- **Plugins Oriented:** Install auth system, content management, custom plugins, and more, in seconds.
+- **Blazing Fast:** Built on top of Node.js, Strapi delivers amazing performance.
+- **Front-end Agnostic:** Use any front-end framework (React, Vue, Angular, etc.), mobile apps or even IoT.
 - **Powerful CLI:** Scaffold projects and APIs on the fly.
 - **SQL & NoSQL databases:** Works with MongoDB, PostgreSQL, MySQL, MariaDB, and SQLite.
 
 **[See more on our website](https://strapi.io/overview)**.
-
-### Try on Heroku
-
-You can also give it a try using Heroku in one click!
-
-<a href="https://heroku.com/deploy?template=https://github.com/strapi/strapi-heroku-app">
-  <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy">
-</a>
-
-Be aware that the Content Type Builder won't work due to the restriction of writing files on the Heroku servers. If you would like to change/edit/add Content Types, you need to follow these steps:
-
-1. Click the button above and deploy your app
-2. Clone that repo by using `heroku git:clone -a` followed by your repo's name
-3. Go into the cloned projects' folder using `cd` followed by your repo's name
-4. Add the Heroku boilerplate as a remote by running `git remote add boilerplate https://github.com/strapi/strapi-heroku-app`
-5. Pull from this new origin by running `git pull boilerplate master`
 
 ## Contributing
 

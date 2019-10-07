@@ -7,10 +7,15 @@
  */
 
 const _ = require('lodash');
+const { sanitizeEntity } = require('strapi-utils');
 
-const sanitizeUser = user => _.omit(user, ['password', 'resetPasswordToken']);
-const adminError = error => [
-  { messages: [{ id: error.message, field: error.field }] },
+const sanitizeUser = user =>
+  sanitizeEntity(user, {
+    model: strapi.query('user', 'users-permissions').model,
+  });
+
+const formatError = error => [
+  { messages: [{ id: error.id, message: error.message, field: error.field }] },
 ];
 
 module.exports = {
@@ -99,12 +104,11 @@ module.exports = {
     if (userWithSameUsername) {
       return ctx.badRequest(
         null,
-        ctx.request.admin
-          ? adminError({
-              message: 'Auth.form.error.username.taken',
-              field: ['username'],
-            })
-          : 'username.alreadyTaken.'
+        formatError({
+          id: 'Auth.form.error.username.taken',
+          message: 'Username already taken.',
+          field: ['username'],
+        })
       );
     }
 
@@ -116,12 +120,12 @@ module.exports = {
       if (userWithSameEmail) {
         return ctx.badRequest(
           null,
-          ctx.request.admin
-            ? adminError({
-                message: 'Auth.form.error.email.taken',
-                field: ['email'],
-              })
-            : 'email.alreadyTaken'
+
+          formatError({
+            id: 'Auth.form.error.email.taken',
+            message: 'Email already taken.',
+            field: ['email'],
+          })
         );
       }
     }
@@ -146,10 +150,7 @@ module.exports = {
 
       ctx.created(data);
     } catch (error) {
-      ctx.badRequest(
-        null,
-        ctx.request.admin ? adminError(error) : error.message
-      );
+      ctx.badRequest(null, formatError(error));
     }
   },
 
@@ -170,27 +171,36 @@ module.exports = {
     const { id } = ctx.params;
     const { email, username, password } = ctx.request.body;
 
-    if (!email) return ctx.badRequest('missing.email');
-    if (!username) return ctx.badRequest('missing.username');
-    if (!password) return ctx.badRequest('missing.password');
-
-    const userWithSameUsername = await strapi
-      .query('user', 'users-permissions')
-      .findOne({ username });
-
-    if (userWithSameUsername && userWithSameUsername.id != id) {
-      return ctx.badRequest(
-        null,
-        ctx.request.admin
-          ? adminError({
-              message: 'Auth.form.error.username.taken',
-              field: ['username'],
-            })
-          : 'username.alreadyTaken.'
-      );
+    if (_.has(ctx.request.body, 'email') && !email) {
+      return ctx.badRequest('email.notNull');
     }
 
-    if (advancedConfigs.unique_email) {
+    if (_.has(ctx.request.body, 'username') && !username) {
+      return ctx.badRequest('username.notNull');
+    }
+
+    if (_.has(ctx.request.body, 'password') && !password) {
+      return ctx.badRequest('password.notNull');
+    }
+
+    if (_.has(ctx.request.body, 'username')) {
+      const userWithSameUsername = await strapi
+        .query('user', 'users-permissions')
+        .findOne({ username });
+
+      if (userWithSameUsername && userWithSameUsername.id != id) {
+        return ctx.badRequest(
+          null,
+          formatError({
+            id: 'Auth.form.error.username.taken',
+            message: 'username.alreadyTaken.',
+            field: ['username'],
+          })
+        );
+      }
+    }
+
+    if (_.has(ctx.request.body, 'email') && advancedConfigs.unique_email) {
       const userWithSameEmail = await strapi
         .query('user', 'users-permissions')
         .findOne({ email });
@@ -198,12 +208,11 @@ module.exports = {
       if (userWithSameEmail && userWithSameEmail.id != id) {
         return ctx.badRequest(
           null,
-          ctx.request.admin
-            ? adminError({
-                message: 'Auth.form.error.email.taken',
-                field: ['email'],
-              })
-            : 'email.alreadyTaken'
+          formatError({
+            id: 'Auth.form.error.email.taken',
+            message: 'Eamil already taken',
+            field: ['email'],
+          })
         );
       }
     }
@@ -216,7 +225,7 @@ module.exports = {
       ...ctx.request.body,
     };
 
-    if (password === user.password) {
+    if (_.has(ctx.request.body, 'password') && password === user.password) {
       delete updateData.password;
     }
 

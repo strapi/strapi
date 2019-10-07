@@ -27,7 +27,7 @@ import {
 import { FormattedMessage } from 'react-intl';
 import Helmet from 'react-helmet';
 
-import { InputSelect } from 'strapi-helper-plugin';
+import { GlobalContext, InputSelect } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 // design
@@ -94,6 +94,8 @@ export class HomePage extends React.Component {
     this.sendUpdatedParams = sendUpdatedParams.bind(this);
   }
 
+  static contextType = GlobalContext;
+
   componentDidMount() {
     if (this.props.match.params.slug) {
       this.handleFetch(this.props);
@@ -153,7 +155,6 @@ export class HomePage extends React.Component {
   }
 
   /* eslint-disable react/sort-comp */
-  /* eslint-disable jsx-a11y/no-static-element-interactions */
   addConnection = e => {
     e.preventDefault();
     const newData = {};
@@ -647,10 +648,6 @@ function mapDispatchToProps(dispatch) {
     dispatch
   );
 }
-
-HomePage.contextTypes = {
-  emitEvent: PropTypes.func,
-};
 
 HomePage.propTypes = {
   cancelChanges: PropTypes.func.isRequired,
