@@ -10,27 +10,36 @@ import { isEmpty } from 'lodash';
 import styles from './styles.scss';
 
 class InputToggle extends React.Component {
-  handleClick = (e) => {
+  state = {
+    value: this.props.value
+  }
+
+  handleClick(value) {
+
+    // // Make value de-selectable (nullable) when clicking again on same value.
+    // if (value === this.state.value)
+    //   value = null;
+
     const target = {
       name: this.props.name,
       type: 'toggle',
-      value: e.target.id.includes('__ON__'),
+      value
     };
 
+    this.setState({ value });
     this.props.onChange({ target });
   }
 
   render() {
+    const value = this.state.value;
     const {
       autoFocus,
       className,
       disabled,
       deactivateErrorHighlight,
       error,
-      name,
       style,
-      tabIndex,
-      value,
+      tabIndex
     } = this.props;
 
     return (
@@ -39,16 +48,15 @@ class InputToggle extends React.Component {
           'btn-group',
           styles.inputToggleContainer,
           !isEmpty(className) && className,
-          !deactivateErrorHighlight && error && styles.error,
+          !deactivateErrorHighlight && error && styles.error
         )}
         style={style}
       >
         <button
           autoFocus={autoFocus}
           disabled={disabled}
-          className={cn('btn', !value && styles.gradientOff)}
-          id={`__OFF__${name}`}
-          onClick={this.handleClick}
+          className = {cn('btn', value !== null && !value && styles.gradientOff)}
+          onClick={this.handleClick.bind(this, false)}
           tabIndex={tabIndex}
           type="button"
         >
@@ -57,8 +65,7 @@ class InputToggle extends React.Component {
         <button
           disabled={disabled}
           className={cn('btn', value && styles.gradientOn)}
-          id={`__ON__${name}`}
-          onClick={this.handleClick}
+          onClick={this.handleClick.bind(this, true)}
           type="button"
         >
           ON
@@ -76,7 +83,7 @@ InputToggle.defaultProps = {
   error: false,
   style: {},
   tabIndex: '0',
-  value: true,
+  value: null
 };
 
 InputToggle.propTypes = {
@@ -89,7 +96,7 @@ InputToggle.propTypes = {
   onChange: PropTypes.func.isRequired,
   style: PropTypes.object,
   tabIndex: PropTypes.string,
-  value: PropTypes.bool,
+  value: PropTypes.bool
 };
 
 export default InputToggle;
