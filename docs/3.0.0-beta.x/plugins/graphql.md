@@ -1,8 +1,6 @@
 # GraphQL
 
-::: note
-This feature requires the GraphQL plugin (not installed by default).
-:::
+By default Strapi create [REST endpoints](../content-api/api-endpoints) for each of your content types. With the GraphQL plugin, you will be able to add a GraphQL endpoint to fetch and mutate your content.
 
 ## Usage
 
@@ -36,7 +34,7 @@ strapi install graphql
 
 ::::
 
-Then, start your app and open your browser at [http://localhost:1337/graphql](http://localhost:1337/graphql). You should see the interface (GraphQL Playground) that will help you to write GraphQL query to explore your data.
+Then, start your app and open your browser at [http://localhost:1337/graphql](http://localhost:1337/graphql). You should see the interface (**GraphQL Playground**) that will help you to write GraphQL query to explore your data.
 
 ::: note
 Install the [ModHeader](https://chrome.google.com/webstore/detail/modheader/idgpnmonknjnojddfkpgkljpfnnfcklj/related) extension to set the `Authorization` header in your request
@@ -54,7 +52,7 @@ You can edit these configurations by creating following file.
 
 **Path —** `./extensions/graphql/config/settings.json`.
 
-```
+```json
 {
   "endpoint": "/graphql",
   "tracing": false,
@@ -65,11 +63,11 @@ You can edit these configurations by creating following file.
 }
 ```
 
-### Query API
+## Query API
 
 In the section, we assume that the [Shadow CRUD](#shadow-crud) feature is enabled. For each model, the plugin auto-generates queries and mutations which just fit to your needs.
 
-#### Fetch a single entry
+### Fetch a single entry
 
 - `id`: String
 
@@ -82,7 +80,7 @@ query {
 }
 ```
 
-#### Fetch multiple entries
+### Fetch multiple entries
 
 ```
 query {
@@ -93,7 +91,7 @@ query {
 }
 ```
 
-#### Create a new entry
+### Create a new entry
 
 - `input`: Object
   - `data`: Object — Values to insert
@@ -114,7 +112,7 @@ mutation {
 }
 ```
 
-The implementation of the mutations also supports relational attributes. For example, you can create a new `User` and attach many `Post` to it by writing your query like this:
+The implementation of the mutations also supports relational attributes. For example, you can create a new `User` and attach many `Restaurant` to it by writing your query like this:
 
 ```
 mutation {
@@ -122,23 +120,23 @@ mutation {
     data: {
       username: "John",
       email: "john@doe.com",
-      posts: ["5b51e3949db573a586ad22de", "5b5b26619b0820c1c2fb79c9"]
+      restaurants: ["5b51e3949db573a586ad22de", "5b5b26619b0820c1c2fb79c9"]
     }
   }) {
     user {
       username
       email
-      posts {
-        title
-        content
-        publishedAt
+      restaurant {
+        name
+        description
+        price
       }
     }
   }
 }
 ```
 
-#### Update an existing entry
+### Update an existing entry
 
 - `input`: Object
   - `where`: Object - Entry's ID to update
@@ -167,16 +165,16 @@ You can also update relational attributes by passing an ID or an array of IDs (d
 
 ```
 mutation {
-  updatePost(input: {
+  updateRestaurant(input: {
     where: {
       id: "5b5b27f8164f75c29c728110"
     },
     data: {
-      author: "5b51e3949db573a586ad22de" // User ID
+      chef: "5b51e3949db573a586ad22de" // User ID
     }
   }) {
-    post {
-      author {
+    restaurant {
+      chef {
         username
         email
       }
@@ -185,7 +183,7 @@ mutation {
 }
 ```
 
-#### Delete an entry
+### Delete an entry
 
 - `input`: Object
   - `where`: Object - Entry's ID to delete
@@ -235,9 +233,9 @@ query {
     username
     email
   },
-  books(limit: 10, where: { _id_nin: ["5c4dad1a8f3845222ca88a56", "5c4dad1a8f3845222ca88a57"] }) {
+  restaurants(limit: 10, where: { _id_nin: ["5c4dad1a8f3845222ca88a56", "5c4dad1a8f3845222ca88a57"] }) {
     _id,
-    title
+    name
   }
 }
 ```
@@ -261,24 +259,24 @@ To simplify and automate the build of the GraphQL schema, we introduced the Shad
 
 ### Example
 
-If you've generated an API called `Post` using the CLI `strapi generate:api post` or the administration panel, your model looks like this:
+If you've generated an API called `Restaurant` using the CLI `strapi generate:api restaurant` or the administration panel, your model looks like this:
 
-**Path —** `./api/post/models/Post.settings.json`.
+**Path —** `./api/restaurant/models/Restaurant.settings.json`.
 
-```
+```json
 {
   "connection": "default",
   "options": {
     "timestamps": true
   },
   "attributes": {
-    "title": {
+    "name": {
       "type": "string"
-    }
-    "content": {
+    },
+    "description": {
       "type": "text"
     },
-    "published": {
+    "open": {
       "type": "boolean"
     }
   }
@@ -288,31 +286,31 @@ If you've generated an API called `Post` using the CLI `strapi generate:api post
 The generated GraphQL type and queries will be:
 
 ```
-// Post's Type definition
-type Post {
+// Restaurant's Type definition
+type Restaurant {
   _id: String
   created_at: String
   updated_at: String
-  title: String
-  content: String
-  published: Boolean
+  name: String
+  description: String
+  open: Boolean
 }
 
-// Queries to retrieve one or multiple posts.
+// Queries to retrieve one or multiple restaurants.
 type Query {
-  posts(sort: String, limit: Int, start: Int, where: JSON): [Post]
-  post(id: String!): Post
+  restaurants(sort: String, limit: Int, start: Int, where: JSON): [Restaurant]
+  restaurant(id: String!): Restaurant
 }
 
-// Mutations to create, update or delete a post.
+// Mutations to create, update or delete a restaurant.
 type Mutation {
-  createPost(input: createPostInput): createPostPayload!
-  updatePost(input: updatePostInput): updatePostPayload!
-  deletePost(input: deletePostInput): deletePostPayload!
+  createRestaurant(input: createRestaurantInput): createRestaurantPayload!
+  updateRestaurant(input: updateRestaurantInput): updateRestaurantPayload!
+  deleteRestaurant(input: deleteRestaurantInput): deleteRestaurantPayload!
 }
 ```
 
-The queries and mutations will use the generated controller's actions as resolvers. It means that the `posts` query will execute the `Post.find` action, the `post` query will use the `Post.findOne` action and the `createProduct` mutation will use the `Post.create` action, etc.
+The queries and mutations will use the generated controller's actions as resolvers. It means that the `restaurants` query will execute the `Restaurant.find` action, the `restaurant` query will use the `Restaurant.findOne` action and the `createRestaurant` mutation will use the `Restaurant.create` action, etc.
 
 ## Aggregation & Grouping
 
@@ -324,14 +322,14 @@ Strapi now supports Aggregation & Grouping.
 Let's consider again the model mentioned above:
 
 ```
-type Post {
+type Restaurant {
   _id: ID
   createdAt: String
   updatedAt: String
-  title: String
-  content: String
+  name: String
+  description: String
   nb_likes: Int,
-  published: Boolean
+  open: Boolean
 }
 ```
 
@@ -340,52 +338,52 @@ Strapi will generate automatically for you the following queries & types:
 ### Aggregation
 
 ```
-type PostConnection {
-  values: [Post]
-  groupBy: PostGroupBy
-  aggregate: PostAggregator
+type RestaurantConnection {
+  values: [Restaurant]
+  groupBy: RestaurantGroupBy
+  aggregate: RestaurantAggregator
 }
 
-type PostGroupBy {
-  _id: [PostConnection_id]
-  createdAt: [PostConnectionCreatedAt]
-  updatedAt: [PostConnectionUpdatedAt]
-  title: [PostConnectionTitle]
-  content: [PostConnectionContent]
-  nb_likes: [PostConnectionNbLikes],
-  published: [PostConnectionPublished]
+type RestaurantGroupBy {
+  _id: [RestaurantConnection_id]
+  createdAt: [RestaurantConnectionCreatedAt]
+  updatedAt: [RestaurantConnectionUpdatedAt]
+  name: [RestaurantConnectionTitle]
+  description: [RestaurantConnectionContent]
+  nb_likes: [RestaurantConnectionNbLikes],
+  open: [RestaurantConnectionPublished]
 }
 
-type PostConnectionPublished {
+type RestaurantConnectionPublished {
   key: Boolean
-  connection: PostConnection
+  connection: RestaurantConnection
 }
 
-type PostAggregator {
+type RestaurantAggregator {
   count: Int
-  sum: PostAggregatorSum
-  avg: PostAggregatorAvg
-  min: PostAggregatorMin
-  max: PostAggregatorMax
+  sum: RestaurantAggregatorSum
+  avg: RestaurantAggregatorAvg
+  min: RestaurantAggregatorMin
+  max: RestaurantAggregatorMax
 }
 
-type PostAggregatorAvg {
+type RestaurantAggregatorAvg {
   nb_likes: Float
 }
 
-type PostAggregatorMin { // Same for max and sum
+type RestaurantAggregatorMin { // Same for max and sum
   nb_likes: Int
 }
 
 type Query {
-  postsConnection(sort: String, limit: Int, start: Int, where: JSON): PostConnection
+  restaurantsConnection(sort: String, limit: Int, start: Int, where: JSON): RestaurantConnection
 }
 ```
 
-Getting the total count and the average likes of posts:
+Getting the total count and the average likes of restaurants:
 
 ```
-postsConnection {
+restaurantsConnection {
   aggregate {
     count
     avg {
@@ -396,10 +394,10 @@ postsConnection {
 }
 ```
 
-Let's say we want to do the same query but for only published posts
+Let's say we want to do the same query but for only open restaurants
 
 ```
-postsConnection(where: { published: true }) {
+restaurantsConnection(where: { open: true }) {
   aggregate {
     count
     avg {
@@ -410,12 +408,12 @@ postsConnection(where: { published: true }) {
 }
 ```
 
-Getting the average likes of published and unpublished posts
+Getting the average likes of open and non open restaurants
 
 ```
-postsConnection {
+restaurantsConnection {
   groupBy {
-    published: {
+    open: {
       key
       connection {
         aggregate {
@@ -431,12 +429,12 @@ postsConnection {
 
 Result
 
-```JSON
+```json
 {
   data: {
-    postsConnection: {
+    restaurantsConnection: {
       groupBy: {
-        published: [
+        open: [
           {
             key: true,
             connection: {
@@ -491,57 +489,55 @@ module.exports = {
 
 ### Example
 
-Let say we are using the same previous `Post` model.
+Let say we are using the same previous `Restaurant` model.
 
-**Path —** `./api/post/config/schema.graphql`.
+**Path —** `./api/restaurant/config/schema.graphql`.
 
 ```js
 module.exports = {
   definition: `
-    enum PostStatusInput {
-      draft
-      reviewing
-      reviewed
-      published
-      deleted
+    enum RestaurantStatusInput {
+      work
+      open
+      closed
     }
   `,
   query: `
-    postsByAuthor(id: ID, status: PostStatusInput, limit: Int): [Post]!
+    restaurantsByChef(id: ID, status: RestaurantStatusInput, limit: Int): [Restaurant]!
   `,
   mutation: `
-    attachPostToAuthor(id: ID, authorID: ID): Post!
+    attachRestaurantToChef(id: ID, chefID: ID): Restaurant!
   `
   resolver: {
     Query: {
-      post: {
-        description: 'Return a single post',
+      restaurant: {
+        description: 'Return a single restaurant',
         policies: ['plugins.users-permissions.isAuthenticated', 'isOwner'], // Apply the 'isAuthenticated' policy of the `Users & Permissions` plugin, then the 'isOwner' policy before executing the resolver.
       },
-      posts: {
-        description: 'Return a list of posts', // Add a description to the query.
-        deprecated: 'This query should not be used anymore. Please consider using postsByAuthor instead.'
+      restaurants: {
+        description: 'Return a list of restaurants', // Add a description to the query.
+        deprecated: 'This query should not be used anymore. Please consider using restaurantsByChef instead.'
       },
-      postsByAuthor: {
-        description: 'Return the posts published by the author',
-        resolver: 'Post.findByAuthor'
+      restaurantsByChef: {
+        description: 'Return the restaurants open by the chef',
+        resolver: 'Restaurant.findByChef'
       },
-      postsByTags: {
-        description: 'Return the posts published by the author',
-        resolverOf: 'Post.findByTags', // Will apply the same policy on the custom resolver as the controller's action `findByTags`.
+      restaurantsByCategories: {
+        description: 'Return the restaurants open by the category',
+        resolverOf: 'Restaurant.findByCategories', // Will apply the same policy on the custom resolver as the controller's action `findByCategories`.
         resolver: (obj, options, ctx) => {
           // ctx is the context of the Koa request.
-          await strapi.controllers.posts.findByTags(ctx);
+          await strapi.controllers.restaurants.findByCategories(ctx);
 
-          return ctx.body.posts || `There is no post.`;
+          return ctx.body.restaurants || `There is no restaurant.`;
         }
       }
     },
     Mutation: {
-      attachPostToAuthor: {
-        description: 'Attach a post to an author',
+      attachRestaurantToChef: {
+        description: 'Attach a restaurant to an chef',
         policies: ['plugins.users-permissions.isAuthenticated', 'isOwner'],
-        resolver: 'Post.attachToAuthor'
+        resolver: 'Restaurant.attachToChef'
       }
     }
   }
@@ -553,7 +549,7 @@ module.exports = {
 Edit the `definition` attribute in one of the `schema.graphql` files of your project by using the GraphQL Type language string.
 
 ::: note
-The easiest way is to create a new model using the CLI `strapi generate:model category --api post`, so you don't need to customise anything.
+The easiest way is to create a new model using the CLI `strapi generate:model category --api restaurant`, so you don't need to customise anything.
 :::
 
 ```js
@@ -634,30 +630,30 @@ module.exports = {
 
 One of the most powerful features of GraphQL is the auto-documentation of the schema. The GraphQL plugin allows you to add a description to a type, a field and a query. You can also deprecate a field or a query.
 
-**Path —** `./api/post/models/Post.settings.json`.
+**Path —** `./api/restaurant/models/Restaurant.settings.json`.
 
-```
+```json
 {
   "connection": "default",
   "info": {
-    "description": "The Post type description"
+    "description": "The Restaurant type description"
   },
   "options": {
     "timestamps": true
   },
   "attributes": {
-    "title": {
+    "name": {
       "type": "string",
-      "description": "The title of the post",
-      "deprecated": "We are not using the title anymore, it is auto-generated thanks to our powerful AI"
+      "description": "The name of the restaurant",
+      "deprecated": "We are not using the name anymore, it is auto-generated thanks to our powerful AI"
     },
-    "content": {
+    "description": {
       "type": "text",
-      "description": "The content of the post."
+      "description": "The description of the restaurant."
     },
-    "published": {
+    "open": {
       "type": "boolean",
-      "description": "Is the post published or not. Yes = true."
+      "description": "Is the restaurant open or not. Yes = true."
     }
   }
 }
@@ -669,21 +665,21 @@ It might happen that you want to add a description to a query or deprecate it. T
 The `schema.graphql` file has to be placed into the config folder of each API `./api/*/config/schema.graphql` or plugin `./extensions/*/config/schema.graphql`.
 :::
 
-**Path —** `./api/post/config/schema.graphql`.
+**Path —** `./api/restaurant/config/schema.graphql`.
 
 ```js
 module.exports = {
   resolver: {
     Query: {
-      posts: {
-        description: 'Return a list of posts', // Add a description to the query.
+      restaurants: {
+        description: 'Return a list of restaurants', // Add a description to the query.
         deprecated:
-          'This query should not be used anymore. Please consider using postsByAuthor instead.', // Deprecate the query and explain the reason why.
+          'This query should not be used anymore. Please consider using restaurantsByChef instead.', // Deprecate the query and explain the reason why.
       },
     },
     Mutation: {
-      createPost: {
-        description: 'Create a new post',
+      createRestaurant: {
+        description: 'Create a new restaurant',
         deprecated: 'Please use the dashboard UI instead',
       },
     },
@@ -699,8 +695,8 @@ Sometimes a query needs to be only accessible to authenticated user. To handle t
 module.exports = {
   resolver: {
     Query: {
-      posts: {
-        description: 'Return a list of posts',
+      restaurants: {
+        description: 'Return a list of restaurants',
         policies: [
           'plugins.users-permissions.isAuthenticated',
           'isOwner',
@@ -709,8 +705,8 @@ module.exports = {
       },
     },
     Mutation: {
-      createPost: {
-        description: 'Create a new post',
+      createRestaurant: {
+        description: 'Create a new restaurant',
         policies: [
           'plugins.users-permissions.isAuthenticated',
           'global.logging',
@@ -721,42 +717,42 @@ module.exports = {
 };
 ```
 
-In this example, the policy `isAuthenticated` located in the `users-permissions` plugin will be executed first. Then, the `isOwner` policy located in the `Post` API `./api/post/config/policies/isOwner.js`. Next, it will execute the `logging` policy located in `./config/policies/logging.js`. Finally, the resolver will be executed.
+In this example, the policy `isAuthenticated` located in the `users-permissions` plugin will be executed first. Then, the `isOwner` policy located in the `Restaurant` API `./api/restaurant/config/policies/isOwner.js`. Next, it will execute the `logging` policy located in `./config/policies/logging.js`. Finally, the resolver will be executed.
 
 ::: note
-There is no custom resolver in that case, so it will execute the default resolver (Post.find) provided by the Shadow CRUD feature.
+There is no custom resolver in that case, so it will execute the default resolver (Restaurant.find) provided by the Shadow CRUD feature.
 :::
 
 ### Link a query or mutation to a controller action
 
-By default, the plugin will execute the actions located in the controllers that has been generated via the Content-Type Builder plugin or the CLI. For example, the query `posts` is going to execute the logic inside the `find` action in the `Post.js` controller. It might happen that you want to execute another action or a custom logic for one of your query.
+By default, the plugin will execute the actions located in the controllers that has been generated via the Content-Type Builder plugin or the CLI. For example, the query `restaurants` is going to execute the logic inside the `find` action in the `Restaurant.js` controller. It might happen that you want to execute another action or a custom logic for one of your query.
 
 ```js
 module.exports = {
   resolver: {
     Query: {
-      posts: {
-        description: 'Return a list of posts by author',
-        resolver: 'Post.findByAuthor',
+      restaurants: {
+        description: 'Return a list of restaurants by chef',
+        resolver: 'Restaurant.findByChef',
       },
     },
     Mutation: {
-      createPost: {
-        description: 'Create a new post',
-        resolver: 'Post.customCreate',
+      createRestaurant: {
+        description: 'Create a new restaurant',
+        resolver: 'Restaurant.customCreate',
       },
     },
   },
 };
 ```
 
-In this example, it will execute the `findByAuthor` action of the `Post` controller. It also means that the resolver will apply on the `posts` query the permissions defined on the `findByAuthor` action (through the administration panel).
+In this example, it will execute the `findByChef` action of the `Restaurant` controller. It also means that the resolver will apply on the `restaurants` query the permissions defined on the `findByChef` action (through the administration panel).
 
 ::: note
 The `obj` parameter is available via `ctx.params` and the `options` are available via `ctx.query` in the controller's action.
 :::
 
-The same process is also applied for the `createPost` mutation. It will execute the `customCreate` action of the `Post` controller.
+The same process is also applied for the `createRestaurant` mutation. It will execute the `customCreate` action of the `Restaurant` controller.
 
 ::: note
 The `where` parameter is available via `ctx.params` and the `data` are available via `ctx.request.body` in the controller's action.
@@ -768,28 +764,28 @@ The `where` parameter is available via `ctx.params` and the `data` are available
 module.exports = {
   resolver: {
     Query: {
-      posts: {
-        description: 'Return a list of posts by author',
+      restaurants: {
+        description: 'Return a list of restaurants by chef',
         resolver: (obj, options, { context }) => {
           // You can return a raw JSON object or a promise.
 
           return [{
-            title: 'My first blog post',
-            content: 'Whatever you want...'
+            name: 'My first blog restaurant',
+            description: 'Whatever you want...'
           }];
         }
       }
     },
     Mutation: {
-      updatePost: {
-        description: 'Update an existing post',
+      updateRestaurant: {
+        description: 'Update an existing restaurant',
         resolver: (obj, options, { context }) => {
           // The `where` and `data` parameters passed as arguments
           // of the GraphQL mutation are available via the `context` object.
           const where = context.params;
           const data = context.request.body;
 
-          return await strapi.api.post.services.post.addPost(data, where);
+          return await strapi.api.restaurant.services.restaurant.addRestaurant(data, where);
         }
       }
     }
@@ -807,28 +803,28 @@ It might happen that you want to apply our permissions layer on a query. That's 
 module.exports = {
   resolver: {
     Query: {
-      posts: {
-        description: 'Return a list of posts by author',
-        resolverOf: 'Post.find', // Will apply the same policy on the custom resolver as the controller's action `find` located in `Post.js`.
+      restaurants: {
+        description: 'Return a list of restaurants by chef',
+        resolverOf: 'Restaurant.find', // Will apply the same policy on the custom resolver as the controller's action `find` located in `Restaurant.js`.
         resolver: (obj, options, context) => {
           // You can return a raw JSON object or a promise.
 
           return [{
-            title: 'My first blog post',
-            content: 'Whatever you want...'
+            name: 'My first blog restaurant',
+            description: 'Whatever you want...'
           }];
         }
       }
     },
     Mutation: {
-      updatePost: {
-        description: 'Update an existing post',
-        resolverOf: 'Post.update', // Will apply the same policy on the custom resolver than the controller's action `update` located in `Post.js`.
+      updateRestaurant: {
+        description: 'Update an existing restaurant',
+        resolverOf: 'Restaurant.update', // Will apply the same policy on the custom resolver than the controller's action `update` located in `Restaurant.js`.
         resolver: (obj, options, { context }) => {
           const where = context.params;
           const data = context.request.body;
 
-          return await strapi.api.post.services.post.addPost(data, where);
+          return await strapi.api.restaurant.services.restaurant.addRestaurant(data, where);
         }
       }
     }
@@ -843,14 +839,14 @@ To do that, we need to use the `schema.graphql` like below:
 ```js
 module.exports = {
   type: {
-    Post: false // The Post type won't be "queriable" or "mutable".
+    Restaurant: false // The Restaurant type won't be "queriable" or "mutable".
   }
   resolver: {
     Query: {
-      posts: false // The `posts` query will no longer be in the GraphQL schema.
+      restaurants: false // The `restaurants` query will no longer be in the GraphQL schema.
     },
     Mutation: {
-      createPost: false,
+      createRestaurant: false,
       deletePOst: false
     }
   }
