@@ -1,9 +1,13 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
-  margin-top: -4px;
+  margin-top: -6px;
   > div {
-    padding-bottom: 20px;
+    padding-top: 2px;
+    &:not(:first-of-type) {
+      padding-top: 18px;
+      padding-bottom: 2px;
+    }
   }
 `;
 
