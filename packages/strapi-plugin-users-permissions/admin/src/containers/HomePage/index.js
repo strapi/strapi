@@ -169,6 +169,10 @@ export class HomePage extends React.Component {
     },
   ];
 
+  isAdvanded = () => {
+    return this.getEndPoint() === 'advanced';
+  };
+
   pluginHeaderActions = [
     {
       label: 'users-permissions.EditPage.cancel',
@@ -186,14 +190,13 @@ export class HomePage extends React.Component {
 
   showLoaders = () => {
     const { data, isLoading, modifiedData } = this.props;
-    const isAdvanded = this.getEndPoint() === 'advanced';
 
     return (
       (isLoading &&
         get(data, this.getEndPoint()) === undefined &&
-        !isAdvanded) ||
+        !this.isAdvanded()) ||
       (isLoading &&
-        isAdvanded &&
+        this.isAdvanded() &&
         get(modifiedData, this.getEndPoint()) === undefined)
     );
   };
@@ -216,24 +219,7 @@ export class HomePage extends React.Component {
     const noButtonList =
       match.params.settingType === 'email-templates' ||
       match.params.settingType === 'providers';
-    const component =
-      match.params.settingType === 'advanced' ? (
-        <EditForm
-          onChange={this.props.onChange}
-          values={get(modifiedData, this.getEndPoint(), {})}
-          showLoaders={this.showLoaders()}
-        />
-      ) : (
-        <List
-          data={get(data, this.getEndPoint(), [])}
-          deleteData={this.props.deleteData}
-          noButton={noButtonList}
-          onButtonClick={this.handleButtonClick}
-          settingType={match.params.settingType}
-          showLoaders={this.showLoaders()}
-          values={get(modifiedData, this.getEndPoint(), {})}
-        />
-      );
+    const values = get(modifiedData, this.getEndPoint(), {});
 
     return (
       <HomePageContextProvider
@@ -253,7 +239,23 @@ export class HomePage extends React.Component {
               actions={headerActions}
             />
             <HeaderNav links={this.headerNavLinks} />
-            {component}
+            {!this.isAdvanded() ? (
+              <List
+                data={get(data, this.getEndPoint(), [])}
+                deleteData={this.props.deleteData}
+                noButton={noButtonList}
+                onButtonClick={this.handleButtonClick}
+                settingType={match.params.settingType}
+                showLoaders={this.showLoaders()}
+                values={values}
+              />
+            ) : (
+              <EditForm
+                onChange={this.props.onChange}
+                values={values}
+                showLoaders={this.showLoaders()}
+              />
+            )}
           </Wrapper>
 
           <PopUpForm

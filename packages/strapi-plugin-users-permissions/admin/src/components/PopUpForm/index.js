@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import {
@@ -22,13 +21,20 @@ import {
   take,
   takeRight,
 } from 'lodash';
-import { InputsIndex as Input } from 'strapi-helper-plugin';
+import {
+  ButtonModal,
+  HeaderModal,
+  HeaderModalTitle,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalForm,
+  InputsIndex as Input,
+} from 'strapi-helper-plugin';
 import { HomePageContext } from '../../contexts/HomePage';
 
 // Translations
 import en from '../../translations/en.json';
-
-import { Header, ProviderContainer, Separator, Wrapper } from './Components';
 
 class PopUpForm extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
@@ -135,7 +141,7 @@ class PopUpForm extends React.Component {
 
     if (settingType === 'providers') {
       return (
-        <ProviderContainer className="row">
+        <>
           <Input
             inputDescription={{
               id: 'users-permissions.PopUpForm.Providers.enabled.description',
@@ -149,8 +155,6 @@ class PopUpForm extends React.Component {
             validations={{}}
             value={get(values, 'enabled', this.state.enabled)}
           />
-
-          {form.length > 1 && <Separator />}
 
           {map(tail(form), (value, key) => (
             <Input
@@ -205,7 +209,7 @@ class PopUpForm extends React.Component {
               validations={{}}
             />
           )}
-        </ProviderContainer>
+        </>
       );
     }
 
@@ -222,7 +226,7 @@ class PopUpForm extends React.Component {
     };
 
     return (
-      <div className="row">
+      <>
         {map(take(form, 3), (value, key) => (
           <Input
             autoFocus={key === 0}
@@ -271,7 +275,7 @@ class PopUpForm extends React.Component {
             inputStyle={!includes(value, 'object') ? { height: '16rem' } : {}}
           />
         ))}
-      </div>
+      </>
     );
   };
 
@@ -296,39 +300,43 @@ class PopUpForm extends React.Component {
       );
     }
 
-    if (display && en[display]) {
-      header = <FormattedMessage id={`users-permissions.${display}`} />;
-    }
+    let subHeader =
+      display && en[display] ? (
+        <FormattedMessage id={`users-permissions.${display}`} />
+      ) : (
+        <span>{capitalize(dataToEdit)}</span>
+      );
 
     return (
-      <Modal
-        isOpen={isOpen}
-        toggle={this.context.unsetDataToEdit}
-        style={{ marginTop: '16.2rem' }}
-      >
-        <Wrapper>
-          <ModalHeader
-            toggle={this.context.unsetDataToEdit}
-            className="modalHeader"
-          />
-          <Header>{header}</Header>
-          <form onSubmit={onSubmit}>
-            <ModalBody className="modalBody">
-              <div className="container-fluid">{this.renderForm()}</div>
-            </ModalBody>
-            <ModalFooter className="modalFooter">
-              <Button
-                onClick={() => this.context.unsetDataToEdit()}
-                className="secondary"
-              >
-                <FormattedMessage id="users-permissions.PopUpForm.button.cancel" />
-              </Button>
-              <Button type="submit" onClick={onSubmit} className="primary">
-                <FormattedMessage id="users-permissions.PopUpForm.button.save" />
-              </Button>
-            </ModalFooter>
-          </form>
-        </Wrapper>
+      <Modal isOpen={isOpen} onToggle={this.context.unsetDataToEdit}>
+        <HeaderModal>
+          <section>
+            <HeaderModalTitle>{header}</HeaderModalTitle>
+          </section>
+          <section>
+            <HeaderModalTitle>{subHeader}</HeaderModalTitle>
+            <hr />
+          </section>
+        </HeaderModal>
+        <form onSubmit={onSubmit}>
+          <ModalForm>
+            <ModalBody>{this.renderForm()}</ModalBody>
+          </ModalForm>
+          <ModalFooter>
+            <section>
+              <ButtonModal
+                message="components.popUpWarning.button.cancel"
+                onClick={this.context.unsetDataToEdit}
+                isSecondary
+              />
+              <ButtonModal
+                message="form.button.done"
+                onClick={onSubmit}
+                type="submit"
+              />
+            </section>
+          </ModalFooter>
+        </form>
       </Modal>
     );
   }

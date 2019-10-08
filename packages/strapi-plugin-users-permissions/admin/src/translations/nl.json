@@ -95,7 +95,7 @@
   "PopUpForm.button.save": "Opslaan",
   "PopUpForm.header.add.providers": "Nieuwe leverancier toevoegen",
   "PopUpForm.header.edit.email-templates": "E-mail sjablonen aanpassen",
-  "PopUpForm.header.edit.providers": "Leverancier {provider} aanpassen",
+  "PopUpForm.header.edit.providers": "Leverancier aanpassen",
   "PopUpForm.inputSelect.providers.label": "Kies een leverancier",
   "components.Input.error.password.length": "Wachtwoord is te kort",
 
