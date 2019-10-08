@@ -92,7 +92,14 @@ const getTypeShape = obj => {
     }
     case 'integer': {
       return {
-        default: yup.number().integer(),
+        default: yup.mixed().test(
+          value =>
+            value === '' ||
+            yup
+              .number()
+              .integer()
+              .isValidSync(value)
+        ),
         required: validators.required,
         unique: validators.unique,
         min: yup.number().integer(),
@@ -119,7 +126,9 @@ const getTypeShape = obj => {
     }
     case 'float': {
       return {
-        default: yup.number(),
+        default: yup
+          .mixed()
+          .test(value => value === '' || yup.number().isValidSync(value)),
         required: validators.required,
         unique: validators.unique,
         min: yup.number(),
@@ -128,7 +137,9 @@ const getTypeShape = obj => {
     }
     case 'decimal': {
       return {
-        default: yup.number(),
+        default: yup
+          .mixed()
+          .test(value => value === '' || yup.number().isValidSync(value)),
         required: validators.required,
         unique: validators.unique,
         min: yup.number(),
