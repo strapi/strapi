@@ -8,13 +8,13 @@ const Wrapper = styled.div`
 const Banner = styled.div`
   display: flex;
   justify-content: space-between;
-  padding: 0 28px;
-  padding-right: 43px;
+  padding: 0 43px 0 28px;
   color: #787e8f;
   cursor: pointer;
   > div:first-child {
     display: flex;
     line-height: 5.3rem;
+    width: 100%;
   }
 `;
 
@@ -59,8 +59,10 @@ const Icon = styled.div`
 
 const Name = styled.div`
   font-size: 12px;
+  line-height: 18px;
   font-weight: 600;
   text-transform: uppercase;
+  margin: auto 0;
 `;
 
 export { Banner, Chevron, ControllerWrapper, Description, Icon, Name, Wrapper };

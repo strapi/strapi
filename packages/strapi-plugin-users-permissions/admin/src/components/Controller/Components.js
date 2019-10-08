@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
-  padding: 1px 43px 0 28px;
+  padding: 1px 30px 0 15px;
   background: #ffffff;
   opacity: none;
   -webkit-font-smoothing: antialiased;

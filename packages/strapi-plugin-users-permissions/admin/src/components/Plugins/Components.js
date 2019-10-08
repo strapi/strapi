@@ -5,6 +5,7 @@ const Wrapper = styled.div`
   padding: 0;
   .plugins-wrapper {
     padding-top: 1.8rem;
+    width: 100%;
   }
 `;
 
@@ -27,7 +28,7 @@ const Header = styled.div`
 `;
 
 const PluginsContainer = styled.div`
-  padding-top: 1.9rem;
+  padding-top: 2rem;
   > div {
     border-bottom: 1px solid white;
     &:last-child {

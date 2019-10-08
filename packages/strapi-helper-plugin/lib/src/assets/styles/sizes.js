@@ -1,4 +1,8 @@
 const sizes = {
+  tablet: '768px',
+  desktop: '992px',
+  wide: '1280px',
+
   header: {
     height: '6rem',
   },
