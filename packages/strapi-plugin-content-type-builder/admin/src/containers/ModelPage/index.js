@@ -652,8 +652,8 @@ export class ModelPage extends React.Component {
               </div>
             </ListWrapper>
           )}
-          {!this.getSource() && (
-            <div className="trash-btn-wrapper">
+          <div className="trash-btn-wrapper">
+            {!this.getSource() && (
               <TrashButton
                 onClick={e => {
                   e.stopPropagation();
@@ -672,8 +672,8 @@ export class ModelPage extends React.Component {
                 </div>
                 <FormattedMessage id={`${pluginId}.button.delete.label`} />
               </TrashButton>
-            </div>
-          )}
+            )}
+          </div>
         </ViewContainer>
 
         <AttributesModalPicker

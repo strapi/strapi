@@ -7,147 +7,106 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import cn from 'classnames';
 
 import { InputsIndex as Input, LoadingIndicator } from 'strapi-helper-plugin';
 
-import styles from './styles.scss';
+import { Wrapper } from './Components';
 
-class EditForm extends React.Component {
-  // eslint-disable-line react/prefer-stateless-function
-  generateSelectOptions = () =>
-    Object.keys(get(this.props.values, 'roles', [])).reduce((acc, current) => {
+function EditForm({ onChange, showLoaders, values }) {
+  const { roles, settings } = values;
+
+  const generateSelectOptions = () =>
+    Object.keys(get(values, 'roles', [])).reduce((acc, current) => {
       const option = {
-        id: get(this.props.values.roles, [current, 'name']),
-        value: get(this.props.values.roles, [current, 'type']),
+        id: get(roles, [current, 'name']),
+        value: get(roles, [current, 'type']),
       };
       acc.push(option);
       return acc;
     }, []);
 
-  render() {
-    if (this.props.showLoaders) {
-      return (
-        <div
-          className={cn(
-            styles.editForm,
-            this.props.showLoaders && styles.loadIndicatorContainer,
-          )}
-        >
-          <LoadingIndicator />
+  return (
+    <Wrapper className={showLoaders && 'load-container'}>
+      {showLoaders ? (
+        <LoadingIndicator />
+      ) : (
+        <div>
+          <div className="row">
+            <Input
+              inputDescription={{
+                id: 'users-permissions.EditForm.inputSelect.description.role',
+              }}
+              label={{
+                id: 'users-permissions.EditForm.inputSelect.label.role',
+              }}
+              name="advanced.settings.default_role"
+              onChange={onChange}
+              selectOptions={generateSelectOptions()}
+              type="select"
+              value={get(settings, 'default_role')}
+            />
+            <div className="col-6"></div>
+            <Input
+              label={{
+                id: 'users-permissions.EditForm.inputToggle.label.email',
+              }}
+              inputDescription={{
+                id: 'users-permissions.EditForm.inputToggle.description.email',
+              }}
+              name="advanced.settings.unique_email"
+              onChange={onChange}
+              type="toggle"
+              value={get(settings, 'unique_email')}
+            />
+            <div className="col-6"></div>
+            <Input
+              label={{
+                id: 'users-permissions.EditForm.inputToggle.label.sign-up',
+              }}
+              inputDescription={{
+                id:
+                  'users-permissions.EditForm.inputToggle.description.sign-up',
+              }}
+              name="advanced.settings.allow_register"
+              onChange={onChange}
+              type="toggle"
+              value={get(settings, 'allow_register')}
+            />
+            <div className="col-6"></div>
+            <Input
+              label={{
+                id:
+                  'users-permissions.EditForm.inputToggle.label.email-confirmation',
+              }}
+              inputDescription={{
+                id:
+                  'users-permissions.EditForm.inputToggle.description.email-confirmation',
+              }}
+              name="advanced.settings.email_confirmation"
+              onChange={onChange}
+              type="toggle"
+              value={get(settings, 'email_confirmation')}
+            />
+            <div className="col-6"></div>
+            <Input
+              label={{
+                id:
+                  'users-permissions.EditForm.inputToggle.label.email-confirmation-redirection',
+              }}
+              inputDescription={{
+                id:
+                  'users-permissions.EditForm.inputToggle.description.email-confirmation-redirection',
+              }}
+              name="advanced.settings.email_confirmation_redirection"
+              onChange={onChange}
+              type="text"
+              value={get(settings, 'email_confirmation_redirection')}
+            />
+          </div>
         </div>
-      );
-    }
-
-    return (
-      <div className={styles.editForm}>
-        <div className="row">
-          <Input
-            inputDescription={{
-              id: 'users-permissions.EditForm.inputSelect.description.role',
-            }}
-            inputClassName={styles.inputStyle}
-            label={{ id: 'users-permissions.EditForm.inputSelect.label.role' }}
-            name="advanced.settings.default_role"
-            onChange={this.props.onChange}
-            selectOptions={this.generateSelectOptions()}
-            type="select"
-            value={get(this.props.values.settings, 'default_role')}
-          />
-        </div>
-        <div className={styles.separator} />
-        <div className="row">
-          <Input
-            label={{ id: 'users-permissions.EditForm.inputToggle.label.email' }}
-            inputDescription={{
-              id: 'users-permissions.EditForm.inputToggle.description.email',
-            }}
-            name="advanced.settings.unique_email"
-            onChange={this.props.onChange}
-            type="toggle"
-            value={get(this.props.values.settings, 'unique_email')}
-          />
-        </div>
-        <div className={styles.separator} />
-        {/*}
-        <div className="row">
-          <Input
-            customBootstrapClass="col-md-3"
-            label="users-permissions.EditForm.inputSelect.subscriptions.label"
-            inputDescription="users-permissions.EditForm.inputSelect.subscriptions.description"
-            name="subscriptions"
-            onChange={this.props.onChange}
-            type="number"
-            validations={{}}
-            value={get(this.props.values, 'subscriptions')}
-          />
-          <div className="col-md-3" />
-          <Input
-            customBootstrapClass="col-md-3"
-            label="users-permissions.EditForm.inputSelect.durations.label"
-            inputDescription="users-permissions.EditForm.inputSelect.durations.description"
-            name="durations"
-            onChange={this.props.onChange}
-            type="number"
-            validations={{}}
-            value={get(this.props.values, 'durations')}
-          />
-        </div>
-        <div className={styles.separator} />
-        */}
-        <div className="row">
-          <Input
-            label={{
-              id: 'users-permissions.EditForm.inputToggle.label.sign-up',
-            }}
-            inputDescription={{
-              id: 'users-permissions.EditForm.inputToggle.description.sign-up',
-            }}
-            name="advanced.settings.allow_register"
-            onChange={this.props.onChange}
-            type="toggle"
-            value={get(this.props.values.settings, 'allow_register')}
-          />
-        </div>
-        <div className={styles.separator} />
-        <div className="row">
-          <Input
-            label={{
-              id:
-                'users-permissions.EditForm.inputToggle.label.email-confirmation',
-            }}
-            inputDescription={{
-              id:
-                'users-permissions.EditForm.inputToggle.description.email-confirmation',
-            }}
-            name="advanced.settings.email_confirmation"
-            onChange={this.props.onChange}
-            type="toggle"
-            value={get(this.props.values.settings, 'email_confirmation')}
-          />
-        </div>
-        <div className="row">
-          <Input
-            label={{
-              id:
-                'users-permissions.EditForm.inputToggle.label.email-confirmation-redirection',
-            }}
-            inputDescription={{
-              id:
-                'users-permissions.EditForm.inputToggle.description.email-confirmation-redirection',
-            }}
-            name="advanced.settings.email_confirmation_redirection"
-            onChange={this.props.onChange}
-            type="text"
-            value={get(
-              this.props.values.settings,
-              'email_confirmation_redirection',
-            )}
-          />
-        </div>
-      </div>
-    );
-  }
+      )}
+    </Wrapper>
+  );
 }
 
 EditForm.propTypes = {

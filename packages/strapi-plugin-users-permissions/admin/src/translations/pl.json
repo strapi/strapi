@@ -95,7 +95,7 @@
   "PopUpForm.button.save": "Zapisz",
   "PopUpForm.header.add.providers": "Dostawca",
   "PopUpForm.header.edit.email-templates": "Zmień szablony e-mail",
-  "PopUpForm.header.edit.providers": "Edytuj dostawcę {provider}",
+  "PopUpForm.header.edit.providers": "Edytuj dostawcę",
   "PopUpForm.inputSelect.providers.label": "Dostawca",
 
   "components.Input.error.password.length": "Hasło jest za krótkie",

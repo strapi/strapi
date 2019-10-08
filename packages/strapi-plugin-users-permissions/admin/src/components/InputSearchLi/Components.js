@@ -1,17 +1,19 @@
-.li {
+import styled from 'styled-components';
+
+const Wrapper = styled.div`
   height: 3.6rem;
   margin: 0 !important;
   padding: 0rem 1rem;
   font-size: 13px;
   font-weight: 500;
   line-height: 3.6rem;
-  border-bottom: 1px solid #F6F6F6;
+  border-bottom: 1px solid #f6f6f6;
   &:hover {
-    background-color: #FAFAFB;
+    background-color: #fafafb;
     background-size: 3.6rem;
     > div {
-      >div:last-child {
-        color: #4B515A;
+      > div:last-child {
+        color: #4b515a;
       }
     }
   }
@@ -24,17 +26,15 @@
     justify-content: space-between;
     > div:last-child {
       cursor: pointer;
-      color: #B3B5B9;
+      color: #b3b5b9;
     }
   }
-}
-
-
-.container {
-  >a {
+  a {
     margin-left: 10px;
-    color: #1C5DE7;
+    color: #1c5de7;
     font-size: 10px;
     cursor: pointer;
   }
-}
+`;
+
+export { Wrapper };
