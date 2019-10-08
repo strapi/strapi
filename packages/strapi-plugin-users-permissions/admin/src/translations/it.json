@@ -86,7 +86,7 @@
   "PopUpForm.button.save": "Salva",
   "PopUpForm.header.add.providers": "Aggiungi nuovo Provider",
   "PopUpForm.header.edit.email-templates": "Modifica il template delle Email",
-  "PopUpForm.header.edit.providers": "Modifica {provider} Provider",
+  "PopUpForm.header.edit.providers": "Modifica Provider",
   "PopUpForm.inputSelect.providers.label": "Scegli il provider",
 
   "eaderNav.link.advancedSettings": "Impostazioni avanzate",

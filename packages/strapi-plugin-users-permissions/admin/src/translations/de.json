@@ -95,7 +95,7 @@
   "PopUpForm.button.save": "Speichern",
   "PopUpForm.header.add.providers": "Neue Methode hinzufügen",
   "PopUpForm.header.edit.email-templates": "E-Mail-Templates bearbeiten",
-  "PopUpForm.header.edit.providers": "Methode {provider} bearbeiten",
+  "PopUpForm.header.edit.providers": "Methode bearbeiten",
   "PopUpForm.inputSelect.providers.label": "Wähle die Methode aus",
 
   "components.Input.error.password.length": "Passwort ist zu kurz",

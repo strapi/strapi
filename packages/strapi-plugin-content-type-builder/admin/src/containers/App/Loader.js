@@ -1,13 +1,14 @@
 import React from 'react';
 import { LoadingIndicator } from 'strapi-helper-plugin';
-import styles from './styles.scss';
+
+import Wrapper from './Wrapper';
 
 const Loader = () => (
-  <div className={styles.app}>
-    <div className={styles.centered}>
+  <Wrapper>
+    <div className="centered">
       <LoadingIndicator />
     </div>
-  </div>
+  </Wrapper>
 );
 
 export default Loader;
