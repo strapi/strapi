@@ -52,8 +52,7 @@ module.exports = {
       }
 
       if (
-        (_.has(association, 'collection') &&
-          association.collection === '*') ||
+        (_.has(association, 'collection') && association.collection === '*') ||
         (_.has(association, 'model') && association.model === '*')
       ) {
         if (association.model) {
@@ -142,10 +141,7 @@ module.exports = {
         ) {
           types.other = 'morphTo';
         }
-      } else if (
-        _.has(association, 'via') &&
-        _.has(association, 'model')
-      ) {
+      } else if (_.has(association, 'via') && _.has(association, 'model')) {
         types.current = 'modelD';
 
         // We have to find if they are a model linked to this key
@@ -159,10 +155,7 @@ module.exports = {
           attribute.collection !== '*'
         ) {
           types.other = 'collection';
-        } else if (
-          _.has(attribute, 'model') &&
-          attribute.model !== '*'
-        ) {
+        } else if (_.has(attribute, 'model') && attribute.model !== '*') {
           types.other = 'model';
         } else if (
           _.has(attribute, 'collection') ||
@@ -266,8 +259,7 @@ module.exports = {
         };
       } else if (
         types.current === 'morphTo' &&
-        (types.other === 'collection' ||
-          _.has(association, 'collection'))
+        (types.other === 'collection' || _.has(association, 'collection'))
       ) {
         return {
           nature: 'manyMorphToMany',

@@ -7,18 +7,24 @@ import cn from 'classnames';
 import styles from './styles.scss';
 
 function InputNumber(props) {
-  const formattedPlaceholder = props.placeholder === '' ? 'app.utils.placeholder.defaultMessage' : props.placeholder;
+  const formattedPlaceholder =
+    props.placeholder === ''
+      ? 'app.utils.placeholder.defaultMessage'
+      : props.placeholder;
 
   return (
-    <FormattedMessage id={formattedPlaceholder} defaultMessage={formattedPlaceholder}>
-      {(message) => (
+    <FormattedMessage
+      id={formattedPlaceholder}
+      defaultMessage={formattedPlaceholder}
+    >
+      {message => (
         <input
           autoFocus={props.autoFocus}
           className={cn(
             styles.input,
             'form-control',
             !props.deactivateErrorHighlight && props.error && 'is-invalid',
-            !isEmpty(props.className) && props.className,
+            !isEmpty(props.className) && props.className
           )}
           disabled={props.disabled}
           id={props.name}
@@ -69,10 +75,7 @@ InputNumber.propTypes = {
   step: PropTypes.number,
   style: PropTypes.object,
   tabIndex: PropTypes.string,
-  value: PropTypes.oneOfType([
-    PropTypes.number,
-    PropTypes.string,
-  ]).isRequired,
+  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
 };
 
 export default InputNumber;

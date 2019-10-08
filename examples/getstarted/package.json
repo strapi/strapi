@@ -26,7 +26,6 @@
     "strapi-plugin-documentation": "3.0.0-beta.16.7",
     "strapi-plugin-email": "3.0.0-beta.16.7",
     "strapi-plugin-graphql": "3.0.0-beta.16.7",
-    "strapi-plugin-settings-manager": "3.0.0-beta.16.7",
     "strapi-plugin-upload": "3.0.0-beta.16.7",
     "strapi-plugin-users-permissions": "3.0.0-beta.16.7",
     "strapi-provider-email-mailgun": "3.0.0-beta.16.7",

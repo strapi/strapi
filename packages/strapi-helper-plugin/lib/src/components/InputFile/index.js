@@ -24,27 +24,26 @@ class InputFile extends React.Component {
     position: 0,
   };
 
-  onDrop = (e) => {
+  onDrop = e => {
     e.preventDefault();
     this.addFilesToProps(e.dataTransfer.files);
-  }
+  };
 
-  handleClick = (e) => {
+  handleClick = e => {
     e.preventDefault();
     e.stopPropagation();
     this.inputFile.click();
-  }
+  };
 
   handleChange = ({ target }) => this.addFilesToProps(target.files);
 
-  addFilesToProps = (files) => {
+  addFilesToProps = files => {
     if (files.length === 0) {
       return;
     }
 
     const initAcc = this.props.multiple ? cloneDeep(this.props.value) : {};
     const value = Object.keys(files).reduce((acc, current) => {
-
       if (this.props.multiple) {
         acc.push(files[current]);
       } else if (current === '0') {
@@ -63,9 +62,9 @@ class InputFile extends React.Component {
     this.inputFile.value = '';
     this.setState({ isUploading: !this.state.isUploading });
     this.props.onChange({ target });
-  }
+  };
 
-  handleFileDelete = (e) => {
+  handleFileDelete = e => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -92,18 +91,19 @@ class InputFile extends React.Component {
       this.updateFilePosition(newPosition, value.length);
     }
     this.setState({ didDeleteFile: !this.state.didDeleteFile });
-  }
+  };
 
   updateFilePosition = (newPosition, size = this.props.value.length) => {
     const label = size === 0 ? false : newPosition + 1;
     this.props.setLabel(label);
     this.setState({ position: newPosition });
-  }
+  };
 
   isVisibleDetails = () => {
-    const {value} = this.props;
+    const { value } = this.props;
 
-    if (!value ||
+    if (
+      !value ||
       (isArray(value) && value.length === 0) ||
       (isObject(value) && Object.keys(value).length === 0)
     ) {
@@ -111,19 +111,20 @@ class InputFile extends React.Component {
     }
 
     return true;
-  }
+  };
 
   render() {
-    const {
-      multiple,
-      name,
-      onChange,
-      value,
-    } = this.props;
+    const { multiple, name, onChange, value } = this.props;
 
     return (
       <div>
-        <div className={cn("form-control", styles.inputFileControlForm, this.props.error && 'is-invalid')}>
+        <div
+          className={cn(
+            'form-control',
+            styles.inputFileControlForm,
+            this.props.error && 'is-invalid'
+          )}
+        >
           <ImgPreview
             didDeleteFile={this.state.didDeleteFile}
             files={value}
@@ -143,7 +144,7 @@ class InputFile extends React.Component {
               name={name}
               onChange={this.handleChange}
               type="file"
-              ref={(input) => this.inputFile = input}
+              ref={input => (this.inputFile = input)}
             />
 
             <div className={styles.buttonContainer}>
@@ -170,7 +171,6 @@ InputFile.defaultProps = {
   setLabel: () => {},
   value: [],
   error: false,
-
 };
 
 InputFile.propTypes = {

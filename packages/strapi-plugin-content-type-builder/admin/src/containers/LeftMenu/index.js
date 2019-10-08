@@ -6,6 +6,7 @@
 
 import React, { useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
+import { StyledLeftMenu } from 'strapi-helper-plugin';
 
 import cn from 'classnames';
 
@@ -15,8 +16,6 @@ import CustomLink from '../../components/CustomLink';
 import DocumentationSection from '../../components/DocumentationSection';
 import MenuContext from '../../containers/MenuContext';
 import LeftMenuLink from '../../components/LeftMenuLink';
-
-import StyledLeftMenu from './StyledLeftMenu';
 
 const displayNotificationCTNotSaved = () =>
   strapi.notification.info(
