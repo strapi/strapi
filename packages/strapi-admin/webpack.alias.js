@@ -2,7 +2,7 @@ const alias = [
   'object-assign',
   'whatwg-fetch',
   '@babel/polyfill',
-  'buffetjs',
+  '@buffetjs/styles',
   'classnames',
   'history',
   'hoist-non-react-statics',

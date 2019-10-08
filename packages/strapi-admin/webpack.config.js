@@ -36,6 +36,7 @@ module.exports = ({
         new MiniCssExtractPlugin({
           filename: '[name].[chunkhash].css',
           chunkFilename: '[name].[chunkhash].chunkhash.css',
+          ignoreOrder: true,
         }),
       ]
     : [
@@ -143,10 +144,7 @@ module.exports = ({
         {
           test: /\.css$/,
           include: /node_modules/,
-          use: [
-            {
-              loader: require.resolve('style-loader'),
-            },
+          use: scssLoader.concat([
             {
               loader: require.resolve('css-loader'),
               options: {
@@ -161,7 +159,7 @@ module.exports = ({
                 },
               },
             },
-          ],
+          ]),
         },
         {
           test: /\.scss$/,
