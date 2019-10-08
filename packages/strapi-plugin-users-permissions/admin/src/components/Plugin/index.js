@@ -89,16 +89,16 @@ class Plugin extends React.Component {
                 />
               )}
             </Description>
+            {emptyApplication && (
+              <Chevron>
+                {this.state.collapse ? (
+                  <i className="fa fa-chevron-up" />
+                ) : (
+                  <i className="fa fa-chevron-down" />
+                )}
+              </Chevron>
+            )}
           </div>
-          {emptyApplication && (
-            <Chevron>
-              {this.state.collapse ? (
-                <i className="fa fa-chevron-up" />
-              ) : (
-                <i className="fa fa-chevron-down" />
-              )}
-            </Chevron>
-          )}
         </Banner>
         <Collapse isOpen={this.state.collapse}>
           <div />

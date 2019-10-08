@@ -1,10 +1,19 @@
 import styled from 'styled-components';
 
+import { sizes } from 'strapi-helper-plugin';
+
 const Wrapper = styled.div`
+  * {
+    box-sizing: border-box;
+  }
+
   > .container-fluid {
     padding: 18px 30px;
     > div:first-child {
-      margin-bottom: 11px;
+      margin-bottom: 7px;
+      @media (min-width: ${sizes.desktop}) {
+        margin-bottom: 11px;
+      }
     }
   }
 
@@ -39,7 +48,7 @@ const Title = styled.div`
 `;
 
 const Separator = styled.div`
-  margin-top: 15px;
+  margin-top: 13px;
   border-top: 1px solid #f6f6f6;
 `;
 

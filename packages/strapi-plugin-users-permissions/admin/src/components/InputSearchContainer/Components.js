@@ -67,7 +67,7 @@ const Addon = styled.div`
 
 const List = styled.div`
   height: 16.3rem;
-  overflow: scroll;
+  overflow-y: auto;
   border: 1px solid #e3e9f3;
   border-top-left-radius: 0 !important;
   border-top-right-radius: 0 !important;
