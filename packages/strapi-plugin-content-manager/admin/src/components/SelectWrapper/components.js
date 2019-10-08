@@ -11,6 +11,13 @@ const Wrapper = styled.div`
     font-weight: 500;
   }
 
+  &.form-group {
+    margin-bottom: 1rem;
+    nav label {
+      margin-bottom: 0.4rem;
+    }
+  }
+
   nav + div {
     height: 34px;
     background-color: white;
@@ -92,6 +99,7 @@ const Wrapper = styled.div`
           div {
             height: 36px;
             cursor: pointer;
+            line-height: 24px;
           }
         }
       }
@@ -103,7 +111,7 @@ const Wrapper = styled.div`
     font-size: 1.2rem;
     margin-top: 1.3rem;
     margin-bottom: 0;
-    line-height: 1.2rem;
+    line-height: 1.3rem;
     padding-bottom: 1.1rem;
   }
 `;

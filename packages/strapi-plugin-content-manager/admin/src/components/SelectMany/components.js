@@ -3,7 +3,6 @@ import styled from 'styled-components';
 const ListWrapper = styled.div`
   overflow: hidden;
   max-height: 116px;
-
   > ul {
     margin: 0 -20px 0;
     padding: 0 20px !important;
@@ -39,9 +38,11 @@ const Li = styled.li`
   justify-content: space-between;
   height: 18px;
   margin-top: 9px;
-  &:last-of-type {
-    margin-bottom: 0px;
+
+  &:nth-child(odd) {
+    margin-bottom: 9px;
   }
+
   &:active {
     .dragHandle {
       > span {
