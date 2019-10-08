@@ -11,6 +11,7 @@ import { get, isEmpty, upperFirst } from 'lodash';
 
 import {
   ButtonModal,
+  GlobalContext,
   HeaderModal,
   HeaderModalTitle,
   Modal,
@@ -33,6 +34,8 @@ const NAVLINKS = [{ id: 'base' }, { id: 'advanced' }];
 
 class ModelForm extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
+  static contextType = GlobalContext;
+
   state = { didCheckErrors: false, formErrors: {}, isVisible: false };
 
   handleCancel = () => {
@@ -280,10 +283,6 @@ class ModelForm extends React.Component {
     );
   }
 }
-
-ModelForm.contextTypes = {
-  emitEvent: PropTypes.func,
-};
 
 ModelForm.defaultProps = {
   actionType: 'create',

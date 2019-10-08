@@ -34,11 +34,6 @@ import reducer from './reducer';
 import saga from './saga';
 
 export class ListPluginsPage extends React.Component {
-  // eslint-disable-line react/prefer-stateless-function
-  getChildContext = () => ({
-    currentEnvironment: this.props.global.currentEnvironment,
-  });
-
   componentDidMount() {
     this.props.getPlugins();
   }
@@ -83,12 +78,6 @@ export class ListPluginsPage extends React.Component {
     );
   }
 }
-
-ListPluginsPage.childContextTypes = {
-  currentEnvironment: PropTypes.string.isRequired,
-};
-
-ListPluginsPage.contextTypes = {};
 
 ListPluginsPage.propTypes = {
   global: PropTypes.shape({

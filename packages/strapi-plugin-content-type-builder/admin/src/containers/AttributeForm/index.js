@@ -11,6 +11,7 @@ import { get, isEmpty } from 'lodash';
 
 import {
   ButtonModal,
+  GlobalContext,
   HeaderModal,
   HeaderModalTitle,
   Modal,
@@ -36,6 +37,8 @@ const NAVLINKS = [{ id: 'base' }, { id: 'advanced' }];
 
 class AttributeForm extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
+  static contextType = GlobalContext;
+
   state = { didCheckErrors: false, formErrors: {}, showForm: false };
 
   getCurrentForm = () => {
@@ -388,10 +391,6 @@ class AttributeForm extends React.Component {
     );
   }
 }
-
-AttributeForm.contextTypes = {
-  emitEvent: PropTypes.func,
-};
 
 AttributeForm.defaultProps = {
   actionType: 'create',

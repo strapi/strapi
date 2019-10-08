@@ -1,10 +1,13 @@
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
 
 import mountWithIntl from 'testUtils/mountWithIntl';
 import formatMessagesWithPluginId from 'testUtils/formatMessages';
 
-import { HeaderModalTitle, InputsIndex as Input } from 'strapi-helper-plugin';
+import {
+  GlobalContextProvider,
+  HeaderModalTitle,
+  InputsIndex as Input,
+} from 'strapi-helper-plugin';
 // This part is needed if you need to test the lifecycle of a container that contains FormattedMessages
 
 import pluginId from '../../../pluginId';
@@ -14,9 +17,21 @@ import CustomCheckbox from '../../../components/CustomCheckbox';
 import AttributeForm from '../index';
 
 const messages = formatMessagesWithPluginId(pluginId, pluginTradsEn);
-const context = { emitEvent: jest.fn() };
+const appContext = {
+  emitEvent: jest.fn(),
+  currentEnvironment: 'development',
+  disableGlobalOverlayBlocker: jest.fn(),
+  enableGlobalOverlayBlocker: jest.fn(),
+  plugins: {},
+  updatePlugin: jest.fn(),
+};
 const renderComponent = (props = {}) =>
-  mountWithIntl(<AttributeForm {...props} />, messages, context);
+  mountWithIntl(
+    <GlobalContextProvider {...appContext}>
+      <AttributeForm {...props} />
+    </GlobalContextProvider>,
+    messages
+  );
 
 describe('<AttributeForm />', () => {
   let props;
@@ -50,17 +65,14 @@ describe('<AttributeForm />', () => {
     props.isOpen = true;
 
     wrapper = renderComponent(props);
-    wrapper.setState({ showForm: true });
+    const compo = wrapper.find(AttributeForm);
+    compo.setState({ showForm: true });
 
     const customs = wrapper.find(CustomCheckbox);
     const inputs = wrapper.find(Input);
 
     expect(customs).toHaveLength(2);
     expect(inputs).toHaveLength(3);
-
-    wrapper.setProps({ activeTab: 'base' });
-
-    expect(wrapper.find(CustomCheckbox)).toHaveLength(0);
   });
 
   it('should handle the title correctly with the activeTab', () => {
@@ -69,6 +81,7 @@ describe('<AttributeForm />', () => {
     props.attributeToEditName = 'test';
 
     wrapper = renderComponent(props);
+
     wrapper.setProps({ actionType: 'edit' });
 
     const title = wrapper
@@ -78,15 +91,6 @@ describe('<AttributeForm />', () => {
       .last();
 
     expect(title.text()).toContain('test');
-
-    wrapper.setProps({ actionType: 'create' });
-
-    expect(
-      wrapper
-        .find(FormattedMessage)
-        .at(0)
-        .prop('id')
-    ).toContain('create');
   });
 
   it('should use the defaultProps', () => {
@@ -112,7 +116,8 @@ describe('<AttributeForm />', () => {
 
         wrapper = renderComponent(props);
 
-        const { getFormErrors } = wrapper.instance();
+        const compo = wrapper.find(AttributeForm);
+        const { getFormErrors } = compo.instance();
 
         expect(getFormErrors()).toEqual({});
       });
@@ -120,7 +125,8 @@ describe('<AttributeForm />', () => {
       it("should return an object with the input's name and an array of error if the name is empty", () => {
         wrapper = renderComponent(props);
 
-        const { getFormErrors } = wrapper.instance();
+        const compo = wrapper.find(AttributeForm);
+        const { getFormErrors } = compo.instance();
 
         expect(getFormErrors()).toEqual({
           name: [{ id: `${pluginId}.error.validation.required` }],
@@ -132,7 +138,8 @@ describe('<AttributeForm />', () => {
 
         wrapper = renderComponent(props);
 
-        const { getFormErrors } = wrapper.instance();
+        const compo = wrapper.find(AttributeForm);
+        const { getFormErrors } = compo.instance();
 
         expect(getFormErrors()).toEqual({
           name: [{ id: `${pluginId}.error.validation.regex.name` }],
@@ -145,7 +152,8 @@ describe('<AttributeForm />', () => {
 
         wrapper = renderComponent(props);
 
-        const { getFormErrors } = wrapper.instance();
+        const compo = wrapper.find(AttributeForm);
+        const { getFormErrors } = compo.instance();
 
         expect(getFormErrors()).toEqual({
           name: [{ id: `${pluginId}.error.attribute.taken` }],
@@ -160,7 +168,8 @@ describe('<AttributeForm />', () => {
 
         wrapper = renderComponent(props);
 
-        const { getFormErrors } = wrapper.instance();
+        const compo = wrapper.find(AttributeForm);
+        const { getFormErrors } = compo.instance();
 
         expect(getFormErrors()).toEqual({
           minLength: [{ id: `${pluginId}.error.validation.required` }],
@@ -174,7 +183,8 @@ describe('<AttributeForm />', () => {
 
         wrapper = renderComponent(props);
 
-        const { getFormErrors } = wrapper.instance();
+        const compo = wrapper.find(AttributeForm);
+        const { getFormErrors } = compo.instance();
 
         expect(getFormErrors()).toEqual({});
       });
@@ -183,7 +193,9 @@ describe('<AttributeForm />', () => {
     describe('HandleCancel', () => {
       it('should remove the search in the URL', () => {
         wrapper = renderComponent(props);
-        const { handleCancel } = wrapper.instance();
+
+        const compo = wrapper.find(AttributeForm);
+        const { handleCancel } = compo.instance();
 
         handleCancel();
 
@@ -196,7 +208,9 @@ describe('<AttributeForm />', () => {
         props.actionType = 'edit';
         props.attributeToEditName = 'name';
         wrapper = renderComponent(props);
-        const { handleGoTo } = wrapper.instance();
+
+        const compo = wrapper.find(AttributeForm);
+        const { handleGoTo } = compo.instance();
 
         handleGoTo('base');
 
@@ -204,12 +218,14 @@ describe('<AttributeForm />', () => {
           search:
             'modalType=attributeForm&attributeType=string&settingType=base&actionType=edit&attributeName=name',
         });
-        expect(context.emitEvent).not.toHaveBeenCalled();
+        expect(appContext.emitEvent).not.toHaveBeenCalled();
       });
 
       it('should emit the event didSelectContentTypeFieldSettings if the user clicks on advanced seettings', () => {
         wrapper = renderComponent(props);
-        const { handleGoTo } = wrapper.instance();
+
+        const compo = wrapper.find(AttributeForm);
+        const { handleGoTo } = compo.instance();
 
         handleGoTo('advanced');
 
@@ -217,7 +233,7 @@ describe('<AttributeForm />', () => {
           search:
             'modalType=attributeForm&attributeType=string&settingType=advanced&actionType=create',
         });
-        expect(context.emitEvent).toHaveBeenCalledWith(
+        expect(appContext.emitEvent).toHaveBeenCalledWith(
           'didSelectContentTypeFieldSettings'
         );
       });
@@ -226,24 +242,28 @@ describe('<AttributeForm />', () => {
     describe('HandleOnClosed', () => {
       it('should set the showForm state to false', () => {
         wrapper = renderComponent(props);
-        wrapper.setState({ formErrors: {}, showForm: true });
-        const { handleOnClosed } = wrapper.instance();
+
+        const compo = wrapper.find(AttributeForm);
+        compo.setState({ formErrors: {}, showForm: true });
+        const { handleOnClosed } = compo.instance();
 
         handleOnClosed();
 
-        expect(wrapper.state('showForm')).toBeFalsy();
+        expect(compo.state('showForm')).toBeFalsy();
       });
     });
 
     describe('HandleOnOpened', () => {
       it('should set the showForm state to false', () => {
         wrapper = renderComponent(props);
-        wrapper.setState({ showForm: false });
-        const { handleOnOpened } = wrapper.instance();
+
+        const compo = wrapper.find(AttributeForm);
+        compo.setState({ showForm: false });
+        const { handleOnOpened } = compo.instance();
 
         handleOnOpened();
 
-        expect(wrapper.state('showForm')).toBeTruthy();
+        expect(compo.state('showForm')).toBeTruthy();
       });
     });
 
@@ -253,7 +273,8 @@ describe('<AttributeForm />', () => {
 
         wrapper = renderComponent(props);
 
-        const { handleSubmit } = wrapper.instance();
+        const compo = wrapper.find(AttributeForm);
+        const { handleSubmit } = compo.instance();
 
         handleSubmit();
 
@@ -266,7 +287,8 @@ describe('<AttributeForm />', () => {
 
         wrapper = renderComponent(props);
 
-        const { handleSubmit } = wrapper.instance();
+        const compo = wrapper.find(AttributeForm);
+        const { handleSubmit } = compo.instance();
 
         handleSubmit();
 
@@ -276,7 +298,8 @@ describe('<AttributeForm />', () => {
       it('should not submit if thee form has an error', () => {
         wrapper = renderComponent(props);
 
-        const { handleSubmit } = wrapper.instance();
+        const compo = wrapper.find(AttributeForm);
+        const { handleSubmit } = compo.instance();
 
         handleSubmit();
 
@@ -290,8 +313,8 @@ describe('<AttributeForm />', () => {
         props.modifiedData = { type: 'string', name: 'test' };
 
         wrapper = renderComponent(props);
-
-        const { handleSubmitAndContinue } = wrapper.instance();
+        const compo = wrapper.find(AttributeForm);
+        const { handleSubmitAndContinue } = compo.instance();
 
         handleSubmitAndContinue({ preventDefault: jest.fn() });
 
@@ -303,13 +326,13 @@ describe('<AttributeForm />', () => {
         props.actionType = 'edit';
 
         wrapper = renderComponent(props);
-
-        const { handleSubmitAndContinue } = wrapper.instance();
+        const compo = wrapper.find(AttributeForm);
+        const { handleSubmitAndContinue } = compo.instance();
 
         handleSubmitAndContinue({ preventDefault: jest.fn() });
 
         expect(props.onSubmitEdit).toHaveBeenCalledWith(true);
-        expect(context.emitEvent).toHaveBeenCalledWith(
+        expect(appContext.emitEvent).toHaveBeenCalledWith(
           'willAddMoreFieldToContentType'
         );
       });
@@ -317,7 +340,8 @@ describe('<AttributeForm />', () => {
       it('should not submit if the form has an error', () => {
         wrapper = renderComponent(props);
 
-        const { handleSubmitAndContinue } = wrapper.instance();
+        const compo = wrapper.find(AttributeForm);
+        const { handleSubmitAndContinue } = compo.instance();
 
         handleSubmitAndContinue({ preventDefault: jest.fn() });
 
@@ -330,7 +354,8 @@ describe('<AttributeForm />', () => {
       it('should clear the search so the modal can be closed', () => {
         wrapper = renderComponent(props);
 
-        const { handleToggle } = wrapper.instance();
+        const compo = wrapper.find(AttributeForm);
+        const { handleToggle } = compo.instance();
 
         handleToggle();
 

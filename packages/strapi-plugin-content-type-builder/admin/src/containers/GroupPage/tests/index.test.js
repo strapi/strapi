@@ -5,7 +5,11 @@ import { shallow } from 'enzyme';
 import mountWithIntl from 'testUtils/mountWithIntl';
 import formatMessagesWithPluginId from 'testUtils/formatMessages';
 
-import { EmptyAttributesBlock, ListHeader } from 'strapi-helper-plugin';
+import {
+  EmptyAttributesBlock,
+  GlobalContextProvider,
+  ListHeader,
+} from 'strapi-helper-plugin';
 
 import pluginId from '../../../pluginId';
 import pluginTradsEn from '../../../translations/en.json';
@@ -17,7 +21,14 @@ import { GroupPage, mapDispatchToProps } from '../index';
 
 const messages = formatMessagesWithPluginId(pluginId, pluginTradsEn);
 
-const context = { emitEvent: jest.fn() };
+const appContext = {
+  emitEvent: jest.fn(),
+  currentEnvironment: 'development',
+  disableGlobalOverlayBlocker: jest.fn(),
+  enableGlobalOverlayBlocker: jest.fn(),
+  plugins: {},
+  updatePlugin: jest.fn(),
+};
 const renderComponent = (props = {}) => {
   const menuContext = {
     canOpenModal: true,
@@ -27,12 +38,13 @@ const renderComponent = (props = {}) => {
   };
   return mountWithIntl(
     <BrowserRouter>
-      <MenuContext.Provider value={menuContext}>
-        <GroupPage {...props} />
-      </MenuContext.Provider>
+      <GlobalContextProvider {...appContext}>
+        <MenuContext.Provider value={menuContext}>
+          <GroupPage {...props} />
+        </MenuContext.Provider>
+      </GlobalContextProvider>
     </BrowserRouter>,
-    messages,
-    context
+    messages
   );
 };
 
@@ -387,6 +399,8 @@ describe('CTB <GroupPage />, lifecycle', () => {
     it('should handle the <number> type correctly', async () => {
       topCompo = renderComponent(props);
       const wrapper = topCompo.find(GroupPage);
+      const globalProvider = topCompo.find(GlobalContextProvider);
+      const { emitEvent } = globalProvider.props();
 
       const { handleClickEditAttribute } = wrapper.instance();
 
@@ -394,7 +408,7 @@ describe('CTB <GroupPage />, lifecycle', () => {
 
       await wait();
 
-      expect(context.emitEvent).toHaveBeenCalledWith('willEditFieldOfGroup');
+      expect(emitEvent).toHaveBeenCalledWith('willEditFieldOfGroup');
       expect(props.history.push).toHaveBeenCalledWith({
         search:
           'modalType=attributeForm&attributeType=number&settingType=base&actionType=edit&attributeName=0',
@@ -537,17 +551,22 @@ describe('CTB <GroupPage />, lifecycle', () => {
       });
     });
 
-    it('should emit event if edit modal can be opened', () => {
-      props.groups.find(item => item.name == 'tests').isTemporary = true;
+    it('should emit event if edit modal can be opened', async () => {
+      props.groups.find(item => item.name === 'tests').isTemporary = true;
       props.canOpenModal = true;
 
       topCompo = renderComponent(props);
+      const globalProvider = topCompo.find(GlobalContextProvider);
       const wrapper = topCompo.find(GroupPage);
+
+      const { emitEvent } = globalProvider.props();
 
       const { openEditFeatureModal } = wrapper.instance();
       openEditFeatureModal();
 
-      expect(context.emitEvent).toHaveBeenCalledWith('willEditNameOfGroup');
+      await wait();
+
+      expect(emitEvent).toHaveBeenCalledWith('willEditNameOfGroup');
     });
   });
 
@@ -565,6 +584,7 @@ describe('CTB <GroupPage />, lifecycle', () => {
       ];
 
       topCompo = renderComponent(props);
+
       const wrapper = topCompo.find(GroupPage);
       const { pluginHeaderActions } = wrapper.find(ViewContainer).props();
 
@@ -572,7 +592,7 @@ describe('CTB <GroupPage />, lifecycle', () => {
 
       expect(props.submitTempGroup).toHaveBeenCalledWith(
         props.newGroup,
-        context
+        appContext
       );
 
       props.newGroup = {
@@ -591,38 +611,46 @@ describe('CTB <GroupPage />, lifecycle', () => {
       props.canOpenModal = false;
 
       topCompo = renderComponent(props);
+      const globalProvider = topCompo.find(GlobalContextProvider);
       const wrapper = topCompo.find(GroupPage);
       const spyOnDisplayNotification = jest.spyOn(
         wrapper.instance(),
         'displayNotificationCTNotSaved'
       );
+      const { emitEvent } = globalProvider.props();
       const { handleClickOnTrashIcon } = wrapper.instance();
       handleClickOnTrashIcon(0);
-      expect(context.emitEvent).not.toHaveBeenCalledWith(
-        'willDeleteFieldOfGroup'
-      );
+
+      expect(emitEvent).not.toHaveBeenCalledWith('willDeleteFieldOfGroup');
       expect(spyOnDisplayNotification).toHaveBeenCalled();
     });
+
     it('should call deleteGroupAttribute with modifiedDataGroup path when isTemporary is false', () => {
       props.groups.find(item => item.name == 'tests').isTemporary = false;
       props.canOpenModal = true;
       topCompo = renderComponent(props);
+      const globalProvider = topCompo.find(GlobalContextProvider);
       const wrapper = topCompo.find(GroupPage);
+      const { emitEvent } = globalProvider.props();
       const {
         handleClickOnTrashIcon,
         handleDeleteAttribute,
       } = wrapper.instance();
       handleClickOnTrashIcon(0);
+
       expect(wrapper.state()).toEqual({
         attrToDelete: 0,
         removePrompt: false,
         showDeleteAttrWarning: true,
         showDeleteWarning: false,
       });
+
       handleDeleteAttribute();
+
       const keys = ['modifiedDataGroup', 'tests', 'attributes', 0];
+
       expect(props.deleteGroupAttribute).toHaveBeenCalledWith(keys);
-      expect(context.emitEvent).toHaveBeenCalledWith('willDeleteFieldOfGroup');
+      expect(emitEvent).toHaveBeenCalledWith('willDeleteFieldOfGroup');
     });
 
     it('should call deleteGroupAttribute with newGroup path when isTemporary is true', () => {
@@ -631,7 +659,10 @@ describe('CTB <GroupPage />, lifecycle', () => {
       props.canOpenModal = true;
 
       topCompo = renderComponent(props);
+
+      const globalProvider = topCompo.find(GlobalContextProvider);
       const wrapper = topCompo.find(GroupPage);
+      const { emitEvent } = globalProvider.props();
       const {
         handleClickOnTrashIcon,
         handleDeleteAttribute,
@@ -640,8 +671,9 @@ describe('CTB <GroupPage />, lifecycle', () => {
       handleDeleteAttribute();
 
       const keys = ['newGroup', 'attributes', 0];
+
       expect(props.deleteGroupAttribute).toHaveBeenCalledWith(keys);
-      expect(context.emitEvent).toHaveBeenCalledWith('willDeleteFieldOfGroup');
+      expect(emitEvent).toHaveBeenCalledWith('willDeleteFieldOfGroup');
     });
   });
 

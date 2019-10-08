@@ -11,6 +11,7 @@ import { get, isEmpty } from 'lodash';
 
 import {
   ButtonModal,
+  GlobalContext,
   HeaderModal,
   HeaderModalTitle,
   Modal,
@@ -42,6 +43,7 @@ const NAVLINKS = [{ id: 'base', custom: 'relation' }, { id: 'advanced' }];
 
 class RelationForm extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
+  static contextType = GlobalContext;
 
   state = { didCheckErrors: false, formErrors: {}, showForm: false };
 
@@ -356,10 +358,6 @@ class RelationForm extends React.Component {
     );
   }
 }
-
-RelationForm.contextTypes = {
-  emitEvent: PropTypes.func,
-};
 
 RelationForm.defaultProps = {
   actionType: 'create',

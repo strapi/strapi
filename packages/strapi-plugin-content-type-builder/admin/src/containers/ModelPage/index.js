@@ -16,6 +16,7 @@ import { Prompt } from 'react-router';
 import {
   Button,
   EmptyAttributesBlock,
+  GlobalContext,
   List,
   ListHeader,
   ListTitle,
@@ -55,6 +56,8 @@ import styles from './styles.scss';
 /* eslint-disable no-extra-boolean-cast */
 export class ModelPage extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
+  static contextType = GlobalContext;
+
   state = {
     attrToDelete: null,
     removePrompt: false,
@@ -107,19 +110,6 @@ export class ModelPage extends React.Component {
 
   getAttributeType = () =>
     getQueryParameters(this.getSearch(), 'attributeType');
-
-  // getFormData = () => {
-  //   const { modifiedData, newContentType } = this.props;
-
-  //   if (
-  //     this.getActionType() === 'create' ||
-  //     this.isUpdatingTemporaryContentType()
-  //   ) {
-  //     return newContentType;
-  //   }
-
-  //   return get(modifiedData, this.getModelName());
-  // };
 
   getModalType = () => getQueryParameters(this.getSearch(), 'modalType');
 
@@ -761,13 +751,6 @@ export class ModelPage extends React.Component {
     );
   }
 }
-
-ModelPage.contextTypes = {
-  emitEvent: PropTypes.func,
-  plugins: PropTypes.object,
-  router: PropTypes.object,
-  updatePlugin: PropTypes.func,
-};
 
 ModelPage.defaultProps = {
   connections: ['default'],

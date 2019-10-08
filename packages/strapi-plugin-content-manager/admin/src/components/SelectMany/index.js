@@ -23,6 +23,7 @@ function SelectMany({
   onRemove,
   options,
   placeholder,
+  source,
   targetModel,
   value,
 }) {
@@ -99,6 +100,7 @@ function SelectMany({
                 moveRelation={moveRelation}
                 nextSearch={nextSearch}
                 onRemove={() => onRemove(`${name}.${index}`)}
+                source={source}
                 targetModel={targetModel}
               />
             ))}
@@ -112,6 +114,7 @@ function SelectMany({
 
 SelectMany.defaultProps = {
   move: () => {},
+  source: 'content-manager',
   value: null,
 };
 
@@ -129,6 +132,7 @@ SelectMany.propTypes = {
   onRemove: PropTypes.func.isRequired,
   options: PropTypes.array.isRequired,
   placeholder: PropTypes.node.isRequired,
+  source: PropTypes.string,
   targetModel: PropTypes.string.isRequired,
   value: PropTypes.array,
 };

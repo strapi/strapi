@@ -10,6 +10,7 @@ import cn from 'classnames';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
+import { GlobalContext } from 'strapi-helper-plugin';
 import injectSaga from '../../utils/injectSaga';
 import injectReducer from '../../utils/injectReducer';
 
@@ -30,6 +31,8 @@ import saga from './saga';
 import styles from './styles.scss';
 
 export class Onboarding extends React.Component {
+  static contextType = GlobalContext;
+
   state = { showVideos: false };
 
   componentDidMount() {
@@ -95,7 +98,6 @@ export class Onboarding extends React.Component {
   render() {
     const { videos, onClick, setVideoDuration } = this.props;
     const { showVideos } = this.state;
-
     const style = showVideos ? {} : { maxWidth: 0 };
 
     return (
@@ -158,9 +160,6 @@ export class Onboarding extends React.Component {
     );
   }
 }
-Onboarding.contextTypes = {
-  emitEvent: PropTypes.func,
-};
 
 Onboarding.defaultProps = {
   onClick: () => {},
