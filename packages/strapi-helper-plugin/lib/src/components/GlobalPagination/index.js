@@ -11,11 +11,12 @@ import PropTypes from 'prop-types';
 import styles from './styles.scss';
 
 class GlobalPagination extends React.Component {
-  getLastPageNumber = () => Math.ceil(this.props.count / this.props.params._limit) || 1;
+  getLastPageNumber = () =>
+    Math.ceil(this.props.count / this.props.params._limit) || 1;
 
-  handleDotsClick = (e) => e.preventDefault();
+  handleDotsClick = e => e.preventDefault();
 
-  handlePreviousPageClick = (e) => {
+  handlePreviousPageClick = e => {
     e.preventDefault();
 
     if (!this.isFirstPage()) {
@@ -25,9 +26,9 @@ class GlobalPagination extends React.Component {
       };
       this.props.onChangeParams({ target });
     }
-  }
+  };
 
-  handleNextPageClick = (e) => {
+  handleNextPageClick = e => {
     e.preventDefault();
 
     if (!this.isLastPage()) {
@@ -37,31 +38,32 @@ class GlobalPagination extends React.Component {
       };
       this.props.onChangeParams({ target });
     }
-  }
+  };
 
-  handleFirstPageClick = (e) => {
+  handleFirstPageClick = e => {
     e.preventDefault();
     const target = {
       name: 'params._page',
       value: 1,
     };
     this.props.onChangeParams({ target });
-  }
+  };
 
-  handleLastPageClick = (e) => {
+  handleLastPageClick = e => {
     e.preventDefault();
     const target = {
       name: 'params._page',
       value: this.getLastPageNumber(),
     };
     this.props.onChangeParams({ target });
-  }
+  };
 
   isFirstPage = () => this.props.params._page === 1;
 
   isLastPage = () => this.props.params._page === this.getLastPageNumber();
 
-  needAfterLinksDots = () => this.props.params._page < this.getLastPageNumber() - 1;
+  needAfterLinksDots = () =>
+    this.props.params._page < this.getLastPageNumber() - 1;
 
   needPreviousLinksDots = () => this.props.params._page > 3;
 
@@ -111,19 +113,18 @@ class GlobalPagination extends React.Component {
     }
 
     // Generate links
-    return (
-      map(linksOptions, (linksOption, key) => (
-        <li
-          className={`${linksOption.isActive && styles.navLiActive}`}
-          key={key}
+    return map(linksOptions, (linksOption, key) => (
+      <li className={`${linksOption.isActive && styles.navLiActive}`} key={key}>
+        <a
+          href=""
+          disabled={linksOption.isActive}
+          onClick={linksOption.handleClick}
         >
-          <a href="" disabled={linksOption.isActive} onClick={linksOption.handleClick}>
-            {linksOption.value}
-          </a>
-        </li>
-      ))
-    );
-  }
+          {linksOption.value}
+        </a>
+      </li>
+    ));
+  };
 
   render() {
     return (
@@ -141,9 +142,7 @@ class GlobalPagination extends React.Component {
             <i className="fa fa-angle-left" aria-hidden="true"></i>
           </a>
           <nav className={styles.nav}>
-            <ul className={styles.navUl}>
-              {this.renderLinks()}
-            </ul>
+            <ul className={styles.navUl}>{this.renderLinks()}</ul>
           </nav>
           <a
             href=""
@@ -172,16 +171,10 @@ GlobalPagination.defaultProps = {
 };
 
 GlobalPagination.propTypes = {
-  count: PropTypes.oneOfType([
-    PropTypes.number,
-    PropTypes.bool,
-  ]),
+  count: PropTypes.oneOfType([PropTypes.number, PropTypes.bool]),
   onChangeParams: PropTypes.func,
   params: PropTypes.shape({
-    _page: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.number,
-    ]),
+    _page: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     _limit: PropTypes.number,
   }),
 };
