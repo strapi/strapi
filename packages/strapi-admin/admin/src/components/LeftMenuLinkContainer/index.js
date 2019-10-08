@@ -66,7 +66,7 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
   // Check if the plugins list is empty or not and display plugins by name
   const pluginsLinks = !isEmpty(plugins) ? (
     map(sortBy(plugins, 'name'), plugin => {
-      if (plugin.id !== 'email' && plugin.id !== 'settings-manager') {
+      if (plugin.id !== 'email') {
         const pluginSuffixUrl = plugin.suffixUrl
           ? plugin.suffixUrl(plugins)
           : '';
@@ -94,7 +94,6 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
     </li>
   );
 
-  const hasSettingsManager = get(plugins, 'settings-manager', null);
   const staticLinks = [
     {
       icon: 'list',
@@ -125,14 +124,6 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
           {staticLinks.map(link => (
             <LeftMenuLink {...rest} key={link.destination} {...link} />
           ))}
-          {hasSettingsManager && (
-            <LeftMenuLink
-              {...rest}
-              icon="gear"
-              label={messages.configuration.id}
-              destination="/plugins/settings-manager"
-            />
-          )}
         </ul>
       </div>
     </div>
