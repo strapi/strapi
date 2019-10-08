@@ -94,7 +94,7 @@
   "PopUpForm.button.save": "Guardar",
   "PopUpForm.header.add.providers": "Adicionar novo serviço de autenticação",
   "PopUpForm.header.edit.email-templates": "Editar Modelos de Email",
-  "PopUpForm.header.edit.providers": "Editar o serviço de autenticação {provider}",
+  "PopUpForm.header.edit.providers": "Editar o serviço de autenticação",
   "PopUpForm.inputSelect.providers.label": "Selecionar o serviço de autenticação",
 
   "components.Input.error.password.length": "A password é demasiado curta",

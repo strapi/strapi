@@ -95,7 +95,7 @@
   "PopUpForm.button.save": "Save",
   "PopUpForm.header.add.providers": "Add New Provider",
   "PopUpForm.header.edit.email-templates": "Edit Email Templates",
-  "PopUpForm.header.edit.providers": "Edit {provider} Provider",
+  "PopUpForm.header.edit.providers": "Edit Provider",
   "PopUpForm.inputSelect.providers.label": "Choose the provider",
 
   "components.Input.error.password.length": "Password is too short",

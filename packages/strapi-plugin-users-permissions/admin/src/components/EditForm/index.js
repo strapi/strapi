@@ -10,7 +10,7 @@ import { get } from 'lodash';
 
 import { InputsIndex as Input, LoadingIndicator } from 'strapi-helper-plugin';
 
-import { Separator, Wrapper } from './Components';
+import { Wrapper } from './Components';
 
 function EditForm({ onChange, showLoaders, values }) {
   const { roles, settings } = values;
@@ -45,9 +45,7 @@ function EditForm({ onChange, showLoaders, values }) {
               type="select"
               value={get(settings, 'default_role')}
             />
-          </div>
-          <Separator />
-          <div className="row">
+            <div className="col-6"></div>
             <Input
               label={{
                 id: 'users-permissions.EditForm.inputToggle.label.email',
@@ -60,9 +58,7 @@ function EditForm({ onChange, showLoaders, values }) {
               type="toggle"
               value={get(settings, 'unique_email')}
             />
-          </div>
-          <Separator />
-          <div className="row">
+            <div className="col-6"></div>
             <Input
               label={{
                 id: 'users-permissions.EditForm.inputToggle.label.sign-up',
@@ -76,9 +72,7 @@ function EditForm({ onChange, showLoaders, values }) {
               type="toggle"
               value={get(settings, 'allow_register')}
             />
-          </div>
-          <Separator />
-          <div className="row">
+            <div className="col-6"></div>
             <Input
               label={{
                 id:
@@ -93,8 +87,7 @@ function EditForm({ onChange, showLoaders, values }) {
               type="toggle"
               value={get(settings, 'email_confirmation')}
             />
-          </div>
-          <div className="row">
+            <div className="col-6"></div>
             <Input
               label={{
                 id:

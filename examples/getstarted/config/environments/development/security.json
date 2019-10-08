@@ -3,7 +3,7 @@
     "enabled": true,
     "policy": [
       {
-        "img-src": "'self' http:"
+        "img-src": "'self' http: data:"
       },
       "block-all-mixed-content"
     ]

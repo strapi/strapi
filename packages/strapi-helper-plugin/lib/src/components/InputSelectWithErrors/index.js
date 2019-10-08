@@ -14,6 +14,7 @@ import Label from '../Label';
 import InputDescription from '../InputDescription';
 import InputErrors from '../InputErrors';
 import InputSelect from '../InputSelect';
+import InputSpacer from '../InputSpacer';
 
 import styles from './styles.scss';
 
@@ -72,6 +73,7 @@ class InputSelectWithErrors extends React.Component {
       labelClassName,
       labelStyle,
       name,
+      noErrorsDescription,
       onBlur,
       onChange,
       onFocus,
@@ -81,6 +83,12 @@ class InputSelectWithErrors extends React.Component {
       value,
       withOptionPlaceholder,
     } = this.props;
+
+    let spacer = !isEmpty(inputDescription) ? <InputSpacer /> : <div />;
+
+    if (!noErrorsDescription && !isEmpty(this.state.errors)) {
+      spacer = <div />;
+    }
 
     return (
       <div
@@ -124,6 +132,7 @@ class InputSelectWithErrors extends React.Component {
           name={name}
           style={errorsStyle}
         />
+        {spacer}
       </div>
     );
   }
@@ -148,6 +157,7 @@ InputSelectWithErrors.defaultProps = {
   labelClassName: '',
   labelStyle: {},
   onBlur: false,
+  noErrorsDescription: false,
   onFocus: () => {},
   selectOptions: [],
   style: {},
@@ -189,6 +199,7 @@ InputSelectWithErrors.propTypes = {
   labelClassName: PropTypes.string,
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
+  noErrorsDescription: PropTypes.bool,
   onBlur: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
