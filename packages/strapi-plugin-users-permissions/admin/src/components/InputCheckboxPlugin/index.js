@@ -61,9 +61,9 @@ function InputCheckboxPlugin({
   return (
     <Wrapper className="col-md-4">
       <div
-        className={`form-check ${isSelected ? 'highlighted' : ''}  ${
-          value ? 'is-checked' : ''
-        }`}
+        className={`form-check ${
+          isSelected && policiesShown ? 'highlighted' : ''
+        }  ${value ? 'is-checked' : ''}`}
       >
         <Label
           className={`form-check-label ${value ? 'checked' : ''}`}

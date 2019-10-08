@@ -20,6 +20,8 @@ const Banner = styled.div`
 
 const Chevron = styled.div`
   margin: auto;
+  margin-left: auto;
+  padding-left: 5px;
   margin-right: 0;
   color: #787e8f;
   font-family: 'FontAwesome';
@@ -48,7 +50,8 @@ const Description = styled.div`
 const Icon = styled.div`
   height: 36px;
   width: 70px;
-  margin: auto;
+  min-width: 70px;
+  margin: auto 0;
   margin-right: 14px;
   color: #333740;
   border: 1px solid rgba(28, 93, 231, 0.1);
