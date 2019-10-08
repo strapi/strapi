@@ -107,17 +107,13 @@ function SelectWrapper({
       }
 
       return { ...prevState, _q: inputValue };
-    });
-
-    ref.current();
+    }, ref.current);
 
     return inputValue;
   };
 
   const onMenuScrollToBottom = () => {
-    setState(prevState => ({ ...prevState, _start: prevState._start + 1 }));
-
-    ref.current();
+    setState(prevState => ({ ...prevState, _start: prevState._start + 1 }), ref.current);
   };
   const isSingle = [
     'oneWay',
