@@ -1,8 +1,13 @@
 # Open Development & Community Driven
 
-Strapi is an open-source project administered by [the Strapi team](https://strapi.io/company). We appreciate your interest and efforts in contributing to Strapi.
+Strapi is an open-source project administered by [the Strapi team](https://strapi.io/company).
 
-There are many ways that you can contribute to Strapi. Contributions to Strapi and the greater Strapi Community can take the form of answering questions in one of the [many Strapi channels](/3.0.0-beta.x/community/contributing-guide.html#get-in-touch), writing articles, creating videos and otherwise publishing self-generated content.
+There are many ways that you can contribute to Strapi. Contributions to Strapi and the greater Strapi Community can take several forms:
+
+1. Answering questions in one of the [many Strapi channels](/3.0.0-beta.x/community/contributing-guide.html#get-in-touch)
+2. Writing articles
+3. Creating videos
+4. Publishing self-generated content on other channels
 
 The two additional ways to contribute to Strapi include contributing **Documentation** and **Code**:
 
