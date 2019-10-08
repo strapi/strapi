@@ -93,8 +93,6 @@ module.exports = async function createProject(
     loader.stop();
     console.log(`Dependencies installed ${chalk.green('successfully')}.`);
   } catch (error) {
-    error.message = error.stderr;
-
     loader.stop();
     await trackUsage({
       event: 'didNotInstallProjectDependencies',
@@ -102,13 +100,17 @@ module.exports = async function createProject(
       error: error.stderr.slice(-1024),
     });
 
+    console.error(`${chalk.red('Error')} while installing dependencies:`);
+    error.stderr
+      .trim()
+      .split('\n')
+      .forEach(line => {
+        console.error(line);
+      });
+
     await captureError(error);
 
-    stopProcess(
-      `${chalk.red(
-        'Error'
-      )} while installing dependencies:\n${error.stderr.trim()}`
-    );
+    stopProcess('Stopping installation');
   }
 
   await trackUsage({ event: 'didCreateProject', scope });
