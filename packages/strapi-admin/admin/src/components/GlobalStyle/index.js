@@ -74,6 +74,11 @@ const GlobalStyle = createGlobalStyle`
     }
   }
 
+  .form-control:focus {
+    outline: none;
+    box-shadow: none;
+  }
+
   textarea.form-control {
     height: 10.6rem;
   }

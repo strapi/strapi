@@ -81,6 +81,7 @@
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "在 Facebook 的設定中填入的重新導向網址",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "在 GitHub 的設定中填入的重新導向網址",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "在 Google 的設定中填入的重新導向網址",
+  "PopUpForm.Providers.instagram.providerConfig.redirectURL": "在 Instagram 的設定中填入的重新導向網址",
   "PopUpForm.Providers.key.label": "客戶端 ID",
   "PopUpForm.Providers.key.placeholder": "TEXT",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "在 Linkedin 的設定中填入的重新導向網址",
@@ -93,7 +94,7 @@
   "PopUpForm.button.save": "儲存",
   "PopUpForm.header.add.providers": "新增驗證方式",
   "PopUpForm.header.edit.email-templates": "編輯郵件範本",
-  "PopUpForm.header.edit.providers": "編輯 {provider} 驗證方式",
+  "PopUpForm.header.edit.providers": "編輯 驗證方式",
   "PopUpForm.inputSelect.providers.label": "選擇驗證方式",
 
   "components.Input.error.password.length": "密碼長度過短",

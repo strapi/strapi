@@ -13,6 +13,7 @@ import { Switch, Route } from 'react-router-dom';
 import { isEmpty } from 'lodash';
 // Components from strapi-helper-plugin
 import {
+  difference,
   GlobalContextProvider,
   LoadingIndicatorPage,
   OverlayBlocker,
@@ -39,7 +40,7 @@ import {
 import makeSelecApp from '../App/selectors';
 import injectSaga from '../../utils/injectSaga';
 import injectReducer from '../../utils/injectReducer';
-import difference from './utils/difference';
+
 import { emitEvent, setAppError } from './actions';
 import makeSelectAdmin from './selectors';
 import reducer from './reducer';

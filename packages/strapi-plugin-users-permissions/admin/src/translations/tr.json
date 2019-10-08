@@ -82,6 +82,7 @@
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "Facebook uygulama yapılandırmalarınıza eklenecek yönlendirme URL'si",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "GitHub uygulama yapılandırmalarınıza eklenecek yönlendirme URL'si",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "Google uygulama yapılandırmalarınıza eklenecek yönlendirme URL'si",
+  "PopUpForm.Providers.instagram.providerConfig.redirectURL": "Instagram uygulama yapılandırmalarınıza eklenecek yönlendirme URL'si",
   "PopUpForm.Providers.key.label": "Web istemcisi ID",
   "PopUpForm.Providers.key.placeholder": "METİN",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "Linkedin uygulama yapılandırmalarınıza eklenecek yönlendirme URL'si",
@@ -94,7 +95,7 @@
   "PopUpForm.button.save": "Kaydet",
   "PopUpForm.header.add.providers": "Yeni Sağlayıcı Ekle",
   "PopUpForm.header.edit.email-templates": "E-posta Şablonlarını Düzenle",
-  "PopUpForm.header.edit.providers": "{sağlayıcı} sağlayıcını düzenle",
+  "PopUpForm.header.edit.providers": "sağlayıcını düzenle",
   "PopUpForm.inputSelect.providers.label": "Sağlayıcıyı seçin",
 
   "components.Input.error.password.length": "Şifreniz çok kısa",

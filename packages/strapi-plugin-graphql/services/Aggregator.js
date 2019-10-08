@@ -356,7 +356,8 @@ const formatConnectionAggregator = function(fields, model, modelName) {
       count(obj, options, context) {
         const opts = GraphQLQuery.convertToQuery(obj.where);
 
-        if (opts._q) { // allow search param
+        if (opts._q) {
+          // allow search param
           return strapi.query(modelName).countSearch(opts);
         }
         return strapi.query(modelName).count(opts);

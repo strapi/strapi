@@ -1,30 +1,28 @@
 {
-  "csrf": {
-    "enabled": false,
-    "key": "_csrf",
-    "secret": "_csrfSecret"
-  },
   "csp": {
-    "enabled": false,
-    "policy": {
-      "default-src": "'self'"
-    }
+    "enabled": true,
+    "policy": [
+      {
+        "img-src": "'self' http: data:"
+      },
+      "block-all-mixed-content"
+    ]
   },
   "p3p": {
     "enabled": false,
     "value": ""
   },
   "hsts": {
-    "enabled": false,
+    "enabled": true,
     "maxAge": 31536000,
     "includeSubDomains": true
   },
   "xframe": {
-    "enabled": false,
+    "enabled": true,
     "value": "SAMEORIGIN"
   },
   "xss": {
-    "enabled": false,
+    "enabled": true,
     "mode": "block"
   },
   "cors": {

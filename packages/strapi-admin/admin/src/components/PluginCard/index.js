@@ -58,7 +58,7 @@ class PluginCard extends React.Component {
   handleClickSettings = e => {
     const settingsPath =
       this.props.plugin.id === 'content-manager'
-        ? '/plugins/content-manager/ctm-configurations'
+        ? '/plugins/content-manager/ctm-configurations/models'
         : `/plugins/${this.props.plugin.id}/configurations/${this.props.currentEnvironment}`;
 
     e.preventDefault();

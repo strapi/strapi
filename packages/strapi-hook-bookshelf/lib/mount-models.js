@@ -887,7 +887,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
   return Promise.all(updates);
 };
 
-const castValueFromType = (type, value, /* definition */) => {
+const castValueFromType = (type, value /* definition */) => {
   // do not cast null values
   if (value === null) return null;
 

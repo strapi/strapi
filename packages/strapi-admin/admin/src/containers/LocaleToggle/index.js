@@ -32,6 +32,7 @@ export class LocaleToggle extends React.Component {
       case 'pt-BR':
         return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/br.svg';
       case 'zh':
+        return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/tw.svg';
       case 'zh-Hans':
         return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/cn.svg';
       case 'ar':

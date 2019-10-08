@@ -8,16 +8,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { has } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { GlobalContext } from 'strapi-helper-plugin';
-
+import {
+  GlobalContext,
+  HeaderModal,
+  HeaderModalTitle,
+  Modal,
+  ModalBody,
+  ModalFooter,
+} from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 
 import AttributeOption from '../../components/AttributeOption';
-import BodyModal from '../../components/BodyModal';
-import FooterModal from '../../components/FooterModal';
-import HeaderModal from '../../components/HeaderModal';
-import HeaderModalTitle from '../../components/HeaderModalTitle';
-import WrapperModal from '../../components/WrapperModal';
 
 import Icon from '../../assets/icons/icon_type_ct.png';
 import IconGroup from '../../assets/icons/icon_type_groups.png';
@@ -168,7 +169,7 @@ class AttributesPickerModal extends React.Component {
     const { featureName, featureType, isOpen } = this.props;
 
     return (
-      <WrapperModal
+      <Modal
         isOpen={isOpen}
         onToggle={this.handleToggle}
         onClosed={this.handleOnClosed}
@@ -189,11 +190,11 @@ class AttributesPickerModal extends React.Component {
             </HeaderModalTitle>
           </section>
         </HeaderModal>
-        <BodyModal style={{ paddingTop: '0.4rem', paddingBottom: '3rem' }}>
+        <ModalBody style={{ paddingTop: '0.4rem', paddingBottom: '3rem' }}>
           {attributes.map(this.renderAttribute)}
-        </BodyModal>
-        <FooterModal />
-      </WrapperModal>
+        </ModalBody>
+        <ModalFooter />
+      </Modal>
     );
   }
 }

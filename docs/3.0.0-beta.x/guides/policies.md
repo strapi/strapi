@@ -38,15 +38,15 @@ Refer to the [concept](../concepts/concepts.md#policies) for details.
 
 The global policies can be associated to any routes in your project.
 
-**Path —** `./api/car/routes.json`.
+**Path —** `./api/restaurant/routes.json`.
 
 ```js
 {
   "routes": [
     {
       "method": "GET",
-      "path": "/cars",
-      "handler": "Car.find",
+      "path": "/restaurants",
+      "handler": "Restaurant.find",
       "config": {
         "policies": [
           "global.isAuthenticated"
@@ -57,7 +57,7 @@ The global policies can be associated to any routes in your project.
 }
 ```
 
-Before executing the `find` action in the `Car.js` controller, the global policy `isAuthenticated` located in `./config/policies/isAuthenticated.js` will be called.
+Before executing the `find` action in the `Restaurant.js` controller, the global policy `isAuthenticated` located in `./config/policies/isAuthenticated.js` will be called.
 
 ::: note
 You can put as much policy you want in this array. However be careful about the performance impact.
@@ -67,15 +67,15 @@ You can put as much policy you want in this array. However be careful about the 
 
 Plugins can add and expose policies into your app. For example, the plugin `Auth` (COMING SOON) comes with several useful policies to ensure that the user is well authenticated or has the rights to perform an action.
 
-**Path —** `./api/car/config/routes.json`.
+**Path —** `./api/restaurant/config/routes.json`.
 
 ```js
 {
   "routes": [
     {
       "method": "GET",
-      "path": "/cars",
-      "handler": "Car.find",
+      "path": "/restaurants",
+      "handler": "Restaurant.find",
       "config": {
         "policies": [
           "plugins.users-permissions.isAuthenticated"
@@ -86,13 +86,13 @@ Plugins can add and expose policies into your app. For example, the plugin `Auth
 }
 ```
 
-The policy `isAuthenticated` located in the `users-permissions` plugin will be executed before the `find` action in the `Car.js` controller.
+The policy `isAuthenticated` located in the `users-permissions` plugin will be executed before the `find` action in the `Restaurant.js` controller.
 
 ### Scoped Policies
 
 The scoped policies can only be associated to the routes defined in the API where they have been declared.
 
-**Path —** `./api/car/config/policies/isAdmin.js`.
+**Path —** `./api/restaurant/config/policies/isAdmin.js`.
 
 ```js
 module.exports = async (ctx, next) => {
@@ -105,15 +105,15 @@ module.exports = async (ctx, next) => {
 };
 ```
 
-**Path —** `./api/car/config/routes.json`.
+**Path —** `./api/restaurant/config/routes.json`.
 
 ```js
 {
   "routes": [
     {
       "method": "GET",
-      "path": "/cars",
-      "handler": "Car.find",
+      "path": "/restaurants",
+      "handler": "Restaurant.find",
       "config": {
         "policies": [
           "isAdmin"
@@ -124,10 +124,10 @@ module.exports = async (ctx, next) => {
 }
 ```
 
-The policy `isAdmin` located in `./api/car/config/policies/isAdmin.js` will be executed before the `find` action in the `Car.js` controller.
+The policy `isAdmin` located in `./api/restaurant/config/policies/isAdmin.js` will be executed before the `find` action in the `Restaurant.js` controller.
 
 ::: note
-The policy `isAdmin` can only be applied to the routes defined in the `/api/car` folder.
+The policy `isAdmin` can only be applied to the routes defined in the `/api/restaurant` folder.
 :::
 
 ## Advanced usage

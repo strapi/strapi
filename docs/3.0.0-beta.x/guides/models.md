@@ -58,7 +58,7 @@ The following types are currently available:
 - `json`
 - `email`
 
-#### Validations
+### Validations
 
 You can apply basic validations to the attributes. The following supported validations are _only supported by MongoDB_ connection.
 If you're using SQL databases, you should use the native SQL constraints to apply them.
@@ -75,7 +75,7 @@ To improve the Developer eXperience when developing or using the administration 
 - `private` (boolean) — if true, the attribute will be removed from the server response (it's useful to hide sensitive data).
 - `configurable` (boolean) - if false, the attribute isn't configurable from the Content Type Builder plugin.
 
-#### Example
+### Example
 
 **Path —** `User.settings.json`.
 

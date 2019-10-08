@@ -1,33 +1,199 @@
 # File Upload
 
-::: warning
+::: note
 This feature requires the Upload plugin (installed by default).
 :::
 
 Thanks to the plugin `Upload`, you can upload any kind of files on your server or externals providers such as AWS S3.
 
-## Usage
+## Upload files
 
-The plugin exposes a single route `POST /upload` to upload one or multiple files in a single request.
+To upload files into your application.
 
-::: warning
-Please send FormData in your request body
-:::
-
-**Parameters**
+### Parameters
 
 - `files`: The file(s) to upload. The value(s) can be a Buffer or Stream.
-- `path`: (optional): The folder where the file(s) will be uploaded to (only supported on strapi-provider-upload-aws-s3 now).
-- `refId`: (optional): The ID of the entry which the file(s) will be linked to.
-- `ref`: (optional): The name of the model which the file(s) will be linked to (see more below).
-- `source`: (optional): The name of the plugin where the model is located.
-- `field`: (optional): The field of the entry which the file(s) will be precisely linked to.
 
-## Models
+### Code example
+
+```html
+<form>
+  <!-- Can be multiple files -->
+  <input type="file" name="files" />
+  <input type="submit" value="Submit" />
+</form>
+
+<script type="text/javascript">
+  const formElement = document.querySelector('form');
+
+  formElement.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const request = new XMLHttpRequest();
+
+    request.open('POST', '/upload');
+
+    request.send(new FormData(formElement));
+  });
+</script>
+```
+
+::: warning
+You have to send FormData in your request body
+:::
+
+## Upload files related to an entry
+
+To upload files that will be liked to an specific entry.
+
+### Request parameters
+
+- `files`: The file(s) to upload. The value(s) can be a Buffer or Stream.
+- `path` (optional): The folder where the file(s) will be uploaded to (only supported on strapi-provider-upload-aws-s3).
+- `refId`: The ID of the entry which the file(s) will be linked to.
+- `ref`: The name of the model which the file(s) will be linked to (see more below).
+- `source` (optional): The name of the plugin where the model is located.
+- `field`: The field of the entry which the file(s) will be precisely linked to.
+
+### Examples
+
+The `Restaurant` model attributes:
+
+```json
+"attributes": {
+  "name": {
+    "type": "string"
+  },
+  "cover": {
+    "model": "file",
+    "via": "related",
+    "plugin": "upload"
+  }
+}
+```
+
+Code
+
+```html
+<form>
+  <!-- Can be multiple files if you setup "collection" instead of "model" -->
+  <input type="file" name="files" />
+  <input type="text" name="ref" value="restaurant" />
+  <input type="text" name="refId" value="5c126648c7415f0c0ef1bccd" />
+  <input type="text" name="field" value="cover" />
+  <input type="submit" value="Submit" />
+</form>
+
+<script type="text/javascript">
+  const formElement = document.querySelector('form');
+
+  formElement.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const request = new XMLHttpRequest();
+
+    request.open('POST', '/upload');
+
+    request.send(new FormData(formElement));
+  });
+</script>
+```
+
+::: warning
+You have to send FormData in your request body
+:::
+
+## Upload file during entry creation
+
+You can also add files during your entry creation.
+
+### Examples
+
+The `Restaurant` model attributes:
+
+```json
+"attributes": {
+  "name": {
+    "type": "string"
+  },
+  "cover": {
+    "model": "file",
+    "via": "related",
+    "plugin": "upload"
+  }
+}
+```
+
+Code
+
+```html
+<form>
+  <!-- Can be multiple files if you setup "collection" instead of "model" -->
+  <input type="text" name="name" />
+  <input type="file" name="cover" />
+  <input type="submit" value="Submit" />
+</form>
+
+<script type="text/javascript">
+  const formElement = document.querySelector('form');
+
+  formElement.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const request = new XMLHttpRequest();
+
+    const formData = new FormData();
+
+    const formElements = formElement.elements;
+
+    const data = {};
+
+    for (let i = 0; i < formElements.length; i++) {
+      const currentElement = formElements[i];
+      if (!['submit', 'file'].includes(currentElement.type)) {
+        data[currentElement.name] = currentElement.value;
+      } else if (currentElement.type === 'file') {
+        if (currentElement.files.length === 1) {
+          const file = currentElement.files[0];
+          formData.append(`files.${currentElement.name}`, file, file.name);
+        } else {
+          for (let i = 0; i < currentElement.files.length; i++) {
+            const file = currentElement.files[i];
+
+            formData.append(`files.${currentElement.name}`, file, file.name);
+          }
+        }
+      }
+    }
+
+    formData.append('data', JSON.stringify(data));
+
+    request.open('POST', `${HOST}/restaurants`);
+
+    request.send(formData);
+  });
+</script>
+```
+
+You entry data have to be contained in a `data` key. You have to `JSON.stringify` your data object.
+
+And for your files, they have to be prefixed by `files`.
+Example here with cover attribute `files.cover`.
+
+::: note
+If you want to upload files for a group, you will have to specify the inidex of the item you wan to add the file.
+Example `files.my_group_name[the_index].attribute_name`
+:::
+
+::: warning
+You have to send FormData in your request body
+:::
+
+## Models definition
 
 Adding a file attribute to a model (or the model of another plugin) is like adding a new association.
 
-In the first example below, you will be able to upload and attach one file to the avatar attribute. Whereas, in our second example, you can upload and attach multiple pictures to the product.
+In the first example below, you will be able to upload and attach one file to the avatar attribute.
 
 **Path —** `User.settings.json`.
 
@@ -53,7 +219,9 @@ In the first example below, you will be able to upload and attach one file to th
 }
 ```
 
-**Path —** `Product.settings.json`.
+In our second example, you can upload and attach multiple pictures to the restaurant.
+
+**Path —** `Restaurant.settings.json`.
 
 ```json
 {
@@ -63,122 +231,13 @@ In the first example below, you will be able to upload and attach one file to th
       "type": "string",
       "required": true
     },
-    "price": {
-      "type": "integer",
-      "required": true
-    },
-    "pictures": {
+    "convers": {
       "collection": "file",
       "via": "related",
       "plugin": "upload"
     }
   }
 }
-```
-
-## Examples
-
-**JS example**
-
-The `Article` attributes:
-
-```json
-"attributes": {
-  "title": {
-    "default": "",
-    "type": "string"
-  },
-  "cover": {
-    "model": "file",
-    "via": "related",
-    "plugin": "upload",
-    "required": false
-  }
-}
-```
-
-Code example:
-
-```html
-<form>
-  <!-- Can be multiple files -->
-  <input type="file" name="files" />
-  <input type="text" name="ref" value="article" />
-  <input type="text" name="refId" value="5c126648c7415f0c0ef1bccd" />
-  <input type="text" name="field" value="cover" />
-  <input type="submit" value="Submit" />
-</form>
-
-<script type="text/javascript">
-  const formElement = document.querySelector('form');
-
-  formElement.addEventListener('submit', e => {
-    e.preventDefault();
-
-    const request = new XMLHttpRequest();
-
-    request.open('POST', '/upload');
-
-    request.send(new FormData(formElement));
-  });
-</script>
-```
-
-> ⚠️ You have to send a FormData in any case (React, Angular, jQuery etc...)
-
-**Single file**
-
-```
-curl -X POST -F 'files=@/path/to/pictures/file.jpg' http://localhost:1337/upload
-```
-
-**Multiple files**
-
-```
-curl -X POST -F 'files[]=@/path/to/pictures/fileX.jpg' -F 'files[]=@/path/to/pictures/fileY.jpg' http://localhost:1337/upload
-```
-
-**Linking files to an entry**
-
-Let's say that you want to have a `User` model provided by the plugin `Users & Permissions` and you want to upload an avatar for a specific user.
-
-```json
-{
-  "connection": "default",
-  "attributes": {
-    "pseudo": {
-      "type": "string",
-      "required": true
-    },
-    "email": {
-      "type": "email",
-      "required": true,
-      "unique": true
-    },
-    "avatar": {
-      "model": "file",
-      "via": "related",
-      "plugin": "upload"
-    }
-  }
-}
-```
-
-```js
-{
-  "files": "...", // Buffer or stream of file(s)
-  "path": "user/avatar", // Uploading folder of file(s).
-  "refId": "5a993616b8e66660e8baf45c", // User's Id.
-  "ref": "user", // Model name.
-  "source": "users-permissions", // Plugin name.
-  "field": "avatar" // Field name in the User model.
-}
-```
-
-Here the request to make to associate the file (/path/to/pictures/avatar.jpg) to the user (id: 5a993616b8e66660e8baf45c) when the `User` model is provided by the `Users & Permissions` plugin.
-
-```
-curl -X POST -F 'files=@/path/to/pictures/avatar.jpg' -F 'refId=5a993616b8e66660e8baf45c' -F 'ref=user -F 'source=users-permissions' -F 'field=avatar' http://localhost:1337/upload
 ```
 
 ## Install providers

@@ -13,18 +13,20 @@ import cn from 'classnames';
 import styles from './styles.scss';
 
 function InputTextArea(props) {
-  const placeholder = isEmpty(props.placeholder) ? 'app.utils.placeholder.defaultMessage' : props.placeholder;
+  const placeholder = isEmpty(props.placeholder)
+    ? 'app.utils.placeholder.defaultMessage'
+    : props.placeholder;
 
   return (
     <FormattedMessage id={placeholder} defaultMessage={placeholder}>
-      {(message) => (
+      {message => (
         <textarea
           autoFocus={props.autoFocus}
           className={cn(
             'form-control',
             styles.inputTextArea,
             !isEmpty(props.className) && props.className,
-            !props.deactivateErrorHighlight && props.error && 'is-invalid',
+            !props.deactivateErrorHighlight && props.error && 'is-invalid'
           )}
           disabled={props.disabled}
           id={props.name}

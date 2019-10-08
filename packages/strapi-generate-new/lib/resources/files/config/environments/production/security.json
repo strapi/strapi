@@ -1,9 +1,4 @@
 {
-  "csrf": {
-    "enabled": false,
-    "key": "_csrf",
-    "secret": "_csrfSecret"
-  },
   "csp": {
     "enabled": true,
     "policy": [

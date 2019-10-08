@@ -82,6 +82,7 @@
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "Die URL, die in den Einstellungen deiner Facebook-App gesetzt wird",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "Die URL, die in den Einstellungen deiner Github-App gesetzt wird",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "Die URL, die in den Einstellungen deiner Google-App gesetzt wird",
+  "PopUpForm.Providers.instagram.providerConfig.redirectURL": "Die URL, die in den Einstellungen deiner Instagram-App gesetzt wird",
   "PopUpForm.Providers.microsoft.providerConfig.redirectURL": "Die URL, die in den Einstellungen deiner Microsoft-App gesetzt wird",
   "PopUpForm.Providers.key.label": "Client ID",
   "PopUpForm.Providers.key.placeholder": "TEXT",
@@ -94,7 +95,7 @@
   "PopUpForm.button.save": "Speichern",
   "PopUpForm.header.add.providers": "Neue Methode hinzufügen",
   "PopUpForm.header.edit.email-templates": "E-Mail-Templates bearbeiten",
-  "PopUpForm.header.edit.providers": "Methode {provider} bearbeiten",
+  "PopUpForm.header.edit.providers": "Methode bearbeiten",
   "PopUpForm.inputSelect.providers.label": "Wähle die Methode aus",
 
   "components.Input.error.password.length": "Passwort ist zu kurz",

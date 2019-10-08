@@ -76,6 +76,7 @@
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "Facebook应用中配置的重定向URL",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "GitHub应用中配置的重定向URL",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "Google应用中配置的重定向URL",
+  "PopUpForm.Providers.instagram.providerConfig.redirectURL": "Instagram应用中配置的重定向URL",
   "PopUpForm.Providers.key.label": "Client ID",
   "PopUpForm.Providers.key.placeholder": "TEXT",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "Linkedin应用中配置的重定向URL",
@@ -87,7 +88,7 @@
   "PopUpForm.button.save": "保存",
   "PopUpForm.header.add.providers": "增加新的供应商(Provider)",
   "PopUpForm.header.edit.email-templates": "编辑电子邮件模版",
-  "PopUpForm.header.edit.providers": "编译 {provider} 供应商",
+  "PopUpForm.header.edit.providers": "编译 供应商",
   "PopUpForm.inputSelect.providers.label": "选择供应商",
 
   "notification.error.delete": "删除数据时出错",

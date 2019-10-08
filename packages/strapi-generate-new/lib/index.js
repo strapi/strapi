@@ -6,11 +6,16 @@ const crypto = require('crypto');
 const chalk = require('chalk');
 const { machineIdSync } = require('node-machine-id');
 const uuid = require('uuid/v4');
+const sentry = require('@sentry/node');
 
 const hasYarn = require('./utils/has-yarn');
-const { trackError } = require('./utils/usage');
+const { trackError, captureError } = require('./utils/usage');
 const parseDatabaseArguments = require('./utils/parse-db-arguments');
 const generateNew = require('./generate-new');
+
+sentry.init({
+  dsn: 'https://841d2b2c9b4d4b43a4cde92794cb705a@sentry.io/1762059',
+});
 
 module.exports = (projectDirectory, cliArguments) => {
   const rootPath = resolve(projectDirectory);
@@ -41,7 +46,6 @@ module.exports = (projectDirectory, cliArguments) => {
       'strapi',
       'strapi-admin',
       'strapi-utils',
-      'strapi-plugin-settings-manager',
       'strapi-plugin-content-type-builder',
       'strapi-plugin-content-manager',
       'strapi-plugin-users-permissions',
@@ -51,6 +55,20 @@ module.exports = (projectDirectory, cliArguments) => {
     additionalsDependencies: {},
   };
 
+  sentry.configureScope(function(sentryScope) {
+    const tags = {
+      os_type: os.type(),
+      os_platform: os.platform(),
+      os_release: os.release(),
+      strapi_version: scope.strapiVersion,
+      node_version: process.version,
+    };
+
+    Object.keys(tags).forEach(tag => {
+      sentryScope.setTag(tag, tags[tag]);
+    });
+  });
+
   parseDatabaseArguments({ scope, args: cliArguments });
   initCancelCatcher(scope);
 
@@ -59,8 +77,10 @@ module.exports = (projectDirectory, cliArguments) => {
 
   return generateNew(scope).catch(error => {
     console.error(error);
-    return trackError({ scope, error }).then(() => {
-      process.exit(1);
+    return captureError(error).then(() => {
+      return trackError({ scope, error }).then(() => {
+        process.exit(1);
+      });
     });
   });
 };

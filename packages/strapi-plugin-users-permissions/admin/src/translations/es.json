@@ -81,6 +81,7 @@
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "La URL de redirección que se debe agregar en la configuración de la aplicación Facebook",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "La URL de redirección que se debe agregar en la configuración de la aplicación GitHub",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "La URL de redirección que se debe agregar en la configuración de la aplicación Google",
+  "PopUpForm.Providers.instagram.providerConfig.redirectURL": "La URL de redirección que se debe agregar en la configuración de la aplicación Instagram",
   "PopUpForm.Providers.key.label": "ID de cliente",
   "PopUpForm.Providers.key.placeholder": "TEXTO",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "La URL de redirección que se debe agregar en la configuración de la aplicación Linkedin",
@@ -93,7 +94,7 @@
   "PopUpForm.button.save": "Guardar",
   "PopUpForm.header.add.providers": "Añadir nuevo proveedor",
   "PopUpForm.header.edit.email-templates": "Editar Plantillas de Email",
-  "PopUpForm.header.edit.providers": "Editar Proveedor {provider}",
+  "PopUpForm.header.edit.providers": "Editar Proveedor",
   "PopUpForm.inputSelect.providers.label": "Elija el proveedor",
 
   "components.Input.error.password.length": "Contraseña muy corta",

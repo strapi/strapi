@@ -81,6 +81,7 @@
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "Facebookアプリケーション設定で追加するリダイレクトURL",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "GitHubアプリケーションの設定で追加するリダイレクトURL",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "Googleアプリケーション設定で追加するリダイレクトURL",
+  "PopUpForm.Providers.instagram.providerConfig.redirectURL": "Instagramアプリケーション設定で追加するリダイレクトURL",
   "PopUpForm.Providers.key.label": "クライアントID",
   "PopUpForm.Providers.key.placeholder": "TEXT",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "あなたのLinkedinアプリケーション構成に追加するリダイレクトURL",
@@ -93,7 +94,7 @@
   "PopUpForm.button.save": "保存",
   "PopUpForm.header.add.providers": "プロバイダーを追加",
   "PopUpForm.header.edit.email-templates": "メールテンプレートの編集",
-  "PopUpForm.header.edit.providers": "{provider}プロバイダを編集",
+  "PopUpForm.header.edit.providers": "プロバイダを編集",
   "PopUpForm.inputSelect.providers.label": "プロバイダの選択",
 
   "components.Input.error.password.length": "パスワードが一致しません",

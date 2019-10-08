@@ -45,7 +45,7 @@ module.exports = {
               file.public_id = image.public_id;
               file.url = image.secure_url;
               resolve();
-            },
+            }
           );
           intoStream(file.buffer).pipe(upload_stream);
         });
