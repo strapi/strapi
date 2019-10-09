@@ -19,24 +19,13 @@ module.exports = {
     Object.keys(strapi.models)
       .filter(model => model !== 'core_store')
       .forEach(model => {
-        (strapi.models[model].associations || []).forEach(association =>
-          this.createLoader(
-            association.collection || association.model,
-            association.plugin
-          )
-        );
+        this.createLoader(model);
       });
 
     // Reproduce the same pattern for each plugin.
     Object.keys(strapi.plugins).forEach(plugin => {
       Object.keys(strapi.plugins[plugin].models).forEach(model => {
-        (strapi.plugins[plugin].models[model].associations || []).forEach(
-          association =>
-            this.createLoader(
-              association.collection || association.model,
-              association.plugin
-            )
-        );
+        this.createLoader(model, plugin);
       });
     });
   },
