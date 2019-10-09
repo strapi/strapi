@@ -23,7 +23,6 @@ import { SHOW_TUTORIALS } from '../../config';
 import Header from '../../components/Header/index';
 import Logout from '../../components/Logout';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
-
 import ComingSoonPage from '../ComingSoonPage';
 import LeftMenu from '../LeftMenu';
 import ListPluginsPage from '../ListPluginsPage';
@@ -33,14 +32,12 @@ import Marketplace from '../Marketplace';
 import NotFoundPage from '../NotFoundPage';
 import Onboarding from '../Onboarding';
 import PluginDispatcher from '../PluginDispatcher';
-
 import {
   disableGlobalOverlayBlocker,
   enableGlobalOverlayBlocker,
   updatePlugin,
 } from '../App/actions';
 import makeSelecApp from '../App/selectors';
-
 import injectSaga from '../../utils/injectSaga';
 import injectReducer from '../../utils/injectReducer';
 
@@ -48,8 +45,8 @@ import { emitEvent, setAppError } from './actions';
 import makeSelectAdmin from './selectors';
 import reducer from './reducer';
 import saga from './saga';
-
-import styles from './styles.scss';
+import Wrapper from './Wrapper';
+import Content from './Content';
 
 export class Admin extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
@@ -151,16 +148,16 @@ export class Admin extends React.Component {
         plugins={this.props.global.plugins}
         updatePlugin={this.props.updatePlugin}
       >
-        <div className={styles.adminPage}>
+        <Wrapper>
           <LeftMenu version={strapiVersion} plugins={plugins} />
           <NavTopRightWrapper>
             {/* Injection zone not ready yet */}
             <Logout />
             <LocaleToggle isLogged />
           </NavTopRightWrapper>
-          <div className={styles.adminPageRightWrapper}>
+          <div className="adminPageRightWrapper">
             <Header />
-            <div className={styles.content}>
+            <Content>
               <Switch>
                 <Route
                   path="/"
@@ -186,7 +183,7 @@ export class Admin extends React.Component {
                 <Route key="7" path="" component={NotFoundPage} />
                 <Route key="8" path="404" component={NotFoundPage} />
               </Switch>
-            </div>
+            </Content>
           </div>
           <OverlayBlocker
             key="overlayBlocker"
@@ -194,7 +191,7 @@ export class Admin extends React.Component {
             {...overlayBlockerData}
           />
           {SHOW_TUTORIALS && <Onboarding />}
-        </div>
+        </Wrapper>
       </GlobalContextProvider>
     );
   }
