@@ -19,6 +19,7 @@ import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 
 import { merge } from 'lodash';
+import { Fonts } from '@buffetjs/styles';
 import {
   freezeApp,
   pluginLoaded,
@@ -147,6 +148,7 @@ window.strapi = Object.assign(window.strapi || {}, {
 const render = messages => {
   ReactDOM.render(
     <Provider store={store}>
+      <Fonts />
       <LanguageProvider messages={messages}>
         <BrowserRouter basename={basename}>
           <App store={store} />

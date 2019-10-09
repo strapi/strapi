@@ -1,9 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
-
-import styles from './styles.scss';
+import {
+  Dropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
+} from 'reactstrap';
+import DropdownWrapper from './DropdownWrapper';
 
 class ModelPicker extends React.Component {
   state = { isOpen: false };
@@ -16,30 +20,46 @@ class ModelPicker extends React.Component {
     const { isOpen } = this.state;
 
     return (
-      <div className={styles.dropDown}>
-        <Dropdown isOpen={isOpen} toggle={this.toggle} style={{ backgroundColor: 'transparent' }}>
+      <DropdownWrapper>
+        <Dropdown
+          isOpen={isOpen}
+          toggle={this.toggle}
+          style={{ backgroundColor: 'transparent' }}
+        >
           <DropdownToggle caret>
             <p>
               <i className="fa fa-caret-square-o-right" />
               {selectedModel}
-              {!!plugin && <span style={{ fontStyle: 'italic', fontWeight: '500' }}>&nbsp;({plugin})</span>}
+              {!!plugin && (
+                <span style={{ fontStyle: 'italic', fontWeight: '500' }}>
+                  &nbsp;({plugin})
+                </span>
+              )}
             </p>
           </DropdownToggle>
           <DropdownMenu>
             {models.map(model => {
               return (
-                <DropdownItem key={model.name} onClick={() => onClick(model)} className={styles.dropdownItem}>
+                <DropdownItem
+                  key={model.name}
+                  onClick={() => onClick(model)}
+                  className="dropdownItem"
+                >
                   <p>
                     <i className="fa fa-caret-square-o-right" />
                     {model.name}
-                    {!!model.source && <span style={{ fontStyle: 'italic' }}>&nbsp;({model.source})</span>}
+                    {!!model.source && (
+                      <span style={{ fontStyle: 'italic' }}>
+                        &nbsp;({model.source})
+                      </span>
+                    )}
                   </p>
                 </DropdownItem>
               );
             })}
           </DropdownMenu>
         </Dropdown>
-      </div>
+      </DropdownWrapper>
     );
   }
 }
