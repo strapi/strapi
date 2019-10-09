@@ -3,7 +3,6 @@
 const _ = require('lodash');
 const uploadFiles = require('./utils/upload-files');
 const getIdAttribute = model => _.get(strapi.query(model), 'primaryKey', 'id');
-const resolveParams = (params, idAttribute) => params.id ? { ..._.omit(params, 'id'), [idAttribute]: params.id } : params
 
 /**
  * default service
@@ -22,7 +21,7 @@ module.exports = ({ model, strapi }) => {
      * @return {Promise}
      */
     find(params, populate) {
-      return strapi.query(model).find(resolveParams(params, getIdAttribute(model)), populate);
+      return strapi.query(model).find(params), populate);
     },
 
     /**
@@ -32,7 +31,7 @@ module.exports = ({ model, strapi }) => {
      */
 
     findOne(params, populate) {
-      return strapi.query(model).findOne(resolveParams(params, getIdAttribute(model)), populate);
+      return strapi.query(model).findOne(params), populate);
     },
 
     /**
@@ -42,7 +41,7 @@ module.exports = ({ model, strapi }) => {
      */
 
     count(params) {
-      return strapi.query(model).count(resolveParams(params, getIdAttribute(model)));
+      return strapi.query(model).count(params);
     },
 
     /**
@@ -70,11 +69,11 @@ module.exports = ({ model, strapi }) => {
      */
 
     async update(params, data, { files } = {}) {
-      const idAttribute = getIdAttribute(model);
-      const entry = await strapi.query(model).update(resolveParams(params, idAttribute), data);
+      const entry = await strapi.query(model).update(params, data);
 
       if (files) {
         await this.uploadFiles(entry, files, { model });
+        const idAttribute = getIdAttribute(model);
         return this.findOne({ id: entry[idAttribute] });
       }
 
@@ -88,7 +87,7 @@ module.exports = ({ model, strapi }) => {
      */
 
     delete(params) {
-      return strapi.query(model).delete(resolveParams(params, getIdAttribute(model)));
+      return strapi.query(model).delete(params);
     },
 
     /**
@@ -98,7 +97,7 @@ module.exports = ({ model, strapi }) => {
      */
 
     search(params) {
-      return strapi.query(model).search(resolveParams(params, getIdAttribute(model)));
+      return strapi.query(model).search(params);
     },
 
     /**
@@ -107,7 +106,7 @@ module.exports = ({ model, strapi }) => {
      * @return {Promise}
      */
     countSearch(params) {
-      return strapi.query(model).countSearch(resolveParams(params, getIdAttribute(model)));
+      return strapi.query(model).countSearch(params);
     },
   };
 };
