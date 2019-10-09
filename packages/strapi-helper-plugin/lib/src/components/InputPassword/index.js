@@ -9,8 +9,8 @@ import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
 import cn from 'classnames';
-
-import styles from './styles.scss';
+import Input from '../Input';
+import EyeWrapper from './EyeWrapper';
 
 class InputPassword extends React.Component {
   state = { showPassword: false };
@@ -46,11 +46,10 @@ class InputPassword extends React.Component {
           defaultMessage={formattedPlaceholder}
         >
           {message => (
-            <input
+            <Input
               autoComplete="new-password"
               autoFocus={autoFocus}
               className={cn(
-                styles.inputPassword,
                 'form-control',
                 !deactivateErrorHighlight && error && 'is-invalid',
                 !isEmpty(className) && className
@@ -69,15 +68,15 @@ class InputPassword extends React.Component {
             />
           )}
         </FormattedMessage>
-        <div className={styles.iconEyeWrapper}>
+        <EyeWrapper>
           <div
-            className={styles.iconEyeSubWrapper}
+            className="iconEyeSubWrapper"
             onClick={this.handleClick}
             style={eyeColor}
           >
             <i className="fa fa-eye" />
           </div>
-        </div>
+        </EyeWrapper>
       </Fragment>
     );
   }

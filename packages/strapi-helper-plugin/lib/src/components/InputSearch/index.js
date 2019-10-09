@@ -9,8 +9,7 @@ import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
-
-import styles from './styles.scss';
+import Wrapper from './Wrapper';
 
 class InputSearch extends React.Component {
   state = { isFocused: false };
@@ -43,20 +42,16 @@ class InputSearch extends React.Component {
       placeholder === '' ? 'app.utils.placeholder.defaultMessage' : placeholder;
 
     return (
-      <div
-        className={cn(
-          styles.inputSearch,
-          'input-group',
-          !isEmpty(className) && className
-        )}
+      <Wrapper
+        className={cn('input-group', !isEmpty(className) && className)}
         style={style}
       >
         <span
           className={cn(
             'input-group-addon',
-            styles.addonSearch,
-            this.state.isFocused && styles.addonFocus,
-            !deactivateErrorHighlight && error && styles.errorAddon
+            'addonSearch',
+            this.state.isFocused && 'addonFocus',
+            !deactivateErrorHighlight && error && 'errorAddon'
           )}
         />
         <FormattedMessage
@@ -72,7 +67,7 @@ class InputSearch extends React.Component {
                 !deactivateErrorHighlight &&
                   error &&
                   this.state.isFocused &&
-                  styles.invalidSearch
+                  'invalidSearch'
               )}
               disabled={disabled}
               id={name}
@@ -87,7 +82,7 @@ class InputSearch extends React.Component {
             />
           )}
         </FormattedMessage>
-      </div>
+      </Wrapper>
     );
   }
 }

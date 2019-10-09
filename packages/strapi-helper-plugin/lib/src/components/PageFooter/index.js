@@ -6,22 +6,19 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import cn from 'classnames';
 import { get } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-
 import GlobalPagination from '../GlobalPagination';
-
-import styles from './styles.scss';
+import Wrapper from './Wrapper';
 
 function PageFooter(props) {
   return (
-    <div className={cn('row', styles.pageFooter)} style={props.style}>
+    <Wrapper className="row" style={props.style}>
       <div className="col-md-6 col-lg-6">
         <form className="form-inline">
-          <div className={styles.pageFooterSelectWrapper}>
+          <div className="pageFooterSelectWrapper">
             <select
-              className={`form-control ${styles.select}`}
+              className={`form-control`}
               id="params._limit"
               name="params._limit"
               onChange={e => {
@@ -41,7 +38,7 @@ function PageFooter(props) {
               ))}
             </select>
           </div>
-          <label className={styles.pageFooterLabel} htmlFor="params._limit">
+          <label className="pageFooterLabel" htmlFor="params._limit">
             <FormattedMessage id="components.PageFooter.select" />
           </label>
         </form>
@@ -53,7 +50,7 @@ function PageFooter(props) {
           params={props.params}
         />
       </div>
-    </div>
+    </Wrapper>
   );
 }
 

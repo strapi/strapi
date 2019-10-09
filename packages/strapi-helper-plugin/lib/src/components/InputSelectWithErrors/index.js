@@ -15,8 +15,7 @@ import InputDescription from '../InputDescription';
 import InputErrors from '../InputErrors';
 import InputSelect from '../InputSelect';
 import InputSpacer from '../InputSpacer';
-
-import styles from './styles.scss';
+import InputWrapper from '../InputWrapper';
 
 class InputSelectWithErrors extends React.Component {
   state = { errors: [] };
@@ -91,12 +90,8 @@ class InputSelectWithErrors extends React.Component {
     }
 
     return (
-      <div
-        className={cn(
-          styles.containerSelect,
-          customBootstrapClass,
-          !isEmpty(className) && className
-        )}
+      <InputWrapper
+        className={cn(customBootstrapClass, !isEmpty(className) && className)}
         style={style}
       >
         <Label
@@ -133,7 +128,7 @@ class InputSelectWithErrors extends React.Component {
           style={errorsStyle}
         />
         {spacer}
-      </div>
+      </InputWrapper>
     );
   }
 }

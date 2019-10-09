@@ -3,8 +3,7 @@ import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
-
-import styles from './styles.scss';
+import Input from '../Input';
 
 function InputText(props) {
   const placeholder = isEmpty(props.placeholder)
@@ -14,10 +13,9 @@ function InputText(props) {
   return (
     <FormattedMessage id={placeholder} defaultMessage={placeholder}>
       {message => (
-        <input
+        <Input
           autoFocus={props.autoFocus}
           className={cn(
-            styles.textInput,
             'form-control',
             !props.deactivateErrorHighlight && props.error && 'is-invalid',
             !isEmpty(props.className) && props.className

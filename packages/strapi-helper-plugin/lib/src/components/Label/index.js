@@ -2,9 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { isFunction, isObject } from 'lodash';
-import cn from 'classnames';
-
-import styles from './styles.scss';
+import StyledLabel from './StyledLabel';
 
 function Label(props) {
   let content = props.children;
@@ -28,13 +26,13 @@ function Label(props) {
   }
 
   return (
-    <label
-      className={cn(styles.labelCompo, props.className)}
+    <StyledLabel
+      className={props.className}
       htmlFor={props.htmlFor}
       style={props.style}
     >
       {content}
-    </label>
+    </StyledLabel>
   );
 }
 
