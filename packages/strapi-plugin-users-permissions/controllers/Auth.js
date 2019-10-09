@@ -264,12 +264,21 @@ module.exports = {
       return ctx.badRequest(null, 'This provider is disabled.');
     }
     // Ability to pass OAuth callback dynamically
-    grantConfig[provider].callback = ctx.query && ctx.query.callback ? ctx.query.callback : grantConfig[provider].callback;
+    grantConfig[provider].callback =
+      ctx.query && ctx.query.callback
+        ? ctx.query.callback
+        : grantConfig[provider].callback;
     return grant(grantConfig)(ctx, next);
   },
 
   async forgotPassword(ctx) {
-    const { email, url } = ctx.request.body;
+    const { email } = ctx.request.body;
+
+    const pluginStore = await strapi.store({
+      environment: '',
+      type: 'plugin',
+      name: 'users-permissions',
+    });
 
     // Find the user user thanks to his email.
     const user = await strapi
@@ -293,18 +302,17 @@ module.exports = {
     // Set the property code.
     user.resetPasswordToken = resetPasswordToken;
 
-    const settings = (await strapi
-      .store({
-        environment: '',
-        type: 'plugin',
-        name: 'users-permissions',
-      })
-      .get({ key: 'email' }))['reset_password'].options;
+    const settings = (await pluginStore.get({ key: 'email' }))['reset_password']
+      .options;
+
+    const advanced = await pluginStore.get({
+      key: 'advanced',
+    });
 
     settings.message = await strapi.plugins[
       'users-permissions'
     ].services.userspermissions.template(settings.message, {
-      URL: url,
+      URL: advanced.email_reset_password,
       USER: _.omit(user.toJSON ? user.toJSON() : user, [
         'password',
         'resetPasswordToken',
