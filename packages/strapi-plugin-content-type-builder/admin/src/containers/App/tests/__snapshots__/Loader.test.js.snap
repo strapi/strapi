@@ -2,12 +2,14 @@
 
 exports[`<Loader /> should not crash 1`] = `
 <div
-  className="sc-cSHVUG bFKXDd"
+  className="sc-jnlKLf dzQmya"
 >
   <div
     className="centered"
   >
-    <div>
+    <div
+      className="sc-fMiknA jVzPKI"
+    >
       <div />
     </div>
   </div>
