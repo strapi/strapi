@@ -21,7 +21,7 @@ module.exports = ({ model, strapi }) => {
      * @return {Promise}
      */
     find(params, populate) {
-      return strapi.query(model).find(params), populate);
+      return strapi.query(model).find(params, populate);
     },
 
     /**
@@ -31,7 +31,7 @@ module.exports = ({ model, strapi }) => {
      */
 
     findOne(params, populate) {
-      return strapi.query(model).findOne(params), populate);
+      return strapi.query(model).findOne(params, populate);
     },
 
     /**
