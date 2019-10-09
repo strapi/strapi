@@ -1,4 +1,6 @@
-.icoContainer {
+import styled from 'styled-components';
+
+const Div = styled.div`
   display: flex;
   min-width: 60px;
   justify-content: flex-end;
@@ -11,4 +13,5 @@
     margin-left: 0;
     padding-left: 7px;
   }
-}
+`;
+export default Div;

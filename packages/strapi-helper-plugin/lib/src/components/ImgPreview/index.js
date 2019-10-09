@@ -14,8 +14,7 @@ import cn from 'classnames';
 import BkgImg from '../../assets/icons/icon_upload.svg';
 import ImgPreviewArrow from '../ImgPreviewArrow';
 import ImgPreviewHint from '../ImgPreviewHint';
-
-import styles from './styles.scss';
+import Wrapper from './Wrapper';
 
 /* eslint-disable react/no-unused-state */
 class ImgPreview extends React.Component {
@@ -169,7 +168,7 @@ class ImgPreview extends React.Component {
     }
 
     return (
-      <div className={styles.fileIcon} onDrop={this.handleDrop}>
+      <div className="fileIcon" onDrop={this.handleDrop}>
         <i className={`fa fa-file-${fileType}-o`} />
       </div>
     );
@@ -189,14 +188,13 @@ class ImgPreview extends React.Component {
       : {};
 
     return (
-      <div
-        className={cn(styles.imgPreviewContainer)}
+      <Wrapper
         onDragOver={this.handleDragOver}
         onDragEnter={this.handleDragEnter}
         style={containerStyle}
       >
         <div
-          className={cn(this.state.isDraging && styles.overlay)}
+          className={cn(this.state.isDraging && 'overlay')}
           onDragLeave={this.handleDragLeave}
           onDragOver={this.handleDragOver}
           onDrop={this.handleDrop}
@@ -223,7 +221,7 @@ class ImgPreview extends React.Component {
           onMouseLeave={() => this.setState({ isOverArrow: false })}
           show={isArray(files) && size(files) > 1}
         />
-      </div>
+      </Wrapper>
     );
   }
 }

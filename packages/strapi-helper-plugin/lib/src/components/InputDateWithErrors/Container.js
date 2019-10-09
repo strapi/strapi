@@ -1,18 +1,21 @@
-.containerDate {
+import styled from 'styled-components';
+
+const Container = styled.div`
   min-width: 200px;
   margin-bottom: 1.5rem;
   font-size: 1.3rem;
 
-  > div:first-of-type{
-    &:before{
+  > div:first-of-type {
+    &:before {
       content: '\f073';
       position: absolute;
-      left: 1px; top: 1px;
+      left: 1px;
+      top: 1px;
       width: 32px;
       height: 32px;
       border-radius: 3px 0px 0px 3px;
-      background: #FAFAFB;
-      color: #B3B5B9;
+      background: #fafafb;
+      color: #b3b5b9;
       text-align: center;
       font-family: 'FontAwesome';
       font-size: 1.4rem;
@@ -24,9 +27,11 @@
       width: 100%;
       padding-left: 42px;
       box-shadow: 0px 1px 1px rgba(104, 118, 142, 0.05);
-      &:focus{
+      &:focus {
         outline: none;
       }
     }
   }
-}
+`;
+
+export default Container;

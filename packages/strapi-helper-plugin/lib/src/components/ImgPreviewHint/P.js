@@ -1,4 +1,6 @@
-.imgPreviewHint {
+import styled from 'styled-components';
+
+const P = styled.p`
   display: block;
   width: 100%;
   position: absolute;
@@ -14,4 +16,6 @@
       cursor: pointer;
     }
   }
-}
+`;
+
+export default P;

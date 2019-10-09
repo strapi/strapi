@@ -8,8 +8,7 @@ import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
-
-import styles from './styles.scss';
+import Div from './Div';
 
 class InputEmail extends React.Component {
   state = { isFocused: false };
@@ -42,20 +41,16 @@ class InputEmail extends React.Component {
       placeholder === '' ? 'app.utils.placeholder.defaultMessage' : placeholder;
 
     return (
-      <div
-        className={cn(
-          styles.inputEmail,
-          'input-group',
-          !isEmpty(className) && className
-        )}
+      <Div
+        className={cn('input-group', !isEmpty(className) && className)}
         style={style}
       >
         <span
           className={cn(
             'input-group-addon',
-            styles.addonEmail,
-            this.state.isFocused && styles.addonFocus,
-            !deactivateErrorHighlight && error && styles.errorAddon
+            'addonEmail',
+            this.state.isFocused && 'addonFocus',
+            !deactivateErrorHighlight && error && 'errorAddon'
           )}
         />
         <FormattedMessage
@@ -71,7 +66,7 @@ class InputEmail extends React.Component {
                 !deactivateErrorHighlight &&
                   error &&
                   this.state.isFocused &&
-                  styles.invalidEmail
+                  'invalidEmail'
               )}
               disabled={disabled}
               id={name}
@@ -86,7 +81,7 @@ class InputEmail extends React.Component {
             />
           )}
         </FormattedMessage>
-      </div>
+      </Div>
     );
   }
 }

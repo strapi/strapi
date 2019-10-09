@@ -21,7 +21,7 @@ const BackHeader = styled.div`
   border-left: 1px solid #f3f4f4;
   cursor: pointer;
   &:before {
-    content: '\F053';
+    content: '\f053';
     font-family: 'FontAwesome';
     font-size: 1.8rem;
     font-weight: bolder;
