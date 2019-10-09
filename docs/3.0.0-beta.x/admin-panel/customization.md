@@ -209,7 +209,7 @@ you can build your admin panel with a specific configuration (located in the `./
 ::: tab "yarn" id="yarn-build-prod"
 
 ```
-NODE_ENV=production yarn build
+yarn build
 ```
 
 :::
@@ -217,7 +217,7 @@ NODE_ENV=production yarn build
 ::: tab "npm" id="npm-build-prod"
 
 ```
-NODE_ENV=production npm run build
+npm run build
 ```
 
 :::
@@ -225,7 +225,7 @@ NODE_ENV=production npm run build
 ::: tab "strapi" id="strapi-build-prod"
 
 ```
-NODE_ENV=production strapi build
+strapi build
 ```
 
 :::
