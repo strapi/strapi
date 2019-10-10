@@ -2,32 +2,29 @@ import styled, { css, keyframes } from 'styled-components';
 import Trash from '../../assets/icons/icon_trash.svg';
 
 const back = css`
+  padding: 0 15px;
   background: #f3f3f3;
   color: #323740;
   font-weight: 500;
-  padding: 0 15px;
   transition: all 0.2s ease;
-
   &:before {
     content: '\f053';
+    margin-right: 10px;
     font-family: 'FontAwesome';
     font-size: 1.2rem;
     color: #323740;
-    margin-right: 10px;
   }
-
   &:hover {
     background: darken(#f6f6f6, 5%);
   }
-
   &:active {
     box-shadow: inset 1px 1px 5px rgba(0, 0, 0, 0.1);
   }
 `;
 
 const primary = css`
-  font-weight: 500;
   min-width: 14rem;
+  font-weight: 500;
   border: 1px solid;
   background: linear-gradient(315deg, #0097f6 0%, #005eea 100%);
   -webkit-font-smoothing: antialiased;
@@ -38,32 +35,32 @@ const primary = css`
 `;
 
 const primaryAddShape = css`
-  font-weight: 500;
   min-width: 14rem;
+  padding-left: 1.6rem;
+  padding-right: 1.6rem;
+  font-weight: 500;
   background: linear-gradient(315deg, #0097f6 0%, #005eea 100%);
   -webkit-font-smoothing: antialiased;
   color: white;
-  &:active {
-    box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.15);
-  }
-  padding-left: 1.6rem;
-  padding-right: 1.6rem;
   &:before {
     content: '\f067';
+    margin-right: 13px;
     font-family: 'FontAwesome';
     font-weight: 600;
     font-size: 1.3rem;
-    margin-right: 13px;
+  }
+  &:active {
+    box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.15);
   }
 `;
 
 const secondary = css`
+  position: relative;
   min-width: 10rem;
+  overflow: hidden;
   color: #919bae;
   border: 0.1rem solid #e3e9f3;
-  position: relative;
   border-radius: 3px;
-  overflow: hidden;
   &:active {
     border: 0.1rem solid #b6bdca;
   }
@@ -71,37 +68,37 @@ const secondary = css`
 
 const deleteStyle = css`
   position: relative;
+  overflow: hidden;
   padding: 0 15px;
   background: rgba(255, 0, 0, 0.15);
   color: #f23508;
   border: 0.1rem solid rgba(255, 0, 0, 0.2);
   border-radius: 3px;
-  overflow: hidden;
-  &:active {
-    border: 0.1rem solid rgba(255, 0, 0, 0.3);
-  }
   &:before {
     content: '';
     display: inline-block;
+    vertical-align: middle;
     width: 11px;
     height: 12px;
     margin-right: 8px;
     margin-top: -3px;
     background-image: url(${Trash});
-    vertical-align: middle;
+  }
+  &:active {
+    border: 0.1rem solid rgba(255, 0, 0, 0.3);
   }
 `;
 
 const secondaryHotline = css`
   height: 2.6rem;
   min-width: 15rem;
-  color: #1c5de7;
-  line-height: 1.6rem;
-  border: 0.1rem solid #1c5de7;
-  font-weight: 500;
-  font-size: 1.3rem;
   padding-left: 1.6rem;
   padding-right: 1.6rem;
+  font-size: 1.3rem;
+  line-height: 1.6rem;
+  font-weight: 500;
+  color: #1c5de7;
+  border: 0.1rem solid #1c5de7;
 `;
 
 const secondaryHotlineAdd = css`
@@ -115,10 +112,10 @@ const secondaryHotlineAdd = css`
   font-size: 1.3rem;
   &:before {
     content: '\f067';
+    margin-right: 13px;
     font-family: 'FontAwesome';
     font-weight: 600;
     font-size: 1.3rem;
-    margin-right: 13px;
   }
 `;
 
@@ -162,23 +159,23 @@ const StyledButton = styled.button`
       cursor: pointer;
       font-family: Lato;
       -webkit-font-smoothing: antialiased;
+      > i {
+        margin-right: 1.3rem;
+        padding-top: 1px;
+        font-weight: 600;
+      }
       &:focus {
         outline: 0;
       }
-      > i {
-        margin-right: 1.3rem;
-        font-weight: 600;
-        padding-top: 1px;
-      }
       &:hover {
         &::after {
+          content: '';
           position: absolute;
           width: 100%;
           height: 100%;
           top: 0;
           left: 0;
           border-radius: 0.3rem;
-          content: '';
           opacity: 0.1;
           background: #ffffff;
         }
@@ -188,7 +185,6 @@ const StyledButton = styled.button`
       }
     `;
   }}
-
 
   ${props => {
     if (props.primary) {
@@ -261,7 +257,6 @@ const StyledButton = styled.button`
   .saving span:nth-child(3) {
     animation-delay: .4s;
   }
-
 `;
 
 export default StyledButton;

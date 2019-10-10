@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
-  display: -webkit-flex;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -17,10 +16,10 @@ const Wrapper = styled.div`
   }
 
   h2 {
+    margin-bottom: 50px;
     color: #2c3138;
     font-size: 1.4rem;
     font-weight: 400;
-    margin-bottom: 50px;
   }
 
   button {

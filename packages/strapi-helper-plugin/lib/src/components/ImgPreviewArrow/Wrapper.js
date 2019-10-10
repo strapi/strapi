@@ -1,6 +1,8 @@
 import styled, { css } from 'styled-components';
 
 const Wrapper = styled.div`
+  position: absolute;
+  top: 56px;
   height: 32px;
   width: 28px;
   background: rgba(0, 0, 0, 0.2);
@@ -9,8 +11,6 @@ const Wrapper = styled.div`
   color: #fff;
   cursor: pointer;
   z-index: 99;
-  position: absolute;
-  top: 56px;
 
   ${({ type }) => {
     if (type === 'left') {

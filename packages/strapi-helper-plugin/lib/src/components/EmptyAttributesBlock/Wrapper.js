@@ -12,18 +12,15 @@ const Wrapper = styled.div`
   font-size: 1.4rem;
   font-family: Lato;
   box-shadow: 2px 2px 4px #e3e9f3;
-
   .title {
     margin-bottom: 1.8rem;
     font-size: 1.8rem;
     line-height: 1.8rem;
     font-weight: bold;
   }
-
   .description {
     color: #333740;
   }
-
   .buttonContainer {
     margin-top: 4.6rem;
     > button {

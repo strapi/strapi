@@ -1,9 +1,9 @@
 import styled from 'styled-components';
 
 const Li = styled.li`
-  margin-top: 0 !important;
   position: relative;
   min-height: 5.4rem;
+  margin-top: 0 !important;
   line-height: 5.4rem;
   cursor: pointer;
   &:hover {
