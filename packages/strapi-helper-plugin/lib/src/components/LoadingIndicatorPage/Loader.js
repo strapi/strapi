@@ -17,11 +17,11 @@ const Loader = styled.div`
   height: 100vh;
   > div {
     margin: auto;
+    width: 50px;
+    height: 50px;
     border: 6px solid #f3f3f3; /* Light grey */
     border-top: 6px solid #1c91e7; /* Blue */
     border-radius: 50%;
-    width: 50px;
-    height: 50px;
     animation: ${spin} 2s linear infinite;
   }
 `;

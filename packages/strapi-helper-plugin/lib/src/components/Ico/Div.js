@@ -5,11 +5,11 @@ const Div = styled.div`
   height: 100%;
   color: #0e1622;
   opacity: 0.75;
+  -webkit-font-smoothing: antialiased;
   > i {
     z-index: 0;
     font-size: 1.3rem;
   }
-  -webkit-font-smoothing: antialiased;
 `;
 
 export default Div;

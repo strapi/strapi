@@ -1,10 +1,10 @@
 import styled from 'styled-components';
 
 const P = styled.p`
-  display: block;
-  width: 100%;
   position: absolute;
   top: 49px;
+  display: block;
+  width: 100%;
   padding: 12px 75px 0 75px;
   white-space: pre-line;
   color: #333740;

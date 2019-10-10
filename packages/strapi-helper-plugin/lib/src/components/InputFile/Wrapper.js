@@ -2,10 +2,10 @@ import styled from 'styled-components';
 
 const Wrapper = styled.div`
   .inputFile {
-    opacity: 0;
     overflow: hidden;
     position: absolute;
     z-index: -1;
+    opacity: 0;
   }
 
   .buttonContainer {

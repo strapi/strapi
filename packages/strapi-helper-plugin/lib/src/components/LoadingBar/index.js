@@ -23,17 +23,17 @@ const loading = keyframes`
 `;
 
 const LoadingBar = styled.div`
-  height: 6px;
-  width: 20%;
-  margin-top: 10px;
   position: relative;
+  width: 20%;
+  height: 6px;
+  margin-top: 10px;
   overflow: hidden;
   background-color: #f3f3f4;
   border-radius: 2px;
   &:before {
+    content: '';
     display: block;
     position: absolute;
-    content: '';
     left: -200px;
     width: 200px;
     height: 6px;

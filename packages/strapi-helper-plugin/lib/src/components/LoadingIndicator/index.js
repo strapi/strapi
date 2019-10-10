@@ -20,11 +20,11 @@ const Loader = styled.div`
   justify-content: space-around;
   width: 100%;
   > div {
+    width: 26px;
+    height: 26px;
     border: 4px solid #f3f3f3;
     border-top: 4px solid #555555 !important;
     border-radius: 50%;
-    width: 26px;
-    height: 26px;
     animation: ${spin} 2s linear infinite;
   }
 `;
