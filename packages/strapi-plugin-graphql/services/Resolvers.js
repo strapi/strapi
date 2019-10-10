@@ -41,7 +41,7 @@ const generateEnumDefinitions = (attributes, globalId) => {
     .join('');
 };
 
-const mutateAssocAttrbiutes = (associations = [], attributes) => {
+const mutateAssocAttributes = (associations = [], attributes) => {
   associations
     .filter(association => association.type === 'collection')
     .forEach(association => {
@@ -136,7 +136,6 @@ const buildAssocResolvers = (model, name, { plugin }) => {
 
       default: {
         resolver[association.alias] = async (obj, options) => {
-          // eslint-disable-line no-unused-vars
           // Construct parameters object to retrieve the correct related entries.
           const params = {
             model: association.model || association.collection,
@@ -173,9 +172,9 @@ const buildAssocResolvers = (model, name, { plugin }) => {
                 queryOpts,
                 ['query', ref.primaryKey],
                 obj[association.alias]
-                  ? obj[association.alias].map(
-                      val => val[ref.primaryKey] || val
-                    )
+                  ? obj[association.alias]
+                      .map(val => val[ref.primaryKey] || val)
+                      .sort()
                   : []
               );
             } else {
@@ -222,7 +221,7 @@ const buildModel = (model, name, { plugin, isGroup = false } = {}) => {
   }
 
   const attributes = convertAttributes(model.attributes, globalId);
-  mutateAssocAttrbiutes(model.associations, attributes);
+  mutateAssocAttributes(model.associations, attributes);
   _.merge(attributes, initialState);
 
   definition += generateEnumDefinitions(model.attributes, globalId);
@@ -304,7 +303,7 @@ const buildShadowCRUD = (models, plugin) => {
 
     // Convert our layer Model to the GraphQL DL.
     const attributes = convertAttributes(model.attributes, globalId);
-    mutateAssocAttrbiutes(model.associations, attributes);
+    mutateAssocAttributes(model.associations, attributes);
     _.merge(attributes, initialState);
 
     acc.definition += generateEnumDefinitions(model.attributes, globalId);

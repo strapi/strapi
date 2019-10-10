@@ -263,7 +263,11 @@ module.exports = {
     if (!_.get(config, 'enabled')) {
       return ctx.badRequest(null, 'This provider is disabled.');
     }
-
+    // Ability to pass OAuth callback dynamically
+    grantConfig[provider].callback =
+      ctx.query && ctx.query.callback
+        ? ctx.query.callback
+        : grantConfig[provider].callback;
     return grant(grantConfig)(ctx, next);
   },
 
