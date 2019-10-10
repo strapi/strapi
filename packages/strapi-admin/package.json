@@ -104,6 +104,7 @@
   "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9",
   "devDependencies": {
     "chokidar": "^3.1.1",
+    "compression-webpack-plugin": "^3.0.0",
     "offline-plugin": "^5.0.7",
     "webpack": "^4.40.1",
     "webpack-cli": "^3.3.2",

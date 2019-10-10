@@ -10,6 +10,7 @@ const TerserPlugin = require('terser-webpack-plugin');
 const WebpackBar = require('webpackbar');
 const isWsl = require('is-wsl');
 const OfflinePlugin = require('offline-plugin');
+const CompressionPlugin = require('compression-webpack-plugin');
 const alias = require('./webpack.alias.js');
 
 // TODO: parametrize
@@ -70,6 +71,17 @@ module.exports = ({
           clearConsole: false,
         }),
       ];
+
+  if (optimize && isProduction) {
+    webpackPlugins.push(
+      new CompressionPlugin({
+        algorithm: 'gzip',
+        test: /\.js$|\.css$|\.html$/,
+        threshold: 10240,
+        minRatio: 0.8,
+      })
+    );
+  }
 
   return {
     mode: isProduction ? 'production' : 'development',
