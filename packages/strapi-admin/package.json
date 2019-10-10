@@ -46,7 +46,6 @@
     "is-wsl": "^2.0.0",
     "mini-css-extract-plugin": "^0.6.0",
     "moment": "^2.24.0",
-    "node-sass": "^4.11.0",
     "open-browser-webpack-plugin": "^0.0.5",
     "postcss-loader": "^3.0.0",
     "postcss-smart-import": "^0.7.6",

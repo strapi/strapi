@@ -46,18 +46,6 @@ module.exports = ({
         new FriendlyErrorsWebpackPlugin(),
       ];
 
-  const scssLoader = isProduction
-    ? [
-        {
-          loader: MiniCssExtractPlugin.loader,
-          options: {
-            fallback: require.resolve('style-loader'),
-            publicPath: options.publicPath,
-          },
-        },
-      ]
-    : [{ loader: 'style-loader', options: {} }];
-
   return {
     mode: isProduction ? 'production' : 'development',
     bail: isProduction ? true : false,
@@ -103,10 +91,6 @@ module.exports = ({
           sourceMap: false,
         }),
       ],
-      // splitChunks: {
-      //   chunks: 'all',
-      //   name: false,
-      // },
       runtimeChunk: true,
     },
     module: {
@@ -141,50 +125,20 @@ module.exports = ({
             },
           },
         },
+        // Copied from react-boilerplate https://github.com/react-boilerplate/react-boilerplate
         {
+          // Preprocess our own .css files
+          // This is the place to add your own loaders (e.g. sass/less etc.)
+          // for a list of loaders, see https://webpack.js.org/loaders/#styling
           test: /\.css$/,
-          include: /node_modules/,
-          use: scssLoader.concat([
-            {
-              loader: require.resolve('css-loader'),
-              options: {
-                sourceMap: false,
-              },
-            },
-            {
-              loader: require.resolve('postcss-loader'),
-              options: {
-                config: {
-                  path: path.resolve(__dirname, 'postcss.config.js'),
-                },
-              },
-            },
-          ]),
+          exclude: /node_modules/,
+          use: ['style-loader', 'css-loader'],
         },
         {
-          test: /\.scss$/,
-          use: scssLoader.concat([
-            {
-              loader: require.resolve('css-loader'),
-              options: {
-                localIdentName: '[local]__[path][name]__[hash:base64:5]',
-                modules: true,
-                importLoaders: 1,
-                sourceMap: false,
-              },
-            },
-            {
-              loader: require.resolve('postcss-loader'),
-              options: {
-                config: {
-                  path: path.resolve(__dirname, 'postcss.config.js'),
-                },
-              },
-            },
-            {
-              loader: 'sass-loader',
-            },
-          ]),
+          // Preprocess 3rd party .css files located in node_modules
+          test: /\.css$/,
+          include: /node_modules/,
+          use: ['style-loader', 'css-loader'],
         },
         {
           test: /\.(svg|eot|otf|ttf|woff|woff2)$/,
