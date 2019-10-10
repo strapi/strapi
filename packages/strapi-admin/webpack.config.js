@@ -38,12 +38,15 @@ module.exports = ({
           chunkFilename: '[name].[chunkhash].chunkhash.css',
           ignoreOrder: true,
         }),
+        new WebpackBar(),
       ]
     : [
         new DuplicatePckgChecker({
           verbose: true,
         }),
-        new FriendlyErrorsWebpackPlugin(),
+        new FriendlyErrorsWebpackPlugin({
+          clearConsole: false,
+        }),
       ];
 
   return {
@@ -189,7 +192,6 @@ module.exports = ({
       mainFields: ['browser', 'jsnext:main', 'main'],
     },
     plugins: [
-      new WebpackBar(),
       new HtmlWebpackPlugin({
         inject: true,
         template: path.resolve(__dirname, 'index.html'),
