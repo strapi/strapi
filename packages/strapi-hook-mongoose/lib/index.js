@@ -93,7 +93,7 @@ module.exports = function(strapi) {
            * https://github.com/Automattic/mongoose/issues/6881 */
           await instance.connect(
             uri ||
-              `mongodb${isSrv ? '+srv' : ''}://${username}:${password}@${host}${
+              `mongodb${isSrv ? '+srv' : ''}://${username}:${isSrv ? encodeURIComponent(password) : password}@${host}${
                 !isSrv ? ':' + port : ''
               }/`,
             connectOptions
