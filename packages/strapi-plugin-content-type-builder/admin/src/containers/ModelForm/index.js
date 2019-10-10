@@ -31,6 +31,7 @@ import IconGroup from '../../assets/icons/icon_type_groups.png';
 import forms from './forms.json';
 
 const NAVLINKS = [{ id: 'base' }, { id: 'advanced' }];
+const RESERVED_NAMES = ['admin', 'series', 'file'];
 
 class ModelForm extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
@@ -97,6 +98,12 @@ class ModelForm extends React.Component {
       name => name !== featureToEditName
     );
     let formErrors = {};
+
+    if (RESERVED_NAMES.includes(modifiedData.name)) {
+      formErrors = {
+        name: [{ id: `${pluginId}.error.contentTypeName.reserved-name` }],
+      };
+    }
 
     if (alreadyTakenContentTypeNames.includes(modifiedData.name)) {
       formErrors = {
