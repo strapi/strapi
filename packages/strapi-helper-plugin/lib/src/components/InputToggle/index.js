@@ -6,8 +6,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { isEmpty } from 'lodash';
-
-import styles from './styles.scss';
+import Wrapper from './Wrapper';
 
 class InputToggle extends React.Component {
   handleClick = e => {
@@ -34,19 +33,18 @@ class InputToggle extends React.Component {
     } = this.props;
 
     return (
-      <div
+      <Wrapper
         className={cn(
           'btn-group',
-          styles.inputToggleContainer,
           !isEmpty(className) && className,
-          !deactivateErrorHighlight && error && styles.error
+          !deactivateErrorHighlight && error && 'error'
         )}
         style={style}
       >
         <button
           autoFocus={autoFocus}
           disabled={disabled}
-          className={cn('btn', !value && styles.gradientOff)}
+          className={cn('btn', !value && 'gradientOff')}
           id={`__OFF__${name}`}
           onClick={this.handleClick}
           tabIndex={tabIndex}
@@ -56,14 +54,14 @@ class InputToggle extends React.Component {
         </button>
         <button
           disabled={disabled}
-          className={cn('btn', value && styles.gradientOn)}
+          className={cn('btn', value && 'gradientOn')}
           id={`__ON__${name}`}
           onClick={this.handleClick}
           type="button"
         >
           ON
         </button>
-      </div>
+      </Wrapper>
     );
   }
 }

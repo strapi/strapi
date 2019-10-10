@@ -13,8 +13,7 @@ import cn from 'classnames';
 
 import ImgPreview from '../ImgPreview';
 import InputFileDetails from '../InputFileDetails';
-
-import styles from './styles.scss';
+import Wrapper from './Wrapper';
 
 /* eslint-disable react/jsx-handler-names */
 class InputFile extends React.Component {
@@ -117,11 +116,11 @@ class InputFile extends React.Component {
     const { multiple, name, onChange, value } = this.props;
 
     return (
-      <div>
+      <Wrapper>
         <div
           className={cn(
             'form-control',
-            styles.inputFileControlForm,
+            'inputFileControlForm',
             this.props.error && 'is-invalid'
           )}
         >
@@ -139,7 +138,7 @@ class InputFile extends React.Component {
           />
           <label style={{ marginBottom: 0, width: '100%' }}>
             <input
-              className={styles.inputFile}
+              className="inputFile"
               multiple={multiple}
               name={name}
               onChange={this.handleChange}
@@ -147,7 +146,7 @@ class InputFile extends React.Component {
               ref={input => (this.inputFile = input)}
             />
 
-            <div className={styles.buttonContainer}>
+            <div className="buttonContainer">
               <i className="fa fa-plus" />
               <FormattedMessage id="app.components.InputFile.newFile" />
             </div>
@@ -161,7 +160,7 @@ class InputFile extends React.Component {
             onFileDelete={this.handleFileDelete}
           />
         )}
-      </div>
+      </Wrapper>
     );
   }
 }

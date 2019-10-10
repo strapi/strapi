@@ -9,8 +9,7 @@ import { FormattedMessage } from 'react-intl';
 import { isEmpty } from 'lodash';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
-
-import styles from './styles.scss';
+import Input from './Input';
 
 function InputTextArea(props) {
   const placeholder = isEmpty(props.placeholder)
@@ -20,11 +19,10 @@ function InputTextArea(props) {
   return (
     <FormattedMessage id={placeholder} defaultMessage={placeholder}>
       {message => (
-        <textarea
+        <Input
           autoFocus={props.autoFocus}
           className={cn(
             'form-control',
-            styles.inputTextArea,
             !isEmpty(props.className) && props.className,
             !props.deactivateErrorHighlight && props.error && 'is-invalid'
           )}

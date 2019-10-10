@@ -30,6 +30,6 @@ module.exports = {
   //   .default,
   // 'strapi-plugin-email': require('../../../strapi-plugin-email/admin/src')
   //   .default,
-  // 'strapi-plugin-upload': require('../../../strapi-plugin-upload/admin/src')
-  //   .default,
+  'strapi-plugin-upload': require('../../../strapi-plugin-upload/admin/src')
+    .default,
 };

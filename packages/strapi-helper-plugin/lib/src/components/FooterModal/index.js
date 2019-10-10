@@ -12,15 +12,13 @@ import sizes from '../../assets/styles/sizes';
 const FooterModal = styled.div`
   padding-top: ${sizes.margin * 0.9}px;
   section {
-    padding: 0 ${sizes.margin * 3}px;
     display: flex;
     height: 72px;
-    &:not(:last-of-type) {
-      justify-content: flex-end;
-    }
+    padding: 0 ${sizes.margin * 3}px;
+    justify-content: flex-end;
     &:last-of-type {
-      background-color: ${colors.beige};
       justify-content: space-between;
+      background-color: ${colors.beige};
     }
     button {
       margin: auto 0;

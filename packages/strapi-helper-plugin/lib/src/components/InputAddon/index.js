@@ -8,8 +8,7 @@ import PropTypes from 'prop-types';
 import { isEmpty, isFunction, upperFirst } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
-
-import styles from './styles.scss';
+import Wrapper from './Wrapper';
 
 class InputAddon extends React.Component {
   state = { isFocused: false };
@@ -46,12 +45,8 @@ class InputAddon extends React.Component {
       placeholder === '' ? 'app.utils.placeholder.defaultMessage' : placeholder;
 
     return (
-      <div
-        className={cn(
-          styles.inputAddon,
-          'input-group',
-          !isEmpty(className) && className
-        )}
+      <Wrapper
+        className={cn('input-group', !isEmpty(className) && className)}
         style={style}
       >
         <FormattedMessage id={addon} defaultMessage={upperFirst(addon)}>
@@ -59,9 +54,9 @@ class InputAddon extends React.Component {
             <span
               className={cn(
                 'input-group-addon',
-                styles.addon,
-                this.state.isFocused && styles.addonFocus,
-                !deactivateErrorHighlight && error && styles.errorAddon
+                'addon',
+                this.state.isFocused && 'addonFocus',
+                !deactivateErrorHighlight && error && 'errorAddon'
               )}
             >
               {message}
@@ -81,7 +76,7 @@ class InputAddon extends React.Component {
                 !deactivateErrorHighlight &&
                   error &&
                   this.state.isFocused &&
-                  styles.invalidAddon
+                  'invalidAddon'
               )}
               disabled={disabled}
               id={name}
@@ -96,7 +91,7 @@ class InputAddon extends React.Component {
             />
           )}
         </FormattedMessage>
-      </div>
+      </Wrapper>
     );
   }
 }

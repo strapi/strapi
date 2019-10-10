@@ -8,15 +8,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { differenceBy, isEmpty } from 'lodash';
-
-// Design
 import Label from '../Label';
 import InputDescription from '../InputDescription';
 import InputFile from '../InputFile';
 import InputErrors from '../InputErrors';
-
-// Styles
-import styles from './styles.scss';
+import Container from './Container';
 
 class InputFileWithErrors extends React.PureComponent {
   state = { errors: [], label: null, hasValue: false };
@@ -84,17 +80,12 @@ class InputFileWithErrors extends React.PureComponent {
       value,
     } = this.props;
 
-    const labelClass =
-      labelClassName === '' ? styles.labelFile : labelClassName;
+    const labelClass = labelClassName === '' ? 'labelFile' : labelClassName;
     const height = isEmpty(value) ? '.4rem' : '.6rem';
 
     return (
-      <div
-        className={cn(
-          styles.inputFileWithErrorsContainer,
-          customBootstrapClass,
-          className !== '' && className
-        )}
+      <Container
+        className={cn(customBootstrapClass, className !== '' && className)}
         style={style}
       >
         <Label
@@ -104,7 +95,7 @@ class InputFileWithErrors extends React.PureComponent {
           style={labelStyle}
         />
         {this.state.label && (
-          <span className={styles.labelNumber}>
+          <span className="labelNumber">
             &nbsp;({this.state.label}/{value.length})
           </span>
         )}
@@ -128,7 +119,7 @@ class InputFileWithErrors extends React.PureComponent {
           style={errorsStyle}
         />
         <div style={{ height }} />
-      </div>
+      </Container>
     );
   }
 }

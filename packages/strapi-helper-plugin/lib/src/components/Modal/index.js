@@ -6,22 +6,19 @@
 
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { Modal, ModalHeader } from 'reactstrap';
-import styles from './styles.scss';
+
+import HeaderModal from './HeaderModal';
+import StyledModal from './StyledModal';
+import Wrapper from './Wrapper';
 
 function WrapperModal({ children, isOpen, onToggle, ...rest }) {
   return (
-    <div className={styles.wrapperModal}>
-      <Modal
-        isOpen={isOpen}
-        toggle={onToggle}
-        className={styles.modal}
-        {...rest}
-      >
-        <ModalHeader className={styles.headerModalWrapper} toggle={onToggle} />
+    <Wrapper>
+      <StyledModal isOpen={isOpen} toggle={onToggle} {...rest}>
+        <HeaderModal toggle={onToggle} />
         {children}
-      </Modal>
-    </div>
+      </StyledModal>
+    </Wrapper>
   );
 }
 

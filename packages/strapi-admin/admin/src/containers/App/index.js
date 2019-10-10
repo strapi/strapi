@@ -18,8 +18,6 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { LoadingIndicatorPage, request } from 'strapi-helper-plugin';
 
-import { Fonts } from '@buffetjs/styles';
-
 import Admin from '../Admin';
 import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
@@ -63,7 +61,6 @@ function App(props) {
   return (
     <Theme>
       <Wrapper>
-        <Fonts />
         <GlobalStyle />
         <NotificationProvider />
         <Content>

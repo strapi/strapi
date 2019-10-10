@@ -71,6 +71,9 @@
     },
     "address": {
       "model": "address"
+    },
+    "short_description": {
+      "type": "text"
     }
   }
 }

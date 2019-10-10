@@ -34,10 +34,8 @@ import RelationBox from './RelationBox';
 
 import Icon from '../../assets/icons/icon_type_ct.png';
 import IconGroup from '../../assets/icons/icon_type_groups.png';
-
+import Divider from './Divider';
 import formAdvanced from './advanced.json';
-
-import styles from './styles.scss';
 
 const NAVLINKS = [{ id: 'base', custom: 'relation' }, { id: 'advanced' }];
 
@@ -199,7 +197,7 @@ class RelationForm extends React.Component {
     const { modifiedData, onChange } = this.props;
 
     return formAdvanced.map((input, i) => {
-      const divider = i === 0 ? <div className={styles.divider} /> : null;
+      const divider = i === 0 ? <Divider /> : null;
 
       return (
         <React.Fragment key={input.name}>

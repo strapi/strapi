@@ -17,8 +17,7 @@ import {
 } from 'strapi-helper-plugin';
 
 import Wysiwyg from '../Wysiwyg';
-
-import styles from './styles.scss';
+import Wrapper from './Wrapper';
 
 class WysiwygWithErrors extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
@@ -103,12 +102,8 @@ class WysiwygWithErrors extends React.Component {
     }
 
     return (
-      <div
-        className={cn(
-          styles.containerWysiwyg,
-          customBootstrapClass,
-          !isEmpty(className) && className
-        )}
+      <Wrapper
+        className={cn(customBootstrapClass, !isEmpty(className) && className)}
         style={style}
       >
         <Label
@@ -144,7 +139,7 @@ class WysiwygWithErrors extends React.Component {
           style={errorsStyle}
         />
         {spacer}
-      </div>
+      </Wrapper>
     );
   }
 }
