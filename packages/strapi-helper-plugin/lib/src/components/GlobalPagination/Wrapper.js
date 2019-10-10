@@ -1,20 +1,20 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
-  width: 100%;
   display: flex;
-  margin-top: -2px;
+  width: 100%;
   justify-content: flex-end;
+  margin-top: -2px;
 
   > div {
     display: inline-flex;
     flex-direction: row;
     min-width: 120px;
     height: 32px;
+    overflow: hidden;
     background: #ffffff;
     border-radius: 3px;
     border: 1px solid #e2e8f3;
-    overflow: hidden;
   }
 
   .paginationNavigator {
@@ -23,13 +23,15 @@ const Wrapper = styled.div`
     text-align: center;
     line-height: 30px;
     font-size: 2rem;
+    i {
+      color: #97999e;
+    }
 
     &:first-of-type {
       margin-right: 10px;
-
       &:after {
-        position: absolute;
         content: '';
+        position: absolute;
         top: 3px;
         bottom: 3px;
         right: 0;
@@ -40,20 +42,15 @@ const Wrapper = styled.div`
 
     &:last-of-type {
       margin-left: 10px;
-
       &:before {
-        position: absolute;
         content: '';
+        position: absolute;
         top: 3px;
         bottom: 3px;
         left: 0;
         width: 1px;
         background: #f1f1f2;
       }
-    }
-
-    i {
-      color: #97999e;
     }
 
     &[disabled] {
@@ -65,7 +62,6 @@ const Wrapper = styled.div`
 
   .navWrapper {
     min-width: 48px;
-
     ul {
       display: flex;
       flex-direction: row;
@@ -82,15 +78,13 @@ const Wrapper = styled.div`
       text-align: center;
       line-height: 32px;
       color: #333740;
-
       a {
         color: #333740;
         font-size: 1.3rem;
-
         &:hover {
           &:after {
-            position: absolute;
             content: '';
+            position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
@@ -98,7 +92,6 @@ const Wrapper = styled.div`
             background: #1c5de7;
           }
         }
-
         &:hover,
         &:visited,
         &:focus,
@@ -120,10 +113,9 @@ const Wrapper = styled.div`
 
   .navLiActive {
     font-weight: 800;
-
     &:after {
-      position: absolute;
       content: '';
+      position: absolute;
       bottom: 0;
       left: 0;
       width: 100%;

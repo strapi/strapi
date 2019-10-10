@@ -12,10 +12,10 @@ const Container = styled.div`
   > div {
     padding-top: 2.5rem;
     > h4 {
+      margin-bottom: 0;
       font-size: 24px;
       font-weight: 700;
       line-height: 24px;
-      margin-bottom: 0;
     }
     > p {
       margin-top: -1px;
@@ -26,10 +26,10 @@ const Container = styled.div`
 
   .icoContainer {
     padding-top: 0 !important;
-    font-size: 4.2rem;
-    color: #323740;
     margin-right: 20px;
+    font-size: 4.2rem;
     line-height: 9.3rem;
+    color: #323740;
   }
 
   .spinner {
@@ -53,24 +53,24 @@ const Container = styled.div`
     padding-right: 1.6rem;
     border-radius: 0.3rem;
     border: none;
-    background: linear-gradient(315deg, #0097f6 0%, #005eea 100%);
-    color: white;
     font-family: Lato;
     font-weight: 600;
     -webkit-font-smoothing: antialiased;
     cursor: pointer;
+    background: linear-gradient(315deg, #0097f6 0%, #005eea 100%);
+    color: white;
 
     > i {
       margin-right: 1.3rem;
-      font-weight: 600;
       padding-top: 1px;
+      font-weight: 600;
     }
     &:before {
       content: '\f02d';
+      margin-right: 13px;
       font-family: 'FontAwesome';
       font-weight: 600;
       font-size: 1.3rem;
-      margin-right: 13px;
     }
 
     &:active {

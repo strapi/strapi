@@ -133,7 +133,7 @@ const DropDownWrapper = styled.div`
       min-width: 230px;
       top: 28px !important;
       left: 53px !important;
-      padding-top: 8px;
+      padding-top: 9px;
       padding-bottom: 5px !important;
       border-top-right-radius: 0;
       border: 1px solid #e3e9f3;
