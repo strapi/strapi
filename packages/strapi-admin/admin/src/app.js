@@ -105,6 +105,7 @@ const unlockApp = () => {
 
 window.strapi = Object.assign(window.strapi || {}, {
   node: MODE || 'host',
+  env: NODE_ENV,
   remoteURL,
   backendURL: BACKEND_URL === '/' ? window.location.origin : BACKEND_URL,
   notification: {
@@ -194,4 +195,11 @@ export { dispatch };
 // TODO remove this for the new Cypress tests
 if (window.Cypress) {
   window.__store__ = Object.assign(window.__store__ || {}, { store });
+}
+
+// Install ServiceWorker and AppCache in the end since
+// it's not most important operation and if main code fails,
+// we do not want it installed
+if (NODE_ENV === 'production') {
+  require('offline-plugin/runtime').install(); // eslint-disable-line global-require
 }

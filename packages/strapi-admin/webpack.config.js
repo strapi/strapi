@@ -9,6 +9,7 @@ const DuplicatePckgChecker = require('duplicate-package-checker-webpack-plugin')
 const TerserPlugin = require('terser-webpack-plugin');
 const WebpackBar = require('webpackbar');
 const isWsl = require('is-wsl');
+const OfflinePlugin = require('offline-plugin');
 const alias = require('./webpack.alias.js');
 
 // TODO: parametrize
@@ -20,13 +21,13 @@ module.exports = ({
   entry,
   dest,
   env,
+  optimize,
   options = {
     backend: 'http://localhost:1337',
     publicPath: '/admin/',
   },
 }) => {
   const isProduction = env === 'production';
-
   const webpackPlugins = isProduction
     ? [
         new webpack.IgnorePlugin({
@@ -37,6 +38,27 @@ module.exports = ({
           filename: '[name].[chunkhash].css',
           chunkFilename: '[name].[chunkhash].chunkhash.css',
           ignoreOrder: true,
+        }),
+        new OfflinePlugin({
+          relativePaths: false,
+          publicPath: options.publicPath,
+          appShell: '/',
+
+          // No need to cache .htaccess. See http://mxs.is/googmp,
+          // this is applied before any match in `caches` section
+          excludes: ['.htaccess'],
+
+          caches: {
+            main: [':rest:'],
+
+            // All chunks marked as `additional`, loaded after main section
+            // and do not prevent SW to install. Change to `optional` if
+            // do not want them to be preloaded at all (cached only when first loaded)
+            additional: ['*.chunk.js'],
+          },
+
+          // Removes warning for about `additional` section usage
+          safeToUseOptionalCaches: true,
         }),
         new WebpackBar(),
       ]
@@ -65,7 +87,7 @@ module.exports = ({
         : '[name].chunk.js',
     },
     optimization: {
-      minimize: isProduction,
+      minimize: optimize,
       minimizer: [
         // Copied from react-scripts
         new TerserPlugin({

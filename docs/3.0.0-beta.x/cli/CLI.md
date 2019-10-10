@@ -69,6 +69,17 @@ By default the `development` environment will be used.
 
 Builds your admin panel.
 
+```bash
+strapi build
+
+options: [--optimize]
+```
+
+- **strapi build**<br/>
+  Builds the administration panel without minimizing the assets
+- **strapi build --optimize**<br/>
+  Builds the administration panel and minize the assets. The build duration takes longer
+
 ::: note
 You can specify a NODE_ENV to use the configurations in the `./config/environments/[development|staging|production]` folder.
 By default the `development` environment will be used.

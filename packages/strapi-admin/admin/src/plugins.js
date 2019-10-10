@@ -6,6 +6,7 @@ const { languages } = require('./i18n');
 
 window.strapi = Object.assign(window.strapi || {}, {
   node: MODE || 'host',
+  env: NODE_ENV,
   backendURL: BACKEND_URL === '/' ? window.location.origin : BACKEND_URL,
   languages,
   currentLanguage:

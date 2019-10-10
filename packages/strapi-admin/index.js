@@ -138,14 +138,14 @@ async function createCacheDir(dir) {
   );
 }
 
-async function build({ dir, env, options }) {
+async function build({ dir, env, options, optimize }) {
   // Create the cache dir containing the front-end files.
   await createCacheDir(dir);
 
   const cacheDir = path.resolve(dir, '.cache');
   const entry = path.resolve(cacheDir, 'admin', 'src', 'app.js');
   const dest = path.resolve(dir, 'build');
-  const config = getWebpackConfig({ entry, dest, env, options });
+  const config = getWebpackConfig({ entry, dest, env, options, optimize });
 
   const compiler = webpack(config);
 

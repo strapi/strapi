@@ -175,6 +175,11 @@ program
 
 program
   .command('build')
+  .option(
+    '--optimize',
+    'Build the Administration with assets optimization',
+    false
+  )
   .description('Builds the strapi admin app')
   .action(getLocalScript('build'));
 
