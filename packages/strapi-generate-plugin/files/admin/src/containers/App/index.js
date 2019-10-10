@@ -1,3 +1,44 @@
+/////////////////////////////////////////////////////
+// DISPLAY YOUR PLUGIN IN THE ADMINISTRATION PANEL //
+/////////////////////////////////////////////////////
+/*
+1. Check the installed plugin in your package.json you will need to require them manually
+2. Copy the following code in my-app/admin/src/plugins.js (don't forget to add the other installed plugins)
+
+```
+const injectReducer = require('./utils/injectReducer').default;
+const useInjectReducer = require('./utils/injectReducer').useInjectReducer;
+const injectSaga = require('./utils/injectSaga').default;
+const useInjectSaga = require('./utils/injectSaga').useInjectSaga;
+const { languages } = require('./i18n');
+
+window.strapi = Object.assign(window.strapi || {}, {
+  node: MODE || 'host',
+  env: NODE_ENV,
+  backendURL: BACKEND_URL === '/' ? window.location.origin : BACKEND_URL,
+  languages,
+  currentLanguage:
+    window.localStorage.getItem('strapi-admin-language') ||
+    window.navigator.language ||
+    window.navigator.userLanguage ||
+    'en',
+  injectReducer,
+  injectSaga,
+  useInjectReducer,
+  useInjectSaga,
+});
+
+module.exports = {
+  'strapi-plugin-users-permissions': require('../../plugins/strapi-plugin-users-permissions/admin/src')
+    .default,
+  // Add the other plugins here
+  // ...,
+  // Add your newly created plugin here (the path is different than the others)
+  'my-plugin': require('../../../plugins/my-plugin/admin/src').default,
+};
+```
+*/
+
 /**
  *
  * This component is the skeleton around the actual pages, and should only
@@ -6,66 +47,22 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { createStructuredSelector } from 'reselect';
 import { Switch, Route } from 'react-router-dom';
-import { bindActionCreators, compose } from 'redux';
-
+import { NotFound } from 'strapi-helper-plugin';
 // Utils
-import pluginId from 'pluginId';
-
+import pluginId from '../../pluginId';
 // Containers
-import HomePage from 'containers/HomePage';
-import NotFoundPage from 'containers/NotFoundPage';
-// When you're done studying the ExamplePage container, remove the following line and delete the ExamplePage container
-import ExamplePage from 'containers/ExamplePage';
+import HomePage from '../HomePage';
 
-import reducer from './reducer';
-
-class App extends React.Component {
-  // When you're done studying the ExamplePage container, remove the following lines and delete the ExamplePage container
-  componentDidMount() {
-    this.props.history.push(`/plugins/${pluginId}/example`);
-  }
-
-  render() {
-    return (
-      <div className={pluginId}>
-        <Switch>
-          <Route path={`/plugins/${pluginId}`} component={HomePage} exact />
-          {/* When you're done studying the ExamplePage container, remove the following line and delete the ExamplePage container  */}
-          <Route path={`/plugins/${pluginId}/example`} component={ExamplePage} exact />
-          <Route component={NotFoundPage} />
-        </Switch>
-      </div>
-    );
-  }
-}
-
-App.contextTypes = {
-  plugins: PropTypes.object,
-  updatePlugin: PropTypes.func,
-};
-
-App.propTypes = {
-  history: PropTypes.object.isRequired,
-};
-
-export function mapDispatchToProps(dispatch) {
-  return bindActionCreators(
-    {},
-    dispatch,
+const App = () => {
+  return (
+    <div className={pluginId}>
+      <Switch>
+        <Route path={`/plugins/${pluginId}`} component={HomePage} exact />
+        <Route component={NotFound} />
+      </Switch>
+    </div>
   );
-}
+};
 
-const mapStateToProps = createStructuredSelector({});
-
-// Wrap the component to inject dispatch and state into it
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-const withReducer = strapi.injectReducer({ key: 'global', reducer, pluginId });
-
-export default compose(
-  withReducer,
-  withConnect,
-)(App);
+export default App;
