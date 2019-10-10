@@ -19,9 +19,6 @@ const Ide = styled.div`
     > ul {
       padding-left: 20px;
       list-style: none;
-      > li {
-        list-style: none;
-      }
     }
   }
 `;

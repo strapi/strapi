@@ -8,8 +8,8 @@ const Overlay = styled.div`
   left: 0;
   z-index: 1040;
   &:before {
-    position: fixed;
     content: '';
+    position: fixed;
     top: 6rem;
     right: 0;
     bottom: 0;

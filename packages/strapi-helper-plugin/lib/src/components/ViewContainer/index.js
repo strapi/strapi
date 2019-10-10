@@ -29,10 +29,10 @@ const StyledViewContainer = styled.div`
     }
     .trash-btn-wrapper {
       position: relative;
-      width: 100%;
-      padding-top: 3.1rem;
       display: flex;
       justify-content: flex-end;
+      width: 100%;
+      padding-top: 3.1rem;
       > div {
         height: 30px;
         line-height: 30px;

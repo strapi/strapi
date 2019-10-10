@@ -12,18 +12,18 @@ const HeaderModal = styled.div`
   color: ${colors.black};
   font-weight: bold;
   section {
-    padding: 0 ${sizes.margin * 3}px;
     display: flex;
+    padding: 0 ${sizes.margin * 3}px;
     &:first-of-type {
-      background-color: ${colors.lightGrey};
-      font-size: 1.3rem;
       height: 59px;
+      font-size: 1.3rem;
+      background-color: ${colors.lightGrey};
     }
     &:not(:first-of-type) {
+      position: relative;
+      justify-content: space-between;
       height: 65px;
       font-size: 1.8rem;
-      justify-content: space-between;
-      position: relative;
       hr {
         position: absolute;
         left: ${sizes.margin * 3}px;

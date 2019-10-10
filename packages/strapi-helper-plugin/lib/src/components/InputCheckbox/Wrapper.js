@@ -9,7 +9,6 @@ const Wrapper = styled.div`
   p {
     margin-left: 1.2rem;
   }
-
   .disabled {
     cursor: not-allowed;
   }
