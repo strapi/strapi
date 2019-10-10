@@ -320,7 +320,7 @@ class PopUpForm extends React.Component {
         </HeaderModal>
         <form onSubmit={onSubmit}>
           <ModalForm>
-            <ModalBody>YOYO{this.renderForm()}</ModalBody>
+            <ModalBody>{this.renderForm()}</ModalBody>
           </ModalForm>
           <ModalFooter>
             <section>
