@@ -30,7 +30,7 @@
   "EditPage.notification.policies.error": "Beim Abruf von policies ist ein Fehler aufgetreten",
   "EditPage.notification.role.error": "Beim Abruf der Rolle ist ein Fehler aufgetreten",
   "EditPage.submit": "Speichern",
-  "Email.template.email_confirmation": "Betsätigung der E-Mail Adresse",
+  "Email.template.email_confirmation": "Bestätigung der E-Mail Adresse",
   "Email.template.reset_password": "Passwort zurücksetzen",
   "Email.template.success_register": "Anmeldung erfolgreich",
   "Email.template.validation_email": "Validierung der E-Mail-Adresse",
