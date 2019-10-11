@@ -32,8 +32,12 @@ const StyledButtonModalSuccess = styled(Button)`
     height: 7px;
   }
   &:hover,
-  &:active {
-    color: ${colors.green};
+  &:active,
+  &.btn-secondary:not(:disabled):not(.disabled):active,
+  &.btn-secondary:not(:disabled):not(.disabled):focus,
+  &.btn-secondary:not(:disabled):not(.disabled):focus:active,
+  &.btn-secondary:hover {
+    color: ${colors.green} !important;
     background-color: white;
     border: 0.1rem solid ${colors.green};
   }

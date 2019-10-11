@@ -31,41 +31,15 @@ const Wrapper = styled.div`
     font-size: 1.3rem;
     color: #333740 !important;
     line-height: 1.6rem;
-  }
 
-  .linkActive {
-    z-index: 10;
-    &:not(:first-child, :last-child) {
+    &.linkActive {
+      z-index: 10;
       background-color: #ffffff !important;
       font-weight: bold;
       text-decoration: none !important;
       box-shadow: 0 0 2px rgba(#dbdbdb, 0.5);
       border-top: 0.2rem solid #1c5de7;
     }
-  }
-
-  .linkActive:first-child {
-    background-color: #ffffff !important;
-    font-weight: bold;
-    text-decoration: none !important;
-    box-shadow: 0 0 2px rgba(#dbdbdb, 0.5);
-    border-top: 0.2rem solid #1c5de7;
-  }
-
-  .linkActive:last-child {
-    background-color: #ffffff !important;
-    font-weight: bold;
-    text-decoration: none !important;
-    box-shadow: 0 0 2px rgba(#dbdbdb, 0.5);
-    border-top: 0.2rem solid #1c5de7;
-  }
-
-  .linkActive:not(:first-child, :last-child) {
-    background-color: #ffffff !important;
-    font-weight: bold;
-    text-decoration: none !important;
-    box-shadow: 0 0 2px rgba(#dbdbdb, 0.5);
-    border-top: 0.2rem solid #1c5de7;
   }
 
   .linkText {
