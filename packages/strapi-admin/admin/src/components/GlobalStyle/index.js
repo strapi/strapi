@@ -28,6 +28,7 @@ const GlobalStyle = createGlobalStyle`
 
   .btn {
     font-size: 1.4rem;
+    padding: 0;
   }
 
   .cursor-pointer {

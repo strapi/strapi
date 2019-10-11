@@ -9,6 +9,10 @@ const StyledButtonSecondary = styled(Button)`
   padding-left: 1.5rem;
   padding-right: 1.5rem;
   cursor: pointer;
+  font-family: Lato;
+  color: #f64d0a;
+  border: 0.1rem solid #f64d0a;
+  border-radius: 3px;
   background-color: transparent;
   border: 0.1rem solid #f64d0a;
   color: #f64d0a;

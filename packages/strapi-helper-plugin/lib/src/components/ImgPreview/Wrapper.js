@@ -1,9 +1,10 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
-  height: 162px;
-  width: 100%;
   position: relative;
+  width: 100%;
+  height: 162px;
+  z-index: 1 !important;
   border-top-left-radius: 2px;
   border-top-right-radius: 2px;
   text-align: center;
@@ -12,7 +13,6 @@ const Wrapper = styled.div`
   background-position: center;
   background-repeat: no-repeat !important;
   white-space: nowrap;
-  z-index: 1 !important;
 
   > img {
     position: absolute;

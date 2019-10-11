@@ -24,10 +24,10 @@ const Wrapper = styled.div`
   }
 
   .icoContainer {
+    margin-right: 20px;
     padding-top: 0 !important;
     font-size: 4.2rem;
     color: #323740;
-    margin-right: 20px;
     line-height: 9.3rem;
   }
 `;
