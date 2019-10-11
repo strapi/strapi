@@ -46,6 +46,7 @@
     "is-wsl": "^2.0.0",
     "mini-css-extract-plugin": "^0.6.0",
     "moment": "^2.24.0",
+    "offline-plugin": "^5.0.7",
     "open-browser-webpack-plugin": "^0.0.5",
     "postcss-loader": "^3.0.0",
     "postcss-smart-import": "^0.7.6",
@@ -105,7 +106,6 @@
   "devDependencies": {
     "chokidar": "^3.1.1",
     "compression-webpack-plugin": "^3.0.0",
-    "offline-plugin": "^5.0.7",
     "webpack": "^4.40.1",
     "webpack-cli": "^3.3.2",
     "webpack-dev-server": "^3.4.1"
