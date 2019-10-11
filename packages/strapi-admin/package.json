@@ -84,6 +84,7 @@
     "video-react": "^0.13.2",
     "webpack": "^4.40.1",
     "webpackbar": "^3.2.0",
+    "webpack-dev-server": "^3.4.1",
     "yup": "^0.27.0"
   },
   "author": {
@@ -107,7 +108,6 @@
   "devDependencies": {
     "chokidar": "^3.1.1",
     "webpack": "^4.40.1",
-    "webpack-cli": "^3.3.2",
-    "webpack-dev-server": "^3.4.1"
+    "webpack-cli": "^3.3.2"
   }
 }
