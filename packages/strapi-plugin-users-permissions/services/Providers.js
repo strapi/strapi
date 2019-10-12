@@ -249,15 +249,36 @@ const getProfile = async (provider, query, callback) => {
             .query()
             .get('user')
             .auth(body.split('&')[0].split('=')[1])
-            .request((err, res, body) => {
+            .request((err, res, userbody) => {
               if (err) {
-                callback(err);
-              } else {
-                callback(null, {
-                  username: body.login,
-                  email: body.email,
+                return callback(err);
+              }
+
+              // This is the public email on the github profile
+              if (userbody.email) {
+                return callback(null, {
+                  username: userbody.login,
+                  email: userbody.email,
                 });
               }
+
+              // Get the email with Github's user/emails API
+              github
+                .query()
+                .get('user/emails')
+                .auth(body.split('&')[0].split('=')[1])
+                .request((err, res, emailsbody) => {
+                  if (err) {
+                    return callback(err);
+                  }
+
+                  return callback(null, {
+                    username: userbody.login,
+                    email: Array.isArray(emailsbody)
+                      ? emailsbody.find(email => email.primary === true).email
+                      : null,
+                  });
+                });
             });
         }
       );
