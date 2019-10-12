@@ -26,25 +26,18 @@ exports.connect = (provider, query) => {
 
   return new Promise((resolve, reject) => {
     if (!access_token) {
-      return reject(null, {
-        message: 'No access_token.',
-      });
+      return reject([null, { message: 'No access_token.' }]);
     }
 
     // Get the profile.
     getProfile(provider, query, async (err, profile) => {
       if (err) {
-        return reject(err);
+        return reject([null, err]);
       }
 
       // We need at least the mail.
       if (!profile.email) {
-        return reject([
-          {
-            message: 'Email was not available.',
-          },
-          null,
-        ]);
+        return reject([null, { message: 'Email was not available.' }]);
       }
 
       try {
@@ -336,19 +329,23 @@ const getProfile = async (provider, query, callback) => {
       const instagram = new Purest({
         provider: 'instagram',
         key: grant.instagram.key,
-        secret: grant.instagram.secret
+        secret: grant.instagram.secret,
       });
-    
-      instagram.query().get('users/self').qs({access_token}).request((err, res, body) => {
-        if (err) {
-          callback(err);
-        } else {
-          callback(null, {
-            username: body.data.username,
-            email: `${body.data.username}@strapi.io` // dummy email as Instagram does not provide user email
-          });
-        }
-      });
+
+      instagram
+        .query()
+        .get('users/self')
+        .qs({ access_token })
+        .request((err, res, body) => {
+          if (err) {
+            callback(err);
+          } else {
+            callback(null, {
+              username: body.data.username,
+              email: `${body.data.username}@strapi.io`, // dummy email as Instagram does not provide user email
+            });
+          }
+        });
       break;
     }
     default:
