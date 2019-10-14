@@ -1,6 +1,23 @@
 # Controllers
 
-See the [controllers' concepts](../concepts/concepts.md#controllers) for a simple overview.
+## Concept
+
+Controllers are JavaScript files which contain a set of methods called **actions** reached by the client according to the requested route. It means that every time a client requests the route, the action performs the business logic coded and sends back the response. They represent the _C_ in the _MVC_ pattern. In most cases, the controllers will contain the bulk of a project's business logic.
+
+```js
+module.exports = {
+  // GET /hello
+  index: async ctx => {
+    ctx.send('Hello World!');
+  },
+};
+```
+
+In this example, any time a web browser is pointed to the `/hello` URL on your app, the page will display the text: `Hello World!`.
+
+### Where are the controllers defined?
+
+The controllers are defined in each `./api/**/controllers/` folders. Every JavaScript file put in these folders will be loaded as a controller. They are also available through the `strapi.controllers` and `strapi.api.**.controllers` global variables. By convention, controllers' names should be Pascal-cased, so that every word in the file (include the first one) is capitalized `User.js`, `LegalEntity.js`.
 
 ## Core controllers
 
@@ -26,6 +43,10 @@ const { parseMultipartData, sanitizeEntity } = require('strapi-utils');
 - `parseMultipartData`: This function parses strapi's formData format.
 - `sanitizeEntity`: This function removes all private fields from the model and its relations.
 
+:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+
+::: tab "find" id="find"
+
 #### `find`
 
 ```js
@@ -49,6 +70,10 @@ module.exports = {
 };
 ```
 
+:::
+
+::: tab "findOne" id="findone"
+
 #### `findOne`
 
 ```js
@@ -65,6 +90,10 @@ module.exports = {
   },
 };
 ```
+
+:::
+
+::: tab "count" id="count"
 
 #### `count`
 
@@ -84,6 +113,10 @@ module.exports = {
   },
 };
 ```
+
+:::
+
+::: tab "create" id="create"
 
 #### `create`
 
@@ -107,6 +140,10 @@ module.exports = {
   },
 };
 ```
+
+:::
+
+::: tab "update" id="update"
 
 #### `update`
 
@@ -132,6 +169,10 @@ module.exports = {
 };
 ```
 
+:::
+
+::: tab "delete" id="delete"
+
 #### `delete`
 
 ```js
@@ -149,6 +190,10 @@ module.exports = {
 };
 ```
 
+:::
+
+::::
+
 ## Custom controllers
 
 You can also create custom controllers to build your own business logic and API endpoints.
@@ -163,7 +208,7 @@ There are two ways to create a controller:
 ### Adding Endpoints
 
 Each controller’s action must be an `async` function.
-Every action receives a `context` (`ctx`) object as first parameter containing the [request context](../guides/requests.md) and the [response context](../guides/responses.md).
+Every action receives a `context` (`ctx`) object as first parameter containing the [request context](./requests-responses.md) and the [response context](./requests-responses.md).
 
 ::: note
 Every action must be referenced by a route.
