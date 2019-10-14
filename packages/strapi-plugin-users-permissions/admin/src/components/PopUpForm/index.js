@@ -272,7 +272,11 @@ class PopUpForm extends React.Component {
             type={includes(value, 'object') ? 'text' : 'textarea'}
             validations={{ required: true }}
             value={get(values, value)}
-            inputStyle={!includes(value, 'object') ? { height: '16rem' } : {}}
+            inputStyle={
+              !includes(value, 'object')
+                ? { height: '16rem', marginBottom: '-0.8rem' }
+                : {}
+            }
           />
         ))}
       </>
