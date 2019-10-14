@@ -176,8 +176,8 @@ program
 program
   .command('build')
   .option(
-    '--optimize',
-    'Build the Administration with assets optimization',
+    '--no-optimization',
+    'Build the Administration without assets optimization',
     false
   )
   .description('Builds the strapi admin app')
