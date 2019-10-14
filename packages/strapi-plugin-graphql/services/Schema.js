@@ -232,7 +232,7 @@ const schemaBuilder = {
               [name, action] = resolverObj.resolver.split('.');
             } else if (
               _.has(resolverObj, ['resolver', 'handler']) &&
-              _.isString(resolverObj.handler)
+              _.isString(resolverObj.resolver.handler)
             ) {
               [name, action] = resolverObj.resolver.handler.split('.');
             } else {

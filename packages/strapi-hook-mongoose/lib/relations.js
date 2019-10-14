@@ -159,7 +159,9 @@ module.exports = {
                     return _.set(
                       acc,
                       current,
-                      property ? property.map(val => val[assocModel.primaryKey] || val) : property
+                      property
+                        ? property.map(val => val[assocModel.primaryKey] || val)
+                        : property
                     );
                   }
 
@@ -187,12 +189,14 @@ module.exports = {
                       return assocModel.updateMany(
                         {
                           [assocModel.primaryKey]: {
-                            $in: property ? property.map(
-                              val =>
-                                new mongoose.Types.ObjectId(
-                                  val[assocModel.primaryKey] || val
+                            $in: property
+                              ? property.map(
+                                  val =>
+                                    new mongoose.Types.ObjectId(
+                                      val[assocModel.primaryKey] || val
+                                    )
                                 )
-                            ) : property,
+                              : property,
                           },
                         },
                         {

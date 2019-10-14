@@ -33,9 +33,120 @@ By default, the administration panel is exposed via [http://localhost:1337/admin
 
 The panel will be available through [http://localhost:1337/dashboard](http://localhost:1337/dashboard) with the configurations above.
 
+---
+
 ### Development mode
 
-**_Currently not available_**
+To enable the front-end development mode you need to start your application using the `--watch-admin` flag.
+
+```bash
+cd my-app
+strapi develop --watch-admin
+```
+
+With this option you can do the following:
+
+#### Customize the `strapi-admin` package
+
+All files added in `my-app/admin/src/` will either be replaced or added
+
+**Example: Changing the available locales of your application**
+
+```bash
+# Create both the admin and admin/src/translations folders
+cd my-app && mkdir -p admin/src/translations
+# Change the available locales of the administration panel
+touch admin/src/i18n.js
+# Change the import and exports of the translations files
+touch admin/src/translations/index.js
+```
+
+**Path --** `my-app/admin/src/translations/index.js`
+
+```js
+import en from './en.json';
+import fr from './fr.json';
+
+const trads = {
+  en,
+  fr,
+};
+
+export default trads;
+```
+
+**Path --** `my-app/admin/src/i18n.js`
+
+```js
+import { addLocaleData } from 'react-intl';
+import { reduce } from 'lodash';
+import en from 'react-intl/locale-data/en';
+import fr from 'react-intl/locale-data/fr';
+import trads from './translations';
+
+// We dismiss pt-BR and zh-Hans locales since they are not supported by react-intl
+const locales = {
+  en,
+  fr,
+};
+const languages = Object.keys(trads);
+
+/**
+ * Dynamically generate `translationsMessages object`.
+ */
+const translationMessages = reduce(
+  languages,
+  (result, language) => {
+    const obj = result;
+    obj[language] = trads[language];
+
+    if (locales[language]) {
+      addLocaleData(locales[language]);
+    }
+
+    return obj;
+  },
+  {}
+);
+
+export { languages, translationMessages };
+```
+
+::: note
+With this modification only English and French will be available in your admin
+:::
+
+#### Customize a plugin
+
+Similarly to the back-end override system any file added in `my-app/extensions/<plugin-name>/admin/` will be copied and used instead of the original one (use with care).
+
+**Example: Changing the current WYSIWYG**
+
+```bash
+cd my-app/extensions
+# Create the content manager folder
+mkdir content-manager && cd content-manager
+# Create the admin folder
+mkdir -p admin/src
+# Create the components folder and the WysiwygWithErrors one
+cd admin/src && mkdir -p components/WysiwygWithErrors
+# Create the index.js so the original file is overridden
+touch components/WysiwygWithErrors/index.js
+```
+
+**Path --** `my-app/extensions/content-manager/admin/src/components/WysiwygWithErrors/index.js`
+
+```js
+import React from 'react';
+import MyNewWYSIWYG from 'my-awesome-lib';
+
+// This is a dummy example
+const WysiwygWithErrors = props => <MyNewWYSIWYG {...props} />;
+
+export default WysiwygWithErrors;
+```
+
+---
 
 ### Styles
 
@@ -44,6 +155,14 @@ The AdminUI package source can be easily found in `./node_modules/strapi-admin/s
 For example, to change the top-left displayed admin panel's color, `./node_modules/strapi-admin/admin/src/components/LeftMenuHeader/styles.scss` should be overriden by `./admin/src/components/LeftMenuHeader/styles.scss` with your own styles.
 
 Thus, you are replacing the files that would normally be in `node_modules/strapi-admin/admin/src` and directing them to `admin/src/some/file/path`.
+
+To apply your changes you need to rebuild your admin panel
+
+```
+npm run build
+```
+
+---
 
 ### Logo
 

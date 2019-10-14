@@ -1,10 +1,42 @@
-# File Upload
+# Upload
 
-::: note
-This feature requires the Upload plugin (installed by default).
-:::
+Thanks to the plugin `Upload`, you can upload any kind of files on your server or externals providers such as **AWS S3**.
 
-Thanks to the plugin `Upload`, you can upload any kind of files on your server or externals providers such as AWS S3.
+## Endpoints
+
+<style lang="stylus">
+#endpoint-table
+  table
+    display table
+    width 100%
+
+  tr
+    border none
+    &:nth-child(2n)
+      background-color white
+
+  tbody
+    tr
+      border-top 1px solid #dfe2e5
+
+  th, td
+    border none
+    padding 1.2em 1em
+    border-right 1px solid #dfe2e5
+    &:last-child
+      border-right none
+</style>
+
+<div id="endpoint-table">
+
+| Method | Path              | Description         |
+| :----- | :---------------- | :------------------ |
+| GET    | /upload/files     | Get a list of files |
+| GET    | /upload/files/:id | Get a specific file |
+| POST   | /upload           | Upload files        |
+| DELETE | /upload/files/:id | Delete a file       |
+
+</div>
 
 ## Upload files
 
@@ -256,7 +288,7 @@ $ npm install strapi-provider-upload-aws-s3@beta --save
 If the provider is not in the mono repo, you probably don't need `@beta` depending if the creator published it with this tag or not.
 :::
 
-Then, visit `/admin/plugins/upload/configurations/development` on your web browser and configure the provider.
+Then, visit [http://localhost:1337/admin/plugins/upload/configurations/development](http://localhost:1337/admin/plugins/upload/configurations/development) on your web browser and configure the provider.
 
 ## Create providers
 
