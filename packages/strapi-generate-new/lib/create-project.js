@@ -108,7 +108,7 @@ module.exports = async function createProject(
         console.error(line);
       });
 
-    await captureError(error);
+    await captureError(new Error('didNotInstallProjectDependencies'));
 
     stopProcess('Stopping installation');
   }

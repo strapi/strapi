@@ -9,6 +9,7 @@ const uuid = require('uuid/v4');
 const sentry = require('@sentry/node');
 
 const hasYarn = require('./utils/has-yarn');
+const checkRequirements = require('./utils/check-requirements');
 const { trackError, captureError } = require('./utils/usage');
 const parseDatabaseArguments = require('./utils/parse-db-arguments');
 const generateNew = require('./generate-new');
@@ -18,6 +19,8 @@ sentry.init({
 });
 
 module.exports = (projectDirectory, cliArguments) => {
+  checkRequirements();
+
   const rootPath = resolve(projectDirectory);
 
   const tmpPath = join(
@@ -78,7 +81,7 @@ module.exports = (projectDirectory, cliArguments) => {
 
   return generateNew(scope).catch(error => {
     console.error(error);
-    return captureError(error).then(() => {
+    return captureError(new Error('didNotCreateProject')).then(() => {
       return trackError({ scope, error }).then(() => {
         process.exit(1);
       });
