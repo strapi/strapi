@@ -10,7 +10,7 @@ const addSlash = require('../utils/addSlash');
 /**
  * `$ strapi build`
  */
-module.exports = async ({ optimize }) => {
+module.exports = async ({ optimization }) => {
   const dir = process.cwd();
   const env = process.env.NODE_ENV || 'development';
 
@@ -39,7 +39,7 @@ module.exports = async ({ optimize }) => {
       dir,
       // front end build env is always production for now
       env: 'production',
-      optimize: optimize || false,
+      optimize: optimization || false,
       options: {
         backend: adminBackend,
         publicPath: addSlash(adminPath),

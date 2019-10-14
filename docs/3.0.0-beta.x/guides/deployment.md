@@ -44,7 +44,7 @@ Before running your server in production you need to build your admin panel for 
 ::: tab "yarn" id="yarn-build"
 
 ```bash
-NODE_ENV=production yarn build --optimize
+NODE_ENV=production yarn build
 ```
 
 :::
@@ -52,7 +52,7 @@ NODE_ENV=production yarn build --optimize
 ::: tab "npm" id="npm-build"
 
 ```bash
-NODE_ENV=production npm run build --optimize
+NODE_ENV=production npm run build
 ```
 
 :::
