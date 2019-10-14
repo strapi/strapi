@@ -15,7 +15,6 @@ const alias = [
   'react-dnd-html5-backend',
   'react-dom',
   'react-helmet',
-  'react-loadable',
   'react-redux',
   'react-router',
   'react-router-dom',
