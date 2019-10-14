@@ -39,7 +39,7 @@ module.exports = async ({ optimization }) => {
       dir,
       // front end build env is always production for now
       env: 'production',
-      optimize: optimization || false,
+      optimize: optimization,
       options: {
         backend: adminBackend,
         publicPath: addSlash(adminPath),

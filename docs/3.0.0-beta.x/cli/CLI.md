@@ -72,7 +72,7 @@ Builds your admin panel.
 ```bash
 strapi build
 
-options: [--optimize]
+options: [--no-optimization]
 ```
 
 - **strapi build**<br/>
