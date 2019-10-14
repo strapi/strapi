@@ -105,6 +105,7 @@ const unlockApp = () => {
 
 window.strapi = Object.assign(window.strapi || {}, {
   node: MODE || 'host',
+  env: NODE_ENV,
   remoteURL,
   backendURL: BACKEND_URL === '/' ? window.location.origin : BACKEND_URL,
   notification: {
