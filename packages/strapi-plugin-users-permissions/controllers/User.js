@@ -246,7 +246,6 @@ module.exports = {
     const data = await strapi.plugins['users-permissions'].services.user.remove(
       { id }
     );
-
     ctx.send(data);
   },
 

@@ -39,7 +39,7 @@
   "error.validation.minSupMax": "Ne peut pas être plus grand",
   "error.validation.regex": "La valeur ne correspond pas au format attendu.",
   "error.validation.regex.name": "Le nom doit commencer par une lettre. Seulement les chiffres et les underscores sont autorisés après.",
-  "error.validation.regex.values": "Les valeurs ne peuvent pas commencer par un nombre ou un caractère spécial",
+  "error.validation.regex.values": "Les valeurs ne doivent pas commencer par un nombre ou un caractere special.",
   "error.validation.required": "Ce champ est obligatoire.",
   "form.attribute.info.no-space-allowed": "Les espaces ne sont pas autorisés pour les noms du champ",
   "form.attribute.item.appearance.description": "Sinon, il sera editable à partir d'une simple zone de texte",
