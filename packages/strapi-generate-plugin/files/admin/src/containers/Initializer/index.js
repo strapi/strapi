@@ -4,21 +4,20 @@
  *
  */
 
-import React from 'react';
+import { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import pluginId from '../../pluginId';
 
-class Initializer extends React.PureComponent {
-  // eslint-disable-line react/prefer-stateless-function
-  componentDidMount() {
-    // Emit the event 'pluginReady'
-    this.props.updatePlugin(pluginId, 'isReady', true);
-  }
+const Initializer = ({ updatePlugin }) => {
+  const ref = useRef();
+  ref.current = updatePlugin;
 
-  render() {
-    return null;
-  }
-}
+  useEffect(() => {
+    ref.current(pluginId, 'isReady', true);
+  }, []);
+
+  return null;
+};
 
 Initializer.propTypes = {
   updatePlugin: PropTypes.func.isRequired,

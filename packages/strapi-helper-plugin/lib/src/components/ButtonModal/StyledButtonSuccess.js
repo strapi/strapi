@@ -7,8 +7,8 @@ import colors from '../../assets/styles/colors';
 const StyledButtonModalSuccess = styled(Button)`
   position: relative;
   height: 3rem;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
+  padding-left: 1.5rem !important;
+  padding-right: 1.5rem !important;
   font-family: Lato;
   color: ${colors.green};
   border: 0.1rem solid ${colors.green};
@@ -32,8 +32,12 @@ const StyledButtonModalSuccess = styled(Button)`
     background-position: center;
   }
   &:hover,
-  &:active {
-    color: ${colors.green};
+  &:active,
+  &.btn-secondary:not(:disabled):not(.disabled):active,
+  &.btn-secondary:not(:disabled):not(.disabled):focus,
+  &.btn-secondary:not(:disabled):not(.disabled):focus:active,
+  &.btn-secondary:hover {
+    color: ${colors.green} !important;
     background-color: white;
     border: 0.1rem solid ${colors.green};
   }

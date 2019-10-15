@@ -10,38 +10,45 @@ const chokidar = require('chokidar');
 const getPkgPath = name =>
   path.dirname(require.resolve(`${name}/package.json`));
 
-async function createPluginsJs(plugins, dest) {
+async function createPluginsJs(plugins, localPlugins, dest) {
   const content = `
-    const injectReducer = require('./utils/injectReducer').default;
-    const injectSaga = require('./utils/injectSaga').default;
-    const useInjectReducer = require('./utils/injectReducer').useInjectReducer;
-    const useInjectSaga = require('./utils/injectSaga').useInjectSaga;
-    const { languages } = require('./i18n');
+const injectReducer = require('./utils/injectReducer').default;
+const injectSaga = require('./utils/injectSaga').default;
+const useInjectReducer = require('./utils/injectReducer').useInjectReducer;
+const useInjectSaga = require('./utils/injectSaga').useInjectSaga;
+const { languages } = require('./i18n');
 
-    window.strapi = Object.assign(window.strapi || {}, {
-      node: MODE || 'host',
-      backendURL: BACKEND_URL === '/' ? window.location.origin : BACKEND_URL,
-      languages,
-      currentLanguage:
-      window.localStorage.getItem('strapi-admin-language') ||
-      window.navigator.language ||
-      window.navigator.userLanguage ||
-      'en',
-      injectReducer,
-      injectSaga,
-      useInjectReducer,
-      useInjectSaga,
-    });
+window.strapi = Object.assign(window.strapi || {}, {
+  node: MODE || 'host',
+  backendURL: BACKEND_URL === '/' ? window.location.origin : BACKEND_URL,
+  languages,
+  currentLanguage:
+  window.localStorage.getItem('strapi-admin-language') ||
+  window.navigator.language ||
+  window.navigator.userLanguage ||
+  'en',
+  injectReducer,
+  injectSaga,
+  useInjectReducer,
+  useInjectSaga,
+});
 
-    module.exports = {
-      ${plugins
-        .map(name => {
-          const shortName = name.replace(/^strapi-plugin-/i, '');
-          const req = `require('../../plugins/${name}/admin/src').default`;
-          return `'${shortName}': ${req}`;
-        })
-        .join(',\n')}
-    }
+module.exports = {
+  ${plugins
+    .map(name => {
+      const shortName = name.replace(/^strapi-plugin-/i, '');
+      const req = `require('../../plugins/${name}/admin/src').default`;
+      return `'${shortName}': ${req},`;
+    })
+    .join('\n')}
+  ${localPlugins
+    .map(name => {
+      const shortName = name.replace(/^strapi-plugin-/i, '');
+      const req = `require('../../../plugins/${name}/admin/src').default`;
+      return `'${shortName}': ${req}`;
+    })
+    .join(',\n')}
+}
   `;
 
   return fs.writeFile(
@@ -98,6 +105,14 @@ async function createCacheDir(dir) {
       fs.existsSync(path.resolve(getPkgPath(dep), 'admin', 'src', 'index.js'))
   );
 
+  const localPluginsToCopy = fs
+    .readdirSync(path.join(dir, 'plugins'))
+    .filter(plugin =>
+      fs.existsSync(
+        path.resolve(dir, 'plugins', plugin, 'admin', 'src', 'index.js')
+      )
+    );
+
   // TODO: add logic to avoid copying files if not necessary
 
   // create .cache dir
@@ -110,7 +125,7 @@ async function createCacheDir(dir) {
   await Promise.all(pluginsToCopy.map(name => copyPlugin(name, cacheDir)));
 
   // create plugins.js with plugins requires
-  await createPluginsJs(pluginsToCopy, cacheDir);
+  await createPluginsJs(pluginsToCopy, localPluginsToCopy, cacheDir);
 
   // override admin code with user customizations
   if (fs.pathExistsSync(path.join(dir, 'admin'))) {
