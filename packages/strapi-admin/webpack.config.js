@@ -151,11 +151,16 @@ module.exports = ({
           test: /\.(jpg|png|gif|ico)$/,
           loaders: [
             require.resolve('file-loader'),
+            // Copied from react-boilerplate https://github.com/react-boilerplate/react-boilerplate
             {
               loader: require.resolve('image-webpack-loader'),
               query: {
                 mozjpeg: {
-                  progressive: true,
+                  enabled: false,
+                  // NOTE: mozjpeg is disabled as it causes errors in some Linux environments
+                  // Try enabling it in your environment by switching the config to:
+                  // enabled: true,
+                  // progressive: true,
                 },
                 gifsicle: {
                   interlaced: false,
