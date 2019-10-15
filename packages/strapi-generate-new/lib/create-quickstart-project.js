@@ -3,7 +3,7 @@
 const execa = require('execa');
 
 const stopProcess = require('./utils/stop-process');
-const { trackUsage, captureError } = require('./utils/usage');
+const { trackUsage, captureStderr } = require('./utils/usage');
 const defaultConfigs = require('./utils/db-configs.js');
 const clientDependencies = require('./utils/db-client-dependencies.js');
 const createProject = require('./create-project');
@@ -43,16 +43,8 @@ module.exports = async function createQuickStartProject(scope) {
       error: error.stderr.slice(-1024),
     });
 
-    error.stderr
-      .trim()
-      .split('\n')
-      .forEach(line => {
-        console.error(line);
-      });
-
-    await captureError(new Error('didNotBuildAdmin'));
-
-    stopProcess('Stopping');
+    await captureStderr('didNotBuildAdmin', error);
+    process.exit(1);
   }
 
   console.log(`Running your Strapi application.`);
@@ -74,15 +66,7 @@ module.exports = async function createQuickStartProject(scope) {
       error: error.stderr.slice(-1024),
     });
 
-    error.stderr
-      .trim()
-      .split('\n')
-      .forEach(line => {
-        console.error(line);
-      });
-
-    await captureError(new Error('didNotStartServer'));
-
-    stopProcess('Stopping');
+    await captureStderr('didNotStartServer', error);
+    process.exit(1);
   }
 };

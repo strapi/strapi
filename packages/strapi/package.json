@@ -17,6 +17,7 @@
     "boom": "^7.3.0",
     "chalk": "^2.4.1",
     "chokidar": "^2.1.2",
+    "cli-table3": "^0.5.1",
     "cross-spawn": "^6.0.5",
     "delegates": "^1.0.0",
     "execa": "^1.0.0",
