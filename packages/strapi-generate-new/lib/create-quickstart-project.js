@@ -30,6 +30,17 @@ module.exports = async function createQuickStartProject(scope) {
       env: {
         FORCE_COLOR: 1,
       },
-    }).catch(error => captureError(error));
+    }).catch(error => {
+      if (error && error.stderr) {
+        (error.stderr || '')
+          .trim()
+          .split('\n')
+          .forEach(line => {
+            console.error(line);
+          });
+      }
+
+      return captureError(error);
+    });
   }
 };

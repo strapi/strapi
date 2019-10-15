@@ -46,8 +46,8 @@
       "configurable": false,
       "required": true
     },
-    "public_id": {
-      "type": "string",
+    "provider_metadata": {
+      "type": "json",
       "configurable": false
     },
     "related": {

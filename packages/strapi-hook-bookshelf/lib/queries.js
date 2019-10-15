@@ -547,7 +547,7 @@ const buildSearchQuery = (qb, model, params) => {
       const searchQuery = searchText.map(attribute =>
         _.toLower(attribute) === attribute
           ? `to_tsvector(${attribute})`
-          : `to_tsvector('${attribute}')`
+          : `to_tsvector("${attribute}")`
       );
 
       qb.orWhereRaw(`${searchQuery.join(' || ')} @@ plainto_tsquery(?)`, query);

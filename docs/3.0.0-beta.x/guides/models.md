@@ -424,7 +424,7 @@ xhr.send(
 
 The polymorphic relationships are the solution when you don't know which kind of model will be associated to your entry. A common use case is an `Image` model that can be associated to many others kind of models (Article, Product, User, etc).
 
-Refer to the [upload plugin](./upload.md) polymorphic implementation for more information.
+Refer to the [upload plugin](../plugins/upload.md) polymorphic implementation for more information.
 
 #### Single vs Many
 

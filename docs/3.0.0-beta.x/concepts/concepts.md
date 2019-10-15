@@ -3,7 +3,7 @@
 - Table of contents
   - [Files structure](#files-structure)
   - [Controllers](#controllers)
-  - [Filters](#filters)
+  - [Parameters](#parameters)
   - [Models](#models)
     - [Attributes](#attributes)
     - [Relations](#relations)
@@ -102,7 +102,7 @@ Please refer to the [controllers' guide](../guides/controllers.md) for more info
 Parameters are a handy way to request data according to generic parameters. It makes filtering, sorting and paginating easy and reusable (eg. `GET /users?_limit=30&name=John`).
 
 ::: note
-Please refer to the [parameters' guide](../guides/parameters.md) for more information.
+Please refer to the [parameters' guide](../content-api/parameters.md) for more information.
 :::
 
 ---

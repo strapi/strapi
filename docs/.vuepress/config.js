@@ -92,20 +92,22 @@ module.exports = {
         },
         {
           collapsable: true,
+          title: '📄 Content API',
+          children: [
+            '/3.0.0-beta.x/content-api/api-endpoints',
+            '/3.0.0-beta.x/content-api/parameters',
+          ],
+        },
+        {
+          collapsable: true,
           title: '💡 Guides',
           children: [
             '/3.0.0-beta.x/concepts/concepts',
-            '/3.0.0-beta.x/guides/api-endpoints',
-            '/3.0.0-beta.x/guides/api-documentation',
-            '/3.0.0-beta.x/guides/authentication',
             '/3.0.0-beta.x/configurations/configurations',
             '/3.0.0-beta.x/guides/controllers',
             '/3.0.0-beta.x/guides/databases',
             '/3.0.0-beta.x/guides/deployment',
-            '/3.0.0-beta.x/guides/email',
-            '/3.0.0-beta.x/guides/upload',
             '/3.0.0-beta.x/guides/parameters',
-            '/3.0.0-beta.x/guides/graphql',
             '/3.0.0-beta.x/guides/i18n',
             '/3.0.0-beta.x/guides/models',
             '/3.0.0-beta.x/guides/policies',
@@ -131,6 +133,17 @@ module.exports = {
         },
         {
           collapsable: true,
+          title: '📦 Plugins',
+          children: [
+            '/3.0.0-beta.x/plugins/users-permissions',
+            '/3.0.0-beta.x/plugins/documentation',
+            '/3.0.0-beta.x/plugins/email',
+            '/3.0.0-beta.x/plugins/upload',
+            '/3.0.0-beta.x/plugins/graphql',
+          ],
+        },
+        {
+          collapsable: true,
           title: '🔌 Local plugins',
           children: [
             '/3.0.0-beta.x/plugin-development/quick-start',
@@ -148,8 +161,8 @@ module.exports = {
         },
         {
           collapsable: true,
-          title: '🏗 API Reference',
-          children: ['/3.0.0-beta.x/api-reference/reference'],
+          title: '🏗 Global strapi',
+          children: ['/3.0.0-beta.x/global-strapi/reference'],
         },
         {
           collapsable: false,
