@@ -302,8 +302,15 @@ module.exports = {
     // Set the property code.
     user.resetPasswordToken = resetPasswordToken;
 
-    const settings = (await pluginStore.get({ key: 'email' }))['reset_password']
-      .options;
+    const settings = await pluginStore
+      .get({ key: 'email' })
+      .then(storeEmail => {
+        try {
+          return storeEmail['reset_password'].options;
+        } catch (error) {
+          return {};
+        }
+      });
 
     const advanced = await pluginStore.get({
       key: 'advanced',
@@ -486,14 +493,15 @@ module.exports = {
       );
 
       if (settings.email_confirmation) {
-        const storeEmail =
-          (await pluginStore.get({
-            key: 'email',
-          })) || {};
-
-        const settings = storeEmail['email_confirmation']
-          ? storeEmail['email_confirmation'].options
-          : {};
+        const settings = await pluginStore
+          .get({ key: 'email' })
+          .then(storeEmail => {
+            try {
+              return storeEmail['email_confirmation'].options;
+            } catch (error) {
+              return {};
+            }
+          });
 
         settings.message = await strapi.plugins[
           'users-permissions'
