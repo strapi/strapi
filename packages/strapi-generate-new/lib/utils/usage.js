@@ -4,7 +4,7 @@ const os = require('os');
 const fetch = require('node-fetch');
 const sentry = require('@sentry/node');
 
-async function captureError(error) {
+async function captureException(error) {
   try {
     sentry.captureException(error);
     await sentry.flush();
@@ -12,6 +12,33 @@ async function captureError(error) {
     /** ignore errors*/
     return Promise.resolve();
   }
+}
+
+async function captureError(message) {
+  try {
+    sentry.captureMessage(message, 'error');
+    await sentry.flush();
+  } catch (err) {
+    /** ignore errors*/
+    return Promise.resolve();
+  }
+}
+
+function captureStderr(name, error) {
+  if (error && error.stderr && error.stderr.trim() !== '') {
+    error.stderr
+      .trim()
+      .split('\n')
+      .forEach(line => {
+        sentry.addBreadcrumb({
+          category: 'stderr',
+          message: line,
+          level: 'error',
+        });
+      });
+  }
+
+  return captureError(name);
 }
 
 function trackEvent(event, body) {
@@ -74,5 +101,6 @@ function trackUsage({ event, scope, error }) {
 module.exports = {
   trackError,
   trackUsage,
-  captureError,
+  captureException,
+  captureStderr,
 };

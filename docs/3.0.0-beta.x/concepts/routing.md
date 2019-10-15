@@ -1,6 +1,10 @@
 # Routing
 
-See the [routing's concept](../concepts/concepts.md#routing) for details.
+## Concept
+
+`./api/**/config/routes.json` files define all available endpoints for the clients.
+
+By default Strapi generate endpoints for all your Content Type. More information in the [Content API](../content-api/api-endpoints.md) documentation.
 
 ## How to create a route?
 
@@ -14,12 +18,18 @@ You have to edit the `routes.json` file in one of your APIs folders (`./api/**/c
     {
       "method": "GET",
       "path": "/restaurants",
-      "handler": "Restaurant.find"
+      "handler": "Restaurant.find",
+      "config": {
+        "policies": []
+      }
     },
     {
       "method": ["POST", "PUT"],
       "path": "/restaurants/:id",
-      "handler": "Restaurant.createOrUpdate"
+      "handler": "Restaurant.createOrUpdate",
+      "config": {
+        "policies": []
+      }
     },
     {
       "method": "POST",
@@ -37,7 +47,7 @@ You have to edit the `routes.json` file in one of your APIs folders (`./api/**/c
 - `path` (string): URL starting with `/` (ex: `/restaurants`)
 - `handler` (string): Action to executed when the route is hit following this syntax `<Controller>.<action>`
 - `config`
-  - `policies` (array): Array of policies names or path ([see more](../guides/policies.md))
+  - `policies` (array): Array of policies names or path ([see more](./policies.md))
   - `prefix` (string): Set a prefix to this route. Also, it will be loaded into the main router (useful feature for plugin)
 
 ## Dynamic parameters
@@ -50,12 +60,18 @@ The router used by Strapi allows you to create dynamic routes where you can use 
     {
       "method": "GET",
       "path": "/restaurants/:category/:id",
-      "handler": "Restaurant.findOneByCategory"
+      "handler": "Restaurant.findOneByCategory",
+      "config": {
+        "policies": []
+      }
     },
     {
       "method": "GET",
       "path": "/restaurants/:region(\\d{2}|\\d{3})/:id", // Only match when the first parameter contains 2 or 3 digits.
-      "handler": "Restaurant.findOneByRegion"
+      "handler": "Restaurant.findOneByRegion",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }
@@ -71,7 +87,10 @@ By default, the main route of the server `/` is pointed to the `/public/index.ht
     {
       "method": "GET",
       "path": "/",
-      "handler": "Controller.name"
+      "handler": "Controller.name",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }

@@ -9,15 +9,13 @@ const chalk = require('chalk');
 const inquirer = require('inquirer');
 const fse = require('fs-extra');
 
-const { trackError, trackUsage } = require('./utils/usage');
+const { trackUsage } = require('./utils/usage');
 const stopProcess = require('./utils/stop-process');
 const createCLIDatabaseProject = require('./create-cli-db-project');
 const createCustomizeProject = require('./create-customized-project');
 const createQuickStartProject = require('./create-quickstart-project');
 
 module.exports = async scope => {
-  await trackUsage({ event: 'willCreateProject', scope });
-
   const hasDatabaseConfig = Boolean(scope.database);
 
   // check rootPath is empty
@@ -25,8 +23,6 @@ module.exports = async scope => {
     const stat = await fse.stat(scope.rootPath);
 
     if (!stat.isDirectory()) {
-      await trackError({ scope, error: 'Path is not a directory' });
-
       stopProcess(
         `⛔️ ${chalk.green(
           scope.rootPath
@@ -36,7 +32,6 @@ module.exports = async scope => {
 
     const files = await fse.readdir(scope.rootPath);
     if (files.length > 1) {
-      await trackError({ scope, error: 'Directory is not empty' });
       stopProcess(
         `⛔️ You can only create a Strapi app in an empty directory.\nMake sure ${chalk.green(
           scope.rootPath
@@ -44,6 +39,8 @@ module.exports = async scope => {
       );
     }
   }
+
+  await trackUsage({ event: 'willCreateProject', scope });
 
   // if database config is provided don't test the connection and create the project directly
   if (hasDatabaseConfig) {

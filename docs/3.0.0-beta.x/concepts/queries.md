@@ -8,38 +8,9 @@ These queries handle for you specific Strapi features like `groups`, `filters` a
 
 ## API Reference
 
-### `findOne`
+:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
 
-This method returns the first entry matching some basic params.
-You can also pass a populate option to specify which relations you want to be populated.
-
-#### Examples
-
-**Find one by id**:
-
-```js
-strapi.query('restaurant').findOne({ id: 1 });
-```
-
-**Find one by name**:
-
-```js
-strapi.query('restaurant').findOne({ name: 'restaurant name' });
-```
-
-**Find one by name and creation_date**:
-
-```js
-strapi
-  .query('restaurant')
-  .findOne({ name: 'restaurant name', date: '2019-01-01T00:00:00Z' });
-```
-
-**Find one by id and populate a relation**
-
-```js
-strapi.query('restaurant').findOne({ id: 1 }, ['category', 'category.name']);
-```
+::: tab "find" id="find"
 
 ### `find`
 
@@ -76,6 +47,47 @@ strapi
   .find({ id_nin: [1], _start: 10 }, ['category', 'category.name']);
 ```
 
+:::
+
+::: tab "findOne" id="findone"
+
+### `findOne`
+
+This method returns the first entry matching some basic params.
+You can also pass a populate option to specify which relations you want to be populated.
+
+#### Examples
+
+**Find one by id**:
+
+```js
+strapi.query('restaurant').findOne({ id: 1 });
+```
+
+**Find one by name**:
+
+```js
+strapi.query('restaurant').findOne({ name: 'restaurant name' });
+```
+
+**Find one by name and creation_date**:
+
+```js
+strapi
+  .query('restaurant')
+  .findOne({ name: 'restaurant name', date: '2019-01-01T00:00:00Z' });
+```
+
+**Find one by id and populate a relation**
+
+```js
+strapi.query('restaurant').findOne({ id: 1 }, ['category', 'category.name']);
+```
+
+:::
+
+::: tab "create" id="create"
+
 ### `create`
 
 Creates an entry in the database and returns the entry.
@@ -104,6 +116,10 @@ strapi.query('restaurant').create({
   reviews: [1, 2, 3],
 });
 ```
+
+:::
+
+::: tab "update" id="update"
 
 ### `update`
 
@@ -180,6 +196,10 @@ strapi.query('restaurant').update(
 );
 ```
 
+:::
+
+::: tab "delete" id="delete"
+
 ### `delete`
 
 Deletes and entry and return its value before deletion.
@@ -198,6 +218,10 @@ strapi.query('restaurant').delete({ id: 1 });
 ```js
 strapi.query('restaurant').delete({ district: '_18th' });
 ```
+
+:::
+
+::: tab "count" id="count"
 
 ### `count`
 
@@ -223,6 +247,10 @@ strapi.query('restaurant').count({ name_contains: 'food' });
 strapi.query('restaurant').count({ date_lt: '2019-08-01T00:00:00Z' });
 ```
 
+:::
+
+::: tab "search" id="search"
+
 ### `search`
 
 Returns entries based on a search on all fields allowing it. (this feature will return all entries on sqlite).
@@ -245,6 +273,10 @@ strapi
   .search({ _q: 'my search query', _limit: 100, _sort: 'date:desc' });
 ```
 
+:::
+
+::: tab "countSearch" id="countsearch"
+
 ### `countSearch`
 
 Returns the total count of entries based on a search. (this feature will return all entries on sqlite).
@@ -254,6 +286,10 @@ Returns the total count of entries based on a search. (this feature will return 
 ```js
 strapi.query('restaurant').countSearch({ _q: 'my search query' });
 ```
+
+:::
+
+::::
 
 ## Custom Queries
 
@@ -266,6 +302,10 @@ strapi.query(modelName, plugin).model;
 ```
 
 Then you can run any queries available on the model. You should refer to the specific ORM documentation for more details:
+
+:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+
+::: tab "Bookshelf" id="bookshelf"
 
 ### Bookshelf
 
@@ -284,6 +324,10 @@ const result = await strapi
 const fields = result.toJSON();
 ```
 
+:::
+
+::: tab "Mongoose" id="mongoose"
+
 ### Mongoose
 
 Documentation: [https://mongoosejs.com/](https://mongoosejs.com/)
@@ -297,3 +341,7 @@ const result = strapi.query('restaurant').model.find({
 
 const fields = result.toObject();
 ```
+
+:::
+
+::::

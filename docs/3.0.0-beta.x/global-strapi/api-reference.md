@@ -1,4 +1,4 @@
-# Reference
+# API reference
 
 - strapi
   - [.admin](#strapi-admin)
@@ -73,7 +73,7 @@ Returns an object of plugins available within the project. Each plugin object co
 ## strapi.query
 
 This utility function allows to bind models with query functions specific to each ORM (e.g: `mongoose` or `bookshelf`).
-For more details, see the [Queries section](../guides/queries.md).
+For more details, see the [Queries section](../concepts/queries.md).
 
 ## strapi.reload
 

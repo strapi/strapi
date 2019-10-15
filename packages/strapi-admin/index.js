@@ -201,7 +201,7 @@ async function watchAdmin({ dir, port, options }) {
     clientLogLevel: 'silent',
     hot: true,
     quiet: true,
-    open: true, 
+    open: true,
     publicPath: options.publicPath,
     historyApiFallback: {
       index: options.publicPath,
