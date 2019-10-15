@@ -1,6 +1,30 @@
 # Policies
 
-See the [policies' concepts](../concepts/concepts.md#policies) for details.
+## Concept
+
+Policies are functions which have the ability to execute specific logic on each request before it reaches the controller's action. They are mostly used for securing business logic easily.
+Each route of the project can be associated to an array of policies. For example, you can create a policy named `isAdmin`, which obviously checks that the request is sent by an admin user, and use it for critical routes.
+
+Policies can be:
+
+- `global`: so they can be used within the entire project.
+- `scoped`: used by single API or plugin.
+
+### Where are the policies defined?
+
+The API and plugins policies (scoped) are defined in each `./api/**/config/policies/` folders and plugins. They are respectively exposed through `strapi.api.**.config.policies` and `strapi.plugins.**.config.policies`. The global policies are defined at `./config/policies/` and accessible via `strapi.config.policies`.
+
+### Global policies
+
+Global policies are reusable through the entire app.
+
+### Scoped policies
+
+A policy defined in an API or plugin is usable only from this API or plugin. You don't need any prefix to use it.
+
+### Plugin policies
+
+Plugin policies are usable from any app API.
 
 ## How to create a policy?
 
@@ -30,17 +54,15 @@ You can access to any controllers, services or models thanks to the global varia
 
 ## Usage
 
-To apply policies to a route, you need to associate an array of policies to it. As explained in the [policies' concepts](../concepts/concepts.md#policies), there are two kinds of policies: global or scoped.
+To apply policies to a route, you need to associate an array of policies to it. There are two kinds of policies: global or scoped.
 
 ### Global policies
-
-Refer to the [concept](../concepts/concepts.md#policies) for details.
 
 The global policies can be associated to any routes in your project.
 
 **Path —** `./api/restaurant/routes.json`.
 
-```js
+```json
 {
   "routes": [
     {
@@ -48,9 +70,7 @@ The global policies can be associated to any routes in your project.
       "path": "/restaurants",
       "handler": "Restaurant.find",
       "config": {
-        "policies": [
-          "global.isAuthenticated"
-        ]
+        "policies": ["global.isAuthenticated"]
       }
     }
   ]
@@ -65,11 +85,11 @@ You can put as much policy you want in this array. However be careful about the 
 
 ### Plugins policies
 
-Plugins can add and expose policies into your app. For example, the plugin `Auth` (COMING SOON) comes with several useful policies to ensure that the user is well authenticated or has the rights to perform an action.
+Plugins can add and expose policies into your app. For example, the plugin **Users & Permissions** comes with useful policies to ensure that the user is well authenticated or has the rights to perform an action.
 
 **Path —** `./api/restaurant/config/routes.json`.
 
-```js
+```json
 {
   "routes": [
     {
@@ -77,9 +97,7 @@ Plugins can add and expose policies into your app. For example, the plugin `Auth
       "path": "/restaurants",
       "handler": "Restaurant.find",
       "config": {
-        "policies": [
-          "plugins.users-permissions.isAuthenticated"
-        ]
+        "policies": ["plugins.users-permissions.isAuthenticated"]
       }
     }
   ]
@@ -107,7 +125,7 @@ module.exports = async (ctx, next) => {
 
 **Path —** `./api/restaurant/config/routes.json`.
 
-```js
+```json
 {
   "routes": [
     {
@@ -115,9 +133,7 @@ module.exports = async (ctx, next) => {
       "path": "/restaurants",
       "handler": "Restaurant.find",
       "config": {
-        "policies": [
-          "isAdmin"
-        ]
+        "policies": ["isAdmin"]
       }
     }
   ]

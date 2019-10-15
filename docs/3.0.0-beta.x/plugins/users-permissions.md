@@ -383,6 +383,26 @@ Add the language translation in `packages/strapi-plugin-users-permissions/admin/
 
 These two change will set up the popup message that appears in the UI. That's it, now you should be able to use your new provider.
 
-## Email templates
+## Templating emails
 
-[See the documentation on GitHub](https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-users-permissions/docs/email-templates.md)
+By default, this plugin comes with only one template (reset password) for the moment. More templates will come later. The templates use Lodash' template() method to populate the variables.
+
+You can update these template in the **Email Templates** tab in the admin panel.
+
+### Reset Password
+
+- `USER` (object)
+  - `username`
+  - `email`
+  - ...and every other fields that you added manually in the model.
+- `TOKEN` corresponds to the token generated to be able to reset the password.
+- `URL` is the link where the user will be redirected after clicking on it in the email.
+
+### Email address confirmation
+
+- `USER` (object)
+  - `username`
+  - `email`
+  - ...and every other fields that you added manually in the model.
+- `CODE` corresponds to the CODE generated to be able confirm the user email.
+- `URL` is the Strapi backend URL that confirm the code (by default `/auth/email-confirmation`).
