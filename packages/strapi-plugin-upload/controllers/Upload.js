@@ -179,7 +179,12 @@ module.exports = {
     );
 
     if (!data) {
-      return ctx.notFound('file.notFound');
+      const response = {
+        statusCode: 404,
+        error: 'File not found',
+        message: 'The requested resource does not exist.',
+      };
+      return ctx.send(response);
     }
 
     // if is local server upload, add backend host as prefix
