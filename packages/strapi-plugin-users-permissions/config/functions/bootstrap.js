@@ -158,6 +158,7 @@ module.exports = async () => {
       allow_register: true,
       email_confirmation: false,
       email_confirmation_redirection: `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}/admin`,
+      email_reset_password: `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}/admin`,
       default_role: 'authenticated',
     };
 
