@@ -1,4 +1,4 @@
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { Button } from 'strapi-helper-plugin';
 
 import RemoveIcon from '../../assets/images/icon-cross-blue.svg';
@@ -38,158 +38,6 @@ const Img = styled.img`
   margin: auto;
   margin-right: 0px;
   font-size: 12px;
-`;
-
-const DropDownWrapper = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  font-family: Lato;
-  margin-top: -2px;
-  -webkit-font-smoothing: antialiased;
-
-  > div {
-    height: 30px;
-
-    > button {
-      padding: 0 10px;
-
-      &:hover {
-        cursor: pointer;
-      }
-
-      ${({ isOpen }) => {
-        if (isOpen) {
-          return css`
-            background: #e6f0fb;
-            border: 1px solid #aed4fb !important;
-            border-radius: 2px;
-            border-bottom-right-radius: 0 !important;
-            border-bottom-left-radius: 0 !important;
-            border-top-right-radius: 2px !important;
-
-            &:before {
-              content: '\f0db';
-              font-family: FontAwesome;
-              color: #007eff;
-            }
-
-            &:after {
-              content: '\f0d7';
-              display: inline-block;
-              margin-top: -1px;
-              margin-left: 10px;
-              font-family: FontAwesome;
-              color: #007eff;
-              transform: rotateX(180deg);
-              transition: transform 0.3s ease-out;
-            }
-
-            &:hover,
-            :active,
-            :focus {
-              background: #e6f0fb;
-              border: 1px solid #aed4fb;
-            }
-          `;
-        }
-
-        return css`
-          background: #ffffff !important;
-          border: 1px solid #e3e9f3;
-          border-radius: 2px !important;
-          font-size: 1.4rem;
-
-          &:before {
-            content: '\f0db';
-            font-family: FontAwesome;
-            color: #323740;
-          }
-          &:after {
-            content: '\f0d7';
-            display: inline-block;
-            margin-top: -1px;
-            margin-left: 10px;
-            font-family: FontAwesome;
-            color: #323740;
-            transition: transform 0.3s ease-out;
-          }
-          &:hover,
-          :focus,
-          :active {
-            background: #ffffff !important;
-            border: 1px solid #e3e9f3;
-          }
-        `;
-      }}
-    }
-
-    button {
-      &:focus {
-        outline: 0;
-      }
-    }
-
-    > div {
-      min-width: 230px;
-      top: 28px !important;
-      left: 53px !important;
-      padding-top: 9px;
-      padding-bottom: 5px !important;
-      border-top-right-radius: 0;
-      border: 1px solid #e3e9f3;
-      box-shadow: 0px 2px 4px rgba(227, 233, 243, 0.5);
-
-      ${({ isOpen }) => {
-        if (isOpen) {
-          return css`
-            border-top-color: #aed4fb !important;
-            border-top-right-radius: 0;
-          `;
-        }
-      }}
-
-      > button {
-        &:active,
-        :focus {
-          background-color: #f7f7f9 !important;
-          color: #333740;
-          font-weight: 500;
-        }
-
-        &:hover {
-          cursor: pointer;
-        }
-
-        &:not(:first-child) {
-          padding: 0;
-          padding-top: 9px;
-        }
-
-        &:first-child {
-          margin-top: 2px;
-          margin-bottom: 2px;
-          font-weight: 600;
-          font-size: 1.3rem;
-
-          &:hover {
-            background-color: #ffffff !important;
-          }
-          > div {
-            > span:last-child {
-              color: #007eff;
-              font-weight: 400;
-              cursor: pointer;
-            }
-          }
-        }
-
-        label {
-          width: 100%;
-          outline: none;
-        }
-      }
-    }
-  }
 `;
 
 const FooterWrapper = styled.div`
@@ -271,7 +119,6 @@ const Remove = styled.span`
 
 export {
   AddFilterCta,
-  DropDownWrapper,
   FooterWrapper,
   Img,
   Label,

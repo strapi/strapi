@@ -5,12 +5,6 @@ import { bindActionCreators, compose } from 'redux';
 import { capitalize, get, sortBy } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import {
-  ButtonDropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
-} from 'reactstrap';
-import {
   PluginHeader,
   PopUpWarning,
   getQueryParameters,
@@ -22,14 +16,13 @@ import FilterLogo from '../../assets/images/icon_filter.png';
 import Container from '../../components/Container';
 import CustomTable from '../../components/CustomTable';
 import FilterPicker from '../../components/FilterPicker';
-import InputCheckbox from '../../components/InputCheckbox';
 import Search from '../../components/Search';
 import {
   generateFiltersFromSearch,
   generateSearchFromFilters,
 } from '../../utils/search';
 import { onChangeListLabels, resetListLabels } from '../Main/actions';
-import { AddFilterCta, DropDownWrapper, Img, Wrapper } from './components';
+import { AddFilterCta, Img, Wrapper } from './components';
 import Filter from './Filter';
 import Footer from './Footer';
 import {
@@ -324,55 +317,13 @@ function ListView({
               <div className="col-2">
                 <DisplayedFieldsDropdown
                   isOpen={isLabelPickerOpen}
+                  items={getAllLabels()}
+                  onChange={handleChangeListLabels}
+                  onClickReset={() => {
+                    resetListLabels(slug);
+                  }}
                   toggle={toggleLabelPickerState}
                 />
-                {/* <DropDownWrapper style={{ marginBottom: '6px' }}>
-                  <ButtonDropdown
-                    isOpen={isLabelPickerOpen}
-                    toggle={toggleLabelPickerState}
-                    direction="left"
-                  >
-                    <DropdownToggle />
-                    <DropdownMenu>
-                      <FormattedMessage id="content-manager.containers.ListPage.displayedFields">
-                        {msg => (
-                          <DropdownItem
-                            onClick={() => {
-                              resetListLabels(slug);
-                            }}
-                          >
-                            <div
-                              style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                              }}
-                            >
-                              <span>{msg}</span>
-                              <FormattedMessage id="content-manager.containers.Edit.reset" />
-                            </div>
-                          </DropdownItem>
-                        )}
-                      </FormattedMessage>
-                      {getAllLabels().map(label => {
-                        return (
-                          <DropdownItem
-                            key={label.name}
-                            toggle={false}
-                            onClick={() => handleChangeListLabels(label)}
-                          >
-                            <div>
-                              <InputCheckbox
-                                onChange={() => handleChangeListLabels(label)}
-                                name={label.name}
-                                value={label.value}
-                              />
-                            </div>
-                          </DropdownItem>
-                        );
-                      })}
-                    </DropdownMenu>
-                  </ButtonDropdown>
-                </DropDownWrapper> */}
               </div>
             </div>
             <div className="row" style={{ paddingTop: '30px' }}>
