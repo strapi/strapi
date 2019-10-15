@@ -9,8 +9,18 @@ const Wrapper = styled.div`
   }
 
   .adminPageRightWrapper {
-    width: calc(100% - #{$left-menu-width});
+    width: ${props => `calc(100% - ${props.theme.main.sizes.leftMenu.width})`};
   }
 `;
+
+Wrapper.defaultProps = {
+  theme: {
+    main: {
+      sizes: {
+        leftMenu: {},
+      },
+    },
+  },
+};
 
 export default Wrapper;
