@@ -21,7 +21,7 @@ const formatError = error => [
 module.exports = {
   /**
    * Retrieve user records.
-   * @return {Object|Array}go
+   * @return {Object|Array}
    */
   async find(ctx, next, { populate } = {}) {
     let users;
