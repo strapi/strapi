@@ -1,6 +1,55 @@
 # Models
 
-See the [models' concepts](../concepts/concepts.md#models) for details.
+## Concept
+
+Models are a representation of the database's structure and lifecycle. They are split into two separate files. A JavaScript file that contains the lifecycle callbacks, and a JSON one that represents the data stored in the database and their format. The models also allow you to define the relationships between them.
+
+**Path —** `./api/user/models/User.js`.
+
+```js
+module.exports = {
+  // Before saving a value.
+  // Fired before an `insert` or `update` query.
+  beforeSave: next => {
+    // Use `this` to get your current object
+    next();
+  },
+
+  // After saving a value.
+  // Fired after an `insert` or `update` query.
+  afterSave: (doc, next) => {
+    next();
+  },
+
+  // ... and more
+};
+```
+
+**Path —** `./api/user/models/User.settings.json`.
+
+```json
+{
+  "connection": "default",
+  "info": {
+    "name": "user",
+    "description": "This represents the User Model"
+  },
+  "attributes": {
+    "firstname": {
+      "type": "string"
+    },
+    "lastname": {
+      "type": "string"
+    }
+  }
+}
+```
+
+In this example, there is a `User` model which contains two attributes `firstname` and `lastname`.
+
+### Where are the models defined?
+
+The models are defined in each `./api/**/models/` folder. Every JavaScript or JSON file in these folders will be loaded as a model. They are also available through the `strapi.models` and `strapi.api.**.models` global variables. Usable everywhere in the project, they contain the ORM model object that they are refer to. By convention, models' names should be written in lowercase.
 
 ## How to create a model?
 
@@ -19,13 +68,49 @@ This will create two files located at `./api/user/models`:
 when you create a new API using the CLI (`strapi generate:api <name>`), a model is automatically created.
 :::
 
-## Model Information
+## Model settings
+
+Additional settings can be set on models:
+
+- `connection` (string) - Connection's name which must be used. Default value: `default`.
+- `collectionName` (string) - Collection's name (or table's name) in which the data should be stored.
+- `globalId` (string) -Global variable name for this model (case-sensitive).
+
+**Path —** `User.settings.json`.
+
+```json
+{
+  "connection": "mongo",
+  "collectionName": "Users_v1",
+  "globalId": "Users",
+  "attributes": {}
+}
+```
+
+In this example, the model `User` will be accessible through the `Users` global variable. The data will be stored in the `Users_v1` collection or table and the model will use the `mongo` connection defined in `./config/environments/**/database.json`
+
+::: note
+The `connection` value can be changed whenever you want, but you should be aware that there is no automatic data migration process. Also if the new connection doesn't use the same ORM you will have to rewrite your queries.
+:::
+
+## Model information
 
 The info key on the model-json states information about the model. This information is used in the admin interface, when showing the model.
 
 - `name`: The name of the model, as shown in admin interface.
 - `description`: The description of the model.
 - `mainField`: Determines which model-attribute is shown when displaying the model.
+
+**Path —** `User.settings.json`.
+
+```json
+{
+  "info": {
+    "name": "user",
+    "description": ""
+  }
+}
+```
 
 ## Model options
 
@@ -34,7 +119,17 @@ The options key on the model-json states.
 - `idAttribute`: This tells the model which attribute to expect as the unique identifier for each database row (typically an auto-incrementing primary key named 'id'). _Only valid for strapi-hook-bookshelf_
 - `idAttributeType`: Data type of `idAttribute`, accepted list of value below. _Only valid for strapi-hook-bookshelf_
 - `timestamps`: This tells the model which attributes to use for timestamps. Accepts either `boolean` or `Array` of strings where first element is create date and second element is update date. Default value when set to `true` for Bookshelf is `["created_at", "updated_at"]` and for MongoDB is `["createdAt", "updatedAt"]`.
-- `uuid` : Boolean to enable UUID support on MySQL, you will need to set the `idAttributeType` to `uuid` as well and install the `bookshelf-uuid` package. To load the package you can see [this example](../configurations/configurations.md#bookshelf-mongoose).
+- `uuid` : Boolean to enable UUID support on MySQL, you will need to set the `idAttributeType` to `uuid` as well and install the `bookshelf-uuid` package. To load the package you can see [this example](./configurations.md#bookshelf-mongoose).
+
+**Path —** `User.settings.json`.
+
+```json
+{
+  "options": {
+    "timestamps": true
+  }
+}
+```
 
 ## Define the attributes
 
@@ -122,11 +217,15 @@ To improve the Developer eXperience when developing or using the administration 
 
 ## Relations
 
-Refer to the [relations concept](../concepts/concepts.md#relations) for more information about relations type.
+Relations let your create links (relations) between your Content Types.
 
-### One-way
+:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
 
-Refer to the [one-way concept](../concepts/concepts.md#one-way) for information.
+::: tab "One-Way" id="one-way"
+
+### One-Way
+
+One-way relationships are useful to link an entry to another. However, only one of the models can be queried with its populated items.
 
 #### Example
 
@@ -173,9 +272,13 @@ xhr.send(
 );
 ```
 
-### One-to-one
+:::
 
-Refer to the [one-to-one concept](../concepts/concepts.md#one-to-one) for information.
+::: tab "One-to-One" id="one-to-one"
+
+### One-to-One
+
+One-to-One relationships are usefull when you have one entity that could be linked to only one other entity. And vis versa.
 
 #### Example
 
@@ -250,9 +353,13 @@ xhr.send(
 );
 ```
 
-### One-to-many
+:::
 
-Refer to the [one-to-many concept](../concepts/concepts.md#one-to-many) for more information.
+::: tab "One-to-Many" id="one-to-many"
+
+### One-to-Many
+
+One-to-Many relationships are usefull when an entry can be liked to multiple entries of an other Content Type. And an entry of the other Content Type can be linked to only one entry.
 
 #### Example
 
@@ -337,9 +444,13 @@ xhr.send(
 );
 ```
 
-### Many-to-many
+:::
 
-Refer to the [many-to-many concept](../concepts/concepts.md#many-to-many).
+::: tab "Many-to-Many" id="many-to-many"
+
+### Many-to-Many
+
+One-to-Many relationships are usefull when an entry can be liked to multiple entries of an other Content Type. And an entry of the other Content Type can be linked to many entries.
 
 #### Example
 
@@ -359,9 +470,8 @@ A `product` can be related to many `categories`, so a `category` can have many `
 }
 ```
 
-::: note
+**NOTE**:
 (NoSQL databases only) The `dominant` key defines which table/collection should store the array that defines the relationship. Because there are no join tables in NoSQL, this key is required for NoSQL databases (ex: MongoDB).
-:::
 
 **Path —** `./api/category/models/Category.settings.json`.
 
@@ -420,19 +530,20 @@ xhr.send(
 );
 ```
 
+:::
+
+::: tab "Polymorphic" id="polymorphic"
+
 ### Polymorphic
 
 The polymorphic relationships are the solution when you don't know which kind of model will be associated to your entry. A common use case is an `Image` model that can be associated to many others kind of models (Article, Product, User, etc).
-
-Refer to the [upload plugin](../plugins/upload.md) polymorphic implementation for more information.
 
 #### Single vs Many
 
 Let's stay with our `Image` model which might belongs to **a single `Article` or `Product` entry**.
 
-::: note
+**NOTE**:
 In other words, it means that an `Image` entry can be associated to one entry. This entry can be a `Article` or `Product` entry.
-:::
 
 **Path —** `./api/image/models/Image.settings.json`.
 
@@ -449,9 +560,8 @@ In other words, it means that an `Image` entry can be associated to one entry. T
 
 Also, our `Image` model which might belongs to **many `Article` or `Product` entries**.
 
-::: note
+**NOTE**:
 In other words, it means that an `Article` entry can relate to the same image as a `Product` entry.
-:::
 
 **Path —** `./api/image/models/Image.settings.json`.
 
@@ -663,9 +773,8 @@ CREATE TABLE `image` (
 )
 ```
 
-::: note
+**NOTE**:
 If you've overridden the default table name given by Strapi by using the `collectionName` attribute. Use the value set in the `collectionName` to name the table.
-:::
 
 The second table will allow us to associate one or many others entries to the `Image` model. The name of the table is the same as the previous one with the suffix `_morph`.
 
@@ -694,41 +803,83 @@ CREATE TABLE `image_morph` (
 | 2   | 4738     | 58         | article      | avatar |
 | 3   | 1738     | 71         | article      | avatar |
 
+:::
+
+::::
+
 ## Lifecycle callbacks
 
-Refer to the [lifecycle callbacks concepts](../concepts/concepts.md#lifecycle-callbacks) for information.
+::: warning
+The life cycle functions are based on the ORM life cycle and not on the strapi request.
+We are currently woking on it to make it easier to use and understand.
+Please check [this issue](https://github.com/strapi/strapi/issues/1443) on GitHub.
+:::
 
 The following events are available by default:
 
-Callbacks on `save`:
+Callbacks on:
+
+:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+
+::: tab "save" id="save"
+
+`save`
 
 - beforeSave
 - afterSave
 
-Callbacks on `fetch`:
+:::
+
+::: tab "fetch" id="fetch"
+
+`fetch`
 
 - beforeFetch
 - afterFetch
 
-Callbacks on `fetchAll`:
+::: tab "fetchAll" id="fetchall"
+
+`fetchAll`
 
 - beforeFetchAll
 - afterFetchAll
 
-Callbacks on `create`:
+:::
+
+::: tab "create" id="create"
+
+`create`
 
 - beforeCreate
 - afterCreate
 
-Callbacks on `update`:
+:::
+
+::: tab "update" id="update"
+
+`update`
 
 - beforeUpdate
 - afterUpdate
 
-Callbacks on `destroy`:
+:::
+
+::: tab "destroy" id="destroy"
+
+destroy`
 
 - beforeDestroy
 - afterDestroy
+
+:::
+
+::::
+
+### Example
+
+:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+
+::: tab "Mongoose" id="mongoose"
 
 #### Mongoose
 
@@ -753,6 +904,10 @@ module.exports = {
 };
 ```
 
+:::
+
+::: tab "Bookshelf" id="bookshelf"
+
 #### Bookshelf
 
 Each of these functions receives a three parameters `model`, `attrs` and `options`. You have to return a Promise.
@@ -776,27 +931,6 @@ module.exports = {
 };
 ```
 
-## Settings
-
-Additional settings can be set on models:
-
-- `connection` (string) - Connection's name which must be used. Default value: `default`.
-- `collectionName` (string) - Collection's name (or table's name) in which the data should be stored.
-- `globalId` (string) -Global variable name for this model (case-sensitive).
-
-**Path —** `User.settings.json`.
-
-```json
-{
-  "connection": "mongo",
-  "collectionName": "Users_v1",
-  "globalId": "Users",
-  "attributes": {}
-}
-```
-
-In this example, the model `User` will be accessible through the `Users` global variable. The data will be stored in the `Users_v1` collection or table and the model will use the `mongo` connection defined in `./config/environments/**/database.json`
-
-::: note
-The `connection` value can be changed whenever you want, but you should be aware that there is no automatic data migration process. Also if the new connection doesn't use the same ORM you will have to rewrite your queries.
 :::
+
+:::::
