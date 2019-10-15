@@ -21,7 +21,7 @@ const formatError = error => [
 module.exports = {
   /**
    * Retrieve user records.
-   * @return {Object|Array}
+   * @return {Object|Array}go
    */
   async find(ctx, next, { populate } = {}) {
     let users;
@@ -246,7 +246,6 @@ module.exports = {
     const data = await strapi.plugins['users-permissions'].services.user.remove(
       { id }
     );
-
     ctx.send(data);
   },
 

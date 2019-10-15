@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const { ApolloError } = require('apollo-server-koa');
 
 module.exports = {
   type: {
@@ -185,6 +186,12 @@ module.exports = {
           await strapi.plugins['users-permissions'].controllers.auth.register(context);
           let output = context.body.toJSON ? context.body.toJSON() : context.body;
           
+          if (_.get(output, 'output.payload.statusCode', 200) !== 200) {
+            const statusCode = _.get(output, 'output.payload.statusCode', 400);
+            const message = _.get(output, 'output.payload.message', 'Bad Request');
+            throw new ApolloError(message, statusCode, _.omit(output, ['output']));
+          }
+          
           return {
             user: output.user || output, jwt: output.jwt
           };
@@ -200,6 +207,12 @@ module.exports = {
           await strapi.plugins['users-permissions'].controllers.auth.callback(context);
           let output = context.body.toJSON ? context.body.toJSON() : context.body;
 
+          if (_.get(output, 'output.payload.statusCode', 200) !== 200) {
+            const statusCode = _.get(output, 'output.payload.statusCode', 400);
+            const message = _.get(output, 'output.payload.message', 'Bad Request');
+            throw new ApolloError(message, statusCode, _.omit(output, ['output']));
+          }
+          
           return {
             user: output.user || output, jwt: output.jwt
           };
