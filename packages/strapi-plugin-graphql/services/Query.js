@@ -246,7 +246,8 @@ module.exports = {
       )
     );
 
-    return async (obj, options = {}, { context }) => {
+    return async (obj, options = {}, graphqlContext) => {
+      const { context } = graphqlContext;
       const _options = _.cloneDeep(options);
 
       // Hack to be able to handle permissions for each query.
@@ -295,7 +296,7 @@ module.exports = {
           return values && values.toJSON ? values.toJSON() : values;
         }
 
-        return resolver.call(null, obj, opts, ctx);
+        return resolver.call(null, obj, opts, graphqlContext);
       }
 
       // Resolver can be a promise.

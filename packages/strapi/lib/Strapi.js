@@ -56,7 +56,7 @@ const createQueryManager = () => {
  */
 
 class Strapi extends EventEmitter {
-  constructor({ dir, autoReload = false } = {}) {
+  constructor({ dir, autoReload = false, serveAdminPanel = true } = {}) {
     super();
 
     this.setMaxListeners(100);
@@ -92,6 +92,7 @@ class Strapi extends EventEmitter {
 
     // Default configurations.
     this.config = {
+      serveAdminPanel,
       launchedAt: Date.now(),
       appPath: this.dir,
       autoReload,
@@ -170,7 +171,10 @@ class Strapi extends EventEmitter {
         );
         this.log.info('To shut down your server, press <CTRL> + C at any time');
         console.log();
-        this.log.info(`☄️  Admin panel: ${this.config.admin.url}`);
+
+        if (this.config.serveAdminPanel === true) {
+          this.log.info(`☄️  Admin panel: ${this.config.admin.url}`);
+        }
         this.log.info(`⚡️ Server: ${this.config.url}`);
         console.log();
 
@@ -413,11 +417,12 @@ class Strapi extends EventEmitter {
   }
 
   getModel(modelKey, plugin) {
+    let key = modelKey.toLowerCase();
     return plugin === 'admin'
-      ? _.get(strapi.admin, ['models', modelKey], undefined)
-      : _.get(strapi.plugins, [plugin, 'models', modelKey]) ||
-          _.get(strapi, ['models', modelKey]) ||
-          _.get(strapi, ['groups', modelKey]) ||
+      ? _.get(strapi.admin, ['models', key], undefined)
+      : _.get(strapi.plugins, [plugin, 'models', key]) ||
+          _.get(strapi, ['models', key]) ||
+          _.get(strapi, ['groups', key]) ||
           undefined;
   }
 
