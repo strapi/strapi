@@ -29,7 +29,6 @@
     "chalk": "^2.4.2",
     "chokidar": "^3.2.1",
     "classnames": "^2.2.6",
-    "compression-webpack-plugin": "^3.0.0",
     "cross-env": "^5.0.5",
     "css-loader": "^2.1.1",
     "duplicate-package-checker-webpack-plugin": "^3.0.0",
