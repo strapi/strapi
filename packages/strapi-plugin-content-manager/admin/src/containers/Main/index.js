@@ -16,6 +16,7 @@ import pluginId from '../../pluginId';
 import DragLayer from '../../components/DragLayer';
 import EditView from '../EditView';
 import ListView from '../ListView';
+import SettingsViewList from '../SettingViewList';
 import SettingViewModel from '../SettingViewModel';
 import SettingViewGroup from '../SettingViewGroup';
 import SettingsView from '../SettingsView';
@@ -85,6 +86,10 @@ function Main({
     />
   );
   const routes = [
+    {
+      path: 'ctm-configurations/list-settings/:slug',
+      comp: SettingsViewList,
+    },
     {
       path: 'ctm-configurations/models/:name/:settingType',
       comp: SettingViewModel,

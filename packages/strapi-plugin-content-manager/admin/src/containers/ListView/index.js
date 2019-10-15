@@ -322,6 +322,8 @@ function ListView({
                   onClickReset={() => {
                     resetListLabels(slug);
                   }}
+                  slug={slug}
+                  source={getSearchParams().source}
                   toggle={toggleLabelPickerState}
                 />
               </div>

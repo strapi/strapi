@@ -18,16 +18,20 @@ const DisplayedFieldsDropdown = ({
   items,
   onChange,
   onClickReset,
+  slug,
+  source,
   toggle,
 }) => {
   return (
     <DropdownWrapper>
-      <ButtonDropdown isOpen={isOpen} toggle={toggle} direction="bottom">
+      <ButtonDropdown isOpen={isOpen} toggle={toggle} direction="down">
         {/* Fix React warning unrecognize prop */}
         <Toggle isopen={isOpen.toString()} />
         <MenuDropdown isopen={isOpen.toString()}>
           <DropdownItemLink>
-            <LayoutWrapper to="/">
+            <LayoutWrapper
+              to={`/plugins/${pluginId}/ctm-configurations/list-settings/${slug}?source=${source}`}
+            >
               <LayoutIcon />
               <FormattedMessage id="app.links.configure-view" />
             </LayoutWrapper>
@@ -75,6 +79,8 @@ DisplayedFieldsDropdown.propTypes = {
   items: PropTypes.array.isRequired,
   onChange: PropTypes.func.isRequired,
   onClickReset: PropTypes.func.isRequired,
+  slug: PropTypes.string.isRequired,
+  source: PropTypes.string.isRequired,
   toggle: PropTypes.func.isRequired,
 };
 

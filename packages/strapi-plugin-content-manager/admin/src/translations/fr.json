@@ -30,6 +30,10 @@
   "components.Group.reset": "Supprimer l'entrée",
   "components.LimitSelect.itemsPerPage": "Éléments par page",
   "components.Search.placeholder": "Rechercher une entrée...",
+
+  "components.SettingsViewWrapper.pluginHeader.title": "Configurer la vue - {name}",
+  "components.SettingsViewWrapper.pluginHeader.description.list-settings": "Définir les paramètres de la vue liste.",
+
   "components.TableDelete.delete": "Tout supprimer",
   "components.TableDelete.deleteSelected": "Supprimer les éléments sélectionnés",
   "components.TableDelete.entries.plural": "{number} entrées sélectionnées",
@@ -71,7 +75,7 @@
   "containers.SettingPage.listSettings.title": "Vue liste (paramètres)",
   "containers.SettingPage.pluginHeaderDescription": "Configurez les paramètres de ce modèle",
   "containers.SettingPage.relations": "Champs relationnels",
-  "containers.SettingPage.settings": "Settings",
+  "containers.SettingPage.settings": "Paramètres",
   "containers.SettingPage.layout": "Layout",
   "containers.SettingsPage.Block.contentType.description": "Configurez les paramètres spécifiques",
   "containers.SettingsPage.Block.contentType.title": "Types de contenu",
