@@ -2,7 +2,6 @@
 
 const execa = require('execa');
 
-const stopProcess = require('./utils/stop-process');
 const { trackUsage, captureStderr } = require('./utils/usage');
 const defaultConfigs = require('./utils/db-configs.js');
 const clientDependencies = require('./utils/db-client-dependencies.js');
