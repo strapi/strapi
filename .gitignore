@@ -95,6 +95,7 @@ node_modules
 .node_history
 package-lock.json
 **/package-lock.json
+!docs/package-lock.json
 
 
 ############################
@@ -103,6 +104,8 @@ package-lock.json
 
 testApp
 coverage
+cypress/screenshots
+cypress/videos
 
 
 ############################
@@ -116,4 +119,15 @@ dist
 ############################
 
 packages/strapi-generate-new/files/public/
-packages/*/yarn.lock
+
+############################
+# Example app
+############################
+
+# *.cache
+
+############################
+# Visual Studio Code
+############################
+
+front-workspace.code-workspace

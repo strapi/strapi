@@ -1,104 +1,442 @@
 /**
  *
- * This component is the skeleton around the actual pages, and should only
- * contain code that should be seen on all pages. (e.g. navigation bar)
+ * App
  *
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-// import { withRouter } from 'react-router';
-import { createStructuredSelector } from 'reselect';
-import { Switch, Route, withRouter } from 'react-router-dom';
-import PropTypes from 'prop-types';
-import { pluginId } from 'app';
+import { Switch, Route } from 'react-router-dom';
+import { get } from 'lodash';
 
-import HomePage from 'containers/HomePage';
-import ModelPage from 'containers/ModelPage';
-import NotFoundPage from 'containers/NotFoundPage';
-import formSaga from 'containers/Form/sagas';
-import formReducer from 'containers/Form/reducer';
+import { NotFound, getQueryParameters } from 'strapi-helper-plugin';
 
-// Other containers actions
-import { makeSelectShouldRefetchContentType } from 'containers/Form/selectors';
+import pluginId from '../../pluginId';
 
-// Utils
-import injectSaga from 'utils/injectSaga';
-import injectReducer from 'utils/injectReducer';
-import { storeData } from '../../utils/storeData';
+import HomePage from '../HomePage';
+import ModelForm from '../ModelForm';
+import ModelPage from '../ModelPage';
+import MenuContext from '../MenuContext';
+import GroupPage from '../GroupPage';
+
+import Loader from './Loader';
+
+import BackButton from '../../components/BackButton';
+
+import {
+  addAttributeRelation,
+  cancelNewContentType,
+  clearTemporaryAttributeRelation,
+  createTempContentType,
+  createTempGroup,
+  deleteGroup,
+  deleteModel,
+  deleteTemporaryGroup,
+  deleteTemporaryModel,
+  getData,
+  onChangeExistingContentTypeMainInfos,
+  onChangeExistingGroupMainInfos,
+  onChangeNewContentTypeMainInfos,
+  onChangeNewGroupMainInfos,
+  onChangeRelation,
+  onChangeRelationNature,
+  onChangeRelationTarget,
+  resetExistingContentTypeMainInfos,
+  resetNewContentTypeMainInfos,
+  resetExistingGroupMainInfos,
+  resetProps,
+  saveEditedAttribute,
+  saveEditedAttributeRelation,
+  setTemporaryAttribute,
+  setTemporaryAttributeRelation,
+  updateTempContentType,
+  updateTempGroup,
+} from './actions';
+
+import reducer from './reducer';
+import saga from './saga';
+import makeSelectApp from './selectors';
 
 import styles from './styles.scss';
-import { modelsFetch } from './actions';
-import saga from './sagas';
 
-/* eslint-disable consistent-return */
-class App extends React.Component {
+const ROUTES = [
+  {
+    component: HomePage,
+    to: `/plugins/${pluginId}/:type`,
+  },
+
+  {
+    component: ModelPage,
+    to: `/plugins/${pluginId}/models/:modelName`,
+  },
+  {
+    component: GroupPage,
+    to: `/plugins/${pluginId}/groups/:groupName`,
+  },
+];
+
+export class App extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
+  state = {
+    routerHistory: [],
+    historyCount: 1,
+  };
+
   componentDidMount() {
-    this.props.modelsFetch();
+    this.props.getData();
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.shouldRefetchContentType !== this.props.shouldRefetchContentType) {
-      this.props.modelsFetch();
+  /* istanbul ignore next */
+  componentDidUpdate(prevProps) {
+    if (prevProps.shouldRefetchData !== this.props.shouldRefetchData) {
+      this.props.getData();
+    }
+    if (prevProps.location !== this.props.location) {
+      if (prevProps.location.pathname !== this.getPathname()) {
+        this.addRouterHistory(prevProps.location.pathname);
+      } else {
+        this.increaseHistoryCount();
+      }
     }
   }
 
-
   componentWillUnmount() {
-    // Empty the app localStorage
-    storeData.clearAppStorage();
+    this.props.resetProps();
   }
 
-  render() {
+  canOpenModal = () => {
+    const { groups, models } = this.props;
+
     return (
-      <div className={`${pluginId} ${styles.app}`}>
-        <Switch>
-          <Route exact path="/plugins/content-type-builder" component={HomePage} />
-          <Route exact path="/plugins/content-type-builder/models/:modelName" component={ModelPage} />
-          <Route path="" component={NotFoundPage} />
-        </Switch>
-      </div>
+      models.every(model => model.isTemporary === false) &&
+      groups.every(group => group.isTemporary === false)
+    );
+  };
+
+  addRouterHistory = pathname => {
+    if (this.getLastPathname() !== this.getPathname()) {
+      this.setState(prevState => {
+        return {
+          routerHistory: [...prevState.routerHistory, pathname],
+          historyCount: prevState.historyCount + 1,
+        };
+      });
+    }
+  };
+
+  increaseHistoryCount = () => {
+    this.setState(prevState => {
+      return {
+        routerHistory: [...prevState.routerHistory],
+        historyCount: prevState.historyCount + 1,
+      };
+    });
+  };
+
+  removeRouterHistory = () => {
+    const array = [...this.state.routerHistory];
+    const index = array.length - 1;
+
+    if (index !== -1) {
+      array.splice(index, 1);
+      this.setState(prevState => {
+        return {
+          routerHistory: array,
+          historyCount: prevState.historyCount + 1,
+        };
+      });
+    }
+  };
+
+  getSearch = () => this.props.location.search;
+
+  getPathname = () => this.props.location.pathname;
+
+  getLastPathname = () => {
+    const { routerHistory } = this.state;
+
+    return routerHistory[routerHistory.length - 1];
+  };
+
+  getActionType = () => {
+    return getQueryParameters(this.getSearch(), 'actionType');
+  };
+
+  getAllGroupsAndModelsNames = () => {
+    const { models, groups } = this.props;
+
+    return models
+      .map(model => model.name)
+      .concat(groups.map(group => group.uid));
+  };
+
+  getFeatureType = () => getQueryParameters(this.getSearch(), 'modalType');
+
+  getFormDataForModel = () => {
+    const { modifiedData, newContentType } = this.props;
+
+    if (this.isUpdatingTemporaryModel()) {
+      return newContentType;
+    }
+
+    return get(modifiedData, this.getFeatureNameFromSearch(), {});
+  };
+
+  getFormDataForGroup = () => {
+    const { modifiedDataGroup, newGroup } = this.props;
+
+    if (this.isUpdatingTemporaryFeature()) {
+      return newGroup;
+    }
+
+    return get(modifiedDataGroup, this.getFeatureNameFromSearch(), {});
+  };
+
+  getFeatureNameFromSearch = () =>
+    getQueryParameters(this.getSearch(), `${this.getFeatureType()}Name`);
+
+  handleGoBack = async () => {
+    const { history } = this.props;
+    const { routerHistory, historyCount } = this.state;
+
+    await this.wait();
+
+    if (routerHistory.length > 0) {
+      history.push(this.getLastPathname());
+      this.removeRouterHistory();
+    } else {
+      history.go(-historyCount);
+    }
+  };
+
+  wait = async () => {
+    return new Promise(resolve => setTimeout(resolve, 200));
+  };
+
+  isUpdatingTemporaryModel = (modelName = this.getFeatureNameFromSearch()) => {
+    const { models } = this.props;
+
+    const currentModel = models.find(model => model.name === modelName) || {
+      isTemporary: true,
+    };
+
+    const { isTemporary } = currentModel;
+
+    return isTemporary;
+  };
+
+  isUpdatingTemporaryFeature = (
+    groupName = this.getFeatureNameFromSearch()
+  ) => {
+    const { groups } = this.props;
+
+    const currentGroup = groups.find(group => group.uid === groupName) || {
+      isTemporary: true,
+    };
+
+    const { isTemporary } = currentGroup;
+
+    return isTemporary;
+  };
+
+  renderRoute = route => {
+    const { component: Component, to } = route;
+
+    /* istanbul ignore next */
+    return (
+      <Route
+        key={to}
+        exact
+        path={to}
+        render={props => (
+          <Component
+            {...this.props}
+            {...props}
+            canOpenModal={this.canOpenModal()}
+          />
+        )}
+      />
+    );
+  };
+
+  render() {
+    const {
+      cancelNewContentType,
+      connections,
+      createTempContentType,
+      createTempGroup,
+      groups,
+      history: { push },
+      location: { search },
+      isLoading,
+      models,
+      onChangeExistingContentTypeMainInfos,
+      onChangeExistingGroupMainInfos,
+      onChangeNewContentTypeMainInfos,
+      onChangeNewGroupMainInfos,
+      resetExistingContentTypeMainInfos,
+      resetExistingGroupMainInfos,
+      resetNewContentTypeMainInfos,
+      updateTempContentType,
+      updateTempGroup,
+    } = this.props;
+
+    if (isLoading) {
+      return <Loader />;
+    }
+
+    const featureForms = [
+      {
+        actionType: this.getActionType(),
+        activeTab: getQueryParameters(search, 'settingType'),
+        allTakenNames: this.getAllGroupsAndModelsNames(),
+        cancelNewFeature: cancelNewContentType,
+        connections,
+        createTempFeature: createTempContentType,
+        featureToEditName: this.getFeatureNameFromSearch(),
+        featureType: 'model',
+        isOpen: getQueryParameters(search, 'modalType') === 'model',
+        isUpdatingTemporaryFeature: this.isUpdatingTemporaryModel(),
+        modifiedData: this.getFormDataForModel(),
+        onChangeExistingFeatureMainInfos: onChangeExistingContentTypeMainInfos,
+        onChangeNewFeatureMainInfos: onChangeNewContentTypeMainInfos,
+        pathname: this.getPathname(),
+        push,
+        resetExistingFeatureMainInfos: resetExistingContentTypeMainInfos,
+        resetNewFeatureMainInfos: resetNewContentTypeMainInfos,
+        updateTempFeature: updateTempContentType,
+      },
+      {
+        actionType: this.getActionType(),
+        activeTab: getQueryParameters(search, 'settingType'),
+        allTakenNames: this.getAllGroupsAndModelsNames(),
+        cancelNewFeature: () => {},
+        createTempFeature: createTempGroup,
+        featureToEditName: this.getFeatureNameFromSearch(),
+        featureType: 'group',
+        isOpen: getQueryParameters(search, 'modalType') === 'group',
+        isUpdatingTemporaryFeature: this.isUpdatingTemporaryFeature(),
+        modifiedData: this.getFormDataForGroup(),
+        onChangeExistingFeatureMainInfos: onChangeExistingGroupMainInfos,
+        onChangeNewFeatureMainInfos: onChangeNewGroupMainInfos,
+        pathname: this.getPathname(),
+        push,
+        resetExistingFeatureMainInfos: resetExistingGroupMainInfos,
+        resetNewFeatureMainInfos: () => {},
+        updateTempFeature: updateTempGroup,
+      },
+    ];
+
+    return (
+      <MenuContext.Provider
+        value={{
+          canOpenModal: this.canOpenModal(),
+          groups,
+          models,
+          push,
+        }}
+      >
+        <div className={styles.app}>
+          <BackButton onClick={this.handleGoBack}></BackButton>
+          <Switch>
+            {ROUTES.map(this.renderRoute)}
+            <Route component={NotFound} />
+          </Switch>
+        </div>
+        {featureForms.map(feature => (
+          <ModelForm key={feature.featureType} {...feature} />
+        ))}
+      </MenuContext.Provider>
     );
   }
 }
 
-App.contextTypes = {
-  plugins: PropTypes.object,
-  router: PropTypes.object.isRequired,
-  updatePlugin: PropTypes.func,
+App.defaultProps = {
+  shouldRefetchData: false,
 };
 
 App.propTypes = {
-  modelsFetch: PropTypes.func.isRequired,
-  shouldRefetchContentType: PropTypes.bool,
+  addAttributeRelation: PropTypes.func.isRequired,
+  cancelNewContentType: PropTypes.func.isRequired,
+  connections: PropTypes.array.isRequired,
+  createTempContentType: PropTypes.func.isRequired,
+  createTempGroup: PropTypes.func.isRequired,
+  deleteModel: PropTypes.func.isRequired,
+  getData: PropTypes.func.isRequired,
+  groups: PropTypes.array.isRequired,
+  history: PropTypes.object.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  location: PropTypes.object.isRequired,
+  models: PropTypes.array.isRequired,
+  modifiedData: PropTypes.object.isRequired,
+  modifiedDataGroup: PropTypes.object.isRequired,
+  newContentType: PropTypes.object.isRequired,
+  newGroup: PropTypes.object.isRequired,
+  onChangeExistingContentTypeMainInfos: PropTypes.func.isRequired,
+  onChangeExistingGroupMainInfos: PropTypes.func.isRequired,
+  onChangeNewContentTypeMainInfos: PropTypes.func.isRequired,
+  onChangeNewGroupMainInfos: PropTypes.func.isRequired,
+  resetProps: PropTypes.func.isRequired,
+  saveEditedAttribute: PropTypes.func.isRequired,
+  saveEditedAttributeRelation: PropTypes.func.isRequired,
+  setTemporaryAttribute: PropTypes.func.isRequired,
+  setTemporaryAttributeRelation: PropTypes.func.isRequired,
+  resetExistingContentTypeMainInfos: PropTypes.func.isRequired,
+  resetExistingGroupMainInfos: PropTypes.func.isRequired,
+  resetNewContentTypeMainInfos: PropTypes.func.isRequired,
+  shouldRefetchData: PropTypes.bool,
+  updateTempContentType: PropTypes.func.isRequired,
+  updateTempGroup: PropTypes.func.isRequired,
 };
 
-App.defaultProps = {
-  shouldRefetchContentType: false,
-};
+const mapStateToProps = makeSelectApp();
 
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
-      modelsFetch,
+      addAttributeRelation,
+      cancelNewContentType,
+      clearTemporaryAttributeRelation,
+      createTempContentType,
+      createTempGroup,
+      deleteGroup,
+      deleteModel,
+      deleteTemporaryGroup,
+      deleteTemporaryModel,
+      getData,
+      onChangeExistingContentTypeMainInfos,
+      onChangeExistingGroupMainInfos,
+      onChangeNewContentTypeMainInfos,
+      onChangeNewGroupMainInfos,
+      onChangeRelation,
+      onChangeRelationNature,
+      onChangeRelationTarget,
+      resetExistingContentTypeMainInfos,
+      resetNewContentTypeMainInfos,
+      resetExistingGroupMainInfos,
+      resetProps,
+      saveEditedAttribute,
+      saveEditedAttributeRelation,
+      setTemporaryAttribute,
+      setTemporaryAttributeRelation,
+      updateTempContentType,
+      updateTempGroup,
     },
     dispatch
   );
 }
 
-const mapStateToProps = createStructuredSelector({
-  shouldRefetchContentType: makeSelectShouldRefetchContentType(),
-});
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps
+);
+const withReducer = strapi.injectReducer({ key: 'app', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'app', saga, pluginId });
 
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-const withSaga = injectSaga({ key: 'global', saga });
-const withFormReducer = injectReducer({ key: 'form', reducer: formReducer });
-const withFormSaga = injectSaga({ key: 'form', saga: formSaga });
 export default compose(
-  withFormReducer,
-  withFormSaga,
+  withReducer,
   withSaga,
-  withRouter,
-  withConnect,
+  withConnect
 )(App);

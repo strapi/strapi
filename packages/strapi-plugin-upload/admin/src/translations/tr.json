@@ -24,5 +24,7 @@
   "notification.config.success": "Ayarlar güncellendi.",
   "notification.delete.success": "Dosya silindi",
   "notification.dropFile.success": "Dosyanız yüklendi",
-  "notification.dropFiles.success": "{number} dosyalar yüklendi"
+  "notification.dropFiles.success": "{number} dosyalar yüklendi",
+  "Upload.status.sizeLimit": "{file} yapılandırılmış sınır boyutundan daha büyük",
+  "Upload.status.disabled" : "Dosya yükleme devre dışı"
 }

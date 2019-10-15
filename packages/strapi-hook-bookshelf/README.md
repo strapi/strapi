@@ -4,7 +4,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/strapi-hook-bookshelf.svg)](https://www.npmjs.org/package/strapi-hook-bookshelf)
 [![npm dependencies](https://david-dm.org/strapi/strapi-hook-bookshelf.svg)](https://david-dm.org/strapi/strapi-hook-bookshelf)
 [![Build status](https://travis-ci.org/strapi/strapi-hook-bookshelf.svg?branch=master)](https://travis-ci.org/strapi/strapi-hook-bookshelf)
-[![Slack status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
+[![Slack status](https://slack.strapi.io/badge.svg)](http://slack.strapi.io)
 
 This built-in hook allows you to use the [Bookshelf ORM](http://bookshelfjs.org/) using the `strapi-hook-knex` hook.
 

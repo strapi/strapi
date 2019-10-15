@@ -1,0 +1,68 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "handler": "Documentation.index",
+      "config": {
+        "policies": ["plugins.documentation.index"]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/v:major(\\d+).:minor(\\d+).:patch(\\d+)",
+      "handler": "Documentation.index",
+      "config": {
+        "policies": ["plugins.documentation.index"]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/login",
+      "handler": "Documentation.loginView",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/login",
+      "handler": "Documentation.login",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/getInfos",
+      "handler": "Documentation.getInfos",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/regenerateDoc",
+      "handler": "Documentation.regenerateDoc",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/updateSettings",
+      "handler": "Documentation.updateSettings",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/deleteDoc/:version",
+      "handler": "Documentation.deleteDoc",
+      "config":{
+        "policies": []
+      }
+    }
+  ]
+}

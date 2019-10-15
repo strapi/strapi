@@ -5,8 +5,10 @@
  */
 
 import {
+  DISABLE_GLOBAL_OVERLAY_BLOCKER,
+  ENABLE_GLOBAL_OVERLAY_BLOCKER,
   FREEZE_APP,
-  GET_APP_PLUGINS_SUCCEEDED,
+  GET_DATA_SUCCEEDED,
   LOAD_PLUGIN,
   PLUGIN_DELETED,
   PLUGIN_LOADED,
@@ -15,16 +17,30 @@ import {
   UPDATE_PLUGIN,
 } from './constants';
 
-export function freezeApp() {
+export function disableGlobalOverlayBlocker() {
   return {
-    type: FREEZE_APP,
+    type: DISABLE_GLOBAL_OVERLAY_BLOCKER,
   };
 }
 
-export function getAppPluginsSucceeded(plugins) {
+export function enableGlobalOverlayBlocker() {
   return {
-    type: GET_APP_PLUGINS_SUCCEEDED,
-    appPlugins: plugins.map(plugin => plugin.id),
+    type: ENABLE_GLOBAL_OVERLAY_BLOCKER,
+  };
+}
+
+export function freezeApp(data) {
+  return {
+    type: FREEZE_APP,
+    data,
+  };
+}
+
+export function getDataSucceeded(hasAdminUser, data) {
+  return {
+    type: GET_DATA_SUCCEEDED,
+    hasAdminUser,
+    data,
   };
 }
 

@@ -4,6 +4,11 @@
  * Export shared utilities
  */
 
+const convertRestQueryParams = require('./convertRestQueryParams');
+const buildQuery = require('./buildQuery');
+const parseMultipartData = require('./parse-multipart');
+const sanitizeEntity = require('./sanitize-entity');
+
 module.exports = {
   cli: require('./cli'),
   commander: require('./commander'),
@@ -13,8 +18,11 @@ module.exports = {
   knex: require('./knex'),
   logger: require('./logger'),
   models: require('./models'),
-  packageManager: require('./packageManager'),
   policy: require('./policy'),
   regex: require('./regex'),
-  templateConfiguration: require('./templateConfiguration')
+  templateConfiguration: require('./templateConfiguration'),
+  convertRestQueryParams,
+  buildQuery,
+  parseMultipartData,
+  sanitizeEntity,
 };

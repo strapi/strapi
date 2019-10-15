@@ -2,7 +2,7 @@
 @import '../../styles/variables/variables';
 
 .notificationsContainer { /* stylelint-disable */
-  position: absolute;
+  position: fixed;
   top: 72px;
   left: 240px;
   right: 0;

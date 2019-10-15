@@ -10,7 +10,7 @@ If you don't want to share your data with us, you can simply modify the `strapi`
 ```json
 {
   "strapi": {
-    "allowGa": false
+    "uuid": false
   }
 }
 ```

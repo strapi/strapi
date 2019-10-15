@@ -13,7 +13,7 @@ import { Switch, Route } from 'react-router-dom';
 import { bindActionCreators, compose } from 'redux';
 
 // Utils
-import { pluginId } from 'app';
+import pluginId from 'pluginId';
 
 // Containers
 import HomePage from 'containers/HomePage';
@@ -21,6 +21,7 @@ import NotFoundPage from 'containers/NotFoundPage';
 // When you're done studying the ExamplePage container, remove the following line and delete the ExamplePage container
 import ExamplePage from 'containers/ExamplePage';
 
+import reducer from './reducer';
 
 class App extends React.Component {
   // When you're done studying the ExamplePage container, remove the following lines and delete the ExamplePage container
@@ -44,7 +45,6 @@ class App extends React.Component {
 
 App.contextTypes = {
   plugins: PropTypes.object,
-  router: PropTypes.object.isRequired,
   updatePlugin: PropTypes.func,
 };
 
@@ -63,7 +63,9 @@ const mapStateToProps = createStructuredSelector({});
 
 // Wrap the component to inject dispatch and state into it
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withReducer = strapi.injectReducer({ key: 'global', reducer, pluginId });
 
 export default compose(
+  withReducer,
   withConnect,
 )(App);

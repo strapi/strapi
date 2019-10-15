@@ -8,36 +8,27 @@
 
 const _ = require('lodash');
 const pluralize = require('pluralize');
+const compose = require('koa-compose');
 const policyUtils = require('strapi-utils').policy;
 const Query = require('./Query.js');
-/* eslint-disable no-unused-vars */
 
 module.exports = {
-  /**
-   * Convert parameters to valid filters parameters.
-   *
-   * @return Object
-   */
-
-  convertToParams: params => {
-    return Object.keys(params).reduce((acc, current) => {
-      return Object.assign(acc, {
-        [`_${current}`]: params[current],
-      });
-    }, {});
-  },
-
   /**
    * Execute policies before the specified resolver.
    *
    * @return Promise or Error.
    */
 
-  composeMutationResolver: function(_schema, plugin, name, action) {
+  composeMutationResolver: function({ _schema, plugin, name, action }) {
     // Extract custom resolver or type description.
     const { resolver: handler = {} } = _schema;
 
-    const queryName = `${action}${_.capitalize(name)}`;
+    let queryName;
+    if (_.has(handler, `Mutation.${action}`)) {
+      queryName = action;
+    } else {
+      queryName = `${action}${_.capitalize(name)}`;
+    }
 
     // Retrieve policies.
     const policies = _.get(handler, `Mutation.${queryName}.policies`, []);
@@ -65,12 +56,15 @@ module.exports = {
         const [name, action] = handler.split('.');
 
         const controller = plugin
-          ? _.get(strapi.plugins, `${plugin}.controllers.${_.toLower(name)}.${action}`)
+          ? _.get(
+              strapi.plugins,
+              `${plugin}.controllers.${_.toLower(name)}.${action}`
+            )
           : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
         if (!controller) {
           return new Error(
-            `Cannot find the controller's action ${name}.${action}`,
+            `Cannot find the controller's action ${name}.${action}`
           );
         }
 
@@ -85,8 +79,8 @@ module.exports = {
               handler: `${name}.${action}`,
             },
             undefined,
-            plugin,
-          ),
+            plugin
+          )
         );
 
         // Return the controller.
@@ -104,14 +98,11 @@ module.exports = {
         : strapi.controllers;
 
       // Try to find the controller that should be related to this model.
-      const controller = _.get(
-        controllers,
-        `${name}.${action === 'delete' ? 'destroy' : action}`,
-      );
+      const controller = _.get(controllers, `${name}.${action}`);
 
       if (!controller) {
         return new Error(
-          `Cannot find the controller's action ${name}.${action}`,
+          `Cannot find the controller's action ${name}.${action}`
         );
       }
 
@@ -121,11 +112,11 @@ module.exports = {
         policyUtils.globalPolicy(
           undefined,
           {
-            handler: `${name}.${action === 'delete' ? 'destroy' : action}`,
+            handler: `${name}.${action}`,
           },
           undefined,
-          plugin,
-        ),
+          plugin
+        )
       );
 
       // Make the query compatible with our controller by
@@ -146,12 +137,15 @@ module.exports = {
       const [name, action] = resolverOf.split('.');
 
       const controller = plugin
-        ? _.get(strapi.plugins, `${plugin}.controllers.${_.toLower(name)}.${action}`)
+        ? _.get(
+            strapi.plugins,
+            `${plugin}.controllers.${_.toLower(name)}.${action}`
+          )
         : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
       if (!controller) {
         return new Error(
-          `Cannot find the controller's action ${name}.${action}`,
+          `Cannot find the controller's action ${name}.${action}`
         );
       }
 
@@ -161,12 +155,12 @@ module.exports = {
           handler: `${name}.${action}`,
         },
         undefined,
-        plugin,
+        plugin
       );
     }
 
     if (strapi.plugins['users-permissions']) {
-      policies.push('plugins.users-permissions.permissions');
+      policies.unshift('plugins.users-permissions.permissions');
     }
 
     // Populate policies.
@@ -176,11 +170,12 @@ module.exports = {
         plugin,
         policiesFn,
         `GraphQL query "${queryName}"`,
-        name,
-      ),
+        name
+      )
     );
 
-    return async (obj, options, { context }) => {
+    return async (obj, options, graphqlCtx) => {
+      const { context } = graphqlCtx;
       // Hack to be able to handle permissions for each query.
       const ctx = Object.assign(_.clone(context), {
         request: Object.assign(_.clone(context.request), {
@@ -189,7 +184,7 @@ module.exports = {
       });
 
       // Execute policies stack.
-      const policy = await strapi.koaMiddlewares.compose(policiesFn)(ctx);
+      const policy = await compose(policiesFn)(ctx);
 
       // Policy doesn't always return errors but they update the current context.
       if (
@@ -206,26 +201,41 @@ module.exports = {
 
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
-        context.params = Query.convertToParams(options.input.where || {});
-        context.request.body = options.input.data || {};
+        const normalizedName = _.toLower(name);
+
+        if (options.input && options.input.where) {
+          context.params = Query.convertToParams(options.input.where || {});
+        } else {
+          context.params = {};
+        }
+
+        if (options.input && options.input.data) {
+          context.request.body = options.input.data || {};
+        } else {
+          context.request.body = options;
+        }
 
         if (isController) {
           const values = await resolver.call(null, context);
 
           if (ctx.body) {
-            return {
-              [pluralize.singular(name)]: ctx.body,
-            };
+            return options.input
+              ? {
+                  [pluralize.singular(normalizedName)]: ctx.body,
+                }
+              : ctx.body;
           }
 
           const body = values && values.toJSON ? values.toJSON() : values;
 
-          return {
-            [pluralize.singular(name)]: body,
-          };
+          return options.input
+            ? {
+                [pluralize.singular(normalizedName)]: body,
+              }
+            : body;
         }
 
-        return resolver.call(null, obj, options, context);
+        return resolver.call(null, obj, options, graphqlCtx);
       }
 
       // Resolver can be a promise.

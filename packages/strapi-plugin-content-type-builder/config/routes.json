@@ -50,16 +50,40 @@
     },
     {
       "method": "GET",
-      "path": "/autoReload",
-      "handler": "ContentTypeBuilder.autoReload",
+      "path": "/groups",
+      "handler": "Groups.getGroups",
       "config": {
         "policies": []
       }
     },
     {
       "method": "GET",
-      "path": "/checkTableExists/:connection/:model",
-      "handler": "ContentTypeBuilder.checkTableExists",
+      "path": "/groups/:uid",
+      "handler": "Groups.getGroup",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/groups",
+      "handler": "Groups.createGroup",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/groups/:uid",
+      "handler": "Groups.updateGroup",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/groups/:uid",
+      "handler": "Groups.deleteGroup",
       "config": {
         "policies": []
       }

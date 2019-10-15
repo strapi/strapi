@@ -6,15 +6,15 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import { isEmpty, isObject, map } from 'lodash';
 import cn from 'classnames';
 
 // Design
-import SelectOption from 'components/SelectOption';
+import SelectOption from '../SelectOption';
 
 import styles from './styles.scss';
 
-/* eslint-disable jsx-a11y/no-autofocus */
 function InputSelect(props) {
   return (
     <select
@@ -24,7 +24,7 @@ function InputSelect(props) {
         'form-control',
         !props.deactivateErrorHighlight && props.error && 'is-invalid',
         !isEmpty(props.className) && props.className,
-        props.disabled && styles.inputSelectDisabled,
+        props.disabled && styles.inputSelectDisabled
       )}
       disabled={props.disabled}
       id={props.name}
@@ -37,12 +37,33 @@ function InputSelect(props) {
       tabIndex={props.tabIndex}
       value={props.value}
     >
+      {props.withOptionPlaceholder && (
+        <FormattedMessage id="components.InputSelect.option.placeholder">
+          {msg => (
+            <option disabled hidden value="">
+              {msg}
+            </option>
+          )}
+        </FormattedMessage>
+      )}
       {map(props.selectOptions, (option, key) => {
         if (isObject(option)) {
-          return <SelectOption key={key} {...option} />;
+          if (option.label) {
+            return (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            );
+          } else {
+            return <SelectOption key={key} {...option} />;
+          }
         }
 
-        return <option key={key} value={option}>{option}</option>;
+        return (
+          <option key={key} value={option}>
+            {option}
+          </option>
+        );
       })}
     </select>
   );
@@ -59,6 +80,7 @@ InputSelect.defaultProps = {
   onFocus: () => {},
   style: {},
   tabIndex: '0',
+  withOptionPlaceholder: false,
 };
 
 InputSelect.propTypes = {
@@ -81,11 +103,12 @@ InputSelect.propTypes = {
         value: PropTypes.string.isRequired,
       }),
       PropTypes.string,
-    ]),
+    ])
   ).isRequired,
   style: PropTypes.object,
   tabIndex: PropTypes.string,
   value: PropTypes.string.isRequired,
+  withOptionPlaceholder: PropTypes.bool,
 };
 
 export default InputSelect;

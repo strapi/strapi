@@ -4,7 +4,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/strapi-generate.svg)](https://www.npmjs.org/package/strapi-generate)
 [![npm dependencies](https://david-dm.org/strapi/strapi-generate.svg)](https://david-dm.org/strapi/strapi-generate)
 [![Build status](https://travis-ci.org/strapi/strapi-generate.svg?branch=master)](https://travis-ci.org/strapi/strapi-generate)
-[![Slack status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
+[![Slack status](https://slack.strapi.io/badge.svg)](http://slack.strapi.io)
 
 Master of ceremonies for generators in the Strapi CLI.
 

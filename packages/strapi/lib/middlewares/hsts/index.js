@@ -3,6 +3,8 @@
 /**
  * Module dependencies
  */
+const convert = require('koa-convert');
+const { hsts } = require('koa-lusca');
 
 /**
  * HSTS hook
@@ -14,21 +16,15 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
-      strapi.app.use(
-        async (ctx, next) => {
-          if (ctx.request.admin) return next();
+    initialize() {
+      strapi.app.use(async (ctx, next) => {
+        if (ctx.request.admin) return next();
 
-          return await strapi.koaMiddlewares.convert(
-            strapi.koaMiddlewares.lusca.hsts({
-              maxAge: strapi.config.middleware.settings.hsts.maxAge,
-              includeSubDomains: strapi.config.middleware.settings.hsts.includeSubDomains
-            })
-          )(ctx, next);
-        }
-      );
-
-      cb();
-    }
+        return await convert(hsts(strapi.config.middleware.settings.hsts))(
+          ctx,
+          next
+        );
+      });
+    },
   };
 };

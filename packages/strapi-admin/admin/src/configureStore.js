@@ -4,24 +4,19 @@
 
 import { createStore, applyMiddleware, compose } from 'redux';
 import { fromJS } from 'immutable';
-import { routerMiddleware } from 'react-router-redux';
+// import { routerMiddleware } from 'react-router-redux';
 import createSagaMiddleware from 'redux-saga';
 import createReducer from './reducers';
 
 const sagaMiddleware = createSagaMiddleware();
 
-export default function configureStore(initialState = {}, history) {
+export default function configureStore(initialState = {}) {
   // Create the store with two middlewares
   // 1. sagaMiddleware: Makes redux-sagas work
   // 2. routerMiddleware: Syncs the location/URL path to the state
-  const middlewares = [
-    sagaMiddleware,
-    routerMiddleware(history),
-  ];
+  const middlewares = [sagaMiddleware];
 
-  const enhancers = [
-    applyMiddleware(...middlewares),
-  ];
+  const enhancers = [applyMiddleware(...middlewares)];
 
   // If Redux DevTools Extension is installed use it, otherwise use Redux compose
   /* eslint-disable no-underscore-dangle */
@@ -33,7 +28,7 @@ export default function configureStore(initialState = {}, history) {
         // TODO Try to remove when `react-router-redux` is out of beta, LOCATION_CHANGE should not be fired more than once after hot reloading
         // Prevent recomputing reducers for `replaceReducer`
         shouldHotReload: false,
-        name: `Strapi - Dashboard`,
+        name: 'Strapi - Dashboard',
       })
       : compose;
   /* eslint-enable */
@@ -41,7 +36,7 @@ export default function configureStore(initialState = {}, history) {
   const store = createStore(
     createReducer(),
     fromJS(initialState),
-    composeEnhancers(...enhancers)
+    composeEnhancers(...enhancers),
   );
 
   // Extensions

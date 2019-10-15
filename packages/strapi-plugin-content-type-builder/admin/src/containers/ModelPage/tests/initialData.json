@@ -1,0 +1,173 @@
+{
+  "permissions": {
+    "attributes": {
+      "action": {
+        "type": "string",
+        "required": true,
+        "configurable": false
+      },
+      "controller": {
+        "type": "string",
+        "required": true,
+        "configurable": false
+      },
+      "enabled": {
+        "type": "boolean",
+        "required": true,
+        "configurable": false
+      },
+      "policy": {
+        "type": "boolean",
+        "configurable": false
+      },
+      "role": {
+        "configurable": false,
+        "key": "permissions",
+        "nature": "manyToOne",
+        "plugin": "users-permissions",
+        "targetColumnName": "",
+        "target": "role"
+      },
+      "type": {
+        "type": "string",
+        "required": true,
+        "configurable": false
+      }
+    },
+    "collectionName": "users-permissions_permission",
+    "connection": "default",
+    "description": "",
+    "mainField": "",
+    "name": "permission"
+  },
+  "user": {
+    "collectionName": "users-permissions_user",
+    "connection": "default",
+    "description": "user model",
+    "mainField": "",
+    "name": "user",
+    "attributes": {
+      "username": {
+        "type": "string",
+        "required": true,
+        "configurable": false,
+        "minLength": 3
+      },
+      "email": {
+        "type": "string",
+        "required": true,
+        "configurable": false,
+        "minLength": 6
+      },
+      "provider": {
+        "type": "string",
+        "configurable": false
+      },
+      "password": {
+        "type": "string",
+        "required": true,
+        "configurable": false,
+        "minLength": 6,
+        "private": true
+      },
+      "resetPasswordToken": {
+        "type": "string",
+        "configurable": false,
+        "private": true
+      },
+      "blocked": {
+        "type": "boolean",
+        "configurable": false,
+        "default": false
+      },
+      "confirmed": {
+        "type": "boolean",
+        "configurable": false,
+        "default": false
+      },
+      "role": {
+        "configurable": false,
+        "key": "users",
+        "nature": "manyToOne",
+        "plugin": "users-permissions",
+        "target": "role",
+        "targetColumnName": ""
+      }
+    }
+  },
+  "product": {
+    "collectionName": "",
+    "connection": "default",
+    "description": "",
+    "mainField": "",
+    "name": "product",
+    "attributes": {
+      "name": {
+        "type": "string",
+        "required": true
+      }
+    }
+  },
+  "role": {
+    "collectionName": "users-permissions_role",
+    "connection": "default",
+    "description": "",
+    "mainField": "",
+    "name": "role",
+    "attributes": {
+      "description": {
+        "type": "string",
+        "configurable": false
+      },
+      "name": {
+        "type": "string",
+        "required": true,
+        "configurable": false,
+        "minLength": 3
+      },
+      "provider": {
+        "type": "string",
+        "configurable": false
+      },
+      "password": {
+        "type": "string",
+        "required": true,
+        "configurable": false,
+        "minLength": 6,
+        "private": true
+      },
+      "resetPasswordToken": {
+        "type": "string",
+        "configurable": false,
+        "private": true
+      },
+      "blocked": {
+        "type": "boolean",
+        "configurable": false,
+        "default": false
+      },
+      "confirmed": {
+        "type": "boolean",
+        "configurable": false,
+        "default": false
+      },
+      "permissions": {
+        "configurable": false,
+        "key": "role",
+        "nature": "oneToMany",
+        "plugin": "users-permissions",
+        "target": "permission",
+        "targetColumnName": ""
+      },
+      "users": {
+        "configurable": false,
+        "key": "role",
+        "nature": "oneToMany",
+        "plugin": "users-permissions",
+        "target": "user",
+        "targetColumnName": "",
+        "isVirtual": true
+      }
+    }
+  }
+}

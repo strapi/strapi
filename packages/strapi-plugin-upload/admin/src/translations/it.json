@@ -24,5 +24,7 @@
   "notification.config.success": "Le impostazioni è stato aggiornato",
   "notification.delete.success": "Il file è stato cancellato",
   "notification.dropFile.success": "Il file è stato caricato",
-  "notification.dropFiles.success": "{number} file sono stati caricati"
+  "notification.dropFiles.success": "{number} file sono stati caricati",
+  "Upload.status.sizeLimit": "{file} è più grande della dimensione limite configurata",
+  "Upload.status.disabled" : "Il caricamento del file è disabilitato"
 }

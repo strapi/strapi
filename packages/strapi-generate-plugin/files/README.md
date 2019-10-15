@@ -1,1 +1,0 @@
-# Strapi plugin

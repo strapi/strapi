@@ -11,13 +11,12 @@ import { FormattedMessage } from 'react-intl';
 import { cloneDeep, isArray, isObject } from 'lodash';
 import cn from 'classnames';
 
-import ImgPreview from 'components/ImgPreview';
-import InputFileDetails from 'components/InputFileDetails';
+import ImgPreview from '../ImgPreview';
+import InputFileDetails from '../InputFileDetails';
 
 import styles from './styles.scss';
 
 /* eslint-disable react/jsx-handler-names */
-/* eslint-disable jsx-a11y/label-has-for */
 class InputFile extends React.Component {
   state = {
     didDeleteFile: false,
@@ -60,7 +59,7 @@ class InputFile extends React.Component {
       type: 'file',
       value,
     };
-    
+
     this.inputFile.value = '';
     this.setState({ isUploading: !this.state.isUploading });
     this.props.onChange({ target });
@@ -105,7 +104,7 @@ class InputFile extends React.Component {
     const {value} = this.props;
 
     if (!value ||
-      (isArray(value) && value.length === 0) || 
+      (isArray(value) && value.length === 0) ||
       (isObject(value) && Object.keys(value).length === 0)
     ) {
       return false;

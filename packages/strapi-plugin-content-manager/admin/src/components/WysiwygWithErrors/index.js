@@ -9,19 +9,19 @@ import PropTypes from 'prop-types';
 import { isEmpty, isFunction } from 'lodash';
 import cn from 'classnames';
 
-// Design
-import Label from 'components/Label';
-import InputDescription from 'components/InputDescription';
-import InputErrors from 'components/InputErrors';
-import InputSpacer from 'components/InputSpacer';
-import Wysiwyg from 'components/Wysiwyg';
+import {
+  Label,
+  InputDescription,
+  InputErrors,
+  validateInput,
+} from 'strapi-helper-plugin';
 
-// Utils
-import validateInput from 'utils/inputsValidations';
+import Wysiwyg from '../Wysiwyg';
 
 import styles from './styles.scss';
 
-class WysiwygWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class WysiwygWithErrors extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   state = { errors: [], hasInitialValue: false };
 
   componentDidMount() {
@@ -38,7 +38,7 @@ class WysiwygWithErrors extends React.Component { // eslint-disable-line react/p
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     // Show required error if the input's value is received after the compo is mounted
     if (!isEmpty(nextProps.value) && !this.state.hasInitialValue) {
       this.setState({ hasInitialValue: true });
@@ -62,7 +62,7 @@ class WysiwygWithErrors extends React.Component { // eslint-disable-line react/p
       const errors = validateInput(target.value, this.props.validations);
       this.setState({ errors, hasInitialValue: true });
     }
-  }
+  };
 
   render() {
     const {
@@ -76,7 +76,6 @@ class WysiwygWithErrors extends React.Component { // eslint-disable-line react/p
       inputClassName,
       inputDescription,
       inputDescriptionClassName,
-      inputDescriptionStyle,
       inputStyle,
       label,
       labelClassName,
@@ -93,7 +92,11 @@ class WysiwygWithErrors extends React.Component { // eslint-disable-line react/p
     } = this.props;
     const handleBlur = isFunction(onBlur) ? onBlur : this.handleBlur;
 
-    let spacer = !isEmpty(inputDescription) ? <InputSpacer /> : <div />;
+    let spacer = !isEmpty(inputDescription) ? (
+      <div style={{ height: '.4rem' }} />
+    ) : (
+      <div />
+    );
 
     if (!noErrorsDescription && !isEmpty(this.state.errors)) {
       spacer = <div />;
@@ -104,7 +107,7 @@ class WysiwygWithErrors extends React.Component { // eslint-disable-line react/p
         className={cn(
           styles.containerWysiwyg,
           customBootstrapClass,
-          !isEmpty(className) && className,
+          !isEmpty(className) && className
         )}
         style={style}
       >
@@ -132,11 +135,12 @@ class WysiwygWithErrors extends React.Component { // eslint-disable-line react/p
         <InputDescription
           className={inputDescriptionClassName}
           message={inputDescription}
-          style={inputDescriptionStyle}
+          style={!isEmpty(inputDescription) ? { marginTop: '1.4rem' } : {}}
         />
         <InputErrors
           className={errorsClassName}
-          errors={!noErrorsDescription && this.state.errors || []}
+          errors={(!noErrorsDescription && this.state.errors) || []}
+          name={name}
           style={errorsStyle}
         />
         {spacer}
@@ -158,7 +162,6 @@ WysiwygWithErrors.defaultProps = {
   inputClassName: '',
   inputDescription: '',
   inputDescriptionClassName: '',
-  inputDescriptionStyle: {},
   inputStyle: {},
   label: '',
   labelClassName: '',
@@ -192,7 +195,6 @@ WysiwygWithErrors.propTypes = {
     }),
   ]),
   inputDescriptionClassName: PropTypes.string,
-  inputDescriptionStyle: PropTypes.object,
   inputStyle: PropTypes.object,
   label: PropTypes.oneOfType([
     PropTypes.string,
@@ -206,10 +208,7 @@ WysiwygWithErrors.propTypes = {
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
   noErrorsDescription: PropTypes.bool,
-  onBlur: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.func,
-  ]),
+  onBlur: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
   onChange: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
   resetProps: PropTypes.bool,

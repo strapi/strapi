@@ -1,0 +1,18 @@
+[
+  {
+    "name": "name",
+    "description": "This is a super description",
+    "price": 1337,
+    "bool": true,
+    "bool1": false,
+    "email": "hi@strapi.io"
+  },
+  {
+    "name": "name1",
+    "description": "This description is not cool",
+    "price": 4000,
+    "bool": false,
+    "bool1": true,
+    "email": "yo@strapi.io"
+  }
+]

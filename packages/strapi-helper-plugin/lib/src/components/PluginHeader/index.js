@@ -6,45 +6,58 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import cn from 'classnames';
 
-import PluginHeaderTitle from 'components/PluginHeaderTitle';
-import PluginHeaderActions from 'components/PluginHeaderActions';
+import PluginHeaderTitle from '../PluginHeaderTitle';
+import PluginHeaderActions from '../PluginHeaderActions';
 
-import styles from './styles.scss';
+import StyledPluginHeader from './StyledPluginHeader';
 
-function PluginHeader({ actions, description, overrideRendering, subActions, title, withDescriptionAnim }) {
+function PluginHeader({
+  actions,
+  description,
+  icon,
+  onClickIcon,
+  overrideRendering,
+  subActions,
+  title,
+  titleId,
+  withDescriptionAnim,
+}) {
   return (
-    <div className={cn(styles.pluginHeader, 'row')}>
-      <div className="col-lg-7">
-        <PluginHeaderTitle
-          title={title}
-          description={description}
-          withDescriptionAnim={withDescriptionAnim}
-        />
+    <StyledPluginHeader>
+      <div className="row">
+        <div className="col-lg-6">
+          <PluginHeaderTitle
+            icon={icon}
+            onClickIcon={onClickIcon}
+            title={title}
+            titleId={titleId}
+            description={description}
+            withDescriptionAnim={withDescriptionAnim}
+          />
+        </div>
+        <div className="col-lg-6 justify-content-end">
+          <PluginHeaderActions actions={subActions} />
+          <PluginHeaderActions
+            actions={actions}
+            overrideRendering={overrideRendering}
+          />
+        </div>
       </div>
-      <div className="col-lg-2 justify-content-end">
-        <PluginHeaderActions
-          actions={subActions}
-        />
-      </div>
-      <div className="col-lg-3 justify-content">
-        <PluginHeaderActions
-          actions={actions}
-          overrideRendering={overrideRendering}
-        />
-      </div>
-    </div>
+    </StyledPluginHeader>
   );
 }
 
 PluginHeader.defaultProps = {
   actions: [],
   description: '',
+  icon: null,
+  onClickIcon: () => {},
   overrideRendering: false,
   subActions: [],
   title: '',
-  withDescriptionAnim: false,  
+  titleId: '',
+  withDescriptionAnim: false,
 };
 
 PluginHeader.propTypes = {
@@ -57,10 +70,9 @@ PluginHeader.propTypes = {
       values: PropTypes.object,
     }),
   ]),
-  overrideRendering: PropTypes.oneOfType([
-    PropTypes.func,
-    PropTypes.bool,
-  ]),
+  icon: PropTypes.string,
+  onClickIcon: PropTypes.func,
+  overrideRendering: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
   subActions: PropTypes.array,
   title: PropTypes.oneOfType([
     PropTypes.string,
@@ -70,6 +82,7 @@ PluginHeader.propTypes = {
       values: PropTypes.object,
     }),
   ]),
+  titleId: PropTypes.string,
   withDescriptionAnim: PropTypes.bool,
 };
 

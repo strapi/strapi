@@ -1,29 +1,29 @@
-.editForm { /* stylelint-disable */
-
+.editForm {
+  /* stylelint-disable */
 }
 
-.formContainer {
+.stmformContainer {
   margin: 0 3.3rem;
   padding: 2rem 1.2rem 0rem 1.2rem;
   border-radius: 0.2rem;
-  background-color: #FFFFFF;
-  box-shadow: 0 0.2rem 0.4rem 0 #E3E9F3;
+  background-color: #ffffff;
+  box-shadow: 0 0.2rem 0.4rem 0 #e3e9f3;
 
   > div > hr {
     margin-top: 1.3rem;
     margin-left: 1.5rem;
     margin-right: 1.5rem;
-    border-top: 1px solid #F6F6F6;
+    border-top: 1px solid #f6f6f6;
   }
 }
 
-.buttonContainer {
+.stmbuttonContainer {
   position: absolute;
   top: 2.8rem;
   right: 0rem;
   padding-right: 1.6rem;
 }
 
-.sectionContainer {
+.stmsectionContainer {
   margin-bottom: 1.9rem;
 }

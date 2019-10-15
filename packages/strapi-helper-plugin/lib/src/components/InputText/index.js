@@ -4,15 +4,16 @@ import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
 
-/* eslint-disable jsx-a11y/no-autofocus */
 import styles from './styles.scss';
 
 function InputText(props) {
-  const placeholder = isEmpty(props.placeholder) ? 'app.utils.placeholder.defaultMessage' : props.placeholder;
+  const placeholder = isEmpty(props.placeholder)
+    ? 'app.utils.placeholder.defaultMessage'
+    : props.placeholder;
 
   return (
     <FormattedMessage id={placeholder} defaultMessage={placeholder}>
-      {(message) => (
+      {message => (
         <input
           autoFocus={props.autoFocus}
           className={cn(

@@ -4,7 +4,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/strapi-generate-controller.svg)](https://www.npmjs.org/package/strapi-generate-controller)
 [![npm dependencies](https://david-dm.org/strapi/strapi-generate-controller.svg)](https://david-dm.org/strapi/strapi-generate-controller)
 [![Build status](https://travis-ci.org/strapi/strapi-generate-controller.svg?branch=master)](https://travis-ci.org/strapi/strapi-generate-controller)
-[![Slack status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
+[![Slack status](https://slack.strapi.io/badge.svg)](http://slack.strapi.io)
 
 This Strapi generator contains the default files for a controller.
 

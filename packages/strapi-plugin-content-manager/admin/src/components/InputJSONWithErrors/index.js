@@ -10,18 +10,20 @@ import { isEmpty, isFunction } from 'lodash';
 import cn from 'classnames';
 
 // Design
-import Label from 'components/Label';
-import InputDescription from 'components/InputDescription';
-import InputErrors from 'components/InputErrors';
-import InputSpacer from 'components/InputSpacer';
-import InputJSON from 'components/InputJSON';
+import {
+  Label,
+  InputDescription,
+  InputErrors,
+  InputSpacer,
+  validateInput,
+} from 'strapi-helper-plugin';
 
-// Utils
-import validateInput from 'utils/inputsValidations';
+import InputJSON from '../InputJSON';
 
 import styles from './styles.scss';
 
-class InputJSONWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class InputJSONWithErrors extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   state = { errors: [], hasInitialValue: false };
 
   componentDidMount() {
@@ -51,6 +53,7 @@ class InputJSONWithErrors extends React.Component { // eslint-disable-line react
       this.setErrors(errors);
     }
   }
+
   setErrors = errors => this.setState({ errors });
 
   setInit = () => this.setState({ hasInitialValue: true });
@@ -66,12 +69,12 @@ class InputJSONWithErrors extends React.Component { // eslint-disable-line react
       this.setErrors(errors);
       this.setInit();
     }
-  }
+  };
 
-  handleChange = (e) => {
+  handleChange = e => {
     this.setState({ errors: [] });
     this.props.onChange(e);
-  }
+  };
 
   render() {
     const {
@@ -111,7 +114,7 @@ class InputJSONWithErrors extends React.Component { // eslint-disable-line react
         className={cn(
           styles.containerJSON,
           customBootstrapClass,
-          !isEmpty(className) && className,
+          !isEmpty(className) && className
         )}
         style={style}
       >
@@ -138,11 +141,12 @@ class InputJSONWithErrors extends React.Component { // eslint-disable-line react
         <InputDescription
           className={inputDescriptionClassName}
           message={inputDescription}
-          style={{ marginTop: '3.2rem'}}
+          style={{ marginTop: '2.9rem' }}
         />
         <InputErrors
           className={errorsClassName}
-          errors={!noErrorsDescription && this.state.errors || []}
+          errors={(!noErrorsDescription && this.state.errors) || []}
+          name={name}
           style={errorsStyle}
         />
         {spacer}
@@ -211,17 +215,18 @@ InputJSONWithErrors.propTypes = {
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
   noErrorsDescription: PropTypes.bool,
-  onBlur: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.func,
-  ]),
+  onBlur: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
   onChange: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
   resetProps: PropTypes.bool,
   style: PropTypes.object,
   tabIndex: PropTypes.string,
   validations: PropTypes.object,
-  value: PropTypes.object,
+  value: PropTypes.oneOfType([
+    PropTypes.array,
+    PropTypes.object,
+    PropTypes.bool,
+  ]),
 };
 
 export default InputJSONWithErrors;

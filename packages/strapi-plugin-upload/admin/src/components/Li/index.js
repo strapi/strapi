@@ -8,14 +8,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import cn from 'classnames';
 import moment from 'moment';
 
-import FileIcon from 'components/FileIcon';
-import IcoContainer from 'components/IcoContainer';
-import PopUpWarning from 'components/PopUpWarning';
-
-import styles from './styles.scss';
+import { IcoContainer, PopUpWarning } from 'strapi-helper-plugin';
+import FileIcon from '../FileIcon';
+import { StyledLi, Truncate, Wrapper, Checked } from './components';
 
 /* eslint-disable react/no-string-refs */
 class Li extends React.Component {
@@ -29,10 +26,10 @@ class Li extends React.Component {
     }
   }
 
-  getUnit = (value) => {
+  getUnit = value => {
     let unit;
     let divider;
-    
+
     switch (true) {
       case value > 1000000:
         unit = 'GB';
@@ -40,7 +37,7 @@ class Li extends React.Component {
         break;
       case value < 1:
         unit = 'B';
-        divider = .001;
+        divider = 0.001;
         break;
       case value > 1000:
         unit = 'MB';
@@ -52,30 +49,30 @@ class Li extends React.Component {
     }
 
     return { divider, unit };
-  }
+  };
 
-  handleClick = (e) => {
+  handleClick = e => {
     e.preventDefault();
     const aTag = document.getElementById(this.props.item.hash);
     aTag.click();
-  }
+  };
 
-  handleDelete = (e) => {
+  handleDelete = e => {
     e.preventDefault();
     this.context.deleteData(this.props.item);
-  }
+  };
 
   renderLiCopied = () => (
-    <li className={cn(styles.liWrapper, styles.copied)}>
+    <StyledLi withCopyStyle>
       <div>
-        <div className={styles.checked}>
+        <Checked>
           <div />
-        </div>
+        </Checked>
         <div>
           <FormattedMessage id="upload.Li.linkCopied" />
         </div>
       </div>
-    </li>
+    </StyledLi>
   );
 
   render() {
@@ -101,45 +98,62 @@ class Li extends React.Component {
     ];
 
     return (
-      <CopyToClipboard text={item.url} onCopy={() => this.setState({copied: true})}>
-        <li className={styles.liWrapper}>
-          <a href={item.url} target="_blank" style={{ display: 'none' }} id={item.hash}>nothing</a>
-          <div className={styles.liContainer}>
+      <CopyToClipboard
+        text={item.url}
+        onCopy={() => this.setState({ copied: true })}
+      >
+        <StyledLi>
+          <a
+            href={item.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ display: 'none' }}
+            id={item.hash}
+          >
+            nothing
+          </a>
+          <Wrapper>
             <div>
               <div />
               <FileIcon fileType={item.ext} />
             </div>
-            {['hash', 'name', 'updatedAt', 'size', 'relatedTo', ''].map((value, key) => {
-              if (value === 'updatedAt') {
-                return (
-                  <div key={key} className={styles.truncate}>{moment(item[value]).format('YYYY/MM/DD - HH:mm')}</div>
-                );
+            {['hash', 'name', 'updatedAt', 'size', 'relatedTo', ''].map(
+              (value, key) => {
+                if (value === 'updatedAt') {
+                  return (
+                    <Truncate key={key}>
+                      {moment(item.updatedAt || item.updated_at).format(
+                        'YYYY/MM/DD - HH:mm'
+                      )}
+                    </Truncate>
+                  );
+                }
+
+                if (value === 'size') {
+                  const { divider, unit } = this.getUnit(item[value]);
+                  const size = item[value] / divider;
+
+                  return (
+                    <Truncate key={key}>
+                      {Math.round(size * 100) / 100}&nbsp;{unit}
+                    </Truncate>
+                  );
+                }
+
+                if (value !== '') {
+                  return <Truncate key={key}>{item[value]}</Truncate>;
+                }
+
+                return <IcoContainer key={key} icons={icons} />;
               }
-
-              if (value === 'size') {
-                const { divider, unit } = this.getUnit(item[value]);
-                const size = item[value]/divider;
-
-                return (
-                  <div key={key} className={styles.truncate}>{Math.round(size * 100) / 100 }&nbsp;{unit}</div>
-                );
-              }
-
-              if (value !== '') {
-                return (
-                  <div key={key} className={styles.truncate}>{item[value]}</div>
-                );
-              }
-
-              return <IcoContainer key={key} icons={icons} />;
-            })}
-          </div>
+            )}
+          </Wrapper>
           <PopUpWarning
             isOpen={this.state.isOpen}
             onConfirm={this.handleDelete}
             toggleModal={() => this.setState({ isOpen: false })}
           />
-        </li>
+        </StyledLi>
       </CopyToClipboard>
     );
   }

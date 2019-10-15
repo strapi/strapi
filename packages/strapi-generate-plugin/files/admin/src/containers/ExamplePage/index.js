@@ -10,9 +10,7 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
-
-import injectReducer from 'utils/injectReducer';
-import injectSaga from 'utils/injectSaga';
+import pluginId from 'pluginId';
 
 import Button from 'components/Button';
 
@@ -90,8 +88,8 @@ const mapStateToProps = createStructuredSelector({
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
-const withReducer = injectReducer({ key: 'examplePage', reducer });
-const withSaga = injectSaga({ key: 'examplePage', saga });
+const withReducer = strapi.injectReducer({ key: 'examplePage', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'examplePage', saga, pluginId });
 
 export default compose(
   withReducer,

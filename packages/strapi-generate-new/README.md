@@ -4,7 +4,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/strapi-generate-new.svg)](https://www.npmjs.org/package/strapi-generate-new)
 [![npm dependencies](https://david-dm.org/strapi/strapi-generate-new.svg)](https://david-dm.org/strapi/strapi-generate-new)
 [![Build status](https://travis-ci.org/strapi/strapi-generate-new.svg?branch=master)](https://travis-ci.org/strapi/strapi-generate-new)
-[![Slack status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
+[![Slack status](https://slack.strapi.io/badge.svg)](http://slack.strapi.io)
 
 This Strapi generator contains all the default files for a new Strapi application.
 

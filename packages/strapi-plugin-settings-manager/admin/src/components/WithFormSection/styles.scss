@@ -1,41 +1,40 @@
-.editFormSection { /* stylelint-disable */
-  background: #FFFFFF;
+.stmeditFormSection {
+  /* stylelint-disable */
+  background: #ffffff;
   padding-top: 0.1rem;
 }
 
-.sectionHeader {
-    color: #787E8F;
-    font-family: Lato;
-    font-size: 1.1rem;
-    font-weight: bold;
-    line-height: 1.3rem;
-    letter-spacing: 0.1rem;
-    text-transform: uppercase;
-  }
-
-.padded {
-  padding:  0 15px 0 15px;
+.stmsectionHeader {
+  color: #787e8f;
+  font-family: Lato;
+  font-size: 1.1rem;
+  font-weight: bold;
+  line-height: 1.3rem;
+  letter-spacing: 0.1rem;
+  text-transform: uppercase;
 }
 
+.stmpadded {
+  padding: 0 15px 0 15px;
+}
 
-.subNestedFormContainer {
+.stmsubNestedFormContainer {
   margin: -1.8rem 15px 1.8rem 15px;
   padding: 0 2rem;
-  background: #FAFAFB;
+  background: #fafafb;
 }
 
-.spacer {
+.stmspacer {
   height: 1.7rem;
 }
 
-
-.nesTedFormContainer {
+.stmnesTedFormContainer {
   padding-top: 0rem;
 }
 
-.sectionDescription {
-  margin: .1rem 0;
-  color: #8B91A0;
+.stmsectionDescription {
+  margin: 0.1rem 0;
+  color: #8b91a0;
   font-family: Lato;
   font-size: 1.1rem;
 }

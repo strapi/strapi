@@ -4,7 +4,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/strapi-hook-mongoose.svg)](https://www.npmjs.org/package/strapi-hook-mongoose)
 [![npm dependencies](https://david-dm.org/strapi/strapi-hook-mongoose.svg)](https://david-dm.org/strapi/strapi-hook-mongoose)
 [![Build status](https://travis-ci.org/strapi/strapi-hook-mongoose.svg?branch=master)](https://travis-ci.org/strapi/strapi-hook-mongoose)
-[![Slack status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
+[![Slack status](https://slack.strapi.io/badge.svg)](http://slack.strapi.io)
 
 This built-in hook allows you to use the [Mongoose ORM](http://mongoosejs.com/).
 

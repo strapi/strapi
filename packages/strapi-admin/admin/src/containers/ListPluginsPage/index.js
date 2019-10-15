@@ -11,26 +11,33 @@ import { Helmet } from 'react-helmet';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
-import cn from 'classnames';
 
-import PluginHeader from 'components/PluginHeader';
-import ListPlugins from 'components/ListPlugins';
-import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
+import { PluginHeader, LoadingIndicatorPage } from 'strapi-helper-plugin';
 
-import injectSaga from 'utils/injectSaga';
-import injectReducer from 'utils/injectReducer';
-import { makeSelectCurrentEnv, makeSelectPluginDeleteAction, makeSelectPlugins, makeSelectIsLoading } from './selectors';
-import { getPlugins, onDeletePluginClick, onDeletePluginConfirm } from './actions';
+import ListPlugins from '../../components/ListPlugins';
+
+import injectSaga from '../../utils/injectSaga';
+import injectReducer from '../../utils/injectReducer';
+import Wrapper from './Wrapper';
+
+import {
+  makeSelectPluginDeleteAction,
+  makeSelectPlugins,
+  makeSelectIsLoading,
+} from './selectors';
+import {
+  getPlugins,
+  onDeletePluginClick,
+  onDeletePluginConfirm,
+} from './actions';
 import reducer from './reducer';
 import saga from './saga';
-import styles from './styles.scss';
 
-export class ListPluginsPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  getChildContext = () => (
-    {
-      currentEnvironment: this.props.currentEnvironment,
-    }
-  );
+export class ListPluginsPage extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
+  getChildContext = () => ({
+    currentEnvironment: this.props.global.currentEnvironment,
+  });
 
   componentDidMount() {
     this.props.getPlugins();
@@ -44,14 +51,17 @@ export class ListPluginsPage extends React.Component { // eslint-disable-line re
     return (
       <div>
         <FormattedMessage id="app.components.ListPluginsPage.helmet.title">
-          {(message) => (
+          {message => (
             <Helmet>
               <title>{message}</title>
-              <meta name="description" content="Description of ListPluginsPage" />
+              <meta
+                name="description"
+                content="Description of ListPluginsPage"
+              />
             </Helmet>
           )}
         </FormattedMessage>
-        <div className={cn('container-fluid', styles.listPluginsPage)}>
+        <Wrapper className="container-fluid">
           <PluginHeader
             title={{
               id: 'app.components.ListPluginsPage.title',
@@ -68,7 +78,7 @@ export class ListPluginsPage extends React.Component { // eslint-disable-line re
             onDeleteClick={this.props.onDeletePluginClick}
             onDeleteConfirm={this.props.onDeletePluginConfirm}
           />
-        </div>
+        </Wrapper>
       </div>
     );
   }
@@ -81,7 +91,9 @@ ListPluginsPage.childContextTypes = {
 ListPluginsPage.contextTypes = {};
 
 ListPluginsPage.propTypes = {
-  currentEnvironment: PropTypes.string.isRequired,
+  global: PropTypes.shape({
+    currentEnvironment: PropTypes.string.isRequired,
+  }),
   getPlugins: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   isLoading: PropTypes.bool.isRequired,
@@ -92,7 +104,6 @@ ListPluginsPage.propTypes = {
 };
 
 const mapStateToProps = createStructuredSelector({
-  currentEnvironment: makeSelectCurrentEnv(),
   isLoading: makeSelectIsLoading(),
   pluginActionSucceeded: makeSelectPluginDeleteAction(),
   plugins: makeSelectPlugins(),
@@ -109,20 +120,23 @@ function mapDispatchToProps(dispatch) {
   );
 }
 
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps
+);
 
 /* Remove this line if the container doesn't have a route and
-*  check the documentation to see how to create the container's store
-*/
+ *  check the documentation to see how to create the container's store
+ */
 const withReducer = injectReducer({ key: 'listPluginsPage', reducer });
 
 /* Remove the line below the container doesn't have a route and
-*  check the documentation to see how to create the container's store
-*/
+ *  check the documentation to see how to create the container's store
+ */
 const withSaga = injectSaga({ key: 'listPluginsPage', saga });
 
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
+  withConnect
 )(ListPluginsPage);

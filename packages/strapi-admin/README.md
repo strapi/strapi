@@ -12,12 +12,6 @@ Create a new Strapi project: `strapi new myApp`.
 
 Go in your project: `cd myApp`.
 
-Remove the generated admin panel: `rm -rf admin`.
-
-Create a symlink in order to be able to easily develop the admin panel from your generated
-Strapi application: `ln -s /usr/local/lib/node_modules/strapi-generate-admin admin`
-(supposing `/usr/local/lib/node_modules` is your global node modules folder).
-
 ### Development
 
 Start the React application: `cd myApp/admin`, then `npm start`.

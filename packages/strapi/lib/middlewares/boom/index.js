@@ -9,13 +9,46 @@ const _ = require('lodash');
 const Boom = require('boom');
 const delegate = require('delegates');
 
+const boomMethods = [
+  'badRequest',
+  'unauthorized',
+  'paymentRequired',
+  'forbidden',
+  'notFound',
+  'methodNotAllowed',
+  'notAcceptable',
+  'proxyAuthRequired',
+  'clientTimeout',
+  'conflict',
+  'resourceGone',
+  'lengthRequired',
+  'preconditionFailed',
+  'entityTooLarge',
+  'uriTooLong',
+  'unsupportedMediaType',
+  'rangeNotSatisfiable',
+  'expectationFailed',
+  'teapot',
+  'badData',
+  'locked',
+  'failedDependency',
+  'preconditionRequired',
+  'tooManyRequests',
+  'illegal',
+  'badImplementation',
+  'notImplemented',
+  'badGateway',
+  'serverUnavailable',
+  'gatewayTimeout',
+];
+
 module.exports = strapi => {
   return {
     /**
      * Initialize the hook
      */
 
-    initialize: function(cb) {
+    initialize() {
       this.delegator = delegate(strapi.app.context, 'response');
       this.createResponses();
 
@@ -26,18 +59,26 @@ module.exports = strapi => {
           await next();
         } catch (error) {
           // emit error if configured
-          if (_.get(strapi, 'config.currentEnvironment.server.emitErrors', false)) {
+          if (
+            _.get(strapi, 'config.currentEnvironment.server.emitErrors', false)
+          ) {
             strapi.app.emit('error', error, ctx);
           }
 
           // Log error.
-          console.error(error);
+          strapi.log.error(error);
 
-          // Wrap error into a Boom's response.
-          ctx.status = error.status || 500;
-          ctx.body = _.get(ctx.body, 'isBoom')
-            ? ctx.body || error && error.message
-            : Boom.wrap(error, ctx.status, ctx.body || error.message);
+          // if the error is a boom error (e.g throw strapi.errors.badRequest)
+          if (error.isBoom) {
+            ctx.status = error.output.statusCode;
+            ctx.body = error.output.payload;
+          } else {
+            // Wrap error into a Boom's response.
+            ctx.status = error.status || 500;
+            ctx.body = _.get(ctx.body, 'isBoom')
+              ? ctx.body || (error && error.message)
+              : Boom.boomify(error, { statusCode: ctx.status });
+          }
         }
 
         if (ctx.response.headers.location) {
@@ -57,25 +98,23 @@ module.exports = strapi => {
         ctx.status = ctx.body.isBoom ? ctx.body.output.statusCode : ctx.status;
         ctx.body = ctx.body.isBoom ? ctx.body.output.payload : ctx.body;
       });
-
-      cb();
     },
 
     // Custom function to avoid ctx.body repeat
-    createResponses: function() {
-      Object.keys(Boom).forEach(key => {
-        strapi.app.response[key] = function(...rest) {
-          const error = Boom[key](...rest) || {};
+    createResponses() {
+      boomMethods.forEach(method => {
+        strapi.app.response[method] = function(...rest) {
+          const error = Boom[method](...rest) || {};
 
           this.status = error.isBoom ? error.output.statusCode : this.status;
           this.body = error;
         };
 
-        this.delegator.method(key);
+        this.delegator.method(method);
       });
 
-      strapi.app.response.send = function(data) {
-        this.status = 200;
+      strapi.app.response.send = function(data, status = 200) {
+        this.status = status;
         this.body = data;
       };
 
@@ -84,9 +123,7 @@ module.exports = strapi => {
         this.body = data;
       };
 
-      this.delegator
-        .method('send')
-        .method('created');
-    }
+      this.delegator.method('send').method('created');
+    },
   };
 };

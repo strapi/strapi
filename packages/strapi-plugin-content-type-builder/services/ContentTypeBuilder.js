@@ -1,221 +1,114 @@
 'use strict';
 
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs-extra');
 const _ = require('lodash');
 const generator = require('strapi-generate');
-const { fromJS, List, Map } = require('immutable');
-const Manager = require('../utils/Manager.js');
-const {
-  createManager,
-  removeColsLine,
-  reorderList,
-} = require('../utils/helpers.js');
+const { deepTrimObject } = require('../utils/helpers.js');
+
+function formatModelInfos(model, plugin) {
+  const data = {
+    icon: 'fa-cube',
+    name: _.get(model, 'info.name', 'model.name.missing'),
+    description: _.get(model, 'info.description', 'model.description.missing'),
+    fields: _.keys(model.attributes).length,
+    isTemporary: false,
+  };
+
+  if (plugin) {
+    data.source = plugin;
+  }
+
+  return data;
+}
 
 module.exports = {
-  appearance: async (attributes, model, plugin) => {
-    const pluginStore = strapi.store({
-      environment: '',
-      type: 'plugin',
-      name: 'content-manager'
-    });
+  /**
+   * Returns a list of user and plugins models
+   */
+  getModels() {
+    const models = Object.keys(strapi.models)
+      .filter(key => key !== 'core_store')
+      .map(name => formatModelInfos(strapi.models[name]));
 
-    const schema = await pluginStore.get({ key: 'schema' });
-    const layout = _.get(schema.layout, model, {});
-
-    // If updating a content-type
-    if (!_.isEmpty(layout)) {
-      const state = fromJS({
-        schema: fromJS(schema),
-      });
-      const schemaPath = plugin ? ['models', 'plugins', plugin, model] : ['models', model];
-      const keys = plugin ? `plugins.${plugin}.${model}.editDisplay` : `${model}.editDisplay`;
-      const prevList = state.getIn(['schema', ...schemaPath, 'editDisplay', 'fields'], List());
-      const prevFields =  Object.keys(state.getIn(['schema', ...schemaPath, 'editDisplay', 'availableFields'], Map()).toJS());
-      const currentFields = Object.keys(attributes);
-      const fieldsToRemove = _.difference(prevFields, currentFields);
-      let newList = prevList;
-
-      fieldsToRemove.forEach((field) => {
-        const index = newList.indexOf(field);
-        const manager = new Manager(state, prevList, keys, index, fromJS(layout.attributes || {}));
-        const attrToRemoveInfos = manager.attrToRemoveInfos; // Retrieve the removed item infos
-        const arrayOfLastLineElements = manager.arrayOfEndLineElements;
-        const isRemovingAFullWidthNode = attrToRemoveInfos.bootstrapCol === 12;
-
-        if (isRemovingAFullWidthNode) {
-          const currentNodeLine = _.findIndex(arrayOfLastLineElements, ['index', attrToRemoveInfos.index]); // Used only to know if removing a full size element on the first line
-          if (currentNodeLine === 0) {
-            newList = newList
-              .delete(index);
-          } else {
-            const previousNodeLine = currentNodeLine - 1;
-            const firstElementOnLine = previousNodeLine === 0 ? 0 : arrayOfLastLineElements[previousNodeLine - 1].index + 1;
-            const lastElementOnLine = arrayOfLastLineElements[previousNodeLine].index + 1;
-            const previousLineRangeIndexes = firstElementOnLine === lastElementOnLine ? [firstElementOnLine] : _.range(firstElementOnLine, lastElementOnLine);
-            const elementsOnLine = manager.getElementsOnALine(previousLineRangeIndexes);
-            const previousLineColNumber = manager.getLineSize(elementsOnLine);
-
-            if (previousLineColNumber >= 10) {
-              newList = newList
-                .delete(index);
-            } else {
-              const colNumberToAdd = 12 - previousLineColNumber;
-              const colsToAdd = manager.getColsToAdd(colNumberToAdd);
-              newList = newList
-                .delete(index)
-                .insert(index, colsToAdd[0]);
-
-              if (colsToAdd.length > 1) {
-                newList = newList
-                  .insert(index, colsToAdd[1]);
-              }
-            }
-          }
-        } else {
-          const nodeBounds = { left: manager.getBound(false), right: manager.getBound(true) }; // Retrieve the removed element's bounds
-          const leftBoundIndex = _.get(nodeBounds, ['left', 'index'], 0) + 1;
-          const rightBoundIndex = _.get(nodeBounds, ['right', 'index'], prevList.size -1);
-          const elementsOnLine = manager.getElementsOnALine(_.range(leftBoundIndex - 1, rightBoundIndex + 1));
-          const currentLineColSize = manager.getLineSize(elementsOnLine);
-          const isRemovingLine = currentLineColSize - attrToRemoveInfos.bootstrapCol === 0;
-
-          if (isRemovingLine) {
-            newList = newList
-              .delete(attrToRemoveInfos.index);
-          } else {
-            const random = Math.random().toString(36).substring(7);
-            newList = newList
-              .delete(attrToRemoveInfos.index)
-              .insert(rightBoundIndex, `__col-md-${attrToRemoveInfos.bootstrapCol}__${random}`);
-          }
-        }
-
-        const newManager = createManager(state, newList, keys, 0, fromJS(layout.attributes));
-        newList = removeColsLine(newManager, newList);
-        const lastManager = createManager(state, newList, keys, 0, fromJS(layout.attributes));
-        newList = reorderList(lastManager, lastManager.getLayout());
-      });
-
-      // Delete them from the available fields
-      fieldsToRemove.forEach(field => {
-        _.unset(schema, [...schemaPath, 'editDisplay', 'availableFields', field]);
-      });
-
-      _.set(schema, [...schemaPath, 'editDisplay', 'fields'], newList.toJS());
-    }
-
-    Object.keys(attributes).map(attribute => {
-      const appearances = _.get(attributes, [attribute, 'appearance'], {});
-      Object.keys(appearances).map(appearance => {
-        _.set(layout, ['attributes', attribute, 'appearance'], appearances[appearance] ? appearance : '' );
-      });
-
-      _.unset(attributes, [attribute, 'appearance']);
-    });
-
-    schema.layout[model] = layout;
-
-    await pluginStore.set({ key: 'schema', value: schema });
-  },
-
-  getModels: () => {
-    const models = [];
-
-    _.forEach(strapi.models, (model, name) => {
-      if (name === 'core_store') {
-        return true;
-      }
-
-      models.push({
-        icon: 'fa-cube',
-        name: _.get(model, 'info.name', 'model.name.missing'),
-        description: _.get(model, 'info.description', 'model.description.missing'),
-        fields: _.keys(model.attributes).length
-      });
-    });
-
-    const pluginModels = Object.keys(strapi.plugins).reduce((acc, current) => {
-      _.forEach(strapi.plugins[current].models, (model, name) => {
-        if (name === 'file') {
-          return true;
-        }
-
-        acc.push({
-          icon: 'fa-cube',
-          name: _.get(model, 'info.name', 'model.name.missing'),
-          description: _.get(model, 'info.description', 'model.description.missing'),
-          fields: _.keys(model.attributes).length,
-          source: current,
-        });
-      });
-
-      return acc;
-    }, []);
+    const pluginModels = Object.keys(strapi.plugins)
+      .map(pluginKey => {
+        const plugin = strapi.plugins[pluginKey];
+        return Object.keys(plugin.models)
+          .filter(key => key !== 'file')
+          .map(name => formatModelInfos(plugin.models[name], pluginKey));
+      })
+      .reduce((acc, models) => acc.concat(models), []);
 
     return models.concat(pluginModels);
   },
 
-  getModel: async (name, source) => {
+  /**
+   * Returns a model info
+   */
+  async getModel(name, source) {
     name = _.toLower(name);
 
-    const model = source ? _.get(strapi.plugins, [source, 'models', name]) : _.get(strapi.models, name);
-
-    const pluginStore = strapi.store({
-      environment: '',
-      type: 'plugin',
-      name: 'content-manager'
-    });
-
-    const schema = await pluginStore.get({ key: 'schema' });
+    const model = source
+      ? _.get(strapi.plugins, [source, 'models', name])
+      : _.get(strapi.models, name);
 
     const attributes = [];
     _.forEach(model.attributes, (params, attr) => {
       const relation = _.find(model.associations, { alias: attr });
 
-      if (relation &&  !_.isArray(_.get(relation, relation.alias))) {
-        if (params.plugin === 'upload' && relation.model || relation.collection === 'file') {
+      if (relation && !_.isArray(_.get(relation, relation.alias))) {
+        if (
+          (params.plugin === 'upload' && relation.model) ||
+          relation.collection === 'file'
+        ) {
           params = {
             type: 'media',
             multiple: params.collection ? true : false,
-            required: params.required
+            required: params.required,
+            configurable: params.configurable,
           };
         } else {
           params = _.omit(params, ['collection', 'model', 'via']);
           params.target = relation.model || relation.collection;
           params.key = relation.via;
           params.nature = relation.nature;
-          params.targetColumnName = _.get((params.plugin ? strapi.plugins[params.plugin].models : strapi.models )[params.target].attributes[params.key], 'columnName', '');
+          params.targetColumnName = _.get(
+            (params.plugin
+              ? strapi.plugins[params.plugin].models
+              : strapi.models)[params.target].attributes[params.key],
+            'columnName',
+            ''
+          );
         }
-      }
-
-      const appearance = _.get(schema, ['layout', name, 'attributes', attr, 'appearance']);
-      if (appearance) {
-        _.set(params, ['appearance', appearance], true);
       }
 
       attributes.push({
         name: attr,
-        params
+        params,
       });
     });
 
     return {
       name: _.get(model, 'info.name', 'model.name.missing'),
-      description: _.get(model, 'info.description', 'model.description.missing'),
+      description: _.get(
+        model,
+        'info.description',
+        'model.description.missing'
+      ),
       mainField: _.get(model, 'info.mainField', ''),
       connection: model.connection,
       collectionName: model.collectionName,
-      attributes: attributes
+      attributes: attributes,
     };
   },
 
-  getConnections: () => {
-    return _.keys(strapi.config.currentEnvironment.database.connections);
-  },
-
-  generateAPI: (name, description, connection, collectionName, attributes) => {
-    const template = _.get(strapi.config.currentEnvironment, `database.connections.${connection}.connector`, 'strapi-hook-mongoose').split('-')[2];
+  generateAPI(name, description, connection, collectionName, attributes) {
+    const template = _.get(
+      strapi.config.currentEnvironment,
+      `database.connections.${connection}.connector`,
+      'strapi-hook-mongoose'
+    ).split('-')[2];
 
     return new Promise((resolve, reject) => {
       const scope = {
@@ -227,51 +120,109 @@ module.exports = {
           description: _.replace(description, /\"/g, '\\"'), // eslint-disable-line no-useless-escape
           attributes,
           connection,
-          collectionName: !_.isEmpty(collectionName) ? collectionName : undefined,
-          tpl: template
-        }
+          collectionName: !_.isEmpty(collectionName)
+            ? collectionName
+            : undefined,
+          tpl: template,
+        },
       };
 
       generator(scope, {
         success: () => {
           resolve();
         },
-        error: (err) => {
+        error: err => {
           reject(err);
-        }
+        },
       });
     });
   },
 
-  getModelPath: (model, plugin) => {
-    // Retrieve where is located the model.
-    // Note: The target is not found when we are creating a new API. That's why, we are returning the lowercased model.
-    const target = Object.keys((plugin ? strapi.plugins : strapi.api) || {})
-      .filter(x => _.includes(Object.keys(_.get((plugin ? strapi.plugins : strapi.api)[x], 'models', [])), model.toLowerCase()))[0] || model.toLowerCase();
+  writeModel(name, data, { api, plugin, group } = {}) {
+    const filepath = this.getModelPath(name, { api, plugin, group });
+    const content = JSON.stringify(data, null, 2);
 
-    // Retrieve the filename of the model.
-    const filename = fs.readdirSync(plugin ? path.join(strapi.config.appPath, 'plugins', target, 'models') : path.join(strapi.config.appPath, 'api', target, 'models'))
-      .filter(x => x[0] !== '.')
-      .filter(x => x.split('.settings.json')[0].toLowerCase() === model.toLowerCase())[0];
-
-    return plugin ?
-      path.resolve(strapi.config.appPath, 'plugins', target, 'models', filename):
-      path.resolve(strapi.config.appPath, 'api', target, 'models', filename);
+    fs.ensureFileSync(filepath);
+    return fs.writeFileSync(filepath, content);
   },
 
-  formatAttributes: (attributes, name, plugin) => {
+  readModel(name, { api, plugin, group } = {}) {
+    const filepath = this.getModelPath(name, { api, plugin, group });
+
+    if (plugin && !fs.pathExistsSync(filepath)) {
+      return _.cloneDeep(
+        _.pick(strapi.plugins[plugin].models[name], [
+          'collectionName',
+          'connection',
+          'info',
+          'options',
+          'attributes',
+        ])
+      );
+    }
+
+    delete require.cache[filepath];
+    return _.cloneDeep(require(filepath));
+  },
+
+  getModelPath(name, { api, plugin, group } = {}) {
+    const fileName = `${_.upperFirst(name)}.settings.json`;
+
+    if (plugin) {
+      return path.resolve(
+        strapi.config.appPath,
+        'extensions',
+        plugin,
+        'models',
+        fileName
+      );
+    } else if (api) {
+      return path.resolve(
+        strapi.config.appPath,
+        'api',
+        api,
+        'models',
+        fileName
+      );
+    } else if (group) {
+      return path.resolve(strapi.config.appPath, 'groups', `${name}.json`);
+    }
+
+    throw new Error('Expected an api or a plugin, received none');
+  },
+
+  formatAttributes(attributes, name, plugin) {
     const errors = [];
     const attrs = {};
 
-    const target = Object.keys((plugin ? strapi.plugins : strapi.api) || {})
-      .filter(x => _.includes(Object.keys(_.get((plugin ? strapi.plugins : strapi.api)[x], 'models', [])), name))[0] || name.toLowerCase();
+    const target =
+      Object.keys((plugin ? strapi.plugins : strapi.api) || {}).filter(x =>
+        _.includes(
+          Object.keys(
+            _.get((plugin ? strapi.plugins : strapi.api)[x], 'models', [])
+          ),
+          name
+        )
+      )[0] || name.toLowerCase();
 
-    const model = (plugin ? _.get(strapi.plugins, [target, 'models', name]) : _.get(strapi.api, [target, 'models', name])) || {};
+    const model =
+      (plugin
+        ? _.get(strapi.plugins, [target, 'models', name])
+        : _.get(strapi.api, [target, 'models', name])) || {};
 
     // Only select configurable attributes.
-    const attributesConfigurable = attributes.filter(attribute => _.get(model, ['attributes', attribute.name, 'configurable'], true) !== false);
+    const attributesConfigurable = attributes.filter(
+      attribute =>
+        _.get(model, ['attributes', attribute.name, 'configurable'], true) !==
+        false
+    );
+
     const attributesNotConfigurable = Object.keys(model.attributes || {})
-      .filter(attribute => _.get(model, ['attributes', attribute, 'configurable'], true) === false)
+      .filter(
+        attribute =>
+          _.get(model, ['attributes', attribute, 'configurable'], true) ===
+          false
+      )
       .reduce((acc, attribute) => {
         acc[attribute] = model.attributes[attribute];
 
@@ -283,21 +234,26 @@ module.exports = {
         attrs[attribute.name] = _.omit(attribute.params, 'multiple');
 
         if (attribute.params.type === 'media') {
-          const via = _.findKey(strapi.plugins.upload.models.file.attributes, {collection: '*'});
+          const via = _.findKey(strapi.plugins.upload.models.file.attributes, {
+            collection: '*',
+          });
 
           attrs[attribute.name] = {
             [attribute.params.multiple ? 'collection' : 'model']: 'file',
             via,
             plugin: 'upload',
-            required: attribute.params.required === true ? true : false
           };
+
+          if (attribute.params.required === true) {
+            attrs[attribute.name].required = true;
+          }
         }
       } else if (_.has(attribute, 'params.target')) {
         const relation = attribute.params;
         const attr = {
           required: relation.required,
           columnName: relation.columnName,
-          unique: relation.unique
+          unique: relation.unique,
         };
 
         switch (relation.nature) {
@@ -306,6 +262,7 @@ module.exports = {
           case 'manyToOne':
             attr.model = relation.target;
             break;
+          case 'manyWay':
           case 'manyToMany':
           case 'oneToMany':
             attr.collection = relation.target;
@@ -313,7 +270,7 @@ module.exports = {
           default:
         }
 
-        if(relation.nature !== 'oneWay') {
+        if (!['manyWay', 'oneWay'].includes(relation.nature)) {
           attr.via = relation.key;
         }
         attr.dominant = relation.dominant;
@@ -325,148 +282,175 @@ module.exports = {
         attrs[attribute.name] = attr;
       }
 
-      if (!_.isNaN(parseFloat(attribute.name[0])) || !_.isNaN(parseFloat(_.get(attribute, 'params.key'), NaN))) {
+      if (
+        !_.isNaN(parseFloat(attribute.name[0])) ||
+        !_.isNaN(parseFloat(_.get(attribute, 'params.key'), NaN))
+      ) {
         errors.push({
           id: 'request.error.attribute.values',
           params: {
-            attribute
-          }
+            attribute,
+          },
         });
       }
     });
 
     Object.assign(attributesNotConfigurable, attrs);
+    const trimmedNotConfigurableAttributes = deepTrimObject(
+      attributesNotConfigurable
+    );
 
-    return [attributesNotConfigurable, errors];
+    return [trimmedNotConfigurableAttributes, errors];
   },
 
-  clearRelations: (model, source, force) => {
-    const errors = [];
-    const structure = {
-      models: strapi.models,
-      plugins: Object.keys(strapi.plugins).reduce((acc, current) => {
-        acc[current] = {
-          models: strapi.plugins[current].models
-        };
+  getConnections() {
+    return _.keys(strapi.config.currentEnvironment.database.connections);
+  },
 
-        return acc;
-      }, {})
-    };
+  // TODO: add groups
+  clearRelations(model, source) {
+    const errors = [];
 
     // Method to delete the association of the models.
-    const deleteAssociations = (models, plugin) => {
+    const deleteAssociations = (models, { plugin, group = false } = {}) => {
       Object.keys(models).forEach(name => {
-        const relationsToDelete = _.get(plugin ? strapi.plugins[plugin].models[name] : strapi.models[name], 'associations', []).filter(association => {
+        const modelData = models[name];
+        const { associations = [] } = modelData;
+
+        const relationsToDelete = associations.filter(association => {
+          const target = association.model || association.collection;
+
           if (source) {
-            return association[association.type] === model && association.plugin === source && (association.nature !== 'oneWay' || force);
+            return target === model && association.plugin === source;
           }
 
-          return association[association.type] === model && (association.nature !== 'oneWay' || force);
+          return target === model;
         });
 
-        if (!_.isEmpty(relationsToDelete)) {
-          // Retrieve where is located the model.
-          const target = Object.keys((plugin ? strapi.plugins : strapi.api) || {})
-            .filter(x => _.includes(Object.keys(_.get((plugin ? strapi.plugins : strapi.api)[x], 'models', [])), name))[0];
+        if (relationsToDelete.length > 0) {
+          const opts = {
+            group,
+            plugin,
+            api: modelData.apiName,
+          };
 
-          // Retrieve the filename of the model.
-          const filename = fs.readdirSync(plugin ? path.join(strapi.config.appPath, 'plugins', target, 'models') : path.join(strapi.config.appPath, 'api', target, 'models'))
-            .filter(x => x[0] !== '.')
-            .filter(x => x.split('.settings.json')[0].toLowerCase() === name)[0];
+          const modelJSON = this.readModel(name, opts);
 
-          // Path to access to the model.
-          const pathToModel = plugin ?
-            path.resolve(strapi.config.appPath, 'plugins', target, 'models', filename):
-            path.resolve(strapi.config.appPath, 'api', target, 'models', filename);
-
-          // Require the model.
-          const modelJSON = require(pathToModel);
-
-          _.forEach(relationsToDelete, relation => {
+          relationsToDelete.forEach(relation => {
             modelJSON.attributes[relation.alias] = undefined;
           });
 
           try {
-            fs.writeFileSync(pathToModel, JSON.stringify(modelJSON, null, 2), 'utf8');
+            this.writeModel(name, modelJSON, opts);
           } catch (e) {
+            strapi.log.error(e);
             errors.push({
               id: 'request.error.model.write',
-              params: {
-                filePath: pathToModel
-              }
             });
           }
         }
       });
     };
 
-    // Update `./api` models.
-    deleteAssociations(structure.models);
+    deleteAssociations(strapi.models);
 
-    Object.keys(structure.plugins).forEach(name => {
-      // Update `./plugins/${name}` models.
-      deleteAssociations(structure.plugins[name].models, name);
+    Object.keys(strapi.plugins).forEach(name => {
+      deleteAssociations(strapi.plugins[name].models, { plugin: name });
     });
+
+    // update groups
+    deleteAssociations(strapi.groups, { group: true });
 
     return errors;
   },
 
-  createRelations: (model, attributes, source) => {
+  createRelations(modelName, { attributes, source, oldName }) {
     const errors = [];
-    const structure = {
-      models: strapi.models,
-      plugins: Object.keys(strapi.plugins).reduce((acc, current) => {
-        acc[current] = {
-          models: strapi.plugins[current].models
-        };
-
-        return acc;
-      }, {})
-    };
 
     // Method to update the model
-    const update = (models, plugin) => {
+    const update = (models, { plugin, group } = {}) => {
       Object.keys(models).forEach(name => {
+        const modelData = models[name];
+        const { associations = [] } = modelData;
+
+        // update oneWays and manyWays that point to the model
+        const unidirectionnalRelationsToCreate = associations.filter(
+          association => {
+            const target = association.model || association.collection;
+
+            if (!['oneWay', 'manyWay'].includes(association.nature)) {
+              return false;
+            }
+
+            if (source) {
+              return target === oldName && association.plugin === source;
+            }
+
+            return target === oldName;
+          }
+        );
+
         const relationsToCreate = attributes.filter(attribute => {
           if (plugin) {
-            return _.get(attribute, 'params.target') === name && _.get(attribute, 'params.pluginValue') === plugin;
+            return (
+              _.get(attribute, 'params.target') === name &&
+              _.get(attribute, 'params.pluginValue') === plugin
+            );
           }
 
-          return _.get(attribute, 'params.target') === name && _.isEmpty(_.get(attribute, 'params.pluginValue', ''));
+          return (
+            _.get(attribute, 'params.target') === name &&
+            _.isEmpty(_.get(attribute, 'params.pluginValue', ''))
+          );
         });
 
-        if (!_.isEmpty(relationsToCreate)) {
-          // Retrieve where is located the model.
-          const target = Object.keys((plugin ? strapi.plugins : strapi.api) || {})
-            .filter(x => _.includes(Object.keys(_.get((plugin ? strapi.plugins : strapi.api)[x], 'models', [])), name))[0];
+        if (
+          relationsToCreate.length > 0 ||
+          unidirectionnalRelationsToCreate.length > 0
+        ) {
+          const opts = {
+            group,
+            plugin,
+            api: modelData.apiName,
+          };
 
-          // Retrieve the filename of the model.
-          const filename = fs.readdirSync(plugin ? path.join(strapi.config.appPath, 'plugins', target, 'models') : path.join(strapi.config.appPath, 'api', target, 'models'))
-            .filter(x => x[0] !== '.')
-            .filter(x => x.split('.settings.json')[0].toLowerCase() === name)[0];
+          const modelJSON = this.readModel(name, opts);
 
-          // Path to access to the model.
-          const pathToModel = plugin ?
-            path.resolve(strapi.config.appPath, 'plugins', target, 'models', filename):
-            path.resolve(strapi.config.appPath, 'api', target, 'models', filename);
+          unidirectionnalRelationsToCreate.forEach(association => {
+            let attr = {};
 
-          const modelJSON = require(pathToModel);
+            switch (association.nature) {
+              case 'manyWay':
+                attr.collection = modelName.toLowerCase();
+                break;
+              case 'oneWay':
+                attr.model = modelName.toLowerCase();
+                break;
+            }
 
-          _.forEach(relationsToCreate, ({ name, params }) => {
+            if (_.trim(source)) {
+              attr.plugin = _.trim(source);
+            }
+
+            modelJSON.attributes[association.alias] = attr;
+          });
+
+          relationsToCreate.forEach(({ name, params }) => {
             const attr = {};
 
             switch (params.nature) {
+              case 'manyWay':
               case 'oneWay':
                 return;
               case 'oneToOne':
               case 'oneToMany':
-                attr.model = model.toLowerCase();
+                attr.model = modelName.toLowerCase();
                 break;
               case 'manyToOne':
-                attr.collection = model.toLowerCase();
+                attr.collection = modelName.toLowerCase();
                 break;
               case 'manyToMany': {
-                attr.collection = model.toLowerCase();
+                attr.collection = modelName.toLowerCase();
 
                 if (!params.dominant) {
                   attr.dominant = true;
@@ -484,38 +468,40 @@ module.exports = {
             }
 
             modelJSON.attributes[params.key] = attr;
-
-            try {
-              fs.writeFileSync(pathToModel, JSON.stringify(modelJSON, null, 2), 'utf8');
-            } catch (e) {
-              errors.push({
-                id: 'request.error.model.write',
-                params: {
-                  filePath: pathToModel
-                }
-              });
-            }
           });
+
+          try {
+            this.writeModel(name, modelJSON, opts);
+          } catch (e) {
+            strapi.log.error(e);
+            errors.push({
+              id: 'request.error.model.write',
+            });
+          }
         }
       });
     };
 
     // Update `./api` models.
-    update(structure.models);
+    update(strapi.models);
 
-    Object.keys(structure.plugins).forEach(name => {
-      // Update `./plugins/${name}` models.
-      update(structure.plugins[name].models, name);
+    Object.keys(strapi.plugins).forEach(pluginName => {
+      // Update `./plugins/${pluginName}` models.
+      if (!strapi.plugins[pluginName].models) return;
+      update(strapi.plugins[pluginName].models, { plugin: pluginName });
     });
+
+    update(strapi.groups, { group: true });
 
     return errors;
   },
 
   removeModel: model => {
-    model = _.toLower(model);
+    const modelName = _.toLower(model);
+    const apiName = strapi.models[modelName].apiName;
+    const apiPath = path.join(strapi.config.appPath, 'api', apiName);
 
     const errors = [];
-    const apiPath = path.join(strapi.config.appPath, 'api');
 
     const deleteModelFile = (parentPath, fileName) => {
       const filePath = path.join(parentPath, fileName);
@@ -527,8 +513,8 @@ module.exports = {
           errors.push({
             id: 'request.error.file.unlink',
             params: {
-              filePath
-            }
+              filePath,
+            },
           });
         }
       }
@@ -547,19 +533,23 @@ module.exports = {
             errors.push({
               id: 'request.error.route.unlink',
               params: {
-                filePath
-              }
+                filePath,
+              },
             });
           }
         } else {
           try {
-            fs.writeFileSync(filePath, JSON.stringify(routesJSON, null, 2), 'utf8');
+            fs.writeFileSync(
+              filePath,
+              JSON.stringify(routesJSON, null, 2),
+              'utf8'
+            );
           } catch (e) {
             errors.push({
               id: 'request.error.route.write',
               params: {
-                filePath
-              }
+                filePath,
+              },
             });
           }
         }
@@ -587,8 +577,8 @@ module.exports = {
             errors.push({
               id: 'request.error.folder.unlink',
               params: {
-                folderPath
-              }
+                folderPath,
+              },
             });
           }
         }
@@ -596,8 +586,8 @@ module.exports = {
         errors.push({
           id: 'request.error.folder.read',
           params: {
-            folderPath
-          }
+            folderPath,
+          },
         });
       }
     };
@@ -605,5 +595,5 @@ module.exports = {
     recurciveDeleteFiles(apiPath);
 
     return errors;
-  }
+  },
 };

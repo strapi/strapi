@@ -1,0 +1,15 @@
+{
+  "connection": "default",
+  "info": {
+    "name": "test",
+    "description": ""
+  },
+  "attributes": {
+    "type": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "configurable": true
+    }
+  }
+}

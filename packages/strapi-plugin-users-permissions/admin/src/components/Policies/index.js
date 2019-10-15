@@ -1,8 +1,8 @@
 /**
-*
-* Policies
-*
-*/
+ *
+ * Policies
+ *
+ */
 
 import React from 'react';
 import cn from 'classnames';
@@ -10,24 +10,42 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, isEmpty, map, takeRight, toLower, without } from 'lodash';
 
-import BoundRoute from 'components/BoundRoute';
-import Input from 'components/InputsIndex';
+import { InputsIndex as Input } from 'strapi-helper-plugin';
+import BoundRoute from '../BoundRoute';
 
 import styles from './styles.scss';
 
-class Policies extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  handleChange = (e) => this.context.onChange(e);
+class Policies extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
+  handleChange = e => this.context.onChange(e);
 
   render() {
     const baseTitle = 'users-permissions.Policies.header';
     const title = this.props.shouldDisplayPoliciesHint ? 'hint' : 'title';
     const value = get(this.props.values, this.props.inputSelectName);
-    const path = without(this.props.inputSelectName.split('.'), 'permissions', 'controllers', 'policy');
-    const controllerRoutes = get(this.props.routes, without(this.props.inputSelectName.split('.'), 'permissions', 'controllers', 'policy')[0]);
-    const routes = isEmpty(controllerRoutes) ? [] : controllerRoutes.filter(o => toLower(o.handler) === toLower(takeRight(path, 2).join('.')));
+    const path = without(
+      this.props.inputSelectName.split('.'),
+      'permissions',
+      'controllers',
+      'policy',
+    );
+    const controllerRoutes = get(
+      this.props.routes,
+      without(
+        this.props.inputSelectName.split('.'),
+        'permissions',
+        'controllers',
+        'policy',
+      )[0],
+    );
+    const routes = isEmpty(controllerRoutes)
+      ? []
+      : controllerRoutes.filter(
+        o => toLower(o.handler) === toLower(takeRight(path, 2).join('.')),
+      );
 
     return (
-      <div className={cn('col-md-5',styles.policies)}>
+      <div className={cn('col-md-5', styles.policies)}>
         <div className="container-fluid">
           <div className={cn('row', styles.inputWrapper)}>
             <div className={cn('col-md-12', styles.header)}>
@@ -44,12 +62,16 @@ class Policies extends React.Component { // eslint-disable-line react/prefer-sta
                 validations={{}}
                 value={value}
               />
-            ) : ''}
+            ) : (
+              ''
+            )}
           </div>
           <div className="row">
-            {!this.props.shouldDisplayPoliciesHint ? (
-              map(routes, (route, key) => <BoundRoute key={key} route={route} />)
-            ) : ''}
+            {!this.props.shouldDisplayPoliciesHint
+              ? map(routes, (route, key) => (
+                <BoundRoute key={key} route={route} />
+              ))
+              : ''}
           </div>
         </div>
       </div>

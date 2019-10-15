@@ -46,6 +46,10 @@
       "configurable": false,
       "required": true
     },
+    "provider_metadata": {
+      "type": "json",
+      "configurable": false
+    },
     "related": {
       "collection": "*",
       "filter": "field",

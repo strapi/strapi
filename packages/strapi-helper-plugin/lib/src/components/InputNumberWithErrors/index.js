@@ -3,19 +3,20 @@ import PropTypes from 'prop-types';
 import { isEmpty, isFunction } from 'lodash';
 import cn from 'classnames';
 
-// Design
-import Label from 'components/Label';
-import InputDescription from 'components/InputDescription';
-import InputErrors from 'components/InputErrors';
-import InputNumber from 'components/InputNumber';
-import InputSpacer from 'components/InputSpacer';
-
 // Utils
-import validateInput from 'utils/inputsValidations';
+import validateInput from '../../utils/inputsValidations';
+
+// Design
+import Label from '../Label';
+import InputDescription from '../InputDescription';
+import InputErrors from '../InputErrors';
+import InputNumber from '../InputNumber';
+import InputSpacer from '../InputSpacer';
 
 import styles from './styles.scss';
 
-class InputNumberWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class InputNumberWithErrors extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   state = { errors: [], hasInitialValue: false };
 
   componentDidMount() {
@@ -32,7 +33,7 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     // Show required error if the input's value is received after the compo is mounted
     if (!isEmpty(nextProps.value) && !this.state.hasInitialValue) {
       this.setState({ hasInitialValue: true });
@@ -56,7 +57,7 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
       const errors = validateInput(target.value, this.props.validations);
       this.setState({ errors, hasInitialValue: true });
     }
-  }
+  };
 
   render() {
     const {
@@ -83,6 +84,7 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
       placeholder,
       style,
       tabIndex,
+      step,
       value,
     } = this.props;
     const handleBlur = isFunction(onBlur) ? onBlur : this.handleBlur;
@@ -98,7 +100,7 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
         className={cn(
           styles.containerInputNumber,
           customBootstrapClass,
-          !isEmpty(className) && className,
+          !isEmpty(className) && className
         )}
         style={style}
       >
@@ -121,6 +123,7 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
           placeholder={placeholder}
           style={inputStyle}
           tabIndex={tabIndex}
+          step={step}
           value={value}
         />
         <InputDescription
@@ -130,7 +133,8 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
         />
         <InputErrors
           className={errorsClassName}
-          errors={!noErrorsDescription && this.state.errors || []}
+          errors={(!noErrorsDescription && this.state.errors) || []}
+          name={name}
           style={errorsStyle}
         />
         {spacer}
@@ -161,6 +165,7 @@ InputNumberWithErrors.defaultProps = {
   labelStyle: {},
   noErrorsDescription: false,
   placeholder: 'app.utils.placeholder.defaultMessage',
+  step: 'any',
   style: {},
   tabIndex: '0',
   validations: {},
@@ -201,20 +206,15 @@ InputNumberWithErrors.propTypes = {
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
   noErrorsDescription: PropTypes.bool,
-  onBlur: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.func,
-  ]),
+  onBlur: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
   placeholder: PropTypes.string,
+  step: PropTypes.number,
   style: PropTypes.object,
   tabIndex: PropTypes.string,
   validations: PropTypes.object,
-  value: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.number,
-  ]),
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };
 
 export default InputNumberWithErrors;

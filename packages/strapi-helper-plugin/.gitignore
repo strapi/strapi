@@ -5,7 +5,7 @@ build
 node_modules
 stats.json
 package-lock.json
-yarn.lock
+yarn-error.log
 
 # Cruft
 .DS_Store

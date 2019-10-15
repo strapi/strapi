@@ -1,78 +1,108 @@
 'use strict';
 
-/**
- * Module dependencies
- */
+const { join, resolve, basename } = require('path');
+const os = require('os');
+const crypto = require('crypto');
+const chalk = require('chalk');
+const { machineIdSync } = require('node-machine-id');
+const uuid = require('uuid/v4');
+const sentry = require('@sentry/node');
 
-// Node.js core.
-const path = require('path');
+const hasYarn = require('./utils/has-yarn');
+const checkRequirements = require('./utils/check-requirements');
+const { trackError, captureException } = require('./utils/usage');
+const parseDatabaseArguments = require('./utils/parse-db-arguments');
+const generateNew = require('./generate-new');
 
-// Local dependencies.
-const packageJSON = require('../json/package.json.js');
-const database = require('../json/database.json.js');
+sentry.init({
+  dsn: 'https://841d2b2c9b4d4b43a4cde92794cb705a@sentry.io/1762059',
+});
 
-/**
- * Copy required files for the generated application
- */
+module.exports = (projectDirectory, cliArguments) => {
+  checkRequirements();
 
-module.exports = {
-  moduleDir: path.resolve(__dirname, '..'),
-  templatesDirectory: path.resolve(__dirname, '..', 'templates'),
-  before: require('./before'),
-  after: require('./after'),
-  targets: {
+  const rootPath = resolve(projectDirectory);
 
-    // Call the `admin` generator.
-    '.': ['admin'],
+  const tmpPath = join(
+    os.tmpdir(),
+    `strapi${crypto.randomBytes(6).toString('hex')}`
+  );
 
-    // Main package.
-    'package.json': {
-      jsonfile: packageJSON
-    },
+  const useNpm = cliArguments.useNpm !== undefined;
 
-    'config/environments/development/database.json': {
-      jsonfile: database
-    },
+  const scope = {
+    rootPath,
+    name: basename(rootPath),
+    // disable quickstart run app after creation
+    runQuickstartApp: cliArguments.run === false ? false : true,
+    // use pacakge version as strapiVersion (all packages have the same version);
+    strapiVersion: require('../package.json').version,
+    debug: cliArguments.debug !== undefined,
+    quick: cliArguments.quickstart !== undefined,
+    uuid: uuid(),
+    deviceId: machineIdSync(),
+    tmpPath,
+    // use yarn if available and --use-npm isn't true
+    useYarn: !useNpm && hasYarn(),
+    installDependencies: true,
+    strapiDependencies: [
+      'strapi',
+      'strapi-admin',
+      'strapi-utils',
+      'strapi-plugin-settings-manager',
+      'strapi-plugin-content-type-builder',
+      'strapi-plugin-content-manager',
+      'strapi-plugin-users-permissions',
+      'strapi-plugin-email',
+      'strapi-plugin-upload',
+    ],
+    additionalsDependencies: {},
+  };
 
-    // Copy dot files.
-    '.editorconfig': {
-      copy: 'editorconfig'
-    },
-    '.npmignore': {
-      copy: 'npmignore'
-    },
-    '.gitignore': {
-      copy: 'gitignore'
-    },
+  sentry.configureScope(function(sentryScope) {
+    const tags = {
+      os_type: os.type(),
+      os_platform: os.platform(),
+      os_release: os.release(),
+      strapi_version: scope.strapiVersion,
+      node_version: process.version,
+    };
 
-    // Copy Markdown files with some information.
-    'README.md': {
-      template: 'README.md'
-    },
+    Object.keys(tags).forEach(tag => {
+      sentryScope.setTag(tag, tags[tag]);
+    });
+  });
 
-    // Empty API directory.
-    'api': {
-      folder: {}
-    },
+  parseDatabaseArguments({ scope, args: cliArguments });
+  initCancelCatcher(scope);
 
-    // Empty plugins directory.
-    'plugins': {
-      folder: {}
-    },
+  console.log(`Creating a new Strapi application at ${chalk.green(rootPath)}.`);
+  console.log();
 
-    // Empty public directory.
-    'public': {
-      folder: {}
-    },
-
-    // Empty public directory.
-    'public/uploads': {
-      folder: {}
-    },
-
-    // Empty node_modules directory.
-    'node_modules': {
-      folder: {}
-    }
-  }
+  return generateNew(scope).catch(error => {
+    console.error(error);
+    return captureException(error).then(() => {
+      return trackError({ scope, error }).then(() => {
+        process.exit(1);
+      });
+    });
+  });
 };
+
+function initCancelCatcher() {
+  // Create interface for windows user to let them quit the program.
+  if (process.platform === 'win32') {
+    const rl = require('readline').createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+
+    rl.on('SIGINT', function() {
+      process.emit('SIGINT');
+    });
+  }
+
+  process.on('SIGINT', () => {
+    process.exit(1);
+  });
+}

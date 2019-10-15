@@ -8,21 +8,24 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 
-// Utils
-import { pluginId } from 'app';
+import pluginId from '../../pluginId';
 
 // Containers
-import ConfigPage from 'containers/ConfigPage';
-import HomePage from 'containers/HomePage';
-import NotFoundPage from 'containers/NotFoundPage';
+import ConfigPage from '../ConfigPage';
+import HomePage from '../HomePage';
+import { NotFound } from 'strapi-helper-plugin';
 
 function App() {
   return (
     <div className={pluginId}>
       <Switch>
-        <Route path={`/plugins/${pluginId}/configurations/:env`} component={ConfigPage} exact />
+        <Route
+          path={`/plugins/${pluginId}/configurations/:env`}
+          component={ConfigPage}
+          exact
+        />
         <Route path={`/plugins/${pluginId}`} component={HomePage} exact />
-        <Route component={NotFoundPage} />
+        <Route component={NotFound} />
       </Switch>
     </div>
   );

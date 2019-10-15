@@ -24,5 +24,7 @@
   "notification.config.success": "Ustawienia zostały zaaktualizowane",
   "notification.delete.success": "Plik został usunięty",
   "notification.dropFile.success": "Plik został przesłany",
-  "notification.dropFiles.success": "{number} plików zostało przesłanych"
+  "notification.dropFiles.success": "{number} plików zostało przesłanych",
+  "Upload.status.sizeLimit": "{plik} jest większy niż skonfigurowany rozmiar limitu",
+  "Upload.status.disabled" : "Przesyłanie plików jest wyłączone"
 }

@@ -11,6 +11,7 @@ const { GraphQLUpload } = require('apollo-server-koa');
 const graphql = require('graphql');
 const GraphQLJSON = require('graphql-type-json');
 const GraphQLDateTime = require('graphql-type-datetime');
+const GraphQLLong = require('graphql-type-long');
 const pluralize = require('pluralize');
 /* eslint-disable no-unused-vars */
 
@@ -29,9 +30,10 @@ module.exports = {
     modelName = '',
     attributeName = '',
     rootType = 'query',
+    action = '',
   }) {
     // Type
-    if (definition.type) {
+    if (definition.type && definition.type !== 'group') {
       let type = 'String';
 
       switch (definition.type) {
@@ -41,6 +43,9 @@ module.exports = {
           break;
         case 'integer':
           type = 'Int';
+          break;
+        case 'biginteger':
+          type = 'Long';
           break;
         case 'decimal':
           type = 'Float';
@@ -62,11 +67,29 @@ module.exports = {
           break;
       }
 
-      if (definition.required) {
+      if (definition.required && action !== 'update') {
         type += '!';
       }
 
       return type;
+    }
+
+    if (definition.type === 'group') {
+      const globalId = strapi.groups[definition.group].globalId;
+      const { required, repeatable } = definition;
+      let typeName = required === true ? `${globalId}` : globalId;
+
+      if (rootType === 'mutation') {
+        typeName =
+          action === 'update'
+            ? `edit${_.capitalize(globalId)}Input`
+            : `${_.capitalize(globalId)}Input${required ? '!' : ''}`;
+      }
+
+      if (repeatable === true) {
+        return `[${typeName}]`;
+      }
+      return `${typeName}`;
     }
 
     const ref = definition.model || definition.collection;
@@ -136,10 +159,11 @@ module.exports = {
     Object.assign(resolvers, {
       JSON: GraphQLJSON,
       DateTime: GraphQLDateTime,
+      Long: GraphQLLong,
       Upload: GraphQLUpload,
     });
 
-    return 'scalar JSON \n scalar DateTime \n scalar Upload';
+    return 'scalar JSON \n scalar DateTime \n scalar Long \n scalar Upload';
   },
 
   /**
@@ -149,11 +173,11 @@ module.exports = {
    */
 
   addPolymorphicUnionType: (customDefs, defs) => {
+    const def = customDefs + defs;
     const types = graphql
-      .parse(customDefs + defs)
+      .parse(def)
       .definitions.filter(
-        def =>
-          def.kind === 'ObjectTypeDefinition' && def.name.value !== 'Query',
+        def => def.kind === 'ObjectTypeDefinition' && def.name.value !== 'Query'
       )
       .map(def => def.name.value);
 
@@ -183,15 +207,26 @@ module.exports = {
     `;
   },
 
-  generateInputModel: function(model, name) {
+  generateInputModel: function(model, name, { allowIds = false } = {}) {
     const globalId = model.globalId;
     const inputName = `${_.capitalize(name)}Input`;
 
-    /* eslint-disable */
-    return `
+    if (_.isEmpty(model.attributes)) {
+      return `
       input ${inputName} {
+        _: String
+      }
+
+      input edit${inputName} {
+        ${allowIds ? 'id: ID' : '_: String'}
+      }
+     `;
+    }
+
+    const inputs = `
+      input ${inputName} {
+        
         ${Object.keys(model.attributes)
-          .filter(attribute => model.attributes[attribute].private !== true)
           .map(attribute => {
             return `${attribute}: ${this.convertType({
               definition: model.attributes[attribute],
@@ -202,8 +237,23 @@ module.exports = {
           })
           .join('\n')}
       }
+
+      input edit${inputName} {
+        ${allowIds ? 'id: ID' : ''}
+        ${Object.keys(model.attributes)
+          .map(attribute => {
+            return `${attribute}: ${this.convertType({
+              definition: model.attributes[attribute],
+              modelName: globalId,
+              attributeName: attribute,
+              rootType: 'mutation',
+              action: 'update',
+            })}`;
+          })
+          .join('\n')}
+      }
     `;
-    /* eslint-enable */
+    return inputs;
   },
 
   generateInputPayloadArguments: function(model, name, type, resolver) {
@@ -224,7 +274,7 @@ module.exports = {
         `;
       case 'update':
         return `
-          input ${type}${inputName}  { where: InputID, data: ${inputName} }
+          input ${type}${inputName}  { where: InputID, data: edit${inputName} }
           type ${type}${payloadName} { ${pluralize.singular(name)}: ${
           model.globalId
         } }

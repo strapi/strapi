@@ -1,21 +1,27 @@
 /**
-*
-* PluginLeftMenu
-*
-*/
+ *
+ * PluginLeftMenu
+ *
+ */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import { map } from 'lodash';
-import PluginLeftMenuSection from 'components/PluginLeftMenuSection';
+import PluginLeftMenuSection from '../PluginLeftMenuSection';
 import styles from './styles.scss';
 
-class PluginLeftMenu extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class PluginLeftMenu extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   render() {
     return (
-      <div className={`${styles.pluginLeftMenu} col-md-3`}>
+      <div className={`${styles.stmpluginLeftMenu} col-md-3`}>
         {map(this.props.sections, (section, index) => (
-          <PluginLeftMenuSection  key={index} section={section} environments={this.props.environments} envParams={this.props.envParams} />
+          <PluginLeftMenuSection
+            key={index}
+            section={section}
+            environments={this.props.environments}
+            envParams={this.props.envParams}
+          />
         ))}
       </div>
     );

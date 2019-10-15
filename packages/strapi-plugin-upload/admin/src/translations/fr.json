@@ -24,5 +24,7 @@
   "notification.config.success": "Les paramètres ont été mis à jour.",
   "notification.delete.success": "Le fichier a bien été supprimé",
   "notification.dropFile.success": "Votre fichier a été téléchargé",
-  "notification.dropFiles.success": "{number} fichiers ont été téléchargées"
+  "notification.dropFiles.success": "{number} fichiers ont été téléchargées",
+  "Upload.status.sizeLimit": "{file} est plus grand que la taille limite configurée",
+  "Upload.status.disabled" : "Le téléchargement de fichier est désactivé"
 }
