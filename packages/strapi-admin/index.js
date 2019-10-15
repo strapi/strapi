@@ -105,13 +105,16 @@ async function createCacheDir(dir) {
       fs.existsSync(path.resolve(getPkgPath(dep), 'admin', 'src', 'index.js'))
   );
 
-  const localPluginsToCopy = fs
-    .readdirSync(path.join(dir, 'plugins'))
-    .filter(plugin =>
-      fs.existsSync(
-        path.resolve(dir, 'plugins', plugin, 'admin', 'src', 'index.js')
-      )
-    );
+  let localPluginsToCopy = [];
+  if (fs.existsSync(path.join(dir, 'plugins'))) {
+    localPluginsToCopy = fs
+      .readdirSync(path.join(dir, 'plugins'))
+      .filter(plugin =>
+        fs.existsSync(
+          path.resolve(dir, 'plugins', plugin, 'admin', 'src', 'index.js')
+        )
+      );
+  }
 
   // TODO: add logic to avoid copying files if not necessary
 

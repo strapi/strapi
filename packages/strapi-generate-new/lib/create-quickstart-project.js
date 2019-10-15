@@ -26,7 +26,7 @@ module.exports = async function createQuickStartProject(scope) {
   try {
     await trackUsage({ event: 'willBuildAdmin', scope });
 
-    await execa('npm', ['run', 'build'], {
+    await execa('npm', ['run', 'build', '--', '--no-optimization'], {
       stdio: 'inherit',
       cwd: scope.rootPath,
       env: {
