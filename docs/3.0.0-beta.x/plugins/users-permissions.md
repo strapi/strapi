@@ -169,8 +169,6 @@ This action sends an email to a user with the link of you reset password page. T
 #### Usage
 
 - `email` is your user email.
-- `url` is the url link that user will receive. After the user triggers a new password reset,
-  it is used to redirect the user to the new-password form.
 
 ```js
 import axios from 'axios';
@@ -179,8 +177,6 @@ import axios from 'axios';
 axios
   .post('http://localhost:1337/auth/forgot-password', {
     email: 'user@strapi.io',
-    url:
-      'http:/localhost:1337/admin/plugins/users-permissions/auth/reset-password',
   })
   .then(response => {
     // Handle success.
@@ -191,6 +187,11 @@ axios
     console.log('An error occurred:', error);
   });
 ```
+
+This action will send you an email that contains an URL with the needed code for the [reset password](#password-reset).
+The URL have to be your frontend application that contains your reset password form.
+
+To configure it you will have to got in the Users & Permissions settings and navigate in the Advanced tab.
 
 ### Password reset
 

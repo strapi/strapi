@@ -76,6 +76,21 @@ function EditForm({ onChange, showLoaders, values }) {
             <Input
               label={{
                 id:
+                  'users-permissions.EditForm.inputToggle.label.email-reset-password',
+              }}
+              inputDescription={{
+                id:
+                  'users-permissions.EditForm.inputToggle.description.email-reset-password',
+              }}
+              name="advanced.settings.email_reset_password"
+              onChange={onChange}
+              type="text"
+              value={get(settings, 'email_reset_password')}
+            />
+            <div className="col-6"></div>
+            <Input
+              label={{
+                id:
                   'users-permissions.EditForm.inputToggle.label.email-confirmation',
               }}
               inputDescription={{
