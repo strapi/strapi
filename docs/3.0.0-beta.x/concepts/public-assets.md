@@ -1,6 +1,6 @@
 # Public Assets
 
-See the [public assets concepts](../concepts/concepts.md#public-assets) for details.
+Public assets are static files such as images, video, css, etc that you want to make accessible to the outside world. Every new project includes by default, a folder named `./public`.
 
 Because an API may need to serve static assets, every new Strapi project includes by default, a folder named `/public`. Any file located in this directory is accessible if the request's path doesn't match any other defined route and if it matches a public file name.
 
@@ -16,4 +16,4 @@ An image named `company-logo.png` in `./public/` is accessible through `/company
 The dotfiles are not exposed. It means that every files with the names start by `.` such as `.htaccess` or `.gitignore` are not served.
 :::
 
-Refer to the [public assets configurations](../configurations/configurations.md#Application) for more information.
+Refer to the [public assets configurations](./configurations.md#Application) for more information.

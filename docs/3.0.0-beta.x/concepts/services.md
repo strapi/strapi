@@ -1,6 +1,8 @@
 # Services
 
-See the [services concept](../concepts/concepts.md#services) for an overview.
+## Concept
+
+Services are a set of reusable functions. They are particularly useful to respect the DRY (don’t repeat yourself) programming concept and to simplify [controllers](./controllers.md) logic.
 
 ## Core services
 
@@ -17,6 +19,10 @@ You can read about `strapi.query` calls [here](./queries.md)
 In the following example your controller, service and model is named `restaurant`
 :::
 
+:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+
+::: tab "find" id="find"
+
 #### `find`
 
 ```js
@@ -31,6 +37,10 @@ module.exports = {
   },
 };
 ```
+
+:::
+
+::: tab "findOne" id="findone"
 
 #### `findOne`
 
@@ -48,6 +58,10 @@ module.exports = {
 };
 ```
 
+:::
+
+::: tab "count" id="count"
+
 #### `count`
 
 ```js
@@ -63,6 +77,10 @@ module.exports = {
   },
 };
 ```
+
+:::
+
+::: tab "create" id="create"
 
 #### `create`
 
@@ -88,6 +106,10 @@ module.exports = {
 };
 ```
 
+:::
+
+::: tab "update" id="update"
+
 #### `update`
 
 ```js
@@ -112,6 +134,10 @@ module.exports = {
 };
 ```
 
+:::
+
+::: tab "delete" id="delete"
+
 #### `delete`
 
 ```js
@@ -127,6 +153,10 @@ module.exports = {
   },
 };
 ```
+
+:::
+
+::: tab "search" id="search"
 
 #### `search`
 
@@ -144,6 +174,10 @@ module.exports = {
 };
 ```
 
+:::
+
+::: tab "countSearch" id="countsearch"
+
 #### `countSearch`
 
 ```js
@@ -158,6 +192,10 @@ module.exports = {
   },
 };
 ```
+
+:::
+
+::::
 
 ## Custom services
 

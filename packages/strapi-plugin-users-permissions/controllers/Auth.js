@@ -272,7 +272,13 @@ module.exports = {
   },
 
   async forgotPassword(ctx) {
-    const { email, url } = ctx.request.body;
+    const { email } = ctx.request.body;
+
+    const pluginStore = await strapi.store({
+      environment: '',
+      type: 'plugin',
+      name: 'users-permissions',
+    });
 
     // Find the user user thanks to his email.
     const user = await strapi
@@ -296,18 +302,24 @@ module.exports = {
     // Set the property code.
     user.resetPasswordToken = resetPasswordToken;
 
-    const settings = (await strapi
-      .store({
-        environment: '',
-        type: 'plugin',
-        name: 'users-permissions',
-      })
-      .get({ key: 'email' }))['reset_password'].options;
+    const settings = await pluginStore
+      .get({ key: 'email' })
+      .then(storeEmail => {
+        try {
+          return storeEmail['reset_password'].options;
+        } catch (error) {
+          return {};
+        }
+      });
+
+    const advanced = await pluginStore.get({
+      key: 'advanced',
+    });
 
     settings.message = await strapi.plugins[
       'users-permissions'
     ].services.userspermissions.template(settings.message, {
-      URL: url,
+      URL: advanced.email_reset_password,
       USER: _.omit(user.toJSON ? user.toJSON() : user, [
         'password',
         'resetPasswordToken',
@@ -481,14 +493,15 @@ module.exports = {
       );
 
       if (settings.email_confirmation) {
-        const storeEmail =
-          (await pluginStore.get({
-            key: 'email',
-          })) || {};
-
-        const settings = storeEmail['email_confirmation']
-          ? storeEmail['email_confirmation'].options
-          : {};
+        const settings = await pluginStore
+          .get({ key: 'email' })
+          .then(storeEmail => {
+            try {
+              return storeEmail['email_confirmation'].options;
+            } catch (error) {
+              return {};
+            }
+          });
 
         settings.message = await strapi.plugins[
           'users-permissions'

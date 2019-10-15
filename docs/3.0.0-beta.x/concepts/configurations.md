@@ -2,6 +2,10 @@
 
 The main configurations of the project are located in the `./config` directory. Additional configs can be added in the `./api/**/config` folder of each API and plugin by creating JavaScript or JSON files.
 
+::: note
+Inside the `/config` folder, every folder will be parsed and injected into the global object `strapi.config`. Let's say, you added a folder named `credentials` with two files `stripe.json` and `paypal.json` into it. The content of these files will be accessible through `strapi.config.credentials.stripe` and `strapi.config.credentials.paypal`.
+:::
+
 ## Application
 
 Contains the main configurations relative to your project.
@@ -45,29 +49,11 @@ Add custom configurations to the project. The content of this file is available 
 
 These configurations are accessible through `strapi.config.backendURL` and `strapi.config.mainColor`.
 
-## Language
-
-As described in the [i18n documentation](../guides/i18n.md), Strapi includes an internationalization system. This is especially useful to translate API messages (errors, etc.).
-
-**Path —** `./config/language.json`.
-
-```json
-{
-  "enabled": true,
-  "defaultLocale": "en_us",
-  "modes": ["query", "subdomain", "cookie", "header", "url", "tld"],
-  "cookieName": "locale"
-}
-```
-
-- `enabled` (boolean): Enable or disable i18n. Default value: `true`.
-- `defaultLocale` (string): Default locale used by the application. Default value: `en_us`.
-- `modes` (array): Methods used to detect client language. Default value: `["query", "subdomain", "cookie", "header", "url", "tld"]`.
-- `cookieName` (string): Name of the cookie used to store the locale name. Default value: `locale`.
-
 ## Functions
 
 The `./config/functions/` folder contains a set of JavaScript files in order to add dynamic and logic based configurations.
+
+All functions that are expose in this folder or in your `./config` folder are accessible via `strapi.config.functions['fileName']();`
 
 ### Bootstrap
 
@@ -147,12 +133,16 @@ module.exports = {
 };
 ```
 
-### Bookshelf, Mongoose
+### Database ORM customization
 
-**Path —** `./config/functions/bookshelf.js`.
-**Path —** `./config/functions/mongoose.js`.
+- **Path —** `./config/functions/bookshelf.js`.
+- **Path —** `./config/functions/mongoose.js`.
 
 When present, they are loaded to let you customize your database connection instance, for example for adding some plugin, customizing parameters, etc.
+
+:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+
+::: tab "Mongoose" id="mongoose"
 
 As an example, for using the `mongoose-simple-random` plugin for MongoDB, you can register it like this:
 
@@ -168,6 +158,10 @@ module.exports = (mongoose, connection) => {
 };
 ```
 
+:::
+
+::: tab "Bookshelf" id="bookshelf"
+
 Another example would be using the `bookshelf-uuid` plugin for MySQL, you can register it like this:
 
 **Path —** `./config/functions/bookshelf.js`.
@@ -180,25 +174,9 @@ module.exports = (bookshelf, connection) => {
 };
 ```
 
-## Locales
-
-The `locales` directory contains the translations of your API.
-
-Each JSON file located in the folder must have the name of its corresponding translation (eg. `en_US.json`, `fr_FR.json`, etc.). Each line defines a translation key and its corresponding value.
-
-#### Example
-
-**Path —** `./config/locales/en_US.json`.
-
-```js
-{
-  "welcome": "Welcome"
-}
-```
-
-::: note
-Take a look at the [internationalization's guide](../guides/i18n.md) for more details.
 :::
+
+::::
 
 ## Environments
 
@@ -212,22 +190,26 @@ You can access the config of the current environment through `strapi.config.curr
 
 **Path —** `./config/environments/**/database.json`.
 
+:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+
+::: tab "Bookshelf" id="bookshelf"
+
 - `defaultConnection` (string): Connection by default for models which are not related to a specific `connection`. Default value: `default`.
 - `connections` List of all available connections.
   - `default`
-    - `connector` (string): Connector used by the current connection. Default value: `strapi-hook-mongoose`.
+    - `connector` (string): Connector used by the current connection. Will be `strapi-hook-bookshelf`.
     - `settings` Useful for external session stores such as Redis.
-      - `client` (string): Database client to create the connection. Default value: `mongo`.
+      - `client` (string): Database client to create the connection. `sqlite` or `postgres` or `mysql`.
       - `host` (string): Database host name. Default value: `localhost`.
-      - `port` (integer): Database port. Default value: `27017`.
-      - `database` (string): Database name. Default value: `development`.
+      - `port` (integer): Database port.
+      - `database` (string): Database name.
       - `username` (string): Username used to establish the connection.
       - `password` (string): Password used to establish the connection.
       - `options` (object): List of additional options used by the connector.
-      - `timezone` (string): Set the default behavior for local time (used only for a SQL database). Default value: `utc`.
-      - `schema` (string): Set the default database schema. (used only for Postgres DB)
+      - `timezone` (string): Set the default behavior for local time. Default value: `utc`.
+      - `schema` (string): Set the default database schema. **Used only for Postgres DB**
+      - `ssl` (boolean): For ssl database connection.
   - `options` Options used for database connection.
-    - `ssl` (boolean): For ssl database connection.
     - `debug` (boolean): Show database exchanges and errors.
     - `autoMigration` (boolean): To disable auto tables/columns creation for SQL database.
     - `pool` Options used for database connection pooling. For more information look at [Knex's pool config documentation](https://knexjs.org/#Installation-pooling).
@@ -239,46 +221,70 @@ You can access the config of the current environment through `strapi.config.curr
       - `reapIntervalMillis` (integer): How often to check for idle connections in milliseconds. Default value: `1000` (1 second).
       - `createRetryIntervalMillis` (integer): How long to idle after a failed create before trying again in milliseconds. Default value: `200`.
 
+:::
+
+::: tab "Mongoose" id="mongoose"
+
+- `defaultConnection` (string): Connection by default for models which are not related to a specific `connection`. Default value: `default`.
+- `connections` List of all available connections.
+  - `default`
+    - `connector` (string): Connector used by the current connection. Will be `strapi-hook-mongoose`.
+    - `settings` Useful for external session stores such as Redis.
+      - `client` (string): Database client to create the connection. Will be `mongo`.
+      - `host` (string): Database host name. Default value: `localhost`.
+      - `port` (integer): Database port. Default value: `27017`.
+      - `database` (string): Database name.
+      - `username` (string): Username used to establish the connection.
+      - `password` (string): Password used to establish the connection.
+  - `options` Options used for database connection.
+    - `ssl` (boolean): For ssl database connection.
+    - `debug` (boolean): Show database exchanges and errors.
+    - `authenticationDatabase` (string): Connect with authentication.
+
+:::
+
+::::
+
 #### Example
 
 **Path —** `./config/environments/**/database.json`.
+
+:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+
+::: tab "Postgres" id="postgres"
 
 ```json
 {
   "defaultConnection": "default",
   "connections": {
     "default": {
-      "connector": "strapi-hook-mongoose",
-      "settings": {
-        "client": "mongo",
-        "host": "localhost",
-        "port": 27017,
-        "database": "development",
-        "username": "fooUsername",
-        "password": "fooPwd"
-      },
-      "options": {
-        "authenticationDatabase": "",
-        "ssl": true,
-        "minimize": true
-      }
-    },
-    "postgres": {
       "connector": "strapi-hook-bookshelf",
       "settings": {
         "client": "postgres",
         "host": "localhost",
         "port": 5432,
         "username": "${process.env.USERNAME}",
-        "password": "${process.env.PWD}",
+        "password": "${process.env.PASSWORD}",
         "database": "strapi",
         "schema": "public"
       },
       "options": {
         "debug": true
       }
-    },
-    "mysql": {
+    }
+  }
+}
+```
+
+:::
+
+::: tab "MySQL" id="mysql"
+
+```json
+{
+  "defaultConnection": "default",
+  "connections": {
+    "default": {
       "connector": "strapi-hook-bookshelf",
       "settings": {
         "client": "mysql",
@@ -286,10 +292,22 @@ You can access the config of the current environment through `strapi.config.curr
         "port": 5432,
         "username": "strapi",
         "password": "root",
-        "database": ""
+        "database": "strapi"
       },
       "options": {}
-    },
+    }
+  }
+}
+```
+
+:::
+
+::: tab "SQLite" id="sqlite"
+
+```json
+{
+  "defaultConnection": "default",
+  "connections": {
     "sqlite": {
       "connector": "strapi-hook-bookshelf",
       "settings": {
@@ -303,6 +321,37 @@ You can access the config of the current environment through `strapi.config.curr
   }
 }
 ```
+
+:::
+
+::: tab "Mongo" id="mongo"
+
+```json
+{
+  "defaultConnection": "default",
+  "connections": {
+    "default": {
+      "connector": "strapi-hook-mongoose",
+      "settings": {
+        "client": "mongo",
+        "host": "localhost",
+        "port": 27017,
+        "database": "strapi",
+        "username": "",
+        "password": ""
+      },
+      "options": {
+        "authenticationDatabase": "",
+        "ssl": true
+      }
+    }
+  }
+}
+```
+
+:::
+
+::::
 
 ::: note
 Please refer to the [dynamic configurations section](#dynamic-configurations) to use global environment variable to configure the databases.
@@ -461,7 +510,7 @@ In any JSON configurations files in your project, you can inject dynamic values 
 You can't execute functions inside the curly braces. Only strings are allowed.
 :::
 
-## Database configuration
+## Configuration in database
 
 Configuration files are not multi server friendly. So we created a data store for config you will want to update in production.
 
