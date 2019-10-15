@@ -9,7 +9,9 @@ import {
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import getRequestUrl from '../../utils/getRequestUrl';
+import DraggedField from '../../components/DraggedField';
 import SettingsViewWrapper from '../../components/SettingsViewWrapper';
+import SortWrapper from '../../components/SortWrapper';
 import reducer, { initialState } from './reducer';
 import forms from './forms.json';
 
@@ -151,7 +153,17 @@ const SettingViewList = ({
             id: `${pluginId}.components.SettingsViewWrapper.pluginHeader.description.list-settings`,
           },
         }}
-      ></SettingsViewWrapper>
+      >
+        <div className="row">
+          <div className="col-12">
+            <SortWrapper style={{ display: 'flex' }}>
+              {getListDisplayedFields().map(item => {
+                return <DraggedField key={item} name={item} />;
+              })}
+            </SortWrapper>
+          </div>
+        </div>
+      </SettingsViewWrapper>
       <PopUpWarning
         isOpen={showWarningCancel}
         toggleModal={toggleWarningCancel}

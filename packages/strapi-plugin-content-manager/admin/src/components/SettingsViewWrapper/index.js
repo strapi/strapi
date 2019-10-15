@@ -14,6 +14,7 @@ import SectionTitle from '../SectionTitle';
 import Separator from '../Separator';
 
 const SettingsViewWrapper = ({
+  children,
   getSelectOptions,
   history: { goBack },
   inputs,
@@ -58,6 +59,8 @@ const SettingsViewWrapper = ({
                   <Separator />
                 </div>
               </div>
+              <SectionTitle />
+              {children}
             </Block>
           </div>
         </form>
@@ -84,6 +87,7 @@ SettingsViewWrapper.defaultProps = {
 };
 
 SettingsViewWrapper.propTypes = {
+  children: PropTypes.node.isRequired,
   getSelectOptions: PropTypes.func,
   history: PropTypes.shape({
     goBack: PropTypes.func.isRequired,
