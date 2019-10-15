@@ -31,6 +31,7 @@
   "error.attribute.sameKeyAndName": "Ne peuvent pas être égaux",
   "error.attribute.taken": "Ce champ existe déjà",
   "error.contentTypeName.taken": "Ce nom existe déjà",
+  "error.contentTypeName.reserved-name": "Ce nom ne peut être utilisé",
   "error.validation.max": "La valeur est trop grande.",
   "error.validation.maxLength": "La valeur est trop longue.",
   "error.validation.min": "La valeur est trop basse.",

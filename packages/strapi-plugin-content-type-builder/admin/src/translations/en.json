@@ -32,6 +32,7 @@
   "error.attribute.sameKeyAndName": "Can't be equal",
   "error.attribute.taken": "This field name already exists",
   "error.contentTypeName.taken": "This name already exists",
+  "error.contentTypeName.reserved-name": "This name cannot be used in your project as it might break other functionnalities",
   "error.validation.max": "The value is too high.",
   "error.validation.maxLength": "The value is too long.",
   "error.validation.min": "The value is too low.",
