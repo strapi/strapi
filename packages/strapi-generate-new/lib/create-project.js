@@ -100,8 +100,8 @@ module.exports = async function createProject(
       error: error.stderr.slice(-1024),
     });
 
-    console.log(`${chalk.red('Error')} while installing dependencies:`);
-    console.log(error.stderr);
+    console.error(`${chalk.red('Error')} while installing dependencies:`);
+    console.error(error.stderr);
 
     await captureStderr('didNotInstallProjectDependencies', error);
 
