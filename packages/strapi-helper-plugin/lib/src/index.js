@@ -123,3 +123,6 @@ export { default as request } from './utils/request';
 export { default as storeData } from './utils/storeData';
 export { default as templateObject } from './utils/templateObject';
 export { default as getYupInnerErrors } from './utils/getYupInnerErrors';
+
+// SVGS
+export { default as LayoutIcon } from './svgs/Layout';

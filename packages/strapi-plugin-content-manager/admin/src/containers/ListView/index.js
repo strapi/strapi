@@ -17,6 +17,7 @@ import {
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import { ListViewProvider } from '../../contexts/ListView';
+import DisplayedFieldsDropdown from '../../components/DisplayedFieldsDropdown';
 import FilterLogo from '../../assets/images/icon_filter.png';
 import Container from '../../components/Container';
 import CustomTable from '../../components/CustomTable';
@@ -321,7 +322,11 @@ function ListView({
                 </div>
               </div>
               <div className="col-2">
-                <DropDownWrapper style={{ marginBottom: '6px' }}>
+                <DisplayedFieldsDropdown
+                  isOpen={isLabelPickerOpen}
+                  toggle={toggleLabelPickerState}
+                />
+                {/* <DropDownWrapper style={{ marginBottom: '6px' }}>
                   <ButtonDropdown
                     isOpen={isLabelPickerOpen}
                     toggle={toggleLabelPickerState}
@@ -367,7 +372,7 @@ function ListView({
                       })}
                     </DropdownMenu>
                   </ButtonDropdown>
-                </DropDownWrapper>
+                </DropDownWrapper> */}
               </div>
             </div>
             <div className="row" style={{ paddingTop: '30px' }}>

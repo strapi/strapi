@@ -534,7 +534,7 @@ function EditView({
                 <ul>
                   <LiLink
                     message={{
-                      id: `${pluginId}.containers.Edit.Link.Layout`,
+                      id: 'app.links.configure-view',
                     }}
                     icon="layout"
                     key={`${pluginId}.link`}
