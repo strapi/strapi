@@ -71,7 +71,7 @@ This feature doesn't allow you to filter nested models, e.g `Find users and only
 To achieve this, there are two options:
 
 - Either build a custom route or modify your services
-- Use [GraphQL](../guides/graphql.md#query-api)
+- Use [GraphQL](../plugins/graphql.md#query-api)
   :::
 
 ::: warning
