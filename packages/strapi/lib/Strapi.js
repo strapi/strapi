@@ -9,6 +9,9 @@ const Koa = require('koa');
 const Router = require('koa-router');
 const _ = require('lodash');
 const { logger, models } = require('strapi-utils');
+const chalk = require('chalk');
+const CLITable = require('cli-table3');
+
 const utils = require('./utils');
 const {
   loadConfig,
@@ -141,6 +144,71 @@ class Strapi extends EventEmitter {
     }
   }
 
+  logStats() {
+    const columns = Math.min(process.stderr.columns, 80) - 2;
+    console.log();
+    console.log(chalk.black.bgWhite(_.padEnd(' Project information', columns)));
+    console.log();
+
+    const infoTable = new CLITable({
+      colWidths: [20, 50],
+      chars: { mid: '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' },
+    });
+
+    infoTable.push(
+      [chalk.blue('Time'), `${new Date()}`],
+      [chalk.blue('Launched in'), Date.now() - this.config.launchedAt + ' ms'],
+      [chalk.blue('Environment'), this.config.environment],
+      [chalk.blue('Process PID'), process.pid],
+      [
+        chalk.blue('Version'),
+        `${this.config.info.strapi} (node v${this.config.info.node})`,
+      ]
+    );
+
+    console.log(infoTable.toString());
+    console.log();
+    console.log(chalk.black.bgWhite(_.padEnd(' Actions available', columns)));
+    console.log();
+  }
+
+  logFirstStartupMessage() {
+    this.logStats();
+
+    console.log(chalk.bold('One more thing...'));
+    console.log(
+      chalk.grey(
+        'Create your first administrator 💻 by going to the administration panel at:'
+      )
+    );
+    console.log();
+
+    const addressTable = new CLITable();
+    addressTable.push([chalk.bold(this.config.admin.url)]);
+    console.log(`${addressTable.toString()}`);
+    console.log();
+  }
+
+  logStartupMessage() {
+    this.logStats();
+
+    console.log(chalk.bold('Welcome back!'));
+
+    if (this.config.serveAdminPanel === true) {
+      console.log(
+        chalk.grey(
+          'To manage your project 🚀, go to the administration panel at:'
+        )
+      );
+      console.log(chalk.bold(this.config.admin.url));
+      console.log();
+    }
+
+    console.log(chalk.grey('To access the server ⚡️, go to:'));
+    console.log(chalk.bold(this.config.url));
+    console.log();
+  }
+
   async start(cb) {
     try {
       // Emit starting event.
@@ -160,23 +228,11 @@ class Strapi extends EventEmitter {
       this.server.listen(this.config.port, async err => {
         if (err) return this.stopWithError(err);
 
-        this.log.info('Time: ' + new Date());
-        this.log.info(
-          'Launched in: ' + (Date.now() - this.config.launchedAt) + ' ms'
-        );
-        this.log.info('Environment: ' + this.config.environment);
-        this.log.info('Process PID: ' + process.pid);
-        this.log.info(
-          `Version: ${this.config.info.strapi} (node v${this.config.info.node})`
-        );
-        this.log.info('To shut down your server, press <CTRL> + C at any time');
-        console.log();
-
-        if (this.config.serveAdminPanel === true) {
-          this.log.info(`☄️  Admin panel: ${this.config.admin.url}`);
+        if (this.config.init) {
+          this.logFirstStartupMessage();
+        } else {
+          this.logStartupMessage();
         }
-        this.log.info(`⚡️ Server: ${this.config.url}`);
-        console.log();
 
         // Emit started event.
         this.emit('server:started');
