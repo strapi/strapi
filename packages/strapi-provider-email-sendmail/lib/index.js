@@ -7,7 +7,7 @@
 // Public node modules.
 const _ = require('lodash');
 const sendmail = require('sendmail')({
-  silent: true
+  silent: true,
 });
 
 /* eslint-disable no-unused-vars */
@@ -17,14 +17,14 @@ module.exports = {
   auth: {
     sendmail_default_from: {
       label: 'Sendmail Default From',
-      type: 'text'
+      type: 'text',
     },
     sendmail_default_replyto: {
       label: 'Sendmail Default Reply-To',
-      type: 'text'
-    }
+      type: 'text',
+    },
   },
-  init: (config) => {
+  init: config => {
     return {
       send: (options, cb) => {
         return new Promise((resolve, reject) => {
@@ -35,23 +35,28 @@ module.exports = {
           options.text = options.text || options.html;
           options.html = options.html || options.text;
 
-          sendmail({
-            from: options.from,
-            to: options.to,
-            replyTo: options.replyTo,
-            subject: options.subject,
-            text: options.text,
-            html: options.html,
-            attachments: options.attachments
-          }, function (err) {
-            if (err) {
-              reject([{ messages: [{ id: 'Auth.form.error.email.invalid' }] }]);
-            } else {
-              resolve();
+          sendmail(
+            {
+              from: options.from,
+              to: options.to,
+              replyTo: options.replyTo,
+              subject: options.subject,
+              text: options.text,
+              html: options.html,
+              attachments: options.attachments,
+            },
+            function(err) {
+              if (err) {
+                reject([
+                  { messages: [{ id: 'Auth.form.error.email.invalid' }] },
+                ]);
+              } else {
+                resolve();
+              }
             }
-          });
+          );
         });
-      }
+      },
     };
-  }
+  },
 };
