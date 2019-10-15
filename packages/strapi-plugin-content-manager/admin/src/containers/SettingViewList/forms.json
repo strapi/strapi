@@ -1,0 +1,64 @@
+[
+  {
+    "label": { "id": "content-manager.form.Input.search" },
+    "customBootstrapClass": "col-md-4",
+    "didCheckErrors": false,
+    "errors": [],
+    "name": "settings.searchable",
+    "type": "toggle",
+    "validations": {}
+  },
+  {
+    "label": { "id": "content-manager.form.Input.filters" },
+    "customBootstrapClass": "col-md-4",
+    "didCheckErrors": false,
+    "errors": [],
+    "name": "settings.filterable",
+    "type": "toggle",
+    "validations": {}
+  },
+  {
+    "label": { "id": "content-manager.form.Input.bulkActions" },
+    "customBootstrapClass": "col-md-4",
+    "didCheckErrors": false,
+    "errors": [],
+    "name": "settings.bulkable",
+    "type": "toggle",
+    "validations": {}
+  },
+  {
+    "label": { "id": "content-manager.form.Input.pageEntries" },
+    "customBootstrapClass": "col-md-4",
+    "didCheckErrors": false,
+    "errors": [],
+    "inputDescription": {
+      "id": "content-manager.form.Input.pageEntries.inputDescription"
+    },
+    "name": "settings.pageSize",
+    "selectOptions": [10, 20, 50, 100],
+    "type": "select",
+    "validations": {}
+  },
+  {
+    "label": { "id": "content-manager.form.Input.defaultSort" },
+    "customBootstrapClass": "col-md-4 ml-md-auto",
+    "didCheckErrors": false,
+    "errors": [],
+    "style": { "marginRight": "-20px" },
+    "name": "settings.defaultSortBy",
+    "selectOptions": ["id"],
+    "type": "select",
+    "validations": {}
+  },
+  {
+    "label": "",
+    "customBootstrapClass": "col-md-1",
+    "didCheckErrors": false,
+    "errors": [],
+
+    "name": "settings.defaultSortOrder",
+    "selectOptions": ["ASC", "DESC"],
+    "type": "select",
+    "validations": {}
+  }
+]

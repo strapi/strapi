@@ -1,16 +1,32 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { get } from 'lodash';
 import { withRouter } from 'react-router-dom';
-import { BackHeader, PluginHeader } from 'strapi-helper-plugin';
+import {
+  BackHeader,
+  InputsIndex as Input,
+  PluginHeader,
+  LoadingIndicatorPage,
+} from 'strapi-helper-plugin';
 import Block from '../Block';
 import Container from '../Container';
 import SectionTitle from '../SectionTitle';
+import Separator from '../Separator';
 
 const SettingsViewWrapper = ({
+  getSelectOptions,
   history: { goBack },
+  inputs,
+  isLoading,
+  modifiedData,
+  onChange,
   onSubmit,
   pluginHeaderProps,
 }) => {
+  if (isLoading) {
+    return <LoadingIndicatorPage />;
+  }
+
   return (
     <>
       <BackHeader onClick={goBack} />
@@ -26,6 +42,22 @@ const SettingsViewWrapper = ({
               }}
             >
               <SectionTitle isSettings />
+              <div className="row">
+                {inputs.map(input => {
+                  return (
+                    <Input
+                      key={input.name}
+                      {...input}
+                      onChange={onChange}
+                      selectOptions={getSelectOptions(input)}
+                      value={get(modifiedData, input.name, '')}
+                    />
+                  );
+                })}
+                <div className="col-12">
+                  <Separator />
+                </div>
+              </div>
             </Block>
           </div>
         </form>
@@ -35,6 +67,9 @@ const SettingsViewWrapper = ({
 };
 
 SettingsViewWrapper.defaultProps = {
+  getSelectOptions: () => {},
+  inputs: [],
+  modifiedData: {},
   onSubmit: () => {},
   pluginHeaderProps: {
     actions: [],
@@ -49,9 +84,14 @@ SettingsViewWrapper.defaultProps = {
 };
 
 SettingsViewWrapper.propTypes = {
+  getSelectOptions: PropTypes.func,
   history: PropTypes.shape({
     goBack: PropTypes.func.isRequired,
   }).isRequired,
+  inputs: PropTypes.array,
+  isLoading: PropTypes.bool.isRequired,
+  modifiedData: PropTypes.object,
+  onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func,
   pluginHeaderProps: PropTypes.shape({
     actions: PropTypes.array,
