@@ -183,6 +183,18 @@ module.exports = {
         }),
       });
 
+      if (options.input && options.input.where) {
+        ctx.params = Query.convertToParams(options.input.where || {});
+      } else {
+        ctx.params = {};
+      }
+
+      if (options.input && options.input.data) {
+        ctx.request.body = options.input.data || {};
+      } else {
+        ctx.request.body = options;
+      }
+
       // Execute policies stack.
       const policy = await compose(policiesFn)(ctx);
 
@@ -203,20 +215,8 @@ module.exports = {
       if (_.isFunction(resolver)) {
         const normalizedName = _.toLower(name);
 
-        if (options.input && options.input.where) {
-          context.params = Query.convertToParams(options.input.where || {});
-        } else {
-          context.params = {};
-        }
-
-        if (options.input && options.input.data) {
-          context.request.body = options.input.data || {};
-        } else {
-          context.request.body = options;
-        }
-
         if (isController) {
-          const values = await resolver.call(null, context);
+          const values = await resolver.call(null, ctx);
 
           if (ctx.body) {
             return options.input
