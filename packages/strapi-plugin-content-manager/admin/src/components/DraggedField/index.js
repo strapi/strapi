@@ -4,9 +4,9 @@ import GrabIcon from '../../icons/GrabIcon';
 import RemoveIcon from '../../icons/RemoveIcon';
 import Wrapper from './Wrapper';
 
-const DraggedField = ({ name, onRemove }) => {
+const DraggedField = ({ count, name, onRemove }) => {
   return (
-    <Wrapper>
+    <Wrapper count={count}>
       <div className="sub_wrapper">
         <div className="grab">
           <GrabIcon style={{ marginRight: 10, cursor: 'move' }} />
@@ -20,7 +20,12 @@ const DraggedField = ({ name, onRemove }) => {
   );
 };
 
+DraggedField.defaultProps = {
+  count: 1,
+};
+
 DraggedField.propTypes = {
+  count: PropTypes.number,
   name: PropTypes.string.isRequired,
   onRemove: PropTypes.func.isRequired,
 };

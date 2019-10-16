@@ -15,6 +15,7 @@ import SettingsViewWrapper from '../../components/SettingsViewWrapper';
 import SortWrapper from '../../components/SortWrapper';
 import MenuDropdown from './MenuDropdown';
 import DropdownButton from './DropdownButton';
+import DragWrapper from './DragWrapper';
 import Toggle from './Toggle';
 import reducer, { initialState } from './reducer';
 import forms from './forms.json';
@@ -187,67 +188,71 @@ const ListSettingsView = ({
           },
         }}
       >
-        <div className="row">
-          <div className="col-12">
-            <SortWrapper
-              style={{
-                display: 'table',
-                paddingLeft: 5,
-                paddingRight: 5,
-                paddingBottom: 11,
-                width: '100%',
-                overflow: 'auto',
-              }}
-            >
-              {getListDisplayedFields().map((item, index) => {
-                return (
-                  <DraggedField
-                    key={item}
-                    name={item}
-                    onRemove={() => {
-                      if (getListDisplayedFields().length === 1) {
-                        strapi.notification.info(
-                          `${pluginId}.notification.info.minimumFields`
-                        );
-                      } else {
-                        dispatch({
-                          type: 'REMOVE_FIELD',
-                          index,
-                        });
-                      }
-                    }}
-                  />
-                );
-              })}
-              <DropdownButton
-                isOpen={isOpen}
-                toggle={() => {
-                  if (getListRemainingFields().length > 0) {
-                    setIsOpen(prevState => !prevState);
-                  }
+        <DragWrapper>
+          <div className="row">
+            <div className="col-12">
+              <SortWrapper
+                style={{
+                  display: 'flex',
+                  width: '100%',
                 }}
-                direction="down"
               >
-                <Toggle disabled={getListRemainingFields().length === 0} />
-                <MenuDropdown>
-                  {getListRemainingFields().map(item => (
-                    <DropdownItem
+                {getListDisplayedFields().map((item, index) => {
+                  return (
+                    <DraggedField
+                      count={getListDisplayedFields().length}
                       key={item}
-                      onClick={() => {
-                        dispatch({
-                          type: 'ADD_FIELD',
-                          item,
-                        });
+                      name={item}
+                      onRemove={() => {
+                        if (getListDisplayedFields().length === 1) {
+                          strapi.notification.info(
+                            `${pluginId}.notification.info.minimumFields`
+                          );
+                        } else {
+                          dispatch({
+                            type: 'REMOVE_FIELD',
+                            index,
+                          });
+                        }
                       }}
-                    >
-                      {item}
-                    </DropdownItem>
-                  ))}
-                </MenuDropdown>
-              </DropdownButton>
-            </SortWrapper>
+                    />
+                  );
+                })}
+              </SortWrapper>
+            </div>
           </div>
-        </div>
+          <DropdownButton
+            isOpen={isOpen}
+            toggle={() => {
+              if (getListRemainingFields().length > 0) {
+                setIsOpen(prevState => !prevState);
+              }
+            }}
+            direction="down"
+            style={{
+              position: 'absolute',
+              top: 11,
+              right: 10,
+            }}
+          >
+            <Toggle disabled={getListRemainingFields().length === 0} />
+            <MenuDropdown>
+              {getListRemainingFields().map(item => (
+                <DropdownItem
+                  key={item}
+                  onClick={() => {
+                    dispatch({
+                      type: 'ADD_FIELD',
+                      item,
+                    });
+                  }}
+                >
+                  {item}
+                </DropdownItem>
+              ))}
+            </MenuDropdown>
+          </DropdownButton>
+        </DragWrapper>
       </SettingsViewWrapper>
       <PopUpWarning
         isOpen={showWarningCancel}
