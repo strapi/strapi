@@ -39,7 +39,7 @@ module.exports = async function createQuickStartProject(scope) {
     await trackUsage({
       event: 'didNotBuildAdmin',
       scope,
-      error: error.stderr.slice(-1024),
+      error,
     });
 
     await captureStderr('didNotBuildAdmin', error);
@@ -62,7 +62,7 @@ module.exports = async function createQuickStartProject(scope) {
     await trackUsage({
       event: 'didNotStartServer',
       scope,
-      error: error.stderr.slice(-1024),
+      error,
     });
 
     await captureStderr('didNotStartServer', error);
