@@ -13,6 +13,7 @@ const colors = {
     grey: '#666B74',
     mediumGrey: '#f2f3f4',
     lightGrey: '#E9EAEB',
+    darkGrey: '#919bae',
   },
 
   // Specific colors for relations
