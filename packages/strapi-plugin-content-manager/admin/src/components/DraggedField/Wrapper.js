@@ -1,5 +1,12 @@
 import styled from 'styled-components';
 
+const centered = `
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 28px;
+`;
+
 const Wrapper = styled.div`
   display: table-cell;
   height: 30px;
@@ -17,16 +24,27 @@ const Wrapper = styled.div`
     border-radius: 2px;
 
     .name {
+      flex-grow: 2;
       overflow: hidden;
       text-overflow: ellipsis;
-      word-wrap: nowrap;
+      word-break: nowrap;
+      cursor: pointer;
     }
     .grab {
-      height: 28px;
-      border-right: 1px solid black;
+      ${centered};
+      margin-right: 10px;
+      border-right: 1px solid #e9eaeb;
+    }
+
+    .remove {
+      ${centered};
+      width: 30px;
+      text-align: center;
+      background-color: #e9eaeb;
+      cursor: pointer;
 
       svg {
-        vertical-align: middle;
+        align-self: center;
       }
     }
   }

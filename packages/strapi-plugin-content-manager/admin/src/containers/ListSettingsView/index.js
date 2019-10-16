@@ -114,7 +114,13 @@ const ListSettingsView = ({
 
   const getSelectOptions = input => {
     if (input.name === 'settings.defaultSortBy') {
-      return getListDisplayedFields();
+      return [
+        'id',
+        ...getListDisplayedFields().filter(
+          name =>
+            get(getAttributes, [name, 'type'], '') !== 'media' && name !== 'id'
+        ),
+      ];
     }
 
     return input.options;
@@ -193,15 +199,23 @@ const ListSettingsView = ({
                 overflow: 'auto',
               }}
             >
-              {getListDisplayedFields().map((item, i) => {
-                const labelsLength = getListDisplayedFields().length;
-
+              {getListDisplayedFields().map((item, index) => {
                 return (
                   <DraggedField
                     key={item}
                     name={item}
-                    labelsLength={labelsLength}
-                    isLast={i === labelsLength - 1}
+                    onRemove={() => {
+                      if (getListDisplayedFields().length === 1) {
+                        strapi.notification.info(
+                          `${pluginId}.notification.info.minimumFields`
+                        );
+                      } else {
+                        dispatch({
+                          type: 'REMOVE_FIELD',
+                          index,
+                        });
+                      }
+                    }}
                   />
                 );
               })}
