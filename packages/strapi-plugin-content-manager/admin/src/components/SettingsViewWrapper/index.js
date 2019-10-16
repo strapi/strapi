@@ -2,9 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { withRouter } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
+import { Inputs as Input } from '@buffetjs/custom';
 import {
   BackHeader,
-  InputsIndex as Input,
   PluginHeader,
   LoadingIndicatorPage,
 } from 'strapi-helper-plugin';
@@ -46,13 +47,30 @@ const SettingsViewWrapper = ({
               <div className="row">
                 {inputs.map(input => {
                   return (
-                    <Input
-                      key={input.name}
-                      {...input}
-                      onChange={onChange}
-                      selectOptions={getSelectOptions(input)}
-                      value={get(modifiedData, input.name, '')}
-                    />
+                    <FormattedMessage key={input.name} id={input.label.id}>
+                      {label => (
+                        <div className={input.customBootstrapClass}>
+                          <FormattedMessage
+                            id={get(
+                              input,
+                              'description.id',
+                              'app.utils.defaultMessage'
+                            )}
+                          >
+                            {description => (
+                              <Input
+                                {...input}
+                                description={description}
+                                label={label === ' ' ? null : label}
+                                onChange={onChange}
+                                options={getSelectOptions(input)}
+                                value={get(modifiedData, input.name, '')}
+                              />
+                            )}
+                          </FormattedMessage>
+                        </div>
+                      )}
+                    </FormattedMessage>
                   );
                 })}
                 <div className="col-12">

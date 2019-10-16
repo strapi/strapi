@@ -21,12 +21,13 @@ import SettingViewModel from '../SettingViewModel';
 import SettingViewGroup from '../SettingViewGroup';
 import SettingsView from '../SettingsView';
 
-import { getData, getLayout, resetProps } from './actions';
+import { deleteLayout, getData, getLayout, resetProps } from './actions';
 import reducer from './reducer';
 import saga from './saga';
 import makeSelectMain from './selectors';
 
 function Main({
+  deleteLayout,
   getData,
   getLayout,
   groups,
@@ -74,6 +75,7 @@ function Main({
   const renderRoute = (props, Component) => (
     <Component
       currentEnvironment={currentEnvironment}
+      deleteLayout={deleteLayout}
       emitEvent={emitEvent}
       groups={groups}
       groupsAndModelsMainPossibleMainFields={
@@ -115,6 +117,7 @@ function Main({
 }
 
 Main.propTypes = {
+  deleteLayout: PropTypes.func.isRequired,
   getData: PropTypes.func.isRequired,
   getLayout: PropTypes.func.isRequired,
   global: PropTypes.shape({
@@ -138,6 +141,7 @@ const mapStateToProps = makeSelectMain();
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      deleteLayout,
       getData,
       getLayout,
       resetProps,

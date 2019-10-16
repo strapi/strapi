@@ -77,6 +77,7 @@
   "containers.SettingPage.relations": "Champs relationnels",
   "containers.SettingPage.settings": "Paramètres",
   "containers.SettingPage.layout": "Layout",
+  "containers.SettingPage.view": "Vue",
   "containers.SettingsPage.Block.contentType.description": "Configurez les paramètres spécifiques",
   "containers.SettingsPage.Block.contentType.title": "Types de contenu",
   "containers.SettingsPage.Block.generalSettings.description": "Configurez les options par défault de vos modèles",

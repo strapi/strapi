@@ -5,7 +5,7 @@
     "didCheckErrors": false,
     "errors": [],
     "name": "settings.searchable",
-    "type": "toggle",
+    "type": "bool",
     "validations": {}
   },
   {
@@ -14,7 +14,7 @@
     "didCheckErrors": false,
     "errors": [],
     "name": "settings.filterable",
-    "type": "toggle",
+    "type": "bool",
     "validations": {}
   },
   {
@@ -23,7 +23,7 @@
     "didCheckErrors": false,
     "errors": [],
     "name": "settings.bulkable",
-    "type": "toggle",
+    "type": "bool",
     "validations": {}
   },
   {
@@ -31,11 +31,11 @@
     "customBootstrapClass": "col-md-4",
     "didCheckErrors": false,
     "errors": [],
-    "inputDescription": {
+    "description": {
       "id": "content-manager.form.Input.pageEntries.inputDescription"
     },
     "name": "settings.pageSize",
-    "selectOptions": [10, 20, 50, 100],
+    "options": [10, 20, 50, 100],
     "type": "select",
     "validations": {}
   },
@@ -46,18 +46,18 @@
     "errors": [],
     "style": { "marginRight": "-20px" },
     "name": "settings.defaultSortBy",
-    "selectOptions": ["id"],
+    "options": ["id"],
     "type": "select",
     "validations": {}
   },
   {
-    "label": "",
-    "customBootstrapClass": "col-md-1",
+    "label": { "id": "app.utils.defaultMessage" },
+    "customBootstrapClass": "col-md-2",
     "didCheckErrors": false,
     "errors": [],
 
     "name": "settings.defaultSortOrder",
-    "selectOptions": ["ASC", "DESC"],
+    "options": ["ASC", "DESC"],
     "type": "select",
     "validations": {}
   }

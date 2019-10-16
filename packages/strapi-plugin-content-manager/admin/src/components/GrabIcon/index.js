@@ -3,10 +3,10 @@ import GrabCompo from './GrabCompo';
 
 const GrabIcon = styled(GrabCompo)`
   > g {
-    fill: '#B3B5B9';
+    fill: #b3b5b9;
 
     &:hover {
-      fill: '#AED4FB';
+      fill: #aed4fb;
     }
   }
 `;

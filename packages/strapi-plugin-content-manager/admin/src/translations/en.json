@@ -78,6 +78,7 @@
   "containers.SettingPage.relations": "Relational fields",
   "containers.SettingPage.settings": "Settings",
   "containers.SettingPage.layout": "Layout",
+  "containers.SettingPage.view": "View",
   "containers.EditView.Group.add.new": "ADD NEW ENTRY",
   "containers.SettingViewModel.pluginHeader.title": "Content Manager - {name}",
   "containers.SettingsPage.Block.contentType.description": "Configure the specific settings",

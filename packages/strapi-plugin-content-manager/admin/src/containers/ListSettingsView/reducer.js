@@ -7,7 +7,10 @@ const initialState = fromJS({
 });
 
 const reducer = (state, action) => {
+  const layoutPath = ['modifiedData', 'layouts', 'list'];
   switch (action.type) {
+    case 'ADD_FIELD':
+      return state.updateIn(layoutPath, list => list.push(action.item));
     case 'GET_DATA_SUCCEEDED':
       return state
         .update('initialData', () => fromJS(action.data))

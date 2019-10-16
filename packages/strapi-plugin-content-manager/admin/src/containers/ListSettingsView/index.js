@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useEffect, useMemo, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
 import { cloneDeep, get, isEqual, upperFirst } from 'lodash';
 import {
@@ -7,15 +7,20 @@ import {
   request,
   useGlobalContext,
 } from 'strapi-helper-plugin';
+import { DropdownItem } from 'reactstrap';
 import pluginId from '../../pluginId';
 import getRequestUrl from '../../utils/getRequestUrl';
 import DraggedField from '../../components/DraggedField';
 import SettingsViewWrapper from '../../components/SettingsViewWrapper';
 import SortWrapper from '../../components/SortWrapper';
+import MenuDropdown from './MenuDropdown';
+import DropdownButton from './DropdownButton';
+import Toggle from './Toggle';
 import reducer, { initialState } from './reducer';
 import forms from './forms.json';
 
 const ListSettingsView = ({
+  deleteLayout,
   location: { search },
   match: {
     params: { slug },
@@ -24,6 +29,8 @@ const ListSettingsView = ({
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningSubmit, setWarningSubmit] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
   const { emitEvent } = useGlobalContext();
 
   const toggleWarningCancel = () => setWarningCancel(prevState => !prevState);
@@ -34,6 +41,10 @@ const ListSettingsView = ({
   const abortController = new AbortController();
   const { signal } = abortController;
   const params = source === 'content-manager' ? {} : { source };
+
+  const getAttributes = useMemo(() => {
+    return get(modifiedData, ['schema', 'attributes'], {});
+  }, [modifiedData]);
 
   useEffect(() => {
     const getData = async () => {
@@ -66,6 +77,21 @@ const ListSettingsView = ({
   const getListDisplayedFields = () =>
     get(modifiedData, ['layouts', 'list'], []);
 
+  const getListRemainingFields = () => {
+    const metadatas = get(modifiedData, ['metadatas'], {});
+    const attributes = getAttributes;
+
+    return Object.keys(metadatas)
+      .filter(key => {
+        const type = get(attributes, [key, 'type'], '');
+
+        return !['json', 'relation', 'group'].includes(type) && !!type;
+      })
+      .filter(field => {
+        return !getListDisplayedFields().includes(field);
+      });
+  };
+
   const getPluginHeaderActions = () => {
     if (isEqual(modifiedData, initialData)) {
       return [];
@@ -91,14 +117,14 @@ const ListSettingsView = ({
       return getListDisplayedFields();
     }
 
-    return input.selectOptions;
+    return input.options;
   };
 
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
       type: 'ON_CHANGE',
       keys: name,
-      value,
+      value: name === 'settings.pageSize' ? parseInt(value, 10) : value,
     });
   };
 
@@ -120,6 +146,7 @@ const ListSettingsView = ({
       dispatch({
         type: 'SUBMIT_SUCCEEDED',
       });
+      deleteLayout(slug);
       emitEvent('didSaveContentTypeLayout');
     } catch (err) {
       strapi.notification.error('notification.error');
@@ -156,10 +183,54 @@ const ListSettingsView = ({
       >
         <div className="row">
           <div className="col-12">
-            <SortWrapper style={{ display: 'flex' }}>
-              {getListDisplayedFields().map(item => {
-                return <DraggedField key={item} name={item} />;
+            <SortWrapper
+              style={{
+                display: 'table',
+                paddingLeft: 5,
+                paddingRight: 5,
+                paddingBottom: 11,
+                width: '100%',
+                overflow: 'auto',
+              }}
+            >
+              {getListDisplayedFields().map((item, i) => {
+                const labelsLength = getListDisplayedFields().length;
+
+                return (
+                  <DraggedField
+                    key={item}
+                    name={item}
+                    labelsLength={labelsLength}
+                    isLast={i === labelsLength - 1}
+                  />
+                );
               })}
+              <DropdownButton
+                isOpen={isOpen}
+                toggle={() => {
+                  if (getListRemainingFields().length > 0) {
+                    setIsOpen(prevState => !prevState);
+                  }
+                }}
+                direction="down"
+              >
+                <Toggle disabled={getListRemainingFields().length === 0} />
+                <MenuDropdown>
+                  {getListRemainingFields().map(item => (
+                    <DropdownItem
+                      key={item}
+                      onClick={() => {
+                        dispatch({
+                          type: 'ADD_FIELD',
+                          item,
+                        });
+                      }}
+                    >
+                      {item}
+                    </DropdownItem>
+                  ))}
+                </MenuDropdown>
+              </DropdownButton>
             </SortWrapper>
           </div>
         </div>
@@ -198,6 +269,7 @@ const ListSettingsView = ({
 };
 
 ListSettingsView.propTypes = {
+  deleteLayout: PropTypes.func.isRequired,
   location: PropTypes.shape({
     search: PropTypes.string.isRequired,
   }).isRequired,
