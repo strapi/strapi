@@ -15,7 +15,7 @@ import SortWrapper from '../../components/SortWrapper';
 import reducer, { initialState } from './reducer';
 import forms from './forms.json';
 
-const SettingViewList = ({
+const ListSettingsView = ({
   location: { search },
   match: {
     params: { slug },
@@ -197,7 +197,7 @@ const SettingViewList = ({
   );
 };
 
-SettingViewList.propTypes = {
+ListSettingsView.propTypes = {
   location: PropTypes.shape({
     search: PropTypes.string.isRequired,
   }).isRequired,
@@ -208,4 +208,4 @@ SettingViewList.propTypes = {
   }).isRequired,
 };
 
-export default SettingViewList;
+export default ListSettingsView;
