@@ -538,7 +538,7 @@ function EditView({
                     }}
                     icon="layout"
                     key={`${pluginId}.link`}
-                    url={`/plugins/${pluginId}/ctm-configurations/models/${slug}/edit-settings${
+                    url={`/plugins/${pluginId}/ctm-configurations/edit-settings/${slug}${
                       source !== pluginId ? `?source=${source}` : ''
                     }`}
                     onClick={() => {

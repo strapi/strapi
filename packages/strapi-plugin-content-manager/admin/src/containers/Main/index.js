@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useRef } from 'react';
+import React, { Suspense, lazy, memo, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
@@ -14,12 +14,14 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import pluginId from '../../pluginId';
 
 import DragLayer from '../../components/DragLayer';
-import EditView from '../EditView';
-import ListView from '../ListView';
-import ListSettingsView from '../ListSettingsView';
-import SettingViewModel from '../SettingViewModel';
-import SettingViewGroup from '../SettingViewGroup';
-import SettingsView from '../SettingsView';
+
+const EditView = lazy(() => import('../EditView'));
+const EditSettingsView = lazy(() => import('../EditSettingsView'));
+const ListView = lazy(() => import('../ListView'));
+const ListSettingsView = lazy(() => import('../ListSettingsView'));
+const SettingViewModel = lazy(() => import('../SettingViewModel'));
+const SettingViewGroup = lazy(() => import('../SettingViewGroup'));
+const SettingsView = lazy(() => import('../SettingsView'));
 
 import { deleteLayout, getData, getLayout, resetProps } from './actions';
 import reducer from './reducer';
@@ -93,6 +95,10 @@ function Main({
       comp: ListSettingsView,
     },
     {
+      path: 'ctm-configurations/edit-settings/:slug',
+      comp: EditSettingsView,
+    },
+    {
       path: 'ctm-configurations/models/:name/:settingType',
       comp: SettingViewModel,
     },
@@ -111,7 +117,9 @@ function Main({
   return (
     <DndProvider backend={HTML5Backend}>
       <DragLayer />
-      <Switch>{routes}</Switch>
+      <Suspense fallback={<LoadingIndicatorPage />}>
+        <Switch>{routes}</Switch>
+      </Suspense>
     </DndProvider>
   );
 }
