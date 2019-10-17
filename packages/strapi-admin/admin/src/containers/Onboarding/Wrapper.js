@@ -50,6 +50,7 @@ const Wrapper = styled.div`
       animation: ${fadeIn} 0.5s forwards;
     }
     &.hide {
+      min-width: 0;
       animation: ${fadeOut} 0.5s forwards;
     }
 

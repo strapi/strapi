@@ -1,11 +1,9 @@
 import styled from 'styled-components';
-import Bkg from '../../assets/images/background-empty-attributes.svg';
 
 const Wrapper = styled.div`
   height: 22.1rem;
   margin-top: -0.1rem;
   padding-top: 5.8rem;
-  background-image: url(${Bkg});
   background-color: #ffffff;
   background-repeat: repeat;
   text-align: center;
