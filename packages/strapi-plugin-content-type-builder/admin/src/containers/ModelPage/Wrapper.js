@@ -1,8 +1,10 @@
 import styled from 'styled-components';
 
+import { colors } from 'strapi-helper-plugin';
+
 const Wrapper = styled.div`
   min-height: calc(100vh - 6rem);
-  background: rgba(14, 22, 34, 0.02);
+  background: ${colors.lightGrey};
 `;
 
 export default Wrapper;

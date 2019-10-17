@@ -109,7 +109,7 @@ function FilterPicker({
 
   return (
     <Collapse isOpen={isOpen} onEntering={handleEntering}>
-      <Container style={{ backgroundColor: 'white' }}>
+      <Container style={{ backgroundColor: 'white', paddingBottom: 0 }}>
         <form
           onSubmit={e => {
             e.preventDefault();
