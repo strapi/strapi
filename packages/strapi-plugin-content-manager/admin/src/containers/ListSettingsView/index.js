@@ -17,13 +17,16 @@ import {
   useGlobalContext,
 } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
+import { useDrop } from 'react-dnd';
 import { DropdownItem } from 'reactstrap';
 import { Inputs as Input } from '@buffetjs/custom';
 import pluginId from '../../pluginId';
+import ItemTypes from '../../utils/ItemTypes';
 import getRequestUrl from '../../utils/getRequestUrl';
-import DraggedField from '../../components/DraggedField';
+
 import SettingsViewWrapper from '../../components/SettingsViewWrapper';
 import SortWrapper from '../../components/SortWrapper';
+import Label from './Label';
 import MenuDropdown from './MenuDropdown';
 import DropdownButton from './DropdownButton';
 import DragWrapper from './DragWrapper';
@@ -57,7 +60,7 @@ const ListSettingsView = ({
     modifiedData,
     isLoading,
   } = reducerState.toJS();
-  console.log(labelForm, modifiedData);
+
   const source = getQueryParameters(search, 'source');
   const abortController = new AbortController();
   const { signal } = abortController;
@@ -210,6 +213,16 @@ const ListSettingsView = ({
     emitEvent('willSaveContentTypeLayout');
   };
 
+  const move = (originalIndex, atIndex) => {
+    dispatch({
+      type: 'MOVE_FIELD',
+      originalIndex,
+      atIndex,
+    });
+  };
+
+  const [, drop] = useDrop({ accept: ItemTypes.FIELD });
+
   return (
     <>
       <SettingsViewWrapper
@@ -234,6 +247,7 @@ const ListSettingsView = ({
           <div className="row">
             <div className="col-12">
               <SortWrapper
+                ref={drop}
                 style={{
                   display: 'flex',
                   width: '100%',
@@ -241,9 +255,11 @@ const ListSettingsView = ({
               >
                 {getListDisplayedFields().map((item, index) => {
                   return (
-                    <DraggedField
+                    <Label
                       count={getListDisplayedFields().length}
                       key={item}
+                      index={index}
+                      move={move}
                       name={item}
                       onClick={handleClickEditLabel}
                       onRemove={() => {
@@ -297,6 +313,10 @@ const ListSettingsView = ({
           </DropdownButton>
         </DragWrapper>
       </SettingsViewWrapper>
+      {/* Temporary in dev need to check the build the input lib causes glimpse */}
+      <div style={{ display: 'none' }}>
+        <Input type="text" name="hidden" />
+      </div>
       {/* Label form */}
       <Modal
         isOpen={isModalFormOpen}
@@ -328,48 +348,46 @@ const ListSettingsView = ({
           }}
         >
           <ModalForm>
-            {labelToEdit !== '' && (
-              <ModalBody>
-                <div className="col-6">
-                  <FormattedMessage id={`${pluginId}.form.Input.label`}>
-                    {label => (
-                      <FormattedMessage
-                        id={`${pluginId}.form.Input.label.inputDescription`}
-                      >
-                        {description => (
-                          <Input
-                            description={description}
-                            label={label}
-                            type="text"
-                            name="label"
-                            onBlur={() => {}}
-                            value={get(labelForm, 'label', '')}
-                            onChange={handleChangeEditLabel}
-                          />
-                        )}
-                      </FormattedMessage>
-                    )}
-                  </FormattedMessage>
-                </div>
-                <div className="col-6" />
-                {get(getAttributes, [labelToEdit, 'type'], 'text') !==
-                  'media' && (
-                  <div className="col-6">
-                    <FormattedMessage id={`${pluginId}.form.Input.sort.field`}>
-                      {label => (
+            <ModalBody>
+              <div className="col-6">
+                <FormattedMessage id={`${pluginId}.form.Input.label`}>
+                  {label => (
+                    <FormattedMessage
+                      id={`${pluginId}.form.Input.label.inputDescription`}
+                    >
+                      {description => (
                         <Input
+                          description={description}
                           label={label}
-                          type="bool"
-                          name="sortable"
-                          value={get(labelForm, 'sortable', false)}
+                          type="text"
+                          name="label"
+                          onBlur={() => {}}
+                          value={get(labelForm, 'label', '')}
                           onChange={handleChangeEditLabel}
                         />
                       )}
                     </FormattedMessage>
-                  </div>
-                )}
-              </ModalBody>
-            )}
+                  )}
+                </FormattedMessage>
+              </div>
+              <div className="col-6" />
+              {get(getAttributes, [labelToEdit, 'type'], 'text') !==
+                'media' && (
+                <div className="col-6">
+                  <FormattedMessage id={`${pluginId}.form.Input.sort.field`}>
+                    {label => (
+                      <Input
+                        label={label}
+                        type="bool"
+                        name="sortable"
+                        value={get(labelForm, 'sortable', false)}
+                        onChange={handleChangeEditLabel}
+                      />
+                    )}
+                  </FormattedMessage>
+                </div>
+              )}
+            </ModalBody>
           </ModalForm>
           <ModalFooter>
             <section>

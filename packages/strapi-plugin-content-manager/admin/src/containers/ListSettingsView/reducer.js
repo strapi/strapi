@@ -19,6 +19,12 @@ const reducer = (state, action) => {
         .update('initialData', () => fromJS(action.data))
         .update('isLoading', () => false)
         .update('modifiedData', () => fromJS(action.data));
+    case 'MOVE_FIELD':
+      return state.updateIn(['modifiedData', 'layouts', 'list'], list => {
+        return list
+          .delete(action.originalIndex)
+          .insert(action.atIndex, list.get(action.originalIndex));
+      });
     case 'ON_CHANGE':
       return state.updateIn(
         ['modifiedData', ...action.keys.split('.')],

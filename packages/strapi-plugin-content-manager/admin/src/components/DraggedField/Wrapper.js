@@ -8,6 +8,7 @@ const Wrapper = styled.div`
   flex-basis: calc(100% / ${props => props.count});
   flex-shrink: 1;
   min-width: 130px;
+  position: relative;
 
   .sub_wrapper {
     position: relative;
@@ -26,12 +27,14 @@ const Wrapper = styled.div`
       cursor: pointer;
     }
     .grab {
-      margin-right: 10px;
-      border-right: 1px solid #e9eaeb;
       position: absolute;
       top: -1px;
       left: 0;
+      margin-right: 10px;
       padding-left: 10px;
+      border-right: 1px solid #e9eaeb;
+      cursor: move;
+      z-index: 99;
     }
 
     .remove {
