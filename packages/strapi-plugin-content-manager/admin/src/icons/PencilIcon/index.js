@@ -18,3 +18,5 @@ PencilCompo.defaultProps = {
 PencilCompo.propTypes = {
   fill: PropTypes.string,
 };
+
+export default PencilCompo;

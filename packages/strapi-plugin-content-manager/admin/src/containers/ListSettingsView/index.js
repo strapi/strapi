@@ -33,6 +33,7 @@ import DragWrapper from './DragWrapper';
 import Toggle from './Toggle';
 import reducer, { initialState } from './reducer';
 import forms from './forms.json';
+import { DraggedFieldProvider } from '../../contexts/DraggedField';
 
 const ListSettingsView = ({
   deleteLayout,
@@ -224,7 +225,7 @@ const ListSettingsView = ({
   const [, drop] = useDrop({ accept: ItemTypes.FIELD });
 
   return (
-    <>
+    <DraggedFieldProvider selectedItem={labelToEdit}>
       <SettingsViewWrapper
         getSelectOptions={getSelectOptions}
         inputs={forms}
@@ -370,7 +371,6 @@ const ListSettingsView = ({
                   )}
                 </FormattedMessage>
               </div>
-              <div className="col-6" />
               {get(getAttributes, [labelToEdit, 'type'], 'text') !==
                 'media' && (
                 <div className="col-6">
@@ -432,7 +432,7 @@ const ListSettingsView = ({
         popUpWarningType="danger"
         onConfirm={handleConfirm}
       />
-    </>
+    </DraggedFieldProvider>
   );
 };
 

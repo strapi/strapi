@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
+const getColor = isSelected => (isSelected ? '#aed4fb' : '#e9eaeb');
+
 const Wrapper = styled.div`
   height: 30px;
   padding: 0 10px 0 0;
@@ -14,8 +16,9 @@ const Wrapper = styled.div`
     position: relative;
     height: 30px;
     line-height: 30px;
-    background: #fafafb;
-    border: 1px solid #e3e9f3;
+
+    background: ${({ isSelected }) => (isSelected ? '#e6f0fb' : '#fafafb')};
+    border: 1px solid ${({ isSelected }) => getColor(isSelected)};
     border-radius: 2px;
     .name {
       position: relative;
@@ -25,6 +28,14 @@ const Wrapper = styled.div`
       text-overflow: ellipsis;
       white-space: nowrap;
       cursor: pointer;
+
+      ${({ isSelected }) => {
+        if (isSelected) {
+          return `
+            color: #007eff
+          `;
+        }
+      }}
     }
     .grab {
       position: absolute;
@@ -32,15 +43,25 @@ const Wrapper = styled.div`
       left: 0;
       margin-right: 10px;
       padding-left: 10px;
-      border-right: 1px solid #e9eaeb;
+      border-right: 1px solid ${({ isSelected }) => getColor(isSelected)};
       cursor: move;
       z-index: 99;
+
+      ${({ isSelected }) => {
+        if (isSelected) {
+          return `
+          g {
+            fill: #007eff;
+          }
+          `;
+        }
+      }}
     }
 
     .remove {
       width: 30px;
       text-align: center;
-      background-color: #e9eaeb;
+      background-color: ${({ isSelected }) => getColor(isSelected)};
       cursor: pointer;
 
       position: absolute;
@@ -56,10 +77,12 @@ const Wrapper = styled.div`
 
 Wrapper.defaultProps = {
   count: 1,
+  isSelected: false,
 };
 
 Wrapper.propTypes = {
   count: PropTypes.number,
+  isSelected: PropTypes.bool,
 };
 
 export default Wrapper;
