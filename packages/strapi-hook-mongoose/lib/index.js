@@ -87,6 +87,8 @@ module.exports = function(strapi) {
         connectOptions.dbName = database;
         connectOptions.useCreateIndex = true;
         connectOptions.useUnifiedTopology = useUnifiedTopology || 'false';
+        connectOptions.autoReconnect = true;
+        connectOptions.reconnectTries = Number.MAX_VALUE;
 
         try {
           /* FIXME: for now, mongoose doesn't support srv auth except the way including user/pass in URI.
