@@ -29,7 +29,7 @@ const Wrapper = styled.div`
       margin-right: 10px;
       border-right: 1px solid #e9eaeb;
       position: absolute;
-      top: 0;
+      top: -1px;
       left: 0;
       padding-left: 10px;
     }
@@ -41,7 +41,7 @@ const Wrapper = styled.div`
       cursor: pointer;
 
       position: absolute;
-      top: 0;
+      top: -1px;
       right: 0;
 
       svg {

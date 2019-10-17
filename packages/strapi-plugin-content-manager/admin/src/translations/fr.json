@@ -58,11 +58,15 @@
   "containers.Home.introduction": "Pour éditer du contenu, choisissez un type de données dans le menu de gauche.",
   "containers.Home.pluginHeaderDescription": "Créer et modifier votre type de contenu",
   "containers.Home.pluginHeaderTitle": "Type de contenu",
+
   "containers.List.addAnEntry": "Ajouter {entity}",
   "containers.List.errorFetchRecords": "Erreur",
   "containers.List.pluginHeaderDescription": "{label} entrées trouvées",
   "containers.List.pluginHeaderDescription.singular": "{label} entrée trouvée",
   "containers.ListPage.displayedFields": "Champs affichés",
+
+  "containers.ListSettingsView.modal-form.edit-label": "Editer le label",
+
   "containers.SettingPage.addField": "Ajouter un nouveau champ",
   "containers.SettingPage.addRelationalField": "Ajouter un nouveau champ relationnel",
   "containers.SettingPage.attributes": "Attributs",

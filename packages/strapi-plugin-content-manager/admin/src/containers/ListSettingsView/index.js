@@ -2,12 +2,23 @@ import React, { useEffect, useMemo, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
 import { cloneDeep, get, isEqual, upperFirst } from 'lodash';
 import {
+  ButtonModal,
+  HeaderModal,
+  HeaderModalTitle,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalForm,
   PopUpWarning,
+  // utils
   getQueryParameters,
   request,
+  // contexts
   useGlobalContext,
 } from 'strapi-helper-plugin';
+import { FormattedMessage } from 'react-intl';
 import { DropdownItem } from 'reactstrap';
+import { Inputs as Input } from '@buffetjs/custom';
 import pluginId from '../../pluginId';
 import getRequestUrl from '../../utils/getRequestUrl';
 import DraggedField from '../../components/DraggedField';
@@ -31,13 +42,22 @@ const ListSettingsView = ({
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningSubmit, setWarningSubmit] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isModalFormOpen, setIsModalFormOpen] = useState(false);
 
   const { emitEvent } = useGlobalContext();
 
   const toggleWarningCancel = () => setWarningCancel(prevState => !prevState);
   const toggleWarningSubmit = () => setWarningSubmit(prevState => !prevState);
+  const toggleModalForm = () => setIsModalFormOpen(prevState => !prevState);
 
-  const { initialData, modifiedData, isLoading } = reducerState.toJS();
+  const {
+    labelForm,
+    labelToEdit,
+    initialData,
+    modifiedData,
+    isLoading,
+  } = reducerState.toJS();
+  console.log(labelForm, modifiedData);
   const source = getQueryParameters(search, 'source');
   const abortController = new AbortController();
   const { signal } = abortController;
@@ -127,11 +147,33 @@ const ListSettingsView = ({
     return input.options;
   };
 
+  const handleClickEditLabel = labelToEdit => {
+    dispatch({
+      type: 'SET_LABEL_TO_EDIT',
+      labelToEdit,
+    });
+    toggleModalForm();
+  };
+
+  const handleClosed = () => {
+    dispatch({
+      type: 'UNSET_LABEL_TO_EDIT',
+    });
+  };
+
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
       type: 'ON_CHANGE',
       keys: name,
       value: name === 'settings.pageSize' ? parseInt(value, 10) : value,
+    });
+  };
+
+  const handleChangeEditLabel = ({ target: { name, value } }) => {
+    dispatch({
+      type: 'ON_CHANGE_LABEL_METAS',
+      name,
+      value,
     });
   };
 
@@ -203,6 +245,7 @@ const ListSettingsView = ({
                       count={getListDisplayedFields().length}
                       key={item}
                       name={item}
+                      onClick={handleClickEditLabel}
                       onRemove={() => {
                         if (getListDisplayedFields().length === 1) {
                           strapi.notification.info(
@@ -254,6 +297,93 @@ const ListSettingsView = ({
           </DropdownButton>
         </DragWrapper>
       </SettingsViewWrapper>
+      {/* Label form */}
+      <Modal
+        isOpen={isModalFormOpen}
+        onClosed={handleClosed}
+        onToggle={toggleModalForm}
+      >
+        <HeaderModal>
+          <section>
+            <HeaderModalTitle>
+              <FormattedMessage
+                id={`${pluginId}.containers.ListSettingsView.modal-form.edit-label`}
+              />
+            </HeaderModalTitle>
+          </section>
+          <section>
+            <HeaderModalTitle>
+              <span>{labelToEdit}</span>
+              <hr />
+            </HeaderModalTitle>
+          </section>
+        </HeaderModal>
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            toggleModalForm();
+            dispatch({
+              type: 'SUBMIT_LABEL_FORM',
+            });
+          }}
+        >
+          <ModalForm>
+            {labelToEdit !== '' && (
+              <ModalBody>
+                <div className="col-6">
+                  <FormattedMessage id={`${pluginId}.form.Input.label`}>
+                    {label => (
+                      <FormattedMessage
+                        id={`${pluginId}.form.Input.label.inputDescription`}
+                      >
+                        {description => (
+                          <Input
+                            description={description}
+                            label={label}
+                            type="text"
+                            name="label"
+                            onBlur={() => {}}
+                            value={get(labelForm, 'label', '')}
+                            onChange={handleChangeEditLabel}
+                          />
+                        )}
+                      </FormattedMessage>
+                    )}
+                  </FormattedMessage>
+                </div>
+                <div className="col-6" />
+                {get(getAttributes, [labelToEdit, 'type'], 'text') !==
+                  'media' && (
+                  <div className="col-6">
+                    <FormattedMessage id={`${pluginId}.form.Input.sort.field`}>
+                      {label => (
+                        <Input
+                          label={label}
+                          type="bool"
+                          name="sortable"
+                          value={get(labelForm, 'sortable', false)}
+                          onChange={handleChangeEditLabel}
+                        />
+                      )}
+                    </FormattedMessage>
+                  </div>
+                )}
+              </ModalBody>
+            )}
+          </ModalForm>
+          <ModalFooter>
+            <section>
+              <ButtonModal
+                message="components.popUpWarning.button.cancel"
+                onClick={toggleModalForm}
+                isSecondary
+              />
+              <ButtonModal message="form.button.done" type="submit" />
+            </section>
+          </ModalFooter>
+        </form>
+      </Modal>
+      {/* Warning cancel */}
       <PopUpWarning
         isOpen={showWarningCancel}
         toggleModal={toggleWarningCancel}
@@ -271,6 +401,7 @@ const ListSettingsView = ({
           toggleWarningCancel();
         }}
       />
+      {/* Warning submit */}
       <PopUpWarning
         isOpen={showWarningSubmit}
         toggleModal={toggleWarningSubmit}

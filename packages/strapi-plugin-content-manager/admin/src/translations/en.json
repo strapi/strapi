@@ -59,11 +59,15 @@
   "containers.Home.introduction": "To edit your entries go to the specific link in the left menu. This plugin doesn't have a proper way to edit settings and it's still under active development.",
   "containers.Home.pluginHeaderDescription": "Manage your entries through a powerful and beautiful interface.",
   "containers.Home.pluginHeaderTitle": "Content Manager",
+
   "containers.List.addAnEntry": "Add New {entity}",
   "containers.List.errorFetchRecords": "Error",
   "containers.List.pluginHeaderDescription": "{label} entries found",
   "containers.List.pluginHeaderDescription.singular": "{label} entry found",
   "containers.ListPage.displayedFields": "Displayed Fields",
+
+  "containers.ListSettingsView.modal-form.edit-label": "Edit label",
+
   "containers.SettingPage.addField": "Add new field",
   "containers.SettingPage.addRelationalField": "Add new relational field",
   "containers.SettingPage.attributes": "Attributes fields",

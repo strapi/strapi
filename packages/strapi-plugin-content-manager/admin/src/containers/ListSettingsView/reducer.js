@@ -1,6 +1,8 @@
 import { fromJS } from 'immutable';
 
 const initialState = fromJS({
+  labelForm: {},
+  labelToEdit: '',
   initialData: {},
   isLoading: true,
   modifiedData: {},
@@ -8,6 +10,7 @@ const initialState = fromJS({
 
 const reducer = (state, action) => {
   const layoutPath = ['modifiedData', 'layouts', 'list'];
+
   switch (action.type) {
     case 'ADD_FIELD':
       return state.updateIn(layoutPath, list => list.push(action.item));
@@ -21,6 +24,8 @@ const reducer = (state, action) => {
         ['modifiedData', ...action.keys.split('.')],
         () => action.value
       );
+    case 'ON_CHANGE_LABEL_METAS':
+      return state.updateIn(['labelForm', action.name], () => action.value);
     case 'ON_RESET':
       return state.update('modifiedData', () => state.get('initialData'));
     case 'REMOVE_FIELD': {
@@ -28,8 +33,6 @@ const reducer = (state, action) => {
       const defaultSortBy = state.getIn(defaultSortByPath);
       const attrPath = ['modifiedData', 'layouts', 'list', action.index];
       const attrToBeRemoved = state.getIn(attrPath);
-
-      console.log(attrToBeRemoved, defaultSortBy);
 
       const firstAttr = state.getIn(['modifiedData', 'layouts', 'list', 1]);
       const firstAttrType = state.getIn([
@@ -50,6 +53,47 @@ const reducer = (state, action) => {
 
           return defaultSortBy;
         });
+    }
+    case 'SET_LABEL_TO_EDIT':
+      return state
+        .update('labelToEdit', () => action.labelToEdit)
+        .updateIn(['labelForm', 'label'], () =>
+          state.getIn([
+            'modifiedData',
+            'metadatas',
+            action.labelToEdit,
+            'list',
+            'label',
+          ])
+        )
+        .updateIn(['labelForm', 'sortable'], () =>
+          state.getIn([
+            'modifiedData',
+            'metadatas',
+            action.labelToEdit,
+            'list',
+            'sortable',
+          ])
+        );
+    case 'UNSET_LABEL_TO_EDIT':
+      return state
+        .update('labelToEdit', () => '')
+        .update('labelForm', () => fromJS({}));
+    case 'SUBMIT_LABEL_FORM': {
+      const metaPath = [
+        'modifiedData',
+        'metadatas',
+        state.get('labelToEdit'),
+        'list',
+      ];
+
+      return state
+        .updateIn([...metaPath, 'label'], () =>
+          state.getIn(['labelForm', 'label'])
+        )
+        .updateIn([...metaPath, 'sortable'], () =>
+          state.getIn(['labelForm', 'sortable'])
+        );
     }
     case 'SUBMIT_SUCCEEDED':
       return state.update('initialData', () => state.get('modifiedData'));
