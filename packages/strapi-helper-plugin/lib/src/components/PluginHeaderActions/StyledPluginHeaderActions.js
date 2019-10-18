@@ -11,7 +11,7 @@ const StyledPluginHeaderActions = styled.div`
   justify-content: flex-end;
   width: fit-content;
   max-width: 100%;
-  padding-top: 1rem;
+  padding-top: 0.9rem;
   button {
     margin-right: 0;
     margin-left: 1rem;

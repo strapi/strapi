@@ -2,8 +2,10 @@ import styled from 'styled-components';
 
 const Li = styled.li`
   display: block;
-  padding: 17px 15px;
+  padding: 8px 15px;
   cursor: pointer;
+  margin-top: 0;
+
   &:hover {
     background-color: #f7f8f8;
     .title {

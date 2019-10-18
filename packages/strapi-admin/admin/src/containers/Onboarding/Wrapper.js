@@ -55,7 +55,7 @@ const Wrapper = styled.div`
     }
 
     ul {
-      padding: 10px 0;
+      padding: 0 0 10px 0;
       margin-bottom: 0;
       list-style: none;
     }
