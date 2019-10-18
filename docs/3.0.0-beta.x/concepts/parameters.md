@@ -1,4 +1,4 @@
-# Prameters
+# Parameters
 
 ## Concept
 
