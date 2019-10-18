@@ -48,7 +48,10 @@ const reducer = (state, action) => {
         firstAttr,
         'type',
       ]);
-      const attrToSelect = firstAttrType !== 'media' ? firstAttr : 'id';
+      const attrToSelect =
+        firstAttrType !== 'media' && firstAttrType !== 'richtext'
+          ? firstAttr
+          : 'id';
 
       return state
         .removeIn(['modifiedData', 'layouts', 'list', action.index])

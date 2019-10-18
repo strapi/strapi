@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
-import { cloneDeep, get, isEqual, upperFirst } from 'lodash';
+import { cloneDeep, get } from 'lodash';
 import {
-  PopUpWarning,
   // utils
   getQueryParameters,
   request,
@@ -36,15 +35,11 @@ const ListSettingsView = ({
   },
 }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState);
-  const [showWarningCancel, setWarningCancel] = useState(false);
-  const [showWarningSubmit, setWarningSubmit] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isModalFormOpen, setIsModalFormOpen] = useState(false);
 
   const { emitEvent } = useGlobalContext();
 
-  const toggleWarningCancel = () => setWarningCancel(prevState => !prevState);
-  const toggleWarningSubmit = () => setWarningSubmit(prevState => !prevState);
   const toggleModalForm = () => setIsModalFormOpen(prevState => !prevState);
 
   const {
@@ -110,40 +105,6 @@ const ListSettingsView = ({
       });
   };
 
-  const getPluginHeaderActions = () => {
-    if (isEqual(modifiedData, initialData)) {
-      return [];
-    }
-
-    return [
-      {
-        label: `${pluginId}.popUpWarning.button.cancel`,
-        kind: 'secondary',
-        onClick: toggleWarningCancel,
-        type: 'button',
-      },
-      {
-        kind: 'primary',
-        label: `${pluginId}.containers.Edit.submit`,
-        type: 'submit',
-      },
-    ];
-  };
-
-  const getSelectOptions = input => {
-    if (input.name === 'settings.defaultSortBy') {
-      return [
-        'id',
-        ...getListDisplayedFields().filter(
-          name =>
-            get(getAttributes, [name, 'type'], '') !== 'media' && name !== 'id'
-        ),
-      ];
-    }
-
-    return input.options;
-  };
-
   const handleClickEditLabel = labelToEdit => {
     dispatch({
       type: 'SET_LABEL_TO_EDIT',
@@ -196,15 +157,7 @@ const ListSettingsView = ({
       emitEvent('didSaveContentTypeLayout');
     } catch (err) {
       strapi.notification.error('notification.error');
-    } finally {
-      toggleWarningSubmit();
     }
-  };
-
-  const handleSubmit = e => {
-    e.preventDefault();
-    toggleWarningSubmit();
-    emitEvent('willSaveContentTypeLayout');
   };
 
   const move = (originalIndex, atIndex) => {
@@ -261,22 +214,19 @@ const ListSettingsView = ({
   return (
     <DraggedFieldProvider selectedItem={labelToEdit}>
       <SettingsViewWrapper
-        getSelectOptions={getSelectOptions}
+        getListDisplayedFields={getListDisplayedFields}
         inputs={forms}
         isLoading={isLoading}
+        initialData={initialData}
         modifiedData={modifiedData}
         onChange={handleChange}
-        onSubmit={handleSubmit}
-        pluginHeaderProps={{
-          actions: getPluginHeaderActions(),
-          title: {
-            id: `${pluginId}.components.SettingsViewWrapper.pluginHeader.title`,
-            values: { name: upperFirst(slug) },
-          },
-          description: {
-            id: `${pluginId}.components.SettingsViewWrapper.pluginHeader.description.list-settings`,
-          },
+        onConfirmReset={() => {
+          dispatch({
+            type: 'ON_RESET',
+          });
         }}
+        onConfirmSubmit={handleConfirm}
+        slug={slug}
       >
         <DragWrapper>
           <div className="row">
@@ -352,7 +302,6 @@ const ListSettingsView = ({
       <div style={{ display: 'none' }}>
         <Input type="text" name="hidden" />
       </div>
-      {/* Label form */}
       <PopupForm
         headerId={`${pluginId}.containers.ListSettingsView.modal-form.edit-label`}
         isOpen={isModalFormOpen}
@@ -367,37 +316,6 @@ const ListSettingsView = ({
         onToggle={toggleModalForm}
         renderForm={renderForm}
         subHeaderContent={labelToEdit}
-      />
-      {/* Warning cancel */}
-      <PopUpWarning
-        isOpen={showWarningCancel}
-        toggleModal={toggleWarningCancel}
-        content={{
-          title: `${pluginId}.popUpWarning.title`,
-          message: `${pluginId}.popUpWarning.warning.cancelAllSettings`,
-          cancel: `${pluginId}.popUpWarning.button.cancel`,
-          confirm: `${pluginId}.popUpWarning.button.confirm`,
-        }}
-        popUpWarningType="danger"
-        onConfirm={() => {
-          dispatch({
-            type: 'ON_RESET',
-          });
-          toggleWarningCancel();
-        }}
-      />
-      {/* Warning submit */}
-      <PopUpWarning
-        isOpen={showWarningSubmit}
-        toggleModal={toggleWarningSubmit}
-        content={{
-          title: `${pluginId}.popUpWarning.title`,
-          message: `${pluginId}.popUpWarning.warning.updateAllSettings`,
-          cancel: `${pluginId}.popUpWarning.button.cancel`,
-          confirm: `${pluginId}.popUpWarning.button.confirm`,
-        }}
-        popUpWarningType="danger"
-        onConfirm={handleConfirm}
       />
     </DraggedFieldProvider>
   );

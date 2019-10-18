@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
+import { get, isEqual, upperFirst } from 'lodash';
 import { withRouter } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { Inputs as Input } from '@buffetjs/custom';
@@ -8,7 +8,11 @@ import {
   BackHeader,
   PluginHeader,
   LoadingIndicatorPage,
+  PopUpWarning,
+  // contexts
+  useGlobalContext,
 } from 'strapi-helper-plugin';
+import pluginId from '../../pluginId';
 import Block from '../Block';
 import Container from '../Container';
 import SectionTitle from '../SectionTitle';
@@ -16,15 +20,106 @@ import Separator from '../Separator';
 
 const SettingsViewWrapper = ({
   children,
-  getSelectOptions,
   history: { goBack },
+  getListDisplayedFields,
   inputs,
+  initialData,
+  isEditSettings,
   isLoading,
   modifiedData,
   onChange,
-  onSubmit,
-  pluginHeaderProps,
+  onConfirmReset,
+  onConfirmSubmit,
+  slug,
 }) => {
+  const { emitEvent } = useGlobalContext();
+  const [showWarningCancel, setWarningCancel] = useState(false);
+  const [showWarningSubmit, setWarningSubmit] = useState(false);
+
+  const getAttributes = useMemo(() => {
+    return get(modifiedData, ['schema', 'attributes'], {});
+  }, [modifiedData]);
+
+  const toggleWarningCancel = () => setWarningCancel(prevState => !prevState);
+  const toggleWarningSubmit = () => setWarningSubmit(prevState => !prevState);
+
+  const getPluginHeaderActions = () => {
+    if (isEqual(modifiedData, initialData)) {
+      return [];
+    }
+
+    return [
+      {
+        label: `${pluginId}.popUpWarning.button.cancel`,
+        kind: 'secondary',
+        onClick: toggleWarningCancel,
+        type: 'button',
+      },
+      {
+        kind: 'primary',
+        label: `${pluginId}.containers.Edit.submit`,
+        type: 'submit',
+      },
+    ];
+  };
+
+  const pluginHeaderProps = {
+    actions: getPluginHeaderActions(),
+    title: {
+      id: `${pluginId}.components.SettingsViewWrapper.pluginHeader.title`,
+      values: { name: upperFirst(slug) },
+    },
+    description: {
+      id: `${pluginId}.components.SettingsViewWrapper.pluginHeader.description.${
+        isEditSettings ? 'edit' : 'list'
+      }-settings`,
+    },
+  };
+
+  const getSelectOptions = input => {
+    if (input.name === 'settings.defaultSortBy') {
+      return [
+        'id',
+        ...getListDisplayedFields().filter(
+          name =>
+            get(getAttributes, [name, 'type'], '') !== 'media' &&
+            name !== 'id' &&
+            get(getAttributes, [name, 'type'], '') !== 'richtext'
+        ),
+      ];
+    }
+
+    if (input.name === 'settings.mainField') {
+      const attributes = getAttributes;
+      const options = Object.keys(attributes).filter(attr => {
+        const type = get(attributes, [attr, 'type'], '');
+
+        return (
+          ![
+            'json',
+            'text',
+            'relation',
+            'group',
+            'boolean',
+            'date',
+            'media',
+            'richtext',
+          ].includes(type) && !!type
+        );
+      });
+
+      return options;
+    }
+
+    return input.options;
+  };
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    toggleWarningSubmit();
+    emitEvent('willSaveContentTypeLayout');
+  };
+
   if (isLoading) {
     return <LoadingIndicatorPage />;
   }
@@ -33,7 +128,7 @@ const SettingsViewWrapper = ({
     <>
       <BackHeader onClick={goBack} />
       <Container className="container-fluid">
-        <form onSubmit={onSubmit}>
+        <form onSubmit={handleSubmit}>
           <PluginHeader {...pluginHeaderProps} />
           <div className="row">
             <Block
@@ -81,6 +176,36 @@ const SettingsViewWrapper = ({
               {children}
             </Block>
           </div>
+          <PopUpWarning
+            isOpen={showWarningCancel}
+            toggleModal={toggleWarningCancel}
+            content={{
+              title: `${pluginId}.popUpWarning.title`,
+              message: `${pluginId}.popUpWarning.warning.cancelAllSettings`,
+              cancel: `${pluginId}.popUpWarning.button.cancel`,
+              confirm: `${pluginId}.popUpWarning.button.confirm`,
+            }}
+            popUpWarningType="danger"
+            onConfirm={() => {
+              onConfirmReset();
+              toggleWarningCancel();
+            }}
+          />
+          <PopUpWarning
+            isOpen={showWarningSubmit}
+            toggleModal={toggleWarningSubmit}
+            content={{
+              title: `${pluginId}.popUpWarning.title`,
+              message: `${pluginId}.popUpWarning.warning.updateAllSettings`,
+              cancel: `${pluginId}.popUpWarning.button.cancel`,
+              confirm: `${pluginId}.popUpWarning.button.confirm`,
+            }}
+            popUpWarningType="danger"
+            onConfirm={async () => {
+              await onConfirmSubmit();
+              toggleWarningSubmit();
+            }}
+          />
         </form>
       </Container>
     </>
@@ -88,9 +213,13 @@ const SettingsViewWrapper = ({
 };
 
 SettingsViewWrapper.defaultProps = {
-  getSelectOptions: () => {},
+  getListDisplayedFields: () => [],
   inputs: [],
+  initialData: {},
+  isEditSettings: false,
   modifiedData: {},
+  onConfirmReset: () => {},
+  onConfirmSubmit: async () => {},
   onSubmit: () => {},
   pluginHeaderProps: {
     actions: [],
@@ -102,18 +231,23 @@ SettingsViewWrapper.defaultProps = {
       values: {},
     },
   },
+  slug: '',
 };
 
 SettingsViewWrapper.propTypes = {
   children: PropTypes.node.isRequired,
-  getSelectOptions: PropTypes.func,
+  getListDisplayedFields: PropTypes.func,
   history: PropTypes.shape({
     goBack: PropTypes.func.isRequired,
   }).isRequired,
+  initialData: PropTypes.object,
   inputs: PropTypes.array,
+  isEditSettings: PropTypes.bool,
   isLoading: PropTypes.bool.isRequired,
   modifiedData: PropTypes.object,
   onChange: PropTypes.func.isRequired,
+  onConfirmReset: PropTypes.func,
+  onConfirmSubmit: PropTypes.func,
   onSubmit: PropTypes.func,
   pluginHeaderProps: PropTypes.shape({
     actions: PropTypes.array,
@@ -125,6 +259,7 @@ SettingsViewWrapper.propTypes = {
       values: PropTypes.object,
     }),
   }),
+  slug: PropTypes.string,
 };
 
 export default withRouter(SettingsViewWrapper);

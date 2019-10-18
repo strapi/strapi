@@ -181,6 +181,8 @@ function SettingViewModel({
     ];
   };
 
+  console.log(modifiedData);
+
   const getListDisplayedFields = () =>
     get(modifiedData, ['layouts', 'list'], []);
   const getEditRemainingFields = () => {

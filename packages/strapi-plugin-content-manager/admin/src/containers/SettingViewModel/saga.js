@@ -43,6 +43,8 @@ export function* getData({ source, uid }) {
       firstEditLayoutField || firstEditLayoutRelation;
     const formItemToSelectType = firstEditLayoutFieldType || 'relation';
 
+    console.log({ layout });
+
     yield put(
       getDataSucceeded(layout, formItemToSelectName, formItemToSelectType)
     );

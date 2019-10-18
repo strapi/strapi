@@ -34,6 +34,7 @@
   "components.Search.placeholder": "Search for an entry...",
 
   "components.SettingsViewWrapper.pluginHeader.title": "Configure the view - {name}",
+  "components.SettingsViewWrapper.pluginHeader.description.edit-settings": "Customize how the edit view will look like.",
   "components.SettingsViewWrapper.pluginHeader.description.list-settings": "Define the settings of the list view.",
 
   "components.TableDelete.delete": "Delete all",

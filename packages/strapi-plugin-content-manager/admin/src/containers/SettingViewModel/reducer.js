@@ -41,7 +41,7 @@ function settingViewModelReducer(state = initialState, action) {
   const layoutPathEdit = ['modifiedData', 'layouts', 'edit'];
   const layoutPathRelations = ['modifiedData', 'layouts', 'editRelations'];
   const { dragIndex, hoverIndex, dragRowIndex, hoverRowIndex } = action;
-
+  console.log(action.type);
   switch (action.type) {
     case ADD_FIELD_TO_LIST:
       return state.updateIn(['modifiedData', 'layouts', 'list'], list =>

@@ -32,6 +32,7 @@
   "components.Search.placeholder": "Rechercher une entrée...",
 
   "components.SettingsViewWrapper.pluginHeader.title": "Configurer la vue - {name}",
+  "components.SettingsViewWrapper.pluginHeader.description.edit-settings": "Définissez l'apparence de la vue edit.",
   "components.SettingsViewWrapper.pluginHeader.description.list-settings": "Définir les paramètres de la vue liste.",
 
   "components.TableDelete.delete": "Tout supprimer",
