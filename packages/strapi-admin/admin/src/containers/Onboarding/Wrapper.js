@@ -50,11 +50,12 @@ const Wrapper = styled.div`
       animation: ${fadeIn} 0.5s forwards;
     }
     &.hide {
+      min-width: 0;
       animation: ${fadeOut} 0.5s forwards;
     }
 
     ul {
-      padding: 10px 0;
+      padding: 0 0 10px 0;
       margin-bottom: 0;
       list-style: none;
     }

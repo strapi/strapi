@@ -25,6 +25,7 @@ const Wrapper = styled.div`
     }
     &:hover {
       z-index: 0 !important;
+      color: #ced3db;
     }
     &:focus {
       outline: 0;

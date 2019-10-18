@@ -25,7 +25,6 @@ const Card = styled.div`
     display: inline-block;
     height: 20px;
     width: 35px;
-    margin-top: -3px;
     margin-right: 10px;
   }
 
@@ -36,11 +35,13 @@ const Card = styled.div`
     font-style: italic;
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
+    margin-top: auto;
+    margin-bottom: auto;
+    line-height: normal;
 
     &:last-child {
       text-overflow: ellipsis;
       overflow: hidden;
-      line-height: normal;
     }
   }
 `;

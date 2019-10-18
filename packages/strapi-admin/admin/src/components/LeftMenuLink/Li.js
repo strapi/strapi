@@ -86,7 +86,7 @@ const Li = styled.li`
 
   .linkIcon {
     position: absolute;
-    top: calc(50% - 0.9rem + 0.6rem);
+    top: calc(50% - 0.9rem + 0.5rem);
     left: 1.6rem;
     margin-right: 1.2rem;
     font-size: 1.2rem;

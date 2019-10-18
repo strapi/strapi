@@ -80,8 +80,24 @@ class OnboardingVideo extends React.Component {
     }
   };
 
+  getVideoTime = (duration, sign) => {
+    const operator = Math.floor(eval(duration + sign + 60));
+
+    if (operator < 10) {
+      return `0${operator}`;
+    }
+    return operator;
+  };
+
   render() {
     const { video } = this.props;
+    const time = isNaN(video.duration)
+      ? '\xA0'
+      : `${Math.floor(video.duration / 60)}:${this.getVideoTime(
+          video.duration,
+          '%'
+        )}`;
+
     return (
       <Li
         key={this.props.id}
@@ -96,13 +112,7 @@ class OnboardingVideo extends React.Component {
         </div>
         <div className="txtWrapper">
           <p className="title">{video.title}</p>
-          <p className="time">
-            {isNaN(video.duration)
-              ? '\xA0'
-              : `${Math.floor(video.duration / 60)}:${Math.floor(
-                  video.duration
-                ) % 60}`}
-          </p>
+          <p className="time">{time}</p>
         </div>
 
         <Modal

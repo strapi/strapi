@@ -5,8 +5,11 @@ const Wrapper = styled.div`
   > div {
     padding-top: 2px;
     &:not(:first-of-type) {
-      padding-top: 18px;
+      padding-top: 9px;
       padding-bottom: 2px;
+      &:last-of-type:nth-of-type(even) {
+        padding-bottom: 11px;
+      }
     }
   }
 `;
