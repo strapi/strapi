@@ -4,6 +4,7 @@ const alias = [
   '@babel/polyfill',
   '@buffetjs/core',
   '@buffetjs/custom',
+  '@buffetjs/icons',
   '@buffetjs/styles',
   '@buffetjs/utils',
   'classnames',

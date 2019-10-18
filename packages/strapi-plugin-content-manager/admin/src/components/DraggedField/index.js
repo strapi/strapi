@@ -2,9 +2,7 @@
 import React, { forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import { useDraggedField } from '../../contexts/DraggedField';
-import GrabIcon from '../../icons/GrabIcon';
-import PencilIcon from '../../icons/PencilIcon';
-import RemoveIcon from '../../icons/RemoveIcon';
+import { Grab, Pencil, Remove } from '@buffetjs/icons';
 
 import Wrapper from './Wrapper';
 
@@ -18,13 +16,13 @@ const DraggedField = forwardRef(
       <Wrapper count={count} isSelected={isSelected}>
         <div className="sub_wrapper" style={{ opacity }}>
           <div className="grab" ref={ref}>
-            <GrabIcon style={{ marginRight: 10, cursor: 'move' }} />
+            <Grab style={{ marginRight: 10, cursor: 'move' }} />
           </div>
           <div className="name" onClick={() => onClick(name)}>
             {name}
           </div>
           <div className="remove" onClick={onRemove}>
-            {isSelected ? <PencilIcon /> : <RemoveIcon />}
+            {isSelected ? <Pencil /> : <Remove />}
           </div>
         </div>
       </Wrapper>

@@ -23,6 +23,7 @@
     "@babel/runtime": "^7.4.3",
     "@buffetjs/core": "^1.0.3",
     "@buffetjs/custom": "^1.0.3",
+    "@buffetjs/icons": "^1.0.0",
     "@buffetjs/styles": "^1.0.3",
     "@buffetjs/utils": "^1.0.3",
     "autoprefixer": "^9.5.1",
