@@ -2,13 +2,6 @@ import React, { useEffect, useMemo, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
 import { cloneDeep, get, isEqual, upperFirst } from 'lodash';
 import {
-  ButtonModal,
-  HeaderModal,
-  HeaderModalTitle,
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalForm,
   PopUpWarning,
   // utils
   getQueryParameters,
@@ -21,9 +14,10 @@ import { useDrop } from 'react-dnd';
 import { DropdownItem } from 'reactstrap';
 import { Inputs as Input } from '@buffetjs/custom';
 import pluginId from '../../pluginId';
+import { DraggedFieldProvider } from '../../contexts/DraggedField';
 import ItemTypes from '../../utils/ItemTypes';
 import getRequestUrl from '../../utils/getRequestUrl';
-
+import PopupForm from '../../components/PopupForm';
 import SettingsViewWrapper from '../../components/SettingsViewWrapper';
 import SortWrapper from '../../components/SortWrapper';
 import Label from './Label';
@@ -33,7 +27,6 @@ import DragWrapper from './DragWrapper';
 import Toggle from './Toggle';
 import reducer, { initialState } from './reducer';
 import forms from './forms.json';
-import { DraggedFieldProvider } from '../../contexts/DraggedField';
 
 const ListSettingsView = ({
   deleteLayout,
@@ -224,6 +217,47 @@ const ListSettingsView = ({
 
   const [, drop] = useDrop({ accept: ItemTypes.FIELD });
 
+  const renderForm = () => (
+    <>
+      <div className="col-6">
+        <FormattedMessage id={`${pluginId}.form.Input.label`}>
+          {label => (
+            <FormattedMessage
+              id={`${pluginId}.form.Input.label.inputDescription`}
+            >
+              {description => (
+                <Input
+                  description={description}
+                  label={label}
+                  type="text"
+                  name="label"
+                  onBlur={() => {}}
+                  value={get(labelForm, 'label', '')}
+                  onChange={handleChangeEditLabel}
+                />
+              )}
+            </FormattedMessage>
+          )}
+        </FormattedMessage>
+      </div>
+      {get(getAttributes, [labelToEdit, 'type'], 'text') !== 'media' && (
+        <div className="col-6">
+          <FormattedMessage id={`${pluginId}.form.Input.sort.field`}>
+            {label => (
+              <Input
+                label={label}
+                type="bool"
+                name="sortable"
+                value={get(labelForm, 'sortable', false)}
+                onChange={handleChangeEditLabel}
+              />
+            )}
+          </FormattedMessage>
+        </div>
+      )}
+    </>
+  );
+
   return (
     <DraggedFieldProvider selectedItem={labelToEdit}>
       <SettingsViewWrapper
@@ -319,88 +353,21 @@ const ListSettingsView = ({
         <Input type="text" name="hidden" />
       </div>
       {/* Label form */}
-      <Modal
+      <PopupForm
+        headerId={`${pluginId}.containers.ListSettingsView.modal-form.edit-label`}
         isOpen={isModalFormOpen}
         onClosed={handleClosed}
+        onSubmit={e => {
+          e.preventDefault();
+          toggleModalForm();
+          dispatch({
+            type: 'SUBMIT_LABEL_FORM',
+          });
+        }}
         onToggle={toggleModalForm}
-      >
-        <HeaderModal>
-          <section>
-            <HeaderModalTitle>
-              <FormattedMessage
-                id={`${pluginId}.containers.ListSettingsView.modal-form.edit-label`}
-              />
-            </HeaderModalTitle>
-          </section>
-          <section>
-            <HeaderModalTitle>
-              <span>{labelToEdit}</span>
-              <hr />
-            </HeaderModalTitle>
-          </section>
-        </HeaderModal>
-        <form
-          onSubmit={e => {
-            e.preventDefault();
-            toggleModalForm();
-            dispatch({
-              type: 'SUBMIT_LABEL_FORM',
-            });
-          }}
-        >
-          <ModalForm>
-            <ModalBody>
-              <div className="col-6">
-                <FormattedMessage id={`${pluginId}.form.Input.label`}>
-                  {label => (
-                    <FormattedMessage
-                      id={`${pluginId}.form.Input.label.inputDescription`}
-                    >
-                      {description => (
-                        <Input
-                          description={description}
-                          label={label}
-                          type="text"
-                          name="label"
-                          onBlur={() => {}}
-                          value={get(labelForm, 'label', '')}
-                          onChange={handleChangeEditLabel}
-                        />
-                      )}
-                    </FormattedMessage>
-                  )}
-                </FormattedMessage>
-              </div>
-              {get(getAttributes, [labelToEdit, 'type'], 'text') !==
-                'media' && (
-                <div className="col-6">
-                  <FormattedMessage id={`${pluginId}.form.Input.sort.field`}>
-                    {label => (
-                      <Input
-                        label={label}
-                        type="bool"
-                        name="sortable"
-                        value={get(labelForm, 'sortable', false)}
-                        onChange={handleChangeEditLabel}
-                      />
-                    )}
-                  </FormattedMessage>
-                </div>
-              )}
-            </ModalBody>
-          </ModalForm>
-          <ModalFooter>
-            <section>
-              <ButtonModal
-                message="components.popUpWarning.button.cancel"
-                onClick={toggleModalForm}
-                isSecondary
-              />
-              <ButtonModal message="form.button.done" type="submit" />
-            </section>
-          </ModalFooter>
-        </form>
-      </Modal>
+        renderForm={renderForm}
+        subHeaderContent={labelToEdit}
+      />
       {/* Warning cancel */}
       <PopUpWarning
         isOpen={showWarningCancel}
