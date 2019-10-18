@@ -639,18 +639,18 @@ class Wysiwyg extends React.Component {
    */
   sendData = editorState => {
     if (
-      this.getEditorState().getCurrentContent() ===
-      editorState.getCurrentContent()
-    )
-      return;
-
-    this.props.onChange({
-      target: {
-        value: editorState.getCurrentContent().getPlainText(),
-        name: this.props.name,
-        type: 'textarea',
-      },
-    });
+      this.getEditorState().getCurrentContent() !==
+        editorState.getCurrentContent() ||
+      editorState.getLastChangeType() === 'remove-range'
+    ) {
+      this.props.onChange({
+        target: {
+          value: editorState.getCurrentContent().getPlainText(),
+          name: this.props.name,
+          type: 'textarea',
+        },
+      });
+    } else return;
   };
 
   toggleFullScreen = e => {
