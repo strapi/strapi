@@ -210,7 +210,7 @@ module.exports = {
           null,
           formatError({
             id: 'Auth.form.error.email.taken',
-            message: 'Eamil already taken',
+            message: 'Email already taken',
             field: ['email'],
           })
         );
