@@ -1,7 +1,15 @@
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
-const getColor = isSelected => (isSelected ? '#aed4fb' : '#e9eaeb');
+const getColor = (isOverRemove, isSelected) => {
+  if (isSelected) {
+    return '#aed4fb';
+  } else if (isOverRemove) {
+    return '#ffa784';
+  } else {
+    return '#e9eaeb';
+  }
+};
 
 const Wrapper = styled.div`
   height: 30px;
@@ -17,8 +25,17 @@ const Wrapper = styled.div`
     height: 30px;
     line-height: 30px;
 
-    background: ${({ isSelected }) => (isSelected ? '#e6f0fb' : '#fafafb')};
-    border: 1px solid ${({ isSelected }) => getColor(isSelected)};
+    background: ${({ isOverRemove, isSelected }) => {
+      if (isSelected) {
+        return '#e6f0fb';
+      } else if (isOverRemove) {
+        return '#ffe9e0';
+      } else {
+        return '#fafafb';
+      }
+    }};
+    border: 1px solid
+      ${({ isOverRemove, isSelected }) => getColor(isOverRemove, isSelected)};
     border-radius: 2px;
     .name {
       position: relative;
@@ -29,10 +46,16 @@ const Wrapper = styled.div`
       white-space: nowrap;
       cursor: pointer;
 
-      ${({ isSelected }) => {
+      ${({ isOverRemove, isSelected }) => {
         if (isSelected) {
           return `
             color: #007eff
+          `;
+        }
+
+        if (isOverRemove) {
+          return `
+            color: #f64d0a
           `;
         }
       }}
@@ -43,15 +66,23 @@ const Wrapper = styled.div`
       left: 0;
       margin-right: 10px;
       padding-left: 10px;
-      border-right: 1px solid ${({ isSelected }) => getColor(isSelected)};
+      border-right: 1px solid
+        ${({ isOverRemove, isSelected }) => getColor(isOverRemove, isSelected)};
       cursor: move;
       z-index: 99;
 
-      ${({ isSelected }) => {
+      ${({ isOverRemove, isSelected }) => {
         if (isSelected) {
           return `
           g {
             fill: #007eff;
+          }
+          `;
+        }
+        if (isOverRemove) {
+          return `
+          g {
+            fill: #ffa784;
           }
           `;
         }
@@ -61,7 +92,8 @@ const Wrapper = styled.div`
     .remove {
       width: 30px;
       text-align: center;
-      background-color: ${({ isSelected }) => getColor(isSelected)};
+      background-color: ${({ isOverRemove, isSelected }) =>
+        getColor(isOverRemove, isSelected)};
       cursor: pointer;
 
       position: absolute;
@@ -71,6 +103,16 @@ const Wrapper = styled.div`
       svg {
         align-self: center;
       }
+
+      ${({ isOverRemove }) => {
+        if (isOverRemove) {
+          return `
+          path {
+            fill: #f64d0a;
+          }
+          `;
+        }
+      }}
     }
   }
 `;

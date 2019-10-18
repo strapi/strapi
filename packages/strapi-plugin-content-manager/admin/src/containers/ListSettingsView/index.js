@@ -13,7 +13,7 @@ import { useDrop } from 'react-dnd';
 import { DropdownItem } from 'reactstrap';
 import { Inputs as Input } from '@buffetjs/custom';
 import pluginId from '../../pluginId';
-import { DraggedFieldProvider } from '../../contexts/DraggedField';
+
 import ItemTypes from '../../utils/ItemTypes';
 import getRequestUrl from '../../utils/getRequestUrl';
 import PopupForm from '../../components/PopupForm';
@@ -212,7 +212,7 @@ const ListSettingsView = ({
   );
 
   return (
-    <DraggedFieldProvider selectedItem={labelToEdit}>
+    <>
       <SettingsViewWrapper
         getListDisplayedFields={getListDisplayedFields}
         inputs={forms}
@@ -259,6 +259,7 @@ const ListSettingsView = ({
                           });
                         }
                       }}
+                      selectedItem={labelToEdit}
                     />
                   );
                 })}
@@ -317,7 +318,7 @@ const ListSettingsView = ({
         renderForm={renderForm}
         subHeaderContent={labelToEdit}
       />
-    </DraggedFieldProvider>
+    </>
   );
 };
 

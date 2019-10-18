@@ -31,6 +31,7 @@ const FieldItem = forwardRef(
     },
     ref
   ) => {
+    console.log(style);
     const [isOver, setIsOver] = useState(false);
     const [dragStart, setDragStart] = useState(false);
     const isHidden = name === '_TEMP_';

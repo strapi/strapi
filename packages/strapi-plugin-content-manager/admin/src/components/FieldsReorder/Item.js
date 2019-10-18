@@ -6,6 +6,7 @@ import { get } from 'lodash';
 
 import { useLayoutDnd } from '../../contexts/LayoutDnd';
 import FieldItem from '../FieldItem';
+import DraggedFieldWithPreview from '../DraggedFieldWithPreview';
 
 import ItemTypes from '../../utils/ItemTypes';
 
@@ -195,7 +196,7 @@ const Item = ({
   }
 
   return (
-    <FieldItem
+    <DraggedFieldWithPreview
       groupUid={groupUid}
       isDragging={isDragging}
       isSelected={name === selectedItemName}

@@ -3,10 +3,10 @@ import { useDragLayer } from 'react-dnd';
 
 import ItemTypes from '../../utils/ItemTypes';
 
-import FieldItem from '../FieldItem';
 import GroupBanner from '../GroupBanner';
 import RelationItem from '../SelectMany/Relation';
 import { Li } from '../SelectMany/components';
+import DraggedField from '../DraggedField';
 
 const layerStyles = {
   position: 'fixed',
@@ -53,7 +53,7 @@ const CustomDragLayer = () => {
   function renderItem() {
     switch (itemType) {
       case ItemTypes.FIELD:
-        return <FieldItem name={item.id} size={12} isEditing />;
+        return <DraggedField name={item.id} selectedItem={item.name} />;
       case ItemTypes.GROUP:
         return (
           <GroupBanner
@@ -74,7 +74,9 @@ const CustomDragLayer = () => {
         );
       case ItemTypes.EDIT_FIELD:
       case ItemTypes.EDIT_RELATION:
-        return <FieldItem name={item.name} size={12} isEditing />;
+        return (
+          <DraggedField name={item.name} size={12} selectedItem={item.name} />
+        );
       default:
         return null;
     }

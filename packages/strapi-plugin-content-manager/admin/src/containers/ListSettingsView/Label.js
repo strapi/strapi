@@ -5,7 +5,15 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import ItemTypes from '../../utils/ItemTypes';
 import DraggedField from '../../components/DraggedField';
 
-const Label = ({ count, index, move, name, onClick, onRemove }) => {
+const Label = ({
+  count,
+  index,
+  move,
+  name,
+  onClick,
+  onRemove,
+  selectedItem,
+}) => {
   const ref = useRef(null);
   const [, drop] = useDrop({
     accept: ItemTypes.FIELD,
@@ -46,6 +54,7 @@ const Label = ({ count, index, move, name, onClick, onRemove }) => {
       name={name}
       onClick={onClick}
       onRemove={onRemove}
+      selectedItem={selectedItem}
     />
   );
 };
@@ -53,6 +62,7 @@ const Label = ({ count, index, move, name, onClick, onRemove }) => {
 Label.defaultProps = {
   index: 0,
   move: () => {},
+  selectedItem: '',
 };
 
 Label.propTypes = {
@@ -62,6 +72,7 @@ Label.propTypes = {
   name: PropTypes.string.isRequired,
   onClick: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
+  selectedItem: PropTypes.string,
 };
 
 export default Label;
