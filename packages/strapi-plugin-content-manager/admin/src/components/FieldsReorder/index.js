@@ -36,7 +36,15 @@ const FieldsReorder = ({ className }) => {
 
   return (
     <div className={className}>
-      <SortWrapper style={{ paddingLeft: 5, paddingRight: 5 }}>
+      <SortWrapper
+        style={{
+          marginTop: 7,
+          paddingTop: 11,
+          paddingLeft: 5,
+          paddingRight: 5,
+          border: '1px dashed #e3e9f3',
+        }}
+      >
         {layout.map((row, rowIndex) => {
           return (
             <Wrapper key={row.rowId} style={{}}>
