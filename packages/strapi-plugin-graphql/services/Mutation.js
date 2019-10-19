@@ -176,24 +176,25 @@ module.exports = {
 
     return async (obj, options, graphqlCtx) => {
       const { context } = graphqlCtx;
+
+      if (options.input && options.input.where) {
+        context.params = Query.convertToParams(options.input.where || {});
+      } else {
+        context.params = {};
+      }
+
+      if (options.input && options.input.data) {
+        context.request.body = options.input.data || {};
+      } else {
+        context.request.body = options;
+      }
+
       // Hack to be able to handle permissions for each query.
       const ctx = Object.assign(_.clone(context), {
         request: Object.assign(_.clone(context.request), {
           graphql: null,
         }),
       });
-
-      if (options.input && options.input.where) {
-        ctx.params = Query.convertToParams(options.input.where || {});
-      } else {
-        ctx.params = {};
-      }
-
-      if (options.input && options.input.data) {
-        ctx.request.body = options.input.data || {};
-      } else {
-        ctx.request.body = options;
-      }
 
       // Execute policies stack.
       const policy = await compose(policiesFn)(ctx);
@@ -216,7 +217,7 @@ module.exports = {
         const normalizedName = _.toLower(name);
 
         if (isController) {
-          const values = await resolver.call(null, ctx);
+          const values = await resolver.call(null, context);
 
           if (ctx.body) {
             return options.input
