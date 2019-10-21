@@ -42,18 +42,23 @@ module.exports = {
               if (err) {
                 return reject(err);
               }
-              file.public_id = image.public_id;
               file.url = image.secure_url;
+              file.provider_metadata = {
+                public_id: image.public_id,
+                resource_type: image.resource_type,
+              };
               resolve();
-            },
+            }
           );
           intoStream(file.buffer).pipe(upload_stream);
         });
       },
       async delete(file) {
         try {
-          const response = await cloudinary.uploader.destroy(file.public_id, {
+          const { resource_type, public_id } = file.provider_metadata;
+          const response = await cloudinary.uploader.destroy(public_id, {
             invalidate: true,
+            resource_type: resource_type || 'image',
           });
           if (response.result !== 'ok') {
             throw {

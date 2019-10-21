@@ -279,7 +279,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       } else {
         validateNonRepeatableInput(groupValue, { key, ...attr });
 
-        if (groupValue === null) return;
+        if (groupValue === null) continue;
         await createGroupAndLink({ value: groupValue, order: 1 });
       }
     }
@@ -376,7 +376,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
           transacting,
         });
 
-        if (groupValue === null) return;
+        if (groupValue === null) continue;
 
         await updateOrCreateGroupAndLink({ value: groupValue, order: 1 });
       }
@@ -418,7 +418,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     if (idsToDelete.length > 0) {
       await joinModel
         .forge()
-        .query(qb => qb.whereIn('group_id', idsToDelete))
+        .query(qb => qb.whereIn('group_id', idsToDelete).andWhere('field', key))
         .destroy({ transacting, require: false });
 
       await strapi
@@ -547,7 +547,7 @@ const buildSearchQuery = (qb, model, params) => {
       const searchQuery = searchText.map(attribute =>
         _.toLower(attribute) === attribute
           ? `to_tsvector(${attribute})`
-          : `to_tsvector('${attribute}')`
+          : `to_tsvector("${attribute}")`
       );
 
       qb.orWhereRaw(`${searchQuery.join(' || ')} @@ plainto_tsquery(?)`, query);

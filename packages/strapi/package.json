@@ -1,6 +1,6 @@
 {
   "name": "strapi",
-  "version": "3.0.0-beta.16.6",
+  "version": "3.0.0-beta.17.2",
   "description": "An open source headless CMS solution to create and manage your own API. It provides a powerful dashboard and features to make your life easier. Databases supported: MongoDB, MySQL, MariaDB, PostgreSQL, SQLite",
   "homepage": "http://strapi.io",
   "directories": {
@@ -17,6 +17,7 @@
     "boom": "^7.3.0",
     "chalk": "^2.4.1",
     "chokidar": "^2.1.2",
+    "cli-table3": "^0.5.1",
     "cross-spawn": "^6.0.5",
     "delegates": "^1.0.0",
     "execa": "^1.0.0",
@@ -47,15 +48,15 @@
     "resolve-cwd": "^3.0.0",
     "rimraf": "^2.6.2",
     "shelljs": "^0.8.3",
-    "strapi-generate": "3.0.0-beta.16.6",
-    "strapi-generate-api": "3.0.0-beta.16.6",
-    "strapi-generate-controller": "3.0.0-beta.16.6",
-    "strapi-generate-model": "3.0.0-beta.16.6",
-    "strapi-generate-new": "3.0.0-beta.16.6",
-    "strapi-generate-plugin": "3.0.0-beta.16.6",
-    "strapi-generate-policy": "3.0.0-beta.16.6",
-    "strapi-generate-service": "3.0.0-beta.16.6",
-    "strapi-utils": "3.0.0-beta.16.6"
+    "strapi-generate": "3.0.0-beta.17.2",
+    "strapi-generate-api": "3.0.0-beta.17.2",
+    "strapi-generate-controller": "3.0.0-beta.17.2",
+    "strapi-generate-model": "3.0.0-beta.17.2",
+    "strapi-generate-new": "3.0.0-beta.17.2",
+    "strapi-generate-plugin": "3.0.0-beta.17.2",
+    "strapi-generate-policy": "3.0.0-beta.17.2",
+    "strapi-generate-service": "3.0.0-beta.17.2",
+    "strapi-utils": "3.0.0-beta.17.2"
   },
   "scripts": {
     "test": "jest --verbose",
