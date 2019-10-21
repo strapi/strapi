@@ -557,6 +557,43 @@ function EditView({
               </LinkWrapper>
             </div>
           </div>
+          <PluginHeader
+            bottom={true}
+            actions={[
+              {
+                label: `${pluginId}.containers.Edit.reset`,
+                kind: 'secondary',
+                onClick: () => {
+                  toggleWarningCancel();
+                },
+                type: 'button',
+                disabled: isSubmitting, // TODO STATE WHEN SUBMITING
+              },
+              {
+                kind: 'primary',
+                label: `${pluginId}.containers.Edit.submit`,
+                type: 'submit',
+                loader: isSubmitting,
+                style: isSubmitting ? { marginRight: '18px' } : {},
+                disabled: isSubmitting, // TODO STATE WHEN SUBMITING
+              },
+            ]}
+            subActions={
+              isCreatingEntry
+                ? []
+                : [
+                    {
+                      label: 'app.utils.delete',
+                      kind: 'delete',
+                      onClick: () => {
+                        toggleWarningDelete();
+                      },
+                      type: 'button',
+                      disabled: isSubmitting, // TODO STATE WHEN SUBMITING
+                    },
+                  ]
+            }
+          />
         </form>
         <PopUpWarning
           isOpen={showWarningCancel}

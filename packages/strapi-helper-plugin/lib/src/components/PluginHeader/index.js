@@ -22,9 +22,10 @@ function PluginHeader({
   title,
   titleId,
   withDescriptionAnim,
+  bottom,
 }) {
   return (
-    <StyledPluginHeader>
+    <StyledPluginHeader bottom={bottom}>
       <div className="row">
         <div className="col-lg-6">
           <PluginHeaderTitle
@@ -58,6 +59,7 @@ PluginHeader.defaultProps = {
   title: '',
   titleId: '',
   withDescriptionAnim: false,
+  bottom: false,
 };
 
 PluginHeader.propTypes = {
@@ -84,6 +86,7 @@ PluginHeader.propTypes = {
   ]),
   titleId: PropTypes.string,
   withDescriptionAnim: PropTypes.bool,
+  bottom: PropTypes.bool,
 };
 
 export default PluginHeader;
