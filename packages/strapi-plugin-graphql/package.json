@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-graphql",
-  "version": "3.0.0-beta.16.8",
+  "version": "3.0.0-beta.17.2",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "graphql",
@@ -23,7 +23,7 @@
     "graphql-type-long": "^0.1.1",
     "koa-compose": "^4.1.0",
     "pluralize": "^7.0.0",
-    "strapi-utils": "3.0.0-beta.16.8"
+    "strapi-utils": "3.0.0-beta.17.2"
   },
   "devDependencies": {
     "cross-env": "^5.2.0",

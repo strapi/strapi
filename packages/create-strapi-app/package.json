@@ -1,6 +1,6 @@
 {
   "name": "create-strapi-app",
-  "version": "3.0.0-beta.16.8",
+  "version": "3.0.0-beta.17.2",
   "description": "Generate a new Strapi application.",
   "license": "MIT",
   "homepage": "http://strapi.io",
@@ -21,7 +21,7 @@
   ],
   "dependencies": {
     "commander": "^2.20.0",
-    "strapi-generate-new": "3.0.0-beta.16.8"
+    "strapi-generate-new": "3.0.0-beta.17.2"
   },
   "scripts": {
     "test": "echo \"no tests yet\""

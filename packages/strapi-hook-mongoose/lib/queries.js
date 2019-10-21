@@ -69,7 +69,7 @@ module.exports = ({ model, modelKey, strapi }) => {
         await entry.save();
       } else {
         validateNonRepeatableInput(groupValue, { key, ...attr });
-        if (groupValue === null) return;
+        if (groupValue === null) continue;
 
         const groupEntry = await strapi.query(group).create(groupValue);
         entry[key] = [
@@ -127,7 +127,7 @@ module.exports = ({ model, modelKey, strapi }) => {
 
         await deleteOldGroups(entry, groupValue, { key, groupModel });
 
-        if (groupValue === null) return;
+        if (groupValue === null) continue;
 
         const group = await updateOrCreateGroup(groupValue);
         entry[key] = [

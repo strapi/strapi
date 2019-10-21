@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-settings-manager",
-  "version": "3.0.0-beta.16.8",
+  "version": "3.0.0-beta.17.2",
   "description": "Strapi plugin to manage settings.",
   "strapi": {
     "name": "Settings Manager",
@@ -27,7 +27,7 @@
     "redux": "^4.0.1",
     "reselect": "^3.0.1",
     "shelljs": "^0.7.8",
-    "strapi-helper-plugin": "3.0.0-beta.16.8"
+    "strapi-helper-plugin": "3.0.0-beta.17.2"
   },
   "author": {
     "name": "Strapi team",

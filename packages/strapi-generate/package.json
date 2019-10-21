@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate",
-  "version": "3.0.0-beta.16.8",
+  "version": "3.0.0-beta.17.2",
   "description": "Master of ceremonies for the Strapi generators.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -20,7 +20,7 @@
     "fs-extra": "^8.0.1",
     "lodash": "^4.17.11",
     "reportback": "^2.0.2",
-    "strapi-utils": "3.0.0-beta.16.8"
+    "strapi-utils": "3.0.0-beta.17.2"
   },
   "author": {
     "name": "Strapi team",

@@ -31,7 +31,7 @@ class EditForm extends React.Component {
         <div
           className={cn(
             styles.editForm,
-            this.props.showLoaders && styles.loadIndicatorContainer,
+            this.props.showLoaders && styles.loadIndicatorContainer
           )}
         >
           <LoadingIndicator />
@@ -114,6 +114,23 @@ class EditForm extends React.Component {
           <Input
             label={{
               id:
+                'users-permissions.EditForm.inputToggle.label.email-reset-password',
+            }}
+            inputDescription={{
+              id:
+                'users-permissions.EditForm.inputToggle.description.email-reset-password',
+            }}
+            name="advanced.settings.email_reset_password"
+            onChange={this.props.onChange}
+            type="text"
+            value={get(this.props.values.settings, 'email_reset_password')}
+          />
+        </div>
+        <div className={styles.separator} />
+        <div className="row">
+          <Input
+            label={{
+              id:
                 'users-permissions.EditForm.inputToggle.label.email-confirmation',
             }}
             inputDescription={{
@@ -141,7 +158,7 @@ class EditForm extends React.Component {
             type="text"
             value={get(
               this.props.values.settings,
-              'email_confirmation_redirection',
+              'email_confirmation_redirection'
             )}
           />
         </div>

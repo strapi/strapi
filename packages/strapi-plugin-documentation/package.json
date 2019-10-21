@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-documentation",
-  "version": "3.0.0-beta.16.8",
+  "version": "3.0.0-beta.17.2",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Documentation",
@@ -32,7 +32,7 @@
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
-    "strapi-helper-plugin": "3.0.0-beta.16.8",
+    "strapi-helper-plugin": "3.0.0-beta.17.2",
     "swagger-ui-dist": "3.22.1"
   },
   "author": {

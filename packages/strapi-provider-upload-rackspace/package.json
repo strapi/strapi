@@ -1,6 +1,6 @@
 {
   "name": "strapi-provider-upload-rackspace",
-  "version": "3.0.0-beta.16.8",
+  "version": "3.0.0-beta.17.2",
   "description": "Rackspace provider for strapi upload",
   "main": "./lib",
   "keywords": [],
