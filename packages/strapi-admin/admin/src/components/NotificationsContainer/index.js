@@ -11,33 +11,30 @@ import { CSSTransition } from 'react-transition-group';
 import Notification from '../Notification';
 import Wrapper from './Wrapper';
 
-class NotificationsContainer extends React.Component {
-  // eslint-disable-line react/prefer-stateless-function
-  render() {
-    if (this.props.notifications.length === 0) {
-      return false;
-    }
-
-    const notifications = this.props.notifications.map((notification, i) => (
-      <CSSTransition
-        key={i}
-        classNames="notification"
-        timeout={{
-          enter: 500,
-          exit: 300,
-        }}
-      >
-        <Notification
-          key={notification.id}
-          onHideNotification={this.props.onHideNotification}
-          notification={notification}
-        />
-      </CSSTransition>
-    ));
-
-    return <Wrapper>{notifications}</Wrapper>;
+const NotificationsContainer = ({ notifications, onHideNotification }) => {
+  if (notifications.length === 0) {
+    return false;
   }
-}
+
+  const notifs = notifications.map((notification, i) => (
+    <CSSTransition
+      key={i}
+      classNames="notification"
+      timeout={{
+        enter: 500,
+        exit: 300,
+      }}
+    >
+      <Notification
+        key={notification.id}
+        onHideNotification={onHideNotification}
+        notification={notification}
+      />
+    </CSSTransition>
+  ));
+
+  return <Wrapper>{notifs}</Wrapper>;
+};
 
 NotificationsContainer.defaultProps = {
   notifications: [

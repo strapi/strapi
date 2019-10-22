@@ -30,7 +30,6 @@ const Wrapper = styled.div`
           margin: 0;
           > div:first-child {
             padding-left: 0 !important;
-            // margin-right: 1.5rem;
           }
         }
       }

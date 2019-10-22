@@ -148,7 +148,6 @@ class OnboardingVideo extends React.Component {
           <div className="hiddenPlayerWrapper">
             <Player
               ref={this.hiddenPlayer}
-              // poster="/assets/poster.png"
               src={video.video}
               preload="auto"
               subscribeToStateChange={this.subscribeToStateChange}

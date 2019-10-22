@@ -15,7 +15,7 @@ import HomePage from '../HomePage';
 
 const App = () => {
   return (
-    <div className={pluginId}>
+    <div>
       <Switch>
         <Route path={`/plugins/${pluginId}`} component={HomePage} exact />
         <Route component={NotFound} />
