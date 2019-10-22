@@ -1,34 +1,36 @@
 /**
-*
-* BoundRoute
-*
-*/
+ *
+ * BoundRoute
+ *
+ */
 
 import React from 'react';
 import { get, includes, map, tail, toLower } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import cn from 'classnames';
-import styles from './styles.scss';
+
+import { Header, Path, Verb, Wrapper } from './Components';
 
 function BoundRoute({ route }) {
   const title = get(route, 'handler');
-  const formattedRoute = get(route, 'path') ? tail(get(route, 'path').split('/')) : [];
-  const [ controller = '', action = '' ] = title ? title.split('.') : [];
+  const formattedRoute = get(route, 'path')
+    ? tail(get(route, 'path').split('/'))
+    : [];
+  const [controller = '', action = ''] = title ? title.split('.') : [];
 
   return (
     <div className="col-md-12">
-      <div className={styles.title}>
+      <Header>
         <FormattedMessage id="users-permissions.BoundRoute.title" />
         &nbsp;
         <span>{controller}</span>
         <span>.{action} </span>
-      </div>
-      <div className={styles.boundRoute}>
-        <div className={cn(styles.verb, styles[toLower(get(route, 'method'))])}>
+      </Header>
+      <Wrapper>
+        <Verb className={toLower(get(route, 'method'))}>
           {get(route, 'method')}
-        </div>
-        <div className={styles.path}>
+        </Verb>
+        <Path>
           {map(formattedRoute, value => (
             <span
               key={value}
@@ -37,8 +39,8 @@ function BoundRoute({ route }) {
               /{value}
             </span>
           ))}
-        </div>
-      </div>
+        </Path>
+      </Wrapper>
     </div>
   );
 }
@@ -52,7 +54,11 @@ BoundRoute.defaultProps = {
 };
 
 BoundRoute.propTypes = {
-  route: PropTypes.object,
+  route: PropTypes.shape({
+    handler: PropTypes.string,
+    method: PropTypes.string,
+    path: PropTypes.string,
+  }),
 };
 
 export default BoundRoute;

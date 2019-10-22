@@ -32,7 +32,9 @@
       "customBootstrapClass": "col-md-4",
       "didCheckErrors": false,
       "errors": [],
-      "inputDescription": { "id": "content-manager.form.Input.pageEntries.inputDescription" },
+      "inputDescription": {
+        "id": "content-manager.form.Input.pageEntries.inputDescription"
+      },
       "name": "settings.pageSize",
       "selectOptions": [10, 20, 50, 100],
       "type": "select",
@@ -40,7 +42,7 @@
     },
     {
       "label": { "id": "content-manager.form.Input.defaultSort" },
-      "customBootstrapClass": "col-md-4 ml-md-auto",
+      "customBootstrapClass": "col-md-4",
       "didCheckErrors": false,
       "errors": [],
       "style": { "marginRight": "-20px" },
@@ -63,8 +65,12 @@
   ],
   "edit-settings": [
     {
-      "label": { "id": "content-manager.containers.SettingPage.editSettings.entry.title"},
-      "inputDescription": { "id": "content-manager.containers.SettingPage.editSettings.entry.title.description"},
+      "label": {
+        "id": "content-manager.containers.SettingPage.editSettings.entry.title"
+      },
+      "inputDescription": {
+        "id": "content-manager.containers.SettingPage.editSettings.entry.title.description"
+      },
       "type": "select",
       "name": "settings.mainField",
       "customBootstrapClass": "col-md-4",

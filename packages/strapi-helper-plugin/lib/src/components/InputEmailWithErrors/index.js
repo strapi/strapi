@@ -18,8 +18,7 @@ import InputDescription from '../InputDescription';
 import InputErrors from '../InputErrors';
 import InputEmail from '../InputEmail';
 import InputSpacer from '../InputSpacer';
-
-import styles from './styles.scss';
+import InputWrapper from '../InputWrapper';
 
 class InputEmailWithErrors extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
@@ -103,9 +102,8 @@ class InputEmailWithErrors extends React.Component {
     }
 
     return (
-      <div
+      <InputWrapper
         className={cn(
-          styles.containerEmail,
           this.props.customBootstrapClass,
           !isEmpty(this.props.className) && this.props.className
         )}
@@ -144,7 +142,7 @@ class InputEmailWithErrors extends React.Component {
           style={errorsStyle}
         />
         {spacer}
-      </div>
+      </InputWrapper>
     );
   }
 }

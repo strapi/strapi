@@ -9,22 +9,24 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, isEmpty } from 'lodash';
 
-import { InputsIndex as Input } from 'strapi-helper-plugin';
+import {
+  ButtonModal,
+  GlobalContext,
+  HeaderModal,
+  HeaderModalTitle,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalForm,
+  InputsIndex as Input,
+} from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
-import BodyModal from '../../components/BodyModal';
 import ButtonModalPrimary from '../../components/ButtonModalPrimary';
-import ButtonModalSecondary from '../../components/ButtonModalSecondary';
-import ButtonModalSuccess from '../../components/ButtonModalSuccess';
 import CustomCheckbox from '../../components/CustomCheckbox';
-import FooterModal from '../../components/FooterModal';
-import FormModal from '../../components/FormModal';
-import HeaderModal from '../../components/HeaderModal';
-import HeaderModalTitle from '../../components/HeaderModalTitle';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
 import HeaderNavLink from '../../components/HeaderNavLink';
-import WrapperModal from '../../components/WrapperModal';
 
 import Icon from '../../assets/icons/icon_type_ct.png';
 import IconGroup from '../../assets/icons/icon_type_groups.png';
@@ -35,6 +37,8 @@ const NAVLINKS = [{ id: 'base' }, { id: 'advanced' }];
 
 class AttributeForm extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
+  static contextType = GlobalContext;
+
   state = { didCheckErrors: false, formErrors: {}, showForm: false };
 
   getCurrentForm = () => {
@@ -320,7 +324,7 @@ class AttributeForm extends React.Component {
     const currentForm = this.getCurrentForm();
 
     return (
-      <WrapperModal
+      <Modal
         isOpen={isOpen}
         onClosed={this.handleOnClosed}
         onOpened={this.handleOnOpened}
@@ -356,12 +360,12 @@ class AttributeForm extends React.Component {
           </section>
         </HeaderModal>
         <form onSubmit={this.handleSubmitAndContinue}>
-          <FormModal>
-            <BodyModal>
+          <ModalForm>
+            <ModalBody>
               {showForm && currentForm.map(this.renderInput)}
-            </BodyModal>
-          </FormModal>
-          <FooterModal>
+            </ModalBody>
+          </ModalForm>
+          <ModalFooter>
             <section>
               <ButtonModalPrimary
                 message={`${pluginId}.form.button.add.field`}
@@ -370,26 +374,23 @@ class AttributeForm extends React.Component {
               />
             </section>
             <section>
-              <ButtonModalSecondary
-                message={`${pluginId}.form.button.cancel`}
+              <ButtonModal
+                message="components.popUpWarning.button.cancel"
                 onClick={this.handleCancel}
+                isSecondary
               />
-              <ButtonModalSuccess
-                message={`${pluginId}.form.button.done`}
+              <ButtonModal
+                message="form.button.done"
                 type="button"
                 onClick={this.handleSubmit}
               />
             </section>
-          </FooterModal>
+          </ModalFooter>
         </form>
-      </WrapperModal>
+      </Modal>
     );
   }
 }
-
-AttributeForm.contextTypes = {
-  emitEvent: PropTypes.func,
-};
 
 AttributeForm.defaultProps = {
   actionType: 'create',

@@ -10,10 +10,8 @@ import cn from 'classnames';
 
 import { Modal, ModalHeader, ModalBody } from 'reactstrap';
 import { Player } from 'video-react';
-
 import 'video-react/dist/video-react.css';
-
-import styles from './styles.scss';
+import Li from './Li';
 
 class OnboardingVideo extends React.Component {
   componentDidMount() {
@@ -46,7 +44,7 @@ class OnboardingVideo extends React.Component {
     this.props.getVideoCurrentTime(
       this.props.id,
       curr,
-      this.props.video.duration,
+      this.props.video.duration
     );
   };
 
@@ -82,51 +80,59 @@ class OnboardingVideo extends React.Component {
     }
   };
 
+  getVideoTime = (duration, sign) => {
+    const operator = Math.floor(eval(duration + sign + 60));
+
+    if (operator < 10) {
+      return `0${operator}`;
+    }
+    return operator;
+  };
+
   render() {
     const { video } = this.props;
+    const time = isNaN(video.duration)
+      ? '\xA0'
+      : `${Math.floor(video.duration / 60)}:${this.getVideoTime(
+          video.duration,
+          '%'
+        )}`;
 
     return (
-      <li
+      <Li
         key={this.props.id}
         onClick={this.props.onClick}
         id={this.props.id}
-        className={cn(styles.listItem, video.end && styles.finished)}
+        className={cn(video.end && 'finished')}
       >
-        <div className={styles.thumbWrapper}>
+        <div className="thumbWrapper">
           <img src={video.preview} alt="preview" />
-          <div className={styles.overlay} />
-          <div className={styles.play} />
+          <div className="overlay" />
+          <div className="play" />
         </div>
-        <div className={styles.txtWrapper}>
-          <p className={styles.title}>{video.title}</p>
-          <p className={styles.time}>
-            {isNaN(video.duration)
-              ? '\xA0'
-              : `${Math.floor(video.duration / 60)}:${Math.floor(
-                video.duration,
-              ) % 60}`}
-          </p>
+        <div className="txtWrapper">
+          <p className="title">{video.title}</p>
+          <p className="time">{time}</p>
         </div>
 
         <Modal
           isOpen={video.isOpen}
           toggle={this.props.onClick} // eslint-disable-line react/jsx-handler-names
-          className={styles.videoModal}
+          className="videoModal"
           onOpened={this.handleModalOpen}
           onClosed={this.handleModalClose}
         >
           <ModalHeader
             toggle={this.props.onClick} // eslint-disable-line react/jsx-handler-names
-            className={styles.videoModalHeader}
+            className="videoModalHeader"
           >
             {video.title}
           </ModalHeader>
-          <ModalBody className={styles.modalBodyHelper}>
+          <ModalBody className="modalBodyHelper">
             <div>
               <Player
                 ref={this.player}
-                className={styles.videoPlayer}
-                // poster="/assets/poster.png"
+                className="videoPlayer"
                 src={video.video}
                 startTime={video.startTime}
                 preload="auto"
@@ -139,17 +145,16 @@ class OnboardingVideo extends React.Component {
         </Modal>
 
         {!this.props.video.duration && (
-          <div className={cn(styles.hiddenPlayerWrapper)}>
+          <div className="hiddenPlayerWrapper">
             <Player
               ref={this.hiddenPlayer}
-              // poster="/assets/poster.png"
               src={video.video}
               preload="auto"
               subscribeToStateChange={this.subscribeToStateChange}
             />
           </div>
         )}
-      </li>
+      </Li>
     );
   }
 }

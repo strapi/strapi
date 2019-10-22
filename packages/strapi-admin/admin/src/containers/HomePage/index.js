@@ -161,7 +161,11 @@ const HomePage = ({ global: { plugins }, history: { push } }) => {
               )}
               <FormattedMessage id={linkProps.id}>
                 {msg => (
-                  <ALink rel="noopener noreferrer" {...linkProps}>
+                  <ALink
+                    rel="noopener noreferrer"
+                    {...linkProps}
+                    style={{ verticalAlign: ' bottom', marginBottom: 5 }}
+                  >
                     {msg}
                   </ALink>
                 )}

@@ -20,6 +20,7 @@ import {
 } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
+import { HomePageContextProvider } from '../../contexts/HomePage';
 
 // Plugin's component
 import EntriesNumber from '../../components/EntriesNumber';
@@ -40,10 +41,6 @@ import reducer from './reducer';
 import saga from './saga';
 
 export class HomePage extends React.Component {
-  getChildContext = () => ({
-    deleteData: this.props.deleteData,
-  });
-
   UNSAFE_componentWillMount() {
     if (!isEmpty(this.props.location.search)) {
       const _page = parseInt(this.getURLParams('_page'), 10);
@@ -112,26 +109,27 @@ export class HomePage extends React.Component {
 
   render() {
     return (
-      <ContainerFluid>
-        <Wrapper>
-          <PluginHeader
-            title={{
-              id: 'upload.HomePage.title',
-            }}
-            description={{
-              id: 'upload.HomePage.description',
-            }}
-            overrideRendering={this.renderInputSearch}
+      <HomePageContextProvider deleteData={this.props.deleteData}>
+        <ContainerFluid>
+          <Wrapper>
+            <PluginHeader
+              title={{
+                id: 'upload.HomePage.title',
+              }}
+              description={{
+                id: 'upload.HomePage.description',
+              }}
+              overrideRendering={this.renderInputSearch}
+            />
+          </Wrapper>
+          <PluginInputFile
+            name="files"
+            onDrop={this.props.onDrop}
+            showLoader={this.props.uploadFilesLoading}
           />
-        </Wrapper>
-        <PluginInputFile
-          name="files"
-          onDrop={this.props.onDrop}
-          showLoader={this.props.uploadFilesLoading}
-        />
-        <EntriesWrapper>
-          <div>
-            {/* NOTE: Prepare for bulk actions}
+          <EntriesWrapper>
+            <div>
+              {/* NOTE: Prepare for bulk actions}
               <InputSelect
               name="bulkAction"
               onChange={() => console.log('change')}
@@ -139,34 +137,27 @@ export class HomePage extends React.Component {
               style={{ minWidth: '200px', height: '32px', marginTop: '-8px' }}
               />
             */}
-          </div>
-          <EntriesNumber number={this.props.entriesNumber} />
-        </EntriesWrapper>
-        <List
-          data={this.props.uploadedFiles}
-          changeSort={this.changeSort}
-          sort={this.props.params._sort}
-        />
-        <div className="col-md-12">
-          <PageFooter
-            count={this.props.entriesNumber}
-            context={{ emitEvent: () => {} }}
-            onChangeParams={this.handleChangeParams}
-            params={this.props.params}
+            </div>
+            <EntriesNumber number={this.props.entriesNumber} />
+          </EntriesWrapper>
+          <List
+            data={this.props.uploadedFiles}
+            changeSort={this.changeSort}
+            sort={this.props.params._sort}
           />
-        </div>
-      </ContainerFluid>
+          <div className="col-md-12">
+            <PageFooter
+              count={this.props.entriesNumber}
+              context={{ emitEvent: () => {} }}
+              onChangeParams={this.handleChangeParams}
+              params={this.props.params}
+            />
+          </div>
+        </ContainerFluid>
+      </HomePageContextProvider>
     );
   }
 }
-
-HomePage.childContextTypes = {
-  deleteData: PropTypes.func.isRequired,
-};
-
-HomePage.contextTypes = {
-  router: PropTypes.object,
-};
 
 HomePage.defaultProps = {
   params: {

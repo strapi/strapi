@@ -96,7 +96,7 @@
   "PopUpForm.button.save": "Сохранить",
   "PopUpForm.header.add.providers": "Добавить новый провайдер",
   "PopUpForm.header.edit.email-templates": "Редактировать шаблон письма",
-  "PopUpForm.header.edit.providers": "Редактирование провайдера {provider}",
+  "PopUpForm.header.edit.providers": "Редактирование провайдера",
   "PopUpForm.inputSelect.providers.label": "Выбрать провайдера",
 
   "notification.error.delete": "Возникла ошибка в процессе удаления",
