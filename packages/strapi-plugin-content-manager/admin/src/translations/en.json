@@ -68,6 +68,7 @@
   "containers.ListPage.displayedFields": "Displayed Fields",
 
   "containers.ListSettingsView.modal-form.edit-label": "Edit label",
+  "containers.EditSettingsView.modal-form.edit-field": "Edit field",
 
   "containers.SettingPage.addField": "Add new field",
   "containers.SettingPage.addRelationalField": "Add new relational field",

@@ -1,9 +1,5 @@
 import React, { forwardRef, useState } from 'react';
 import PropTypes from 'prop-types';
-// import { FormattedMessage } from 'react-intl';
-// import { Grab, Pencil, Remove } from '@buffetjs/icons';
-
-// import pluginId from '../../pluginId';
 import Carret from './Carret';
 import DraggedField from '../DraggedField';
 import PreviewCarret from '../PreviewCarret';
@@ -12,7 +8,16 @@ import Wrapper from './Wrapper';
 // eslint-disable-next-line react/display-name
 const DraggedFieldWithPreview = forwardRef(
   (
-    { name, onClickRemove, showLeftCarret, showRightCarret, size, type },
+    {
+      name,
+      onClickEdit,
+      onClickRemove,
+      selectedItem,
+      showLeftCarret,
+      showRightCarret,
+      size,
+      type,
+    },
     refs
   ) => {
     const isHidden = name === '_TEMP_';
@@ -23,7 +28,7 @@ const DraggedFieldWithPreview = forwardRef(
     const withLongerHeight =
       ['json', 'text', 'file', 'media', 'group', 'richtext'].includes(type) &&
       !dragStart;
-    const carretStyle = withLongerHeight ? { height: '84px' } : {};
+    const carretStyle = withLongerHeight ? { height: '102px' } : {};
 
     return (
       <div
@@ -51,10 +56,13 @@ const DraggedFieldWithPreview = forwardRef(
                 ref={refs.dragRef}
                 isHidden={isHidden}
                 name={name}
+                onClick={onClickEdit}
                 onRemove={onClickRemove}
+                selectedItem={selectedItem}
                 style={{ padding: 0, margin: 0, display }}
+                type={type}
                 withLongerHeight={withLongerHeight}
-              />
+              ></DraggedField>
             </div>
             {showRightCarret && <Carret right style={carretStyle} />}
           </>
@@ -65,7 +73,9 @@ const DraggedFieldWithPreview = forwardRef(
 );
 
 DraggedFieldWithPreview.defaultProps = {
+  onClickEdit: () => {},
   onClickRemove: () => {},
+  selectedItem: '',
   showLeftCarret: false,
   showRightCarret: false,
   size: 1,
@@ -74,7 +84,9 @@ DraggedFieldWithPreview.defaultProps = {
 
 DraggedFieldWithPreview.propTypes = {
   name: PropTypes.string.isRequired,
+  onClickEdit: PropTypes.func,
   onClickRemove: PropTypes.func,
+  selectedItem: PropTypes.string,
   showLeftCarret: PropTypes.bool,
   showRightCarret: PropTypes.bool,
   size: PropTypes.number,

@@ -11,7 +11,7 @@ const getColor = (isOverRemove, isSelected) => {
   }
 };
 
-const getHeight = withLongerHeight => (withLongerHeight ? '84px' : '30px');
+const getHeight = withLongerHeight => (withLongerHeight ? '102px' : '30px');
 
 const Wrapper = styled.div`
   height: ${({ withLongerHeight }) => getHeight(withLongerHeight)};
@@ -26,6 +26,7 @@ const Wrapper = styled.div`
     position: relative;
     height: ${({ withLongerHeight }) => getHeight(withLongerHeight)};
     line-height: ${({ withLongerHeight }) => getHeight(withLongerHeight)};
+    cursor: pointer;
 
     background: ${({ isOverRemove, isSelected }) => {
       if (isSelected) {

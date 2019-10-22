@@ -23,8 +23,8 @@ const Item = ({
   const {
     goTo,
     metadatas,
-    selectedItemName,
     setEditFieldToSelect,
+    selectedItemName,
   } = useLayoutDnd();
   const dragRef = useRef(null);
   const dropRef = useRef(null);
@@ -153,9 +153,6 @@ const Item = ({
       // We will need to add a 12 size _TEMP_ div to offer a drop target between each existing row.
       return name !== '_TEMP_';
     },
-    begin() {
-      setEditFieldToSelect(name, type);
-    },
     collect: monitor => ({
       isDragging: monitor.isDragging(),
       getItem: monitor.getItem(),
@@ -203,12 +200,15 @@ const Item = ({
     <DraggedFieldWithPreview
       groupUid={groupUid}
       isDragging={isDragging}
-      isSelected={name === selectedItemName}
       label={get(metadatas, [name, 'edit', 'label'], '')}
       name={name}
-      onClickEdit={() => setEditFieldToSelect(name, type)}
-      onClickRemove={() => removeField(rowIndex, itemIndex)}
+      onClickEdit={setEditFieldToSelect}
+      onClickRemove={e => {
+        e.stopPropagation();
+        removeField(rowIndex, itemIndex);
+      }}
       push={goTo}
+      selectedItem={selectedItemName}
       showLeftCarret={showLeftCarret}
       showRightCarret={showRightCarret}
       size={size}

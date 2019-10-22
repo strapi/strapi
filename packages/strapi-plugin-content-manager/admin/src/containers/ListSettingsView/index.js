@@ -247,7 +247,9 @@ const ListSettingsView = ({
                       move={move}
                       name={item}
                       onClick={handleClickEditLabel}
-                      onRemove={() => {
+                      onRemove={e => {
+                        e.stopPropagation();
+
                         if (getListDisplayedFields().length === 1) {
                           strapi.notification.info(
                             `${pluginId}.notification.info.minimumFields`

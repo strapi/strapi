@@ -1,14 +1,16 @@
 /* eslint-disable react/display-name */
 import React, { forwardRef, useState } from 'react';
 import PropTypes from 'prop-types';
-
+import { FormattedMessage } from 'react-intl';
 import { Grab, GrabLarge, Pencil, Remove } from '@buffetjs/icons';
-
+import pluginId from '../../pluginId';
+import Link from './Link';
 import Wrapper from './Wrapper';
 
 const DraggedField = forwardRef(
   (
     {
+      children,
       count,
       isDragging,
       isHidden,
@@ -17,6 +19,7 @@ const DraggedField = forwardRef(
       onRemove,
       selectedItem,
       style,
+      type,
       withLongerHeight,
     },
     ref
@@ -35,17 +38,21 @@ const DraggedField = forwardRef(
         withLongerHeight={withLongerHeight}
       >
         {!isHidden && (
-          <div className="sub_wrapper" style={{ opacity }}>
-            <div className="grab" ref={ref}>
+          <div
+            className="sub_wrapper"
+            style={{ opacity }}
+            onClick={() => {
+              onClick(name);
+            }}
+          >
+            <div className="grab" ref={ref} onClick={e => e.stopPropagation()}>
               {withLongerHeight ? (
                 <GrabLarge style={{ marginRight: 10, cursor: 'move' }} />
               ) : (
                 <Grab style={{ marginRight: 10, cursor: 'move' }} />
               )}
             </div>
-            <div className="name" onClick={() => onClick(name)}>
-              {name}
-            </div>
+            <div className="name">{children ? children : name}</div>
             <div
               className="remove"
               onClick={onRemove}
@@ -56,12 +63,31 @@ const DraggedField = forwardRef(
             </div>
           </div>
         )}
+        {type === 'group' && (
+          <FormattedMessage
+            id={`${pluginId}.components.FieldItem.linkToGroupLayout`}
+          >
+            {msg => (
+              <Link
+                onClick={e => {
+                  e.stopPropagation();
+                  // push(
+                  //   `/plugins/${pluginId}/ctm-configurations/groups/${groupUid}`
+                  // )
+                }}
+              >
+                {msg}
+              </Link>
+            )}
+          </FormattedMessage>
+        )}
       </Wrapper>
     );
   }
 );
 
 DraggedField.defaultProps = {
+  children: null,
   count: 1,
   isDragging: false,
   isHidden: false,
@@ -73,6 +99,7 @@ DraggedField.defaultProps = {
 };
 
 DraggedField.propTypes = {
+  children: PropTypes.node,
   count: PropTypes.number,
   isDragging: PropTypes.bool,
   isHidden: PropTypes.bool,
@@ -81,6 +108,7 @@ DraggedField.propTypes = {
   onRemove: PropTypes.func,
   selectedItem: PropTypes.string,
   style: PropTypes.object,
+  type: PropTypes.string,
   withLongerHeight: PropTypes.bool,
 };
 

@@ -67,6 +67,7 @@
   "containers.ListPage.displayedFields": "Champs affichés",
 
   "containers.ListSettingsView.modal-form.edit-label": "Editer le label",
+  "containers.EditSettingsView.modal-form.edit-field": "Editer le champ",
 
   "containers.SettingPage.addField": "Ajouter un nouveau champ",
   "containers.SettingPage.addRelationalField": "Ajouter un nouveau champ relationnel",

@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useState,
+} from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import {
@@ -14,6 +20,7 @@ import getRequestUrl from '../../utils/getRequestUrl';
 import FieldsReorder from '../../components/FieldsReorder';
 import FormTitle from '../../components/FormTitle';
 import LayoutTitle from '../../components/LayoutTitle';
+import PopupForm from '../../components/PopupForm';
 import SettingsViewWrapper from '../../components/SettingsViewWrapper';
 
 import reducer, { initialState } from './reducer';
@@ -27,11 +34,19 @@ const EditSettingsView = ({
   },
 }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState);
+  const [isModalFormOpen, setIsModalFormOpen] = useState(false);
+
   const source = getQueryParameters(search, 'source');
   const abortController = new AbortController();
   const { signal } = abortController;
   const params = source === 'content-manager' ? {} : { source };
-  const { isLoading, initialData, modifiedData } = reducerState.toJS();
+
+  const {
+    fieldNameToEdit,
+    isLoading,
+    initialData,
+    modifiedData,
+  } = reducerState.toJS();
 
   const getAttributes = useMemo(() => {
     return get(modifiedData, ['schema', 'attributes'], {});
@@ -119,6 +134,12 @@ const EditSettingsView = ({
     });
   };
 
+  const toggleModalForm = () => {
+    setIsModalFormOpen(prevState => !prevState);
+  };
+
+  console.log(fieldNameToEdit);
+
   return (
     <LayoutDndProvider
       attributes={getAttributes}
@@ -142,8 +163,14 @@ const EditSettingsView = ({
           fieldIndex,
         });
       }}
-      setEditFieldToSelect={() => {}}
-      selectedItemName={''}
+      setEditFieldToSelect={name => {
+        dispatch({
+          type: 'SET_FIELD_TO_EDIT',
+          name,
+        });
+        toggleModalForm();
+      }}
+      selectedItemName={fieldNameToEdit}
     >
       <SettingsViewWrapper
         inputs={[
@@ -192,6 +219,22 @@ const EditSettingsView = ({
           <FieldsReorder />
         </div>
       </SettingsViewWrapper>
+      <PopupForm
+        headerId={`${pluginId}.containers.EditSettingsView.modal-form.edit-field`}
+        isOpen={isModalFormOpen}
+        onClosed={() => {
+          dispatch({
+            type: 'UNSET_FIELD_TO_EDIT',
+          });
+        }}
+        onSubmit={e => {
+          e.preventDefault();
+          toggleModalForm();
+        }}
+        onToggle={toggleModalForm}
+        renderForm={() => {}}
+        subHeaderContent={fieldNameToEdit}
+      />
     </LayoutDndProvider>
   );
 };

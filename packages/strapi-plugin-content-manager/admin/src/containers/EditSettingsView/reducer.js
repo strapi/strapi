@@ -3,8 +3,8 @@ import { cloneDeep, set } from 'lodash';
 import { createLayout, formatLayout, getInputSize } from '../../utils/layout';
 
 const initialState = fromJS({
-  labelForm: {},
-  labelToEdit: '',
+  fieldForm: {},
+  fieldNameToEdit: '',
   initialData: {},
   isLoading: true,
   modifiedData: {},
@@ -140,6 +140,10 @@ const reducer = (state, action) => {
 
       return state.updateIn(layoutPathEdit, () => fromJS(updatedList));
     }
+    case 'SET_FIELD_TO_EDIT':
+      return state.update('fieldNameToEdit', () => action.name);
+    case 'UNSET_FIELD_TO_EDIT':
+      return state.update('fieldNameToEdit', () => '');
     default:
       return state;
   }
