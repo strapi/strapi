@@ -107,6 +107,7 @@ module.exports = function(strapi) {
             setTimeout(function() {
               connect()
               .catch(function(e) {
+                strapi.log.error(e.message);
               })
             }, 2000);
           })
