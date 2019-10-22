@@ -52,22 +52,22 @@
       "required": true
     },
     "opening_times": {
-      "group": "openingtimes",
-      "type": "group",
+      "component": "openingtimes",
+      "type": "component",
       "required": true,
       "repeatable": true,
       "min": 1,
       "max": 10
     },
     "closing_period": {
-      "group": "closingperiod",
-      "type": "group"
+      "component": "closingperiod",
+      "type": "component"
     },
     "services": {
-      "group": "restaurantservice",
+      "component": "restaurantservice",
       "required": true,
       "repeatable": true,
-      "type": "group"
+      "type": "component"
     },
     "address": {
       "model": "address"

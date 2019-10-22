@@ -5,11 +5,11 @@ const { exists } = require('fs-extra');
 const loadFiles = require('../load/load-files');
 
 module.exports = async ({ dir }) => {
-  const groupsDir = join(dir, 'groups');
+  const componentsDir = join(dir, 'components');
 
-  if (!(await exists(groupsDir))) {
+  if (!(await exists(componentsDir))) {
     return {};
   }
 
-  return await loadFiles(groupsDir, '*.*(js|json)');
+  return await loadFiles(componentsDir, '*.*(js|json)');
 };

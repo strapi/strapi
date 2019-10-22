@@ -2,7 +2,7 @@
 
 const storeUtils = require('./utils/store');
 
-const uidToStoreKey = uid => `groups::${uid}`;
+const uidToStoreKey = uid => `components::${uid}`;
 
 module.exports = {
   uidToStoreKey,
@@ -18,7 +18,7 @@ module.exports = {
     const storeKey = uidToStoreKey(uid);
     return storeUtils.setModelConfiguration(storeKey, {
       uid,
-      isGroup: true,
+      isComponent: true,
       settings,
       metadatas,
       layouts,
@@ -36,7 +36,7 @@ module.exports = {
 
     await storeUtils.setModelConfiguration(oldKey, {
       uid: oldUID,
-      isGroup: true,
+      isComponent: true,
     });
 
     return storeUtils.moveKey(oldKey, newKey);

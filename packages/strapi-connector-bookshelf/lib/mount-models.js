@@ -7,9 +7,9 @@ const utilsModels = require('strapi-utils').models;
 const relations = require('./relations');
 const buildDatabaseSchema = require('./buildDatabaseSchema');
 const {
-  createGroupJoinTables,
-  createGroupModels,
-} = require('./generate-group-relations');
+  createComponentJoinTables,
+  createComponentModels,
+} = require('./generate-component-relations');
 
 const PIVOT_PREFIX = '_pivot_';
 
@@ -83,8 +83,8 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       definition.options
     );
 
-    const groupAttributes = Object.keys(definition.attributes).filter(
-      key => definition.attributes[key].type === 'group'
+    const componentAttributes = Object.keys(definition.attributes).filter(
+      key => definition.attributes[key].type === 'component'
     );
 
     if (_.isString(_.get(connection, 'options.pivot_prefix'))) {
@@ -119,7 +119,12 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       global[definition.globalName] = {};
     }
 
-    await createGroupModels({ model: loadedModel, definition, ORM, GLOBALS });
+    await createComponentModels({
+      model: loadedModel,
+      definition,
+      ORM,
+      GLOBALS,
+    });
 
     // Add every relationships to the loaded model for Bookshelf.
     // Basic attributes don't need this-- only relations.
@@ -350,7 +355,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
             );
 
             if (models.length === 0) {
-              models = Object.values(strapi.groups).filter(
+              models = Object.values(strapi.components).filter(
                 model => model.globalId === id
               );
             }
@@ -468,12 +473,13 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
         const relations = this.relations;
 
-        groupAttributes.forEach(key => {
+        componentAttributes.forEach(key => {
           const { repeatable } = definition.attributes[key];
           if (relations[key]) {
-            const groups = relations[key].toJSON().map(el => el.group);
+            const components = relations[key].toJSON().map(el => el.component);
 
-            attrs[key] = repeatable === true ? groups : _.first(groups) || null;
+            attrs[key] =
+              repeatable === true ? components : _.first(components) || null;
           }
         });
 
@@ -602,48 +608,49 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
           .reduce((acc, val) => acc.concat(val), []);
       };
 
-      const populateGroup = key => {
+      const populateComponent = key => {
         let paths = [];
-        const group = strapi.groups[definition.attributes[key].group];
+        const component =
+          strapi.components[definition.attributes[key].component];
 
-        const assocs = (group.associations || []).filter(
+        const assocs = (component.associations || []).filter(
           assoc => assoc.autoPopulate === true
         );
 
-        // paths.push(`${key}.group`);
+        // paths.push(`${key}.component`);
         assocs.forEach(assoc => {
           if (isPolymorphic({ assoc })) {
             const rel = formatPolymorphicPopulate({
               assoc,
               path: assoc.alias,
-              prefix: `${key}.group.`,
+              prefix: `${key}.component.`,
             });
 
             paths.push(rel);
           } else {
-            paths.push(`${key}.group.${assoc.alias}`);
+            paths.push(`${key}.component.${assoc.alias}`);
           }
         });
 
-        return [`${key}.group`, ...paths];
+        return [`${key}.component`, ...paths];
       };
 
-      const createGroupsPopulate = () => {
-        const groupsToPopulate = groupAttributes.reduce((acc, key) => {
+      const createComponentsPopulate = () => {
+        const componentsToPopulate = componentAttributes.reduce((acc, key) => {
           const attribute = definition.attributes[key];
           const autoPopulate = _.get(attribute, ['autoPopulate'], true);
 
           if (autoPopulate === true) {
-            return acc.concat(populateGroup(key));
+            return acc.concat(populateComponent(key));
           }
           return acc;
         }, []);
 
-        return groupsToPopulate;
+        return componentsToPopulate;
       };
 
-      const isGroup = (def, key) =>
-        _.get(def, ['attributes', key, 'type']) === 'group';
+      const isComponent = (def, key) =>
+        _.get(def, ['attributes', key, 'type']) === 'component';
 
       const formatPopulateOptions = withRelated => {
         if (!Array.isArray(withRelated)) withRelated = [withRelated];
@@ -657,7 +664,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
           return _.extend(acc, key);
         }, {});
 
-        // if groups are no
+        // if components are no
         const finalObj = Object.keys(obj).reduce((acc, key) => {
           // check the key path and update it if necessary nothing more
           const parts = key.split('.');
@@ -666,10 +673,10 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
           let prefix = '';
           let tmpModel = definition;
           for (let part of parts) {
-            if (isGroup(tmpModel, part)) {
-              tmpModel = strapi.groups[tmpModel.attributes[part].group];
-              // add group path and there relations / images
-              const path = `${prefix}${part}.group`;
+            if (isComponent(tmpModel, part)) {
+              tmpModel = strapi.components[tmpModel.attributes[part].component];
+              // add component path and there relations / images
+              const path = `${prefix}${part}.component`;
 
               newKey = path;
               prefix = `${path}.`;
@@ -740,10 +747,10 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
           if (_.isNil(options.withRelated)) {
             options.withRelated = []
-              .concat(createGroupsPopulate())
+              .concat(createComponentsPopulate())
               .concat(createAssociationPopulate());
           } else if (_.isEmpty(options.withRelated)) {
-            options.withRelated = createGroupsPopulate();
+            options.withRelated = createComponentsPopulate();
           } else {
             options.withRelated = formatPopulateOptions(options.withRelated);
           }
@@ -880,7 +887,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
         model: target[model],
       });
 
-      await createGroupJoinTables({ definition, ORM });
+      await createComponentJoinTables({ definition, ORM });
     } catch (err) {
       strapi.log.error(`Impossible to register the '${model}' model.`);
       strapi.log.error(err);

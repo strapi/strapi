@@ -16,10 +16,10 @@ module.exports = ({ model, modelKey, strapi }) => {
     _.has(obj, model.primaryKey) ? obj[model.primaryKey] : obj.id;
 
   const assocKeys = model.associations.map(ast => ast.alias);
-  const groupKeys = Object.keys(model.attributes).filter(key => {
-    return model.attributes[key].type === 'group';
+  const componentKeys = Object.keys(model.attributes).filter(key => {
+    return model.attributes[key].type === 'component';
   });
-  const excludedKeys = assocKeys.concat(groupKeys);
+  const excludedKeys = assocKeys.concat(componentKeys);
 
   const defaultPopulate = model.associations
     .filter(ast => ast.autoPopulate !== false)
@@ -33,49 +33,51 @@ module.exports = ({ model, modelKey, strapi }) => {
     return _.omit(values, excludedKeys);
   };
 
-  async function createGroups(entry, values) {
-    if (groupKeys.length === 0) return;
+  async function createComponents(entry, values) {
+    if (componentKeys.length === 0) return;
 
-    for (let key of groupKeys) {
+    for (let key of componentKeys) {
       const attr = model.attributes[key];
-      const { group, required = false, repeatable = false } = attr;
+      const { component, required = false, repeatable = false } = attr;
 
-      const groupModel = strapi.groups[group];
+      const componentModel = strapi.components[component];
 
       if (required === true && !_.has(values, key)) {
-        const err = new Error(`Group ${key} is required`);
+        const err = new Error(`Component ${key} is required`);
         err.status = 400;
         throw err;
       }
 
       if (!_.has(values, key)) continue;
 
-      const groupValue = values[key];
+      const componentValue = values[key];
 
       if (repeatable === true) {
-        validateRepeatableInput(groupValue, { key, ...attr });
-        const groups = await Promise.all(
-          groupValue.map(value => {
-            return strapi.query(group).create(value);
+        validateRepeatableInput(componentValue, { key, ...attr });
+        const components = await Promise.all(
+          componentValue.map(value => {
+            return strapi.query(component).create(value);
           })
         );
 
-        const groupsArr = groups.map(groupEntry => ({
-          kind: groupModel.globalId,
-          ref: groupEntry,
+        const componentsArr = components.map(componentEntry => ({
+          kind: componentModel.globalId,
+          ref: componentEntry,
         }));
 
-        entry[key] = groupsArr;
+        entry[key] = componentsArr;
         await entry.save();
       } else {
-        validateNonRepeatableInput(groupValue, { key, ...attr });
-        if (groupValue === null) continue;
+        validateNonRepeatableInput(componentValue, { key, ...attr });
+        if (componentValue === null) continue;
 
-        const groupEntry = await strapi.query(group).create(groupValue);
+        const componentEntry = await strapi
+          .query(component)
+          .create(componentValue);
         entry[key] = [
           {
-            kind: groupModel.globalId,
-            ref: groupEntry,
+            kind: componentModel.globalId,
+            ref: componentEntry,
           },
         ];
         await entry.save();
@@ -83,57 +85,65 @@ module.exports = ({ model, modelKey, strapi }) => {
     }
   }
 
-  async function updateGroups(entry, values) {
-    if (groupKeys.length === 0) return;
+  async function updateComponents(entry, values) {
+    if (componentKeys.length === 0) return;
 
-    for (let key of groupKeys) {
-      // if key isn't present then don't change the current group data
+    for (let key of componentKeys) {
+      // if key isn't present then don't change the current component data
       if (!_.has(values, key)) continue;
 
       const attr = model.attributes[key];
-      const { group, repeatable = false } = attr;
+      const { component, repeatable = false } = attr;
 
-      const groupModel = strapi.groups[group];
-      const groupValue = values[key];
+      const componentModel = strapi.components[component];
+      const componentValue = values[key];
 
-      const updateOrCreateGroup = async value => {
+      const updateOrCreateComponent = async value => {
         // check if value has an id then update else create
         if (hasPK(value)) {
-          return strapi.query(group).update(
+          return strapi.query(component).update(
             {
               [model.primaryKey]: getPK(value),
             },
             value
           );
         }
-        return strapi.query(group).create(value);
+        return strapi.query(component).create(value);
       };
 
       if (repeatable === true) {
-        validateRepeatableInput(groupValue, { key, ...attr });
+        validateRepeatableInput(componentValue, { key, ...attr });
 
-        await deleteOldGroups(entry, groupValue, { key, groupModel });
+        await deleteOldComponents(entry, componentValue, {
+          key,
+          componentModel,
+        });
 
-        const groups = await Promise.all(groupValue.map(updateOrCreateGroup));
-        const groupsArr = groups.map(group => ({
-          kind: groupModel.globalId,
-          ref: group,
+        const components = await Promise.all(
+          componentValue.map(updateOrCreateComponent)
+        );
+        const componentsArr = components.map(component => ({
+          kind: componentModel.globalId,
+          ref: component,
         }));
 
-        entry[key] = groupsArr;
+        entry[key] = componentsArr;
         await entry.save();
       } else {
-        validateNonRepeatableInput(groupValue, { key, ...attr });
+        validateNonRepeatableInput(componentValue, { key, ...attr });
 
-        await deleteOldGroups(entry, groupValue, { key, groupModel });
+        await deleteOldComponents(entry, componentValue, {
+          key,
+          componentModel,
+        });
 
-        if (groupValue === null) continue;
+        if (componentValue === null) continue;
 
-        const group = await updateOrCreateGroup(groupValue);
+        const component = await updateOrCreateComponent(componentValue);
         entry[key] = [
           {
-            kind: groupModel.globalId,
-            ref: group,
+            kind: componentModel.globalId,
+            ref: component,
           },
         ];
         await entry.save();
@@ -142,10 +152,16 @@ module.exports = ({ model, modelKey, strapi }) => {
     return;
   }
 
-  async function deleteOldGroups(entry, groupValue, { key, groupModel }) {
-    const groupArr = Array.isArray(groupValue) ? groupValue : [groupValue];
+  async function deleteOldComponents(
+    entry,
+    componentValue,
+    { key, componentModel }
+  ) {
+    const componentArr = Array.isArray(componentValue)
+      ? componentValue
+      : [componentValue];
 
-    const idsToKeep = groupArr.filter(hasPK).map(getPK);
+    const idsToKeep = componentArr.filter(hasPK).map(getPK);
     const allIds = await (entry[key] || [])
       .filter(el => el.ref)
       .map(el => el.ref._id);
@@ -154,7 +170,7 @@ module.exports = ({ model, modelKey, strapi }) => {
     idsToKeep.forEach(id => {
       if (allIds.findIndex(currentId => currentId.toString() === id) === -1) {
         const err = new Error(
-          `Some of the provided groups in ${key} are not related to the entity`
+          `Some of the provided components in ${key} are not related to the entity`
         );
         err.status = 400;
         throw err;
@@ -168,23 +184,23 @@ module.exports = ({ model, modelKey, strapi }) => {
 
     if (idsToDelete.length > 0) {
       await strapi
-        .query(groupModel.uid)
+        .query(componentModel.uid)
         .delete({ [`${model.primaryKey}_in`]: idsToDelete });
     }
   }
 
-  async function deleteGroups(entry) {
-    if (groupKeys.length === 0) return;
+  async function deleteComponents(entry) {
+    if (componentKeys.length === 0) return;
 
-    for (let key of groupKeys) {
+    for (let key of componentKeys) {
       const attr = model.attributes[key];
-      const { group } = attr;
-      const groupModel = strapi.groups[group];
+      const { component } = attr;
+      const componentModel = strapi.components[component];
 
       if (Array.isArray(entry[key]) && entry[key].length > 0) {
         const idsToDelete = entry[key].map(el => el.ref);
         await strapi
-          .query(groupModel.uid)
+          .query(componentModel.uid)
           .delete({ [`${model.primaryKey}_in`]: idsToDelete });
       }
     }
@@ -237,7 +253,7 @@ module.exports = ({ model, modelKey, strapi }) => {
     // Create entry with no-relational data.
     const entry = await model.create(data);
 
-    await createGroups(entry, values);
+    await createComponents(entry, values);
 
     // Create relational data and return the entry.
     return model.updateRelations({
@@ -267,8 +283,8 @@ module.exports = ({ model, modelKey, strapi }) => {
     const relations = pickRelations(values);
     const data = omitExernalValues(values);
 
-    // update groups first in case it fails don't update the entity
-    await updateGroups(entry, values);
+    // update components first in case it fails don't update the entity
+    await updateComponents(entry, values);
     // Update entry with no-relational data.
     await entry.updateOne(data);
 
@@ -296,7 +312,7 @@ module.exports = ({ model, modelKey, strapi }) => {
       throw err;
     }
 
-    await deleteGroups(entry);
+    await deleteComponents(entry);
 
     await Promise.all(
       model.associations.map(async association => {
@@ -392,7 +408,7 @@ const buildSearchOr = (model, query) => {
 
 function validateRepeatableInput(value, { key, min, max }) {
   if (!Array.isArray(value)) {
-    const err = new Error(`Group ${key} is repetable. Expected an array`);
+    const err = new Error(`Component ${key} is repetable. Expected an array`);
     err.status = 400;
     throw err;
   }
@@ -400,7 +416,7 @@ function validateRepeatableInput(value, { key, min, max }) {
   value.forEach(val => {
     if (typeof val !== 'object' || Array.isArray(val) || val === null) {
       const err = new Error(
-        `Group ${key} as invalid items. Expected each items to be objects`
+        `Component ${key} as invalid items. Expected each items to be objects`
       );
       err.status = 400;
       throw err;
@@ -408,12 +424,14 @@ function validateRepeatableInput(value, { key, min, max }) {
   });
 
   if (min && value.length < min) {
-    const err = new Error(`Group ${key} must contain at least ${min} items`);
+    const err = new Error(
+      `Component ${key} must contain at least ${min} items`
+    );
     err.status = 400;
     throw err;
   }
   if (max && value.length > max) {
-    const err = new Error(`Group ${key} must contain at most ${max} items`);
+    const err = new Error(`Component ${key} must contain at most ${max} items`);
     err.status = 400;
     throw err;
   }
@@ -421,13 +439,13 @@ function validateRepeatableInput(value, { key, min, max }) {
 
 function validateNonRepeatableInput(value, { key, required }) {
   if (typeof value !== 'object' || Array.isArray(value)) {
-    const err = new Error(`Group ${key} should be an object`);
+    const err = new Error(`Component ${key} should be an object`);
     err.status = 400;
     throw err;
   }
 
   if (required === true && value === null) {
-    const err = new Error(`Group ${key} is required`);
+    const err = new Error(`Component ${key} is required`);
     err.status = 400;
     throw err;
   }

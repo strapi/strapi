@@ -4,17 +4,17 @@ const waitRestart = require('../../../test/helpers/waitRestart');
 
 let rq;
 
-describe.only('Content Type Builder - Groups', () => {
+describe.only('Content Type Builder - Components', () => {
   beforeAll(async () => {
     const token = await registerAndLogin();
     rq = createAuthRequest(token);
   }, 60000);
 
-  describe('POST /groups', () => {
+  describe('POST /components', () => {
     test('Validates input and return 400 in case of invalid input', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/content-type-builder/groups',
+        url: '/content-type-builder/components',
       });
 
       expect(res.statusCode).toBe(400);
@@ -26,12 +26,12 @@ describe.only('Content Type Builder - Groups', () => {
       });
     });
 
-    test('Creates a group properly', async () => {
+    test('Creates a component properly', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/content-type-builder/groups',
+        url: '/content-type-builder/components',
         body: {
-          name: 'SomeGroup',
+          name: 'SomeComponent',
           attributes: {
             title: {
               type: 'string',
@@ -46,35 +46,35 @@ describe.only('Content Type Builder - Groups', () => {
       expect(res.statusCode).toBe(201);
       expect(res.body).toEqual({
         data: {
-          uid: 'some_group',
+          uid: 'some_component',
         },
       });
 
       await waitRestart();
     }, 10000);
 
-    test('Errors on already existing groups', async () => {
+    test('Errors on already existing components', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/content-type-builder/groups',
+        url: '/content-type-builder/components',
         body: {
-          name: 'someGroup',
+          name: 'someComponent',
           attributes: {},
         },
       });
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
-        error: 'group.alreadyExists',
+        error: 'component.alreadyExists',
       });
     });
   });
 
-  describe('Get /groups', () => {
+  describe('Get /components', () => {
     test('Returns valid enveloppe', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-type-builder/groups',
+        url: '/content-type-builder/components',
       });
 
       expect(res.statusCode).toBe(200);
@@ -97,34 +97,34 @@ describe.only('Content Type Builder - Groups', () => {
     });
   });
 
-  describe('GET /groups/:uid', () => {
+  describe('GET /components/:uid', () => {
     test('Returns 404 on not found', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-type-builder/groups/nonexistent-group',
+        url: '/content-type-builder/components/nonexistent-component',
       });
 
       expect(res.statusCode).toBe(404);
       expect(res.body).toEqual({
-        error: 'group.notFound',
+        error: 'component.notFound',
       });
     });
 
     test('Returns correct format', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-type-builder/groups/some_group',
+        url: '/content-type-builder/components/some_component',
       });
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject({
         data: {
-          uid: 'some_group',
+          uid: 'some_component',
           schema: {
-            name: 'SomeGroup',
+            name: 'SomeComponent',
             description: '',
             connection: 'default',
-            collectionName: 'groups_some_groups',
+            collectionName: 'components_some_components',
             attributes: {
               title: {
                 type: 'string',
@@ -141,23 +141,23 @@ describe.only('Content Type Builder - Groups', () => {
     });
   });
 
-  describe('PUT /groups/:uid', () => {
-    test('Throws 404 on updating non existent group', async () => {
+  describe('PUT /components/:uid', () => {
+    test('Throws 404 on updating non existent component', async () => {
       const res = await rq({
         method: 'PUT',
-        url: '/content-type-builder/groups/nonexistent-groups',
+        url: '/content-type-builder/components/nonexistent-components',
       });
 
       expect(res.statusCode).toBe(404);
       expect(res.body).toEqual({
-        error: 'group.notFound',
+        error: 'component.notFound',
       });
     });
 
     test('Validates input and return 400 in case of invalid input', async () => {
       const res = await rq({
         method: 'PUT',
-        url: '/content-type-builder/groups/some_group',
+        url: '/content-type-builder/components/some_component',
         body: {
           attributes: {},
         },
@@ -171,12 +171,12 @@ describe.only('Content Type Builder - Groups', () => {
       });
     });
 
-    test('Updates a group properly', async () => {
+    test('Updates a component properly', async () => {
       const res = await rq({
         method: 'PUT',
-        url: '/content-type-builder/groups/some_group',
+        url: '/content-type-builder/components/some_component',
         body: {
-          name: 'NewGroup',
+          name: 'NewComponent',
           attributes: {},
         },
       });
@@ -184,7 +184,7 @@ describe.only('Content Type Builder - Groups', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body).toEqual({
         data: {
-          uid: 'new_group',
+          uid: 'new_component',
         },
       });
 
@@ -192,29 +192,29 @@ describe.only('Content Type Builder - Groups', () => {
     }, 10000);
   });
 
-  describe('DELETE /groups/:uid', () => {
-    test('Throws 404 on non existent group', async () => {
+  describe('DELETE /components/:uid', () => {
+    test('Throws 404 on non existent component', async () => {
       const res = await rq({
         method: 'DELETE',
-        url: '/content-type-builder/groups/nonexistent-groups',
+        url: '/content-type-builder/components/nonexistent-components',
       });
 
       expect(res.statusCode).toBe(404);
       expect(res.body).toEqual({
-        error: 'group.notFound',
+        error: 'component.notFound',
       });
     });
 
-    test('Deletes a group correctly', async () => {
+    test('Deletes a component correctly', async () => {
       const res = await rq({
         method: 'DELETE',
-        url: '/content-type-builder/groups/new_group',
+        url: '/content-type-builder/components/new_component',
       });
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toEqual({
         data: {
-          uid: 'new_group',
+          uid: 'new_component',
         },
       });
 
@@ -222,12 +222,12 @@ describe.only('Content Type Builder - Groups', () => {
 
       const tryGet = await rq({
         method: 'GET',
-        url: '/content-type-builder/groups/new_group',
+        url: '/content-type-builder/components/new_component',
       });
 
       expect(tryGet.statusCode).toBe(404);
       expect(tryGet.body).toEqual({
-        error: 'group.notFound',
+        error: 'component.notFound',
       });
     }, 10000);
   });

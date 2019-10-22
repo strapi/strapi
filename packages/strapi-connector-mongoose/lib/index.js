@@ -33,8 +33,7 @@ const defaults = {
   debug: false,
 };
 
-const isMongooseConnection = ({ connector }) =>
-  connector === 'mongoose';
+const isMongooseConnection = ({ connector }) => connector === 'mongoose';
 
 module.exports = function(strapi) {
   function initialize() {
@@ -126,7 +125,7 @@ module.exports = function(strapi) {
         };
 
         return Promise.all([
-          mountGroups(connectionName, ctx),
+          mountComponents(connectionName, ctx),
           mountApis(connectionName, ctx),
           mountAdmin(connectionName, ctx),
           mountPlugins(connectionName, ctx),
@@ -136,13 +135,13 @@ module.exports = function(strapi) {
     return Promise.all(connectionsPromises);
   }
 
-  function mountGroups(connectionName, ctx) {
+  function mountComponents(connectionName, ctx) {
     const options = {
       models: _.pickBy(
-        strapi.groups,
+        strapi.components,
         ({ connection }) => connection === connectionName
       ),
-      target: strapi.groups,
+      target: strapi.components,
       plugin: false,
     };
 

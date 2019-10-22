@@ -1,9 +1,9 @@
 const waitRestart = require('./waitRestart');
 
 module.exports = ({ rq }) => {
-  async function createGroup(data) {
+  async function createComponent(data) {
     await rq({
-      url: '/content-type-builder/groups',
+      url: '/content-type-builder/components',
       method: 'POST',
       body: {
         connection: 'default',
@@ -14,9 +14,9 @@ module.exports = ({ rq }) => {
     await waitRestart();
   }
 
-  async function deleteGroup(name) {
+  async function deleteComponent(name) {
     await rq({
-      url: `/content-type-builder/groups/${name}`,
+      url: `/content-type-builder/components/${name}`,
       method: 'DELETE',
     });
 
@@ -74,8 +74,8 @@ module.exports = ({ rq }) => {
   }
 
   return {
-    createGroup,
-    deleteGroup,
+    createComponent,
+    deleteComponent,
 
     createModels,
     createModel,

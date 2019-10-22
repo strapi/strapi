@@ -14,9 +14,9 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   /* Utils */
   // association key
   const assocKeys = model.associations.map(ast => ast.alias);
-  // group keys
-  const groupKeys = Object.keys(model.attributes).filter(key => {
-    return model.attributes[key].type === 'group';
+  // component keys
+  const componentKeys = Object.keys(model.attributes).filter(key => {
+    return model.attributes[key].type === 'component';
   });
 
   const timestamps = _.get(model, ['options', 'timestamps'], []);
@@ -27,7 +27,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   };
 
   // keys to exclude to get attribute keys
-  const excludedKeys = assocKeys.concat(groupKeys);
+  const excludedKeys = assocKeys.concat(componentKeys);
   // Returns an object without relational keys to persist in DB
   const selectAttributes = values => {
     return _.pickBy(values, (value, key) => {
@@ -97,7 +97,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     const runCreate = async trx => {
       // Create entry with no-relational data.
       const entry = await model.forge(data).save(null, { transacting: trx });
-      await createGroups(entry, values, { transacting: trx });
+      await createComponents(entry, values, { transacting: trx });
 
       return model.updateRelations(
         { id: entry.id, values: relations },
@@ -130,7 +130,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
               patch: true,
             })
           : entry;
-      await updateGroups(updatedEntry, values, { transacting: trx });
+      await updateComponents(updatedEntry, values, { transacting: trx });
 
       if (Object.keys(relations).length > 0) {
         return model.updateRelations(
@@ -176,7 +176,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     await model.updateRelations({ ...params, values }, { transacting });
 
     const runDelete = async trx => {
-      await deleteGroups(entry, { transacting: trx });
+      await deleteComponents(entry, { transacting: trx });
       await model.forge(params).destroy({ transacting: trx, require: false });
       return entry.toJSON();
     };
@@ -229,28 +229,28 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       .count();
   }
 
-  async function createGroups(entry, values, { transacting }) {
-    if (groupKeys.length === 0) return;
+  async function createComponents(entry, values, { transacting }) {
+    if (componentKeys.length === 0) return;
 
-    const joinModel = model.groupsJoinModel;
+    const joinModel = model.componentsJoinModel;
     const { foreignKey } = joinModel;
 
-    for (let key of groupKeys) {
+    for (let key of componentKeys) {
       const attr = model.attributes[key];
-      const { group, required = false, repeatable = false } = attr;
+      const { component, required = false, repeatable = false } = attr;
 
-      const groupModel = strapi.groups[group];
+      const componentModel = strapi.components[component];
 
-      const createGroupAndLink = async ({ value, order }) => {
+      const createComponentAndLink = async ({ value, order }) => {
         return strapi
-          .query(groupModel.uid)
+          .query(componentModel.uid)
           .create(value, { transacting })
-          .then(group => {
+          .then(component => {
             return joinModel.forge().save(
               {
                 [foreignKey]: entry.id,
-                group_type: groupModel.collectionName,
-                group_id: group.id,
+                component_type: componentModel.collectionName,
+                component_id: component.id,
                 field: key,
                 order,
               },
@@ -260,68 +260,68 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       };
 
       if (required === true && !_.has(values, key)) {
-        const err = new Error(`Group ${key} is required`);
+        const err = new Error(`Component ${key} is required`);
         err.status = 400;
         throw err;
       }
 
       if (!_.has(values, key)) continue;
 
-      const groupValue = values[key];
+      const componentValue = values[key];
 
       if (repeatable === true) {
-        validateRepeatableInput(groupValue, { key, ...attr });
+        validateRepeatableInput(componentValue, { key, ...attr });
         await Promise.all(
-          groupValue.map((value, idx) =>
-            createGroupAndLink({ value, order: idx + 1 })
+          componentValue.map((value, idx) =>
+            createComponentAndLink({ value, order: idx + 1 })
           )
         );
       } else {
-        validateNonRepeatableInput(groupValue, { key, ...attr });
+        validateNonRepeatableInput(componentValue, { key, ...attr });
 
-        if (groupValue === null) continue;
-        await createGroupAndLink({ value: groupValue, order: 1 });
+        if (componentValue === null) continue;
+        await createComponentAndLink({ value: componentValue, order: 1 });
       }
     }
   }
 
-  async function updateGroups(entry, values, { transacting }) {
-    if (groupKeys.length === 0) return;
+  async function updateComponents(entry, values, { transacting }) {
+    if (componentKeys.length === 0) return;
 
-    const joinModel = model.groupsJoinModel;
+    const joinModel = model.componentsJoinModel;
     const { foreignKey } = joinModel;
 
-    for (let key of groupKeys) {
-      // if key isn't present then don't change the current group data
+    for (let key of componentKeys) {
+      // if key isn't present then don't change the current component data
       if (!_.has(values, key)) continue;
 
       const attr = model.attributes[key];
-      const { group, repeatable = false } = attr;
+      const { component, repeatable = false } = attr;
 
-      const groupModel = strapi.groups[group];
+      const componentModel = strapi.components[component];
 
-      const groupValue = values[key];
+      const componentValue = values[key];
 
-      const updateOrCreateGroupAndLink = async ({ value, order }) => {
+      const updateOrCreateComponentAndLink = async ({ value, order }) => {
         // check if value has an id then update else create
-        if (_.has(value, groupModel.primaryKey)) {
+        if (_.has(value, componentModel.primaryKey)) {
           return strapi
-            .query(groupModel.uid)
+            .query(componentModel.uid)
             .update(
               {
-                [groupModel.primaryKey]: value[groupModel.primaryKey],
+                [componentModel.primaryKey]: value[componentModel.primaryKey],
               },
               value,
               { transacting }
             )
-            .then(group => {
+            .then(component => {
               return joinModel
                 .forge()
                 .query({
                   where: {
                     [foreignKey]: entry.id,
-                    group_type: groupModel.collectionName,
-                    group_id: group.id,
+                    component_type: componentModel.collectionName,
+                    component_id: component.id,
                     field: key,
                   },
                 })
@@ -335,14 +335,14 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
         }
         // create
         return strapi
-          .query(groupModel.uid)
+          .query(componentModel.uid)
           .create(value, { transacting })
-          .then(group => {
+          .then(component => {
             return joinModel.forge().save(
               {
                 [foreignKey]: entry.id,
-                group_type: groupModel.collectionName,
-                group_id: group.id,
+                component_type: componentModel.collectionName,
+                component_id: component.id,
                 field: key,
                 order,
               },
@@ -352,48 +352,53 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       };
 
       if (repeatable === true) {
-        validateRepeatableInput(groupValue, { key, ...attr });
+        validateRepeatableInput(componentValue, { key, ...attr });
 
-        await deleteOldGroups(entry, groupValue, {
+        await deleteOldComponents(entry, componentValue, {
           key,
           joinModel,
-          groupModel,
+          componentModel,
           transacting,
         });
 
         await Promise.all(
-          groupValue.map((value, idx) => {
-            return updateOrCreateGroupAndLink({ value, order: idx + 1 });
+          componentValue.map((value, idx) => {
+            return updateOrCreateComponentAndLink({ value, order: idx + 1 });
           })
         );
       } else {
-        validateNonRepeatableInput(groupValue, { key, ...attr });
+        validateNonRepeatableInput(componentValue, { key, ...attr });
 
-        await deleteOldGroups(entry, groupValue, {
+        await deleteOldComponents(entry, componentValue, {
           key,
           joinModel,
-          groupModel,
+          componentModel,
           transacting,
         });
 
-        if (groupValue === null) continue;
+        if (componentValue === null) continue;
 
-        await updateOrCreateGroupAndLink({ value: groupValue, order: 1 });
+        await updateOrCreateComponentAndLink({
+          value: componentValue,
+          order: 1,
+        });
       }
     }
     return;
   }
 
-  async function deleteOldGroups(
+  async function deleteOldComponents(
     entry,
-    groupValue,
-    { key, joinModel, groupModel, transacting }
+    componentValue,
+    { key, joinModel, componentModel, transacting }
   ) {
-    const groupArr = Array.isArray(groupValue) ? groupValue : [groupValue];
+    const componentArr = Array.isArray(componentValue)
+      ? componentValue
+      : [componentValue];
 
-    const idsToKeep = groupArr
-      .filter(el => _.has(el, groupModel.primaryKey))
-      .map(el => el[groupModel.primaryKey].toString());
+    const idsToKeep = componentArr
+      .filter(el => _.has(el, componentModel.primaryKey))
+      .map(el => el[componentModel.primaryKey].toString());
 
     const allIds = await joinModel
       .forge()
@@ -401,13 +406,13 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
         qb.where(joinModel.foreignKey, entry.id).andWhere('field', key);
       })
       .fetchAll({ transacting })
-      .map(el => el.get('group_id').toString());
+      .map(el => el.get('component_id').toString());
 
     // verify the provided ids are realted to this entity.
     idsToKeep.forEach(id => {
       if (!allIds.includes(id)) {
         const err = new Error(
-          `Some of the provided groups in ${key} are not related to the entity`
+          `Some of the provided components in ${key} are not related to the entity`
         );
         err.status = 400;
         throw err;
@@ -418,52 +423,54 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     if (idsToDelete.length > 0) {
       await joinModel
         .forge()
-        .query(qb => qb.whereIn('group_id', idsToDelete).andWhere('field', key))
+        .query(qb =>
+          qb.whereIn('component_id', idsToDelete).andWhere('field', key)
+        )
         .destroy({ transacting, require: false });
 
       await strapi
-        .query(groupModel.uid)
+        .query(componentModel.uid)
         .delete(
-          { [`${groupModel.primaryKey}_in`]: idsToDelete },
+          { [`${componentModel.primaryKey}_in`]: idsToDelete },
           { transacting }
         );
     }
   }
 
-  async function deleteGroups(entry, { transacting }) {
-    if (groupKeys.length === 0) return;
+  async function deleteComponents(entry, { transacting }) {
+    if (componentKeys.length === 0) return;
 
-    const joinModel = model.groupsJoinModel;
+    const joinModel = model.componentsJoinModel;
     const { foreignKey } = joinModel;
 
-    for (let key of groupKeys) {
+    for (let key of componentKeys) {
       const attr = model.attributes[key];
-      const { group } = attr;
+      const { component } = attr;
 
-      const groupModel = strapi.groups[group];
+      const componentModel = strapi.components[component];
 
       const ids = await joinModel
         .forge()
         .query({
           where: {
             [foreignKey]: entry.id,
-            group_type: groupModel.collectionName,
+            component_type: componentModel.collectionName,
             field: key,
           },
         })
         .fetchAll({ transacting })
-        .map(el => el.get('group_id'));
+        .map(el => el.get('component_id'));
 
       await strapi
-        .query(groupModel.uid)
-        .delete({ [`${groupModel.primaryKey}_in`]: ids }, { transacting });
+        .query(componentModel.uid)
+        .delete({ [`${componentModel.primaryKey}_in`]: ids }, { transacting });
 
       await joinModel
         .forge()
         .query({
           where: {
             [foreignKey]: entry.id,
-            group_type: groupModel.collectionName,
+            component_type: componentModel.collectionName,
             field: key,
           },
         })
@@ -558,7 +565,7 @@ const buildSearchQuery = (qb, model, params) => {
 
 function validateRepeatableInput(value, { key, min, max }) {
   if (!Array.isArray(value)) {
-    const err = new Error(`Group ${key} is repetable. Expected an array`);
+    const err = new Error(`Component ${key} is repetable. Expected an array`);
     err.status = 400;
     throw err;
   }
@@ -566,7 +573,7 @@ function validateRepeatableInput(value, { key, min, max }) {
   value.forEach(val => {
     if (typeof val !== 'object' || Array.isArray(val) || val === null) {
       const err = new Error(
-        `Group ${key} as invalid items. Expected each items to be objects`
+        `Component ${key} as invalid items. Expected each items to be objects`
       );
       err.status = 400;
       throw err;
@@ -574,12 +581,14 @@ function validateRepeatableInput(value, { key, min, max }) {
   });
 
   if (min && value.length < min) {
-    const err = new Error(`Group ${key} must contain at least ${min} items`);
+    const err = new Error(
+      `Component ${key} must contain at least ${min} items`
+    );
     err.status = 400;
     throw err;
   }
   if (max && value.length > max) {
-    const err = new Error(`Group ${key} must contain at most ${max} items`);
+    const err = new Error(`Component ${key} must contain at most ${max} items`);
     err.status = 400;
     throw err;
   }
@@ -587,13 +596,13 @@ function validateRepeatableInput(value, { key, min, max }) {
 
 function validateNonRepeatableInput(value, { key, required }) {
   if (typeof value !== 'object' || Array.isArray(value)) {
-    const err = new Error(`Group ${key} should be an object`);
+    const err = new Error(`Component ${key} should be an object`);
     err.status = 400;
     throw err;
   }
 
   if (required === true && value === null) {
-    const err = new Error(`Group ${key} is required`);
+    const err = new Error(`Component ${key} is required`);
     err.status = 400;
     throw err;
   }

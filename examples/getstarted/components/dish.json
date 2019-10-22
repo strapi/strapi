@@ -4,7 +4,7 @@
     "description": ""
   },
   "connection": "default",
-  "collectionName": "groups_dishes",
+  "collectionName": "components_dishes",
   "attributes": {
     "name": {
       "type": "string"

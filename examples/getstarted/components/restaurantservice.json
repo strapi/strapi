@@ -4,7 +4,7 @@
     "description": ""
   },
   "connection": "default",
-  "collectionName": "groups_restaurantservices",
+  "collectionName": "components_restaurantservices",
   "attributes": {
     "name": {
       "type": "string",
