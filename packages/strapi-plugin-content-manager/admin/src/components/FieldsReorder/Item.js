@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 
 import { useLayoutDnd } from '../../contexts/LayoutDnd';
-import FieldItem from '../FieldItem';
 import DraggedFieldWithPreview from '../DraggedFieldWithPreview';
 
 import ItemTypes from '../../utils/ItemTypes';
@@ -27,13 +26,14 @@ const Item = ({
     selectedItemName,
     setEditFieldToSelect,
   } = useLayoutDnd();
-  const ref = useRef(null);
+  const dragRef = useRef(null);
+  const dropRef = useRef(null);
   const [{ clientOffset, isOver }, drop] = useDrop({
     // Source code from http://react-dnd.github.io/react-dnd/examples/sortable/simple
     // And also from https://codesandbox.io/s/6v7l7z68jk
     accept: ItemTypes.EDIT_FIELD,
     hover(item, monitor) {
-      if (!ref.current) {
+      if (!dropRef.current) {
         return;
       }
 
@@ -53,7 +53,7 @@ const Item = ({
       }
 
       // Determine rectangle on screen
-      const hoverBoundingRect = ref.current.getBoundingClientRect();
+      const hoverBoundingRect = dropRef.current.getBoundingClientRect();
 
       // Get vertical middle
       const hoverMiddleY =
@@ -86,7 +86,7 @@ const Item = ({
       return;
     },
     drop(item, monitor) {
-      if (!ref.current) {
+      if (!dropRef.current) {
         return;
       }
 
@@ -106,7 +106,7 @@ const Item = ({
       }
 
       // Determine rectangle on screen
-      const hoverBoundingRect = ref.current.getBoundingClientRect();
+      const hoverBoundingRect = dropRef.current.getBoundingClientRect();
 
       // Scroll window if mouse near vertical edge(100px)
 
@@ -170,13 +170,17 @@ const Item = ({
   }, [preview]);
 
   // Create the ref
-  drag(drop(ref));
+  const refs = {
+    dragRef: drag(dragRef),
+    dropRef: drop(dropRef),
+  };
+  // drag(drop(ref));
 
   let showLeftCarret = false;
   let showRightCarret = false;
 
-  if (ref.current && clientOffset) {
-    const hoverBoundingRect = ref.current.getBoundingClientRect();
+  if (dropRef.current && clientOffset) {
+    const hoverBoundingRect = dropRef.current.getBoundingClientRect();
 
     showLeftCarret =
       isOver &&
@@ -209,7 +213,7 @@ const Item = ({
       showRightCarret={showRightCarret}
       size={size}
       type={type}
-      ref={ref}
+      ref={refs}
     />
   );
 };
