@@ -2,7 +2,7 @@
 import React, { forwardRef, useState } from 'react';
 import PropTypes from 'prop-types';
 
-import { Grab, Pencil, Remove } from '@buffetjs/icons';
+import { Grab, GrabLarge, Pencil, Remove } from '@buffetjs/icons';
 
 import Wrapper from './Wrapper';
 
@@ -17,6 +17,7 @@ const DraggedField = forwardRef(
       onRemove,
       selectedItem,
       style,
+      withLongerHeight,
     },
     ref
   ) => {
@@ -31,11 +32,16 @@ const DraggedField = forwardRef(
         isSelected={isSelected}
         isOverRemove={isOverRemove}
         style={style}
+        withLongerHeight={withLongerHeight}
       >
         {!isHidden && (
           <div className="sub_wrapper" style={{ opacity }}>
             <div className="grab" ref={ref}>
-              <Grab style={{ marginRight: 10, cursor: 'move' }} />
+              {withLongerHeight ? (
+                <GrabLarge style={{ marginRight: 10, cursor: 'move' }} />
+              ) : (
+                <Grab style={{ marginRight: 10, cursor: 'move' }} />
+              )}
             </div>
             <div className="name" onClick={() => onClick(name)}>
               {name}
@@ -62,17 +68,20 @@ DraggedField.defaultProps = {
   onClick: () => {},
   onRemove: () => {},
   selectedItem: '',
-
   style: {},
+  withLongerHeight: false,
 };
 
 DraggedField.propTypes = {
   count: PropTypes.number,
   isDragging: PropTypes.bool,
+  isHidden: PropTypes.bool,
   name: PropTypes.string.isRequired,
   onClick: PropTypes.func,
   onRemove: PropTypes.func,
   selectedItem: PropTypes.string,
+  style: PropTypes.object,
+  withLongerHeight: PropTypes.bool,
 };
 
 export default DraggedField;

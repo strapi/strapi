@@ -1,14 +1,23 @@
 import styled from 'styled-components';
+import PropTypes from 'prop-types';
 
 const Wrapper = styled.div`
   display: flex;
   position: relative;
-  height: 30px;
+  height: ${({ withLongerHeight }) => (withLongerHeight ? '84px' : '30px')};
 
   .sub {
     width: 100%;
     padding: 0 5px;
   }
 `;
+
+Wrapper.defaultProps = {
+  withLongerHeight: false,
+};
+
+Wrapper.propTypes = {
+  withLongerHeight: PropTypes.bool,
+};
 
 export default Wrapper;

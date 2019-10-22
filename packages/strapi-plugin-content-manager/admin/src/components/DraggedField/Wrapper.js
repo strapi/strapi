@@ -11,8 +11,10 @@ const getColor = (isOverRemove, isSelected) => {
   }
 };
 
+const getHeight = withLongerHeight => (withLongerHeight ? '84px' : '30px');
+
 const Wrapper = styled.div`
-  height: 30px;
+  height: ${({ withLongerHeight }) => getHeight(withLongerHeight)};
   padding: 0 10px 0 0;
   margin-right: 4px;
   flex-basis: calc(100% / ${props => props.count});
@@ -22,8 +24,8 @@ const Wrapper = styled.div`
 
   .sub_wrapper {
     position: relative;
-    height: 30px;
-    line-height: 30px;
+    height: ${({ withLongerHeight }) => getHeight(withLongerHeight)};
+    line-height: ${({ withLongerHeight }) => getHeight(withLongerHeight)};
 
     background: ${({ isOverRemove, isSelected }) => {
       if (isSelected) {
@@ -41,6 +43,7 @@ const Wrapper = styled.div`
       position: relative;
       padding-left: 38px;
       padding-right: 38px;
+      line-height: 30px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
