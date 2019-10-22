@@ -89,8 +89,8 @@ module.exports = function(strapi) {
         connectOptions.dbName = database;
         connectOptions.useCreateIndex = true;
         connectOptions.useUnifiedTopology = useUnifiedTopology || 'false';
-        connectOptions.reconnectInterval = reconnectInterval || defaults.reconnectInterval;
-        connectOptions.reconnectTries = reconnectTries || defaults.reconnectTries;
+        connectOptions.reconnectInterval = reconnectInterval;
+        connectOptions.reconnectTries = reconnectTries;
 
         const connect = () => {
           /* FIXME: for now, mongoose doesn't support srv auth except the way including user/pass in URI.
@@ -107,7 +107,7 @@ module.exports = function(strapi) {
         try {
           await connect();
 
-          instance.connection.on('disconnected', function() {
+          instance.connection.on('disconnected', () => {
             setTimeout(function() {
               connect()
               .catch(function(e) {
