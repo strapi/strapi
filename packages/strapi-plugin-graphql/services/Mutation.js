@@ -176,6 +176,19 @@ module.exports = {
 
     return async (obj, options, graphqlCtx) => {
       const { context } = graphqlCtx;
+
+      if (options.input && options.input.where) {
+        context.params = Query.convertToParams(options.input.where || {});
+      } else {
+        context.params = {};
+      }
+
+      if (options.input && options.input.data) {
+        context.request.body = options.input.data || {};
+      } else {
+        context.request.body = options;
+      }
+
       // Hack to be able to handle permissions for each query.
       const ctx = Object.assign(_.clone(context), {
         request: Object.assign(_.clone(context.request), {
@@ -202,18 +215,6 @@ module.exports = {
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
         const normalizedName = _.toLower(name);
-
-        if (options.input && options.input.where) {
-          context.params = Query.convertToParams(options.input.where || {});
-        } else {
-          context.params = {};
-        }
-
-        if (options.input && options.input.data) {
-          context.request.body = options.input.data || {};
-        } else {
-          context.request.body = options;
-        }
 
         if (isController) {
           const values = await resolver.call(null, context);

@@ -165,8 +165,9 @@ const buildAssocResolvers = (model, name, { plugin }) => {
             };
 
             if (
-              (association.nature === 'manyToMany' && association.dominant) ||
-              association.nature === 'manyWay'
+              ((association.nature === 'manyToMany' && association.dominant) ||
+                association.nature === 'manyWay') &&
+              _.has(obj, association.alias) // if populated
             ) {
               _.set(
                 queryOpts,
