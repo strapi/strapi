@@ -26,24 +26,24 @@
     },
     {
       "method": "GET",
-      "path": "/groups",
-      "handler": "Groups.listGroups",
+      "path": "/components",
+      "handler": "Components.listComponents",
       "config": {
         "policies": []
       }
     },
     {
       "method": "GET",
-      "path": "/groups/:uid",
-      "handler": "Groups.findGroup",
+      "path": "/components/:uid",
+      "handler": "Components.findComponent",
       "config": {
         "policies": []
       }
     },
     {
       "method": "PUT",
-      "path": "/groups/:uid",
-      "handler": "Groups.updateGroup",
+      "path": "/components/:uid",
+      "handler": "Components.updateComponent",
       "config": {
         "policies": []
       }

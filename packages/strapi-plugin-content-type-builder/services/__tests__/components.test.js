@@ -1,6 +1,6 @@
-const { createSchema, createGroupUID } = require('../Groups');
+const { createSchema, createComponentUID } = require('../Components');
 
-describe('Group Service', () => {
+describe('Component Service', () => {
   describe('createSchema', () => {
     test('Formats schema and create default values', () => {
       const input = {
@@ -24,7 +24,7 @@ describe('Group Service', () => {
           description: '',
         },
         connection: 'default',
-        collectionName: 'groups_some_names',
+        collectionName: 'components_some_names',
         attributes: {},
       };
 
@@ -53,11 +53,11 @@ describe('Group Service', () => {
     });
   });
 
-  describe('createGroupUID', () => {
+  describe('createComponentUID', () => {
     test('Generats normalized uids', () => {
-      expect(createGroupUID('some char')).toBe('some_char');
-      expect(createGroupUID('some-char')).toBe('some_char');
-      expect(createGroupUID('Some Char')).toBe('some_char');
+      expect(createComponentUID('some char')).toBe('some_char');
+      expect(createComponentUID('some-char')).toBe('some_char');
+      expect(createComponentUID('Some Char')).toBe('some_char');
     });
   });
 });

@@ -655,12 +655,12 @@ module.exports = {
             default:
               acc.properties[current] = associationSchema;
           }
-        } else if (type === 'group') {
-          const { repeatable, group, min, max } = attribute;
+        } else if (type === 'component') {
+          const { repeatable, component, min, max } = attribute;
 
           const cmp = this.generateMainComponent(
-            strapi.groups[group].attributes,
-            strapi.groups[group].associations
+            strapi.components[component].attributes,
+            strapi.components[component].associations
           );
 
           if (repeatable) {

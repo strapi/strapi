@@ -208,7 +208,7 @@ const buildAssocResolvers = (model, name, { plugin }) => {
   }, {});
 };
 
-const buildModel = (model, name, { plugin, isGroup = false } = {}) => {
+const buildModel = (model, name, { plugin, isComponent = false } = {}) => {
   const { globalId, primaryKey } = model;
 
   let definition = '';
@@ -235,7 +235,7 @@ const buildModel = (model, name, { plugin, isGroup = false } = {}) => {
 
   definition += typeDef;
   definition += Types.generateInputModel(model, globalId, {
-    allowIds: isGroup,
+    allowIds: isComponent,
   });
 
   const resolver = {

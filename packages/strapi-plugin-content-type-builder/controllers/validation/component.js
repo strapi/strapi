@@ -9,7 +9,7 @@ const getTypeValidator = require('./types');
 const getRelationValidator = require('./relations');
 
 module.exports = data => {
-  return groupSchema
+  return componentSchema
     .validate(data, {
       strict: true,
       abortEarly: false,
@@ -17,7 +17,7 @@ module.exports = data => {
     .catch(error => Promise.reject(formatYupErrors(error)));
 };
 
-const groupSchema = yup
+const componentSchema = yup
   .object({
     name: yup
       .string()

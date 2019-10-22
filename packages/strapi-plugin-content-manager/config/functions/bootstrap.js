@@ -16,7 +16,7 @@ module.exports = () => {
 
 async function syncSchemas() {
   await syncContentTypesSchemas();
-  await syncGroupsSchemas();
+  await syncComponentsSchemas();
 }
 
 /**
@@ -96,42 +96,42 @@ async function updateContentTypesScope(models, configurations, source) {
 }
 
 /**
- * sync groups schemas
+ * sync components schemas
  */
-async function syncGroupsSchemas() {
+async function syncComponentsSchemas() {
   const updateConfiguration = async uid => {
     const conf = configurations.find(conf => conf.uid === uid);
-    const model = strapi.groups[uid];
+    const model = strapi.components[uid];
     return service.setConfiguration(uid, await syncConfiguration(conf, model));
   };
 
   const generateNewConfiguration = async uid => {
     return service.setConfiguration(
       uid,
-      await createDefaultConfiguration(strapi.groups[uid])
+      await createDefaultConfiguration(strapi.components[uid])
     );
   };
 
-  const service = strapi.plugins['content-manager'].services.groups;
+  const service = strapi.plugins['content-manager'].services.components;
 
   const configurations = await storeUtils.findByKey(
-    'plugin_content_manager_configuration_groups'
+    'plugin_content_manager_configuration_components'
   );
 
-  const realUIDs = Object.keys(strapi.groups);
+  const realUIDs = Object.keys(strapi.components);
   const DBUIDs = configurations.map(({ uid }) => uid);
-  const groupsToUpdate = _.intersection(realUIDs, DBUIDs);
-  const groupsToAdd = _.difference(realUIDs, DBUIDs);
-  const groupsToDelete = _.difference(DBUIDs, realUIDs);
+  const componentsToUpdate = _.intersection(realUIDs, DBUIDs);
+  const componentsToAdd = _.difference(realUIDs, DBUIDs);
+  const componentsToDelete = _.difference(DBUIDs, realUIDs);
 
   // delette old schemas
   await Promise.all(
-    groupsToDelete.map(uid => service.deleteConfiguration(uid))
+    componentsToDelete.map(uid => service.deleteConfiguration(uid))
   );
 
   // create new schemas
-  await Promise.all(groupsToAdd.map(uid => generateNewConfiguration(uid)));
+  await Promise.all(componentsToAdd.map(uid => generateNewConfiguration(uid)));
 
   // update current schemas
-  await Promise.all(groupsToUpdate.map(uid => updateConfiguration(uid)));
+  await Promise.all(componentsToUpdate.map(uid => updateConfiguration(uid)));
 }

@@ -487,24 +487,29 @@ module.exports = {
         return acc;
       }, []);
 
-      const groupModels = Object.keys(strapi.groups).reduce((acc, entity) => {
-        Object.keys(strapi.groups[entity].attributes).forEach(attribute => {
-          const attr = strapi.groups[entity].attributes[attribute];
+      const componentModels = Object.keys(strapi.components).reduce(
+        (acc, entity) => {
+          Object.keys(strapi.components[entity].attributes).forEach(
+            attribute => {
+              const attr = strapi.components[entity].attributes[attribute];
 
-          if (
-            (attr.collection || attr.model || '').toLowerCase() ===
-              model.toLowerCase() &&
-            strapi.groups[entity].globalId !== definition.globalId
-          ) {
-            acc.push(strapi.groups[entity].globalId);
-          }
-        });
+              if (
+                (attr.collection || attr.model || '').toLowerCase() ===
+                  model.toLowerCase() &&
+                strapi.components[entity].globalId !== definition.globalId
+              ) {
+                acc.push(strapi.components[entity].globalId);
+              }
+            }
+          );
 
-        return acc;
-      }, []);
+          return acc;
+        },
+        []
+      );
 
       const models = _.uniq(
-        appModels.concat(pluginsModels).concat(groupModels)
+        appModels.concat(pluginsModels).concat(componentModels)
       );
 
       definition.associations.push({

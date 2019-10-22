@@ -138,16 +138,16 @@ module.exports = {
     });
   },
 
-  writeModel(name, data, { api, plugin, group } = {}) {
-    const filepath = this.getModelPath(name, { api, plugin, group });
+  writeModel(name, data, { api, plugin, component } = {}) {
+    const filepath = this.getModelPath(name, { api, plugin, component });
     const content = JSON.stringify(data, null, 2);
 
     fs.ensureFileSync(filepath);
     return fs.writeFileSync(filepath, content);
   },
 
-  readModel(name, { api, plugin, group } = {}) {
-    const filepath = this.getModelPath(name, { api, plugin, group });
+  readModel(name, { api, plugin, component } = {}) {
+    const filepath = this.getModelPath(name, { api, plugin, component });
 
     if (plugin && !fs.pathExistsSync(filepath)) {
       return _.cloneDeep(
@@ -165,7 +165,7 @@ module.exports = {
     return _.cloneDeep(require(filepath));
   },
 
-  getModelPath(name, { api, plugin, group } = {}) {
+  getModelPath(name, { api, plugin, component } = {}) {
     const fileName = `${_.upperFirst(name)}.settings.json`;
 
     if (plugin) {
@@ -184,8 +184,8 @@ module.exports = {
         'models',
         fileName
       );
-    } else if (group) {
-      return path.resolve(strapi.config.appPath, 'groups', `${name}.json`);
+    } else if (component) {
+      return path.resolve(strapi.config.appPath, 'components', `${name}.json`);
     }
 
     throw new Error('Expected an api or a plugin, received none');
@@ -307,12 +307,12 @@ module.exports = {
     return _.keys(strapi.config.currentEnvironment.database.connections);
   },
 
-  // TODO: add groups
+  // TODO: add components
   clearRelations(model, source) {
     const errors = [];
 
     // Method to delete the association of the models.
-    const deleteAssociations = (models, { plugin, group = false } = {}) => {
+    const deleteAssociations = (models, { plugin, component = false } = {}) => {
       Object.keys(models).forEach(name => {
         const modelData = models[name];
         const { associations = [] } = modelData;
@@ -329,7 +329,7 @@ module.exports = {
 
         if (relationsToDelete.length > 0) {
           const opts = {
-            group,
+            component,
             plugin,
             api: modelData.apiName,
           };
@@ -358,8 +358,8 @@ module.exports = {
       deleteAssociations(strapi.plugins[name].models, { plugin: name });
     });
 
-    // update groups
-    deleteAssociations(strapi.groups, { group: true });
+    // update components
+    deleteAssociations(strapi.components, { component: true });
 
     return errors;
   },
@@ -368,7 +368,7 @@ module.exports = {
     const errors = [];
 
     // Method to update the model
-    const update = (models, { plugin, group } = {}) => {
+    const update = (models, { plugin, component } = {}) => {
       Object.keys(models).forEach(name => {
         const modelData = models[name];
         const { associations = [] } = modelData;
@@ -409,7 +409,7 @@ module.exports = {
           unidirectionnalRelationsToCreate.length > 0
         ) {
           const opts = {
-            group,
+            component,
             plugin,
             api: modelData.apiName,
           };
@@ -491,7 +491,7 @@ module.exports = {
       update(strapi.plugins[pluginName].models, { plugin: pluginName });
     });
 
-    update(strapi.groups, { group: true });
+    update(strapi.components, { component: true });
 
     return errors;
   },

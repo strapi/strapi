@@ -2,35 +2,35 @@
 
 const pluralize = require('pluralize');
 
-const createGroupModels = async ({ model, definition, ORM, GLOBALS }) => {
+const createComponentModels = async ({ model, definition, ORM, GLOBALS }) => {
   const { collectionName, primaryKey } = definition;
 
-  const groupAttributes = Object.keys(definition.attributes).filter(
-    key => definition.attributes[key].type === 'group'
+  const componentAttributes = Object.keys(definition.attributes).filter(
+    key => definition.attributes[key].type === 'component'
   );
 
-  if (groupAttributes.length > 0) {
-    // create group model
-    const joinTable = `${collectionName}_groups`;
+  if (componentAttributes.length > 0) {
+    // create component model
+    const joinTable = `${collectionName}_components`;
     const joinColumn = `${pluralize.singular(collectionName)}_${primaryKey}`;
     const joinModel = ORM.Model.extend({
       requireFetch: false,
       tableName: joinTable,
-      group() {
+      component() {
         return this.morphTo(
-          'group',
-          ...groupAttributes.map(key => {
-            const groupKey = definition.attributes[key].group;
-            return GLOBALS[strapi.groups[groupKey].globalId];
+          'component',
+          ...componentAttributes.map(key => {
+            const componentKey = definition.attributes[key].component;
+            return GLOBALS[strapi.components[componentKey].globalId];
           })
         );
       },
     });
 
     joinModel.foreignKey = joinColumn;
-    definition.groupsJoinModel = joinModel;
+    definition.componentsJoinModel = joinModel;
 
-    groupAttributes.forEach(name => {
+    componentAttributes.forEach(name => {
       model[name] = function relation() {
         return this.hasMany(joinModel).query(qb => {
           qb.where('field', name).orderBy('order');
@@ -40,15 +40,15 @@ const createGroupModels = async ({ model, definition, ORM, GLOBALS }) => {
   }
 };
 
-const createGroupJoinTables = async ({ definition, ORM }) => {
+const createComponentJoinTables = async ({ definition, ORM }) => {
   const { collectionName, primaryKey } = definition;
 
-  const groupAttributes = Object.keys(definition.attributes).filter(
-    key => definition.attributes[key].type === 'group'
+  const componentAttributes = Object.keys(definition.attributes).filter(
+    key => definition.attributes[key].type === 'component'
   );
 
-  if (groupAttributes.length > 0) {
-    const joinTable = `${collectionName}_groups`;
+  if (componentAttributes.length > 0) {
+    const joinTable = `${collectionName}_components`;
     const joinColumn = `${pluralize.singular(collectionName)}_${primaryKey}`;
 
     if (await ORM.knex.schema.hasTable(joinTable)) return;
@@ -60,8 +60,8 @@ const createGroupJoinTables = async ({ definition, ORM }) => {
         .integer('order')
         .unsigned()
         .notNullable();
-      table.string('group_type').notNullable();
-      table.integer('group_id').notNullable();
+      table.string('component_type').notNullable();
+      table.integer('component_id').notNullable();
       table.integer(joinColumn).notNullable();
 
       table
@@ -74,6 +74,6 @@ const createGroupJoinTables = async ({ definition, ORM }) => {
 };
 
 module.exports = {
-  createGroupModels,
-  createGroupJoinTables,
+  createComponentModels,
+  createComponentJoinTables,
 };

@@ -50,40 +50,40 @@
     },
     {
       "method": "GET",
-      "path": "/groups",
-      "handler": "Groups.getGroups",
+      "path": "/components",
+      "handler": "Components.getComponents",
       "config": {
         "policies": []
       }
     },
     {
       "method": "GET",
-      "path": "/groups/:uid",
-      "handler": "Groups.getGroup",
+      "path": "/components/:uid",
+      "handler": "Components.getComponent",
       "config": {
         "policies": []
       }
     },
     {
       "method": "POST",
-      "path": "/groups",
-      "handler": "Groups.createGroup",
+      "path": "/components",
+      "handler": "Components.createComponent",
       "config": {
         "policies": []
       }
     },
     {
       "method": "PUT",
-      "path": "/groups/:uid",
-      "handler": "Groups.updateGroup",
+      "path": "/components/:uid",
+      "handler": "Components.updateComponent",
       "config": {
         "policies": []
       }
     },
     {
       "method": "DELETE",
-      "path": "/groups/:uid",
-      "handler": "Groups.deleteGroup",
+      "path": "/components/:uid",
+      "handler": "Components.deleteComponent",
       "config": {
         "policies": []
       }

@@ -27,13 +27,13 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       global[definition.globalName] = {};
     }
 
-    const groupAttributes = Object.keys(definition.attributes).filter(
-      key => definition.attributes[key].type === 'group'
+    const componentAttributes = Object.keys(definition.attributes).filter(
+      key => definition.attributes[key].type === 'component'
     );
 
     const scalarAttributes = Object.keys(definition.attributes).filter(key => {
       const { type } = definition.attributes[key];
-      return type !== undefined && type !== null && type !== 'group';
+      return type !== undefined && type !== null && type !== 'component';
     });
 
     const relationalAttributes = Object.keys(definition.attributes).filter(
@@ -44,9 +44,9 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
     );
 
     // handle gorup attrs
-    if (groupAttributes.length > 0) {
+    if (componentAttributes.length > 0) {
       // create join morph collection thingy
-      groupAttributes.forEach(name => {
+      componentAttributes.forEach(name => {
         definition.loadedModel[name] = [
           {
             kind: String,
@@ -115,7 +115,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
     );
 
     const populateFn = createOnFetchPopulateFn({
-      groupAttributes,
+      componentAttributes,
       morphAssociations,
       definition,
     });
@@ -250,14 +250,16 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
           }
         });
 
-        groupAttributes.forEach(name => {
+        componentAttributes.forEach(name => {
           const attribute = definition.attributes[name];
 
           if (Array.isArray(returned[name])) {
-            const groups = returned[name].map(el => el.ref);
+            const components = returned[name].map(el => el.ref);
             // Reformat data by bypassing the many-to-many relationship.
             returned[name] =
-              attribute.repeatable === true ? groups : _.first(groups) || null;
+              attribute.repeatable === true
+                ? components
+                : _.first(components) || null;
           }
         });
       },
@@ -299,7 +301,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
 const createOnFetchPopulateFn = ({
   morphAssociations,
-  groupAttributes,
+  componentAttributes,
   definition,
 }) => {
   return function(next) {
@@ -353,12 +355,12 @@ const createOnFetchPopulateFn = ({
       }
     });
 
-    groupAttributes.forEach(name => {
+    componentAttributes.forEach(name => {
       const attr = definition.attributes[name];
 
-      const group = strapi.groups[attr.group];
+      const component = strapi.components[attr.component];
 
-      const assocs = (group.associations || []).filter(
+      const assocs = (component.associations || []).filter(
         assoc => assoc.autoPopulate === true
       );
 

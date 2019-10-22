@@ -157,18 +157,18 @@ const schemaBuilder = {
       }, modelCruds);
     }
 
-    let groups = Object.keys(strapi.groups)
+    let components = Object.keys(strapi.components)
       .map(key =>
-        Resolvers.buildModel(strapi.groups[key], key, {
+        Resolvers.buildModel(strapi.components[key], key, {
           plugin: null,
-          isGroup: true,
+          isComponent: true,
         })
       )
       .reduce(
-        (acc, group) => {
+        (acc, component) => {
           return {
-            definition: acc.definition + group.definition,
-            resolver: _.merge(acc.resolver, group.resolver),
+            definition: acc.definition + component.definition,
+            resolver: _.merge(acc.resolver, component.resolver),
           };
         },
         { definition: '', resolver: {} }
@@ -193,7 +193,7 @@ const schemaBuilder = {
       _.omitBy(
         _.merge(
           shadowCRUD.resolver,
-          groups.resolver,
+          components.resolver,
           resolver,
           polymorphicResolver
         ),
@@ -274,7 +274,7 @@ const schemaBuilder = {
     let typeDefs = `
       ${definition}
       ${shadowCRUD.definition}
-      ${groups.definition}
+      ${components.definition}
       type Query {${shadowCRUD.query &&
         this.formatGQL(
           shadowCRUD.query,
