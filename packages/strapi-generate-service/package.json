@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-service",
-  "version": "3.0.0-beta.17.2",
+  "version": "3.0.0-beta.17.3",
   "description": "Generate a service for a Strapi API.",
   "homepage": "http://strapi.io",
   "keywords": [
