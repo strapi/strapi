@@ -7,7 +7,7 @@
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import styles from './componentsStyles.scss';
+import ToggleModeWrapper from './ToggleModeWrapper';
 
 const ToggleMode = props => {
   const label = props.isPreviewMode
@@ -15,19 +15,19 @@ const ToggleMode = props => {
     : 'components.Wysiwyg.ToggleMode.preview';
 
   return (
-    <div className={styles.toggleModeWrapper}>
+    <ToggleModeWrapper>
       <FormattedMessage id={label}>
         {msg => (
           <button
             type="button"
-            className={styles.toggleModeButton}
+            className="toggleModeButton"
             onClick={props.onClick}
           >
             {msg}
           </button>
         )}
       </FormattedMessage>
-    </div>
+    </ToggleModeWrapper>
   );
 };
 

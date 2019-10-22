@@ -6,6 +6,7 @@ const { languages } = require('./i18n');
 
 window.strapi = Object.assign(window.strapi || {}, {
   node: MODE || 'host',
+  env: NODE_ENV,
   backendURL: BACKEND_URL === '/' ? window.location.origin : BACKEND_URL,
   languages,
   currentLanguage:
@@ -26,12 +27,10 @@ module.exports = {
     .default,
   'strapi-plugin-content-type-builder': require('../../../strapi-plugin-content-type-builder/admin/src')
     .default,
-  'strapi-plugin-documentation': require('../../../strapi-plugin-documentation/admin/src')
-    .default,
-  'strapi-plugin-settings-manager': require('../../../strapi-plugin-settings-manager/admin/src')
-    .default,
-  'strapi-plugin-email': require('../../../strapi-plugin-email/admin/src')
-    .default,
+  // 'strapi-plugin-documentation': require('../../../strapi-plugin-documentation/admin/src')
+  //   .default,
+  // 'strapi-plugin-email': require('../../../strapi-plugin-email/admin/src')
+  //   .default,
   'strapi-plugin-upload': require('../../../strapi-plugin-upload/admin/src')
     .default,
 };

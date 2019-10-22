@@ -11,11 +11,8 @@ import { Helmet } from 'react-helmet';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
-
 import { PluginHeader, LoadingIndicatorPage } from 'strapi-helper-plugin';
-
 import ListPlugins from '../../components/ListPlugins';
-
 import injectSaga from '../../utils/injectSaga';
 import injectReducer from '../../utils/injectReducer';
 import Wrapper from './Wrapper';
@@ -34,11 +31,6 @@ import reducer from './reducer';
 import saga from './saga';
 
 export class ListPluginsPage extends React.Component {
-  // eslint-disable-line react/prefer-stateless-function
-  getChildContext = () => ({
-    currentEnvironment: this.props.global.currentEnvironment,
-  });
-
   componentDidMount() {
     this.props.getPlugins();
   }
@@ -83,12 +75,6 @@ export class ListPluginsPage extends React.Component {
     );
   }
 }
-
-ListPluginsPage.childContextTypes = {
-  currentEnvironment: PropTypes.string.isRequired,
-};
-
-ListPluginsPage.contextTypes = {};
 
 ListPluginsPage.propTypes = {
   global: PropTypes.shape({

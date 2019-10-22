@@ -9,10 +9,13 @@ const Wrapper = styled.div`
     width: 100%;
     line-height: 5.8rem;
     z-index: 999;
-    > button {
+    > button,
+    > button.btn {
+      position: relative;
+      z-index: 9;
       width: 100%;
       padding-right: 20px;
-      background: transparent;
+      background: white;
       border: none;
       border-radius: 0;
       color: #333740;
@@ -27,6 +30,7 @@ const Wrapper = styled.div`
       &:active {
         color: #333740;
         background-color: #fafafb !important;
+        z-index: 9;
       }
 
       > i {
@@ -57,6 +61,8 @@ const Wrapper = styled.div`
   }
 
   .dropDownContent {
+    z-index: 8;
+    top: -3px !important;
     left: auto !important;
     min-width: 100% !important;
     margin: 0 !important;
@@ -72,7 +78,7 @@ const Wrapper = styled.div`
     &:before {
       content: '';
       position: absolute;
-      top: -3px;
+      top: 0;
       left: -1px;
       width: calc(100% + 1px);
       height: 3px;
@@ -80,21 +86,16 @@ const Wrapper = styled.div`
     }
 
     > button {
-      height: 40px;
+      height: 54px;
       padding: 0px 15px;
-      line-height: 40px;
       &:hover,
       &:focus,
       &:active {
         background-color: #fafafb !important;
         border-radius: 0px;
         cursor: pointer;
+        outline: 0;
       }
-    }
-
-    > button {
-      height: 44px;
-      line-height: 48px;
       &:hover,
       &:active {
         color: #333740;

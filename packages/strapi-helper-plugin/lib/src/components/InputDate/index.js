@@ -7,12 +7,10 @@
 import React from 'react';
 import moment from 'moment';
 import PropTypes from 'prop-types';
-import DateTime from 'react-datetime';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty, isObject } from 'lodash';
 import cn from 'classnames';
-
-import styles from './styles.scss';
+import StyledDateTime from './StyledDateTime';
 
 /* eslint-disable react/jsx-boolean-value */
 function InputDate(props) {
@@ -31,13 +29,13 @@ function InputDate(props) {
       defaultMessage={formattedPlaceholder}
     >
       {placeholder => (
-        <DateTime
+        <StyledDateTime
           dateFormat="YYYY-MM-DD"
           inputProps={{
             autoFocus: props.autoFocus,
             className: cn(
               'form-control',
-              styles.inputDate,
+              'input',
               !props.deactivateErrorHighlight && props.error && 'is-invalid',
               !isEmpty(props.className) && props.className
             ),

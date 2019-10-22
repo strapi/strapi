@@ -10,8 +10,8 @@ import { FormattedMessage } from 'react-intl';
 
 import attributeIcons from '../../utils/attributeIcons';
 import pluginId from '../../pluginId';
-
-import styles from './styles.scss';
+import Button from './Button';
+import Card from './Card';
 
 class AttributeOption extends React.Component {
   componentDidUpdate(prevProps) {
@@ -43,26 +43,23 @@ class AttributeOption extends React.Component {
 
     return (
       <div className="col-md-6">
-        <button
-          className={styles.attributeOption}
+        <Button
           id={`attrCard${type}`}
           onClick={() => onClick(type)}
           type="button"
           tabIndex={tabIndex + 1}
           ref={this.button}
         >
-          <div className={styles.card}>
+          <Card>
             <img src={attributeIcons[type]} alt="ico" />
             <FormattedMessage
               id={`${pluginId}.popUpForm.attributes.${type}.name`}
             >
-              {message => (
-                <span className={styles.attributeType}>{message}</span>
-              )}
+              {message => <span className="attributeType">{message}</span>}
             </FormattedMessage>
             <FormattedMessage id={description} />
-          </div>
-        </button>
+          </Card>
+        </Button>
       </div>
     );
   }

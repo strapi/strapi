@@ -139,8 +139,6 @@ class ConfigPage extends React.Component {
   }
 }
 
-ConfigPage.contextTypes = {};
-
 ConfigPage.defaultProps = {
   appEnvironments: [],
   formErrors: [],

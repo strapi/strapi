@@ -12,28 +12,26 @@ import PropTypes from 'prop-types';
 
 // Utils
 import { darken } from '../../utils/colors';
-
-// Styles
-import styles from './styles.scss';
+import Wrapper from './Wrapper';
 
 function HeaderNav({ links, style }) {
   let linkColor = '#F5F5F5';
 
   return (
-    <div className={styles.headerContainer} style={style}>
+    <Wrapper style={style}>
       {map(links, link => {
         linkColor = darken(linkColor, 1.5);
 
         return (
           <NavLink
             key={link.name}
-            className={styles.headerLink}
+            className="headerLink"
             style={{
               backgroundColor: linkColor,
               cursor: link.disabled ? 'not-allowed' : 'pointer',
             }}
             to={link.to}
-            activeClassName={styles.linkActive}
+            activeClassName="linkActive"
             isActive={(match, location) => {
               return location.pathname === link.to.split('?')[0];
             }}
@@ -45,18 +43,18 @@ function HeaderNav({ links, style }) {
               }
             }}
           >
-            <div className={`${styles.linkText} text-center`}>
+            <div className="linkText text-center">
               <FormattedMessage
                 id={link.name}
                 defaultMessage={link.name}
                 values={link.values}
               />
-              {link.active && <div className={styles.notifPoint} />}
+              {link.active && <div className="notifPoint" />}
             </div>
           </NavLink>
         );
       })}
-    </div>
+    </Wrapper>
   );
 }
 

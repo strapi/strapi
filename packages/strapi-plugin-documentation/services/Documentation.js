@@ -381,8 +381,7 @@ module.exports = {
       (acc, curr) => {
         const attribute = attributes[curr];
         const isField =
-          !_.has(attribute, 'model') &&
-          !_.has(attribute, 'collection');
+          !_.has(attribute, 'model') && !_.has(attribute, 'collection');
 
         if (attribute.required) {
           acc.required.push(curr);
@@ -1551,8 +1550,7 @@ module.exports = {
       .map(attr => {
         const attribute = modelAttributes[attr];
         const isField =
-          !_.has(attribute, 'model') &&
-          !_.has(attribute, 'collection');
+          !_.has(attribute, 'model') && !_.has(attribute, 'collection');
 
         if (!isField) {
           const name = attribute.model || attribute.collection;

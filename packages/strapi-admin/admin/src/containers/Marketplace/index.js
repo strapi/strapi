@@ -9,34 +9,24 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
-import cn from 'classnames';
-
 import { LoadingIndicatorPage, PluginHeader } from 'strapi-helper-plugin';
-
+import { MarketPlaceContextProvider } from '../../contexts/MarketPlace';
 // Design
 import PageTitle from '../../components/PageTitle';
 import PluginCard from '../../components/PluginCard';
-
 import injectSaga from '../../utils/injectSaga';
 import injectReducer from '../../utils/injectReducer';
-
+import Wrapper from './Wrapper';
 import {
   downloadPlugin,
   getAvailableAndInstalledPlugins,
   resetProps,
 } from './actions';
 import makeSelectMarketplace from './selectors';
-
 import reducer from './reducer';
 import saga from './saga';
 
-import styles from './styles.scss';
-
 class Marketplace extends React.Component {
-  getChildContext = () => ({
-    downloadPlugin: this.props.downloadPlugin,
-  });
-
   componentDidMount() {
     // Fetch the available and installed plugins
     this.props.getAvailableAndInstalledPlugins();
@@ -87,28 +77,28 @@ class Marketplace extends React.Component {
     }
 
     return (
-      <div>
-        <FormattedMessage id="app.components.InstallPluginPage.helmet">
-          {this.renderHelmet}
-        </FormattedMessage>
-        <div className={cn('container-fluid', styles.containerFluid)}>
-          <PluginHeader
-            title={{ id: 'app.components.InstallPluginPage.title' }}
-            description={{ id: 'app.components.InstallPluginPage.description' }}
-            actions={[]}
-          />
-          <div className={cn('row', styles.wrapper)}>
-            {Object.keys(availablePlugins).map(this.renderPluginCard)}
-          </div>
+      <MarketPlaceContextProvider downloadPlugin={this.props.downloadPlugin}>
+        <div>
+          <FormattedMessage id="app.components.InstallPluginPage.helmet">
+            {this.renderHelmet}
+          </FormattedMessage>
+          <Wrapper className="container-fluid">
+            <PluginHeader
+              title={{ id: 'app.components.InstallPluginPage.title' }}
+              description={{
+                id: 'app.components.InstallPluginPage.description',
+              }}
+              actions={[]}
+            />
+            <div className="row" style={{ paddingTop: '3.8rem' }}>
+              {Object.keys(availablePlugins).map(this.renderPluginCard)}
+            </div>
+          </Wrapper>
         </div>
-      </div>
+      </MarketPlaceContextProvider>
     );
   }
 }
-
-Marketplace.childContextTypes = {
-  downloadPlugin: PropTypes.func.isRequired,
-};
 
 Marketplace.defaultProps = {};
 

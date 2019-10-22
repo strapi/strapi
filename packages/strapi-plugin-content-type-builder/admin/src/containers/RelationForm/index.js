@@ -9,21 +9,24 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, isEmpty } from 'lodash';
 
-import { InputsIndex as Input } from 'strapi-helper-plugin';
+import {
+  ButtonModal,
+  GlobalContext,
+  HeaderModal,
+  HeaderModalTitle,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalForm,
+  InputsIndex as Input,
+} from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
-import BodyModal from '../../components/BodyModal';
 import ButtonModalPrimary from '../../components/ButtonModalPrimary';
-import ButtonModalSecondary from '../../components/ButtonModalSecondary';
-import ButtonModalSuccess from '../../components/ButtonModalSuccess';
-import FooterModal from '../../components/FooterModal';
-import FormModal from '../../components/FormModal';
-import HeaderModal from '../../components/HeaderModal';
+
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
-import HeaderModalTitle from '../../components/HeaderModalTitle';
 import HeaderNavLink from '../../components/HeaderNavLink';
-import WrapperModal from '../../components/WrapperModal';
 
 import NaturePicker from './NaturePicker';
 import RelationWrapper from './RelationWrapper';
@@ -31,15 +34,14 @@ import RelationBox from './RelationBox';
 
 import Icon from '../../assets/icons/icon_type_ct.png';
 import IconGroup from '../../assets/icons/icon_type_groups.png';
-
+import Divider from './Divider';
 import formAdvanced from './advanced.json';
-
-import styles from './styles.scss';
 
 const NAVLINKS = [{ id: 'base', custom: 'relation' }, { id: 'advanced' }];
 
 class RelationForm extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
+  static contextType = GlobalContext;
 
   state = { didCheckErrors: false, formErrors: {}, showForm: false };
 
@@ -195,7 +197,7 @@ class RelationForm extends React.Component {
     const { modifiedData, onChange } = this.props;
 
     return formAdvanced.map((input, i) => {
-      const divider = i === 0 ? <div className={styles.divider} /> : null;
+      const divider = i === 0 ? <Divider /> : null;
 
       return (
         <React.Fragment key={input.name}>
@@ -289,7 +291,7 @@ class RelationForm extends React.Component {
         : this.renderAdvancedSettings();
 
     return (
-      <WrapperModal
+      <Modal
         isOpen={isOpen}
         onClosed={this.handleOnClosed}
         onOpened={this.handleOnOpened}
@@ -325,10 +327,10 @@ class RelationForm extends React.Component {
           </section>
         </HeaderModal>
         <form onSubmit={this.handleSubmitAndContinue}>
-          <FormModal>
-            <BodyModal>{showForm && content}</BodyModal>
-          </FormModal>
-          <FooterModal>
+          <ModalForm>
+            <ModalBody>{showForm && content}</ModalBody>
+          </ModalForm>
+          <ModalFooter>
             <section>
               <ButtonModalPrimary
                 message={`${pluginId}.form.button.add.field`}
@@ -337,26 +339,23 @@ class RelationForm extends React.Component {
               />
             </section>
             <section>
-              <ButtonModalSecondary
-                message={`${pluginId}.form.button.cancel`}
+              <ButtonModal
+                isSecondary
+                message="components.popUpWarning.button.cancel"
                 onClick={this.handleCancel}
               />
-              <ButtonModalSuccess
-                message={`${pluginId}.form.button.done`}
+              <ButtonModal
+                message="form.button.done"
                 type="button"
                 onClick={this.handleSubmit}
               />
             </section>
-          </FooterModal>
+          </ModalFooter>
         </form>
-      </WrapperModal>
+      </Modal>
     );
   }
 }
-
-RelationForm.contextTypes = {
-  emitEvent: PropTypes.func,
-};
 
 RelationForm.defaultProps = {
   actionType: 'create',

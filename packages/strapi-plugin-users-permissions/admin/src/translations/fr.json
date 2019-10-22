@@ -98,7 +98,7 @@
   "PopUpForm.button.save": "Sauvegarder",
   "PopUpForm.header.add.providers": "Ajouter un Nouveau Provider",
   "PopUpForm.header.edit.email-templates": "Editer E-mail Templates",
-  "PopUpForm.header.edit.providers": "Editer {provider} Provider",
+  "PopUpForm.header.edit.providers": "Editer le Provider",
   "PopUpForm.inputSelect.providers.label": "Sélectionnez le provider",
 
   "components.Input.error.password.length": "Le mot de passe doit contenir au moins 6 caractères",

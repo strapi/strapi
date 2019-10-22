@@ -5,20 +5,21 @@
  */
 
 import React from 'react';
-import cn from 'classnames';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { capitalize, get, includes } from 'lodash';
 
-// Design
 import { IcoContainer, PopUpWarning } from 'strapi-helper-plugin';
+import { HomePageContext } from '../../contexts/HomePage';
+import { Container, Flex, Row, Wrapper } from './Components';
 
 import en from '../../translations/en.json';
-import styles from './styles.scss';
 
 class ListRow extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = { showModalDelete: false };
+
+  static contextType = HomePageContext;
 
   // Roles that can't be deleted && modified
   // Don't delete this line
@@ -52,10 +53,7 @@ class ListRow extends React.Component {
         }
 
         return (
-          <div
-            className={cn('row', styles.wrapper)}
-            style={{ paddingLeft: '20px' }}
-          >
+          <Wrapper className="row" style={{ paddingLeft: '20px' }}>
             <div className="col-md-2">
               <b>{this.props.item.name}</b>
             </div>
@@ -67,44 +65,44 @@ class ListRow extends React.Component {
             <div className="col-md-2">
               <IcoContainer icons={icons} />
             </div>
-          </div>
+          </Wrapper>
         );
       case 'providers':
         icons.pop(); // Remove the icon-trash
 
         return (
-          <div className={cn('row', styles.wrapper)}>
+          <Wrapper className="row">
             <div className="col-md-4">
-              <div className={styles.flex}>
+              <Flex>
                 <div>
                   <i className={`fa fa-${this.props.item.icon}`} />
                 </div>
                 <div>{capitalize(this.props.item.name)}</div>
-              </div>
+              </Flex>
             </div>
             <div className="col-md-6" style={{ fontWeight: '500' }}>
               {get(this.props.values, [
                 get(this.props.item, 'name'),
                 'enabled',
               ]) ? (
-                  <span style={{ color: '#5A9E06' }}>Enabled</span>
-                ) : (
-                  <span style={{ color: '#F64D0A' }}>Disabled</span>
-                )}
+                <span style={{ color: '#5A9E06' }}>Enabled</span>
+              ) : (
+                <span style={{ color: '#F64D0A' }}>Disabled</span>
+              )}
             </div>
             <div className="col-md-2">
               <IcoContainer icons={icons} />
             </div>
-          </div>
+          </Wrapper>
         );
 
       case 'email-templates':
         icons.pop();
 
         return (
-          <div className={cn('row', styles.wrapper)}>
+          <Wrapper className="row">
             <div className="col-md-4">
-              <div className={styles.flex}>
+              <Flex>
                 <div>
                   <i className={`fa fa-${this.props.item.icon}`} />
                 </div>
@@ -117,12 +115,12 @@ class ListRow extends React.Component {
                     this.props.item.name
                   )}
                 </div>
-              </div>
+              </Flex>
             </div>
             <div className="col-md-8">
               <IcoContainer icons={icons} />
             </div>
-          </div>
+          </Wrapper>
         );
 
       default:
@@ -162,29 +160,22 @@ class ListRow extends React.Component {
 
   render() {
     return (
-      <li className={styles.li} onClick={this.handleClick}>
-        <div className={styles.container}>{this.generateContent()}</div>
+      <Row onClick={this.handleClick}>
+        <Container>{this.generateContent()}</Container>
         <PopUpWarning
           isOpen={this.state.showModalDelete}
           onConfirm={this.handleDelete}
           toggleModal={() => this.setState({ showModalDelete: false })}
         />
-      </li>
+      </Row>
     );
   }
 }
 
-ListRow.contextTypes = {
-  emitEvent: PropTypes.func,
-  pathname: PropTypes.string,
-  push: PropTypes.func,
-  setDataToEdit: PropTypes.func.isRequired,
-};
-
 ListRow.defaultProps = {
   item: {
     name: 'Owner',
-    description: 'Rule them all. This role can\'t be deleted',
+    description: "Rule them all. This role can't be deleted",
     nb_users: 1,
     icon: 'envelope',
   },

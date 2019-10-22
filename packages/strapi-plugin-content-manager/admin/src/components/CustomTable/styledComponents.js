@@ -17,6 +17,10 @@ const Table = styled.table`
   th,
   td {
     padding: 0 25px;
+
+    label {
+      display: inline;
+    }
   }
 `;
 
