@@ -22,8 +22,8 @@ The admin panel is a `node_module` that is similar to a plugin but the slight di
 
 To extend this package you will have to create an `admin` folder at the root of your application.
 
-In this folder you will be able to override admin flies and functions.
+In this folder you will be able to override admin files and functions.
 
 ::: note
-For more details, visit the [admin panel constomization](../admin-panel/customization.md) documentation.
+For more details, visit the [admin panel customization](../admin-panel/customization.md) documentation.
 :::
