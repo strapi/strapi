@@ -88,7 +88,7 @@ module.exports = function(strapi) {
         connectOptions.useCreateIndex = true;
         connectOptions.useUnifiedTopology = useUnifiedTopology || 'false';
 
-        let connect = () => {
+        const connect = () => {
           /* FIXME: for now, mongoose doesn't support srv auth except the way including user/pass in URI.
            * https://github.com/Automattic/mongoose/issues/6881 */
           return instance.connect(
