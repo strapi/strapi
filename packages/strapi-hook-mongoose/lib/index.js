@@ -119,7 +119,6 @@ module.exports = function(strapi) {
           throw err;
         }
 
-
         const initFunctionPath = path.resolve(
           strapi.config.appPath,
           'config',
