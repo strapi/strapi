@@ -58,7 +58,7 @@ module.exports = {
     return Promise.all(files.map(stream => createBuffer(stream)));
   },
 
-  upload(files, config) {
+  upload: async (files, config) => {
     // Get upload provider settings to configure the provider to use.
     const provider = _.find(strapi.plugins.upload.config.providers, {
       provider: config.provider,
@@ -70,7 +70,7 @@ module.exports = {
       );
     }
 
-    const actions = provider.init(config);
+    const actions = await provider.init(config);
 
     // upload a single file
     const uploadFile = async file => {
