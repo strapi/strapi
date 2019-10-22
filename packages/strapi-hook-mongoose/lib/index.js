@@ -31,6 +31,8 @@ const defaults = {
   authenticationDatabase: '',
   ssl: false,
   debug: false,
+  reconnectInterval: 1000,
+  reconnectTries: 30
 };
 
 const isMongooseConnection = ({ connector }) =>
@@ -60,7 +62,7 @@ module.exports = function(strapi) {
         } = connection.settings;
 
         const uriOptions = uri ? url.parse(uri, true).query : {};
-        const { authenticationDatabase, ssl, debug } = _.defaults(
+        const { authenticationDatabase, ssl, debug, reconnectInterval, reconnectTries } = _.defaults(
           connection.options,
           uriOptions,
           strapi.config.hook.settings.mongoose
@@ -87,6 +89,8 @@ module.exports = function(strapi) {
         connectOptions.dbName = database;
         connectOptions.useCreateIndex = true;
         connectOptions.useUnifiedTopology = useUnifiedTopology || 'false';
+        connectOptions.reconnectInterval = reconnectInterval || defaults.reconnectInterval;
+        connectOptions.reconnectTries = reconnectTries || defaults.reconnectTries;
 
         const connect = () => {
           /* FIXME: for now, mongoose doesn't support srv auth except the way including user/pass in URI.
@@ -109,7 +113,7 @@ module.exports = function(strapi) {
               .catch(function(e) {
                 strapi.log.error(e.message);
               })
-            }, 2000);
+            }, reconnectInterval);
           })
 
         } catch (error) {
