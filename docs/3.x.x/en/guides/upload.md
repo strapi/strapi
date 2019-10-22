@@ -125,6 +125,33 @@ Here the request to make to associate the file (/path/to/pictures/avatar.jpg) to
 curl -X POST -F 'files=@/path/to/pictures/avatar.jpg&refId=5a993616b8e66660e8baf45c&ref=user&source=users-permissions&field=avatar' http://localhost:1337/upload
 ```
 
+## Customise upload Folder
+By default Strapi uploads all assets into the /public/uploads folder.
+You can Add a custom configurations to the project. The content of this file is available through the `strapi.config` object.
+
+**Path —** `config.custom.json`.
+
+#### Example 
+```
+{
+  "uploadsPath": "/api/uploads"
+}
+```
+
+OR if you orefer it you can add custom configurations to an especific environment of the project. 
+The content of this file is available through the `strapi.config.environments[strapi.config.environment].uploadsPath` object.
+
+
+**Path —** `config.environment.development.custom.json`.
+
+#### Example
+```
+{
+  "uploadsPath": "/api/uploads"
+}
+```
+
+
 ## Install providers
 
 By default Strapi provides a local file upload system. You might want to upload your files on AWS S3 or another provider.

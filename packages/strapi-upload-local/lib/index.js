@@ -14,14 +14,15 @@ module.exports = {
   init: (config) => {
     return {
       upload: (file) => {
+        const uploadsPath = strapi.config.uploadsPath ? strapi.config.uploadsPath : strapi.config.environments[strapi.config.environment].uploadsPath || '/uploads'
+
         return new Promise((resolve, reject) => {
           // write file in public/assets folder
-          fs.writeFile(path.join(strapi.config.appPath, 'public', `uploads/${file.hash}${file.ext}`), file.buffer, (err) => {
+          fs.writeFile(path.join(strapi.config.public.path, uploadsPath,`/${file.hash}${file.ext}`), file.buffer, (err) => {
             if (err) {
               return reject(err);
             }
-
-            file.url = `/uploads/${file.hash}${file.ext}`;
+            file.url = `${uploadsPath}/${file.hash}${file.ext}`;
 
             resolve();
           });
