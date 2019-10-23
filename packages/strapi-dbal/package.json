@@ -1,6 +1,6 @@
 {
   "name": "strapi-dbal",
-  "version": "3.0.0-beta.17.3",
+  "version": "3.0.0-beta.17.4",
   "description": "Strapi's database abstraction layer",
   "homepage": "http://strapi.io",
   "main": "./lib/index.js",
