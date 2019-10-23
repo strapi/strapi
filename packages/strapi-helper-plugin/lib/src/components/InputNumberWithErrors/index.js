@@ -119,7 +119,7 @@ class InputNumberWithErrors extends React.Component {
           style={inputStyle}
           tabIndex={tabIndex}
           step={step}
-          value={value}
+          value={value && Number(value)}
         />
         <InputDescription
           className={inputDescriptionClassName}
@@ -164,7 +164,7 @@ InputNumberWithErrors.defaultProps = {
   style: {},
   tabIndex: '0',
   validations: {},
-  value: 0,
+  value: null,
 };
 
 InputNumberWithErrors.propTypes = {
@@ -209,7 +209,7 @@ InputNumberWithErrors.propTypes = {
   style: PropTypes.object,
   tabIndex: PropTypes.string,
   validations: PropTypes.object,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  value: PropTypes.number,
 };
 
 export default InputNumberWithErrors;

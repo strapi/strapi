@@ -15,7 +15,10 @@ import StyledCustomCheckbox from './StyledCustomCheckbox';
 class CustomCheckbox extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = {
-    isChecked: this.props.value !== null && this.props.value !== undefined,
+    isChecked:
+      this.props.value !== null &&
+      this.props.value !== undefined &&
+      !isNaN(this.props.value),
   };
 
   handleChange = ({ target: { checked } }) => {
@@ -66,7 +69,7 @@ class CustomCheckbox extends React.Component {
             errors={errors}
             name={name}
             onChange={this.handleInputNumberChange}
-            value={value || ''}
+            value={value}
           />
         )}
       </StyledCustomCheckbox>
