@@ -196,7 +196,7 @@ You can leave all your files in `./config` unchanged but remove the `server.auto
 
 One of our main objectives for the `beta` is to make it easier and quicker to upgrade to more recent versions of Strapi. This is why moving forward, plugins will be located in the `node_modules` folder.
 
-[Read more](https://strapi.io/documentation/3.0.0-beta.x/concepts/concepts.html#files-structure)
+[Read more](../concepts/file-structure.md)
 
 Let's start by creating a new folder called `./extensions`. This folder needs to exist even if it's empty. You may use a `.gitkeep` file to ensure the folder isn't deleted from the repository (if it's empty) when cloning. [More details](https://davidwalsh.name/git-empty-directory).
 
@@ -495,7 +495,7 @@ The only difference is that the admin of a local plugin is ignored for the momen
 In the `beta`, we are introducing the `Core API`, which is replacing the templates that were generated before.
 
 Now when you create a new model your `controller` and `service` will be empty modules and will be used to override the default behaviors.
-Read more about [controllers](https://strapi.io/documentation/3.0.0-beta.x/guides/controllers.html) or [services](https://strapi.io/documentation/3.0.0-beta.x/guides/services.html)
+Read more about [controllers](../concepts/controllers.md) or [services](../concepts/services.md)
 
 To migrate, you will only have to delete the methods you haven't modified or created from your `controllers` and `services`
 
