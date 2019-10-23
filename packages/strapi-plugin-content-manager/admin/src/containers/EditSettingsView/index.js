@@ -35,16 +35,17 @@ const EditSettingsView = ({
   history: { push },
   location: { search },
   match: {
-    params: { slug },
+    params: { slug, type },
   },
 }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const [isModalFormOpen, setIsModalFormOpen] = useState(false);
 
+  const fieldsReorderClassName = type === 'content-types' ? 'col-8' : 'col-12';
   const source = getQueryParameters(search, 'source');
   const abortController = new AbortController();
   const { signal } = abortController;
-  const params = source === 'content-manager' ? {} : { source };
+  const params = source === 'content-manager' && type ? {} : { source };
 
   const {
     metaToEdit,
@@ -118,7 +119,7 @@ const EditSettingsView = ({
   useEffect(() => {
     const getData = async () => {
       try {
-        const { data } = await request(getRequestUrl(`content-types/${slug}`), {
+        const { data } = await request(getRequestUrl(`${type}/${slug}`), {
           method: 'GET',
           params,
           signal,
@@ -141,7 +142,7 @@ const EditSettingsView = ({
       abortController.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug, source]);
+  }, [slug, source, type]);
 
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
@@ -168,11 +169,12 @@ const EditSettingsView = ({
       delete body.schema;
       delete body.uid;
       delete body.source;
+      delete body.isGroup;
 
-      await request(getRequestUrl(`content-types/${slug}`), {
+      await request(getRequestUrl(`${type}/${slug}`), {
         method: 'PUT',
         body,
-        params,
+        params: type === 'groups' ? {} : params,
         signal,
       });
 
@@ -341,42 +343,46 @@ const EditSettingsView = ({
         isEditSettings
       >
         <div className="row">
-          <LayoutTitle className="col-8">
+          <LayoutTitle className={fieldsReorderClassName}>
             <FormTitle
               title={`${pluginId}.global.displayedFields`}
               description={`${pluginId}.containers.SettingPage.editSettings.description`}
             />
           </LayoutTitle>
-          <LayoutTitle className="col-4">
-            <FormTitle
-              title={`${pluginId}.containers.SettingPage.relations`}
-              description={`${pluginId}.containers.SettingPage.editSettings.description`}
-            />
-          </LayoutTitle>
+          {type !== 'groups' && (
+            <LayoutTitle className="col-4">
+              <FormTitle
+                title={`${pluginId}.containers.SettingPage.relations`}
+                description={`${pluginId}.containers.SettingPage.editSettings.description`}
+              />
+            </LayoutTitle>
+          )}
 
-          <FieldsReorder />
-          <SortableList
-            addItem={name => {
-              dispatch({
-                type: 'ADD_RELATION',
-                name,
-              });
-            }}
-            buttonData={getEditRelationsRemaingFields()}
-            moveItem={(dragIndex, hoverIndex) => {
-              dispatch({
-                type: 'MOVE_RELATION',
-                dragIndex,
-                hoverIndex,
-              });
-            }}
-            removeItem={index => {
-              dispatch({
-                type: 'REMOVE_RELATION',
-                index,
-              });
-            }}
-          />
+          <FieldsReorder className={fieldsReorderClassName} />
+          {type !== 'groups' && (
+            <SortableList
+              addItem={name => {
+                dispatch({
+                  type: 'ADD_RELATION',
+                  name,
+                });
+              }}
+              buttonData={getEditRelationsRemaingFields()}
+              moveItem={(dragIndex, hoverIndex) => {
+                dispatch({
+                  type: 'MOVE_RELATION',
+                  dragIndex,
+                  hoverIndex,
+                });
+              }}
+              removeItem={index => {
+                dispatch({
+                  type: 'REMOVE_RELATION',
+                  index,
+                });
+              }}
+            />
+          )}
         </div>
       </SettingsViewWrapper>
       <PopupForm
@@ -408,6 +414,7 @@ EditSettingsView.propTypes = {
   match: PropTypes.shape({
     params: PropTypes.shape({
       slug: PropTypes.string.isRequired,
+      type: PropTypes.string.isRequired,
     }).isRequired,
   }).isRequired,
 };

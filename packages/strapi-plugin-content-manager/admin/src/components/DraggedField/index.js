@@ -12,6 +12,8 @@ const DraggedField = forwardRef(
     {
       children,
       count,
+      goTo,
+      groupUid,
       isDragging,
       isHidden,
       name,
@@ -77,9 +79,10 @@ const DraggedField = forwardRef(
               <Link
                 onClick={e => {
                   e.stopPropagation();
-                  // push(
-                  //   `/plugins/${pluginId}/ctm-configurations/groups/${groupUid}`
-                  // )
+                  console.log('cll');
+                  goTo(
+                    `/plugins/${pluginId}/ctm-configurations/edit-settings/groups/${groupUid}`
+                  );
                 }}
               >
                 {msg}
@@ -95,6 +98,8 @@ const DraggedField = forwardRef(
 DraggedField.defaultProps = {
   children: null,
   count: 1,
+  goTo: () => {},
+  groupUid: null,
   isDragging: false,
   isHidden: false,
   onClick: () => {},
@@ -107,6 +112,8 @@ DraggedField.defaultProps = {
 DraggedField.propTypes = {
   children: PropTypes.node,
   count: PropTypes.number,
+  goTo: PropTypes.func,
+  groupUid: PropTypes.string,
   isDragging: PropTypes.bool,
   isHidden: PropTypes.bool,
   name: PropTypes.string.isRequired,

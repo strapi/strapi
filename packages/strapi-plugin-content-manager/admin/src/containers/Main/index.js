@@ -95,7 +95,7 @@ function Main({
       comp: ListSettingsView,
     },
     {
-      path: 'ctm-configurations/edit-settings/:slug',
+      path: 'ctm-configurations/edit-settings/:type/:slug',
       comp: EditSettingsView,
     },
     {

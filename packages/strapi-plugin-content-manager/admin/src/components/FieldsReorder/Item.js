@@ -199,6 +199,7 @@ const Item = ({
 
   return (
     <DraggedFieldWithPreview
+      goTo={goTo}
       groupUid={groupUid}
       isDragging={isDragging}
       label={get(metadatas, [name, 'edit', 'label'], '')}
@@ -208,7 +209,6 @@ const Item = ({
         e.stopPropagation();
         removeField(rowIndex, itemIndex);
       }}
-      push={goTo}
       selectedItem={selectedItemName}
       showLeftCarret={showLeftCarret}
       showRightCarret={showRightCarret}

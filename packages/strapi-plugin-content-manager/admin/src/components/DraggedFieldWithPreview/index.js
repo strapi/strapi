@@ -9,6 +9,8 @@ import Wrapper from './Wrapper';
 const DraggedFieldWithPreview = forwardRef(
   (
     {
+      goTo,
+      groupUid,
       isDragging,
       name,
       onClickEdit,
@@ -60,11 +62,13 @@ const DraggedFieldWithPreview = forwardRef(
 
             <div className="sub" style={{ width, opacity }}>
               <DraggedField
-                ref={refs.dragRef}
+                goTo={goTo}
+                groupUid={groupUid}
                 isHidden={isHidden}
                 name={name}
                 onClick={onClickEdit}
                 onRemove={onClickRemove}
+                ref={refs.dragRef}
                 selectedItem={selectedItem}
                 style={{ padding: 0, margin: 0, display }}
                 type={type}
@@ -80,6 +84,10 @@ const DraggedFieldWithPreview = forwardRef(
 );
 
 DraggedFieldWithPreview.defaultProps = {
+  goTo: () => {
+    console.log('l');
+  },
+  groupUid: null,
   isDragging: false,
   onClickEdit: () => {},
   onClickRemove: () => {},
@@ -92,6 +100,8 @@ DraggedFieldWithPreview.defaultProps = {
 };
 
 DraggedFieldWithPreview.propTypes = {
+  goTo: PropTypes.func,
+  groupUid: PropTypes.string,
   isDragging: PropTypes.bool,
   name: PropTypes.string.isRequired,
   onClickEdit: PropTypes.func,
