@@ -11,7 +11,15 @@ const SortableList = ({ addItem, buttonData, moveItem, removeItem }) => {
 
   return (
     <div className="col-4">
-      <SortWrapper>
+      <SortWrapper
+        style={{
+          marginTop: 7,
+          paddingTop: 11,
+          paddingLeft: 5,
+          paddingRight: 5,
+          border: '1px dashed #e3e9f3',
+        }}
+      >
         {relationsLayout.map((relationName, index) => {
           return (
             <Item

@@ -4,9 +4,10 @@ import { createLayout, formatLayout, getInputSize } from '../../utils/layout';
 
 const initialState = fromJS({
   fieldForm: {},
-  fieldNameToEdit: '',
+  metaToEdit: '',
   initialData: {},
   isLoading: true,
+  metaForm: {},
   modifiedData: {},
 });
 
@@ -69,6 +70,8 @@ const reducer = (state, action) => {
         ['modifiedData', ...action.keys],
         () => action.value
       );
+    case 'ON_CHANGE_META':
+      return state.updateIn(['metaForm', ...action.keys], () => action.value);
     case 'ON_RESET':
       return state.update('modifiedData', () => state.get('initialData'));
     case 'REMOVE_FIELD': {
@@ -141,9 +144,27 @@ const reducer = (state, action) => {
       return state.updateIn(layoutPathEdit, () => fromJS(updatedList));
     }
     case 'SET_FIELD_TO_EDIT':
-      return state.update('fieldNameToEdit', () => action.name);
+      return state
+        .update('metaToEdit', () => action.name)
+        .updateIn(['metaForm'], () =>
+          state.getIn(['modifiedData', 'metadatas', action.name, 'edit'])
+        );
+    case 'SUBMIT_META_FORM': {
+      const metaPath = [
+        'modifiedData',
+        'metadatas',
+        state.get('metaToEdit'),
+        'edit',
+      ];
+
+      return state.updateIn(metaPath, () => state.getIn(['metaForm']));
+    }
+    case 'SUBMIT_SUCCEEDED':
+      return state.update('initialData', () => state.get('modifiedData'));
     case 'UNSET_FIELD_TO_EDIT':
-      return state.update('fieldNameToEdit', () => '');
+      return state
+        .update('metaToEdit', () => '')
+        .update('metaForm', () => fromJS({}));
     default:
       return state;
   }

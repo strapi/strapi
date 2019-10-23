@@ -9,6 +9,7 @@ import Wrapper from './Wrapper';
 const DraggedFieldWithPreview = forwardRef(
   (
     {
+      isDragging,
       name,
       onClickEdit,
       onClickRemove,
@@ -22,6 +23,7 @@ const DraggedFieldWithPreview = forwardRef(
   ) => {
     const isHidden = name === '_TEMP_';
     const [dragStart, setDragStart] = useState(false);
+    const opacity = isDragging ? 0.2 : 1;
     const isFullSize = size === 12;
     const display = isFullSize && dragStart ? 'none' : '';
     const width = isFullSize && dragStart ? 0 : '100%';
@@ -51,7 +53,7 @@ const DraggedFieldWithPreview = forwardRef(
           <>
             {showLeftCarret && <Carret style={carretStyle} />}
 
-            <div className="sub" style={{ width }}>
+            <div className="sub" style={{ width, opacity }}>
               <DraggedField
                 ref={refs.dragRef}
                 isHidden={isHidden}
@@ -73,6 +75,7 @@ const DraggedFieldWithPreview = forwardRef(
 );
 
 DraggedFieldWithPreview.defaultProps = {
+  isDragging: false,
   onClickEdit: () => {},
   onClickRemove: () => {},
   selectedItem: '',
@@ -83,6 +86,7 @@ DraggedFieldWithPreview.defaultProps = {
 };
 
 DraggedFieldWithPreview.propTypes = {
+  isDragging: PropTypes.bool,
   name: PropTypes.string.isRequired,
   onClickEdit: PropTypes.func,
   onClickRemove: PropTypes.func,

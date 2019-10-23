@@ -166,12 +166,13 @@ const Item = ({
     preview(getEmptyImage(), { captureDraggingState: true });
   }, [preview]);
 
-  // Create the ref
+  // Create the refs
+  // We need 1 for the drop target
+  // 1 for the drag target
   const refs = {
     dragRef: drag(dragRef),
     dropRef: drop(dropRef),
   };
-  // drag(drop(ref));
 
   let showLeftCarret = false;
   let showRightCarret = false;

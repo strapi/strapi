@@ -26,13 +26,15 @@ const DraggedField = forwardRef(
   ) => {
     const opacity = isDragging ? 0.2 : 1;
     const [isOverRemove, setIsOverRemove] = useState(false);
-
+    const [isOverEditBlock, setIsOverEditBlock] = useState(false);
     const isSelected = selectedItem === name;
 
     return (
       <Wrapper
         count={count}
+        onDrag={() => setIsOverEditBlock(false)}
         isSelected={isSelected}
+        isOverEditBlock={isOverEditBlock}
         isOverRemove={isOverRemove}
         style={style}
         withLongerHeight={withLongerHeight}
@@ -41,6 +43,8 @@ const DraggedField = forwardRef(
           <div
             className="sub_wrapper"
             style={{ opacity }}
+            onMouseEnter={() => setIsOverEditBlock(true)}
+            onMouseLeave={() => setIsOverEditBlock(false)}
             onClick={() => {
               onClick(name);
             }}
@@ -59,7 +63,9 @@ const DraggedField = forwardRef(
               onMouseEnter={() => setIsOverRemove(true)}
               onMouseLeave={() => setIsOverRemove(false)}
             >
-              {isSelected ? <Pencil /> : <Remove />}
+              {isOverRemove && !isSelected && <Remove />}
+              {((isOverEditBlock && !isOverRemove) || isSelected) && <Pencil />}
+              {!isOverEditBlock && !isOverRemove && !isSelected && <Remove />}
             </div>
           </div>
         )}

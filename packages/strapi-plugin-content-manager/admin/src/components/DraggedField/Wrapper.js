@@ -1,11 +1,11 @@
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
-const getColor = (isOverRemove, isSelected) => {
-  if (isSelected) {
-    return '#aed4fb';
-  } else if (isOverRemove) {
+const getColor = (isOverRemove, isSelected, isOverEditBlock) => {
+  if (isOverRemove) {
     return '#ffa784';
+  } else if (isSelected || isOverEditBlock) {
+    return '#aed4fb';
   } else {
     return '#e9eaeb';
   }
@@ -28,17 +28,18 @@ const Wrapper = styled.div`
     line-height: ${({ withLongerHeight }) => getHeight(withLongerHeight)};
     cursor: pointer;
 
-    background: ${({ isOverRemove, isSelected }) => {
-      if (isSelected) {
-        return '#e6f0fb';
-      } else if (isOverRemove) {
+    background: ${({ isOverEditBlock, isOverRemove, isSelected }) => {
+      if (isOverRemove) {
         return '#ffe9e0';
+      } else if (isSelected || isOverEditBlock) {
+        return '#e6f0fb';
       } else {
         return '#fafafb';
       }
     }};
     border: 1px solid
-      ${({ isOverRemove, isSelected }) => getColor(isOverRemove, isSelected)};
+      ${({ isOverEditBlock, isOverRemove, isSelected }) =>
+        getColor(isOverRemove, isSelected, isOverEditBlock)};
     border-radius: 2px;
     .name {
       position: relative;
@@ -50,16 +51,16 @@ const Wrapper = styled.div`
       white-space: nowrap;
       cursor: pointer;
 
-      ${({ isOverRemove, isSelected }) => {
-        if (isSelected) {
-          return `
-            color: #007eff
-          `;
-        }
-
+      ${({ isOverEditBlock, isOverRemove, isSelected }) => {
         if (isOverRemove) {
           return `
             color: #f64d0a
+          `;
+        }
+
+        if (isSelected || isOverEditBlock) {
+          return `
+            color: #007eff
           `;
         }
       }}
@@ -71,22 +72,24 @@ const Wrapper = styled.div`
       margin-right: 10px;
       padding-left: 10px;
       border-right: 1px solid
-        ${({ isOverRemove, isSelected }) => getColor(isOverRemove, isSelected)};
+        ${({ isOverEditBlock, isOverRemove, isSelected }) =>
+          getColor(isOverRemove, isSelected, isOverEditBlock)};
       cursor: move;
       z-index: 99;
 
-      ${({ isOverRemove, isSelected }) => {
-        if (isSelected) {
-          return `
-          g {
-            fill: #007eff;
-          }
-          `;
-        }
+      ${({ isOverEditBlock, isOverRemove, isSelected }) => {
         if (isOverRemove) {
           return `
           g {
             fill: #ffa784;
+          }
+          `;
+        }
+
+        if (isSelected || isOverEditBlock) {
+          return `
+          g {
+            fill: #007eff;
           }
           `;
         }
@@ -96,13 +99,14 @@ const Wrapper = styled.div`
     .remove {
       width: 30px;
       text-align: center;
-      background-color: ${({ isOverRemove, isSelected }) =>
-        getColor(isOverRemove, isSelected)};
+      background-color: ${({ isOverEditBlock, isOverRemove, isSelected }) =>
+        getColor(isOverRemove, isSelected, isOverEditBlock)};
       cursor: pointer;
 
       position: absolute;
       top: -1px;
       right: 0;
+      z-index: 999;
 
       svg {
         align-self: center;

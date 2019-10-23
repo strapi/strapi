@@ -6,7 +6,7 @@ import React, {
   useState,
 } from 'react';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
+import { cloneDeep, get, set } from 'lodash';
 import {
   // utils
   getQueryParameters,
@@ -14,6 +14,8 @@ import {
   // contexts
   // useGlobalContext,
 } from 'strapi-helper-plugin';
+import { Inputs as Input } from '@buffetjs/custom';
+import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
 import { LayoutDndProvider } from '../../contexts/LayoutDnd';
 import getRequestUrl from '../../utils/getRequestUrl';
@@ -22,11 +24,14 @@ import FormTitle from '../../components/FormTitle';
 import LayoutTitle from '../../components/LayoutTitle';
 import PopupForm from '../../components/PopupForm';
 import SettingsViewWrapper from '../../components/SettingsViewWrapper';
-
+import SortableList from '../../components/SortableList';
+import { unformatLayout } from '../../utils/layout';
+import getInputProps from './utils/getInputProps';
 import reducer, { initialState } from './reducer';
 
 const EditSettingsView = ({
-  // deleteLayout,
+  deleteLayout,
+  groupsAndModelsMainPossibleMainFields,
   history: { push },
   location: { search },
   match: {
@@ -42,10 +47,11 @@ const EditSettingsView = ({
   const params = source === 'content-manager' ? {} : { source };
 
   const {
-    fieldNameToEdit,
+    metaToEdit,
     isLoading,
     initialData,
     modifiedData,
+    metaForm,
   } = reducerState.toJS();
 
   const getAttributes = useMemo(() => {
@@ -56,9 +62,49 @@ const EditSettingsView = ({
     return get(modifiedData, ['layouts', 'edit'], []);
   }, [modifiedData]);
 
+  const getEditRemainingFields = () => {
+    const attributes = getAttributes;
+    const metadatas = get(modifiedData, ['metadatas'], {});
+    const displayedFields = getEditLayout().reduce(
+      (acc, curr) => [...acc, ...curr.rowContent],
+      []
+    );
+
+    return Object.keys(attributes)
+      .filter(attr => get(attributes, [attr, 'type'], '') !== 'relation')
+      .filter(attr => get(metadatas, [attr, 'edit', 'visible'], false) === true)
+      .filter(attr => {
+        return displayedFields.findIndex(el => el.name === attr) === -1;
+      });
+  };
+
+  const getForm = () =>
+    Object.keys(
+      get(modifiedData, ['metadatas', metaToEdit, 'edit'], {})
+    ).filter(meta => meta !== 'visible');
+
   const getRelationsLayout = useCallback(() => {
     return get(modifiedData, ['layouts', 'editRelations'], []);
   }, [modifiedData]);
+
+  const getSelectedItemSelectOptions = useCallback(
+    formType => {
+      if (formType !== 'relation' && formType !== 'group') {
+        return [];
+      }
+
+      const targetKey = formType === 'group' ? 'group' : 'targetModel';
+      const key = get(
+        modifiedData,
+        ['schema', 'attributes', metaToEdit, targetKey],
+        ''
+      );
+
+      return get(groupsAndModelsMainPossibleMainFields, [key], []);
+    },
+
+    [metaToEdit, groupsAndModelsMainPossibleMainFields, modifiedData]
+  );
 
   useEffect(() => {
     const getData = async () => {
@@ -88,23 +134,56 @@ const EditSettingsView = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug, source]);
 
-  const getEditRemainingFields = () => {
-    const attributes = getAttributes;
-    const metadatas = get(modifiedData, ['metadatas'], {});
-    const displayedFields = getEditLayout().reduce(
-      (acc, curr) => [...acc, ...curr.rowContent],
-      []
-    );
-
-    return Object.keys(attributes)
-      .filter(attr => get(attributes, [attr, 'type'], '') !== 'relation')
-      .filter(attr => get(metadatas, [attr, 'edit', 'visible'], false) === true)
-      .filter(attr => {
-        return displayedFields.findIndex(el => el.name === attr) === -1;
-      });
+  const handleChange = ({ target: { name, value } }) => {
+    dispatch({
+      type: 'ON_CHANGE',
+      keys: name.split('.'),
+      value,
+    });
   };
 
-  const handleConfirm = async () => {};
+  const handleChangeMeta = ({ target: { name, value } }) => {
+    dispatch({
+      type: 'ON_CHANGE_META',
+      keys: name.split('.'),
+      value,
+    });
+  };
+
+  const handleConfirm = async () => {
+    try {
+      const body = cloneDeep(modifiedData);
+      // We need to send the unformated edit layout
+      set(body, 'layouts.edit', unformatLayout(body.layouts.edit));
+
+      delete body.schema;
+      delete body.uid;
+      delete body.source;
+
+      await request(getRequestUrl(`content-types/${slug}`), {
+        method: 'PUT',
+        body,
+        params,
+        signal,
+      });
+
+      dispatch({
+        type: 'SUBMIT_SUCCEEDED',
+      });
+      deleteLayout(slug);
+      // emitEvent('didSaveContentTypeLayout');
+    } catch (err) {
+      strapi.notification.error('notification.error');
+    }
+  };
+
+  const handleSubmitMetaForm = e => {
+    e.preventDefault();
+    dispatch({
+      type: 'SUBMIT_META_FORM',
+    });
+    toggleModalForm();
+  };
 
   const moveItem = (dragIndex, hoverIndex, dragRowIndex, hoverRowIndex) => {
     // Same row = just reorder
@@ -138,7 +217,57 @@ const EditSettingsView = ({
     setIsModalFormOpen(prevState => !prevState);
   };
 
-  console.log(fieldNameToEdit);
+  const renderForm = () =>
+    getForm().map((meta, index) => {
+      const formType = get(getAttributes, [metaToEdit, 'type']);
+
+      if ((formType === 'group' || formType === 'media') && meta !== 'label') {
+        return null;
+      }
+
+      if (
+        (formType === 'json' || formType === 'boolean') &&
+        meta === 'placeholder'
+      ) {
+        return null;
+      }
+
+      if (formType === 'richtext' && meta === 'editable') {
+        return null;
+      }
+
+      return (
+        <div className="col-6" key={meta}>
+          <FormattedMessage
+            id={`${pluginId}.containers.SettingPage.editSettings.entry.title.description`}
+          >
+            {description => (
+              <FormattedMessage
+                id={get(
+                  getInputProps(meta),
+                  'label.id',
+                  'app.utils.defaultMessage'
+                )}
+              >
+                {label => (
+                  <Input
+                    autoFocus={index === 0}
+                    description={meta === 'mainField' ? description : ''}
+                    label={label}
+                    name={meta}
+                    type={getInputProps(meta).type}
+                    onBlur={() => {}}
+                    value={get(metaForm, meta, '')}
+                    onChange={handleChangeMeta}
+                    options={getSelectedItemSelectOptions(formType)}
+                  />
+                )}
+              </FormattedMessage>
+            )}
+          </FormattedMessage>
+        </div>
+      );
+    });
 
   return (
     <LayoutDndProvider
@@ -170,7 +299,7 @@ const EditSettingsView = ({
         });
         toggleModalForm();
       }}
-      selectedItemName={fieldNameToEdit}
+      selectedItemName={metaToEdit}
     >
       <SettingsViewWrapper
         inputs={[
@@ -192,13 +321,7 @@ const EditSettingsView = ({
         initialData={initialData}
         isLoading={isLoading}
         modifiedData={modifiedData}
-        onChange={({ target: { name, value } }) => {
-          dispatch({
-            type: 'ON_CHANGE',
-            keys: name.split('.'),
-            value,
-          });
-        }}
+        onChange={handleChange}
         onConfirmReset={() => {
           dispatch({
             type: 'ON_RESET',
@@ -215,8 +338,20 @@ const EditSettingsView = ({
               description={`${pluginId}.containers.SettingPage.editSettings.description`}
             />
           </LayoutTitle>
+          <LayoutTitle className="col-4">
+            <FormTitle
+              title={`${pluginId}.containers.SettingPage.relations`}
+              description={`${pluginId}.containers.SettingPage.editSettings.description`}
+            />
+          </LayoutTitle>
 
           <FieldsReorder />
+          <SortableList
+            addItem={() => {}}
+            buttonData={[]}
+            moveItem={() => {}}
+            removeItem={() => {}}
+          />
         </div>
       </SettingsViewWrapper>
       <PopupForm
@@ -227,20 +362,18 @@ const EditSettingsView = ({
             type: 'UNSET_FIELD_TO_EDIT',
           });
         }}
-        onSubmit={e => {
-          e.preventDefault();
-          toggleModalForm();
-        }}
+        onSubmit={handleSubmitMetaForm}
         onToggle={toggleModalForm}
-        renderForm={() => {}}
-        subHeaderContent={fieldNameToEdit}
+        renderForm={renderForm}
+        subHeaderContent={metaToEdit}
       />
     </LayoutDndProvider>
   );
 };
 
 EditSettingsView.propTypes = {
-  // deleteLayout: PropTypes.func.isRequired,
+  deleteLayout: PropTypes.func.isRequired,
+  groupsAndModelsMainPossibleMainFields: PropTypes.object.isRequired,
   history: PropTypes.shape({
     push: PropTypes.func,
   }).isRequired,
