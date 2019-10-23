@@ -293,3 +293,26 @@ Then, visit [http://localhost:1337/admin/plugins/upload/configurations/developme
 ## Create providers
 
 If you want to create your own, make sure the name starts with `strapi-provider-upload-` (duplicating an existing one will be easier to create), modify the `auth` config object and customize the `upload` and `delete` functions.
+
+To use it you will have to publish it on **npm**.
+
+### Create a local provider
+
+If you want create your own provider without publishing it on **npm** you can follow these following steps:
+
+- You create a `providers` folder in your application.
+- Create your provider as explain in the documentation eg. `./providers/strapi-provider-upload-[...]/...`
+- Then update your `package.json` to link your `strapi-provider-upload-[...]` dependency to the [local path](https://docs.npmjs.com/files/package.json#local-paths) of your new provider.
+
+```json
+{
+  ...
+  "dependencies": {
+    ...
+    "strapi-provider-upload-[...]": "file:providers/strapi-provider-upload-[...]",
+    ...
+  }
+}
+```
+
+- Finally, run `yarn install` or `npm install` to install your new custom provider.
