@@ -20,7 +20,8 @@ const Li = styled.li`
     transition: right 1s ease-in-out;
 
     span {
-      display: inline-block;
+      display: flex;
+      align-items: center;
       overflow: hidden;
       width: auto;
       height: 20px;
@@ -69,7 +70,8 @@ const Li = styled.li`
       color: ${props => props.theme.main.colors.leftMenu['link-color']};
     }
     span {
-      display: inline-block;
+      display: flex;
+      align-items: center;
       width: 100%;
       padding-right: 1rem;
       padding-left: 2.6rem;
@@ -85,22 +87,17 @@ const Li = styled.li`
   }
 
   .linkIcon {
-    position: absolute;
-    top: calc(50% - 0.9rem + 0.5rem);
-    left: 1.6rem;
-    margin-right: 1.2rem;
     font-size: 1.2rem;
-    width: 1.4rem;
-    height: 1.2rem;
-    padding-bottom: 0.2rem;
-    text-align: center;
+    align-items: center;
+    display: flex;
   }
 
   .linkLabel {
-    display: inline-block;
+    display: flex;
+    align-items: center;
     width: 100%;
     padding-right: 1rem;
-    padding-left: 2.6rem;
+    padding-left: 1.5rem;
   }
 `;
 
