@@ -10,7 +10,7 @@ Start by upgrading your dependencies. Make sur to use exact versions.
 `strapi-plugin-settings-manager` has been deprecated. you need to remove it from your `package.json`.
 :::
 
-Your package.json would look like this:
+Your package.json should look like this:
 
 ```json
 {
