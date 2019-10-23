@@ -50,6 +50,7 @@
     "intl": "^1.2.5",
     "invariant": "^2.2.4",
     "is-wsl": "^2.0.0",
+    "match-sorter": "^4.0.2",
     "mini-css-extract-plugin": "^0.6.0",
     "moment": "^2.24.0",
     "prop-types": "^15.7.2",

@@ -3,32 +3,27 @@ import styled from 'styled-components';
 import { colors } from 'strapi-helper-plugin';
 
 const Wrapper = styled.div`
-  margin-bottom: 33px;
+  margin-bottom: 25px;
+  button {
+    outline: 0;
+  }
   .list-header {
     color: ${colors.leftMenu.darkGrey};
-    button {
+    > div {
       position: relative;
-      outline: 0;
-      padding: 0;
-      &::before {
-        content: '\f106';
-        position: absolute;
-        left: 0;
-        top: 0px;
-        font-family: 'FontAwesome';
-        font-size: 15px;
-      }
     }
+    // Title
     h3 {
-      margin: 0;
-      line-height: 1.3rem;
-      letter-spacing: 0.1rem;
+      margin-bottom: 21px;
+      padding-right: 20px;
+      padding-top: 2px;
       font-family: Lato;
       font-size: 1.1rem;
+      line-height: normal;
+      letter-spacing: 0.1rem;
       font-weight: bold;
       text-transform: uppercase;
-      padding-left: 1.6rem;
-      span {
+      span:last-of-type {
         margin-top: 2px;
         padding: 1px 3px;
         height: 14px;
@@ -37,13 +32,50 @@ const Wrapper = styled.div`
         background-color: ${colors.leftMenu.lightGrey};
         text-align: center;
       }
+      & + button {
+        position: absolute;
+        top: 2px;
+        right: 0;
+        padding: 2px 0 0px 5px;
+        line-height: 11px;
+        i {
+          font-size: 11px;
+        }
+      }
+    }
+    // Search
+    .search-wrapper {
+      margin-bottom: 16px;
+      &::after {
+        display: block;
+        content: '';
+        height: 2px;
+        width: calc(100% - 20px);
+        background: ${colors.leftMenu.lightGrey};
+      }
+      > i {
+        position: absolute;
+        bottom: 6px;
+        left: 0;
+        font-size: 11px;
+      }
+      button {
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 5px 0 0px 5px;
+        line-height: 11px;
+        i {
+          font-size: 11px;
+        }
+      }
     }
   }
-
-  &.list-collapsed {
-    .list-header {
-      button::before {
-        content: '\f107';
+  ul {
+    list-style: none;
+    li {
+      a {
+        text-transform: capitalize;
       }
     }
   }

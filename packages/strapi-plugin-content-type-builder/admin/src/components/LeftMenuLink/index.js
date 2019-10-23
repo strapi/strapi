@@ -5,21 +5,11 @@ import { FormattedMessage } from 'react-intl';
 
 import pluginId from '../../pluginId';
 
-function LeftMenuLink({ isTemporary, name, source, to }) {
+function LeftMenuLink({ isTemporary, name, to }) {
   return (
     <NavLink to={to}>
       <p>
-        <i className="fa fa-caret-square-o-right" />
-        <span>{name}</span>
-        {!!source && (
-          <FormattedMessage id={`${pluginId}.from`}>
-            {msg => (
-              <span>
-                ({msg}: {source})
-              </span>
-            )}
-          </FormattedMessage>
-        )}
+        {name}
         {isTemporary && (
           <FormattedMessage id={`${pluginId}.contentType.temporaryDisplay`}>
             {msg => <span>{msg}</span>}
@@ -33,13 +23,11 @@ function LeftMenuLink({ isTemporary, name, source, to }) {
 LeftMenuLink.defaultProps = {
   isTemporary: false,
   name: null,
-  source: null,
 };
 
 LeftMenuLink.propTypes = {
   isTemporary: PropTypes.bool,
   name: PropTypes.string,
-  source: PropTypes.string,
   to: PropTypes.string.isRequired,
 };
 

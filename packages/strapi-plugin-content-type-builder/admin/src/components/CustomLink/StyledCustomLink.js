@@ -6,20 +6,24 @@
 
 import styled from 'styled-components';
 
-// Prepare for theming
-const colors = {
-  blue: '#1c8fe5',
-};
+import { colors } from 'strapi-helper-plugin';
 
 const StyledCustomLink = styled.div`
+  padding-left: 15px;
+  padding-top: 10px;
+  line-height: 0;
   p {
     color: ${colors.blue};
+    font-size: 13px;
+    font-weight: 500;
     i {
-      -webkit-font-smoothing: subpixel-antialiased;
+      margin-right: 5px;
     }
   }
   button {
     cursor: pointer;
+    padding: 0;
+    line-height: 16px;
   }
 `;
 

@@ -1,27 +1,26 @@
 import React, { memo } from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import pluginId from '../../pluginId';
 
 import StyledCustomLink from './StyledCustomLink';
 
-const CustomLink = ({ featureType, onClick }) => (
+const CustomLink = ({ id, onClick }) => (
   <StyledCustomLink>
     <button onClick={onClick} role="button">
       <p>
         <i className="fa fa-plus" />
-        <FormattedMessage id={`${pluginId}.button.${featureType}.add`} />
+        {id && <FormattedMessage id={id} />}
       </p>
     </button>
   </StyledCustomLink>
 );
 
 CustomLink.defaultProps = {
-  featureType: 'model',
+  id: null,
 };
 
 CustomLink.propTypes = {
-  featureType: PropTypes.string,
+  id: PropTypes.string,
   onClick: PropTypes.func.isRequired,
 };
 
