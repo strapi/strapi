@@ -26,7 +26,7 @@ export function* fetchUser(action) {
     const data = yield call(
       request,
       `/users-permissions/search/${action.user}`,
-      { method: 'GET' },
+      { method: 'GET' }
     );
 
     yield put(getUserSucceeded(data));
@@ -47,7 +47,7 @@ export function* permissionsGet() {
     yield put(getPermissionsSucceeded(response));
   } catch (err) {
     strapi.notification.error(
-      'users-permissions.EditPage.notification.permissions.error',
+      'users-permissions.EditPage.notification.permissions.error'
     );
   }
 }
@@ -63,7 +63,7 @@ export function* policiesGet() {
     yield put(getRoutesSucceeded(routes));
   } catch (err) {
     strapi.notification.error(
-      'users-permissions.EditPage.notification.policies.error',
+      'users-permissions.EditPage.notification.policies.error'
     );
   }
 }
@@ -80,7 +80,7 @@ export function* roleGet(action) {
     yield put(getRoleSucceeded(role));
   } catch (err) {
     strapi.notification.error(
-      'users-permissions.EditPage.notification.role.error',
+      'users-permissions.EditPage.notification.role.error'
     );
   }
 }

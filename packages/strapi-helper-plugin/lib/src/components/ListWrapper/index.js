@@ -4,9 +4,9 @@ import colors from '../../styles/colors';
 import sizes from '../../styles/sizes';
 
 const ListWrapper = styled.div`
+  position: relative;
   font-family: 'Lato';
   box-shadow: 0 2px 4px ${colors.lightGrey};
-  position: relative;
   .table-wrapper {
     width: 100%;
     overflow-x: scroll;

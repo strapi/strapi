@@ -21,6 +21,7 @@ import MenuContext from '../MenuContext';
 import GroupPage from '../GroupPage';
 
 import Loader from './Loader';
+import Wrapper from './Wrapper';
 
 import BackButton from '../../components/BackButton';
 
@@ -57,8 +58,6 @@ import {
 import reducer from './reducer';
 import saga from './saga';
 import makeSelectApp from './selectors';
-
-import styles from './styles.scss';
 
 const ROUTES = [
   {
@@ -332,13 +331,13 @@ export class App extends React.Component {
           push,
         }}
       >
-        <div className={styles.app}>
+        <Wrapper>
           <BackButton onClick={this.handleGoBack}></BackButton>
           <Switch>
             {ROUTES.map(this.renderRoute)}
             <Route component={NotFound} />
           </Switch>
-        </div>
+        </Wrapper>
         {featureForms.map(feature => (
           <ModelForm key={feature.featureType} {...feature} />
         ))}

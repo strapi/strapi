@@ -3,6 +3,16 @@ module.exports = {
     userCustomRoute: String
   `,
   resolver: {
+    Mutation: {
+      updateUser: {
+        description: 'Updates a user',
+        policies: ['customPolicy'],
+        resolver: {
+          plugin: 'users-permissions',
+          handler: 'User.update',
+        },
+      },
+    },
     Query: {
       userCustomRoute: {
         resolver: {

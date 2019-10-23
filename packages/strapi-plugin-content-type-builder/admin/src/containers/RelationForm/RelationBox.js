@@ -3,10 +3,8 @@ import PropTypes from 'prop-types';
 
 import { InputTextWithErrors as InputText } from 'strapi-helper-plugin';
 
-import InlineBlock from './InlineBlock';
 import ModelPicker from './ModelPicker';
-
-import styles from './styles.scss';
+import RelationBoxWrapper from './RelationBoxWrapper';
 
 /* istanbul ignore next */
 const RelationBox = ({
@@ -25,9 +23,9 @@ const RelationBox = ({
   value,
 }) => {
   return (
-    <InlineBlock>
-      <div className={styles.relationBox}>
-        <div className={styles.relationBoxHeader}>
+    <RelationBoxWrapper>
+      <div className="relationBox">
+        <div className="relationBoxHeader">
           {main ? (
             <p>
               <i className="fa fa-caret-square-o-right" />
@@ -47,7 +45,7 @@ const RelationBox = ({
             />
           )}
         </div>
-        <div className={styles.relationBoxBody}>
+        <div className="relationBoxBody">
           <InputText
             autoFocus={autoFocus}
             didCheckErrors={didCheckErrors}
@@ -63,7 +61,7 @@ const RelationBox = ({
           />
         </div>
       </div>
-    </InlineBlock>
+    </RelationBoxWrapper>
   );
 };
 

@@ -11,11 +11,8 @@ import { Helmet } from 'react-helmet';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
-
 import { PluginHeader, LoadingIndicatorPage } from 'strapi-helper-plugin';
-
 import ListPlugins from '../../components/ListPlugins';
-
 import injectSaga from '../../utils/injectSaga';
 import injectReducer from '../../utils/injectReducer';
 import Wrapper from './Wrapper';

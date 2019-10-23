@@ -61,7 +61,7 @@ function GroupCollapse({
         ref={ref}
         removeField={removeField}
       />
-      <Collapse isOpen={isOpen} style={{ backgroundColor: '#F7F8F8' }}>
+      <Collapse isOpen={isOpen} style={{ backgroundColor: '#FAFAFB' }}>
         <FormWrapper hasErrors={hasErrors} isOpen={isOpen}>
           {fields.map((fieldRow, key) => {
             return (

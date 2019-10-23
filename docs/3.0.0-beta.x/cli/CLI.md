@@ -37,6 +37,18 @@ Start a Strapi application with autoReload enabled.
 
 Strapi modifies/creates files at runtime and needs to restart when new files are created. To achieve this, `strapi develop` adds a file watcher and restarts the application when necessary.
 
+```
+strapi develop
+options: [--no-build |--watch-admin ]
+```
+
+- **strapi develop**<br/>
+  Starts your application with the autoReload enabled
+- **strapi develop --no-build**<br/>
+  Starts your application with the autoReload enabled and skip the administration panel build process
+- **strapi develop --watch-admin**<br/>
+  Starts your application with the autoReload enabled and the front-end development server. It allows you to customize the administration panel.
+
 ::: note
 You should never use this command to run a Strapi application in production.
 :::
@@ -56,6 +68,17 @@ By default the `development` environment will be used.
 ## strapi build
 
 Builds your admin panel.
+
+```bash
+strapi build
+
+options: [--no-optimization]
+```
+
+- **strapi build**<br/>
+  Builds the administration panel without minimizing the assets
+- **strapi build --no-optimization**<br/>
+  Builds the administration panel without minizing the assets. The build duration is faster.
 
 ::: note
 You can specify a NODE_ENV to use the configurations in the `./config/environments/[development|staging|production]` folder.

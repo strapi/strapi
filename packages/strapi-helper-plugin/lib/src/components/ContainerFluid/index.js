@@ -6,26 +6,10 @@
  *
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import cn from 'classnames';
+import styled from 'styled-components';
 
-import styles from './styles.scss';
-
-function ContainerFluid({ children }) {
-  return (
-    <div className={cn('container-fluid', styles.helperContainerFluid)}>
-      {children}
-    </div>
-  );
-}
-
-ContainerFluid.defaultProps = {
-  children: <div />,
-};
-
-ContainerFluid.propTypes = {
-  children: PropTypes.node,
-};
+const ContainerFluid = styled.div`
+  padding: 18px 30px !important;
+`;
 
 export default ContainerFluid;

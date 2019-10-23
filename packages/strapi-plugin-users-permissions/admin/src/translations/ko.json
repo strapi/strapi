@@ -88,7 +88,7 @@
   "PopUpForm.button.save": "저장",
   "PopUpForm.header.add.providers": "새 프로바이더(provider) 추가",
   "PopUpForm.header.edit.email-templates": "이메일 템플릿 수정",
-  "PopUpForm.header.edit.providers": "{provider} 프로바이더(Provider) 설정",
+  "PopUpForm.header.edit.providers": "프로바이더(Provider) 설정",
   "PopUpForm.inputSelect.providers.label": "프로바이더(provider) 선택",
 
   "notification.error.delete": "항목을 삭제하는데 에러가 발생했습니다.",

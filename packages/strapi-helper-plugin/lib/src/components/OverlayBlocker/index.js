@@ -9,8 +9,8 @@ import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
-
-import styles from './styles.scss';
+import Container from './Container';
+import Overlay from './Overlay';
 
 const DELAY = 1000;
 
@@ -69,9 +69,9 @@ class OverlayBlocker extends React.Component {
     const { elapsed } = this.state;
 
     let button = (
-      <div className={styles.buttonContainer}>
+      <div className="buttonContainer">
         <a
-          className={cn(styles.primary, 'btn')}
+          className={cn('primary', 'btn')}
           href="https://strapi.io/documentation/configurations/configurations.html#server"
           target="_blank"
           rel="noopener noreferrer"
@@ -91,8 +91,8 @@ class OverlayBlocker extends React.Component {
     const content = this.props.children ? (
       this.props.children
     ) : (
-      <div className={styles.container}>
-        <div className={cn(styles.icoContainer, elapsed < 15 && styles.spin)}>
+      <Container>
+        <div className={cn('icoContainer', elapsed < 15 && 'spinner')}>
           <i className={icon} />
         </div>
         <div>
@@ -104,14 +104,14 @@ class OverlayBlocker extends React.Component {
           </p>
           {button}
         </div>
-      </div>
+      </Container>
     );
 
     if (this.props.isOpen) {
       return ReactDOM.createPortal(
-        <div className={styles.overlay}>
+        <Overlay>
           <div>{content}</div>
-        </div>,
+        </Overlay>,
         this.overlayContainer
       );
     }

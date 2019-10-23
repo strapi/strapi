@@ -12,8 +12,7 @@ import InputDescription from '../InputDescription';
 import InputErrors from '../InputErrors';
 import InputNumber from '../InputNumber';
 import InputSpacer from '../InputSpacer';
-
-import styles from './styles.scss';
+import InputWrapper from '../InputWrapper';
 
 class InputNumberWithErrors extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
@@ -96,12 +95,8 @@ class InputNumberWithErrors extends React.Component {
     }
 
     return (
-      <div
-        className={cn(
-          styles.containerInputNumber,
-          customBootstrapClass,
-          !isEmpty(className) && className
-        )}
+      <InputWrapper
+        className={cn(customBootstrapClass, !isEmpty(className) && className)}
         style={style}
       >
         <Label
@@ -138,7 +133,7 @@ class InputNumberWithErrors extends React.Component {
           style={errorsStyle}
         />
         {spacer}
-      </div>
+      </InputWrapper>
     );
   }
 }

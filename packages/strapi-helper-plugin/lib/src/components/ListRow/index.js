@@ -9,8 +9,7 @@ import { map, size } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
-
-import styles from './styles.scss';
+import Li from './Li';
 
 function ListRow({ children, items, onClick, ...rest }) {
   const colNumber = size(items) !== 0 ? Math.floor(12 / size(items)) : 12;
@@ -23,15 +22,15 @@ function ListRow({ children, items, onClick, ...rest }) {
     ));
 
   return (
-    <li className={styles.li} {...rest}>
+    <Li {...rest}>
       <div
-        className={cn(styles.container, 'row')}
+        className={cn('subContainer', 'row')}
         onClick={onClick}
         role="button"
       >
         {data}
       </div>
-    </li>
+    </Li>
   );
 }
 

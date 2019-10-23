@@ -18,7 +18,7 @@ const TrashButton = styled.div`
   }
   div {
     height: 100%;
-    background-color: #f3f4f4;
+    background-color: #f3f4fb;
     border-radius: 2px;
     padding: 0 10px;
     font-size: 13px;

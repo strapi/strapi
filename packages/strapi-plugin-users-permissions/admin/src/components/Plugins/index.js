@@ -8,11 +8,10 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import { has, map } from 'lodash';
 import PropTypes from 'prop-types';
-import cn from 'classnames';
 
 import Plugin from '../Plugin';
 
-import styles from './styles.scss';
+import { Header, PluginsContainer, Wrapper } from './Components';
 
 class Plugins extends React.Component {
   state = { pluginSelected: '' };
@@ -21,21 +20,20 @@ class Plugins extends React.Component {
 
   render() {
     return (
-      <div className={cn('col-md-7', styles.wrapper)}>
-        <div className={styles.plugins}>
-          <div className={styles.headerContainer}>
+      <Wrapper className="col-md-7">
+        <div className="plugins-wrapper">
+          <Header>
             <div>
               <FormattedMessage id="users-permissions.Plugins.header.title" />
             </div>
             <div>
               <FormattedMessage id="users-permissions.Plugins.header.description" />
             </div>
-          </div>
-          <div
-            className={cn(
-              styles.pluginsContainer,
-              !has(this.props.plugins, 'application') && styles.pluginsGradient
-            )}
+          </Header>
+          <PluginsContainer
+            className={
+              !has(this.props.plugins, 'application') && 'pluginsGradient'
+            }
           >
             {map(Object.keys(this.props.plugins).sort(), plugin => (
               <Plugin
@@ -46,9 +44,9 @@ class Plugins extends React.Component {
                 pluginSelected={this.state.pluginSelected}
               />
             ))}
-          </div>
+          </PluginsContainer>
         </div>
-      </div>
+      </Wrapper>
     );
   }
 }

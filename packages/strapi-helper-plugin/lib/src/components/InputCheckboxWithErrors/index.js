@@ -15,8 +15,7 @@ import InputDescription from '../InputDescription';
 import InputErrors from '../InputErrors';
 import InputCheckbox from '../InputCheckbox';
 import InputSpacer from '../InputSpacer';
-
-import styles from './styles.scss';
+import Container from './Container';
 
 class InputCheckboxWithErrors extends React.Component {
   state = { errors: [] };
@@ -75,7 +74,7 @@ class InputCheckboxWithErrors extends React.Component {
 
     if (isObject(title) && title.id) {
       inputTitle = (
-        <div className={styles.inputTitle}>
+        <div className="inputTitle">
           <FormattedMessage
             id={title.id}
             defaultMessage={title.id}
@@ -90,12 +89,8 @@ class InputCheckboxWithErrors extends React.Component {
     }
 
     return (
-      <div
-        className={cn(
-          styles.container,
-          customBootstrapClass,
-          !isEmpty(className) && className
-        )}
+      <Container
+        className={cn(customBootstrapClass, !isEmpty(className) && className)}
         style={style}
       >
         {inputTitle}
@@ -115,7 +110,7 @@ class InputCheckboxWithErrors extends React.Component {
         />
         <InputDescription
           className={cn(
-            styles.inputCheckboxDescriptionContainer,
+            'inputCheckboxDescriptionContainer',
             inputDescriptionClassName
           )}
           message={this.props.inputDescription}
@@ -128,7 +123,7 @@ class InputCheckboxWithErrors extends React.Component {
           style={errorsStyle}
         />
         {spacer}
-      </div>
+      </Container>
     );
   }
 }
