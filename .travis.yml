@@ -13,7 +13,7 @@ env:
     - PGPORT=5433
 
 sudo: required
-dist: trusty
+dist: xenial
 
 language: node_js
 
