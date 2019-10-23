@@ -1,62 +1,151 @@
 import React, { useState } from 'react';
-import { Collapse } from 'reactstrap';
+import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
+import { isEmpty } from 'lodash';
+import matchSorter from 'match-sorter';
+
+import pluginId from '../../pluginId';
 
 import Wrapper from './Wrapper';
+import List from './List';
+import Search from './Search';
+import LeftMenuLink from '../../components/LeftMenuLink';
 
-const renderCompo = link => {
-  const { links, name } = link;
-  return links ? (
-    <Dropdown {...link} key={name} />
-  ) : (
-    <LeftMenuLink {...link} key={name} />
-  );
-};
+import LeftMenuSubList from '../LeftMenuSubList';
 
-const LeftMenuLink = ({ name, to }) => {
-  return (
-    <a to={to}>
-      <p>{name}</p>
-    </a>
-  );
-};
-
-const Dropdown = ({ name, links }) => {
-  return (
-    <div>
-      <p>{name}</p>
-      <ul>
-        {links.map(link => {
-          return (
-            <li key={link.name}>
-              <LeftMenuLink {...link} />
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  );
-};
-
-function LeftMenuList({ name, links }) {
+function LeftMenuList({ customLink, name, links }) {
   const [search, setSearch] = useState('');
-  const [collapse, setCollapse] = useState(true);
+  const [showSearch, setShowSearch] = useState(false);
 
-  const toggle = () => setCollapse(!collapse);
+  const { Component, componentProps } = customLink;
+
+  const toggleSearch = () => setShowSearch(!showSearch);
+
+  const handleChange = ({ target: { value } }) => {
+    setSearch(value);
+  };
+
+  const clearSearch = () => {
+    setSearch('');
+  };
+
+  const hasChildObject = () => {
+    return links.find(obj => obj.links);
+  };
+
+  const handleClose = () => {
+    clearSearch();
+    toggleSearch();
+  };
+
+  const getList = () => {
+    if (hasChildObject()) {
+      return links.map(link => {
+        return {
+          ...link,
+          links: matchSorter(link.links, search, { keys: ['name'] }),
+        };
+      });
+    }
+    return matchSorter(links, search, { keys: ['name'] });
+  };
+
+  const getCount = () => {
+    if (hasChildObject()) {
+      return links.reduce((acc, current) => {
+        return acc + current.links.length;
+      }, 0);
+    }
+    return links.length;
+  };
+
+  const getTitle = () => {
+    const base = `${pluginId}.menu.section.${name}.name.`;
+
+    return getCount() > 1 ? `${base}plural` : `${base}singular`;
+  };
+
+  const renderCompo = (link, i) => {
+    const { links, name } = link;
+
+    if (links) {
+      const isFiltered = !isEmpty(search) ? true : false;
+
+      return (
+        <LeftMenuSubList
+          key={name}
+          {...link}
+          isFiltered={isFiltered}
+          isFirstItem={i === 0}
+        />
+      );
+    }
+
+    return (
+      <li key={name}>
+        <LeftMenuLink {...link} />
+      </li>
+    );
+  };
 
   return (
-    <Wrapper className={!collapse ? 'list-collapsed' : ''}>
+    <Wrapper>
       <div className="list-header">
-        <button onClick={toggle}>
-          <h3>
-            {name}&nbsp;&nbsp;<span>{links.length}</span>
-          </h3>
-        </button>
+        {!showSearch ? (
+          <div className="title-wrapper">
+            <h3>
+              <FormattedMessage id={getTitle()} />
+              &nbsp;&nbsp;<span>{getCount()}</span>
+            </h3>
+            <button onClick={toggleSearch}>
+              <i className="fa fa-search"></i>
+            </button>
+          </div>
+        ) : (
+          <div className="search-wrapper">
+            <i className="fa fa-search"></i>
+            <button onClick={toggleSearch}></button>
+            <Search
+              onChange={handleChange}
+              value={search}
+              placeholder="search…"
+            />
+            <button onClick={handleClose}>
+              <i className="fa fa-close"></i>
+            </button>
+          </div>
+        )}
       </div>
-      <Collapse isOpen={collapse}>
-        <ul>{links.map(link => renderCompo(link))}</ul>
-      </Collapse>
+      <div>
+        <List>{getList().map((link, i) => renderCompo(link, i))}</List>
+        <Component {...componentProps} />
+      </div>
     </Wrapper>
   );
 }
+
+LeftMenuList.defaultProps = {
+  customLink: {
+    Component: null,
+    componentProps: {
+      id: null,
+      onClick: () => {},
+    },
+  },
+  links: [],
+  name: 'models',
+};
+
+LeftMenuList.propTypes = {
+  customLink: PropTypes.shape({
+    Component: PropTypes.object,
+    componentProps: PropTypes.shape({
+      id: PropTypes.string,
+      onClick: PropTypes.func,
+    }),
+  }),
+  links: PropTypes.array,
+  name: PropTypes.string,
+};
 
 export default LeftMenuList;
