@@ -13,7 +13,14 @@ const initialState = fromJS({
 
 const reducer = (state, action) => {
   const layoutPathEdit = ['modifiedData', 'layouts', 'edit'];
+  const layoutPathRelations = ['modifiedData', 'layouts', 'editRelations'];
+
   switch (action.type) {
+    case 'ADD_RELATION':
+      return state.updateIn(layoutPathRelations, list =>
+        list.push(action.name)
+      );
+
     case 'GET_DATA_SUCCEEDED': {
       const data = cloneDeep(action.data);
 
@@ -27,6 +34,16 @@ const reducer = (state, action) => {
         .update('initialData', () => fromJS(data || {}))
         .update('isLoading', () => false)
         .update('modifiedData', () => fromJS(data || {}));
+    }
+    case 'MOVE_RELATION': {
+      return state.updateIn(layoutPathRelations, list => {
+        return list
+          .delete(action.dragIndex)
+          .insert(
+            action.hoverIndex,
+            state.getIn([...layoutPathRelations, action.dragIndex])
+          );
+      });
     }
     case 'MOVE_ROW':
       return state.updateIn(layoutPathEdit, list => {
@@ -102,6 +119,10 @@ const reducer = (state, action) => {
 
       return state.updateIn(layoutPathEdit, () => updatedList);
     }
+    case 'REMOVE_RELATION':
+      return state.updateIn(layoutPathRelations, list =>
+        list.delete(action.index)
+      );
     case 'REORDER_DIFF_ROW': {
       const newState = state
         .updateIn(

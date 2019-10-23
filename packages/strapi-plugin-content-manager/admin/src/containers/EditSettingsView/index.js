@@ -62,6 +62,24 @@ const EditSettingsView = ({
     return get(modifiedData, ['layouts', 'edit'], []);
   }, [modifiedData]);
 
+  const getForm = () =>
+    Object.keys(
+      get(modifiedData, ['metadatas', metaToEdit, 'edit'], {})
+    ).filter(meta => meta !== 'visible');
+
+  const getRelationsLayout = useCallback(() => {
+    return get(modifiedData, ['layouts', 'editRelations'], []);
+  }, [modifiedData]);
+
+  const getEditRelationsRemaingFields = () => {
+    const attributes = getAttributes;
+    const displayedFields = getRelationsLayout();
+
+    return Object.keys(attributes)
+      .filter(attr => get(attributes, [attr, 'type'], '') === 'relation')
+      .filter(attr => displayedFields.indexOf(attr) === -1);
+  };
+
   const getEditRemainingFields = () => {
     const attributes = getAttributes;
     const metadatas = get(modifiedData, ['metadatas'], {});
@@ -77,15 +95,6 @@ const EditSettingsView = ({
         return displayedFields.findIndex(el => el.name === attr) === -1;
       });
   };
-
-  const getForm = () =>
-    Object.keys(
-      get(modifiedData, ['metadatas', metaToEdit, 'edit'], {})
-    ).filter(meta => meta !== 'visible');
-
-  const getRelationsLayout = useCallback(() => {
-    return get(modifiedData, ['layouts', 'editRelations'], []);
-  }, [modifiedData]);
 
   const getSelectedItemSelectOptions = useCallback(
     formType => {
@@ -347,10 +356,26 @@ const EditSettingsView = ({
 
           <FieldsReorder />
           <SortableList
-            addItem={() => {}}
-            buttonData={[]}
-            moveItem={() => {}}
-            removeItem={() => {}}
+            addItem={name => {
+              dispatch({
+                type: 'ADD_RELATION',
+                name,
+              });
+            }}
+            buttonData={getEditRelationsRemaingFields()}
+            moveItem={(dragIndex, hoverIndex) => {
+              dispatch({
+                type: 'MOVE_RELATION',
+                dragIndex,
+                hoverIndex,
+              });
+            }}
+            removeItem={index => {
+              dispatch({
+                type: 'REMOVE_RELATION',
+                index,
+              });
+            }}
           />
         </div>
       </SettingsViewWrapper>

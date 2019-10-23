@@ -17,6 +17,7 @@ const DraggedFieldWithPreview = forwardRef(
       showLeftCarret,
       showRightCarret,
       size,
+      style,
       type,
     },
     refs
@@ -46,7 +47,11 @@ const DraggedFieldWithPreview = forwardRef(
           }
         }}
       >
-        <Wrapper ref={refs.dropRef} withLongerHeight={withLongerHeight}>
+        <Wrapper
+          ref={refs.dropRef}
+          withLongerHeight={withLongerHeight}
+          style={style}
+        >
           {dragStart && isFullSize && (
             <PreviewCarret style={{ marginRight: '-10px' }} />
           )}
@@ -82,6 +87,7 @@ DraggedFieldWithPreview.defaultProps = {
   showLeftCarret: false,
   showRightCarret: false,
   size: 1,
+  style: {},
   type: 'string',
 };
 
@@ -94,6 +100,7 @@ DraggedFieldWithPreview.propTypes = {
   showLeftCarret: PropTypes.bool,
   showRightCarret: PropTypes.bool,
   size: PropTypes.number,
+  style: PropTypes.object,
   type: PropTypes.string,
 };
 
