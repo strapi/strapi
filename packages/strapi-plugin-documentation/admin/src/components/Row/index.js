@@ -6,13 +6,19 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import ButtonContainer from './ButtonContainer';
-import styles from './styles.scss';
+import { Wrapper } from './components';
 
-function Row({ currentDocVersion, data, isHeader, onClickDelete, onUpdateDoc }) {
+function Row({
+  currentDocVersion,
+  data,
+  isHeader,
+  onClickDelete,
+  onUpdateDoc,
+}) {
   const { version, generatedDate } = data;
 
   return (
-    <div className={styles.docRow}>
+    <Wrapper>
       <div>{version}</div>
       <div>
         {isHeader ? (
@@ -28,7 +34,7 @@ function Row({ currentDocVersion, data, isHeader, onClickDelete, onUpdateDoc }) 
         onClickDelete={onClickDelete}
         onClick={onUpdateDoc}
       />
-    </div>
+    </Wrapper>
   );
 }
 

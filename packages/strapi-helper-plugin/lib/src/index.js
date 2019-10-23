@@ -1,11 +1,11 @@
-// // Assets
+// Assets
 export { default as colors } from './assets/styles/colors';
 export { default as sizes } from './assets/styles/sizes';
 
-// // CommonPropTypes
+// CommonPropTypes
 export { default as routerPropTypes } from './commonPropTypes/router';
 
-// // Components
+// Components
 export { default as BackHeader } from './components/BackHeader';
 export { default as BlockerComponent } from './components/BlockerComponent';
 export { default as Button } from './components/Button';
@@ -92,6 +92,13 @@ export { default as PageFooter } from './components/PageFooter';
 export { default as PluginHeader } from './components/PluginHeader';
 export { default as PopUpWarning } from './components/PopUpWarning';
 export { default as TrashButton } from './components/TrashButton';
+
+// Contexts
+export {
+  GlobalContext,
+  GlobalContextProvider,
+  useGlobalContext,
+} from './contexts/GlobalContext';
 
 // Utils
 export { default as auth } from './utils/auth';
