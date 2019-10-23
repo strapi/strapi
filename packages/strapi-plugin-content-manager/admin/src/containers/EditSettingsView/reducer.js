@@ -4,6 +4,7 @@ import { createLayout, formatLayout, getInputSize } from '../../utils/layout';
 
 const initialState = fromJS({
   fieldForm: {},
+  groupLayouts: {},
   metaToEdit: '',
   initialData: {},
   isLoading: true,
@@ -31,6 +32,7 @@ const reducer = (state, action) => {
       );
 
       return state
+        .update('groupLayouts', () => fromJS(action.groupLayouts))
         .update('initialData', () => fromJS(data || {}))
         .update('isLoading', () => false)
         .update('modifiedData', () => fromJS(data || {}));

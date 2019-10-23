@@ -17,6 +17,7 @@ export function LayoutDndProvider({
   removeField,
   selectedItemName,
   setEditFieldToSelect,
+  ...rest
 }) {
   return (
     <LayoutDndContext.Provider
@@ -33,6 +34,7 @@ export function LayoutDndProvider({
         removeField,
         selectedItemName,
         setEditFieldToSelect,
+        ...rest,
       }}
     >
       {children}

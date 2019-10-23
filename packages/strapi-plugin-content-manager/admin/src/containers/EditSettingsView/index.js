@@ -12,6 +12,7 @@ import {
   getQueryParameters,
   request,
   // contexts
+  // TODO add emit event
   // useGlobalContext,
 } from 'strapi-helper-plugin';
 import { Inputs as Input } from '@buffetjs/custom';
@@ -27,6 +28,12 @@ import SettingsViewWrapper from '../../components/SettingsViewWrapper';
 import SortableList from '../../components/SortableList';
 import { unformatLayout } from '../../utils/layout';
 import getInputProps from './utils/getInputProps';
+// TODO to remove when the API is available
+import {
+  retrieveDisplayedGroups,
+  retrieveGroupLayoutsToFetch,
+} from '../EditView/utils/groups';
+
 import reducer, { initialState } from './reducer';
 
 const EditSettingsView = ({
@@ -48,9 +55,10 @@ const EditSettingsView = ({
   const params = source === 'content-manager' && type ? {} : { source };
 
   const {
-    metaToEdit,
+    groupLayouts,
     isLoading,
     initialData,
+    metaToEdit,
     modifiedData,
     metaForm,
   } = reducerState.toJS();
@@ -125,9 +133,32 @@ const EditSettingsView = ({
           signal,
         });
 
+        // TODO temporary to remove when api available
+        const groups = retrieveDisplayedGroups(
+          get(data, 'schema.attributes', {})
+        );
+        const groupLayoutsToGet = retrieveGroupLayoutsToFetch(groups);
+
+        const groupData = await Promise.all(
+          groupLayoutsToGet.map(uid =>
+            request(`/${pluginId}/groups/${uid}`, {
+              method: 'GET',
+              signal,
+            })
+          )
+        );
+
+        const groupLayouts = groupData.reduce((acc, current) => {
+          acc[current.data.uid] = current.data;
+
+          return acc;
+        }, {});
+
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
           data,
+          // TODO temporary to remove when api available
+          groupLayouts,
         });
       } catch (err) {
         if (err.code !== 20) {
@@ -280,11 +311,14 @@ const EditSettingsView = ({
       );
     });
 
+  console.log({ ll: groupLayouts });
+
   return (
     <LayoutDndProvider
       attributes={getAttributes}
       buttonData={getEditRemainingFields()}
       goTo={push}
+      groupLayouts={groupLayouts}
       layout={getEditLayout()}
       metadatas={get(modifiedData, ['metadatas'], {})}
       moveItem={moveItem}

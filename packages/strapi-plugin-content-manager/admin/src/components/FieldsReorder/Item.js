@@ -22,6 +22,7 @@ const Item = ({
 }) => {
   const {
     goTo,
+    groupLayouts,
     metadatas,
     setEditFieldToSelect,
     selectedItemName,
@@ -197,10 +198,13 @@ const Item = ({
     }
   }
 
+  console.log({ fr: groupLayouts });
+
   return (
     <DraggedFieldWithPreview
       goTo={goTo}
       groupUid={groupUid}
+      groupLayouts={groupLayouts}
       isDragging={isDragging}
       label={get(metadatas, [name, 'edit', 'label'], '')}
       name={name}
