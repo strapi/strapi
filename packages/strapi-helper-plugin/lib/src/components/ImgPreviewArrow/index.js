@@ -6,9 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import cn from 'classnames';
-
-import styles from './styles.scss';
+import Wrapper from './Wrapper';
 
 function ImgPreviewArrow(props) {
   let divStyle = props.show ? {} : { display: 'none' };
@@ -18,14 +16,10 @@ function ImgPreviewArrow(props) {
   }
 
   return (
-    <div
-      className={cn(
-        styles.arrowContainer,
-        props.type === 'left' && styles.arrowLeft,
-        props.type !== 'left' && styles.arrowRight,
-      )}
+    <Wrapper
+      type={props.type}
       style={divStyle}
-      onClick={(e) => {
+      onClick={e => {
         e.preventDefault();
         e.stopPropagation();
         props.onClick(props.type);

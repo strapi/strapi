@@ -1,12 +1,16 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
-  margin-top: -13px;
-  > div:not(:first-child) {
-    padding-top: 10px;
-  }
-  > div:last-child {
-    margin-bottom: 2px;
+  margin-top: -6px;
+  > div {
+    padding-top: 2px;
+    &:not(:first-of-type) {
+      padding-top: 9px;
+      padding-bottom: 2px;
+      &:last-of-type:nth-of-type(even) {
+        padding-bottom: 11px;
+      }
+    }
   }
 `;
 
@@ -25,7 +29,8 @@ const Span = styled.span`
 const Flex = styled.div`
   display: flex;
   justify-content: flex-end;
-  padding: 0 0 9px 30px !important;
+  padding: 0 0 12px 30px !important;
+  margin-top: -10px;
   color: #c3c5c8;
   font-size: 13px;
 `;

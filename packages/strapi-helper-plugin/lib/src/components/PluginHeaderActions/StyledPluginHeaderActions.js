@@ -14,7 +14,7 @@ const StyledPluginHeaderActions = styled.div`
   padding-top: 0.9rem;
   button {
     margin-right: 0;
-    margin-left: 1.8rem;
+    margin-left: 1rem;
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;

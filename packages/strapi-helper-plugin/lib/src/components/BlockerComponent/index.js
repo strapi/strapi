@@ -8,8 +8,9 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
-
-import styles from './styles.scss';
+import ButtonWrapper from './ButtonWrapper';
+import Ide from './Ide';
+import Wrapper from './Wrapper';
 
 /* eslint-disable react/require-default-props */
 function BlockerComponent({
@@ -31,9 +32,9 @@ function BlockerComponent({
   }
 
   return (
-    <div className={styles.blockerComponent}>
-      <div className={styles.header}>
-        <div className={styles.icoContainer}>
+    <Wrapper>
+      <div className="header">
+        <div className="icoContainer">
           <i className={cn('fa', blockerComponentIcon)} />
         </div>
         <div>
@@ -46,12 +47,12 @@ function BlockerComponent({
           {content}
         </div>
       </div>
-    </div>
+    </Wrapper>
   );
 }
 
 const renderIde = () => (
-  <div className={styles.ide}>
+  <Ide>
     <div>
       <pre style={{ whiteSpace: 'pre-wrap' }}>
         <code>strapi develop</code>
@@ -60,20 +61,20 @@ const renderIde = () => (
         <code>npm run develop</code>
       </pre>
     </div>
-  </div>
+  </Ide>
 );
 
 const renderButton = () => (
-  <div className={styles.buttonContainer}>
+  <ButtonWrapper>
     <a
-      className={cn(styles.primary, 'btn')}
+      className={cn('primary', 'btn')}
       href="http://strapi.io"
       target="_blank"
       rel="noopener noreferrer"
     >
       Read the documentation
     </a>
-  </div>
+  </ButtonWrapper>
 );
 
 BlockerComponent.defaultProps = {

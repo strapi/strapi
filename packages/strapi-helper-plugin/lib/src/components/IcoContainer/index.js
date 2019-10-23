@@ -3,13 +3,15 @@ import { map } from 'lodash';
 import PropTypes from 'prop-types';
 
 import Ico from '../Ico';
-import styles from './styles.scss';
+import Div from './Div';
 
 function IcoContainer({ icons }) {
   return (
-    <div className={styles.icoContainer}>
-      {map(icons, (value, key) => <Ico key={key} {...value} />)}
-    </div>
+    <Div>
+      {map(icons, (value, key) => (
+        <Ico key={key} {...value} />
+      ))}
+    </Div>
   );
 }
 
@@ -18,7 +20,10 @@ IcoContainer.propTypes = {
 };
 
 IcoContainer.defaultProps = {
-  icons: [{ icoType: 'pencil', onClick: () => {} }, { icoType: 'trash', onClick: () => {} }],
+  icons: [
+    { icoType: 'pencil', onClick: () => {} },
+    { icoType: 'trash', onClick: () => {} },
+  ],
 };
 
 export default IcoContainer;

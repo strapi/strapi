@@ -9,8 +9,8 @@ import colors from '../../styles/colors';
 import sizes from '../../styles/sizes';
 
 const List = styled.div`
-  width: 100%;
   position: relative;
+  width: 100%;
   overflow-x: scroll;
   border-radius: 3px;
   background: white;
@@ -61,14 +61,14 @@ const List = styled.div`
       &::before {
         content: '-';
         display: inline-block;
-        line-height: 1.1em;
-        color: transparent;
-        background-color: transparent;
         position: absolute;
         left: ${sizes.margin * 3}px;
         width: calc(100% - ${sizes.margin * 6}px);
         height: 1px;
         margin-top: -${sizes.margin * 0.1}px;
+        line-height: 1.1em;
+        color: transparent;
+        background-color: transparent;
       }
       &:not(:first-of-type)::before {
         background-color: rgba(14, 22, 34, 0.04);

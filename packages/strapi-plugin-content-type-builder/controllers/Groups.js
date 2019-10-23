@@ -1,6 +1,6 @@
 'use strict';
-
 const validateGroupInput = require('./validation/group');
+const _ = require('lodash');
 /**
  * Groups controller
  */
@@ -80,6 +80,15 @@ module.exports = {
 
     if (!group) {
       return ctx.send({ error: 'group.notFound' }, 404);
+    }
+
+    // convert zero length string on default attributes to undefined
+    if (_.has(body, 'attributes')) {
+      Object.keys(body.attributes).forEach(attribute => {
+        if (body.attributes[attribute].default === '') {
+          body.attributes[attribute].default = undefined;
+        }
+      });
     }
 
     try {

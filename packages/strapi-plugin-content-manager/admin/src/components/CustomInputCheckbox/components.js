@@ -3,6 +3,7 @@ import styled, { css } from 'styled-components';
 const Label = styled.label`
   cursor: pointer;
   position: relative;
+  vertical-align: middle;
   > input {
     display: none;
   }
@@ -10,7 +11,7 @@ const Label = styled.label`
     content: '';
     position: absolute;
     left: 15px;
-    top: calc(50% - 9px);
+    top: calc(50% - 8px);
     width: 14px;
     height: 14px;
     border: 1px solid rgba(16, 22, 34, 0.15);
@@ -24,7 +25,7 @@ const Label = styled.label`
         &:after {
           content: '\f068';
           position: absolute;
-          top: calc(50% - 9px);
+          top: calc(50% - 8px);
           left: 18px;
           font-size: 10px;
           font-family: 'FontAwesome';

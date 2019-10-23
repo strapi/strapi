@@ -9,7 +9,8 @@ const uuid = require('uuid/v4');
 const sentry = require('@sentry/node');
 
 const hasYarn = require('./utils/has-yarn');
-const { trackError, captureError } = require('./utils/usage');
+const checkRequirements = require('./utils/check-requirements');
+const { trackError, captureException } = require('./utils/usage');
 const parseDatabaseArguments = require('./utils/parse-db-arguments');
 const generateNew = require('./generate-new');
 
@@ -18,6 +19,8 @@ sentry.init({
 });
 
 module.exports = (projectDirectory, cliArguments) => {
+  checkRequirements();
+
   const rootPath = resolve(projectDirectory);
 
   const tmpPath = join(
@@ -46,7 +49,6 @@ module.exports = (projectDirectory, cliArguments) => {
       'strapi',
       'strapi-admin',
       'strapi-utils',
-      'strapi-plugin-settings-manager',
       'strapi-plugin-content-type-builder',
       'strapi-plugin-content-manager',
       'strapi-plugin-users-permissions',
@@ -78,7 +80,7 @@ module.exports = (projectDirectory, cliArguments) => {
 
   return generateNew(scope).catch(error => {
     console.error(error);
-    return captureError(error).then(() => {
+    return captureException(error).then(() => {
       return trackError({ scope, error }).then(() => {
         process.exit(1);
       });

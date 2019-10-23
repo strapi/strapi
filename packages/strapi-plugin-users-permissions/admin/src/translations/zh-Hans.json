@@ -88,7 +88,7 @@
   "PopUpForm.button.save": "保存",
   "PopUpForm.header.add.providers": "增加新的供应商(Provider)",
   "PopUpForm.header.edit.email-templates": "编辑电子邮件模版",
-  "PopUpForm.header.edit.providers": "编译 {provider} 供应商",
+  "PopUpForm.header.edit.providers": "编译 供应商",
   "PopUpForm.inputSelect.providers.label": "选择供应商",
 
   "notification.error.delete": "删除数据时出错",

@@ -1,16 +1,9 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import styled from 'styled-components';
 
-import styles from './styles.scss';
-
-const RelationWrapper = ({ children }) => <div className={styles.relationWrapper}>{children}</div>;
-
-RelationWrapper.defaultProps = {
-  children: null,
-};
-
-RelationWrapper.propTypes = {
-  children: PropTypes.node,
-};
+const RelationWrapper = styled.div`
+  width: 100%;
+  display: flex;
+  padding: 2.7rem 15px 3.3rem 15px;
+`;
 
 export default RelationWrapper;

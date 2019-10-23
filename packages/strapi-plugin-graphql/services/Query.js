@@ -246,7 +246,8 @@ module.exports = {
       )
     );
 
-    return async (obj, options = {}, { context }) => {
+    return async (obj, options = {}, graphqlContext) => {
+      const { context } = graphqlContext;
       const _options = _.cloneDeep(options);
 
       // Hack to be able to handle permissions for each query.
@@ -255,6 +256,17 @@ module.exports = {
           graphql: null,
         }),
       });
+
+      // Note: we've to used the Object.defineProperties to reset the prototype. It seems that the cloning the context
+      // cause a lost of the Object prototype.
+      const opts = this.amountLimiting(_options);
+
+      ctx.query = {
+        ...this.convertToParams(_.omit(opts, 'where')),
+        ...this.convertToQuery(opts.where),
+      };
+
+      ctx.params = this.convertToParams(opts);
 
       // Execute policies stack.
       const policy = await compose(policiesFn)(ctx);
@@ -274,17 +286,6 @@ module.exports = {
 
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
-        // Note: we've to used the Object.defineProperties to reset the prototype. It seems that the cloning the context
-        // cause a lost of the Object prototype.
-        const opts = this.amountLimiting(_options);
-
-        ctx.query = {
-          ...this.convertToParams(_.omit(opts, 'where')),
-          ...this.convertToQuery(opts.where),
-        };
-
-        ctx.params = this.convertToParams(opts);
-
         if (isController) {
           const values = await resolver.call(null, ctx, null);
 
@@ -295,7 +296,7 @@ module.exports = {
           return values && values.toJSON ? values.toJSON() : values;
         }
 
-        return resolver.call(null, obj, opts, ctx);
+        return resolver.call(null, obj, opts, graphqlContext);
       }
 
       // Resolver can be a promise.

@@ -9,10 +9,8 @@ import { startsWith, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
-
 import en from '../../translations/en.json';
-
-import styles from './styles.scss';
+import Li from './Li';
 
 function LeftMenuLink(props) {
   const isLinkActive = startsWith(
@@ -25,7 +23,7 @@ function LeftMenuLink(props) {
 
   const plugin =
     props.source !== 'content-manager' && props.source !== '' ? (
-      <div className={styles.plugin}>
+      <div className="plugin">
         <span>{upperFirst(props.source.split('-').join(' '))}</span>
       </div>
     ) : (
@@ -40,19 +38,19 @@ function LeftMenuLink(props) {
       values={{
         label: `${props.label}`,
       }}
-      className={styles.linkLabel}
+      className="linkLabel"
     />
   ) : (
-    <span className={styles.linkLabel}>{props.label}</span>
+    <span className="linkLabel">{props.label}</span>
   );
 
   // Icon.
-  const icon = <i className={`${styles.linkIcon} fa-${props.icon} fa`} />;
+  const icon = <i className={`linkIcon fa-${props.icon} fa`} />;
 
   // Create external or internal link.
   const link = props.destination.includes('http') ? (
     <a
-      className={`${styles.link} ${isLinkActive ? styles.linkActive : ''}`}
+      className={`link ${isLinkActive ? 'linkActive' : ''}`}
       href={props.destination}
       target="_blank"
       rel="noopener noreferrer"
@@ -62,7 +60,7 @@ function LeftMenuLink(props) {
     </a>
   ) : (
     <Link
-      className={`${styles.link} ${isLinkActive ? styles.linkActive : ''}`}
+      className={`link ${isLinkActive ? 'linkActive' : ''}`}
       to={{
         pathname: props.destination,
         search: props.source ? `?source=${props.source}` : '',
@@ -74,10 +72,10 @@ function LeftMenuLink(props) {
   );
 
   return (
-    <li className={styles.item}>
+    <Li>
       {link}
       {plugin}
-    </li>
+    </Li>
   );
 }
 

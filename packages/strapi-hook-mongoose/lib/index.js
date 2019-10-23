@@ -56,7 +56,7 @@ module.exports = function(strapi) {
           password,
           database,
           srv,
-          useUnifiedTopology
+          useUnifiedTopology,
         } = connection.settings;
 
         const uriOptions = uri ? url.parse(uri, true).query : {};
@@ -93,9 +93,9 @@ module.exports = function(strapi) {
            * https://github.com/Automattic/mongoose/issues/6881 */
           await instance.connect(
             uri ||
-              `mongodb${isSrv ? '+srv' : ''}://${username}:${password}@${host}${
-                !isSrv ? ':' + port : ''
-              }/`,
+              `mongodb${isSrv ? '+srv' : ''}://${username}:${encodeURIComponent(
+                password
+              )}@${host}${!isSrv ? ':' + port : ''}/`,
             connectOptions
           );
         } catch (error) {

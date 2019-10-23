@@ -8,21 +8,20 @@ import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
-
-import styles from './styles.scss';
+import Div from './Div';
 
 class InputEmail extends React.Component {
   state = { isFocused: false };
 
-  handleBlur = (e) => {
+  handleBlur = e => {
     this.setState({ isFocused: !this.state.isFocused });
     this.props.onBlur(e);
-  }
+  };
 
-  handleFocus = (e) => {
+  handleFocus = e => {
     this.setState({ isFocused: !this.state.isFocused });
     this.props.onFocus(e);
-  }
+  };
 
   render() {
     const {
@@ -38,26 +37,36 @@ class InputEmail extends React.Component {
       tabIndex,
       value,
     } = this.props;
-    const formattedPlaceholder = placeholder === '' ? 'app.utils.placeholder.defaultMessage' : placeholder;
+    const formattedPlaceholder =
+      placeholder === '' ? 'app.utils.placeholder.defaultMessage' : placeholder;
 
     return (
-      <div className={cn(styles.inputEmail, 'input-group', !isEmpty(className) && className)} style={style}>
+      <Div
+        className={cn('input-group', !isEmpty(className) && className)}
+        style={style}
+      >
         <span
           className={cn(
             'input-group-addon',
-            styles.addonEmail,
-            this.state.isFocused && styles.addonFocus,
-            !deactivateErrorHighlight && error && styles.errorAddon,
+            'addonEmail',
+            this.state.isFocused && 'addonFocus',
+            !deactivateErrorHighlight && error && 'errorAddon'
           )}
         />
-        <FormattedMessage id={formattedPlaceholder} defaultMessage={formattedPlaceholder}>
-          {(message) => (
+        <FormattedMessage
+          id={formattedPlaceholder}
+          defaultMessage={formattedPlaceholder}
+        >
+          {message => (
             <input
               autoFocus={autoFocus}
               className={cn(
                 'form-control',
                 !deactivateErrorHighlight && error && 'is-invalid',
-                !deactivateErrorHighlight && error && this.state.isFocused && styles.invalidEmail,
+                !deactivateErrorHighlight &&
+                  error &&
+                  this.state.isFocused &&
+                  'invalidEmail'
               )}
               disabled={disabled}
               id={name}
@@ -72,7 +81,7 @@ class InputEmail extends React.Component {
             />
           )}
         </FormattedMessage>
-      </div>
+      </Div>
     );
   }
 }

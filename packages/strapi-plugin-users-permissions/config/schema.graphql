@@ -1,4 +1,18 @@
 const _ = require('lodash');
+const { ApolloError } = require('apollo-server-koa');
+
+/**
+* Throws an ApolloError if context body contains a bad request
+* @param contextBody - body of the context object given to the resolver
+* @throws ApolloError if the body is a bad request
+*/
+function checkBadRequest(contextBody) {
+  if (_.get(contextBody, 'output.payload.statusCode', 200) !== 200) {
+    const statusCode = _.get(contextBody, 'output.payload.statusCode', 400);
+    const message = _.get(contextBody, 'output.payload.message', 'Bad Request');
+    throw new ApolloError(message, statusCode, _.omit(contextBody, ['output']));
+  }
+}
 
 module.exports = {
   type: {
@@ -20,9 +34,24 @@ module.exports = {
       description: String
       type: String
     }
+
+    input UsersPermissionsLoginInput {
+      identifier: String!
+      password: String!
+      provider: String = "local"
+    }
+
+    type UsersPermissionsLoginPayload {
+      jwt: String!
+      user: UsersPermissionsUser!
+    }
   `,
   query: `
     me: UsersPermissionsMe
+  `,
+  mutation: `
+    login(input: UsersPermissionsLoginInput!): UsersPermissionsLoginPayload!
+    register(input: UserInput!): UsersPermissionsLoginPayload!
   `,
   resolver: {
     Query: {
@@ -158,8 +187,40 @@ module.exports = {
           return {
             user,
           };
-        },
+        }
       },
-    },
-  },
+      register: {
+        description: 'Register a user',
+        plugin: 'users-permissions',
+        resolverOf: 'Auth.register',
+        resolver: async (obj, options, {context}) => {
+          context.request.body = _.toPlainObject(options.input);
+          
+          await strapi.plugins['users-permissions'].controllers.auth.register(context);
+          let output = context.body.toJSON ? context.body.toJSON() : context.body;
+          
+          checkBadRequest(output);
+          return {
+            user: output.user || output, jwt: output.jwt
+          };
+        }
+      },
+      login: {
+        resolverOf: 'Auth.callback',
+        plugin: 'users-permissions',
+        resolver: async (obj, options, {context}) => {
+          context.params = {...context.params, provider: options.input.provider};
+          context.request.body = _.toPlainObject(options.input);
+
+          await strapi.plugins['users-permissions'].controllers.auth.callback(context);
+          let output = context.body.toJSON ? context.body.toJSON() : context.body;
+
+          checkBadRequest(output);
+          return {
+            user: output.user || output, jwt: output.jwt
+          };
+        }
+      }
+    }
+  }
 };
