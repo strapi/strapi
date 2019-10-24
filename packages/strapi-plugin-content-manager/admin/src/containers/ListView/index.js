@@ -49,9 +49,6 @@ function ListView({
   layouts,
   isLoading,
   history: { push },
-  match: {
-    params: { slug },
-  },
   onChangeBulk,
   onChangeBulkSelectall,
   onChangeListLabels,
@@ -61,6 +58,7 @@ function ListView({
   resetProps,
   shouldRefetchData,
   showWarningDelete,
+  slug,
   toggleModalDelete,
   showWarningDeleteAll,
   toggleModalDeleteAll,
@@ -399,11 +397,6 @@ ListView.propTypes = {
   history: PropTypes.shape({
     push: PropTypes.func.isRequired,
   }),
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      slug: PropTypes.string.isRequired,
-    }),
-  }),
   onChangeBulk: PropTypes.func.isRequired,
   onChangeBulkSelectall: PropTypes.func.isRequired,
   onChangeListLabels: PropTypes.func.isRequired,
@@ -414,6 +407,7 @@ ListView.propTypes = {
   shouldRefetchData: PropTypes.bool.isRequired,
   showWarningDelete: PropTypes.bool.isRequired,
   showWarningDeleteAll: PropTypes.bool.isRequired,
+  slug: PropTypes.string.isRequired,
   toggleModalDelete: PropTypes.func.isRequired,
   toggleModalDeleteAll: PropTypes.func.isRequired,
 };

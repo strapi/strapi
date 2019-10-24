@@ -133,7 +133,7 @@ const DraggedField = forwardRef(
               <Link
                 onClick={e => {
                   e.stopPropagation();
-                  console.log('cll');
+
                   goTo(
                     `/plugins/${pluginId}/ctm-configurations/edit-settings/groups/${groupUid}`
                   );

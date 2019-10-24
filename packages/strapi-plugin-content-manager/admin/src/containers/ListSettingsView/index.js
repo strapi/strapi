@@ -27,13 +27,7 @@ import Toggle from './Toggle';
 import reducer, { initialState } from './reducer';
 import forms from './forms.json';
 
-const ListSettingsView = ({
-  deleteLayout,
-  location: { search },
-  match: {
-    params: { slug },
-  },
-}) => {
+const ListSettingsView = ({ deleteLayout, location: { search }, slug }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const [isOpen, setIsOpen] = useState(false);
   const [isModalFormOpen, setIsModalFormOpen] = useState(false);
@@ -339,11 +333,7 @@ ListSettingsView.propTypes = {
   location: PropTypes.shape({
     search: PropTypes.string.isRequired,
   }).isRequired,
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      slug: PropTypes.string.isRequired,
-    }).isRequired,
-  }).isRequired,
+  slug: PropTypes.string.isRequired,
 };
 
 export default ListSettingsView;

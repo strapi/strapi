@@ -65,7 +65,7 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
   // Check if the plugins list is empty or not and display plugins by name
   const pluginsLinks = !isEmpty(plugins) ? (
     map(sortBy(plugins, 'name'), plugin => {
-      if (plugin.id !== 'email') {
+      if (plugin.id !== 'email' && plugin.id !== 'content-manager') {
         const pluginSuffixUrl = plugin.suffixUrl
           ? plugin.suffixUrl(plugins)
           : '';

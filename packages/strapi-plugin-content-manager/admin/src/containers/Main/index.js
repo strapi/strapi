@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, memo, useEffect, useRef } from 'react';
+import React, { Suspense, lazy, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
@@ -10,18 +10,11 @@ import {
 } from 'strapi-helper-plugin';
 import { DndProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
-
 import pluginId from '../../pluginId';
-
 import DragLayer from '../../components/DragLayer';
 
-const EditView = lazy(() => import('../EditView'));
 const EditSettingsView = lazy(() => import('../EditSettingsView'));
-const ListView = lazy(() => import('../ListView'));
-const ListSettingsView = lazy(() => import('../ListSettingsView'));
-const SettingViewModel = lazy(() => import('../SettingViewModel'));
-const SettingViewGroup = lazy(() => import('../SettingViewGroup'));
-const SettingsView = lazy(() => import('../SettingsView'));
+const RecursivePath = lazy(() => import('../RecursivePath'));
 
 import { deleteLayout, getData, getLayout, resetProps } from './actions';
 import reducer from './reducer';
@@ -55,7 +48,7 @@ function Main({
   resetPropsRef.current = resetProps;
 
   const shouldShowLoader =
-    slug !== 'ctm-configurations' && layouts[slug] === undefined;
+    !pathname.includes('ctm-configurations/') && layouts[slug] === undefined;
 
   useEffect(() => {
     getDataRef.current();
@@ -91,21 +84,10 @@ function Main({
   );
   const routes = [
     {
-      path: 'ctm-configurations/list-settings/:slug',
-      comp: ListSettingsView,
-    },
-    {
-      path: 'ctm-configurations/edit-settings/:type/:slug',
+      path: 'ctm-configurations/edit-settings/:type/:groupSlug',
       comp: EditSettingsView,
     },
-    {
-      path: 'ctm-configurations/models/:name/:settingType',
-      comp: SettingViewModel,
-    },
-    { path: 'ctm-configurations/groups/:name', comp: SettingViewGroup },
-    { path: 'ctm-configurations/:type', comp: SettingsView },
-    { path: ':slug/:id', comp: EditView },
-    { path: ':slug', comp: ListView },
+    { path: ':slug', comp: RecursivePath },
   ].map(({ path, comp }) => (
     <Route
       key={path}
@@ -162,7 +144,4 @@ const withConnect = connect(
   mapDispatchToProps
 );
 
-export default compose(
-  withConnect,
-  memo
-)(Main);
+export default compose(withConnect)(Main);

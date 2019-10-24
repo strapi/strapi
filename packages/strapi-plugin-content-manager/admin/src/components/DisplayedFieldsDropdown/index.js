@@ -30,7 +30,7 @@ const DisplayedFieldsDropdown = ({
         <MenuDropdown isopen={isOpen.toString()}>
           <DropdownItemLink>
             <LayoutWrapper
-              to={`/plugins/${pluginId}/ctm-configurations/list-settings/${slug}?source=${source}`}
+              to={`${slug}/ctm-configurations/list-settings?source=${source}`}
             >
               <LayoutIcon />
               <FormattedMessage id="app.links.configure-view" />

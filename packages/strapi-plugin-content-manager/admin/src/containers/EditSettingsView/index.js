@@ -6,6 +6,7 @@ import React, {
   useState,
 } from 'react';
 import PropTypes from 'prop-types';
+import { useParams } from 'react-router-dom';
 import { cloneDeep, get, set } from 'lodash';
 import {
   // utils
@@ -41,10 +42,9 @@ const EditSettingsView = ({
   groupsAndModelsMainPossibleMainFields,
   history: { push },
   location: { search },
-  match: {
-    params: { slug, type },
-  },
+  slug,
 }) => {
+  const { groupSlug, type } = useParams();
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const [isModalFormOpen, setIsModalFormOpen] = useState(false);
 
@@ -127,11 +127,14 @@ const EditSettingsView = ({
   useEffect(() => {
     const getData = async () => {
       try {
-        const { data } = await request(getRequestUrl(`${type}/${slug}`), {
-          method: 'GET',
-          params,
-          signal,
-        });
+        const { data } = await request(
+          getRequestUrl(`${type}/${slug || groupSlug}`),
+          {
+            method: 'GET',
+            params,
+            signal,
+          }
+        );
 
         // TODO temporary to remove when api available
         const groups = retrieveDisplayedGroups(
@@ -202,7 +205,7 @@ const EditSettingsView = ({
       delete body.source;
       delete body.isGroup;
 
-      await request(getRequestUrl(`${type}/${slug}`), {
+      await request(getRequestUrl(`${type}/${slug || groupSlug}`), {
         method: 'PUT',
         body,
         params: type === 'groups' ? {} : params,
@@ -371,7 +374,7 @@ const EditSettingsView = ({
           });
         }}
         onConfirmSubmit={handleConfirm}
-        slug={slug}
+        slug={slug || groupSlug}
         isEditSettings
       >
         <div className="row">
@@ -439,6 +442,10 @@ const EditSettingsView = ({
   );
 };
 
+EditSettingsView.defaultProps = {
+  slug: null,
+};
+
 EditSettingsView.propTypes = {
   deleteLayout: PropTypes.func.isRequired,
   groupsAndModelsMainPossibleMainFields: PropTypes.object.isRequired,
@@ -448,12 +455,7 @@ EditSettingsView.propTypes = {
   location: PropTypes.shape({
     search: PropTypes.string.isRequired,
   }).isRequired,
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      slug: PropTypes.string.isRequired,
-      type: PropTypes.string.isRequired,
-    }).isRequired,
-  }).isRequired,
+  slug: PropTypes.string,
 };
 
 export default EditSettingsView;

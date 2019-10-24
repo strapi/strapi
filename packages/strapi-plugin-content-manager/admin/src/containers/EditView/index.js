@@ -1,6 +1,7 @@
 import React, { memo, useEffect, useState, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { cloneDeep, get } from 'lodash';
+import { useParams } from 'react-router-dom';
 import {
   BackHeader,
   getQueryParameters,
@@ -43,11 +44,12 @@ function EditView({
   layouts,
   location: { pathname, search },
   history: { push },
-  match: {
-    params: { slug, id },
-  },
+
+  slug,
   plugins,
 }) {
+  const { id } = useParams();
+
   const abortController = new AbortController();
   const { signal } = abortController;
   const layout = get(layouts, [slug], {});
@@ -321,6 +323,8 @@ function EditView({
     }
   };
 
+  // return null;
+
   return (
     <EditViewProvider
       addRelation={({ target: { name, value } }) => {
@@ -538,7 +542,8 @@ function EditView({
                     }}
                     icon="layout"
                     key={`${pluginId}.link`}
-                    url={`/plugins/${pluginId}/ctm-configurations/edit-settings/content-types/${slug}${`?source=${source}`}`}
+                    // url={`/plugins/${pluginId}/ctm-configurations/edit-settings/content-types/${slug}${`?source=${source}`}`}
+                    url={`ctm-configurations/edit-settings/content-types${`?source=${source}`}`}
                     onClick={() => {
                       emitEvent('willEditContentTypeLayoutFromEditView');
                     }}
@@ -601,12 +606,7 @@ EditView.propTypes = {
     pathname: PropTypes.string,
     search: PropTypes.string,
   }),
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      slug: PropTypes.string.isRequired,
-    }),
-  }),
+  slug: PropTypes.string.isRequired,
   plugins: PropTypes.object,
 };
 
