@@ -1,12 +1,10 @@
 import React from 'react';
 import { shallow } from 'enzyme';
-import { FormattedMessage } from 'react-intl';
 
 import { LeftMenuLink } from '../index';
 
 const props = {
   to: '/',
-  name: 'link',
 };
 
 describe('<LeftMenuLink />', () => {
@@ -14,14 +12,15 @@ describe('<LeftMenuLink />', () => {
     shallow(<LeftMenuLink {...props} />);
   });
 
-  it('should add a not saved span if the isTemporary prop is true', () => {
-    const renderedComponent = shallow(<LeftMenuLink {...props} isTemporary />);
-    const isTemporaryInfo = renderedComponent.find(FormattedMessage).first();
+  it('should render a node children if it exists', () => {
+    const renderedComponent = shallow(
+      <LeftMenuLink {...props}>
+        <span>test</span>
+      </LeftMenuLink>
+    );
 
-    expect(isTemporaryInfo.exists()).toBe(true);
+    const children = renderedComponent.find('span');
 
-    const insideCompo = shallow(isTemporaryInfo.prop('children')());
-
-    expect(insideCompo.find('span').length).toBe(1);
+    expect(children.exists()).toBe(true);
   });
 });
