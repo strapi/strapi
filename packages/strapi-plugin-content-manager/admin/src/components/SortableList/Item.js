@@ -9,7 +9,14 @@ import FieldItem from '../DraggedFieldWithPreview';
 
 import ItemTypes from '../../utils/ItemTypes';
 
-const Item = ({ index, move, name, removeItem }) => {
+const Item = ({
+  index,
+  isDraggingSibling,
+  move,
+  name,
+  removeItem,
+  setIsDraggingSibling,
+}) => {
   const {
     goTo,
     metadatas,
@@ -63,6 +70,14 @@ const Item = ({ index, move, name, removeItem }) => {
   });
   const [{ isDragging }, drag, preview] = useDrag({
     item: { type: ItemTypes.EDIT_RELATION, id: name, name, index },
+    begin: () => {
+      // Remove the over state from other components
+      // Since it's a dynamic list where items are replaced on the fly we need to disable all the over state
+      setIsDraggingSibling(true);
+    },
+    end: () => {
+      setIsDraggingSibling(false);
+    },
     collect: monitor => ({
       isDragging: monitor.isDragging(),
     }),
@@ -83,6 +98,7 @@ const Item = ({ index, move, name, removeItem }) => {
   return (
     <FieldItem
       isDragging={isDragging}
+      isDraggingSibling={isDraggingSibling}
       label={get(metadatas, [name, 'edit', 'label'], '')}
       name={name}
       onClickEdit={() => setEditFieldToSelect(name)}
@@ -101,14 +117,18 @@ const Item = ({ index, move, name, removeItem }) => {
 };
 
 Item.defaultProps = {
+  isDraggingSibling: false,
   move: () => {},
+  setIsDraggingSibling: () => {},
 };
 
 Item.propTypes = {
   index: PropTypes.number.isRequired,
+  isDraggingSibling: PropTypes.bool,
   move: PropTypes.func,
   name: PropTypes.string.isRequired,
   removeItem: PropTypes.func.isRequired,
+  setIsDraggingSibling: PropTypes.func,
 };
 
 export default Item;

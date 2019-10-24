@@ -37,6 +37,7 @@ const ListSettingsView = ({
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const [isOpen, setIsOpen] = useState(false);
   const [isModalFormOpen, setIsModalFormOpen] = useState(false);
+  const [isDraggingSibling, setIsDraggingSibling] = useState(false);
 
   const { emitEvent } = useGlobalContext();
 
@@ -244,6 +245,7 @@ const ListSettingsView = ({
                       count={getListDisplayedFields().length}
                       key={item}
                       index={index}
+                      isDraggingSibling={isDraggingSibling}
                       move={move}
                       name={item}
                       onClick={handleClickEditLabel}
@@ -262,6 +264,7 @@ const ListSettingsView = ({
                         }
                       }}
                       selectedItem={labelToEdit}
+                      setIsDraggingSibling={setIsDraggingSibling}
                     />
                   );
                 })}

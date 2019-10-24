@@ -1,4 +1,5 @@
 import React, { forwardRef, useState } from 'react';
+import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import Carret from './Carret';
 import DraggedField from '../DraggedField';
@@ -11,7 +12,9 @@ const DraggedFieldWithPreview = forwardRef(
     {
       goTo,
       groupUid,
+      groupLayouts,
       isDragging,
+      isDraggingSibling,
       name,
       onClickEdit,
       onClickRemove,
@@ -30,14 +33,16 @@ const DraggedFieldWithPreview = forwardRef(
     const isFullSize = size === 12;
     const display = isFullSize && dragStart ? 'none' : '';
     const width = isFullSize && dragStart ? 0 : '100%';
-    const withLongerHeight =
-      ['json', 'text', 'file', 'media', 'group', 'richtext'].includes(type) &&
-      !dragStart;
-    const carretStyle = withLongerHeight ? { height: '102px' } : {};
+    const higherFields = ['json', 'text', 'file', 'media', 'group', 'richtext'];
+    const withLongerHeight = higherFields.includes(type) && !dragStart;
+
+    const groupData = get(groupLayouts, [groupUid], {});
+    const groupLayout = get(groupData, ['layouts', 'edit'], []);
+    const getWrapperWitdh = colNum => `${(1 / 12) * colNum * 100}%`;
 
     return (
       <div
-        style={{ width: `${(1 / 12) * size * 100}%` }}
+        style={{ width: getWrapperWitdh(size) }}
         onDrag={() => {
           if (isFullSize && !dragStart) {
             setDragStart(true);
@@ -58,24 +63,69 @@ const DraggedFieldWithPreview = forwardRef(
             <PreviewCarret style={{ marginRight: '-10px' }} />
           )}
           <>
-            {showLeftCarret && <Carret style={carretStyle} />}
+            {showLeftCarret && <Carret />}
 
             <div className="sub" style={{ width, opacity }}>
               <DraggedField
                 goTo={goTo}
                 groupUid={groupUid}
                 isHidden={isHidden}
+                isDraggingSibling={isDraggingSibling}
                 name={name}
                 onClick={onClickEdit}
                 onRemove={onClickRemove}
                 ref={refs.dragRef}
                 selectedItem={selectedItem}
-                style={{ padding: 0, margin: 0, display }}
+                style={{ display, marginRight: 0, paddingRight: 0 }}
                 type={type}
                 withLongerHeight={withLongerHeight}
-              ></DraggedField>
+              >
+                {type === 'group' &&
+                  groupLayout.map((row, i) => {
+                    const marginBottom =
+                      i === groupLayout.length - 1 ? '29px' : '';
+                    const marginTop = i === 0 ? '5px' : '';
+
+                    return (
+                      <div
+                        style={{
+                          display: 'flex',
+                          marginBottom,
+                          marginTop,
+                        }}
+                        key={i}
+                      >
+                        {row.map(field => {
+                          const fieldType = get(
+                            groupData,
+                            ['schema', 'attributes', field.name, 'type'],
+                            ''
+                          );
+
+                          return (
+                            <div
+                              key={field.name}
+                              style={{
+                                width: getWrapperWitdh(field.size),
+                                marginBottom: '6px',
+                              }}
+                            >
+                              <DraggedField
+                                name={field.name}
+                                isSub
+                                withLongerHeight={higherFields.includes(
+                                  fieldType
+                                )}
+                              ></DraggedField>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
+              </DraggedField>
             </div>
-            {showRightCarret && <Carret right style={carretStyle} />}
+            {showRightCarret && <Carret right />}
           </>
         </Wrapper>
       </div>
@@ -84,11 +134,11 @@ const DraggedFieldWithPreview = forwardRef(
 );
 
 DraggedFieldWithPreview.defaultProps = {
-  goTo: () => {
-    console.log('l');
-  },
+  goTo: () => {},
+  groupLayouts: {},
   groupUid: null,
   isDragging: false,
+  isDraggingSibling: false,
   onClickEdit: () => {},
   onClickRemove: () => {},
   selectedItem: '',
@@ -101,8 +151,10 @@ DraggedFieldWithPreview.defaultProps = {
 
 DraggedFieldWithPreview.propTypes = {
   goTo: PropTypes.func,
+  groupLayouts: PropTypes.object,
   groupUid: PropTypes.string,
   isDragging: PropTypes.bool,
+  isDraggingSibling: PropTypes.bool,
   name: PropTypes.string.isRequired,
   onClickEdit: PropTypes.func,
   onClickRemove: PropTypes.func,

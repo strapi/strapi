@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useLayoutDnd } from '../../contexts/LayoutDnd';
 
@@ -8,6 +8,7 @@ import Item from './Item';
 
 const SortableList = ({ addItem, buttonData, moveItem, removeItem }) => {
   const { relationsLayout } = useLayoutDnd();
+  const [isDraggingSibling, setIsDraggingSibling] = useState(false);
 
   return (
     <div className="col-4">
@@ -24,10 +25,12 @@ const SortableList = ({ addItem, buttonData, moveItem, removeItem }) => {
           return (
             <Item
               index={index}
+              isDraggingSibling={isDraggingSibling}
               key={relationName}
               move={moveItem}
               name={relationName}
               removeItem={removeItem}
+              setIsDraggingSibling={setIsDraggingSibling}
             />
           );
         })}

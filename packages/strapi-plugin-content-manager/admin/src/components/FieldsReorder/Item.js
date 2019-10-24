@@ -198,8 +198,6 @@ const Item = ({
     }
   }
 
-  console.log({ fr: groupLayouts });
-
   return (
     <DraggedFieldWithPreview
       goTo={goTo}

@@ -26,6 +26,9 @@
       "via": "related",
       "plugin": "upload",
       "required": false
+    },
+    "very_long_description": {
+      "type": "richtext"
     }
   }
 }

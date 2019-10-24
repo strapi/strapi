@@ -8,11 +8,13 @@ import DraggedField from '../../components/DraggedField';
 const Label = ({
   count,
   index,
+  isDraggingSibling,
   move,
   name,
   onClick,
   onRemove,
   selectedItem,
+  setIsDraggingSibling,
 }) => {
   const ref = useRef(null);
   const [, drop] = useDrop({
@@ -34,6 +36,12 @@ const Label = ({
     },
   });
   const [{ isDragging }, drag, preview] = useDrag({
+    begin: () => {
+      setIsDraggingSibling(true);
+    },
+    end: () => {
+      setIsDraggingSibling(false);
+    },
     item: { type: ItemTypes.FIELD, id: name, name, index },
     collect: monitor => ({
       isDragging: monitor.isDragging(),
@@ -51,6 +59,7 @@ const Label = ({
       count={count}
       ref={ref}
       isDragging={isDragging}
+      isDraggingSibling={isDraggingSibling}
       name={name}
       onClick={onClick}
       onRemove={onRemove}
@@ -61,18 +70,22 @@ const Label = ({
 
 Label.defaultProps = {
   index: 0,
+  isDraggingSibling: false,
   move: () => {},
   selectedItem: '',
+  setIsDraggingSibling: () => {},
 };
 
 Label.propTypes = {
   count: PropTypes.number.isRequired,
   index: PropTypes.number,
+  isDraggingSibling: PropTypes.bool,
   move: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
   onClick: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   selectedItem: PropTypes.string,
+  setIsDraggingSibling: PropTypes.func,
 };
 
 export default Label;

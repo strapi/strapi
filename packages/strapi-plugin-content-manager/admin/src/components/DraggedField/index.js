@@ -4,7 +4,11 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Grab, GrabLarge, Pencil, Remove } from '@buffetjs/icons';
 import pluginId from '../../pluginId';
+import GrabWrapper from './GrabWrapper';
 import Link from './Link';
+import NameWrapper from './NameWrapper';
+import RemoveWrapper from './RemoveWrapper';
+import SubWrapper from './SubWrapper';
 import Wrapper from './Wrapper';
 
 const DraggedField = forwardRef(
@@ -15,7 +19,9 @@ const DraggedField = forwardRef(
       goTo,
       groupUid,
       isDragging,
+      isDraggingSibling,
       isHidden,
+      isSub,
       name,
       onClick,
       onRemove,
@@ -30,46 +36,91 @@ const DraggedField = forwardRef(
     const [isOverRemove, setIsOverRemove] = useState(false);
     const [isOverEditBlock, setIsOverEditBlock] = useState(false);
     const isSelected = selectedItem === name;
+    const showEditBlockOverState = isOverEditBlock && !isDraggingSibling;
 
     return (
       <Wrapper
         count={count}
         onDrag={() => setIsOverEditBlock(false)}
         isSelected={isSelected}
-        isOverEditBlock={isOverEditBlock}
+        isOverEditBlock={showEditBlockOverState}
         isOverRemove={isOverRemove}
         style={style}
         withLongerHeight={withLongerHeight}
       >
         {!isHidden && (
-          <div
+          <SubWrapper
             className="sub_wrapper"
-            style={{ opacity }}
-            onMouseEnter={() => setIsOverEditBlock(true)}
+            isSelected={isSelected}
+            isOverEditBlock={isOverEditBlock}
+            isOverRemove={isOverRemove}
+            onMouseEnter={() => {
+              if (!isSub) {
+                setIsOverEditBlock(true);
+              }
+            }}
             onMouseLeave={() => setIsOverEditBlock(false)}
             onClick={() => {
               onClick(name);
             }}
+            style={{ opacity }}
+            withLongerHeight={withLongerHeight}
           >
-            <div className="grab" ref={ref} onClick={e => e.stopPropagation()}>
+            <GrabWrapper
+              className="grab"
+              isSelected={isSelected}
+              isOverEditBlock={showEditBlockOverState}
+              isOverRemove={isOverRemove}
+              ref={ref}
+              onClick={e => {
+                e.stopPropagation();
+                e.preventDefault();
+              }}
+            >
               {withLongerHeight ? (
                 <GrabLarge style={{ marginRight: 10, cursor: 'move' }} />
               ) : (
                 <Grab style={{ marginRight: 10, cursor: 'move' }} />
               )}
-            </div>
-            <div className="name">{children ? children : name}</div>
-            <div
+            </GrabWrapper>
+            <NameWrapper
+              className="name"
+              isSelected={isSelected}
+              isOverEditBlock={showEditBlockOverState}
+              isOverRemove={isOverRemove}
+            >
+              {children ? (
+                <>
+                  <span>{name}</span>
+                  {children}
+                </>
+              ) : (
+                <span>{name}</span>
+              )}
+            </NameWrapper>
+            <RemoveWrapper
               className="remove"
+              isSelected={isSelected}
+              // isOverEditBlock={isOverEditBlock}
+              isOverEditBlock={showEditBlockOverState}
+              isOverRemove={isOverRemove}
               onClick={onRemove}
-              onMouseEnter={() => setIsOverRemove(true)}
+              onMouseEnter={() => {
+                if (!isSub) {
+                  setIsOverRemove(true);
+                }
+              }}
               onMouseLeave={() => setIsOverRemove(false)}
             >
               {isOverRemove && !isSelected && <Remove />}
-              {((isOverEditBlock && !isOverRemove) || isSelected) && <Pencil />}
-              {!isOverEditBlock && !isOverRemove && !isSelected && <Remove />}
-            </div>
-          </div>
+              {((showEditBlockOverState && !isOverRemove) || isSelected) && (
+                <Pencil />
+              )}
+              {!showEditBlockOverState && !isOverRemove && !isSelected && (
+                <Remove />
+              )}
+            </RemoveWrapper>
+          </SubWrapper>
         )}
         {type === 'group' && (
           <FormattedMessage
@@ -101,7 +152,9 @@ DraggedField.defaultProps = {
   goTo: () => {},
   groupUid: null,
   isDragging: false,
+  isDraggingSibling: false,
   isHidden: false,
+  isSub: false,
   onClick: () => {},
   onRemove: () => {},
   selectedItem: '',
@@ -115,7 +168,9 @@ DraggedField.propTypes = {
   goTo: PropTypes.func,
   groupUid: PropTypes.string,
   isDragging: PropTypes.bool,
+  isDraggingSibling: PropTypes.bool,
   isHidden: PropTypes.bool,
+  isSub: PropTypes.bool,
   name: PropTypes.string.isRequired,
   onClick: PropTypes.func,
   onRemove: PropTypes.func,
