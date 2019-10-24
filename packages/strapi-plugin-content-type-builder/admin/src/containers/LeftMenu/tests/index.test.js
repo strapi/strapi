@@ -1,16 +1,15 @@
 import React from 'react';
 import formatMessagesWithPluginId from 'testUtils/formatMessages';
-import pluginTradsEn from '../../../translations/en.json';
+import mountWithIntl from 'testUtils/mountWithIntl';
 import { BrowserRouter } from 'react-router-dom';
-
-import MenuContext from '../../MenuContext';
-// import LeftMenuLink from '../../../components/LeftMenuLink';
-import LeftMenu from '../index';
-
 import { LeftMenuList } from 'strapi-helper-plugin';
 
+import pluginTradsEn from '../../../translations/en.json';
+import MenuContext from '../../MenuContext';
+
+import LeftMenu from '../index';
+
 import pluginId from '../../../pluginId';
-import mountWithIntl from 'testUtils/mountWithIntl';
 
 // @soupette
 // TODO update the test when switching to react testing lib

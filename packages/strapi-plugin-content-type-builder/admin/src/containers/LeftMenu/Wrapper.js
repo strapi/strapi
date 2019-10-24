@@ -1,6 +1,5 @@
 import styled from 'styled-components';
 
-// TODO - change with path
 import { colors, sizes } from 'strapi-helper-plugin';
 
 const Wrapper = styled.div`
