@@ -1,8 +1,8 @@
 # JWT validation
 
-In this guide we will see how validate a JWT via another service.
+In this guide we will see how to validate a `JWT` (JSON Web Token) with a third party service.
 
-When you signin with the authentication route `POST /auth/local`, Strapi generate a `JWT` that let your users request your API as an authenticated user.
+When you sign in with the authentication route `POST /auth/local`, Strapi generates a `JWT` which lets your users request your API as an authenticated one.
 
 ```json
 {
@@ -15,17 +15,17 @@ When you signin with the authentication route `POST /auth/local`, Strapi generat
 }
 ```
 
-These users are managed in the application database and can be managed via the admin dashboard.
+These users are managed in the application's database and can be managed via the admin dashboard.
 
-We can now imagine you have a `JWT` that come from [Auth0](https://auth0.com) and you want to make sure the `JWT` is correct and allow this user to use the Strapi API endpoints.
+We can now imagine you have a `JWT` that comes from [Auth0](https://auth0.com) and you want to make sure the `JWT` is correct before allowing the user to use the Strapi API endpoints.
 
-## Customise the JWT validation function
+## Customize the JWT validation function
 
-We have to use the [customization concept](../concepts/customization.md) to update the function that validate the `JWT`. This feature is powered by the **Users & Permissions** plugin.
+We have to use the [customization concept](../concepts/customization.md) to update the function that validates the `JWT`. This feature is powered by the **Users & Permissions** plugin.
 
 Here is the file we will have to customize: [permission.js](https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-users-permissions/config/policies/permissions.js)
 
-- We have now to create a file that follow this path `./extensions/users-permissions/config/policies/permissions.js`.
+- We have to create a file that follows this path `./extensions/users-permissions/config/policies/permissions.js`.
 - You will have to add in this new file, the same content of the original one.
 
 Now we are ready to create our custom validation code.
@@ -55,11 +55,11 @@ module.exports = async (ctx, next) => {
     }
 ```
 
-The `jwt.getToken` will throw and error it the token don't come from Strapi. So if it's not a Strapi `JWT` token, lets test if it's an Auth0 token.
+The `jwt.getToken` will throw an error if the token doesn't come from Strapi. So if it's not a Strapi `JWT` token, let's test if it's an Auth0 one.
 
 We will have to write our validation code before throwing an error.
 
-By using the [Auth0 get user profile](https://auth0.com/docs/api/authentication?http#get-user-info) documentation, I will verify a valid user match with the current `JWT`
+By using the [Auth0 get user profile](https://auth0.com/docs/api/authentication?http#get-user-info) documentation, you will verify a valid user matches with the current `JWT`
 
 ```js
 const _ = require('lodash');
@@ -99,5 +99,5 @@ module.exports = async (ctx, next) => {
 ```
 
 ::: warning
-In the code example we use `axios` you will have to install the dependence to make it works or use and other library to request Auth0 API.
+In the code example we use `axios` you will have to install the dependency to make it work. You can choose another library if you prefer.
 :::
