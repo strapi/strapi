@@ -1,4 +1,4 @@
-import { DatabaseManager, Repository } from 'strapi-dbal';
+import { DatabaseManager, Repository } from 'strapi-database';
 
 interface Strapi {
   db: DatabaseManager;
