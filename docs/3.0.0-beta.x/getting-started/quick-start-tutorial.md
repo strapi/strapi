@@ -145,7 +145,7 @@ Using the `--quickstart` flag installs Strapi using an [SQLite](https://www.sqli
 
 You are now ready to create a new **Administrator** and new front-end **User**.
 
-## 2. Create an Adminstrator and front-end User
+## 2. Create an Administrator and front-end User
 
 The first step is to create an **Administrator** (or "root user") for your project. An **Administrator** has all administrator privileges and access rights. (You can read more about why **Administrators** and front-end **Users** are separate [here](https://blog.strapi.io/why-we-split-the-management-of-the-admin-users-and-end-users/).)
 
