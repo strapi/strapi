@@ -132,7 +132,7 @@ describe('Upload plugin end to end tests', () => {
           id: expect.anything(),
           sha256: expect.any(String),
           hash: expect.any(String),
-          size: expect.any(String),
+          size: expect.any(Number),
           url: expect.any(String),
           provider: 'local',
           name: 'rec.jpg',
