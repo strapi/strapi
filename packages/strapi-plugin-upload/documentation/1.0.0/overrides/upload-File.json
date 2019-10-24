@@ -233,7 +233,7 @@
             "type": "string"
           },
           "size": {
-            "type": "string"
+            "type": "integer"
           },
           "mime": {
             "type": "string"

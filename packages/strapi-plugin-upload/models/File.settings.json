@@ -32,7 +32,7 @@
       "required": true
     },
     "size": {
-      "type": "string",
+      "type": "integer",
       "configurable": false,
       "required": true
     },
