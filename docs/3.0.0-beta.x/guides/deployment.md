@@ -1544,8 +1544,6 @@ You can now continue with the [Tutorial - Creating an Admin User](../getting-sta
 For security reasons, the Content Type Builder plugin is disabled in production. To update content structure, please make your changes locally and deploy again.
 :::
 
----
-
 ### Project updates
 
 When Strapi is deployed to Heroku, Heroku sets the environment variable to `NODE_ENV=production`. In `production mode` Strapi disables the content-type builder (for security reasons). Additionally, if you wanted to change the default production mode in Heroku, it wouldn't work as the file system is temporary. Strapi writes files to the server when you update the content-types and these updates would disappear when Heroku restarts the server.
@@ -1562,8 +1560,6 @@ git commit -am "Changes to my-project noted"
 git push heroku master
 heroku open
 ```
-
----
 
 ### File Uploads
 
