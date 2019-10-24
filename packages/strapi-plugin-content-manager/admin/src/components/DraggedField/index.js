@@ -46,6 +46,7 @@ const DraggedField = forwardRef(
         count={count}
         onDrag={() => setIsOverEditBlock(false)}
         isSelected={isSelected}
+        isSub={isSub}
         isOverEditBlock={showEditBlockOverState}
         isOverRemove={isOverRemove}
         style={style}
@@ -55,6 +56,7 @@ const DraggedField = forwardRef(
           <SubWrapper
             className="sub_wrapper"
             isSelected={isSelected}
+            isSub={isSub}
             isOverEditBlock={isOverEditBlock}
             isOverRemove={isOverRemove}
             onMouseEnter={() => {

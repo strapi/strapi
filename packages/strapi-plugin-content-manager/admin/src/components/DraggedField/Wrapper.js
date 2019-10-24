@@ -23,11 +23,13 @@ const Wrapper = styled.div`
     position: relative;
     cursor: pointer;
 
-    background: ${({ isOverEditBlock, isOverRemove, isSelected }) => {
+    background: ${({ isOverEditBlock, isOverRemove, isSelected, isSub }) => {
       if (isOverRemove) {
         return '#ffe9e0';
       } else if (isSelected || isOverEditBlock) {
         return '#e6f0fb';
+      } else if (isSub) {
+        return '#ffffff';
       } else {
         return '#fafafb';
       }
