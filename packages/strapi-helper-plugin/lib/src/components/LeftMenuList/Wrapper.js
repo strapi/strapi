@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { colors } from 'strapi-helper-plugin';
+import colors from '../../assets/styles/colors';
 
 const Wrapper = styled.div`
   margin-bottom: 25px;

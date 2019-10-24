@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Collapse } from 'reactstrap';
 
 import Dropdown from './Dropdown';
-import LeftMenuLink from '../../components/LeftMenuLink';
+import LeftMenuLink from '../LeftMenuLink';
 
 const LeftMenuSubList = ({ name, links, isFiltered, isFirstItem }) => {
   const [collapse, setCollapse] = useState(isFiltered || isFirstItem);
@@ -34,10 +34,10 @@ const LeftMenuSubList = ({ name, links, isFiltered, isFirstItem }) => {
         <Collapse isOpen={filtered}>
           <ul>
             {links.map(link => {
-              const { name, to } = link;
+              const { name, title } = link;
               return (
                 <li key={name}>
-                  <LeftMenuLink name={name} to={to} />
+                  <LeftMenuLink {...link}>{title}</LeftMenuLink>
                 </li>
               );
             })}

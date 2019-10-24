@@ -4,16 +4,14 @@ import { FormattedMessage } from 'react-intl';
 import { isEmpty } from 'lodash';
 import matchSorter from 'match-sorter';
 
-import pluginId from '../../pluginId';
-
 import Wrapper from './Wrapper';
 import List from './List';
 import Search from './Search';
-import LeftMenuLink from '../../components/LeftMenuLink';
 
+import LeftMenuLink from '../LeftMenuLink';
 import LeftMenuSubList from '../LeftMenuSubList';
 
-function LeftMenuList({ customLink, name, links }) {
+function LeftMenuList({ customLink, links, title }) {
   const [search, setSearch] = useState('');
   const [showSearch, setShowSearch] = useState(false);
 
@@ -59,14 +57,11 @@ function LeftMenuList({ customLink, name, links }) {
     return links.length;
   };
 
-  const getTitle = () => {
-    const base = `${pluginId}.menu.section.${name}.name.`;
-
-    return getCount() > 1 ? `${base}plural` : `${base}singular`;
-  };
+  const getTitle = () =>
+    getCount() > 1 ? `${title.id}plural` : `${title.id}singular`;
 
   const renderCompo = (link, i) => {
-    const { links, name } = link;
+    const { links, name, title } = link;
 
     if (links) {
       const isFiltered = !isEmpty(search) ? true : false;
@@ -83,7 +78,7 @@ function LeftMenuList({ customLink, name, links }) {
 
     return (
       <li key={name}>
-        <LeftMenuLink {...link} />
+        <LeftMenuLink {...link}>{title}</LeftMenuLink>
       </li>
     );
   };
@@ -133,7 +128,7 @@ LeftMenuList.defaultProps = {
     },
   },
   links: [],
-  name: 'models',
+  title: 'models',
 };
 
 LeftMenuList.propTypes = {
@@ -145,7 +140,7 @@ LeftMenuList.propTypes = {
     }),
   }),
   links: PropTypes.array,
-  name: PropTypes.string,
+  title: PropTypes.string,
 };
 
 export default LeftMenuList;

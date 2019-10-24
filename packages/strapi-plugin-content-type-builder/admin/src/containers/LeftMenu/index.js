@@ -5,15 +5,15 @@
  */
 
 import React, { useContext } from 'react';
+import { FormattedMessage } from 'react-intl';
 import { groupBy } from 'lodash';
+
+import { LeftMenuList } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
 import MenuContext from '../../containers/MenuContext';
-
 import CustomLink from '../../components/CustomLink';
-import LeftMenuList from '../../components/LeftMenuList';
-
 import Wrapper from './Wrapper';
 
 const displayNotificationCTNotSaved = () => {
@@ -29,6 +29,9 @@ function LeftMenu() {
     const data = [
       {
         name: 'models',
+        title: {
+          id: `${pluginId}.menu.section.models.name.`,
+        },
         searchable: true,
         customLink: {
           Component: CustomLink,
@@ -41,6 +44,9 @@ function LeftMenu() {
       },
       {
         name: 'components',
+        title: {
+          id: `${pluginId}.menu.section.components.name.`,
+        },
         searchable: true,
         customLink: {
           Component: CustomLink,
@@ -59,7 +65,11 @@ function LeftMenu() {
   const getModels = () => {
     return [
       ...models.map(model => {
-        return { ...model, to: model.name };
+        return {
+          ...model,
+          to: getLinkRoute('models', model),
+          title: getLinkTitle(model),
+        };
       }),
     ];
   };
@@ -71,12 +81,40 @@ function LeftMenu() {
     return Object.keys(componentsObj).map(key => {
       const links = [
         ...componentsObj[key].map(compo => {
-          return { ...compo, to: `${key}/${compo.name}` };
+          return {
+            ...compo,
+            to: getLinkRoute('components', compo, key),
+            title: getLinkTitle(compo),
+          };
         }),
       ];
 
       return { name: key, links };
     });
+  };
+
+  const notSavedLabel = () => {
+    return <FormattedMessage id={`${pluginId}.contentType.temporaryDisplay`} />;
+  };
+
+  const getLinkRoute = (param, item, category = null) => {
+    const { name, source, uid } = item;
+
+    const cat = category ? `${category}/` : '';
+    const base = `/plugins/${pluginId}/${param}/${cat}${uid || name}`;
+    const to = source ? `${base}&source=${source}` : base;
+
+    return to;
+  };
+
+  const getLinkTitle = item => {
+    const { name, isTemporary } = item;
+    return (
+      <p>
+        <span>{name}</span>
+        {isTemporary && notSavedLabel()}
+      </p>
+    );
   };
 
   const openCreateModal = type => {
