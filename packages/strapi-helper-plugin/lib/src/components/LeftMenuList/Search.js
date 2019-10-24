@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { colors } from 'strapi-helper-plugin';
+import colors from '../../assets/styles/colors';
 
 const Search = styled.input`
   width: 100%;

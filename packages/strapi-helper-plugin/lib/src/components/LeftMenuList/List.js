@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { colors } from 'strapi-helper-plugin';
+import colors from '../../assets/styles/colors';
 
 const List = styled.ul`
   padding-left: 15px;
@@ -30,10 +30,17 @@ const List = styled.ul`
   }
   a {
     display: block;
+    &.active {
+      p {
+        font-weight: 600;
+      }
+    }
     p {
       color: ${colors.leftMenu.black};
       font-size: 13px;
       line-height: 16px;
+      display: flex;
+      justify-content: space-between;
     }
     &:hover {
       text-decoration: none;
