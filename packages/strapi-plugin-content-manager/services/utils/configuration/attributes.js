@@ -2,8 +2,23 @@
 
 const _ = require('lodash');
 
-const NON_SORTABLES = ['component', 'json', 'relation', 'media'];
-const NON_LISTABLES = ['component', 'json', 'relation', 'password'];
+const NON_SORTABLES = [
+  'component',
+  'json',
+  'relation',
+  'media',
+  'richtext',
+  'dynamiczone',
+];
+
+const NON_LISTABLES = [
+  'component',
+  'json',
+  'relation',
+  'password',
+  'richtext',
+  'dynamiczone',
+];
 
 const isListable = (schema, name) => {
   if (!_.has(schema.attributes, name)) {

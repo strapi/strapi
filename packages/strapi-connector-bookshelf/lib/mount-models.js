@@ -83,8 +83,8 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       definition.options
     );
 
-    const componentAttributes = Object.keys(definition.attributes).filter(
-      key => definition.attributes[key].type === 'component'
+    const componentAttributes = Object.keys(definition.attributes).filter(key =>
+      ['component', 'dynamiczone'].includes(definition.attributes[key].type)
     );
 
     if (_.isString(_.get(connection, 'options.pivot_prefix'))) {
@@ -474,12 +474,42 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
         const relations = this.relations;
 
         componentAttributes.forEach(key => {
-          const { repeatable } = definition.attributes[key];
-          if (relations[key]) {
-            const components = relations[key].toJSON().map(el => el.component);
+          if (!_.has(relations, key)) return;
 
-            attrs[key] =
-              repeatable === true ? components : _.first(components) || null;
+          const attr = definition.attributes[key];
+          const { type } = attr;
+
+          switch (type) {
+            case 'component': {
+              const { repeatable } = attr;
+
+              const components = relations[key]
+                .toJSON()
+                .map(el => el.component);
+
+              attrs[key] =
+                repeatable === true ? components : _.first(components) || null;
+
+              break;
+            }
+            case 'dynamiczone': {
+              attrs[key] = relations[key].toJSON().map(el => {
+                const componentKey = Object.keys(strapi.components).find(
+                  key =>
+                    strapi.components[key].collectionName === el.component_type
+                );
+
+                return {
+                  __component: strapi.components[componentKey].uid,
+                  ...el.component,
+                };
+              });
+
+              break;
+            }
+            default: {
+              throw new Error(`Invalid type for attribute ${key}: ${type}`);
+            }
           }
         });
 
@@ -609,9 +639,13 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       };
 
       const populateComponent = key => {
+        const attr = definition.attributes[key];
+
+        // TODO: maybe find a better approach
+        if (attr.type === 'dynamiczone') return [`${key}.component`];
+
         let paths = [];
-        const component =
-          strapi.components[definition.attributes[key].component];
+        const component = strapi.components[attr.component];
 
         const assocs = (component.associations || []).filter(
           assoc => assoc.autoPopulate === true
