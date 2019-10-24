@@ -293,7 +293,12 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
             validateNonRepeatableInput(componentValue, { key, ...attr });
 
             if (componentValue === null) continue;
-            await createComponentAndLink({ value: componentValue, order: 1 });
+            await createComponentAndLink({
+              componentModel,
+              key,
+              value: componentValue,
+              order: 1,
+            });
           }
           break;
         }
@@ -558,7 +563,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
         })
         .destroy({ transacting });
 
-      for (let idToDelete of idsToDelete) {
+      for (const idToDelete of idsToDelete) {
         const { id, component } = idToDelete;
         const model = strapi.query(component.uid);
         await model.delete({ [model.primaryKey]: id }, { transacting });
@@ -624,36 +629,91 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
 
     for (let key of componentKeys) {
       const attr = model.attributes[key];
-      const { component } = attr;
+      const { type } = attr;
 
-      const componentModel = strapi.components[component];
+      switch (type) {
+        case 'component': {
+          const { component } = attr;
 
-      const ids = await joinModel
-        .forge()
-        .query({
-          where: {
-            [foreignKey]: entry.id,
-            component_type: componentModel.collectionName,
-            field: key,
-          },
-        })
-        .fetchAll({ transacting })
-        .map(el => el.get('component_id'));
+          const componentModel = strapi.components[component];
 
-      await strapi
-        .query(componentModel.uid)
-        .delete({ [`${componentModel.primaryKey}_in`]: ids }, { transacting });
+          const ids = await joinModel
+            .forge()
+            .query({
+              where: {
+                [foreignKey]: entry.id,
+                field: key,
+              },
+            })
+            .fetchAll({ transacting })
+            .map(el => el.get('component_id'));
 
-      await joinModel
-        .forge()
-        .query({
-          where: {
-            [foreignKey]: entry.id,
-            component_type: componentModel.collectionName,
-            field: key,
-          },
-        })
-        .destroy({ transacting, require: false });
+          await strapi
+            .query(componentModel.uid)
+            .delete(
+              { [`${componentModel.primaryKey}_in`]: ids },
+              { transacting }
+            );
+
+          await joinModel
+            .forge()
+            .query({
+              where: {
+                [foreignKey]: entry.id,
+                field: key,
+              },
+            })
+            .destroy({ transacting, require: false });
+          break;
+        }
+        case 'dynamiczone': {
+          const { components } = attr;
+
+          const componentJoins = await joinModel
+            .forge()
+            .query({
+              where: {
+                [foreignKey]: entry.id,
+                field: key,
+              },
+            })
+            .fetchAll({ transacting })
+            .map(el => ({
+              id: el.get('component_id'),
+              componentType: el.get('component_type'),
+            }));
+
+          for (const compo of components) {
+            const { uid, collectionName } = strapi.components[compo];
+            const model = strapi.query(uid);
+
+            const toDelete = componentJoins.filter(
+              el => el.componentType === collectionName
+            );
+
+            if (toDelete.length > 0) {
+              await model.delete(
+                {
+                  [`${model.primaryKey}_in`]: toDelete.map(el => el.id),
+                },
+                { transacting }
+              );
+            }
+          }
+
+          await joinModel
+            .forge()
+            .query({
+              where: {
+                [foreignKey]: entry.id,
+                field: key,
+              },
+            })
+            .destroy({ transacting, require: false });
+
+          break;
+        }
+      }
     }
   }
 

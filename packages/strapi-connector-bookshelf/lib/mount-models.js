@@ -641,7 +641,6 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       const populateComponent = key => {
         const attr = definition.attributes[key];
 
-        // TODO: maybe find a better approach
         if (attr.type === 'dynamiczone') return [`${key}.component`];
 
         let paths = [];

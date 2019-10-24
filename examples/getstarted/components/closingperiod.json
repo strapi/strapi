@@ -16,6 +16,10 @@
     "end_date": {
       "type": "date",
       "required": true
+    },
+    "dish": {
+      "component": "dish",
+      "type": "component"
     }
   }
 }
