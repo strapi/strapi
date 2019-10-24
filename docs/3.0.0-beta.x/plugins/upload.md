@@ -298,7 +298,7 @@ To use it you will have to publish it on **npm**.
 
 ### Create a local provider
 
-If you want create your own provider without publishing it on **npm** you can follow these steps:
+If you want to create your own provider without publishing it on **npm** you can follow these steps:
 
 - Create a `providers` folder in your application.
 - Create your provider as explained in the documentation eg. `./providers/strapi-provider-upload-[...]/...`
