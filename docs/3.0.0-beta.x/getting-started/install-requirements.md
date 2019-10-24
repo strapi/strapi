@@ -130,5 +130,5 @@ npm -v
 You can also use yarn if you want [here](https://yarnpkg.com/en/docs/getting-started) are the instructions to get started with it.
 
 ::: tip NEXT STEPS
-👏 Congrats, you are all set! Now that Node.js is installed you can continue with the [Quick start guide](/3.0.0-beta.x/getting-started/quick-start.html).
+👏 Congrats, you are all set! Now that Node.js is installed you can continue with the [Quick start guide](quick-start.md).
 :::

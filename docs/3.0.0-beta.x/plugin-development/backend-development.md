@@ -7,7 +7,7 @@ This section explains how the 'back-end part' of your plugin works.
 The plugin API routes are defined in the `./plugins/**/config/routes.json` file.
 
 ::: note
-Please refer to [router documentation](../guides/routing.md) for information.
+Please refer to [router documentation](../concepts/routing.md) for information.
 :::
 
 **Route prefix**
@@ -38,7 +38,7 @@ Please refer to the [CLI documentation](../cli/CLI.md) for more information.
 
 Controllers contain functions executed according to the requested route.
 
-Please refer to the [Controllers documentation](../guides/controllers.md) for more information.
+Please refer to the [Controllers documentation](../concepts/controllers.md) for more information.
 
 ## Models
 
@@ -61,7 +61,7 @@ module.exports = {
 
 Also, the table/collection name won't be `users` because you already have a `User` model. That's why, the framework will automatically prefix the table/collection name for this model with the name of the plugin. Which means in our example, the table/collection name of the `User` model of our plugin `Users & Permissions` will be `users-permissions_users`. If you want to force the table/collection name of the plugin's model, you can add the `collectionName` attribute in your model.
 
-Please refer to the [Models documentation](../guides/models.md) for more information.
+Please refer to the [Models documentation](../concepts/models.md) for more information.
 
 ## Policies
 
@@ -103,7 +103,7 @@ A plugin can have its own policies, such as adding security rules. For instance,
 }
 ```
 
-Please refer to the [Policies documentation](../guides/policies.md) for more information.
+Please refer to the [Policies documentation](../concepts/policies.md) for more information.
 
 ## ORM queries
 

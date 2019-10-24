@@ -1,6 +1,6 @@
 # Tutorial
 
-This **tutorial** is written for developers to **teach and explain** a step-by-step introduction to Strapi. (The [Quick Start Guide](/3.0.0-beta.x/getting-started/quick-start.html) is a more concise **How-to** version.) This tutorial takes you through the beginning steps of how you start a project like **"FoodAdvisor"** ([Github](https://github.com/strapi/foodadvisor/))([Demo](https://foodadvisor.strapi.io/)).
+This **tutorial** is written for developers to **teach and explain** a step-by-step introduction to Strapi. (The [Quick Start Guide](quick-start.md) is a more concise **How-to** version.) This tutorial takes you through the beginning steps of how you start a project like **"FoodAdvisor"** ([Github](https://github.com/strapi/foodadvisor/))([Demo](https://foodadvisor.strapi.io/)).
 
 You get a good overview of the features developers love found in Strapi.
 
@@ -10,20 +10,13 @@ By following this tutorial, you install and create your first Strapi project.
 
 ::: tip NOTE
 
-You need to have **_Node.js and npm_** installed on your system before following these steps. If you do not have Node.js and npm installed (or are not sure), please visit our [Installation Requirements](/3.0.0-beta.x/getting-started/install-requirements.html).
+You need to have **_Node.js and npm_** installed on your system before following these steps. If you do not have Node.js and npm installed (or are not sure), please visit our [Installation Requirements](install-requirements.md).
 
 :::
 
 **Table of Contents**
 
-1. [Install Strapi and create project](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_1-install-strapi-and-create-a-project)
-2. [Create an Administrator and front-end User](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_2-create-an-adminstrator-and-front-end-user)
-3. [Create a new Content Type called, "Restaurant"](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_3-create-a-new-content-type-called-restaurant)
-4. [Create a new Content Type called, "Category"](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_4-create-a-new-content-type-called-category)
-5. [Create a new Group and Repeatable Field called, "Hours of Operations"](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_5-create-a-new-group-and-repeatable-field-called-hours-of-operation)
-6. [Manage and add content to the "Restaurant" Content Type](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_6-manage-and-add-content-to-a-restaurant-content-type)
-7. [Set Roles and Permissions](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_7-set-roles-and-permissions)
-8. [Consume the Content Type API](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_8-consume-the-content-type-api)
+[[toc]]
 
 ## 1. Install Strapi and create a project
 
@@ -140,7 +133,7 @@ Using the `--quickstart` flag installs Strapi using an [SQLite](https://www.sqli
 
 **Note:** An **SQLite** database is an excellent database to use for prototyping and _developing_ Strapi projects. **SQLite** is a light database that ports effortlessly to the other relational databases (**MySQL**, **PostgreSQL**, and **MariaDB**). It is recommended to **develop** with SQLite and to use another relational database (MySQL, PostgreSQL or MariaDB) in production.
 
-**Note:** If you would like to use **MongoDB** in production, you need to [install, run, and use MongoDB to develop your Strapi project (in development)](/3.0.0-beta.x/guides/databases.html#mongodb-installation).
+**Note:** If you would like to use **MongoDB** in production, you need to [install, run, and use MongoDB to develop your Strapi project (in development)](../guides/databases.md#mongodb-installation).
 :::
 
 You are now ready to create a new **Administrator** and new front-end **User**.
@@ -626,7 +619,7 @@ If you would like to see the route of any specific **Content Type**, you need to
 👏 Congratulations, you have now completed the **Strapi Getting Started Tutorial**. Where to go next?
 
 - Learn how to use Strapi with React ([Gatsby](https://blog.strapi.io/building-a-static-website-using-gatsby-and-strapi) or [Next.js](https://blog.strapi.io/strapi-next-setup/)) or Vue.js ([Nuxt.js](https://blog.strapi.io/cooking-a-deliveroo-clone-with-nuxt-vue-js-graphql-strapi-and-stripe-setup-part-1-7/)).
-- Read the [concepts](../concepts/concepts.html) to deep dive into Strapi
+- Read the **concepts** to deep dive into Strapi
 - Get help on [StackOverflow](https://stackoverflow.com/questions/tagged/strapi)
 - Read the [source code](https://github.com/strapi/strapi), [contribute](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) or [give a star](https://github.com/strapi/strapi) on GitHub
 - Follow us on [Twitter](https://twitter.com/strapijs) to get the latest news

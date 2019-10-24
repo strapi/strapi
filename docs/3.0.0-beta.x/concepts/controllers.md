@@ -50,6 +50,8 @@ const { parseMultipartData, sanitizeEntity } = require('strapi-utils');
 #### `find`
 
 ```js
+const { sanitizeEntity } = require('strapi-utils');
+
 module.exports = {
   /**
    * Retrieve records.
@@ -60,9 +62,9 @@ module.exports = {
   async find(ctx) {
     let entities;
     if (ctx.query._q) {
-      entities = await service.search(ctx.query);
+      entities = await strapi.services.restaurant.search(ctx.query);
     } else {
-      entities = await service.find(ctx.query);
+      entities = await strapi.services.restaurant.find(ctx.query);
     }
 
     return entities.map(entity => sanitizeEntity(entity, { model }));
@@ -77,6 +79,8 @@ module.exports = {
 #### `findOne`
 
 ```js
+const { sanitizeEntity } = require('strapi-utils');
+
 module.exports = {
   /**
    * Retrieve a record.
@@ -85,7 +89,7 @@ module.exports = {
    */
 
   async findOne(ctx) {
-    const entity = await service.findOne(ctx.params);
+    const entity = await strapi.services.restaurant.findOne(ctx.params);
     return sanitizeEntity(entity, { model });
   },
 };
@@ -107,9 +111,9 @@ module.exports = {
 
   count(ctx) {
     if (ctx.query._q) {
-      return service.countSearch(ctx.query);
+      return strapi.services.restaurant.countSearch(ctx.query);
     }
-    return service.count(ctx.query);
+    return strapi.services.restaurant.count(ctx.query);
   },
 };
 ```
@@ -121,6 +125,8 @@ module.exports = {
 #### `create`
 
 ```js
+const { parseMultipartData, sanitizeEntity } = require('strapi-utils');
+
 module.exports = {
   /**
    * Create a record.
@@ -132,9 +138,9 @@ module.exports = {
     let entity;
     if (ctx.is('multipart')) {
       const { data, files } = parseMultipartData(ctx);
-      entity = await service.create(data, { files });
+      entity = await strapi.services.restaurant.create(data, { files });
     } else {
-      entity = await service.create(ctx.request.body);
+      entity = await strapi.services.restaurant.create(ctx.request.body);
     }
     return sanitizeEntity(entity, { model });
   },
@@ -148,6 +154,8 @@ module.exports = {
 #### `update`
 
 ```js
+const { parseMultipartData, sanitizeEntity } = require('strapi-utils');
+
 module.exports = {
   /**
    * Update a record.
@@ -159,9 +167,14 @@ module.exports = {
     let entity;
     if (ctx.is('multipart')) {
       const { data, files } = parseMultipartData(ctx);
-      entity = await service.update(ctx.params, data, { files });
+      entity = await strapi.services.restaurant.update(ctx.params, data, {
+        files,
+      });
     } else {
-      entity = await service.update(ctx.params, ctx.request.body);
+      entity = await strapi.services.restaurant.update(
+        ctx.params,
+        ctx.request.body
+      );
     }
 
     return sanitizeEntity(entity, { model });
@@ -176,6 +189,8 @@ module.exports = {
 #### `delete`
 
 ```js
+const { sanitizeEntity } = require('strapi-utils');
+
 module.exports = {
   /**
    * delete a record.
@@ -184,7 +199,7 @@ module.exports = {
    */
 
   async delete(ctx) {
-    const entity = await service.delete(ctx.params);
+    const entity = await strapi.services.restaurant.delete(ctx.params);
     return sanitizeEntity(entity, { model });
   },
 };
