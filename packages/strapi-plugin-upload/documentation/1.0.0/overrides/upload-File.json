@@ -30,7 +30,7 @@
                         "type": "string"
                       },
                       "size": {
-                        "type": "integer"
+                        "type": "decimal"
                       },
                       "url": {
                         "type": "string",
@@ -233,7 +233,7 @@
             "type": "string"
           },
           "size": {
-            "type": "integer"
+            "type": "decimal"
           },
           "mime": {
             "type": "string"

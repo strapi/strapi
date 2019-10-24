@@ -32,7 +32,7 @@
       "required": true
     },
     "size": {
-      "type": "integer",
+      "type": "decimal",
       "configurable": false,
       "required": true
     },
