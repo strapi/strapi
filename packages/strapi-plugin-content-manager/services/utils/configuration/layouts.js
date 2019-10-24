@@ -24,6 +24,7 @@ const typeToSize = type => {
     case 'json':
     case 'component':
     case 'richtext':
+    case 'dynamiczone':
       return MAX_ROW_SIZE;
 
     default:
