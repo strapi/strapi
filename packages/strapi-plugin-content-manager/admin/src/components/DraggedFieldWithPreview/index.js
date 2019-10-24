@@ -15,6 +15,7 @@ const DraggedFieldWithPreview = forwardRef(
       groupLayouts,
       isDragging,
       isDraggingSibling,
+      label,
       name,
       onClickEdit,
       onClickRemove,
@@ -71,6 +72,7 @@ const DraggedFieldWithPreview = forwardRef(
                 groupUid={groupUid}
                 isHidden={isHidden}
                 isDraggingSibling={isDraggingSibling}
+                label={label}
                 name={name}
                 onClick={onClickEdit}
                 onRemove={onClickRemove}
@@ -101,6 +103,11 @@ const DraggedFieldWithPreview = forwardRef(
                             ['schema', 'attributes', field.name, 'type'],
                             ''
                           );
+                          const label = get(
+                            groupData,
+                            ['metadatas', field.name, 'edit', 'label'],
+                            ''
+                          );
 
                           return (
                             <div
@@ -111,6 +118,7 @@ const DraggedFieldWithPreview = forwardRef(
                               }}
                             >
                               <DraggedField
+                                label={label}
                                 name={field.name}
                                 isSub
                                 withLongerHeight={higherFields.includes(
@@ -139,6 +147,7 @@ DraggedFieldWithPreview.defaultProps = {
   groupUid: null,
   isDragging: false,
   isDraggingSibling: false,
+  label: '',
   onClickEdit: () => {},
   onClickRemove: () => {},
   selectedItem: '',
@@ -155,6 +164,7 @@ DraggedFieldWithPreview.propTypes = {
   groupUid: PropTypes.string,
   isDragging: PropTypes.bool,
   isDraggingSibling: PropTypes.bool,
+  label: PropTypes.string,
   name: PropTypes.string.isRequired,
   onClickEdit: PropTypes.func,
   onClickRemove: PropTypes.func,

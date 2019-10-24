@@ -1,6 +1,7 @@
 /* eslint-disable react/display-name */
 import React, { forwardRef, useState } from 'react';
 import PropTypes from 'prop-types';
+import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Grab, GrabLarge, Pencil, Remove } from '@buffetjs/icons';
 import pluginId from '../../pluginId';
@@ -22,6 +23,7 @@ const DraggedField = forwardRef(
       isDraggingSibling,
       isHidden,
       isSub,
+      label,
       name,
       onClick,
       onRemove,
@@ -37,6 +39,7 @@ const DraggedField = forwardRef(
     const [isOverEditBlock, setIsOverEditBlock] = useState(false);
     const isSelected = selectedItem === name;
     const showEditBlockOverState = isOverEditBlock && !isDraggingSibling;
+    const displayedLabel = isEmpty(label) ? name : label;
 
     return (
       <Wrapper
@@ -91,11 +94,11 @@ const DraggedField = forwardRef(
             >
               {children ? (
                 <>
-                  <span>{name}</span>
+                  <span>{displayedLabel}</span>
                   {children}
                 </>
               ) : (
-                <span>{name}</span>
+                <span>{displayedLabel}</span>
               )}
             </NameWrapper>
             <RemoveWrapper
@@ -155,6 +158,7 @@ DraggedField.defaultProps = {
   isDraggingSibling: false,
   isHidden: false,
   isSub: false,
+  label: '',
   onClick: () => {},
   onRemove: () => {},
   selectedItem: '',
@@ -171,6 +175,7 @@ DraggedField.propTypes = {
   isDraggingSibling: PropTypes.bool,
   isHidden: PropTypes.bool,
   isSub: PropTypes.bool,
+  label: PropTypes.string,
   name: PropTypes.string.isRequired,
   onClick: PropTypes.func,
   onRemove: PropTypes.func,

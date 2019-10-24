@@ -9,6 +9,7 @@ const Label = ({
   count,
   index,
   isDraggingSibling,
+  label,
   move,
   name,
   onClick,
@@ -60,6 +61,7 @@ const Label = ({
       ref={ref}
       isDragging={isDragging}
       isDraggingSibling={isDraggingSibling}
+      label={label}
       name={name}
       onClick={onClick}
       onRemove={onRemove}
@@ -71,6 +73,7 @@ const Label = ({
 Label.defaultProps = {
   index: 0,
   isDraggingSibling: false,
+  label: '',
   move: () => {},
   selectedItem: '',
   setIsDraggingSibling: () => {},
@@ -80,6 +83,7 @@ Label.propTypes = {
   count: PropTypes.number.isRequired,
   index: PropTypes.number,
   isDraggingSibling: PropTypes.bool,
+  label: PropTypes.string,
   move: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
   onClick: PropTypes.func.isRequired,

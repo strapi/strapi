@@ -240,12 +240,19 @@ const ListSettingsView = ({
                 }}
               >
                 {getListDisplayedFields().map((item, index) => {
+                  const label = get(
+                    modifiedData,
+                    ['metadatas', item, 'list', 'label'],
+                    ''
+                  );
+
                   return (
                     <Label
                       count={getListDisplayedFields().length}
                       key={item}
                       index={index}
                       isDraggingSibling={isDraggingSibling}
+                      label={label}
                       move={move}
                       name={item}
                       onClick={handleClickEditLabel}
