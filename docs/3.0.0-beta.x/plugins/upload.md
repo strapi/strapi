@@ -298,10 +298,10 @@ To use it you will have to publish it on **npm**.
 
 ### Create a local provider
 
-If you want create your own provider without publishing it on **npm** you can follow these following steps:
+If you want to create your own provider without publishing it on **npm** you can follow these steps:
 
-- You create a `providers` folder in your application.
-- Create your provider as explain in the documentation eg. `./providers/strapi-provider-upload-[...]/...`
+- Create a `providers` folder in your application.
+- Create your provider as explained in the documentation eg. `./providers/strapi-provider-upload-[...]/...`
 - Then update your `package.json` to link your `strapi-provider-upload-[...]` dependency to the [local path](https://docs.npmjs.com/files/package.json#local-paths) of your new provider.
 
 ```json
