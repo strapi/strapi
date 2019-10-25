@@ -323,6 +323,7 @@ const ListSettingsView = ({ deleteLayout, location: { search }, slug }) => {
         onToggle={toggleModalForm}
         renderForm={renderForm}
         subHeaderContent={labelToEdit}
+        type={get(getAttributes, [labelToEdit, 'type'], 'text')}
       />
     </>
   );

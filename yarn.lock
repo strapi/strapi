@@ -752,11 +752,12 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@buffetjs/core@1.0.5", "@buffetjs/core@^1.0.5":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@buffetjs/core/-/core-1.0.5.tgz#20ac6a6c5a14f3fe2d759c3620e308d28bd2fbcd"
-  integrity sha512-fpcUdZfLSCLAds9R31kSeNjCHV5Ms1NGKJoZpGHAJTjNPpH9LCJ6G15V84hidebh6fLhpAc8O60eE3AtP3v9mg==
+"@buffetjs/core@1.0.6", "@buffetjs/core@^1.0.6":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@buffetjs/core/-/core-1.0.6.tgz#0694649d7c68c1a0ce0e5c8acfad725ba4074802"
+  integrity sha512-zsQaoBHADF31KmCRoTgpSdt4n8cZyQoWlPeoifuaN9QH+lPlGkdDu/P+wwLtFlJBxDL3D6+R9DkVBgLVMDTa+A==
   dependencies:
+    "@buffetjs/icons" "1.0.6"
     "@buffetjs/styles" "1.0.5"
     "@buffetjs/utils" "1.0.5"
     "@fortawesome/fontawesome-svg-core" "^1.2.25"
@@ -769,21 +770,21 @@
     react-dates "^21.1.0"
     react-moment-proptypes "^1.7.0"
 
-"@buffetjs/custom@^1.0.5":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@buffetjs/custom/-/custom-1.0.5.tgz#2d84640654013cd4b7f927691b6970ab00e6a537"
-  integrity sha512-wqKg1eCVaMetqbwDbrVGYSCJGerBklues/PPw16SGHlnMqdPRvNCVg8e/1GsGyN3XogaxRW/cv86D79505yezg==
+"@buffetjs/custom@^1.0.6":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@buffetjs/custom/-/custom-1.0.6.tgz#654e1b6155f486691c65d8025c6be362e3e9074b"
+  integrity sha512-Sped1k47KCS8o7R4d14N4ujut/umqbUi+jERHHA0cocjD5bpfSbCVakmmL36HGZhXo5kBaHUVfKxMx3uEjwZaA==
   dependencies:
-    "@buffetjs/core" "1.0.5"
+    "@buffetjs/core" "1.0.6"
     "@buffetjs/styles" "1.0.5"
     "@buffetjs/utils" "1.0.5"
     moment "^2.24.0"
     react-moment-proptypes "^1.7.0"
 
-"@buffetjs/icons@^1.0.5":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@buffetjs/icons/-/icons-1.0.5.tgz#0fb557d5a2dd7b48165ba635c6cd209784a7883e"
-  integrity sha512-potY6gQOSMIjsQ+44tTrX2ajyge5rZfSJldSbaOGmQQhFUtxrQyHMRyful+KgJ1bDILyHS1A5G8KujH2mtAAaw==
+"@buffetjs/icons@1.0.6", "@buffetjs/icons@^1.0.6":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@buffetjs/icons/-/icons-1.0.6.tgz#c12ab7516d5ed619046dcdf1d34fbc0feb1b5fef"
+  integrity sha512-Te31jtNuOXFvMkVnuPqAZmL20RXwJUu07rdM8kQ0ejnfWK3xX/lAzdBnZp9iLt4YKhmKUX1rvLqLEp1dQ1wl3w==
 
 "@buffetjs/styles@1.0.5", "@buffetjs/styles@^1.0.5":
   version "1.0.5"

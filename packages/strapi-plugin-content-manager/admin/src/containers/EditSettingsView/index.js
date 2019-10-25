@@ -437,6 +437,7 @@ const EditSettingsView = ({
         onToggle={toggleModalForm}
         renderForm={renderForm}
         subHeaderContent={metaToEdit}
+        type={get(getAttributes, [metaToEdit, 'type'], '')}
       />
     </LayoutDndProvider>
   );

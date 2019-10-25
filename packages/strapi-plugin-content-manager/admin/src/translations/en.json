@@ -67,8 +67,8 @@
   "containers.List.pluginHeaderDescription.singular": "{label} entry found",
   "containers.ListPage.displayedFields": "Displayed Fields",
 
-  "containers.ListSettingsView.modal-form.edit-label": "Edit label",
-  "containers.EditSettingsView.modal-form.edit-field": "Edit field",
+  "containers.ListSettingsView.modal-form.edit-label": "Edit the label",
+  "containers.EditSettingsView.modal-form.edit-field": "Edit the field",
 
   "containers.SettingPage.addField": "Add new field",
   "containers.SettingPage.addRelationalField": "Add new relational field",

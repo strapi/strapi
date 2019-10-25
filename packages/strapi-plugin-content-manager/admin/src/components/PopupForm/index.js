@@ -10,6 +10,8 @@ import {
   ModalForm,
 } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
+import { upperFirst } from 'lodash';
+import { AttributeIcon } from '@buffetjs/core';
 
 const PopupForm = ({
   headerId,
@@ -19,18 +21,38 @@ const PopupForm = ({
   onToggle,
   renderForm,
   subHeaderContent,
+  type,
 }) => {
+  const getAttrType = () => {
+    if (type === 'timestamp') {
+      return 'date';
+    }
+
+    if (['decimal', 'float', 'integer', 'biginter'].includes(type)) {
+      return 'number';
+    }
+
+    if (type === 'group') {
+      return 'component';
+    }
+
+    return type;
+  };
   return (
     <Modal isOpen={isOpen} onClosed={onClosed} onToggle={onToggle}>
       <HeaderModal>
         <section>
-          <HeaderModalTitle>
+          <HeaderModalTitle style={{ textTransform: 'none' }}>
+            <AttributeIcon
+              type={getAttrType()}
+              style={{ margin: 'auto 20px auto 0' }}
+            />
             <FormattedMessage id={headerId} />
           </HeaderModalTitle>
         </section>
         <section>
           <HeaderModalTitle>
-            <span>{subHeaderContent}</span>
+            <span>{upperFirst(subHeaderContent)}</span>
             <hr />
           </HeaderModalTitle>
         </section>
@@ -61,6 +83,7 @@ PopupForm.defaultProps = {
   onToggle: () => {},
   renderForm: () => {},
   subHeaderContent: '',
+  type: '',
 };
 
 PopupForm.propTypes = {
@@ -71,6 +94,7 @@ PopupForm.propTypes = {
   onToggle: PropTypes.func,
   renderForm: PropTypes.func,
   subHeaderContent: PropTypes.string,
+  type: PropTypes.string,
 };
 
 export default PopupForm;
