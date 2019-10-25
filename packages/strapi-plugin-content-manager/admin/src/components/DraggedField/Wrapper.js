@@ -13,7 +13,6 @@ const Wrapper = styled.div`
   }};
   min-height: ${({ withLongerHeight }) => getHeight(withLongerHeight)};
   padding: 0 10px 0 0;
-  margin-right: 4px;
   flex-basis: calc(100% / ${props => props.count});
   flex-shrink: 1;
   min-width: 130px;
