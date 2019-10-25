@@ -261,12 +261,22 @@ module.exports = {
       // cause a lost of the Object prototype.
       const opts = this.amountLimiting(_options);
 
-      ctx.query = {
-        ...this.convertToParams(_.omit(opts, 'where')),
-        ...this.convertToQuery(opts.where),
-      };
+      Object.defineProperty(ctx, 'query', {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: {
+          ...this.convertToParams(_.omit(opts, 'where')),
+          ...this.convertToQuery(opts.where),
+        },
+      });
 
-      ctx.params = this.convertToParams(opts);
+      Object.defineProperty(ctx, 'params', {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: this.convertToParams(opts),
+      });
 
       // Execute policies stack.
       const policy = await compose(policiesFn)(ctx);

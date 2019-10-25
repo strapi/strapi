@@ -1,6 +1,6 @@
 {
   "name": "strapi-admin",
-  "version": "3.0.0-beta.17.3",
+  "version": "3.0.0-beta.17.4",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -70,8 +70,8 @@
     "reselect": "^3.0.1",
     "sanitize.css": "^4.1.0",
     "shelljs": "^0.7.8",
-    "strapi-helper-plugin": "3.0.0-beta.17.3",
-    "strapi-utils": "3.0.0-beta.17.3",
+    "strapi-helper-plugin": "3.0.0-beta.17.4",
+    "strapi-utils": "3.0.0-beta.17.4",
     "style-loader": "^0.23.1",
     "styled-components": "^4.2.0",
     "terser-webpack-plugin": "^1.2.3",
@@ -100,6 +100,5 @@
     "npm": ">=6.0.0"
   },
   "license": "MIT",
-  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9",
-  "devDependencies": {}
+  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
 }
