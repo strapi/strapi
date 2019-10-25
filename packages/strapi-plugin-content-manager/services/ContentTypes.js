@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+
 const pluralize = require('pluralize');
 const storeUtils = require('./utils/store');
 const { pickSchemaFields } = require('./utils/schema');
