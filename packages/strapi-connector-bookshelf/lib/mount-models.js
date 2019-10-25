@@ -741,6 +741,8 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
             options.withRelated = []
               .concat(createGroupsPopulate())
               .concat(createAssociationPopulate());
+          } else if (_.isEmpty(options.withRelated)) {
+            options.withRelated = createGroupsPopulate();
           } else {
             options.withRelated = formatPopulateOptions(options.withRelated);
           }

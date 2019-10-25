@@ -3,7 +3,7 @@
 Strapi gives you many possible deployment options for your project or application. Strapi can be deployed on traditional hosting servers or services such as Heroku, AWS, Azure and others. The following documentation covers how to develop locally with Strapi and deploy Strapi with various hosting options.
 
 ::: note
-Deploying **databases** along with Strapi is covered in the [Databases Guide](/3.0.0-beta.x/guides/databases.html).
+Deploying **databases** along with Strapi is covered in the [Databases Guide](../guides/databases.md).
 :::
 
 ## Configuration
@@ -24,7 +24,7 @@ Update the `production` settings with the IP and domain name where the project w
 In case your database is not running on the same server, make sure that the environment of your production
 database (`./config/environments/production/database.json`) is set properly.
 
-If you are passing a number of configuration item values via environment variables which is always encouraged for production environment, read the section for [Dynamic Configuration](../configurations/configurations.md#dynamic-configurations). Here is an example:
+If you are passing a number of configuration item values via environment variables which is always encouraged for production environment, read the section for [Dynamic Configuration](../concepts/configurations.md#dynamic-configurations). Here is an example:
 
 **Path —** `./config/environments/production/server.json`.
 
@@ -95,11 +95,11 @@ strapi(/* {...} */).start();
 
 ### Advanced configurations
 
-If you want to host the administration on another server than the API, [please take a look at this dedicated section](../advanced/customize-admin.md#deployment).
+If you want to host the administration on another server than the API, [please take a look at this dedicated section](../admin-panel/deploy.md).
 
 ## Amazon AWS
 
-This is a step-by-step guide for deploying a Strapi project to [Amazon AWS EC2](https://aws.amazon.com/ec2/). This guide will connect to an [Amazon AWS RDS](https://aws.amazon.com/rds/) for managing and hosting the database. Optionally, this guide will show you how to connect host and serve images on [Amazon AWS S3](https://aws.amazon.com/s3/). Prior to starting this guide, you should have created a [Strapi project](/3.0.0-beta.x/getting-started/quick-start.html), to use for deploying on AWS.
+This is a step-by-step guide for deploying a Strapi project to [Amazon AWS EC2](https://aws.amazon.com/ec2/). This guide will connect to an [Amazon AWS RDS](https://aws.amazon.com/rds/) for managing and hosting the database. Optionally, this guide will show you how to connect host and serve images on [Amazon AWS S3](https://aws.amazon.com/s3/). Prior to starting this guide, you should have created a [Strapi project](../getting-started/quick-start.md), to use for deploying on AWS.
 
 ### Amazon AWS Install Requirement and creating an IAM non-root user
 
@@ -748,7 +748,7 @@ Your `Strapi` project has been installed on an **AWS EC2 instance** using **Ubun
 
 ## Digital Ocean
 
-This is a step-by-step guide for deploying a Strapi project to [Digital Ocean](https://www.digitalocean.com/). Databases can be on a [Digital Ocean Droplet](https://www.digitalocean.com/docs/droplets/) or hosted externally as a service. Prior to starting this guide, you should have created a [Strapi project](/3.0.0-beta.x/getting-started/quick-start.html).
+This is a step-by-step guide for deploying a Strapi project to [Digital Ocean](https://www.digitalocean.com/). Databases can be on a [Digital Ocean Droplet](https://www.digitalocean.com/docs/droplets/) or hosted externally as a service. Prior to starting this guide, you should have created a [Strapi project](../getting-started/quick-start.md).
 
 ### Digital Ocean Install Requirements
 
@@ -979,7 +979,7 @@ Command may disrupt existing ssh connections. Proceed with operation (y|n)? y
 Firewall is active and enabled on system startup
 ```
 
-Your Strapi project is now installed on your **Droplet**. You have a few more steps prior to being able to access Strapi and [create your first user](https://strapi.io/documentation/3.0.0-beta.x/getting-started/quick-start.html#_3-create-an-admin-user).
+Your Strapi project is now installed on your **Droplet**. You have a few more steps prior to being able to access Strapi and [create your first user](../getting-started/quick-start.md#_3-create-an-admin-user).
 
 You will next need to [install and configure PM2 Runtime](#install-and-configure-pm2-runtime).
 
@@ -1037,7 +1037,7 @@ pm2 start ecosystem.config.js
 
 `pm2` is now set-up to use an `ecosystem.config.js` to manage restarting your application upon changes. This is a recommended best practice.
 
-**OPTIONAL:** You may see your project and set-up your first administrator user, by [creating an admin user](https://strapi.io/documentation/3.0.0-beta.x/getting-started/quick-start.html#_3-create-an-admin-user).
+**OPTIONAL:** You may see your project and set-up your first administrator user, by [creating an admin user](../getting-started/quick-start.md#_3-create-an-admin-user).
 
 ::: note
 Earlier, `Port 1337` was allowed access for **testing and setup** purposes. After setting up **NGINX**, the **Port 1337** needs to have access **denied**.
@@ -1298,11 +1298,11 @@ Follow the instructions and return to your command line.
 
 #### 3. Create a new project (or use an existing one)
 
-Create a [new Strapi project](/3.0.0-beta.x/getting-started/quick-start.html) (if you want to deploy an existing project go to step 4).
+Create a [new Strapi project](../getting-started/quick-start.md) (if you want to deploy an existing project go to step 4).
 
 ::: warning NOTE
 
-If you plan to use **MongoDB** with your project, [refer to the create a Strapi project with MongoDB section of the documentation](/3.0.0-beta.x/guides/databases.html#install-mongodb-locally) then, jump to step 4.
+If you plan to use **MongoDB** with your project, [refer to the create a Strapi project with MongoDB section of the documentation](../guides/databases.md#install-mongodb-locally) then, jump to step 4.
 
 :::
 
@@ -1463,11 +1463,11 @@ npm install pg --save
 
 Please follow these steps the **deploy a Strapi app with MongoDB on Heroku**.
 
-You must have completed the [steps to use Strapi with MongoDB Atlas](/3.0.0-beta.x/guides/databases.html#install-on-atlas-mongodb-atlas) - through **4. Retrieve database credentials**.
+You must have completed the [steps to use Strapi with MongoDB Atlas](../guides/databases.md#install-on-atlas-mongodb-atlas) - through **4. Retrieve database credentials**.
 
 #### 1. Set environment variables
 
-When you [set-up your MongoDB Atlas database](/3.0.0-beta.x/guides/databases.html#install-on-atlas-mongodb-atlas) you noted a connection string. Similar to this:
+When you [set-up your MongoDB Atlas database](../guides/databases.md#install-on-atlas-mongodb-atlas) you noted a connection string. Similar to this:
 
 ```bash
 mongodb://paulbocuse:<password>@strapidatabase-shard-00-00-fxxx6c.mongodb.net:27017,strapidatabase-shard-00-01-fxxxc.mongodb.net:27017,strapidatabase-shard-00-02-fxxxc.mongodb.net:27017/test?ssl=true&replicaSet=strapidatabase-shard-0&authSource=admin&retryWrites=true&w=majority
@@ -1538,13 +1538,11 @@ heroku open
 
 If you see the Strapi Welcome page, you have correctly set-up, configured and deployed your Strapi project on Heroku. You will now need to set-up your `admin user` as the production database is brand-new (and empty).
 
-You can now continue with the [Tutorial - Creating an Admin User](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_3-create-an-admin-user), if you have any questions on how to proceed.
+You can now continue with the [Tutorial - Creating an Admin User](../getting-started/quick-start-tutorial.md#_3-create-an-admin-user), if you have any questions on how to proceed.
 
 ::: warning
 For security reasons, the Content Type Builder plugin is disabled in production. To update content structure, please make your changes locally and deploy again.
 :::
-
----
 
 ### Project updates
 
@@ -1562,3 +1560,9 @@ git commit -am "Changes to my-project noted"
 git push heroku master
 heroku open
 ```
+
+### File Uploads
+
+Like with project updates on Heroku, the file system doesn't support local uploading of files as they will be wiped when Heroku "Cycles" the dyno. This type of file system is called [ephemeral](https://devcenter.heroku.com/articles/dynos#ephemeral-filesystem), which means the file system only lasts until the dyno is restarted (with Heroku this happens any time you redeploy or during their regular restart which can happen every few hours or every day).
+
+Due to Heroku's filesystem you will need to use an upload provider such as AWS S3, Cloudinary, or Rackspace. You can view the documentation for installing providers [here](../plugins/upload.md#install-providers) and you can see a list of providers from both Strapi and the community on [npmjs.com](https://www.npmjs.com/search?q=strapi-provider-upload-&page=0&perPage=20).
