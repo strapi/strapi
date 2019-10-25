@@ -2,22 +2,6 @@
   "routes": [
     {
       "method": "GET",
-      "path": "/general-settings",
-      "handler": "GeneralSettings.getGeneralSettings",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "PUT",
-      "path": "/general-settings",
-      "handler": "GeneralSettings.updateGeneralSettings",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
       "path": "/content-types",
       "handler": "ContentTypes.listContentTypes",
       "config": {
