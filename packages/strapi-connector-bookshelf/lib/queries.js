@@ -9,6 +9,7 @@ const {
   buildQuery,
   models: modelUtils,
 } = require('strapi-utils');
+const resolveParams = (params, idAttribute) => params.id ? { ..._.omit(params, 'id'), [idAttribute]: params.id } : params
 
 module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   /* Utils */
@@ -18,6 +19,8 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   const groupKeys = Object.keys(model.attributes).filter(key => {
     return model.attributes[key].type === 'group';
   });
+  const idAttribute = _.get(model, 'primaryKey', 'id');
+
 
   const timestamps = _.get(model, ['options', 'timestamps'], []);
 
@@ -109,7 +112,8 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   }
 
   async function update(params, values, { transacting } = {}) {
-    const entry = await model.forge(params).fetch({ transacting });
+    const modelForge =  await model.forge(params)
+    const entry = await model.forge(resolveParams(params, idAttribute)).fetch({ transacting });
 
     if (!entry) {
       const err = new Error('entry.notFound');
