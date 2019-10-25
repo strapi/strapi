@@ -45,7 +45,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
     definition.databaseName = getDatabaseName(connection);
     definition.client = _.get(connection.settings, 'client');
     _.defaults(definition, {
-      primaryKey: 'id',
+      primaryKey: _.get(definition, 'options.idAttribute', 'id'),
       primaryKeyType: _.get(definition, 'options.idAttributeType', 'integer'),
     });
 
