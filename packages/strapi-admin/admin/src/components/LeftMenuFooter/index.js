@@ -10,7 +10,8 @@ import { PropTypes } from 'prop-types';
 
 import LeftMenuLink from '../LeftMenuLink';
 
-import styles from './styles.scss';
+import Wrapper from './Wrapper';
+
 import messages from './messages.json';
 defineMessages(messages);
 
@@ -29,8 +30,8 @@ function LeftMenuFooter({ version, ...rest }) {
   ];
 
   return (
-    <div className={styles.leftMenuFooter}>
-      <ul className={styles.list}>
+    <Wrapper>
+      <ul className="list">
         {staticLinks.map(link => (
           <LeftMenuLink
             {...rest}
@@ -40,7 +41,7 @@ function LeftMenuFooter({ version, ...rest }) {
           />
         ))}
       </ul>
-      <div className={styles.poweredBy}>
+      <div className="poweredBy">
         <FormattedMessage {...messages.poweredBy} key="poweredBy" />
         <a
           key="website"
@@ -60,7 +61,7 @@ function LeftMenuFooter({ version, ...rest }) {
           v{version}
         </a>
       </div>
-    </div>
+    </Wrapper>
   );
 }
 

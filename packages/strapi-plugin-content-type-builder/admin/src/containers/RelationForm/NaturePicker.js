@@ -6,9 +6,6 @@ import pluralize from 'pluralize';
 
 import pluginId from '../../pluginId';
 
-import styles from './styles.scss';
-
-import InlineBlock from './InlineBlock';
 import oneWay from '../../assets/images/one_way.svg';
 import oneWaySelected from '../../assets/images/one_way_selected.svg';
 import oneToOne from '../../assets/images/one_to_one.svg';
@@ -21,6 +18,8 @@ import manyToMany from '../../assets/images/many_to_many.svg';
 import manyToManySelected from '../../assets/images/many_to_many_selected.svg';
 import manyWay from '../../assets/images/many_way.svg';
 import manyWaySelected from '../../assets/images/many_way_selected.svg';
+
+import NaturePickerWrapper from './NaturePickerWrapper';
 
 const assets = {
   oneWay: {
@@ -84,10 +83,8 @@ const NaturePicker = ({ modelName, onClick, nature, target }) => {
       };
 
   return (
-    <InlineBlock
-      style={{ width: '100%', paddingTop: '70px', cursor: 'pointer' }}
-    >
-      <div className={styles.relationNatureWrapper}>
+    <NaturePickerWrapper>
+      <div className="relationNatureWrapper">
         {Object.keys(assets).map(iconName => {
           const src =
             iconName === nature
@@ -104,12 +101,12 @@ const NaturePicker = ({ modelName, onClick, nature, target }) => {
           );
         })}
       </div>
-      <div className={styles.infoContainer}>
+      <div className="infoContainer">
         <span>{truncate(leftName, { length: 24 })}</span>
         &nbsp; <FormattedMessage id={`${pluginId}.relation.${nature}`} /> &nbsp;
         <span>{truncate(rightName, { length: 24 })}</span>
       </div>
-    </InlineBlock>
+    </NaturePickerWrapper>
   );
 };
 

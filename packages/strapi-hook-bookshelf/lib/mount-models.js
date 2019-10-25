@@ -740,6 +740,8 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
             options.withRelated = []
               .concat(createGroupsPopulate())
               .concat(createAssociationPopulate());
+          } else if (_.isEmpty(options.withRelated)) {
+            options.withRelated = createGroupsPopulate();
           } else {
             options.withRelated = formatPopulateOptions(options.withRelated);
           }
@@ -887,7 +889,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
   return Promise.all(updates);
 };
 
-const castValueFromType = (type, value, /* definition */) => {
+const castValueFromType = (type, value /* definition */) => {
   // do not cast null values
   if (value === null) return null;
 

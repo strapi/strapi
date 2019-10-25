@@ -14,12 +14,12 @@
     "description": {
       "type": "text"
     },
-    "restaurant": {
-      "model": "restaurant",
-      "via": "menu"
-    },
     "menusections": {
       "collection": "menusection",
+      "via": "menu"
+    },
+    "restaurant": {
+      "model": "restaurant",
       "via": "menu"
     }
   }

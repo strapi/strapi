@@ -2,7 +2,7 @@
   "base": {
     "items": [
       {
-        "customBootstrapClass": "col-md-6 offset-md-6 mr-md-5",
+        "customBootstrapClass": "col-md-6 mr-md-5",
         "label": {
           "id": "content-type-builder.form.contentType.item.name"
         },
@@ -22,7 +22,7 @@
         }
       },
       {
-        "customBootstrapClass": "col-md-6 offset-md-6 mr-md-5",
+        "customBootstrapClass": "col-md-6 mr-md-5",
         "label": {
           "id": "content-type-builder.form.contentType.item.connections"
         },
@@ -35,7 +35,7 @@
         }
       },
       {
-        "customBootstrapClass": "col-md-8 offset-md-4 mr-md-5",
+        "customBootstrapClass": "col-md-8 mr-md-5",
         "label": {
           "id": "content-type-builder.form.contentType.item.description"
         },
@@ -50,7 +50,7 @@
   "advanced": {
     "items": [
       {
-        "customBootstrapClass": "col-md-6 offset-md-6 mr-md-5",
+        "customBootstrapClass": "col-md-6 mr-md-5",
         "label": {
           "id": "content-type-builder.form.contentType.item.collectionName"
         },

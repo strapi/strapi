@@ -351,7 +351,6 @@ function ListView({
                         )}
                       </FormattedMessage>
                       {getAllLabels().map(label => {
-                        //
                         return (
                           <DropdownItem
                             key={label.name}

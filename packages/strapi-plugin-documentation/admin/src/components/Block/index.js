@@ -6,19 +6,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import styles from './styles.scss';
+import { Wrapper, Title } from './components';
 
 const renderMsg = msg => <p>{msg}</p>;
 
 const Block = ({ children, description, style, title }) => (
   <div className="col-md-12">
-    <div className={styles.documentationBlock} style={style}>
-      <div className={styles.documentationBlockTitle}>
+    <Wrapper style={style}>
+      <Title>
         <FormattedMessage id={title} />
         <FormattedMessage id={description}>{renderMsg}</FormattedMessage>
-      </div>
+      </Title>
       {children}
-    </div>
+    </Wrapper>
   </div>
 );
 

@@ -9,13 +9,13 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
-import cn from 'classnames';
 import { clone, get, includes, isEqual, isEmpty } from 'lodash';
 
-import { HeaderNav, PluginHeader } from 'strapi-helper-plugin';
-// import PluginHeader from 'components/PluginHeader';
+import { GlobalContext, HeaderNav, PluginHeader } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
+
+import { HomePageContextProvider } from '../../contexts/HomePage';
 
 // Design
 import EditForm from '../../components/EditForm';
@@ -26,7 +26,7 @@ import PopUpForm from '../../components/PopUpForm';
 import selectHomePage from './selectors';
 
 // Styles
-import styles from './styles.scss';
+import Wrapper from './Wrapper';
 
 // Actions
 import {
@@ -51,12 +51,7 @@ const keyBoardShortCuts = [18, 78];
 export class HomePage extends React.Component {
   state = { mapKey: {}, showModalEdit: false };
 
-  getChildContext = () => ({
-    pathname: this.props.location.pathname,
-    push: this.props.history.push,
-    setDataToEdit: this.props.setDataToEdit,
-    unsetDataToEdit: this.props.unsetDataToEdit,
-  });
+  static contextType = GlobalContext;
 
   componentDidMount() {
     this.props.fetchData(this.props.match.params.settingType);
@@ -174,6 +169,10 @@ export class HomePage extends React.Component {
     },
   ];
 
+  isAdvanded = () => {
+    return this.getEndPoint() === 'advanced';
+  };
+
   pluginHeaderActions = [
     {
       label: 'users-permissions.EditPage.cancel',
@@ -191,14 +190,13 @@ export class HomePage extends React.Component {
 
   showLoaders = () => {
     const { data, isLoading, modifiedData } = this.props;
-    const isAdvanded = this.getEndPoint() === 'advanced';
 
     return (
       (isLoading &&
         get(data, this.getEndPoint()) === undefined &&
-        !isAdvanded) ||
+        !this.isAdvanded()) ||
       (isLoading &&
-        isAdvanded &&
+        this.isAdvanded() &&
         get(modifiedData, this.getEndPoint()) === undefined)
     );
   };
@@ -221,29 +219,18 @@ export class HomePage extends React.Component {
     const noButtonList =
       match.params.settingType === 'email-templates' ||
       match.params.settingType === 'providers';
-    const component =
-      match.params.settingType === 'advanced' ? (
-        <EditForm
-          onChange={this.props.onChange}
-          values={get(modifiedData, this.getEndPoint(), {})}
-          showLoaders={this.showLoaders()}
-        />
-      ) : (
-        <List
-          data={get(data, this.getEndPoint(), [])}
-          deleteData={this.props.deleteData}
-          noButton={noButtonList}
-          onButtonClick={this.handleButtonClick}
-          settingType={match.params.settingType}
-          showLoaders={this.showLoaders()}
-          values={get(modifiedData, this.getEndPoint(), {})}
-        />
-      );
+    const values = get(modifiedData, this.getEndPoint(), {});
 
     return (
-      <div>
+      <HomePageContextProvider
+        emitEvent={this.context.emitEvent}
+        pathname={this.props.location.pathname}
+        push={this.props.history.push}
+        setDataToEdit={this.props.setDataToEdit}
+        unsetDataToEdit={this.props.unsetDataToEdit}
+      >
         <form onSubmit={e => e.preventDefault()}>
-          <div className={cn('container-fluid', styles.containerFluid)}>
+          <Wrapper className="container-fluid">
             <PluginHeader
               title={{ id: 'users-permissions.HomePage.header.title' }}
               description={{
@@ -252,8 +239,25 @@ export class HomePage extends React.Component {
               actions={headerActions}
             />
             <HeaderNav links={this.headerNavLinks} />
-            {component}
-          </div>
+            {!this.isAdvanded() ? (
+              <List
+                data={get(data, this.getEndPoint(), [])}
+                deleteData={this.props.deleteData}
+                noButton={noButtonList}
+                onButtonClick={this.handleButtonClick}
+                settingType={match.params.settingType}
+                showLoaders={this.showLoaders()}
+                values={values}
+              />
+            ) : (
+              <EditForm
+                onChange={this.props.onChange}
+                values={values}
+                showLoaders={this.showLoaders()}
+              />
+            )}
+          </Wrapper>
+
           <PopUpForm
             actionType="edit"
             isOpen={this.state.showModalEdit}
@@ -266,23 +270,10 @@ export class HomePage extends React.Component {
             values={get(modifiedData, [this.getEndPoint(), dataToEdit], {})}
           />
         </form>
-      </div>
+      </HomePageContextProvider>
     );
   }
 }
-
-HomePage.childContextTypes = {
-  pathname: PropTypes.string,
-  push: PropTypes.func,
-  setDataToEdit: PropTypes.func,
-  unsetDataToEdit: PropTypes.func,
-};
-
-HomePage.contextTypes = {
-  emitEvent: PropTypes.func,
-};
-
-HomePage.defaultProps = {};
 
 HomePage.propTypes = {
   cancelChanges: PropTypes.func.isRequired,

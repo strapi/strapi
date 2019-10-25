@@ -3,6 +3,7 @@ import styled from 'styled-components';
 const Wrapper = styled.div`
   margin-top: 9px;
   padding: 0;
+  padding-bottom: 7px;
 
   > div:first-child {
     margin: 0;
@@ -12,6 +13,7 @@ const Wrapper = styled.div`
     width: 100%;
     padding: 0 !important;
     list-style: none;
+    margin-bottom: 0;
     > li:nth-child(2) {
       height: 57px;
       > div {

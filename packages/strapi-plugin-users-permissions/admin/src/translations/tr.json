@@ -95,7 +95,7 @@
   "PopUpForm.button.save": "Kaydet",
   "PopUpForm.header.add.providers": "Yeni Sağlayıcı Ekle",
   "PopUpForm.header.edit.email-templates": "E-posta Şablonlarını Düzenle",
-  "PopUpForm.header.edit.providers": "{sağlayıcı} sağlayıcını düzenle",
+  "PopUpForm.header.edit.providers": "sağlayıcını düzenle",
   "PopUpForm.inputSelect.providers.label": "Sağlayıcıyı seçin",
 
   "components.Input.error.password.length": "Şifreniz çok kısa",

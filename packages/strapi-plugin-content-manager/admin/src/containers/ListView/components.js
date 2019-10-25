@@ -97,6 +97,7 @@ const DropDownWrapper = styled.div`
           background: #ffffff !important;
           border: 1px solid #e3e9f3;
           border-radius: 2px !important;
+          font-size: 1.4rem;
 
           &:before {
             content: '\f0db';
@@ -132,7 +133,7 @@ const DropDownWrapper = styled.div`
       min-width: 230px;
       top: 28px !important;
       left: 53px !important;
-      padding-top: 8px;
+      padding-top: 9px;
       padding-bottom: 5px !important;
       border-top-right-radius: 0;
       border: 1px solid #e3e9f3;
@@ -161,6 +162,7 @@ const DropDownWrapper = styled.div`
 
         &:not(:first-child) {
           padding: 0;
+          padding-top: 9px;
         }
 
         &:first-child {

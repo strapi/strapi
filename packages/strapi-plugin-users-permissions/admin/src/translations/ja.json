@@ -94,7 +94,7 @@
   "PopUpForm.button.save": "保存",
   "PopUpForm.header.add.providers": "プロバイダーを追加",
   "PopUpForm.header.edit.email-templates": "メールテンプレートの編集",
-  "PopUpForm.header.edit.providers": "{provider}プロバイダを編集",
+  "PopUpForm.header.edit.providers": "プロバイダを編集",
   "PopUpForm.inputSelect.providers.label": "プロバイダの選択",
 
   "components.Input.error.password.length": "パスワードが一致しません",
