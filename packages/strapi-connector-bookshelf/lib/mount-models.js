@@ -382,6 +382,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
           // Define new model.
           const options = {
+            requireFetch: false,
             tableName: `${definition.collectionName}_morph`,
             [definition.collectionName]: function() {
               return this.belongsTo(

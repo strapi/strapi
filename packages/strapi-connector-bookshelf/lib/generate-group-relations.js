@@ -14,6 +14,7 @@ const createGroupModels = async ({ model, definition, ORM, GLOBALS }) => {
     const joinTable = `${collectionName}_groups`;
     const joinColumn = `${pluralize.singular(collectionName)}_${primaryKey}`;
     const joinModel = ORM.Model.extend({
+      requireFetch: false,
       tableName: joinTable,
       group() {
         return this.morphTo(
