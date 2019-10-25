@@ -58,6 +58,8 @@ module.exports = {
     const { uid } = ctx.params;
     const { source } = ctx.query;
     const service = strapi.plugins['content-manager'].services.contenttypes;
+    const componentService =
+      strapi.plugins['content-manager'].services.components;
 
     const contentType = service.findContentTypeModel({
       uid,
@@ -74,10 +76,13 @@ module.exports = {
     });
 
     const data = {
-      uid,
-      source,
-      schema: service.formatContentTypeSchema(contentType),
-      ...contentTypeConfigurations,
+      contentType: {
+        uid,
+        source,
+        schema: service.formatContentTypeSchema(contentType),
+        ...contentTypeConfigurations,
+      },
+      components: await componentService.getComponentsSchemas(contentType),
     };
 
     ctx.body = { data };

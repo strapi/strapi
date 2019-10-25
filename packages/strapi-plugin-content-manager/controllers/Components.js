@@ -31,16 +31,9 @@ module.exports = {
       return ctx.notFound('component.notFound');
     }
 
-    const ctService = strapi.plugins['content-manager'].services.contenttypes;
-    const componentService =
-      strapi.plugins['content-manager'].services.components;
-    const configurations = await componentService.getConfiguration(uid);
+    const service = strapi.plugins['content-manager'].services.components;
 
-    const data = {
-      uid,
-      schema: ctService.formatContentTypeSchema(component),
-      ...configurations,
-    };
+    const data = await service.getComponentInformations(uid);
 
     ctx.body = { data };
   },
