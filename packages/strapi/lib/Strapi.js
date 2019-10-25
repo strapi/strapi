@@ -30,27 +30,7 @@ const initializeHooks = require('./hooks');
 const createStrapiFs = require('./core/fs');
 const getPrefixedDeps = require('./utils/get-prefixed-dependencies');
 
-const createQueryManager = () => {
-  const _queries = new Map();
-
-  const toUid = (modelKey, plugin) => {
-    return plugin ? `plugins::${plugin}.${modelKey}` : modelKey;
-  };
-
-  return {
-    get({ modelKey, plugin }) {
-      return _queries.get(toUid(modelKey, plugin));
-    },
-    has({ modelKey, plugin }) {
-      return _queries.has(toUid(modelKey, plugin));
-    },
-    set({ modelKey, plugin }, query) {
-      const uid = toUid(modelKey, plugin);
-      _queries.set(uid, query);
-      return this;
-    },
-  };
-};
+const { createDatabaseManager } = require('strapi-database');
 
 /**
  * Construct an Strapi instance.
@@ -128,7 +108,6 @@ class Strapi extends EventEmitter {
       installedHooks: getPrefixedDeps('strapi-hook', pkgJSON),
     };
 
-    this.queryManager = createQueryManager();
     this.fs = createStrapiFs(this);
     this.requireProjectBootstrap();
   }
@@ -215,6 +194,7 @@ class Strapi extends EventEmitter {
       this.emit('server:starting');
 
       await this.load();
+
       // Run bootstrap function.
       await this.runBootstrapFunctions();
       // Freeze object.
@@ -378,6 +358,9 @@ class Strapi extends EventEmitter {
     // Init core store
     initCoreStore(this);
 
+    this.db = createDatabaseManager(this);
+    await this.db.initialize();
+
     // Initialize hooks and middlewares.
     await initializeMiddlewares.call(this);
     await initializeHooks.call(this);
@@ -473,90 +456,16 @@ class Strapi extends EventEmitter {
   }
 
   getModel(modelKey, plugin) {
-    let key = modelKey.toLowerCase();
-    return plugin === 'admin'
-      ? _.get(strapi.admin, ['models', key], undefined)
-      : _.get(strapi.plugins, [plugin, 'models', key]) ||
-          _.get(strapi, ['models', key]) ||
-          _.get(strapi, ['groups', key]) ||
-          undefined;
+    return this.db.getModel(modelKey, plugin);
   }
 
   /**
    * Binds queries with a specific model
    * @param {string} entity - entity name
    * @param {string} plugin - plugin name or null
-   * @param {Object} queriesMap - a map of orm to queries object factory (defaults to ./core-api/queries)
    */
   query(entity, plugin) {
-    if (!entity) {
-      throw new Error(
-        `You can't call the query method without passing the model's name as a first argument.`
-      );
-    }
-
-    const modelKey = entity.toLowerCase();
-
-    if (this.queryManager.has({ modelKey, plugin })) {
-      return this.queryManager.get({ modelKey, plugin });
-    }
-
-    const model =
-      plugin === 'admin'
-        ? _.get(strapi.admin, ['models', modelKey], undefined)
-        : _.get(strapi.plugins, [plugin, 'models', modelKey]) ||
-          _.get(strapi, ['models', modelKey]) ||
-          _.get(strapi, ['groups', modelKey]) ||
-          undefined;
-
-    if (!model) {
-      throw new Error(`The model ${modelKey} can't be found.`);
-    }
-
-    const connector = model.orm;
-
-    if (!connector) {
-      throw new Error(
-        `Impossible to determine the use ORM for the model ${modelKey}.`
-      );
-    }
-
-    const orm = strapi.hook[model.orm];
-    const query = orm.load.queries({ model, modelKey, strapi: this });
-    Object.assign(query, {
-      orm: connector,
-      primaryKey: model.primaryKey,
-      associations: model.associations,
-    });
-
-    // custom queries made easy
-    Object.assign(query, {
-      get model() {
-        return model;
-      },
-      custom(mapping) {
-        if (typeof mapping === 'function') {
-          return mapping.bind(query, { model, modelKey });
-        }
-
-        if (!mapping[connector]) {
-          throw new Error(`Missing mapping for orm ${connector}`);
-        }
-
-        if (typeof mapping[connector] !== 'function') {
-          throw new Error(
-            `Custom queries must be functions received ${typeof mapping[
-              connector
-            ]}`
-          );
-        }
-
-        return mapping[connector].call(query, { model, modelKey });
-      },
-    });
-
-    this.queryManager.set({ modelKey, plugin }, query);
-    return query;
+    return this.db.query(entity, plugin);
   }
 }
 

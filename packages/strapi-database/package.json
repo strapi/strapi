@@ -1,0 +1,33 @@
+{
+  "name": "strapi-database",
+  "version": "3.0.0-beta.17.4",
+  "description": "Strapi's database layer",
+  "homepage": "http://strapi.io",
+  "main": "./lib/index.js",
+  "scripts": {
+    "test": "echo \"no tests yet\""
+  },
+  "directories": {
+    "lib": "./lib"
+  },
+  "author": {
+    "name": "Strapi team",
+    "email": "hi@strapi.io",
+    "url": "http://strapi.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "engines": {
+    "node": ">=10.0.0",
+    "npm": ">=6.0.0"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "verror": "^1.10.0"
+  }
+}

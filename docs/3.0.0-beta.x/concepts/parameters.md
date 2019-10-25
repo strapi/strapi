@@ -53,7 +53,7 @@ module.exports = {
 };
 ```
 
-### SQL databases (strapi-hook-bookshelf)
+### SQL databases (bookshelf)
 
 If you are using a SQL database, calling `buildQuery` will return a [`Bookshelf Query`](https://bookshelfjs.org/api.html) on which you can call other functions (e.g `count`)
 

@@ -64,6 +64,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
     // Register the final model for Bookshelf.
     const loadedModel = _.assign(
       {
+        requireFetch: false,
         tableName: definition.collectionName,
         hasTimestamps: _.get(definition, 'options.timestamps', false),
         idAttribute: _.get(definition, 'options.idAttribute', 'id'),

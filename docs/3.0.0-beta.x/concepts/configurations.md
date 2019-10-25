@@ -197,7 +197,7 @@ You can access the config of the current environment through `strapi.config.curr
 - `defaultConnection` (string): Connection by default for models which are not related to a specific `connection`. Default value: `default`.
 - `connections` List of all available connections.
   - `default`
-    - `connector` (string): Connector used by the current connection. Will be `strapi-hook-bookshelf`.
+    - `connector` (string): Connector used by the current connection. Will be `bookshelf`.
     - `settings` Useful for external session stores such as Redis.
       - `client` (string): Database client to create the connection. `sqlite` or `postgres` or `mysql`.
       - `host` (string): Database host name. Default value: `localhost`.
@@ -228,7 +228,7 @@ You can access the config of the current environment through `strapi.config.curr
 - `defaultConnection` (string): Connection by default for models which are not related to a specific `connection`. Default value: `default`.
 - `connections` List of all available connections.
   - `default`
-    - `connector` (string): Connector used by the current connection. Will be `strapi-hook-mongoose`.
+    - `connector` (string): Connector used by the current connection. Will be `mongoose`.
     - `settings` Useful for external session stores such as Redis.
       - `client` (string): Database client to create the connection. Will be `mongo`.
       - `host` (string): Database host name. Default value: `localhost`.
@@ -258,7 +258,7 @@ You can access the config of the current environment through `strapi.config.curr
   "defaultConnection": "default",
   "connections": {
     "default": {
-      "connector": "strapi-hook-bookshelf",
+      "connector": "bookshelf",
       "settings": {
         "client": "postgres",
         "host": "localhost",
@@ -285,7 +285,7 @@ You can access the config of the current environment through `strapi.config.curr
   "defaultConnection": "default",
   "connections": {
     "default": {
-      "connector": "strapi-hook-bookshelf",
+      "connector": "bookshelf",
       "settings": {
         "client": "mysql",
         "host": "localhost",
@@ -309,7 +309,7 @@ You can access the config of the current environment through `strapi.config.curr
   "defaultConnection": "default",
   "connections": {
     "sqlite": {
-      "connector": "strapi-hook-bookshelf",
+      "connector": "bookshelf",
       "settings": {
         "client": "sqlite",
         "filename": ".tmp/data.db"
@@ -331,7 +331,7 @@ You can access the config of the current environment through `strapi.config.curr
   "defaultConnection": "default",
   "connections": {
     "default": {
-      "connector": "strapi-hook-mongoose",
+      "connector": "mongoose",
       "settings": {
         "client": "mongo",
         "host": "localhost",
@@ -490,7 +490,7 @@ In any JSON configurations files in your project, you can inject dynamic values 
   "defaultConnection": "default",
   "connections": {
     "default": {
-      "connector": "strapi-hook-mongoose",
+      "connector": "mongoose",
       "settings": {
         "client": "mongo",
         "uri": "${process.env.DATABASE_URI || ''}",
