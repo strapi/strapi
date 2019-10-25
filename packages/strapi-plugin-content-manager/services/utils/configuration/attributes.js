@@ -2,8 +2,8 @@
 
 const _ = require('lodash');
 
-const NON_SORTABLES = ['group', 'json', 'relation', 'media'];
-const NON_LISTABLES = ['group', 'json', 'relation', 'password'];
+const NON_SORTABLES = ['component', 'json', 'relation', 'media'];
+const NON_LISTABLES = ['component', 'json', 'relation', 'password'];
 
 const isListable = (schema, name) => {
   if (!_.has(schema.attributes, name)) {
@@ -23,7 +23,7 @@ const isSortable = (schema, name) => {
     return false;
   }
 
-  if (schema.modelType === 'group' && name === 'id') return false;
+  if (schema.modelType === 'component' && name === 'id') return false;
 
   const attribute = schema.attributes[name];
   if (NON_SORTABLES.includes(attribute.type)) {
@@ -88,7 +88,7 @@ const hasEditableAttribute = (schema, name) => {
   }
 
   if (isRelation(schema.attributes[name])) {
-    if (schema.modelType === 'group') return true;
+    if (schema.modelType === 'component') return true;
     return false;
   }
 

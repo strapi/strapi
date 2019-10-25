@@ -36,14 +36,14 @@ describe('attributesUtils', () => {
       expect(isSortable(createMockSchema({}, false), 'createdAt')).toBe(false);
     });
 
-    test('Group fields are not sortable', () => {
+    test('Component fields are not sortable', () => {
       const schema = createMockSchema({
-        someGroup: {
-          type: 'group',
+        someComponent: {
+          type: 'component',
         },
       });
 
-      expect(isSortable(schema, 'someGroup')).toBe(false);
+      expect(isSortable(schema, 'someComponent')).toBe(false);
     });
 
     test('Json fields are not sortable', () => {

@@ -4,68 +4,69 @@ const { createModelConfigurationSchema } = require('./validation');
 
 module.exports = {
   /**
-   * Returns the list of available groups
+   * Returns the list of available components
    */
-  async listGroups(ctx) {
+  async listComponents(ctx) {
     const ctService = strapi.plugins['content-manager'].services.contenttypes;
 
-    const data = Object.keys(strapi.groups).map(uid => {
-      return ctService.formatContentType(uid, strapi.groups[uid]);
+    const data = Object.keys(strapi.components).map(uid => {
+      return ctService.formatContentType(uid, strapi.components[uid]);
     });
     ctx.body = { data };
   },
   /**
-   * Returns a group configuration.
+   * Returns a component configuration.
    * It includes
    *  - schema
    *  - content-manager layouts (list,edit)
    *  - content-manager settings
    *  - content-manager metadata (placeholders, description, label...)
    */
-  async findGroup(ctx) {
+  async findComponent(ctx) {
     const { uid } = ctx.params;
 
-    const group = strapi.groups[uid];
+    const component = strapi.components[uid];
 
-    if (!group) {
-      return ctx.notFound('group.notFound');
+    if (!component) {
+      return ctx.notFound('component.notFound');
     }
 
     const ctService = strapi.plugins['content-manager'].services.contenttypes;
-    const groupService = strapi.plugins['content-manager'].services.groups;
-    const configurations = await groupService.getConfiguration(uid);
+    const componentService =
+      strapi.plugins['content-manager'].services.components;
+    const configurations = await componentService.getConfiguration(uid);
 
     const data = {
       uid,
-      schema: ctService.formatContentTypeSchema(group),
+      schema: ctService.formatContentTypeSchema(component),
       ...configurations,
     };
 
     ctx.body = { data };
   },
   /**
-   * Updates a group configuration
+   * Updates a component configuration
    * You can only update the content-manager settings: (use the content-type-builder to update attributes)
    *  - content-manager layouts (list,edit)
    *  - content-manager settings
    *  - content-manager metadata (placeholders, description, label...)
    */
-  async updateGroup(ctx) {
+  async updateComponent(ctx) {
     const { uid } = ctx.params;
     const { body } = ctx.request;
 
-    const group = strapi.groups[uid];
+    const component = strapi.components[uid];
 
     const ctService = strapi.plugins['content-manager'].services.contenttypes;
 
-    if (!group) {
-      return ctx.notFound('group.notFound');
+    if (!component) {
+      return ctx.notFound('component.notFound');
     }
 
-    const schema = ctService.formatContentTypeSchema(group);
+    const schema = ctService.formatContentTypeSchema(component);
     let input;
     try {
-      input = await createModelConfigurationSchema(group, schema).validate(
+      input = await createModelConfigurationSchema(component, schema).validate(
         body,
         {
           abortEarly: false,
@@ -80,10 +81,11 @@ module.exports = {
       });
     }
 
-    const groupService = strapi.plugins['content-manager'].services.groups;
-    await groupService.setConfiguration(uid, input);
+    const componentService =
+      strapi.plugins['content-manager'].services.components;
+    await componentService.setConfiguration(uid, input);
 
-    const configurations = await groupService.getConfiguration(uid);
+    const configurations = await componentService.getConfiguration(uid);
 
     const data = {
       uid,

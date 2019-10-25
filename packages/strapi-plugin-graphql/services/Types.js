@@ -33,7 +33,7 @@ module.exports = {
     action = '',
   }) {
     // Type
-    if (definition.type && definition.type !== 'group') {
+    if (definition.type && definition.type !== 'component') {
       let type = 'String';
 
       switch (definition.type) {
@@ -74,8 +74,8 @@ module.exports = {
       return type;
     }
 
-    if (definition.type === 'group') {
-      const globalId = strapi.groups[definition.group].globalId;
+    if (definition.type === 'component') {
+      const globalId = strapi.components[definition.component].globalId;
       const { required, repeatable } = definition;
       let typeName = required === true ? `${globalId}` : globalId;
 

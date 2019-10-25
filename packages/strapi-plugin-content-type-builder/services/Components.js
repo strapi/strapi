@@ -5,32 +5,32 @@ const pluralize = require('pluralize');
 const slugify = require('@sindresorhus/slugify');
 
 /**
- * Returns a list of all available groups with formatted attributes
+ * Returns a list of all available components with formatted attributes
  */
-const getGroups = () => {
-  return Object.keys(strapi.groups).map(uid => {
-    return formatGroup(uid, strapi.groups[uid]);
+const getComponents = () => {
+  return Object.keys(strapi.components).map(uid => {
+    return formatComponent(uid, strapi.components[uid]);
   });
 };
 
 /**
- * Returns a group by uid
- * @param {string} uid - group's UID
+ * Returns a component by uid
+ * @param {string} uid - component's UID
  */
-const getGroup = uid => {
-  const group = strapi.groups[uid];
-  if (!group) return null;
+const getComponent = uid => {
+  const component = strapi.components[uid];
+  if (!component) return null;
 
-  return formatGroup(uid, group);
+  return formatComponent(uid, component);
 };
 
 /**
- * Formats a group attributes
+ * Formats a component attributes
  * @param {string} uid - string
- * @param {Object} group - strapi group model
+ * @param {Object} component - strapi component model
  */
-const formatGroup = (uid, group) => {
-  const { connection, collectionName, attributes, info } = group;
+const formatComponent = (uid, component) => {
+  const { connection, collectionName, attributes, info } = component;
 
   return {
     uid,
@@ -39,36 +39,36 @@ const formatGroup = (uid, group) => {
       description: _.get(info, 'description', ''),
       connection,
       collectionName,
-      attributes: formatAttributes(attributes, { group }),
+      attributes: formatAttributes(attributes, { component }),
     },
   };
 };
 
 /**
- * Formats a group's attributes
+ * Formats a component's attributes
  * @param {Object} attributes - the attributes map
  * @param {Object} context - function context
- * @param {Object} context.group - the associated group
+ * @param {Object} context.component - the associated component
  */
-const formatAttributes = (attributes, { group }) => {
+const formatAttributes = (attributes, { component }) => {
   return Object.keys(attributes).reduce((acc, key) => {
-    acc[key] = formatAttribute(key, attributes[key], { group });
+    acc[key] = formatAttribute(key, attributes[key], { component });
     return acc;
   }, {});
 };
 
 /**
- * Fromats a group attribute
+ * Fromats a component attribute
  * @param {string} key - the attribute key
  * @param {Object} attribute - the attribute
  * @param {Object} context - function context
- * @param {Object} context.group - the associated group
+ * @param {Object} context.component - the associated component
  */
-const formatAttribute = (key, attribute, { group }) => {
+const formatAttribute = (key, attribute, { component }) => {
   if (_.has(attribute, 'type')) return attribute;
 
   // format relations
-  const relation = (group.associations || []).find(
+  const relation = (component.associations || []).find(
     assoc => assoc.alias === key
   );
   const { plugin } = attribute;
@@ -99,11 +99,11 @@ const formatAttribute = (key, attribute, { group }) => {
 };
 
 /**
- * Creates a group schema file
+ * Creates a component schema file
  * @param {string} uid
  * @param {Object} infos
  */
-async function createGroup(uid, infos) {
+async function createComponent(uid, infos) {
   const schema = createSchema(uid, infos);
 
   await writeSchema(uid, schema);
@@ -111,12 +111,12 @@ async function createGroup(uid, infos) {
 }
 
 /**
- * Updates a group schema file
- * @param {Object} group
+ * Updates a component schema file
+ * @param {Object} component
  * @param {Object} infos
  */
-async function updateGroup(group, infos) {
-  const { uid, schema: oldSchema } = group;
+async function updateComponent(component, infos) {
+  const { uid, schema: oldSchema } = component;
 
   // don't update collectionName if not provided
   const updatedSchema = {
@@ -129,15 +129,15 @@ async function updateGroup(group, infos) {
     attributes: convertAttributes(infos.attributes),
   };
 
-  const newUID = createGroupUID(infos.name);
+  const newUID = createComponentUID(infos.name);
   if (uid !== newUID) {
     await deleteSchema(uid);
 
-    if (_.has(strapi.plugins, ['content-manager', 'services', 'groups'])) {
+    if (_.has(strapi.plugins, ['content-manager', 'services', 'components'])) {
       await _.get(strapi.plugins, [
         'content-manager',
         'services',
-        'groups',
+        'components',
       ]).updateUID(uid, newUID);
     }
 
@@ -172,7 +172,8 @@ const createSchema = (uid, infos) => {
       description,
     },
     connection,
-    collectionName: collectionName || `groups_${pluralize(uid).toLowerCase()}`,
+    collectionName:
+      collectionName || `components_${pluralize(uid).toLowerCase()}`,
     attributes: convertAttributes(attributes),
   };
 };
@@ -223,35 +224,35 @@ const convertAttributes = attributes => {
  * Returns a uid from a string
  * @param {string} str - string to slugify
  */
-const createGroupUID = str => slugify(str, { separator: '_' });
+const createComponentUID = str => slugify(str, { separator: '_' });
 
 /**
- * Deletes a group
- * @param {Object} group
+ * Deletes a component
+ * @param {Object} component
  */
-async function deleteGroup(group) {
-  await deleteSchema(group.uid);
+async function deleteComponent(component) {
+  await deleteSchema(component.uid);
 }
 
 /**
- * Writes a group schema file
+ * Writes a component schema file
  */
 async function writeSchema(uid, schema) {
   await strapi.fs.writeAppFile(
-    `groups/${uid}.json`,
+    `components/${uid}.json`,
     JSON.stringify(schema, null, 2)
   );
 }
 
 /**
- * Deletes a group schema file
+ * Deletes a component schema file
  * @param {string} ui
  */
 async function deleteSchema(uid) {
-  await strapi.fs.removeAppFile(`groups/${uid}.json`);
+  await strapi.fs.removeAppFile(`components/${uid}.json`);
 }
 
-const updateGroupInModels = (oldUID, newUID) => {
+const updateComponentInModels = (oldUID, newUID) => {
   const contentTypeService =
     strapi.plugins['content-type-builder'].services.contenttypebuilder;
 
@@ -262,8 +263,8 @@ const updateGroupInModels = (oldUID, newUID) => {
       const attributesToModify = Object.keys(model.attributes).reduce(
         (acc, key) => {
           if (
-            model.attributes[key].type === 'group' &&
-            model.attributes[key].group === oldUID
+            model.attributes[key].type === 'component' &&
+            model.attributes[key].component === oldUID
           ) {
             acc.push(key);
           }
@@ -280,7 +281,7 @@ const updateGroupInModels = (oldUID, newUID) => {
         });
 
         attributesToModify.forEach(key => {
-          modelJSON.attributes[key].group = newUID;
+          modelJSON.attributes[key].component = newUID;
         });
 
         contentTypeService.writeModel(modelKey, modelJSON, {
@@ -297,10 +298,10 @@ const updateGroupInModels = (oldUID, newUID) => {
     updateModels(strapi.plugins[pluginKey].models, { plugin: pluginKey });
   });
 
-  // add strapi.groups or strapi.admin if necessary
+  // add strapi.components or strapi.admin if necessary
 };
 
-const deleteGroupInModels = groupUID => {
+const deleteComponentInModels = componentUID => {
   const contentTypeService =
     strapi.plugins['content-type-builder'].services.contenttypebuilder;
 
@@ -311,8 +312,8 @@ const deleteGroupInModels = groupUID => {
       const attributesToDelete = Object.keys(model.attributes).reduce(
         (acc, key) => {
           if (
-            model.attributes[key].type === 'group' &&
-            model.attributes[key].group === groupUID
+            model.attributes[key].type === 'component' &&
+            model.attributes[key].component === componentUID
           ) {
             acc.push(key);
           }
@@ -346,20 +347,20 @@ const deleteGroupInModels = groupUID => {
     updateModels(strapi.plugins[pluginKey].models, { plugin: pluginKey });
   });
 
-  // add strapi.groups or strapi.admin if necessary
+  // add strapi.components or strapi.admin if necessary
 };
 
 module.exports = {
-  getGroups,
-  getGroup,
-  createGroup,
-  createGroupUID,
-  updateGroup,
-  deleteGroup,
+  getComponents,
+  getComponent,
+  createComponent,
+  createComponentUID,
+  updateComponent,
+  deleteComponent,
 
   // export for testing only
   createSchema,
 
-  deleteGroupInModels,
-  updateGroupInModels,
+  deleteComponentInModels,
+  updateComponentInModels,
 };

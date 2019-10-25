@@ -22,7 +22,7 @@ const typeToSize = type => {
     case 'number':
       return MAX_ROW_SIZE / 3;
     case 'json':
-    case 'group':
+    case 'component':
     case 'richtext':
       return MAX_ROW_SIZE;
 
@@ -51,7 +51,7 @@ function createDefaultListLayout(schema) {
 }
 
 function createDefaultEditRelationsLayout(schema) {
-  if (schema.modelType === 'group') return [];
+  if (schema.modelType === 'component') return [];
 
   return Object.keys(schema.attributes).filter(name =>
     hasRelationAttribute(schema, name)
@@ -124,7 +124,7 @@ function syncLayouts(configuration, schema) {
   }
 
   // add new relations to layout
-  if (schema.modelType !== 'group') {
+  if (schema.modelType !== 'component') {
     const newRelations = newAttributes.filter(key =>
       hasRelationAttribute(schema, key)
     );

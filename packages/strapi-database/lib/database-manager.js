@@ -77,7 +77,7 @@ class DatabaseManager {
     return (
       _.get(strapi.plugins, [plugin, 'models', key]) ||
       _.get(strapi, ['models', key]) ||
-      _.get(strapi, ['groups', key])
+      _.get(strapi, ['components', key])
     );
   }
 }

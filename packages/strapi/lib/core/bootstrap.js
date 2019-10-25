@@ -37,19 +37,20 @@ module.exports = function(strapi) {
     );
   }
 
-  Object.keys(strapi.groups).forEach(key => {
-    const group = strapi.groups[key];
+  Object.keys(strapi.components).forEach(key => {
+    const component = strapi.components[key];
 
-    if (!group.connection)
-      throw new Error(`Group ${key} is missing a connection attribute`);
+    if (!component.connection)
+      throw new Error(`Component ${key} is missing a connection attribute`);
 
-    if (!group.collectionName)
-      throw new Error(`Group ${key} is missing a collectionName attribute`);
+    if (!component.collectionName)
+      throw new Error(`Component ${key} is missing a collectionName attribute`);
 
-    return Object.assign(group, {
+    return Object.assign(component, {
       uid: key,
-      modelType: 'group',
-      globalId: group.globalId || _.upperFirst(_.camelCase(`group_${key}`)),
+      modelType: 'component',
+      globalId:
+        component.globalId || _.upperFirst(_.camelCase(`component_${key}`)),
     });
   });
 

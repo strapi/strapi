@@ -24,9 +24,9 @@ module.exports = async (entry, files, { model, source }) => {
 
       if (!attr) return {};
 
-      if (attr.type === 'group') {
-        modelName = attr.group;
-        tmpModel = strapi.groups[attr.group];
+      if (attr.type === 'component') {
+        modelName = attr.component;
+        tmpModel = strapi.components[attr.component];
       } else if (_.has(attr, 'model') || _.has(attr, 'collection')) {
         sourceName = attr.plugin;
         modelName = attr.model || attr.collection;
