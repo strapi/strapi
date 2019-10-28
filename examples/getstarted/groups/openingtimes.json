@@ -11,6 +11,9 @@
     },
     "time": {
       "type": "string"
+    },
+    "addresses": {
+      "collection": "address"
     }
   }
 }

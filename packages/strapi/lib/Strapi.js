@@ -199,8 +199,8 @@ class Strapi extends EventEmitter {
       await this.runBootstrapFunctions();
       // Freeze object.
       await this.freeze();
-      // Init first start
-      utils.init(this.config);
+      // Is the project initialised?
+      const isInitialised = await utils.isInitialised(this);
 
       this.app.use(this.router.routes()).use(this.router.allowedMethods());
 
@@ -208,7 +208,7 @@ class Strapi extends EventEmitter {
       this.server.listen(this.config.port, async err => {
         if (err) return this.stopWithError(err);
 
-        if (this.config.init) {
+        if (!isInitialised) {
           this.logFirstStartupMessage();
         } else {
           this.logStartupMessage();
@@ -228,7 +228,7 @@ class Strapi extends EventEmitter {
               'server.admin.autoOpen',
               true
             ) !== false) ||
-          this.config.init
+          !isInitialised
         ) {
           await utils.openBrowser.call(this);
         }
