@@ -112,7 +112,6 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   }
 
   async function update(params, values, { transacting } = {}) {
-    const modelForge =  await model.forge(params)
     const entry = await model.forge(resolveParams(params, idAttribute)).fetch({ transacting });
 
     if (!entry) {
