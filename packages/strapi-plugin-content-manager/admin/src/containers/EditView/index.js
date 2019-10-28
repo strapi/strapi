@@ -50,7 +50,6 @@ function EditView({
   plugins,
 }) {
   const { id } = useParams();
-  console.log({ layouts });
   const abortController = new AbortController();
   const { signal } = abortController;
   const layout = get(layouts, [slug], {});

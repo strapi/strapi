@@ -20,7 +20,7 @@ const NonRepeatableComponent = ({
     return (
       <NonRepeatableWrapper isEmpty onClick={() => addField(name, false)}>
         <div />
-        <FormattedMessage id={`${pluginId}.components.Group.empty.repeatable`}>
+        <FormattedMessage id={`${pluginId}.components.empty-repeatable`}>
           {msg => <P style={{ paddingTop: 75 }}>{msg}</P>}
         </FormattedMessage>
       </NonRepeatableWrapper>

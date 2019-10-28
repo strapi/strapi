@@ -324,8 +324,6 @@ const EditSettingsView = ({
       );
     });
 
-  console.log(reducerState.toJS());
-
   return (
     <LayoutDndProvider
       attributes={getAttributes}

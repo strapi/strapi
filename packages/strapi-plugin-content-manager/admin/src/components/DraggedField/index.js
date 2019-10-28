@@ -129,7 +129,7 @@ const DraggedField = forwardRef(
         )}
         {type === 'component' && (
           <FormattedMessage
-            id={`${pluginId}.components.FieldItem.linkToGroupLayout`}
+            id={`${pluginId}.components.FieldItem.linkToComponentLayout`}
           >
             {msg => (
               <Link

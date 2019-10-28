@@ -115,7 +115,7 @@ function ComponentField({
                 resetComponentData(name);
               }}
             >
-              <FormattedMessage id={`${pluginId}.components.Group.reset`} />
+              <FormattedMessage id={`${pluginId}.components.reset-entry`} />
               <div />
             </ResetComponent>
           )}
@@ -140,9 +140,7 @@ function ComponentField({
         >
           {componentValue.length === 0 && (
             <EmptyComponent>
-              <FormattedMessage
-                id={`${pluginId}.components.Group.empty.repeatable`}
-              >
+              <FormattedMessage id={`${pluginId}.components.empty-repeatable`}>
                 {msg => <P>{msg}</P>}
               </FormattedMessage>
             </EmptyComponent>
@@ -189,7 +187,7 @@ function ComponentField({
 
                   if (componentValue.length - 1 < min) {
                     strapi.notification.info(
-                      `${pluginId}.components.Group.notification.info.minimum-requirement`
+                      `${pluginId}.components.notification.info.minimum-requirement`
                     );
                   }
 
@@ -225,15 +223,13 @@ function ComponentField({
               }
 
               strapi.notification.info(
-                `${pluginId}.components.Group.notification.info.maximum-requirement`
+                `${pluginId}.components.notification.info.maximum-requirement`
               );
             }}
             withBorderRadius={false}
           >
             <i className="fa fa-plus" />
-            <FormattedMessage
-              id={`${pluginId}.containers.EditView.Group.add.new`}
-            />
+            <FormattedMessage id={`${pluginId}.containers.EditView.add.new`} />
           </Button>
         </div>
       )}
