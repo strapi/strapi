@@ -20,7 +20,7 @@ module.exports = async () => {
   strapi.plugins.upload.config.providers = [];
 
   const installedProviders = Object.keys(strapi.config.info.dependencies)
-    .filter(d => d.startsWith('strapi-provider-upload-'))
+    .filter(d => d.includes('strapi-provider-upload-'))
     .concat('strapi-provider-upload-local');
 
   for (let installedProvider of _.uniq(installedProviders)) {
