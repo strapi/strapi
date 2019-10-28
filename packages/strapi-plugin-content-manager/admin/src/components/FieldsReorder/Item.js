@@ -10,7 +10,7 @@ import DraggedFieldWithPreview from '../DraggedFieldWithPreview';
 import ItemTypes from '../../utils/ItemTypes';
 
 const Item = ({
-  groupUid,
+  componentUid,
   itemIndex,
   moveItem,
   moveRow,
@@ -22,7 +22,7 @@ const Item = ({
 }) => {
   const {
     goTo,
-    groupLayouts,
+    componentLayouts,
     metadatas,
     setEditFieldToSelect,
     selectedItemName,
@@ -201,8 +201,8 @@ const Item = ({
   return (
     <DraggedFieldWithPreview
       goTo={goTo}
-      groupUid={groupUid}
-      groupLayouts={groupLayouts}
+      componentUid={componentUid}
+      componentLayouts={componentLayouts}
       isDragging={isDragging}
       label={get(metadatas, [name, 'edit', 'label'], '')}
       name={name}
@@ -222,12 +222,12 @@ const Item = ({
 };
 
 Item.defaultProps = {
-  groupUid: '',
+  componentUid: '',
   type: 'string',
 };
 
 Item.propTypes = {
-  groupUid: PropTypes.string,
+  componentUid: PropTypes.string,
   itemIndex: PropTypes.number.isRequired,
   moveItem: PropTypes.func.isRequired,
   moveRow: PropTypes.func.isRequired,

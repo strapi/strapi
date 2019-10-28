@@ -19,9 +19,9 @@ const FieldsReorder = ({ className }) => {
     onAddData,
     removeField,
   } = useLayoutDnd();
-  const getGroup = useCallback(
+  const getComponent = useCallback(
     attributeName => {
-      return get(attributes, [attributeName, 'group'], '');
+      return get(attributes, [attributeName, 'component'], '');
     },
     [attributes]
   );
@@ -53,7 +53,7 @@ const FieldsReorder = ({ className }) => {
 
                 return (
                   <Item
-                    groupUid={getGroup(name)}
+                    componentUid={getComponent(name)}
                     itemIndex={index}
                     key={name}
                     moveRow={moveRow}

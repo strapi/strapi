@@ -1,6 +1,6 @@
 import { get, isArray, isEmpty, isObject } from 'lodash';
 
-export const cleanData = (retrievedData, ctLayout, groupLayouts) => {
+export const cleanData = (retrievedData, ctLayout, componentLayouts) => {
   const getType = (schema, attrName) =>
     get(schema, ['attributes', attrName, 'type'], '');
   const getOtherInfos = (schema, arr) =>
@@ -10,7 +10,7 @@ export const cleanData = (retrievedData, ctLayout, groupLayouts) => {
     return Object.keys(data).reduce((acc, current) => {
       const attrType = getType(layout.schema, current);
       const value = get(data, current);
-      const group = getOtherInfos(layout.schema, [current, 'group']);
+      const component = getOtherInfos(layout.schema, [current, 'component']);
       const isRepeatable = getOtherInfos(layout.schema, [
         current,
         'repeatable',
@@ -40,14 +40,14 @@ export const cleanData = (retrievedData, ctLayout, groupLayouts) => {
               get(value, 0) instanceof File ? null : get(value, 'id', null);
           }
           break;
-        case 'group':
+        case 'component':
           if (isRepeatable) {
             cleanedData = value
               ? value.map(data => {
                   delete data._temp__id;
                   const subCleanedData = recursiveCleanData(
                     data,
-                    groupLayouts[group]
+                    componentLayouts[component]
                   );
 
                   return subCleanedData;
@@ -55,7 +55,7 @@ export const cleanData = (retrievedData, ctLayout, groupLayouts) => {
               : value;
           } else {
             cleanedData = value
-              ? recursiveCleanData(value, groupLayouts[group])
+              ? recursiveCleanData(value, componentLayouts[component])
               : value;
           }
           break;
@@ -72,11 +72,11 @@ export const cleanData = (retrievedData, ctLayout, groupLayouts) => {
   return recursiveCleanData(retrievedData, ctLayout);
 };
 
-export const getMediaAttributes = (ctLayout, groupLayouts) => {
+export const getMediaAttributes = (ctLayout, componentLayouts) => {
   const getMedia = (
     layout,
     prefix = '',
-    isGroupType = false,
+    isComponentType = false,
     repeatable = false
   ) => {
     const attributes = get(layout, ['schema', 'attributes'], {});
@@ -85,21 +85,26 @@ export const getMediaAttributes = (ctLayout, groupLayouts) => {
       const type = get(attributes, [current, 'type']);
       const multiple = get(attributes, [current, 'multiple'], false);
       const isRepeatable = get(attributes, [current, 'repeatable']);
-      const isGroup = type === 'group';
+      const isComponent = type === 'component';
 
-      if (isGroup) {
-        const group = get(attributes, [current, 'group']);
+      if (isComponent) {
+        const component = get(attributes, [current, 'component']);
 
         return {
           ...acc,
-          ...getMedia(groupLayouts[group], current, isGroup, isRepeatable),
+          ...getMedia(
+            componentLayouts[component],
+            current,
+            isComponent,
+            isRepeatable
+          ),
         };
       }
 
       if (type === 'media') {
         const path = prefix !== '' ? `${prefix}.${current}` : current;
 
-        acc[path] = { multiple, isGroup: isGroupType, repeatable };
+        acc[path] = { multiple, isComponent: isComponentType, repeatable };
       }
 
       return acc;
@@ -123,7 +128,7 @@ export const mapDataKeysToFilesToUpload = (filesMap, data) => {
   return Object.keys(filesMap).reduce((acc, current) => {
     const keys = current.split('.');
     const isMultiple = get(filesMap, [current, 'multiple'], false);
-    const isGroup = get(filesMap, [current, 'isGroup'], false);
+    const isComponent = get(filesMap, [current, 'isComponent'], false);
     const isRepeatable = get(filesMap, [current, 'repeatable'], false);
 
     const getFilesToUpload = path => {
@@ -152,10 +157,10 @@ export const mapDataKeysToFilesToUpload = (filesMap, data) => {
       }
     }
 
-    if (isGroup && isRepeatable) {
+    if (isComponent && isRepeatable) {
       const [key, targetKey] = current.split('.');
-      const groupData = get(data, [key], []);
-      const groupFiles = groupData.reduce((acc1, current, index) => {
+      const componentData = get(data, [key], []);
+      const componentFiles = componentData.reduce((acc1, current, index) => {
         const files = isMultiple
           ? getFilesToUpload([key, index, targetKey])
           : getFileToUpload([key, index, targetKey]);
@@ -167,7 +172,7 @@ export const mapDataKeysToFilesToUpload = (filesMap, data) => {
         return acc1;
       }, {});
 
-      return { ...acc, ...groupFiles };
+      return { ...acc, ...componentFiles };
     }
 
     return acc;

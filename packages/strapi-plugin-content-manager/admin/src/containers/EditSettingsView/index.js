@@ -31,20 +31,20 @@ import { unformatLayout } from '../../utils/layout';
 import getInputProps from './utils/getInputProps';
 // TODO to remove when the API is available
 import {
-  retrieveDisplayedGroups,
-  retrieveGroupLayoutsToFetch,
-} from '../EditView/utils/groups';
+  retrieveDisplayedComponents,
+  retrieveComponentsLayoutsToFetch,
+} from '../EditView/utils/components';
 
 import reducer, { initialState } from './reducer';
 
 const EditSettingsView = ({
   deleteLayout,
-  groupsAndModelsMainPossibleMainFields,
+  componentsAndModelsMainPossibleMainFields,
   history: { push },
   location: { search },
   slug,
 }) => {
-  const { groupSlug, type } = useParams();
+  const { componentSlug, type } = useParams();
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const [isModalFormOpen, setIsModalFormOpen] = useState(false);
 
@@ -55,7 +55,7 @@ const EditSettingsView = ({
   const params = source === 'content-manager' && type ? {} : { source };
 
   const {
-    groupLayouts,
+    componentLayouts,
     isLoading,
     initialData,
     metaToEdit,
@@ -107,28 +107,28 @@ const EditSettingsView = ({
 
   const getSelectedItemSelectOptions = useCallback(
     formType => {
-      if (formType !== 'relation' && formType !== 'group') {
+      if (formType !== 'relation' && formType !== 'component') {
         return [];
       }
 
-      const targetKey = formType === 'group' ? 'group' : 'targetModel';
+      const targetKey = formType === 'component' ? 'component' : 'targetModel';
       const key = get(
         modifiedData,
         ['schema', 'attributes', metaToEdit, targetKey],
         ''
       );
 
-      return get(groupsAndModelsMainPossibleMainFields, [key], []);
+      return get(componentsAndModelsMainPossibleMainFields, [key], []);
     },
 
-    [metaToEdit, groupsAndModelsMainPossibleMainFields, modifiedData]
+    [metaToEdit, componentsAndModelsMainPossibleMainFields, modifiedData]
   );
 
   useEffect(() => {
     const getData = async () => {
       try {
         const { data } = await request(
-          getRequestUrl(`${type}/${slug || groupSlug}`),
+          getRequestUrl(`${type}/${slug || componentSlug}`),
           {
             method: 'GET',
             params,
@@ -137,21 +137,23 @@ const EditSettingsView = ({
         );
 
         // TODO temporary to remove when api available
-        const groups = retrieveDisplayedGroups(
+        const components = retrieveDisplayedComponents(
           get(data, 'schema.attributes', {})
         );
-        const groupLayoutsToGet = retrieveGroupLayoutsToFetch(groups);
+        const componentLayoutsToGet = retrieveComponentsLayoutsToFetch(
+          components
+        );
 
-        const groupData = await Promise.all(
-          groupLayoutsToGet.map(uid =>
-            request(`/${pluginId}/groups/${uid}`, {
+        const componentData = await Promise.all(
+          componentLayoutsToGet.map(uid =>
+            request(`/${pluginId}/components/${uid}`, {
               method: 'GET',
               signal,
             })
           )
         );
 
-        const groupLayouts = groupData.reduce((acc, current) => {
+        const componentLayouts = componentData.reduce((acc, current) => {
           acc[current.data.uid] = current.data;
 
           return acc;
@@ -161,7 +163,7 @@ const EditSettingsView = ({
           type: 'GET_DATA_SUCCEEDED',
           data,
           // TODO temporary to remove when api available
-          groupLayouts,
+          componentLayouts,
         });
       } catch (err) {
         if (err.code !== 20) {
@@ -203,12 +205,12 @@ const EditSettingsView = ({
       delete body.schema;
       delete body.uid;
       delete body.source;
-      delete body.isGroup;
+      delete body.isComponent;
 
-      await request(getRequestUrl(`${type}/${slug || groupSlug}`), {
+      await request(getRequestUrl(`${type}/${slug || componentSlug}`), {
         method: 'PUT',
         body,
-        params: type === 'groups' ? {} : params,
+        params: type === 'components' ? {} : params,
         signal,
       });
 
@@ -266,7 +268,10 @@ const EditSettingsView = ({
     getForm().map((meta, index) => {
       const formType = get(getAttributes, [metaToEdit, 'type']);
 
-      if ((formType === 'group' || formType === 'media') && meta !== 'label') {
+      if (
+        (formType === 'component' || formType === 'media') &&
+        meta !== 'label'
+      ) {
         return null;
       }
 
@@ -319,7 +324,7 @@ const EditSettingsView = ({
       attributes={getAttributes}
       buttonData={getEditRemainingFields()}
       goTo={push}
-      groupLayouts={groupLayouts}
+      componentLayouts={componentLayouts}
       layout={getEditLayout()}
       metadatas={get(modifiedData, ['metadatas'], {})}
       moveItem={moveItem}
@@ -374,7 +379,7 @@ const EditSettingsView = ({
           });
         }}
         onConfirmSubmit={handleConfirm}
-        slug={slug || groupSlug}
+        slug={slug || componentSlug}
         isEditSettings
       >
         <div className="row">
@@ -384,7 +389,7 @@ const EditSettingsView = ({
               description={`${pluginId}.containers.SettingPage.editSettings.description`}
             />
           </LayoutTitle>
-          {type !== 'groups' && (
+          {type !== 'components' && (
             <LayoutTitle className="col-4">
               <FormTitle
                 title={`${pluginId}.containers.SettingPage.relations`}
@@ -394,7 +399,7 @@ const EditSettingsView = ({
           )}
 
           <FieldsReorder className={fieldsReorderClassName} />
-          {type !== 'groups' && (
+          {type !== 'components' && (
             <SortableList
               addItem={name => {
                 dispatch({
@@ -449,7 +454,7 @@ EditSettingsView.defaultProps = {
 
 EditSettingsView.propTypes = {
   deleteLayout: PropTypes.func.isRequired,
-  groupsAndModelsMainPossibleMainFields: PropTypes.object.isRequired,
+  componentsAndModelsMainPossibleMainFields: PropTypes.object.isRequired,
   history: PropTypes.shape({
     push: PropTypes.func,
   }).isRequired,

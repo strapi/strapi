@@ -4,12 +4,12 @@ const initialState = fromJS({
   collapses: {},
   didCheckErrors: false,
   errors: {},
-  groupLayoutsData: {},
+  componentLayoutsData: {},
   initialData: {},
   isLoading: true,
   isLoadingForLayouts: true,
   modifiedData: {},
-  defaultGroupValues: {},
+  defaultComponentValues: {},
   defaultForm: {},
 });
 
@@ -22,10 +22,10 @@ const getMax = arr => {
 
 function reducer(state, action) {
   switch (action.type) {
-    case 'ADD_FIELD_TO_GROUP':
+    case 'ADD_FIELD_TO_COMPONENT':
       return state.updateIn(['modifiedData', ...action.keys], list => {
         const defaultAttribute = state.getIn([
-          'defaultGroupValues',
+          'defaultComponentValues',
           ...action.keys,
           'defaultRepeatable',
         ]);
@@ -71,16 +71,16 @@ function reducer(state, action) {
         .update('initialData', () => fromJS(action.data))
         .update('modifiedData', () => fromJS(action.data))
         .update('isLoading', () => false);
-    case 'GET_GROUP_LAYOUTS_SUCCEEDED': {
-      const addTempIdToGroupData = obj => {
-        const { defaultGroupValues } = action;
+    case 'GET_COMPONENT_LAYOUTS_SUCCEEDED': {
+      const addTempIdToComponentData = obj => {
+        const { defaultComponentValues } = action;
 
         if (action.isCreatingEntry === true) {
           return obj.keySeq().reduce((acc, current) => {
-            if (defaultGroupValues[current]) {
+            if (defaultComponentValues[current]) {
               return acc.set(
                 current,
-                fromJS(defaultGroupValues[current].toSet)
+                fromJS(defaultComponentValues[current].toSet)
               );
             }
 
@@ -88,7 +88,10 @@ function reducer(state, action) {
           }, obj);
         } else {
           return obj.keySeq().reduce((acc, current) => {
-            if (defaultGroupValues[current] && List.isList(obj.get(current))) {
+            if (
+              defaultComponentValues[current] &&
+              List.isList(obj.get(current))
+            ) {
               const formatted = obj.get(current).reduce((acc2, curr, index) => {
                 return acc2.set(index, curr.set('_temp__id', index));
               }, List([]));
@@ -102,13 +105,15 @@ function reducer(state, action) {
       };
 
       return state
-        .update('groupLayoutsData', () => fromJS(action.groupLayouts))
-        .update('defaultGroupValues', () => fromJS(action.defaultGroupValues))
+        .update('componentLayoutsData', () => fromJS(action.componentLayouts))
+        .update('defaultComponentValues', () =>
+          fromJS(action.defaultComponentValues)
+        )
         .update('modifiedData', obj => {
-          return addTempIdToGroupData(obj);
+          return addTempIdToComponentData(obj);
         })
         .update('initialData', obj => {
-          return addTempIdToGroupData(obj);
+          return addTempIdToComponentData(obj);
         })
         .update('isLoadingForLayouts', () => false);
     }
@@ -123,16 +128,18 @@ function reducer(state, action) {
           .delete(action.dragIndex)
           .insert(action.overIndex, list.get(action.dragIndex));
       });
+
     case 'ON_CHANGE': {
       let newState = state;
-      const [nonRepeatableGroupKey] = action.keys;
+      const [nonRepeatableComponentKey] = action.keys;
 
       if (
         action.keys.length === 2 &&
-        state.getIn(['modifiedData', nonRepeatableGroupKey]) === null
+        state.getIn(['modifiedData', nonRepeatableComponentKey]) === null
       ) {
-        newState = state.updateIn(['modifiedData', nonRepeatableGroupKey], () =>
-          fromJS({})
+        newState = state.updateIn(
+          ['modifiedData', nonRepeatableComponentKey],
+          () => fromJS({})
         );
       }
 
@@ -140,13 +147,14 @@ function reducer(state, action) {
         return action.value;
       });
     }
+
     case 'ON_REMOVE_FIELD':
       return state
         .removeIn(['modifiedData', ...action.keys])
         .updateIn(['modifiedData', action.keys[0]], list => {
           if (action.shouldAddEmptyField) {
             const defaultAttribute = state.getIn([
-              'defaultGroupValues',
+              'defaultComponentValues',
               action.keys[0],
               'defaultRepeatable',
             ]);
@@ -164,13 +172,14 @@ function reducer(state, action) {
         .update('modifiedData', () => state.get('initialData'))
         .update('errors', () => fromJS({}))
         .update('didCheckErrors', v => !v);
-    case 'RESET_GROUP_DATA': {
-      const groupPath = ['modifiedData', action.groupName];
+
+    case 'RESET_COMPONENT_DATA': {
+      const componentPath = ['modifiedData', action.componentName];
 
       return state
         .updateIn(
-          groupPath,
-          () => state.getIn(['defaultForm', action.groupName]) || null
+          componentPath,
+          () => state.getIn(['defaultForm', action.componentName]) || null
         )
         .update('errors', () => fromJS({}))
         .update('didCheckErrors', v => !v);

@@ -16,7 +16,7 @@ import {
 import pluginId from '../../pluginId';
 import { EditViewProvider } from '../../contexts/EditView';
 import Container from '../../components/Container';
-import Group from '../../components/Group';
+import ComponentField from '../../components/ComponentField';
 import Inputs from '../../components/Inputs';
 import SelectWrapper from '../../components/SelectWrapper';
 import createYupSchema from './utils/schema';
@@ -30,11 +30,12 @@ import {
   cleanData,
   mapDataKeysToFilesToUpload,
 } from './utils/formatData';
+
 import {
-  getDefaultGroupValues,
-  retrieveDisplayedGroups,
-  retrieveGroupLayoutsToFetch,
-} from './utils/groups';
+  getDefaultComponentValues,
+  retrieveDisplayedComponents,
+  retrieveComponentsLayoutsToFetch,
+} from './utils/components';
 
 const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 
@@ -49,14 +50,16 @@ function EditView({
   plugins,
 }) {
   const { id } = useParams();
-
+  console.log({ layouts });
   const abortController = new AbortController();
   const { signal } = abortController;
   const layout = get(layouts, [slug], {});
   const isCreatingEntry = id === 'create';
   const attributes = get(layout, ['schema', 'attributes'], {});
-  const groups = retrieveDisplayedGroups(attributes);
-  const groupLayoutsToGet = retrieveGroupLayoutsToFetch(groups);
+
+  const components = retrieveDisplayedComponents(attributes);
+  const componentLayoutsToGet = retrieveComponentsLayoutsToFetch(components);
+
   // States
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningDelete, setWarningDelete] = useState(false);
@@ -69,7 +72,7 @@ function EditView({
   const {
     didCheckErrors,
     errors,
-    groupLayoutsData,
+    componentLayoutsData,
     initialData,
     modifiedData,
     isLoading,
@@ -81,30 +84,33 @@ function EditView({
     isLoadingForLayouts || (!isCreatingEntry && isLoading);
 
   useEffect(() => {
-    const fetchGroupLayouts = async () => {
+    const fetchComponentLayouts = async () => {
       try {
         const data = await Promise.all(
-          groupLayoutsToGet.map(uid =>
-            request(`/${pluginId}/groups/${uid}`, {
+          componentLayoutsToGet.map(uid =>
+            request(`/${pluginId}/components/${uid}`, {
               method: 'GET',
               signal,
             })
           )
         );
 
-        const groupLayouts = data.reduce((acc, current) => {
+        const componentLayouts = data.reduce((acc, current) => {
           acc[current.data.uid] = current.data;
 
           return acc;
         }, {});
 
         // Retrieve all the default values for the repeatables and init the form
-        const defaultGroupValues = getDefaultGroupValues(groups, groupLayouts);
+        const defaultComponentValues = getDefaultComponentValues(
+          components,
+          componentLayouts
+        );
 
         dispatch({
-          type: 'GET_GROUP_LAYOUTS_SUCCEEDED',
-          groupLayouts,
-          defaultGroupValues,
+          type: 'GET_COMPONENT_LAYOUTS_SUCCEEDED',
+          componentLayouts,
+          defaultComponentValues,
           isCreatingEntry,
         });
       } catch (err) {
@@ -128,7 +134,7 @@ function EditView({
           data,
           defaultForm: setDefaultForm(get(layout, ['schema', 'attributes'])),
         });
-        fetchGroupLayouts();
+        fetchComponentLayouts();
       } catch (err) {
         if (err.code !== 20) {
           strapi.notification.error(`${pluginId}.error.record.fetch`);
@@ -147,7 +153,7 @@ function EditView({
         data: setDefaultForm(get(layout, ['schema', 'attributes'])),
         defaultForm: setDefaultForm(get(layout, ['schema', 'attributes'])),
       });
-      fetchGroupLayouts();
+      fetchComponentLayouts();
     }
 
     return () => {
@@ -201,7 +207,9 @@ function EditView({
   const fields = get(layout, ['layouts', 'edit'], []);
 
   const checkFormErrors = async () => {
-    const schema = createYupSchema(layout, { groups: groupLayoutsData });
+    const schema = createYupSchema(layout, {
+      components: componentLayoutsData,
+    });
     let errors = {};
 
     try {
@@ -235,7 +243,9 @@ function EditView({
 
   const handleSubmit = async e => {
     e.preventDefault();
-    const schema = createYupSchema(layout, { groups: groupLayoutsData });
+    const schema = createYupSchema(layout, {
+      components: componentLayoutsData,
+    });
 
     try {
       // Validate the form using yup
@@ -244,14 +254,14 @@ function EditView({
       setIsSubmitting(true);
       emitEvent('willSaveEntry');
       // Create an object containing all the paths of the media fields
-      const filesMap = getMediaAttributes(layout, groupLayoutsData);
+      const filesMap = getMediaAttributes(layout, componentLayoutsData);
       // Create an object that maps the keys with the related files to upload
       const filesToUpload = mapDataKeysToFilesToUpload(filesMap, modifiedData);
 
       const cleanedData = cleanData(
         cloneDeep(modifiedData),
         layout,
-        groupLayoutsData
+        componentLayoutsData
       );
 
       const formData = new FormData();
@@ -359,10 +369,10 @@ function EditView({
           errors: {},
         });
       }}
-      resetGroupData={groupName => {
+      resetComponentData={componentName => {
         dispatch({
-          type: 'RESET_GROUP_DATA',
-          groupName,
+          type: 'RESET_COMPONENT_DATA',
+          componentName,
         });
       }}
       search={search}
@@ -416,22 +426,29 @@ function EditView({
                   }
 
                   const [{ name }] = fieldsRow;
-                  const group = get(layout, ['schema', 'attributes', name], {});
-                  const groupMetas = get(
+                  const component = get(
+                    layout,
+                    ['schema', 'attributes', name],
+                    {}
+                  );
+                  const componentMetas = get(
                     layout,
                     ['metadatas', name, 'edit'],
                     {}
                   );
-                  const groupValue = get(
+                  const componentValue = get(
                     modifiedData,
                     [name],
-                    group.repeatable ? [] : {}
+                    component.repeatable ? [] : {}
                   );
 
-                  if (fieldsRow.length === 1 && group.type === 'group') {
+                  if (
+                    fieldsRow.length === 1 &&
+                    component.type === 'component'
+                  ) {
                     // Array containing all the keys with of the error object created by YUP
                     // It is used only to know if whether or not we need to apply an orange border to the n+1 field item
-                    const groupErrorKeys = Object.keys(errors)
+                    const componentErrorKeys = Object.keys(errors)
                       .filter(errorKey => errorKey.includes(name))
                       .map(errorKey =>
                         errorKey
@@ -441,23 +458,23 @@ function EditView({
                       );
 
                     return (
-                      <Group
-                        {...group}
-                        {...groupMetas}
+                      <ComponentField
+                        {...component}
+                        {...componentMetas}
                         addField={(keys, isRepeatable = true) => {
                           dispatch({
-                            type: 'ADD_FIELD_TO_GROUP',
+                            type: 'ADD_FIELD_TO_COMPONENT',
                             keys: keys.split('.'),
                             isRepeatable,
                           });
                         }}
-                        groupErrorKeys={groupErrorKeys}
-                        groupValue={groupValue}
+                        componentErrorKeys={componentErrorKeys}
+                        componentValue={componentValue}
                         key={key}
-                        isRepeatable={group.repeatable || false}
+                        isRepeatable={component.repeatable || false}
                         name={name}
                         modifiedData={modifiedData}
-                        moveGroupField={(dragIndex, overIndex, name) => {
+                        moveComponentField={(dragIndex, overIndex, name) => {
                           dispatch({
                             type: 'MOVE_FIELD',
                             dragIndex,
@@ -466,7 +483,11 @@ function EditView({
                           });
                         }}
                         onChange={handleChange}
-                        layout={get(groupLayoutsData, group.group, {})}
+                        layout={get(
+                          componentLayoutsData,
+                          component.component,
+                          {}
+                        )}
                         pathname={pathname}
                         removeField={(keys, shouldAddEmptyField) => {
                           dispatch({

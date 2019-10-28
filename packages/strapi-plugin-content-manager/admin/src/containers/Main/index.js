@@ -25,8 +25,8 @@ function Main({
   deleteLayout,
   getData,
   getLayout,
-  groups,
-  groupsAndModelsMainPossibleMainFields,
+  components,
+  componentsAndModelsMainPossibleMainFields,
   isLoading,
   layouts,
   location: { pathname, search },
@@ -72,9 +72,9 @@ function Main({
       currentEnvironment={currentEnvironment}
       deleteLayout={deleteLayout}
       emitEvent={emitEvent}
-      groups={groups}
-      groupsAndModelsMainPossibleMainFields={
-        groupsAndModelsMainPossibleMainFields
+      components={components}
+      componentsAndModelsMainPossibleMainFields={
+        componentsAndModelsMainPossibleMainFields
       }
       layouts={layouts}
       models={models}
@@ -84,7 +84,7 @@ function Main({
   );
   const routes = [
     {
-      path: 'ctm-configurations/edit-settings/:type/:groupSlug',
+      path: 'ctm-configurations/edit-settings/:type/:componentSlug',
       comp: EditSettingsView,
     },
     { path: ':slug', comp: RecursivePath },
@@ -114,8 +114,8 @@ Main.propTypes = {
     currentEnvironment: PropTypes.string.isRequired,
     plugins: PropTypes.object,
   }),
-  groups: PropTypes.array.isRequired,
-  groupsAndModelsMainPossibleMainFields: PropTypes.object.isRequired,
+  components: PropTypes.array.isRequired,
+  componentsAndModelsMainPossibleMainFields: PropTypes.object.isRequired,
   isLoading: PropTypes.bool,
   layouts: PropTypes.object.isRequired,
   location: PropTypes.shape({

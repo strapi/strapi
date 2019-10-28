@@ -20,13 +20,13 @@ yup.addMethod(yup.mixed, 'defined', function() {
 
 const getAttributes = data => get(data, ['schema', 'attributes'], {});
 
-const createYupSchema = (model, { groups }) => {
+const createYupSchema = (model, { components }) => {
   const attributes = getAttributes(model);
 
   return yup.object().shape(
     Object.keys(attributes).reduce((acc, current) => {
       const attribute = attributes[current];
-      if (attribute.type !== 'relation' && attribute.type !== 'group') {
+      if (attribute.type !== 'relation' && attribute.type !== 'component') {
         const formatted = createYupSchemaAttribute(attribute.type, attribute);
         acc[current] = formatted;
       }
@@ -43,32 +43,35 @@ const createYupSchema = (model, { groups }) => {
           : yup.array().nullable();
       }
 
-      if (attribute.type === 'group') {
-        const groupFieldSchema = createYupSchema(groups[attribute.group], {
-          groups,
-        });
+      if (attribute.type === 'component') {
+        const componentFieldSchema = createYupSchema(
+          components[attribute.component],
+          {
+            components,
+          }
+        );
 
         if (attribute.repeatable === true) {
-          const groupSchema =
+          const componentSchema =
             attribute.required === true
               ? yup
                   .array()
-                  .of(groupFieldSchema)
+                  .of(componentFieldSchema)
                   .defined()
               : yup
                   .array()
-                  .of(groupFieldSchema)
+                  .of(componentFieldSchema)
                   .nullable();
 
-          acc[current] = groupSchema;
+          acc[current] = componentSchema;
 
           return acc;
         } else {
-          const groupSchema = yup.lazy(obj => {
+          const componentSchema = yup.lazy(obj => {
             if (obj !== undefined) {
               return attribute.required === true
-                ? groupFieldSchema.defined()
-                : groupFieldSchema.nullable();
+                ? componentFieldSchema.defined()
+                : componentFieldSchema.nullable();
             }
 
             return attribute.required === true
@@ -76,7 +79,7 @@ const createYupSchema = (model, { groups }) => {
               : yup.object().nullable();
           });
 
-          acc[current] = groupSchema;
+          acc[current] = componentSchema;
 
           return acc;
         }

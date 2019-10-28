@@ -7,8 +7,8 @@ const Wrapper = styled.div`
   height: 30px;
   width: 100%;
   padding: 0 5px;
-  ${({ isGroup }) => {
-    if (isGroup) {
+  ${({ isComponent }) => {
+    if (isComponent) {
       return css`
         height: 36px;
         border: 1px solid #e3e9f3;

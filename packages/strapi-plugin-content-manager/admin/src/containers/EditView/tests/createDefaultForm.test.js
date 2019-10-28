@@ -1,7 +1,7 @@
 import createDefaultForm from '../utils/createDefaultForm';
 
 describe('Content Manager | EditView | utils | createDefaultForm', () => {
-  it('should return an empty object if there is no group or default value in the argument', () => {
+  it('should return an empty object if there is no component or default value in the argument', () => {
     const attributes = {
       title: {
         type: 'string',
@@ -69,7 +69,7 @@ describe('Content Manager | EditView | utils | createDefaultForm', () => {
     });
   });
 
-  it('should handle the group fields correctly', () => {
+  it('should handle the component fields correctly', () => {
     const attributes = {
       title: {
         type: 'string',
@@ -78,40 +78,40 @@ describe('Content Manager | EditView | utils | createDefaultForm', () => {
       description: {
         type: 'text',
       },
-      group: {
-        type: 'group',
+      component: {
+        type: 'component',
       },
-      group1: {
-        type: 'group',
+      component1: {
+        type: 'component',
         required: true,
       },
-      group2: {
-        type: 'group',
+      component2: {
+        type: 'component',
         repeatable: true,
       },
-      group3: {
-        type: 'group',
+      component3: {
+        type: 'component',
         repeatable: true,
         required: true,
       },
-      group4: {
-        type: 'group',
+      component4: {
+        type: 'component',
         repeatable: true,
         required: true,
         min: 2,
       },
-      group5: {
-        type: 'group',
+      component5: {
+        type: 'component',
         repeatable: true,
         min: 2,
       },
     };
     expect(createDefaultForm(attributes)).toEqual({
       title: 'test',
-      group1: {},
-      group3: [],
-      group4: [{ _temp__id: 0 }, { _temp__id: 1 }],
-      group5: [{ _temp__id: 0 }, { _temp__id: 1 }],
+      component1: {},
+      component3: [],
+      component4: [{ _temp__id: 0 }, { _temp__id: 1 }],
+      component5: [{ _temp__id: 0 }, { _temp__id: 1 }],
     });
   });
 });

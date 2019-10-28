@@ -12,8 +12,8 @@ describe('Content Manager | Main | reducer', () => {
 
   beforeEach(() => {
     state = {
-      groupsAndModelsMainPossibleMainFields: {},
-      groups: [],
+      componentsAndModelsMainPossibleMainFields: {},
+      components: [],
       initialLayouts: {
         test: {
           layouts: {

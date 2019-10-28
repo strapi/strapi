@@ -17,7 +17,13 @@ import FilterPickerOption from '../FilterPickerOption';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
-const NOT_ALLOWED_FILTERS = ['json', 'group', 'relation', 'media', 'richtext'];
+const NOT_ALLOWED_FILTERS = [
+  'json',
+  'component',
+  'relation',
+  'media',
+  'richtext',
+];
 
 function FilterPicker({
   actions,

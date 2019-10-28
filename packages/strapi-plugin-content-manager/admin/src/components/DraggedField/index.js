@@ -18,7 +18,7 @@ const DraggedField = forwardRef(
       children,
       count,
       goTo,
-      groupUid,
+      componentUid,
       isDragging,
       isDraggingSibling,
       isHidden,
@@ -127,7 +127,7 @@ const DraggedField = forwardRef(
             </RemoveWrapper>
           </SubWrapper>
         )}
-        {type === 'group' && (
+        {type === 'component' && (
           <FormattedMessage
             id={`${pluginId}.components.FieldItem.linkToGroupLayout`}
           >
@@ -137,7 +137,7 @@ const DraggedField = forwardRef(
                   e.stopPropagation();
 
                   goTo(
-                    `/plugins/${pluginId}/ctm-configurations/edit-settings/groups/${groupUid}`
+                    `/plugins/${pluginId}/ctm-configurations/edit-settings/components/${componentUid}`
                   );
                 }}
               >
@@ -155,7 +155,7 @@ DraggedField.defaultProps = {
   children: null,
   count: 1,
   goTo: () => {},
-  groupUid: null,
+  componentUid: null,
   isDragging: false,
   isDraggingSibling: false,
   isHidden: false,
@@ -172,7 +172,7 @@ DraggedField.propTypes = {
   children: PropTypes.node,
   count: PropTypes.number,
   goTo: PropTypes.func,
-  groupUid: PropTypes.string,
+  componentUid: PropTypes.string,
   isDragging: PropTypes.bool,
   isDraggingSibling: PropTypes.bool,
   isHidden: PropTypes.bool,

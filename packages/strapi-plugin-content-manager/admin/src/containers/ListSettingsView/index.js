@@ -93,7 +93,7 @@ const ListSettingsView = ({ deleteLayout, location: { search }, slug }) => {
       .filter(key => {
         const type = get(attributes, [key, 'type'], '');
 
-        return !['json', 'relation', 'group'].includes(type) && !!type;
+        return !['json', 'relation', 'component'].includes(type) && !!type;
       })
       .filter(field => {
         return !getListDisplayedFields().includes(field);

@@ -11,8 +11,8 @@ const DraggedFieldWithPreview = forwardRef(
   (
     {
       goTo,
-      groupUid,
-      groupLayouts,
+      componentUid,
+      componentLayouts,
       isDragging,
       isDraggingSibling,
       label,
@@ -34,11 +34,18 @@ const DraggedFieldWithPreview = forwardRef(
     const isFullSize = size === 12;
     const display = isFullSize && dragStart ? 'none' : '';
     const width = isFullSize && dragStart ? 0 : '100%';
-    const higherFields = ['json', 'text', 'file', 'media', 'group', 'richtext'];
+    const higherFields = [
+      'json',
+      'text',
+      'file',
+      'media',
+      'component',
+      'richtext',
+    ];
     const withLongerHeight = higherFields.includes(type) && !dragStart;
 
-    const groupData = get(groupLayouts, [groupUid], {});
-    const groupLayout = get(groupData, ['layouts', 'edit'], []);
+    const componentData = get(componentLayouts, [componentUid], {});
+    const componentLayout = get(componentData, ['layouts', 'edit'], []);
     const getWrapperWitdh = colNum => `${(1 / 12) * colNum * 100}%`;
 
     return (
@@ -69,7 +76,7 @@ const DraggedFieldWithPreview = forwardRef(
             <div className="sub" style={{ width, opacity }}>
               <DraggedField
                 goTo={goTo}
-                groupUid={groupUid}
+                componentUid={componentUid}
                 isHidden={isHidden}
                 isDraggingSibling={isDraggingSibling}
                 label={label}
@@ -82,10 +89,10 @@ const DraggedFieldWithPreview = forwardRef(
                 type={type}
                 withLongerHeight={withLongerHeight}
               >
-                {type === 'group' &&
-                  groupLayout.map((row, i) => {
+                {type === 'component' &&
+                  componentLayout.map((row, i) => {
                     const marginBottom =
-                      i === groupLayout.length - 1 ? '29px' : '';
+                      i === componentLayout.length - 1 ? '29px' : '';
                     const marginTop = i === 0 ? '5px' : '';
 
                     return (
@@ -99,12 +106,12 @@ const DraggedFieldWithPreview = forwardRef(
                       >
                         {row.map(field => {
                           const fieldType = get(
-                            groupData,
+                            componentData,
                             ['schema', 'attributes', field.name, 'type'],
                             ''
                           );
                           const label = get(
-                            groupData,
+                            componentData,
                             ['metadatas', field.name, 'edit', 'label'],
                             ''
                           );
@@ -143,8 +150,8 @@ const DraggedFieldWithPreview = forwardRef(
 
 DraggedFieldWithPreview.defaultProps = {
   goTo: () => {},
-  groupLayouts: {},
-  groupUid: null,
+  componentLayouts: {},
+  componentUid: null,
   isDragging: false,
   isDraggingSibling: false,
   label: '',
@@ -160,8 +167,8 @@ DraggedFieldWithPreview.defaultProps = {
 
 DraggedFieldWithPreview.propTypes = {
   goTo: PropTypes.func,
-  groupLayouts: PropTypes.object,
-  groupUid: PropTypes.string,
+  componentLayouts: PropTypes.object,
+  componentUid: PropTypes.string,
   isDragging: PropTypes.bool,
   isDraggingSibling: PropTypes.bool,
   label: PropTypes.string,

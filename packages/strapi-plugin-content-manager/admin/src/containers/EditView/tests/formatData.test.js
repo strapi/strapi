@@ -3,17 +3,17 @@ import {
   getMediaAttributes,
   helperCleanData,
 } from '../utils/formatData';
-import { ctLayout, groupLayouts, simpleCtLayout } from './data';
+import { ctLayout, componentLayouts, simpleCtLayout } from './data';
 
 describe('Content Manager | EditView | utils | cleanData', () => {
   let simpleContentTypeLayout;
   let contentTypeLayout;
-  let grpLayouts;
+  let cpLayouts;
 
   beforeEach(() => {
     simpleContentTypeLayout = simpleCtLayout;
     contentTypeLayout = ctLayout;
-    grpLayouts = groupLayouts;
+    cpLayouts = componentLayouts;
   });
 
   it('should format de data correctly if the content type has no group and no file has been added', () => {
@@ -60,7 +60,7 @@ describe('Content Manager | EditView | utils | cleanData', () => {
       pictures: [1, 2],
     };
 
-    expect(cleanData(data, simpleContentTypeLayout, grpLayouts)).toEqual(
+    expect(cleanData(data, simpleContentTypeLayout, cpLayouts)).toEqual(
       expected
     );
   });
@@ -148,7 +148,9 @@ describe('Content Manager | EditView | utils | cleanData', () => {
       title: 'test',
     };
 
-    expect(cleanData(data, contentTypeLayout, groupLayouts)).toEqual(expected);
+    expect(cleanData(data, contentTypeLayout, componentLayouts)).toEqual(
+      expected
+    );
   });
 });
 
@@ -202,36 +204,40 @@ describe('Content Manager | EditView | utils | helperCleanData', () => {
 
 describe('Content Manager | EditView | utils | getMediasAttributes', () => {
   let contentTypeLayout;
-  let grpLayouts;
+  let cpLayouts;
 
   beforeEach(() => {
     contentTypeLayout = ctLayout;
-    grpLayouts = groupLayouts;
+    cpLayouts = componentLayouts;
   });
 
   it('should return an array containing the paths of all the medias attributes', () => {
     const expected = {
       'ingredients.testMultiple': {
         multiple: true,
-        isGroup: true,
+        isComponent: true,
         repeatable: true,
       },
-      'ingredients.test': { multiple: false, isGroup: true, repeatable: true },
+      'ingredients.test': {
+        multiple: false,
+        isComponent: true,
+        repeatable: true,
+      },
       'mainIngredient.testMultiple': {
         multiple: true,
-        isGroup: true,
+        isComponent: true,
         repeatable: false,
       },
       'mainIngredient.test': {
         multiple: false,
-        isGroup: true,
+        isComponent: true,
         repeatable: false,
       },
-      pic: { multiple: false, isGroup: false, repeatable: false },
-      pictures: { multiple: true, isGroup: false, repeatable: false },
+      pic: { multiple: false, isComponent: false, repeatable: false },
+      pictures: { multiple: true, isComponent: false, repeatable: false },
     };
 
-    expect(getMediaAttributes(contentTypeLayout, grpLayouts)).toMatchObject(
+    expect(getMediaAttributes(contentTypeLayout, cpLayouts)).toMatchObject(
       expected
     );
   });

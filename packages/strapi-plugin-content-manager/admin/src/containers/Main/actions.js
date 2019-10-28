@@ -29,10 +29,10 @@ export function getData() {
   };
 }
 
-export function getDataSucceeded(groups, models, mainFields) {
+export function getDataSucceeded(components, models, mainFields) {
   return {
     type: GET_DATA_SUCCEEDED,
-    groups,
+    components,
     models: models.filter(model => model.isDisplayed === true),
     mainFields,
   };

@@ -8,14 +8,14 @@ const ctLayout = {
       enum: { type: 'enumeration', enum: ['un', 'deux'] },
       fb_cta: {
         required: true,
-        type: 'group',
-        group: 'cta_facebook',
+        type: 'component',
+        component: 'cta_facebook',
         repeatable: false,
       },
       id: { type: 'integer' },
       ingredients: {
-        type: 'group',
-        group: 'ingredients',
+        type: 'component',
+        component: 'ingredients',
         repeatable: true,
         min: 1,
         max: 10,
@@ -31,8 +31,8 @@ const ctLayout = {
         type: 'relation',
       },
       mainIngredient: {
-        type: 'group',
-        group: 'ingredients',
+        type: 'component',
+        component: 'ingredients',
         repeatable: false,
       },
       mainTag: {
@@ -67,7 +67,7 @@ const ctLayout = {
   },
 };
 
-const groupLayouts = {
+const componentLayouts = {
   cta_facebook: {
     schema: {
       attributes: {
@@ -123,4 +123,4 @@ const simpleCtLayout = {
   settings: {},
 };
 
-export { ctLayout, groupLayouts, simpleCtLayout };
+export { ctLayout, componentLayouts, simpleCtLayout };

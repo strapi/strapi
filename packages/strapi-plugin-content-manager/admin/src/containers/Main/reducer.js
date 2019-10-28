@@ -15,8 +15,8 @@ import {
 } from './constants';
 
 export const initialState = fromJS({
-  groupsAndModelsMainPossibleMainFields: {},
-  groups: [],
+  componentsAndModelsMainPossibleMainFields: {},
+  components: [],
   initialLayouts: {},
   isLoading: true,
   layouts: {},
@@ -31,9 +31,9 @@ function mainReducer(state = initialState, action) {
       return state.update('layouts', () => fromJS({}));
     case GET_DATA_SUCCEEDED:
       return state
-        .update('groups', () => fromJS(action.groups))
+        .update('components', () => fromJS(action.components))
         .update('models', () => fromJS(action.models))
-        .update('groupsAndModelsMainPossibleMainFields', () =>
+        .update('componentsAndModelsMainPossibleMainFields', () =>
           fromJS(action.mainFields)
         )
         .update('isLoading', () => false);

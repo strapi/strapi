@@ -3,7 +3,7 @@ import { useDragLayer } from 'react-dnd';
 
 import ItemTypes from '../../utils/ItemTypes';
 
-import GroupBanner from '../GroupBanner';
+import ComponentBanner from '../ComponentBanner';
 import RelationItem from '../SelectMany/Relation';
 import { Li } from '../SelectMany/components';
 import DraggedField from '../DraggedField';
@@ -54,9 +54,9 @@ const CustomDragLayer = () => {
     switch (itemType) {
       case ItemTypes.FIELD:
         return <DraggedField name={item.id} selectedItem={item.name} />;
-      case ItemTypes.GROUP:
+      case ItemTypes.COMPONENT:
         return (
-          <GroupBanner
+          <ComponentBanner
             {...item}
             isOpen
             style={{

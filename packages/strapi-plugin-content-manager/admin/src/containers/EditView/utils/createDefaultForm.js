@@ -23,7 +23,7 @@ const setDefaultForm = attributes => {
       acc[current] = defaultValue;
     }
 
-    if (type === 'group') {
+    if (type === 'component') {
       if (required === true) {
         acc[current] = repeatable === true ? [] : {};
       }

@@ -3,19 +3,19 @@ import PropTypes from 'prop-types';
 
 import Wrapper from './components';
 
-const PreviewCarret = ({ isGroup, style }) => (
-  <Wrapper isGroup={isGroup} style={style}>
+const PreviewCarret = ({ isComponent, style }) => (
+  <Wrapper isComponent={isComponent} style={style}>
     <div />
   </Wrapper>
 );
 
 PreviewCarret.defaultProps = {
-  isGroup: false,
+  isComponent: false,
   style: {},
 };
 
 PreviewCarret.propTypes = {
-  isGroup: PropTypes.bool,
+  isComponent: PropTypes.bool,
   style: PropTypes.object,
 };
 

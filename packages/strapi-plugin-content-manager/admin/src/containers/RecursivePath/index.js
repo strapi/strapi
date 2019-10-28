@@ -5,10 +5,6 @@ const EditView = lazy(() => import('../EditView'));
 const EditSettingsView = lazy(() => import('../EditSettingsView'));
 const ListView = lazy(() => import('../ListView'));
 const ListSettingsView = lazy(() => import('../ListSettingsView'));
-// import EditView from '../EditView';
-// import EditSettingsView from '../EditSettingsView';
-// import ListSettingsView from '../ListSettingsView';
-// import ListView from '../ListView';
 
 const RecursivePath = props => {
   const { url } = useRouteMatch();
