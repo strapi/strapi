@@ -2,12 +2,12 @@
 
 const pluralize = require('pluralize');
 
+const { getComponentAttributes } = require('./utils/attributes');
+
 const createComponentModels = async ({ model, definition, ORM, GLOBALS }) => {
   const { collectionName, primaryKey } = definition;
 
-  const componentAttributes = Object.keys(definition.attributes).filter(
-    key => definition.attributes[key].type === 'component'
-  );
+  const componentAttributes = getComponentAttributes(definition.attributes);
 
   if (componentAttributes.length > 0) {
     // create component model
@@ -20,8 +20,24 @@ const createComponentModels = async ({ model, definition, ORM, GLOBALS }) => {
         return this.morphTo(
           'component',
           ...componentAttributes.map(key => {
-            const componentKey = definition.attributes[key].component;
-            return GLOBALS[strapi.components[componentKey].globalId];
+            const attr = definition.attributes[key];
+            const { type } = attr;
+
+            switch (type) {
+              case 'component': {
+                const { component } = attr;
+                return GLOBALS[strapi.components[component].globalId];
+              }
+              case 'dynamiczone': {
+                const { components } = attr;
+                return components.map(
+                  component => GLOBALS[strapi.components[component].globalId]
+                );
+              }
+              default: {
+                throw new Error(`Invalid type for attribute ${key}: ${type}`);
+              }
+            }
           })
         );
       },
@@ -43,9 +59,7 @@ const createComponentModels = async ({ model, definition, ORM, GLOBALS }) => {
 const createComponentJoinTables = async ({ definition, ORM }) => {
   const { collectionName, primaryKey } = definition;
 
-  const componentAttributes = Object.keys(definition.attributes).filter(
-    key => definition.attributes[key].type === 'component'
-  );
+  const componentAttributes = getComponentAttributes(definition.attributes);
 
   if (componentAttributes.length > 0) {
     const joinTable = `${collectionName}_components`;

@@ -7,10 +7,7 @@
   },
   "options": {
     "increments": true,
-    "timestamps": [
-      "created_at",
-      "updated_at"
-    ],
+    "timestamps": ["created_at", "updated_at"],
     "comment": ""
   },
   "attributes": {
@@ -38,14 +35,12 @@
       "collection": "category"
     },
     "price_range": {
-      "enum": [
-        "very_cheap",
-        "cheap",
-        "average",
-        "expensive",
-        "very_expensive"
-      ],
+      "enum": ["very_cheap", "cheap", "average", "expensive", "very_expensive"],
       "type": "enumeration"
+    },
+    "body": {
+      "type": "dynamiczone",
+      "components": ["closingperiod", "restaurantservice"]
     },
     "description": {
       "type": "richtext",

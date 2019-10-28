@@ -16,7 +16,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   const assocKeys = model.associations.map(ast => ast.alias);
   // component keys
   const componentKeys = Object.keys(model.attributes).filter(key => {
-    return model.attributes[key].type === 'component';
+    return ['dynamiczone', 'component'].includes(model.attributes[key].type);
   });
 
   const timestamps = _.get(model, ['options', 'timestamps'], []);
@@ -235,52 +235,102 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     const joinModel = model.componentsJoinModel;
     const { foreignKey } = joinModel;
 
+    const createComponentAndLink = async ({
+      componentModel,
+      value,
+      key,
+      order,
+    }) => {
+      return strapi
+        .query(componentModel.uid)
+        .create(value, { transacting })
+        .then(component => {
+          return joinModel.forge().save(
+            {
+              [foreignKey]: entry.id,
+              component_type: componentModel.collectionName,
+              component_id: component.id,
+              field: key,
+              order,
+            },
+            { transacting }
+          );
+        });
+    };
+
     for (let key of componentKeys) {
       const attr = model.attributes[key];
-      const { component, required = false, repeatable = false } = attr;
+      const { type } = attr;
 
-      const componentModel = strapi.components[component];
+      switch (type) {
+        case 'component': {
+          const { component, required = false, repeatable = false } = attr;
+          const componentModel = strapi.components[component];
 
-      const createComponentAndLink = async ({ value, order }) => {
-        return strapi
-          .query(componentModel.uid)
-          .create(value, { transacting })
-          .then(component => {
-            return joinModel.forge().save(
-              {
-                [foreignKey]: entry.id,
-                component_type: componentModel.collectionName,
-                component_id: component.id,
-                field: key,
-                order,
-              },
-              { transacting }
+          if (required === true && !_.has(values, key)) {
+            const err = new Error(`Component ${key} is required`);
+            err.status = 400;
+            throw err;
+          }
+
+          if (!_.has(values, key)) continue;
+
+          const componentValue = values[key];
+
+          if (repeatable === true) {
+            validateRepeatableInput(componentValue, { key, ...attr });
+            await Promise.all(
+              componentValue.map((value, idx) =>
+                createComponentAndLink({
+                  componentModel,
+                  value,
+                  key,
+                  order: idx + 1,
+                })
+              )
             );
-          });
-      };
+          } else {
+            validateNonRepeatableInput(componentValue, { key, ...attr });
 
-      if (required === true && !_.has(values, key)) {
-        const err = new Error(`Component ${key} is required`);
-        err.status = 400;
-        throw err;
-      }
+            if (componentValue === null) continue;
+            await createComponentAndLink({
+              componentModel,
+              key,
+              value: componentValue,
+              order: 1,
+            });
+          }
+          break;
+        }
+        case 'dynamiczone': {
+          const { required = false } = attr;
 
-      if (!_.has(values, key)) continue;
+          if (required === true && !_.has(values, key)) {
+            const err = new Error(`Dynamiczone ${key} is required`);
+            err.status = 400;
+            throw err;
+          }
 
-      const componentValue = values[key];
+          if (!_.has(values, key)) continue;
 
-      if (repeatable === true) {
-        validateRepeatableInput(componentValue, { key, ...attr });
-        await Promise.all(
-          componentValue.map((value, idx) =>
-            createComponentAndLink({ value, order: idx + 1 })
-          )
-        );
-      } else {
-        validateNonRepeatableInput(componentValue, { key, ...attr });
+          const dynamiczoneValues = values[key];
 
-        if (componentValue === null) continue;
-        await createComponentAndLink({ value: componentValue, order: 1 });
+          validateDynamiczoneInput(dynamiczoneValues, { key, ...attr });
+
+          await Promise.all(
+            dynamiczoneValues.map((value, idx) => {
+              const component = value.__component;
+              const componentModel = strapi.components[component];
+              return createComponentAndLink({
+                componentModel,
+                value: _.omit(value, ['__component']),
+                key,
+                order: idx + 1,
+              });
+            })
+          );
+          break;
+        }
       }
     }
   }
@@ -291,100 +341,234 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     const joinModel = model.componentsJoinModel;
     const { foreignKey } = joinModel;
 
+    const updateOrCreateComponentAndLink = async ({
+      componentModel,
+      key,
+      value,
+      order,
+    }) => {
+      // check if value has an id then update else create
+      if (_.has(value, componentModel.primaryKey)) {
+        return strapi
+          .query(componentModel.uid)
+          .update(
+            {
+              [componentModel.primaryKey]: value[componentModel.primaryKey],
+            },
+            value,
+            { transacting }
+          )
+          .then(component => {
+            return joinModel
+              .forge()
+              .query({
+                where: {
+                  [foreignKey]: entry.id,
+                  component_type: componentModel.collectionName,
+                  component_id: component.id,
+                  field: key,
+                },
+              })
+              .save(
+                {
+                  order,
+                },
+                { transacting, patch: true, require: false }
+              );
+          });
+      }
+      // create
+      return strapi
+        .query(componentModel.uid)
+        .create(value, { transacting })
+        .then(component => {
+          return joinModel.forge().save(
+            {
+              [foreignKey]: entry.id,
+              component_type: componentModel.collectionName,
+              component_id: component.id,
+              field: key,
+              order,
+            },
+            { transacting }
+          );
+        });
+    };
+
     for (let key of componentKeys) {
       // if key isn't present then don't change the current component data
       if (!_.has(values, key)) continue;
 
       const attr = model.attributes[key];
-      const { component, repeatable = false } = attr;
+      const { type } = attr;
 
-      const componentModel = strapi.components[component];
+      switch (type) {
+        case 'component': {
+          const { component, repeatable = false } = attr;
 
-      const componentValue = values[key];
+          const componentModel = strapi.components[component];
 
-      const updateOrCreateComponentAndLink = async ({ value, order }) => {
-        // check if value has an id then update else create
-        if (_.has(value, componentModel.primaryKey)) {
-          return strapi
-            .query(componentModel.uid)
-            .update(
-              {
-                [componentModel.primaryKey]: value[componentModel.primaryKey],
-              },
-              value,
-              { transacting }
-            )
-            .then(component => {
-              return joinModel
-                .forge()
-                .query({
-                  where: {
-                    [foreignKey]: entry.id,
-                    component_type: componentModel.collectionName,
-                    component_id: component.id,
-                    field: key,
-                  },
-                })
-                .save(
-                  {
-                    order,
-                  },
-                  { transacting, patch: true, require: false }
-                );
+          const componentValue = values[key];
+
+          if (repeatable === true) {
+            validateRepeatableInput(componentValue, { key, ...attr });
+
+            await deleteOldComponents(entry, componentValue, {
+              key,
+              joinModel,
+              componentModel,
+              transacting,
             });
-        }
-        // create
-        return strapi
-          .query(componentModel.uid)
-          .create(value, { transacting })
-          .then(component => {
-            return joinModel.forge().save(
-              {
-                [foreignKey]: entry.id,
-                component_type: componentModel.collectionName,
-                component_id: component.id,
-                field: key,
-                order,
-              },
-              { transacting }
+
+            await Promise.all(
+              componentValue.map((value, idx) => {
+                return updateOrCreateComponentAndLink({
+                  componentModel,
+                  key,
+                  value,
+                  order: idx + 1,
+                });
+              })
             );
+          } else {
+            validateNonRepeatableInput(componentValue, { key, ...attr });
+
+            await deleteOldComponents(entry, componentValue, {
+              key,
+              joinModel,
+              componentModel,
+              transacting,
+            });
+
+            if (componentValue === null) continue;
+
+            await updateOrCreateComponentAndLink({
+              componentModel,
+              key,
+              value: componentValue,
+              order: 1,
+            });
+          }
+
+          break;
+        }
+        case 'dynamiczone': {
+          const dynamiczoneValues = values[key];
+
+          validateDynamiczoneInput(dynamiczoneValues, { key, ...attr });
+
+          await deleteDynamicZoneOldComponents(entry, dynamiczoneValues, {
+            key,
+            joinModel,
+            transacting,
           });
-      };
 
-      if (repeatable === true) {
-        validateRepeatableInput(componentValue, { key, ...attr });
-
-        await deleteOldComponents(entry, componentValue, {
-          key,
-          joinModel,
-          componentModel,
-          transacting,
-        });
-
-        await Promise.all(
-          componentValue.map((value, idx) => {
-            return updateOrCreateComponentAndLink({ value, order: idx + 1 });
-          })
-        );
-      } else {
-        validateNonRepeatableInput(componentValue, { key, ...attr });
-
-        await deleteOldComponents(entry, componentValue, {
-          key,
-          joinModel,
-          componentModel,
-          transacting,
-        });
-
-        if (componentValue === null) continue;
-
-        await updateOrCreateComponentAndLink({
-          value: componentValue,
-          order: 1,
-        });
+          await Promise.all(
+            dynamiczoneValues.map((value, idx) => {
+              const component = value.__component;
+              const componentModel = strapi.components[component];
+              return updateOrCreateComponentAndLink({
+                componentModel,
+                value: _.omit(value, ['__component']),
+                key,
+                order: idx + 1,
+              });
+            })
+          );
+          break;
+        }
       }
     }
     return;
+  }
+
+  async function deleteDynamicZoneOldComponents(
+    entry,
+    values,
+    { key, joinModel, transacting }
+  ) {
+    const idsToKeep = values.reduce((acc, value) => {
+      const component = value.__component;
+      const componentModel = strapi.components[component];
+      if (_.has(value, componentModel.primaryKey)) {
+        acc.push({
+          id: value[componentModel.primaryKey].toString(),
+          component: componentModel,
+        });
+      }
+
+      return acc;
+    }, []);
+
+    const allIds = await joinModel
+      .forge()
+      .query(qb => {
+        qb.where(joinModel.foreignKey, entry.id).andWhere('field', key);
+      })
+      .fetchAll({ transacting })
+      .map(el => {
+        const componentKey = Object.keys(strapi.components).find(
+          key =>
+            strapi.components[key].collectionName === el.get('component_type')
+        );
+
+        return {
+          id: el.get('component_id').toString(),
+          component: strapi.components[componentKey],
+        };
+      });
+
+    // verify the provided ids are realted to this entity.
+    idsToKeep.forEach(({ id, component }) => {
+      if (
+        !allIds.find(el => el.id === id && el.component.uid === component.uid)
+      ) {
+        const err = new Error(
+          `Some of the provided components in ${key} are not related to the entity`
+        );
+        err.status = 400;
+        throw err;
+      }
+    });
+
+    const idsToDelete = allIds.reduce((acc, { id, component }) => {
+      if (
+        !idsToKeep.find(
+          el => el.id === id && el.component.uid === component.uid
+        )
+      ) {
+        acc.push({
+          id,
+          component,
+        });
+      }
+      return acc;
+    }, []);
+
+    if (idsToDelete.length > 0) {
+      await joinModel
+        .forge()
+        .query(qb => {
+          qb.where('field', key);
+          qb.where(qb => {
+            idsToDelete.forEach(({ id, component }) => {
+              qb.orWhere(qb => {
+                qb.where('component_id', id).andWhere(
+                  'component_type',
+                  component.collectionName
+                );
+              });
+            });
+          });
+        })
+        .destroy({ transacting });
+
+      for (const idToDelete of idsToDelete) {
+        const { id, component } = idToDelete;
+        const model = strapi.query(component.uid);
+        await model.delete({ [model.primaryKey]: id }, { transacting });
+      }
+    }
   }
 
   async function deleteOldComponents(
@@ -445,36 +629,91 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
 
     for (let key of componentKeys) {
       const attr = model.attributes[key];
-      const { component } = attr;
+      const { type } = attr;
 
-      const componentModel = strapi.components[component];
+      switch (type) {
+        case 'component': {
+          const { component } = attr;
 
-      const ids = await joinModel
-        .forge()
-        .query({
-          where: {
-            [foreignKey]: entry.id,
-            component_type: componentModel.collectionName,
-            field: key,
-          },
-        })
-        .fetchAll({ transacting })
-        .map(el => el.get('component_id'));
+          const componentModel = strapi.components[component];
 
-      await strapi
-        .query(componentModel.uid)
-        .delete({ [`${componentModel.primaryKey}_in`]: ids }, { transacting });
+          const ids = await joinModel
+            .forge()
+            .query({
+              where: {
+                [foreignKey]: entry.id,
+                field: key,
+              },
+            })
+            .fetchAll({ transacting })
+            .map(el => el.get('component_id'));
 
-      await joinModel
-        .forge()
-        .query({
-          where: {
-            [foreignKey]: entry.id,
-            component_type: componentModel.collectionName,
-            field: key,
-          },
-        })
-        .destroy({ transacting, require: false });
+          await strapi
+            .query(componentModel.uid)
+            .delete(
+              { [`${componentModel.primaryKey}_in`]: ids },
+              { transacting }
+            );
+
+          await joinModel
+            .forge()
+            .query({
+              where: {
+                [foreignKey]: entry.id,
+                field: key,
+              },
+            })
+            .destroy({ transacting, require: false });
+          break;
+        }
+        case 'dynamiczone': {
+          const { components } = attr;
+
+          const componentJoins = await joinModel
+            .forge()
+            .query({
+              where: {
+                [foreignKey]: entry.id,
+                field: key,
+              },
+            })
+            .fetchAll({ transacting })
+            .map(el => ({
+              id: el.get('component_id'),
+              componentType: el.get('component_type'),
+            }));
+
+          for (const compo of components) {
+            const { uid, collectionName } = strapi.components[compo];
+            const model = strapi.query(uid);
+
+            const toDelete = componentJoins.filter(
+              el => el.componentType === collectionName
+            );
+
+            if (toDelete.length > 0) {
+              await model.delete(
+                {
+                  [`${model.primaryKey}_in`]: toDelete.map(el => el.id),
+                },
+                { transacting }
+              );
+            }
+          }
+
+          await joinModel
+            .forge()
+            .query({
+              where: {
+                [foreignKey]: entry.id,
+                field: key,
+              },
+            })
+            .destroy({ transacting, require: false });
+
+          break;
+        }
+      }
     }
   }
 
@@ -573,7 +812,7 @@ function validateRepeatableInput(value, { key, min, max }) {
   value.forEach(val => {
     if (typeof val !== 'object' || Array.isArray(val) || val === null) {
       const err = new Error(
-        `Component ${key} as invalid items. Expected each items to be objects`
+        `Component ${key} has invalid items. Expected each items to be objects`
       );
       err.status = 400;
       throw err;
@@ -603,6 +842,53 @@ function validateNonRepeatableInput(value, { key, required }) {
 
   if (required === true && value === null) {
     const err = new Error(`Component ${key} is required`);
+    err.status = 400;
+    throw err;
+  }
+}
+
+function validateDynamiczoneInput(value, { key, min, max, components }) {
+  if (!Array.isArray(value)) {
+    const err = new Error(`Dynamiczone ${key} is repetable. Expected an array`);
+    err.status = 400;
+    throw err;
+  }
+
+  value.forEach(val => {
+    if (typeof val !== 'object' || Array.isArray(val) || val === null) {
+      const err = new Error(
+        `Dynamiczone ${key} has invalid items. Expected each items to be objects`
+      );
+      err.status = 400;
+      throw err;
+    }
+
+    if (!_.has(val, '__component')) {
+      const err = new Error(
+        `Dynamiczone ${key} has invalid items. Expected each items to have a valid __component key`
+      );
+      err.status = 400;
+      throw err;
+    } else if (!components.includes(val.__component)) {
+      const err = new Error(
+        `Dynamiczone ${key} has invalid items. Each item must have a __component key that is present in the attribute definition`
+      );
+      err.status = 400;
+      throw err;
+    }
+  });
+
+  if (min && value.length < min) {
+    const err = new Error(
+      `Dynamiczone ${key} must contain at least ${min} items`
+    );
+    err.status = 400;
+    throw err;
+  }
+  if (max && value.length > max) {
+    const err = new Error(
+      `Dynamiczone ${key} must contain at most ${max} items`
+    );
     err.status = 400;
     throw err;
   }
