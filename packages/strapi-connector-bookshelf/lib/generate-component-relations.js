@@ -7,7 +7,7 @@ const { getComponentAttributes } = require('./utils/attributes');
 const createComponentModels = async ({ model, definition, ORM, GLOBALS }) => {
   const { collectionName, primaryKey } = definition;
 
-  const componentAttributes = getComponentAttributes(definition.attributes);
+  const componentAttributes = getComponentAttributes(definition);
 
   if (componentAttributes.length > 0) {
     // create component model
@@ -59,7 +59,7 @@ const createComponentModels = async ({ model, definition, ORM, GLOBALS }) => {
 const createComponentJoinTables = async ({ definition, ORM }) => {
   const { collectionName, primaryKey } = definition;
 
-  const componentAttributes = getComponentAttributes(definition.attributes);
+  const componentAttributes = getComponentAttributes(definition);
 
   if (componentAttributes.length > 0) {
     const joinTable = `${collectionName}_components`;
