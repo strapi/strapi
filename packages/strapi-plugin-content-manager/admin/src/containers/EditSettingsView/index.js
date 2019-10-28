@@ -430,11 +430,7 @@ const EditSettingsView = ({
           )}
         </div>
       </SettingsViewWrapper>
-      {/* Temporary in dev need to check the build the input lib causes glimpse */}
-      <div style={{ display: 'none' }}>
-        <Input type="text" name="hidden" />
-        <Input type="bool" name="hiddenn" />
-      </div>
+
       <PopupForm
         headerId={`${pluginId}.containers.EditSettingsView.modal-form.edit-field`}
         isOpen={isModalFormOpen}

@@ -305,10 +305,6 @@ const ListSettingsView = ({ deleteLayout, location: { search }, slug }) => {
           </DropdownButton>
         </DragWrapper>
       </SettingsViewWrapper>
-      {/* Temporary in dev need to check the build the input lib causes glimpse */}
-      <div style={{ display: 'none' }}>
-        <Input type="text" name="hidden" />
-      </div>
       <PopupForm
         headerId={`${pluginId}.containers.ListSettingsView.modal-form.edit-label`}
         isOpen={isModalFormOpen}
