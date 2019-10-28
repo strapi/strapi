@@ -50,7 +50,7 @@ const Label = ({
   });
 
   useEffect(() => {
-    preview(getEmptyImage(), { captureDraggingState: true });
+    preview(getEmptyImage(), { captureDraggingState: false });
   }, [preview]);
 
   drag(drop(ref));

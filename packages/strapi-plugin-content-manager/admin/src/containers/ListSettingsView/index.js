@@ -65,7 +65,7 @@ const ListSettingsView = ({ deleteLayout, location: { search }, slug }) => {
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
-          data,
+          data: data.contentType,
         });
       } catch (err) {
         if (err.code !== 20) {

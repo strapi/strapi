@@ -9,7 +9,7 @@ const GrabWrapper = styled.div`
   top: 0px;
   bottom: 0px;
   left: 0;
-  margin-right: 10px;
+  // margin-right: 10px;
   padding-left: 10px;
   border-right: 1px solid
     ${({ isOverEditBlock, isOverRemove, isSelected }) =>

@@ -84,7 +84,7 @@ const Item = ({
   });
 
   useEffect(() => {
-    preview(getEmptyImage(), { captureDraggingState: true });
+    preview(getEmptyImage(), { captureDraggingState: false });
   }, [preview]);
 
   // Create the refs
@@ -112,6 +112,7 @@ const Item = ({
       size={12}
       style={{ marginBottom: 6, paddingLeft: 5, paddingRight: 5 }}
       type="relation"
+      i={index === 0}
     />
   );
 };

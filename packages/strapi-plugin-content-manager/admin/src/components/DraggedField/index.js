@@ -22,6 +22,7 @@ const DraggedField = forwardRef(
       isDragging,
       isDraggingSibling,
       isHidden,
+      isOverDynamicZone,
       isSub,
       label,
       name,
@@ -34,11 +35,11 @@ const DraggedField = forwardRef(
     },
     ref
   ) => {
-    const opacity = isDragging ? 0.2 : 1;
     const [isOverRemove, setIsOverRemove] = useState(false);
     const [isOverEditBlock, setIsOverEditBlock] = useState(false);
+    const opacity = isDragging ? 0.2 : 1;
     const isSelected = selectedItem === name;
-    const showEditBlockOverState = isOverEditBlock && !isDraggingSibling;
+    const showEditBlockOverState = isOverEditBlock && !isOverDynamicZone;
     const displayedLabel = isEmpty(label) ? name : label;
 
     return (
@@ -60,11 +61,13 @@ const DraggedField = forwardRef(
             isOverEditBlock={isOverEditBlock}
             isOverRemove={isOverRemove}
             onMouseEnter={() => {
-              if (!isSub) {
+              if (!isSub && !isDraggingSibling) {
                 setIsOverEditBlock(true);
               }
             }}
-            onMouseLeave={() => setIsOverEditBlock(false)}
+            onMouseLeave={() => {
+              setIsOverEditBlock(false);
+            }}
             onClick={() => {
               onClick(name);
             }}
@@ -159,11 +162,13 @@ DraggedField.defaultProps = {
   isDragging: false,
   isDraggingSibling: false,
   isHidden: false,
+  isOverDynamicZone: false,
   isSub: false,
   label: '',
   onClick: () => {},
   onRemove: () => {},
   selectedItem: '',
+  shouldToggleDraggedFieldOverState: false,
   style: {},
   withLongerHeight: false,
 };
@@ -176,6 +181,7 @@ DraggedField.propTypes = {
   isDragging: PropTypes.bool,
   isDraggingSibling: PropTypes.bool,
   isHidden: PropTypes.bool,
+  isOverDynamicZone: PropTypes.bool,
   isSub: PropTypes.bool,
   label: PropTypes.string,
   name: PropTypes.string.isRequired,

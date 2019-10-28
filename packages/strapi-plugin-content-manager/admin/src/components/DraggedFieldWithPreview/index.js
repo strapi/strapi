@@ -3,8 +3,10 @@ import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import Carret from './Carret';
 import DraggedField from '../DraggedField';
+import DynamicZoneWrapper from './DynamicZoneWrapper';
 import PreviewCarret from '../PreviewCarret';
 import Wrapper from './Wrapper';
+import DynamicComponent from './DynamicComponent';
 
 // eslint-disable-next-line react/display-name
 const DraggedFieldWithPreview = forwardRef(
@@ -13,6 +15,7 @@ const DraggedFieldWithPreview = forwardRef(
       goTo,
       componentUid,
       componentLayouts,
+      dynamicZoneComponents,
       isDragging,
       isDraggingSibling,
       label,
@@ -30,6 +33,7 @@ const DraggedFieldWithPreview = forwardRef(
   ) => {
     const isHidden = name === '_TEMP_';
     const [dragStart, setDragStart] = useState(false);
+    const [isOverDynamicZone, setIsOverDynamicZone] = useState(false);
     const opacity = isDragging ? 0.2 : 1;
     const isFullSize = size === 12;
     const display = isFullSize && dragStart ? 'none' : '';
@@ -41,6 +45,7 @@ const DraggedFieldWithPreview = forwardRef(
       'media',
       'component',
       'richtext',
+      'dynamiczone',
     ];
     const withLongerHeight = higherFields.includes(type) && !dragStart;
 
@@ -79,6 +84,7 @@ const DraggedFieldWithPreview = forwardRef(
                 componentUid={componentUid}
                 isHidden={isHidden}
                 isDraggingSibling={isDraggingSibling}
+                isOverDynamicZone={isOverDynamicZone}
                 label={label}
                 name={name}
                 onClick={onClickEdit}
@@ -138,6 +144,19 @@ const DraggedFieldWithPreview = forwardRef(
                       </div>
                     );
                   })}
+                {type === 'dynamiczone' && (
+                  <DynamicZoneWrapper>
+                    {dynamicZoneComponents.map(compo => {
+                      return (
+                        <DynamicComponent
+                          key={compo}
+                          componentUid={compo}
+                          setIsOverDynamicZone={setIsOverDynamicZone}
+                        />
+                      );
+                    })}
+                  </DynamicZoneWrapper>
+                )}
               </DraggedField>
             </div>
             {showRightCarret && <Carret right />}
@@ -152,6 +171,7 @@ DraggedFieldWithPreview.defaultProps = {
   goTo: () => {},
   componentLayouts: {},
   componentUid: null,
+  dynamicZoneComponents: [],
   isDragging: false,
   isDraggingSibling: false,
   label: '',
@@ -169,6 +189,7 @@ DraggedFieldWithPreview.propTypes = {
   goTo: PropTypes.func,
   componentLayouts: PropTypes.object,
   componentUid: PropTypes.string,
+  dynamicZoneComponents: PropTypes.array,
   isDragging: PropTypes.bool,
   isDraggingSibling: PropTypes.bool,
   label: PropTypes.string,

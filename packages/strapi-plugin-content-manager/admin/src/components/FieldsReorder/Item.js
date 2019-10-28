@@ -11,12 +11,15 @@ import ItemTypes from '../../utils/ItemTypes';
 
 const Item = ({
   componentUid,
+  dynamicZoneComponents,
+  isDraggingSibling,
   itemIndex,
   moveItem,
   moveRow,
   name,
   removeField,
   rowIndex,
+  setIsDraggingSibling,
   size,
   type,
 }) => {
@@ -146,6 +149,9 @@ const Item = ({
     }),
   });
   const [{ isDragging, getItem }, drag, preview] = useDrag({
+    begin: () => {
+      setIsDraggingSibling(true);
+    },
     canDrag() {
       // Each row of the layout has a max size of 12 (based on bootstrap grid system)
       // So in order to offer a better drop zone we add the _TEMP_ div to complete the remaining substract (12 - existing)
@@ -158,6 +164,9 @@ const Item = ({
       isDragging: monitor.isDragging(),
       getItem: monitor.getItem(),
     }),
+    end: () => {
+      setIsDraggingSibling(false);
+    },
     item: { type: ItemTypes.EDIT_FIELD, itemIndex, rowIndex, name, size },
   });
 
@@ -203,7 +212,9 @@ const Item = ({
       goTo={goTo}
       componentUid={componentUid}
       componentLayouts={componentLayouts}
+      dynamicZoneComponents={dynamicZoneComponents}
       isDragging={isDragging}
+      isDraggingSibling={isDraggingSibling}
       label={get(metadatas, [name, 'edit', 'label'], '')}
       name={name}
       onClickEdit={setEditFieldToSelect}
@@ -223,17 +234,23 @@ const Item = ({
 
 Item.defaultProps = {
   componentUid: '',
+  dynamicZoneComponents: [],
+  isDraggingSibling: false,
+  setIsDraggingSibling: () => {},
   type: 'string',
 };
 
 Item.propTypes = {
   componentUid: PropTypes.string,
+  dynamicZoneComponents: PropTypes.array,
+  isDraggingSibling: PropTypes.bool,
   itemIndex: PropTypes.number.isRequired,
   moveItem: PropTypes.func.isRequired,
   moveRow: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
   removeField: PropTypes.func.isRequired,
   rowIndex: PropTypes.number.isRequired,
+  setIsDraggingSibling: PropTypes.func,
   size: PropTypes.number.isRequired,
   type: PropTypes.string,
 };

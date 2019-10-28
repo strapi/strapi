@@ -52,7 +52,7 @@ function EditView({
   const { id } = useParams();
   const abortController = new AbortController();
   const { signal } = abortController;
-  const layout = get(layouts, [slug], {});
+  const layout = get(layouts, [slug, 'contentType'], {});
   const isCreatingEntry = id === 'create';
   const attributes = get(layout, ['schema', 'attributes'], {});
 

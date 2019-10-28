@@ -70,9 +70,10 @@ function ListView({
   const [isLabelPickerOpen, setLabelPickerState] = useState(false);
   const [isFilterPickerOpen, setFilterPickerState] = useState(false);
   const [idToDelete, setIdToDelete] = useState(null);
+  const contentTypePath = [slug, 'contentType'];
 
   getLayoutSettingRef.current = settingName =>
-    get(layouts, [slug, 'settings', settingName], '');
+    get(layouts, [...contentTypePath, 'settings', settingName], '');
 
   const getSearchParams = useCallback(
     (updatedParams = {}) => {
@@ -117,15 +118,20 @@ function ListView({
 
   // Helpers
   const getMetaDatas = (path = []) =>
-    get(layouts, [slug, 'metadatas', ...path], {});
-  const getListLayout = () => get(layouts, [slug, 'layouts', 'list'], []);
+    get(layouts, [...contentTypePath, 'metadatas', ...path], {});
+  const getListLayout = () =>
+    get(layouts, [...contentTypePath, 'layouts', 'list'], []);
   const getAllLabels = () => {
     return sortBy(
       Object.keys(getMetaDatas())
         .filter(
           key =>
             !['json', 'component', 'relation', 'richtext'].includes(
-              get(layouts, [slug, 'schema', 'attributes', key, 'type'], '')
+              get(
+                layouts,
+                [...contentTypePath, 'schema', 'attributes', key, 'type'],
+                ''
+              )
             )
         )
         .map(label => ({
@@ -242,7 +248,7 @@ function ListView({
         onChangeParams={handleChangeParams}
         onClickDelete={handleClickDelete}
         onDeleteSeveralData={onDeleteSeveralData}
-        schema={get(layouts, [slug, 'schema'], {})}
+        schema={get(layouts, [...contentTypePath, 'schema'], {})}
         searchParams={getSearchParams()}
         slug={slug}
         toggleModalDeleteAll={toggleModalDeleteAll}
@@ -302,7 +308,11 @@ function ListView({
                           changeParams={handleChangeParams}
                           filters={getSearchParams().filters}
                           index={key}
-                          schema={get(layouts, [slug, 'schema'], {})}
+                          schema={get(
+                            layouts,
+                            [...contentTypePath, 'schema'],
+                            {}
+                          )}
                           key={key}
                           toggleFilterPickerState={toggleFilterPickerState}
                           isFilterPickerOpen={isFilterPickerOpen}

@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 
@@ -19,6 +19,7 @@ const FieldsReorder = ({ className }) => {
     onAddData,
     removeField,
   } = useLayoutDnd();
+  const [isDraggingSibling, setIsDraggingSibling] = useState(false);
   const getComponent = useCallback(
     attributeName => {
       return get(attributes, [attributeName, 'component'], '');
@@ -30,6 +31,14 @@ const FieldsReorder = ({ className }) => {
       const attribute = get(attributes, [attributeName], {});
 
       return attribute.type;
+    },
+    [attributes]
+  );
+  const getDynamicZoneComponents = useCallback(
+    attributeName => {
+      const attribute = get(attributes, [attributeName], {});
+
+      return attribute.components || [];
     },
     [attributes]
   );
@@ -54,6 +63,8 @@ const FieldsReorder = ({ className }) => {
                 return (
                   <Item
                     componentUid={getComponent(name)}
+                    dynamicZoneComponents={getDynamicZoneComponents(name)}
+                    isDraggingSibling={isDraggingSibling}
                     itemIndex={index}
                     key={name}
                     moveRow={moveRow}
@@ -61,6 +72,7 @@ const FieldsReorder = ({ className }) => {
                     name={name}
                     removeField={removeField}
                     rowIndex={rowIndex}
+                    setIsDraggingSibling={setIsDraggingSibling}
                     size={size}
                     type={getType(name)}
                   />

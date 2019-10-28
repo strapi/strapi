@@ -83,6 +83,7 @@ const getInputSize = type => {
     case 'json':
     case 'component':
     case 'richtext':
+    case 'dynamiczone':
       return 12;
     default:
       return 6;

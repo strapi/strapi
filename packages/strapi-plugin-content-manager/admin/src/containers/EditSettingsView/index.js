@@ -29,11 +29,6 @@ import SettingsViewWrapper from '../../components/SettingsViewWrapper';
 import SortableList from '../../components/SortableList';
 import { unformatLayout } from '../../utils/layout';
 import getInputProps from './utils/getInputProps';
-// TODO to remove when the API is available
-import {
-  retrieveDisplayedComponents,
-  retrieveComponentsLayoutsToFetch,
-} from '../EditView/utils/components';
 
 import reducer, { initialState } from './reducer';
 
@@ -137,34 +132,12 @@ const EditSettingsView = ({
           }
         );
 
-        // TODO temporary to remove when api available
-        const components = retrieveDisplayedComponents(
-          get(data, 'schema.attributes', {})
-        );
-        const componentLayoutsToGet = retrieveComponentsLayoutsToFetch(
-          components
-        );
-
-        const componentData = await Promise.all(
-          componentLayoutsToGet.map(uid =>
-            request(`/${pluginId}/components/${uid}`, {
-              method: 'GET',
-              signal,
-            })
-          )
-        );
-
-        const componentLayouts = componentData.reduce((acc, current) => {
-          acc[current.data.uid] = current.data;
-
-          return acc;
-        }, {});
+        console.log({ data });
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
-          data,
-          // TODO temporary to remove when api available
-          componentLayouts,
+          data: data.contentType || data.component,
+          componentLayouts: data.components,
         });
       } catch (err) {
         if (err.code !== 20) {
@@ -179,7 +152,7 @@ const EditSettingsView = ({
       abortController.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug, source, type]);
+  }, [slug, source, type, componentSlug]);
 
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
@@ -272,6 +245,14 @@ const EditSettingsView = ({
   const renderForm = () =>
     getForm().map((meta, index) => {
       const formType = get(getAttributes, [metaToEdit, 'type']);
+
+      console.log(formType);
+      if (
+        formType === 'dynamiczone' &&
+        !['label', 'description'].includes(meta)
+      ) {
+        return null;
+      }
 
       if (
         (formType === 'component' || formType === 'media') &&

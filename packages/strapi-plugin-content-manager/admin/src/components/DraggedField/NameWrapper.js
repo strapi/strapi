@@ -4,6 +4,7 @@ const NameWrapper = styled.div`
   position: relative;
   padding-left: 38px;
   padding-right: 38px;
+
   line-height: 30px;
   overflow: hidden;
   text-overflow: ellipsis;
