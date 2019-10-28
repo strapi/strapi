@@ -146,6 +146,7 @@ module.exports = {
 
         // We have to find if they are a model linked to this key
         const model = models[association.model];
+
         const attribute = model.attributes[association.via];
 
         if (
@@ -457,9 +458,7 @@ module.exports = {
 
               if (
                 (attr.collection || attr.model || '').toLowerCase() ===
-                  model.toLowerCase() &&
-                strapi.plugins[current].models[entity].globalId !==
-                  definition.globalId
+                model.toLowerCase()
               ) {
                 acc.push(strapi.plugins[current].models[entity].globalId);
               }
@@ -477,8 +476,7 @@ module.exports = {
 
           if (
             (attr.collection || attr.model || '').toLowerCase() ===
-              model.toLowerCase() &&
-            strapi.models[entity].globalId !== definition.globalId
+            model.toLowerCase()
           ) {
             acc.push(strapi.models[entity].globalId);
           }
@@ -495,8 +493,7 @@ module.exports = {
 
               if (
                 (attr.collection || attr.model || '').toLowerCase() ===
-                  model.toLowerCase() &&
-                strapi.components[entity].globalId !== definition.globalId
+                model.toLowerCase()
               ) {
                 acc.push(strapi.components[entity].globalId);
               }

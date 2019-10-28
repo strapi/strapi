@@ -15,6 +15,12 @@
     "price": {
       "type": "float"
     },
+    "address": {
+      "model": "address"
+    },
+    "addresses": {
+      "collection": "address"
+    },
     "picture": {
       "model": "file",
       "via": "related",
