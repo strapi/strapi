@@ -129,10 +129,9 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
       if (_.isFunction(target[model.toLowerCase()][fn])) {
         schema.pre(key, function(next) {
-          target[model.toLowerCase()]
+          return target[model.toLowerCase()]
             [fn](this)
-            .then(next)
-            .catch(err => strapi.log.error(err));
+            .then(next);
         });
       }
     });
