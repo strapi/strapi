@@ -12,6 +12,7 @@ const {
   get,
   difference,
   intersection,
+  isEmpty,
   isObject,
   isFunction,
 } = require('lodash');
@@ -28,6 +29,10 @@ module.exports = {
    */
   async isInitialised(strapi) {
     try {
+      if (isEmpty(strapi.admin)) {
+        return true;
+      }
+
       const numberOfAdministrators = await strapi
         .query('administrator', 'admin')
         .find({ _limit: 1 });
