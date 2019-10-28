@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { useLayoutDnd } from '../../contexts/LayoutDnd';
 
-import FieldItem from '../DraggedFieldWithPreview';
+import DraggedFieldWithPreview from '../DraggedFieldWithPreview';
 
 import ItemTypes from '../../utils/ItemTypes';
 
@@ -96,7 +96,7 @@ const Item = ({
   };
 
   return (
-    <FieldItem
+    <DraggedFieldWithPreview
       isDragging={isDragging}
       isDraggingSibling={isDraggingSibling}
       label={get(metadatas, [name, 'edit', 'label'], '')}

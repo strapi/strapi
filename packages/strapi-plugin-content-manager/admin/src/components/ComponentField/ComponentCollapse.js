@@ -161,7 +161,7 @@ export default DropTarget(
       //   const didDrop = monitor.didDrop();
 
       //   if (!didDrop) {
-      //     props.move(droppedId, originalIndex, props.groupName);
+      //     props.move(droppedId, originalIndex, props.componentName);
       //   }
       // },
     },

@@ -16,7 +16,7 @@ describe('Content Manager | EditView | utils | cleanData', () => {
     cpLayouts = componentLayouts;
   });
 
-  it('should format de data correctly if the content type has no group and no file has been added', () => {
+  it('should format de data correctly if the content type has no component and no file has been added', () => {
     const data = {
       title: 'test',
       article: {

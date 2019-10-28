@@ -32,10 +32,6 @@ const PopupForm = ({
       return 'number';
     }
 
-    if (type === 'group') {
-      return 'component';
-    }
-
     return type;
   };
   return (

@@ -99,7 +99,7 @@ const SettingsViewWrapper = ({
             'json',
             'text',
             'relation',
-            'group',
+            'component',
             'boolean',
             'date',
             'media',

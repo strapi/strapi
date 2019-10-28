@@ -14,7 +14,7 @@ import {
   request,
   // contexts
   // TODO add emit event
-  // useGlobalContext,
+  useGlobalContext,
 } from 'strapi-helper-plugin';
 import { Inputs as Input } from '@buffetjs/custom';
 import { FormattedMessage } from 'react-intl';
@@ -45,6 +45,7 @@ const EditSettingsView = ({
   slug,
 }) => {
   const { componentSlug, type } = useParams();
+  const { emitEvent } = useGlobalContext();
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const [isModalFormOpen, setIsModalFormOpen] = useState(false);
 
@@ -207,12 +208,16 @@ const EditSettingsView = ({
       delete body.source;
       delete body.isComponent;
 
+      emitEvent('willSaveContentTypeLayout');
+
       await request(getRequestUrl(`${type}/${slug || componentSlug}`), {
         method: 'PUT',
         body,
         params: type === 'components' ? {} : params,
         signal,
       });
+
+      emitEvent('didSaveContentTypeLayout');
 
       dispatch({
         type: 'SUBMIT_SUCCEEDED',
@@ -318,6 +323,8 @@ const EditSettingsView = ({
         </div>
       );
     });
+
+  console.log(reducerState.toJS());
 
   return (
     <LayoutDndProvider
