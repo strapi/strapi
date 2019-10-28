@@ -9,6 +9,10 @@ function getComponentAttributes(definition) {
   );
 }
 
+const isComponent = (def, key) =>
+  ['component', 'dynamiczone'].includes(def.attributes[key].type);
+
 module.exports = {
   getComponentAttributes,
+  isComponent,
 };

@@ -332,7 +332,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
               `${definition.collectionName}`
             ).query(qb => {
               qb.where(
-                _.get(model, `attributes.${details.via}.filter`, 'field'),
+                _.get(model, ['attributes', details.via, 'filter'], 'field'),
                 name
               );
             });
@@ -353,7 +353,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
               `${definition.collectionName}`
             ).query(qb => {
               qb.where(
-                _.get(collection, `attributes.${details.via}.filter`, 'field'),
+                _.get(model, ['attributes', details.via, 'filter'], 'field'),
                 name
               );
             });

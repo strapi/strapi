@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { getComponentAttributes } = require('./utils/attributes');
+const { getComponentAttributes, isComponent } = require('./utils/attributes');
 const { findModelByAssoc, isPolymorphic } = require('./utils/associations');
 
 /**
@@ -15,10 +15,10 @@ const populateFetch = (definition, options) => {
 
   if (_.isNil(options.withRelated)) {
     options.withRelated = []
-      .concat(createComponentsPopulate(definition))
-      .concat(createAssociationPopulate(definition));
+      .concat(populateComponents(definition))
+      .concat(populateAssociations(definition));
   } else if (_.isEmpty(options.withRelated)) {
-    options.withRelated = createComponentsPopulate(definition);
+    options.withRelated = populateComponents(definition);
   } else {
     options.withRelated = formatPopulateOptions(
       definition,
@@ -27,39 +27,82 @@ const populateFetch = (definition, options) => {
   }
 };
 
-const isComponent = (def, key) =>
-  _.get(def, ['attributes', key, 'type']) === 'component';
-
-const createAssociationPopulate = definition => {
+const populateAssociations = (definition, { prefix = '' } = {}) => {
   return definition.associations
     .filter(ast => ast.autoPopulate !== false)
     .map(assoc => {
       if (isPolymorphic({ assoc })) {
         return formatPolymorphicPopulate({
           assoc,
-          path: assoc.alias,
+          prefix,
         });
       }
 
-      let path = assoc.alias;
-      let extraAssocs = [];
-      if (assoc) {
-        const assocModel = findModelByAssoc({ assoc });
-
-        extraAssocs = assocModel.associations
-          .filter(assoc => isPolymorphic({ assoc }))
-          .map(assoc =>
-            formatPolymorphicPopulate({
-              assoc,
-              path: assoc.alias,
-              prefix: `${path}.`,
-            })
-          );
-      }
-
-      return [assoc.alias, ...extraAssocs];
+      return formatAssociationPopulate({ assoc, prefix });
     })
     .reduce((acc, val) => acc.concat(val), []);
+};
+
+const formatAssociationPopulate = ({ assoc, prefix = '' }) => {
+  const path = `${prefix}${assoc.alias}`;
+  const assocModel = findModelByAssoc({ assoc });
+
+  const polyAssocs = assocModel.associations
+    .filter(assoc => isPolymorphic({ assoc }))
+    .map(assoc =>
+      formatPolymorphicPopulate({
+        assoc,
+        prefix: `${path}.`,
+      })
+    );
+
+  const components = populateComponents(assocModel, { prefix: `${path}.` });
+
+  return [path, ...polyAssocs, ...components];
+};
+
+const populateComponents = (definition, { prefix = '' } = {}) => {
+  return getComponentAttributes(definition)
+    .map(key => {
+      const attribute = definition.attributes[key];
+      const autoPopulate = _.get(attribute, ['autoPopulate'], true);
+
+      if (autoPopulate === true) {
+        return populateComponent(key, attribute, { prefix });
+      }
+    }, [])
+    .reduce((acc, val) => acc.concat(val), []);
+};
+
+const populateComponent = (key, attr, { prefix = '' } = {}) => {
+  const path = `${prefix}${key}.component`;
+  if (attr.type === 'dynamiczone') {
+    const componentKeys = attr.components;
+
+    return componentKeys.reduce((acc, key) => {
+      const component = strapi.components[key];
+      const assocs = populateAssociations(component, {
+        prefix: `${path}.`,
+      });
+
+      const components = populateComponents(component, {
+        prefix: `${path}.`,
+      });
+
+      return acc.concat([path, ...assocs, ...components]);
+    }, []);
+  }
+
+  const component = strapi.components[attr.component];
+  const assocs = populateAssociations(component, {
+    prefix: `${path}.`,
+  });
+
+  const components = populateComponents(component, {
+    prefix: `${path}.`,
+  });
+
+  return [path, ...assocs, ...components];
 };
 
 const formatPopulateOptions = (definition, withRelated) => {
@@ -74,17 +117,24 @@ const formatPopulateOptions = (definition, withRelated) => {
     return _.extend(acc, key);
   }, {});
 
-  // if components are no
   const finalObj = Object.keys(obj).reduce((acc, key) => {
-    // check the key path and update it if necessary nothing more
+    // check the key path and update it if necessary
     const parts = key.split('.');
 
     let newKey;
     let prefix = '';
     let tmpModel = definition;
     for (let part of parts) {
+      const attr = tmpModel.attributes[part];
+
       if (isComponent(tmpModel, part)) {
-        tmpModel = strapi.components[tmpModel.attributes[part].component];
+        if (attr.type === 'dynamiczone') {
+          const path = `${prefix}${part}.component`;
+          newKey = path;
+          break;
+        }
+
+        tmpModel = strapi.components[attr.component];
         // add component path and there relations / images
         const path = `${prefix}${part}.component`;
 
@@ -104,7 +154,6 @@ const formatPopulateOptions = (definition, withRelated) => {
       if (isPolymorphic({ assoc })) {
         const path = formatPolymorphicPopulate({
           assoc,
-          path: assoc.alias,
           prefix,
         });
 
@@ -122,65 +171,21 @@ const formatPopulateOptions = (definition, withRelated) => {
   return [finalObj];
 };
 
-const populateComponent = (key, attr) => {
-  if (attr.type === 'dynamiczone') return [`${key}.component`];
-
-  let paths = [];
-  const component = strapi.components[attr.component];
-
-  const assocs = (component.associations || []).filter(
-    assoc => assoc.autoPopulate === true
-  );
-
-  // paths.push(`${key}.component`);
-  assocs.forEach(assoc => {
-    if (isPolymorphic({ assoc })) {
-      const rel = formatPolymorphicPopulate({
-        assoc,
-        path: assoc.alias,
-        prefix: `${key}.component.`,
-      });
-
-      paths.push(rel);
-    } else {
-      paths.push(`${key}.component.${assoc.alias}`);
-    }
-  });
-
-  return [`${key}.component`, ...paths];
-};
-
-const createComponentsPopulate = definition => {
-  return getComponentAttributes(definition).reduce((acc, key) => {
-    const attribute = definition.attributes[key];
-    const autoPopulate = _.get(attribute, ['autoPopulate'], true);
-
-    if (autoPopulate === true) {
-      return acc.concat(populateComponent(key, attribute));
-    }
-    return acc;
-  }, []);
-};
-
-const formatPolymorphicPopulate = ({ assoc, path, prefix = '' }) => {
-  if (_.isString(path) && path === assoc.via) {
-    return { [`related.${assoc.via}`]: () => {} };
-  } else if (_.isString(path) && path === assoc.alias) {
-    // MorphTo side.
-    if (assoc.related) {
-      return { [`${prefix}${assoc.alias}.related`]: () => {} };
-    }
-
-    // oneToMorph or manyToMorph side.
-    // Retrieve collection name because we are using it to build our hidden model.
-    const model = findModelByAssoc({ assoc });
-
-    return {
-      [`${prefix}${assoc.alias}.${model.collectionName}`]: function(query) {
-        query.orderBy('created_at', 'desc');
-      },
-    };
+const formatPolymorphicPopulate = ({ assoc, prefix = '' }) => {
+  // MorphTo side.
+  if (assoc.related) {
+    return { [`${prefix}${assoc.alias}.related`]: () => {} };
   }
+
+  // oneToMorph or manyToMorph side.
+  // Retrieve collection name because we are using it to build our hidden model.
+  const model = findModelByAssoc({ assoc });
+
+  return {
+    [`${prefix}${assoc.alias}.${model.collectionName}`]: function(query) {
+      query.orderBy('created_at', 'desc');
+    },
+  };
 };
 
 module.exports = populateFetch;
