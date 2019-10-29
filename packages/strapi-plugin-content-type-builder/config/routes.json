@@ -95,6 +95,14 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "DELETE",
+      "path": "/component-categories/:name",
+      "handler": "ComponentCategories.deleteCategory",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }

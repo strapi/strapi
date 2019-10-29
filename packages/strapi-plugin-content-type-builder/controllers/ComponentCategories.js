@@ -24,4 +24,19 @@ module.exports = {
 
     ctx.send({ name: body.name });
   },
+  async deleteCategory(ctx) {
+    const { name } = ctx.params;
+
+    const service =
+      strapi.plugins['content-type-builder'].services.componentcategories;
+    service;
+
+    strapi.reload.isWatching = false;
+
+    await service.deleteCategory(name);
+
+    strapi.reload();
+
+    ctx.send({ name });
+  },
 };

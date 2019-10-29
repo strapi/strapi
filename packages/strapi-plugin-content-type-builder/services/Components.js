@@ -155,7 +155,7 @@ async function updateComponent({ component, newUID, infos }) {
     const categoryDir = path.join(strapi.dir, 'components', category);
     const categoryCompos = await fse.readdir(categoryDir);
     if (categoryCompos.length === 0) {
-      await fse.rmdir(categoryDir);
+      await fse.remove(categoryDir);
     }
 
     return { uid: newUID };
@@ -458,7 +458,7 @@ const deleteComponentInModels = async componentUID => {
   const categoryDir = path.join(strapi.dir, 'components', category);
   const categoryCompos = await fse.readdir(categoryDir);
   if (categoryCompos.length === 0) {
-    await fse.rmdir(categoryDir);
+    await fse.remove(categoryDir);
   }
 };
 
