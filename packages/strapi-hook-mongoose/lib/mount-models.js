@@ -130,8 +130,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       if (_.isFunction(target[model.toLowerCase()][fn])) {
         schema.pre(key, function(next) {
           return target[model.toLowerCase()]
-            [fn](this)
-            .then(next);
+            [fn](this);
         });
       }
     });
