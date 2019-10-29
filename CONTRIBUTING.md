@@ -156,7 +156,7 @@ Before submitting an issue you need to make sure:
 - You have tried all the following (if relevant) and your issue remains:
   - Make sure you have the right application started.
   - Make sure the [issue template](.github/ISSUE_TEMPLATE) is respected.
-  - Make sure your issue body is readable and [well formated](https://guides.github.com/features/mastering-markdown).
+  - Make sure your issue body is readable and [well formatted](https://guides.github.com/features/mastering-markdown).
   - Make sure you've killed the Strapi server with CTRL+C and started it again.
   - Make sure the application you are using to reproduce the issue has a clean `node_modules` directory, meaning:
     - no dependencies are linked (e.g. you haven't run `npm link`)
