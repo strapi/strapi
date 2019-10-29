@@ -128,7 +128,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       const fn = preLifecycle[key];
 
       if (_.isFunction(target[model.toLowerCase()][fn])) {
-        schema.pre(key, function(next) {
+        schema.pre(key, function() {
           return target[model.toLowerCase()]
             [fn](this);
         });
