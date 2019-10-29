@@ -811,7 +811,7 @@ CREATE TABLE `image_morph` (
 
 ::: warning
 The life cycle functions are based on the ORM life cycle and not on the strapi request.
-We are currently woking on it to make it easier to use and understand.
+We are currently working on it to make it easier to use and understand.
 Please check [this issue](https://github.com/strapi/strapi/issues/1443) on GitHub.
 :::
 
