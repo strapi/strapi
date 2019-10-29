@@ -30,6 +30,9 @@ import {
 import pluginId from '../../pluginId';
 
 import ListRowCollapse from '../../components/ListRowCollapse';
+import PluginHeader from '../../components/PluginHeader';
+import PluginHeaderTitle from '../../components/PluginHeaderTitle';
+import PluginHeaderActions from '../../components/PluginHeaderActions';
 
 import AttributeForm from '../AttributeForm';
 import AttributesModalPicker from '../AttributesPickerModal';
@@ -213,15 +216,15 @@ export class ModelPage extends React.Component {
     if (shouldShowActions) {
       return [
         {
-          label: `${pluginId}.form.button.cancel`,
+          title: `${pluginId}.form.button.cancel`,
           onClick: handleCancel,
-          kind: 'secondary',
+          color: 'secondary',
           type: 'button',
         },
         {
-          label: `${pluginId}.form.button.save`,
+          title: `${pluginId}.form.button.save`,
           onClick: handleSubmit,
-          kind: 'primary',
+          color: 'success',
           type: 'submit',
           id: 'saveData',
         },
@@ -520,6 +523,18 @@ export class ModelPage extends React.Component {
     );
   };
 
+  getDescription = () => {
+    const description = this.getModelDescription();
+    const { id } = description;
+
+    return id ? <FormattedMessage id={id} /> : <span>{description}</span>;
+  };
+
+  getCTA = () =>
+    !this.getSource()
+      ? { icon: 'fa fa-pencil', onClick: this.handleClickEditModelMainInfos }
+      : null;
+
   render() {
     const {
       canOpenModal,
@@ -584,6 +599,19 @@ export class ModelPage extends React.Component {
       onClick: () => this.handleClickOpenModalChooseAttributes(),
     };
 
+    const pluginHeaderProps = {
+      title: (
+        <PluginHeaderTitle
+          title={this.getPluginHeaderTitle()}
+          cta={this.getCTA()}
+        />
+      ),
+      content: <p>{this.getDescription()}</p>,
+      callToAction: (
+        <PluginHeaderActions actions={this.getPluginHeaderActions()} />
+      ),
+    };
+
     return (
       <Wrapper>
         <FormattedMessage id={`${pluginId}.prompt.content.unsaved`}>
@@ -602,6 +630,8 @@ export class ModelPage extends React.Component {
           pluginHeaderActions={this.getPluginHeaderActions()}
           onClickIcon={this.handleClickEditModelMainInfos}
         >
+          <PluginHeader {...pluginHeaderProps} />
+
           {attributesNumber === 0 ? (
             <EmptyAttributesBlock
               description="content-type-builder.home.emptyAttributes.description"

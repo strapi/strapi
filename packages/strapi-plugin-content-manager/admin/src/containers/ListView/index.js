@@ -278,6 +278,7 @@ function ListView({
               title={{
                 id: slug || 'Content Manager',
               }}
+              // TODO : New plugin header - show loader as Content if isLoading
               withDescriptionAnim={isLoading}
             />
           )}

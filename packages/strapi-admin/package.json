@@ -21,6 +21,7 @@
     "@babel/preset-env": "^7.4.3",
     "@babel/preset-react": "^7.0.0",
     "@babel/runtime": "^7.4.3",
+    "@buffetjs/core": "^1.0.6",
     "@buffetjs/styles": "^1.0.0",
     "autoprefixer": "^9.5.1",
     "babel-loader": "^8.0.5",
