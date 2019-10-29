@@ -6,6 +6,8 @@ module.exports = ({ rq }) => {
       url: '/content-type-builder/components',
       method: 'POST',
       body: {
+        category: 'default',
+        icon: 'default',
         connection: 'default',
         ...data,
       },

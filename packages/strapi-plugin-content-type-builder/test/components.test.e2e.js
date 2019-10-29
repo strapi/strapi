@@ -20,6 +20,8 @@ describe.only('Content Type Builder - Components', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
         error: {
+          category: ['category.required'],
+          icon: ['icon.required'],
           attributes: ['attributes.required'],
           name: ['name.required'],
         },
@@ -31,7 +33,9 @@ describe.only('Content Type Builder - Components', () => {
         method: 'POST',
         url: '/content-type-builder/components',
         body: {
-          name: 'SomeComponent',
+          category: 'default',
+          icon: 'default',
+          name: 'Some Component',
           attributes: {
             title: {
               type: 'string',
@@ -46,7 +50,7 @@ describe.only('Content Type Builder - Components', () => {
       expect(res.statusCode).toBe(201);
       expect(res.body).toEqual({
         data: {
-          uid: 'some_component',
+          uid: 'default.some_component',
         },
       });
 
@@ -58,6 +62,8 @@ describe.only('Content Type Builder - Components', () => {
         method: 'POST',
         url: '/content-type-builder/components',
         body: {
+          category: 'default',
+          icon: 'default',
           name: 'someComponent',
           attributes: {},
         },
@@ -113,18 +119,20 @@ describe.only('Content Type Builder - Components', () => {
     test('Returns correct format', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-type-builder/components/some_component',
+        url: '/content-type-builder/components/default.some_component',
       });
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject({
         data: {
-          uid: 'some_component',
+          uid: 'default.some_component',
+          category: 'default',
           schema: {
-            name: 'SomeComponent',
+            icon: 'default',
+            name: 'Some Component',
             description: '',
             connection: 'default',
-            collectionName: 'components_some_components',
+            collectionName: 'components_default_some_components',
             attributes: {
               title: {
                 type: 'string',
@@ -157,7 +165,7 @@ describe.only('Content Type Builder - Components', () => {
     test('Validates input and return 400 in case of invalid input', async () => {
       const res = await rq({
         method: 'PUT',
-        url: '/content-type-builder/components/some_component',
+        url: '/content-type-builder/components/default.some_component',
         body: {
           attributes: {},
         },
@@ -166,6 +174,8 @@ describe.only('Content Type Builder - Components', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
         error: {
+          category: ['category.required'],
+          icon: ['icon.required'],
           name: ['name.required'],
         },
       });
@@ -174,8 +184,10 @@ describe.only('Content Type Builder - Components', () => {
     test('Updates a component properly', async () => {
       const res = await rq({
         method: 'PUT',
-        url: '/content-type-builder/components/some_component',
+        url: '/content-type-builder/components/default.some_component',
         body: {
+          category: 'default',
+          icon: 'default',
           name: 'NewComponent',
           attributes: {},
         },
@@ -184,7 +196,7 @@ describe.only('Content Type Builder - Components', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body).toEqual({
         data: {
-          uid: 'new_component',
+          uid: 'default.new_component',
         },
       });
 
@@ -208,13 +220,13 @@ describe.only('Content Type Builder - Components', () => {
     test('Deletes a component correctly', async () => {
       const res = await rq({
         method: 'DELETE',
-        url: '/content-type-builder/components/new_component',
+        url: '/content-type-builder/components/default.new_component',
       });
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toEqual({
         data: {
-          uid: 'new_component',
+          uid: 'default.new_component',
         },
       });
 
@@ -222,7 +234,7 @@ describe.only('Content Type Builder - Components', () => {
 
       const tryGet = await rq({
         method: 'GET',
-        url: '/content-type-builder/components/new_component',
+        url: '/content-type-builder/components/default.new_component',
       });
 
       expect(tryGet.statusCode).toBe(404);

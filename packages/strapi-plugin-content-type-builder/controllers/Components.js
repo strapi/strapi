@@ -1,6 +1,9 @@
 'use strict';
-const validateComponentInput = require('./validation/component');
-const _ = require('lodash');
+const {
+  validateComponentInput,
+  validateUpdateComponentInput,
+} = require('./validation/component');
+
 /**
  * Components controller
  */
@@ -59,7 +62,7 @@ module.exports = {
 
     strapi.reload.isWatching = false;
 
-    const newComponent = await service.createComponent(uid, body);
+    const newComponent = await service.createComponent({ uid, infos: body });
 
     strapi.reload();
 
@@ -82,24 +85,24 @@ module.exports = {
       return ctx.send({ error: 'component.notFound' }, 404);
     }
 
-    // convert zero length string on default attributes to undefined
-    if (_.has(body, 'attributes')) {
-      Object.keys(body.attributes).forEach(attribute => {
-        if (body.attributes[attribute].default === '') {
-          body.attributes[attribute].default = undefined;
-        }
-      });
-    }
-
     try {
-      await validateComponentInput(body);
+      await validateUpdateComponentInput(body);
     } catch (error) {
       return ctx.send({ error }, 400);
     }
 
+    const newUID = service.createComponentUID(body);
+    if (newUID !== uid && service.getComponent(newUID)) {
+      return ctx.send({ error: 'new.component.alreadyExists' }, 400);
+    }
+
     strapi.reload.isWatching = false;
 
-    const updatedComponent = await service.updateComponent(component, body);
+    const updatedComponent = await service.updateComponent({
+      newUID,
+      component,
+      infos: body,
+    });
     await service.updateComponentInModels(component.uid, updatedComponent.uid);
 
     strapi.reload();

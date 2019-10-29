@@ -4,6 +4,7 @@ describe('Component Service', () => {
   describe('createSchema', () => {
     test('Formats schema and create default values', () => {
       const input = {
+        category: 'default',
         name: 'Some name',
         attributes: {},
       };
@@ -24,11 +25,11 @@ describe('Component Service', () => {
           description: '',
         },
         connection: 'default',
-        collectionName: 'components_some_names',
+        collectionName: 'components_default_some_names',
         attributes: {},
       };
 
-      expect(createSchema('some_name', input)).toEqual(expected);
+      expect(createSchema(input)).toEqual(expected);
     });
 
     test('Accepts overrides', () => {
@@ -49,15 +50,23 @@ describe('Component Service', () => {
         attributes: {},
       };
 
-      expect(createSchema('some_name', input)).toEqual(expected);
+      expect(createSchema(input)).toEqual(expected);
     });
   });
 
   describe('createComponentUID', () => {
     test('Generats normalized uids', () => {
-      expect(createComponentUID('some char')).toBe('some_char');
-      expect(createComponentUID('some-char')).toBe('some_char');
-      expect(createComponentUID('Some Char')).toBe('some_char');
+      expect(
+        createComponentUID({ category: 'default', name: 'some char' })
+      ).toBe('default.some_char');
+
+      expect(
+        createComponentUID({ category: 'default', name: 'some-char' })
+      ).toBe('default.some_char');
+
+      expect(
+        createComponentUID({ category: 'default', name: 'Some Char' })
+      ).toBe('default.some_char');
     });
   });
 });
