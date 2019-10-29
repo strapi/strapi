@@ -9,19 +9,13 @@ import DraggedFieldWithPreview from '../DraggedFieldWithPreview';
 
 import ItemTypes from '../../utils/ItemTypes';
 
-const Item = ({
-  index,
-  isDraggingSibling,
-  move,
-  name,
-  removeItem,
-  setIsDraggingSibling,
-}) => {
+const Item = ({ index, move, name, removeItem }) => {
   const {
     goTo,
     metadatas,
     selectedItemName,
     setEditFieldToSelect,
+    setIsDraggingSibling,
   } = useLayoutDnd();
   const dragRef = useRef(null);
   const dropRef = useRef(null);
@@ -98,7 +92,6 @@ const Item = ({
   return (
     <DraggedFieldWithPreview
       isDragging={isDragging}
-      isDraggingSibling={isDraggingSibling}
       label={get(metadatas, [name, 'edit', 'label'], '')}
       name={name}
       onClickEdit={() => setEditFieldToSelect(name)}
@@ -118,18 +111,14 @@ const Item = ({
 };
 
 Item.defaultProps = {
-  isDraggingSibling: false,
   move: () => {},
-  setIsDraggingSibling: () => {},
 };
 
 Item.propTypes = {
   index: PropTypes.number.isRequired,
-  isDraggingSibling: PropTypes.bool,
   move: PropTypes.func,
   name: PropTypes.string.isRequired,
   removeItem: PropTypes.func.isRequired,
-  setIsDraggingSibling: PropTypes.func,
 };
 
 export default Item;

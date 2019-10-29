@@ -17,7 +17,6 @@ const DraggedFieldWithPreview = forwardRef(
       componentLayouts,
       dynamicZoneComponents,
       isDragging,
-      isDraggingSibling,
       label,
       name,
       onClickEdit,
@@ -83,7 +82,6 @@ const DraggedFieldWithPreview = forwardRef(
                 goTo={goTo}
                 componentUid={componentUid}
                 isHidden={isHidden}
-                isDraggingSibling={isDraggingSibling}
                 isOverDynamicZone={isOverDynamicZone}
                 label={label}
                 name={name}
@@ -173,7 +171,6 @@ DraggedFieldWithPreview.defaultProps = {
   componentUid: null,
   dynamicZoneComponents: [],
   isDragging: false,
-  isDraggingSibling: false,
   label: '',
   onClickEdit: () => {},
   onClickRemove: () => {},
@@ -191,7 +188,6 @@ DraggedFieldWithPreview.propTypes = {
   componentUid: PropTypes.string,
   dynamicZoneComponents: PropTypes.array,
   isDragging: PropTypes.bool,
-  isDraggingSibling: PropTypes.bool,
   label: PropTypes.string,
   name: PropTypes.string.isRequired,
   onClickEdit: PropTypes.func,

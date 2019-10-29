@@ -43,6 +43,7 @@ const EditSettingsView = ({
   const { emitEvent } = useGlobalContext();
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const [isModalFormOpen, setIsModalFormOpen] = useState(false);
+  const [isDraggingSibling, setIsDraggingSibling] = useState(false);
 
   const fieldsReorderClassName = type === 'content-types' ? 'col-8' : 'col-12';
   const source = getQueryParameters(search, 'source');
@@ -131,8 +132,6 @@ const EditSettingsView = ({
             signal,
           }
         );
-
-        console.log({ data });
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
@@ -309,8 +308,9 @@ const EditSettingsView = ({
     <LayoutDndProvider
       attributes={getAttributes}
       buttonData={getEditRemainingFields()}
-      goTo={push}
       componentLayouts={componentLayouts}
+      goTo={push}
+      isDraggingSibling={isDraggingSibling}
       layout={getEditLayout()}
       metadatas={get(modifiedData, ['metadatas'], {})}
       moveItem={moveItem}
@@ -336,6 +336,7 @@ const EditSettingsView = ({
         });
         toggleModalForm();
       }}
+      setIsDraggingSibling={setIsDraggingSibling}
       selectedItemName={metaToEdit}
     >
       <SettingsViewWrapper

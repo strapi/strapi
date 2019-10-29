@@ -5,6 +5,7 @@ import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Grab, GrabLarge, Pencil, Remove } from '@buffetjs/icons';
 import pluginId from '../../pluginId';
+import { useLayoutDnd } from '../../contexts/LayoutDnd';
 import GrabWrapper from './GrabWrapper';
 import Link from './Link';
 import NameWrapper from './NameWrapper';
@@ -20,7 +21,6 @@ const DraggedField = forwardRef(
       goTo,
       componentUid,
       isDragging,
-      isDraggingSibling,
       isHidden,
       isOverDynamicZone,
       isSub,
@@ -35,6 +35,7 @@ const DraggedField = forwardRef(
     },
     ref
   ) => {
+    const { isDraggingSibling } = useLayoutDnd();
     const [isOverRemove, setIsOverRemove] = useState(false);
     const [isOverEditBlock, setIsOverEditBlock] = useState(false);
     const opacity = isDragging ? 0.2 : 1;
@@ -160,7 +161,6 @@ DraggedField.defaultProps = {
   goTo: () => {},
   componentUid: null,
   isDragging: false,
-  isDraggingSibling: false,
   isHidden: false,
   isOverDynamicZone: false,
   isSub: false,
@@ -179,7 +179,6 @@ DraggedField.propTypes = {
   goTo: PropTypes.func,
   componentUid: PropTypes.string,
   isDragging: PropTypes.bool,
-  isDraggingSibling: PropTypes.bool,
   isHidden: PropTypes.bool,
   isOverDynamicZone: PropTypes.bool,
   isSub: PropTypes.bool,

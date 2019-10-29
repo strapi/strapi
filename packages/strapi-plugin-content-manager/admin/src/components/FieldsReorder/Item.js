@@ -12,14 +12,12 @@ import ItemTypes from '../../utils/ItemTypes';
 const Item = ({
   componentUid,
   dynamicZoneComponents,
-  isDraggingSibling,
   itemIndex,
   moveItem,
   moveRow,
   name,
   removeField,
   rowIndex,
-  setIsDraggingSibling,
   size,
   type,
 }) => {
@@ -29,6 +27,7 @@ const Item = ({
     metadatas,
     setEditFieldToSelect,
     selectedItemName,
+    setIsDraggingSibling,
   } = useLayoutDnd();
   const dragRef = useRef(null);
   const dropRef = useRef(null);
@@ -214,7 +213,6 @@ const Item = ({
       componentLayouts={componentLayouts}
       dynamicZoneComponents={dynamicZoneComponents}
       isDragging={isDragging}
-      isDraggingSibling={isDraggingSibling}
       label={get(metadatas, [name, 'edit', 'label'], '')}
       name={name}
       onClickEdit={setEditFieldToSelect}
@@ -235,22 +233,18 @@ const Item = ({
 Item.defaultProps = {
   componentUid: '',
   dynamicZoneComponents: [],
-  isDraggingSibling: false,
-  setIsDraggingSibling: () => {},
   type: 'string',
 };
 
 Item.propTypes = {
   componentUid: PropTypes.string,
   dynamicZoneComponents: PropTypes.array,
-  isDraggingSibling: PropTypes.bool,
   itemIndex: PropTypes.number.isRequired,
   moveItem: PropTypes.func.isRequired,
   moveRow: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
   removeField: PropTypes.func.isRequired,
   rowIndex: PropTypes.number.isRequired,
-  setIsDraggingSibling: PropTypes.func,
   size: PropTypes.number.isRequired,
   type: PropTypes.string,
 };

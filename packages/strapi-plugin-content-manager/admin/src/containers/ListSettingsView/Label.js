@@ -4,20 +4,21 @@ import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import ItemTypes from '../../utils/ItemTypes';
 import DraggedField from '../../components/DraggedField';
+import { useLayoutDnd } from '../../contexts/LayoutDnd';
 
 const Label = ({
   count,
   index,
-  isDraggingSibling,
   label,
   move,
   name,
   onClick,
   onRemove,
   selectedItem,
-  setIsDraggingSibling,
 }) => {
   const ref = useRef(null);
+  const { setIsDraggingSibling } = useLayoutDnd();
+
   const [, drop] = useDrop({
     accept: ItemTypes.FIELD,
     hover(item) {
@@ -60,7 +61,6 @@ const Label = ({
       count={count}
       ref={ref}
       isDragging={isDragging}
-      isDraggingSibling={isDraggingSibling}
       label={label}
       name={name}
       onClick={onClick}
@@ -72,24 +72,20 @@ const Label = ({
 
 Label.defaultProps = {
   index: 0,
-  isDraggingSibling: false,
   label: '',
   move: () => {},
   selectedItem: '',
-  setIsDraggingSibling: () => {},
 };
 
 Label.propTypes = {
   count: PropTypes.number.isRequired,
   index: PropTypes.number,
-  isDraggingSibling: PropTypes.bool,
   label: PropTypes.string,
   move: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
   onClick: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   selectedItem: PropTypes.string,
-  setIsDraggingSibling: PropTypes.func,
 };
 
 export default Label;

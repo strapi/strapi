@@ -13,7 +13,7 @@ import { useDrop } from 'react-dnd';
 import { DropdownItem } from 'reactstrap';
 import { Inputs as Input } from '@buffetjs/custom';
 import pluginId from '../../pluginId';
-
+import { LayoutDndProvider } from '../../contexts/LayoutDnd';
 import ItemTypes from '../../utils/ItemTypes';
 import getRequestUrl from '../../utils/getRequestUrl';
 import PopupForm from '../../components/PopupForm';
@@ -207,7 +207,10 @@ const ListSettingsView = ({ deleteLayout, location: { search }, slug }) => {
   );
 
   return (
-    <>
+    <LayoutDndProvider
+      isDraggingSibling={isDraggingSibling}
+      setIsDraggingSibling={setIsDraggingSibling}
+    >
       <SettingsViewWrapper
         getListDisplayedFields={getListDisplayedFields}
         inputs={forms}
@@ -321,7 +324,7 @@ const ListSettingsView = ({ deleteLayout, location: { search }, slug }) => {
         subHeaderContent={labelToEdit}
         type={get(getAttributes, [labelToEdit, 'type'], 'text')}
       />
-    </>
+    </LayoutDndProvider>
   );
 };
 

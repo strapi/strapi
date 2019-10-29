@@ -1,5 +1,6 @@
 import React from 'react';
 import { useDragLayer } from 'react-dnd';
+import { LayoutDndProvider } from '../../contexts/LayoutDnd';
 
 import ItemTypes from '../../utils/ItemTypes';
 
@@ -87,14 +88,16 @@ const CustomDragLayer = () => {
   }
 
   return (
-    <div style={layerStyles}>
-      <div
-        style={getItemStyles(initialOffset, currentOffset, mouseOffset)}
-        className="col-md-2"
-      >
-        {renderItem()}
+    <LayoutDndProvider>
+      <div style={layerStyles}>
+        <div
+          style={getItemStyles(initialOffset, currentOffset, mouseOffset)}
+          className="col-md-2"
+        >
+          {renderItem()}
+        </div>
       </div>
-    </div>
+    </LayoutDndProvider>
   );
 };
 
