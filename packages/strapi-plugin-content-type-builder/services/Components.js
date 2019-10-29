@@ -107,11 +107,10 @@ const formatAttribute = (key, attribute, { component }) => {
  * @param {string} uid
  * @param {Object} infos
  */
-async function createComponent(uid, infos) {
-  const { name, category } = infos;
-  const schema = createSchema(uid, infos);
+async function createComponent({ uid, infos }) {
+  const schema = createSchema(infos);
 
-  await writeSchema({ name, schema, category });
+  await writeSchema({ uid, schema });
   return { uid };
 }
 
@@ -120,13 +119,14 @@ async function createComponent(uid, infos) {
  * @param {Object} component
  * @param {Object} infos
  */
-async function updateComponent(component, infos) {
+async function updateComponent({ component, newUID, infos }) {
   const { uid, schema: oldSchema } = component;
 
   // don't update collectionName if not provided
   const updatedSchema = {
     info: {
-      name: infos.name || oldSchema.name,
+      icon: infos.icon,
+      name: infos.name,
       description: infos.description || oldSchema.description,
     },
     connection: infos.connection || oldSchema.connection,
@@ -134,7 +134,6 @@ async function updateComponent(component, infos) {
     attributes: convertAttributes(infos.attributes),
   };
 
-  const newUID = createComponentUID(infos.name);
   if (uid !== newUID) {
     await deleteSchema(uid);
 
@@ -146,11 +145,23 @@ async function updateComponent(component, infos) {
       ]).updateUID(uid, newUID);
     }
 
-    await writeSchema(newUID, updatedSchema);
+    await writeSchema({
+      uid: newUID,
+      schema: updatedSchema,
+    });
+
+    const [category] = uid.split('.');
+
+    const categoryDir = path.join(strapi.dir, 'components', category);
+    const categoryCompos = await fse.readdir(categoryDir);
+    if (categoryCompos.length === 0) {
+      await fse.rmdir(categoryDir);
+    }
+
     return { uid: newUID };
   }
 
-  await writeSchema(uid, updatedSchema);
+  await writeSchema({ uid, schema: updatedSchema });
   return { uid };
 }
 
@@ -158,7 +169,7 @@ async function updateComponent(component, infos) {
  * Create a schema
  * @param {Object} infos
  */
-const createSchema = (uid, infos) => {
+const createSchema = infos => {
   const {
     name,
     icon,
@@ -252,16 +263,15 @@ async function deleteComponent(component) {
 /**
  * Writes a component schema file
  */
-async function writeSchema({ name, schema, category }) {
+async function writeSchema({ uid, schema }) {
+  const [category, filename] = uid.split('.');
   const categoryDir = path.join(strapi.dir, 'components', category);
 
   if (!(await fse.pathExists(categoryDir))) {
-    await fse.mkdir(categoryDir);
+    await fse.ensureDir(categoryDir);
   }
 
-  const filename = nameToSlug(name);
   const filepath = path.join(categoryDir, `${filename}.json`);
-
   await fse.writeFile(filepath, JSON.stringify(schema, null, 2));
 }
 
@@ -270,7 +280,8 @@ async function writeSchema({ name, schema, category }) {
  * @param {string} ui
  */
 async function deleteSchema(uid) {
-  await strapi.fs.removeAppFile(`components/${uid}.json`);
+  const [category, filename] = uid.split('.');
+  await strapi.fs.removeAppFile(`components/${category}/${filename}.json`);
 }
 
 const updateComponentInModels = (oldUID, newUID) => {
@@ -295,6 +306,13 @@ const updateComponentInModels = (oldUID, newUID) => {
         []
       );
 
+      const dynamicoznesToUpdate = Object.keys(model.attributes).filter(key => {
+        return (
+          model.attributes[key].type === 'dynamiczone' &&
+          model.attributes[key].components.includes(oldUID)
+        );
+      }, []);
+
       if (attributesToModify.length > 0) {
         const modelJSON = contentTypeService.readModel(modelKey, {
           plugin,
@@ -305,6 +323,15 @@ const updateComponentInModels = (oldUID, newUID) => {
           modelJSON.attributes[key].component = newUID;
         });
 
+        dynamicoznesToUpdate.forEach(key => {
+          modelJSON.attributes[key] = {
+            ...modelJSON.attributes[key],
+            components: modelJSON.attributes[key].components.map(val =>
+              val !== oldUID ? val : newUID
+            ),
+          };
+        });
+
         contentTypeService.writeModel(modelKey, modelJSON, {
           plugin,
           api: model.apiName,
@@ -319,10 +346,35 @@ const updateComponentInModels = (oldUID, newUID) => {
     updateModels(strapi.plugins[pluginKey].models, { plugin: pluginKey });
   });
 
-  // add strapi.components or strapi.admin if necessary
+  Object.keys(strapi.components).forEach(uid => {
+    const component = strapi.components[uid];
+
+    const componentsToRemove = Object.keys(component.attributes).filter(key => {
+      return (
+        component.attributes[key].type === 'component' &&
+        component.attributes[key].component === oldUID
+      );
+    }, []);
+
+    if (componentsToRemove.length > 0) {
+      const newSchema = {
+        info: component.info,
+        connection: component.connection,
+        collectionName: component.collectionName,
+        attributes: component.attributes,
+      };
+
+      componentsToRemove.forEach(key => {
+        newSchema.attributes[key].component = newUID;
+      });
+
+      writeSchema({ uid, schema: newSchema });
+    }
+  });
 };
 
-const deleteComponentInModels = componentUID => {
+const deleteComponentInModels = async componentUID => {
+  const [category] = componentUID.split('.');
   const contentTypeService =
     strapi.plugins['content-type-builder'].services.contenttypebuilder;
 
@@ -330,28 +382,37 @@ const deleteComponentInModels = componentUID => {
     Object.keys(models).forEach(modelKey => {
       const model = models[modelKey];
 
-      const attributesToDelete = Object.keys(model.attributes).reduce(
-        (acc, key) => {
-          if (
-            model.attributes[key].type === 'component' &&
-            model.attributes[key].component === componentUID
-          ) {
-            acc.push(key);
-          }
+      const componentsToRemove = Object.keys(model.attributes).filter(key => {
+        return (
+          model.attributes[key].type === 'component' &&
+          model.attributes[key].component === componentUID
+        );
+      }, []);
 
-          return acc;
-        },
-        []
-      );
+      const dynamicoznesToUpdate = Object.keys(model.attributes).filter(key => {
+        return (
+          model.attributes[key].type === 'dynamiczone' &&
+          model.attributes[key].components.includes(componentUID)
+        );
+      }, []);
 
-      if (attributesToDelete.length > 0) {
+      if (componentsToRemove.length > 0 || dynamicoznesToUpdate.length > 0) {
         const modelJSON = contentTypeService.readModel(modelKey, {
           plugin,
           api: model.apiName,
         });
 
-        attributesToDelete.forEach(key => {
+        componentsToRemove.forEach(key => {
           delete modelJSON.attributes[key];
+        });
+
+        dynamicoznesToUpdate.forEach(key => {
+          modelJSON.attributes[key] = {
+            ...modelJSON.attributes[key],
+            components: modelJSON.attributes[key].components.filter(
+              val => val !== componentUID
+            ),
+          };
         });
 
         contentTypeService.writeModel(modelKey, modelJSON, {
@@ -368,7 +429,37 @@ const deleteComponentInModels = componentUID => {
     updateModels(strapi.plugins[pluginKey].models, { plugin: pluginKey });
   });
 
-  // add strapi.components or strapi.admin if necessary
+  Object.keys(strapi.components).forEach(uid => {
+    const component = strapi.components[uid];
+
+    const componentsToRemove = Object.keys(component.attributes).filter(key => {
+      return (
+        component.attributes[key].type === 'component' &&
+        component.attributes[key].component === componentUID
+      );
+    }, []);
+
+    if (componentsToRemove.length > 0) {
+      const newSchema = {
+        info: component.info,
+        connection: component.connection,
+        collectionName: component.collectionName,
+        attributes: component.attributes,
+      };
+
+      componentsToRemove.forEach(key => {
+        delete newSchema.attributes[key];
+      });
+
+      writeSchema({ uid, schema: newSchema });
+    }
+  });
+
+  const categoryDir = path.join(strapi.dir, 'components', category);
+  const categoryCompos = await fse.readdir(categoryDir);
+  if (categoryCompos.length === 0) {
+    await fse.rmdir(categoryDir);
+  }
 };
 
 module.exports = {

@@ -25,7 +25,7 @@ describe.each([
     });
 
     await modelsUtils.createModelWithType('withcomponent', 'component', {
-      component: 'somecomponent',
+      component: 'default.somecomponent',
       repeatable: false,
       required: false,
     });
