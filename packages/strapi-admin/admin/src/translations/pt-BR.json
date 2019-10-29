@@ -161,7 +161,7 @@
   "HomePage.welcome.congrats.content": "Você está logado como o primeiro administrador. Para descobrir os recursos avançados fornecidos pelo Strapi,",
   "HomePage.welcome.congrats.content.bold": "recomendamos que você crie seu primeiro tipo de conteúdo.",
   "HomePage.community": "Participe da Comunidade",
-  "HomePage.roadmap": "Seja nosso roadmap",
+  "HomePage.roadmap": "Veja nosso roadmap",
   "HomePage.greetings": "Olá {name}!",
 
   "Auth.advanced.allow_register": "",
