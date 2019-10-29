@@ -51,7 +51,7 @@ module.exports = {
     }
 
     const service = strapi.plugins['content-type-builder'].services.components;
-    const uid = service.createComponentUID(body.name);
+    const uid = service.createComponentUID(body);
 
     if (service.getComponent(uid)) {
       return ctx.send({ error: 'component.alreadyExists' }, 400);

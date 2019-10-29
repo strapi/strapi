@@ -47,7 +47,7 @@
       "required": true
     },
     "opening_times": {
-      "component": "openingtimes",
+      "component": "default.openingtimes",
       "type": "component",
       "required": true,
       "repeatable": true,
@@ -55,11 +55,11 @@
       "max": 10
     },
     "closing_period": {
-      "component": "closingperiod",
+      "component": "default.closingperiod",
       "type": "component"
     },
     "services": {
-      "component": "restaurantservice",
+      "component": "default.restaurantservice",
       "required": true,
       "repeatable": true,
       "type": "component"
@@ -69,6 +69,11 @@
     },
     "short_description": {
       "type": "text"
+    },
+    "metas": {
+      "type": "component",
+      "component": "seo.meta",
+      "repeatable": true
     }
   }
 }

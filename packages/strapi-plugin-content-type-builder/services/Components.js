@@ -1,6 +1,8 @@
 'use strict';
 
+const path = require('path');
 const _ = require('lodash');
+const fse = require('fs-extra');
 const pluralize = require('pluralize');
 const slugify = require('@sindresorhus/slugify');
 
@@ -30,11 +32,13 @@ const getComponent = uid => {
  * @param {Object} component - strapi component model
  */
 const formatComponent = (uid, component) => {
-  const { connection, collectionName, attributes, info } = component;
+  const { connection, collectionName, attributes, info, category } = component;
 
   return {
     uid,
+    category,
     schema: {
+      icon: _.get(info, 'icon'),
       name: _.get(info, 'name') || _.upperFirst(pluralize(uid)),
       description: _.get(info, 'description', ''),
       connection,
@@ -104,9 +108,10 @@ const formatAttribute = (key, attribute, { component }) => {
  * @param {Object} infos
  */
 async function createComponent(uid, infos) {
+  const { name, category } = infos;
   const schema = createSchema(uid, infos);
 
-  await writeSchema(uid, schema);
+  await writeSchema({ name, schema, category });
   return { uid };
 }
 
@@ -156,6 +161,8 @@ async function updateComponent(component, infos) {
 const createSchema = (uid, infos) => {
   const {
     name,
+    icon,
+    category,
     connection = _.get(
       strapi,
       ['config', 'currentEnvironment', 'database', 'defaultConnection'],
@@ -170,10 +177,11 @@ const createSchema = (uid, infos) => {
     info: {
       name,
       description,
+      icon,
     },
     connection,
     collectionName:
-      collectionName || `components_${pluralize(uid).toLowerCase()}`,
+      collectionName || `components_${category}_${nameToSlug(pluralize(name))}`,
     attributes: convertAttributes(attributes),
   };
 };
@@ -224,7 +232,14 @@ const convertAttributes = attributes => {
  * Returns a uid from a string
  * @param {string} str - string to slugify
  */
-const createComponentUID = str => slugify(str, { separator: '_' });
+const createComponentUID = ({ category, name }) =>
+  `${category}.${nameToSlug(name)}`;
+
+/**
+ * Converts a name to a slug
+ * @param {string} name a name to convert
+ */
+const nameToSlug = name => slugify(name, { separator: '_' });
 
 /**
  * Deletes a component
@@ -237,11 +252,17 @@ async function deleteComponent(component) {
 /**
  * Writes a component schema file
  */
-async function writeSchema(uid, schema) {
-  await strapi.fs.writeAppFile(
-    `components/${uid}.json`,
-    JSON.stringify(schema, null, 2)
-  );
+async function writeSchema({ name, schema, category }) {
+  const categoryDir = path.join(strapi.dir, 'components', category);
+
+  if (!(await fse.pathExists(categoryDir))) {
+    await fse.mkdir(categoryDir);
+  }
+
+  const filename = nameToSlug(name);
+  const filepath = path.join(categoryDir, `${filename}.json`);
+
+  await fse.writeFile(filepath, JSON.stringify(schema, null, 2));
 }
 
 /**
