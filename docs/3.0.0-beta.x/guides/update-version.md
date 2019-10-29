@@ -62,6 +62,10 @@ For example moving from `3.0.0-beta.16` to `3.0.0-beta.17`
 
 Then run either `yarn install` or `npm install` to install the specified version.
 
+::: note
+If the operation doesn't work, you should probably remove your `yarn.lock` or `package-lock.json`. And if it still not work let's run the hard mode `rm -Rf node_modules`
+:::
+
 ## Building your administration panel
 
 New release can introduces changes to the administration panel that require a rebuild.
@@ -69,7 +73,7 @@ New release can introduces changes to the administration panel that require a re
 Start by deleting your current build:
 
 ```bash
-rm -rf ./build
+rm -rf build
 ```
 
 Build the administration panel:
@@ -79,6 +83,10 @@ yarn build
 # or
 npm run build
 ```
+
+::: note
+If the operation doesn't work, you should probably remove the `.cache` folder too.
+:::
 
 ## Migration guides
 
