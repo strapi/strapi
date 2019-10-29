@@ -1,12 +1,12 @@
 # Create a slug system
 
-In this guide we will see how to create a slug system for your Post, Article or the Content Type you want.
+This guide will explain how to create a slug system for a Post, Article or any Content Type you want.
 
 ## Create attributes
 
-To realize the slug system you will need a `string` filed as **base** for your slug. In this example it will be `title`.
+To start building your slug system you need a `string` field as a **base** for your slug, in this example we will use `title`.
 
-And you need another string field that will contains the slugified value of your `title`. In this example it will be `slug`.
+You will also need another `string` field that contains the slugified value of your `title`, in this case we will use `slug`.
 
 ![Slug fields](../assets/guides/slug/fields.png)
 
