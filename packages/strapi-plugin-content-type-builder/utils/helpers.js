@@ -1,3 +1,7 @@
+'use strict';
+
+const slugify = require('@sindresorhus/slugify');
+
 const escapeNewlines = (content = '', placeholder = '\n') => {
   return content.replace(/[\r\n]+/g, placeholder);
 };
@@ -18,7 +22,14 @@ const deepTrimObject = attribute => {
   return typeof attribute === 'string' ? attribute.trim() : attribute;
 };
 
+/**
+ * Converts a name to a slug
+ * @param {string} name a name to convert
+ */
+const nameToSlug = name => slugify(name, { separator: '-' });
+
 module.exports = {
   escapeNewlines,
   deepTrimObject,
+  nameToSlug,
 };

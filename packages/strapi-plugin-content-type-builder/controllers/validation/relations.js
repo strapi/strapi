@@ -4,9 +4,7 @@ const yup = require('yup');
 const _ = require('lodash');
 const { validators } = require('./common');
 
-const VALID_NATURES = ['oneWay', 'manyWay'];
-
-module.exports = () => {
+module.exports = validNatures => {
   return {
     target: yup
       .mixed()
@@ -29,7 +27,7 @@ module.exports = () => {
       .required(),
     nature: yup
       .string()
-      .oneOf(VALID_NATURES)
+      .oneOf(validNatures)
       .required(),
     plugin: yup.string().oneOf(['', ...Object.keys(strapi.plugins)]),
     unique: validators.unique,

@@ -8,7 +8,14 @@ const { isValidName, isValidKey } = require('./common');
 const { getTypeShape } = require('./types');
 const getRelationValidator = require('./relations');
 
-const VALID_COMPONENT_RELATIONS = ['oneWay', 'manyWay'];
+const VALID_COMPONENT_RELATIONS = [
+  'oneWay',
+  'manyWay',
+  'oneToOne',
+  'oneToMany',
+  'manyToOne',
+  'manyToMany',
+];
 const VALID_COMPONENT_TYPES = [
   // advanced types
   'media',
@@ -30,9 +37,10 @@ const VALID_COMPONENT_TYPES = [
 
   // nested component
   'component',
+  'dynamiczone',
 ];
 
-const validateComponentInput = data => {
+const validateContentTypeInput = data => {
   return componentSchema
     .validate(data, {
       strict: true,
@@ -41,7 +49,7 @@ const validateComponentInput = data => {
     .catch(error => Promise.reject(formatYupErrors(error)));
 };
 
-const validateUpdateComponentInput = data => {
+const validateUpdateContentTypeInput = data => {
   // convert zero length string on default attributes to undefined
   if (_.has(data, 'attributes')) {
     Object.keys(data.attributes).forEach(attribute => {
@@ -65,15 +73,6 @@ const componentSchema = yup
       .string()
       .min(1)
       .required('name.required'),
-    icon: yup
-      .string()
-      .test(isValidName)
-      .required('icon.required'),
-    category: yup
-      .string()
-      .min(3)
-      .test(isValidName)
-      .required('category.required'),
     description: yup.string(),
     connection: yup.string(),
     collectionName: yup
@@ -119,6 +118,6 @@ const componentSchema = yup
   .noUnknown();
 
 module.exports = {
-  validateComponentInput,
-  validateUpdateComponentInput,
+  validateContentTypeInput,
+  validateUpdateContentTypeInput,
 };

@@ -4,7 +4,9 @@ const path = require('path');
 const _ = require('lodash');
 const fse = require('fs-extra');
 const pluralize = require('pluralize');
-const slugify = require('@sindresorhus/slugify');
+
+const { formatAttributes, convertAttributes } = require('../utils/attributes');
+const { nameToSlug } = require('../utils/helpers');
 
 /**
  * Returns a list of all available components with formatted attributes
@@ -32,7 +34,7 @@ const getComponent = uid => {
  * @param {Object} component - strapi component model
  */
 const formatComponent = (uid, component) => {
-  const { connection, collectionName, attributes, info, category } = component;
+  const { connection, collectionName, info, category } = component;
 
   return {
     uid,
@@ -43,63 +45,9 @@ const formatComponent = (uid, component) => {
       description: _.get(info, 'description', ''),
       connection,
       collectionName,
-      attributes: formatAttributes(attributes, { component }),
+      attributes: formatAttributes(component),
     },
   };
-};
-
-/**
- * Formats a component's attributes
- * @param {Object} attributes - the attributes map
- * @param {Object} context - function context
- * @param {Object} context.component - the associated component
- */
-const formatAttributes = (attributes, { component }) => {
-  return Object.keys(attributes).reduce((acc, key) => {
-    acc[key] = formatAttribute(key, attributes[key], { component });
-    return acc;
-  }, {});
-};
-
-/**
- * Fromats a component attribute
- * @param {string} key - the attribute key
- * @param {Object} attribute - the attribute
- * @param {Object} context - function context
- * @param {Object} context.component - the associated component
- */
-const formatAttribute = (key, attribute, { component }) => {
-  if (_.has(attribute, 'type')) return attribute;
-
-  // format relations
-  const relation = (component.associations || []).find(
-    assoc => assoc.alias === key
-  );
-  const { plugin } = attribute;
-  let targetEntity = attribute.model || attribute.collection;
-
-  if (plugin === 'upload' && targetEntity === 'file') {
-    return {
-      type: 'media',
-      multiple: attribute.collection ? true : false,
-      required: attribute.required ? true : false,
-    };
-  } else {
-    return {
-      nature: relation.nature,
-      target: targetEntity,
-      plugin: plugin || undefined,
-      dominant: attribute.dominant ? true : false,
-      key: attribute.via || undefined,
-      columnName: attribute.columnName || undefined,
-      targetColumnName: _.get(
-        strapi.getModel(targetEntity, plugin),
-        ['attributes', attribute.via, 'columnName'],
-        undefined
-      ),
-      unique: attribute.unique ? true : false,
-    };
-  }
 };
 
 /**
@@ -197,60 +145,12 @@ const createSchema = infos => {
   };
 };
 
-const convertAttributes = attributes => {
-  return Object.keys(attributes).reduce((acc, key) => {
-    const attribute = attributes[key];
-
-    if (_.has(attribute, 'type')) {
-      if (attribute.type === 'media') {
-        const fileModel = strapi.getModel('file', 'upload');
-        if (!fileModel) return acc;
-
-        const via = _.findKey(fileModel.attributes, { collection: '*' });
-        acc[key] = {
-          [attribute.multiple ? 'collection' : 'model']: 'file',
-          via,
-          plugin: 'upload',
-          required: attribute.required ? true : false,
-        };
-      } else {
-        acc[key] = attribute;
-      }
-
-      return acc;
-    }
-
-    if (_.has(attribute, 'target')) {
-      const { target, nature, unique, plugin } = attribute;
-
-      // ingore relation which aren't oneWay or manyWay
-      if (!['oneWay', 'manyWay'].includes(nature)) {
-        return acc;
-      }
-
-      acc[key] = {
-        [nature === 'oneWay' ? 'model' : 'collection']: target,
-        plugin: plugin ? _.trim(plugin) : undefined,
-        unique: unique === true ? true : undefined,
-      };
-    }
-
-    return acc;
-  }, {});
-};
-
 /**
  * Returns a uid from a string
  * @param {string} str - string to slugify
  */
 const createComponentUID = ({ category, name }) =>
   `${category}.${nameToSlug(name)}`;
-
-/**
- * Converts a name to a slug
- * @param {string} name a name to convert
- */
-const nameToSlug = name => slugify(name, { separator: '_' });
 
 /**
  * Deletes a component

@@ -37,6 +37,8 @@ module.exports = function(strapi) {
     );
   }
 
+  strapi.contentTypes = {};
+
   Object.keys(strapi.components).forEach(key => {
     const component = strapi.components[key];
 
@@ -46,7 +48,7 @@ module.exports = function(strapi) {
     if (!component.collectionName)
       throw new Error(`Component ${key} is missing a collectionName attribute`);
 
-    return Object.assign(component, {
+    Object.assign(component, {
       uid: key,
       modelType: 'component',
       globalId:
@@ -61,12 +63,14 @@ module.exports = function(strapi) {
 
       Object.assign(model, {
         modelType: 'contentType',
-        uid: `app::${key}.${index}`,
+        uid: `application::${key}.${index}`,
         apiName: key,
         globalId: model.globalId || _.upperFirst(_.camelCase(index)),
         collectionName: model.collectionName || `${index}`.toLocaleLowerCase(),
         connection: model.connection || defaultConnection,
       });
+
+      strapi.contentTypes[model.uid] = model;
 
       // find corresponding service and controller
       const userService = _.get(strapi.api[key], ['services', index], {});
@@ -129,13 +133,15 @@ module.exports = function(strapi) {
 
     Object.assign(model, {
       modelType: 'contentType',
-      uid: `admin::${key}`,
+      uid: `strapi::${key}`,
       identity: model.identity || _.upperFirst(key),
       globalId: model.globalId || _.upperFirst(_.camelCase(`admin-${key}`)),
       connection:
         model.connection ||
         strapi.config.currentEnvironment.database.defaultConnection,
     });
+
+    strapi.contentTypes[model.uid] = model;
   });
 
   Object.keys(strapi.plugins).forEach(pluginName => {
@@ -169,6 +175,8 @@ module.exports = function(strapi) {
           model.connection ||
           strapi.config.currentEnvironment.database.defaultConnection,
       });
+
+      strapi.contentTypes[model.uid] = model;
     });
   });
 

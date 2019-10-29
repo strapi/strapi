@@ -2,26 +2,6 @@
 
 const yup = require('yup');
 
-const VALID_TYPES = [
-  // advanced types
-  'media',
-
-  // scalar types
-  'string',
-  'text',
-  'richtext',
-  'json',
-  'enumeration',
-  'password',
-  'email',
-  'integer',
-  'biginteger',
-  'float',
-  'decimal',
-  'date',
-  'boolean',
-];
-
 const validators = {
   required: yup.boolean(),
   unique: yup.boolean(),
@@ -63,6 +43,4 @@ module.exports = {
   isValidName,
   isValidKey,
   isValidEnum,
-
-  VALID_TYPES,
 };

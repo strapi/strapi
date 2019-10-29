@@ -1,22 +1,7 @@
 'use strict';
 
 const yup = require('yup');
-const {
-  validators,
-  VALID_TYPES,
-  isValidName,
-  isValidEnum,
-} = require('./common');
-
-module.exports = obj => {
-  return {
-    type: yup
-      .string()
-      .oneOf(VALID_TYPES)
-      .required(),
-    ...getTypeShape(obj),
-  };
-};
+const { validators, isValidName, isValidEnum } = require('./common');
 
 const getTypeShape = obj => {
   switch (obj.type) {
@@ -149,8 +134,36 @@ const getTypeShape = obj => {
         unique: validators.unique,
       };
     }
+
+    case 'component': {
+      return {
+        required: validators.required,
+        repeatable: yup.boolean(),
+        component: yup.string().required(),
+        min: yup.number(),
+        max: yup.number(),
+      };
+    }
+
+    case 'dynamiczone': {
+      return {
+        required: validators.required,
+        components: yup
+          .array()
+          .of(yup.string())
+          .min(1)
+          .required(),
+        min: yup.number(),
+        max: yup.number(),
+      };
+    }
+
     default: {
       return {};
     }
   }
+};
+
+module.exports = {
+  getTypeShape,
 };
