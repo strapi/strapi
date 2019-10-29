@@ -105,7 +105,26 @@ module.exports = async function createProject(
 
     await captureStderr('didNotInstallProjectDependencies', error);
 
-    stopProcess('Stopping installation');
+    console.log(chalk.black.bgWhite(' Keep trying!             '));
+    console.log();
+    console.log(
+      chalk.bold(
+        'Oh, it seems that you encountered errors while installing dependencies in your project.'
+      )
+    );
+    console.log(`Don't give up, your project was created correctly.`);
+    console.log(
+      `Fix the issues mentionned in the installation errors and try to run the following command:`
+    );
+    console.log();
+    console.log(
+      `cd ${chalk.green(rootPath)} && ${chalk.cyan(
+        scope.useYarn ? 'yarn' : 'npm'
+      )} install`
+    );
+    console.log();
+
+    stopProcess();
   }
 
   await trackUsage({ event: 'didCreateProject', scope });
