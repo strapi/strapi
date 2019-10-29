@@ -157,7 +157,7 @@ export const mapDataKeysToFilesToUpload = (filesMap, data) => {
       const groupData = get(data, [key], []);
       const groupFiles = groupData.reduce((acc1, current, index) => {
         const files = isMultiple
-          ? getFileToUpload([key, index, targetKey])
+          ? getFilesToUpload([key, index, targetKey])
           : getFileToUpload([key, index, targetKey]);
 
         if (!isEmpty(files)) {

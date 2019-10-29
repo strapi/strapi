@@ -128,11 +128,9 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       const fn = preLifecycle[key];
 
       if (_.isFunction(target[model.toLowerCase()][fn])) {
-        schema.pre(key, function(next) {
-          target[model.toLowerCase()]
-            [fn](this)
-            .then(next)
-            .catch(err => strapi.log.error(err));
+        schema.pre(key, function() {
+          return target[model.toLowerCase()]
+            [fn](this);
         });
       }
     });
