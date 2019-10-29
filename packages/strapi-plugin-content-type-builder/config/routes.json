@@ -87,6 +87,14 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "PUT",
+      "path": "/component-categories/:name",
+      "handler": "ComponentCategories.editCategory",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }
