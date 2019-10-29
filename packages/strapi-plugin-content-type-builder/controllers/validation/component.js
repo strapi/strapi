@@ -22,8 +22,16 @@ const componentSchema = yup
     name: yup
       .string()
       .min(1)
-      .test(isValidName)
       .required('name.required'),
+    icon: yup
+      .string()
+      .test(isValidName)
+      .required('icon.required'),
+    category: yup
+      .string()
+      .min(3)
+      .test(isValidName)
+      .required('category.required'),
     description: yup.string(),
     connection: yup.string(),
     collectionName: yup

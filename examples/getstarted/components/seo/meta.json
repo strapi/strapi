@@ -1,0 +1,16 @@
+{
+  "info": {
+    "name": "meta",
+    "description": ""
+  },
+  "connection": "default",
+  "collectionName": "seo_meta",
+  "attributes": {
+    "key": {
+      "type": "string"
+    },
+    "value": {
+      "type": "text"
+    }
+  }
+}

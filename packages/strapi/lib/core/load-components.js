@@ -11,5 +11,14 @@ module.exports = async ({ dir }) => {
     return {};
   }
 
-  return await loadFiles(componentsDir, '*.*(js|json)');
+  const map = await loadFiles(componentsDir, '*/*.*(js|json)');
+
+  return Object.keys(map).reduce((acc, category) => {
+    Object.keys(map[category]).forEach(key => {
+      acc[`${category}.${key}`] = Object.assign(map[category][key], {
+        category,
+      });
+    });
+    return acc;
+  }, {});
 };
