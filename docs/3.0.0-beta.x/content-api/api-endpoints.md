@@ -214,6 +214,12 @@ GET http://localhost:1337/restaurants
 
 Returns the count of entries matching the query filters. You can read more about parameters [here](./parameters.md).
 
+**Example request**
+
+```js
+GET http://localhost:1337/restaurants/count
+```
+
 **Example response**
 
 ```
