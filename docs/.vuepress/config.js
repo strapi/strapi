@@ -124,6 +124,7 @@ module.exports = {
           collapsable: true,
           title: '📚 Guides',
           children: [
+            '/3.0.0-beta.x/guides/update-version',
             '/3.0.0-beta.x/guides/databases',
             '/3.0.0-beta.x/guides/deployment',
             '/3.0.0-beta.x/guides/jwt-validation',
