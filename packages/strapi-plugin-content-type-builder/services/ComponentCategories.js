@@ -34,4 +34,21 @@ module.exports = {
 
     await fse.move(join(componentsDir, name), join(componentsDir, infos.name));
   },
+
+  async deleteCategory(name) {
+    const componentsDir = join(strapi.dir, 'components');
+    const componentService =
+      strapi.plugins['content-type-builder'].services.components;
+
+    const deletePromises = Object.keys(strapi.components)
+      .filter(uid => {
+        const [category] = uid.split('.');
+        return category === name;
+      })
+      .map(uid => componentService.deleteComponentInModels(uid));
+
+    await Promise.all(deletePromises);
+
+    await fse.remove(join(componentsDir, name));
+  },
 };
