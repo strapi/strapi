@@ -38,7 +38,7 @@ describe.each([
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteComponent('somecomponent');
+    await modelsUtils.deleteComponent('default.somecomponent');
     await modelsUtils.deleteModel('withcomponent');
   }, 60000);
 

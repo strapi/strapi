@@ -118,6 +118,8 @@ function watchFileChanges({ dir, strapiInstance }) {
       '**/admin/**',
       'extensions/**/admin',
       'extensions/**/admin/**',
+      '**/documentation',
+      '**/documentation/**',
       '**/node_modules',
       '**/node_modules/**',
       '**/plugins.json',
