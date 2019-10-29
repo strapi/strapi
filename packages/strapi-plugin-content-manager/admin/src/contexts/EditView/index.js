@@ -14,11 +14,22 @@ function useEditView() {
 }
 
 EditViewProvider.propTypes = {
+  addRelation: PropTypes.func,
   children: PropTypes.node.isRequired,
+  didCheckErrors: PropTypes.bool,
+  errors: PropTypes.object,
+  layout: PropTypes.object,
+  moveRelation: PropTypes.func,
+  onRemove: PropTypes.func,
+  onChange: PropTypes.func,
 };
 
 EditViewProvider.defaultProps = {
   addRelation: () => {},
+  didCheckErrors: false,
+  errors: {},
+  layout: {},
+  modifiedData: {},
   moveRelation: () => {},
   onChange: () => {},
   onRemove: () => {},

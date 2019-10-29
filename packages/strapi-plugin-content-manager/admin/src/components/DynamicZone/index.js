@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 
 const DynamicZone = ({ name }) => {
-  return <div>{name}</div>;
+  return <div>DYNAMIC ZONE: {name}</div>;
 };
 
 DynamicZone.propTypes = {

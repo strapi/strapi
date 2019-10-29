@@ -1,8 +1,13 @@
 import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { get, omit } from 'lodash';
+import {
+  get,
+  // omit,
+} from 'lodash';
+// import { InputsIndex } from 'strapi-helper-plugin';
+import { InputFileWithErrors } from 'strapi-helper-plugin';
+import { Inputs as InputsIndex } from '@buffetjs/custom';
 
-import { InputsIndex } from 'strapi-helper-plugin';
 import { useEditView } from '../../contexts/EditView';
 import InputJSONWithErrors from '../InputJSONWithErrors';
 import WysiwygWithErrors from '../WysiwygWithErrors';
@@ -10,7 +15,7 @@ import WysiwygWithErrors from '../WysiwygWithErrors';
 const getInputType = (type = '') => {
   switch (type.toLowerCase()) {
     case 'boolean':
-      return 'toggle';
+      return 'bool';
     case 'biginteger':
     case 'decimal':
     case 'float':
@@ -18,7 +23,8 @@ const getInputType = (type = '') => {
       return 'number';
     case 'date':
     case 'datetime':
-      return 'date';
+    case 'time':
+      return type;
     case 'email':
       return 'email';
     case 'enumeration':
@@ -32,7 +38,7 @@ const getInputType = (type = '') => {
     case 'media':
     case 'file':
     case 'files':
-      return 'file';
+      return 'media';
     case 'json':
       return 'json';
     case 'wysiwyg':
@@ -44,16 +50,9 @@ const getInputType = (type = '') => {
   }
 };
 
-function Inputs({
-  autoFocus,
-  keys,
-  layout,
-  modifiedData,
-  name,
-  onBlur,
-  onChange,
-}) {
-  const { didCheckErrors, errors } = useEditView();
+function Inputs({ autoFocus, keys, name, onBlur, onChange }) {
+  const { didCheckErrors, errors, layout, modifiedData } = useEditView();
+  console.log({ errors });
   const attribute = useMemo(
     () => get(layout, ['schema', 'attributes', name], {}),
     [layout, name]
@@ -66,24 +65,26 @@ function Inputs({
     metadatas,
   ]);
   const type = useMemo(() => get(attribute, 'type', null), [attribute]);
-  const inputStyle = type === 'text' ? { height: '196px' } : {};
-  const validations = omit(attribute, [
-    'type',
-    'model',
-    'via',
-    'collection',
-    'default',
-    'plugin',
-    'enum',
-  ]);
+
+  // const inputStyle = type === 'text' ? { height: '196px' } : {};
+  // const validations = omit(attribute, [
+  //   'type',
+  //   'model',
+  //   'via',
+  //   'collection',
+  //   'default',
+  //   'plugin',
+  //   'enum',
+  // ]);
   const { description, visible } = metadatas;
   const value = get(modifiedData, keys);
 
   if (visible === false) {
     return null;
   }
-  const inputErrors = get(errors, keys, []);
-  const withOptionPlaceholder = get(attribute, 'type', '') === 'enumeration';
+
+  // const inputErrors = get(errors, keys, []);
+  // const withOptionPlaceholder = get(attribute, 'type', '') === 'enumeration';
 
   return (
     <InputsIndex
@@ -91,10 +92,13 @@ function Inputs({
       autoFocus={autoFocus}
       didCheckErrors={didCheckErrors}
       disabled={disabled}
-      errors={inputErrors}
-      inputDescription={description}
-      inputStyle={inputStyle}
+      // errors={errors}
+      // errors={inputErrors}
+      // inputDescription={description}
+      description={description}
+      // inputStyle={inputStyle}
       customInputs={{
+        media: InputFileWithErrors,
         json: InputJSONWithErrors,
         wysiwyg: WysiwygWithErrors,
       }}
@@ -102,11 +106,12 @@ function Inputs({
       name={name}
       onBlur={onBlur}
       onChange={onChange}
-      selectOptions={get(attribute, 'enum', [])}
+      options={get(attribute, 'enum', [])}
       type={getInputType(type)}
-      validations={validations}
+      // validations={null}
+      // validations={validations}
       value={value}
-      withOptionPlaceholder={withOptionPlaceholder}
+      // withOptionPlaceholder={withOptionPlaceholder}
     />
   );
 }
@@ -120,7 +125,6 @@ Inputs.propTypes = {
   autoFocus: PropTypes.bool,
   keys: PropTypes.string.isRequired,
   layout: PropTypes.object.isRequired,
-  modifiedData: PropTypes.object.isRequired,
   name: PropTypes.string.isRequired,
   onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,

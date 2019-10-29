@@ -74,11 +74,11 @@ const getInputSize = type => {
   switch (type) {
     case 'boolean':
     case 'date':
-    case 'datetime':
     case 'integer':
     case 'float':
     case 'biginteger':
     case 'decimal':
+    case 'time':
       return 4;
     case 'json':
     case 'component':

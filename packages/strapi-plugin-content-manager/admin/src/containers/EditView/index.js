@@ -31,7 +31,7 @@ import Container from '../../components/Container';
 import DynamicZone from '../../components/DynamicZone';
 import FormWrapper from '../../components/FormWrapper';
 // import ComponentField from '../../components/ComponentField';
-// import Inputs from '../../components/Inputs';
+import Inputs from '../../components/Inputs';
 import SelectWrapper from '../../components/SelectWrapper';
 // import createYupSchema from './utils/schema';
 // import setDefaultForm from './utils/createDefaultForm';
@@ -153,7 +153,7 @@ const EditView = ({
   };
 
   return (
-    <EditViewProvider>
+    <EditViewProvider layout={currentContentTypeLayoutData}>
       <BackHeader onClick={() => redirectToPreviousPage()} />
       <Container className="container-fluid">
         <form onSubmit={handleSubmit}>
@@ -204,10 +204,36 @@ const EditView = ({
                     },
                   } = block;
 
-                  return <DynamicZone name={name} />;
+                  return <DynamicZone key={blockIndex} name={name} />;
                 }
 
-                return <FormWrapper key={blockIndex}>SUBBLOCK</FormWrapper>;
+                return (
+                  <FormWrapper key={blockIndex}>
+                    {block.map((fieldsBlock, fieldsBlockIndex) => {
+                      return (
+                        <div className="row" key={fieldsBlockIndex}>
+                          {fieldsBlock.map(({ name, size }, fieldIndex) => {
+                            return (
+                              <div className={`col-${size}`} key={name}>
+                                <Inputs
+                                  autoFocus={
+                                    blockIndex === 0 &&
+                                    fieldsBlockIndex === 0 &&
+                                    fieldIndex === 0
+                                  }
+                                  keys={name}
+                                  layout={currentContentTypeLayoutData}
+                                  name={name}
+                                  onChange={() => {}}
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })}
+                  </FormWrapper>
+                );
               })}
             </div>
 

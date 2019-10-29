@@ -14,6 +14,9 @@
     "comment": ""
   },
   "attributes": {
+    "since": {
+      "type": "date"
+    },
     "name": {
       "maxLength": 50,
       "required": true,
