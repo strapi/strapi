@@ -4,9 +4,11 @@ import {
 } from 'immutable';
 
 const initialState = fromJS({
+  formErrors: {},
   isLoading: true,
   initialData: {},
   modifiedData: {},
+  shouldShowLoadingState: false,
 });
 
 const reducer = (state, action) => {
@@ -25,6 +27,13 @@ const reducer = (state, action) => {
 
         return fromJS([el]);
       });
+    case 'GET_DATA_SUCCEEDED':
+      return state
+        .update('initialData', () => fromJS(action.data))
+        .update('modifiedData', () => fromJS(action.data))
+        .update('isLoading', () => false);
+    case 'IS_SUBMITING':
+      return state.update('shouldShowLoadingState', () => true);
     case 'MOVE_FIELD':
       return state.updateIn(['modifiedData', ...action.keys], list => {
         return list
@@ -51,6 +60,12 @@ const reducer = (state, action) => {
     }
     case 'REMOVE_RELATION':
       return state.removeIn(['modifiedData', ...action.keys.split('.')]);
+    case 'RESET_PROPS':
+      return initialState;
+    case 'SUBMIT_ERRORS':
+      return state
+        .update('formErrors', () => fromJS(action.errors))
+        .update('shouldShowLoadingState', () => false);
     default:
       return state;
   }

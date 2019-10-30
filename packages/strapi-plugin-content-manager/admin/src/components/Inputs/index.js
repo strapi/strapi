@@ -1,7 +1,7 @@
 import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { get, omit } from 'lodash';
-// import { InputsIndex } from 'strapi-helper-plugin';
+import { get, isEmpty, omit, toLower } from 'lodash';
+import { FormattedMessage } from 'react-intl';
 import { InputFileWithErrors } from 'strapi-helper-plugin';
 import { Inputs as InputsIndex } from '@buffetjs/custom';
 
@@ -10,7 +10,7 @@ import InputJSONWithErrors from '../InputJSONWithErrors';
 import WysiwygWithErrors from '../WysiwygWithErrors';
 
 const getInputType = (type = '') => {
-  switch (type.toLowerCase()) {
+  switch (toLower(type)) {
     case 'boolean':
       return 'bool';
     case 'biginteger':
@@ -50,12 +50,12 @@ const getInputType = (type = '') => {
 function Inputs({ autoFocus, keys, name, onBlur }) {
   const {
     didCheckErrors,
-    errors,
+    formErrors,
     layout,
     modifiedData,
     onChange,
   } = useDataManager();
-  console.log({ errors });
+
   const attribute = useMemo(
     () => get(layout, ['schema', 'attributes', name], {}),
     [layout, name]
@@ -85,37 +85,57 @@ function Inputs({ autoFocus, keys, name, onBlur }) {
   if (visible === false) {
     return null;
   }
+  const temporaryErrorIdUntilBuffetjsSupportsFormattedMessage =
+    'app.utils.defaultMessage';
+  const errorId = get(
+    formErrors,
+    [keys, 'id'],
+    temporaryErrorIdUntilBuffetjsSupportsFormattedMessage
+  );
 
-  // const inputErrors = get(errors, keys, []);
+  // TODO add the option placeholder to buffetjs
+  // check https://github.com/strapi/strapi/issues/2471
   // const withOptionPlaceholder = get(attribute, 'type', '') === 'enumeration';
 
+  // TODO format error for the JSON, the WYSIWYG and also the file inputs
+  // TODO check if the height for the textarea is 196px (not mandatory)
+
   return (
-    <InputsIndex
-      {...metadatas}
-      autoFocus={autoFocus}
-      didCheckErrors={didCheckErrors}
-      disabled={disabled}
-      // errors={errors}
-      // errors={inputErrors}
-      // inputDescription={description}
-      description={description}
-      // inputStyle={inputStyle}
-      customInputs={{
-        media: InputFileWithErrors,
-        json: InputJSONWithErrors,
-        wysiwyg: WysiwygWithErrors,
+    <FormattedMessage id={errorId}>
+      {error => {
+        return (
+          <InputsIndex
+            {...metadatas}
+            autoFocus={autoFocus}
+            didCheckErrors={didCheckErrors}
+            disabled={disabled}
+            error={
+              isEmpty(error) ||
+              errorId === temporaryErrorIdUntilBuffetjsSupportsFormattedMessage
+                ? null
+                : error
+            }
+            inputDescription={description}
+            description={description}
+            // inputStyle={inputStyle} used to set the height of the text area
+            customInputs={{
+              media: InputFileWithErrors,
+              json: InputJSONWithErrors,
+              wysiwyg: WysiwygWithErrors,
+            }}
+            multiple={get(attribute, 'multiple', false)}
+            name={name}
+            onBlur={onBlur}
+            onChange={onChange}
+            options={get(attribute, 'enum', [])}
+            type={getInputType(type)}
+            validations={validations}
+            value={value}
+            // withOptionPlaceholder={withOptionPlaceholder}
+          />
+        );
       }}
-      multiple={get(attribute, 'multiple', false)}
-      name={name}
-      onBlur={onBlur}
-      onChange={onChange}
-      options={get(attribute, 'enum', [])}
-      type={getInputType(type)}
-      // validations={null}
-      validations={validations}
-      value={value}
-      // withOptionPlaceholder={withOptionPlaceholder}
-    />
+    </FormattedMessage>
   );
 }
 

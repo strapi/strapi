@@ -49,9 +49,13 @@ const EditView = ({
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState)
   );
+  const allLayoutData = useMemo(() => get(layouts, [slug], {}), [
+    layouts,
+    slug,
+  ]);
   const currentContentTypeLayoutData = useMemo(
-    () => get(layouts, [slug, 'contentType'], {}),
-    [layouts, slug]
+    () => get(allLayoutData, ['contentType'], {}),
+    [allLayoutData]
   );
   const currentContentTypeLayout = useMemo(
     () => get(currentContentTypeLayoutData, ['layouts', 'edit'], []),
@@ -110,7 +114,7 @@ const EditView = ({
 
   return (
     <EditViewProvider layout={currentContentTypeLayoutData}>
-      <EditViewDataManagerProvider layout={currentContentTypeLayoutData}>
+      <EditViewDataManagerProvider allLayoutData={allLayoutData} slug={slug}>
         <BackHeader onClick={() => redirectToPreviousPage()} />
         <Container className="container-fluid">
           <Header />
@@ -133,7 +137,6 @@ const EditView = ({
                       return (
                         <div className="row" key={fieldsBlockIndex}>
                           {fieldsBlock.map(({ name, size }, fieldIndex) => {
-                            console.log({ fieldIndex });
                             return (
                               <div className={`col-${size}`} key={name}>
                                 <Inputs

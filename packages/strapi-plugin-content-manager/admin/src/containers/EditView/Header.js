@@ -14,11 +14,11 @@ const Header = () => {
   const [showWarningDelete, setWarningDelete] = useState(false);
 
   const { id } = useParams();
-  const { initialData, layout } = useDataManager();
+  const { initialData, layout, shouldShowLoadingState } = useDataManager();
 
   const currentContentTypeMainField = get(
     layout,
-    ['contentType', 'settings', 'mainField'],
+    ['settings', 'mainField'],
     'id'
   );
   const isCreatingEntry = id === 'create';
@@ -39,6 +39,8 @@ const Header = () => {
     toggleWarningDelete();
   };
 
+  console.log({ shouldShowLoadingState });
+
   return (
     <>
       <PluginHeader
@@ -50,15 +52,15 @@ const Header = () => {
               toggleWarningCancel();
             },
             type: 'button',
-            // disabled: isSubmitting, // TODO STATE WHEN SUBMITING
+            disabled: shouldShowLoadingState,
           },
           {
             kind: 'primary',
             label: `${pluginId}.containers.Edit.submit`,
             type: 'submit',
-            // loader: isSubmitting,
-            // style: isSubmitting ? { marginRight: '18px' } : {},
-            // disabled: isSubmitting, // TODO STATE WHEN SUBMITING
+            loader: shouldShowLoadingState,
+            style: shouldShowLoadingState ? { marginRight: '18px' } : {},
+            disabled: shouldShowLoadingState,
           },
         ]}
         subActions={
@@ -72,7 +74,7 @@ const Header = () => {
                     toggleWarningDelete();
                   },
                   type: 'button',
-                  // disabled: isSubmitting, // TODO STATE WHEN SUBMITING
+                  disabled: shouldShowLoadingState,
                 },
               ]
         }
