@@ -66,7 +66,7 @@ Here are some use cases:
 - Create an admin user if there isn't one.
 - Fill the database with some necessary data.
 - Check that the database is up-and-running.
-- Load some envrionments variables.
+- Load some environments variables.
 
 The bootstrap function can be synchronous or asynchronous
 
@@ -97,6 +97,8 @@ module.exports = async () => {
 ### CRON tasks
 
 CRON tasks allow you to schedule jobs (arbitrary functions) for execution at specific dates, with optional recurrence rules. It only uses a single timer at any given time (rather than reevaluating upcoming jobs every second/minute).
+
+This feature is powered by [`node-schedule`](https://www.npmjs.com/package/node-schedule) node modules. Check it for more information.
 
 ::: note
 Make sure the `enabled` cron config is set to `true` in `./config/environments/**/server.json` file.
