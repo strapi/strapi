@@ -31,10 +31,11 @@ import Container from '../../components/Container';
 import DynamicZone from '../../components/DynamicZone';
 import FormWrapper from '../../components/FormWrapper';
 // import ComponentField from '../../components/ComponentField';
-import Inputs from '../../components/Inputs';
-import SelectWrapper from '../../components/SelectWrapper';
+// import Inputs from '../../components/Inputs';
+// import SelectWrapper from '../../components/SelectWrapper';
 // import createYupSchema from './utils/schema';
 // import setDefaultForm from './utils/createDefaultForm';
+import EditViewDataManagerProvider from '../EditViewDataManagerProvider';
 import getInjectedComponents from './utils/getComponents';
 import init from './init';
 import reducer, { initialState } from './reducer';
@@ -148,15 +149,11 @@ const EditView = ({
     .join('');
   const redirectToPreviousPage = () => push(redirectURL);
 
-  const handleSubmit = async e => {
-    e.preventDefault();
-  };
-
   return (
     <EditViewProvider layout={currentContentTypeLayoutData}>
-      <BackHeader onClick={() => redirectToPreviousPage()} />
-      <Container className="container-fluid">
-        <form onSubmit={handleSubmit}>
+      <EditViewDataManagerProvider layouts={layouts}>
+        <BackHeader onClick={() => redirectToPreviousPage()} />
+        <Container className="container-fluid">
           <PluginHeader
             actions={[
               {
@@ -213,9 +210,11 @@ const EditView = ({
                       return (
                         <div className="row" key={fieldsBlockIndex}>
                           {fieldsBlock.map(({ name, size }, fieldIndex) => {
+                            console.log({ fieldIndex });
                             return (
                               <div className={`col-${size}`} key={name}>
-                                <Inputs
+                                INPUT HERE
+                                {/* <Inputs
                                   autoFocus={
                                     blockIndex === 0 &&
                                     fieldsBlockIndex === 0 &&
@@ -225,7 +224,7 @@ const EditView = ({
                                   layout={currentContentTypeLayoutData}
                                   name={name}
                                   onChange={() => {}}
-                                />
+                                /> */}
                               </div>
                             );
                           })}
@@ -244,28 +243,30 @@ const EditView = ({
                 >
                   <div style={{ paddingTop: '22px' }}>
                     {currentContentTypeLayoutRelations.map(relationName => {
-                      const relation = get(
-                        currentContentTypeLayoutData,
-                        ['schema', 'attributes', relationName],
-                        {}
-                      );
-                      const relationMetas = get(
-                        currentContentTypeLayoutData,
-                        ['metadatas', relationName, 'edit'],
-                        {}
-                      );
-                      const value = get({}, [relationName], null);
+                      console.log({ relationName });
+                      // const relation = get(
+                      //   currentContentTypeLayoutData,
+                      //   ['schema', 'attributes', relationName],
+                      //   {}
+                      // );
+                      // const relationMetas = get(
+                      //   currentContentTypeLayoutData,
+                      //   ['metadatas', relationName, 'edit'],
+                      //   {}
+                      // );
+                      // const value = get({}, [relationName], null);
 
-                      return (
-                        <SelectWrapper
-                          {...relation}
-                          {...relationMetas}
-                          key={relationName}
-                          name={relationName}
-                          relationsType={relation.relationType}
-                          value={value}
-                        />
-                      );
+                      return 'RELATION HERE';
+                      // return (
+                      //   <SelectWrapper
+                      //     {...relation}
+                      //     {...relationMetas}
+                      //     key={relationName}
+                      //     name={relationName}
+                      //     relationsType={relation.relationType}
+                      //     value={value}
+                      //   />
+                      // );
                     })}
                   </div>
                 </SubWrapper>
@@ -296,8 +297,8 @@ const EditView = ({
               </LinkWrapper>
             </div>
           </div>
-        </form>
-      </Container>
+        </Container>
+      </EditViewDataManagerProvider>
     </EditViewProvider>
   );
 };
