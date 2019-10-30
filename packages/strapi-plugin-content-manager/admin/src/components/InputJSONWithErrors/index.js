@@ -98,6 +98,7 @@ class InputJSONWithErrors extends React.Component {
       tabIndex,
       value,
     } = this.props;
+
     const handleBlur = isFunction(onBlur) ? onBlur : this.handleBlur;
 
     let spacer = !isEmpty(inputDescription) ? <InputSpacer /> : <div />;
@@ -221,6 +222,8 @@ InputJSONWithErrors.propTypes = {
     PropTypes.array,
     PropTypes.object,
     PropTypes.bool,
+    PropTypes.string,
+    PropTypes.number,
   ]),
 };
 

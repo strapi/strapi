@@ -17,7 +17,7 @@ import Container from '../../components/Container';
 import DynamicZone from '../../components/DynamicZone';
 import FormWrapper from '../../components/FormWrapper';
 // import ComponentField from '../../components/ComponentField';
-// import Inputs from '../../components/Inputs';
+import Inputs from '../../components/Inputs';
 import SelectWrapper from '../../components/SelectWrapper';
 import EditViewDataManagerProvider from '../EditViewDataManagerProvider';
 import Header from './Header';
@@ -136,8 +136,7 @@ const EditView = ({
                             console.log({ fieldIndex });
                             return (
                               <div className={`col-${size}`} key={name}>
-                                INPUT HERE
-                                {/* <Inputs
+                                <Inputs
                                   autoFocus={
                                     blockIndex === 0 &&
                                     fieldsBlockIndex === 0 &&
@@ -147,7 +146,7 @@ const EditView = ({
                                   layout={currentContentTypeLayoutData}
                                   name={name}
                                   onChange={() => {}}
-                                /> */}
+                                />
                               </div>
                             );
                           })}

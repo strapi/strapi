@@ -1,14 +1,11 @@
 import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import {
-  get,
-  // omit,
-} from 'lodash';
+import { get, omit } from 'lodash';
 // import { InputsIndex } from 'strapi-helper-plugin';
 import { InputFileWithErrors } from 'strapi-helper-plugin';
 import { Inputs as InputsIndex } from '@buffetjs/custom';
 
-import { useEditView } from '../../contexts/EditView';
+import useDataManager from '../../hooks/useDataManager';
 import InputJSONWithErrors from '../InputJSONWithErrors';
 import WysiwygWithErrors from '../WysiwygWithErrors';
 
@@ -50,8 +47,14 @@ const getInputType = (type = '') => {
   }
 };
 
-function Inputs({ autoFocus, keys, name, onBlur, onChange }) {
-  const { didCheckErrors, errors, layout, modifiedData } = useEditView();
+function Inputs({ autoFocus, keys, name, onBlur }) {
+  const {
+    didCheckErrors,
+    errors,
+    layout,
+    modifiedData,
+    onChange,
+  } = useDataManager();
   console.log({ errors });
   const attribute = useMemo(
     () => get(layout, ['schema', 'attributes', name], {}),
@@ -67,17 +70,17 @@ function Inputs({ autoFocus, keys, name, onBlur, onChange }) {
   const type = useMemo(() => get(attribute, 'type', null), [attribute]);
 
   // const inputStyle = type === 'text' ? { height: '196px' } : {};
-  // const validations = omit(attribute, [
-  //   'type',
-  //   'model',
-  //   'via',
-  //   'collection',
-  //   'default',
-  //   'plugin',
-  //   'enum',
-  // ]);
+  const validations = omit(attribute, [
+    'type',
+    'model',
+    'via',
+    'collection',
+    'default',
+    'plugin',
+    'enum',
+  ]);
   const { description, visible } = metadatas;
-  const value = get(modifiedData, keys);
+  const value = get(modifiedData, keys, null);
 
   if (visible === false) {
     return null;
@@ -109,7 +112,7 @@ function Inputs({ autoFocus, keys, name, onBlur, onChange }) {
       options={get(attribute, 'enum', [])}
       type={getInputType(type)}
       // validations={null}
-      // validations={validations}
+      validations={validations}
       value={value}
       // withOptionPlaceholder={withOptionPlaceholder}
     />
