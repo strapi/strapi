@@ -18,9 +18,6 @@ import {
 
 const initialState = fromJS({
   formattedContentTypeLayout: [],
-  isLoading: true,
-  initialData: {},
-  modifiedData: {},
 });
 
 // const getMax = arr => {
@@ -33,11 +30,9 @@ const initialState = fromJS({
 const reducer = (state, action) => {
   switch (action.type) {
     case 'SET_LAYOUT_DATA':
-      return state
-        .update('formattedContentTypeLayout', () =>
-          fromJS(action.formattedContentTypeLayout)
-        )
-        .update('isLoading', () => false);
+      return state.update('formattedContentTypeLayout', () =>
+        fromJS(action.formattedContentTypeLayout)
+      );
     case 'RESET_PROPS':
       return initialState;
     default:

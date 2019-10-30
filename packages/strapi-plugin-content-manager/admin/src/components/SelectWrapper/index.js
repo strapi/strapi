@@ -3,11 +3,12 @@ import React, { useState, useEffect, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
-import { isArray, isEmpty } from 'lodash';
+import { get, isArray, isEmpty } from 'lodash';
 import { request } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
-import { useEditView } from '../../contexts/EditView';
+import useDataManager from '../../hooks/useDataManager';
+// import useEditViewDataManager from '../../containers/EditViewDataManagerProvider/useEditViewDataManager';
 
 import SelectOne from '../SelectOne';
 import SelectMany from '../SelectMany';
@@ -23,11 +24,16 @@ function SelectWrapper({
   targetModel,
   placeholder,
   plugin,
-  value,
 }) {
   const { pathname, search } = useLocation();
-  const { addRelation, moveRelation, onChange, onRemove } = useEditView();
-
+  const {
+    addRelation,
+    modifiedData,
+    moveRelation,
+    onChange,
+    onRemove,
+  } = useDataManager();
+  const value = get(modifiedData, name, null);
   const source = isEmpty(plugin) ? 'content-manager' : plugin;
   const [state, setState] = useState({
     _q: '',
