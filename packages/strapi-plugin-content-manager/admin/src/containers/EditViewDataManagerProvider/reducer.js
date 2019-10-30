@@ -32,8 +32,8 @@ const reducer = (state, action) => {
         .update('initialData', () => fromJS(action.data))
         .update('modifiedData', () => fromJS(action.data))
         .update('isLoading', () => false);
-    case 'IS_SUBMITING':
-      return state.update('shouldShowLoadingState', () => true);
+    case 'IS_SUBMITTING':
+      return state.update('shouldShowLoadingState', () => action.value);
     case 'MOVE_FIELD':
       return state.updateIn(['modifiedData', ...action.keys], list => {
         return list
@@ -60,6 +60,11 @@ const reducer = (state, action) => {
     }
     case 'REMOVE_RELATION':
       return state.removeIn(['modifiedData', ...action.keys.split('.')]);
+    case 'RESET_DATA':
+      return state
+        .update('modifiedData', () => state.get('initialData'))
+        .update('formErrors', () => fromJS({}));
+
     case 'RESET_PROPS':
       return initialState;
     case 'SUBMIT_ERRORS':

@@ -15,7 +15,12 @@ import reducer, { initialState } from './reducer';
 
 const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 
-const EditViewDataManagerProvider = ({ allLayoutData, children, slug }) => {
+const EditViewDataManagerProvider = ({
+  allLayoutData,
+  children,
+  redirectToPreviousPage,
+  slug,
+}) => {
   const { id } = useParams();
   // Retrieve the search
   const { search } = useLocation();
@@ -105,7 +110,7 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, slug }) => {
       // Validate the form using yup
       await schema.validate(modifiedData, { abortEarly: false });
       // Set the loading state in the plugin header
-      dispatch({ type: 'IS_SUBMITING' });
+      setIsSubmitting();
     } catch (err) {
       const errors = get(err, 'inner', []).reduce((acc, curr) => {
         acc[
@@ -145,6 +150,10 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, slug }) => {
     });
   };
 
+  const setIsSubmitting = (value = true) => {
+    dispatch({ type: 'IS_SUBMITTING', value });
+  };
+
   const showLoader = !isCreatingEntry && isLoading;
 
   return (
@@ -158,7 +167,16 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, slug }) => {
         moveRelation,
         onChange: handleChange,
         onRemoveRelation,
+        redirectToPreviousPage,
+        resetData: () => {
+          dispatch({
+            type: 'RESET_DATA',
+          });
+        },
+        setIsSubmitting,
         shouldShowLoadingState,
+        slug,
+        source,
       }}
     >
       {showLoader ? (
@@ -170,10 +188,14 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, slug }) => {
   );
 };
 
-EditViewDataManagerProvider.defaultProps = {};
+EditViewDataManagerProvider.defaultProps = {
+  redirectToPreviousPage: () => {},
+};
+
 EditViewDataManagerProvider.propTypes = {
   allLayoutData: PropTypes.object.isRequired,
   children: PropTypes.node.isRequired,
+  redirectToPreviousPage: PropTypes.func,
   slug: PropTypes.string.isRequired,
 };
 

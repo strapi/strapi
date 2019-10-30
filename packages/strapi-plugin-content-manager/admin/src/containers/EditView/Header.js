@@ -3,18 +3,32 @@ import { useParams } from 'react-router-dom';
 import {
   PluginHeader,
   PopUpWarning,
+  request,
   templateObject,
 } from 'strapi-helper-plugin';
 import { get } from 'lodash';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 
+const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
+
 const Header = () => {
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningDelete, setWarningDelete] = useState(false);
 
   const { id } = useParams();
-  const { initialData, layout, shouldShowLoadingState } = useDataManager();
+  const {
+    initialData,
+    layout,
+    redirectToPreviousPage,
+    resetData,
+    setIsSubmitting,
+    shouldShowLoadingState,
+    slug,
+    source,
+  } = useDataManager();
+
+  console.log({ slug });
 
   const currentContentTypeMainField = get(
     layout,
@@ -31,15 +45,26 @@ const Header = () => {
   const toggleWarningDelete = () => setWarningDelete(prevState => !prevState);
 
   const handleConfirmReset = () => {
-    console.log('WILL RESET DATA');
     toggleWarningCancel();
+    resetData();
   };
   const handleConfirmDelete = async () => {
-    console.log('WILL DELETE ENTRY');
     toggleWarningDelete();
-  };
+    setIsSubmitting();
 
-  console.log({ shouldShowLoadingState });
+    try {
+      await request(getRequestUrl(`${slug}/${id}`), {
+        method: 'DELETE',
+        params: { source },
+      });
+
+      strapi.notification.success(`${pluginId}.success.record.delete`);
+      redirectToPreviousPage();
+    } catch (err) {
+      setIsSubmitting(false);
+      strapi.notification.error(`${pluginId}.error.record.delete`);
+    }
+  };
 
   return (
     <>

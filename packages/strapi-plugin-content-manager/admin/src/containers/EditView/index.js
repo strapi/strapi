@@ -3,7 +3,6 @@ import React, {
   useCallback,
   useMemo,
   useEffect,
-  // useState,
   useReducer,
   useRef,
 } from 'react';
@@ -24,13 +23,8 @@ import Header from './Header';
 import getInjectedComponents from './utils/getComponents';
 import init from './init';
 import reducer, { initialState } from './reducer';
-import {
-  LinkWrapper,
-  // MainWrapper,
-  SubWrapper,
-} from './components';
+import { LinkWrapper, SubWrapper } from './components';
 import createAttributesLayout from './utils/createAttributesLayout';
-// const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 
 const EditView = ({
   currentEnvironment,
@@ -114,7 +108,11 @@ const EditView = ({
 
   return (
     <EditViewProvider layout={currentContentTypeLayoutData}>
-      <EditViewDataManagerProvider allLayoutData={allLayoutData} slug={slug}>
+      <EditViewDataManagerProvider
+        allLayoutData={allLayoutData}
+        redirectToPreviousPage={redirectToPreviousPage}
+        slug={slug}
+      >
         <BackHeader onClick={() => redirectToPreviousPage()} />
         <Container className="container-fluid">
           <Header />
@@ -137,6 +135,17 @@ const EditView = ({
                       return (
                         <div className="row" key={fieldsBlockIndex}>
                           {fieldsBlock.map(({ name, size }, fieldIndex) => {
+                            const isComponent =
+                              getFieldType(name) === 'component';
+
+                            if (isComponent) {
+                              return (
+                                <div className={`col-${size}`} key={name}>
+                                  COMPONENT: {name}
+                                </div>
+                              );
+                            }
+
                             return (
                               <div className={`col-${size}`} key={name}>
                                 <Inputs
