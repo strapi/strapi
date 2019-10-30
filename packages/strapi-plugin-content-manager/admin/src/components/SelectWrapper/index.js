@@ -5,10 +5,8 @@ import { FormattedMessage } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 import { get, isArray, isEmpty } from 'lodash';
 import { request } from 'strapi-helper-plugin';
-
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
-// import useEditViewDataManager from '../../containers/EditViewDataManagerProvider/useEditViewDataManager';
 
 import SelectOne from '../SelectOne';
 import SelectMany from '../SelectMany';
@@ -31,7 +29,7 @@ function SelectWrapper({
     modifiedData,
     moveRelation,
     onChange,
-    onRemove,
+    onRemoveRelation,
   } = useDataManager();
   const value = get(modifiedData, name, null);
   const source = isEmpty(plugin) ? 'content-manager' : plugin;
@@ -199,7 +197,7 @@ function SelectWrapper({
           setState(prevState => ({ ...prevState, _q: '', _start: 0 }));
         }}
         onMenuScrollToBottom={onMenuScrollToBottom}
-        onRemove={onRemove}
+        onRemove={onRemoveRelation}
         placeholder={
           isEmpty(placeholder) ? (
             <FormattedMessage id={`${pluginId}.containers.Edit.addAnItem`} />
@@ -222,7 +220,6 @@ SelectWrapper.defaultProps = {
   label: '',
   plugin: '',
   placeholder: '',
-  value: null,
 };
 
 SelectWrapper.propTypes = {
@@ -235,7 +232,6 @@ SelectWrapper.propTypes = {
   plugin: PropTypes.string,
   relationType: PropTypes.string.isRequired,
   targetModel: PropTypes.string.isRequired,
-  value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
 };
 
 export default memo(SelectWrapper);
