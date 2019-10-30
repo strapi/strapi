@@ -88,16 +88,7 @@ yarn develop
 
 The server (API) is available at http://localhost:1337
 
-**WARNING** ⚠️ If you've followed the recommended setup, you should not be able to reach the administration panel at http://localhost:1337/admin.
-
-**Start the administration panel server**
-
-```bash
-cd strapi/packages/strapi-admin
-yarn develop
-```
-
-The administration panel is available at http://localhost:4000/admin
+The administration panel is available at http://localhost:1337/admin
 
 **Awesome! You are now able to contribute to Strapi.**
 
