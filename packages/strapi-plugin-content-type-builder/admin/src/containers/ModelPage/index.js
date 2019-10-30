@@ -12,6 +12,11 @@ import { FormattedMessage } from 'react-intl';
 import { Redirect } from 'react-router-dom';
 import { get, isEqual, pickBy } from 'lodash';
 import { Prompt } from 'react-router';
+import {
+  PluginHeader,
+  PluginHeaderActions,
+  PluginHeaderTitle,
+} from '@buffetjs/core';
 
 import {
   Button,
@@ -30,9 +35,6 @@ import {
 import pluginId from '../../pluginId';
 
 import ListRowCollapse from '../../components/ListRowCollapse';
-import PluginHeader from '../../components/PluginHeader';
-import PluginHeaderTitle from '../../components/PluginHeaderTitle';
-import PluginHeaderActions from '../../components/PluginHeaderActions';
 
 import AttributeForm from '../AttributeForm';
 import AttributesModalPicker from '../AttributesPickerModal';
@@ -216,13 +218,13 @@ export class ModelPage extends React.Component {
     if (shouldShowActions) {
       return [
         {
-          title: `${pluginId}.form.button.cancel`,
+          title: <FormattedMessage id={`${pluginId}.form.button.cancel`} />,
           onClick: handleCancel,
-          color: 'secondary',
+          color: 'cancel',
           type: 'button',
         },
         {
-          title: `${pluginId}.form.button.save`,
+          title: <FormattedMessage id={`${pluginId}.form.button.save`} />,
           onClick: handleSubmit,
           color: 'success',
           type: 'submit',
@@ -622,14 +624,7 @@ export class ModelPage extends React.Component {
             />
           )}
         </FormattedMessage>
-        <ViewContainer
-          {...this.props}
-          featureType={this.featureType}
-          headerTitle={this.getPluginHeaderTitle()}
-          headerDescription={this.getModelDescription()}
-          pluginHeaderActions={this.getPluginHeaderActions()}
-          onClickIcon={this.handleClickEditModelMainInfos}
-        >
+        <ViewContainer {...this.props} featureType={this.featureType}>
           <PluginHeader {...pluginHeaderProps} />
 
           {attributesNumber === 0 ? (

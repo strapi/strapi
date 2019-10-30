@@ -7,6 +7,11 @@ import { bindActionCreators, compose } from 'redux';
 import { get, isEqual } from 'lodash';
 import { Prompt } from 'react-router';
 import { GlobalContext } from 'strapi-helper-plugin';
+import {
+  PluginHeader,
+  PluginHeaderActions,
+  PluginHeaderTitle,
+} from '@buffetjs/core';
 
 import pluginId from '../../pluginId';
 
@@ -219,15 +224,15 @@ export class GroupPage extends React.Component {
     if (shouldShowActions) {
       return [
         {
-          label: `${pluginId}.form.button.cancel`,
+          title: <FormattedMessage id={`${pluginId}.form.button.cancel`} />,
           onClick: handleCancel,
-          kind: 'secondary',
+          color: 'cancel',
           type: 'button',
         },
         {
-          label: `${pluginId}.form.button.save`,
+          title: <FormattedMessage id={`${pluginId}.form.button.save`} />,
           onClick: handleSubmit,
-          kind: 'primary',
+          color: 'success',
           type: 'submit',
           id: 'saveData',
         },
@@ -463,6 +468,18 @@ export class GroupPage extends React.Component {
     );
   };
 
+  getDescription = () => {
+    const description = this.getFeatureHeaderDescription();
+    const { id } = description;
+
+    return id ? <FormattedMessage id={id} /> : <span>{description}</span>;
+  };
+
+  getCTA = () =>
+    !this.getSource()
+      ? { icon: 'fa fa-pencil', onClick: this.openEditFeatureModal }
+      : null;
+
   render() {
     const {
       canOpenModal,
@@ -520,6 +537,19 @@ export class GroupPage extends React.Component {
       onClick: () => this.openAttributesModal(),
     };
 
+    const pluginHeaderProps = {
+      title: (
+        <PluginHeaderTitle
+          title={this.getFeatureDisplayName()}
+          cta={this.getCTA()}
+        />
+      ),
+      content: <p>{this.getDescription()}</p>,
+      callToAction: (
+        <PluginHeaderActions actions={this.getPluginHeaderActions()} />
+      ),
+    };
+
     return (
       <>
         <FormattedMessage id={`${pluginId}.prompt.content.unsaved`}>
@@ -538,6 +568,8 @@ export class GroupPage extends React.Component {
           pluginHeaderActions={this.getPluginHeaderActions()}
           onClickIcon={this.openEditFeatureModal}
         >
+          <PluginHeader {...pluginHeaderProps} />
+
           {attributesNumber === 0 ? (
             <EmptyAttributesBlock
               description={`${pluginId}.home.emptyAttributes.description.${this.featureType}`}
