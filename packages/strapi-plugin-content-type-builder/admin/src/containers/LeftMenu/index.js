@@ -25,55 +25,6 @@ const displayNotificationCTNotSaved = () => {
 function LeftMenu() {
   const { canOpenModal, groups, models, push } = useContext(MenuContext);
 
-  const getData = () => {
-    const data = [
-      {
-        name: 'models',
-        title: {
-          id: `${pluginId}.menu.section.models.name.`,
-        },
-        searchable: true,
-        customLink: {
-          Component: CustomLink,
-          componentProps: {
-            id: `${pluginId}.button.model.create`,
-            onClick: () => openCreateModal('model'),
-          },
-        },
-        links: getModels(),
-      },
-      {
-        name: 'components',
-        title: {
-          id: `${pluginId}.menu.section.components.name.`,
-        },
-        searchable: true,
-        customLink: {
-          Component: CustomLink,
-          componentProps: {
-            id: `${pluginId}.button.component.create`,
-            onClick: () => openCreateModal('group'),
-          },
-        },
-        links: getComponents(),
-      },
-    ];
-
-    return data;
-  };
-
-  const getModels = () => {
-    return [
-      ...models.map(model => {
-        return {
-          ...model,
-          to: getLinkRoute('models', model),
-          title: getLinkTitle(model),
-        };
-      }),
-    ];
-  };
-
   const getComponents = () => {
     // TODO : Replace groupsBy param with category when available
     const componentsObj = groupBy(groups, 'uid');
@@ -127,9 +78,52 @@ function LeftMenu() {
     }
   };
 
+  const getModels = [
+    ...models.map(model => {
+      return {
+        ...model,
+        to: getLinkRoute('models', model),
+        title: getLinkTitle(model),
+      };
+    }),
+  ];
+
+  const data = [
+    {
+      name: 'models',
+      title: {
+        id: `${pluginId}.menu.section.models.name.`,
+      },
+      searchable: true,
+      customLink: {
+        Component: CustomLink,
+        componentProps: {
+          id: `${pluginId}.button.model.create`,
+          onClick: () => openCreateModal('model'),
+        },
+      },
+      links: getModels,
+    },
+    {
+      name: 'components',
+      title: {
+        id: `${pluginId}.menu.section.components.name.`,
+      },
+      searchable: true,
+      customLink: {
+        Component: CustomLink,
+        componentProps: {
+          id: `${pluginId}.button.component.create`,
+          onClick: () => openCreateModal('group'),
+        },
+      },
+      links: getComponents(),
+    },
+  ];
+
   return (
     <Wrapper className="col-md-3">
-      {getData().map(list => {
+      {data.map(list => {
         return <LeftMenuList {...list} key={list.name}></LeftMenuList>;
       })}
     </Wrapper>

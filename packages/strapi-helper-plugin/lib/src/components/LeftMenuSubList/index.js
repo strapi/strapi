@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-
+import PropTypes from 'prop-types';
 import { Collapse } from 'reactstrap';
 
 import Dropdown from './Dropdown';
 import LeftMenuLink from '../LeftMenuLink';
 
-const LeftMenuSubList = ({ name, links, isFiltered, isFirstItem }) => {
-  const [collapse, setCollapse] = useState(isFiltered || isFirstItem);
+const LeftMenuSubList = ({ name, links, isSearching, isFirstItem }) => {
+  const [collapse, setCollapse] = useState(isSearching || isFirstItem);
   const [filtered, setFiltered] = useState(collapse);
 
   const toggle = () => {
@@ -17,21 +17,13 @@ const LeftMenuSubList = ({ name, links, isFiltered, isFirstItem }) => {
     setFiltered(collapse);
   }, [collapse]);
 
-  useEffect(() => {
-    if (isFiltered === true) {
-      setFiltered(isFiltered);
-    } else {
-      setFiltered(collapse);
-    }
-  }, [isFiltered, collapse]);
-
   return (
     links.length > 0 && (
       <Dropdown>
         <button onClick={toggle} className={filtered ? 'is-open' : ''}>
           {name}
         </button>
-        <Collapse isOpen={filtered}>
+        <Collapse isOpen={filtered || isSearching}>
           <ul>
             {links.map(link => {
               const { name, title } = link;
@@ -46,6 +38,20 @@ const LeftMenuSubList = ({ name, links, isFiltered, isFirstItem }) => {
       </Dropdown>
     )
   );
+};
+
+LeftMenuSubList.defaultProps = {
+  name: null,
+  links: [],
+  isSearching: false,
+  isFirstItem: false,
+};
+
+LeftMenuSubList.propTypes = {
+  name: PropTypes.string,
+  links: PropTypes.array,
+  isSearching: PropTypes.bool,
+  isFirstItem: PropTypes.bool,
 };
 
 export default LeftMenuSubList;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { createRef, isValidElement, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty } from 'lodash';
@@ -14,26 +14,43 @@ import LeftMenuSubList from '../LeftMenuSubList';
 function LeftMenuList({ customLink, links, title }) {
   const [search, setSearch] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const ref = createRef();
 
-  const { Component, componentProps } = customLink;
+  useEffect(() => {
+    if (showSearch && ref.current) {
+      ref.current.focus();
+    }
+  }, [ref, showSearch]);
+
+  const { Component, componentProps } = customLink || {
+    Component: null,
+    componentProps: {},
+  };
 
   const toggleSearch = () => setShowSearch(!showSearch);
 
-  const handleChange = ({ target: { value } }) => {
-    setSearch(value);
+  const handleClose = () => {
+    clearSearch();
+    toggleSearch();
   };
 
   const clearSearch = () => {
     setSearch('');
   };
 
-  const hasChildObject = () => {
-    return links.find(obj => obj.links);
+  const handleChange = ({ target: { value } }) => {
+    setSearch(value);
   };
 
-  const handleClose = () => {
-    clearSearch();
-    toggleSearch();
+  const hasChildObject = () => links.some(link => !isEmpty(link.links));
+
+  const getCount = () => {
+    if (hasChildObject()) {
+      return links.reduce((acc, current) => {
+        return acc + current.links.length;
+      }, 0);
+    }
+    return links.length;
   };
 
   const getList = () => {
@@ -48,15 +65,6 @@ function LeftMenuList({ customLink, links, title }) {
     return matchSorter(links, search, { keys: ['name'] });
   };
 
-  const getCount = () => {
-    if (hasChildObject()) {
-      return links.reduce((acc, current) => {
-        return acc + current.links.length;
-      }, 0);
-    }
-    return links.length;
-  };
-
   const getTitle = () =>
     getCount() > 1 ? `${title.id}plural` : `${title.id}singular`;
 
@@ -64,13 +72,13 @@ function LeftMenuList({ customLink, links, title }) {
     const { links, name, title } = link;
 
     if (links) {
-      const isFiltered = !isEmpty(search) ? true : false;
+      const isSearching = !isEmpty(search);
 
       return (
         <LeftMenuSubList
           key={name}
           {...link}
-          isFiltered={isFiltered}
+          isSearching={isSearching}
           isFirstItem={i === 0}
         />
       );
@@ -101,6 +109,7 @@ function LeftMenuList({ customLink, links, title }) {
             <i className="fa fa-search"></i>
             <button onClick={toggleSearch}></button>
             <Search
+              ref={ref}
               onChange={handleChange}
               value={search}
               placeholder="search…"
@@ -113,20 +122,16 @@ function LeftMenuList({ customLink, links, title }) {
       </div>
       <div>
         <List>{getList().map((link, i) => renderCompo(link, i))}</List>
-        <Component {...componentProps} />
+        {Component && isValidElement(<Component />) && (
+          <Component {...componentProps} />
+        )}
       </div>
     </Wrapper>
   );
 }
 
 LeftMenuList.defaultProps = {
-  customLink: {
-    Component: null,
-    componentProps: {
-      id: null,
-      onClick: () => {},
-    },
-  },
+  customLink: null,
   links: [],
   title: 'models',
 };
