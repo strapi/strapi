@@ -61,6 +61,7 @@ function SelectWrapper({
         params: params,
         signal,
       });
+
       const formattedData = data.map(obj => {
         return { value: obj, label: obj[mainField] };
       });
