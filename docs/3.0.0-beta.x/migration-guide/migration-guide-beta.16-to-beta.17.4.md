@@ -4,7 +4,7 @@ Upgrading your Strapi application to `v3.0.0-beta.17.4`.
 
 ## Upgrading your dependencies
 
-Start by upgrading your dependencies. Make sur to use exact versions.
+Start by upgrading your dependencies. Make sure to use exact versions.
 
 ::: danger
 `strapi-plugin-settings-manager` has been deprecated. you need to remove it from your `package.json`.
