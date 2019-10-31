@@ -6,24 +6,28 @@ import Dropdown from './Dropdown';
 import LeftMenuLink from '../LeftMenuLink';
 
 const LeftMenuSubList = ({ name, links, isSearching, isFirstItem }) => {
-  const [collapse, setCollapse] = useState(isSearching || isFirstItem);
-  const [filtered, setFiltered] = useState(collapse);
+  const [collapse, setCollapse] = useState(isFirstItem);
 
   const toggle = () => {
     setCollapse(!collapse);
   };
 
   useEffect(() => {
-    setFiltered(collapse);
-  }, [collapse]);
+    if (isSearching) {
+      setCollapse(true);
+    } else {
+      setCollapse(isFirstItem);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSearching]);
 
   return (
     links.length > 0 && (
       <Dropdown>
-        <button onClick={toggle} className={filtered ? 'is-open' : ''}>
+        <button onClick={toggle} className={collapse ? 'is-open' : ''}>
           {name}
         </button>
-        <Collapse isOpen={filtered || isSearching}>
+        <Collapse isOpen={collapse}>
           <ul>
             {links.map(link => {
               const { name, title } = link;
