@@ -158,7 +158,7 @@ Amazon calls a virtual private server, a **virtual server** or **Amazon EC2 inst
 
 #### 1. From your **AWS Management Console** and as your **_regular_** user
 
-- `Find Services`, seach for `ec2` and click on `EC2, Virtual Servers in the Cloud`
+- `Find Services`, search for `ec2` and click on `EC2, Virtual Servers in the Cloud`
 
 #### 2. **Select Appropriate Region**
 
