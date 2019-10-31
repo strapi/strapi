@@ -20,28 +20,28 @@ module.exports = {
   targets: {
     // Use the default `controller` file as a template for
     // every generated controller.
-    ':folderPrefix/:folderName/controllers/:filename': {
+    ':filePath/controllers/:filename': {
       template: 'controller.template',
     },
 
     // every generated controller.
-    ':folderPrefix/:folderName/services/:filename': {
+    ':filePath/services/:filename': {
       template: 'service.template',
     },
 
     // Copy an empty JavaScript model where every functions will be.
-    ':folderPrefix/:folderName/models/:filename': {
+    ':filePath/models/:filename': {
       template: 'model.template',
     },
 
     // Copy the generated JSON model for the connection,
     // schema and attributes.
-    ':folderPrefix/:folderName/models/:filenameSettings': {
+    ':filePath/models/:filenameSettings': {
       template: 'model.settings.template',
     },
 
     // Generate routes.
-    ':folderPrefix/:folderName/config/routes.json': {
+    ':filePath/config/routes.json': {
       jsonfile: routesJSON,
     },
   },

@@ -1,0 +1,14 @@
+{
+  "connection": "default",
+  "collectionName": "blog_posts",
+  "info": {
+    "name": "blog post",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "comment": ""
+  },
+  "attributes": {}
+}

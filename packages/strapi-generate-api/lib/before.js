@@ -11,9 +11,6 @@ const path = require('path');
 // Public node modules.
 const _ = require('lodash');
 const pluralize = require('pluralize');
-const slugify = require('@sindresorhus/slugify');
-
-const toSlug = str => slugify(str, { separator: '-' });
 
 /**
  * This `before` function is run before generating targets.
@@ -28,32 +25,38 @@ module.exports = (scope, cb) => {
     return cb.invalid('Usage: `$ strapi generate:api apiName`');
   }
 
-  // Check `api` and `plugin` parameters
-  const parent = scope.args.api || scope.args.plugin;
-
   // Format `id`.
-  const name = toSlug(scope.id);
+  const name = _.trim(_.camelCase(scope.id));
   const environment = process.env.NODE_ENV || 'development';
 
   // `scope.args` are the raw command line arguments.
   _.defaults(scope, {
-    idPluralized: pluralize(name),
-    parentId: _.isEmpty(parent) ? undefined : _.trim(_.deburr(parent)),
-    globalID: name,
+    name,
+    route: _.kebabCase(pluralize(scope.id)),
   });
+
+  let filePath;
+  if (scope.args.api) {
+    filePath = `./api/${scope.args.api}`;
+  } else if (scope.args.plugin) {
+    filePath = `./plugins/${scope.args.plugin}`;
+  } else if (scope.args.extend) {
+    filePath = `./extensions/${scope.args.extend}`;
+  } else {
+    filePath = `./api/${name}`;
+  }
 
   // Take another pass to take advantage of the defaults absorbed in previous passes.
   _.defaults(scope, {
     filename: `${name}.js`,
     filenameSettings: `${name}.settings.json`,
-    folderPrefix: !scope.args.api && scope.args.plugin ? 'extensions' : 'api',
-    folderName: scope.parentId || name,
+    filePath,
   });
 
   // Humanize output.
   _.defaults(scope, {
-    humanizeId: _.camelCase(scope.id).toLowerCase(),
-    humanizedPath: `./${scope.folderPrefix}/${scope.folderName}`,
+    humanizeId: name,
+    humanizedPath: filePath,
   });
 
   // Validate optional attribute arguments.
@@ -115,7 +118,7 @@ module.exports = (scope, cb) => {
   // Set collectionName
   scope.collectionName = _.has(scope.args, 'collectionName')
     ? scope.args.collectionName
-    : pluralize(name);
+    : _.snakeCase(pluralize(name));
 
   // Set description
   scope.description = _.has(scope.args, 'description')
@@ -147,7 +150,7 @@ module.exports = (scope, cb) => {
       connection: scope.connection,
       collectionName: scope.collectionName,
       info: {
-        name: scope.args.name || scope.id,
+        name: scope.args.displayName || scope.id,
         description: scope.description,
       },
       options: {

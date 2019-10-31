@@ -119,8 +119,9 @@ program
 // `$ strapi generate:api`
 program
   .command('generate:api <id> [attributes...]')
-  .option('-a, --api <api>', 'API name to generate a sub API')
-  .option('-p, --plugin <api>', 'plugin name')
+  .option('-a, --api <api>', 'API name to generate the files in')
+  .option('-p, --plugin <api>', 'Name of the local plugin')
+  .option('-e, --extend <api>', 'Name of the plugin to extend')
   .option('-c, --connection <connection>', 'The name of the connection to use')
   .description('generate a basic API')
   .action((id, attributes, cliArguments) => {
@@ -131,9 +132,9 @@ program
 // `$ strapi generate:controller`
 program
   .command('generate:controller <id>')
-  .option('-a, --api <api>', 'API name to generate a sub API')
-  .option('-p, --plugin <api>', 'plugin name')
-  .option('-t, --tpl <template>', 'template name')
+  .option('-a, --api <api>', 'API name to generate the files in')
+  .option('-p, --plugin <api>', 'Name of the local plugin')
+  .option('-e, --extend <api>', 'Name of the plugin to extend')
   .description('generate a controller for an API')
   .action(getLocalScript('generate'));
 
