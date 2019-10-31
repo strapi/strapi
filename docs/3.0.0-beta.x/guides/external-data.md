@@ -1,14 +1,14 @@
 # Fetching external data
 
-This guide will explain how to fetch data in an external service and use it in your app.
+This guide explains how to fetch data from an external service to use it in your app.
 
-In this example we will see how to daily fetch Docker pull count and store it in database.
+In this example we will see how to daily fetch Docker pull count to store the result in your database.
 
 ## Content Type settings
 
-First we will have to create a Content Type. Let say the Content Type name will be `hit` and will have a `date` and a `count` attributes.
+First, we need to create a Content Type, in this example we will call it `hit` with a `date` and `count` attribute.
 
-Your content type will look like this:
+Your Content Type should look like this:
 
 **Path —** `./api/hit/models/Hit.settings.json`
 
@@ -54,11 +54,11 @@ module.exports = async () => {
 };
 ```
 
-Here in `data` we recieve all the data from the API. We will be interested by adding in our database the `pull_count` value.
+`data` contains all the data received from the Docker Hub API. What we want here is to add the `pull_count` value in your database.
 
 ## Create a `hit` entry
 
-Now let's create the entry programatically.
+let's programmatically create the entry.
 
 **Path —** `./config/functions/docker.js`
 
@@ -77,13 +77,13 @@ module.exports = async () => {
 };
 ```
 
-With this code, everytime this function will be called, that will fetch the `strapi/strapi` docker repo data and insert in the Strapi database the current pull count with the current date.
+With this code, everytime this function is called it will fetch the docker repo's data and insert the current `pull_count` with the corresponding date in your Strapi database.
 
 ## Call the function
 
 Here is how to call the function in your application `strapi.config.functions.docker()`
 
-So lets execute this function everyday at 2am. For this we will use a [CRON tasks](../concepts/configurations.md#cron-tasks).
+So let's execute this function everyday at 2am. For this we will use a [CRON tasks](../concepts/configurations.md#cron-tasks).
 
 **Path —** `./config/functions/cron.js`
 
