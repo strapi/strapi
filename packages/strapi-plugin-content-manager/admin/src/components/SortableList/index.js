@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { useLayoutDnd } from '../../contexts/LayoutDnd';
+import useLayoutDnd from '../../hooks/useLayoutDnd';
 
 import Add from '../AddDropdown';
 import SortWrapper from '../SortWrapper';

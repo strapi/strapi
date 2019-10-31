@@ -4,7 +4,7 @@ import { FormattedMessage } from 'react-intl';
 import { get, size } from 'lodash';
 
 import pluginId from '../../pluginId';
-import { useEditView } from '../../contexts/EditView';
+import useEditView from '../../hooks/useEditView';
 import Button from './Button';
 import ComponentCollapse from './ComponentCollapse';
 import EmptyComponent from './EmptyComponent';

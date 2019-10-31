@@ -19,7 +19,6 @@ import {
 import { Inputs as Input } from '@buffetjs/custom';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
-import { LayoutDndProvider } from '../../contexts/LayoutDnd';
 import getRequestUrl from '../../utils/getRequestUrl';
 import FieldsReorder from '../../components/FieldsReorder';
 import FormTitle from '../../components/FormTitle';
@@ -28,6 +27,7 @@ import PopupForm from '../../components/PopupForm';
 import SettingsViewWrapper from '../../components/SettingsViewWrapper';
 import SortableList from '../../components/SortableList';
 import { unformatLayout } from '../../utils/layout';
+import LayoutDndProvider from '../LayoutDndProvider';
 import getInputProps from './utils/getInputProps';
 
 import reducer, { initialState } from './reducer';

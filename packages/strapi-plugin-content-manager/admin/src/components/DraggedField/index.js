@@ -5,7 +5,7 @@ import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Grab, GrabLarge, Pencil, Remove } from '@buffetjs/icons';
 import pluginId from '../../pluginId';
-import { useLayoutDnd } from '../../contexts/LayoutDnd';
+import useLayoutDnd from '../../hooks/useLayoutDnd';
 import GrabWrapper from './GrabWrapper';
 import Link from './Link';
 import NameWrapper from './NameWrapper';

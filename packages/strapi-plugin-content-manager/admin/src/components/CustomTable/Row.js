@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { get, isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import moment from 'moment';
 import { IcoContainer } from 'strapi-helper-plugin';
-import { useListView } from '../../contexts/ListView';
+import useListView from '../../hooks/useListView';
 
 import CustomInputCheckbox from '../CustomInputCheckbox';
 import MediaPreviewList from '../MediaPreviewList';

@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 
-import { useListView } from '../../contexts/ListView';
+import useListView from '../../hooks/useListView';
 import CustomInputCheckbox from '../CustomInputCheckbox';
 import { Icon, Thead } from './styledComponents';
 

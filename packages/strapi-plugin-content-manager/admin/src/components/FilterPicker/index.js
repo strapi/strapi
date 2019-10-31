@@ -7,7 +7,7 @@ import { FormattedMessage } from 'react-intl';
 import { PluginHeader } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
-import { useListView } from '../../contexts/ListView';
+import useListView from '../../hooks/useListView';
 import Container from '../Container';
 
 import getFilterType from '../FilterPickerOption/utils';

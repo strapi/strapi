@@ -2,7 +2,7 @@ import React, { memo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 
-import { useLayoutDnd } from '../../contexts/LayoutDnd';
+import useLayoutDnd from '../../hooks/useLayoutDnd';
 
 import Add from '../AddDropdown';
 import SortWrapper from '../SortWrapper';

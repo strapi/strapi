@@ -4,7 +4,7 @@ import { withRouter } from 'react-router';
 import { FormattedMessage } from 'react-intl';
 import { upperFirst } from 'lodash';
 import pluginId from '../../pluginId';
-import { useListView } from '../../contexts/ListView';
+import useListView from '../../hooks/useListView';
 import TableHeader from './TableHeader';
 import { Table, TableEmpty, TableRow } from './styledComponents';
 import ActionCollapse from './ActionCollapse';

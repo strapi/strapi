@@ -1,9 +1,8 @@
-import React, { createContext, useContext } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
+import LayoutDndContext from '../../contexts/LayoutDnd';
 
-const LayoutDndContext = createContext();
-
-export function LayoutDndProvider({
+function LayoutDndProvider({
   attributes,
   buttonData,
   children,
@@ -42,10 +41,6 @@ export function LayoutDndProvider({
   );
 }
 
-export function useLayoutDnd() {
-  return useContext(LayoutDndContext);
-}
-
 LayoutDndProvider.defaultProps = {
   attributes: {},
   buttonData: [],
@@ -78,3 +73,5 @@ LayoutDndProvider.propTypes = {
   selectedItemName: PropTypes.string,
   setEditFieldToSelect: PropTypes.func,
 };
+
+export default LayoutDndProvider;

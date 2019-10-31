@@ -3,7 +3,7 @@ import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { useLayoutDnd } from '../../contexts/LayoutDnd';
+import useLayoutDnd from '../../hooks/useLayoutDnd';
 
 import DraggedFieldWithPreview from '../DraggedFieldWithPreview';
 

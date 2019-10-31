@@ -10,7 +10,6 @@ import {
   getQueryParameters,
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
-import { ListViewProvider } from '../../contexts/ListView';
 import DisplayedFieldsDropdown from '../../components/DisplayedFieldsDropdown';
 import FilterLogo from '../../assets/images/icon_filter.png';
 import Container from '../../components/Container';
@@ -21,6 +20,7 @@ import {
   generateFiltersFromSearch,
   generateSearchFromFilters,
 } from '../../utils/search';
+import ListViewProvider from '../ListViewProvider';
 import { onChangeListLabels, resetListLabels } from '../Main/actions';
 import { AddFilterCta, Img, Wrapper } from './components';
 import Filter from './Filter';
