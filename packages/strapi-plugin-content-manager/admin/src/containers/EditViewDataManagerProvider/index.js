@@ -160,6 +160,7 @@ const EditViewDataManagerProvider = ({
     <EditViewDataManagerContext.Provider
       value={{
         addRelation,
+        allLayoutData,
         formErrors,
         initialData,
         layout: currentContentTypeLayout,
