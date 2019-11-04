@@ -7,6 +7,7 @@ import { Inputs as InputsIndex } from '@buffetjs/custom';
 
 import useDataManager from '../../hooks/useDataManager';
 import InputJSONWithErrors from '../InputJSONWithErrors';
+import SelectWrapper from '../SelectWrapper';
 import WysiwygWithErrors from '../WysiwygWithErrors';
 
 const getInputType = (type = '') => {
@@ -98,6 +99,21 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
 
   // TODO format error for the JSON, the WYSIWYG and also the file inputs
   // TODO check if the height for the textarea is 196px (not mandatory)
+
+  if (type === 'relation') {
+    return (
+      <div className="col-6" key={keys}>
+        <SelectWrapper
+          {...metadatas}
+          name={keys}
+          plugin={attribute.plugin}
+          relationType={attribute.relationType}
+          targetModel={attribute.targetModel}
+          value={get(modifiedData, keys)}
+        />
+      </div>
+    );
+  }
 
   return (
     <FormattedMessage id={errorId}>

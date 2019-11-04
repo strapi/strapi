@@ -7,7 +7,8 @@
   "collectionName": "components_dishes",
   "attributes": {
     "name": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "description": {
       "type": "text"

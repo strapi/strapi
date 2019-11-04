@@ -210,7 +210,7 @@ WysiwygWithErrors.propTypes = {
   style: PropTypes.object,
   tabIndex: PropTypes.string,
   validations: PropTypes.object,
-  value: PropTypes.string.isRequired,
+  value: PropTypes.string,
 };
 
 export default WysiwygWithErrors;
