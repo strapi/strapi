@@ -168,9 +168,7 @@ async function writeSchema({ uid, schema }) {
   const [category, filename] = uid.split('.');
   const categoryDir = path.join(strapi.dir, 'components', category);
 
-  if (!(await fse.pathExists(categoryDir))) {
-    await fse.ensureDir(categoryDir);
-  }
+  await fse.ensureDir(categoryDir);
 
   const filepath = path.join(categoryDir, `${filename}.json`);
   await fse.writeFile(filepath, JSON.stringify(schema, null, 2));

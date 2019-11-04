@@ -5,6 +5,18 @@ const _ = require('lodash');
 const MODEL_RELATIONS = ['oneWay', 'oneToOne', 'manyToOne'];
 const COLLECTION_RELATIONS = ['manyWay', 'manyToMany', 'oneToMany'];
 
+const toUID = (name, plugin) => {
+  const model = strapi.getModel(name, plugin);
+  return model.uid;
+};
+
+const fromUID = uid => {
+  const contentType = strapi.contentTypes[uid];
+  const { modelName, plugin } = contentType;
+
+  return { modelName, plugin };
+};
+
 /**
  * Formats a component's attributes
  * @param {Object} attributes - the attributes map
@@ -44,7 +56,7 @@ const formatAttribute = (key, attribute, { model }) => {
   } else {
     return {
       nature: relation.nature,
-      target: targetEntity,
+      target: toUID(targetEntity, plugin),
       plugin: plugin || undefined,
       dominant: attribute.dominant ? true : false,
       targetAttribute: attribute.via || undefined,
@@ -55,7 +67,6 @@ const formatAttribute = (key, attribute, { model }) => {
         undefined
       ),
       unique: attribute.unique ? true : false,
-      required: attribute.required ? true : false,
     };
   }
 };
@@ -88,27 +99,29 @@ const convertAttributes = attributes => {
         target,
         nature,
         unique,
-        plugin,
         targetAttribute,
         columnName,
         dominant,
       } = attribute;
 
       const attr = {
-        plugin: plugin ? _.trim(plugin) : undefined,
         unique: unique === true ? true : undefined,
-        dominant,
         columnName,
       };
 
+      const { modelName, plugin } = fromUID(target);
+
+      attr.plugin = plugin;
+
       if (MODEL_RELATIONS.includes(nature)) {
-        attr.model = target;
+        attr.model = modelName;
       } else if (COLLECTION_RELATIONS.includes(nature)) {
-        attr.collection = target;
+        attr.collection = modelName;
       }
 
       if (!['manyWay', 'oneWay'].includes(nature)) {
         attr.via = targetAttribute;
+        attr.dominant = dominant;
       }
 
       acc[key] = attr;

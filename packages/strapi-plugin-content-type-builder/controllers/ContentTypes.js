@@ -2,6 +2,8 @@
 
 const _ = require('lodash');
 const pluralize = require('pluralize');
+const fse = require('fs-extra');
+const path = require('path');
 
 const generator = require('strapi-generate');
 const { formatAttributes, convertAttributes } = require('../utils/attributes');
@@ -58,7 +60,8 @@ module.exports = {
 
     await generateAPI(slug, contentType);
 
-    // create relations
+    await generateReversedRelations({ attributes: body.attributes, slug });
+
     strapi.reload();
 
     ctx.send({
@@ -69,6 +72,73 @@ module.exports = {
   },
 };
 
+const generateReversedRelations = ({ attributes, slug, plugin }) => {
+  const promises = Object.keys(attributes)
+    .filter(key => _.has(attributes[key], 'target'))
+    .map(key => {
+      const attr = attributes[key];
+
+      const target = strapi.contentTypes[attr.target];
+
+      const targetAttributeOptions = {
+        via: key,
+        columnName: attr.targetColumnName,
+        plugin,
+      };
+
+      switch (attr.nature) {
+        case 'manyWay':
+        case 'oneWay':
+          return;
+        case 'oneToOne':
+        case 'oneToMany':
+          targetAttributeOptions.model = slug;
+          break;
+        case 'manyToOne':
+          targetAttributeOptions.collection = slug;
+          break;
+        case 'manyToMany': {
+          targetAttributeOptions.collection = slug;
+
+          if (!targetAttributeOptions.dominant) {
+            targetAttributeOptions.dominant = true;
+          }
+          break;
+        }
+        default:
+      }
+
+      const oldSchema = target.__schema__;
+      const schema = _.merge({}, oldSchema, {
+        attributes: {
+          [attr.targetAttribute]: targetAttributeOptions,
+        },
+      });
+
+      return writeContentType({ uid: attr.target, schema });
+    });
+
+  return Promise.all(promises);
+};
+
+const writeContentType = async ({ uid, schema }) => {
+  const { plugin, apiName, __filename__ } = strapi.contentTypes[uid];
+
+  const fileName = __filename__;
+
+  let fileDir;
+  if (plugin) {
+    fileDir = `./extensions/${plugin}/models`;
+  } else {
+    fileDir = `./api/${apiName}/models`;
+  }
+
+  const filePath = path.join(strapi.dir, fileDir, fileName);
+
+  await fse.ensureFile(filePath);
+  return fse.writeFile(filePath, JSON.stringify(schema, null, 2));
+};
+
 const formatContentType = contentType => {
   const { uid, plugin, connection, collectionName, info } = contentType;
 
@@ -76,7 +146,6 @@ const formatContentType = contentType => {
     uid,
     plugin,
     schema: {
-      icon: _.get(info, 'icon'),
       name: _.get(info, 'name') || _.upperFirst(pluralize(uid)),
       description: _.get(info, 'description', ''),
       connection,
