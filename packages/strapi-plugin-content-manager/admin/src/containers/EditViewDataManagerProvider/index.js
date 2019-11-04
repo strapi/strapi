@@ -75,6 +75,22 @@ const EditViewDataManagerProvider = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, slug, source]);
 
+  const addComponentToDynamicZone = (keys, componentUid) => {
+    dispatch({
+      type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE',
+      keys: keys.split('.'),
+      componentUid,
+    });
+  };
+
+  const addNonRepeatableComponentToField = (keys, componentUid) => {
+    dispatch({
+      type: 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD',
+      keys: keys.split('.'),
+      componentUid,
+    });
+  };
+
   const addRelation = ({ target: { name, value } }) => {
     dispatch({
       type: 'ADD_RELATION',
@@ -150,15 +166,29 @@ const EditViewDataManagerProvider = ({
     });
   };
 
+  // REMOVE_COMPONENT_FROM_FIELD
+
+  const removeComponentFromField = (keys, componentUid) => {
+    dispatch({
+      type: 'REMOVE_COMPONENT_FROM_FIELD',
+      keys: keys.split('.'),
+      componentUid,
+    });
+  };
+
   const setIsSubmitting = (value = true) => {
     dispatch({ type: 'IS_SUBMITTING', value });
   };
 
   const showLoader = !isCreatingEntry && isLoading;
 
+  console.log({ modifiedData });
+
   return (
     <EditViewDataManagerContext.Provider
       value={{
+        addComponentToDynamicZone,
+        addNonRepeatableComponentToField,
         addRelation,
         allLayoutData,
         formErrors,
@@ -169,6 +199,7 @@ const EditViewDataManagerProvider = ({
         onChange: handleChange,
         onRemoveRelation,
         redirectToPreviousPage,
+        removeComponentFromField,
         resetData: () => {
           dispatch({
             type: 'RESET_DATA',

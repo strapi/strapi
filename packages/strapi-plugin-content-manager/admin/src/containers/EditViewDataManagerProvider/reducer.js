@@ -13,6 +13,22 @@ const initialState = fromJS({
 
 const reducer = (state, action) => {
   switch (action.type) {
+    case 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD':
+      return state.updateIn(['modifiedData', ...action.keys], () => {
+        return fromJS({});
+      });
+    case 'ADD_COMPONENT_TO_DYNAMIC_ZONE':
+      return state.updateIn(['modifiedData', ...action.keys], list => {
+        const componentToAdd = fromJS({
+          __component: action.componentUid,
+        });
+
+        if (list) {
+          return list.push(componentToAdd);
+        }
+
+        return fromJS([componentToAdd]);
+      });
     case 'ADD_RELATION':
       return state.updateIn(['modifiedData', ...action.keys], list => {
         if (!action.value) {
@@ -58,6 +74,12 @@ const reducer = (state, action) => {
         return action.value;
       });
     }
+    case 'REMOVE_COMPONENT_FROM_FIELD': {
+      const componentPathToRemove = ['modifiedData', ...action.keys];
+
+      return state.updateIn(componentPathToRemove, () => null);
+    }
+
     case 'REMOVE_RELATION':
       return state.removeIn(['modifiedData', ...action.keys.split('.')]);
     case 'RESET_DATA':

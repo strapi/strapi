@@ -15,6 +15,7 @@ import Container from '../../components/Container';
 import DynamicZone from '../../components/DynamicZone';
 import FormWrapper from '../../components/FormWrapper';
 // import ComponentField from '../../components/ComponentField';
+import FieldComponent from '../../components/FieldComponent';
 import Inputs from '../../components/Inputs';
 import SelectWrapper from '../../components/SelectWrapper';
 import EditViewDataManagerProvider from '../EditViewDataManagerProvider';
@@ -64,15 +65,34 @@ const EditView = ({
     [currentContentTypeLayoutData]
   );
   const source = getQueryParameters(search, 'source');
-  const getFieldType = useCallback(
+
+  const getFieldMetas = useCallback(
     fieldName => {
       return get(
-        currentContentTypeSchema,
-        ['attributes', fieldName, 'type'],
-        ''
+        currentContentTypeLayoutData,
+        ['metadatas', fieldName, 'edit'],
+        {}
       );
     },
+    [currentContentTypeLayoutData]
+  );
+  const getField = useCallback(
+    fieldName => {
+      return get(currentContentTypeSchema, ['attributes', fieldName], {});
+    },
     [currentContentTypeSchema]
+  );
+  const getFieldType = useCallback(
+    fieldName => {
+      return get(getField(fieldName), ['type'], '');
+    },
+    [getField]
+  );
+  const getFieldComponentUid = useCallback(
+    fieldName => {
+      return get(getField(fieldName), ['component'], '');
+    },
+    [getField]
   );
   // Check if a block is a dynamic zone
   const isDynamicZone = useCallback(
@@ -106,8 +126,13 @@ const EditView = ({
     .join('');
   const redirectToPreviousPage = () => push(redirectURL);
 
+  console.log({ allLayoutData });
+
   return (
-    <EditViewProvider layout={currentContentTypeLayoutData}>
+    <EditViewProvider
+      allLayoutData={allLayoutData}
+      layout={currentContentTypeLayoutData}
+    >
       <EditViewDataManagerProvider
         allLayoutData={allLayoutData}
         redirectToPreviousPage={redirectToPreviousPage}
@@ -139,10 +164,26 @@ const EditView = ({
                               getFieldType(name) === 'component';
 
                             if (isComponent) {
+                              const componentUid = getFieldComponentUid(name);
+                              const isRepeatable = get(
+                                getField(name),
+                                'repeatable',
+                                false
+                              );
+                              const label = get(
+                                getFieldMetas(name),
+                                'label',
+                                componentUid
+                              );
+
                               return (
-                                <div className={`col-${size}`} key={name}>
-                                  COMPONENT: {name}
-                                </div>
+                                <FieldComponent
+                                  key={componentUid}
+                                  componentUid={componentUid}
+                                  isRepeatable={isRepeatable}
+                                  label={label}
+                                  name={name}
+                                />
                               );
                             }
 

@@ -1,4 +1,7 @@
-import React, { memo, useState } from 'react';
+import React, {
+  // useCallback,
+  useState,
+} from 'react';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { Remove } from '@buffetjs/icons'; // TODO use css instead
@@ -13,15 +16,23 @@ import Wrapper from './Wrapper';
 const DynamicZone = ({ name }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isOver, setIsOver] = useState(false);
-  const { allLayoutData, layout } = useDataManager();
+  const {
+    addComponentToDynamicZone,
+    // allLayoutData,
+    layout,
+    // modifiedData,
+  } = useDataManager();
+  // const getDynamicDisplayedComponents = useCallback(() => {
+  //   return get(modifiedData, [name], []).map(data => data.__component);
+  // }, [modifiedData, name]);
+
   const dynamicZoneAvailableComponents = get(
     layout,
     ['schema', 'attributes', name, 'components'],
     []
   );
-  const handleMouseEvent = () => setIsOver(prev => !prev);
   const displayInfo = isOver && !isOpen;
-  console.log({ allLayoutData, dynamicZoneAvailableComponents });
+  const handleMouseEvent = () => setIsOver(prev => !prev);
 
   return (
     <>
@@ -43,8 +54,17 @@ const DynamicZone = ({ name }) => {
           />
         </div>
         <ComponentsPicker isOpen={isOpen}>
-          {dynamicZoneAvailableComponents.map(name => {
-            return <DynamicComponentCard key={name} componentUid={name} />;
+          {dynamicZoneAvailableComponents.map(componentUid => {
+            return (
+              <DynamicComponentCard
+                key={componentUid}
+                componentUid={componentUid}
+                onClick={() => {
+                  setIsOpen(false);
+                  addComponentToDynamicZone(name, componentUid);
+                }}
+              />
+            );
           })}
         </ComponentsPicker>
       </Wrapper>
@@ -57,4 +77,4 @@ DynamicZone.propTypes = {
 };
 
 export { DynamicZone };
-export default memo(DynamicZone);
+export default DynamicZone;
