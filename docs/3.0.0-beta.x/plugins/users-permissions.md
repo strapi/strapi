@@ -222,6 +222,34 @@ axios
 });
 ```
 
+### Email validation
+
+This action send an email to a user with the link to confirm the user.
+
+#### Usage
+
+- email is the user email.
+
+```js
+import axios from 'axios';
+
+// Example of a function that send a confirmation email
+async function your_function() {
+  try {
+    await axios
+      .post(`http://localhost:1337/auth/send-email-confirmation`, {
+        email: 'user@strapi.io'
+      })
+    // Handle success.
+    console.log('Your user received an email')
+  } catch (err) {
+    // Handle error.
+    console.err('An error occured:', err)
+  }
+}
+},
+```
+
 ## User object in Strapi context
 
 The `user` object is available to successfully authenticated requests.
