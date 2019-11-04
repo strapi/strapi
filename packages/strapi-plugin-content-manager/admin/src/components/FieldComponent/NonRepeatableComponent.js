@@ -1,13 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-// import useEditView from '../../hooks/useEditView';
 import NonRepeatableWrapper from '../NonRepeatableWrapper';
+import Inputs from '../Inputs';
 import FieldComponent from './index';
 
 const NonRepeatableComponent = ({ fields, name, schema }) => {
-  // const { allLayoutData } = useEditView();
-  const getField = fieldName => get(schema, ['attributes', fieldName], {});
+  const getField = fieldName =>
+    get(schema, ['schema', 'attributes', fieldName], {});
+  const getMeta = fieldName =>
+    get(schema, ['metadatas', fieldName, 'edit'], {});
 
   return (
     <NonRepeatableWrapper>
@@ -17,22 +19,31 @@ const NonRepeatableComponent = ({ fields, name, schema }) => {
             {fieldRow.map(field => {
               const currentField = getField(field.name);
               const isComponent = get(currentField, 'type', '') === 'component';
+              const keys = `${name}.${field.name}`;
 
               if (isComponent) {
                 const componentUid = currentField.component;
+                const metas = getMeta(field.name);
 
                 return (
                   <FieldComponent
-                    name={`${name}.${field.name}`}
-                    label="cooo"
+                    key={field.name}
+                    name={keys}
+                    label={metas.label}
                     componentUid={componentUid}
                   />
                 );
               }
+
               return (
-                <div key={field.name}>
-                  {field.name}
-                  <br /> type: {currentField.type}
+                <div key={field.name} className={`col-${field.size}`}>
+                  <Inputs
+                    autoFocus={false}
+                    keys={keys}
+                    layout={schema}
+                    name={field.name}
+                    onChange={() => {}}
+                  />
                 </div>
               );
             })}

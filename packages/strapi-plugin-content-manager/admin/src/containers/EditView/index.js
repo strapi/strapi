@@ -126,8 +126,6 @@ const EditView = ({
     .join('');
   const redirectToPreviousPage = () => push(redirectURL);
 
-  console.log({ allLayoutData });
-
   return (
     <EditViewProvider
       allLayoutData={allLayoutData}

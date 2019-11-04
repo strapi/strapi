@@ -28,8 +28,6 @@ const Header = () => {
     source,
   } = useDataManager();
 
-  console.log({ slug });
-
   const currentContentTypeMainField = get(
     layout,
     ['settings', 'mainField'],

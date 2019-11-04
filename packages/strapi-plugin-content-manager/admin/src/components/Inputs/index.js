@@ -47,11 +47,10 @@ const getInputType = (type = '') => {
   }
 };
 
-function Inputs({ autoFocus, keys, name, onBlur }) {
+function Inputs({ autoFocus, keys, layout, name, onBlur }) {
   const {
     didCheckErrors,
     formErrors,
-    layout,
     modifiedData,
     onChange,
   } = useDataManager();
@@ -124,7 +123,8 @@ function Inputs({ autoFocus, keys, name, onBlur }) {
               wysiwyg: WysiwygWithErrors,
             }}
             multiple={get(attribute, 'multiple', false)}
-            name={name}
+            // name={name}
+            name={keys}
             onBlur={onBlur}
             onChange={onChange}
             options={get(attribute, 'enum', [])}

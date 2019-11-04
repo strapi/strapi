@@ -22,7 +22,6 @@ const FieldComponent = ({ componentUid, isRepeatable, label, name }) => {
     {}
   );
   const displayedFields = get(currentComponentSchema, ['layouts', 'edit'], []);
-  const schema = get(currentComponentSchema, 'schema', {});
 
   return (
     <Wrapper className="col-12">
@@ -48,7 +47,7 @@ const FieldComponent = ({ componentUid, isRepeatable, label, name }) => {
         <NonRepeatableComponent
           fields={displayedFields}
           name={name}
-          schema={schema}
+          schema={currentComponentSchema}
         />
       )}
     </Wrapper>
