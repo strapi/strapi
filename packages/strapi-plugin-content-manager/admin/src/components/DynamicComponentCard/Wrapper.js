@@ -13,6 +13,7 @@ const Wrapper = styled.div`
   color: #919bae;
   text-align: center;
   border-radius: 2px;
+  cursor: pointer;
 
   .component-uid {
     width: 119px;
