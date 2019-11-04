@@ -60,12 +60,6 @@ module.exports = function(strapi) {
           require(initFunctionPath)(ORM, connection);
         }
 
-        // Load plugins
-        if (_.get(connection, 'options.plugins', true) !== false) {
-          ORM.plugin('visibility');
-          ORM.plugin('pagination');
-        }
-
         const ctx = {
           GLOBALS,
           connection,
