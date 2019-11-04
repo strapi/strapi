@@ -140,7 +140,8 @@ const createSchema = infos => {
     },
     connection,
     collectionName:
-      collectionName || `components_${category}_${nameToSlug(pluralize(name))}`,
+      collectionName ||
+      `components_${nameToSlug(category)}_${pluralize(nameToSlug(name))}`,
     attributes: convertAttributes(attributes),
   };
 };
@@ -150,7 +151,7 @@ const createSchema = infos => {
  * @param {string} str - string to slugify
  */
 const createComponentUID = ({ category, name }) =>
-  `${category}.${nameToSlug(name)}`;
+  `${nameToSlug(category)}.${nameToSlug(name)}`;
 
 /**
  * Deletes a component
