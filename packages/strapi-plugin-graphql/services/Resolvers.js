@@ -7,12 +7,13 @@
  */
 
 const _ = require('lodash');
-const pluralize = require('pluralize');
+
 const Aggregator = require('./Aggregator');
 const Query = require('./Query.js');
 const Mutation = require('./Mutation.js');
 const Types = require('./Types.js');
 const Schema = require('./Schema.js');
+const { toSingular, toPlural } = require('./naming');
 
 const convertAttributes = (attributes, globalId) => {
   return Object.keys(attributes)
@@ -273,6 +274,7 @@ const buildShadowCRUD = (models, plugin) => {
     const model = models[name];
 
     const { globalId, primaryKey } = model;
+
     // Setup initial state with default attribute that should be displayed
     // but these attributes are not properly defined in the models.
     const initialState = {
@@ -325,8 +327,8 @@ const buildShadowCRUD = (models, plugin) => {
       return acc;
     }
 
-    const singularName = pluralize.singular(name);
-    const pluralName = pluralize.plural(name);
+    const singularName = toSingular(name);
+    const pluralName = toPlural(name);
     // Build resolvers.
     const queries = {
       singular:
@@ -387,7 +389,7 @@ const buildShadowCRUD = (models, plugin) => {
     // TODO:
     // - Implement batch methods (need to update the content-manager as well).
     // - Implement nested transactional methods (create/update).
-    const capitalizedName = _.capitalize(name);
+    const capitalizedName = _.upperFirst(singularName);
     const mutations = {
       create:
         _.get(resolver, `Mutation.create${capitalizedName}`) !== false

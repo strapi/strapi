@@ -12,7 +12,9 @@ const graphql = require('graphql');
 const GraphQLJSON = require('graphql-type-json');
 const GraphQLDateTime = require('graphql-type-datetime');
 const GraphQLLong = require('graphql-type-long');
-const pluralize = require('pluralize');
+
+const { toSingular } = require('./naming');
+
 /* eslint-disable no-unused-vars */
 
 module.exports = {
@@ -25,7 +27,7 @@ module.exports = {
    * @return String
    */
 
-  convertType: function({
+  convertType({
     definition = {},
     modelName = '',
     attributeName = '',
@@ -76,14 +78,17 @@ module.exports = {
 
     if (definition.type === 'component') {
       const globalId = strapi.components[definition.component].globalId;
+
       const { required, repeatable } = definition;
       let typeName = required === true ? `${globalId}` : globalId;
 
       if (rootType === 'mutation') {
         typeName =
           action === 'update'
-            ? `edit${_.capitalize(globalId)}Input`
-            : `${_.capitalize(globalId)}Input${required ? '!' : ''}`;
+            ? `edit${_.upperFirst(toSingular(globalId))}Input`
+            : `${_.upperFirst(toSingular(globalId))}Input${
+                required ? '!' : ''
+              }`;
       }
 
       if (repeatable === true) {
@@ -132,10 +137,11 @@ module.exports = {
    * @return String
    */
 
-  convertEnumType: (definition, model, field) =>
-    definition.enumName
+  convertEnumType(definition, model, field) {
+    return definition.enumName
       ? definition.enumName
-      : `ENUM_${model.toUpperCase()}_${field.toUpperCase()}`,
+      : `ENUM_${model.toUpperCase()}_${field.toUpperCase()}`;
+  },
 
   /**
    * Remove custom scalar type such as Upload because Apollo automatically adds it in the schema.
@@ -144,7 +150,7 @@ module.exports = {
    * @return void
    */
 
-  removeCustomScalar: (typeDefs, resolvers) => {
+  removeCustomScalar(typeDefs, resolvers) {
     delete resolvers.Upload;
     return typeDefs.replace('scalar Upload', '');
   },
@@ -155,7 +161,7 @@ module.exports = {
    * @return void
    */
 
-  addCustomScalar: resolvers => {
+  addCustomScalar(resolvers) {
     Object.assign(resolvers, {
       JSON: GraphQLJSON,
       DateTime: GraphQLDateTime,
@@ -172,7 +178,7 @@ module.exports = {
    * @return string
    */
 
-  addPolymorphicUnionType: (customDefs, defs) => {
+  addPolymorphicUnionType(customDefs, defs) {
     const def = customDefs + defs;
     const types = graphql
       .parse(def)
@@ -201,15 +207,15 @@ module.exports = {
     };
   },
 
-  addInput: function() {
+  addInput() {
     return `
       input InputID { id: ID!}
     `;
   },
 
-  generateInputModel: function(model, name, { allowIds = false } = {}) {
+  generateInputModel(model, name, { allowIds = false } = {}) {
     const globalId = model.globalId;
-    const inputName = `${_.capitalize(name)}Input`;
+    const inputName = `${_.upperFirst(toSingular(name))}Input`;
 
     if (_.isEmpty(model.attributes)) {
       return `
@@ -256,39 +262,35 @@ module.exports = {
     return inputs;
   },
 
-  generateInputPayloadArguments: function(model, name, type, resolver) {
-    if (_.get(resolver, `Mutation.${type}${_.capitalize(name)}`) === false) {
+  generateInputPayloadArguments(model, name, type, resolver) {
+    const singularName = toSingular(name);
+    if (
+      _.get(resolver, `Mutation.${type}${_.upperFirst(singularName)}`) === false
+    ) {
       return '';
     }
 
-    const inputName = `${_.capitalize(name)}Input`;
-    const payloadName = `${_.capitalize(name)}Payload`;
-    /* eslint-disable indent */
+    const inputName = `${_.upperFirst(singularName)}Input`;
+    const payloadName = `${_.upperFirst(singularName)}Payload`;
+
     switch (type) {
       case 'create':
         return `
           input ${type}${inputName} { data: ${inputName} }
-          type ${type}${payloadName} { ${pluralize.singular(name)}: ${
-          model.globalId
-        } }
+          type ${type}${payloadName} { ${singularName}: ${model.globalId} }
         `;
       case 'update':
         return `
           input ${type}${inputName}  { where: InputID, data: edit${inputName} }
-          type ${type}${payloadName} { ${pluralize.singular(name)}: ${
-          model.globalId
-        } }
+          type ${type}${payloadName} { ${singularName}: ${model.globalId} }
         `;
       case 'delete':
         return `
           input ${type}${inputName}  { where: InputID }
-          type ${type}${payloadName} { ${pluralize.singular(name)}: ${
-          model.globalId
-        } }
+          type ${type}${payloadName} { ${singularName}: ${model.globalId} }
         `;
       default:
       // Nothing
     }
-    /* eslint-enable indent */
   },
 };

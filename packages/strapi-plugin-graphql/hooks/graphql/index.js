@@ -14,7 +14,7 @@ module.exports = strapi => {
   const { appPath, installedPlugins } = strapi.config;
 
   return {
-    beforeInitialize: async function() {
+    async beforeInitialize() {
       // Try to inject this hook just after the others hooks to skip the router processing.
       if (!_.get(strapi.config.hook.load, 'after')) {
         _.set(strapi.config.hook.load, 'after', []);
@@ -52,7 +52,7 @@ module.exports = strapi => {
       );
     },
 
-    initialize: function() {
+    initialize() {
       const {
         typeDefs,
         resolvers,
@@ -92,7 +92,7 @@ module.exports = strapi => {
       ) {
         serverParams.playground = {
           endpoint: strapi.plugins.graphql.config.endpoint,
-          shareEnabled: strapi.plugins.graphql.config.shareEnabled
+          shareEnabled: strapi.plugins.graphql.config.shareEnabled,
         };
 
         serverParams.introspection = true;
