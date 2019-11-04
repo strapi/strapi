@@ -47,7 +47,7 @@ const formatAttribute = (key, attribute, { model }) => {
       target: targetEntity,
       plugin: plugin || undefined,
       dominant: attribute.dominant ? true : false,
-      key: attribute.via || undefined,
+      targetAttribute: attribute.via || undefined,
       columnName: attribute.columnName || undefined,
       targetColumnName: _.get(
         strapi.getModel(targetEntity, plugin),
@@ -89,8 +89,7 @@ const convertAttributes = attributes => {
         nature,
         unique,
         plugin,
-        required,
-        key,
+        targetAttribute,
         columnName,
         dominant,
       } = attribute;
@@ -99,7 +98,6 @@ const convertAttributes = attributes => {
         plugin: plugin ? _.trim(plugin) : undefined,
         unique: unique === true ? true : undefined,
         dominant,
-        required,
         columnName,
       };
 
@@ -110,7 +108,7 @@ const convertAttributes = attributes => {
       }
 
       if (!['manyWay', 'oneWay'].includes(nature)) {
-        attr.via = key;
+        attr.via = targetAttribute;
       }
 
       acc[key] = attr;

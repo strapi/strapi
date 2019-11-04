@@ -31,11 +31,9 @@ module.exports = validNatures => {
       .required(),
     plugin: yup.string().oneOf(['', ...Object.keys(strapi.plugins)]),
     unique: validators.unique,
-
-    // TODO: remove once front-end stop sending them even if useless
     dominant: yup.boolean(),
     columnName: yup.string(),
-    key: yup.string(),
+    targetAttribute: yup.string(),
     targetColumnName: yup.string(),
   };
 };
