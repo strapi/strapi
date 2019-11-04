@@ -26,7 +26,7 @@ module.exports = (scope, cb) => {
   }
 
   // Format `id`.
-  const name = _.trim(_.camelCase(scope.id));
+  const name = scope.name || _.trim(_.camelCase(scope.id));
   const environment = process.env.NODE_ENV || 'development';
 
   // `scope.args` are the raw command line arguments.

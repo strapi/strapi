@@ -95,7 +95,7 @@ const createContentTypeSchema = infos => ({
       'default'
     ),
   collectionName:
-    infos.collectionName || `${nameToSlug(pluralize(infos.name))}`,
+    infos.collectionName || `${_.snakeCase(pluralize(infos.name))}`,
   info: {
     name: infos.name,
     description: infos.description,
@@ -109,10 +109,10 @@ const generateAPI = (name, contentType) => {
     const scope = {
       generatorType: 'api',
       id: name,
+      name,
       rootPath: strapi.dir,
       args: {
-        api: name,
-        name: contentType.info.name,
+        displayName: contentType.info.name,
         description: contentType.info.description,
         connection: contentType.connection,
         collectionName: contentType.collectionName,
