@@ -22,7 +22,7 @@ const DynamicComponent = ({
       isOver={state}
       onClick={() => {
         push(
-          `/plugins/${pluginId}/ctm-configurations/edit-settings/components/${componentUid}`
+          `/plugins/${pluginId}/ctm-configurations/edit-settings/components/${componentUid}/`
         );
       }}
       onMouseEvent={handleMouseEvent}

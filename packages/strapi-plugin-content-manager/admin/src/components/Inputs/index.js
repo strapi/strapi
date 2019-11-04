@@ -147,6 +147,7 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
             type={getInputType(type)}
             validations={validations}
             value={value}
+            withDefaultValue={false}
             // withOptionPlaceholder={withOptionPlaceholder}
           />
         );

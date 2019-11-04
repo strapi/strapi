@@ -141,7 +141,7 @@ const DraggedField = forwardRef(
                   e.stopPropagation();
 
                   goTo(
-                    `/plugins/${pluginId}/ctm-configurations/edit-settings/components/${componentUid}`
+                    `/plugins/${pluginId}/ctm-configurations/edit-settings/components/${componentUid}/`
                   );
                 }}
               >
