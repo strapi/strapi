@@ -34,6 +34,7 @@ import reducer, { initialState } from './reducer';
 
 const EditSettingsView = ({
   deleteLayout,
+  deleteLayouts,
   componentsAndModelsMainPossibleMainFields,
   history: { push },
   location: { search },
@@ -194,8 +195,16 @@ const EditSettingsView = ({
       dispatch({
         type: 'SUBMIT_SUCCEEDED',
       });
-      deleteLayout(slug);
-      // emitEvent('didSaveContentTypeLayout');
+
+      if (slug) {
+        deleteLayout(slug);
+      }
+
+      if (componentSlug) {
+        deleteLayouts();
+      }
+
+      emitEvent('didSaveContentTypeLayout');
     } catch (err) {
       strapi.notification.error('notification.error');
     }
@@ -432,11 +441,13 @@ const EditSettingsView = ({
 };
 
 EditSettingsView.defaultProps = {
+  deleteAllLayouts: () => {},
   slug: null,
 };
 
 EditSettingsView.propTypes = {
   deleteLayout: PropTypes.func.isRequired,
+  deleteLayouts: PropTypes.func,
   componentsAndModelsMainPossibleMainFields: PropTypes.object.isRequired,
   history: PropTypes.shape({
     push: PropTypes.func,

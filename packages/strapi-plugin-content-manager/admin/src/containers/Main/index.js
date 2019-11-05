@@ -16,13 +16,20 @@ import DragLayer from '../../components/DragLayer';
 const EditSettingsView = lazy(() => import('../EditSettingsView'));
 const RecursivePath = lazy(() => import('../RecursivePath'));
 
-import { deleteLayout, getData, getLayout, resetProps } from './actions';
+import {
+  deleteLayout,
+  deleteLayouts,
+  getData,
+  getLayout,
+  resetProps,
+} from './actions';
 import reducer from './reducer';
 import saga from './saga';
 import makeSelectMain from './selectors';
 
 function Main({
   deleteLayout,
+  deleteLayouts,
   getData,
   getLayout,
   components,
@@ -71,6 +78,7 @@ function Main({
     <Component
       currentEnvironment={currentEnvironment}
       deleteLayout={deleteLayout}
+      deleteLayouts={deleteLayouts}
       emitEvent={emitEvent}
       components={components}
       componentsAndModelsMainPossibleMainFields={
@@ -108,6 +116,7 @@ function Main({
 
 Main.propTypes = {
   deleteLayout: PropTypes.func.isRequired,
+  deleteLayouts: PropTypes.func.isRequired,
   getData: PropTypes.func.isRequired,
   getLayout: PropTypes.func.isRequired,
   global: PropTypes.shape({
@@ -132,6 +141,7 @@ export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       deleteLayout,
+      deleteLayouts,
       getData,
       getLayout,
       resetProps,
