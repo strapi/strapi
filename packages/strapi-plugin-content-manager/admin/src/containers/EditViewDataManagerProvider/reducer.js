@@ -2,6 +2,7 @@ import {
   fromJS,
   // List,
 } from 'immutable';
+import getMax from './utils/getMax';
 
 const initialState = fromJS({
   formErrors: {},
@@ -17,6 +18,19 @@ const reducer = (state, action) => {
       return state.updateIn(['modifiedData', ...action.keys], () => {
         return fromJS({});
       });
+    case 'ADD_REPEATABLE_COMPONENT_TO_FIELD': {
+      return state.updateIn(['modifiedData', ...action.keys], list => {
+        const defaultAttribute = fromJS({});
+
+        if (list) {
+          const max = getMax(list);
+
+          return list.push(defaultAttribute.set('_temp__id', max + 1));
+        }
+
+        return fromJS([defaultAttribute.set('_temp__id', 0)]);
+      });
+    }
     case 'ADD_COMPONENT_TO_DYNAMIC_ZONE':
       return state.updateIn(['modifiedData', ...action.keys], list => {
         const componentToAdd = fromJS({

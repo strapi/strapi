@@ -99,6 +99,13 @@ const EditViewDataManagerProvider = ({
     });
   };
 
+  const addRepeatableComponentToField = keys => {
+    dispatch({
+      type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
+      keys: keys.split('.'),
+    });
+  };
+
   const handleChange = ({ target: { name, value, type } }) => {
     let inputValue = value;
 
@@ -188,6 +195,7 @@ const EditViewDataManagerProvider = ({
         addComponentToDynamicZone,
         addNonRepeatableComponentToField,
         addRelation,
+        addRepeatableComponentToField,
         allLayoutData,
         formErrors,
         initialData,
