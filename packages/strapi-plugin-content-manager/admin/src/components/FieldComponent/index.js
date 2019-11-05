@@ -12,7 +12,7 @@ import Label from './Label';
 
 import Reset from './ResetComponent';
 import Wrapper from './Wrapper';
-import NonRepeatableComponent from './NonRepeatableComponent';
+import NonRepeatableComponent from '../NonRepeatableComponent';
 
 const FieldComponent = ({ componentUid, isRepeatable, label, name }) => {
   const {

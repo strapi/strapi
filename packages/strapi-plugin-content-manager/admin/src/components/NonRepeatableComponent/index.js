@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import NonRepeatableWrapper from '../NonRepeatableWrapper';
 import Inputs from '../Inputs';
-import FieldComponent from './index';
+import FieldComponent from '../FieldComponent';
 
 const NonRepeatableComponent = ({ fields, name, schema }) => {
   const getField = fieldName =>
