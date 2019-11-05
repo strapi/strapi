@@ -6,7 +6,7 @@ import pluginId from '../../pluginId';
 import BannerWrapper from './BannerWrapper';
 import CarretTop from './CarretTop';
 
-const Banner = ({ displayedValue, isOpen, onClickToggle }) => {
+const Banner = ({ displayedValue, isOpen, onClickToggle, onClickRemove }) => {
   return (
     <BannerWrapper type="button" isOpen={isOpen} onClick={onClickToggle}>
       <span className="img-wrapper">
@@ -24,7 +24,11 @@ const Banner = ({ displayedValue, isOpen, onClickToggle }) => {
         <span
           className="trash-icon"
           style={{ marginRight: 13 }}
-          // onClick={removeField}
+          onClick={e => {
+            e.preventDefault();
+            e.stopPropagation();
+            onClickRemove();
+          }}
         >
           <i className="fa fa-trash" />
         </span>
@@ -39,6 +43,7 @@ const Banner = ({ displayedValue, isOpen, onClickToggle }) => {
 Banner.defaultProps = {
   displayedValue: null,
   isOpen: false,
+  onClickRemove: () => {},
 };
 
 Banner.propTypes = {
@@ -49,6 +54,7 @@ Banner.propTypes = {
   ]),
   isOpen: PropTypes.bool,
   onClickToggle: PropTypes.func.isRequired,
+  onClickRemove: PropTypes.func,
 };
 
 export default Banner;

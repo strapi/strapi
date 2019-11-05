@@ -93,6 +93,11 @@ const reducer = (state, action) => {
 
       return state.updateIn(componentPathToRemove, () => null);
     }
+    case 'REMOVE_REPEATABLE_FIELD': {
+      const componentPathToRemove = ['modifiedData', ...action.keys];
+
+      return state.deleteIn(componentPathToRemove);
+    }
 
     case 'REMOVE_RELATION':
       return state.removeIn(['modifiedData', ...action.keys.split('.')]);

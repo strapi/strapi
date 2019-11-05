@@ -183,6 +183,14 @@ const EditViewDataManagerProvider = ({
     });
   };
 
+  const removeRepeatableField = (keys, componentUid) => {
+    dispatch({
+      type: 'REMOVE_REPEATABLE_FIELD',
+      keys: keys.split('.'),
+      componentUid,
+    });
+  };
+
   const setIsSubmitting = (value = true) => {
     dispatch({ type: 'IS_SUBMITTING', value });
   };
@@ -208,6 +216,7 @@ const EditViewDataManagerProvider = ({
         onRemoveRelation,
         redirectToPreviousPage,
         removeComponentFromField,
+        removeRepeatableField,
         resetData: () => {
           dispatch({
             type: 'RESET_DATA',

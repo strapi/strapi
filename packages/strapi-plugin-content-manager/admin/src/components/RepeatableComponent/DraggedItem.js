@@ -13,9 +13,10 @@ const DraggedItem = ({
   fields,
   isOpen,
   onClickToggle,
+  removeCollapse,
   schema,
 }) => {
-  const { modifiedData } = useDataManager();
+  const { modifiedData, removeRepeatableField } = useDataManager();
   const mainField = get(schema, ['settings', 'mainField'], 'id');
   const displayedValue = get(
     modifiedData,
@@ -27,14 +28,17 @@ const DraggedItem = ({
   const getMeta = fieldName =>
     get(schema, ['metadatas', fieldName, 'edit'], {});
 
-  console.log({ fields });
-
   return (
     <>
       <Banner
+        componentFieldName={componentFieldName}
         displayedValue={displayedValue}
         isOpen={isOpen}
         onClickToggle={onClickToggle}
+        onClickRemove={() => {
+          removeRepeatableField(componentFieldName);
+          removeCollapse();
+        }}
       />
       <Collapse isOpen={isOpen} style={{ backgroundColor: '#FAFAFB' }}>
         <FormWrapper isOpen={isOpen}>
@@ -50,7 +54,7 @@ const DraggedItem = ({
                   if (isComponent) {
                     const componentUid = currentField.component;
                     const metas = getMeta(field.name);
-                    console.log({ componentUid, currentField });
+
                     return (
                       <FieldComponent
                         componentUid={componentUid}
@@ -93,6 +97,7 @@ DraggedItem.propTypes = {
   fields: PropTypes.array,
   isOpen: PropTypes.bool,
   onClickToggle: PropTypes.func.isRequired,
+  removeCollapse: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
 };
 

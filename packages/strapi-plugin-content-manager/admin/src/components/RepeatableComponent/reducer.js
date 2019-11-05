@@ -20,6 +20,17 @@ const reducer = (state, action) => {
           return obj.update('isOpen', () => false);
         });
       });
+    case 'REMOVE_COLLAPSE':
+      return state
+        .removeIn(['collapses', action.index])
+        .update('collapses', list => list.map(obj => obj.set('isOpen', false)))
+        .update('collapses', list => {
+          if (action.shouldAddEmptyField) {
+            return list.push(fromJS({ isOpen: true }));
+          }
+
+          return list;
+        });
     default:
       return state;
   }

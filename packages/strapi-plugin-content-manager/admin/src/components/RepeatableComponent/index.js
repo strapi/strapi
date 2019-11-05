@@ -28,8 +28,6 @@ const RepeatableComponent = ({
   );
   const { collapses } = state.toJS();
 
-  console.log({ state: state.toJS(), fields, schema });
-
   return (
     <div>
       {componentValueLength === 0 && (
@@ -42,11 +40,11 @@ const RepeatableComponent = ({
       {componentValueLength > 0 &&
         componentValue.map((data, index) => {
           const componentFieldName = `${name}.${index}`;
-          console.log({ componentFieldName });
 
           return (
             <DraggedItem
               fields={fields}
+              componentFieldName={componentFieldName}
               isOpen={collapses[index].isOpen}
               key={data._temp__id}
               onClickToggle={() => {
@@ -55,8 +53,13 @@ const RepeatableComponent = ({
                   index,
                 });
               }}
+              removeCollapse={() => {
+                dispatch({
+                  type: 'REMOVE_COLLAPSE',
+                  index,
+                });
+              }}
               schema={schema}
-              componentFieldName={componentFieldName}
             />
           );
         })}
