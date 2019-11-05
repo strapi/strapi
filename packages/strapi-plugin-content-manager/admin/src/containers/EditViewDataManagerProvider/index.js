@@ -189,6 +189,8 @@ const EditViewDataManagerProvider = ({
 
   const showLoader = !isCreatingEntry && isLoading;
 
+  console.log({ modifiedData });
+
   return (
     <EditViewDataManagerContext.Provider
       value={{

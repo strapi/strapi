@@ -6,20 +6,14 @@ import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import useEditView from '../../hooks/useEditView';
 import ComponentInitializer from '../ComponentInitializer';
-import AddFieldButton from './AddFieldButton';
-import EmptyComponent from './EmptyComponent';
+import NonRepeatableComponent from '../NonRepeatableComponent';
+import RepeatableComponent from '../RepeatableComponent';
 import Label from './Label';
-
 import Reset from './ResetComponent';
 import Wrapper from './Wrapper';
-import NonRepeatableComponent from '../NonRepeatableComponent';
 
 const FieldComponent = ({ componentUid, isRepeatable, label, name }) => {
-  const {
-    addRepeatableComponentToField,
-    modifiedData,
-    removeComponentFromField,
-  } = useDataManager();
+  const { modifiedData, removeComponentFromField } = useDataManager();
   const { allLayoutData } = useEditView();
   const componentValue = get(modifiedData, name, null);
   const componentValueLength = size(componentValue);
@@ -31,7 +25,6 @@ const FieldComponent = ({ componentUid, isRepeatable, label, name }) => {
     {}
   );
   const displayedFields = get(currentComponentSchema, ['layouts', 'edit'], []);
-  console.log({ componentValue });
 
   return (
     <Wrapper className="col-12">
@@ -61,27 +54,14 @@ const FieldComponent = ({ componentUid, isRepeatable, label, name }) => {
         />
       )}
       {isRepeatable && (
-        <div>
-          {componentValueLength === 0 && (
-            <EmptyComponent>
-              <FormattedMessage id={`${pluginId}.components.empty-repeatable`}>
-                {msg => <p>{msg}</p>}
-              </FormattedMessage>
-            </EmptyComponent>
-          )}
-          <AddFieldButton
-            withBorderRadius={false}
-            type="button"
-            onClick={() => {
-              // TODO min max validations
-              // TODO add componentUID
-              addRepeatableComponentToField(name);
-            }}
-          >
-            <i className="fa fa-plus" />
-            <FormattedMessage id={`${pluginId}.containers.EditView.add.new`} />
-          </AddFieldButton>
-        </div>
+        <RepeatableComponent
+          componentValue={componentValue}
+          componentValueLength={componentValueLength}
+          componentUid={componentUid}
+          fields={displayedFields}
+          name={name}
+          schema={currentComponentSchema}
+        />
       )}
     </Wrapper>
   );

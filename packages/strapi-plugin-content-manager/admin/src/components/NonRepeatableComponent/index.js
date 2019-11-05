@@ -28,9 +28,10 @@ const NonRepeatableComponent = ({ fields, name, schema }) => {
                 return (
                   <FieldComponent
                     key={field.name}
-                    name={keys}
-                    label={metas.label}
                     componentUid={componentUid}
+                    isRepeatable={currentField.repeatable}
+                    label={metas.label}
+                    name={keys}
                   />
                 );
               }
