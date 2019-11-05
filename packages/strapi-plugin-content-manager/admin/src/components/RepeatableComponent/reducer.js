@@ -2,13 +2,30 @@ import { fromJS } from 'immutable';
 
 const initialState = fromJS({ collapses: [] });
 
+const getMax = arr => {
+  if (arr.size === 0) {
+    return -1;
+  }
+
+  return Math.max.apply(Math, arr.toJS().map(o => o._temp__id));
+};
+
 const reducer = (state, action) => {
   switch (action.type) {
     case 'ADD_NEW_FIELD':
       return state.update('collapses', list => {
         return list
           .map(obj => obj.update('isOpen', () => false))
-          .push(fromJS({ isOpen: true }));
+          .push(fromJS({ isOpen: true, _temp__id: getMax(list) + 1 }));
+      });
+    case 'MOVE_COLLAPSE':
+      return state.updateIn(['collapses'], list => {
+        return list
+          .delete(action.dragIndex)
+          .insert(
+            action.hoverIndex,
+            state.getIn(['collapses', action.dragIndex])
+          );
       });
     case 'TOGGLE_COLLAPSE':
       return state.update('collapses', list => {

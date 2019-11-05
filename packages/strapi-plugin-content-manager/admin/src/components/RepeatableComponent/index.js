@@ -1,7 +1,6 @@
 import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-// import { get } from 'lodash';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import Button from './AddFieldButton';
@@ -13,7 +12,6 @@ import reducer, { initialState } from './reducer';
 const RepeatableComponent = ({
   componentValue,
   componentValueLength,
-  // componentUid,
   fields,
   name,
   schema,
@@ -23,10 +21,20 @@ const RepeatableComponent = ({
     // modifiedData,
     // removeComponentFromField,
   } = useDataManager();
+
+  // We need to synchronize the collapses array with the data
+  // The key needed for react in the list will be the one from the collapses data
+  // This way we don't have to mutate the data when it is received and we can use a unique key
   const [state, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, componentValue)
   );
   const { collapses } = state.toJS();
+  const toggleCollapses = index => {
+    dispatch({
+      type: 'TOGGLE_COLLAPSE',
+      index,
+    });
+  };
 
   return (
     <div>
@@ -46,12 +54,10 @@ const RepeatableComponent = ({
               fields={fields}
               componentFieldName={componentFieldName}
               isOpen={collapses[index].isOpen}
-              key={data._temp__id}
+              key={collapses[index]._temp__id}
               onClickToggle={() => {
-                dispatch({
-                  type: 'TOGGLE_COLLAPSE',
-                  index,
-                });
+                // Close all other collapses and open the selected one
+                toggleCollapses(index);
               }}
               removeCollapse={() => {
                 dispatch({
@@ -59,7 +65,15 @@ const RepeatableComponent = ({
                   index,
                 });
               }}
+              moveCollapse={(dragIndex, hoverIndex) => {
+                dispatch({
+                  type: 'MOVE_COLLAPSE',
+                  dragIndex,
+                  hoverIndex,
+                });
+              }}
               schema={schema}
+              toggleCollapses={toggleCollapses}
             />
           );
         })}

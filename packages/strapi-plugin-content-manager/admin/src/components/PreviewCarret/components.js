@@ -10,9 +10,10 @@ const Wrapper = styled.div`
   ${({ isComponent }) => {
     if (isComponent) {
       return css`
-        height: 36px;
-        border: 1px solid #e3e9f3;
-        border-bottom: 0;
+        height: 34px;
+        padding: 0;
+        // border: 1px solid #e3e9f3;
+        // border-bottom: 0;
       `;
     }
   }}

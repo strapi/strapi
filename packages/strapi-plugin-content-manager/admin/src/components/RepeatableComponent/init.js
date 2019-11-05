@@ -7,8 +7,9 @@ function init(initialState, componentValue) {
   return initialState.update('collapses', list => {
     if (isArray(componentValue)) {
       return fromJS(
-        componentValue.map(() => ({
+        componentValue.map((_, i) => ({
           isOpen: false,
+          _temp__id: i,
         }))
       );
     }

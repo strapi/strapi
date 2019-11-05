@@ -7,7 +7,8 @@
   "collectionName": "components_openingtimes",
   "attributes": {
     "label": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "time": {
       "type": "string"

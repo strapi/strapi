@@ -4,7 +4,7 @@ import LayoutDndProvider from '../../containers/LayoutDndProvider';
 
 import ItemTypes from '../../utils/ItemTypes';
 
-import ComponentBanner from '../ComponentBanner';
+import ComponentBanner from '../RepeatableComponent/Banner';
 import RelationItem from '../SelectMany/Relation';
 import { Li } from '../SelectMany/components';
 import DraggedField from '../DraggedField';

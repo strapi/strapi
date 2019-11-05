@@ -2,7 +2,6 @@ import {
   fromJS,
   // List,
 } from 'immutable';
-import getMax from './utils/getMax';
 
 const initialState = fromJS({
   formErrors: {},
@@ -23,12 +22,10 @@ const reducer = (state, action) => {
         const defaultAttribute = fromJS({});
 
         if (list) {
-          const max = getMax(list);
-
-          return list.push(defaultAttribute.set('_temp__id', max + 1));
+          return list.push(defaultAttribute);
         }
 
-        return fromJS([defaultAttribute.set('_temp__id', 0)]);
+        return fromJS([defaultAttribute]);
       });
     }
     case 'ADD_COMPONENT_TO_DYNAMIC_ZONE':
@@ -64,6 +61,23 @@ const reducer = (state, action) => {
         .update('isLoading', () => false);
     case 'IS_SUBMITTING':
       return state.update('shouldShowLoadingState', () => action.value);
+    case 'MOVE_COMPONENT_FIELD':
+      // console.log({ dragPath: action.dragPath, hoverPath: action.hoverPath });
+      return state.updateIn(
+        ['modifiedData', ...action.pathToComponent],
+        list => {
+          return list
+            .delete(action.dragIndex)
+            .insert(
+              action.hoverIndex,
+              state.getIn([
+                'modifiedData',
+                ...action.pathToComponent,
+                action.dragIndex,
+              ])
+            );
+        }
+      );
     case 'MOVE_FIELD':
       return state.updateIn(['modifiedData', ...action.keys], list => {
         return list

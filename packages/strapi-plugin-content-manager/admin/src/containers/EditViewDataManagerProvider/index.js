@@ -157,6 +157,15 @@ const EditViewDataManagerProvider = ({
     // });
   };
 
+  const moveComponentField = (pathToComponent, dragIndex, hoverIndex) => {
+    dispatch({
+      type: 'MOVE_COMPONENT_FIELD',
+      pathToComponent,
+      dragIndex,
+      hoverIndex,
+    });
+  };
+
   const moveRelation = (dragIndex, overIndex, name) => {
     dispatch({
       type: 'MOVE_FIELD',
@@ -211,6 +220,7 @@ const EditViewDataManagerProvider = ({
         initialData,
         layout: currentContentTypeLayout,
         modifiedData,
+        moveComponentField,
         moveRelation,
         onChange: handleChange,
         onRemoveRelation,
