@@ -5,6 +5,7 @@
  */
 
 // Node.js core.
+const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
 const koaStatic = require('koa-static');
@@ -29,17 +30,10 @@ module.exports = strapi => {
       );
 
       // Serve /public index page.
-      strapi.router.get(
-        '/',
-        async (ctx, next) => {
-          ctx.url = path.basename(`${ctx.url}/index.html`);
-          await next();
-        },
-        koaStatic(staticDir, {
-          maxage: maxAge,
-          defer: true,
-        })
-      );
+      strapi.router.get('/', ctx => {
+        ctx.type = 'html';
+        ctx.body = fs.createReadStream(path.join(staticDir + '/index.html'));
+      });
 
       // Match every route with an extension.
       // The file without extension will not be served.
@@ -69,50 +63,24 @@ module.exports = strapi => {
 
       const buildDir = path.resolve(strapi.dir, 'build');
 
-      // Serve /admin index page.
-      strapi.router.get(
-        basename,
-        async (ctx, next) => {
-          ctx.url = 'index.html';
-          await next();
-        },
-        koaStatic(buildDir, {
-          maxage: maxAge,
-          defer: true,
-        })
-      );
-
-      // Allow refresh in admin page.
+      // Serve admin assets.
       strapi.router.get(
         `${basename}/*`,
         async (ctx, next) => {
-          const parse = path.parse(ctx.url);
-
-          if (parse.ext === '') {
-            ctx.url = 'index.html';
-          }
-
-          await next();
-        },
-        koaStatic(buildDir, {
-          maxage: maxAge,
-          defer: true,
-        })
-      );
-
-      // Serve admin assets.
-      strapi.router.get(
-        `${basename}/*.*`,
-        async (ctx, next) => {
           ctx.url = path.basename(ctx.url);
-
           await next();
         },
         koaStatic(buildDir, {
+          index: 'index.html',
           maxage: maxAge,
-          defer: true,
+          defer: false,
         })
       );
+
+      strapi.router.get(`${basename}*`, ctx => {
+        ctx.type = 'html';
+        ctx.body = fs.createReadStream(path.join(buildDir + '/index.html'));
+      });
     },
   };
 };
