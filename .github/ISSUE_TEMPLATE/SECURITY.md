@@ -1,6 +1,6 @@
 ---
 name: 🛡 Security
-about: Information on reporting security volnerabilities
+about: Information on reporting security vulnerabilities
 ---
 
 # Security Policy
