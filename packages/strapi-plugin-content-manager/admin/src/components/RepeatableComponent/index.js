@@ -16,12 +16,16 @@ const RepeatableComponent = ({
   name,
   schema,
 }) => {
-  const {
-    addRepeatableComponentToField,
-    // modifiedData,
-    // removeComponentFromField,
-  } = useDataManager();
+  const { addRepeatableComponentToField, formErrors } = useDataManager();
 
+  const componentErrorKeys = Object.keys(formErrors)
+    .filter(errorKey => errorKey.includes(name))
+    .map(errorKey => {
+      return errorKey
+        .split('.')
+        .slice(0, name.split('.').length + 1)
+        .join('.');
+    });
   // We need to synchronize the collapses array with the data
   // The key needed for react in the list will be the one from the collapses data
   // This way we don't have to mutate the data when it is received and we can use a unique key
@@ -48,11 +52,20 @@ const RepeatableComponent = ({
       {componentValueLength > 0 &&
         componentValue.map((data, index) => {
           const componentFieldName = `${name}.${index}`;
+          const doesPreviousFieldContainErrorsAndIsOpen =
+            componentErrorKeys.includes(`${name}.${index - 1}`) &&
+            index !== 0 &&
+            collapses[index - 1].isOpen === false;
+          const hasErrors = componentErrorKeys.includes(componentFieldName);
 
           return (
             <DraggedItem
               fields={fields}
               componentFieldName={componentFieldName}
+              doesPreviousFieldContainErrorsAndIsOpen={
+                doesPreviousFieldContainErrorsAndIsOpen
+              }
+              hasErrors={hasErrors}
               isOpen={collapses[index].isOpen}
               key={collapses[index]._temp__id}
               onClickToggle={() => {
@@ -79,6 +92,11 @@ const RepeatableComponent = ({
         })}
       <Button
         withBorderRadius={false}
+        doesPreviousFieldContainErrorsAndIsClosed={
+          componentValueLength > 0 &&
+          componentErrorKeys.includes(`${name}.${componentValueLength - 1}`) &&
+          collapses[componentValueLength - 1].isOpen === false
+        }
         type="button"
         onClick={() => {
           // TODO min max validations

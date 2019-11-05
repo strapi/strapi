@@ -16,6 +16,14 @@ const BannerWrapper = styled.button`
       }
     }};
 
+  ${({ doesPreviousFieldContainErrorsAndIsOpen }) => {
+    if (doesPreviousFieldContainErrorsAndIsOpen) {
+      return `
+        border-top: 1px solid #ffa784;
+      `;
+    }
+  }}
+
   ${({ isFirst }) => {
     if (isFirst) {
       return `
@@ -55,6 +63,8 @@ const BannerWrapper = styled.button`
     }
   }}
 
+
+
   ${({ isOpen }) => {
     if (isOpen) {
       return `
@@ -87,6 +97,8 @@ const BannerWrapper = styled.button`
     line-height: 19px;
 
     ${({ isOpen }) => !isOpen && 'transform: rotate(180deg)'}
+
+
   }
 
   .cta-wrapper {
@@ -99,6 +111,26 @@ const BannerWrapper = styled.button`
       cursor: move;
     }
   }
+
+  ${({ hasErrors, isOpen }) => {
+    let fill = '#B4B6BA';
+
+    if (isOpen) {
+      fill = '#007EFF';
+    }
+
+    if (hasErrors) {
+      fill = '#F64D0A';
+    }
+
+    return `
+      svg {
+        path {
+          fill: ${fill};
+        }
+      }
+    `;
+  }}
 
   webkit-font-smoothing: antialiased;
 `;

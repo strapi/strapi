@@ -13,7 +13,9 @@ import FormWrapper from './FormWrapper';
 
 const DraggedItem = ({
   componentFieldName,
+  doesPreviousFieldContainErrorsAndIsOpen,
   fields,
+  hasErrors,
   isOpen,
   moveCollapse,
   onClickToggle,
@@ -138,7 +140,11 @@ const DraggedItem = ({
     <>
       <Banner
         componentFieldName={componentFieldName}
+        hasErrors={hasErrors}
         displayedValue={displayedValue}
+        doesPreviousFieldContainErrorsAndIsOpen={
+          doesPreviousFieldContainErrorsAndIsOpen
+        }
         isDragging={isDragging}
         isOpen={isOpen}
         onClickToggle={onClickToggle}
@@ -149,7 +155,7 @@ const DraggedItem = ({
         ref={refs}
       />
       <Collapse isOpen={isOpen} style={{ backgroundColor: '#FAFAFB' }}>
-        <FormWrapper isOpen={isOpen}>
+        <FormWrapper hasErrors={hasErrors} isOpen={isOpen}>
           {fields.map((fieldRow, key) => {
             return (
               <div className="row" key={key}>
@@ -196,7 +202,9 @@ const DraggedItem = ({
 };
 
 DraggedItem.defaultProps = {
+  doesPreviousFieldContainErrorsAndIsOpen: false,
   fields: [],
+  hasErrors: false,
   isOpen: false,
   moveCollapse: () => {},
   toggleCollapses: () => {},
@@ -204,7 +212,9 @@ DraggedItem.defaultProps = {
 
 DraggedItem.propTypes = {
   componentFieldName: PropTypes.string.isRequired,
+  doesPreviousFieldContainErrorsAndIsOpen: PropTypes.bool,
   fields: PropTypes.array,
+  hasErrors: PropTypes.bool,
   isOpen: PropTypes.bool,
   moveCollapse: PropTypes.func,
   onClickToggle: PropTypes.func.isRequired,

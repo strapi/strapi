@@ -9,14 +9,27 @@ import CarretTop from './CarretTop';
 
 const Banner = forwardRef(
   (
-    { displayedValue, isDragging, isOpen, onClickToggle, onClickRemove, style },
+    {
+      displayedValue,
+      doesPreviousFieldContainErrorsAndIsOpen,
+      hasErrors,
+      isDragging,
+      isOpen,
+      onClickToggle,
+      onClickRemove,
+      style,
+    },
     refs
   ) => {
     const display = isDragging ? 'none' : '';
 
     return (
       <BannerWrapper
+        doesPreviousFieldContainErrorsAndIsOpen={
+          doesPreviousFieldContainErrorsAndIsOpen
+        }
         type="button"
+        hasErrors={hasErrors}
         isOpen={isOpen}
         onClick={onClickToggle}
         ref={refs ? refs.dropRef : null}
@@ -25,7 +38,7 @@ const Banner = forwardRef(
         {isDragging && <PreviewCarret isComponent />}
         <>
           <span className="img-wrapper" style={{ display }}>
-            <CarretTop />
+            <CarretTop isOpen={isOpen} hasErrors={hasErrors} />
           </span>
 
           <FormattedMessage
@@ -59,6 +72,8 @@ const Banner = forwardRef(
 
 Banner.defaultProps = {
   displayedValue: null,
+  doesPreviousFieldContainErrorsAndIsOpen: false,
+  hasErrors: false,
   isDragging: false,
   isOpen: false,
   onClickRemove: () => {},
@@ -72,6 +87,8 @@ Banner.propTypes = {
     PropTypes.number,
     PropTypes.object,
   ]),
+  doesPreviousFieldContainErrorsAndIsOpen: PropTypes.bool,
+  hasErrors: PropTypes.bool,
   isDragging: PropTypes.bool,
   isOpen: PropTypes.bool,
   onClickToggle: PropTypes.func,
