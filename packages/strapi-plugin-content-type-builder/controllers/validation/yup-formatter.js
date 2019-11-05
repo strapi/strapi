@@ -8,8 +8,8 @@ const { ValidationError } = require('yup');
  */
 const formatYupErrors = validationError => {
   if (!(validationError instanceof ValidationError)) {
-    console.log('ici');
-    throw validationError;
+    console.log('ici', validationError);
+    throw new Error('error validation input');
   }
 
   if (validationError.inner.length === 0) {

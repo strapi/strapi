@@ -8,7 +8,10 @@ const path = require('path');
 const generator = require('strapi-generate');
 const { formatAttributes, convertAttributes } = require('../utils/attributes');
 const { nameToSlug } = require('../utils/helpers');
-const { validateContentTypeInput } = require('./validation/contentType');
+const {
+  validateContentTypeInput,
+  validateUpdateContentTypeInput,
+} = require('./validation/contentType');
 
 module.exports = {
   getContentTypes(ctx) {
@@ -41,8 +44,6 @@ module.exports = {
   async createContentType(ctx) {
     const { body } = ctx.request;
 
-    strapi.reload.isWatching = false;
-
     try {
       await validateContentTypeInput(body);
     } catch (error) {
@@ -56,13 +57,114 @@ module.exports = {
       return ctx.send({ error: 'contentType.alreadyExists' }, 400);
     }
 
-    const contentType = createContentTypeSchema(body);
+    strapi.reload.isWatching = false;
 
-    await generateAPI(slug, contentType);
+    try {
+      const contentType = createContentTypeSchema(body);
 
-    await generateReversedRelations({ attributes: body.attributes, slug });
+      await generateAPI(slug, contentType);
 
-    strapi.reload();
+      await generateReversedRelations({ attributes: body.attributes, slug });
+
+      if (_.isEmpty(strapi.api)) {
+        strapi.emit('didCreateFirstContentType');
+      } else {
+        strapi.emit('didCreateContentType');
+      }
+    } catch (e) {
+      strapi.log.error(e);
+      strapi.emit('didNotCreateContentType', e);
+      return ctx.badRequest(null, [
+        { messages: [{ id: 'request.error.model.write' }] },
+      ]);
+    }
+
+    setImmediate(() => strapi.reload());
+
+    ctx.send({
+      data: {
+        uid,
+      },
+    });
+  },
+
+  async updateContentType(ctx) {
+    const { uid } = ctx.params;
+    const { body } = ctx.request;
+
+    const contentType = strapi.contentTypes[uid];
+
+    if (!contentType) {
+      return ctx.send({ error: 'contentType.notFound' }, 404);
+    }
+
+    try {
+      await validateUpdateContentTypeInput(body);
+    } catch (error) {
+      return ctx.send({ error }, 400);
+    }
+
+    strapi.reload.isWatching = false;
+
+    try {
+      const newSchema = updateContentTypeSchema(contentType.__schema__, body);
+
+      await writeContentType({ uid, schema: newSchema });
+
+      const updates = Object.keys(strapi.contentTypes).map(ctUID => {
+        const contentType = strapi.contentTypes[ctUID];
+
+        const keysToDelete = Object.keys(
+          contentType.__schema__.attributes
+        ).filter(key => {
+          const attr = contentType.__schema__.attributes[key];
+          if (
+            (attr.model === uid || attr.collection === uid) &&
+            attr.via &&
+            !Object.keys(newSchema.attributes).includes(attr.via)
+          ) {
+            return true;
+          }
+          return false;
+        });
+
+        const keysToUpdate = [];
+
+        if (keysToDelete.length > 0 || keysToUpdate.length > 0) {
+          const newAttributes = _.omit(contentType.__schema__.attributes, [
+            keysToDelete,
+          ]);
+
+          const newCTSchema = {
+            ...contentType.__schema__,
+            attributes: newAttributes,
+          };
+
+          return writeContentType({ uid: ctUID, schema: newCTSchema });
+        }
+      });
+
+      await Promise.all(updates);
+
+      // TODO: clear relations to delete (diff old vs new attributes and delete the ones with via)
+
+      // TODO: update relations that changed
+      // TODO: add new relations (diff old vs new and add new attributes)
+
+      if (_.isEmpty(strapi.api)) {
+        strapi.emit('didCreateFirstContentType');
+      } else {
+        strapi.emit('didCreateContentType');
+      }
+    } catch (e) {
+      strapi.log.error(e);
+      strapi.emit('didNotCreateContentType', e);
+      return ctx.badRequest(null, [
+        { messages: [{ id: 'request.error.model.write' }] },
+      ]);
+    }
+
+    setImmediate(() => strapi.reload());
 
     ctx.send({
       data: {
@@ -108,8 +210,7 @@ const generateReversedRelations = ({ attributes, slug, plugin }) => {
         default:
       }
 
-      const oldSchema = target.__schema__;
-      const schema = _.merge({}, oldSchema, {
+      const schema = _.merge({}, target.__schema__, {
         attributes: {
           [attr.targetAttribute]: targetAttributeOptions,
         },
@@ -124,8 +225,6 @@ const generateReversedRelations = ({ attributes, slug, plugin }) => {
 const writeContentType = async ({ uid, schema }) => {
   const { plugin, apiName, __filename__ } = strapi.contentTypes[uid];
 
-  const fileName = __filename__;
-
   let fileDir;
   if (plugin) {
     fileDir = `./extensions/${plugin}/models`;
@@ -133,7 +232,7 @@ const writeContentType = async ({ uid, schema }) => {
     fileDir = `./api/${apiName}/models`;
   }
 
-  const filePath = path.join(strapi.dir, fileDir, fileName);
+  const filePath = path.join(strapi.dir, fileDir, __filename__);
 
   await fse.ensureFile(filePath);
   return fse.writeFile(filePath, JSON.stringify(schema, null, 2));
@@ -169,6 +268,18 @@ const createContentTypeSchema = infos => ({
     name: infos.name,
     description: infos.description,
   },
+  attributes: convertAttributes(infos.attributes),
+});
+
+const updateContentTypeSchema = (old, infos) => ({
+  ...old,
+  connection: infos.connection || old.connection,
+  collectionName: infos.collectionName || old.collectionName,
+  info: {
+    name: infos.name || old.info.name,
+    description: infos.description || old.info.description,
+  },
+  // TODO: keep old params like autoMigration, private, configurable
   attributes: convertAttributes(infos.attributes),
 });
 

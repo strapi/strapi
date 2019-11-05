@@ -6,7 +6,7 @@ const { validators, isValidName } = require('./common');
 
 const REVERSE_RELATIONS = ['oneToOne', 'oneToMany', 'manyToOne', 'manyToMany'];
 
-module.exports = validNatures => {
+module.exports = (obj, validNatures) => {
   const contentTypesUIDs = Object.keys(strapi.contentTypes);
 
   return {

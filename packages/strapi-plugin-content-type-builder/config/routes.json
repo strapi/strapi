@@ -34,8 +34,8 @@
     },
     {
       "method": "PUT",
-      "path": "/models/:model",
-      "handler": "ContentTypeBuilder.updateModel",
+      "path": "/content-types/:uid",
+      "handler": "ContentTypes.updateContentType",
       "config": {
         "policies": []
       }

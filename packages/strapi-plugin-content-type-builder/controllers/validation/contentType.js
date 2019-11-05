@@ -95,7 +95,7 @@ const componentSchema = yup
                   ...getTypeShape(obj),
                 };
               } else if (_.has(obj, 'target')) {
-                shape = getRelationValidator(VALID_COMPONENT_RELATIONS);
+                shape = getRelationValidator(obj, VALID_COMPONENT_RELATIONS);
               } else {
                 return yup.object().test({
                   name: 'mustHaveTypeOrTarget',
