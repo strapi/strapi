@@ -11,12 +11,9 @@ const setDefaultForm = attributes => {
       repeatable,
     } = attribute;
 
-    if (type === 'json') {
-      acc[current] = null;
-    }
-
+    // Fix for https://github.com/strapi/strapi/issues/2644
     if (type === 'json' && required === true) {
-      acc[current] = {};
+      acc[current] = JSON.stringify(null);
     }
 
     if (defaultValue !== undefined) {

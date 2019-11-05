@@ -123,13 +123,7 @@ class InputJSON extends React.Component {
   handleChange = () => {
     const { hasInitValue } = this.state;
     const { name, onChange } = this.props;
-    let value = this.codeMirror.getValue();
-
-    try {
-      value = parse(value);
-    } catch (err) {
-      // Silent
-    }
+    const value = this.codeMirror.getValue();
 
     // Update the parent
     onChange({
