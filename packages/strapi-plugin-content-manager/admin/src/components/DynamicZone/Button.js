@@ -1,20 +1,19 @@
 import styled from 'styled-components';
+import PlusButton from '../PlusButton';
 
-const Button = styled.button`
-  height: 36px;
-  width: 36px;
-  background-color: #f3f4f4;
-  border-radius: 50%;
+const Button = styled(PlusButton)`
   transform: rotate(-45deg);
   transition: background-color 0.2s linear;
-  transition: transform 0.5s ease-in-out;
-  text-align: center;
+  transition: transform 0.2s ease-in-out;
 
   ${({ isOpen }) => {
     if (isOpen) {
       return `
-      transform: rotate(-90deg);
-      background-color: #aed4fb;
+        transform: rotate(-90deg);
+        background-color: #aed4fb;
+        :before, :after {
+          background-color: #007eff;
+        }
       `;
     }
   }}

@@ -1,4 +1,4 @@
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 const NonRepeatableWrapper = styled.div`
   margin: 0 !important;
@@ -6,7 +6,7 @@ const NonRepeatableWrapper = styled.div`
 
   ${({ isEmpty }) => {
     if (isEmpty) {
-      return css`
+      return `
         position: relative;
         height: 108px;
         margin-bottom: 21px !important;
@@ -15,7 +15,7 @@ const NonRepeatableWrapper = styled.div`
         cursor: pointer;
         border-radius: 2px;
 
-        > div {
+        > button {
           position: absolute;
           top: 30px;
           left: calc(50% - 18px);
@@ -25,37 +25,28 @@ const NonRepeatableWrapper = styled.div`
           border-radius: 50%;
           background-color: #f3f4f4;
           cursor: pointer;
-          &:before {
-            content: '\f067';
-            font-family: FontAwesome;
-            font-size: 15px;
-            color: #b4b6ba;
-          }
         }
         border: 1px solid transparent;
 
         &:hover {
           border: 1px solid #aed4fb;
           background-color: #e6f0fb;
+          > button {
+            :before,
+            :after {
+              background-color: #007eff;
+            }
+            background-color: #aed4fb;
+          }
 
           > p {
             color: #007eff;
-          }
-
-          > div {
-            background-color: #aed4fb;
-            &:before {
-              content: '\f067';
-              font-family: FontAwesome;
-              font-size: 15px;
-              color: #007eff;
-            }
           }
         }
       `;
     }
 
-    return css`
+    return `
       padding-top: 21px !important;
       background-color: #f7f8f8;
       margin-bottom: 18px !important;

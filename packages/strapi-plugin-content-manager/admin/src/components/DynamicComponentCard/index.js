@@ -22,9 +22,9 @@ const DynamicComponentCard = ({
       onMouseEnter={onMouseEvent}
       onMouseLeave={onMouseEvent}
     >
-      <div className="component-icon">
+      <button className="component-icon">
         <i className="fa fa-picture-o" />
-      </div>
+      </button>
 
       <div className="component-uid">
         {isOver ? (

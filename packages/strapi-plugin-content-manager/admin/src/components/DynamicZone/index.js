@@ -4,7 +4,6 @@ import React, {
 } from 'react';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
-import { Remove } from '@buffetjs/icons'; // TODO use css instead
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
@@ -43,9 +42,7 @@ const DynamicZone = ({ name }) => {
           onMouseEnter={handleMouseEvent}
           onMouseLeave={handleMouseEvent}
           onClick={() => setIsOpen(prev => !prev)}
-        >
-          <Remove />
-        </Button>
+        />
 
         <div className="info">
           <FormattedMessage
