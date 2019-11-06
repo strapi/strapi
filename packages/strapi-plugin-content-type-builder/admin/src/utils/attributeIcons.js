@@ -11,6 +11,7 @@ import relation from '../assets/icons/attributes/icon_relation.png';
 import richtext from '../assets/icons/attributes/icon_text.png';
 import string from '../assets/icons/attributes/icon_string.png';
 import text from '../assets/icons/attributes/icon_text.png';
+import uuid from '../assets/icons/attributes/icon_uuid.png';
 
 const attributeIcons = {
   boolean,
@@ -26,6 +27,7 @@ const attributeIcons = {
   richtext,
   string,
   text,
+  uuid,
 };
 
 export default attributeIcons;
