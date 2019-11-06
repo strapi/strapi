@@ -62,7 +62,6 @@ const reducer = (state, action) => {
     case 'IS_SUBMITTING':
       return state.update('shouldShowLoadingState', () => action.value);
     case 'MOVE_COMPONENT_FIELD':
-      // console.log({ dragPath: action.dragPath, hoverPath: action.hoverPath });
       return state.updateIn(
         ['modifiedData', ...action.pathToComponent],
         list => {
@@ -78,6 +77,32 @@ const reducer = (state, action) => {
             );
         }
       );
+    case 'MOVE_COMPONENT_UP':
+      return state.updateIn(['modifiedData', action.dynamicZoneName], list => {
+        return list
+          .delete(action.currentIndex)
+          .insert(
+            action.currentIndex - 1,
+            state.getIn([
+              'modifiedData',
+              action.dynamicZoneName,
+              action.currentIndex,
+            ])
+          );
+      });
+    case 'MOVE_COMPONENT_DOWN':
+      return state.updateIn(['modifiedData', action.dynamicZoneName], list => {
+        return list
+          .delete(action.currentIndex)
+          .insert(
+            action.currentIndex + 1,
+            state.getIn([
+              'modifiedData',
+              action.dynamicZoneName,
+              action.currentIndex,
+            ])
+          );
+      });
     case 'MOVE_FIELD':
       return state.updateIn(['modifiedData', ...action.keys], list => {
         return list
@@ -102,6 +127,12 @@ const reducer = (state, action) => {
         return action.value;
       });
     }
+    case 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE':
+      return state.deleteIn([
+        'modifiedData',
+        action.dynamicZoneName,
+        action.index,
+      ]);
     case 'REMOVE_COMPONENT_FROM_FIELD': {
       const componentPathToRemove = ['modifiedData', ...action.keys];
 

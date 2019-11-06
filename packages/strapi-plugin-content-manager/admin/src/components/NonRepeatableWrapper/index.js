@@ -4,7 +4,7 @@ const NonRepeatableWrapper = styled.div`
   margin: 0 !important;
   padding: 0 20px !important;
 
-  ${({ isEmpty }) => {
+  ${({ isEmpty, isFromDynamicZone }) => {
     if (isEmpty) {
       return `
         position: relative;
@@ -43,6 +43,12 @@ const NonRepeatableWrapper = styled.div`
             color: #007eff;
           }
         }
+      `;
+    }
+
+    if (isFromDynamicZone) {
+      return `
+        background-color: #fff;
       `;
     }
 

@@ -157,6 +157,20 @@ const EditViewDataManagerProvider = ({
     // });
   };
 
+  const moveComponentDown = (dynamicZoneName, currentIndex) => {
+    dispatch({
+      type: 'MOVE_COMPONENT_DOWN',
+      dynamicZoneName,
+      currentIndex,
+    });
+  };
+  const moveComponentUp = (dynamicZoneName, currentIndex) => {
+    dispatch({
+      type: 'MOVE_COMPONENT_UP',
+      dynamicZoneName,
+      currentIndex,
+    });
+  };
   const moveComponentField = (pathToComponent, dragIndex, hoverIndex) => {
     dispatch({
       type: 'MOVE_COMPONENT_FIELD',
@@ -183,7 +197,13 @@ const EditViewDataManagerProvider = ({
   };
 
   // REMOVE_COMPONENT_FROM_FIELD
-
+  const removeComponentFromDynamicZone = (dynamicZoneName, index) => {
+    dispatch({
+      type: 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE',
+      dynamicZoneName,
+      index,
+    });
+  };
   const removeComponentFromField = (keys, componentUid) => {
     dispatch({
       type: 'REMOVE_COMPONENT_FROM_FIELD',
@@ -218,11 +238,14 @@ const EditViewDataManagerProvider = ({
         initialData,
         layout: currentContentTypeLayout,
         modifiedData,
+        moveComponentDown,
         moveComponentField,
+        moveComponentUp,
         moveRelation,
         onChange: handleChange,
         onRemoveRelation,
         redirectToPreviousPage,
+        removeComponentFromDynamicZone,
         removeComponentFromField,
         removeRepeatableField,
         resetData: () => {

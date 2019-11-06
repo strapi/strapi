@@ -12,13 +12,20 @@ import Label from './Label';
 import Reset from './ResetComponent';
 import Wrapper from './Wrapper';
 
-const FieldComponent = ({ componentUid, isRepeatable, label, name }) => {
+const FieldComponent = ({
+  componentUid,
+  isFromDynamicZone,
+  isRepeatable,
+  label,
+  name,
+}) => {
   const { modifiedData, removeComponentFromField } = useDataManager();
   const { allLayoutData } = useEditView();
   const componentValue = get(modifiedData, name, null);
   const componentValueLength = size(componentValue);
-  const isInitialized = componentValue !== null;
-  const showResetComponent = !isRepeatable && isInitialized;
+  const isInitialized = componentValue !== null || isFromDynamicZone;
+  const showResetComponent =
+    !isRepeatable && isInitialized && !isFromDynamicZone;
   const currentComponentSchema = get(
     allLayoutData,
     ['components', componentUid],
@@ -27,7 +34,7 @@ const FieldComponent = ({ componentUid, isRepeatable, label, name }) => {
   const displayedFields = get(currentComponentSchema, ['layouts', 'edit'], []);
 
   return (
-    <Wrapper className="col-12">
+    <Wrapper className="col-12" isFromDynamicZone={isFromDynamicZone}>
       <Label>
         {label}&nbsp;
         {isRepeatable && `(${componentValueLength})`}
@@ -49,6 +56,7 @@ const FieldComponent = ({ componentUid, isRepeatable, label, name }) => {
       {!isRepeatable && isInitialized && (
         <NonRepeatableComponent
           fields={displayedFields}
+          isFromDynamicZone={isFromDynamicZone}
           name={name}
           schema={currentComponentSchema}
         />
@@ -59,6 +67,7 @@ const FieldComponent = ({ componentUid, isRepeatable, label, name }) => {
           componentValueLength={componentValueLength}
           componentUid={componentUid}
           fields={displayedFields}
+          isFromDynamicZone={isFromDynamicZone}
           name={name}
           schema={currentComponentSchema}
         />
@@ -68,11 +77,13 @@ const FieldComponent = ({ componentUid, isRepeatable, label, name }) => {
 };
 
 FieldComponent.defaultProps = {
+  isFromDynamicZone: false,
   isRepeatable: false,
 };
 
 FieldComponent.propTypes = {
   componentUid: PropTypes.string.isRequired,
+  isFromDynamicZone: PropTypes.bool,
   isRepeatable: PropTypes.bool,
   label: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
