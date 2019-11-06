@@ -92,6 +92,7 @@ module.exports = strapi => {
       ) {
         serverParams.playground = {
           endpoint: strapi.plugins.graphql.config.endpoint,
+          shareEnabled: strapi.plugins.graphql.config.shareEnabled
         };
 
         serverParams.introspection = true;

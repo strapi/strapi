@@ -6,23 +6,27 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import cn from 'classnames';
 import { withRouter } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty } from 'lodash';
-
 // Design
-import { IcoContainer, ListRow, PopUpWarning } from 'strapi-helper-plugin';
-
-import styles from './styles.scss';
+import {
+  GlobalContext,
+  IcoContainer,
+  ListRow,
+  PopUpWarning,
+} from 'strapi-helper-plugin';
+import Action from './Action';
+import Content from './Content';
 
 const PLUGINS_WITH_CONFIG = ['content-manager', 'email', 'upload'];
 
 class Row extends React.Component {
+  static contextType = GlobalContext;
   state = { showModal: false };
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    if (nextProps.pluginActionSucceeded !== this.props.pluginActionSucceeded) {
+  componentDidUpdate(prevProps) {
+    if (prevProps.pluginActionSucceeded !== this.props.pluginActionSucceeded) {
       this.setState({ showModal: false });
     }
   }
@@ -69,29 +73,29 @@ class Row extends React.Component {
 
     return (
       <ListRow>
-        <div className={cn('col-md-11', styles.nameWrapper)}>
-          <div className={styles.icoContainer} style={{ marginRight: '14px' }}>
+        <Content className="col-md-11">
+          <div className="icoContainer" style={{ marginRight: '14px' }}>
             {!isEmpty(this.props.plugin.logo) && (
               <img src={`${this.props.plugin.logo}`} alt="icon" />
             )}
             {isEmpty(this.props.plugin.logo) && (
-              <div className={styles.icoWrapper}>
+              <div className="icoWrapper">
                 <i className={`fa fa-${this.props.plugin.icon}`} />
               </div>
             )}
           </div>
-          <div className={styles.pluginContent}>
+          <div className="pluginContent">
             <span>{this.props.plugin.name} —&nbsp;</span>
             <FormattedMessage
               id={`${this.props.plugin.description}.short`}
               defaultMessage={this.props.plugin.description}
             />
           </div>
-        </div>
+        </Content>
         <div className="col-md-1">
-          <div className={styles.actionContainer}>
+          <Action>
             <IcoContainer icons={icons} />
-          </div>
+          </Action>
         </div>
         <PopUpWarning
           isOpen={this.state.showModal}
@@ -105,10 +109,6 @@ class Row extends React.Component {
     );
   }
 }
-
-Row.contextTypes = {
-  currentEnvironment: PropTypes.string,
-};
 
 Row.propTypes = {
   history: PropTypes.object.isRequired,

@@ -56,6 +56,12 @@ module.exports = (scope, cb) => {
   const pluginDir = path.resolve(scope.rootPath, 'plugins');
   fs.ensureDirSync(pluginDir);
 
+  // Copy the admin files.
+  fs.copySync(
+    path.resolve(__dirname, '..', 'files'),
+    path.resolve(pluginDir, scope.humanizeId)
+  );
+
   // Trigger callback with no error to proceed.
   return cb.success();
 };

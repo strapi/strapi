@@ -257,6 +257,27 @@ module.exports = {
         }),
       });
 
+      // Note: we've to used the Object.defineProperties to reset the prototype. It seems that the cloning the context
+      // cause a lost of the Object prototype.
+      const opts = this.amountLimiting(_options);
+
+      Object.defineProperty(ctx, 'query', {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: {
+          ...this.convertToParams(_.omit(opts, 'where')),
+          ...this.convertToQuery(opts.where),
+        },
+      });
+
+      Object.defineProperty(ctx, 'params', {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: this.convertToParams(opts),
+      });
+
       // Execute policies stack.
       const policy = await compose(policiesFn)(ctx);
 
@@ -275,17 +296,6 @@ module.exports = {
 
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
-        // Note: we've to used the Object.defineProperties to reset the prototype. It seems that the cloning the context
-        // cause a lost of the Object prototype.
-        const opts = this.amountLimiting(_options);
-
-        ctx.query = {
-          ...this.convertToParams(_.omit(opts, 'where')),
-          ...this.convertToQuery(opts.where),
-        };
-
-        ctx.params = this.convertToParams(opts);
-
         if (isController) {
           const values = await resolver.call(null, ctx, null);
 

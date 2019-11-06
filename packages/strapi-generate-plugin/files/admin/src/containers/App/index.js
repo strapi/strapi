@@ -6,66 +6,22 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { createStructuredSelector } from 'reselect';
 import { Switch, Route } from 'react-router-dom';
-import { bindActionCreators, compose } from 'redux';
-
+import { NotFound } from 'strapi-helper-plugin';
 // Utils
-import pluginId from 'pluginId';
-
+import pluginId from '../../pluginId';
 // Containers
-import HomePage from 'containers/HomePage';
-import NotFoundPage from 'containers/NotFoundPage';
-// When you're done studying the ExamplePage container, remove the following line and delete the ExamplePage container
-import ExamplePage from 'containers/ExamplePage';
+import HomePage from '../HomePage';
 
-import reducer from './reducer';
-
-class App extends React.Component {
-  // When you're done studying the ExamplePage container, remove the following lines and delete the ExamplePage container
-  componentDidMount() {
-    this.props.history.push(`/plugins/${pluginId}/example`);
-  }
-
-  render() {
-    return (
-      <div className={pluginId}>
-        <Switch>
-          <Route path={`/plugins/${pluginId}`} component={HomePage} exact />
-          {/* When you're done studying the ExamplePage container, remove the following line and delete the ExamplePage container  */}
-          <Route path={`/plugins/${pluginId}/example`} component={ExamplePage} exact />
-          <Route component={NotFoundPage} />
-        </Switch>
-      </div>
-    );
-  }
-}
-
-App.contextTypes = {
-  plugins: PropTypes.object,
-  updatePlugin: PropTypes.func,
-};
-
-App.propTypes = {
-  history: PropTypes.object.isRequired,
-};
-
-export function mapDispatchToProps(dispatch) {
-  return bindActionCreators(
-    {},
-    dispatch,
+const App = () => {
+  return (
+    <div>
+      <Switch>
+        <Route path={`/plugins/${pluginId}`} component={HomePage} exact />
+        <Route component={NotFound} />
+      </Switch>
+    </div>
   );
-}
+};
 
-const mapStateToProps = createStructuredSelector({});
-
-// Wrap the component to inject dispatch and state into it
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-const withReducer = strapi.injectReducer({ key: 'global', reducer, pluginId });
-
-export default compose(
-  withReducer,
-  withConnect,
-)(App);
+export default App;

@@ -4,7 +4,7 @@
 This feature is currently not available (coming soon).
 :::
 
-<!-- 
+<!--
 
 ## Admin panel
 
@@ -313,5 +313,5 @@ const Foo = props => (
 export default Foo;
 ```
 
-See [the documentation](https://github.com/yahoo/react-intl/wiki/Components#formattedmessage) for more extensive usage. 
+See [the documentation](https://github.com/yahoo/react-intl/wiki/Components#formattedmessage) for more extensive usage.
 -->

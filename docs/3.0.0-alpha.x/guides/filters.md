@@ -103,7 +103,7 @@ Limit the result length to 30.
 
 `GET /users?_limit=30`
 
-You can require the full data set by passing a limit equal to `-1`
+You can require the full data set by passing a limit equal to `0`
 
 ### Start
 

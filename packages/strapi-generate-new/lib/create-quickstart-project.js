@@ -2,7 +2,7 @@
 
 const execa = require('execa');
 
-const { trackUsage, captureError } = require('./utils/usage');
+const { trackUsage, captureStderr } = require('./utils/usage');
 const defaultConfigs = require('./utils/db-configs.js');
 const clientDependencies = require('./utils/db-client-dependencies.js');
 const createProject = require('./create-project');
@@ -21,8 +21,35 @@ module.exports = async function createQuickStartProject(scope) {
 
   await createProject(scope, configuration);
 
-  if (scope.runQuickstartApp === true) {
-    console.log(`Running your Strapi application.`);
+  if (scope.runQuickstartApp !== true) return;
+
+  try {
+    await trackUsage({ event: 'willBuildAdmin', scope });
+
+    await execa('npm', ['run', 'build', '--', '--no-optimization'], {
+      stdio: 'inherit',
+      cwd: scope.rootPath,
+      env: {
+        FORCE_COLOR: 1,
+      },
+    });
+
+    await trackUsage({ event: 'didBuildAdmin', scope });
+  } catch (error) {
+    await trackUsage({
+      event: 'didNotBuildAdmin',
+      scope,
+      error,
+    });
+
+    await captureStderr('didNotBuildAdmin', error);
+    process.exit(1);
+  }
+
+  console.log(`Running your Strapi application.`);
+
+  try {
+    await trackUsage({ event: 'willStartServer', scope });
 
     await execa('npm', ['run', 'develop'], {
       stdio: 'inherit',
@@ -30,17 +57,15 @@ module.exports = async function createQuickStartProject(scope) {
       env: {
         FORCE_COLOR: 1,
       },
-    }).catch(error => {
-      if (error && error.stderr) {
-        (error.stderr || '')
-          .trim()
-          .split('\n')
-          .forEach(line => {
-            console.error(line);
-          });
-      }
-
-      return captureError(error);
     });
+  } catch (error) {
+    await trackUsage({
+      event: 'didNotStartServer',
+      scope,
+      error,
+    });
+
+    await captureStderr('didNotStartServer', error);
+    process.exit(1);
   }
 };

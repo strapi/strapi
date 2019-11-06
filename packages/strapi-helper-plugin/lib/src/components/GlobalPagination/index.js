@@ -7,8 +7,8 @@
 import React from 'react';
 import { map } from 'lodash';
 import PropTypes from 'prop-types';
-
-import styles from './styles.scss';
+import cn from 'classnames';
+import Wrapper from './Wrapper';
 
 class GlobalPagination extends React.Component {
   getLastPageNumber = () =>
@@ -114,7 +114,7 @@ class GlobalPagination extends React.Component {
 
     // Generate links
     return map(linksOptions, (linksOption, key) => (
-      <li className={`${linksOption.isActive && styles.navLiActive}`} key={key}>
+      <li className={cn(linksOption.isActive && 'navLiActive')} key={key}>
         <a
           href=""
           disabled={linksOption.isActive}
@@ -128,35 +128,29 @@ class GlobalPagination extends React.Component {
 
   render() {
     return (
-      <div className={styles.pagination}>
+      <Wrapper>
         <div>
           <a
             href=""
-            className={`
-               ${styles.paginationNavigator}
-               ${this.isFirstPage() && styles.paginationNavigatorDisabled}
-             `}
+            className="paginationNavigator"
             onClick={this.handlePreviousPageClick}
             disabled={this.isFirstPage()}
           >
             <i className="fa fa-angle-left" aria-hidden="true"></i>
           </a>
-          <nav className={styles.nav}>
-            <ul className={styles.navUl}>{this.renderLinks()}</ul>
+          <nav className="navWrapper">
+            <ul className="navUl">{this.renderLinks()}</ul>
           </nav>
           <a
             href=""
-            className={`
-               ${styles.paginationNavigator}
-               ${this.isLastPage() && styles.paginationNavigatorDisabled}
-             `}
+            className="paginationNavigator"
             onClick={this.handleNextPageClick}
             disabled={this.isLastPage()}
           >
             <i className="fa fa-angle-right" aria-hidden="true"></i>
           </a>
         </div>
-      </div>
+      </Wrapper>
     );
   }
 }

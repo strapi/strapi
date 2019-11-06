@@ -11,17 +11,16 @@ import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
 import { findIndex, get, isEmpty, isEqual, size } from 'lodash';
-import cn from 'classnames';
-
 // Design
 import {
+  GlobalContext,
   BackHeader,
   InputsIndex as Input,
   LoadingIndicator,
   LoadingIndicatorPage,
   PluginHeader,
 } from 'strapi-helper-plugin';
-
+import { EditPageContextProvider } from '../../contexts/EditPage';
 import InputSearch from '../../components/InputSearchContainer';
 import Plugins from '../../components/Plugins';
 import Policies from '../../components/Policies';
@@ -56,7 +55,7 @@ import makeSelectEditPage from './selectors';
 import reducer from './reducer';
 import saga from './saga';
 
-import styles from './styles.scss';
+import { Loader, Title, Separator, Wrapper } from './Components';
 
 export class EditPage extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
@@ -67,6 +66,8 @@ export class EditPage extends React.Component {
     setShouldDisplayPolicieshint: this.props.setShouldDisplayPolicieshint,
     resetShouldDisplayPoliciesHint: this.props.resetShouldDisplayPoliciesHint,
   });
+
+  static contextType = GlobalContext;
 
   componentDidMount() {
     this.props.setActionType(this.props.match.params.actionType);
@@ -132,7 +133,7 @@ export class EditPage extends React.Component {
   };
 
   renderFirstBlock = () => (
-    <React.Fragment>
+    <>
       <div className="col-md-6">
         <div className="row">
           <Input
@@ -190,9 +191,9 @@ export class EditPage extends React.Component {
         values={get(this.props.editPage, ['modifiedData', 'users'])}
       />
       <div className="col-md-12">
-        <div className={styles.separator} />
+        <Separator />
       </div>
-    </React.Fragment>
+    </>
   );
 
   render() {
@@ -228,74 +229,81 @@ export class EditPage extends React.Component {
     }
 
     return (
-      <div>
-        <BackHeader onClick={() => this.props.history.goBack()} />
-        <div className={cn('container-fluid', styles.containerFluid)}>
-          <PluginHeader
-            title={{
-              id: pluginHeaderTitle,
-              values: {
-                name: get(this.props.editPage.initialData, 'name'),
-              },
-            }}
-            description={{
-              id: pluginHeaderDescription,
-              values: {
-                description:
-                  get(this.props.editPage.initialData, 'description') || '',
-              },
-            }}
-            actions={pluginHeaderActions}
-          />
-          <div className={cn('row', styles.container)}>
-            <div className="col-md-12">
-              <div className={styles.main_wrapper}>
-                <div className={styles.titleContainer}>
-                  <FormattedMessage id="users-permissions.EditPage.form.roles" />
-                </div>
-                <form className={styles.form}>
-                  <div className="row">
-                    {this.showLoaderForm() ? (
-                      <div className={styles.loaderWrapper}>
-                        <LoadingIndicator />
-                      </div>
-                    ) : (
-                      this.renderFirstBlock()
-                    )}
-                  </div>
-                  <div className="row" style={{ marginRight: '-30px' }}>
-                    {this.showLoaderPermissions() && (
-                      <div
-                        className={styles.loaderWrapper}
-                        style={{ minHeight: '400px' }}
-                      >
-                        <LoadingIndicator />
-                      </div>
-                    )}
-                    {!this.showLoaderPermissions() && (
-                      <Plugins
-                        plugins={get(this.props.editPage, [
-                          'modifiedData',
-                          'permissions',
-                        ])}
+      <EditPageContextProvider
+        onChange={this.props.onChangeInput}
+        selectAllActions={this.props.selectAllActions}
+        setInputPoliciesPath={this.props.setInputPoliciesPath}
+        setShouldDisplayPolicieshint={this.props.setShouldDisplayPolicieshint}
+        resetShouldDisplayPoliciesHint={
+          this.props.resetShouldDisplayPoliciesHint
+        }
+      >
+        <Wrapper>
+          <BackHeader onClick={() => this.props.history.goBack()} />
+          <div className="container-fluid">
+            <PluginHeader
+              title={{
+                id: pluginHeaderTitle,
+                values: {
+                  name: get(this.props.editPage.initialData, 'name'),
+                },
+              }}
+              description={{
+                id: pluginHeaderDescription,
+                values: {
+                  description:
+                    get(this.props.editPage.initialData, 'description') || '',
+                },
+              }}
+              actions={pluginHeaderActions}
+            />
+            <div className="form-wrapper row">
+              <div className="col-md-12">
+                <div className="form-container">
+                  <Title>
+                    <FormattedMessage id="users-permissions.EditPage.form.roles" />
+                  </Title>
+                  <form>
+                    <div className="row">
+                      {this.showLoaderForm() ? (
+                        <Loader>
+                          <LoadingIndicator />
+                        </Loader>
+                      ) : (
+                        this.renderFirstBlock()
+                      )}
+                    </div>
+                    <div className="row" style={{ marginRight: '-30px' }}>
+                      {this.showLoaderPermissions() && (
+                        <Loader style={{ minHeight: '400px' }}>
+                          <LoadingIndicator />
+                        </Loader>
+                      )}
+                      {!this.showLoaderPermissions() && (
+                        <Plugins
+                          plugins={get(this.props.editPage, [
+                            'modifiedData',
+                            'permissions',
+                          ])}
+                        />
+                      )}
+                      <Policies
+                        shouldDisplayPoliciesHint={
+                          this.props.editPage.shouldDisplayPoliciesHint
+                        }
+                        inputSelectName={this.props.editPage.inputPoliciesPath}
+                        routes={this.props.editPage.routes}
+                        selectOptions={this.props.editPage.policies}
+                        values={this.props.editPage.modifiedData}
                       />
-                    )}
-                    <Policies
-                      shouldDisplayPoliciesHint={
-                        this.props.editPage.shouldDisplayPoliciesHint
-                      }
-                      inputSelectName={this.props.editPage.inputPoliciesPath}
-                      routes={this.props.editPage.routes}
-                      selectOptions={this.props.editPage.policies}
-                      values={this.props.editPage.modifiedData}
-                    />
-                  </div>
-                </form>
+                    </div>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </Wrapper>
+      </EditPageContextProvider>
     );
   }
 }
@@ -306,10 +314,6 @@ EditPage.childContextTypes = {
   setInputPoliciesPath: PropTypes.func.isRequired,
   setShouldDisplayPolicieshint: PropTypes.func.isRequired,
   resetShouldDisplayPoliciesHint: PropTypes.func.isRequired,
-};
-
-EditPage.contextTypes = {
-  emitEvent: PropTypes.func,
 };
 
 EditPage.propTypes = {

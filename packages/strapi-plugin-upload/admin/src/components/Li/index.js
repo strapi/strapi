@@ -11,11 +11,14 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import moment from 'moment';
 
 import { IcoContainer, PopUpWarning } from 'strapi-helper-plugin';
+import { HomePageContext } from '../../contexts/HomePage';
 import FileIcon from '../FileIcon';
 import { StyledLi, Truncate, Wrapper, Checked } from './components';
 
 /* eslint-disable react/no-string-refs */
 class Li extends React.Component {
+  static contextType = HomePageContext;
+
   state = { isOpen: false, copied: false };
 
   componentDidUpdate(prevProps, prevState) {
@@ -158,10 +161,6 @@ class Li extends React.Component {
     );
   }
 }
-
-Li.contextTypes = {
-  deleteData: PropTypes.func.isRequired,
-};
 
 Li.defaultProps = {
   item: {

@@ -29,6 +29,7 @@ const plugin = {
   name: pluginPkg.strapi.name,
   preventComponentRendering: false,
   suffixUrl: () => '/roles',
+  suffixUrlToReplaceForLeftMenuHighlight: '/roles',
   trads,
 };
 

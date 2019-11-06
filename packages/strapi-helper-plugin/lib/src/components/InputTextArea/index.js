@@ -9,22 +9,22 @@ import { FormattedMessage } from 'react-intl';
 import { isEmpty } from 'lodash';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
-
-import styles from './styles.scss';
+import Input from './Input';
 
 function InputTextArea(props) {
-  const placeholder = isEmpty(props.placeholder) ? 'app.utils.placeholder.defaultMessage' : props.placeholder;
+  const placeholder = isEmpty(props.placeholder)
+    ? 'app.utils.placeholder.defaultMessage'
+    : props.placeholder;
 
   return (
     <FormattedMessage id={placeholder} defaultMessage={placeholder}>
-      {(message) => (
-        <textarea
+      {message => (
+        <Input
           autoFocus={props.autoFocus}
           className={cn(
             'form-control',
-            styles.inputTextArea,
             !isEmpty(props.className) && props.className,
-            !props.deactivateErrorHighlight && props.error && 'is-invalid',
+            !props.deactivateErrorHighlight && props.error && 'is-invalid'
           )}
           disabled={props.disabled}
           id={props.name}

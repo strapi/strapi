@@ -3,8 +3,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty, isObject, map } from 'lodash';
 import cn from 'classnames';
-
-import styles from './styles.scss';
+import Div from './Div';
 
 function InputErrors(props) {
   const divStyle = Object.assign({ display: 'block' }, props.style);
@@ -12,23 +11,29 @@ function InputErrors(props) {
   return (
     <div>
       {map(props.errors, (error, key) => {
-        const displayError = isObject(error) && error.id ?
-          <FormattedMessage {...error} values={{ errorMessage: error.errorMessage }} /> : error;
+        const displayError =
+          isObject(error) && error.id ? (
+            <FormattedMessage
+              {...error}
+              values={{ errorMessage: error.errorMessage }}
+            />
+          ) : (
+            error
+          );
 
         return (
-          <div
+          <Div
             className={cn(
               'form-control-feedback',
               'invalid-feedback',
-              styles.errorContainer,
-              !isEmpty(props.className) && props.className,
+              !isEmpty(props.className) && props.className
             )}
             id={`errorOf${props.name}`}
             key={key}
             style={divStyle}
           >
             {displayError}
-          </div>
+          </Div>
         );
       })}
     </div>

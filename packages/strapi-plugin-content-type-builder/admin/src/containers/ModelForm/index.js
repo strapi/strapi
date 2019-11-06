@@ -9,19 +9,21 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, isEmpty, upperFirst } from 'lodash';
 
-import { InputsIndex as Input } from 'strapi-helper-plugin';
+import {
+  ButtonModal,
+  GlobalContext,
+  HeaderModal,
+  HeaderModalTitle,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  InputsIndex as Input,
+} from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
-import BodyModal from '../../components/BodyModal';
-import ButtonModalSecondary from '../../components/ButtonModalSecondary';
-import ButtonModalSuccess from '../../components/ButtonModalSuccess';
-import FooterModal from '../../components/FooterModal';
-import HeaderModal from '../../components/HeaderModal';
-import HeaderModalTitle from '../../components/HeaderModalTitle';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
 import HeaderNavLink from '../../components/HeaderNavLink';
-import WrapperModal from '../../components/WrapperModal';
 
 import Icon from '../../assets/icons/icon_type_ct.png';
 import IconGroup from '../../assets/icons/icon_type_groups.png';
@@ -29,9 +31,12 @@ import IconGroup from '../../assets/icons/icon_type_groups.png';
 import forms from './forms.json';
 
 const NAVLINKS = [{ id: 'base' }, { id: 'advanced' }];
+const RESERVED_NAMES = ['admin', 'series', 'file'];
 
 class ModelForm extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
+  static contextType = GlobalContext;
+
   state = { didCheckErrors: false, formErrors: {}, isVisible: false };
 
   handleCancel = () => {
@@ -93,6 +98,12 @@ class ModelForm extends React.Component {
       name => name !== featureToEditName
     );
     let formErrors = {};
+
+    if (RESERVED_NAMES.includes(modifiedData.name)) {
+      formErrors = {
+        name: [{ id: `${pluginId}.error.contentTypeName.reserved-name` }],
+      };
+    }
 
     if (alreadyTakenContentTypeNames.includes(modifiedData.name)) {
       formErrors = {
@@ -228,7 +239,7 @@ class ModelForm extends React.Component {
     const currentForm = get(forms, activeTab, forms.base);
 
     return (
-      <WrapperModal
+      <Modal
         isOpen={isOpen}
         onOpened={this.handleOnOpened}
         onClosed={this.handleOnClosed}
@@ -263,28 +274,22 @@ class ModelForm extends React.Component {
           </section>
         </HeaderModal>
         <form onSubmit={this.handleSubmit}>
-          <BodyModal>{currentForm.items.map(this.renderInput)}</BodyModal>
-          <FooterModal>
+          <ModalBody>{currentForm.items.map(this.renderInput)}</ModalBody>
+          <ModalFooter>
             <section>
-              <ButtonModalSecondary
-                message={`${pluginId}.form.button.cancel`}
+              <ButtonModal
+                isSecondary
+                message="components.popUpWarning.button.cancel"
                 onClick={this.handleCancel}
               />
-              <ButtonModalSuccess
-                message={`${pluginId}.form.button.done`}
-                type="submit"
-              />
+              <ButtonModal message="form.button.done" type="submit" />
             </section>
-          </FooterModal>
+          </ModalFooter>
         </form>
-      </WrapperModal>
+      </Modal>
     );
   }
 }
-
-ModelForm.contextTypes = {
-  emitEvent: PropTypes.func,
-};
 
 ModelForm.defaultProps = {
   actionType: 'create',
