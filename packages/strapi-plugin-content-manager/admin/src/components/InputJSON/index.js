@@ -15,7 +15,7 @@ import 'codemirror/addon/selection/mark-selection';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/3024-night.css';
 
-import { isEmpty, isObject, trimStart } from 'lodash';
+import { isEmpty, trimStart } from 'lodash';
 import jsonlint from './jsonlint';
 import Wrapper from './components';
 
@@ -65,15 +65,13 @@ class InputJSON extends React.Component {
   setInitValue = () => {
     const { value } = this.props;
 
-    if (isObject(value) && value !== null) {
-      try {
-        parse(stringify(value));
-        this.setState({ hasInitValue: true });
+    try {
+      parse(stringify(value));
+      this.setState({ hasInitValue: true });
 
-        return this.codeMirror.setValue(stringify(value, null, 2));
-      } catch (err) {
-        return this.setState({ error: true });
-      }
+      return this.codeMirror.setValue(stringify(value, null, 2));
+    } catch (err) {
+      return this.setState({ error: true });
     }
   };
 
@@ -125,10 +123,8 @@ class InputJSON extends React.Component {
     const { name, onChange } = this.props;
     let value = this.codeMirror.getValue();
 
-    try {
-      value = parse(value);
-    } catch (err) {
-      // Silent
+    if (value === '') {
+      value = null;
     }
 
     // Update the parent
