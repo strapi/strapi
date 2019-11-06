@@ -14,7 +14,6 @@ import pluginId from '../../pluginId';
 import Container from '../../components/Container';
 import DynamicZone from '../../components/DynamicZone';
 import FormWrapper from '../../components/FormWrapper';
-// import ComponentField from '../../components/ComponentField';
 import FieldComponent from '../../components/FieldComponent';
 import Inputs from '../../components/Inputs';
 import SelectWrapper from '../../components/SelectWrapper';

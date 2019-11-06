@@ -45,7 +45,6 @@ const DynamicZone = ({ name }) => {
   const metas = get(layout, ['metadatas', name, 'edit'], {});
   const dynamicDisplayedComponentsLength = getDynamicDisplayedComponents()
     .length;
-  console.log({ layout });
 
   return (
     <>

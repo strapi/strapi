@@ -254,7 +254,6 @@ const EditSettingsView = ({
     getForm().map((meta, index) => {
       const formType = get(getAttributes, [metaToEdit, 'type']);
 
-      console.log(formType);
       if (
         formType === 'dynamiczone' &&
         !['label', 'description'].includes(meta)
