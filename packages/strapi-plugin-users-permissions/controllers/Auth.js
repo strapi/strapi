@@ -186,7 +186,7 @@ module.exports = {
     ) {
       const user = await strapi
         .query('user', 'users-permissions')
-        .findOne({ resetPasswordToken: params.code });
+        .findOne({ resetPasswordToken: `${params.code}` });
 
       if (!user) {
         return ctx.badRequest(
@@ -448,6 +448,14 @@ module.exports = {
 
     if (isEmail) {
       params.email = params.email.toLowerCase();
+    } else {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'Auth.form.error.email.format',
+          message: 'Please provide valid email address.',
+        })
+      );
     }
 
     params.role = role.id;
