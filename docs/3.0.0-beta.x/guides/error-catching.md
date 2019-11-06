@@ -28,7 +28,9 @@ module.exports = strapi => {
 
 ## Handle errors
 
-Here is the [Node.js client documentation](https://docs.sentry.io/platforms/node/). Install it with `yarn add @sentry/node` or `npm install @sentry/node --save`.
+Here is the [Node.js client documentation](https://docs.sentry.io/platforms/node/).
+
+Install it with `yarn add @sentry/node` or `npm install @sentry/node --save`.
 
 - Now add the logic that will catch errors.
 
@@ -38,7 +40,7 @@ Here is the [Node.js client documentation](https://docs.sentry.io/platforms/node
 const Sentry = require('@sentry/node');
 Sentry.init({
   dsn: 'https://<key>@sentry.io/<project>',
-  environment: strapi.config.environment
+  environment: strapi.config.environment,
 });
 
 module.exports = strapi => {
