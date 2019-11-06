@@ -20,12 +20,26 @@ const reducer = (state, action) => {
       });
     case 'MOVE_COLLAPSE':
       return state.updateIn(['collapses'], list => {
-        return list
+        const oldList = list;
+        const newList = list
           .delete(action.dragIndex)
           .insert(
             action.hoverIndex,
             state.getIn(['collapses', action.dragIndex])
           );
+
+        // Fix for
+        // https://github.com/react-dnd/react-dnd/issues/1368
+        // https://github.com/frontend-collective/react-sortable-tree/issues/490
+        if (oldList.size !== newList.size) {
+          strapi.notification.error(
+            "An error occured while reordering your component's field, please try again"
+          );
+
+          return oldList;
+        }
+
+        return newList;
       });
     case 'TOGGLE_COLLAPSE':
       return state.update('collapses', list => {

@@ -1,7 +1,4 @@
-import React, {
-  // useCallback,
-  useState,
-} from 'react';
+import React, { useCallback, useState } from 'react';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
@@ -17,13 +14,19 @@ const DynamicZone = ({ name }) => {
   const [isOver, setIsOver] = useState(false);
   const {
     addComponentToDynamicZone,
-    // allLayoutData,
+    allLayoutData,
     layout,
-    // modifiedData,
+    modifiedData,
   } = useDataManager();
-  // const getDynamicDisplayedComponents = useCallback(() => {
-  //   return get(modifiedData, [name], []).map(data => data.__component);
-  // }, [modifiedData, name]);
+  const getDynamicDisplayedComponents = useCallback(() => {
+    return get(modifiedData, [name], []).map(data => data.__component);
+  }, [modifiedData, name]);
+  const getDynamicComponentSchemaData = useCallback(
+    compoUid => {
+      return get(allLayoutData, compoUid, {});
+    },
+    [allLayoutData]
+  );
 
   const dynamicZoneAvailableComponents = get(
     layout,
@@ -64,6 +67,10 @@ const DynamicZone = ({ name }) => {
             );
           })}
         </ComponentsPicker>
+        {getDynamicDisplayedComponents().map((componentUid, index) => {
+          console.log({ all: getDynamicComponentSchemaData(componentUid) });
+          return <div key={index}>{componentUid}</div>;
+        })}
       </Wrapper>
     </>
   );

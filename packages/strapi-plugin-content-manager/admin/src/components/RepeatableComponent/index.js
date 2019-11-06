@@ -1,8 +1,10 @@
 import React, { useReducer } from 'react';
+import { useDrop } from 'react-dnd';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
+import ItemTypes from '../../utils/ItemTypes';
 import Button from './AddFieldButton';
 import DraggedItem from './DraggedItem';
 import EmptyComponent from './EmptyComponent';
@@ -17,6 +19,8 @@ const RepeatableComponent = ({
   schema,
 }) => {
   const { addRepeatableComponentToField, formErrors } = useDataManager();
+
+  const [, drop] = useDrop({ accept: ItemTypes.COMPONENT });
 
   const componentErrorKeys = Object.keys(formErrors)
     .filter(errorKey => errorKey.includes(name))
@@ -49,47 +53,49 @@ const RepeatableComponent = ({
           </FormattedMessage>
         </EmptyComponent>
       )}
-      {componentValueLength > 0 &&
-        componentValue.map((data, index) => {
-          const componentFieldName = `${name}.${index}`;
-          const doesPreviousFieldContainErrorsAndIsOpen =
-            componentErrorKeys.includes(`${name}.${index - 1}`) &&
-            index !== 0 &&
-            collapses[index - 1].isOpen === false;
-          const hasErrors = componentErrorKeys.includes(componentFieldName);
+      <div ref={drop}>
+        {componentValueLength > 0 &&
+          componentValue.map((data, index) => {
+            const componentFieldName = `${name}.${index}`;
+            const doesPreviousFieldContainErrorsAndIsOpen =
+              componentErrorKeys.includes(`${name}.${index - 1}`) &&
+              index !== 0 &&
+              collapses[index - 1].isOpen === false;
+            const hasErrors = componentErrorKeys.includes(componentFieldName);
 
-          return (
-            <DraggedItem
-              fields={fields}
-              componentFieldName={componentFieldName}
-              doesPreviousFieldContainErrorsAndIsOpen={
-                doesPreviousFieldContainErrorsAndIsOpen
-              }
-              hasErrors={hasErrors}
-              isOpen={collapses[index].isOpen}
-              key={collapses[index]._temp__id}
-              onClickToggle={() => {
-                // Close all other collapses and open the selected one
-                toggleCollapses(index);
-              }}
-              removeCollapse={() => {
-                dispatch({
-                  type: 'REMOVE_COLLAPSE',
-                  index,
-                });
-              }}
-              moveCollapse={(dragIndex, hoverIndex) => {
-                dispatch({
-                  type: 'MOVE_COLLAPSE',
-                  dragIndex,
-                  hoverIndex,
-                });
-              }}
-              schema={schema}
-              toggleCollapses={toggleCollapses}
-            />
-          );
-        })}
+            return (
+              <DraggedItem
+                fields={fields}
+                componentFieldName={componentFieldName}
+                doesPreviousFieldContainErrorsAndIsOpen={
+                  doesPreviousFieldContainErrorsAndIsOpen
+                }
+                hasErrors={hasErrors}
+                isOpen={collapses[index].isOpen}
+                key={collapses[index]._temp__id}
+                onClickToggle={() => {
+                  // Close all other collapses and open the selected one
+                  toggleCollapses(index);
+                }}
+                removeCollapse={() => {
+                  dispatch({
+                    type: 'REMOVE_COLLAPSE',
+                    index,
+                  });
+                }}
+                moveCollapse={(dragIndex, hoverIndex) => {
+                  dispatch({
+                    type: 'MOVE_COLLAPSE',
+                    dragIndex,
+                    hoverIndex,
+                  });
+                }}
+                schema={schema}
+                toggleCollapses={toggleCollapses}
+              />
+            );
+          })}
+      </div>
       <Button
         withBorderRadius={false}
         doesPreviousFieldContainErrorsAndIsClosed={

@@ -5,11 +5,16 @@ import { Collapse } from 'reactstrap';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import useDataManager from '../../hooks/useDataManager';
+import useEditView from '../../hooks/useEditView';
 import ItemTypes from '../../utils/ItemTypes';
 import Inputs from '../Inputs';
 import FieldComponent from '../FieldComponent';
 import Banner from './Banner';
 import FormWrapper from './FormWrapper';
+
+// Issues:
+// https://github.com/react-dnd/react-dnd/issues/1368
+// https://github.com/frontend-collective/react-sortable-tree/issues/490
 
 const DraggedItem = ({
   componentFieldName,
@@ -28,6 +33,7 @@ const DraggedItem = ({
     moveComponentField,
     removeRepeatableField,
   } = useDataManager();
+  const { setIsDraggingComponent, unsetIsDraggingComponent } = useEditView();
   const mainField = get(schema, ['settings', 'mainField'], 'id');
   const displayedValue = get(
     modifiedData,
@@ -39,6 +45,9 @@ const DraggedItem = ({
 
   const [, drop] = useDrop({
     accept: ItemTypes.COMPONENT,
+    canDrop() {
+      return false;
+    },
     hover(item, monitor) {
       if (!dropRef.current) {
         return;
@@ -63,14 +72,10 @@ const DraggedItem = ({
       const hoverIndex = parseInt(hoverIndexString, 10);
 
       // Don't replace items with themselves
-      if (dragPath === hoverPath) {
+      if (dragIndex === hoverIndex) {
         return;
       }
 
-      // Don't replace items with themselves
-      if (dragPath === hoverPath) {
-        return;
-      }
       // Determine rectangle on screen
       const hoverBoundingRect = dropRef.current.getBoundingClientRect();
       // Get vertical middle
@@ -113,6 +118,12 @@ const DraggedItem = ({
     begin: () => {
       // Close all collapses
       toggleCollapses(-1);
+      // Prevent the relations select from firing requests
+      setIsDraggingComponent();
+    },
+    end: () => {
+      // Enable the relations select to fire requests
+      unsetIsDraggingComponent();
     },
     collect: monitor => ({
       isDragging: monitor.isDragging(),

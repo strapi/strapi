@@ -7,6 +7,7 @@ import { get, isArray, isEmpty } from 'lodash';
 import { request } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
+import useEditView from '../../hooks/useEditView';
 
 import SelectOne from '../SelectOne';
 import SelectMany from '../SelectMany';
@@ -31,6 +32,7 @@ function SelectWrapper({
     onChange,
     onRemoveRelation,
   } = useDataManager();
+  const { isDraggingComponent } = useEditView();
   const value = get(modifiedData, name, null);
   const source = isEmpty(plugin) ? 'content-manager' : plugin;
   const [state, setState] = useState({
@@ -48,48 +50,50 @@ function SelectWrapper({
   startRef.current = state._start;
 
   ref.current = async () => {
-    try {
-      const params = cloneDeep(state);
-      const requestUrl = `/${pluginId}/explorer/${targetModel}`;
+    if (!isDraggingComponent) {
+      try {
+        const params = cloneDeep(state);
+        const requestUrl = `/${pluginId}/explorer/${targetModel}`;
 
-      if (isEmpty(params._q)) {
-        delete params._q;
-      }
+        if (isEmpty(params._q)) {
+          delete params._q;
+        }
 
-      const data = await request(requestUrl, {
-        method: 'GET',
-        params: params,
-        signal,
-      });
+        const data = await request(requestUrl, {
+          method: 'GET',
+          params: params,
+          signal,
+        });
 
-      const formattedData = data.map(obj => {
-        return { value: obj, label: obj[mainField] };
-      });
+        const formattedData = data.map(obj => {
+          return { value: obj, label: obj[mainField] };
+        });
 
-      if (!isEmpty(params._q)) {
-        setOptions(formattedData);
+        if (!isEmpty(params._q)) {
+          setOptions(formattedData);
 
-        return;
-      }
+          return;
+        }
 
-      setOptions(prevState =>
-        prevState.concat(formattedData).filter((obj, index) => {
-          const objIndex = prevState.findIndex(
-            el => el.value.id === obj.value.id
-          );
+        setOptions(prevState =>
+          prevState.concat(formattedData).filter((obj, index) => {
+            const objIndex = prevState.findIndex(
+              el => el.value.id === obj.value.id
+            );
 
-          if (objIndex === -1) {
-            return true;
-          }
-          return (
-            prevState.findIndex(el => el.value.id === obj.value.id) === index
-          );
-        })
-      );
-      setIsLoading(false);
-    } catch (err) {
-      if (err.code !== 20) {
-        strapi.notification.error('notification.error');
+            if (objIndex === -1) {
+              return true;
+            }
+            return (
+              prevState.findIndex(el => el.value.id === obj.value.id) === index
+            );
+          })
+        );
+        setIsLoading(false);
+      } catch (err) {
+        if (err.code !== 20) {
+          strapi.notification.error('notification.error');
+        }
       }
     }
   };
