@@ -67,7 +67,6 @@ class WysiwygWithErrors extends React.Component {
     const {
       autoFocus,
       className,
-      customBootstrapClass,
       deactivateErrorHighlight,
       disabled,
       errorsClassName,
@@ -102,10 +101,7 @@ class WysiwygWithErrors extends React.Component {
     }
 
     return (
-      <Wrapper
-        className={cn(customBootstrapClass, !isEmpty(className) && className)}
-        style={style}
-      >
+      <Wrapper className={cn(!isEmpty(className) && className)} style={style}>
         <Label
           className={labelClassName}
           htmlFor={name}
@@ -147,7 +143,6 @@ class WysiwygWithErrors extends React.Component {
 WysiwygWithErrors.defaultProps = {
   autoFocus: false,
   className: '',
-  customBootstrapClass: 'col-md-12',
   deactivateErrorHighlight: false,
   didCheckErrors: false,
   disabled: false,
@@ -173,7 +168,6 @@ WysiwygWithErrors.defaultProps = {
 WysiwygWithErrors.propTypes = {
   autoFocus: PropTypes.bool,
   className: PropTypes.string,
-  customBootstrapClass: PropTypes.string,
   deactivateErrorHighlight: PropTypes.bool,
   didCheckErrors: PropTypes.bool,
   disabled: PropTypes.bool,

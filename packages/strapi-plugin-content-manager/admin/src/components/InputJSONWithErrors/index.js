@@ -78,7 +78,6 @@ class InputJSONWithErrors extends React.Component {
     const {
       autoFocus,
       className,
-      customBootstrapClass,
       deactivateErrorHighlight,
       disabled,
       errorsClassName,
@@ -109,7 +108,7 @@ class InputJSONWithErrors extends React.Component {
 
     return (
       <div
-        className={cn(customBootstrapClass, !isEmpty(className) && className)}
+        className={cn(!isEmpty(className) && className)}
         style={{
           marginBottom: '1.5rem',
           fontSize: '1.3rem',
@@ -156,7 +155,6 @@ class InputJSONWithErrors extends React.Component {
 InputJSONWithErrors.defaultProps = {
   autoFocus: false,
   className: '',
-  customBootstrapClass: 'col-md-12',
   deactivateErrorHighlight: false,
   didCheckErrors: false,
   disabled: false,
@@ -182,7 +180,6 @@ InputJSONWithErrors.defaultProps = {
 InputJSONWithErrors.propTypes = {
   autoFocus: PropTypes.bool,
   className: PropTypes.string,
-  customBootstrapClass: PropTypes.string,
   deactivateErrorHighlight: PropTypes.bool,
   didCheckErrors: PropTypes.bool,
   disabled: PropTypes.bool,

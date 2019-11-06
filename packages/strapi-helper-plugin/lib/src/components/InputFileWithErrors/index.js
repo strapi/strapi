@@ -6,7 +6,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import cn from 'classnames';
 import { differenceBy, isEmpty } from 'lodash';
 import Label from '../Label';
 import InputDescription from '../InputDescription';
@@ -63,7 +62,6 @@ class InputFileWithErrors extends React.PureComponent {
   render() {
     const {
       className,
-      customBootstrapClass,
       errorsClassName,
       errorsStyle,
       noErrorsDescription,
@@ -84,10 +82,7 @@ class InputFileWithErrors extends React.PureComponent {
     const height = isEmpty(value) ? '.4rem' : '.6rem';
 
     return (
-      <Container
-        className={cn(customBootstrapClass, className !== '' && className)}
-        style={style}
-      >
+      <Container className={className !== '' && className} style={style}>
         <Label
           className={labelClass}
           htmlFor={`${name}NotNeeded`}
@@ -129,7 +124,6 @@ InputFileWithErrors.defaultProps = {
   errorsClassName: '',
   errorsStyle: {},
   className: '',
-  customBootstrapClass: 'col-md-12',
   didCheckErrors: false,
   inputDescription: '',
   inputDescriptionClassName: '',
@@ -145,7 +139,6 @@ InputFileWithErrors.defaultProps = {
 
 InputFileWithErrors.propTypes = {
   className: PropTypes.string,
-  customBootstrapClass: PropTypes.string,
   didCheckErrors: PropTypes.bool,
   errors: PropTypes.array,
   errorsClassName: PropTypes.string,
