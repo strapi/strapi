@@ -4,11 +4,9 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { capitalize, get, sortBy } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import {
-  PluginHeader,
-  PopUpWarning,
-  getQueryParameters,
-} from 'strapi-helper-plugin';
+import { Header, HeaderActions, HeaderTitle } from '@buffetjs/core';
+import { PopUpWarning, getQueryParameters } from 'strapi-helper-plugin';
+
 import pluginId from '../../pluginId';
 import DisplayedFieldsDropdown from '../../components/DisplayedFieldsDropdown';
 import FilterLogo from '../../assets/images/icon_filter.png';
@@ -47,7 +45,6 @@ function ListView({
   location: { pathname, search },
   getData,
   layouts,
-  isLoading,
   history: { push },
   onChangeBulk,
   onChangeBulkSelectall,
@@ -217,14 +214,17 @@ function ListView({
       type: 'submit',
     },
   ];
-  const pluginHeaderActions = [
+
+  const headerAction = [
     {
-      id: 'addEntry',
-      label: 'content-manager.containers.List.addAnEntry',
-      labelValues: {
-        entity: capitalize(slug) || 'Content Manager',
-      },
-      kind: 'primaryAddShape',
+      title: (
+        <FormattedMessage
+          id="content-manager.containers.List.addAnEntry"
+          values={{
+            entity: capitalize(slug) || 'Content Manager',
+          }}
+        />
+      ),
       onClick: () => {
         emitEvent('willCreateEntry');
         push({
@@ -232,8 +232,28 @@ function ListView({
           search: `redirectUrl=${pathname}${search}`,
         });
       },
+      color: 'primary',
+      type: 'button',
+      icon: true,
     },
   ];
+
+  const headerProps = {
+    title: <HeaderTitle title={slug || 'Content Manager'} />,
+    content: (
+      <p>
+        <FormattedMessage
+          id={
+            count > 1
+              ? `${pluginId}.containers.List.pluginHeaderDescription`
+              : `${pluginId}.containers.List.pluginHeaderDescription.singular`
+          }
+          values={{ label: count }}
+        />
+      </p>
+    ),
+    callToAction: <HeaderActions actions={headerAction} />,
+  };
 
   return (
     <>
@@ -261,24 +281,7 @@ function ListView({
           onSubmit={handleSubmit}
         />
         <Container className="container-fluid">
-          {!isFilterPickerOpen && (
-            <PluginHeader
-              actions={pluginHeaderActions}
-              description={{
-                id:
-                  count > 1
-                    ? `${pluginId}.containers.List.pluginHeaderDescription`
-                    : `${pluginId}.containers.List.pluginHeaderDescription.singular`,
-                values: {
-                  label: count,
-                },
-              }}
-              title={{
-                id: slug || 'Content Manager',
-              }}
-              withDescriptionAnim={isLoading}
-            />
-          )}
+          {!isFilterPickerOpen && <Header {...headerProps} />}
           {getLayoutSettingRef.current('searchable') && (
             <Search
               changeParams={handleChangeParams}
@@ -403,7 +406,6 @@ ListView.propTypes = {
     search: PropTypes.string.isRequired,
   }),
   getData: PropTypes.func.isRequired,
-  isLoading: PropTypes.bool.isRequired,
   history: PropTypes.shape({
     push: PropTypes.func.isRequired,
   }),
