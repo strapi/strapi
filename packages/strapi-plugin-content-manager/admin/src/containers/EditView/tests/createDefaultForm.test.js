@@ -32,20 +32,7 @@ describe('Content Manager | EditView | utils | createDefaultForm', () => {
     });
   });
 
-  it('should set the json fields to null for non required fields', () => {
-    const attributes = {
-      test: {
-        type: 'json',
-      },
-      test1: {
-        type: 'string',
-      },
-    };
-
-    expect(createDefaultForm(attributes)).toEqual({ test: null });
-  });
-
-  it('should set the json fields to {} for required fields', () => {
+  it('should set the json fields to null for required fields', () => {
     const attributes = {
       test: {
         type: 'json',
@@ -63,8 +50,7 @@ describe('Content Manager | EditView | utils | createDefaultForm', () => {
     };
 
     expect(createDefaultForm(attributes)).toEqual({
-      test: {},
-      test1: null,
+      test: JSON.stringify(null),
       test2: { ok: true },
     });
   });
