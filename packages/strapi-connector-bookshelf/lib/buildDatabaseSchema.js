@@ -356,7 +356,9 @@ module.exports = async ({
       };
 
       const table = manyRelation.tableCollectionName;
-      await createOrUpdateTable(table, attributes);
+      if (connection.options && connection.options.autoMigration !== false) {
+        await createOrUpdateTable(table, attributes);
+      }
     }
   }
 
