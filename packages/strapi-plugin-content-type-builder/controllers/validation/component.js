@@ -1,8 +1,10 @@
 'use strict';
 
 const _ = require('lodash');
-const formatYupErrors = require('./yup-formatter');
+const yup = require('yup');
 
+const { isValidName } = require('./common');
+const formatYupErrors = require('./yup-formatter');
 const createSchema = require('./model-schema');
 
 const VALID_RELATIONS = ['oneWay', 'manyWay'];
@@ -29,8 +31,21 @@ const VALID_TYPES = [
   'component',
 ];
 
+const createComponentSchema = () => {
+  return createSchema(VALID_TYPES, VALID_RELATIONS).shape({
+    icon: yup
+      .string()
+      .nullable()
+      .test(isValidName),
+    category: yup
+      .string()
+      .nullable()
+      .test(isValidName),
+  });
+};
+
 const validateComponentInput = data => {
-  return createSchema(VALID_TYPES, VALID_RELATIONS)
+  return createComponentSchema()
     .validate(data, {
       strict: true,
       abortEarly: false,
@@ -48,7 +63,7 @@ const validateUpdateComponentInput = data => {
     });
   }
 
-  return createSchema(VALID_TYPES, VALID_RELATIONS)
+  return createComponentSchema()
     .validate(data, {
       strict: true,
       abortEarly: false,

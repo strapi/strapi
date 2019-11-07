@@ -42,8 +42,8 @@
     },
     {
       "method": "DELETE",
-      "path": "/models/:model",
-      "handler": "ContentTypeBuilder.deleteModel",
+      "path": "/content-types/:uid",
+      "handler": "ContentTypes.deleteContentType",
       "config": {
         "policies": []
       }

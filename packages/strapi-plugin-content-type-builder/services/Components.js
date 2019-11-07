@@ -368,6 +368,7 @@ module.exports = {
   createComponentUID,
   updateComponent,
   deleteComponent,
+  writeComponent: writeSchema,
 
   // export for testing only
   createSchema,

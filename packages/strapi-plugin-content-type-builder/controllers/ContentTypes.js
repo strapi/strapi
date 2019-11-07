@@ -144,6 +144,95 @@ module.exports = {
       },
     });
   },
+
+  async deleteContentType(ctx) {
+    const { uid } = ctx.params;
+
+    const contentType = strapi.contentTypes[uid];
+
+    if (!contentType) {
+      return ctx.send({ error: 'contentType.notFound' }, 404);
+    }
+
+    if (!_.has(contentType, 'apiName')) {
+      return ctx.send({ error: 'contentType.not.deletable' }, 400);
+    }
+
+    strapi.reload.isWatching = false;
+
+    await removeContentType(contentType);
+    await deleteAllRelations(contentType);
+
+    setImmediate(() => strapi.reload());
+
+    ctx.send({
+      data: {
+        uid,
+      },
+    });
+  },
+};
+
+const deleteAllRelations = ({ modelName, plugin }) => {
+  const contentTypeUpdates = Object.keys(strapi.contentTypes).map(uid => {
+    const { __schema__ } = strapi.contentTypes[uid];
+
+    const keysToDelete = Object.keys(__schema__.attributes).filter(key => {
+      const attr = __schema__.attributes[key];
+      const target = attr.model || attr.collection;
+
+      const sameModel = target === modelName;
+      const samePluginOrNoPlugin =
+        (attr.plugin && attr.plugin === plugin) || !attr.plugin;
+
+      if (samePluginOrNoPlugin && sameModel) {
+        return true;
+      }
+
+      return false;
+    });
+
+    if (keysToDelete.length > 0) {
+      const newchema = {
+        ...__schema__,
+        attributes: _.omit(__schema__.attributes, keysToDelete),
+      };
+
+      return writeContentType({ uid, schema: newchema });
+    }
+  });
+
+  const componentUpdates = Object.keys(strapi.components).map(uid => {
+    const { __schema__ } = strapi.components[uid];
+
+    const keysToDelete = Object.keys(__schema__.attributes).filter(key => {
+      const attr = __schema__.attributes[key];
+      const target = attr.model || attr.collection;
+
+      const sameModel = target === modelName;
+      const samePluginOrNoPlugin =
+        (attr.plugin && attr.plugin === plugin) || !attr.plugin;
+
+      if (samePluginOrNoPlugin && sameModel) {
+        return true;
+      }
+
+      return false;
+    });
+
+    if (keysToDelete.length > 0) {
+      const newchema = {
+        ...__schema__,
+        attributes: _.omit(__schema__.attributes, keysToDelete),
+      };
+
+      return strapi.plugins[
+        'content-type-builder'
+      ].services.components.writeComponent({ uid, schema: newchema });
+    }
+  });
+
+  return Promise.all([...contentTypeUpdates, ...componentUpdates]);
 };
 
 const deleteBidirectionalRelations = ({ modelName, plugin }) => {
@@ -234,6 +323,69 @@ const generateReversedRelations = ({ attributes, modelName, plugin }) => {
     });
 
   return Promise.all(promises);
+};
+
+const removeContentType = async ({ uid }) => {
+  const { apiName, __filename__ } = strapi.contentTypes[uid];
+
+  const baseName = path.basename(__filename__, '.settings.json');
+  const apiFolder = path.join(strapi.dir, 'api', apiName);
+
+  const deleteFile = async filePath => {
+    const fileName = path.basename(filePath);
+
+    if (_.startsWith(_.toLower(fileName), _.toLower(baseName) + '.')) {
+      await fse.remove(filePath);
+    }
+
+    if (fileName === 'routes.json') {
+      const { routes } = await fse.readJSON(filePath);
+
+      const clearedRoutes = routes.filter(route => {
+        return !_.startsWith(
+          _.toLower(route.handler),
+          _.toLower(baseName) + '.'
+        );
+      });
+
+      if (clearedRoutes.length === 0) {
+        await fse.remove(filePath);
+      } else {
+        await fse.writeJSON(
+          filePath,
+          {
+            routes: clearedRoutes,
+          },
+          {
+            spaces: 2,
+          }
+        );
+      }
+    }
+  };
+
+  const recursiveRemoveFiles = async folder => {
+    const filesName = await fse.readdir(folder);
+
+    for (const fileName of filesName) {
+      const filePath = path.join(folder, fileName);
+
+      const stat = await fse.stat(filePath);
+
+      if (stat.isDirectory()) {
+        await recursiveRemoveFiles(filePath);
+      } else {
+        await deleteFile(filePath);
+      }
+    }
+
+    const files = await fse.readdir(folder);
+    if (files.length === 0) {
+      await fse.remove(folder);
+    }
+  };
+
+  await recursiveRemoveFiles(apiFolder);
 };
 
 const writeContentType = async ({ uid, schema }) => {
