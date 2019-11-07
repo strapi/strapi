@@ -19,26 +19,28 @@ const createComponentModels = async ({ model, definition, ORM, GLOBALS }) => {
       component() {
         return this.morphTo(
           'component',
-          ...componentAttributes.map(key => {
-            const attr = definition.attributes[key];
-            const { type } = attr;
+          ...componentAttributes
+            .map(key => {
+              const attr = definition.attributes[key];
+              const { type } = attr;
 
-            switch (type) {
-              case 'component': {
-                const { component } = attr;
-                return GLOBALS[strapi.components[component].globalId];
+              switch (type) {
+                case 'component': {
+                  const { component } = attr;
+                  return GLOBALS[strapi.components[component].globalId];
+                }
+                case 'dynamiczone': {
+                  const { components } = attr;
+                  return components.map(
+                    component => GLOBALS[strapi.components[component].globalId]
+                  );
+                }
+                default: {
+                  throw new Error(`Invalid type for attribute ${key}: ${type}`);
+                }
               }
-              case 'dynamiczone': {
-                const { components } = attr;
-                return components.map(
-                  component => GLOBALS[strapi.components[component].globalId]
-                );
-              }
-              default: {
-                throw new Error(`Invalid type for attribute ${key}: ${type}`);
-              }
-            }
-          })
+            })
+            .reduce((acc, arr) => acc.concat(arr), [])
         );
       },
     });
