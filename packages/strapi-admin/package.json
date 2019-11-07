@@ -27,6 +27,7 @@
     "@buffetjs/icons": "^1.0.6",
     "@buffetjs/styles": "^1.0.5",
     "@buffetjs/utils": "^1.0.5",
+    "@comparaonline/react-intl-hooks": "^0.0.1-alpha.6",
     "autoprefixer": "^9.5.1",
     "babel-loader": "^8.0.5",
     "bcryptjs": "^2.4.3",

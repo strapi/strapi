@@ -4,8 +4,12 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { capitalize, get, sortBy } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { Header, HeaderActions, HeaderTitle } from '@buffetjs/core';
-import { PopUpWarning, getQueryParameters } from 'strapi-helper-plugin';
+import { Header } from '@buffetjs/custom';
+import {
+  PopUpWarning,
+  getQueryParameters,
+  useGlobalContext,
+} from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 import DisplayedFieldsDropdown from '../../components/DisplayedFieldsDropdown';
@@ -62,7 +66,7 @@ function ListView({
 }) {
   strapi.useInjectReducer({ key: 'listView', reducer, pluginId });
   strapi.useInjectSaga({ key: 'listView', saga, pluginId });
-
+  const { formatMessage } = useGlobalContext();
   const getLayoutSettingRef = useRef();
   const [isLabelPickerOpen, setLabelPickerState] = useState(false);
   const [isFilterPickerOpen, setFilterPickerState] = useState(false);
@@ -217,13 +221,13 @@ function ListView({
 
   const headerAction = [
     {
-      title: (
-        <FormattedMessage
-          id="content-manager.containers.List.addAnEntry"
-          values={{
-            entity: capitalize(slug) || 'Content Manager',
-          }}
-        />
+      title: formatMessage(
+        {
+          id: 'content-manager.containers.List.addAnEntry',
+        },
+        {
+          entity: capitalize(slug) || 'Content Manager',
+        }
       ),
       onClick: () => {
         emitEvent('willCreateEntry');
@@ -239,20 +243,19 @@ function ListView({
   ];
 
   const headerProps = {
-    title: <HeaderTitle title={slug || 'Content Manager'} />,
-    content: (
-      <p>
-        <FormattedMessage
-          id={
-            count > 1
-              ? `${pluginId}.containers.List.pluginHeaderDescription`
-              : `${pluginId}.containers.List.pluginHeaderDescription.singular`
-          }
-          values={{ label: count }}
-        />
-      </p>
+    title: {
+      label: slug || 'Content Manager',
+    },
+    content: formatMessage(
+      {
+        id:
+          count > 1
+            ? `${pluginId}.containers.List.pluginHeaderDescription`
+            : `${pluginId}.containers.List.pluginHeaderDescription.singular`,
+      },
+      { label: count }
     ),
-    callToAction: <HeaderActions actions={headerAction} />,
+    actions: headerAction,
   };
 
   return (
@@ -291,7 +294,7 @@ function ListView({
             />
           )}
           <Wrapper>
-            <div className="row" style={{ marginBottom: '6px' }}>
+            <div className="row" style={{ marginBottom: '5px' }}>
               <div className="col-10">
                 <div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
                   {getLayoutSettingRef.current('filterable') && (
