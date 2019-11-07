@@ -31,14 +31,6 @@ module.exports = {
     return strapi.query(params.model, source).count(filters);
   },
 
-  async createMultipart(data, { files = {}, model, source } = {}) {
-    const entry = await strapi.query(model, source).create(data);
-
-    await uploadFiles(entry, files, { model, source });
-
-    return strapi.query(model, source).findOne({ id: entry.id });
-  },
-
   async create(data, { files, model, source } = {}) {
     const entry = await strapi.query(model, source).create(data);
 
