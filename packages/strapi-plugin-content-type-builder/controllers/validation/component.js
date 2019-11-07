@@ -6,6 +6,7 @@ const yup = require('yup');
 const { isValidName } = require('./common');
 const formatYupErrors = require('./yup-formatter');
 const createSchema = require('./model-schema');
+const { modelTypes } = require('./constants');
 
 const VALID_RELATIONS = ['oneWay', 'manyWay'];
 const VALID_TYPES = [
@@ -32,7 +33,9 @@ const VALID_TYPES = [
 ];
 
 const createComponentSchema = () => {
-  return createSchema(VALID_TYPES, VALID_RELATIONS).shape({
+  return createSchema(VALID_TYPES, VALID_RELATIONS, {
+    modelType: modelTypes.COMPONENT,
+  }).shape({
     icon: yup
       .string()
       .nullable()

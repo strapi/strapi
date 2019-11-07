@@ -2,9 +2,11 @@
 
 const yup = require('yup');
 const { validators, isValidName, isValidEnum } = require('./common');
+const { hasComponent } = require('../../utils/attributes');
+const { modelTypes } = require('./constants');
 
-const getTypeShape = obj => {
-  switch (obj.type) {
+const getTypeShape = (attribute, { modelType } = {}) => {
+  switch (attribute.type) {
     /**
      * complexe types
      */
@@ -139,7 +141,28 @@ const getTypeShape = obj => {
       return {
         required: validators.required,
         repeatable: yup.boolean(),
-        component: yup.string().required(),
+        component: yup
+          .string()
+          .oneOf(Object.keys(strapi.components))
+          .test({
+            name: 'Check max component nesting is 1 lvl',
+            test: function(compoUID) {
+              const targetCompo = strapi.components[compoUID];
+              if (!targetCompo) return true; // ignore this error as it will fail beforehand
+
+              if (
+                modelType === modelTypes.COMPONENT &&
+                hasComponent(targetCompo)
+              ) {
+                return this.createError({
+                  path: this.path,
+                  message: `${targetCompo.modelName} already as a nested compoent. You cannot have more than one level of nesting inside your components.`,
+                });
+              }
+              return true;
+            },
+          })
+          .required(),
         min: yup.number(),
         max: yup.number(),
       };
@@ -150,7 +173,12 @@ const getTypeShape = obj => {
         required: validators.required,
         components: yup
           .array()
-          .of(yup.string())
+          .of(
+            yup
+              .string()
+              .oneOf(Object.keys(strapi.components))
+              .required()
+          )
           .min(1)
           .required(),
         min: yup.number(),

@@ -7,7 +7,7 @@ const { isValidName, isValidKey } = require('./common');
 const { getTypeShape } = require('./types');
 const getRelationValidator = require('./relations');
 
-const createSchema = (types, relations) =>
+const createSchema = (types, relations, { modelType } = {}) =>
   yup
     .object({
       name: yup
@@ -31,7 +31,7 @@ const createSchema = (types, relations) =>
                     .string()
                     .oneOf(types)
                     .required(),
-                  ...getTypeShape(attribute),
+                  ...getTypeShape(attribute, { modelType }),
                 };
 
                 return yup

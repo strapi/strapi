@@ -17,6 +17,14 @@ const fromUID = uid => {
   return { modelName, plugin };
 };
 
+const hasComponent = model => {
+  const compoKeys = Object.keys(model.attributes || {}).filter(key => {
+    return model.attributes[key].type === 'component';
+  });
+
+  return compoKeys.length > 0;
+};
+
 /**
  * Formats a component's attributes
  * @param {Object} attributes - the attributes map
@@ -132,6 +140,8 @@ const convertAttributes = attributes => {
 };
 
 module.exports = {
+  hasComponent,
+
   formatAttributes,
   convertAttributes,
 };

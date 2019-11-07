@@ -4,6 +4,7 @@ const _ = require('lodash');
 const formatYupErrors = require('./yup-formatter');
 
 const createSchema = require('./model-schema');
+const { modelTypes } = require('./constants');
 
 const VALID_RELATIONS = [
   'oneWay',
@@ -38,7 +39,9 @@ const VALID_TYPES = [
 ];
 
 const validateContentTypeInput = data => {
-  return createSchema(VALID_TYPES, VALID_RELATIONS)
+  return createSchema(VALID_TYPES, VALID_RELATIONS, {
+    modelType: modelTypes.CONTENT_TYPE,
+  })
     .validate(data, {
       strict: true,
       abortEarly: false,
@@ -56,7 +59,9 @@ const validateUpdateContentTypeInput = data => {
     });
   }
 
-  return createSchema(VALID_TYPES, VALID_RELATIONS)
+  return createSchema(VALID_TYPES, VALID_RELATIONS, {
+    modelType: modelTypes.CONTENT_TYPE,
+  })
     .validate(data, {
       strict: true,
       abortEarly: false,
