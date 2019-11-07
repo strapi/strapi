@@ -1,0 +1,15 @@
+{
+  "name": "docs",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vuepress dev",
+    "build": "vuepress build"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@vuepress/plugin-medium-zoom": "^1.2.0",
+    "vuepress": "^1.2.0",
+    "vuepress-plugin-element-tabs": "^0.1.8"
+  }
+}
