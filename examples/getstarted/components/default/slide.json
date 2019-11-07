@@ -11,10 +11,9 @@
       "default": "something"
     },
     "pictures": {
-      "model": "file",
+      "collection": "file",
       "via": "related",
-      "plugin": "upload",
-      "multiple": true
+      "plugin": "upload"
     }
   }
 }

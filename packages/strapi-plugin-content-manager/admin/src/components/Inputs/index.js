@@ -115,6 +115,13 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
     );
   }
 
+  let inputValue = value;
+
+  // Fix for input file multipe
+  if (type === 'media' && !value) {
+    inputValue = [];
+  }
+
   return (
     <FormattedMessage id={errorId}>
       {error => {
@@ -146,7 +153,7 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
             options={get(attribute, 'enum', [])}
             type={getInputType(type)}
             validations={validations}
-            value={value}
+            value={inputValue}
             withDefaultValue={false}
             // withOptionPlaceholder={withOptionPlaceholder}
           />

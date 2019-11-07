@@ -129,7 +129,7 @@ InputFileWithErrors.defaultProps = {
   errorsClassName: '',
   errorsStyle: {},
   className: '',
-  customBootstrapClass: 'col-md-6',
+  customBootstrapClass: 'col-md-12',
   didCheckErrors: false,
   inputDescription: '',
   inputDescriptionClassName: '',

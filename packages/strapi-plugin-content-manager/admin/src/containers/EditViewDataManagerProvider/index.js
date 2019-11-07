@@ -1,7 +1,7 @@
 import React, { useEffect, useReducer } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
+import { cloneDeep, get } from 'lodash';
 import {
   getQueryParameters,
   request,
@@ -11,6 +11,8 @@ import pluginId from '../../pluginId';
 import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
 import createYupSchema from './utils/schema';
 import createDefaultForm from './utils/createDefaultForm';
+import getFilesToUpload from './utils/getFilesToUpload';
+import cleanData from './utils/cleanData';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
@@ -157,7 +159,61 @@ const EditViewDataManagerProvider = ({
       // Validate the form using yup
       await schema.validate(modifiedData, { abortEarly: false });
       // Set the loading state in the plugin header
-      setIsSubmitting();
+      const filesToUpload = getFilesToUpload(modifiedData);
+      const cleanedData = cleanData(
+        cloneDeep(modifiedData),
+        currentContentTypeLayout,
+        allLayoutData.components
+      );
+
+      console.log({ cleanedData });
+
+      const formData = new FormData();
+
+      formData.append('data', JSON.stringify(cleanedData));
+
+      Object.keys(filesToUpload).forEach(key => {
+        const files = filesToUpload[key];
+
+        files.forEach(file => {
+          formData.append(`files.${key}`, file);
+        });
+      });
+
+      // Change the request helper default headers so we can pass a FormData
+      const headers = {};
+      const method = isCreatingEntry ? 'POST' : 'PUT';
+      const endPoint = isCreatingEntry ? slug : `${slug}/${id}`;
+
+      try {
+        // Time to actually send the data
+        await request(
+          getRequestUrl(endPoint),
+          {
+            method,
+            headers,
+            params: { source },
+            body: formData,
+            signal,
+          },
+          false,
+          false
+        );
+        // emitEvent('didSaveEntry');
+        redirectToPreviousPage();
+      } catch (err) {
+        const error = get(
+          err,
+          ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
+          'SERVER ERROR'
+        );
+
+        setIsSubmitting(false);
+        // emitEvent('didNotSaveEntry', { error: err });
+        strapi.notification.error(error);
+      }
+
+      // setIsSubmitting();
     } catch (err) {
       const errors = get(err, 'inner', []).reduce((acc, curr) => {
         acc[
@@ -249,6 +305,10 @@ const EditViewDataManagerProvider = ({
   };
 
   const showLoader = !isCreatingEntry && isLoading;
+
+  console.log({ modifiedData });
+
+  // console.log({ cleanedData });
 
   return (
     <EditViewDataManagerContext.Provider
