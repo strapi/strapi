@@ -1,9 +1,10 @@
 # Introduction
 
------
-Important Note: **Strapi 1.x is on maintenance only**. Development focuses on the upcoming Strapi 3.0. 
+---
 
------
+Important Note: **Strapi 1.x is on maintenance only**. Development focuses on the upcoming Strapi 3.0.
+
+---
 
 Strapi is an open-source Node.js rich framework for building applications and services.
 
@@ -23,7 +24,6 @@ Install the latest stable release with the npm command-line tool:
 ```bash
 $ npm install strapi -g
 ```
-
 
 ### Create your first project
 
@@ -49,6 +49,7 @@ the license plate (`license`) with:
 ```bash
 $ strapi generate api car name:string year:integer license:string
 ```
+
 ## Alternatives
 
 ### Dry Application
@@ -77,13 +78,12 @@ thanks to a powerful User Interface.
 Log into the Strapi Studio with your user account ([http://studio.strapi.io](http://studio.strapi.io))
 and follow the instructions to start the experience.
 
-
 ### Link to the Strapi Studio
 
 > We advise you to use our Studio to build APIs. To do so, you need to create a Strapi account.
-[Go to the Strapi Studio to signup](http://studio.strapi.io).
-Studio is dedicated to developers to build applications without writing
-any single line of code thanks to its powerful set of tools.
+> [Go to the Strapi Studio to signup](http://studio.strapi.io).
+> Studio is dedicated to developers to build applications without writing
+> any single line of code thanks to its powerful set of tools.
 
 After creating an account on the Strapi Studio, you are able to link your machine to your
 Strapi Studio account to get access to all features offered by the Strapi ecosystem.
@@ -118,6 +118,7 @@ Strapi comes with a generator that help jumpstart your application's backend wit
 ```bash
 $ strapi generate api car
 ```
+
 and you'll get an API that lets you read, paginate, sort, filter, create, destroy, update,
 and associate cars.
 
@@ -172,7 +173,7 @@ By default outputs all errors to `stderr` unless `NODE_ENV` is `test`.
 To perform custom error-handling logic such as centralized logging you can add an "error" event listener:
 
 ```js
-strapi.app.on('error', function (err) {
+strapi.app.on('error', function(err) {
   strapi.log.error('server error', err);
 });
 ```
@@ -181,7 +182,7 @@ If an error in the req/res cycle and it is not possible to respond to the client
 the `Context` instance is also passed:
 
 ```js
-strapi.app.on('error', function (err, ctx) {
+strapi.app.on('error', function(err, ctx) {
   strapi.log.error('server error', err, ctx);
 });
 ```

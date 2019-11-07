@@ -67,9 +67,8 @@ By taking the previous example, your `Post` controller should look like this:
 
 ```js
 module.exports = {
-
   // GET request
-  find: function *() {
+  find: function*() {
     try {
       this.body = yield Post.find(this.params);
     } catch (error) {
@@ -77,7 +76,7 @@ module.exports = {
     }
   },
 
-  findOne: function *() {
+  findOne: function*() {
     try {
       this.body = yield Post.findOne(this.params);
     } catch (error) {
@@ -86,7 +85,7 @@ module.exports = {
   },
 
   // POST request
-  create: function *() {
+  create: function*() {
     try {
       this.body = yield Post.create(this.request.body);
     } catch (error) {
@@ -95,7 +94,7 @@ module.exports = {
   },
 
   // PUT request
-  update: function *() {
+  update: function*() {
     try {
       this.body = yield Post.update(this.params.id, this.request.body);
     } catch (error) {
@@ -104,15 +103,14 @@ module.exports = {
   },
 
   // DELETE request
-  delete: function *() {
+  delete: function*() {
     try {
       this.body = yield Post.destroy(this.params);
     } catch (error) {
       this.body = error;
     }
-  }
-};  
-
+  },
+};
 ```
 
 ## Router prefix

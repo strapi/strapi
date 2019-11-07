@@ -13,7 +13,7 @@ as the receiver, or the `this` identifier, as shown in the following
 snippet:
 
 ```js
-strapi.app.use(function * () {
+strapi.app.use(function*() {
   this; // is the Context
   this.request; // is a Strapi Request
   this.response; // is a Strapi Response

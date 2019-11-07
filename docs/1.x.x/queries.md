@@ -34,14 +34,13 @@ set of brackets otherwise Waterline will think you want to perform an `inQuery`.
 
 ```js
 User.find({
-    name: 'Walter Jr'
-  })
-  .exec(function (err, users) {
-    if (err) {
-      console.log(err);
-    }
-    console.log(users);
-  });
+  name: 'Walter Jr',
+}).exec(function(err, users) {
+  if (err) {
+    console.log(err);
+  }
+  console.log(users);
+});
 ```
 
 ### .findOne(criteria, [callback])
@@ -57,14 +56,13 @@ set of brackets otherwise Waterline will think you want to perform an `inQuery`.
 
 ```js
 User.findOne({
-    name: 'Walter Jr'
-  })
-  .exec(function (err, user) {
-    if (err) {
-      console.log(err);
-    }
-    console.log(user);
-  });
+  name: 'Walter Jr',
+}).exec(function(err, user) {
+  if (err) {
+    console.log(err);
+  }
+  console.log(user);
+});
 ```
 
 ### .create(criteria, [callback])
@@ -77,14 +75,13 @@ If the data is valid and passes all validations it will be sent to the adapters 
 
 ```js
 User.create({
-    name: 'Walter Jr'
-  })
-  .exec(function (err, user) {
-    if (err) {
-      console.log(err);
-    }
-    console.log(user);
-  });
+  name: 'Walter Jr',
+}).exec(function(err, user) {
+  if (err) {
+    console.log(err);
+  }
+  console.log(user);
+});
 ```
 
 ### .findOrCreate(criteria, [values, callback])
@@ -110,14 +107,13 @@ a single user gets created with the name "Walter Jr" and returned:
 
 ```js
 User.findOrCreate({
-    name: 'Walter Jr'
-  })
-  .exec(function (err, users) {
-    if (err) {
-      console.log(err);
-    }
-    console.log(users);
-  });
+  name: 'Walter Jr',
+}).exec(function(err, users) {
+  if (err) {
+    console.log(err);
+  }
+  console.log(users);
+});
 ```
 
 ### .update(search criteria, values, [callback])
@@ -135,17 +131,19 @@ of the record. If you specify a primary key instead of a criteria object,
 any `.where()` filters will be ignored.
 
 ```js
-User.update({
-    name: 'Walter Jr'
-  }, {
-    name: 'Flynn'
-  })
-  .exec(function (err, user) {
-    if (err) {
-      console.log(err);
-    }
-    console.log(user);
-  });
+User.update(
+  {
+    name: 'Walter Jr',
+  },
+  {
+    name: 'Flynn',
+  }
+).exec(function(err, user) {
+  if (err) {
+    console.log(err);
+  }
+  console.log(user);
+});
 ```
 
 ### .destroy(criteria, [callback])
@@ -161,13 +159,12 @@ you must first perform a `.find()`. Any string arguments passed must be the ID o
 
 ```js
 User.destroy({
-    name: 'Flynn'
-  })
-  .exec(function (err) {
-    if (err) {
-      console.log(err);
-    }
-  });
+  name: 'Flynn',
+}).exec(function(err) {
+  if (err) {
+    console.log(err);
+  }
+});
 ```
 
 ### .query(query, [data], callback)
@@ -188,7 +185,10 @@ Using PostgreSQL:
 
 ```js
 const title = "The King's Speech";
-Movie.query('SELECT * FROM movie WHERE title = $1', [title], function (err, results) {
+Movie.query('SELECT * FROM movie WHERE title = $1', [title], function(
+  err,
+  results
+) {
   console.log('Found the following movie: ', results.rows[0]);
 });
 ```
@@ -197,7 +197,10 @@ Using MySQL:
 
 ```js
 const title = "The King's Speech";
-Movie.query('SELECT * FROM movie WHERE title = $1', [title], function (err, results) {
+Movie.query('SELECT * FROM movie WHERE title = $1', [title], function(
+  err,
+  results
+) {
   console.log('Found the following movie: ', results[0]);
 });
 ```
@@ -225,11 +228,11 @@ if `where` is excluded the entire object will be treated as a `where` criteria.
 ```js
 User.find({
   where: {
-    name: 'John'
+    name: 'John',
   },
   skip: 20,
   limit: 10,
-  sort: 'name DESC'
+  sort: 'name DESC',
 });
 ```
 
@@ -237,7 +240,7 @@ Or:
 
 ```js
 User.find({
-  name: 'John'
+  name: 'John',
 });
 ```
 
@@ -249,7 +252,7 @@ and the value is a strict equality check of the records for matching values.
 
 ```js
 User.find({
-  name: 'John'
+  name: 'John',
 });
 ```
 
@@ -258,7 +261,7 @@ They can be used together to search multiple attributes:
 ```js
 User.find({
   name: 'John',
-  country: 'France'
+  country: 'France',
 });
 ```
 
@@ -270,9 +273,9 @@ supported criteria modifiers to perform queries where a strict equality check wo
 ```js
 User.find({
   name: {
-    contains: 'alt'
-  }
-})
+    contains: 'alt',
+  },
+});
 ```
 
 #### In Pairs
@@ -281,7 +284,7 @@ In queries work similarly to MySQL `in` queries. Each element in the array is tr
 
 ```js
 User.find({
-  name: ['John', 'Walter']
+  name: ['John', 'Walter'],
 });
 ```
 
@@ -292,8 +295,8 @@ Not-In queries work similar to `in` queries, except for the nested object criter
 ```js
 User.find({
   name: {
-    '!': ['John', 'Walter']
-  }
+    '!': ['John', 'Walter'],
+  },
 });
 ```
 
@@ -306,18 +309,19 @@ Results will be returned that match any of the criteria objects inside the array
 User.find({
   or: [
     {
-      name: 'John'
+      name: 'John',
     },
     {
-      occupation: 'Developer'
-    }
-  ]
+      occupation: 'Developer',
+    },
+  ],
 });
 ```
 
 ### Criteria Modifiers
 
 The following modifiers are available to use when building queries:
+
 - `<` or `lessThan`
 - `<=` or `lessThanOrEqual`
 - `>` or `greaterThan`
@@ -335,8 +339,8 @@ Searches for records where the value is less than the value specified.
 ```js
 User.find({
   age: {
-    '<': 30
-  }
+    '<': 30,
+  },
 });
 ```
 
@@ -347,8 +351,8 @@ Searches for records where the value is less or equal to the value specified.
 ```js
 User.find({
   age: {
-    '<=': 21
-  }
+    '<=': 21,
+  },
 });
 ```
 
@@ -359,8 +363,8 @@ Searches for records where the value is more than the value specified.
 ```js
 User.find({
   age: {
-    '>': 18
-  }
+    '>': 18,
+  },
 });
 ```
 
@@ -371,8 +375,8 @@ Searches for records where the value is more or equal to the value specified.
 ```js
 User.find({
   age: {
-    '>=': 21
-  }
+    '>=': 21,
+  },
 });
 ```
 
@@ -383,8 +387,8 @@ Searches for records where the value is not equal to the value specified.
 ```js
 User.find({
   name: {
-    '!': 'John'
-  }
+    '!': 'John',
+  },
 });
 ```
 
@@ -395,8 +399,8 @@ Searches for records using pattern matching with the `%` sign.
 ```js
 User.find({
   food: {
-    'like': '%burgers'
-  }
+    like: '%burgers',
+  },
 });
 ```
 
@@ -408,16 +412,16 @@ Will return records where the value contains the string anywhere inside of it.
 ```js
 User.find({
   class: {
-    'like': '%history%'
-  }
+    like: '%history%',
+  },
 });
 ```
 
 ```js
 User.find({
   class: {
-    'contains': 'history'
-  }
+    contains: 'history',
+  },
 });
 ```
 
@@ -429,16 +433,16 @@ Will return records where the value starts with the supplied string value.
 ```js
 User.find({
   class: {
-    'startsWith': 'french'
-  }
+    startsWith: 'french',
+  },
 });
 ```
 
 ```js
 User.find({
   class: {
-    'like': 'french%'
-  }
+    like: 'french%',
+  },
 });
 ```
 
@@ -450,16 +454,16 @@ Will return records where the value ends with the supplied string value.
 ```js
 User.find({
   class: {
-    'endsWith': 'can'
-  }
+    endsWith: 'can',
+  },
 });
 ```
 
 ```js
 User.find({
   class: {
-    'like': '%can'
-  }
+    like: '%can',
+  },
 });
 ```
 
@@ -471,8 +475,8 @@ You can do date range queries using the comparison operators.
 User.find({
   date: {
     '>': new Date('2/4/2014'),
-    '<': new Date('2/7/2014')
-  }
+    '<': new Date('2/7/2014'),
+  },
 });
 ```
 
@@ -487,9 +491,9 @@ Limit the number of results returned from a query.
 ```js
 User.find({
   where: {
-    name: 'John'
+    name: 'John',
   },
-  limit: 20
+  limit: 20,
 });
 ```
 
@@ -500,9 +504,9 @@ Return all the results excluding the number of items to skip.
 ```js
 User.find({
   where: {
-    name: 'John'
+    name: 'John',
   },
-  skip: 10
+  skip: 10,
 });
 ```
 
@@ -513,10 +517,10 @@ User.find({
 ```js
 User.find({
   where: {
-    name: 'John'
+    name: 'John',
   },
   limit: 10,
-  skip: 10
+  skip: 10,
 });
 ```
 
@@ -531,9 +535,9 @@ Sort by name in ascending order:
 ```js
 User.find({
   where: {
-    name: 'John'
+    name: 'John',
   },
-  sort: 'name'
+  sort: 'name',
 });
 ```
 
@@ -542,9 +546,9 @@ Sort by name in descending order:
 ```js
 User.find({
   where: {
-    name: 'John'
+    name: 'John',
   },
-  sort: 'name DESC'
+  sort: 'name DESC',
 });
 ```
 
@@ -553,9 +557,9 @@ Sort by name in ascending order:
 ```js
 User.find({
   where: {
-    name: 'John'
+    name: 'John',
   },
-  sort: 'name ASC'
+  sort: 'name ASC',
 });
 ```
 
@@ -564,11 +568,11 @@ Sort by binary notation
 ```js
 User.find({
   where: {
-    name: 'John'
+    name: 'John',
   },
   sort: {
-    name: 1
-  }
+    name: 1,
+  },
 });
 ```
 
@@ -577,12 +581,12 @@ Sort by multiple attributes:
 ```js
 User.find({
   where: {
-    name: 'John'
+    name: 'John',
   },
   sort: {
-    name:  1,
-    age: 0
-  }
+    name: 1,
+    age: 0,
+  },
 });
 ```
 
@@ -596,9 +600,9 @@ This example only returns the field name:
 User.find({
   where: {
     age: {
-      '<': 30
-    }
+      '<': 30,
+    },
   },
-  select: ['name']
+  select: ['name'],
 });
 ```

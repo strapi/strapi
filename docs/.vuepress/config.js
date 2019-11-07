@@ -1,71 +1,39 @@
-const container = require('markdown-it-container');
-
-const ogprefix = 'og: http://ogp.me/ns#';
-const title = 'Strapi Documentation';
-const description = 'The headless CMS developers love.';
-const color = '#2F80ED';
-const author = 'Strapi';
-const url = 'https://strapi.io/documentation/';
-
 module.exports = {
-  head: [
-    ['link', { rel: 'icon', href: `/rocket.png` }],
-    ['meta', { name: 'theme-color', content: color }],
-    ['meta', { prefix: ogprefix, property: 'og:title', content: title }],
-    ['meta', { prefix: ogprefix, property: 'twitter:title', content: title }],
-    ['meta', { prefix: ogprefix, property: 'og:type', content: 'article' }],
-    ['meta', { prefix: ogprefix, property: 'og:url', content: url }],
-    [
-      'meta',
-      { prefix: ogprefix, property: 'og:description', content: description },
-    ],
-    [
-      'meta',
-      { prefix: ogprefix, property: 'og:image', content: `${url}rocket.png` },
-    ],
-    [
-      'meta',
-      { prefix: ogprefix, property: 'og:article:author', content: author },
-    ],
-    ['meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }],
-    [
-      'meta',
-      { name: 'apple-mobile-web-app-status-bar-style', content: 'black' },
-    ],
-    // ['link', { rel: 'apple-touch-icon', href: `/assets/apple-touch-icon.png` }],
-    // ['link', { rel: 'mask-icon', href: '/assets/safari-pinned-tab.svg', color: color }],
-    ['meta', { name: 'msapplication-TileImage', content: '/rocket.png' }],
-    ['meta', { name: 'msapplication-TileColor', content: color }],
-  ],
-  markdown: {
-    anchor: {
-      permalink: true,
-    },
-    config: md => {
-      md.use(require('markdown-it-decorate'))
-        .use(...createContainer('intro'))
-        .use(...createContainer('windows'))
-        .use(...createContainer('ubuntu'))
-        .use(...createContainer('mac'))
-        .use(...createContainer('note'));
-      const vuepressTabs = require('vuepress-tabs');
-      vuepressTabs(md);
-    },
-  },
-  title,
-  description,
+  title: 'Strapi Documentation',
+  description: 'The headless CMS developers love.',
   base: '/documentation/',
   ga: 'UA-54313258-1',
+  plugins: ['@vuepress/medium-zoom', 'vuepress-plugin-element-tabs'],
+  head: [['link', { rel: 'icon', href: `/rocket.png` }]],
   themeConfig: {
-    versions: [
-      ['Version 3.0.0-beta.x', '/3.0.0-beta.x/'],
-      ['Version 3.0.0-alpha.x', '/3.0.0-alpha.x/'],
-      ['Version 1.x.x', '/1.x.x/'],
-    ],
+    nav: (module.exports = [
+      {
+        text: 'Versions',
+        items: [
+          {
+            text: 'Version 3.0.0-beta.x',
+            link: '/3.0.0-beta.x/',
+          },
+          {
+            text: 'Version 3.0.0-alpha.x',
+            link: '/3.0.0-alpha.x/',
+          },
+        ],
+      },
+      {
+        text: 'Website',
+        link: 'https://strapi',
+      },
+      {
+        text: 'slack',
+        link: 'https://slack.strapi.io',
+      },
+      {
+        text: 'Blog',
+        link: 'https://blog.strapi.io',
+      },
+    ]),
     repo: 'strapi/strapi',
-    website: 'https://strapi.io',
-    slack: 'https://slack.strapi.io',
-    blog: 'https://blog.strapi.io',
     docsDir: 'docs',
     algolia: {
       apiKey: 'a93451de224096fb34471c8b8b049de7',
@@ -74,10 +42,7 @@ module.exports = {
     editLinks: true,
     editLinkText: 'Improve this page',
     serviceWorker: true,
-    hiddenLinks: [
-      '/3.0.0-beta.x/cli/CLI.html',
-      '/3.0.0-beta.x/api-reference/reference.html',
-    ],
+    sidebarDepth: 1,
     sidebar: {
       '/3.0.0-beta.x/': [
         {
@@ -313,20 +278,3 @@ module.exports = {
     },
   },
 };
-
-function createContainer(className) {
-  return [
-    container,
-    className,
-    {
-      render(tokens, idx) {
-        const token = tokens[idx];
-        if (token.nesting === 1) {
-          return `<div class="${className} custom-block">\n`;
-        } else {
-          return `</div>\n`;
-        }
-      },
-    },
-  ];
-}

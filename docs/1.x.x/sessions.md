@@ -13,8 +13,7 @@ The current session is available in `this.session` inside a controller action.
 
 ```js
 module.exports = {
-  find: function *() {
-
+  find: function*() {
     // Limit request rate to 100
     if (this.session.views < 100) {
       try {
@@ -26,21 +25,21 @@ module.exports = {
     } else {
       this.body = 'You have reached your request rate limit';
     }
-  }
-};  
+  },
+};
 ```
 
 To destroy an active session, simply set it to `null`:
 
 ```js
 module.exports = {
-  logout: function () {
+  logout: function() {
     try {
       this.session = null;
       this.redirect('./');
     } catch (error) {
       this.body = error;
     }
-  }
-};  
+  },
+};
 ```

@@ -18,6 +18,7 @@ You can override this settings in the `./config/general.json` file.
 ```
 
 Options:
+
 - `enabled` (boolean): Enabled or disabled GraphQL.
 - `route` (string): Change GraphQL endpoint.
 
@@ -31,16 +32,18 @@ Strapi takes over GraphQL natively. We added a function called `query` to execut
 your query without given as a parameters the GraphQL schemas each time.
 
 An example of how to use `query` function:
+
 ```js
 // Build your query
 const query = '{ users{firstName lastName posts{title}} }';
 
 // Execute the query
-graphql.query(query)
-  .then(function (result) {
+graphql
+  .query(query)
+  .then(function(result) {
     console.log(result);
   })
-  .catch(function (error) {
+  .catch(function(error) {
     console.log(error);
   });
 ```
@@ -58,13 +61,13 @@ And the JSON result:
       "title": "Second title..."
     }, {
       "title": "Third title..."
-    }]    
+    }]
   }, {
     "firstname": "Karl",
     "lastname": "Doe",
     "posts":[{
       "title": "Fourth title..."
-    }]    
+    }]
   }]
 }
 ```
@@ -76,9 +79,12 @@ Strapi also provides a HTTP GraphQL server to execute request from your front-en
 An example of how to execute the same request as above with a HTTP request with jQuery.
 
 ```js
-$.get('http://yourserver.com/graphql?query={ users{firstName lastName posts{title}} }', function (data) {
-  console.log(data);
-});
+$.get(
+  'http://yourserver.com/graphql?query={ users{firstName lastName posts{title}} }',
+  function(data) {
+    console.log(data);
+  }
+);
 ```
 
 ## Execute complex queries
@@ -92,19 +98,22 @@ Strapi also provides the `start` and `end` parameters to select records between 
 This example will return 10 users' records sorted alphabetically by `firstName`:
 
 ```js
-const query = '{ users(limit: 10, sort: "firstName ASC"){firstName lastName post{title}} }';
+const query =
+  '{ users(limit: 10, sort: "firstName ASC"){firstName lastName post{title}} }';
 ```
 
 You can access to the 10 next users by adding the `skip` parameter:
 
 ```js
-const query = '{ users(limit: 10, sort: "firstName ASC", skip: 10){firstName lastName posts{title}} }';
+const query =
+  '{ users(limit: 10, sort: "firstName ASC", skip: 10){firstName lastName posts{title}} }';
 ```
 
 And you also can select those records in a period between two dates with the `start` and `end` parameters:
 
 ```js
-const query = '{ users(limit: 10, sort: "firstName ASC", skip: 10, start: "09/21/2015", end:" 09/22/2015"){firstName lastName posts{title}} }';
+const query =
+  '{ users(limit: 10, sort: "firstName ASC", skip: 10, start: "09/21/2015", end:" 09/22/2015"){firstName lastName posts{title}} }';
 ```
 
 ### Useful functions
@@ -114,7 +123,8 @@ Strapi comes with a powerful set of useful functions such as `getLatest<Model>`,
 Returns the 5 latest users from the September 27th 2015 at 8:59:59 PM:
 
 ```js
-const query = '{ getLatestUsers(count: 5, start: "9/27/2015 20:59:59"){firstName lastName posts{title}} }';
+const query =
+  '{ getLatestUsers(count: 5, start: "9/27/2015 20:59:59"){firstName lastName posts{title}} }';
 ```
 
 Returns the 5 first users:

@@ -9,19 +9,19 @@ Simply create a JavaScript file containing a function or an object into your
 `./api/<apiName>/services` directory.
 
 For example, you could have an `Email service` like this:
+
 ```js
 const nodemailer = require('nodemailer');
 
 module.exports = {
-  sendEmail: function (from, to, subject, text) {
-
+  sendEmail: function(from, to, subject, text) {
     // Create reusable transporter object using SMTP transport
     const transporter = nodemailer.createTransport({
       service: 'Gmail',
       auth: {
         user: 'gmail.user@gmail.com',
-        pass: 'userpass'
-      }
+        pass: 'userpass',
+      },
     });
 
     // Setup e-mail data
@@ -29,11 +29,11 @@ module.exports = {
       from: from,
       to: to,
       subject: subject,
-      text: text
+      text: text,
     };
 
     // Send mail
-    transporter.sendMail(options, function(error, info){
+    transporter.sendMail(options, function(error, info) {
       if (error) {
         console.log(error);
         return false;
@@ -41,6 +41,6 @@ module.exports = {
 
       console.log('Message sent: ' + info.response);
     });
-  }
+  },
 };
 ```

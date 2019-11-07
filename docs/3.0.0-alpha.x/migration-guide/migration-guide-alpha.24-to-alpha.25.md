@@ -6,12 +6,13 @@
 - New getting started
 
 **Useful links:**
+
 - Changelog: [https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.25.2](https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.25)
 - GitHub diff: [https://github.com/strapi/strapi/compare/v3.0.0-alpha.24...v3.0.0-alpha.25.2](https://github.com/strapi/strapi/compare/v3.0.0-alpha.24...v3.0.0-alpha.25.2)
 
 <br>
 
-::: note
+::: tip
 Feel free to [join us on Slack](http://slack.strapi.io) and ask questions about the migration process.
 :::
 
@@ -35,7 +36,7 @@ Run `npm install strapi@3.0.0-alpha.25.2 --save` to update your strapi version.
 
 ## Update the Admin
 
-::: note
+::: tip
 If you performed updates in the Admin, you will have to manually migrate your changes.
 :::
 
@@ -45,7 +46,7 @@ Delete your old admin folder and replace it with the new one.
 
 ## Update the Plugins
 
-::: note
+::: tip
 If you did a custom update on one of the plugins, you will have to manually migrate your update.
 :::
 
@@ -59,7 +60,7 @@ Update all your API services by following this update [https://github.com/strapi
 
 ## Update Bookshelf
 
-Update all your API services by following this update [https://github.com/strapi/strapi/pull/2970/files#diff-61ba361ed6161efcd5f4e583001cc9c9R240](https://github.com/strapi/strapi/pull/2970/files#diff-61ba361ed6161efcd5f4e583001cc9c9R240) and  [https://github.com/strapi/strapi/pull/2864/files#diff-61ba361ed6161efcd5f4e583001cc9c9R124](https://github.com/strapi/strapi/pull/2864/files#diff-61ba361ed6161efcd5f4e583001cc9c9R124)
+Update all your API services by following this update [https://github.com/strapi/strapi/pull/2970/files#diff-61ba361ed6161efcd5f4e583001cc9c9R240](https://github.com/strapi/strapi/pull/2970/files#diff-61ba361ed6161efcd5f4e583001cc9c9R240) and [https://github.com/strapi/strapi/pull/2864/files#diff-61ba361ed6161efcd5f4e583001cc9c9R124](https://github.com/strapi/strapi/pull/2864/files#diff-61ba361ed6161efcd5f4e583001cc9c9R124)
 
 We update the name of the life cycle for the before/after fetch all [https://github.com/strapi/strapi/pull/2965/files](https://github.com/strapi/strapi/pull/2965/files)
 You will have to replace `beforeFetchCollection` by `beforeFetchAll` if you added theses functions in you `Model.js` files.

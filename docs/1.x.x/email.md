@@ -21,6 +21,7 @@ To change the STMP config, edit the `./api/email/config/environments/development
 ```
 
 Options:
+
 - `from` (string): The email address used to send emails.
 - `service` (object): The SMTP service info:
   - `name` (string): Name of the service used to send emails (eg. `Gmail`).
@@ -34,16 +35,17 @@ The email service allows you to easily send emails from anywhere in your applica
 Usage as a promise (yieldable) :
 
 ```js
-strapi.api.email.services.email.send({
+strapi.api.email.services.email
+  .send({
     from: 'contact@company.com', // Sender (defaults to `strapi.config.smtp.from`).
     to: ['john@doe.com'], // Recipients list.
     html: '<p>Hello John</p>', // HTML version of the email content.
-    text: 'Hello John' // Text version of the email content.
+    text: 'Hello John', // Text version of the email content.
   })
-  .then(function (data) {
+  .then(function(data) {
     console.log(data);
   })
-  .catch(function (err) {
+  .catch(function(err) {
     console.log(err);
   });
 ```
@@ -51,18 +53,21 @@ strapi.api.email.services.email.send({
 Usage with a callback :
 
 ```js
-strapi.api.email.services.email.send({
+strapi.api.email.services.email.send(
+  {
     from: 'contact@company.com', // Sender (defaults to `strapi.config.smtp.from`).
     to: ['john@doe.com'], // Recipients list.
     html: '<p>Hello John</p>', // HTML version of the email content.
-    text: 'Hello John' // Text version of the email content.
-  }, function (err, data) {
+    text: 'Hello John', // Text version of the email content.
+  },
+  function(err, data) {
     if (err) {
       console.log(err);
     } else {
       console.log(data);
     }
-  });
+  }
+);
 ```
 
 ## Email API

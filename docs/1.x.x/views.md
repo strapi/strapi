@@ -43,9 +43,11 @@ yield this.render('user', {
 
 ```html
 <html>
-  <head>...</head>
+  <head>
+    ...
+  </head>
   <body>
-    <p>Firstname: <% firstname %><br>Lastname: <% lastname %></p>
+    <p>Firstname: <% firstname %><br />Lastname: <% lastname %></p>
   </body>
 </html>
 ```

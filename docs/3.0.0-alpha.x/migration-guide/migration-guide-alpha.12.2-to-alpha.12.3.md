@@ -9,12 +9,13 @@
 - Fix delete manyToMany relations with Mongoose
 
 **Useful links:**
+
 - Changelog: [https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.12.3](https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.12.3)
 - GitHub diff: [https://github.com/strapi/strapi/compare/v3.0.0-alpha.12.2...v3.0.0-alpha.12.3](https://github.com/strapi/strapi/compare/v3.0.0-alpha.12.2...v3.0.0-alpha.12.3)
 
 <br>
 
-::: note
+::: tip
 Feel free to [join us on Slack](http://slack.strapi.io) and ask questions about the migration process.
 :::
 
@@ -38,7 +39,7 @@ Run `npm install strapi@3.0.0-alpha.12.3 --save` to update your strapi version a
 
 ## Update the Admin
 
-::: note
+::: tip
 If you performed updates in the Admin, you will have to manually migrate your changes.
 :::
 
@@ -48,7 +49,7 @@ Delete your old admin folder and replace it with the new one.
 
 ## Update the Plugins
 
-::: note
+::: tip
 If you did a custom update on one of the plugins, you will have to manually migrate your update.
 :::
 
@@ -95,45 +96,43 @@ Then update your controller's file and add the count action.
 
 ```js
 /**
-  * Count article records.
-  *
-  * @return {Number}
-  */
+ * Count article records.
+ *
+ * @return {Number}
+ */
 
-count: async (ctx) => {
+count: async ctx => {
   return strapi.services.article.count(ctx.query);
-}
+};
 ```
 
 For Mongo applications update the service of your API with the following code:
 
 ```js
 /**
-  * Promise to count articles.
-  *
-  * @return {Promise}
-  */
+ * Promise to count articles.
+ *
+ * @return {Promise}
+ */
 
-count: (params) => {
+count: params => {
   // Convert `params` object to filters compatible with Mongo.
   const filters = strapi.utils.models.convertParams('article', params);
 
-  return Article
-    .count()
-    .where(filters.where);
-}
+  return Article.count().where(filters.where);
+};
 ```
 
 And for Postgres and MySQL applications with this one:
 
 ```js
 /**
-  * Promise to count a/an article.
-  *
-  * @return {Promise}
-  */
+ * Promise to count a/an article.
+ *
+ * @return {Promise}
+ */
 
-count: (params) => {
+count: params => {
   // Convert `params` object to filters compatible with Bookshelf.
   const filters = strapi.utils.models.convertParams('article', params);
 
@@ -141,14 +140,18 @@ count: (params) => {
     _.forEach(filters.where, (where, key) => {
       if (_.isArray(where.value)) {
         for (const value in where.value) {
-          qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value])
+          qb[value ? 'where' : 'orWhere'](
+            key,
+            where.symbol,
+            where.value[value]
+          );
         }
       } else {
         qb.where(key, where.symbol, where.value);
       }
     });
   }).count();
-}
+};
 ```
 
 That's all, you have now upgraded to Strapi `alpha.12.3`.

@@ -43,9 +43,9 @@ const { parseMultipartData, sanitizeEntity } = require('strapi-utils');
 - `parseMultipartData`: This function parses strapi's formData format.
 - `sanitizeEntity`: This function removes all private fields from the model and its relations.
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "find" id="find"
+::: tab find
 
 #### `find`
 
@@ -74,7 +74,7 @@ module.exports = {
 
 :::
 
-::: tab "findOne" id="findone"
+::: tab findOne
 
 #### `findOne`
 
@@ -97,7 +97,7 @@ module.exports = {
 
 :::
 
-::: tab "count" id="count"
+::: tab count
 
 #### `count`
 
@@ -120,7 +120,7 @@ module.exports = {
 
 :::
 
-::: tab "create" id="create"
+::: tab create
 
 #### `create`
 
@@ -149,7 +149,7 @@ module.exports = {
 
 :::
 
-::: tab "update" id="update"
+::: tab update
 
 #### `update`
 
@@ -184,7 +184,7 @@ module.exports = {
 
 :::
 
-::: tab "delete" id="delete"
+::: tab delete
 
 #### `delete`
 
@@ -225,7 +225,7 @@ There are two ways to create a controller:
 Each controller’s action must be an `async` function.
 Every action receives a `context` (`ctx`) object as first parameter containing the [request context](./requests-responses.md) and the [response context](./requests-responses.md).
 
-::: note
+::: tip
 Every action must be referenced by a route.
 :::
 
@@ -261,6 +261,6 @@ module.exports = {
 };
 ```
 
-::: note
+::: tip
 A route handler can only access the controllers defined in the `./api/**/controllers` folders.
 :::

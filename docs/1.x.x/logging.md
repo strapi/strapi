@@ -20,7 +20,7 @@ JSON metadata objects. Adding metadata is simple:
 
 ```js
 strapi.log.info('Test log message', {
-  anything: 'This is metadata'
+  anything: 'This is metadata',
 });
 ```
 
@@ -41,16 +41,20 @@ strapi.log.info('test message %d', 123);
 ```
 
 ```js
-strapi.log.info('test message %j', {
-  number: 123
-}, {});
+strapi.log.info(
+  'test message %j',
+  {
+    number: 123,
+  },
+  {}
+);
 // => info: test message {"number":123}
 // => meta = {}
 ```
 
 ```js
 strapi.log.info('test message %s, %s', 'first', 'second', {
-  number: 123
+  number: 123,
 });
 // => info: test message first, second
 // => meta = {number: 123}
@@ -58,25 +62,37 @@ strapi.log.info('test message %s, %s', 'first', 'second', {
 
 ```js
 strapi.log.info('test message', 'first', 'second', {
-  number: 123
+  number: 123,
 });
 // => info: test message first second
 // => meta = {number: 123}
 ```
 
 ```js
-strapi.log.info('test message %s, %s', 'first', 'second', {
-  number: 123
-}, function() {});
+strapi.log.info(
+  'test message %s, %s',
+  'first',
+  'second',
+  {
+    number: 123,
+  },
+  function() {}
+);
 // => info: test message first, second
 // => meta = {number: 123}
 // => callback = function() {}
 ```
 
 ```js
-strapi.log.info('test message', 'first', 'second', {
-  number: 123
-}, function() {});
+strapi.log.info(
+  'test message',
+  'first',
+  'second',
+  {
+    number: 123,
+  },
+  function() {}
+);
 // => info: test message first second
 // => meta = {number: 123}
 // => callback = function() {}

@@ -49,6 +49,7 @@ Results may be filtered, paginated, and sorted based on the blueprint configurat
 and/or parameters sent in the request.
 
 Optional parameters:
+
 - `*` (string): To filter results based on a particular attribute, specify a query
   parameter with the same name as the attribute defined on your model.
 - `where` (string): Instead of filtering based on a specific attribute, you may instead
@@ -59,7 +60,7 @@ Optional parameters:
   Defaults to 30.
 - `skip` (number): The number of records to skip (useful for pagination).
 - `sort` (string): The sort order. By default, returned records are sorted by primary key value
-  in ascending order.  `ASC` or `DESC`.
+  in ascending order. `ASC` or `DESC`.
 - `populate` (string): If specified, override the default automatic population process.
   Accepts a comma separated list of attributes names for which to populate record values.
 
@@ -98,6 +99,7 @@ The `findOne()` blueprint action returns a single record from the model as a JSO
 The specified id is the primary key of the desired record.
 
 Required parameters:
+
 - `id` (string or number): The desired record's primary key value.
 
 ## create a record
@@ -138,6 +140,7 @@ If a validation error occurred, a JSON response with the invalid attributes and
 the Context status is set to `400`.
 
 Optional parameters:
+
 - `*` (string, number, object or array): Pass in body parameter with the same
   name as the attribute defined in your model to set those values on your new record.
   Nested objects and arrays passed in as parameters are handled the same
@@ -182,9 +185,11 @@ If a validation error occurred, a JSON response with the invalid attributes and 
 specified `id`, a `404` is returned.
 
 Required parameters:
+
 - `id` (string or number): The desired record's primary key value.
 
 Optional parameters:
+
 - `*` (string, number, object or array): Pass in body parameter with the same
   name as the attribute defined on your model to set those values on your new record.
   Nested objects and arrays passed in as parameters are handled the same
@@ -227,6 +232,7 @@ Responds with a JSON object representing the newly destroyed instance.
 If no model instance exists matching the specified `id`, the Context status is set to 400 and the returned promise is rejected.
 
 Required parameters:
+
 - `id` (string or number): The desired record's primary key value.
 
 ## add to a record
@@ -273,6 +279,7 @@ collection attribute of this record (the "primary" record).
   on the foreign record will also be updated.
 
 Notes:
+
 - This action is for dealing with plural ("collection") associations.
   If you want to set or unset a singular ("model") association, just use
   the `update` blueprint.

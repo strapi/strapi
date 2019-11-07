@@ -7,6 +7,7 @@ will setup tests using the mocha framework.
 ## Setup
 
 Before writing tests, you should setup a basic directory structure, like this:
+
 ```
 ./strapiApp
 ├── api/
@@ -29,12 +30,12 @@ perform any actions before and after our tests.
 In this example, the app server is started before running any tests an stop
 the server after tests are completed.
 
-*./test/bootstrap.js*
+_./test/bootstrap.js_
 
 ```js
 const strapi = require('strapi');
 
-before(function (done) {
+before(function(done) {
   strapi.start({}, function(err) {
     if (err) {
       return done(err);
@@ -44,7 +45,7 @@ before(function (done) {
   });
 });
 
-after(function (done) {
+after(function(done) {
   strapi.stop(done());
 });
 ```
@@ -56,16 +57,16 @@ In this example we use [co-supertest](https://github.com/avbel/co-supertest),
 a `co` and `Supertest` integration library.
 [Supertest](https://github.com/visionmedia/supertest) provides several useful
 methods for testing HTTP requests.  
-If you want to test an api endpoint, you can do it like this:  
+If you want to test an api endpoint, you can do it like this:
 
-*./test/integration/controllers/my_endpoint.js*
+_./test/integration/controllers/my_endpoint.js_
 
 ```js
 const request = require('co-supertest');
 
 describe('MyEndpoint Controller Integration', function() {
   describe('GET /my_endpoint', function() {
-    it('should return 200 status code', function *() {
+    it('should return 200 status code', function*() {
       yield request(strapi.config.url)
         .get('/my_endpoint')
         .expect(200)
@@ -81,7 +82,7 @@ describe('MyEndpoint Controller Integration', function() {
 In order to run tests you can use `npm test`. In your `package.json`, in the
 `scripts` section, add this:
 
-*./package.json*
+_./package.json_
 
 ```js
 "scripts": {

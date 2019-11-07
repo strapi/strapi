@@ -55,6 +55,7 @@ Response payload:
 
 JWT does not use session. Once you get the token, it has to be stored in front (for
 example in the `localstorage`), and sent within each request. The token can be sent:
+
 - in the header (`Bearer`)
 - in the body (`token` field)
 - in the querystring (`token` field)
@@ -64,6 +65,7 @@ example in the `localstorage`), and sent within each request. The token can be s
 Thanks to [Grant](https://github.com/simov/grant) and [Purest](https://github.com/simov/purest), you can easily use OAuth and OAuth2
 providers to enable authentication in your application. By default,
 Strapi comes with four providers:
+
 - Facebook
 - Google
 - Github
@@ -125,7 +127,6 @@ Response payload:
 }
 ```
 
-
 ## Accessing user from requests.
 
-If you want to access attributes of the logged in user, you can use `this.user` inside of your controller action. 
+If you want to access attributes of the logged in user, you can use `this.user` inside of your controller action.

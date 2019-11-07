@@ -9,7 +9,7 @@ using a web framework. That's why Strapi provides a ready-to-use admin panel.
 
 This part is a summary of your application.
 
-*Work in progress.*
+_Work in progress._
 
 ## Data Explorer
 
@@ -21,7 +21,7 @@ delete your data.
 To try it, simply create a new API using the Studio or the CLI.
 Then restart the server and reload the web browser page.
 
-![Strapi Admin panel Screenshot Data Explorer](http://strapi.io/assets/screenshots/create.png "Strapi Admin panel Screenshot Data Explorer")
+![Strapi Admin panel Screenshot Data Explorer](http://strapi.io/assets/screenshots/create.png 'Strapi Admin panel Screenshot Data Explorer')
 
 ## Users
 
@@ -46,7 +46,7 @@ to manage the security of each of them.
 - `Owner`: the user must be one of the `contributors` of the `model` updated or deleted.
 - `Admin`: only the users related to the `admin` role are allowed to access the route.
 
-![Strapi Admin panel Screenshot Permissions](http://strapi.io/assets/screenshots/permissions.png "Strapi Admin panel Screenshot Permissions")
+![Strapi Admin panel Screenshot Permissions](http://strapi.io/assets/screenshots/permissions.png 'Strapi Admin panel Screenshot Permissions')
 
 ## Customization
 
@@ -54,6 +54,7 @@ The admin panel is developed with Angular.js, using the John PAPA styleguide.
 You can customize the admin from `./api/admin/public` in your generated application.
 
 To build the admin panel:
+
 - You need to install `bower` and `gulp` with `$ npm install gulp bower -g`.
 - Run `$ npm install` in this directory.
 - Run `$ gulp serve`.

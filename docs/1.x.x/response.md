@@ -156,6 +156,7 @@ this.set('Cache-Control', 'no-cache');
 ```
 
 ### response.append(field, value)
+
 Append additional header `field` with value `val`.
 
 ```js
@@ -168,8 +169,8 @@ Set several response header `fields` with an object:
 
 ```js
 this.set({
-  'Etag': '1234',
-  'Last-Modified': date
+  Etag: '1234',
+  'Last-Modified': date,
 });
 ```
 
@@ -215,7 +216,7 @@ all HTML responses except for streams.
 ```js
 const minify = require('html-minifier');
 
-strapi.app.use(function *minifyHTML(next) {
+strapi.app.use(function* minifyHTML(next) {
   yield next;
 
   if (!this.response.is('html')) {
@@ -289,7 +290,10 @@ Set the ETag of a response including the wrapped `"`s.
 Note that there is no corresponding `response.etag` getter.
 
 ```js
-this.response.etag = crypto.createHash('md5').update(this.body).digest('hex');
+this.response.etag = crypto
+  .createHash('md5')
+  .update(this.body)
+  .digest('hex');
 ```
 
 ### response.vary(field)

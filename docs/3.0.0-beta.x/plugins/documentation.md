@@ -10,9 +10,9 @@ You'll be able to visualize all your end-points directly from the SWAGGER UI.
 
 As usual run the following in your terminal:
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "yarn" id="yarn-install-documentation"
+::: tab yarn
 
 ```
 yarn strapi install documentation
@@ -20,7 +20,7 @@ yarn strapi install documentation
 
 :::
 
-::: tab "npm" id="npm-install-documentation"
+::: tab npm
 
 ```
 npm run strapi install documentation
@@ -28,7 +28,7 @@ npm run strapi install documentation
 
 :::
 
-::: tab "strapi" id="strapi-install-documentation"
+::: tab strapi
 
 ```
 strapi install documentation

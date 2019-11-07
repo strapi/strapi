@@ -5,15 +5,17 @@ The middlewares are functions which are composed and executed in a stack-like ma
 Enable the middleware in environments settings
 
 **Path —** `config/environments/middleware.json`.
+
 ```json
 {
   "responseTime": {
     "enabled": true
-  },
+  }
 }
 ```
 
 **Path —** [`strapi/lib/middlewares/responseTime/index.js`](https://github.com/strapi/strapi/blob/master/packages/strapi/lib/middlewares/responseTime/index.js).
+
 ```js
 module.exports = strapi => {
   return {
@@ -30,7 +32,7 @@ module.exports = strapi => {
       });
 
       cb();
-    }
+    },
   };
 };
 ```
@@ -60,7 +62,7 @@ The core of Strapi embraces a small list of middlewares for performances, securi
 - xframe
 - xss
 
-::: note
+::: tip
 The following middlewares cannot be disabled: responses, router, logger and boom.
 :::
 
@@ -107,23 +109,16 @@ Every middleware will be injected into the Koa stack. To manage the load order, 
 The middlewares are injected into the Koa stack asynchronously. Sometimes it happens that some of these middlewares need to be loaded in a specific order. To define a load order, we created a dedicated file located in `./config/middleware.json`.
 
 **Path —** `./config/middleware.json`.
+
 ```json
 {
   "timeout": 100,
   "load": {
-    "before": [
-      "responseTime",
-      "logger",
-      "cors",
-      "responses"
-    ],
+    "before": ["responseTime", "logger", "cors", "responses"],
     "order": [
       "Define the middlewares' load order by putting their name in this array in the right order"
     ],
-    "after": [
-      "parser",
-      "router"
-    ]
+    "after": ["parser", "router"]
   }
 }
 ```
@@ -139,46 +134,41 @@ The middlewares are injected into the Koa stack asynchronously. Sometimes it hap
 **Load a middleware at the very first place**
 
 **Path —** `./config/middleware.json`
+
 ```json
-  {
-    "timeout": 100,
-    "load": {
-      "before": [
-        "responseTime",
-        "logger"
-      ],
-      "order": [],
-      "after": []
-    }
+{
+  "timeout": 100,
+  "load": {
+    "before": ["responseTime", "logger"],
+    "order": [],
+    "after": []
   }
+}
 ```
 
 The `responseTime` middleware will be loaded first. Immediately followed by the `logger` middleware. Then, the others middlewares will be loaded asynchronously.
 
-
 **Load a middleware after another one**
 
 **Path —** `./config/middleware.json`.
+
 ```json
-  {
-    "timeout": 100,
-    "load": {
-      "before": [],
-      "order": [
-        "p3p",
-        "gzip"
-      ],
-      "after": []
-    }
+{
+  "timeout": 100,
+  "load": {
+    "before": [],
+    "order": ["p3p", "gzip"],
+    "after": []
   }
+}
 ```
 
 The `gzip` middleware will be loaded after the `p3p` middleware. All the others will be loaded asynchronously.
 
-
 **Load a middleware at the very end**
 
 **Path —** `./config/middleware.json`.
+
 ```json
   {
     "timeout": 100,
@@ -197,7 +187,6 @@ The `gzip` middleware will be loaded after the `p3p` middleware. All the others 
 
 The `router` middleware will be loaded at the very end. The `parser` middleware will be loaded after all the others and just before the `router` middleware.
 
-
 **Complete example**
 
 For this example, we are going to imagine that we have 10 middlewares to load:
@@ -214,25 +203,16 @@ For this example, we are going to imagine that we have 10 middlewares to load:
 - router
 
 We assume that we set the `./config/middleware.json` file like this:
+
 ```json
-  {
-    "timeout": 100,
-    "load": {
-      "before": [
-        "responseTime",
-        "logger",
-        "cors",
-      ],
-      "order": [
-        "p3p",
-        "gzip"
-      ],
-      "after": [
-        "parser",
-        "router"
-      ]
-    }
+{
+  "timeout": 100,
+  "load": {
+    "before": ["responseTime", "logger", "cors"],
+    "order": ["p3p", "gzip"],
+    "after": ["parser", "router"]
   }
+}
 ```
 
 Here is the loader order:

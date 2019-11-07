@@ -38,6 +38,7 @@ The name of the application.
 - Type: `string`
 
 Notes:
+
 - The name must be shorter than 214 characters. This includes the scope for scoped packages.
 - The name can't start with a dot or an underscore.
 - New packages must not have uppercase letters in the name.
@@ -61,6 +62,7 @@ Changes to the package should come along with changes to the version.
 - Type: `string`
 
 Notes:
+
 - Version must be parseable by `node-semver`, which is bundled with npm as a dependency.
 
 ### Application description
@@ -95,6 +97,7 @@ iOS, Android, Windows Phone, or something else that hasn't been invented yet.
   ```
 
 Notes:
+
 - Set to `false` to disable the public assets.
 
 ### Views
@@ -114,6 +117,7 @@ Notes:
 For more information, please refer to the [views documentation](http://strapi.io/documentation/views).
 
 Options:
+
 - `map`: Object mapping extension names to engine names.
 - `default`: Default extension name to use when missing.
 - `cache`: When `true` compiled template functions will be cached in-memory,
@@ -122,6 +126,7 @@ Options:
   environment variable is anything but `development`, such as `stage` or `production`.
 
 Notes:
+
 - Set to `false` to disable views support.
 
 ### WebSockets
@@ -146,6 +151,7 @@ available using the `io` object.
   ```
 
 Notes:
+
 - Set to `false` to disable websockets with Socket.IO.
 
 ### Favicon
@@ -168,10 +174,12 @@ Set a favicon for your web application.
   ```
 
 Options:
+
 - `path` (string): Relative path for the favicon to use from the application root directory.
 - `maxAge` (integer): Cache-control max-age directive. Set to pass the cache-control in ms.
 
 Notes:
+
 - Set to `false` to disable the favicon feature.
 
 ### API prefix
@@ -192,6 +200,7 @@ for some other reasons.
   ```
 
 Notes:
+
 - Let an empty string if you don't want to prefix your API.
 - The prefix must starts with a `/`, e.g. `/api`.
 
@@ -218,6 +227,7 @@ from the CLI, you can enjoy a RESTful API without writing any line of code.
   ```
 
 Options:
+
 - `defaultLimit` (integer): The maximum number of records to send back.
 - `populate` (boolean): If enabled, the population process fills out attributes
   in the returned list of records according to the model's defined associations.
@@ -254,6 +264,7 @@ static words/sentences.
   ```
 
 Options:
+
 - `defaultLocale` (string): The default locale to use.
 - `modes` (array): Accept locale variable from:
   - `query`: detect query string with `/?locale=fr`
@@ -266,6 +277,7 @@ Options:
   Allows the locale to be set from query string or from cookie.
 
 Notes:
+
 - Set to `false` to disable the locales feature.
 - Locales may be configured in the `./config/locales` directory.
 
@@ -302,6 +314,7 @@ outside of a function (since Strapi will not have finished loading yet).
   ```
 
 Options:
+
 - `models` (boolean): Your application's models are exposed as global variables using their `globalId`.
   For instance, the model defined in the file `./api/car/models/Car.js` will be globally accessible as `Car`.
 - `strapi` (boolean): In most cases, you will want to keep the `strapi` object globally accessible,
@@ -311,6 +324,7 @@ Options:
 - `graphql` (boolean): Exposes an instance of GraphQL.
 
 Notes:
+
 - Set to `false` to disable global variables.
 
 ### Bootstrap function
@@ -326,6 +340,7 @@ This gives you an opportunity to set up your data model, run jobs, or perform so
 - Type: `function`
 
 Notes:
+
 - It's very important to trigger the callback method when you are finished with the bootstrap.
   Otherwise your server will never start, since it's waiting on the bootstrap.
 
@@ -355,6 +370,7 @@ with optional recurrence rules. It only uses a single timer at any given time
   ```
 
 Notes:
+
 - The cron format consists of:
   1. second (0 - 59, optional)
   2. minute (0 - 59)
@@ -386,6 +402,7 @@ the changes in realtime in your local application.
   ```
 
 Options:
+
 - `enabled` (boolean): Do you want your application linked to the Strapi Studio?
 - `secretKey` (string): The secret key of your application to link your
   current application with the Strapi Studio.
@@ -409,6 +426,7 @@ The host name the connection was configured to.
   ```
 
 Notes:
+
 - You don't need to specify a `host` in a `production` environment.
 - Defaults to the operating system hostname when available, otherwise `localhost`.
 
@@ -429,6 +447,7 @@ The actual port assigned after the server has been started.
   ```
 
 Notes:
+
 - You don't need to specify a `host` in a `production` environment.
 - When no port is configured or set, Strapi will look for the `process.env.PORT`
   value. If no port specified, the port will be `1337`.
@@ -475,12 +494,14 @@ Enable or disable auto-reload when your application crashes.
   ```
 
 Options:
+
 - `timeout` (integer): Set the timeout before killing a worker in ms.
 - `workers` (integer): Set the number of workers to spawn.
   If the `workers` key is not defined, Strapi will use every free CPU
   (recommended in `production` environment).
 
 Notes:
+
 - Set to `false` to disable the auto-reload and clustering features.
 
 ## Request
@@ -502,6 +523,7 @@ Enable or disable request logs.
   ```
 
 Notes:
+
 - Set to `false` to disable the logger.
 
 ### Body parser
@@ -531,6 +553,7 @@ Parse request bodies.
   ```
 
 Options:
+
 - `encode` (string): Requested encoding.
 - `formLimit` (string): Limit of the urlencoded body.
   If the body ends up being larger than this limit, a 413 error code is returned.
@@ -539,6 +562,7 @@ Options:
 - `extendTypes` (array): Support extend types.
 
 Notes:
+
 - Set to `false` to disable the body parser.
 
 ## Response
@@ -560,6 +584,7 @@ Enable or disable Gzip compression.
   ```
 
 Notes:
+
 - Set to `false` to disable Gzip.
 
 ### Response time header
@@ -581,6 +606,7 @@ to when the headers are written out to the client.
   ```
 
 Notes:
+
 - Set to `false` to disable the response time header.
 
 ## Databases
@@ -623,6 +649,7 @@ and manipulate your data without writing vendor-specific integration code.
   ```
 
 Options:
+
 - `adapters` (object): Association between a connection and the adapter to use.
 - `defaultConnection` (string): The default connection will be used if the
   `connection` key of a model is empty or missing.
@@ -635,6 +662,7 @@ Options:
   - `drop`: drop all data and rebuild models every time your application starts.
 
 Notes:
+
 - When your Strapi application starts, the Waterline ORM validates all of the data in your database.
   This `migrate` flag tells waterline what to do with data when the data is corrupt.
   You can set this flag to `safe` which will ignore the corrupt data and continue to start.
@@ -675,11 +703,13 @@ Strapi only supports cookie sessions, for now.
   ```
 
 Options:
+
 - `key` (string): The cookie name.
 - `secretKeys` (array): Keys used to encrypt the session cookie.
 - `maxAge` (integer): Sets the time in seconds for when a cookie will be deleted.
 
 Notes:
+
 - Set to `false` to disable sessions.
 
 ### Cross Site Request Forgery (CSRF) headers
@@ -702,12 +732,14 @@ Strapi bundles optional CSRF protection out of the box.
   ```
 
 Options:
+
 - `key` (string): The name of the CSRF token added to the model.
   Defaults to `_csrf`.
 - `secret` (string): The key to place on the session object which maps to the server side token.
   Defaults to `_csrfSecret`.
 
 Notes:
+
 - Set to `false` to disable CSRF headers.
 - If you have existing code that communicates with your Strapi backend via `POST`, `PUT`, or `DELETE`
   requests, you'll need to acquire a CSRF token and include it as a parameter or header in those requests.
@@ -733,11 +765,13 @@ Directives can be specified using HTTP response headers or or HTML Meta tags.
   ```
 
 Options:
+
 - `policy` (object): Object definition of policy.
 - `reportOnly` (boolean): Enable report only mode.
 - `reportUri` (string): URI where to send the report data.
 
 Notes:
+
 - Set to `false` to disable CSP headers.
 
 ### X-Frame-Options headers
@@ -757,6 +791,7 @@ Enables `X-Frame-Options` headers to help prevent Clickjacking.
   ```
 
 Notes:
+
 - The string is the value for the header: `DENY`, `SAMEORIGIN` or `ALLOW-FROM`.
 - Set to `false` to disable X-Frame-Options headers.
 
@@ -779,6 +814,7 @@ supported by Internet Explorer. It comes into play most often when dealing with 
   ```
 
 Notes:
+
 - The string is the value of the compact privacy policy.
 - Set to `false` to disable P3P.
 
@@ -804,10 +840,12 @@ The preload flag is required for HSTS domain submissions to Chrome's HSTS preloa
   ```
 
 Options:
+
 - `maxAge` (integer): Number of seconds HSTS is in effect.
 - `includeSubDomains` (boolean): Applies HSTS to all subdomains of the host.
 
 Notes:
+
 - Set to `false` to disable HSTS.
 
 ### X-XSS-Protection headers
@@ -830,10 +868,12 @@ Enables `X-XSS-Protection` headers to help prevent cross site scripting (XSS) at
   ```
 
 Options:
+
 - `enabled` (boolean): If the header is enabled or not.
 - `mode` (string): Mode to set on the header.
 
 Notes:
+
 - Set to `false` to disable HTTP Strict Transport Security.
 
 ### Cross-Origin Resource Sharing (CORS)
@@ -875,6 +915,7 @@ the domain from which the resource originated.
   ```
 
 Options:
+
 - `origin` (string|boolean): Configures the `Access-Control-Allow-Origin` CORS header.
   Expects a string (ex: `http://example.com`) or a boolean.
   Set to `true` to reflect the request origin, as defined by `req.header('Origin')`.
@@ -891,6 +932,7 @@ Options:
   `Access-Control-Request-Headers` header.
 
 Notes:
+
 - Set to `false` to disable CORS.
 
 ### Secure Sockets Layer (SSL)
@@ -913,10 +955,12 @@ This configuration enforce SSL for your application.
   ```
 
 Options:
+
 - `disabled` (boolean): If `true`, this middleware will allow all requests through.
 - `trustProxy` (boolean): If `true`, trust the `X-Forwarded-Proto` header.
 
 Notes:
+
 - Set to `false` to disable SSL.
 
 ### IP filter
@@ -941,10 +985,12 @@ The blacklisted IP addresses won't have access to your web application at all.
   ```
 
 Options:
+
 - `whiteList` (array): IP addresses allowed.
 - `blackList` (array): IP addresses forbidden.
 
 Notes:
+
 - Set to `false` to disable IP filter.
 
 ### Proxy
@@ -967,5 +1013,6 @@ Request your server, fetch the proxy URL you typed and return.
   ```
 
 Notes:
+
 - The string will fetch the host and return.
 - Set to `false` to disable the proxy security.
