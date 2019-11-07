@@ -10,6 +10,7 @@ import {
 import pluginId from '../../pluginId';
 import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
 import createYupSchema from './utils/schema';
+import createDefaultForm from './utils/createDefaultForm';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
@@ -59,14 +60,36 @@ const EditViewDataManagerProvider = ({
       }
     };
 
+    const componentsDataStructure = Object.keys(
+      allLayoutData.components
+    ).reduce((acc, current) => {
+      acc[current] = createDefaultForm(
+        get(allLayoutData, ['components', current, 'schema', 'attributes'], {}),
+        allLayoutData.components
+      );
+      return acc;
+    }, {});
+    const contentTypeDataStructure = createDefaultForm(
+      currentContentTypeLayout.schema.attributes,
+      allLayoutData.components
+    );
+
     // Force state to be cleared when navigation from one entry to another
     dispatch({ type: 'RESET_PROPS' });
+    dispatch({
+      type: 'SET_DEFAULT_DATA_STRUCTURES',
+      componentsDataStructure,
+      contentTypeDataStructure,
+    });
 
     if (!isCreatingEntry) {
       fetchData();
     } else {
       // Will create default form
-      console.log('will create default form');
+      dispatch({
+        type: 'SET_DEFAULT_MODIFIED_DATA_STRUCTURE',
+        contentTypeDataStructure,
+      });
     }
 
     return () => {
@@ -99,10 +122,11 @@ const EditViewDataManagerProvider = ({
     });
   };
 
-  const addRepeatableComponentToField = keys => {
+  const addRepeatableComponentToField = (keys, componentUid) => {
     dispatch({
       type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
       keys: keys.split('.'),
+      componentUid,
     });
   };
 

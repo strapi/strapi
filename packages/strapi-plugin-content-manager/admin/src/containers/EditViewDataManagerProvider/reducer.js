@@ -4,6 +4,8 @@ import {
 } from 'immutable';
 
 const initialState = fromJS({
+  componentsDataStructure: {},
+  contentTypeDataStructure: {},
   formErrors: {},
   isLoading: true,
   initialData: {},
@@ -15,30 +17,38 @@ const reducer = (state, action) => {
   switch (action.type) {
     case 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD':
       return state.updateIn(['modifiedData', ...action.keys], () => {
-        return fromJS({});
+        const defaultDataStructure = state.getIn([
+          'componentsDataStructure',
+          action.componentUid,
+        ]);
+
+        return fromJS(defaultDataStructure);
       });
     case 'ADD_REPEATABLE_COMPONENT_TO_FIELD': {
       return state.updateIn(['modifiedData', ...action.keys], list => {
-        const defaultAttribute = fromJS({});
+        const defaultDataStructure = state.getIn([
+          'componentsDataStructure',
+          action.componentUid,
+        ]);
 
         if (list) {
-          return list.push(defaultAttribute);
+          return list.push(defaultDataStructure);
         }
 
-        return fromJS([defaultAttribute]);
+        return fromJS([defaultDataStructure]);
       });
     }
     case 'ADD_COMPONENT_TO_DYNAMIC_ZONE':
       return state.updateIn(['modifiedData', ...action.keys], list => {
-        const componentToAdd = fromJS({
-          __component: action.componentUid,
-        });
+        const defaultDataStructure = state
+          .getIn(['componentsDataStructure', action.componentUid])
+          .set('__component', action.componentUid);
 
         if (list) {
-          return list.push(componentToAdd);
+          return list.push(defaultDataStructure);
         }
 
-        return fromJS([componentToAdd]);
+        return fromJS([defaultDataStructure]);
       });
     case 'ADD_RELATION':
       return state.updateIn(['modifiedData', ...action.keys], list => {
@@ -153,6 +163,18 @@ const reducer = (state, action) => {
 
     case 'RESET_PROPS':
       return initialState;
+    case 'SET_DEFAULT_DATA_STRUCTURES':
+      return state
+        .update('componentsDataStructure', () =>
+          fromJS(action.componentsDataStructure)
+        )
+        .update('contentTypeDataStructure', () =>
+          fromJS(action.contentTypeDataStructure)
+        );
+    case 'SET_DEFAULT_MODIFIED_DATA_STRUCTURE':
+      return state.update('modifiedData', () =>
+        fromJS(action.contentTypeDataStructure)
+      );
     case 'SUBMIT_ERRORS':
       return state
         .update('formErrors', () => fromJS(action.errors))

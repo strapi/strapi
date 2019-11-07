@@ -8,7 +8,8 @@
   "attributes": {
     "label": {
       "type": "string",
-      "required": true
+      "required": true,
+      "default": "something"
     },
     "time": {
       "type": "string"

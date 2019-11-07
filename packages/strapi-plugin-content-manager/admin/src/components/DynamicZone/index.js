@@ -65,6 +65,7 @@ const DynamicZone = ({ name }) => {
 
         return (
           <ComponentWrapper key={index}>
+            (TEMP: {componentUid})
             {showDownIcon && (
               <RoundCTA
                 style={{ top: -15, right: 30 }}
@@ -81,7 +82,6 @@ const DynamicZone = ({ name }) => {
                 <i className="fa fa-arrow-up" />
               </RoundCTA>
             )}
-
             <RoundCTA
               style={{ top: -15, right: 0 }}
               onClick={() => removeComponentFromDynamicZone(name, index)}

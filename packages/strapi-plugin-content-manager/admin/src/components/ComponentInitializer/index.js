@@ -7,14 +7,14 @@ import NonRepeatableWrapper from '../NonRepeatableWrapper';
 import PlusButton from '../PlusButton';
 import P from './P';
 
-const ComponentInitializer = ({ name }) => {
+const ComponentInitializer = ({ componentUid, name }) => {
   const { addNonRepeatableComponentToField } = useDataManager();
 
   return (
     <NonRepeatableWrapper isEmpty>
       {/* <div /> */}
       <PlusButton
-        onClick={() => addNonRepeatableComponentToField(name, false)}
+        onClick={() => addNonRepeatableComponentToField(name, componentUid)}
         type="button"
       />
       <FormattedMessage id={`${pluginId}.components.empty-repeatable`}>
@@ -29,6 +29,7 @@ ComponentInitializer.defaultProps = {
 };
 
 ComponentInitializer.propTypes = {
+  componentUid: PropTypes.string.isRequired,
   name: PropTypes.string,
 };
 

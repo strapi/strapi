@@ -1,0 +1,13 @@
+{
+  "info": {
+    "name": "rich_text",
+    "description": ""
+  },
+  "connection": "default",
+  "collectionName": "components_rich_texts",
+  "attributes": {
+    "content": {
+      "type": "richtext"
+    }
+  }
+}

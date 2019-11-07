@@ -51,7 +51,9 @@ const FieldComponent = ({
           <div />
         </Reset>
       )}
-      {!isRepeatable && !isInitialized && <ComponentInitializer name={name} />}
+      {!isRepeatable && !isInitialized && (
+        <ComponentInitializer componentUid={componentUid} name={name} />
+      )}
 
       {!isRepeatable && isInitialized && (
         <NonRepeatableComponent

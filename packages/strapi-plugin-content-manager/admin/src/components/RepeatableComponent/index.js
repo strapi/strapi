@@ -12,6 +12,7 @@ import init from './init';
 import reducer, { initialState } from './reducer';
 
 const RepeatableComponent = ({
+  componentUid,
   componentValue,
   componentValueLength,
   fields,
@@ -19,7 +20,6 @@ const RepeatableComponent = ({
   schema,
 }) => {
   const { addRepeatableComponentToField, formErrors } = useDataManager();
-
   const [, drop] = useDrop({ accept: ItemTypes.COMPONENT });
 
   const componentErrorKeys = Object.keys(formErrors)
@@ -107,7 +107,7 @@ const RepeatableComponent = ({
         onClick={() => {
           // TODO min max validations
           // TODO add componentUID
-          addRepeatableComponentToField(name);
+          addRepeatableComponentToField(name, componentUid);
           dispatch({
             type: 'ADD_NEW_FIELD',
           });
@@ -127,6 +127,7 @@ RepeatableComponent.defaultProps = {
 };
 
 RepeatableComponent.propTypes = {
+  componentUid: PropTypes.string.isRequired,
   componentValue: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   componentValueLength: PropTypes.number,
   fields: PropTypes.array,
