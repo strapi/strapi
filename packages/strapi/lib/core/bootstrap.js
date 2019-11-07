@@ -5,6 +5,17 @@ const _ = require('lodash');
 const { createController, createService } = require('../core-api');
 const getURLFromSegments = require('../utils/url-from-segments');
 
+const pickSchema = obj =>
+  _.cloneDeep(
+    _.pick(obj, [
+      'connection',
+      'collectionName',
+      'info',
+      'options',
+      'attributes',
+    ])
+  );
+
 module.exports = function(strapi) {
   // Retrieve Strapi version.
   strapi.config.uuid = _.get(strapi.config.info, 'strapi.uuid', '');
@@ -49,7 +60,7 @@ module.exports = function(strapi) {
       throw new Error(`Component ${key} is missing a collectionName attribute`);
 
     Object.assign(component, {
-      __schema__: _.cloneDeep(component),
+      __schema__: pickSchema(component),
       uid: key,
       modelType: 'component',
       globalId:
@@ -63,7 +74,7 @@ module.exports = function(strapi) {
       let model = strapi.api[apiName].models[modelName];
 
       Object.assign(model, {
-        __schema__: _.cloneDeep(model),
+        __schema__: pickSchema(model),
         modelType: 'contentType',
         uid: `application::${apiName}.${modelName}`,
         apiName,
@@ -144,7 +155,7 @@ module.exports = function(strapi) {
     let model = strapi.admin.models[key];
 
     Object.assign(model, {
-      __schema__: _.cloneDeep(model),
+      __schema__: pickSchema(model),
       modelType: 'contentType',
       uid: `strapi::${key}`,
       modelName: key,
@@ -178,7 +189,7 @@ module.exports = function(strapi) {
       let model = plugin.models[key];
 
       Object.assign(model, {
-        __schema__: _.cloneDeep(model),
+        __schema__: pickSchema(model),
         modelType: 'contentType',
         modelName: key,
         uid: `plugins::${pluginName}.${key}`,

@@ -1,6 +1,6 @@
 'use strict';
 
-const validateComponentCategory = require('./validation/componentCategory');
+const validateComponentCategory = require('./validation/component-category');
 
 module.exports = {
   async editCategory(ctx) {

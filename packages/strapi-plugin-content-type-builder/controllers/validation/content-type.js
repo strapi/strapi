@@ -5,7 +5,14 @@ const formatYupErrors = require('./yup-formatter');
 
 const createSchema = require('./model-schema');
 
-const VALID_RELATIONS = ['oneWay', 'manyWay'];
+const VALID_RELATIONS = [
+  'oneWay',
+  'manyWay',
+  'oneToOne',
+  'oneToMany',
+  'manyToOne',
+  'manyToMany',
+];
 const VALID_TYPES = [
   // advanced types
   'media',
@@ -27,9 +34,10 @@ const VALID_TYPES = [
 
   // nested component
   'component',
+  'dynamiczone',
 ];
 
-const validateComponentInput = data => {
+const validateContentTypeInput = data => {
   return createSchema(VALID_TYPES, VALID_RELATIONS)
     .validate(data, {
       strict: true,
@@ -38,7 +46,7 @@ const validateComponentInput = data => {
     .catch(error => Promise.reject(formatYupErrors(error)));
 };
 
-const validateUpdateComponentInput = data => {
+const validateUpdateContentTypeInput = data => {
   // convert zero length string on default attributes to undefined
   if (_.has(data, 'attributes')) {
     Object.keys(data.attributes).forEach(attribute => {
@@ -57,6 +65,6 @@ const validateUpdateComponentInput = data => {
 };
 
 module.exports = {
-  validateComponentInput,
-  validateUpdateComponentInput,
+  validateContentTypeInput,
+  validateUpdateContentTypeInput,
 };

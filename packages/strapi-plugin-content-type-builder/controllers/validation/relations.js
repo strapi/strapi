@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
 const yup = require('yup');
 const { validators, isValidName } = require('./common');
 
@@ -25,15 +24,6 @@ module.exports = (obj, validNatures) => {
       ? yup
           .string()
           .test(isValidName)
-          .test({
-            name: 'checkAvailableAttribute',
-            message: `The attribute '${obj.targetAttribute}' already exists in the target`,
-            test: value => {
-              const targetContentType = strapi.contentTypes[obj.target];
-              if (_.has(targetContentType.attributes, value)) return false;
-              return true;
-            },
-          })
           .required()
       : yup.string().test(isValidName),
     targetColumnName: yup.string(),

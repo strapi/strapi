@@ -11,7 +11,7 @@ const { nameToSlug } = require('../utils/helpers');
 const {
   validateContentTypeInput,
   validateUpdateContentTypeInput,
-} = require('./validation/contentType');
+} = require('./validation/content-type');
 
 module.exports = {
   getContentTypes(ctx) {
@@ -50,8 +50,8 @@ module.exports = {
       return ctx.send({ error }, 400);
     }
 
-    const slug = nameToSlug(body.name);
-    const uid = `application::${slug}.${slug}`;
+    const modelName = nameToSlug(body.name);
+    const uid = `application::${modelName}.${modelName}`;
 
     if (_.has(strapi.contentTypes, uid)) {
       return ctx.send({ error: 'contentType.alreadyExists' }, 400);
@@ -62,9 +62,12 @@ module.exports = {
     try {
       const contentType = createContentTypeSchema(body);
 
-      await generateAPI(slug, contentType);
+      await generateAPI(modelName, contentType);
 
-      await generateReversedRelations({ attributes: body.attributes, slug });
+      await generateReversedRelations({
+        attributes: body.attributes,
+        modelName,
+      });
 
       if (_.isEmpty(strapi.api)) {
         strapi.emit('didCreateFirstContentType');
@@ -111,45 +114,14 @@ module.exports = {
 
       await writeContentType({ uid, schema: newSchema });
 
-      const updates = Object.keys(strapi.contentTypes).map(ctUID => {
-        const contentType = strapi.contentTypes[ctUID];
+      // delete all relations directed to the updated ct except for oneWay and manyWay
+      await deleteBidirectionalRelations(contentType);
 
-        const keysToDelete = Object.keys(
-          contentType.__schema__.attributes
-        ).filter(key => {
-          const attr = contentType.__schema__.attributes[key];
-          if (
-            (attr.model === uid || attr.collection === uid) &&
-            attr.via &&
-            !Object.keys(newSchema.attributes).includes(attr.via)
-          ) {
-            return true;
-          }
-          return false;
-        });
-
-        const keysToUpdate = [];
-
-        if (keysToDelete.length > 0 || keysToUpdate.length > 0) {
-          const newAttributes = _.omit(contentType.__schema__.attributes, [
-            keysToDelete,
-          ]);
-
-          const newCTSchema = {
-            ...contentType.__schema__,
-            attributes: newAttributes,
-          };
-
-          return writeContentType({ uid: ctUID, schema: newCTSchema });
-        }
+      await generateReversedRelations({
+        attributes: body.attributes,
+        modelName: contentType.modelName,
+        plugin: contentType.plugin,
       });
-
-      await Promise.all(updates);
-
-      // TODO: clear relations to delete (diff old vs new attributes and delete the ones with via)
-
-      // TODO: update relations that changed
-      // TODO: add new relations (diff old vs new and add new attributes)
 
       if (_.isEmpty(strapi.api)) {
         strapi.emit('didCreateFirstContentType');
@@ -174,45 +146,87 @@ module.exports = {
   },
 };
 
-const generateReversedRelations = ({ attributes, slug, plugin }) => {
+const deleteBidirectionalRelations = ({ modelName, plugin }) => {
+  const updates = Object.keys(strapi.contentTypes).map(uid => {
+    const { __schema__ } = strapi.contentTypes[uid];
+
+    const keysToDelete = Object.keys(__schema__.attributes).filter(key => {
+      const attr = __schema__.attributes[key];
+      const target = attr.model || attr.collection;
+
+      const sameModel = target === modelName;
+      const samePluginOrNoPlugin =
+        (attr.plugin && attr.plugin === plugin) || !attr.plugin;
+
+      const isBiDirectionnal = _.has(attr, 'via');
+
+      if (samePluginOrNoPlugin && sameModel && isBiDirectionnal) {
+        return true;
+      }
+
+      return false;
+    });
+
+    if (keysToDelete.length > 0) {
+      const newchema = {
+        ...__schema__,
+        attributes: _.omit(__schema__.attributes, keysToDelete),
+      };
+
+      return writeContentType({ uid, schema: newchema });
+    }
+  });
+
+  return Promise.all(updates);
+};
+
+const buildReversedRelation = ({ key, attr, plugin, modelName }) => {
+  const targetAttributeOptions = {
+    via: key,
+    columnName: attr.targetColumnName,
+    plugin,
+  };
+
+  switch (attr.nature) {
+    case 'manyWay':
+    case 'oneWay':
+      return;
+    case 'oneToOne':
+    case 'oneToMany':
+      targetAttributeOptions.model = modelName;
+      break;
+    case 'manyToOne':
+      targetAttributeOptions.collection = modelName;
+      break;
+    case 'manyToMany': {
+      targetAttributeOptions.collection = modelName;
+
+      if (!targetAttributeOptions.dominant) {
+        targetAttributeOptions.dominant = true;
+      }
+      break;
+    }
+    default:
+  }
+
+  return targetAttributeOptions;
+};
+
+const generateReversedRelations = ({ attributes, modelName, plugin }) => {
   const promises = Object.keys(attributes)
     .filter(key => _.has(attributes[key], 'target'))
     .map(key => {
       const attr = attributes[key];
-
       const target = strapi.contentTypes[attr.target];
-
-      const targetAttributeOptions = {
-        via: key,
-        columnName: attr.targetColumnName,
-        plugin,
-      };
-
-      switch (attr.nature) {
-        case 'manyWay':
-        case 'oneWay':
-          return;
-        case 'oneToOne':
-        case 'oneToMany':
-          targetAttributeOptions.model = slug;
-          break;
-        case 'manyToOne':
-          targetAttributeOptions.collection = slug;
-          break;
-        case 'manyToMany': {
-          targetAttributeOptions.collection = slug;
-
-          if (!targetAttributeOptions.dominant) {
-            targetAttributeOptions.dominant = true;
-          }
-          break;
-        }
-        default:
-      }
 
       const schema = _.merge({}, target.__schema__, {
         attributes: {
-          [attr.targetAttribute]: targetAttributeOptions,
+          [attr.targetAttribute]: buildReversedRelation({
+            key,
+            attr,
+            plugin,
+            modelName,
+          }),
         },
       });
 
