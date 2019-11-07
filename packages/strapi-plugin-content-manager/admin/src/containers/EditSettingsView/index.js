@@ -29,15 +29,18 @@ import SortableList from '../../components/SortableList';
 import { unformatLayout } from '../../utils/layout';
 import LayoutDndProvider from '../LayoutDndProvider';
 import getInputProps from './utils/getInputProps';
+import getInjectedComponents from '../../utils/getComponents';
 
 import reducer, { initialState } from './reducer';
 
 const EditSettingsView = ({
+  currentEnvironment,
   deleteLayout,
   deleteLayouts,
   componentsAndModelsMainPossibleMainFields,
   history: { push },
   location: { search },
+  plugins,
   slug,
 }) => {
   const { componentSlug, type } = useParams();
@@ -379,10 +382,34 @@ const EditSettingsView = ({
       >
         <div className="row">
           <LayoutTitle className={fieldsReorderClassName}>
-            <FormTitle
-              title={`${pluginId}.global.displayedFields`}
-              description={`${pluginId}.containers.SettingPage.editSettings.description`}
-            />
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div>
+                <FormTitle
+                  title={`${pluginId}.global.displayedFields`}
+                  description={`${pluginId}.containers.SettingPage.editSettings.description`}
+                />
+              </div>
+              <div
+                style={{
+                  marginTop: -6,
+                }}
+              >
+                {getInjectedComponents(
+                  'left.links',
+                  plugins,
+                  currentEnvironment,
+                  slug,
+                  source,
+                  emitEvent,
+                  push
+                )}
+              </div>
+            </div>
           </LayoutTitle>
           {type !== 'components' && (
             <LayoutTitle className="col-4">
@@ -445,6 +472,7 @@ EditSettingsView.defaultProps = {
 };
 
 EditSettingsView.propTypes = {
+  currentEnvironment: PropTypes.string,
   deleteLayout: PropTypes.func.isRequired,
   deleteLayouts: PropTypes.func,
   componentsAndModelsMainPossibleMainFields: PropTypes.object.isRequired,
@@ -454,6 +482,7 @@ EditSettingsView.propTypes = {
   location: PropTypes.shape({
     search: PropTypes.string.isRequired,
   }).isRequired,
+  plugins: PropTypes.object,
   slug: PropTypes.string,
 };
 

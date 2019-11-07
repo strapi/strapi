@@ -3,10 +3,9 @@ import PropTypes from 'prop-types';
 import { get, isEqual, upperFirst } from 'lodash';
 import { withRouter } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
-import { Inputs as Input } from '@buffetjs/custom';
+import { Inputs as Input, Header } from '@buffetjs/custom';
 import {
   BackHeader,
-  PluginHeader,
   LoadingIndicatorPage,
   PopUpWarning,
   // contexts
@@ -32,7 +31,7 @@ const SettingsViewWrapper = ({
   onConfirmSubmit,
   slug,
 }) => {
-  const { emitEvent } = useGlobalContext();
+  const { emitEvent, formatMessage } = useGlobalContext();
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningSubmit, setWarningSubmit] = useState(false);
 
@@ -50,30 +49,38 @@ const SettingsViewWrapper = ({
 
     return [
       {
-        label: `${pluginId}.popUpWarning.button.cancel`,
-        kind: 'secondary',
+        color: 'cancel',
         onClick: toggleWarningCancel,
+        title: formatMessage({
+          id: `${pluginId}.popUpWarning.button.cancel`,
+        }),
         type: 'button',
       },
       {
-        kind: 'primary',
-        label: `${pluginId}.containers.Edit.submit`,
+        color: 'success',
+        title: formatMessage({
+          id: `${pluginId}.containers.Edit.submit`,
+        }),
         type: 'submit',
       },
     ];
   };
 
-  const pluginHeaderProps = {
+  const headerProps = {
     actions: getPluginHeaderActions(),
     title: {
-      id: `${pluginId}.components.SettingsViewWrapper.pluginHeader.title`,
-      values: { name: upperFirst(slug) },
+      label: formatMessage(
+        {
+          id: `${pluginId}.components.SettingsViewWrapper.pluginHeader.title`,
+        },
+        { name: upperFirst(slug) }
+      ),
     },
-    description: {
+    content: formatMessage({
       id: `${pluginId}.components.SettingsViewWrapper.pluginHeader.description.${
         isEditSettings ? 'edit' : 'list'
       }-settings`,
-    },
+    }),
   };
 
   const getSelectOptions = input => {
@@ -129,8 +136,13 @@ const SettingsViewWrapper = ({
       <BackHeader onClick={goBack} />
       <Container className="container-fluid">
         <form onSubmit={handleSubmit}>
-          <PluginHeader {...pluginHeaderProps} />
-          <div className="row">
+          <Header {...headerProps} />
+          <div
+            className="row"
+            style={{
+              paddingTop: '3px',
+            }}
+          >
             <Block
               style={{
                 marginBottom: '13px',

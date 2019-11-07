@@ -57,7 +57,7 @@ const Header = () => {
         type: 'button',
       },
       {
-        color: 'primary',
+        color: 'success',
         title: formatMessage({
           id: `${pluginId}.containers.Edit.submit`,
         }),

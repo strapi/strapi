@@ -6,7 +6,7 @@ const LayoutTitle = styled.div`
   font-weight: 500;
   line-height: 18px;
 
-  > p {
+  p {
     margin-bottom: 29px;
     color: #787e8f;
     font-weight: 400;

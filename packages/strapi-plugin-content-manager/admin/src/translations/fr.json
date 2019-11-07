@@ -57,6 +57,7 @@
   "containers.EditView.notification.errors": "Le formulaire contient des erreurs",
   "containers.Edit.Link.Layout": "Paramétrer la vue",
   "containers.Edit.Link.Fields": "Éditer le modèle",
+  "containers.Edit.Link.Model": "Éditer le modèle",
   "containers.Home.introduction": "Pour éditer du contenu, choisissez un type de données dans le menu de gauche.",
   "containers.Home.pluginHeaderDescription": "Créer et modifier votre type de contenu",
   "containers.Home.pluginHeaderTitle": "Type de contenu",

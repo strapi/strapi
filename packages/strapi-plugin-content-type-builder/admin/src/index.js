@@ -4,6 +4,7 @@ import pluginPkg from '../../package.json';
 import App from './containers/App';
 import Initializer from './containers/Initializer';
 import Link from './InjectedComponents/ContentManager/EditViewLink';
+import Button from './InjectedComponents/ContentManager/EditViewButton';
 import lifecycles from './lifecycles';
 import trads from './translations';
 import pluginId from './pluginId';
@@ -34,6 +35,12 @@ const plugin = {
         icon: 'fa-cog',
       },
     },
+    {
+      plugin: 'content-manager.editPage',
+      area: 'left.links',
+      component: Button,
+      key: 'content-type-builder.form',
+    },
   ],
   layout: null,
   lifecycles,
@@ -53,7 +60,6 @@ const plugin = {
       ? `/models/${uid}&source=${source}`
       : `/models/${uid}`;
   },
-
   trads,
 };
 

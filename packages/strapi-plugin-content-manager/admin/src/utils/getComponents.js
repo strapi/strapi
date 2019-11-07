@@ -1,6 +1,6 @@
 import React from 'react';
 import { get } from 'lodash';
-import pluginId from '../../../pluginId';
+import pluginId from '../pluginId';
 
 /**
  * Retrieve external links from injected components
@@ -12,7 +12,8 @@ const getInjectedComponents = (
   currentEnvironment,
   slug,
   source,
-  emitEvent
+  emitEvent,
+  push
 ) => {
   const componentsToInject = Object.keys(plugins).reduce((acc, current) => {
     // Retrieve injected compos from plugin
@@ -35,6 +36,7 @@ const getInjectedComponents = (
             getContentTypeBuilderBaseUrl={() =>
               '/plugins/content-type-builder/models/'
             }
+            push={push}
             {...compo.props}
             key={compo.key}
             onClick={() => {
