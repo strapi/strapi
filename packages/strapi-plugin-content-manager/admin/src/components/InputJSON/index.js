@@ -21,7 +21,6 @@ import Wrapper from './components';
 
 const WAIT = 600;
 const stringify = JSON.stringify;
-const parse = JSON.parse;
 const DEFAULT_THEME = '3024-night';
 
 class InputJSON extends React.Component {
@@ -66,8 +65,9 @@ class InputJSON extends React.Component {
     const { value } = this.props;
 
     try {
-      parse(stringify(value));
       this.setState({ hasInitValue: true });
+
+      if (value === null) return this.codeMirror.setValue('');
 
       return this.codeMirror.setValue(stringify(value, null, 2));
     } catch (err) {
