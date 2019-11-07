@@ -23,7 +23,6 @@ Your package.json should look like this:
     "strapi-plugin-content-manager": "3.0.0-beta.17.5",
     "strapi-plugin-content-type-builder": "3.0.0-beta.17.5",
     "strapi-plugin-email": "3.0.0-beta.17.5",
-    "strapi-plugin-graphql": "3.0.0-beta.17.5",
     "strapi-plugin-upload": "3.0.0-beta.17.5",
     "strapi-plugin-users-permissions": "3.0.0-beta.17.5",
     "strapi-utils": "3.0.0-beta.17.5"
