@@ -59,7 +59,9 @@ const buildAssocResolvers = (model, name, { plugin }) => {
 
   const { primaryKey, associations = [] } = model;
 
-  return associations.reduce((resolver, association) => {
+  return associations
+  .filter(association => model.attributes[association.alias].private !== true)
+  .reduce((resolver, association) => {
     switch (association.nature) {
       case 'oneToManyMorph': {
         resolver[association.alias] = async obj => {
