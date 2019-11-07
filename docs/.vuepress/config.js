@@ -4,9 +4,103 @@ module.exports = {
   base: '/documentation/',
   ga: 'UA-54313258-1',
   plugins: ['@vuepress/medium-zoom', 'vuepress-plugin-element-tabs'],
-  head: [['link', { rel: 'icon', href: `/rocket.png` }]],
+  head: [
+    [
+      'link',
+      {
+        rel: 'icon',
+        href: 'https://strapi.io/favicon.ico',
+      },
+    ],
+
+    [
+      'meta',
+      {
+        property: 'og:title',
+        content: 'Strapi Documentation',
+      },
+    ],
+    [
+      'meta',
+      {
+        property: 'og:type',
+        content: 'article',
+      },
+    ],
+    [
+      'meta',
+      {
+        property: 'og:url',
+        content: 'https://strapi.io/documentation/',
+      },
+    ],
+    [
+      'meta',
+      {
+        property: 'og:description',
+        content: 'The headless CMS developers love.',
+      },
+    ],
+    [
+      'meta',
+      {
+        property: 'og:image',
+        content: 'https://strapi.io/assets/images/strapi-website-preview.png',
+      },
+    ],
+    [
+      'meta',
+      {
+        property: 'og:article:author',
+        content: 'strapi',
+      },
+    ],
+
+    [
+      'meta',
+      {
+        property: 'twitter:card',
+        content: 'summary_large_image',
+      },
+    ],
+    [
+      'meta',
+      {
+        property: 'twitter:url',
+        content: 'https://strapi.io/documentation/',
+      },
+    ],
+    [
+      'meta',
+      {
+        property: 'twitter:site',
+        content: '@strapijs',
+      },
+    ],
+    [
+      'meta',
+      {
+        property: 'twitter:title',
+        content: 'Strapi Documentation',
+      },
+    ],
+    [
+      'meta',
+      {
+        property: 'twitter:description',
+        content: 'The headless CMS developers love.',
+      },
+    ],
+    [
+      'meta',
+      {
+        property: 'twitter:image',
+        content: 'http://strapi.io/assets/images/strapi-website-preview.png',
+      },
+    ],
+  ],
   themeConfig: {
-    nav: (module.exports = [
+    nav: [
       {
         text: 'Versions',
         items: [
@@ -25,14 +119,14 @@ module.exports = {
         link: 'https://strapi',
       },
       {
-        text: 'slack',
+        text: 'Slack',
         link: 'https://slack.strapi.io',
       },
       {
         text: 'Blog',
         link: 'https://blog.strapi.io',
       },
-    ]),
+    ],
     repo: 'strapi/strapi',
     docsDir: 'docs',
     algolia: {
@@ -47,7 +141,7 @@ module.exports = {
       '/3.0.0-beta.x/': [
         {
           collapsable: false,
-          title: '🚀 Getting started',
+          title: '🚀 Getting Started',
           children: [
             '/3.0.0-beta.x/getting-started/introduction',
             '/3.0.0-beta.x/getting-started/install-requirements',
@@ -100,7 +194,7 @@ module.exports = {
         },
         {
           collapsable: true,
-          title: '⚙️️ Admin panel',
+          title: '⚙️️ Admin Panel',
           children: [
             '/3.0.0-beta.x/admin-panel/customization',
             '/3.0.0-beta.x/admin-panel/deploy',
@@ -119,14 +213,12 @@ module.exports = {
         },
         {
           collapsable: true,
-          title: '🔌 Local plugins',
+          title: '🔌 Local Plugins',
           children: [
             '/3.0.0-beta.x/plugin-development/quick-start',
             '/3.0.0-beta.x/plugin-development/plugin-architecture',
             '/3.0.0-beta.x/plugin-development/backend-development',
             '/3.0.0-beta.x/plugin-development/frontend-development',
-
-            // '/3.0.0-beta.x/plugin-development/ui-components', TODO: Add this file
           ],
         },
         {
@@ -157,7 +249,7 @@ module.exports = {
       '/3.0.0-alpha.x/': [
         {
           collapsable: false,
-          title: '🚀 Getting started',
+          title: '🚀 Getting Started',
           children: [
             '/3.0.0-alpha.x/getting-started/introduction',
             '/3.0.0-alpha.x/getting-started/install-requirements',
@@ -212,7 +304,6 @@ module.exports = {
             '/3.0.0-alpha.x/plugin-development/frontend-development',
             '/3.0.0-alpha.x/plugin-development/frontend-use-cases',
             '/3.0.0-alpha.x/plugin-development/utils',
-            // '/3.0.0-alpha.x/plugin-development/ui-components', TODO: Add this file
           ],
         },
         {
