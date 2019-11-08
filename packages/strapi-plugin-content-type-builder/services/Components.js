@@ -173,7 +173,14 @@ async function editSchema({ uid, schema }) {
  */
 async function deleteSchema(uid) {
   const { category, __filename__ } = strapi.components[uid];
-  await strapi.fs.removeAppFile(`components/${category}/${__filename__}`);
+
+  const categoryDir = path.join(strapi.dir, 'components', category);
+  await fse.remove(path.join(categoryDir, __filename__));
+
+  const list = await fse.readdir(categoryDir);
+  if (list.length === 0) {
+    await fse.remove(categoryDir);
+  }
 }
 
 const updateComponentInModels = (oldUID, newUID) => {
