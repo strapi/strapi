@@ -57,7 +57,7 @@ module.exports = {
       return ctx.send({ error }, 400);
     }
 
-    const uid = componentService.createComponentUID(body);
+    const uid = componentService.createComponentUID(body.component);
 
     if (_.has(strapi.components, uid)) {
       return ctx.send({ error: 'component.alreadyExists' }, 400);
@@ -67,7 +67,7 @@ module.exports = {
 
     const newComponent = await componentService.createComponent({
       uid,
-      infos: body,
+      infos: body.component,
     });
 
     strapi.reload();
@@ -91,12 +91,12 @@ module.exports = {
     }
 
     try {
-      await validateUpdateComponentInput(body);
+      await validateUpdateComponentInput(body.component);
     } catch (error) {
       return ctx.send({ error }, 400);
     }
 
-    const newUID = componentService.editComponentUID(body);
+    const newUID = componentService.editComponentUID(body.component);
     if (newUID !== uid && _.has(strapi.components, newUID)) {
       return ctx.send({ error: 'new.component.alreadyExists' }, 400);
     }
@@ -105,7 +105,7 @@ module.exports = {
 
     const updatedComponent = await componentService.updateComponent({
       uid,
-      infos: body,
+      infos: body.component,
     });
 
     await componentService.updateComponentInModels(

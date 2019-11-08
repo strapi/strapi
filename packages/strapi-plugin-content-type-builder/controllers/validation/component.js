@@ -32,19 +32,28 @@ const VALID_TYPES = [
   'component',
 ];
 
+const componentSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
+  modelType: modelTypes.COMPONENT,
+}).shape({
+  icon: yup
+    .string()
+    .nullable()
+    .test(isValidName)
+    .required(),
+  category: yup
+    .string()
+    .nullable()
+    .test(isValidName)
+    .required(),
+});
+
 const createComponentSchema = () => {
-  return createSchema(VALID_TYPES, VALID_RELATIONS, {
-    modelType: modelTypes.COMPONENT,
-  }).shape({
-    icon: yup
-      .string()
-      .nullable()
-      .test(isValidName),
-    category: yup
-      .string()
-      .nullable()
-      .test(isValidName),
-  });
+  return yup
+    .object({
+      component: componentSchema.required().noUnknown(),
+      components: yup.array().of(componentSchema),
+    })
+    .noUnknown();
 };
 
 const validateComponentInput = data => {
@@ -58,10 +67,22 @@ const validateComponentInput = data => {
 
 const validateUpdateComponentInput = data => {
   // convert zero length string on default attributes to undefined
-  if (_.has(data, 'attributes')) {
-    Object.keys(data.attributes).forEach(attribute => {
-      if (data.attributes[attribute].default === '') {
-        data.attributes[attribute].default = undefined;
+  if (_.has(data, ['component', 'attributes'])) {
+    Object.keys(data.component.attributes).forEach(attribute => {
+      if (data.component.attributes[attribute].default === '') {
+        data.component.attributes[attribute].default = undefined;
+      }
+    });
+  }
+
+  if (_.has(data, 'components') && Array.isArray(data.components)) {
+    data.components.forEach(data => {
+      if (_.has(data, 'attributes') && _.has(data, 'uid')) {
+        Object.keys(data.attributes).forEach(attribute => {
+          if (data.attributes[attribute].default === '') {
+            data.attributes[attribute].default = undefined;
+          }
+        });
       }
     });
   }
