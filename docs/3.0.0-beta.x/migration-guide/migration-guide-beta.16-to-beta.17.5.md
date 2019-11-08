@@ -18,6 +18,7 @@ Your package.json should look like this:
   "dependencies": {
     "strapi": "3.0.0-beta.17.5",
     "strapi-admin": "3.0.0-beta.17.5",
+    "strapi-helper-plugin": "^3.0.0-beta.17.5",
     "strapi-hook-bookshelf": "3.0.0-beta.17.5",
     "strapi-hook-knex": "3.0.0-beta.17.5",
     "strapi-plugin-content-manager": "3.0.0-beta.17.5",
