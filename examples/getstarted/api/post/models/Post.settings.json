@@ -34,7 +34,19 @@
         "blog.rich_text",
         "blog.slider",
         "blog.text_with_image"
-      ]
+      ],
+      "min": 2
+    },
+    "contente": {
+      "type": "dynamiczone",
+      "components": [
+        "blog.code_snippet",
+        "blog.quote",
+        "blog.rich_text",
+        "blog.slider",
+        "blog.text_with_image"
+      ],
+      "max": 3
     }
   }
 }

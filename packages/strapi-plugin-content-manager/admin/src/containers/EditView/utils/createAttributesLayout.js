@@ -31,7 +31,7 @@ const createAttributesLayout = (currentLayout, attributes) => {
     }
   }
 
-  return newLayout;
+  return newLayout.filter(arr => arr.length > 0);
 };
 
 export default createAttributesLayout;

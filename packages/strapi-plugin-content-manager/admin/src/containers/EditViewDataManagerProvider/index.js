@@ -151,6 +151,7 @@ const EditViewDataManagerProvider = ({
   const handleSubmit = async e => {
     e.preventDefault();
 
+    // Create yup schema
     const schema = createYupSchema(currentContentTypeLayout, {
       components: get(allLayoutData, 'components', {}),
     });
@@ -160,13 +161,13 @@ const EditViewDataManagerProvider = ({
       await schema.validate(modifiedData, { abortEarly: false });
       // Set the loading state in the plugin header
       const filesToUpload = getFilesToUpload(modifiedData);
+      // Remove keys that are not needed
+      // Clean relations
       const cleanedData = cleanData(
         cloneDeep(modifiedData),
         currentContentTypeLayout,
         allLayoutData.components
       );
-
-      console.log({ cleanedData });
 
       const formData = new FormData();
 
@@ -232,9 +233,6 @@ const EditViewDataManagerProvider = ({
       });
       console.log({ errors });
     }
-    // dispatch({
-    //   type: 'SUBMIT_SUCCEEDED',
-    // });
   };
 
   const moveComponentDown = (dynamicZoneName, currentIndex) => {
@@ -305,10 +303,6 @@ const EditViewDataManagerProvider = ({
   };
 
   const showLoader = !isCreatingEntry && isLoading;
-
-  console.log({ modifiedData });
-
-  // console.log({ cleanedData });
 
   return (
     <EditViewDataManagerContext.Provider
