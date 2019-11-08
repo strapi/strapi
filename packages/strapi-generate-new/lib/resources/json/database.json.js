@@ -12,9 +12,7 @@ module.exports = ({ connection, env }) => {
       password: "${process.env.DATABASE_PASSWORD || ''}",
     };
 
-    const optionsBase = {
-      debug: false,
-    };
+    const optionsBase = {};
 
     return {
       defaultConnection: 'default',
