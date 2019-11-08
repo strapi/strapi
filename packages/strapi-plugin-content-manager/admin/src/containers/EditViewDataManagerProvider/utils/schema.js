@@ -56,7 +56,9 @@ const createYupSchema = (model, { components }) => {
         );
 
         if (attribute.repeatable === true) {
-          const componentSchema =
+          const { min, max } = attribute;
+
+          let componentSchema =
             attribute.required === true
               ? yup
                   .array()
@@ -66,6 +68,14 @@ const createYupSchema = (model, { components }) => {
                   .array()
                   .of(componentFieldSchema)
                   .nullable();
+
+          if (min) {
+            componentSchema = componentSchema.min(min, errorsTrads.min);
+          }
+
+          if (max) {
+            componentSchema = componentSchema.max(max, errorsTrads.max);
+          }
 
           acc[current] = componentSchema;
 

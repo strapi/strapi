@@ -16,12 +16,13 @@ const RepeatableComponent = ({
   componentValue,
   componentValueLength,
   fields,
+  max,
   name,
   schema,
 }) => {
   const { addRepeatableComponentToField, formErrors } = useDataManager();
   const [, drop] = useDrop({ accept: ItemTypes.COMPONENT });
-
+  console.log({ name, max });
   const componentErrorKeys = Object.keys(formErrors)
     .filter(errorKey => errorKey.includes(name))
     .map(errorKey => {
@@ -43,6 +44,8 @@ const RepeatableComponent = ({
       index,
     });
   };
+
+  console.log({ schema });
 
   return (
     <div>
@@ -107,10 +110,12 @@ const RepeatableComponent = ({
         onClick={() => {
           // TODO min max validations
           // TODO add componentUID
-          addRepeatableComponentToField(name, componentUid);
-          dispatch({
-            type: 'ADD_NEW_FIELD',
-          });
+          if (componentValueLength < max) {
+            addRepeatableComponentToField(name, componentUid);
+            dispatch({
+              type: 'ADD_NEW_FIELD',
+            });
+          }
         }}
       >
         <i className="fa fa-plus" />
@@ -124,6 +129,7 @@ RepeatableComponent.defaultProps = {
   componentValue: null,
   componentValueLength: 0,
   fields: [],
+  max: Infinity,
 };
 
 RepeatableComponent.propTypes = {
@@ -131,6 +137,7 @@ RepeatableComponent.propTypes = {
   componentValue: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   componentValueLength: PropTypes.number,
   fields: PropTypes.array,
+  max: PropTypes.number,
   name: PropTypes.string.isRequired,
   schema: PropTypes.object.isRequired,
 };

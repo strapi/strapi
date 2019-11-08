@@ -36,6 +36,7 @@ const NonRepeatableComponent = ({
                     componentUid={componentUid}
                     isRepeatable={currentField.repeatable}
                     label={metas.label}
+                    max={currentField.max}
                     name={keys}
                   />
                 );
