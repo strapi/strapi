@@ -3,6 +3,9 @@
 const { join } = require('path');
 const fse = require('fs-extra');
 
+const componentService = require('./Components');
+const { nameToSlug } = require('../utils/helpers');
+
 module.exports = {
   async editCategory(name, infos) {
     const componentsDir = join(strapi.dir, 'components');
@@ -14,9 +17,6 @@ module.exports = {
       throw strapi.errors.badRequest('Name already taken');
     }
 
-    const componentService =
-      strapi.plugins['content-type-builder'].services.components;
-
     const promises = Object.keys(strapi.components)
       .filter(uid => {
         const [category] = uid.split('.');
@@ -26,7 +26,7 @@ module.exports = {
         const [, name] = uid.split('.');
         return componentService.updateComponentInModels(
           uid,
-          `${infos.name}.${name}`
+          `${nameToSlug(infos.name)}.${name}`
         );
       });
 
@@ -37,8 +37,6 @@ module.exports = {
 
   async deleteCategory(name) {
     const componentsDir = join(strapi.dir, 'components');
-    const componentService =
-      strapi.plugins['content-type-builder'].services.components;
 
     const deletePromises = Object.keys(strapi.components)
       .filter(uid => {

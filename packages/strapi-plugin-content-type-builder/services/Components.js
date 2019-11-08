@@ -212,7 +212,7 @@ const updateComponentInModels = (oldUID, newUID) => {
     );
 
     if (componentsToUpdate.length > 0 || dynamiczonesToUpdate.length > 0) {
-      const newSchema = _.cloneDeep(oldSchema);
+      const newSchema = oldSchema;
 
       componentsToUpdate.forEach(key => {
         newSchema.attributes[key].component = newUID;
@@ -221,7 +221,9 @@ const updateComponentInModels = (oldUID, newUID) => {
       dynamiczonesToUpdate.forEach(key => {
         newSchema.attributes[key].components = oldSchema.attributes[
           key
-        ].components.map(val => (val !== oldUID ? val : newUID));
+        ].components.map(val => {
+          return val === oldUID ? newUID : val;
+        });
       });
 
       return contentTypeService.writeContentType({ uid, schema: newSchema });
@@ -241,9 +243,7 @@ const updateComponentInModels = (oldUID, newUID) => {
     }, []);
 
     if (componentsToUpdate.length > 0) {
-      const newSchema = {
-        ...oldSchema,
-      };
+      const newSchema = oldSchema;
 
       componentsToUpdate.forEach(key => {
         newSchema.attributes[key].component = newUID;
@@ -282,7 +282,7 @@ const deleteComponentInModels = async componentUID => {
     );
 
     if (componentsToRemove.length > 0 || dynamiczonesToUpdate.length > 0) {
-      const newSchema = _.cloneDeep(oldSchema);
+      const newSchema = oldSchema;
 
       componentsToRemove.forEach(key => {
         delete newSchema.attributes[key];
@@ -304,22 +304,17 @@ const deleteComponentInModels = async componentUID => {
   });
 
   const componentUpdates = Object.keys(strapi.components).map(uid => {
-    const component = strapi.components[uid];
+    const { __schema__: oldSchema } = strapi.components[uid];
 
-    const componentsToRemove = Object.keys(component.attributes).filter(key => {
+    const componentsToRemove = Object.keys(oldSchema.attributes).filter(key => {
       return (
-        component.attributes[key].type === 'component' &&
-        component.attributes[key].component === componentUID
+        oldSchema.attributes[key].type === 'component' &&
+        oldSchema.attributes[key].component === componentUID
       );
     }, []);
 
     if (componentsToRemove.length > 0) {
-      const newSchema = {
-        info: component.info,
-        connection: component.connection,
-        collectionName: component.collectionName,
-        attributes: component.attributes,
-      };
+      const newSchema = oldSchema;
 
       componentsToRemove.forEach(key => {
         delete newSchema.attributes[key];
