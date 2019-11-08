@@ -21,10 +21,10 @@ import EditViewDataManagerProvider from '../EditViewDataManagerProvider';
 import EditViewProvider from '../EditViewProvider';
 import Header from './Header';
 import getInjectedComponents from './utils/getComponents';
+import createAttributesLayout from './utils/createAttributesLayout';
+import { LinkWrapper, SubWrapper } from './components';
 import init from './init';
 import reducer, { initialState } from './reducer';
-import { LinkWrapper, SubWrapper } from './components';
-import createAttributesLayout from './utils/createAttributesLayout';
 
 const EditView = ({
   currentEnvironment,

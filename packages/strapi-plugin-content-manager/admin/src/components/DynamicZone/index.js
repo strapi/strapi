@@ -77,7 +77,6 @@ const DynamicZone = ({ max, min, name }) => {
 
         return (
           <ComponentWrapper key={index}>
-            (TEMP: {componentUid})
             {showDownIcon && (
               <RoundCTA
                 style={{ top: -15, right: 30 }}
@@ -164,8 +163,8 @@ DynamicZone.defaultProps = {
 };
 
 DynamicZone.propTypes = {
-  max: PropTypes.bool,
-  min: PropTypes.bool,
+  max: PropTypes.number,
+  min: PropTypes.number,
   name: PropTypes.string.isRequired,
 };
 
