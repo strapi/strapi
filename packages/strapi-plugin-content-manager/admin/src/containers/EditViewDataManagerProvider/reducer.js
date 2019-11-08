@@ -11,6 +11,7 @@ const initialState = fromJS({
   initialData: {},
   modifiedData: {},
   shouldShowLoadingState: false,
+  shouldCheckErrors: false,
 });
 
 const reducer = (state, action) => {
@@ -25,31 +26,47 @@ const reducer = (state, action) => {
         return fromJS(defaultDataStructure);
       });
     case 'ADD_REPEATABLE_COMPONENT_TO_FIELD': {
-      return state.updateIn(['modifiedData', ...action.keys], list => {
-        const defaultDataStructure = state.getIn([
-          'componentsDataStructure',
-          action.componentUid,
-        ]);
+      return state
+        .updateIn(['modifiedData', ...action.keys], list => {
+          const defaultDataStructure = state.getIn([
+            'componentsDataStructure',
+            action.componentUid,
+          ]);
 
-        if (list) {
-          return list.push(defaultDataStructure);
-        }
+          if (list) {
+            return list.push(defaultDataStructure);
+          }
 
-        return fromJS([defaultDataStructure]);
-      });
+          return fromJS([defaultDataStructure]);
+        })
+        .update('shouldCheckErrors', v => {
+          if (action.shouldCheckErrors === true) {
+            return !v;
+          }
+
+          return v;
+        });
     }
     case 'ADD_COMPONENT_TO_DYNAMIC_ZONE':
-      return state.updateIn(['modifiedData', ...action.keys], list => {
-        const defaultDataStructure = state
-          .getIn(['componentsDataStructure', action.componentUid])
-          .set('__component', action.componentUid);
+      return state
+        .updateIn(['modifiedData', ...action.keys], list => {
+          const defaultDataStructure = state
+            .getIn(['componentsDataStructure', action.componentUid])
+            .set('__component', action.componentUid);
 
-        if (list) {
-          return list.push(defaultDataStructure);
-        }
+          if (list) {
+            return list.push(defaultDataStructure);
+          }
 
-        return fromJS([defaultDataStructure]);
-      });
+          return fromJS([defaultDataStructure]);
+        })
+        .update('shouldCheckErrors', v => {
+          if (action.shouldCheckErrors === true) {
+            return !v;
+          }
+
+          return v;
+        });
     case 'ADD_RELATION':
       return state.updateIn(['modifiedData', ...action.keys], list => {
         if (!action.value) {
@@ -172,9 +189,11 @@ const reducer = (state, action) => {
           fromJS(action.contentTypeDataStructure)
         );
     case 'SET_DEFAULT_MODIFIED_DATA_STRUCTURE':
-      return state.update('modifiedData', () =>
-        fromJS(action.contentTypeDataStructure)
-      );
+      return state
+        .update('isLoading', () => false)
+        .update('modifiedData', () => fromJS(action.contentTypeDataStructure));
+    case 'SET_ERRORS':
+      return state.update('formErrors', () => fromJS(action.errors));
     case 'SUBMIT_ERRORS':
       return state
         .update('formErrors', () => fromJS(action.errors))

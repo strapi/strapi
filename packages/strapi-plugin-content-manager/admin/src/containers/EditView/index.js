@@ -161,8 +161,16 @@ const EditView = ({
                       0: { name },
                     },
                   } = block;
+                  const { max, min } = getField(name);
 
-                  return <DynamicZone key={blockIndex} name={name} />;
+                  return (
+                    <DynamicZone
+                      key={blockIndex}
+                      name={name}
+                      max={max}
+                      min={min}
+                    />
+                  );
                 }
 
                 return (
@@ -181,7 +189,7 @@ const EditView = ({
                                 'repeatable',
                                 false
                               );
-                              const { max } = getField(name);
+                              const { max, min } = getField(name);
 
                               const label = get(
                                 getFieldMetas(name),
@@ -196,6 +204,7 @@ const EditView = ({
                                   isRepeatable={isRepeatable}
                                   label={label}
                                   max={max}
+                                  min={min}
                                   name={name}
                                 />
                               );

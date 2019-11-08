@@ -22,6 +22,15 @@ const Button = styled.button`
     }
   }}
 
+  ${({ hasMinError }) => {
+    if (hasMinError) {
+      return `
+        border-color: #FAA684;
+        border-top-color: rgba(227, 233, 243, 0.75);
+      `;
+    }
+  }}
+
   color: #007eff;
   font-size: 12px;
   font-weight: 700;

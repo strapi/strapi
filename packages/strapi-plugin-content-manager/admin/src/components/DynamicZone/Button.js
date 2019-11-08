@@ -6,6 +6,17 @@ const Button = styled(PlusButton)`
   transition: background-color 0.2s linear;
   transition: transform 0.2s ease-in-out;
 
+  ${({ hasError }) => {
+    if (hasError) {
+      return `
+        background-color: #FAA684;
+        :before, :after {
+          background-color: #F64D0A;
+        }
+      `;
+    }
+  }}
+
   ${({ isOpen }) => {
     if (isOpen) {
       return `

@@ -10,6 +10,12 @@ const EmptyComponent = styled.div`
   text-align: center;
   background-color: #fff;
 
+  ${({ hasMinError }) => {
+    if (hasMinError) {
+      return `border-color: #FAA684`;
+    }
+  }}
+
   > p {
     color: #9ea7b8;
     font-size: 13px;

@@ -21,6 +21,8 @@ const DraggedItem = ({
   doesPreviousFieldContainErrorsAndIsOpen,
   fields,
   hasErrors,
+  hasMinError,
+  isFirst,
   isOpen,
   moveCollapse,
   onClickToggle,
@@ -29,6 +31,7 @@ const DraggedItem = ({
   toggleCollapses,
 }) => {
   const {
+    checkFormErrors,
     modifiedData,
     moveComponentField,
     removeRepeatableField,
@@ -152,6 +155,8 @@ const DraggedItem = ({
       <Banner
         componentFieldName={componentFieldName}
         hasErrors={hasErrors}
+        hasMinError={hasMinError}
+        isFirst={isFirst}
         displayedValue={displayedValue}
         doesPreviousFieldContainErrorsAndIsOpen={
           doesPreviousFieldContainErrorsAndIsOpen
@@ -187,6 +192,8 @@ const DraggedItem = ({
                         key={field.name}
                         label={metas.label}
                         name={keys}
+                        max={currentField.max}
+                        min={currentField.min}
                       />
                     );
                   }
@@ -199,6 +206,7 @@ const DraggedItem = ({
                         layout={schema}
                         name={field.name}
                         onChange={() => {}}
+                        onBlur={hasErrors ? checkFormErrors : null}
                       />
                     </div>
                   );
@@ -216,6 +224,8 @@ DraggedItem.defaultProps = {
   doesPreviousFieldContainErrorsAndIsOpen: false,
   fields: [],
   hasErrors: false,
+  hasMinError: false,
+  isFirst: false,
   isOpen: false,
   moveCollapse: () => {},
   toggleCollapses: () => {},
@@ -226,6 +236,8 @@ DraggedItem.propTypes = {
   doesPreviousFieldContainErrorsAndIsOpen: PropTypes.bool,
   fields: PropTypes.array,
   hasErrors: PropTypes.bool,
+  hasMinError: PropTypes.bool,
+  isFirst: PropTypes.bool,
   isOpen: PropTypes.bool,
   moveCollapse: PropTypes.func,
   onClickToggle: PropTypes.func.isRequired,

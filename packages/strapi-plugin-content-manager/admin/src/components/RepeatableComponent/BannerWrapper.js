@@ -32,6 +32,17 @@ const BannerWrapper = styled.button`
       `;
     }
   }}
+
+  ${({ hasMinError, isFirst }) => {
+    if (hasMinError) {
+      return `
+        border-color: #FAA684;
+        border-top-color: ${isFirst ? '#FAA684' : 'rgba(227, 233, 243, 0.75)'};
+        border-bottom-color: rgba(227, 233, 243, 0.75);
+        `;
+    }
+  }}
+
   border-bottom: 0;
   line-height: 36px;
   font-size: 13px;

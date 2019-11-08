@@ -18,6 +18,7 @@ const FieldComponent = ({
   isRepeatable,
   label,
   max,
+  min,
   name,
 }) => {
   const { modifiedData, removeComponentFromField } = useDataManager();
@@ -72,6 +73,7 @@ const FieldComponent = ({
           fields={displayedFields}
           isFromDynamicZone={isFromDynamicZone}
           max={max}
+          min={min}
           name={name}
           schema={currentComponentSchema}
         />
@@ -84,6 +86,7 @@ FieldComponent.defaultProps = {
   isFromDynamicZone: false,
   isRepeatable: false,
   max: Infinity,
+  min: -Infinity,
 };
 
 FieldComponent.propTypes = {
@@ -92,6 +95,7 @@ FieldComponent.propTypes = {
   isRepeatable: PropTypes.bool,
   label: PropTypes.string.isRequired,
   max: PropTypes.number,
+  min: PropTypes.number,
   name: PropTypes.string.isRequired,
 };
 

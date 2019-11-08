@@ -17,7 +17,8 @@
     "dish": {
       "component": "default.dish",
       "type": "component",
-      "repeatable": true
+      "repeatable": true,
+      "min": 3
     }
   }
 }

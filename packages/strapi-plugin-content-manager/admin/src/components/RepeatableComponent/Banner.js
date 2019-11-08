@@ -13,6 +13,8 @@ const Banner = forwardRef(
       displayedValue,
       doesPreviousFieldContainErrorsAndIsOpen,
       hasErrors,
+      hasMinError,
+      isFirst,
       isDragging,
       isOpen,
       onClickToggle,
@@ -29,7 +31,9 @@ const Banner = forwardRef(
           doesPreviousFieldContainErrorsAndIsOpen
         }
         type="button"
+        hasMinError={hasMinError}
         hasErrors={hasErrors}
+        isFirst={isFirst}
         isOpen={isOpen}
         onClick={onClickToggle}
         ref={refs ? refs.dropRef : null}
@@ -74,7 +78,9 @@ Banner.defaultProps = {
   displayedValue: null,
   doesPreviousFieldContainErrorsAndIsOpen: false,
   hasErrors: false,
+  hasMinError: false,
   isDragging: false,
+  isFirst: false,
   isOpen: false,
   onClickRemove: () => {},
   onClickToggle: () => {},
@@ -89,7 +95,9 @@ Banner.propTypes = {
   ]),
   doesPreviousFieldContainErrorsAndIsOpen: PropTypes.bool,
   hasErrors: PropTypes.bool,
+  hasMinError: PropTypes.bool,
   isDragging: PropTypes.bool,
+  isFirst: PropTypes.bool,
   isOpen: PropTypes.bool,
   onClickToggle: PropTypes.func,
   onClickRemove: PropTypes.func,

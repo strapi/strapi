@@ -107,12 +107,12 @@ const createYupSchema = (model, { components }) => {
         );
         const { max, min } = attribute;
 
-        if (attribute.required || min) {
+        if (attribute.required) {
           dynamicZoneSchema = dynamicZoneSchema.defined();
+        }
 
-          if (min) {
-            dynamicZoneSchema = dynamicZoneSchema.min(min, errorsTrads.min);
-          }
+        if (min) {
+          dynamicZoneSchema = dynamicZoneSchema.min(min, errorsTrads.min);
         }
 
         if (max) {
