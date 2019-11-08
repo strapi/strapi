@@ -1,8 +1,12 @@
 'use strict';
+
 const {
   validateComponentInput,
   validateUpdateComponentInput,
 } = require('./validation/component');
+
+const _ = require('lodash');
+const componentService = require('../services/Components');
 
 /**
  * Components controller
@@ -15,8 +19,9 @@ module.exports = {
    * @param {Object} ctx - koa context
    */
   async getComponents(ctx) {
-    const service = strapi.plugins['content-type-builder'].services.components;
-    const data = service.getComponents();
+    const data = Object.keys(strapi.components).map(uid => {
+      return componentService.formatComponent(strapi.components[uid]);
+    });
 
     ctx.send({ data });
   },
@@ -29,14 +34,13 @@ module.exports = {
   async getComponent(ctx) {
     const { uid } = ctx.params;
 
-    const service = strapi.plugins['content-type-builder'].services.components;
-    const component = service.getComponent(uid);
+    const component = strapi.components[uid];
 
     if (!component) {
       return ctx.send({ error: 'component.notFound' }, 404);
     }
 
-    ctx.send({ data: component });
+    ctx.send({ data: componentService.formatComponent(component) });
   },
 
   /**
@@ -53,16 +57,18 @@ module.exports = {
       return ctx.send({ error }, 400);
     }
 
-    const service = strapi.plugins['content-type-builder'].services.components;
-    const uid = service.createComponentUID(body);
+    const uid = componentService.createComponentUID(body);
 
-    if (service.getComponent(uid)) {
+    if (_.has(strapi.components, uid)) {
       return ctx.send({ error: 'component.alreadyExists' }, 400);
     }
 
     strapi.reload.isWatching = false;
 
-    const newComponent = await service.createComponent({ uid, infos: body });
+    const newComponent = await componentService.createComponent({
+      uid,
+      infos: body,
+    });
 
     strapi.reload();
 
@@ -78,8 +84,7 @@ module.exports = {
     const { uid } = ctx.params;
     const { body } = ctx.request;
 
-    const service = strapi.plugins['content-type-builder'].services.components;
-    const component = service.getComponent(uid);
+    const component = strapi.components[uid];
 
     if (!component) {
       return ctx.send({ error: 'component.notFound' }, 404);
@@ -91,23 +96,26 @@ module.exports = {
       return ctx.send({ error }, 400);
     }
 
-    const newUID = service.createComponentUID(body);
-    if (newUID !== uid && service.getComponent(newUID)) {
+    const newUID = componentService.editComponentUID(body);
+    if (newUID !== uid && _.has(strapi.components, newUID)) {
       return ctx.send({ error: 'new.component.alreadyExists' }, 400);
     }
 
     strapi.reload.isWatching = false;
 
-    const updatedComponent = await service.updateComponent({
-      newUID,
-      component,
+    const updatedComponent = await componentService.updateComponent({
+      uid,
       infos: body,
     });
-    await service.updateComponentInModels(component.uid, updatedComponent.uid);
 
-    strapi.reload();
+    await componentService.updateComponentInModels(
+      component.uid,
+      updatedComponent.uid
+    );
 
-    ctx.send({ data: updatedComponent }, 200);
+    setImmediate(() => strapi.reload());
+
+    ctx.send({ data: updatedComponent });
   },
 
   /**
@@ -118,8 +126,7 @@ module.exports = {
   async deleteComponent(ctx) {
     const { uid } = ctx.params;
 
-    const service = strapi.plugins['content-type-builder'].services.components;
-    const component = service.getComponent(uid);
+    const component = strapi.components[uid];
 
     if (!component) {
       return ctx.send({ error: 'component.notFound' }, 404);
@@ -127,11 +134,11 @@ module.exports = {
 
     strapi.reload.isWatching = false;
 
-    await service.deleteComponent(component);
-    await service.deleteComponentInModels(component.uid);
+    await componentService.deleteComponentInModels(component.uid);
+    await componentService.deleteComponent(component);
 
-    strapi.reload();
+    setImmediate(() => strapi.reload());
 
-    ctx.send({ data: { uid } }, 200);
+    ctx.send({ data: { uid } });
   },
 };
