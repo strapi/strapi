@@ -105,7 +105,3 @@ module.exports = {
 Then you will have to be able to fetch your **Articles** by this slug.
 
 You will be able to find your articles by slug with this request `GET /articles?slug=my-article-slug`
-
-```
-
-```
