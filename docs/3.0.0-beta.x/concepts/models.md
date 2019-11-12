@@ -637,7 +637,7 @@ Callbacks on:
 
 ::: tab destroy
 
-destroy`
+`destroy`
 
 - beforeDestroy
 - afterDestroy

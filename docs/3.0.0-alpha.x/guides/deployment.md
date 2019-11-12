@@ -1179,7 +1179,7 @@ sudo snap install --classic heroku
 
 :::
 
-::: tab "Windows"
+::: tab "Windows 10"
 Download the appropriate installer for your Windows installation:
 
 [64-bit installer](https://cli-assets.heroku.com/heroku-x64.exe)
