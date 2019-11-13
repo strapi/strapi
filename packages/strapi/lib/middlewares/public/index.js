@@ -35,32 +35,50 @@ module.exports = strapi => {
       // Open the file.
       const filename =
         strapi.config.environment === 'development' ? 'index' : 'production';
+
       const index = fs.readFileSync(
         path.join(staticDir, `${filename}.html`),
         'utf8'
       );
 
       // Is the project initialized?
-      const isInitialised = await utils.isInitialised(strapi);
+      const renderer = _.template(index);
 
-      // Template the expressions.
-      const templatedIndex = await this.template(index, isInitialised);
+      const renderIndexPage = async () => {
+        const isInitialised = await utils.isInitialised(strapi);
 
-      const serveDynamicFiles = async ctx => {
+        const data = {
+          serverTime: new Date().toUTCString(),
+          isInitialised,
+          ..._.pick(strapi, [
+            'config.info.version',
+            'config.info.name',
+            'config.admin.url',
+            'config.environment',
+          ]),
+        };
+
+        return renderer(data);
+      };
+
+      const serveIndexPage = async ctx => {
         ctx.url = path.basename(`${ctx.url}/${filename}.html`);
 
-        // Open stream to serve the file.
-        const filestream = new stream.PassThrough();
-        filestream.end(Buffer.from(templatedIndex));
-
+        const content = await renderIndexPage();
+        const body = stream.Readable({
+          read() {
+            this.push(Buffer.from(content));
+            this.push(null);
+          },
+        });
         // Serve static.
         ctx.type = 'html';
-        ctx.body = filestream;
+        ctx.body = body;
       };
 
       // Serve /public index page.
-      strapi.router.get('/', serveDynamicFiles);
-      strapi.router.get('/(index.html|production.html)', serveDynamicFiles);
+      strapi.router.get('/', serveIndexPage);
+      strapi.router.get('/(index.html|production.html)', serveIndexPage);
 
       // Match every route with an extension.
       // The file without extension will not be served.
@@ -108,41 +126,6 @@ module.exports = strapi => {
         ctx.type = 'html';
         ctx.body = fs.createReadStream(path.join(buildDir + '/index.html'));
       });
-    },
-
-    template: async (data, isInitialised) => {
-      // Allowed expressions to avoid data leaking.
-      const allowedExpression = [
-        'config.info.version',
-        'config.info.name',
-        'config.admin.url',
-        'config.environment',
-        'serverTime',
-        'isInitialised',
-      ];
-
-      // Populate values to object.
-      const objectWithValues = allowedExpression.reduce((acc, key) => {
-        switch (key) {
-          case 'serverTime':
-            acc[key] = new Date().toUTCString();
-
-            break;
-          case 'isInitialised':
-            acc[key] = isInitialised;
-
-            break;
-          default: {
-            acc[key] = _.get(strapi, key, '');
-          }
-        }
-
-        return acc;
-      }, {});
-
-      const templatedIndex = _.template(data);
-
-      return templatedIndex(objectWithValues);
     },
   };
 };

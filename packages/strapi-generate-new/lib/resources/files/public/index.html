@@ -15,7 +15,9 @@
   <body lang="en">
     <section class="wrapper">
       <h1><img class="logo" src="https://strapi.io/assets/images/logo_login.png" /></h1>
+      <% if (isInitialised) { %>
       <div class="informations">
+
         <div>
           <span class="environment"><%= strapi.config.environment %></span>
           <p>
@@ -27,19 +29,24 @@
           <a class="cta cta-primary" href="<%= strapi.config.admin.url %>" target="_blank" title="Click to open the administration" ><i class="fas fa-external-link-alt"></i>Open the administration</a>
         </div>
       </div>
-      <div class="lets-started">
-        <h2>Let's get started!</h2>
-        <p>To discover the power provided by Strapi, you need to create an administrator.</p>
-        <a class="cta cta-secondary" href="<%= strapi.config.admin.url %>" target="_blank" title="Click to create the first administration" ><i class="fas fa-external-link-alt"></i>Create the first administrator</a>
-        <div class="people-saying-hello">
-          <img class="visible" src="https://strapi.io/assets/images/group_people_1.png" alt="People saying hello" />
-          <img src="https://strapi.io/assets/images/group_people_2.png" alt="People saying hello" />
-          <img src="https://strapi.io/assets/images/group_people_3.png" alt="People saying hello" />
+      <% } %>
+      <% if (!isInitialised) { %>
+
+        <div class="lets-started">
+          <h2>Let's get started!</h2>
+          <p>To discover the power provided by Strapi, you need to create an administrator.</p>
+          <a class="cta cta-secondary" href="<%= strapi.config.admin.url %>" target="_blank" title="Click to create the first administration" ><i class="fas fa-external-link-alt"></i>Create the first administrator</a>
+          <div class="people-saying-hello">
+            <img class="visible" src="https://strapi.io/assets/images/group_people_1.png" alt="People saying hello" />
+            <img src="https://strapi.io/assets/images/group_people_2.png" alt="People saying hello" />
+            <img src="https://strapi.io/assets/images/group_people_3.png" alt="People saying hello" />
+          </div>
         </div>
-      </div>
+
+      <% } %>
+
     </section>
     <script>
-      if(<%= isInitialised %>){document.querySelector('.lets-started').remove()}else{document.querySelector('.informations').remove()}
       var images=document.querySelectorAll('.people-saying-hello img');var nextIndex=0;setInterval(function(){var currentIndex=0;images.forEach(function(image,index){if(image.className==='visible'){currentIndex=index}});nextIndex=currentIndex+1;if(nextIndex===images.length){nextIndex=0}
       images.forEach(function(image){image.classList.remove('visible')})
       images[nextIndex].classList.add('visible')},1500)
