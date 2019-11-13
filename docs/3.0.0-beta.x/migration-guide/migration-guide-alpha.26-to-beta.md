@@ -190,7 +190,54 @@ build
 
 ## Migrating `config`
 
-You can leave all your files in `./config` unchanged but remove the `server.autoReload` key in `./config/environments/**/server.json`.
+
+### Remove the `server.autoReload` key
+
+You need to remove the `server.autoReload` key in `./config/environments/**/server.json`.
+
+### Bootstrap function
+
+The function exported in `config/functions/bootstrap.js` previously received a callback. This is not the case anymore. You can either use an async function, return a promise or simply run a synchronous function.
+
+**Before**
+
+```js
+module.exports = cb => {
+  cb();
+};
+```
+
+**After**
+
+**Async**
+
+```js
+module.exports = async () => {
+  await someOperation();
+};
+```
+
+**Promise**
+
+```js
+module.exports = () => {
+  return new Promise(/* ... */);
+};
+```
+
+**Sync**
+
+```js
+module.exports = () => {
+  someSyncCode();
+};
+```
+
+**No Function**
+
+```js
+module.exports = () => {};
+```
 
 ## Migrating `plugins`
 
