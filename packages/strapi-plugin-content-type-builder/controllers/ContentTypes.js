@@ -49,7 +49,7 @@ module.exports = {
       return ctx.send({ error }, 400);
     }
 
-    const modelName = nameToSlug(body.name);
+    const modelName = nameToSlug(body.contentType.name);
     const uid = `application::${modelName}.${modelName}`;
 
     if (_.has(strapi.contentTypes, uid)) {
@@ -59,12 +59,14 @@ module.exports = {
     strapi.reload.isWatching = false;
 
     try {
-      const contentType = contentTypeService.createContentTypeSchema(body);
+      const contentType = contentTypeService.createContentTypeSchema(
+        body.contentType
+      );
 
       await contentTypeService.generateAPI(modelName, contentType);
 
       await contentTypeService.generateReversedRelations({
-        attributes: body.attributes,
+        attributes: body.contentType.attributes,
         modelName,
       });
 
@@ -114,7 +116,7 @@ module.exports = {
     try {
       const newSchema = contentTypeService.updateContentTypeSchema(
         contentType.__schema__,
-        body
+        body.contentType
       );
 
       await contentTypeService.writeContentType({ uid, schema: newSchema });
@@ -123,7 +125,7 @@ module.exports = {
       await contentTypeService.deleteBidirectionalRelations(contentType);
 
       await contentTypeService.generateReversedRelations({
-        attributes: body.attributes,
+        attributes: body.contentType.attributes,
         modelName: contentType.modelName,
         plugin: contentType.plugin,
       });

@@ -91,12 +91,15 @@ module.exports = {
     }
 
     try {
-      await validateUpdateComponentInput(body.component);
+      await validateUpdateComponentInput(body);
     } catch (error) {
       return ctx.send({ error }, 400);
     }
 
-    const newUID = componentService.editComponentUID(body.component);
+    const newUID = componentService.updateComponentUID(
+      component,
+      body.component
+    );
     if (newUID !== uid && _.has(strapi.components, newUID)) {
       return ctx.send({ error: 'new.component.alreadyExists' }, 400);
     }
@@ -104,7 +107,7 @@ module.exports = {
     strapi.reload.isWatching = false;
 
     const updatedComponent = await componentService.updateComponent({
-      uid,
+      component,
       infos: body.component,
     });
 

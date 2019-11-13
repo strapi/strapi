@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const yup = require('yup');
 const formatYupErrors = require('./yup-formatter');
 
 const createSchema = require('./model-schema');
@@ -38,10 +39,21 @@ const VALID_TYPES = [
   'dynamiczone',
 ];
 
+const contentTypeSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
+  modelType: modelTypes.CONTENT_TYPE,
+});
+
+const createContentTypeSchema = () => {
+  return yup
+    .object({
+      contentType: contentTypeSchema.required().noUnknown(),
+      components: yup.array().of(contentTypeSchema),
+    })
+    .noUnknown();
+};
+
 const validateContentTypeInput = data => {
-  return createSchema(VALID_TYPES, VALID_RELATIONS, {
-    modelType: modelTypes.CONTENT_TYPE,
-  })
+  return createContentTypeSchema()
     .validate(data, {
       strict: true,
       abortEarly: false,
@@ -59,9 +71,7 @@ const validateUpdateContentTypeInput = data => {
     });
   }
 
-  return createSchema(VALID_TYPES, VALID_RELATIONS, {
-    modelType: modelTypes.CONTENT_TYPE,
-  })
+  return createContentTypeSchema()
     .validate(data, {
       strict: true,
       abortEarly: false,

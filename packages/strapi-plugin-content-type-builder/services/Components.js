@@ -134,6 +134,13 @@ const createComponentUID = ({ category, name }) =>
   `${nameToSlug(category)}.${nameToSlug(name)}`;
 
 /**
+ * Returns a uid from a string
+ * @param {string} str - string to slugify
+ */
+const updateComponentUID = (component, { category }) =>
+  `${nameToSlug(category)}.${nameToSlug(component.name)}`;
+
+/**
  * Deletes a component
  * @param {Object} component
  */
@@ -336,8 +343,9 @@ const deleteComponentInModels = async componentUID => {
 };
 
 module.exports = {
-  createComponent,
   createComponentUID,
+  updateComponentUID,
+  createComponent,
   updateComponent,
   deleteComponent,
   editSchema,
