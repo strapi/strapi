@@ -4,89 +4,33 @@
  *
  */
 
-import React, { useContext } from 'react';
-import { FormattedMessage } from 'react-intl';
+import React from 'react';
 import { groupBy } from 'lodash';
 
 import { LeftMenuList } from 'strapi-helper-plugin';
-
 import pluginId from '../../pluginId';
-
-import MenuContext from '../../containers/MenuContext';
 import CustomLink from '../../components/CustomLink';
+import useDataManager from '../../hooks/useDataManager';
 import Wrapper from './Wrapper';
 
-const displayNotificationCTNotSaved = () => {
-  strapi.notification.info(
-    `${pluginId}.notification.info.contentType.creating.notSaved`
-  );
-};
+// const displayNotificationCTNotSaved = () => {
+//   strapi.notification.info(
+//     `${pluginId}.notification.info.contentType.creating.notSaved`
+//   );
+// };
 
 function LeftMenu() {
-  const { canOpenModal, groups, models, push } = useContext(MenuContext);
-
-  const getComponents = () => {
-    // TODO : Replace groupsBy param with category when available
-    const componentsObj = groupBy(groups, 'uid');
-
-    return Object.keys(componentsObj).map(key => {
-      const links = [
-        ...componentsObj[key].map(compo => {
-          return {
-            ...compo,
-            to: getLinkRoute('components', compo, key),
-            title: getLinkTitle(compo),
-          };
-        }),
-      ];
-
-      return { name: key, links };
-    });
-  };
-
-  const notSavedLabel = () => {
-    return <FormattedMessage id={`${pluginId}.contentType.temporaryDisplay`} />;
-  };
-
-  const getLinkRoute = (param, item, category = null) => {
-    const { name, source, uid } = item;
-
-    const cat = category ? `${category}/` : '';
-    const base = `/plugins/${pluginId}/${param}/${cat}${uid || name}`;
-    const to = source ? `${base}&source=${source}` : base;
-
-    return to;
-  };
-
-  const getLinkTitle = item => {
-    const { name, isTemporary } = item;
-    return (
-      <p>
-        <span>{name}</span>
-        {isTemporary && notSavedLabel()}
-      </p>
-    );
-  };
-
-  const openCreateModal = type => {
-    if (canOpenModal) {
-      push({
-        search: `modalType=${type}&settingType=base&actionType=create`,
-      });
-    } else {
-      displayNotificationCTNotSaved();
-    }
-  };
-
-  const getModels = [
-    ...models.map(model => {
-      return {
-        ...model,
-        to: getLinkRoute('models', model),
-        title: getLinkTitle(model),
-      };
-    }),
-  ];
+  const { components, contentTypes } = useDataManager();
+  const grouped = groupBy(components, 'category');
+  const componentsData = Object.keys(grouped).map(category => ({
+    name: category,
+    title: category,
+    links: grouped[category].map(compo => ({
+      name: compo.uid,
+      to: `/plugins/${pluginId}/component-categories/${category}/${compo.uid}`,
+      title: compo.schema.name,
+    })),
+  }));
 
   const data = [
     {
@@ -99,10 +43,14 @@ function LeftMenu() {
         Component: CustomLink,
         componentProps: {
           id: `${pluginId}.button.model.create`,
-          onClick: () => openCreateModal('model'),
+          onClick: () => {},
         },
       },
-      links: getModels,
+      links: Object.keys(contentTypes).map(uid => ({
+        name: uid,
+        title: contentTypes[uid].schema.name,
+        to: `/plugins/${pluginId}/content-types/${uid}`,
+      })),
     },
     {
       name: 'components',
@@ -114,10 +62,10 @@ function LeftMenu() {
         Component: CustomLink,
         componentProps: {
           id: `${pluginId}.button.component.create`,
-          onClick: () => openCreateModal('group'),
+          onClick: () => {},
         },
       },
-      links: getComponents(),
+      links: componentsData,
     },
   ];
 

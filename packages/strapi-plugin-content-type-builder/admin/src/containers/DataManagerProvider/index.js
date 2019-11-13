@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { memo, useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { request, LoadingIndicatorPage } from 'strapi-helper-plugin';
 import DataManagerContext from '../../contexts/DataManagerContext';
@@ -12,12 +12,15 @@ const DataManagerProvider = ({ children }) => {
   const { signal } = abortController;
 
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
-  const { isLoading } = reducerState.toJS();
+  const { components, contentTypes, isLoading } = reducerState.toJS();
 
   useEffect(() => {
     const getData = async () => {
-      const [{ data: componentsArray }] = await Promise.all(
-        ['components'].map(endPoint => {
+      const [
+        { data: componentsArray },
+        { data: contentTypesArray },
+      ] = await Promise.all(
+        ['components', 'content-types'].map(endPoint => {
           return request(`/${pluginId}/${endPoint}`, {
             method: 'GET',
             signal,
@@ -28,14 +31,23 @@ const DataManagerProvider = ({ children }) => {
       dispatch({
         type: 'GET_DATA_SUCCEEDED',
         components: createDataObject(componentsArray),
+        contentTypes: createDataObject(contentTypesArray),
       });
     };
 
     getData();
-  }, [signal]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  console.log({ contentTypes, components });
 
   return (
-    <DataManagerContext.Provider>
+    <DataManagerContext.Provider
+      value={{
+        components,
+        contentTypes,
+      }}
+    >
       {isLoading ? <LoadingIndicatorPage /> : children}
     </DataManagerContext.Provider>
   );
@@ -45,4 +57,4 @@ DataManagerProvider.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-export default DataManagerProvider;
+export default memo(DataManagerProvider);
