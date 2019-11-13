@@ -58,7 +58,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       };
     }
 
-    const entry = await model.forge(params).fetch({
+    const entry = await model.where(params).fetch({
       withRelated: populate,
       transacting,
     });
@@ -109,7 +109,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   }
 
   async function update(params, values, { transacting } = {}) {
-    const entry = await model.forge(params).fetch({ transacting });
+    const entry = await model.where(params).fetch({ transacting });
 
     if (!entry) {
       const err = new Error('entry.notFound');
@@ -146,7 +146,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   }
 
   async function deleteOne(params, { transacting } = {}) {
-    const entry = await model.forge(params).fetch({ transacting });
+    const entry = await model.where(params).fetch({ transacting });
 
     if (!entry) {
       const err = new Error('entry.notFound');
@@ -177,7 +177,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
 
     const runDelete = async trx => {
       await deleteComponents(entry, { transacting: trx });
-      await model.forge(params).destroy({ transacting: trx, require: false });
+      await model.where(params).destroy({ transacting: trx, require: false });
       return entry.toJSON();
     };
 
@@ -360,14 +360,11 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
           )
           .then(component => {
             return joinModel
-              .forge()
-              .query({
-                where: {
-                  [foreignKey]: entry.id,
-                  component_type: componentModel.collectionName,
-                  component_id: component.id,
-                  field: key,
-                },
+              .where({
+                [foreignKey]: entry.id,
+                component_type: componentModel.collectionName,
+                component_id: component.id,
+                field: key,
               })
               .save(
                 {
@@ -501,7 +498,6 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     }, []);
 
     const allIds = await joinModel
-      .forge()
       .query(qb => {
         qb.where(joinModel.foreignKey, entry.id).andWhere('field', key);
       })
@@ -547,7 +543,6 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
 
     if (idsToDelete.length > 0) {
       await joinModel
-        .forge()
         .query(qb => {
           qb.where('field', key);
           qb.where(qb => {
@@ -585,9 +580,9 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       .map(el => el[componentModel.primaryKey].toString());
 
     const allIds = await joinModel
-      .forge()
-      .query(qb => {
-        qb.where(joinModel.foreignKey, entry.id).andWhere('field', key);
+      .where({
+        [joinModel.foreignKey]: entry.id,
+        field: key,
       })
       .fetchAll({ transacting })
       .map(el => el.get('component_id').toString());
@@ -606,7 +601,6 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     const idsToDelete = _.difference(allIds, idsToKeep);
     if (idsToDelete.length > 0) {
       await joinModel
-        .forge()
         .query(qb =>
           qb.whereIn('component_id', idsToDelete).andWhere('field', key)
         )
@@ -638,12 +632,9 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
           const componentModel = strapi.components[component];
 
           const ids = await joinModel
-            .forge()
-            .query({
-              where: {
-                [foreignKey]: entry.id,
-                field: key,
-              },
+            .where({
+              [foreignKey]: entry.id,
+              field: key,
             })
             .fetchAll({ transacting })
             .map(el => el.get('component_id'));
@@ -656,12 +647,9 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
             );
 
           await joinModel
-            .forge()
-            .query({
-              where: {
-                [foreignKey]: entry.id,
-                field: key,
-              },
+            .where({
+              [foreignKey]: entry.id,
+              field: key,
             })
             .destroy({ transacting, require: false });
           break;
@@ -670,12 +658,9 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
           const { components } = attr;
 
           const componentJoins = await joinModel
-            .forge()
-            .query({
-              where: {
-                [foreignKey]: entry.id,
-                field: key,
-              },
+            .where({
+              [foreignKey]: entry.id,
+              field: key,
             })
             .fetchAll({ transacting })
             .map(el => ({
@@ -702,12 +687,9 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
           }
 
           await joinModel
-            .forge()
-            .query({
-              where: {
-                [foreignKey]: entry.id,
-                field: key,
-              },
+            .where({
+              [foreignKey]: entry.id,
+              field: key,
             })
             .destroy({ transacting, require: false });
 
