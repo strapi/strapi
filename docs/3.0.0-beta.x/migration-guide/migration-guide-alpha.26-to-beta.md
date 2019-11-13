@@ -82,7 +82,6 @@ Here are the default ones. If you have installed other plugins you will also nee
     "strapi-plugin-content-manager": "3.0.0-beta.x",
     "strapi-plugin-content-type-builder": "3.0.0-beta.x",
     "strapi-plugin-email": "3.0.0-beta.x",
-    "strapi-plugin-settings-manager": "3.0.0-beta.x",
     "strapi-plugin-upload": "3.0.0-beta.x",
     "strapi-plugin-users-permissions": "3.0.0-beta.x"
   }
