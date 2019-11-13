@@ -58,7 +58,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       };
     }
 
-    const entry = await model.forge(params).fetch({
+    const entry = await model.where(params).fetch({
       withRelated: populate,
       transacting,
     });
@@ -109,7 +109,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   }
 
   async function update(params, values, { transacting } = {}) {
-    const entry = await model.forge(params).fetch({ transacting });
+    const entry = await model.where(params).fetch({ transacting });
 
     if (!entry) {
       const err = new Error('entry.notFound');
@@ -146,7 +146,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   }
 
   async function deleteOne(params, { transacting } = {}) {
-    const entry = await model.forge(params).fetch({ transacting });
+    const entry = await model.where(params).fetch({ transacting });
 
     if (!entry) {
       const err = new Error('entry.notFound');
@@ -177,7 +177,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
 
     const runDelete = async trx => {
       await deleteGroups(entry, { transacting: trx });
-      await model.forge(params).destroy({ transacting: trx, require: false });
+      await model.where(params).destroy({ transacting: trx, require: false });
       return entry.toJSON();
     };
 
@@ -316,14 +316,11 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
             )
             .then(group => {
               return joinModel
-                .forge()
-                .query({
-                  where: {
-                    [foreignKey]: entry.id,
-                    group_type: groupModel.collectionName,
-                    group_id: group.id,
-                    field: key,
-                  },
+                .where({
+                  [foreignKey]: entry.id,
+                  group_type: groupModel.collectionName,
+                  group_id: group.id,
+                  field: key,
                 })
                 .save(
                   {
@@ -396,9 +393,9 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       .map(el => el[groupModel.primaryKey].toString());
 
     const allIds = await joinModel
-      .forge()
-      .query(qb => {
-        qb.where(joinModel.foreignKey, entry.id).andWhere('field', key);
+      .where({
+        [joinModel.foreignKey]: entry.id,
+        field: key,
       })
       .fetchAll({ transacting })
       .map(el => el.get('group_id').toString());
@@ -417,7 +414,6 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     const idsToDelete = _.difference(allIds, idsToKeep);
     if (idsToDelete.length > 0) {
       await joinModel
-        .forge()
         .query(qb => qb.whereIn('group_id', idsToDelete).andWhere('field', key))
         .destroy({ transacting, require: false });
 
@@ -443,13 +439,10 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       const groupModel = strapi.groups[group];
 
       const ids = await joinModel
-        .forge()
-        .query({
-          where: {
-            [foreignKey]: entry.id,
-            group_type: groupModel.collectionName,
-            field: key,
-          },
+        .where({
+          [foreignKey]: entry.id,
+          group_type: groupModel.collectionName,
+          field: key,
         })
         .fetchAll({ transacting })
         .map(el => el.get('group_id'));
@@ -459,13 +452,10 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
         .delete({ [`${groupModel.primaryKey}_in`]: ids }, { transacting });
 
       await joinModel
-        .forge()
-        .query({
-          where: {
-            [foreignKey]: entry.id,
-            group_type: groupModel.collectionName,
-            field: key,
-          },
+        .where({
+          [foreignKey]: entry.id,
+          group_type: groupModel.collectionName,
+          field: key,
         })
         .destroy({ transacting, require: false });
     }
