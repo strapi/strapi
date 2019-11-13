@@ -43,15 +43,13 @@ const plugin = {
   name: pluginPkg.strapi.name,
   preventComponentRendering: false,
   suffixUrl: plugins => {
-    const { uid, source } = get(
+    const { uid } = get(
       plugins,
       ['content-manager', 'leftMenuSections', '0', 'links', '0'],
-      { uid: '', source: '' }
+      { uid: '' }
     );
 
-    return source !== 'content-manager'
-      ? `/models/${uid}&source=${source}`
-      : `/models/${uid}`;
+    return `/content-types/${uid}`;
   },
 
   trads,
