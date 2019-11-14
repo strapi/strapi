@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { groupBy, sortBy } from 'lodash';
-
+import { useHistory } from 'react-router-dom';
 import { LeftMenuList, useGlobalContext } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import CustomLink from '../../components/CustomLink';
@@ -22,6 +22,7 @@ import Wrapper from './Wrapper';
 function LeftMenu() {
   const { components, contentTypes } = useDataManager();
   const { currentEnvironment } = useGlobalContext();
+  const { push } = useHistory();
   const isProduction = currentEnvironment === 'production';
   const grouped = groupBy(components, 'category');
   const componentsData = sortBy(
@@ -52,7 +53,12 @@ function LeftMenu() {
         componentProps: {
           disabled: isProduction,
           id: `${pluginId}.button.model.create`,
-          onClick: () => {},
+          onClick: () => {
+            push({
+              search:
+                'modalType=contentType&actionType=create&settingType=base',
+            });
+          },
         },
       },
       links: sortBy(
@@ -75,7 +81,11 @@ function LeftMenu() {
         componentProps: {
           disabled: isProduction,
           id: `${pluginId}.button.component.create`,
-          onClick: () => {},
+          onClick: () => {
+            push({
+              search: 'modalType=component&actionType=create&settingType=base',
+            });
+          },
         },
       },
       links: componentsData,
