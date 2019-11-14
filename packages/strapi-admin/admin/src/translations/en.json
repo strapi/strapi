@@ -128,6 +128,7 @@
   "components.Input.error.validation.minSupMax": "Can't be superior",
   "components.Input.error.validation.regex": "The value not match the regex.",
   "components.Input.error.validation.required": "This value is required.",
+  "components.Input.error.validation.unique": "This value is already used.",
   "components.InputSelect.option.placeholder": "Choose here",
   "components.ListRow.empty": "There is no data to be shown.",
   "components.OverlayBlocker.description": "You're using a feature that needs the server to restart. Please wait until the server is up.",

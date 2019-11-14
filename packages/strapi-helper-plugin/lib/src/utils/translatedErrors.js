@@ -7,6 +7,7 @@ const errorsTrads = {
   minLength: 'components.Input.error.validation.minLength',
   regex: 'components.Input.error.validation.regex',
   required: 'components.Input.error.validation.required',
+  unique: 'components.Input.error.validation.unique',
 };
 
 export default errorsTrads;

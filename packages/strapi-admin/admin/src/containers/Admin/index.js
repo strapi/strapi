@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import { Switch, Route } from 'react-router-dom';
+import { injectIntl } from 'react-intl';
 import { isEmpty } from 'lodash';
 // Components from strapi-helper-plugin
 import {
@@ -145,6 +146,7 @@ export class Admin extends React.Component {
         currentEnvironment={this.props.global.currentEnvironment}
         disableGlobalOverlayBlocker={this.props.disableGlobalOverlayBlocker}
         enableGlobalOverlayBlocker={this.props.enableGlobalOverlayBlocker}
+        formatMessage={this.props.intl.formatMessage}
         plugins={this.props.global.plugins}
         updatePlugin={this.props.updatePlugin}
       >
@@ -212,6 +214,9 @@ Admin.propTypes = {
     showGlobalAppBlocker: PropTypes.bool,
     strapiVersion: PropTypes.string,
   }).isRequired,
+  intl: PropTypes.shape({
+    formatMessage: PropTypes.func,
+  }),
   location: PropTypes.object.isRequired,
   setAppError: PropTypes.func.isRequired,
   updatePlugin: PropTypes.func.isRequired,
@@ -243,6 +248,7 @@ const withReducer = injectReducer({ key: 'admin', reducer });
 const withSaga = injectSaga({ key: 'admin', saga });
 
 export default compose(
+  injectIntl,
   withReducer,
   withSaga,
   withConnect

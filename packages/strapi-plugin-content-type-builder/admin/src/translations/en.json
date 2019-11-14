@@ -220,8 +220,14 @@
   "table.relations.title.plural": "including {number} relationships",
   "table.relations.title.singular": "including {number} relationship",
   "prompt.content.unsaved": "Are you sure you want to leave this content type? All your modifications will be lost.",
+
   "modalForm.contentType.header-create": "Create a content type",
   "modalForm.header-edit": "Edit {name}",
   "modalForm.component.header-create": "Create a component",
-  "configurations": "configurations"
+  "configurations": "configurations",
+  "contentType.displayName.label": "Display name",
+  "contentType.collectionName.description": "Useful when the name of your Content Type and your table name differ",
+  "contentType.collectionName.label": "Collection name",
+
+  "contentType.UID.description": "The UID is used to generate the API routes and databases tables/collections"
 }
