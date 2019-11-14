@@ -20,7 +20,7 @@ import Wrapper from './Wrapper';
 // };
 
 function LeftMenu() {
-  const { components, contentTypes } = useDataManager();
+  const { components, contentTypes, newSchema } = useDataManager();
   const { currentEnvironment } = useGlobalContext();
   const { push } = useHistory();
   const isProduction = currentEnvironment === 'production';
@@ -40,7 +40,14 @@ function LeftMenu() {
     })),
     obj => obj.title
   );
-
+  const tempSchemaCT =
+    newSchema.schemaType === 'contentType'
+      ? {
+          name: newSchema.uid,
+          title: newSchema.schema.name,
+          to: `/plugins/${pluginId}/content-types/${newSchema.uid}`,
+        }
+      : null;
   const data = [
     {
       name: 'models',
@@ -62,11 +69,14 @@ function LeftMenu() {
         },
       },
       links: sortBy(
-        Object.keys(contentTypes).map(uid => ({
-          name: uid,
-          title: contentTypes[uid].schema.name,
-          to: `/plugins/${pluginId}/content-types/${uid}`,
-        })),
+        Object.keys(contentTypes)
+          .map(uid => ({
+            name: uid,
+            title: contentTypes[uid].schema.name,
+            to: `/plugins/${pluginId}/content-types/${uid}`,
+          }))
+          .concat(tempSchemaCT)
+          .filter(obj => obj !== null),
         obj => obj.title
       ),
     },

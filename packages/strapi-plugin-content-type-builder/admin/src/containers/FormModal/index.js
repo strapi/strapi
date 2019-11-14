@@ -22,6 +22,7 @@ import ModalHeader from '../../components/ModalHeader';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
 import HeaderNavLink from '../../components/HeaderNavLink';
 import forms from './utils/forms';
+import { createUid } from './utils/createUid';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
@@ -42,7 +43,7 @@ const FormModal = () => {
   const { formatMessage } = useGlobalContext();
   const isOpen = !isEmpty(search);
   const query = useQuery();
-  const { contentTypes, initialData } = useDataManager();
+  const { contentTypes, createSchema, initialData } = useDataManager();
   const { formErrors, modifiedData } = reducerState.toJS();
 
   useEffect(() => {
@@ -89,6 +90,9 @@ const FormModal = () => {
       const schema = forms.contentType.schema(Object.keys(contentTypes));
 
       await schema.validate(modifiedData, { abortEarly: false });
+      createSchema(modifiedData, state.modalType, createUid(modifiedData.name));
+      handleToggle();
+      // push({ p})
     } catch (err) {
       const errors = getYupInnerErrors(err);
       // TODO
@@ -175,6 +179,7 @@ const FormModal = () => {
                                 : formatMessage({ id: errorId })
                             }
                             onChange={handleChange}
+                            onBlur={() => {}}
                             description={
                               get(input, 'description.id', null)
                                 ? formatMessage(input.description)

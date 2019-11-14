@@ -18,6 +18,7 @@ const DataManagerProvider = ({ children }) => {
     isLoading,
     initialData,
     modifiedData,
+    newSchema,
   } = reducerState.toJS();
 
   const contentTypeMatch = useRouteMatch(
@@ -60,6 +61,15 @@ const DataManagerProvider = ({ children }) => {
     getDataRef.current();
   }, []);
 
+  const createSchema = (data, schemaType, uid) => {
+    dispatch({
+      type: 'CREATE_SCHEMA',
+      data,
+      schemaType,
+      uid,
+    });
+  };
+
   const setModifiedData = () => {
     const currentSchemas = isInContentTypeView ? contentTypes : components;
     const schemaToSet = get(currentSchemas, currentUid, {});
@@ -70,15 +80,17 @@ const DataManagerProvider = ({ children }) => {
     });
   };
 
-  console.log({ contentTypes });
+  console.log({ contentTypes, components });
 
   return (
     <DataManagerContext.Provider
       value={{
         components,
         contentTypes,
+        createSchema,
         initialData,
         modifiedData,
+        newSchema,
         setModifiedData,
       }}
     >
