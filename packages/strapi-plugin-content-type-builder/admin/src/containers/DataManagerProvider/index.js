@@ -5,6 +5,7 @@ import { request, LoadingIndicatorPage } from 'strapi-helper-plugin';
 import { useRouteMatch } from 'react-router-dom';
 import DataManagerContext from '../../contexts/DataManagerContext';
 import pluginId from '../../pluginId';
+import FormModal from '../FormModal';
 import init from './init';
 import reducer, { initialState } from './reducer';
 import createDataObject from './utils/createDataObject';
@@ -15,9 +16,10 @@ const DataManagerProvider = ({ children }) => {
     components,
     contentTypes,
     isLoading,
+    initialData,
     modifiedData,
   } = reducerState.toJS();
-  console.log({ modifiedData });
+
   const contentTypeMatch = useRouteMatch(
     `/plugins/${pluginId}/content-types/:uid`
   );
@@ -73,10 +75,19 @@ const DataManagerProvider = ({ children }) => {
       value={{
         components,
         contentTypes,
+        initialData,
+        modifiedData,
         setModifiedData,
       }}
     >
-      {isLoading ? <LoadingIndicatorPage /> : children}
+      {isLoading ? (
+        <LoadingIndicatorPage />
+      ) : (
+        <>
+          {children}
+          <FormModal />
+        </>
+      )}
     </DataManagerContext.Provider>
   );
 };

@@ -219,5 +219,9 @@
   "table.attributes.title.singular": "{number} field",
   "table.relations.title.plural": "including {number} relationships",
   "table.relations.title.singular": "including {number} relationship",
-  "prompt.content.unsaved": "Are you sure you want to leave this content type? All your modifications will be lost."
+  "prompt.content.unsaved": "Are you sure you want to leave this content type? All your modifications will be lost.",
+  "modalForm.contentType.header-create": "Create a content type",
+  "modalForm.header-edit": "Edit {name}",
+  "modalForm.component.header-create": "Create a component",
+  "configurations": "configurations"
 }
