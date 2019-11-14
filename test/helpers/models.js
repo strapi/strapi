@@ -6,10 +6,12 @@ module.exports = ({ rq }) => {
       url: '/content-type-builder/components',
       method: 'POST',
       body: {
-        category: 'default',
-        icon: 'default',
-        connection: 'default',
-        ...data,
+        component: {
+          category: 'default',
+          icon: 'default',
+          connection: 'default',
+          ...data,
+        },
       },
     });
 
@@ -29,25 +31,24 @@ module.exports = ({ rq }) => {
     return createModel({
       connection: 'default',
       name,
-      attributes: [
-        {
-          name: 'field',
-          params: {
-            type,
-            ...opts,
-          },
+      attributes: {
+        field: {
+          type,
+          ...opts,
         },
-      ],
+      },
     });
   }
 
   async function createModel(data) {
     await rq({
-      url: '/content-type-builder/models',
+      url: '/content-type-builder/content-types',
       method: 'POST',
       body: {
-        connection: 'default',
-        ...data,
+        contentType: {
+          connection: 'default',
+          ...data,
+        },
       },
     });
 
@@ -62,7 +63,7 @@ module.exports = ({ rq }) => {
 
   async function deleteModel(model) {
     await rq({
-      url: `/content-type-builder/models/${model}`,
+      url: `/content-type-builder/content-types/application::${model}.${model}`,
       method: 'DELETE',
     });
 

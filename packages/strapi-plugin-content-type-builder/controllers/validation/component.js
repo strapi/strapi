@@ -39,12 +39,12 @@ const componentSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
     .string()
     .nullable()
     .test(isValidName)
-    .required(),
+    .required('icon.required'),
   category: yup
     .string()
     .nullable()
     .test(isValidName)
-    .required(),
+    .required('category.required'),
 });
 
 const createComponentSchema = () => {

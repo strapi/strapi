@@ -125,7 +125,7 @@ const buildReversedRelation = ({ key, attr, plugin, modelName }) => {
     case 'manyToMany': {
       targetAttributeOptions.collection = modelName;
 
-      if (!targetAttributeOptions.dominant) {
+      if (!attr.dominant) {
         targetAttributeOptions.dominant = true;
       }
       break;

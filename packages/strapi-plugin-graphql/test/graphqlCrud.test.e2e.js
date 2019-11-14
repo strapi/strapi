@@ -8,27 +8,17 @@ let graphqlQuery;
 let modelsUtils;
 
 const postModel = {
-  attributes: [
-    {
-      name: 'name',
-      params: {
-        multiple: false,
-        type: 'richtext',
-      },
+  attributes: {
+    name: {
+      type: 'richtext',
     },
-    {
-      name: 'bigint',
-      params: {
-        type: 'biginteger',
-      },
+    bigint: {
+      type: 'biginteger',
     },
-    {
-      name: 'nullable',
-      params: {
-        type: 'string',
-      },
+    nullable: {
+      type: 'string',
     },
-  ],
+  },
   connection: 'default',
   name: 'post',
   description: '',
