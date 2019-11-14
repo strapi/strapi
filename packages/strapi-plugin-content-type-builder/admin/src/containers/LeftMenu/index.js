@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
-import { groupBy } from 'lodash';
+import { groupBy, sortBy } from 'lodash';
 
-import { LeftMenuList } from 'strapi-helper-plugin';
+import { LeftMenuList, useGlobalContext } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import CustomLink from '../../components/CustomLink';
 import useDataManager from '../../hooks/useDataManager';
@@ -21,16 +21,24 @@ import Wrapper from './Wrapper';
 
 function LeftMenu() {
   const { components, contentTypes } = useDataManager();
+  const { currentEnvironment } = useGlobalContext();
+  const isProduction = currentEnvironment === 'production';
   const grouped = groupBy(components, 'category');
-  const componentsData = Object.keys(grouped).map(category => ({
-    name: category,
-    title: category,
-    links: grouped[category].map(compo => ({
-      name: compo.uid,
-      to: `/plugins/${pluginId}/component-categories/${category}/${compo.uid}`,
-      title: compo.schema.name,
+  const componentsData = sortBy(
+    Object.keys(grouped).map(category => ({
+      name: category,
+      title: category,
+      links: sortBy(
+        grouped[category].map(compo => ({
+          name: compo.uid,
+          to: `/plugins/${pluginId}/component-categories/${category}/${compo.uid}`,
+          title: compo.schema.name,
+        })),
+        obj => obj.title
+      ),
     })),
-  }));
+    obj => obj.title
+  );
 
   const data = [
     {
@@ -42,15 +50,19 @@ function LeftMenu() {
       customLink: {
         Component: CustomLink,
         componentProps: {
+          disabled: isProduction,
           id: `${pluginId}.button.model.create`,
           onClick: () => {},
         },
       },
-      links: Object.keys(contentTypes).map(uid => ({
-        name: uid,
-        title: contentTypes[uid].schema.name,
-        to: `/plugins/${pluginId}/content-types/${uid}`,
-      })),
+      links: sortBy(
+        Object.keys(contentTypes).map(uid => ({
+          name: uid,
+          title: contentTypes[uid].schema.name,
+          to: `/plugins/${pluginId}/content-types/${uid}`,
+        })),
+        obj => obj.title
+      ),
     },
     {
       name: 'components',
@@ -61,6 +73,7 @@ function LeftMenu() {
       customLink: {
         Component: CustomLink,
         componentProps: {
+          disabled: isProduction,
           id: `${pluginId}.button.component.create`,
           onClick: () => {},
         },

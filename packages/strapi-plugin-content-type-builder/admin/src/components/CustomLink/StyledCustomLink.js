@@ -21,7 +21,7 @@ const StyledCustomLink = styled.div`
     }
   }
   button {
-    cursor: pointer;
+    cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
     padding: 0;
     line-height: 16px;
   }

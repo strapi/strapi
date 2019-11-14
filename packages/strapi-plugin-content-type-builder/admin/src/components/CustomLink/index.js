@@ -4,9 +4,9 @@ import PropTypes from 'prop-types';
 
 import StyledCustomLink from './StyledCustomLink';
 
-const CustomLink = ({ id, onClick }) => (
-  <StyledCustomLink>
-    <button onClick={onClick} role="button">
+const CustomLink = ({ disabled, id, onClick }) => (
+  <StyledCustomLink disabled={disabled}>
+    <button onClick={onClick} role="button" disabled={disabled}>
       <p>
         <i className="fa fa-plus" />
         {id && <FormattedMessage id={id} />}
@@ -16,10 +16,12 @@ const CustomLink = ({ id, onClick }) => (
 );
 
 CustomLink.defaultProps = {
+  disabled: false,
   id: null,
 };
 
 CustomLink.propTypes = {
+  disabled: PropTypes.bool,
   id: PropTypes.string,
   onClick: PropTypes.func.isRequired,
 };
