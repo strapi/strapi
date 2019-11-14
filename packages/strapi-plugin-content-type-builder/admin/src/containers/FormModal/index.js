@@ -8,6 +8,7 @@ import {
   Modal,
   ModalFooter,
   ModalForm,
+  getYupInnerErrors,
 } from 'strapi-helper-plugin';
 import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
@@ -18,6 +19,7 @@ import useDataManager from '../../hooks/useDataManager';
 import ModalHeader from '../../components/ModalHeader';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
 import HeaderNavLink from '../../components/HeaderNavLink';
+import forms from './utils/forms';
 
 const getTrad = id => `${pluginId}.${id}`;
 const NAVLINKS = [{ id: 'base' }, { id: 'advanced' }];
@@ -68,6 +70,19 @@ const FormModal = () => {
 
     return newSearch;
   };
+  const handleSubmit = async e => {
+    e.preventDefault();
+
+    try {
+      const schema = forms.contentType.schema(['admin', 'series', 'file']);
+
+      await schema.validate({ name: 'admin' }, { abortEarly: false });
+    } catch (err) {
+      const errors = getYupInnerErrors(err);
+      // TODO
+      console.log({ errors });
+    }
+  };
   const handleToggle = () => {
     push({ search: '' });
   };
@@ -107,7 +122,7 @@ const FormModal = () => {
           </HeaderModalTitle>
         </section>
       </HeaderModal>
-      <form onSubmit={() => {}}>
+      <form onSubmit={handleSubmit}>
         <ModalForm>{/* <ModalBody>{renderForm()}</ModalBody> */}</ModalForm>
         <ModalFooter>
           <section>

@@ -70,6 +70,8 @@ const DataManagerProvider = ({ children }) => {
     });
   };
 
+  console.log({ contentTypes });
+
   return (
     <DataManagerContext.Provider
       value={{
