@@ -81,9 +81,7 @@ async function updateContentTypesScope(models, configurations, source) {
 
   // delette old schemas
   await Promise.all(
-    contentTypesToDelete.map(uid =>
-      service.deleteConfiguration({ uid, source })
-    )
+    contentTypesToDelete.map(uid => service.deleteConfiguration({ uid }))
   );
 
   // create new schemas

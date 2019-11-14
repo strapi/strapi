@@ -6,64 +6,68 @@ const pluralize = require('pluralize');
 const storeUtils = require('./utils/store');
 const { pickSchemaFields } = require('./utils/schema');
 
-const uidToStoreKey = ({ uid, source }) => {
-  const sourceKey = source ? `${source}.${uid}` : uid;
-  return `content_types::${sourceKey}`;
+const uidToStoreKey = uid => {
+  return `content_types::${uid}`;
 };
 
 const formatContentTypeLabel = label => _.upperFirst(pluralize(label));
 
-const getModelIn = source => uid => _.get(source, ['models', uid], null);
+const HIDDEN_CONTENT_TYPES = [
+  'strapi::admin',
+  'plugins::upload.file',
+  'plugins::users-permissions.permission',
+  'plugins::users-permissions.role',
+];
 
 module.exports = {
   uidToStoreKey,
 
-  getConfiguration({ uid, source }) {
-    const storeKey = uidToStoreKey({ uid, source });
+  getConfiguration({ uid }) {
+    const storeKey = uidToStoreKey(uid);
     return storeUtils.getModelConfiguration(storeKey);
   },
 
-  setConfiguration({ uid, source }, input) {
+  setConfiguration({ uid }, input) {
     const { settings, metadatas, layouts } = input;
 
-    const storeKey = uidToStoreKey({ uid, source });
+    const storeKey = uidToStoreKey(uid);
     return storeUtils.setModelConfiguration(storeKey, {
       uid,
-      source,
       settings,
       metadatas,
       layouts,
     });
   },
 
-  deleteConfiguration({ uid, source }) {
-    const storeKey = uidToStoreKey({ uid, source });
+  deleteConfiguration({ uid }) {
+    const storeKey = uidToStoreKey(uid);
     return storeUtils.deleteKey(storeKey);
   },
 
-  formatContentType(uid, contentType, opts = {}) {
-    const { source = null, isDisplayed = true } = opts;
-
+  formatContentType(contentType) {
     return {
-      uid,
-      name: uid,
-      label: formatContentTypeLabel(_.get(contentType, ['info', 'name'], uid)),
-      isDisplayed,
-      source,
+      uid: contentType.uid,
+      name: _.get(contentType, ['info', 'name']),
+      label: formatContentTypeLabel(
+        _.get(contentType, ['info', 'name'], contentType.modelName)
+      ),
+      isDisplayed: HIDDEN_CONTENT_TYPES.includes(contentType.uid)
+        ? false
+        : true,
       schema: this.formatContentTypeSchema(contentType),
     };
   },
 
   formatContentTypeSchema(contentType) {
-    const { associations, allAttributes } = contentType;
+    const { associations, attributes } = contentType;
     return {
       ...pickSchemaFields(contentType),
       attributes: {
         id: {
           type: contentType.primaryKeyType,
         },
-        ...Object.keys(allAttributes).reduce((acc, key) => {
-          const attribute = allAttributes[key];
+        ...Object.keys(attributes).reduce((acc, key) => {
+          const attribute = attributes[key];
           const assoc = associations.find(assoc => assoc.alias === key);
 
           if (assoc) {
@@ -84,38 +88,35 @@ module.exports = {
                 relationType: assoc.nature,
               };
             }
-          } else {
-            if (attribute.type === 'timestampUpdate') {
-              attribute.type = 'timestamp';
-            }
 
-            acc[key] = attribute;
+            return acc;
           }
+
+          acc[key] = attribute;
           return acc;
         }, {}),
+        ...addTimestamps(contentType),
       },
     };
   },
-
-  findContentTypeModel({ uid, source }) {
-    const getModel = getModelIn(
-      !source
-        ? strapi
-        : source === 'admin'
-        ? strapi.admin
-        : strapi.plugins[source] || {}
-    );
-    return getModel(uid);
-  },
-
-  async updateUID({ oldUID, newUID, source }) {
-    const oldKey = uidToStoreKey({ uid: oldUID, source });
-    const newKey = uidToStoreKey({ uid: newUID, source });
-
-    await storeUtils.setModelConfiguration(oldKey, {
-      uid: oldUID,
-    });
-
-    return storeUtils.moveKey(oldKey, newKey);
-  },
 };
+
+function addTimestamps(contentType) {
+  if (_.get(contentType, 'options.timestamps', false) === false) {
+    return {};
+  }
+
+  const [createdAtAttribute, updatedAtAttribute] = _.get(contentType, [
+    'options',
+    'timestamps',
+  ]);
+
+  return {
+    [createdAtAttribute]: {
+      type: 'timestamp',
+    },
+    [updatedAtAttribute]: {
+      type: 'timestamp',
+    },
+  };
+}
