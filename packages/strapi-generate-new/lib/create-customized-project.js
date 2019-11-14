@@ -44,7 +44,7 @@ async function askDbInfosAndTest(scope) {
       dependencies: clientDependencies({ scope, client }),
     };
 
-    await testDatabaseConnection({
+    return testDatabaseConnection({
       scope,
       configuration,
     })
@@ -67,6 +67,7 @@ async function askDbInfosAndTest(scope) {
           });
         }
       )
+      .then(() => configuration)
       .catch(err => {
         if (retries < MAX_RETRIES - 1) {
           console.log();
@@ -88,8 +89,6 @@ async function askDbInfosAndTest(scope) {
           `️⛔️ Could not connect to your database after ${MAX_RETRIES} tries. Try to check your database configuration an retry.`
         );
       });
-
-    return configuration;
   }
 
   return loop();
