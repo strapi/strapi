@@ -7,7 +7,7 @@ const pluralize = require('pluralize');
 
 const contentTypeService = require('./ContentTypes');
 const { formatAttributes, convertAttributes } = require('../utils/attributes');
-const { nameToSlug } = require('../utils/helpers');
+const { nameToSlug, nameToCollectionName } = require('../utils/helpers');
 
 /**
  * Formats a component attributes
@@ -121,7 +121,9 @@ const createSchema = infos => {
     connection,
     collectionName:
       collectionName ||
-      `components_${nameToSlug(category)}_${pluralize(nameToSlug(name))}`,
+      `components_${nameToCollectionName(category)}_${nameToCollectionName(
+        pluralize(name)
+      )}`,
     attributes: convertAttributes(attributes),
   };
 };

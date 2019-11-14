@@ -8,6 +8,7 @@ const generator = require('strapi-generate');
 
 const componentService = require('./Components');
 const { formatAttributes, convertAttributes } = require('../utils/attributes');
+const { nameToCollectionName } = require('../utils/helpers');
 
 const deleteAllRelations = ({ modelName, plugin }) => {
   const contentTypeUpdates = Object.keys(strapi.contentTypes).map(uid => {
@@ -263,7 +264,7 @@ const createContentTypeSchema = infos => ({
       'default'
     ),
   collectionName:
-    infos.collectionName || `${_.snakeCase(pluralize(infos.name))}`,
+    infos.collectionName || `${nameToCollectionName(pluralize(infos.name))}`,
   info: {
     name: infos.name,
     description: infos.description,

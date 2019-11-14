@@ -28,8 +28,11 @@ const deepTrimObject = attribute => {
  */
 const nameToSlug = name => slugify(name, { separator: '-' });
 
+const nameToCollectionName = name => slugify(name, { separator: '_' });
+
 module.exports = {
   escapeNewlines,
   deepTrimObject,
   nameToSlug,
+  nameToCollectionName,
 };
