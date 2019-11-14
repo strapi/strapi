@@ -35,9 +35,7 @@ module.exports = {
       return ctx.notFound('contentType.notFound');
     }
 
-    const contentTypeConfigurations = await service.getConfiguration(
-      contentType
-    );
+    const contentTypeConfigurations = await service.getConfiguration(uid);
 
     const data = {
       contentType: {
@@ -88,11 +86,8 @@ module.exports = {
       });
     }
 
-    await service.setConfiguration(contentType, input);
-
-    const contentTypeConfigurations = await service.getConfiguration(
-      contentType
-    );
+    await service.setConfiguration(uid, input);
+    const contentTypeConfigurations = await service.getConfiguration(uid);
 
     const data = {
       uid,

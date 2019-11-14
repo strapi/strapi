@@ -22,12 +22,12 @@ const HIDDEN_CONTENT_TYPES = [
 module.exports = {
   uidToStoreKey,
 
-  getConfiguration({ uid }) {
+  getConfiguration(uid) {
     const storeKey = uidToStoreKey(uid);
     return storeUtils.getModelConfiguration(storeKey);
   },
 
-  setConfiguration({ uid }, input) {
+  setConfiguration(uid, input) {
     const { settings, metadatas, layouts } = input;
 
     const storeKey = uidToStoreKey(uid);
@@ -39,7 +39,7 @@ module.exports = {
     });
   },
 
-  deleteConfiguration({ uid }) {
+  deleteConfiguration(uid) {
     const storeKey = uidToStoreKey(uid);
     return storeUtils.deleteKey(storeKey);
   },
