@@ -7,8 +7,6 @@ const storeUtils = require('./utils/store');
 const uidToStoreKey = uid => `components::${uid}`;
 
 module.exports = {
-  uidToStoreKey,
-
   async getComponentInformations(uid) {
     const ctService = strapi.plugins['content-manager'].services.contenttypes;
 

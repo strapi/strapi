@@ -10,6 +10,11 @@ const uidToStoreKey = uid => {
   return `content_types::${uid}`;
 };
 
+const toUID = (name, plugin) => {
+  const model = strapi.getModel(name, plugin);
+  return model.uid;
+};
+
 const formatContentTypeLabel = label => _.upperFirst(pluralize(label));
 
 const HIDDEN_CONTENT_TYPES = [
@@ -19,89 +24,88 @@ const HIDDEN_CONTENT_TYPES = [
   'plugins::users-permissions.role',
 ];
 
-module.exports = {
-  uidToStoreKey,
-
-  getConfiguration(uid) {
-    const storeKey = uidToStoreKey(uid);
-    return storeUtils.getModelConfiguration(storeKey);
-  },
-
-  setConfiguration(uid, input) {
-    const { settings, metadatas, layouts } = input;
-
-    const storeKey = uidToStoreKey(uid);
-    return storeUtils.setModelConfiguration(storeKey, {
-      uid,
-      settings,
-      metadatas,
-      layouts,
-    });
-  },
-
-  deleteConfiguration(uid) {
-    const storeKey = uidToStoreKey(uid);
-    return storeUtils.deleteKey(storeKey);
-  },
-
-  formatContentType(contentType) {
-    return {
-      uid: contentType.uid,
-      name: _.get(contentType, ['info', 'name']),
-      label: formatContentTypeLabel(
-        _.get(contentType, ['info', 'name'], contentType.modelName)
-      ),
-      isDisplayed: HIDDEN_CONTENT_TYPES.includes(contentType.uid)
-        ? false
-        : true,
-      schema: this.formatContentTypeSchema(contentType),
-    };
-  },
-
-  formatContentTypeSchema(contentType) {
-    const { associations, attributes } = contentType;
-    return {
-      ...pickSchemaFields(contentType),
-      attributes: {
-        id: {
-          type: contentType.primaryKeyType,
-        },
-        ...Object.keys(attributes).reduce((acc, key) => {
-          const attribute = attributes[key];
-          const assoc = associations.find(assoc => assoc.alias === key);
-
-          if (assoc) {
-            const { plugin } = attribute;
-            let targetEntity = attribute.model || attribute.collection;
-
-            if (plugin === 'upload' && targetEntity === 'file') {
-              acc[key] = {
-                type: 'media',
-                multiple: attribute.collection ? true : false,
-                required: attribute.required ? true : false,
-              };
-            } else {
-              acc[key] = {
-                ...attribute,
-                type: 'relation',
-                targetModel: targetEntity,
-                relationType: assoc.nature,
-              };
-            }
-
-            return acc;
-          }
-
-          acc[key] = attribute;
-          return acc;
-        }, {}),
-        ...addTimestamps(contentType),
-      },
-    };
-  },
+const getConfiguration = uid => {
+  const storeKey = uidToStoreKey(uid);
+  return storeUtils.getModelConfiguration(storeKey);
 };
 
-function addTimestamps(contentType) {
+const setConfiguration = (uid, input) => {
+  const { settings, metadatas, layouts } = input;
+
+  const storeKey = uidToStoreKey(uid);
+  return storeUtils.setModelConfiguration(storeKey, {
+    uid,
+    settings,
+    metadatas,
+    layouts,
+  });
+};
+
+const deleteConfiguration = uid => {
+  const storeKey = uidToStoreKey(uid);
+  return storeUtils.deleteKey(storeKey);
+};
+
+const formatContentType = contentType => {
+  return {
+    uid: contentType.uid,
+    name: _.get(contentType, ['info', 'name']),
+    label: formatContentTypeLabel(
+      _.get(contentType, ['info', 'name'], contentType.modelName)
+    ),
+    isDisplayed: HIDDEN_CONTENT_TYPES.includes(contentType.uid) ? false : true,
+    schema: formatContentTypeSchema(contentType),
+  };
+};
+
+const formatAttributes = model => {
+  return Object.keys(model.attributes).reduce((acc, key) => {
+    acc[key] = formatAttribute(key, model.attributes[key], { model });
+    return acc;
+  }, {});
+};
+
+const formatAttribute = (key, attribute, { model }) => {
+  if (_.has(attribute, 'type')) return attribute;
+
+  // format relations
+  const relation = (model.associations || []).find(
+    assoc => assoc.alias === key
+  );
+
+  const { plugin } = attribute;
+  let targetEntity = attribute.model || attribute.collection;
+
+  if (plugin === 'upload' && targetEntity === 'file') {
+    return {
+      type: 'media',
+      multiple: attribute.collection ? true : false,
+      required: attribute.required ? true : false,
+    };
+  } else {
+    return {
+      ...attribute,
+      type: 'relation',
+      targetModel: targetEntity === '*' ? '*' : toUID(targetEntity, plugin),
+      relationType: relation.nature,
+    };
+  }
+};
+
+const formatContentTypeSchema = contentType => {
+  return {
+    ...pickSchemaFields(contentType),
+    attributes: {
+      id: {
+        type: contentType.primaryKeyType,
+      },
+      ...formatAttributes(contentType),
+      ...createTimestampsSchema(contentType),
+    },
+  };
+};
+
+const createTimestampsSchema = contentType => {
   if (_.get(contentType, 'options.timestamps', false) === false) {
     return {};
   }
@@ -119,4 +123,12 @@ function addTimestamps(contentType) {
       type: 'timestamp',
     },
   };
-}
+};
+
+module.exports = {
+  getConfiguration,
+  setConfiguration,
+  deleteConfiguration,
+  formatContentType,
+  formatContentTypeSchema,
+};

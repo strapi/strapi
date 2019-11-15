@@ -158,6 +158,7 @@ module.exports = function(strapi) {
       __schema__: pickSchema(model),
       modelType: 'contentType',
       uid: `strapi::${key}`,
+      plugin: 'admin',
       modelName: key,
       identity: model.identity || _.upperFirst(key),
       globalId: model.globalId || _.upperFirst(_.camelCase(`admin-${key}`)),
