@@ -6,7 +6,10 @@ let modelsUtils;
 let rq;
 
 describe.each([
-  ['CONTENT MANAGER', '/content-manager/explorer/withcomponent'],
+  [
+    'CONTENT MANAGER',
+    '/content-manager/explorer/application::withcomponent.withcomponent',
+  ],
   ['GENERATED API', '/withcomponents'],
 ])('[%s] => Non repeatable and Not required component', (_, path) => {
   beforeAll(async () => {
@@ -27,7 +30,7 @@ describe.each([
     await modelsUtils.createModelWithType('withcomponent', 'component', {
       component: 'default.somecomponent',
       repeatable: true,
-      required: false,
+      required: true,
       min: 1,
       max: 5,
     });
@@ -104,7 +107,7 @@ describe.each([
       }
     );
 
-    test('Throws when sending an empty array or an array with less then the min', async () => {
+    test('Throws when sending an empty array or an array with less than the min', async () => {
       const res = await rq.post('/', {
         body: {
           field: [],
@@ -141,15 +144,6 @@ describe.each([
       });
 
       expect(res.statusCode).toBe(400);
-    });
-
-    test('Can send input without the component field', async () => {
-      const res = await rq.post('/', {
-        body: {},
-      });
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body.field).toEqual([]);
     });
   });
 

@@ -64,7 +64,7 @@ const formatAttribute = (key, attribute, { model }) => {
   } else {
     return {
       nature: relation.nature,
-      target: toUID(targetEntity, plugin),
+      target: targetEntity === '*' ? targetEntity : toUID(targetEntity, plugin),
       plugin: plugin || undefined,
       dominant: attribute.dominant ? true : false,
       targetAttribute: attribute.via || undefined,

@@ -30,7 +30,9 @@ describe.each([
     await modelsUtils.createModelWithType('withcomponent', 'component', {
       component: 'default.somecomponent',
       repeatable: true,
-      required: true,
+      required: false,
+      min: 2,
+      max: 5,
     });
 
     rq = authRq.defaults({
@@ -48,6 +50,9 @@ describe.each([
       const res = await rq.post('/', {
         body: {
           field: [
+            {
+              name: 'someString',
+            },
             {
               name: 'someString',
             },
@@ -74,6 +79,9 @@ describe.each([
             field: [
               {
                 name: 'someValue',
+              },
+              {
+                name: 'someString',
               },
             ],
           }),
@@ -105,7 +113,21 @@ describe.each([
       }
     );
 
-    test('Can send an empty array', async () => {
+    test('Throws when sending a non empty array with less then the min', async () => {
+      const res = await rq.post('/', {
+        body: {
+          field: [
+            {
+              name: 'test',
+            },
+          ],
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    test('Success when sending an empty array', async () => {
       const res = await rq.post('/', {
         body: {
           field: [],
@@ -113,15 +135,44 @@ describe.each([
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body.field).toEqual([]);
     });
 
-    test('Throws when component is not provided', async () => {
+    test('Throws when sending too many items', async () => {
+      const res = await rq.post('/', {
+        body: {
+          field: [
+            {
+              name: 'one',
+            },
+            {
+              name: 'one',
+            },
+            {
+              name: 'one',
+            },
+            {
+              name: 'one',
+            },
+            {
+              name: 'one',
+            },
+            {
+              name: 'one',
+            },
+          ],
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    test('Can send input without the component field', async () => {
       const res = await rq.post('/', {
         body: {},
       });
 
-      expect(res.statusCode).toBe(400);
+      expect(res.statusCode).toBe(200);
+      expect(res.body.field).toEqual([]);
     });
   });
 
@@ -180,6 +231,9 @@ describe.each([
         const res = await rq.post('/', {
           body: {
             field: [
+              {
+                name: 'someString',
+              },
               {
                 name: 'someString',
               },
@@ -296,12 +350,15 @@ describe.each([
       });
     });
 
-    test('Removes previous components if empty array sent', async () => {
+    test('Throws when not enough items', async () => {
       const res = await rq.post('/', {
         body: {
           field: [
             {
               name: 'someString',
+            },
+            {
+              name: 'new String',
             },
           ],
         },
@@ -309,22 +366,67 @@ describe.each([
 
       const updateRes = await rq.put(`/${res.body.id}`, {
         body: {
-          field: [],
+          field: [
+            {
+              name: 'lala',
+            },
+          ],
         },
       });
 
-      const expectResult = {
-        id: res.body.id,
-        field: [],
-      };
-
-      expect(updateRes.statusCode).toBe(200);
-      expect(updateRes.body).toMatchObject(expectResult);
+      expect(updateRes.statusCode).toBe(400);
 
       const getRes = await rq.get(`/${res.body.id}`);
 
       expect(getRes.statusCode).toBe(200);
-      expect(getRes.body).toMatchObject(expectResult);
+      expect(getRes.body).toMatchObject(res.body);
+    });
+
+    test('Throws when too many items', async () => {
+      const res = await rq.post('/', {
+        body: {
+          field: [
+            {
+              name: 'someString',
+            },
+            {
+              name: 'test',
+            },
+          ],
+        },
+      });
+
+      const updateRes = await rq.put(`/${res.body.id}`, {
+        body: {
+          field: [
+            {
+              name: 'someString',
+            },
+            {
+              name: 'someString',
+            },
+            {
+              name: 'someString',
+            },
+            {
+              name: 'someString',
+            },
+            {
+              name: 'someString',
+            },
+            {
+              name: 'someString',
+            },
+          ],
+        },
+      });
+
+      expect(updateRes.statusCode).toBe(400);
+
+      const getRes = await rq.get(`/${res.body.id}`);
+
+      expect(getRes.statusCode).toBe(200);
+      expect(getRes.body).toMatchObject(res.body);
     });
 
     test('Replaces the previous components if sent without id', async () => {
@@ -334,6 +436,7 @@ describe.each([
             {
               name: 'someString',
             },
+            { name: 'test' },
           ],
         },
       });
@@ -343,6 +446,9 @@ describe.each([
           field: [
             {
               name: 'new String',
+            },
+            {
+              name: 'test',
             },
           ],
         },
@@ -361,6 +467,9 @@ describe.each([
           {
             name: 'new String',
           },
+          {
+            name: 'test',
+          },
         ],
       });
 
@@ -373,6 +482,9 @@ describe.each([
           {
             name: 'new String',
           },
+          {
+            name: 'test',
+          },
         ],
       });
     });
@@ -383,6 +495,9 @@ describe.each([
           field: [
             {
               name: 'someString',
+            },
+            {
+              name: 'test',
             },
           ],
         },

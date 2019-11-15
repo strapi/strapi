@@ -7,6 +7,9 @@ const {
   syncConfiguration,
 } = require('../../services/utils/configuration');
 
+const contentTypeService = require('../../services/ContentTypes');
+const componentService = require('../../services/Components');
+
 /**
  * Synchronize content manager schemas
  */
@@ -27,63 +30,36 @@ async function syncContentTypesSchemas() {
     'plugin_content_manager_configuration_content_types'
   );
 
-  // update strapi.models
-  await updateContentTypesScope(
-    _.omit(strapi.models, ['core_store']),
-    configurations.filter(({ source }) => !source)
-  );
-
-  // update strapi.admin.models
-  await updateContentTypesScope(
-    strapi.admin.models,
-    configurations.filter(({ source }) => source === 'admin'),
-    'admin'
-  );
-
-  // update strapi.plugins.x.models
-  await Promise.all(
-    Object.keys(strapi.plugins).map(pluginKey => {
-      const plugin = strapi.plugins[pluginKey];
-
-      return updateContentTypesScope(
-        plugin.models || {},
-        configurations.filter(({ source }) => source === pluginKey),
-        pluginKey
-      );
-    })
-  );
+  await updateContentTypes(configurations);
 }
 
-async function updateContentTypesScope(models, configurations, source) {
-  const service = strapi.plugins['content-manager'].services.contenttypes;
-
+async function updateContentTypes(configurations) {
   const updateConfiguration = async uid => {
     const conf = configurations.find(conf => conf.uid === uid);
-    const model = models[uid];
-    return service.setConfiguration(
-      { uid, source },
-      await syncConfiguration(conf, model)
+
+    return contentTypeService.setConfiguration(
+      uid,
+      await syncConfiguration(conf, strapi.contentTypes[uid])
     );
   };
 
   const generateNewConfiguration = async uid => {
-    return service.setConfiguration(
-      { uid, source },
-      await createDefaultConfiguration(models[uid])
+    return contentTypeService.setConfiguration(
+      uid,
+      await createDefaultConfiguration(strapi.contentTypes[uid])
     );
   };
 
-  const realUIDs = Object.keys(models);
+  const currentUIDS = Object.keys(strapi.contentTypes);
   const DBUIDs = configurations.map(({ uid }) => uid);
-  const contentTypesToUpdate = _.intersection(realUIDs, DBUIDs);
-  const contentTypesToAdd = _.difference(realUIDs, DBUIDs);
-  const contentTypesToDelete = _.difference(DBUIDs, realUIDs);
+
+  const contentTypesToUpdate = _.intersection(currentUIDS, DBUIDs);
+  const contentTypesToAdd = _.difference(currentUIDS, DBUIDs);
+  const contentTypesToDelete = _.difference(DBUIDs, currentUIDS);
 
   // delette old schemas
   await Promise.all(
-    contentTypesToDelete.map(uid =>
-      service.deleteConfiguration({ uid, source })
-    )
+    contentTypesToDelete.map(uid => contentTypeService.deleteConfiguration(uid))
   );
 
   // create new schemas
@@ -101,18 +77,19 @@ async function updateContentTypesScope(models, configurations, source) {
 async function syncComponentsSchemas() {
   const updateConfiguration = async uid => {
     const conf = configurations.find(conf => conf.uid === uid);
-    const model = strapi.components[uid];
-    return service.setConfiguration(uid, await syncConfiguration(conf, model));
+
+    return componentService.setConfiguration(
+      uid,
+      await syncConfiguration(conf, strapi.components[uid])
+    );
   };
 
   const generateNewConfiguration = async uid => {
-    return service.setConfiguration(
+    return componentService.setConfiguration(
       uid,
       await createDefaultConfiguration(strapi.components[uid])
     );
   };
-
-  const service = strapi.plugins['content-manager'].services.components;
 
   const configurations = await storeUtils.findByKey(
     'plugin_content_manager_configuration_components'
@@ -126,7 +103,7 @@ async function syncComponentsSchemas() {
 
   // delette old schemas
   await Promise.all(
-    componentsToDelete.map(uid => service.deleteConfiguration(uid))
+    componentsToDelete.map(uid => componentService.deleteConfiguration(uid))
   );
 
   // create new schemas
