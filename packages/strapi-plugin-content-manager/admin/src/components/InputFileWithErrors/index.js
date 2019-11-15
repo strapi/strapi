@@ -7,25 +7,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { differenceBy, isEmpty } from 'lodash';
-import Label from '../Label';
-import InputDescription from '../InputDescription';
-import InputFile from '../InputFile';
-import InputErrors from '../InputErrors';
+import { Description, ErrorMessage, Label } from '@buffetjs/styles';
+import { Error } from '@buffetjs/core';
+import { InputFile } from 'strapi-helper-plugin';
+
 import Container from './Container';
 
 class InputFileWithErrors extends React.PureComponent {
-  state = { errors: [], label: null, hasValue: false };
+  state = { label: null, hasValue: false };
 
   componentDidMount() {
-    const { errors } = this.props;
     let newState = Object.assign({}, this.state);
 
     if (this.props.multiple && !isEmpty(this.props.value)) {
       newState = Object.assign({}, newState, { label: 1, hasValue: true });
-    }
-
-    if (!isEmpty(errors)) {
-      newState = Object.assign({}, newState, { errors });
     }
 
     this.setState(newState);
@@ -42,12 +37,6 @@ class InputFileWithErrors extends React.PureComponent {
     } else if (isEmpty(this.props.value)) {
       this.updateState({ label: null });
     }
-    // Check if errors have been updated during validations
-    if (prevProps.didCheckErrors !== this.props.didCheckErrors) {
-      // Remove from the state the errors that have already been set
-      const errors = isEmpty(this.props.errors) ? [] : this.props.errors;
-      this.updateState({ errors });
-    }
   }
 
   setLabel = label => {
@@ -58,71 +47,74 @@ class InputFileWithErrors extends React.PureComponent {
     this.setState(state);
   };
 
-  // TODO handle errors lifecycle
   render() {
     const {
       className,
-      errorsClassName,
-      errorsStyle,
-      noErrorsDescription,
+      error: inputError,
       inputDescription,
-      inputDescriptionClassName,
-      inputDescriptionStyle,
       label,
-      labelClassName,
-      labelStyle,
       multiple,
       name,
       onChange,
       style,
+      validations,
       value,
     } = this.props;
 
-    const labelClass = labelClassName === '' ? 'labelFile' : labelClassName;
-    const height = isEmpty(value) ? '.4rem' : '.6rem';
-
     return (
-      <Container className={className !== '' && className} style={style}>
-        <Label
-          className={labelClass}
-          htmlFor={`${name}NotNeeded`}
-          message={label}
-          style={labelStyle}
-        />
-        {this.state.label && (
-          <span className="labelNumber">
-            &nbsp;({this.state.label}/{value.length})
-          </span>
-        )}
-        <InputFile
-          multiple={multiple}
-          error={!isEmpty(this.state.errors)}
-          name={name}
-          onChange={onChange}
-          setLabel={this.setLabel}
-          value={value}
-        />
-        <InputDescription
-          className={inputDescriptionClassName}
-          message={inputDescription}
-          style={inputDescriptionStyle}
-        />
-        <InputErrors
-          className={errorsClassName}
-          errors={(!noErrorsDescription && this.state.errors) || []}
-          name={name}
-          style={errorsStyle}
-        />
-        <div style={{ height }} />
-      </Container>
+      <Error
+        inputError={inputError}
+        name={name}
+        type="text"
+        validations={validations}
+      >
+        {({ canCheck, onBlur, error, dispatch }) => {
+          const hasError = error && error !== null;
+
+          if (!hasError && !canCheck) {
+            dispatch({
+              type: 'SET_CHECK',
+            });
+          }
+
+          return (
+            <Container className={className !== '' && className} style={style}>
+              <Label htmlFor={`${name}NotNeeded`}>{label}</Label>
+              {this.state.label && (
+                <span className="labelNumber">
+                  &nbsp;({this.state.label}/{value.length})
+                </span>
+              )}
+              <InputFile
+                multiple={multiple}
+                error={hasError}
+                name={name}
+                onChange={e => {
+                  dispatch({
+                    type: 'SET_ERROR',
+                    error: null,
+                  });
+                  onChange(e);
+                  onBlur(e);
+                }}
+                setLabel={this.setLabel}
+                value={value}
+              />
+
+              {!hasError && inputDescription && (
+                <Description>{inputDescription}</Description>
+              )}
+              {hasError && <ErrorMessage>{error}</ErrorMessage>}
+            </Container>
+          );
+        }}
+      </Error>
     );
   }
 }
 
 InputFileWithErrors.defaultProps = {
-  errors: [],
-  errorsClassName: '',
-  errorsStyle: {},
+  error: null,
   className: '',
   didCheckErrors: false,
   inputDescription: '',
@@ -134,15 +126,14 @@ InputFileWithErrors.defaultProps = {
   multiple: false,
   noErrorsDescription: false,
   style: {},
+  validations: {},
   value: [],
 };
 
 InputFileWithErrors.propTypes = {
   className: PropTypes.string,
   didCheckErrors: PropTypes.bool,
-  errors: PropTypes.array,
-  errorsClassName: PropTypes.string,
-  errorsStyle: PropTypes.object,
+  error: PropTypes.string,
   inputDescription: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.func,
@@ -168,6 +159,7 @@ InputFileWithErrors.propTypes = {
   noErrorsDescription: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   style: PropTypes.object,
+  validations: PropTypes.object,
   value: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.object,

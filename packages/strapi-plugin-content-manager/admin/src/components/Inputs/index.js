@@ -2,11 +2,11 @@ import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { get, isEmpty, omit, toLower } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { InputFileWithErrors } from 'strapi-helper-plugin';
 import { Inputs as InputsIndex } from '@buffetjs/custom';
 
 import useDataManager from '../../hooks/useDataManager';
 import InputJSONWithErrors from '../InputJSONWithErrors';
+import InputFileWithErrors from '../InputFileWithErrors';
 import SelectWrapper from '../SelectWrapper';
 import WysiwygWithErrors from '../WysiwygWithErrors';
 
