@@ -364,7 +364,7 @@ module.exports = ({ model, modelKey, strapi }) => {
 };
 
 const buildSearchOr = (model, query) => {
-  return Object.keys(model.attributes).reduce((acc, curr) => {
+  const ret = Object.keys(model.attributes).reduce((acc, curr) => {
     switch (model.attributes[curr].type) {
       case 'integer':
       case 'float':
@@ -375,6 +375,7 @@ const buildSearchOr = (model, query) => {
 
         return acc;
       case 'string':
+      case 'email':
       case 'text':
       case 'password':
         return acc.concat({ [curr]: { $regex: query, $options: 'i' } });
@@ -387,7 +388,10 @@ const buildSearchOr = (model, query) => {
       default:
         return acc;
     }
-  }, []);
+  }, [])
+  // Also make object id searchable
+  ret.push({ _id: query });
+  return ret;
 };
 
 function validateRepeatableInput(value, { key, min, max }) {
