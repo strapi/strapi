@@ -390,7 +390,9 @@ const buildSearchOr = (model, query) => {
     }
   }, [])
   // Also make object id searchable
-  ret.push({ _id: query });
+  if (query.match(/^[0-9a-f]{24}$/i)) {
+    ret.push({ _id: query });
+  }
   return ret;
 };
 
