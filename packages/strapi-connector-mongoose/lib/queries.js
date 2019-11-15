@@ -406,7 +406,7 @@ const buildSearchOr = (model, query) => {
   }, []);
 };
 
-function validateRepeatableInput(value, { key, min, max }) {
+function validateRepeatableInput(value, { key, min, max, required }) {
   if (!Array.isArray(value)) {
     const err = new Error(`Component ${key} is repetable. Expected an array`);
     err.status = 400;
@@ -416,20 +416,24 @@ function validateRepeatableInput(value, { key, min, max }) {
   value.forEach(val => {
     if (typeof val !== 'object' || Array.isArray(val) || val === null) {
       const err = new Error(
-        `Component ${key} as invalid items. Expected each items to be objects`
+        `Component ${key} has invalid items. Expected each items to be objects`
       );
       err.status = 400;
       throw err;
     }
   });
 
-  if (min && value.length < min) {
+  if (
+    (required === true || (required !== true && value.length > 0)) &&
+    (min && value.length < min)
+  ) {
     const err = new Error(
       `Component ${key} must contain at least ${min} items`
     );
     err.status = 400;
     throw err;
   }
+
   if (max && value.length > max) {
     const err = new Error(`Component ${key} must contain at most ${max} items`);
     err.status = 400;
