@@ -1,4 +1,5 @@
 /* eslint-disable no-useless-escape */
+const os = require('os');
 const path = require('path');
 const fs = require('fs-extra');
 const webpack = require('webpack');
@@ -279,9 +280,14 @@ async function watchFiles(dir) {
     const packageName = isExtension
       ? `strapi-plugin-${pluginName}`
       : 'strapi-admin';
+
+    const spliter = os.platform() === 'win32' ? '\\' : '/';
+
     const targetPath = isExtension
-      ? filePath.split('/extensions/')[1].replace(pluginName, '')
-      : filePath.split('/admin')[1];
+      ? filePath
+          .split(`${spliter}extensions${spliter}`)[1]
+          .replace(pluginName, '')
+      : filePath.split(`${spliter}admin`)[1];
 
     const destFolder = isExtension
       ? path.join(cacheDir, 'plugins', packageName)
