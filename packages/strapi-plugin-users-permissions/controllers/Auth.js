@@ -273,19 +273,31 @@ module.exports = {
 
   async forgotPassword(ctx) {
     const { email } = ctx.request.body;
-
+    
     const pluginStore = await strapi.store({
       environment: '',
       type: 'plugin',
       name: 'users-permissions',
     });
-
+    
+    // Check if email is sent
+    if (!email) {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'missing.email',
+          message: 'Missing email',
+        })
+      );
+    }
+    
     // Find the user user thanks to his email.
     const user = await strapi
       .query('user', 'users-permissions')
       .findOne({ email });
 
     // User not found.
+    
     if (!user) {
       return ctx.badRequest(
         null,
@@ -301,7 +313,7 @@ module.exports = {
 
     // Set the property code.
     user.resetPasswordToken = resetPasswordToken;
-
+    
     const settings = await pluginStore
       .get({ key: 'email' })
       .then(storeEmail => {
@@ -311,11 +323,11 @@ module.exports = {
           return {};
         }
       });
-
+    
     const advanced = await pluginStore.get({
       key: 'advanced',
     });
-
+    
     settings.message = await strapi.plugins[
       'users-permissions'
     ].services.userspermissions.template(settings.message, {
@@ -328,7 +340,7 @@ module.exports = {
       ]),
       TOKEN: resetPasswordToken,
     });
-
+    
     settings.object = await strapi.plugins[
       'users-permissions'
     ].services.userspermissions.template(settings.object, {
