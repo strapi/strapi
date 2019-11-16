@@ -272,7 +272,7 @@ module.exports = {
   },
 
   async forgotPassword(ctx) {
-    const { email } = ctx.request.body;
+    const { email, token_length } = ctx.request.body;
 
     const pluginStore = await strapi.store({
       environment: '',
@@ -308,9 +308,10 @@ module.exports = {
       );
     }
 
-    // Generate random token.
-    const resetPasswordToken = crypto.randomBytes(64).toString('hex');
-
+    // Generate random token with custom length [Between 5 and 128] | default 64.
+    const c = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const resetPasswordToken = Array.from({ length: ((parseInt(token_length) >= 5 && parseInt(token_length) <= 128) ? parseInt(token_length) : 64 )}, _ => c[Math.floor(Math.random() * c.length)]).join('')
+    
     // Set the property code.
     user.resetPasswordToken = resetPasswordToken;
 

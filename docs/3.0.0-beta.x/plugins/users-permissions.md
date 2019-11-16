@@ -169,6 +169,7 @@ This action sends an email to a user with the link of you reset password page. T
 #### Usage
 
 - `email` is your user email.
+- `token_length` (Optional) Allow overwrite token length with a value Between 5 and 128, default value is 64. Good for send small code in mobile devices
 
 ```js
 import axios from 'axios';
