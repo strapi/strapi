@@ -19,10 +19,19 @@ const Button = styled.button`
   &:hover,
   &:active,
   &:focus {
-    background: #f7f7f7;
-    outline: 0;
-    > div:after {
-      color: #0097f6;
+    background: #e6f0fb;
+    border-color: #aed4fb;
+
+    .attributeIcon {
+      background-color: #007eff;
+
+      > svg {
+        g {
+          path {
+            fill: #007eff;
+          }
+        }
+      }
     }
   }
 

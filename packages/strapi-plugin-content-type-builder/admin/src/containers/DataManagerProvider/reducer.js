@@ -6,16 +6,6 @@ const initialState = fromJS({
   initialData: {},
   modifiedData: {},
   isLoading: true,
-  newSchema: {
-    schemaType: '',
-    schema: {},
-    uid: '',
-  },
-  newSchemaClone: {
-    schemaType: '',
-    schema: {},
-    uid: '',
-  },
 });
 
 const reducer = (state, action) => {
@@ -25,12 +15,21 @@ const reducer = (state, action) => {
         .update('components', () => fromJS(action.components))
         .update('contentTypes', () => fromJS(action.contentTypes))
         .update('isLoading', () => false);
-    case 'CREATE_SCHEMA':
-      console.log({ action });
-      return state
-        .updateIn(['newSchema', 'schema'], () => fromJS(action.data))
-        .updateIn(['newSchema', 'uid'], () => fromJS(action.uid))
-        .updateIn(['newSchema', 'schemaType'], () => fromJS(action.schemaType));
+    case 'CREATE_SCHEMA': {
+      const newSchema = {
+        uid: action.uid,
+        isTemporary: true,
+        schema: {
+          ...action.data,
+          attributes: {},
+        },
+      };
+      const key =
+        action.schemaType === 'contentType' ? 'contentTypes' : 'components';
+
+      return state.updateIn([key, action.uid], () => fromJS(newSchema));
+    }
+
     case 'SET_MODIFIED_DATA':
       return state
         .update('initialData', () => OrderedMap(action.schemaToSet))

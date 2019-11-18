@@ -2,15 +2,20 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { HeaderModalTitle } from 'strapi-helper-plugin';
 import { AttributeIcon } from '@buffetjs/core';
-import pluginId from '../../pluginId';
 import { FormattedMessage } from 'react-intl';
+import { upperFirst } from 'lodash';
+import pluginId from '../../pluginId';
 
-const ModalHeader = ({ headerId, name, type }) => {
+const ModalHeader = ({ headerId, iconType, name }) => {
+  console.log({ iconType });
   return (
     <section>
       <HeaderModalTitle style={{ textTransform: 'none' }}>
-        <AttributeIcon type={type} style={{ margin: 'auto 20px auto 0' }} />
-        <FormattedMessage id={`${pluginId}.${headerId}`} values={{ name }} />
+        <AttributeIcon type={iconType} style={{ margin: 'auto 20px auto 0' }} />
+        {headerId && (
+          <FormattedMessage id={`${pluginId}.${headerId}`} values={{ name }} />
+        )}
+        {!headerId && <span>{upperFirst(name)}</span>}
       </HeaderModalTitle>
     </section>
   );
@@ -18,14 +23,14 @@ const ModalHeader = ({ headerId, name, type }) => {
 
 ModalHeader.defaultProps = {
   headerId: '',
+  iconType: 'contentType',
   name: '',
-  type: 'contentType',
 };
 
 ModalHeader.propTypes = {
   headerId: PropTypes.string,
+  iconType: PropTypes.string,
   name: PropTypes.string,
-  type: PropTypes.string,
 };
 
 export default ModalHeader;

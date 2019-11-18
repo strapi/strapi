@@ -18,7 +18,6 @@ const DataManagerProvider = ({ children }) => {
     isLoading,
     initialData,
     modifiedData,
-    newSchema,
   } = reducerState.toJS();
 
   const contentTypeMatch = useRouteMatch(
@@ -90,7 +89,6 @@ const DataManagerProvider = ({ children }) => {
         createSchema,
         initialData,
         modifiedData,
-        newSchema,
         setModifiedData,
       }}
     >

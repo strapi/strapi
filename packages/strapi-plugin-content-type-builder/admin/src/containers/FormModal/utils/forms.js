@@ -1,6 +1,7 @@
 import * as yup from 'yup';
 import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
 import pluginId from '../../../pluginId';
+import getTrad from '../../../utils/getTrad';
 import { createUid, nameToSlug } from './createUid';
 
 yup.addMethod(yup.mixed, 'defined', function() {
@@ -22,6 +23,57 @@ yup.addMethod(yup.string, 'unique', function(message, allReadyTakenValues) {
 });
 
 const forms = {
+  attribute: {
+    schema() {
+      return yup.object();
+    },
+    form: {
+      advanced() {
+        return {
+          items: [[]],
+        };
+      },
+      base(data, type) {
+        const items = [
+          [
+            {
+              autoFocus: true,
+              name: 'name',
+              type: 'text',
+              label: {
+                id: getTrad('modalForm.attribute.form.base.name'),
+              },
+              description: {
+                id: getTrad('modalForm.attribute.form.base.name.description'),
+              },
+              validations: {
+                required: true,
+              },
+            },
+          ],
+        ];
+
+        if (type === 'text') {
+          items[0].push({
+            label: {
+              id: 'content-type-builder.form.attribute.item.number.type',
+            },
+            name: 'type',
+            type: 'select',
+            value: 'short text',
+            options: ['short text', 'long text'],
+            validations: {
+              required: true,
+            },
+          });
+        }
+
+        return {
+          items,
+        };
+      },
+    },
+  },
   contentType: {
     schema(allReadyTakenValues) {
       return yup.object().shape({

@@ -13,14 +13,19 @@ import CustomLink from '../../components/CustomLink';
 import useDataManager from '../../hooks/useDataManager';
 import Wrapper from './Wrapper';
 
-// const displayNotificationCTNotSaved = () => {
-//   strapi.notification.info(
-//     `${pluginId}.notification.info.contentType.creating.notSaved`
-//   );
-// };
+const displayNotificationCTNotSaved = () => {
+  strapi.notification.info(
+    `${pluginId}.notification.info.contentType.creating.notSaved`
+  );
+};
 
 function LeftMenu() {
-  const { components, contentTypes, newSchema } = useDataManager();
+  const {
+    components,
+    contentTypes,
+    // initialData,
+    // modifiedData,
+  } = useDataManager();
   const { currentEnvironment } = useGlobalContext();
   const { push } = useHistory();
   const isProduction = currentEnvironment === 'production';
@@ -40,14 +45,24 @@ function LeftMenu() {
     })),
     obj => obj.title
   );
-  const tempSchemaCT =
-    newSchema.schemaType === 'contentType'
-      ? {
-          name: newSchema.uid,
-          title: newSchema.schema.name,
-          to: `/plugins/${pluginId}/content-types/${newSchema.uid}`,
-        }
-      : null;
+  const canOpenModalCreateCTorComponent = () => {
+    return (
+      !Object.keys(contentTypes).some(
+        ct => contentTypes[ct].isTemporary === true
+      ) &&
+      !Object.keys(components).some(
+        component => components[component].isTemporary === true
+      )
+    );
+  };
+  const handleClickOpenModal = type => {
+    if (canOpenModalCreateCTorComponent()) {
+      push({ search: `modalType=${type}&actionType=create&settingType=base` });
+    } else {
+      displayNotificationCTNotSaved();
+    }
+  };
+
   const data = [
     {
       name: 'models',
@@ -61,10 +76,7 @@ function LeftMenu() {
           disabled: isProduction,
           id: `${pluginId}.button.model.create`,
           onClick: () => {
-            push({
-              search:
-                'modalType=contentType&actionType=create&settingType=base',
-            });
+            handleClickOpenModal('contentType');
           },
         },
       },
@@ -75,7 +87,6 @@ function LeftMenu() {
             title: contentTypes[uid].schema.name,
             to: `/plugins/${pluginId}/content-types/${uid}`,
           }))
-          .concat(tempSchemaCT)
           .filter(obj => obj !== null),
         obj => obj.title
       ),
@@ -92,9 +103,7 @@ function LeftMenu() {
           disabled: isProduction,
           id: `${pluginId}.button.component.create`,
           onClick: () => {
-            push({
-              search: 'modalType=component&actionType=create&settingType=base',
-            });
+            handleClickOpenModal('component');
           },
         },
       },

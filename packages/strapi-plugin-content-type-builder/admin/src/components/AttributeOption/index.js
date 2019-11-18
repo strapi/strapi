@@ -4,81 +4,76 @@
  *
  */
 
-import React from 'react';
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+} from 'react';
+import { AttributeIcon } from '@buffetjs/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-
-import attributeIcons from '../../utils/attributeIcons';
-import pluginId from '../../pluginId';
+import { useHistory } from 'react-router-dom';
+import getTrad from '../../utils/getTrad';
+import useQuery from '../../hooks/useQuery';
 import Button from './Button';
 import Card from './Card';
 
-class AttributeOption extends React.Component {
-  componentDidUpdate(prevProps) {
-    const { isDisplayed, nodeToFocus, tabIndex } = this.props;
+const AttributeOption = forwardRef(({ tabIndex, type }, ref) => {
+  const buttonRef = useRef();
+  const tabRef = useRef();
+  const query = useQuery();
+  const { push } = useHistory();
+  tabRef.current = tabIndex;
 
-    if (
-      prevProps.isDisplayed !== isDisplayed &&
-      isDisplayed &&
-      nodeToFocus === tabIndex
-    ) {
-      this.focusNode();
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      buttonRef.current.focus();
+    },
+  }));
+
+  useEffect(() => {
+    if (tabRef.current === 0) {
+      buttonRef.current.focus();
     }
+  }, []);
 
-    if (prevProps.nodeToFocus !== nodeToFocus && nodeToFocus === tabIndex) {
-      this.focusNode();
-    }
-  }
+  const handleClick = () => {
+    const forTarget = query.get('for');
+    const target = query.get('target');
 
-  button = React.createRef();
-
-  focusNode = () => {
-    const { current } = this.button;
-
-    current.focus();
+    push({
+      search: `modalType=attribute&actionType=create&settingType=base&for=${forTarget}&target=${target}&attributeType=${type}`,
+    });
   };
 
-  render() {
-    const { description, onClick, tabIndex, type } = this.props;
+  return (
+    <div className="col-6">
+      <Button ref={buttonRef} type="button" onClick={handleClick}>
+        <Card>
+          <AttributeIcon
+            type={type}
+            style={{ marginRight: 10 }}
+            className="attributeIcon"
+          />
+          <FormattedMessage id={getTrad(`attribute.${type}`)}>
+            {message => <span className="attributeType">{message}</span>}
+          </FormattedMessage>
+          <FormattedMessage id={getTrad(`attribute.${type}.description`)} />
+        </Card>
+      </Button>
+    </div>
+  );
+});
 
-    return (
-      <div className="col-md-6">
-        <Button
-          id={`attrCard${type}`}
-          onClick={() => onClick(type)}
-          type="button"
-          tabIndex={tabIndex + 1}
-          ref={this.button}
-        >
-          <Card>
-            <img src={attributeIcons[type]} alt="ico" />
-            <FormattedMessage
-              id={`${pluginId}.popUpForm.attributes.${type}.name`}
-            >
-              {message => <span className="attributeType">{message}</span>}
-            </FormattedMessage>
-            <FormattedMessage id={description} />
-          </Card>
-        </Button>
-      </div>
-    );
-  }
-}
+AttributeOption.displayName = 'AttributeOption';
 
 AttributeOption.defaultProps = {
-  description: 'app.utils.defaultMessage',
-  isDisplayed: false,
-  nodeToFocus: -1,
-  onClick: () => {},
   tabIndex: 0,
-  type: 'string',
+  type: 'text',
 };
 
 AttributeOption.propTypes = {
-  description: PropTypes.string,
-  isDisplayed: PropTypes.bool,
-  nodeToFocus: PropTypes.number,
-  onClick: PropTypes.func,
   tabIndex: PropTypes.number,
   type: PropTypes.string,
 };
