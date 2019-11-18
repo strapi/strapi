@@ -9,7 +9,7 @@ const pluralize = require('pluralize');
 const { convertAttributes } = require('../../utils/attributes');
 const { nameToSlug, nameToCollectionName } = require('../../utils/helpers');
 
-const createSchema = infos => {
+const createSchemaHandler = infos => {
   const uid = infos.uid;
   const dir = infos.dir;
   const filename = infos.filename;
@@ -50,23 +50,33 @@ const createSchema = infos => {
       return this;
     },
 
-    flush() {
+    async flush() {
       if (modified === true) {
-        return fse.writeJSON(path.join(dir, filename), schema, { spaces: 2 });
+        const filePath = path.join(dir, filename);
+
+        await fse.ensureFile(filePath);
+        return fse.writeJSON(filePath, schema, { spaces: 2 });
       }
 
       return Promise.resolve();
     },
-    rollback() {
+
+    async rollback() {
+      const filePath = path.join(dir, filename);
       // it is a creating
       if (!uid) {
-        return fse.remove(path.join(dir, filename));
+        await fse.remove(filePath);
+
+        const list = await fse.readdir(dir);
+        if (list.length === 0) {
+          await fse.remove(dir);
+        }
+        return;
       }
 
       if (modified === true) {
-        return fse.writeJSON(path.join(dir, filename), initialSchema, {
-          spaces: 2,
-        });
+        await fse.ensureFile(filePath);
+        return fse.writeJSON(filePath, initialSchema, { spaces: 2 });
       }
 
       return Promise.resolve();
@@ -80,24 +90,20 @@ const createTransaction = ({ components, contentTypes }) => {
 
   // init temporary ContentTypes:
   Object.keys(contentTypes).forEach(key => {
-    tmpContentTypes.set(key, createSchema(contentTypes[key]));
+    tmpContentTypes.set(key, createSchemaHandler(contentTypes[key]));
   });
 
   // init temporary components:
   Object.keys(components).forEach(key => {
-    tmpComponents.set(key, createSchema(components[key]));
+    tmpComponents.set(key, createSchemaHandler(components[key]));
   });
 
   const ctx = {
     get components() {
-      return Array.from(tmpComponents.values());
+      return tmpComponents;
     },
     get contentTypes() {
-      return Array.from(tmpComponents.values());
-    },
-
-    get allSchemas() {
-      return [...this.components, ...this.contentTypes];
+      return tmpComponents;
     },
 
     /**
@@ -118,7 +124,12 @@ const createTransaction = ({ components, contentTypes }) => {
         attributes,
       } = infos;
 
-      const componentSchema = {
+      const handler = createSchemaHandler({
+        dir: path.join(strapi.dir, 'components', nameToSlug(category)),
+        filename: `${nameToSlug(name)}.json`,
+      });
+
+      handler.schema = {
         info: {
           name,
           description,
@@ -133,35 +144,62 @@ const createTransaction = ({ components, contentTypes }) => {
         attributes: convertAttributes(attributes),
       };
 
-      const schema = createSchema({
-        dir: path.join(strapi.dir, 'components', nameToSlug(category)),
-        filename: `${nameToSlug(name)}.json`,
-        scehma: componentSchema,
-      });
+      tmpComponents.set(uid, handler);
 
-      tmpComponents.set(uid, schema);
+      return this;
     },
 
     flush() {
-      const flushOps = this.allSchemas.map(schema => {
-        return schema.flush();
-      });
-
-      return Promise.all(flushOps);
+      return Promise.all(
+        [
+          ...Array.from(tmpComponents.values()),
+          ...Array.from(tmpContentTypes.values()),
+        ].map(schema => schema.flush())
+      );
     },
     rollback() {
-      const rollbackOps = this.allSchemas.map(schema => {
-        return schema.rollback();
-      });
-
-      return Promise.all(rollbackOps);
+      return Promise.all(
+        [
+          ...Array.from(tmpComponents.values()),
+          ...Array.from(tmpContentTypes.values()),
+        ].map(schema => schema.rollback())
+      );
     },
   };
 
   return ctx;
 };
 
-module.exports = function createSchemasManager({ components, contentTypes }) {
+module.exports = function createSchemasManager() {
+  const components = Object.keys(strapi.components).map(key => {
+    const compo = strapi.components[key];
+
+    return {
+      uid: compo.uid,
+      filename: compo.__filename__,
+      dir: path.join(strapi.dir, 'components'),
+      schema: compo.__schema__,
+    };
+  });
+
+  const contentTypes = Object.keys(strapi.contentTypes).map(key => {
+    const contentType = strapi.contentTypes[key];
+
+    let dir;
+    if (contentType.plugin) {
+      dir = `./extensions/${contentType.plugin}/models`;
+    } else {
+      dir = `./api/${contentType.apiName}/models`;
+    }
+
+    return {
+      uid: contentType.uid,
+      filename: contentType.__filename__,
+      dir: path.join(strapi.dir, dir),
+      schema: contentType.__schema__,
+    };
+  });
+
   return {
     async edit(editorFn) {
       const trx = createTransaction({
@@ -169,13 +207,22 @@ module.exports = function createSchemasManager({ components, contentTypes }) {
         contentTypes,
       });
 
-      try {
-        await editorFn(trx);
-        await trx.flush();
-      } catch (error) {
-        await trx.rollback();
-        throw error;
-      }
+      await editorFn(trx);
+
+      await trx
+        .flush()
+        .catch(error => {
+          console.error('Error writing schema files', error);
+          return trx.rollback();
+        })
+        .catch(error => {
+          console.error(
+            'Error rolling back schema files. You might need to fix your files manually',
+            error
+          );
+
+          throw new Error('Invalid schema edition');
+        });
     },
   };
 };
