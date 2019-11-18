@@ -165,6 +165,15 @@ const createTransaction = ({ components, contentTypes }) => {
       return handler;
     },
 
+    /**
+     * create a component in the tmpComponent map
+     */
+    editComponent(infos) {
+      const { uid } = infos;
+
+      return tmpComponents.get(uid);
+    },
+
     flush() {
       return Promise.all(
         [

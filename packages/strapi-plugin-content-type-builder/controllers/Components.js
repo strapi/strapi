@@ -73,13 +73,13 @@ module.exports = {
           ctx.createComponent(compoToCreate);
         }
 
-        // const nestedComponentsToEdit = body.components.filter(
-        //   compo => !_.has(compo, 'uid')
-        // );
+        const nestedComponentsToEdit = body.components.filter(
+          compo => !_.has(compo, 'uid')
+        );
 
-        // nestedComponentsToEdit.forEach(compo => {
-        //   ctx.editComponent(compo.uid, compo);
-        // });
+        for (let compoToEdit of nestedComponentsToEdit) {
+          ctx.editComponent(compoToEdit);
+        }
 
         return component;
       })
