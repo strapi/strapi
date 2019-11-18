@@ -8,6 +8,7 @@
   "components.AddFilterCTA.hide": "Filtres",
   "components.DraggableAttr.edit": "Cliquez pour modifier",
   "components.DynamicZone.add-compo": "Ajouter un composant à {componentName}",
+  "components.DynamicZone.pick-compo": "Choisir un composant",
   "components.EmptyAttributesBlock.button": "Voir la page des configurations",
   "components.EmptyAttributesBlock.description": "Vous pouvez modifiez vos paramètres",
   "components.FieldItem.linkToComponentLayout": "Modifier le layout du composant",

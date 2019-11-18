@@ -1,17 +1,8 @@
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import pluginId from '../../pluginId';
 import Wrapper from './Wrapper';
 
-const DynamicComponentCard = ({
-  children,
-  componentUid,
-  isOver,
-  onClick,
-  onMouseEvent,
-  tradId,
-}) => {
+const DynamicComponentCard = ({ children, componentUid, icon, onClick }) => {
   return (
     <Wrapper
       onClick={e => {
@@ -19,19 +10,13 @@ const DynamicComponentCard = ({
         e.stopPropagation();
         onClick(componentUid);
       }}
-      onMouseEnter={onMouseEvent}
-      onMouseLeave={onMouseEvent}
     >
       <button className="component-icon">
-        <i className="fa fa-picture-o" />
+        <i className={`fa fa-${icon}`} />
       </button>
 
       <div className="component-uid">
-        {isOver ? (
-          <FormattedMessage id={`${pluginId}.${tradId}`} />
-        ) : (
-          <span>{componentUid}</span>
-        )}
+        <span>{componentUid}</span>
       </div>
       {children}
     </Wrapper>
@@ -40,19 +25,15 @@ const DynamicComponentCard = ({
 
 DynamicComponentCard.defaultProps = {
   children: null,
-  isOver: false,
   onClick: () => {},
-  onMouseEvent: () => {},
-  tradId: 'components.DraggableAttr.edit',
+  icon: 'smile',
 };
 
 DynamicComponentCard.propTypes = {
   children: PropTypes.node,
   componentUid: PropTypes.string.isRequired,
-  isOver: PropTypes.bool,
+  icon: PropTypes.string,
   onClick: PropTypes.func,
-  onMouseEvent: PropTypes.func,
-  tradId: PropTypes.string,
 };
 
 export default DynamicComponentCard;

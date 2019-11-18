@@ -93,6 +93,12 @@ const EditView = ({
     },
     [getField]
   );
+  const getFieldComponentIcon = useCallback(
+    fieldName => {
+      return get(getField(fieldName), ['component'], '');
+    },
+    [getField]
+  );
   // Check if a block is a dynamic zone
   const isDynamicZone = useCallback(
     block => {
@@ -184,6 +190,11 @@ const EditView = ({
 
                             if (isComponent) {
                               const componentUid = getFieldComponentUid(name);
+
+                              const componentIcon = getFieldComponentIcon(name);
+                              console.log('icon', componentUid);
+                              console.log('icon', componentIcon);
+
                               const isRepeatable = get(
                                 getField(name),
                                 'repeatable',

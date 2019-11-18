@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
@@ -14,8 +15,7 @@ import RoundCTA from './RoundCTA';
 import Wrapper from './Wrapper';
 
 const DynamicZone = ({ max, min, name }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isOver, setIsOver] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const {
     addComponentToDynamicZone,
     formErrors,
@@ -25,15 +25,10 @@ const DynamicZone = ({ max, min, name }) => {
     moveComponentDown,
     removeComponentFromDynamicZone,
   } = useDataManager();
+
   const getDynamicDisplayedComponents = useCallback(() => {
     return get(modifiedData, [name], []).map(data => data.__component);
   }, [modifiedData, name]);
-  // const getDynamicComponentSchemaData = useCallback(
-  //   compoUid => {
-  //     return get(allLayoutData, ['components', compoUid], {});
-  //   },
-  //   [allLayoutData]
-  // );
 
   const dynamicZoneErrors = Object.keys(formErrors)
     .filter(key => {
@@ -46,8 +41,7 @@ const DynamicZone = ({ max, min, name }) => {
     ['schema', 'attributes', name, 'components'],
     []
   );
-  const displayInfo = isOver && !isOpen;
-  const handleMouseEvent = () => setIsOver(prev => !prev);
+
   const metas = get(layout, ['metadatas', name, 'edit'], {});
   const dynamicDisplayedComponentsLength = getDynamicDisplayedComponents()
     .length;
@@ -108,13 +102,11 @@ const DynamicZone = ({ max, min, name }) => {
           </ComponentWrapper>
         );
       })}
-      <Wrapper show={displayInfo}>
+      <Wrapper>
         <Button
-          hasError={hasError}
-          isOpen={isOpen}
           type="button"
-          onMouseEnter={handleMouseEvent}
-          onMouseLeave={handleMouseEvent}
+          hasError={hasError}
+          className={isOpen && 'isOpen'}
           onClick={() => {
             if (dynamicDisplayedComponentsLength < max) {
               setIsOpen(prev => !prev);
@@ -134,23 +126,33 @@ const DynamicZone = ({ max, min, name }) => {
         </div>
         {hasMinError && <div> {missingComponentNumber} missing components</div>}
         <ComponentsPicker isOpen={isOpen}>
-          {dynamicZoneAvailableComponents.map(componentUid => {
-            return (
-              <DynamicComponentCard
-                key={componentUid}
-                componentUid={componentUid}
-                onClick={() => {
-                  setIsOpen(false);
-                  const shouldCheckErrors = hasError;
-                  addComponentToDynamicZone(
-                    name,
-                    componentUid,
-                    shouldCheckErrors
-                  );
-                }}
+          <div>
+            <p className="componentPickerTitle">
+              <FormattedMessage
+                id={`${pluginId}.components.DynamicZone.pick-compo`}
               />
-            );
-          })}
+            </p>
+            <div className="componentsList">
+              {dynamicZoneAvailableComponents.map(componentUid => {
+                return (
+                  <DynamicComponentCard
+                    key={componentUid}
+                    componentUid={componentUid}
+                    icon={''}
+                    onClick={() => {
+                      setIsOpen(false);
+                      const shouldCheckErrors = hasError;
+                      addComponentToDynamicZone(
+                        name,
+                        componentUid,
+                        shouldCheckErrors
+                      );
+                    }}
+                  />
+                );
+              })}
+            </div>
+          </div>
         </ComponentsPicker>
       </Wrapper>
     </>
