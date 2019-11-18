@@ -11,20 +11,14 @@ let data = {
 };
 
 const product = {
-  attributes: [
-    {
-      name: 'name',
-      params: {
-        type: 'string',
-      },
+  attributes: {
+    name: {
+      type: 'string',
     },
-    {
-      name: 'description',
-      params: {
-        type: 'text',
-      },
+    description: {
+      type: 'text',
     },
-  ],
+  },
   connection: 'default',
   name: 'product',
   description: '',

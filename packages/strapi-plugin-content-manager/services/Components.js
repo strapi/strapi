@@ -7,8 +7,6 @@ const storeUtils = require('./utils/store');
 const uidToStoreKey = uid => `components::${uid}`;
 
 module.exports = {
-  uidToStoreKey,
-
   async getComponentInformations(uid) {
     const ctService = strapi.plugins['content-manager'].services.contenttypes;
 
@@ -93,17 +91,5 @@ module.exports = {
   deleteConfiguration(uid) {
     const storeKey = uidToStoreKey(uid);
     return storeUtils.deleteKey(storeKey);
-  },
-
-  async updateUID(oldUID, newUID) {
-    const oldKey = uidToStoreKey(oldUID);
-    const newKey = uidToStoreKey(newUID);
-
-    await storeUtils.setModelConfiguration(oldKey, {
-      uid: oldUID,
-      isComponent: true,
-    });
-
-    return storeUtils.moveKey(oldKey, newKey);
   },
 };

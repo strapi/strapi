@@ -58,15 +58,15 @@ describe('Component Service', () => {
     test('Generats normalized uids', () => {
       expect(
         createComponentUID({ category: 'default', name: 'some char' })
-      ).toBe('default.some_char');
+      ).toBe('default.some-char');
 
       expect(
         createComponentUID({ category: 'default', name: 'some-char' })
-      ).toBe('default.some_char');
+      ).toBe('default.some-char');
 
       expect(
-        createComponentUID({ category: 'default', name: 'Some Char' })
-      ).toBe('default.some_char');
+        createComponentUID({ category: 'defaultTest', name: 'Some Char' })
+      ).toBe('default-test.some-char');
     });
   });
 });

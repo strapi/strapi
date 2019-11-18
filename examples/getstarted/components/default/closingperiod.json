@@ -1,10 +1,10 @@
 {
+  "connection": "default",
+  "collectionName": "components_closingperiods",
   "info": {
     "name": "closingperiod",
     "description": ""
   },
-  "connection": "default",
-  "collectionName": "components_closingperiods",
   "attributes": {
     "label": {
       "type": "string"

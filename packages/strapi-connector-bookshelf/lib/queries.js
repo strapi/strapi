@@ -784,7 +784,7 @@ const buildSearchQuery = (qb, model, params) => {
   }
 };
 
-function validateRepeatableInput(value, { key, min, max }) {
+function validateRepeatableInput(value, { key, min, max, required }) {
   if (!Array.isArray(value)) {
     const err = new Error(`Component ${key} is repetable. Expected an array`);
     err.status = 400;
@@ -801,13 +801,17 @@ function validateRepeatableInput(value, { key, min, max }) {
     }
   });
 
-  if (min && value.length < min) {
+  if (
+    (required === true || (required !== true && value.length > 0)) &&
+    (min && value.length < min)
+  ) {
     const err = new Error(
       `Component ${key} must contain at least ${min} items`
     );
     err.status = 400;
     throw err;
   }
+
   if (max && value.length > max) {
     const err = new Error(`Component ${key} must contain at most ${max} items`);
     err.status = 400;
@@ -829,9 +833,12 @@ function validateNonRepeatableInput(value, { key, required }) {
   }
 }
 
-function validateDynamiczoneInput(value, { key, min, max, components }) {
+function validateDynamiczoneInput(
+  value,
+  { key, min, max, components, required }
+) {
   if (!Array.isArray(value)) {
-    const err = new Error(`Dynamiczone ${key} is repetable. Expected an array`);
+    const err = new Error(`Dynamiczone ${key} is invalid. Expected an array`);
     err.status = 400;
     throw err;
   }
@@ -860,7 +867,10 @@ function validateDynamiczoneInput(value, { key, min, max, components }) {
     }
   });
 
-  if (min && value.length < min) {
+  if (
+    (required === true || (required !== true && value.length > 0)) &&
+    (min && value.length < min)
+  ) {
     const err = new Error(
       `Dynamiczone ${key} must contain at least ${min} items`
     );

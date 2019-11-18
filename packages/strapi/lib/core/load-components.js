@@ -17,6 +17,7 @@ module.exports = async ({ dir }) => {
     Object.keys(map[category]).forEach(key => {
       acc[`${category}.${key}`] = Object.assign(map[category][key], {
         category,
+        modelName: key,
       });
     });
     return acc;

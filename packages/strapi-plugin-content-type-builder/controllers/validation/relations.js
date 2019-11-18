@@ -1,43 +1,31 @@
 'use strict';
 
 const yup = require('yup');
-const _ = require('lodash');
-const { validators } = require('./common');
+const { validators, isValidName } = require('./common');
 
-const VALID_NATURES = ['oneWay', 'manyWay'];
+const REVERSE_RELATIONS = ['oneToOne', 'oneToMany', 'manyToOne', 'manyToMany'];
 
-module.exports = () => {
+module.exports = (obj, validNatures) => {
+  const contentTypesUIDs = Object.keys(strapi.contentTypes);
+
   return {
     target: yup
-      .mixed()
-      .when('plugin', plugin => {
-        if (!plugin)
-          return yup
-            .string()
-            .oneOf(
-              Object.keys(strapi.models).filter(name => name !== 'core_store')
-            );
-
-        if (plugin === 'admin')
-          return yup.string().oneOf(Object.keys(strapi.admin.models));
-
-        if (plugin)
-          return yup
-            .string()
-            .oneOf(Object.keys(_.get(strapi.plugins, [plugin, 'models'], {})));
-      })
+      .string()
+      .oneOf(contentTypesUIDs)
       .required(),
     nature: yup
       .string()
-      .oneOf(VALID_NATURES)
+      .oneOf(validNatures)
       .required(),
-    plugin: yup.string().oneOf(['', ...Object.keys(strapi.plugins)]),
     unique: validators.unique,
-
-    // TODO: remove once front-end stop sending them even if useless
     dominant: yup.boolean(),
     columnName: yup.string(),
-    key: yup.string(),
+    targetAttribute: REVERSE_RELATIONS.includes(obj.nature)
+      ? yup
+          .string()
+          .test(isValidName)
+          .required()
+      : yup.string().test(isValidName),
     targetColumnName: yup.string(),
   };
 };
