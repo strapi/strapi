@@ -91,6 +91,7 @@ exports.connect = (provider, query) => {
         const params = _.assign(profile, {
           provider: provider,
           role: defaultRole.id,
+          confirmed: true,
         });
 
         const createdUser = await strapi

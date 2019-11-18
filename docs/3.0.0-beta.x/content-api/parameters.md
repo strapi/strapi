@@ -89,7 +89,7 @@ Sort according to a specific field.
 - ASC: `GET /users?_sort=email:ASC`
 - DESC: `GET /users?_sort=email:DESC`
 
-#### Sorting on multiple fileds
+#### Sorting on multiple fields
 
 - `GET /users?_sort=email:asc,dateField:desc`
 - `GET /users?_sort=email:DESC,username:ASC`
