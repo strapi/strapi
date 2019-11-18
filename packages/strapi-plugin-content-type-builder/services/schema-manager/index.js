@@ -8,6 +8,7 @@ const pluralize = require('pluralize');
 
 const { convertAttributes } = require('../../utils/attributes');
 const { nameToSlug, nameToCollectionName } = require('../../utils/helpers');
+const componentService = require('../Components');
 
 const createSchemaHandler = infos => {
   const uid = infos.uid;
@@ -21,6 +22,9 @@ const createSchemaHandler = infos => {
   let modified = false;
 
   return {
+    uid,
+    dir,
+    filename,
     get schema() {
       return _.cloneDeep(schema);
     },
@@ -90,12 +94,18 @@ const createTransaction = ({ components, contentTypes }) => {
 
   // init temporary ContentTypes:
   Object.keys(contentTypes).forEach(key => {
-    tmpContentTypes.set(key, createSchemaHandler(contentTypes[key]));
+    tmpContentTypes.set(
+      contentTypes[key].uid,
+      createSchemaHandler(contentTypes[key])
+    );
   });
 
   // init temporary components:
   Object.keys(components).forEach(key => {
-    tmpComponents.set(key, createSchemaHandler(components[key]));
+    tmpComponents.set(
+      components[key].uid,
+      createSchemaHandler(components[key])
+    );
   });
 
   const ctx = {
@@ -109,7 +119,13 @@ const createTransaction = ({ components, contentTypes }) => {
     /**
      * create a component in the tmpComponent map
      */
-    createComponent(uid, infos) {
+    createComponent(infos) {
+      const uid = componentService.createComponentUID(infos);
+
+      if (tmpComponents.has(uid)) {
+        throw new Error('component.alreadyExists');
+      }
+
       const {
         name,
         icon,
@@ -129,6 +145,7 @@ const createTransaction = ({ components, contentTypes }) => {
         filename: `${nameToSlug(name)}.json`,
       });
 
+      handler.uid = uid;
       handler.schema = {
         info: {
           name,
@@ -145,8 +162,7 @@ const createTransaction = ({ components, contentTypes }) => {
       };
 
       tmpComponents.set(uid, handler);
-
-      return this;
+      return handler;
     },
 
     flush() {
@@ -207,7 +223,7 @@ module.exports = function createSchemasManager() {
         contentTypes,
       });
 
-      await editorFn(trx);
+      const result = await editorFn(trx);
 
       await trx
         .flush()
@@ -223,6 +239,8 @@ module.exports = function createSchemasManager() {
 
           throw new Error('Invalid schema edition');
         });
+
+      return result;
     },
   };
 };

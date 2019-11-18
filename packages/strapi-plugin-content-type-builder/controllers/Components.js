@@ -58,22 +58,39 @@ module.exports = {
       return ctx.send({ error }, 400);
     }
 
-    const uid = componentService.createComponentUID(body.component);
-
-    if (_.has(strapi.components, uid)) {
-      return ctx.send({ error: 'component.alreadyExists' }, 400);
-    }
-
     strapi.reload.isWatching = false;
 
     const manager = createSchemaManager();
-    await manager.edit(ctx => {
-      ctx.createComponent(uid, body.component);
-    });
+    await manager
+      .edit(ctx => {
+        const component = ctx.createComponent(body.component);
 
-    strapi.reload();
+        const nestedComponentsToCreate = body.components.filter(
+          compo => !_.has(compo, 'uid')
+        );
 
-    ctx.send({ data: uid }, 201);
+        for (let compoToCreate of nestedComponentsToCreate) {
+          ctx.createComponent(compoToCreate);
+        }
+
+        // const nestedComponentsToEdit = body.components.filter(
+        //   compo => !_.has(compo, 'uid')
+        // );
+
+        // nestedComponentsToEdit.forEach(compo => {
+        //   ctx.editComponent(compo.uid, compo);
+        // });
+
+        return component;
+      })
+      .then(component => {
+        strapi.reload();
+
+        ctx.send({ data: { uid: component.uid } }, 201);
+      })
+      .catch(error => {
+        ctx.send({ error: error.message }, 400);
+      });
   },
 
   /**
