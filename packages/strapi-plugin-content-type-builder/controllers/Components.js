@@ -1,12 +1,14 @@
 'use strict';
 
+const path = require('path');
+const _ = require('lodash');
+
 const {
   validateComponentInput,
   validateUpdateComponentInput,
 } = require('./validation/component');
-
-const _ = require('lodash');
 const componentService = require('../services/Components');
+const createSchemaManager = require('../services/schema-manager');
 
 /**
  * Components controller
@@ -63,16 +65,50 @@ module.exports = {
       return ctx.send({ error: 'component.alreadyExists' }, 400);
     }
 
-    strapi.reload.isWatching = false;
+    const manager = createSchemaManager({
+      components: Object.keys(strapi.components).map(key => {
+        const compo = strapi.components[key];
 
-    const newComponent = await componentService.createComponent({
-      uid,
-      infos: body.component,
+        return {
+          uid: compo.uid,
+          filename: compo.__filename__,
+          dir: path.join(strapi.dir, 'components'),
+          schema: compo.__schema__,
+        };
+      }),
+      contentTypes: Object.keys(strapi.contentTypes).map(key => {
+        const contentType = strapi.contentTypes[key];
+
+        let dir;
+        if (contentType.plugin) {
+          dir = `./extensions/${contentType.plugin}/models`;
+        } else {
+          dir = `./api/${contentType.apiName}/models`;
+        }
+
+        return {
+          uid: contentType.uid,
+          filename: contentType.__filename__,
+          dir: path.join(strapi.dir, dir),
+          schema: contentType.__schema__,
+        };
+      }),
     });
 
-    strapi.reload();
+    await manager.edit(ctx => {
+      ctx.createComponent(uid, body.component);
+    });
 
-    ctx.send({ data: newComponent }, 201);
+    // strapi.reload.isWatching = false;
+
+    // const newComponent = await componentService.createComponent({
+    //   uid,
+    //   infos: body.component,
+    // });
+
+    // strapi.reload();
+
+    ctx.send({ data: uid }, 201);
   },
 
   /**

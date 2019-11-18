@@ -59,11 +59,11 @@ module.exports = {
     strapi.reload.isWatching = false;
 
     try {
-      const contentType = contentTypeService.createContentTypeSchema(
+      const contentTypeSchema = contentTypeService.createContentTypeSchema(
         body.contentType
       );
 
-      await contentTypeService.generateAPI(modelName, contentType);
+      await contentTypeService.generateAPI(modelName, contentTypeSchema);
 
       await contentTypeService.generateReversedRelations({
         attributes: body.contentType.attributes,
