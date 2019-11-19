@@ -211,6 +211,7 @@ const FormModal = () => {
       });
     } catch (err) {
       const errors = getYupInnerErrors(err);
+      console.log({ err, errors });
 
       dispatch({
         type: 'SET_ERRORS',

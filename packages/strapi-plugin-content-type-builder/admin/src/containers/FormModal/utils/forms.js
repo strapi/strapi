@@ -33,7 +33,7 @@ yup.addMethod(yup.string, 'unique', function(
 
 const forms = {
   attribute: {
-    schema(currentSchema) {
+    schema(currentSchema, attributeType) {
       const allreadyTakenAttributes = Object.keys(
         get(currentSchema, ['schema', 'attributes'], {})
       );
@@ -65,24 +65,37 @@ const forms = {
             }
           })
           .nullable(),
-        max: yup
-          .number()
-          .integer()
-          .nullable(),
-        min: yup
-          .number()
-          .integer()
-          .when('max', (max, schema) => {
-            if (max) {
-              return schema.lessThan(
-                max,
-                getTrad('error.validation.minSupMax')
-              );
-            } else {
-              return schema;
-            }
-          })
-          .nullable(),
+        max: yup.lazy(() => {
+          let schema = yup.number();
+
+          if (attributeType === 'integer' || attributeType === 'biginteger') {
+            schema = schema.integer();
+          }
+
+          return schema.nullable();
+        }),
+
+        min: yup.lazy(() => {
+          let schema = yup.number();
+
+          if (attributeType === 'integer' || attributeType === 'biginteger') {
+            schema = schema.integer();
+          }
+
+          return schema
+            .nullable()
+            .when('max', (max, schema) => {
+              if (max) {
+                return schema.lessThan(
+                  max,
+                  getTrad('error.validation.minSupMax')
+                );
+              } else {
+                return schema;
+              }
+            })
+            .nullable();
+        }),
       });
     },
     form: {
