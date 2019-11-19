@@ -1,13 +1,10 @@
 'use strict';
 
-const _ = require('lodash');
-
 const {
   validateComponentInput,
   validateUpdateComponentInput,
 } = require('./validation/component');
 const componentService = require('../services/Components');
-const createSchemaManager = require('../services/schema-manager');
 
 /**
  * Components controller
@@ -58,39 +55,20 @@ module.exports = {
       return ctx.send({ error }, 400);
     }
 
-    strapi.reload.isWatching = false;
+    try {
+      strapi.reload.isWatching = false;
 
-    const manager = createSchemaManager();
-    await manager
-      .edit(ctx => {
-        const component = ctx.createComponent(body.component);
-
-        const nestedComponentsToCreate = body.components.filter(
-          compo => !_.has(compo, 'uid')
-        );
-
-        for (let compoToCreate of nestedComponentsToCreate) {
-          ctx.createComponent(compoToCreate);
-        }
-
-        const nestedComponentsToEdit = body.components.filter(
-          compo => !_.has(compo, 'uid')
-        );
-
-        for (let compoToEdit of nestedComponentsToEdit) {
-          ctx.editComponent(compoToEdit);
-        }
-
-        return component;
-      })
-      .then(component => {
-        strapi.reload();
-
-        ctx.send({ data: { uid: component.uid } }, 201);
-      })
-      .catch(error => {
-        ctx.send({ error: error.message }, 400);
+      const component = await componentService.createComponent({
+        component: body.component,
+        components: body.components,
       });
+
+      setImmediate(() => strapi.reload());
+
+      ctx.send({ data: { uid: component.uid } }, 201);
+    } catch (error) {
+      ctx.send({ error: error.message }, 400);
+    }
   },
 
   /**
@@ -102,41 +80,26 @@ module.exports = {
     const { uid } = ctx.params;
     const { body } = ctx.request;
 
-    const component = strapi.components[uid];
-
-    if (!component) {
-      return ctx.send({ error: 'component.notFound' }, 404);
-    }
-
     try {
       await validateUpdateComponentInput(body);
     } catch (error) {
       return ctx.send({ error }, 400);
     }
 
-    const newUID = componentService.updateComponentUID(
-      component,
-      body.component
-    );
-    if (newUID !== uid && _.has(strapi.components, newUID)) {
-      return ctx.send({ error: 'new.component.alreadyExists' }, 400);
+    try {
+      strapi.reload.isWatching = false;
+
+      const component = await componentService.editComponent(uid, {
+        component: body.component,
+        components: body.components,
+      });
+
+      setImmediate(() => strapi.reload());
+
+      ctx.send({ data: { uid: component.uid } });
+    } catch (error) {
+      ctx.send({ error: error.message }, 400);
     }
-
-    strapi.reload.isWatching = false;
-
-    const updatedComponent = await componentService.updateComponent({
-      component,
-      infos: body.component,
-    });
-
-    await componentService.updateComponentInModels(
-      component.uid,
-      updatedComponent.uid
-    );
-
-    setImmediate(() => strapi.reload());
-
-    ctx.send({ data: updatedComponent });
   },
 
   /**
@@ -147,19 +110,16 @@ module.exports = {
   async deleteComponent(ctx) {
     const { uid } = ctx.params;
 
-    const component = strapi.components[uid];
+    try {
+      strapi.reload.isWatching = false;
 
-    if (!component) {
-      return ctx.send({ error: 'component.notFound' }, 404);
+      const component = await componentService.deleteComponent(uid);
+
+      setImmediate(() => strapi.reload());
+
+      ctx.send({ data: { uid: component.uid } });
+    } catch (error) {
+      ctx.send({ error: error.message }, 400);
     }
-
-    strapi.reload.isWatching = false;
-
-    await componentService.deleteComponentInModels(component.uid);
-    await componentService.deleteComponent(component);
-
-    setImmediate(() => strapi.reload());
-
-    ctx.send({ data: { uid } });
   },
 };

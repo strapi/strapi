@@ -6,8 +6,9 @@ const fse = require('fs-extra');
 const pluralize = require('pluralize');
 
 const contentTypeService = require('./ContentTypes');
-const { formatAttributes, convertAttributes } = require('../utils/attributes');
-const { nameToSlug, nameToCollectionName } = require('../utils/helpers');
+const { formatAttributes } = require('../utils/attributes');
+const { nameToSlug } = require('../utils/helpers');
+const getSchemaManager = require('./schema-manager');
 
 /**
  * Formats a component attributes
@@ -31,102 +32,50 @@ const formatComponent = component => {
   };
 };
 
-/**
- * Creates a component schema file
- * @param {string} uid
- * @param {Object} infos
- */
-async function createComponent({ uid, infos }) {
-  const schema = createSchema(infos);
+// /**
+//  * Updates a component schema file
+//  * @param {Object} component
+//  * @param {Object} infos
+//  */
+// async function updateComponent({ component, infos }) {
+//   const { uid, __schema__: oldSchema } = component;
 
-  await writeSchema({
-    category: nameToSlug(infos.category),
-    name: nameToSlug(infos.name),
-    schema,
-  });
+//   // don't update collectionName if not provided
+//   const updatedSchema = {
+//     ...oldSchema,
+//     connection: infos.connection || oldSchema.connection,
+//     collectionName: infos.collectionName || oldSchema.collectionName,
+//     info: {
+//       name: infos.name || oldSchema.info.name,
+//       icon: infos.icon || oldSchema.info.icon,
+//       description: infos.description || oldSchema.info.description,
+//     },
+//     attributes: convertAttributes(infos.attributes),
+//   };
 
-  return { uid };
-}
+//   await editSchema({ uid, schema: updatedSchema });
 
-/**
- * Updates a component schema file
- * @param {Object} component
- * @param {Object} infos
- */
-async function updateComponent({ component, infos }) {
-  const { uid, __schema__: oldSchema } = component;
+//   if (component.category !== infos.category) {
+//     const oldDir = path.join(strapi.dir, 'components', component.category);
+//     const newDir = path.join(strapi.dir, 'components', infos.category);
 
-  // don't update collectionName if not provided
-  const updatedSchema = {
-    ...oldSchema,
-    connection: infos.connection || oldSchema.connection,
-    collectionName: infos.collectionName || oldSchema.collectionName,
-    info: {
-      name: infos.name || oldSchema.info.name,
-      icon: infos.icon || oldSchema.info.icon,
-      description: infos.description || oldSchema.info.description,
-    },
-    attributes: convertAttributes(infos.attributes),
-  };
+//     await fse.move(
+//       path.join(oldDir, component.__filename__),
+//       path.join(newDir, component.__filename__)
+//     );
 
-  await editSchema({ uid, schema: updatedSchema });
+//     const list = await fse.readdir(oldDir);
+//     if (list.length === 0) {
+//       await fse.remove(oldDir);
+//     }
 
-  if (component.category !== infos.category) {
-    const oldDir = path.join(strapi.dir, 'components', component.category);
-    const newDir = path.join(strapi.dir, 'components', infos.category);
+//     return {
+//       uid: `${infos.category}.${component.modelName}`,
+//     };
+//   }
 
-    await fse.move(
-      path.join(oldDir, component.__filename__),
-      path.join(newDir, component.__filename__)
-    );
-
-    const list = await fse.readdir(oldDir);
-    if (list.length === 0) {
-      await fse.remove(oldDir);
-    }
-
-    return {
-      uid: `${infos.category}.${component.modelName}`,
-    };
-  }
-
-  return { uid };
-}
-
-/**
- * Create a schema
- * @param {Object} infos
- */
-const createSchema = infos => {
-  const {
-    name,
-    icon,
-    category,
-    connection = _.get(
-      strapi,
-      ['config', 'currentEnvironment', 'database', 'defaultConnection'],
-      'default'
-    ),
-    description = '',
-    collectionName,
-    attributes,
-  } = infos;
-
-  return {
-    info: {
-      name,
-      description,
-      icon,
-    },
-    connection,
-    collectionName:
-      collectionName ||
-      `components_${nameToCollectionName(category)}_${nameToCollectionName(
-        pluralize(name)
-      )}`,
-    attributes: convertAttributes(attributes),
-  };
-};
+//   return { uid };
+// }
 
 /**
  * Returns a uid from a string
@@ -143,29 +92,6 @@ const updateComponentUID = (component, { category }) =>
   `${nameToSlug(category)}.${nameToSlug(component.name)}`;
 
 /**
- * Deletes a component
- * @param {Object} component
- */
-async function deleteComponent(component) {
-  await deleteSchema(component.uid);
-}
-
-/**
- * Writes a component schema file
- */
-async function writeSchema({ category, name, schema }) {
-  const filePath = path.join(
-    strapi.dir,
-    'components',
-    category,
-    `${name}.json`
-  );
-
-  await fse.ensureFile(filePath);
-  await fse.writeJSON(filePath, schema, { spaces: 2 });
-}
-
-/**
  * Edit a component schema file
  */
 async function editSchema({ uid, schema }) {
@@ -174,22 +100,6 @@ async function editSchema({ uid, schema }) {
 
   await fse.ensureFile(filePath);
   await fse.writeJSON(filePath, schema, { spaces: 2 });
-}
-
-/**
- * Deletes a component schema file
- * @param {string} ui
- */
-async function deleteSchema(uid) {
-  const { category, __filename__ } = strapi.components[uid];
-
-  const categoryDir = path.join(strapi.dir, 'components', category);
-  await fse.remove(path.join(categoryDir, __filename__));
-
-  const list = await fse.readdir(categoryDir);
-  if (list.length === 0) {
-    await fse.remove(categoryDir);
-  }
 }
 
 const updateComponentInModels = (oldUID, newUID) => {
@@ -267,95 +177,65 @@ const updateComponentInModels = (oldUID, newUID) => {
   return Promise.all([...contentTypeUpdates, ...componentUpdates]);
 };
 
-const deleteComponentInModels = async componentUID => {
-  const component = strapi.components[componentUID];
+/**
+ * Creates a component and handle the nested components sent with it
+ * @param {Object} params params object
+ * @param {Object} params.component Main component to create
+ * @param {Array<Object>} params.components List of nested components to created or edit
+ */
+const createComponent = ({ component, components }) => {
+  const componentsToCreate = components.filter(compo => !_.has(compo, 'uid'));
+  const componentsToEdit = components.filter(compo => _.has(compo, 'uid'));
 
-  const contentTypeUpdates = Object.keys(strapi.contentTypes).map(uid => {
-    const { __schema__: oldSchema } = strapi.contentTypes[uid];
+  return getSchemaManager().edit(ctx => {
+    const newComponent = ctx.createComponent(component);
 
-    const componentsToRemove = Object.keys(oldSchema.attributes).filter(key => {
-      return (
-        oldSchema.attributes[key].type === 'component' &&
-        oldSchema.attributes[key].component === componentUID
-      );
-    }, []);
+    componentsToCreate.forEach(ctx.createComponent);
+    componentsToEdit.forEach(ctx.editComponent);
 
-    const dynamiczonesToUpdate = Object.keys(oldSchema.attributes).filter(
-      key => {
-        return (
-          oldSchema.attributes[key].type === 'dynamiczone' &&
-          oldSchema.attributes[key].components.includes(componentUID)
-        );
-      },
-      []
-    );
-
-    if (componentsToRemove.length > 0 || dynamiczonesToUpdate.length > 0) {
-      const newSchema = oldSchema;
-
-      componentsToRemove.forEach(key => {
-        delete newSchema.attributes[key];
-      });
-
-      dynamiczonesToUpdate.forEach(key => {
-        newSchema.attributes[key] = {
-          ...newSchema.attributes[key],
-          components: newSchema.attributes[key].components.filter(
-            val => val !== componentUID
-          ),
-        };
-      });
-
-      return contentTypeService.writeContentType({ uid, schema: newSchema });
-    }
-
-    return Promise.resolve();
+    return newComponent;
   });
+};
 
-  const componentUpdates = Object.keys(strapi.components).map(uid => {
-    const { __schema__: oldSchema } = strapi.components[uid];
+/**
+ * Edits a component and handle the nested components sent with it
+ * @param {Object} params params object
+ * @param {Object} params.component Main component to create
+ * @param {Array<Object>} params.components List of nested components to created or edit
+ */
+const editComponent = (uid, { component, components }) => {
+  const componentsToCreate = components.filter(compo => !_.has(compo, 'uid'));
+  const componentsToEdit = components.filter(compo => _.has(compo, 'uid'));
 
-    const componentsToRemove = Object.keys(oldSchema.attributes).filter(key => {
-      return (
-        oldSchema.attributes[key].type === 'component' &&
-        oldSchema.attributes[key].component === componentUID
-      );
-    }, []);
+  return getSchemaManager().edit(ctx => {
+    const updatedComponent = ctx.editComponent({
+      uid,
+      ...component,
+    });
 
-    if (componentsToRemove.length > 0) {
-      const newSchema = oldSchema;
+    componentsToCreate.forEach(ctx.createComponent);
+    componentsToEdit.forEach(ctx.editComponent);
 
-      componentsToRemove.forEach(key => {
-        delete newSchema.attributes[key];
-      });
-
-      return editSchema({ uid, schema: newSchema });
-    }
-
-    return Promise.resolve();
+    return updatedComponent;
   });
+};
 
-  await Promise.all([...contentTypeUpdates, ...componentUpdates]);
-
-  const categoryDir = path.join(strapi.dir, 'components', component.category);
-  const list = await fse.readdir(categoryDir);
-  if (list.length === 0) {
-    await fse.remove(categoryDir);
-  }
+const deleteComponent = uid => {
+  return getSchemaManager().edit(ctx => {
+    return ctx.deleteComponent(uid);
+  });
 };
 
 module.exports = {
   createComponentUID,
   updateComponentUID,
+
   createComponent,
-  updateComponent,
+  editComponent,
   deleteComponent,
+
   editSchema,
   formatComponent,
 
-  // export for testing only
-  createSchema,
-
-  deleteComponentInModels,
   updateComponentInModels,
 };

@@ -79,6 +79,10 @@
     "address": {
       "model": "address"
     },
+    "test": {
+      "components": [],
+      "type": "dynamiczone"
+    },
     "short_description": {
       "type": "text"
     }

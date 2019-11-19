@@ -51,7 +51,11 @@ const createComponentSchema = () => {
   return yup
     .object({
       component: componentSchema.required().noUnknown(),
-      components: yup.array().of(componentSchema),
+      components: yup.array().of(
+        componentSchema.shape({
+          uid: yup.string(),
+        })
+      ),
     })
     .noUnknown();
 };
