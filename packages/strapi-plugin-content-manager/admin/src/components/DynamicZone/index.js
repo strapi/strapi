@@ -78,46 +78,50 @@ const DynamicZone = ({ max, min, name }) => {
           <p>{metas.description}</p>
         </Label>
       )}
-      {getDynamicDisplayedComponents().map((componentUid, index) => {
-        const showDownIcon =
-          dynamicDisplayedComponentsLength > 0 &&
-          index < dynamicDisplayedComponentsLength - 1;
-        const showUpIcon = dynamicDisplayedComponentsLength > 0 && index > 0;
 
-        return (
-          <ComponentWrapper key={index}>
-            {showDownIcon && (
+      <ComponentWrapper>
+        {getDynamicDisplayedComponents().map((componentUid, index) => {
+          const showDownIcon =
+            dynamicDisplayedComponentsLength > 0 &&
+            index < dynamicDisplayedComponentsLength - 1;
+          const showUpIcon = dynamicDisplayedComponentsLength > 0 && index > 0;
+
+          return (
+            <div key={index}>
+              {showDownIcon && (
+                <RoundCTA
+                  style={{ top: -15, right: 30 }}
+                  onClick={() => moveComponentDown(name, index)}
+                >
+                  <i className="fa fa-arrow-down" />
+                </RoundCTA>
+              )}
+              {showUpIcon && (
+                <RoundCTA
+                  style={{ top: -15, right: 45 }}
+                  onClick={() => moveComponentUp(name, index)}
+                >
+                  <i className="fa fa-arrow-up" />
+                </RoundCTA>
+              )}
+
               <RoundCTA
-                style={{ top: -15, right: 30 }}
-                onClick={() => moveComponentDown(name, index)}
+                style={{ top: -15, right: 15 }}
+                onClick={() => removeComponentFromDynamicZone(name, index)}
               >
-                <i className="fa fa-arrow-down" />
+                <i className="far fa-trash-alt" />
               </RoundCTA>
-            )}
-            {showUpIcon && (
-              <RoundCTA
-                style={{ top: -15, right: 45 }}
-                onClick={() => moveComponentUp(name, index)}
-              >
-                <i className="fa fa-arrow-up" />
-              </RoundCTA>
-            )}
-            <RoundCTA
-              style={{ top: -15, right: 0 }}
-              onClick={() => removeComponentFromDynamicZone(name, index)}
-            >
-              <i className="fa fa-trash" />
-            </RoundCTA>
-            <FieldComponent
-              componentUid={componentUid}
-              icon={getDynamicComponentIcon(componentUid)}
-              label=""
-              name={`${name}.${index}`}
-              isFromDynamicZone
-            />
-          </ComponentWrapper>
-        );
-      })}
+              <FieldComponent
+                componentUid={componentUid}
+                icon={getDynamicComponentIcon(componentUid)}
+                label=""
+                name={`${name}.${index}`}
+                isFromDynamicZone
+              />
+            </div>
+          );
+        })}
+      </ComponentWrapper>
       <Wrapper>
         <Button
           type="button"

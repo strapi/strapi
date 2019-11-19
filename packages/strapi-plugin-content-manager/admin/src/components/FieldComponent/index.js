@@ -8,6 +8,7 @@ import useEditView from '../../hooks/useEditView';
 import ComponentInitializer from '../ComponentInitializer';
 import NonRepeatableComponent from '../NonRepeatableComponent';
 import RepeatableComponent from '../RepeatableComponent';
+import ComponentIcon from './ComponentIcon';
 import Label from './Label';
 import Reset from './ResetComponent';
 import Wrapper from './Wrapper';
@@ -39,8 +40,11 @@ const FieldComponent = ({
 
   return (
     <Wrapper className="col-12" isFromDynamicZone={isFromDynamicZone}>
-      {isFromDynamicZone && <i className={`fa fa-${icon}`}></i>}
-
+      {isFromDynamicZone && (
+        <ComponentIcon>
+          <i className={`fas fa-${icon}`}></i>
+        </ComponentIcon>
+      )}
       <Label>
         {label}&nbsp;
         {isRepeatable && `(${componentValueLength})`}

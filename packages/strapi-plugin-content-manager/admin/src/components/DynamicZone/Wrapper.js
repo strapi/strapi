@@ -22,6 +22,10 @@ const Wrapper = styled.div`
       display: block;
     }
   }
+
+  &:not(:first-of-type) {
+    margin-top: 30px;
+  }
 `;
 
 export default Wrapper;
