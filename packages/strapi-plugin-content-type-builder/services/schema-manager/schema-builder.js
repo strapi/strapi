@@ -2,6 +2,7 @@
 
 const createSchemaHandler = require('./schema-handler');
 const createComponentBuilder = require('./component-builder');
+const createContentTypeBuilder = require('./content-type-builder');
 
 module.exports = function createSchemaBuilder({ components, contentTypes }) {
   const tmpComponents = new Map();
@@ -32,8 +33,7 @@ module.exports = function createSchemaBuilder({ components, contentTypes }) {
     },
 
     ...createComponentBuilder({ tmpComponents, tmpContentTypes }),
-
-    //...createContentTypeBuilder(),
+    ...createContentTypeBuilder({ tmpComponents, tmpContentTypes }),
 
     flush() {
       return Promise.all(

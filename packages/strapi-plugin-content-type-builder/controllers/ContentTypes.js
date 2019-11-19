@@ -2,7 +2,6 @@
 
 const _ = require('lodash');
 
-const { nameToSlug } = require('../utils/helpers');
 const {
   validateContentTypeInput,
   validateUpdateContentTypeInput,
@@ -49,25 +48,12 @@ module.exports = {
       return ctx.send({ error }, 400);
     }
 
-    const modelName = nameToSlug(body.contentType.name);
-    const uid = `application::${modelName}.${modelName}`;
-
-    if (_.has(strapi.contentTypes, uid)) {
-      return ctx.send({ error: 'contentType.alreadyExists' }, 400);
-    }
-
-    strapi.reload.isWatching = false;
-
     try {
-      const contentTypeSchema = contentTypeService.createContentTypeSchema(
-        body.contentType
-      );
+      strapi.reload.isWatching = false;
 
-      await contentTypeService.generateAPI(modelName, contentTypeSchema);
-
-      await contentTypeService.generateReversedRelations({
-        attributes: body.contentType.attributes,
-        modelName,
+      const component = await contentTypeService.createContentType({
+        contentType: body.contentType,
+        components: body.components,
       });
 
       if (_.isEmpty(strapi.api)) {
@@ -75,24 +61,52 @@ module.exports = {
       } else {
         strapi.emit('didCreateContentType');
       }
-    } catch (e) {
-      strapi.log.error(e);
-      strapi.emit('didNotCreateContentType', e);
-      return ctx.badRequest(null, [
-        { messages: [{ id: 'request.error.model.write' }] },
-      ]);
+
+      setImmediate(() => strapi.reload());
+
+      ctx.send({ data: { uid: component.uid } }, 201);
+    } catch (error) {
+      strapi.emit('didNotCreateContentType', error);
+      ctx.send({ error: error.message }, 400);
     }
 
-    setImmediate(() => strapi.reload());
+    // strapi.reload.isWatching = false;
 
-    ctx.send(
-      {
-        data: {
-          uid,
-        },
-      },
-      201
-    );
+    // try {
+    //   const contentTypeSchema = contentTypeService.createContentTypeSchema(
+    //     body.contentType
+    //   );
+
+    //   await contentTypeService.generateAPI(modelName, contentTypeSchema);
+
+    //   await contentTypeService.generateReversedRelations({
+    //     attributes: body.contentType.attributes,
+    //     modelName,
+    //   });
+
+    //   if (_.isEmpty(strapi.api)) {
+    //     strapi.emit('didCreateFirstContentType');
+    //   } else {
+    //     strapi.emit('didCreateContentType');
+    //   }
+    // } catch (e) {
+    //   strapi.log.error(e);
+    //   strapi.emit('didNotCreateContentType', e);
+    //   return ctx.badRequest(null, [
+    //     { messages: [{ id: 'request.error.model.write' }] },
+    //   ]);
+    // }
+
+    // setImmediate(() => strapi.reload());
+
+    // ctx.send(
+    //   {
+    //     data: {
+    //       uid,
+    //     },
+    //   },
+    //   201
+    // );
   },
 
   async updateContentType(ctx) {
