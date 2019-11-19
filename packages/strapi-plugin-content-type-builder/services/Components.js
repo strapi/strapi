@@ -32,51 +32,6 @@ const formatComponent = component => {
   };
 };
 
-// /**
-//  * Updates a component schema file
-//  * @param {Object} component
-//  * @param {Object} infos
-//  */
-// async function updateComponent({ component, infos }) {
-//   const { uid, __schema__: oldSchema } = component;
-
-//   // don't update collectionName if not provided
-//   const updatedSchema = {
-//     ...oldSchema,
-//     connection: infos.connection || oldSchema.connection,
-//     collectionName: infos.collectionName || oldSchema.collectionName,
-//     info: {
-//       name: infos.name || oldSchema.info.name,
-//       icon: infos.icon || oldSchema.info.icon,
-//       description: infos.description || oldSchema.info.description,
-//     },
-//     attributes: convertAttributes(infos.attributes),
-//   };
-
-//   await editSchema({ uid, schema: updatedSchema });
-
-//   if (component.category !== infos.category) {
-//     const oldDir = path.join(strapi.dir, 'components', component.category);
-//     const newDir = path.join(strapi.dir, 'components', infos.category);
-
-//     await fse.move(
-//       path.join(oldDir, component.__filename__),
-//       path.join(newDir, component.__filename__)
-//     );
-
-//     const list = await fse.readdir(oldDir);
-//     if (list.length === 0) {
-//       await fse.remove(oldDir);
-//     }
-
-//     return {
-//       uid: `${infos.category}.${component.modelName}`,
-//     };
-//   }
-
-//   return { uid };
-// }
-
 /**
  * Returns a uid from a string
  * @param {string} str - string to slugify
@@ -183,7 +138,7 @@ const updateComponentInModels = (oldUID, newUID) => {
  * @param {Object} params.component Main component to create
  * @param {Array<Object>} params.components List of nested components to created or edit
  */
-const createComponent = ({ component, components }) => {
+const createComponent = ({ component, components = [] }) => {
   const componentsToCreate = components.filter(compo => !_.has(compo, 'uid'));
   const componentsToEdit = components.filter(compo => _.has(compo, 'uid'));
 
@@ -203,7 +158,7 @@ const createComponent = ({ component, components }) => {
  * @param {Object} params.component Main component to create
  * @param {Array<Object>} params.components List of nested components to created or edit
  */
-const editComponent = (uid, { component, components }) => {
+const editComponent = (uid, { component, components = [] }) => {
   const componentsToCreate = components.filter(compo => !_.has(compo, 'uid'));
   const componentsToEdit = components.filter(compo => _.has(compo, 'uid'));
 

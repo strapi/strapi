@@ -42,8 +42,8 @@ module.exports = function createComponentBuilder({ tmpComponents }) {
         infos.category
       )}_${nameToCollectionName(pluralize(infos.name))}`;
 
-      handler.uid = uid;
       handler
+        .setUID(uid)
         .set('connection', infos.connection || defaultConnection)
         .set('collectionName', infos.collectionName || defaultCollectionName)
         .set(['info', 'name'], infos.name)
@@ -52,6 +52,7 @@ module.exports = function createComponentBuilder({ tmpComponents }) {
         .set('attributes', convertAttributes(infos.attributes));
 
       tmpComponents.set(uid, handler);
+
       return handler;
     },
 
@@ -67,9 +68,20 @@ module.exports = function createComponentBuilder({ tmpComponents }) {
 
       const handler = tmpComponents.get(uid);
 
-      // TODO: handle category change to move the file
+      const [, nameUID] = uid.split('.');
+
+      const newCategory = nameToSlug(infos.category);
+      const newUID = `${newCategory}.${nameUID}`;
+
+      if (newUID !== uid && tmpComponents.has(newUID)) {
+        throw new Error('component.edit.alreadyExists');
+      }
+
+      const newDir = path.join(strapi.dir, 'components', newCategory);
 
       handler
+        .setUID(newUID)
+        .setDir(newDir)
         .set('connection', infos.connection)
         .set('collectionName', infos.collectionName)
         .set(['info', 'name'], infos.name)
@@ -77,8 +89,15 @@ module.exports = function createComponentBuilder({ tmpComponents }) {
         .set(['info', 'description'], infos.description)
         .set('attributes', convertAttributes(infos.attributes));
 
-      // TODO: update relations if uid changed
-      // TODO: update relations if uid changed
+      if (newUID !== uid) {
+        this.components.forEach(compo => {
+          compo.updateComponent(uid, newUID);
+        });
+
+        this.contentTypes.forEach(ct => {
+          ct.updateComponent(uid, newUID);
+        });
+      }
 
       return handler;
     },

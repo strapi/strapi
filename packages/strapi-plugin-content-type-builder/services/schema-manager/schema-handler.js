@@ -5,48 +5,61 @@ const fse = require('fs-extra');
 const _ = require('lodash');
 
 module.exports = function createSchemaHandler(infos) {
-  const uid = infos.uid;
-  const dir = infos.dir;
-  const filename = infos.filename;
+  const initialState = {
+    uid: infos.uid,
+    dir: infos.dir,
+    filename: infos.filename,
+    schema: infos.schema || {},
+  };
+
+  const state = _.cloneDeep(initialState);
 
   // always keep it the same to rollback
-  let initialSchema = Object.freeze(infos.schema);
-  let schema = _.cloneDeep(infos.schema) || {};
+  Object.freeze(initialState.schema);
 
   let modified = false;
   let deleted = false;
 
   return {
-    uid,
-    dir,
-    filename,
-
-    // Flag schema for deletion
-    delete() {
-      deleted = true;
+    get uid() {
+      return state.uid;
     },
 
-    // get a copy of the full schema
-    get schema() {
-      return _.cloneDeep(schema);
-    },
-
-    // set a new schema object
-    set schema(val) {
+    setUID(val) {
       modified = true;
-      schema = _.cloneDeep(val);
+
+      state.uid = val;
+      return this;
+    },
+
+    setDir(val) {
+      modified = true;
+
+      state.dir = val;
+      return this;
+    },
+
+    get schema() {
+      return _.cloneDeep(state.schema);
+    },
+
+    setSchema(val) {
+      modified = true;
+
+      state.schema = _.cloneDeep(val);
+      return this;
     },
 
     // get a particuar path inside the schema
     get(path) {
-      return _.get(schema, path);
+      return _.get(state.schema, path);
     },
 
     // set a particuar path inside the schema
     set(path, val) {
       modified = true;
 
-      _.set(schema, path, val || _.get(schema, path));
+      _.set(state.schema, path, val || _.get(state.schema, path));
 
       return this;
     },
@@ -55,15 +68,22 @@ module.exports = function createSchemaHandler(infos) {
     unset(path) {
       modified = true;
 
-      _.unset(schema, path);
+      _.unset(state.schema, path);
 
+      return this;
+    },
+
+    delete() {
+      deleted = true;
       return this;
     },
 
     // utils
     removeComponent(uid) {
-      Object.keys(schema.attributes).forEach(key => {
-        const attr = schema.attributes[key];
+      const { attributes } = state.schema;
+
+      Object.keys(attributes).forEach(key => {
+        const attr = attributes[key];
 
         if (attr.type === 'component' && attr.component === uid) {
           this.unset(['attributes', key]);
@@ -74,7 +94,7 @@ module.exports = function createSchemaHandler(infos) {
           Array.isArray(attr.components) &&
           attr.components.includes(uid)
         ) {
-          const updatedComponentList = schema.attributes[key].components.filter(
+          const updatedComponentList = attributes[key].components.filter(
             val => val !== uid
           );
           this.set(['attributes', key, 'components'], updatedComponentList);
@@ -84,22 +104,58 @@ module.exports = function createSchemaHandler(infos) {
       return this;
     },
 
+    updateComponent(uid, newUID) {
+      const { attributes } = state.schema;
+
+      Object.keys(attributes).forEach(key => {
+        const attr = attributes[key];
+
+        if (attr.type === 'component' && attr.component === uid) {
+          this.set(['attributes', key, 'component'], newUID);
+        }
+
+        if (
+          attr.type === 'dynamiczone' &&
+          Array.isArray(attr.components) &&
+          attr.components.includes(uid)
+        ) {
+          const updatedComponentList = attributes[key].components.map(val =>
+            val === uid ? newUID : uid
+          );
+
+          this.set(['attributes', key, 'components'], updatedComponentList);
+        }
+      });
+
+      return this;
+    },
+
     // save the schema to disk
     async flush() {
-      const filePath = path.join(dir, filename);
+      const initialPath = path.join(initialState.dir, initialState.filename);
+      const filePath = path.join(state.dir, state.filename);
 
       if (deleted === true) {
-        await fse.remove(filePath);
+        await fse.remove(initialPath);
 
-        const list = await fse.readdir(dir);
+        const list = await fse.readdir(initialState.dir);
         if (list.length === 0) {
-          await fse.remove(dir);
+          await fse.remove(initialState.dir);
         }
       }
-
       if (modified === true) {
         await fse.ensureFile(filePath);
-        return fse.writeJSON(filePath, schema, { spaces: 2 });
+        await fse.writeJSON(filePath, state.schema, { spaces: 2 });
+
+        // remove from oldPath
+        if (initialPath !== filePath) {
+          await fse.remove(initialPath);
+
+          const list = await fse.readdir(initialState.dir);
+          if (list.length === 0) {
+            await fse.remove(initialState.dir);
+          }
+        }
       }
 
       return Promise.resolve();
@@ -107,22 +163,33 @@ module.exports = function createSchemaHandler(infos) {
 
     // reset the schema to its initial value
     async rollback() {
-      const filePath = path.join(dir, filename);
+      const initialPath = path.join(initialState.dir, initialState.filename);
+      const filePath = path.join(state.dir, state.filename);
 
       // it was a creation so it needs to be deleted
-      if (!uid) {
+      if (!initialState.uid) {
         await fse.remove(filePath);
 
-        const list = await fse.readdir(dir);
+        const list = await fse.readdir(state.dir);
         if (list.length === 0) {
-          await fse.remove(dir);
+          await fse.remove(state.dir);
         }
         return;
       }
 
       if (modified === true || deleted === true) {
-        await fse.ensureFile(filePath);
-        return fse.writeJSON(filePath, initialSchema, { spaces: 2 });
+        await fse.ensureFile(initialPath);
+        await fse.writeJSON(initialPath, initialState.schema, { spaces: 2 });
+
+        // remove
+        if (initialPath !== filePath) {
+          await fse.remove(filePath);
+
+          const list = await fse.readdir(state.dir);
+          if (list.length === 0) {
+            await fse.remove(state.dir);
+          }
+        }
       }
 
       return Promise.resolve();

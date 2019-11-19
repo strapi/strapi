@@ -59,14 +59,15 @@ function createSchemaManager() {
       await builder
         .flush()
         .catch(error => {
-          strapi.log.error('Error writing schema files', error);
+          strapi.log.error('Error writing schema files');
+          strapi.log.error(error);
           return builder.rollback();
         })
         .catch(error => {
           strapi.log.error(
-            'Error rolling back schema files. You might need to fix your files manually',
-            error
+            'Error rolling back schema files. You might need to fix your files manually'
           );
+          strapi.log.error(error);
 
           throw new Error('Invalid schema edition');
         });
