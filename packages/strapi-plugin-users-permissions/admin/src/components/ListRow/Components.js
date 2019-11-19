@@ -25,7 +25,8 @@ const Flex = styled.div`
   > div:first-child {
     width: 17px;
     padding-top: 2px;
-    > i {
+    > i,
+    > svg {
       font-size: 15px;
     }
   }

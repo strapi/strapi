@@ -138,7 +138,7 @@ class PluginCard extends React.Component {
             <div>
               {this.props.plugin.name}{' '}
               <i
-                className="fa fa-external-link"
+                className="fa fa-external-link-alt"
                 onClick={() =>
                   window.open(
                     `https://github.com/strapi/strapi/tree/master/packages/strapi-plugin-${this.props.plugin.id}`,

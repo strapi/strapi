@@ -28,6 +28,9 @@
     "@buffetjs/styles": "^1.0.5",
     "@buffetjs/utils": "^1.0.5",
     "@comparaonline/react-intl-hooks": "^0.0.1-alpha.6",
+    "@fortawesome/fontawesome-svg-core": "^1.2.25",
+    "@fortawesome/free-brands-svg-icons": "^5.11.2",
+    "@fortawesome/free-solid-svg-icons": "^5.11.2",
     "autoprefixer": "^9.5.1",
     "babel-loader": "^8.0.5",
     "bcryptjs": "^2.4.3",
@@ -105,5 +108,8 @@
     "npm": ">=6.0.0"
   },
   "license": "MIT",
-  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
+  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9",
+  "devDependencies": {
+    "@fortawesome/fontawesome-free": "^5.11.2"
+  }
 }

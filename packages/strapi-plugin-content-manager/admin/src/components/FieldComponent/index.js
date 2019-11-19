@@ -14,6 +14,7 @@ import Wrapper from './Wrapper';
 
 const FieldComponent = ({
   componentUid,
+  icon,
   isFromDynamicZone,
   isRepeatable,
   label,
@@ -33,10 +34,13 @@ const FieldComponent = ({
     ['components', componentUid],
     {}
   );
+
   const displayedFields = get(currentComponentSchema, ['layouts', 'edit'], []);
 
   return (
     <Wrapper className="col-12" isFromDynamicZone={isFromDynamicZone}>
+      {isFromDynamicZone && <i className={`fa fa-${icon}`}></i>}
+
       <Label>
         {label}&nbsp;
         {isRepeatable && `(${componentValueLength})`}
@@ -83,6 +87,7 @@ const FieldComponent = ({
 };
 
 FieldComponent.defaultProps = {
+  icon: 'smile',
   isFromDynamicZone: false,
   isRepeatable: false,
   max: Infinity,
@@ -91,6 +96,7 @@ FieldComponent.defaultProps = {
 
 FieldComponent.propTypes = {
   componentUid: PropTypes.string.isRequired,
+  icon: PropTypes.string,
   isFromDynamicZone: PropTypes.bool,
   isRepeatable: PropTypes.bool,
   label: PropTypes.string.isRequired,

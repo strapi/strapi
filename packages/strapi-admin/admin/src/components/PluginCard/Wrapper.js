@@ -28,7 +28,8 @@ const Wrapper = styled.div`
       line-height: 36px;
     }
 
-    i {
+    i,
+    svg {
       margin-left: 7px;
       color: #b3b5b9;
       font-size: 1rem;
@@ -70,7 +71,8 @@ const Wrapper = styled.div`
     font-size: 1.3rem;
     font-style: italic;
 
-    > i {
+    > i,
+    > svg {
       margin-right: 7px;
       font-size: 12px;
     }
@@ -83,7 +85,8 @@ const Wrapper = styled.div`
     font-weight: 500;
     cursor: pointer;
 
-    > i {
+    > i,
+    > svg {
       margin-right: 7px;
       font-size: 12px;
     }

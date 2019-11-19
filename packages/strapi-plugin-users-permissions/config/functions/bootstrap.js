@@ -45,7 +45,7 @@ module.exports = async () => {
     },
     facebook: {
       enabled: false,
-      icon: 'facebook-official',
+      icon: 'facebook',
       key: '',
       secret: '',
       callback: '/auth/facebook/callback',
@@ -111,7 +111,7 @@ module.exports = async () => {
     const value = {
       reset_password: {
         display: 'Email.template.reset_password',
-        icon: 'refresh',
+        icon: 'sync',
         options: {
           from: {
             name: 'Administration Panel',
@@ -130,7 +130,7 @@ module.exports = async () => {
       },
       email_confirmation: {
         display: 'Email.template.email_confirmation',
-        icon: 'check-square-o',
+        icon: 'check-square',
         options: {
           from: {
             name: 'Administration Panel',

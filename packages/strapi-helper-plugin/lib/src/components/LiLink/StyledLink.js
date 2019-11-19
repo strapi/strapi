@@ -8,13 +8,15 @@ const StyledLink = styled(Link)`
   width: 100%;
   text-decoration: none;
   span,
-  i {
+  i,
+  svg {
     color: #333740;
   }
   span {
     font-size: 13px;
   }
-  i {
+  i,
+  svg {
     width: 13px;
     height: 11px;
     margin-right: 10px;
@@ -26,7 +28,8 @@ const StyledLink = styled(Link)`
   &:hover {
     text-decoration: none;
     span,
-    i {
+    i,
+    svg {
       color: #007eff;
     }
     .layout {

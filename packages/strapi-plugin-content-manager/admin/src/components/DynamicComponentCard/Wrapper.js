@@ -13,6 +13,10 @@ const Wrapper = styled.div`
   cursor: pointer;
   border: 1px solid #ffffff;
 
+  button {
+    outline: 0;
+  }
+
   .component-uid {
     width: 119px;
     text-overflow: ellipsis;
@@ -33,7 +37,9 @@ const Wrapper = styled.div`
     border-radius: 50%;
     background-color: #e9eaeb;
     color: #b4b6ba;
-    i {
+    padding: 0;
+    i,
+    svg {
       margin: auto;
       display: block;
     }

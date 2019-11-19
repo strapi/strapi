@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
+import useEditView from '../../hooks/useEditView';
 import DynamicComponentCard from '../DynamicComponentCard';
 import FieldComponent from '../FieldComponent';
 import Button from './Button';
@@ -26,9 +27,26 @@ const DynamicZone = ({ max, min, name }) => {
     removeComponentFromDynamicZone,
   } = useDataManager();
 
+  const { components } = useEditView();
+
   const getDynamicDisplayedComponents = useCallback(() => {
     return get(modifiedData, [name], []).map(data => data.__component);
   }, [modifiedData, name]);
+
+  const getDynamicComponentSchemaData = componentUid => {
+    const component = components.find(compo => compo.uid === componentUid);
+    const { schema } = component;
+
+    return schema;
+  };
+
+  const getDynamicComponentIcon = componentUid => {
+    const {
+      info: { icon },
+    } = getDynamicComponentSchemaData(componentUid);
+
+    return icon;
+  };
 
   const dynamicZoneErrors = Object.keys(formErrors)
     .filter(key => {
@@ -61,9 +79,6 @@ const DynamicZone = ({ max, min, name }) => {
         </Label>
       )}
       {getDynamicDisplayedComponents().map((componentUid, index) => {
-        // TODO when available
-        // const icon = getDynamicComponentSchemaData(componentUid);
-
         const showDownIcon =
           dynamicDisplayedComponentsLength > 0 &&
           index < dynamicDisplayedComponentsLength - 1;
@@ -95,6 +110,7 @@ const DynamicZone = ({ max, min, name }) => {
             </RoundCTA>
             <FieldComponent
               componentUid={componentUid}
+              icon={getDynamicComponentIcon(componentUid)}
               label=""
               name={`${name}.${index}`}
               isFromDynamicZone
@@ -138,7 +154,7 @@ const DynamicZone = ({ max, min, name }) => {
                   <DynamicComponentCard
                     key={componentUid}
                     componentUid={componentUid}
-                    icon={''}
+                    icon={getDynamicComponentIcon(componentUid)}
                     onClick={() => {
                       setIsOpen(false);
                       const shouldCheckErrors = hasError;

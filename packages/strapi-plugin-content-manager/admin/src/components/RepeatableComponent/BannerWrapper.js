@@ -74,13 +74,13 @@ const BannerWrapper = styled.button`
     }
   }}
 
-
-
   ${({ isOpen }) => {
     if (isOpen) {
       return `
-        &.trash-icon i {
-          color: #007eff;
+        &.trash-icon {
+          i, svg {
+            color: #007eff;
+          }
         }
       `;
     }

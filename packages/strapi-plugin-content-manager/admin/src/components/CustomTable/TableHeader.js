@@ -60,10 +60,7 @@ function TableHeader({ headers, isBulkable }) {
               <span className={header.sortable ? 'sortable' : ''}>
                 {header.label}
                 {sortBy === header.name && (
-                  <Icon
-                    className="fa fa-sort-asc"
-                    isAsc={sortOrder === 'ASC'}
-                  />
+                  <Icon className="fa fa-sort-up" isAsc={sortOrder === 'ASC'} />
                 )}
               </span>
             </th>

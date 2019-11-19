@@ -50,7 +50,8 @@ const Addon = styled.div`
   -moz-appearance: none;
   -webkit-appearance: none;
   box-shadow: 0px 2px 1px rgba(104, 118, 142, 0.05);
-  i {
+  i,
+  svg {
     margin-left: 2px;
     color: #b3b5b9;
     font-weight: 900;

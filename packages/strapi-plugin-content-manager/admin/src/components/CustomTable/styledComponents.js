@@ -140,7 +140,8 @@ const TableDelete = styled.tr`
 const ActionContainer = styled.td`
   text-align: right;
 
-  i {
+  i,
+  svg {
     margin-left: 15px;
     font-size: 1.1rem;
     color: #0e1622;

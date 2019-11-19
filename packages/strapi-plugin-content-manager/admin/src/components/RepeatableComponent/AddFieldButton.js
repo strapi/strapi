@@ -40,7 +40,8 @@ const Button = styled.button`
   text-transform: uppercase;
   letter-spacing: 0.5px;
   background-color: #fff;
-  > i {
+  > i,
+  svg {
     margin-right: 10px;
   }
 `;

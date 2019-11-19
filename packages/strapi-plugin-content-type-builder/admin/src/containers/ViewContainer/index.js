@@ -33,7 +33,7 @@ function ViewContainer({
     return !!source ? source : null;
   };
 
-  const icon = getSource() ? null : 'fa fa-pencil';
+  const icon = getSource() ? null : 'fa fa-pencil-alt';
 
   return (
     <StyledViewContainer>

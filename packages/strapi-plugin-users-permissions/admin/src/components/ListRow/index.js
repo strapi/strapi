@@ -31,7 +31,7 @@ class ListRow extends React.Component {
   generateContent = () => {
     let icons = [
       {
-        icoType: 'pencil',
+        icoType: 'pencil-alt',
         onClick: this.handleClick,
       },
       {
@@ -49,7 +49,7 @@ class ListRow extends React.Component {
         }
 
         if (includes(this.undeletableIDs, get(this.props.item, 'type', ''))) {
-          icons = [{ icoType: 'pencil', onClick: this.handleClick }];
+          icons = [{ icoType: 'pencil-alt', onClick: this.handleClick }];
         }
 
         return (
@@ -75,7 +75,7 @@ class ListRow extends React.Component {
             <div className="col-md-4">
               <Flex>
                 <div>
-                  <i className={`fa fa-${this.props.item.icon}`} />
+                  {/* <i className={`fa fa-${this.props.item.icon}`} /> */}
                 </div>
                 <div>{capitalize(this.props.item.name)}</div>
               </Flex>

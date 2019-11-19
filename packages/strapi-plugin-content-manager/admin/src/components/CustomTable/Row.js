@@ -107,7 +107,7 @@ function Row({ goTo, isBulkable, row, headers }) {
           style={{ minWidth: 'inherit', width: '100%' }}
           icons={[
             {
-              icoType: 'pencil',
+              icoType: 'pencil-alt',
               onClick: () => {
                 goTo(row.id);
               },
