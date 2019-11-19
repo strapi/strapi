@@ -234,13 +234,17 @@ function EditView({
   const handleSubmit = async e => {
     e.preventDefault();
     const schema = createYupSchema(layout, { groups: groupLayoutsData });
+    const eventInfo =
+      layout.uid === 'administrator' && source === 'admin'
+        ? { model: layout.uid }
+        : {};
 
     try {
       // Validate the form using yup
       await schema.validate(modifiedData, { abortEarly: false });
       // Set the loading state in the plugin header
       setIsSubmitting(true);
-      emitEvent('willSaveEntry');
+      emitEvent('willSaveEntry', eventInfo);
       // Create an object containing all the paths of the media fields
       const filesMap = getMediaAttributes(layout, groupLayoutsData);
       // Create an object that maps the keys with the related files to upload
@@ -283,7 +287,7 @@ function EditView({
           false,
           false
         );
-        emitEvent('didSaveEntry');
+        emitEvent('didSaveEntry', eventInfo);
         redirectToPreviousPage();
       } catch (err) {
         const error = get(
