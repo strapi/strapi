@@ -28,8 +28,8 @@ const DataManagerProvider = ({ children }) => {
   );
   const isInContentTypeView = contentTypeMatch !== null;
   const currentUid = isInContentTypeView
-    ? contentTypeMatch.params.uid
-    : componentMatch.params.componentUid;
+    ? get(contentTypeMatch, 'params.uid', null)
+    : get(componentMatch, 'params.componentUid', null);
   const abortController = new AbortController();
   const { signal } = abortController;
   const getDataRef = useRef();

@@ -53,23 +53,31 @@ const FormModal = () => {
     contentTypes,
     createSchema,
     initialData,
+    modifiedData: allDataSchema,
   } = useDataManager();
   const { formErrors, modifiedData } = reducerState.toJS();
 
   useEffect(() => {
     if (!isEmpty(search)) {
+      // Return 'null' if there isn't any attributeType search params
       const attributeType = query.get('attributeType');
+      const modalType = query.get('modalType');
 
       setState({
         actionType: query.get('actionType'),
-        modalType: query.get('modalType'),
+        modalType,
         settingType: query.get('settingType'),
         forTarget: query.get('forTarget'),
         target: query.get('target'),
         attributeType,
       });
 
-      if (attributeType) {
+      // Set the predefined data structure to create an attribute
+      if (
+        attributeType &&
+        attributeType !== 'null' &&
+        state.modalType !== 'attribute'
+      ) {
         dispatch({
           type: 'SET_ATTRIBUTE_DATA_SCHEMA',
           attributeType,
@@ -107,7 +115,15 @@ const FormModal = () => {
     : {};
 
   const checkFormValidity = async () => {
-    const schema = forms[state.modalType].schema(Object.keys(contentTypes));
+    let schema;
+
+    if (state.modalType === 'contentType') {
+      schema = forms[state.modalType].schema(Object.keys(contentTypes));
+    } else if (state.modalType === 'attribute') {
+      schema = forms[state.modalType].schema(allDataSchema, modifiedData.type);
+    } else {
+      console.log('Will do something');
+    }
 
     await schema.validate(modifiedData, { abortEarly: false });
   };
@@ -138,10 +154,33 @@ const FormModal = () => {
   };
 
   const handleChange = ({ target: { name, value } }) => {
+    const namesThatCanResetErrors = ['max', 'min', 'maxLength', 'minLength'];
+    const val =
+      ['default', ...namesThatCanResetErrors].includes(name) && value === ''
+        ? null
+        : value;
+
+    const clonedErrors = Object.assign({}, formErrors);
+
+    if (name === 'max') {
+      delete clonedErrors.min;
+    }
+
+    if (name === 'maxLength') {
+      delete clonedErrors.maxLength;
+    }
+
+    delete clonedErrors[name];
+
+    dispatch({
+      type: 'SET_ERRORS',
+      errors: clonedErrors,
+    });
+
     dispatch({
       type: 'ON_CHANGE',
       keys: name.split('.'),
-      value,
+      value: val,
     });
   };
   const handleSubmit = async e => {
@@ -149,9 +188,10 @@ const FormModal = () => {
 
     try {
       await checkFormValidity();
-      const nextSearch = `modalType=chooseAttribute&forTarget=${state.modalType}&target=${modifiedData.name}`;
+      const nextSearch = `modalType=chooseAttribute&forTarget=${state.forTarget}&target=${modifiedData.name}`;
 
-      if (state.modalType !== 'attribute') {
+      if (state.modalType === 'contentType') {
+        // Create the content type schema
         createSchema(modifiedData, state.modalType, uid);
         const nextSlug = isCreatingCT
           ? 'content-types'
@@ -160,16 +200,18 @@ const FormModal = () => {
           pathname: `/plugins/${pluginId}/${nextSlug}/${uid}`,
           search: nextSearch,
         });
-      } else {
-        // Do something
+      } else if (state.modalType === 'attribute') {
         addAttribute(modifiedData);
         push({ search: nextSearch });
+      } else {
+        console.log('Do something with component later');
       }
       dispatch({
         type: 'RESET_PROPS',
       });
     } catch (err) {
       const errors = getYupInnerErrors(err);
+
       dispatch({
         type: 'SET_ERRORS',
         errors,
@@ -201,7 +243,7 @@ const FormModal = () => {
     >
       <HeaderModal>
         <ModalHeader
-          name={state.target || name}
+          name={state.forTarget || name}
           headerId={headerId}
           iconType={iconType || 'contentType'}
         />
@@ -306,7 +348,7 @@ const FormModal = () => {
                                       : formatMessage({ id: errorId })
                                   }
                                   onChange={handleChange}
-                                  onBlur={() => {}}
+                                  // onBlur={() => {}}
                                   description={
                                     get(input, 'description.id', null)
                                       ? formatMessage(input.description)

@@ -6,6 +6,7 @@ const initialState = fromJS({
 });
 
 const reducer = (state, action) => {
+  console.log({ action: action.type });
   switch (action.type) {
     case 'ON_CHANGE':
       return state.updateIn(
@@ -16,7 +17,10 @@ const reducer = (state, action) => {
       return initialState;
     case 'SET_ATTRIBUTE_DATA_SCHEMA': {
       const { attributeType } = action;
-      const dataToSet = attributeType === 'text' ? {} : { type: attributeType };
+      const dataToSet =
+        attributeType === 'text' || attributeType === 'number'
+          ? {}
+          : { type: attributeType };
 
       return state.update('modifiedData', () => fromJS(dataToSet));
     }

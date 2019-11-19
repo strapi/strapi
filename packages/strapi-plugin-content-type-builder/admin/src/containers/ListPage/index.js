@@ -16,7 +16,7 @@ const ListPage = () => {
   }, [pathname]);
 
   const attributes = get(modifiedData, ['schema', 'attributes'], {});
-  console.log({ modifiedData });
+  console.log({ allSchema: modifiedData });
   return (
     <ViewContainer>
       <div className="container-fluid">

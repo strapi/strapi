@@ -57,7 +57,9 @@ function LeftMenu() {
   };
   const handleClickOpenModal = type => {
     if (canOpenModalCreateCTorComponent()) {
-      push({ search: `modalType=${type}&actionType=create&settingType=base` });
+      push({
+        search: `modalType=${type}&actionType=create&settingType=base&forTarget=${type}`,
+      });
     } else {
       displayNotificationCTNotSaved();
     }
