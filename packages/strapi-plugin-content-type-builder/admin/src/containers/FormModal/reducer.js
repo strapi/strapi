@@ -6,7 +6,6 @@ const initialState = fromJS({
 });
 
 const reducer = (state, action) => {
-  console.log({ action: action.type });
   switch (action.type) {
     case 'ON_CHANGE':
       return state.updateIn(

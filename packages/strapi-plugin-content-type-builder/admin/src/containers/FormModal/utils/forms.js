@@ -145,7 +145,8 @@ const forms = {
               {
                 autoFocus: false,
                 name: type === 'number' ? 'max' : 'maxLength',
-                type: 'number',
+                // type: 'number',
+                type: 'customCheckboxWithChildren',
                 label: {
                   id: getTrad(
                     `form.attribute.item.maximum${
@@ -161,7 +162,7 @@ const forms = {
               {
                 autoFocus: false,
                 name: type === 'number' ? 'min' : 'minLength',
-                type: 'number',
+                type: 'customCheckboxWithChildren',
                 label: {
                   id: getTrad(
                     `form.attribute.item.minimum${
@@ -169,9 +170,6 @@ const forms = {
                     }`
                   ),
                 },
-                // description: {
-                //   id: getTrad('form.attribute.item.uniqueField.description'),
-                // },
                 validations: {},
               },
             ],

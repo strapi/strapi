@@ -19,6 +19,7 @@ import pluginId from '../../pluginId';
 import useQuery from '../../hooks/useQuery';
 import useDataManager from '../../hooks/useDataManager';
 import AttributeOption from '../../components/AttributeOption';
+import CustomCheckbox from '../../components/CustomCheckbox';
 import ModalHeader from '../../components/ModalHeader';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
 import HeaderNavLink from '../../components/HeaderNavLink';
@@ -167,7 +168,7 @@ const FormModal = () => {
     }
 
     if (name === 'maxLength') {
-      delete clonedErrors.maxLength;
+      delete clonedErrors.minLength;
     }
 
     delete clonedErrors[name];
@@ -211,7 +212,6 @@ const FormModal = () => {
       });
     } catch (err) {
       const errors = getYupInnerErrors(err);
-      console.log({ err, errors });
 
       dispatch({
         type: 'SET_ERRORS',
@@ -341,6 +341,9 @@ const FormModal = () => {
                                 key={input.name}
                               >
                                 <Inputs
+                                  customInputs={{
+                                    customCheckboxWithChildren: CustomCheckbox,
+                                  }}
                                   value={get(modifiedData, input.name, '')}
                                   {...input}
                                   error={
