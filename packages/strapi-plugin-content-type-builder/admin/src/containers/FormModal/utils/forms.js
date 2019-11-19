@@ -1,9 +1,10 @@
+import React from 'react';
 import * as yup from 'yup';
 import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
+import { FormattedMessage } from 'react-intl';
 import pluginId from '../../../pluginId';
 import getTrad from '../../../utils/getTrad';
 import { createUid, nameToSlug } from './createUid';
-
 yup.addMethod(yup.mixed, 'defined', function() {
   return this.test(
     'defined',
@@ -25,7 +26,10 @@ yup.addMethod(yup.string, 'unique', function(message, allReadyTakenValues) {
 const forms = {
   attribute: {
     schema() {
-      return yup.object();
+      return yup.object().shape({
+        name: yup.string().required(errorsTrads.required),
+        type: yup.string().required(errorsTrads.required),
+      });
     },
     form: {
       advanced() {
@@ -56,12 +60,28 @@ const forms = {
         if (type === 'text') {
           items[0].push({
             label: {
-              id: 'content-type-builder.form.attribute.item.number.type',
+              id: getTrad('modalForm.attribute.text.type-selection'),
             },
             name: 'type',
             type: 'select',
-            value: 'short text',
-            options: ['short text', 'long text'],
+            options: [
+              { id: 'components.InputSelect.option.placeholder', value: '' },
+              { id: 'form.attribute.text.option.short-text', value: 'string' },
+              { id: 'form.attribute.text.option.long-text', value: 'text' },
+            ].map(({ id, value }, index) => {
+              const disabled = index === 0;
+              const tradId = index === 0 ? id : getTrad(id);
+
+              return (
+                <FormattedMessage id={tradId} key={id}>
+                  {msg => (
+                    <option disabled={disabled} hidden={disabled} value={value}>
+                      {msg}
+                    </option>
+                  )}
+                </FormattedMessage>
+              );
+            }),
             validations: {
               required: true,
             },

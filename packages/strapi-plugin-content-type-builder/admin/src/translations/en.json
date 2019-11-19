@@ -216,6 +216,9 @@
   "modalForm.contentType.header-create": "Create a content type",
   "modalForm.attribute.form.base.name": "Name",
   "modalForm.attribute.form.base.name.description": "No space is allowed for the name of the attribute",
+  "modalForm.attribute.text.type-selection": "Choose a text format",
+  "form.attribute.text.option.short-text": "Short text (string)",
+  "form.attribute.text.option.long-text": "Long text (text)",
   "modalForm.header-edit": "Edit {name}",
   "modalForm.sub-header.chooseAttribute.component": "Select a field for your component",
   "modalForm.sub-header.chooseAttribute.contentType": "Select a field for your content type"

@@ -7,7 +7,6 @@ import { upperFirst } from 'lodash';
 import pluginId from '../../pluginId';
 
 const ModalHeader = ({ headerId, iconType, name }) => {
-  console.log({ iconType });
   return (
     <section>
       <HeaderModalTitle style={{ textTransform: 'none' }}>

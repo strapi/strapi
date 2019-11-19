@@ -36,7 +36,7 @@ const FormModal = () => {
     actionType: null,
     modalType: null,
     settingType: null,
-    for: null,
+    forTarget: null,
     target: null,
     attributeType: null,
   };
@@ -48,31 +48,45 @@ const FormModal = () => {
   const query = useQuery();
   const attributeOptionRef = useRef();
 
-  const { contentTypes, createSchema, initialData } = useDataManager();
+  const {
+    addAttribute,
+    contentTypes,
+    createSchema,
+    initialData,
+  } = useDataManager();
   const { formErrors, modifiedData } = reducerState.toJS();
 
   useEffect(() => {
     if (!isEmpty(search)) {
+      const attributeType = query.get('attributeType');
+
       setState({
         actionType: query.get('actionType'),
         modalType: query.get('modalType'),
         settingType: query.get('settingType'),
-        for: query.get('for'),
+        forTarget: query.get('forTarget'),
         target: query.get('target'),
-        attributeType: query.get('attributeType'),
+        attributeType,
       });
+
+      if (attributeType) {
+        dispatch({
+          type: 'SET_ATTRIBUTE_DATA_SCHEMA',
+          attributeType,
+        });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
-  const displayedAttributes = getAttributes(state.for);
+  const displayedAttributes = getAttributes(state.forTarget);
 
   const form = get(forms, [state.modalType, 'form', state.settingType], () => ({
     items: [],
   }));
   const iconType = ['components', 'contentType'].includes(state.modalType)
     ? state.modalType
-    : state.for;
+    : state.forTarget;
   const isCreatingCT = state.modalType === 'contentType';
   const isCreating = state.actionType === 'create';
   const isOpen = !isEmpty(search);
@@ -92,10 +106,18 @@ const FormModal = () => {
     ? { paddingTop: '0.5rem', paddingBottom: '3rem' }
     : {};
 
+  const checkFormValidity = async () => {
+    const schema = forms[state.modalType].schema(Object.keys(contentTypes));
+
+    await schema.validate(modifiedData, { abortEarly: false });
+  };
+
   const getModalTitleSubHeader = () => {
     switch (state.modalType) {
       case 'chooseAttribute':
-        return getTrad(`modalForm.sub-header.chooseAttribute.${state.for}`);
+        return getTrad(
+          `modalForm.sub-header.chooseAttribute.${state.forTarget}`
+        );
       default:
         return getTrad('configurations');
     }
@@ -126,16 +148,23 @@ const FormModal = () => {
     e.preventDefault();
 
     try {
-      const schema = forms[state.modalType].schema(Object.keys(contentTypes));
+      await checkFormValidity();
+      const nextSearch = `modalType=chooseAttribute&forTarget=${state.modalType}&target=${modifiedData.name}`;
 
-      await schema.validate(modifiedData, { abortEarly: false });
-
-      createSchema(modifiedData, state.modalType, uid);
-      const nextSlug = isCreatingCT ? 'content-types' : 'component-categories';
-      push({
-        pathname: `/plugins/${pluginId}/${nextSlug}/${uid}`,
-        search: `modalType=chooseAttribute&for=${state.modalType}&target=${modifiedData.name}`,
-      });
+      if (state.modalType !== 'attribute') {
+        createSchema(modifiedData, state.modalType, uid);
+        const nextSlug = isCreatingCT
+          ? 'content-types'
+          : 'component-categories';
+        push({
+          pathname: `/plugins/${pluginId}/${nextSlug}/${uid}`,
+          search: nextSearch,
+        });
+      } else {
+        // Do something
+        addAttribute(modifiedData);
+        push({ search: nextSearch });
+      }
       dispatch({
         type: 'RESET_PROPS',
       });

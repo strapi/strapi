@@ -10,6 +10,16 @@ const initialState = fromJS({
 
 const reducer = (state, action) => {
   switch (action.type) {
+    case 'ADD_ATTRIBUTE': {
+      const {
+        attributeToSet: { name, ...rest },
+      } = action;
+
+      return state.updateIn(
+        ['modifiedData', 'schema', 'attributes', name],
+        () => fromJS(rest)
+      );
+    }
     case 'GET_DATA_SUCCEEDED':
       return state
         .update('components', () => fromJS(action.components))
@@ -30,10 +40,16 @@ const reducer = (state, action) => {
       return state.updateIn([key, action.uid], () => fromJS(newSchema));
     }
 
-    case 'SET_MODIFIED_DATA':
+    case 'SET_MODIFIED_DATA': {
+      const schemaWithOrderedAttributes = fromJS(action.schemaToSet).setIn(
+        ['schema', 'attributes'],
+        OrderedMap(action.schemaToSet.schema.attributes)
+      );
+
       return state
-        .update('initialData', () => OrderedMap(action.schemaToSet))
-        .update('modifiedData', () => OrderedMap(action.schemaToSet));
+        .update('initialData', () => schemaWithOrderedAttributes)
+        .update('modifiedData', () => schemaWithOrderedAttributes);
+    }
     default:
       return state;
   }

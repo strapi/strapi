@@ -2,7 +2,7 @@ import React, { memo, useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { request, LoadingIndicatorPage } from 'strapi-helper-plugin';
-import { useRouteMatch } from 'react-router-dom';
+import { useRouteMatch, Redirect } from 'react-router-dom';
 import DataManagerContext from '../../contexts/DataManagerContext';
 import pluginId from '../../pluginId';
 import FormModal from '../FormModal';
@@ -60,6 +60,13 @@ const DataManagerProvider = ({ children }) => {
     getDataRef.current();
   }, []);
 
+  const addAttribute = attributeToSet => {
+    dispatch({
+      type: 'ADD_ATTRIBUTE',
+      attributeToSet,
+    });
+  };
+
   const createSchema = (data, schemaType, uid) => {
     dispatch({
       type: 'CREATE_SCHEMA',
@@ -78,12 +85,22 @@ const DataManagerProvider = ({ children }) => {
       schemaToSet,
     });
   };
+  const shouldRedirect = () => {
+    const dataSet = isInContentTypeView ? contentTypes : components;
 
-  console.log({ contentTypes, components });
+    return !Object.keys(dataSet).includes(currentUid) && !isLoading;
+  };
+
+  if (shouldRedirect()) {
+    const firstCTUid = Object.keys(contentTypes).sort()[0];
+
+    return <Redirect to={`/plugins/${pluginId}/content-types/${firstCTUid}`} />;
+  }
 
   return (
     <DataManagerContext.Provider
       value={{
+        addAttribute,
         components,
         contentTypes,
         createSchema,
@@ -98,6 +115,9 @@ const DataManagerProvider = ({ children }) => {
         <>
           {children}
           <FormModal />
+          <button type="button" onClick={() => dispatch({ type: 'TEST' })}>
+            click
+          </button>
         </>
       )}
     </DataManagerContext.Provider>
