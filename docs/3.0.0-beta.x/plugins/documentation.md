@@ -126,9 +126,9 @@ Here are the file that needs to be created in order to change the documentation 
       "bearerAuth": []
     }
   ],
-  "paths": {} // All your Api routes,
-  "tags": [] // Group of routes
-  "components": {} // Default generat
+  "paths": {},
+  "tags": [],
+  "components": {}
 }
 ```
 
