@@ -6,6 +6,8 @@ const _ = require('lodash');
 
 module.exports = function createSchemaHandler(infos) {
   const initialState = {
+    modelName: infos.modelName,
+    plugin: infos.plugin,
     uid: infos.uid,
     dir: infos.dir,
     filename: infos.filename,
@@ -21,6 +23,14 @@ module.exports = function createSchemaHandler(infos) {
   let deleted = false;
 
   return {
+    get modelName() {
+      return initialState.modelName;
+    },
+
+    get plugin() {
+      return initialState.plugin;
+    },
+
     get uid() {
       return state.uid;
     },

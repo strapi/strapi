@@ -27,7 +27,7 @@ module.exports = function createComponentBuilder() {
         throw new Error('contentType.alreadyExists');
       }
 
-      const handler = createSchemaHandler({
+      const contentType = createSchemaHandler({
         dir: path.join(strapi.dir, 'api', nameToSlug(infos.name), 'models'),
         filename: `${nameToSlug(infos.name)}.settings.json`,
       });
@@ -42,7 +42,7 @@ module.exports = function createComponentBuilder() {
         pluralize(infos.name)
       )}`;
 
-      handler
+      contentType
         .setUID(uid)
         .set('connection', infos.connection || defaultConnection)
         .set('collectionName', infos.collectionName || defaultCollectionName)
@@ -50,11 +50,57 @@ module.exports = function createComponentBuilder() {
         .set(['info', 'description'], infos.description)
         .set('attributes', convertAttributes(infos.attributes));
 
-      this.contentTypes.set(uid, handler);
+      this.contentTypes.set(uid, contentType);
 
       // TODO: add reversed relations
+      Object.keys(infos.attributes).forEach(key => {
+        const attr = infos.attributes[key];
 
-      return handler;
+        if (_.has(attr, 'target')) {
+          if (!this.contentTypes.has(attr.target)) {
+            throw new Error('target.contentType.notFound');
+          }
+
+          const targetContentType = this.contentTypes.get(attr.target);
+
+          if (
+            _.has(targetContentType.schema.attributes, attr.targetAttribute)
+          ) {
+            throw new Error('target.attribute.alreadyExists');
+          }
+
+          const opts = {
+            via: key,
+            columnName: attr.targetColumnName,
+          };
+
+          switch (attr.nature) {
+            case 'manyWay':
+            case 'oneWay':
+              return;
+            case 'oneToOne':
+            case 'oneToMany':
+              opts.model = contentType.modelName;
+              break;
+            case 'manyToOne':
+              opts.collection = contentType.modelName;
+              break;
+            case 'manyToMany': {
+              opts.collection = contentType.modelName;
+
+              if (!attr.dominant) {
+                opts.dominant = true;
+              }
+              break;
+            }
+            default:
+          }
+
+          targetContentType.set(['attributes', attr.targetAttribute], opts);
+        }
+      });
+
+      return contentType;
     },
 
     editContentType(infos) {

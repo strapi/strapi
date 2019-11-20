@@ -17,6 +17,8 @@ function createSchemaManager() {
     const compo = strapi.components[key];
 
     return {
+      modelName: compo.modelName,
+      plugin: compo.modelName,
       uid: compo.uid,
       filename: compo.__filename__,
       dir: path.join(strapi.dir, 'components', compo.category),
@@ -35,6 +37,8 @@ function createSchemaManager() {
     }
 
     return {
+      modelName: contentType.modelName,
+      plugin: contentType.plugin,
       uid: contentType.uid,
       filename: contentType.__filename__,
       dir: path.join(strapi.dir, dir),
