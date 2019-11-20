@@ -65,7 +65,7 @@ Querying your API with deep filters may cause performance issues.
 If one of your deep filtering queries is too slow, we recommend building a custom route with an optimized version of your query.
 :::
 
-::: note
+::: tip
 This feature doesn't allow you to filter nested models, e.g `Find users and only return their posts older than yesterday`.
 
 To achieve this, there are two options:

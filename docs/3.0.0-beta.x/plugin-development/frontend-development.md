@@ -226,7 +226,7 @@ export default Initializer;
 
 The routing is based on the [React Router V4](https://reacttraining.com/react-router/web/guides/philosophy), due to it's implementation each route is declared in the `containers/App/index.js` file.
 
-::: note
+::: tip
 Each route defined in a plugin must be prefixed by the plugin's id.
 :::
 

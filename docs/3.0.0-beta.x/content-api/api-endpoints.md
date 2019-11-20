@@ -4,9 +4,9 @@ When you create a `Content Type` you will have a certain number of **REST API en
 
 As an **example** let's consider the `Restaurant` as a **Content Type** and `Openning_hours` as a **Group** for the next steps.
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "Content Type" id="content-type"
+::: tab "Content Type"
 
 ### `Restaurant` Content Type
 
@@ -18,7 +18,7 @@ As an **example** let's consider the `Restaurant` as a **Content Type** and `Ope
 
 :::
 
-::: tab "Group" id="group"
+::: tab Group
 
 ### `Opening_hours` Group
 
@@ -76,9 +76,9 @@ Here is the list of endpoints generated for each of your **Content Types**
 
 ### Here some Content Type examples
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "Restaurant" id="restaurant"
+::: tab Restaurant
 
 `Restaurant` **Content Type**
 
@@ -97,7 +97,7 @@ Here is the list of endpoints generated for each of your **Content Types**
 
 :::
 
-::: tab "Article" id="article"
+::: tab Article
 
 `Article` **Content Type**
 
@@ -116,7 +116,7 @@ Here is the list of endpoints generated for each of your **Content Types**
 
 :::
 
-::: tab "Product" id="product"
+::: tab Product
 
 `Product` **Content Type**
 
@@ -135,7 +135,7 @@ Here is the list of endpoints generated for each of your **Content Types**
 
 :::
 
-::: tab "Category" id="category"
+::: tab Category
 
 `Category` **Content Type**
 
@@ -154,7 +154,7 @@ Here is the list of endpoints generated for each of your **Content Types**
 
 :::
 
-::: tab "Tag" id="tag"
+::: tab Tag
 
 `Tag` **Content Type**
 
