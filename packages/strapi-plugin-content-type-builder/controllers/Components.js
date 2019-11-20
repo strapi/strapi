@@ -67,6 +67,7 @@ module.exports = {
 
       ctx.send({ data: { uid: component.uid } }, 201);
     } catch (error) {
+      strapi.log.error(error);
       ctx.send({ error: error.message }, 400);
     }
   },
@@ -98,6 +99,7 @@ module.exports = {
 
       ctx.send({ data: { uid: component.uid } });
     } catch (error) {
+      strapi.log.error(error);
       ctx.send({ error: error.message }, 400);
     }
   },
@@ -119,6 +121,7 @@ module.exports = {
 
       ctx.send({ data: { uid: component.uid } });
     } catch (error) {
+      strapi.log.error(error);
       ctx.send({ error: error.message }, 400);
     }
   },

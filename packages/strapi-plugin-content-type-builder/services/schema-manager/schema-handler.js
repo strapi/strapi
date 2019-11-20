@@ -78,6 +78,21 @@ module.exports = function createSchemaHandler(infos) {
       return this;
     },
 
+    removeContentType(uid) {
+      const { attributes } = state.schema;
+
+      Object.keys(attributes).forEach(key => {
+        const attr = attributes[key];
+        const target = attr.model || attr.collection;
+
+        if (target === uid) {
+          this.unset(['attributes', key]);
+        }
+      });
+
+      return this;
+    },
+
     // utils
     removeComponent(uid) {
       const { attributes } = state.schema;

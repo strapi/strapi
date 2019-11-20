@@ -15,7 +15,7 @@ const createSchemaHandler = require('./schema-handler');
 const createComponentUID = ({ category, name }) =>
   `${nameToSlug(category)}.${nameToSlug(name)}`;
 
-module.exports = function createComponentBuilder({ tmpComponents }) {
+module.exports = function createComponentBuilder() {
   return {
     /**
      * create a component in the tmpComponent map
@@ -23,7 +23,7 @@ module.exports = function createComponentBuilder({ tmpComponents }) {
     createComponent(infos) {
       const uid = createComponentUID(infos);
 
-      if (tmpComponents.has(uid)) {
+      if (this.components.has(uid)) {
         throw new Error('component.alreadyExists');
       }
 
@@ -51,7 +51,7 @@ module.exports = function createComponentBuilder({ tmpComponents }) {
         .set(['info', 'description'], infos.description)
         .set('attributes', convertAttributes(infos.attributes));
 
-      tmpComponents.set(uid, handler);
+      this.components.set(uid, handler);
 
       return handler;
     },
@@ -62,18 +62,18 @@ module.exports = function createComponentBuilder({ tmpComponents }) {
     editComponent(infos) {
       const { uid } = infos;
 
-      if (!tmpComponents.has(uid)) {
+      if (!this.components.has(uid)) {
         throw new Error('component.notFound');
       }
 
-      const handler = tmpComponents.get(uid);
+      const handler = this.components.get(uid);
 
       const [, nameUID] = uid.split('.');
 
       const newCategory = nameToSlug(infos.category);
       const newUID = `${newCategory}.${nameUID}`;
 
-      if (newUID !== uid && tmpComponents.has(newUID)) {
+      if (newUID !== uid && this.components.has(newUID)) {
         throw new Error('component.edit.alreadyExists');
       }
 
@@ -87,6 +87,7 @@ module.exports = function createComponentBuilder({ tmpComponents }) {
         .set(['info', 'name'], infos.name)
         .set(['info', 'icon'], infos.icon)
         .set(['info', 'description'], infos.description)
+        // TODO: keep configurable args etc...
         .set('attributes', convertAttributes(infos.attributes));
 
       if (newUID !== uid) {
@@ -103,7 +104,7 @@ module.exports = function createComponentBuilder({ tmpComponents }) {
     },
 
     deleteComponent(uid) {
-      if (!tmpComponents.has(uid)) {
+      if (!this.components.has(uid)) {
         throw new Error('component.notFound');
       }
 
@@ -115,7 +116,7 @@ module.exports = function createComponentBuilder({ tmpComponents }) {
         ct.removeComponent(uid);
       });
 
-      return tmpComponents.get(uid).delete();
+      return this.components.get(uid).delete();
     },
   };
 };

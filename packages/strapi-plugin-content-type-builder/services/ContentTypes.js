@@ -1,8 +1,12 @@
 'use strict';
 
 const _ = require('lodash');
+const pluralize = require('pluralize');
+const generator = require('strapi-generate');
 
+const { formatAttributes } = require('../utils/attributes');
 const getSchemaManager = require('./schema-manager');
+const { nameToSlug } = require('../utils/helpers');
 
 /**
  * Creates a component and handle the nested components sent with it
@@ -10,7 +14,10 @@ const getSchemaManager = require('./schema-manager');
  * @param {Object} params.component Main component to create
  * @param {Array<Object>} params.components List of nested components to created or edit
  */
-const createContentType = ({ contentType, components = [] }) => {
+const createContentType = async ({ contentType, components = [] }) => {
+  // generate api squeleton
+  await generateAPI(contentType.name);
+
   const componentsToCreate = components.filter(compo => !_.has(compo, 'uid'));
   const componentsToEdit = components.filter(compo => _.has(compo, 'uid'));
 
@@ -24,8 +31,81 @@ const createContentType = ({ contentType, components = [] }) => {
   });
 };
 
+/**
+ * Generate a squeleton API
+ * @param {*} name
+ * @param {*} contentType
+ */
+const generateAPI = name => {
+  return new Promise((resolve, reject) => {
+    const scope = {
+      generatorType: 'api',
+      id: nameToSlug(name),
+      name: nameToSlug(name),
+      rootPath: strapi.dir,
+      args: {
+        attributes: {},
+      },
+    };
+
+    generator(scope, {
+      success: () => resolve(),
+      error: err => reject(err),
+    });
+  });
+};
+
+/**
+ * Edits a contentType and handle the nested contentTypes sent with it
+ * @param {Object} params params object
+ * @param {Object} params.contentType Main contentType to create
+ * @param {Array<Object>} params.components List of nested components to created or edit
+ */
+const editContentType = (uid, { contentType, components = [] }) => {
+  const componentsToCreate = components.filter(compo => !_.has(compo, 'uid'));
+  const componentsToEdit = components.filter(compo => _.has(compo, 'uid'));
+
+  return getSchemaManager().edit(ctx => {
+    const updatedComponent = ctx.editContentType({
+      uid,
+      ...contentType,
+    });
+
+    componentsToCreate.forEach(ctx.createComponent);
+    componentsToEdit.forEach(ctx.editComponent);
+
+    return updatedComponent;
+  });
+};
+
+const deleteContentType = uid => {
+  return getSchemaManager().edit(ctx => {
+    return ctx.deleteContentType(uid);
+  });
+};
+
+const formatContentType = contentType => {
+  const { uid, plugin, connection, collectionName, info } = contentType;
+
+  return {
+    uid,
+    plugin,
+    schema: {
+      name: _.get(info, 'name') || _.upperFirst(pluralize(uid)),
+      description: _.get(info, 'description', ''),
+      connection,
+      collectionName,
+      attributes: formatAttributes(contentType),
+    },
+  };
+};
+
 module.exports = {
   createContentType,
+  editContentType,
+  deleteContentType,
+
+  formatContentType,
 };
 
 // const path = require('path');
@@ -266,51 +346,6 @@ module.exports = {
 //   await fse.ensureFile(filePath);
 //   return fse.writeFile(filePath, JSON.stringify(schema, null, 2));
 // };
-
-// const formatContentType = contentType => {
-//   const { uid, plugin, connection, collectionName, info } = contentType;
-
-//   return {
-//     uid,
-//     plugin,
-//     schema: {
-//       name: _.get(info, 'name') || _.upperFirst(pluralize(uid)),
-//       description: _.get(info, 'description', ''),
-//       connection,
-//       collectionName,
-//       attributes: formatAttributes(contentType),
-//     },
-//   };
-// };
-
-// const createContentTypeSchema = infos => ({
-//   connection:
-//     infos.connection ||
-//     _.get(
-//       strapi,
-//       ['config', 'currentEnvironment', 'database', 'defaultConnection'],
-//       'default'
-//     ),
-//   collectionName:
-//     infos.collectionName || `${nameToCollectionName(pluralize(infos.name))}`,
-//   info: {
-//     name: infos.name,
-//     description: infos.description,
-//   },
-//   attributes: convertAttributes(infos.attributes),
-// });
-
-// const updateContentTypeSchema = (old, infos) => ({
-//   ...old,
-//   connection: infos.connection || old.connection,
-//   collectionName: infos.collectionName || old.collectionName,
-//   info: {
-//     name: infos.name || old.info.name,
-//     description: infos.description || old.info.description,
-//   },
-//   // TODO: keep old params like autoMigration, private, configurable
-//   attributes: convertAttributes(infos.attributes),
-// });
 
 // const generateAPI = (name, contentType) => {
 //   // create api
