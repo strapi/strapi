@@ -241,5 +241,6 @@
   "modalForm.header-edit": "Edit {name}",
   "modalForm.sub-header.chooseAttribute.component": "Select a field for your component",
   "modalForm.sub-header.chooseAttribute.contentType": "Select a field for your content type",
-  "modalForm.sub-header.attribute.create": "Add new {type} field"
+  "modalForm.sub-header.attribute.create": "Add new {type} field",
+  "modalForm.sub-header.attribute.edit": "Edit {name}"
 }

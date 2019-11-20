@@ -35,6 +35,7 @@ const NAVLINKS = [{ id: 'base' }, { id: 'advanced' }];
 
 const FormModal = () => {
   const initialStateData = {
+    attributeName: null,
     actionType: null,
     modalType: null,
     settingType: null,
@@ -62,11 +63,15 @@ const FormModal = () => {
   useEffect(() => {
     if (!isEmpty(search)) {
       // Return 'null' if there isn't any attributeType search params
+      //TODO need targetUID
+      // TODO change target by targetUID & add displayName instead of target
       const attributeType = query.get('attributeType');
       const modalType = query.get('modalType');
+      const actionType = query.get('actionType');
 
       setState({
-        actionType: query.get('actionType'),
+        attributeName: query.get('attributeName'),
+        actionType,
         modalType,
         settingType: query.get('settingType'),
         forTarget: query.get('forTarget'),
@@ -83,6 +88,7 @@ const FormModal = () => {
         dispatch({
           type: 'SET_ATTRIBUTE_DATA_SCHEMA',
           attributeType,
+          isEditing: actionType === 'edit',
         });
       }
     }
@@ -292,6 +298,7 @@ const FormModal = () => {
                     id: getTrad(`attribute.${state.attributeType}`),
                   })
                 ),
+                name: upperFirst(state.attributeName),
               }}
             >
               {msg => <span>{upperFirst(msg)}</span>}
