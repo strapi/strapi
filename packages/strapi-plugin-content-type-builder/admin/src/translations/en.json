@@ -40,7 +40,7 @@
   "form.attribute.item.enumeration.graphql.description": "Allows you to override the default generated name for GraphQL",
   "form.attribute.item.enumeration.name": "Name",
   "form.attribute.item.enumeration.placeholder": "Ex:\nmorning\nnoon\nevening",
-  "form.attribute.item.enumeration.rules": "Values (one line per value)",
+
   "form.attribute.item.group.label.name": "Group Name in this content type",
   "form.attribute.item.group.label.select": "Select a group",
   "form.attribute.item.group.placeholder.name": "Name of this group",
@@ -166,6 +166,7 @@
   "table.relations.title.plural": "including {number} relationships",
   "table.relations.title.singular": "including {number} relationship",
   "prompt.content.unsaved": "Are you sure you want to leave this content type? All your modifications will be lost.",
+  "DELETE ALL ABOVE TRADS": null,
 
   "attribute.boolean": "Boolean",
   "attribute.boolean.description": "Yes or no, 1 or 0, true or false",
@@ -196,20 +197,24 @@
   "attribute.text.description": "Small or long text like title or description",
   "attribute.uid": "Uuid",
   "attribute.uid.description": "Unique identifier",
+
   "configurations": "configurations",
   "contentType.displayName.label": "Display name",
   "contentType.collectionName.description": "Useful when the name of your Content Type and your table name differ",
   "contentType.collectionName.label": "Collection name",
-
   "contentType.UID.description": "The UID is used to generate the API routes and databases tables/collections",
+
   "modalForm.component.header-create": "Create a component",
   "modalForm.contentType.header-create": "Create a content type",
   "modalForm.attribute.form.base.name": "Name",
   "modalForm.attribute.form.base.name.description": "No space is allowed for the name of the attribute",
   "modalForm.attribute.text.type-selection": "Type",
+
   "form.attribute.item.settings.name": "Settings",
   "form.attribute.item.date.type.date": "date",
   "form.attribute.item.date.type.datetime": "datetime",
+  "form.attribute.item.enumeration.rules": "Values (one line per value)",
+  "form.attribute.item.enumeration.placeholder": "Ex:\nmorning\nnoon\nevening",
   "form.attribute.item.date.type.time": "time",
   "form.attribute.media.option.multiple": "Multiple media",
   "form.attribute.media.option.multiple.description": "Best for sliders, carousels or multiple files download",

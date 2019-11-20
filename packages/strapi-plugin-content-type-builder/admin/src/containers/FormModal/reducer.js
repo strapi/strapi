@@ -24,6 +24,8 @@ const reducer = (state, action) => {
         dataToSet = {};
       } else if (attributeType === 'media') {
         dataToSet = { type: 'media', multiple: true };
+      } else if (attributeType === 'enumeration') {
+        dataToSet = { type: 'enumeration', enum: [] };
       } else {
         dataToSet = { type: attributeType, default: null };
       }

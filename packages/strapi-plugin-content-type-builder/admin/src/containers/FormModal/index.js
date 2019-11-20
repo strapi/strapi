@@ -179,6 +179,8 @@ const FormModal = () => {
         val = null;
       }
       // val = value === 'false' ? false : true;
+    } else if (name === 'enum') {
+      val = value.split('\n');
     } else {
       val = value;
     }
@@ -372,6 +374,7 @@ const FormModal = () => {
                                     marginTop: -2,
                                     fontWeight: 500,
                                   }}
+                                  key="divider"
                                 >
                                   <FormattedMessage
                                     id={getTrad(
@@ -393,13 +396,22 @@ const FormModal = () => {
                               ''
                             );
 
-                            const value =
+                            let value;
+
+                            if (
                               input.name === 'default' &&
                               state.attributeType === 'boolean'
-                                ? toString(retrievedValue)
-                                : retrievedValue;
+                            ) {
+                              value = toString(retrievedValue);
+                            } else if (
+                              input.name === 'enum' &&
+                              Array.isArray(retrievedValue)
+                            ) {
+                              value = retrievedValue.join('\n');
+                            } else {
+                              value = retrievedValue;
+                            }
 
-                            console.log({ value });
                             return (
                               <div
                                 className={`col-${input.size || 6}`}
@@ -418,11 +430,16 @@ const FormModal = () => {
                                       : formatMessage({ id: errorId })
                                   }
                                   onChange={handleChange}
-                                  // onBlur={() => {}}
+                                  onBlur={() => {}}
                                   description={
                                     get(input, 'description.id', null)
                                       ? formatMessage(input.description)
                                       : input.description
+                                  }
+                                  placeholder={
+                                    get(input, 'placeholder.id', null)
+                                      ? formatMessage(input.placeholder)
+                                      : input.placeholder
                                   }
                                   label={
                                     get(input, 'label.id', null)

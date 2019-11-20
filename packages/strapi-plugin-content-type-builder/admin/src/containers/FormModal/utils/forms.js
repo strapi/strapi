@@ -95,6 +95,10 @@ const forms = {
             })
             .nullable();
         }),
+        enum: yup
+          .array()
+          .of(yup.string())
+          .min(1, errorsTrads.min),
       });
     },
     form: {
@@ -104,7 +108,7 @@ const forms = {
             {
               autoFocus: true,
               name: 'default',
-              type: 'text',
+              type: type === 'email' ? 'email' : 'text',
               label: {
                 id: getTrad('form.attribute.settings.default'),
               },
@@ -114,7 +118,6 @@ const forms = {
           [
             {
               type: 'divider',
-              name: 'kk',
             },
           ],
           [
@@ -175,7 +178,21 @@ const forms = {
           ]);
         }
 
-        console.log(data.type);
+        if (type === 'enumeration') {
+          items.splice(0, 1, [
+            {
+              autoFocus: false,
+              name: 'default',
+              type: 'select',
+              label: {
+                id: getTrad('form.attribute.settings.default'),
+              },
+              validations: {},
+              options: data.enum || [],
+            },
+          ]);
+        }
+
         if (type === 'date') {
           items.splice(0, 1, [
             {
@@ -260,7 +277,7 @@ const forms = {
               label: {
                 id: getTrad('modalForm.attribute.text.type-selection'),
               },
-              name: 'multiple',
+              name: type === 'text' ? 'type' : 'multiple',
               type: 'booleanBox',
               size: 12,
               options: [
@@ -275,7 +292,7 @@ const forms = {
                       type === 'text' ? 'short-text' : 'multiple'
                     }.description`
                   ),
-                  value: true,
+                  value: type === 'text' ? 'string' : true,
                 },
                 {
                   headerId: getTrad(
@@ -288,7 +305,7 @@ const forms = {
                       type === 'text' ? 'long-text' : 'single'
                     }.description`
                   ),
-                  value: false,
+                  value: type === 'text' ? 'text' : false,
                 },
               ],
               validations: {},
@@ -379,6 +396,26 @@ const forms = {
               required: true,
             },
           });
+        }
+
+        if (type === 'enumeration') {
+          items.push([
+            {
+              autoFocus: false,
+              name: 'enum',
+              type: 'textarea',
+              size: 8,
+              label: {
+                id: getTrad('form.attribute.item.enumeration.rules'),
+              },
+              placeholder: {
+                id: getTrad('form.attribute.item.enumeration.placeholder'),
+              },
+              validations: {
+                required: true,
+              },
+            },
+          ]);
         }
 
         return {
