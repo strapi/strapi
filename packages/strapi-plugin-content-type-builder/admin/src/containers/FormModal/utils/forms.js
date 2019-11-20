@@ -1,6 +1,6 @@
 import React from 'react';
 import * as yup from 'yup';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../../pluginId';
@@ -31,14 +31,27 @@ yup.addMethod(yup.string, 'unique', function(
   });
 });
 
+yup.addMethod(yup.array, 'hasNotEmptyValues', function(message) {
+  return this.test('hasNotEmptyValues', message, function(array) {
+    return !array.some(value => isEmpty(value));
+  });
+});
+
+const ATTRIBUTES_THAT_DONT_HAVE_MIN_MAX_SETTINGS = [
+  'boolean',
+  'date',
+  'enumeration',
+  'media',
+];
+
 const forms = {
   attribute: {
-    schema(currentSchema, attributeType) {
+    schema(currentSchema, attributeType, dataToValidate) {
       const allreadyTakenAttributes = Object.keys(
         get(currentSchema, ['schema', 'attributes'], {})
       );
 
-      return yup.object().shape({
+      const commonShape = {
         name: yup
           .string()
           .unique(errorsTrads.unique, allreadyTakenAttributes)
@@ -46,25 +59,8 @@ const forms = {
         type: yup.string().required(errorsTrads.required),
         default: yup.string().nullable(),
         required: yup.boolean(),
-        unique: yup.boolean(),
-        maxLength: yup
-          .number()
-          .integer()
-          .nullable(),
-        minLength: yup
-          .number()
-          .integer()
-          .when('maxLength', (maxLength, schema) => {
-            if (maxLength) {
-              return schema.lessThan(
-                maxLength,
-                getTrad('error.validation.minSupMax')
-              );
-            } else {
-              return schema;
-            }
-          })
-          .nullable(),
+      };
+      const numberTypeShape = {
         max: yup.lazy(() => {
           let schema = yup.number();
 
@@ -95,11 +91,57 @@ const forms = {
             })
             .nullable();
         }),
-        enum: yup
-          .array()
-          .of(yup.string())
-          .min(1, errorsTrads.min),
-      });
+      };
+      const fieldsThatSupportMaxAndMinLengthShape = {
+        maxLength: yup
+          .number()
+          .integer()
+          .nullable(),
+        minLength: yup
+          .number()
+          .integer()
+          .when('maxLength', (maxLength, schema) => {
+            if (maxLength) {
+              return schema.lessThan(
+                maxLength,
+                getTrad('error.validation.minSupMax')
+              );
+            } else {
+              return schema;
+            }
+          })
+          .nullable(),
+      };
+
+      switch (attributeType) {
+        case 'enumeration':
+          return yup.object().shape({
+            ...commonShape,
+            enum: yup
+              .array()
+              .of(yup.string())
+              .min(1, errorsTrads.min)
+              .hasNotEmptyValues(
+                'Empty strings are not allowed',
+                dataToValidate.enum
+              ),
+            enumName: yup.string().nullable(),
+          });
+        case 'number':
+        case 'integer':
+        case 'biginteger':
+        case 'float':
+        case 'decimal':
+          return yup.object().shape({
+            ...commonShape,
+            ...numberTypeShape,
+          });
+        default:
+          return yup.object().shape({
+            ...commonShape,
+            ...fieldsThatSupportMaxAndMinLengthShape,
+          });
+      }
     },
     form: {
       advanced(data, type) {
@@ -165,9 +207,6 @@ const forms = {
               label: {
                 id: getTrad('form.attribute.settings.default'),
               },
-              // description: {
-              //   id: getTrad('form.attribute.item.requiredField.description'),
-              // },
               options: [
                 { value: 'true', label: 'TRUE' },
                 { value: '', label: 'NULL' },
@@ -188,7 +227,42 @@ const forms = {
                 id: getTrad('form.attribute.settings.default'),
               },
               validations: {},
-              options: data.enum || [],
+              options: [
+                <FormattedMessage
+                  key="hidden___value__placeholder"
+                  id={'components.InputSelect.option.placeholder'}
+                >
+                  {msg => <option value="">{msg}</option>}
+                </FormattedMessage>,
+              ].concat(
+                data.enum
+                  ? data.enum
+                      .filter(
+                        (val, index) =>
+                          data.enum.indexOf(val) === index && !isEmpty(val)
+                      )
+                      .map(val => (
+                        <option key={val} value={val}>
+                          {val}
+                        </option>
+                      ))
+                  : []
+              ),
+            },
+          ]);
+          items.splice(1, 1, [
+            {
+              label: {
+                id: getTrad('form.attribute.item.enumeration.graphql'),
+              },
+              name: 'enumName',
+              type: 'text',
+              validations: {},
+              description: {
+                id: getTrad(
+                  'form.attribute.item.enumeration.graphql.description'
+                ),
+              },
             },
           ]);
         }
@@ -210,13 +284,12 @@ const forms = {
           ]);
         }
 
-        if (type !== 'media' && type !== 'boolean' && type !== 'date') {
+        if (!ATTRIBUTES_THAT_DONT_HAVE_MIN_MAX_SETTINGS.includes(type)) {
           items.push(
             [
               {
                 autoFocus: false,
                 name: type === 'number' ? 'max' : 'maxLength',
-                // type: 'number',
                 type: 'customCheckboxWithChildren',
                 label: {
                   id: getTrad(

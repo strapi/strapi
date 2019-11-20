@@ -122,7 +122,11 @@ const FormModal = () => {
     if (state.modalType === 'contentType') {
       schema = forms[state.modalType].schema(Object.keys(contentTypes));
     } else if (state.modalType === 'attribute') {
-      schema = forms[state.modalType].schema(allDataSchema, modifiedData.type);
+      schema = forms[state.modalType].schema(
+        allDataSchema,
+        modifiedData.type,
+        modifiedData
+      );
     } else {
       console.log('Will do something');
     }
@@ -158,13 +162,17 @@ const FormModal = () => {
   };
 
   const handleChange = ({ target: { name, value, type } }) => {
-    const namesThatCanResetErrors = ['max', 'min', 'maxLength', 'minLength'];
+    const namesThatCanResetToNullValue = [
+      'enumName',
+      'max',
+      'min',
+      'maxLength',
+      'minLength',
+    ];
     let val;
 
-    console.log({ type });
-
     if (
-      ['default', ...namesThatCanResetErrors].includes(name) &&
+      ['default', ...namesThatCanResetToNullValue].includes(name) &&
       value === ''
     ) {
       val = null;

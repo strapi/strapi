@@ -5,6 +5,7 @@ const uploadFiles = require('../../utils/upload-files');
 
 module.exports = async (ctx, next) => {
   const { model } = ctx.params;
+  console.log({ model });
 
   const ct = strapi.contentTypes[model];
 
