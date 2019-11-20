@@ -47,7 +47,6 @@
     "is-wsl": "^2.0.0",
     "mini-css-extract-plugin": "^0.6.0",
     "moment": "^2.24.0",
-    "open-browser-webpack-plugin": "^0.0.5",
     "prop-types": "^15.7.2",
     "react": "^16.9.0",
     "react-copy-to-clipboard": "^5.0.1",

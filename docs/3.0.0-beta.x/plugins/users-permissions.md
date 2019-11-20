@@ -213,17 +213,42 @@ axios
   .post('http://localhost:1337/auth/reset-password', {
     code: 'privateCode',
     password: 'myNewPassword',
-    passwordConfirmation: 'myNewPassword'
+    passwordConfirmation: 'myNewPassword',
   })
   .then(response => {
     // Handle success.
-    console.log('Your user\'s password has been changed.');
+    console.log("Your user's password has been changed.");
   })
   .catch(error => {
     // Handle error.
     console.log('An error occurred:', error);
   });
-});
+```
+
+### Email validation
+
+This action send an email to a user with the link to confirm the user.
+
+#### Usage
+
+- email is the user email.
+
+```js
+import axios from 'axios';
+
+// Request API.
+axios
+  .post(`http://localhost:1337/auth/send-email-confirmation`, {
+    email: 'user@strapi.io',
+  })
+  .then(response => {
+    // Handle success.
+    console.log('Your user received an email');
+  })
+  .catch(error => {
+    // Handle error.
+    console.err('An error occured:', err);
+  });
 ```
 
 ## User object in Strapi context
