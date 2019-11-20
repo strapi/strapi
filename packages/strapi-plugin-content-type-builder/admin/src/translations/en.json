@@ -54,7 +54,6 @@
   "form.attribute.item.repeatable": "Repeatable field",
   "form.attribute.item.repeatable.description": "You won't be able to create an entry if there is an existing entry with identical content",
 
-  "form.attribute.item.settings.name": "Settings",
   "form.attribute.item.string.name": "Name",
   "form.attribute.item.textarea.name": "Name",
 
@@ -186,6 +185,7 @@
   "attribute.media.description": "Images, videos, PDFs and other files",
   "attribute.number": "Number",
   "attribute.number.description": "Everything that is number",
+  "attribute.null": " ",
   "attribute.password": "Password",
   "attribute.password.description": "User password...",
   "attribute.relation": "Relation",
@@ -207,6 +207,10 @@
   "modalForm.attribute.form.base.name": "Name",
   "modalForm.attribute.form.base.name.description": "No space is allowed for the name of the attribute",
   "modalForm.attribute.text.type-selection": "Type",
+  "form.attribute.item.settings.name": "Settings",
+  "form.attribute.item.date.type.date": "date",
+  "form.attribute.item.date.type.datetime": "datetime",
+  "form.attribute.item.date.type.time": "time",
   "form.attribute.media.option.multiple": "Multiple media",
   "form.attribute.media.option.multiple.description": "Best for sliders, carousels or multiple files download",
   "form.attribute.media.option.single": "Single media",
@@ -231,5 +235,6 @@
   "form.attribute.item.uniqueField.description": "You won't be able to create an entry if there is an existing entry with identical content",
   "modalForm.header-edit": "Edit {name}",
   "modalForm.sub-header.chooseAttribute.component": "Select a field for your component",
-  "modalForm.sub-header.chooseAttribute.contentType": "Select a field for your content type"
+  "modalForm.sub-header.chooseAttribute.contentType": "Select a field for your content type",
+  "modalForm.sub-header.attribute.create": "Add new {type} field"
 }

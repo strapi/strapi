@@ -20,12 +20,12 @@ const reducer = (state, action) => {
 
       if (attributeType === 'text') {
         dataToSet = { type: 'string' };
-      } else if (attributeType === 'number') {
+      } else if (attributeType === 'number' || attributeType === 'date') {
         dataToSet = {};
       } else if (attributeType === 'media') {
         dataToSet = { type: 'media', multiple: true };
       } else {
-        dataToSet = { type: attributeType };
+        dataToSet = { type: attributeType, default: null };
       }
 
       return state.update('modifiedData', () => fromJS(dataToSet));

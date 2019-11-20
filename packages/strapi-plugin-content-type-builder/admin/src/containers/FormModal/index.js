@@ -14,7 +14,7 @@ import {
 import { Inputs } from '@buffetjs/custom';
 import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
-import { get, isEmpty, upperFirst } from 'lodash';
+import { get, isEmpty, toString, upperFirst } from 'lodash';
 import pluginId from '../../pluginId';
 import useQuery from '../../hooks/useQuery';
 import useDataManager from '../../hooks/useDataManager';
@@ -136,6 +136,8 @@ const FormModal = () => {
         return getTrad(
           `modalForm.sub-header.chooseAttribute.${state.forTarget}`
         );
+      case 'attribute':
+        return getTrad(`modalForm.sub-header.attribute.${state.actionType}`);
       default:
         return getTrad('configurations');
     }
@@ -159,6 +161,8 @@ const FormModal = () => {
     const namesThatCanResetErrors = ['max', 'min', 'maxLength', 'minLength'];
     let val;
 
+    console.log({ type });
+
     if (
       ['default', ...namesThatCanResetErrors].includes(name) &&
       value === ''
@@ -166,6 +170,15 @@ const FormModal = () => {
       val = null;
     } else if (type === 'radio' && (name === 'multiple' || name === 'single')) {
       val = value === 'false' ? false : true;
+    } else if (type === 'radio' && name === 'default') {
+      if (value === 'false') {
+        val = false;
+      } else if (value === 'true') {
+        val = true;
+      } else {
+        val = null;
+      }
+      // val = value === 'false' ? false : true;
     } else {
       val = value;
     }
@@ -255,16 +268,25 @@ const FormModal = () => {
     >
       <HeaderModal>
         <ModalHeader
-          // name={state.forTarget || name}
           name={name}
           headerId={headerId}
           iconType={iconType || 'contentType'}
         />
         <section>
           <HeaderModalTitle>
-            <FormattedMessage id={getModalTitleSubHeader()}>
+            <FormattedMessage
+              id={getModalTitleSubHeader()}
+              values={{
+                type: upperFirst(
+                  formatMessage({
+                    id: getTrad(`attribute.${state.attributeType}`),
+                  })
+                ),
+              }}
+            >
               {msg => <span>{upperFirst(msg)}</span>}
             </FormattedMessage>
+
             {!isPickingAttribute && (
               <>
                 <div className="settings-tabs">
@@ -341,12 +363,43 @@ const FormModal = () => {
                       return (
                         <div className="row" key={index}>
                           {row.map(input => {
+                            if (input.type === 'divider') {
+                              return (
+                                <div
+                                  className="col-12"
+                                  style={{
+                                    marginBottom: '1.7rem',
+                                    marginTop: -2,
+                                    fontWeight: 500,
+                                  }}
+                                >
+                                  <FormattedMessage
+                                    id={getTrad(
+                                      'form.attribute.item.settings.name'
+                                    )}
+                                  />
+                                </div>
+                              );
+                            }
                             const errorId = get(
                               formErrors,
                               [...input.name.split('.'), 'id'],
                               null
                             );
 
+                            const retrievedValue = get(
+                              modifiedData,
+                              input.name,
+                              ''
+                            );
+
+                            const value =
+                              input.name === 'default' &&
+                              state.attributeType === 'boolean'
+                                ? toString(retrievedValue)
+                                : retrievedValue;
+
+                            console.log({ value });
                             return (
                               <div
                                 className={`col-${input.size || 6}`}
@@ -357,7 +410,7 @@ const FormModal = () => {
                                     customCheckboxWithChildren: CustomCheckbox,
                                     booleanBox: BooleanBox,
                                   }}
-                                  value={get(modifiedData, input.name, '')}
+                                  value={value}
                                   {...input}
                                   error={
                                     isEmpty(errorId)

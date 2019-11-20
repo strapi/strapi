@@ -113,6 +113,12 @@ const forms = {
           ],
           [
             {
+              type: 'divider',
+              name: 'kk',
+            },
+          ],
+          [
+            {
               autoFocus: false,
               name: 'required',
               type: 'checkbox',
@@ -143,11 +149,51 @@ const forms = {
 
         const items = defaultItems.slice();
 
-        if (type === 'media' || type === 'boolean') {
+        if (type === 'media') {
           items.splice(0, 1);
         }
 
-        if (type !== 'media' && type !== 'boolean') {
+        if (type === 'boolean') {
+          items.splice(0, 1, [
+            {
+              autoFocus: false,
+              name: 'default',
+              type: 'enum',
+              label: {
+                id: getTrad('form.attribute.settings.default'),
+              },
+              // description: {
+              //   id: getTrad('form.attribute.item.requiredField.description'),
+              // },
+              options: [
+                { value: 'true', label: 'TRUE' },
+                { value: '', label: 'NULL' },
+                { value: 'false', label: 'FALSE' },
+              ],
+              validations: {},
+            },
+          ]);
+        }
+
+        console.log(data.type);
+        if (type === 'date') {
+          items.splice(0, 1, [
+            {
+              autoFocus: false,
+              name: 'default',
+              type: 'date',
+              label: {
+                id: getTrad('form.attribute.settings.default'),
+              },
+              validations: {},
+              value: null,
+              withDefaultValue: false,
+              disabled: data.type !== 'date',
+            },
+          ]);
+        }
+
+        if (type !== 'media' && type !== 'boolean' && type !== 'date') {
           items.push(
             [
               {
@@ -272,6 +318,49 @@ const forms = {
                 value: 'decimal',
               },
               { id: 'form.attribute.item.number.type.float', value: 'float' },
+            ].map(({ id, value }, index) => {
+              const disabled = index === 0;
+              const tradId = index === 0 ? id : getTrad(id);
+
+              return (
+                <FormattedMessage id={tradId} key={id}>
+                  {msg => (
+                    <option disabled={disabled} hidden={disabled} value={value}>
+                      {msg}
+                    </option>
+                  )}
+                </FormattedMessage>
+              );
+            }),
+            validations: {
+              required: true,
+            },
+          });
+        }
+
+        if (type === 'date') {
+          items[0].push({
+            label: {
+              id: getTrad('modalForm.attribute.text.type-selection'),
+            },
+            name: 'type',
+            type: 'select',
+            options: [
+              { id: 'components.InputSelect.option.placeholder', value: '' },
+              {
+                id: 'form.attribute.item.date.type.date',
+                value: 'date',
+              },
+              {
+                id: 'form.attribute.item.date.type.datetime',
+                value: 'datetime',
+              },
+              // Not sure the ctm supports that one
+              // {
+              //   id: 'form.attribute.item.date.type.timestamp',
+              //   value: 'timestamp',
+              // },
+              { id: 'form.attribute.item.date.type.time', value: 'time' },
             ].map(({ id, value }, index) => {
               const disabled = index === 0;
               const tradId = index === 0 ? id : getTrad(id);
