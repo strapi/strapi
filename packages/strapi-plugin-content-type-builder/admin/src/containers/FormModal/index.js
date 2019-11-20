@@ -19,6 +19,7 @@ import pluginId from '../../pluginId';
 import useQuery from '../../hooks/useQuery';
 import useDataManager from '../../hooks/useDataManager';
 import AttributeOption from '../../components/AttributeOption';
+import BooleanBox from '../../components/BooleanBox';
 import CustomCheckbox from '../../components/CustomCheckbox';
 import ModalHeader from '../../components/ModalHeader';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
@@ -154,12 +155,20 @@ const FormModal = () => {
     return newSearch;
   };
 
-  const handleChange = ({ target: { name, value } }) => {
+  const handleChange = ({ target: { name, value, type } }) => {
     const namesThatCanResetErrors = ['max', 'min', 'maxLength', 'minLength'];
-    const val =
-      ['default', ...namesThatCanResetErrors].includes(name) && value === ''
-        ? null
-        : value;
+    let val;
+
+    if (
+      ['default', ...namesThatCanResetErrors].includes(name) &&
+      value === ''
+    ) {
+      val = null;
+    } else if (type === 'radio' && (name === 'multiple' || name === 'single')) {
+      val = value === 'false' ? false : true;
+    } else {
+      val = value;
+    }
 
     const clonedErrors = Object.assign({}, formErrors);
 
@@ -234,6 +243,8 @@ const FormModal = () => {
       attributeOptionRef.current.focus();
     }
   };
+
+  console.log({ modifiedData });
 
   return (
     <Modal
@@ -344,6 +355,7 @@ const FormModal = () => {
                                 <Inputs
                                   customInputs={{
                                     customCheckboxWithChildren: CustomCheckbox,
+                                    booleanBox: BooleanBox,
                                   }}
                                   value={get(modifiedData, input.name, '')}
                                   {...input}

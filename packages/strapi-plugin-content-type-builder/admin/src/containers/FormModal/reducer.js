@@ -16,10 +16,17 @@ const reducer = (state, action) => {
       return initialState;
     case 'SET_ATTRIBUTE_DATA_SCHEMA': {
       const { attributeType } = action;
-      const dataToSet =
-        attributeType === 'text' || attributeType === 'number'
-          ? {}
-          : { type: attributeType };
+      let dataToSet;
+
+      if (attributeType === 'text') {
+        dataToSet = { type: 'string' };
+      } else if (attributeType === 'number') {
+        dataToSet = {};
+      } else if (attributeType === 'media') {
+        dataToSet = { type: 'media', multiple: true };
+      } else {
+        dataToSet = { type: attributeType };
+      }
 
       return state.update('modifiedData', () => fromJS(dataToSet));
     }

@@ -74,7 +74,6 @@ const forms = {
 
           return schema.nullable();
         }),
-
         min: yup.lazy(() => {
           let schema = yup.number();
 
@@ -100,47 +99,56 @@ const forms = {
     },
     form: {
       advanced(data, type) {
-        return {
-          items: [
-            [
-              {
-                autoFocus: true,
-                name: 'default',
-                type: 'text',
-                label: {
-                  id: getTrad('form.attribute.settings.default'),
-                },
-                validations: {},
+        const defaultItems = [
+          [
+            {
+              autoFocus: true,
+              name: 'default',
+              type: 'text',
+              label: {
+                id: getTrad('form.attribute.settings.default'),
               },
-            ],
-            [
-              {
-                autoFocus: false,
-                name: 'required',
-                type: 'checkbox',
-                label: {
-                  id: getTrad('form.attribute.item.requiredField'),
-                },
-                description: {
-                  id: getTrad('form.attribute.item.requiredField.description'),
-                },
-                validations: {},
+              validations: {},
+            },
+          ],
+          [
+            {
+              autoFocus: false,
+              name: 'required',
+              type: 'checkbox',
+              label: {
+                id: getTrad('form.attribute.item.requiredField'),
               },
-            ],
-            [
-              {
-                autoFocus: false,
-                name: 'unique',
-                type: 'checkbox',
-                label: {
-                  id: getTrad('form.attribute.item.uniqueField'),
-                },
-                description: {
-                  id: getTrad('form.attribute.item.uniqueField.description'),
-                },
-                validations: {},
+              description: {
+                id: getTrad('form.attribute.item.requiredField.description'),
               },
-            ],
+              validations: {},
+            },
+          ],
+          [
+            {
+              autoFocus: false,
+              name: 'unique',
+              type: 'checkbox',
+              label: {
+                id: getTrad('form.attribute.item.uniqueField'),
+              },
+              description: {
+                id: getTrad('form.attribute.item.uniqueField.description'),
+              },
+              validations: {},
+            },
+          ],
+        ];
+
+        const items = defaultItems.slice();
+
+        if (type === 'media' || type === 'boolean') {
+          items.splice(0, 1);
+        }
+
+        if (type !== 'media' && type !== 'boolean') {
+          items.push(
             [
               {
                 autoFocus: false,
@@ -172,8 +180,12 @@ const forms = {
                 },
                 validations: {},
               },
-            ],
-          ],
+            ]
+          );
+        }
+
+        return {
+          items,
         };
       },
       base(data, type) {
@@ -196,35 +208,46 @@ const forms = {
           ],
         ];
 
-        if (type === 'text') {
-          items[0].push({
-            label: {
-              id: getTrad('modalForm.attribute.text.type-selection'),
+        if (type === 'text' || type === 'media') {
+          items.push([
+            {
+              label: {
+                id: getTrad('modalForm.attribute.text.type-selection'),
+              },
+              name: 'multiple',
+              type: 'booleanBox',
+              size: 12,
+              options: [
+                {
+                  headerId: getTrad(
+                    `form.attribute.${type}.option.${
+                      type === 'text' ? 'short-text' : 'multiple'
+                    }`
+                  ),
+                  descriptionId: getTrad(
+                    `form.attribute.${type}.option.${
+                      type === 'text' ? 'short-text' : 'multiple'
+                    }.description`
+                  ),
+                  value: true,
+                },
+                {
+                  headerId: getTrad(
+                    `form.attribute.${type}.option.${
+                      type === 'text' ? 'long-text' : 'single'
+                    }`
+                  ),
+                  descriptionId: getTrad(
+                    `form.attribute.${type}.option.${
+                      type === 'text' ? 'long-text' : 'single'
+                    }.description`
+                  ),
+                  value: false,
+                },
+              ],
+              validations: {},
             },
-            name: 'type',
-            type: 'select',
-            options: [
-              { id: 'components.InputSelect.option.placeholder', value: '' },
-              { id: 'form.attribute.text.option.short-text', value: 'string' },
-              { id: 'form.attribute.text.option.long-text', value: 'text' },
-            ].map(({ id, value }, index) => {
-              const disabled = index === 0;
-              const tradId = index === 0 ? id : getTrad(id);
-
-              return (
-                <FormattedMessage id={tradId} key={id}>
-                  {msg => (
-                    <option disabled={disabled} hidden={disabled} value={value}>
-                      {msg}
-                    </option>
-                  )}
-                </FormattedMessage>
-              );
-            }),
-            validations: {
-              required: true,
-            },
-          });
+          ]);
         }
 
         if (type === 'number') {
@@ -313,17 +336,6 @@ const forms = {
                 value: data.name ? nameToSlug(data.name) : '',
               },
             ],
-            // Maybe for later
-            // [
-            //   {
-            //     name: 'repeatable',
-            //     type: 'customBooleanContentType',
-            //     value: true,
-            //     title: 'Something',
-            //     description: 'Cool',
-            //     icon: 'multipleFiles',
-            //   },
-            // ],
           ],
         };
       },
