@@ -244,7 +244,8 @@ const FormModal = () => {
     >
       <HeaderModal>
         <ModalHeader
-          name={state.forTarget || name}
+          // name={state.forTarget || name}
+          name={name}
           headerId={headerId}
           iconType={iconType || 'contentType'}
         />
@@ -296,7 +297,7 @@ const FormModal = () => {
                           <hr
                             style={{
                               width: 'calc(100% - 30px)',
-                              marginBottom: 7,
+                              marginBottom: 25,
                             }}
                           />
                         )}

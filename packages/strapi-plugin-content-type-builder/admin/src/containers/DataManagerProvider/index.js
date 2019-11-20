@@ -105,6 +105,7 @@ const DataManagerProvider = ({ children }) => {
         contentTypes,
         createSchema,
         initialData,
+        isInContentTypeView,
         modifiedData,
         setModifiedData,
       }}
