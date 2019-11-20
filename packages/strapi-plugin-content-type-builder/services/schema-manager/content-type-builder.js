@@ -52,7 +52,6 @@ module.exports = function createComponentBuilder() {
 
       this.contentTypes.set(uid, contentType);
 
-      // TODO: add reversed relations
       Object.keys(infos.attributes).forEach(key => {
         const attr = infos.attributes[key];
 

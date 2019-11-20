@@ -50,7 +50,12 @@ const getTypeShape = (attribute, { modelType } = {}) => {
       return {
         enum: yup
           .array()
-          .of(yup.string().test(isValidEnum))
+          .of(
+            yup
+              .string()
+              .test(isValidEnum)
+              .required()
+          )
           .min(1)
           .required(),
         default: yup
