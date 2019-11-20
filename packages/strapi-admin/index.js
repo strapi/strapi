@@ -279,9 +279,12 @@ async function watchFiles(dir) {
     const packageName = isExtension
       ? `strapi-plugin-${pluginName}`
       : 'strapi-admin';
+
     const targetPath = isExtension
-      ? filePath.split('/extensions/')[1].replace(pluginName, '')
-      : filePath.split('/admin')[1];
+      ? filePath
+          .split(`${path.sep}extensions${path.sep}`)[1]
+          .replace(pluginName, '')
+      : filePath.split(`${path.sep}admin`)[1];
 
     const destFolder = isExtension
       ? path.join(cacheDir, 'plugins', packageName)
