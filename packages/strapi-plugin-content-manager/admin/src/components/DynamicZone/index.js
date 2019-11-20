@@ -16,7 +16,7 @@ import RoundCTA from './RoundCTA';
 import Wrapper from './Wrapper';
 
 const DynamicZone = ({ max, min, name }) => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const {
     addComponentToDynamicZone,
     formErrors,
@@ -67,8 +67,12 @@ const DynamicZone = ({ max, min, name }) => {
   const hasError = dynamicZoneErrors.length > 0;
   const hasMinError =
     dynamicZoneErrors.length > 0 &&
-    get(dynamicZoneErrors, [0, 'id'], '').includes('min') &&
-    !isOpen;
+    get(dynamicZoneErrors, [0, 'id'], '').includes('min');
+
+  const hasRequiredError = hasError && !hasMinError;
+
+  console.log('error', name, hasError, dynamicZoneErrors);
+  console.log('min', hasMinError);
 
   return (
     <>
@@ -137,14 +141,14 @@ const DynamicZone = ({ max, min, name }) => {
             }
           }}
         />
-
+        {hasRequiredError && <div>Component is required</div>}
+        {hasMinError && <div> {missingComponentNumber} missing components</div>}
         <div className="info">
           <FormattedMessage
             id={`${pluginId}.components.DynamicZone.add-compo`}
             values={{ componentName: name }}
           />
         </div>
-        {hasMinError && <div> {missingComponentNumber} missing components</div>}
         <ComponentsPicker isOpen={isOpen}>
           <div>
             <p className="componentPickerTitle">

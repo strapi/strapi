@@ -70,7 +70,7 @@ const Toggle = styled(DropdownToggle)`
         content: '\f0d7';
         display: inline-block;
         margin-top: -1px;
-        margin-left: 10px;
+        margin-left: 11px;
         font-family: FontAwesome;
         color: #323740;
         transition: transform 0.3s ease-out;

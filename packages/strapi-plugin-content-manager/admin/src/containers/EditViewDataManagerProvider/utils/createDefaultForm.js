@@ -48,6 +48,13 @@ const createDefaultForm = (attributes, allComponentsSchema) => {
       }
     }
 
+    if (type === 'dynamiczone') {
+      console.log('dynamic', attribute, acc);
+      if (required === true) {
+        acc[current] = [];
+      }
+    }
+
     return acc;
   }, {});
 };

@@ -127,7 +127,13 @@ function ListView({
       Object.keys(getMetaDatas())
         .filter(
           key =>
-            !['json', 'component', 'relation', 'richtext'].includes(
+            ![
+              'json',
+              'component',
+              'dynamiczone',
+              'relation',
+              'richtext',
+            ].includes(
               get(
                 layouts,
                 [...contentTypePath, 'schema', 'attributes', key, 'type'],
@@ -142,6 +148,7 @@ function ListView({
       ['label', 'name']
     );
   };
+
   const getFirstSortableElement = (name = '') => {
     return get(
       getListLayout().filter(h => {

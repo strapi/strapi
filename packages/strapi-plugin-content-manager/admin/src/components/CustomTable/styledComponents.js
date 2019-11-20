@@ -94,7 +94,7 @@ const TableRow = styled.tr`
 
 const Icon = styled.i`
   position: absolute;
-  top: 3px;
+  top: 6px;
   right: -12px;
 
   ${({ isAsc }) => {
