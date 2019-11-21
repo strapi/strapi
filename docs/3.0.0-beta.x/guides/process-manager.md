@@ -56,7 +56,7 @@ By default there is two important commands.
 
 You can also start your process manager using the `yarn start` command.
 
-`pm2 start npm --no-automation --name app -- run start`
+`pm2 start npm --name app -- run start`
 
 ## Configuration file
 
