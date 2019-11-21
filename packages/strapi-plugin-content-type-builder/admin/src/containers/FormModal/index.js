@@ -1,5 +1,4 @@
 import React, { useEffect, useReducer, useRef, useState } from 'react';
-// import PropTypes from 'prop-types';
 import {
   ButtonModal,
   HeaderModal,
@@ -53,12 +52,10 @@ const FormModal = () => {
   const { formatMessage } = useGlobalContext();
   const query = useQuery();
   const attributeOptionRef = useRef();
-
   const {
     addAttribute,
     contentTypes,
     createSchema,
-    initialData,
     modifiedData: allDataSchema,
     sortedContentTypesList,
   } = useDataManager();
@@ -105,8 +102,6 @@ const FormModal = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
-  const displayedAttributes = getAttributes(state.forTarget);
-
   const form = get(forms, [state.modalType, 'form', state.settingType], () => ({
     items: [],
   }));
@@ -117,7 +112,6 @@ const FormModal = () => {
   const isCreating = state.actionType === 'create';
   const isOpen = !isEmpty(search);
   const isPickingAttribute = state.modalType === 'chooseAttribute';
-  const name = get(initialData, ['schema', 'name'], '');
   const uid = createUid(modifiedData.name || '');
 
   let headerId = isCreating
@@ -128,23 +122,26 @@ const FormModal = () => {
     headerId = null;
   }
 
-  const modalBodyStyle = isPickingAttribute
-    ? { paddingTop: '0.5rem', paddingBottom: '3rem' }
-    : {};
-
   const checkFormValidity = async () => {
     let schema;
 
     if (state.modalType === 'contentType') {
       schema = forms[state.modalType].schema(Object.keys(contentTypes));
-    } else if (state.modalType === 'attribute') {
+    } else if (
+      state.modalType === 'attribute' &&
+      state.forTarget !== 'components' &&
+      state.forTarget !== 'component'
+    ) {
       schema = forms[state.modalType].schema(
         allDataSchema,
         modifiedData.type,
         modifiedData
       );
     } else {
+      // TODO validate component schema
       console.log('Will do something');
+
+      return;
     }
 
     await schema.validate(modifiedData, { abortEarly: false });
@@ -286,6 +283,14 @@ const FormModal = () => {
     }
   };
 
+  // Display data
+  const displayedAttributes = getAttributes(state.forTarget);
+
+  // Styles
+  const modalBodyStyle = isPickingAttribute
+    ? { paddingTop: '0.5rem', paddingBottom: '3rem' }
+    : {};
+
   return (
     <Modal
       isOpen={isOpen}
@@ -416,7 +421,7 @@ const FormModal = () => {
                               return (
                                 <RelationForm
                                   key="relation"
-                                  mainBoxHeader={name}
+                                  mainBoxHeader={state.headerDisplayName}
                                   modifiedData={modifiedData}
                                   naturePickerType={state.forTarget}
                                   onChange={handleChange}

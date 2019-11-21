@@ -1,4 +1,4 @@
-const getAttributes = () => {
+const getAttributes = (dataTarget = '') => {
   const defaultAttributes = [
     [
       'text',
@@ -14,10 +14,16 @@ const getAttributes = () => {
       // 'uid',
       'relation',
     ],
-    ['component', 'dynamiczone'],
+    ['component'],
   ];
 
-  return defaultAttributes;
+  const items = defaultAttributes.slice();
+
+  if (dataTarget !== 'component' && dataTarget !== 'components') {
+    items[1].push('dynamiczone');
+  }
+
+  return items;
 };
 
 export default getAttributes;
