@@ -25,6 +25,9 @@ const hasComponent = model => {
   return compoKeys.length > 0;
 };
 
+const isRelation = attribute =>
+  _.has(attribute, 'model') || _.has(attribute, 'collection');
+
 /**
  * Formats a component's attributes
  * @param {Object} attributes - the attributes map
@@ -141,6 +144,7 @@ const convertAttributes = attributes => {
 
 module.exports = {
   hasComponent,
+  isRelation,
 
   formatAttributes,
   convertAttributes,

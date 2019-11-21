@@ -4,7 +4,11 @@ const path = require('path');
 const _ = require('lodash');
 const pluralize = require('pluralize');
 
-const { convertAttributes } = require('../../utils/attributes');
+const {
+  convertAttributes,
+  isRelation,
+  toUID,
+} = require('../../utils/attributes');
 const { nameToSlug, nameToCollectionName } = require('../../utils/helpers');
 const createSchemaHandler = require('./schema-handler');
 
@@ -109,20 +113,58 @@ module.exports = function createComponentBuilder() {
         throw new Error('contentType.notFound');
       }
 
-      const handler = this.contentTypes.get(uid);
+      const contentType = this.contentTypes.get(uid);
 
-      handler
+      const newAttributes = convertAttributes(infos.attributes);
+
+      // TODO: clear changed or deleted relations
+      Object.keys(contentType.schema.attributes)
+        .filter(key => {
+          const attr = contentType.schema.attributes[key];
+
+          // ignore non relational attributes and unidirectionnal attributes
+          if (!isRelation(attr) || !_.has(attr, 'via')) return false;
+
+          console.log(key);
+
+          const target = attr.model || attr.collection;
+          const plugin = attr.plugin;
+
+          // key isn't present anymore
+          if (!_.has(newAttributes, key)) return true;
+
+          const newAttr = newAttributes[key];
+          // if the new attribute isn't a relation;
+          if (!isRelation(newAttr)) return true;
+
+          const newTarget = newAttr.model || newAttr.collection;
+
+          // if target attribute isn't the same as before
+          if (attr.via !== newAttr.via) return true;
+
+          // if the target content type isn't the same
+          if (target !== newTarget || plugin !== attr.plugin) return true;
+        })
+        .forEach(key => {
+          const attr = contentType.schema.attributes[key];
+          const target = attr.model || attr.collection;
+          const plugin = attr.plugin;
+
+          const uid = toUID(target, plugin);
+
+          this.contentTypes.get(uid).unset(['attributes', attr.via]);
+        });
+
+      // TODO: build new reversed relations
+
+      contentType
         .set('connection', infos.connection)
         .set('collectionName', infos.collectionName)
         .set(['info', 'name'], infos.name)
         .set(['info', 'description'], infos.description)
-        // TODO: keep configurable args etc...
-        .set('attributes', convertAttributes(infos.attributes));
+        .set('attributes', newAttributes);
 
-      // TODO: clear old relations
-      // TODO: build new reversed relations
-
-      return handler;
+      return contentType;
     },
 
     deleteContentType(uid) {
