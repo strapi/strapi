@@ -22,6 +22,7 @@ import {
   generateFiltersFromSearch,
   generateSearchFromFilters,
 } from '../../utils/search';
+import getFeatureLabel from '../../utils/getFeatureLabel';
 import ListViewProvider from '../ListViewProvider';
 import { onChangeListLabels, resetListLabels } from '../Main/actions';
 import { AddFilterCta, Img, Wrapper } from './components';
@@ -49,6 +50,7 @@ function ListView({
   location: { pathname, search },
   getData,
   layouts,
+  models,
   history: { push },
   onChangeBulk,
   onChangeBulkSelectall,
@@ -89,7 +91,6 @@ function ListView({
           `${getLayoutSettingRef.current(
             'defaultSortBy'
           )}:${getLayoutSettingRef.current('defaultSortOrder')}`,
-        source: getQueryParameters(search, 'source'),
         filters: generateFiltersFromSearch(search),
         ...updatedParams,
       };
@@ -122,6 +123,11 @@ function ListView({
     get(layouts, [...contentTypePath, 'metadatas', ...path], {});
   const getListLayout = () =>
     get(layouts, [...contentTypePath, 'layouts', 'list'], []);
+
+  const getName = () => {
+    return getFeatureLabel(models, slug);
+  };
+
   const getAllLabels = () => {
     return sortBy(
       Object.keys(getMetaDatas())
@@ -233,7 +239,7 @@ function ListView({
           id: 'content-manager.containers.List.addAnEntry',
         },
         {
-          entity: capitalize(slug) || 'Content Manager',
+          entity: capitalize(getName()) || 'Content Manager',
         }
       ),
       onClick: () => {
@@ -251,7 +257,7 @@ function ListView({
 
   const headerProps = {
     title: {
-      label: slug || 'Content Manager',
+      label: getName() || 'Content Manager',
     },
     content: formatMessage(
       {
@@ -273,6 +279,7 @@ function ListView({
         entriesToDelete={entriesToDelete}
         emitEvent={emitEvent}
         firstSortableElement={getFirstSortableElement()}
+        label={getName()}
         onChangeBulk={onChangeBulk}
         onChangeBulkSelectall={onChangeBulkSelectall}
         onChangeParams={handleChangeParams}
@@ -286,7 +293,7 @@ function ListView({
         <FilterPicker
           actions={filterPickerActions}
           isOpen={isFilterPickerOpen}
-          name={slug}
+          name={getName()}
           toggleFilterPickerState={toggleFilterPickerState}
           onSubmit={handleSubmit}
         />
@@ -296,7 +303,7 @@ function ListView({
             <Search
               changeParams={handleChangeParams}
               initValue={getQueryParameters(search, '_q') || ''}
-              model={slug}
+              model={getName()}
               value={getQueryParameters(search, '_q') || ''}
             />
           )}
@@ -344,7 +351,6 @@ function ListView({
                     resetListLabels(slug);
                   }}
                   slug={slug}
-                  source={getSearchParams().source}
                   toggle={toggleLabelPickerState}
                 />
               </div>
@@ -356,7 +362,6 @@ function ListView({
                   headers={getTableHeaders()}
                   isBulkable={getLayoutSettingRef.current('bulkable')}
                   onChangeParams={handleChangeParams}
-                  slug={slug}
                 />
                 <Footer />
               </div>
@@ -374,7 +379,7 @@ function ListView({
           }}
           popUpWarningType="danger"
           onConfirm={() => {
-            onDeleteData(idToDelete, slug, getSearchParams().source, emitEvent);
+            onDeleteData(idToDelete, slug, emitEvent);
           }}
         />
         <PopUpWarning
@@ -415,6 +420,7 @@ ListView.propTypes = {
     pathname: PropTypes.string.isRequired,
     search: PropTypes.string.isRequired,
   }),
+  models: PropTypes.array.isRequired,
   getData: PropTypes.func.isRequired,
   history: PropTypes.shape({
     push: PropTypes.func.isRequired,

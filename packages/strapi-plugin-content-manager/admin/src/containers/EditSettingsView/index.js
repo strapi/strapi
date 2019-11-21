@@ -19,6 +19,7 @@ import {
 import { Inputs as Input } from '@buffetjs/custom';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
+import getFeatureLabel from '../../utils/getFeatureLabel';
 import getRequestUrl from '../../utils/getRequestUrl';
 import FieldsReorder from '../../components/FieldsReorder';
 import FormTitle from '../../components/FormTitle';
@@ -34,12 +35,14 @@ import getInjectedComponents from '../../utils/getComponents';
 import reducer, { initialState } from './reducer';
 
 const EditSettingsView = ({
+  components,
   currentEnvironment,
   deleteLayout,
   deleteLayouts,
   componentsAndModelsMainPossibleMainFields,
   history: { push },
   location: { search },
+  models,
   plugins,
   slug,
 }) => {
@@ -76,6 +79,12 @@ const EditSettingsView = ({
     Object.keys(
       get(modifiedData, ['metadatas', metaToEdit, 'edit'], {})
     ).filter(meta => meta !== 'visible');
+
+  const getName = () => {
+    return type === 'content-types'
+      ? getFeatureLabel(models, slug)
+      : getFeatureLabel(components, componentSlug);
+  };
 
   const getRelationsLayout = useCallback(() => {
     return get(modifiedData, ['layouts', 'editRelations'], []);
@@ -370,6 +379,7 @@ const EditSettingsView = ({
         initialData={initialData}
         isLoading={isLoading}
         modifiedData={modifiedData}
+        name={getName()}
         onChange={handleChange}
         onConfirmReset={() => {
           dispatch({
@@ -472,6 +482,8 @@ EditSettingsView.defaultProps = {
 };
 
 EditSettingsView.propTypes = {
+  components: PropTypes.array.isRequired,
+  models: PropTypes.array.isRequired,
   currentEnvironment: PropTypes.string,
   deleteLayout: PropTypes.func.isRequired,
   deleteLayouts: PropTypes.func,

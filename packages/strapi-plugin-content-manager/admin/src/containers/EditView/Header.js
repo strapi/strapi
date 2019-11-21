@@ -27,7 +27,6 @@ const Header = () => {
     resetData,
     setIsSubmitting,
     slug,
-    source,
   } = useDataManager();
 
   const currentContentTypeMainField = get(
@@ -102,7 +101,6 @@ const Header = () => {
     try {
       await request(getRequestUrl(`${slug}/${id}`), {
         method: 'DELETE',
-        params: { source },
       });
 
       strapi.notification.success(`${pluginId}.success.record.delete`);

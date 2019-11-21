@@ -29,7 +29,7 @@ const SettingsViewWrapper = ({
   onChange,
   onConfirmReset,
   onConfirmSubmit,
-  slug,
+  name,
 }) => {
   const { emitEvent, formatMessage } = useGlobalContext();
   const [showWarningCancel, setWarningCancel] = useState(false);
@@ -73,7 +73,7 @@ const SettingsViewWrapper = ({
         {
           id: `${pluginId}.components.SettingsViewWrapper.pluginHeader.title`,
         },
-        { name: upperFirst(slug) }
+        { name: upperFirst(name) }
       ),
     },
     content: formatMessage({
@@ -243,7 +243,7 @@ SettingsViewWrapper.defaultProps = {
       values: {},
     },
   },
-  slug: '',
+  name: '',
 };
 
 SettingsViewWrapper.propTypes = {
@@ -271,7 +271,7 @@ SettingsViewWrapper.propTypes = {
       values: PropTypes.object,
     }),
   }),
-  slug: PropTypes.string,
+  name: PropTypes.string,
 };
 
 export default withRouter(SettingsViewWrapper);

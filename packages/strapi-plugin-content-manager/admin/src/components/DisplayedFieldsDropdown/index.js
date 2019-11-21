@@ -19,7 +19,6 @@ const DisplayedFieldsDropdown = ({
   onChange,
   onClickReset,
   slug,
-  source,
   toggle,
 }) => {
   return (
@@ -29,9 +28,7 @@ const DisplayedFieldsDropdown = ({
         <Toggle isopen={isOpen.toString()} />
         <MenuDropdown isopen={isOpen.toString()}>
           <DropdownItemLink>
-            <LayoutWrapper
-              to={`${slug}/ctm-configurations/list-settings?source=${source}`}
-            >
+            <LayoutWrapper to={`${slug}/ctm-configurations/list-settings`}>
               <LayoutIcon />
               <FormattedMessage id="app.links.configure-view" />
             </LayoutWrapper>
@@ -80,7 +77,6 @@ DisplayedFieldsDropdown.propTypes = {
   onChange: PropTypes.func.isRequired,
   onClickReset: PropTypes.func.isRequired,
   slug: PropTypes.string.isRequired,
-  source: PropTypes.string.isRequired,
   toggle: PropTypes.func.isRequired,
 };
 

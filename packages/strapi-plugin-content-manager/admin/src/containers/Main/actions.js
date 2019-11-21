@@ -38,11 +38,10 @@ export function getDataSucceeded(components, models, mainFields) {
   };
 }
 
-export function getLayout(uid, source) {
+export function getLayout(uid) {
   return {
     type: GET_LAYOUT,
     uid,
-    source,
   };
 }
 

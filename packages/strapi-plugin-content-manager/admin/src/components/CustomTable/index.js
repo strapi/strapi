@@ -22,6 +22,7 @@ function CustomTable({
   const {
     emitEvent,
     entriesToDelete,
+    label,
     searchParams: { filters, _q },
     slug,
   } = useListView();
@@ -37,7 +38,7 @@ function CustomTable({
     });
   };
 
-  const values = { contentType: upperFirst(slug), search: _q };
+  const values = { contentType: upperFirst(label), search: _q };
   let tableEmptyMsgId = filters.length > 0 ? 'withFilters' : 'withoutFilter';
 
   if (_q !== '') {
