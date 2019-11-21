@@ -40,10 +40,10 @@ const AttributeOption = forwardRef(({ tabIndex, type }, ref) => {
 
   const handleClick = () => {
     const forTarget = query.get('forTarget');
-    const target = query.get('target');
+    const targetUid = query.get('targetUid');
 
     push({
-      search: `modalType=attribute&actionType=create&settingType=base&forTarget=${forTarget}&target=${target}&attributeType=${type}`,
+      search: `modalType=attribute&actionType=create&settingType=base&forTarget=${forTarget}&targetUid=${targetUid}&attributeType=${type}`,
     });
   };
 

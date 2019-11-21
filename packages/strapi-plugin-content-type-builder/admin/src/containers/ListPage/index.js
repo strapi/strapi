@@ -8,18 +8,18 @@ import LeftMenu from '../LeftMenu';
 const ListPage = () => {
   const {
     components,
-    initialData,
+    // initialData,
     modifiedData,
     isInContentTypeView,
   } = useDataManager();
   const { push } = useHistory();
 
   const attributes = get(modifiedData, ['schema', 'attributes'], {});
-  const currentDataName = get(initialData, ['schema', 'name'], '');
+  // const currentDataName = get(initialData, ['schema', 'name'], '');
 
   const handleClick = () => {
     const forTarget = isInContentTypeView ? 'contentType' : 'component';
-    const search = `modalType=chooseAttribute&forTarget=${forTarget}&target=${currentDataName}`;
+    const search = `modalType=chooseAttribute&forTarget=${forTarget}&targetUid=${modifiedData.uid}`;
     push({ search });
   };
   // TODO just a util not sure it should be kept
@@ -44,7 +44,7 @@ const ListPage = () => {
 
     return componentSchema;
   };
-  const handleClickEditField = (forTarget, target, attrName, type) => {
+  const handleClickEditField = (forTarget, targetUid, attrName, type) => {
     const attributeType = [
       'integer',
       'biginteger',
@@ -55,11 +55,9 @@ const ListPage = () => {
       : type;
 
     push({
-      search: `modalType=attribute&actionType=edit&settingType=base&forTarget=${forTarget}&target=${target}&attributeName=${attrName}&attributeType=${attributeType}`,
+      search: `modalType=attribute&actionType=edit&settingType=base&forTarget=${forTarget}&targetUid=${targetUid}&attributeName=${attrName}&attributeType=${attributeType}`,
     });
   };
-
-  console.log({ ctSchema: modifiedData });
 
   return (
     <ViewContainer>
@@ -112,7 +110,7 @@ const ListPage = () => {
                     onClick={() =>
                       handleClickEditField(
                         'contentType',
-                        currentDataName,
+                        modifiedData.uid,
                         attr,
                         type
                       )

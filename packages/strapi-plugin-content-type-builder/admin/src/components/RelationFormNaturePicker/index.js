@@ -30,8 +30,6 @@ const RelationFormNaturePicker = ({
   target,
 }) => {
   const { contentTypes } = useDataManager();
-  console.log({ target });
-
   const relationsType =
     naturePickerType === 'contentType'
       ? [

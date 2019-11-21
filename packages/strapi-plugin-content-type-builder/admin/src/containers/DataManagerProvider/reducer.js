@@ -1,5 +1,5 @@
 import { fromJS, OrderedMap } from 'immutable';
-
+import { get } from 'lodash';
 const initialState = fromJS({
   components: {},
   contentTypes: {},
@@ -18,7 +18,12 @@ const reducer = (state, action) => {
 
       return state.updateIn(
         ['modifiedData', 'schema', 'attributes', name],
-        () => fromJS(rest)
+        () => {
+          const type = get(rest, 'type');
+          console.log(type);
+
+          return fromJS(rest);
+        }
       );
     }
     case 'GET_DATA_SUCCEEDED':
@@ -44,7 +49,7 @@ const reducer = (state, action) => {
     case 'SET_MODIFIED_DATA': {
       const schemaWithOrderedAttributes = fromJS(action.schemaToSet).setIn(
         ['schema', 'attributes'],
-        OrderedMap(action.schemaToSet.schema.attributes)
+        OrderedMap(get(action, 'schemaToSet.schema.attributes', {}))
       );
 
       return state

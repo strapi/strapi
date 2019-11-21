@@ -75,7 +75,7 @@ const reducer = (state, action) => {
     case 'RESET_PROPS':
       return initialState;
     case 'SET_ATTRIBUTE_DATA_SCHEMA': {
-      const { attributeType, nameToSetForRelation, target } = action;
+      const { attributeType, nameToSetForRelation, targetUid } = action;
       let dataToSet;
 
       if (attributeType === 'text') {
@@ -92,7 +92,7 @@ const reducer = (state, action) => {
           type: 'relation',
           nature: 'oneWay',
           targetAttribute: '-',
-          target,
+          target: targetUid,
           unique: false,
           required: false,
           dominant: null,

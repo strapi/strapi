@@ -42,7 +42,7 @@ const FormModal = () => {
     modalType: null,
     settingType: null,
     forTarget: null,
-    target: null,
+    targetUid: null,
     attributeType: null,
   };
   const [state, setState] = useState(initialStateData);
@@ -78,7 +78,7 @@ const FormModal = () => {
         modalType,
         settingType: query.get('settingType'),
         forTarget: query.get('forTarget'),
-        target: query.get('target'),
+        targetUid: query.get('targetUid'),
         attributeType,
       });
 
@@ -91,9 +91,8 @@ const FormModal = () => {
         dispatch({
           type: 'SET_ATTRIBUTE_DATA_SCHEMA',
           attributeType,
-          // TODO handle component name set
           nameToSetForRelation: get(allDataSchema, ['schema', 'name'], ''),
-          target: get(sortedContentTypesList, ['0', 'uid'], 'error'),
+          targetUid: get(sortedContentTypesList, ['0', 'uid'], 'error'),
         });
       }
     }
@@ -233,7 +232,7 @@ const FormModal = () => {
 
     try {
       await checkFormValidity();
-      const nextSearch = `modalType=chooseAttribute&forTarget=${state.forTarget}&target=${modifiedData.name}`;
+      const nextSearch = `modalType=chooseAttribute&forTarget=${state.forTarget}&targetUid=${uid}`;
 
       if (state.modalType === 'contentType') {
         // Create the content type schema
@@ -278,8 +277,6 @@ const FormModal = () => {
       attributeOptionRef.current.focus();
     }
   };
-
-  console.log({ modifiedData, formErrors });
 
   return (
     <Modal
