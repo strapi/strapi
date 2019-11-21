@@ -4,20 +4,20 @@ Strapi gives you the option to choose the most appropriate database for your pro
 **MariaDB**. The following documentation covers how to install these databases locally (for development purposes) and on various hosted or cloud server solutions (for staging or production purposes).
 
 :::note
-Deploying **Strapi** itself is covered in the [Deployment Guide](/3.0.0-beta.x/guides/deployment.html).
+Deploying **Strapi** itself is covered in the [Deployment Guide](deployment.md).
 :::
 
 ## SQLite Installation
 
-SQLite is the default ([Quick Start](/3.0.0-beta.x/getting-started/quick-start.html)) and recommended database to quickly create an app locally.
+SQLite is the default ([Quick Start](../getting-started/quick-start.md)) and recommended database to quickly create an app locally.
 
 ### Install SQLite locally
 
 Simply use one of the following commands.
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "yarn" id="yarn-create-qs"
+::: tab yarn
 
 ```bash
 yarn create strapi-app new my-project --quickstart
@@ -25,7 +25,7 @@ yarn create strapi-app new my-project --quickstart
 
 :::
 
-::: tab "npx" id="npx-create-qs"
+::: tab npx
 
 ```bash
 npx create-strapi-app my-project --quickstart
@@ -37,8 +37,8 @@ npx create-strapi-app my-project --quickstart
 
 This will create a new project and launch it in the browser.
 
-::: note
-The [Quick Start Guide](/3.0.0-beta.x/getting-started/quick-start.html) is a complete step-by-step tutorial
+::: tip
+The [Quick Start Guide](../getting-started/quick-start.md) is a complete step-by-step tutorial
 :::
 
 ## MongoDB Installation
@@ -51,9 +51,9 @@ If you already have MongoDB installed locally and running as a background servic
 
 Please complete the installation steps appropriate to your operating system.
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "Windows 10" id="windows-mongodb"
+::: tab "Windows 10"
 
 #### Install MongoDB on Windows 10
 
@@ -73,7 +73,7 @@ You have now installed MongoDB for _Windows 10_. You are now ready to [install S
 
 :::
 
-::: tab "Mac O/S 10.14 Mojave" id="mac-mongodb"
+::: tab "Mac O/S"
 
 #### Install MongoDB on Mac
 
@@ -101,7 +101,7 @@ You have now installed MongoDB for _Mac_. You are now ready to [install Strapi w
 
 :::
 
-::: tab "Ubuntu 18.04" id="ubuntu-mongodb"
+::: tab "Ubuntu 18.04"
 
 #### Install MongoDB on Ubuntu
 
@@ -110,14 +110,12 @@ Follow these steps to [install MongoDB onto your Ubuntu](https://docs.mongodb.co
 1. Import a public key to ensure your MongoDB is authentic:
 
 ```bash
-
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
 ```
 
 2. Next, add the repository for 18.04. Repositories for other versions of Ubuntu are found [here](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/).
 
 ```bash
-
 echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
 ```
 
@@ -161,7 +159,7 @@ You have now installed MongoDB for _Linux_. You are now ready to [install Strapi
 
 Follow these steps to create a Strapi project locally using the MongoDB database.
 
-::: note
+::: tip
 MongoDB must already be running in the background.
 :::
 
@@ -169,9 +167,9 @@ MongoDB must already be running in the background.
 
 `Path: ./`
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "yarn" id="yarn-create"
+::: tab yarn
 
 ```
 yarn create strapi-app new my-project
@@ -179,7 +177,7 @@ yarn create strapi-app new my-project
 
 :::
 
-::: tab "npx" id="npx-create"
+::: tab npx
 
 ```
 npx create-strapi-app my-project
@@ -240,7 +238,7 @@ $ strapi develop
 
 ```
 
-You have successfully installed Strapi with MongoDB on your local development environment. You are now ready to [create your first user](/3.0.0-beta.x/getting-started/quick-start.html#_3-create-an-admin-user).
+You have successfully installed Strapi with MongoDB on your local development environment. You are now ready to [create your first user](../getting-started/quick-start.md#_3-create-an-admin-user).
 
 ---
 
@@ -248,7 +246,7 @@ You have successfully installed Strapi with MongoDB on your local development en
 
 Follow these steps to configure a local Strapi project to use a [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) free 512 MB account in production. (Please see [MongoDB Atlas Documentation](https://docs.atlas.mongodb.com/getting-started/) if you have any questions.)
 
-- You must have already [created your Strapi project using MongoDB](/3.0.0-beta.x/guides/databases.html#install-strapi-locally-with-mongodb).
+- You must have already [created your Strapi project using MongoDB](databases.md#install-strapi-locally-with-mongodb).
 - You must have already created a [free MongoDB Atlas account](https://www.mongodb.com/cloud/atlas).
 
 #### 1. Log in to your account to create a **Project** and a **Cluster**
@@ -277,7 +275,7 @@ Follow these steps to configure a local Strapi project to use a [MongoDB Atlas](
   - Then click the green `Confirm` button.
   - Delete the `0.0.0.0/0` configuration after testing the connection.
 
-  ::: note
+  ::: tip
   If for any reason you need to test the configuration or other aspect of your connection to the database, you may want to set back the `Allow Access from Anywhere`. Follow this steps:
   :::
 
@@ -286,7 +284,7 @@ Follow these steps to configure a local Strapi project to use a [MongoDB Atlas](
     - Leave a comment to label this IP Address. E.g. `Anywhere`.
     - Click `Confirm`. Then wait until the status turns from `Pending` to `Active`.
 
-  ::: note
+  ::: tip
   If you are serving you Strapi project from a known IP Address then follow the following steps to `allow Network Access`.
   :::
 
@@ -342,7 +340,7 @@ The above configuration will create a database called `strapi`, the _default dat
 :::
 
 ::: danger WARNING
-We recommend replacing sensitive (eg. "URI string" above) information in your database.json files before uploading your project to a public repository such as GitHub. For more information about using environment variables, please read [dynamic configurations](/3.0.0-beta.x/configurations/configurations.html#dynamic-configurations).
+We recommend replacing sensitive (eg. "URI string" above) information in your database.json files before uploading your project to a public repository such as GitHub. For more information about using environment variables, please read [dynamic configurations](../concepts/configurations.md#dynamic-configurations).
 
 :::
 

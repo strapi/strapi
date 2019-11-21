@@ -6,15 +6,15 @@
 - Fix many bugs and enhancement
 
 **Usefull links:**
+
 - Change log: [https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.12.2](https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.12.2)
-- GitHub diff: [https://github.com/strapi/strapi/compare/v3.0.0-alpha.12.1.3...v3.0.0-alpha.12.2  ](https://github.com/strapi/strapi/compare/v3.0.0-alpha.12.1.3...v3.0.0-alpha.12.2  )
+- GitHub diff: [https://github.com/strapi/strapi/compare/v3.0.0-alpha.12.1.3...v3.0.0-alpha.12.2 ](https://github.com/strapi/strapi/compare/v3.0.0-alpha.12.1.3...v3.0.0-alpha.12.2)
 
 <br>
 
-::: note
+::: tip
 Feel free to [join us on Slack](http://slack.strapi.io) and ask questions about the migration process.
 :::
-
 
 <br>
 
@@ -36,7 +36,7 @@ Run `npm install strapi@3.0.0-alpha.12.2 --save` to update your strapi version a
 
 ## Update the Admin
 
-::: note
+::: tip
 If you did custom update of the admin, you will have to manually migrate your update.
 :::
 
@@ -46,7 +46,7 @@ Delete your old admin folder and replace it by the new one.
 
 ## Update the Plugins
 
-::: note
+::: tip
 If you did custom update on one of the plugin, you will have to manually migrate your update.
 :::
 
@@ -106,9 +106,7 @@ remove: async params => {
 
   // Note: To get the full response of Mongo, use the `remove()` method
   // or add spent the parameter `{ passRawResult: true }` as second argument.
-  const data = await Article
-    .findOneAndRemove(params, {})
-    .populate(populate);
+  const data = await Article.findOneAndRemove(params, {}).populate(populate);
 
   if (!data) {
     return data;
@@ -116,20 +114,30 @@ remove: async params => {
 
   await Promise.all(
     Article.associations.map(async association => {
-      const search = _.endsWith(association.nature, 'One') || association.nature === 'oneToMany' ? { [association.via]: data._id } : { [association.via]: { $in: [data._id] } };
-      const update = _.endsWith(association.nature, 'One') || association.nature === 'oneToMany' ? { [association.via]: null } : { $pull: { [association.via]: data._id } };
+      const search =
+        _.endsWith(association.nature, 'One') ||
+        association.nature === 'oneToMany'
+          ? { [association.via]: data._id }
+          : { [association.via]: { $in: [data._id] } };
+      const update =
+        _.endsWith(association.nature, 'One') ||
+        association.nature === 'oneToMany'
+          ? { [association.via]: null }
+          : { $pull: { [association.via]: data._id } };
 
       // Retrieve model.
-      const model = association.plugin ?
-        strapi.plugins[association.plugin].models[association.model || association.collection] :
-        strapi.models[association.model || association.collection];
+      const model = association.plugin
+        ? strapi.plugins[association.plugin].models[
+            association.model || association.collection
+          ]
+        : strapi.models[association.model || association.collection];
 
       return model.update(search, update, { multi: true });
     })
   );
 
   return data;
-}
+};
 ```
 
 That's all, you have now upgraded to Strapi `alpha.12.2`.

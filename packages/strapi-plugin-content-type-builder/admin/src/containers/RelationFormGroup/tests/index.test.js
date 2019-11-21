@@ -1,4 +1,5 @@
 import React from 'react';
+import { GlobalContextProvider } from 'strapi-helper-plugin';
 import mountWithIntl from 'testUtils/mountWithIntl';
 import formatMessagesWithPluginId from 'testUtils/formatMessages';
 
@@ -7,8 +8,21 @@ import pluginTradsEn from '../../../translations/en.json';
 import RelationFormGroup from '../index';
 
 const messages = formatMessagesWithPluginId(pluginId, pluginTradsEn);
-const renderComponent = (props = {}, context = {}) =>
-  mountWithIntl(<RelationFormGroup {...props} />, messages, context);
+const appContext = {
+  emitEvent: jest.fn(),
+  currentEnvironment: 'development',
+  disableGlobalOverlayBlocker: jest.fn(),
+  enableGlobalOverlayBlocker: jest.fn(),
+  plugins: {},
+  updatePlugin: jest.fn(),
+};
+const renderComponent = (props = {}) =>
+  mountWithIntl(
+    <GlobalContextProvider {...appContext}>
+      <RelationFormGroup {...props} />
+    </GlobalContextProvider>,
+    messages
+  );
 
 describe('<RelationFormGroup />', () => {
   let props;
@@ -163,45 +177,8 @@ describe('<RelationFormGroup />', () => {
     });
 
     describe('HandleGoTo', () => {
-      it('should emit the event didSelectContentTypeFieldSettings if the user clicks on the advanced tab', () => {
-        const context = { emitEvent: jest.fn() };
-
-        wrapper = renderComponent(props, context);
-        const { handleGoTo } = wrapper.find(RelationFormGroup).instance();
-
-        handleGoTo('advanced');
-
-        expect(props.push).toHaveBeenCalledWith({
-          search:
-            'modalType=attributeForm&attributeType=relation&settingType=advanced&actionType=create',
-        });
-        expect(context.emitEvent).toHaveBeenCalledWith(
-          'didSelectContentTypeFieldSettings'
-        );
-      });
-
-      it('should add the keep the attribute name if the action is edit', () => {
-        const context = { emitEvent: jest.fn() };
-        props.actionType = 'edit';
-        props.attributeToEditName = 'test';
-        wrapper = renderComponent(props, context);
-        const { handleGoTo } = wrapper.find(RelationFormGroup).instance();
-
-        handleGoTo('advanced');
-
-        expect(props.push).toHaveBeenCalledWith({
-          search:
-            'modalType=attributeForm&attributeType=relation&settingType=advanced&actionType=edit&attributeName=test',
-        });
-        expect(context.emitEvent).toHaveBeenCalledWith(
-          'didSelectContentTypeFieldSettings'
-        );
-      });
-
       it('should not emit the event if the tab is base', () => {
-        const context = { emitEvent: jest.fn() };
-
-        wrapper = renderComponent(props, context);
+        wrapper = renderComponent(props);
         const { handleGoTo } = wrapper.find(RelationFormGroup).instance();
 
         handleGoTo('base');
@@ -210,7 +187,39 @@ describe('<RelationFormGroup />', () => {
           search:
             'modalType=attributeForm&attributeType=relation&settingType=base&actionType=create',
         });
-        expect(context.emitEvent).not.toHaveBeenCalled();
+        expect(appContext.emitEvent).not.toHaveBeenCalled();
+      });
+
+      it('should emit the event didSelectContentTypeFieldSettings if the user clicks on the advanced tab', () => {
+        wrapper = renderComponent(props);
+        const { handleGoTo } = wrapper.find(RelationFormGroup).instance();
+
+        handleGoTo('advanced');
+
+        expect(props.push).toHaveBeenCalledWith({
+          search:
+            'modalType=attributeForm&attributeType=relation&settingType=advanced&actionType=create',
+        });
+        expect(appContext.emitEvent).toHaveBeenCalledWith(
+          'didSelectContentTypeFieldSettings'
+        );
+      });
+
+      it('should add the keep the attribute name if the action is edit', () => {
+        props.actionType = 'edit';
+        props.attributeToEditName = 'test';
+        wrapper = renderComponent(props);
+        const { handleGoTo } = wrapper.find(RelationFormGroup).instance();
+
+        handleGoTo('advanced');
+
+        expect(props.push).toHaveBeenCalledWith({
+          search:
+            'modalType=attributeForm&attributeType=relation&settingType=advanced&actionType=edit&attributeName=test',
+        });
+        expect(appContext.emitEvent).toHaveBeenCalledWith(
+          'didSelectContentTypeFieldSettings'
+        );
       });
     });
 
@@ -297,7 +306,7 @@ describe('<RelationFormGroup />', () => {
           key: '-',
         };
         wrapper = renderComponent(props);
-        const { handleSubmit } = wrapper.instance();
+        const { handleSubmit } = wrapper.find(RelationFormGroup).instance();
 
         handleSubmit({ preventDefault: jest.fn() });
 
@@ -306,7 +315,7 @@ describe('<RelationFormGroup />', () => {
 
       it('should not call the submit if the form is empty', () => {
         wrapper = renderComponent(props);
-        const { handleSubmit } = wrapper.instance();
+        const { handleSubmit } = wrapper.find(RelationFormGroup).instance();
 
         handleSubmit({ preventDefault: jest.fn() });
 
@@ -323,7 +332,9 @@ describe('<RelationFormGroup />', () => {
           key: '-',
         };
         wrapper = renderComponent(props);
-        const { handleSubmitAndContinue } = wrapper.instance();
+        const { handleSubmitAndContinue } = wrapper
+          .find(RelationFormGroup)
+          .instance();
 
         handleSubmitAndContinue({ preventDefault: jest.fn() });
 
@@ -332,7 +343,9 @@ describe('<RelationFormGroup />', () => {
 
       it('should not call the submit if the form is empty', () => {
         wrapper = renderComponent(props);
-        const { handleSubmitAndContinue } = wrapper.instance();
+        const { handleSubmitAndContinue } = wrapper
+          .find(RelationFormGroup)
+          .instance();
 
         handleSubmitAndContinue({ preventDefault: jest.fn() });
 
@@ -343,7 +356,7 @@ describe('<RelationFormGroup />', () => {
     describe('HandleToggle', () => {
       it('should clear the search', () => {
         wrapper = renderComponent(props);
-        const { handleToggle } = wrapper.instance();
+        const { handleToggle } = wrapper.find(RelationFormGroup).instance();
 
         handleToggle();
 
@@ -355,7 +368,7 @@ describe('<RelationFormGroup />', () => {
         props.actionType = 'edit';
         wrapper = renderComponent(props);
 
-        const { submit } = wrapper.instance();
+        const { submit } = wrapper.find(RelationFormGroup).instance();
 
         submit();
 
@@ -365,7 +378,7 @@ describe('<RelationFormGroup />', () => {
       it('should call the onSubmitEdit if the actionType is create', () => {
         wrapper = renderComponent(props);
 
-        const { submit } = wrapper.instance();
+        const { submit } = wrapper.find(RelationFormGroup).instance();
 
         submit(true);
 

@@ -356,13 +356,14 @@ const formatConnectionAggregator = function(fields, model, modelName) {
       count(obj, options, context) {
         const opts = GraphQLQuery.convertToQuery(obj.where);
 
-        if (opts._q) { // allow search param
-          return strapi.query(modelName).countSearch(opts);
+        if (opts._q) {
+          // allow search param
+          return strapi.query(modelName, model.plugin).countSearch(opts);
         }
-        return strapi.query(modelName).count(opts);
+        return strapi.query(modelName, model.plugin).count(opts);
       },
       totalCount(obj, options, context) {
-        return strapi.query(modelName).count({});
+        return strapi.query(modelName, model.plugin).count({});
       },
     },
   };

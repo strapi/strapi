@@ -18,8 +18,7 @@ import InputDescription from '../InputDescription';
 import InputErrors from '../InputErrors';
 import InputDate from '../InputDate';
 import InputSpacer from '../InputSpacer';
-
-import styles from './styles.scss';
+import Container from './Container';
 
 class InputDateWithErrors extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
@@ -101,11 +100,10 @@ class InputDateWithErrors extends React.Component {
     }
 
     return (
-      <div
+      <Container
         className={cn(
           (!isEmpty(customBootstrapClass) && customBootstrapClass) ||
             'col-md-4',
-          styles.containerDate,
           !isEmpty(className) && className
         )}
         style={style}
@@ -143,7 +141,7 @@ class InputDateWithErrors extends React.Component {
           style={errorsStyle}
         />
         {spacer}
-      </div>
+      </Container>
     );
   }
 }

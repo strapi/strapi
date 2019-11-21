@@ -59,7 +59,9 @@ const buildAssocResolvers = (model, name, { plugin }) => {
 
   const { primaryKey, associations = [] } = model;
 
-  return associations.reduce((resolver, association) => {
+  return associations
+  .filter(association => model.attributes[association.alias].private !== true)
+  .reduce((resolver, association) => {
     switch (association.nature) {
       case 'oneToManyMorph': {
         resolver[association.alias] = async obj => {
@@ -165,16 +167,17 @@ const buildAssocResolvers = (model, name, { plugin }) => {
             };
 
             if (
-              (association.nature === 'manyToMany' && association.dominant) ||
-              association.nature === 'manyWay'
+              ((association.nature === 'manyToMany' && association.dominant) ||
+                association.nature === 'manyWay') &&
+              _.has(obj, association.alias) // if populated
             ) {
               _.set(
                 queryOpts,
                 ['query', ref.primaryKey],
                 obj[association.alias]
-                  ? obj[association.alias].map(
-                      val => val[ref.primaryKey] || val
-                    ).sort()
+                  ? obj[association.alias]
+                      .map(val => val[ref.primaryKey] || val)
+                      .sort()
                   : []
               );
             } else {

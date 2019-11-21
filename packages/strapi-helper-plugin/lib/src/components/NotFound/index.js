@@ -2,28 +2,25 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import Button from '../Button';
-
-import styles from './styles.scss';
+import Wrapper from './Wrapper';
 
 function NotFound({ history }) {
   return (
-    <div className={styles.notFound}>
-      <h1 className={styles.notFoundTitle}>
-        404
-      </h1>
-      <h2 className={styles.notFoundDescription}>
+    <Wrapper>
+      <h1>404</h1>
+      <h2>
         <FormattedMessage id="app.components.NotFoundPage.description" />
       </h2>
       <Button
         label="app.components.NotFoundPage.back"
         kind="back"
-        onClick={(e) => {
+        onClick={e => {
           e.stopPropagation();
 
           history.goBack();
         }}
       />
-    </div>
+    </Wrapper>
   );
 }
 

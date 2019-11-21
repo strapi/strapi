@@ -7,22 +7,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import cn from 'classnames';
-
 import pluginId from '../../pluginId';
-
-import styles from './styles.scss';
+import Wrapper from './Wrapper';
 
 /* istanbul ignore next */
 function HeaderNavLink({ custom, id, isActive, onClick }) {
   return (
-    <div
-      className={cn(isActive && styles.headerNavLink)}
+    <Wrapper
+      isActive={isActive}
       style={{ cursor: 'pointer' }}
       onClick={() => onClick(id)}
     >
-      <FormattedMessage id={`${pluginId}.popUpForm.navContainer.${custom || id}`} />
-    </div>
+      <FormattedMessage
+        id={`${pluginId}.popUpForm.navContainer.${custom || id}`}
+      />
+    </Wrapper>
   );
 }
 

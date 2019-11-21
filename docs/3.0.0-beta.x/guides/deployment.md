@@ -2,8 +2,8 @@
 
 Strapi gives you many possible deployment options for your project or application. Strapi can be deployed on traditional hosting servers or services such as Heroku, AWS, Azure and others. The following documentation covers how to develop locally with Strapi and deploy Strapi with various hosting options.
 
-::: note
-Deploying **databases** along with Strapi is covered in the [Databases Guide](/3.0.0-beta.x/guides/databases.html).
+::: tip
+Deploying **databases** along with Strapi is covered in the [Databases Guide](../guides/databases.md).
 :::
 
 ## Configuration
@@ -24,7 +24,7 @@ Update the `production` settings with the IP and domain name where the project w
 In case your database is not running on the same server, make sure that the environment of your production
 database (`./config/environments/production/database.json`) is set properly.
 
-If you are passing a number of configuration item values via environment variables which is always encouraged for production environment, read the section for [Dynamic Configuration](../configurations/configurations.md#dynamic-configurations). Here is an example:
+If you are passing a number of configuration item values via environment variables which is always encouraged for production environment, read the section for [Dynamic Configuration](../concepts/configurations.md#dynamic-configurations). Here is an example:
 
 **Path —** `./config/environments/production/server.json`.
 
@@ -39,9 +39,9 @@ If you are passing a number of configuration item values via environment variabl
 
 Before running your server in production you need to build your admin panel for production
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "yarn" id="yarn-build"
+::: tab yarn
 
 ```bash
 NODE_ENV=production yarn build
@@ -49,7 +49,7 @@ NODE_ENV=production yarn build
 
 :::
 
-::: tab "npm" id="npm-build"
+::: tab npm
 
 ```bash
 NODE_ENV=production npm run build
@@ -61,9 +61,9 @@ NODE_ENV=production npm run build
 
 Run the server with the `production` settings.
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "yarn" id="yarn-start"
+::: tab yarn
 
 ```bash
 NODE_ENV=production yarn start
@@ -71,7 +71,7 @@ NODE_ENV=production yarn start
 
 :::
 
-::: tab "npm" id="npm-start"
+::: tab npm
 
 ```bash
 NODE_ENV=production npm start
@@ -95,11 +95,11 @@ strapi(/* {...} */).start();
 
 ### Advanced configurations
 
-If you want to host the administration on another server than the API, [please take a look at this dedicated section](../advanced/customize-admin.md#deployment).
+If you want to host the administration on another server than the API, [please take a look at this dedicated section](../admin-panel/deploy.md).
 
 ## Amazon AWS
 
-This is a step-by-step guide for deploying a Strapi project to [Amazon AWS EC2](https://aws.amazon.com/ec2/). This guide will connect to an [Amazon AWS RDS](https://aws.amazon.com/rds/) for managing and hosting the database. Optionally, this guide will show you how to connect host and serve images on [Amazon AWS S3](https://aws.amazon.com/s3/). Prior to starting this guide, you should have created a [Strapi project](/3.0.0-beta.x/getting-started/quick-start.html), to use for deploying on AWS.
+This is a step-by-step guide for deploying a Strapi project to [Amazon AWS EC2](https://aws.amazon.com/ec2/). This guide will connect to an [Amazon AWS RDS](https://aws.amazon.com/rds/) for managing and hosting the database. Optionally, this guide will show you how to connect host and serve images on [Amazon AWS S3](https://aws.amazon.com/s3/). Prior to starting this guide, you should have created a [Strapi project](../getting-started/quick-start.md), to use for deploying on AWS.
 
 ### Amazon AWS Install Requirement and creating an IAM non-root user
 
@@ -158,7 +158,7 @@ Amazon calls a virtual private server, a **virtual server** or **Amazon EC2 inst
 
 #### 1. From your **AWS Management Console** and as your **_regular_** user
 
-- `Find Services`, seach for `ec2` and click on `EC2, Virtual Servers in the Cloud`
+- `Find Services`, search for `ec2` and click on `EC2, Virtual Servers in the Cloud`
 
 #### 2. **Select Appropriate Region**
 
@@ -168,7 +168,7 @@ In the top menu, near your IAM Account User name, select, from the dropdown, the
 
 - `Select` **Ubuntu Server 18.04 LTS (HVM), SSD Volume Type**
 - Ensure `General purpose` + `t2.small` is `checked`.
-  ::: note
+  ::: tip
   `t2.small` is the smallest instance type in which Strapi runs. `t2.nano` and `t2.micro` **DO NOT** work. At the moment, deploying the Strapi Admin interface requires more than 1g of RAM. Therefore, **t2.small** or larger instance is needed.
   :::
 - Click the grey `Next: Configure Instance Details` and `Next: Add Storage`
@@ -185,7 +185,7 @@ In the top menu, near your IAM Account User name, select, from the dropdown, the
     - **Type:** `HTTPS`, **Protocol:** `TCP`, **Port Range** `443`, **Source:** `0.0.0.0/0, ::/0`
     - **Type:** `Custom TCP Rule`, **Protocol:** `TCP`, **Port Range** `1337`, **Source:** `0.0.0.0/0` **Description:** `Strapi for Testing Port`
       These rules are basic configuration and security rules. You may want to tighten and limit these rules based on your own project and organizational policies.
-      ::: note
+      ::: tip
       After setting up your Nginx rules and domain name with the proper aliases, you will need to delete the rule regarding port 1337 as this is for testing and setting up the project - **not for production**.
       :::
 - Click the blue `Review and Launch` button.
@@ -203,7 +203,7 @@ Your instance is now running. Continue to the next steps.
 
 Amazon calls their database hosting services **RDS**. Multiple database options exist and are available. In this guide, **PostgreSQL** is used as the example, and the steps are similar for each of the other database that are supported by Strapi. (**MySQL**, **MondoDB**, **PostgreSQL**, **MariaDB**, **SQLite**). You will set-up an **RDS instance** to host your `postgresql` database.
 
-::: note
+::: tip
 **Amazon RDS** does **NOT** have a completely free evaluation tier. After finishing this guide, if you are only testing, please remember to [delete the database](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_DeleteInstance.html). Otherwise, you will incur charges.
 :::
 
@@ -284,7 +284,7 @@ chmod 400 ~/.ssh/ec2-strapi-key-pair.pem
 
 #### 2. Log in to your server as the default `ubuntu` user:
 
-::: note
+::: tip
 In the future, each time you log into your `EC2` server, you will need to add the path to the .pem file, e.g. `ssh -i ~/.ssh/ec2-strapi-key-pair.pem ubuntu@12.123.123.11`.
 :::
 
@@ -366,7 +366,7 @@ git --version
 
 #### 2. **OPTIONAL:** Install Git.
 
-::: note
+::: tip
 Only do if _not installed_, as above. Please follow these directions on [how to install Git on Ubuntu 18.04](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
 :::
 
@@ -379,7 +379,7 @@ After installing and configuring Git on your EC2 instance. Please continue to th
 These instructions assume that you have already created a **Strapi** project, and have it in a **GitHub** repository.
 
 You will need to update the `database.json` file to configure Strapi to connect to the `RDS` database. And you will need to install an npm package called `pg` locally on your development server.
-::: note
+::: tip
 The `pg` package install is only necessary if you are using **PostgresSQL** as your database.
 :::
 
@@ -511,7 +511,7 @@ pm2 start ecosystem.config.js
 
 Your Strapi project should now be available on `http://your-ip-address:1337/`.
 
-::: note
+::: tip
 Earlier, `Port 1337` was allowed access for **testing and setup** purposes. After setting up **NGINX**, the **Port 1337** needs to have access **denied**.
 :::
 
@@ -519,7 +519,7 @@ Earlier, `Port 1337` was allowed access for **testing and setup** purposes. Afte
 
 Follow the steps below to have your app launch on system startup.
 
-::: note
+::: tip
 These steps are based on the [PM2 Runtime Startup Hook Guide](https://pm2.io/doc/en/runtime/guide/startup-hook/).
 :::
 
@@ -737,7 +737,7 @@ sudo systemctl status webhook
 ### Further steps to take
 
 - You can **add a domain name** or **use a subdomain name** for your Strapi project, you will need to [install NGINX](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source/) and [configure it](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/nodejs-platform-proxy.html).
-  ::: note
+  ::: tip
   After setting up **NGINX**, for security purposes, you need to disable port access on `Port 1337`. You may do this easily from your **EC2 Dashboard**. In `Security Groups` (lefthand menu), click the checkbox of the group, eg. `strapi`, and below in the `inbound` tab, click `Edit`, and delete the rule for `Port Range` : `1337` by click the `x`.
   :::
 - To **install SSL**, you will need to [install and run Certbot by Let's Encrypt](https://certbot.eff.org/docs/using.html).
@@ -748,7 +748,7 @@ Your `Strapi` project has been installed on an **AWS EC2 instance** using **Ubun
 
 ## Digital Ocean
 
-This is a step-by-step guide for deploying a Strapi project to [Digital Ocean](https://www.digitalocean.com/). Databases can be on a [Digital Ocean Droplet](https://www.digitalocean.com/docs/droplets/) or hosted externally as a service. Prior to starting this guide, you should have created a [Strapi project](/3.0.0-beta.x/getting-started/quick-start.html).
+This is a step-by-step guide for deploying a Strapi project to [Digital Ocean](https://www.digitalocean.com/). Databases can be on a [Digital Ocean Droplet](https://www.digitalocean.com/docs/droplets/) or hosted externally as a service. Prior to starting this guide, you should have created a [Strapi project](../getting-started/quick-start.md).
 
 ### Digital Ocean Install Requirements
 
@@ -767,13 +767,13 @@ Choose these options:
 - Ubuntu 18.04 x64
 - STARTER `Standard`
 - Choose an appropriate pricing plan. For example, pricing: `$10/mo` _(Scroll to the left)_
-  ::: note
+  ::: tip
   The \$5/mo plan is currently unsupported as Strapi will not build with 1G of RAM. At the moment, deploying the Strapi Admin interface requires more than 1g of RAM. Therefore, a minimum standard Droplet of **\$10/mo** or larger instance is needed.
   :::
 - Choose a `datacenter` region nearest your audience, for example, `New York`.
 - **OPTIONAL:** Select additional options, for example, `[x] IPv6`.
 - Add your SSH key
-  ::: note
+  ::: tip
   We recommend you `add your SSH key` for better security.
   :::
   - In your terminal, use `pbcopy < ~/.ssh/id_rsa.pub` to copy your existing SSH public key, on your development computer, to the clipboard.
@@ -865,9 +865,9 @@ After installing and configuring Git on your Droplet. Please continue to the nex
 
 Digital Ocean has excellent documentation regarding the installation and use of the major databases that work with Strapi. The previous steps above should all be completed prior to continuing. You can find links, and any further instructions, below:
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "PostgreSQL" id="postgreSQL-ubuntu"
+::: tab PostgreSQL
 
 1. [Install PostgresSQL on Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04)(Through **Step 4** - Creating a New Database).
 
@@ -979,7 +979,7 @@ Command may disrupt existing ssh connections. Proceed with operation (y|n)? y
 Firewall is active and enabled on system startup
 ```
 
-Your Strapi project is now installed on your **Droplet**. You have a few more steps prior to being able to access Strapi and [create your first user](https://strapi.io/documentation/3.0.0-beta.x/getting-started/quick-start.html#_3-create-an-admin-user).
+Your Strapi project is now installed on your **Droplet**. You have a few more steps prior to being able to access Strapi and [create your first user](../getting-started/quick-start.md#_3-create-an-admin-user).
 
 You will next need to [install and configure PM2 Runtime](#install-and-configure-pm2-runtime).
 
@@ -1037,15 +1037,15 @@ pm2 start ecosystem.config.js
 
 `pm2` is now set-up to use an `ecosystem.config.js` to manage restarting your application upon changes. This is a recommended best practice.
 
-**OPTIONAL:** You may see your project and set-up your first administrator user, by [creating an admin user](https://strapi.io/documentation/3.0.0-beta.x/getting-started/quick-start.html#_3-create-an-admin-user).
+**OPTIONAL:** You may see your project and set-up your first administrator user, by [creating an admin user](../getting-started/quick-start.md#_3-create-an-admin-user).
 
-::: note
+::: tip
 Earlier, `Port 1337` was allowed access for **testing and setup** purposes. After setting up **NGINX**, the **Port 1337** needs to have access **denied**.
 :::
 
 Follow the steps below to have your app launch on system startup.
 
-::: note
+::: tip
 These steps are modified from the Digital Ocean [documentation for setting up PM2](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-18-04#step-3-%E2%80%94-installing-pm2).
 :::
 
@@ -1255,9 +1255,9 @@ If you already have the Heroku CLI installed locally on your computer. Skip to [
 
 Download and install the `Heroku CLI` for your operating system:
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "macOS"
+::: tab "Mac O/S"
 [Download the installer](https://cli-assets.heroku.com/heroku.pkg)
 
 Also available via Homebrew:
@@ -1268,7 +1268,7 @@ brew tap heroku/brew && brew install heroku
 
 :::
 
-::: tab "Ubuntu"
+::: tab Ubuntu
 Run the following from your terminal:
 
 ```bash
@@ -1277,12 +1277,12 @@ sudo snap install --classic heroku
 
 :::
 
-::: tab "Windows"
+::: tab Windows
 Download the appropriate installer for your Windows installation:
 
-[64-bit installer](https://cli-assets.heroku.com/heroku-x64.exe)
-[32-bit installer](https://cli-assets.heroku.com/heroku-x86.exe)
-:::
+- [64-bit installer](https://cli-assets.heroku.com/heroku-x64.exe)
+- [32-bit installer](https://cli-assets.heroku.com/heroku-x86.exe)
+  :::
 
 ::::
 
@@ -1298,11 +1298,11 @@ Follow the instructions and return to your command line.
 
 #### 3. Create a new project (or use an existing one)
 
-Create a [new Strapi project](/3.0.0-beta.x/getting-started/quick-start.html) (if you want to deploy an existing project go to step 4).
+Create a [new Strapi project](../getting-started/quick-start.md) (if you want to deploy an existing project go to step 4).
 
 ::: warning NOTE
 
-If you plan to use **MongoDB** with your project, [refer to the create a Strapi project with MongoDB section of the documentation](/3.0.0-beta.x/guides/databases.html#install-mongodb-locally) then, jump to step 4.
+If you plan to use **MongoDB** with your project, [refer to the create a Strapi project with MongoDB section of the documentation](../guides/databases.md#install-mongodb-locally) then, jump to step 4.
 
 :::
 
@@ -1312,7 +1312,7 @@ If you plan to use **MongoDB** with your project, [refer to the create a Strapi 
 strapi new my-project --quickstart
 ```
 
-::: note
+::: tip
 When you use `--quickstart` to create a Strapi project locally, a **SQLite database** is used which is not compatible with Heroku. Therefore, another database option [must be chosen](#_6-heroku-database-set-up).
 :::
 
@@ -1370,9 +1370,9 @@ Your local development environment is now set-up and configured to work with Her
 
 Below you will find database options when working with Heroku. Please choose the correct database (e.g. PostgreSQL, MongoDB, etc.) and follow those instructions.
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "PostgreSQL" id="heroku-postgresql"
+::: tab PostgreSQL
 
 ### Heroku Postgres
 
@@ -1455,7 +1455,7 @@ npm install pg --save
 
 :::
 
-::: tab "MongoDB" id="heroku-mongodb"
+::: tab MongoDB
 
 ### MongoDB Atlas
 
@@ -1463,11 +1463,11 @@ npm install pg --save
 
 Please follow these steps the **deploy a Strapi app with MongoDB on Heroku**.
 
-You must have completed the [steps to use Strapi with MongoDB Atlas](/3.0.0-beta.x/guides/databases.html#install-on-atlas-mongodb-atlas) - through **4. Retrieve database credentials**.
+You must have completed the [steps to use Strapi with MongoDB Atlas](../guides/databases.md#install-on-atlas-mongodb-atlas) - through **4. Retrieve database credentials**.
 
 #### 1. Set environment variables
 
-When you [set-up your MongoDB Atlas database](/3.0.0-beta.x/guides/databases.html#install-on-atlas-mongodb-atlas) you noted a connection string. Similar to this:
+When you [set-up your MongoDB Atlas database](../guides/databases.md#install-on-atlas-mongodb-atlas) you noted a connection string. Similar to this:
 
 ```bash
 mongodb://paulbocuse:<password>@strapidatabase-shard-00-00-fxxx6c.mongodb.net:27017,strapidatabase-shard-00-01-fxxxc.mongodb.net:27017,strapidatabase-shard-00-02-fxxxc.mongodb.net:27017/test?ssl=true&replicaSet=strapidatabase-shard-0&authSource=admin&retryWrites=true&w=majority
@@ -1538,13 +1538,11 @@ heroku open
 
 If you see the Strapi Welcome page, you have correctly set-up, configured and deployed your Strapi project on Heroku. You will now need to set-up your `admin user` as the production database is brand-new (and empty).
 
-You can now continue with the [Tutorial - Creating an Admin User](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_3-create-an-admin-user), if you have any questions on how to proceed.
+You can now continue with the [Tutorial - Creating an Admin User](../getting-started/quick-start-tutorial.md#_3-create-an-admin-user), if you have any questions on how to proceed.
 
 ::: warning
 For security reasons, the Content Type Builder plugin is disabled in production. To update content structure, please make your changes locally and deploy again.
 :::
-
----
 
 ### Project updates
 
@@ -1562,3 +1560,9 @@ git commit -am "Changes to my-project noted"
 git push heroku master
 heroku open
 ```
+
+### File Uploads
+
+Like with project updates on Heroku, the file system doesn't support local uploading of files as they will be wiped when Heroku "Cycles" the dyno. This type of file system is called [ephemeral](https://devcenter.heroku.com/articles/dynos#ephemeral-filesystem), which means the file system only lasts until the dyno is restarted (with Heroku this happens any time you redeploy or during their regular restart which can happen every few hours or every day).
+
+Due to Heroku's filesystem you will need to use an upload provider such as AWS S3, Cloudinary, or Rackspace. You can view the documentation for installing providers [here](../plugins/upload.md#install-providers) and you can see a list of providers from both Strapi and the community on [npmjs.com](https://www.npmjs.com/search?q=strapi-provider-upload-&page=0&perPage=20).

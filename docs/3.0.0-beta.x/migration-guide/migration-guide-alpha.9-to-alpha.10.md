@@ -7,7 +7,7 @@
 
 <br>
 
-::: note
+::: tip
 Feel free to [join us on Slack](http://slack.strapi.io) and ask questions about the migration process.
 :::
 
@@ -55,7 +55,7 @@ Then, delete your old `plugins` folder and replace it by the new one.
 
 <br>
 
-## ⚠️  Config in database
+## ⚠️ Config in database
 
 To let you update your configurations when your application is deployed on multiple server instances, we have created a data store for settings. So we moved all the `users-permissions` plugin's configs in database.
 
@@ -63,9 +63,8 @@ You will have to reconfigure all your `users-permissions` configs from the admin
 
 <br>
 
-## ⚠️  Data type Number
+## ⚠️ Data type Number
 
 We fixed how mongoose handles the model's `Number` type. Previously, mongoose stored `Number` type as `String` and now it's `Integer`. So you will have to update all your documents which have a type `Number` in its model and replace their `String` value with a `Number` one.
-
 
 That's all, you have now upgraded to Strapi `alpha.10`.

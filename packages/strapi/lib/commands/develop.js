@@ -7,18 +7,20 @@ const chokidar = require('chokidar');
 const execa = require('execa');
 
 const { logger } = require('strapi-utils');
+
 const strapi = require('../index');
 
 /**
  * `$ strapi develop`
  *
  */
-module.exports = async function({ build }) {
+module.exports = async function({ build, watchAdmin }) {
   const dir = process.cwd();
 
-  if (build && !fs.existsSync(path.join(dir, 'build'))) {
+  // Don't run the build process if the admin is in watch mode
+  if (build && !watchAdmin && !fs.existsSync(path.join(dir, 'build'))) {
     try {
-      execa.shellSync('npm run -s build', {
+      execa.shellSync('npm run -s build -- --no-optimization', {
         stdio: 'inherit',
       });
     } catch (err) {
@@ -27,9 +29,24 @@ module.exports = async function({ build }) {
   }
 
   try {
-    const strapiInstance = strapi({ dir, autoReload: true });
+    const strapiInstance = strapi({
+      dir,
+      autoReload: true,
+      serveAdminPanel: watchAdmin ? false : true,
+    });
 
     if (cluster.isMaster) {
+      //  Start the front-end dev server
+      if (watchAdmin) {
+        try {
+          execa('npm', ['run', '-s', 'strapi', 'watch-admin'], {
+            stdio: 'inherit',
+          });
+        } catch (err) {
+          process.exit(1);
+        }
+      }
+
       cluster.on('message', (worker, message) => {
         switch (message) {
           case 'reload':

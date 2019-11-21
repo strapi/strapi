@@ -6,19 +6,21 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import styles from './styles.scss';
+
+import { Wrapper } from './Components';
 
 function InputSearchLi({ onClick, isAdding, item }) {
+  const { id, username } = item;
   const icon = isAdding ? 'fa-plus' : 'fa-minus-circle';
   const liStyle = isAdding ? { cursor: 'pointer' } : {};
   const handleClick = isAdding ? () => onClick(item) : () => {};
-  const path = `/admin/plugins/content-manager/user/${item.id}?redirectUrl=/plugins/content-manager/user/?page=1&limit=20&sort=id&source=users-permissions`;
+  const path = `/admin/plugins/content-manager/user/${id}?redirectUrl=/plugins/content-manager/user/?page=1&limit=20&sort=id&source=users-permissions`;
 
   return (
-    <li className={styles.li} style={liStyle} onClick={handleClick}>
+    <Wrapper style={liStyle} onClick={handleClick}>
       <div>
-        <div className={styles.container}>
-          {item.username}
+        <div>
+          {username}
           <a href={`${path}`} target="_blank" rel="noopener noreferrer">
             <i className="fa fa-external-link" />
           </a>
@@ -33,13 +35,14 @@ function InputSearchLi({ onClick, isAdding, item }) {
           <i className={`fa ${icon}`} />
         </div>
       </div>
-    </li>
+    </Wrapper>
   );
 }
 
 InputSearchLi.defaultProps = {
   item: {
-    name: '',
+    id: null,
+    username: null,
   },
 };
 

@@ -14,11 +14,9 @@ You can install `Node.js` and `npm` for `Windows 10`, `Ubuntu 18.04` and `Mac O/
 
 #### Installation Instructions for each Operating System:
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "Windows 10" id="windows-requirements"
-
-**WINDOWS 10**
+::: tab "Windows 10"
 
 ### Installing Node.js on Windows 10
 
@@ -50,9 +48,7 @@ npm -v
 
 :::
 
-::: tab "Mac O/S 10.14 Mojave" id="mac-requirements"
-
-**MAC O/S 10.14 MOJAVE**
+::: tab "Mac O/S"
 
 ### Installing Node.js on Mac O/S X (Mojave)
 
@@ -84,9 +80,7 @@ npm -v
 
 :::
 
-::: tab "UBUNTU 18.04" id="ubuntu-requirements"
-
-**UBUNTU 18.04**
+::: tab "UBUNTU 18.04"
 
 ### Installing Node.js on Ubuntu 18.04
 
@@ -130,5 +124,5 @@ npm -v
 You can also use yarn if you want [here](https://yarnpkg.com/en/docs/getting-started) are the instructions to get started with it.
 
 ::: tip NEXT STEPS
-👏 Congrats, you are all set! Now that Node.js is installed you can continue with the [Quick start guide](/3.0.0-beta.x/getting-started/quick-start.html).
+👏 Congrats, you are all set! Now that Node.js is installed you can continue with the [Quick start guide](quick-start.md).
 :::

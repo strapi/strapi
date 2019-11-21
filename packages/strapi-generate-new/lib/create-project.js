@@ -7,7 +7,7 @@ const execa = require('execa');
 const ora = require('ora');
 
 const stopProcess = require('./utils/stop-process');
-const { trackUsage, captureError } = require('./utils/usage');
+const { trackUsage, captureStderr } = require('./utils/usage');
 const packageJSON = require('./resources/json/package.json');
 const databaseJSON = require('./resources/json/database.json.js');
 
@@ -93,8 +93,6 @@ module.exports = async function createProject(
     loader.stop();
     console.log(`Dependencies installed ${chalk.green('successfully')}.`);
   } catch (error) {
-    error.message = error.stderr;
-
     loader.stop();
     await trackUsage({
       event: 'didNotInstallProjectDependencies',
@@ -102,13 +100,31 @@ module.exports = async function createProject(
       error: error.stderr.slice(-1024),
     });
 
-    await captureError(error);
+    console.error(`${chalk.red('Error')} while installing dependencies:`);
+    console.error(error.stderr);
 
-    stopProcess(
-      `${chalk.red(
-        'Error'
-      )} while installing dependencies:\n${error.stderr.trim()}`
+    await captureStderr('didNotInstallProjectDependencies', error);
+
+    console.log(chalk.black.bgWhite(' Keep trying!             '));
+    console.log();
+    console.log(
+      chalk.bold(
+        'Oh, it seems that you encountered errors while installing dependencies in your project.'
+      )
     );
+    console.log(`Don't give up, your project was created correctly.`);
+    console.log(
+      `Fix the issues mentionned in the installation errors and try to run the following command:`
+    );
+    console.log();
+    console.log(
+      `cd ${chalk.green(rootPath)} && ${chalk.cyan(
+        scope.useYarn ? 'yarn' : 'npm'
+      )} install`
+    );
+    console.log();
+
+    stopProcess();
   }
 
   await trackUsage({ event: 'didCreateProject', scope });

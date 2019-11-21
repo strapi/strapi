@@ -37,7 +37,19 @@ Start a Strapi application with autoReload enabled.
 
 Strapi modifies/creates files at runtime and needs to restart when new files are created. To achieve this, `strapi develop` adds a file watcher and restarts the application when necessary.
 
-::: note
+```
+strapi develop
+options: [--no-build |--watch-admin ]
+```
+
+- **strapi develop**<br/>
+  Starts your application with the autoReload enabled
+- **strapi develop --no-build**<br/>
+  Starts your application with the autoReload enabled and skip the administration panel build process
+- **strapi develop --watch-admin**<br/>
+  Starts your application with the autoReload enabled and the front-end development server. It allows you to customize the administration panel.
+
+::: tip
 You should never use this command to run a Strapi application in production.
 :::
 
@@ -48,7 +60,7 @@ Start a Strapi application with autoReload disabled.
 This commands is there to run a Strapi application without restarts and file writes (aimed at production usage).
 Certain features are disabled in the `strapi start` mode because they require application restarts.
 
-::: note
+::: tip
 You can specify a NODE_ENV to use the configurations in the `./config/environments/[development|staging|production]` folder.
 By default the `development` environment will be used.
 :::
@@ -57,7 +69,18 @@ By default the `development` environment will be used.
 
 Builds your admin panel.
 
-::: note
+```bash
+strapi build
+
+options: [--no-optimization]
+```
+
+- **strapi build**<br/>
+  Builds the administration panel without minimizing the assets
+- **strapi build --no-optimization**<br/>
+  Builds the administration panel without minizing the assets. The build duration is faster.
+
+::: tip
 You can specify a NODE_ENV to use the configurations in the `./config/environments/[development|staging|production]` folder.
 By default the `development` environment will be used.
 :::
@@ -90,7 +113,7 @@ options: [--tpl <name>|--plugin <name>]
 
   Example: `strapi generate:api product --tpl bookshelf`
 
-::: note
+::: tip
 The first letter of the filename will be uppercase.
 :::
 
@@ -117,7 +140,7 @@ options: [--api <name>|--plugin <name>]
 - **strapi generate:controller &#60;name&#62; --plugin &#60;plugin&#62;**<br/>
   Generates an empty controller called **&#60;name&#62;** in the `./plugins/<plugin>/controllers` folder.
 
-::: note
+::: tip
 The first letter of the filename will be uppercase.
 :::
 
@@ -153,7 +176,7 @@ options: [--api <name>|--plugin <name>]
 * **strapi generate:model &#60;name&#62; --plugin &#60;plugin&#62;**<br/>
   Generates an empty model called **&#60;name&#62;** in the `./plugins/<plugin>/models` folder.
 
-::: note
+::: tip
 The first letter of the filename will be uppercase.
 :::
 
@@ -180,7 +203,7 @@ options: [--api <name>|--plugin <name>]
 - **strapi generate:service &#60;name&#62; --plugin &#60;plugin&#62;**<br/>
   Generates an empty service called **&#60;name&#62;** in the `./plugins/<plugin>/services` folder.
 
-::: note
+::: tip
 The first letter of the filename will be uppercase.
 :::
 

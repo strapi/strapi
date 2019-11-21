@@ -11,7 +11,6 @@ import { injectIntl } from 'react-intl';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { bindActionCreators, compose } from 'redux';
 import { get, isEmpty } from 'lodash';
-import cn from 'classnames';
 
 // Components
 import {
@@ -28,7 +27,7 @@ import Block from '../../components/Block';
 import Row from '../../components/Row';
 
 import openWithNewTab from '../../utils/openWithNewTab';
-
+import { ContainerFluid, StyledRow, VersionWrapper } from './components';
 // Actions
 import {
   getDocInfos,
@@ -40,8 +39,6 @@ import {
 } from './actions';
 // Selectors
 import selectHomePage from './selectors';
-// Styles
-import styles from './styles.scss';
 import reducer from './reducer';
 import saga from './saga';
 
@@ -62,7 +59,7 @@ export class HomePage extends React.Component {
     return [
       {
         label: makeTranslation('Button.open'),
-        className: styles.buttonOutline,
+        className: 'buttonOutline',
         onClick: this.openCurrentDocumentation,
         type: 'button',
       },
@@ -145,7 +142,7 @@ export class HomePage extends React.Component {
     }
 
     return (
-      <div className={cn('container-fluid', styles.containerFluid)}>
+      <ContainerFluid className="container-fluid">
         <PopUpWarning
           isOpen={!isEmpty(versionToDelete)}
           toggleModal={this.toggleModal}
@@ -164,7 +161,7 @@ export class HomePage extends React.Component {
             title={{ id: makeTranslation('PluginHeader.title') }}
             description={{ id: makeTranslation('PluginHeader.description') }}
           />
-          <div className={cn('row', styles.container)}>
+          <StyledRow className="row">
             <Block>
               <CopyToClipboard text={auth.getToken()} onCopy={this.handleCopy}>
                 <div className="row" style={{ zIndex: '99' }}>
@@ -185,14 +182,14 @@ export class HomePage extends React.Component {
             </Block>
             <Block>{form.map(this.renderForm)}</Block>
             <Block title={makeTranslation('Block.title')}>
-              <div className={styles.wrapper}>
+              <VersionWrapper>
                 <Row isHeader />
                 {docVersions.map(this.renderRow)}
-              </div>
+              </VersionWrapper>
             </Block>
-          </div>
+          </StyledRow>
         </form>
-      </div>
+      </ContainerFluid>
     );
   }
 }
@@ -238,7 +235,7 @@ function mapDispatchToProps(dispatch) {
       onSubmit,
       onUpdateDoc,
     },
-    dispatch,
+    dispatch
   );
 }
 
@@ -246,7 +243,7 @@ const mapStateToProps = selectHomePage();
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 const withReducer = strapi.injectReducer({
   key: 'homePage',
@@ -258,5 +255,5 @@ const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
+  withConnect
 )(injectIntl(HomePage));

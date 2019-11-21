@@ -16,6 +16,7 @@ import { Prompt } from 'react-router';
 import {
   Button,
   EmptyAttributesBlock,
+  GlobalContext,
   List,
   ListHeader,
   ListTitle,
@@ -48,13 +49,14 @@ import {
   submitContentType,
   submitTempContentType,
 } from '../App/actions';
-
-import styles from './styles.scss';
+import Wrapper from './Wrapper';
 
 /* eslint-disable react/sort-comp */
 /* eslint-disable no-extra-boolean-cast */
 export class ModelPage extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
+  static contextType = GlobalContext;
+
   state = {
     attrToDelete: null,
     removePrompt: false,
@@ -107,19 +109,6 @@ export class ModelPage extends React.Component {
 
   getAttributeType = () =>
     getQueryParameters(this.getSearch(), 'attributeType');
-
-  // getFormData = () => {
-  //   const { modifiedData, newContentType } = this.props;
-
-  //   if (
-  //     this.getActionType() === 'create' ||
-  //     this.isUpdatingTemporaryContentType()
-  //   ) {
-  //     return newContentType;
-  //   }
-
-  //   return get(modifiedData, this.getModelName());
-  // };
 
   getModalType = () => getQueryParameters(this.getSearch(), 'modalType');
 
@@ -596,7 +585,7 @@ export class ModelPage extends React.Component {
     };
 
     return (
-      <div className={styles.modelpage}>
+      <Wrapper>
         <FormattedMessage id={`${pluginId}.prompt.content.unsaved`}>
           {msg => (
             <Prompt
@@ -662,8 +651,8 @@ export class ModelPage extends React.Component {
               </div>
             </ListWrapper>
           )}
-          {!this.getSource() && (
-            <div className="trash-btn-wrapper">
+          <div className="trash-btn-wrapper">
+            {!this.getSource() && (
               <TrashButton
                 onClick={e => {
                   e.stopPropagation();
@@ -682,8 +671,8 @@ export class ModelPage extends React.Component {
                 </div>
                 <FormattedMessage id={`${pluginId}.button.delete.label`} />
               </TrashButton>
-            </div>
-          )}
+            )}
+          </div>
         </ViewContainer>
 
         <AttributesModalPicker
@@ -757,17 +746,10 @@ export class ModelPage extends React.Component {
           popUpWarningType="danger"
           onConfirm={this.handleDeleteAttribute}
         />
-      </div>
+      </Wrapper>
     );
   }
 }
-
-ModelPage.contextTypes = {
-  emitEvent: PropTypes.func,
-  plugins: PropTypes.object,
-  router: PropTypes.object,
-  updatePlugin: PropTypes.func,
-};
 
 ModelPage.defaultProps = {
   connections: ['default'],

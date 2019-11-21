@@ -10,11 +10,11 @@ import cn from 'classnames';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
+import { GlobalContext } from 'strapi-helper-plugin';
 import injectSaga from '../../utils/injectSaga';
 import injectReducer from '../../utils/injectReducer';
-
 import OnboardingVideo from '../../components/OnboardingVideo';
-
+import Wrapper from './Wrapper';
 import {
   getVideos,
   onClick,
@@ -27,9 +27,9 @@ import makeSelectOnboarding from './selectors';
 import reducer from './reducer';
 import saga from './saga';
 
-import styles from './styles.scss';
-
 export class Onboarding extends React.Component {
+  static contextType = GlobalContext;
+
   state = { showVideos: false };
 
   componentDidMount() {
@@ -95,38 +95,34 @@ export class Onboarding extends React.Component {
   render() {
     const { videos, onClick, setVideoDuration } = this.props;
     const { showVideos } = this.state;
-
     const style = showVideos ? {} : { maxWidth: 0 };
 
     return (
-      <div
+      <Wrapper
         style={style}
-        className={cn(
-          styles.videosWrapper,
-          videos.length > 0 ? styles.visible : styles.hidden,
-        )}
+        className={cn(videos.length > 0 ? 'visible' : 'hidden')}
       >
         <div
           style={style}
           className={cn(
-            styles.videosContent,
-            this.state.showVideos ? styles.shown : styles.hide,
+            'videosContent',
+            this.state.showVideos ? 'shown' : 'hide'
           )}
         >
-          <div className={styles.videosHeader}>
+          <div className="videosHeader">
             <p>
               <FormattedMessage id="app.components.Onboarding.title" />
             </p>
             {videos.length && (
               <p>
                 {Math.floor(
-                  (videos.filter(v => v.end).length * 100) / videos.length,
+                  (videos.filter(v => v.end).length * 100) / videos.length
                 )}
                 <FormattedMessage id="app.components.Onboarding.label.completed" />
               </p>
             )}
           </div>
-          <ul className={styles.onboardingList}>
+          <ul className="onboardingList">
             {videos.map((video, i) => {
               return (
                 <OnboardingVideo
@@ -144,23 +140,20 @@ export class Onboarding extends React.Component {
           </ul>
         </div>
 
-        <div className={styles.openBtn}>
+        <div className="openBtn">
           <button
             onClick={this.handleVideosToggle}
-            className={this.state.showVideos ? styles.active : ''}
+            className={this.state.showVideos ? 'active' : ''}
           >
             <i className="fa fa-question" />
             <i className="fa fa-times" />
             <span />
           </button>
         </div>
-      </div>
+      </Wrapper>
     );
   }
 }
-Onboarding.contextTypes = {
-  emitEvent: PropTypes.func,
-};
 
 Onboarding.defaultProps = {
   onClick: () => {},
@@ -195,13 +188,13 @@ function mapDispatchToProps(dispatch) {
       setVideoEnd,
       removeVideos,
     },
-    dispatch,
+    dispatch
   );
 }
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 
 /* Remove this line if the container doesn't have a route and
@@ -217,5 +210,5 @@ const withSaga = injectSaga({ key: 'onboarding', saga });
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
+  withConnect
 )(Onboarding);

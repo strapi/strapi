@@ -389,7 +389,9 @@ module.exports = {
       };
 
       // Retrieve roles
-      const roles = await strapi.query('role', 'users-permissions').find();
+      const roles = await strapi
+        .query('role', 'users-permissions')
+        .find({}, []);
 
       // We have to know the difference to add or remove
       // the permissions entries in the database.

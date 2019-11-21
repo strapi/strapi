@@ -18,8 +18,7 @@ import InputDescription from '../InputDescription';
 import InputErrors from '../InputErrors';
 import InputPassword from '../InputPassword';
 import InputSpacer from '../InputSpacer';
-
-import styles from './styles.scss';
+import InputWrapper from '../InputWrapper';
 
 class InputPasswordWithErrors extends React.Component {
   state = { errors: [], hasInitialValue: false };
@@ -98,9 +97,8 @@ class InputPasswordWithErrors extends React.Component {
     }
 
     return (
-      <div
+      <InputWrapper
         className={cn(
-          styles.containerInputPassword,
           this.props.customBootstrapClass,
           !isEmpty(this.props.className) && this.props.className
         )}
@@ -139,7 +137,7 @@ class InputPasswordWithErrors extends React.Component {
           style={errorsStyle}
         />
         {spacer}
-      </div>
+      </InputWrapper>
     );
   }
 }

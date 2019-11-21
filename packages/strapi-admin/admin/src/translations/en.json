@@ -2,6 +2,7 @@
   "Analytics": "Analytics",
   "Content Manager": "Content Manager",
   "Content Type Builder": "Content Type Builder",
+  "Documentation": "Documentation",
   "Email": "Email",
   "Files Upload": "Files Upload",
   "HomePage.notification.newsLetter.success": "Successfully subscribed to the newsletter",
@@ -212,5 +213,7 @@
   "Auth.link.forgot-password": "Forgot your password?",
   "Auth.link.ready": "Ready to sign in?",
   "app.containers.App.notification.error.init": "An error occured while requesting the API",
-  "components.Input.error.password.noMatch": "Passwords do not match"
+  "components.Input.error.password.noMatch": "Passwords do not match",
+  "form.button.done": "Done",
+  "notification.form.error.fields": "The form contains some errors"
 }

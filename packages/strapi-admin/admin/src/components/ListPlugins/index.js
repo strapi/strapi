@@ -13,8 +13,7 @@ import { map, size } from 'lodash';
 // Design
 import { Button } from 'strapi-helper-plugin';
 import Row from '../Row';
-
-import styles from './styles.scss';
+import Wrapper from './Wrapper';
 
 class ListPlugins extends React.Component {
   render() {
@@ -26,8 +25,8 @@ class ListPlugins extends React.Component {
     }
 
     return (
-      <div className={styles.container}>
-        <div className={styles.titleContainer}>
+      <Wrapper>
+        <div className="titleContainer">
           <div>
             <FormattedMessage
               id={`app.components.listPlugins.title.${titleType}`}
@@ -45,7 +44,7 @@ class ListPlugins extends React.Component {
         </div>
         <div className="container-fluid">
           <div className="row">
-            <div className={styles.ulContainer}>
+            <div className="ulContainer">
               <ul>
                 {map(this.props.plugins, (plugin, key) => (
                   <Row
@@ -61,7 +60,7 @@ class ListPlugins extends React.Component {
             </div>
           </div>
         </div>
-      </div>
+      </Wrapper>
     );
   }
 }
