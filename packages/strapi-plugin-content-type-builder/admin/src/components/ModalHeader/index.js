@@ -7,10 +7,18 @@ import { upperFirst } from 'lodash';
 import pluginId from '../../pluginId';
 
 const ModalHeader = ({ headerId, iconType, name }) => {
+  let iconName;
+
+  if (iconType === 'components') {
+    iconName = 'component';
+  } else {
+    iconName = iconType;
+  }
+
   return (
     <section>
       <HeaderModalTitle style={{ textTransform: 'none' }}>
-        <AttributeIcon type={iconType} style={{ margin: 'auto 20px auto 0' }} />
+        <AttributeIcon type={iconName} style={{ margin: 'auto 20px auto 0' }} />
         {headerId && (
           <FormattedMessage id={`${pluginId}.${headerId}`} values={{ name }} />
         )}

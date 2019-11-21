@@ -93,7 +93,11 @@ const FormModal = () => {
         dispatch({
           type: 'SET_ATTRIBUTE_DATA_SCHEMA',
           attributeType,
-          nameToSetForRelation: get(allDataSchema, ['schema', 'name'], ''),
+          nameToSetForRelation: get(
+            sortedContentTypesList,
+            ['0', 'title'],
+            'error'
+          ),
           targetUid: get(sortedContentTypesList, ['0', 'uid'], 'error'),
         });
       }
@@ -150,7 +154,9 @@ const FormModal = () => {
     switch (state.modalType) {
       case 'chooseAttribute':
         return getTrad(
-          `modalForm.sub-header.chooseAttribute.${state.forTarget}`
+          `modalForm.sub-header.chooseAttribute.${
+            state.forTarget === 'contentType' ? 'contentType' : 'component'
+          }`
         );
       case 'attribute':
         return getTrad(`modalForm.sub-header.attribute.${state.actionType}`);
@@ -247,7 +253,7 @@ const FormModal = () => {
           search: nextSearch,
         });
       } else if (state.modalType === 'attribute') {
-        addAttribute(modifiedData);
+        addAttribute(modifiedData, state.forTarget, state.targetUid);
         push({ search: nextSearch });
       } else {
         console.log('Do something with component later');

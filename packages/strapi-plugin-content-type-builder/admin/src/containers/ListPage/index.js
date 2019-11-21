@@ -7,38 +7,62 @@ import LeftMenu from '../LeftMenu';
 
 const ListPage = () => {
   const {
-    components,
+    // components,
     initialData,
     modifiedData,
     isInContentTypeView,
   } = useDataManager();
   const { push } = useHistory();
+  const firstMainDataPath = isInContentTypeView ? 'contentType' : 'component';
+  const mainDataTypeAttributesPath = [
+    firstMainDataPath,
+    'schema',
+    'attributes',
+  ];
 
-  const attributes = get(modifiedData, ['schema', 'attributes'], {});
-  const currentDataName = get(initialData, ['schema', 'name'], '');
+  const attributes = get(modifiedData, mainDataTypeAttributesPath, {});
+  const currentDataName = get(
+    initialData,
+    [firstMainDataPath, 'schema', 'name'],
+    ''
+  );
+  const targetUid = get(modifiedData, [firstMainDataPath, 'uid']);
 
-  const handleClick = () => {
+  const handleClickAddAttributeMainData = () => {
     const forTarget = isInContentTypeView ? 'contentType' : 'component';
-    const search = `modalType=chooseAttribute&forTarget=${forTarget}&targetUid=${modifiedData.uid}&headerDisplayName=${currentDataName}`;
+    const search = `modalType=chooseAttribute&forTarget=${forTarget}&targetUid=${targetUid}&headerDisplayName=${currentDataName}`;
+    push({ search });
+  };
+  const handleClickAddAttributeNestedData = (targetUid, headerDisplayName) => {
+    const search = `modalType=chooseAttribute&forTarget=components&targetUid=${targetUid}&headerDisplayName=${headerDisplayName}`;
     push({ search });
   };
   // TODO just a util not sure it should be kept
   const getType = attrName => {
-    const type = has(modifiedData, ['schema', 'attributes', attrName, 'nature'])
+    const type = has(modifiedData, [
+      ...mainDataTypeAttributesPath,
+      attrName,
+      'nature',
+    ])
       ? 'relation'
-      : get(modifiedData, ['schema', 'attributes', attrName, 'type'], '');
+      : get(
+          modifiedData,
+          [...mainDataTypeAttributesPath, attrName, 'type'],
+          ''
+        );
 
     return type;
   };
-  const getComponentSchema = attrName => {
+
+  const getComponent = attrName => {
     const componentToGet = get(
       modifiedData,
-      ['schema', 'attributes', attrName, 'component'],
+      [...mainDataTypeAttributesPath, attrName, 'component'],
       ''
     );
     const componentSchema = get(
-      components,
-      [componentToGet, 'schema', 'attributes'],
+      modifiedData,
+      ['components', componentToGet],
       {}
     );
 
@@ -79,7 +103,7 @@ const ListPage = () => {
         <div className="row">
           <LeftMenu />
           <div className="col-md-9">
-            <button type="button" onClick={handleClick}>
+            <button type="button" onClick={handleClickAddAttributeMainData}>
               Add field
             </button>
 
@@ -89,7 +113,12 @@ const ListPage = () => {
                 const type = getType(attr);
 
                 if (type === 'component') {
-                  const componentSchema = getComponentSchema(attr);
+                  const compoData = getComponent(attr);
+                  const componentSchema = get(
+                    compoData,
+                    ['schema', 'attributes'],
+                    {}
+                  );
                   // TODO edit component field name & other stuff
                   // TODO edit component's fields
                   return (
@@ -113,6 +142,17 @@ const ListPage = () => {
                             </li>
                           );
                         })}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleClickAddAttributeNestedData(
+                              get(compoData, 'uid', ''),
+                              get(compoData, 'schema.name', 'ERROR')
+                            )
+                          }
+                        >
+                          Add field
+                        </button>
                       </ul>
                     </li>
                   );
@@ -124,7 +164,7 @@ const ListPage = () => {
                     onClick={() =>
                       handleClickEditField(
                         'contentType',
-                        modifiedData.uid,
+                        targetUid,
                         attr,
                         type,
                         currentDataName

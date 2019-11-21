@@ -8,7 +8,7 @@ import Wrapper from './Wrapper';
 
 const BooleanBox = ({ label, name, onChange, options, value }) => {
   const { formatMessage } = useGlobalContext();
-  console.log({ value });
+
   return (
     <div style={{ marginTop: '-2px' }}>
       <Label htmlFor={name}>{label}</Label>

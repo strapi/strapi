@@ -9,6 +9,10 @@ import FormModal from '../FormModal';
 import init from './init';
 import reducer, { initialState } from './reducer';
 import createDataObject from './utils/createDataObject';
+import createModifiedDataSchema, {
+  orderAllDataAttributesWithImmutable,
+} from './utils/createModifiedDataSchema';
+import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
 
 const DataManagerProvider = ({ children }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
@@ -69,10 +73,12 @@ const DataManagerProvider = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, pathname]);
 
-  const addAttribute = attributeToSet => {
+  const addAttribute = (attributeToSet, forTarget, targetUid) => {
     dispatch({
       type: 'ADD_ATTRIBUTE',
       attributeToSet,
+      forTarget,
+      targetUid,
     });
   };
 
@@ -98,11 +104,26 @@ const DataManagerProvider = ({ children }) => {
 
   const setModifiedData = () => {
     const currentSchemas = isInContentTypeView ? contentTypes : components;
-    const schemaToSet = get(currentSchemas, currentUid, {});
+    const schemaToSet = get(currentSchemas, currentUid, {
+      schema: { attributes: {} },
+    });
+    const retrievedComponents = retrieveComponentsFromSchema(
+      schemaToSet.schema.attributes
+    );
+    const newSchemaToSet = createModifiedDataSchema(
+      schemaToSet,
+      retrievedComponents,
+      components,
+      isInContentTypeView
+    );
+    const dataShape = orderAllDataAttributesWithImmutable(
+      newSchemaToSet,
+      isInContentTypeView
+    );
 
     dispatch({
       type: 'SET_MODIFIED_DATA',
-      schemaToSet,
+      schemaToSet: dataShape,
     });
   };
   const shouldRedirect = () => {

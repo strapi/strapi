@@ -1,4 +1,4 @@
-import { fromJS, OrderedMap } from 'immutable';
+import { fromJS } from 'immutable';
 import { get } from 'lodash';
 const initialState = fromJS({
   components: {},
@@ -14,12 +14,20 @@ const reducer = (state, action) => {
     case 'ADD_ATTRIBUTE': {
       const {
         attributeToSet: { name, ...rest },
+        forTarget,
+        targetUid,
       } = action;
+      const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
+        ? [forTarget]
+        : [forTarget, targetUid];
 
       return state
-        .updateIn(['modifiedData', 'schema', 'attributes', name], () => {
-          return fromJS(rest);
-        })
+        .updateIn(
+          ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes', name],
+          () => {
+            return fromJS(rest);
+          }
+        )
         .updateIn(['modifiedData', 'schema', 'attributes'], obj => {
           const type = get(rest, 'type');
           const target = get(rest, 'target', null);
@@ -73,15 +81,10 @@ const reducer = (state, action) => {
     }
 
     case 'SET_MODIFIED_DATA': {
-      const schemaWithOrderedAttributes = fromJS(action.schemaToSet).setIn(
-        ['schema', 'attributes'],
-        OrderedMap(get(action, 'schemaToSet.schema.attributes', {}))
-      );
-
       return state
         .update('isLoadingForDataToBeSet', () => false)
-        .update('initialData', () => schemaWithOrderedAttributes)
-        .update('modifiedData', () => schemaWithOrderedAttributes);
+        .update('initialData', () => action.schemaToSet)
+        .update('modifiedData', () => action.schemaToSet);
     }
     default:
       return state;
