@@ -102,4 +102,5 @@ const validateUpdateComponentInput = data => {
 module.exports = {
   validateComponentInput,
   validateUpdateComponentInput,
+  componentSchema,
 };

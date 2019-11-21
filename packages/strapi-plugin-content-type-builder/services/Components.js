@@ -41,8 +41,8 @@ const createComponent = ({ component, components = [] }) => {
   return getSchemaManager().edit(ctx => {
     const newComponent = ctx.createComponent(component);
 
-    componentsToCreate.forEach(ctx.createComponent);
-    componentsToEdit.forEach(ctx.editComponent);
+    componentsToCreate.forEach(component => ctx.createComponent(component));
+    componentsToEdit.forEach(component => ctx.editComponent(component));
 
     return newComponent;
   });
@@ -64,8 +64,8 @@ const editComponent = (uid, { component, components = [] }) => {
       ...component,
     });
 
-    componentsToCreate.forEach(ctx.createComponent);
-    componentsToEdit.forEach(ctx.editComponent);
+    componentsToCreate.forEach(component => ctx.createComponent(component));
+    componentsToEdit.forEach(component => ctx.editComponent(component));
 
     return updatedComponent;
   });

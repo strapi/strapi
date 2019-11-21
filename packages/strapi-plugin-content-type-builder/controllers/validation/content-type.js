@@ -5,6 +5,7 @@ const yup = require('yup');
 const formatYupErrors = require('./yup-formatter');
 
 const createSchema = require('./model-schema');
+const { componentSchema } = require('./component');
 const { modelTypes } = require('./constants');
 
 const VALID_RELATIONS = [
@@ -47,7 +48,11 @@ const createContentTypeSchema = () => {
   return yup
     .object({
       contentType: contentTypeSchema.required().noUnknown(),
-      components: yup.array().of(contentTypeSchema),
+      components: yup.array().of(
+        componentSchema.shape({
+          uid: yup.string(),
+        })
+      ),
     })
     .noUnknown();
 };

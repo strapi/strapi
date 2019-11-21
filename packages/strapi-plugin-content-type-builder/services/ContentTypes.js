@@ -15,17 +15,17 @@ const { nameToSlug } = require('../utils/helpers');
  * @param {Array<Object>} params.components List of nested components to created or edit
  */
 const createContentType = async ({ contentType, components = [] }) => {
-  // generate api squeleton
-  await generateAPI(contentType.name);
-
   const componentsToCreate = components.filter(compo => !_.has(compo, 'uid'));
   const componentsToEdit = components.filter(compo => _.has(compo, 'uid'));
 
-  return getSchemaManager().edit(ctx => {
+  return getSchemaManager().edit(async ctx => {
     const newContentType = ctx.createContentType(contentType);
 
-    componentsToCreate.forEach(ctx.createComponent);
-    componentsToEdit.forEach(ctx.editComponent);
+    componentsToCreate.forEach(component => ctx.createComponent(component));
+    componentsToEdit.forEach(component => ctx.editComponent(component));
+
+    // generate api squeleton
+    await generateAPI(contentType.name);
 
     return newContentType;
   });
@@ -71,8 +71,8 @@ const editContentType = (uid, { contentType, components = [] }) => {
       ...contentType,
     });
 
-    componentsToCreate.forEach(ctx.createComponent);
-    componentsToEdit.forEach(ctx.editComponent);
+    componentsToCreate.forEach(component => ctx.createComponent(component));
+    componentsToEdit.forEach(component => ctx.editComponent(component));
 
     return updatedComponent;
   });
