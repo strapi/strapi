@@ -44,6 +44,7 @@ const FormModal = () => {
     forTarget: null,
     targetUid: null,
     attributeType: null,
+    headerDisplayName: null,
   };
   const [state, setState] = useState(initialStateData);
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
@@ -79,6 +80,7 @@ const FormModal = () => {
         settingType: query.get('settingType'),
         forTarget: query.get('forTarget'),
         targetUid: query.get('targetUid'),
+        headerDisplayName: query.get('headerDisplayName'),
         attributeType,
       });
 
@@ -232,7 +234,7 @@ const FormModal = () => {
 
     try {
       await checkFormValidity();
-      const nextSearch = `modalType=chooseAttribute&forTarget=${state.forTarget}&targetUid=${uid}`;
+      const nextSearch = `modalType=chooseAttribute&forTarget=${state.forTarget}&targetUid=${uid}&headerDisplayName=${modifiedData.name}`;
 
       if (state.modalType === 'contentType') {
         // Create the content type schema
@@ -287,7 +289,8 @@ const FormModal = () => {
     >
       <HeaderModal>
         <ModalHeader
-          name={name}
+          // name={name}
+          name={state.headerDisplayName}
           headerId={headerId}
           iconType={iconType || 'contentType'}
         />

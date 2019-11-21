@@ -8,18 +8,18 @@ import LeftMenu from '../LeftMenu';
 const ListPage = () => {
   const {
     components,
-    // initialData,
+    initialData,
     modifiedData,
     isInContentTypeView,
   } = useDataManager();
   const { push } = useHistory();
 
   const attributes = get(modifiedData, ['schema', 'attributes'], {});
-  // const currentDataName = get(initialData, ['schema', 'name'], '');
+  const currentDataName = get(initialData, ['schema', 'name'], '');
 
   const handleClick = () => {
     const forTarget = isInContentTypeView ? 'contentType' : 'component';
-    const search = `modalType=chooseAttribute&forTarget=${forTarget}&targetUid=${modifiedData.uid}`;
+    const search = `modalType=chooseAttribute&forTarget=${forTarget}&targetUid=${modifiedData.uid}&headerDisplayName=${currentDataName}`;
     push({ search });
   };
   // TODO just a util not sure it should be kept
@@ -44,18 +44,32 @@ const ListPage = () => {
 
     return componentSchema;
   };
-  const handleClickEditField = (forTarget, targetUid, attrName, type) => {
-    const attributeType = [
-      'integer',
-      'biginteger',
-      'decimal',
-      'float',
-    ].includes(type)
-      ? 'number'
-      : type;
+  const handleClickEditField = (
+    forTarget,
+    targetUid,
+    attrName,
+    type,
+    headerDisplayName
+  ) => {
+    let attributeType;
+
+    switch (type) {
+      case 'integer':
+      case 'biginteger':
+      case 'decimal':
+      case 'float':
+        attributeType = 'number';
+        break;
+      case 'string':
+      case 'text':
+        attributeType = 'text';
+        break;
+      default:
+        attributeType = type;
+    }
 
     push({
-      search: `modalType=attribute&actionType=edit&settingType=base&forTarget=${forTarget}&targetUid=${targetUid}&attributeName=${attrName}&attributeType=${attributeType}`,
+      search: `modalType=attribute&actionType=edit&settingType=base&forTarget=${forTarget}&targetUid=${targetUid}&attributeName=${attrName}&attributeType=${attributeType}&headerDisplayName=${headerDisplayName}`,
     });
   };
 
@@ -112,7 +126,8 @@ const ListPage = () => {
                         'contentType',
                         modifiedData.uid,
                         attr,
-                        type
+                        type,
+                        currentDataName
                       )
                     }
                   >

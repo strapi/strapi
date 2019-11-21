@@ -16,15 +16,41 @@ const reducer = (state, action) => {
         attributeToSet: { name, ...rest },
       } = action;
 
-      return state.updateIn(
-        ['modifiedData', 'schema', 'attributes', name],
-        () => {
-          const type = get(rest, 'type');
-          console.log(type);
-
+      return state
+        .updateIn(['modifiedData', 'schema', 'attributes', name], () => {
           return fromJS(rest);
-        }
-      );
+        })
+        .updateIn(['modifiedData', 'schema', 'attributes'], obj => {
+          const type = get(rest, 'type');
+          const target = get(rest, 'target', null);
+          const nature = get(rest, 'nature', null);
+          const currentUid = state.getIn(['modifiedData', 'uid']);
+
+          // When the user in creating a relation with the same content type we need to create another attribute
+          // that is the opposite of the created one
+          if (
+            type === 'relation' &&
+            nature !== 'oneWay' &&
+            nature !== 'manyWay' &&
+            target === currentUid
+          ) {
+            const oppositeAttribute = {
+              nature,
+              target,
+              type,
+              unique: rest.unique,
+              required: rest.required,
+              dominant: nature === 'manyToMany' ? !rest.dominant : null,
+              targetAttribute: name,
+            };
+
+            return obj.update(rest.targetAttribute, () => {
+              return fromJS(oppositeAttribute);
+            });
+          }
+
+          return obj;
+        });
     }
     case 'GET_DATA_SUCCEEDED':
       return state
