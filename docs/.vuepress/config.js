@@ -189,6 +189,7 @@ module.exports = {
             '/3.0.0-beta.x/guides/jwt-validation',
             '/3.0.0-beta.x/guides/error-catching',
             '/3.0.0-beta.x/guides/external-data',
+            '/3.0.0-beta.x/guides/custom-data-response',
             '/3.0.0-beta.x/guides/slug',
             '/3.0.0-beta.x/guides/webhooks',
           ],

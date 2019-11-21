@@ -1,0 +1,118 @@
+# Custom data response
+
+In this guide we will see how you can customize the data of your APIs responnses.
+
+## Introduction
+
+To be able to update the default data response you have first to understand how it works.
+
+When you create a content type, it generate an API with the following list of [endpoints](../content-api/endpoint).
+
+Each of these endpoint trigger a controller action. Here is the list of [controller actions](../concepts/controller.md) that exist by default when a content type is created.
+
+If you check the controller file of your generated API `./api/{content-type}/controller/{Content-Type}.js`, you will see an empty file. It's because all the default logic is managed by Strapi. But we allow your override these functions with your own logic.
+
+And that is what we will do to manage our custom data response.
+
+## Example
+
+In our example we will imagine we have restaurants with a chef. By default when you fetch restaurants, you will got all information of the chef.
+And I don't want to be able to fetch the email - to respect the privacy of my chefs.
+
+To do that, we will customize the functions that fetch all restaurants and remove the email of all restaurant's chef.
+
+To follow my example your will have to create a content type `restaurant` and add the following field definition:
+
+- `string` attribute named `name`
+- `text` attribute named `description`
+- `relation` attribute **Restaurant** (`chef`) - **User** has many **Restaurants** - **Users** (`restaurants`)
+
+Then add some data.
+
+## Override controller action
+
+To customize the function that fetch all our restaurants we will have to override the `find` function.
+
+First, to see the difference, let's request `GET /restaurants`. You will see all the data you created.
+Now let's start the customization.
+
+**Path —** `./api/restaurant/controller/Restaurant.js`
+
+```js
+module.exports = {
+  async find() {
+    return 'strapi';
+  },
+};
+```
+
+After saving the new function, let's restart the `GET /restaurants` request. We will see `strapi` as response.
+So it works well.
+
+## Get the data back
+
+We now know the function we have to update, but we just want to customize the returned restaurant values.
+
+In the [controller documentation](../concepts/controllers.html#extending-a-model-controller) you will find the default function of all actions. It will help you to not re-code all the logic to fetch your data.
+
+**Path —** `./api/restaurant/controller/Restaurant.js`
+
+```js
+const { sanitizeEntity } = require('strapi-utils');
+
+module.exports = {
+  async find(ctx) {
+    let entities;
+    if (ctx.query._q) {
+      entities = await strapi.services.restaurant.search(ctx.query);
+    } else {
+      entities = await strapi.services.restaurant.find(ctx.query);
+    }
+
+    return entities.map(entity =>
+      sanitizeEntity(entity, { model: strapi.models.restaurant })
+    );
+  },
+};
+```
+
+And now the data is back on `GET /restaurants`
+
+## Apply our changes
+
+We can see the `find` function `return` the result of the `map`. And the map function just sanitize all entries.
+
+So instead of just return the sanitized entry, we will also remove the chef email of each restaurant.
+
+**Path —** `./api/restaurant/controller/Restaurant.js`
+
+```js
+const { sanitizeEntity } = require('strapi-utils');
+
+module.exports = {
+  async find(ctx) {
+    let entities;
+    if (ctx.query._q) {
+      entities = await strapi.services.restaurant.search(ctx.query);
+    } else {
+      entities = await strapi.services.restaurant.find(ctx.query);
+    }
+
+    return entities.map(entity => {
+      const restaurant = sanitizeEntity(entity, {
+        model: strapi.models.restaurant,
+      });
+      if (restaurant.chef && restaurant.chef.email) {
+        delete restaurant.chef.email;
+      }
+      return restaurant;
+    });
+  },
+};
+```
+
+And tada! The email disapeared.
+
+::: tip
+This guide can be applied to any other controller action.
+:::
