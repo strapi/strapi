@@ -1,26 +1,18 @@
-import React, { useEffect, useRef } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
-import { get } from 'lodash';
+import React from 'react';
+import { useHistory } from 'react-router-dom';
+import { get, has } from 'lodash';
 import { ViewContainer } from 'strapi-helper-plugin';
 import useDataManager from '../../hooks/useDataManager';
 import LeftMenu from '../LeftMenu';
 
 const ListPage = () => {
-  const { pathname } = useLocation();
   const {
     components,
     initialData,
     modifiedData,
     isInContentTypeView,
-    setModifiedData,
   } = useDataManager();
   const { push } = useHistory();
-  const setModifiedDataRef = useRef();
-  setModifiedDataRef.current = setModifiedData;
-
-  useEffect(() => {
-    setModifiedDataRef.current();
-  }, [pathname]);
 
   const attributes = get(modifiedData, ['schema', 'attributes'], {});
   const currentDataName = get(initialData, ['schema', 'name'], '');
@@ -32,7 +24,11 @@ const ListPage = () => {
   };
   // TODO just a util not sure it should be kept
   const getType = attrName => {
-    return get(modifiedData, ['schema', 'attributes', attrName, 'type'], '');
+    const type = has(modifiedData, ['schema', 'attributes', attrName, 'nature'])
+      ? 'relation'
+      : get(modifiedData, ['schema', 'attributes', attrName, 'type'], '');
+
+    return type;
   };
   const getComponentSchema = attrName => {
     const componentToGet = get(
@@ -62,6 +58,8 @@ const ListPage = () => {
       search: `modalType=attribute&actionType=edit&settingType=base&forTarget=${forTarget}&target=${target}&attributeName=${attrName}&attributeType=${attributeType}`,
     });
   };
+
+  console.log({ ctSchema: modifiedData });
 
   return (
     <ViewContainer>

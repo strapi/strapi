@@ -2,7 +2,7 @@ import React, { memo, useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { request, LoadingIndicatorPage } from 'strapi-helper-plugin';
-import { useRouteMatch, Redirect } from 'react-router-dom';
+import { useLocation, useRouteMatch, Redirect } from 'react-router-dom';
 import DataManagerContext from '../../contexts/DataManagerContext';
 import pluginId from '../../pluginId';
 import FormModal from '../FormModal';
@@ -16,10 +16,11 @@ const DataManagerProvider = ({ children }) => {
     components,
     contentTypes,
     isLoading,
+    isLoadingForDataToBeSet,
     initialData,
     modifiedData,
   } = reducerState.toJS();
-
+  const { pathname } = useLocation();
   const contentTypeMatch = useRouteMatch(
     `/plugins/${pluginId}/content-types/:uid`
   );
@@ -59,6 +60,14 @@ const DataManagerProvider = ({ children }) => {
   useEffect(() => {
     getDataRef.current();
   }, []);
+
+  useEffect(() => {
+    // We need to set the modifiedData after the data has been retrieved and also on pathname change
+    if (!isLoading) {
+      setModifiedData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, pathname]);
 
   const addAttribute = attributeToSet => {
     dispatch({
@@ -110,7 +119,7 @@ const DataManagerProvider = ({ children }) => {
         setModifiedData,
       }}
     >
-      {isLoading ? (
+      {isLoadingForDataToBeSet ? (
         <LoadingIndicatorPage />
       ) : (
         <>

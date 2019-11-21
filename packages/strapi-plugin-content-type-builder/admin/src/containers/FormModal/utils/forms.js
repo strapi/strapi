@@ -50,6 +50,9 @@ const forms = {
       const allreadyTakenAttributes = Object.keys(
         get(currentSchema, ['schema', 'attributes'], {})
       );
+      const targetAttributeAllreadyTakenValue = dataToValidate.name
+        ? [...allreadyTakenAttributes, dataToValidate.name]
+        : allreadyTakenAttributes;
 
       const commonShape = {
         name: yup
@@ -58,6 +61,7 @@ const forms = {
           .required(errorsTrads.required),
         type: yup.string().required(errorsTrads.required),
         default: yup.string().nullable(),
+        unique: yup.boolean().nullable(),
         required: yup.boolean(),
       };
       const numberTypeShape = {
@@ -136,6 +140,22 @@ const forms = {
             ...commonShape,
             ...numberTypeShape,
           });
+        case 'relation':
+          console.log('lll');
+          return yup.object().shape({
+            name: yup
+              .string()
+              .unique(errorsTrads.unique, allreadyTakenAttributes)
+              .required(errorsTrads.required),
+            targetAttribute: yup
+              .string()
+              .unique(errorsTrads.unique, targetAttributeAllreadyTakenValue)
+              .required(errorsTrads.required),
+            type: yup.string().required(errorsTrads.required),
+            nature: yup.string().required(),
+            dominant: yup.boolean(),
+            unique: yup.boolean().nullable(),
+          });
         default:
           return yup.object().shape({
             ...commonShape,
@@ -145,6 +165,56 @@ const forms = {
     },
     form: {
       advanced(data, type) {
+        const targetAttributeValue = get(data, 'targetAttribute', null);
+        const nameValue = get(data, 'name', null);
+        const relationItems = [
+          [
+            {
+              type: 'divider',
+            },
+          ],
+          [
+            {
+              autoFocus: false,
+              name: 'unique',
+              type: 'checkbox',
+              label: {
+                id: getTrad('form.attribute.item.uniqueField'),
+              },
+              description: {
+                id: getTrad('form.attribute.item.uniqueField.description'),
+              },
+              validations: {},
+            },
+          ],
+          [
+            {
+              autoFocus: false,
+              disabled: nameValue === null,
+              name: 'columnName',
+              type: 'addon',
+              addon: nameValue,
+              label: {
+                id: getTrad('form.attribute.item.customColumnName'),
+              },
+              inputDescription: {
+                id: getTrad('form.attribute.item.customColumnName.description'),
+              },
+              validations: {},
+            },
+            {
+              autoFocus: false,
+              disabled:
+                targetAttributeValue === null || targetAttributeValue === '-',
+              name: 'targetColumnName',
+              label: '',
+              type: 'addon',
+              addon: targetAttributeValue,
+              validations: {},
+            },
+          ],
+        ];
+
         const defaultItems = [
           [
             {
@@ -320,11 +390,29 @@ const forms = {
           );
         }
 
+        if (type === 'relation') {
+          return {
+            items: relationItems,
+          };
+        }
+
         return {
           items,
         };
       },
       base(data, type) {
+        if (type === 'relation') {
+          return {
+            items: [
+              [
+                {
+                  type: 'relation',
+                },
+              ],
+            ],
+          };
+        }
+
         const items = [
           [
             {

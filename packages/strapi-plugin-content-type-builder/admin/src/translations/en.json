@@ -210,6 +210,7 @@
   "modalForm.attribute.form.base.name.description": "No space is allowed for the name of the attribute",
   "modalForm.attribute.text.type-selection": "Type",
 
+  "form.attribute.item.defineRelation.fieldName": "Field name",
   "form.attribute.item.settings.name": "Settings",
   "form.attribute.item.date.type.date": "date",
   "form.attribute.item.date.type.datetime": "datetime",
@@ -224,6 +225,8 @@
   "form.attribute.text.option.short-text.description": "Best for titles, names, links (URL). It also enables exact search on the field.",
   "form.attribute.text.option.long-text": "Long text",
   "form.attribute.text.option.long-text.description": "Best for descriptions, biography.  Exact search is disabled.",
+  "form.attribute.item.customColumnName": "Custom column names",
+  "form.attribute.item.customColumnName.description": "This is useful to rename database column names in a more comprehensive format for the API's responses",
   "form.attribute.settings.default": "Default value",
   "form.attribute.item.maximum": "Maximum value",
   "form.attribute.item.maximumLength": "Maximum length",

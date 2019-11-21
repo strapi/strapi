@@ -10,6 +10,7 @@ import {
   ModalForm,
   getYupInnerErrors,
   useGlobalContext,
+  InputsIndex,
 } from 'strapi-helper-plugin';
 import { Inputs } from '@buffetjs/custom';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -30,6 +31,7 @@ import forms from './utils/forms';
 import { createUid } from './utils/createUid';
 import init from './init';
 import reducer, { initialState } from './reducer';
+import RelationForm from '../../components/RelationForm';
 
 const NAVLINKS = [{ id: 'base' }, { id: 'advanced' }];
 
@@ -88,7 +90,8 @@ const FormModal = () => {
         dispatch({
           type: 'SET_ATTRIBUTE_DATA_SCHEMA',
           attributeType,
-          isEditing: actionType === 'edit',
+          // TODO handle component name set
+          nameToSetForRelation: get(allDataSchema, ['schema', 'name'], ''),
         });
       }
     }
@@ -273,7 +276,7 @@ const FormModal = () => {
     }
   };
 
-  console.log({ modifiedData });
+  console.log({ modifiedData, formErrors });
 
   return (
     <Modal
@@ -399,6 +402,19 @@ const FormModal = () => {
                                 </div>
                               );
                             }
+
+                            if (input.type === 'relation') {
+                              return (
+                                <RelationForm
+                                  key="relation"
+                                  mainBoxHeader={name}
+                                  modifiedData={modifiedData}
+                                  onChange={handleChange}
+                                  errors={formErrors}
+                                />
+                              );
+                            }
+
                             const errorId = get(
                               formErrors,
                               [...input.name.split('.'), 'id'],
@@ -427,6 +443,18 @@ const FormModal = () => {
                               value = retrievedValue;
                             }
 
+                            if (input.type === 'addon') {
+                              return (
+                                <InputsIndex
+                                  key={input.name}
+                                  {...input}
+                                  type="string"
+                                  onChange={handleChange}
+                                  value={value}
+                                />
+                              );
+                            }
+
                             return (
                               <div
                                 className={`col-${input.size || 6}`}
@@ -434,6 +462,7 @@ const FormModal = () => {
                               >
                                 <Inputs
                                   customInputs={{
+                                    // addon: InputsIndex,
                                     customCheckboxWithChildren: CustomCheckbox,
                                     booleanBox: BooleanBox,
                                   }}

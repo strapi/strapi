@@ -6,6 +6,7 @@ const initialState = fromJS({
   initialData: {},
   modifiedData: {},
   isLoading: true,
+  isLoadingForDataToBeSet: true,
 });
 
 const reducer = (state, action) => {
@@ -47,6 +48,7 @@ const reducer = (state, action) => {
       );
 
       return state
+        .update('isLoadingForDataToBeSet', () => false)
         .update('initialData', () => schemaWithOrderedAttributes)
         .update('modifiedData', () => schemaWithOrderedAttributes);
     }
