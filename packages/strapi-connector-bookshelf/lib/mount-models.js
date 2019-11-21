@@ -204,16 +204,19 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
           const columnName = details.plugin
             ? _.get(
                 strapi.plugins,
-                `${
-                  details.plugin
-                }.models.${globalId.toLowerCase()}.attributes.${
-                  details.via
-                }.columnName`,
+                [
+                  details.plugin,
+                  'models',
+                  details.collection,
+                  'attributes',
+                  details.via,
+                  'columnName',
+                ],
                 details.via
               )
             : _.get(
-                strapi.models[globalId.toLowerCase()].attributes,
-                `${details.via}.columnName`,
+                strapi.models,
+                [model.collection, 'attributes', details.via, 'columnName'],
                 details.via
               );
 

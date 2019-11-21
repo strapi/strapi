@@ -26,7 +26,9 @@ const hasComponent = model => {
 };
 
 const isRelation = attribute =>
-  _.has(attribute, 'model') || _.has(attribute, 'collection');
+  _.has(attribute, 'target') ||
+  _.has(attribute, 'model') ||
+  _.has(attribute, 'collection');
 
 /**
  * Formats a component's attributes
@@ -143,9 +145,12 @@ const convertAttributes = attributes => {
 };
 
 module.exports = {
+  fromUID,
+  toUID,
   hasComponent,
   isRelation,
 
   formatAttributes,
+  formatAttribute,
   convertAttributes,
 };

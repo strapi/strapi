@@ -19,8 +19,59 @@ const createSchemaHandler = require('./schema-handler');
 const createContentTypeUID = ({ name }) =>
   `application::${nameToSlug(name)}.${nameToSlug(name)}`;
 
+const generateRelation = ({ key, attribute, modelName }) => {
+  const opts = {
+    via: key,
+    columnName: attribute.targetColumnName,
+  };
+
+  switch (attribute.nature) {
+    case 'manyWay':
+    case 'oneWay':
+      return;
+    case 'oneToOne':
+    case 'oneToMany':
+      opts.model = modelName;
+      break;
+    case 'manyToOne':
+      opts.collection = modelName;
+      break;
+    case 'manyToMany': {
+      opts.collection = modelName;
+
+      if (!attribute.dominant) {
+        opts.dominant = true;
+      }
+      break;
+    }
+    default:
+  }
+
+  return opts;
+};
+
 module.exports = function createComponentBuilder() {
   return {
+    setRelation({ key, modelName, attribute }) {
+      this.contentTypes.get(attribute.target).set(
+        ['attributes', attribute.targetAttribute],
+        generateRelation({
+          key,
+          attribute,
+          modelName,
+        })
+      );
+    },
+
+    unsetRelation(attribute) {
+      const target = attribute.model || attribute.collection;
+      const plugin = attribute.plugin;
+
+      const uid = toUID(target, plugin);
+
+      return this.contentTypes.get(uid).unset(['attributes', attribute.via]);
+    },
+
     /**
      * create a component in the tmpComponent map
      */
@@ -32,6 +83,7 @@ module.exports = function createComponentBuilder() {
       }
 
       const contentType = createSchemaHandler({
+        modelName: nameToSlug(infos.name),
         dir: path.join(strapi.dir, 'api', nameToSlug(infos.name), 'models'),
         filename: `${nameToSlug(infos.name)}.settings.json`,
       });
@@ -57,49 +109,14 @@ module.exports = function createComponentBuilder() {
       this.contentTypes.set(uid, contentType);
 
       Object.keys(infos.attributes).forEach(key => {
-        const attr = infos.attributes[key];
+        const attribute = infos.attributes[key];
 
-        if (_.has(attr, 'target')) {
-          if (!this.contentTypes.has(attr.target)) {
-            throw new Error('target.contentType.notFound');
-          }
-
-          const targetContentType = this.contentTypes.get(attr.target);
-
-          if (
-            _.has(targetContentType.schema.attributes, attr.targetAttribute)
-          ) {
-            throw new Error('target.attribute.alreadyExists');
-          }
-
-          const opts = {
-            via: key,
-            columnName: attr.targetColumnName,
-          };
-
-          switch (attr.nature) {
-            case 'manyWay':
-            case 'oneWay':
-              return;
-            case 'oneToOne':
-            case 'oneToMany':
-              opts.model = contentType.modelName;
-              break;
-            case 'manyToOne':
-              opts.collection = contentType.modelName;
-              break;
-            case 'manyToMany': {
-              opts.collection = contentType.modelName;
-
-              if (!attr.dominant) {
-                opts.dominant = true;
-              }
-              break;
-            }
-            default:
-          }
-
-          targetContentType.set(['attributes', attr.targetAttribute], opts);
+        if (isRelation(attribute)) {
+          this.setRelation({
+            key,
+            modelName: contentType.modelName,
+            attribute,
+          });
         }
       });
 
@@ -115,54 +132,80 @@ module.exports = function createComponentBuilder() {
 
       const contentType = this.contentTypes.get(uid);
 
-      const newAttributes = convertAttributes(infos.attributes);
+      const oldAttributes = contentType.schema.attributes;
 
-      // TODO: clear changed or deleted relations
-      Object.keys(contentType.schema.attributes)
-        .filter(key => {
-          const attr = contentType.schema.attributes[key];
+      const newKeys = _.difference(
+        Object.keys(infos.attributes),
+        Object.keys(oldAttributes)
+      );
 
-          // ignore non relational attributes and unidirectionnal attributes
-          if (!isRelation(attr) || !_.has(attr, 'via')) return false;
+      const deletedKeys = _.difference(
+        Object.keys(oldAttributes),
+        Object.keys(infos.attributes)
+      );
 
-          console.log(key);
+      const remainingKeys = _.intersection(
+        Object.keys(oldAttributes),
+        Object.keys(infos.attributes)
+      );
 
-          const target = attr.model || attr.collection;
-          const plugin = attr.plugin;
+      // remove old relations
+      deletedKeys.forEach(key => {
+        const attribute = oldAttributes[key];
 
-          // key isn't present anymore
-          if (!_.has(newAttributes, key)) return true;
+        if (isRelation(attribute) && _.has(attribute, 'via')) {
+          this.unsetRelation(attribute);
+        }
+      });
 
-          const newAttr = newAttributes[key];
-          // if the new attribute isn't a relation;
-          if (!isRelation(newAttr)) return true;
+      remainingKeys.forEach(key => {
+        const oldAttribute = oldAttributes[key];
+        const newAttribute = infos.attributes[key];
 
-          const newTarget = newAttr.model || newAttr.collection;
+        if (!isRelation(oldAttribute) && isRelation(newAttribute)) {
+          return this.setRelation({
+            key,
+            modelName: contentType.modelName,
+            attribute: infos.attributes[key],
+          });
+        }
 
-          // if target attribute isn't the same as before
-          if (attr.via !== newAttr.via) return true;
+        if (isRelation(oldAttribute) && !isRelation(newAttribute)) {
+          return this.unsetRelation(oldAttribute);
+        }
 
-          // if the target content type isn't the same
-          if (target !== newTarget || plugin !== attr.plugin) return true;
-        })
-        .forEach(key => {
-          const attr = contentType.schema.attributes[key];
-          const target = attr.model || attr.collection;
-          const plugin = attr.plugin;
+        if (isRelation(oldAttribute) && isRelation(newAttribute)) {
+          if (oldAttribute.via !== newAttribute.targetAttribute) {
+            this.unsetRelation(oldAttribute);
+          }
 
-          const uid = toUID(target, plugin);
+          return this.setRelation({
+            key,
+            modelName: contentType.modelName,
+            attribute: newAttribute,
+          });
+        }
+      });
 
-          this.contentTypes.get(uid).unset(['attributes', attr.via]);
-        });
+      // add new relations
+      newKeys.forEach(key => {
+        const attribute = infos.attributes[key];
 
-      // TODO: build new reversed relations
+        if (isRelation(attribute)) {
+          this.setRelation({
+            key,
+            modelName: contentType.modelName,
+            attribute,
+          });
+        }
+      });
 
       contentType
         .set('connection', infos.connection)
         .set('collectionName', infos.collectionName)
         .set(['info', 'name'], infos.name)
         .set(['info', 'description'], infos.description)
-        .set('attributes', newAttributes);
+        .set('attributes', convertAttributes(infos.attributes));
 
       return contentType;
     },
