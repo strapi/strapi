@@ -141,7 +141,6 @@ const forms = {
             ...numberTypeShape,
           });
         case 'relation':
-          console.log('lll');
           return yup.object().shape({
             name: yup
               .string()
@@ -152,6 +151,7 @@ const forms = {
               .unique(errorsTrads.unique, targetAttributeAllreadyTakenValue)
               .required(errorsTrads.required),
             type: yup.string().required(errorsTrads.required),
+            target: yup.string().required(errorsTrads.required),
             nature: yup.string().required(),
             dominant: yup.boolean(),
             unique: yup.boolean().nullable(),

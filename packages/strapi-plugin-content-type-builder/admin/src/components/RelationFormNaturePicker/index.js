@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
+import { truncate } from 'lodash';
+import pluralize from 'pluralize';
 import ManyToMany from '../../icons/ManyToMany';
 import ManyToOne from '../../icons/ManyToOne';
 import ManyWay from '../../icons/ManyWay';
@@ -10,29 +12,76 @@ import OneWay from '../../icons/OneWay';
 import getTrad from '../../utils/getTrad';
 import Wrapper from './Wrapper';
 
-const RelationFormNaturePicker = ({ nature }) => {
+const relations = {
+  oneWay: OneWay,
+  oneToOne: OneToOne,
+  oneToMany: OneToMany,
+  manyToOne: ManyToOne,
+  manyToMany: ManyToMany,
+  manyWay: ManyWay,
+};
+
+const RelationFormNaturePicker = ({
+  nature,
+  naturePickerType,
+  onChange,
+  oneThatIsCreatingARelationWithAnother,
+  target,
+}) => {
+  const relationsType =
+    naturePickerType === 'contentType'
+      ? [
+          'oneWay',
+          'oneToOne',
+          'oneToMany',
+          'manyToOne',
+          'manyToMany',
+          'manyWay',
+        ]
+      : ['oneWay', 'manyWay'];
+
+  const leftTarget =
+    nature === 'manyToOne' ? target : oneThatIsCreatingARelationWithAnother;
+  const rightTarget =
+    nature === 'manyToOne' ? oneThatIsCreatingARelationWithAnother : target;
+  const leftDisplayedValue = pluralize(
+    leftTarget,
+    nature === 'manyToMany' ? 2 : 1
+  );
+  const rightDisplayedValue = pluralize(
+    rightTarget,
+    ['manyToMany', 'oneToMany', 'manyToOne', 'manyWay'].includes(nature) ? 2 : 1
+  );
+
   return (
     <Wrapper>
       <div className="nature-container">
         <div className="nature-buttons">
-          <ManyToOne />
-          <ManyToOne isSelected />
-          <ManyWay />
-          <ManyWay isSelected />
-          <ManyToMany />
-          <ManyToMany isSelected />
-          <OneToMany />
-          <OneToMany isSelected />
-          <OneToOne />
-          <OneToOne isSelected />
-          <OneWay />
-          <OneWay isSelected />
+          {relationsType.map(relationNature => {
+            const Asset = relations[relationNature];
+
+            return (
+              <Asset
+                key={relationNature}
+                isSelected={nature === relationNature}
+                onClick={() => {
+                  onChange({
+                    target: {
+                      name: 'nature',
+                      value: relationNature,
+                      type: 'relation',
+                    },
+                  });
+                }}
+              />
+            );
+          })}
         </div>
         <div className="nature-txt">
-          <span>left</span>
+          <span>{truncate(leftDisplayedValue, { length: 24 })}</span>
           &nbsp; <FormattedMessage id={getTrad(`relation.${nature}`)} />
           &nbsp;
-          <span>right</span>
+          <span>{truncate(rightDisplayedValue, { length: 24 })}</span>
         </div>
       </div>
     </Wrapper>
@@ -45,6 +94,10 @@ RelationFormNaturePicker.defaultProps = {
 
 RelationFormNaturePicker.propTypes = {
   nature: PropTypes.string,
+  naturePickerType: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  oneThatIsCreatingARelationWithAnother: PropTypes.string.isRequired,
+  target: PropTypes.string.isRequired,
 };
 
 export default RelationFormNaturePicker;

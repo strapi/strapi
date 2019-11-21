@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const OneWay = ({ isSelected }) => {
+const OneWay = ({ isSelected, ...rest }) => {
   const stroke = isSelected ? '#1C5DE7' : '#919BAE';
   const rectProps = isSelected
     ? {
@@ -12,7 +12,7 @@ const OneWay = ({ isSelected }) => {
         stroke: '#101622',
       };
   return (
-    <svg width="41" height="41" xmlns="http://www.w3.org/2000/svg">
+    <svg {...rest} width="41" height="41" xmlns="http://www.w3.org/2000/svg">
       <g fill="none" fillRule="evenodd">
         <rect width="41" height="41" rx="2" fill="#FFF" />
         <rect {...rectProps} x=".5" y=".5" width="40" height="40" rx="2" />

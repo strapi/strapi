@@ -32,6 +32,7 @@ const reducer = (state, action) => {
           type: 'relation',
           nature: 'oneWay',
           targetAttribute: '-',
+          target: 'address',
         };
       } else {
         dataToSet = { type: attributeType, default: null };

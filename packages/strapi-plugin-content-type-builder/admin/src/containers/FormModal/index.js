@@ -409,6 +409,7 @@ const FormModal = () => {
                                   key="relation"
                                   mainBoxHeader={name}
                                   modifiedData={modifiedData}
+                                  naturePickerType={state.forTarget}
                                   onChange={handleChange}
                                   errors={formErrors}
                                 />

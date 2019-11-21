@@ -43,7 +43,7 @@ const StyledRelationNaturePicker = styled.div`
         }
       }
     }
-    img {
+    svg {
       margin: 0 1.5rem;
       cursor: pointer;
     }

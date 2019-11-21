@@ -6,7 +6,13 @@ import RelationFormBox from '../RelationFormBox';
 import RelationFormNaturePicker from '../RelationFormNaturePicker';
 import Wrapper from './Wrapper';
 
-const RelationForm = ({ errors, mainBoxHeader, modifiedData, onChange }) => {
+const RelationForm = ({
+  errors,
+  mainBoxHeader,
+  modifiedData,
+  naturePickerType,
+  onChange,
+}) => {
   const { formatMessage } = useGlobalContext();
   const getError = name => {
     const errorId = get(errors, [name, 'id'], null);
@@ -24,9 +30,15 @@ const RelationForm = ({ errors, mainBoxHeader, modifiedData, onChange }) => {
         onChange={onChange}
         value={get(modifiedData, 'name', '')}
       />
-      <RelationFormNaturePicker nature={modifiedData.nature} />
+      <RelationFormNaturePicker
+        oneThatIsCreatingARelationWithAnother={mainBoxHeader}
+        target={modifiedData.target}
+        nature={modifiedData.nature}
+        naturePickerType={naturePickerType}
+        onChange={onChange}
+      />
       <RelationFormBox
-        disabled={modifiedData.nature === 'oneWay'}
+        disabled={['oneWay', 'manyWay'].includes(modifiedData.nature)}
         error={getError('targetAttribute')}
         name="targetAttribute"
         onChange={onChange}
@@ -45,6 +57,7 @@ RelationForm.propTypes = {
   errors: PropTypes.object,
   mainBoxHeader: PropTypes.string.isRequired,
   modifiedData: PropTypes.object,
+  naturePickerType: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
 };
 

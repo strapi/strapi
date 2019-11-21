@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const ManyToMany = ({ isSelected }) => {
+const ManyToMany = ({ isSelected, ...rest }) => {
   const stroke = isSelected ? '#1C5DE7' : '#919BAE';
   const rectProps = isSelected
     ? {
@@ -14,6 +14,7 @@ const ManyToMany = ({ isSelected }) => {
 
   return (
     <svg
+      {...rest}
       width="41"
       height="41"
       xmlns="http://www.w3.org/2000/svg"

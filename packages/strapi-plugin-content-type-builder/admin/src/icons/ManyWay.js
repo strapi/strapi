@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const ManyWay = ({ isSelected }) => {
+const ManyWay = ({ isSelected, ...rest }) => {
   const rectStroke = isSelected ? '#1C5DE7' : '#E3E9F3';
   const stroke = isSelected ? '#1C5DE7' : '#ABB3C2';
   const otherStroke = isSelected ? '#1C5DE7' : '#ABB3C4';
 
   return (
-    <svg width="41" height="41" xmlns="http://www.w3.org/2000/svg">
+    <svg {...rest} width="41" height="41" xmlns="http://www.w3.org/2000/svg">
       <g fill="none" fillRule="evenodd">
         <rect width="41" height="41" rx="2" fill="#FFF" />
         <rect stroke={rectStroke} x=".5" y=".5" width="40" height="40" rx="2" />
