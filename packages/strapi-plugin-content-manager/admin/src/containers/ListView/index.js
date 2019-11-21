@@ -121,6 +121,7 @@ function ListView({
   // Helpers
   const getMetaDatas = (path = []) =>
     get(layouts, [...contentTypePath, 'metadatas', ...path], {});
+
   const getListLayout = () =>
     get(layouts, [...contentTypePath, 'layouts', 'list'], []);
 
@@ -190,7 +191,11 @@ function ListView({
       });
     }
     onChangeListLabels({
-      target: { name: `${slug}.${name}`, value: !value },
+      target: {
+        name,
+        slug,
+        value: !value,
+      },
     });
   };
 

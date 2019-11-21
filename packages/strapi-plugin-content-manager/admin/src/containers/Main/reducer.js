@@ -42,18 +42,17 @@ function mainReducer(state = initialState, action) {
         .updateIn(['layouts', action.uid], () => fromJS(action.layout))
         .updateIn(['initialLayouts', action.uid], () => fromJS(action.layout));
     case ON_CHANGE_LIST_LABELS: {
-      const {
-        keys: [slug, label],
-        value,
-      } = action;
+      const { name, slug, value } = action;
 
-      return state.updateIn(['layouts', slug, 'layouts', 'list'], list => {
-        if (value) {
-          return list.push(label);
+      return state.updateIn(
+        ['layouts', slug, 'contentType', 'layouts', 'list'],
+        list => {
+          if (value) {
+            return list.push(name);
+          }
+          return list.filter(l => l !== name);
         }
-
-        return list.filter(l => l !== label);
-      });
+      );
     }
     case RESET_LIST_LABELS:
       return state.updateIn(['layouts', action.slug], () =>
