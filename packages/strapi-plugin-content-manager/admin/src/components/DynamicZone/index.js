@@ -71,9 +71,6 @@ const DynamicZone = ({ max, min, name }) => {
 
   const hasRequiredError = hasError && !hasMinError;
 
-  console.log('error', name, hasError, dynamicZoneErrors);
-  console.log('min', hasMinError);
-
   return (
     <>
       {getDynamicDisplayedComponents().length > 0 && (
@@ -141,8 +138,15 @@ const DynamicZone = ({ max, min, name }) => {
             }
           }}
         />
-        {hasRequiredError && <div>Component is required</div>}
-        {hasMinError && <div> {missingComponentNumber} missing components</div>}
+        {hasRequiredError && !isOpen && (
+          <div className="error-label">Component is required</div>
+        )}
+        {hasMinError && (
+          <div className="error-label">
+            {' '}
+            {missingComponentNumber} missing components
+          </div>
+        )}
         <div className="info">
           <FormattedMessage
             id={`${pluginId}.components.DynamicZone.add-compo`}

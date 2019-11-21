@@ -105,14 +105,20 @@ const createYupSchema = (model, { components }) => {
             return createYupSchema(components[__component], { components });
           })
         );
+
         const { max, min } = attribute;
 
         if (attribute.required) {
-          dynamicZoneSchema = dynamicZoneSchema.defined();
-        }
-
-        if (min) {
-          dynamicZoneSchema = dynamicZoneSchema.min(min, errorsTrads.min);
+          dynamicZoneSchema = dynamicZoneSchema.required();
+          if (min) {
+            dynamicZoneSchema = dynamicZoneSchema
+              .min(min, errorsTrads.min)
+              .required();
+          }
+        } else {
+          if (min) {
+            dynamicZoneSchema = dynamicZoneSchema.min(min, errorsTrads.min);
+          }
         }
 
         if (max) {

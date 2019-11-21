@@ -22,9 +22,11 @@ const Wrapper = styled.div`
       display: block;
     }
   }
-
-  &:not(:first-of-type) {
-    margin-top: 30px;
+  .error-label {
+    color: #f64d0a;
+    font-size: 13px;
+    margin-top: 9px;
+    margin-bottom: -10px;
   }
 `;
 
