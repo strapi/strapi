@@ -153,7 +153,7 @@ const forms = {
             type: yup.string().required(errorsTrads.required),
             target: yup.string().required(errorsTrads.required),
             nature: yup.string().required(),
-            dominant: yup.boolean(),
+            dominant: yup.boolean().nullable(),
             unique: yup.boolean().nullable(),
           });
         default:

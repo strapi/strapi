@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { truncate } from 'lodash';
+import { get, truncate } from 'lodash';
 import pluralize from 'pluralize';
+import useDataManager from '../../hooks/useDataManager';
 import ManyToMany from '../../icons/ManyToMany';
 import ManyToOne from '../../icons/ManyToOne';
 import ManyWay from '../../icons/ManyWay';
@@ -28,6 +29,9 @@ const RelationFormNaturePicker = ({
   oneThatIsCreatingARelationWithAnother,
   target,
 }) => {
+  const { contentTypes } = useDataManager();
+  console.log({ target });
+
   const relationsType =
     naturePickerType === 'contentType'
       ? [
@@ -40,14 +44,19 @@ const RelationFormNaturePicker = ({
         ]
       : ['oneWay', 'manyWay'];
 
-  const leftTarget =
-    nature === 'manyToOne' ? target : oneThatIsCreatingARelationWithAnother;
-  const rightTarget =
-    nature === 'manyToOne' ? oneThatIsCreatingARelationWithAnother : target;
+  const areDisplayedNamesInverted = nature === 'manyToOne';
+  const targetLabel = get(contentTypes, [target, 'schema', 'name'], 'unknown');
+  const leftTarget = areDisplayedNamesInverted
+    ? targetLabel
+    : oneThatIsCreatingARelationWithAnother;
+  const rightTarget = areDisplayedNamesInverted
+    ? oneThatIsCreatingARelationWithAnother
+    : targetLabel;
   const leftDisplayedValue = pluralize(
     leftTarget,
     nature === 'manyToMany' ? 2 : 1
   );
+
   const rightDisplayedValue = pluralize(
     rightTarget,
     ['manyToMany', 'oneToMany', 'manyToOne', 'manyWay'].includes(nature) ? 2 : 1
@@ -69,6 +78,8 @@ const RelationFormNaturePicker = ({
                     target: {
                       name: 'nature',
                       value: relationNature,
+                      targetContentType: target,
+                      oneThatIsCreatingARelationWithAnother,
                       type: 'relation',
                     },
                   });

@@ -42,6 +42,8 @@ const RelationForm = ({
         error={getError('targetAttribute')}
         name="targetAttribute"
         onChange={onChange}
+        oneThatIsCreatingARelationWithAnother={mainBoxHeader}
+        target={modifiedData.target}
         value={get(modifiedData, 'targetAttribute', '')}
       />
     </Wrapper>

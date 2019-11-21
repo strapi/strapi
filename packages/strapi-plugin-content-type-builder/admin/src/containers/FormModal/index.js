@@ -59,6 +59,7 @@ const FormModal = () => {
     createSchema,
     initialData,
     modifiedData: allDataSchema,
+    sortedContentTypesList,
   } = useDataManager();
   const { formErrors, modifiedData } = reducerState.toJS();
 
@@ -92,6 +93,7 @@ const FormModal = () => {
           attributeType,
           // TODO handle component name set
           nameToSetForRelation: get(allDataSchema, ['schema', 'name'], ''),
+          target: get(sortedContentTypesList, ['0', 'uid'], 'error'),
         });
       }
     }
@@ -170,7 +172,7 @@ const FormModal = () => {
     return newSearch;
   };
 
-  const handleChange = ({ target: { name, value, type } }) => {
+  const handleChange = ({ target: { name, value, type, ...rest } }) => {
     const namesThatCanResetToNullValue = [
       'enumName',
       'max',
@@ -223,6 +225,7 @@ const FormModal = () => {
       type: 'ON_CHANGE',
       keys: name.split('.'),
       value: val,
+      ...rest,
     });
   };
   const handleSubmit = async e => {

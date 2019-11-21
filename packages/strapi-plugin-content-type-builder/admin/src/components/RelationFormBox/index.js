@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Inputs } from '@buffetjs/custom';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import getTrad from '../../utils/getTrad';
+import RelationTargetPicker from '../RelationTargetPicker';
 import Wrapper from './Wrapper';
 
 const RelationFormBox = ({
@@ -12,6 +13,8 @@ const RelationFormBox = ({
   isMain,
   name,
   onChange,
+  oneThatIsCreatingARelationWithAnother,
+  target,
   value,
 }) => {
   const { formatMessage } = useGlobalContext();
@@ -25,7 +28,13 @@ const RelationFormBox = ({
             {header}
           </p>
         ) : (
-          <div>picker</div>
+          <RelationTargetPicker
+            target={target}
+            onChange={onChange}
+            oneThatIsCreatingARelationWithAnother={
+              oneThatIsCreatingARelationWithAnother
+            }
+          />
         )}
       </div>
       <div className="box-body">
@@ -52,6 +61,8 @@ RelationFormBox.defaultProps = {
   header: null,
   isMain: false,
   onChange: () => {},
+  oneThatIsCreatingARelationWithAnother: null,
+  target: null,
   value: '',
 };
 
@@ -62,6 +73,8 @@ RelationFormBox.propTypes = {
   isMain: PropTypes.bool,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func,
+  oneThatIsCreatingARelationWithAnother: PropTypes.string,
+  target: PropTypes.string,
   value: PropTypes.string,
 };
 

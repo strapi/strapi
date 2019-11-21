@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
+import { get, sortBy } from 'lodash';
 import { request, LoadingIndicatorPage } from 'strapi-helper-plugin';
 import { useLocation, useRouteMatch, Redirect } from 'react-router-dom';
 import DataManagerContext from '../../contexts/DataManagerContext';
@@ -84,6 +84,17 @@ const DataManagerProvider = ({ children }) => {
       uid,
     });
   };
+  const sortedContentTypesList = sortBy(
+    Object.keys(contentTypes)
+      .map(uid => ({
+        name: uid,
+        title: contentTypes[uid].schema.name,
+        uid,
+        to: `/plugins/${pluginId}/content-types/${uid}`,
+      }))
+      .filter(obj => obj !== null),
+    obj => obj.title
+  );
 
   const setModifiedData = () => {
     const currentSchemas = isInContentTypeView ? contentTypes : components;
@@ -117,6 +128,7 @@ const DataManagerProvider = ({ children }) => {
         isInContentTypeView,
         modifiedData,
         setModifiedData,
+        sortedContentTypesList,
       }}
     >
       {isLoadingForDataToBeSet ? (

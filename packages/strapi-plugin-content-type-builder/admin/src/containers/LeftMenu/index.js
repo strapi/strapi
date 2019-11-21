@@ -25,6 +25,7 @@ function LeftMenu() {
     contentTypes,
     // initialData,
     // modifiedData,
+    sortedContentTypesList,
   } = useDataManager();
   const { currentEnvironment } = useGlobalContext();
   const { push } = useHistory();
@@ -82,16 +83,7 @@ function LeftMenu() {
           },
         },
       },
-      links: sortBy(
-        Object.keys(contentTypes)
-          .map(uid => ({
-            name: uid,
-            title: contentTypes[uid].schema.name,
-            to: `/plugins/${pluginId}/content-types/${uid}`,
-          }))
-          .filter(obj => obj !== null),
-        obj => obj.title
-      ),
+      links: sortedContentTypesList,
     },
     {
       name: 'components',
