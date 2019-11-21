@@ -31,7 +31,18 @@ import IconGroup from '../../assets/icons/icon_type_groups.png';
 import forms from './forms.json';
 
 const NAVLINKS = [{ id: 'base' }, { id: 'advanced' }];
-const RESERVED_NAMES = ['admin', 'series', 'file'];
+const JS_BUILT_IN_OBJECTS = [
+  'object',
+  'function',
+  'boolean',
+  'symbol',
+  'error',
+  'infinity',
+  'number',
+  'math',
+  'date',
+];
+const RESERVED_NAMES = ['admin', 'series', 'file', ...JS_BUILT_IN_OBJECTS];
 
 class ModelForm extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
