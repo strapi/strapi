@@ -217,11 +217,7 @@ InputJSONWithErrors.propTypes = {
   resetProps: PropTypes.bool,
   tabIndex: PropTypes.string,
   validations: PropTypes.object,
-  value: PropTypes.oneOfType([
-    PropTypes.array,
-    PropTypes.object,
-    PropTypes.bool,
-  ]),
+  value: PropTypes.any,
 };
 
 export default InputJSONWithErrors;
