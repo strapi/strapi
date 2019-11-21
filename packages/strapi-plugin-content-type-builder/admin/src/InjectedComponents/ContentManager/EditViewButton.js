@@ -13,19 +13,11 @@ import { Button } from '@buffetjs/core';
 function EditViewButton(props) {
   const { formatMessage } = useGlobalContext();
   // Retrieve URL from props
-  const base = `${props.getContentTypeBuilderBaseUrl()}${props.getModelName()}`;
-  const url =
-    props.getSource() === 'users-permissions'
-      ? `${base}&source=${props.getSource()}`
-      : base;
+  const url = `${props.getContentTypeBuilderBaseUrl()}${props.getModelName()}`;
 
   const handleClick = () => {
     props.push(url);
   };
-
-  if (props.getSource() === 'admin') {
-    return null;
-  }
 
   if (props.currentEnvironment === 'development') {
     return (
@@ -52,7 +44,6 @@ EditViewButton.propTypes = {
   currentEnvironment: PropTypes.string.isRequired,
   getContentTypeBuilderBaseUrl: PropTypes.func.isRequired,
   getModelName: PropTypes.func.isRequired,
-  getSource: PropTypes.func.isRequired,
   push: PropTypes.func.isRequired,
 };
 

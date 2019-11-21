@@ -1,12 +1,8 @@
 import React, { useEffect, useReducer } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { cloneDeep, get, isEmpty, set } from 'lodash';
-import {
-  getQueryParameters,
-  request,
-  LoadingIndicatorPage,
-} from 'strapi-helper-plugin';
+import { request, LoadingIndicatorPage } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
 import createYupSchema from './utils/schema';
@@ -27,7 +23,6 @@ const EditViewDataManagerProvider = ({
 }) => {
   const { id } = useParams();
   // Retrieve the search
-  const { search } = useLocation();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const {
     formErrors,
@@ -42,7 +37,6 @@ const EditViewDataManagerProvider = ({
   const abortController = new AbortController();
   const { signal } = abortController;
   const isCreatingEntry = id === 'create';
-  const source = getQueryParameters(search, 'source');
 
   useEffect(() => {
     if (!isLoading) {
@@ -56,7 +50,6 @@ const EditViewDataManagerProvider = ({
       try {
         const data = await request(getRequestUrl(`${slug}/${id}`), {
           method: 'GET',
-          params: { source },
           signal,
         });
 
@@ -107,7 +100,7 @@ const EditViewDataManagerProvider = ({
       abortController.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, slug, source]);
+  }, [id, slug]);
 
   const addComponentToDynamicZone = (
     keys,
@@ -236,7 +229,6 @@ const EditViewDataManagerProvider = ({
           {
             method,
             headers,
-            params: { source },
             body: formData,
             signal,
           },
@@ -369,7 +361,6 @@ const EditViewDataManagerProvider = ({
         setIsSubmitting,
         shouldShowLoadingState,
         slug,
-        source,
       }}
     >
       {showLoader ? (

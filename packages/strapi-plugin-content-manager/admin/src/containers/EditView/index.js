@@ -9,7 +9,7 @@ import React, {
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
-import { BackHeader, getQueryParameters, LiLink } from 'strapi-helper-plugin';
+import { BackHeader, LiLink } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import Container from '../../components/Container';
 import DynamicZone from '../../components/DynamicZone';
@@ -64,7 +64,6 @@ const EditView = ({
     () => get(currentContentTypeLayoutData, ['schema'], {}),
     [currentContentTypeLayoutData]
   );
-  const source = getQueryParameters(search, 'source');
 
   const getFieldMetas = useCallback(
     fieldName => {
@@ -276,8 +275,7 @@ const EditView = ({
                     }}
                     icon="layout"
                     key={`${pluginId}.link`}
-                    // url={`/plugins/${pluginId}/ctm-configurations/edit-settings/content-types/${slug}${`?source=${source}`}`}
-                    url={`ctm-configurations/edit-settings/content-types${`?source=${source}`}`}
+                    url={`ctm-configurations/edit-settings/content-types`}
                     onClick={() => {
                       // emitEvent('willEditContentTypeLayoutFromEditView');
                     }}
@@ -287,7 +285,6 @@ const EditView = ({
                     plugins,
                     currentEnvironment,
                     slug,
-                    source,
                     emitEvent,
                     true
                   )}

@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
-import { get, isArray, isEmpty } from 'lodash';
+import { cloneDeep, get, isArray, isEmpty } from 'lodash';
 import { request } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
@@ -22,7 +22,6 @@ function SelectWrapper({
   relationType,
   targetModel,
   placeholder,
-  plugin,
 }) {
   const { pathname, search } = useLocation();
   const {
@@ -33,13 +32,12 @@ function SelectWrapper({
     onRemoveRelation,
   } = useDataManager();
   const { isDraggingComponent } = useEditView();
+
   const value = get(modifiedData, name, null);
-  const source = isEmpty(plugin) ? 'content-manager' : plugin;
   const [state, setState] = useState({
     _q: '',
     _limit: 20,
     _start: 0,
-    source,
   });
   const [options, setOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -153,7 +151,7 @@ function SelectWrapper({
   const nextSearch = `${pathname}${search}`;
   const to = `/plugins/${pluginId}/${targetModel}/${
     value ? value.id : null
-  }?source=${source}&redirectUrl=${nextSearch}`;
+  }?redirectUrl=${nextSearch}`;
   const link =
     value === null ||
     value === undefined ||
@@ -210,7 +208,6 @@ function SelectWrapper({
             placeholder
           )
         }
-        source={source}
         targetModel={targetModel}
         value={value}
       />

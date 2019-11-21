@@ -11,7 +11,6 @@ const getInjectedComponents = (
   plugins,
   currentEnvironment,
   slug,
-  source,
   emitEvent,
   push
 ) => {
@@ -32,7 +31,6 @@ const getInjectedComponents = (
           <Component
             currentEnvironment={currentEnvironment}
             getModelName={() => slug}
-            getSource={() => source}
             getContentTypeBuilderBaseUrl={() =>
               '/plugins/content-type-builder/models/'
             }

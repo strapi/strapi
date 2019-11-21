@@ -15,9 +15,18 @@ const RoundCTA = styled.div`
     line-height: 27px;
     margin: auto;
   }
-  &:hover {
+  &:not(.arrow-btn):hover {
     background-color: #faa684;
     color: #f64d0a;
+  }
+  &.arrow-btn {
+    height: 22px;
+    width: 22px;
+    background-color: #ffffff;
+    border: 2px solid #ffffff;
+    &:hover {
+      background-color: #f2f3f4;
+    }
   }
 `;
 

@@ -91,7 +91,8 @@ const DynamicZone = ({ max, min, name }) => {
             <div key={index}>
               {showDownIcon && (
                 <RoundCTA
-                  style={{ top: -15, right: 30 }}
+                  style={{ top: -15, right: 54 }}
+                  className="arrow-btn"
                   onClick={() => moveComponentDown(name, index)}
                 >
                   <i className="fa fa-arrow-down" />
@@ -99,7 +100,8 @@ const DynamicZone = ({ max, min, name }) => {
               )}
               {showUpIcon && (
                 <RoundCTA
-                  style={{ top: -15, right: 45 }}
+                  style={{ top: -15, right: 88 }}
+                  className="arrow-btn"
                   onClick={() => moveComponentUp(name, index)}
                 >
                   <i className="fa fa-arrow-up" />

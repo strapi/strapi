@@ -400,11 +400,7 @@ function ListView({
           }}
           popUpWarningType="danger"
           onConfirm={() => {
-            onDeleteSeveralData(
-              entriesToDelete,
-              slug,
-              getSearchParams().source
-            );
+            onDeleteSeveralData(entriesToDelete, slug);
           }}
         />
       </ListViewProvider>
