@@ -54,6 +54,12 @@ const forms = {
       attributeToEditName,
       initialData
     ) {
+      console.log({ currentSchema });
+      console.log({ attributeType });
+      console.log({ dataToValidate });
+      console.log({ isEditing });
+      console.log({ attributeToEditName });
+      console.log({ initialData });
       const alreadyTakenAttributes = Object.keys(
         get(currentSchema, ['schema', 'attributes'], {})
       ).filter(attribute => {

@@ -116,8 +116,10 @@ const DataManagerProvider = ({ children }) => {
     const schemaToSet = get(currentSchemas, currentUid, {
       schema: { attributes: {} },
     });
+
     const retrievedComponents = retrieveComponentsFromSchema(
-      schemaToSet.schema.attributes
+      schemaToSet.schema.attributes,
+      components
     );
     const newSchemaToSet = createModifiedDataSchema(
       schemaToSet,
@@ -147,7 +149,7 @@ const DataManagerProvider = ({ children }) => {
     return <Redirect to={`/plugins/${pluginId}/content-types/${firstCTUid}`} />;
   }
 
-  console.log({ modifiedData: modifiedData.contentType });
+  console.log({ modifiedData });
 
   return (
     <DataManagerContext.Provider

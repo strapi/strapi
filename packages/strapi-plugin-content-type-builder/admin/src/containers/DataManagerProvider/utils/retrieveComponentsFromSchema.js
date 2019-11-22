@@ -1,11 +1,27 @@
 import { get } from 'lodash';
 
-const retrieveComponentsFromSchema = attributes => {
+const retrieveComponentsFromSchema = (attributes, allComponentsData) => {
   const allComponents = Object.keys(attributes).reduce((acc, current) => {
     const type = get(attributes, [current, 'type'], '');
 
     if (type === 'component') {
-      acc.push(attributes[current].component);
+      const currentComponentName = attributes[current].component;
+      // Push the existing compo
+      acc.push(currentComponentName);
+
+      const currentComponentAttributes = get(
+        allComponentsData,
+        [currentComponentName, 'schema', 'attributes'],
+        {}
+      );
+
+      // Retrieve the nested ones
+      acc.push(
+        ...retrieveComponentsFromSchema(
+          currentComponentAttributes,
+          allComponentsData
+        )
+      );
     }
 
     if (type === 'dynamiczone') {
