@@ -39,7 +39,7 @@ const orderAllDataAttributesWithImmutable = (
       const currentAttributes = get(currentSchema, attributesPath, {});
       const currentImmutableSchemas = fromJS(currentSchema).setIn(
         ['schema', 'attributes'],
-        OrderedMap(currentAttributes)
+        OrderedMap(fromJS(currentAttributes))
       );
 
       acc[current] = fromJS(currentImmutableSchemas);
@@ -52,7 +52,7 @@ const orderAllDataAttributesWithImmutable = (
   const mainSchema = get(allDataSchema, [keyName], {});
   const mainImmutableSchema = fromJS(mainSchema).setIn(
     attributesPath,
-    OrderedMap(get(mainSchema, attributesPath, {}))
+    OrderedMap(fromJS(get(mainSchema, attributesPath, {})))
   );
 
   const immutableData = fromJS({

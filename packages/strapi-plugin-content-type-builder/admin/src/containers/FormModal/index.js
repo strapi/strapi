@@ -64,7 +64,6 @@ const FormModal = () => {
 
   useEffect(() => {
     if (!isEmpty(search)) {
-      console.log('up');
       // Return 'null' if there isn't any attributeType search params
       const attributeType = query.get('attributeType');
       const modalType = query.get('modalType');
@@ -164,7 +163,7 @@ const FormModal = () => {
     ) {
       const type =
         state.attributeType === 'relation' ? 'relation' : modifiedData.type;
-      console.log({ pathToSchema: state.pathToSchema });
+
       schema = forms[state.modalType].schema(
         get(allDataSchema, state.pathToSchema, {}),
         type,

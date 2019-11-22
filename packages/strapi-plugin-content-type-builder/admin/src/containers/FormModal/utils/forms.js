@@ -54,12 +54,6 @@ const forms = {
       attributeToEditName,
       initialData
     ) {
-      console.log({ currentSchema });
-      console.log({ attributeType });
-      console.log({ dataToValidate });
-      console.log({ isEditing });
-      console.log({ attributeToEditName });
-      console.log({ initialData });
       const alreadyTakenAttributes = Object.keys(
         get(currentSchema, ['schema', 'attributes'], {})
       ).filter(attribute => {
@@ -70,6 +64,7 @@ const forms = {
         return true;
       });
 
+      // For relations
       let targetAttributeAlreadyTakenValue = dataToValidate.name
         ? [...alreadyTakenAttributes, dataToValidate.name]
         : alreadyTakenAttributes;
@@ -84,6 +79,7 @@ const forms = {
         );
       }
 
+      // Common yup shape for most attributes
       const commonShape = {
         name: yup
           .string()

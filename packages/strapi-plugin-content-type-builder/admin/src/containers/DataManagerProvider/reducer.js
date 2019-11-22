@@ -79,6 +79,20 @@ const reducer = (state, action) => {
           }
         );
     }
+    case 'CREATE_SCHEMA': {
+      const newSchema = {
+        uid: action.uid,
+        isTemporary: true,
+        schema: {
+          ...action.data,
+          attributes: {},
+        },
+      };
+      const key =
+        action.schemaType === 'contentType' ? 'contentTypes' : 'components';
+
+      return state.updateIn([key, action.uid], () => fromJS(newSchema));
+    }
     case 'EDIT_ATTRIBUTE': {
       const {
         attributeToSet: { name, ...rest },
@@ -228,26 +242,78 @@ const reducer = (state, action) => {
         .update('components', () => fromJS(action.components))
         .update('contentTypes', () => fromJS(action.contentTypes))
         .update('isLoading', () => false);
-    case 'CREATE_SCHEMA': {
-      const newSchema = {
-        uid: action.uid,
-        isTemporary: true,
-        schema: {
-          ...action.data,
-          attributes: {},
-        },
-      };
-      const key =
-        action.schemaType === 'contentType' ? 'contentTypes' : 'components';
+    case 'REMOVE_FIELD_FROM_DISPLAYED_COMPONENT': {
+      const { attributeToRemoveName, componentUid } = action;
 
-      return state.updateIn([key, action.uid], () => fromJS(newSchema));
+      console.log({ componentUid, attributeToRemoveName });
+      console.log(
+        state
+          .getIn([
+            'modifiedData',
+            'components',
+            componentUid,
+            'schema',
+            'attributes',
+            attributeToRemoveName,
+          ])
+          .toJS()
+      );
+
+      return state.removeIn([
+        'modifiedData',
+        'components',
+        componentUid,
+        'schema',
+        'attributes',
+        attributeToRemoveName,
+      ]);
     }
+    case 'REMOVE_FIELD': {
+      const { mainDataKey, attributeToRemoveName } = action;
+      const pathToAttributes = [
+        'modifiedData',
+        mainDataKey,
+        'schema',
+        'attributes',
+      ];
+      const pathToAttributeToRemove = [
+        ...pathToAttributes,
+        attributeToRemoveName,
+      ];
+      const attributeToRemoveData = state.getIn(pathToAttributeToRemove);
+      const isRemovingRelationAttribute =
+        attributeToRemoveData.get('nature') !== undefined;
+      // Only content types can have relations that with themselves since, components can only have oneWay or manyWay relations
+      const canTheAttributeToRemoveHaveARelationWithItself =
+        mainDataKey === 'contentType';
 
+      if (
+        isRemovingRelationAttribute &&
+        canTheAttributeToRemoveHaveARelationWithItself
+      ) {
+        const {
+          target,
+          nature,
+          targetAttribute,
+        } = attributeToRemoveData.toJS();
+        const uid = state.getIn(['modifiedData', 'contentType', 'uid']);
+        const shouldRemoveOppositeAttribute =
+          target === uid && !ONE_SIDE_RELATIONS.includes(nature);
+
+        if (shouldRemoveOppositeAttribute) {
+          return state
+            .removeIn(pathToAttributeToRemove)
+            .removeIn([...pathToAttributes, targetAttribute]);
+        }
+      }
+
+      return state.removeIn(pathToAttributeToRemove);
+    }
     case 'SET_MODIFIED_DATA': {
       return state
         .update('isLoadingForDataToBeSet', () => false)
-        .update('initialData', () => action.schemaToSet)
-        .update('modifiedData', () => action.schemaToSet);
+        .update('initialData', () => fromJS(action.schemaToSet))
+        .update('modifiedData', () => fromJS(action.schemaToSet));
     }
     default:
       return state;

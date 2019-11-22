@@ -6,7 +6,12 @@ import useDataManager from '../../hooks/useDataManager';
 import LeftMenu from '../LeftMenu';
 
 const ListPage = () => {
-  const { initialData, modifiedData, isInContentTypeView } = useDataManager();
+  const {
+    initialData,
+    modifiedData,
+    isInContentTypeView,
+    removeAttribute,
+  } = useDataManager();
   const { push } = useHistory();
   const firstMainDataPath = isInContentTypeView ? 'contentType' : 'component';
   const mainDataTypeAttributesPath = [
@@ -134,9 +139,26 @@ const ListPage = () => {
 
                   return (
                     <li key={attr}>
-                      <span>{attr}</span>
-                      &nbsp:
-                      <span>component</span>
+                      <div>
+                        <span>{attr}</span>
+                        &nbsp;
+                        <span>component</span>
+                      </div>
+                      <div
+                        onClick={e => {
+                          e.stopPropagation();
+                          removeAttribute(
+                            isInContentTypeView ? 'contentType' : 'component',
+                            attr,
+                            get(compoData, 'uid', '')
+                          );
+                        }}
+                      >
+                        REMOVE COMPO (fieldName: {attr}, compoName:{' '}
+                        {get(compoData, 'uid')})
+                      </div>
+                      <hr />
+                      <div> COMPONENT FIELDs:</div>
                       <ul>
                         {Object.keys(componentSchema).map(componentAttr => {
                           // Type of the component's attribute
@@ -163,9 +185,26 @@ const ListPage = () => {
 
                             return (
                               <li key={`${attr}.${componentAttr}`}>
-                                <span>{componentAttr}</span>
-                                &nbsp;
-                                <span>{componentAttrType}</span>
+                                <div>
+                                  <span>{componentAttr}</span>
+                                  &nbsp;
+                                  <span>{componentAttrType}</span>
+                                </div>
+                                <div
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    removeAttribute(
+                                      'components',
+                                      componentAttr,
+                                      get(compoData, 'uid', '')
+                                    );
+                                  }}
+                                >
+                                  REMOVE NESTED COMPO FROM COMPONENT (fieldName:{' '}
+                                  {componentAttr}, compoName:{' '}
+                                  {get(compoData, 'uid')})
+                                </div>
+                                <hr />
                                 <ul>
                                   {Object.keys(nestedCompoAttributes).map(
                                     nestedCompoAttribute => {
@@ -187,9 +226,29 @@ const ListPage = () => {
                                             )
                                           }
                                         >
-                                          <span>{nestedCompoAttribute}</span>
-                                          &nbsp;
-                                          <span>{nestedComponentAttrType}</span>
+                                          <div>
+                                            <span>{nestedCompoAttribute}</span>
+                                            &nbsp;
+                                            <span>
+                                              {nestedComponentAttrType}
+                                            </span>
+                                          </div>
+                                          <div>
+                                            <div
+                                              onClick={e => {
+                                                e.stopPropagation();
+                                                removeAttribute(
+                                                  'components',
+                                                  nestedCompoAttribute,
+                                                  nestedCompoNameUid
+                                                );
+                                              }}
+                                            >
+                                              REMOVE NESTED COMPONENT FIELD
+                                              (fieldName: {nestedCompoAttribute}
+                                              , compoName: {nestedCompoNameUid})
+                                            </div>
+                                          </div>
                                         </li>
                                       );
                                     }
@@ -197,7 +256,6 @@ const ListPage = () => {
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      console.log('ooo', componentAttr);
                                       handleClickAddAttributeNestedData(
                                         nestedCompoNameUid,
                                         componentAttr
@@ -207,6 +265,7 @@ const ListPage = () => {
                                     Add field to nested compo
                                   </button>
                                 </ul>
+                                <hr />
                               </li>
                             );
                           }
@@ -224,9 +283,23 @@ const ListPage = () => {
                                 )
                               }
                             >
-                              <span>{componentAttr}</span>
-                              &nbsp;
-                              <span>{componentAttrType}</span>
+                              <div>
+                                <span>{componentAttr}</span>
+                                &nbsp;
+                                <span>{componentAttrType}</span>
+                              </div>
+                              <div
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  removeAttribute(
+                                    'components',
+                                    componentAttr,
+                                    getFirstLevelComponentName(attr)
+                                  );
+                                }}
+                              >
+                                REMOVE FIELD
+                              </div>
                             </li>
                           );
                         })}
@@ -242,6 +315,7 @@ const ListPage = () => {
                           Add field to compo
                         </button>
                       </ul>
+                      <hr />
                     </li>
                   );
                 }
@@ -259,9 +333,22 @@ const ListPage = () => {
                       )
                     }
                   >
-                    <span>{attr}</span>
-                    &nbsp;
-                    <span>{type}</span>
+                    <div>
+                      <span>{attr}</span>
+                      &nbsp;
+                      <span>{type}</span>
+                    </div>
+                    <div
+                      onClick={e => {
+                        e.stopPropagation();
+                        removeAttribute(
+                          isInContentTypeView ? 'contentType' : 'component',
+                          attr
+                        );
+                      }}
+                    >
+                      REMOVE FIELD
+                    </div>
                   </li>
                 );
               })}

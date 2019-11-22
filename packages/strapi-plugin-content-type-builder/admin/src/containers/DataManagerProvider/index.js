@@ -99,6 +99,24 @@ const DataManagerProvider = ({ children }) => {
       uid,
     });
   };
+  const removeAttribute = (
+    mainDataKey,
+    attributeToRemoveName,
+    componentUid = ''
+  ) => {
+    const type =
+      mainDataKey === 'components'
+        ? 'REMOVE_FIELD_FROM_DISPLAYED_COMPONENT'
+        : 'REMOVE_FIELD';
+
+    dispatch({
+      type,
+      mainDataKey,
+      attributeToRemoveName,
+      componentUid,
+    });
+  };
+
   const sortedContentTypesList = sortBy(
     Object.keys(contentTypes)
       .map(uid => ({
@@ -161,6 +179,7 @@ const DataManagerProvider = ({ children }) => {
         initialData,
         isInContentTypeView,
         modifiedData,
+        removeAttribute,
         setModifiedData,
         sortedContentTypesList,
       }}
