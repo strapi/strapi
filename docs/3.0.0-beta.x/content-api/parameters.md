@@ -55,6 +55,14 @@ If you use the same operator (except for in and nin) the values will be used to 
 
 `GET /restaurants?name_contains=pizza&name_contains=giovanni`
 
+::: warning
+
+If you want to use `AND` for your query you will have to create a custom query by using the [Query](../concepts/query.md) documentation.
+
+Strapi doesn't support the `AND` opperator for now.
+
+:::
+
 ## Deep filtering
 
 Find restaurants owned by a chef who belongs to a restaurant with star equal to 5

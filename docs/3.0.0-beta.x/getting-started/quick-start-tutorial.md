@@ -10,7 +10,7 @@ By following this tutorial, you install and create your first Strapi project.
 
 ::: tip NOTE
 
-You need to have **_Node.js and npm_** installed on your system before following these steps. If you do not have Node.js and npm installed (or are not sure), please visit our [Installation Requirements](install-requirements.md).
+You need to have **_Node.js and npm_** installed on your system before following these steps. If you do not have Node.js and npm installed (or are not sure), please visit our [installation requirements](install-requirements.md).
 
 :::
 
@@ -20,31 +20,41 @@ You need to have **_Node.js and npm_** installed on your system before following
 
 ## 1. Install Strapi and create a project
 
-- Navigate to your parent `Projects/` directory from your command line.
+Navigate to your parent `Projects/` directory from your command line.
 
-**Note:** In this tutorial, the example assumes a **Projects** folder on your **Desktop**. However, this is not required, and you may put your project where you want.
+::: tip NOTE
 
-Path: `~/Desktop/Projects/`
+In this tutorial, the example assumes a **Projects** folder on your **Desktop**. However, this is not required, and you may put your project where you want.
 
-Use **only one** of the following commands to create a new Strapi project:
+:::
 
----
+**Path —** `~/Desktop/Projects/`
 
-- Use **yarn** to install the Strapi project (**recommended**). [Install yarn with these docs](https://yarnpkg.com/lang/en/docs/install/)
+Use **only one** of the following commands to create a new Strapi project
+
+:::: tabs
+
+::: tab yarn
+
+Use **yarn** to install the Strapi project (**recommended**). [Install yarn with these docs](https://yarnpkg.com/lang/en/docs/install/)
 
 ```bash
 yarn create strapi-app my-project --quickstart
 ```
 
-**or**
+:::
 
-- Use **npm/npx** to install the Strapi project
+::: tab npx
+
+Use **npm/npx** to install the Strapi project
 
 ```bash
 npx create-strapi-app my-project --quickstart
 ```
 
----
+:::
+
+::::
 
 The command creates a Strapi project `my-project/` folder within your parent `Projects/` directory.
 
@@ -52,9 +62,6 @@ The command creates a Strapi project `my-project/` folder within your parent `Pr
 
 When you create a new Quick Start(`--quickstart`) project, Strapi downloads the node modules and the Strapi files needed. Using `--quickstart` automatically completes an **additional** step of **building the administration panel** for Strapi and then **starting** Strapi for you. This opens the browser for you and brings you to the [Welcome](http://localhost:1337/admin/plugins/users-permissions/auth/register) page.
 
-:::
-
-::: tip NOTE
 You can replace the `my-project` name with any name you want. E.g., `yarn create strapi-app my-foodadvisor-project --quickstart` creates a folder `./Projects/my-foodadvisor-project`.
 
 :::
@@ -131,9 +138,9 @@ Building your admin UI with development configuration ...
 ::: tip NOTE
 Using the `--quickstart` flag installs Strapi using an [SQLite](https://www.sqlite.org/index.html) database. You may, at any time, leave off the **--flag**, but you need to follow a few configuration steps for your database choice. **You need to have your database choice installed and running locally before creating your project.**
 
-**Note:** An **SQLite** database is an excellent database to use for prototyping and _developing_ Strapi projects. **SQLite** is a light database that ports effortlessly to the other relational databases (**MySQL**, **PostgreSQL**, and **MariaDB**). It is recommended to **develop** with SQLite and to use another relational database (MySQL, PostgreSQL or MariaDB) in production.
+An **SQLite** database is an excellent database to use for prototyping and _developing_ Strapi projects. **SQLite** is a light database that ports effortlessly to the other relational databases (**MySQL**, **PostgreSQL**, and **MariaDB**). It is recommended to **develop** with SQLite and to use another relational database (MySQL, PostgreSQL or MariaDB) in production.
 
-**Note:** If you would like to use **MongoDB** in production, you need to [install, run, and use MongoDB to develop your Strapi project (in development)](../guides/databases.md#mongodb-installation).
+If you would like to use **MongoDB** in production, you need to [install, run, and use MongoDB to develop your Strapi project (in development)](../guides/databases.md#mongodb-installation).
 :::
 
 You are now ready to create a new **Administrator** and new front-end **User**.
@@ -164,7 +171,11 @@ After your **Administrator** registration is complete, you see the Strapi _Admin
 
 Up until this point, you have created an **Administrator**, and so you next want to create a front-end **User**.
 
-**Note:** It is not necessary to always create a front-end **User** for your **Administrators**; in this case, the **Administrator** is also a front-end **User** as an "Author" of content in the application.
+::: tip NOTE
+
+It is not necessary to always create a front-end **User** for your **Administrators**; in this case, the **Administrator** is also a front-end **User** as an "Author" of content in the application.
+
+:::
 
 - Click on `Users` located under **CONTENT TYPES** in the left-hand menu
 - Click the blue **+ Add New User** button in the top right corner
@@ -193,7 +204,7 @@ Additional **Restaurant** themed **Content Types** and fields can be seen in the
 
 ### The Restaurant Content Type
 
-- Go to the **Content Type Builder** plugin, located in the left menu: Under **PLUGINS**: --> **Content Type Builder**
+Go to the **Content Type Builder** plugin, located in the left menu: Under **PLUGINS** -> **Content Type Builder**
 
 You are now able to see the three available **Content Types**. At this point, three Content Types are available `Permission`, `Role`, and `Users`.
 
@@ -201,7 +212,7 @@ You are now able to see the three available **Content Types**. At this point, th
 
 You need to create a new **Content Type** for `Restaurants`.
 
-1. Complete these steps to **Add a Restaurant Content Type**:
+1. Complete these steps to **Add a Restaurant Content Type**
 
 - Click the `+ Add A Content Type` link (under existing **CONTENT TYPES**)
 - Enter a **Name** for your new **Content Type** (call this `restaurant`), and you can write `Restaurant Listings` for the **Description**
@@ -215,7 +226,7 @@ The Content Type **Name** is always **singular**. For example, `restaurant` not 
 
 :::
 
-2. You are now at the **Field Selection** panel:
+2. You are now at the **Field Selection** panel
 
 You may add your first field, a **String** field for the **Restaurant** name.
 
@@ -402,7 +413,11 @@ You are now ready to add a third field, another **String** field for the **Closi
 
 After Strapi has restarted, you are ready to assign this **Hours_of_operation** group to the **Restaurant** Content Type.
 
-**Note:** It would be possible to assign the **Hours_of_operation** group to another **Content Type**, let's say, a **Cafe** Content Type. You have the option to reuse this group across your application.
+::: tip NOTE
+
+It would be possible to assign the **Hours_of_operation** group to another **Content Type**, let's say, a **Cafe** Content Type. You have the option to reuse this group across your application.
+
+:::
 
 3. Next, you need to assign the **Hours_of_operation** Group to the **Restaurant** Content Type.
 
