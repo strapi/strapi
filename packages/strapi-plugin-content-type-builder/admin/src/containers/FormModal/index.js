@@ -122,18 +122,25 @@ const FormModal = () => {
     headerId = null;
   }
 
+  console.log({ allDataSchema });
+
   const checkFormValidity = async () => {
     let schema;
 
     if (state.modalType === 'contentType') {
       schema = forms[state.modalType].schema(Object.keys(contentTypes));
     } else if (
-      state.modalType === 'attribute' &&
-      state.forTarget !== 'components' &&
-      state.forTarget !== 'component'
+      state.modalType === 'attribute'
+      // && state.forTarget !== 'components' &&
+      // state.forTarget !== 'component'
     ) {
+      const pathToSchemaAttributes =
+        state.forTarget === 'contentType' || state.forTarget === 'component'
+          ? [state.forTarget]
+          : [state.forTarget, state.targetUid];
+
       schema = forms[state.modalType].schema(
-        allDataSchema,
+        get(allDataSchema, pathToSchemaAttributes, {}),
         modifiedData.type,
         modifiedData
       );
