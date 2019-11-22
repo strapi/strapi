@@ -5,13 +5,15 @@ const fse = require('fs-extra');
 const _ = require('lodash');
 
 module.exports = function createSchemaHandler(infos) {
+  const { modelName, plugin, uid, dir, filename, schema } = infos;
+
   const initialState = {
-    modelName: infos.modelName,
-    plugin: infos.plugin,
-    uid: infos.uid,
-    dir: infos.dir,
-    filename: infos.filename,
-    schema: infos.schema || {},
+    modelName,
+    plugin,
+    uid,
+    dir,
+    filename,
+    schema: schema || {},
   };
 
   const state = _.cloneDeep(initialState);
