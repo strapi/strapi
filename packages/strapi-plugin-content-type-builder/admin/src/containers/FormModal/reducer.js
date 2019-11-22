@@ -4,6 +4,7 @@ import pluralize from 'pluralize';
 const initialState = fromJS({
   formErrors: {},
   modifiedData: {},
+  initialData: {},
 });
 
 export const shouldPluralizeTargetAttribute = nature =>
@@ -75,7 +76,20 @@ const reducer = (state, action) => {
     case 'RESET_PROPS':
       return initialState;
     case 'SET_ATTRIBUTE_DATA_SCHEMA': {
-      const { attributeType, nameToSetForRelation, targetUid } = action;
+      const {
+        attributeType,
+        isEditing,
+        modifiedDataToSetForEditing,
+        nameToSetForRelation,
+        targetUid,
+      } = action;
+
+      if (isEditing) {
+        return state
+          .update('modifiedData', () => fromJS(modifiedDataToSetForEditing))
+          .update('initialData', () => fromJS(modifiedDataToSetForEditing));
+      }
+
       let dataToSet;
 
       if (attributeType === 'text') {

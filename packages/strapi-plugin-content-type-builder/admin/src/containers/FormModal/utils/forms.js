@@ -17,7 +17,7 @@ yup.addMethod(yup.mixed, 'defined', function() {
 
 yup.addMethod(yup.string, 'unique', function(
   message,
-  allReadyTakenValues,
+  alreadyTakenAttributes,
   validator
 ) {
   return this.test('unique', message, function(string) {
@@ -25,7 +25,7 @@ yup.addMethod(yup.string, 'unique', function(
       return false;
     }
 
-    return !allReadyTakenValues.includes(
+    return !alreadyTakenAttributes.includes(
       typeof validator === 'function' ? validator(string) : string
     );
   });
@@ -46,18 +46,42 @@ const ATTRIBUTES_THAT_DONT_HAVE_MIN_MAX_SETTINGS = [
 
 const forms = {
   attribute: {
-    schema(currentSchema, attributeType, dataToValidate) {
-      const allreadyTakenAttributes = Object.keys(
+    schema(
+      currentSchema,
+      attributeType,
+      dataToValidate,
+      isEditing,
+      attributeToEditName,
+      initialData
+    ) {
+      const alreadyTakenAttributes = Object.keys(
         get(currentSchema, ['schema', 'attributes'], {})
-      );
-      const targetAttributeAllreadyTakenValue = dataToValidate.name
-        ? [...allreadyTakenAttributes, dataToValidate.name]
-        : allreadyTakenAttributes;
+      ).filter(attribute => {
+        if (isEditing) {
+          return attribute !== attributeToEditName;
+        }
+
+        return true;
+      });
+
+      let targetAttributeAlreadyTakenValue = dataToValidate.name
+        ? [...alreadyTakenAttributes, dataToValidate.name]
+        : alreadyTakenAttributes;
+
+      if (
+        isEditing &&
+        attributeType === 'relation' &&
+        dataToValidate.target === currentSchema.uid
+      ) {
+        targetAttributeAlreadyTakenValue = targetAttributeAlreadyTakenValue.filter(
+          attribute => attribute !== initialData.targetAttribute
+        );
+      }
 
       const commonShape = {
         name: yup
           .string()
-          .unique(errorsTrads.unique, allreadyTakenAttributes)
+          .unique(errorsTrads.unique, alreadyTakenAttributes)
           .required(errorsTrads.required),
         type: yup.string().required(errorsTrads.required),
         default: yup.string().nullable(),
@@ -144,13 +168,12 @@ const forms = {
           return yup.object().shape({
             name: yup
               .string()
-              .unique(errorsTrads.unique, allreadyTakenAttributes)
+              .unique(errorsTrads.unique, alreadyTakenAttributes)
               .required(errorsTrads.required),
             targetAttribute: yup
               .string()
-              .unique(errorsTrads.unique, targetAttributeAllreadyTakenValue)
+              .unique(errorsTrads.unique, targetAttributeAlreadyTakenValue)
               .required(errorsTrads.required),
-            type: yup.string().required(errorsTrads.required),
             target: yup.string().required(errorsTrads.required),
             nature: yup.string().required(),
             dominant: yup.boolean().nullable(),
@@ -586,11 +609,11 @@ const forms = {
     },
   },
   contentType: {
-    schema(allReadyTakenValues) {
+    schema(alreadyTakenAttributes) {
       return yup.object().shape({
         name: yup
           .string()
-          .unique(errorsTrads.unique, allReadyTakenValues, createUid)
+          .unique(errorsTrads.unique, alreadyTakenAttributes, createUid)
           .required(errorsTrads.required),
         collectionName: yup.string(),
       });

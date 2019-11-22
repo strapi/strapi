@@ -14,7 +14,7 @@ import {
 import { Inputs } from '@buffetjs/custom';
 import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
-import { get, isEmpty, toString, upperFirst } from 'lodash';
+import { get, has, isEmpty, set, toString, upperFirst } from 'lodash';
 import pluginId from '../../pluginId';
 import useQuery from '../../hooks/useQuery';
 import useDataManager from '../../hooks/useDataManager';
@@ -44,6 +44,7 @@ const FormModal = () => {
     targetUid: null,
     attributeType: null,
     headerDisplayName: null,
+    pathToSchema: [],
   };
   const [state, setState] = useState(initialStateData);
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
@@ -59,34 +60,60 @@ const FormModal = () => {
     modifiedData: allDataSchema,
     sortedContentTypesList,
   } = useDataManager();
-  const { formErrors, modifiedData } = reducerState.toJS();
+  const { formErrors, initialData, modifiedData } = reducerState.toJS();
 
   useEffect(() => {
     if (!isEmpty(search)) {
       // Return 'null' if there isn't any attributeType search params
-      //TODO need targetUID
-      // TODO change target by targetUID & add displayName instead of target
       const attributeType = query.get('attributeType');
       const modalType = query.get('modalType');
       const actionType = query.get('actionType');
+      const attributeName = query.get('attributeName');
+      const settingType = query.get('settingType');
+      const forTarget = query.get('forTarget');
+      const targetUid = query.get('targetUid');
+      const headerDisplayName = query.get('headerDisplayName');
+      const pathToSchema =
+        forTarget === 'contentType' || forTarget === 'component'
+          ? [forTarget]
+          : [forTarget, targetUid];
 
       setState({
-        attributeName: query.get('attributeName'),
+        attributeName,
         actionType,
         modalType,
-        settingType: query.get('settingType'),
-        forTarget: query.get('forTarget'),
-        targetUid: query.get('targetUid'),
-        headerDisplayName: query.get('headerDisplayName'),
+        settingType,
+        forTarget,
+        targetUid,
+        headerDisplayName,
         attributeType,
+        pathToSchema,
       });
 
       // Set the predefined data structure to create an attribute
       if (
         attributeType &&
         attributeType !== 'null' &&
+        // This condition is added to prevent the reducer state to be cleared when navigating from the base tab to tha advanced one
         state.modalType !== 'attribute'
       ) {
+        const attributeToEditNotFormatted = get(
+          allDataSchema,
+          [...pathToSchema, 'schema', 'attributes', attributeName],
+          {}
+        );
+        const attributeToEdit = {
+          ...attributeToEditNotFormatted,
+          name: attributeName,
+        };
+
+        if (
+          attributeType === 'relation' &&
+          !has(attributeToEdit, ['targetAttribute'])
+        ) {
+          set(attributeToEdit, ['targetAttribute'], '-');
+        }
+
         dispatch({
           type: 'SET_ATTRIBUTE_DATA_SCHEMA',
           attributeType,
@@ -96,6 +123,8 @@ const FormModal = () => {
             'error'
           ),
           targetUid: get(sortedContentTypesList, ['0', 'uid'], 'error'),
+          isEditing: actionType === 'edit',
+          modifiedDataToSetForEditing: attributeToEdit,
         });
       }
     }
@@ -122,8 +151,6 @@ const FormModal = () => {
     headerId = null;
   }
 
-  console.log({ allDataSchema });
-
   const checkFormValidity = async () => {
     let schema;
 
@@ -134,15 +161,16 @@ const FormModal = () => {
       // && state.forTarget !== 'components' &&
       // state.forTarget !== 'component'
     ) {
-      const pathToSchemaAttributes =
-        state.forTarget === 'contentType' || state.forTarget === 'component'
-          ? [state.forTarget]
-          : [state.forTarget, state.targetUid];
+      const type =
+        state.attributeType === 'relation' ? 'relation' : modifiedData.type;
 
       schema = forms[state.modalType].schema(
-        get(allDataSchema, pathToSchemaAttributes, {}),
-        modifiedData.type,
-        modifiedData
+        get(allDataSchema, state.pathToSchema, {}),
+        type,
+        modifiedData,
+        state.actionType === 'edit',
+        state.attributeName,
+        initialData
       );
     } else {
       // TODO validate component schema
