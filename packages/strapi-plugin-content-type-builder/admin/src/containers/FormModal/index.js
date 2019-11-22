@@ -272,7 +272,11 @@ const FormModal = () => {
 
     try {
       await checkFormValidity();
-      const nextSearch = `modalType=chooseAttribute&forTarget=${state.forTarget}&targetUid=${uid}&headerDisplayName=${modifiedData.name}`;
+
+      const nextSearch = `modalType=chooseAttribute&forTarget=${
+        state.forTarget
+      }&targetUid=${uid}&headerDisplayName=${state.headerDisplayName ||
+        modifiedData.name}`;
 
       if (state.modalType === 'contentType') {
         // Create the content type schema
