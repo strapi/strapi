@@ -18,6 +18,14 @@
     "review": {
       "model": "review",
       "via": "likes"
+    },
+    "like_left": {
+      "collection": "like",
+      "via": "like_right"
+    },
+    "like_right": {
+      "model": "like",
+      "via": "like_left"
     }
   }
 }

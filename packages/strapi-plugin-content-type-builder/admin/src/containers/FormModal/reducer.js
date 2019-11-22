@@ -47,6 +47,13 @@ const reducer = (state, action) => {
                   : oldValue,
                 shouldPluralizeTargetAttribute(value)
               );
+            })
+            .update('targetColumnName', oldValue => {
+              if (['oneWay', 'manyWay'].includes(value)) {
+                return null;
+              }
+
+              return oldValue;
             });
         }
 
@@ -110,6 +117,8 @@ const reducer = (state, action) => {
           unique: false,
           required: false,
           dominant: null,
+          columnName: null,
+          targetColumnName: null,
         };
       } else {
         dataToSet = { type: attributeType, default: null };

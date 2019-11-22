@@ -73,12 +73,21 @@ const DataManagerProvider = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, pathname]);
 
-  const addAttribute = (attributeToSet, forTarget, targetUid) => {
+  const addAttribute = (
+    attributeToSet,
+    forTarget,
+    targetUid,
+    isEditing = false,
+    initialAttribute
+  ) => {
+    const actionType = isEditing ? 'EDIT_ATTRIBUTE' : 'ADD_ATTRIBUTE';
+
     dispatch({
-      type: 'ADD_ATTRIBUTE',
+      type: actionType,
       attributeToSet,
       forTarget,
       targetUid,
+      initialAttribute,
     });
   };
 
@@ -138,7 +147,7 @@ const DataManagerProvider = ({ children }) => {
     return <Redirect to={`/plugins/${pluginId}/content-types/${firstCTUid}`} />;
   }
 
-  console.log({ modifiedData, contentTypes });
+  console.log({ modifiedData: modifiedData.contentType });
 
   return (
     <DataManagerContext.Provider

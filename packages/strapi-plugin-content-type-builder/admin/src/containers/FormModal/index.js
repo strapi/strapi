@@ -285,7 +285,13 @@ const FormModal = () => {
           search: nextSearch,
         });
       } else if (state.modalType === 'attribute') {
-        addAttribute(modifiedData, state.forTarget, state.targetUid);
+        addAttribute(
+          modifiedData,
+          state.forTarget,
+          state.targetUid,
+          state.actionType === 'edit',
+          initialData
+        );
         push({ search: nextSearch });
       } else {
         console.log('Do something with component later');
