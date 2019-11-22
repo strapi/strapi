@@ -7,7 +7,7 @@
 
 <br>
 
-::: note
+::: tip
 Feel free to [join us on Slack](http://slack.strapi.io) and ask questions about the migration process.
 :::
 
@@ -37,7 +37,6 @@ You will have to update just 2 files: `package.json` and `request.json`
 }
 ```
 
-
 - Edit the `session.enabled` settings to `true` in each environment file: `/configs/environments/***/request.json`
 
 ```json
@@ -66,17 +65,16 @@ Then, delete your old `plugins` folder and replace it by the new one.
 
 <br>
 
-## ⚠️  Roles update
+## ⚠️ Roles update
 
 Roles are now stored in your database. You will have to re-create and configure them via the admin dashboard.
 
 <br>
 
-## ⚠️  User collection/table name has changed
+## ⚠️ User collection/table name has changed
 
 If you have an existing set of users in your database you will have to rename the collection/table from `user` to `users-permissions_user`.
 
 Then update all your users by changing the old role id by the new one which is in `users-permissions_role` collection/table.
-
 
 That's all, you have now upgraded to Strapi `alpha.9`.
