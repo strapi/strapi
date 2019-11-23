@@ -60,11 +60,11 @@ You can also start your process manager using the `yarn start` command.
 
 ## Configuration file
 
-PM2 let you create a config file to save all information to start your sever properly at anytime.
+PM2 lets you create a config file to save all information to start your server properly at anytime.
 
 By running `pm2 init` it will init an `ecosystem.config.js` in your application.
 
-Then replace the content of this files by the following code
+Then replace the content of this file by the following code.
 
 ```js
 module.exports = {
