@@ -154,7 +154,7 @@ const EditView = ({
         <BackHeader onClick={() => redirectToPreviousPage()} />
         <Container className="container-fluid">
           <Header />
-          <div className="row" style={{ paddingTop: 13 }}>
+          <div className="row" style={{ paddingTop: 3 }}>
             <div className="col-md-12 col-lg-9">
               {formattedContentTypeLayout.map((block, blockIndex) => {
                 if (isDynamicZone(block)) {

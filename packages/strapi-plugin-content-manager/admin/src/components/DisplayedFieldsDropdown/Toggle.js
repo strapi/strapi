@@ -3,7 +3,6 @@ import styled from 'styled-components';
 
 const Toggle = styled(DropdownToggle)`
   height: 30px;
-
   padding: 0 10px;
 
   &:focus {

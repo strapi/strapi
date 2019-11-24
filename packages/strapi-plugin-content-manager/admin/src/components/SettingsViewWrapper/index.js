@@ -43,10 +43,6 @@ const SettingsViewWrapper = ({
   const toggleWarningSubmit = () => setWarningSubmit(prevState => !prevState);
 
   const getPluginHeaderActions = () => {
-    if (isEqual(modifiedData, initialData)) {
-      return [];
-    }
-
     return [
       {
         color: 'cancel',
@@ -55,6 +51,7 @@ const SettingsViewWrapper = ({
           id: `${pluginId}.popUpWarning.button.cancel`,
         }),
         type: 'button',
+        disabled: isEqual(modifiedData, initialData) ? true : false,
       },
       {
         color: 'success',
@@ -62,6 +59,7 @@ const SettingsViewWrapper = ({
           id: `${pluginId}.containers.Edit.submit`,
         }),
         type: 'submit',
+        disabled: isEqual(modifiedData, initialData) ? true : false,
       },
     ];
   };
