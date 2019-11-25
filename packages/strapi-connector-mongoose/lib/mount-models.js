@@ -27,13 +27,18 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       global[definition.globalName] = {};
     }
 
-    const componentAttributes = Object.keys(definition.attributes).filter(
-      key => definition.attributes[key].type === 'component'
+    const componentAttributes = Object.keys(definition.attributes).filter(key =>
+      ['component', 'dynamiczone'].includes(definition.attributes[key].type)
     );
 
     const scalarAttributes = Object.keys(definition.attributes).filter(key => {
       const { type } = definition.attributes[key];
-      return type !== undefined && type !== null && type !== 'component';
+      return (
+        type !== undefined &&
+        type !== null &&
+        type !== 'component' &&
+        type !== 'dynamiczone'
+      );
     });
 
     const relationalAttributes = Object.keys(definition.attributes).filter(
@@ -43,7 +48,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       }
     );
 
-    // handle gorup attrs
+    // handle component and dynamic zone attrs
     if (componentAttributes.length > 0) {
       // create join morph collection thingy
       componentAttributes.forEach(name => {
@@ -129,8 +134,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
       if (_.isFunction(target[model.toLowerCase()][fn])) {
         schema.pre(key, function() {
-          return target[model.toLowerCase()]
-            [fn](this);
+          return target[model.toLowerCase()][fn](this);
         });
       }
     });
@@ -254,6 +258,8 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
           const attribute = definition.attributes[name];
 
           if (Array.isArray(returned[name])) {
+            // TODO: map to __component
+
             const components = returned[name].map(el => el.ref);
             // Reformat data by bypassing the many-to-many relationship.
             returned[name] =
@@ -355,6 +361,7 @@ const createOnFetchPopulateFn = ({
       }
     });
 
+    // TODO: handle Dynamic zone
     componentAttributes.forEach(name => {
       const attr = definition.attributes[name];
 
