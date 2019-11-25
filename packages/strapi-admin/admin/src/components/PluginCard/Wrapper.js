@@ -88,7 +88,8 @@ const Wrapper = styled.div`
     > i,
     > svg {
       margin-right: 7px;
-      font-size: 12px;
+      font-size: 11px;
+      vertical-align: inherit;
     }
   }
 

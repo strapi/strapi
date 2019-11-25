@@ -35,7 +35,7 @@ class ListRow extends React.Component {
         onClick: this.handleClick,
       },
       {
-        icoType: 'trash',
+        icoType: 'trash-alt',
         onClick: () => {
           this.setState({ showModalDelete: true });
         },

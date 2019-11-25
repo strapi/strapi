@@ -80,7 +80,7 @@ const Li = styled.li`
   }
 
   .linkActive {
-    color: $white !important;
+    color: white !important;
     border-left: 0.3rem solid ${props => props.theme.main.colors.strapi.blue};
   }
 
@@ -89,9 +89,8 @@ const Li = styled.li`
     top: calc(50% - 0.9rem + 0.5rem);
     left: 1.6rem;
     margin-right: 1.2rem;
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     width: 1.4rem;
-    height: 1.2rem;
     padding-bottom: 0.2rem;
     text-align: center;
   }

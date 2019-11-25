@@ -11,15 +11,13 @@ const StyledLink = styled(Link)`
   i,
   svg {
     color: #333740;
-  }
-  span {
-    font-size: 13px;
-  }
-  i,
-  svg {
     width: 13px;
     height: 11px;
     margin-right: 10px;
+    vertical-align: 0;
+  }
+  span {
+    font-size: 13px;
   }
   .layout {
     display: inline-block;

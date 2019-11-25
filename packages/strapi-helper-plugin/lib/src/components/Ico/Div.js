@@ -9,7 +9,9 @@ const Div = styled.div`
   > i,
   > svg {
     z-index: 0;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
+    height: 1.2rem;
+    vertical-align: inherit;
   }
 `;
 

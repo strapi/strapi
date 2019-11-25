@@ -104,7 +104,7 @@ function Row({ goTo, isBulkable, row, headers }) {
       })}
       <ActionContainer>
         <IcoContainer
-          style={{ minWidth: 'inherit', width: '100%' }}
+          style={{ minWidth: 'inherit', width: '100%', lineHeight: 48 }}
           icons={[
             {
               icoType: 'pencil-alt',
@@ -114,7 +114,7 @@ function Row({ goTo, isBulkable, row, headers }) {
             },
             {
               id: row.id,
-              icoType: 'trash',
+              icoType: 'trash-alt',
               onClick: () => {
                 onClickDelete(row.id);
               },

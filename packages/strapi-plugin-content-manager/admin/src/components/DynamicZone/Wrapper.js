@@ -4,9 +4,6 @@ const Wrapper = styled.div`
   position: relative;
   margin: 24px 0 0 0;
   padding-bottom: 23px;
-  & + & {
-    padding-bottom: 9px;
-  }
   text-align: center;
   .info {
     position: absolute;
