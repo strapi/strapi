@@ -4,7 +4,7 @@ const _ = require('lodash');
 const pluralize = require('pluralize');
 const generator = require('strapi-generate');
 
-const getSchemaManager = require('./schema-manager');
+const createBuilder = require('./schema-builder');
 const apiCleaner = require('./clear-api');
 const { formatAttributes } = require('../utils/attributes');
 const { nameToSlug } = require('../utils/helpers');
@@ -29,6 +29,25 @@ const formatContentType = contentType => {
   };
 };
 
+const applyComponentUIDMap = map => ct => {
+  return {
+    ...ct,
+    attributes: Object.keys(ct.attributes).reduce((acc, key) => {
+      const attr = ct.attributes[key];
+      if (attr.type === 'component' && _.has(map, attr.component)) {
+        acc[key] = {
+          ...attr,
+          component: map[attr.component],
+        };
+      } else {
+        acc[key] = attr;
+      }
+
+      return acc;
+    }, {}),
+  };
+};
+
 /**
  * Creates a component and handle the nested components sent with it
  * @param {Object} params params object
@@ -39,17 +58,32 @@ const createContentType = async ({ contentType, components = [] }) => {
   const componentsToCreate = components.filter(compo => !_.has(compo, 'uid'));
   const componentsToEdit = components.filter(compo => _.has(compo, 'uid'));
 
-  return getSchemaManager().edit(async ctx => {
-    const newContentType = ctx.createContentType(contentType);
+  const builder = createBuilder();
 
-    componentsToCreate.forEach(component => ctx.createComponent(component));
-    componentsToEdit.forEach(component => ctx.editComponent(component));
+  const uidMap = componentsToCreate.reduce((uidMap, component) => {
+    uidMap[component.tmpUID] = builder.createComponentUID(component);
+    return uidMap;
+  }, {});
 
-    // generate api squeleton
-    await generateAPI(contentType.name);
+  const updateAttributes = applyComponentUIDMap(uidMap);
 
-    return newContentType;
-  });
+  const newContentType = builder.createContentType(
+    updateAttributes(contentType)
+  );
+
+  componentsToCreate.forEach(component =>
+    builder.createComponent(updateAttributes(component))
+  );
+
+  componentsToEdit.forEach(component =>
+    builder.editComponent(updateAttributes(component))
+  );
+
+  // generate api squeleton
+  await generateAPI(contentType.name);
+
+  await builder.writeFiles();
+  return newContentType;
 };
 
 /**
@@ -81,21 +115,21 @@ const generateAPI = name => {
  * @param {Object} params.contentType Main contentType to create
  * @param {Array<Object>} params.components List of nested components to created or edit
  */
-const editContentType = (uid, { contentType, components = [] }) => {
+const editContentType = async (uid, { contentType, components = [] }) => {
   const componentsToCreate = components.filter(compo => !_.has(compo, 'uid'));
   const componentsToEdit = components.filter(compo => _.has(compo, 'uid'));
 
-  return getSchemaManager().edit(ctx => {
-    const updatedComponent = ctx.editContentType({
-      uid,
-      ...contentType,
-    });
-
-    componentsToCreate.forEach(component => ctx.createComponent(component));
-    componentsToEdit.forEach(component => ctx.editComponent(component));
-
-    return updatedComponent;
+  const builder = createBuilder();
+  const updatedComponent = builder.editContentType({
+    uid,
+    ...contentType,
   });
+
+  componentsToCreate.forEach(component => builder.createComponent(component));
+  componentsToEdit.forEach(component => builder.editComponent(component));
+
+  await builder.writeFiles();
+  return updatedComponent;
 };
 
 /**
@@ -103,26 +137,21 @@ const editContentType = (uid, { contentType, components = [] }) => {
  * @param {string} uid content type uid
  */
 const deleteContentType = async uid => {
+  const builder = createBuilder();
+
   // make a backup
   await apiCleaner.backup(uid);
 
-  return getSchemaManager().edit(async ctx => {
-    const component = ctx.deleteContentType(uid);
+  const component = builder.deleteContentType(uid);
 
-    try {
-      await ctx.flush();
-      await apiCleaner.clear(uid);
-    } catch (error) {
-      await ctx.rollback();
-      await apiCleaner.rollback(uid);
+  try {
+    await builder.writeFiles();
+    await apiCleaner.clear(uid);
+  } catch (error) {
+    await apiCleaner.rollback(uid);
+  }
 
-      throw new Error(
-        `Error delete ContentType: ${error.message}. Changes were rollbacked`
-      );
-    }
-
-    return component;
-  });
+  return component;
 };
 
 module.exports = {

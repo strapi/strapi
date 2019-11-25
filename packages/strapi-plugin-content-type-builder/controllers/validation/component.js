@@ -47,15 +47,20 @@ const componentSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
     .required('category.required'),
 });
 
+const nestedComponentSchema = yup.array().of(
+  componentSchema
+    .shape({
+      uid: yup.string(),
+      tmpUID: yup.string(),
+    })
+    .required()
+);
+
 const createComponentSchema = () => {
   return yup
     .object({
       component: componentSchema.required().noUnknown(),
-      components: yup.array().of(
-        componentSchema.shape({
-          uid: yup.string(),
-        })
-      ),
+      components: nestedComponentSchema,
     })
     .noUnknown();
 };
@@ -103,4 +108,5 @@ module.exports = {
   validateComponentInput,
   validateUpdateComponentInput,
   componentSchema,
+  nestedComponentSchema,
 };

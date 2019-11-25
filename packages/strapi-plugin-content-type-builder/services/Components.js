@@ -4,7 +4,7 @@ const _ = require('lodash');
 const pluralize = require('pluralize');
 
 const { formatAttributes } = require('../utils/attributes');
-const getSchemaManager = require('./schema-manager');
+const createBuilder = require('./schema-builder');
 
 /**
  * Formats a component attributes
@@ -34,18 +34,19 @@ const formatComponent = component => {
  * @param {Object} params.component Main component to create
  * @param {Array<Object>} params.components List of nested components to created or edit
  */
-const createComponent = ({ component, components = [] }) => {
+const createComponent = async ({ component, components = [] }) => {
   const componentsToCreate = components.filter(compo => !_.has(compo, 'uid'));
   const componentsToEdit = components.filter(compo => _.has(compo, 'uid'));
 
-  return getSchemaManager().edit(ctx => {
-    const newComponent = ctx.createComponent(component);
+  const builder = createBuilder();
 
-    componentsToCreate.forEach(component => ctx.createComponent(component));
-    componentsToEdit.forEach(component => ctx.editComponent(component));
+  const newComponent = builder.createComponent(component);
 
-    return newComponent;
-  });
+  componentsToCreate.forEach(component => builder.createComponent(component));
+  componentsToEdit.forEach(component => builder.editComponent(component));
+
+  await builder.writeFiles();
+  return newComponent;
 };
 
 /**
@@ -54,27 +55,31 @@ const createComponent = ({ component, components = [] }) => {
  * @param {Object} params.component Main component to create
  * @param {Array<Object>} params.components List of nested components to created or edit
  */
-const editComponent = (uid, { component, components = [] }) => {
+const editComponent = async (uid, { component, components = [] }) => {
   const componentsToCreate = components.filter(compo => !_.has(compo, 'uid'));
   const componentsToEdit = components.filter(compo => _.has(compo, 'uid'));
 
-  return getSchemaManager().edit(ctx => {
-    const updatedComponent = ctx.editComponent({
-      uid,
-      ...component,
-    });
+  const builder = createBuilder();
 
-    componentsToCreate.forEach(component => ctx.createComponent(component));
-    componentsToEdit.forEach(component => ctx.editComponent(component));
-
-    return updatedComponent;
+  const updatedComponent = builder.editComponent({
+    ...component,
+    uid,
   });
+
+  componentsToCreate.forEach(component => builder.createComponent(component));
+  componentsToEdit.forEach(component => builder.editComponent(component));
+
+  await builder.writeFiles();
+  return updatedComponent;
 };
 
-const deleteComponent = uid => {
-  return getSchemaManager().edit(ctx => {
-    return ctx.deleteComponent(uid);
-  });
+const deleteComponent = async uid => {
+  const builder = createBuilder();
+
+  const deletedComponent = builder.deleteComponent(uid);
+
+  await builder.writeFiles();
+  return deletedComponent;
 };
 
 module.exports = {

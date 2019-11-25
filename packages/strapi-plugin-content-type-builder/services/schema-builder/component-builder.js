@@ -8,20 +8,21 @@ const { convertAttributes } = require('../../utils/attributes');
 const { nameToSlug, nameToCollectionName } = require('../../utils/helpers');
 const createSchemaHandler = require('./schema-handler');
 
-/**
- * Returns a uid from a string
- * @param {string} str - string to slugify
- */
-const createComponentUID = ({ category, name }) =>
-  `${nameToSlug(category)}.${nameToSlug(name)}`;
-
 module.exports = function createComponentBuilder() {
   return {
+    /**
+     * Returns a uid from a string
+     * @param {string} str - string to slugify
+     */
+    createComponentUID({ category, name }) {
+      return `${nameToSlug(category)}.${nameToSlug(name)}`;
+    },
+
     /**
      * create a component in the tmpComponent map
      */
     createComponent(infos) {
-      const uid = createComponentUID(infos);
+      const uid = this.createComponentUID(infos);
 
       if (this.components.has(uid)) {
         throw new Error('component.alreadyExists');

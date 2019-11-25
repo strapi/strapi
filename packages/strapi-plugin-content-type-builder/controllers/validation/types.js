@@ -148,7 +148,7 @@ const getTypeShape = (attribute, { modelType } = {}) => {
         repeatable: yup.boolean(),
         component: yup
           .string()
-          .oneOf(Object.keys(strapi.components))
+          // .oneOf(Object.keys(strapi.components))
           .test({
             name: 'Check max component nesting is 1 lvl',
             test: function(compoUID) {
