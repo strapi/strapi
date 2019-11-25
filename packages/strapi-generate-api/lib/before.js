@@ -127,20 +127,24 @@ module.exports = (scope, cb) => {
 
   // Get default connection
   try {
-    scope.connection =
-      _.get(scope.args, 'connection') ||
-      JSON.parse(
-        fs.readFileSync(
-          path.resolve(
-            scope.rootPath,
-            'config',
-            'environments',
-            environment,
-            'database.json'
+    scope.connection = scope.args.connection;
+    if (!scope.args.connection) {
+      try {
+        scope.connection = JSON.parse(
+          fs.readFileSync(
+            path.resolve(
+              scope.rootPath,
+              'config',
+              'environments',
+              environment,
+              'database.json'
+            )
           )
-        )
-      ).defaultConnection ||
-      '';
+        ).defaultConnection;
+      } catch (err) {
+        scope.connection = 'default';
+      }
+    }
   } catch (err) {
     return cb.invalid(err);
   }

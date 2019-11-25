@@ -1,10 +1,10 @@
 {
+  "connection": "default",
+  "collectionName": "components_restaurantservices",
   "info": {
     "name": "restaurantservice",
     "description": ""
   },
-  "connection": "default",
-  "collectionName": "components_restaurantservices",
   "attributes": {
     "name": {
       "type": "string",
