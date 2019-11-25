@@ -153,25 +153,42 @@ const replaceTemporaryUIDs = uidMap => schema => {
     ...schema,
     attributes: Object.keys(schema.attributes).reduce((acc, key) => {
       const attr = schema.attributes[key];
-      if (attr.type === 'component' && _.has(uidMap, attr.component)) {
-        acc[key] = {
-          ...attr,
-          component: uidMap[attr.component],
-        };
-      } else if (
+      if (attr.type === 'component') {
+        if (_.has(uidMap, attr.component)) {
+          acc[key] = {
+            ...attr,
+            component: uidMap[attr.component],
+          };
+
+          return acc;
+        }
+
+        if (!_.has(strapi.components, attr.component)) {
+          throw new Error('component.notFound');
+        }
+      }
+
+      if (
         attr.type === 'dynamiczone' &&
         _.intersection(attr.components, Object.keys(uidMap)).length > 0
       ) {
         acc[key] = {
           ...attr,
           components: attr.components.map(value => {
-            return _.has(uidMap, value) ? uidMap[value] : value;
+            if (_.has(uidMap, value)) return uidMap[value];
+
+            if (!_.has(strapi.components, attr.component)) {
+              throw new Error('component.notFound');
+            }
+
+            return value;
           }),
         };
-      } else {
-        acc[key] = attr;
+
+        return acc;
       }
 
+      acc[key] = attr;
       return acc;
     }, {}),
   };
