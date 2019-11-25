@@ -43,16 +43,16 @@ const createContentType = async ({ contentType, components = [] }) => {
 
   const uidMap = builder.createNewComponentUIDMap(components);
 
-  const replacer = replaceTemporaryUIDs(uidMap);
+  const replaceTmpUIDs = replaceTemporaryUIDs(uidMap);
 
-  const newContentType = builder.createContentType(replacer(contentType));
+  const newContentType = builder.createContentType(replaceTmpUIDs(contentType));
 
   components.forEach(component => {
     if (!_.has(component, 'uid')) {
-      return builder.createComponent(replacer(component));
+      return builder.createComponent(replaceTmpUIDs(component));
     }
 
-    return builder.editComponent(replacer(component));
+    return builder.editComponent(replaceTmpUIDs(component));
   });
 
   // generate api squeleton
@@ -95,19 +95,19 @@ const editContentType = async (uid, { contentType, components = [] }) => {
   const builder = createBuilder();
 
   const uidMap = builder.createNewComponentUIDMap(components);
-  const replacer = replaceTemporaryUIDs(uidMap);
+  const replaceTmpUIDs = replaceTemporaryUIDs(uidMap);
 
   const updatedComponent = builder.editContentType({
     uid,
-    ...replacer(contentType),
+    ...replaceTmpUIDs(contentType),
   });
 
   components.forEach(component => {
     if (!_.has(component, 'uid')) {
-      return builder.createComponent(replacer(component));
+      return builder.createComponent(replaceTmpUIDs(component));
     }
 
-    return builder.editComponent(replacer(component));
+    return builder.editComponent(replaceTmpUIDs(component));
   });
 
   await builder.writeFiles();

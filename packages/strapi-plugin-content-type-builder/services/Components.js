@@ -41,16 +41,16 @@ const createComponent = async ({ component, components = [] }) => {
   const builder = createBuilder();
 
   const uidMap = builder.createNewComponentUIDMap(components);
-  const replacer = replaceTemporaryUIDs(uidMap);
+  const replaceTmpUIDs = replaceTemporaryUIDs(uidMap);
 
-  const newComponent = builder.createComponent(replacer(component));
+  const newComponent = builder.createComponent(replaceTmpUIDs(component));
 
   components.forEach(component => {
     if (!_.has(component, 'uid')) {
-      return builder.createComponent(replacer(component));
+      return builder.createComponent(replaceTmpUIDs(component));
     }
 
-    return builder.editComponent(replacer(component));
+    return builder.editComponent(replaceTmpUIDs(component));
   });
 
   await builder.writeFiles();
@@ -67,19 +67,19 @@ const editComponent = async (uid, { component, components = [] }) => {
   const builder = createBuilder();
 
   const uidMap = builder.createNewComponentUIDMap(components);
-  const replacer = replaceTemporaryUIDs(uidMap);
+  const replaceTmpUIDs = replaceTemporaryUIDs(uidMap);
 
   const updatedComponent = builder.editComponent({
     uid,
-    ...replacer(component),
+    ...replaceTmpUIDs(component),
   });
 
   components.forEach(component => {
     if (!_.has(component, 'uid')) {
-      return builder.createComponent(replacer(component));
+      return builder.createComponent(replaceTmpUIDs(component));
     }
 
-    return builder.editComponent(replacer(component));
+    return builder.editComponent(replaceTmpUIDs(component));
   });
 
   await builder.writeFiles();
