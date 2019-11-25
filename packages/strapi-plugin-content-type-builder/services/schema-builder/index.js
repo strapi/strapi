@@ -11,6 +11,7 @@ module.exports = function createBuilder() {
     const compo = strapi.components[key];
 
     return {
+      category: compo.category,
       modelName: compo.modelName,
       plugin: compo.modelName,
       uid: compo.uid,

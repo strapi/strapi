@@ -6,11 +6,12 @@ const _ = require('lodash');
 const { toUID } = require('../../utils/attributes');
 
 module.exports = function createSchemaHandler(infos) {
-  const { modelName, plugin, uid, dir, filename, schema } = infos;
+  const { category, modelName, plugin, uid, dir, filename, schema } = infos;
 
   const initialState = {
     modelName,
     plugin,
+    category,
     uid,
     dir,
     filename,
@@ -32,6 +33,10 @@ module.exports = function createSchemaHandler(infos) {
 
     get plugin() {
       return initialState.plugin;
+    },
+
+    get category() {
+      return initialState.category;
     },
 
     get uid() {

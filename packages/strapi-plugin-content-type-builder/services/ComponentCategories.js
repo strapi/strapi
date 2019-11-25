@@ -1,52 +1,85 @@
 'use strict';
 
 const { join } = require('path');
-const fse = require('fs-extra');
 
-const componentService = require('./Components');
 const { nameToSlug } = require('../utils/helpers');
+const createBuilder = require('./schema-builder');
+
+/**
+ * Edit a category name and move components to the write folder
+ * @param {string} name category name
+ * @param {Object} infos new category data
+ */
+const editCategory = async (name, infos) => {
+  const componentsDir = join(strapi.dir, 'components');
+  const newName = nameToSlug(infos.name);
+
+  // don't do anything the name doesn't change
+  if (name === newName) return;
+
+  if (!categoryExists(name)) {
+    throw strapi.errors.notFound('cateogry.notFound');
+  }
+
+  if (categoryExists(newName)) {
+    throw strapi.errors.badRequest('Name already taken');
+  }
+
+  const builder = createBuilder();
+
+  builder.components.forEach(component => {
+    const oldUID = component.uid;
+    const newUID = `${newName}.${component.modelName}`;
+
+    component.setUID(newUID).setDir(join(componentsDir, newName));
+
+    builder.components.forEach(compo => {
+      compo.updateComponent(oldUID, newUID);
+    });
+
+    builder.contentTypes.forEach(ct => {
+      ct.updateComponent(oldUID, newUID);
+    });
+  });
+
+  await builder.writeFiles();
+
+  return newName;
+};
+
+/**
+ * Deletes a category and its components
+ * @param {string} name category name to delete
+ */
+const deleteCategory = async name => {
+  if (!categoryExists(name)) {
+    throw strapi.errors.notFound('cateogry.notFound');
+  }
+
+  const builder = createBuilder();
+
+  builder.components.forEach(component => {
+    if (component.category === name) {
+      return component.delete();
+    }
+  });
+
+  await builder.writeFiles();
+};
+
+/**
+ * Checks if a category exists
+ * @param {string} name category name to serach for
+ */
+const categoryExists = name => {
+  const matchingIndex = Object.values(strapi.components).findIndex(
+    component => component.category === name
+  );
+
+  return matchingIndex > -1;
+};
 
 module.exports = {
-  async editCategory(name, infos) {
-    const componentsDir = join(strapi.dir, 'components');
-
-    // don't do anything the name doesn't change
-    if (name === infos.name) return;
-
-    if (await fse.pathExists(join(componentsDir, infos.name))) {
-      throw strapi.errors.badRequest('Name already taken');
-    }
-
-    const promises = Object.keys(strapi.components)
-      .filter(uid => {
-        const [category] = uid.split('.');
-        return category === name;
-      })
-      .map(uid => {
-        const [, name] = uid.split('.');
-        return componentService.updateComponentInModels(
-          uid,
-          `${nameToSlug(infos.name)}.${name}`
-        );
-      });
-
-    await Promise.all(promises);
-
-    await fse.move(join(componentsDir, name), join(componentsDir, infos.name));
-  },
-
-  async deleteCategory(name) {
-    const componentsDir = join(strapi.dir, 'components');
-
-    const deletePromises = Object.keys(strapi.components)
-      .filter(uid => {
-        const [category] = uid.split('.');
-        return category === name;
-      })
-      .map(uid => componentService.deleteComponentInModels(uid));
-
-    await Promise.all(deletePromises);
-
-    await fse.remove(join(componentsDir, name));
-  },
+  editCategory,
+  deleteCategory,
 };

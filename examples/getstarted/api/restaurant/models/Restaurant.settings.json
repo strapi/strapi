@@ -50,8 +50,7 @@
     "body": {
       "type": "dynamiczone",
       "components": [
-        "default.closingperiod",
-        "default.restaurantservice"
+        "default.closingperiod"
       ]
     },
     "description": {
