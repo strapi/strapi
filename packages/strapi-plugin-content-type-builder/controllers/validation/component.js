@@ -53,6 +53,15 @@ const nestedComponentSchema = yup.array().of(
       uid: yup.string(),
       tmpUID: yup.string(),
     })
+    .test({
+      name: 'mustHaveUIDOrTmpUID',
+      message: 'Component must have a uid or a tmpUID',
+      test: attr => {
+        if (_.has(attr, 'uid') && _.has(attr, 'tmpUID')) return false;
+        if (!_.has(attr, 'uid') && !_.has(attr, 'tmpUID')) return false;
+        return true;
+      },
+    })
     .required()
 );
 

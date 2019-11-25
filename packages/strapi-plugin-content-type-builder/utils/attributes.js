@@ -148,12 +148,42 @@ const convertAttributes = attributes => {
   }, {});
 };
 
+const replaceTemporaryUIDs = uidMap => schema => {
+  return {
+    ...schema,
+    attributes: Object.keys(schema.attributes).reduce((acc, key) => {
+      const attr = schema.attributes[key];
+      if (attr.type === 'component' && _.has(uidMap, attr.component)) {
+        acc[key] = {
+          ...attr,
+          component: uidMap[attr.component],
+        };
+      } else if (
+        attr.type === 'dynamiczone' &&
+        _.intersection(attr.components, Object.keys(uidMap)).length > 0
+      ) {
+        acc[key] = {
+          ...attr,
+          components: attr.components.map(value => {
+            return _.has(uidMap, value) ? uidMap[value] : value;
+          }),
+        };
+      } else {
+        acc[key] = attr;
+      }
+
+      return acc;
+    }, {}),
+  };
+};
+
 module.exports = {
   fromUID,
   toUID,
   hasComponent,
   isRelation,
 
+  replaceTemporaryUIDs,
   formatAttributes,
   formatAttribute,
   convertAttributes,

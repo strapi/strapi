@@ -181,7 +181,7 @@ const getTypeShape = (attribute, { modelType } = {}) => {
           .of(
             yup
               .string()
-              .oneOf(Object.keys(strapi.components))
+              // .oneOf(Object.keys(strapi.components))
               .required()
           )
           .min(1)

@@ -3,7 +3,10 @@
 const _ = require('lodash');
 const pluralize = require('pluralize');
 
-const { formatAttributes } = require('../utils/attributes');
+const {
+  formatAttributes,
+  replaceTemporaryUIDs,
+} = require('../utils/attributes');
 const createBuilder = require('./schema-builder');
 
 /**
@@ -35,15 +38,20 @@ const formatComponent = component => {
  * @param {Array<Object>} params.components List of nested components to created or edit
  */
 const createComponent = async ({ component, components = [] }) => {
-  const componentsToCreate = components.filter(compo => !_.has(compo, 'uid'));
-  const componentsToEdit = components.filter(compo => _.has(compo, 'uid'));
-
   const builder = createBuilder();
 
-  const newComponent = builder.createComponent(component);
+  const uidMap = builder.createNewComponentUIDMap(components);
+  const replacer = replaceTemporaryUIDs(uidMap);
 
-  componentsToCreate.forEach(component => builder.createComponent(component));
-  componentsToEdit.forEach(component => builder.editComponent(component));
+  const newComponent = builder.createComponent(replacer(component));
+
+  components.forEach(component => {
+    if (!_.has(component, 'uid')) {
+      return builder.createComponent(replacer(component));
+    }
+
+    return builder.editComponent(replacer(component));
+  });
 
   await builder.writeFiles();
   return newComponent;
@@ -56,18 +64,23 @@ const createComponent = async ({ component, components = [] }) => {
  * @param {Array<Object>} params.components List of nested components to created or edit
  */
 const editComponent = async (uid, { component, components = [] }) => {
-  const componentsToCreate = components.filter(compo => !_.has(compo, 'uid'));
-  const componentsToEdit = components.filter(compo => _.has(compo, 'uid'));
-
   const builder = createBuilder();
 
+  const uidMap = builder.createNewComponentUIDMap(components);
+  const replacer = replaceTemporaryUIDs(uidMap);
+
   const updatedComponent = builder.editComponent({
-    ...component,
     uid,
+    ...replacer(component),
   });
 
-  componentsToCreate.forEach(component => builder.createComponent(component));
-  componentsToEdit.forEach(component => builder.editComponent(component));
+  components.forEach(component => {
+    if (!_.has(component, 'uid')) {
+      return builder.createComponent(replacer(component));
+    }
+
+    return builder.editComponent(replacer(component));
+  });
 
   await builder.writeFiles();
   return updatedComponent;

@@ -18,6 +18,13 @@ module.exports = function createComponentBuilder() {
       return `${nameToSlug(category)}.${nameToSlug(name)}`;
     },
 
+    createNewComponentUIDMap(components) {
+      return components.reduce((uidMap, component) => {
+        uidMap[component.tmpUID] = this.createComponentUID(component);
+        return uidMap;
+      }, {});
+    },
+
     /**
      * create a component in the tmpComponent map
      */

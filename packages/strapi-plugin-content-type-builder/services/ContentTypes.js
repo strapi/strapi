@@ -6,7 +6,10 @@ const generator = require('strapi-generate');
 
 const createBuilder = require('./schema-builder');
 const apiCleaner = require('./clear-api');
-const { formatAttributes } = require('../utils/attributes');
+const {
+  formatAttributes,
+  replaceTemporaryUIDs,
+} = require('../utils/attributes');
 const { nameToSlug } = require('../utils/helpers');
 
 /**
@@ -29,25 +32,6 @@ const formatContentType = contentType => {
   };
 };
 
-const applyComponentUIDMap = map => ct => {
-  return {
-    ...ct,
-    attributes: Object.keys(ct.attributes).reduce((acc, key) => {
-      const attr = ct.attributes[key];
-      if (attr.type === 'component' && _.has(map, attr.component)) {
-        acc[key] = {
-          ...attr,
-          component: map[attr.component],
-        };
-      } else {
-        acc[key] = attr;
-      }
-
-      return acc;
-    }, {}),
-  };
-};
-
 /**
  * Creates a component and handle the nested components sent with it
  * @param {Object} params params object
@@ -55,29 +39,21 @@ const applyComponentUIDMap = map => ct => {
  * @param {Array<Object>} params.components List of nested components to created or edit
  */
 const createContentType = async ({ contentType, components = [] }) => {
-  const componentsToCreate = components.filter(compo => !_.has(compo, 'uid'));
-  const componentsToEdit = components.filter(compo => _.has(compo, 'uid'));
-
   const builder = createBuilder();
 
-  const uidMap = componentsToCreate.reduce((uidMap, component) => {
-    uidMap[component.tmpUID] = builder.createComponentUID(component);
-    return uidMap;
-  }, {});
+  const uidMap = builder.createNewComponentUIDMap(components);
 
-  const updateAttributes = applyComponentUIDMap(uidMap);
+  const replacer = replaceTemporaryUIDs(uidMap);
 
-  const newContentType = builder.createContentType(
-    updateAttributes(contentType)
-  );
+  const newContentType = builder.createContentType(replacer(contentType));
 
-  componentsToCreate.forEach(component =>
-    builder.createComponent(updateAttributes(component))
-  );
+  components.forEach(component => {
+    if (!_.has(component, 'uid')) {
+      return builder.createComponent(replacer(component));
+    }
 
-  componentsToEdit.forEach(component =>
-    builder.editComponent(updateAttributes(component))
-  );
+    return builder.editComponent(replacer(component));
+  });
 
   // generate api squeleton
   await generateAPI(contentType.name);
@@ -116,17 +92,23 @@ const generateAPI = name => {
  * @param {Array<Object>} params.components List of nested components to created or edit
  */
 const editContentType = async (uid, { contentType, components = [] }) => {
-  const componentsToCreate = components.filter(compo => !_.has(compo, 'uid'));
-  const componentsToEdit = components.filter(compo => _.has(compo, 'uid'));
-
   const builder = createBuilder();
+
+  const uidMap = builder.createNewComponentUIDMap(components);
+  const replacer = replaceTemporaryUIDs(uidMap);
+
   const updatedComponent = builder.editContentType({
     uid,
-    ...contentType,
+    ...replacer(contentType),
   });
 
-  componentsToCreate.forEach(component => builder.createComponent(component));
-  componentsToEdit.forEach(component => builder.editComponent(component));
+  components.forEach(component => {
+    if (!_.has(component, 'uid')) {
+      return builder.createComponent(replacer(component));
+    }
+
+    return builder.editComponent(replacer(component));
+  });
 
   await builder.writeFiles();
   return updatedComponent;
