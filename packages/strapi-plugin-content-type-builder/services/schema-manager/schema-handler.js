@@ -3,6 +3,7 @@
 const path = require('path');
 const fse = require('fs-extra');
 const _ = require('lodash');
+const { toUID } = require('../../utils/attributes');
 
 module.exports = function createSchemaHandler(infos) {
   const { modelName, plugin, uid, dir, filename, schema } = infos;
@@ -96,8 +97,11 @@ module.exports = function createSchemaHandler(infos) {
       Object.keys(attributes).forEach(key => {
         const attr = attributes[key];
         const target = attr.model || attr.collection;
+        const plugin = attr.plugin;
 
-        if (target === uid) {
+        const relationUID = toUID(target, plugin);
+
+        if (relationUID === uid) {
           this.unset(['attributes', key]);
         }
       });

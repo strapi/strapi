@@ -6,8 +6,12 @@ const MODEL_RELATIONS = ['oneWay', 'oneToOne', 'manyToOne'];
 const COLLECTION_RELATIONS = ['manyWay', 'manyToMany', 'oneToMany'];
 
 const toUID = (name, plugin) => {
-  const model = strapi.getModel(name, plugin);
-  return model.uid;
+  const modelUID = Object.keys(strapi.contentTypes).find(key => {
+    const ct = strapi.contentTypes[key];
+    if (ct.modelName === name && ct.plugin === plugin) return true;
+  });
+
+  return modelUID;
 };
 
 const fromUID = uid => {

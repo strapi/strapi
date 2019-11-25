@@ -8,6 +8,9 @@ module.exports = function createSchemaBuilder({ components, contentTypes }) {
   const tmpComponents = new Map();
   const tmpContentTypes = new Map();
 
+  let flushed = false;
+  let rollbacked = false;
+
   // init temporary ContentTypes
   Object.keys(contentTypes).forEach(key => {
     tmpContentTypes.set(
@@ -36,20 +39,31 @@ module.exports = function createSchemaBuilder({ components, contentTypes }) {
     ...createContentTypeBuilder({ tmpComponents, tmpContentTypes }),
 
     flush() {
-      return Promise.all(
-        [
-          ...Array.from(tmpComponents.values()),
-          ...Array.from(tmpContentTypes.values()),
-        ].map(schema => schema.flush())
-      );
+      if (!flushed) {
+        flushed = true;
+
+        return Promise.all(
+          [
+            ...Array.from(tmpComponents.values()),
+            ...Array.from(tmpContentTypes.values()),
+          ].map(schema => schema.flush())
+        );
+      }
+
+      return Promise.resolve();
     },
     rollback() {
-      return Promise.all(
-        [
-          ...Array.from(tmpComponents.values()),
-          ...Array.from(tmpContentTypes.values()),
-        ].map(schema => schema.rollback())
-      );
+      if (!rollbacked) {
+        rollbacked = true;
+        return Promise.all(
+          [
+            ...Array.from(tmpComponents.values()),
+            ...Array.from(tmpContentTypes.values()),
+          ].map(schema => schema.rollback())
+        );
+      }
+
+      return Promise.resolve();
     },
   };
 
