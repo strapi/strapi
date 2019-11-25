@@ -5,7 +5,7 @@ import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../../pluginId';
 import getTrad from '../../../utils/getTrad';
-import { createUid, nameToSlug } from './createUid';
+import { createComponentUid, createUid, nameToSlug } from './createUid';
 
 yup.addMethod(yup.mixed, 'defined', function() {
   return this.test(
@@ -18,7 +18,8 @@ yup.addMethod(yup.mixed, 'defined', function() {
 yup.addMethod(yup.string, 'unique', function(
   message,
   alreadyTakenAttributes,
-  validator
+  validator,
+  category = ''
 ) {
   return this.test('unique', message, function(string) {
     if (!string) {
@@ -26,7 +27,7 @@ yup.addMethod(yup.string, 'unique', function(
     }
 
     return !alreadyTakenAttributes.includes(
-      typeof validator === 'function' ? validator(string) : string
+      typeof validator === 'function' ? validator(string, category) : string
     );
   });
 });
@@ -604,8 +605,6 @@ const forms = {
           ]);
         }
 
-        console.log({ items });
-
         return {
           items,
         };
@@ -676,14 +675,44 @@ const forms = {
     },
   },
   component: {
-    schema(alreadyTakenAttributes) {
+    schema(alreadyTakenAttributes, componentCategory) {
       return yup.object().shape({
-        name: yup.string().required(),
+        name: yup
+          .string()
+          .unique(
+            errorsTrads.unique,
+            alreadyTakenAttributes,
+            createComponentUid,
+            componentCategory
+          )
+          .required(),
         category: yup.string().required(),
+        icon: yup.string().required(),
+        collectionName: yup.string(),
       });
     },
     form: {
-      base(data) {
+      advanced() {
+        return {
+          items: [
+            [
+              {
+                autoFocus: true,
+                label: {
+                  id: `${pluginId}.contentType.collectionName.label`,
+                },
+                description: {
+                  id: `${pluginId}.contentType.collectionName.description`,
+                },
+                name: 'collectionName',
+                type: 'text',
+                validations: {},
+              },
+            ],
+          ],
+        };
+      },
+      base() {
         const defaultItems = [
           [
             {
@@ -706,11 +735,20 @@ const forms = {
               type: 'creatableSelect',
               label: {
                 id: getTrad(
-                  'modalForm.components.create-component.categoryLabel'
+                  'modalForm.components.create-component.category.label'
                 ),
               },
               validations: {
                 required: true,
+              },
+            },
+          ],
+          [
+            {
+              name: 'icon',
+              type: 'componentIconPicker',
+              label: {
+                id: getTrad('modalForm.components.icon.label'),
               },
             },
           ],

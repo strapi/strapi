@@ -88,10 +88,27 @@ const reducer = (state, action) => {
           attributes: {},
         },
       };
-      const key =
-        action.schemaType === 'contentType' ? 'contentTypes' : 'components';
 
-      return state.updateIn([key, action.uid], () => fromJS(newSchema));
+      // const key =
+      //   action.schemaType === 'contentType' ? 'contentTypes' : 'components';
+
+      return state.updateIn(['contentTypes', action.uid], () =>
+        fromJS(newSchema)
+      );
+    }
+    case 'CREATE_COMPONENT_SCHEMA': {
+      const newSchema = {
+        uid: action.uid,
+        isTemporary: true,
+        category: action.componentCategory,
+        schema: {
+          ...action.data,
+          attributes: {},
+        },
+      };
+      return state.updateIn(['components', action.uid], () =>
+        fromJS(newSchema)
+      );
     }
     case 'EDIT_ATTRIBUTE': {
       const {

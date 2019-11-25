@@ -1,26 +1,32 @@
 import React from 'react';
 import Creatable from 'react-select/creatable';
 import PropTypes from 'prop-types';
-import {
-  SelectWrapper,
-  SelectNav,
-  useGlobalContext,
-} from 'strapi-helper-plugin';
+import { SelectWrapper, SelectNav } from 'strapi-helper-plugin';
+import { ErrorMessage } from '@buffetjs/styles';
 import useDataManager from '../../hooks/useDataManager';
 
-const CreatableSelect = ({ label, name }) => {
+const CreatableSelect = ({ error, label, onChange, name }) => {
   const { allComponentsCategories } = useDataManager();
-  console.log({ label });
-  const { formatMessage } = useGlobalContext();
-  const handleInputChange = (newValue, actionMeta) => {
-    console.log({ actionMeta, newValue });
-    console.log(actionMeta);
+
+  const handleChange = (inputValue, actionMeta) => {
+    const { action } = actionMeta;
+
+    if (action === 'clear') {
+      onChange({ target: { name, value: '' } });
+    }
+
+    if (action === 'create-option' || action === 'select-option') {
+      onChange({ target: { name, value: inputValue.value } });
+    }
   };
+
   const styles = {
     control: (base, state) => ({
       ...base,
       border: state.isFocused
         ? '1px solid #78caff !important'
+        : error
+        ? '1px solid red !important'
         : '1px solid #E3E9F3 !important',
     }),
     menu: base => {
@@ -36,7 +42,7 @@ const CreatableSelect = ({ label, name }) => {
   };
 
   return (
-    <SelectWrapper className="form-group">
+    <SelectWrapper className="form-group" style={{ marginBottom: 0 }}>
       <SelectNav>
         <div>
           <label htmlFor={name}>{label}</label>
@@ -44,18 +50,24 @@ const CreatableSelect = ({ label, name }) => {
       </SelectNav>
       <Creatable
         isClearable
-        onInputChange={handleInputChange}
+        onChange={handleChange}
         styles={styles}
         options={formatOptions()}
-        // menuIsOpen
       />
+      {error && <ErrorMessage style={{ paddingTop: 10 }}>{error}</ErrorMessage>}
     </SelectWrapper>
   );
 };
 
+CreatableSelect.defaultProps = {
+  error: null,
+};
+
 CreatableSelect.propTypes = {
+  error: PropTypes.string,
   label: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
 };
 
 export default CreatableSelect;

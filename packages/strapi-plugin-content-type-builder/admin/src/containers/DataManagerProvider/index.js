@@ -93,10 +93,16 @@ const DataManagerProvider = ({ children }) => {
     });
   };
 
-  const createSchema = (data, schemaType, uid) => {
+  const createSchema = (data, schemaType, uid, componentCategory) => {
+    const type =
+      schemaType === 'contentType'
+        ? 'CREATE_SCHEMA'
+        : 'CREATE_COMPONENT_SCHEMA';
+
     dispatch({
-      type: 'CREATE_SCHEMA',
+      type,
       data,
+      componentCategory,
       schemaType,
       uid,
     });
@@ -168,8 +174,6 @@ const DataManagerProvider = ({ children }) => {
 
     return <Redirect to={`/plugins/${pluginId}/content-types/${firstCTUid}`} />;
   }
-
-  console.log({ modifiedData });
 
   return (
     <DataManagerContext.Provider

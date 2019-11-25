@@ -9,4 +9,9 @@ const createUid = name => {
   return uid;
 };
 
-export { createUid, nameToSlug };
+// From `content-type-builder/services/Components/createComponentUid`
+const createComponentUid = (name, category) => {
+  return `${nameToSlug(category)}.${nameToSlug(name)}`;
+};
+
+export { createComponentUid, createUid, nameToSlug };

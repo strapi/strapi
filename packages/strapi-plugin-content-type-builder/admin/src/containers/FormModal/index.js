@@ -28,7 +28,7 @@ import HeaderNavLink from '../../components/HeaderNavLink';
 import getTrad from '../../utils/getTrad';
 import getAttributes from './utils/attributes';
 import forms from './utils/forms';
-import { createUid } from './utils/createUid';
+import { createComponentUid, createUid } from './utils/createUid';
 import init from './init';
 import reducer, { initialState } from './reducer';
 import RelationForm from '../../components/RelationForm';
@@ -57,6 +57,7 @@ const FormModal = () => {
   const {
     addAttribute,
     contentTypes,
+    components,
     createSchema,
     modifiedData: allDataSchema,
     sortedContentTypesList,
@@ -155,13 +156,14 @@ const FormModal = () => {
   const checkFormValidity = async () => {
     let schema;
 
-    if (state.modalType === 'contentType' || state.modalType === 'component') {
-      schema = forms[state.modalType].schema(Object.keys(contentTypes));
-    } else if (
-      state.modalType === 'attribute'
-      // && state.forTarget !== 'components' &&
-      // state.forTarget !== 'component'
-    ) {
+    if (state.modalType === 'contentType') {
+      schema = forms.contentType.schema(Object.keys(contentTypes));
+    } else if (state.modalType === 'component') {
+      schema = forms.component.schema(
+        Object.keys(components),
+        modifiedData.category || ''
+      );
+    } else if (state.modalType === 'attribute') {
       const type =
         state.attributeType === 'relation' ? 'relation' : modifiedData.type;
 
@@ -275,11 +277,12 @@ const FormModal = () => {
       await checkFormValidity();
       const targetUid =
         state.forTarget === 'components' ? state.targetUid : uid;
-
-      const nextSearch = `modalType=chooseAttribute&forTarget=${
-        state.forTarget
-      }&targetUid=${targetUid}&headerDisplayName=${state.headerDisplayName ||
-        modifiedData.name}`;
+      const createNextSearch = searchUid => {
+        return `modalType=chooseAttribute&forTarget=${
+          state.forTarget
+        }&targetUid=${searchUid}&headerDisplayName=${state.headerDisplayName ||
+          modifiedData.name}`;
+      };
 
       if (state.modalType === 'contentType') {
         // Create the content type schema
@@ -289,7 +292,7 @@ const FormModal = () => {
           : 'component-categories';
         push({
           pathname: `/plugins/${pluginId}/${nextSlug}/${uid}`,
-          search: nextSearch,
+          search: createNextSearch(targetUid),
         });
       } else if (state.modalType === 'attribute') {
         addAttribute(
@@ -299,9 +302,22 @@ const FormModal = () => {
           state.actionType === 'edit',
           initialData
         );
-        push({ search: nextSearch });
+        push({ search: createNextSearch(targetUid) });
+      } else if (state.modalType === 'component') {
+        // Create the component schema
+        const componentUid = createComponentUid(
+          modifiedData.name,
+          modifiedData.category
+        );
+        const { category, ...rest } = modifiedData;
+        createSchema(rest, 'component', componentUid, category);
+
+        push({
+          search: createNextSearch(componentUid),
+          pathname: `/plugins/${pluginId}/component-categories/${category}/${componentUid}`,
+        });
       } else {
-        console.log('Do something with component later');
+        console.log('Do somethign later');
       }
       dispatch({
         type: 'RESET_PROPS',
