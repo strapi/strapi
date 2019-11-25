@@ -47,13 +47,12 @@ module.exports = {
 ```
 
 After saving the new function, let's restart the `GET /restaurants` request. We will see `strapi` as response.
-So it works well.
 
 ## Get the data back
 
 We now know the function we have to update, but we just want to customize the returned restaurant values.
 
-In the [controller documentation](../concepts/controllers.html#extending-a-model-controller) you will find the default function of all actions. It will help you to not re-code all the logic to fetch your data.
+In the [controller documentation](../concepts/controllers.html#extending-a-model-controller) you will find the default implementation of every actions. It will help you overwrite the fetch logic.
 
 **Path —** `./api/restaurant/controller/Restaurant.js`
 
@@ -80,7 +79,7 @@ And now the data is back on `GET /restaurants`
 
 ## Apply our changes
 
-We can see the `find` function `return` the result of the `map`. And the map function just sanitize all entries.
+We can see the `find` function returns the result of the `map`. And the map function just sanitizes all entries.
 
 So instead of just return the sanitized entry, we will also remove the chef email of each restaurant.
 
