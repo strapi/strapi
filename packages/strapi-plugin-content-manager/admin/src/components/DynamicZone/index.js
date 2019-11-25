@@ -119,7 +119,7 @@ const DynamicZone = ({ max, min, name }) => {
                 icon={getDynamicComponentIcon(componentUid)}
                 label=""
                 name={`${name}.${index}`}
-                isFromDynamicZone
+                isFromDynamicZone={true}
               />
             </div>
           );

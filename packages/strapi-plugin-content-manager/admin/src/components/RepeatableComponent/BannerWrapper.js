@@ -78,15 +78,21 @@ const BannerWrapper = styled.button`
     if (isOpen) {
       return `
         &.trash-icon {
-          i, svg {
-            color: #007eff;
+          svg {
+            path {
+              fill: #007eff;
+            }
           }
         }
       `;
     }
   }}
+
+  &:focus {
+    outline: 0;;
+  }
   span, div, button {
-    line-height: 34px;
+    line-height: 16px;
   }
 
   .img-wrapper {
@@ -116,6 +122,15 @@ const BannerWrapper = styled.button`
     margin-left: auto;
     > button {
       padding: 0;
+    }
+
+    .trash-icon {
+      svg {
+        font-size: 10px;
+        path {
+          fill: #292b2c;
+        }
+      }
     }
 
     .grab {

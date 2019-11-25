@@ -1,10 +1,10 @@
 import styled from 'styled-components';
 
 const FormWrapper = styled.div`
-  padding-top: 27px;
+  padding-top: 24px;
   padding-left: 20px;
   padding-right: 20px;
-  padding-bottom: 8px;
+  padding-bottom: 10px;
   border-top: 1px solid
     ${({ hasErrors, isOpen }) => {
       if (hasErrors) {

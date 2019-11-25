@@ -2,7 +2,11 @@ import styled from 'styled-components';
 
 const Wrapper = styled.div`
   position: relative;
-  margin: 24px 0 23px 0;
+  margin: 24px 0 0 0;
+  padding-bottom: 23px;
+  & + & {
+    padding-bottom: 9px;
+  }
   text-align: center;
   .info {
     position: absolute;

@@ -9,7 +9,7 @@ const NonRepeatableWrapper = styled.div`
       return `
         position: relative;
         height: 108px;
-        margin-bottom: 21px !important;
+        margin-bottom: 25px !important;
         background-color: #fafafb;
         text-align: center;
         cursor: pointer;
@@ -53,7 +53,7 @@ const NonRepeatableWrapper = styled.div`
     }
 
     return `
-      padding-top: 21px !important;
+      padding-top: 25px !important;
       background-color: #f7f8f8;
       margin-bottom: 18px !important;
     `;

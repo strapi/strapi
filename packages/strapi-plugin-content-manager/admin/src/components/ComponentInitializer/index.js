@@ -18,7 +18,7 @@ const ComponentInitializer = ({ componentUid, name }) => {
         type="button"
       />
       <FormattedMessage id={`${pluginId}.components.empty-repeatable`}>
-        {msg => <P style={{ paddingTop: 75 }}>{msg}</P>}
+        {msg => <P style={{ paddingTop: 78 }}>{msg}</P>}
       </FormattedMessage>
     </NonRepeatableWrapper>
   );

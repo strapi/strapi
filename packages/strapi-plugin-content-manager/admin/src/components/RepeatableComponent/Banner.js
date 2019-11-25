@@ -55,14 +55,14 @@ const Banner = forwardRef(
           <div className="cta-wrapper" style={{ display }}>
             <span
               className="trash-icon"
-              style={{ marginRight: 13 }}
+              style={{ marginRight: 10, padding: '0 5px' }}
               onClick={e => {
                 e.preventDefault();
                 e.stopPropagation();
                 onClickRemove();
               }}
             >
-              <i className="fa fa-trash" />
+              <i className="fa fa-trash-alt" />
             </span>
             <span className="grab" ref={refs ? refs.dragRef : null}>
               <Grab />

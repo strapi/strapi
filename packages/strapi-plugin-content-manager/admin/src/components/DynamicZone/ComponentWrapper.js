@@ -7,7 +7,6 @@ const ComponentWrapper = styled.div`
     box-shadow: 0 2px 4px #e3e9f3;
     &:not(:first-of-type) {
       margin-top: 37px;
-
       &:before {
         content: '&';
         position: absolute;
@@ -18,6 +17,9 @@ const ComponentWrapper = styled.div`
         background-color: #e6f0fb;
         color: transparent;
       }
+    }
+    > div:not(:first-of-type) {
+      padding-top: 6px;
     }
   }
 `;
