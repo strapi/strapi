@@ -20,7 +20,7 @@ Simply use one of the following commands.
 ::: tab yarn
 
 ```bash
-yarn create strapi-app new my-project --quickstart
+yarn create strapi-app my-project --quickstart
 ```
 
 :::
