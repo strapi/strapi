@@ -12,7 +12,7 @@ import createDataObject from './utils/createDataObject';
 import createModifiedDataSchema, {
   orderAllDataAttributesWithImmutable,
 } from './utils/createModifiedDataSchema';
-import retrieveCategoriesFromComponents from './utils/retrieveCategoriesFromComponents';
+import retrieveSpecificInfoFromComponents from './utils/retrieveSpecificInfoFromComponents';
 import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
 
 const DataManagerProvider = ({ children }) => {
@@ -179,7 +179,14 @@ const DataManagerProvider = ({ children }) => {
     <DataManagerContext.Provider
       value={{
         addAttribute,
-        allComponentsCategories: retrieveCategoriesFromComponents(components),
+        allComponentsCategories: retrieveSpecificInfoFromComponents(
+          components,
+          'category'
+        ),
+        allComponentsIconAlreadyTaken: retrieveSpecificInfoFromComponents(
+          components,
+          'icon'
+        ),
         components,
         contentTypes,
         createSchema,

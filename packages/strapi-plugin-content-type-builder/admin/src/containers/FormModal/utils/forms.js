@@ -685,9 +685,9 @@ const forms = {
             createComponentUid,
             componentCategory
           )
-          .required(),
-        category: yup.string().required(),
-        icon: yup.string().required(),
+          .required(errorsTrads.required),
+        category: yup.string().required(errorsTrads.required),
+        icon: yup.string().required(errorsTrads.required),
         collectionName: yup.string(),
       });
     },
