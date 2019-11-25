@@ -226,7 +226,6 @@ const reducer = (state, action) => {
 
           // Remove the opposite attribute
           if (oppositeAttributeNameToRemove !== null) {
-            console.log('ppppp');
             updatedObj = newObj.remove(oppositeAttributeNameToRemove);
           } else {
             updatedObj = newObj;
@@ -244,20 +243,6 @@ const reducer = (state, action) => {
         .update('isLoading', () => false);
     case 'REMOVE_FIELD_FROM_DISPLAYED_COMPONENT': {
       const { attributeToRemoveName, componentUid } = action;
-
-      console.log({ componentUid, attributeToRemoveName });
-      console.log(
-        state
-          .getIn([
-            'modifiedData',
-            'components',
-            componentUid,
-            'schema',
-            'attributes',
-            attributeToRemoveName,
-          ])
-          .toJS()
-      );
 
       return state.removeIn([
         'modifiedData',
@@ -283,7 +268,8 @@ const reducer = (state, action) => {
       const attributeToRemoveData = state.getIn(pathToAttributeToRemove);
       const isRemovingRelationAttribute =
         attributeToRemoveData.get('nature') !== undefined;
-      // Only content types can have relations that with themselves since, components can only have oneWay or manyWay relations
+      // Only content types can have relations that with themselves since
+      // components can only have oneWay or manyWay relations
       const canTheAttributeToRemoveHaveARelationWithItself =
         mainDataKey === 'contentType';
 

@@ -604,6 +604,8 @@ const forms = {
           ]);
         }
 
+        console.log({ items });
+
         return {
           items,
         };
@@ -669,6 +671,53 @@ const forms = {
               },
             ],
           ],
+        };
+      },
+    },
+  },
+  component: {
+    schema(alreadyTakenAttributes) {
+      return yup.object().shape({
+        name: yup.string().required(),
+        category: yup.string().required(),
+      });
+    },
+    form: {
+      base(data) {
+        const defaultItems = [
+          [
+            {
+              autoFocus: true,
+              name: 'name',
+              type: 'text',
+              label: {
+                id: getTrad('modalForm.attribute.form.base.name'),
+              },
+              description: {
+                id: getTrad('modalForm.attribute.form.base.name.description'),
+              },
+              validations: {
+                required: true,
+              },
+            },
+            {
+              autoFocus: true,
+              name: 'category',
+              type: 'creatableSelect',
+              label: {
+                id: getTrad(
+                  'modalForm.components.create-component.categoryLabel'
+                ),
+              },
+              validations: {
+                required: true,
+              },
+            },
+          ],
+        ];
+
+        return {
+          items: defaultItems,
         };
       },
     },

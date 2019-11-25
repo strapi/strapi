@@ -21,6 +21,7 @@ import useDataManager from '../../hooks/useDataManager';
 import AttributeOption from '../../components/AttributeOption';
 import BooleanBox from '../../components/BooleanBox';
 import CustomCheckbox from '../../components/CustomCheckbox';
+import CreatableSelect from '../../components/CreatableSelect';
 import ModalHeader from '../../components/ModalHeader';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
 import HeaderNavLink from '../../components/HeaderNavLink';
@@ -154,7 +155,7 @@ const FormModal = () => {
   const checkFormValidity = async () => {
     let schema;
 
-    if (state.modalType === 'contentType') {
+    if (state.modalType === 'contentType' || state.modalType === 'component') {
       schema = forms[state.modalType].schema(Object.keys(contentTypes));
     } else if (
       state.modalType === 'attribute'
@@ -307,6 +308,7 @@ const FormModal = () => {
       });
     } catch (err) {
       const errors = getYupInnerErrors(err);
+      console.log({ errors, err });
 
       dispatch({
         type: 'SET_ERRORS',
@@ -338,6 +340,7 @@ const FormModal = () => {
     ? { paddingTop: '0.5rem', paddingBottom: '3rem' }
     : {};
 
+  console.log({ formModal: modifiedData });
   return (
     <Modal
       isOpen={isOpen}
@@ -525,6 +528,7 @@ const FormModal = () => {
                                 <Inputs
                                   customInputs={{
                                     // addon: InputsIndex,
+                                    creatableSelect: CreatableSelect,
                                     customCheckboxWithChildren: CustomCheckbox,
                                     booleanBox: BooleanBox,
                                   }}

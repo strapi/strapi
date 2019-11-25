@@ -12,6 +12,7 @@ import createDataObject from './utils/createDataObject';
 import createModifiedDataSchema, {
   orderAllDataAttributesWithImmutable,
 } from './utils/createModifiedDataSchema';
+import retrieveCategoriesFromComponents from './utils/retrieveCategoriesFromComponents';
 import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
 
 const DataManagerProvider = ({ children }) => {
@@ -66,7 +67,8 @@ const DataManagerProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    // We need to set the modifiedData after the data has been retrieved and also on pathname change
+    // We need to set the modifiedData after the data has been retrieved
+    //and also on pathname change
     if (!isLoading) {
       setModifiedData();
     }
@@ -173,6 +175,7 @@ const DataManagerProvider = ({ children }) => {
     <DataManagerContext.Provider
       value={{
         addAttribute,
+        allComponentsCategories: retrieveCategoriesFromComponents(components),
         components,
         contentTypes,
         createSchema,

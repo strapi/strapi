@@ -20,13 +20,7 @@ const displayNotificationCTNotSaved = () => {
 };
 
 function LeftMenu() {
-  const {
-    components,
-    contentTypes,
-    // initialData,
-    // modifiedData,
-    sortedContentTypesList,
-  } = useDataManager();
+  const { components, contentTypes, sortedContentTypesList } = useDataManager();
   const { currentEnvironment } = useGlobalContext();
   const { push } = useHistory();
   const isProduction = currentEnvironment === 'production';
@@ -56,6 +50,7 @@ function LeftMenu() {
       )
     );
   };
+
   const handleClickOpenModal = type => {
     if (canOpenModalCreateCTorComponent()) {
       push({

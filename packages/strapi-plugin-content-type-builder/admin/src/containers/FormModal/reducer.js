@@ -110,7 +110,7 @@ const reducer = (state, action) => {
       } else if (attributeType === 'relation') {
         dataToSet = {
           name: nameToSetForRelation,
-          type: 'relation',
+          // type: 'relation',
           nature: 'oneWay',
           targetAttribute: '-',
           target: targetUid,
