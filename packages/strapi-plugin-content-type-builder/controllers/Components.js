@@ -1,5 +1,7 @@
 'use strict';
 
+const _ = require('lodash');
+
 const {
   validateComponentInput,
   validateUpdateComponentInput,
@@ -81,6 +83,10 @@ module.exports = {
     const { uid } = ctx.params;
     const { body } = ctx.request;
 
+    if (!_.has(strapi.components, uid)) {
+      return ctx.send({ error: 'component.notFound' }, 404);
+    }
+
     try {
       await validateUpdateComponentInput(body);
     } catch (error) {
@@ -111,6 +117,10 @@ module.exports = {
    */
   async deleteComponent(ctx) {
     const { uid } = ctx.params;
+
+    if (!_.has(strapi.components, uid)) {
+      return ctx.send({ error: 'component.notFound' }, 404);
+    }
 
     try {
       strapi.reload.isWatching = false;

@@ -44,17 +44,15 @@ const contentTypeSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
   modelType: modelTypes.CONTENT_TYPE,
 });
 
-const createContentTypeSchema = () => {
-  return yup
-    .object({
-      contentType: contentTypeSchema.required().noUnknown(),
-      components: nestedComponentSchema,
-    })
-    .noUnknown();
-};
+const createContentTypeSchema = yup
+  .object({
+    contentType: contentTypeSchema.required().noUnknown(),
+    components: nestedComponentSchema,
+  })
+  .noUnknown();
 
 const validateContentTypeInput = data => {
-  return createContentTypeSchema()
+  return createContentTypeSchema
     .validate(data, {
       strict: true,
       abortEarly: false,
@@ -72,7 +70,19 @@ const validateUpdateContentTypeInput = data => {
     });
   }
 
-  return createContentTypeSchema()
+  if (_.has(data, 'components') && Array.isArray(data.components)) {
+    data.components.forEach(data => {
+      if (_.has(data, 'attributes') && _.has(data, 'uid')) {
+        Object.keys(data.attributes).forEach(attribute => {
+          if (data.attributes[attribute].default === '') {
+            data.attributes[attribute].default = undefined;
+          }
+        });
+      }
+    });
+  }
+
+  return createContentTypeSchema
     .validate(data, {
       strict: true,
       abortEarly: false,

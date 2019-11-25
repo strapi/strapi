@@ -76,6 +76,10 @@ module.exports = {
     const { uid } = ctx.params;
     const { body } = ctx.request;
 
+    if (!_.has(strapi.contentTypes, uid)) {
+      return ctx.send({ error: 'contentType.notFound' }, 404);
+    }
+
     try {
       await validateUpdateContentTypeInput(body);
     } catch (error) {
@@ -101,6 +105,10 @@ module.exports = {
 
   async deleteContentType(ctx) {
     const { uid } = ctx.params;
+
+    if (!_.has(strapi.contentTypes, uid)) {
+      return ctx.send({ error: 'contentType.notFound' }, 404);
+    }
 
     try {
       strapi.reload.isWatching = false;
