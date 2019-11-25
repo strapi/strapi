@@ -4,7 +4,7 @@ In this guide we will see how you can customize the admin panel.
 
 ## Introduction
 
-For this example, we will see two things, the first one will be the customization of the admin panel it self, by updating the content of the `/admin/` home page. And in a second time we will see ho to update the interface of a plugin, by replacing the `date` format in the content manager list view.
+For this example, we will see two things, the first one will be the customization of the admin panel itself, by updating the content of the `/admin/` home page. And in a second time we will see ho to update the interface of a plugin, by replacing the `date` format in the content manager list view.
 
 First of all, you will have to read the [customization concept](../concepts/customization.md), it will help you to understand how to customize all your application.
 
@@ -24,7 +24,7 @@ Let's eject this file to be able to customize it.
 
 **Path —** `./admin/src/containers/HomePage/index.js`
 
-In this new files, paste the current [HomePage container](https://github.com/strapi/strapi/tree/master/packages/strapi-admin/admin/src/containers/HomePage/index.js) code.
+In this new file, paste the current [HomePage container](https://github.com/strapi/strapi/tree/master/packages/strapi-admin/admin/src/containers/HomePage/index.js) code.
 
 To run your application, you will have to run the `yarn develop --watch-admin` command.
 
@@ -82,7 +82,7 @@ Let's eject the file to be able to customize it.
 
 **Path —** `./extensions/content-manager/admin/src/components/CustomTable/Row.js`
 
-In this new files, paste the current [Row component](https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-content-manager/admin/src/components/CustomTable/Row.js) code.
+In this new file, paste the current [Row component](https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-content-manager/admin/src/components/CustomTable/Row.js) code.
 
 To run your application, you will have to run the `yarn develop --watch-admin` command.
 
