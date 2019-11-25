@@ -69,13 +69,17 @@ class ListRow extends React.Component {
         );
       case 'providers':
         icons.pop(); // Remove the icon-trash
-
+        console.log(this.props.item.key);
         return (
           <Wrapper className="row">
             <div className="col-md-4">
               <Flex>
                 <div>
-                  {/* <i className={`fa fa-${this.props.item.icon}`} /> */}
+                  <i
+                    className={`fa${
+                      this.props.item.key !== undefined ? 'b' : ''
+                    } fa-${this.props.item.icon}`}
+                  />
                 </div>
                 <div>{capitalize(this.props.item.name)}</div>
               </Flex>
@@ -104,7 +108,7 @@ class ListRow extends React.Component {
             <div className="col-md-4">
               <Flex>
                 <div>
-                  <i className={`fa fa-${this.props.item.icon}`} />
+                  <i className={`fas fa-${this.props.item.icon}`} />
                 </div>
                 <div>
                   {this.props.item.display && en[this.props.item.display] ? (

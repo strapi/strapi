@@ -37,7 +37,7 @@ module.exports = async () => {
     },
     discord: {
       enabled: false,
-      icon: 'comments',
+      icon: 'discord',
       key: '',
       secret: '',
       callback: '/auth/discord/callback',
@@ -45,7 +45,7 @@ module.exports = async () => {
     },
     facebook: {
       enabled: false,
-      icon: 'facebook',
+      icon: 'facebook-square',
       key: '',
       secret: '',
       callback: '/auth/facebook/callback',
