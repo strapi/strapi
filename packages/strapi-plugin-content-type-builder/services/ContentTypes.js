@@ -35,7 +35,7 @@ const formatContentType = contentType => {
 /**
  * Creates a component and handle the nested components sent with it
  * @param {Object} params params object
- * @param {Object} params.component Main component to create
+ * @param {Object} params.contentType Main component to create
  * @param {Array<Object>} params.components List of nested components to created or edit
  */
 const createContentType = async ({ contentType, components = [] }) => {

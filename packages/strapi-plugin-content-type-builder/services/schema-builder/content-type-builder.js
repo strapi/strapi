@@ -12,44 +12,6 @@ const {
 const { nameToSlug, nameToCollectionName } = require('../../utils/helpers');
 const createSchemaHandler = require('./schema-handler');
 
-/**
- * Returns a uid from a string
- * @param {string} str - string to slugify
- */
-const createContentTypeUID = ({ name }) =>
-  `application::${nameToSlug(name)}.${nameToSlug(name)}`;
-
-const generateRelation = ({ key, attribute, modelName }) => {
-  const opts = {
-    via: key,
-    columnName: attribute.targetColumnName,
-  };
-
-  switch (attribute.nature) {
-    case 'manyWay':
-    case 'oneWay':
-      return;
-    case 'oneToOne':
-    case 'oneToMany':
-      opts.model = modelName;
-      break;
-    case 'manyToOne':
-      opts.collection = modelName;
-      break;
-    case 'manyToMany': {
-      opts.collection = modelName;
-
-      if (!attribute.dominant) {
-        opts.dominant = true;
-      }
-      break;
-    }
-    default:
-  }
-
-  return opts;
-};
-
 module.exports = function createComponentBuilder() {
   return {
     setRelation({ key, modelName, attribute }) {
@@ -227,4 +189,43 @@ module.exports = function createComponentBuilder() {
       return this.contentTypes.get(uid).delete();
     },
   };
+};
+
+/**
+ * Returns a uid from a content type infos
+ * @param {Object} options options
+ * @param {string} options.name component name
+ */
+const createContentTypeUID = ({ name }) =>
+  `application::${nameToSlug(name)}.${nameToSlug(name)}`;
+
+const generateRelation = ({ key, attribute, modelName }) => {
+  const opts = {
+    via: key,
+    columnName: attribute.targetColumnName,
+  };
+
+  switch (attribute.nature) {
+    case 'manyWay':
+    case 'oneWay':
+      return;
+    case 'oneToOne':
+    case 'oneToMany':
+      opts.model = modelName;
+      break;
+    case 'manyToOne':
+      opts.collection = modelName;
+      break;
+    case 'manyToMany': {
+      opts.collection = modelName;
+
+      if (!attribute.dominant) {
+        opts.dominant = true;
+      }
+      break;
+    }
+    default:
+  }
+
+  return opts;
 };

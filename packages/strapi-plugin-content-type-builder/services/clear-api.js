@@ -75,7 +75,7 @@ async function rollback(uid) {
 
 /**
  * Creates a delete function to clear an api folder
- * @param {str} baseName
+ * @param {string} baseName
  */
 const createDeleteApiFunction = baseName => {
   /**

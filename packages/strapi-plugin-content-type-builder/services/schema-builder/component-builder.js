@@ -11,8 +11,10 @@ const createSchemaHandler = require('./schema-handler');
 module.exports = function createComponentBuilder() {
   return {
     /**
-     * Returns a uid from a string
-     * @param {string} str - string to slugify
+     * Returns a uid from a component infos
+     * @param {Object} options options
+     * @param {string} options.category component category
+     * @param {string} options.name component name
      */
     createComponentUID({ category, name }) {
       return `${nameToSlug(category)}.${nameToSlug(name)}`;

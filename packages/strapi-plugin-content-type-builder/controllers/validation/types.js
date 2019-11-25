@@ -148,7 +148,6 @@ const getTypeShape = (attribute, { modelType } = {}) => {
         repeatable: yup.boolean(),
         component: yup
           .string()
-          // .oneOf(Object.keys(strapi.components))
           .test({
             name: 'Check max component nesting is 1 lvl',
             test: function(compoUID) {
@@ -178,12 +177,7 @@ const getTypeShape = (attribute, { modelType } = {}) => {
         required: validators.required,
         components: yup
           .array()
-          .of(
-            yup
-              .string()
-              // .oneOf(Object.keys(strapi.components))
-              .required()
-          )
+          .of(yup.string().required())
           .min(1)
           .required(),
         min: yup.number(),
