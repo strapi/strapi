@@ -370,14 +370,45 @@ module.exports = ({ model, modelKey, strapi }) => {
 
     for (let key of componentKeys) {
       const attr = model.attributes[key];
-      const { component } = attr;
-      const componentModel = strapi.components[component];
+      const { type } = attr;
 
-      if (Array.isArray(entry[key]) && entry[key].length > 0) {
-        const idsToDelete = entry[key].map(el => el.ref);
-        await strapi
-          .query(componentModel.uid)
-          .delete({ [`${model.primaryKey}_in`]: idsToDelete });
+      if (type === 'component') {
+        const { component } = attr;
+        const componentModel = strapi.components[component];
+
+        if (Array.isArray(entry[key]) && entry[key].length > 0) {
+          const idsToDelete = entry[key].map(el => el.ref);
+          await strapi
+            .query(componentModel.uid)
+            .delete({ [`${model.primaryKey}_in`]: idsToDelete });
+        }
+      }
+
+      if (type === 'dynamiczone') {
+        if (Array.isArray(entry[key]) && entry[key].length > 0) {
+          const idsToDelete = entry[key].map(el => ({
+            componentUID: findComponentByGlobalId(el.kind).uid,
+            id: el.ref,
+          }));
+
+          const deleteMap = idsToDelete.reduce((map, { id, componentUID }) => {
+            if (!_.has(map, componentUID)) {
+              map[componentUID] = [id];
+              return map;
+            }
+
+            map[componentUID].push(id);
+            return map;
+          }, {});
+
+          await Promise.all(
+            Object.keys(deleteMap).map(componentUID => {
+              return strapi.query(componentUID).delete({
+                [`${model.primaryKey}_in`]: idsToDelete[componentUID],
+              });
+            })
+          );
+        }
       }
     }
   }
