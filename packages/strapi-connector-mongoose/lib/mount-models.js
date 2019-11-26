@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const utilsModels = require('strapi-utils').models;
 const utils = require('./utils');
 const relations = require('./relations');
+const { findComponentByGlobalId } = require('./utils/helpers');
 
 module.exports = ({ models, target, plugin = false }, ctx) => {
   const { instance } = ctx;
@@ -256,16 +257,28 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
         componentAttributes.forEach(name => {
           const attribute = definition.attributes[name];
+          const { type } = attribute;
 
-          if (Array.isArray(returned[name])) {
-            // TODO: map to __component
+          if (type === 'component') {
+            if (Array.isArray(returned[name])) {
+              const components = returned[name].map(el => el.ref);
+              // Reformat data by bypassing the many-to-many relationship.
+              returned[name] =
+                attribute.repeatable === true
+                  ? components
+                  : _.first(components) || null;
+            }
+          }
 
-            const components = returned[name].map(el => el.ref);
-            // Reformat data by bypassing the many-to-many relationship.
-            returned[name] =
-              attribute.repeatable === true
-                ? components
-                : _.first(components) || null;
+          if (type === 'dynamiczone') {
+            const components = returned[name].map(el => {
+              return {
+                __component: findComponentByGlobalId(el.kind).uid,
+                ...el.ref,
+              };
+            });
+
+            returned[name] = components;
           }
         });
       },
@@ -361,21 +374,12 @@ const createOnFetchPopulateFn = ({
       }
     });
 
-    // TODO: handle Dynamic zone
-    componentAttributes.forEach(name => {
-      const attr = definition.attributes[name];
-      const { type } = attr;
+    function createPopulates(definition, associations = []) {
+      let subpopulates = [];
 
-      if (type === 'component') {
-        const component = strapi.components[attr.component];
-
-        const assocs = (component.associations || []).filter(
-          assoc => assoc.autoPopulate === true
-        );
-
-        let subpopulates = [];
-
-        assocs.forEach(assoc => {
+      associations
+        .filter(assoc => assoc.autoPopulate === true)
+        .forEach(assoc => {
           if (isPolymorphic({ assoc })) {
             if (
               assoc.nature === 'oneToManyMorph' ||
@@ -405,19 +409,43 @@ const createOnFetchPopulateFn = ({
           }
         });
 
-        if (
-          this._mongooseOptions.populate &&
-          this._mongooseOptions.populate[name]
-        ) {
-          this._mongooseOptions.populate[name].path = `${name}.ref`;
-          this._mongooseOptions.populate[name].populate = subpopulates;
-        } else {
-          _.set(this._mongooseOptions, ['populate', name], {
-            path: `${name}.ref`,
-            populate: subpopulates,
-            _docs: {},
-          });
-        }
+      return subpopulates;
+    }
+
+    function addPopulate(options, name, populate) {
+      if (options.populate && options.populate[name]) {
+        _.assign(options.populate, {
+          path: `${name}.ref`,
+          populate,
+        });
+      } else {
+        _.set(options, ['populate', name], {
+          path: `${name}.ref`,
+          populate,
+          _docs: {},
+        });
+      }
+    }
+
+    componentAttributes.forEach(name => {
+      const attr = definition.attributes[name];
+      const { type } = attr;
+
+      if (type === 'component') {
+        const component = strapi.components[attr.component];
+        const populates = createPopulates(component, component.associations);
+        addPopulate(this._mongooseOptions, name, populates);
+      }
+
+      if (type === 'dynamiczone') {
+        const allPopulates = attr.components
+          .map(componentUID => {
+            const component = strapi.components[componentUID];
+            return createPopulates(component, component.associations);
+          })
+          .reduce((acc, populates) => acc.concat(populates), []);
+
+        addPopulate(this._mongooseOptions, name, allPopulates);
       }
     });
 

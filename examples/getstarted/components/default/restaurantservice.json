@@ -10,6 +10,11 @@
       "type": "string",
       "required": true
     },
+    "media": {
+      "model": "file",
+      "via": "related",
+      "plugin": "upload"
+    },
     "is_available": {
       "type": "boolean",
       "required": true,

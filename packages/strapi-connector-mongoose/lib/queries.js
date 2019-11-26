@@ -10,6 +10,8 @@ const {
   models: modelUtils,
 } = require('strapi-utils');
 
+const { findComponentByGlobalId } = require('./utils/helpers');
+
 module.exports = ({ model, modelKey, strapi }) => {
   const hasPK = obj => _.has(obj, model.primaryKey) || _.has(obj, 'id');
   const getPK = obj =>
@@ -136,68 +138,190 @@ module.exports = ({ model, modelKey, strapi }) => {
   async function updateComponents(entry, values) {
     if (componentKeys.length === 0) return;
 
+    const updateOrCreateComponent = async ({ componentUID, value }) => {
+      // check if value has an id then update else create
+      if (hasPK(value)) {
+        return strapi.query(componentUID).update(
+          {
+            [model.primaryKey]: getPK(value),
+          },
+          value
+        );
+      }
+      return strapi.query(componentUID).create(value);
+    };
+
     for (let key of componentKeys) {
       // if key isn't present then don't change the current component data
       if (!_.has(values, key)) continue;
 
       const attr = model.attributes[key];
-      const { component, repeatable = false } = attr;
+      const { type } = attr;
 
-      const componentModel = strapi.components[component];
-      const componentValue = values[key];
+      if (type === 'component') {
+        const { component: componentUID, repeatable = false } = attr;
 
-      const updateOrCreateComponent = async value => {
-        // check if value has an id then update else create
-        if (hasPK(value)) {
-          return strapi.query(component).update(
-            {
-              [model.primaryKey]: getPK(value),
-            },
-            value
+        const componentModel = strapi.components[componentUID];
+        const componentValue = values[key];
+
+        if (repeatable === true) {
+          validateRepeatableInput(componentValue, { key, ...attr });
+
+          await deleteOldComponents(entry, componentValue, {
+            key,
+            componentModel,
+          });
+
+          const components = await Promise.all(
+            componentValue.map(value =>
+              updateOrCreateComponent({ componentUID, value })
+            )
           );
-        }
-        return strapi.query(component).create(value);
-      };
-
-      if (repeatable === true) {
-        validateRepeatableInput(componentValue, { key, ...attr });
-
-        await deleteOldComponents(entry, componentValue, {
-          key,
-          componentModel,
-        });
-
-        const components = await Promise.all(
-          componentValue.map(updateOrCreateComponent)
-        );
-        const componentsArr = components.map(component => ({
-          kind: componentModel.globalId,
-          ref: component,
-        }));
-
-        entry[key] = componentsArr;
-        await entry.save();
-      } else {
-        validateNonRepeatableInput(componentValue, { key, ...attr });
-
-        await deleteOldComponents(entry, componentValue, {
-          key,
-          componentModel,
-        });
-
-        if (componentValue === null) continue;
-
-        const component = await updateOrCreateComponent(componentValue);
-        entry[key] = [
-          {
+          const componentsArr = components.map(component => ({
             kind: componentModel.globalId,
             ref: component,
-          },
-        ];
+          }));
+
+          entry[key] = componentsArr;
+          await entry.save();
+        } else {
+          validateNonRepeatableInput(componentValue, { key, ...attr });
+
+          await deleteOldComponents(entry, componentValue, {
+            key,
+            componentModel,
+          });
+
+          if (componentValue === null) continue;
+
+          const component = await updateOrCreateComponent({
+            componentUID,
+            value: componentValue,
+          });
+
+          entry[key] = [
+            {
+              kind: componentModel.globalId,
+              ref: component,
+            },
+          ];
+          await entry.save();
+        }
+      }
+
+      if (type === 'dynamiczone') {
+        const dynamiczoneValues = values[key];
+
+        validateDynamiczoneInput(dynamiczoneValues, { key, ...attr });
+
+        await deleteDynamicZoneOldComponents(entry, dynamiczoneValues, {
+          key,
+        });
+
+        const dynamiczones = await Promise.all(
+          dynamiczoneValues.map(value => {
+            const componentUID = value.__component;
+            return updateOrCreateComponent({ componentUID, value }).then(
+              entity => {
+                return {
+                  componentUID,
+                  entity,
+                };
+              }
+            );
+          })
+        );
+
+        const componentsArr = dynamiczones.map(({ componentUID, entity }) => {
+          const componentModel = strapi.components[componentUID];
+
+          return {
+            kind: componentModel.globalId,
+            ref: entity,
+          };
+        });
+
+        entry[key] = componentsArr;
         await entry.save();
       }
     }
     return;
+  }
+
+  async function deleteDynamicZoneOldComponents(entry, values, { key }) {
+    const idsToKeep = values.reduce((acc, value) => {
+      const component = value.__component;
+      const componentModel = strapi.components[component];
+      if (_.has(value, componentModel.primaryKey)) {
+        acc.push({
+          id: value[componentModel.primaryKey].toString(),
+          componentUID: componentModel.uid,
+        });
+      }
+
+      return acc;
+    }, []);
+
+    const allIds = []
+      .concat(entry[key] || [])
+      .filter(el => el.ref)
+      .map(el => ({
+        id: el.ref._id,
+        componentUID: findComponentByGlobalId(el.kind).uid,
+      }));
+
+    // verify the provided ids are realted to this entity.
+    idsToKeep.forEach(({ id, componentUID }) => {
+      if (
+        !allIds.find(
+          el =>
+            el.id.toString() === id.toString() &&
+            el.componentUID === componentUID
+        )
+      ) {
+        const err = new Error(
+          `Some of the provided components in ${key} are not related to the entity`
+        );
+        err.status = 400;
+        throw err;
+      }
+    });
+
+    const idsToDelete = allIds.reduce((acc, { id, componentUID }) => {
+      if (
+        !idsToKeep.find(
+          el =>
+            el.id.toString() === id.toString() &&
+            el.componentUID === componentUID
+        )
+      ) {
+        acc.push({
+          id,
+          componentUID,
+        });
+      }
+      return acc;
+    }, []);
+
+    if (idsToDelete.length > 0) {
+      const deleteMap = idsToDelete.reduce((map, { id, componentUID }) => {
+        if (!_.has(map, componentUID)) {
+          map[componentUID] = [id];
+          return map;
+        }
+
+        map[componentUID].push(id);
+        return map;
+      }, {});
+
+      await Promise.all(
+        Object.keys(deleteMap).map(componentUID => {
+          return strapi
+            .query(componentUID)
+            .delete({ [`${model.primaryKey}_in`]: deleteMap[componentUID] });
+        })
+      );
+    }
   }
 
   async function deleteOldComponents(
@@ -209,8 +333,12 @@ module.exports = ({ model, modelKey, strapi }) => {
       ? componentValue
       : [componentValue];
 
-    const idsToKeep = componentArr.filter(hasPK).map(getPK);
-    const allIds = await (entry[key] || [])
+    const idsToKeep = componentArr
+      .filter(val => _.has(val, componentModel.primaryKey))
+      .map(val => _.get(val, componentModel.primaryKey));
+
+    const allIds = []
+      .concat(entry[key] || [])
       .filter(el => el.ref)
       .map(el => el.ref._id);
 
