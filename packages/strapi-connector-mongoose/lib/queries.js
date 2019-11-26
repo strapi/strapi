@@ -12,11 +12,11 @@ const {
 
 const { findComponentByGlobalId } = require('./utils/helpers');
 
-module.exports = ({ model, modelKey, strapi }) => {
-  const hasPK = obj => _.has(obj, model.primaryKey) || _.has(obj, 'id');
-  const getPK = obj =>
-    _.has(obj, model.primaryKey) ? obj[model.primaryKey] : obj.id;
+const hasPK = (obj, model) => _.has(obj, model.primaryKey) || _.has(obj, 'id');
+const getPK = (obj, model) =>
+  _.has(obj, model.primaryKey) ? obj[model.primaryKey] : obj.id;
 
+module.exports = ({ model, modelKey, strapi }) => {
   const assocKeys = model.associations.map(ast => ast.alias);
   const componentKeys = Object.keys(model.attributes).filter(key =>
     ['component', 'dynamiczone'].includes(model.attributes[key].type)
@@ -140,15 +140,16 @@ module.exports = ({ model, modelKey, strapi }) => {
 
     const updateOrCreateComponent = async ({ componentUID, value }) => {
       // check if value has an id then update else create
-      if (hasPK(value)) {
-        return strapi.query(componentUID).update(
+      const query = strapi.query(componentUID);
+      if (hasPK(value, query.model)) {
+        return query.update(
           {
-            [model.primaryKey]: getPK(value),
+            [query.model.primaryKey]: getPK(value, query.model),
           },
           value
         );
       }
-      return strapi.query(componentUID).create(value);
+      return query.create(value);
     };
 
     for (let key of componentKeys) {
@@ -252,9 +253,9 @@ module.exports = ({ model, modelKey, strapi }) => {
     const idsToKeep = values.reduce((acc, value) => {
       const component = value.__component;
       const componentModel = strapi.components[component];
-      if (_.has(value, componentModel.primaryKey)) {
+      if (hasPK(value, componentModel)) {
         acc.push({
-          id: value[componentModel.primaryKey].toString(),
+          id: getPK(value, componentModel).toString(),
           componentUID: componentModel.uid,
         });
       }
@@ -266,18 +267,14 @@ module.exports = ({ model, modelKey, strapi }) => {
       .concat(entry[key] || [])
       .filter(el => el.ref)
       .map(el => ({
-        id: el.ref._id,
+        id: el.ref._id.toString(),
         componentUID: findComponentByGlobalId(el.kind).uid,
       }));
 
     // verify the provided ids are realted to this entity.
     idsToKeep.forEach(({ id, componentUID }) => {
       if (
-        !allIds.find(
-          el =>
-            el.id.toString() === id.toString() &&
-            el.componentUID === componentUID
-        )
+        !allIds.find(el => el.id === id && el.componentUID === componentUID)
       ) {
         const err = new Error(
           `Some of the provided components in ${key} are not related to the entity`
@@ -289,11 +286,7 @@ module.exports = ({ model, modelKey, strapi }) => {
 
     const idsToDelete = allIds.reduce((acc, { id, componentUID }) => {
       if (
-        !idsToKeep.find(
-          el =>
-            el.id.toString() === id.toString() &&
-            el.componentUID === componentUID
-        )
+        !idsToKeep.find(el => el.id === id && el.componentUID === componentUID)
       ) {
         acc.push({
           id,
@@ -334,8 +327,8 @@ module.exports = ({ model, modelKey, strapi }) => {
       : [componentValue];
 
     const idsToKeep = componentArr
-      .filter(val => _.has(val, componentModel.primaryKey))
-      .map(val => _.get(val, componentModel.primaryKey));
+      .filter(val => hasPK(val, componentModel))
+      .map(val => getPK(val, componentModel));
 
     const allIds = []
       .concat(entry[key] || [])
@@ -428,7 +421,7 @@ module.exports = ({ model, modelKey, strapi }) => {
   }
 
   async function findOne(params, populate) {
-    const primaryKey = getPK(params);
+    const primaryKey = getPK(params, model);
 
     if (primaryKey) {
       params = {
@@ -464,13 +457,13 @@ module.exports = ({ model, modelKey, strapi }) => {
 
     // Create relational data and return the entry.
     return model.updateRelations({
-      [model.primaryKey]: getPK(entry),
+      [model.primaryKey]: getPK(entry, model),
       values: relations,
     });
   }
 
   async function update(params, values) {
-    const primaryKey = getPK(params);
+    const primaryKey = getPK(params, model);
 
     if (primaryKey) {
       params = {
@@ -500,7 +493,7 @@ module.exports = ({ model, modelKey, strapi }) => {
   }
 
   async function deleteMany(params) {
-    const primaryKey = getPK(params);
+    const primaryKey = getPK(params, model);
 
     if (primaryKey) return deleteOne(params);
 
@@ -510,7 +503,7 @@ module.exports = ({ model, modelKey, strapi }) => {
 
   async function deleteOne(params) {
     const entry = await model
-      .findOneAndRemove({ [model.primaryKey]: getPK(params) })
+      .findOneAndRemove({ [model.primaryKey]: getPK(params, model) })
       .populate(defaultPopulate);
 
     if (!entry) {
