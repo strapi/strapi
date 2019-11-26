@@ -134,6 +134,11 @@ const FormModal = () => {
     : state.forTarget;
   const isCreatingCT = state.modalType === 'contentType';
   const isCreating = state.actionType === 'create';
+  const isCreatingComponentFromAView = get(
+    modifiedData,
+    'createComponent',
+    false
+  );
   const isOpen = !isEmpty(search);
   const isPickingAttribute = state.modalType === 'chooseAttribute';
   const uid = createUid(modifiedData.name || '');
@@ -148,6 +153,9 @@ const FormModal = () => {
 
   const checkFormValidity = async () => {
     let schema;
+    const dataToValidate = isCreatingComponentFromAView
+      ? get(modifiedData, 'componentToCreate', {})
+      : modifiedData;
 
     if (state.modalType === 'contentType') {
       schema = forms.contentType.schema(Object.keys(contentTypes));
@@ -155,6 +163,19 @@ const FormModal = () => {
       schema = forms.component.schema(
         Object.keys(components),
         modifiedData.category || ''
+      );
+    } else if (
+      // We could definitely simplify this condition
+      // TODO
+      state.modalType === 'attribute' &&
+      state.attributeType === 'component' &&
+      isCreatingComponentFromAView
+    ) {
+      console.log('Should Validate');
+
+      schema = forms.component.schema(
+        Object.keys(components),
+        get(modifiedData, 'componentToCreate.category', '')
       );
     } else if (state.modalType === 'attribute') {
       const type =
@@ -175,7 +196,7 @@ const FormModal = () => {
       return;
     }
 
-    await schema.validate(modifiedData, { abortEarly: false });
+    await schema.validate(dataToValidate, { abortEarly: false });
   };
 
   const handleChange = ({ target: { name, value, type, ...rest } }) => {
@@ -261,7 +282,10 @@ const FormModal = () => {
           pathname: `/plugins/${pluginId}/${nextSlug}/${uid}`,
           search: createNextSearch(targetUid),
         });
-      } else if (state.modalType === 'attribute') {
+      } else if (
+        state.modalType === 'attribute' &&
+        !isCreatingComponentFromAView
+      ) {
         addAttribute(
           modifiedData,
           state.forTarget,
@@ -277,6 +301,11 @@ const FormModal = () => {
             : createNextSearch(targetUid);
 
         push({ search: nextSearch });
+      } else if (
+        state.modalType === 'attribute' &&
+        isCreatingComponentFromAView
+      ) {
+        console.log('Go to step 2');
       } else if (state.modalType === 'component') {
         // Create the component schema
         const componentUid = createComponentUid(
@@ -298,7 +327,6 @@ const FormModal = () => {
       });
     } catch (err) {
       const errors = getYupInnerErrors(err);
-      console.log({ errors, err });
 
       dispatch({
         type: 'SET_ERRORS',
@@ -373,7 +401,6 @@ const FormModal = () => {
                     {NAVLINKS.map((link, index) => {
                       return (
                         <HeaderNavLink
-                          // isDisabled={state.step === '1' && index === 1}
                           isDisabled={index === 1 && shouldDisableAdvancedTab()}
                           isActive={state.settingType === link.id}
                           key={link.id}
@@ -485,7 +512,12 @@ const FormModal = () => {
 
                             const errorId = get(
                               formErrors,
-                              [...input.name.split('.'), 'id'],
+                              [
+                                ...input.name
+                                  .split('.')
+                                  .filter(key => key !== 'componentToCreate'),
+                                'id',
+                              ],
                               null
                             );
 

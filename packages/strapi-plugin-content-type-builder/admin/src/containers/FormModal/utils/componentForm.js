@@ -20,7 +20,7 @@ const componentForm = {
         },
         {
           autoFocus: true,
-          name: 'category',
+          name: `${prefix}category`,
           type: 'creatableSelect',
           label: {
             id: getTrad('modalForm.components.create-component.category.label'),
