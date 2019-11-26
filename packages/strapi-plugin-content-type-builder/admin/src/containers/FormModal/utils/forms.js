@@ -747,6 +747,7 @@ const forms = {
             {
               name: 'icon',
               type: 'componentIconPicker',
+              size: 12,
               label: {
                 id: getTrad('modalForm.components.icon.label'),
               },

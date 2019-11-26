@@ -20,6 +20,7 @@ import useQuery from '../../hooks/useQuery';
 import useDataManager from '../../hooks/useDataManager';
 import AttributeOption from '../../components/AttributeOption';
 import BooleanBox from '../../components/BooleanBox';
+import ComponentIconPicker from '../../components/ComponentIconPicker';
 import CustomCheckbox from '../../components/CustomCheckbox';
 import CreatableSelect from '../../components/CreatableSelect';
 import ModalHeader from '../../components/ModalHeader';
@@ -544,6 +545,7 @@ const FormModal = () => {
                                 <Inputs
                                   customInputs={{
                                     // addon: InputsIndex,
+                                    componentIconPicker: ComponentIconPicker,
                                     creatableSelect: CreatableSelect,
                                     customCheckboxWithChildren: CustomCheckbox,
                                     booleanBox: BooleanBox,
