@@ -364,57 +364,60 @@ const createOnFetchPopulateFn = ({
     // TODO: handle Dynamic zone
     componentAttributes.forEach(name => {
       const attr = definition.attributes[name];
+      const { type } = attr;
 
-      const component = strapi.components[attr.component];
+      if (type === 'component') {
+        const component = strapi.components[attr.component];
 
-      const assocs = (component.associations || []).filter(
-        assoc => assoc.autoPopulate === true
-      );
+        const assocs = (component.associations || []).filter(
+          assoc => assoc.autoPopulate === true
+        );
 
-      let subpopulates = [];
+        let subpopulates = [];
 
-      assocs.forEach(assoc => {
-        if (isPolymorphic({ assoc })) {
-          if (
-            assoc.nature === 'oneToManyMorph' ||
-            assoc.nature === 'manyToManyMorph'
-          ) {
+        assocs.forEach(assoc => {
+          if (isPolymorphic({ assoc })) {
+            if (
+              assoc.nature === 'oneToManyMorph' ||
+              assoc.nature === 'manyToManyMorph'
+            ) {
+              subpopulates.push({
+                path: assoc.alias,
+                match: {
+                  [`${assoc.via}.${assoc.filter}`]: assoc.alias,
+                  [`${assoc.via}.kind`]: definition.globalId,
+                },
+                options: {
+                  sort: '-createdAt',
+                },
+                select: undefined,
+                model: undefined,
+                _docs: {},
+              });
+            } else {
+              subpopulates.push({ path: `${assoc.alias}.ref`, _docs: {} });
+            }
+          } else {
             subpopulates.push({
               path: assoc.alias,
-              match: {
-                [`${assoc.via}.${assoc.filter}`]: assoc.alias,
-                [`${assoc.via}.kind`]: definition.globalId,
-              },
-              options: {
-                sort: '-createdAt',
-              },
-              select: undefined,
-              model: undefined,
               _docs: {},
             });
-          } else {
-            subpopulates.push({ path: `${assoc.alias}.ref`, _docs: {} });
           }
+        });
+
+        if (
+          this._mongooseOptions.populate &&
+          this._mongooseOptions.populate[name]
+        ) {
+          this._mongooseOptions.populate[name].path = `${name}.ref`;
+          this._mongooseOptions.populate[name].populate = subpopulates;
         } else {
-          subpopulates.push({
-            path: assoc.alias,
+          _.set(this._mongooseOptions, ['populate', name], {
+            path: `${name}.ref`,
+            populate: subpopulates,
             _docs: {},
           });
         }
-      });
-
-      if (
-        this._mongooseOptions.populate &&
-        this._mongooseOptions.populate[name]
-      ) {
-        this._mongooseOptions.populate[name].path = `${name}.ref`;
-        this._mongooseOptions.populate[name].populate = subpopulates;
-      } else {
-        _.set(this._mongooseOptions, ['populate', name], {
-          path: `${name}.ref`,
-          populate: subpopulates,
-          _docs: {},
-        });
       }
     });
 

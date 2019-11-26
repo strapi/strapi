@@ -16,9 +16,10 @@ module.exports = ({ model, modelKey, strapi }) => {
     _.has(obj, model.primaryKey) ? obj[model.primaryKey] : obj.id;
 
   const assocKeys = model.associations.map(ast => ast.alias);
-  const componentKeys = Object.keys(model.attributes).filter(key => {
-    return model.attributes[key].type === 'component';
-  });
+  const componentKeys = Object.keys(model.attributes).filter(key =>
+    ['component', 'dynamiczone'].includes(model.attributes[key].type)
+  );
+
   const excludedKeys = assocKeys.concat(componentKeys);
 
   const defaultPopulate = model.associations
@@ -38,48 +39,95 @@ module.exports = ({ model, modelKey, strapi }) => {
 
     for (let key of componentKeys) {
       const attr = model.attributes[key];
-      const { component, required = false, repeatable = false } = attr;
+      const { type } = attr;
 
-      const componentModel = strapi.components[component];
+      if (type === 'component') {
+        const { component, required = false, repeatable = false } = attr;
 
-      if (required === true && !_.has(values, key)) {
-        const err = new Error(`Component ${key} is required`);
-        err.status = 400;
-        throw err;
+        const componentModel = strapi.components[component];
+
+        if (required === true && !_.has(values, key)) {
+          const err = new Error(`Component ${key} is required`);
+          err.status = 400;
+          throw err;
+        }
+
+        if (!_.has(values, key)) continue;
+
+        const componentValue = values[key];
+
+        if (repeatable === true) {
+          validateRepeatableInput(componentValue, { key, ...attr });
+          const components = await Promise.all(
+            componentValue.map(value => {
+              return strapi.query(component).create(value);
+            })
+          );
+
+          const componentsArr = components.map(componentEntry => ({
+            kind: componentModel.globalId,
+            ref: componentEntry,
+          }));
+
+          entry[key] = componentsArr;
+          await entry.save();
+        } else {
+          validateNonRepeatableInput(componentValue, { key, ...attr });
+          if (componentValue === null) continue;
+
+          const componentEntry = await strapi
+            .query(component)
+            .create(componentValue);
+          entry[key] = [
+            {
+              kind: componentModel.globalId,
+              ref: componentEntry,
+            },
+          ];
+          await entry.save();
+        }
       }
 
-      if (!_.has(values, key)) continue;
+      if (type === 'dynamiczone') {
+        const { required = false } = attr;
 
-      const componentValue = values[key];
+        if (required === true && !_.has(values, key)) {
+          const err = new Error(`Dynamiczone ${key} is required`);
+          err.status = 400;
+          throw err;
+        }
 
-      if (repeatable === true) {
-        validateRepeatableInput(componentValue, { key, ...attr });
-        const components = await Promise.all(
-          componentValue.map(value => {
-            return strapi.query(component).create(value);
+        if (!_.has(values, key)) continue;
+
+        const dynamiczoneValues = values[key];
+
+        validateDynamiczoneInput(dynamiczoneValues, { key, ...attr });
+
+        const dynamiczones = await Promise.all(
+          dynamiczoneValues.map(value => {
+            const component = value.__component;
+            return strapi
+              .query(component)
+              .create(value)
+              .then(entity => {
+                return {
+                  __component: value.__component,
+                  entity,
+                };
+              });
           })
         );
 
-        const componentsArr = components.map(componentEntry => ({
-          kind: componentModel.globalId,
-          ref: componentEntry,
-        }));
+        const componentsArr = dynamiczones.map(({ __component, entity }) => {
+          const componentModel = strapi.components[__component];
+
+          return {
+            kind: componentModel.globalId,
+            ref: entity,
+          };
+        });
 
         entry[key] = componentsArr;
-        await entry.save();
-      } else {
-        validateNonRepeatableInput(componentValue, { key, ...attr });
-        if (componentValue === null) continue;
-
-        const componentEntry = await strapi
-          .query(component)
-          .create(componentValue);
-        entry[key] = [
-          {
-            kind: componentModel.globalId,
-            ref: componentEntry,
-          },
-        ];
         await entry.save();
       }
     }
@@ -450,6 +498,59 @@ function validateNonRepeatableInput(value, { key, required }) {
 
   if (required === true && value === null) {
     const err = new Error(`Component ${key} is required`);
+    err.status = 400;
+    throw err;
+  }
+}
+
+function validateDynamiczoneInput(
+  value,
+  { key, min, max, components, required }
+) {
+  if (!Array.isArray(value)) {
+    const err = new Error(`Dynamiczone ${key} is invalid. Expected an array`);
+    err.status = 400;
+    throw err;
+  }
+
+  value.forEach(val => {
+    if (typeof val !== 'object' || Array.isArray(val) || val === null) {
+      const err = new Error(
+        `Dynamiczone ${key} has invalid items. Expected each items to be objects`
+      );
+      err.status = 400;
+      throw err;
+    }
+
+    if (!_.has(val, '__component')) {
+      const err = new Error(
+        `Dynamiczone ${key} has invalid items. Expected each items to have a valid __component key`
+      );
+      err.status = 400;
+      throw err;
+    } else if (!components.includes(val.__component)) {
+      const err = new Error(
+        `Dynamiczone ${key} has invalid items. Each item must have a __component key that is present in the attribute definition`
+      );
+      err.status = 400;
+      throw err;
+    }
+  });
+
+  if (
+    (required === true || (required !== true && value.length > 0)) &&
+    (min && value.length < min)
+  ) {
+    const err = new Error(
+      `Dynamiczone ${key} must contain at least ${min} items`
+    );
+    err.status = 400;
+    throw err;
+  }
+  if (max && value.length > max) {
+    const err = new Error(
+      `Dynamiczone ${key} must contain at most ${max} items`
+    );
     err.status = 400;
     throw err;
   }
