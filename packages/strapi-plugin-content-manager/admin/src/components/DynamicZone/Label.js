@@ -1,15 +1,15 @@
 import styled from 'styled-components';
 
 const Label = styled.div`
-  padding: 18px 20px 17px 20px;
+  padding: 13px 20px;
   font-size: 13px;
   font-weight: 600;
   position: relative;
-  min-height: 73px;
+  min-height: 68px;
   &:after {
     content: '• ';
     position: absolute;
-    top: 15px;
+    top: 11px;
     left: 18.5px;
     color: #aed4fb;
     font-size: 15px;
@@ -17,7 +17,7 @@ const Label = styled.div`
   &:before {
     content: '&';
     position: absolute;
-    top: 26px;
+    top: 22px;
     left: 22px;
     height: 100%;
     width: 2px;

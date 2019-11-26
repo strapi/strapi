@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import getColor from './utils/getColor';
 
 const GrabWrapper = styled.div`
@@ -9,7 +9,6 @@ const GrabWrapper = styled.div`
   top: 0px;
   bottom: 0px;
   left: 0;
-  // margin-right: 10px;
   padding-left: 10px;
   border-right: 1px solid
     ${({ isOverEditBlock, isOverRemove, isSelected }) =>
@@ -17,23 +16,21 @@ const GrabWrapper = styled.div`
   cursor: move;
   z-index: 99;
 
-  ${({ isOverEditBlock, isOverRemove, isSelected }) => {
-    if (isOverRemove) {
-      return `
-    g {
-      fill: #ffa784;
-    }
-    `;
-    }
+  ${({ isOverRemove }) =>
+    isOverRemove &&
+    css`
+      g {
+        fill: #ffa784;
+      }
+    `}
 
-    if (isSelected || isOverEditBlock) {
-      return `
-    g {
-      fill: #007eff;
-    }
-    `;
-    }
-  }}
+  ${({ isSelected, isOverEditBlock }) =>
+    (isSelected || isOverEditBlock) &&
+    css`
+      g {
+        fill: #007eff;
+      }
+    `}
 `;
 
 export default GrabWrapper;

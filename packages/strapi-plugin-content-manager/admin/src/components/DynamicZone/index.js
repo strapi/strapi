@@ -11,6 +11,7 @@ import FieldComponent from '../FieldComponent';
 import Button from './Button';
 import ComponentsPicker from './ComponentsPicker';
 import ComponentWrapper from './ComponentWrapper';
+import DynamicZoneWrapper from './DynamicZoneWrapper';
 import Label from './Label';
 import RoundCTA from './RoundCTA';
 import Wrapper from './Wrapper';
@@ -72,7 +73,7 @@ const DynamicZone = ({ max, min, name }) => {
   const hasRequiredError = hasError && !hasMinError;
 
   return (
-    <>
+    <DynamicZoneWrapper>
       {getDynamicDisplayedComponents().length > 0 && (
         <Label>
           <p>{metas.label}</p>
@@ -143,10 +144,14 @@ const DynamicZone = ({ max, min, name }) => {
         {hasRequiredError && !isOpen && (
           <div className="error-label">Component is required</div>
         )}
-        {hasMinError && (
+        {hasMinError && !isOpen && (
           <div className="error-label">
-            {' '}
-            {missingComponentNumber} missing components
+            <FormattedMessage
+              id={`${pluginId}.components.DynamicZone.missing${
+                missingComponentNumber > 1 ? '.plural' : '.singular'
+              }`}
+              values={{ count: missingComponentNumber }}
+            />
           </div>
         )}
         <div className="info">
@@ -185,7 +190,7 @@ const DynamicZone = ({ max, min, name }) => {
           </div>
         </ComponentsPicker>
       </Wrapper>
-    </>
+    </DynamicZoneWrapper>
   );
 };
 

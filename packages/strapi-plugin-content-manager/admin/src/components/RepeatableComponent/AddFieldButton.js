@@ -48,6 +48,10 @@ const Button = styled.button`
   svg {
     margin-right: 10px;
   }
+  & + p {
+    margin-bottom: 17px;
+    margin-top: -18px;
+  }
 `;
 
 export default Button;

@@ -12,7 +12,6 @@ const ComponentInitializer = ({ componentUid, name }) => {
 
   return (
     <NonRepeatableWrapper isEmpty>
-      {/* <div /> */}
       <PlusButton
         onClick={() => addNonRepeatableComponentToField(name, componentUid)}
         type="button"

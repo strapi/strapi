@@ -1,4 +1,3 @@
-/* eslint-disable react/display-name */
 import React, { forwardRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
@@ -110,7 +109,6 @@ const DraggedField = forwardRef(
             <RemoveWrapper
               className="remove"
               isSelected={isSelected}
-              // isOverEditBlock={isOverEditBlock}
               isOverEditBlock={showEditBlockOverState}
               isOverRemove={isOverRemove}
               onClick={onRemove}
@@ -191,5 +189,7 @@ DraggedField.propTypes = {
   type: PropTypes.string,
   withLongerHeight: PropTypes.bool,
 };
+
+DraggedField.displayName = 'DraggedField';
 
 export default DraggedField;

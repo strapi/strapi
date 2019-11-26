@@ -2,8 +2,7 @@ import styled from 'styled-components';
 
 const Wrapper = styled.div`
   position: relative;
-  margin: 24px 0 0 0;
-  padding-bottom: 23px;
+  padding-top: 5px;
   text-align: center;
   .info {
     position: absolute;
@@ -26,8 +25,8 @@ const Wrapper = styled.div`
   .error-label {
     color: #f64d0a;
     font-size: 13px;
-    margin-top: 9px;
-    margin-bottom: -10px;
+    margin-top: 4px;
+    margin-bottom: -5px;
   }
 `;
 

@@ -69,7 +69,6 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
   ]);
   const type = useMemo(() => get(attribute, 'type', null), [attribute]);
 
-  // const inputStyle = type === 'text' ? { height: '196px' } : {};
   const validations = omit(attribute, [
     'type',
     'model',
@@ -92,13 +91,6 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
     [keys, 'id'],
     temporaryErrorIdUntilBuffetjsSupportsFormattedMessage
   );
-
-  // TODO add the option placeholder to buffetjs
-  // check https://github.com/strapi/strapi/issues/2471
-  // const withOptionPlaceholder = get(attribute, 'type', '') === 'enumeration';
-
-  // TODO format error for the JSON, the WYSIWYG and also the file inputs
-  // TODO check if the height for the textarea is 196px (not mandatory)
 
   if (type === 'relation') {
     return (
@@ -139,14 +131,12 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
             }
             inputDescription={description}
             description={description}
-            // inputStyle={inputStyle} used to set the height of the text area
             customInputs={{
               media: InputFileWithErrors,
               json: InputJSONWithErrors,
               wysiwyg: WysiwygWithErrors,
             }}
             multiple={get(attribute, 'multiple', false)}
-            // name={name}
             name={keys}
             onBlur={onBlur}
             onChange={onChange}
@@ -155,7 +145,6 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
             validations={validations}
             value={inputValue}
             withDefaultValue={false}
-            // withOptionPlaceholder={withOptionPlaceholder}
           />
         );
       }}

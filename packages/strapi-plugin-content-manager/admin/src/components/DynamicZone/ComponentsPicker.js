@@ -6,8 +6,8 @@ const ComponentsPicker = styled.div`
   transition: max-height 0.2s ease-out;
 
   > div {
-    margin-top: 23px;
-    padding: 23px 18px 18px 18px;
+    margin-top: 19px;
+    padding: 23px 18px 22px 18px;
     background-color: #f2f3f4;
   }
 

@@ -155,7 +155,7 @@ const EditView = ({
         <Container className="container-fluid">
           <Header />
           <div className="row" style={{ paddingTop: 3 }}>
-            <div className="col-md-12 col-lg-9">
+            <div className="col-md-12 col-lg-9" style={{ marginBottom: 13 }}>
               {formattedContentTypeLayout.map((block, blockIndex) => {
                 if (isDynamicZone(block)) {
                   const {

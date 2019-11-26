@@ -6,7 +6,7 @@ const ComponentWrapper = styled.div`
     position: relative;
     box-shadow: 0 2px 4px #e3e9f3;
     &:not(:first-of-type) {
-      margin-top: 37px;
+      margin-top: 32px;
       &:before {
         content: '&';
         position: absolute;
@@ -20,6 +20,10 @@ const ComponentWrapper = styled.div`
     }
     > div:not(:first-of-type) {
       padding-top: 6px;
+      padding-bottom: 5px;
+    }
+    > div:last-of-type {
+      margin-bottom: 18px;
     }
   }
 `;
