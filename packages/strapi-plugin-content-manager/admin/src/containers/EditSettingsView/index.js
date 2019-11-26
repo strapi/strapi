@@ -56,7 +56,6 @@ const EditSettingsView = ({
   const source = getQueryParameters(search, 'source');
   const abortController = new AbortController();
   const { signal } = abortController;
-  const params = source === 'content-manager' && type ? {} : { source };
 
   const {
     componentLayouts,
@@ -141,7 +140,6 @@ const EditSettingsView = ({
           getRequestUrl(`${type}/${slug || componentSlug}`),
           {
             method: 'GET',
-            params,
             signal,
           }
         );
@@ -198,7 +196,6 @@ const EditSettingsView = ({
       await request(getRequestUrl(`${type}/${slug || componentSlug}`), {
         method: 'PUT',
         body,
-        params: type === 'components' ? {} : params,
         signal,
       });
 

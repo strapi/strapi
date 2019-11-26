@@ -107,8 +107,5 @@
     "npm": ">=6.0.0"
   },
   "license": "MIT",
-  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9",
-  "devDependencies": {
-    "@fortawesome/fontawesome-free": "^5.11.2"
-  }
+  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
 }

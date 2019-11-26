@@ -94,7 +94,10 @@ const ListSettingsView = ({ deleteLayout, models, slug }) => {
       .filter(key => {
         const type = get(attributes, [key, 'type'], '');
 
-        return !['json', 'relation', 'component'].includes(type) && !!type;
+        return (
+          !['json', 'component', 'richtext', 'relation'].includes(type) &&
+          !!type
+        );
       })
       .filter(field => {
         return !getListDisplayedFields().includes(field);
