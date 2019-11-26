@@ -11,7 +11,7 @@ import pluginId from '../../pluginId';
 import DataManagerProvider from '../DataManagerProvider';
 import Wrapper from './Wrapper';
 
-const ListPage = lazy(() => import('../ListPage'));
+const ListPage = lazy(() => import('../ListView'));
 
 import RecursivePath from '../RecursivePath';
 

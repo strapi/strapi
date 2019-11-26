@@ -270,6 +270,16 @@ const reducer = (state, action) => {
         attributeToRemoveName,
       ]);
     }
+    case 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE':
+      return state.removeIn([
+        'modifiedData',
+        'contentType',
+        'schema',
+        'attributes',
+        action.dzName,
+        'components',
+        action.componentToRemoveIndex,
+      ]);
     case 'REMOVE_FIELD': {
       const { mainDataKey, attributeToRemoveName } = action;
       const pathToAttributes = [
@@ -312,6 +322,7 @@ const reducer = (state, action) => {
 
       return state.removeIn(pathToAttributeToRemove);
     }
+
     case 'SET_MODIFIED_DATA': {
       return state
         .update('isLoadingForDataToBeSet', () => false)

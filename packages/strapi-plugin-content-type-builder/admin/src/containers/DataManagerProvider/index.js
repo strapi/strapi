@@ -125,6 +125,15 @@ const DataManagerProvider = ({ children }) => {
     });
   };
 
+  const removeComponentFromDynamicZone = (dzName, componentToRemoveIndex) => {
+    console.log({ dzName, componentToRemoveIndex });
+    dispatch({
+      type: 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE',
+      dzName,
+      componentToRemoveIndex,
+    });
+  };
+
   const sortedContentTypesList = sortBy(
     Object.keys(contentTypes)
       .map(uid => ({
@@ -196,6 +205,7 @@ const DataManagerProvider = ({ children }) => {
         isInContentTypeView,
         modifiedData,
         removeAttribute,
+        removeComponentFromDynamicZone,
         setModifiedData,
         sortedContentTypesList,
       }}

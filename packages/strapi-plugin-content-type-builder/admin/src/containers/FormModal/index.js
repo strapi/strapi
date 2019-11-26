@@ -47,6 +47,7 @@ const FormModal = () => {
     attributeType: null,
     headerDisplayName: null,
     pathToSchema: [],
+    step: null,
   };
   const [state, setState] = useState(initialStateData);
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
@@ -76,6 +77,7 @@ const FormModal = () => {
       const forTarget = query.get('forTarget');
       const targetUid = query.get('targetUid');
       const headerDisplayName = query.get('headerDisplayName');
+      const step = query.get('step');
       const pathToSchema =
         forTarget === 'contentType' || forTarget === 'component'
           ? [forTarget]
@@ -91,6 +93,7 @@ const FormModal = () => {
         headerDisplayName,
         attributeType,
         pathToSchema,
+        step,
       });
 
       // Set the predefined data structure to create an attribute
@@ -303,7 +306,14 @@ const FormModal = () => {
           state.actionType === 'edit',
           initialData
         );
-        push({ search: createNextSearch(targetUid) });
+        // Adding a component to a dynamiczone is not the same logic as creating a simple field
+        // so the search is different
+        const nextSearch =
+          state.attributeType === 'dynamiczone'
+            ? ''
+            : createNextSearch(targetUid);
+
+        push({ search: nextSearch });
       } else if (state.modalType === 'component') {
         // Create the component schema
         const componentUid = createComponentUid(
