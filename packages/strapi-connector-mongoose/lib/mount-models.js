@@ -323,138 +323,36 @@ const createOnFetchPopulateFn = ({
   componentAttributes,
   definition,
 }) => {
-  return function(next) {
+  return function() {
+    const populatedPaths = this.getPopulatedPaths();
+
     morphAssociations.forEach(association => {
-      if (
-        this._mongooseOptions.populate &&
-        this._mongooseOptions.populate[association.alias]
-      ) {
-        if (
-          association.nature === 'oneToManyMorph' ||
-          association.nature === 'manyToManyMorph'
-        ) {
-          this._mongooseOptions.populate[association.alias].match = {
+      const { alias, nature } = association;
+
+      if (['oneToManyMorph', 'manyToManyMorph'].includes(nature)) {
+        this.populate({
+          path: alias,
+          match: {
             [`${association.via}.${association.filter}`]: association.alias,
             [`${association.via}.kind`]: definition.globalId,
-          };
-
-          // Select last related to an entity.
-          this._mongooseOptions.populate[association.alias].options = {
+          },
+          options: {
             sort: '-createdAt',
-          };
-        } else {
-          this._mongooseOptions.populate[
-            association.alias
-          ].path = `${association.alias}.ref`;
-        }
-      } else {
-        if (!this._mongooseOptions.populate) {
-          this._mongooseOptions.populate = {};
-        }
-        // Images are not displayed in populated data.
-        // We automatically populate morph relations.
-        if (
-          association.nature === 'oneToManyMorph' ||
-          association.nature === 'manyToManyMorph'
-        ) {
-          this._mongooseOptions.populate[association.alias] = {
-            path: association.alias,
-            match: {
-              [`${association.via}.${association.filter}`]: association.alias,
-              [`${association.via}.kind`]: definition.globalId,
-            },
-            options: {
-              sort: '-createdAt',
-            },
-            select: undefined,
-            model: undefined,
-            _docs: {},
-          };
-        }
+          },
+        });
+
+        return;
+      }
+
+      if (populatedPaths.includes(alias)) {
+        _.set(this._mongooseOptions.populate, [alias, 'path'], `${alias}.ref`);
       }
     });
 
-    function createPopulates(definition, associations = []) {
-      let subpopulates = [];
-
-      associations
-        .filter(assoc => assoc.autoPopulate === true)
-        .forEach(assoc => {
-          if (isPolymorphic({ assoc })) {
-            if (
-              assoc.nature === 'oneToManyMorph' ||
-              assoc.nature === 'manyToManyMorph'
-            ) {
-              subpopulates.push({
-                path: assoc.alias,
-                match: {
-                  [`${assoc.via}.${assoc.filter}`]: assoc.alias,
-                  [`${assoc.via}.kind`]: definition.globalId,
-                },
-                options: {
-                  sort: '-createdAt',
-                },
-                select: undefined,
-                model: undefined,
-                _docs: {},
-              });
-            } else {
-              subpopulates.push({ path: `${assoc.alias}.ref`, _docs: {} });
-            }
-          } else {
-            subpopulates.push({
-              path: assoc.alias,
-              _docs: {},
-            });
-          }
-        });
-
-      return subpopulates;
-    }
-
-    function addPopulate(options, name, populate) {
-      if (options.populate && options.populate[name]) {
-        _.assign(options.populate, {
-          path: `${name}.ref`,
-          populate,
-        });
-      } else {
-        _.set(options, ['populate', name], {
-          path: `${name}.ref`,
-          populate,
-          _docs: {},
-        });
-      }
-    }
-
-    componentAttributes.forEach(name => {
-      const attr = definition.attributes[name];
-      const { type } = attr;
-
-      if (type === 'component') {
-        const component = strapi.components[attr.component];
-        const populates = createPopulates(component, component.associations);
-        addPopulate(this._mongooseOptions, name, populates);
-      }
-
-      if (type === 'dynamiczone') {
-        const allPopulates = attr.components
-          .map(componentUID => {
-            const component = strapi.components[componentUID];
-            return createPopulates(component, component.associations);
-          })
-          .reduce((acc, populates) => acc.concat(populates), []);
-
-        addPopulate(this._mongooseOptions, name, allPopulates);
-      }
+    componentAttributes.forEach(key => {
+      this.populate({ path: `${key}.ref` });
     });
-
-    next();
   };
-};
-
-const isPolymorphic = ({ assoc }) => {
-  return assoc.nature.toLowerCase().indexOf('morph') !== -1;
 };
 
 const buildRelation = ({ definition, model, instance, attribute, name }) => {
