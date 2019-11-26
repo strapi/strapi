@@ -1,6 +1,6 @@
 # Custom data response
 
-In this guide we will see how you can customize the data of your APIs responnses.
+In this guide we will see how you can customize your API's response..
 
 ## Introduction
 
