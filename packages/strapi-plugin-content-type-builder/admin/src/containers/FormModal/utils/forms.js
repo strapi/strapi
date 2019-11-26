@@ -328,6 +328,12 @@ const forms = {
           ],
         ];
 
+        if (type === 'component') {
+          return {
+            items: componentForm.advanced('componentToCreate.'),
+          };
+        }
+
         const items = defaultItems.slice();
 
         if (type === 'media') {
@@ -780,22 +786,7 @@ const forms = {
     form: {
       advanced() {
         return {
-          items: [
-            [
-              {
-                autoFocus: true,
-                label: {
-                  id: `${pluginId}.contentType.collectionName.label`,
-                },
-                description: {
-                  id: `${pluginId}.contentType.collectionName.description`,
-                },
-                name: 'collectionName',
-                type: 'text',
-                validations: {},
-              },
-            ],
-          ],
+          items: componentForm.advanced(),
         };
       },
       base() {

@@ -321,6 +321,13 @@ const FormModal = () => {
       attributeOptionRef.current.focus();
     }
   };
+  const shouldDisableAdvancedTab = () => {
+    return (
+      state.modalType === 'attribute' &&
+      state.attributeType === 'component' &&
+      get(modifiedData, ['createComponent'], null) === false
+    );
+  };
 
   // Display data
   const displayedAttributes = getAttributes(state.forTarget);
@@ -366,7 +373,8 @@ const FormModal = () => {
                     {NAVLINKS.map((link, index) => {
                       return (
                         <HeaderNavLink
-                          isDisabled={state.step === '1' && index === 1}
+                          // isDisabled={state.step === '1' && index === 1}
+                          isDisabled={index === 1 && shouldDisableAdvancedTab()}
                           isActive={state.settingType === link.id}
                           key={link.id}
                           {...link}
