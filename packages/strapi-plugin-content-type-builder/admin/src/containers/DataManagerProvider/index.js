@@ -175,7 +175,7 @@ const DataManagerProvider = ({ children }) => {
     return <Redirect to={`/plugins/${pluginId}/content-types/${firstCTUid}`} />;
   }
 
-  console.log({ components });
+  console.log({ d: modifiedData });
 
   return (
     <DataManagerContext.Provider

@@ -95,7 +95,11 @@ const forms = {
         max: yup.lazy(() => {
           let schema = yup.number();
 
-          if (attributeType === 'integer' || attributeType === 'biginteger') {
+          if (
+            attributeType === 'integer' ||
+            attributeType === 'biginteger' ||
+            attributeType === 'dynamiczone'
+          ) {
             schema = schema.integer();
           }
 
@@ -104,7 +108,11 @@ const forms = {
         min: yup.lazy(() => {
           let schema = yup.number();
 
-          if (attributeType === 'integer' || attributeType === 'biginteger') {
+          if (
+            attributeType === 'integer' ||
+            attributeType === 'biginteger' ||
+            attributeType === 'dynamiczone'
+          ) {
             schema = schema.integer();
           }
 
@@ -145,6 +153,11 @@ const forms = {
       };
 
       switch (attributeType) {
+        case 'dynamiczone':
+          return yup.object().shape({
+            ...commonShape,
+            ...numberTypeShape,
+          });
         case 'enumeration':
           return yup.object().shape({
             ...commonShape,
@@ -240,7 +253,6 @@ const forms = {
             },
           ],
         ];
-
         const defaultItems = [
           [
             {
@@ -287,14 +299,36 @@ const forms = {
             },
           ],
         ];
+        const dynamiczoneItems = [
+          [
+            {
+              autoFocus: false,
+              name: 'max',
+              type: 'customCheckboxWithChildren',
+              label: {
+                id: getTrad(`form.attribute.item.maximum`),
+              },
+              validations: {},
+            },
+          ],
+          [
+            {
+              autoFocus: false,
+              name: 'min',
+              type: 'customCheckboxWithChildren',
+              label: {
+                id: getTrad(`form.attribute.item.minimum`),
+              },
+              validations: {},
+            },
+          ],
+        ];
 
         const items = defaultItems.slice();
 
         if (type === 'media') {
           items.splice(0, 1);
-        }
-
-        if (type === 'boolean') {
+        } else if (type === 'boolean') {
           items.splice(0, 1, [
             {
               autoFocus: false,
@@ -311,9 +345,7 @@ const forms = {
               validations: {},
             },
           ]);
-        }
-
-        if (type === 'enumeration') {
+        } else if (type === 'enumeration') {
           items.splice(0, 1, [
             {
               autoFocus: false,
@@ -361,9 +393,7 @@ const forms = {
               },
             },
           ]);
-        }
-
-        if (type === 'date') {
+        } else if (type === 'date') {
           items.splice(0, 1, [
             {
               autoFocus: false,
@@ -414,6 +444,12 @@ const forms = {
               },
             ]
           );
+        }
+
+        if (type === 'dynamiczone') {
+          return {
+            items: dynamiczoneItems,
+          };
         }
 
         if (type === 'relation') {
