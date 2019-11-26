@@ -10,7 +10,7 @@ When you create a content type, it generates an API with the following list of [
 
 Each of these endpoint triggers a controller action. Here is the list of [controller actions](../concepts/controller.md) that exist by default when a content type is created.
 
-If you check the controller file of your generated API `./api/{content-type}/controller/{Content-Type}.js`. It is because you will see an empty file. It's because all the default logic is managed by Strapi. But you can override these actions with your own code.
+If you check the controller file of your generated API `./api/{content-type}/controller/{Content-Type}.js`, you will see an empty file. It is because all the default logic is managed by Strapi. But you can override these actions with your own code.
 
 And that is what we will do to manage our custom data response.
 
