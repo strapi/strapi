@@ -25,31 +25,20 @@ import CustomCheckbox from '../../components/CustomCheckbox';
 import CreatableSelect from '../../components/CreatableSelect';
 import ModalHeader from '../../components/ModalHeader';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
+import RelationForm from '../../components/RelationForm';
 import HeaderNavLink from '../../components/HeaderNavLink';
 import getTrad from '../../utils/getTrad';
 import getAttributes from './utils/attributes';
 import forms from './utils/forms';
 import { createComponentUid, createUid } from './utils/createUid';
+import getModalTitleSubHeader from './utils/getModalTitleSubHeader';
+import getNextSearch from './utils/getNextSearch';
+import { NAVLINKS, INITIAL_STATE_DATA } from './utils/staticData';
 import init from './init';
 import reducer, { initialState } from './reducer';
-import RelationForm from '../../components/RelationForm';
-
-const NAVLINKS = [{ id: 'base' }, { id: 'advanced' }];
 
 const FormModal = () => {
-  const initialStateData = {
-    attributeName: null,
-    actionType: null,
-    modalType: null,
-    settingType: null,
-    forTarget: null,
-    targetUid: null,
-    attributeType: null,
-    headerDisplayName: null,
-    pathToSchema: [],
-    step: null,
-  };
-  const [state, setState] = useState(initialStateData);
+  const [state, setState] = useState(INITIAL_STATE_DATA);
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { push } = useHistory();
   const { search } = useLocation();
@@ -189,35 +178,6 @@ const FormModal = () => {
     await schema.validate(modifiedData, { abortEarly: false });
   };
 
-  const getModalTitleSubHeader = () => {
-    switch (state.modalType) {
-      case 'chooseAttribute':
-        return getTrad(
-          `modalForm.sub-header.chooseAttribute.${
-            state.forTarget === 'contentType' ? 'contentType' : 'component'
-          }`
-        );
-      case 'attribute':
-        return getTrad(`modalForm.sub-header.attribute.${state.actionType}`);
-      default:
-        return getTrad('configurations');
-    }
-  };
-
-  const getNextSearch = nextTab => {
-    const newSearch = Object.keys(state).reduce((acc, current, index) => {
-      if (current !== 'settingType') {
-        acc = `${acc}${index === 0 ? '' : '&'}${current}=${state[current]}`;
-      } else {
-        acc = `${acc}${index === 0 ? '' : '&'}${current}=${nextTab}`;
-      }
-
-      return acc;
-    }, '');
-
-    return newSearch;
-  };
-
   const handleChange = ({ target: { name, value, type, ...rest } }) => {
     const namesThatCanResetToNullValue = [
       'enumName',
@@ -349,13 +309,13 @@ const FormModal = () => {
   const handleToggle = () => {
     push({ search: '' });
   };
+
   const onClosed = () => {
-    setState(initialStateData);
+    setState(INITIAL_STATE_DATA);
     dispatch({
       type: 'RESET_PROPS',
     });
   };
-
   const onOpened = () => {
     if (state.modalType === 'chooseAttribute') {
       attributeOptionRef.current.focus();
@@ -379,7 +339,6 @@ const FormModal = () => {
     >
       <HeaderModal>
         <ModalHeader
-          // name={name}
           name={state.headerDisplayName}
           headerId={headerId}
           iconType={iconType || 'contentType'}
@@ -387,7 +346,7 @@ const FormModal = () => {
         <section>
           <HeaderModalTitle>
             <FormattedMessage
-              id={getModalTitleSubHeader()}
+              id={getModalTitleSubHeader(state)}
               values={{
                 type: upperFirst(
                   formatMessage({
@@ -416,7 +375,7 @@ const FormModal = () => {
                               ...prev,
                               settingType: link.id,
                             }));
-                            push({ search: getNextSearch(link.id) });
+                            push({ search: getNextSearch(link.id, state) });
                           }}
                           nextTab={
                             index === NAVLINKS.length - 1 ? 0 : index + 1
@@ -563,7 +522,6 @@ const FormModal = () => {
                               >
                                 <Inputs
                                   customInputs={{
-                                    // addon: InputsIndex,
                                     componentIconPicker: ComponentIconPicker,
                                     creatableSelect: CreatableSelect,
                                     customCheckboxWithChildren: CustomCheckbox,
