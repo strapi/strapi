@@ -6,6 +6,7 @@ import { FormattedMessage } from 'react-intl';
 import pluginId from '../../../pluginId';
 import getTrad from '../../../utils/getTrad';
 import { createComponentUid, createUid, nameToSlug } from './createUid';
+import componentForm from './componentForm';
 
 yup.addMethod(yup.mixed, 'defined', function() {
   return this.test(
@@ -54,6 +55,7 @@ const forms = {
       isEditing,
       attributeToEditName,
       initialData
+      // componentCategory
     ) {
       const alreadyTakenAttributes = Object.keys(
         get(currentSchema, ['schema', 'attributes'], {})
@@ -153,6 +155,8 @@ const forms = {
       };
 
       switch (attributeType) {
+        case 'component':
+          return yup.object();
         case 'dynamiczone':
           return yup.object().shape({
             ...commonShape,
@@ -494,6 +498,52 @@ const forms = {
           ],
         ];
 
+        if (type === 'component') {
+          const itemsToConcat =
+            data.createComponent === true
+              ? [[{ type: 'spacer' }]].concat(
+                  componentForm.base('componentToCreate.')
+                )
+              : [];
+
+          return {
+            items: [
+              [
+                {
+                  label: {
+                    id: getTrad('modalForm.attribute.text.type-selection'),
+                  },
+                  name: 'createComponent',
+                  type: 'booleanBox',
+                  size: 12,
+                  options: [
+                    {
+                      headerId: getTrad(
+                        `form.attribute.component.option.create`
+                      ),
+                      descriptionId: getTrad(
+                        `form.attribute.component.option.create.description`
+                      ),
+                      value: true,
+                    },
+                    {
+                      headerId: getTrad(
+                        `form.attribute.component.option.reuse-existing`
+                      ),
+                      descriptionId: getTrad(
+                        `form.attribute.${type}.option.reuse-existing.description`
+                      ),
+                      value: false,
+                    },
+                  ],
+                  validations: {},
+                },
+              ],
+              ...itemsToConcat,
+            ],
+          };
+        }
+
         if (type === 'text' || type === 'media') {
           items.push([
             {
@@ -724,7 +774,7 @@ const forms = {
           .required(errorsTrads.required),
         category: yup.string().required(errorsTrads.required),
         icon: yup.string().required(errorsTrads.required),
-        collectionName: yup.string(),
+        collectionName: yup.string().nullable(),
       });
     },
     form: {
@@ -749,50 +799,8 @@ const forms = {
         };
       },
       base() {
-        const defaultItems = [
-          [
-            {
-              autoFocus: true,
-              name: 'name',
-              type: 'text',
-              label: {
-                id: getTrad('modalForm.attribute.form.base.name'),
-              },
-              description: {
-                id: getTrad('modalForm.attribute.form.base.name.description'),
-              },
-              validations: {
-                required: true,
-              },
-            },
-            {
-              autoFocus: true,
-              name: 'category',
-              type: 'creatableSelect',
-              label: {
-                id: getTrad(
-                  'modalForm.components.create-component.category.label'
-                ),
-              },
-              validations: {
-                required: true,
-              },
-            },
-          ],
-          [
-            {
-              name: 'icon',
-              type: 'componentIconPicker',
-              size: 12,
-              label: {
-                id: getTrad('modalForm.components.icon.label'),
-              },
-            },
-          ],
-        ];
-
         return {
-          items: defaultItems,
+          items: componentForm.base(),
         };
       },
     },

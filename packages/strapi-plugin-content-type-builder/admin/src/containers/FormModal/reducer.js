@@ -99,8 +99,17 @@ const reducer = (state, action) => {
 
       let dataToSet;
 
-      if (attributeType === 'dynamiczone') {
-        dataToSet = { type: 'dynamiczone', components: [] };
+      if (attributeType === 'component') {
+        dataToSet = {
+          type: 'component',
+          createComponent: true,
+          componentToCreate: { type: 'component' },
+        };
+      } else if (attributeType === 'dynamiczone') {
+        dataToSet = {
+          type: 'dynamiczone',
+          components: [],
+        };
       } else if (attributeType === 'text') {
         dataToSet = { type: 'string' };
       } else if (attributeType === 'number' || attributeType === 'date') {

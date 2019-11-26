@@ -210,6 +210,10 @@
   "modalForm.attribute.form.base.name.description": "No space is allowed for the name of the attribute",
   "modalForm.attribute.text.type-selection": "Type",
 
+  "form.attribute.component.option.create": "Create a new component",
+  "form.attribute.component.option.create.description": "A component is shared across types, it will be available and accessible in your other components and content types as well.",
+  "form.attribute.component.option.reuse-existing": "Use an existing component",
+  "form.attribute.component.option.reuse-existing.description": "Reuse a component already created to keep your data consistent across content types.",
   "form.attribute.item.defineRelation.fieldName": "Field name",
   "form.attribute.item.settings.name": "Settings",
   "form.attribute.item.date.type.date": "date",

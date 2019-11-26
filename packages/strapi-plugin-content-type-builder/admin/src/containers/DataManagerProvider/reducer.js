@@ -28,6 +28,8 @@ const reducer = (state, action) => {
         forTarget,
         targetUid,
       } = action;
+      delete rest.createComponent;
+
       const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
         ? [forTarget]
         : [forTarget, targetUid];

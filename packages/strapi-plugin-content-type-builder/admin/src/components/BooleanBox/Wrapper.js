@@ -13,8 +13,9 @@ const Wrapper = styled.div`
     will-change: transform, opacity;
     color: #9ea7b8;
     > p {
-      max-width: 300px;
-      line-height: 17px;
+      max-width: calc(100% - 20px);
+      margin-top: -1px;
+      line-height: 18px;
     }
   }
 

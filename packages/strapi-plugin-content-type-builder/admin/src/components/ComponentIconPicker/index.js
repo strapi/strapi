@@ -6,8 +6,6 @@ import useDataManager from '../../hooks/useDataManager';
 import CellRenderer from './CellRenderer';
 import Wrapper from './Wrapper';
 
-import allIcons from './utils/icons';
-
 const ComponentIconPicker = ({
   error,
   isCreating,
@@ -16,7 +14,7 @@ const ComponentIconPicker = ({
   onChange,
   value,
 }) => {
-  const { allComponentsIconAlreadyTaken } = useDataManager();
+  const { allIcons, allComponentsIconAlreadyTaken } = useDataManager();
 
   const icons = allIcons.filter(ico => {
     if (isCreating) {

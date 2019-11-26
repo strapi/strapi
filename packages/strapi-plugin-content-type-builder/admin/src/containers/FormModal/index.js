@@ -233,7 +233,10 @@ const FormModal = () => {
       value === ''
     ) {
       val = null;
-    } else if (type === 'radio' && (name === 'multiple' || name === 'single')) {
+    } else if (
+      type === 'radio' &&
+      (name === 'multiple' || name === 'single' || name === 'createComponent')
+    ) {
       val = value === 'false' ? false : true;
     } else if (type === 'radio' && name === 'default') {
       if (value === 'false') {
@@ -367,7 +370,6 @@ const FormModal = () => {
     ? { paddingTop: '0.5rem', paddingBottom: '3rem' }
     : {};
 
-  console.log({ formModal: modifiedData });
   return (
     <Modal
       isOpen={isOpen}
@@ -405,6 +407,7 @@ const FormModal = () => {
                     {NAVLINKS.map((link, index) => {
                       return (
                         <HeaderNavLink
+                          isDisabled={state.step === '1' && index === 1}
                           isActive={state.settingType === link.id}
                           key={link.id}
                           {...link}
@@ -491,6 +494,12 @@ const FormModal = () => {
                                     )}
                                   />
                                 </div>
+                              );
+                            }
+
+                            if (input.type === 'spacer') {
+                              return (
+                                <div key="spacer" style={{ height: 20 }}></div>
                               );
                             }
 

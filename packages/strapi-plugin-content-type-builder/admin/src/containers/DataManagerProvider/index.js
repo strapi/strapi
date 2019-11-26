@@ -15,7 +15,7 @@ import createModifiedDataSchema, {
 import retrieveSpecificInfoFromComponents from './utils/retrieveSpecificInfoFromComponents';
 import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
 
-const DataManagerProvider = ({ children }) => {
+const DataManagerProvider = ({ allIcons, children }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const {
     components,
@@ -126,7 +126,6 @@ const DataManagerProvider = ({ children }) => {
   };
 
   const removeComponentFromDynamicZone = (dzName, componentToRemoveIndex) => {
-    console.log({ dzName, componentToRemoveIndex });
     dispatch({
       type: 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE',
       dzName,
@@ -201,6 +200,7 @@ const DataManagerProvider = ({ children }) => {
         components,
         contentTypes,
         createSchema,
+        allIcons,
         initialData,
         isInContentTypeView,
         modifiedData,
@@ -226,6 +226,7 @@ const DataManagerProvider = ({ children }) => {
 };
 
 DataManagerProvider.propTypes = {
+  allIcons: PropTypes.array.isRequired,
   children: PropTypes.node.isRequired,
 };
 
