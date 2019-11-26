@@ -6,22 +6,22 @@ In this guide we will see how you can customize the data of your APIs responnses
 
 To be able to update the default data response you have first to understand how it works.
 
-When you create a content type, it generate an API with the following list of [endpoints](../content-api/endpoint).
+When you create a content type, it generates an API with the following list of [endpoints](../content-api/endpoint).
 
-Each of these endpoint trigger a controller action. Here is the list of [controller actions](../concepts/controller.md) that exist by default when a content type is created.
+Each of these endpoint triggers a controller action. Here is the list of [controller actions](../concepts/controller.md) that exist by default when a content type is created.
 
-If you check the controller file of your generated API `./api/{content-type}/controller/{Content-Type}.js`, you will see an empty file. It's because all the default logic is managed by Strapi. But we allow your override these functions with your own logic.
+If you check the controller file of your generated API `./api/{content-type}/controller/{Content-Type}.js`. It is because you will see an empty file. It's because all the default logic is managed by Strapi. But you can override these actions with your own code.
 
 And that is what we will do to manage our custom data response.
 
 ## Example
 
-In our example we will imagine we have restaurants with a chef. By default when you fetch restaurants, you will got all information of the chef.
-And I don't want to be able to fetch the email - to respect the privacy of my chefs.
+In our example we will use a restaurant type with a chef.. By default when you fetch restaurants, you will got all information of the chef.
+Let's consider you don't want to expose the chef's email for privacy reasons.
 
-To do that, we will customize the functions that fetch all restaurants and remove the email of all restaurant's chef.
+To enforce this rule we will customize the action that fetchs all restaurants and remove the email from the returned data.
 
-To follow my example your will have to create a content type `restaurant` and add the following field definition:
+To follow the example your will have to create a content type `restaurant` and add the following field definition:
 
 - `string` attribute named `name`
 - `text` attribute named `description`
