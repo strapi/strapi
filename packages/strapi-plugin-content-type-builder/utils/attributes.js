@@ -2,9 +2,6 @@
 
 const _ = require('lodash');
 
-const MODEL_RELATIONS = ['oneWay', 'oneToOne', 'manyToOne'];
-const COLLECTION_RELATIONS = ['manyWay', 'manyToMany', 'oneToMany'];
-
 const toUID = (name, plugin) => {
   const modelUID = Object.keys(strapi.contentTypes).find(key => {
     const ct = strapi.contentTypes[key];
@@ -88,66 +85,6 @@ const formatAttribute = (key, attribute, { model }) => {
   }
 };
 
-const convertAttributes = attributes => {
-  return Object.keys(attributes).reduce((acc, key) => {
-    const attribute = attributes[key];
-
-    if (_.has(attribute, 'type')) {
-      if (attribute.type === 'media') {
-        const fileModel = strapi.getModel('file', 'upload');
-        if (!fileModel) return acc;
-
-        const via = _.findKey(fileModel.attributes, { collection: '*' });
-        acc[key] = {
-          [attribute.multiple ? 'collection' : 'model']: 'file',
-          via,
-          plugin: 'upload',
-          required: attribute.required ? true : false,
-        };
-      } else {
-        acc[key] = attribute;
-      }
-
-      return acc;
-    }
-
-    if (_.has(attribute, 'target')) {
-      const {
-        target,
-        nature,
-        unique,
-        targetAttribute,
-        columnName,
-        dominant,
-      } = attribute;
-
-      const attr = {
-        unique: unique === true ? true : undefined,
-        columnName,
-      };
-
-      const { modelName, plugin } = fromUID(target);
-
-      attr.plugin = plugin;
-
-      if (MODEL_RELATIONS.includes(nature)) {
-        attr.model = modelName;
-      } else if (COLLECTION_RELATIONS.includes(nature)) {
-        attr.collection = modelName;
-      }
-
-      if (!['manyWay', 'oneWay'].includes(nature)) {
-        attr.via = targetAttribute;
-        attr.dominant = dominant;
-      }
-
-      acc[key] = attr;
-    }
-
-    return acc;
-  }, {});
-};
-
 const replaceTemporaryUIDs = uidMap => schema => {
   return {
     ...schema,
@@ -203,5 +140,4 @@ module.exports = {
   replaceTemporaryUIDs,
   formatAttributes,
   formatAttribute,
-  convertAttributes,
 };

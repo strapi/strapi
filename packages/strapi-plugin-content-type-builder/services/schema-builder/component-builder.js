@@ -4,7 +4,6 @@ const path = require('path');
 const _ = require('lodash');
 const pluralize = require('pluralize');
 
-const { convertAttributes } = require('../../utils/attributes');
 const { nameToSlug, nameToCollectionName } = require('../../utils/helpers');
 const createSchemaHandler = require('./schema-handler');
 
@@ -59,7 +58,7 @@ module.exports = function createComponentBuilder() {
         .set(['info', 'name'], infos.name)
         .set(['info', 'icon'], infos.icon)
         .set(['info', 'description'], infos.description)
-        .set('attributes', convertAttributes(infos.attributes));
+        .set('attributes', this.convertAttributes(infos.attributes));
 
       this.components.set(uid, handler);
 
@@ -98,7 +97,7 @@ module.exports = function createComponentBuilder() {
         .set(['info', 'icon'], infos.icon)
         .set(['info', 'description'], infos.description)
         // TODO: keep configurable args etc...
-        .set('attributes', convertAttributes(infos.attributes));
+        .set('attributes', this.convertAttributes(infos.attributes));
 
       if (newUID !== uid) {
         this.components.forEach(compo => {

@@ -47,12 +47,26 @@ const createContentType = async ({ contentType, components = [] }) => {
 
   const newContentType = builder.createContentType(replaceTmpUIDs(contentType));
 
+  // allow components to target the new contentType
+  const targetContentType = infos => {
+    Object.keys(infos.attributes).forEach(key => {
+      const { target } = infos.attributes[key];
+      if (target === '__contentType__') {
+        infos.attributes[key].target = newContentType.uid;
+      }
+    });
+
+    return infos;
+  };
+
   components.forEach(component => {
+    const options = replaceTmpUIDs(targetContentType(component));
+
     if (!_.has(component, 'uid')) {
-      return builder.createComponent(replaceTmpUIDs(component));
+      return builder.createComponent(options);
     }
 
-    return builder.editComponent(replaceTmpUIDs(component));
+    return builder.editComponent(options);
   });
 
   // generate api squeleton
