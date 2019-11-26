@@ -228,6 +228,7 @@ SettingsViewWrapper.defaultProps = {
   initialData: {},
   isEditSettings: false,
   modifiedData: {},
+  name: '',
   onConfirmReset: () => {},
   onConfirmSubmit: async () => {},
   onSubmit: () => {},
@@ -241,7 +242,6 @@ SettingsViewWrapper.defaultProps = {
       values: {},
     },
   },
-  name: '',
 };
 
 SettingsViewWrapper.propTypes = {
@@ -255,6 +255,7 @@ SettingsViewWrapper.propTypes = {
   isEditSettings: PropTypes.bool,
   isLoading: PropTypes.bool.isRequired,
   modifiedData: PropTypes.object,
+  name: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   onConfirmReset: PropTypes.func,
   onConfirmSubmit: PropTypes.func,
@@ -269,7 +270,6 @@ SettingsViewWrapper.propTypes = {
       values: PropTypes.object,
     }),
   }),
-  name: PropTypes.string,
 };
 
 export default withRouter(SettingsViewWrapper);

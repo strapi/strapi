@@ -69,7 +69,7 @@ class ListRow extends React.Component {
         );
       case 'providers':
         icons.pop(); // Remove the icon-trash
-        console.log(this.props.item.key);
+
         return (
           <Wrapper className="row">
             <div className="col-md-4">
