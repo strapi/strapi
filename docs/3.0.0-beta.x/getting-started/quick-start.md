@@ -12,17 +12,25 @@ _For a step-by-step guide, please take a look at the [detailed tutorial](quick-s
 
 ## 1. Install Strapi and Create a new project
 
+:::: tabs
+
+::: tab yarn
+
 ```bash
 yarn create strapi-app my-project --quickstart
 ```
 
-**or**
+:::
 
-- Use **npm/npx** to install the Strapi project.
+::: tab npx
 
 ```bash
 npx create-strapi-app my-project --quickstart
 ```
+
+:::
+
+::::
 
 ## 2. Create an Administrator user
 
