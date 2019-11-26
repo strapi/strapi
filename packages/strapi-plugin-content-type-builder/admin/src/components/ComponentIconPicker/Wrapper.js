@@ -1,22 +1,11 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
-  height: 150px;
-  margin-top: -1px;
+  min-height: 199px;
+  margin-top: -2px;
 
   .collection {
-    background-color: #fff;
-  }
-
-  .cell {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 0.25rem;
-    // color: #fff;
-    color: black;
+    background-color: #fafafb;
   }
 
   .noCells {

@@ -175,17 +175,19 @@ const DataManagerProvider = ({ children }) => {
     return <Redirect to={`/plugins/${pluginId}/content-types/${firstCTUid}`} />;
   }
 
+  console.log({ components });
+
   return (
     <DataManagerContext.Provider
       value={{
         addAttribute,
         allComponentsCategories: retrieveSpecificInfoFromComponents(
           components,
-          'category'
+          ['category']
         ),
         allComponentsIconAlreadyTaken: retrieveSpecificInfoFromComponents(
           components,
-          'icon'
+          ['schema', 'icon']
         ),
         components,
         contentTypes,

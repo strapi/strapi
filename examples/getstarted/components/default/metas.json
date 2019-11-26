@@ -1,7 +1,8 @@
 {
   "info": {
     "name": "metas",
-    "description": ""
+    "description": "",
+    "icon": "angry"
   },
   "connection": "default",
   "collectionName": "components_metas",

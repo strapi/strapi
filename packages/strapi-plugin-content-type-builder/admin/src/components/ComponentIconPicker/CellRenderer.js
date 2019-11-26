@@ -1,19 +1,35 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import icons from './utils/icons';
+import Cell from './Cell';
 
-const CellRenderer = ({ index, key, style }) => {
+const CellRenderer = ({ icon, name, onChange, style, value }) => {
+  const isSelected = icon === value;
+  const handleClick = () => {
+    onChange({ target: { name, value: icon } });
+  };
+
   return (
-    <div className="cell" key={key} style={style}>
-      <i className={`fa fa-${icons[index]}`} />
-    </div>
+    <Cell
+      className="cell"
+      style={style}
+      isSelected={isSelected}
+      onClick={handleClick}
+    >
+      <i className={`fa fa-${icon}`} />
+    </Cell>
   );
 };
 
+CellRenderer.defaultProps = {
+  value: '',
+};
+
 CellRenderer.propTypes = {
-  key: PropTypes.string.isRequired,
-  index: PropTypes.number.isRequired,
+  icon: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
   style: PropTypes.object.isRequired,
+  value: PropTypes.string,
 };
 
 export default CellRenderer;

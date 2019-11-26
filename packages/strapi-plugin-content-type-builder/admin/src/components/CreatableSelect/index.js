@@ -54,7 +54,7 @@ const CreatableSelect = ({ error, label, onChange, name }) => {
         styles={styles}
         options={formatOptions()}
       />
-      {error && <ErrorMessage style={{ paddingTop: 10 }}>{error}</ErrorMessage>}
+      {error && <ErrorMessage style={{ paddingTop: 9 }}>{error}</ErrorMessage>}
     </SelectWrapper>
   );
 };

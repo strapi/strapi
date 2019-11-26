@@ -550,6 +550,7 @@ const FormModal = () => {
                                     customCheckboxWithChildren: CustomCheckbox,
                                     booleanBox: BooleanBox,
                                   }}
+                                  isCreating={isCreating}
                                   value={value}
                                   {...input}
                                   error={
