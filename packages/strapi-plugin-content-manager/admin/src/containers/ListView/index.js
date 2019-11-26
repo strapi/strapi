@@ -190,6 +190,7 @@ function ListView({
         },
       });
     }
+
     onChangeListLabels({
       target: {
         name,
