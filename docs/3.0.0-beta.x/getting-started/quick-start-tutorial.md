@@ -138,8 +138,6 @@ Building your admin UI with development configuration ...
 ::: tip NOTE
 Using the `--quickstart` flag installs Strapi using an [SQLite](https://www.sqlite.org/index.html) database. You may, at any time, leave off the **--flag**, but you need to follow a few configuration steps for your database choice. **You need to have your database choice installed and running locally before creating your project.**
 
-An **SQLite** database is an excellent database to use for prototyping and _developing_ Strapi projects. **SQLite** is a light database that ports effortlessly to the other relational databases (**MySQL**, **PostgreSQL**, and **MariaDB**). It is recommended to **develop** with SQLite and to use another relational database (MySQL, PostgreSQL or MariaDB) in production.
-
 If you would like to use **MongoDB** in production, you need to [install, run, and use MongoDB to develop your Strapi project (in development)](../guides/databases.md#mongodb-installation).
 :::
 
