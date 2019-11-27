@@ -97,6 +97,12 @@ strapi(/* {...} */).start();
 
 If you want to host the administration on another server than the API, [please take a look at this dedicated section](../admin-panel/deploy.md).
 
+## Docker
+
+In this section, you will not find a specific guide to deploy your app with [Docker](https://www.docker.com/).
+
+We recently updated the [strapi/strapi-docker](https://github.com/strapi/strapi-docker) GitHub repository that contains all informations needed to user Strapi with Docker.
+
 ## Amazon AWS
 
 This is a step-by-step guide for deploying a Strapi project to [Amazon AWS EC2](https://aws.amazon.com/ec2/). This guide will connect to an [Amazon AWS RDS](https://aws.amazon.com/rds/) for managing and hosting the database. Optionally, this guide will show you how to connect host and serve images on [Amazon AWS S3](https://aws.amazon.com/s3/). Prior to starting this guide, you should have created a [Strapi project](../getting-started/quick-start.md), to use for deploying on AWS.
