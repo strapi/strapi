@@ -80,7 +80,7 @@ To style a plugin component:
 
 Use this style in the component: `<div className={styles.wrapper}></div>`.
 
-::: note
+::: tip
 if you want to use several classes:
 :::
 

@@ -28,6 +28,7 @@ Please send FormData in your request body
 To add a new file attribute in your models, it's like adding a new association. In the first example, you will be able to upload and attach one file to the avatar attribute. Whereas, in our second example, you can upload and attach multiple pictures to the product.
 
 **Path —** `User.settings.json`.
+
 ```json
 {
   "connection": "default",
@@ -51,6 +52,7 @@ To add a new file attribute in your models, it's like adding a new association. 
 ```
 
 **Path —** `Product.settings.json`.
+
 ```json
 {
   "connection": "default",
@@ -98,17 +100,17 @@ Code example:
 ```html
 <form>
   <!-- Can be multiple files -->
-  <input type="file" name="files">
-  <input type="text" name="ref" value="article">
-  <input type="text" name="refId" value="5c126648c7415f0c0ef1bccd">
-  <input type="text" name="field" value="cover">
-  <input type="submit" value="Submit">
+  <input type="file" name="files" />
+  <input type="text" name="ref" value="article" />
+  <input type="text" name="refId" value="5c126648c7415f0c0ef1bccd" />
+  <input type="text" name="field" value="cover" />
+  <input type="submit" value="Submit" />
 </form>
 
 <script type="text/javascript">
   const formElement = document.querySelector('form');
 
-  formElement.addEventListener('submit', (e) => {
+  formElement.addEventListener('submit', e => {
     e.preventDefault();
 
     const request = new XMLHttpRequest();
@@ -120,7 +122,7 @@ Code example:
 </script>
 ```
 
-> ⚠️  You have to send a FormData in any case (React, Angular, jQuery etc...)
+> ⚠️ You have to send a FormData in any case (React, Angular, jQuery etc...)
 
 **Single file**
 
@@ -160,7 +162,6 @@ Let's say that you want to have a `User` model provided by the plugin `Users & P
 }
 ```
 
-
 ```js
 {
   "files": "...", // Buffer or stream of file(s)
@@ -173,6 +174,7 @@ Let's say that you want to have a `User` model provided by the plugin `Users & P
 ```
 
 Here the request to make to associate the file (/path/to/pictures/avatar.jpg) to the user (id: 5a993616b8e66660e8baf45c) when the `User` model is provided by the `Users & Permissions` plugin.
+
 ```
 curl -X POST -F 'files=@/path/to/pictures/avatar.jpg&refId=5a993616b8e66660e8baf45c&ref=user&source=users-permissions&field=avatar' http://localhost:1337/upload
 ```
@@ -189,7 +191,7 @@ To install a new provider run:
 $ npm install strapi-provider-upload-aws-s3@alpha --save
 ```
 
-::: note
+::: tip
 If the provider is not in the mono repo, you probably not need `@alpha` depending if the creator published it with this tag or not.
 :::
 

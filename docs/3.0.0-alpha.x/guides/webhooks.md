@@ -8,12 +8,12 @@ But what we like at Strapi is to help developers. So even if the feature is not 
 
 As you may know, every Content Type (aka models) has lifecycle callbacks: functions which are triggered every time an entry is fetched, inserted, updated or deleted. Here is the list:
 
- - Callbacks on `save` (both triggered on entry creation and update): `beforeSave`, `afterSave`.
- - Callbacks on `fetch`: `beforeFetch`, `afterFetch`.
- - Callbacks on `fetchAll`: `beforeFetchAll`, `afterFetchAll`.
- - Callbacks on `create`: `beforeCreate`, `afterCreate`.
- - Callbacks on `update`: `beforeUpdate`, `afterUpdate`.
- - Callbacks on `destroy`: `beforeDestroy`, `afterDestroy`.
+- Callbacks on `save` (both triggered on entry creation and update): `beforeSave`, `afterSave`.
+- Callbacks on `fetch`: `beforeFetch`, `afterFetch`.
+- Callbacks on `fetchAll`: `beforeFetchAll`, `afterFetchAll`.
+- Callbacks on `create`: `beforeCreate`, `afterCreate`.
+- Callbacks on `update`: `beforeUpdate`, `afterUpdate`.
+- Callbacks on `destroy`: `beforeDestroy`, `afterDestroy`.
 
 All of these functions are available in a file located at `api/yourContentType/models/YourContentType.js`.
 
@@ -28,18 +28,18 @@ If your goal is to rebuild a static website, the only useful callbacks are `afte
  * Lifecycle callbacks for the `Post` model.
  */
 
-module.exports = {  
-  afterCreate: async (entry) => {
+module.exports = {
+  afterCreate: async entry => {
     console.log('afterCreate');
   },
 
-  afterUpdate: async (entry) => {
+  afterUpdate: async entry => {
     console.log('afterUpdate');
   },
 
-  afterDestroy: async (entry) => {
+  afterDestroy: async entry => {
     console.log('afterDestroy');
-  }
+  },
 };
 ```
 
@@ -82,30 +82,30 @@ const axios = require('axios');
  * Lifecycle callbacks for the `Post` model.
  */
 
-module.exports = {  
-  afterCreate: async (entry) => {
-    axios.post(strapi.config.currentEnvironment.staticWebsiteBuildURL, entry)
+module.exports = {
+  afterCreate: async entry => {
+    axios
+      .post(strapi.config.currentEnvironment.staticWebsiteBuildURL, entry)
       .catch(() => {
-          // Ignore
-        }
-      );
+        // Ignore
+      });
   },
 
-  afterUpdate: async (entry) => {
-    axios.post(strapi.config.currentEnvironment.staticWebsiteBuildURL, entry)
+  afterUpdate: async entry => {
+    axios
+      .post(strapi.config.currentEnvironment.staticWebsiteBuildURL, entry)
       .catch(() => {
-          // Ignore
-        }
-      );
+        // Ignore
+      });
   },
 
-  afterDestroy: async (entry) => {
-    axios.post(strapi.config.currentEnvironment.staticWebsiteBuildURL, entry)
+  afterDestroy: async entry => {
+    axios
+      .post(strapi.config.currentEnvironment.staticWebsiteBuildURL, entry)
       .catch(() => {
-          // Ignore
-        }
-      );
-  }
+        // Ignore
+      });
+  },
 };
 ```
 
@@ -115,9 +115,9 @@ Until September 2018, `remove` lifecycle callback [was not supported by Mongoose
 
 So, to trigger an url on delete, please add `request.post(strapi.config.currentEnvironment.staticWebsiteBuildURL, entry);` in:
 
- - `remove` action of `api/yourContentType/services/YourContentType.js` (triggered by your public API).
- - `delete` action of `plugins/content-manager/services/ContentManager.js` (triggered by the Content Manager).
+- `remove` action of `api/yourContentType/services/YourContentType.js` (triggered by your public API).
+- `delete` action of `plugins/content-manager/services/ContentManager.js` (triggered by the Content Manager).
 
-::: note
+::: tip
 Do not forget to require `axios` at the top of these files.
 :::
