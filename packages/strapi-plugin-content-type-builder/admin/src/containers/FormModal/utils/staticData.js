@@ -2,6 +2,7 @@ const NAVLINKS = [{ id: 'base' }, { id: 'advanced' }];
 const INITIAL_STATE_DATA = {
   attributeName: null,
   actionType: null,
+  dynamicZoneTarget: null,
   modalType: null,
   settingType: null,
   forTarget: null,

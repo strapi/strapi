@@ -257,5 +257,6 @@
   "modalForm.sub-header.attribute.edit": "Edit {name}",
   "modalForm.components.create-component.category.label": "Select a category or enter a name to create a new one",
   "modalForm.attributes.select-component": "Select a component",
-  "modalForm.components.icon.label": "Icon"
+  "modalForm.components.icon.label": "Icon",
+  "modalForm.sub-header.addComponentToDynamicZone": "Add new component to the dynamic zone"
 }

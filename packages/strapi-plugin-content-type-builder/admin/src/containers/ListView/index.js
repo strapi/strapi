@@ -48,7 +48,7 @@ const ListPage = () => {
     push({ search });
   };
   const handleClickAddComponentToDZ = dzName => {
-    const search = `modalType=addCompoToDynamicZone&forTarget=contentType&targetUid=${targetUid}&headerDisplayName=${currentDataName}&dynamicZoneTarget=${dzName}`;
+    const search = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${targetUid}&headerDisplayName=${currentDataName}&dynamicZoneTarget=${dzName}&settingType=base`;
     push({ search });
   };
   // TODO just a util not sure it should be kept

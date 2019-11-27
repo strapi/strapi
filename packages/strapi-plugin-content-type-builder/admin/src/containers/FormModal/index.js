@@ -73,6 +73,7 @@ const FormModal = () => {
       const targetUid = query.get('targetUid');
       const headerDisplayName = query.get('headerDisplayName');
       const step = query.get('step');
+      const dynamicZoneTarget = query.get('dynamicZoneTarget');
       const pathToSchema =
         forTarget === 'contentType' || forTarget === 'component'
           ? [forTarget]
@@ -81,6 +82,7 @@ const FormModal = () => {
       setState({
         attributeName,
         actionType,
+        dynamicZoneTarget,
         modalType,
         settingType,
         forTarget,
@@ -341,9 +343,12 @@ const FormModal = () => {
           );
           // Adding a component to a dynamiczone is not the same logic as creating a simple field
           // so the search is different
+
+          // TODO make sure it works for edit
+          const dzSearch = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${state.targetUid}&headerDisplayName=${state.headerDisplayName}&dynamicZoneTarget=${modifiedData.name}&settingType=base`;
           const nextSearch =
             state.attributeType === 'dynamiczone'
-              ? ''
+              ? dzSearch
               : createNextSearch(targetUid);
 
           push({ search: nextSearch });

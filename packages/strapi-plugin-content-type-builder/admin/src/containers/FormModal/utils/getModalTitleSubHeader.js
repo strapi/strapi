@@ -9,15 +9,14 @@ const getModalTitleSubHeader = state => {
         }`
       );
     case 'attribute': {
-      // if (state.step) {
-      //   return getTrad(`modalForm.sub-header.attribute.${state.actionType}`);
-      // }
       return getTrad(
         `modalForm.sub-header.attribute.${state.actionType}${
           state.step !== 'null' && state.step !== null ? '.step' : ''
         }`
       );
     }
+    case 'addComponentToDynamicZone':
+      return getTrad('modalForm.sub-header.addComponentToDynamicZone');
     default:
       return getTrad('configurations');
   }
