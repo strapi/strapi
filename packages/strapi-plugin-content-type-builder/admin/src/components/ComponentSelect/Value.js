@@ -16,7 +16,12 @@ const Value = ({ children, ...props }) => {
     category,
     schema: { name },
   } = selectedComponent;
-
+  const {
+    selectProps: { componentCategory, componentName, isCreatingComponent },
+  } = props;
+  console.log({ props });
+  const displayedCategory = isCreatingComponent ? componentCategory : category;
+  const displayedName = isCreatingComponent ? componentName : name;
   const style = { color: '#333740' };
 
   return (
@@ -24,10 +29,10 @@ const Value = ({ children, ...props }) => {
       {!!value && (
         <>
           <span style={{ fontWeight: 700, ...style }}>
-            {upperFirst(category)}
+            {upperFirst(displayedCategory)}
           </span>
           <span style={style}>&nbsp;—&nbsp;</span>
-          <span style={style}>{name}</span>
+          <span style={style}>{displayedName}</span>
         </>
       )}
     </SingleValue>
@@ -36,10 +41,20 @@ const Value = ({ children, ...props }) => {
 
 Value.defaultProps = {
   children: null,
+  selectProps: {
+    componentCategory: null,
+    componentName: null,
+    isCreatingComponent: false,
+  },
 };
 
 Value.propTypes = {
   children: PropTypes.string,
+  selectProps: PropTypes.shape({
+    componentCategory: PropTypes.string,
+    componentName: PropTypes.string,
+    isCreatingComponent: PropTypes.bool,
+  }),
 };
 
 export default Value;

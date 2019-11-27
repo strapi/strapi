@@ -4,7 +4,15 @@ import PropTypes from 'prop-types';
 import MenuList from './MenuList';
 import Value from './Value';
 
-const ComponentSelect = ({ onChange, name, value, styles }) => {
+const ComponentSelect = ({
+  componentCategoryNeededForAddingAfieldWhileCreatingAComponent,
+  componentNameNeededForAddingAfieldWhileCreatingAComponent,
+  isCreatingComponentWhileAddingAField,
+  onChange,
+  name,
+  value,
+  styles,
+}) => {
   // Create a ref in order to access the StateManager
   // So we can close the menu after clicking on a menu item
   // This allows us to get rid of the menuIsOpen state management
@@ -22,6 +30,12 @@ const ComponentSelect = ({ onChange, name, value, styles }) => {
   return (
     <Select
       isClearable
+      isDisabled={isCreatingComponentWhileAddingAField}
+      isCreatingComponent={isCreatingComponentWhileAddingAField}
+      componentCategory={
+        componentCategoryNeededForAddingAfieldWhileCreatingAComponent
+      }
+      componentName={componentNameNeededForAddingAfieldWhileCreatingAComponent}
       name={name}
       onChange={handleChange}
       onClickOption={onChange}
@@ -39,11 +53,17 @@ const ComponentSelect = ({ onChange, name, value, styles }) => {
 };
 
 ComponentSelect.defaultProps = {
-  error: null,
+  componentCategoryNeededForAddingAfieldWhileCreatingAComponent: null,
+  componentNameNeededForAddingAfieldWhileCreatingAComponent: null,
+  isCreatingComponentWhileAddingAField: false,
   value: null,
 };
 
 ComponentSelect.propTypes = {
+  componentCategoryNeededForAddingAfieldWhileCreatingAComponent:
+    PropTypes.string,
+  componentNameNeededForAddingAfieldWhileCreatingAComponent: PropTypes.string,
+  isCreatingComponentWhileAddingAField: PropTypes.bool,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   styles: PropTypes.object.isRequired,

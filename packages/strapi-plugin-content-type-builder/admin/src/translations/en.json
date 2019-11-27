@@ -253,7 +253,7 @@
   "modalForm.sub-header.chooseAttribute.component": "Select a field for your component",
   "modalForm.sub-header.chooseAttribute.contentType": "Select a field for your content type",
   "modalForm.sub-header.attribute.create": "Add new {type} field",
-  "modalForm.sub-header.attribute.create.step": "Add new component ({step})/2)",
+  "modalForm.sub-header.attribute.create.step": "Add new component ({step}/2)",
   "modalForm.sub-header.attribute.edit": "Edit {name}",
   "modalForm.components.create-component.category.label": "Select a category or enter a name to create a new one",
   "modalForm.attributes.select-component": "Select a component",

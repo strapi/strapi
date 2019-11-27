@@ -57,6 +57,7 @@ const FormModal = () => {
     componentToCreate,
     formErrors,
     initialData,
+    isCreatingComponentWhileAddingAField,
     modifiedData,
   } = reducerState.toJS();
 
@@ -608,6 +609,19 @@ const FormModal = () => {
                                     booleanBox: BooleanBox,
                                   }}
                                   isCreating={isCreating}
+                                  isCreatingComponentWhileAddingAField={
+                                    isCreatingComponentWhileAddingAField
+                                  }
+                                  componentCategoryNeededForAddingAfieldWhileCreatingAComponent={get(
+                                    componentToCreate,
+                                    'category',
+                                    null
+                                  )}
+                                  componentNameNeededForAddingAfieldWhileCreatingAComponent={get(
+                                    componentToCreate,
+                                    'name',
+                                    null
+                                  )}
                                   value={value}
                                   {...input}
                                   error={
