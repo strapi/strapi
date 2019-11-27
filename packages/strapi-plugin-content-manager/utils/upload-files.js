@@ -16,6 +16,7 @@ module.exports = async (entry, files, { model, source }) => {
     let tmpModel = entity;
     let modelName = model;
     let sourceName;
+
     for (let i = 0; i < path.length; i++) {
       if (!tmpModel) return {};
       const part = path[i];
@@ -35,7 +36,11 @@ module.exports = async (entry, files, { model, source }) => {
         tmpModel = strapi.components[attr.component];
       } else if (attr.type === 'dynamiczone') {
         const entryIdx = path[i + 1]; // get component index
-        modelName = _.get(entry, [...currentPath, entryIdx]).__component; // get component type
+        const value = _.get(entry, [...currentPath, entryIdx]);
+
+        if (!value) return {};
+
+        modelName = value.__component; // get component type
         tmpModel = strapi.components[modelName];
       } else if (_.has(attr, 'model') || _.has(attr, 'collection')) {
         sourceName = attr.plugin;
@@ -57,6 +62,7 @@ module.exports = async (entry, files, { model, source }) => {
 
     if (model) {
       const id = _.get(entry, path.concat('id'));
+
       return uploadService.uploadToEntity(
         { id, model },
         { [field]: files },
