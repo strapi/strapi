@@ -32,8 +32,11 @@ const ComponentIconPicker = ({
     const columnPosition = index % (columnCount || 1);
 
     const height = 48;
-    const width = 53;
-    const x = columnPosition * width;
+    const width = 52;
+    let x = columnPosition * width;
+    if (x === 0) {
+      x = 8;
+    }
 
     const y = parseInt(index / 16, 10) * 48;
 

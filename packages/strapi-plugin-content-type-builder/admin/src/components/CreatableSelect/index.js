@@ -32,6 +32,7 @@ const CreatableSelect = ({ error, label, onChange, name }) => {
     menu: base => {
       return {
         ...base,
+        border: '1px solid #78caff !important',
         borderColor: '#78caff !important',
         borderTopColor: '#E3E9F3 !important',
       };
@@ -53,7 +54,9 @@ const CreatableSelect = ({ error, label, onChange, name }) => {
         onChange={handleChange}
         styles={styles}
         options={formatOptions()}
+        // menuIsOpen
       />
+
       {error && <ErrorMessage style={{ paddingTop: 9 }}>{error}</ErrorMessage>}
     </SelectWrapper>
   );

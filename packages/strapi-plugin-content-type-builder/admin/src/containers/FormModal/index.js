@@ -53,7 +53,12 @@ const FormModal = () => {
     modifiedData: allDataSchema,
     sortedContentTypesList,
   } = useDataManager();
-  const { formErrors, initialData, modifiedData } = reducerState.toJS();
+  const {
+    componentToCreate,
+    formErrors,
+    initialData,
+    modifiedData,
+  } = reducerState.toJS();
 
   useEffect(() => {
     if (!isEmpty(search)) {
@@ -92,6 +97,7 @@ const FormModal = () => {
         // This condition is added to prevent the reducer state to be cleared when navigating from the base tab to tha advanced one
         state.modalType !== 'attribute'
       ) {
+        console.log('ook');
         const attributeToEditNotFormatted = get(
           allDataSchema,
           [...pathToSchema, 'schema', 'attributes', attributeName],
@@ -169,7 +175,8 @@ const FormModal = () => {
       // TODO
       state.modalType === 'attribute' &&
       state.attributeType === 'component' &&
-      isCreatingComponentFromAView
+      isCreatingComponentFromAView &&
+      state.step === '1'
     ) {
       console.log('Should Validate');
 
@@ -216,7 +223,10 @@ const FormModal = () => {
       val = null;
     } else if (
       type === 'radio' &&
-      (name === 'multiple' || name === 'single' || name === 'createComponent')
+      (name === 'multiple' ||
+        name === 'single' ||
+        name === 'createComponent' ||
+        name === 'repeatable')
     ) {
       val = value === 'false' ? false : true;
     } else if (type === 'radio' && name === 'default') {
@@ -305,7 +315,33 @@ const FormModal = () => {
         state.modalType === 'attribute' &&
         isCreatingComponentFromAView
       ) {
-        console.log('Go to step 2');
+        console.log({ step: state.step });
+        if (state.step === '1') {
+          console.log('olll');
+          // const componentUid = createComponentUid(
+          //   modifiedData.componentToCreate.name,
+          //   modifiedData.componentToCreate.category
+          // );
+          // const {
+          //   componentToCreate: { category, ...rest },
+          // } = modifiedData;
+          // // Create the component first temporary
+          // // It should be removed if the
+          // createSchema(rest, 'component', componentUid, category);
+          push({
+            search:
+              'modalType=attribute&actionType=create&settingType=base&forTarget=contentType&targetUid=application::address.address&attributeType=component&headerDisplayName=address&step=2',
+          });
+
+          dispatch({
+            type: 'RESET_PROPS_AND_SAVE_CURRENT_DATA',
+          });
+
+          console.log('Go to step 2');
+          return;
+        } else {
+          console.log('Go to add field to compo');
+        }
       } else if (state.modalType === 'component') {
         // Create the component schema
         const componentUid = createComponentUid(
@@ -364,6 +400,8 @@ const FormModal = () => {
   const modalBodyStyle = isPickingAttribute
     ? { paddingTop: '0.5rem', paddingBottom: '3rem' }
     : {};
+
+  console.log({ FormModal: modifiedData, componentToCreate });
 
   return (
     <Modal
@@ -466,7 +504,7 @@ const FormModal = () => {
                       </div>
                     );
                   })
-                : form(modifiedData, state.attributeType).items.map(
+                : form(modifiedData, state.attributeType, state.step).items.map(
                     (row, index) => {
                       return (
                         <div className="row" key={index}>

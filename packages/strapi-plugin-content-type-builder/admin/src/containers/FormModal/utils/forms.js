@@ -207,7 +207,7 @@ const forms = {
       }
     },
     form: {
-      advanced(data, type) {
+      advanced(data, type, step) {
         const targetAttributeValue = get(data, 'targetAttribute', null);
         const nameValue = get(data, 'name', null);
         const relationItems = [
@@ -329,9 +329,36 @@ const forms = {
         ];
 
         if (type === 'component') {
-          return {
-            items: componentForm.advanced('componentToCreate.'),
-          };
+          if (step === '1') {
+            return {
+              items: componentForm.advanced('componentToCreate.'),
+            };
+          } else {
+            const requiredItem = [
+              [
+                {
+                  autoFocus: false,
+                  name: 'required',
+                  type: 'checkbox',
+                  label: {
+                    id: getTrad('form.attribute.item.requiredField'),
+                  },
+                  description: {
+                    id: getTrad(
+                      'form.attribute.item.requiredField.description'
+                    ),
+                  },
+                  validations: {},
+                },
+              ],
+            ];
+
+            return {
+              items: data.repeatable
+                ? [...requiredItem, ...dynamiczoneItems]
+                : requiredItem,
+            };
+          }
         }
 
         const items = defaultItems.slice();
@@ -472,7 +499,7 @@ const forms = {
           items,
         };
       },
-      base(data, type) {
+      base(data, type, step) {
         if (type === 'relation') {
           return {
             items: [
@@ -504,7 +531,7 @@ const forms = {
           ],
         ];
 
-        if (type === 'component') {
+        if (type === 'component' && step === '1') {
           const itemsToConcat =
             data.createComponent === true
               ? [[{ type: 'spacer' }]].concat(
@@ -548,6 +575,40 @@ const forms = {
               ...itemsToConcat,
             ],
           };
+        }
+
+        if (type === 'component' && step === '2') {
+          // items[0]
+
+          items.push([
+            {
+              label: {
+                id: getTrad('modalForm.attribute.text.type-selection'),
+              },
+              name: 'repeatable',
+              type: 'booleanBox',
+              size: 12,
+              options: [
+                {
+                  headerId: getTrad(`form.attribute.component.option.create`),
+                  descriptionId: getTrad(
+                    `form.attribute.component.option.create.description`
+                  ),
+                  value: true,
+                },
+                {
+                  headerId: getTrad(
+                    `form.attribute.component.option.reuse-existing`
+                  ),
+                  descriptionId: getTrad(
+                    `form.attribute.${type}.option.reuse-existing.description`
+                  ),
+                  value: false,
+                },
+              ],
+              validations: {},
+            },
+          ]);
         }
 
         if (type === 'text' || type === 'media') {

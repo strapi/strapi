@@ -14,8 +14,8 @@ const Cell = styled.div`
         &::after {
           content: '';
           position: absolute;
-          top: 4;
-          left: 6.5px;
+          top: 4px;
+          left: 6px;
           border-radius: 50%;
           width: 40px;
           height: 40px;

@@ -9,7 +9,7 @@ import { Switch, Route } from 'react-router-dom';
 import { LoadingIndicatorPage } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import DataManagerProvider from '../DataManagerProvider';
-import icons from './utils/icons';
+import icons from './utils/icons.json';
 import Wrapper from './Wrapper';
 
 const ListPage = lazy(() => import('../ListView'));

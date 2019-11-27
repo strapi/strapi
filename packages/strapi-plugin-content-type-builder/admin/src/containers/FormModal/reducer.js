@@ -1,10 +1,12 @@
 import { fromJS } from 'immutable';
 import pluralize from 'pluralize';
+import { createComponentUid } from './utils/createUid';
 
 const initialState = fromJS({
   formErrors: {},
   modifiedData: {},
   initialData: {},
+  componentToCreate: {},
 });
 
 export const shouldPluralizeTargetAttribute = nature =>
@@ -82,6 +84,24 @@ const reducer = (state, action) => {
       });
     case 'RESET_PROPS':
       return initialState;
+    case 'RESET_PROPS_AND_SAVE_CURRENT_DATA': {
+      const componentToCreate = state.getIn([
+        'modifiedData',
+        'componentToCreate',
+      ]);
+      const modifiedData = fromJS({
+        type: 'component',
+        repeatable: false,
+        component: createComponentUid(
+          componentToCreate.get('name'),
+          componentToCreate.get('category')
+        ),
+      });
+
+      return initialState
+        .update('componentToCreate', () => componentToCreate)
+        .update('modifiedData', () => modifiedData);
+    }
     case 'SET_ATTRIBUTE_DATA_SCHEMA': {
       const {
         attributeType,
