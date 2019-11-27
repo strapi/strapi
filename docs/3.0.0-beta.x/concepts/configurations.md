@@ -215,17 +215,17 @@ You can access the config of the current environment through `strapi.config.curr
       - `timezone` (string): Set the default behavior for local time. Default value: `utc`.
       - `schema` (string): Set the default database schema. **Used only for Postgres DB**
       - `ssl` (boolean): For ssl database connection.
-  - `options` Options used for database connection.
-    - `debug` (boolean): Show database exchanges and errors.
-    - `autoMigration` (boolean): To disable auto tables/columns creation for SQL database.
-    - `pool` Options used for database connection pooling. For more information look at [Knex's pool config documentation](https://knexjs.org/#Installation-pooling).
-      - `min` (integer): Minimum number of connections to keep in the pool. Default value: `0`.
-      - `max` (integer): Maximum number of connections to keep in the pool. Default value: `10`.
-      - `acquireTimeoutMillis` (integer): Maximum time in milliseconds to wait for acquiring a connection from the pool. Default value: `2000` (2 seconds).
-      - `createTimeoutMillis` (integer): Maximum time in milliseconds to wait for creating a connection to be added to the pool. Default value: `2000` (2 seconds).
-      - `idleTimeoutMillis` (integer): Number of milliseconds to wait before destroying idle connections. Default value: `30000` (30 seconds).
-      - `reapIntervalMillis` (integer): How often to check for idle connections in milliseconds. Default value: `1000` (1 second).
-      - `createRetryIntervalMillis` (integer): How long to idle after a failed create before trying again in milliseconds. Default value: `200`.
+    - `options` Options used for database connection.
+      - `debug` (boolean): Show database exchanges and errors.
+      - `autoMigration` (boolean): To disable auto tables/columns creation for SQL database.
+      - `pool` Options used for database connection pooling. For more information look at [Knex's pool config documentation](https://knexjs.org/#Installation-pooling).
+        - `min` (integer): Minimum number of connections to keep in the pool. Default value: `0`.
+        - `max` (integer): Maximum number of connections to keep in the pool. Default value: `10`.
+        - `acquireTimeoutMillis` (integer): Maximum time in milliseconds to wait for acquiring a connection from the pool. Default value: `2000` (2 seconds).
+        - `createTimeoutMillis` (integer): Maximum time in milliseconds to wait for creating a connection to be added to the pool. Default value: `2000` (2 seconds).
+        - `idleTimeoutMillis` (integer): Number of milliseconds to wait before destroying idle connections. Default value: `30000` (30 seconds).
+        - `reapIntervalMillis` (integer): How often to check for idle connections in milliseconds. Default value: `1000` (1 second).
+        - `createRetryIntervalMillis` (integer): How long to idle after a failed create before trying again in milliseconds. Default value: `200`.
 
 :::
 
@@ -242,10 +242,10 @@ You can access the config of the current environment through `strapi.config.curr
       - `database` (string): Database name.
       - `username` (string): Username used to establish the connection.
       - `password` (string): Password used to establish the connection.
-  - `options` Options used for database connection.
-    - `ssl` (boolean): For ssl database connection.
-    - `debug` (boolean): Show database exchanges and errors.
-    - `authenticationDatabase` (string): Connect with authentication.
+    - `options` Options used for database connection.
+      - `ssl` (boolean): For ssl database connection.
+      - `debug` (boolean): Show database exchanges and errors.
+      - `authenticationDatabase` (string): Connect with authentication.
 
 :::
 
@@ -314,7 +314,7 @@ You can access the config of the current environment through `strapi.config.curr
 {
   "defaultConnection": "default",
   "connections": {
-    "sqlite": {
+    "default": {
       "connector": "strapi-hook-bookshelf",
       "settings": {
         "client": "sqlite",
@@ -481,7 +481,7 @@ As an example using this configuration with Nginx your server would respond to `
 
 For security reasons, sometimes it's better to set variables through the server environment. It's also useful to push dynamics values into configurations files. To enable this feature into JSON files, Strapi embraces a JSON-file interpreter into his core to allow dynamic value in the JSON configurations files.
 
-### Syntax
+#### Syntax
 
 The syntax is inspired by the [template literals ES2015 specifications](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals). These dynamic values are indicated by the Dollar sign and curly braces (`${expression}`).
 
