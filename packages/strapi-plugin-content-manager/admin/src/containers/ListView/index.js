@@ -125,6 +125,8 @@ function ListView({
   const getListLayout = () =>
     get(layouts, [...contentTypePath, 'layouts', 'list'], []);
 
+  const getListSchema = () => get(layouts, [...contentTypePath, 'schema'], {});
+
   const getName = () => {
     return getFeatureLabel(models, slug);
   };
@@ -140,13 +142,7 @@ function ListView({
               'dynamiczone',
               'relation',
               'richtext',
-            ].includes(
-              get(
-                layouts,
-                [...contentTypePath, 'schema', 'attributes', key, 'type'],
-                ''
-              )
-            )
+            ].includes(get(getListSchema(), ['attributes', key, 'type'], ''))
         )
         .map(label => ({
           name: label,
@@ -291,7 +287,7 @@ function ListView({
         onChangeParams={handleChangeParams}
         onClickDelete={handleClickDelete}
         onDeleteSeveralData={onDeleteSeveralData}
-        schema={get(layouts, [...contentTypePath, 'schema'], {})}
+        schema={getListSchema()}
         searchParams={getSearchParams()}
         slug={slug}
         toggleModalDeleteAll={toggleModalDeleteAll}
@@ -334,11 +330,7 @@ function ListView({
                           changeParams={handleChangeParams}
                           filters={getSearchParams().filters}
                           index={key}
-                          schema={get(
-                            layouts,
-                            [...contentTypePath, 'schema'],
-                            {}
-                          )}
+                          schema={getListSchema()}
                           key={key}
                           toggleFilterPickerState={toggleFilterPickerState}
                           isFilterPickerOpen={isFilterPickerOpen}
