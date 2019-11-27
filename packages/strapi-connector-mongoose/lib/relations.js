@@ -27,7 +27,7 @@ module.exports = {
     const populate = this.associations.map(x => x.alias);
     const primaryKeyValue = getValuePrimaryKey(params, this.primaryKey);
 
-    const response = await this.findOne({ [this.primaryKey]: primaryKeyValue })
+    const entry = await this.findOne({ [this.primaryKey]: primaryKeyValue })
       .populate(populate)
       .lean();
 
@@ -36,40 +36,44 @@ module.exports = {
       params.parseRelationships === false
         ? params.values
         : Object.keys(removeUndefinedKeys(params.values)).reduce(
-            (acc, current) => {
-              const property = params.values[current];
+            (acc, attribute) => {
+              const currentValue = entry[attribute];
+              const newValue = params.values[attribute];
+
               const association = this.associations.find(
-                x => x.alias === current
+                x => x.alias === attribute
               );
-              const details = this._attributes[current];
+
+              const details = this._attributes[attribute];
 
               // set simple attributes
               if (!association && _.get(details, 'isVirtual') !== true) {
-                return _.set(acc, current, property);
+                return _.set(acc, attribute, newValue);
               }
 
               const assocModel = getModel(
                 details.model || details.collection,
                 details.plugin
               );
+
               switch (association.nature) {
                 case 'oneWay': {
                   return _.set(
                     acc,
-                    current,
-                    _.get(property, assocModel.primaryKey, property)
+                    attribute,
+                    _.get(newValue, assocModel.primaryKey, newValue)
                   );
                 }
                 case 'oneToOne': {
                   // if value is the same don't do anything
-                  if (response[current] === property) return acc;
+                  if (currentValue === newValue) return acc;
 
                   // if the value is null, set field to null on both sides
-                  if (_.isNull(property)) {
+                  if (_.isNull(newValue)) {
                     const updatePromise = assocModel.updateOne(
                       {
                         [assocModel.primaryKey]: getValuePrimaryKey(
-                          response[current],
+                          currentValue,
                           assocModel.primaryKey
                         ),
                       },
@@ -77,18 +81,18 @@ module.exports = {
                     );
 
                     relationUpdates.push(updatePromise);
-                    return _.set(acc, current, null);
+                    return _.set(acc, attribute, null);
                   }
 
                   // set old relations to null
                   const updateLink = this.updateOne(
-                    { [current]: new mongoose.Types.ObjectId(property) },
-                    { [current]: null }
+                    { [attribute]: new mongoose.Types.ObjectId(newValue) },
+                    { [attribute]: null }
                   ).then(() => {
                     return assocModel.updateOne(
                       {
                         [this.primaryKey]: new mongoose.Types.ObjectId(
-                          property
+                          newValue
                         ),
                       },
                       { [details.via]: primaryKeyValue }
@@ -97,14 +101,14 @@ module.exports = {
 
                   // set new relation
                   relationUpdates.push(updateLink);
-                  return _.set(acc, current, property);
+                  return _.set(acc, attribute, newValue);
                 }
                 case 'oneToMany': {
                   // set relation to null for all the ids not in the list
-                  const currentIds = response[current];
+                  const attributeIds = currentValue;
                   const toRemove = _.differenceWith(
-                    currentIds,
-                    property,
+                    attributeIds,
+                    newValue,
                     (a, b) => {
                       return (
                         `${a[assocModel.primaryKey] || a}` ===
@@ -131,7 +135,7 @@ module.exports = {
                       return assocModel.updateMany(
                         {
                           [assocModel.primaryKey]: {
-                            $in: property.map(
+                            $in: newValue.map(
                               val =>
                                 new mongoose.Types.ObjectId(
                                   val[assocModel.primaryKey] || val
@@ -149,8 +153,8 @@ module.exports = {
                 case 'manyToOne': {
                   return _.set(
                     acc,
-                    current,
-                    _.get(property, assocModel.primaryKey, property)
+                    attribute,
+                    _.get(newValue, assocModel.primaryKey, newValue)
                   );
                 }
                 case 'manyWay':
@@ -158,10 +162,10 @@ module.exports = {
                   if (association.dominant) {
                     return _.set(
                       acc,
-                      current,
-                      property
-                        ? property.map(val => val[assocModel.primaryKey] || val)
-                        : property
+                      attribute,
+                      newValue
+                        ? newValue.map(val => val[assocModel.primaryKey] || val)
+                        : newValue
                     );
                   }
 
@@ -169,7 +173,7 @@ module.exports = {
                     .updateMany(
                       {
                         [assocModel.primaryKey]: {
-                          $in: response[current].map(
+                          $in: currentValue.map(
                             val =>
                               new mongoose.Types.ObjectId(
                                 val[assocModel.primaryKey] || val
@@ -189,14 +193,14 @@ module.exports = {
                       return assocModel.updateMany(
                         {
                           [assocModel.primaryKey]: {
-                            $in: property
-                              ? property.map(
+                            $in: newValue
+                              ? newValue.map(
                                   val =>
                                     new mongoose.Types.ObjectId(
                                       val[assocModel.primaryKey] || val
                                     )
                                 )
-                              : property,
+                              : newValue,
                           },
                         },
                         {
@@ -211,8 +215,9 @@ module.exports = {
                 case 'manyMorphToMany':
                 case 'manyMorphToOne': {
                   // Update the relational array.
-                  acc[current] = property.map(obj => {
+                  acc[attribute] = newValue.map(obj => {
                     const refModel = strapi.getModel(obj.ref, obj.source);
+
                     return {
                       ref: new mongoose.Types.ObjectId(obj.refId),
                       kind: obj.kind || refModel.globalId,
@@ -247,15 +252,15 @@ module.exports = {
                   };
 
                   // Compare array of ID to find deleted files.
-                  const currentValue = transformToArrayID(
-                    response[current]
-                  ).map(id => id.toString());
-                  const storedValue = transformToArrayID(property).map(id =>
+                  const attributeValue = transformToArrayID(currentValue).map(
+                    id => id.toString()
+                  );
+                  const storedValue = transformToArrayID(newValue).map(id =>
                     id.toString()
                   );
 
-                  const toAdd = _.difference(storedValue, currentValue);
-                  const toRemove = _.difference(currentValue, storedValue);
+                  const toAdd = _.difference(storedValue, attributeValue);
+                  const toRemove = _.difference(attributeValue, storedValue);
 
                   const model = getModel(
                     details.model || details.collection,
@@ -269,8 +274,9 @@ module.exports = {
                         id,
                         alias: association.via,
                         ref: this.globalId,
-                        refId: response._id,
+                        refId: entry._id,
                         field: association.alias,
+                        filter: association.filter,
                       })
                     );
                   });
@@ -282,7 +288,7 @@ module.exports = {
                         id,
                         alias: association.via,
                         ref: this.globalId,
-                        refId: response._id,
+                        refId: entry._id,
                         field: association.alias,
                       })
                     );
@@ -316,30 +322,21 @@ module.exports = {
       : updatedEntity;
   },
 
-  addRelationMorph: async function(params) {
+  async addRelationMorph(params) {
+    const { alias, id } = params;
+
     let entry = await this.findOne({
-      [this.primaryKey]: getValuePrimaryKey(params, this.primaryKey),
+      [this.primaryKey]: id,
     });
 
-    if (entry) {
-      entry = entry.toJSON();
-    }
-
-    const value = [];
-
-    // Retrieve association.
-    const association = this.associations.find(
-      association => association.alias === params.alias
-    );
-
-    if (!association) {
-      throw Error(
-        `Impossible to create relationship with ${params.ref} (${params.refId})`
+    if (!entry) {
+      throw new Error(
+        `Relation ${params.field} cannot be created because the target entity doesnt exist`
       );
     }
 
-    // Resolve if the association is already existing.
-    const isExisting = value.find(obj => {
+    // if association already exists ignore
+    const relationExists = entry[alias].find(obj => {
       if (
         obj.kind === params.ref &&
         obj.ref.toString() === params.refId.toString() &&
@@ -351,34 +348,28 @@ module.exports = {
       return false;
     });
 
-    // Avoid duplicate.
-    if (isExisting) {
-      return Promise.resolve();
-    }
+    if (relationExists) return Promise.resolve();
 
-    // Push new relation to the association array.
-    value.push({
-      ref: params.ref,
-      refId: params.refId,
+    entry[alias].push({
+      ref: new mongoose.Types.ObjectId(params.refId),
       kind: params.ref,
-      field: params.field,
+      [params.filter]: params.field,
     });
 
-    entry[params.alias] = value;
-
-    return module.exports.update.call(this, {
-      id: params.id,
-      values: entry,
-    });
+    await entry.save();
   },
 
-  removeRelationMorph: async function(params) {
+  async removeRelationMorph(params) {
+    const { alias, id } = params;
+
     const entry = await this.findOne({
-      [this.primaryKey]: getValuePrimaryKey(params, this.primaryKey),
+      [this.primaryKey]: id,
     });
 
+    if (!entry) return Promise.resolve();
+
     // Filter the association array and remove the association.
-    entry[params.alias] = entry[params.alias].filter(obj => {
+    entry[alias] = entry[alias].filter(obj => {
       if (
         obj.kind === params.ref &&
         obj.ref.toString() === params.refId.toString() &&
@@ -390,9 +381,6 @@ module.exports = {
       return true;
     });
 
-    return module.exports.update.call(this, {
-      id: params.id,
-      values: entry,
-    });
+    entry.save();
   },
 };
