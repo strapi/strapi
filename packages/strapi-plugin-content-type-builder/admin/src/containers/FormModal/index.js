@@ -140,11 +140,10 @@ const FormModal = () => {
     : state.forTarget;
   const isCreatingCT = state.modalType === 'contentType';
   const isCreating = state.actionType === 'create';
-  const isCreatingComponentFromAView = get(
-    modifiedData,
-    'createComponent',
-    false
-  );
+  const isCreatingComponentFromAView =
+    get(modifiedData, 'createComponent', false) ||
+    isCreatingComponentWhileAddingAField;
+
   const isOpen = !isEmpty(search);
   const isPickingAttribute = state.modalType === 'chooseAttribute';
   const uid = createUid(modifiedData.name || '');
@@ -315,19 +314,7 @@ const FormModal = () => {
         state.modalType === 'attribute' &&
         isCreatingComponentFromAView
       ) {
-        console.log({ step: state.step });
         if (state.step === '1') {
-          console.log('olll');
-          // const componentUid = createComponentUid(
-          //   modifiedData.componentToCreate.name,
-          //   modifiedData.componentToCreate.category
-          // );
-          // const {
-          //   componentToCreate: { category, ...rest },
-          // } = modifiedData;
-          // // Create the component first temporary
-          // // It should be removed if the
-          // createSchema(rest, 'component', componentUid, category);
           push({
             search:
               'modalType=attribute&actionType=create&settingType=base&forTarget=contentType&targetUid=application::address.address&attributeType=component&headerDisplayName=address&step=2',
@@ -340,7 +327,21 @@ const FormModal = () => {
           console.log('Go to step 2');
           return;
         } else {
-          console.log('Go to add field to compo');
+          const { category, type, ...rest } = componentToCreate;
+          const componentUid = createComponentUid(
+            componentToCreate.name,
+            category
+          );
+          // Create the component first
+          // TODO create custom handler
+          createSchema(rest, 'components', componentUid, category);
+          // Add the field to the schema
+          addAttribute(modifiedData, state.forTarget, state.targetUid, false);
+
+          console.log('Go to add field to compo', type);
+          dispatch({ type: 'RESET_PROPS' });
+          push({ search: '' });
+          return;
         }
       } else if (state.modalType === 'component') {
         // Create the component schema
@@ -400,8 +401,6 @@ const FormModal = () => {
   const modalBodyStyle = isPickingAttribute
     ? { paddingTop: '0.5rem', paddingBottom: '3rem' }
     : {};
-
-  console.log({ FormModal: modifiedData, componentToCreate });
 
   return (
     <Modal
