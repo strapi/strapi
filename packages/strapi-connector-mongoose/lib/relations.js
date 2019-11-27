@@ -215,14 +215,43 @@ module.exports = {
                 case 'manyMorphToMany':
                 case 'manyMorphToOne': {
                   // Update the relational array.
-                  acc[attribute] = newValue.map(obj => {
+
+                  newValue.forEach(obj => {
                     const refModel = strapi.getModel(obj.ref, obj.source);
 
-                    return {
-                      ref: new mongoose.Types.ObjectId(obj.refId),
-                      kind: obj.kind || refModel.globalId,
-                      [association.filter]: obj.field,
+                    const createRelation = () => {
+                      return module.exports.addRelationMorph.call(this, {
+                        id: entry[this.primaryKey],
+                        alias: association.alias,
+                        ref: obj.kind || refModel.globalId,
+                        refId: new mongoose.Types.ObjectId(obj.refId),
+                        field: obj.field,
+                        filter: association.filter,
+                      });
                     };
+
+                    // Clear relations to refModel
+                    const reverseAssoc = refModel.associations.find(
+                      assoc => assoc.alias === obj.field
+                    );
+                    if (
+                      reverseAssoc &&
+                      reverseAssoc.nature === 'oneToManyMorph'
+                    ) {
+                      relationUpdates.push(
+                        module.exports.removeRelationMorph
+                          .call(this, {
+                            alias: association.alias,
+                            ref: obj.kind || refModel.globalId,
+                            refId: new mongoose.Types.ObjectId(obj.refId),
+                            field: obj.field,
+                            filter: association.filter,
+                          })
+                          .then(createRelation)
+                      );
+                    } else {
+                      relationUpdates.push(createRelation());
+                    }
                   });
                   break;
                 }
@@ -329,11 +358,7 @@ module.exports = {
       [this.primaryKey]: id,
     });
 
-    if (!entry) {
-      throw new Error(
-        `Relation ${params.field} cannot be created because the target entity doesnt exist`
-      );
-    }
+    if (!entry) return Promise.resolve();
 
     // if association already exists ignore
     const relationExists = entry[alias].find(obj => {
@@ -360,27 +385,44 @@ module.exports = {
   },
 
   async removeRelationMorph(params) {
-    const { alias, id } = params;
+    const { alias } = params;
 
-    const entry = await this.findOne({
-      [this.primaryKey]: id,
+    let opts;
+    // if entry id is provided simply query it
+    if (params.id) {
+      opts = {
+        _id: params.id,
+      };
+    } else {
+      opts = {
+        [alias]: {
+          $elemMatch: {
+            ref: params.refId,
+            kind: params.ref,
+            [params.filter]: params.field,
+          },
+        },
+      };
+    }
+
+    const entries = await this.find(opts);
+
+    const updates = entries.map(entry => {
+      entry[alias] = entry[alias].filter(obj => {
+        if (
+          obj.kind === params.ref &&
+          obj.ref.toString() === params.refId.toString() &&
+          obj.field === params.field
+        ) {
+          return false;
+        }
+
+        return true;
+      });
+
+      return entry.save();
     });
 
-    if (!entry) return Promise.resolve();
-
-    // Filter the association array and remove the association.
-    entry[alias] = entry[alias].filter(obj => {
-      if (
-        obj.kind === params.ref &&
-        obj.ref.toString() === params.refId.toString() &&
-        obj.field === params.field
-      ) {
-        return false;
-      }
-
-      return true;
-    });
-
-    entry.save();
+    await Promise.all(updates);
   },
 };
