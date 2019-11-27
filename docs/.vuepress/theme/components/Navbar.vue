@@ -20,6 +20,18 @@
       >{{ $siteTitle }}</span>
     </router-link>
 
+    <span
+      class="deprecated"
+      v-if="isAlpha">
+      Deprecated docs -
+      <router-link
+        :to="$localePath"
+        class="home-link"
+      >
+        current version
+      </router-link>
+    </span>
+
     <div
       class="links"
       :style="linksWrapMaxWidth ? {
@@ -63,6 +75,10 @@ export default {
   computed: {
     algolia () {
       return this.$themeLocaleConfig.algolia || this.$site.themeConfig.algolia || {}
+    },
+
+    isAlpha () {
+      return /documentation\/3.0.0-alpha.x/.test(window.location.href)
     }
   }
 }
@@ -80,6 +96,12 @@ $navbar-horizontal-padding = 1.5rem
 .navbar
   padding $navbar-vertical-padding $navbar-horizontal-padding
   line-height $navbarHeight - 1.4rem
+  .deprecated
+    padding 0 0.5rem
+    margin-left 1rem
+    font-weight 600
+    background-color #fff3cd;
+    border-radius .25rem
   a, span, img
     display inline-block
   .logo
