@@ -461,6 +461,14 @@ const forms = {
         }
 
         if (type === 'component' && step === '2') {
+          items[0].push({
+            name: 'component',
+            type: 'componentSelect',
+            label: {
+              id: getTrad('modalForm.attributes.select-component'),
+            },
+            isMultiple: false,
+          });
           items.push([
             {
               label: {
@@ -471,18 +479,18 @@ const forms = {
               size: 12,
               options: [
                 {
-                  headerId: getTrad(`form.attribute.component.option.create`),
+                  headerId: getTrad(
+                    `form.attribute.component.option.repeatable`
+                  ),
                   descriptionId: getTrad(
-                    `form.attribute.component.option.create.description`
+                    `form.attribute.component.option.repeatable.description`
                   ),
                   value: true,
                 },
                 {
-                  headerId: getTrad(
-                    `form.attribute.component.option.reuse-existing`
-                  ),
+                  headerId: getTrad(`form.attribute.component.option.single`),
                   descriptionId: getTrad(
-                    `form.attribute.${type}.option.reuse-existing.description`
+                    `form.attribute.component.option.single.description`
                   ),
                   value: false,
                 },

@@ -20,17 +20,21 @@ const displayNotificationCTNotSaved = () => {
 };
 
 function LeftMenu() {
-  const { components, contentTypes, sortedContentTypesList } = useDataManager();
+  const {
+    components,
+    componentsGroupedByCategory,
+    contentTypes,
+    sortedContentTypesList,
+  } = useDataManager();
   const { currentEnvironment } = useGlobalContext();
   const { push } = useHistory();
   const isProduction = currentEnvironment === 'production';
-  const grouped = groupBy(components, 'category');
   const componentsData = sortBy(
-    Object.keys(grouped).map(category => ({
+    Object.keys(componentsGroupedByCategory).map(category => ({
       name: category,
       title: category,
       links: sortBy(
-        grouped[category].map(compo => ({
+        componentsGroupedByCategory[category].map(compo => ({
           name: compo.uid,
           to: `/plugins/${pluginId}/component-categories/${category}/${compo.uid}`,
           title: compo.schema.name,

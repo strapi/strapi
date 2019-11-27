@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { get, sortBy } from 'lodash';
+import { get, groupBy, sortBy } from 'lodash';
 import { request, LoadingIndicatorPage } from 'strapi-helper-plugin';
 import { useLocation, useRouteMatch, Redirect } from 'react-router-dom';
 import DataManagerContext from '../../contexts/DataManagerContext';
@@ -198,6 +198,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
           ['schema', 'icon']
         ),
         components,
+        componentsGroupedByCategory: groupBy(components, 'category'),
         contentTypes,
         createSchema,
         allIcons,

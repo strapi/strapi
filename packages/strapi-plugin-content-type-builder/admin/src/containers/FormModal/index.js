@@ -21,6 +21,7 @@ import useDataManager from '../../hooks/useDataManager';
 import AttributeOption from '../../components/AttributeOption';
 import BooleanBox from '../../components/BooleanBox';
 import ComponentIconPicker from '../../components/ComponentIconPicker';
+import ComponentSelect from '../../components/ComponentSelect';
 import CustomCheckbox from '../../components/CustomCheckbox';
 import CreatableSelect from '../../components/CreatableSelect';
 import ModalHeader from '../../components/ModalHeader';
@@ -97,7 +98,6 @@ const FormModal = () => {
         // This condition is added to prevent the reducer state to be cleared when navigating from the base tab to tha advanced one
         state.modalType !== 'attribute'
       ) {
-        console.log('ook');
         const attributeToEditNotFormatted = get(
           allDataSchema,
           [...pathToSchema, 'schema', 'attributes', attributeName],
@@ -602,6 +602,7 @@ const FormModal = () => {
                                 <Inputs
                                   customInputs={{
                                     componentIconPicker: ComponentIconPicker,
+                                    componentSelect: ComponentSelect,
                                     creatableSelect: CreatableSelect,
                                     customCheckboxWithChildren: CustomCheckbox,
                                     booleanBox: BooleanBox,
