@@ -21,13 +21,12 @@ import useDataManager from '../../hooks/useDataManager';
 import AttributeOption from '../../components/AttributeOption';
 import BooleanBox from '../../components/BooleanBox';
 import ComponentIconPicker from '../../components/ComponentIconPicker';
-import ComponentSelect from '../../components/ComponentSelect';
 import CustomCheckbox from '../../components/CustomCheckbox';
-import CreatableSelect from '../../components/CreatableSelect';
 import ModalHeader from '../../components/ModalHeader';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
 import RelationForm from '../../components/RelationForm';
 import HeaderNavLink from '../../components/HeaderNavLink';
+import WrapperSelect from '../../components/WrapperSelect';
 import getTrad from '../../utils/getTrad';
 import getAttributes from './utils/attributes';
 import forms from './utils/forms';
@@ -602,8 +601,9 @@ const FormModal = () => {
                                 <Inputs
                                   customInputs={{
                                     componentIconPicker: ComponentIconPicker,
-                                    componentSelect: ComponentSelect,
-                                    creatableSelect: CreatableSelect,
+                                    componentSelect: WrapperSelect,
+                                    // creatableSelect: CreatableSelect,
+                                    creatableSelect: WrapperSelect,
                                     customCheckboxWithChildren: CustomCheckbox,
                                     booleanBox: BooleanBox,
                                   }}
