@@ -55,7 +55,8 @@ export default {
   components: { SidebarButton, NavLinks, AlgoliaSearchBox, SearchBox},
   data () {
     return {
-      linksWrapMaxWidth: null
+      linksWrapMaxWidth: null,
+      isAlpha: false
     }
   },
   mounted () {
@@ -71,14 +72,11 @@ export default {
     }
     handleLinksWrapWidth()
     window.addEventListener('resize', handleLinksWrapWidth, false)
+    this.isAlpha = /documentation\/3.0.0-alpha.x/.test(window.location.href)
   },
   computed: {
     algolia () {
       return this.$themeLocaleConfig.algolia || this.$site.themeConfig.algolia || {}
-    },
-
-    isAlpha () {
-      return /documentation\/3.0.0-alpha.x/.test(window.location.href)
     }
   }
 }
