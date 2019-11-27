@@ -40,10 +40,8 @@ const Header = () => {
     ? formatMessage({
         id: `${pluginId}.containers.Edit.pluginHeader.title.new`,
       })
-    : templateObject(
-        { mainField: currentContentTypeMainField },
-        initialData
-      ).mainField.toString();
+    : templateObject({ mainField: currentContentTypeMainField }, initialData)
+        .mainField;
 
   const getHeaderActions = () => {
     const headerActions = [
@@ -84,7 +82,7 @@ const Header = () => {
 
   const headerProps = {
     title: {
-      label: headerTitle,
+      label: headerTitle && headerTitle.toString(),
     },
     actions: getHeaderActions(),
   };
