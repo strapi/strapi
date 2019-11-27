@@ -340,7 +340,6 @@ const createOnFetchPopulateFn = ({
             sort: '-createdAt',
           },
         });
-
         return;
       }
 
