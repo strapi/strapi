@@ -66,7 +66,7 @@ cd /path/to/the/project
 npm run setup
 ```
 
-::: note
+::: tip
 To display the build logs use the --debug option `npm run setup --debug`.
 :::
 
@@ -777,9 +777,9 @@ After installing and configuring Git on your Droplet. Please continue to the nex
 
 Digital Ocean has excellent documentation regarding the installation and use of the major databases that work with Strapi. The previous steps above should all be completed prior to continuing. You can find links, and any further instructions, below:
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "PostgreSQL" id="postgreSQL-ubuntu"
+::: tab "PostgreSQL"
 
 1. [Install PostgresSQL on Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04)(Through **Step 4** - Creating a New Database).
 
@@ -1157,9 +1157,9 @@ If you already have the Heroku CLI installed locally on your computer. Skip to [
 
 Download and install the `Heroku CLI` for your operating system:
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "macOS"
+::: tab "Mac O/S"
 [Download the installer](https://cli-assets.heroku.com/heroku.pkg)
 
 Also available via Homebrew:
@@ -1179,7 +1179,7 @@ sudo snap install --classic heroku
 
 :::
 
-::: tab "Windows"
+::: tab "Windows 10"
 Download the appropriate installer for your Windows installation:
 
 [64-bit installer](https://cli-assets.heroku.com/heroku-x64.exe)
@@ -1270,9 +1270,9 @@ Your local development environment is now set-up and configured to work with Her
 
 Below you will find database options when working with Heroku. Please choose the correct database (e.g. PostgreSQL, MongoDB, etc.) and follow those instructions.
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "PostgreSQL" id="heroku-postgresql"
+::: tab "PostgreSQL"
 
 #### Heroku Postgres
 
@@ -1355,7 +1355,7 @@ npm install pg --save
 
 :::
 
-::: tab "MongoDB" id="heroku-mongodb"
+::: tab "MongoDB"
 
 #### MongoDB Atlas
 

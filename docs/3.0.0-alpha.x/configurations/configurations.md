@@ -91,7 +91,7 @@ Here are some use cases:
 
 CRON tasks allow you to schedule jobs (arbitrary functions) for execution at specific dates, with optional recurrence rules. It only uses a single timer at any given time (rather than reevaluating upcoming jobs every second/minute).
 
-::: note
+::: tip
 Make sure the `enabled` cron config is set to `true` in your environment's variables.
 :::
 
@@ -173,7 +173,7 @@ Each JSON file located in the folder must have the name of its corresponding tra
 
 Most of the application's configurations are defined by environment. It means that you can specify settings for each environment (`development`, `production`, `test`, etc.).
 
-::: note
+::: tip
 You can access the config of the current environment through `strapi.config.currentEnvironment`.
 :::
 
@@ -275,7 +275,7 @@ You can access the config of the current environment through `strapi.config.curr
 }
 ```
 
-::: note
+::: tip
 Please refer to the [dynamic configurations section](#dynamic-configurations) to use global environment variable to configure the databases.
 :::
 
@@ -306,7 +306,7 @@ Please refer to the [dynamic configurations section](#dynamic-configurations) to
 }
 ```
 
-::: note
+::: tip
 Please note that you must give your MLab database name as the authenticationDatabase and your password can not contain the "@" symbol.
 :::
 
@@ -332,7 +332,7 @@ Please note that you must give your MLab database name as the authenticationData
   - `enabled`(boolean): Enable or disable parser. Default value: `true`.
   - `multipart` (boolean): Enable or disable multipart bodies parsing. Default value: `true`.
 
-::: note
+::: tip
 The session doesn't work with `mongo` as a client. The package that we should use is broken for now.
 :::
 
@@ -478,7 +478,7 @@ In any JSON configurations files in your project, you can inject dynamic values 
 }
 ```
 
-::: note
+::: tip
 You can't execute functions inside the curly braces. Only strings are allowed.
 :::
 

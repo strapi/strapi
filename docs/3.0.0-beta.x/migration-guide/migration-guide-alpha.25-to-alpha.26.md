@@ -5,12 +5,13 @@
 - Fix some issues
 
 **Useful links:**
+
 - Changelog: [https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.26](https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.26)
 - GitHub diff: [https://github.com/strapi/strapi/compare/v3.0.0-alpha.25...v3.0.0-alpha.26.2](https://github.com/strapi/strapi/compare/v3.0.0-alpha.25...v3.0.0-alpha.26.2)
 
 <br>
 
-::: note
+::: tip
 Feel free to [join us on Slack](http://slack.strapi.io) and ask questions about the migration process.
 :::
 
@@ -34,7 +35,7 @@ Run `npm install strapi@3.0.0-alpha.26.2 --save` to update your strapi version.
 
 ## Update the Admin
 
-::: note
+::: tip
 If you performed updates in the Admin, you will have to manually migrate your changes.
 :::
 
@@ -44,7 +45,7 @@ Delete your old admin folder and replace it with the new one.
 
 ## Update the Plugins
 
-::: note
+::: tip
 If you did a custom update on one of the plugins, you will have to manually migrate your update.
 :::
 
@@ -52,14 +53,13 @@ Copy the fields and relations you had in your `/plugins/users-permissions/models
 
 Then, delete your old `plugins` folder and replace it with the new one.
 
-
 ## Add deep filtering feature
 
 By default your generated API will not have the deep filtering feature provide by this release. You will have to make some updates.
 
 ### Updating Mongoose
 
-**Updating your controllers**:  [https://github.com/strapi/strapi/pull/2961/files#diff-008d6bf29828238415549d6caf613284](https://github.com/strapi/strapi/pull/2961/files#diff-008d6bf29828238415549d6caf613284)
+**Updating your controllers**: [https://github.com/strapi/strapi/pull/2961/files#diff-008d6bf29828238415549d6caf613284](https://github.com/strapi/strapi/pull/2961/files#diff-008d6bf29828238415549d6caf613284)
 
 You will have to add `, next, { populate } = {}` in the arguments of the `find` function.
 

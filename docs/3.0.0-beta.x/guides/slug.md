@@ -25,21 +25,21 @@ Here we will be able to setup the `slug` field.
 - And click **OFF** for **Editable field** option.
 - Don't forget to save your updates.
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "Edit View before" id="before"
+::: tab "View before"
 
-![Edit View before](../assets/guides/slug/layout-before.png)
-
-:::
-
-::: tab "Edit View after" id="after"
-
-![Edit View after](../assets/guides/slug/layout-after.png)
+![View before](../assets/guides/slug/layout-before.png)
 
 :::
 
-::: tab "Edit View configuration" id="config"
+::: tab "View after"
+
+![View after](../assets/guides/slug/layout-after.png)
+
+:::
+
+::: tab "View configuration"
 
 ![Edit View config](../assets/guides/slug/layout-config.png)
 
@@ -55,9 +55,9 @@ When it's done, you have to update the life cycle of the **Article** Content Typ
 
 **Path —** `./api/article/models/Article.js`
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "Mongoose" id="mongoose"
+::: tab Mongoose
 
 ```js
 const slugify = require('slugify');
@@ -80,7 +80,7 @@ module.exports = {
 
 :::
 
-::: tab "Bookshelf" id="bookshelf"
+::: tab Bookshelf
 
 ```js
 const slugify = require('slugify');
@@ -92,8 +92,9 @@ module.exports = {
     } else if (options.method === 'update' && attrs.title) {
       attrs.slug = slugify(attrs.title);
     }
-  }
-}
+  },
+};
+```
 
 :::
 
@@ -104,4 +105,3 @@ module.exports = {
 Then you will have to be able to fetch your **Articles** by this slug.
 
 You will be able to find your articles by slug with this request `GET /articles?slug=my-article-slug`
-```

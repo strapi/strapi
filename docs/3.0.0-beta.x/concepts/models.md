@@ -55,7 +55,7 @@ The models are defined in each `./api/**/models/` folder. Every JavaScript or JS
 
 ## How to create a model?
 
-::: note
+::: tip
 If you are just starting out it is very convenient to generate some models with the Content Type Builder, directly in the admin interface. You can then review the generated model mappings on the code level. The UI takes over a lot of validation tasks and gives you a fast feeling for available features.
 :::
 
@@ -66,7 +66,7 @@ This will create two files located at `./api/restaurant/models`:
 - `Restaurant.settings.json`: contains the list of attributes and settings. The JSON format makes the file easily editable.
 - `Restaurant.js`: imports `Restaurant.settings.json` and extends it with additional settings and lifecycle callbacks.
 
-::: note
+::: tip
 when you create a new API using the CLI (`strapi generate:api <name>`), a model is automatically created.
 :::
 
@@ -91,7 +91,7 @@ Additional settings can be set on models:
 
 In this example, the model `Restaurant` will be accessible through the `Restaurants` global variable. The data will be stored in the `Restaurants_v1` collection or table and the model will use the `mongo` connection defined in `./config/environments/**/database.json`
 
-::: note
+::: tip
 The `connection` value can be changed whenever you want, but you should be aware that there is no automatic data migration process. Also if the new connection doesn't use the same ORM you will have to rewrite your queries.
 :::
 
@@ -201,11 +201,9 @@ To improve the Developer eXperience when developing or using the administration 
 
 Relations let your create links (relations) between your Content Types.
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
 ::: tab "One-Way" id="one-way"
-
-### One-Way
 
 One-way relationships are useful to link an entry to another. However, only one of the models can be queried with its populated items.
 
@@ -242,8 +240,6 @@ xhr.send(
 :::
 
 ::: tab "One-to-One" id="one-to-one"
-
-### One-to-One
 
 One-to-One relationships are usefull when you have one entity that could be linked to only one other entity. And vis versa.
 
@@ -293,8 +289,6 @@ xhr.send(
 :::
 
 ::: tab "One-to-Many" id="one-to-many"
-
-### One-to-Many
 
 One-to-Many relationships are usefull when an entry can be liked to multiple entries of an other Content Type. And an entry of the other Content Type can be linked to only one entry.
 
@@ -355,8 +349,6 @@ xhr.send(
 
 ::: tab "Many-to-Many" id="many-to-many"
 
-### Many-to-Many
-
 One-to-Many relationships are usefull when an entry can be liked to multiple entries of an other Content Type. And an entry of the other Content Type can be linked to many entries.
 
 #### Example
@@ -410,8 +402,6 @@ xhr.send(
 :::
 
 ::: tab "Polymorphic" id="polymorphic"
-
-### Polymorphic
 
 The polymorphic relationships are the solution when you don't know which kind of model will be associated to your entry. A common use case is an `Image` model that can be associated to many others kind of models (Article, Product, User, etc).
 
@@ -600,9 +590,9 @@ The following events are available by default:
 
 Callbacks on:
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "save" id="save"
+::: tab save
 
 `save`
 
@@ -611,14 +601,14 @@ Callbacks on:
 
 :::
 
-::: tab "fetch" id="fetch"
+::: tab fetch
 
 `fetch`
 
 - beforeFetch
 - afterFetch
 
-::: tab "fetchAll" id="fetchall"
+::: tab fetchAll
 
 `fetchAll`
 
@@ -627,7 +617,7 @@ Callbacks on:
 
 :::
 
-::: tab "create" id="create"
+::: tab create
 
 `create`
 
@@ -636,7 +626,7 @@ Callbacks on:
 
 :::
 
-::: tab "update" id="update"
+::: tab update
 
 `update`
 
@@ -645,9 +635,9 @@ Callbacks on:
 
 :::
 
-::: tab "destroy" id="destroy"
+::: tab destroy
 
-destroy`
+`destroy`
 
 - beforeDestroy
 - afterDestroy
@@ -658,9 +648,9 @@ destroy`
 
 ### Example
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "Mongoose" id="mongoose"
+::: tab Mongoose
 
 #### Mongoose
 
@@ -687,7 +677,7 @@ module.exports = {
 
 :::
 
-::: tab "Bookshelf" id="bookshelf"
+::: tab Bookshelf
 
 #### Bookshelf
 

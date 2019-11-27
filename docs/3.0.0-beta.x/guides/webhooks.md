@@ -118,6 +118,6 @@ So, to trigger an url on delete, please add `request.post(strapi.config.currentE
 - `remove` action of `api/restaurant/services/Restaurant.js` (triggered by your public API).
 - `delete` action of `plugins/content-manager/services/ContentManager.js` (triggered by the Content Manager).
 
-::: note
+::: tip
 Do not forget to require `axios` at the top of these files.
 :::

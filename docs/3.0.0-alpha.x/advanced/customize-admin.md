@@ -78,7 +78,7 @@ Run `npm start` from the `./admin` folder. That's all.
 
 You should be able to see the admin at [http://localhost:4000/admin](http://localhost:4000/admin).
 
-::: note
+::: tip
 In development, all the plugins of your app are mounted in the same build as the administration panel.
 :::
 
@@ -100,7 +100,7 @@ Fonts can also be overridden:
 
 To change the top-left displayed admin panel's logo, replace the image located at `./admin/admin/src/assets/images/logo-strapi.png`.
 
-::: note
+::: tip
 make sure the size of your image is the same as the existing one (434px x 120px).
 :::
 
@@ -118,7 +118,7 @@ This will replace the folder's content located at `./admin/admin/build`. Visit h
 
 After you have built the admininistration you can now create a new project to develop your API with the changes implemented.
 
-::: note
+::: tip
 You should now create a project without `--dev`
 :::
 
@@ -191,7 +191,7 @@ It's very common to deploy the front-end and the back-end on different servers. 
 
 The administration URL will be http://yourfrontend.com and every request from the panel will hit the backend at http://yourbackend.com. The plugins will be injected through the `origin` (means the API itself). In other words, the plugins URLs will be `http://yourbackend.com/dashboard/content-manager/main.js`.
 
-::: note
+::: tip
 How it is possible? The API (the Strapi server) owns the plugin and these plugins are exposed through `http://yourbackend.com/admin/**/main.js`
 :::
 
@@ -213,7 +213,7 @@ The DOM should look like this:
 </html>
 ```
 
-::: note
+::: tip
 The plugins are injected using the `./admin/admin/build/config/plugins.json`. To see the plugins URLs in the `index.html`, you need to launch the administration panel in the browser.
 :::
 
@@ -296,6 +296,6 @@ The generated `index.html` will look like this:
 </html>
 ```
 
-::: note
+::: tip
 The plugins are injected using the `./admin/admin/build/config/plugins.json`. To see the plugins URLs in the `index.html`, you need to launch the administration panel in the browser.
 :::
