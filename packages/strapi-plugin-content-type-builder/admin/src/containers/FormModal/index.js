@@ -427,6 +427,7 @@ const FormModal = () => {
                   })
                 ),
                 name: upperFirst(state.attributeName),
+                step: state.step,
               }}
             >
               {msg => <span>{upperFirst(msg)}</span>}

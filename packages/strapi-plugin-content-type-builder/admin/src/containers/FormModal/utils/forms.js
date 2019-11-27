@@ -7,6 +7,7 @@ import pluginId from '../../../pluginId';
 import getTrad from '../../../utils/getTrad';
 import { createComponentUid, createUid, nameToSlug } from './createUid';
 import componentForm from './componentForm';
+import fields from './staticFields';
 
 yup.addMethod(yup.mixed, 'defined', function() {
   return this.test(
@@ -211,25 +212,8 @@ const forms = {
         const targetAttributeValue = get(data, 'targetAttribute', null);
         const nameValue = get(data, 'name', null);
         const relationItems = [
-          [
-            {
-              type: 'divider',
-            },
-          ],
-          [
-            {
-              autoFocus: false,
-              name: 'unique',
-              type: 'checkbox',
-              label: {
-                id: getTrad('form.attribute.item.uniqueField'),
-              },
-              description: {
-                id: getTrad('form.attribute.item.uniqueField.description'),
-              },
-              validations: {},
-            },
-          ],
+          [fields.divider],
+          [fields.unique],
           [
             {
               autoFocus: false,
@@ -260,73 +244,15 @@ const forms = {
         const defaultItems = [
           [
             {
-              autoFocus: true,
-              name: 'default',
+              ...fields.default,
               type: type === 'email' ? 'email' : 'text',
-              label: {
-                id: getTrad('form.attribute.settings.default'),
-              },
-              validations: {},
             },
           ],
-          [
-            {
-              type: 'divider',
-            },
-          ],
-          [
-            {
-              autoFocus: false,
-              name: 'required',
-              type: 'checkbox',
-              label: {
-                id: getTrad('form.attribute.item.requiredField'),
-              },
-              description: {
-                id: getTrad('form.attribute.item.requiredField.description'),
-              },
-              validations: {},
-            },
-          ],
-          [
-            {
-              autoFocus: false,
-              name: 'unique',
-              type: 'checkbox',
-              label: {
-                id: getTrad('form.attribute.item.uniqueField'),
-              },
-              description: {
-                id: getTrad('form.attribute.item.uniqueField.description'),
-              },
-              validations: {},
-            },
-          ],
+          [fields.divider],
+          [fields.required],
+          [fields.unique],
         ];
-        const dynamiczoneItems = [
-          [
-            {
-              autoFocus: false,
-              name: 'max',
-              type: 'customCheckboxWithChildren',
-              label: {
-                id: getTrad(`form.attribute.item.maximum`),
-              },
-              validations: {},
-            },
-          ],
-          [
-            {
-              autoFocus: false,
-              name: 'min',
-              type: 'customCheckboxWithChildren',
-              label: {
-                id: getTrad(`form.attribute.item.minimum`),
-              },
-              validations: {},
-            },
-          ],
-        ];
+        const dynamiczoneItems = [[fields.max], [fields.min]];
 
         if (type === 'component') {
           if (step === '1') {
@@ -334,24 +260,7 @@ const forms = {
               items: componentForm.advanced('componentToCreate.'),
             };
           } else {
-            const requiredItem = [
-              [
-                {
-                  autoFocus: false,
-                  name: 'required',
-                  type: 'checkbox',
-                  label: {
-                    id: getTrad('form.attribute.item.requiredField'),
-                  },
-                  description: {
-                    id: getTrad(
-                      'form.attribute.item.requiredField.description'
-                    ),
-                  },
-                  validations: {},
-                },
-              ],
-            ];
+            const requiredItem = [[fields.required]];
 
             return {
               items: data.repeatable
@@ -368,12 +277,8 @@ const forms = {
         } else if (type === 'boolean') {
           items.splice(0, 1, [
             {
-              autoFocus: false,
-              name: 'default',
+              ...fields.default,
               type: 'enum',
-              label: {
-                id: getTrad('form.attribute.settings.default'),
-              },
               options: [
                 { value: 'true', label: 'TRUE' },
                 { value: '', label: 'NULL' },
@@ -415,7 +320,7 @@ const forms = {
               ),
             },
           ]);
-          items.splice(1, 1, [
+          items.splice(1, 0, [
             {
               label: {
                 id: getTrad('form.attribute.item.enumeration.graphql'),
@@ -433,13 +338,8 @@ const forms = {
         } else if (type === 'date') {
           items.splice(0, 1, [
             {
-              autoFocus: false,
-              name: 'default',
+              ...fields.default,
               type: 'date',
-              label: {
-                id: getTrad('form.attribute.settings.default'),
-              },
-              validations: {},
               value: null,
               withDefaultValue: false,
               disabled: data.type !== 'date',
@@ -512,24 +412,7 @@ const forms = {
           };
         }
 
-        const items = [
-          [
-            {
-              autoFocus: true,
-              name: 'name',
-              type: 'text',
-              label: {
-                id: getTrad('modalForm.attribute.form.base.name'),
-              },
-              description: {
-                id: getTrad('modalForm.attribute.form.base.name.description'),
-              },
-              validations: {
-                required: true,
-              },
-            },
-          ],
-        ];
+        const items = [[fields.name]];
 
         if (type === 'component' && step === '1') {
           const itemsToConcat =
@@ -578,8 +461,6 @@ const forms = {
         }
 
         if (type === 'component' && step === '2') {
-          // items[0]
-
           items.push([
             {
               label: {

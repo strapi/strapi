@@ -7,6 +7,7 @@ const initialState = fromJS({
   modifiedData: {},
   initialData: {},
   componentToCreate: {},
+  isCreatingComponentWhileAddingAField: false,
 });
 
 export const shouldPluralizeTargetAttribute = nature =>
@@ -100,7 +101,10 @@ const reducer = (state, action) => {
 
       return initialState
         .update('componentToCreate', () => componentToCreate)
-        .update('modifiedData', () => modifiedData);
+        .update('modifiedData', () => modifiedData)
+        .update('isCreatingComponentWhileAddingAField', () =>
+          state.getIn(['modifiedData', 'createComponent'])
+        );
     }
     case 'SET_ATTRIBUTE_DATA_SCHEMA': {
       const {

@@ -8,8 +8,16 @@ const getModalTitleSubHeader = state => {
           state.forTarget === 'contentType' ? 'contentType' : 'component'
         }`
       );
-    case 'attribute':
-      return getTrad(`modalForm.sub-header.attribute.${state.actionType}`);
+    case 'attribute': {
+      // if (state.step) {
+      //   return getTrad(`modalForm.sub-header.attribute.${state.actionType}`);
+      // }
+      return getTrad(
+        `modalForm.sub-header.attribute.${state.actionType}${
+          state.step !== 'null' ? '.step' : ''
+        }`
+      );
+    }
     default:
       return getTrad('configurations');
   }
