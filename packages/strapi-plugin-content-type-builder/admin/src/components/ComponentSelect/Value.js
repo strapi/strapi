@@ -19,7 +19,6 @@ const Value = ({ children, ...props }) => {
   const {
     selectProps: { componentCategory, componentName, isCreatingComponent },
   } = props;
-  console.log({ props });
   const displayedCategory = isCreatingComponent ? componentCategory : category;
   const displayedName = isCreatingComponent ? componentName : name;
   const style = { color: '#333740' };

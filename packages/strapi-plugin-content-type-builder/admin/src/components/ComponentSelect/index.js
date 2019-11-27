@@ -43,6 +43,7 @@ const ComponentSelect = ({
       value={{ label: value, value }}
       options={[]}
       ref={ref}
+      // menuIsOpen
       refState={ref}
       components={{
         MenuList,

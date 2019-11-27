@@ -126,6 +126,7 @@ const FormModal = () => {
           targetUid: get(sortedContentTypesList, ['0', 'uid'], 'error'),
           isEditing: actionType === 'edit',
           modifiedDataToSetForEditing: attributeToEdit,
+          step,
         });
       }
     }
@@ -158,9 +159,10 @@ const FormModal = () => {
 
   const checkFormValidity = async () => {
     let schema;
-    const dataToValidate = isCreatingComponentFromAView
-      ? get(modifiedData, 'componentToCreate', {})
-      : modifiedData;
+    const dataToValidate =
+      isCreatingComponentFromAView && state.step === '1'
+        ? get(modifiedData, 'componentToCreate', {})
+        : modifiedData;
 
     if (state.modalType === 'contentType') {
       schema = forms.contentType.schema(Object.keys(contentTypes));
@@ -177,13 +179,11 @@ const FormModal = () => {
       isCreatingComponentFromAView &&
       state.step === '1'
     ) {
-      console.log('Should Validate');
-
       schema = forms.component.schema(
         Object.keys(components),
         get(modifiedData, 'componentToCreate.category', '')
       );
-    } else if (state.modalType === 'attribute') {
+    } else if (state.modalType === 'attribute' && state.step !== '1') {
       const type =
         state.attributeType === 'relation' ? 'relation' : modifiedData.type;
 
@@ -293,7 +293,8 @@ const FormModal = () => {
         });
       } else if (
         state.modalType === 'attribute' &&
-        !isCreatingComponentFromAView
+        !isCreatingComponentFromAView &&
+        state.attributeType !== 'component'
       ) {
         addAttribute(
           modifiedData,
@@ -312,19 +313,50 @@ const FormModal = () => {
         push({ search: nextSearch });
       } else if (
         state.modalType === 'attribute' &&
+        !isCreatingComponentFromAView &&
+        state.attributeType === 'component'
+      ) {
+        if (state.step === '1') {
+          push({
+            search: `modalType=attribute&actionType=${state.actionType}&settingType=base&forTarget=${state.forTarget}&targetUid=${state.targetUid}&attributeType=component&headerDisplayName=${state.headerDisplayName}&step=2`,
+          });
+
+          dispatch({
+            type: 'RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO',
+          });
+
+          return;
+        } else {
+          addAttribute(
+            modifiedData,
+            state.forTarget,
+            state.targetUid,
+            state.actionType === 'edit',
+            initialData,
+            true
+          );
+          // Adding a component to a dynamiczone is not the same logic as creating a simple field
+          // so the search is different
+          const nextSearch =
+            state.attributeType === 'dynamiczone'
+              ? ''
+              : createNextSearch(targetUid);
+
+          push({ search: nextSearch });
+        }
+      } else if (
+        state.modalType === 'attribute' &&
         isCreatingComponentFromAView
       ) {
         if (state.step === '1') {
           push({
-            search:
-              'modalType=attribute&actionType=create&settingType=base&forTarget=contentType&targetUid=application::address.address&attributeType=component&headerDisplayName=address&step=2',
+            search: `modalType=attribute&actionType=${state.actionType}&settingType=base&forTarget=${state.forTarget}&targetUid=${state.targetUid}&attributeType=component&headerDisplayName=${state.headerDisplayName}&step=2`,
           });
 
           dispatch({
             type: 'RESET_PROPS_AND_SAVE_CURRENT_DATA',
           });
 
-          console.log('Go to step 2');
           return;
         } else {
           const { category, type, ...rest } = componentToCreate;
@@ -332,13 +364,18 @@ const FormModal = () => {
             componentToCreate.name,
             category
           );
-          // Create the component first
-          // TODO create custom handler
-          createSchema(rest, 'components', componentUid, category);
+          // Create the component first and add it to the components data
+          createSchema(
+            rest,
+            type,
+            componentUid,
+            category,
+            isCreatingComponentFromAView
+          );
           // Add the field to the schema
           addAttribute(modifiedData, state.forTarget, state.targetUid, false);
+          // add the component to main modified data component object
 
-          console.log('Go to add field to compo', type);
           dispatch({ type: 'RESET_PROPS' });
           push({ search: '' });
           return;

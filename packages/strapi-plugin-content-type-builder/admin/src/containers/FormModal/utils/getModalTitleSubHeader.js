@@ -14,7 +14,7 @@ const getModalTitleSubHeader = state => {
       // }
       return getTrad(
         `modalForm.sub-header.attribute.${state.actionType}${
-          state.step !== 'null' ? '.step' : ''
+          state.step !== 'null' && state.step !== null ? '.step' : ''
         }`
       );
     }

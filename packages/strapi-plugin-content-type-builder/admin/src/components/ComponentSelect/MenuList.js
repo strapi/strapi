@@ -16,7 +16,7 @@ const MenuList = ({
         style={{
           backgroundColor: '#fff',
           maxHeight: 150,
-          overflow: 'auto',
+          // overflow: 'scroll',
         }}
       >
         {Object.keys(componentsGroupedByCategory).map(categoryName => {

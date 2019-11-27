@@ -85,6 +85,11 @@ const reducer = (state, action) => {
       });
     case 'RESET_PROPS':
       return initialState;
+    case 'RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO': {
+      return initialState.update('modifiedData', () =>
+        fromJS({ type: 'component', repeatable: true })
+      );
+    }
     case 'RESET_PROPS_AND_SAVE_CURRENT_DATA': {
       const componentToCreate = state.getIn([
         'modifiedData',
@@ -113,6 +118,7 @@ const reducer = (state, action) => {
         modifiedDataToSetForEditing,
         nameToSetForRelation,
         targetUid,
+        step,
       } = action;
 
       if (isEditing) {
@@ -124,11 +130,18 @@ const reducer = (state, action) => {
       let dataToSet;
 
       if (attributeType === 'component') {
-        dataToSet = {
-          type: 'component',
-          createComponent: true,
-          componentToCreate: { type: 'component' },
-        };
+        if (step === '1') {
+          dataToSet = {
+            type: 'component',
+            createComponent: true,
+            componentToCreate: { type: 'component' },
+          };
+        } else {
+          dataToSet = {
+            type: 'component',
+            repeatable: true,
+          };
+        }
       } else if (attributeType === 'dynamiczone') {
         dataToSet = {
           type: 'dynamiczone',

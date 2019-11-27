@@ -79,7 +79,19 @@ const reducer = (state, action) => {
 
             return obj;
           }
-        );
+        )
+        .updateIn(['modifiedData', 'components'], existingCompos => {
+          if (action.shouldAddComponentToData) {
+            const componentToAdd = state.getIn(['components', rest.component]);
+
+            return existingCompos.update(
+              componentToAdd.get('uid'),
+              () => componentToAdd
+            );
+          }
+
+          return existingCompos;
+        });
     }
     case 'CREATE_SCHEMA': {
       const newSchema = {
@@ -90,9 +102,6 @@ const reducer = (state, action) => {
           attributes: {},
         },
       };
-
-      // const key =
-      //   action.schemaType === 'contentType' ? 'contentTypes' : 'components';
 
       return state.updateIn(['contentTypes', action.uid], () =>
         fromJS(newSchema)
@@ -108,6 +117,15 @@ const reducer = (state, action) => {
           attributes: {},
         },
       };
+
+      if (action.shouldAddComponentToData) {
+        return state
+          .updateIn(['components', action.uid], () => fromJS(newSchema))
+          .updateIn(['modifiedData', 'components', action.uid], () =>
+            fromJS(newSchema)
+          );
+      }
+
       return state.updateIn(['components', action.uid], () =>
         fromJS(newSchema)
       );

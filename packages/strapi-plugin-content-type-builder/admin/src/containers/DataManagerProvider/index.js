@@ -80,7 +80,8 @@ const DataManagerProvider = ({ allIcons, children }) => {
     forTarget,
     targetUid,
     isEditing = false,
-    initialAttribute
+    initialAttribute,
+    shouldAddComponentToData = false
   ) => {
     const actionType = isEditing ? 'EDIT_ATTRIBUTE' : 'ADD_ATTRIBUTE';
 
@@ -90,14 +91,23 @@ const DataManagerProvider = ({ allIcons, children }) => {
       forTarget,
       targetUid,
       initialAttribute,
+      shouldAddComponentToData,
     });
   };
-
-  const createSchema = (data, schemaType, uid, componentCategory) => {
+  // const addComponentToSchema = ()
+  const createSchema = (
+    data,
+    schemaType,
+    uid,
+    componentCategory,
+    shouldAddComponentToData = false
+  ) => {
     const type =
       schemaType === 'contentType'
         ? 'CREATE_SCHEMA'
         : 'CREATE_COMPONENT_SCHEMA';
+
+    console.log({ shouldAddComponentToData, type });
 
     dispatch({
       type,
@@ -105,6 +115,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
       componentCategory,
       schemaType,
       uid,
+      shouldAddComponentToData,
     });
   };
   const removeAttribute = (
@@ -182,8 +193,6 @@ const DataManagerProvider = ({ allIcons, children }) => {
 
     return <Redirect to={`/plugins/${pluginId}/content-types/${firstCTUid}`} />;
   }
-
-  console.log({ d: modifiedData });
 
   return (
     <DataManagerContext.Provider

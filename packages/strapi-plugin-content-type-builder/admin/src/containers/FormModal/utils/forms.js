@@ -157,7 +157,11 @@ const forms = {
 
       switch (attributeType) {
         case 'component':
-          return yup.object();
+          return yup.object().shape({
+            ...commonShape,
+            component: yup.string().required(errorsTrads.required),
+            ...numberTypeShape,
+          });
         case 'dynamiczone':
           return yup.object().shape({
             ...commonShape,
