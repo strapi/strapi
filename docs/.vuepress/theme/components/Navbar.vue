@@ -100,7 +100,7 @@ $navbar-horizontal-padding = 1.5rem
     padding 0 0.5rem
     margin-left 1rem
     font-weight 600
-    background-color #fff3cd;
+    background-color #fff3cd
     border-radius .25rem
   a, span, img
     display inline-block
