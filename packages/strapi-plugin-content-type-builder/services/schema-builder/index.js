@@ -1,10 +1,14 @@
 'use strict';
 
 const path = require('path');
+const _ = require('lodash');
 
 const createSchemaHandler = require('./schema-handler');
 const createComponentBuilder = require('./component-builder');
 const createContentTypeBuilder = require('./content-type-builder');
+
+const MODEL_RELATIONS = ['oneWay', 'oneToOne', 'manyToOne'];
+const COLLECTION_RELATIONS = ['manyWay', 'manyToMany', 'oneToMany'];
 
 module.exports = function createBuilder() {
   const components = Object.keys(strapi.components).map(key => {
@@ -76,6 +80,70 @@ function createSchemaBuilder({ components, contentTypes }) {
     },
     get contentTypes() {
       return tmpContentTypes;
+    },
+
+    convertAttributes(attributes) {
+      return Object.keys(attributes).reduce((acc, key) => {
+        const attribute = attributes[key];
+
+        if (_.has(attribute, 'type')) {
+          if (attribute.type === 'media') {
+            const fileModel = strapi.getModel('file', 'upload');
+            if (!fileModel) return acc;
+
+            const via = _.findKey(fileModel.attributes, { collection: '*' });
+            acc[key] = {
+              [attribute.multiple ? 'collection' : 'model']: 'file',
+              via,
+              plugin: 'upload',
+              required: attribute.required ? true : false,
+            };
+          } else {
+            acc[key] = attribute;
+          }
+
+          return acc;
+        }
+
+        if (_.has(attribute, 'target')) {
+          const {
+            target,
+            nature,
+            unique,
+            targetAttribute,
+            columnName,
+            dominant,
+          } = attribute;
+
+          const attr = {
+            unique: unique === true ? true : undefined,
+            columnName,
+          };
+
+          if (!this.contentTypes.has(target)) {
+            throw new Error(`target: ${target} does not exist`);
+          }
+
+          const { modelName, plugin } = this.contentTypes.get(target);
+
+          attr.plugin = plugin;
+
+          if (MODEL_RELATIONS.includes(nature)) {
+            attr.model = modelName;
+          } else if (COLLECTION_RELATIONS.includes(nature)) {
+            attr.collection = modelName;
+          }
+
+          if (!['manyWay', 'oneWay'].includes(nature)) {
+            attr.via = targetAttribute;
+            attr.dominant = dominant;
+          }
+
+          acc[key] = attr;
+        }
+
+        return acc;
+      }, {});
     },
 
     ...createComponentBuilder({ tmpComponents, tmpContentTypes }),

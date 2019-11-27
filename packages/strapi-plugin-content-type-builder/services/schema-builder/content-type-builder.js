@@ -4,11 +4,7 @@ const path = require('path');
 const _ = require('lodash');
 const pluralize = require('pluralize');
 
-const {
-  convertAttributes,
-  isRelation,
-  toUID,
-} = require('../../utils/attributes');
+const { isRelation, toUID } = require('../../utils/attributes');
 const { nameToSlug, nameToCollectionName } = require('../../utils/helpers');
 const createSchemaHandler = require('./schema-handler');
 
@@ -50,6 +46,8 @@ module.exports = function createComponentBuilder() {
         filename: `${nameToSlug(infos.name)}.settings.json`,
       });
 
+      this.contentTypes.set(uid, contentType);
+
       const defaultConnection = _.get(
         strapi,
         ['config', 'currentEnvironment', 'database', 'defaultConnection'],
@@ -60,15 +58,21 @@ module.exports = function createComponentBuilder() {
         pluralize(infos.name)
       )}`;
 
+      // support self referencing content type relation
+      Object.keys(infos.attributes).forEach(key => {
+        const { target } = infos.attributes[key];
+        if (target === '__self__') {
+          infos.attributes[key].target = uid;
+        }
+      });
+
       contentType
         .setUID(uid)
         .set('connection', infos.connection || defaultConnection)
         .set('collectionName', infos.collectionName || defaultCollectionName)
         .set(['info', 'name'], infos.name)
         .set(['info', 'description'], infos.description)
-        .set('attributes', convertAttributes(infos.attributes));
-
-      this.contentTypes.set(uid, contentType);
+        .set('attributes', this.convertAttributes(infos.attributes));
 
       Object.keys(infos.attributes).forEach(key => {
         const attribute = infos.attributes[key];
@@ -167,7 +171,7 @@ module.exports = function createComponentBuilder() {
         .set('collectionName', infos.collectionName)
         .set(['info', 'name'], infos.name)
         .set(['info', 'description'], infos.description)
-        .set('attributes', convertAttributes(infos.attributes));
+        .set('attributes', this.convertAttributes(infos.attributes));
 
       return contentType;
     },
