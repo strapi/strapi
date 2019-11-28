@@ -2,13 +2,16 @@ import React, { useRef } from 'react';
 import Select from 'react-select';
 import PropTypes from 'prop-types';
 import MenuList from './MenuList';
+import MultipleMenuList from './MultipleMenuList';
 import Value from './Value';
 
 const ComponentSelect = ({
   componentCategoryNeededForAddingAfieldWhileCreatingAComponent,
   componentNameNeededForAddingAfieldWhileCreatingAComponent,
   isCreatingComponentWhileAddingAField,
+  isMultiple,
   onChange,
+  onClickAddComponentsToDynamicZone,
   name,
   value,
   styles,
@@ -27,17 +30,21 @@ const ComponentSelect = ({
     }
   };
 
+  const MenuListCompo = isMultiple ? MultipleMenuList : MenuList;
+
   return (
     <Select
-      isClearable
+      isClearable={!isMultiple}
       isDisabled={isCreatingComponentWhileAddingAField}
       isCreatingComponent={isCreatingComponentWhileAddingAField}
+      isMultiple={isMultiple}
       componentCategory={
         componentCategoryNeededForAddingAfieldWhileCreatingAComponent
       }
       componentName={componentNameNeededForAddingAfieldWhileCreatingAComponent}
       name={name}
       onChange={handleChange}
+      onClickAddComponentsToDynamicZone={onClickAddComponentsToDynamicZone}
       onClickOption={onChange}
       styles={styles}
       value={{ label: value, value }}
@@ -46,7 +53,7 @@ const ComponentSelect = ({
       // menuIsOpen
       refState={ref}
       components={{
-        MenuList,
+        MenuList: MenuListCompo,
         SingleValue: Value,
       }}
     />
@@ -57,6 +64,7 @@ ComponentSelect.defaultProps = {
   componentCategoryNeededForAddingAfieldWhileCreatingAComponent: null,
   componentNameNeededForAddingAfieldWhileCreatingAComponent: null,
   isCreatingComponentWhileAddingAField: false,
+  isMultiple: false,
   value: null,
 };
 
@@ -65,10 +73,15 @@ ComponentSelect.propTypes = {
     PropTypes.string,
   componentNameNeededForAddingAfieldWhileCreatingAComponent: PropTypes.string,
   isCreatingComponentWhileAddingAField: PropTypes.bool,
+  isMultiple: PropTypes.bool,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
+  onClickAddComponentsToDynamicZone: PropTypes.func.isRequired,
   styles: PropTypes.object.isRequired,
-  value: PropTypes.string,
+  value: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.arrayOf(PropTypes.string),
+  ]),
 };
 
 export default ComponentSelect;

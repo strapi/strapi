@@ -94,6 +94,33 @@ const FormModal = () => {
         step,
       });
 
+      // Special case for the dynamic zone
+      if (
+        modalType === 'addComponentToDynamicZone' &&
+        state.modalType !== 'addComponentToDynamicZone' &&
+        actionType === 'edit'
+      ) {
+        console.log('sub');
+        const attributeToEditNotFormatted = get(
+          allDataSchema,
+          [...pathToSchema, 'schema', 'attributes', dynamicZoneTarget],
+          {}
+        );
+        const attributeToEdit = {
+          ...attributeToEditNotFormatted,
+          name: dynamicZoneTarget,
+          // createComponent: true,
+          createComponent: false,
+          componentToCreate: { type: 'component' },
+        };
+
+        dispatch({
+          type: 'SET_DYNAMIC_ZONE_DATA_SCHEMA',
+          attributeToEdit,
+        });
+        console.log({ attributeToEdit });
+      }
+
       // Set the predefined data structure to create an attribute
       if (
         attributeType &&
@@ -101,6 +128,7 @@ const FormModal = () => {
         // This condition is added to prevent the reducer state to be cleared when navigating from the base tab to tha advanced one
         state.modalType !== 'attribute'
       ) {
+        console.log('effect');
         const attributeToEditNotFormatted = get(
           allDataSchema,
           [...pathToSchema, 'schema', 'attributes', attributeName],
@@ -238,6 +266,17 @@ const FormModal = () => {
     await schema.validate(dataToValidate, { abortEarly: false });
   };
 
+  const handleClickAddComponentsToDynamicZone = ({
+    target: { name, components, shouldAddComponents },
+  }) => {
+    dispatch({
+      type: 'ADD_COMPONENTS_TO_DYNAMIC_ZONE',
+      name,
+      components,
+      shouldAddComponents,
+    });
+  };
+
   const handleChange = ({ target: { name, value, type, ...rest } }) => {
     const namesThatCanResetToNullValue = [
       'enumName',
@@ -360,7 +399,7 @@ const FormModal = () => {
           // Adding a component to a dynamiczone is not the same logic as creating a simple field
           // so the search is different
           // TODO make sure it works for edit
-          const dzSearch = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${state.targetUid}&headerDisplayName=${state.headerDisplayName}&dynamicZoneTarget=${modifiedData.name}&settingType=base&step=1`;
+          const dzSearch = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${state.targetUid}&headerDisplayName=${state.headerDisplayName}&dynamicZoneTarget=${modifiedData.name}&settingType=base&step=1&actionType=create`;
           const nextSearch = isDynamicZoneAttribute
             ? dzSearch
             : createNextSearch(targetUid);
@@ -478,8 +517,6 @@ const FormModal = () => {
         // The modal is addComponentToDynamicZone
       } else {
         if (isInFirstComponentStep) {
-          console.log('add compo dz step 1', isCreatingComponentFromAView);
-          // addCo
           if (isCreatingComponentFromAView) {
             const { category, type, ...rest } = modifiedData.componentToCreate;
             const componentUid = createComponentUid(
@@ -504,6 +541,7 @@ const FormModal = () => {
             addComponentsToDynamicZone(state.dynamicZoneTarget, [componentUid]);
           } else {
             console.log('not ready');
+            // TODO apply components to DZ
           }
         } else {
           console.log('step 2???');
@@ -565,6 +603,7 @@ const FormModal = () => {
       onOpened={onOpened}
       onClosed={onClosed}
       onToggle={handleToggle}
+      withoverflow={toString(state.modalType === 'addComponentToDynamicZone')}
     >
       <HeaderModal>
         <ModalHeader
@@ -820,6 +859,9 @@ const FormModal = () => {
                                       : formatMessage({ id: errorId })
                                   }
                                   onChange={handleChange}
+                                  onClickAddComponentsToDynamicZone={
+                                    handleClickAddComponentsToDynamicZone
+                                  }
                                   onBlur={() => {}}
                                   description={
                                     get(input, 'description.id', null)

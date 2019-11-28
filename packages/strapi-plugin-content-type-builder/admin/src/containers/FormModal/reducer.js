@@ -17,6 +17,19 @@ export const shouldPluralizeName = nature =>
 
 const reducer = (state, action) => {
   switch (action.type) {
+    case 'ADD_COMPONENTS_TO_DYNAMIC_ZONE': {
+      const { name, components, shouldAddComponents } = action;
+
+      return state.updateIn(['modifiedData', name], list => {
+        if (shouldAddComponents) {
+          return list.concat(components);
+        } else {
+          return list.filter(comp => {
+            return components.indexOf(comp) === -1;
+          });
+        }
+      });
+    }
     case 'ON_CHANGE':
       return state.update('modifiedData', obj => {
         const {
@@ -183,6 +196,11 @@ const reducer = (state, action) => {
       }
 
       return state.update('modifiedData', () => fromJS(dataToSet));
+    }
+    case 'SET_DYNAMIC_ZONE_DATA_SCHEMA': {
+      return state
+        .update('modifiedData', () => fromJS(action.attributeToEdit))
+        .update('initialData', () => fromJS(action.attributeToEdit));
     }
 
     case 'SET_ERRORS':
