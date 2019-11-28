@@ -249,8 +249,6 @@ const EditViewDataManagerProvider = ({
         // emitEvent('didNotSaveEntry', { error: err });
         strapi.notification.error(error);
       }
-
-      // setIsSubmitting();
     } catch (err) {
       const errors = getYupInnerErrors(err);
 
@@ -300,7 +298,6 @@ const EditViewDataManagerProvider = ({
     });
   };
 
-  // REMOVE_COMPONENT_FROM_FIELD
   const removeComponentFromDynamicZone = (dynamicZoneName, index) => {
     dispatch({
       type: 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE',

@@ -114,7 +114,7 @@ const createYupSchema = (model, { components }) => {
           if (min) {
             dynamicZoneSchema = dynamicZoneSchema
               .min(min, errorsTrads.min)
-              .required();
+              .required(errorsTrads.required);
           }
         } else {
           if (min) {

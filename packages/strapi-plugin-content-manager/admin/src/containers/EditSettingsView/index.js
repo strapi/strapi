@@ -10,7 +10,6 @@ import { useParams } from 'react-router-dom';
 import { cloneDeep, get, set } from 'lodash';
 import {
   // utils
-  getQueryParameters,
   request,
   // contexts
   // TODO add emit event
@@ -41,7 +40,6 @@ const EditSettingsView = ({
   deleteLayouts,
   componentsAndModelsMainPossibleMainFields,
   history: { push },
-  location: { search },
   models,
   plugins,
   slug,
@@ -53,7 +51,6 @@ const EditSettingsView = ({
   const [isDraggingSibling, setIsDraggingSibling] = useState(false);
 
   const fieldsReorderClassName = type === 'content-types' ? 'col-8' : 'col-12';
-  const source = getQueryParameters(search, 'source');
   const abortController = new AbortController();
   const { signal } = abortController;
 
@@ -162,7 +159,7 @@ const EditSettingsView = ({
       abortController.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug, source, type, componentSlug]);
+  }, [slug, type, componentSlug]);
 
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
@@ -188,7 +185,6 @@ const EditSettingsView = ({
 
       delete body.schema;
       delete body.uid;
-      delete body.source;
       delete body.isComponent;
 
       emitEvent('willSaveContentTypeLayout');
@@ -411,7 +407,6 @@ const EditSettingsView = ({
                   plugins,
                   currentEnvironment,
                   slug,
-                  source,
                   emitEvent,
                   push
                 )}
