@@ -103,7 +103,7 @@ function LeftMenu() {
   return (
     <Wrapper className="col-md-3">
       {data.map(list => {
-        return <LeftMenuList {...list} key={list.name}></LeftMenuList>;
+        return <LeftMenuList {...list} key={list.name} />;
       })}
     </Wrapper>
   );

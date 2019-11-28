@@ -356,7 +356,6 @@ const FormModal = () => {
     ? { paddingTop: '0.5rem', paddingBottom: '3rem' }
     : {};
 
-  console.log({ formModal: modifiedData });
   return (
     <Modal
       isOpen={isOpen}

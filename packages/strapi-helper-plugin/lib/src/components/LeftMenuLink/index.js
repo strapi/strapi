@@ -3,7 +3,11 @@ import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
 
 function LeftMenuLink({ children, to }) {
-  return <NavLink to={to}>{children}</NavLink>;
+  return (
+    <NavLink to={to}>
+      <p>{children}</p>
+    </NavLink>
+  );
 }
 
 LeftMenuLink.defaultProps = {

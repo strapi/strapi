@@ -10,12 +10,14 @@ import { colors } from 'strapi-helper-plugin';
 
 const StyledCustomLink = styled.div`
   padding-left: 15px;
-  padding-top: 10px;
+  padding-top: 9px;
   line-height: 0;
   p {
     color: ${colors.blue};
     font-size: 13px;
     font-weight: 500;
+    line-height: 18px;
+    text-align: left;
     i {
       margin-right: 5px;
     }

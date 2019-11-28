@@ -1,8 +1,19 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { get, has } from 'lodash';
-import { ViewContainer } from 'strapi-helper-plugin';
+import { get, has, isEqual } from 'lodash';
+import { Header } from '@buffetjs/custom';
+import {
+  List,
+  ListWrapper,
+  ViewContainer,
+  useGlobalContext,
+} from 'strapi-helper-plugin';
+
+import ListHeader from '../../components/ListHeader';
+import { ListButton } from '../../components/ListButton';
 import useDataManager from '../../hooks/useDataManager';
+import pluginId from '../../pluginId';
+
 import LeftMenu from '../LeftMenu';
 
 const ListPage = () => {
@@ -21,6 +32,7 @@ const ListPage = () => {
     isInContentTypeView,
     removeAttribute,
   } = useDataManager();
+  const { formatMessage } = useGlobalContext();
   const { push } = useHistory();
   const firstMainDataPath = isInContentTypeView ? 'contentType' : 'component';
   const mainDataTypeAttributesPath = [
@@ -30,6 +42,8 @@ const ListPage = () => {
   ];
 
   const attributes = get(modifiedData, mainDataTypeAttributesPath, {});
+  const attributesLength = Object.keys(attributes).length;
+
   const currentDataName = get(
     initialData,
     [firstMainDataPath, 'schema', 'name'],
@@ -114,15 +128,98 @@ const ListPage = () => {
     });
   };
 
+  const getDescription = () => {
+    const description = get(
+      modifiedData,
+      [firstMainDataPath, 'schema', 'description'],
+      null
+    );
+
+    return description
+      ? description
+      : formatMessage({
+          id: `${pluginId}.modelPage.contentHeader.emptyDescription.description`,
+        });
+  };
+
+  const getActions = () => {
+    // const handleSubmit = () =>
+    //   this.isUpdatingTempFeature()
+    //     ? submitTempGroup(newGroup, this.context)
+    //     : submitGroup(
+    //         featureName,
+    //         get(modifiedDataGroup, featureName),
+    //         Object.assign(this.context, {
+    //           history: this.props.history,
+    //         }),
+    //         this.getSource()
+    //       );
+
+    // const handleCancel = resetEditExistingGroup(this.getFeatureName());
+
+    return [
+      {
+        color: 'cancel',
+        onClick: () => {},
+        title: formatMessage({
+          id: `${pluginId}.form.button.cancel`,
+        }),
+        type: 'button',
+        disabled: isEqual(modifiedData, initialData) ? true : false,
+      },
+      {
+        color: 'success',
+        onClick: () => {},
+        title: formatMessage({
+          id: `${pluginId}.form.button.save`,
+        }),
+        type: 'submit',
+        disabled: isEqual(modifiedData, initialData) ? true : false,
+      },
+    ];
+  };
+
+  const headerProps = {
+    actions: getActions(),
+    title: {
+      label: get(modifiedData, [firstMainDataPath, 'schema', 'name']),
+    },
+    content: getDescription(),
+  };
+
+  const listTitle = [
+    formatMessage(
+      {
+        id: `${pluginId}.table.attributes.title.${
+          attributesLength > 1 ? 'plural' : 'singular'
+        }`,
+      },
+      { number: attributesLength }
+    ),
+  ];
+
+  const addButtonProps = {
+    icon: true,
+    color: 'primary',
+    label: formatMessage({ id: `${pluginId}.button.attributes.add.another` }),
+    onClick: () => handleClickAddAttributeMainData(),
+  };
+
+  const listActions = [{ ...addButtonProps }];
+
   return (
     <ViewContainer>
       <div className="container-fluid">
         <div className="row">
           <LeftMenu />
-          <div className="col-md-9">
-            <button type="button" onClick={handleClickAddAttributeMainData}>
-              Add field
-            </button>
+          <div className="col-md-9 content">
+            <Header {...headerProps} />
+
+            <ListWrapper>
+              <ListHeader actions={listActions} title={listTitle} />
+              <List></List>
+              <ListButton {...addButtonProps}></ListButton>
+            </ListWrapper>
 
             {/* REALLY TEMPORARY SINCE IT DOESN T SUPPORT ANY NESTING COMPONENT*/}
             <ul>
