@@ -94,7 +94,13 @@ const DataManagerProvider = ({ allIcons, children }) => {
       shouldAddComponentToData,
     });
   };
-  // const addComponentToSchema = ()
+  const addComponentsToDynamicZone = (dynamicZoneTarget, componentsToAdd) => {
+    dispatch({
+      type: 'ADD_COMPONENTS_TO_DYNAMIC_ZONE',
+      dynamicZoneTarget,
+      componentsToAdd,
+    });
+  };
   const createSchema = (
     data,
     schemaType,
@@ -106,8 +112,6 @@ const DataManagerProvider = ({ allIcons, children }) => {
       schemaType === 'contentType'
         ? 'CREATE_SCHEMA'
         : 'CREATE_COMPONENT_SCHEMA';
-
-    console.log({ shouldAddComponentToData, type });
 
     dispatch({
       type,
@@ -194,10 +198,13 @@ const DataManagerProvider = ({ allIcons, children }) => {
     return <Redirect to={`/plugins/${pluginId}/content-types/${firstCTUid}`} />;
   }
 
+  console.warn({ allData: modifiedData });
+
   return (
     <DataManagerContext.Provider
       value={{
         addAttribute,
+        addComponentsToDynamicZone,
         allComponentsCategories: retrieveSpecificInfoFromComponents(
           components,
           ['category']

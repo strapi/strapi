@@ -93,6 +93,23 @@ const reducer = (state, action) => {
           return existingCompos;
         });
     }
+    case 'ADD_COMPONENTS_TO_DYNAMIC_ZONE': {
+      const { dynamicZoneTarget, componentsToAdd } = action;
+
+      return state.updateIn(
+        [
+          'modifiedData',
+          'contentType',
+          'schema',
+          'attributes',
+          dynamicZoneTarget,
+          'components',
+        ],
+        list => {
+          return list.concat(componentsToAdd);
+        }
+      );
+    }
     case 'CREATE_SCHEMA': {
       const newSchema = {
         uid: action.uid,

@@ -47,6 +47,7 @@ const FormModal = () => {
   const attributeOptionRef = useRef();
   const {
     addAttribute,
+    addComponentsToDynamicZone,
     contentTypes,
     components,
     createSchema,
@@ -138,9 +139,15 @@ const FormModal = () => {
   const form = get(forms, [state.modalType, 'form', state.settingType], () => ({
     items: [],
   }));
-  const iconType = ['components', 'contentType'].includes(state.modalType)
+
+  // TODO improve icon logic
+  let iconType = ['components', 'contentType'].includes(state.modalType)
     ? state.modalType
     : state.forTarget;
+
+  if (state.modalType === 'addComponentToDynamicZone') {
+    iconType = 'dynamiczone';
+  }
   const isCreatingContentType = state.modalType === 'contentType';
   const isCreatingComponent = state.modalType === 'component';
   const isCreatingAttribute = state.modalType === 'attribute';
@@ -213,12 +220,19 @@ const FormModal = () => {
         initialData
       );
 
-      // This might be used for dynamic zones if not remove this part
+      // The user is either in the addComponentToDynamicZone modal or
+      // in step 1 of the add component (modalType=attribute&attributeType=component) but not creating a component
     } else {
-      // TODO validate component schema
-      console.log('Will do something');
-
-      return;
+      if (isInFirstComponentStep && isCreatingComponentFromAView) {
+        schema = forms.component.schema(
+          Object.keys(components),
+          get(modifiedData, 'componentToCreate.category', '')
+        );
+      } else {
+        // The form is valid
+        // TODO validate case dz not creating component
+        return;
+      }
     }
 
     await schema.validate(dataToValidate, { abortEarly: false });
@@ -341,17 +355,31 @@ const FormModal = () => {
             state.actionType === 'edit',
             initialData
           );
+          const isDynamicZoneAttribute = state.attributeType === 'dynamiczone';
+
           // Adding a component to a dynamiczone is not the same logic as creating a simple field
           // so the search is different
-
           // TODO make sure it works for edit
-          const dzSearch = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${state.targetUid}&headerDisplayName=${state.headerDisplayName}&dynamicZoneTarget=${modifiedData.name}&settingType=base`;
-          const nextSearch =
-            state.attributeType === 'dynamiczone'
-              ? dzSearch
-              : createNextSearch(targetUid);
+          const dzSearch = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${state.targetUid}&headerDisplayName=${state.headerDisplayName}&dynamicZoneTarget=${modifiedData.name}&settingType=base&step=1`;
+          const nextSearch = isDynamicZoneAttribute
+            ? dzSearch
+            : createNextSearch(targetUid);
 
-          push({ search: nextSearch });
+          if (state.attributeType === 'dynamiczone' && !isCreating) {
+            push({ search: '' });
+          } else {
+            if (isDynamicZoneAttribute) {
+              // Step 1 of adding a component to a DZ, the user has the option to create a component
+              dispatch({
+                type: 'RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ',
+              });
+
+              push({ search: nextSearch });
+              return;
+            }
+
+            push({ search: nextSearch });
+          }
 
           // Adding an existing component
         } else {
@@ -447,8 +475,41 @@ const FormModal = () => {
           push({ search: '' });
           return;
         }
+        // The modal is addComponentToDynamicZone
       } else {
-        console.log('handle submit unknown case');
+        if (isInFirstComponentStep) {
+          console.log('add compo dz step 1', isCreatingComponentFromAView);
+          // addCo
+          if (isCreatingComponentFromAView) {
+            const { category, type, ...rest } = modifiedData.componentToCreate;
+            const componentUid = createComponentUid(
+              modifiedData.componentToCreate.name,
+              category
+            );
+            // Create the component first and add it to the components data
+            createSchema(
+              // Component data
+              rest,
+              // Type will always be component
+              // It will dispatch the CREATE_COMPONENT_SCHEMA action
+              // So the component will be added in the main components object
+              // This might not be needed if we don't allow navigation between entries while editing
+              type,
+              componentUid,
+              category,
+              // This will add the created component in the datamanager modifiedData components key
+              // Like explained above we will be able to modify the created component structure
+              isCreatingComponentFromAView
+            );
+            addComponentsToDynamicZone(state.dynamicZoneTarget, [componentUid]);
+          } else {
+            console.log('not ready');
+          }
+        } else {
+          console.log('step 2???');
+        }
+
+        return;
       }
 
       dispatch({
@@ -456,6 +517,7 @@ const FormModal = () => {
       });
     } catch (err) {
       const errors = getYupInnerErrors(err);
+      console.log({ err, errors });
 
       dispatch({
         type: 'SET_ERRORS',
@@ -480,8 +542,9 @@ const FormModal = () => {
   };
   const shouldDisableAdvancedTab = () => {
     return (
-      isCreatingAttribute &&
-      state.attributeType === 'component' &&
+      // isCreatingAttribute &&
+      (state.attributeType === 'component' ||
+        state.modalType === 'addComponentToDynamicZone') &&
       get(modifiedData, ['createComponent'], null) === false
     );
   };
@@ -493,6 +556,8 @@ const FormModal = () => {
   const modalBodyStyle = isPickingAttribute
     ? { paddingTop: '0.5rem', paddingBottom: '3rem' }
     : {};
+
+  console.log({ modifiedData });
 
   return (
     <Modal
@@ -603,7 +668,7 @@ const FormModal = () => {
                     (row, index) => {
                       return (
                         <div className="row" key={index}>
-                          {row.map(input => {
+                          {row.map((input, i) => {
                             // The divider type is used mainly the advanced tab
                             // It is the one responsible for displaying the settings label
                             if (input.type === 'divider') {
@@ -630,6 +695,15 @@ const FormModal = () => {
                             if (input.type === 'spacer') {
                               return (
                                 <div key="spacer" style={{ height: 20 }}></div>
+                              );
+                            }
+
+                            if (input.type === 'pushRight') {
+                              return (
+                                <div
+                                  key={`${index}.${i}`}
+                                  className={`col-${input.size}`}
+                                />
                               );
                             }
 

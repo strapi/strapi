@@ -86,11 +86,13 @@ const reducer = (state, action) => {
     case 'RESET_PROPS':
       return initialState;
     case 'RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO': {
+      // This is run when the user doesn't want to create a new component
       return initialState.update('modifiedData', () =>
         fromJS({ type: 'component', repeatable: true })
       );
     }
     case 'RESET_PROPS_AND_SAVE_CURRENT_DATA': {
+      // This is run when the user has created a new component
       const componentToCreate = state.getIn([
         'modifiedData',
         'componentToCreate',
@@ -110,6 +112,14 @@ const reducer = (state, action) => {
         .update('isCreatingComponentWhileAddingAField', () =>
           state.getIn(['modifiedData', 'createComponent'])
         );
+    }
+    case 'RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ': {
+      const createdDZ = state.get('modifiedData');
+      const dataToSet = createdDZ
+        .set('createComponent', true)
+        .set('componentToCreate', fromJS({ type: 'component' }));
+
+      return initialState.update('modifiedData', () => dataToSet);
     }
     case 'SET_ATTRIBUTE_DATA_SCHEMA': {
       const {

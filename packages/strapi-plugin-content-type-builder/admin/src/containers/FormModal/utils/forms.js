@@ -256,7 +256,12 @@ const forms = {
           [fields.required],
           [fields.unique],
         ];
-        const dynamiczoneItems = [[fields.max], [fields.min]];
+        const dynamiczoneItems = [
+          [fields.required],
+          [fields.divider],
+          [fields.max],
+          [fields.min],
+        ];
 
         if (type === 'component') {
           if (step === '1') {
@@ -427,40 +432,7 @@ const forms = {
               : [];
 
           return {
-            items: [
-              [
-                {
-                  label: {
-                    id: getTrad('modalForm.attribute.text.type-selection'),
-                  },
-                  name: 'createComponent',
-                  type: 'booleanBox',
-                  size: 12,
-                  options: [
-                    {
-                      headerId: getTrad(
-                        `form.attribute.component.option.create`
-                      ),
-                      descriptionId: getTrad(
-                        `form.attribute.component.option.create.description`
-                      ),
-                      value: true,
-                    },
-                    {
-                      headerId: getTrad(
-                        `form.attribute.component.option.reuse-existing`
-                      ),
-                      descriptionId: getTrad(
-                        `form.attribute.${type}.option.reuse-existing.description`
-                      ),
-                      value: false,
-                    },
-                  ],
-                  validations: {},
-                },
-              ],
-              ...itemsToConcat,
-            ],
+            items: [[fields.createComponent], ...itemsToConcat],
           };
         }
 
@@ -746,6 +718,45 @@ const forms = {
       base() {
         return {
           items: componentForm.base(),
+        };
+      },
+    },
+  },
+  addComponentToDynamicZone: {
+    schema(...args) {
+      // TODO
+      console.log('k', args);
+      return yup.object();
+    },
+    form: {
+      advanced(data, type, step) {
+        return forms.attribute.form.advanced(data, 'component', step);
+      },
+      base(data) {
+        const isCreatingComponent = get(data, 'createComponent', false);
+
+        const itemsToConcat = isCreatingComponent
+          ? [[{ type: 'spacer' }]].concat(
+              componentForm.base('componentToCreate.')
+            )
+          : [
+              [{ type: 'spacer' }],
+              [
+                { type: 'pushRight', size: 6 },
+
+                {
+                  name: 'components',
+                  type: 'componentSelect',
+                  label: {
+                    id: getTrad('modalForm.attributes.select-components'),
+                  },
+                  isMultiple: true,
+                },
+              ],
+            ];
+
+        return {
+          items: [[fields.createComponent], ...itemsToConcat],
         };
       },
     },
