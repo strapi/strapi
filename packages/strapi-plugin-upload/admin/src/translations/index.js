@@ -12,6 +12,7 @@ import ptBR from './pt-BR.json';
 import pt from './pt.json';
 import ru from './ru.json';
 import tr from './tr.json';
+import vi from './vi.json';
 import zhHans from './zh-Hans.json';
 import zh from './zh.json';
 
@@ -30,6 +31,7 @@ const trads = {
   pt,
   ru,
   tr,
+  vi,
   'zh-Hans': zhHans,
   zh,
 };

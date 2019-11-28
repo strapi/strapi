@@ -8,7 +8,7 @@ Because an API may need to serve static assets, every new Strapi project include
 
 An image named `company-logo.png` in `./public/` is accessible through `/company-logo.png` URL.
 
-::: note
+::: tip
 `index.html` files are served if the request corresponds to a folder name (`/pictures` url will try to serve `public/pictures/index.html` file).
 :::
 

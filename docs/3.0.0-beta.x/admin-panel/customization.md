@@ -104,7 +104,7 @@ const translationMessages = reduce(
 export { languages, translationMessages };
 ```
 
-::: note
+::: tip
 With this modification only English and French will be available in your admin
 :::
 
@@ -156,7 +156,7 @@ npm run build
 
 To change the top-left displayed admin panel's logo, add your custom image at `./admin/src/assets/images/logo-strapi.png`.
 
-::: note
+::: tip
 make sure the size of your image is the same as the existing one (434px x 120px).
 :::
 
@@ -174,9 +174,9 @@ export const SHOW_TUTORIALS = false;
 
 To build the administration, run the following command from the root directory of your project.
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "yarn" id="yarn-build-dev"
+::: tab yarn
 
 ```
 yarn build
@@ -184,7 +184,7 @@ yarn build
 
 :::
 
-::: tab "npm" id="npm-build-dev"
+::: tab npm
 
 ```
 npm run build
@@ -192,7 +192,7 @@ npm run build
 
 :::
 
-::: tab "strapi" id="strapi-build-dev"
+::: tab strapi
 
 ```
 strapi build
@@ -204,9 +204,9 @@ strapi build
 
 you can build your admin panel with a specific configuration (located in the `./config/environments/**/server.json`) config by specifying a NODE_ENV as follows:
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "yarn" id="yarn-build-prod"
+::: tab yarn
 
 ```
 NODE_ENV=production yarn build
@@ -214,7 +214,7 @@ NODE_ENV=production yarn build
 
 :::
 
-::: tab "npm" id="npm-build-prod"
+::: tab npm
 
 ```
 NODE_ENV=production npm run build
@@ -222,7 +222,7 @@ NODE_ENV=production npm run build
 
 :::
 
-::: tab "strapi" id="strapi-build-prod"
+::: tab strapi
 
 ```
 NODE_ENV=production strapi build

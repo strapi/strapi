@@ -2,7 +2,6 @@
 
 const _ = require('lodash');
 
-const { nameToSlug } = require('../utils/helpers');
 const {
   validateContentTypeInput,
   validateUpdateContentTypeInput,
@@ -49,25 +48,12 @@ module.exports = {
       return ctx.send({ error }, 400);
     }
 
-    const modelName = nameToSlug(body.contentType.name);
-    const uid = `application::${modelName}.${modelName}`;
-
-    if (_.has(strapi.contentTypes, uid)) {
-      return ctx.send({ error: 'contentType.alreadyExists' }, 400);
-    }
-
-    strapi.reload.isWatching = false;
-
     try {
-      const contentType = contentTypeService.createContentTypeSchema(
-        body.contentType
-      );
+      strapi.reload.isWatching = false;
 
-      await contentTypeService.generateAPI(modelName, contentType);
-
-      await contentTypeService.generateReversedRelations({
-        attributes: body.contentType.attributes,
-        modelName,
+      const component = await contentTypeService.createContentType({
+        contentType: body.contentType,
+        components: body.components,
       });
 
       if (_.isEmpty(strapi.api)) {
@@ -75,33 +61,22 @@ module.exports = {
       } else {
         strapi.emit('didCreateContentType');
       }
-    } catch (e) {
-      strapi.log.error(e);
-      strapi.emit('didNotCreateContentType', e);
-      return ctx.badRequest(null, [
-        { messages: [{ id: 'request.error.model.write' }] },
-      ]);
+
+      setImmediate(() => strapi.reload());
+
+      ctx.send({ data: { uid: component.uid } }, 201);
+    } catch (error) {
+      strapi.log.error(error);
+      strapi.emit('didNotCreateContentType', error);
+      ctx.send({ error: error.message }, 400);
     }
-
-    setImmediate(() => strapi.reload());
-
-    ctx.send(
-      {
-        data: {
-          uid,
-        },
-      },
-      201
-    );
   },
 
   async updateContentType(ctx) {
     const { uid } = ctx.params;
     const { body } = ctx.request;
 
-    const contentType = strapi.contentTypes[uid];
-
-    if (!contentType) {
+    if (!_.has(strapi.contentTypes, uid)) {
       return ctx.send({ error: 'contentType.notFound' }, 404);
     }
 
@@ -111,68 +86,41 @@ module.exports = {
       return ctx.send({ error }, 400);
     }
 
-    strapi.reload.isWatching = false;
-
     try {
-      const newSchema = contentTypeService.updateContentTypeSchema(
-        contentType.__schema__,
-        body.contentType
-      );
+      strapi.reload.isWatching = false;
 
-      await contentTypeService.writeContentType({ uid, schema: newSchema });
-
-      // delete all relations directed to the updated ct except for oneWay and manyWay
-      await contentTypeService.deleteBidirectionalRelations(contentType);
-
-      await contentTypeService.generateReversedRelations({
-        attributes: body.contentType.attributes,
-        modelName: contentType.modelName,
-        plugin: contentType.plugin,
+      const component = await contentTypeService.editContentType(uid, {
+        contentType: body.contentType,
+        components: body.components,
       });
 
-      if (_.isEmpty(strapi.api)) {
-        strapi.emit('didCreateFirstContentType');
-      } else {
-        strapi.emit('didCreateContentType');
-      }
+      setImmediate(() => strapi.reload());
+
+      ctx.send({ data: { uid: component.uid } }, 201);
     } catch (error) {
-      strapi.emit('didNotCreateContentType', error);
-      throw error;
+      strapi.log.error(error);
+      ctx.send({ error: error.message }, 400);
     }
-
-    setImmediate(() => strapi.reload());
-
-    ctx.send({
-      data: {
-        uid,
-      },
-    });
   },
 
   async deleteContentType(ctx) {
     const { uid } = ctx.params;
 
-    const contentType = strapi.contentTypes[uid];
-
-    if (!contentType) {
+    if (!_.has(strapi.contentTypes, uid)) {
       return ctx.send({ error: 'contentType.notFound' }, 404);
     }
 
-    if (!_.has(contentType, 'apiName')) {
-      return ctx.send({ error: 'contentType.not.deletable' }, 400);
+    try {
+      strapi.reload.isWatching = false;
+
+      const component = await contentTypeService.deleteContentType(uid);
+
+      setImmediate(() => strapi.reload());
+
+      ctx.send({ data: { uid: component.uid } });
+    } catch (error) {
+      strapi.log.error(error);
+      ctx.send({ error: error.message }, 400);
     }
-
-    strapi.reload.isWatching = false;
-
-    await contentTypeService.deleteAllRelations(contentType);
-    await contentTypeService.removeContentType(contentType);
-
-    setImmediate(() => strapi.reload());
-
-    ctx.send({
-      data: {
-        uid,
-      },
-    });
   },
 };

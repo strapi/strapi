@@ -6,7 +6,7 @@
 /* eslint-disable react/require-default-props */
 import React from 'react';
 import PropTypes from 'prop-types';
-import { isEmpty, isObject, merge } from 'lodash';
+import { isEmpty, merge } from 'lodash';
 
 // Design
 import InputAddonWithErrors from '../InputAddonWithErrors';
@@ -54,7 +54,7 @@ function InputsIndex(props) {
       inputValue = props.value === 0 ? props.value : props.value || '';
       break;
     case 'json':
-      inputValue = isObject(props.value) ? props.value : null;
+      inputValue = props.value || null;
       break;
     default:
       inputValue = props.value || '';

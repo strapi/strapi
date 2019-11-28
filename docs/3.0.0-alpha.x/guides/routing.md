@@ -7,18 +7,19 @@ See the [routing's concept](../concepts/concepts.md#routing) for details.
 You have to edit the `routes.json` file in one of your APIs folders (`./api/**/config/routes.json`) and manually add a new route object into the `routes` array.
 
 **Path —** `./api/**/config/routes.json`.
+
 ```json
 {
   "routes": [
     {
       "method": "GET",
       "path": "/products",
-      "handler": "Product.find",
+      "handler": "Product.find"
     },
     {
       "method": ["POST", "PUT"],
       "path": "/products/:id",
-      "handler": "Product.createOrUpdate",
+      "handler": "Product.createOrUpdate"
     },
     {
       "method": "POST",
@@ -49,12 +50,12 @@ The router used by Strapi allows you to create dynamic routes where you can use 
     {
       "method": "GET",
       "path": "/products/:category/:id",
-      "handler": "Product.findOneByCategory",
+      "handler": "Product.findOneByCategory"
     },
     {
       "method": "GET",
       "path": "/products/:region(\\d{2}|\\d{3})/:id", // Only match when the first parameter contains 2 or 3 digits.
-      "handler": "Product.findOneByRegion",
+      "handler": "Product.findOneByRegion"
     }
   ]
 }
@@ -70,7 +71,7 @@ By default, the main route of the server `/` is pointed to the `/public/index.ht
     {
       "method": "GET",
       "path": "/",
-      "handler": "Controller.name",
+      "handler": "Controller.name"
     }
   ]
 }
