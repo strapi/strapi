@@ -7,9 +7,12 @@ const LayoutTitle = styled.div`
   line-height: 18px;
 
   p {
+    margin-top: 2px;
     margin-bottom: 29px;
-    color: #787e8f;
+    color: #9ea7b8;
+    font-size: 12px;
     font-weight: 400;
+    line-height: normal;
   }
 `;
 

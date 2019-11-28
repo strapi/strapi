@@ -84,7 +84,6 @@ const FieldsReorder = ({ className }) => {
             data={buttonData}
             onClick={onAddData}
             style={{ width: '100%', margin: '0 5px' }}
-            pStyle={{ marginTop: '-2px' }}
           />
         </Wrapper>
       </SortWrapper>

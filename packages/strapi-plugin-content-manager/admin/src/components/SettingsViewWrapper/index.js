@@ -52,6 +52,11 @@ const SettingsViewWrapper = ({
         }),
         type: 'button',
         disabled: isEqual(modifiedData, initialData) ? true : false,
+        style: {
+          fontWeight: 600,
+          paddingLeft: 15,
+          paddingRight: 15,
+        },
       },
       {
         color: 'success',
@@ -60,6 +65,10 @@ const SettingsViewWrapper = ({
         }),
         type: 'submit',
         disabled: isEqual(modifiedData, initialData) ? true : false,
+        style: {
+          minWidth: 150,
+          fontWeight: 600,
+        },
       },
     ];
   };

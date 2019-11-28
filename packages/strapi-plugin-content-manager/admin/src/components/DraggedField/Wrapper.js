@@ -27,7 +27,7 @@ const Wrapper = styled.div`
       } else if (isSub) {
         return '#ffffff';
       } else {
-        return '#fafafb';
+        return '#F2F3F4';
       }
     }};
     border: 1px solid

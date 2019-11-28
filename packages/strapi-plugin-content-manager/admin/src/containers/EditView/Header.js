@@ -54,6 +54,11 @@ const Header = () => {
           id: `${pluginId}.containers.Edit.reset`,
         }),
         type: 'button',
+        style: {
+          paddingLeft: 15,
+          paddingRight: 15,
+          fontWeight: 600,
+        },
       },
       {
         color: 'success',
@@ -61,6 +66,10 @@ const Header = () => {
           id: `${pluginId}.containers.Edit.submit`,
         }),
         type: 'submit',
+        style: {
+          minWidth: 150,
+          fontWeight: 600,
+        },
       },
     ];
 
@@ -74,6 +83,11 @@ const Header = () => {
           toggleWarningDelete();
         },
         type: 'button',
+        style: {
+          paddingLeft: 15,
+          paddingRight: 15,
+          fontWeight: 600,
+        },
       });
     }
 

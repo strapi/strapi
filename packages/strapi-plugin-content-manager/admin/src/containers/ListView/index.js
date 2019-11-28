@@ -254,6 +254,11 @@ function ListView({
       color: 'primary',
       type: 'button',
       icon: true,
+      style: {
+        paddingLeft: 15,
+        paddingRight: 15,
+        fontWeight: 600,
+      },
     },
   ];
 
@@ -353,7 +358,7 @@ function ListView({
                 />
               </div>
             </div>
-            <div className="row" style={{ paddingTop: '30px' }}>
+            <div className="row" style={{ paddingTop: '12px' }}>
               <div className="col-12">
                 <CustomTable
                   data={data}

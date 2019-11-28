@@ -24,7 +24,7 @@ function EditViewButton(props) {
       <Button
         {...props}
         onClick={handleClick}
-        icon={<i className="fa fa-cog"></i>}
+        icon={<i className="fa fa-cog" style={{ fontSize: 13 }}></i>}
         label={formatMessage({
           id: 'content-manager.containers.Edit.Link.Model',
         })}
@@ -32,6 +32,7 @@ function EditViewButton(props) {
           paddingLeft: 15,
           paddingRight: 15,
           outline: 0,
+          fontWeight: 600,
         }}
       ></Button>
     );

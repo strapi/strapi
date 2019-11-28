@@ -5,6 +5,10 @@ const Li = styled.li`
   position: relative;
   overflow: hidden;
 
+  &.dotted-link {
+    background: red;
+  }
+
   &:not(:first-child) {
     margin-top: 0;
   }
