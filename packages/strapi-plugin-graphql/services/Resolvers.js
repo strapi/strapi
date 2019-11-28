@@ -7,7 +7,8 @@
  */
 
 const _ = require('lodash');
-const graphql = require('graphql');
+
+const DynamicZoneScalar = require('../types/dynamiczoneScalar');
 
 const Aggregator = require('./Aggregator');
 const Query = require('./Query.js');
@@ -83,75 +84,11 @@ const generateDynamicZoneDefinitions = (attributes, globalId, schema) => {
         },
       };
 
-      function parseObject(ast, variables) {
-        const value = Object.create(null);
-        ast.fields.forEach(field => {
-          // eslint-disable-next-line no-use-before-define
-          value[field.name.value] = parseLiteral(field.value, variables);
-        });
-
-        return value;
-      }
-
-      function parseLiteral(ast, variables) {
-        switch (ast.kind) {
-          case graphql.Kind.STRING:
-          case graphql.Kind.BOOLEAN:
-            return ast.value;
-          case graphql.Kind.INT:
-          case graphql.Kind.FLOAT:
-            return parseFloat(ast.value);
-          case graphql.Kind.OBJECT:
-            return parseObject(ast, variables);
-          case graphql.Kind.LIST:
-            return ast.values.map(n => parseLiteral(n, variables));
-          case graphql.Kind.NULL:
-            return null;
-          case graphql.Kind.VARIABLE: {
-            const name = ast.name.value;
-            return variables ? variables[name] : undefined;
-          }
-          default:
-            return undefined;
-        }
-      }
-
-      schema.resolvers[inputTypeName] = new graphql.GraphQLScalarType({
+      schema.resolvers[inputTypeName] = new DynamicZoneScalar({
         name: inputTypeName,
-        description: `Input type for dynamic zone ${attribute} of ${globalId}`,
-        serialize: value => value,
-        parseValue: value => {
-          const compo = Object.values(strapi.components).find(
-            compo => compo.globalId === value.__typename
-          );
-
-          if (!compo) return undefined;
-
-          const finalValue = {
-            __component: compo.uid,
-            ..._.omit(value, ['__typename']),
-          };
-
-          return finalValue;
-        },
-        parseLiteral: (ast, variables) => {
-          if (ast.kind !== graphql.Kind.OBJECT) return undefined;
-
-          const value = parseObject(ast, variables);
-
-          const compo = Object.values(strapi.components).find(
-            compo => compo.globalId === value.__typename
-          );
-
-          if (!compo) return undefined;
-
-          const finalValue = {
-            __component: compo.uid,
-            ..._.omit(value, ['__typename']),
-          };
-
-          return finalValue;
-        },
+        attribute,
+        globalId,
+        components,
       });
     });
 };
