@@ -14,6 +14,7 @@ import createModifiedDataSchema, {
 } from './utils/createModifiedDataSchema';
 import retrieveSpecificInfoFromComponents from './utils/retrieveSpecificInfoFromComponents';
 import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
+import retrieveNestedComponents from './utils/retrieveNestedComponents';
 
 const DataManagerProvider = ({ allIcons, children }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
@@ -209,6 +210,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
   }
 
   console.log({ modifiedData, components });
+  console.log(retrieveNestedComponents(components));
 
   return (
     <DataManagerContext.Provider
@@ -223,15 +225,16 @@ const DataManagerProvider = ({ allIcons, children }) => {
           components,
           ['schema', 'icon']
         ),
+        allIcons,
         changeDynamicZoneComponents,
         components,
         componentsGroupedByCategory: groupBy(components, 'category'),
         contentTypes,
         createSchema,
-        allIcons,
         initialData,
         isInContentTypeView,
         modifiedData,
+        nestedComponents: retrieveNestedComponents(components),
         removeAttribute,
         removeComponentFromDynamicZone,
         setModifiedData,
