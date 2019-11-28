@@ -2,8 +2,16 @@ module.exports = {
   title: 'Strapi Documentation',
   description: 'The headless CMS developers love.',
   base: '/documentation/',
-  ga: 'UA-54313258-1',
-  plugins: ['@vuepress/medium-zoom', 'vuepress-plugin-element-tabs'],
+  plugins: [
+    '@vuepress/medium-zoom',
+    'vuepress-plugin-element-tabs',
+    [
+      '@vuepress/google-analytics',
+      {
+        ga: 'UA-54313258-1',
+      },
+    ],
+  ],
   head: [
     [
       'link',
@@ -116,7 +124,7 @@ module.exports = {
       },
       {
         text: 'Website',
-        link: 'https://strapi',
+        link: 'https://strapi.io',
       },
       {
         text: 'Slack',
