@@ -42,6 +42,8 @@ const EditViewDataManagerProvider = ({
   const { signal } = abortController;
   const isCreatingEntry = id === 'create';
 
+  const { emitEvent } = useGlobalContext();
+
   useEffect(() => {
     if (!isLoading) {
       checkFormErrors();
@@ -111,6 +113,7 @@ const EditViewDataManagerProvider = ({
     componentUid,
     shouldCheckErrors = false
   ) => {
+    emitEvent('addComponentToDynamicZone');
     dispatch({
       type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE',
       keys: keys.split('.'),
@@ -187,8 +190,6 @@ const EditViewDataManagerProvider = ({
       value: inputValue,
     });
   };
-
-  const { emitEvent } = useGlobalContext();
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -270,6 +271,7 @@ const EditViewDataManagerProvider = ({
   };
 
   const moveComponentDown = (dynamicZoneName, currentIndex) => {
+    emitEvent('changeComponentsOrder');
     dispatch({
       type: 'MOVE_COMPONENT_DOWN',
       dynamicZoneName,
@@ -277,6 +279,7 @@ const EditViewDataManagerProvider = ({
     });
   };
   const moveComponentUp = (dynamicZoneName, currentIndex) => {
+    emitEvent('changeComponentsOrder');
     dispatch({
       type: 'MOVE_COMPONENT_UP',
       dynamicZoneName,
@@ -309,6 +312,7 @@ const EditViewDataManagerProvider = ({
   };
 
   const removeComponentFromDynamicZone = (dynamicZoneName, index) => {
+    emitEvent('removeComponentFromDynamicZone');
     dispatch({
       type: 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE',
       dynamicZoneName,
