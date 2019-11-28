@@ -1,8 +1,8 @@
 import { get } from 'lodash';
 
-const retrieveSpecificInfoFromComponents = (allComponents, keyToRetrieve) => {
+const retrieveSpecificInfoFromComponents = (allComponents, keysToRetrieve) => {
   const allData = Object.keys(allComponents).map(compo => {
-    return get(allComponents, [compo, keyToRetrieve], '');
+    return get(allComponents, [compo, ...keysToRetrieve], '');
   });
 
   return allData.filter((key, index) => {

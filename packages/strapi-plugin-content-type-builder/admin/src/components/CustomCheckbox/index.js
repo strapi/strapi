@@ -33,13 +33,15 @@ const CustomCheckbox = ({ label, name, onChange, value, ...rest }) => {
         }}
       />
       {checked && (
-        <Inputs
-          {...rest}
-          name={name}
-          onChange={onChange}
-          value={value}
-          type="number"
-        />
+        <div className="no-label col-6">
+          <Inputs
+            {...rest}
+            name={name}
+            onChange={onChange}
+            value={value}
+            type="number"
+          />
+        </div>
       )}
     </StyledCustomCheckbox>
   );

@@ -6,6 +6,8 @@ import { FormattedMessage } from 'react-intl';
 import pluginId from '../../../pluginId';
 import getTrad from '../../../utils/getTrad';
 import { createComponentUid, createUid, nameToSlug } from './createUid';
+import componentForm from './componentForm';
+import fields from './staticFields';
 
 yup.addMethod(yup.mixed, 'defined', function() {
   return this.test(
@@ -54,6 +56,7 @@ const forms = {
       isEditing,
       attributeToEditName,
       initialData
+      // componentCategory
     ) {
       const alreadyTakenAttributes = Object.keys(
         get(currentSchema, ['schema', 'attributes'], {})
@@ -95,7 +98,11 @@ const forms = {
         max: yup.lazy(() => {
           let schema = yup.number();
 
-          if (attributeType === 'integer' || attributeType === 'biginteger') {
+          if (
+            attributeType === 'integer' ||
+            attributeType === 'biginteger' ||
+            attributeType === 'dynamiczone'
+          ) {
             schema = schema.integer();
           }
 
@@ -104,7 +111,11 @@ const forms = {
         min: yup.lazy(() => {
           let schema = yup.number();
 
-          if (attributeType === 'integer' || attributeType === 'biginteger') {
+          if (
+            attributeType === 'integer' ||
+            attributeType === 'biginteger' ||
+            attributeType === 'dynamiczone'
+          ) {
             schema = schema.integer();
           }
 
@@ -145,6 +156,17 @@ const forms = {
       };
 
       switch (attributeType) {
+        case 'component':
+          return yup.object().shape({
+            ...commonShape,
+            component: yup.string().required(errorsTrads.required),
+            ...numberTypeShape,
+          });
+        case 'dynamiczone':
+          return yup.object().shape({
+            ...commonShape,
+            ...numberTypeShape,
+          });
         case 'enumeration':
           return yup.object().shape({
             ...commonShape,
@@ -190,29 +212,12 @@ const forms = {
       }
     },
     form: {
-      advanced(data, type) {
+      advanced(data, type, step) {
         const targetAttributeValue = get(data, 'targetAttribute', null);
         const nameValue = get(data, 'name', null);
         const relationItems = [
-          [
-            {
-              type: 'divider',
-            },
-          ],
-          [
-            {
-              autoFocus: false,
-              name: 'unique',
-              type: 'checkbox',
-              label: {
-                id: getTrad('form.attribute.item.uniqueField'),
-              },
-              description: {
-                id: getTrad('form.attribute.item.uniqueField.description'),
-              },
-              validations: {},
-            },
-          ],
+          [fields.divider],
+          [fields.unique],
           [
             {
               autoFocus: false,
@@ -240,69 +245,49 @@ const forms = {
             },
           ],
         ];
-
         const defaultItems = [
           [
             {
-              autoFocus: true,
-              name: 'default',
+              ...fields.default,
               type: type === 'email' ? 'email' : 'text',
-              label: {
-                id: getTrad('form.attribute.settings.default'),
-              },
-              validations: {},
             },
           ],
-          [
-            {
-              type: 'divider',
-            },
-          ],
-          [
-            {
-              autoFocus: false,
-              name: 'required',
-              type: 'checkbox',
-              label: {
-                id: getTrad('form.attribute.item.requiredField'),
-              },
-              description: {
-                id: getTrad('form.attribute.item.requiredField.description'),
-              },
-              validations: {},
-            },
-          ],
-          [
-            {
-              autoFocus: false,
-              name: 'unique',
-              type: 'checkbox',
-              label: {
-                id: getTrad('form.attribute.item.uniqueField'),
-              },
-              description: {
-                id: getTrad('form.attribute.item.uniqueField.description'),
-              },
-              validations: {},
-            },
-          ],
+          [fields.divider],
+          [fields.required],
+          [fields.unique],
         ];
+        const dynamiczoneItems = [
+          [fields.required],
+          [fields.divider],
+          [fields.max],
+          [fields.min],
+        ];
+
+        if (type === 'component') {
+          if (step === '1') {
+            return {
+              items: componentForm.advanced('componentToCreate.'),
+            };
+          } else {
+            const requiredItem = [[fields.required]];
+
+            return {
+              items: data.repeatable
+                ? [...requiredItem, ...dynamiczoneItems]
+                : requiredItem,
+            };
+          }
+        }
 
         const items = defaultItems.slice();
 
         if (type === 'media') {
           items.splice(0, 1);
-        }
-
-        if (type === 'boolean') {
+        } else if (type === 'boolean') {
           items.splice(0, 1, [
             {
-              autoFocus: false,
-              name: 'default',
+              ...fields.default,
               type: 'enum',
-              label: {
-                id: getTrad('form.attribute.settings.default'),
-              },
               options: [
                 { value: 'true', label: 'TRUE' },
                 { value: '', label: 'NULL' },
@@ -311,9 +296,7 @@ const forms = {
               validations: {},
             },
           ]);
-        }
-
-        if (type === 'enumeration') {
+        } else if (type === 'enumeration') {
           items.splice(0, 1, [
             {
               autoFocus: false,
@@ -346,7 +329,7 @@ const forms = {
               ),
             },
           ]);
-          items.splice(1, 1, [
+          items.splice(1, 0, [
             {
               label: {
                 id: getTrad('form.attribute.item.enumeration.graphql'),
@@ -361,18 +344,11 @@ const forms = {
               },
             },
           ]);
-        }
-
-        if (type === 'date') {
+        } else if (type === 'date') {
           items.splice(0, 1, [
             {
-              autoFocus: false,
-              name: 'default',
+              ...fields.default,
               type: 'date',
-              label: {
-                id: getTrad('form.attribute.settings.default'),
-              },
-              validations: {},
               value: null,
               withDefaultValue: false,
               disabled: data.type !== 'date',
@@ -416,6 +392,12 @@ const forms = {
           );
         }
 
+        if (type === 'dynamiczone') {
+          return {
+            items: dynamiczoneItems,
+          };
+        }
+
         if (type === 'relation') {
           return {
             items: relationItems,
@@ -426,7 +408,7 @@ const forms = {
           items,
         };
       },
-      base(data, type) {
+      base(data, type, step) {
         if (type === 'relation') {
           return {
             items: [
@@ -439,24 +421,60 @@ const forms = {
           };
         }
 
-        const items = [
-          [
-            {
-              autoFocus: true,
-              name: 'name',
-              type: 'text',
-              label: {
-                id: getTrad('modalForm.attribute.form.base.name'),
-              },
-              description: {
-                id: getTrad('modalForm.attribute.form.base.name.description'),
-              },
-              validations: {
-                required: true,
-              },
+        const items = [[fields.name]];
+
+        if (type === 'component' && step === '1') {
+          const itemsToConcat =
+            data.createComponent === true
+              ? [[{ type: 'spacer' }]].concat(
+                  componentForm.base('componentToCreate.')
+                )
+              : [];
+
+          return {
+            items: [[fields.createComponent], ...itemsToConcat],
+          };
+        }
+
+        if (type === 'component' && step === '2') {
+          items[0].push({
+            name: 'component',
+            type: 'componentSelect',
+            label: {
+              id: getTrad('modalForm.attributes.select-component'),
             },
-          ],
-        ];
+            isMultiple: false,
+          });
+          items.push([
+            {
+              label: {
+                id: getTrad('modalForm.attribute.text.type-selection'),
+              },
+              name: 'repeatable',
+              type: 'booleanBox',
+              size: 12,
+              options: [
+                {
+                  headerId: getTrad(
+                    `form.attribute.component.option.repeatable`
+                  ),
+                  descriptionId: getTrad(
+                    `form.attribute.component.option.repeatable.description`
+                  ),
+                  value: true,
+                },
+                {
+                  headerId: getTrad(`form.attribute.component.option.single`),
+                  descriptionId: getTrad(
+                    `form.attribute.component.option.single.description`
+                  ),
+                  value: false,
+                },
+              ],
+              validations: {},
+            },
+          ]);
+        }
 
         if (type === 'text' || type === 'media') {
           items.push([
@@ -688,74 +706,57 @@ const forms = {
           .required(errorsTrads.required),
         category: yup.string().required(errorsTrads.required),
         icon: yup.string().required(errorsTrads.required),
-        collectionName: yup.string(),
+        collectionName: yup.string().nullable(),
       });
     },
     form: {
       advanced() {
         return {
-          items: [
-            [
-              {
-                autoFocus: true,
-                label: {
-                  id: `${pluginId}.contentType.collectionName.label`,
-                },
-                description: {
-                  id: `${pluginId}.contentType.collectionName.description`,
-                },
-                name: 'collectionName',
-                type: 'text',
-                validations: {},
-              },
-            ],
-          ],
+          items: componentForm.advanced(),
         };
       },
       base() {
-        const defaultItems = [
-          [
-            {
-              autoFocus: true,
-              name: 'name',
-              type: 'text',
-              label: {
-                id: getTrad('modalForm.attribute.form.base.name'),
-              },
-              description: {
-                id: getTrad('modalForm.attribute.form.base.name.description'),
-              },
-              validations: {
-                required: true,
-              },
-            },
-            {
-              autoFocus: true,
-              name: 'category',
-              type: 'creatableSelect',
-              label: {
-                id: getTrad(
-                  'modalForm.components.create-component.category.label'
-                ),
-              },
-              validations: {
-                required: true,
-              },
-            },
-          ],
-          [
-            {
-              name: 'icon',
-              type: 'componentIconPicker',
-              label: {
-                id: getTrad('modalForm.components.icon.label'),
-              },
-            },
-          ],
-        ];
+        return {
+          items: componentForm.base(),
+        };
+      },
+    },
+  },
+  addComponentToDynamicZone: {
+    schema(...args) {
+      // TODO
+      console.log('k', args);
+      return yup.object();
+    },
+    form: {
+      advanced(data, type, step) {
+        return forms.attribute.form.advanced(data, 'component', step);
+      },
+      base(data) {
+        const isCreatingComponent = get(data, 'createComponent', false);
+
+        const itemsToConcat = isCreatingComponent
+          ? [[{ type: 'spacer' }]].concat(
+              componentForm.base('componentToCreate.')
+            )
+          : [
+              [{ type: 'spacer' }],
+              [
+                { type: 'pushRight', size: 6 },
+
+                {
+                  name: 'components',
+                  type: 'componentSelect',
+                  label: {
+                    id: getTrad('modalForm.attributes.select-components'),
+                  },
+                  isMultiple: true,
+                },
+              ],
+            ];
 
         return {
-          items: defaultItems,
+          items: [[fields.createComponent], ...itemsToConcat],
         };
       },
     },

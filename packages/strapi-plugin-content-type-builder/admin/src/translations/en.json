@@ -210,6 +210,14 @@
   "modalForm.attribute.form.base.name.description": "No space is allowed for the name of the attribute",
   "modalForm.attribute.text.type-selection": "Type",
 
+  "form.attribute.component.option.create": "Create a new component",
+  "form.attribute.component.option.repeatable": "Repeatable component",
+  "form.attribute.component.option.repeatable.description": "Best for multiple instances (array) of ingredients, meta tags, etc..",
+  "form.attribute.component.option.single": "Single component",
+  "form.attribute.component.option.single.description": "Best for grouping fields like full address, main information, etc...",
+  "form.attribute.component.option.create.description": "A component is shared across types, it will be available and accessible in your other components and content types as well.",
+  "form.attribute.component.option.reuse-existing": "Use an existing component",
+  "form.attribute.component.option.reuse-existing.description": "Reuse a component already created to keep your data consistent across content types.",
   "form.attribute.item.defineRelation.fieldName": "Field name",
   "form.attribute.item.settings.name": "Settings",
   "form.attribute.item.date.type.date": "date",
@@ -245,7 +253,11 @@
   "modalForm.sub-header.chooseAttribute.component": "Select a field for your component",
   "modalForm.sub-header.chooseAttribute.contentType": "Select a field for your content type",
   "modalForm.sub-header.attribute.create": "Add new {type} field",
+  "modalForm.sub-header.attribute.create.step": "Add new component ({step}/2)",
   "modalForm.sub-header.attribute.edit": "Edit {name}",
   "modalForm.components.create-component.category.label": "Select a category or enter a name to create a new one",
-  "modalForm.components.icon.label": "Icon"
+  "modalForm.attributes.select-component": "Select a component",
+  "modalForm.attributes.select-components": "Select the components",
+  "modalForm.components.icon.label": "Icon",
+  "modalForm.sub-header.addComponentToDynamicZone": "Add new component to the dynamic zone"
 }

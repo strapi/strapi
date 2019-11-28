@@ -28,6 +28,8 @@ const reducer = (state, action) => {
         forTarget,
         targetUid,
       } = action;
+      delete rest.createComponent;
+
       const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
         ? [forTarget]
         : [forTarget, targetUid];
@@ -77,7 +79,36 @@ const reducer = (state, action) => {
 
             return obj;
           }
-        );
+        )
+        .updateIn(['modifiedData', 'components'], existingCompos => {
+          if (action.shouldAddComponentToData) {
+            const componentToAdd = state.getIn(['components', rest.component]);
+
+            return existingCompos.update(
+              componentToAdd.get('uid'),
+              () => componentToAdd
+            );
+          }
+
+          return existingCompos;
+        });
+    }
+    case 'ADD_COMPONENTS_TO_DYNAMIC_ZONE': {
+      const { dynamicZoneTarget, componentsToAdd } = action;
+
+      return state.updateIn(
+        [
+          'modifiedData',
+          'contentType',
+          'schema',
+          'attributes',
+          dynamicZoneTarget,
+          'components',
+        ],
+        list => {
+          return list.concat(componentsToAdd);
+        }
+      );
     }
     case 'CREATE_SCHEMA': {
       const newSchema = {
@@ -88,9 +119,6 @@ const reducer = (state, action) => {
           attributes: {},
         },
       };
-
-      // const key =
-      //   action.schemaType === 'contentType' ? 'contentTypes' : 'components';
 
       return state.updateIn(['contentTypes', action.uid], () =>
         fromJS(newSchema)
@@ -106,6 +134,15 @@ const reducer = (state, action) => {
           attributes: {},
         },
       };
+
+      if (action.shouldAddComponentToData) {
+        return state
+          .updateIn(['components', action.uid], () => fromJS(newSchema))
+          .updateIn(['modifiedData', 'components', action.uid], () =>
+            fromJS(newSchema)
+          );
+      }
+
       return state.updateIn(['components', action.uid], () =>
         fromJS(newSchema)
       );
@@ -270,6 +307,16 @@ const reducer = (state, action) => {
         attributeToRemoveName,
       ]);
     }
+    case 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE':
+      return state.removeIn([
+        'modifiedData',
+        'contentType',
+        'schema',
+        'attributes',
+        action.dzName,
+        'components',
+        action.componentToRemoveIndex,
+      ]);
     case 'REMOVE_FIELD': {
       const { mainDataKey, attributeToRemoveName } = action;
       const pathToAttributes = [
@@ -312,6 +359,7 @@ const reducer = (state, action) => {
 
       return state.removeIn(pathToAttributeToRemove);
     }
+
     case 'SET_MODIFIED_DATA': {
       return state
         .update('isLoadingForDataToBeSet', () => false)

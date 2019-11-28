@@ -1,10 +1,13 @@
 import { fromJS } from 'immutable';
 import pluralize from 'pluralize';
+import { createComponentUid } from './utils/createUid';
 
 const initialState = fromJS({
   formErrors: {},
   modifiedData: {},
   initialData: {},
+  componentToCreate: {},
+  isCreatingComponentWhileAddingAField: false,
 });
 
 export const shouldPluralizeTargetAttribute = nature =>
@@ -82,6 +85,42 @@ const reducer = (state, action) => {
       });
     case 'RESET_PROPS':
       return initialState;
+    case 'RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO': {
+      // This is run when the user doesn't want to create a new component
+      return initialState.update('modifiedData', () =>
+        fromJS({ type: 'component', repeatable: true })
+      );
+    }
+    case 'RESET_PROPS_AND_SAVE_CURRENT_DATA': {
+      // This is run when the user has created a new component
+      const componentToCreate = state.getIn([
+        'modifiedData',
+        'componentToCreate',
+      ]);
+      const modifiedData = fromJS({
+        type: 'component',
+        repeatable: false,
+        component: createComponentUid(
+          componentToCreate.get('name'),
+          componentToCreate.get('category')
+        ),
+      });
+
+      return initialState
+        .update('componentToCreate', () => componentToCreate)
+        .update('modifiedData', () => modifiedData)
+        .update('isCreatingComponentWhileAddingAField', () =>
+          state.getIn(['modifiedData', 'createComponent'])
+        );
+    }
+    case 'RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ': {
+      const createdDZ = state.get('modifiedData');
+      const dataToSet = createdDZ
+        .set('createComponent', true)
+        .set('componentToCreate', fromJS({ type: 'component' }));
+
+      return initialState.update('modifiedData', () => dataToSet);
+    }
     case 'SET_ATTRIBUTE_DATA_SCHEMA': {
       const {
         attributeType,
@@ -89,6 +128,7 @@ const reducer = (state, action) => {
         modifiedDataToSetForEditing,
         nameToSetForRelation,
         targetUid,
+        step,
       } = action;
 
       if (isEditing) {
@@ -99,7 +139,25 @@ const reducer = (state, action) => {
 
       let dataToSet;
 
-      if (attributeType === 'text') {
+      if (attributeType === 'component') {
+        if (step === '1') {
+          dataToSet = {
+            type: 'component',
+            createComponent: true,
+            componentToCreate: { type: 'component' },
+          };
+        } else {
+          dataToSet = {
+            type: 'component',
+            repeatable: true,
+          };
+        }
+      } else if (attributeType === 'dynamiczone') {
+        dataToSet = {
+          type: 'dynamiczone',
+          components: [],
+        };
+      } else if (attributeType === 'text') {
         dataToSet = { type: 'string' };
       } else if (attributeType === 'number' || attributeType === 'date') {
         dataToSet = {};

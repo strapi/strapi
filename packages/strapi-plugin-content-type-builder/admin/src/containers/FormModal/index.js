@@ -20,34 +20,25 @@ import useQuery from '../../hooks/useQuery';
 import useDataManager from '../../hooks/useDataManager';
 import AttributeOption from '../../components/AttributeOption';
 import BooleanBox from '../../components/BooleanBox';
+import ComponentIconPicker from '../../components/ComponentIconPicker';
 import CustomCheckbox from '../../components/CustomCheckbox';
-import CreatableSelect from '../../components/CreatableSelect';
 import ModalHeader from '../../components/ModalHeader';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
+import RelationForm from '../../components/RelationForm';
 import HeaderNavLink from '../../components/HeaderNavLink';
+import WrapperSelect from '../../components/WrapperSelect';
 import getTrad from '../../utils/getTrad';
 import getAttributes from './utils/attributes';
 import forms from './utils/forms';
 import { createComponentUid, createUid } from './utils/createUid';
+import getModalTitleSubHeader from './utils/getModalTitleSubHeader';
+import getNextSearch from './utils/getNextSearch';
+import { NAVLINKS, INITIAL_STATE_DATA } from './utils/staticData';
 import init from './init';
 import reducer, { initialState } from './reducer';
-import RelationForm from '../../components/RelationForm';
-
-const NAVLINKS = [{ id: 'base' }, { id: 'advanced' }];
 
 const FormModal = () => {
-  const initialStateData = {
-    attributeName: null,
-    actionType: null,
-    modalType: null,
-    settingType: null,
-    forTarget: null,
-    targetUid: null,
-    attributeType: null,
-    headerDisplayName: null,
-    pathToSchema: [],
-  };
-  const [state, setState] = useState(initialStateData);
+  const [state, setState] = useState(INITIAL_STATE_DATA);
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { push } = useHistory();
   const { search } = useLocation();
@@ -56,13 +47,20 @@ const FormModal = () => {
   const attributeOptionRef = useRef();
   const {
     addAttribute,
+    addComponentsToDynamicZone,
     contentTypes,
     components,
     createSchema,
     modifiedData: allDataSchema,
     sortedContentTypesList,
   } = useDataManager();
-  const { formErrors, initialData, modifiedData } = reducerState.toJS();
+  const {
+    componentToCreate,
+    formErrors,
+    initialData,
+    isCreatingComponentWhileAddingAField,
+    modifiedData,
+  } = reducerState.toJS();
 
   useEffect(() => {
     if (!isEmpty(search)) {
@@ -75,6 +73,8 @@ const FormModal = () => {
       const forTarget = query.get('forTarget');
       const targetUid = query.get('targetUid');
       const headerDisplayName = query.get('headerDisplayName');
+      const step = query.get('step');
+      const dynamicZoneTarget = query.get('dynamicZoneTarget');
       const pathToSchema =
         forTarget === 'contentType' || forTarget === 'component'
           ? [forTarget]
@@ -83,6 +83,7 @@ const FormModal = () => {
       setState({
         attributeName,
         actionType,
+        dynamicZoneTarget,
         modalType,
         settingType,
         forTarget,
@@ -90,6 +91,7 @@ const FormModal = () => {
         headerDisplayName,
         attributeType,
         pathToSchema,
+        step,
       });
 
       // Set the predefined data structure to create an attribute
@@ -127,6 +129,7 @@ const FormModal = () => {
           targetUid: get(sortedContentTypesList, ['0', 'uid'], 'error'),
           isEditing: actionType === 'edit',
           modifiedDataToSetForEditing: attributeToEdit,
+          step,
         });
       }
     }
@@ -136,11 +139,27 @@ const FormModal = () => {
   const form = get(forms, [state.modalType, 'form', state.settingType], () => ({
     items: [],
   }));
-  const iconType = ['components', 'contentType'].includes(state.modalType)
+
+  // TODO improve icon logic
+  let iconType = ['components', 'contentType'].includes(state.modalType)
     ? state.modalType
     : state.forTarget;
-  const isCreatingCT = state.modalType === 'contentType';
+
+  if (state.modalType === 'addComponentToDynamicZone') {
+    iconType = 'dynamiczone';
+  }
+  const isCreatingContentType = state.modalType === 'contentType';
+  const isCreatingComponent = state.modalType === 'component';
+  const isCreatingAttribute = state.modalType === 'attribute';
+  const isComponentAttribute =
+    state.attributeType === 'component' && isCreatingAttribute;
+
   const isCreating = state.actionType === 'create';
+  const isCreatingComponentFromAView =
+    get(modifiedData, 'createComponent', false) ||
+    isCreatingComponentWhileAddingAField;
+  const isInFirstComponentStep = state.step === '1';
+
   const isOpen = !isEmpty(search);
   const isPickingAttribute = state.modalType === 'chooseAttribute';
   const uid = createUid(modifiedData.name || '');
@@ -155,15 +174,40 @@ const FormModal = () => {
 
   const checkFormValidity = async () => {
     let schema;
+    const dataToValidate =
+      isCreatingComponentFromAView && state.step === '1'
+        ? get(modifiedData, 'componentToCreate', {})
+        : modifiedData;
 
-    if (state.modalType === 'contentType') {
+    // Check form validity for content type
+    if (isCreatingContentType) {
       schema = forms.contentType.schema(Object.keys(contentTypes));
-    } else if (state.modalType === 'component') {
+
+      // Check form validity for component
+      // This is happening when the user click on the link from the left menu
+    } else if (isCreatingComponent) {
       schema = forms.component.schema(
         Object.keys(components),
         modifiedData.category || ''
       );
-    } else if (state.modalType === 'attribute') {
+
+      // Check for validity for creating a component
+      // This is happening when the user creates a component "on the fly"
+      // Since we temporarily store the component info in another object
+      // The data is set in the componentToCreate key
+    } else if (
+      isComponentAttribute &&
+      isCreatingComponentFromAView &&
+      isInFirstComponentStep
+    ) {
+      schema = forms.component.schema(
+        Object.keys(components),
+        get(modifiedData, 'componentToCreate.category', '')
+      );
+
+      // Check form validity for creating a 'common attribute'
+      // We need to make sure that it is independent from the step
+    } else if (isCreatingAttribute && !isInFirstComponentStep) {
       const type =
         state.attributeType === 'relation' ? 'relation' : modifiedData.type;
 
@@ -175,43 +219,23 @@ const FormModal = () => {
         state.attributeName,
         initialData
       );
+
+      // The user is either in the addComponentToDynamicZone modal or
+      // in step 1 of the add component (modalType=attribute&attributeType=component) but not creating a component
     } else {
-      // TODO validate component schema
-      console.log('Will do something');
-
-      return;
-    }
-
-    await schema.validate(modifiedData, { abortEarly: false });
-  };
-
-  const getModalTitleSubHeader = () => {
-    switch (state.modalType) {
-      case 'chooseAttribute':
-        return getTrad(
-          `modalForm.sub-header.chooseAttribute.${
-            state.forTarget === 'contentType' ? 'contentType' : 'component'
-          }`
+      if (isInFirstComponentStep && isCreatingComponentFromAView) {
+        schema = forms.component.schema(
+          Object.keys(components),
+          get(modifiedData, 'componentToCreate.category', '')
         );
-      case 'attribute':
-        return getTrad(`modalForm.sub-header.attribute.${state.actionType}`);
-      default:
-        return getTrad('configurations');
-    }
-  };
-
-  const getNextSearch = nextTab => {
-    const newSearch = Object.keys(state).reduce((acc, current, index) => {
-      if (current !== 'settingType') {
-        acc = `${acc}${index === 0 ? '' : '&'}${current}=${state[current]}`;
       } else {
-        acc = `${acc}${index === 0 ? '' : '&'}${current}=${nextTab}`;
+        // The form is valid
+        // TODO validate case dz not creating component
+        return;
       }
+    }
 
-      return acc;
-    }, '');
-
-    return newSearch;
+    await schema.validate(dataToValidate, { abortEarly: false });
   };
 
   const handleChange = ({ target: { name, value, type, ...rest } }) => {
@@ -229,8 +253,17 @@ const FormModal = () => {
       value === ''
     ) {
       val = null;
-    } else if (type === 'radio' && (name === 'multiple' || name === 'single')) {
+    } else if (
+      type === 'radio' &&
+      (name === 'multiple' ||
+        name === 'single' ||
+        name === 'createComponent' ||
+        name === 'repeatable')
+    ) {
       val = value === 'false' ? false : true;
+
+      // The boolean default accepts 3 different values
+      // This check has been added to allow a reset to null for the bool
     } else if (type === 'radio' && name === 'default') {
       if (value === 'false') {
         val = false;
@@ -239,7 +272,8 @@ const FormModal = () => {
       } else {
         val = null;
       }
-      // val = value === 'false' ? false : true;
+
+      // We store an array for the enum
     } else if (name === 'enum') {
       val = value.split('\n');
     } else {
@@ -248,14 +282,17 @@ const FormModal = () => {
 
     const clonedErrors = Object.assign({}, formErrors);
 
+    // Reset min error when modifying the max
     if (name === 'max') {
       delete clonedErrors.min;
     }
 
+    // Same here
     if (name === 'maxLength') {
       delete clonedErrors.minLength;
     }
 
+    // Since the onBlur is deactivated we remove the errors directly when changing an input
     delete clonedErrors[name];
 
     dispatch({
@@ -277,6 +314,7 @@ const FormModal = () => {
       await checkFormValidity();
       const targetUid =
         state.forTarget === 'components' ? state.targetUid : uid;
+      // This should be improved
       const createNextSearch = searchUid => {
         return `modalType=chooseAttribute&forTarget=${
           state.forTarget
@@ -284,26 +322,15 @@ const FormModal = () => {
           modifiedData.name}`;
       };
 
-      if (state.modalType === 'contentType') {
+      if (isCreatingContentType) {
         // Create the content type schema
         createSchema(modifiedData, state.modalType, uid);
-        const nextSlug = isCreatingCT
-          ? 'content-types'
-          : 'component-categories';
+
         push({
-          pathname: `/plugins/${pluginId}/${nextSlug}/${uid}`,
+          pathname: `/plugins/${pluginId}/content-types/${uid}`,
           search: createNextSearch(targetUid),
         });
-      } else if (state.modalType === 'attribute') {
-        addAttribute(
-          modifiedData,
-          state.forTarget,
-          state.targetUid,
-          state.actionType === 'edit',
-          initialData
-        );
-        push({ search: createNextSearch(targetUid) });
-      } else if (state.modalType === 'component') {
+      } else if (isCreatingComponent) {
         // Create the component schema
         const componentUid = createComponentUid(
           modifiedData.name,
@@ -316,15 +343,181 @@ const FormModal = () => {
           search: createNextSearch(componentUid),
           pathname: `/plugins/${pluginId}/component-categories/${category}/${componentUid}`,
         });
+
+        // Add/edit a field
+      } else if (isCreatingAttribute && !isCreatingComponentFromAView) {
+        // Normal fields like boolean relations
+        if (!isComponentAttribute) {
+          addAttribute(
+            modifiedData,
+            state.forTarget,
+            state.targetUid,
+            state.actionType === 'edit',
+            initialData
+          );
+          const isDynamicZoneAttribute = state.attributeType === 'dynamiczone';
+
+          // Adding a component to a dynamiczone is not the same logic as creating a simple field
+          // so the search is different
+          // TODO make sure it works for edit
+          const dzSearch = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${state.targetUid}&headerDisplayName=${state.headerDisplayName}&dynamicZoneTarget=${modifiedData.name}&settingType=base&step=1`;
+          const nextSearch = isDynamicZoneAttribute
+            ? dzSearch
+            : createNextSearch(targetUid);
+
+          if (state.attributeType === 'dynamiczone' && !isCreating) {
+            push({ search: '' });
+          } else {
+            if (isDynamicZoneAttribute) {
+              // Step 1 of adding a component to a DZ, the user has the option to create a component
+              dispatch({
+                type: 'RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ',
+              });
+
+              push({ search: nextSearch });
+              return;
+            }
+
+            push({ search: nextSearch });
+          }
+
+          // Adding an existing component
+        } else {
+          if (isInFirstComponentStep) {
+            // Navigate the user to step 2
+            push({
+              search: `modalType=attribute&actionType=${state.actionType}&settingType=base&forTarget=${state.forTarget}&targetUid=${state.targetUid}&attributeType=component&headerDisplayName=${state.headerDisplayName}&step=2`,
+            });
+
+            // Clear the reducer and prepare the modified data
+            // This way we don't have to add some logic to re-run the useEffect
+            // The first step is either needed to create a component or just to navigate
+            // To the modal for adding a "common field"
+            dispatch({
+              type: 'RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO',
+            });
+
+            // We don't want all the props to be reset
+            return;
+
+            // Here we are in step 2
+          } else {
+            addAttribute(
+              modifiedData,
+              state.forTarget,
+              state.targetUid,
+              // This change the dispatched type
+              // either 'EDIT_ATTRIBUTE' or 'ADD_ATTRIBUTE' in the DataManagerProvider
+              state.actionType === 'edit',
+              // This is for the edit part
+              initialData,
+              // Passing true will add the component to the components object
+              // This way we can add fields to the added component (if it wasn't there already)
+              true
+            );
+
+            push({ search: createNextSearch(targetUid) });
+
+            // We don't need to end the loop here we want the reducer to be reinitialised
+          }
+        }
+        // Logic for creating a component without clicking on the link in
+        // the left menu
+        // We need to separate the logic otherwise the component would be created
+        // even though the user didn't set any field
+        // The use case is happening when closing the modal at step 2 without any submission
+      } else if (isCreatingAttribute && isCreatingComponentFromAView) {
+        if (isInFirstComponentStep) {
+          // Here the search could be refactored since it is the same as the case from above
+          push({
+            search: `modalType=attribute&actionType=${state.actionType}&settingType=base&forTarget=${state.forTarget}&targetUid=${state.targetUid}&attributeType=component&headerDisplayName=${state.headerDisplayName}&step=2`,
+          });
+
+          // Here we clear the reducer state but we also keep the created component
+          // If we were to create the component before
+          dispatch({
+            type: 'RESET_PROPS_AND_SAVE_CURRENT_DATA',
+          });
+
+          // Terminate because we don't want the reducer to be entirely reset
+          return;
+
+          // Step 2
+        } else {
+          // We are destructuring because the modifiedData object doesn't have the appropriate format to create a field
+          const { category, type, ...rest } = componentToCreate;
+          // Create a the component temp UID
+          // This could be refactored but I think it's more understandable to separate the logic
+          const componentUid = createComponentUid(
+            componentToCreate.name,
+            category
+          );
+          // Create the component first and add it to the components data
+          createSchema(
+            // Component data
+            rest,
+            // Type will always be component
+            // It will dispatch the CREATE_COMPONENT_SCHEMA action
+            // So the component will be added in the main components object
+            // This might not be needed if we don't allow navigation between entries while editing
+            type,
+            componentUid,
+            category,
+            // This will add the created component in the datamanager modifiedData components key
+            // Like explained above we will be able to modify the created component structure
+            isCreatingComponentFromAView
+          );
+          // Add the field to the schema
+          addAttribute(modifiedData, state.forTarget, state.targetUid, false);
+
+          // TODO temporary
+          dispatch({ type: 'RESET_PROPS' });
+          push({ search: '' });
+          return;
+        }
+        // The modal is addComponentToDynamicZone
       } else {
-        console.log('Do somethign later');
+        if (isInFirstComponentStep) {
+          console.log('add compo dz step 1', isCreatingComponentFromAView);
+          // addCo
+          if (isCreatingComponentFromAView) {
+            const { category, type, ...rest } = modifiedData.componentToCreate;
+            const componentUid = createComponentUid(
+              modifiedData.componentToCreate.name,
+              category
+            );
+            // Create the component first and add it to the components data
+            createSchema(
+              // Component data
+              rest,
+              // Type will always be component
+              // It will dispatch the CREATE_COMPONENT_SCHEMA action
+              // So the component will be added in the main components object
+              // This might not be needed if we don't allow navigation between entries while editing
+              type,
+              componentUid,
+              category,
+              // This will add the created component in the datamanager modifiedData components key
+              // Like explained above we will be able to modify the created component structure
+              isCreatingComponentFromAView
+            );
+            addComponentsToDynamicZone(state.dynamicZoneTarget, [componentUid]);
+          } else {
+            console.log('not ready');
+          }
+        } else {
+          console.log('step 2???');
+        }
+
+        return;
       }
+
       dispatch({
         type: 'RESET_PROPS',
       });
     } catch (err) {
       const errors = getYupInnerErrors(err);
-      console.log({ errors, err });
+      console.log({ err, errors });
 
       dispatch({
         type: 'SET_ERRORS',
@@ -335,26 +528,36 @@ const FormModal = () => {
   const handleToggle = () => {
     push({ search: '' });
   };
+
   const onClosed = () => {
-    setState(initialStateData);
+    setState(INITIAL_STATE_DATA);
     dispatch({
       type: 'RESET_PROPS',
     });
   };
-
   const onOpened = () => {
     if (state.modalType === 'chooseAttribute') {
       attributeOptionRef.current.focus();
     }
   };
+  const shouldDisableAdvancedTab = () => {
+    return (
+      // isCreatingAttribute &&
+      (state.attributeType === 'component' ||
+        state.modalType === 'addComponentToDynamicZone') &&
+      get(modifiedData, ['createComponent'], null) === false
+    );
+  };
 
-  // Display data
+  // Display data for the attributes picker modal
   const displayedAttributes = getAttributes(state.forTarget);
 
   // Styles
   const modalBodyStyle = isPickingAttribute
     ? { paddingTop: '0.5rem', paddingBottom: '3rem' }
     : {};
+
+  console.log({ modifiedData });
 
   return (
     <Modal
@@ -365,7 +568,7 @@ const FormModal = () => {
     >
       <HeaderModal>
         <ModalHeader
-          // name={name}
+          // We need to add the category here
           name={state.headerDisplayName}
           headerId={headerId}
           iconType={iconType || 'contentType'}
@@ -373,7 +576,7 @@ const FormModal = () => {
         <section>
           <HeaderModalTitle>
             <FormattedMessage
-              id={getModalTitleSubHeader()}
+              id={getModalTitleSubHeader(state)}
               values={{
                 type: upperFirst(
                   formatMessage({
@@ -381,6 +584,7 @@ const FormModal = () => {
                   })
                 ),
                 name: upperFirst(state.attributeName),
+                step: state.step,
               }}
             >
               {msg => <span>{upperFirst(msg)}</span>}
@@ -393,6 +597,9 @@ const FormModal = () => {
                     {NAVLINKS.map((link, index) => {
                       return (
                         <HeaderNavLink
+                          // The advanced tab is disabled when adding an existing component
+                          // step 1
+                          isDisabled={index === 1 && shouldDisableAdvancedTab()}
                           isActive={state.settingType === link.id}
                           key={link.id}
                           {...link}
@@ -401,7 +608,7 @@ const FormModal = () => {
                               ...prev,
                               settingType: link.id,
                             }));
-                            push({ search: getNextSearch(link.id) });
+                            push({ search: getNextSearch(link.id, state) });
                           }}
                           nextTab={
                             index === NAVLINKS.length - 1 ? 0 : index + 1
@@ -457,11 +664,13 @@ const FormModal = () => {
                       </div>
                     );
                   })
-                : form(modifiedData, state.attributeType).items.map(
+                : form(modifiedData, state.attributeType, state.step).items.map(
                     (row, index) => {
                       return (
                         <div className="row" key={index}>
-                          {row.map(input => {
+                          {row.map((input, i) => {
+                            // The divider type is used mainly the advanced tab
+                            // It is the one responsible for displaying the settings label
                             if (input.type === 'divider') {
                               return (
                                 <div
@@ -482,6 +691,22 @@ const FormModal = () => {
                               );
                             }
 
+                            // The spacer type is used mainly to aligne the icon picker
+                            if (input.type === 'spacer') {
+                              return (
+                                <div key="spacer" style={{ height: 20 }}></div>
+                              );
+                            }
+
+                            if (input.type === 'pushRight') {
+                              return (
+                                <div
+                                  key={`${index}.${i}`}
+                                  className={`col-${input.size}`}
+                                />
+                              );
+                            }
+
                             if (input.type === 'relation') {
                               return (
                                 <RelationForm
@@ -495,9 +720,20 @@ const FormModal = () => {
                               );
                             }
 
+                            // Retrieve the error for a specific input
                             const errorId = get(
                               formErrors,
-                              [...input.name.split('.'), 'id'],
+                              [
+                                ...input.name
+                                  .split('.')
+                                  // The filter here is used when creating a component
+                                  // in the component step 1 modal
+                                  // Since the component info is stored in the
+                                  // componentToCreate object we can access the error
+                                  // By removing the key
+                                  .filter(key => key !== 'componentToCreate'),
+                                'id',
+                              ],
                               null
                             );
 
@@ -509,11 +745,17 @@ const FormModal = () => {
 
                             let value;
 
+                            // Condition for the boolean default value
+                            // The radio input doesn't accept false, true or null as value
+                            // So we pass them as string
+                            // This way the data stays accurate and we don't have to operate
+                            // any data mutation
                             if (
                               input.name === 'default' &&
                               state.attributeType === 'boolean'
                             ) {
                               value = toString(retrievedValue);
+                              // Same here for the enum
                             } else if (
                               input.name === 'enum' &&
                               Array.isArray(retrievedValue)
@@ -523,6 +765,9 @@ const FormModal = () => {
                               value = retrievedValue;
                             }
 
+                            // The addon input is not present in buffet so we are used the all lib
+                            // for the moment that's why we don't want them be passed to buffet
+                            // like the other created inputs
                             if (input.type === 'addon') {
                               return (
                                 <InputsIndex
@@ -542,11 +787,31 @@ const FormModal = () => {
                               >
                                 <Inputs
                                   customInputs={{
-                                    // addon: InputsIndex,
-                                    creatableSelect: CreatableSelect,
+                                    componentIconPicker: ComponentIconPicker,
+                                    componentSelect: WrapperSelect,
+                                    creatableSelect: WrapperSelect,
                                     customCheckboxWithChildren: CustomCheckbox,
                                     booleanBox: BooleanBox,
                                   }}
+                                  isCreating={isCreating}
+                                  // Props for the componentSelect
+                                  isCreatingComponentWhileAddingAField={
+                                    isCreatingComponentWhileAddingAField
+                                  }
+                                  // Props for the componentSelect
+                                  // Since the component is created after adding it to a type
+                                  // its name and category can't be retrieved from the data manager
+                                  componentCategoryNeededForAddingAfieldWhileCreatingAComponent={get(
+                                    componentToCreate,
+                                    'category',
+                                    null
+                                  )}
+                                  // Props for the componentSelect same explanation
+                                  componentNameNeededForAddingAfieldWhileCreatingAComponent={get(
+                                    componentToCreate,
+                                    'name',
+                                    null
+                                  )}
                                   value={value}
                                   {...input}
                                   error={

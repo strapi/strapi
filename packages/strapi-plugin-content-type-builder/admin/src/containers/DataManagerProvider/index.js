@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { get, sortBy } from 'lodash';
+import { get, groupBy, sortBy } from 'lodash';
 import { request, LoadingIndicatorPage } from 'strapi-helper-plugin';
 import { useLocation, useRouteMatch, Redirect } from 'react-router-dom';
 import DataManagerContext from '../../contexts/DataManagerContext';
@@ -15,7 +15,7 @@ import createModifiedDataSchema, {
 import retrieveSpecificInfoFromComponents from './utils/retrieveSpecificInfoFromComponents';
 import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
 
-const DataManagerProvider = ({ children }) => {
+const DataManagerProvider = ({ allIcons, children }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const {
     components,
@@ -80,7 +80,8 @@ const DataManagerProvider = ({ children }) => {
     forTarget,
     targetUid,
     isEditing = false,
-    initialAttribute
+    initialAttribute,
+    shouldAddComponentToData = false
   ) => {
     const actionType = isEditing ? 'EDIT_ATTRIBUTE' : 'ADD_ATTRIBUTE';
 
@@ -90,10 +91,23 @@ const DataManagerProvider = ({ children }) => {
       forTarget,
       targetUid,
       initialAttribute,
+      shouldAddComponentToData,
     });
   };
-
-  const createSchema = (data, schemaType, uid, componentCategory) => {
+  const addComponentsToDynamicZone = (dynamicZoneTarget, componentsToAdd) => {
+    dispatch({
+      type: 'ADD_COMPONENTS_TO_DYNAMIC_ZONE',
+      dynamicZoneTarget,
+      componentsToAdd,
+    });
+  };
+  const createSchema = (
+    data,
+    schemaType,
+    uid,
+    componentCategory,
+    shouldAddComponentToData = false
+  ) => {
     const type =
       schemaType === 'contentType'
         ? 'CREATE_SCHEMA'
@@ -105,6 +119,7 @@ const DataManagerProvider = ({ children }) => {
       componentCategory,
       schemaType,
       uid,
+      shouldAddComponentToData,
     });
   };
   const removeAttribute = (
@@ -122,6 +137,14 @@ const DataManagerProvider = ({ children }) => {
       mainDataKey,
       attributeToRemoveName,
       componentUid,
+    });
+  };
+
+  const removeComponentFromDynamicZone = (dzName, componentToRemoveIndex) => {
+    dispatch({
+      type: 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE',
+      dzName,
+      componentToRemoveIndex,
     });
   };
 
@@ -175,25 +198,31 @@ const DataManagerProvider = ({ children }) => {
     return <Redirect to={`/plugins/${pluginId}/content-types/${firstCTUid}`} />;
   }
 
+  console.warn({ allData: modifiedData });
+
   return (
     <DataManagerContext.Provider
       value={{
         addAttribute,
+        addComponentsToDynamicZone,
         allComponentsCategories: retrieveSpecificInfoFromComponents(
           components,
-          'category'
+          ['category']
         ),
         allComponentsIconAlreadyTaken: retrieveSpecificInfoFromComponents(
           components,
-          'icon'
+          ['schema', 'icon']
         ),
         components,
+        componentsGroupedByCategory: groupBy(components, 'category'),
         contentTypes,
         createSchema,
+        allIcons,
         initialData,
         isInContentTypeView,
         modifiedData,
         removeAttribute,
+        removeComponentFromDynamicZone,
         setModifiedData,
         sortedContentTypesList,
       }}
@@ -214,6 +243,7 @@ const DataManagerProvider = ({ children }) => {
 };
 
 DataManagerProvider.propTypes = {
+  allIcons: PropTypes.array.isRequired,
   children: PropTypes.node.isRequired,
 };
 
