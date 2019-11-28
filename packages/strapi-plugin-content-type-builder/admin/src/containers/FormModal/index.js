@@ -47,7 +47,8 @@ const FormModal = () => {
   const attributeOptionRef = useRef();
   const {
     addAttribute,
-    addComponentsToDynamicZone,
+    addCreatedComponentToDynamicZone,
+    changeDynamicZoneComponents,
     contentTypes,
     components,
     createSchema,
@@ -128,7 +129,6 @@ const FormModal = () => {
         // This condition is added to prevent the reducer state to be cleared when navigating from the base tab to tha advanced one
         state.modalType !== 'attribute'
       ) {
-        console.log('effect');
         const attributeToEditNotFormatted = get(
           allDataSchema,
           [...pathToSchema, 'schema', 'attributes', attributeName],
@@ -538,10 +538,23 @@ const FormModal = () => {
               // Like explained above we will be able to modify the created component structure
               isCreatingComponentFromAView
             );
-            addComponentsToDynamicZone(state.dynamicZoneTarget, [componentUid]);
+            // Add the created component to the DZ
+            // We don't want to remove the old ones
+            addCreatedComponentToDynamicZone(state.dynamicZoneTarget, [
+              componentUid,
+            ]);
+
+            // TODO change routing so the user can add fields to the created component
+            push({ search: '' });
           } else {
-            console.log('not ready');
-            // TODO apply components to DZ
+            // Add the components to the DZ
+            changeDynamicZoneComponents(
+              state.dynamicZoneTarget,
+              modifiedData.components
+            );
+
+            // TODO nav
+            push({ search: '' });
           }
         } else {
           console.log('step 2???');
@@ -825,6 +838,9 @@ const FormModal = () => {
                                 key={input.name}
                               >
                                 <Inputs
+                                  addComponentsToDynamicZone={
+                                    handleClickAddComponentsToDynamicZone
+                                  }
                                   customInputs={{
                                     componentIconPicker: ComponentIconPicker,
                                     componentSelect: WrapperSelect,
@@ -859,9 +875,6 @@ const FormModal = () => {
                                       : formatMessage({ id: errorId })
                                   }
                                   onChange={handleChange}
-                                  onClickAddComponentsToDynamicZone={
-                                    handleClickAddComponentsToDynamicZone
-                                  }
                                   onBlur={() => {}}
                                   description={
                                     get(input, 'description.id', null)

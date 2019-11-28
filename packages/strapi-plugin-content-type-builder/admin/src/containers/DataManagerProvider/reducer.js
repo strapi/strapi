@@ -93,7 +93,7 @@ const reducer = (state, action) => {
           return existingCompos;
         });
     }
-    case 'ADD_COMPONENTS_TO_DYNAMIC_ZONE': {
+    case 'ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE': {
       const { dynamicZoneTarget, componentsToAdd } = action;
 
       return state.updateIn(
@@ -110,6 +110,32 @@ const reducer = (state, action) => {
         }
       );
     }
+    case 'CHANGE_DYNAMIC_ZONE_COMPONENTS': {
+      const { dynamicZoneTarget, newComponents } = action;
+
+      return state
+        .updateIn(
+          [
+            'modifiedData',
+            'contentType',
+            'schema',
+            'attributes',
+            dynamicZoneTarget,
+            'components',
+          ],
+          () => fromJS(newComponents)
+        )
+        .updateIn(['modifiedData', 'components'], old => {
+          const componentsSchema = newComponents.reduce((acc, current) => {
+            const addedCompoSchema = state.getIn(['components', current]);
+
+            return acc.set(current, addedCompoSchema);
+          }, old);
+
+          return componentsSchema;
+        });
+    }
+
     case 'CREATE_SCHEMA': {
       const newSchema = {
         uid: action.uid,

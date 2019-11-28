@@ -94,9 +94,12 @@ const DataManagerProvider = ({ allIcons, children }) => {
       shouldAddComponentToData,
     });
   };
-  const addComponentsToDynamicZone = (dynamicZoneTarget, componentsToAdd) => {
+  const addCreatedComponentToDynamicZone = (
+    dynamicZoneTarget,
+    componentsToAdd
+  ) => {
     dispatch({
-      type: 'ADD_COMPONENTS_TO_DYNAMIC_ZONE',
+      type: 'ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE',
       dynamicZoneTarget,
       componentsToAdd,
     });
@@ -120,6 +123,14 @@ const DataManagerProvider = ({ allIcons, children }) => {
       schemaType,
       uid,
       shouldAddComponentToData,
+    });
+  };
+  const changeDynamicZoneComponents = (dynamicZoneTarget, newComponents) => {
+    console.log({ newComponents });
+    dispatch({
+      type: 'CHANGE_DYNAMIC_ZONE_COMPONENTS',
+      dynamicZoneTarget,
+      newComponents,
     });
   };
   const removeAttribute = (
@@ -204,7 +215,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
     <DataManagerContext.Provider
       value={{
         addAttribute,
-        addComponentsToDynamicZone,
+        addCreatedComponentToDynamicZone,
         allComponentsCategories: retrieveSpecificInfoFromComponents(
           components,
           ['category']
@@ -213,6 +224,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
           components,
           ['schema', 'icon']
         ),
+        changeDynamicZoneComponents,
         components,
         componentsGroupedByCategory: groupBy(components, 'category'),
         contentTypes,

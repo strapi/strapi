@@ -6,12 +6,12 @@ import MultipleMenuList from './MultipleMenuList';
 import Value from './Value';
 
 const ComponentSelect = ({
+  addComponentsToDynamicZone,
   componentCategoryNeededForAddingAfieldWhileCreatingAComponent,
   componentNameNeededForAddingAfieldWhileCreatingAComponent,
   isCreatingComponentWhileAddingAField,
   isMultiple,
   onChange,
-  onClickAddComponentsToDynamicZone,
   name,
   value,
   styles,
@@ -34,6 +34,7 @@ const ComponentSelect = ({
 
   return (
     <Select
+      addComponentsToDynamicZone={addComponentsToDynamicZone}
       isClearable={!isMultiple}
       isDisabled={isCreatingComponentWhileAddingAField}
       isCreatingComponent={isCreatingComponentWhileAddingAField}
@@ -44,7 +45,6 @@ const ComponentSelect = ({
       componentName={componentNameNeededForAddingAfieldWhileCreatingAComponent}
       name={name}
       onChange={handleChange}
-      onClickAddComponentsToDynamicZone={onClickAddComponentsToDynamicZone}
       onClickOption={onChange}
       styles={styles}
       value={{ label: value, value }}
@@ -69,6 +69,7 @@ ComponentSelect.defaultProps = {
 };
 
 ComponentSelect.propTypes = {
+  addComponentsToDynamicZone: PropTypes.func.isRequired,
   componentCategoryNeededForAddingAfieldWhileCreatingAComponent:
     PropTypes.string,
   componentNameNeededForAddingAfieldWhileCreatingAComponent: PropTypes.string,
@@ -76,7 +77,7 @@ ComponentSelect.propTypes = {
   isMultiple: PropTypes.bool,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
-  onClickAddComponentsToDynamicZone: PropTypes.func.isRequired,
+
   styles: PropTypes.object.isRequired,
   value: PropTypes.oneOfType([
     PropTypes.string,

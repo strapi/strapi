@@ -9,7 +9,7 @@ import Ul from './Ul';
 import hasSubArray from './utils/hasSubArray';
 
 const MultipleMenuList = ({
-  selectProps: { name, onClickAddComponentsToDynamicZone, refState, value },
+  selectProps: { name, addComponentsToDynamicZone, refState, value },
   ...rest
 }) => {
   const { componentsGroupedByCategory } = useDataManager();
@@ -41,7 +41,7 @@ const MultipleMenuList = ({
       components: allComponentsCategory[target.name],
       shouldAddComponents: target.value,
     };
-    onClickAddComponentsToDynamicZone({ target: dataTarget });
+    addComponentsToDynamicZone({ target: dataTarget });
   };
 
   const handleChange = ({ target }) => {
@@ -51,7 +51,7 @@ const MultipleMenuList = ({
       shouldAddComponents: target.value,
     };
 
-    onClickAddComponentsToDynamicZone({ target: dataTarget });
+    addComponentsToDynamicZone({ target: dataTarget });
   };
 
   return (
@@ -140,8 +140,8 @@ MultipleMenuList.defaultProps = {
 
 MultipleMenuList.propTypes = {
   selectProps: PropTypes.shape({
+    addComponentsToDynamicZone: PropTypes.func.isRequired,
     name: PropTypes.string.isRequired,
-    onClickAddComponentsToDynamicZone: PropTypes.func.isRequired,
     refState: PropTypes.object,
     value: PropTypes.object,
   }).isRequired,
