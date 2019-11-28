@@ -2,7 +2,11 @@ import React, { useEffect, useReducer } from 'react';
 import { useParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { cloneDeep, get, isEmpty, set } from 'lodash';
-import { request, LoadingIndicatorPage } from 'strapi-helper-plugin';
+import {
+  request,
+  LoadingIndicatorPage,
+  useGlobalContext,
+} from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
 import createYupSchema from './utils/schema';
@@ -184,6 +188,8 @@ const EditViewDataManagerProvider = ({
     });
   };
 
+  const { emitEvent } = useGlobalContext();
+
   const handleSubmit = async e => {
     e.preventDefault();
 
@@ -222,6 +228,8 @@ const EditViewDataManagerProvider = ({
       const method = isCreatingEntry ? 'POST' : 'PUT';
       const endPoint = isCreatingEntry ? slug : `${slug}/${id}`;
 
+      emitEvent(isCreatingEntry ? 'willCreateEntry' : 'willEditEntry');
+
       try {
         // Time to actually send the data
         await request(
@@ -235,7 +243,7 @@ const EditViewDataManagerProvider = ({
           false,
           false
         );
-        // emitEvent('didSaveEntry');
+        emitEvent(isCreatingEntry ? 'didCreateEntry' : 'didEditEntry');
         redirectToPreviousPage();
       } catch (err) {
         console.log({ err });
@@ -246,7 +254,9 @@ const EditViewDataManagerProvider = ({
         );
 
         setIsSubmitting(false);
-        // emitEvent('didNotSaveEntry', { error: err });
+        emitEvent(isCreatingEntry ? 'didNotCreateEntry' : 'didNotEditEntry', {
+          error: err,
+        });
         strapi.notification.error(error);
       }
     } catch (err) {

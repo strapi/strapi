@@ -18,7 +18,7 @@ const Header = () => {
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningDelete, setWarningDelete] = useState(false);
 
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage, emitEvent } = useGlobalContext();
   const { id } = useParams();
   const {
     initialData,
@@ -99,14 +99,17 @@ const Header = () => {
     setIsSubmitting();
 
     try {
+      emitEvent('willDeleteEntry');
       await request(getRequestUrl(`${slug}/${id}`), {
         method: 'DELETE',
       });
 
       strapi.notification.success(`${pluginId}.success.record.delete`);
+      emitEvent('didDeleteEntry');
       redirectToPreviousPage();
     } catch (err) {
       setIsSubmitting(false);
+      emitEvent('didNotDeleteEntry', { error: err });
       strapi.notification.error(`${pluginId}.error.record.delete`);
     }
   };
