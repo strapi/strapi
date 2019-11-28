@@ -180,12 +180,22 @@ const reducer = (state, action) => {
         targetUid,
         initialAttribute,
       } = action;
+      let newState = state;
       const initialAttributeName = get(initialAttribute, ['name'], '');
       const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
         ? [forTarget]
         : [forTarget, targetUid];
 
-      return state.updateIn(
+      const isEditingComponentAttribute = rest.type === 'component';
+
+      if (isEditingComponentAttribute) {
+        newState = state.updateIn(
+          ['modifiedData', 'components', rest.component],
+          () => state.getIn(['components', rest.component])
+        );
+      }
+
+      return newState.updateIn(
         ['modifiedData', ...pathToDataToEdit, 'schema'],
         obj => {
           let oppositeAttributeNameToRemove = null;

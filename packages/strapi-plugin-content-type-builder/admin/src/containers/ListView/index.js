@@ -51,6 +51,7 @@ const ListPage = () => {
     const search = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${targetUid}&headerDisplayName=${currentDataName}&dynamicZoneTarget=${dzName}&settingType=base&step=1&actionType=edit`;
     push({ search });
   };
+
   // TODO just a util not sure it should be kept
   const getType = attrName => {
     const type = has(modifiedData, [
@@ -114,10 +115,17 @@ const ListPage = () => {
         attributeType = type;
     }
 
+    const step = type === 'component' ? '&step=2' : '';
+
     push({
-      search: `modalType=attribute&actionType=edit&settingType=base&forTarget=${forTarget}&targetUid=${targetUid}&attributeName=${attrName}&attributeType=${attributeType}&headerDisplayName=${headerDisplayName}`,
+      search: `modalType=attribute&actionType=edit&settingType=base&forTarget=${forTarget}&targetUid=${targetUid}&attributeName=${attrName}&attributeType=${attributeType}&headerDisplayName=${headerDisplayName}${step}`,
     });
   };
+
+  // const handleClickEditComponent = compoName => {
+  //   const search = `modalType=attribute&actionType=edit&settingType=base&forTarget=${forTarget}&targetUid=${targetUid}&attributeName=${attrName}&attributeType=${attributeType}&headerDisplayName=${headerDisplayName}`,
+  //   push({ search });
+  // }
 
   return (
     <ViewContainer>
@@ -143,7 +151,19 @@ const ListPage = () => {
                   );
 
                   return (
-                    <li key={attr}>
+                    <li
+                      key={attr}
+                      onClick={e => {
+                        e.stopPropagation();
+                        handleClickEditField(
+                          isInContentTypeView ? 'contentType' : 'component',
+                          targetUid,
+                          attr,
+                          'component',
+                          currentDataName
+                        );
+                      }}
+                    >
                       <div>
                         <span>{attr}</span>
                         &nbsp;
@@ -189,7 +209,27 @@ const ListPage = () => {
                             );
 
                             return (
-                              <li key={`${attr}.${componentAttr}`}>
+                              <li
+                                key={`${attr}.${componentAttr}`}
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  console.log('edit nested compo');
+                                  console.log(
+                                    'nested compo attr name',
+                                    componentAttr
+                                  );
+                                  handleClickEditField(
+                                    'components',
+                                    // component uid
+                                    get(compoData, 'uid'),
+                                    // attr name
+                                    componentAttr,
+                                    'component',
+                                    // header display
+                                    attr
+                                  );
+                                }}
+                              >
                                 <div>
                                   <span>{componentAttr}</span>
                                   &nbsp;
@@ -221,15 +261,21 @@ const ListPage = () => {
                                       return (
                                         <li
                                           key={`${attr}.${componentAttr}.${nestedCompoAttribute}`}
-                                          onClick={() =>
+                                          onClick={e => {
+                                            e.stopPropagation();
+                                            console.log({
+                                              nestedCompoAttribute,
+                                              nestedComponentAttrType,
+                                              nestedCompoNameUid,
+                                            });
                                             handleClickEditField(
                                               'components',
                                               nestedCompoNameUid,
                                               nestedCompoAttribute,
                                               nestedComponentAttrType,
                                               nestedCompoNameUid
-                                            )
-                                          }
+                                            );
+                                          }}
                                         >
                                           <div>
                                             <span>{nestedCompoAttribute}</span>
@@ -278,15 +324,16 @@ const ListPage = () => {
                           return (
                             <li
                               key={`${attr}.${componentAttr}`}
-                              onClick={() =>
+                              onClick={e => {
+                                e.stopPropagation();
                                 handleClickEditField(
                                   'components',
                                   getFirstLevelComponentName(attr),
                                   componentAttr,
                                   componentAttrType,
                                   attr
-                                )
-                              }
+                                );
+                              }}
                             >
                               <div>
                                 <span>{componentAttr}</span>
@@ -310,12 +357,13 @@ const ListPage = () => {
                         })}
                         <button
                           type="button"
-                          onClick={() =>
+                          onClick={e => {
+                            e.stopPropagation();
                             handleClickAddAttributeNestedData(
                               get(compoData, 'uid', ''),
                               get(compoData, 'schema.name', 'ERROR')
-                            )
-                          }
+                            );
+                          }}
                         >
                           Add field to compo
                         </button>

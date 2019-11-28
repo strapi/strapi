@@ -126,7 +126,6 @@ const DataManagerProvider = ({ allIcons, children }) => {
     });
   };
   const changeDynamicZoneComponents = (dynamicZoneTarget, newComponents) => {
-    console.log({ newComponents });
     dispatch({
       type: 'CHANGE_DYNAMIC_ZONE_COMPONENTS',
       dynamicZoneTarget,
@@ -209,7 +208,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
     return <Redirect to={`/plugins/${pluginId}/content-types/${firstCTUid}`} />;
   }
 
-  console.warn({ allData: modifiedData });
+  console.log({ modifiedData, components });
 
   return (
     <DataManagerContext.Provider

@@ -101,7 +101,6 @@ const FormModal = () => {
         state.modalType !== 'addComponentToDynamicZone' &&
         actionType === 'edit'
       ) {
-        console.log('sub');
         const attributeToEditNotFormatted = get(
           allDataSchema,
           [...pathToSchema, 'schema', 'attributes', dynamicZoneTarget],
@@ -119,7 +118,6 @@ const FormModal = () => {
           type: 'SET_DYNAMIC_ZONE_DATA_SCHEMA',
           attributeToEdit,
         });
-        console.log({ attributeToEdit });
       }
 
       // Set the predefined data structure to create an attribute
@@ -138,6 +136,14 @@ const FormModal = () => {
           ...attributeToEditNotFormatted,
           name: attributeName,
         };
+
+        // We need to set the repeatable key to false when editing a component
+        // The API doesn't send this info
+        if (attributeType === 'component' && actionType === 'edit') {
+          if (!attributeToEdit.repeatable) {
+            set(attributeToEdit, 'repeatable', false);
+          }
+        }
 
         if (
           attributeType === 'relation' &&
@@ -440,6 +446,7 @@ const FormModal = () => {
             return;
 
             // Here we are in step 2
+            // The step 2 is also use to edit an attribute that is a component
           } else {
             addAttribute(
               modifiedData,
@@ -557,7 +564,7 @@ const FormModal = () => {
             push({ search: '' });
           }
         } else {
-          console.log('step 2???');
+          console.error('This case is not handled');
         }
 
         return;
@@ -568,7 +575,6 @@ const FormModal = () => {
       });
     } catch (err) {
       const errors = getYupInnerErrors(err);
-      console.log({ err, errors });
 
       dispatch({
         type: 'SET_ERRORS',
@@ -607,8 +613,6 @@ const FormModal = () => {
   const modalBodyStyle = isPickingAttribute
     ? { paddingTop: '0.5rem', paddingBottom: '3rem' }
     : {};
-
-  console.log({ modifiedData });
 
   return (
     <Modal
