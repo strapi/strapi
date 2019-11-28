@@ -187,15 +187,11 @@ const EditSettingsView = ({
       delete body.uid;
       delete body.isComponent;
 
-      emitEvent('willSaveContentTypeLayout');
-
       await request(getRequestUrl(`${type}/${slug || componentSlug}`), {
         method: 'PUT',
         body,
         signal,
       });
-
-      emitEvent('didSaveContentTypeLayout');
 
       dispatch({
         type: 'SUBMIT_SUCCEEDED',
@@ -209,7 +205,7 @@ const EditSettingsView = ({
         deleteLayouts();
       }
 
-      emitEvent('didSaveContentTypeLayout');
+      emitEvent('didEditEditSettings');
     } catch (err) {
       strapi.notification.error('notification.error');
     }

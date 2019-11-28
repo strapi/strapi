@@ -151,7 +151,7 @@ const ListSettingsView = ({ deleteLayout, models, slug }) => {
         type: 'SUBMIT_SUCCEEDED',
       });
       deleteLayout(slug);
-      emitEvent('didSaveContentTypeLayout');
+      emitEvent('didEditListSettings');
     } catch (err) {
       strapi.notification.error('notification.error');
     }
