@@ -43,7 +43,7 @@
     },
     "body": {
       "type": "dynamiczone",
-      "components": ["default.closingperiod", "default.restaurantservice", "default.openingtimes"]
+      "components": []
     },
     "description": {
       "type": "richtext",
