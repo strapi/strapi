@@ -30,6 +30,7 @@
     "@fortawesome/fontawesome-free": "^5.11.2",
     "@fortawesome/fontawesome-svg-core": "^1.2.25",
     "@fortawesome/free-solid-svg-icons": "^5.11.2",
+    "@fortawesome/react-fontawesome": "^0.1.7",
     "autoprefixer": "^9.5.1",
     "babel-loader": "^8.0.5",
     "bcryptjs": "^2.4.3",

@@ -9,6 +9,7 @@ const alias = [
   '@buffetjs/utils',
   '@fortawesome/fontawesome-svg-core',
   '@fortawesome/free-solid-svg-icons',
+  '@fortawesome/react-fontawesome',
   'classnames',
   'history',
   'hoist-non-react-statics',
