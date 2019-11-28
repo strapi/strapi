@@ -116,7 +116,7 @@ module.exports = {
       },
       {
         text: 'Website',
-        link: 'https://strapi',
+        link: 'https://strapi.io',
       },
       {
         text: 'Slack',
