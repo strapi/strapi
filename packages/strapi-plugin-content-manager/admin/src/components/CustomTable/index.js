@@ -31,7 +31,7 @@ function CustomTable({
   const colSpanLength = isBulkable ? headers.length + 2 : headers.length + 1;
 
   const handleGoTo = id => {
-    emitEvent('willEditEntry');
+    emitEvent('willEditEntryFromList');
     push({
       pathname: `/plugins/${pluginId}/${slug}/${id}`,
       search: redirectUrl,
