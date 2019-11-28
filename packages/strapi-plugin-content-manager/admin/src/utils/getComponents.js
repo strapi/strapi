@@ -38,7 +38,7 @@ const getInjectedComponents = (
             {...compo.props}
             key={compo.key}
             onClick={() => {
-              emitEvent('willEditContentTypeFromEditView');
+              emitEvent('willEditEditLayout');
             }}
           />
         );

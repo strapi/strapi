@@ -109,12 +109,16 @@ function ListView({
 
   const toggleLabelPickerState = () => {
     if (!isLabelPickerOpen) {
-      emitEvent('willChangeDisplayedFields');
+      emitEvent('willChangeListFieldsSettings');
     }
 
     setLabelPickerState(prevState => !prevState);
   };
   const toggleFilterPickerState = () => {
+    if (!isFilterPickerOpen) {
+      emitEvent('willFilterEntries');
+    }
+
     setFilterPickerState(prevState => !prevState);
   };
 
