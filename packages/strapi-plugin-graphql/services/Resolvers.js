@@ -56,27 +56,30 @@ const generateDynamicZoneDefinitions = (attributes, globalId, schema) => {
 
       if (components.length === 0) {
         // Create dummy type because graphql doesn't support empty ones
-        // TODO: do sth
+
+        schema.definition += `type ${typeName} { _:Boolean}`;
+        schema.definition += `\nscalar EmptyQuery\n`;
+      } else {
+        const componentsTypeNames = components.map(componentUID => {
+          const compo = strapi.components[componentUID];
+          if (!compo) {
+            throw new Error(
+              `Trying to creating dynamiczone type with unkown component ${componentUID}`
+            );
+          }
+
+          return compo.globalId;
+        });
+
+        const unionType = `union ${typeName} = ${componentsTypeNames.join(
+          ' | '
+        )}`;
+
+        schema.definition += `\n${unionType}\n`;
       }
 
-      const componentsTypeNames = components.map(componentUID => {
-        const compo = strapi.components[componentUID];
-        if (!compo) {
-          throw new Error(
-            `Trying to creating dynamiczone type with unkown component ${componentUID}`
-          );
-        }
-
-        return compo.globalId;
-      });
-
-      const unionType = `union ${typeName} = ${componentsTypeNames.join(
-        ' | '
-      )}`;
-
       const inputTypeName = `${typeName}Input`;
-
-      schema.definition += `\n${unionType}\nscalar ${inputTypeName}\n`;
+      schema.definition += `\nscalar ${inputTypeName}\n`;
 
       schema.resolvers[typeName] = {
         __resolveType(obj) {
