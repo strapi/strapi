@@ -15,13 +15,13 @@ You can simply copy and paste this code to your own service file to customize th
 
 You can read about `strapi.query` calls [here](./queries.md)
 
-::: note
+::: tip
 In the following example your controller, service and model is named `restaurant`
 :::
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "find" id="find"
+::: tab find
 
 #### `find`
 
@@ -40,7 +40,7 @@ module.exports = {
 
 :::
 
-::: tab "findOne" id="findone"
+::: tab findOne
 
 #### `findOne`
 
@@ -60,7 +60,7 @@ module.exports = {
 
 :::
 
-::: tab "count" id="count"
+::: tab count
 
 #### `count`
 
@@ -80,7 +80,7 @@ module.exports = {
 
 :::
 
-::: tab "create" id="create"
+::: tab create
 
 #### `create`
 
@@ -97,7 +97,7 @@ module.exports = {
 
     if (files) {
       // automatically uploads the files based on the entry and the model
-      await this.uploadFiles(entry, files, { model });
+      await this.uploadFiles(entry, files, { model: strapi.models.restaurant });
       return this.findOne({ id: entry.id });
     }
 
@@ -108,7 +108,7 @@ module.exports = {
 
 :::
 
-::: tab "update" id="update"
+::: tab update
 
 #### `update`
 
@@ -125,7 +125,7 @@ module.exports = {
 
     if (files) {
       // automatically uploads the files based on the entry and the model
-      await this.uploadFiles(entry, files, { model });
+      await this.uploadFiles(entry, files, { model: strapi.models.restaurant });
       return this.findOne({ id: entry.id });
     }
 
@@ -136,7 +136,7 @@ module.exports = {
 
 :::
 
-::: tab "delete" id="delete"
+::: tab delete
 
 #### `delete`
 
@@ -156,7 +156,7 @@ module.exports = {
 
 :::
 
-::: tab "search" id="search"
+::: tab search
 
 #### `search`
 
@@ -176,7 +176,7 @@ module.exports = {
 
 :::
 
-::: tab "countSearch" id="countsearch"
+::: tab countSearch
 
 #### `countSearch`
 
@@ -242,7 +242,7 @@ module.exports = {
 };
 ```
 
-::: note
+::: tip
 please make sure you installed `nodemailer` (`npm install nodemailer`) for this example.
 :::
 

@@ -4,7 +4,7 @@ See the [models' concepts](../concepts/concepts.md#models) for details.
 
 ## How to create a model?
 
-::: note
+::: tip
 If you are just starting out it is very convenient to generate some models with the Content Type Builder, directly in the admin interface. You can then review the generated model mappings on the code level. The UI takes over a lot of validation tasks and gives you a fast feeling for available features.
 :::
 
@@ -15,7 +15,7 @@ This will create two files located at `./api/user/models`:
 - `User.settings.json`: contains the list of attributes and settings. The JSON format makes the file easily editable.
 - `User.js`: imports `User.settings.json` and extends it with additional settings and lifecycle callbacks.
 
-::: note
+::: tip
 when you create a new API using the CLI (`strapi generate:api <name>`), a model is automatically created.
 :::
 
@@ -358,7 +358,7 @@ A `product` can be related to many `categories`, so a `category` can have many `
 }
 ```
 
-::: note
+::: tip
 (NoSQL databases only) The `dominant` key defines which table/collection should store the array that defines the relationship. Because there are no join tables in NoSQL, this key is required for NoSQL databases (ex: MongoDB).
 :::
 
@@ -429,7 +429,7 @@ Refer to the [upload plugin](./upload.md) polymorphic implementation for more in
 
 Let's stay with our `Image` model which might belongs to **a single `Article` or `Product` entry**.
 
-::: note
+::: tip
 In other words, it means that an `Image` entry can be associated to one entry. This entry can be a `Article` or `Product` entry.
 :::
 
@@ -448,7 +448,7 @@ In other words, it means that an `Image` entry can be associated to one entry. T
 
 Also, our `Image` model which might belongs to **many `Article` or `Product` entries**.
 
-::: note
+::: tip
 In other words, it means that an `Article` entry can relate to the same image as a `Product` entry.
 :::
 
@@ -662,7 +662,7 @@ CREATE TABLE `image` (
 )
 ```
 
-::: note
+::: tip
 If you've overridden the default table name given by Strapi by using the `collectionName` attribute. Use the value set in the `collectionName` to name the table.
 :::
 
@@ -796,6 +796,6 @@ Additional settings can be set on models:
 
 In this example, the model `User` will be accessible through the `Users` global variable. The data will be stored in the `Users_v1` collection or table and the model will use the `mongo` connection defined in `./config/environments/**/database.json`
 
-::: note
+::: tip
 The `connection` value can be changed whenever you want, but you should be aware that there is no automatic data migration process. Also if the new connection doesn't use the same ORM you will have to rewrite your queries.
 :::

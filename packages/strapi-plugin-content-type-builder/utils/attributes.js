@@ -2,12 +2,13 @@
 
 const _ = require('lodash');
 
-const MODEL_RELATIONS = ['oneWay', 'oneToOne', 'manyToOne'];
-const COLLECTION_RELATIONS = ['manyWay', 'manyToMany', 'oneToMany'];
-
 const toUID = (name, plugin) => {
-  const model = strapi.getModel(name, plugin);
-  return model.uid;
+  const modelUID = Object.keys(strapi.contentTypes).find(key => {
+    const ct = strapi.contentTypes[key];
+    if (ct.modelName === name && ct.plugin === plugin) return true;
+  });
+
+  return modelUID;
 };
 
 const fromUID = uid => {
@@ -24,6 +25,11 @@ const hasComponent = model => {
 
   return compoKeys.length > 0;
 };
+
+const isRelation = attribute =>
+  _.has(attribute, 'target') ||
+  _.has(attribute, 'model') ||
+  _.has(attribute, 'collection');
 
 /**
  * Formats a component's attributes
@@ -79,69 +85,59 @@ const formatAttribute = (key, attribute, { model }) => {
   }
 };
 
-const convertAttributes = attributes => {
-  return Object.keys(attributes).reduce((acc, key) => {
-    const attribute = attributes[key];
+const replaceTemporaryUIDs = uidMap => schema => {
+  return {
+    ...schema,
+    attributes: Object.keys(schema.attributes).reduce((acc, key) => {
+      const attr = schema.attributes[key];
+      if (attr.type === 'component') {
+        if (_.has(uidMap, attr.component)) {
+          acc[key] = {
+            ...attr,
+            component: uidMap[attr.component],
+          };
 
-    if (_.has(attribute, 'type')) {
-      if (attribute.type === 'media') {
-        const fileModel = strapi.getModel('file', 'upload');
-        if (!fileModel) return acc;
+          return acc;
+        }
 
-        const via = _.findKey(fileModel.attributes, { collection: '*' });
+        if (!_.has(strapi.components, attr.component)) {
+          throw new Error('component.notFound');
+        }
+      }
+
+      if (
+        attr.type === 'dynamiczone' &&
+        _.intersection(attr.components, Object.keys(uidMap)).length > 0
+      ) {
         acc[key] = {
-          [attribute.multiple ? 'collection' : 'model']: 'file',
-          via,
-          plugin: 'upload',
-          required: attribute.required ? true : false,
+          ...attr,
+          components: attr.components.map(value => {
+            if (_.has(uidMap, value)) return uidMap[value];
+
+            if (!_.has(strapi.components, attr.component)) {
+              throw new Error('component.notFound');
+            }
+
+            return value;
+          }),
         };
-      } else {
-        acc[key] = attribute;
-      }
 
-      return acc;
-    }
-
-    if (_.has(attribute, 'target')) {
-      const {
-        target,
-        nature,
-        unique,
-        targetAttribute,
-        columnName,
-        dominant,
-      } = attribute;
-
-      const attr = {
-        unique: unique === true ? true : undefined,
-        columnName,
-      };
-
-      const { modelName, plugin } = fromUID(target);
-
-      attr.plugin = plugin;
-
-      if (MODEL_RELATIONS.includes(nature)) {
-        attr.model = modelName;
-      } else if (COLLECTION_RELATIONS.includes(nature)) {
-        attr.collection = modelName;
-      }
-
-      if (!['manyWay', 'oneWay'].includes(nature)) {
-        attr.via = targetAttribute;
-        attr.dominant = dominant;
+        return acc;
       }
 
       acc[key] = attr;
-    }
-
-    return acc;
-  }, {});
+      return acc;
+    }, {}),
+  };
 };
 
 module.exports = {
+  fromUID,
+  toUID,
   hasComponent,
+  isRelation,
 
+  replaceTemporaryUIDs,
   formatAttributes,
-  convertAttributes,
+  formatAttribute,
 };

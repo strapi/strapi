@@ -1,12 +1,4 @@
-import {
-  get,
-  isBoolean,
-  isNaN,
-  isNumber,
-  isNull,
-  isArray,
-  isObject,
-} from 'lodash';
+import { get, isBoolean, isNaN } from 'lodash';
 import * as yup from 'yup';
 import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
 
@@ -147,20 +139,13 @@ const createYupSchemaAttribute = (type, validations) => {
     schema = yup
       .mixed(errorsTrads.json)
       .test('isJSON', errorsTrads.json, value => {
-        try {
-          if (
-            isObject(value) ||
-            isBoolean(value) ||
-            isNumber(value) ||
-            isArray(value) ||
-            isNaN(value) ||
-            isNull(value)
-          ) {
-            JSON.parse(JSON.stringify(value));
-            return true;
-          }
+        if (value === undefined) {
+          return true;
+        }
 
-          return false;
+        try {
+          JSON.parse(value);
+          return true;
         } catch (err) {
           return false;
         }

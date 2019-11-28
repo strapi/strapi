@@ -55,6 +55,14 @@ If you use the same operator (except for in and nin) the values will be used to 
 
 `GET /restaurants?name_contains=pizza&name_contains=giovanni`
 
+::: warning
+
+If you want to use `AND` for your query you will have to create a custom query by using the [Query](../concepts/query.md) documentation.
+
+Strapi doesn't support the `AND` opperator for now.
+
+:::
+
 ## Deep filtering
 
 Find restaurants owned by a chef who belongs to a restaurant with star equal to 5
@@ -65,7 +73,7 @@ Querying your API with deep filters may cause performance issues.
 If one of your deep filtering queries is too slow, we recommend building a custom route with an optimized version of your query.
 :::
 
-::: note
+::: tip
 This feature doesn't allow you to filter nested models, e.g `Find users and only return their posts older than yesterday`.
 
 To achieve this, there are two options:
@@ -89,7 +97,7 @@ Sort according to a specific field.
 - ASC: `GET /users?_sort=email:ASC`
 - DESC: `GET /users?_sort=email:DESC`
 
-#### Sorting on multiple fileds
+#### Sorting on multiple fields
 
 - `GET /users?_sort=email:asc,dateField:desc`
 - `GET /users?_sort=email:DESC,username:ASC`

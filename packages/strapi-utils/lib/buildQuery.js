@@ -8,7 +8,9 @@ const findModelByAssoc = assoc => {
 };
 
 const isAttribute = (model, field) =>
-  _.has(model.allAttributes, field) || model.primaryKey === field;
+  _.has(model.allAttributes, field) ||
+  model.primaryKey === field ||
+  field === 'id';
 
 /**
  * Returns the model, attribute name and association from a path of relation
@@ -131,7 +133,11 @@ const buildQuery = ({ model, filters = {}, ...rest }) => {
           ? value.map(val => castValue({ type, operator, value: val }))
           : castValue({ type, operator, value: value });
 
-        return { field, operator, value: castedValue };
+        return {
+          field: field === 'id' ? model.primaryKey : field,
+          operator,
+          value: castedValue,
+        };
       });
   }
 

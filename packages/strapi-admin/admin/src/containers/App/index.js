@@ -44,6 +44,20 @@ function App(props) {
 
         const { hasAdmin } = await request(requestURL, { method: 'GET' });
         const { data } = await request('/admin/init', { method: 'GET' });
+        const { uuid } = data;
+
+        if (uuid) {
+          await fetch('https://analytics.strapi.io/track', {
+            method: 'POST',
+            body: JSON.stringify({
+              event: 'didInitializeAdministration',
+              uuid,
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+        }
 
         getDataRef.current(hasAdmin, data);
         setState({ hasAdmin, isLoading: false });

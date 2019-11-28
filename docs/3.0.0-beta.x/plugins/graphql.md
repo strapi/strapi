@@ -6,9 +6,9 @@ By default Strapi create [REST endpoints](../content-api/api-endpoints) for each
 
 To get started with GraphQL in your app, please install the plugin first. To do that, open your terminal and run the following command:
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "yarn" id="yarn"
+::: tab yarn
 
 ```
 yarn strapi install graphql
@@ -16,7 +16,7 @@ yarn strapi install graphql
 
 :::
 
-::: tab "npm" id="npm"
+::: tab npm
 
 ```
 npm run strapi install graphql
@@ -24,7 +24,7 @@ npm run strapi install graphql
 
 :::
 
-::: tab "strapi" id="strapi"
+::: tab strapi
 
 ```
 strapi install graphql
@@ -36,7 +36,7 @@ strapi install graphql
 
 Then, start your app and open your browser at [http://localhost:1337/graphql](http://localhost:1337/graphql). You should see the interface (**GraphQL Playground**) that will help you to write GraphQL query to explore your data.
 
-::: note
+::: tip
 Install the [ModHeader](https://chrome.google.com/webstore/detail/modheader/idgpnmonknjnojddfkpgkljpfnnfcklj/related) extension to set the `Authorization` header in your request
 :::
 
@@ -548,7 +548,7 @@ module.exports = {
 
 Edit the `definition` attribute in one of the `schema.graphql` files of your project by using the GraphQL Type language string.
 
-::: note
+::: tip
 The easiest way is to create a new model using the CLI `strapi generate:model category --api restaurant`, so you don't need to customise anything.
 :::
 
@@ -605,7 +605,7 @@ module.exports = {
 };
 ```
 
-::: note
+::: tip
 The resolver parameter also accepts an object as a value to target a controller located in a plugin.
 :::
 
@@ -719,7 +719,7 @@ module.exports = {
 
 In this example, the policy `isAuthenticated` located in the `users-permissions` plugin will be executed first. Then, the `isOwner` policy located in the `Restaurant` API `./api/restaurant/config/policies/isOwner.js`. Next, it will execute the `logging` policy located in `./config/policies/logging.js`. Finally, the resolver will be executed.
 
-::: note
+::: tip
 There is no custom resolver in that case, so it will execute the default resolver (Restaurant.find) provided by the Shadow CRUD feature.
 :::
 
@@ -748,13 +748,13 @@ module.exports = {
 
 In this example, it will execute the `findByChef` action of the `Restaurant` controller. It also means that the resolver will apply on the `restaurants` query the permissions defined on the `findByChef` action (through the administration panel).
 
-::: note
+::: tip
 The `obj` parameter is available via `ctx.params` and the `options` are available via `ctx.query` in the controller's action.
 :::
 
 The same process is also applied for the `createRestaurant` mutation. It will execute the `customCreate` action of the `Restaurant` controller.
 
-::: note
+::: tip
 The `where` parameter is available via `ctx.params` and the `data` are available via `ctx.request.body` in the controller's action.
 :::
 
@@ -863,7 +863,7 @@ The type name is the global ID of the model. You can find the global ID of a mod
 
 We recommend putting the field description and deprecated reason in the model. Right now, the GraphQL plugin is the only which uses these fields. Another plugin could use this description in the future as well. However, sometimes you don't have the choice, especially when you're defining a custom type.
 
-::: note
+::: tip
 It's not a bad practice to put the description and deprecated attribute in the `schema.graphql`, though.
 :::
 

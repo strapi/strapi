@@ -4,10 +4,9 @@ This migration guide is a mix of migrations from 3.0.0-alpha.11.1 to 3.0.0-alpha
 
 <br>
 
-::: note
+::: tip
 Feel free to [join us on Slack](http://slack.strapi.io) and ask questions about the migration process.
 :::
-
 
 <br>
 
@@ -53,7 +52,7 @@ Then, delete your old `plugins` folder and replace it by the new one.
 
 ## Update roles
 
-::: note
+::: tip
 This update is if you come from version before alpha-11.2
 :::
 
@@ -77,7 +76,7 @@ Create Authenticated role:
 }
 ```
 
-In `Users & Permissions > Advanced`  in admin panel update default role to `Authenticated`
+In `Users & Permissions > Advanced` in admin panel update default role to `Authenticated`
 
 You also will have to reset your roles permissions.
 
@@ -85,7 +84,7 @@ You also will have to reset your roles permissions.
 
 ### Update bookshelf filters
 
-::: note
+::: tip
 This update is if you come from version before alpha-11.3
 :::
 
@@ -93,22 +92,22 @@ You will have to replace your `fetchAll` services queries of your generated API:
 
 ```js
 _.forEach(convertedParams.where, (where, key) => {
-   if (_.isArray(where.value)) {
-     for (const value in where.value) {
-       qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value])
-     }
-   } else {
-     qb.where(key, where.symbol, where.value);
-   }
- });
+  if (_.isArray(where.value)) {
+    for (const value in where.value) {
+      qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value]);
+    }
+  } else {
+    qb.where(key, where.symbol, where.value);
+  }
+});
 
- if (convertedParams.sort) {
-   qb.orderBy(convertedParams.sort.key, convertedParams.sort.order);
- }
+if (convertedParams.sort) {
+  qb.orderBy(convertedParams.sort.key, convertedParams.sort.order);
+}
 
- qb.offset(convertedParams.start);
+qb.offset(convertedParams.start);
 
- qb.limit(convertedParams.limit);
+qb.limit(convertedParams.limit);
 ```
 
 That's all, you have now upgraded to Strapi `alpha.12.1.3`.

@@ -89,7 +89,7 @@ Set response status via numeric code:
 - 510 "not extended"
 - 511 "network authentication required"
 
-::: note
+::: tip
 Don't worry too much about memorizing these strings,
 if you have a typo an error will be thrown, displaying this list
 so you can make a correction.
@@ -223,7 +223,7 @@ ctx.type = '.png';
 ctx.type = 'png';
 ```
 
-::: note
+::: tip
 when appropriate a `charset` is selected for you, for
 example `response.type = 'html'` will default to "utf-8". If you need to overwrite `charset`,
 use `ctx.set('Content-Type', 'text/html')` to set response header field to value directly.
@@ -329,7 +329,7 @@ Strapi integrates [Boom](https://github.com/hapijs/boom): a set of utilities for
 
 You can also override responses based on them status. Please read the [configuration responses](../configurations/configurations.md#responses) for that.
 
-::: note
+::: tip
 Every Boom's functions is delegated to the context. It means that `ctx.notFound` is a shortcut to `ctx.response.notFound`.
 :::
 

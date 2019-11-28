@@ -1,12 +1,11 @@
 'use strict';
 
 const validateComponentCategory = require('./validation/component-category');
+const componentCategoryService = require('../services/ComponentCategories');
 
 module.exports = {
   async editCategory(ctx) {
     const { body } = ctx.request;
-    const service =
-      strapi.plugins['content-type-builder'].services.componentcategories;
 
     try {
       await validateComponentCategory(body);
@@ -18,24 +17,20 @@ module.exports = {
 
     strapi.reload.isWatching = false;
 
-    await service.editCategory(name, body);
+    const newName = await componentCategoryService.editCategory(name, body);
 
-    strapi.reload();
+    setImmediate(() => strapi.reload());
 
-    ctx.send({ name: body.name });
+    ctx.send({ name: newName });
   },
   async deleteCategory(ctx) {
     const { name } = ctx.params;
 
-    const service =
-      strapi.plugins['content-type-builder'].services.componentcategories;
-    service;
-
     strapi.reload.isWatching = false;
 
-    await service.deleteCategory(name);
+    await componentCategoryService.deleteCategory(name);
 
-    strapi.reload();
+    setImmediate(() => strapi.reload());
 
     ctx.send({ name });
   },

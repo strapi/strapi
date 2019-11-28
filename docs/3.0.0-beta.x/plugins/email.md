@@ -34,9 +34,9 @@ You can check all the available providers developed by the community on npmjs.or
 
 To install a new provider run:
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "yarn"
+::: tab yarn
 
 ```
 yarn add strapi-provider-email-sendgrid@beta --save
@@ -44,7 +44,7 @@ yarn add strapi-provider-email-sendgrid@beta --save
 
 :::
 
-::: tab "npm"
+::: tab npm
 
 ```
 npm install strapi-provider-email-sendgrid@beta --save
@@ -54,7 +54,7 @@ npm install strapi-provider-email-sendgrid@beta --save
 
 ::::
 
-::: note
+::: tip
 If the provider is not in the mono repo, you probably don't need `@beta` depending if the creator published it with this tag or not.
 :::
 
