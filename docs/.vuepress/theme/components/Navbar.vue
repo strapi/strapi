@@ -80,6 +80,12 @@ $navbar-horizontal-padding = 1.5rem
 .navbar
   padding $navbar-vertical-padding $navbar-horizontal-padding
   line-height $navbarHeight - 1.4rem
+  .deprecated
+    padding 0 0.5rem
+    margin-left 1rem
+    font-weight 600
+    background-color #fff3cd
+    border-radius .25rem
   a, span, img
     display inline-block
   .logo
