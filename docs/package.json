@@ -9,6 +9,7 @@
   "license": "MIT",
   "dependencies": {
     "@vuepress/plugin-medium-zoom": "^1.2.0",
+    "@vuepress/plugin-google-analytics": "^1.2.0",
     "vuepress": "^1.2.0",
     "vuepress-plugin-element-tabs": "^0.1.8"
   }
