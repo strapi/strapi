@@ -20,6 +20,18 @@
       >{{ $siteTitle }}</span>
     </router-link>
 
+    <span
+      class="deprecated"
+      v-if="isAlpha">
+      Deprecated docs -
+      <router-link
+        :to="$localePath"
+        class="home-link"
+      >
+        current version
+      </router-link>
+    </span>
+
     <div
       class="links"
       :style="linksWrapMaxWidth ? {
@@ -43,7 +55,8 @@ export default {
   components: { SidebarButton, NavLinks, AlgoliaSearchBox, SearchBox},
   data () {
     return {
-      linksWrapMaxWidth: null
+      linksWrapMaxWidth: null,
+      isAlpha: false
     }
   },
   mounted () {
@@ -59,6 +72,7 @@ export default {
     }
     handleLinksWrapWidth()
     window.addEventListener('resize', handleLinksWrapWidth, false)
+    this.isAlpha = /documentation\/3.0.0-alpha.x/.test(window.location.href)
   },
   computed: {
     algolia () {
