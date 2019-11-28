@@ -3,6 +3,8 @@ import { get, has } from 'lodash';
 const initialState = fromJS({
   components: {},
   contentTypes: {},
+  initialComponents: {},
+  intialContentTypes: {},
   initialData: {},
   modifiedData: {},
   isLoading: true,

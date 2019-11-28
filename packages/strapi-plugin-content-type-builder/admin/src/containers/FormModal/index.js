@@ -53,6 +53,7 @@ const FormModal = () => {
     components,
     createSchema,
     modifiedData: allDataSchema,
+    nestedComponents,
     sortedContentTypesList,
   } = useDataManager();
   const {
@@ -607,7 +608,11 @@ const FormModal = () => {
   };
 
   // Display data for the attributes picker modal
-  const displayedAttributes = getAttributes(state.forTarget);
+  const displayedAttributes = getAttributes(
+    state.forTarget,
+    state.targetUid,
+    nestedComponents
+  );
 
   // Styles
   const modalBodyStyle = isPickingAttribute

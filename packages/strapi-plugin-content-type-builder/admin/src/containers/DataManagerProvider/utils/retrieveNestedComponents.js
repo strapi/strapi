@@ -1,4 +1,5 @@
 import { get } from 'lodash';
+import makeUnique from './makeUnique';
 
 const retrieveNestedComponents = appComponents => {
   const nestedComponents = Object.keys(appComponents).reduce((acc, current) => {
@@ -14,9 +15,7 @@ const retrieveNestedComponents = appComponents => {
     return [...acc, ...currentComponentNestedCompos];
   }, []);
 
-  return nestedComponents.filter(
-    (compo, index) => nestedComponents.indexOf(compo) === index
-  );
+  return makeUnique(nestedComponents);
 };
 
 const getComponentsFromComponent = componentAttributes => {
@@ -27,6 +26,7 @@ const getComponentsFromComponent = componentAttributes => {
     if (type === 'component') {
       acc.push(component);
     }
+
     return acc;
   }, []);
 };

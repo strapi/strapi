@@ -1,4 +1,4 @@
-const getAttributes = (dataTarget = '') => {
+const getAttributes = (dataTarget = '', targetUid, nestedComponents) => {
   const defaultAttributes = [
     [
       'text',
@@ -14,13 +14,20 @@ const getAttributes = (dataTarget = '') => {
       // 'uid',
       'relation',
     ],
-    ['component'],
   ];
 
+  const isPickingAttributeForAContentType = dataTarget === 'contentType';
+  const isNestedInAnotherComponent = nestedComponents.includes(targetUid);
+  const canAddComponentInAnotherComponent =
+    !isPickingAttributeForAContentType && !isNestedInAnotherComponent;
   const items = defaultAttributes.slice();
 
-  if (dataTarget !== 'component' && dataTarget !== 'components') {
-    items[1].push('dynamiczone');
+  if (isPickingAttributeForAContentType) {
+    items.push(['component', 'dynamiczone']);
+  }
+
+  if (canAddComponentInAnotherComponent) {
+    items.push(['component']);
   }
 
   return items;

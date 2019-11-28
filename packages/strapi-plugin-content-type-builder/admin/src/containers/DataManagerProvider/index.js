@@ -15,6 +15,7 @@ import createModifiedDataSchema, {
 import retrieveSpecificInfoFromComponents from './utils/retrieveSpecificInfoFromComponents';
 import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
 import retrieveNestedComponents from './utils/retrieveNestedComponents';
+import makeUnique from './utils/makeUnique';
 
 const DataManagerProvider = ({ allIcons, children }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
@@ -209,8 +210,18 @@ const DataManagerProvider = ({ allIcons, children }) => {
     return <Redirect to={`/plugins/${pluginId}/content-types/${firstCTUid}`} />;
   }
 
-  console.log({ modifiedData, components });
-  console.log(retrieveNestedComponents(components));
+  const getAllNestedComponents = () => {
+    const appNestedCompo = retrieveNestedComponents(components);
+    const editingDataNestedCompoe = retrieveNestedComponents(
+      modifiedData.components || {}
+    );
+
+    return makeUnique([...appNestedCompo, ...editingDataNestedCompoe]);
+  };
+
+  // console.log({ modifiedData, components });
+  // console.log(retrieveNestedComponents(components));
+  // console.log('ll', getAllNestedComponents());
 
   return (
     <DataManagerContext.Provider
@@ -234,7 +245,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
         initialData,
         isInContentTypeView,
         modifiedData,
-        nestedComponents: retrieveNestedComponents(components),
+        nestedComponents: getAllNestedComponents(),
         removeAttribute,
         removeComponentFromDynamicZone,
         setModifiedData,
