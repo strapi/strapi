@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { components } from 'react-select';
-import { get } from 'lodash';
-// import { Label } from '@buffetjs/core';
+import { get, upperFirst } from 'lodash';
+
 import { Checkbox, CheckboxWrapper, Label } from '@buffetjs/styles';
 import useDataManager from '../../hooks/useDataManager';
 import Ul from './Ul';
@@ -59,7 +59,6 @@ const MultipleMenuList = ({
       <Ul
         style={{
           maxHeight: 150,
-          // overflow: 'scroll',
         }}
       >
         {Object.keys(componentsGroupedByCategory).map(categoryName => {
@@ -67,7 +66,7 @@ const MultipleMenuList = ({
           const target = { name: categoryName, value: !isChecked };
           return (
             <li key={categoryName}>
-              <div>
+              <div style={{ marginTop: 3 }}>
                 <CheckboxWrapper>
                   <Label
                     htmlFor="overrideReactSelectBehaviour"
@@ -82,7 +81,7 @@ const MultipleMenuList = ({
                       checked={getCategoryValue(categoryName)}
                       style={{ marginRight: 10 }}
                     />
-                    {categoryName}
+                    {upperFirst(categoryName)}
                   </Label>
                 </CheckboxWrapper>
               </div>

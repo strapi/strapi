@@ -1,7 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { components } from 'react-select';
+import { upperFirst } from 'lodash';
 import useDataManager from '../../hooks/useDataManager';
+import Category from './Category';
+import Ul from './Ul';
 
 const MenuList = ({
   selectProps: {
@@ -20,18 +23,16 @@ const MenuList = ({
 
   return (
     <Component {...rest}>
-      <ul
+      <Ul
         style={{
-          backgroundColor: '#fff',
           maxHeight: 150,
-          // overflow: 'scroll',
         }}
       >
         {Object.keys(componentsGroupedByCategory).map(categoryName => {
           return (
             <li key={categoryName}>
-              {categoryName}
-              <ul>
+              <Category categoryName={categoryName} />
+              <Ul style={{ marginTop: '-4px' }}>
                 {componentsGroupedByCategory[categoryName].map(component => {
                   if (
                     isAddingAComponentToAnotherComponent &&
@@ -45,6 +46,8 @@ const MenuList = ({
                   return (
                     <li
                       key={component.uid}
+                      className="li"
+                      // style={{ lineHeight: '18px', maerginBottom: 8 }}
                       onClick={() => {
                         refState.current.select.blur();
                         onClickOption({
@@ -52,15 +55,17 @@ const MenuList = ({
                         });
                       }}
                     >
-                      {component.schema.name}
+                      <p datadescr={upperFirst(component.schema.name)}>
+                        {upperFirst(component.schema.name)}
+                      </p>
                     </li>
                   );
                 })}
-              </ul>
+              </Ul>
             </li>
           );
         })}
-      </ul>
+      </Ul>
     </Component>
   );
 };
