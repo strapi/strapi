@@ -81,6 +81,7 @@ const MultipleMenuList = ({
         {Object.keys(componentsGroupedByCategory).map(categoryName => {
           const isChecked = getCategoryValue(categoryName);
           const target = { name: categoryName, value: !isChecked };
+
           return (
             <li key={categoryName} className="li-multi-menu">
               <div style={{ marginTop: 3 }}>

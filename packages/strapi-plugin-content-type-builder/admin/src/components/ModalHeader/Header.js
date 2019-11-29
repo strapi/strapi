@@ -1,45 +1,49 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { get, upperFirst } from 'lodash';
-import useDataManager from '../../hooks/useDataManager';
 import ComponentInfos from './ComponentInfos';
 import IconWrapper from './IconWrapper';
+import UpperFirst from './UpperFirst';
 
-const Header = ({ category, name, target, targetUid }) => {
-  const { modifiedData } = useDataManager();
-  const currentComponent = get(modifiedData, ['components', targetUid], {});
-  const currentComponentCategory = get(currentComponent, 'category', '');
-  const currentComponentFriendlyName = get(
-    currentComponent,
-    ['schema', 'name'],
-    ''
-  );
-  const componentInfos = (
-    <>
-      <ComponentInfos>
-        &nbsp; ({upperFirst(currentComponentCategory)}
-        &nbsp;—&nbsp;
-        {upperFirst(currentComponentFriendlyName)})
-      </ComponentInfos>
-    </>
-  );
+const Header = ({
+  category,
+  name,
+  subCategory,
+  target,
+  targetUid,
+  subTargetUid,
+}) => {
   const shouldDisplayComponentCatInfos = target === 'components';
 
   const content = (
     <>
-      <span>{upperFirst(category)}</span>
+      <span>
+        <UpperFirst content={category} />
+      </span>
       <IconWrapper>
         <FontAwesomeIcon icon="chevron-right" />
       </IconWrapper>
+      {subCategory && (
+        <>
+          <span>
+            <UpperFirst content={subCategory} />
+          </span>
+          <ComponentInfos uid={subTargetUid} />
+          <IconWrapper>
+            <FontAwesomeIcon icon="chevron-right" />
+          </IconWrapper>
+        </>
+      )}
     </>
   );
 
   return (
     <>
       {category && content}
-      <span>{upperFirst(name)}</span>
-      {shouldDisplayComponentCatInfos && componentInfos}
+      <span>
+        <UpperFirst content={name} />
+      </span>
+      {shouldDisplayComponentCatInfos && <ComponentInfos uid={targetUid} />}
     </>
   );
 };
@@ -47,6 +51,8 @@ const Header = ({ category, name, target, targetUid }) => {
 Header.defaultProps = {
   category: null,
   name: null,
+  subCategory: null,
+  subTargetUid: null,
   target: null,
   targetUid: null,
 };
@@ -54,6 +60,8 @@ Header.defaultProps = {
 Header.propTypes = {
   category: PropTypes.string,
   name: PropTypes.string,
+  subCategory: PropTypes.string,
+  subTargetUid: PropTypes.string,
   target: PropTypes.string,
   targetUid: PropTypes.string,
 };

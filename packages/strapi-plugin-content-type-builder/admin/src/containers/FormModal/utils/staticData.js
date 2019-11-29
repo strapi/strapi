@@ -7,10 +7,12 @@ const INITIAL_STATE_DATA = {
   forTarget: null,
   headerDisplayCategory: null,
   headerDisplayName: null,
+  headerDisplaySubCategory: null,
   modalType: null,
   pathToSchema: [],
   settingType: null,
   step: null,
+  subTargetUid: null,
   targetUid: null,
 };
 

@@ -43,8 +43,23 @@ const ListPage = () => {
     const search = `modalType=chooseAttribute&forTarget=${forTarget}&targetUid=${targetUid}&headerDisplayName=${currentDataName}`;
     push({ search });
   };
-  const handleClickAddAttributeNestedData = (targetUid, headerDisplayName) => {
-    const search = `modalType=chooseAttribute&forTarget=components&targetUid=${targetUid}&headerDisplayName=${headerDisplayName}`;
+  const handleClickAddAttributeNestedData = (
+    targetUid,
+    headerDisplayName,
+    headerDisplayCategory = null,
+    headerDisplaySubCategory = null,
+    subTargetUid = null
+  ) => {
+    const displayCategory = headerDisplayCategory
+      ? `&headerDisplayCategory=${headerDisplayCategory}`
+      : '';
+    const displaySubCategory = headerDisplaySubCategory
+      ? `&headerDisplaySubCategory=${headerDisplaySubCategory}`
+      : '';
+    const search = `modalType=chooseAttribute&forTarget=components&targetUid=${targetUid}&headerDisplayName=${headerDisplayName}${displayCategory}${displaySubCategory}${
+      subTargetUid ? `&subTargetUid=${subTargetUid}` : ''
+    }`;
+
     push({ search });
   };
   const handleClickAddComponentToDZ = dzName => {
@@ -267,11 +282,7 @@ const ListPage = () => {
                                           key={`${attr}.${componentAttr}.${nestedCompoAttribute}`}
                                           onClick={e => {
                                             e.stopPropagation();
-                                            console.log({
-                                              nestedCompoAttribute,
-                                              nestedComponentAttrType,
-                                              nestedCompoNameUid,
-                                            });
+
                                             handleClickEditField(
                                               'components',
                                               nestedCompoNameUid,
@@ -310,10 +321,23 @@ const ListPage = () => {
                                   )}
                                   <button
                                     type="button"
-                                    onClick={() => {
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      console.log({
+                                        attr,
+                                        componentAttr,
+                                        nestedCompoNameUid,
+                                        top: compoData.uid,
+                                      });
                                       handleClickAddAttributeNestedData(
                                         nestedCompoNameUid,
-                                        componentAttr
+                                        componentAttr,
+                                        // Category
+                                        currentDataName,
+                                        // Sub category
+                                        attr,
+                                        // Sub targetuid
+                                        compoData.uid
                                       );
                                     }}
                                   >
@@ -367,7 +391,8 @@ const ListPage = () => {
                             e.stopPropagation();
                             handleClickAddAttributeNestedData(
                               get(compoData, 'uid', ''),
-                              get(compoData, 'schema.name', 'ERROR')
+                              get(compoData, 'schema.name', 'ERROR'),
+                              currentDataName
                             );
                           }}
                         >

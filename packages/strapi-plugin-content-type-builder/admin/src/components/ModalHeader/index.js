@@ -17,6 +17,8 @@ const ModalHeader = ({
   name,
   target,
   targetUid,
+  subCategory,
+  subTargetUid,
 }) => {
   const { modifiedData } = useDataManager();
   const currentComponent = get(modifiedData, ['components', targetUid], {});
@@ -53,6 +55,8 @@ const ModalHeader = ({
             name={name}
             target={target}
             targetUid={targetUid}
+            subCategory={subCategory}
+            subTargetUid={subTargetUid}
           />
         )}
       </HeaderModalTitle>
@@ -67,6 +71,8 @@ ModalHeader.defaultProps = {
   name: '',
   target: null,
   targetUid: null,
+  subCategory: null,
+  subTargetUid: null,
 };
 
 ModalHeader.propTypes = {
@@ -76,6 +82,8 @@ ModalHeader.propTypes = {
   name: PropTypes.string,
   target: PropTypes.string,
   targetUid: PropTypes.string,
+  subCategory: PropTypes.string,
+  subTargetUid: PropTypes.string,
 };
 
 export default ModalHeader;

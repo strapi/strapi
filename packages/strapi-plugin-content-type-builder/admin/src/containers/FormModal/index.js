@@ -74,9 +74,11 @@ const FormModal = () => {
       const forTarget = query.get('forTarget');
       const headerDisplayCategory = query.get('headerDisplayCategory');
       const headerDisplayName = query.get('headerDisplayName');
+      const headerDisplaySubCategory = query.get('headerDisplaySubCategory');
       const modalType = query.get('modalType');
       const targetUid = query.get('targetUid');
       const settingType = query.get('settingType');
+      const subTargetUid = query.get('subTargetUid');
       const step = query.get('step');
       const pathToSchema =
         forTarget === 'contentType' || forTarget === 'component'
@@ -90,10 +92,12 @@ const FormModal = () => {
         dynamicZoneTarget,
         headerDisplayName,
         headerDisplayCategory,
+        headerDisplaySubCategory,
         forTarget,
         modalType,
         pathToSchema,
         settingType,
+        subTargetUid,
         step,
         targetUid,
       });
@@ -641,6 +645,8 @@ const FormModal = () => {
           category={state.headerDisplayCategory}
           headerId={headerId}
           iconType={iconType || 'contentType'}
+          subCategory={state.headerDisplaySubCategory}
+          subTargetUid={state.subTargetUid}
           target={state.forTarget}
           targetUid={state.targetUid}
         />
