@@ -1,5 +1,6 @@
 import { fromJS } from 'immutable';
 import pluralize from 'pluralize';
+import makeUnique from '../../utils/makeUnique';
 import { createComponentUid } from './utils/createUid';
 
 const initialState = fromJS({
@@ -22,11 +23,13 @@ const reducer = (state, action) => {
 
       return state.updateIn(['modifiedData', name], list => {
         if (shouldAddComponents) {
-          return list.concat(components);
+          return makeUnique(list.concat(components));
         } else {
-          return list.filter(comp => {
-            return components.indexOf(comp) === -1;
-          });
+          return makeUnique(
+            list.filter(comp => {
+              return components.indexOf(comp) === -1;
+            })
+          );
         }
       });
     }

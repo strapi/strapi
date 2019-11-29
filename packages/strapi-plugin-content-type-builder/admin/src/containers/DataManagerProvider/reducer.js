@@ -1,6 +1,6 @@
 import { fromJS, OrderedMap } from 'immutable';
 import { get, has } from 'lodash';
-import makeUnique from './utils/makeUnique';
+import makeUnique from '../../utils/makeUnique';
 
 const initialState = fromJS({
   components: {},

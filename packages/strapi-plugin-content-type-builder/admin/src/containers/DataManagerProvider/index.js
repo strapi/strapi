@@ -15,7 +15,7 @@ import createModifiedDataSchema, {
 import retrieveSpecificInfoFromComponents from './utils/retrieveSpecificInfoFromComponents';
 import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
 import retrieveNestedComponents from './utils/retrieveNestedComponents';
-import makeUnique from './utils/makeUnique';
+import makeUnique from '../../utils/makeUnique';
 
 const DataManagerProvider = ({ allIcons, children }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
