@@ -48,7 +48,7 @@ const ListPage = () => {
     push({ search });
   };
   const handleClickAddComponentToDZ = dzName => {
-    const search = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${targetUid}&headerDisplayName=${currentDataName}&dynamicZoneTarget=${dzName}&settingType=base&step=1&actionType=edit`;
+    const search = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${targetUid}&headerDisplayCategory=${currentDataName}&dynamicZoneTarget=${dzName}&settingType=base&step=1&actionType=edit&headerDisplayName=${dzName}`;
     push({ search });
   };
 
@@ -93,7 +93,8 @@ const ListPage = () => {
     targetUid,
     attrName,
     type,
-    headerDisplayName
+    headerDisplayName,
+    headerDisplayCategory = null
   ) => {
     let attributeType;
 
@@ -116,9 +117,12 @@ const ListPage = () => {
     }
 
     const step = type === 'component' ? '&step=2' : '';
+    const displayCategory = headerDisplayCategory
+      ? `&headerDisplayCategory=${headerDisplayCategory}`
+      : '';
 
     push({
-      search: `modalType=attribute&actionType=edit&settingType=base&forTarget=${forTarget}&targetUid=${targetUid}&attributeName=${attrName}&attributeType=${attributeType}&headerDisplayName=${headerDisplayName}${step}`,
+      search: `modalType=attribute&actionType=edit&settingType=base&forTarget=${forTarget}&targetUid=${targetUid}&attributeName=${attrName}&attributeType=${attributeType}&headerDisplayName=${headerDisplayName}${step}${displayCategory}`,
     });
   };
 
@@ -331,7 +335,9 @@ const ListPage = () => {
                                   getFirstLevelComponentName(attr),
                                   componentAttr,
                                   componentAttrType,
-                                  attr
+                                  attr,
+                                  // Header category,
+                                  currentDataName
                                 );
                               }}
                             >

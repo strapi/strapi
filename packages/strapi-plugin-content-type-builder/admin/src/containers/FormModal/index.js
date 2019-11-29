@@ -66,34 +66,36 @@ const FormModal = () => {
 
   useEffect(() => {
     if (!isEmpty(search)) {
-      // Return 'null' if there isn't any attributeType search params
-      const attributeType = query.get('attributeType');
-      const modalType = query.get('modalType');
       const actionType = query.get('actionType');
+      // Return 'null' if there isn't any attributeType search params
       const attributeName = query.get('attributeName');
-      const settingType = query.get('settingType');
-      const forTarget = query.get('forTarget');
-      const targetUid = query.get('targetUid');
-      const headerDisplayName = query.get('headerDisplayName');
-      const step = query.get('step');
+      const attributeType = query.get('attributeType');
       const dynamicZoneTarget = query.get('dynamicZoneTarget');
+      const forTarget = query.get('forTarget');
+      const headerDisplayCategory = query.get('headerDisplayCategory');
+      const headerDisplayName = query.get('headerDisplayName');
+      const modalType = query.get('modalType');
+      const targetUid = query.get('targetUid');
+      const settingType = query.get('settingType');
+      const step = query.get('step');
       const pathToSchema =
         forTarget === 'contentType' || forTarget === 'component'
           ? [forTarget]
           : [forTarget, targetUid];
 
       setState({
-        attributeName,
         actionType,
-        dynamicZoneTarget,
-        modalType,
-        settingType,
-        forTarget,
-        targetUid,
-        headerDisplayName,
+        attributeName,
         attributeType,
+        dynamicZoneTarget,
+        headerDisplayName,
+        headerDisplayCategory,
+        forTarget,
+        modalType,
         pathToSchema,
+        settingType,
         step,
+        targetUid,
       });
 
       // Special case for the dynamic zone
@@ -392,7 +394,7 @@ const FormModal = () => {
 
         // Add/edit a field
       } else if (isCreatingAttribute && !isCreatingComponentFromAView) {
-        // Normal fields like boolean relations
+        // Normal fields like boolean relations or dynamic zone
         if (!isComponentAttribute) {
           addAttribute(
             modifiedData,
@@ -402,11 +404,16 @@ const FormModal = () => {
             initialData
           );
           const isDynamicZoneAttribute = state.attributeType === 'dynamiczone';
-
+          console.log('oooo');
           // Adding a component to a dynamiczone is not the same logic as creating a simple field
           // so the search is different
           // TODO make sure it works for edit
-          const dzSearch = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${state.targetUid}&headerDisplayName=${state.headerDisplayName}&dynamicZoneTarget=${modifiedData.name}&settingType=base&step=1&actionType=create`;
+          // const dzSearch = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${state.targetUid}&headerDisplayName=${state.headerDisplayName}&dynamicZoneTarget=${modifiedData.name}&settingType=base&step=1&actionType=create`;
+
+          // For the modal header
+          const displayCategory = state.headerDisplayName;
+          const displayName = modifiedData.name;
+          const dzSearch = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${state.targetUid}&headerDisplayName=${displayName}&headerDisplayCategory=${displayCategory}&dynamicZoneTarget=${modifiedData.name}&settingType=base&step=1&actionType=create`;
           const nextSearch = isDynamicZoneAttribute
             ? dzSearch
             : createNextSearch(targetUid);
@@ -631,8 +638,11 @@ const FormModal = () => {
         <ModalHeader
           // We need to add the category here
           name={state.headerDisplayName}
+          category={state.headerDisplayCategory}
           headerId={headerId}
           iconType={iconType || 'contentType'}
+          target={state.forTarget}
+          targetUid={state.targetUid}
         />
         <section>
           <HeaderModalTitle>

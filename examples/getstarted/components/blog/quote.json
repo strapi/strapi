@@ -1,7 +1,8 @@
 {
   "info": {
     "name": "quote",
-    "description": ""
+    "description": "",
+    "icon": "anchor"
   },
   "connection": "default",
   "collectionName": "components_quotes",

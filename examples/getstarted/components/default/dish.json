@@ -3,7 +3,8 @@
   "collectionName": "components_dishes",
   "info": {
     "name": "dish",
-    "description": ""
+    "description": "",
+    "icon": "beer"
   },
   "attributes": {
     "name": {

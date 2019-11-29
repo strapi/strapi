@@ -3,7 +3,8 @@
   "collectionName": "components_restaurantservices",
   "info": {
     "name": "restaurantservice",
-    "description": ""
+    "description": "",
+    "icon": "cannabis"
   },
   "attributes": {
     "name": {

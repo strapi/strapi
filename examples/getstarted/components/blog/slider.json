@@ -1,7 +1,8 @@
 {
   "info": {
     "name": "slider",
-    "description": ""
+    "description": "",
+    "icon": "atom"
   },
   "connection": "default",
   "collectionName": "components_sliders",

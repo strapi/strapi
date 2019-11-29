@@ -3,7 +3,8 @@
   "collectionName": "components_closingperiods",
   "info": {
     "name": "closingperiod",
-    "description": ""
+    "description": "",
+    "icon": "briefcase"
   },
   "attributes": {
     "label": {

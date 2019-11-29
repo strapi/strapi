@@ -3,7 +3,8 @@
   "collectionName": "components_openingtimes",
   "info": {
     "name": "openingtimes",
-    "description": ""
+    "description": "",
+    "icon": "calendar"
   },
   "attributes": {
     "label": {
