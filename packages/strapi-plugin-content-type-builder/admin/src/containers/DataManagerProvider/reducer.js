@@ -1,5 +1,7 @@
 import { fromJS, OrderedMap } from 'immutable';
 import { get, has } from 'lodash';
+import makeUnique from './utils/makeUnique';
+
 const initialState = fromJS({
   components: {},
   contentTypes: {},
@@ -125,7 +127,7 @@ const reducer = (state, action) => {
             dynamicZoneTarget,
             'components',
           ],
-          () => fromJS(newComponents)
+          () => fromJS(makeUnique(newComponents))
         )
         .updateIn(['modifiedData', 'components'], old => {
           const componentsSchema = newComponents.reduce((acc, current) => {
