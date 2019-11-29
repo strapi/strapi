@@ -1,10 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { upperFirst } from 'lodash';
+import UpperFirst from '../UpperFirst';
 import CategoryName from './CategoryName';
 
 const Category = ({ categoryName }) => (
-  <CategoryName>{upperFirst(categoryName)}</CategoryName>
+  <CategoryName>
+    <UpperFirst content={categoryName} />
+  </CategoryName>
 );
 
 Category.defaultProps = {

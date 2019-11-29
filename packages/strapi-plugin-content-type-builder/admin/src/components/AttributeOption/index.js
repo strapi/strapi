@@ -44,6 +44,7 @@ const AttributeOption = forwardRef(({ tabIndex, type }, ref) => {
     const headerDisplayName = query.get('headerDisplayName');
     const step = type === 'component' ? '&step=1' : '';
 
+    // TODO modify so the modal header keeps its consistency
     push({
       search: `modalType=attribute&actionType=create&settingType=base&forTarget=${forTarget}&targetUid=${targetUid}&attributeType=${type}&headerDisplayName=${headerDisplayName}${step}`,
     });

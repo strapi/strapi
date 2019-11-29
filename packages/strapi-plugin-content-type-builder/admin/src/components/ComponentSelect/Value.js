@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { components } from 'react-select';
-import { get, upperFirst } from 'lodash';
+import { get } from 'lodash';
 import useDataManager from '../../hooks/useDataManager';
+import UpperFirst from '../UpperFirst';
 
 const Value = ({ children, ...props }) => {
   const SingleValue = components.SingleValue;
@@ -34,7 +35,7 @@ const Value = ({ children, ...props }) => {
       {!!value && !isMultiple && (
         <>
           <span style={{ fontWeight: 700, ...style }}>
-            {upperFirst(displayedCategory)}
+            <UpperFirst content={displayedCategory} />
           </span>
           <span style={style}>&nbsp;—&nbsp;</span>
           <span style={style}>{displayedName}</span>

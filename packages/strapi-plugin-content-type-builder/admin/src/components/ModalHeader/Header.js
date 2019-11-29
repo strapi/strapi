@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import UpperFirst from '../UpperFirst';
 import ComponentInfos from './ComponentInfos';
 import IconWrapper from './IconWrapper';
-import UpperFirst from './UpperFirst';
 
 const Header = ({
   category,

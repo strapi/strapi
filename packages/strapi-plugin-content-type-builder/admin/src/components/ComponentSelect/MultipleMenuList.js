@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { components } from 'react-select';
-import { get, upperFirst } from 'lodash';
+import { get } from 'lodash';
 import { Checkbox, CheckboxWrapper, Label } from '@buffetjs/styles';
 import useDataManager from '../../hooks/useDataManager';
+import UpperFirst from '../UpperFirst';
 import SubUl from './SubUl';
 import Ul from './Ul';
 import hasSubArray from './utils/hasSubArray';
@@ -99,7 +100,7 @@ const MultipleMenuList = ({
                       checked={getCategoryValue(categoryName)}
                       style={{ marginRight: 10 }}
                     />
-                    {upperFirst(categoryName)}
+                    <UpperFirst content={categoryName} />
                   </Label>
                   <FontAwesomeIcon
                     onClick={e => {
