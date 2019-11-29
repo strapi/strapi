@@ -205,7 +205,7 @@ const Item = ({
       showRightCarret = false;
     }
   }
-
+  console.log(type);
   return (
     <DraggedFieldWithPreview
       goTo={goTo}

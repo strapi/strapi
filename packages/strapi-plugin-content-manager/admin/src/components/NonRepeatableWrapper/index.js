@@ -9,7 +9,7 @@ const NonRepeatableWrapper = styled.div`
       return `
         position: relative;
         height: 108px;
-        margin-bottom: 25px !important;
+        margin-bottom: 21px !important;
         background-color: #fafafb;
         text-align: center;
         cursor: pointer;
@@ -49,6 +49,7 @@ const NonRepeatableWrapper = styled.div`
     if (isFromDynamicZone) {
       return `
         background-color: #fff;
+        padding: 0 10px !important;
       `;
     }
 

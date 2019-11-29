@@ -7,6 +7,7 @@ const Link = styled.div`
   font-weight: 400;
   color: #007eff;
   cursor: pointer;
+  font-size: 13px;
   &:before {
     content: '\f013';
     margin-right: 7px;

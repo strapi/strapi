@@ -1,11 +1,11 @@
 import styled from 'styled-components';
 
 const Label = styled.div`
-  padding: 13px 20px;
+  padding: 9px 20px;
   font-size: 13px;
   font-weight: 600;
   position: relative;
-  min-height: 68px;
+  min-height: 64px;
   &:after {
     content: '• ';
     position: absolute;

@@ -10,7 +10,7 @@ const ComponentWrapper = styled.div`
       &:before {
         content: '&';
         position: absolute;
-        top: -37px;
+        top: -30px;
         left: 22px;
         height: 100%;
         width: 2px;
@@ -23,7 +23,7 @@ const ComponentWrapper = styled.div`
       padding-bottom: 5px;
     }
     > div:last-of-type {
-      margin-bottom: 18px;
+      margin-bottom: 22px;
     }
   }
 `;
