@@ -1,0 +1,22 @@
+{
+  "info": {
+    "name": "quote",
+    "description": ""
+  },
+  "connection": "default",
+  "collectionName": "components_quotes",
+  "attributes": {
+    "quote": {
+      "type": "text",
+      "required": true
+    },
+    "author": {
+      "model": "user",
+      "plugin": "users-permissions"
+    },
+    "link_to_biography": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

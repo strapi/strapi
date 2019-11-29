@@ -14,6 +14,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
+
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { LoadingIndicatorPage, request } from 'strapi-helper-plugin';

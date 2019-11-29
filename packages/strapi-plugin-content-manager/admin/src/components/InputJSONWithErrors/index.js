@@ -9,66 +9,13 @@ import PropTypes from 'prop-types';
 import { isEmpty, isFunction } from 'lodash';
 import cn from 'classnames';
 
-// Design
-import {
-  Label,
-  InputDescription,
-  InputErrors,
-  InputSpacer,
-  validateInput,
-} from 'strapi-helper-plugin';
+import { Description, ErrorMessage, Label } from '@buffetjs/styles';
+import { Error } from '@buffetjs/core';
 
 import InputJSON from '../InputJSON';
+import Wrapper from './Wrapper';
 
 class InputJSONWithErrors extends React.Component {
-  // eslint-disable-line react/prefer-stateless-function
-  state = { errors: [], hasInitialValue: false };
-
-  componentDidMount() {
-    const { value, errors } = this.props;
-
-    // Prevent the input from displaying an error when the user enters and leaves without filling it
-    if (!isEmpty(value)) {
-      this.setState({ hasInitialValue: true });
-    }
-
-    // Display input error if it already has some
-    if (!isEmpty(errors)) {
-      this.setState({ errors });
-    }
-  }
-
-  componentDidUpdate(prevProps) {
-    // Show required error if the input's value is received after the compo is mounted
-    if (!isEmpty(this.props.value) && !this.state.hasInitialValue) {
-      this.setInit();
-    }
-
-    // Check if errors have been updated during validations
-    if (prevProps.didCheckErrors !== this.props.didCheckErrors) {
-      // Remove from the state the errors that have already been set
-      const errors = isEmpty(this.props.errors) ? [] : this.props.errors;
-      this.setErrors(errors);
-    }
-  }
-
-  setErrors = errors => this.setState({ errors });
-
-  setInit = () => this.setState({ hasInitialValue: true });
-
-  /**
-   * Set the errors depending on the validations given to the input
-   * @param  {Object} target
-   */
-  handleBlur = ({ target }) => {
-    // Prevent from displaying error if the input is initially isEmpty
-    if (!isEmpty(target.value) || this.state.hasInitialValue) {
-      const errors = validateInput(target.value, this.props.validations);
-      this.setErrors(errors);
-      this.setInit();
-    }
-  };
-
   handleChange = e => {
     this.setState({ errors: [] });
     this.props.onChange(e);
@@ -78,76 +25,77 @@ class InputJSONWithErrors extends React.Component {
     const {
       autoFocus,
       className,
-      customBootstrapClass,
       deactivateErrorHighlight,
       disabled,
-      errorsClassName,
-      errorsStyle,
+      error: inputError,
       inputClassName,
       inputDescription,
-      inputDescriptionClassName,
       inputStyle,
       label,
-      labelClassName,
-      labelStyle,
       name,
-      noErrorsDescription,
       onBlur,
       placeholder,
       resetProps,
       tabIndex,
+      validations,
       value,
+      ...rest
     } = this.props;
+
     const handleBlur = isFunction(onBlur) ? onBlur : this.handleBlur;
 
-    let spacer = !isEmpty(inputDescription) ? <InputSpacer /> : <div />;
-
-    if (!noErrorsDescription && !isEmpty(this.state.errors)) {
-      spacer = <div />;
-    }
-
     return (
-      <div
-        className={cn(customBootstrapClass, !isEmpty(className) && className)}
-        style={{
-          marginBottom: '1.5rem',
-          fontSize: '1.3rem',
-          fontFamily: 'Lato',
-        }}
+      <Error
+        inputError={inputError}
+        name={name}
+        type="text"
+        validations={validations}
       >
-        <Label
-          className={labelClassName}
-          htmlFor={name}
-          message={label}
-          style={labelStyle}
-        />
-        <InputJSON
-          autoFocus={autoFocus}
-          className={inputClassName}
-          disabled={disabled}
-          deactivateErrorHighlight={deactivateErrorHighlight}
-          name={name}
-          onBlur={handleBlur}
-          onChange={this.handleChange}
-          placeholder={placeholder}
-          resetProps={resetProps}
-          style={inputStyle}
-          tabIndex={tabIndex}
-          value={value}
-        />
-        <InputDescription
-          className={inputDescriptionClassName}
-          message={inputDescription}
-          style={{ marginTop: '2.9rem' }}
-        />
-        <InputErrors
-          className={errorsClassName}
-          errors={(!noErrorsDescription && this.state.errors) || []}
-          name={name}
-          style={errorsStyle}
-        />
-        {spacer}
-      </div>
+        {({ canCheck, onBlur, error, dispatch }) => {
+          const hasError = error && error !== null;
+
+          return (
+            <Wrapper
+              className={`${cn(!isEmpty(className) && className)} ${
+                hasError ? 'bordered' : ''
+              }`}
+            >
+              <Label htmlFor={name}>{label}</Label>
+              <InputJSON
+                {...rest}
+                autoFocus={autoFocus}
+                className={inputClassName}
+                disabled={disabled}
+                deactivateErrorHighlight={deactivateErrorHighlight}
+                name={name}
+                onBlur={isFunction(handleBlur) ? handleBlur : onBlur}
+                onChange={e => {
+                  if (!canCheck) {
+                    dispatch({
+                      type: 'SET_CHECK',
+                    });
+                  }
+
+                  dispatch({
+                    type: 'SET_ERROR',
+                    error: null,
+                  });
+                  this.handleChange(e);
+                }}
+                placeholder={placeholder}
+                resetProps={resetProps}
+                style={inputStyle}
+                tabIndex={tabIndex}
+                value={value}
+              />
+              {!hasError && inputDescription && (
+                <Description>{inputDescription}</Description>
+              )}
+              {hasError && <ErrorMessage>{error}</ErrorMessage>}
+            </Wrapper>
+          );
+        }}
+      </Error>
     );
   }
 }
@@ -155,21 +103,16 @@ class InputJSONWithErrors extends React.Component {
 InputJSONWithErrors.defaultProps = {
   autoFocus: false,
   className: '',
-  customBootstrapClass: 'col-md-12',
   deactivateErrorHighlight: false,
   didCheckErrors: false,
   disabled: false,
-  errors: [],
-  errorsClassName: '',
-  errorsStyle: {},
+  error: null,
   inputClassName: '',
   inputDescription: '',
-  inputDescriptionClassName: '',
   inputStyle: {},
   label: '',
   labelClassName: '',
   labelStyle: {},
-  noErrorsDescription: false,
   onBlur: false,
   placeholder: '',
   resetProps: false,
@@ -181,13 +124,10 @@ InputJSONWithErrors.defaultProps = {
 InputJSONWithErrors.propTypes = {
   autoFocus: PropTypes.bool,
   className: PropTypes.string,
-  customBootstrapClass: PropTypes.string,
   deactivateErrorHighlight: PropTypes.bool,
   didCheckErrors: PropTypes.bool,
   disabled: PropTypes.bool,
-  errors: PropTypes.array,
-  errorsClassName: PropTypes.string,
-  errorsStyle: PropTypes.object,
+  error: PropTypes.string,
   inputClassName: PropTypes.string,
   inputDescription: PropTypes.oneOfType([
     PropTypes.string,
@@ -197,7 +137,6 @@ InputJSONWithErrors.propTypes = {
       params: PropTypes.object,
     }),
   ]),
-  inputDescriptionClassName: PropTypes.string,
   inputStyle: PropTypes.object,
   label: PropTypes.oneOfType([
     PropTypes.string,
@@ -210,14 +149,19 @@ InputJSONWithErrors.propTypes = {
   labelClassName: PropTypes.string,
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
-  noErrorsDescription: PropTypes.bool,
   onBlur: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
   onChange: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
   resetProps: PropTypes.bool,
   tabIndex: PropTypes.string,
   validations: PropTypes.object,
-  value: PropTypes.any,
+  value: PropTypes.oneOfType([
+    PropTypes.array,
+    PropTypes.object,
+    PropTypes.bool,
+    PropTypes.string,
+    PropTypes.number,
+  ]),
 };
 
 export default InputJSONWithErrors;

@@ -105,6 +105,9 @@
   "app.components.listPlugins.title.plural": "{number} plugins are installed",
   "app.components.listPlugins.title.singular": "{number} plugin is installed",
   "app.components.listPluginsPage.deletePlugin.error": "An error occurred while uninstalling the plugin",
+
+  "app.links.configure-view": "Configure the view",
+
   "app.utils.SelectOption.defaultMessage": " ",
   "app.utils.defaultMessage": " ",
   "app.utils.placeholder.defaultMessage": " ",

@@ -64,14 +64,17 @@ class Notification extends React.Component {
           className={`${options.class}`}
           onClick={this.handleCloseClicked}
         >
-          <i className={`fa ${options.icon} notificationIcon`} />
+          <div className={`notificationIcon`}>
+            <div>
+              <i className={`fa ${options.icon}`} />
+            </div>
+          </div>
           <div className="notificationContent">
             <p className="notificationTitle">{content}</p>
           </div>
-          <i
-            className="fa fa-close notificationClose"
-            onClick={this.handleCloseClicked}
-          />
+          <div className={`notificationClose`}>
+            <i className="fa fa-times" onClick={this.handleCloseClicked} />
+          </div>
         </Li>
       </>
     );

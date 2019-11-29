@@ -19,7 +19,7 @@ import {
 import Action from './Action';
 import Content from './Content';
 
-const PLUGINS_WITH_CONFIG = ['content-manager', 'email', 'upload'];
+const PLUGINS_WITH_CONFIG = ['email', 'upload'];
 
 class Row extends React.Component {
   static contextType = GlobalContext;
@@ -45,11 +45,7 @@ class Row extends React.Component {
     } = this.props;
     const { currentEnvironment } = this.context;
 
-    const settingsPath =
-      name === 'content-manager'
-        ? '/plugins/content-manager/ctm-configurations/models'
-        : `/plugins/${name}/configurations/${currentEnvironment}`;
-
+    const settingsPath = `/plugins/${name}/configurations/${currentEnvironment}`;
     const icons = [];
 
     if (PLUGINS_WITH_CONFIG.includes(name)) {
@@ -65,7 +61,7 @@ class Row extends React.Component {
 
     if (!required && currentEnvironment === 'development') {
       icons.push({
-        icoType: 'trash',
+        icoType: 'trash-alt',
         id: name,
         onClick: this.handleClick,
       });

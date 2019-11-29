@@ -1,0 +1,16 @@
+{
+  "info": {
+    "name": "code_snippet",
+    "description": ""
+  },
+  "connection": "default",
+  "collectionName": "components_code_snippets",
+  "attributes": {
+    "code": {
+      "type": "text"
+    },
+    "link": {
+      "type": "string"
+    }
+  }
+}

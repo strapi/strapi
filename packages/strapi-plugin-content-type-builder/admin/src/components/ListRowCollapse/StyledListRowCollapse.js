@@ -87,7 +87,8 @@ const StyedListRowCollapse = styled.tr`
                 button:last-of-type {
                   padding-right: 0;
                 }
-                i {
+                i,
+                svg {
                   margin: auto;
                 }
               }

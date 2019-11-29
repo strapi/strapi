@@ -31,7 +31,8 @@ const Wrapper = styled.div`
       text-decoration: none;
     }
 
-    > i {
+    > i,
+    > svg {
       margin-right: 7px;
       color: #b3b5b9;
     }

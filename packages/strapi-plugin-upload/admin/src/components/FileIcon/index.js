@@ -15,19 +15,19 @@ function FileIcon({ fileType }) {
   const iconType = (() => {
     switch (true) {
       case ext.archive.includes(trim(fileType, '.')):
-        return 'file-archive-o';
+        return 'file-archive';
       case ext.code.includes(trim(fileType, '.')):
-        return 'file-code-o';
+        return 'file-code';
       case ext.img.includes(trim(fileType, '.')):
-        return 'file-image-o';
+        return 'file-image';
       case ext.pdf.includes(trim(fileType, '.')):
-        return 'file-pdf-o';
+        return 'file-pdf';
       case ext.powerpoint.includes(trim(fileType, '.')):
-        return 'file-powerpoint-o';
+        return 'file-powerpoint';
       case ext.video.includes(trim(fileType, '.')):
-        return 'file-video-o';
+        return 'file-video';
       case ext.word.includes(trim(fileType, '.')):
-        return 'file-word-o';
+        return 'file-word';
       default:
         return 'file';
     }

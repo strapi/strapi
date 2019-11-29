@@ -1,0 +1,19 @@
+{
+  "info": {
+    "name": "slide",
+    "description": ""
+  },
+  "connection": "default",
+  "collectionName": "components_slides",
+  "attributes": {
+    "caption": {
+      "type": "string",
+      "default": "something"
+    },
+    "pictures": {
+      "collection": "file",
+      "via": "related",
+      "plugin": "upload"
+    }
+  }
+}

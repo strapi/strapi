@@ -130,7 +130,7 @@ function ListRowCollapse({
                             handleClick();
                           }}
                         >
-                          <i className="fa fa-pencil link-icon" />
+                          <i className="fa fa-pencil-alt link-icon" />
                         </button>
                         <button
                           type="button"

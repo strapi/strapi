@@ -45,12 +45,12 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
     return (
       <div key={j}>
         <p className="title">{pluginsSections[current].name}</p>
-        <ul className="list">
+        <ul className="list  models-list">
           {sortBy(contentTypes, 'label').map((link, i) => (
             <LeftMenuLink
               {...rest}
               key={`${i}-${link.label}`}
-              icon={link.icon || 'caret-right'}
+              icon={link.icon || 'circle'}
               label={link.label}
               destination={`/plugins/${link.plugin}/${link.destination ||
                 link.uid}`}
@@ -65,7 +65,7 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
   // Check if the plugins list is empty or not and display plugins by name
   const pluginsLinks = !isEmpty(plugins) ? (
     map(sortBy(plugins, 'name'), plugin => {
-      if (plugin.id !== 'email') {
+      if (plugin.id !== 'email' && plugin.id !== 'content-manager') {
         const pluginSuffixUrl = plugin.suffixUrl
           ? plugin.suffixUrl(plugins)
           : '';

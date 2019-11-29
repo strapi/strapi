@@ -33,7 +33,8 @@ const StyledFeaturePicker = styled.div`
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        > i {
+        > i,
+        > svg {
           margin-right: 8px;
         }
         span {
@@ -73,7 +74,8 @@ const StyledFeaturePicker = styled.div`
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          i {
+          i,
+          svg {
             margin-right: 10px;
           }
           span {

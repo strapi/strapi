@@ -14,7 +14,8 @@ const colors = {
 const StyledCustomLink = styled.div`
   p {
     color: ${colors.blue};
-    i {
+    i,
+    svg {
       -webkit-font-smoothing: subpixel-antialiased;
     }
   }

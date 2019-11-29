@@ -65,7 +65,8 @@ const StyledLeftMenu = styled.div`
               margin-right: 5px;
             }
           }
-          i {
+          i,
+          svg {
             position: absolute;
             left: 0;
             margin-right: 1rem;
@@ -73,7 +74,8 @@ const StyledLeftMenu = styled.div`
         }
       }
       button {
-        i {
+        i,
+        svg {
           top: calc(50% - ${sizes.margin * 0.6}px);
         }
       }
@@ -83,7 +85,8 @@ const StyledLeftMenu = styled.div`
         p {
           color: ${colors.leftMenu.black};
         }
-        i {
+        i,
+        svg {
           font-size: 11px;
           top: calc(50% - ${sizes.margin * 0.5}px);
           color: ${colors.leftMenu.grey};
@@ -91,7 +94,8 @@ const StyledLeftMenu = styled.div`
         &.active {
           background-color: ${colors.leftMenu.lightGrey};
           font-weight: 700;
-          i {
+          i,
+          svg {
             color: ${colors.leftMenu.black};
           }
         }

@@ -23,7 +23,8 @@ const StyledButtonModalPrimary = styled(Button)`
     box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.15);
     color: white;
   }
-  i {
+  i,
+  svg {
     font-weight: 600;
     font-size: 1.3rem;
     margin-right: 13px;

@@ -7,7 +7,9 @@
   },
   "attributes": {
     "name": {
-      "type": "string"
+      "type": "string",
+      "required": true,
+      "default": "My super dish"
     },
     "description": {
       "type": "text"
@@ -26,6 +28,9 @@
       "via": "related",
       "plugin": "upload",
       "required": false
+    },
+    "very_long_description": {
+      "type": "richtext"
     }
   }
 }

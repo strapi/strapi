@@ -20,7 +20,8 @@ const StyledBackButton = styled.div`
   border-right: 1px solid #f3f4f4;
   border-left: 1px solid #f3f4f4;
   cursor: pointer;
-  i {
+  i,
+  svg {
     font-size: 1.8rem;
     font-weight: bolder;
   }
