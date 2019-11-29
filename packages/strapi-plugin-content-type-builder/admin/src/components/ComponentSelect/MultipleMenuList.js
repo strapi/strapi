@@ -14,7 +14,7 @@ const MultipleMenuList = ({
 }) => {
   const { componentsGroupedByCategory } = useDataManager();
   const Component = components.MenuList;
-  console.log({ menu: value.value });
+
   const allComponentsCategory = Object.keys(componentsGroupedByCategory).reduce(
     (acc, current) => {
       const categoryCompos = componentsGroupedByCategory[current].map(compo => {

@@ -2,6 +2,10 @@ import { fromJS } from 'immutable';
 import pluralize from 'pluralize';
 import makeUnique from '../../utils/makeUnique';
 import { createComponentUid } from './utils/createUid';
+import {
+  shouldPluralizeName,
+  shouldPluralizeTargetAttribute,
+} from './utils/relations';
 
 const initialState = fromJS({
   formErrors: {},
@@ -10,11 +14,6 @@ const initialState = fromJS({
   componentToCreate: {},
   isCreatingComponentWhileAddingAField: false,
 });
-
-export const shouldPluralizeTargetAttribute = nature =>
-  ['manyToMany', 'manyToOne'].includes(nature) ? 2 : 1;
-export const shouldPluralizeName = nature =>
-  ['manyToMany', 'oneToMany', 'manyWay'].includes(nature) ? 2 : 1;
 
 const reducer = (state, action) => {
   switch (action.type) {

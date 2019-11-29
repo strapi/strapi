@@ -24,7 +24,7 @@ const Value = ({ children, ...props }) => {
       isMultiple,
     },
   } = props;
-  console.log({ value });
+
   const displayedCategory = isCreatingComponent ? componentCategory : category;
   const displayedName = isCreatingComponent ? componentName : name;
   const style = { color: '#333740' };
