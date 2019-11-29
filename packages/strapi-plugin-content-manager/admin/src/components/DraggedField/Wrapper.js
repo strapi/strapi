@@ -64,7 +64,7 @@ const Wrapper = styled.div`
         (isSelected || isOverEditBlock) &&
         css`
           g {
-            fill: #007eff;
+            fill: #aed4fb;
           }
         `}
     }

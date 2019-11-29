@@ -19,14 +19,15 @@ const RemoveWrapper = styled.div`
 
   svg {
     align-self: center;
+    color: #b4b6ba;
   }
 
   ${({ isOverRemove }) => {
     if (isOverRemove) {
       return `
-    path {
-      fill: #f64d0a;
-    }
+        path {
+          fill: #f64d0a;
+        }
     `;
     }
   }}
