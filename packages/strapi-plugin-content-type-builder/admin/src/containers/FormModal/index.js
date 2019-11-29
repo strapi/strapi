@@ -398,6 +398,7 @@ const FormModal = () => {
 
         // Add/edit a field
       } else if (isCreatingAttribute && !isCreatingComponentFromAView) {
+        console.log('not creat compo');
         // Normal fields like boolean relations or dynamic zone
         if (!isComponentAttribute) {
           addAttribute(
@@ -408,7 +409,6 @@ const FormModal = () => {
             initialData
           );
           const isDynamicZoneAttribute = state.attributeType === 'dynamiczone';
-          console.log('oooo');
           // Adding a component to a dynamiczone is not the same logic as creating a simple field
           // so the search is different
           // TODO make sure it works for edit
@@ -530,7 +530,13 @@ const FormModal = () => {
 
           // TODO temporary
           dispatch({ type: 'RESET_PROPS' });
-          push({ search: '' });
+
+          // Open modal attribute for adding attr to component
+          // The we inverse the headerDisplayName because it becomes the last one displayed
+          const searchToOpenModalAttributeToAddAttributesToAComponent = `modalType=chooseAttribute&forTarget=components&targetUid=${componentUid}&headerDisplayName=${componentToCreate.name}&headerDisplayCategory=${state.headerDisplayName}`;
+          push({
+            search: searchToOpenModalAttributeToAddAttributesToAComponent,
+          });
           return;
         }
         // The modal is addComponentToDynamicZone
@@ -624,6 +630,8 @@ const FormModal = () => {
     state.targetUid,
     nestedComponents
   );
+
+  console.log({ state });
 
   // Styles
   const modalBodyStyle = isPickingAttribute

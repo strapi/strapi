@@ -8,6 +8,7 @@ const ComponentInfos = ({ uid }) => {
   // We might want to change to initialData...
   // @Aurelsicoko
   const { modifiedData } = useDataManager();
+  console.log({ modifiedData });
   const currentComponent = get(modifiedData, ['components', uid], {});
   const currentComponentCategory = get(currentComponent, 'category', '');
   const currentComponentFriendlyName = get(
@@ -15,6 +16,7 @@ const ComponentInfos = ({ uid }) => {
     ['schema', 'name'],
     ''
   );
+  console.log({ uid, currentComponentFriendlyName });
 
   return (
     <ComponentInfosWrapper>
