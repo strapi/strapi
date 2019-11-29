@@ -70,6 +70,10 @@ export class Admin extends React.Component {
     this.props.setAppError();
   }
 
+  componentDidMount() {
+    this.props.emitEvent('didAccessAuthenticatedAdministration');
+  }
+
   hasApluginNotReady = props => {
     const {
       global: { plugins },
