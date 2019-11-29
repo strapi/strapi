@@ -886,6 +886,10 @@ const FormModal = () => {
                                     'name',
                                     null
                                   )}
+                                  isAddingAComponentToAnotherComponent={
+                                    state.forTarget === 'components' ||
+                                    state.forTarget === 'component'
+                                  }
                                   value={value}
                                   {...input}
                                   error={

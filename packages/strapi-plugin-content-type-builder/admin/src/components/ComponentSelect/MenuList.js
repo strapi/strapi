@@ -4,10 +4,18 @@ import { components } from 'react-select';
 import useDataManager from '../../hooks/useDataManager';
 
 const MenuList = ({
-  selectProps: { name, onClickOption, refState },
+  selectProps: {
+    isAddingAComponentToAnotherComponent,
+    name,
+    onClickOption,
+    refState,
+  },
   ...rest
 }) => {
-  const { componentsGroupedByCategory } = useDataManager();
+  const {
+    componentsGroupedByCategory,
+    componentsThatHaveOtherComponentInTheirAttributes,
+  } = useDataManager();
   const Component = components.MenuList;
 
   return (
@@ -25,6 +33,15 @@ const MenuList = ({
               {categoryName}
               <ul>
                 {componentsGroupedByCategory[categoryName].map(component => {
+                  if (
+                    isAddingAComponentToAnotherComponent &&
+                    componentsThatHaveOtherComponentInTheirAttributes.includes(
+                      component.uid
+                    )
+                  ) {
+                    return null;
+                  }
+
                   return (
                     <li
                       key={component.uid}
@@ -50,6 +67,7 @@ const MenuList = ({
 
 MenuList.defaultProps = {
   selectProps: {
+    isAddingAComponentToAnotherComponent: false,
     refState: {
       current: {
         select: {
@@ -62,6 +80,7 @@ MenuList.defaultProps = {
 
 MenuList.propTypes = {
   selectProps: PropTypes.shape({
+    isAddingAComponentToAnotherComponent: PropTypes.bool,
     name: PropTypes.string.isRequired,
     onClickOption: PropTypes.func.isRequired,
     refState: PropTypes.object,

@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { get, groupBy, sortBy } from 'lodash';
+import { get, groupBy, set, sortBy } from 'lodash';
 import { request, LoadingIndicatorPage } from 'strapi-helper-plugin';
 import { useLocation, useRouteMatch, Redirect } from 'react-router-dom';
 import DataManagerContext from '../../contexts/DataManagerContext';
@@ -15,6 +15,7 @@ import createModifiedDataSchema, {
 import retrieveSpecificInfoFromComponents from './utils/retrieveSpecificInfoFromComponents';
 import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
 import retrieveNestedComponents from './utils/retrieveNestedComponents';
+import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
 import makeUnique from '../../utils/makeUnique';
 
 const DataManagerProvider = ({ allIcons, children }) => {
@@ -212,16 +213,30 @@ const DataManagerProvider = ({ allIcons, children }) => {
 
   const getAllNestedComponents = () => {
     const appNestedCompo = retrieveNestedComponents(components);
-    const editingDataNestedCompoe = retrieveNestedComponents(
+    const editingDataNestedCompos = retrieveNestedComponents(
       modifiedData.components || {}
     );
 
-    return makeUnique([...appNestedCompo, ...editingDataNestedCompoe]);
+    return makeUnique([...editingDataNestedCompos, ...appNestedCompo]);
   };
 
-  // console.log({ modifiedData, components });
-  // console.log(retrieveNestedComponents(components));
-  // console.log('ll', getAllNestedComponents());
+  const getAllComponentsThatHaveAComponentInTheirAttributes = () => {
+    // We need to create an object with all the non modified compos
+    // plus the ones that are created on the fly
+    const allCompos = Object.assign({}, components, modifiedData.components);
+
+    // Since we apply the modification of a specific component only in the modified data
+    // we need to update all compos with the modifications
+    if (!isInContentTypeView) {
+      const currentEditedCompo = get(modifiedData, 'component', {});
+
+      set(allCompos, get(currentEditedCompo, ['uid'], ''), currentEditedCompo);
+    }
+
+    const composWithCompos = retrieveComponentsThatHaveComponents(allCompos);
+
+    return makeUnique(composWithCompos);
+  };
 
   return (
     <DataManagerContext.Provider
@@ -240,6 +255,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
         changeDynamicZoneComponents,
         components,
         componentsGroupedByCategory: groupBy(components, 'category'),
+        componentsThatHaveOtherComponentInTheirAttributes: getAllComponentsThatHaveAComponentInTheirAttributes(),
         contentTypes,
         createSchema,
         initialData,
