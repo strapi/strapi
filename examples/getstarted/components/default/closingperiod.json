@@ -17,6 +17,11 @@
       "type": "date",
       "required": true
     },
+    "media": {
+      "model": "file",
+      "via": "related",
+      "plugin": "upload"
+    },
     "dish": {
       "component": "default.dish",
       "type": "component"

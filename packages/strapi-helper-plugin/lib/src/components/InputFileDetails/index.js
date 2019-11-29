@@ -36,7 +36,7 @@ function InputFileDetails(props) {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <i className="fa fa-external-link-square" />
+              <i className="fa fa-external-link-alt" />
               <FormattedMessage id="app.components.InputFileDetails.open" />
             </a>
           )}

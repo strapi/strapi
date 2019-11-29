@@ -21,7 +21,8 @@
       "type": "string"
     },
     "geolocation": {
-      "type": "json"
+      "type": "json",
+      "required": true
     },
     "country": {
       "model": "country"

@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { cloneDeep, get } from 'lodash';
 import {
   // utils
-  getQueryParameters,
   request,
   // contexts
   useGlobalContext,
@@ -14,6 +13,7 @@ import { DropdownItem } from 'reactstrap';
 import { Inputs as Input } from '@buffetjs/custom';
 import pluginId from '../../pluginId';
 import ItemTypes from '../../utils/ItemTypes';
+import getFeatureLabel from '../../utils/getFeatureLabel';
 import getRequestUrl from '../../utils/getRequestUrl';
 import PopupForm from '../../components/PopupForm';
 import SettingsViewWrapper from '../../components/SettingsViewWrapper';
@@ -27,7 +27,7 @@ import Toggle from './Toggle';
 import reducer, { initialState } from './reducer';
 import forms from './forms.json';
 
-const ListSettingsView = ({ deleteLayout, location: { search }, slug }) => {
+const ListSettingsView = ({ deleteLayout, models, slug }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const [isOpen, setIsOpen] = useState(false);
   const [isModalFormOpen, setIsModalFormOpen] = useState(false);
@@ -45,10 +45,8 @@ const ListSettingsView = ({ deleteLayout, location: { search }, slug }) => {
     isLoading,
   } = reducerState.toJS();
 
-  const source = getQueryParameters(search, 'source');
   const abortController = new AbortController();
   const { signal } = abortController;
-  const params = source === 'content-manager' ? {} : { source };
 
   const getAttributes = useMemo(() => {
     return get(modifiedData, ['schema', 'attributes'], {});
@@ -59,7 +57,6 @@ const ListSettingsView = ({ deleteLayout, location: { search }, slug }) => {
       try {
         const { data } = await request(getRequestUrl(`content-types/${slug}`), {
           method: 'GET',
-          params,
           signal,
         });
 
@@ -80,7 +77,11 @@ const ListSettingsView = ({ deleteLayout, location: { search }, slug }) => {
       abortController.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug, source]);
+  }, [slug]);
+
+  const getName = () => {
+    return getFeatureLabel(models, slug);
+  };
 
   const getListDisplayedFields = () =>
     get(modifiedData, ['layouts', 'list'], []);
@@ -93,7 +94,10 @@ const ListSettingsView = ({ deleteLayout, location: { search }, slug }) => {
       .filter(key => {
         const type = get(attributes, [key, 'type'], '');
 
-        return !['json', 'relation', 'component'].includes(type) && !!type;
+        return (
+          !['json', 'component', 'richtext', 'relation'].includes(type) &&
+          !!type
+        );
       })
       .filter(field => {
         return !getListDisplayedFields().includes(field);
@@ -136,12 +140,10 @@ const ListSettingsView = ({ deleteLayout, location: { search }, slug }) => {
 
       delete body.schema;
       delete body.uid;
-      delete body.source;
 
       await request(getRequestUrl(`content-types/${slug}`), {
         method: 'PUT',
         body,
-        params,
         signal,
       });
 
@@ -149,7 +151,7 @@ const ListSettingsView = ({ deleteLayout, location: { search }, slug }) => {
         type: 'SUBMIT_SUCCEEDED',
       });
       deleteLayout(slug);
-      emitEvent('didSaveContentTypeLayout');
+      emitEvent('didEditListSettings');
     } catch (err) {
       strapi.notification.error('notification.error');
     }
@@ -224,7 +226,7 @@ const ListSettingsView = ({ deleteLayout, location: { search }, slug }) => {
           });
         }}
         onConfirmSubmit={handleConfirm}
-        slug={slug}
+        name={getName()}
       >
         <DragWrapper>
           <div className="row">
@@ -333,6 +335,7 @@ ListSettingsView.propTypes = {
   location: PropTypes.shape({
     search: PropTypes.string.isRequired,
   }).isRequired,
+  models: PropTypes.array.isRequired,
   slug: PropTypes.string.isRequired,
 };
 

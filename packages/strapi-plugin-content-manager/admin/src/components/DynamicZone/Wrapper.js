@@ -2,13 +2,12 @@ import styled from 'styled-components';
 
 const Wrapper = styled.div`
   position: relative;
-  margin: 18px 0;
+  padding-top: 5px;
   text-align: center;
-
   .info {
     position: absolute;
-    display: ${({ show }) => (show ? 'block' : 'none')};
-    top: 25%;
+    display: none;
+    top: 10px;
     left: calc(50% + 46px);
     > span {
       letter-spacing: 0.5px;
@@ -17,6 +16,17 @@ const Wrapper = styled.div`
       font-size: 11px;
       font-weight: 700;
     }
+  }
+  button {
+    &:not(.isOpen):hover + .info {
+      display: block;
+    }
+  }
+  .error-label {
+    color: #f64d0a;
+    font-size: 13px;
+    margin-top: 4px;
+    margin-bottom: -5px;
   }
 `;
 

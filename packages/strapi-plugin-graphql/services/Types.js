@@ -9,13 +9,11 @@
 const _ = require('lodash');
 const { GraphQLUpload } = require('apollo-server-koa');
 const graphql = require('graphql');
-const GraphQLJSON = require('graphql-type-json');
+const { GraphQLJSON } = require('graphql-type-json');
 const GraphQLDateTime = require('graphql-type-datetime');
 const GraphQLLong = require('graphql-type-long');
 
 const { toSingular } = require('./naming');
-
-/* eslint-disable no-unused-vars */
 
 module.exports = {
   /**
@@ -35,7 +33,11 @@ module.exports = {
     action = '',
   }) {
     // Type
-    if (definition.type && definition.type !== 'component') {
+    if (
+      definition.type &&
+      definition.type !== 'component' &&
+      definition.type !== 'dynamiczone'
+    ) {
       let type = 'String';
 
       switch (definition.type) {
@@ -95,6 +97,22 @@ module.exports = {
         return `[${typeName}]`;
       }
       return `${typeName}`;
+    }
+
+    if (definition.type === 'dynamiczone') {
+      const { required } = definition;
+
+      const unionName = `${modelName}${_.upperFirst(
+        _.camelCase(attributeName)
+      )}DynamicZone`;
+
+      let typeName = unionName;
+
+      if (rootType === 'mutation') {
+        typeName = `${unionName}Input!`;
+      }
+
+      return `[${typeName}]${required ? '!' : ''}`;
     }
 
     const ref = definition.model || definition.collection;
@@ -192,7 +210,7 @@ module.exports = {
         polymorphicDef: `union Morph = ${types.join(' | ')}`,
         polymorphicResolver: {
           Morph: {
-            __resolveType(obj, context, info) {
+            __resolveType(obj) {
               // eslint-disable-line no-unused-vars
               return obj.kind || obj._type;
             },

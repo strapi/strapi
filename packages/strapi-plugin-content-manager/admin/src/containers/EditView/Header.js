@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { Header as PluginHeader } from '@buffetjs/custom';
+
 import {
-  PluginHeader,
   PopUpWarning,
   request,
   templateObject,
+  useGlobalContext,
 } from 'strapi-helper-plugin';
 import { get } from 'lodash';
 import pluginId from '../../pluginId';
@@ -16,6 +18,7 @@ const Header = () => {
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningDelete, setWarningDelete] = useState(false);
 
+  const { formatMessage, emitEvent } = useGlobalContext();
   const { id } = useParams();
   const {
     initialData,
@@ -23,9 +26,7 @@ const Header = () => {
     redirectToPreviousPage,
     resetData,
     setIsSubmitting,
-    shouldShowLoadingState,
     slug,
-    source,
   } = useDataManager();
 
   const currentContentTypeMainField = get(
@@ -34,10 +35,71 @@ const Header = () => {
     'id'
   );
   const isCreatingEntry = id === 'create';
-  const pluginHeaderTitle = isCreatingEntry
-    ? { id: `${pluginId}.containers.Edit.pluginHeader.title.new` }
+
+  const headerTitle = isCreatingEntry
+    ? formatMessage({
+        id: `${pluginId}.containers.Edit.pluginHeader.title.new`,
+      })
     : templateObject({ mainField: currentContentTypeMainField }, initialData)
         .mainField;
+
+  const getHeaderActions = () => {
+    const headerActions = [
+      {
+        onClick: () => {
+          toggleWarningCancel();
+        },
+        color: 'cancel',
+        title: formatMessage({
+          id: `${pluginId}.containers.Edit.reset`,
+        }),
+        type: 'button',
+        style: {
+          paddingLeft: 15,
+          paddingRight: 15,
+          fontWeight: 600,
+        },
+      },
+      {
+        color: 'success',
+        title: formatMessage({
+          id: `${pluginId}.containers.Edit.submit`,
+        }),
+        type: 'submit',
+        style: {
+          minWidth: 150,
+          fontWeight: 600,
+        },
+      },
+    ];
+
+    if (!isCreatingEntry) {
+      headerActions.unshift({
+        title: formatMessage({
+          id: 'app.utils.delete',
+        }),
+        color: 'delete',
+        onClick: () => {
+          toggleWarningDelete();
+        },
+        type: 'button',
+        style: {
+          paddingLeft: 15,
+          paddingRight: 15,
+          fontWeight: 600,
+        },
+      });
+    }
+
+    return headerActions;
+  };
+
+  const headerProps = {
+    title: {
+      label: headerTitle && headerTitle.toString(),
+    },
+    actions: getHeaderActions(),
+  };
 
   const toggleWarningCancel = () => setWarningCancel(prevState => !prevState);
   const toggleWarningDelete = () => setWarningDelete(prevState => !prevState);
@@ -51,58 +113,24 @@ const Header = () => {
     setIsSubmitting();
 
     try {
+      emitEvent('willDeleteEntry');
       await request(getRequestUrl(`${slug}/${id}`), {
         method: 'DELETE',
-        params: { source },
       });
 
       strapi.notification.success(`${pluginId}.success.record.delete`);
+      emitEvent('didDeleteEntry');
       redirectToPreviousPage();
     } catch (err) {
       setIsSubmitting(false);
+      emitEvent('didNotDeleteEntry', { error: err });
       strapi.notification.error(`${pluginId}.error.record.delete`);
     }
   };
 
   return (
     <>
-      <PluginHeader
-        actions={[
-          {
-            label: `${pluginId}.containers.Edit.reset`,
-            kind: 'secondary',
-            onClick: () => {
-              toggleWarningCancel();
-            },
-            type: 'button',
-            disabled: shouldShowLoadingState,
-          },
-          {
-            kind: 'primary',
-            label: `${pluginId}.containers.Edit.submit`,
-            type: 'submit',
-            loader: shouldShowLoadingState,
-            style: shouldShowLoadingState ? { marginRight: '18px' } : {},
-            disabled: shouldShowLoadingState,
-          },
-        ]}
-        subActions={
-          isCreatingEntry
-            ? []
-            : [
-                {
-                  label: 'app.utils.delete',
-                  kind: 'delete',
-                  onClick: () => {
-                    toggleWarningDelete();
-                  },
-                  type: 'button',
-                  disabled: shouldShowLoadingState,
-                },
-              ]
-        }
-        title={pluginHeaderTitle}
-      />
+      <PluginHeader {...headerProps} />
       <PopUpWarning
         isOpen={showWarningCancel}
         toggleModal={toggleWarningCancel}

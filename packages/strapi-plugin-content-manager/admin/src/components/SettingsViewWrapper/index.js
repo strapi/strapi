@@ -3,10 +3,9 @@ import PropTypes from 'prop-types';
 import { get, isEqual, upperFirst } from 'lodash';
 import { withRouter } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
-import { Inputs as Input } from '@buffetjs/custom';
+import { Inputs as Input, Header } from '@buffetjs/custom';
 import {
   BackHeader,
-  PluginHeader,
   LoadingIndicatorPage,
   PopUpWarning,
   // contexts
@@ -30,9 +29,9 @@ const SettingsViewWrapper = ({
   onChange,
   onConfirmReset,
   onConfirmSubmit,
-  slug,
+  name,
 }) => {
-  const { emitEvent } = useGlobalContext();
+  const { emitEvent, formatMessage } = useGlobalContext();
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningSubmit, setWarningSubmit] = useState(false);
 
@@ -44,36 +43,51 @@ const SettingsViewWrapper = ({
   const toggleWarningSubmit = () => setWarningSubmit(prevState => !prevState);
 
   const getPluginHeaderActions = () => {
-    if (isEqual(modifiedData, initialData)) {
-      return [];
-    }
-
     return [
       {
-        label: `${pluginId}.popUpWarning.button.cancel`,
-        kind: 'secondary',
+        color: 'cancel',
         onClick: toggleWarningCancel,
+        title: formatMessage({
+          id: `${pluginId}.popUpWarning.button.cancel`,
+        }),
         type: 'button',
+        disabled: isEqual(modifiedData, initialData) ? true : false,
+        style: {
+          fontWeight: 600,
+          paddingLeft: 15,
+          paddingRight: 15,
+        },
       },
       {
-        kind: 'primary',
-        label: `${pluginId}.containers.Edit.submit`,
+        color: 'success',
+        title: formatMessage({
+          id: `${pluginId}.containers.Edit.submit`,
+        }),
         type: 'submit',
+        disabled: isEqual(modifiedData, initialData) ? true : false,
+        style: {
+          minWidth: 150,
+          fontWeight: 600,
+        },
       },
     ];
   };
 
-  const pluginHeaderProps = {
+  const headerProps = {
     actions: getPluginHeaderActions(),
     title: {
-      id: `${pluginId}.components.SettingsViewWrapper.pluginHeader.title`,
-      values: { name: upperFirst(slug) },
+      label: formatMessage(
+        {
+          id: `${pluginId}.components.SettingsViewWrapper.pluginHeader.title`,
+        },
+        { name: upperFirst(name) }
+      ),
     },
-    description: {
+    content: formatMessage({
       id: `${pluginId}.components.SettingsViewWrapper.pluginHeader.description.${
         isEditSettings ? 'edit' : 'list'
       }-settings`,
-    },
+    }),
   };
 
   const getSelectOptions = input => {
@@ -129,8 +143,13 @@ const SettingsViewWrapper = ({
       <BackHeader onClick={goBack} />
       <Container className="container-fluid">
         <form onSubmit={handleSubmit}>
-          <PluginHeader {...pluginHeaderProps} />
-          <div className="row">
+          <Header {...headerProps} />
+          <div
+            className="row"
+            style={{
+              paddingTop: '3px',
+            }}
+          >
             <Block
               style={{
                 marginBottom: '13px',
@@ -218,6 +237,7 @@ SettingsViewWrapper.defaultProps = {
   initialData: {},
   isEditSettings: false,
   modifiedData: {},
+  name: '',
   onConfirmReset: () => {},
   onConfirmSubmit: async () => {},
   onSubmit: () => {},
@@ -231,7 +251,6 @@ SettingsViewWrapper.defaultProps = {
       values: {},
     },
   },
-  slug: '',
 };
 
 SettingsViewWrapper.propTypes = {
@@ -245,6 +264,7 @@ SettingsViewWrapper.propTypes = {
   isEditSettings: PropTypes.bool,
   isLoading: PropTypes.bool.isRequired,
   modifiedData: PropTypes.object,
+  name: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   onConfirmReset: PropTypes.func,
   onConfirmSubmit: PropTypes.func,
@@ -259,7 +279,6 @@ SettingsViewWrapper.propTypes = {
       values: PropTypes.object,
     }),
   }),
-  slug: PropTypes.string,
 };
 
 export default withRouter(SettingsViewWrapper);

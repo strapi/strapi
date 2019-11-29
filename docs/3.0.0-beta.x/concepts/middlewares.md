@@ -60,7 +60,7 @@ The core of Strapi embraces a small list of middlewares for performances, securi
 - xframe
 - xss
 
-::: note
+::: tip
 The following middlewares cannot be disabled: responses, router, logger and boom.
 :::
 

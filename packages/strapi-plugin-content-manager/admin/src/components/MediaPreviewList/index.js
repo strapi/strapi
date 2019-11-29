@@ -44,7 +44,7 @@ function MediaPreviewList({ hoverable, files }) {
       <MediaPreviewFile className={hoverable ? 'hoverable' : ''}>
         <div>
           <span>{fileType}</span>
-          <i className={`fa fa-file-${fileType}-o`} />
+          <i className={`far fa-file-${fileType}`} />
         </div>
         <span>{name}</span>
       </MediaPreviewFile>

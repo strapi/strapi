@@ -72,7 +72,7 @@ options: [--tpl <name>|--plugin <name>]
 
   Example: `strapi generate:api product --tpl bookshelf`
 
-::: note
+::: tip
 The first letter of the filename will be uppercase.
 :::
 
@@ -99,7 +99,7 @@ options: [--api <name>|--plugin <name>]
 - **strapi generate:controller &#60;name&#62; --plugin &#60;plugin&#62;**<br/>
   Generates an empty controller called **&#60;name&#62;** in the `./plugins/<plugin>/controllers` folder.
 
-::: note
+::: tip
 The first letter of the filename will be uppercase.
 :::
 
@@ -135,7 +135,7 @@ options: [--api <name>|--plugin <name>]
 * **strapi generate:model &#60;name&#62; --plugin &#60;plugin&#62;**<br/>
   Generates an empty model called **&#60;name&#62;** in the `./plugins/<plugin>/models` folder.
 
-::: note
+::: tip
 The first letter of the filename will be uppercase.
 :::
 
@@ -162,7 +162,7 @@ options: [--api <name>|--plugin <name>]
 - **strapi generate:service &#60;name&#62; --plugin &#60;plugin&#62;**<br/>
   Generates an empty service called **&#60;name&#62;** in the `./plugins/<plugin>/services` folder.
 
-::: note
+::: tip
 The first letter of the filename will be uppercase.
 :::
 
@@ -226,7 +226,7 @@ options: [--dev]
 
   Example: `strapi install content-type-builder --dev` will create a symlink from `/path/to/the/repository/packages/strapi-plugin-content-type-builder` to `./plugins/content-type-builder`.
 
-::: note
+::: tip
 Checkout the [CONTRIBUTING guide](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) for more details about the local Strapi development workflow.
 :::
 

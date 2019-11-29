@@ -6,14 +6,13 @@
 /* eslint-disable react/require-default-props */
 import React from 'react';
 import PropTypes from 'prop-types';
-import { isEmpty, isObject, merge } from 'lodash';
+import { isEmpty, merge } from 'lodash';
 
 // Design
 import InputAddonWithErrors from '../InputAddonWithErrors';
 import InputCheckboxWithErrors from '../InputCheckboxWithErrors';
 import InputDateWithErrors from '../InputDateWithErrors';
 import InputEmailWithErrors from '../InputEmailWithErrors';
-import InputFileWithErrors from '../InputFileWithErrors';
 import InputNumberWithErrors from '../InputNumberWithErrors';
 import InputSearchWithErrors from '../InputSearchWithErrors';
 import InputSelectWithErrors from '../InputSelectWithErrors';
@@ -22,14 +21,17 @@ import InputTextAreaWithErrors from '../InputTextAreaWithErrors';
 import InputTextWithErrors from '../InputTextWithErrors';
 import InputToggleWithErrors from '../InputToggleWithErrors';
 
-const DefaultInputError = ({ type }) => <div>Your input type: <b>{type}</b> does not exist</div>;
+const DefaultInputError = ({ type }) => (
+  <div>
+    Your input type: <b>{type}</b> does not exist
+  </div>
+);
 
 const inputs = {
   addon: InputAddonWithErrors,
   checkbox: InputCheckboxWithErrors,
   date: InputDateWithErrors,
   email: InputEmailWithErrors,
-  file: InputFileWithErrors,
   number: InputNumberWithErrors,
   password: InputPasswordWithErrors,
   search: InputSearchWithErrors,
@@ -51,18 +53,15 @@ function InputsIndex(props) {
     case 'number':
       inputValue = props.value === 0 ? props.value : props.value || '';
       break;
-    case 'file':
-      inputValue = props.value || [];
-      break;
     case 'json':
-      inputValue = isObject(props.value) ? props.value : null;
+      inputValue = props.value || null;
       break;
     default:
       inputValue = props.value || '';
   }
 
   merge(inputs, props.customInputs);
-  
+
   const Input = inputs[type] ? inputs[type] : DefaultInputError;
 
   return <Input {...props} value={inputValue} />;
@@ -78,10 +77,7 @@ InputsIndex.defaultProps = {
 };
 
 InputsIndex.propTypes = {
-  addon: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.string,
-  ]),
+  addon: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
   customInputs: PropTypes.object,
   type: PropTypes.string.isRequired,
   value: PropTypes.any,

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { ButtonDropdown } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
-import { LayoutIcon } from 'strapi-helper-plugin';
+import { LayoutIcon, useGlobalContext } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import InputCheckbox from '../InputCheckbox';
 import DropdownItemLink from './DropdownItemLink';
@@ -19,9 +19,10 @@ const DisplayedFieldsDropdown = ({
   onChange,
   onClickReset,
   slug,
-  source,
   toggle,
 }) => {
+  const { emitEvent } = useGlobalContext();
+
   return (
     <DropdownWrapper>
       <ButtonDropdown isOpen={isOpen} toggle={toggle} direction="down">
@@ -30,7 +31,8 @@ const DisplayedFieldsDropdown = ({
         <MenuDropdown isopen={isOpen.toString()}>
           <DropdownItemLink>
             <LayoutWrapper
-              to={`${slug}/ctm-configurations/list-settings?source=${source}`}
+              to={`${slug}/ctm-configurations/list-settings`}
+              onClick={() => emitEvent('willEditListLayout')}
             >
               <LayoutIcon />
               <FormattedMessage id="app.links.configure-view" />
@@ -80,7 +82,6 @@ DisplayedFieldsDropdown.propTypes = {
   onChange: PropTypes.func.isRequired,
   onClickReset: PropTypes.func.isRequired,
   slug: PropTypes.string.isRequired,
-  source: PropTypes.string.isRequired,
   toggle: PropTypes.func.isRequired,
 };
 

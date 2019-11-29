@@ -37,7 +37,8 @@ const StyledBody = styled(ModalBody)`
       font-family: Lato;
       cursor: pointer;
 
-      > i {
+      > i,
+      svg {
         margin-right: 1.3rem;
       }
 

@@ -10,7 +10,6 @@ import { useParams } from 'react-router-dom';
 import { cloneDeep, get, set } from 'lodash';
 import {
   // utils
-  getQueryParameters,
   request,
   // contexts
   // TODO add emit event
@@ -19,6 +18,7 @@ import {
 import { Inputs as Input } from '@buffetjs/custom';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
+import getFeatureLabel from '../../utils/getFeatureLabel';
 import getRequestUrl from '../../utils/getRequestUrl';
 import FieldsReorder from '../../components/FieldsReorder';
 import FormTitle from '../../components/FormTitle';
@@ -29,15 +29,19 @@ import SortableList from '../../components/SortableList';
 import { unformatLayout } from '../../utils/layout';
 import LayoutDndProvider from '../LayoutDndProvider';
 import getInputProps from './utils/getInputProps';
+import getInjectedComponents from '../../utils/getComponents';
 
 import reducer, { initialState } from './reducer';
 
 const EditSettingsView = ({
+  components,
+  currentEnvironment,
   deleteLayout,
   deleteLayouts,
   componentsAndModelsMainPossibleMainFields,
   history: { push },
-  location: { search },
+  models,
+  plugins,
   slug,
 }) => {
   const { componentSlug, type } = useParams();
@@ -47,10 +51,8 @@ const EditSettingsView = ({
   const [isDraggingSibling, setIsDraggingSibling] = useState(false);
 
   const fieldsReorderClassName = type === 'content-types' ? 'col-8' : 'col-12';
-  const source = getQueryParameters(search, 'source');
   const abortController = new AbortController();
   const { signal } = abortController;
-  const params = source === 'content-manager' && type ? {} : { source };
 
   const {
     componentLayouts,
@@ -73,6 +75,12 @@ const EditSettingsView = ({
     Object.keys(
       get(modifiedData, ['metadatas', metaToEdit, 'edit'], {})
     ).filter(meta => meta !== 'visible');
+
+  const getName = () => {
+    return type === 'content-types'
+      ? getFeatureLabel(models, slug)
+      : getFeatureLabel(components, componentSlug);
+  };
 
   const getRelationsLayout = useCallback(() => {
     return get(modifiedData, ['layouts', 'editRelations'], []);
@@ -129,7 +137,6 @@ const EditSettingsView = ({
           getRequestUrl(`${type}/${slug || componentSlug}`),
           {
             method: 'GET',
-            params,
             signal,
           }
         );
@@ -152,7 +159,7 @@ const EditSettingsView = ({
       abortController.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug, source, type, componentSlug]);
+  }, [slug, type, componentSlug]);
 
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
@@ -178,19 +185,13 @@ const EditSettingsView = ({
 
       delete body.schema;
       delete body.uid;
-      delete body.source;
       delete body.isComponent;
-
-      emitEvent('willSaveContentTypeLayout');
 
       await request(getRequestUrl(`${type}/${slug || componentSlug}`), {
         method: 'PUT',
         body,
-        params: type === 'components' ? {} : params,
         signal,
       });
-
-      emitEvent('didSaveContentTypeLayout');
 
       dispatch({
         type: 'SUBMIT_SUCCEEDED',
@@ -204,7 +205,7 @@ const EditSettingsView = ({
         deleteLayouts();
       }
 
-      emitEvent('didSaveContentTypeLayout');
+      emitEvent('didEditEditSettings');
     } catch (err) {
       strapi.notification.error('notification.error');
     }
@@ -367,6 +368,7 @@ const EditSettingsView = ({
         initialData={initialData}
         isLoading={isLoading}
         modifiedData={modifiedData}
+        name={getName()}
         onChange={handleChange}
         onConfirmReset={() => {
           dispatch({
@@ -379,10 +381,33 @@ const EditSettingsView = ({
       >
         <div className="row">
           <LayoutTitle className={fieldsReorderClassName}>
-            <FormTitle
-              title={`${pluginId}.global.displayedFields`}
-              description={`${pluginId}.containers.SettingPage.editSettings.description`}
-            />
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div>
+                <FormTitle
+                  title={`${pluginId}.global.displayedFields`}
+                  description={`${pluginId}.containers.SettingPage.editSettings.description`}
+                />
+              </div>
+              <div
+                style={{
+                  marginTop: -6,
+                }}
+              >
+                {getInjectedComponents(
+                  'left.links',
+                  plugins,
+                  currentEnvironment,
+                  slug,
+                  emitEvent,
+                  push
+                )}
+              </div>
+            </div>
           </LayoutTitle>
           {type !== 'components' && (
             <LayoutTitle className="col-4">
@@ -445,6 +470,9 @@ EditSettingsView.defaultProps = {
 };
 
 EditSettingsView.propTypes = {
+  components: PropTypes.array.isRequired,
+  models: PropTypes.array.isRequired,
+  currentEnvironment: PropTypes.string,
   deleteLayout: PropTypes.func.isRequired,
   deleteLayouts: PropTypes.func,
   componentsAndModelsMainPossibleMainFields: PropTypes.object.isRequired,
@@ -454,6 +482,7 @@ EditSettingsView.propTypes = {
   location: PropTypes.shape({
     search: PropTypes.string.isRequired,
   }).isRequired,
+  plugins: PropTypes.object,
   slug: PropTypes.string,
 };
 

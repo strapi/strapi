@@ -9,9 +9,10 @@ const ListSettingsView = lazy(() => import('../ListSettingsView'));
 const RecursivePath = props => {
   const { url } = useRouteMatch();
   const { slug } = useParams();
-  const renderRoute = (routeProps, Component) => (
-    <Component {...props} {...routeProps} slug={slug} />
-  );
+
+  const renderRoute = (routeProps, Component) => {
+    return <Component {...props} {...routeProps} slug={slug} />;
+  };
 
   const routes = [
     {

@@ -57,7 +57,7 @@ const Logout = ({ history: { push } }) => {
           </DropdownItem>
           <DropdownItem onClick={handleLogout}>
             <FormattedMessage id="app.components.Logout.logout" />
-            <i className="fa fa-sign-out" />
+            <i className="fa fa-sign-out-alt" />
           </DropdownItem>
         </DropdownMenu>
       </ButtonDropdown>

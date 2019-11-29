@@ -1,11 +1,11 @@
 import React, { useEffect, useReducer } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { cloneDeep, get, isEmpty, set } from 'lodash';
 import {
-  getQueryParameters,
   request,
   LoadingIndicatorPage,
+  useGlobalContext,
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
@@ -27,7 +27,6 @@ const EditViewDataManagerProvider = ({
 }) => {
   const { id } = useParams();
   // Retrieve the search
-  const { search } = useLocation();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const {
     formErrors,
@@ -42,7 +41,8 @@ const EditViewDataManagerProvider = ({
   const abortController = new AbortController();
   const { signal } = abortController;
   const isCreatingEntry = id === 'create';
-  const source = getQueryParameters(search, 'source');
+
+  const { emitEvent } = useGlobalContext();
 
   useEffect(() => {
     if (!isLoading) {
@@ -56,7 +56,6 @@ const EditViewDataManagerProvider = ({
       try {
         const data = await request(getRequestUrl(`${slug}/${id}`), {
           method: 'GET',
-          params: { source },
           signal,
         });
 
@@ -107,13 +106,14 @@ const EditViewDataManagerProvider = ({
       abortController.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, slug, source]);
+  }, [id, slug]);
 
   const addComponentToDynamicZone = (
     keys,
     componentUid,
     shouldCheckErrors = false
   ) => {
+    emitEvent('addComponentToDynamicZone');
     dispatch({
       type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE',
       keys: keys.split('.'),
@@ -229,6 +229,8 @@ const EditViewDataManagerProvider = ({
       const method = isCreatingEntry ? 'POST' : 'PUT';
       const endPoint = isCreatingEntry ? slug : `${slug}/${id}`;
 
+      emitEvent(isCreatingEntry ? 'willCreateEntry' : 'willEditEntry');
+
       try {
         // Time to actually send the data
         await request(
@@ -236,14 +238,13 @@ const EditViewDataManagerProvider = ({
           {
             method,
             headers,
-            params: { source },
             body: formData,
             signal,
           },
           false,
           false
         );
-        // emitEvent('didSaveEntry');
+        emitEvent(isCreatingEntry ? 'didCreateEntry' : 'didEditEntry');
         redirectToPreviousPage();
       } catch (err) {
         console.log({ err });
@@ -254,11 +255,11 @@ const EditViewDataManagerProvider = ({
         );
 
         setIsSubmitting(false);
-        // emitEvent('didNotSaveEntry', { error: err });
+        emitEvent(isCreatingEntry ? 'didNotCreateEntry' : 'didNotEditEntry', {
+          error: err,
+        });
         strapi.notification.error(error);
       }
-
-      // setIsSubmitting();
     } catch (err) {
       const errors = getYupInnerErrors(err);
 
@@ -270,6 +271,7 @@ const EditViewDataManagerProvider = ({
   };
 
   const moveComponentDown = (dynamicZoneName, currentIndex) => {
+    emitEvent('changeComponentsOrder');
     dispatch({
       type: 'MOVE_COMPONENT_DOWN',
       dynamicZoneName,
@@ -277,6 +279,7 @@ const EditViewDataManagerProvider = ({
     });
   };
   const moveComponentUp = (dynamicZoneName, currentIndex) => {
+    emitEvent('changeComponentsOrder');
     dispatch({
       type: 'MOVE_COMPONENT_UP',
       dynamicZoneName,
@@ -308,8 +311,8 @@ const EditViewDataManagerProvider = ({
     });
   };
 
-  // REMOVE_COMPONENT_FROM_FIELD
   const removeComponentFromDynamicZone = (dynamicZoneName, index) => {
+    emitEvent('removeComponentFromDynamicZone');
     dispatch({
       type: 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE',
       dynamicZoneName,
@@ -369,7 +372,6 @@ const EditViewDataManagerProvider = ({
         setIsSubmitting,
         shouldShowLoadingState,
         slug,
-        source,
       }}
     >
       {showLoader ? (

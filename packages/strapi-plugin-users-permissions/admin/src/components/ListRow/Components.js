@@ -25,8 +25,10 @@ const Flex = styled.div`
   > div:first-child {
     width: 17px;
     padding-top: 2px;
-    > i {
-      font-size: 15px;
+    > i,
+    > svg {
+      font-size: 12px;
+      vertical-align: inherit;
     }
   }
   > div:last-child {

@@ -23,13 +23,16 @@ const afterStyle = `
 `;
 
 const Button = styled.button`
+  position: relative;
   height: 36px;
   width: 36px;
   background-color: #f3f4f4;
   border-radius: 50%;
-
   text-align: center;
-  position: relative;
+
+  :focus {
+    outline: 0;
+  }
 
   :before {
     ${beforeStyle}

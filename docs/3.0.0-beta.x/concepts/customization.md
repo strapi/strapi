@@ -24,6 +24,6 @@ To extend this package you will have to create an `admin` folder at the root of 
 
 In this folder you will be able to override admin files and functions.
 
-::: note
+::: tip
 For more details, visit the [admin panel customization](../admin-panel/customization.md) documentation.
 :::

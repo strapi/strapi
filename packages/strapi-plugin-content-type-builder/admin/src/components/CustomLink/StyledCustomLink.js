@@ -14,10 +14,9 @@ const StyledCustomLink = styled.div`
   line-height: 0;
   p {
     color: ${colors.blue};
-    font-size: 13px;
-    font-weight: 500;
-    i {
-      margin-right: 5px;
+    i,
+    svg {
+      -webkit-font-smoothing: subpixel-antialiased;
     }
   }
   button {

@@ -1,0 +1,11 @@
+{
+  "ConfigPage.description": "Cấu hình email plugin",
+  "ConfigPage.title": "Email - Các cài đặt",
+  "EditForm.Input.number.label": "Kích thước tối đa được phép (MB)",
+  "EditForm.Input.select.inputDescription": "Các Email có thể được gửi với nhà cung cấp mặc định (Sendmail) hoặc là nhà cung cấp bên ngoài",
+  "EditForm.Input.select.label": "Các nhà cung cấp",
+  "EditForm.Input.toggle.label": "Kích hoạt gửi email",
+  "notification.config.success": "Các cài đặt đã được cập nhật",
+  "plugin.description.long": "Gửi các email.",
+  "plugin.description.short": "Gửi các email."
+}

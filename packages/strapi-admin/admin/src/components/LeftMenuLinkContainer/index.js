@@ -45,12 +45,12 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
     return (
       <div key={j}>
         <p className="title">{pluginsSections[current].name}</p>
-        <ul className="list">
+        <ul className="list  models-list">
           {sortBy(contentTypes, 'label').map((link, i) => (
             <LeftMenuLink
               {...rest}
               key={`${i}-${link.label}`}
-              icon={link.icon || 'caret-right'}
+              icon={link.icon || 'circle'}
               label={link.label}
               destination={`/plugins/${link.plugin}/${link.destination ||
                 link.uid}`}

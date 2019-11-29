@@ -30,7 +30,8 @@ const Button = styled.button`
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  > i {
+  > i,
+  > svg {
     margin-right: 10px;
   }
 `;

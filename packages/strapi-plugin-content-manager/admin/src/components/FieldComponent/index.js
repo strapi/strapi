@@ -8,12 +8,14 @@ import useEditView from '../../hooks/useEditView';
 import ComponentInitializer from '../ComponentInitializer';
 import NonRepeatableComponent from '../NonRepeatableComponent';
 import RepeatableComponent from '../RepeatableComponent';
+import ComponentIcon from './ComponentIcon';
 import Label from './Label';
 import Reset from './ResetComponent';
 import Wrapper from './Wrapper';
 
 const FieldComponent = ({
   componentUid,
+  icon,
   isFromDynamicZone,
   isRepeatable,
   label,
@@ -33,10 +35,16 @@ const FieldComponent = ({
     ['components', componentUid],
     {}
   );
+
   const displayedFields = get(currentComponentSchema, ['layouts', 'edit'], []);
 
   return (
     <Wrapper className="col-12" isFromDynamicZone={isFromDynamicZone}>
+      {isFromDynamicZone && (
+        <ComponentIcon>
+          <i className={`fas fa-${icon}`}></i>
+        </ComponentIcon>
+      )}
       <Label>
         {label}&nbsp;
         {isRepeatable && `(${componentValueLength})`}
@@ -83,6 +91,7 @@ const FieldComponent = ({
 };
 
 FieldComponent.defaultProps = {
+  icon: 'smile',
   isFromDynamicZone: false,
   isRepeatable: false,
   max: Infinity,
@@ -91,6 +100,7 @@ FieldComponent.defaultProps = {
 
 FieldComponent.propTypes = {
   componentUid: PropTypes.string.isRequired,
+  icon: PropTypes.string,
   isFromDynamicZone: PropTypes.bool,
   isRepeatable: PropTypes.bool,
   label: PropTypes.string.isRequired,

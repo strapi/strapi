@@ -41,9 +41,6 @@ export {
 } from './components/InputEmailWithErrors';
 export { default as InputErrors } from './components/InputErrors';
 export { default as InputFile } from './components/InputFile';
-export {
-  default as InputFileWithErrors,
-} from './components/InputFileWithErrors';
 export { default as InputNumber } from './components/InputNumber';
 export {
   default as InputNumberWithErrors,

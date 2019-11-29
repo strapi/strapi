@@ -28,6 +28,12 @@ const Wrapper = styled.div`
     list-style: none;
     padding: 0;
     margin-bottom: 2rem;
+    &.models-list {
+      li a svg {
+        font-size: 0.74rem;
+        top: calc(50% - 0.35rem);
+      }
+    }
   }
 
   .noPluginsInstalled {

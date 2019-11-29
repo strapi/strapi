@@ -38,11 +38,10 @@ export function getDataSucceeded(components, models, mainFields) {
   };
 }
 
-export function getLayout(uid, source) {
+export function getLayout(uid) {
   return {
     type: GET_LAYOUT,
     uid,
-    source,
   };
 }
 
@@ -54,10 +53,11 @@ export function getLayoutSucceeded(layout, uid) {
   };
 }
 
-export function onChangeListLabels({ target: { name, value } }) {
+export function onChangeListLabels({ target: { name, slug, value } }) {
   return {
     type: ON_CHANGE_LIST_LABELS,
-    keys: name.split('.'),
+    name,
+    slug,
     value,
   };
 }
