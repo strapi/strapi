@@ -1,18 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { components } from 'react-select';
 import { get, upperFirst } from 'lodash';
-
 import { Checkbox, CheckboxWrapper, Label } from '@buffetjs/styles';
 import useDataManager from '../../hooks/useDataManager';
+import SubUl from './SubUl';
 import Ul from './Ul';
 import hasSubArray from './utils/hasSubArray';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const MultipleMenuList = ({
-  selectProps: { name, addComponentsToDynamicZone, refState, value },
+  selectProps: { name, addComponentsToDynamicZone, /*refState, */ value },
   ...rest
 }) => {
   const { componentsGroupedByCategory } = useDataManager();
+  const collapsesObject = Object.keys(componentsGroupedByCategory).reduce(
+    (acc, current) => {
+      acc[current] = false;
+
+      return acc;
+    },
+    {}
+  );
+  const [collapses, setCollapses] = useState(collapsesObject);
+  const toggleCollapse = catName => {
+    setCollapses(prevState => ({
+      ...prevState,
+      [catName]: !prevState[catName],
+    }));
+  };
+
   const Component = components.MenuList;
 
   const allComponentsCategory = Object.keys(componentsGroupedByCategory).reduce(
@@ -35,7 +52,7 @@ const MultipleMenuList = ({
   };
 
   const handleChangeCategory = ({ target }) => {
-    refState.current.select.blur();
+    // refState.current.select.blur();
     const dataTarget = {
       name,
       components: allComponentsCategory[target.name],
@@ -65,7 +82,7 @@ const MultipleMenuList = ({
           const isChecked = getCategoryValue(categoryName);
           const target = { name: categoryName, value: !isChecked };
           return (
-            <li key={categoryName}>
+            <li key={categoryName} className="li-multi-menu">
               <div style={{ marginTop: 3 }}>
                 <CheckboxWrapper>
                   <Label
@@ -83,9 +100,19 @@ const MultipleMenuList = ({
                     />
                     {upperFirst(categoryName)}
                   </Label>
+                  <FontAwesomeIcon
+                    onClick={e => {
+                      e.stopPropagation();
+                      toggleCollapse(categoryName);
+                    }}
+                    className="chevron"
+                    icon={
+                      collapses[categoryName] ? 'chevron-up' : 'chevron-down'
+                    }
+                  />
                 </CheckboxWrapper>
               </div>
-              <Ul>
+              <SubUl tag="ul" isOpen={collapses[categoryName]}>
                 {componentsGroupedByCategory[categoryName].map(component => {
                   const isChecked = get(value, 'value', []).includes(
                     component.uid
@@ -115,7 +142,7 @@ const MultipleMenuList = ({
                     </li>
                   );
                 })}
-              </Ul>
+              </SubUl>
             </li>
           );
         })}

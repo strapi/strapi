@@ -16,6 +16,15 @@ const Ul = styled.ul`
         z-index: 1;
       }
     }
+    .chevron {
+      margin-right: -10px !important;
+
+      font-size: 11px;
+      color: #919bae;
+    }
+  }
+  .li-multi-menu {
+    margin-bottom: -3px;
   }
   .li {
     line-height: 27px;
