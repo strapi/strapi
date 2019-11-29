@@ -110,6 +110,8 @@ const ListPage = () => {
     type,
     headerDisplayName,
     headerDisplayCategory = null
+    // TODO ADD LOGIC headerDisplaySubCategory when editing a field
+    // It should be the same one as adding a field
   ) => {
     let attributeType;
 
