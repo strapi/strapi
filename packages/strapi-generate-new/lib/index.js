@@ -39,6 +39,7 @@ module.exports = (projectDirectory, cliArguments) => {
     strapiVersion: require('../package.json').version,
     debug: cliArguments.debug !== undefined,
     quick: cliArguments.quickstart !== undefined,
+    docker: process.env.DOCKER === 'true',
     uuid: uuid(),
     deviceId: machineIdSync(),
     tmpPath,
@@ -65,6 +66,7 @@ module.exports = (projectDirectory, cliArguments) => {
       os_release: os.release(),
       strapi_version: scope.strapiVersion,
       node_version: process.version,
+      docker: scope.docker,
     };
 
     Object.keys(tags).forEach(tag => {
