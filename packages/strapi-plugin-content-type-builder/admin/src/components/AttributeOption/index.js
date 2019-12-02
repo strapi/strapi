@@ -15,6 +15,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import getTrad from '../../utils/getTrad';
+import makeSearch from '../../utils/makeSearch';
 import useQuery from '../../hooks/useQuery';
 import Button from './Button';
 import Card from './Card';
@@ -42,14 +43,23 @@ const AttributeOption = forwardRef(({ tabIndex, type }, ref) => {
     const forTarget = query.get('forTarget');
     const targetUid = query.get('targetUid');
     const headerDisplayName = query.get('headerDisplayName');
-    const step = type === 'component' ? '&step=1' : '';
-    const headerDisplayCat = query.get('headerDisplayCategory');
-    const headerDisplayCategory = headerDisplayCat
-      ? `&headerDisplayCategory=${headerDisplayCat}`
-      : '';
+
+    const search = makeSearch({
+      modalType: 'attribute',
+      actionType: 'create',
+      settingType: 'base',
+      forTarget,
+      targetUid,
+      attributeType: type,
+      headerDisplayName,
+      step: type === 'component' ? '1' : null,
+      headerDisplayCategory: query.get('headerDisplayCategory'),
+      headerDisplaySubCategory: query.get('headerDisplaySubCategory'),
+      subTargetUid: query.get('subTargetUid'),
+    });
 
     push({
-      search: `modalType=attribute&actionType=create&settingType=base&forTarget=${forTarget}&targetUid=${targetUid}&attributeType=${type}&headerDisplayName=${headerDisplayName}${step}${headerDisplayCategory}`,
+      search,
     });
   };
 
