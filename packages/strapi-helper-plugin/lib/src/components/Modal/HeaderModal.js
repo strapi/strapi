@@ -11,7 +11,7 @@ const HeaderModal = styled(ModalHeader)`
   border: 0;
   > button {
     margin: 0;
-    padding: 20px;
+    padding: 2rem;
     color: #c3c5c8;
     opacity: 1;
     font-size: 1.2rem;
@@ -26,13 +26,19 @@ const HeaderModal = styled(ModalHeader)`
     > span {
       display: none;
     }
-    &:before {
-      content: '\f00d';
-      -webkit-font-smoothing: antialiased;
-      font-family: 'FontAwesome';
-      font-weight: 400;
-      font-size: 1.2rem;
-    }
-
+    // &:before {
+    //   content: '\f00d';
+    //   -webkit-font-smoothing: antialiased;
+    //   font-family: 'FontAwesome';
+    //   font-weight: 400;
+    //   font-size: 1.2rem;
+    // }
+  }
+  & + svg {
+    position: absolute;
+    top: 26px;
+    right: 30px;
+    fill: #c3c5c8;
+  }
 `;
 export default HeaderModal;

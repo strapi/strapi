@@ -163,7 +163,10 @@ const SettingsViewWrapper = ({
                   return (
                     <FormattedMessage key={input.name} id={input.label.id}>
                       {label => (
-                        <div className={input.customBootstrapClass}>
+                        <div
+                          className={input.customBootstrapClass}
+                          style={{ marginBottom: 1 }}
+                        >
                           <FormattedMessage
                             id={get(
                               input,
@@ -188,7 +191,7 @@ const SettingsViewWrapper = ({
                   );
                 })}
                 <div className="col-12">
-                  <Separator />
+                  <Separator style={{ marginBottom: 23 }} />
                 </div>
               </div>
               <SectionTitle />

@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-  ButtonModal,
   HeaderModal,
   HeaderModalTitle,
   Modal,
@@ -11,7 +10,7 @@ import {
 } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
 import { upperFirst } from 'lodash';
-import { AttributeIcon } from '@buffetjs/core';
+import { AttributeIcon, Button } from '@buffetjs/core';
 
 const PopupForm = ({
   headerId,
@@ -59,12 +58,12 @@ const PopupForm = ({
         </ModalForm>
         <ModalFooter>
           <section>
-            <ButtonModal
-              message="components.popUpWarning.button.cancel"
-              onClick={onToggle}
-              isSecondary
-            />
-            <ButtonModal message="form.button.done" type="submit" />
+            <Button onClick={onToggle} color="cancel">
+              <FormattedMessage id="components.popUpWarning.button.cancel" />
+            </Button>
+            <Button type="submit" color="success">
+              <FormattedMessage id="form.button.done" />
+            </Button>
           </section>
         </ModalFooter>
       </form>

@@ -169,7 +169,7 @@ const ListSettingsView = ({ deleteLayout, models, slug }) => {
 
   const renderForm = () => (
     <>
-      <div className="col-6">
+      <div className="col-6" style={{ marginBottom: 4 }}>
         <FormattedMessage id={`${pluginId}.form.Input.label`}>
           {label => (
             <FormattedMessage
@@ -191,7 +191,7 @@ const ListSettingsView = ({ deleteLayout, models, slug }) => {
         </FormattedMessage>
       </div>
       {get(getAttributes, [labelToEdit, 'type'], 'text') !== 'media' && (
-        <div className="col-6">
+        <div className="col-6" style={{ marginBottom: 4 }}>
           <FormattedMessage id={`${pluginId}.form.Input.sort.field`}>
             {label => (
               <Input
