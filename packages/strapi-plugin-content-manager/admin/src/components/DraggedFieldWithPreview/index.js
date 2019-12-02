@@ -8,7 +8,6 @@ import PreviewCarret from '../PreviewCarret';
 import Wrapper from './Wrapper';
 import DynamicComponent from './DynamicComponent';
 
-// eslint-disable-next-line react/display-name
 const DraggedFieldWithPreview = forwardRef(
   (
     {
@@ -199,5 +198,7 @@ DraggedFieldWithPreview.propTypes = {
   style: PropTypes.object,
   type: PropTypes.string,
 };
+
+DraggedFieldWithPreview.displayName = 'DraggedFieldWithPreview';
 
 export default DraggedFieldWithPreview;

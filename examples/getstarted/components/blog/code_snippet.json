@@ -1,7 +1,8 @@
 {
   "info": {
     "name": "code_snippet",
-    "description": ""
+    "description": "",
+    "icon": "ambulance"
   },
   "connection": "default",
   "collectionName": "components_code_snippets",

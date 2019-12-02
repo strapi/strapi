@@ -1,10 +1,11 @@
 {
-  "info": {
-    "name": "dish",
-    "description": ""
-  },
   "connection": "default",
   "collectionName": "components_dishes",
+  "info": {
+    "name": "dish",
+    "description": "",
+    "icon": "beer"
+  },
   "attributes": {
     "name": {
       "type": "string",

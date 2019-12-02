@@ -4,18 +4,19 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
+import useEditView from '../../hooks/useEditView';
 import DynamicComponentCard from '../DynamicComponentCard';
 import FieldComponent from '../FieldComponent';
 import Button from './Button';
 import ComponentsPicker from './ComponentsPicker';
 import ComponentWrapper from './ComponentWrapper';
+import DynamicZoneWrapper from './DynamicZoneWrapper';
 import Label from './Label';
 import RoundCTA from './RoundCTA';
 import Wrapper from './Wrapper';
 
 const DynamicZone = ({ max, min, name }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isOver, setIsOver] = useState(false);
   const {
     addComponentToDynamicZone,
     formErrors,
@@ -25,15 +26,27 @@ const DynamicZone = ({ max, min, name }) => {
     moveComponentDown,
     removeComponentFromDynamicZone,
   } = useDataManager();
+
+  const { components } = useEditView();
+
   const getDynamicDisplayedComponents = useCallback(() => {
     return get(modifiedData, [name], []).map(data => data.__component);
   }, [modifiedData, name]);
-  // const getDynamicComponentSchemaData = useCallback(
-  //   compoUid => {
-  //     return get(allLayoutData, ['components', compoUid], {});
-  //   },
-  //   [allLayoutData]
-  // );
+
+  const getDynamicComponentSchemaData = componentUid => {
+    const component = components.find(compo => compo.uid === componentUid);
+    const { schema } = component;
+
+    return schema;
+  };
+
+  const getDynamicComponentIcon = componentUid => {
+    const {
+      info: { icon },
+    } = getDynamicComponentSchemaData(componentUid);
+
+    return icon;
+  };
 
   const dynamicZoneErrors = Object.keys(formErrors)
     .filter(key => {
@@ -46,8 +59,7 @@ const DynamicZone = ({ max, min, name }) => {
     ['schema', 'attributes', name, 'components'],
     []
   );
-  const displayInfo = isOver && !isOpen;
-  const handleMouseEvent = () => setIsOver(prev => !prev);
+
   const metas = get(layout, ['metadatas', name, 'edit'], {});
   const dynamicDisplayedComponentsLength = getDynamicDisplayedComponents()
     .length;
@@ -55,66 +67,69 @@ const DynamicZone = ({ max, min, name }) => {
   const hasError = dynamicZoneErrors.length > 0;
   const hasMinError =
     dynamicZoneErrors.length > 0 &&
-    get(dynamicZoneErrors, [0, 'id'], '').includes('min') &&
-    !isOpen;
+    get(dynamicZoneErrors, [0, 'id'], '').includes('min');
+
+  const hasRequiredError = hasError && !hasMinError;
 
   return (
-    <>
+    <DynamicZoneWrapper>
       {getDynamicDisplayedComponents().length > 0 && (
         <Label>
           <p>{metas.label}</p>
           <p>{metas.description}</p>
         </Label>
       )}
-      {getDynamicDisplayedComponents().map((componentUid, index) => {
-        // TODO when available
-        // const icon = getDynamicComponentSchemaData(componentUid);
 
-        const showDownIcon =
-          dynamicDisplayedComponentsLength > 0 &&
-          index < dynamicDisplayedComponentsLength - 1;
-        const showUpIcon = dynamicDisplayedComponentsLength > 0 && index > 0;
+      <ComponentWrapper>
+        {getDynamicDisplayedComponents().map((componentUid, index) => {
+          const showDownIcon =
+            dynamicDisplayedComponentsLength > 0 &&
+            index < dynamicDisplayedComponentsLength - 1;
+          const showUpIcon = dynamicDisplayedComponentsLength > 0 && index > 0;
 
-        return (
-          <ComponentWrapper key={index}>
-            {showDownIcon && (
+          return (
+            <div key={index}>
+              {showDownIcon && (
+                <RoundCTA
+                  style={{ top: -15, right: 54 }}
+                  className="arrow-btn"
+                  onClick={() => moveComponentDown(name, index)}
+                >
+                  <i className="fa fa-arrow-down" />
+                </RoundCTA>
+              )}
+              {showUpIcon && (
+                <RoundCTA
+                  style={{ top: -15, right: 88 }}
+                  className="arrow-btn"
+                  onClick={() => moveComponentUp(name, index)}
+                >
+                  <i className="fa fa-arrow-up" />
+                </RoundCTA>
+              )}
+
               <RoundCTA
-                style={{ top: -15, right: 30 }}
-                onClick={() => moveComponentDown(name, index)}
+                style={{ top: -15, right: 15 }}
+                onClick={() => removeComponentFromDynamicZone(name, index)}
               >
-                <i className="fa fa-arrow-down" />
+                <i className="far fa-trash-alt" />
               </RoundCTA>
-            )}
-            {showUpIcon && (
-              <RoundCTA
-                style={{ top: -15, right: 45 }}
-                onClick={() => moveComponentUp(name, index)}
-              >
-                <i className="fa fa-arrow-up" />
-              </RoundCTA>
-            )}
-            <RoundCTA
-              style={{ top: -15, right: 0 }}
-              onClick={() => removeComponentFromDynamicZone(name, index)}
-            >
-              <i className="fa fa-trash" />
-            </RoundCTA>
-            <FieldComponent
-              componentUid={componentUid}
-              label=""
-              name={`${name}.${index}`}
-              isFromDynamicZone
-            />
-          </ComponentWrapper>
-        );
-      })}
-      <Wrapper show={displayInfo}>
+              <FieldComponent
+                componentUid={componentUid}
+                icon={getDynamicComponentIcon(componentUid)}
+                label=""
+                name={`${name}.${index}`}
+                isFromDynamicZone={true}
+              />
+            </div>
+          );
+        })}
+      </ComponentWrapper>
+      <Wrapper>
         <Button
-          hasError={hasError}
-          isOpen={isOpen}
           type="button"
-          onMouseEnter={handleMouseEvent}
-          onMouseLeave={handleMouseEvent}
+          hasError={hasError}
+          className={isOpen && 'isOpen'}
           onClick={() => {
             if (dynamicDisplayedComponentsLength < max) {
               setIsOpen(prev => !prev);
@@ -125,35 +140,56 @@ const DynamicZone = ({ max, min, name }) => {
             }
           }}
         />
-
+        {hasRequiredError && !isOpen && (
+          <div className="error-label">Component is required</div>
+        )}
+        {hasMinError && !isOpen && (
+          <div className="error-label">
+            <FormattedMessage
+              id={`${pluginId}.components.DynamicZone.missing${
+                missingComponentNumber > 1 ? '.plural' : '.singular'
+              }`}
+              values={{ count: missingComponentNumber }}
+            />
+          </div>
+        )}
         <div className="info">
           <FormattedMessage
             id={`${pluginId}.components.DynamicZone.add-compo`}
             values={{ componentName: name }}
           />
         </div>
-        {hasMinError && <div> {missingComponentNumber} missing components</div>}
         <ComponentsPicker isOpen={isOpen}>
-          {dynamicZoneAvailableComponents.map(componentUid => {
-            return (
-              <DynamicComponentCard
-                key={componentUid}
-                componentUid={componentUid}
-                onClick={() => {
-                  setIsOpen(false);
-                  const shouldCheckErrors = hasError;
-                  addComponentToDynamicZone(
-                    name,
-                    componentUid,
-                    shouldCheckErrors
-                  );
-                }}
+          <div>
+            <p className="componentPickerTitle">
+              <FormattedMessage
+                id={`${pluginId}.components.DynamicZone.pick-compo`}
               />
-            );
-          })}
+            </p>
+            <div className="componentsList">
+              {dynamicZoneAvailableComponents.map(componentUid => {
+                return (
+                  <DynamicComponentCard
+                    key={componentUid}
+                    componentUid={componentUid}
+                    icon={getDynamicComponentIcon(componentUid)}
+                    onClick={() => {
+                      setIsOpen(false);
+                      const shouldCheckErrors = hasError;
+                      addComponentToDynamicZone(
+                        name,
+                        componentUid,
+                        shouldCheckErrors
+                      );
+                    }}
+                  />
+                );
+              })}
+            </div>
+          </div>
         </ComponentsPicker>
       </Wrapper>
-    </>
+    </DynamicZoneWrapper>
   );
 };
 

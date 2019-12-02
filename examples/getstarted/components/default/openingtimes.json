@@ -1,10 +1,11 @@
 {
-  "info": {
-    "name": "openingtimes",
-    "description": ""
-  },
   "connection": "default",
   "collectionName": "components_openingtimes",
+  "info": {
+    "name": "openingtimes",
+    "description": "",
+    "icon": "calendar"
+  },
   "attributes": {
     "label": {
       "type": "string",

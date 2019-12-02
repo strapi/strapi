@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import pluginId from '../../pluginId';
 import DynamicComponentCard from '../DynamicComponentCard';
 import Tooltip from './Tooltip';
 
-const DynamicComponent = ({
-  componentUid,
-  history: { push },
-  setIsOverDynamicZone,
-}) => {
+const DynamicComponent = ({ componentUid, setIsOverDynamicZone }) => {
   const [state, setState] = useState(false);
+  const { push } = useHistory();
+
   const handleMouseEvent = () => {
     setIsOverDynamicZone(v => !v);
     setState(v => !v);
@@ -35,10 +33,7 @@ const DynamicComponent = ({
 
 DynamicComponent.propTypes = {
   componentUid: PropTypes.string.isRequired,
-  history: PropTypes.shape({
-    push: PropTypes.func.isRequired,
-  }),
   setIsOverDynamicZone: PropTypes.func.isRequired,
 };
 
-export default withRouter(DynamicComponent);
+export default DynamicComponent;

@@ -1,8 +1,22 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { get, has } from 'lodash';
-import { ViewContainer } from 'strapi-helper-plugin';
+import PropTypes from 'prop-types';
+import { get, has, isEqual } from 'lodash';
+import { Header } from '@buffetjs/custom';
+import { List } from '@buffetjs/core';
+import ListRow from '../../components/ListRow';
+
+import {
+  ListWrapper,
+  useGlobalContext,
+  ViewContainer,
+} from 'strapi-helper-plugin';
+
 import useDataManager from '../../hooks/useDataManager';
+import pluginId from '../../pluginId';
+
+import ListHeader from '../../components/ListHeader';
+import { ListButton } from '../../components/ListButton';
 import LeftMenu from '../LeftMenu';
 
 const ListPage = () => {
@@ -22,6 +36,7 @@ const ListPage = () => {
     removeAttribute,
     removeComponentFromDynamicZone,
   } = useDataManager();
+  const { formatMessage } = useGlobalContext();
   const { push } = useHistory();
   const firstMainDataPath = isInContentTypeView ? 'contentType' : 'component';
   const mainDataTypeAttributesPath = [
@@ -31,6 +46,8 @@ const ListPage = () => {
   ];
 
   const attributes = get(modifiedData, mainDataTypeAttributesPath, {});
+  const attributesLength = Object.keys(attributes).length;
+
   const currentDataName = get(
     initialData,
     [firstMainDataPath, 'schema', 'name'],
@@ -43,14 +60,30 @@ const ListPage = () => {
     const search = `modalType=chooseAttribute&forTarget=${forTarget}&targetUid=${targetUid}&headerDisplayName=${currentDataName}`;
     push({ search });
   };
-  const handleClickAddAttributeNestedData = (targetUid, headerDisplayName) => {
-    const search = `modalType=chooseAttribute&forTarget=components&targetUid=${targetUid}&headerDisplayName=${headerDisplayName}`;
+  const handleClickAddAttributeNestedData = (
+    targetUid,
+    headerDisplayName,
+    headerDisplayCategory = null,
+    headerDisplaySubCategory = null,
+    subTargetUid = null
+  ) => {
+    const displayCategory = headerDisplayCategory
+      ? `&headerDisplayCategory=${headerDisplayCategory}`
+      : '';
+    const displaySubCategory = headerDisplaySubCategory
+      ? `&headerDisplaySubCategory=${headerDisplaySubCategory}`
+      : '';
+    const search = `modalType=chooseAttribute&forTarget=components&targetUid=${targetUid}&headerDisplayName=${headerDisplayName}${displayCategory}${displaySubCategory}${
+      subTargetUid ? `&subTargetUid=${subTargetUid}` : ''
+    }`;
+
     push({ search });
   };
   const handleClickAddComponentToDZ = dzName => {
-    const search = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${targetUid}&headerDisplayName=${currentDataName}&dynamicZoneTarget=${dzName}&settingType=base&step=1`;
+    const search = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${targetUid}&headerDisplayCategory=${currentDataName}&dynamicZoneTarget=${dzName}&settingType=base&step=1&actionType=edit&headerDisplayName=${dzName}`;
     push({ search });
   };
+
   // TODO just a util not sure it should be kept
   const getType = attrName => {
     const type = has(modifiedData, [
@@ -92,7 +125,10 @@ const ListPage = () => {
     targetUid,
     attrName,
     type,
-    headerDisplayName
+    headerDisplayName,
+    headerDisplayCategory = null
+    // TODO ADD LOGIC headerDisplaySubCategory when editing a field
+    // It should be the same one as adding a field
   ) => {
     let attributeType;
 
@@ -114,9 +150,130 @@ const ListPage = () => {
         attributeType = type;
     }
 
+    const step = type === 'component' ? '&step=2' : '';
+    const displayCategory = headerDisplayCategory
+      ? `&headerDisplayCategory=${headerDisplayCategory}`
+      : '';
+
     push({
-      search: `modalType=attribute&actionType=edit&settingType=base&forTarget=${forTarget}&targetUid=${targetUid}&attributeName=${attrName}&attributeType=${attributeType}&headerDisplayName=${headerDisplayName}`,
+      search: `modalType=attribute&actionType=edit&settingType=base&forTarget=${forTarget}&targetUid=${targetUid}&attributeName=${attrName}&attributeType=${attributeType}&headerDisplayName=${headerDisplayName}${step}${displayCategory}`,
     });
+  };
+
+  // const handleClickEditComponent = compoName => {
+  //   const search = `modalType=attribute&actionType=edit&settingType=base&forTarget=${forTarget}&targetUid=${targetUid}&attributeName=${attrName}&attributeType=${attributeType}&headerDisplayName=${headerDisplayName}`,
+  //   push({ search });
+  // }
+
+  const getDescription = () => {
+    const description = get(
+      modifiedData,
+      [firstMainDataPath, 'schema', 'description'],
+      null
+    );
+
+    return description
+      ? description
+      : formatMessage({
+          id: `${pluginId}.modelPage.contentHeader.emptyDescription.description`,
+        });
+  };
+
+  const getActions = () => {
+    // const handleSubmit = () =>
+    //   this.isUpdatingTempFeature()
+    //     ? submitTempGroup(newGroup, this.context)
+    //     : submitGroup(
+    //         featureName,
+    //         get(modifiedDataGroup, featureName),
+    //         Object.assign(this.context, {
+    //           history: this.props.history,
+    //         }),
+    //         this.getSource()
+    //       );
+
+    // const handleCancel = resetEditExistingGroup(this.getFeatureName());
+
+    return [
+      {
+        color: 'cancel',
+        onClick: () => {},
+        title: formatMessage({
+          id: `${pluginId}.form.button.cancel`,
+        }),
+        type: 'button',
+        disabled: isEqual(modifiedData, initialData) ? true : false,
+      },
+      {
+        color: 'success',
+        onClick: () => {},
+        title: formatMessage({
+          id: `${pluginId}.form.button.save`,
+        }),
+        type: 'submit',
+        disabled: isEqual(modifiedData, initialData) ? true : false,
+      },
+    ];
+  };
+
+  const headerProps = {
+    actions: getActions(),
+    title: {
+      label: get(modifiedData, [firstMainDataPath, 'schema', 'name']),
+    },
+    content: getDescription(),
+  };
+
+  const listTitle = [
+    formatMessage(
+      {
+        id: `${pluginId}.table.attributes.title.${
+          attributesLength > 1 ? 'plural' : 'singular'
+        }`,
+      },
+      { number: attributesLength }
+    ),
+  ];
+
+  const addButtonProps = {
+    icon: true,
+    color: 'primary',
+    label: formatMessage({ id: `${pluginId}.button.attributes.add.another` }),
+    onClick: () => handleClickAddAttributeMainData(),
+  };
+
+  const listActions = [{ ...addButtonProps }];
+
+  const convertDataToArray = () => {
+    return Object.keys(attributes).map((key, index) => {
+      return { ...attributes[key], name: key, index };
+    });
+  };
+
+  const handleClickEditAttribute = () => {};
+
+  const handleClickOnTrashIcon = () => {};
+
+  const CustomRow = ({ index, name, ...rest }) => {
+    return (
+      <ListRow
+        {...rest}
+        attributeId={index}
+        name={name}
+        onClick={handleClickEditAttribute}
+        onClickDelete={handleClickOnTrashIcon}
+      />
+    );
+  };
+
+  CustomRow.defaultProps = {
+    index: 0,
+    name: null,
+  };
+
+  CustomRow.propTypes = {
+    index: PropTypes.number,
+    name: PropTypes.string,
   };
 
   return (
@@ -124,10 +281,17 @@ const ListPage = () => {
       <div className="container-fluid">
         <div className="row">
           <LeftMenu />
-          <div className="col-md-9">
-            <button type="button" onClick={handleClickAddAttributeMainData}>
-              Add field
-            </button>
+          <div className="col-md-9 content">
+            <Header {...headerProps} />
+
+            <ListWrapper>
+              <ListHeader actions={listActions} title={listTitle} />
+              <List
+                items={convertDataToArray()}
+                customRowComponent={props => <CustomRow {...props} />}
+              ></List>
+              <ListButton {...addButtonProps}></ListButton>
+            </ListWrapper>
 
             {/* REALLY TEMPORARY SINCE IT DOESN T SUPPORT ANY NESTING COMPONENT*/}
             <ul>
@@ -143,7 +307,19 @@ const ListPage = () => {
                   );
 
                   return (
-                    <li key={attr}>
+                    <li
+                      key={attr}
+                      onClick={e => {
+                        e.stopPropagation();
+                        handleClickEditField(
+                          isInContentTypeView ? 'contentType' : 'component',
+                          targetUid,
+                          attr,
+                          'component',
+                          currentDataName
+                        );
+                      }}
+                    >
                       <div>
                         <span>{attr}</span>
                         &nbsp;
@@ -189,7 +365,27 @@ const ListPage = () => {
                             );
 
                             return (
-                              <li key={`${attr}.${componentAttr}`}>
+                              <li
+                                key={`${attr}.${componentAttr}`}
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  console.log('edit nested compo');
+                                  console.log(
+                                    'nested compo attr name',
+                                    componentAttr
+                                  );
+                                  handleClickEditField(
+                                    'components',
+                                    // component uid
+                                    get(compoData, 'uid'),
+                                    // attr name
+                                    componentAttr,
+                                    'component',
+                                    // header display
+                                    attr
+                                  );
+                                }}
+                              >
                                 <div>
                                   <span>{componentAttr}</span>
                                   &nbsp;
@@ -221,15 +417,17 @@ const ListPage = () => {
                                       return (
                                         <li
                                           key={`${attr}.${componentAttr}.${nestedCompoAttribute}`}
-                                          onClick={() =>
+                                          onClick={e => {
+                                            e.stopPropagation();
+
                                             handleClickEditField(
                                               'components',
                                               nestedCompoNameUid,
                                               nestedCompoAttribute,
                                               nestedComponentAttrType,
                                               nestedCompoNameUid
-                                            )
-                                          }
+                                            );
+                                          }}
                                         >
                                           <div>
                                             <span>{nestedCompoAttribute}</span>
@@ -260,10 +458,23 @@ const ListPage = () => {
                                   )}
                                   <button
                                     type="button"
-                                    onClick={() => {
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      console.log({
+                                        attr,
+                                        componentAttr,
+                                        nestedCompoNameUid,
+                                        top: compoData.uid,
+                                      });
                                       handleClickAddAttributeNestedData(
                                         nestedCompoNameUid,
-                                        componentAttr
+                                        componentAttr,
+                                        // Category
+                                        currentDataName,
+                                        // Sub category
+                                        attr,
+                                        // Sub targetuid
+                                        compoData.uid
                                       );
                                     }}
                                   >
@@ -278,15 +489,18 @@ const ListPage = () => {
                           return (
                             <li
                               key={`${attr}.${componentAttr}`}
-                              onClick={() =>
+                              onClick={e => {
+                                e.stopPropagation();
                                 handleClickEditField(
                                   'components',
                                   getFirstLevelComponentName(attr),
                                   componentAttr,
                                   componentAttrType,
-                                  attr
-                                )
-                              }
+                                  attr,
+                                  // Header category,
+                                  currentDataName
+                                );
+                              }}
                             >
                               <div>
                                 <span>{componentAttr}</span>
@@ -310,12 +524,14 @@ const ListPage = () => {
                         })}
                         <button
                           type="button"
-                          onClick={() =>
+                          onClick={e => {
+                            e.stopPropagation();
                             handleClickAddAttributeNestedData(
                               get(compoData, 'uid', ''),
-                              get(compoData, 'schema.name', 'ERROR')
-                            )
-                          }
+                              get(compoData, 'schema.name', 'ERROR'),
+                              currentDataName
+                            );
+                          }}
                         >
                           Add field to compo
                         </button>

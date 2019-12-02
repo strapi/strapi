@@ -20,7 +20,8 @@ const Wrapper = styled.div`
       font-size: 1.4rem;
       font-weight: 700;
     }
-    i {
+    i,
+    svg {
       margin-right: 8px;
     }
   }

@@ -1,8 +1,12 @@
 import { fromJS, OrderedMap } from 'immutable';
 import { get, has } from 'lodash';
+import makeUnique from '../../utils/makeUnique';
+
 const initialState = fromJS({
   components: {},
   contentTypes: {},
+  initialComponents: {},
+  intialContentTypes: {},
   initialData: {},
   modifiedData: {},
   isLoading: true,
@@ -93,7 +97,7 @@ const reducer = (state, action) => {
           return existingCompos;
         });
     }
-    case 'ADD_COMPONENTS_TO_DYNAMIC_ZONE': {
+    case 'ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE': {
       const { dynamicZoneTarget, componentsToAdd } = action;
 
       return state.updateIn(
@@ -110,6 +114,32 @@ const reducer = (state, action) => {
         }
       );
     }
+    case 'CHANGE_DYNAMIC_ZONE_COMPONENTS': {
+      const { dynamicZoneTarget, newComponents } = action;
+
+      return state
+        .updateIn(
+          [
+            'modifiedData',
+            'contentType',
+            'schema',
+            'attributes',
+            dynamicZoneTarget,
+            'components',
+          ],
+          () => fromJS(makeUnique(newComponents))
+        )
+        .updateIn(['modifiedData', 'components'], old => {
+          const componentsSchema = newComponents.reduce((acc, current) => {
+            const addedCompoSchema = state.getIn(['components', current]);
+
+            return acc.set(current, addedCompoSchema);
+          }, old);
+
+          return componentsSchema;
+        });
+    }
+
     case 'CREATE_SCHEMA': {
       const newSchema = {
         uid: action.uid,
@@ -154,12 +184,22 @@ const reducer = (state, action) => {
         targetUid,
         initialAttribute,
       } = action;
+      let newState = state;
       const initialAttributeName = get(initialAttribute, ['name'], '');
       const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
         ? [forTarget]
         : [forTarget, targetUid];
 
-      return state.updateIn(
+      const isEditingComponentAttribute = rest.type === 'component';
+
+      if (isEditingComponentAttribute) {
+        newState = state.updateIn(
+          ['modifiedData', 'components', rest.component],
+          () => state.getIn(['components', rest.component])
+        );
+      }
+
+      return newState.updateIn(
         ['modifiedData', ...pathToDataToEdit, 'schema'],
         obj => {
           let oppositeAttributeNameToRemove = null;

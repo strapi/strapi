@@ -130,7 +130,7 @@ const schemaBuilder = {
 
   generateSchema: function() {
     // Generate type definition and query/mutation for models.
-    let shadowCRUD = { definition: '', query: '', mutation: '', resolver: '' };
+    let shadowCRUD = { definition: '', query: '', mutation: '', resolvers: {} };
 
     // build defaults schemas if shadowCRUD is enabled
     if (strapi.plugins.graphql.config.shadowCRUD !== false) {
@@ -157,22 +157,18 @@ const schemaBuilder = {
       }, modelCruds);
     }
 
-    let components = Object.keys(strapi.components)
-      .map(key =>
-        Resolvers.buildModel(strapi.components[key], key, {
-          plugin: null,
-          isComponent: true,
-        })
-      )
-      .reduce(
-        (acc, component) => {
-          return {
-            definition: acc.definition + component.definition,
-            resolver: _.merge(acc.resolver, component.resolver),
-          };
-        },
-        { definition: '', resolver: {} }
-      );
+    const componentsSchema = {
+      definition: '',
+      resolvers: {},
+    };
+
+    Object.keys(strapi.components).forEach(key =>
+      Resolvers.buildModel(strapi.components[key], key, {
+        plugin: null,
+        isComponent: true,
+        schema: componentsSchema,
+      })
+    );
 
     // Extract custom definition, query or resolver.
     const {
@@ -192,8 +188,8 @@ const schemaBuilder = {
     const resolvers =
       _.omitBy(
         _.merge(
-          shadowCRUD.resolver,
-          components.resolver,
+          shadowCRUD.resolvers,
+          componentsSchema.resolvers,
           resolver,
           polymorphicResolver
         ),
@@ -202,6 +198,10 @@ const schemaBuilder = {
 
     // Transform object to only contain function.
     Object.keys(resolvers).reduce((acc, type) => {
+      if (graphql.isScalarType(acc[type])) {
+        return acc;
+      }
+
       return Object.keys(acc[type]).reduce((acc, resolverName) => {
         const resolverObj = acc[type][resolverName];
         // Disabled this query.
@@ -251,7 +251,7 @@ const schemaBuilder = {
             break;
           }
           case 'Query':
-          default:
+          default: {
             acc[type][resolverName] = Query.composeQueryResolver({
               _schema: strapi.plugins.graphql.config._schema.graphql,
               plugin,
@@ -259,6 +259,7 @@ const schemaBuilder = {
               isSingular: 'force', // Avoid singular/pluralize and force query name.
             });
             break;
+          }
         }
 
         return acc;
@@ -274,7 +275,7 @@ const schemaBuilder = {
     let typeDefs = `
       ${definition}
       ${shadowCRUD.definition}
-      ${components.definition}
+      ${componentsSchema.definition}
       type Query {${shadowCRUD.query &&
         this.formatGQL(
           shadowCRUD.query,

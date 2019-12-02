@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Cell from './Cell';
 
 const CellRenderer = ({ icon, name, onChange, style, value }) => {
@@ -15,7 +16,7 @@ const CellRenderer = ({ icon, name, onChange, style, value }) => {
       isSelected={isSelected}
       onClick={handleClick}
     >
-      <i className={`fa fa-${icon}`} />
+      <FontAwesomeIcon icon={icon} />
     </Cell>
   );
 };

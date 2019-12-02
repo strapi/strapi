@@ -4,11 +4,13 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { capitalize, get, sortBy } from 'lodash';
 import { FormattedMessage } from 'react-intl';
+import { Header } from '@buffetjs/custom';
 import {
-  PluginHeader,
   PopUpWarning,
   getQueryParameters,
+  useGlobalContext,
 } from 'strapi-helper-plugin';
+
 import pluginId from '../../pluginId';
 import DisplayedFieldsDropdown from '../../components/DisplayedFieldsDropdown';
 import FilterLogo from '../../assets/images/icon_filter.png';
@@ -20,6 +22,7 @@ import {
   generateFiltersFromSearch,
   generateSearchFromFilters,
 } from '../../utils/search';
+import getFeatureLabel from '../../utils/getFeatureLabel';
 import ListViewProvider from '../ListViewProvider';
 import { onChangeListLabels, resetListLabels } from '../Main/actions';
 import { AddFilterCta, Img, Wrapper } from './components';
@@ -47,7 +50,7 @@ function ListView({
   location: { pathname, search },
   getData,
   layouts,
-  isLoading,
+  models,
   history: { push },
   onChangeBulk,
   onChangeBulkSelectall,
@@ -65,7 +68,7 @@ function ListView({
 }) {
   strapi.useInjectReducer({ key: 'listView', reducer, pluginId });
   strapi.useInjectSaga({ key: 'listView', saga, pluginId });
-
+  const { formatMessage } = useGlobalContext();
   const getLayoutSettingRef = useRef();
   const [isLabelPickerOpen, setLabelPickerState] = useState(false);
   const [isFilterPickerOpen, setFilterPickerState] = useState(false);
@@ -88,7 +91,6 @@ function ListView({
           `${getLayoutSettingRef.current(
             'defaultSortBy'
           )}:${getLayoutSettingRef.current('defaultSortOrder')}`,
-        source: getQueryParameters(search, 'source'),
         filters: generateFiltersFromSearch(search),
         ...updatedParams,
       };
@@ -107,32 +109,44 @@ function ListView({
 
   const toggleLabelPickerState = () => {
     if (!isLabelPickerOpen) {
-      emitEvent('willChangeDisplayedFields');
+      emitEvent('willChangeListFieldsSettings');
     }
 
     setLabelPickerState(prevState => !prevState);
   };
   const toggleFilterPickerState = () => {
+    if (!isFilterPickerOpen) {
+      emitEvent('willFilterEntries');
+    }
+
     setFilterPickerState(prevState => !prevState);
   };
 
   // Helpers
   const getMetaDatas = (path = []) =>
     get(layouts, [...contentTypePath, 'metadatas', ...path], {});
+
   const getListLayout = () =>
     get(layouts, [...contentTypePath, 'layouts', 'list'], []);
+
+  const getListSchema = () => get(layouts, [...contentTypePath, 'schema'], {});
+
+  const getName = () => {
+    return getFeatureLabel(models, slug);
+  };
+
   const getAllLabels = () => {
     return sortBy(
       Object.keys(getMetaDatas())
         .filter(
           key =>
-            !['json', 'component', 'relation', 'richtext'].includes(
-              get(
-                layouts,
-                [...contentTypePath, 'schema', 'attributes', key, 'type'],
-                ''
-              )
-            )
+            ![
+              'json',
+              'component',
+              'dynamiczone',
+              'relation',
+              'richtext',
+            ].includes(get(getListSchema(), ['attributes', key, 'type'], ''))
         )
         .map(label => ({
           name: label,
@@ -141,6 +155,7 @@ function ListView({
       ['label', 'name']
     );
   };
+
   const getFirstSortableElement = (name = '') => {
     return get(
       getListLayout().filter(h => {
@@ -175,8 +190,13 @@ function ListView({
         },
       });
     }
+
     onChangeListLabels({
-      target: { name: `${slug}.${name}`, value: !value },
+      target: {
+        name,
+        slug,
+        value: !value,
+      },
     });
   };
 
@@ -217,14 +237,17 @@ function ListView({
       type: 'submit',
     },
   ];
-  const pluginHeaderActions = [
+
+  const headerAction = [
     {
-      id: 'addEntry',
-      label: 'content-manager.containers.List.addAnEntry',
-      labelValues: {
-        entity: capitalize(slug) || 'Content Manager',
-      },
-      kind: 'primaryAddShape',
+      title: formatMessage(
+        {
+          id: 'content-manager.containers.List.addAnEntry',
+        },
+        {
+          entity: capitalize(getName()) || 'Content Manager',
+        }
+      ),
       onClick: () => {
         emitEvent('willCreateEntry');
         push({
@@ -232,8 +255,32 @@ function ListView({
           search: `redirectUrl=${pathname}${search}`,
         });
       },
+      color: 'primary',
+      type: 'button',
+      icon: true,
+      style: {
+        paddingLeft: 15,
+        paddingRight: 15,
+        fontWeight: 600,
+      },
     },
   ];
+
+  const headerProps = {
+    title: {
+      label: getName() || 'Content Manager',
+    },
+    content: formatMessage(
+      {
+        id:
+          count > 1
+            ? `${pluginId}.containers.List.pluginHeaderDescription`
+            : `${pluginId}.containers.List.pluginHeaderDescription.singular`,
+      },
+      { label: count }
+    ),
+    actions: headerAction,
+  };
 
   return (
     <>
@@ -243,12 +290,13 @@ function ListView({
         entriesToDelete={entriesToDelete}
         emitEvent={emitEvent}
         firstSortableElement={getFirstSortableElement()}
+        label={getName()}
         onChangeBulk={onChangeBulk}
         onChangeBulkSelectall={onChangeBulkSelectall}
         onChangeParams={handleChangeParams}
         onClickDelete={handleClickDelete}
         onDeleteSeveralData={onDeleteSeveralData}
-        schema={get(layouts, [...contentTypePath, 'schema'], {})}
+        schema={getListSchema()}
         searchParams={getSearchParams()}
         slug={slug}
         toggleModalDeleteAll={toggleModalDeleteAll}
@@ -256,39 +304,22 @@ function ListView({
         <FilterPicker
           actions={filterPickerActions}
           isOpen={isFilterPickerOpen}
-          name={slug}
+          name={getName()}
           toggleFilterPickerState={toggleFilterPickerState}
           onSubmit={handleSubmit}
         />
         <Container className="container-fluid">
-          {!isFilterPickerOpen && (
-            <PluginHeader
-              actions={pluginHeaderActions}
-              description={{
-                id:
-                  count > 1
-                    ? `${pluginId}.containers.List.pluginHeaderDescription`
-                    : `${pluginId}.containers.List.pluginHeaderDescription.singular`,
-                values: {
-                  label: count,
-                },
-              }}
-              title={{
-                id: slug || 'Content Manager',
-              }}
-              withDescriptionAnim={isLoading}
-            />
-          )}
+          {!isFilterPickerOpen && <Header {...headerProps} />}
           {getLayoutSettingRef.current('searchable') && (
             <Search
               changeParams={handleChangeParams}
               initValue={getQueryParameters(search, '_q') || ''}
-              model={slug}
+              model={getName()}
               value={getQueryParameters(search, '_q') || ''}
             />
           )}
           <Wrapper>
-            <div className="row" style={{ marginBottom: '6px' }}>
+            <div className="row" style={{ marginBottom: '5px' }}>
               <div className="col-10">
                 <div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
                   {getLayoutSettingRef.current('filterable') && (
@@ -308,11 +339,7 @@ function ListView({
                           changeParams={handleChangeParams}
                           filters={getSearchParams().filters}
                           index={key}
-                          schema={get(
-                            layouts,
-                            [...contentTypePath, 'schema'],
-                            {}
-                          )}
+                          schema={getListSchema()}
                           key={key}
                           toggleFilterPickerState={toggleFilterPickerState}
                           isFilterPickerOpen={isFilterPickerOpen}
@@ -331,19 +358,17 @@ function ListView({
                     resetListLabels(slug);
                   }}
                   slug={slug}
-                  source={getSearchParams().source}
                   toggle={toggleLabelPickerState}
                 />
               </div>
             </div>
-            <div className="row" style={{ paddingTop: '30px' }}>
+            <div className="row" style={{ paddingTop: '12px' }}>
               <div className="col-12">
                 <CustomTable
                   data={data}
                   headers={getTableHeaders()}
                   isBulkable={getLayoutSettingRef.current('bulkable')}
                   onChangeParams={handleChangeParams}
-                  slug={slug}
                 />
                 <Footer />
               </div>
@@ -361,7 +386,7 @@ function ListView({
           }}
           popUpWarningType="danger"
           onConfirm={() => {
-            onDeleteData(idToDelete, slug, getSearchParams().source, emitEvent);
+            onDeleteData(idToDelete, slug, emitEvent);
           }}
         />
         <PopUpWarning
@@ -377,11 +402,7 @@ function ListView({
           }}
           popUpWarningType="danger"
           onConfirm={() => {
-            onDeleteSeveralData(
-              entriesToDelete,
-              slug,
-              getSearchParams().source
-            );
+            onDeleteSeveralData(entriesToDelete, slug);
           }}
         />
       </ListViewProvider>
@@ -402,8 +423,8 @@ ListView.propTypes = {
     pathname: PropTypes.string.isRequired,
     search: PropTypes.string.isRequired,
   }),
+  models: PropTypes.array.isRequired,
   getData: PropTypes.func.isRequired,
-  isLoading: PropTypes.bool.isRequired,
   history: PropTypes.shape({
     push: PropTypes.func.isRequired,
   }),

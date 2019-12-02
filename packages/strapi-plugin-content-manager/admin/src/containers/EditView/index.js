@@ -9,7 +9,7 @@ import React, {
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
-import { BackHeader, getQueryParameters, LiLink } from 'strapi-helper-plugin';
+import { BackHeader, LiLink } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import Container from '../../components/Container';
 import DynamicZone from '../../components/DynamicZone';
@@ -20,13 +20,14 @@ import SelectWrapper from '../../components/SelectWrapper';
 import EditViewDataManagerProvider from '../EditViewDataManagerProvider';
 import EditViewProvider from '../EditViewProvider';
 import Header from './Header';
-import getInjectedComponents from './utils/getComponents';
 import createAttributesLayout from './utils/createAttributesLayout';
 import { LinkWrapper, SubWrapper } from './components';
+import getInjectedComponents from '../../utils/getComponents';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
 const EditView = ({
+  components,
   currentEnvironment,
   emitEvent,
   layouts,
@@ -63,7 +64,6 @@ const EditView = ({
     () => get(currentContentTypeLayoutData, ['schema'], {}),
     [currentContentTypeLayoutData]
   );
-  const source = getQueryParameters(search, 'source');
 
   const getFieldMetas = useCallback(
     fieldName => {
@@ -93,6 +93,7 @@ const EditView = ({
     },
     [getField]
   );
+
   // Check if a block is a dynamic zone
   const isDynamicZone = useCallback(
     block => {
@@ -131,6 +132,7 @@ const EditView = ({
   return (
     <EditViewProvider
       allLayoutData={allLayoutData}
+      components={components}
       layout={currentContentTypeLayoutData}
       isDraggingComponent={isDraggingComponent}
       setIsDraggingComponent={() => {
@@ -152,8 +154,8 @@ const EditView = ({
         <BackHeader onClick={() => redirectToPreviousPage()} />
         <Container className="container-fluid">
           <Header />
-          <div className="row">
-            <div className="col-md-12 col-lg-9">
+          <div className="row" style={{ paddingTop: 3 }}>
+            <div className="col-md-12 col-lg-9" style={{ marginBottom: 13 }}>
               {formattedContentTypeLayout.map((block, blockIndex) => {
                 if (isDynamicZone(block)) {
                   const {
@@ -273,8 +275,7 @@ const EditView = ({
                     }}
                     icon="layout"
                     key={`${pluginId}.link`}
-                    // url={`/plugins/${pluginId}/ctm-configurations/edit-settings/content-types/${slug}${`?source=${source}`}`}
-                    url={`ctm-configurations/edit-settings/content-types${`?source=${source}`}`}
+                    url={`ctm-configurations/edit-settings/content-types`}
                     onClick={() => {
                       // emitEvent('willEditContentTypeLayoutFromEditView');
                     }}
@@ -284,8 +285,8 @@ const EditView = ({
                     plugins,
                     currentEnvironment,
                     slug,
-                    source,
-                    emitEvent
+                    emitEvent,
+                    true
                   )}
                 </ul>
               </LinkWrapper>
@@ -305,6 +306,7 @@ EditView.defaultProps = {
 
 EditView.propTypes = {
   currentEnvironment: PropTypes.string,
+  components: PropTypes.array.isRequired,
   emitEvent: PropTypes.func,
   layouts: PropTypes.object.isRequired,
   slug: PropTypes.string.isRequired,

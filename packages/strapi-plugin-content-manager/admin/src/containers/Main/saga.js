@@ -50,15 +50,13 @@ function* getData() {
   }
 }
 
-function* getLayout({ source, uid }) {
+function* getLayout({ uid }) {
   try {
-    const params = source !== 'content-manager' ? { source } : {};
     const { data: layout } = yield call(
       request,
       getRequestUrl(`content-types/${uid}`),
       {
         method: 'GET',
-        params,
       }
     );
 

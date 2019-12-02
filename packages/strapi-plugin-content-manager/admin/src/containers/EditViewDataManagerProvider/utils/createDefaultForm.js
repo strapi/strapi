@@ -39,12 +39,18 @@ const createDefaultForm = (attributes, allComponentsSchema) => {
         acc[current] = repeatable === true ? [] : {};
       }
 
-      if (min && repeatable === true) {
+      if (min && repeatable === true && required) {
         acc[current] = [];
 
         for (let i = 0; i < min; i++) {
           acc[current].push(currentComponentDefaultForm);
         }
+      }
+    }
+
+    if (type === 'dynamiczone') {
+      if (required === true) {
+        acc[current] = [];
       }
     }
 

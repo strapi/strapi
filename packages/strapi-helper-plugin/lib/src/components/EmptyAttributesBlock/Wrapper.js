@@ -24,7 +24,8 @@ const Wrapper = styled.div`
     > button {
       padding-right: 1.5rem;
       font-size: 1.3rem;
-      > i {
+      > i,
+      > svg {
         margin-right: 1rem !important;
       }
     }

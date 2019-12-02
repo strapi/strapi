@@ -22,6 +22,7 @@ const WrapperSelect = ({ error, label, name, type, ...rest }) => {
     menu: base => {
       return {
         ...base,
+        padding: '0 15px',
         border: '1px solid #78caff !important',
         borderColor: '#78caff !important',
         borderTopColor: '#E3E9F3 !important',

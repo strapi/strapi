@@ -3,6 +3,7 @@ import { useDrop } from 'react-dnd';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { FormattedMessage } from 'react-intl';
+import { ErrorMessage } from '@buffetjs/styles';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import ItemTypes from '../../utils/ItemTypes';
@@ -119,8 +120,6 @@ const RepeatableComponent = ({
         }
         type="button"
         onClick={() => {
-          // TODO min max validations
-          // TODO add componentUID
           if (componentValueLength < max) {
             const shouldCheckErrors = hasMinError;
             addRepeatableComponentToField(
@@ -131,7 +130,7 @@ const RepeatableComponent = ({
             dispatch({
               type: 'ADD_NEW_FIELD',
             });
-          } else {
+          } else if (componentValueLength > max) {
             strapi.notification.info(
               `${pluginId}.components.components.notification.info.maximum-requirement`
             );
@@ -142,7 +141,14 @@ const RepeatableComponent = ({
         <FormattedMessage id={`${pluginId}.containers.EditView.add.new`} />
       </Button>
       {hasMinError && (
-        <div>There is {missingComponentsValue} missing components</div>
+        <ErrorMessage>
+          <FormattedMessage
+            id={`${pluginId}.components.DynamicZone.missing${
+              missingComponentsValue > 1 ? '.plural' : '.singular'
+            }`}
+            values={{ count: missingComponentsValue }}
+          />
+        </ErrorMessage>
       )}
     </div>
   );

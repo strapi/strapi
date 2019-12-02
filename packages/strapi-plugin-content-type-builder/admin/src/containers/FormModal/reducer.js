@@ -1,6 +1,11 @@
 import { fromJS } from 'immutable';
 import pluralize from 'pluralize';
+import makeUnique from '../../utils/makeUnique';
 import { createComponentUid } from './utils/createUid';
+import {
+  shouldPluralizeName,
+  shouldPluralizeTargetAttribute,
+} from './utils/relations';
 
 const initialState = fromJS({
   formErrors: {},
@@ -10,13 +15,23 @@ const initialState = fromJS({
   isCreatingComponentWhileAddingAField: false,
 });
 
-export const shouldPluralizeTargetAttribute = nature =>
-  ['manyToMany', 'manyToOne'].includes(nature) ? 2 : 1;
-export const shouldPluralizeName = nature =>
-  ['manyToMany', 'oneToMany', 'manyWay'].includes(nature) ? 2 : 1;
-
 const reducer = (state, action) => {
   switch (action.type) {
+    case 'ADD_COMPONENTS_TO_DYNAMIC_ZONE': {
+      const { name, components, shouldAddComponents } = action;
+
+      return state.updateIn(['modifiedData', name], list => {
+        if (shouldAddComponents) {
+          return makeUnique(list.concat(components));
+        } else {
+          return makeUnique(
+            list.filter(comp => {
+              return components.indexOf(comp) === -1;
+            })
+          );
+        }
+      });
+    }
     case 'ON_CHANGE':
       return state.update('modifiedData', obj => {
         const {
@@ -183,6 +198,11 @@ const reducer = (state, action) => {
       }
 
       return state.update('modifiedData', () => fromJS(dataToSet));
+    }
+    case 'SET_DYNAMIC_ZONE_DATA_SCHEMA': {
+      return state
+        .update('modifiedData', () => fromJS(action.attributeToEdit))
+        .update('initialData', () => fromJS(action.attributeToEdit));
     }
 
     case 'SET_ERRORS':

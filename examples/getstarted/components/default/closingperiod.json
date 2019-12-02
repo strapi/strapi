@@ -3,7 +3,8 @@
   "collectionName": "components_closingperiods",
   "info": {
     "name": "closingperiod",
-    "description": ""
+    "description": "",
+    "icon": "briefcase"
   },
   "attributes": {
     "label": {
@@ -16,6 +17,11 @@
     "end_date": {
       "type": "date",
       "required": true
+    },
+    "media": {
+      "model": "file",
+      "via": "related",
+      "plugin": "upload"
     },
     "dish": {
       "component": "default.dish",

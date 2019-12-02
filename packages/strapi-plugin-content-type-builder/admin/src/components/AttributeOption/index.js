@@ -43,9 +43,13 @@ const AttributeOption = forwardRef(({ tabIndex, type }, ref) => {
     const targetUid = query.get('targetUid');
     const headerDisplayName = query.get('headerDisplayName');
     const step = type === 'component' ? '&step=1' : '';
+    const headerDisplayCat = query.get('headerDisplayCategory');
+    const headerDisplayCategory = headerDisplayCat
+      ? `&headerDisplayCategory=${headerDisplayCat}`
+      : '';
 
     push({
-      search: `modalType=attribute&actionType=create&settingType=base&forTarget=${forTarget}&targetUid=${targetUid}&attributeType=${type}&headerDisplayName=${headerDisplayName}${step}`,
+      search: `modalType=attribute&actionType=create&settingType=base&forTarget=${forTarget}&targetUid=${targetUid}&attributeType=${type}&headerDisplayName=${headerDisplayName}${step}${headerDisplayCategory}`,
     });
   };
 

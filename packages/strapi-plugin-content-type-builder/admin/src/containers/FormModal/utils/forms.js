@@ -8,6 +8,7 @@ import getTrad from '../../../utils/getTrad';
 import { createComponentUid, createUid, nameToSlug } from './createUid';
 import componentForm from './componentForm';
 import fields from './staticFields';
+import { NAME_REGEX, ENUM_REGEX } from './attributesRegexes';
 
 yup.addMethod(yup.mixed, 'defined', function() {
   return this.test(
@@ -88,6 +89,7 @@ const forms = {
         name: yup
           .string()
           .unique(errorsTrads.unique, alreadyTakenAttributes)
+          .matches(NAME_REGEX, errorsTrads.regex)
           .required(errorsTrads.required),
         type: yup.string().required(errorsTrads.required),
         default: yup.string().nullable(),
@@ -169,7 +171,15 @@ const forms = {
           });
         case 'enumeration':
           return yup.object().shape({
-            ...commonShape,
+            name: yup
+              .string()
+              .unique(errorsTrads.unique, alreadyTakenAttributes)
+              .matches(ENUM_REGEX, errorsTrads.regex)
+              .required(errorsTrads.required),
+            type: yup.string().required(errorsTrads.required),
+            default: yup.string().nullable(),
+            unique: yup.boolean().nullable(),
+            required: yup.boolean(),
             enum: yup
               .array()
               .of(yup.string())
@@ -193,10 +203,12 @@ const forms = {
           return yup.object().shape({
             name: yup
               .string()
+              .matches(NAME_REGEX, errorsTrads.regex)
               .unique(errorsTrads.unique, alreadyTakenAttributes)
               .required(errorsTrads.required),
             targetAttribute: yup
               .string()
+              .matches(NAME_REGEX, errorsTrads.regex)
               .unique(errorsTrads.unique, targetAttributeAlreadyTakenValue)
               .required(errorsTrads.required),
             target: yup.string().required(errorsTrads.required),

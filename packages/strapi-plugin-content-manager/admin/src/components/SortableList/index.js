@@ -37,9 +37,8 @@ const SortableList = ({ addItem, buttonData, moveItem, removeItem }) => {
           style={{
             marginLeft: 10,
             marginRight: 10,
-            marginBottom: 10,
+            marginBottom: 13,
           }}
-          pStyle={{ marginTop: '-2px' }}
         />
       </SortWrapper>
     </div>

@@ -47,11 +47,13 @@ const FormModal = () => {
   const attributeOptionRef = useRef();
   const {
     addAttribute,
-    addComponentsToDynamicZone,
+    addCreatedComponentToDynamicZone,
+    changeDynamicZoneComponents,
     contentTypes,
     components,
     createSchema,
     modifiedData: allDataSchema,
+    nestedComponents,
     sortedContentTypesList,
   } = useDataManager();
   const {
@@ -64,35 +66,66 @@ const FormModal = () => {
 
   useEffect(() => {
     if (!isEmpty(search)) {
-      // Return 'null' if there isn't any attributeType search params
-      const attributeType = query.get('attributeType');
-      const modalType = query.get('modalType');
       const actionType = query.get('actionType');
+      // Return 'null' if there isn't any attributeType search params
       const attributeName = query.get('attributeName');
-      const settingType = query.get('settingType');
-      const forTarget = query.get('forTarget');
-      const targetUid = query.get('targetUid');
-      const headerDisplayName = query.get('headerDisplayName');
-      const step = query.get('step');
+      const attributeType = query.get('attributeType');
       const dynamicZoneTarget = query.get('dynamicZoneTarget');
+      const forTarget = query.get('forTarget');
+      const headerDisplayCategory = query.get('headerDisplayCategory');
+      const headerDisplayName = query.get('headerDisplayName');
+      const headerDisplaySubCategory = query.get('headerDisplaySubCategory');
+      const modalType = query.get('modalType');
+      const targetUid = query.get('targetUid');
+      const settingType = query.get('settingType');
+      const subTargetUid = query.get('subTargetUid');
+      const step = query.get('step');
       const pathToSchema =
         forTarget === 'contentType' || forTarget === 'component'
           ? [forTarget]
           : [forTarget, targetUid];
 
       setState({
-        attributeName,
         actionType,
-        dynamicZoneTarget,
-        modalType,
-        settingType,
-        forTarget,
-        targetUid,
-        headerDisplayName,
+        attributeName,
         attributeType,
+        dynamicZoneTarget,
+        headerDisplayName,
+        headerDisplayCategory,
+        headerDisplaySubCategory,
+        forTarget,
+        modalType,
         pathToSchema,
+        settingType,
+        subTargetUid,
         step,
+        targetUid,
       });
+
+      // Special case for the dynamic zone
+      if (
+        modalType === 'addComponentToDynamicZone' &&
+        state.modalType !== 'addComponentToDynamicZone' &&
+        actionType === 'edit'
+      ) {
+        const attributeToEditNotFormatted = get(
+          allDataSchema,
+          [...pathToSchema, 'schema', 'attributes', dynamicZoneTarget],
+          {}
+        );
+        const attributeToEdit = {
+          ...attributeToEditNotFormatted,
+          name: dynamicZoneTarget,
+          // createComponent: true,
+          createComponent: false,
+          componentToCreate: { type: 'component' },
+        };
+
+        dispatch({
+          type: 'SET_DYNAMIC_ZONE_DATA_SCHEMA',
+          attributeToEdit,
+        });
+      }
 
       // Set the predefined data structure to create an attribute
       if (
@@ -110,6 +143,14 @@ const FormModal = () => {
           ...attributeToEditNotFormatted,
           name: attributeName,
         };
+
+        // We need to set the repeatable key to false when editing a component
+        // The API doesn't send this info
+        if (attributeType === 'component' && actionType === 'edit') {
+          if (!attributeToEdit.repeatable) {
+            set(attributeToEdit, 'repeatable', false);
+          }
+        }
 
         if (
           attributeType === 'relation' &&
@@ -238,6 +279,17 @@ const FormModal = () => {
     await schema.validate(dataToValidate, { abortEarly: false });
   };
 
+  const handleClickAddComponentsToDynamicZone = ({
+    target: { name, components, shouldAddComponents },
+  }) => {
+    dispatch({
+      type: 'ADD_COMPONENTS_TO_DYNAMIC_ZONE',
+      name,
+      components,
+      shouldAddComponents,
+    });
+  };
+
   const handleChange = ({ target: { name, value, type, ...rest } }) => {
     const namesThatCanResetToNullValue = [
       'enumName',
@@ -346,7 +398,8 @@ const FormModal = () => {
 
         // Add/edit a field
       } else if (isCreatingAttribute && !isCreatingComponentFromAView) {
-        // Normal fields like boolean relations
+        console.log('not creat compo');
+        // Normal fields like boolean relations or dynamic zone
         if (!isComponentAttribute) {
           addAttribute(
             modifiedData,
@@ -356,11 +409,15 @@ const FormModal = () => {
             initialData
           );
           const isDynamicZoneAttribute = state.attributeType === 'dynamiczone';
-
           // Adding a component to a dynamiczone is not the same logic as creating a simple field
           // so the search is different
           // TODO make sure it works for edit
-          const dzSearch = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${state.targetUid}&headerDisplayName=${state.headerDisplayName}&dynamicZoneTarget=${modifiedData.name}&settingType=base&step=1`;
+          // const dzSearch = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${state.targetUid}&headerDisplayName=${state.headerDisplayName}&dynamicZoneTarget=${modifiedData.name}&settingType=base&step=1&actionType=create`;
+
+          // For the modal header
+          const displayCategory = state.headerDisplayName;
+          const displayName = modifiedData.name;
+          const dzSearch = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${state.targetUid}&headerDisplayName=${displayName}&headerDisplayCategory=${displayCategory}&dynamicZoneTarget=${modifiedData.name}&settingType=base&step=1&actionType=create`;
           const nextSearch = isDynamicZoneAttribute
             ? dzSearch
             : createNextSearch(targetUid);
@@ -401,6 +458,7 @@ const FormModal = () => {
             return;
 
             // Here we are in step 2
+            // The step 2 is also use to edit an attribute that is a component
           } else {
             addAttribute(
               modifiedData,
@@ -472,14 +530,18 @@ const FormModal = () => {
 
           // TODO temporary
           dispatch({ type: 'RESET_PROPS' });
-          push({ search: '' });
+
+          // Open modal attribute for adding attr to component
+          // The we inverse the headerDisplayName because it becomes the last one displayed
+          const searchToOpenModalAttributeToAddAttributesToAComponent = `modalType=chooseAttribute&forTarget=components&targetUid=${componentUid}&headerDisplayName=${componentToCreate.name}&headerDisplayCategory=${state.headerDisplayName}`;
+          push({
+            search: searchToOpenModalAttributeToAddAttributesToAComponent,
+          });
           return;
         }
         // The modal is addComponentToDynamicZone
       } else {
         if (isInFirstComponentStep) {
-          console.log('add compo dz step 1', isCreatingComponentFromAView);
-          // addCo
           if (isCreatingComponentFromAView) {
             const { category, type, ...rest } = modifiedData.componentToCreate;
             const componentUid = createComponentUid(
@@ -501,12 +563,26 @@ const FormModal = () => {
               // Like explained above we will be able to modify the created component structure
               isCreatingComponentFromAView
             );
-            addComponentsToDynamicZone(state.dynamicZoneTarget, [componentUid]);
+            // Add the created component to the DZ
+            // We don't want to remove the old ones
+            addCreatedComponentToDynamicZone(state.dynamicZoneTarget, [
+              componentUid,
+            ]);
+
+            // TODO change routing so the user can add fields to the created component
+            push({ search: '' });
           } else {
-            console.log('not ready');
+            // Add the components to the DZ
+            changeDynamicZoneComponents(
+              state.dynamicZoneTarget,
+              modifiedData.components
+            );
+
+            // TODO nav
+            push({ search: '' });
           }
         } else {
-          console.log('step 2???');
+          console.error('This case is not handled');
         }
 
         return;
@@ -517,7 +593,6 @@ const FormModal = () => {
       });
     } catch (err) {
       const errors = getYupInnerErrors(err);
-      console.log({ err, errors });
 
       dispatch({
         type: 'SET_ERRORS',
@@ -550,14 +625,18 @@ const FormModal = () => {
   };
 
   // Display data for the attributes picker modal
-  const displayedAttributes = getAttributes(state.forTarget);
+  const displayedAttributes = getAttributes(
+    state.forTarget,
+    state.targetUid,
+    nestedComponents
+  );
+
+  console.log({ state });
 
   // Styles
   const modalBodyStyle = isPickingAttribute
     ? { paddingTop: '0.5rem', paddingBottom: '3rem' }
     : {};
-
-  console.log({ modifiedData });
 
   return (
     <Modal
@@ -565,13 +644,19 @@ const FormModal = () => {
       onOpened={onOpened}
       onClosed={onClosed}
       onToggle={handleToggle}
+      withoverflow={toString(state.modalType === 'addComponentToDynamicZone')}
     >
       <HeaderModal>
         <ModalHeader
           // We need to add the category here
           name={state.headerDisplayName}
+          category={state.headerDisplayCategory}
           headerId={headerId}
           iconType={iconType || 'contentType'}
+          subCategory={state.headerDisplaySubCategory}
+          subTargetUid={state.subTargetUid}
+          target={state.forTarget}
+          targetUid={state.targetUid}
         />
         <section>
           <HeaderModalTitle>
@@ -786,6 +871,9 @@ const FormModal = () => {
                                 key={input.name}
                               >
                                 <Inputs
+                                  addComponentsToDynamicZone={
+                                    handleClickAddComponentsToDynamicZone
+                                  }
                                   customInputs={{
                                     componentIconPicker: ComponentIconPicker,
                                     componentSelect: WrapperSelect,
@@ -812,6 +900,10 @@ const FormModal = () => {
                                     'name',
                                     null
                                   )}
+                                  isAddingAComponentToAnotherComponent={
+                                    state.forTarget === 'components' ||
+                                    state.forTarget === 'component'
+                                  }
                                   value={value}
                                   {...input}
                                   error={

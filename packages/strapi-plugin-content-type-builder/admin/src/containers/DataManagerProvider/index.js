@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { get, groupBy, sortBy } from 'lodash';
+import { get, groupBy, set, sortBy } from 'lodash';
 import { request, LoadingIndicatorPage } from 'strapi-helper-plugin';
 import { useLocation, useRouteMatch, Redirect } from 'react-router-dom';
 import DataManagerContext from '../../contexts/DataManagerContext';
@@ -14,6 +14,9 @@ import createModifiedDataSchema, {
 } from './utils/createModifiedDataSchema';
 import retrieveSpecificInfoFromComponents from './utils/retrieveSpecificInfoFromComponents';
 import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
+import retrieveNestedComponents from './utils/retrieveNestedComponents';
+import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
+import makeUnique from '../../utils/makeUnique';
 
 const DataManagerProvider = ({ allIcons, children }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
@@ -94,9 +97,12 @@ const DataManagerProvider = ({ allIcons, children }) => {
       shouldAddComponentToData,
     });
   };
-  const addComponentsToDynamicZone = (dynamicZoneTarget, componentsToAdd) => {
+  const addCreatedComponentToDynamicZone = (
+    dynamicZoneTarget,
+    componentsToAdd
+  ) => {
     dispatch({
-      type: 'ADD_COMPONENTS_TO_DYNAMIC_ZONE',
+      type: 'ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE',
       dynamicZoneTarget,
       componentsToAdd,
     });
@@ -120,6 +126,13 @@ const DataManagerProvider = ({ allIcons, children }) => {
       schemaType,
       uid,
       shouldAddComponentToData,
+    });
+  };
+  const changeDynamicZoneComponents = (dynamicZoneTarget, newComponents) => {
+    dispatch({
+      type: 'CHANGE_DYNAMIC_ZONE_COMPONENTS',
+      dynamicZoneTarget,
+      newComponents,
     });
   };
   const removeAttribute = (
@@ -198,13 +211,38 @@ const DataManagerProvider = ({ allIcons, children }) => {
     return <Redirect to={`/plugins/${pluginId}/content-types/${firstCTUid}`} />;
   }
 
-  console.warn({ allData: modifiedData });
+  const getAllNestedComponents = () => {
+    const appNestedCompo = retrieveNestedComponents(components);
+    const editingDataNestedCompos = retrieveNestedComponents(
+      modifiedData.components || {}
+    );
+
+    return makeUnique([...editingDataNestedCompos, ...appNestedCompo]);
+  };
+
+  const getAllComponentsThatHaveAComponentInTheirAttributes = () => {
+    // We need to create an object with all the non modified compos
+    // plus the ones that are created on the fly
+    const allCompos = Object.assign({}, components, modifiedData.components);
+
+    // Since we apply the modification of a specific component only in the modified data
+    // we need to update all compos with the modifications
+    if (!isInContentTypeView) {
+      const currentEditedCompo = get(modifiedData, 'component', {});
+
+      set(allCompos, get(currentEditedCompo, ['uid'], ''), currentEditedCompo);
+    }
+
+    const composWithCompos = retrieveComponentsThatHaveComponents(allCompos);
+
+    return makeUnique(composWithCompos);
+  };
 
   return (
     <DataManagerContext.Provider
       value={{
         addAttribute,
-        addComponentsToDynamicZone,
+        addCreatedComponentToDynamicZone,
         allComponentsCategories: retrieveSpecificInfoFromComponents(
           components,
           ['category']
@@ -213,14 +251,17 @@ const DataManagerProvider = ({ allIcons, children }) => {
           components,
           ['schema', 'icon']
         ),
+        allIcons,
+        changeDynamicZoneComponents,
         components,
         componentsGroupedByCategory: groupBy(components, 'category'),
+        componentsThatHaveOtherComponentInTheirAttributes: getAllComponentsThatHaveAComponentInTheirAttributes(),
         contentTypes,
         createSchema,
-        allIcons,
         initialData,
         isInContentTypeView,
         modifiedData,
+        nestedComponents: getAllNestedComponents(),
         removeAttribute,
         removeComponentFromDynamicZone,
         setModifiedData,

@@ -1,7 +1,8 @@
 {
   "info": {
     "name": "slide",
-    "description": ""
+    "description": "",
+    "icon": "camera"
   },
   "connection": "default",
   "collectionName": "components_slides",

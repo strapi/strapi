@@ -34,30 +34,48 @@ const VALID_TYPES = [
 
 const componentSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
   modelType: modelTypes.COMPONENT,
-}).shape({
-  icon: yup
-    .string()
-    .nullable()
-    .test(isValidName)
-    .required('icon.required'),
-  category: yup
-    .string()
-    .nullable()
-    .test(isValidName)
-    .required('category.required'),
-});
+})
+  .shape({
+    icon: yup
+      .string()
+      .nullable()
+      .test(isValidName)
+      .required('icon.required'),
+    category: yup
+      .string()
+      .nullable()
+      .test(isValidName)
+      .required('category.required'),
+  })
+  .required()
+  .noUnknown();
 
-const createComponentSchema = () => {
-  return yup
-    .object({
-      component: componentSchema.required().noUnknown(),
-      components: yup.array().of(componentSchema),
+const nestedComponentSchema = yup.array().of(
+  componentSchema
+    .shape({
+      uid: yup.string(),
+      tmpUID: yup.string(),
     })
-    .noUnknown();
-};
+    .test({
+      name: 'mustHaveUIDOrTmpUID',
+      message: 'Component must have a uid or a tmpUID',
+      test: attr => {
+        if (_.has(attr, 'uid') && _.has(attr, 'tmpUID')) return false;
+        if (!_.has(attr, 'uid') && !_.has(attr, 'tmpUID')) return false;
+        return true;
+      },
+    })
+    .required()
+    .noUnknown()
+);
 
 const validateComponentInput = data => {
-  return createComponentSchema()
+  return yup
+    .object({
+      component: componentSchema,
+      components: nestedComponentSchema,
+    })
+    .noUnknown()
     .validate(data, {
       strict: true,
       abortEarly: false,
@@ -87,7 +105,12 @@ const validateUpdateComponentInput = data => {
     });
   }
 
-  return createComponentSchema()
+  return yup
+    .object({
+      component: componentSchema,
+      components: nestedComponentSchema,
+    })
+    .noUnknown()
     .validate(data, {
       strict: true,
       abortEarly: false,
@@ -98,4 +121,6 @@ const validateUpdateComponentInput = data => {
 module.exports = {
   validateComponentInput,
   validateUpdateComponentInput,
+
+  nestedComponentSchema,
 };

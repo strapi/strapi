@@ -4,7 +4,7 @@ import { Button } from 'strapi-helper-plugin';
 import RemoveIcon from '../../assets/images/icon-cross-blue.svg';
 
 const Wrapper = styled.div`
-  padding-top: 18px;
+  padding-top: 1px;
 `;
 
 const AddFilterCta = styled(Button)`

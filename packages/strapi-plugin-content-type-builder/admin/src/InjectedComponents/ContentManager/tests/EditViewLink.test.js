@@ -28,19 +28,4 @@ describe('<EditViewLink />', () => {
 
     expect(liLink).toHaveLength(0);
   });
-
-  it('should handle the source correctly if it is undefined', () => {
-    const wrapper = shallow(<EditViewLink {...props} />);
-    const liLink = wrapper.find(LiLink);
-
-    expect(liLink.prop('url')).toBe('/plugins/test');
-  });
-
-  it('should handle the source correctly if it is not undefined', () => {
-    props.getSource = jest.fn(() => 'users-permissions');
-    const wrapper = shallow(<EditViewLink {...props} />);
-    const liLink = wrapper.find(LiLink);
-
-    expect(liLink.prop('url')).toBe('/plugins/test&source=users-permissions');
-  });
 });

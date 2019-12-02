@@ -77,8 +77,9 @@ const GlobalStyle = createGlobalStyle`
     border-radius: .2rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     border: none;
+
   }
-  
+
   .modal-header {
     button {
       &.close {

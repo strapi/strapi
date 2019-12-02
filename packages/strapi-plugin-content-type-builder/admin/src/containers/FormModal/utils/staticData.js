@@ -1,16 +1,19 @@
 const NAVLINKS = [{ id: 'base' }, { id: 'advanced' }];
 const INITIAL_STATE_DATA = {
-  attributeName: null,
   actionType: null,
-  dynamicZoneTarget: null,
-  modalType: null,
-  settingType: null,
-  forTarget: null,
-  targetUid: null,
+  attributeName: null,
   attributeType: null,
+  dynamicZoneTarget: null,
+  forTarget: null,
+  headerDisplayCategory: null,
   headerDisplayName: null,
+  headerDisplaySubCategory: null,
+  modalType: null,
   pathToSchema: [],
+  settingType: null,
   step: null,
+  subTargetUid: null,
+  targetUid: null,
 };
 
 export { NAVLINKS, INITIAL_STATE_DATA };

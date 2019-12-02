@@ -23,7 +23,8 @@ const Wrapper = styled.div`
     line-height: 35px;
     cursor: pointer;
     text-transform: uppercase;
-    > i {
+    > i,
+    > svg {
       margin-right: 10px;
     }
   }

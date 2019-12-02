@@ -13,7 +13,6 @@ const Carret = styled.div`
       left: -1px;
     `;
   }}
-  // height: 30px;
   height: 100%;
   width: 2px;
   margin-right: 3px;

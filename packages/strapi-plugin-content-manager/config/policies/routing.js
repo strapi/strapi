@@ -9,6 +9,10 @@ module.exports = async (ctx, next) => {
 
   const ct = strapi.contentTypes[model];
 
+  if (!ct) {
+    return ctx.send({ error: 'contentType.notFound' }, 404);
+  }
+
   const target =
     ct.plugin === 'admin' ? strapi.admin : strapi.plugins[ct.plugin];
 

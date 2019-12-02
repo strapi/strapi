@@ -1,7 +1,8 @@
 {
   "info": {
     "name": "text_with_image",
-    "description": ""
+    "description": "",
+    "icon": "broom"
   },
   "connection": "default",
   "collectionName": "components_text_with_images",

@@ -18,8 +18,10 @@ const StyledCustomLink = styled.div`
     font-weight: 500;
     line-height: 18px;
     text-align: left;
-    i {
+    i,
+    svg {
       margin-right: 5px;
+      -webkit-font-smoothing: subpixel-antialiased;
     }
   }
   button {
