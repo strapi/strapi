@@ -26,13 +26,6 @@ const HeaderModal = styled(ModalHeader)`
     > span {
       display: none;
     }
-    // &:before {
-    //   content: '\f00d';
-    //   -webkit-font-smoothing: antialiased;
-    //   font-family: 'FontAwesome';
-    //   font-weight: 400;
-    //   font-size: 1.2rem;
-    // }
   }
   & + svg {
     position: absolute;
