@@ -1,6 +1,5 @@
 import React, { useEffect, useReducer, useRef, useState } from 'react';
 import {
-  ButtonModal,
   HeaderModal,
   HeaderModalTitle,
   Modal,
@@ -11,6 +10,7 @@ import {
   useGlobalContext,
   InputsIndex,
 } from 'strapi-helper-plugin';
+import { Button } from '@buffetjs/core';
 import { Inputs } from '@buffetjs/custom';
 import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
@@ -279,6 +279,47 @@ const FormModal = () => {
     await schema.validate(dataToValidate, { abortEarly: false });
   };
 
+  const getButtonSubmitMessage = () => {
+    const { attributeType, modalType } = state;
+    const isCreatingAComponent = get(modifiedData, 'createComponent', false);
+    let tradId;
+
+    switch (modalType) {
+      case 'contentType':
+      case 'component':
+        tradId = getTrad('form.button.continue');
+        break;
+      case 'addComponentToDynamicZone': {
+        tradId = isCreatingAComponent
+          ? getTrad('form.button.add-first-field-to-created-component')
+          : getTrad('form.button.finish');
+        break;
+      }
+      case 'attribute': {
+        if (attributeType === 'dynamiczone') {
+          tradId = getTrad('form.button.add-components-to-dynamiczone');
+        } else if (attributeType === 'component') {
+          if (isInFirstComponentStep) {
+            tradId = isCreatingAComponent
+              ? getTrad('form.button.add-first-field-to-created-component')
+              : getTrad('form.button.select-component');
+          } else {
+            tradId = isCreatingComponentWhileAddingAField
+              ? getTrad('form.button.add-first-field-to-created-component')
+              : getTrad('form.button.add-field');
+          }
+        } else {
+          tradId = getTrad('form.button.add-field');
+        }
+        break;
+      }
+      default:
+        tradId = getTrad('form.button.add-field');
+    }
+
+    return formatMessage({ id: tradId });
+  };
+
   const handleClickAddComponentsToDynamicZone = ({
     target: { name, components, shouldAddComponents },
   }) => {
@@ -359,7 +400,7 @@ const FormModal = () => {
       ...rest,
     });
   };
-  const handleSubmit = async e => {
+  const handleSubmit = async (e, shouldContinue = isCreating) => {
     e.preventDefault();
 
     try {
@@ -368,6 +409,10 @@ const FormModal = () => {
         state.forTarget === 'components' ? state.targetUid : uid;
       // This should be improved
       const createNextSearch = searchUid => {
+        if (!shouldContinue) {
+          return '';
+        }
+
         return `modalType=chooseAttribute&forTarget=${
           state.forTarget
         }&targetUid=${searchUid}&headerDisplayName=${state.headerDisplayName ||
@@ -377,6 +422,8 @@ const FormModal = () => {
       if (isCreatingContentType) {
         // Create the content type schema
         createSchema(modifiedData, state.modalType, uid);
+
+        // TODO refacto search
 
         push({
           pathname: `/plugins/${pluginId}/content-types/${uid}`,
@@ -422,20 +469,23 @@ const FormModal = () => {
             ? dzSearch
             : createNextSearch(targetUid);
 
+          // The case is editing a the name of the dynamic zone
           if (state.attributeType === 'dynamiczone' && !isCreating) {
             push({ search: '' });
           } else {
+            // The user is creating a DZ (he had entered the name of the dz)
             if (isDynamicZoneAttribute) {
+              console.log('dz');
               // Step 1 of adding a component to a DZ, the user has the option to create a component
               dispatch({
                 type: 'RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ',
               });
 
-              push({ search: nextSearch });
+              push({ search: shouldContinue ? nextSearch : '' });
               return;
             }
 
-            push({ search: nextSearch });
+            push({ search: shouldContinue ? nextSearch : '' });
           }
 
           // Adding an existing component
@@ -443,7 +493,9 @@ const FormModal = () => {
           if (isInFirstComponentStep) {
             // Navigate the user to step 2
             push({
-              search: `modalType=attribute&actionType=${state.actionType}&settingType=base&forTarget=${state.forTarget}&targetUid=${state.targetUid}&attributeType=component&headerDisplayName=${state.headerDisplayName}&step=2`,
+              search: shouldContinue
+                ? `modalType=attribute&actionType=${state.actionType}&settingType=base&forTarget=${state.forTarget}&targetUid=${state.targetUid}&attributeType=component&headerDisplayName=${state.headerDisplayName}&step=2`
+                : '',
             });
 
             // Clear the reducer and prepare the modified data
@@ -474,7 +526,7 @@ const FormModal = () => {
               true
             );
 
-            push({ search: createNextSearch(targetUid) });
+            push({ search: shouldContinue ? createNextSearch(targetUid) : '' });
 
             // We don't need to end the loop here we want the reducer to be reinitialised
           }
@@ -488,7 +540,9 @@ const FormModal = () => {
         if (isInFirstComponentStep) {
           // Here the search could be refactored since it is the same as the case from above
           push({
-            search: `modalType=attribute&actionType=${state.actionType}&settingType=base&forTarget=${state.forTarget}&targetUid=${state.targetUid}&attributeType=component&headerDisplayName=${state.headerDisplayName}&step=2`,
+            search: shouldContinue
+              ? `modalType=attribute&actionType=${state.actionType}&settingType=base&forTarget=${state.forTarget}&targetUid=${state.targetUid}&attributeType=component&headerDisplayName=${state.headerDisplayName}&step=2`
+              : '',
           });
 
           // Here we clear the reducer state but we also keep the created component
@@ -535,7 +589,9 @@ const FormModal = () => {
           // The we inverse the headerDisplayName because it becomes the last one displayed
           const searchToOpenModalAttributeToAddAttributesToAComponent = `modalType=chooseAttribute&forTarget=components&targetUid=${componentUid}&headerDisplayName=${componentToCreate.name}&headerDisplayCategory=${state.headerDisplayName}`;
           push({
-            search: searchToOpenModalAttributeToAddAttributesToAComponent,
+            search: shouldContinue
+              ? searchToOpenModalAttributeToAddAttributesToAComponent
+              : '',
           });
           return;
         }
@@ -630,8 +686,6 @@ const FormModal = () => {
     state.targetUid,
     nestedComponents
   );
-
-  console.log({ state });
 
   // Styles
   const modalBodyStyle = isPickingAttribute
@@ -942,12 +996,34 @@ const FormModal = () => {
         {!isPickingAttribute && (
           <ModalFooter>
             <section>
-              <ButtonModal
-                message="components.popUpWarning.button.cancel"
-                onClick={handleToggle}
-                isSecondary
-              />
-              <ButtonModal message="form.button.done" type="submit" />
+              <Button type="button" color="cancel" onClick={handleToggle}>
+                {formatMessage({
+                  id: 'components.popUpWarning.button.cancel',
+                })}
+              </Button>
+              <div style={{ margin: 'auto 0' }}>
+                {isCreatingAttribute && !isInFirstComponentStep && (
+                  <Button
+                    type="button"
+                    color="success"
+                    onClick={e => {
+                      handleSubmit(e, false);
+                    }}
+                    style={{ marginRight: '10px' }}
+                  >
+                    {formatMessage({ id: 'form.button.finish' })}
+                  </Button>
+                )}
+                <Button
+                  type="submit"
+                  color="primary"
+                  onClick={handleSubmit}
+                  icon={isCreatingAttribute}
+                >
+                  {getButtonSubmitMessage()}
+                </Button>
+                {/* <ButtonModal message="form.button.done" type="submit" /> */}
+              </div>
             </section>
           </ModalFooter>
         )}

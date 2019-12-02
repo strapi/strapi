@@ -735,11 +735,6 @@ const forms = {
     },
   },
   addComponentToDynamicZone: {
-    schema(...args) {
-      // TODO
-      console.log('k', args);
-      return yup.object();
-    },
     form: {
       advanced(data, type, step) {
         return forms.attribute.form.advanced(data, 'component', step);
