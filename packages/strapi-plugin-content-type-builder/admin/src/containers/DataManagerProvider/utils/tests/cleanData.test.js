@@ -1,5 +1,6 @@
 import {
   formatComponent,
+  formatContentType,
   getComponentsToPost,
   getCreatedAndModifiedComponents,
 } from '../cleanData';
@@ -65,6 +66,17 @@ describe('CleanData utils', () => {
           )
         ).toEqual(expectedComponent);
       });
+    });
+  });
+
+  describe('FormatContentType', () => {
+    it('should format the content type correctly', () => {
+      const {
+        rawData: { contentType },
+      } = contentTypeData;
+      const expected = expectedData.contentType;
+
+      expect(formatContentType(contentType)).toEqual(expected);
     });
   });
 

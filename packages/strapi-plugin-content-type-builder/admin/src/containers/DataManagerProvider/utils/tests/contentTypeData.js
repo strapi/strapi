@@ -152,6 +152,9 @@ const data = {
       isTemporary: true,
       schema: {
         name: 'test content type',
+        collectionName: 'test-content-types',
+        connection: 'default',
+        description: '',
         attributes: {
           name: {
             type: 'string',

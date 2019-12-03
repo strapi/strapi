@@ -1,6 +1,9 @@
 const expectedData = {
   contentType: {
     name: 'test content type',
+    collectionName: 'test-content-types',
+    connection: 'default',
+    description: '',
     attributes: {
       name: {
         type: 'string',
@@ -44,6 +47,11 @@ const expectedData = {
         type: 'component',
         repeatable: true,
         component: 'default.metas',
+      },
+      quote: {
+        type: 'component',
+        repeatable: false,
+        component: 'blog.quote',
       },
     },
   },
