@@ -95,9 +95,9 @@ const formatAttributes = (
           ),
         });
 
-        acc[current] = relationAttr;
+        acc[current] = removeNullKeys(relationAttr);
       } else {
-        acc[current] = currentAttribute;
+        acc[current] = removeNullKeys(currentAttribute);
       }
     }
 
@@ -113,7 +113,7 @@ const formatAttributes = (
         targetAttribute: formatRelationTargetAttribute(currentTargetAttribute),
       });
 
-      acc[current] = formattedRelationAttribute;
+      acc[current] = removeNullKeys(formattedRelationAttribute);
     }
 
     return acc;
@@ -122,6 +122,15 @@ const formatAttributes = (
 
 const formatRelationTargetAttribute = targetAttribute =>
   targetAttribute === '-' ? null : targetAttribute;
+
+const removeNullKeys = obj =>
+  Object.keys(obj).reduce((acc, current) => {
+    if (obj[current] !== null) {
+      acc[current] = obj[current];
+    }
+
+    return acc;
+  }, {});
 
 const getComponentsToPost = (
   allComponents,

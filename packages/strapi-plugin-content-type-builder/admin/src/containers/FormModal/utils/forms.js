@@ -289,9 +289,7 @@ const forms = {
             const requiredItem = [[fields.required]];
 
             return {
-              items: data.repeatable
-                ? [...requiredItem, ...dynamiczoneItems]
-                : requiredItem,
+              items: data.repeatable ? [...dynamiczoneItems] : requiredItem,
             };
           }
         }

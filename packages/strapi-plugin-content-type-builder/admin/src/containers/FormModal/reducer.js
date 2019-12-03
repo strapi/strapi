@@ -190,12 +190,11 @@ const reducer = (state, action) => {
       } else if (attributeType === 'relation') {
         dataToSet = {
           name: nameToSetForRelation,
-          // type: 'relation',
           nature: 'oneWay',
           targetAttribute: '-',
           target: targetUid,
           unique: false,
-          required: false,
+          // required: false,
           dominant: null,
           columnName: null,
           targetColumnName: null,

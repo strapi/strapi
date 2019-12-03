@@ -253,12 +253,9 @@ const DataManagerProvider = ({ allIcons, children }) => {
         ),
         contentType: formatContentType(modifiedData.contentType),
       };
+      const method = 'POST';
 
-      await request(
-        `/${pluginId}/content-types`,
-        { method: 'POST', body },
-        true
-      );
+      await request(`/${pluginId}/content-types`, { method, body }, true);
 
       // TODO
       // - update menu

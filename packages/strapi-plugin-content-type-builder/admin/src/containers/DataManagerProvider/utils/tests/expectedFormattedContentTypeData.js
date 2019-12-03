@@ -1,5 +1,5 @@
 const expectedData = {
-  contentType: {
+  contentTypeToCreate: {
     name: 'test content type',
     collectionName: 'test-content-types',
     connection: 'default',
@@ -9,23 +9,16 @@ const expectedData = {
         type: 'string',
       },
       address: {
-        dominant: null,
-        columnName: null,
         nature: 'oneWay',
-        targetAttribute: null,
         target: 'application::address.address',
         unique: false,
-        targetColumnName: null,
         required: false,
       },
       testContentTypes: {
-        dominant: null,
-        columnName: null,
         nature: 'oneToMany',
         targetAttribute: 'testContentType',
         target: '__self__',
         unique: false,
-        targetColumnName: null,
         required: false,
       },
       testContentType: {
@@ -33,10 +26,7 @@ const expectedData = {
         target: '__self__',
         unique: false,
         required: false,
-        dominant: null,
         targetAttribute: 'testContentTypes',
-        columnName: null,
-        targetColumnName: null,
       },
       mainCompoField: {
         type: 'component',
@@ -72,13 +62,9 @@ const expectedData = {
           type: 'string',
         },
         testContentType: {
-          dominant: null,
-          columnName: null,
           nature: 'oneWay',
-          targetAttribute: null,
           target: '__contentType__',
           unique: false,
-          targetColumnName: null,
           required: false,
         },
         subCompoField: {
@@ -99,7 +85,6 @@ const expectedData = {
         },
         email: {
           type: 'email',
-          default: null,
         },
       },
     },
@@ -138,13 +123,9 @@ const expectedData = {
           type: 'string',
         },
         testContentType: {
-          dominant: null,
-          columnName: null,
           nature: 'oneWay',
-          targetAttribute: null,
           target: '__contentType__',
           unique: false,
-          targetColumnName: null,
           required: false,
         },
         subCompoField: {
@@ -165,7 +146,6 @@ const expectedData = {
         },
         email: {
           type: 'email',
-          default: null,
         },
       },
     },

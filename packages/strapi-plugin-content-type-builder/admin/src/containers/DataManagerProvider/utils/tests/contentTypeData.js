@@ -147,7 +147,7 @@ const data = {
         },
       },
     },
-    contentType: {
+    contentTypeToCreate: {
       uid: 'application::test-content-type.test-content-type',
       isTemporary: true,
       schema: {

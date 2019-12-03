@@ -72,11 +72,11 @@ describe('CleanData utils', () => {
   describe('FormatContentType', () => {
     it('should format the content type correctly', () => {
       const {
-        rawData: { contentType },
+        rawData: { contentTypeToCreate },
       } = contentTypeData;
-      const expected = expectedData.contentType;
+      const expected = expectedData.contentTypeToCreate;
 
-      expect(formatContentType(contentType)).toEqual(expected);
+      expect(formatContentType(contentTypeToCreate)).toEqual(expected);
     });
   });
 
