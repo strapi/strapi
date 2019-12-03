@@ -425,7 +425,6 @@ const FormModal = () => {
         state.forTarget === 'components' ? state.targetUid : uid;
       // This should be improved
       const createNextSearch = searchUid => {
-        console.log({ state });
         if (!shouldContinue) {
           return '';
         }
@@ -509,6 +508,9 @@ const FormModal = () => {
                   targetUid,
                   headerDisplayName: state.headerDisplayName,
                   headerDisplayCategory: state.headerDisplayCategory,
+                  // keep the old state
+                  headerDisplaySubCategory: state.headerDisplaySubCategory,
+                  subTargetUid: state.subTargetUid,
                 },
                 shouldContinue
               );
@@ -585,9 +587,13 @@ const FormModal = () => {
         // even though the user didn't set any field
         // We need to prevent the component from being created if the user closes the modal at step 2 without any submission
       } else if (isCreatingAttribute && isCreatingComponentFromAView) {
+        const { headerDisplayCategory } = state;
+        // Step 1
         if (isInFirstComponentStep) {
           // Here the search could be refactored since it is the same as the case from above
-          const searchObj = {
+          // Navigate the user to step 2
+
+          let searchObj = {
             modalType: 'attribute',
             actionType: state.actionType,
             settingType: 'base',
@@ -597,6 +603,14 @@ const FormModal = () => {
             headerDisplayName: state.headerDisplayName,
             step: '2',
           };
+
+          // Modify the searchObj for the modal header
+          // This case is happening when creating a nestedComponent after creating a component
+          if (headerDisplayCategory) {
+            searchObj.headerDisplayCategory = state.headerDisplayCategory;
+            searchObj.headerDisplayName = state.headerDisplayName;
+            searchObj.targetUid = state.targetUid;
+          }
 
           push({
             search: makeNextSearch(searchObj, shouldContinue),
@@ -611,7 +625,7 @@ const FormModal = () => {
           // Terminate because we don't want the reducer to be entirely reset
           return;
 
-          // Step 2
+          // Step 2 of creating a component (which is setting the attribute name in the parent's schema)
         } else {
           // We are destructuring because the modifiedData object doesn't have the appropriate format to create a field
           const { category, type, ...rest } = componentToCreate;
@@ -642,17 +656,25 @@ const FormModal = () => {
           dispatch({ type: 'RESET_PROPS' });
 
           // Open modal attribute for adding attr to component
-          // Then we inverse the headerDisplayName because it becomes the last one displayed
-          // #########
-          // TODO handle sub category
-          // The case is created a component then created a nested one
+
           const searchToOpenModalAttributeToAddAttributesToAComponent = {
             modalType: 'chooseAttribute',
             forTarget: 'components',
             targetUid: componentUid,
-            headerDisplayName: componentToCreate.name,
-            headerDisplayCategory: state.headerDisplayName,
+            headerDisplayName: modifiedData.name,
+            headerDisplayCategory:
+              state.headerDisplayCategory || state.headerDisplayName,
           };
+
+          // Then we inverse the headerDisplayName because it becomes the last one displayed
+          // The case is created a component then created a nested one
+          if (headerDisplayCategory) {
+            // This is allows to modify the modal header
+            searchToOpenModalAttributeToAddAttributesToAComponent.headerDisplaySubCategory =
+              state.headerDisplayName;
+            searchToOpenModalAttributeToAddAttributesToAComponent.subTargetUid =
+              state.targetUid;
+          }
 
           push({
             search: makeNextSearch(
@@ -664,9 +686,9 @@ const FormModal = () => {
         }
         // The modal is addComponentToDynamicZone
       } else {
+        // The modal is addComponentToDynamicZone
         if (isInFirstComponentStep) {
           if (isCreatingComponentFromAView) {
-            console.log('addComponentToDynamicZone && isInFirstComponentStep');
             const { category, type, ...rest } = modifiedData.componentToCreate;
             const componentUid = createComponentUid(
               modifiedData.componentToCreate.name,
@@ -695,6 +717,8 @@ const FormModal = () => {
 
             // The Dynamic Zone and the component is created created
             // Open the modal to add fields to the created component
+
+            // TODO search for modal header
             const searchToOpenAddField = {
               modalType: 'chooseAttribute',
               forTarget: 'components',
@@ -769,8 +793,6 @@ const FormModal = () => {
   const modalBodyStyle = isPickingAttribute
     ? { paddingTop: '0.5rem', paddingBottom: '3rem' }
     : {};
-
-  console.log({ state });
 
   return (
     <Modal
