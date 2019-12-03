@@ -14,7 +14,10 @@ Strapi needs Node.js and npm installed. npm installs at the same time as Node.js
 
 #### Installation Instructions for each Operating System:
 
-::: windows
+:::: tabs
+
+::: tab Windows
+
 **WINDOWS 10**
 
 ### Install Node.js (and npm) on Windows 10
@@ -47,7 +50,8 @@ npm -v
 
 :::
 
-::: mac
+::: tab "Mac O/S"
+
 **MAC O/S 10.14 MOJAVE**
 
 ### Install Node.js (and npm) on Mac O/S X (Mojave)
@@ -80,7 +84,7 @@ npm -v
 
 :::
 
-::: ubuntu
+::: tab Ubuntu
 
 **UBUNTU 18.04**
 
@@ -118,7 +122,9 @@ npm -v
 ## You should see "6.x.x"
 ```
 
-## :::
+:::
+
+::::
 
 ::: tip NEXT STEPS
 👏 Congrats, you are all set! Now that Node.js is installed you can proceed to the [Quick start](/3.0.0-alpha.x/getting-started/quick-start.html).
