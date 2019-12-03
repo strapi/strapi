@@ -1,0 +1,12 @@
+{
+  "connection": "default",
+  "collectionName": "totos",
+  "info": {
+    "name": "toto tata"
+  },
+  "attributes": {
+    "bool": {
+      "type": "boolean"
+    }
+  }
+}

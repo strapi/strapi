@@ -17,7 +17,7 @@ import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
 import retrieveNestedComponents from './utils/retrieveNestedComponents';
 import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
 import makeUnique from '../../utils/makeUnique';
-import { getComponentsToPost, formatContentType } from './utils/cleanData';
+import { getComponentsToPost, formatMainDataType } from './utils/cleanData';
 
 const DataManagerProvider = ({ allIcons, children }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
@@ -37,6 +37,9 @@ const DataManagerProvider = ({ allIcons, children }) => {
     `/plugins/${pluginId}/component-categories/:categoryUid/:componentUid`
   );
   const isInContentTypeView = contentTypeMatch !== null;
+  const firstKeyToMainSchema = isInContentTypeView
+    ? 'contentType'
+    : 'component';
   const currentUid = isInContentTypeView
     ? get(contentTypeMatch, 'params.uid', null)
     : get(componentMatch, 'params.componentUid', null);
@@ -240,22 +243,28 @@ const DataManagerProvider = ({ allIcons, children }) => {
   };
 
   const submitData = async () => {
-    console.log('will submit', currentUid);
     try {
-      // const mainDataUID =
-      // Temporary works only for creating ct
+      // Temporary works only for ct (POST|PUT)
+      const isCreating = get(
+        modifiedData,
+        [firstKeyToMainSchema, 'isTemporary'],
+        false
+      );
       const body = {
         components: getComponentsToPost(
           modifiedData.components,
           components,
           currentUid,
-          true
+          isCreating
         ),
-        contentType: formatContentType(modifiedData.contentType),
+        contentType: formatMainDataType(modifiedData.contentType),
       };
-      const method = 'POST';
 
-      await request(`/${pluginId}/content-types`, { method, body }, true);
+      const method = isCreating ? 'POST' : 'PUT';
+      const baseURL = `/${pluginId}/content-types`;
+      const requestURL = isCreating ? baseURL : `${baseURL}/${currentUid}`;
+
+      await request(requestURL, { method, body }, true);
 
       // TODO
       // - update menu

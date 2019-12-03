@@ -41,8 +41,8 @@ const formatComponent = (component, mainDataUID, isCreatingData = false) => {
   return formattedComponent;
 };
 
-const formatContentType = data => {
-  const isCreatingData = get(data, 'isTemporary', true);
+const formatMainDataType = data => {
+  const isCreatingData = get(data, 'isTemporary', false);
   const mainDataUID = get(data, 'uid', null);
 
   const formattedAttributes = formatAttributes(
@@ -102,7 +102,7 @@ const formatAttributes = (
     }
 
     if (hasARelationWithMainDataUID) {
-      let target = currentTargetAttribute.target;
+      let target = currentAttribute.target;
 
       if (isCreatingMainData) {
         target = isComponent ? '__contentType__' : '__self__';
@@ -160,5 +160,5 @@ export {
   formatComponent,
   getComponentsToPost,
   getCreatedAndModifiedComponents,
-  formatContentType,
+  formatMainDataType,
 };

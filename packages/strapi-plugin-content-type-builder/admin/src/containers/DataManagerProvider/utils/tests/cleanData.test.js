@@ -1,104 +1,194 @@
 import {
   formatComponent,
-  formatContentType,
+  formatMainDataType,
   getComponentsToPost,
   getCreatedAndModifiedComponents,
 } from '../cleanData';
-import contentTypeData from './contentTypeData';
-import expectedData from './expectedFormattedContentTypeData';
+import rawData from './rawData';
+import expectedData from './expectedFormattedData';
 
 describe('CleanData utils', () => {
   describe('FormatComponent', () => {
-    describe('Formatting created component', () => {
-      it('should remove the uid key if the component is new', () => {
-        const component =
-          contentTypeData.rawData.components['components.main-compo'];
+    describe('FormatComponent when creating a type (POST)', () => {
+      describe('Formatting created component', () => {
+        it('should remove the uid key if the component is new', () => {
+          const component = rawData.rawData.components['components.main-compo'];
 
-        expect(
-          formatComponent(
-            component,
-            'application::test-content-type.test-content-type',
-            true
-          )
-        ).not.toHaveProperty('uid');
+          expect(
+            formatComponent(
+              component,
+              'application::test-content-type.test-content-type',
+              true
+            )
+          ).not.toHaveProperty('uid');
+        });
+
+        it('should add a tempUID key if the component is new', () => {
+          const component = rawData.rawData.components['components.main-compo'];
+
+          expect(
+            formatComponent(
+              component,
+              'application::test-content-type.test-content-type',
+              true
+            )
+          ).toHaveProperty('tmpUID');
+        });
+
+        it('should format the component correctly', () => {
+          const component = rawData.rawData.components['components.main-compo'];
+          const expectedComponent =
+            expectedData.formattedComponents['components.main-compo'];
+
+          expect(
+            formatComponent(
+              component,
+              'application::test-content-type.test-content-type',
+              true
+            )
+          ).toEqual(expectedComponent);
+        });
       });
 
-      it('should add a tempUID key if the component is new', () => {
-        const component =
-          contentTypeData.rawData.components['components.main-compo'];
+      describe('Formatting existing component', () => {
+        it('should format the component correctly', () => {
+          const component = rawData.rawData.components['blog.quote'];
+          const expectedComponent =
+            expectedData.formattedComponents['blog.quote'];
 
-        expect(
-          formatComponent(
-            component,
-            'application::test-content-type.test-content-type',
-            true
-          )
-        ).toHaveProperty('tmpUID');
-      });
-
-      it('should format the component correctly', () => {
-        const component =
-          contentTypeData.rawData.components['components.main-compo'];
-        const expectedComponent =
-          expectedData.formattedComponents['components.main-compo'];
-
-        expect(
-          formatComponent(
-            component,
-            'application::test-content-type.test-content-type',
-            true
-          )
-        ).toEqual(expectedComponent);
+          expect(
+            formatComponent(
+              component,
+              'application::test-content-type.test-content-type',
+              true
+            )
+          ).toEqual(expectedComponent);
+        });
       });
     });
 
-    describe('Formatting existing component', () => {
-      it('should format the component correctly', () => {
-        const component = contentTypeData.rawData.components['blog.quote'];
-        const expectedComponent =
-          expectedData.formattedComponents['blog.quote'];
+    describe('FormatComponent when editing a type content type or component (PUT)', () => {
+      describe('Formatting created component', () => {
+        it('should remove the uid key if the component is new', () => {
+          const component = rawData.rawData.components['components.main-compo'];
 
-        expect(
-          formatComponent(
-            component,
-            'application::test-content-type.test-content-type',
-            true
-          )
-        ).toEqual(expectedComponent);
+          expect(
+            formatComponent(
+              component,
+              'application::test-content-type.test-content-type',
+              false
+            )
+          ).not.toHaveProperty('uid');
+        });
+
+        it('should add a tempUID key if the component is new', () => {
+          const component = rawData.rawData.components['components.main-compo'];
+
+          expect(
+            formatComponent(
+              component,
+              'application::test-content-type.test-content-type',
+              false
+            )
+          ).toHaveProperty('tmpUID');
+        });
+
+        it('should format the component correctly', () => {
+          const component = rawData.rawData.components['components.main-compo'];
+          const expectedComponent =
+            expectedData.formattedComponentsForEdit['components.main-compo'];
+
+          expect(
+            formatComponent(
+              component,
+              'application::test-content-type.test-content-type',
+              false
+            )
+          ).toEqual(expectedComponent);
+        });
+      });
+
+      describe('Formatting existing component', () => {
+        it('should format the component correctly', () => {
+          const component = rawData.rawData.components['blog.quote'];
+          const expectedComponent =
+            expectedData.formattedComponents['blog.quote'];
+
+          expect(
+            formatComponent(
+              component,
+              'application::test-content-type.test-content-type',
+              true
+            )
+          ).toEqual(expectedComponent);
+        });
       });
     });
   });
 
-  describe('FormatContentType', () => {
-    it('should format the content type correctly', () => {
-      const {
-        rawData: { contentTypeToCreate },
-      } = contentTypeData;
-      const expected = expectedData.contentTypeToCreate;
+  describe('FormatMainDataType', () => {
+    describe('Case Content Type', () => {
+      describe('POSTING a content type', () => {
+        it('should format the content type correctly', () => {
+          const {
+            rawData: { contentTypeToCreate },
+          } = rawData;
+          const expected = expectedData.contentTypeToCreate;
 
-      expect(formatContentType(contentTypeToCreate)).toEqual(expected);
+          expect(formatMainDataType(contentTypeToCreate)).toEqual(expected);
+        });
+      });
+
+      describe('PUTING a content type', () => {
+        it('should format the content type correctly', () => {
+          const {
+            rawData: { contentTypeToEdit },
+          } = rawData;
+          const expected = expectedData.contentTypeToEdit;
+          expect(formatMainDataType(contentTypeToEdit)).toEqual(expected);
+        });
+      });
     });
   });
 
   describe('GetComponentsToPost', () => {
-    it('should return an array containing all the formattedComponents', () => {
-      const {
-        initialComponents,
-        rawData: { components },
-      } = contentTypeData;
-      const expectedFormattedComponents = expectedData.components;
-
-      expect(
-        getComponentsToPost(
-          components,
+    describe('Creating a type (POST)', () => {
+      it('should return an array containing all the formattedComponents', () => {
+        const {
           initialComponents,
-          'application::test-content-type.test-content-type',
-          true
-        )
-      ).toEqual(expectedFormattedComponents);
+          rawData: { components },
+        } = rawData;
+        const expectedFormattedComponents = expectedData.components;
+
+        expect(
+          getComponentsToPost(
+            components,
+            initialComponents,
+            'application::test-content-type.test-content-type',
+            true
+          )
+        ).toEqual(expectedFormattedComponents);
+      });
     });
 
-    // TODO add test for existing content type
+    describe('Editing a type (PUT)', () => {
+      it('should return an array containing all the formattedComponents', () => {
+        const {
+          initialComponents,
+          rawData: { components },
+        } = rawData;
+        const expectedFormattedComponents = expectedData.componentsForEdit;
+
+        expect(
+          getComponentsToPost(
+            components,
+            initialComponents,
+            'application::test-content-type.test-content-type',
+            false
+          )
+        ).toEqual(expectedFormattedComponents);
+      });
+    });
   });
 
   describe('GetCreatedAndModifiedComponents', () => {
@@ -111,7 +201,7 @@ describe('CleanData utils', () => {
       const {
         initialComponents,
         rawData: { components },
-      } = contentTypeData;
+      } = rawData;
       expect(
         getCreatedAndModifiedComponents(components, initialComponents).sort()
       ).toEqual(componentsToFormat.sort());
