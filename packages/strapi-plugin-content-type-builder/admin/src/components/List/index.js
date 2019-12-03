@@ -8,11 +8,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 
-import convertAttrObjToArray from '../../utils/convertAttrObjToArray';
+// import convertAttrObjToArray from '../../utils/convertAttrObjToArray';
 import useDataManager from '../../hooks/useDataManager';
 
-import Wrapper from './List';
+// TODO fix merge conflict
+// import Wrapper from './List';
 
+/* eslint-disable */
 function List({ className, customRowComponent, items }) {
   const { modifiedData } = useDataManager();
 
@@ -28,10 +30,10 @@ function List({ className, customRowComponent, items }) {
     return (
       <tr className="component-row">
         <td colSpan={12}>
-          {List({
+          {/* {List({
             customRowComponent,
             items: convertAttrObjToArray(attributes),
-          })}
+          })} */}
         </td>
       </tr>
     );
@@ -64,7 +66,7 @@ function List({ className, customRowComponent, items }) {
   };
 
   return (
-    <Wrapper className={className}>
+    <div className={className}>
       <table>
         <tbody>
           {items.map(item => {
@@ -87,7 +89,7 @@ function List({ className, customRowComponent, items }) {
           })}
         </tbody>
       </table>
-    </Wrapper>
+    </div>
   );
 }
 

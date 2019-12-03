@@ -7,7 +7,8 @@ import { AttributeIcon } from '@buffetjs/core';
 import pluginId from '../../pluginId';
 
 import Wrapper from './Wrapper';
-import Component from '../../icons/Component';
+// TODO fix merge conflict
+// import Component from '../../icons/Component';
 
 function ListRow({
   attributeId,
@@ -48,7 +49,7 @@ function ListRow({
     >
       <td>
         <AttributeIcon key={src} type={src} />
-        <Component fill="#f3f4f4" />
+        {/* <Component fill="#f3f4f4" /> */}
       </td>
       <td styles={{ fontWeight: 600 }}>
         <p>{name}</p>
