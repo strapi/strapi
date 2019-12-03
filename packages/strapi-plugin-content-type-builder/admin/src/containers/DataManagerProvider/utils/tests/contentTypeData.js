@@ -196,6 +196,11 @@ const data = {
             repeatable: true,
             component: 'default.metas',
           },
+          quote: {
+            type: 'component',
+            repeatable: false,
+            component: 'blog.quote',
+          },
         },
       },
     },

@@ -246,6 +246,8 @@ const DataManagerProvider = ({ allIcons, children }) => {
     });
   };
 
+  // console.log('mod', modifiedData);
+
   return (
     <DataManagerContext.Provider
       value={{

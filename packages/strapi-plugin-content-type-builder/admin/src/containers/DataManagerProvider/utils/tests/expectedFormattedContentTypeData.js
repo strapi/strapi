@@ -54,13 +54,74 @@ const expectedData = {
   ],
 
   components: [
-    expectedData.formattedComponents['components.main-compo'],
-    expectedData.formattedComponents['default.nested-compo'],
-    expectedData.formattedComponents['blog.quote'],
+    {
+      tmpUID: 'components.main-compo',
+      name: 'mainCompo',
+      icon: 'ad',
+      category: 'components',
+      attributes: {
+        name: {
+          type: 'string',
+        },
+        testContentType: {
+          dominant: null,
+          columnName: null,
+          nature: 'oneWay',
+          targetAttribute: null,
+          target: '__contentType__',
+          unique: false,
+          targetColumnName: null,
+          required: false,
+        },
+        subCompoField: {
+          type: 'component',
+          repeatable: false,
+          component: 'default.nested-compo',
+        },
+      },
+    },
+    {
+      tmpUID: 'default.nested-compo',
+      name: 'nestedCompo',
+      icon: 'address-book',
+      category: 'default',
+      attributes: {
+        name: {
+          type: 'string',
+        },
+        email: {
+          type: 'email',
+          default: null,
+        },
+      },
+    },
+    {
+      uid: 'blog.quote',
+      category: 'blog',
+      name: 'quote',
+      description: '',
+      icon: 'anchor',
+      connection: 'default',
+      collectionName: 'components_quotes',
+      attributes: {
+        quote: {
+          type: 'string',
+          required: true,
+        },
+        author: {
+          model: 'user',
+          plugin: 'users-permissions',
+        },
+        link_to_biography: {
+          type: 'string',
+          required: true,
+        },
+      },
+    },
   ],
   formattedComponents: {
     'components.main-compo': {
-      tmpUId: 'components.main-compo',
+      tmpUID: 'components.main-compo',
       name: 'mainCompo',
       icon: 'ad',
       category: 'components',
@@ -86,7 +147,7 @@ const expectedData = {
       },
     },
     'default.nested-compo': {
-      tmpUId: 'default.nested-compo',
+      tmpUID: 'default.nested-compo',
       name: 'nestedCompo',
       icon: 'address-book',
       category: 'default',
@@ -130,7 +191,7 @@ export default expectedData;
 
 // components: [
 //   {
-//     tmpUId: 'components.main-compo',
+//     tmpUID: 'components.main-compo',
 //     name: 'mainCompo',
 //     icon: 'ad',
 //     category: 'components',
@@ -156,7 +217,7 @@ export default expectedData;
 //     },
 //   },
 //   {
-//     tmpUId: 'default.nested-compo',
+//     tmpUID: 'default.nested-compo',
 //     name: 'nestedCompo',
 //     icon: 'address-book',
 //     category: 'default',
