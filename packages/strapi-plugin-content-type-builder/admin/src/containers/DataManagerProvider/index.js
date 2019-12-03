@@ -244,7 +244,6 @@ const DataManagerProvider = ({ allIcons, children }) => {
 
   const submitData = async () => {
     try {
-      // Temporary works only for ct (POST|PUT)
       const isCreating = get(
         modifiedData,
         [firstKeyToMainSchema, 'isTemporary'],
@@ -257,25 +256,28 @@ const DataManagerProvider = ({ allIcons, children }) => {
           currentUid,
           isCreating
         ),
-        contentType: formatMainDataType(modifiedData.contentType),
       };
 
+      if (isInContentTypeView) {
+        body.contentType = formatMainDataType(modifiedData.contentType);
+      } else {
+        body.component = formatMainDataType(modifiedData.component, true);
+      }
+
       const method = isCreating ? 'POST' : 'PUT';
-      const baseURL = `/${pluginId}/content-types`;
+      const endPoint = isInContentTypeView ? 'content-types' : 'components';
+      const baseURL = `/${pluginId}/${endPoint}`;
       const requestURL = isCreating ? baseURL : `${baseURL}/${currentUid}`;
 
       await request(requestURL, { method, body }, true);
 
       // TODO
       // - update menu
-      // - reload plugin
 
       // Reload the plugin so the cycle is new again
       dispatch({ type: 'RELOAD_PLUGIN' });
       // Refetch all the data
       getDataRef.current();
-
-      console.log({ body });
     } catch (err) {
       console.log(err);
     }
@@ -288,8 +290,6 @@ const DataManagerProvider = ({ allIcons, children }) => {
       schemaType,
     });
   };
-
-  // console.log('mod', modifiedData);
 
   return (
     <DataManagerContext.Provider

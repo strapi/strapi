@@ -413,7 +413,6 @@ const reducer = (state, action) => {
       return state.updateIn(
         ['modifiedData', action.schemaType, 'schema'],
         obj => {
-          console.log({ obj: obj.toJS() });
           return obj
             .update('name', () => action.data.name)
             .update('collectionName', () => action.data.collectionName);

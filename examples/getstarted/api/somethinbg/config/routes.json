@@ -1,0 +1,52 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/somethinbgs",
+      "handler": "somethinbg.find",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/somethinbgs/count",
+      "handler": "somethinbg.count",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/somethinbgs/:id",
+      "handler": "somethinbg.findOne",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/somethinbgs",
+      "handler": "somethinbg.create",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/somethinbgs/:id",
+      "handler": "somethinbg.update",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/somethinbgs/:id",
+      "handler": "somethinbg.delete",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}

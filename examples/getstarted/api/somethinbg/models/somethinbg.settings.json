@@ -1,0 +1,12 @@
+{
+  "connection": "default",
+  "collectionName": "somethinbgs",
+  "info": {
+    "name": "somethinbg"
+  },
+  "attributes": {
+    "name": {
+      "type": "string"
+    }
+  }
+}

@@ -41,7 +41,7 @@ const formatComponent = (component, mainDataUID, isCreatingData = false) => {
   return formattedComponent;
 };
 
-const formatMainDataType = data => {
+const formatMainDataType = (data, isComponent = false) => {
   const isCreatingData = get(data, 'isTemporary', false);
   const mainDataUID = get(data, 'uid', null);
 
@@ -51,9 +51,10 @@ const formatMainDataType = data => {
     isCreatingData,
     false
   );
+  const initObj = isComponent ? { category: get(data, 'category', '') } : {};
 
   const formattedContentType = Object.assign(
-    {},
+    initObj,
     omit(data.schema, 'attributes'),
     { attributes: formattedAttributes }
   );

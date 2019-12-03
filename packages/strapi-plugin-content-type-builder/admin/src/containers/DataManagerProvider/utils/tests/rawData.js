@@ -147,6 +147,10 @@ const data = {
         },
       },
     },
+    // TODO add test for component
+    // componentToCreate: {
+
+    // },
     contentTypeToCreate: {
       uid: 'application::test-content-type.test-content-type',
       isTemporary: true,

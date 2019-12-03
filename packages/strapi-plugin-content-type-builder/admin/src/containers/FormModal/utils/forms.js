@@ -726,7 +726,10 @@ const forms = {
             componentCategory
           )
           .required(errorsTrads.required),
-        category: yup.string().required(errorsTrads.required),
+        category: yup
+          .string()
+          .matches(NAME_REGEX, errorsTrads.regex)
+          .required(errorsTrads.required),
         icon: yup.string().required(errorsTrads.required),
         collectionName: yup.string().nullable(),
       });
