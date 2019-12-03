@@ -238,6 +238,14 @@ const DataManagerProvider = ({ allIcons, children }) => {
     return makeUnique(composWithCompos);
   };
 
+  const updateSchema = (data, schemaType) => {
+    dispatch({
+      type: 'UPDATE_SCHEMA',
+      data,
+      schemaType,
+    });
+  };
+
   return (
     <DataManagerContext.Provider
       value={{
@@ -266,6 +274,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
         removeComponentFromDynamicZone,
         setModifiedData,
         sortedContentTypesList,
+        updateSchema,
       }}
     >
       {isLoadingForDataToBeSet ? (

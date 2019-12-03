@@ -32,7 +32,7 @@
     "strapi-utils": "3.0.0-beta.17.6"
   },
   "strapi": {
-    "uuid": "getstarted"
+    "uuid": false
   },
   "engines": {
     "node": ">=10.0.0",

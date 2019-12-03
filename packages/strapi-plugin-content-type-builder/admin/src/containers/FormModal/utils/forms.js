@@ -647,45 +647,52 @@ const forms = {
     },
   },
   contentType: {
-    schema(alreadyTakenAttributes) {
+    schema(alreadyTakenNames, isEditing, ctUid) {
+      const takenNames = isEditing
+        ? alreadyTakenNames.filter(uid => uid !== ctUid)
+        : alreadyTakenNames;
+
       return yup.object().shape({
         name: yup
           .string()
-          .unique(errorsTrads.unique, alreadyTakenAttributes, createUid)
+          .unique(errorsTrads.unique, takenNames, createUid)
           .required(errorsTrads.required),
         collectionName: yup.string(),
       });
     },
     form: {
-      base(data = {}) {
-        return {
-          items: [
-            [
-              {
-                autoFocus: true,
-                name: 'name',
-                type: 'text',
-                label: {
-                  id: `${pluginId}.contentType.displayName.label`,
-                },
-                validations: {
-                  required: true,
-                },
+      base(data = {}, type, step, actionType) {
+        const items = [
+          [
+            {
+              autoFocus: true,
+              name: 'name',
+              type: 'text',
+              label: {
+                id: `${pluginId}.contentType.displayName.label`,
               },
-              {
-                description: {
-                  id: `${pluginId}.contentType.UID.description`,
-                },
-                label: 'UID',
-                name: 'uid',
-                type: 'text',
-                readOnly: true,
-                disabled: true,
-                value: data.name ? nameToSlug(data.name) : '',
+              validations: {
+                required: true,
               },
-            ],
+            },
           ],
-        };
+        ];
+
+        if (actionType === 'create') {
+          items[0].push({
+            description: {
+              id: `${pluginId}.contentType.UID.description`,
+            },
+            label: 'UID',
+            name: 'uid',
+            type: 'text',
+            readOnly: true,
+            disabled: true,
+            value: data.name ? nameToSlug(data.name) : '',
+          });
+        }
+
+        return { items };
       },
       advanced() {
         return {

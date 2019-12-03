@@ -217,10 +217,12 @@ const ListPage = () => {
     ];
   };
 
+  const label = get(modifiedData, [firstMainDataPath, 'schema', 'name'], '');
+
   const headerProps = {
     actions: getActions(),
     title: {
-      label: get(modifiedData, [firstMainDataPath, 'schema', 'name']),
+      label,
       cta: {
         icon: 'pencil-alt',
         onClick: () => {
@@ -230,9 +232,10 @@ const ListPage = () => {
               actionType: 'edit',
               settingType: 'base',
               forTarget: firstMainDataPath,
+              targetUid,
+              headerDisplayName: label,
             }),
           });
-          // modalType=contentType&actionType=create&settingType=base&forTarget=contentType
         },
       },
     },

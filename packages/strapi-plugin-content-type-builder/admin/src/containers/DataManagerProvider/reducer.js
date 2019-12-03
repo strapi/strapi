@@ -406,6 +406,16 @@ const reducer = (state, action) => {
         .update('initialData', () => fromJS(action.schemaToSet))
         .update('modifiedData', () => fromJS(action.schemaToSet));
     }
+    case 'UPDATE_SCHEMA':
+      return state.updateIn(
+        ['modifiedData', action.schemaType, 'schema'],
+        obj => {
+          console.log({ obj: obj.toJS() });
+          return obj
+            .update('name', () => action.data.name)
+            .update('collectionName', () => action.data.collectionName);
+        }
+      );
     default:
       return state;
   }

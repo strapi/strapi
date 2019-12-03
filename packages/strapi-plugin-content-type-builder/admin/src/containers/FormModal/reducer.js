@@ -16,6 +16,7 @@ const initialState = fromJS({
 });
 
 const reducer = (state, action) => {
+  console.log({ type: action.type });
   switch (action.type) {
     case 'ADD_COMPONENTS_TO_DYNAMIC_ZONE': {
       const { name, components, shouldAddComponents } = action;
@@ -135,6 +136,12 @@ const reducer = (state, action) => {
         .set('componentToCreate', fromJS({ type: 'component' }));
 
       return initialState.update('modifiedData', () => dataToSet);
+    }
+    case 'SET_DATA_TO_EDIT': {
+      console.log(action.data);
+      return state
+        .updateIn(['modifiedData'], () => fromJS(action.data))
+        .updateIn(['initialData'], () => fromJS(action.data));
     }
     case 'SET_ATTRIBUTE_DATA_SCHEMA': {
       const {
