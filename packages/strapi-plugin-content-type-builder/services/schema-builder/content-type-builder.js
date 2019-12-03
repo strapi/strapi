@@ -206,7 +206,7 @@ const createContentTypeUID = ({ name }) =>
 const generateRelation = ({ key, attribute, modelName }) => {
   const opts = {
     via: key,
-    columnName: attribute.targetColumnName,
+    columnName: attribute.targetColumnName || undefined,
   };
 
   switch (attribute.nature) {

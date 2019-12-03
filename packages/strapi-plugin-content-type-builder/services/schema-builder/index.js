@@ -117,7 +117,7 @@ function createSchemaBuilder({ components, contentTypes }) {
 
           const attr = {
             unique: unique === true ? true : undefined,
-            columnName,
+            columnName: columnName || undefined,
           };
 
           if (!this.contentTypes.has(target)) {
@@ -136,7 +136,7 @@ function createSchemaBuilder({ components, contentTypes }) {
 
           if (!['manyWay', 'oneWay'].includes(nature)) {
             attr.via = targetAttribute;
-            attr.dominant = dominant;
+            attr.dominant = dominant || undefined;
           }
 
           acc[key] = attr;
