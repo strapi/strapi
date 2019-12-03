@@ -1,7 +1,6 @@
 'use strict';
 const _ = require('lodash');
 const { singular } = require('pluralize');
-const dateFns = require('date-fns');
 
 const utilsModels = require('strapi-utils').models;
 const relations = require('./relations');
@@ -10,6 +9,8 @@ const {
   createComponentJoinTables,
   createComponentModels,
 } = require('./generate-component-relations');
+const { createParser } = require('./parser');
+const { createFormatter } = require('./formatter');
 
 const populateFetch = require('./populate');
 
@@ -457,12 +458,13 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
     // Call this callback function after we are done parsing
     // all attributes for relationships-- see below.
 
+    const parseValue = createParser();
     try {
       // External function to map key that has been updated with `columnName`
       const mapper = (params = {}) => {
         Object.keys(params).map(key => {
           const attr = definition.attributes[key] || {};
-          params[key] = castValueFromType(attr.type, params[key], definition);
+          params[key] = parseValue(attr.type, params[key], definition);
         });
 
         return _.mapKeys(params, (value, key) => {
@@ -636,44 +638,11 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
             },
           ];
 
+          const formatValue = createFormatter(definition.client);
           const formatter = attributes => {
             Object.keys(attributes).forEach(key => {
               const attr = definition.attributes[key] || {};
-
-              if (attributes[key] === null) return;
-
-              if (attr.type === 'json') {
-                attributes[key] = JSON.parse(attributes[key]);
-              }
-
-              if (attr.type === 'boolean') {
-                if (typeof attributes[key] === 'boolean') {
-                  return;
-                }
-
-                const strVal = attributes[key].toString();
-                if (strVal === '1') {
-                  attributes[key] = true;
-                } else if (strVal === '0') {
-                  attributes[key] = false;
-                } else {
-                  attributes[key] = null;
-                }
-              }
-
-              if (attr.type === 'date' && definition.client === 'sqlite3') {
-                const cast = dateFns.parseISO(attributes[key]);
-                attributes[key] = dateFns.isValid(cast)
-                  ? dateFns.format(cast, 'yyyy-MM-dd')
-                  : null;
-              }
-
-              if (
-                attr.type === 'biginteger' &&
-                definition.client === 'sqlite3'
-              ) {
-                attributes[key] = attributes[key].toString();
-              }
+              attributes[key] = formatValue(attr, attributes[key]);
             });
           };
 
@@ -748,49 +717,4 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
   });
 
   return Promise.all(updates);
-};
-
-const castValueFromType = (type, value /* definition */) => {
-  // do not cast null values
-  if (value === null) return null;
-
-  switch (type) {
-    case 'json':
-      return JSON.stringify(value);
-    case 'time': {
-      try {
-        dateFns.parse(value, 'HH:mm:ss', new Date());
-      } catch (error) {
-        throw new Error(`Invalid time format, expected a time HH:mm:ss`);
-      }
-
-      return value;
-    }
-    case 'date': {
-      try {
-        dateFns.parse(value, 'yyyy-MM-dd', new Date());
-      } catch (error) {
-        throw new Error(`Invalid date format, expected a date YYYY-MM-DD`);
-      }
-
-      return value;
-    }
-    case 'timestamp':
-    case 'datetime': {
-      const date = dateFns.parseISO(value);
-      if (dateFns.isValid(date)) return date;
-
-      date.setTime(value);
-
-      if (!dateFns.isValid(date)) {
-        throw new Error(
-          `Invalid ${type} format, expected a timestamp or an ISO date`
-        );
-      }
-
-      return date;
-    }
-    default:
-      return value;
-  }
 };
