@@ -88,4 +88,32 @@ const formatAttributes = (
   }, {});
 };
 
-export { formatComponent, getCreatedAndModifiedComponents };
+const getComponentsToPost = (
+  allComponents,
+  initialComponents,
+  mainDataUID,
+  isCreatingData = false
+) => {
+  const componentsToFormat = getCreatedAndModifiedComponents(
+    allComponents,
+    initialComponents
+  );
+  const formattedComponents = componentsToFormat.map(compoUID => {
+    const currentCompo = get(allComponents, compoUID, {});
+    const formattedComponent = formatComponent(
+      currentCompo,
+      mainDataUID,
+      isCreatingData
+    );
+
+    return formattedComponent;
+  });
+
+  return formattedComponents;
+};
+
+export {
+  formatComponent,
+  getComponentsToPost,
+  getCreatedAndModifiedComponents,
+};

@@ -1,25 +1,12 @@
-import { formatComponent, getCreatedAndModifiedComponents } from '../cleanData';
+import {
+  formatComponent,
+  getComponentsToPost,
+  getCreatedAndModifiedComponents,
+} from '../cleanData';
 import contentTypeData from './contentTypeData';
 import expectedData from './expectedFormattedContentTypeData';
 
 describe('CleanData utils', () => {
-  describe('GetCreatedAndModifiedComponents', () => {
-    it('should return an empty array if there is no component', () => {
-      expect(getCreatedAndModifiedComponents({}, {})).toEqual([]);
-    });
-
-    it('should return an array containing the uid of the modified and created components', () => {
-      const { componentsToFormat } = expectedData;
-      const {
-        initialComponents,
-        rawData: { components },
-      } = contentTypeData;
-      expect(
-        getCreatedAndModifiedComponents(components, initialComponents).sort()
-      ).toEqual(componentsToFormat.sort());
-    });
-  });
-
   describe('FormatComponent', () => {
     describe('Formatting created component', () => {
       it('should remove the uid key if the component is new', () => {
@@ -78,6 +65,44 @@ describe('CleanData utils', () => {
           )
         ).toEqual(expectedComponent);
       });
+    });
+  });
+
+  describe('GetComponentsToPost', () => {
+    it('should return an array containing all the formattedComponents', () => {
+      const {
+        initialComponents,
+        rawData: { components },
+      } = contentTypeData;
+      const expectedFormattedComponents = expectedData.components;
+
+      expect(
+        getComponentsToPost(
+          components,
+          initialComponents,
+          'application::test-content-type.test-content-type',
+          true
+        )
+      ).toEqual(expectedFormattedComponents);
+    });
+
+    // TODO add test for existing content type
+  });
+
+  describe('GetCreatedAndModifiedComponents', () => {
+    it('should return an empty array if there is no component', () => {
+      expect(getCreatedAndModifiedComponents({}, {})).toEqual([]);
+    });
+
+    it('should return an array containing the uid of the modified and created components', () => {
+      const { componentsToFormat } = expectedData;
+      const {
+        initialComponents,
+        rawData: { components },
+      } = contentTypeData;
+      expect(
+        getCreatedAndModifiedComponents(components, initialComponents).sort()
+      ).toEqual(componentsToFormat.sort());
     });
   });
 });
