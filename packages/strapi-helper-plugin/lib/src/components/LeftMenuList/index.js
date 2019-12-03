@@ -2,6 +2,7 @@ import React, { createRef, isValidElement, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty } from 'lodash';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import matchSorter from 'match-sorter';
 
 import Wrapper from './Wrapper';
@@ -101,12 +102,12 @@ function LeftMenuList({ customLink, links, title }) {
               &nbsp;&nbsp;<span>{getCount()}</span>
             </h3>
             <button onClick={toggleSearch}>
-              <i className="fa fa-search"></i>
+              <FontAwesomeIcon icon="search" />
             </button>
           </div>
         ) : (
           <div className="search-wrapper">
-            <i className="fa fa-search"></i>
+            <FontAwesomeIcon icon="search" />
             <button onClick={toggleSearch}></button>
             <Search
               ref={ref}
@@ -115,7 +116,7 @@ function LeftMenuList({ customLink, links, title }) {
               placeholder="search…"
             />
             <button onClick={handleClose}>
-              <i className="fa fa-close"></i>
+              <FontAwesomeIcon icon="times" />
             </button>
           </div>
         )}

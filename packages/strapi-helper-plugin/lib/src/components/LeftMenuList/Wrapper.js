@@ -38,7 +38,8 @@ const Wrapper = styled.div`
         right: 0;
         padding: 2px 0 0px 5px;
         line-height: 11px;
-        i {
+        i,
+        svg {
           font-size: 11px;
         }
       }
@@ -53,7 +54,7 @@ const Wrapper = styled.div`
         width: calc(100% - 20px);
         background: ${colors.leftMenu.lightGrey};
       }
-      > i {
+      > svg {
         position: absolute;
         bottom: 6px;
         left: 0;
@@ -65,7 +66,8 @@ const Wrapper = styled.div`
         right: 0;
         padding: 5px 0 0px 5px;
         line-height: 11px;
-        i {
+        i,
+        svg {
           font-size: 11px;
         }
       }
