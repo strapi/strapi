@@ -7,6 +7,7 @@ import { AttributeIcon } from '@buffetjs/core';
 import pluginId from '../../pluginId';
 
 import Wrapper from './Wrapper';
+import Component from '../../icons/Component';
 
 function ListRow({
   attributeId,
@@ -21,6 +22,14 @@ function ListRow({
   const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type)
     ? 'number'
     : type;
+
+  let readableType = type;
+  if (['integer', 'biginteger', 'float', 'decimal'].includes(type)) {
+    readableType = 'number';
+  } else if (['string'].includes(type)) {
+    readableType = 'text';
+  }
+
   const src = target ? 'relation' : ico;
 
   const handleClick = () => {
@@ -39,6 +48,7 @@ function ListRow({
     >
       <td>
         <AttributeIcon key={src} type={src} />
+        <Component fill="#f3f4f4" />
       </td>
       <td styles={{ fontWeight: 600 }}>
         <p>{name}</p>
@@ -61,7 +71,7 @@ function ListRow({
             </FormattedMessage>
           </div>
         ) : (
-          <FormattedMessage id={`${pluginId}.attribute.${type}`} />
+          <FormattedMessage id={`${pluginId}.attribute.${readableType}`} />
         )}
       </td>
       <td>

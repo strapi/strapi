@@ -2,7 +2,6 @@
   "model": "Content Type",
   "group": "Group",
   "attribute.WYSIWYG": "Text (WYSIWYG)",
-
   "button.attributes.add": "Add New Field",
   "button.attributes.add.another": "Add Another Field",
   "button.contentType.add": "Add a Content Type",
