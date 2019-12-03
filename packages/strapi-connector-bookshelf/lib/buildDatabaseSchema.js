@@ -412,20 +412,23 @@ const getType = ({ definition, attribute, name, tableExists = false }) => {
       return 'decimal(10,2)';
     // TODO: split time types as they should be different
     case 'date':
+      return 'date';
     case 'time':
-    case 'datetime':
+      return 'time';
+    case 'datetime': {
       if (client === 'pg') {
         return 'timestamp with time zone';
       }
-
       return 'timestamp';
-    case 'timestamp':
+    }
+    case 'timestamp': {
       if (client === 'pg') {
         return 'timestamp with time zone';
       } else if (client === 'sqlite3' && tableExists) {
         return 'timestamp DEFAULT NULL';
       }
       return 'timestamp DEFAULT CURRENT_TIMESTAMP';
+    }
     case 'timestampUpdate':
       switch (client) {
         case 'pg':

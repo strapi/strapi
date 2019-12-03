@@ -611,10 +611,8 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
             : Promise.resolve();
         });
 
-        //eslint-disable-next-line
-        this.on('saving', (instance, attrs, options) => {
+        this.on('saving', instance => {
           instance.attributes = mapper(instance.attributes);
-          attrs = mapper(attrs);
 
           return _.isFunction(target[model.toLowerCase()]['beforeSave'])
             ? target[model.toLowerCase()]['beforeSave']
@@ -664,7 +662,10 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
               }
 
               if (attr.type === 'date' && definition.client === 'sqlite3') {
-                attributes[key] = dateFns.parse(attributes[key]);
+                const cast = dateFns.parseISO(attributes[key]);
+                attributes[key] = dateFns.isValid(cast)
+                  ? dateFns.format(cast, 'yyyy-MM-dd')
+                  : null;
               }
 
               if (
@@ -756,13 +757,27 @@ const castValueFromType = (type, value /* definition */) => {
   switch (type) {
     case 'json':
       return JSON.stringify(value);
-    // TODO: handle real date format 1970-01-01
-    // TODO: handle real time format 12:00:00
-    case 'time':
+    case 'time': {
+      try {
+        dateFns.parse(value, 'HH:mm:ss', new Date());
+      } catch (error) {
+        throw new Error(`Invalid time format, expected a time HH:mm:ss`);
+      }
+
+      return value;
+    }
+    case 'date': {
+      try {
+        dateFns.parse(value, 'yyyy-MM-dd', new Date());
+      } catch (error) {
+        throw new Error(`Invalid date format, expected a date YYYY-MM-DD`);
+      }
+
+      return value;
+    }
     case 'timestamp':
-    case 'date':
     case 'datetime': {
-      const date = dateFns.parse(value);
+      const date = dateFns.parseISO(value);
       if (dateFns.isValid(date)) return date;
 
       date.setTime(value);
