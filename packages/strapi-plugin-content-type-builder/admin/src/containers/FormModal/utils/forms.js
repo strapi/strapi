@@ -206,11 +206,16 @@ const forms = {
               .matches(NAME_REGEX, errorsTrads.regex)
               .unique(errorsTrads.unique, alreadyTakenAttributes)
               .required(errorsTrads.required),
-            targetAttribute: yup
-              .string()
-              .matches(NAME_REGEX, errorsTrads.regex)
-              .unique(errorsTrads.unique, targetAttributeAlreadyTakenValue)
-              .required(errorsTrads.required),
+            targetAttribute: yup.lazy(() => {
+              let schema = yup.string();
+
+              if (!['oneWay', 'manyWay'].includes(dataToValidate.nature)) {
+                schema = schema.matches(NAME_REGEX, errorsTrads.regex);
+              }
+              return schema
+                .unique(errorsTrads.unique, targetAttributeAlreadyTakenValue)
+                .required(errorsTrads.required);
+            }),
             target: yup.string().required(errorsTrads.required),
             nature: yup.string().required(),
             dominant: yup.boolean().nullable(),
@@ -735,11 +740,6 @@ const forms = {
     },
   },
   addComponentToDynamicZone: {
-    schema(...args) {
-      // TODO
-      console.log('k', args);
-      return yup.object();
-    },
     form: {
       advanced(data, type, step) {
         return forms.attribute.form.advanced(data, 'component', step);
