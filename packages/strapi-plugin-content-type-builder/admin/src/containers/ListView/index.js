@@ -3,8 +3,8 @@ import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { get, has, isEqual } from 'lodash';
 import { Header } from '@buffetjs/custom';
-import { List } from '@buffetjs/core';
 import ListRow from '../../components/ListRow';
+import List from '../../components/List';
 
 import {
   ListWrapper,
@@ -250,8 +250,6 @@ const ListPage = () => {
     });
   };
 
-  const handleClickEditAttribute = () => {};
-
   const handleClickOnTrashIcon = () => {};
 
   const CustomRow = ({ index, name, ...rest }) => {
@@ -260,7 +258,7 @@ const ListPage = () => {
         {...rest}
         attributeId={index}
         name={name}
-        onClick={handleClickEditAttribute}
+        onClick={handleClickEditField}
         onClickDelete={handleClickOnTrashIcon}
       />
     );
@@ -288,6 +286,7 @@ const ListPage = () => {
               <ListHeader actions={listActions} title={listTitle} />
               <List
                 items={convertDataToArray()}
+                ok
                 customRowComponent={props => <CustomRow {...props} />}
               ></List>
               <ListButton {...addButtonProps}></ListButton>

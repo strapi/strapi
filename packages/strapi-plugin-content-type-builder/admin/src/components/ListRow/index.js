@@ -25,7 +25,7 @@ function ListRow({
 
   const handleClick = () => {
     if (configurable !== false) {
-      onClick(attributeId, type);
+      onClick(type, attributeId, name, type, name);
     }
   };
 
