@@ -2,7 +2,12 @@ import React, { memo, useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { get, groupBy, set, sortBy } from 'lodash';
 import { request, LoadingIndicatorPage } from 'strapi-helper-plugin';
-import { useLocation, useRouteMatch, Redirect } from 'react-router-dom';
+import {
+  useHistory,
+  useLocation,
+  useRouteMatch,
+  Redirect,
+} from 'react-router-dom';
 import DataManagerContext from '../../contexts/DataManagerContext';
 import pluginId from '../../pluginId';
 import FormModal from '../FormModal';
@@ -30,6 +35,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
     modifiedData,
   } = reducerState.toJS();
   const { pathname } = useLocation();
+  const { push } = useHistory();
   const contentTypeMatch = useRouteMatch(
     `/plugins/${pluginId}/content-types/:uid`
   );
@@ -46,6 +52,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
   const abortController = new AbortController();
   const { signal } = abortController;
   const getDataRef = useRef();
+  const endPoint = isInContentTypeView ? 'content-types' : 'components';
 
   getDataRef.current = async () => {
     const [
@@ -265,7 +272,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
       }
 
       const method = isCreating ? 'POST' : 'PUT';
-      const endPoint = isInContentTypeView ? 'content-types' : 'components';
+
       const baseURL = `/${pluginId}/${endPoint}`;
       const requestURL = isCreating ? baseURL : `${baseURL}/${currentUid}`;
 
@@ -280,6 +287,26 @@ const DataManagerProvider = ({ allIcons, children }) => {
       getDataRef.current();
     } catch (err) {
       console.log(err);
+    }
+  };
+
+  const deleteData = async () => {
+    try {
+      const requestURL = `/${pluginId}/${endPoint}/${currentUid}`;
+
+      // Close the modal
+      push({ search: '' });
+
+      await request(requestURL, { method: 'DELETE' }, true);
+
+      // TODO update menu
+
+      // Reload the plugin so the cycle is new again
+      dispatch({ type: 'RELOAD_PLUGIN' });
+      // Refetch all the data
+      getDataRef.current();
+    } catch (err) {
+      console.log({ err });
     }
   };
 
@@ -311,6 +338,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
         componentsThatHaveOtherComponentInTheirAttributes: getAllComponentsThatHaveAComponentInTheirAttributes(),
         contentTypes,
         createSchema,
+        deleteData,
         initialData,
         isInContentTypeView,
         modifiedData,

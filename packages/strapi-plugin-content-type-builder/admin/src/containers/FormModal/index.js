@@ -53,6 +53,7 @@ const FormModal = () => {
     contentTypes,
     components,
     createSchema,
+    deleteData,
     modifiedData: allDataSchema,
     nestedComponents,
     sortedContentTypesList,
@@ -1177,8 +1178,7 @@ const FormModal = () => {
                     color="delete"
                     onClick={e => {
                       e.preventDefault();
-                      console.log('shouldDelete');
-                      // handleSubmit(e, false);
+                      deleteData();
                     }}
                     style={{ marginRight: '10px' }}
                   >
