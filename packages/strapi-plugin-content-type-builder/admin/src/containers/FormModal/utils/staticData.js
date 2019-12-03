@@ -1,4 +1,5 @@
 const NAVLINKS = [{ id: 'base' }, { id: 'advanced' }];
+
 const INITIAL_STATE_DATA = {
   actionType: null,
   attributeName: null,

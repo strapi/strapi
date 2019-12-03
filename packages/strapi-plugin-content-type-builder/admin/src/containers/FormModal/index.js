@@ -65,6 +65,8 @@ const FormModal = () => {
     modifiedData,
   } = reducerState.toJS();
 
+  // TODO close the modal when the user tried to create a field and reloaded the app
+
   useEffect(() => {
     if (!isEmpty(search)) {
       const actionType = query.get('actionType');
@@ -272,7 +274,7 @@ const FormModal = () => {
         );
       } else {
         // The form is valid
-        // TODO validate case dz not creating component
+        // The case here is being in the addComponentToDynamicZone modal and not creating a component
         return;
       }
     }
@@ -280,6 +282,7 @@ const FormModal = () => {
     await schema.validate(dataToValidate, { abortEarly: false });
   };
 
+  // TODO this should be a util for testing
   const getButtonSubmitMessage = () => {
     const { attributeType, modalType } = state;
     const isCreatingAComponent = get(modifiedData, 'createComponent', false);
@@ -302,8 +305,7 @@ const FormModal = () => {
         } else if (attributeType === 'component') {
           if (isInFirstComponentStep) {
             tradId = isCreatingAComponent
-              ? // ? getTrad('form.button.add-first-field-to-created-component')
-                getTrad('form.button.configure-component')
+              ? getTrad('form.button.configure-component')
               : getTrad('form.button.select-component');
           } else {
             tradId = isCreatingComponentWhileAddingAField
@@ -322,6 +324,7 @@ const FormModal = () => {
     return formatMessage({ id: tradId });
   };
 
+  // TODO remove and use the utils/makeSearch
   const makeNextSearch = (searchObj, shouldContinue = isCreating) => {
     if (!shouldContinue) {
       return '';
@@ -423,7 +426,8 @@ const FormModal = () => {
       await checkFormValidity();
       const targetUid =
         state.forTarget === 'components' ? state.targetUid : uid;
-      // This should be improved
+
+      // TODO REMOVE and use makeSearch
       const createNextSearch = searchUid => {
         if (!shouldContinue) {
           return '';
@@ -533,6 +537,7 @@ const FormModal = () => {
         } else {
           if (isInFirstComponentStep) {
             // Navigate the user to step 2
+            // TODO refacto
             const nextSearchObj = {
               modalType: 'attribute',
               actionType: state.actionType,
@@ -576,6 +581,7 @@ const FormModal = () => {
               true
             );
 
+            // TODO change the search so the modal header is kept
             push({ search: shouldContinue ? createNextSearch(targetUid) : '' });
 
             // We don't need to end the loop here we want the reducer to be reinitialised
@@ -775,7 +781,6 @@ const FormModal = () => {
   };
   const shouldDisableAdvancedTab = () => {
     return (
-      // isCreatingAttribute &&
       (state.attributeType === 'component' ||
         state.modalType === 'addComponentToDynamicZone') &&
       get(modifiedData, ['createComponent'], null) === false
@@ -786,6 +791,7 @@ const FormModal = () => {
   const displayedAttributes = getAttributes(
     state.forTarget,
     state.targetUid,
+    // We need the nested components so we know when to remove the component option
     nestedComponents
   );
 
@@ -804,7 +810,6 @@ const FormModal = () => {
     >
       <HeaderModal>
         <ModalHeader
-          // We need to add the category here
           name={state.headerDisplayName}
           category={state.headerDisplayCategory}
           headerId={headerId}
@@ -932,13 +937,15 @@ const FormModal = () => {
                               );
                             }
 
-                            // The spacer type is used mainly to aligne the icon picker
+                            // The spacer type is used mainly to align the icon picker...
                             if (input.type === 'spacer') {
                               return (
                                 <div key="spacer" style={{ height: 20 }}></div>
                               );
                             }
 
+                            // This type is used in the addComponentToDynamicZone modal when selecting the option add an existing component
+                            // It pushes select the components to the right
                             if (input.type === 'pushRight') {
                               return (
                                 <div
@@ -1006,7 +1013,7 @@ const FormModal = () => {
                               value = retrievedValue;
                             }
 
-                            // The addon input is not present in buffet so we are used the all lib
+                            // The addon input is not present in @buffetjs so we are using the old lib
                             // for the moment that's why we don't want them be passed to buffet
                             // like the other created inputs
                             if (input.type === 'addon') {
@@ -1124,7 +1131,6 @@ const FormModal = () => {
                 >
                   {getButtonSubmitMessage()}
                 </Button>
-                {/* <ButtonModal message="form.button.done" type="submit" /> */}
               </div>
             </section>
           </ModalFooter>
