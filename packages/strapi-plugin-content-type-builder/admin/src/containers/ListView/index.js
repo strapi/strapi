@@ -1,8 +1,9 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { get, has, isEqual } from 'lodash';
+import { get, isEqual } from 'lodash';
 import { Header } from '@buffetjs/custom';
+import convertAttrObjToArray from '../../utils/convertAttrObjToArray';
 import ListRow from '../../components/ListRow';
 import List from '../../components/List';
 
@@ -33,8 +34,8 @@ const ListPage = () => {
     initialData,
     modifiedData,
     isInContentTypeView,
-    removeAttribute,
-    removeComponentFromDynamicZone,
+    // removeAttribute,
+    // removeComponentFromDynamicZone,
   } = useDataManager();
   const { formatMessage } = useGlobalContext();
   const { push } = useHistory();
@@ -60,66 +61,70 @@ const ListPage = () => {
     const search = `modalType=chooseAttribute&forTarget=${forTarget}&targetUid=${targetUid}&headerDisplayName=${currentDataName}`;
     push({ search });
   };
-  const handleClickAddAttributeNestedData = (
-    targetUid,
-    headerDisplayName,
-    headerDisplayCategory = null,
-    headerDisplaySubCategory = null,
-    subTargetUid = null
-  ) => {
-    const displayCategory = headerDisplayCategory
-      ? `&headerDisplayCategory=${headerDisplayCategory}`
-      : '';
-    const displaySubCategory = headerDisplaySubCategory
-      ? `&headerDisplaySubCategory=${headerDisplaySubCategory}`
-      : '';
-    const search = `modalType=chooseAttribute&forTarget=components&targetUid=${targetUid}&headerDisplayName=${headerDisplayName}${displayCategory}${displaySubCategory}${
-      subTargetUid ? `&subTargetUid=${subTargetUid}` : ''
-    }`;
 
-    push({ search });
-  };
-  const handleClickAddComponentToDZ = dzName => {
-    const search = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${targetUid}&headerDisplayCategory=${currentDataName}&dynamicZoneTarget=${dzName}&settingType=base&step=1&actionType=edit&headerDisplayName=${dzName}`;
-    push({ search });
-  };
+  // const handleClickAddAttributeNestedData = (
+  //   targetUid,
+  //   headerDisplayName,
+  //   headerDisplayCategory = null,
+  //   headerDisplaySubCategory = null,
+  //   subTargetUid = null
+  // ) => {
+  //   const displayCategory = headerDisplayCategory
+  //     ? `&headerDisplayCategory=${headerDisplayCategory}`
+  //     : '';
+  //   const displaySubCategory = headerDisplaySubCategory
+  //     ? `&headerDisplaySubCategory=${headerDisplaySubCategory}`
+  //     : '';
+  //   const search = `modalType=chooseAttribute&forTarget=components&targetUid=${targetUid}&headerDisplayName=${headerDisplayName}${displayCategory}${displaySubCategory}${
+  //     subTargetUid ? `&subTargetUid=${subTargetUid}` : ''
+  //   }`;
 
-  // TODO just a util not sure it should be kept
-  const getType = attrName => {
-    const type = has(modifiedData, [
-      ...mainDataTypeAttributesPath,
-      attrName,
-      'nature',
-    ])
-      ? 'relation'
-      : get(
-          modifiedData,
-          [...mainDataTypeAttributesPath, attrName, 'type'],
-          ''
-        );
+  //   push({ search });
+  // };
 
-    return type;
-  };
-  const getComponentSchema = componentName => {
-    return get(modifiedData, ['components', componentName], {});
-  };
-  const getFirstLevelComponentName = compoName => {
-    return get(
-      modifiedData,
-      [...mainDataTypeAttributesPath, compoName, 'component'],
-      ''
-    );
-  };
-  const getComponent = attrName => {
-    const componentToGet = get(
-      modifiedData,
-      [...mainDataTypeAttributesPath, attrName, 'component'],
-      ''
-    );
-    const componentSchema = getComponentSchema(componentToGet);
+  // const handleClickAddComponentToDZ = dzName => {
+  //   const search = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${targetUid}&headerDisplayCategory=${currentDataName}&dynamicZoneTarget=${dzName}&settingType=base&step=1&actionType=edit&headerDisplayName=${dzName}`;
+  //   push({ search });
+  // };
 
-    return componentSchema;
-  };
+  // // TODO just a util not sure it should be kept
+  // const getType = attrName => {
+  //   const type = has(modifiedData, [
+  //     ...mainDataTypeAttributesPath,
+  //     attrName,
+  //     'nature',
+  //   ])
+  //     ? 'relation'
+  //     : get(
+  //         modifiedData,
+  //         [...mainDataTypeAttributesPath, attrName, 'type'],
+  //         ''
+  //       );
+
+  //   return type;
+  // };
+
+  // const getComponentSchema = componentName => {
+  //   return get(modifiedData, ['components', componentName], {});
+  // };
+  // const getFirstLevelComponentName = compoName => {
+  //   return get(
+  //     modifiedData,
+  //     [...mainDataTypeAttributesPath, compoName, 'component'],
+  //     ''
+  //   );
+  // };
+  // const getComponent = attrName => {
+  //   const componentToGet = get(
+  //     modifiedData,
+  //     [...mainDataTypeAttributesPath, attrName, 'component'],
+  //     ''
+  //   );
+  //   const componentSchema = getComponentSchema(componentToGet);
+
+  //   return componentSchema;
+  // };
+
   const handleClickEditField = (
     forTarget,
     targetUid,
@@ -244,12 +249,6 @@ const ListPage = () => {
 
   const listActions = [{ ...addButtonProps }];
 
-  const convertDataToArray = () => {
-    return Object.keys(attributes).map((key, index) => {
-      return { ...attributes[key], name: key, index };
-    });
-  };
-
   const handleClickOnTrashIcon = () => {};
 
   const CustomRow = ({ index, name, ...rest }) => {
@@ -285,7 +284,7 @@ const ListPage = () => {
             <ListWrapper>
               <ListHeader actions={listActions} title={listTitle} />
               <List
-                items={convertDataToArray()}
+                items={convertAttrObjToArray(attributes)}
                 customRowComponent={props => <CustomRow {...props} />}
               ></List>
               <ListButton {...addButtonProps}></ListButton>
