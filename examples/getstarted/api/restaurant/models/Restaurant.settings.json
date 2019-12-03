@@ -43,7 +43,7 @@
     },
     "body": {
       "type": "dynamiczone",
-      "components": []
+      "components": ["default.closingperiod", "default.openingtimes"]
     },
     "description": {
       "type": "richtext",
