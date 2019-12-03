@@ -17,6 +17,7 @@ import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
 import retrieveNestedComponents from './utils/retrieveNestedComponents';
 import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
 import makeUnique from '../../utils/makeUnique';
+import { getComponentsToPost, formatContentType } from './utils/cleanData';
 
 const DataManagerProvider = ({ allIcons, children }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
@@ -238,6 +239,35 @@ const DataManagerProvider = ({ allIcons, children }) => {
     return makeUnique(composWithCompos);
   };
 
+  const submitData = async () => {
+    console.log('will submit', currentUid);
+    try {
+      // const mainDataUID =
+      // Temporary works only for creating ct
+      const body = {
+        components: getComponentsToPost(
+          modifiedData.components,
+          components,
+          currentUid,
+          true
+        ),
+        contentType: formatContentType(modifiedData.contentType),
+      };
+
+      const response = await request(
+        `/${pluginId}/content-types`,
+        { method: 'POST', body },
+        true
+      );
+
+      console.log({ response });
+
+      console.log({ body });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const updateSchema = (data, schemaType) => {
     dispatch({
       type: 'UPDATE_SCHEMA',
@@ -276,6 +306,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
         removeComponentFromDynamicZone,
         setModifiedData,
         sortedContentTypesList,
+        submitData,
         updateSchema,
       }}
     >

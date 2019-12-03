@@ -36,6 +36,7 @@ const ListPage = () => {
     isInContentTypeView,
     // removeAttribute,
     // removeComponentFromDynamicZone,
+    submitData,
   } = useDataManager();
   const { formatMessage } = useGlobalContext();
   const { push } = useHistory();
@@ -207,7 +208,7 @@ const ListPage = () => {
       },
       {
         color: 'success',
-        onClick: () => {},
+        onClick: () => submitData(),
         title: formatMessage({
           id: `${pluginId}.form.button.save`,
         }),
