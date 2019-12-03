@@ -335,6 +335,9 @@ const reducer = (state, action) => {
         .update('components', () => fromJS(action.components))
         .update('contentTypes', () => fromJS(action.contentTypes))
         .update('isLoading', () => false);
+
+    case 'RELOAD_PLUGIN':
+      return initialState;
     case 'REMOVE_FIELD_FROM_DISPLAYED_COMPONENT': {
       const { attributeToRemoveName, componentUid } = action;
 

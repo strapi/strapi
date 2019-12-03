@@ -254,13 +254,20 @@ const DataManagerProvider = ({ allIcons, children }) => {
         contentType: formatContentType(modifiedData.contentType),
       };
 
-      const response = await request(
+      await request(
         `/${pluginId}/content-types`,
         { method: 'POST', body },
         true
       );
 
-      console.log({ response });
+      // TODO
+      // - update menu
+      // - reload plugin
+
+      // Reload the plugin so the cycle is new again
+      dispatch({ type: 'RELOAD_PLUGIN' });
+      // Refetch all the data
+      getDataRef.current();
 
       console.log({ body });
     } catch (err) {
