@@ -114,6 +114,11 @@ const reducer = (state, action) => {
         }
       );
     }
+    case 'CANCEL_CHANGES': {
+      return state
+        .update('modifiedData', () => state.get('initialData'))
+        .update('components', () => state.get('initialComponents'));
+    }
     case 'CHANGE_DYNAMIC_ZONE_COMPONENTS': {
       const { dynamicZoneTarget, newComponents } = action;
 
@@ -176,6 +181,12 @@ const reducer = (state, action) => {
       return state.updateIn(['components', action.uid], () =>
         fromJS(newSchema)
       );
+    }
+    case 'DELETE_NOT_SAVED_TYPE': {
+      // Doing so will also reset the modified initial data
+      return state
+        .update('contentTypes', () => state.get('initialContentTypes'))
+        .update('components', () => state.get('initialComponents'));
     }
     case 'EDIT_ATTRIBUTE': {
       const {
@@ -333,6 +344,8 @@ const reducer = (state, action) => {
     case 'GET_DATA_SUCCEEDED':
       return state
         .update('components', () => fromJS(action.components))
+        .update('initialComponents', () => fromJS(action.components))
+        .update('initialContentTypes', () => fromJS(action.contentTypes))
         .update('contentTypes', () => fromJS(action.contentTypes))
         .update('isLoading', () => false);
 
@@ -402,7 +415,6 @@ const reducer = (state, action) => {
 
       return state.removeIn(pathToAttributeToRemove);
     }
-
     case 'SET_MODIFIED_DATA': {
       return state
         .update('isLoadingForDataToBeSet', () => false)
