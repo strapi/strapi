@@ -23,6 +23,7 @@ const parseTime = value => {
 const parseDate = value => {
   try {
     let date = dates.parseISO(value);
+
     if (dates.isValid(date)) return dates.format(date, 'yyyy-MM-dd');
 
     throw new Error(`Invalid format, expected an ISO compatble date`);
@@ -32,16 +33,17 @@ const parseDate = value => {
 };
 
 const parseDateTimeOrTimestamp = value => {
-  const date = dates.parseISO(value);
-  if (dates.isValid(date)) return date;
+  try {
+    const date = dates.parseISO(value);
+    if (dates.isValid(date)) return date;
 
-  dates.setTime(date, value);
+    const milliUnixDate = dates.parse(value, 'T', new Date());
+    if (dates.isValid(milliUnixDate)) return milliUnixDate;
 
-  if (!dates.isValid(date)) {
+    throw new Error(`Invalid format, expected a timestamp or an ISO date`);
+  } catch (error) {
     throw new Error(`Invalid format, expected a timestamp or an ISO date`);
   }
-
-  return date;
 };
 
 /**

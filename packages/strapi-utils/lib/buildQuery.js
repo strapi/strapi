@@ -110,7 +110,7 @@ const buildQuery = ({ model, filters = {}, ...rest }) => {
           field,
         });
 
-        const { type } = _.get(assocModel, ['attributes', attribute], {});
+        const { type } = _.get(assocModel, ['allAttributes', attribute], {});
 
         // cast value or array of values
         const castedValue = castInput({ type, operator, value });

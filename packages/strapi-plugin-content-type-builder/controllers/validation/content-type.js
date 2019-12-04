@@ -6,7 +6,7 @@ const formatYupErrors = require('./yup-formatter');
 
 const createSchema = require('./model-schema');
 const { nestedComponentSchema } = require('./component');
-const { modelTypes } = require('./constants');
+const { modelTypes, DEFAULT_TYPES } = require('./constants');
 
 const VALID_RELATIONS = [
   'oneWay',
@@ -16,31 +16,7 @@ const VALID_RELATIONS = [
   'manyToOne',
   'manyToMany',
 ];
-const VALID_TYPES = [
-  // advanced types
-  'media',
-
-  // scalar types
-  'string',
-  'text',
-  'richtext',
-  'json',
-  'enumeration',
-  'password',
-  'email',
-  'integer',
-  'biginteger',
-  'float',
-  'decimal',
-  'date',
-  'time',
-  'datetime',
-  'boolean',
-
-  // nested component
-  'component',
-  'dynamiczone',
-];
+const VALID_TYPES = [...DEFAULT_TYPES, 'component', 'dynamiczone'];
 
 const contentTypeSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
   modelType: modelTypes.CONTENT_TYPE,
