@@ -42,10 +42,6 @@ const formatters = {
       const cast = new Date(value);
       return isValid(cast) ? formatISO(cast, { representation: 'date' }) : null;
     },
-    time: value => {
-      const cast = new Date(value);
-      return isValid(cast) ? formatISO(cast, { representation: 'time' }) : null;
-    },
     datetime: value => {
       const cast = new Date(value);
       return isValid(cast) ? formatISO(cast) : null;

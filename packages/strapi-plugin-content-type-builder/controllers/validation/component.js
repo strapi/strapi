@@ -26,6 +26,8 @@ const VALID_TYPES = [
   'float',
   'decimal',
   'date',
+  'time',
+  'datetime',
   'boolean',
 
   // nested component

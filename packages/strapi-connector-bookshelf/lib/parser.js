@@ -1,6 +1,6 @@
 'use strict';
 
-const _ = require('lodash');
+const { parseType } = require('strapi-utils');
 const { parse, isValid, parseISO } = require('date-fns');
 
 const createParser = () => (type, value) => {
@@ -10,7 +10,7 @@ const createParser = () => (type, value) => {
     case 'json':
       return JSON.stringify(value);
     case 'time':
-      return parseTime(value);
+      return parseType({ type: 'time', value });
     case 'date':
       return parseDate(value);
     case 'timestamp':
@@ -49,23 +49,6 @@ const parseDateTimeOrTimestamp = value => {
   }
 
   return date;
-};
-
-const parseTime = value => {
-  const time = {
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-    secondsFraction: 0,
-  };
-
-  const padTime = t => _.padStart(t, 2, '0');
-
-  const hrs = padTime(time.hours);
-  const min = padeTime(time.minutes);
-  const seconds = padeTime(time.seconds);
-
-  return `${time}.${padFraction()}`;
 };
 
 const parseDate = parseDateOrThrow('yyyy-MM-dd');
