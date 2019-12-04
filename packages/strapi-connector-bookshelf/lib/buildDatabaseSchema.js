@@ -283,15 +283,22 @@ module.exports = async ({
   // Add created_at and updated_at field if timestamp option is true
   if (hasTimestamps) {
     definition.attributes[createAtCol] = {
-      type: 'timestamp',
+      type: 'currentTimestamp',
     };
     definition.attributes[updatedAtCol] = {
       type: 'timestampUpdate',
     };
   }
 
-  // Save all attributes (with timestamps)
-  model.allAttributes = _.clone(definition.attributes);
+  // Save all attributes (with timestamps) and right type
+  model.allAttributes = _.assign(_.clone(definition.attributes), {
+    [createAtCol]: {
+      type: 'timestamp',
+    },
+    [updatedAtCol]: {
+      type: 'timestamp',
+    },
+  });
 
   // Equilize tables
   if (connection.options && connection.options.autoMigration !== false) {
@@ -410,29 +417,34 @@ const getType = ({ definition, attribute, name, tableExists = false }) => {
       return client === 'pg' ? 'double precision' : 'double';
     case 'decimal':
       return 'decimal(10,2)';
-    // TODO: split time types as they should be different
     case 'date':
       return 'date';
     case 'time':
       return 'time';
     case 'datetime': {
-      if (client === 'pg') {
-        return 'timestamp with time zone';
-      }
-      return 'timestamp';
+      if (client === 'pg') return 'timestampz';
+      return 'datetime';
     }
     case 'timestamp': {
       if (client === 'pg') {
-        return 'timestamp with time zone';
+        return 'timestampz';
+      }
+
+      return 'timestamp';
+    }
+    case 'currentTimestamp': {
+      if (client === 'pg') {
+        return 'timestamp with time zone DEFAULT CURRENT_TIMESTAMP';
       } else if (client === 'sqlite3' && tableExists) {
         return 'timestamp DEFAULT NULL';
       }
+
       return 'timestamp DEFAULT CURRENT_TIMESTAMP';
     }
     case 'timestampUpdate':
       switch (client) {
         case 'pg':
-          return 'timestamp with time zone';
+          return 'timestamp with time zone DEFAULT CURRENT_TIMESTAMP';
         case 'sqlite3':
           if (tableExists) {
             return 'timestamp DEFAULT NULL';

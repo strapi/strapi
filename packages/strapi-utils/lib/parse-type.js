@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const dates = require('date-fns');
 
 const timeRegex = new RegExp(
   '^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(.[0-9]{1,3})?$'
@@ -17,6 +18,30 @@ const parseTime = value => {
   const fractionPart = _.padEnd(fraction.slice(1), 3, '0');
 
   return `${hours}:${minutes}:${seconds}.${fractionPart}`;
+};
+
+const parseDate = value => {
+  try {
+    let date = dates.parseISO(value);
+    if (dates.isValid(date)) return dates.format(date, 'yyyy-MM-dd');
+
+    throw new Error(`Invalid format, expected an ISO compatble date`);
+  } catch (error) {
+    throw new Error(`Invalid format, expected an ISO compatble date`);
+  }
+};
+
+const parseDateTimeOrTimestamp = value => {
+  const date = dates.parseISO(value);
+  if (dates.isValid(date)) return date;
+
+  dates.setTime(date, value);
+
+  if (!dates.isValid(date)) {
+    throw new Error(`Invalid format, expected a timestamp or an ISO date`);
+  }
+
+  return date;
 };
 
 /**
@@ -46,6 +71,13 @@ const parseType = ({ type, value }) => {
     }
     case 'time': {
       return parseTime(value);
+    }
+    case 'date': {
+      return parseDate(value);
+    }
+    case 'timestamp':
+    case 'datetime': {
+      return parseDateTimeOrTimestamp(value);
     }
     default:
       return value;
