@@ -1006,7 +1006,8 @@ const FormModal = () => {
                           <hr
                             style={{
                               width: 'calc(100% - 30px)',
-                              marginBottom: 25,
+                              marginBottom: 16,
+                              marginTop: 19,
                             }}
                           />
                         )}
