@@ -70,14 +70,18 @@ function LeftMenuList({ customLink, links, title }) {
     getCount() > 1 ? `${title.id}plural` : `${title.id}singular`;
 
   const renderCompo = (link, i) => {
-    const { links, name, title } = link;
+    const { links, name, title, ...rest } = link;
+    console.log({ link });
 
     if (links) {
       const isSearching = !isEmpty(search);
 
+      console.log({ links });
+
       return (
         <LeftMenuSubList
           key={name}
+          {...rest}
           {...link}
           isSearching={isSearching}
           isFirstItem={i === 0}

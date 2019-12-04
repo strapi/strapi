@@ -33,6 +33,12 @@ function LeftMenu() {
     Object.keys(componentsGroupedByCategory).map(category => ({
       name: category,
       title: category,
+      isEditable: true,
+      onClickEdit: (e, data) => {
+        e.stopPropagation();
+
+        console.log({ data });
+      },
       links: sortBy(
         componentsGroupedByCategory[category].map(compo => ({
           name: compo.uid,

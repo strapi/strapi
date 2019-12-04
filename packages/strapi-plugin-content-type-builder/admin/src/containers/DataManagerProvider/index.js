@@ -357,9 +357,6 @@ const DataManagerProvider = ({ allIcons, children }) => {
         <>
           {children}
           <FormModal />
-          <button type="button" onClick={() => dispatch({ type: 'TEST' })}>
-            click
-          </button>
         </>
       )}
     </DataManagerContext.Provider>
