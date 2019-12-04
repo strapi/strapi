@@ -6,23 +6,22 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useGlobalContext } from 'strapi-helper-plugin';
+
+import pluginId from '../../pluginId';
 
 import DynamicZoneList from '../DynamicZoneList';
 import ComponentList from '../ComponentList';
 import Wrapper from './List';
+import { ListButton } from '../ListButton';
 
-/* eslint-disable */
-function List({ className, customRowComponent, items }) {
-  const renderComponentList = attribute => {
-    return (
-      <ComponentList {...attribute} customRowComponent={customRowComponent} />
-    );
-  };
-
-  const renderDynamicZoneList = attribute => {
-    return (
-      <DynamicZoneList {...attribute} customRowComponent={customRowComponent} />
-    );
+function List({ className, customRowComponent, items, addField }) {
+  const { formatMessage } = useGlobalContext();
+  const addButtonProps = {
+    icon: true,
+    color: 'primary',
+    label: formatMessage({ id: `${pluginId}.button.attributes.add.another` }),
+    onClick: () => addField(),
   };
 
   return (
@@ -35,31 +34,38 @@ function List({ className, customRowComponent, items }) {
               <React.Fragment key={JSON.stringify(item)}>
                 {customRowComponent(item)}
 
-                {type === 'component' &&
-                  renderComponentList({
-                    ...item,
-                  })}
+                {type === 'component' && (
+                  <ComponentList
+                    {...item}
+                    customRowComponent={customRowComponent}
+                  />
+                )}
 
-                {type === 'dynamiczone' &&
-                  renderDynamicZoneList({
-                    ...item,
-                  })}
+                {type === 'dynamiczone' && (
+                  <DynamicZoneList
+                    {...item}
+                    customRowComponent={customRowComponent}
+                  />
+                )}
               </React.Fragment>
             );
           })}
         </tbody>
       </table>
+      <ListButton {...addButtonProps}></ListButton>
     </Wrapper>
   );
 }
 
 List.defaultProps = {
+  addField: () => {},
   className: null,
   customRowComponent: null,
   items: [],
 };
 
 List.propTypes = {
+  addField: PropTypes.func,
   className: PropTypes.string,
   customRowComponent: PropTypes.func,
   items: PropTypes.instanceOf(Array),

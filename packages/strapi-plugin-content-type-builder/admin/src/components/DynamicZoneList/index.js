@@ -6,11 +6,16 @@
 
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
+import { TabContent, TabPane, Nav } from 'reactstrap';
+import { Plus } from '@buffetjs/icons';
+
+import getTrad from '../../utils/getTrad';
 import ComponentList from '../ComponentList';
+import ComponentButton from './ComponentButton';
+import ComponentCard from '../ComponentCard';
 
-import { TabContent, TabPane, Nav, NavLink } from 'reactstrap';
-
-function DynamicZoneList({ customRowComponent, components }) {
+function DynamicZoneList({ customRowComponent, components, addComponent }) {
   const [activeTab, setActiveTab] = useState('0');
   const toggle = tab => {
     if (activeTab !== tab) setActiveTab(tab);
@@ -20,21 +25,33 @@ function DynamicZoneList({ customRowComponent, components }) {
     <tr className="dynamiczone-row">
       <td colSpan={12}>
         <div>
-          <Nav tabs>
-            {components.map((component, index) => {
-              return (
-                <NavLink
-                  key={component}
-                  className={activeTab === `${index}` ? 'active' : ''}
-                  onClick={() => {
-                    toggle(`${index}`);
-                  }}
-                >
-                  {component}
-                </NavLink>
-              );
-            })}
-          </Nav>
+          <div className="tabs-wrapper">
+            <Nav tabs>
+              <li>
+                <ComponentButton onClick={addComponent}>
+                  <div>
+                    <Plus />
+                  </div>
+                  <p>
+                    <FormattedMessage id={getTrad('button.component.add')} />
+                  </p>
+                </ComponentButton>
+              </li>
+              {components.map((component, index) => {
+                return (
+                  <li key={component}>
+                    <ComponentCard
+                      component={component}
+                      isActive={activeTab === `${index}`}
+                      onClick={() => {
+                        toggle(`${index}`);
+                      }}
+                    ></ComponentCard>
+                  </li>
+                );
+              })}
+            </Nav>
+          </div>
           <TabContent activeTab={activeTab}>
             {components.map((component, index) => {
               const props = {
@@ -60,11 +77,13 @@ function DynamicZoneList({ customRowComponent, components }) {
 }
 
 DynamicZoneList.defaultProps = {
+  addComponent: () => {},
   components: [],
   customRowComponent: null,
 };
 
 DynamicZoneList.propTypes = {
+  addComponent: PropTypes.func,
   components: PropTypes.instanceOf(Array),
   customRowComponent: PropTypes.func,
 };
