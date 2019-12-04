@@ -250,7 +250,7 @@ module.exports = {
 
     const admin = await strapi
       .query('administrator', 'admin')
-      .findOne({ resetPasswordToken: code });
+      .findOne({ resetPasswordToken: `${code}` });
 
     if (!admin) {
       return ctx.badRequest(

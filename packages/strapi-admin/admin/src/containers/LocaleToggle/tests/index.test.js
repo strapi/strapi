@@ -81,6 +81,15 @@ describe('<LocaleToggle />', () => {
       );
     });
 
+    it('should return the vn flag', () => {
+      const renderedComponent = shallow(<LocaleToggle {...props} />);
+      const { getFlagUrl } = renderedComponent.instance();
+
+      expect(getFlagUrl('vi')).toEqual(
+        'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/vn.svg'
+      );
+    });
+
     it('should return the locale flag', () => {
       const renderedComponent = shallow(<LocaleToggle {...props} />);
       const { getFlagUrl } = renderedComponent.instance();

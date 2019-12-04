@@ -27,6 +27,8 @@ module.exports = () => {
       historyApiFallback: {
         index: '/admin/',
       },
+      open: true,
+      openPage: '/admin',
     },
   };
 };

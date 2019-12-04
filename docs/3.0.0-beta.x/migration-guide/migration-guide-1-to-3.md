@@ -10,7 +10,7 @@ To be honest with all of you, the migration process won't be easy. The new versi
 - Removed middlewares from core (koa-graphql, koa-proxy, koa-ssl, koa-views).
 - Better error handling with Boom.
 
-::: note
+::: tip
 Feel free to [join us on Slack](http://slack.strapi.io) and ask questions about the migration process.
 :::
 
@@ -37,7 +37,7 @@ The structure of the configurations has been harmonised and simplified. Files ha
 
 Please refer to the [new documentation](https://github.com/strapi/strapi/blob/master/docs/3.0.0-x/en/configurations/configurations.md) to set the correct values in each file.
 
-::: note
+::: tip
 Don't forget that middlewares has been removed. Please refers to the right section of this document for more details.
 :::
 
@@ -144,11 +144,11 @@ The services files should stay as they are. Your generator functions can be conv
 
 The models didn't change a lot. The `autoCreatedAt`, `autoUpdatedAt` and `autoPK` attributes have been removed and replaced by the `hasTimestamps` attribute.
 
-::: note
+::: tip
 The `hasTimestamps` options will only work with Bookshelf. Also you need to create the `created_at` and `updated_at` columns manually.
 :::
 
-::: note
+::: tip
 The `enum` type is not available for now. Also, the validations are not working properly. It means that most of the validations have to be done manually.
 :::
 
@@ -317,7 +317,7 @@ module.exports = {
 };
 ```
 
-::: note
+::: tip
 You will have more changes if your project is based on a SQL database. Waterline and Mongoose are almost sharing the same API.
 :::
 
@@ -361,7 +361,7 @@ It works exactly as before. You need to add `strapi-views` into your app's depen
 }
 ```
 
-::: note
+::: tip
 You might have to install the template engine by your own (ex: `npm install ejs --save`).
 :::
 

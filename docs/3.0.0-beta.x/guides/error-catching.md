@@ -2,7 +2,7 @@
 
 In this guide we will see how you can catch errors and send them to the Application Monitoring / Error Tracking Software you want.
 
-::: note
+::: tip
 In this example we will use [Sentry](https://sentry.io).
 :::
 
@@ -28,7 +28,9 @@ module.exports = strapi => {
 
 ## Handle errors
 
-Here is the [Node.js client documentation](https://docs.sentry.io/platforms/node/)
+Here is the [Node.js client documentation](https://docs.sentry.io/platforms/node/).
+
+Install it with `yarn add @sentry/node` or `npm install @sentry/node --save`.
 
 - Now add the logic that will catch errors.
 
@@ -36,7 +38,10 @@ Here is the [Node.js client documentation](https://docs.sentry.io/platforms/node
 
 ```js
 const Sentry = require('@sentry/node');
-Sentry.init({ dsn: 'https://<key>@sentry.io/<project>' });
+Sentry.init({
+  dsn: 'https://<key>@sentry.io/<project>',
+  environment: strapi.config.environment,
+});
 
 module.exports = strapi => {
   return {

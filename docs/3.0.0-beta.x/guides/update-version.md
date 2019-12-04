@@ -8,9 +8,9 @@ Start by upgrading all your strapi package version.
 
 For example moving from `3.0.0-beta.16` to `3.0.0-beta.17`
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "Before - 3.0.0-beta.16" id="3.0.0-beta.16"
+::: tab 3.0.0-beta.16
 
 ```json
 {
@@ -34,7 +34,7 @@ For example moving from `3.0.0-beta.16` to `3.0.0-beta.17`
 
 :::
 
-::: tab "After - 3.0.0-beta.17" id="3.0.0-beta.17"
+::: tab 3.0.0-beta.17
 
 ```json
 {
@@ -62,7 +62,7 @@ For example moving from `3.0.0-beta.16` to `3.0.0-beta.17`
 
 Then run either `yarn install` or `npm install` to install the specified version.
 
-::: note
+::: tip
 If the operation doesn't work, you should probably remove your `yarn.lock` or `package-lock.json`. And if it still not work let's run the hard mode `rm -Rf node_modules`
 :::
 
@@ -84,7 +84,7 @@ yarn build
 npm run build
 ```
 
-::: note
+::: tip
 If the operation doesn't work, you should probably remove the `.cache` folder too.
 :::
 

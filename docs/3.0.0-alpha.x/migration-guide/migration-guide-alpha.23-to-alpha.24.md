@@ -6,12 +6,13 @@
 - Documentation
 
 **Useful links:**
+
 - Changelog: [https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.24](https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.24.1)
 - GitHub diff: [https://github.com/strapi/strapi/compare/v3.0.0-alpha.23...v3.0.0-alpha.24](https://github.com/strapi/strapi/compare/v3.0.0-alpha.23...v3.0.0-alpha.24)
 
 <br>
 
-::: note
+::: tip
 Feel free to [join us on Slack](http://slack.strapi.io) and ask questions about the migration process.
 :::
 
@@ -35,7 +36,7 @@ Run `npm install strapi@3.0.0-alpha.24.1 --save` to update your strapi version.
 
 ## Update the Admin
 
-::: note
+::: tip
 If you performed updates in the Admin, you will have to manually migrate your changes.
 :::
 
@@ -45,7 +46,7 @@ Delete your old admin folder and replace it with the new one.
 
 ## Update the Plugins
 
-::: note
+::: tip
 If you did a custom update on one of the plugins, you will have to manually migrate your update.
 :::
 
