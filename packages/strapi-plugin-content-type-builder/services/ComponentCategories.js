@@ -31,6 +31,9 @@ const editCategory = async (name, infos) => {
     const oldUID = component.uid;
     const newUID = `${newName}.${component.modelName}`;
 
+    // only edit the components in this specific category
+    if (component.category !== name) return;
+
     component.setUID(newUID).setDir(join(componentsDir, newName));
 
     builder.components.forEach(compo => {
@@ -60,7 +63,7 @@ const deleteCategory = async name => {
 
   builder.components.forEach(component => {
     if (component.category === name) {
-      return component.delete();
+      builder.deleteComponent(component.uid);
     }
   });
 

@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const yup = require('yup');
 
-const { isValidName } = require('./common');
+const { isValidName, isValidIcon } = require('./common');
 const formatYupErrors = require('./yup-formatter');
 const createSchema = require('./model-schema');
 const { modelTypes } = require('./constants');
@@ -39,7 +39,7 @@ const componentSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
     icon: yup
       .string()
       .nullable()
-      .test(isValidName)
+      .test(isValidIcon)
       .required('icon.required'),
     category: yup
       .string()
