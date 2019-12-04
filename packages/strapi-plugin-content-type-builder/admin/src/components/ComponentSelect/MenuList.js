@@ -13,6 +13,7 @@ const MenuList = ({
     name,
     onClickOption,
     refState,
+    value,
   },
   ...rest
 }) => {
@@ -50,6 +51,8 @@ const MenuList = ({
                     return null;
                   }
 
+                  const isSelected = value.value === component.uid;
+
                   return (
                     <li
                       key={component.uid}
@@ -61,7 +64,13 @@ const MenuList = ({
                         });
                       }}
                     >
-                      <p datadescr={upperFirst(component.schema.name)}>
+                      <p
+                        datadescr={upperFirst(component.schema.name)}
+                        style={{
+                          color: isSelected ? '#007eff' : '',
+                          fontWeight: isSelected ? '700' : '400',
+                        }}
+                      >
                         {upperFirst(component.schema.name)}
                       </p>
                     </li>
@@ -86,6 +95,9 @@ MenuList.defaultProps = {
         },
       },
     },
+    value: {
+      value: '',
+    },
   },
 };
 
@@ -95,6 +107,7 @@ MenuList.propTypes = {
     name: PropTypes.string.isRequired,
     onClickOption: PropTypes.func.isRequired,
     refState: PropTypes.object,
+    value: PropTypes.object,
   }).isRequired,
 };
 

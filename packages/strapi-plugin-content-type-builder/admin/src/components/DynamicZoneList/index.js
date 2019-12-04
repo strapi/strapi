@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { TabContent, TabPane, Nav } from 'reactstrap';
-import { Plus } from '@buffetjs/icons';
+// import { Plus } from '@buffetjs/icons';
 
 import getTrad from '../../utils/getTrad';
 import ComponentList from '../ComponentList';
@@ -29,9 +29,7 @@ function DynamicZoneList({ customRowComponent, components, addComponent }) {
             <Nav tabs>
               <li>
                 <ComponentButton onClick={addComponent}>
-                  <div>
-                    <Plus />
-                  </div>
+                  <div>{/* <Plus /> */}+</div>
                   <p>
                     <FormattedMessage id={getTrad('button.component.add')} />
                   </p>

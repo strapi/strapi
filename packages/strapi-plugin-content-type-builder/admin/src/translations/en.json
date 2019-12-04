@@ -272,5 +272,7 @@
   "modalForm.sub-header.addComponentToDynamicZone": "Add new component to the dynamic zone",
   "popUpWarning.bodyMessage.cancel-modifications": "Are you sure you want to cancel your modifications?",
   "popUpWarning.bodyMessage.cancel-modifications.with-components": "Are you sure you want to cancel your modifications? Some components have been created or modified...",
-  "prompt.unsaved": "Are you sure you want to leave? All your modifications will be lost."
+  "prompt.unsaved": "Are you sure you want to leave? All your modifications will be lost.",
+  "components.componentSelect.value-components": "{number} components selected",
+  "components.componentSelect.value-component": "{number} component selected"
 }

@@ -30,6 +30,7 @@ const CreatableSelect = ({ onChange, name, styles, value }) => {
     <Creatable
       value={getValue()}
       isClearable
+      // menuIsOpen
       onChange={handleChange}
       styles={styles}
       options={formatOptions()}

@@ -28,6 +28,16 @@ const WrapperSelect = ({ error, label, name, type, ...rest }) => {
         borderTopColor: '#E3E9F3 !important',
       };
     },
+    option: (base, state) => {
+      console.log({ base, state });
+      return {
+        ...base,
+        // backgroundColor: state.isSelected ? '#DEEBFF' : base.backgroundColor,
+        backgroundColor: '#fff',
+        color: state.isSelected ? '#007eff' : '#333740',
+        fontWeight: state.isSelected ? '600' : '400',
+      };
+    },
   };
 
   const Component =

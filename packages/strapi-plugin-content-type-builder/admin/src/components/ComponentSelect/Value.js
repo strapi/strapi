@@ -1,8 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { components } from 'react-select';
-import { get } from 'lodash';
+import { get, size } from 'lodash';
+import { FormattedMessage } from 'react-intl';
 import useDataManager from '../../hooks/useDataManager';
+import getTrad from '../../utils/getTrad';
 import UpperFirst from '../UpperFirst';
 
 const Value = ({ children, ...props }) => {
@@ -29,6 +31,11 @@ const Value = ({ children, ...props }) => {
   const displayedCategory = isCreatingComponent ? componentCategory : category;
   const displayedName = isCreatingComponent ? componentName : name;
   const style = { color: '#333740' };
+  const valueLength = size(value);
+  const message =
+    valueLength > '0'
+      ? getTrad('components.componentSelect.value-components')
+      : getTrad('components.componentSelect.value-components');
 
   return (
     <SingleValue {...props}>
@@ -42,7 +49,9 @@ const Value = ({ children, ...props }) => {
         </>
       )}
       {isMultiple && (
-        <span style={style}>{value.length} components selected</span>
+        <FormattedMessage id={message} values={{ number: valueLength }}>
+          {msg => <span style={style}>{msg}</span>}
+        </FormattedMessage>
       )}
     </SingleValue>
   );
