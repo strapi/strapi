@@ -260,7 +260,10 @@ const ListPage = () => {
       <div className="container-fluid">
         <div className="row">
           <LeftMenu wait={wait} togglePrompt={togglePrompt} />
-          <div className="col-md-9 content">
+          <div
+            className="col-md-9 content"
+            style={{ paddingLeft: 30, paddingRight: 30 }}
+          >
             <Header {...headerProps} />
 
             <ListWrapper>
