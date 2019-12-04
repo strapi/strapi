@@ -1,5 +1,5 @@
-import React from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Prompt, useHistory, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { get, isEqual } from 'lodash';
 import { Header } from '@buffetjs/custom';
@@ -15,9 +15,9 @@ import {
 
 import useDataManager from '../../hooks/useDataManager';
 import pluginId from '../../pluginId';
-
 import ListHeader from '../../components/ListHeader';
 import { ListButton } from '../../components/ListButton';
+import getTrad from '../../utils/getTrad';
 import LeftMenu from '../LeftMenu';
 
 const ListPage = () => {
@@ -41,12 +41,20 @@ const ListPage = () => {
   } = useDataManager();
   const { formatMessage } = useGlobalContext();
   const { push } = useHistory();
+  const { search } = useLocation();
   const firstMainDataPath = isInContentTypeView ? 'contentType' : 'component';
   const mainDataTypeAttributesPath = [
     firstMainDataPath,
     'schema',
     'attributes',
   ];
+  const [enablePrompt, togglePrompt] = useState(true);
+
+  useEffect(() => {
+    if (search === '') {
+      togglePrompt(true);
+    }
+  }, [search]);
 
   const attributes = get(modifiedData, mainDataTypeAttributesPath, {});
   const attributesLength = Object.keys(attributes).length;
@@ -58,72 +66,16 @@ const ListPage = () => {
   );
   const targetUid = get(modifiedData, [firstMainDataPath, 'uid']);
 
-  const handleClickAddAttributeMainData = () => {
+  const handleClickAddAttributeMainData = async () => {
     const forTarget = isInContentTypeView ? 'contentType' : 'component';
     const search = `modalType=chooseAttribute&forTarget=${forTarget}&targetUid=${targetUid}&headerDisplayName=${currentDataName}`;
+
+    await wait();
+
     push({ search });
   };
-  // const handleClickAddAttributeNestedData = (
-  //   targetUid,
-  //   headerDisplayName,
-  //   headerDisplayCategory = null,
-  //   headerDisplaySubCategory = null,
-  //   subTargetUid = null
-  // ) => {
-  //   const displayCategory = headerDisplayCategory
-  //     ? `&headerDisplayCategory=${headerDisplayCategory}`
-  //     : '';
-  //   const displaySubCategory = headerDisplaySubCategory
-  //     ? `&headerDisplaySubCategory=${headerDisplaySubCategory}`
-  //     : '';
-  //   const search = `modalType=chooseAttribute&forTarget=components&targetUid=${targetUid}&headerDisplayName=${headerDisplayName}${displayCategory}${displaySubCategory}${
-  //     subTargetUid ? `&subTargetUid=${subTargetUid}` : ''
-  //   }`;
 
-  //   push({ search });
-  // };
-  // const handleClickAddComponentToDZ = dzName => {
-  //   const search = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${targetUid}&headerDisplayCategory=${currentDataName}&dynamicZoneTarget=${dzName}&settingType=base&step=1&actionType=edit&headerDisplayName=${dzName}`;
-  //   push({ search });
-  // };
-
-  // // TODO just a util not sure it should be kept
-  // const getType = attrName => {
-  //   const type = has(modifiedData, [
-  //     ...mainDataTypeAttributesPath,
-  //     attrName,
-  //     'nature',
-  //   ])
-  //     ? 'relation'
-  //     : get(
-  //         modifiedData,
-  //         [...mainDataTypeAttributesPath, attrName, 'type'],
-  //         ''
-  //       );
-
-  //   return type;
-  // };
-  // const getComponentSchema = componentName => {
-  //   return get(modifiedData, ['components', componentName], {});
-  // };
-  // const getFirstLevelComponentName = compoName => {
-  //   return get(
-  //     modifiedData,
-  //     [...mainDataTypeAttributesPath, compoName, 'component'],
-  //     ''
-  //   );
-  // };
-  // const getComponent = attrName => {
-  //   const componentToGet = get(
-  //     modifiedData,
-  //     [...mainDataTypeAttributesPath, attrName, 'component'],
-  //     ''
-  //   );
-  //   const componentSchema = getComponentSchema(componentToGet);
-
-  //   return componentSchema;
-  // };
-  const handleClickEditField = (
+  const handleClickEditField = async (
     forTarget,
     targetUid,
     attrName,
@@ -158,6 +110,7 @@ const ListPage = () => {
       ? `&headerDisplayCategory=${headerDisplayCategory}`
       : '';
 
+    await wait();
     push({
       search: `modalType=attribute&actionType=edit&settingType=base&forTarget=${forTarget}&targetUid=${targetUid}&attributeName=${attrName}&attributeType=${attributeType}&headerDisplayName=${headerDisplayName}${step}${displayCategory}`,
     });
@@ -211,7 +164,9 @@ const ListPage = () => {
       label,
       cta: {
         icon: 'pencil-alt',
-        onClick: () => {
+        onClick: async () => {
+          await wait();
+
           push({
             search: makeSearch({
               modalType: firstMainDataPath,
@@ -278,11 +233,23 @@ const ListPage = () => {
     name: PropTypes.string,
   };
 
+  const hasModelBeenModified = !isEqual(modifiedData, initialData);
+
+  const wait = async () => {
+    // this.setState({ removePrompt: true });
+    togglePrompt(false);
+    return new Promise(resolve => setTimeout(resolve, 100));
+  };
+
   return (
     <ViewContainer>
+      <Prompt
+        message={formatMessage({ id: getTrad('prompt.unsaved') })}
+        when={hasModelBeenModified && enablePrompt}
+      />
       <div className="container-fluid">
         <div className="row">
-          <LeftMenu />
+          <LeftMenu wait={wait} togglePrompt={togglePrompt} />
           <div className="col-md-9 content">
             <Header {...headerProps} />
 

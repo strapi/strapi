@@ -1,0 +1,18 @@
+{
+  "connection": "default",
+  "collectionName": "components_main_main_compos",
+  "info": {
+    "name": "main compo",
+    "icon": "air-freshener"
+  },
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "subCompoField": {
+      "type": "component",
+      "repeatable": false,
+      "component": "main.sub-compo"
+    }
+  }
+}

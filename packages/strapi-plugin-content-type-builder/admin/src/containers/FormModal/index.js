@@ -158,8 +158,6 @@ const FormModal = () => {
             collectionName: data.schema.collectionName,
           },
         });
-        console.log({ data });
-        console.log('will edit component');
       }
 
       // Special case for the dynamic zone
@@ -278,8 +276,6 @@ const FormModal = () => {
     headerId = null;
   }
 
-  console.log({ modifiedData });
-
   const checkFormValidity = async () => {
     let schema;
     const dataToValidate =
@@ -333,10 +329,6 @@ const FormModal = () => {
         initialData
       );
     } else if (isEditingCategory) {
-      console.log('edit category');
-      console.log({ initialData });
-      // const initialCategory = 'cocuou';
-
       schema = forms.editCategory.schema(allComponentsCategories, initialData);
     } else {
       // The user is either in the addComponentToDynamicZone modal or
@@ -558,8 +550,6 @@ const FormModal = () => {
             pathname: `/plugins/${pluginId}/component-categories/${category}/${componentUid}`,
           });
         } else {
-          console.log('loo');
-
           updateSchema(modifiedData, state.modalType, state.targetUid);
 
           // Close the modal

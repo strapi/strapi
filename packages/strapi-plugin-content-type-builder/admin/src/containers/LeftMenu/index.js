@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { sortBy } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { LeftMenuList, useGlobalContext } from 'strapi-helper-plugin';
@@ -21,7 +22,7 @@ const displayNotificationCTNotSaved = () => {
   );
 };
 
-function LeftMenu() {
+function LeftMenu({ wait }) {
   const {
     components,
     componentsGroupedByCategory,
@@ -76,8 +77,9 @@ function LeftMenu() {
     );
   };
 
-  const handleClickOpenModal = type => {
+  const handleClickOpenModal = async type => {
     if (canOpenModalCreateCTorComponent()) {
+      await wait();
       push({
         search: `modalType=${type}&actionType=create&settingType=base&forTarget=${type}`,
       });
@@ -133,5 +135,13 @@ function LeftMenu() {
     </Wrapper>
   );
 }
+
+LeftMenu.defaultProps = {
+  wait: () => {},
+};
+
+LeftMenu.propTypes = {
+  wait: PropTypes.func,
+};
 
 export default LeftMenu;

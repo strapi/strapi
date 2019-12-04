@@ -164,7 +164,6 @@
   "table.attributes.title.singular": "{number} field",
   "table.relations.title.plural": "including {number} relationships",
   "table.relations.title.singular": "including {number} relationship",
-  "prompt.content.unsaved": "Are you sure you want to leave this content type? All your modifications will be lost.",
 
   "DELETE ALL ABOVE TRADS": null,
 
@@ -270,5 +269,6 @@
   "modalForm.components.icon.label": "Icon",
   "modalForm.sub-header.addComponentToDynamicZone": "Add new component to the dynamic zone",
   "popUpWarning.bodyMessage.cancel-modifications": "Are you sure you want to cancel your modifications?",
-  "popUpWarning.bodyMessage.cancel-modifications.with-components": "Are you sure you want to cancel your modifications? Some components have been created or modified..."
+  "popUpWarning.bodyMessage.cancel-modifications.with-components": "Are you sure you want to cancel your modifications? Some components have been created or modified...",
+  "prompt.unsaved": "Are you sure you want to leave? All your modifications will be lost."
 }

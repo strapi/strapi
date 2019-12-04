@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useReducer, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { get, groupBy, set, sortBy } from 'lodash';
+import { get, groupBy, set, size, sortBy } from 'lodash';
 import {
   request,
   LoadingIndicatorPage,
@@ -319,9 +319,15 @@ const DataManagerProvider = ({ allIcons, children }) => {
       isInContentTypeView
     );
 
+    // This prevents from losing the created content type or component when clicking on the link from the left menu
+    const hasJustCreatedSchema =
+      get(schemaToSet, 'isTemporary', false) &&
+      size(get(schemaToSet, 'schema.attributes', {})) === 0;
+
     dispatch({
       type: 'SET_MODIFIED_DATA',
       schemaToSet: dataShape,
+      hasJustCreatedSchema,
     });
   };
 

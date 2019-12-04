@@ -137,6 +137,12 @@ const reducer = (state, action) => {
         .updateIn(['modifiedData', 'components'], old => {
           const componentsSchema = newComponents.reduce((acc, current) => {
             const addedCompoSchema = state.getIn(['components', current]);
+            const isTemporaryComponent = addedCompoSchema.get('isTemporary');
+
+            // created components are already in the modifiedData.components
+            if (isTemporaryComponent) {
+              return acc;
+            }
 
             return acc.set(current, addedCompoSchema);
           }, old);
@@ -416,10 +422,20 @@ const reducer = (state, action) => {
       return state.removeIn(pathToAttributeToRemove);
     }
     case 'SET_MODIFIED_DATA': {
-      return state
+      let newState = state
         .update('isLoadingForDataToBeSet', () => false)
         .update('initialData', () => fromJS(action.schemaToSet))
         .update('modifiedData', () => fromJS(action.schemaToSet));
+
+      // Reset the state with the initial data
+      // All created components and content types will be lost
+      if (!action.hasJustCreatedSchema) {
+        newState = newState
+          .update('components', () => state.get('initialComponents'))
+          .update('contentTypes', () => state.get('initialContentTypes'));
+      }
+
+      return newState;
     }
     case 'UPDATE_SCHEMA': {
       const {
