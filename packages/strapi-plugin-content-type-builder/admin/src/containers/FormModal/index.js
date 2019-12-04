@@ -1288,7 +1288,13 @@ const FormModal = () => {
                       : 'primary'
                   }
                   onClick={handleSubmit}
-                  icon={isCreatingAttribute}
+                  icon={
+                    (isCreatingAttribute &&
+                      !isCreatingComponentFromAView &&
+                      state.step !== '1') ||
+                    (state.modalType === 'addComponentToDynamicZone' &&
+                      isCreatingComponentFromAView)
+                  }
                 >
                   {getButtonSubmitMessage()}
                 </Button>
