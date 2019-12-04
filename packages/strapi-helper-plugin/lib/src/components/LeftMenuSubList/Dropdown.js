@@ -51,7 +51,10 @@ const Dropdown = styled.div`
     justify-content: space-between;
 
     > svg {
+      margin-top: auto;
+      margin-bottom: auto;
       color: #b3b5b9;
+      font-size: 12px;
       z-index: -1;
     }
 

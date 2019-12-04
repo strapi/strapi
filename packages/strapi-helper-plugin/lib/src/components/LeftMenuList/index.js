@@ -71,12 +71,9 @@ function LeftMenuList({ customLink, links, title }) {
 
   const renderCompo = (link, i) => {
     const { links, name, title, ...rest } = link;
-    console.log({ link });
 
     if (links) {
       const isSearching = !isEmpty(search);
-
-      console.log({ links });
 
       return (
         <LeftMenuSubList
