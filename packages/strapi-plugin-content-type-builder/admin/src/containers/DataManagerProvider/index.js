@@ -1,10 +1,11 @@
-import React, { memo, useEffect, useReducer, useRef } from 'react';
+import React, { memo, useEffect, useReducer, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { get, groupBy, set, sortBy } from 'lodash';
 import {
   request,
   LoadingIndicatorPage,
   useGlobalContext,
+  PopUpWarning,
 } from 'strapi-helper-plugin';
 import {
   useHistory,
@@ -26,10 +27,16 @@ import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
 import retrieveNestedComponents from './utils/retrieveNestedComponents';
 import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
 import makeUnique from '../../utils/makeUnique';
-import { getComponentsToPost, formatMainDataType } from './utils/cleanData';
+import {
+  getComponentsToPost,
+  formatMainDataType,
+  getCreatedAndModifiedComponents,
+} from './utils/cleanData';
+import getTrad from '../../utils/getTrad';
 
 const DataManagerProvider = ({ allIcons, children }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
+  const [infoModals, toggleInfoModal] = useState({ cancel: false });
   const { updatePlugin } = useGlobalContext();
   const {
     components,
@@ -94,6 +101,10 @@ const DataManagerProvider = ({ allIcons, children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, pathname]);
 
+  const didModifiedComponents =
+    getCreatedAndModifiedComponents(modifiedData.components || {}, components)
+      .length > 0;
+
   const addAttribute = (
     attributeToSet,
     forTarget,
@@ -123,6 +134,11 @@ const DataManagerProvider = ({ allIcons, children }) => {
       dynamicZoneTarget,
       componentsToAdd,
     });
+  };
+
+  const cancelChanges = () => {
+    toggleModalCancel();
+    dispatch({ type: 'CANCEL_CHANGES' });
   };
 
   const createSchema = (
@@ -373,6 +389,11 @@ const DataManagerProvider = ({ allIcons, children }) => {
     }
   };
 
+  // Open the modal warning cancel changes
+  const toggleModalCancel = () => {
+    toggleInfoModal(prev => ({ ...prev, cancel: !prev.cancel }));
+  };
+
   // Really temporary until menu API
   const updateAppMenu = async () => {
     const requestURL = '/content-manager/content-types';
@@ -397,6 +418,8 @@ const DataManagerProvider = ({ allIcons, children }) => {
   };
 
   console.log({ contentTypes, initialData, modifiedData });
+
+  console.log({ isLoadingForDataToBeSet });
 
   return (
     <DataManagerContext.Provider
@@ -430,6 +453,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
         setModifiedData,
         sortedContentTypesList,
         submitData,
+        toggleModalCancel,
         updateSchema,
       }}
     >
@@ -439,6 +463,21 @@ const DataManagerProvider = ({ allIcons, children }) => {
         <>
           {children}
           <FormModal />
+          <PopUpWarning
+            isOpen={infoModals.cancel}
+            toggleModal={toggleModalCancel}
+            content={{
+              message: getTrad(
+                `popUpWarning.bodyMessage.cancel-modifications${
+                  didModifiedComponents ? '.with-components' : ''
+                }`
+              ),
+            }}
+            popUpWarningType="danger"
+            onConfirm={() => {
+              cancelChanges();
+            }}
+          />
         </>
       )}
     </DataManagerContext.Provider>
@@ -451,15 +490,3 @@ DataManagerProvider.propTypes = {
 };
 
 export default memo(DataManagerProvider);
-
-// const appPlugins = plugins;
-//       const appMenu = get(
-//         appPlugins,
-//         ['content-manager', 'leftMenuSections'],
-//         [{ links: [] }]
-//       );
-//       const updatedMenu = appMenu[0].links.filter(el => {
-//         return el.uid !== modelName;
-//       });
-//       appMenu[0].links = sortBy(updatedMenu, 'label');
-//       updatePlugin('content-manager', 'leftMenuSections', appMenu);

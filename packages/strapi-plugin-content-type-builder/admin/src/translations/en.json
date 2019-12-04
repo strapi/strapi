@@ -268,5 +268,7 @@
   "modalForm.attributes.select-component": "Select a component",
   "modalForm.attributes.select-components": "Select the components",
   "modalForm.components.icon.label": "Icon",
-  "modalForm.sub-header.addComponentToDynamicZone": "Add new component to the dynamic zone"
+  "modalForm.sub-header.addComponentToDynamicZone": "Add new component to the dynamic zone",
+  "popUpWarning.bodyMessage.cancel-modifications": "Are you sure you want to cancel your modifications?",
+  "popUpWarning.bodyMessage.cancel-modifications.with-components": "Are you sure you want to cancel your modifications? Some components have been created or modified..."
 }

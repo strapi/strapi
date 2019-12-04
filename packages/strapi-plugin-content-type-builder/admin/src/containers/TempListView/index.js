@@ -37,6 +37,7 @@ const ListPage = () => {
     // removeAttribute,
     // removeComponentFromDynamicZone,
     submitData,
+    toggleModalCancel,
   } = useDataManager();
   const { formatMessage } = useGlobalContext();
   const { push } = useHistory();
@@ -162,11 +163,6 @@ const ListPage = () => {
     });
   };
 
-  // const handleClickEditComponent = compoName => {
-  //   const search = `modalType=attribute&actionType=edit&settingType=base&forTarget=${forTarget}&targetUid=${targetUid}&attributeName=${attrName}&attributeType=${attributeType}&headerDisplayName=${headerDisplayName}`,
-  //   push({ search });
-  // }
-
   const getDescription = () => {
     const description = get(
       modifiedData,
@@ -182,24 +178,13 @@ const ListPage = () => {
   };
 
   const getActions = () => {
-    // const handleSubmit = () =>
-    //   this.isUpdatingTempFeature()
-    //     ? submitTempGroup(newGroup, this.context)
-    //     : submitGroup(
-    //         featureName,
-    //         get(modifiedDataGroup, featureName),
-    //         Object.assign(this.context, {
-    //           history: this.props.history,
-    //         }),
-    //         this.getSource()
-    //       );
-
-    // const handleCancel = resetEditExistingGroup(this.getFeatureName());
-
     return [
       {
         color: 'cancel',
-        onClick: () => {},
+        onClick: () => {
+          console.log('cancel modifs');
+          toggleModalCancel();
+        },
         title: formatMessage({
           id: `${pluginId}.form.button.cancel`,
         }),

@@ -17,18 +17,20 @@ import {
   Col,
 } from 'reactstrap';
 
-// import convertAttrObjToArray from '../../utils/convertAttrObjToArray';
+import convertAttrObjToArray from '../../utils/convertAttrObjToArray';
 import useDataManager from '../../hooks/useDataManager';
 
 // TODO fix merge conflict
-// import Wrapper from './List';
+import Wrapper from './List';
 
 /* eslint-disable */
 function List({ className, customRowComponent, items }) {
   const { modifiedData } = useDataManager();
 
   const getComponentSchema = componentName => {
-    return get(modifiedData, ['components', componentName], {});
+    return get(modifiedData, ['components', componentName], {
+      schema: { attributes: {} },
+    });
   };
 
   const renderComponentList = ({ component }) => {
@@ -39,10 +41,10 @@ function List({ className, customRowComponent, items }) {
     return (
       <tr className="component-row">
         <td colSpan={12}>
-          {/* {List({
+          {List({
             customRowComponent,
             items: convertAttrObjToArray(attributes),
-          })} */}
+          })}
         </td>
       </tr>
     );
@@ -53,7 +55,7 @@ function List({ className, customRowComponent, items }) {
   };
 
   renderComponentList.propTypes = {
-    component: PropTypes.stringÒ,
+    component: PropTypes.string,
   };
 
   const renderDynamicZoneList = ({ components }) => {
@@ -119,7 +121,7 @@ function List({ className, customRowComponent, items }) {
   };
 
   return (
-    <div className={className}>
+    <Wrapper className={className}>
       <table>
         <tbody>
           {items.map(item => {
@@ -142,7 +144,7 @@ function List({ className, customRowComponent, items }) {
           })}
         </tbody>
       </table>
-    </div>
+    </Wrapper>
   );
 }
 
