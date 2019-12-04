@@ -14,7 +14,7 @@ import { Button } from '@buffetjs/core';
 import { Inputs } from '@buffetjs/custom';
 import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
-import { get, has, isEmpty, set, toString, upperFirst } from 'lodash';
+import { get, has, isEmpty, set, toLower, toString, upperFirst } from 'lodash';
 import pluginId from '../../pluginId';
 import useQuery from '../../hooks/useQuery';
 import useDataManager from '../../hooks/useDataManager';
@@ -49,11 +49,14 @@ const FormModal = () => {
   const {
     addAttribute,
     addCreatedComponentToDynamicZone,
+    allComponentsCategories,
     changeDynamicZoneComponents,
     contentTypes,
     components,
     createSchema,
+    deleteCategory,
     deleteData,
+    editCategory,
     modifiedData: allDataSchema,
     nestedComponents,
     sortedContentTypesList,
@@ -107,6 +110,16 @@ const FormModal = () => {
         targetUid,
       });
 
+      // Edit category
+      if (modalType === 'editCategory' && actionType === 'edit') {
+        dispatch({
+          type: 'SET_DATA_TO_EDIT',
+          data: {
+            name: query.get('categoryName'),
+          },
+        });
+      }
+
       // Edit content type
       if (
         modalType === 'contentType' &&
@@ -128,6 +141,7 @@ const FormModal = () => {
         });
       }
 
+      // Edit component
       if (
         modalType === 'component' &&
         state.modalType !== 'component' &&
@@ -223,6 +237,11 @@ const FormModal = () => {
   if (state.modalType === 'addComponentToDynamicZone') {
     iconType = 'dynamiczone';
   }
+
+  if (state.modalType === 'editCategory') {
+    iconType = 'component';
+  }
+
   const isCreatingContentType = state.modalType === 'contentType';
   const isCreatingComponent = state.modalType === 'component';
   const isCreatingAttribute = state.modalType === 'attribute';
@@ -234,7 +253,7 @@ const FormModal = () => {
     get(modifiedData, 'createComponent', false) ||
     isCreatingComponentWhileAddingAField;
   const isInFirstComponentStep = state.step === '1';
-
+  const isEditingCategory = state.modalType === 'editCategory';
   const isOpen = !isEmpty(search);
   const isPickingAttribute = state.modalType === 'chooseAttribute';
   const uid = createUid(modifiedData.name || '');
@@ -299,10 +318,15 @@ const FormModal = () => {
         state.attributeName,
         initialData
       );
+    } else if (isEditingCategory) {
+      console.log('edit category');
+      console.log({ initialData });
+      // const initialCategory = 'cocuou';
 
+      schema = forms.editCategory.schema(allComponentsCategories, initialData);
+    } else {
       // The user is either in the addComponentToDynamicZone modal or
       // in step 1 of the add component (modalType=attribute&attributeType=component) but not creating a component
-    } else {
       if (isInFirstComponentStep && isCreatingComponentFromAView) {
         schema = forms.component.schema(
           Object.keys(components),
@@ -327,6 +351,7 @@ const FormModal = () => {
     switch (modalType) {
       case 'contentType':
       case 'component':
+      case 'editCategory':
         tradId = !isCreating
           ? getTrad('form.button.finish')
           : getTrad('form.button.continue');
@@ -516,7 +541,16 @@ const FormModal = () => {
           }),
           pathname: `/plugins/${pluginId}/component-categories/${category}/${componentUid}`,
         });
+      } else if (isEditingCategory) {
+        if (toLower(initialData.name) === toLower(modifiedData.name)) {
+          push({ search: '' });
 
+          return;
+        }
+
+        editCategory(initialData.name, modifiedData);
+
+        return;
         // Add/edit a field to a content type
         // Add/edit a field to a created component (the end modal is not step 2)
       } else if (isCreatingAttribute && !isCreatingComponentFromAView) {
@@ -827,9 +861,10 @@ const FormModal = () => {
   };
   const shouldDisableAdvancedTab = () => {
     return (
-      (state.attributeType === 'component' ||
+      ((state.attributeType === 'component' ||
         state.modalType === 'addComponentToDynamicZone') &&
-      get(modifiedData, ['createComponent'], null) === false
+        get(modifiedData, ['createComponent'], null) === false) ||
+      state.modalType == 'editCategory'
     );
   };
 
@@ -1182,15 +1217,29 @@ const FormModal = () => {
                     }}
                     style={{ marginRight: '10px' }}
                   >
-                    {/* {formatMessage({ id: 'form.button.finish' })} */}
+                    Delete
+                  </Button>
+                )}
+                {isEditingCategory && (
+                  <Button
+                    type="button"
+                    color="delete"
+                    onClick={e => {
+                      e.preventDefault();
+
+                      deleteCategory(initialData.name);
+                    }}
+                    style={{ marginRight: '10px' }}
+                  >
                     Delete
                   </Button>
                 )}
                 <Button
                   type="submit"
-                  // color="primary"
                   color={
-                    (isCreatingContentType || isCreatingComponent) &&
+                    (isCreatingContentType ||
+                      isCreatingComponent ||
+                      isEditingCategory) &&
                     !isCreating
                       ? 'success'
                       : 'primary'

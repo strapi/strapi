@@ -1,6 +1,6 @@
 import React from 'react';
 import * as yup from 'yup';
-import { get, isEmpty } from 'lodash';
+import { get, isEmpty, toLower } from 'lodash';
 import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../../pluginId';
@@ -777,6 +777,36 @@ const forms = {
 
         return {
           items: [[fields.createComponent], ...itemsToConcat],
+        };
+      },
+    },
+  },
+  editCategory: {
+    schema(allCategories, initialData) {
+      const allowedCategories = allCategories
+        .filter(cat => cat !== initialData.name)
+        .map(cat => toLower(cat));
+
+      return yup.object().shape({
+        name: yup
+          .string()
+          .unique(errorsTrads.unique, allowedCategories, toLower)
+          .required(errorsTrads.required),
+      });
+    },
+    form: {
+      base() {
+        return {
+          items: [
+            [
+              {
+                ...fields.name,
+                description: {
+                  id: getTrad('modalForm.editCategory.base.name.description'),
+                },
+              },
+            ],
+          ],
         };
       },
     },

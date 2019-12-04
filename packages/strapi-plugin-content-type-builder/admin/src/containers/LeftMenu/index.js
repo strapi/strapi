@@ -9,8 +9,10 @@ import { sortBy } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { LeftMenuList, useGlobalContext } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
+import getTrad from '../../utils/getTrad';
 import CustomLink from '../../components/CustomLink';
 import useDataManager from '../../hooks/useDataManager';
+import makeSearch from '../../utils/makeSearch';
 import Wrapper from './Wrapper';
 
 const displayNotificationCTNotSaved = () => {
@@ -26,9 +28,11 @@ function LeftMenu() {
     contentTypes,
     sortedContentTypesList,
   } = useDataManager();
-  const { currentEnvironment } = useGlobalContext();
+  const { currentEnvironment, formatMessage } = useGlobalContext();
   const { push } = useHistory();
+
   const isProduction = currentEnvironment === 'production';
+
   const componentsData = sortBy(
     Object.keys(componentsGroupedByCategory).map(category => ({
       name: category,
@@ -36,8 +40,18 @@ function LeftMenu() {
       isEditable: true,
       onClickEdit: (e, data) => {
         e.stopPropagation();
+        const search = makeSearch({
+          actionType: 'edit',
+          modalType: 'editCategory',
+          categoryName: data.name,
+          headerDisplayName: data.name,
+          headerDisplayCategory: formatMessage({
+            id: getTrad('modalForm.header.categories'),
+          }),
+          settingType: 'base',
+        });
 
-        console.log({ data });
+        push({ search });
       },
       links: sortBy(
         componentsGroupedByCategory[category].map(compo => ({
@@ -50,6 +64,7 @@ function LeftMenu() {
     })),
     obj => obj.title
   );
+
   const canOpenModalCreateCTorComponent = () => {
     return (
       !Object.keys(contentTypes).some(

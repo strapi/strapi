@@ -249,6 +249,25 @@ const DataManagerProvider = ({ allIcons, children }) => {
     return makeUnique(composWithCompos);
   };
 
+  const editCategory = async (categoryUid, body) => {
+    try {
+      const requestURL = `/${pluginId}/component-categories/${categoryUid}`;
+
+      // Close the modal
+      push({ search: '' });
+
+      // Update the category
+      await request(requestURL, { method: 'PUT', body }, true);
+
+      // Reload the plugin so the cycle is new again
+      dispatch({ type: 'RELOAD_PLUGIN' });
+      // Refetch all the data
+      getDataRef.current();
+    } catch (err) {
+      console.log({ err });
+    }
+  };
+
   const submitData = async () => {
     try {
       const isCreating = get(
@@ -310,6 +329,26 @@ const DataManagerProvider = ({ allIcons, children }) => {
     }
   };
 
+  const deleteCategory = async categoryUid => {
+    try {
+      const requestURL = `/${pluginId}/component-categories/${categoryUid}`;
+
+      // Close the modal
+      push({ search: '' });
+
+      await request(requestURL, { method: 'DELETE' }, true);
+
+      // TODO update menu
+
+      // Reload the plugin so the cycle is new again
+      dispatch({ type: 'RELOAD_PLUGIN' });
+      // Refetch all the data
+      getDataRef.current();
+    } catch (err) {
+      console.log({ err });
+    }
+  };
+
   const updateSchema = (data, schemaType) => {
     dispatch({
       type: 'UPDATE_SCHEMA',
@@ -338,7 +377,9 @@ const DataManagerProvider = ({ allIcons, children }) => {
         componentsThatHaveOtherComponentInTheirAttributes: getAllComponentsThatHaveAComponentInTheirAttributes(),
         contentTypes,
         createSchema,
+        deleteCategory,
         deleteData,
+        editCategory,
         initialData,
         isInContentTypeView,
         modifiedData,

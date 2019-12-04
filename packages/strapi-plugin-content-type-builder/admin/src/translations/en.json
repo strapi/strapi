@@ -165,6 +165,7 @@
   "table.relations.title.plural": "including {number} relationships",
   "table.relations.title.singular": "including {number} relationship",
   "prompt.content.unsaved": "Are you sure you want to leave this content type? All your modifications will be lost.",
+
   "DELETE ALL ABOVE TRADS": null,
 
   "attribute.boolean": "Boolean",
@@ -255,7 +256,9 @@
   "form.button.select-component": "Select a component",
   "form.button.add-components-to-dynamiczone": "Add components to the zone",
   "form.button.configure-component": "Configure the component",
+  "modalForm.editCategory.base.name.description": "No space is allowed for the name of the category",
   "modalForm.header-edit": "Edit {name}",
+  "modalForm.header.categories": "Categories",
   "modalForm.sub-header.chooseAttribute.component": "Select a field for your component",
   "modalForm.sub-header.chooseAttribute.contentType": "Select a field for your content type",
   "modalForm.sub-header.attribute.create": "Add new {type} field",
