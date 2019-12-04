@@ -409,17 +409,14 @@ const DataManagerProvider = ({ allIcons, children }) => {
     }
   };
 
-  const updateSchema = (data, schemaType) => {
+  const updateSchema = (data, schemaType, componentUID) => {
     dispatch({
       type: 'UPDATE_SCHEMA',
       data,
       schemaType,
+      uid: componentUID,
     });
   };
-
-  console.log({ contentTypes, initialData, modifiedData });
-
-  console.log({ isLoadingForDataToBeSet });
 
   return (
     <DataManagerContext.Provider

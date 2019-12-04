@@ -3,7 +3,7 @@ import Creatable from 'react-select/creatable';
 import PropTypes from 'prop-types';
 import useDataManager from '../../hooks/useDataManager';
 
-const CreatableSelect = ({ onChange, name, styles }) => {
+const CreatableSelect = ({ onChange, name, styles, value }) => {
   const { allComponentsCategories } = useDataManager();
 
   const handleChange = (inputValue, actionMeta) => {
@@ -22,8 +22,13 @@ const CreatableSelect = ({ onChange, name, styles }) => {
     return allComponentsCategories.map(cat => ({ value: cat, label: cat }));
   };
 
+  const getValue = () => {
+    return formatOptions().find(el => el.value === value);
+  };
+
   return (
     <Creatable
+      value={getValue()}
       isClearable
       onChange={handleChange}
       styles={styles}
@@ -34,12 +39,14 @@ const CreatableSelect = ({ onChange, name, styles }) => {
 
 CreatableSelect.defaultProps = {
   error: null,
+  value: null,
 };
 
 CreatableSelect.propTypes = {
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   styles: PropTypes.object.isRequired,
+  value: PropTypes.string,
 };
 
 export default CreatableSelect;

@@ -421,15 +421,37 @@ const reducer = (state, action) => {
         .update('initialData', () => fromJS(action.schemaToSet))
         .update('modifiedData', () => fromJS(action.schemaToSet));
     }
-    case 'UPDATE_SCHEMA':
-      return state.updateIn(
-        ['modifiedData', action.schemaType, 'schema'],
-        obj => {
-          return obj
-            .update('name', () => action.data.name)
-            .update('collectionName', () => action.data.collectionName);
+    case 'UPDATE_SCHEMA': {
+      const {
+        data: { name, collectionName, category, icon },
+        schemaType,
+        uid,
+      } = action;
+
+      let newState = state.updateIn(['modifiedData', schemaType], obj => {
+        let updatedObj = obj
+          .updateIn(['schema', 'name'], () => name)
+          .updateIn(['schema', 'collectionName'], () => collectionName);
+
+        if (action.schemaType === 'component') {
+          updatedObj = updatedObj
+            .update('category', () => category)
+            .updateIn(['schema', 'icon'], () => icon);
         }
-      );
+
+        return updatedObj;
+      });
+
+      if (schemaType === 'component') {
+        newState = newState.updateIn(['components'], obj => {
+          return obj.update(uid, () =>
+            newState.getIn(['modifiedData', 'component'])
+          );
+        });
+      }
+
+      return newState;
+    }
     default:
       return state;
   }

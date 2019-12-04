@@ -147,6 +147,18 @@ const FormModal = () => {
         state.modalType !== 'component' &&
         actionType === 'edit'
       ) {
+        const data = get(allDataSchema, pathToSchema, {});
+
+        dispatch({
+          type: 'SET_DATA_TO_EDIT',
+          data: {
+            name: data.schema.name,
+            category: data.category,
+            icon: data.schema.icon,
+            collectionName: data.schema.collectionName,
+          },
+        });
+        console.log({ data });
         console.log('will edit component');
       }
 
@@ -265,6 +277,8 @@ const FormModal = () => {
   if (!['contentType', 'component'].includes(state.modalType)) {
     headerId = null;
   }
+
+  console.log({ modifiedData });
 
   const checkFormValidity = async () => {
     let schema;
@@ -524,23 +538,35 @@ const FormModal = () => {
           }),
         });
       } else if (isCreatingComponent) {
-        // Create the component schema
-        const componentUid = createComponentUid(
-          modifiedData.name,
-          modifiedData.category
-        );
-        const { category, ...rest } = modifiedData;
-        createSchema(rest, 'component', componentUid, category);
+        if (isCreating) {
+          // Create the component schema
+          const componentUid = createComponentUid(
+            modifiedData.name,
+            modifiedData.category
+          );
+          const { category, ...rest } = modifiedData;
 
-        push({
-          search: makeNextSearch({
-            modalType: 'chooseAttribute',
-            forTarget: state.forTarget,
-            targetUid: componentUid,
-            headerDisplayName: modifiedData.name,
-          }),
-          pathname: `/plugins/${pluginId}/component-categories/${category}/${componentUid}`,
-        });
+          createSchema(rest, 'component', componentUid, category);
+
+          push({
+            search: makeNextSearch({
+              modalType: 'chooseAttribute',
+              forTarget: state.forTarget,
+              targetUid: componentUid,
+              headerDisplayName: modifiedData.name,
+            }),
+            pathname: `/plugins/${pluginId}/component-categories/${category}/${componentUid}`,
+          });
+        } else {
+          console.log('loo');
+
+          updateSchema(modifiedData, state.modalType, state.targetUid);
+
+          // Close the modal
+          push({ search: '' });
+
+          return;
+        }
       } else if (isEditingCategory) {
         if (toLower(initialData.name) === toLower(modifiedData.name)) {
           push({ search: '' });
