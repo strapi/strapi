@@ -56,6 +56,14 @@ const ListPage = () => {
     }
   }, [search]);
 
+  // Disabling the prompt on the first render if one of the modal is open
+  useEffect(() => {
+    if (search !== '') {
+      togglePrompt(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const attributes = get(modifiedData, mainDataTypeAttributesPath, {});
   const attributesLength = Object.keys(attributes).length;
 
