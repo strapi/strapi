@@ -44,7 +44,7 @@ const formatters = {
     },
     datetime: value => {
       const cast = new Date(value);
-      return isValid(cast) ? formatISO(cast) : null;
+      return isValid(cast) ? cast.toISOString() : null;
     },
     timestamp: value => {
       const cast = new Date(value);

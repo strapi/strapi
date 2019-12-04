@@ -12,7 +12,7 @@ describe.skip('Test type date', () => {
 
     modelsUtils = createModelsUtils({ rq });
 
-    await modelsUtils.createModelWithType('withdate', 'date');
+    await modelsUtils.createModelWithType('withdate', 'datetime');
   }, 60000);
 
   afterAll(async () => {

@@ -8,6 +8,9 @@ const timeRegex = new RegExp(
 );
 
 const parseTime = value => {
+  if (typeof value !== 'string') {
+    throw new Error(`Expected a string, got a ${typeof value}`);
+  }
   const result = value.match(timeRegex);
 
   if (result === null) {
@@ -55,7 +58,9 @@ const parseDateTimeOrTimestamp = value => {
 const parseType = ({ type, value }) => {
   switch (type) {
     case 'boolean': {
-      if (['true', 't', '1', 1, true].includes(value)) {
+      if (typeof value === 'boolean') return value;
+
+      if (['true', 't', '1', 1].includes(value)) {
         return true;
       }
 
@@ -63,7 +68,9 @@ const parseType = ({ type, value }) => {
         return false;
       }
 
-      return Boolean(value);
+      throw new Error(
+        'Invalid boolean input. Expected "t","1","true","false","0","f"'
+      );
     }
     case 'integer':
     case 'biginteger':

@@ -5,14 +5,14 @@ const { createAuthRequest } = require('../../../../test/helpers/request');
 let modelsUtils;
 let rq;
 
-describe.skip('Test type date', () => {
+describe('Test type date', () => {
   beforeAll(async () => {
     const token = await registerAndLogin();
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
 
-    await modelsUtils.createModelWithType('withdate', 'date');
+    await modelsUtils.createModelWithType('withdate', 'datetime');
   }, 60000);
 
   afterAll(async () => {
