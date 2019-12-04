@@ -1274,7 +1274,7 @@ const FormModal = () => {
                     }}
                     style={{ marginRight: '10px' }}
                   >
-                    Delete
+                    {formatMessage({ id: getTrad('button.delete.title') })}
                   </Button>
                 )}
                 <Button
