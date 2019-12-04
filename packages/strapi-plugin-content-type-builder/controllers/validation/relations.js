@@ -20,15 +20,18 @@ module.exports = (obj, validNatures) => {
       .string()
       .oneOf(validNatures)
       .required(),
-    unique: validators.unique,
-    dominant: yup.boolean(),
-    columnName: yup.string(),
+    unique: validators.unique.nullable(),
+    dominant: yup.boolean().nullable(),
+    columnName: yup.string().nullable(),
     targetAttribute: REVERSE_RELATIONS.includes(obj.nature)
       ? yup
           .string()
           .test(isValidName)
           .required()
-      : yup.string().test(isValidName),
-    targetColumnName: yup.string(),
+      : yup
+          .string()
+          .test(isValidName)
+          .nullable(),
+    targetColumnName: yup.string().nullable(),
   };
 };

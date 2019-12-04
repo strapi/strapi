@@ -155,8 +155,8 @@ module.exports = function createSchemaHandler(infos) {
           Array.isArray(attr.components) &&
           attr.components.includes(uid)
         ) {
-          const updatedComponentList = attributes[key].components.map(val =>
-            val === uid ? newUID : uid
+          const updatedComponentList = attr.components.map(val =>
+            val === uid ? newUID : val
           );
 
           this.set(['attributes', key, 'components'], updatedComponentList);

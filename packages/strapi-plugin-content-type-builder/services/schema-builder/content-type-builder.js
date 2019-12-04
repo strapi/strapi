@@ -27,7 +27,15 @@ module.exports = function createComponentBuilder() {
 
       const uid = toUID(target, plugin);
 
-      return this.contentTypes.get(uid).unset(['attributes', attribute.via]);
+      const targetCT = this.contentTypes.get(uid);
+      const targetAttribute = targetCT.get(['attributes', attribute.via]);
+
+      // do not delete polymorphic relations
+      if (targetAttribute.collection === '*' || targetAttribute.model === '*') {
+        return;
+      }
+
+      return targetCT.unset(['attributes', attribute.via]);
     },
 
     /**
@@ -206,7 +214,7 @@ const createContentTypeUID = ({ name }) =>
 const generateRelation = ({ key, attribute, modelName }) => {
   const opts = {
     via: key,
-    columnName: attribute.targetColumnName,
+    columnName: attribute.targetColumnName || undefined,
   };
 
   switch (attribute.nature) {
