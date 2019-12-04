@@ -19,7 +19,12 @@ const Wrapper = styled.div`
   .sub_wrapper {
     position: relative;
     cursor: pointer;
-    background: ${({ isOverEditBlock, isOverRemove, isSelected, isSub }) => {
+    background-color: ${({
+      isOverEditBlock,
+      isOverRemove,
+      isSelected,
+      isSub,
+    }) => {
       if (isOverRemove) {
         return '#ffe9e0';
       } else if (isSelected || isOverEditBlock) {
@@ -34,7 +39,25 @@ const Wrapper = styled.div`
       ${({ isOverEditBlock, isOverRemove, isSelected }) =>
         getColor(isOverRemove, isSelected, isOverEditBlock)};
     border-radius: 2px;
+    padding-left: 38px;
+    padding-right: 38px;
+
+    ${({ isSub }) =>
+      isSub &&
+      css`
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+
+        .grab,
+        .remove {
+          display: none;
+        }
+      `}
+
     .name {
+      font-size: 13px;
+      font-weight: 500;
+
       ${({ isOverRemove }) =>
         isOverRemove &&
         css`
@@ -64,7 +87,7 @@ const Wrapper = styled.div`
         (isSelected || isOverEditBlock) &&
         css`
           g {
-            fill: #007eff;
+            fill: #aed4fb;
           }
         `}
     }

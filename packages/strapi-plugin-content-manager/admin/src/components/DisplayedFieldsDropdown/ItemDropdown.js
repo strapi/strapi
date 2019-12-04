@@ -3,7 +3,6 @@ import styled from 'styled-components';
 
 const ItemDropdown = styled(DropdownItem)`
   padding: 0;
-  padding-top: 9px;
   &:active,
   :focus {
     background-color: #f7f7f9 !important;
@@ -19,6 +18,13 @@ const ItemDropdown = styled(DropdownItem)`
   label {
     width: 100%;
     outline: none;
+    &:before {
+      top: 12px;
+    }
+  }
+  .form-check {
+    height: 36px;
+    line-height: 36px;
   }
 `;
 

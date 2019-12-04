@@ -85,6 +85,7 @@ const formatAttribute = (key, attribute, { model }) => {
   }
 };
 
+// TODO: move to schema builder
 const replaceTemporaryUIDs = uidMap => schema => {
   return {
     ...schema,
@@ -114,7 +115,7 @@ const replaceTemporaryUIDs = uidMap => schema => {
           components: attr.components.map(value => {
             if (_.has(uidMap, value)) return uidMap[value];
 
-            if (!_.has(strapi.components, attr.component)) {
+            if (!_.has(strapi.components, value)) {
               throw new Error('component.notFound');
             }
 

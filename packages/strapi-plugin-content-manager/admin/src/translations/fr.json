@@ -7,7 +7,7 @@
   "components.AddFilterCTA.add": "Filtres",
   "components.AddFilterCTA.hide": "Filtres",
   "components.DraggableAttr.edit": "Cliquez pour modifier",
-  "components.DynamicZone.add-compo": "Ajouter un composant à {componentName}",
+  "components.DynamicZone.add-compo": "Ajouter à {componentName}",
   "components.DynamicZone.pick-compo": "Choisir un composant",
   "components.DynamicZone.missing.singular": "{count} composant manquant",
   "components.DynamicZone.missing.plural": "{count} composants manquants",

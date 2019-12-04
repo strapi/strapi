@@ -9,7 +9,7 @@ const Wrapper = styled.div`
     background: #ffffff;
     color: #333740;
     border-radius: 2px;
-    border: solid 1px #006ced;
+    border: solid 1px #007eff;
 
     > button {
       cursor: pointer;

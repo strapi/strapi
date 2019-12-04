@@ -1,18 +1,23 @@
 import styled from 'styled-components';
 
 const Label = styled.div`
-  padding: 13px 20px;
+  padding: 9px 20px;
   font-size: 13px;
   font-weight: 600;
   position: relative;
-  min-height: 68px;
+  min-height: 64px;
   &:after {
-    content: '• ';
+    content: '•';
     position: absolute;
-    top: 11px;
+    top: 15px;
     left: 18.5px;
-    color: #aed4fb;
     font-size: 15px;
+    width: 8px;
+    height: 8px;
+    background-color: #aed4fb;
+    color: transparent;
+    border-radius: 4px;
+    border: 1px solid white;
   }
   &:before {
     content: '&';
