@@ -3,8 +3,15 @@ import PlusButton from '../PlusButton';
 
 const Button = styled(PlusButton)`
   transform: rotate(-90deg);
-  transition: background-color 0.2s linear;
-  transition: transform 0.2s ease-in-out;
+  transition: background-color 0.1s linear;
+  transition: transform 0.1s ease-in-out;
+  &:hover {
+    background-color: #aed4fb;
+    :before,
+    :after {
+      background-color: #007eff;
+    }
+  }
 
   ${({ hasError }) => {
     if (hasError) {
@@ -18,11 +25,6 @@ const Button = styled(PlusButton)`
   }}
   &.isOpen {
     transform: rotate(-45deg);
-    background-color: #aed4fb;
-    :before,
-    :after {
-      background-color: #007eff;
-    }
   }
 `;
 

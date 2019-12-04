@@ -3,7 +3,7 @@ import styled from 'styled-components';
 const Container = styled.div`
   min-width: 200px;
   font-size: 1.3rem;
-  padding-bottom: 30px;
+  padding-bottom: 26px;
 
   .labelFile {
     margin-bottom: 9px;

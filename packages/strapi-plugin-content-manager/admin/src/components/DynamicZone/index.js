@@ -2,6 +2,8 @@ import React, { useCallback, useState } from 'react';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
+import { Arrow } from '@buffetjs/icons';
+
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import useEditView from '../../hooks/useEditView';
@@ -89,27 +91,26 @@ const DynamicZone = ({ max, min, name }) => {
 
           return (
             <div key={index}>
-              {showDownIcon && (
-                <RoundCTA
-                  style={{ top: -15, right: 54 }}
-                  className="arrow-btn"
-                  onClick={() => moveComponentDown(name, index)}
-                >
-                  <i className="fa fa-arrow-down" />
-                </RoundCTA>
-              )}
-              {showUpIcon && (
-                <RoundCTA
-                  style={{ top: -15, right: 88 }}
-                  className="arrow-btn"
-                  onClick={() => moveComponentUp(name, index)}
-                >
-                  <i className="fa fa-arrow-up" />
-                </RoundCTA>
-              )}
+              <div className="arrow-icons">
+                {showDownIcon && (
+                  <RoundCTA
+                    className="arrow-btn arrow-down"
+                    onClick={() => moveComponentDown(name, index)}
+                  >
+                    <Arrow />
+                  </RoundCTA>
+                )}
+                {showUpIcon && (
+                  <RoundCTA
+                    className="arrow-btn arrow-up"
+                    onClick={() => moveComponentUp(name, index)}
+                  >
+                    <Arrow />
+                  </RoundCTA>
+                )}
+              </div>
 
               <RoundCTA
-                style={{ top: -15, right: 15 }}
                 onClick={() => removeComponentFromDynamicZone(name, index)}
               >
                 <i className="far fa-trash-alt" />

@@ -6,8 +6,8 @@ const ComponentsPicker = styled.div`
   transition: max-height 0.2s ease-out;
 
   > div {
-    margin-top: 19px;
-    padding: 23px 18px 22px 18px;
+    margin-top: 15px;
+    padding: 23px 18px 26px 18px;
     background-color: #f2f3f4;
   }
 
@@ -18,6 +18,7 @@ const ComponentsPicker = styled.div`
     `}
 
   .componentPickerTitle {
+    margin-bottom: 18px;
     color: #919bae;
     font-weight: 600;
     font-size: 13px;

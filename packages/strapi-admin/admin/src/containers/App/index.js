@@ -47,16 +47,20 @@ function App(props) {
         const { uuid } = data;
 
         if (uuid) {
-          await fetch('https://analytics.strapi.io/track', {
-            method: 'POST',
-            body: JSON.stringify({
-              event: 'didInitializeAdministration',
-              uuid,
-            }),
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
+          try {
+            await fetch('https://analytics.strapi.io/track', {
+              method: 'POST',
+              body: JSON.stringify({
+                event: 'didInitializeAdministration',
+                uuid,
+              }),
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+          } catch (e) {
+            // Silent.
+          }
         }
 
         getDataRef.current(hasAdmin, data);
