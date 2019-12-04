@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Prompt, useHistory, useLocation } from 'react-router-dom';
+import { BackHeader } from 'strapi-helper-plugin';
 import PropTypes from 'prop-types';
 import { get, isEqual } from 'lodash';
 import { Header } from '@buffetjs/custom';
@@ -251,6 +252,7 @@ const ListPage = () => {
 
   return (
     <ViewContainer>
+      <BackHeader />
       <Prompt
         message={formatMessage({ id: getTrad('prompt.unsaved') })}
         when={hasModelBeenModified && enablePrompt}

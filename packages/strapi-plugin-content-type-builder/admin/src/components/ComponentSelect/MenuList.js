@@ -35,51 +35,53 @@ const MenuList = ({
           maxHeight: 150,
         }}
       >
-        {Object.keys(componentsGroupedByCategory).map(categoryName => {
-          return (
-            <li key={categoryName}>
-              <Category categoryName={categoryName} />
-              <Ul style={{ marginTop: '-4px' }}>
-                {componentsGroupedByCategory[categoryName].map(component => {
-                  if (
-                    (isAddingAComponentToAnotherComponent &&
-                      componentsThatHaveOtherComponentInTheirAttributes.includes(
-                        component.uid
-                      )) ||
-                    (isTargetAComponent && component.uid === uid)
-                  ) {
-                    return null;
-                  }
+        {Object.keys(componentsGroupedByCategory)
+          .sort()
+          .map(categoryName => {
+            return (
+              <li key={categoryName}>
+                <Category categoryName={categoryName} />
+                <Ul style={{ marginTop: '-4px' }}>
+                  {componentsGroupedByCategory[categoryName].map(component => {
+                    if (
+                      (isAddingAComponentToAnotherComponent &&
+                        componentsThatHaveOtherComponentInTheirAttributes.includes(
+                          component.uid
+                        )) ||
+                      (isTargetAComponent && component.uid === uid)
+                    ) {
+                      return null;
+                    }
 
-                  const isSelected = value.value === component.uid;
+                    const isSelected = value.value === component.uid;
 
-                  return (
-                    <li
-                      key={component.uid}
-                      className="li"
-                      onClick={() => {
-                        refState.current.select.blur();
-                        onClickOption({
-                          target: { name, value: component.uid },
-                        });
-                      }}
-                    >
-                      <p
-                        datadescr={upperFirst(component.schema.name)}
-                        style={{
-                          color: isSelected ? '#007eff' : '',
-                          fontWeight: isSelected ? '700' : '400',
+                    return (
+                      <li
+                        key={component.uid}
+                        className="li"
+                        onClick={() => {
+                          refState.current.select.blur();
+                          onClickOption({
+                            target: { name, value: component.uid },
+                          });
                         }}
                       >
-                        {upperFirst(component.schema.name)}
-                      </p>
-                    </li>
-                  );
-                })}
-              </Ul>
-            </li>
-          );
-        })}
+                        <p
+                          datadescr={upperFirst(component.schema.name)}
+                          style={{
+                            color: isSelected ? '#007eff' : '',
+                            fontWeight: isSelected ? '700' : '400',
+                          }}
+                        >
+                          {upperFirst(component.schema.name)}
+                        </p>
+                      </li>
+                    );
+                  })}
+                </Ul>
+              </li>
+            );
+          })}
       </Ul>
     </Component>
   );
