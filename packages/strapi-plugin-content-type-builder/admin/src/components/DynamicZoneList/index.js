@@ -15,10 +15,20 @@ import ComponentList from '../ComponentList';
 import ComponentButton from './ComponentButton';
 import ComponentCard from '../ComponentCard';
 
-function DynamicZoneList({ customRowComponent, components, addComponent }) {
+function DynamicZoneList({
+  customRowComponent,
+  components,
+  addComponent,
+  name,
+}) {
   const [activeTab, setActiveTab] = useState('0');
+
   const toggle = tab => {
     if (activeTab !== tab) setActiveTab(tab);
+  };
+
+  const handleClickAdd = () => {
+    addComponent(name);
   };
 
   return (
@@ -28,7 +38,7 @@ function DynamicZoneList({ customRowComponent, components, addComponent }) {
           <div className="tabs-wrapper">
             <Nav tabs>
               <li>
-                <ComponentButton onClick={addComponent}>
+                <ComponentButton onClick={handleClickAdd}>
                   <div>
                     <Plus />
                   </div>
@@ -80,12 +90,14 @@ DynamicZoneList.defaultProps = {
   addComponent: () => {},
   components: [],
   customRowComponent: null,
+  name: null,
 };
 
 DynamicZoneList.propTypes = {
   addComponent: PropTypes.func,
   components: PropTypes.instanceOf(Array),
   customRowComponent: PropTypes.func,
+  name: PropTypes.string,
 };
 
 export default DynamicZoneList;

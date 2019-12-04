@@ -10,7 +10,7 @@ import Wrapper from './Wrapper';
 import Component from '../../icons/Component';
 
 function ListRow({
-  attributeId,
+  attributeName,
   configurable,
   name,
   onClick,
@@ -34,7 +34,7 @@ function ListRow({
 
   const handleClick = () => {
     if (configurable !== false) {
-      onClick(type, attributeId, name, type, name);
+      onClick(attributeName, name, type, name);
     }
   };
 
@@ -85,7 +85,7 @@ function ListRow({
               onClick={e => {
                 e.stopPropagation();
 
-                onClickDelete(attributeId);
+                onClickDelete(attributeName);
               }}
             >
               <i className="fas fa-trash-alt link-icon" />
@@ -109,8 +109,7 @@ ListRow.defaultProps = {
 };
 
 ListRow.propTypes = {
-  attributeId: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-    .isRequired,
+  attributeName: PropTypes.string.isRequired,
   configurable: PropTypes.bool,
   name: PropTypes.string.isRequired,
   onClick: PropTypes.func,

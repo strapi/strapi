@@ -36,7 +36,8 @@ const ListPage = () => {
     // removeAttribute,
     // removeComponentFromDynamicZone,
   } = useDataManager();
-  const { formatMessage } = useGlobalContext();
+
+  const { emitEvent, formatMessage } = useGlobalContext();
   const { push } = useHistory();
   const firstMainDataPath = isInContentTypeView ? 'contentType' : 'component';
   const mainDataTypeAttributesPath = [
@@ -53,11 +54,24 @@ const ListPage = () => {
     [firstMainDataPath, 'schema', 'name'],
     ''
   );
+
+  const forTarget = isInContentTypeView ? 'contentType' : 'component';
   const targetUid = get(modifiedData, [firstMainDataPath, 'uid']);
 
+  const handleClickEditMain = () => {
+    push({
+      search: `modalType=${firstMainDataPath}&settingType=base&actionType=edit&forTarget=${forTarget}&targetUid=${targetUid}&headerDisplayName=${currentDataName}`,
+    });
+    emitEvent('willEditNameOfGroup');
+  };
+
   const handleClickAddAttributeMainData = () => {
-    const forTarget = isInContentTypeView ? 'contentType' : 'component';
     const search = `modalType=chooseAttribute&forTarget=${forTarget}&targetUid=${targetUid}&headerDisplayName=${currentDataName}`;
+    push({ search });
+  };
+
+  const handleClickAddComponentToDZ = dzName => {
+    const search = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${targetUid}&headerDisplayCategory=${currentDataName}&dynamicZoneTarget=${dzName}&settingType=base&step=1&actionType=create&headerDisplayName=${dzName}`;
     push({ search });
   };
 
@@ -78,11 +92,6 @@ const ListPage = () => {
   //     subTargetUid ? `&subTargetUid=${subTargetUid}` : ''
   //   }`;
 
-  //   push({ search });
-  // };
-
-  // const handleClickAddComponentToDZ = dzName => {
-  //   const search = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${targetUid}&headerDisplayCategory=${currentDataName}&dynamicZoneTarget=${dzName}&settingType=base&step=1&actionType=edit&headerDisplayName=${dzName}`;
   //   push({ search });
   // };
 
@@ -125,7 +134,6 @@ const ListPage = () => {
   // };
 
   const handleClickEditField = (
-    forTarget,
     targetUid,
     attrName,
     type,
@@ -224,6 +232,10 @@ const ListPage = () => {
     actions: getActions(),
     title: {
       label: get(modifiedData, [firstMainDataPath, 'schema', 'name']),
+      cta: {
+        icon: 'fa fa-pencil',
+        onClick: handleClickEditMain,
+      },
     },
     content: getDescription(),
   };
@@ -243,18 +255,19 @@ const ListPage = () => {
     icon: true,
     color: 'primary',
     label: formatMessage({ id: `${pluginId}.button.attributes.add.another` }),
-    onClick: () => handleClickAddAttributeMainData(),
+    onClick: handleClickAddAttributeMainData,
   };
 
   const listActions = [{ ...addButtonProps }];
 
   const handleClickOnTrashIcon = () => {};
 
-  const CustomRow = ({ index, name, ...rest }) => {
+  const CustomRow = props => {
+    const { name } = props;
     return (
       <ListRow
-        {...rest}
-        attributeId={index}
+        {...props}
+        attributeName={name}
         name={name}
         onClick={handleClickEditField}
         onClickDelete={handleClickOnTrashIcon}
@@ -263,12 +276,10 @@ const ListPage = () => {
   };
 
   CustomRow.defaultProps = {
-    index: 0,
     name: null,
   };
 
   CustomRow.propTypes = {
-    index: PropTypes.number,
     name: PropTypes.string,
   };
 
@@ -286,6 +297,7 @@ const ListPage = () => {
                 items={convertAttrObjToArray(attributes)}
                 customRowComponent={props => <CustomRow {...props} />}
                 addField={handleClickAddAttributeMainData}
+                addComponentToDZ={handleClickAddComponentToDZ}
               ></List>
             </ListWrapper>
           </div>

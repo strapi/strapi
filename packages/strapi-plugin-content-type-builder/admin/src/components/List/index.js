@@ -15,7 +15,13 @@ import ComponentList from '../ComponentList';
 import Wrapper from './List';
 import { ListButton } from '../ListButton';
 
-function List({ className, customRowComponent, items, addField }) {
+function List({
+  className,
+  customRowComponent,
+  items,
+  addField,
+  addComponentToDZ,
+}) {
   const { formatMessage } = useGlobalContext();
   const addButtonProps = {
     icon: true,
@@ -45,6 +51,7 @@ function List({ className, customRowComponent, items, addField }) {
                   <DynamicZoneList
                     {...item}
                     customRowComponent={customRowComponent}
+                    addComponent={addComponentToDZ}
                   />
                 )}
               </React.Fragment>
@@ -59,6 +66,7 @@ function List({ className, customRowComponent, items, addField }) {
 
 List.defaultProps = {
   addField: () => {},
+  addComponentToDZ: () => {},
   className: null,
   customRowComponent: null,
   items: [],
@@ -66,6 +74,7 @@ List.defaultProps = {
 
 List.propTypes = {
   addField: PropTypes.func,
+  addComponentToDZ: PropTypes.func,
   className: PropTypes.string,
   customRowComponent: PropTypes.func,
   items: PropTypes.instanceOf(Array),

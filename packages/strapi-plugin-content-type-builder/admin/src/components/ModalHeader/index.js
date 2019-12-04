@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { HeaderModalTitle } from 'strapi-helper-plugin';
-import { get } from 'lodash';
+import { get, toLower } from 'lodash';
 import { AttributeIcon } from '@buffetjs/core';
 import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -30,7 +30,7 @@ const ModalHeader = ({
   if (iconType === 'components') {
     iconName = 'component';
   } else {
-    iconName = iconType;
+    iconName = toLower(iconType);
   }
 
   return (
