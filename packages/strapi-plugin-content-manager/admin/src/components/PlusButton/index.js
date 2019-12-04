@@ -4,9 +4,10 @@ const beforeStyle = `
   content: ' ';
   position: absolute;
   display: block;
-  width: 2px;
-  left: 17px;
-  top: 10px;
+  width: 14px;
+  height: 2px;
+  left: 11px;
+  top: 17px;
   bottom: 10px;
   z-index: 9;
 `;
@@ -15,9 +16,10 @@ const afterStyle = `
   content: ' ';
   position: absolute;
   display: block;
-  height: 2px;
-  top: 17px;
-  left: 10px;
+  height: 14px;
+  width: 2px;
+  left: 17px;
+  top: 11px;
   right: 10px;
   z-index: 9;
 `;

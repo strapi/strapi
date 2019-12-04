@@ -6,16 +6,18 @@
 
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-
 import HeaderModal from './HeaderModal';
 import StyledModal from './StyledModal';
 import Wrapper from './Wrapper';
+
+import Close from '../../svgs/Close';
 
 function WrapperModal({ children, isOpen, onToggle, ...rest }) {
   return (
     <Wrapper>
       <StyledModal isOpen={isOpen} toggle={onToggle} {...rest}>
         <HeaderModal toggle={onToggle} />
+        <Close />
         {children}
       </StyledModal>
     </Wrapper>

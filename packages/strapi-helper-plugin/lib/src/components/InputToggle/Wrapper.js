@@ -37,26 +37,26 @@ const Wrapper = styled.div`
   }
 
   .gradientOff {
-    background-image: linear-gradient(to bottom right, #f65a1d, #f68e0e);
+    background-color: #f64d0a;
     color: white !important;
     z-index: 0 !important;
 
     &:active,
     :hover {
       box-shadow: inset -1px 1px 3px rgba(0, 0, 0, 0.1);
-      background-image: linear-gradient(to bottom right, #f65a1d, #f68e0e);
+      background-color: #f64d0a;
       color: white !important;
       z-index: 0 !important;
     }
   }
 
   .gradientOn {
-    background-image: linear-gradient(to bottom right, #005eea, #0097f6);
+    background-color: #007eff;
     color: white !important;
     box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1);
     &:active,
     :hover {
-      background-image: linear-gradient(to bottom right, #005eea, #0097f6);
+      background-color: #007eff;
       color: white !important;
       z-index: 0 !important;
     }
