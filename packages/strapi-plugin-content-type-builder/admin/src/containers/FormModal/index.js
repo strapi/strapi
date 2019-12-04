@@ -110,6 +110,33 @@ const FormModal = () => {
         targetUid,
       });
 
+      // Case:
+      // the user opens the modal chooseAttributes
+      // selects dynamic zone => set the field name
+      // then goes to step 1 (the modal is addComponentToDynamicZone) and finally reloads the app.
+      // In this particular if the user tries to add components to the zone it will pop an error since the dz is unknown
+      const shouldCloseModalToPreventErrorWhenCreatingADZ =
+        get(
+          allDataSchema,
+          [...pathToSchema, 'schema', 'attributes', dynamicZoneTarget],
+          null
+        ) === null && modalType === 'addComponentToDynamicZone';
+
+      // Similarly when creating a component on the fly if the user reloads the app
+      // The previous data is lost
+      // Since the modal uses the search it will still be opened
+      const shouldCloseModalChooseAttribute =
+        get(allDataSchema, ['components', targetUid], null) === null &&
+        // modalType === 'chooseAttribute' &&
+        forTarget === 'components';
+
+      if (
+        shouldCloseModalToPreventErrorWhenCreatingADZ ||
+        shouldCloseModalChooseAttribute
+      ) {
+        push({ search: '' });
+      }
+
       // Edit category
       if (modalType === 'editCategory' && actionType === 'edit') {
         dispatch({
