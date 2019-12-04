@@ -139,6 +139,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
       shouldAddComponentToData,
     });
   };
+
   const changeDynamicZoneComponents = (dynamicZoneTarget, newComponents) => {
     dispatch({
       type: 'CHANGE_DYNAMIC_ZONE_COMPONENTS',
@@ -164,6 +165,92 @@ const DataManagerProvider = ({ allIcons, children }) => {
     });
   };
 
+  const deleteCategory = async categoryUid => {
+    try {
+      const requestURL = `/${pluginId}/component-categories/${categoryUid}`;
+
+      // Close the modal
+      push({ search: '' });
+
+      await request(requestURL, { method: 'DELETE' }, true);
+
+      // TODO update menu
+
+      // Reload the plugin so the cycle is new again
+      dispatch({ type: 'RELOAD_PLUGIN' });
+      // Refetch all the data
+      getDataRef.current();
+    } catch (err) {
+      console.log({ err });
+    }
+  };
+
+  const deleteData = async () => {
+    try {
+      const requestURL = `/${pluginId}/${endPoint}/${currentUid}`;
+
+      // Close the modal
+      push({ search: '' });
+
+      await request(requestURL, { method: 'DELETE' }, true);
+
+      // TODO update menu
+
+      // Reload the plugin so the cycle is new again
+      dispatch({ type: 'RELOAD_PLUGIN' });
+      // Refetch all the data
+      getDataRef.current();
+    } catch (err) {
+      console.log({ err });
+    }
+  };
+
+  const editCategory = async (categoryUid, body) => {
+    try {
+      const requestURL = `/${pluginId}/component-categories/${categoryUid}`;
+
+      // Close the modal
+      push({ search: '' });
+
+      // Update the category
+      await request(requestURL, { method: 'PUT', body }, true);
+
+      // Reload the plugin so the cycle is new again
+      dispatch({ type: 'RELOAD_PLUGIN' });
+      // Refetch all the data
+      getDataRef.current();
+    } catch (err) {
+      console.log({ err });
+    }
+  };
+
+  const getAllComponentsThatHaveAComponentInTheirAttributes = () => {
+    // We need to create an object with all the non modified compos
+    // plus the ones that are created on the fly
+    const allCompos = Object.assign({}, components, modifiedData.components);
+
+    // Since we apply the modification of a specific component only in the modified data
+    // we need to update all compos with the modifications
+    if (!isInContentTypeView) {
+      const currentEditedCompo = get(modifiedData, 'component', {});
+
+      set(allCompos, get(currentEditedCompo, ['uid'], ''), currentEditedCompo);
+    }
+
+    const composWithCompos = retrieveComponentsThatHaveComponents(allCompos);
+
+    return makeUnique(composWithCompos);
+  };
+
+  const getAllNestedComponents = () => {
+    const appNestedCompo = retrieveNestedComponents(components);
+    const editingDataNestedCompos = retrieveNestedComponents(
+      modifiedData.components || {}
+    );
+
+    return makeUnique([...editingDataNestedCompos, ...appNestedCompo]);
+  };
+
   const removeComponentFromDynamicZone = (dzName, componentToRemoveIndex) => {
     dispatch({
       type: 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE',
@@ -171,18 +258,6 @@ const DataManagerProvider = ({ allIcons, children }) => {
       componentToRemoveIndex,
     });
   };
-
-  const sortedContentTypesList = sortBy(
-    Object.keys(contentTypes)
-      .map(uid => ({
-        name: uid,
-        title: contentTypes[uid].schema.name,
-        uid,
-        to: `/plugins/${pluginId}/content-types/${uid}`,
-      }))
-      .filter(obj => obj !== null),
-    obj => obj.title
-  );
 
   const setModifiedData = () => {
     const currentSchemas = isInContentTypeView ? contentTypes : components;
@@ -210,6 +285,19 @@ const DataManagerProvider = ({ allIcons, children }) => {
       schemaToSet: dataShape,
     });
   };
+
+  const sortedContentTypesList = sortBy(
+    Object.keys(contentTypes)
+      .map(uid => ({
+        name: uid,
+        title: contentTypes[uid].schema.name,
+        uid,
+        to: `/plugins/${pluginId}/content-types/${uid}`,
+      }))
+      .filter(obj => obj !== null),
+    obj => obj.title
+  );
+
   const shouldRedirect = () => {
     const dataSet = isInContentTypeView ? contentTypes : components;
 
@@ -221,52 +309,6 @@ const DataManagerProvider = ({ allIcons, children }) => {
 
     return <Redirect to={`/plugins/${pluginId}/content-types/${firstCTUid}`} />;
   }
-
-  const getAllNestedComponents = () => {
-    const appNestedCompo = retrieveNestedComponents(components);
-    const editingDataNestedCompos = retrieveNestedComponents(
-      modifiedData.components || {}
-    );
-
-    return makeUnique([...editingDataNestedCompos, ...appNestedCompo]);
-  };
-
-  const getAllComponentsThatHaveAComponentInTheirAttributes = () => {
-    // We need to create an object with all the non modified compos
-    // plus the ones that are created on the fly
-    const allCompos = Object.assign({}, components, modifiedData.components);
-
-    // Since we apply the modification of a specific component only in the modified data
-    // we need to update all compos with the modifications
-    if (!isInContentTypeView) {
-      const currentEditedCompo = get(modifiedData, 'component', {});
-
-      set(allCompos, get(currentEditedCompo, ['uid'], ''), currentEditedCompo);
-    }
-
-    const composWithCompos = retrieveComponentsThatHaveComponents(allCompos);
-
-    return makeUnique(composWithCompos);
-  };
-
-  const editCategory = async (categoryUid, body) => {
-    try {
-      const requestURL = `/${pluginId}/component-categories/${categoryUid}`;
-
-      // Close the modal
-      push({ search: '' });
-
-      // Update the category
-      await request(requestURL, { method: 'PUT', body }, true);
-
-      // Reload the plugin so the cycle is new again
-      dispatch({ type: 'RELOAD_PLUGIN' });
-      // Refetch all the data
-      getDataRef.current();
-    } catch (err) {
-      console.log({ err });
-    }
-  };
 
   const submitData = async () => {
     try {
@@ -306,46 +348,6 @@ const DataManagerProvider = ({ allIcons, children }) => {
       getDataRef.current();
     } catch (err) {
       console.log(err);
-    }
-  };
-
-  const deleteData = async () => {
-    try {
-      const requestURL = `/${pluginId}/${endPoint}/${currentUid}`;
-
-      // Close the modal
-      push({ search: '' });
-
-      await request(requestURL, { method: 'DELETE' }, true);
-
-      // TODO update menu
-
-      // Reload the plugin so the cycle is new again
-      dispatch({ type: 'RELOAD_PLUGIN' });
-      // Refetch all the data
-      getDataRef.current();
-    } catch (err) {
-      console.log({ err });
-    }
-  };
-
-  const deleteCategory = async categoryUid => {
-    try {
-      const requestURL = `/${pluginId}/component-categories/${categoryUid}`;
-
-      // Close the modal
-      push({ search: '' });
-
-      await request(requestURL, { method: 'DELETE' }, true);
-
-      // TODO update menu
-
-      // Reload the plugin so the cycle is new again
-      dispatch({ type: 'RELOAD_PLUGIN' });
-      // Refetch all the data
-      getDataRef.current();
-    } catch (err) {
-      console.log({ err });
     }
   };
 
