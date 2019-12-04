@@ -1,7 +1,11 @@
 import React, { memo, useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { get, groupBy, set, sortBy } from 'lodash';
-import { request, LoadingIndicatorPage } from 'strapi-helper-plugin';
+import {
+  request,
+  LoadingIndicatorPage,
+  useGlobalContext,
+} from 'strapi-helper-plugin';
 import {
   useHistory,
   useLocation,
@@ -26,6 +30,7 @@ import { getComponentsToPost, formatMainDataType } from './utils/cleanData';
 
 const DataManagerProvider = ({ allIcons, children }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
+  const { updatePlugin } = useGlobalContext();
   const {
     components,
     contentTypes,
@@ -108,6 +113,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
       shouldAddComponentToData,
     });
   };
+
   const addCreatedComponentToDynamicZone = (
     dynamicZoneTarget,
     componentsToAdd
@@ -118,6 +124,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
       componentsToAdd,
     });
   };
+
   const createSchema = (
     data,
     schemaType,
@@ -147,6 +154,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
       newComponents,
     });
   };
+
   const removeAttribute = (
     mainDataKey,
     attributeToRemoveName,
@@ -193,8 +201,8 @@ const DataManagerProvider = ({ allIcons, children }) => {
       push({ search: '' });
 
       await request(requestURL, { method: 'DELETE' }, true);
-
-      // TODO update menu
+      // Update the app menu
+      await updateAppMenu();
 
       // Reload the plugin so the cycle is new again
       dispatch({ type: 'RELOAD_PLUGIN' });
@@ -338,9 +346,8 @@ const DataManagerProvider = ({ allIcons, children }) => {
       const requestURL = isCreating ? baseURL : `${baseURL}/${currentUid}`;
 
       await request(requestURL, { method, body }, true);
-
-      // TODO
-      // - update menu
+      // Update the app menu
+      await updateAppMenu();
 
       // Reload the plugin so the cycle is new again
       dispatch({ type: 'RELOAD_PLUGIN' });
@@ -348,6 +355,21 @@ const DataManagerProvider = ({ allIcons, children }) => {
       getDataRef.current();
     } catch (err) {
       console.log(err);
+    }
+  };
+
+  // Really temporary until menu API
+  const updateAppMenu = async () => {
+    const requestURL = '/content-manager/content-types';
+
+    try {
+      const { data } = await request(requestURL, { method: 'GET' });
+
+      const menu = [{ name: 'Content Types', links: data }];
+
+      updatePlugin('content-manager', 'leftMenuSections', menu);
+    } catch (err) {
+      console.log({ err });
     }
   };
 
@@ -412,3 +434,15 @@ DataManagerProvider.propTypes = {
 };
 
 export default memo(DataManagerProvider);
+
+// const appPlugins = plugins;
+//       const appMenu = get(
+//         appPlugins,
+//         ['content-manager', 'leftMenuSections'],
+//         [{ links: [] }]
+//       );
+//       const updatedMenu = appMenu[0].links.filter(el => {
+//         return el.uid !== modelName;
+//       });
+//       appMenu[0].links = sortBy(updatedMenu, 'label');
+//       updatePlugin('content-manager', 'leftMenuSections', appMenu);
