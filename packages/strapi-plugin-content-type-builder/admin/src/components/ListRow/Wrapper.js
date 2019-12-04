@@ -43,6 +43,9 @@ const Wrapper = styled.tr`
   }
   td:last-child {
     text-align: right;
+    &:not(:first-of-type) {
+      font-size: 10px;
+    }
   }
   &.relation-row {
     background: linear-gradient(

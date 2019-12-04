@@ -25,6 +25,7 @@
   "button.group.add": "Ajouter un Groupe",
   "button.model.create": "Créer un Type de Contenu",
   "button.component.create": "Créer un Composant",
+  "button.component.add": "Ajouter un Composant",
   "contentType.temporaryDisplay": "(Non sauvegardé)",
   "error.attribute.forbidden": "Cet attribut est réservé",
   "error.attribute.key.taken": "Cette valeur existe déjà",

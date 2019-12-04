@@ -17,7 +17,6 @@ import useDataManager from '../../hooks/useDataManager';
 import pluginId from '../../pluginId';
 
 import ListHeader from '../../components/ListHeader';
-import { ListButton } from '../../components/ListButton';
 import LeftMenu from '../LeftMenu';
 
 const ListPage = () => {
@@ -286,8 +285,8 @@ const ListPage = () => {
               <List
                 items={convertAttrObjToArray(attributes)}
                 customRowComponent={props => <CustomRow {...props} />}
+                addField={handleClickAddAttributeMainData}
               ></List>
-              <ListButton {...addButtonProps}></ListButton>
             </ListWrapper>
           </div>
         </div>

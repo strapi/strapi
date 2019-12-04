@@ -88,7 +88,7 @@ function ListRow({
                 onClickDelete(attributeId);
               }}
             >
-              <i className="fa fa-trash-alt link-icon" />
+              <i className="fas fa-trash-alt link-icon" />
             </button>
           </>
         ) : (

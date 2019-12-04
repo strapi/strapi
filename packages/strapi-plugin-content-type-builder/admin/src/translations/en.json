@@ -10,6 +10,7 @@
   "button.group.add": "Add a Group",
   "button.model.create": "Create new content-type",
   "button.component.create": "Create new component",
+  "button.component.add": "Add a component",
   "contentType.temporaryDisplay": "(Not saved)",
   "error.attribute.forbidden": "This attribute name is reserved",
   "error.attribute.key.taken": "This value already exists",
@@ -210,6 +211,7 @@
   "modalForm.attribute.text.type-selection": "Type",
 
   "form.attribute.component.option.create": "Create a new component",
+  "form.attribute.component.option.add": "Add a component",
   "form.attribute.component.option.repeatable": "Repeatable component",
   "form.attribute.component.option.repeatable.description": "Best for multiple instances (array) of ingredients, meta tags, etc..",
   "form.attribute.component.option.single": "Single component",
