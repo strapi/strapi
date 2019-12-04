@@ -281,7 +281,7 @@ const EditSettingsView = ({
       }
 
       return (
-        <div className="col-6" key={meta}>
+        <div className="col-6" key={meta} style={{ marginBottom: 4 }}>
           <FormattedMessage
             id={`${pluginId}.containers.SettingPage.editSettings.entry.title.description`}
           >

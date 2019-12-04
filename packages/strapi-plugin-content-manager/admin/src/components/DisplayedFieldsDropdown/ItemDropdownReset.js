@@ -2,9 +2,8 @@ import styled from 'styled-components';
 import ItemDropdown from './ItemDropdown';
 
 const ItemDropdownReset = styled(ItemDropdown)`
-  margin-top: 11px;
-  margin-bottom: 2px;
-  padding: 0.25rem 1.5rem;
+  margin-bottom: 6px;
+  padding: 0.8rem 1.5rem 0.2rem 1.5rem;
   font-weight: 600;
   font-size: 1.3rem;
 

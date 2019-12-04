@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
-  padding-bottom: 30px;
+  padding-bottom: 26px;
 
   label {
     margin-bottom: 1rem;
