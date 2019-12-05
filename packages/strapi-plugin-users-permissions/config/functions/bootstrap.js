@@ -89,6 +89,15 @@ module.exports = async () => {
       secret: '',
       callback: '/auth/instagram/callback',
     },
+    vk: {
+      enabled: false,
+      icon: 'vk',
+      key: '',
+      secret: '',
+      callback: '/auth/vk/callback',
+      scope: ['email'],
+      custom_params: { v: '5.103', display: 'page' },
+    },
   };
   const prevGrantConfig = (await pluginStore.get({ key: 'grant' })) || {};
   // store grant auth config to db
