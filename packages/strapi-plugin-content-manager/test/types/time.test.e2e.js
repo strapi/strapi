@@ -5,141 +5,105 @@ const { createAuthRequest } = require('../../../../test/helpers/request');
 let modelsUtils;
 let rq;
 
-describe.skip('Test type date', () => {
+describe('Test type time', () => {
   beforeAll(async () => {
     const token = await registerAndLogin();
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
 
-    await modelsUtils.createModelWithType('withdate', 'date');
+    await modelsUtils.createModelWithType('withtime', 'time');
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteModel('withdate');
+    await modelsUtils.deleteModel('withtime');
   }, 60000);
 
   test('Create entry with valid value JSON', async () => {
     const res = await rq.post(
-      '/content-manager/explorer/application::withdate.withdate',
+      '/content-manager/explorer/application::withtime.withtime',
       {
         body: {
-          field: '2019-08-08T10:10:57.000Z',
+          field: '10:10:57.123',
         },
       }
     );
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
-      field: '2019-08-08T10:10:57.000Z',
+      field: '10:10:57.123',
     });
   });
 
-  test('Create entry with valid value FormData', async () => {
-    const now = new Date(2019, 0, 12);
+  test.each(['00:00:00', '01:03:11.2', '01:03:11.93', '01:03:11.123'])(
+    'Accepts multiple time formats %s',
+    async input => {
+      const res = await rq.post(
+        '/content-manager/explorer/application::withtime.withtime',
+        {
+          body: {
+            field: input,
+          },
+        }
+      );
 
-    const res = await rq.post(
-      '/content-manager/explorer/application::withdate.withdate',
-      {
-        formData: {
-          data: JSON.stringify({ field: now }),
-        },
-      }
-    );
+      expect(res.statusCode).toBe(200);
+    }
+  );
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
-      field: now.toISOString(),
-    });
-  });
+  test.each(['24:11:23', '23:72:11', '12:45:83', 1234, {}, 'test', new Date()])(
+    'Throws on invalid time (%s)',
+    async input => {
+      const res = await rq.post(
+        '/content-manager/explorer/application::withtime.withtime',
+        {
+          body: {
+            field: input,
+          },
+        }
+      );
 
-  test('Create entry with timestamp value should be converted to ISO', async () => {
-    const now = new Date(2016, 4, 8);
-
-    const res = await rq.post(
-      '/content-manager/explorer/application::withdate.withdate',
-      {
-        body: {
-          field: now.getTime(),
-        },
-      }
-    );
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
-      field: now.toISOString(),
-    });
-  });
-
-  test('Accepts string timestamp', async () => {
-    const now = new Date(2000, 0, 1);
-
-    const res = await rq.post(
-      '/content-manager/explorer/application::withdate.withdate',
-      {
-        body: {
-          field: `${now.getTime()}`,
-        },
-      }
-    );
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
-      field: now.toISOString(),
-    });
-  });
-
-  test('Throws on invalid date format', async () => {
-    const res = await rq.post(
-      '/content-manager/explorer/application::withdate.withdate',
-      {
-        body: {
-          field: 'azdazindoaizdnoainzd',
-        },
-      }
-    );
-
-    expect(res.statusCode).toBe(400);
-  });
+      expect(res.statusCode).toBe(400);
+    }
+  );
 
   test('Reading entry, returns correct value', async () => {
     const res = await rq.get(
-      '/content-manager/explorer/application::withdate.withdate'
+      '/content-manager/explorer/application::withtime.withtime'
     );
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
     res.body.forEach(entry => {
-      expect(new Date(entry.field).toISOString()).toBe(entry.field);
+      expect(entry.field).toMatch(
+        /^2[0-3]|[01][0-9]:[0-5][0-9]:[0-5][0-9](.[0-9]{1,3})?$/
+      );
     });
   });
 
   test('Updating entry sets the right value and format JSON', async () => {
-    const now = new Date(2018, 7, 5);
-
     const res = await rq.post(
-      '/content-manager/explorer/application::withdate.withdate',
+      '/content-manager/explorer/application::withtime.withtime',
       {
         body: {
-          field: now.getTime(),
+          field: '12:11:04',
         },
       }
     );
 
-    const newDate = new Date(2017, 10, 23);
-    const updateRes = await rq.put(
-      `/content-manager/explorer/application::withdate.withdate/${res.body.id}`,
+    const uptimeRes = await rq.put(
+      `/content-manager/explorer/application::withtime.withtime/${res.body.id}`,
       {
         body: {
-          field: newDate,
+          field: '13:45:19.123',
         },
       }
     );
 
-    expect(updateRes.statusCode).toBe(200);
-    expect(updateRes.body).toMatchObject({
+    expect(uptimeRes.statusCode).toBe(200);
+    expect(uptimeRes.body).toMatchObject({
       id: res.body.id,
-      field: newDate.toISOString(),
+      field: '13:45:19.123',
     });
   });
 });

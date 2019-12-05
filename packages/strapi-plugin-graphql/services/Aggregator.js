@@ -481,7 +481,7 @@ const formatModelConnectionsGQL = function(fields, model, name, modelResolver) {
     groupBy: `${globalId}GroupBy`,
     aggregate: `${globalId}Aggregator`,
   };
-  const pluralName = pluralize.plural(name);
+  const pluralName = pluralize.plural(_.camelCase(name));
 
   let modelConnectionTypes = `type ${connectionGlobalId} {${Schema.formatGQL(
     connectionFields
