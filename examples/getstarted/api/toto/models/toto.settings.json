@@ -32,6 +32,12 @@
       "model": "toto",
       "via": "totosonetomanyLeft"
     },
+    "mainCompoField": {
+      "type": "component",
+      "repeatable": true,
+      "component": "nested.compo-with-nested",
+      "max": 2
+    },
     "totosmanyway": {
       "collection": "toto"
     },
@@ -76,11 +82,11 @@
       "model": "category",
       "via": "toto"
     },
-    "mainCompoField": {
-      "type": "component",
-      "repeatable": true,
-      "component": "nested.compo-with-nested",
-      "max": 2
+    "dz": {
+      "type": "dynamiczone",
+      "components": [
+        "babab.baba"
+      ]
     }
   }
 }

@@ -28,7 +28,7 @@ const CreatableSelect = ({ onChange, name, styles, value }) => {
 
   return (
     <Creatable
-      value={getValue()}
+      defaultValue={getValue()}
       isClearable
       // menuIsOpen
       onChange={handleChange}

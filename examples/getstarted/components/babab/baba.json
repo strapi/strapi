@@ -1,0 +1,16 @@
+{
+  "connection": "default",
+  "collectionName": "components_babab_babas",
+  "info": {
+    "name": "baba",
+    "icon": "balance-scale-right"
+  },
+  "attributes": {
+    "babaname": {
+      "type": "string",
+      "default": "babababa",
+      "unique": true,
+      "required": true
+    }
+  }
+}

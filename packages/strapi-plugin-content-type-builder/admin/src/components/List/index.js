@@ -64,8 +64,6 @@ function List({
                 {type === 'component' && (
                   <ComponentList
                     {...item}
-                    // mainDataType={dataType}
-                    // mainDataTypeName={dataTypeName}
                     customRowComponent={customRowComponent}
                     targetUid={targetUid}
                     // NEW PROPS
@@ -82,6 +80,8 @@ function List({
                     {...item}
                     customRowComponent={customRowComponent}
                     addComponent={addComponentToDZ}
+                    targetUid={targetUid}
+                    mainTypeName={mainTypeName}
                   />
                 )}
               </React.Fragment>

@@ -31,8 +31,7 @@ const WrapperSelect = ({ error, label, name, type, ...rest }) => {
     option: (base, state) => {
       return {
         ...base,
-        // backgroundColor: state.isSelected ? '#DEEBFF' : base.backgroundColor,
-        backgroundColor: '#fff',
+        backgroundColor: state.isSelected ? '#fff' : base.backgroundColor,
         color: state.isSelected ? '#007eff' : '#333740',
         fontWeight: state.isSelected ? '600' : '400',
       };

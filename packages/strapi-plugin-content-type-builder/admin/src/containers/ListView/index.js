@@ -78,13 +78,26 @@ const ListPage = () => {
 
     // Disable the prompt
     await wait();
-    // const search = `modalType=chooseAttribute&forTarget=${forTarget}&targetUid=${targetUid}&headerDisplayName=${currentDataName}`;
+
     push({ search: makeSearch(searchObj, true) });
   };
 
-  const handleClickAddComponentToDZ = dzName => {
-    const search = `modalType=addComponentToDynamicZone&forTarget=contentType&targetUid=${targetUid}&headerDisplayCategory=${currentDataName}&dynamicZoneTarget=${dzName}&settingType=base&step=1&actionType=create&headerDisplayName=${dzName}`;
-    push({ search });
+  const handleClickAddComponentToDZ = async dzName => {
+    const search = {
+      modalType: 'addComponentToDynamicZone',
+      forTarget: 'contentType',
+      targetUid,
+      headerDisplayCategory: currentDataName,
+      dynamicZoneTarget: dzName,
+      settingType: 'base',
+      step: '1',
+      actionType: 'edit',
+      headerDisplayName: dzName,
+    };
+
+    await wait();
+
+    push({ search: makeSearch(search, true) });
   };
 
   const handleClickEditField = async (
@@ -96,8 +109,6 @@ const ListPage = () => {
     headerDisplayCategory = null,
     headerDisplaySubCategory = null,
     subTargetUid = null
-    // TODO ADD LOGIC headerDisplaySubCategory when editing a field
-    // It should be the same one as adding a field
   ) => {
     let attributeType;
 
