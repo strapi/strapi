@@ -2,7 +2,10 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { get, isEqual } from 'lodash';
+
 import { Header } from '@buffetjs/custom';
+import { LayoutIcon } from 'strapi-helper-plugin';
+
 import convertAttrObjToArray from '../../utils/convertAttrObjToArray';
 import ListRow from '../../components/ListRow';
 import List from '../../components/List';
@@ -253,17 +256,23 @@ const ListPage = () => {
     ),
   ];
 
+  const goToCMSettingsPage = () => {
+    push(
+      `/plugins/content-manager/${targetUid}/ctm-configurations/list-settings`
+    );
+  };
+
+  const configureButtonProps = {
+    icon: <LayoutIcon className="colored" />,
+    color: 'secondary',
+    label: formatMessage({ id: `${pluginId}.form.button.configure-view` }),
+    onClick: goToCMSettingsPage,
+  };
+
   const addButtonProps = {
     icon: true,
     color: 'primary',
     label: formatMessage({ id: `${pluginId}.button.attributes.add.another` }),
-    onClick: handleClickAddAttributeMainData,
-  };
-
-  const configureButtonProps = {
-    icon: true,
-    color: 'secondary',
-    label: formatMessage({ id: `${pluginId}.form.button.configure-view` }),
     onClick: handleClickAddAttributeMainData,
   };
 

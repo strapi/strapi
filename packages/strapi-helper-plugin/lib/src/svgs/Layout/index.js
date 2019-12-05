@@ -9,6 +9,11 @@ const Layout = styled(SvgCompo)`
       fill: #007eff;
     }
   }
+  &.colored {
+    > g {
+      fill: #007eff;
+    }
+  }
 `;
 
 export default Layout;
