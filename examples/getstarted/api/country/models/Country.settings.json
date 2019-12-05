@@ -7,7 +7,10 @@
   },
   "options": {
     "increments": true,
-    "timestamps": ["created_at", "updated_at"],
+    "timestamps": [
+      "created_at",
+      "updated_at"
+    ],
     "comment": ""
   },
   "attributes": {
@@ -21,6 +24,10 @@
       "maxLength": 3,
       "unique": true,
       "minLength": 2
+    },
+    "toto": {
+      "via": "countries",
+      "model": "toto"
     }
   }
 }

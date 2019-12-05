@@ -202,6 +202,7 @@ const reducer = (state, action) => {
         initialAttribute,
       } = action;
       let newState = state;
+
       const initialAttributeName = get(initialAttribute, ['name'], '');
       const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
         ? [forTarget]
@@ -270,6 +271,10 @@ const reducer = (state, action) => {
                     hadInternalRelation &&
                     didCreateInternalRelation &&
                     isEditingRelation;
+                  const shouldCreateOppositeAttributeBecauseOfTargetChange =
+                    didChangeTargetRelation &&
+                    didCreateInternalRelation &&
+                    !ONE_SIDE_RELATIONS.includes(nature);
 
                   // Update the opposite attribute name so it is removed at the end of the loop
                   if (
@@ -283,7 +288,8 @@ const reducer = (state, action) => {
                   // Set the opposite attribute that will be updated when the loop attribute matches the name
                   if (
                     shouldUpdateOppositeAttributeBecauseOfNatureChange ||
-                    shouldCreateOppositeAttributeBecauseOfNatureChange
+                    shouldCreateOppositeAttributeBecauseOfNatureChange ||
+                    shouldCreateOppositeAttributeBecauseOfTargetChange
                   ) {
                     oppositeAttributeNameToUpdate =
                       initialAttribute.targetAttribute;
@@ -308,7 +314,10 @@ const reducer = (state, action) => {
                     // Then (if needed) create the opposite attribute the case is changing the relation from
                     // We do it here so keep the order of the attributes
                     // oneWay || manyWay to something another relation
-                    if (shouldCreateOppositeAttributeBecauseOfNatureChange) {
+                    if (
+                      shouldCreateOppositeAttributeBecauseOfNatureChange ||
+                      shouldCreateOppositeAttributeBecauseOfTargetChange
+                    ) {
                       acc[
                         oppositeAttributeNameToCreateBecauseOfNatureChange
                       ] = fromJS(oppositeAttributeToCreate);

@@ -21,6 +21,10 @@
     "restaurant": {
       "model": "restaurant",
       "via": "menu"
+    },
+    "totos": {
+      "via": "menus",
+      "collection": "toto"
     }
   }
 }

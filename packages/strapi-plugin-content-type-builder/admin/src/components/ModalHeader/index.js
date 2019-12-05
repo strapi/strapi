@@ -34,8 +34,6 @@ const ModalHeader = ({
     // iconName = toLower(iconType);
   }
 
-  console.log(iconName);
-
   return (
     <section>
       <HeaderModalTitle style={{ textTransform: 'none' }}>

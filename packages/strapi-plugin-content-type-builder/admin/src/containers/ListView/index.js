@@ -57,6 +57,7 @@ const ListPage = () => {
     'attributes',
   ];
   const targetUid = get(modifiedData, [firstMainDataPath, 'uid']);
+
   const attributes = get(modifiedData, mainDataTypeAttributesPath, {});
   const attributesLength = Object.keys(attributes).length;
   const currentDataName = get(
@@ -87,17 +88,25 @@ const ListPage = () => {
   };
 
   const handleClickEditField = async (
+    forTarget,
     targetUid,
-    attrName,
+    attributeName,
     type,
     headerDisplayName,
-    headerDisplayCategory = null
+    headerDisplayCategory = null,
+    headerDisplaySubCategory = null,
+    subTargetUid = null
     // TODO ADD LOGIC headerDisplaySubCategory when editing a field
     // It should be the same one as adding a field
   ) => {
     let attributeType;
 
-    console.log('ooo');
+    console.log({
+      headerDisplayName,
+      headerDisplayCategory,
+      headerDisplaySubCategory,
+      subTargetUid,
+    });
 
     switch (type) {
       case 'integer':
@@ -117,16 +126,35 @@ const ListPage = () => {
         attributeType = type;
     }
 
-    const step = type === 'component' ? '&step=2' : '';
-    const displayCategory = headerDisplayCategory
-      ? `&headerDisplayCategory=${headerDisplayCategory}`
-      : '';
+    // const step = type === 'component' ? '&step=2' : '';
+    // const displayCategory = headerDisplayCategory
+    //   ? `&headerDisplayCategory=${headerDisplayCategory}`
+    //   : '';
 
     await wait();
 
-    push({
-      search: `modalType=attribute&actionType=edit&settingType=base&forTarget=${forTarget}&targetUid=${targetUid}&attributeName=${attrName}&attributeType=${attributeType}&headerDisplayName=${headerDisplayName}${step}${displayCategory}`,
-    });
+    const search = {
+      modalType: 'attribute',
+      actionType: 'edit',
+      settingType: 'base',
+      forTarget,
+      targetUid,
+      attributeName,
+      attributeType,
+      headerDisplayName,
+      headerDisplayCategory,
+      headerDisplaySubCategory,
+      step: type === 'component' ? '2' : null,
+      subTargetUid,
+    };
+
+    await wait();
+
+    push({ search: makeSearch(search, true) });
+
+    // push({
+    //   search: `modalType=attribute&actionType=edit&settingType=base&forTarget=${forTarget}&targetUid=${targetUid}&attributeName=${attrName}&attributeType=${attributeType}&headerDisplayName=${headerDisplayName}${step}${displayCategory}`,
+    // });
   };
 
   // const handleClickEditMain = () => {
@@ -235,6 +263,7 @@ const ListPage = () => {
 
   const CustomRow = props => {
     const { name } = props;
+
     return (
       <ListRow
         {...props}
@@ -277,6 +306,13 @@ const ListPage = () => {
                 customRowComponent={props => <CustomRow {...props} />}
                 addField={handleClickAddAttributeMainData}
                 addComponentToDZ={handleClickAddComponentToDZ}
+                targetUid={targetUid}
+                dataType={forTarget}
+                dataTypeName={currentDataName}
+                //
+                mainTypeName={currentDataName}
+                editTarget={forTarget}
+                // parentTarget={forTarget}
               ></List>
             </ListWrapper>
           </div>

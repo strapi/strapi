@@ -29,7 +29,6 @@ const WrapperSelect = ({ error, label, name, type, ...rest }) => {
       };
     },
     option: (base, state) => {
-      console.log({ base, state });
       return {
         ...base,
         // backgroundColor: state.isSelected ? '#DEEBFF' : base.backgroundColor,

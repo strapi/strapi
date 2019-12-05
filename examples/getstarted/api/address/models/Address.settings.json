@@ -7,14 +7,17 @@
   },
   "options": {
     "increments": true,
-    "timestamps": ["created_at", "updated_at"],
+    "timestamps": [
+      "created_at",
+      "updated_at"
+    ],
     "comment": ""
   },
   "attributes": {
     "full_name": {
       "type": "string"
     },
-    "postal_code": {
+    "postal_coder": {
       "type": "string"
     },
     "city": {
@@ -24,18 +27,30 @@
       "type": "json",
       "required": true
     },
-    "country": {
-      "model": "country"
+    "addresses": {
+      "collection": "address",
+      "via": "address"
+    },
+    "address": {
+      "model": "address",
+      "via": "addresses"
     },
     "cover": {
       "model": "file",
       "via": "related",
-      "plugin": "upload"
+      "plugin": "upload",
+      "required": false
     },
     "images": {
       "collection": "file",
       "via": "related",
-      "plugin": "upload"
+      "plugin": "upload",
+      "required": false
+    },
+    "teter": {
+      "type": "component",
+      "repeatable": false,
+      "component": "default.teter"
     }
   }
 }

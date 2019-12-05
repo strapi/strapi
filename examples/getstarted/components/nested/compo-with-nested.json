@@ -1,0 +1,21 @@
+{
+  "connection": "default",
+  "collectionName": "components_nested_compo_with_nesteds",
+  "info": {
+    "name": "compo with nested",
+    "icon": "address-card"
+  },
+  "attributes": {
+    "something": {
+      "type": "string",
+      "default": "default value",
+      "required": true,
+      "unique": true
+    },
+    "nestcompofield": {
+      "type": "component",
+      "repeatable": false,
+      "component": "nested.nested-compo"
+    }
+  }
+}

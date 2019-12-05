@@ -316,6 +316,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
       components,
       isInContentTypeView
     );
+
     const dataShape = orderAllDataAttributesWithImmutable(
       newSchemaToSet,
       isInContentTypeView

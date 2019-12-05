@@ -1,0 +1,86 @@
+{
+  "connection": "default",
+  "collectionName": "totos",
+  "info": {
+    "name": "toto"
+  },
+  "attributes": {
+    "totosmanytomanyright": {
+      "collection": "toto",
+      "via": "totosmanytomany"
+    },
+    "totoonewayLeft": {
+      "model": "toto",
+      "via": "totoonewayRight"
+    },
+    "totosonetomanyLeft": {
+      "collection": "toto",
+      "via": "totoonetomanyRight"
+    },
+    "name": {
+      "type": "string",
+      "default": "something"
+    },
+    "menusections": {
+      "collection": "menusection"
+    },
+    "totosmanytooneright": {
+      "collection": "toto",
+      "via": "totomanytooneleft"
+    },
+    "totoonetomanyRight": {
+      "model": "toto",
+      "via": "totosonetomanyLeft"
+    },
+    "totosmanyway": {
+      "collection": "toto"
+    },
+    "countries": {
+      "collection": "country",
+      "via": "toto"
+    },
+    "menus": {
+      "collection": "menu",
+      "via": "totos",
+      "dominant": true
+    },
+    "address": {
+      "model": "address"
+    },
+    "toto": {
+      "model": "toto"
+    },
+    "totosmanytomany": {
+      "collection": "toto",
+      "via": "totosmanytomanyright",
+      "dominant": true
+    },
+    "like": {
+      "model": "like",
+      "via": "totos"
+    },
+    "compoField": {
+      "type": "component",
+      "repeatable": false,
+      "component": "compo.newcompo"
+    },
+    "totoonewayRight": {
+      "model": "toto",
+      "via": "totoonewayLeft"
+    },
+    "totomanytooneleft": {
+      "model": "toto",
+      "via": "totosmanytooneright"
+    },
+    "category": {
+      "model": "category",
+      "via": "toto"
+    },
+    "mainCompoField": {
+      "type": "component",
+      "repeatable": true,
+      "component": "nested.compo-with-nested",
+      "max": 2
+    }
+  }
+}

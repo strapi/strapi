@@ -21,6 +21,14 @@ function List({
   items,
   addField,
   addComponentToDZ,
+  targetUid,
+
+  mainTypeName,
+  editTarget,
+  firstLoopComponentName,
+  firstLoopComponentUid,
+  secondLoopComponentName,
+  secondLoopComponentUid,
 }) {
   const { formatMessage } = useGlobalContext();
   const addButtonProps = {
@@ -36,14 +44,36 @@ function List({
         <tbody>
           {items.map(item => {
             const { type } = item;
+
+            const CustomRow = customRowComponent;
+
             return (
               <React.Fragment key={JSON.stringify(item)}>
-                {customRowComponent(item)}
+                <CustomRow
+                  {...item}
+                  targetUid={targetUid}
+                  // NEW props
+                  mainTypeName={mainTypeName}
+                  editTarget={editTarget}
+                  firstLoopComponentName={firstLoopComponentName}
+                  firstLoopComponentUid={firstLoopComponentUid}
+                  secondLoopComponentName={secondLoopComponentName}
+                  secondLoopComponentUid={secondLoopComponentUid}
+                />
 
                 {type === 'component' && (
                   <ComponentList
                     {...item}
+                    // mainDataType={dataType}
+                    // mainDataTypeName={dataTypeName}
                     customRowComponent={customRowComponent}
+                    targetUid={targetUid}
+                    // NEW PROPS
+
+                    mainTypeName={mainTypeName}
+                    editTarget={editTarget}
+                    firstLoopComponentName={firstLoopComponentName}
+                    firstLoopComponentUid={firstLoopComponentUid}
                   />
                 )}
 
@@ -70,6 +100,11 @@ List.defaultProps = {
   className: null,
   customRowComponent: null,
   items: [],
+
+  firstLoopComponentName: null,
+  firstLoopComponentUid: null,
+  secondLoopComponentName: null,
+  secondLoopComponentUid: null,
 };
 
 List.propTypes = {
@@ -77,7 +112,16 @@ List.propTypes = {
   addComponentToDZ: PropTypes.func,
   className: PropTypes.string,
   customRowComponent: PropTypes.func,
+  // dataType: PropTypes.string.isRequired,
+  // dataTypeName: PropTypes.string.isRequired,
+  editTarget: PropTypes.string.isRequired,
+  firstLoopComponentName: PropTypes.string,
+  firstLoopComponentUid: PropTypes.string,
   items: PropTypes.instanceOf(Array),
+  mainTypeName: PropTypes.string.isRequired,
+  secondLoopComponentName: PropTypes.string,
+  secondLoopComponentUid: PropTypes.string,
+  targetUid: PropTypes.string.isRequired,
 };
 
 export default List;

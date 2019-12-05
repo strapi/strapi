@@ -13,6 +13,10 @@
   "attributes": {
     "name": {
       "type": "string"
+    },
+    "toto": {
+      "via": "category",
+      "model": "toto"
     }
   }
 }

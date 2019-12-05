@@ -93,8 +93,6 @@ const FormModal = () => {
           ? [forTarget]
           : [forTarget, targetUid];
 
-      console.log({ modalType });
-
       setState({
         actionType,
         attributeName,
@@ -271,9 +269,7 @@ const FormModal = () => {
   // TODO improve icon logic
   let iconType = ['component', 'contentType'].includes(state.modalType)
     ? state.modalType
-    : state.attributeType;
-
-  console.log({ modalType: state });
+    : state.forTarget;
 
   if (state.modalType === 'addComponentToDynamicZone') {
     iconType = 'dynamiczone';
@@ -660,6 +656,8 @@ const FormModal = () => {
 
           push({ search: nextSearch });
 
+          return;
+
           // Adding an existing component
         } else {
           if (isInFirstComponentStep) {
@@ -928,8 +926,7 @@ const FormModal = () => {
     ? { paddingTop: '0.5rem', paddingBottom: '3rem' }
     : {};
 
-  console.log({ iconType });
-
+  console.log({ modifiedData });
   return (
     <Modal
       isOpen={isOpen}
