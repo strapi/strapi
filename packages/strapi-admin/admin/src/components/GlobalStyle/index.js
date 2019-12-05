@@ -84,6 +84,7 @@ const GlobalStyle = createGlobalStyle`
     button {
       &.close {
         margin: 0;
+        padding: 2rem;
       }
     }
   }
