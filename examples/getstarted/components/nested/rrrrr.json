@@ -1,0 +1,13 @@
+{
+  "connection": "default",
+  "collectionName": "components_nested_rrrrrs",
+  "info": {
+    "name": "rrrrr",
+    "icon": "align-center"
+  },
+  "attributes": {
+    "rrrrr": {
+      "type": "string"
+    }
+  }
+}

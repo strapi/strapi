@@ -82,11 +82,17 @@ const DataManagerProvider = ({ allIcons, children }) => {
     );
     const components = createDataObject(componentsArray);
     const contentTypes = createDataObject(contentTypesArray);
+    const orderedComponents = orderAllDataAttributesWithImmutable({
+      components,
+    });
+    const orderedContenTypes = orderAllDataAttributesWithImmutable({
+      components: contentTypes,
+    });
 
     dispatch({
       type: 'GET_DATA_SUCCEEDED',
-      components,
-      contentTypes,
+      components: orderedComponents.get('components'),
+      contentTypes: orderedContenTypes.get('components'),
     });
   };
 

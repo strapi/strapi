@@ -14,10 +14,6 @@
     "comment": ""
   },
   "attributes": {
-    "addresses": {
-      "collection": "address",
-      "via": "address"
-    },
     "geolocation": {
       "type": "json",
       "required": true
@@ -28,9 +24,8 @@
     "postal_coder": {
       "type": "string"
     },
-    "address": {
-      "model": "address",
-      "via": "addresses"
+    "category": {
+      "model": "category"
     },
     "cover": {
       "model": "file",
@@ -46,6 +41,11 @@
     },
     "full_name": {
       "type": "string"
+    },
+    "rrrr": {
+      "type": "component",
+      "repeatable": false,
+      "component": "default.rrr"
     }
   }
 }
