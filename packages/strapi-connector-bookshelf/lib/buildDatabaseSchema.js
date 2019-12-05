@@ -64,8 +64,9 @@ module.exports = async ({
       case 'text':
         return table.text(name, 'longtext');
       case 'json':
-        // return client === 'pg' ? 'jsonb' : 'longtext';
-        return table.jsonb(name);
+        return definition.client === 'pg'
+          ? table.jsonb(name)
+          : table.text(name, 'longtext');
       case 'enumeration':
         return table.enu(name, attribute.enum || []);
       case 'string':

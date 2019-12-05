@@ -615,7 +615,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
         });
 
         this.on('saving', (instance, attrs) => {
-          instance.attributes = mapper(attrs);
+          instance.attributes = _.assign(instance.attributes, mapper(attrs));
 
           return _.isFunction(target[model.toLowerCase()]['beforeSave'])
             ? target[model.toLowerCase()]['beforeSave']
@@ -632,7 +632,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
         function formatOutput(instance) {
           if (Array.isArray(instance.models)) {
-            instance.models.map(formatEntry);
+            instance.models.forEach(entry => formatEntry(entry));
           } else {
             formatEntry(instance);
           }

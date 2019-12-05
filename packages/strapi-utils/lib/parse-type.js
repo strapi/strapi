@@ -8,6 +8,8 @@ const timeRegex = new RegExp(
 );
 
 const parseTime = value => {
+  if (dates.isDate(value)) return dates.format(value, 'HH:mm:ss.SSS');
+
   if (typeof value !== 'string') {
     throw new Error(`Expected a string, got a ${typeof value}`);
   }
@@ -24,6 +26,7 @@ const parseTime = value => {
 };
 
 const parseDate = value => {
+  if (dates.isDate(value)) return dates.format(value, 'yyyy-MM-dd');
   try {
     let date = dates.parseISO(value);
 
@@ -36,6 +39,7 @@ const parseDate = value => {
 };
 
 const parseDateTimeOrTimestamp = value => {
+  if (dates.isDate(value)) return value;
   try {
     const date = dates.parseISO(value);
     if (dates.isValid(date)) return date;

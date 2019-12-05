@@ -57,22 +57,6 @@ const formatters = {
       return value.toString();
     },
   },
-  mysql: {
-    boolean: value => {
-      if (typeof value === 'boolean') {
-        return value;
-      }
-
-      const strVal = value.toString();
-      if (strVal === '1') {
-        return true;
-      } else if (strVal === '0') {
-        return false;
-      } else {
-        return null;
-      }
-    },
-  },
 };
 
 module.exports = {
