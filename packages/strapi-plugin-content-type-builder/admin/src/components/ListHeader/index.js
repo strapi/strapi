@@ -8,20 +8,22 @@ import Title from './Title';
 function ListHeader({ actions, title }) {
   return (
     <Wrapper>
-      {actions.map(action => {
-        const { disabled, label, onClick } = action;
+      <div className="list-header-actions">
+        {actions.map(action => {
+          const { disabled, label, onClick } = action;
 
-        return (
-          <ListHeaderButton
-            key={label}
-            onClick={onClick}
-            disabled={disabled || false}
-            {...action}
-          >
-            {label}
-          </ListHeaderButton>
-        );
-      })}
+          return (
+            <ListHeaderButton
+              key={label}
+              onClick={onClick}
+              disabled={disabled || false}
+              {...action}
+            >
+              {label}
+            </ListHeaderButton>
+          );
+        })}
+      </div>
       <div className="list-header-title">
         {title.map(item => {
           return <Title key={item}>{item}&nbsp;</Title>;

@@ -75,6 +75,8 @@ const ListPage = () => {
     push({ search });
   };
 
+  const handleClickRemoveComponentFromDZ = () => {};
+
   // const handleClickAddAttributeNestedData = (
   //   targetUid,
   //   headerDisplayName,
@@ -258,7 +260,14 @@ const ListPage = () => {
     onClick: handleClickAddAttributeMainData,
   };
 
-  const listActions = [{ ...addButtonProps }];
+  const configureButtonProps = {
+    icon: true,
+    color: 'secondary',
+    label: formatMessage({ id: `${pluginId}.form.button.configure-view` }),
+    onClick: handleClickAddAttributeMainData,
+  };
+
+  const listActions = [{ ...configureButtonProps }, { ...addButtonProps }];
 
   const handleClickOnTrashIcon = () => {};
 
@@ -298,6 +307,7 @@ const ListPage = () => {
                 customRowComponent={props => <CustomRow {...props} />}
                 addField={handleClickAddAttributeMainData}
                 addComponentToDZ={handleClickAddComponentToDZ}
+                removeComponentFromDZ={handleClickRemoveComponentFromDZ}
               ></List>
             </ListWrapper>
           </div>

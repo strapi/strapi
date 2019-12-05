@@ -20,6 +20,7 @@ function DynamicZoneList({
   components,
   addComponent,
   name,
+  removeComponent,
 }) {
   const [activeTab, setActiveTab] = useState('0');
 
@@ -56,6 +57,7 @@ function DynamicZoneList({
                       onClick={() => {
                         toggle(`${index}`);
                       }}
+                      onRemoveClick={removeComponent}
                     ></ComponentCard>
                   </li>
                 );
@@ -91,6 +93,7 @@ DynamicZoneList.defaultProps = {
   components: [],
   customRowComponent: null,
   name: null,
+  removeComponent: () => {},
 };
 
 DynamicZoneList.propTypes = {
@@ -98,6 +101,7 @@ DynamicZoneList.propTypes = {
   components: PropTypes.instanceOf(Array),
   customRowComponent: PropTypes.func,
   name: PropTypes.string,
+  removeComponent: PropTypes.func,
 };
 
 export default DynamicZoneList;

@@ -259,6 +259,7 @@
   "form.button.select-component": "Select a component",
   "form.button.add-components-to-dynamiczone": "Add components to the zone",
   "form.button.configure-component": "Configure the component",
+  "form.button.configure-view": "Configure the view",
   "modalForm.header-edit": "Edit {name}",
   "modalForm.sub-header.chooseAttribute.component": "Select a field for your component",
   "modalForm.sub-header.chooseAttribute.contentType": "Select a field for your content type",

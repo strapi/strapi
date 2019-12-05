@@ -22,6 +22,7 @@ function List({
   items,
   addField,
   addComponentToDZ,
+  removeComponentFromDZ,
   isSub,
 }) {
   const { formatMessage } = useGlobalContext();
@@ -59,6 +60,7 @@ function List({
                       {...item}
                       customRowComponent={customRowComponent}
                       addComponent={addComponentToDZ}
+                      removeComponent={removeComponentFromDZ}
                     />
                   )}
                 </React.Fragment>
@@ -84,6 +86,7 @@ List.defaultProps = {
   customRowComponent: null,
   items: [],
   isSub: false,
+  removeComponentFromDZ: () => {},
 };
 
 List.propTypes = {
@@ -93,6 +96,7 @@ List.propTypes = {
   customRowComponent: PropTypes.func,
   items: PropTypes.instanceOf(Array),
   isSub: PropTypes.bool,
+  removeComponentFromDZ: PropTypes.func,
 };
 
 export default List;
