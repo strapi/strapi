@@ -267,9 +267,9 @@ const FormModal = () => {
   }));
 
   // TODO improve icon logic
-  let iconType = ['components', 'contentType'].includes(state.modalType)
+  let iconType = ['component', 'contentType'].includes(state.modalType)
     ? state.modalType
-    : state.forTarget;
+    : state.attributeType;
 
   if (state.modalType === 'addComponentToDynamicZone') {
     iconType = 'dynamiczone';

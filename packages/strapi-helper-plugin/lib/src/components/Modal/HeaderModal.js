@@ -30,7 +30,7 @@ const HeaderModal = styled(ModalHeader)`
   }
   & + svg {
     position: absolute;
-    top: 26px;
+    top: 24px;
     right: 30px;
     fill: #c3c5c8;
   }

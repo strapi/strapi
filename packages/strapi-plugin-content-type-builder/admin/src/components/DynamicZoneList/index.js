@@ -8,17 +8,27 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { TabContent, TabPane, Nav } from 'reactstrap';
-// import { Plus } from '@buffetjs/icons';
+import { Plus } from '@buffetjs/icons';
 
 import getTrad from '../../utils/getTrad';
 import ComponentList from '../ComponentList';
 import ComponentButton from './ComponentButton';
 import ComponentCard from '../ComponentCard';
 
-function DynamicZoneList({ customRowComponent, components, addComponent }) {
+function DynamicZoneList({
+  customRowComponent,
+  components,
+  addComponent,
+  name,
+}) {
   const [activeTab, setActiveTab] = useState('0');
+
   const toggle = tab => {
     if (activeTab !== tab) setActiveTab(tab);
+  };
+
+  const handleClickAdd = () => {
+    addComponent(name);
   };
 
   return (
@@ -28,8 +38,10 @@ function DynamicZoneList({ customRowComponent, components, addComponent }) {
           <div className="tabs-wrapper">
             <Nav tabs>
               <li>
-                <ComponentButton onClick={addComponent}>
-                  <div>{/* <Plus /> */}+</div>
+                <ComponentButton onClick={handleClickAdd}>
+                  <div>
+                    <Plus />
+                  </div>
                   <p>
                     <FormattedMessage id={getTrad('button.component.add')} />
                   </p>
@@ -78,12 +90,14 @@ DynamicZoneList.defaultProps = {
   addComponent: () => {},
   components: [],
   customRowComponent: null,
+  name: null,
 };
 
 DynamicZoneList.propTypes = {
   addComponent: PropTypes.func,
   components: PropTypes.instanceOf(Array),
   customRowComponent: PropTypes.func,
+  name: PropTypes.string,
 };
 
 export default DynamicZoneList;
