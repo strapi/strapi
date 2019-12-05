@@ -12,16 +12,16 @@ describe('Test type date', () => {
 
     modelsUtils = createModelsUtils({ rq });
 
-    await modelsUtils.createModelWithType('withdate', 'datetime');
+    await modelsUtils.createModelWithType('withdatetime', 'datetime');
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteModel('withdate');
+    await modelsUtils.deleteModel('withdatetime');
   }, 60000);
 
   test('Create entry with valid value JSON', async () => {
     const res = await rq.post(
-      '/content-manager/explorer/application::withdate.withdate',
+      '/content-manager/explorer/application::withdatetime.withdatetime',
       {
         body: {
           field: '2019-08-08T10:10:57.000Z',
@@ -39,7 +39,7 @@ describe('Test type date', () => {
     const now = new Date(2019, 0, 12);
 
     const res = await rq.post(
-      '/content-manager/explorer/application::withdate.withdate',
+      '/content-manager/explorer/application::withdatetime.withdatetime',
       {
         formData: {
           data: JSON.stringify({ field: now }),
@@ -57,7 +57,7 @@ describe('Test type date', () => {
     const now = new Date(2016, 4, 8);
 
     const res = await rq.post(
-      '/content-manager/explorer/application::withdate.withdate',
+      '/content-manager/explorer/application::withdatetime.withdatetime',
       {
         body: {
           field: now.getTime(),
@@ -75,7 +75,7 @@ describe('Test type date', () => {
     const now = new Date(2000, 0, 1);
 
     const res = await rq.post(
-      '/content-manager/explorer/application::withdate.withdate',
+      '/content-manager/explorer/application::withdatetime.withdatetime',
       {
         body: {
           field: `${now.getTime()}`,
@@ -91,7 +91,7 @@ describe('Test type date', () => {
 
   test('Throws on invalid date format', async () => {
     const res = await rq.post(
-      '/content-manager/explorer/application::withdate.withdate',
+      '/content-manager/explorer/application::withdatetime.withdatetime',
       {
         body: {
           field: 'azdazindoaizdnoainzd',
@@ -104,7 +104,7 @@ describe('Test type date', () => {
 
   test('Reading entry, returns correct value', async () => {
     const res = await rq.get(
-      '/content-manager/explorer/application::withdate.withdate'
+      '/content-manager/explorer/application::withdatetime.withdatetime'
     );
 
     expect(res.statusCode).toBe(200);
@@ -118,7 +118,7 @@ describe('Test type date', () => {
     const now = new Date(2018, 7, 5);
 
     const res = await rq.post(
-      '/content-manager/explorer/application::withdate.withdate',
+      '/content-manager/explorer/application::withdatetime.withdatetime',
       {
         body: {
           field: now.getTime(),
@@ -128,7 +128,7 @@ describe('Test type date', () => {
 
     const newDate = new Date(2017, 10, 23);
     const updateRes = await rq.put(
-      `/content-manager/explorer/application::withdate.withdate/${res.body.id}`,
+      `/content-manager/explorer/application::withdatetime.withdatetime/${res.body.id}`,
       {
         body: {
           field: newDate,
