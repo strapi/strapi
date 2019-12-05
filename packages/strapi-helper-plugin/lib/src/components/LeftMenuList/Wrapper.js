@@ -14,7 +14,7 @@ const Wrapper = styled.div`
     }
     // Title
     h3 {
-      margin-bottom: 21px;
+      margin-bottom: 12px;
       padding-right: 20px;
       padding-top: 2px;
       font-family: Lato;

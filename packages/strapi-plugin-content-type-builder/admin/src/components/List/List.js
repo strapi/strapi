@@ -14,17 +14,17 @@ const Wrapper = styled(List)`
       width: 73px;
       padding-left: 30px;
       > svg {
-        // width: 16px;
-        // height: 16px;
+        width: auto;
+        height: 16px;
         position: absolute;
-        left: 0;
-        top: 5px;
+        left: -4px;
+        top: 16px;
         display: none;
       }
     }
     td[colspan='12'] {
       position: relative;
-      padding: 0 0 0 56px;
+      padding: 0 0 0 50px;
       > div {
         box-shadow: none;
       }
@@ -46,8 +46,32 @@ const Wrapper = styled(List)`
           background-color: transparent;
         }
       }
-      table tr td:first-of-type:not(:last-of-type) svg {
-        display: block;
+      table tr td:first-of-type:not(:last-of-type) {
+        width: 79px;
+        padding-left: 36px;
+        svg {
+          display: block;
+        }
+      }
+    }
+    table + button {
+      position: relative;
+      background-color: transparent;
+      &::before {
+        content: '&';
+        width: 27px;
+        height: 27px;
+        border-radius: 18px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        background-color: #f3f4f4;
+        color: transparent;
+      }
+      svg {
+        position: absolute;
+        top: 0;
+        left: 0;
       }
     }
     tr.dynamiczone-row {
