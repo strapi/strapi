@@ -464,7 +464,8 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       const mapper = (params = {}) => {
         Object.keys(params).map(key => {
           const attr = definition.attributes[key] || {};
-          params[key] = parseValue(attr.type, params[key], definition);
+
+          params[key] = parseValue(attr.type, params[key]);
         });
 
         return _.mapKeys(params, (value, key) => {
@@ -613,60 +614,54 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
             : Promise.resolve();
         });
 
-        this.on('saving', instance => {
-          instance.attributes = mapper(instance.attributes);
+        this.on('saving', (instance, attrs) => {
+          instance.attributes = mapper(attrs);
 
           return _.isFunction(target[model.toLowerCase()]['beforeSave'])
             ? target[model.toLowerCase()]['beforeSave']
             : Promise.resolve();
         });
 
-        // Convert to JSON format stringify json for mysql database
-        if (definition.client === 'mysql' || definition.client === 'sqlite3') {
-          const events = [
-            {
-              name: 'saved',
-              target: 'afterSave',
-            },
-            {
-              name: 'fetched',
-              target: 'afterFetch',
-            },
-            {
-              name: 'fetched:collection',
-              target: 'afterFetchAll',
-            },
-          ];
-
-          const formatValue = createFormatter(definition.client);
-          const formatter = attributes => {
-            Object.keys(attributes).forEach(key => {
-              const attr = definition.attributes[key] || {};
-              attributes[key] = formatValue(attr, attributes[key]);
-            });
-          };
-
-          events.forEach(event => {
-            let fn;
-
-            if (event.name.indexOf('collection') !== -1) {
-              fn = instance =>
-                instance.models.map(entry => {
-                  formatter(entry.attributes);
-                });
-            } else {
-              fn = instance => formatter(instance.attributes);
-            }
-
-            this.on(event.name, instance => {
-              fn(instance);
-
-              return _.isFunction(target[model.toLowerCase()][event.target])
-                ? target[model.toLowerCase()][event.target]
-                : Promise.resolve();
-            });
+        const formatValue = createFormatter(definition.client);
+        function formatEntry(entry) {
+          Object.keys(entry.attributes).forEach(key => {
+            const attr = definition.attributes[key] || {};
+            entry.attributes[key] = formatValue(attr, entry.attributes[key]);
           });
         }
+
+        function formatOutput(instance) {
+          if (Array.isArray(instance.models)) {
+            instance.models.map(formatEntry);
+          } else {
+            formatEntry(instance);
+          }
+        }
+
+        const events = [
+          {
+            name: 'saved',
+            target: 'afterSave',
+          },
+          {
+            name: 'fetched',
+            target: 'afterFetch',
+          },
+          {
+            name: 'fetched:collection',
+            target: 'afterFetchAll',
+          },
+        ];
+
+        events.forEach(event => {
+          this.on(event.name, instance => {
+            formatOutput(instance);
+
+            return _.isFunction(target[model.toLowerCase()][event.target])
+              ? target[model.toLowerCase()][event.target]
+              : Promise.resolve();
+          });
+        });
       };
 
       loadedModel.hidden = _.keys(

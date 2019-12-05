@@ -19,7 +19,10 @@ const createFormatter = client => ({ type }, value) => {
 };
 
 const defaultFormatter = {
-  json: value => JSON.parse(value),
+  json: value => {
+    if (typeof value === 'object') return value;
+    return JSON.parse(value);
+  },
   boolean: value => {
     if (typeof value === 'boolean') {
       return value;
@@ -34,24 +37,40 @@ const defaultFormatter = {
       return null;
     }
   },
+  date: value => {
+    const cast = new Date(value);
+    return isValid(cast) ? formatISO(cast, { representation: 'date' }) : null;
+  },
+  datetime: value => {
+    const cast = new Date(value);
+    return isValid(cast) ? cast.toISOString() : null;
+  },
+  timestamp: value => {
+    const cast = new Date(value);
+    return isValid(cast) ? format(cast, 'T') : null;
+  },
 };
 
 const formatters = {
   sqlite3: {
-    date: value => {
-      const cast = new Date(value);
-      return isValid(cast) ? formatISO(cast, { representation: 'date' }) : null;
-    },
-    datetime: value => {
-      const cast = new Date(value);
-      return isValid(cast) ? cast.toISOString() : null;
-    },
-    timestamp: value => {
-      const cast = new Date(value);
-      return isValid(cast) ? format(cast, 'T') : null;
-    },
     biginteger: value => {
       return value.toString();
+    },
+  },
+  mysql: {
+    boolean: value => {
+      if (typeof value === 'boolean') {
+        return value;
+      }
+
+      const strVal = value.toString();
+      if (strVal === '1') {
+        return true;
+      } else if (strVal === '0') {
+        return false;
+      } else {
+        return null;
+      }
     },
   },
 };
