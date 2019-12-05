@@ -12,8 +12,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useDataManager from '../../hooks/useDataManager';
 import Wrapper from './Wrapper';
 
-function ComponentCard({ component, isActive, onClick }) {
-  const { modifiedData } = useDataManager();
+function ComponentCard({ component, dzName, index, isActive, onClick }) {
+  const { modifiedData, removeComponentFromDynamicZone } = useDataManager();
 
   const getComponentSchema = componentName => {
     return get(modifiedData, ['components', componentName], {
@@ -31,6 +31,14 @@ function ComponentCard({ component, isActive, onClick }) {
         <FontAwesomeIcon icon={icon} />
       </div>
       <p>{component}</p>
+      <p
+        onClick={e => {
+          e.stopPropagation();
+          removeComponentFromDynamicZone(dzName, index);
+        }}
+      >
+        X
+      </p>
     </Wrapper>
   );
 }
@@ -43,6 +51,8 @@ ComponentCard.defaultProps = {
 
 ComponentCard.propTypes = {
   component: PropTypes.string,
+  dzName: PropTypes.string.isRequired,
+  index: PropTypes.number.isRequired,
   isActive: PropTypes.bool,
   onClick: PropTypes.func,
 };

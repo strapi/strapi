@@ -51,6 +51,8 @@ function DynamicZoneList({
                 return (
                   <li key={component}>
                     <ComponentCard
+                      dzName={name}
+                      index={index}
                       component={component}
                       isActive={activeTab === `${index}`}
                       onClick={() => {

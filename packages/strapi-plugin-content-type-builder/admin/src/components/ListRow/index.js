@@ -5,18 +5,17 @@ import { FormattedMessage } from 'react-intl';
 import { AttributeIcon } from '@buffetjs/core';
 
 import pluginId from '../../pluginId';
+import useDataManager from '../../hooks/useDataManager';
 
 import Wrapper from './Wrapper';
 // TODO fix merge conflict
-// import Component from '../../icons/Component';
+import Component from '../../icons/Component';
 
 function ListRow({
-  attributeName,
   configurable,
   name,
   nature,
   onClick,
-  onClickDelete,
   plugin,
   target,
   targetUid,
@@ -28,6 +27,7 @@ function ListRow({
   secondLoopComponentName,
   secondLoopComponentUid,
 }) {
+  const { removeAttribute } = useDataManager();
   const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type)
     ? 'number'
     : type;
@@ -81,7 +81,7 @@ function ListRow({
     >
       <td>
         <AttributeIcon key={src} type={src} />
-        {/* <Component fill="#f3f4f4" /> */}
+        <Component fill="#f3f4f4" />
       </td>
       <td styles={{ fontWeight: 600 }}>
         <p>{name}</p>
@@ -118,7 +118,11 @@ function ListRow({
               onClick={e => {
                 e.stopPropagation();
 
-                onClickDelete(attributeName);
+                removeAttribute(
+                  editTarget,
+                  name,
+                  secondLoopComponentUid || firstLoopComponentUid || ''
+                );
               }}
             >
               <i className="fas fa-trash-alt link-icon" />
@@ -148,7 +152,6 @@ ListRow.defaultProps = {
 };
 
 ListRow.propTypes = {
-  attributeName: PropTypes.string.isRequired,
   configurable: PropTypes.bool,
   editTarget: PropTypes.string.isRequired,
   firstLoopComponentName: PropTypes.string,
@@ -157,7 +160,6 @@ ListRow.propTypes = {
   name: PropTypes.string.isRequired,
   nature: PropTypes.string,
   onClick: PropTypes.func,
-  onClickDelete: PropTypes.func,
   plugin: PropTypes.string,
   secondLoopComponentName: PropTypes.string,
   secondLoopComponentUid: PropTypes.string,

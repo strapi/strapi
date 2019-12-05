@@ -112,13 +112,6 @@ const ListPage = () => {
   ) => {
     let attributeType;
 
-    console.log({
-      headerDisplayName,
-      headerDisplayCategory,
-      headerDisplaySubCategory,
-      subTargetUid,
-    });
-
     switch (type) {
       case 'integer':
       case 'biginteger':
@@ -136,11 +129,6 @@ const ListPage = () => {
       default:
         attributeType = type;
     }
-
-    // const step = type === 'component' ? '&step=2' : '';
-    // const displayCategory = headerDisplayCategory
-    //   ? `&headerDisplayCategory=${headerDisplayCategory}`
-    //   : '';
 
     await wait();
 
@@ -162,23 +150,7 @@ const ListPage = () => {
     await wait();
 
     push({ search: makeSearch(search, true) });
-
-    // push({
-    //   search: `modalType=attribute&actionType=edit&settingType=base&forTarget=${forTarget}&targetUid=${targetUid}&attributeName=${attrName}&attributeType=${attributeType}&headerDisplayName=${headerDisplayName}${step}${displayCategory}`,
-    // });
   };
-
-  // const handleClickEditMain = () => {
-  //   push({
-  //     search: `modalType=${firstMainDataPath}&settingType=base&actionType=edit&forTarget=${forTarget}&targetUid=${targetUid}&headerDisplayName=${currentDataName}`,
-  //   });
-  //   emitEvent('willEditNameOfGroup');
-  // };
-
-  // const handleClickEditComponent = compoName => {
-  //   const search = `modalType=attribute&actionType=edit&settingType=base&forTarget=${forTarget}&targetUid=${targetUid}&attributeName=${attrName}&attributeType=${attributeType}&headerDisplayName=${headerDisplayName}`,
-  //   push({ search });
-  // }
 
   const getDescription = () => {
     const description = get(
