@@ -76,7 +76,7 @@ You have to send FormData in your request body
 
 ## Upload files related to an entry
 
-To upload files that will be liked to an specific entry.
+To upload files that will be linked to an specific entry.
 
 ### Request parameters
 
