@@ -1,6 +1,7 @@
 //TODO: move to dbal
 
 const _ = require('lodash');
+const parseType = require('./parse-type');
 
 const findModelByAssoc = assoc => {
   const { models } = assoc.plugin ? strapi.plugins[assoc.plugin] : strapi;
@@ -58,33 +59,16 @@ const getAssociationFromFieldKey = ({ model, field }) => {
 };
 
 /**
- * Cast basic values based on attribute type
+ * Cast an input value
  * @param {Object} options - Options
  * @param {string} options.type - type of the atribute
  * @param {*} options.value - value tu cast
+ * @param {string} options.operator - name of operator
  */
-const castValueToType = ({ type, value }) => {
-  switch (type) {
-    case 'boolean': {
-      if (['true', 't', '1', 1, true].includes(value)) {
-        return true;
-      }
-
-      if (['false', 'f', '0', 0].includes(value)) {
-        return false;
-      }
-
-      return Boolean(value);
-    }
-    case 'integer':
-    case 'biginteger':
-    case 'float':
-    case 'decimal': {
-      return _.toNumber(value);
-    }
-    default:
-      return value;
-  }
+const castInput = ({ type, value, operator }) => {
+  return Array.isArray(value)
+    ? value.map(val => castValue({ type, operator, value: val }))
+    : castValue({ type, operator, value: value });
 };
 
 /**
@@ -95,8 +79,8 @@ const castValueToType = ({ type, value }) => {
  * @param {string} options.operator - name of operator
  */
 const castValue = ({ type, value, operator }) => {
-  if (operator === 'null') return castValueToType({ type: 'boolean', value });
-  return castValueToType({ type, value });
+  if (operator === 'null') return parseType({ type: 'boolean', value });
+  return parseType({ type, value });
 };
 /**
  *
@@ -126,12 +110,10 @@ const buildQuery = ({ model, filters = {}, ...rest }) => {
           field,
         });
 
-        const { type } = _.get(assocModel, ['attributes', attribute], {});
+        const { type } = _.get(assocModel, ['allAttributes', attribute], {});
 
         // cast value or array of values
-        const castedValue = Array.isArray(value)
-          ? value.map(val => castValue({ type, operator, value: val }))
-          : castValue({ type, operator, value: value });
+        const castedValue = castInput({ type, operator, value });
 
         return {
           field: field === 'id' ? model.primaryKey : field,
