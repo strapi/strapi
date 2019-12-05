@@ -11,6 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import useDataManager from '../../hooks/useDataManager';
 import Wrapper from './Wrapper';
+import Close from './Close';
 
 function ComponentCard({ component, dzName, index, isActive, onClick }) {
   const { modifiedData, removeComponentFromDynamicZone } = useDataManager();
@@ -31,14 +32,16 @@ function ComponentCard({ component, dzName, index, isActive, onClick }) {
         <FontAwesomeIcon icon={icon} />
       </div>
       <p>{component}</p>
-      <p
+
+      <div
+        className="close-btn"
         onClick={e => {
           e.stopPropagation();
           removeComponentFromDynamicZone(dzName, index);
         }}
       >
-        X
-      </p>
+        <Close width="7px" height="7px" />
+      </div>
     </Wrapper>
   );
 }
@@ -47,6 +50,7 @@ ComponentCard.defaultProps = {
   component: null,
   isActive: false,
   onClick: () => {},
+  onRemoveClick: () => {},
 };
 
 ComponentCard.propTypes = {

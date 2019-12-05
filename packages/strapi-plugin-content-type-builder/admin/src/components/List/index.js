@@ -36,7 +36,6 @@ function List({
   const addButtonProps = {
     icon: !isSub ? true : false,
     color: 'primary',
-    // label: formatMessage({ id: `${pluginId}.button.attributes.add.another` }),
     label: formatMessage({
       id: !isSub
         ? `${pluginId}.form.button.add.field.to.contentType`

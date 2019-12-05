@@ -7,6 +7,7 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.button`
+  position: relative;
   background-color: #fafafb;
   width: 139px;
   height: 100%;
@@ -14,11 +15,12 @@ const Wrapper = styled.button`
   border: 0;
   padding: 0;
   text-align: center;
+  border: solid 1px #fafafb;
   &:focus {
     outline: 0;
   }
 
-  div {
+  div:first-of-type {
     width: 34px;
     height: 34px;
     border-radius: 18px;
@@ -31,6 +33,15 @@ const Wrapper = styled.button`
       margin auto;
     }
   }
+
+  div:last-of-type {
+    position: absolute;
+    padding: 0 7px;
+    top: 0;
+    right: 0;
+    display: none;
+  }
+
   p {
     font-size: 13px;
     font-weight: bold;
@@ -47,11 +58,14 @@ const Wrapper = styled.button`
     cursor: initial;
   }
   &:hover, &.active {
-    border: solid 1px #aed4fb;
+    border-color: #aed4fb;
     background-color: #e6f0fb;
-    div {
+    div:first-of-type  {
       background-color: #aed4fb;
       color: #007eff;
+    }
+    div:last-of-type {
+      display: block;
     }
     p {
       color: #007eff;

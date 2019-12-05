@@ -87,6 +87,7 @@
   "form.button.cancel": "Annuler",
   "form.button.continue": "Continuer",
   "form.button.save": "Sauvegarder",
+  "form.button.configure-view": "Configurer la vue",
 
   "form.contentType.item.collectionName": "Nom de la Collection",
   "form.contentType.item.collectionName.inputDescription": "Pratique quand le Nom de votre Type de Contenu et de votre table sont différents",

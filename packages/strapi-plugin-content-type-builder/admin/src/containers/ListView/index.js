@@ -253,7 +253,17 @@ const ListPage = () => {
     },
   };
 
-  const listActions = isInDevelopmentMode ? [{ ...addButtonProps }] : [];
+  // const listActions = isInDevelopmentMode ? [{ ...addButtonProps }] : [];
+  const configureButtonProps = {
+    icon: true,
+    color: 'secondary',
+    label: formatMessage({ id: `${pluginId}.form.button.configure-view` }),
+    onClick: () => {},
+  };
+
+  const listActions = isInDevelopmentMode
+    ? [{ ...configureButtonProps }, { ...addButtonProps }]
+    : [];
 
   const handleClickOnTrashIcon = () => {};
 

@@ -260,6 +260,7 @@
   "form.button.add-components-to-dynamiczone": "Add components to the zone",
   "form.button.configure-component": "Configure the component",
   "modalForm.editCategory.base.name.description": "No space is allowed for the name of the category",
+  "form.button.configure-view": "Configure the view",
   "modalForm.header-edit": "Edit {name}",
   "modalForm.header.categories": "Categories",
   "modalForm.sub-header.chooseAttribute.component": "Select a field for your component",
