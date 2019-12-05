@@ -9,6 +9,7 @@ import { List } from '@buffetjs/styles';
 
 const Wrapper = styled(List)`
   table-layout: fixed;
+
   tbody {
     td:first-of-type:not(:last-of-type) {
       width: 73px;
@@ -31,7 +32,7 @@ const Wrapper = styled(List)`
       &::before {
         content: '&';
         width: 5px;
-        height: 100%;
+        height: calc(100% - 15px);
         position: absolute;
         top: -7px;
         left: 45px;
@@ -57,17 +58,11 @@ const Wrapper = styled(List)`
     table + button {
       position: relative;
       background-color: transparent;
-      &::before {
-        content: '&';
-        width: 27px;
-        height: 27px;
-        border-radius: 18px;
-        position: absolute;
-        top: 0;
-        left: 0;
-        background-color: #f3f4f4;
-        color: transparent;
-      }
+      text-transform: initial;
+      color: #9ea7b8;
+      text-align: left;
+      padding-left: 35px;
+      border-color: transparent;
       svg {
         position: absolute;
         top: 0;
@@ -117,6 +112,24 @@ const Wrapper = styled(List)`
           z-index: 1;
         }
       }
+    }
+  }
+  & + .plus-icon {
+    width: 27px;
+    height: 27px;
+    border-radius: 18px;
+    position: absolute;
+    bottom: 14px;
+    left: 34px;
+    background-color: #f3f4f4;
+    color: transparent;
+    text-align: center;
+    line-height: 27px;
+    display: flex;
+    svg {
+      margin: auto;
+      width: 11px;
+      height: 11px;
     }
   }
 `;

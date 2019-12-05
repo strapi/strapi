@@ -31,6 +31,7 @@ function ComponentList({ customRowComponent, component }) {
         {List({
           customRowComponent,
           items: convertAttrObjToArray(attributes),
+          isSub: true,
         })}
       </td>
     </tr>

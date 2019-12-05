@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useGlobalContext } from 'strapi-helper-plugin';
+import { Plus } from '@buffetjs/icons';
 
 import pluginId from '../../pluginId';
 
@@ -21,46 +22,58 @@ function List({
   items,
   addField,
   addComponentToDZ,
+  isSub,
 }) {
   const { formatMessage } = useGlobalContext();
   const addButtonProps = {
-    icon: true,
+    icon: !isSub ? true : false,
     color: 'primary',
-    label: formatMessage({ id: `${pluginId}.button.attributes.add.another` }),
+    label: formatMessage({
+      id: !isSub
+        ? `${pluginId}.form.button.add.field.to.contentType`
+        : `${pluginId}.form.button.add.field.to.component`,
+    }),
     onClick: () => addField(),
   };
 
   return (
-    <Wrapper className={className}>
-      <table>
-        <tbody>
-          {items.map(item => {
-            const { type } = item;
-            return (
-              <React.Fragment key={JSON.stringify(item)}>
-                {customRowComponent(item)}
+    <>
+      <Wrapper className={className}>
+        <table>
+          <tbody>
+            {items.map(item => {
+              const { type } = item;
+              return (
+                <React.Fragment key={JSON.stringify(item)}>
+                  {customRowComponent(item)}
 
-                {type === 'component' && (
-                  <ComponentList
-                    {...item}
-                    customRowComponent={customRowComponent}
-                  />
-                )}
+                  {type === 'component' && (
+                    <ComponentList
+                      {...item}
+                      customRowComponent={customRowComponent}
+                    />
+                  )}
 
-                {type === 'dynamiczone' && (
-                  <DynamicZoneList
-                    {...item}
-                    customRowComponent={customRowComponent}
-                    addComponent={addComponentToDZ}
-                  />
-                )}
-              </React.Fragment>
-            );
-          })}
-        </tbody>
-      </table>
-      <ListButton {...addButtonProps}></ListButton>
-    </Wrapper>
+                  {type === 'dynamiczone' && (
+                    <DynamicZoneList
+                      {...item}
+                      customRowComponent={customRowComponent}
+                      addComponent={addComponentToDZ}
+                    />
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </tbody>
+        </table>
+        <ListButton {...addButtonProps}></ListButton>
+      </Wrapper>
+      {isSub && (
+        <div className="plus-icon">
+          <Plus fill="#b4b6ba" />
+        </div>
+      )}
+    </>
   );
 }
 
@@ -70,6 +83,7 @@ List.defaultProps = {
   className: null,
   customRowComponent: null,
   items: [],
+  isSub: false,
 };
 
 List.propTypes = {
@@ -78,6 +92,7 @@ List.propTypes = {
   className: PropTypes.string,
   customRowComponent: PropTypes.func,
   items: PropTypes.instanceOf(Array),
+  isSub: PropTypes.bool,
 };
 
 export default List;
