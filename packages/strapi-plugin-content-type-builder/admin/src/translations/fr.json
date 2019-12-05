@@ -82,6 +82,8 @@
   "form.attribute.settings.default": "Valeur par défault",
   "form.attribute.settings.default.checkboxLabel": "Définir à true",
   "form.button.add.field": "Ajouter un nouveau champ",
+  "form.button.add.field.to.contentType": "Ajouter un nouveau champ à ce type de contenu",
+  "form.button.add.field.to.component": "Ajouter un nouveau champ à composant",
   "form.button.cancel": "Annuler",
   "form.button.continue": "Continuer",
   "form.button.save": "Sauvegarder",

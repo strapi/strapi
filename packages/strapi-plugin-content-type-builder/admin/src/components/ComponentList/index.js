@@ -38,6 +38,7 @@ function ComponentList({
           firstLoopComponentName={firstLoopComponentName || componentName}
           firstLoopComponentUid={firstLoopComponentUid || component}
           editTarget="components"
+          isSub
           secondLoopComponentName={
             firstLoopComponentName ? componentName : null
           }

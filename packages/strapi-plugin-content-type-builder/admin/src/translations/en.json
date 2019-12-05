@@ -59,6 +59,8 @@
 
   "form.attribute.settings.default.checkboxLabel": "Set to true",
   "form.button.add.field": "Add Another Field",
+  "form.button.add.field.to.contentType": "Add another field to this content-type",
+  "form.button.add.field.to.component": "Add another field to this component",
   "form.button.cancel": "Cancel",
   "form.button.continue": "Continue",
   "form.button.save": "Save",

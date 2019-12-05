@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useGlobalContext } from 'strapi-helper-plugin';
+// import { Plus } from '@buffetjs/icons';
 
 import pluginId from '../../pluginId';
 import useListView from '../../hooks/useListView';
@@ -28,13 +29,19 @@ function List({
   firstLoopComponentUid,
   secondLoopComponentName,
   secondLoopComponentUid,
+  isSub,
 }) {
   const { formatMessage } = useGlobalContext();
   const { openModalAddField } = useListView();
   const addButtonProps = {
-    icon: true,
+    icon: !isSub ? true : false,
     color: 'primary',
-    label: formatMessage({ id: `${pluginId}.button.attributes.add.another` }),
+    // label: formatMessage({ id: `${pluginId}.button.attributes.add.another` }),
+    label: formatMessage({
+      id: !isSub
+        ? `${pluginId}.form.button.add.field.to.contentType`
+        : `${pluginId}.form.button.add.field.to.component`,
+    }),
     onClick: () => {
       let headerDisplayName = mainTypeName;
 
@@ -58,58 +65,63 @@ function List({
   };
 
   return (
-    <Wrapper className={className}>
-      <table>
-        <tbody>
-          {items.map(item => {
-            const { type } = item;
+    <>
+      <Wrapper className={className}>
+        <table>
+          <tbody>
+            {items.map(item => {
+              const { type } = item;
 
-            const CustomRow = customRowComponent;
+              const CustomRow = customRowComponent;
 
-            return (
-              <React.Fragment key={JSON.stringify(item)}>
-                <CustomRow
-                  {...item}
-                  targetUid={targetUid}
-                  // NEW props
-                  mainTypeName={mainTypeName}
-                  editTarget={editTarget}
-                  firstLoopComponentName={firstLoopComponentName}
-                  firstLoopComponentUid={firstLoopComponentUid}
-                  secondLoopComponentName={secondLoopComponentName}
-                  secondLoopComponentUid={secondLoopComponentUid}
-                />
-
-                {type === 'component' && (
-                  <ComponentList
+              return (
+                <React.Fragment key={JSON.stringify(item)}>
+                  <CustomRow
                     {...item}
-                    customRowComponent={customRowComponent}
                     targetUid={targetUid}
-                    // NEW PROPS
-
+                    // NEW props
                     mainTypeName={mainTypeName}
                     editTarget={editTarget}
                     firstLoopComponentName={firstLoopComponentName}
                     firstLoopComponentUid={firstLoopComponentUid}
+                    secondLoopComponentName={secondLoopComponentName}
+                    secondLoopComponentUid={secondLoopComponentUid}
                   />
-                )}
 
-                {type === 'dynamiczone' && (
-                  <DynamicZoneList
-                    {...item}
-                    customRowComponent={customRowComponent}
-                    addComponent={addComponentToDZ}
-                    targetUid={targetUid}
-                    mainTypeName={mainTypeName}
-                  />
-                )}
-              </React.Fragment>
-            );
-          })}
-        </tbody>
-      </table>
-      <ListButton {...addButtonProps}></ListButton>
-    </Wrapper>
+                  {type === 'component' && (
+                    <ComponentList
+                      {...item}
+                      customRowComponent={customRowComponent}
+                      targetUid={targetUid}
+                      // NEW PROPS
+
+                      mainTypeName={mainTypeName}
+                      editTarget={editTarget}
+                      firstLoopComponentName={firstLoopComponentName}
+                      firstLoopComponentUid={firstLoopComponentUid}
+                    />
+                  )}
+
+                  {type === 'dynamiczone' && (
+                    <DynamicZoneList
+                      {...item}
+                      customRowComponent={customRowComponent}
+                      addComponent={addComponentToDZ}
+                      targetUid={targetUid}
+                      mainTypeName={mainTypeName}
+                    />
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </tbody>
+        </table>
+        <ListButton {...addButtonProps}></ListButton>
+      </Wrapper>
+      {isSub && (
+        <div className="plus-icon">{/* <Plus fill="#b4b6ba" /> */}+</div>
+      )}
+    </>
   );
 }
 
@@ -124,6 +136,7 @@ List.defaultProps = {
   firstLoopComponentUid: null,
   secondLoopComponentName: null,
   secondLoopComponentUid: null,
+  isSub: false,
 };
 
 List.propTypes = {
@@ -138,6 +151,7 @@ List.propTypes = {
   secondLoopComponentName: PropTypes.string,
   secondLoopComponentUid: PropTypes.string,
   targetUid: PropTypes.string.isRequired,
+  isSub: PropTypes.bool,
 };
 
 export default List;

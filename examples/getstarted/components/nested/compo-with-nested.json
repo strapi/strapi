@@ -16,6 +16,9 @@
       "type": "component",
       "repeatable": false,
       "component": "nested.nested-compo"
+    },
+    "zzzz": {
+      "type": "string"
     }
   }
 }

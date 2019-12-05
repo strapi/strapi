@@ -9,29 +9,30 @@ import { List } from '@buffetjs/styles';
 
 const Wrapper = styled(List)`
   table-layout: fixed;
+
   tbody {
     td:first-of-type:not(:last-of-type) {
       width: 73px;
       padding-left: 30px;
       > svg {
-        // width: 16px;
-        // height: 16px;
+        width: auto;
+        height: 16px;
         position: absolute;
-        left: 0;
-        top: 5px;
+        left: -4px;
+        top: 16px;
         display: none;
       }
     }
     td[colspan='12'] {
       position: relative;
-      padding: 0 0 0 56px;
+      padding: 0 0 0 50px;
       > div {
         box-shadow: none;
       }
       &::before {
         content: '&';
         width: 5px;
-        height: 100%;
+        height: calc(100% - 15px);
         position: absolute;
         top: -7px;
         left: 45px;
@@ -46,8 +47,26 @@ const Wrapper = styled(List)`
           background-color: transparent;
         }
       }
-      table tr td:first-of-type:not(:last-of-type) svg {
-        display: block;
+      table tr td:first-of-type:not(:last-of-type) {
+        width: 79px;
+        padding-left: 36px;
+        svg {
+          display: block;
+        }
+      }
+    }
+    table + button {
+      position: relative;
+      background-color: transparent;
+      text-transform: initial;
+      color: #9ea7b8;
+      text-align: left;
+      padding-left: 35px;
+      border-color: transparent;
+      svg {
+        position: absolute;
+        top: 0;
+        left: 0;
       }
     }
     tr.dynamiczone-row {
@@ -93,6 +112,24 @@ const Wrapper = styled(List)`
           z-index: 1;
         }
       }
+    }
+  }
+  & + .plus-icon {
+    width: 27px;
+    height: 27px;
+    border-radius: 18px;
+    position: absolute;
+    bottom: 14px;
+    left: 34px;
+    background-color: #f3f4f4;
+    color: transparent;
+    text-align: center;
+    line-height: 27px;
+    display: flex;
+    svg {
+      margin: auto;
+      width: 11px;
+      height: 11px;
     }
   }
 `;
