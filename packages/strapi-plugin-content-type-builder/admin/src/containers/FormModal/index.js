@@ -93,6 +93,8 @@ const FormModal = () => {
           ? [forTarget]
           : [forTarget, targetUid];
 
+      console.log({ modalType });
+
       setState({
         actionType,
         attributeName,
@@ -270,6 +272,8 @@ const FormModal = () => {
   let iconType = ['component', 'contentType'].includes(state.modalType)
     ? state.modalType
     : state.attributeType;
+
+  console.log({ modalType: state });
 
   if (state.modalType === 'addComponentToDynamicZone') {
     iconType = 'dynamiczone';
@@ -923,6 +927,8 @@ const FormModal = () => {
   const modalBodyStyle = isPickingAttribute
     ? { paddingTop: '0.5rem', paddingBottom: '3rem' }
     : {};
+
+  console.log({ iconType });
 
   return (
     <Modal

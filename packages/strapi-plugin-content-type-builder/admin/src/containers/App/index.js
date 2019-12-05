@@ -12,7 +12,7 @@ import DataManagerProvider from '../DataManagerProvider';
 import icons from './utils/icons.json';
 import Wrapper from './Wrapper';
 
-const ListPage = lazy(() => import('../TempListView'));
+const ListPage = lazy(() => import('../ListView'));
 
 import RecursivePath from '../RecursivePath';
 

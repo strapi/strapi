@@ -248,7 +248,6 @@ const ListPage = () => {
   const hasModelBeenModified = !isEqual(modifiedData, initialData);
 
   const wait = async () => {
-    // this.setState({ removePrompt: true });
     togglePrompt(false);
     return new Promise(resolve => setTimeout(resolve, 100));
   };

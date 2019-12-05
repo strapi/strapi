@@ -28,6 +28,7 @@ function LeftMenu({ wait }) {
     componentsGroupedByCategory,
     contentTypes,
     isInDevelopmentMode,
+    setModifiedData,
     sortedContentTypesList,
   } = useDataManager();
   const { formatMessage } = useGlobalContext();
@@ -40,6 +41,9 @@ function LeftMenu({ wait }) {
       isEditable: isInDevelopmentMode,
       onClickEdit: (e, data) => {
         e.stopPropagation();
+
+        // Reset previous modifications
+        setModifiedData();
         const search = makeSearch({
           actionType: 'edit',
           modalType: 'editCategory',
