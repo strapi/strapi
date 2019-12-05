@@ -1249,7 +1249,7 @@ const FormModal = () => {
               <div style={{ margin: 'auto 0' }}>
                 {isCreatingAttribute && !isInFirstComponentStep && (
                   <Button
-                    type="button"
+                    type={isCreating ? 'button' : 'submit'}
                     color="success"
                     onClick={e => {
                       handleSubmit(e, false);
@@ -1287,7 +1287,7 @@ const FormModal = () => {
                   </Button>
                 )}
                 <Button
-                  type="submit"
+                  type={isCreating ? 'submit' : 'button'}
                   color={
                     (isCreatingContentType ||
                       isCreatingComponent ||
@@ -1296,7 +1296,7 @@ const FormModal = () => {
                       ? 'success'
                       : 'primary'
                   }
-                  onClick={handleSubmit}
+                  onClick={e => handleSubmit(e, true)}
                   icon={
                     (isCreatingAttribute &&
                       !isCreatingComponentFromAView &&
