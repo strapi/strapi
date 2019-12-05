@@ -37,7 +37,7 @@ import getTrad from '../../utils/getTrad';
 const DataManagerProvider = ({ allIcons, children }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const [infoModals, toggleInfoModal] = useState({ cancel: false });
-  const { updatePlugin } = useGlobalContext();
+  const { currentEnvironment, updatePlugin } = useGlobalContext();
   const {
     components,
     contentTypes,
@@ -54,6 +54,8 @@ const DataManagerProvider = ({ allIcons, children }) => {
   const componentMatch = useRouteMatch(
     `/plugins/${pluginId}/component-categories/:categoryUid/:componentUid`
   );
+  const isInDevelopmentMode = currentEnvironment === 'development';
+
   const isInContentTypeView = contentTypeMatch !== null;
   const firstKeyToMainSchema = isInContentTypeView
     ? 'contentType'
@@ -424,8 +426,6 @@ const DataManagerProvider = ({ allIcons, children }) => {
     });
   };
 
-  console.log({ modifiedData });
-
   return (
     <DataManagerContext.Provider
       value={{
@@ -449,6 +449,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
         deleteCategory,
         deleteData,
         editCategory,
+        isInDevelopmentMode,
         initialData,
         isInContentTypeView,
         modifiedData,
@@ -467,22 +468,26 @@ const DataManagerProvider = ({ allIcons, children }) => {
       ) : (
         <>
           {children}
-          <FormModal />
-          <PopUpWarning
-            isOpen={infoModals.cancel}
-            toggleModal={toggleModalCancel}
-            content={{
-              message: getTrad(
-                `popUpWarning.bodyMessage.cancel-modifications${
-                  didModifiedComponents ? '.with-components' : ''
-                }`
-              ),
-            }}
-            popUpWarningType="danger"
-            onConfirm={() => {
-              cancelChanges();
-            }}
-          />
+          {isInDevelopmentMode && (
+            <>
+              <FormModal />
+              <PopUpWarning
+                isOpen={infoModals.cancel}
+                toggleModal={toggleModalCancel}
+                content={{
+                  message: getTrad(
+                    `popUpWarning.bodyMessage.cancel-modifications${
+                      didModifiedComponents ? '.with-components' : ''
+                    }`
+                  ),
+                }}
+                popUpWarningType="danger"
+                onConfirm={() => {
+                  cancelChanges();
+                }}
+              />
+            </>
+          )}
         </>
       )}
     </DataManagerContext.Provider>

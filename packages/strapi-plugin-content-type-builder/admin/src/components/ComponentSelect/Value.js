@@ -35,7 +35,7 @@ const Value = ({ children, ...props }) => {
   const message =
     valueLength > '0'
       ? getTrad('components.componentSelect.value-components')
-      : getTrad('components.componentSelect.value-components');
+      : getTrad('components.componentSelect.value-component');
 
   return (
     <SingleValue {...props}>

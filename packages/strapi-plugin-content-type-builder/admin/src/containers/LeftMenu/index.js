@@ -27,18 +27,17 @@ function LeftMenu({ wait }) {
     components,
     componentsGroupedByCategory,
     contentTypes,
+    isInDevelopmentMode,
     sortedContentTypesList,
   } = useDataManager();
-  const { currentEnvironment, formatMessage } = useGlobalContext();
+  const { formatMessage } = useGlobalContext();
   const { push } = useHistory();
-
-  const isProduction = currentEnvironment === 'production';
 
   const componentsData = sortBy(
     Object.keys(componentsGroupedByCategory).map(category => ({
       name: category,
       title: category,
-      isEditable: true,
+      isEditable: isInDevelopmentMode,
       onClickEdit: (e, data) => {
         e.stopPropagation();
         const search = makeSearch({
@@ -95,16 +94,17 @@ function LeftMenu({ wait }) {
         id: `${pluginId}.menu.section.models.name.`,
       },
       searchable: true,
-      customLink: {
-        Component: CustomLink,
-        componentProps: {
-          disabled: isProduction,
-          id: `${pluginId}.button.model.create`,
-          onClick: () => {
-            handleClickOpenModal('contentType');
-          },
-        },
-      },
+      customLink: isInDevelopmentMode
+        ? {
+            Component: CustomLink,
+            componentProps: {
+              id: `${pluginId}.button.model.create`,
+              onClick: () => {
+                handleClickOpenModal('contentType');
+              },
+            },
+          }
+        : null,
       links: sortedContentTypesList,
     },
     {
@@ -113,16 +113,17 @@ function LeftMenu({ wait }) {
         id: `${pluginId}.menu.section.components.name.`,
       },
       searchable: true,
-      customLink: {
-        Component: CustomLink,
-        componentProps: {
-          disabled: isProduction,
-          id: `${pluginId}.button.component.create`,
-          onClick: () => {
-            handleClickOpenModal('component');
-          },
-        },
-      },
+      customLink: isInDevelopmentMode
+        ? {
+            Component: CustomLink,
+            componentProps: {
+              id: `${pluginId}.button.component.create`,
+              onClick: () => {
+                handleClickOpenModal('component');
+              },
+            },
+          }
+        : null,
       links: componentsData,
     },
   ];

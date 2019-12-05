@@ -37,6 +37,7 @@ const ListPage = () => {
     isInContentTypeView,
     // removeAttribute,
     // removeComponentFromDynamicZone,
+    isInDevelopmentMode,
     submitData,
     toggleModalCancel,
   } = useDataManager();
@@ -168,26 +169,28 @@ const ListPage = () => {
   const label = get(modifiedData, [firstMainDataPath, 'schema', 'name'], '');
 
   const headerProps = {
-    actions: getActions(),
+    actions: isInDevelopmentMode ? getActions() : [],
     title: {
       label,
-      cta: {
-        icon: 'pencil-alt',
-        onClick: async () => {
-          await wait();
+      cta: isInDevelopmentMode
+        ? {
+            icon: 'pencil-alt',
+            onClick: async () => {
+              await wait();
 
-          push({
-            search: makeSearch({
-              modalType: firstMainDataPath,
-              actionType: 'edit',
-              settingType: 'base',
-              forTarget: firstMainDataPath,
-              targetUid,
-              headerDisplayName: label,
-            }),
-          });
-        },
-      },
+              push({
+                search: makeSearch({
+                  modalType: firstMainDataPath,
+                  actionType: 'edit',
+                  settingType: 'base',
+                  forTarget: firstMainDataPath,
+                  targetUid,
+                  headerDisplayName: label,
+                }),
+              });
+            },
+          }
+        : null,
     },
     content: getDescription(),
   };
@@ -210,7 +213,7 @@ const ListPage = () => {
     onClick: () => handleClickAddAttributeMainData(),
   };
 
-  const listActions = [{ ...addButtonProps }];
+  const listActions = isInDevelopmentMode ? [{ ...addButtonProps }] : [];
 
   const convertDataToArray = () => {
     return Object.keys(attributes).map((key, index) => {

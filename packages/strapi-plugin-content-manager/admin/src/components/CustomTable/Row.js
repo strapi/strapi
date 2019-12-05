@@ -31,7 +31,7 @@ const getDisplayedValue = (type, value, name) => {
     case 'time':
     case 'datetime':
     case 'timestamp': {
-      if (value === null) {
+      if (value == null) {
         return '-';
       }
 

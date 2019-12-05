@@ -88,7 +88,7 @@ const MultipleMenuList = ({
               <div style={{ marginTop: 3 }}>
                 <CheckboxWrapper>
                   <Label
-                    htmlFor="overrideReactSelectBehaviour"
+                    htmlFor="overrideReactSelectBehavior"
                     onClick={() => {
                       handleChangeCategory({ target });
                     }}
