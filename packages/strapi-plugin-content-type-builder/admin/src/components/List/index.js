@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useGlobalContext } from 'strapi-helper-plugin';
-// import { Plus } from '@buffetjs/icons';
+import { Plus } from '@buffetjs/icons';
 
 import pluginId from '../../pluginId';
 import useListView from '../../hooks/useListView';
@@ -119,7 +119,9 @@ function List({
         <ListButton {...addButtonProps}></ListButton>
       </Wrapper>
       {isSub && (
-        <div className="plus-icon">{/* <Plus fill="#b4b6ba" /> */}+</div>
+        <div className="plus-icon">
+          <Plus fill="#b4b6ba" />
+        </div>
       )}
     </>
   );
