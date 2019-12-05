@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { useGlobalContext } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
+import useListView from '../../hooks/useListView';
 
 import DynamicZoneList from '../DynamicZoneList';
 import ComponentList from '../ComponentList';
@@ -19,10 +20,8 @@ function List({
   className,
   customRowComponent,
   items,
-  addField,
   addComponentToDZ,
   targetUid,
-
   mainTypeName,
   editTarget,
   firstLoopComponentName,
@@ -31,11 +30,31 @@ function List({
   secondLoopComponentUid,
 }) {
   const { formatMessage } = useGlobalContext();
+  const { openModalAddField } = useListView();
   const addButtonProps = {
     icon: true,
     color: 'primary',
     label: formatMessage({ id: `${pluginId}.button.attributes.add.another` }),
-    onClick: () => addField(),
+    onClick: () => {
+      let headerDisplayName = mainTypeName;
+
+      if (firstLoopComponentName) {
+        headerDisplayName = firstLoopComponentName;
+      }
+
+      if (secondLoopComponentUid) {
+        headerDisplayName = secondLoopComponentName;
+      }
+
+      openModalAddField(
+        editTarget,
+        targetUid,
+        headerDisplayName,
+        firstLoopComponentUid ? mainTypeName : null,
+        secondLoopComponentName ? firstLoopComponentName : null,
+        secondLoopComponentUid ? firstLoopComponentUid : null
+      );
+    },
   };
 
   return (
@@ -108,12 +127,9 @@ List.defaultProps = {
 };
 
 List.propTypes = {
-  addField: PropTypes.func,
   addComponentToDZ: PropTypes.func,
   className: PropTypes.string,
   customRowComponent: PropTypes.func,
-  // dataType: PropTypes.string.isRequired,
-  // dataTypeName: PropTypes.string.isRequired,
   editTarget: PropTypes.string.isRequired,
   firstLoopComponentName: PropTypes.string,
   firstLoopComponentUid: PropTypes.string,

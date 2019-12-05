@@ -9,6 +9,7 @@ import {
   ViewContainer,
 } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
+import ListViewContext from '../../contexts/ListViewContext';
 import convertAttrObjToArray from '../../utils/convertAttrObjToArray';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
@@ -68,12 +69,22 @@ const ListPage = () => {
   const hasModelBeenModified = !isEqual(modifiedData, initialData);
   const forTarget = isInContentTypeView ? 'contentType' : 'component';
 
-  const handleClickAddAttributeMainData = async () => {
+  const handleClickOpenModalAddField = async (
+    forTarget,
+    targetUid,
+    headerDisplayName,
+    headerDisplayCategory = null,
+    headerDisplaySubCategory = null,
+    subTargetUid = null
+  ) => {
     const searchObj = {
       modalType: 'chooseAttribute',
       forTarget,
       targetUid,
-      headerDisplayName: currentDataName,
+      headerDisplayName,
+      headerDisplayCategory,
+      headerDisplaySubCategory,
+      subTargetUid,
     };
 
     // Disable the prompt
@@ -237,7 +248,9 @@ const ListPage = () => {
     icon: true,
     color: 'primary',
     label: formatMessage({ id: `${pluginId}.button.attributes.add.another` }),
-    onClick: handleClickAddAttributeMainData,
+    onClick: () => {
+      handleClickOpenModalAddField(forTarget, targetUid, currentDataName);
+    },
   };
 
   const listActions = isInDevelopmentMode ? [{ ...addButtonProps }] : [];
@@ -267,41 +280,42 @@ const ListPage = () => {
   };
 
   return (
-    <ViewContainer>
-      <BackHeader />
-      <Prompt
-        message={formatMessage({ id: getTrad('prompt.unsaved') })}
-        when={hasModelBeenModified && enablePrompt}
-      />
-      <div className="container-fluid">
-        <div className="row">
-          <LeftMenu wait={wait} />
-          <div
-            className="col-md-9 content"
-            style={{ paddingLeft: '30px', paddingRight: '30px' }}
-          >
-            <Header {...headerProps} />
+    <ListViewContext.Provider
+      value={{ openModalAddField: handleClickOpenModalAddField }}
+    >
+      <ViewContainer>
+        <BackHeader />
+        <Prompt
+          message={formatMessage({ id: getTrad('prompt.unsaved') })}
+          when={hasModelBeenModified && enablePrompt}
+        />
+        <div className="container-fluid">
+          <div className="row">
+            <LeftMenu wait={wait} />
+            <div
+              className="col-md-9 content"
+              style={{ paddingLeft: '30px', paddingRight: '30px' }}
+            >
+              <Header {...headerProps} />
 
-            <ListWrapper>
-              <ListHeader actions={listActions} title={listTitle} />
-              <List
-                items={convertAttrObjToArray(attributes)}
-                customRowComponent={props => <CustomRow {...props} />}
-                addField={handleClickAddAttributeMainData}
-                addComponentToDZ={handleClickAddComponentToDZ}
-                targetUid={targetUid}
-                dataType={forTarget}
-                dataTypeName={currentDataName}
-                //
-                mainTypeName={currentDataName}
-                editTarget={forTarget}
-                // parentTarget={forTarget}
-              ></List>
-            </ListWrapper>
+              <ListWrapper>
+                <ListHeader actions={listActions} title={listTitle} />
+                <List
+                  items={convertAttrObjToArray(attributes)}
+                  customRowComponent={props => <CustomRow {...props} />}
+                  addComponentToDZ={handleClickAddComponentToDZ}
+                  targetUid={targetUid}
+                  dataType={forTarget}
+                  dataTypeName={currentDataName}
+                  mainTypeName={currentDataName}
+                  editTarget={forTarget}
+                ></List>
+              </ListWrapper>
+            </div>
           </div>
         </div>
-      </div>
-    </ViewContainer>
+      </ViewContainer>
+    </ListViewContext.Provider>
   );
 };
 

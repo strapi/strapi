@@ -14,22 +14,19 @@
     "comment": ""
   },
   "attributes": {
-    "full_name": {
-      "type": "string"
-    },
-    "postal_coder": {
-      "type": "string"
-    },
-    "city": {
-      "type": "string"
+    "addresses": {
+      "collection": "address",
+      "via": "address"
     },
     "geolocation": {
       "type": "json",
       "required": true
     },
-    "addresses": {
-      "collection": "address",
-      "via": "address"
+    "city": {
+      "type": "string"
+    },
+    "postal_coder": {
+      "type": "string"
     },
     "address": {
       "model": "address",
@@ -47,10 +44,8 @@
       "plugin": "upload",
       "required": false
     },
-    "teter": {
-      "type": "component",
-      "repeatable": false,
-      "component": "default.teter"
+    "full_name": {
+      "type": "string"
     }
   }
 }

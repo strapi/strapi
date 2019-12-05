@@ -59,6 +59,7 @@ const FormModal = () => {
     editCategory,
     modifiedData: allDataSchema,
     nestedComponents,
+    setModifiedData,
     sortedContentTypesList,
     updateSchema,
   } = useDataManager();
@@ -109,6 +110,11 @@ const FormModal = () => {
         step,
         targetUid,
       });
+
+      // Reset all the modification when opening the edit category modal
+      if (modalType === 'editCategory') {
+        setModifiedData();
+      }
 
       // Case:
       // the user opens the modal chooseAttributes

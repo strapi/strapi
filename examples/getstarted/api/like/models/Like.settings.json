@@ -26,10 +26,6 @@
     "like_right": {
       "model": "like",
       "via": "like_left"
-    },
-    "totos": {
-      "via": "like",
-      "collection": "toto"
     }
   }
 }
