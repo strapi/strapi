@@ -84,7 +84,7 @@ module.exports = async ({
       case 'date':
         return table.date(name);
       case 'time':
-        return table.time(name);
+        return table.time(name, 3);
       case 'datetime':
         return table.datetime(name);
       case 'timestamp':
