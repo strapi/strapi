@@ -363,6 +363,7 @@ const forms = {
           items.splice(0, 1, [
             {
               ...fields.default,
+              // type: data.type || 'date',
               type: 'date',
               value: null,
               withDefaultValue: false,

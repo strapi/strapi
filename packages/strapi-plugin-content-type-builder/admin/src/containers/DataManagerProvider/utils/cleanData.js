@@ -126,7 +126,7 @@ const formatRelationTargetAttribute = targetAttribute =>
 
 const removeNullKeys = obj =>
   Object.keys(obj).reduce((acc, current) => {
-    if (obj[current] !== null) {
+    if (obj[current] !== null && current !== 'plugin') {
       acc[current] = obj[current];
     }
 

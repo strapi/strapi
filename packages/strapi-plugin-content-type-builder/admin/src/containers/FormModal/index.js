@@ -1171,6 +1171,7 @@ const FormModal = () => {
                               key={input.name}
                             >
                               <Inputs
+                                {...input}
                                 addComponentsToDynamicZone={
                                   handleClickAddComponentsToDynamicZone
                                 }
@@ -1205,7 +1206,6 @@ const FormModal = () => {
                                   state.forTarget === 'component'
                                 }
                                 value={value}
-                                {...input}
                                 error={
                                   isEmpty(errorId)
                                     ? null

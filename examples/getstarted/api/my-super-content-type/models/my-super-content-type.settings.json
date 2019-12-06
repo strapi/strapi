@@ -7,6 +7,10 @@
   "attributes": {
     "name": {
       "type": "string"
+    },
+    "rrrr": {
+      "type": "date",
+      "default": "2019-12-20T11:00:00.000Z"
     }
   }
 }

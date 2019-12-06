@@ -17,6 +17,9 @@
     },
     "time": {
       "type": "time"
+    },
+    "rrr": {
+      "type": "string"
     }
   }
 }
