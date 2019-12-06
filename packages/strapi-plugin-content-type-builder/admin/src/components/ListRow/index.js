@@ -125,7 +125,7 @@ function ListRow({
                 );
               }}
             >
-              <FontAwesomeIcon className="link-icon" icon="trash-alt" />
+              <FontAwesomeIcon className="link-icon" icon="trash" />
             </button>
           </>
         ) : (

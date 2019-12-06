@@ -117,7 +117,7 @@ function Row({ goTo, isBulkable, row, headers }) {
             },
             {
               id: row.id,
-              icoType: 'trash-alt',
+              icoType: 'trash',
               onClick: () => {
                 emitEvent('willDeleteEntryFromList');
                 onClickDelete(row.id);

@@ -62,7 +62,7 @@ class Row extends React.Component {
 
     if (!required && currentEnvironment === 'development') {
       icons.push({
-        icoType: 'trash-alt',
+        icoType: 'trash',
         id: name,
         onClick: this.handleClick,
       });

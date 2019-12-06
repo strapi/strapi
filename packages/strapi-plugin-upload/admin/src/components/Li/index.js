@@ -95,7 +95,7 @@ class Li extends React.Component {
         onClick: this.handleClick,
       },
       {
-        icoType: 'trash-alt',
+        icoType: 'trash',
         onClick: () => this.setState({ isOpen: true }),
       },
     ];
