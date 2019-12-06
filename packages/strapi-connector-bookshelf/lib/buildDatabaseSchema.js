@@ -35,7 +35,7 @@ module.exports = async ({
     return table.increments('id');
   };
 
-  const buildColType = ({ name, attribute, table }) => {
+  const buildColType = ({ name, attribute, table, tableExists = false }) => {
     if (!attribute.type) {
       const relation = definition.associations.find(association => {
         return association.alias === name;
@@ -46,6 +46,7 @@ module.exports = async ({
           name,
           attribute: { type: definition.primaryKeyType },
           table,
+          tableExists,
         });
       }
 
@@ -89,8 +90,15 @@ module.exports = async ({
         return table.datetime(name);
       case 'timestamp':
         return table.timestamp(name);
-      case 'currentTimestamp':
-        return table.timestamp(name).defaultTo(ORM.knex.fn.now());
+      case 'currentTimestamp': {
+        const col = table.timestamp(name);
+
+        if (definition.client !== 'sqlite3' && tableExists) {
+          return col;
+        }
+
+        return col.defaultTo(ORM.knex.fn.now());
+      }
       case 'boolean':
         return table.boolean(name);
       default:
@@ -173,7 +181,12 @@ module.exports = async ({
       Object.keys(columns).forEach(key => {
         const attribute = columns[key];
 
-        const col = buildColType({ name: key, attribute, table: tbl });
+        const col = buildColType({
+          name: key,
+          attribute,
+          table: tbl,
+          tableExists,
+        });
         if (!col) return;
 
         if (attribute.required === true) {
