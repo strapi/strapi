@@ -3,7 +3,7 @@ import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Arrow } from '@buffetjs/icons';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import useEditView from '../../hooks/useEditView';
@@ -113,7 +113,8 @@ const DynamicZone = ({ max, min, name }) => {
               <RoundCTA
                 onClick={() => removeComponentFromDynamicZone(name, index)}
               >
-                <i className="far fa-trash-alt" />
+                {/* <i className="far fa-trash-alt" /> */}
+                <FontAwesomeIcon icon={'trash-alt'} />
               </RoundCTA>
               <FieldComponent
                 componentUid={componentUid}

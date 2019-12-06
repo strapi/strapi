@@ -9,7 +9,6 @@ import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 
 import Wrapper from './Wrapper';
-// TODO fix merge conflict
 import Component from '../../icons/Component';
 
 function ListRow({

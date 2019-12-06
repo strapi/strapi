@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { get, size } from 'lodash';
 import { FormattedMessage } from 'react-intl';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import useEditView from '../../hooks/useEditView';
@@ -42,7 +43,8 @@ const FieldComponent = ({
     <Wrapper className="col-12" isFromDynamicZone={isFromDynamicZone}>
       {isFromDynamicZone && (
         <ComponentIcon>
-          <i className={`fas fa-${icon}`}></i>
+          {/* <i className={`fas fa-${icon}`}></i> */}
+          <FontAwesomeIcon icon={icon} />
         </ComponentIcon>
       )}
       <Label>

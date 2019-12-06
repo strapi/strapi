@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Wrapper from './Wrapper';
 
 const DynamicComponentCard = ({ children, componentUid, icon, onClick }) => {
@@ -12,7 +13,8 @@ const DynamicComponentCard = ({ children, componentUid, icon, onClick }) => {
       }}
     >
       <button className="component-icon">
-        <i className={`fa fa-${icon}`} />
+        {/* <i className={`fa fa-${icon}`} /> */}
+        <FontAwesomeIcon icon={icon} />
       </button>
 
       <div className="component-uid">

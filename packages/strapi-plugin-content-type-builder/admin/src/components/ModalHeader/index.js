@@ -31,7 +31,6 @@ const ModalHeader = ({
     iconName = 'component';
   } else {
     iconName = iconType;
-    // iconName = toLower(iconType);
   }
 
   return (

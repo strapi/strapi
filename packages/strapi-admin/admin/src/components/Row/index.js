@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty } from 'lodash';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // Design
 import {
   GlobalContext,
@@ -76,7 +77,8 @@ class Row extends React.Component {
             )}
             {isEmpty(this.props.plugin.logo) && (
               <div className="icoWrapper">
-                <i className={`fa fa-${this.props.plugin.icon}`} />
+                {/* <i className={`fa fa-${this.props.plugin.icon}`} /> */}
+                <FontAwesomeIcon icon={this.props.plugin.icon} />
               </div>
             )}
           </div>

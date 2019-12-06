@@ -36,7 +36,6 @@ const RelationTargetPicker = ({
       >
         <DropdownToggle caret>
           <p>
-            {/* <i className="fa fa-caret-square-o-right" /> */}
             <FontAwesomeIcon
               icon={['far', 'caret-square-right']}
               style={{ fontSize: 12, marginTop: '-3px' }}
