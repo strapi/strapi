@@ -63,6 +63,10 @@ function List({
     },
   };
 
+  if (!targetUid) {
+    return null;
+  }
+
   return (
     <>
       <Wrapper className={className}>
@@ -131,13 +135,14 @@ List.defaultProps = {
   addComponentToDZ: () => {},
   className: null,
   customRowComponent: null,
-  items: [],
 
   firstLoopComponentName: null,
   firstLoopComponentUid: null,
+  isSub: false,
+  items: [],
   secondLoopComponentName: null,
   secondLoopComponentUid: null,
-  isSub: false,
+  targetUid: null,
 };
 
 List.propTypes = {
@@ -151,7 +156,7 @@ List.propTypes = {
   mainTypeName: PropTypes.string.isRequired,
   secondLoopComponentName: PropTypes.string,
   secondLoopComponentUid: PropTypes.string,
-  targetUid: PropTypes.string.isRequired,
+  targetUid: PropTypes.string,
   isSub: PropTypes.bool,
 };
 

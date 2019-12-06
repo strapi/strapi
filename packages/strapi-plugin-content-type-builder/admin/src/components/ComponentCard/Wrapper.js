@@ -14,6 +14,7 @@ const Wrapper = styled.button`
   border-radius: 2px;
   border: 0;
   padding: 0;
+  padding-top: 5px;
   text-align: center;
   border: solid 1px #fafafb;
   &:focus {

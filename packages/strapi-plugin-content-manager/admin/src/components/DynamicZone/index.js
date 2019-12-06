@@ -42,12 +42,12 @@ const DynamicZone = ({ max, min, name }) => {
     return schema;
   };
 
-  const getDynamicComponentIcon = componentUid => {
+  const getDynamicComponentInfos = componentUid => {
     const {
-      info: { icon },
+      info: { icon, name },
     } = getDynamicComponentSchemaData(componentUid);
 
-    return icon;
+    return { icon, name };
   };
 
   const dynamicZoneErrors = Object.keys(formErrors)
@@ -118,7 +118,7 @@ const DynamicZone = ({ max, min, name }) => {
               </RoundCTA>
               <FieldComponent
                 componentUid={componentUid}
-                icon={getDynamicComponentIcon(componentUid)}
+                icon={getDynamicComponentInfos(componentUid).icon}
                 label=""
                 name={`${name}.${index}`}
                 isFromDynamicZone={true}
@@ -137,7 +137,7 @@ const DynamicZone = ({ max, min, name }) => {
               setIsOpen(prev => !prev);
             } else {
               strapi.notification.info(
-                `${pluginId}.components.components.notification.info.maximum-requirement`
+                `${pluginId}.components.notification.info.maximum-requirement`
               );
             }
           }}
@@ -170,11 +170,16 @@ const DynamicZone = ({ max, min, name }) => {
             </p>
             <div className="componentsList">
               {dynamicZoneAvailableComponents.map(componentUid => {
+                const { icon, name: friendlyName } = getDynamicComponentInfos(
+                  componentUid
+                );
+
                 return (
                   <DynamicComponentCard
                     key={componentUid}
                     componentUid={componentUid}
-                    icon={getDynamicComponentIcon(componentUid)}
+                    friendlyName={friendlyName}
+                    icon={icon}
                     onClick={() => {
                       setIsOpen(false);
                       const shouldCheckErrors = hasError;

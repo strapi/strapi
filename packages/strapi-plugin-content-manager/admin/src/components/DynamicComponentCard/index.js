@@ -3,12 +3,19 @@ import PropTypes from 'prop-types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Wrapper from './Wrapper';
 
-const DynamicComponentCard = ({ children, componentUid, icon, onClick }) => {
+const DynamicComponentCard = ({
+  children,
+  componentUid,
+  friendlyName,
+  icon,
+  onClick,
+}) => {
   return (
     <Wrapper
       onClick={e => {
         e.preventDefault();
         e.stopPropagation();
+        console.log('oooo');
         onClick(componentUid);
       }}
     >
@@ -18,7 +25,7 @@ const DynamicComponentCard = ({ children, componentUid, icon, onClick }) => {
       </button>
 
       <div className="component-uid">
-        <span>{componentUid}</span>
+        <span>{friendlyName}</span>
       </div>
       {children}
     </Wrapper>
@@ -27,6 +34,7 @@ const DynamicComponentCard = ({ children, componentUid, icon, onClick }) => {
 
 DynamicComponentCard.defaultProps = {
   children: null,
+  friendlyName: '',
   onClick: () => {},
   icon: 'smile',
 };
@@ -34,6 +42,7 @@ DynamicComponentCard.defaultProps = {
 DynamicComponentCard.propTypes = {
   children: PropTypes.node,
   componentUid: PropTypes.string.isRequired,
+  friendlyName: PropTypes.string,
   icon: PropTypes.string,
   onClick: PropTypes.func,
 };

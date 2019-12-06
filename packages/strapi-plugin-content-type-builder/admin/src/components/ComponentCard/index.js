@@ -15,23 +15,18 @@ import Close from './Close';
 
 function ComponentCard({ component, dzName, index, isActive, onClick }) {
   const { modifiedData, removeComponentFromDynamicZone } = useDataManager();
-
-  const getComponentSchema = componentName => {
-    return get(modifiedData, ['components', componentName], {
-      schema: { icon: null },
-    });
-  };
-
   const {
-    schema: { icon },
-  } = getComponentSchema(component);
+    schema: { icon, name },
+  } = get(modifiedData, ['components', component], {
+    schema: { icon: null },
+  });
 
   return (
     <Wrapper onClick={onClick} className={isActive ? 'active' : ''}>
       <div>
         <FontAwesomeIcon icon={icon} />
       </div>
-      <p>{component}</p>
+      <p>{name}</p>
 
       <div
         className="close-btn"
@@ -41,6 +36,7 @@ function ComponentCard({ component, dzName, index, isActive, onClick }) {
         }}
       >
         <Close width="7px" height="7px" />
+        {/* <Remove /> */}
       </div>
     </Wrapper>
   );
