@@ -78,7 +78,10 @@ const createComponentJoinTables = async ({ definition, ORM }) => {
         .notNullable();
       table.string('component_type').notNullable();
       table.integer('component_id').notNullable();
-      table.integer(joinColumn).notNullable();
+      table
+        .integer(joinColumn)
+        .unsigned()
+        .notNullable();
 
       table
         .foreign(joinColumn)

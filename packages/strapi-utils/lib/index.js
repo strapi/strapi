@@ -8,6 +8,7 @@ const convertRestQueryParams = require('./convertRestQueryParams');
 const buildQuery = require('./buildQuery');
 const parseMultipartData = require('./parse-multipart');
 const sanitizeEntity = require('./sanitize-entity');
+const parseType = require('./parse-type');
 
 module.exports = {
   cli: require('./cli'),
@@ -25,4 +26,5 @@ module.exports = {
   buildQuery,
   parseMultipartData,
   sanitizeEntity,
+  parseType,
 };

@@ -144,6 +144,7 @@ program
   .option('-a, --api <api>', 'API name to generate a sub API')
   .option('-p, --plugin <api>', 'plugin name')
   .option('-t, --tpl <template>', 'template name')
+  .option('-c, --connection <connection>', 'The name of the connection to use')
   .description('generate a model for an API')
   .action((id, attributes, cliArguments) => {
     cliArguments.attributes = attributes;

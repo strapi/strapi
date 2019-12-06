@@ -6,31 +6,10 @@ const yup = require('yup');
 const { isValidName, isValidIcon } = require('./common');
 const formatYupErrors = require('./yup-formatter');
 const createSchema = require('./model-schema');
-const { modelTypes } = require('./constants');
+const { modelTypes, DEFAULT_TYPES } = require('./constants');
 
 const VALID_RELATIONS = ['oneWay', 'manyWay'];
-const VALID_TYPES = [
-  // advanced types
-  'media',
-
-  // scalar types
-  'string',
-  'text',
-  'richtext',
-  'json',
-  'enumeration',
-  'password',
-  'email',
-  'integer',
-  'biginteger',
-  'float',
-  'decimal',
-  'date',
-  'boolean',
-
-  // nested component
-  'component',
-];
+const VALID_TYPES = [...DEFAULT_TYPES, 'component'];
 
 const componentSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
   modelType: modelTypes.COMPONENT,

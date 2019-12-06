@@ -71,7 +71,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
       definition.loadedModel[name] = {
         ...attr,
-        type: utils(instance).convertType(attr.type),
+        ...utils(instance).convertType(attr.type),
       };
     });
 
@@ -203,7 +203,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
         type: 'timestamp',
       };
       target[model].allAttributes[updatedAtCol] = {
-        type: 'timestampUpdate',
+        type: 'timestamp',
       };
     } else if (timestampsOption === true) {
       schema.set('timestamps', true);
@@ -214,7 +214,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
         type: 'timestamp',
       };
       target[model].allAttributes.updatedAt = {
-        type: 'timestampUpdate',
+        type: 'timestamp',
       };
     }
     schema.set(
