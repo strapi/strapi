@@ -83,9 +83,10 @@ And now the data is back on `GET /articles`
 
 ## Apply our changes
 
-We can see the `find` function returns the result of the `map`. And the map function just sanitizes all entries.
+Here we want force to fetch articles that have status equal to `published`.
 
-So instead of just return the sanitized entry, we will also remove the chef email of each restaurant.
+The way to do that is to set `ctx.query.status` to `published`.
+It will force the filter of the query.
 
 **Path —** `./api/restaurant/controller/Restaurant.js`
 
@@ -96,7 +97,10 @@ module.exports = {
   async find(ctx) {
     let entities;
 
-    ctx.query.status = 'published';
+    ctx.query = {
+      ...ctx.query,
+      status: 'published
+    };
 
     if (ctx.query._q) {
       entities = await strapi.services.article.search(ctx.query);
