@@ -10,7 +10,8 @@ const _ = require('lodash');
 const { GraphQLUpload } = require('apollo-server-koa');
 const graphql = require('graphql');
 const { GraphQLJSON } = require('graphql-type-json');
-const GraphQLDateTime = require('graphql-type-datetime');
+const { GraphQLDate, GraphQLDateTime } = require('graphql-iso-date');
+const Time = require('../types/time');
 const GraphQLLong = require('graphql-type-long');
 
 const { toSingular } = require('./naming');
@@ -60,8 +61,12 @@ module.exports = {
         case 'json':
           type = 'JSON';
           break;
-        case 'time':
         case 'date':
+          type = 'Date';
+          break;
+        case 'time':
+          type = 'Time';
+          break;
         case 'datetime':
         case 'timestamp':
           type = 'DateTime';
@@ -180,14 +185,20 @@ module.exports = {
    */
 
   addCustomScalar(resolvers) {
-    Object.assign(resolvers, {
+    const scalars = {
       JSON: GraphQLJSON,
       DateTime: GraphQLDateTime,
+      Time,
+      Date: GraphQLDate,
       Long: GraphQLLong,
       Upload: GraphQLUpload,
-    });
+    };
 
-    return 'scalar JSON \n scalar DateTime \n scalar Long \n scalar Upload';
+    Object.assign(resolvers, scalars);
+
+    return Object.keys(scalars)
+      .map(key => `scalar ${key}`)
+      .join('\n');
   },
 
   /**
