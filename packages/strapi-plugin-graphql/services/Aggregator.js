@@ -7,6 +7,8 @@
 const _ = require('lodash');
 const pluralize = require('pluralize');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
+const policyUtils = require('strapi-utils').policy;
+const compose = require('koa-compose');
 
 const Schema = require('./Schema.js');
 const GraphQLQuery = require('./Query.js');
@@ -470,7 +472,13 @@ const formatConnectionAggregator = function(fields, model, modelName) {
  *  }
  *
  */
-const formatModelConnectionsGQL = function(fields, model, name, modelResolver) {
+const formatModelConnectionsGQL = function(
+  fields,
+  model,
+  name,
+  modelResolver,
+  plugin
+) {
   const { globalId } = model;
 
   const connectionGlobalId = `${globalId}Connection`;
@@ -501,7 +509,50 @@ const formatModelConnectionsGQL = function(fields, model, name, modelResolver) {
     },
     resolver: {
       Query: {
-        [`${pluralName}Connection`](obj, options, context) {
+        async [`${pluralName}Connection`](obj, options, { context }) {
+          // need to check
+
+          const ctx = Object.assign(_.clone(context), {
+            request: Object.assign(_.clone(context.request), {
+              graphql: null,
+            }),
+          });
+
+          const policiesFn = [
+            policyUtils.globalPolicy(
+              undefined,
+              {
+                handler: `${name}.find`,
+              },
+              undefined,
+              plugin
+            ),
+          ];
+
+          policyUtils.get(
+            'plugins.users-permissions.permissions',
+            plugin,
+            policiesFn,
+            `GraphQL connection "${name}" `,
+            name
+          );
+
+          // Execute policies stack.
+          const policy = await compose(policiesFn)(ctx);
+
+          // Policy doesn't always return errors but they update the current context.
+          if (
+            _.isError(ctx.request.graphql) ||
+            _.get(ctx.request.graphql, 'isBoom')
+          ) {
+            return ctx.request.graphql;
+          }
+
+          // Something went wrong in the policy.
+          if (policy) {
+            return policy;
+          }
+
           return options;
         },
       },
