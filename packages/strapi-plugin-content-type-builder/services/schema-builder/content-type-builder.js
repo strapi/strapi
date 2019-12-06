@@ -4,15 +4,15 @@ const path = require('path');
 const _ = require('lodash');
 const pluralize = require('pluralize');
 
-const { isRelation, toUID } = require('../../utils/attributes');
+const { isRelation, toUID, isConfigurable } = require('../../utils/attributes');
 const { nameToSlug, nameToCollectionName } = require('../../utils/helpers');
 const createSchemaHandler = require('./schema-handler');
 
 module.exports = function createComponentBuilder() {
   return {
     setRelation({ key, modelName, attribute }) {
-      this.contentTypes.get(attribute.target).set(
-        ['attributes', attribute.targetAttribute],
+      this.contentTypes.get(attribute.target).setAttribute(
+        attribute.targetAttribute,
         generateRelation({
           key,
           attribute,
@@ -28,14 +28,14 @@ module.exports = function createComponentBuilder() {
       const uid = toUID(target, plugin);
 
       const targetCT = this.contentTypes.get(uid);
-      const targetAttribute = targetCT.get(['attributes', attribute.via]);
+      const targetAttribute = targetCT.getAttribute(attribute.via);
 
       // do not delete polymorphic relations
       if (targetAttribute.collection === '*' || targetAttribute.model === '*') {
         return;
       }
 
-      return targetCT.unset(['attributes', attribute.via]);
+      return targetCT.deleteAttribute(attribute.via);
     },
 
     /**
@@ -84,7 +84,7 @@ module.exports = function createComponentBuilder() {
           increments: true,
           timestamps: true,
         })
-        .set('attributes', this.convertAttributes(infos.attributes));
+        .setAttributes(this.convertAttributes(infos.attributes));
 
       Object.keys(infos.attributes).forEach(key => {
         const attribute = infos.attributes[key];
@@ -112,39 +112,48 @@ module.exports = function createComponentBuilder() {
 
       const oldAttributes = contentType.schema.attributes;
 
+      const newAttributes = _.omitBy(infos.attributes, (attr, key) => {
+        return _.has(oldAttributes, key) && !isConfigurable(oldAttributes[key]);
+      });
+
       const newKeys = _.difference(
-        Object.keys(infos.attributes),
+        Object.keys(newAttributes),
         Object.keys(oldAttributes)
       );
 
       const deletedKeys = _.difference(
         Object.keys(oldAttributes),
-        Object.keys(infos.attributes)
+        Object.keys(newAttributes)
       );
 
       const remainingKeys = _.intersection(
         Object.keys(oldAttributes),
-        Object.keys(infos.attributes)
+        Object.keys(newAttributes)
       );
 
       // remove old relations
       deletedKeys.forEach(key => {
         const attribute = oldAttributes[key];
 
-        if (isRelation(attribute) && _.has(attribute, 'via')) {
+        // if the old relation has a target attribute. we need to remove it
+        if (
+          isConfigurable(attribute) &&
+          isRelation(attribute) &&
+          _.has(attribute, 'via')
+        ) {
           this.unsetRelation(attribute);
         }
       });
 
       remainingKeys.forEach(key => {
         const oldAttribute = oldAttributes[key];
-        const newAttribute = infos.attributes[key];
+        const newAttribute = newAttributes[key];
 
         if (!isRelation(oldAttribute) && isRelation(newAttribute)) {
           return this.setRelation({
             key,
             modelName: contentType.modelName,
-            attribute: infos.attributes[key],
+            attribute: newAttributes[key],
           });
         }
 
@@ -153,7 +162,10 @@ module.exports = function createComponentBuilder() {
         }
 
         if (isRelation(oldAttribute) && isRelation(newAttribute)) {
-          if (oldAttribute.via !== newAttribute.targetAttribute) {
+          if (
+            _.has(oldAttribute, 'via') &&
+            oldAttribute.via !== newAttribute.targetAttribute
+          ) {
             this.unsetRelation(oldAttribute);
           }
 
@@ -167,7 +179,7 @@ module.exports = function createComponentBuilder() {
 
       // add new relations
       newKeys.forEach(key => {
-        const attribute = infos.attributes[key];
+        const attribute = newAttributes[key];
 
         if (isRelation(attribute)) {
           this.setRelation({
@@ -183,7 +195,7 @@ module.exports = function createComponentBuilder() {
         .set('collectionName', infos.collectionName)
         .set(['info', 'name'], infos.name)
         .set(['info', 'description'], infos.description)
-        .set('attributes', this.convertAttributes(infos.attributes));
+        .setAttributes(this.convertAttributes(newAttributes));
 
       return contentType;
     },

@@ -3,7 +3,7 @@
 const path = require('path');
 const fse = require('fs-extra');
 const _ = require('lodash');
-const { toUID } = require('../../utils/attributes');
+const { toUID, isConfigurable } = require('../../utils/attributes');
 
 module.exports = function createSchemaHandler(infos) {
   const { category, modelName, plugin, uid, dir, filename, schema } = infos;
@@ -96,6 +96,34 @@ module.exports = function createSchemaHandler(infos) {
       return this;
     },
 
+    getAttribute(key) {
+      return this.get(['attributes', key]);
+    },
+
+    setAttribute(key, attribute) {
+      return this.set(['attributes', key], attribute);
+    },
+
+    deleteAttribute(key) {
+      return this.unset(['attributes', key]);
+    },
+
+    setAttributes(newAttributes) {
+      // delete old configurable attributes
+      for (let key in this.schema.attributes) {
+        if (isConfigurable(this.schema.attributes[key])) {
+          this.deleteAttribute(key);
+        }
+      }
+
+      // set new Attributes
+      for (let key in newAttributes) {
+        this.setAttribute(key, newAttributes[key]);
+      }
+
+      return this;
+    },
+
     removeContentType(uid) {
       const { attributes } = state.schema;
 
@@ -107,7 +135,7 @@ module.exports = function createSchemaHandler(infos) {
         const relationUID = toUID(target, plugin);
 
         if (relationUID === uid) {
-          this.unset(['attributes', key]);
+          this.deleteAttribute(key);
         }
       });
 
@@ -122,7 +150,7 @@ module.exports = function createSchemaHandler(infos) {
         const attr = attributes[key];
 
         if (attr.type === 'component' && attr.component === uid) {
-          this.unset(['attributes', key]);
+          this.deleteAttribute(key);
         }
 
         if (
