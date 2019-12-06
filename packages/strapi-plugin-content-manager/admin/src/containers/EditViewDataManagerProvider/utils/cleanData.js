@@ -22,6 +22,7 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
           cleanedData = value;
           break;
         case 'date':
+        case 'datetime':
           cleanedData =
             value && value._isAMomentObject === true
               ? value.toISOString()

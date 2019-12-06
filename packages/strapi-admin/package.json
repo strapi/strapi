@@ -26,7 +26,7 @@
     "@buffetjs/custom": "^1.1.1",
     "@buffetjs/icons": "^1.1.1",
     "@buffetjs/styles": "^1.1.1",
-    "@buffetjs/utils": "^1.1.1",
+    "@buffetjs/utils": "^1.1.0",
     "@fortawesome/fontawesome-free": "^5.11.2",
     "@fortawesome/fontawesome-svg-core": "^1.2.25",
     "@fortawesome/free-brands-svg-icons": "^5.11.2",

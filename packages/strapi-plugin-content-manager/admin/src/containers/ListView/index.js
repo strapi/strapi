@@ -282,8 +282,6 @@ function ListView({
     actions: headerAction,
   };
 
-  console.log(getSearchParams());
-
   return (
     <>
       <ListViewProvider

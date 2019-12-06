@@ -15,7 +15,7 @@ const DynamicComponentCard = ({
       onClick={e => {
         e.preventDefault();
         e.stopPropagation();
-        console.log('oooo');
+
         onClick(componentUid);
       }}
     >

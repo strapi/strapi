@@ -1,0 +1,22 @@
+{
+  "connection": "default",
+  "collectionName": "date_ts",
+  "info": {
+    "name": "date t"
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true
+  },
+  "attributes": {
+    "date": {
+      "type": "date"
+    },
+    "datetime": {
+      "type": "datetime"
+    },
+    "time": {
+      "type": "time"
+    }
+  }
+}
