@@ -9,9 +9,16 @@ module.exports = {
    * Returns the list of available content types
    */
   listContentTypes(ctx) {
-    const contentTypes = Object.keys(strapi.contentTypes).map(uid => {
-      return service.formatContentType(strapi.contentTypes[uid]);
-    });
+    const contentTypes = Object.keys(strapi.contentTypes)
+      .filter(uid => {
+        if (uid.startsWith('strapi::')) return false;
+        if (uid === 'plugins::upload.file') return false;
+
+        return true;
+      })
+      .map(uid => {
+        return service.formatContentType(strapi.contentTypes[uid]);
+      });
 
     ctx.body = {
       data: contentTypes,
