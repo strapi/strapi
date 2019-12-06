@@ -59,11 +59,11 @@ function LeftMenuList({ customLink, links, title }) {
       return links.map(link => {
         return {
           ...link,
-          links: matchSorter(link.links, search, { keys: ['name'] }),
+          links: matchSorter(link.links, search, { keys: ['title'] }),
         };
       });
     }
-    return matchSorter(links, search, { keys: ['name'] });
+    return matchSorter(links, search, { keys: ['title'] });
   };
 
   const getTitle = () =>

@@ -401,20 +401,9 @@ const reducer = (state, action) => {
         ...pathToAttributes,
         attributeToRemoveName,
       ];
-      console.log(
-        pathToAttributeToRemove,
-        state.getIn([
-          'modifiedData',
-          'contentType',
-          'schema',
-          'attributes',
-          'price_range',
-        ])
-      );
-      // return state;
+
       const attributeToRemoveData = state.getIn(pathToAttributeToRemove);
-      // console.log(attributeToRemoveData);
-      // return state;
+
       const isRemovingRelationAttribute =
         attributeToRemoveData.get('nature') !== undefined;
       // Only content types can have relations that with themselves since
@@ -452,11 +441,11 @@ const reducer = (state, action) => {
 
       // Reset the state with the initial data
       // All created components and content types will be lost
-      // if (!action.hasJustCreatedSchema) {
-      //   newState = newState
-      //     .update('components', () => state.get('initialComponents'))
-      //     .update('contentTypes', () => state.get('initialContentTypes'));
-      // }
+      if (!action.hasJustCreatedSchema) {
+        newState = newState
+          .update('components', () => state.get('initialComponents'))
+          .update('contentTypes', () => state.get('initialContentTypes'));
+      }
 
       return newState;
     }

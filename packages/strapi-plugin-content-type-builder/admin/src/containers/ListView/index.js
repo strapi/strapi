@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Prompt, useHistory, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { get, isEqual } from 'lodash';
+import { get, has, isEqual } from 'lodash';
 import {
   BackHeader,
   ListWrapper,
@@ -67,6 +67,7 @@ const ListPage = () => {
     [firstMainDataPath, 'schema', 'name'],
     ''
   );
+  const isFromPlugin = has(initialData, [firstMainDataPath, 'plugin']);
   const hasModelBeenModified = !isEqual(modifiedData, initialData);
   const forTarget = isInContentTypeView ? 'contentType' : 'component';
 
@@ -211,25 +212,26 @@ const ListPage = () => {
       : [],
     title: {
       label,
-      cta: isInDevelopmentMode
-        ? {
-            icon: 'pencil-alt',
-            onClick: async () => {
-              await wait();
+      cta:
+        isInDevelopmentMode && !isFromPlugin
+          ? {
+              icon: 'pencil-alt',
+              onClick: async () => {
+                await wait();
 
-              push({
-                search: makeSearch({
-                  modalType: firstMainDataPath,
-                  actionType: 'edit',
-                  settingType: 'base',
-                  forTarget: firstMainDataPath,
-                  targetUid,
-                  headerDisplayName: label,
-                }),
-              });
-            },
-          }
-        : null,
+                push({
+                  search: makeSearch({
+                    modalType: firstMainDataPath,
+                    actionType: 'edit',
+                    settingType: 'base',
+                    forTarget: firstMainDataPath,
+                    targetUid,
+                    headerDisplayName: label,
+                  }),
+                });
+              },
+            }
+          : null,
     },
     content: getDescription(),
   };

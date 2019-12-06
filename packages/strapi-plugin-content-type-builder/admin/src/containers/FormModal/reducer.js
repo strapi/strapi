@@ -1,5 +1,6 @@
 import { fromJS } from 'immutable';
 import pluralize from 'pluralize';
+import { snakeCase } from 'lodash';
 import makeUnique from '../../utils/makeUnique';
 import { createComponentUid } from './utils/createUid';
 import {
@@ -52,7 +53,7 @@ const reducer = (state, action) => {
               return null;
             })
             .update('name', oldValue => {
-              return pluralize(oldValue, shouldPluralizeName(value));
+              return pluralize(snakeCase(oldValue), shouldPluralizeName(value));
             })
             .update('targetAttribute', oldValue => {
               if (['oneWay', 'manyWay'].includes(value)) {
@@ -61,7 +62,7 @@ const reducer = (state, action) => {
 
               return pluralize(
                 oldValue === '-'
-                  ? oneThatIsCreatingARelationWithAnother
+                  ? snakeCase(oneThatIsCreatingARelationWithAnother)
                   : oldValue,
                 shouldPluralizeTargetAttribute(value)
               );
@@ -80,7 +81,7 @@ const reducer = (state, action) => {
             .update('target', () => value)
             .update('name', () => {
               return pluralize(
-                selectedContentTypeFriendlyName,
+                snakeCase(selectedContentTypeFriendlyName),
                 shouldPluralizeName(obj.get('nature'))
               );
             })
@@ -90,7 +91,7 @@ const reducer = (state, action) => {
               }
 
               return pluralize(
-                oneThatIsCreatingARelationWithAnother,
+                snakeCase(oneThatIsCreatingARelationWithAnother),
                 shouldPluralizeTargetAttribute(obj.get('nature'))
               );
             });
@@ -187,7 +188,7 @@ const reducer = (state, action) => {
         dataToSet = { type: 'enumeration', enum: [] };
       } else if (attributeType === 'relation') {
         dataToSet = {
-          name: nameToSetForRelation,
+          name: snakeCase(nameToSetForRelation),
           nature: 'oneWay',
           targetAttribute: '-',
           target: targetUid,

@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useReducer, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { get, groupBy, set, size, sortBy } from 'lodash';
+import { camelCase, get, groupBy, set, size, sortBy } from 'lodash';
 import {
   request,
   LoadingIndicatorPage,
@@ -349,7 +349,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
         to: `/plugins/${pluginId}/content-types/${uid}`,
       }))
       .filter(obj => obj !== null),
-    obj => obj.title
+    obj => camelCase(obj.title)
   );
 
   const shouldRedirect = () => {

@@ -2,7 +2,7 @@
   "connection": "default",
   "collectionName": "my_super_content_type",
   "info": {
-    "name": "My super content type ⚠️"
+    "name": "My super content type"
   },
   "attributes": {
     "name": {
