@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 const NameWrapper = styled.div`
   position: relative;
-  line-height: 30px;
+  line-height: 26px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

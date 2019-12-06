@@ -7,7 +7,7 @@ const ComponentsPicker = styled.div`
 
   > div {
     margin-top: 15px;
-    padding: 23px 18px 26px 18px;
+    padding: 23px 18px 21px 18px;
     background-color: #f2f3f4;
   }
 
@@ -18,7 +18,7 @@ const ComponentsPicker = styled.div`
     `}
 
   .componentPickerTitle {
-    margin-bottom: 18px;
+    margin-bottom: 15px;
     color: #919bae;
     font-weight: 600;
     font-size: 13px;

@@ -2,7 +2,8 @@ import React, { forwardRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { Grab, GrabLarge, Pencil, Remove } from '@buffetjs/icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Grab, GrabLarge, Pencil } from '@buffetjs/icons';
 import pluginId from '../../pluginId';
 import useLayoutDnd from '../../hooks/useLayoutDnd';
 import GrabWrapper from './GrabWrapper';
@@ -11,6 +12,7 @@ import NameWrapper from './NameWrapper';
 import RemoveWrapper from './RemoveWrapper';
 import SubWrapper from './SubWrapper';
 import Wrapper from './Wrapper';
+import Close from './Close';
 
 const DraggedField = forwardRef(
   (
@@ -118,12 +120,12 @@ const DraggedField = forwardRef(
               }}
               onMouseLeave={() => setIsOverRemove(false)}
             >
-              {isOverRemove && !isSelected && <Remove />}
+              {isOverRemove && !isSelected && <Close />}
               {((showEditBlockOverState && !isOverRemove) || isSelected) && (
                 <Pencil />
               )}
               {!showEditBlockOverState && !isOverRemove && !isSelected && (
-                <Remove />
+                <Close width="10px" height="10px" />
               )}
             </RemoveWrapper>
           </SubWrapper>
@@ -142,6 +144,7 @@ const DraggedField = forwardRef(
                   );
                 }}
               >
+                <FontAwesomeIcon icon="cog" />
                 {msg}
               </Link>
             )}

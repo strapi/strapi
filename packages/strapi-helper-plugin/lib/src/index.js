@@ -125,3 +125,4 @@ export { default as getYupInnerErrors } from './utils/getYupInnerErrors';
 
 // SVGS
 export { default as LayoutIcon } from './svgs/Layout';
+export { default as Close } from './svgs/Close';
