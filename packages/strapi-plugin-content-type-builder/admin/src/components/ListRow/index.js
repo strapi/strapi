@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { capitalize } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { AttributeIcon } from '@buffetjs/core';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
@@ -111,7 +112,7 @@ function ListRow({
         {configurable ? (
           <>
             <button type="button" onClick={handleClick}>
-              <i className="fa fa-pencil-alt link-icon" />
+              <FontAwesomeIcon className="link-icon" icon="pencil-alt" />
             </button>
             <button
               type="button"
@@ -125,11 +126,13 @@ function ListRow({
                 );
               }}
             >
-              <i className="fas fa-trash-alt link-icon" />
+              <FontAwesomeIcon className="link-icon" icon="trash-alt" />
             </button>
           </>
         ) : (
-          <i className="fa fa-lock" />
+          <button>
+            <FontAwesomeIcon icon="lock" />
+          </button>
         )}
       </td>
     </Wrapper>

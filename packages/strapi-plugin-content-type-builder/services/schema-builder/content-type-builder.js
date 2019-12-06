@@ -80,6 +80,10 @@ module.exports = function createComponentBuilder() {
         .set('collectionName', infos.collectionName || defaultCollectionName)
         .set(['info', 'name'], infos.name)
         .set(['info', 'description'], infos.description)
+        .set('options', {
+          increments: true,
+          timestamps: true,
+        })
         .set('attributes', this.convertAttributes(infos.attributes));
 
       Object.keys(infos.attributes).forEach(key => {

@@ -7,6 +7,7 @@ import {
   ListWrapper,
   useGlobalContext,
   ViewContainer,
+  LayoutIcon,
 } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
 import ListViewContext from '../../contexts/ListViewContext';
@@ -252,14 +253,26 @@ const ListPage = () => {
       handleClickOpenModalAddField(forTarget, targetUid, currentDataName);
     },
   };
+  const goToCMSettingsPage = () => {
+    push(
+      `/plugins/content-manager/${targetUid}/ctm-configurations/list-settings`
+    );
+  };
 
   // const listActions = isInDevelopmentMode ? [{ ...addButtonProps }] : [];
   const configureButtonProps = {
-    icon: true,
+    icon: <LayoutIcon className="colored" />,
     color: 'secondary',
     label: formatMessage({ id: `${pluginId}.form.button.configure-view` }),
-    onClick: () => {},
+    onClick: goToCMSettingsPage,
   };
+
+  // const addButtonProps = {
+  //   icon: true,
+  //   color: 'primary',
+  //   label: formatMessage({ id: `${pluginId}.button.attributes.add.another` }),
+  //   onClick: handleClickAddAttributeMainData,
+  // };
 
   const listActions = isInDevelopmentMode
     ? [{ ...configureButtonProps }, { ...addButtonProps }]

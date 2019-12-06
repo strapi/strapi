@@ -15,6 +15,7 @@ const typeToSize = type => {
     case 'checkbox':
     case 'boolean':
     case 'date':
+    case 'time':
     case 'biginteger':
     case 'decimal':
     case 'float':
