@@ -32,7 +32,7 @@ const getInjectedComponents = (
             currentEnvironment={currentEnvironment}
             getModelName={() => slug}
             getContentTypeBuilderBaseUrl={() =>
-              '/plugins/content-type-builder/models/'
+              '/plugins/content-type-builder/content-types/'
             }
             push={push}
             {...compo.props}

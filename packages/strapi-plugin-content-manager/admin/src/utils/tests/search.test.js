@@ -7,7 +7,7 @@ describe('Content Manager | utils | search', () => {
   describe('generateFiltersFromSearch', () => {
     it('should generate an array of filters', () => {
       const search =
-        '?_sort=id:ASC&source=content-manager&bool=true&big_number_ne=1&created_at_lt=2019-08-01T00:00:00Z&date_lte=2019-08-02T00:00:00Z&decimal_number_gt=2&enum_ne=noon&float_number_gte=3';
+        '?_sort=id:ASC&bool=true&big_number_ne=1&created_at_lt=2019-08-01T00:00:00Z&date_lte=2019-08-02T00:00:00Z&decimal_number_gt=2&enum_ne=noon&float_number_gte=3';
       const expected = [
         {
           name: 'bool',
@@ -56,7 +56,6 @@ describe('Content Manager | utils | search', () => {
         _limit: 10,
         _sort: 'id:ASC',
         _page: 2,
-        source: 'content-manager',
         filters: [
           {
             name: 'bool',
@@ -96,7 +95,7 @@ describe('Content Manager | utils | search', () => {
         ],
       };
       const expected =
-        '_limit=10&_sort=id:ASC&_page=2&source=content-manager&bool=true&big_number_ne=1&created_at_lt=2019-08-01T00:00:00Z&date_lte=2019-08-02T00:00:00Z&decimal_number_gt=2&enum_ne=noon&float_number_gte=3';
+        '_limit=10&_sort=id:ASC&_page=2&bool=true&big_number_ne=1&created_at_lt=2019-08-01T00:00:00Z&date_lte=2019-08-02T00:00:00Z&decimal_number_gt=2&enum_ne=noon&float_number_gte=3';
       expect(generateSearchFromFilters(data)).toEqual(expected);
     });
   });
