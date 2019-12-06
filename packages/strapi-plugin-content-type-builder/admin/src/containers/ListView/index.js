@@ -261,22 +261,16 @@ const ListPage = () => {
 
   // const listActions = isInDevelopmentMode ? [{ ...addButtonProps }] : [];
   const configureButtonProps = {
-    icon: <LayoutIcon className="colored" />,
+    icon: <LayoutIcon className="colored" fill="#007eff" />,
     color: 'secondary',
     label: formatMessage({ id: `${pluginId}.form.button.configure-view` }),
     onClick: goToCMSettingsPage,
+    style: { height: '30px' },
   };
-
-  // const addButtonProps = {
-  //   icon: true,
-  //   color: 'primary',
-  //   label: formatMessage({ id: `${pluginId}.button.attributes.add.another` }),
-  //   onClick: handleClickAddAttributeMainData,
-  // };
 
   const listActions = isInDevelopmentMode
     ? [{ ...configureButtonProps }, { ...addButtonProps }]
-    : [];
+    : [configureButtonProps];
 
   const handleClickOnTrashIcon = () => {};
 
