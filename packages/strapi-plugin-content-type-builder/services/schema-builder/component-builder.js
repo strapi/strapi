@@ -60,6 +60,12 @@ module.exports = function createComponentBuilder() {
         .set(['info', 'description'], infos.description)
         .set('attributes', this.convertAttributes(infos.attributes));
 
+      if (this.components.size === 0) {
+        strapi.emit('didCreateFirstComponent');
+      } else {
+        strapi.emit('didCreateComponent');
+      }
+
       this.components.set(uid, handler);
 
       return handler;
