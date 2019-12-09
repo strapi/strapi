@@ -12,7 +12,7 @@ import DataManagerProvider from '../DataManagerProvider';
 import icons from './utils/icons.json';
 import Wrapper from './Wrapper';
 
-const ListPage = lazy(() => import('../ListView'));
+const ListView = lazy(() => import('../ListView'));
 
 import RecursivePath from '../RecursivePath';
 
@@ -24,7 +24,7 @@ const App = () => {
           <Switch>
             <Route
               path={`/plugins/${pluginId}/content-types/:uid`}
-              component={ListPage}
+              component={ListView}
             />
             <Route
               path={`/plugins/${pluginId}/component-categories/:categoryUid`}

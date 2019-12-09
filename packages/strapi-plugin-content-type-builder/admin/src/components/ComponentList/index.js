@@ -8,9 +8,8 @@ import React from 'react';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import List from '../List';
-
-import convertAttrObjToArray from '../../utils/convertAttrObjToArray';
 import useDataManager from '../../hooks/useDataManager';
+import convertAttrObjToArray from '../../utils/convertAttrObjToArray';
 
 function ComponentList({
   customRowComponent,

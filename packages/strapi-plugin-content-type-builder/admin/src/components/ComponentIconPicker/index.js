@@ -21,7 +21,6 @@ const ComponentIconPicker = ({
       return !allComponentsIconAlreadyTaken.includes(ico);
     }
 
-    // TODO
     return true;
   });
 
@@ -34,6 +33,7 @@ const ComponentIconPicker = ({
     const height = 48;
     const width = 52;
     let x = columnPosition * width;
+
     if (x === 0) {
       x = 8;
     }

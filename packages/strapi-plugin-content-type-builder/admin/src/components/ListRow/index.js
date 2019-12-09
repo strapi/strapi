@@ -4,7 +4,6 @@ import { get } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { AttributeIcon } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import Component from '../../icons/Component';

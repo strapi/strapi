@@ -47,7 +47,6 @@ const ComponentSelect = ({
       }
       componentName={componentNameNeededForAddingAfieldWhileCreatingAComponent}
       name={name}
-      // menuIsOpen
       onChange={handleChange}
       onClickOption={onChange}
       styles={styles}

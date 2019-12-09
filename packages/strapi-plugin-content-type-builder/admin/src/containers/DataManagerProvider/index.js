@@ -73,31 +73,36 @@ const DataManagerProvider = ({ allIcons, children }) => {
   const endPoint = isInContentTypeView ? 'content-types' : 'components';
 
   getDataRef.current = async () => {
-    const [
-      { data: componentsArray },
-      { data: contentTypesArray },
-    ] = await Promise.all(
-      ['components', 'content-types'].map(endPoint => {
-        return request(`/${pluginId}/${endPoint}`, {
-          method: 'GET',
-          signal,
-        });
-      })
-    );
-    const components = createDataObject(componentsArray);
-    const contentTypes = createDataObject(contentTypesArray);
-    const orderedComponents = orderAllDataAttributesWithImmutable({
-      components,
-    });
-    const orderedContenTypes = orderAllDataAttributesWithImmutable({
-      components: contentTypes,
-    });
+    try {
+      const [
+        { data: componentsArray },
+        { data: contentTypesArray },
+      ] = await Promise.all(
+        ['components', 'content-types'].map(endPoint => {
+          return request(`/${pluginId}/${endPoint}`, {
+            method: 'GET',
+            signal,
+          });
+        })
+      );
+      const components = createDataObject(componentsArray);
+      const contentTypes = createDataObject(contentTypesArray);
+      const orderedComponents = orderAllDataAttributesWithImmutable({
+        components,
+      });
+      const orderedContenTypes = orderAllDataAttributesWithImmutable({
+        components: contentTypes,
+      });
 
-    dispatch({
-      type: 'GET_DATA_SUCCEEDED',
-      components: orderedComponents.get('components'),
-      contentTypes: orderedContenTypes.get('components'),
-    });
+      dispatch({
+        type: 'GET_DATA_SUCCEEDED',
+        components: orderedComponents.get('components'),
+        contentTypes: orderedContenTypes.get('components'),
+      });
+    } catch (err) {
+      console.error({ err });
+      strapi.notification.error('notification.error');
+    }
   };
 
   useEffect(() => {
@@ -220,7 +225,8 @@ const DataManagerProvider = ({ allIcons, children }) => {
         getDataRef.current();
       }
     } catch (err) {
-      console.log({ err });
+      console.error({ err });
+      strapi.notification.error('notification.error');
     }
   };
 
@@ -267,7 +273,8 @@ const DataManagerProvider = ({ allIcons, children }) => {
         getDataRef.current();
       }
     } catch (err) {
-      console.log({ err });
+      console.error({ err });
+      strapi.notification.error('notification.error');
     }
   };
 
@@ -286,7 +293,8 @@ const DataManagerProvider = ({ allIcons, children }) => {
       // Refetch all the data
       getDataRef.current();
     } catch (err) {
-      console.log({ err });
+      console.error({ err });
+      strapi.notification.error('notification.error');
     }
   };
 
@@ -419,7 +427,8 @@ const DataManagerProvider = ({ allIcons, children }) => {
       // Refetch all the data
       getDataRef.current();
     } catch (err) {
-      console.log(err);
+      console.error({ err });
+      strapi.notification.error('notification.error');
     }
   };
 
@@ -439,7 +448,8 @@ const DataManagerProvider = ({ allIcons, children }) => {
 
       updatePlugin('content-manager', 'leftMenuSections', menu);
     } catch (err) {
-      console.log({ err });
+      console.error({ err });
+      strapi.notification.error('notification.error');
     }
   };
 

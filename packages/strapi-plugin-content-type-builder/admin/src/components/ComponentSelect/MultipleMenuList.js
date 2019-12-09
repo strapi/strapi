@@ -3,12 +3,12 @@ import PropTypes from 'prop-types';
 import { components } from 'react-select';
 import { get } from 'lodash';
 import { Checkbox, CheckboxWrapper, Label } from '@buffetjs/styles';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useDataManager from '../../hooks/useDataManager';
 import UpperFirst from '../UpperFirst';
 import SubUl from './SubUl';
 import Ul from './Ul';
 import hasSubArray from './utils/hasSubArray';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const MultipleMenuList = ({
   selectProps: { name, addComponentsToDynamicZone, /*refState, */ value },

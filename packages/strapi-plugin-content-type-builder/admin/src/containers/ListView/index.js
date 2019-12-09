@@ -23,7 +23,7 @@ import ListHeader from '../../components/ListHeader';
 import LeftMenu from '../LeftMenu';
 import Wrapper from './Wrapper';
 
-const ListPage = () => {
+const ListView = () => {
   const {
     initialData,
     modifiedData,
@@ -321,11 +321,7 @@ const ListPage = () => {
               <Header {...headerProps} />
 
               <ListWrapper>
-                <ListHeader
-                  actions={listActions}
-                  title={listTitle}
-                  // style={{ top: 1 }}
-                />
+                <ListHeader actions={listActions} title={listTitle} />
                 <List
                   items={convertAttrObjToArray(attributes)}
                   customRowComponent={props => <CustomRow {...props} />}
@@ -345,4 +341,4 @@ const ListPage = () => {
   );
 };
 
-export default ListPage;
+export default ListView;

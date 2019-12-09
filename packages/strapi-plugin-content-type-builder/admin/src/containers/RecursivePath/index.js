@@ -2,7 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { Switch, Route, useRouteMatch, useParams } from 'react-router-dom';
 import { LoadingIndicatorPage } from 'strapi-helper-plugin';
 
-const ListPage = lazy(() => import('../ListView'));
+const ListView = lazy(() => import('../ListView'));
 
 const RecursivePath = () => {
   const { url } = useRouteMatch();
@@ -12,7 +12,7 @@ const RecursivePath = () => {
     <Suspense fallback={<LoadingIndicatorPage />}>
       <Switch>
         <Route path={`${url}/:componentUid`}>
-          <ListPage categoryId={categoryUid} />
+          <ListView categoryId={categoryUid} />
         </Route>
       </Switch>
     </Suspense>

@@ -1,9 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
 import { ListHeaderButton } from '../ListButton';
-import Wrapper from './Wrapper';
 import Title from './Title';
+import Wrapper from './Wrapper';
 
 function ListHeader({ actions, title }) {
   return (

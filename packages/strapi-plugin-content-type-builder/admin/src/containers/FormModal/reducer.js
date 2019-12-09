@@ -193,7 +193,6 @@ const reducer = (state, action) => {
           targetAttribute: '-',
           target: targetUid,
           unique: false,
-          // required: false,
           dominant: null,
           columnName: null,
           targetColumnName: null,
