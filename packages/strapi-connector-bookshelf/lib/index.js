@@ -17,6 +17,7 @@ const buildQuery = require('./buildQuery');
 const mountModels = require('./mount-models');
 const getQueryParams = require('./get-query-params');
 const queries = require('./queries');
+const initKnex = require('./knex');
 
 /**
  * Bookshelf hook
@@ -31,11 +32,12 @@ const defaults = {
   host: 'localhost',
 };
 
-const isBookshelfConnection = ({ connector }) =>
-  connector === 'strapi-hook-bookshelf';
+const isBookshelfConnection = ({ connector }) => connector === 'bookshelf';
 
 module.exports = function(strapi) {
   function initialize() {
+    initKnex(strapi);
+
     const { connections } = strapi.config;
     const GLOBALS = {};
 
@@ -58,12 +60,6 @@ module.exports = function(strapi) {
 
         if (fs.existsSync(initFunctionPath)) {
           require(initFunctionPath)(ORM, connection);
-        }
-
-        // Load plugins
-        if (_.get(connection, 'options.plugins', true) !== false) {
-          ORM.plugin('visibility');
-          ORM.plugin('pagination');
         }
 
         const ctx = {

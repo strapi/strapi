@@ -409,7 +409,7 @@ Copy/paste the following:
   "defaultConnection": "default",
   "connections": {
     "default": {
-      "connector": "strapi-hook-bookshelf",
+      "connector": "bookshelf",
       "settings": {
         "client": "postgres",
         "host": "${process.env.DATABASE_HOST || '127.0.0.1'}",
@@ -922,7 +922,7 @@ In your code editor, you will need to edit a file called `database.json`. Replac
   "defaultConnection": "default",
   "connections": {
     "default": {
-      "connector": "strapi-hook-bookshelf",
+      "connector": "bookshelf",
       "settings": {
         "client": "postgres",
         "host": "${process.env.DATABASE_HOST || '127.0.0.1'}",
@@ -1433,7 +1433,7 @@ Replace the contents of `database.json` with the following:
   "defaultConnection": "default",
   "connections": {
     "default": {
-      "connector": "strapi-hook-bookshelf",
+      "connector": "bookshelf",
       "settings": {
         "client": "postgres",
         "host": "${process.env.DATABASE_HOST}",
@@ -1500,7 +1500,7 @@ Replace the contents of `database.json` with the following:
   "defaultConnection": "default",
   "connections": {
     "default": {
-      "connector": "strapi-hook-mongoose",
+      "connector": "mongoose",
       "settings": {
         "uri": "${process.env.DATABASE_URI}",
         "database": "${process.env.DATABASE_NAME}"

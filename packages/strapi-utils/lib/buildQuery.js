@@ -1,3 +1,5 @@
+//TODO: move to dbal
+
 const _ = require('lodash');
 
 const findModelByAssoc = assoc => {
@@ -133,10 +135,10 @@ const buildQuery = ({ model, filters = {}, ...rest }) => {
       });
   }
 
-  const orm = strapi.hook[model.orm];
-
   // call the orm's buildQuery implementation
-  return orm.load.buildQuery({ model, filters, ...rest });
+  return strapi.db.connectors
+    .get(model.orm)
+    .buildQuery({ model, filters, ...rest });
 };
 
 module.exports = buildQuery;
