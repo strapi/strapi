@@ -4,48 +4,50 @@
 
 Models are a representation of the database's structure and lifecycle. They are split into two separate files. A JavaScript file that contains the lifecycle callbacks, and a JSON one that represents the data stored in the database and their format. The models also allow you to define the relationships between them.
 
-**Path —** `./api/user/models/User.js`.
+**Path —** `./api/restaurant/models/Restaurant.js`.
 
 ```js
 module.exports = {
   // Before saving a value.
   // Fired before an `insert` or `update` query.
-  beforeSave: next => {
-    // Use `this` to get your current object
-    next();
-  },
+  beforeSave: (model, attrs, options) => {},
 
   // After saving a value.
   // Fired after an `insert` or `update` query.
-  afterSave: (doc, next) => {
-    next();
-  },
+  afterSave: (model, attrs, options) => {},
 
   // ... and more
 };
 ```
 
-**Path —** `./api/user/models/User.settings.json`.
+**Path —** `./api/restaurant/models/Restaurant.settings.json`.
 
 ```json
 {
   "connection": "default",
   "info": {
-    "name": "user",
-    "description": "This represents the User Model"
+    "name": "restaurant",
+    "description": "This represents the Restaurant Model"
   },
   "attributes": {
-    "firstname": {
+    "cover": {
+      "collection": "file",
+      "via": "related",
+      "plugin": "upload"
+    },
+    "name": {
+      "default": "",
       "type": "string"
     },
-    "lastname": {
-      "type": "string"
+    "description": {
+      "default": "",
+      "type": "text"
     }
   }
 }
 ```
 
-In this example, there is a `User` model which contains two attributes `firstname` and `lastname`.
+In this example, there is a `Restaurant` model which contains two attributes `cover`, `name` and `description`.
 
 ### Where are the models defined?
 
@@ -53,18 +55,18 @@ The models are defined in each `./api/**/models/` folder. Every JavaScript or JS
 
 ## How to create a model?
 
-::: note
+::: tip
 If you are just starting out it is very convenient to generate some models with the Content Type Builder, directly in the admin interface. You can then review the generated model mappings on the code level. The UI takes over a lot of validation tasks and gives you a fast feeling for available features.
 :::
 
-Use the CLI, and run the following command `strapi generate:model user firstname:string lastname:string`. Read the [CLI documentation](../cli/CLI.md) for more information.
+Use the CLI, and run the following command `strapi generate:model restaurant name:string description:text`. Read the [CLI documentation](../cli/CLI.md) for more information.
 
-This will create two files located at `./api/user/models`:
+This will create two files located at `./api/restaurant/models`:
 
-- `User.settings.json`: contains the list of attributes and settings. The JSON format makes the file easily editable.
-- `User.js`: imports `User.settings.json` and extends it with additional settings and lifecycle callbacks.
+- `Restaurant.settings.json`: contains the list of attributes and settings. The JSON format makes the file easily editable.
+- `Restaurant.js`: imports `Restaurant.settings.json` and extends it with additional settings and lifecycle callbacks.
 
-::: note
+::: tip
 when you create a new API using the CLI (`strapi generate:api <name>`), a model is automatically created.
 :::
 
@@ -76,20 +78,20 @@ Additional settings can be set on models:
 - `collectionName` (string) - Collection's name (or table's name) in which the data should be stored.
 - `globalId` (string) -Global variable name for this model (case-sensitive).
 
-**Path —** `User.settings.json`.
+**Path —** `Restaurant.settings.json`.
 
 ```json
 {
   "connection": "mongo",
-  "collectionName": "Users_v1",
-  "globalId": "Users",
+  "collectionName": "Restaurants_v1",
+  "globalId": "Restaurants",
   "attributes": {}
 }
 ```
 
-In this example, the model `User` will be accessible through the `Users` global variable. The data will be stored in the `Users_v1` collection or table and the model will use the `mongo` connection defined in `./config/environments/**/database.json`
+In this example, the model `Restaurant` will be accessible through the `Restaurants` global variable. The data will be stored in the `Restaurants_v1` collection or table and the model will use the `mongo` connection defined in `./config/environments/**/database.json`
 
-::: note
+::: tip
 The `connection` value can be changed whenever you want, but you should be aware that there is no automatic data migration process. Also if the new connection doesn't use the same ORM you will have to rewrite your queries.
 :::
 
@@ -101,12 +103,12 @@ The info key on the model-json states information about the model. This informat
 - `description`: The description of the model.
 - `mainField`: Determines which model-attribute is shown when displaying the model.
 
-**Path —** `User.settings.json`.
+**Path —** `Restaurant.settings.json`.
 
 ```json
 {
   "info": {
-    "name": "user",
+    "name": "restaurant",
     "description": ""
   }
 }
@@ -137,6 +139,7 @@ The following types are currently available:
 
 - `string`
 - `text`
+- `richtext`
 - `integer`
 - `biginteger`
 - `float`
@@ -172,45 +175,24 @@ To improve the Developer eXperience when developing or using the administration 
 
 ### Example
 
-**Path —** `User.settings.json`.
+**Path —** `Restaurant.settings.json`.
 
 ```json
 {
-  "connection": "default",
-  "info": {
-    "name": "user",
-    "description": "This represents the User Model",
-    "mainField": "email"
-  },
+  ...
   "attributes": {
-    "firstname": {
-      "type": "string"
-    },
-    "lastname": {
-      "type": "string"
-    },
-    "email": {
-      "type": "email",
-      "required": true,
+    "title": {
+      "type": "string",
+      "min": 3,
+      "max": 99,
       "unique": true
     },
-    "password": {
-      "type": "password",
-      "required": true,
-      "private": true
+    "description": {
+      "default": "My descrioption",
+      "type": "text",
+      "required": true
     },
-    "about": {
-      "type": "description"
-    },
-    "age": {
-      "type": "integer",
-      "min": 18,
-      "max": 99,
-      "index": true
-    },
-    "birthday": {
-      "type": "date"
-    }
+    ...
   }
 }
 ```
@@ -219,11 +201,9 @@ To improve the Developer eXperience when developing or using the administration 
 
 Relations let your create links (relations) between your Content Types.
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
 ::: tab "One-Way" id="one-way"
-
-### One-Way
 
 One-way relationships are useful to link an entry to another. However, only one of the models can be queried with its populated items.
 
@@ -243,21 +223,6 @@ A `pet` can be owned by someone (a `user`).
 }
 ```
 
-**Path —** `./api/pet/controllers/Pet.js`.
-
-```js
-// Mongoose example
-module.exports = {
-  findPetsWithOwners: async ctx => {
-    // Retrieve the list of pets with their owners.
-    const pets = Pet.find().populate('owner');
-
-    // Send the list of pets.
-    ctx.body = pets;
-  },
-};
-```
-
 **Example**
 
 ```js
@@ -275,8 +240,6 @@ xhr.send(
 :::
 
 ::: tab "One-to-One" id="one-to-one"
-
-### One-to-One
 
 One-to-One relationships are usefull when you have one entity that could be linked to only one other entity. And vis versa.
 
@@ -309,36 +272,6 @@ A `user` can have one `address`. And this address is only related to this `user`
 }
 ```
 
-**Path —** `./api/user/controllers/User.js`.
-
-```js
-// Mongoose example
-module.exports = {
-  findUsersWithAddresses: async ctx => {
-    // Retrieve the list of users with their addresses.
-    const users = User.find().populate('address');
-
-    // Send the list of users.
-    ctx.body = users;
-  },
-};
-```
-
-**Path —** `./api/adress/controllers/Address.js`.
-
-```js
-// Mongoose example
-module.exports = {
-  findArticlesWithUsers: async ctx => {
-    // Retrieve the list of addresses with their users.
-    const articles = Address.find().populate('user');
-
-    // Send the list of addresses.
-    ctx.body = addresses;
-  },
-};
-```
-
 **Example**
 
 ```js
@@ -356,8 +289,6 @@ xhr.send(
 :::
 
 ::: tab "One-to-Many" id="one-to-many"
-
-### One-to-Many
 
 One-to-Many relationships are usefull when an entry can be liked to multiple entries of an other Content Type. And an entry of the other Content Type can be linked to only one entry.
 
@@ -390,36 +321,6 @@ A `user` can have many `articles`, and an `article` can be related to one `user`
 }
 ```
 
-**Path —** `./api/user/controllers/User.js`.
-
-```js
-// Mongoose example
-module.exports = {
-  findUsersWithArticles: async ctx => {
-    // Retrieve the list of users with their articles.
-    const users = User.find().populate('articles');
-
-    // Send the list of users.
-    ctx.body = users;
-  },
-};
-```
-
-**Path —** `./api/article/controllers/Article.js`.
-
-```js
-// Mongoose example
-module.exports = {
-  findArticlesWithAuthors: async ctx => {
-    // Retrieve the list of articles with their authors.
-    const articles = Article.find().populate('author');
-
-    // Send the list of users.
-    ctx.body = articles;
-  },
-};
-```
-
 **Examples**
 
 ```js
@@ -447,8 +348,6 @@ xhr.send(
 :::
 
 ::: tab "Many-to-Many" id="many-to-many"
-
-### Many-to-Many
 
 One-to-Many relationships are usefull when an entry can be liked to multiple entries of an other Content Type. And an entry of the other Content Type can be linked to many entries.
 
@@ -486,36 +385,6 @@ A `product` can be related to many `categories`, so a `category` can have many `
 }
 ```
 
-**Path —** `./api/product/controllers/Product.js`.
-
-```js
-// Mongoose example
-module.exports = {
-  findProductsWithCategories: async ctx => {
-    // Retrieve the list of products.
-    const products = Product.find().populate('categories');
-
-    // Send the list of products.
-    ctx.body = products;
-  },
-};
-```
-
-**Path —** `./api/category/controllers/Category.js`.
-
-```js
-// Mongoose example
-module.exports = {
-  findCategoriesWithProducts: async ctx => {
-    // Retrieve the list of categories.
-    const categories = Category.find().populate('products');
-
-    // Send the list of categories.
-    ctx.body = categories;
-  },
-};
-```
-
 **Example**
 
 ```js
@@ -533,8 +402,6 @@ xhr.send(
 :::
 
 ::: tab "Polymorphic" id="polymorphic"
-
-### Polymorphic
 
 The polymorphic relationships are the solution when you don't know which kind of model will be associated to your entry. A common use case is an `Image` model that can be associated to many others kind of models (Article, Product, User, etc).
 
@@ -644,102 +511,6 @@ A `Image` model might belongs to many either `Article` models or a `Product` mod
 }
 ```
 
-**Path —** `./api/image/controllers/Image.js`.
-
-```js
-// Mongoose example
-module.exports = {
-  findFiles: async ctx => {
-    // Retrieve the list of images with the Article or Product entries related to them.
-    const images = Images.find().populate('related');
-
-    /*
-    [{
-      "_id": "5a81b0fa8c063a53298a934a",
-      "url": "http://....",
-      "name": "john_doe_avatar.png",
-      "related": [{
-        "_id": "5a81b0fa8c063a5393qj934a",
-        "title": "John Doe is awesome",
-        "description": "..."
-      }, {
-        "_id": "5a81jei389ns5abd75f79c",
-        "name": "A simple chair",
-        "description": "..."
-      }]
-    }]
-    */
-
-    // Send the list of files.
-    ctx.body = images;
-  },
-};
-```
-
-**Path —** `./api/article/controllers/Article.js`.
-
-```js
-// Mongoose example
-module.exports = {
-  findArticlesWithAvatar: async ctx => {
-    // Retrieve the list of articles with the avatar (image).
-    const articles = Article.find().populate('avatar');
-
-    /*
-    [{
-      "_id": "5a81b0fa8c063a5393qj934a",
-      "title": "John Doe is awesome",
-      "description": "...",
-      "avatar": {
-        "_id": "5a81b0fa8c063a53298a934a",
-        "url": "http://....",
-        "name": "john_doe_avatar.png"
-      }
-    }]
-    */
-
-    // Send the list of users.
-    ctx.body = articles;
-  },
-};
-```
-
-**Path —** `./api/product/controllers/Product.js`.
-
-```js
-// Mongoose example
-module.exports = {
-  findProductWithPictures: async ctx => {
-    // Retrieve the list of products with the pictures (images).
-    const products = Product.find().populate('pictures');
-
-    /*
-    [{
-      "_id": "5a81jei389ns5abd75f79c",
-      "name": "A simple chair",
-      "description": "...",
-      "pictures": [{
-        "_id": "5a81b0fa8c063a53298a934a",
-        "url": "http://....",
-        "name": "chair_position_1.png"
-      }, {
-        "_id": "5a81d22bee1ad45abd75f79c",
-        "url": "http://....",
-        "name": "chair_position_2.png"
-      }, {
-        "_id": "5a81d232ee1ad45abd75f79e",
-        "url": "http://....",
-        "name": "chair_position_3.png"
-      }]
-    }]
-    */
-
-    // Send the list of users.
-    ctx.body = products;
-  },
-};
-```
-
 #### Database implementation
 
 If you're using MongoDB as a database, you don't need to do anything. Everything is natively handled by Strapi. However, to implement a polymorphic relationship with SQL databases, you need to create two tables.
@@ -811,7 +582,7 @@ CREATE TABLE `image_morph` (
 
 ::: warning
 The life cycle functions are based on the ORM life cycle and not on the strapi request.
-We are currently woking on it to make it easier to use and understand.
+We are currently working on it to make it easier to use and understand.
 Please check [this issue](https://github.com/strapi/strapi/issues/1443) on GitHub.
 :::
 
@@ -819,9 +590,9 @@ The following events are available by default:
 
 Callbacks on:
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "save" id="save"
+::: tab save
 
 `save`
 
@@ -830,14 +601,14 @@ Callbacks on:
 
 :::
 
-::: tab "fetch" id="fetch"
+::: tab fetch
 
 `fetch`
 
 - beforeFetch
 - afterFetch
 
-::: tab "fetchAll" id="fetchall"
+::: tab fetchAll
 
 `fetchAll`
 
@@ -846,7 +617,7 @@ Callbacks on:
 
 :::
 
-::: tab "create" id="create"
+::: tab create
 
 `create`
 
@@ -855,7 +626,7 @@ Callbacks on:
 
 :::
 
-::: tab "update" id="update"
+::: tab update
 
 `update`
 
@@ -864,9 +635,9 @@ Callbacks on:
 
 :::
 
-::: tab "destroy" id="destroy"
+::: tab destroy
 
-destroy`
+`destroy`
 
 - beforeDestroy
 - afterDestroy
@@ -877,9 +648,9 @@ destroy`
 
 ### Example
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "Mongoose" id="mongoose"
+::: tab Mongoose
 
 #### Mongoose
 
@@ -906,7 +677,7 @@ module.exports = {
 
 :::
 
-::: tab "Bookshelf" id="bookshelf"
+::: tab Bookshelf
 
 #### Bookshelf
 

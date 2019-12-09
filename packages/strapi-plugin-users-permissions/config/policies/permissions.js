@@ -16,11 +16,11 @@ module.exports = async (ctx, next) => {
       if (isAdmin) {
         ctx.state.admin = await strapi
           .query('administrator', 'admin')
-          .findOne({ id });
+          .findOne({ id }, ['role']);
       } else {
         ctx.state.user = await strapi
           .query('user', 'users-permissions')
-          .findOne({ id });
+          .findOne({ id }, ['role']);
       }
     } catch (err) {
       return handleErrors(ctx, err, 'unauthorized');

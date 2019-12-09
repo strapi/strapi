@@ -66,6 +66,11 @@ module.exports = {
   async installPlugin(ctx) {
     try {
       const { plugin } = ctx.request.body;
+
+      if (!/^[A-Za-z0-9_-]+$/.test(plugin)) {
+        return ctx.badRequest('Invalid plugin name');
+      }
+
       strapi.reload.isWatching = false;
 
       strapi.log.info(`Installing ${plugin}...`);
@@ -101,6 +106,11 @@ module.exports = {
   async uninstallPlugin(ctx) {
     try {
       const { plugin } = ctx.params;
+
+      if (!/^[A-Za-z0-9_-]+$/.test(plugin)) {
+        return ctx.badRequest('Invalid plugin name');
+      }
+
       strapi.reload.isWatching = false;
 
       strapi.log.info(`Uninstalling ${plugin}...`);

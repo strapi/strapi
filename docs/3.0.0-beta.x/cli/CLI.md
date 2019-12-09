@@ -2,8 +2,6 @@
 
 Strapi comes with a full featured Command Line Interface (CLI) which lets you scaffold and manage your project in seconds.
 
----
-
 ## strapi new
 
 Create a new project.
@@ -49,7 +47,7 @@ options: [--no-build |--watch-admin ]
 - **strapi develop --watch-admin**<br/>
   Starts your application with the autoReload enabled and the front-end development server. It allows you to customize the administration panel.
 
-::: note
+::: tip
 You should never use this command to run a Strapi application in production.
 :::
 
@@ -60,7 +58,7 @@ Start a Strapi application with autoReload disabled.
 This commands is there to run a Strapi application without restarts and file writes (aimed at production usage).
 Certain features are disabled in the `strapi start` mode because they require application restarts.
 
-::: note
+::: tip
 You can specify a NODE_ENV to use the configurations in the `./config/environments/[development|staging|production]` folder.
 By default the `development` environment will be used.
 :::
@@ -80,7 +78,7 @@ options: [--no-optimization]
 - **strapi build --no-optimization**<br/>
   Builds the administration panel without minizing the assets. The build duration is faster.
 
-::: note
+::: tip
 You can specify a NODE_ENV to use the configurations in the `./config/environments/[development|staging|production]` folder.
 By default the `development` environment will be used.
 :::
@@ -113,7 +111,7 @@ options: [--tpl <name>|--plugin <name>]
 
   Example: `strapi generate:api product --tpl bookshelf`
 
-::: note
+::: tip
 The first letter of the filename will be uppercase.
 :::
 
@@ -140,7 +138,7 @@ options: [--api <name>|--plugin <name>]
 - **strapi generate:controller &#60;name&#62; --plugin &#60;plugin&#62;**<br/>
   Generates an empty controller called **&#60;name&#62;** in the `./plugins/<plugin>/controllers` folder.
 
-::: note
+::: tip
 The first letter of the filename will be uppercase.
 :::
 
@@ -176,7 +174,7 @@ options: [--api <name>|--plugin <name>]
 * **strapi generate:model &#60;name&#62; --plugin &#60;plugin&#62;**<br/>
   Generates an empty model called **&#60;name&#62;** in the `./plugins/<plugin>/models` folder.
 
-::: note
+::: tip
 The first letter of the filename will be uppercase.
 :::
 
@@ -203,7 +201,7 @@ options: [--api <name>|--plugin <name>]
 - **strapi generate:service &#60;name&#62; --plugin &#60;plugin&#62;**<br/>
   Generates an empty service called **&#60;name&#62;** in the `./plugins/<plugin>/services` folder.
 
-::: note
+::: tip
 The first letter of the filename will be uppercase.
 :::
 
@@ -245,8 +243,6 @@ strapi generate:plugin <name>
 
 Please refer to the [local plugins](../plugin-development/quick-start.md) section to know more.
 
----
-
 ## strapi install
 
 Install a plugin in the project.
@@ -263,8 +259,6 @@ strapi install <name>
 ::: warning
 Some plugins have admin panel integrations, your admin panel might have to be rebuilt. This can take some time.
 :::
-
----
 
 ## strapi uninstall
 
@@ -290,7 +284,13 @@ options [--delete-files]
 Some plugins have admin panel integrations, your admin panel might have to be rebuilt. This can take some time.
 :::
 
----
+## strapi console
+
+Start the server and let you eval commands into your application in real time.
+
+```bash
+strapi console
+```
 
 ## strapi version
 
@@ -299,8 +299,6 @@ Print the current globally installed Strapi version.
 ```bash
 strapi version
 ```
-
----
 
 ## strapi help
 

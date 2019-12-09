@@ -76,7 +76,7 @@ You have to send FormData in your request body
 
 ## Upload files related to an entry
 
-To upload files that will be liked to an specific entry.
+To upload files that will be linked to an specific entry.
 
 ### Request parameters
 
@@ -212,7 +212,7 @@ You entry data have to be contained in a `data` key. You have to `JSON.stringify
 And for your files, they have to be prefixed by `files`.
 Example here with cover attribute `files.cover`.
 
-::: note
+::: tip
 If you want to upload files for a group, you will have to specify the inidex of the item you wan to add the file.
 Example `files.my_group_name[the_index].attribute_name`
 :::
@@ -284,7 +284,7 @@ To install a new provider run:
 $ npm install strapi-provider-upload-aws-s3@beta --save
 ```
 
-::: note
+::: tip
 If the provider is not in the mono repo, you probably don't need `@beta` depending if the creator published it with this tag or not.
 :::
 
@@ -293,3 +293,26 @@ Then, visit [http://localhost:1337/admin/plugins/upload/configurations/developme
 ## Create providers
 
 If you want to create your own, make sure the name starts with `strapi-provider-upload-` (duplicating an existing one will be easier to create), modify the `auth` config object and customize the `upload` and `delete` functions.
+
+To use it you will have to publish it on **npm**.
+
+### Create a local provider
+
+If you want to create your own provider without publishing it on **npm** you can follow these steps:
+
+- Create a `providers` folder in your application.
+- Create your provider as explained in the documentation eg. `./providers/strapi-provider-upload-[...]/...`
+- Then update your `package.json` to link your `strapi-provider-upload-[...]` dependency to the [local path](https://docs.npmjs.com/files/package.json#local-paths) of your new provider.
+
+```json
+{
+  ...
+  "dependencies": {
+    ...
+    "strapi-provider-upload-[...]": "file:providers/strapi-provider-upload-[...]",
+    ...
+  }
+}
+```
+
+- Finally, run `yarn install` or `npm install` to install your new custom provider.

@@ -34,9 +34,9 @@ You can check all the available providers developed by the community on npmjs.or
 
 To install a new provider run:
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "yarn"
+::: tab yarn
 
 ```
 yarn add strapi-provider-email-sendgrid@beta --save
@@ -44,7 +44,7 @@ yarn add strapi-provider-email-sendgrid@beta --save
 
 :::
 
-::: tab "npm"
+::: tab npm
 
 ```
 npm install strapi-provider-email-sendgrid@beta --save
@@ -54,7 +54,7 @@ npm install strapi-provider-email-sendgrid@beta --save
 
 ::::
 
-::: note
+::: tip
 If the provider is not in the mono repo, you probably don't need `@beta` depending if the creator published it with this tag or not.
 :::
 
@@ -88,3 +88,26 @@ In the `send` function you will have access to:
 
 - `config` that contain configuration you setup in your admin panel
 - `options` that contain option your send when you called the `send` function from the email plugin service
+
+To use it you will have to publish it on **npm**.
+
+### Create a local provider
+
+If you want to create your own provider without publishing it on **npm** you can follow these steps:
+
+- Create a `providers` folder in your application.
+- Create your provider as explained in the documentation eg. `./providers/strapi-provider-email-[...]/...`
+- Then update your `package.json` to link your `strapi-provider-email-[...]` dependency to the [local path](https://docs.npmjs.com/files/package.json#local-paths) of your new provider.
+
+```json
+{
+  ...
+  "dependencies": {
+    ...
+    "strapi-provider-email-[...]": "file:providers/strapi-provider-email-[...]",
+    ...
+  }
+}
+```
+
+- Finally, run `yarn install` or `npm install` to install your new custom provider.

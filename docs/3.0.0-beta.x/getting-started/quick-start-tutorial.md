@@ -1,6 +1,6 @@
 # Tutorial
 
-This **tutorial** is written for developers to **teach and explain** a step-by-step introduction to Strapi. (The [Quick Start Guide](/3.0.0-beta.x/getting-started/quick-start.html) is a more concise **How-to** version.) This tutorial takes you through the beginning steps of how you start a project like **"FoodAdvisor"** ([Github](https://github.com/strapi/foodadvisor/))([Demo](https://foodadvisor.strapi.io/)).
+This **tutorial** is written for developers to **teach and explain** a step-by-step introduction to Strapi. (The [Quick Start Guide](quick-start.md) is a more concise **How-to** version.) This tutorial takes you through the beginning steps of how you start a project like **"FoodAdvisor"** ([Github](https://github.com/strapi/foodadvisor/))([Demo](https://foodadvisor.strapi.io/)).
 
 You get a good overview of the features developers love found in Strapi.
 
@@ -10,48 +10,51 @@ By following this tutorial, you install and create your first Strapi project.
 
 ::: tip NOTE
 
-You need to have **_Node.js and npm_** installed on your system before following these steps. If you do not have Node.js and npm installed (or are not sure), please visit our [Installation Requirements](/3.0.0-beta.x/getting-started/install-requirements.html).
+You need to have **_Node.js and npm_** installed on your system before following these steps. If you do not have Node.js and npm installed (or are not sure), please visit our [installation requirements](install-requirements.md).
 
 :::
 
 **Table of Contents**
 
-1. [Install Strapi and create project](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_1-install-strapi-and-create-a-project)
-2. [Create an Administrator and front-end User](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_2-create-an-adminstrator-and-front-end-user)
-3. [Create a new Content Type called, "Restaurant"](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_3-create-a-new-content-type-called-restaurant)
-4. [Create a new Content Type called, "Category"](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_4-create-a-new-content-type-called-category)
-5. [Create a new Group and Repeatable Field called, "Hours of Operations"](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_5-create-a-new-group-and-repeatable-field-called-hours-of-operation)
-6. [Manage and add content to the "Restaurant" Content Type](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_6-manage-and-add-content-to-a-restaurant-content-type)
-7. [Set Roles and Permissions](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_7-set-roles-and-permissions)
-8. [Consume the Content Type API](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_8-consume-the-content-type-api)
+[[toc]]
 
 ## 1. Install Strapi and create a project
 
-- Navigate to your parent `Projects/` directory from your command line.
+Navigate to your parent `Projects/` directory from your command line.
 
-**Note:** In this tutorial, the example assumes a **Projects** folder on your **Desktop**. However, this is not required, and you may put your project where you want.
+::: tip NOTE
 
-Path: `~/Desktop/Projects/`
+In this tutorial, the example assumes a **Projects** folder on your **Desktop**. However, this is not required, and you may put your project where you want.
 
-Use **only one** of the following commands to create a new Strapi project:
+:::
 
----
+**Path —** `~/Desktop/Projects/`
 
-- Use **yarn** to install the Strapi project (**recommended**). [Install yarn with these docs](https://yarnpkg.com/lang/en/docs/install/)
+Use **only one** of the following commands to create a new Strapi project
+
+:::: tabs
+
+::: tab yarn
+
+Use **yarn** to install the Strapi project (**recommended**). [Install yarn with these docs](https://yarnpkg.com/lang/en/docs/install/)
 
 ```bash
 yarn create strapi-app my-project --quickstart
 ```
 
-**or**
+:::
 
-- Use **npm/npx** to install the Strapi project
+::: tab npx
+
+Use **npm/npx** to install the Strapi project
 
 ```bash
 npx create-strapi-app my-project --quickstart
 ```
 
----
+:::
+
+::::
 
 The command creates a Strapi project `my-project/` folder within your parent `Projects/` directory.
 
@@ -59,9 +62,6 @@ The command creates a Strapi project `my-project/` folder within your parent `Pr
 
 When you create a new Quick Start(`--quickstart`) project, Strapi downloads the node modules and the Strapi files needed. Using `--quickstart` automatically completes an **additional** step of **building the administration panel** for Strapi and then **starting** Strapi for you. This opens the browser for you and brings you to the [Welcome](http://localhost:1337/admin/plugins/users-permissions/auth/register) page.
 
-:::
-
-::: tip NOTE
 You can replace the `my-project` name with any name you want. E.g., `yarn create strapi-app my-foodadvisor-project --quickstart` creates a folder `./Projects/my-foodadvisor-project`.
 
 :::
@@ -138,14 +138,12 @@ Building your admin UI with development configuration ...
 ::: tip NOTE
 Using the `--quickstart` flag installs Strapi using an [SQLite](https://www.sqlite.org/index.html) database. You may, at any time, leave off the **--flag**, but you need to follow a few configuration steps for your database choice. **You need to have your database choice installed and running locally before creating your project.**
 
-**Note:** An **SQLite** database is an excellent database to use for prototyping and _developing_ Strapi projects. **SQLite** is a light database that ports effortlessly to the other relational databases (**MySQL**, **PostgreSQL**, and **MariaDB**). It is recommended to **develop** with SQLite and to use another relational database (MySQL, PostgreSQL or MariaDB) in production.
-
-**Note:** If you would like to use **MongoDB** in production, you need to [install, run, and use MongoDB to develop your Strapi project (in development)](/3.0.0-beta.x/guides/databases.html#mongodb-installation).
+If you would like to use **MongoDB** in production, you need to [install, run, and use MongoDB to develop your Strapi project (in development)](../guides/databases.md#mongodb-installation).
 :::
 
 You are now ready to create a new **Administrator** and new front-end **User**.
 
-## 2. Create an Adminstrator and front-end User
+## 2. Create an Administrator and front-end User
 
 The first step is to create an **Administrator** (or "root user") for your project. An **Administrator** has all administrator privileges and access rights. (You can read more about why **Administrators** and front-end **Users** are separate [here](https://blog.strapi.io/why-we-split-the-management-of-the-admin-users-and-end-users/).)
 
@@ -171,7 +169,11 @@ After your **Administrator** registration is complete, you see the Strapi _Admin
 
 Up until this point, you have created an **Administrator**, and so you next want to create a front-end **User**.
 
-**Note:** It is not necessary to always create a front-end **User** for your **Administrators**; in this case, the **Administrator** is also a front-end **User** as an "Author" of content in the application.
+::: tip NOTE
+
+It is not necessary to always create a front-end **User** for your **Administrators**; in this case, the **Administrator** is also a front-end **User** as an "Author" of content in the application.
+
+:::
 
 - Click on `Users` located under **CONTENT TYPES** in the left-hand menu
 - Click the blue **+ Add New User** button in the top right corner
@@ -200,7 +202,7 @@ Additional **Restaurant** themed **Content Types** and fields can be seen in the
 
 ### The Restaurant Content Type
 
-- Go to the **Content Type Builder** plugin, located in the left menu: Under **PLUGINS**: --> **Content Type Builder**
+Go to the **Content Type Builder** plugin, located in the left menu: Under **PLUGINS** -> **Content Type Builder**
 
 You are now able to see the three available **Content Types**. At this point, three Content Types are available `Permission`, `Role`, and `Users`.
 
@@ -208,7 +210,7 @@ You are now able to see the three available **Content Types**. At this point, th
 
 You need to create a new **Content Type** for `Restaurants`.
 
-1. Complete these steps to **Add a Restaurant Content Type**:
+1. Complete these steps to **Add a Restaurant Content Type**
 
 - Click the `+ Add A Content Type` link (under existing **CONTENT TYPES**)
 - Enter a **Name** for your new **Content Type** (call this `restaurant`), and you can write `Restaurant Listings` for the **Description**
@@ -222,7 +224,7 @@ The Content Type **Name** is always **singular**. For example, `restaurant` not 
 
 :::
 
-2. You are now at the **Field Selection** panel:
+2. You are now at the **Field Selection** panel
 
 You may add your first field, a **String** field for the **Restaurant** name.
 
@@ -409,7 +411,11 @@ You are now ready to add a third field, another **String** field for the **Closi
 
 After Strapi has restarted, you are ready to assign this **Hours_of_operation** group to the **Restaurant** Content Type.
 
-**Note:** It would be possible to assign the **Hours_of_operation** group to another **Content Type**, let's say, a **Cafe** Content Type. You have the option to reuse this group across your application.
+::: tip NOTE
+
+It would be possible to assign the **Hours_of_operation** group to another **Content Type**, let's say, a **Cafe** Content Type. You have the option to reuse this group across your application.
+
+:::
 
 3. Next, you need to assign the **Hours_of_operation** Group to the **Restaurant** Content Type.
 
@@ -626,7 +632,7 @@ If you would like to see the route of any specific **Content Type**, you need to
 👏 Congratulations, you have now completed the **Strapi Getting Started Tutorial**. Where to go next?
 
 - Learn how to use Strapi with React ([Gatsby](https://blog.strapi.io/building-a-static-website-using-gatsby-and-strapi) or [Next.js](https://blog.strapi.io/strapi-next-setup/)) or Vue.js ([Nuxt.js](https://blog.strapi.io/cooking-a-deliveroo-clone-with-nuxt-vue-js-graphql-strapi-and-stripe-setup-part-1-7/)).
-- Read the [concepts](../concepts/concepts.html) to deep dive into Strapi
+- Read the **concepts** to deep dive into Strapi
 - Get help on [StackOverflow](https://stackoverflow.com/questions/tagged/strapi)
 - Read the [source code](https://github.com/strapi/strapi), [contribute](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) or [give a star](https://github.com/strapi/strapi) on GitHub
 - Follow us on [Twitter](https://twitter.com/strapijs) to get the latest news

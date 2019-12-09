@@ -88,16 +88,16 @@ yarn develop
 
 The server (API) is available at http://localhost:1337
 
-**WARNING** ⚠️ If you've followed the recommended setup, you should not be able to reach the administration panel at http://localhost:1337/admin.
+The built administration panel is available at http://localhost:1337/admin
 
-**Start the administration panel server**
+**Start the administration panel server for development**	
 
-```bash
-cd strapi/packages/strapi-admin
-yarn develop
-```
+```bash	
+cd strapi/packages/strapi-admin	
+yarn develop	
+```	
 
-The administration panel is available at http://localhost:4000/admin
+The administration panel will be available at http://localhost:4000/admin
 
 **Awesome! You are now able to contribute to Strapi.**
 
@@ -156,7 +156,7 @@ Before submitting an issue you need to make sure:
 - You have tried all the following (if relevant) and your issue remains:
   - Make sure you have the right application started.
   - Make sure the [issue template](.github/ISSUE_TEMPLATE) is respected.
-  - Make sure your issue body is readable and [well formated](https://guides.github.com/features/mastering-markdown).
+  - Make sure your issue body is readable and [well formatted](https://guides.github.com/features/mastering-markdown).
   - Make sure you've killed the Strapi server with CTRL+C and started it again.
   - Make sure the application you are using to reproduce the issue has a clean `node_modules` directory, meaning:
     - no dependencies are linked (e.g. you haven't run `npm link`)
