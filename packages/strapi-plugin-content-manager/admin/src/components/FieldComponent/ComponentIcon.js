@@ -2,10 +2,10 @@ import styled from 'styled-components';
 
 const ComponentIcon = styled.div`
   position: absolute;
-  top: -13px;
+  top: -16px;
   left: 10px;
-  width: 29px;
-  height: 29px;
+  width: 31px;
+  height: 31px;
   border-radius: 50%;
   border: 2px solid white;
   background-color: #e6f0fb;

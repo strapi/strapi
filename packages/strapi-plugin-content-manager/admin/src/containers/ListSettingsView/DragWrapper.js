@@ -3,7 +3,7 @@ import styled from 'styled-components';
 const DragWrapper = styled.div`
   position: relative;
   padding: 11px 40px 11px 11px;
-  margin-top: 7px;
+  margin-top: 19px;
   margin-bottom: 10px;
   border: 1px dashed #e3e9f3;
   border-radius: 2px;

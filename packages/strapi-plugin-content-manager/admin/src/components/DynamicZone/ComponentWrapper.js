@@ -5,6 +5,7 @@ const ComponentWrapper = styled.div`
   > div {
     position: relative;
     box-shadow: 0 2px 4px #e3e9f3;
+    border-radius: 2px;
     .arrow-icons {
       position: absolute;
       top: -12px;
@@ -13,7 +14,8 @@ const ComponentWrapper = styled.div`
       .arrow-btn {
         display: inline-flex;
         svg {
-          margin-left: 6px;
+          margin-left: 5px;
+          margin-top: 5px;
         }
       }
     }

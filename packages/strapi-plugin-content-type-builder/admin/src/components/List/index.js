@@ -34,7 +34,7 @@ function List({
   const { formatMessage } = useGlobalContext();
   const { openModalAddField } = useListView();
   const addButtonProps = {
-    icon: !isSub ? true : false,
+    icon: !isSub ? <Plus fill="#007eff" /> : false,
     color: 'primary',
     label: formatMessage({
       id: !isSub

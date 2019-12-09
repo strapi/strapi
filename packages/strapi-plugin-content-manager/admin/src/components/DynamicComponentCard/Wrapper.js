@@ -5,7 +5,7 @@ const Wrapper = styled.div`
   height: 90px;
   width: 139px !important;
   margin-right: 10px;
-  padding: 18px 10px 15px 10px;
+  padding: 18px 10px;
   background-color: #ffffff;
   color: #919bae;
   text-align: center;
@@ -31,7 +31,7 @@ const Wrapper = styled.div`
   .component-icon {
     width: 35px;
     height: 35px;
-    margin-bottom: 11px;
+    margin-bottom: 5px;
     line-height: 35px;
     align-self: center;
     border-radius: 50%;

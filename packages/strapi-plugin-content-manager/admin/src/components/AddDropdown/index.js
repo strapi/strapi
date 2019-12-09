@@ -1,6 +1,7 @@
 import React, { memo, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
+import { Plus } from '@buffetjs/icons';
 
 import {
   ButtonDropdown,
@@ -28,7 +29,7 @@ function Add({ data, onClick, pStyle, style }) {
           <FormattedMessage id="content-manager.containers.SettingPage.addField">
             {msg => (
               <p style={pStyle}>
-                <span />
+                <Plus fill="#007eff" />
                 {msg}
               </p>
             )}

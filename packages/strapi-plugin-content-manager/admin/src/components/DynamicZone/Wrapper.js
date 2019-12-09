@@ -8,7 +8,7 @@ const Wrapper = styled.div`
     position: absolute;
     display: none;
     top: 10px;
-    left: calc(50% + 38px);
+    left: calc(50% + 28px);
     > span {
       letter-spacing: 0.5px;
       text-transform: uppercase;
