@@ -167,7 +167,7 @@
   "table.attributes.title.singular": "{number} field",
   "table.relations.title.plural": "including {number} relationships",
   "table.relations.title.singular": "including {number} relationship",
-  "prompt.content.unsaved": "Are you sure you want to leave this content type? All your modifications will be lost.",
+
   "DELETE ALL ABOVE TRADS": null,
 
   "attribute.boolean": "Boolean",
@@ -259,8 +259,10 @@
   "form.button.select-component": "Select a component",
   "form.button.add-components-to-dynamiczone": "Add components to the zone",
   "form.button.configure-component": "Configure the component",
+  "modalForm.editCategory.base.name.description": "No space is allowed for the name of the category",
   "form.button.configure-view": "Configure the view",
   "modalForm.header-edit": "Edit {name}",
+  "modalForm.header.categories": "Categories",
   "modalForm.sub-header.chooseAttribute.component": "Select a field for your component",
   "modalForm.sub-header.chooseAttribute.contentType": "Select a field for your content type",
   "modalForm.sub-header.attribute.create": "Add new {type} field",
@@ -270,5 +272,10 @@
   "modalForm.attributes.select-component": "Select a component",
   "modalForm.attributes.select-components": "Select the components",
   "modalForm.components.icon.label": "Icon",
-  "modalForm.sub-header.addComponentToDynamicZone": "Add new component to the dynamic zone"
+  "modalForm.sub-header.addComponentToDynamicZone": "Add new component to the dynamic zone",
+  "popUpWarning.bodyMessage.cancel-modifications": "Are you sure you want to cancel your modifications?",
+  "popUpWarning.bodyMessage.cancel-modifications.with-components": "Are you sure you want to cancel your modifications? Some components have been created or modified...",
+  "prompt.unsaved": "Are you sure you want to leave? All your modifications will be lost.",
+  "components.componentSelect.value-components": "{number} components selected",
+  "components.componentSelect.value-component": "{number} component selected"
 }

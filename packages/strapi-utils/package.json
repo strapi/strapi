@@ -1,6 +1,6 @@
 {
   "name": "strapi-utils",
-  "version": "3.0.0-beta.17.6",
+  "version": "3.0.0-beta.17.8",
   "description": "Shared utilities for the Strapi packages",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "commander": "^2.20.0",
+    "date-fns": "^2.8.1",
     "joi-json": "^2.1.0",
     "knex": "^0.16.5",
     "lodash": "^4.17.11",

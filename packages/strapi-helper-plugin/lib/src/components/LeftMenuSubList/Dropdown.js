@@ -46,6 +46,25 @@ const Dropdown = styled.div`
       margin-bottom: 0px;
     }
   }
+  .editable {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+
+    > svg {
+      margin-top: auto;
+      margin-bottom: auto;
+      color: #b3b5b9;
+      font-size: 12px;
+      z-index: -1;
+    }
+
+    &:hover {
+      > svg {
+        z-index: 1;
+      }
+    }
+  }
 `;
 
 export default Dropdown;

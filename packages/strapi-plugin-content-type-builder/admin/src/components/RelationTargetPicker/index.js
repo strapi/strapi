@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { get } from 'lodash';
 import {
   Dropdown,
@@ -35,11 +36,14 @@ const RelationTargetPicker = ({
       >
         <DropdownToggle caret>
           <p>
-            <i className="fa fa-caret-square-o-right" />
+            <FontAwesomeIcon
+              icon={['far', 'caret-square-right']}
+              style={{ fontSize: 12, marginTop: '-3px' }}
+            />
             {targetFriendlyName}
           </p>
         </DropdownToggle>
-        <DropdownMenu>
+        <DropdownMenu style={{ paddingTop: '3px' }}>
           {sortedContentTypesList.map(({ uid, title }) => {
             return (
               <DropdownItem
@@ -58,7 +62,10 @@ const RelationTargetPicker = ({
                 }}
               >
                 <p>
-                  <i className="fa fa-caret-square-o-right" />
+                  <FontAwesomeIcon
+                    icon={['far', 'caret-square-right']}
+                    style={{ fontSize: 12, marginTop: '-3px' }}
+                  />
                   {title}
                 </p>
               </DropdownItem>

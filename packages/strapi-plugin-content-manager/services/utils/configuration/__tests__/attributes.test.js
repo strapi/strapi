@@ -16,7 +16,7 @@ const createMockSchema = (attrs, timestamps = true) => {
               type: 'timestamp',
             },
             updatedAt: {
-              type: 'timestampUpdate',
+              type: 'timestamp',
             },
           }
         : {}),

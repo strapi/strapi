@@ -83,6 +83,11 @@ module.exports = strapi => {
         playground: false,
         cors: false,
         bodyParserConfig: true,
+        introspection: _.get(
+          strapi.plugins.graphql,
+          'config.introspection',
+          true
+        ),
       };
 
       // Disable GraphQL Playground in production environment.
@@ -94,8 +99,6 @@ module.exports = strapi => {
           endpoint: strapi.plugins.graphql.config.endpoint,
           shareEnabled: strapi.plugins.graphql.config.shareEnabled,
         };
-
-        serverParams.introspection = true;
       }
 
       const server = new ApolloServer(serverParams);

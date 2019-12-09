@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Collapse } from 'reactstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { capitalize, get, isEmpty, map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { EditPageContext } from '../../contexts/EditPage';
@@ -92,9 +93,9 @@ class Plugin extends React.Component {
             {emptyApplication && (
               <Chevron>
                 {this.state.collapse ? (
-                  <i className="fa fa-chevron-up" />
+                  <FontAwesomeIcon icon="chevron-up" />
                 ) : (
-                  <i className="fa fa-chevron-down" />
+                  <FontAwesomeIcon icon="chevron-down" />
                 )}
               </Chevron>
             )}

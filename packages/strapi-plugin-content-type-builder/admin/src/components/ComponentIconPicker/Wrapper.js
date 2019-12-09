@@ -1,4 +1,6 @@
 import styled from 'styled-components';
+import { colors } from '@buffetjs/styles';
+import PropTypes from 'prop-types';
 
 const Wrapper = styled.div`
   min-height: 199px;
@@ -6,6 +8,14 @@ const Wrapper = styled.div`
 
   .collection {
     background-color: #fafafb;
+    ${({ error }) => {
+      if (error) {
+        return `
+          border: 1px solid ${colors.darkOrange};
+          border-radius: 2px;
+        `;
+      }
+    }}
   }
 
   .noCells {
@@ -21,5 +31,13 @@ const Wrapper = styled.div`
     color: #bdbdbd;
   }
 `;
+
+Wrapper.defaultProps = {
+  error: false,
+};
+
+Wrapper.propTypes = {
+  error: PropTypes.bool,
+};
 
 export default Wrapper;

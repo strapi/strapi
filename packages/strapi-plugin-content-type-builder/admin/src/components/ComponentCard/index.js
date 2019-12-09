@@ -13,34 +13,30 @@ import useDataManager from '../../hooks/useDataManager';
 import Wrapper from './Wrapper';
 import Close from './Close';
 
-function ComponentCard({ component, isActive, onClick, onRemoveClick }) {
-  const { modifiedData } = useDataManager();
-
-  const getComponentSchema = componentName => {
-    return get(modifiedData, ['components', componentName], {
-      schema: { icon: null },
-    });
-  };
-
+function ComponentCard({ component, dzName, index, isActive, onClick }) {
+  const { modifiedData, removeComponentFromDynamicZone } = useDataManager();
   const {
-    schema: { icon },
-  } = getComponentSchema(component);
-
-  const handleRemoveClick = e => {
-    onRemoveClick(e);
-
-    e.preventDefault();
-    e.stopPropagation();
-  };
+    schema: { icon, name },
+  } = get(modifiedData, ['components', component], {
+    schema: { icon: null },
+  });
 
   return (
     <Wrapper onClick={onClick} className={isActive ? 'active' : ''}>
       <div>
         <FontAwesomeIcon icon={icon} />
       </div>
-      <p>{component}</p>
-      <div className="close-btn" onClick={handleRemoveClick}>
+      <p>{name}</p>
+
+      <div
+        className="close-btn"
+        onClick={e => {
+          e.stopPropagation();
+          removeComponentFromDynamicZone(dzName, index);
+        }}
+      >
         <Close width="7px" height="7px" />
+        {/* <Remove /> */}
       </div>
     </Wrapper>
   );
@@ -55,9 +51,10 @@ ComponentCard.defaultProps = {
 
 ComponentCard.propTypes = {
   component: PropTypes.string,
+  dzName: PropTypes.string.isRequired,
+  index: PropTypes.number.isRequired,
   isActive: PropTypes.bool,
   onClick: PropTypes.func,
-  onRemoveClick: PropTypes.func,
 };
 
 export default ComponentCard;

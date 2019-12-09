@@ -114,6 +114,11 @@ const reducer = (state, action) => {
         }
       );
     }
+    case 'CANCEL_CHANGES': {
+      return state
+        .update('modifiedData', () => state.get('initialData'))
+        .update('components', () => state.get('initialComponents'));
+    }
     case 'CHANGE_DYNAMIC_ZONE_COMPONENTS': {
       const { dynamicZoneTarget, newComponents } = action;
 
@@ -132,6 +137,12 @@ const reducer = (state, action) => {
         .updateIn(['modifiedData', 'components'], old => {
           const componentsSchema = newComponents.reduce((acc, current) => {
             const addedCompoSchema = state.getIn(['components', current]);
+            const isTemporaryComponent = addedCompoSchema.get('isTemporary');
+
+            // created components are already in the modifiedData.components
+            if (isTemporaryComponent) {
+              return acc;
+            }
 
             return acc.set(current, addedCompoSchema);
           }, old);
@@ -177,6 +188,12 @@ const reducer = (state, action) => {
         fromJS(newSchema)
       );
     }
+    case 'DELETE_NOT_SAVED_TYPE': {
+      // Doing so will also reset the modified initial data
+      return state
+        .update('contentTypes', () => state.get('initialContentTypes'))
+        .update('components', () => state.get('initialComponents'));
+    }
     case 'EDIT_ATTRIBUTE': {
       const {
         attributeToSet: { name, ...rest },
@@ -185,6 +202,7 @@ const reducer = (state, action) => {
         initialAttribute,
       } = action;
       let newState = state;
+
       const initialAttributeName = get(initialAttribute, ['name'], '');
       const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
         ? [forTarget]
@@ -253,6 +271,10 @@ const reducer = (state, action) => {
                     hadInternalRelation &&
                     didCreateInternalRelation &&
                     isEditingRelation;
+                  const shouldCreateOppositeAttributeBecauseOfTargetChange =
+                    didChangeTargetRelation &&
+                    didCreateInternalRelation &&
+                    !ONE_SIDE_RELATIONS.includes(nature);
 
                   // Update the opposite attribute name so it is removed at the end of the loop
                   if (
@@ -266,7 +288,8 @@ const reducer = (state, action) => {
                   // Set the opposite attribute that will be updated when the loop attribute matches the name
                   if (
                     shouldUpdateOppositeAttributeBecauseOfNatureChange ||
-                    shouldCreateOppositeAttributeBecauseOfNatureChange
+                    shouldCreateOppositeAttributeBecauseOfNatureChange ||
+                    shouldCreateOppositeAttributeBecauseOfTargetChange
                   ) {
                     oppositeAttributeNameToUpdate =
                       initialAttribute.targetAttribute;
@@ -291,7 +314,10 @@ const reducer = (state, action) => {
                     // Then (if needed) create the opposite attribute the case is changing the relation from
                     // We do it here so keep the order of the attributes
                     // oneWay || manyWay to something another relation
-                    if (shouldCreateOppositeAttributeBecauseOfNatureChange) {
+                    if (
+                      shouldCreateOppositeAttributeBecauseOfNatureChange ||
+                      shouldCreateOppositeAttributeBecauseOfTargetChange
+                    ) {
                       acc[
                         oppositeAttributeNameToCreateBecauseOfNatureChange
                       ] = fromJS(oppositeAttributeToCreate);
@@ -333,8 +359,14 @@ const reducer = (state, action) => {
     case 'GET_DATA_SUCCEEDED':
       return state
         .update('components', () => fromJS(action.components))
+        .update('initialComponents', () => fromJS(action.components))
+        .update('initialContentTypes', () => fromJS(action.contentTypes))
         .update('contentTypes', () => fromJS(action.contentTypes))
+
         .update('isLoading', () => false);
+
+    case 'RELOAD_PLUGIN':
+      return initialState;
     case 'REMOVE_FIELD_FROM_DISPLAYED_COMPONENT': {
       const { attributeToRemoveName, componentUid } = action;
 
@@ -369,7 +401,9 @@ const reducer = (state, action) => {
         ...pathToAttributes,
         attributeToRemoveName,
       ];
+
       const attributeToRemoveData = state.getIn(pathToAttributeToRemove);
+
       const isRemovingRelationAttribute =
         attributeToRemoveData.get('nature') !== undefined;
       // Only content types can have relations that with themselves since
@@ -399,12 +433,52 @@ const reducer = (state, action) => {
 
       return state.removeIn(pathToAttributeToRemove);
     }
-
     case 'SET_MODIFIED_DATA': {
-      return state
+      let newState = state
         .update('isLoadingForDataToBeSet', () => false)
         .update('initialData', () => fromJS(action.schemaToSet))
         .update('modifiedData', () => fromJS(action.schemaToSet));
+
+      // Reset the state with the initial data
+      // All created components and content types will be lost
+      if (!action.hasJustCreatedSchema) {
+        newState = newState
+          .update('components', () => state.get('initialComponents'))
+          .update('contentTypes', () => state.get('initialContentTypes'));
+      }
+
+      return newState;
+    }
+    case 'UPDATE_SCHEMA': {
+      const {
+        data: { name, collectionName, category, icon },
+        schemaType,
+        uid,
+      } = action;
+
+      let newState = state.updateIn(['modifiedData', schemaType], obj => {
+        let updatedObj = obj
+          .updateIn(['schema', 'name'], () => name)
+          .updateIn(['schema', 'collectionName'], () => collectionName);
+
+        if (action.schemaType === 'component') {
+          updatedObj = updatedObj
+            .update('category', () => category)
+            .updateIn(['schema', 'icon'], () => icon);
+        }
+
+        return updatedObj;
+      });
+
+      if (schemaType === 'component') {
+        newState = newState.updateIn(['components'], obj => {
+          return obj.update(uid, () =>
+            newState.getIn(['modifiedData', 'component'])
+          );
+        });
+      }
+
+      return newState;
     }
     default:
       return state;

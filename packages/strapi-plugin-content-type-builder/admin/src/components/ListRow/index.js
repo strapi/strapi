@@ -6,20 +6,28 @@ import { AttributeIcon } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import pluginId from '../../pluginId';
+import useDataManager from '../../hooks/useDataManager';
 
 import Wrapper from './Wrapper';
 import Component from '../../icons/Component';
 
 function ListRow({
-  attributeName,
   configurable,
   name,
+  nature,
   onClick,
-  onClickDelete,
   plugin,
   target,
+  targetUid,
   type,
+  mainTypeName,
+  editTarget,
+  firstLoopComponentName,
+  firstLoopComponentUid,
+  secondLoopComponentName,
+  secondLoopComponentUid,
 }) {
+  const { removeAttribute } = useDataManager();
   const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type)
     ? 'number'
     : type;
@@ -35,7 +43,31 @@ function ListRow({
 
   const handleClick = () => {
     if (configurable !== false) {
-      onClick(attributeName, name, type, name);
+      const attrType = nature ? 'relation' : type;
+      let headerDisplayName = mainTypeName;
+
+      if (firstLoopComponentName) {
+        headerDisplayName = firstLoopComponentName;
+      }
+
+      if (secondLoopComponentUid) {
+        headerDisplayName = secondLoopComponentName;
+      }
+
+      onClick(
+        // Tells where the attribute is located in the main modifiedData object : contentType, component or components
+        editTarget,
+        // main data type uid
+        secondLoopComponentUid || firstLoopComponentUid || targetUid,
+        // Name of the attribute
+        name,
+        // Type of the attribute
+        attrType,
+        headerDisplayName,
+        firstLoopComponentUid ? mainTypeName : null,
+        secondLoopComponentName ? firstLoopComponentName : null,
+        secondLoopComponentUid ? firstLoopComponentUid : null
+      );
     }
   };
 
@@ -86,10 +118,14 @@ function ListRow({
               onClick={e => {
                 e.stopPropagation();
 
-                onClickDelete(attributeName);
+                removeAttribute(
+                  editTarget,
+                  name,
+                  secondLoopComponentUid || firstLoopComponentUid || ''
+                );
               }}
             >
-              <FontAwesomeIcon className="link-icon" icon="trash-alt" />
+              <FontAwesomeIcon className="link-icon" icon="trash" />
             </button>
           </>
         ) : (
@@ -104,21 +140,33 @@ function ListRow({
 
 ListRow.defaultProps = {
   configurable: true,
+  firstLoopComponentName: null,
+  firstLoopComponentUid: null,
+  nature: null,
   onClick: () => {},
   onClickDelete: () => {},
   plugin: null,
+  secondLoopComponentName: null,
+  secondLoopComponentUid: null,
   target: null,
+  targetUid: null,
   type: null,
 };
 
 ListRow.propTypes = {
-  attributeName: PropTypes.string.isRequired,
   configurable: PropTypes.bool,
+  editTarget: PropTypes.string.isRequired,
+  firstLoopComponentName: PropTypes.string,
+  firstLoopComponentUid: PropTypes.string,
+  mainTypeName: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  nature: PropTypes.string,
   onClick: PropTypes.func,
-  onClickDelete: PropTypes.func,
   plugin: PropTypes.string,
+  secondLoopComponentName: PropTypes.string,
+  secondLoopComponentUid: PropTypes.string,
   target: PropTypes.string,
+  targetUid: PropTypes.string,
   type: PropTypes.string,
 };
 

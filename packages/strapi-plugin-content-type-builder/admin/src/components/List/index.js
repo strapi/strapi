@@ -10,6 +10,7 @@ import { useGlobalContext } from 'strapi-helper-plugin';
 import { Plus } from '@buffetjs/icons';
 
 import pluginId from '../../pluginId';
+import useListView from '../../hooks/useListView';
 
 import DynamicZoneList from '../DynamicZoneList';
 import ComponentList from '../ComponentList';
@@ -20,12 +21,18 @@ function List({
   className,
   customRowComponent,
   items,
-  addField,
   addComponentToDZ,
-  removeComponentFromDZ,
+  targetUid,
+  mainTypeName,
+  editTarget,
+  firstLoopComponentName,
+  firstLoopComponentUid,
+  secondLoopComponentName,
+  secondLoopComponentUid,
   isSub,
 }) {
   const { formatMessage } = useGlobalContext();
+  const { openModalAddField } = useListView();
   const addButtonProps = {
     icon: !isSub ? <Plus fill="#007eff" /> : false,
     color: 'primary',
@@ -34,8 +41,31 @@ function List({
         ? `${pluginId}.form.button.add.field.to.contentType`
         : `${pluginId}.form.button.add.field.to.component`,
     }),
-    onClick: () => addField(),
+    onClick: () => {
+      let headerDisplayName = mainTypeName;
+
+      if (firstLoopComponentName) {
+        headerDisplayName = firstLoopComponentName;
+      }
+
+      if (secondLoopComponentUid) {
+        headerDisplayName = secondLoopComponentName;
+      }
+
+      openModalAddField(
+        editTarget,
+        targetUid,
+        headerDisplayName,
+        firstLoopComponentUid ? mainTypeName : null,
+        secondLoopComponentName ? firstLoopComponentName : null,
+        secondLoopComponentUid ? firstLoopComponentUid : null
+      );
+    },
   };
+
+  if (!targetUid) {
+    return null;
+  }
 
   return (
     <>
@@ -44,14 +74,34 @@ function List({
           <tbody>
             {items.map(item => {
               const { type } = item;
+
+              const CustomRow = customRowComponent;
+
               return (
                 <React.Fragment key={JSON.stringify(item)}>
-                  {customRowComponent(item)}
+                  <CustomRow
+                    {...item}
+                    targetUid={targetUid}
+                    // NEW props
+                    mainTypeName={mainTypeName}
+                    editTarget={editTarget}
+                    firstLoopComponentName={firstLoopComponentName}
+                    firstLoopComponentUid={firstLoopComponentUid}
+                    secondLoopComponentName={secondLoopComponentName}
+                    secondLoopComponentUid={secondLoopComponentUid}
+                  />
 
                   {type === 'component' && (
                     <ComponentList
                       {...item}
                       customRowComponent={customRowComponent}
+                      targetUid={targetUid}
+                      // NEW PROPS
+
+                      mainTypeName={mainTypeName}
+                      editTarget={editTarget}
+                      firstLoopComponentName={firstLoopComponentName}
+                      firstLoopComponentUid={firstLoopComponentUid}
                     />
                   )}
 
@@ -60,7 +110,8 @@ function List({
                       {...item}
                       customRowComponent={customRowComponent}
                       addComponent={addComponentToDZ}
-                      removeComponent={removeComponentFromDZ}
+                      targetUid={targetUid}
+                      mainTypeName={mainTypeName}
                     />
                   )}
                 </React.Fragment>
@@ -84,19 +135,29 @@ List.defaultProps = {
   addComponentToDZ: () => {},
   className: null,
   customRowComponent: null,
-  items: [],
+
+  firstLoopComponentName: null,
+  firstLoopComponentUid: null,
   isSub: false,
-  removeComponentFromDZ: () => {},
+  items: [],
+  secondLoopComponentName: null,
+  secondLoopComponentUid: null,
+  targetUid: null,
 };
 
 List.propTypes = {
-  addField: PropTypes.func,
   addComponentToDZ: PropTypes.func,
   className: PropTypes.string,
   customRowComponent: PropTypes.func,
+  editTarget: PropTypes.string.isRequired,
+  firstLoopComponentName: PropTypes.string,
+  firstLoopComponentUid: PropTypes.string,
   items: PropTypes.instanceOf(Array),
+  mainTypeName: PropTypes.string.isRequired,
+  secondLoopComponentName: PropTypes.string,
+  secondLoopComponentUid: PropTypes.string,
+  targetUid: PropTypes.string,
   isSub: PropTypes.bool,
-  removeComponentFromDZ: PropTypes.func,
 };
 
 export default List;

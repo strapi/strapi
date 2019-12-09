@@ -9,6 +9,103 @@ module.exports = async ({
   connection,
   model,
 }) => {
+  const createIdType = (table, definition) => {
+    if (definition.primaryKeyType === 'uuid' && definition.client === 'pg') {
+      return table
+        .specificType('id', 'uuid DEFAULT uuid_generate_v4()')
+        .notNullable()
+        .primary();
+    }
+
+    if (definition.primaryKeyType !== 'integer') {
+      const col = buildColType({
+        name: 'id',
+        table,
+        definition,
+        attribute: {
+          type: definition.primaryKeyType,
+        },
+      });
+
+      if (!col) throw new Error('Invalid primaryKeyType');
+
+      return col.notNullable().primary();
+    }
+
+    return table.increments('id');
+  };
+
+  const buildColType = ({ name, attribute, table, tableExists = false }) => {
+    if (!attribute.type) {
+      const relation = definition.associations.find(association => {
+        return association.alias === name;
+      });
+
+      if (['oneToOne', 'manyToOne', 'oneWay'].includes(relation.nature)) {
+        return buildColType({
+          name,
+          attribute: { type: definition.primaryKeyType },
+          table,
+          tableExists,
+        });
+      }
+
+      return null;
+    }
+
+    // allo custom data type for a column
+    if (_.has(attribute, 'columnType')) {
+      return table.specificType(name, attribute.columnType);
+    }
+
+    switch (attribute.type) {
+      case 'uuid':
+        return table.uuid(name);
+      case 'richtext':
+      case 'text':
+        return table.text(name, 'longtext');
+      case 'json':
+        return definition.client === 'pg'
+          ? table.jsonb(name)
+          : table.text(name, 'longtext');
+      case 'enumeration':
+        return table.enu(name, attribute.enum || []);
+      case 'string':
+      case 'password':
+      case 'email':
+        return table.string(name);
+      case 'integer':
+        return table.integer(name);
+      case 'biginteger':
+        return table.bigInteger(name);
+      case 'float':
+        return table.double(name);
+      case 'decimal':
+        return table.decimal(name, 10, 2);
+      case 'date':
+        return table.date(name);
+      case 'time':
+        return table.time(name, 3);
+      case 'datetime':
+        return table.datetime(name);
+      case 'timestamp':
+        return table.timestamp(name);
+      case 'currentTimestamp': {
+        const col = table.timestamp(name);
+
+        if (definition.client !== 'sqlite3' && tableExists) {
+          return col;
+        }
+
+        return col.defaultTo(ORM.knex.fn.now());
+      }
+      case 'boolean':
+        return table.boolean(name);
+      default:
+        return null;
+    }
+  };
+
   const { hasTimestamps } = loadedModel;
 
   let [createAtCol, updatedAtCol] = ['created_at', 'updated_at'];
@@ -83,33 +180,31 @@ module.exports = async ({
 
       Object.keys(columns).forEach(key => {
         const attribute = columns[key];
-        const type = getType({
-          definition,
-          attribute,
+
+        const col = buildColType({
           name: key,
+          attribute,
+          table: tbl,
           tableExists,
         });
+        if (!col) return;
 
-        if (type) {
-          const col = tbl.specificType(key, type);
-
-          if (attribute.required === true) {
-            if (definition.client !== 'sqlite3' || !tableExists) {
-              col.notNullable();
-            }
-          } else {
-            col.nullable();
+        if (attribute.required === true) {
+          if (definition.client !== 'sqlite3' || !tableExists) {
+            col.notNullable();
           }
+        } else {
+          col.nullable();
+        }
 
-          if (attribute.unique === true) {
-            if (definition.client !== 'sqlite3' || !tableExists) {
-              tbl.unique(key, uniqueColName(table, key));
-            }
+        if (attribute.unique === true) {
+          if (definition.client !== 'sqlite3' || !tableExists) {
+            tbl.unique(key, uniqueColName(table, key));
           }
+        }
 
-          if (alter) {
-            col.alter();
-          }
+        if (alter) {
+          col.alter();
         }
       });
     };
@@ -124,7 +219,7 @@ module.exports = async ({
 
     const createTable = (table, { trx = ORM.knex, ...opts } = {}) => {
       return trx.schema.createTable(table, tbl => {
-        tbl.specificType('id', getIdType(definition));
+        createIdType(tbl, definition);
         createColumns(tbl, attributes, { ...opts, tableExists: false });
       });
     };
@@ -201,7 +296,7 @@ module.exports = async ({
         await createTable(table, { trx });
 
         const attrs = Object.keys(attributes).filter(attribute =>
-          getType({
+          isColumn({
             definition,
             attribute: attributes[attribute],
             name: attribute,
@@ -283,15 +378,22 @@ module.exports = async ({
   // Add created_at and updated_at field if timestamp option is true
   if (hasTimestamps) {
     definition.attributes[createAtCol] = {
-      type: 'timestamp',
+      type: 'currentTimestamp',
     };
     definition.attributes[updatedAtCol] = {
-      type: 'timestampUpdate',
+      type: 'currentTimestamp',
     };
   }
 
-  // Save all attributes (with timestamps)
-  model.allAttributes = _.clone(definition.attributes);
+  // Save all attributes (with timestamps) and right type
+  model.allAttributes = _.assign(_.clone(definition.attributes), {
+    [createAtCol]: {
+      type: 'timestamp',
+    },
+    [updatedAtCol]: {
+      type: 'timestamp',
+    },
+  });
 
   // Equilize tables
   if (connection.options && connection.options.autoMigration !== false) {
@@ -369,79 +471,26 @@ module.exports = async ({
   }
 };
 
-const getType = ({ definition, attribute, name, tableExists = false }) => {
-  const { client } = definition;
-
-  if (!attribute.type) {
-    // Add integer value if there is a relation
+const isColumn = ({ definition, attribute, name }) => {
+  if (!_.has(attribute, 'type')) {
     const relation = definition.associations.find(association => {
       return association.alias === name;
     });
 
-    switch (relation.nature) {
-      case 'oneToOne':
-      case 'manyToOne':
-      case 'oneWay':
-        return definition.primaryKeyType;
-      default:
-        return null;
+    if (!relation) return false;
+
+    if (['oneToOne', 'manyToOne', 'oneWay'].includes(relation.nature)) {
+      return true;
     }
+
+    return false;
   }
 
-  switch (attribute.type) {
-    case 'uuid':
-      return client === 'pg' ? 'uuid' : 'varchar(36)';
-    case 'richtext':
-    case 'text':
-      return client === 'pg' ? 'text' : 'longtext';
-    case 'json':
-      return client === 'pg' ? 'jsonb' : 'longtext';
-    case 'string':
-    case 'enumeration':
-    case 'password':
-    case 'email':
-      return 'varchar(255)';
-    case 'integer':
-      return client === 'pg' ? 'integer' : 'int';
-    case 'biginteger':
-      if (client === 'sqlite3') return 'bigint(53)'; // no choice until the sqlite3 package supports returning strings for big integers
-      return 'bigint';
-    case 'float':
-      return client === 'pg' ? 'double precision' : 'double';
-    case 'decimal':
-      return 'decimal(10,2)';
-    // TODO: split time types as they should be different
-    case 'date':
-    case 'time':
-    case 'datetime':
-      if (client === 'pg') {
-        return 'timestamp with time zone';
-      }
-
-      return 'timestamp';
-    case 'timestamp':
-      if (client === 'pg') {
-        return 'timestamp with time zone';
-      } else if (client === 'sqlite3' && tableExists) {
-        return 'timestamp DEFAULT NULL';
-      }
-      return 'timestamp DEFAULT CURRENT_TIMESTAMP';
-    case 'timestampUpdate':
-      switch (client) {
-        case 'pg':
-          return 'timestamp with time zone';
-        case 'sqlite3':
-          if (tableExists) {
-            return 'timestamp DEFAULT NULL';
-          }
-          return 'timestamp DEFAULT CURRENT_TIMESTAMP';
-        default:
-          return 'timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP';
-      }
-    case 'boolean':
-      return 'boolean';
-    default:
+  if (['component', 'dynamiczone'].includes(attribute.type)) {
+    return false;
   }
+
+  return true;
 };
 
 const storeTable = async (table, attributes) => {
@@ -462,31 +511,6 @@ const storeTable = async (table, attributes) => {
     type: 'object',
     value: JSON.stringify(attributes),
   }).save();
-};
-
-const defaultIdType = {
-  mysql: 'INT AUTO_INCREMENT NOT NULL PRIMARY KEY',
-  pg: 'SERIAL NOT NULL PRIMARY KEY',
-  sqlite3: 'INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL',
-};
-
-const getIdType = definition => {
-  if (definition.primaryKeyType === 'uuid' && definition.client === 'pg') {
-    return 'uuid NOT NULL DEFAULT uuid_generate_v4() NOT NULL PRIMARY KEY';
-  }
-
-  if (definition.primaryKeyType !== 'integer') {
-    const type = getType({
-      definition,
-      attribute: {
-        type: definition.primaryKeyType,
-      },
-    });
-
-    return `${type} NOT NULL PRIMARY KEY`;
-  }
-
-  return defaultIdType[definition.client];
 };
 
 const uniqueColName = (table, key) => `${table}_${key}_unique`;

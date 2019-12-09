@@ -13,11 +13,11 @@ function EditViewLink(props) {
   // Retrieve URL from props
   const url = `${props.getContentTypeBuilderBaseUrl()}${props.getModelName()}`;
 
-  if (props.currentEnvironment === 'development') {
-    return <LiLink {...props} url={url} />;
+  if (props.getModelName() === 'strapi::administrator') {
+    return null;
   }
 
-  return null;
+  return <LiLink {...props} url={url} />;
 }
 
 EditViewLink.propTypes = {
