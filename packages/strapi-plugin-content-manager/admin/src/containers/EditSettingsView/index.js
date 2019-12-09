@@ -399,6 +399,7 @@ const EditSettingsView = ({
                 }}
               >
                 {getInjectedComponents(
+                  'editSettingsView',
                   'left.links',
                   plugins,
                   currentEnvironment,

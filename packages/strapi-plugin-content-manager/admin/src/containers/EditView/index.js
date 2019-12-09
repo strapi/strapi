@@ -281,6 +281,7 @@ const EditView = ({
                     }}
                   />
                   {getInjectedComponents(
+                    'editView',
                     'right.links',
                     plugins,
                     currentEnvironment,

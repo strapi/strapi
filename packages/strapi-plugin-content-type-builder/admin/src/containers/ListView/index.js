@@ -34,7 +34,7 @@ const ListView = () => {
   } = useDataManager();
 
   const { formatMessage } = useGlobalContext();
-  const { push } = useHistory();
+  const { push, goBack } = useHistory();
   const { search } = useLocation();
   const [enablePrompt, togglePrompt] = useState(true);
 
@@ -306,7 +306,7 @@ const ListView = () => {
       value={{ openModalAddField: handleClickOpenModalAddField }}
     >
       <Wrapper>
-        <BackHeader />
+        <BackHeader onClick={goBack} />
         <Prompt
           message={formatMessage({ id: getTrad('prompt.unsaved') })}
           when={hasModelBeenModified && enablePrompt}
@@ -331,6 +331,7 @@ const ListView = () => {
                   dataTypeName={currentDataName}
                   mainTypeName={currentDataName}
                   editTarget={forTarget}
+                  isMain
                 ></List>
               </ListWrapper>
             </div>

@@ -23,7 +23,7 @@ const plugin = {
   initializer: Initializer,
   injectedComponents: [
     {
-      plugin: 'content-manager.editPage',
+      plugin: 'content-manager.editView',
       area: 'right.links',
       component: Link,
       key: 'content-type-builder.link',
@@ -35,7 +35,7 @@ const plugin = {
       },
     },
     {
-      plugin: 'content-manager.editPage',
+      plugin: 'content-manager.editSettingsView',
       area: 'left.links',
       component: Button,
       key: 'content-type-builder.form',

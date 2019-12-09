@@ -127,30 +127,34 @@ function ListRow({
         )}
       </td>
       <td>
-        {configurable && isInDevelopmentMode ? (
+        {isInDevelopmentMode && (
           <>
-            <button type="button" onClick={handleClick}>
-              <FontAwesomeIcon className="link-icon" icon="pencil-alt" />
-            </button>
-            <button
-              type="button"
-              onClick={e => {
-                e.stopPropagation();
+            {configurable ? (
+              <>
+                <button type="button" onClick={handleClick}>
+                  <FontAwesomeIcon className="link-icon" icon="pencil-alt" />
+                </button>
+                <button
+                  type="button"
+                  onClick={e => {
+                    e.stopPropagation();
 
-                removeAttribute(
-                  editTarget,
-                  name,
-                  secondLoopComponentUid || firstLoopComponentUid || ''
-                );
-              }}
-            >
-              <FontAwesomeIcon className="link-icon" icon="trash" />
-            </button>
+                    removeAttribute(
+                      editTarget,
+                      name,
+                      secondLoopComponentUid || firstLoopComponentUid || ''
+                    );
+                  }}
+                >
+                  <FontAwesomeIcon className="link-icon" icon="trash" />
+                </button>
+              </>
+            ) : (
+              <button>
+                <FontAwesomeIcon icon="lock" />
+              </button>
+            )}
           </>
-        ) : (
-          <button>
-            <FontAwesomeIcon icon="lock" />
-          </button>
         )}
       </td>
     </Wrapper>

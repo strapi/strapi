@@ -25,6 +25,7 @@ function List({
   mainTypeName,
   editTarget,
   isFromDynamicZone,
+  isMain,
   firstLoopComponentName,
   firstLoopComponentUid,
   secondLoopComponentName,
@@ -125,11 +126,16 @@ function List({
             })}
           </tbody>
         </table>
-        <ListButton {...addButtonProps}></ListButton>
+        {isMain && isInDevelopmentMode && (
+          <ListButton {...addButtonProps}></ListButton>
+        )}
+        {!isMain && <ListButton {...addButtonProps}></ListButton>}
       </Wrapper>
       {isSub && (
         <div className="plus-icon" onClick={onClickAddField}>
-          <Plus fill={isFromDynamicZone ? '#007EFF' : '#b4b6ba'} />
+          {isInDevelopmentMode && (
+            <Plus fill={isFromDynamicZone ? '#007EFF' : '#b4b6ba'} />
+          )}
         </div>
       )}
     </>
@@ -144,6 +150,7 @@ List.defaultProps = {
   firstLoopComponentName: null,
   firstLoopComponentUid: null,
   isFromDynamicZone: false,
+  isMain: false,
   isSub: false,
   items: [],
   secondLoopComponentName: null,
@@ -159,6 +166,7 @@ List.propTypes = {
   firstLoopComponentName: PropTypes.string,
   firstLoopComponentUid: PropTypes.string,
   isFromDynamicZone: PropTypes.bool,
+  isMain: PropTypes.bool,
   items: PropTypes.instanceOf(Array),
   mainTypeName: PropTypes.string.isRequired,
   secondLoopComponentName: PropTypes.string,

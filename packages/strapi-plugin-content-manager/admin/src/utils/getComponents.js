@@ -7,6 +7,7 @@ import pluginId from '../pluginId';
  * @type {Array} List of external links to display
  */
 const getInjectedComponents = (
+  container,
   area,
   plugins,
   currentEnvironment,
@@ -22,7 +23,9 @@ const getInjectedComponents = (
 
     const compos = injectedComponents
       .filter(compo => {
-        return compo.plugin === `${pluginId}.editPage` && compo.area === area;
+        return (
+          compo.plugin === `${pluginId}.${container}` && compo.area === area
+        );
       })
       .map(compo => {
         const Component = compo.component;
