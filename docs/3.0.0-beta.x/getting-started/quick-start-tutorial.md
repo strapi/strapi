@@ -347,24 +347,24 @@ This brings you to the **Add New Relation** screen.
 
 ![Category Save Strapi Restart](../assets/getting-started/tutorial/category-save-strapi-restart.png 'Category Save Strapi Restart')
 
-After Strapi has restarted, you are ready to create a `Group and Repeatable Field` called **"Hours of Operations."**
+After Strapi has restarted, you are ready to create a `Component and Repeatable Field` called **"Hours of Operations."**
 
-## 5. Create a new Group, and Repeatable Field called, "Hours of Operation"
+## 5. Create a new Component, and Repeatable Field called, "Hours of Operation"
 
-### The Hours of Operation Group
+### The Hours of Operation Component
 
-The `Restaurant` Content Type has a **Group** field named `Hours_of_operation`. This Group is **Repeatable** and for displaying the **Opening hours** and **Closing hours** of a **Restaurant**.
+The `Restaurant` Content Type has a **Component** field named `Hours_of_operation`. This Component is **Repeatable** and for displaying the **Opening hours** and **Closing hours** of a **Restaurant**.
 
-1. Complete these steps to **add a new Group**:
+1. Complete these steps to **add a new Component**:
 
-- Click the `+ Add A Group` link to add a new **Group**
-- Enter a **Name** for your new **Group** (call this `hours_of_operation`), and you can write `Hours of Operation` for the **Description**
+- Click the `+ Add A Component` link to add a new **Component**
+- Enter a **Name** for your new **Component** (call this `hours_of_operation`), and you can write `Hours of Operation` for the **Description**
 
-![Hours of Operation Add Group](../assets/getting-started/tutorial/hours-of-operation-add-group.png 'Hours of Operation Add Group')
+![Hours of Operation Add Component](../assets/getting-started/tutorial/hours-of-operation-add-group.png 'Hours of Operation Add Component')
 
 - Click the `Done` button
 
-2. Now, you are ready to add fields to your **Group**:
+2. Now, you are ready to add fields to your **Component**:
 
 ![Hours of Operation Add Fields](../assets/getting-started/tutorial/hours-of-operation-add-fields.png 'Hours of Operation Add Fields')
 
@@ -409,17 +409,17 @@ You are now ready to add a third field, another **String** field for the **Closi
 
 ![Hours of Operation Strapi Restart](../assets/getting-started/tutorial/hours-of-operation-strapi-restart.png 'Hours of Operation Strapi Restart')
 
-After Strapi has restarted, you are ready to assign this **Hours_of_operation** group to the **Restaurant** Content Type.
+After Strapi has restarted, you are ready to assign this **Hours_of_operation** Component to the **Restaurant** Content Type.
 
 ::: tip NOTE
 
-It would be possible to assign the **Hours_of_operation** group to another **Content Type**, let's say, a **Cafe** Content Type. You have the option to reuse this group across your application.
+It would be possible to assign the **Hours_of_operation** Component to another **Content Type**, let's say, a **Cafe** Content Type. You have the option to reuse this component across your application.
 
 :::
 
-3. Next, you need to assign the **Hours_of_operation** Group to the **Restaurant** Content Type.
+3. Next, you need to assign the **Hours_of_operation** Component to the **Restaurant** Content Type.
 
-To access the **Hours_of_operation** Group from within the **Restaurant** Content Type, you need to **edit** the **Restaurant** Content Type in the **Content Type Builder**.
+To access the **Hours_of_operation** Component from within the **Restaurant** Content Type, you need to **edit** the **Restaurant** Content Type in the **Content Type Builder**.
 
 - If needed, navigate back to the **Content Type Builder**
 
@@ -429,36 +429,36 @@ To access the **Hours_of_operation** Group from within the **Restaurant** Conten
 
 ![Edit Restaurant Add Another Field](../assets/getting-started/tutorial/edit-restaurant-add-another-field.png 'Edit Restaurant Add Another Field')
 
-- Click one of the `+ Add Another Field` buttons, to add the **Group**
+- Click one of the `+ Add Another Field` buttons, to add the **Component**
 
-![Edit Restaurant Group Field](../assets/getting-started/tutorial/edit-restaurant-group-field.png 'Edit Restaurant Group Field')
+![Edit Restaurant Component Field](../assets/getting-started/tutorial/edit-restaurant-group-field.png 'Edit Restaurant Component Field')
 
-- Click on the `Group` field
+- Click on the `Component` field
 
-- Ensure `hours_of_operation` is displayed in the **Select a group** dropdown
-- Provide a **name** for this group in the **Restaurant** Content Type. E.g., `restaurant_hours`
+- Ensure `hours_of_operation` is displayed in the **Select a component** dropdown
+- Provide a **name** for this component in the **Restaurant** Content Type. E.g., `restaurant_hours`
 - Check the `Repeatable field` box
 
-![Restaurant Group Inputs](../assets/getting-started/tutorial/restaurant-group-inputs.png 'Restaurant Group Inputs')
+![Restaurant Component Inputs](../assets/getting-started/tutorial/restaurant-group-inputs.png 'Restaurant Component Inputs')
 
 - Click on the `ADVANCED SETTINGS` tab
 - Check the `Required field` checkbox
 
-![Restaurant Group Advanced Settings](../assets/getting-started/tutorial/restaurant-group-advanced-settings.png 'Restaurant Group Advanced Settings')
+![Restaurant Component Advanced Settings](../assets/getting-started/tutorial/restaurant-group-advanced-settings.png 'Restaurant Component Advanced Settings')
 
 - Click the `Done` button
 
-![Restaurant Group Save](../assets/getting-started/tutorial/restaurant-group-save.png 'Restaurant Group save')
+![Restaurant Component Save](../assets/getting-started/tutorial/restaurant-group-save.png 'Restaurant Component save')
 
 - Click the `Save` button
 
 - Wait for Strapi to restart
 
-![Restaurant Group Strapi Restart](../assets/getting-started/tutorial/restaurant-group-strapi-restart.png 'Restaurant Group Strapi Restart')
+![Restaurant Component Strapi Restart](../assets/getting-started/tutorial/restaurant-group-strapi-restart.png 'Restaurant Component Strapi Restart')
 
 After Strapi has restarted, you are ready to continue to the next section where you customize the user-interface of your **Restaurant** Content Type.
 
-4. Next, you edit the **View Settings** for the new **Hoursofoperation Group** from within the **Content Manager**.
+4. Next, you edit the **View Settings** for the new **Hoursofoperation Component** from within the **Content Manager**.
 
 You can _drag and drop_ fields into a different layout, as well as, _rename the labels_ as two examples of how you can customize the user interface for your **Content Types**.
 
@@ -466,9 +466,9 @@ You can _drag and drop_ fields into a different layout, as well as, _rename the 
 
 ![Content Manager](../assets/getting-started/tutorial/content-manager.png 'Content Manager')
 
-- Click on the `Groups(1)` tab
+- Click on the `Component(1)` tab
 
-![Content Manager Groups Tab](../assets/getting-started/tutorial/content-manager-groups-tab.png 'Content Manager Groups Tab')
+![Content Manager Components Tab](../assets/getting-started/tutorial/content-manager-groups-tab.png 'Content Manager Components Tab')
 
 - Click on `Hours_of_operation` to modify the **View Settings**
 
