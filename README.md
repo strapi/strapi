@@ -72,7 +72,7 @@ Complete installation requirements can be found in the documentation under <a hr
 
 - Ubuntu 18.04/Debian 9.x
 - CentOS/RHEL 8
-- Mac O/S Mojave
+- macOS Mojave
 - Windows 10
 - Docker - [Docker-Repo](https://github.com/strapi/strapi-docker)
 
