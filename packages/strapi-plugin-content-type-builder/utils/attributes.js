@@ -26,6 +26,8 @@ const hasComponent = model => {
   return compoKeys.length > 0;
 };
 
+const isConfigurable = attribute => _.get(attribute, 'configurable', true);
+
 const isRelation = attribute =>
   _.has(attribute, 'target') ||
   _.has(attribute, 'model') ||
@@ -137,6 +139,7 @@ module.exports = {
   toUID,
   hasComponent,
   isRelation,
+  isConfigurable,
 
   replaceTemporaryUIDs,
   formatAttributes,

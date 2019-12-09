@@ -4,6 +4,7 @@ const path = require('path');
 const _ = require('lodash');
 const pluralize = require('pluralize');
 
+const { isConfigurable } = require('../../utils/attributes');
 const { nameToSlug, nameToCollectionName } = require('../../utils/helpers');
 const createSchemaHandler = require('./schema-handler');
 
@@ -58,7 +59,13 @@ module.exports = function createComponentBuilder() {
         .set(['info', 'name'], infos.name)
         .set(['info', 'icon'], infos.icon)
         .set(['info', 'description'], infos.description)
-        .set('attributes', this.convertAttributes(infos.attributes));
+        .setAttributes(this.convertAttributes(infos.attributes));
+
+      if (this.components.size === 0) {
+        strapi.emit('didCreateFirstComponent');
+      } else {
+        strapi.emit('didCreateComponent');
+      }
 
       this.components.set(uid, handler);
 
@@ -75,7 +82,7 @@ module.exports = function createComponentBuilder() {
         throw new Error('component.notFound');
       }
 
-      const handler = this.components.get(uid);
+      const component = this.components.get(uid);
 
       const [, nameUID] = uid.split('.');
 
@@ -88,7 +95,13 @@ module.exports = function createComponentBuilder() {
 
       const newDir = path.join(strapi.dir, 'components', newCategory);
 
-      handler
+      const oldAttributes = component.schema.attributes;
+
+      const newAttributes = _.omitBy(infos.attributes, (attr, key) => {
+        return _.has(oldAttributes, key) && !isConfigurable(oldAttributes[key]);
+      });
+
+      component
         .setUID(newUID)
         .setDir(newDir)
         .set('connection', infos.connection)
@@ -96,8 +109,7 @@ module.exports = function createComponentBuilder() {
         .set(['info', 'name'], infos.name)
         .set(['info', 'icon'], infos.icon)
         .set(['info', 'description'], infos.description)
-        // TODO: keep configurable args etc...
-        .set('attributes', this.convertAttributes(infos.attributes));
+        .setAttributes(this.convertAttributes(newAttributes));
 
       if (newUID !== uid) {
         this.components.forEach(compo => {
@@ -109,7 +121,7 @@ module.exports = function createComponentBuilder() {
         });
       }
 
-      return handler;
+      return component;
     },
 
     deleteComponent(uid) {
