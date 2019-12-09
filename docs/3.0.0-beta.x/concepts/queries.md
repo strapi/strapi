@@ -101,8 +101,8 @@ strapi.query('restaurant').create({
   content: [
     {
       __component: 'blog.rich-text',
-      title: 'some title',
-      subTitle: 'some sub title',
+      title: 'Some title',
+      subTitle: 'Some sub title',
     },
     {
       __component: 'blog.quote',
@@ -150,8 +150,8 @@ strapi.query('restaurant').update(
     content: [
       {
         __component: 'blog.rich-text',
-        title: 'some title',
-        subTitle: 'some sub title',
+        title: 'Some title',
+        subTitle: 'Some sub title',
       },
       {
         __component: 'blog.quote',
@@ -192,8 +192,8 @@ strapi.query('restaurant').update(
       {
         __component: 'blog.rich-text',
         id: 1,
-        title: 'some title',
-        subTitle: 'some sub title',
+        title: 'Some title',
+        subTitle: 'Some sub title',
       },
       {
         __component: 'blog.quote',

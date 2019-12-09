@@ -56,7 +56,7 @@ As an **example** let's consider the following models:
 | :---------- | :----- | :------------------- |
 | image       | media  | The image file       |
 | title       | string | the image title      |
-| description | text   | the image dscription |
+| description | text   | the image description |
 
 :::
 
