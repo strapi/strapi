@@ -6,7 +6,6 @@ import {
   BackHeader,
   ListWrapper,
   useGlobalContext,
-  ViewContainer,
   LayoutIcon,
 } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
@@ -22,6 +21,7 @@ import pluginId from '../../pluginId';
 
 import ListHeader from '../../components/ListHeader';
 import LeftMenu from '../LeftMenu';
+import Wrapper from './Wrapper';
 
 const ListPage = () => {
   const {
@@ -200,6 +200,7 @@ const ListPage = () => {
             disabled: isEqual(modifiedData, initialData) ? true : false,
           },
           {
+            className: 'button-submit',
             color: 'success',
             onClick: () => submitData(),
             title: formatMessage({
@@ -268,6 +269,7 @@ const ListPage = () => {
     label: formatMessage({ id: `${pluginId}.form.button.configure-view` }),
     onClick: goToCMSettingsPage,
     style: { height: '30px' },
+    className: 'button-secondary',
   };
 
   const listActions = isInDevelopmentMode
@@ -302,7 +304,7 @@ const ListPage = () => {
     <ListViewContext.Provider
       value={{ openModalAddField: handleClickOpenModalAddField }}
     >
-      <ViewContainer>
+      <Wrapper>
         <BackHeader />
         <Prompt
           message={formatMessage({ id: getTrad('prompt.unsaved') })}
@@ -333,7 +335,7 @@ const ListPage = () => {
             </div>
           </div>
         </div>
-      </ViewContainer>
+      </Wrapper>
     </ListViewContext.Provider>
   );
 };

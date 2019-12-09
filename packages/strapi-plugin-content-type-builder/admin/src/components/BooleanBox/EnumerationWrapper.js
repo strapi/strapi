@@ -7,6 +7,7 @@ const EnumerationWrapper = styled(Label)`
   position: relative;
   padding-left: 54px;
   padding-top: 17px;
+  cursor: pointer;
 `;
 
 export default EnumerationWrapper;

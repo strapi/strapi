@@ -13,7 +13,7 @@ const ComponentIcon = styled.div`
 
   svg {
     margin: auto;
-    font-size: 18px;
+    font-size: 16px;
     color: #007eff;
   }
 `;

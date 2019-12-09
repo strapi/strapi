@@ -33,6 +33,27 @@ function List({
 }) {
   const { formatMessage } = useGlobalContext();
   const { openModalAddField } = useListView();
+  const onClickAddField = () => {
+    let headerDisplayName = mainTypeName;
+
+    if (firstLoopComponentName) {
+      headerDisplayName = firstLoopComponentName;
+    }
+
+    if (secondLoopComponentUid) {
+      headerDisplayName = secondLoopComponentName;
+    }
+
+    openModalAddField(
+      editTarget,
+      targetUid,
+      headerDisplayName,
+      firstLoopComponentUid ? mainTypeName : null,
+      secondLoopComponentName ? firstLoopComponentName : null,
+      secondLoopComponentUid ? firstLoopComponentUid : null
+    );
+  };
+
   const addButtonProps = {
     icon: !isSub ? <Plus fill="#007eff" /> : false,
     color: 'primary',
@@ -41,26 +62,7 @@ function List({
         ? `${pluginId}.form.button.add.field.to.contentType`
         : `${pluginId}.form.button.add.field.to.component`,
     }),
-    onClick: () => {
-      let headerDisplayName = mainTypeName;
-
-      if (firstLoopComponentName) {
-        headerDisplayName = firstLoopComponentName;
-      }
-
-      if (secondLoopComponentUid) {
-        headerDisplayName = secondLoopComponentName;
-      }
-
-      openModalAddField(
-        editTarget,
-        targetUid,
-        headerDisplayName,
-        firstLoopComponentUid ? mainTypeName : null,
-        secondLoopComponentName ? firstLoopComponentName : null,
-        secondLoopComponentUid ? firstLoopComponentUid : null
-      );
-    },
+    onClick: onClickAddField,
   };
 
   if (!targetUid) {
@@ -122,7 +124,7 @@ function List({
         <ListButton {...addButtonProps}></ListButton>
       </Wrapper>
       {isSub && (
-        <div className="plus-icon">
+        <div className="plus-icon" onClick={onClickAddField}>
           <Plus fill="#b4b6ba" />
         </div>
       )}

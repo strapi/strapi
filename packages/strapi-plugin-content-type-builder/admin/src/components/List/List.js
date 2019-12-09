@@ -126,6 +126,7 @@ const Wrapper = styled(List)`
     text-align: center;
     line-height: 27px;
     display: flex;
+    cursor: pointer;
     svg {
       margin: auto;
       width: 11px;

@@ -46,7 +46,8 @@ const Wrapper = styled.div`
     }
     // Search
     .search-wrapper {
-      margin-bottom: 16px;
+      // margin-bottom: 16px;
+      margin-bottom: 7px;
       &::after {
         display: block;
         content: '';

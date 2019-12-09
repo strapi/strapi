@@ -12,10 +12,10 @@ const ListButton = styled(Button)`
   height: 54px;
   border-top: 1px solid #aed4fb;
   color: #007eff;
-  font-weight: 600;
+  font-weight: 500;
   border-radius: 0;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+
   svg {
     vertical-align: initial;
   }

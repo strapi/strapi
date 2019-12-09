@@ -35,7 +35,12 @@ const Wrapper = styled.tr`
     }
   }
   td:nth-child(2) {
-    width: 25rem;
+    // width: 25rem;
+    ${({ loopNumber }) => {
+      return `
+        width: calc(25rem - ${5 * loopNumber}rem);
+      `;
+    }}
     p {
       font-weight: 500;
       text-transform: capitalize;

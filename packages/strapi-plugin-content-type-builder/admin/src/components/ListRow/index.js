@@ -1,15 +1,15 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { capitalize } from 'lodash';
+import { get } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { AttributeIcon } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
-
-import Wrapper from './Wrapper';
 import Component from '../../icons/Component';
+import UpperFist from '../UpperFirst';
+import Wrapper from './Wrapper';
 
 function ListRow({
   configurable,
@@ -27,7 +27,7 @@ function ListRow({
   secondLoopComponentName,
   secondLoopComponentUid,
 }) {
-  const { removeAttribute } = useDataManager();
+  const { contentTypes, removeAttribute } = useDataManager();
   const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type)
     ? 'number'
     : type;
@@ -39,6 +39,11 @@ function ListRow({
     readableType = 'text';
   }
 
+  const contentTypeFriendlyName = get(
+    contentTypes,
+    [target, 'schema', 'name'],
+    ''
+  );
   const src = target ? 'relation' : ico;
 
   const handleClick = () => {
@@ -70,6 +75,15 @@ function ListRow({
       );
     }
   };
+  let loopNumber;
+
+  if (secondLoopComponentUid && firstLoopComponentUid) {
+    loopNumber = 2;
+  } else if (firstLoopComponentUid) {
+    loopNumber = 1;
+  } else {
+    loopNumber = 0;
+  }
 
   return (
     <Wrapper
@@ -78,12 +92,13 @@ function ListRow({
         target ? 'relation-row' : '',
         configurable ? 'clickable' : '',
       ]}
+      loopNumber={loopNumber}
     >
       <td>
         <AttributeIcon key={src} type={src} />
         <Component fill="#f3f4f4" />
       </td>
-      <td styles={{ fontWeight: 600 }}>
+      <td style={{ fontWeight: 600 }}>
         <p>{name}</p>
       </td>
       <td>
@@ -96,7 +111,7 @@ function ListRow({
             <FormattedMessage id={`${pluginId}.from`}>
               {msg => (
                 <span style={{ fontStyle: 'italic' }}>
-                  {capitalize(target)}
+                  <UpperFist content={contentTypeFriendlyName} />
                   &nbsp;
                   {plugin && `(${msg}: ${plugin})`}
                 </span>
