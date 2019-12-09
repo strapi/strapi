@@ -5,12 +5,15 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { sortBy } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { LeftMenuList, useGlobalContext } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
+import getTrad from '../../utils/getTrad';
 import CustomLink from '../../components/CustomLink';
 import useDataManager from '../../hooks/useDataManager';
+import makeSearch from '../../utils/makeSearch';
 import Wrapper from './Wrapper';
 
 const displayNotificationCTNotSaved = () => {
@@ -19,20 +22,38 @@ const displayNotificationCTNotSaved = () => {
   );
 };
 
-function LeftMenu() {
+function LeftMenu({ wait }) {
   const {
     components,
     componentsGroupedByCategory,
     contentTypes,
+    isInDevelopmentMode,
     sortedContentTypesList,
   } = useDataManager();
-  const { currentEnvironment } = useGlobalContext();
+  const { formatMessage } = useGlobalContext();
   const { push } = useHistory();
-  const isProduction = currentEnvironment === 'production';
+
   const componentsData = sortBy(
     Object.keys(componentsGroupedByCategory).map(category => ({
       name: category,
       title: category,
+      isEditable: isInDevelopmentMode,
+      onClickEdit: (e, data) => {
+        e.stopPropagation();
+
+        const search = makeSearch({
+          actionType: 'edit',
+          modalType: 'editCategory',
+          categoryName: data.name,
+          headerDisplayName: data.name,
+          headerDisplayCategory: formatMessage({
+            id: getTrad('modalForm.header.categories'),
+          }),
+          settingType: 'base',
+        });
+
+        push({ search });
+      },
       links: sortBy(
         componentsGroupedByCategory[category].map(compo => ({
           name: compo.uid,
@@ -44,6 +65,7 @@ function LeftMenu() {
     })),
     obj => obj.title
   );
+
   const canOpenModalCreateCTorComponent = () => {
     return (
       !Object.keys(contentTypes).some(
@@ -55,8 +77,9 @@ function LeftMenu() {
     );
   };
 
-  const handleClickOpenModal = type => {
+  const handleClickOpenModal = async type => {
     if (canOpenModalCreateCTorComponent()) {
+      await wait();
       push({
         search: `modalType=${type}&actionType=create&settingType=base&forTarget=${type}`,
       });
@@ -72,16 +95,17 @@ function LeftMenu() {
         id: `${pluginId}.menu.section.models.name.`,
       },
       searchable: true,
-      customLink: {
-        Component: CustomLink,
-        componentProps: {
-          disabled: isProduction,
-          id: `${pluginId}.button.model.create`,
-          onClick: () => {
-            handleClickOpenModal('contentType');
-          },
-        },
-      },
+      customLink: isInDevelopmentMode
+        ? {
+            Component: CustomLink,
+            componentProps: {
+              id: `${pluginId}.button.model.create`,
+              onClick: () => {
+                handleClickOpenModal('contentType');
+              },
+            },
+          }
+        : null,
       links: sortedContentTypesList,
     },
     {
@@ -90,16 +114,17 @@ function LeftMenu() {
         id: `${pluginId}.menu.section.components.name.`,
       },
       searchable: true,
-      customLink: {
-        Component: CustomLink,
-        componentProps: {
-          disabled: isProduction,
-          id: `${pluginId}.button.component.create`,
-          onClick: () => {
-            handleClickOpenModal('component');
-          },
-        },
-      },
+      customLink: isInDevelopmentMode
+        ? {
+            Component: CustomLink,
+            componentProps: {
+              id: `${pluginId}.button.component.create`,
+              onClick: () => {
+                handleClickOpenModal('component');
+              },
+            },
+          }
+        : null,
       links: componentsData,
     },
   ];
@@ -112,5 +137,13 @@ function LeftMenu() {
     </Wrapper>
   );
 }
+
+LeftMenu.defaultProps = {
+  wait: () => {},
+};
+
+LeftMenu.propTypes = {
+  wait: PropTypes.func,
+};
 
 export default LeftMenu;

@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Inputs } from '@buffetjs/custom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import getTrad from '../../utils/getTrad';
 import RelationTargetPicker from '../RelationTargetPicker';
@@ -24,7 +25,10 @@ const RelationFormBox = ({
       <div className="box-header">
         {isMain ? (
           <p>
-            <i className="fa fa-caret-square-o-right" />
+            <FontAwesomeIcon
+              icon={['far', 'caret-square-right']}
+              style={{ fontSize: 12, marginTop: '-3px' }}
+            />
             {header}
           </p>
         ) : (

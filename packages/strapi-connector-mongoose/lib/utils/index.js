@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const Mongoose = require('mongoose');
+const { parseType } = require('strapi-utils');
 
 /**
  * Module dependencies
@@ -29,35 +30,50 @@ module.exports = (mongoose = Mongoose) => {
   const convertType = mongooseType => {
     switch (mongooseType.toLowerCase()) {
       case 'array':
-        return Array;
+        return { type: Array };
       case 'boolean':
-        return 'Boolean';
+        return { type: 'Boolean' };
       case 'binary':
-        return 'Buffer';
-      case 'date':
-      case 'datetime':
+        return { type: 'Buffer' };
       case 'time':
+        return {
+          type: String,
+          validate: value => parseType({ type: 'time', value }),
+          set: value => parseType({ type: 'time', value }),
+        };
+      case 'date':
+        return {
+          type: String,
+          validate: value => parseType({ type: 'date', value }),
+          set: value => parseType({ type: 'date', value }),
+        };
+      case 'datetime':
+        return {
+          type: Date,
+        };
       case 'timestamp':
-        return Date;
+        return {
+          type: Date,
+        };
       case 'decimal':
-        return 'Decimal';
+        return { type: 'Decimal' };
       case 'float':
-        return 'Float';
+        return { type: 'Float' };
       case 'json':
-        return 'Mixed';
+        return { type: 'Mixed' };
       case 'biginteger':
-        return 'Long';
+        return { type: 'Long' };
       case 'integer':
-        return 'Number';
+        return { type: 'Number' };
       case 'uuid':
-        return 'ObjectId';
+        return { type: 'ObjectId' };
       case 'email':
       case 'enumeration':
       case 'password':
       case 'string':
       case 'text':
       case 'richtext':
-        return 'String';
+        return { type: 'String' };
       default:
         return undefined;
     }

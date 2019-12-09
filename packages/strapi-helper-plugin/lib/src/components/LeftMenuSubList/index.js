@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Collapse } from 'reactstrap';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Dropdown from './Dropdown';
 import LeftMenuLink from '../LeftMenuLink';
 
-const LeftMenuSubList = ({ name, links, isSearching, isFirstItem }) => {
+const LeftMenuSubList = ({
+  isEditable,
+  isFirstItem,
+  isSearching,
+  links,
+  name,
+  onClickEdit,
+}) => {
   const [collapse, setCollapse] = useState(isFirstItem);
 
   const toggle = () => {
@@ -24,8 +31,19 @@ const LeftMenuSubList = ({ name, links, isSearching, isFirstItem }) => {
   return (
     links.length > 0 && (
       <Dropdown>
-        <button onClick={toggle} className={collapse ? 'is-open' : ''}>
+        <button
+          onClick={toggle}
+          className={`editable ${collapse ? 'is-open' : ''}`}
+        >
           {name}
+          {isEditable && (
+            <FontAwesomeIcon
+              icon="pencil-alt"
+              onClick={e => {
+                onClickEdit(e, { name, links, isFirstItem, isSearching });
+              }}
+            />
+          )}
         </button>
         <Collapse isOpen={collapse}>
           <ul>
@@ -45,17 +63,21 @@ const LeftMenuSubList = ({ name, links, isSearching, isFirstItem }) => {
 };
 
 LeftMenuSubList.defaultProps = {
-  name: null,
-  links: [],
-  isSearching: false,
+  isEditable: false,
   isFirstItem: false,
+  isSearching: false,
+  links: [],
+  name: null,
+  onClickEdit: () => {},
 };
 
 LeftMenuSubList.propTypes = {
-  name: PropTypes.string,
-  links: PropTypes.array,
-  isSearching: PropTypes.bool,
+  isEditable: PropTypes.bool,
   isFirstItem: PropTypes.bool,
+  isSearching: PropTypes.bool,
+  links: PropTypes.array,
+  name: PropTypes.string,
+  onClickEdit: PropTypes.func,
 };
 
 export default LeftMenuSubList;

@@ -214,7 +214,7 @@ module.exports = {
 
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
-        const normalizedName = _.toLower(name);
+        const normalizedName = _.camelCase(name);
 
         if (isController) {
           const values = await resolver.call(null, context);

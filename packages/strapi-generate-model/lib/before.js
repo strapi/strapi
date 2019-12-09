@@ -138,6 +138,7 @@ module.exports = (scope, cb) => {
   // Get default connection
   try {
     scope.connection =
+      scope.args.connection ||
       JSON.parse(
         fs.readFileSync(
           path.resolve(
@@ -148,7 +149,8 @@ module.exports = (scope, cb) => {
             'database.json'
           )
         )
-      ).defaultConnection || '';
+      ).defaultConnection ||
+      '';
   } catch (err) {
     return cb.invalid(err);
   }

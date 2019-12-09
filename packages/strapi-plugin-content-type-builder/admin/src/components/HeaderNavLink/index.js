@@ -15,7 +15,7 @@ function HeaderNavLink({ custom, isDisabled, id, isActive, onClick }) {
   return (
     <Wrapper
       isActive={isActive}
-      style={{ cursor: 'pointer' }}
+      style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
       onClick={e => {
         if (isDisabled) {
           e.preventDefault();

@@ -537,7 +537,8 @@ const buildShadowCRUD = (models, plugin) => {
         attributes,
         model,
         name,
-        queries.plural
+        queries.plural,
+        plugin
       );
       if (modelAggregator) {
         acc.definition += modelAggregator.type;

@@ -30,7 +30,7 @@ const ButtonContainer = ({
         <FormattedMessage id="documentation.components.Row.regenerate" />
       </StyledButton>
       <StyledButton
-        type={version === currentDocVersion ? '' : 'trash-alt'}
+        type={version === currentDocVersion ? '' : 'trash'}
         onClick={() => onClickDelete(version)}
       />
     </div>

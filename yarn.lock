@@ -778,13 +778,13 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@buffetjs/core@1.1.0", "@buffetjs/core@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@buffetjs/core/-/core-1.1.0.tgz#45de63b02bbe1e12973a18dbaa52199c86754435"
-  integrity sha512-K/6s+U45ypPPFkm8TVv9VOxe/YwGevMIJy7EUDbSprOx00LN4TQszKSVlcJw/dVGCLSiCNmTEbAT5HStE1I6SA==
+"@buffetjs/core@1.1.1", "@buffetjs/core@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@buffetjs/core/-/core-1.1.1.tgz#3e1bb3ab99e93bf8e78b5ab19a2a5412f714d385"
+  integrity sha512-ob8uuURql0VsLHChQ8+wEr8BUCizLVUFJ9xU5z9FUyaXgPj58GGBGL8c74eJidyre+AiY4soCc/udQ5BPLMNtw==
   dependencies:
-    "@buffetjs/icons" "1.1.0"
-    "@buffetjs/styles" "1.1.0"
+    "@buffetjs/icons" "1.1.1"
+    "@buffetjs/styles" "1.1.1"
     "@buffetjs/utils" "1.1.0"
     "@fortawesome/fontawesome-svg-core" "^1.2.25"
     "@fortawesome/free-regular-svg-icons" "^5.11.2"
@@ -796,26 +796,26 @@
     react-dates "^21.1.0"
     react-moment-proptypes "^1.7.0"
 
-"@buffetjs/custom@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@buffetjs/custom/-/custom-1.1.0.tgz#45de81d90a7aa4d0d7d8cd3b4acabb7836f0b692"
-  integrity sha512-2WlyTRKUQHZeY/zxfXtF9HrHY7zca1ZvgcwcnfSdRJJqEAMd44GtvzgBZO2aHcrdrm8mRdtzc4/Nm7yCb+ediA==
+"@buffetjs/custom@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@buffetjs/custom/-/custom-1.1.1.tgz#0fd0d5a39245a388603d9229dba91aa733e2e57b"
+  integrity sha512-iRnZfbbwHM3PcQyY0VIeIJBg+XDqOc6fv+7ZF3nhhvIjBaZ6cyJ9pWBzCeVq9Ap7B3C8d09KPMsCWEHbXwJTlQ==
   dependencies:
-    "@buffetjs/core" "1.1.0"
-    "@buffetjs/styles" "1.1.0"
+    "@buffetjs/core" "1.1.1"
+    "@buffetjs/styles" "1.1.1"
     "@buffetjs/utils" "1.1.0"
     moment "^2.24.0"
     react-moment-proptypes "^1.7.0"
 
-"@buffetjs/icons@1.1.0", "@buffetjs/icons@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@buffetjs/icons/-/icons-1.1.0.tgz#2934c10b512dd41c66759694ae18c53cdf7403b0"
-  integrity sha512-vsUz7p0xZYGrgcNtWw4970Y+mA0A818PN1/V1ihk+CdR0aEqNfj7uLlzmBQK/ptBCxhudDIoTM+16gzKRm6mpQ==
+"@buffetjs/icons@1.1.1", "@buffetjs/icons@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@buffetjs/icons/-/icons-1.1.1.tgz#59dfedb1f3d30b1a5251fcedf55c4e95fa7b3ea4"
+  integrity sha512-zKg6pm3xwtDG0yOcBK64XG/DdOkuea4D8GG5xb+9ypfd8TxqV58zJlZIxvLOcMNX/2I0d/CCHIgRcEdzq19ivg==
 
-"@buffetjs/styles@1.1.0", "@buffetjs/styles@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@buffetjs/styles/-/styles-1.1.0.tgz#e5bd3b1bdf2c72b6a6734d902a5723bc4cd0d734"
-  integrity sha512-zs9uWEOxJQmW/lPUuYRO96I/4oY3C8UHvcjiIkJUEa/C4fC+IhiNVnlljS2/rp+7MxbH6F+EX2xd6U0r3QJykg==
+"@buffetjs/styles@1.1.1", "@buffetjs/styles@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@buffetjs/styles/-/styles-1.1.1.tgz#abae274cbef69556f371072dc65950808edb9bc3"
+  integrity sha512-AGHgURE/4dWpUCMRGD7cfCT86xb6Sh+cVuXwSEwANw4u6+eJQdzvNMrQp+GQAcRV3U+GpMbIOBEwUAWSzpIuOA==
   dependencies:
     "@fortawesome/fontawesome-svg-core" "^1.2.22"
     "@fortawesome/free-regular-svg-icons" "^5.10.2"
@@ -823,7 +823,7 @@
     "@fortawesome/react-fontawesome" "^0.1.4"
     react-dates "^21.1.0"
 
-"@buffetjs/utils@1.1.0", "@buffetjs/utils@^1.1.0":
+"@buffetjs/utils@1.1.0", "@buffetjs/utils@^1.1.1":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@buffetjs/utils/-/utils-1.1.0.tgz#04a7abb81256506ecd32e255c5ab0a199560bbbd"
   integrity sha512-mm84s2DuaGGwNfxjR7UhLs3qAEY5dnmAFGl5FMoBcflPN7wRwthR//2rbZsOjyXhnW1J2foamYtxgzA3gqI3Ng==
@@ -4692,7 +4692,7 @@ check-more-types@2.24.0:
   resolved "https://registry.yarnpkg.com/check-more-types/-/check-more-types-2.24.0.tgz#1420ffb10fd444dcfc79b43891bbfffd32a84600"
   integrity sha1-FCD/sQ/URNz8ebQ4kbv//TKoRgA=
 
-cheerio@^1.0.0-rc.2:
+cheerio@^1.0.0-rc.2, cheerio@^1.0.0-rc.3:
   version "1.0.0-rc.3"
   resolved "https://registry.yarnpkg.com/cheerio/-/cheerio-1.0.0-rc.3.tgz#094636d425b2e9c0f4eb91a46c05630c9a1a8bf6"
   integrity sha512-0td5ijfUPuubwLUu0OBoe98gZj8C/AA+RW3v67GPlGOrvxWjZmBXiBCRU+I8VEiNyJzjth40POfHiz2RB3gImA==
@@ -5954,10 +5954,15 @@ date-and-time@^0.6.3:
   resolved "https://registry.yarnpkg.com/date-and-time/-/date-and-time-0.6.3.tgz#2daee52df67c28bd93bce862756ac86b68cf4237"
   integrity sha512-lcWy3AXDRJOD7MplwZMmNSRM//kZtJaLz4n6D1P5z9wEmZGBKhJRBIr1Xs9KNQJmdXPblvgffynYji4iylUTcA==
 
-date-fns@^1.27.2, date-fns@^1.30.1:
+date-fns@^1.27.2:
   version "1.30.1"
   resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-1.30.1.tgz#2e71bf0b119153dbb4cc4e88d9ea5acfb50dc05c"
   integrity sha512-hBSVCvSmWC+QypYObzwGOd9wqdDpOt+0wl0KbU+R+uuZBS1jN8VsD1ss3irQDknRj5NvxiTF6oj/nDRnN/UQNw==
+
+date-fns@^2.8.1:
+  version "2.8.1"
+  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-2.8.1.tgz#2109362ccb6c87c3ca011e9e31f702bc09e4123b"
+  integrity sha512-EL/C8IHvYRwAHYgFRse4MGAPSqlJVlOrhVYZ75iQBKrnv+ZedmYsgwH3t+BCDuZDXpoo07+q9j4qgSSOa7irJg==
 
 date-now@^0.1.4:
   version "0.1.4"
@@ -8528,6 +8533,11 @@ graphql-extensions@^0.10.7:
     apollo-server-env "^2.4.3"
     apollo-server-types "^0.2.8"
 
+graphql-iso-date@^3.6.1:
+  version "3.6.1"
+  resolved "https://registry.yarnpkg.com/graphql-iso-date/-/graphql-iso-date-3.6.1.tgz#bd2d0dc886e0f954cbbbc496bbf1d480b57ffa96"
+  integrity sha512-AwFGIuYMJQXOEAgRlJlFL4H1ncFM8n8XmoVDTNypNOZyQ8LFDG2ppMFlsS862BSTCDcSUfHp8PD3/uJhv7t59Q==
+
 graphql-playground-html@1.6.13:
   version "1.6.13"
   resolved "https://registry.yarnpkg.com/graphql-playground-html/-/graphql-playground-html-1.6.13.tgz#16d61416161d96f2725bc37b0b64d135a189f252"
@@ -8573,13 +8583,6 @@ graphql-tools@^4.0.0:
     deprecated-decorator "^0.1.6"
     iterall "^1.1.3"
     uuid "^3.1.0"
-
-graphql-type-datetime@^0.2.4:
-  version "0.2.4"
-  resolved "https://registry.yarnpkg.com/graphql-type-datetime/-/graphql-type-datetime-0.2.4.tgz#438cd3886ad2c7898af057ee3c4a5666bd153095"
-  integrity sha512-R/4Y7L+7WtBfW3g2WGv4NcU+hSPPES4JsiDzLl8sj30hEDxQyIwvJ2yJi8DGcBE8s325B6Q4ky5qwicZ7F0b7A==
-  dependencies:
-    moment "^2.22.2"
 
 graphql-type-json@0.3.1:
   version "0.3.1"
@@ -12282,7 +12285,7 @@ moment@2.22.2:
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.22.2.tgz#3c257f9839fc0e93ff53149632239eb90783ff66"
   integrity sha1-PCV/mDn8DpP/UxSWMiOeuQeD/2Y=
 
-"moment@>= 2.9.0", moment@>=1.6.0, moment@^2.16.0, moment@^2.22.2, moment@^2.24.0:
+"moment@>= 2.9.0", moment@>=1.6.0, moment@^2.16.0, moment@^2.24.0:
   version "2.24.0"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.24.0.tgz#0d055d53f5052aa653c9f6eb68bb5d12bf5c2b5b"
   integrity sha512-bV7f+6l2QigeBBZSM/6yTNq4P2fNpSWj/0e7jQcy87A8e7o2nAfP/34/2ky5Vw4B9S446EtIhodAzkFCcR4dQg==
@@ -13653,10 +13656,10 @@ path-to-regexp@^1.1.1, path-to-regexp@^1.7.0:
   dependencies:
     isarray "0.0.1"
 
-path-to-regexp@^3.0.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-3.1.0.tgz#f45a9cc4dc6331ae8f131e0ce4fde8607f802367"
-  integrity sha512-PtHLisEvUOepjc+sStXxJ/pDV/s5UBTOKWJY2SOz3e6E/iN/jLknY9WL72kTwRrwXDUbZTEAtSnJbz2fF127DA==
+path-to-regexp@^3.1.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-3.2.0.tgz#fa7877ecbc495c601907562222453c43cc204a5f"
+  integrity sha512-jczvQbCUS7XmS7o+y1aEO9OBVFeZBQ1MDSEqmO7xSoPgOPoowY/SxLpZ6Vh97/8qHZOteiCKb7gkG9gA2ZUxJA==
 
 path-type@^1.0.0:
   version "1.1.0"
@@ -17507,10 +17510,10 @@ svgo@^1.0.0, svgo@^1.0.5:
     unquote "~1.1.1"
     util.promisify "~1.0.0"
 
-swagger-ui-dist@3.22.1:
-  version "3.22.1"
-  resolved "https://registry.yarnpkg.com/swagger-ui-dist/-/swagger-ui-dist-3.22.1.tgz#a7a4ebc5af5d28f7c9e1436be9a9258f5d23497e"
-  integrity sha512-KITbEqXkXrjGH12A0lpVZlH3uODFkwUh8d15My1YD4N0PSZDnIiC1iMFT6ryyuJxDYWZh0qezKpPqa5FRowngw==
+swagger-ui-dist@3.24.3:
+  version "3.24.3"
+  resolved "https://registry.yarnpkg.com/swagger-ui-dist/-/swagger-ui-dist-3.24.3.tgz#99754d11b0ddd314a1a50db850acb415e4b0a0c6"
+  integrity sha512-kB8qobP42Xazaym7sD9g5mZuRL4416VIIYZMqPEIskkzKqbPLQGEiHA3ga31bdzyzFLgr6Z797+6X1Am6zYpbg==
 
 switchback@^2.0.1:
   version "2.0.5"

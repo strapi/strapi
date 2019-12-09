@@ -49,7 +49,7 @@ const ComponentIconPicker = ({
   };
 
   return (
-    <Wrapper>
+    <Wrapper error={error !== null}>
       <Label htmlFor={name} style={{ marginBottom: 12 }}>
         {label}
       </Label>

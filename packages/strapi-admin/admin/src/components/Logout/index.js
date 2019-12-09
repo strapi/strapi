@@ -32,8 +32,7 @@ const Logout = ({ history: { push } }) => {
   };
   const handleGoToAdministrator = () => {
     push({
-      pathname: '/plugins/content-manager/administrator',
-      search: '?source=admin',
+      pathname: '/plugins/content-manager/strapi::administrator',
     });
   };
   const handleLogout = () => {

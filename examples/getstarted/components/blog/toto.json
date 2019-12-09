@@ -1,0 +1,13 @@
+{
+  "connection": "default",
+  "collectionName": "components_blog_totos",
+  "info": {
+    "name": "toto",
+    "icon": "ad"
+  },
+  "attributes": {
+    "jjj": {
+      "type": "string"
+    }
+  }
+}

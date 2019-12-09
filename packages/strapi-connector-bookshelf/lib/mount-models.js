@@ -1,7 +1,6 @@
 'use strict';
 const _ = require('lodash');
 const { singular } = require('pluralize');
-const dateFns = require('date-fns');
 
 const utilsModels = require('strapi-utils').models;
 const relations = require('./relations');
@@ -10,6 +9,8 @@ const {
   createComponentJoinTables,
   createComponentModels,
 } = require('./generate-component-relations');
+const { createParser } = require('./parser');
+const { createFormatter } = require('./formatter');
 
 const populateFetch = require('./populate');
 
@@ -457,12 +458,14 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
     // Call this callback function after we are done parsing
     // all attributes for relationships-- see below.
 
+    const parseValue = createParser();
     try {
       // External function to map key that has been updated with `columnName`
       const mapper = (params = {}) => {
         Object.keys(params).map(key => {
           const attr = definition.attributes[key] || {};
-          params[key] = castValueFromType(attr.type, params[key], definition);
+
+          params[key] = parseValue(attr.type, params[key]);
         });
 
         return _.mapKeys(params, (value, key) => {
@@ -611,92 +614,54 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
             : Promise.resolve();
         });
 
-        //eslint-disable-next-line
-        this.on('saving', (instance, attrs, options) => {
-          instance.attributes = mapper(instance.attributes);
-          attrs = mapper(attrs);
+        this.on('saving', (instance, attrs) => {
+          instance.attributes = _.assign(instance.attributes, mapper(attrs));
 
           return _.isFunction(target[model.toLowerCase()]['beforeSave'])
             ? target[model.toLowerCase()]['beforeSave']
             : Promise.resolve();
         });
 
-        // Convert to JSON format stringify json for mysql database
-        if (definition.client === 'mysql' || definition.client === 'sqlite3') {
-          const events = [
-            {
-              name: 'saved',
-              target: 'afterSave',
-            },
-            {
-              name: 'fetched',
-              target: 'afterFetch',
-            },
-            {
-              name: 'fetched:collection',
-              target: 'afterFetchAll',
-            },
-          ];
-
-          const formatter = attributes => {
-            Object.keys(attributes).forEach(key => {
-              const attr = definition.attributes[key] || {};
-
-              if (attributes[key] === null) return;
-
-              if (attr.type === 'json') {
-                attributes[key] = JSON.parse(attributes[key]);
-              }
-
-              if (attr.type === 'boolean') {
-                if (typeof attributes[key] === 'boolean') {
-                  return;
-                }
-
-                const strVal = attributes[key].toString();
-                if (strVal === '1') {
-                  attributes[key] = true;
-                } else if (strVal === '0') {
-                  attributes[key] = false;
-                } else {
-                  attributes[key] = null;
-                }
-              }
-
-              if (attr.type === 'date' && definition.client === 'sqlite3') {
-                attributes[key] = dateFns.parse(attributes[key]);
-              }
-
-              if (
-                attr.type === 'biginteger' &&
-                definition.client === 'sqlite3'
-              ) {
-                attributes[key] = attributes[key].toString();
-              }
-            });
-          };
-
-          events.forEach(event => {
-            let fn;
-
-            if (event.name.indexOf('collection') !== -1) {
-              fn = instance =>
-                instance.models.map(entry => {
-                  formatter(entry.attributes);
-                });
-            } else {
-              fn = instance => formatter(instance.attributes);
-            }
-
-            this.on(event.name, instance => {
-              fn(instance);
-
-              return _.isFunction(target[model.toLowerCase()][event.target])
-                ? target[model.toLowerCase()][event.target]
-                : Promise.resolve();
-            });
+        const formatValue = createFormatter(definition.client);
+        function formatEntry(entry) {
+          Object.keys(entry.attributes).forEach(key => {
+            const attr = definition.attributes[key] || {};
+            entry.attributes[key] = formatValue(attr, entry.attributes[key]);
           });
         }
+
+        function formatOutput(instance) {
+          if (Array.isArray(instance.models)) {
+            instance.models.forEach(entry => formatEntry(entry));
+          } else {
+            formatEntry(instance);
+          }
+        }
+
+        const events = [
+          {
+            name: 'saved',
+            target: 'afterSave',
+          },
+          {
+            name: 'fetched',
+            target: 'afterFetch',
+          },
+          {
+            name: 'fetched:collection',
+            target: 'afterFetchAll',
+          },
+        ];
+
+        events.forEach(event => {
+          this.on(event.name, instance => {
+            formatOutput(instance);
+
+            return _.isFunction(target[model.toLowerCase()][event.target])
+              ? target[model.toLowerCase()][event.target]
+              : Promise.resolve();
+          });
+        });
       };
 
       loadedModel.hidden = _.keys(
@@ -747,35 +712,4 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
   });
 
   return Promise.all(updates);
-};
-
-const castValueFromType = (type, value /* definition */) => {
-  // do not cast null values
-  if (value === null) return null;
-
-  switch (type) {
-    case 'json':
-      return JSON.stringify(value);
-    // TODO: handle real date format 1970-01-01
-    // TODO: handle real time format 12:00:00
-    case 'time':
-    case 'timestamp':
-    case 'date':
-    case 'datetime': {
-      const date = dateFns.parse(value);
-      if (dateFns.isValid(date)) return date;
-
-      date.setTime(value);
-
-      if (!dateFns.isValid(date)) {
-        throw new Error(
-          `Invalid ${type} format, expected a timestamp or an ISO date`
-        );
-      }
-
-      return date;
-    }
-    default:
-      return value;
-  }
 };

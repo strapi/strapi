@@ -22,7 +22,7 @@ IcoContainer.propTypes = {
 IcoContainer.defaultProps = {
   icons: [
     { icoType: 'pencil', onClick: () => {} },
-    { icoType: 'trash-alt', onClick: () => {} },
+    { icoType: 'trash', onClick: () => {} },
   ],
 };
 

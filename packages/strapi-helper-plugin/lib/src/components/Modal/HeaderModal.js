@@ -4,7 +4,7 @@ import { ModalHeader } from 'reactstrap';
 const HeaderModal = styled(ModalHeader)`
   position: absolute;
   top: 0;
-  right: 0;
+  right: 17px;
   width: auto;
   padding: 0;
   z-index: 999;
@@ -16,10 +16,11 @@ const HeaderModal = styled(ModalHeader)`
     opacity: 1;
     font-size: 1.2rem;
     font-weight: 100;
+    position: relative;
+    transform: rotate(45deg);
     &:hover,
     &:focus {
-      color: #c3c5c8;
-      opacity: 1;
+      opacity: 1 !important;
       outline: 0 !important;
       cursor: pointer;
     }

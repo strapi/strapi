@@ -1,6 +1,6 @@
 import React from 'react';
 import * as yup from 'yup';
-import { get, isEmpty } from 'lodash';
+import { get, isEmpty, toLower } from 'lodash';
 import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../../pluginId';
@@ -289,9 +289,7 @@ const forms = {
             const requiredItem = [[fields.required]];
 
             return {
-              items: data.repeatable
-                ? [...requiredItem, ...dynamiczoneItems]
-                : requiredItem,
+              items: data.repeatable ? [...dynamiczoneItems] : requiredItem,
             };
           }
         }
@@ -365,6 +363,7 @@ const forms = {
           items.splice(0, 1, [
             {
               ...fields.default,
+              // type: data.type || 'date',
               type: 'date',
               value: null,
               withDefaultValue: false,
@@ -647,45 +646,52 @@ const forms = {
     },
   },
   contentType: {
-    schema(alreadyTakenAttributes) {
+    schema(alreadyTakenNames, isEditing, ctUid) {
+      const takenNames = isEditing
+        ? alreadyTakenNames.filter(uid => uid !== ctUid)
+        : alreadyTakenNames;
+
       return yup.object().shape({
         name: yup
           .string()
-          .unique(errorsTrads.unique, alreadyTakenAttributes, createUid)
+          .unique(errorsTrads.unique, takenNames, createUid)
           .required(errorsTrads.required),
         collectionName: yup.string(),
       });
     },
     form: {
-      base(data = {}) {
-        return {
-          items: [
-            [
-              {
-                autoFocus: true,
-                name: 'name',
-                type: 'text',
-                label: {
-                  id: `${pluginId}.contentType.displayName.label`,
-                },
-                validations: {
-                  required: true,
-                },
+      base(data = {}, type, step, actionType) {
+        const items = [
+          [
+            {
+              autoFocus: true,
+              name: 'name',
+              type: 'text',
+              label: {
+                id: `${pluginId}.contentType.displayName.label`,
               },
-              {
-                description: {
-                  id: `${pluginId}.contentType.UID.description`,
-                },
-                label: 'UID',
-                name: 'uid',
-                type: 'text',
-                readOnly: true,
-                disabled: true,
-                value: data.name ? nameToSlug(data.name) : '',
+              validations: {
+                required: true,
               },
-            ],
+            },
           ],
-        };
+        ];
+
+        if (actionType === 'create') {
+          items[0].push({
+            description: {
+              id: `${pluginId}.contentType.UID.description`,
+            },
+            label: 'UID',
+            name: 'uid',
+            type: 'text',
+            readOnly: true,
+            disabled: true,
+            value: data.name ? nameToSlug(data.name) : '',
+          });
+        }
+
+        return { items };
       },
       advanced() {
         return {
@@ -721,7 +727,10 @@ const forms = {
             componentCategory
           )
           .required(errorsTrads.required),
-        category: yup.string().required(errorsTrads.required),
+        category: yup
+          .string()
+          .matches(NAME_REGEX, errorsTrads.regex)
+          .required(errorsTrads.required),
         icon: yup.string().required(errorsTrads.required),
         collectionName: yup.string().nullable(),
       });
@@ -769,6 +778,36 @@ const forms = {
 
         return {
           items: [[fields.createComponent], ...itemsToConcat],
+        };
+      },
+    },
+  },
+  editCategory: {
+    schema(allCategories, initialData) {
+      const allowedCategories = allCategories
+        .filter(cat => cat !== initialData.name)
+        .map(cat => toLower(cat));
+
+      return yup.object().shape({
+        name: yup
+          .string()
+          .unique(errorsTrads.unique, allowedCategories, toLower)
+          .required(errorsTrads.required),
+      });
+    },
+    form: {
+      base() {
+        return {
+          items: [
+            [
+              {
+                ...fields.name,
+                description: {
+                  id: getTrad('modalForm.editCategory.base.name.description'),
+                },
+              },
+            ],
+          ],
         };
       },
     },

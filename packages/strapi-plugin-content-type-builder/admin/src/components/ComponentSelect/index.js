@@ -20,8 +20,7 @@ const ComponentSelect = ({
   // Create a ref in order to access the StateManager
   // So we can close the menu after clicking on a menu item
   // This allows us to get rid of the menuIsOpen state management
-  // So we let the lib taking care of it
-  // It's not the best practice but it is efficient
+  // So we let the custom components taking care of it
   const ref = useRef();
   const handleChange = (inputValue, actionMeta) => {
     const { action } = actionMeta;
@@ -54,7 +53,6 @@ const ComponentSelect = ({
       value={{ label: value, value }}
       options={[]}
       ref={ref}
-      // menuIsOpen
       refState={ref}
       components={{
         MenuList: MenuListCompo,

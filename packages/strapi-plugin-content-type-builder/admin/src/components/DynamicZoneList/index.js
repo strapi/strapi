@@ -19,8 +19,9 @@ function DynamicZoneList({
   customRowComponent,
   components,
   addComponent,
+  mainTypeName,
   name,
-  removeComponent,
+  targetUid,
 }) {
   const [activeTab, setActiveTab] = useState('0');
 
@@ -52,13 +53,14 @@ function DynamicZoneList({
                 return (
                   <li key={component}>
                     <ComponentCard
+                      dzName={name}
+                      index={index}
                       component={component}
                       isActive={activeTab === `${index}`}
                       onClick={() => {
                         toggle(`${index}`);
                       }}
-                      onRemoveClick={removeComponent}
-                    ></ComponentCard>
+                    />
                   </li>
                 );
               })}
@@ -75,7 +77,12 @@ function DynamicZoneList({
                 <TabPane tabId={`${index}`} key={component}>
                   <table>
                     <tbody>
-                      <ComponentList {...props} key={component} />
+                      <ComponentList
+                        {...props}
+                        mainTypeName={mainTypeName}
+                        targetUid={targetUid}
+                        key={component}
+                      />
                     </tbody>
                   </table>
                 </TabPane>
@@ -93,15 +100,15 @@ DynamicZoneList.defaultProps = {
   components: [],
   customRowComponent: null,
   name: null,
-  removeComponent: () => {},
 };
 
 DynamicZoneList.propTypes = {
   addComponent: PropTypes.func,
   components: PropTypes.instanceOf(Array),
   customRowComponent: PropTypes.func,
+  mainTypeName: PropTypes.string.isRequired,
   name: PropTypes.string,
-  removeComponent: PropTypes.func,
+  targetUid: PropTypes.string.isRequired,
 };
 
 export default DynamicZoneList;

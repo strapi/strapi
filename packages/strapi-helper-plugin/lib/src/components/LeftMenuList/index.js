@@ -2,6 +2,7 @@ import React, { createRef, isValidElement, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty } from 'lodash';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import matchSorter from 'match-sorter';
 
 import Wrapper from './Wrapper';
@@ -58,18 +59,18 @@ function LeftMenuList({ customLink, links, title }) {
       return links.map(link => {
         return {
           ...link,
-          links: matchSorter(link.links, search, { keys: ['name'] }),
+          links: matchSorter(link.links, search, { keys: ['title'] }),
         };
       });
     }
-    return matchSorter(links, search, { keys: ['name'] });
+    return matchSorter(links, search, { keys: ['title'] });
   };
 
   const getTitle = () =>
     getCount() > 1 ? `${title.id}plural` : `${title.id}singular`;
 
   const renderCompo = (link, i) => {
-    const { links, name, title } = link;
+    const { links, name, title, ...rest } = link;
 
     if (links) {
       const isSearching = !isEmpty(search);
@@ -77,6 +78,7 @@ function LeftMenuList({ customLink, links, title }) {
       return (
         <LeftMenuSubList
           key={name}
+          {...rest}
           {...link}
           isSearching={isSearching}
           isFirstItem={i === 0}
@@ -101,12 +103,12 @@ function LeftMenuList({ customLink, links, title }) {
               &nbsp;&nbsp;<span>{getCount()}</span>
             </h3>
             <button onClick={toggleSearch}>
-              <i className="fa fa-search"></i>
+              <FontAwesomeIcon icon="search" />
             </button>
           </div>
         ) : (
           <div className="search-wrapper">
-            <i className="fa fa-search"></i>
+            <FontAwesomeIcon icon="search" />
             <button onClick={toggleSearch}></button>
             <Search
               ref={ref}
@@ -115,7 +117,7 @@ function LeftMenuList({ customLink, links, title }) {
               placeholder="search…"
             />
             <button onClick={handleClose}>
-              <i className="fa fa-close"></i>
+              <FontAwesomeIcon icon="times" />
             </button>
           </div>
         )}

@@ -31,7 +31,7 @@ const getDisplayedValue = (type, value, name) => {
     case 'time':
     case 'datetime':
     case 'timestamp': {
-      if (value === null) {
+      if (value == null) {
         return '-';
       }
 
@@ -117,7 +117,7 @@ function Row({ goTo, isBulkable, row, headers }) {
             },
             {
               id: row.id,
-              icoType: 'trash-alt',
+              icoType: 'trash',
               onClick: () => {
                 emitEvent('willDeleteEntryFromList');
                 onClickDelete(row.id);
