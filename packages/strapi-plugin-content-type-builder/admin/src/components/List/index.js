@@ -59,7 +59,7 @@ function List({
     color: 'primary',
     label: formatMessage({
       id: !isSub
-        ? `${pluginId}.form.button.add.field.to.contentType`
+        ? `${pluginId}.form.button.add.field.to.${editTarget}`
         : `${pluginId}.form.button.add.field.to.component`,
     }),
     onClick: onClickAddField,

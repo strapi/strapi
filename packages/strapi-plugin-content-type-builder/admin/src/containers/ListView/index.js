@@ -258,12 +258,12 @@ const ListPage = () => {
     },
   };
   const goToCMSettingsPage = () => {
-    push(
-      `/plugins/content-manager/${targetUid}/ctm-configurations/list-settings`
-    );
+    const endPoint = isInContentTypeView
+      ? `/plugins/content-manager/${targetUid}/ctm-configurations/edit-settings/content-types`
+      : `/plugins/content-manager/ctm-configurations/edit-settings/components/${targetUid}/`;
+    push(endPoint);
   };
 
-  // const listActions = isInDevelopmentMode ? [{ ...addButtonProps }] : [];
   const configureButtonProps = {
     icon: <LayoutIcon className="colored" fill="#007eff" />,
     color: 'secondary',

@@ -46,6 +46,15 @@
       "type": "component",
       "repeatable": false,
       "component": "default.rrr"
+    },
+    "date": {
+      "type": "date"
+    },
+    "datetime": {
+      "type": "datetime"
+    },
+    "time": {
+      "type": "time"
     }
   }
 }
