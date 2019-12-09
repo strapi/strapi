@@ -41,7 +41,7 @@ As an **example** let's consider the following models:
 
 ---
 
-### `Image With Description` Component
+### `Title With Subtitle` Component
 
 | Fields   | Type   | Description   |
 | :------- | :----- | :------------ |
@@ -50,7 +50,7 @@ As an **example** let's consider the following models:
 
 ---
 
-### `ImageWithDescription` Component
+### `Image With Description` Component
 
 | Fields      | Type   | Description          |
 | :---------- | :----- | :------------------- |
