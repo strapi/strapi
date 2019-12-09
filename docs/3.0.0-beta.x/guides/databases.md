@@ -3,7 +3,7 @@
 Strapi gives you the option to choose the most appropriate database for your project. It currently supports **PostgreSQL**, **MongoDB**, **SQLite**, **MySQL** and
 **MariaDB**. The following documentation covers how to install these databases locally (for development purposes) and on various hosted or cloud server solutions (for staging or production purposes).
 
-:::note
+::: tip
 Deploying **Strapi** itself is covered in the [Deployment Guide](deployment.md).
 :::
 
@@ -15,17 +15,17 @@ SQLite is the default ([Quick Start](../getting-started/quick-start.md)) and rec
 
 Simply use one of the following commands.
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "yarn" id="yarn-create-qs"
+::: tab yarn
 
 ```bash
-yarn create strapi-app new my-project --quickstart
+yarn create strapi-app my-project --quickstart
 ```
 
 :::
 
-::: tab "npx" id="npx-create-qs"
+::: tab npx
 
 ```bash
 npx create-strapi-app my-project --quickstart
@@ -37,7 +37,7 @@ npx create-strapi-app my-project --quickstart
 
 This will create a new project and launch it in the browser.
 
-::: note
+::: tip
 The [Quick Start Guide](../getting-started/quick-start.md) is a complete step-by-step tutorial
 :::
 
@@ -51,9 +51,9 @@ If you already have MongoDB installed locally and running as a background servic
 
 Please complete the installation steps appropriate to your operating system.
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "Windows 10" id="windows-mongodb"
+::: tab "Windows 10"
 
 #### Install MongoDB on Windows 10
 
@@ -73,7 +73,7 @@ You have now installed MongoDB for _Windows 10_. You are now ready to [install S
 
 :::
 
-::: tab "Mac O/S 10.14 Mojave" id="mac-mongodb"
+::: tab "Mac O/S"
 
 #### Install MongoDB on Mac
 
@@ -101,7 +101,7 @@ You have now installed MongoDB for _Mac_. You are now ready to [install Strapi w
 
 :::
 
-::: tab "Ubuntu 18.04" id="ubuntu-mongodb"
+::: tab "Ubuntu 18.04"
 
 #### Install MongoDB on Ubuntu
 
@@ -110,14 +110,12 @@ Follow these steps to [install MongoDB onto your Ubuntu](https://docs.mongodb.co
 1. Import a public key to ensure your MongoDB is authentic:
 
 ```bash
-
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
 ```
 
 2. Next, add the repository for 18.04. Repositories for other versions of Ubuntu are found [here](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/).
 
 ```bash
-
 echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
 ```
 
@@ -161,7 +159,7 @@ You have now installed MongoDB for _Linux_. You are now ready to [install Strapi
 
 Follow these steps to create a Strapi project locally using the MongoDB database.
 
-::: note
+::: tip
 MongoDB must already be running in the background.
 :::
 
@@ -169,9 +167,9 @@ MongoDB must already be running in the background.
 
 `Path: ./`
 
-:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+:::: tabs
 
-::: tab "yarn" id="yarn-create"
+::: tab yarn
 
 ```
 yarn create strapi-app new my-project
@@ -179,7 +177,7 @@ yarn create strapi-app new my-project
 
 :::
 
-::: tab "npx" id="npx-create"
+::: tab npx
 
 ```
 npx create-strapi-app my-project
@@ -277,7 +275,7 @@ Follow these steps to configure a local Strapi project to use a [MongoDB Atlas](
   - Then click the green `Confirm` button.
   - Delete the `0.0.0.0/0` configuration after testing the connection.
 
-  ::: note
+  ::: tip
   If for any reason you need to test the configuration or other aspect of your connection to the database, you may want to set back the `Allow Access from Anywhere`. Follow this steps:
   :::
 
@@ -286,7 +284,7 @@ Follow these steps to configure a local Strapi project to use a [MongoDB Atlas](
     - Leave a comment to label this IP Address. E.g. `Anywhere`.
     - Click `Confirm`. Then wait until the status turns from `Pending` to `Active`.
 
-  ::: note
+  ::: tip
   If you are serving you Strapi project from a known IP Address then follow the following steps to `allow Network Access`.
   :::
 

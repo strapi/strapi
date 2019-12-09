@@ -60,152 +60,161 @@ const buildAssocResolvers = (model, name, { plugin }) => {
   const { primaryKey, associations = [] } = model;
 
   return associations
-  .filter(association => model.attributes[association.alias].private !== true)
-  .reduce((resolver, association) => {
-    switch (association.nature) {
-      case 'oneToManyMorph': {
-        resolver[association.alias] = async obj => {
-          const entry = await contentManager.fetch(
-            {
-              id: obj[primaryKey],
-              model: name,
-            },
-            plugin,
-            [association.alias]
-          );
-
-          // Set the _type only when the value is defined
-          if (entry[association.alias]) {
-            entry[association.alias]._type = _.upperFirst(association.model);
-          }
-
-          return entry[association.alias];
-        };
-        break;
-      }
-      case 'manyMorphToOne':
-      case 'manyMorphToMany':
-      case 'manyToManyMorph': {
-        resolver[association.alias] = async obj => {
-          // eslint-disable-line no-unused-vars
-          const [withRelated, withoutRelated] = await Promise.all([
-            contentManager.fetch(
+    .filter(association => model.attributes[association.alias].private !== true)
+    .reduce((resolver, association) => {
+      switch (association.nature) {
+        case 'oneToManyMorph': {
+          resolver[association.alias] = async obj => {
+            const entry = await contentManager.fetch(
               {
                 id: obj[primaryKey],
                 model: name,
               },
               plugin,
-              [association.alias],
-              false
-            ),
-            contentManager.fetch(
-              {
-                id: obj[primaryKey],
-                model: name,
-              },
-              plugin,
-              []
-            ),
-          ]);
-
-          const entry =
-            withRelated && withRelated.toJSON
-              ? withRelated.toJSON()
-              : withRelated;
-
-          entry[association.alias].map((entry, index) => {
-            const type =
-              _.get(withoutRelated, `${association.alias}.${index}.kind`) ||
-              _.upperFirst(
-                _.camelCase(
-                  _.get(
-                    withoutRelated,
-                    `${association.alias}.${index}.${association.alias}_type`
-                  )
-                )
-              ) ||
-              _.upperFirst(_.camelCase(association[association.type]));
-
-            entry._type = type;
-
-            return entry;
-          });
-
-          return entry[association.alias];
-        };
-        break;
-      }
-
-      default: {
-        resolver[association.alias] = async (obj, options) => {
-          // Construct parameters object to retrieve the correct related entries.
-          const params = {
-            model: association.model || association.collection,
-          };
-
-          let queryOpts = {
-            source: association.plugin,
-          };
-
-          // Get refering model.
-          const ref = association.plugin
-            ? strapi.plugins[association.plugin].models[params.model]
-            : strapi.models[params.model];
-
-          if (association.type === 'model') {
-            params[ref.primaryKey] = _.get(
-              obj,
-              [association.alias, ref.primaryKey],
-              obj[association.alias]
+              [association.alias]
             );
-          } else {
-            const queryParams = Query.amountLimiting(options);
-            queryOpts = {
-              ...queryOpts,
-              ...Query.convertToParams(_.omit(queryParams, 'where')), // Convert filters (sort, limit and start/skip)
-              ...Query.convertToQuery(queryParams.where),
+
+            // Set the _type only when the value is defined
+            if (entry[association.alias]) {
+              entry[association.alias]._type = _.upperFirst(association.model);
+            }
+
+            return entry[association.alias];
+          };
+          break;
+        }
+        case 'manyMorphToOne':
+        case 'manyMorphToMany':
+        case 'manyToManyMorph': {
+          resolver[association.alias] = async obj => {
+            // eslint-disable-line no-unused-vars
+            const [withRelated, withoutRelated] = await Promise.all([
+              contentManager.fetch(
+                {
+                  id: obj[primaryKey],
+                  model: name,
+                },
+                plugin,
+                [association.alias],
+                false
+              ),
+              contentManager.fetch(
+                {
+                  id: obj[primaryKey],
+                  model: name,
+                },
+                plugin,
+                []
+              ),
+            ]);
+
+            const entry =
+              withRelated && withRelated.toJSON
+                ? withRelated.toJSON()
+                : withRelated;
+
+            entry[association.alias].map((entry, index) => {
+              const type =
+                _.get(withoutRelated, `${association.alias}.${index}.kind`) ||
+                _.upperFirst(
+                  _.camelCase(
+                    _.get(
+                      withoutRelated,
+                      `${association.alias}.${index}.${association.alias}_type`
+                    )
+                  )
+                ) ||
+                _.upperFirst(_.camelCase(association[association.type]));
+
+              entry._type = type;
+
+              return entry;
+            });
+
+            return entry[association.alias];
+          };
+          break;
+        }
+
+        default: {
+          resolver[association.alias] = async (obj, options) => {
+            // Construct parameters object to retrieve the correct related entries.
+            const params = {
+              model: association.model || association.collection,
             };
 
-            if (
-              ((association.nature === 'manyToMany' && association.dominant) ||
-                association.nature === 'manyWay') &&
-              _.has(obj, association.alias) // if populated
-            ) {
-              _.set(
-                queryOpts,
-                ['query', ref.primaryKey],
+            let queryOpts = {
+              source: association.plugin,
+            };
+
+            // Get refering model.
+            const ref = association.plugin
+              ? strapi.plugins[association.plugin].models[params.model]
+              : strapi.models[params.model];
+
+            if (association.type === 'model') {
+              params[ref.primaryKey] = _.get(
+                obj,
+                [association.alias, ref.primaryKey],
                 obj[association.alias]
-                  ? obj[association.alias]
-                      .map(val => val[ref.primaryKey] || val)
-                      .sort()
-                  : []
               );
             } else {
-              _.set(queryOpts, ['query', association.via], obj[ref.primaryKey]);
+              const queryParams = Query.amountLimiting(options);
+              queryOpts = {
+                ...queryOpts,
+                ...Query.convertToParams(_.omit(queryParams, 'where')), // Convert filters (sort, limit and start/skip)
+                ...Query.convertToQuery(queryParams.where),
+              };
+
+              if (
+                ((association.nature === 'manyToMany' &&
+                  association.dominant) ||
+                  association.nature === 'manyWay') &&
+                _.has(obj, association.alias) // if populated
+              ) {
+                _.set(
+                  queryOpts,
+                  ['query', ref.primaryKey],
+                  obj[association.alias]
+                    ? obj[association.alias]
+                        .map(val => val[ref.primaryKey] || val)
+                        .sort()
+                    : []
+                );
+              } else {
+                _.set(
+                  queryOpts,
+                  ['query', association.via],
+                  obj[ref.primaryKey]
+                );
+              }
             }
-          }
 
-          const loaderName = association.plugin
-            ? `${association.plugin}__${params.model}`
-            : params.model;
+            const loaderName = association.plugin
+              ? `${association.plugin}__${params.model}`
+              : params.model;
 
-          return association.model
-            ? strapi.plugins.graphql.services.loaders.loaders[loaderName].load({
-                params,
-                options: queryOpts,
-                single: true,
-              })
-            : strapi.plugins.graphql.services.loaders.loaders[loaderName].load({
-                options: queryOpts,
-                association,
-              });
-        };
-        break;
+            return association.model
+              ? strapi.plugins.graphql.services.loaders.loaders[
+                  loaderName
+                ].load({
+                  params,
+                  options: queryOpts,
+                  single: true,
+                })
+              : strapi.plugins.graphql.services.loaders.loaders[
+                  loaderName
+                ].load({
+                  options: queryOpts,
+                  association,
+                });
+          };
+          break;
+        }
       }
-    }
 
-    return resolver;
-  }, {});
+      return resolver;
+    }, {});
 };
 
 const buildModel = (model, name, { plugin, isGroup = false } = {}) => {
@@ -475,7 +484,8 @@ const buildShadowCRUD = (models, plugin) => {
         attributes,
         model,
         name,
-        queries.plural
+        queries.plural,
+        plugin
       );
       if (modelAggregator) {
         acc.definition += modelAggregator.type;
