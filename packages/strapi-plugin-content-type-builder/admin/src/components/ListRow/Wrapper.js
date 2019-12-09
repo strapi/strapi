@@ -35,7 +35,6 @@ const Wrapper = styled.tr`
     }
   }
   td:nth-child(2) {
-    // width: 25rem;
     ${({ loopNumber }) => {
       return `
         width: calc(25rem - ${5 * loopNumber}rem);

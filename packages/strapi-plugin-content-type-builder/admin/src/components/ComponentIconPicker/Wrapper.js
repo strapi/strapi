@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 const Wrapper = styled.div`
   min-height: 199px;
   margin-top: -2px;
+  margin-bottom: -2px;
 
   .collection {
     background-color: #fafafb;

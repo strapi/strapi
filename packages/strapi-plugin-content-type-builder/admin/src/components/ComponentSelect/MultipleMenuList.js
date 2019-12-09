@@ -96,22 +96,30 @@ const MultipleMenuList = ({
                     <Checkbox
                       id="checkCategory"
                       name={categoryName}
-                      onChange={handleChangeCategory}
+                      onChange={() => {}}
                       checked={getCategoryValue(categoryName)}
                       style={{ marginRight: 10 }}
                     />
                     <UpperFirst content={categoryName} />
                   </Label>
-                  <FontAwesomeIcon
+                  <div
+                    style={{
+                      display: 'flex',
+                      width: '150px',
+                      textAlign: 'right',
+                    }}
                     onClick={e => {
                       e.stopPropagation();
                       toggleCollapse(categoryName);
                     }}
-                    className="chevron"
-                    icon={
-                      collapses[categoryName] ? 'chevron-up' : 'chevron-down'
-                    }
-                  />
+                  >
+                    <FontAwesomeIcon
+                      className="chevron"
+                      icon={
+                        collapses[categoryName] ? 'chevron-up' : 'chevron-down'
+                      }
+                    />
+                  </div>
                 </CheckboxWrapper>
               </div>
               <SubUl tag="ul" isOpen={collapses[categoryName]}>
@@ -134,7 +142,8 @@ const MultipleMenuList = ({
                           <Checkbox
                             id="check"
                             name={component.uid}
-                            onChange={handleChange}
+                            // Remove the handler
+                            onChange={() => {}}
                             checked={isChecked}
                             style={{ marginRight: 10 }}
                           />

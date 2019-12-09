@@ -42,7 +42,7 @@ function DynamicZoneList({
               <li>
                 <ComponentButton onClick={handleClickAdd}>
                   <div>
-                    <Plus />
+                    <Plus style={{ height: 15, width: 15 }} />
                   </div>
                   <p>
                     <FormattedMessage id={getTrad('button.component.add')} />

@@ -10,6 +10,8 @@ const WrapperSelect = ({ error, label, name, type, ...rest }) => {
     container: base => ({
       ...base,
       'z-index': 9999,
+      //
+      marginTop: '4px !important',
     }),
     control: (base, state) => ({
       ...base,
@@ -18,6 +20,7 @@ const WrapperSelect = ({ error, label, name, type, ...rest }) => {
         : error
         ? '1px solid red !important'
         : '1px solid #E3E9F3 !important',
+      'border-radius': '2px !important',
     }),
     menu: base => {
       return {

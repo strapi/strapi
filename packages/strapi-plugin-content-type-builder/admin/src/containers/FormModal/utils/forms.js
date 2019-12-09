@@ -532,6 +532,7 @@ const forms = {
               validations: {},
             },
           ]);
+          items.push([{ type: 'spacer-medium' }]);
         }
 
         if (type === 'number') {
@@ -774,6 +775,7 @@ const forms = {
                   isMultiple: true,
                 },
               ],
+              [{ type: 'spacer-small' }],
             ];
 
         return {

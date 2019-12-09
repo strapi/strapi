@@ -21,6 +21,7 @@ const Button = styled.button`
   &:focus {
     background: #e6f0fb;
     border-color: #aed4fb;
+    outline: 0;
 
     .attributeIcon {
       background-color: #007eff;

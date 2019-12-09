@@ -8,15 +8,15 @@ import styled from 'styled-components';
 
 const ComponentButton = styled.button`
   width: 139px;
-  height: 100%;
+  height: 90px;
   padding-top: 7px;
   &:focus {
     outline: 0;
   }
 
   div {
-    width: 34px;
-    height: 34px;
+    width: 35px;
+    height: 35px;
     border-radius: 18px;
     background-color: #2c3138;
     display: flex;
@@ -32,7 +32,8 @@ const ComponentButton = styled.button`
     font-weight: bold;
     color: #2c3138;
     line-height: normal;
-    margin-top: 7px;
+    // margin-top: 7px;
+    margin-top: 5px;
   }
 `;
 

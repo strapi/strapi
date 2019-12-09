@@ -80,7 +80,7 @@ function List({
               const CustomRow = customRowComponent;
 
               return (
-                <React.Fragment key={JSON.stringify(item)}>
+                <React.Fragment key={item.name}>
                   <CustomRow
                     {...item}
                     targetUid={targetUid}
@@ -140,6 +140,7 @@ List.defaultProps = {
 
   firstLoopComponentName: null,
   firstLoopComponentUid: null,
+
   isSub: false,
   items: [],
   secondLoopComponentName: null,
@@ -154,6 +155,7 @@ List.propTypes = {
   editTarget: PropTypes.string.isRequired,
   firstLoopComponentName: PropTypes.string,
   firstLoopComponentUid: PropTypes.string,
+
   items: PropTypes.instanceOf(Array),
   mainTypeName: PropTypes.string.isRequired,
   secondLoopComponentName: PropTypes.string,

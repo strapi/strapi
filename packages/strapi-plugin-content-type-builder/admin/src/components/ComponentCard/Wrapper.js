@@ -10,20 +10,23 @@ const Wrapper = styled.button`
   position: relative;
   background-color: #fafafb;
   width: 139px;
-  height: 100%;
+  // height: 100%;
+  height: 90px;
   border-radius: 2px;
   border: 0;
   padding: 0;
   padding-top: 5px;
   text-align: center;
   border: solid 1px #fafafb;
+
   &:focus {
     outline: 0;
   }
 
+
   div:first-of-type {
-    width: 34px;
-    height: 34px;
+    width: 35px;
+    height: 35px;
     border-radius: 18px;
     background-color: #e9eaeb;
     color: #919bae;
@@ -48,7 +51,9 @@ const Wrapper = styled.button`
     font-weight: bold;
     color: #919bae;
     line-height: normal;
-    margin-top: 7px;
+    // margin-top: 7px;
+    margin-top: 5px;
+    // margin: 0;
     padding-left: 5px;
     padding-right: 5px;
     overflow: hidden;

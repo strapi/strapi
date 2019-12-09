@@ -1050,7 +1050,11 @@ const FormModal = () => {
                     state.actionType
                   ).items.map((row, index) => {
                     return (
-                      <div className="row" key={index}>
+                      <div
+                        className="row"
+                        key={index}
+                        style={{ marginBottom: 4 }}
+                      >
                         {row.map((input, i) => {
                           // The divider type is used mainly the advanced tab
                           // It is the one responsible for displaying the settings label
@@ -1059,7 +1063,7 @@ const FormModal = () => {
                               <div
                                 className="col-12"
                                 style={{
-                                  marginBottom: '1.7rem',
+                                  marginBottom: '1.4rem',
                                   marginTop: -2,
                                   fontWeight: 500,
                                 }}
@@ -1077,7 +1081,20 @@ const FormModal = () => {
                           // The spacer type is used mainly to align the icon picker...
                           if (input.type === 'spacer') {
                             return (
-                              <div key="spacer" style={{ height: 20 }}></div>
+                              <div key="spacer" style={{ height: 11 }}></div>
+                            );
+                          }
+
+                          // The spacer type is used mainly to align the icon picker...
+                          if (input.type === 'spacer-small') {
+                            return (
+                              <div key="spacer" style={{ height: 4 }}></div>
+                            );
+                          }
+
+                          if (input.type === 'spacer-medium') {
+                            return (
+                              <div key="spacer" style={{ height: 8 }}></div>
                             );
                           }
 
@@ -1129,6 +1146,14 @@ const FormModal = () => {
                           );
 
                           let value;
+                          // let style = {};
+
+                          // if (
+                          //   // input.name === 'required' ||
+                          //   input.name === 'unique'
+                          // ) {
+                          //   style = { marginTop: -4, marginBottom: 5 };
+                          // }
 
                           // Condition for the boolean default value
                           // The radio input doesn't accept false, true or null as value
@@ -1161,6 +1186,7 @@ const FormModal = () => {
                                 type="string"
                                 onChange={handleChange}
                                 value={value}
+                                style={{ marginTop: 8, marginBottom: 11 }}
                               />
                             );
                           }
@@ -1169,6 +1195,7 @@ const FormModal = () => {
                             <div
                               className={`col-${input.size || 6}`}
                               key={input.name}
+                              // style={style}
                             >
                               <Inputs
                                 {...input}

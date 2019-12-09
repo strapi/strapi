@@ -17,7 +17,7 @@ const Ul = styled.ul`
       }
     }
     .chevron {
-      margin-right: -10px !important;
+      margin: auto;
 
       font-size: 11px;
       color: #919bae;
