@@ -37,7 +37,11 @@ import getTrad from '../../utils/getTrad';
 const DataManagerProvider = ({ allIcons, children }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const [infoModals, toggleInfoModal] = useState({ cancel: false });
-  const { currentEnvironment, updatePlugin } = useGlobalContext();
+  const {
+    currentEnvironment,
+    formatMessage,
+    updatePlugin,
+  } = useGlobalContext();
   const {
     components,
     contentTypes,
@@ -200,18 +204,21 @@ const DataManagerProvider = ({ allIcons, children }) => {
   const deleteCategory = async categoryUid => {
     try {
       const requestURL = `/${pluginId}/component-categories/${categoryUid}`;
-
+      const userConfirm = window.confirm(
+        formatMessage({
+          id: getTrad(`popUpWarning.bodyMessage.category.delete`),
+        })
+      );
       // Close the modal
       push({ search: '' });
 
-      await request(requestURL, { method: 'DELETE' }, true);
-
-      // TODO update menu
-
-      // Reload the plugin so the cycle is new again
-      dispatch({ type: 'RELOAD_PLUGIN' });
-      // Refetch all the data
-      getDataRef.current();
+      if (userConfirm) {
+        await request(requestURL, { method: 'DELETE' }, true);
+        // Reload the plugin so the cycle is new again
+        dispatch({ type: 'RELOAD_PLUGIN' });
+        // Refetch all the data
+        getDataRef.current();
+      }
     } catch (err) {
       console.log({ err });
     }
@@ -225,28 +232,40 @@ const DataManagerProvider = ({ allIcons, children }) => {
         [firstKeyToMainSchema, 'isTemporary'],
         false
       );
+      const userConfirm = window.confirm(
+        formatMessage({
+          id: getTrad(
+            `popUpWarning.bodyMessage.${
+              isInContentTypeView ? 'contentType' : 'component'
+            }.delete`
+          ),
+        })
+      );
 
       // Close the modal
       push({ search: '' });
 
-      if (isTemporary) {
-        // Delete the not saved type
-        // Here we just need to reset the components to the initial ones and also the content types
-        // Doing so will trigging a url change since the type doesn't exist in either the contentTypes or the components
-        // so the modified and the initial data will also be reset in the useEffect...
-        dispatch({ type: 'DELETE_NOT_SAVED_TYPE' });
+      if (userConfirm) {
+        if (isTemporary) {
+          // Delete the not saved type
+          // Here we just need to reset the components to the initial ones and also the content types
+          // Doing so will trigging a url change since the type doesn't exist in either the contentTypes or the components
+          // so the modified and the initial data will also be reset in the useEffect...
+          dispatch({ type: 'DELETE_NOT_SAVED_TYPE' });
 
-        return;
+          return;
+        }
+
+        await request(requestURL, { method: 'DELETE' }, true);
+
+        // Reload the plugin so the cycle is new again
+        dispatch({ type: 'RELOAD_PLUGIN' });
+
+        // Update the app menu
+        await updateAppMenu();
+        // Refetch all the data
+        getDataRef.current();
       }
-
-      await request(requestURL, { method: 'DELETE' }, true);
-      // Update the app menu
-      await updateAppMenu();
-
-      // Reload the plugin so the cycle is new again
-      dispatch({ type: 'RELOAD_PLUGIN' });
-      // Refetch all the data
-      getDataRef.current();
     } catch (err) {
       console.log({ err });
     }
