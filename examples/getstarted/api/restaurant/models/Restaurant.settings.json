@@ -80,9 +80,7 @@
     },
     "dz": {
       "type": "dynamiczone",
-      "components": [
-        "default.metas"
-      ]
+      "components": []
     }
   }
 }

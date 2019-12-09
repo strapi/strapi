@@ -12,20 +12,12 @@
   },
   "attributes": {
     "author": {
-      "model": "user",
-      "plugin": "users-permissions"
+      "plugin": "users-permissions",
+      "model": "user"
     },
     "review": {
       "model": "review",
       "via": "likes"
-    },
-    "like_left": {
-      "collection": "like",
-      "via": "like_right"
-    },
-    "like_right": {
-      "model": "like",
-      "via": "like_left"
     }
   }
 }
