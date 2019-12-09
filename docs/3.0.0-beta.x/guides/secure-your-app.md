@@ -1,6 +1,6 @@
 # Secure your application
 
-In this guide we will see how you can secure your Strapi application by using a tiers provider.
+In this guide we will see how you can secure your Strapi application by using a third party provider.
 
 ::: tip
 In this example we will use [Sqreen](https://sqreen.com).
@@ -21,14 +21,14 @@ You will have to install Sqreen node_module in your application.
 :::
 
 ::: tab npm
-`npm install qreen`
+`npm install sqreen`
 :::
 
 ::::
 
 ## Start your application programmaticaly
 
-We will have to plug the Sqreen node_module in the file we use to start Strapi.
+We will have to require the Sqreen node_module in the file we use to start Strapi.
 
 To do so you will have to create a `server.js` file to be able to start our application by running `node server.js`.
 
@@ -43,9 +43,10 @@ Now you can run `node server.js` and it will start your application.
 
 ## Inject and configure Sqreen agent
 
-By following there Node.js onboarding, we need to require the Sqreen node_module where the server is started.
+By following their Node.js onboarding, we need to require the Sqreen node_module where the server is started.
+Also, Sqreen has to be required just before Strapi to work!
 
-*That is the reason why we created a `server.js` file.*
+*This is the reason why we have created a `server.js` file.*
 
 To do so, you will have to update this file.
 
