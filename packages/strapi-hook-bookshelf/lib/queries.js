@@ -134,7 +134,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
 
       if (Object.keys(relations).length > 0) {
         return model.updateRelations(
-          Object.assign(params, { values: relations }),
+          { id: entry.id, values: relations },
           { transacting: trx }
         );
       }
