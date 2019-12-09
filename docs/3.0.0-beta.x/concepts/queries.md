@@ -4,7 +4,7 @@ Strapi provides a utility function `strapi.query` to make database queries.
 
 You can just call `strapi.query('modelName', 'pluginName')` to access the query API for any model.
 
-These queries handle for you specific Strapi features like `groups`, `filters` and `search`.
+These queries handle for you specific Strapi features like `components`, `dynamic zones`, `filters` and `search`.
 
 ## API Reference
 
@@ -97,7 +97,20 @@ Creates an entry in the database and returns the entry.
 ```js
 strapi.query('restaurant').create({
   name: 'restaurant name',
-  // this is a group field. the order is persisted in db.
+  // this is a dynamiczone field. the order is persisted in db.
+  content: [
+    {
+      __component: 'blog.rich-text',
+      title: 'some title',
+      subTitle: 'some sub title',
+    },
+    {
+      __component: 'blog.quote',
+      quote: 'Some interesting quote',
+      author: 1,
+    },
+  ],
+  // this is a component field. the order is persisted in db.
   opening_hours: [
     {
       day_interval: 'Mon',
@@ -134,6 +147,18 @@ strapi.query('restaurant').update(
   { id: 1 },
   {
     name: 'restaurant name',
+    content: [
+      {
+        __component: 'blog.rich-text',
+        title: 'some title',
+        subTitle: 'some sub title',
+      },
+      {
+        __component: 'blog.quote',
+        quote: 'Some interesting quote',
+        author: 1,
+      },
+    ],
     opening_hours: [
       {
         day_interval: 'Mon',
@@ -154,15 +179,29 @@ strapi.query('restaurant').update(
 );
 ```
 
-When updating an entry with its groups beware that if you send the groups without any `id` the previous groups will be deleted and replaced. You can update the groups by sending their `id` with the rest of the fields:
+When updating an entry with its components or dynamiczones beware that if you send the components without any `id` the previous components will be deleted and replaced. You can update the components by sending their `id` with the rest of the fields:
 
-**Update by id and update previous groups**
+**Update by id and update previous components**
 
 ```js
 strapi.query('restaurant').update(
   { id: 1 },
   {
     name: 'Mytitle',
+    content: [
+      {
+        __component: 'blog.rich-text',
+        id: 1,
+        title: 'some title',
+        subTitle: 'some sub title',
+      },
+      {
+        __component: 'blog.quote',
+        id: 1,
+        quote: 'Some interesting quote',
+        author: 1,
+      },
+    ],
     opening_hours: [
       {
         id: 2,
