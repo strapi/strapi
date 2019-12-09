@@ -18,9 +18,9 @@ const StyledCustomLink = styled.div`
     font-weight: 500;
     line-height: 18px;
     text-align: left;
-    i,
     svg {
-      margin-right: 5px;
+      margin-left: -3px;
+      margin-right: 7px;
       -webkit-font-smoothing: subpixel-antialiased;
     }
   }

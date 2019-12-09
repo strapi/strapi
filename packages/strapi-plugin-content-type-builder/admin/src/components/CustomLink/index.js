@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
+import { Plus } from '@buffetjs/icons';
 
 import StyledCustomLink from './StyledCustomLink';
 
@@ -8,7 +9,7 @@ const CustomLink = ({ disabled, id, onClick }) => (
   <StyledCustomLink disabled={disabled}>
     <button onClick={onClick} role="button" disabled={disabled}>
       <p>
-        <i className="fa fa-plus" />
+        <Plus fill="#007EFF" width="11px" height="11px" />
         {id && <FormattedMessage id={id} />}
       </p>
     </button>

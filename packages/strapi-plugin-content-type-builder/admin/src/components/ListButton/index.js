@@ -17,7 +17,7 @@ const ListButton = styled(Button)`
   text-transform: uppercase;
   letter-spacing: 0.5px;
   svg {
-    fill: #007eff;
+    vertical-align: initial;
   }
   &:hover {
     box-shadow: none;
