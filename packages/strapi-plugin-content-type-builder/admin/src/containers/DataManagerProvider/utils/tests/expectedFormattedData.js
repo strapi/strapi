@@ -149,7 +149,6 @@ const expectedData = {
         },
         author: {
           model: 'user',
-          plugin: 'users-permissions',
         },
         link_to_biography: {
           type: 'string',
@@ -210,7 +209,6 @@ const expectedData = {
         },
         author: {
           model: 'user',
-          plugin: 'users-permissions',
         },
         link_to_biography: {
           type: 'string',
@@ -271,7 +269,6 @@ const expectedData = {
         },
         author: {
           model: 'user',
-          plugin: 'users-permissions',
         },
         link_to_biography: {
           type: 'string',
@@ -332,7 +329,6 @@ const expectedData = {
         },
         author: {
           model: 'user',
-          plugin: 'users-permissions',
         },
         link_to_biography: {
           type: 'string',
