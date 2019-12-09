@@ -86,6 +86,8 @@ function createSchemaBuilder({ components, contentTypes }) {
       return Object.keys(attributes).reduce((acc, key) => {
         const attribute = attributes[key];
 
+        const { configurable } = attribute;
+
         if (_.has(attribute, 'type')) {
           if (attribute.type === 'media') {
             const fileModel = strapi.getModel('file', 'upload');
@@ -97,9 +99,13 @@ function createSchemaBuilder({ components, contentTypes }) {
               via,
               plugin: 'upload',
               required: attribute.required ? true : false,
+              configurable: configurable === false ? false : undefined,
             };
           } else {
-            acc[key] = attribute;
+            acc[key] = {
+              ...attribute,
+              configurable: configurable === false ? false : undefined,
+            };
           }
 
           return acc;
@@ -118,6 +124,7 @@ function createSchemaBuilder({ components, contentTypes }) {
           const attr = {
             unique: unique === true ? true : undefined,
             columnName: columnName || undefined,
+            configurable: configurable === false ? false : undefined,
           };
 
           if (!this.contentTypes.has(target)) {

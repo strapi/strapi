@@ -21,6 +21,7 @@ module.exports = (obj, validNatures) => {
       .oneOf(validNatures)
       .required(),
     unique: validators.unique.nullable(),
+    configurable: yup.boolean().nullable(),
     dominant: yup.boolean().nullable(),
     columnName: yup.string().nullable(),
     targetAttribute: REVERSE_RELATIONS.includes(obj.nature)

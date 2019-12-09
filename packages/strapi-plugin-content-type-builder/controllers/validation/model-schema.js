@@ -31,6 +31,7 @@ const createSchema = (types, relations, { modelType } = {}) =>
                     .string()
                     .oneOf(types)
                     .required(),
+                  configurable: yup.boolean().nullable(),
                   ...getTypeShape(attribute, { modelType }),
                 };
 
