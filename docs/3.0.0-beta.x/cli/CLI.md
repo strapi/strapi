@@ -2,8 +2,6 @@
 
 Strapi comes with a full featured Command Line Interface (CLI) which lets you scaffold and manage your project in seconds.
 
----
-
 ## strapi new
 
 Create a new project.
@@ -245,8 +243,6 @@ strapi generate:plugin <name>
 
 Please refer to the [local plugins](../plugin-development/quick-start.md) section to know more.
 
----
-
 ## strapi install
 
 Install a plugin in the project.
@@ -263,8 +259,6 @@ strapi install <name>
 ::: warning
 Some plugins have admin panel integrations, your admin panel might have to be rebuilt. This can take some time.
 :::
-
----
 
 ## strapi uninstall
 
@@ -290,7 +284,13 @@ options [--delete-files]
 Some plugins have admin panel integrations, your admin panel might have to be rebuilt. This can take some time.
 :::
 
----
+## strapi console
+
+Start the server and let you eval commands into your application in real time.
+
+```bash
+strapi console
+```
 
 ## strapi version
 
@@ -299,8 +299,6 @@ Print the current globally installed Strapi version.
 ```bash
 strapi version
 ```
-
----
 
 ## strapi help
 
