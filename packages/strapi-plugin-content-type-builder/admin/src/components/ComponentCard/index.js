@@ -13,7 +13,14 @@ import useDataManager from '../../hooks/useDataManager';
 import Wrapper from './Wrapper';
 import Close from './Close';
 
-function ComponentCard({ component, dzName, index, isActive, onClick }) {
+function ComponentCard({
+  component,
+  dzName,
+  index,
+  isActive,
+  isInDevelopmentMode,
+  onClick,
+}) {
   const { modifiedData, removeComponentFromDynamicZone } = useDataManager();
   const {
     schema: { icon, name },
@@ -27,7 +34,6 @@ function ComponentCard({ component, dzName, index, isActive, onClick }) {
         <FontAwesomeIcon icon={icon} />
       </div>
       <p>{name}</p>
-
       <div
         className="close-btn"
         onClick={e => {
@@ -35,8 +41,7 @@ function ComponentCard({ component, dzName, index, isActive, onClick }) {
           removeComponentFromDynamicZone(dzName, index);
         }}
       >
-        <Close width="7px" height="7px" />
-        {/* <Remove /> */}
+        {isInDevelopmentMode && <Close width="7px" height="7px" />}
       </div>
     </Wrapper>
   );
@@ -45,6 +50,7 @@ function ComponentCard({ component, dzName, index, isActive, onClick }) {
 ComponentCard.defaultProps = {
   component: null,
   isActive: false,
+  isInDevelopmentMode: false,
   onClick: () => {},
   onRemoveClick: () => {},
 };
@@ -54,6 +60,7 @@ ComponentCard.propTypes = {
   dzName: PropTypes.string.isRequired,
   index: PropTypes.number.isRequired,
   isActive: PropTypes.bool,
+  isInDevelopmentMode: PropTypes.bool,
   onClick: PropTypes.func,
 };
 

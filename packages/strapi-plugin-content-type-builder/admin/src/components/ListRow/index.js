@@ -27,7 +27,11 @@ function ListRow({
   secondLoopComponentName,
   secondLoopComponentUid,
 }) {
-  const { contentTypes, removeAttribute } = useDataManager();
+  const {
+    contentTypes,
+    isInDevelopmentMode,
+    removeAttribute,
+  } = useDataManager();
   const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type)
     ? 'number'
     : type;
@@ -123,7 +127,7 @@ function ListRow({
         )}
       </td>
       <td>
-        {configurable ? (
+        {configurable && isInDevelopmentMode ? (
           <>
             <button type="button" onClick={handleClick}>
               <FontAwesomeIcon className="link-icon" icon="pencil-alt" />

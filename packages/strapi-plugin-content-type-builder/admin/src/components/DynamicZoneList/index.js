@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { TabContent, TabPane, Nav } from 'reactstrap';
 import { Plus } from '@buffetjs/icons';
-
+import useDataManager from '../../hooks/useDataManager';
 import getTrad from '../../utils/getTrad';
 import ComponentList from '../ComponentList';
 import ComponentButton from './ComponentButton';
@@ -23,6 +23,7 @@ function DynamicZoneList({
   name,
   targetUid,
 }) {
+  const { isInDevelopmentMode } = useDataManager();
   const [activeTab, setActiveTab] = useState('0');
 
   const toggle = tab => {
@@ -39,16 +40,18 @@ function DynamicZoneList({
         <div>
           <div className="tabs-wrapper">
             <Nav tabs>
-              <li>
-                <ComponentButton onClick={handleClickAdd}>
-                  <div>
-                    <Plus style={{ height: 15, width: 15 }} />
-                  </div>
-                  <p>
-                    <FormattedMessage id={getTrad('button.component.add')} />
-                  </p>
-                </ComponentButton>
-              </li>
+              {isInDevelopmentMode && (
+                <li>
+                  <ComponentButton onClick={handleClickAdd}>
+                    <div>
+                      <Plus style={{ height: 15, width: 15 }} />
+                    </div>
+                    <p>
+                      <FormattedMessage id={getTrad('button.component.add')} />
+                    </p>
+                  </ComponentButton>
+                </li>
+              )}
               {components.map((component, index) => {
                 return (
                   <li key={component}>
@@ -57,6 +60,7 @@ function DynamicZoneList({
                       index={index}
                       component={component}
                       isActive={activeTab === `${index}`}
+                      isInDevelopmentMode={isInDevelopmentMode}
                       onClick={() => {
                         toggle(`${index}`);
                       }}

@@ -11,6 +11,7 @@ import { Plus } from '@buffetjs/icons';
 
 import pluginId from '../../pluginId';
 import useListView from '../../hooks/useListView';
+import useDataManager from '../../hooks/useDataManager';
 
 import DynamicZoneList from '../DynamicZoneList';
 import ComponentList from '../ComponentList';
@@ -32,6 +33,7 @@ function List({
   isSub,
 }) {
   const { formatMessage } = useGlobalContext();
+  const { isInDevelopmentMode } = useDataManager();
   const { openModalAddField } = useListView();
   const onClickAddField = () => {
     let headerDisplayName = mainTypeName;
@@ -57,11 +59,13 @@ function List({
   const addButtonProps = {
     icon: !isSub ? <Plus fill="#007eff" width="11px" height="11px" /> : false,
     color: 'primary',
-    label: formatMessage({
-      id: !isSub
-        ? `${pluginId}.form.button.add.field.to.${editTarget}`
-        : `${pluginId}.form.button.add.field.to.component`,
-    }),
+    label: isInDevelopmentMode
+      ? formatMessage({
+          id: !isSub
+            ? `${pluginId}.form.button.add.field.to.${editTarget}`
+            : `${pluginId}.form.button.add.field.to.component`,
+        })
+      : null,
     onClick: onClickAddField,
   };
 
@@ -121,7 +125,9 @@ function List({
             })}
           </tbody>
         </table>
-        <ListButton {...addButtonProps}></ListButton>
+        {editTarget === 'components' && (
+          <ListButton {...addButtonProps}></ListButton>
+        )}
       </Wrapper>
       {isSub && (
         <div className="plus-icon" onClick={onClickAddField}>
