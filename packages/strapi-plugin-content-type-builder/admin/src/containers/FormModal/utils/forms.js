@@ -445,7 +445,7 @@ const forms = {
               ? [[{ type: 'spacer' }]].concat(
                   componentForm.base('componentToCreate.')
                 )
-              : [];
+              : [[{ type: 'spacer' }]];
 
           return {
             items: [[fields.createComponent], ...itemsToConcat],

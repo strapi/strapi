@@ -11,6 +11,14 @@ const Wrapper = styled(ViewContainer)`
   .button-submit {
     min-width: 140px;
   }
+  .add-button {
+    line-height: 30px;
+    svg {
+      height: 11px;
+      width: 11px;
+      vertical-align: middle;
+    }
+  }
 `;
 
 export default Wrapper;

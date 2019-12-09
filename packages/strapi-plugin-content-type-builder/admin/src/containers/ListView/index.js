@@ -250,6 +250,7 @@ const ListPage = () => {
 
   const addButtonProps = {
     icon: true,
+    className: 'add-button',
     color: 'primary',
     label: formatMessage({ id: `${pluginId}.button.attributes.add.another` }),
     onClick: () => {
@@ -268,7 +269,7 @@ const ListPage = () => {
     color: 'secondary',
     label: formatMessage({ id: `${pluginId}.form.button.configure-view` }),
     onClick: goToCMSettingsPage,
-    style: { height: '30px' },
+    style: { height: '30px', marginTop: '1px' },
     className: 'button-secondary',
   };
 
@@ -320,7 +321,11 @@ const ListPage = () => {
               <Header {...headerProps} />
 
               <ListWrapper>
-                <ListHeader actions={listActions} title={listTitle} />
+                <ListHeader
+                  actions={listActions}
+                  title={listTitle}
+                  // style={{ top: 1 }}
+                />
                 <List
                   items={convertAttrObjToArray(attributes)}
                   customRowComponent={props => <CustomRow {...props} />}

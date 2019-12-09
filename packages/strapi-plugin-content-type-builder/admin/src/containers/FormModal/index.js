@@ -28,6 +28,7 @@ import RelationForm from '../../components/RelationForm';
 import HeaderNavLink from '../../components/HeaderNavLink';
 import WrapperSelect from '../../components/WrapperSelect';
 import getTrad from '../../utils/getTrad';
+import makeSearch from '../../utils/makeSearch';
 import getAttributes from './utils/attributes';
 import forms from './utils/forms';
 import { createComponentUid, createUid } from './utils/createUid';
@@ -36,7 +37,7 @@ import getNextSearch from './utils/getNextSearch';
 import { NAVLINKS, INITIAL_STATE_DATA } from './utils/staticData';
 import init from './init';
 import reducer, { initialState } from './reducer';
-import makeSearch from '../../utils/makeSearch';
+import CustomButton from './CustomButton';
 
 const FormModal = () => {
   const [state, setState] = useState(INITIAL_STATE_DATA);
@@ -1313,7 +1314,7 @@ const FormModal = () => {
                     {formatMessage({ id: getTrad('button.delete.title') })}
                   </Button>
                 )}
-                <Button
+                <CustomButton
                   type={isCreating ? 'submit' : 'button'}
                   color={
                     (isCreatingContentType ||
@@ -1329,11 +1330,12 @@ const FormModal = () => {
                       !isCreatingComponentFromAView &&
                       state.step !== '1') ||
                     (state.modalType === 'addComponentToDynamicZone' &&
-                      isCreatingComponentFromAView)
+                      isCreatingComponentFromAView) ||
+                    (isCreatingComponentFromAView && state.step === '2')
                   }
                 >
                   {getButtonSubmitMessage()}
-                </Button>
+                </CustomButton>
               </div>
             </section>
           </ModalFooter>

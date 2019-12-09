@@ -20,7 +20,7 @@ const WrapperSelect = ({ error, label, name, type, ...rest }) => {
         : error
         ? '1px solid red !important'
         : '1px solid #E3E9F3 !important',
-      'border-radius': '2px !important',
+      borderRadius: '2px !important',
     }),
     menu: base => {
       return {

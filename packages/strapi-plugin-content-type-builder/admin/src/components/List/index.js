@@ -55,7 +55,7 @@ function List({
   };
 
   const addButtonProps = {
-    icon: !isSub ? <Plus fill="#007eff" /> : false,
+    icon: !isSub ? <Plus fill="#007eff" width="11px" height="11px" /> : false,
     color: 'primary',
     label: formatMessage({
       id: !isSub
