@@ -493,7 +493,7 @@ sudo nano ecosystem.config.js
 module.exports = {
   apps : [{
     name: 'your-app-name',
-    cwd: '/home/ubuntu/my-strapi-project/my-project'
+    cwd: '/home/ubuntu/my-strapi-project/my-project',
     script: 'npm',
     args: 'start',
     env: {
