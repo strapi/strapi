@@ -23,6 +23,7 @@ module.exports = async (ctx, next) => {
           .findOne({ id }, ['role']);
       }
     } catch (err) {
+      strapi.log.error(err);
       return handleErrors(ctx, err, 'unauthorized');
     }
 
