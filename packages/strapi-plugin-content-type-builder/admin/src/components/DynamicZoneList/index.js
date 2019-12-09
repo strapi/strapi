@@ -14,6 +14,7 @@ import getTrad from '../../utils/getTrad';
 import ComponentList from '../ComponentList';
 import ComponentButton from './ComponentButton';
 import ComponentCard from '../ComponentCard';
+import Td from '../Td';
 
 function DynamicZoneList({
   customRowComponent,
@@ -36,7 +37,7 @@ function DynamicZoneList({
 
   return (
     <tr className="dynamiczone-row">
-      <td colSpan={12}>
+      <Td colSpan={12} isFromDynamicZone>
         <div>
           <div className="tabs-wrapper">
             <Nav tabs>
@@ -83,6 +84,7 @@ function DynamicZoneList({
                     <tbody>
                       <ComponentList
                         {...props}
+                        isFromDynamicZone
                         mainTypeName={mainTypeName}
                         targetUid={targetUid}
                         key={component}
@@ -94,7 +96,7 @@ function DynamicZoneList({
             })}
           </TabContent>
         </div>
-      </td>
+      </Td>
     </tr>
   );
 }

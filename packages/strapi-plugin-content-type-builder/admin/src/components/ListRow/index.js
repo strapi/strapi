@@ -6,7 +6,7 @@ import { AttributeIcon } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
-import Component from '../../icons/Component';
+import Curve from '../../icons/Curve';
 import UpperFist from '../UpperFirst';
 import Wrapper from './Wrapper';
 
@@ -23,6 +23,7 @@ function ListRow({
   editTarget,
   firstLoopComponentName,
   firstLoopComponentUid,
+  isFromDynamicZone,
   secondLoopComponentName,
   secondLoopComponentUid,
 }) {
@@ -99,7 +100,7 @@ function ListRow({
     >
       <td>
         <AttributeIcon key={src} type={src} />
-        <Component fill="#f3f4f4" />
+        <Curve fill={isFromDynamicZone ? '#AED4FB' : '#f3f4f4'} />
       </td>
       <td style={{ fontWeight: 600 }}>
         <p>{name}</p>
@@ -160,6 +161,7 @@ ListRow.defaultProps = {
   configurable: true,
   firstLoopComponentName: null,
   firstLoopComponentUid: null,
+  isFromDynamicZone: false,
   nature: null,
   onClick: () => {},
   onClickDelete: () => {},
@@ -176,6 +178,7 @@ ListRow.propTypes = {
   editTarget: PropTypes.string.isRequired,
   firstLoopComponentName: PropTypes.string,
   firstLoopComponentUid: PropTypes.string,
+  isFromDynamicZone: PropTypes.bool,
   mainTypeName: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   nature: PropTypes.string,

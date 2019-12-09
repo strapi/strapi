@@ -80,7 +80,12 @@
     },
     "dz": {
       "type": "dynamiczone",
-      "components": []
+      "components": [
+        "default.closingperiod",
+        "default.dish",
+        "default.openingtimes",
+        "default.restaurantservice"
+      ]
     }
   }
 }

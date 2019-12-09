@@ -121,7 +121,9 @@ const Wrapper = styled(List)`
     position: absolute;
     bottom: 14px;
     left: 34px;
-    background-color: #f3f4f4;
+    background-color: ${({ isFromDynamicZone }) =>
+      isFromDynamicZone ? '#AED4FB' : '#f3f4f4'};
+
     color: transparent;
     text-align: center;
     line-height: 27px;
@@ -134,5 +136,9 @@ const Wrapper = styled(List)`
     }
   }
 `;
+
+Wrapper.defaultProps = {
+  isFromDynamicZone: false,
+};
 
 export default Wrapper;

@@ -24,6 +24,7 @@ function List({
   targetUid,
   mainTypeName,
   editTarget,
+  isFromDynamicZone,
   firstLoopComponentName,
   firstLoopComponentUid,
   secondLoopComponentName,
@@ -73,7 +74,7 @@ function List({
 
   return (
     <>
-      <Wrapper className={className}>
+      <Wrapper className={className} isFromDynamicZone={isFromDynamicZone}>
         <table>
           <tbody>
             {items.map(item => {
@@ -91,6 +92,7 @@ function List({
                     editTarget={editTarget}
                     firstLoopComponentName={firstLoopComponentName}
                     firstLoopComponentUid={firstLoopComponentUid}
+                    isFromDynamicZone={isFromDynamicZone}
                     secondLoopComponentName={secondLoopComponentName}
                     secondLoopComponentUid={secondLoopComponentUid}
                   />
@@ -123,13 +125,11 @@ function List({
             })}
           </tbody>
         </table>
-        {editTarget === 'components' && (
-          <ListButton {...addButtonProps}></ListButton>
-        )}
+        <ListButton {...addButtonProps}></ListButton>
       </Wrapper>
       {isSub && (
         <div className="plus-icon" onClick={onClickAddField}>
-          <Plus fill="#b4b6ba" />
+          <Plus fill={isFromDynamicZone ? '#007EFF' : '#b4b6ba'} />
         </div>
       )}
     </>
@@ -143,6 +143,7 @@ List.defaultProps = {
   customRowComponent: null,
   firstLoopComponentName: null,
   firstLoopComponentUid: null,
+  isFromDynamicZone: false,
   isSub: false,
   items: [],
   secondLoopComponentName: null,
@@ -157,6 +158,7 @@ List.propTypes = {
   editTarget: PropTypes.string.isRequired,
   firstLoopComponentName: PropTypes.string,
   firstLoopComponentUid: PropTypes.string,
+  isFromDynamicZone: PropTypes.bool,
   items: PropTypes.instanceOf(Array),
   mainTypeName: PropTypes.string.isRequired,
   secondLoopComponentName: PropTypes.string,

@@ -10,12 +10,13 @@ import PropTypes from 'prop-types';
 import List from '../List';
 import useDataManager from '../../hooks/useDataManager';
 import convertAttrObjToArray from '../../utils/convertAttrObjToArray';
+import Td from '../Td';
 
 function ComponentList({
   customRowComponent,
   component,
   mainTypeName,
-
+  isFromDynamicZone,
   firstLoopComponentName,
   firstLoopComponentUid,
 }) {
@@ -28,7 +29,7 @@ function ComponentList({
 
   return (
     <tr className="component-row">
-      <td colSpan={12}>
+      <Td colSpan={12} isFromDynamicZone={isFromDynamicZone}>
         <List
           customRowComponent={customRowComponent}
           items={convertAttrObjToArray(attributes)}
@@ -37,13 +38,14 @@ function ComponentList({
           firstLoopComponentName={firstLoopComponentName || componentName}
           firstLoopComponentUid={firstLoopComponentUid || component}
           editTarget="components"
+          isFromDynamicZone={isFromDynamicZone}
           isSub
           secondLoopComponentName={
             firstLoopComponentName ? componentName : null
           }
           secondLoopComponentUid={firstLoopComponentUid ? component : null}
         />
-      </td>
+      </Td>
     </tr>
   );
 }
@@ -51,6 +53,7 @@ function ComponentList({
 ComponentList.defaultProps = {
   component: null,
   customRowComponent: null,
+  isFromDynamicZone: false,
 };
 
 ComponentList.propTypes = {
@@ -58,6 +61,7 @@ ComponentList.propTypes = {
   customRowComponent: PropTypes.func,
   firstLoopComponentName: PropTypes.string,
   firstLoopComponentUid: PropTypes.string,
+  isFromDynamicZone: PropTypes.bool,
   mainTypeName: PropTypes.string.isRequired,
   targetUid: PropTypes.string.isRequired,
 };
