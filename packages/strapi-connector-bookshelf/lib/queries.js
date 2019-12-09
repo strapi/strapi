@@ -134,7 +134,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
 
       if (Object.keys(relations).length > 0) {
         return model.updateRelations(
-          Object.assign(params, { values: relations }),
+          { id: entry.id, values: relations },
           { transacting: trx }
         );
       }
@@ -774,8 +774,8 @@ const buildSearchQuery = (qb, model, params) => {
     case 'pg': {
       const searchQuery = searchText.map(attribute =>
         _.toLower(attribute) === attribute
-          ? `to_tsvector(${attribute})`
-          : `to_tsvector("${attribute}")`
+          ? `to_tsvector(coalesce(${attribute}, ''))`
+          : `to_tsvector(coalesce("${attribute}", ''))`
       );
 
       qb.orWhereRaw(`${searchQuery.join(' || ')} @@ plainto_tsquery(?)`, query);
