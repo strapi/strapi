@@ -118,6 +118,9 @@ const DynamicZone = ({ max, min, name }) => {
               </RoundCTA>
               <FieldComponent
                 componentUid={componentUid}
+                componentFriendlyName={
+                  getDynamicComponentInfos(componentUid).name
+                }
                 icon={getDynamicComponentInfos(componentUid).icon}
                 label=""
                 name={`${name}.${index}`}

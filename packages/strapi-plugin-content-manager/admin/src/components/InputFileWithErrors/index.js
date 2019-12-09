@@ -49,12 +49,14 @@ function InputFileWithErrors({
 
         return (
           <Container className={className !== '' && className} style={style}>
-            <Label htmlFor={`${name}NotNeeded`}>{label}</Label>
-            {multiple && fileLabel && (
-              <span className="labelNumber">
-                &nbsp;({fileLabel}/{value.length})
-              </span>
-            )}
+            <Label htmlFor={`${name}NotNeeded`}>
+              {label}
+              {multiple && fileLabel && (
+                <span className="labelNumber">
+                  &nbsp;({fileLabel}/{value.length})
+                </span>
+              )}
+            </Label>
 
             <InputFile
               {...props}
@@ -69,7 +71,13 @@ function InputFileWithErrors({
             {!hasError && inputDescription && (
               <Description>{inputDescription}</Description>
             )}
-            {hasError && <ErrorMessage>{error}</ErrorMessage>}
+            {hasError && (
+              <ErrorMessage
+              // style={{ marginBottom: '-15px', paddingTop: '10px' }}
+              >
+                {error}
+              </ErrorMessage>
+            )}
           </Container>
         );
       }}

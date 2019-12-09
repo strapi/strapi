@@ -42,7 +42,11 @@ function InputFileDetails(props) {
             </a>
           )}
         </div>
-        <div className="removeContainer" onClick={props.onFileDelete}>
+        <div
+          className="removeContainer"
+          onClick={props.onFileDelete}
+          style={{ marginBottom: '-2px', paddingTop: '4px' }}
+        >
           <FormattedMessage id="app.components.InputFileDetails.remove" />
         </div>
       </div>

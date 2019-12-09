@@ -15,6 +15,7 @@ import Reset from './ResetComponent';
 import Wrapper from './Wrapper';
 
 const FieldComponent = ({
+  componentFriendlyName,
   componentUid,
   icon,
   isFromDynamicZone,
@@ -42,8 +43,7 @@ const FieldComponent = ({
   return (
     <Wrapper className="col-12" isFromDynamicZone={isFromDynamicZone}>
       {isFromDynamicZone && (
-        <ComponentIcon>
-          {/* <i className={`fas fa-${icon}`}></i> */}
+        <ComponentIcon title={componentFriendlyName}>
           <FontAwesomeIcon icon={icon} />
         </ComponentIcon>
       )}
@@ -93,6 +93,7 @@ const FieldComponent = ({
 };
 
 FieldComponent.defaultProps = {
+  componentFriendlyName: null,
   icon: 'smile',
   isFromDynamicZone: false,
   isRepeatable: false,
@@ -101,6 +102,7 @@ FieldComponent.defaultProps = {
 };
 
 FieldComponent.propTypes = {
+  componentFriendlyName: PropTypes.string,
   componentUid: PropTypes.string.isRequired,
   icon: PropTypes.string,
   isFromDynamicZone: PropTypes.bool,
