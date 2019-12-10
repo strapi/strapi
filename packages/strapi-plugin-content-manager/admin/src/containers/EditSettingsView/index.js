@@ -66,7 +66,7 @@ const EditSettingsView = ({
   }, [modifiedData]);
 
   const getName = useMemo(() => {
-    return get(modifiedData, ['schema', 'info', 'name'], {});
+    return get(modifiedData, ['schema', 'info', 'name'], '');
   }, [modifiedData]);
 
   const getEditLayout = useCallback(() => {
