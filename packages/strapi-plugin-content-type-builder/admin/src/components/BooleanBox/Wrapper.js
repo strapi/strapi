@@ -60,8 +60,10 @@ const Wrapper = styled.div`
     border: 1px solid #aed4fb;
     color: #007eff;
     .option__indicator {
+      border: solid 1px #aed4fb;
       &::after {
         background: #007eff;
+
         transform: scale(1);
       }
     }

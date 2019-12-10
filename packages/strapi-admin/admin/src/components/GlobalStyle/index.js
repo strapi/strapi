@@ -49,6 +49,10 @@ const GlobalStyle = createGlobalStyle`
     }
   }
 
+  .modal-backdrop.show {
+    opacity: 0.15;
+  }
+
   // TODO - New modal transition in progress
   // .modal {
   //   &::before {

@@ -22,7 +22,7 @@ import {
   generateFiltersFromSearch,
   generateSearchFromFilters,
 } from '../../utils/search';
-import getFeatureLabel from '../../utils/getFeatureLabel';
+
 import ListViewProvider from '../ListViewProvider';
 import { onChangeListLabels, resetListLabels } from '../Main/actions';
 import { AddFilterCta, Img, Wrapper } from './components';
@@ -50,7 +50,6 @@ function ListView({
   location: { pathname, search },
   getData,
   layouts,
-  models,
   history: { push },
   onChangeBulk,
   onChangeBulkSelectall,
@@ -132,7 +131,8 @@ function ListView({
   const getListSchema = () => get(layouts, [...contentTypePath, 'schema'], {});
 
   const getName = () => {
-    return getFeatureLabel(models, slug);
+    // return getFeatureLabel(models, slug);
+    return get(getListSchema(), ['info', 'name'], '');
   };
 
   const getAllLabels = () => {

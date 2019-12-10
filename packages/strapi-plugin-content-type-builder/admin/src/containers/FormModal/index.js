@@ -1017,6 +1017,7 @@ const FormModal = () => {
                               width: 'calc(100% - 30px)',
                               marginBottom: 16,
                               marginTop: 19,
+                              borderColor: '#F0F3F8',
                             }}
                           />
                         )}
@@ -1147,14 +1148,6 @@ const FormModal = () => {
                           );
 
                           let value;
-                          // let style = {};
-
-                          // if (
-                          //   // input.name === 'required' ||
-                          //   input.name === 'unique'
-                          // ) {
-                          //   style = { marginTop: -4, marginBottom: 5 };
-                          // }
 
                           // Condition for the boolean default value
                           // The radio input doesn't accept false, true or null as value
@@ -1172,6 +1165,8 @@ const FormModal = () => {
                             Array.isArray(retrievedValue)
                           ) {
                             value = retrievedValue.join('\n');
+                          } else if (input.name === 'uid') {
+                            value = input.value;
                           } else {
                             value = retrievedValue;
                           }

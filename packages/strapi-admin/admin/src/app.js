@@ -19,8 +19,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { fas } from '@fortawesome/free-solid-svg-icons';
+
 import { merge } from 'lodash';
 import { Fonts } from '@buffetjs/styles';
 import {
@@ -49,7 +48,7 @@ import { translationMessages, languages } from './i18n';
 import history from './utils/history';
 
 import plugins from './plugins';
-library.add(fas);
+
 const initialState = {};
 const store = configureStore(initialState, history);
 const { dispatch } = store;

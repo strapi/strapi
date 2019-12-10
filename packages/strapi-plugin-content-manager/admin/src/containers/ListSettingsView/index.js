@@ -13,7 +13,6 @@ import { DropdownItem } from 'reactstrap';
 import { Inputs as Input } from '@buffetjs/custom';
 import pluginId from '../../pluginId';
 import ItemTypes from '../../utils/ItemTypes';
-import getFeatureLabel from '../../utils/getFeatureLabel';
 import getRequestUrl from '../../utils/getRequestUrl';
 import PopupForm from '../../components/PopupForm';
 import SettingsViewWrapper from '../../components/SettingsViewWrapper';
@@ -27,7 +26,7 @@ import Toggle from './Toggle';
 import reducer, { initialState } from './reducer';
 import forms from './forms.json';
 
-const ListSettingsView = ({ deleteLayout, models, slug }) => {
+const ListSettingsView = ({ deleteLayout, slug }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const [isOpen, setIsOpen] = useState(false);
   const [isModalFormOpen, setIsModalFormOpen] = useState(false);
@@ -79,9 +78,9 @@ const ListSettingsView = ({ deleteLayout, models, slug }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
-  const getName = () => {
-    return getFeatureLabel(models, slug);
-  };
+  const getName = useMemo(() => {
+    return get(modifiedData, ['schema', 'info', 'name'], '');
+  }, [modifiedData]);
 
   const getListDisplayedFields = () =>
     get(modifiedData, ['layouts', 'list'], []);
@@ -226,7 +225,7 @@ const ListSettingsView = ({ deleteLayout, models, slug }) => {
           });
         }}
         onConfirmSubmit={handleConfirm}
-        name={getName()}
+        name={getName}
       >
         <DragWrapper>
           <div className="row">
