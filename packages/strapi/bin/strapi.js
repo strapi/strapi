@@ -4,9 +4,17 @@
 const _ = require('lodash');
 const resolveCwd = require('resolve-cwd');
 const { yellow } = require('chalk');
+const program = require('commander');
 
-const program = require('strapi-utils').commander;
 const packageJSON = require('../package.json');
+
+// Allow us to display `help()`, but omit the wildcard (`*`) command.
+program.Command.prototype.usageMinusWildcard = program.usageMinusWildcard = () => {
+  program.commands = _.reject(program.commands, {
+    _name: '*',
+  });
+  program.help();
+};
 
 const checkCwdIsStrapiApp = name => {
   let logErrorAndExit = () => {

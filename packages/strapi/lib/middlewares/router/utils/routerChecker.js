@@ -8,9 +8,7 @@
 const _ = require('lodash');
 
 // Strapi utilities.
-const finder = require('strapi-utils').finder;
-const regex = require('strapi-utils').regex;
-const policyUtils = require('strapi-utils').policy;
+const { finder, regex, policy: policyUtils } = require('strapi-utils');
 
 module.exports = strapi =>
   function routerChecker(value, endpoint, plugin) {

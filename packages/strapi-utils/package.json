@@ -18,9 +18,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "commander": "^2.20.0",
     "date-fns": "^2.8.1",
-    "joi-json": "^2.1.0",
     "knex": "^0.16.5",
     "lodash": "^4.17.11",
     "pino": "^4.7.1",
