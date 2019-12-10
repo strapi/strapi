@@ -136,7 +136,7 @@ If you were using the groups feature you will need to apply some changes:
 
 Start by renaming the `./groups` folder to `./components` in your project root folder.
 
-Components now are placed into `categories`. To reflect this you must move all your components must live inside a `category` folder.
+Components now are placed into `categories`. To reflect this you must move all your components inside a `category` folder.
 
 ### Example
 
@@ -156,6 +156,72 @@ components/
 │   └── metadata.json
 └── content/
     └── image-text.json
+```
+
+Now that you have moved your component into categories. You need to update your content-types to references them correctly.
+
+**Before**
+`./api/restaurant/models/Restaurant.settings.json`
+
+```json
+{
+  "connection": "default",
+  "collectionName": "restaurants",
+  "info": {
+    "name": "restaurant",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": ["created_at", "updated_at"]
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "seo_metadatas": {
+      "type": "group",
+      "group": "seo-metadata",
+      "repeatable": true
+    },
+    "cover": {
+      "type": "group",
+      "group": "image-text"
+    }
+  }
+}
+```
+
+**After**
+`./api/restaurant/models/Restaurant.settings.json`
+
+```json
+{
+  "connection": "default",
+  "collectionName": "restaurants",
+  "info": {
+    "name": "restaurant",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": ["created_at", "updated_at"]
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "seo_metadatas": {
+      "type": "component",
+      "component": "seo.metadata", // {category}.{name}
+      "repeatable": true
+    },
+    "cover": {
+      "type": "component",
+      "component": "content.image-text"
+    }
+  }
+}
 ```
 
 ## Rebuilding your administration panel
