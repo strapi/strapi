@@ -222,8 +222,7 @@ module.exports = {
         polymorphicResolver: {
           Morph: {
             __resolveType(obj) {
-              // eslint-disable-line no-unused-vars
-              return obj.kind || obj._type;
+              return obj.kind || obj.__contentType || null;
             },
           },
         },

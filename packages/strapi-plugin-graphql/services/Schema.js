@@ -143,7 +143,7 @@ const schemaBuilder = {
           definition,
           query,
           mutation,
-          resolver,
+          resolvers,
         } = Resolvers.buildShadowCRUD(strapi.plugins[plugin].models, plugin);
 
         // We cannot put this in the merge because it's a string.
@@ -151,7 +151,7 @@ const schemaBuilder = {
 
         return _.merge(acc, {
           query,
-          resolver,
+          resolvers,
           mutation,
         });
       }, modelCruds);
@@ -163,8 +163,7 @@ const schemaBuilder = {
     };
 
     Object.keys(strapi.components).forEach(key =>
-      Resolvers.buildModel(strapi.components[key], key, {
-        plugin: null,
+      Resolvers.buildModel(strapi.components[key], {
         isComponent: true,
         schema: componentsSchema,
       })

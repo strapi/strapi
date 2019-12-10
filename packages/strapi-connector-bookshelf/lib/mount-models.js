@@ -547,11 +547,10 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
               : relation;
 
             // Retrieve opposite model.
-            const model = association.plugin
-              ? strapi.plugins[association.plugin].models[
-                  association.collection || association.model
-                ]
-              : strapi.models[association.collection || association.model];
+            const model = strapi.getModel(
+              association.collection || association.model,
+              association.plugin
+            );
 
             // Reformat data by bypassing the many-to-many relationship.
             switch (association.nature) {
@@ -564,15 +563,36 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
                   rel => rel[model.collectionName]
                 );
                 break;
-              case 'oneMorphToOne':
-                attrs[association.alias] =
-                  attrs[association.alias].related || null;
+              case 'oneMorphToOne': {
+                const obj = attrs[association.alias];
+
+                if (obj === undefined || obj === null) {
+                  break;
+                }
+
+                const contentType = strapi.db.getModelByCollectionName(
+                  obj[`${association.alias}_type`]
+                );
+
+                attrs[association.alias] = {
+                  __contentType: contentType ? contentType.globalId : null,
+                  ...obj.related,
+                };
+
                 break;
+              }
               case 'manyMorphToOne':
               case 'manyMorphToMany':
-                attrs[association.alias] = attrs[association.alias].map(
-                  obj => obj.related
-                );
+                attrs[association.alias] = attrs[association.alias].map(obj => {
+                  const contentType = strapi.db.getModelByCollectionName(
+                    obj[`${association.alias}_type`]
+                  );
+
+                  return {
+                    __contentType: contentType ? contentType.globalId : null,
+                    ...obj.related,
+                  };
+                });
                 break;
               default:
             }

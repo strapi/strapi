@@ -107,6 +107,12 @@ class DatabaseManager {
       _.get(strapi, ['components', key])
     );
   }
+
+  getModelByCollectionName(collectionName) {
+    return Array.from(this.models.values()).find(model => {
+      return model.collectionName === collectionName;
+    });
+  }
 }
 
 function createDatabaseManager(strapi) {

@@ -6,8 +6,8 @@ const uploadFiles = require('../utils/upload-files');
  * A set of functions called "actions" for `ContentManager`
  */
 module.exports = {
-  fetch(params) {
-    return strapi.query(params.model).findOne({ id: params.id });
+  fetch(params, populate) {
+    return strapi.query(params.model).findOne({ id: params.id }, populate);
   },
 
   fetchAll(params, query) {
