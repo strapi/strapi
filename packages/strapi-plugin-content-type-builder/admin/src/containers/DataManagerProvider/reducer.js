@@ -189,7 +189,7 @@ const reducer = (state, action) => {
       );
     }
     case 'DELETE_NOT_SAVED_TYPE': {
-      // Doing so will also reset the modified initial data
+      // Doing so will also reset the modified and the initial data
       return state
         .update('contentTypes', () => state.get('initialContentTypes'))
         .update('components', () => state.get('initialComponents'));
@@ -406,7 +406,7 @@ const reducer = (state, action) => {
 
       const isRemovingRelationAttribute =
         attributeToRemoveData.get('nature') !== undefined;
-      // Only content types can have relations that with themselves since
+      // Only content types can have relations with themselves since
       // components can only have oneWay or manyWay relations
       const canTheAttributeToRemoveHaveARelationWithItself =
         mainDataKey === 'contentType';

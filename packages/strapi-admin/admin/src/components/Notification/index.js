@@ -66,7 +66,6 @@ class Notification extends React.Component {
         >
           <div className={`notificationIcon`}>
             <div>
-              {/* <i className={`fa ${options.icon}`} /> */}
               <FontAwesomeIcon icon={options.icon} />
             </div>
           </div>

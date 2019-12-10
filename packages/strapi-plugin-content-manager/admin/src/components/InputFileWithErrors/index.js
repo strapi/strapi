@@ -71,13 +71,7 @@ function InputFileWithErrors({
             {!hasError && inputDescription && (
               <Description>{inputDescription}</Description>
             )}
-            {hasError && (
-              <ErrorMessage
-              // style={{ marginBottom: '-15px', paddingTop: '10px' }}
-              >
-                {error}
-              </ErrorMessage>
-            )}
+            {hasError && <ErrorMessage>{error}</ErrorMessage>}
           </Container>
         );
       }}

@@ -4,7 +4,7 @@ const getColor = (isOverRemove, isSelected, isOverEditBlock) => {
   } else if (isSelected || isOverEditBlock) {
     return '#aed4fb';
   } else {
-    return '#E9EAEB ';
+    return '#e9eaeb';
   }
 };
 

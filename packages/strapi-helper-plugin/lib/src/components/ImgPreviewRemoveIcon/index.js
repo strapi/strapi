@@ -14,7 +14,6 @@ function ImgPreviewRemoveIcon(props) {
 
   return (
     <Div onClick={props.onClick} style={divStyle}>
-      {/* <i className="fa fa-times" /> */}
       <FontAwesomeIcon icon="times" />
     </Div>
   );

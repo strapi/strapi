@@ -113,7 +113,6 @@ const DynamicZone = ({ max, min, name }) => {
               <RoundCTA
                 onClick={() => removeComponentFromDynamicZone(name, index)}
               >
-                {/* <i className="far fa-trash-alt" /> */}
                 <FontAwesomeIcon icon={'trash'} />
               </RoundCTA>
               <FieldComponent

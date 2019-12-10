@@ -72,8 +72,6 @@ const FormModal = () => {
     modifiedData,
   } = reducerState.toJS();
 
-  // TODO close the modal when the user tries to create a field and reloaded the app
-
   useEffect(() => {
     if (!isEmpty(search)) {
       const actionType = query.get('actionType');

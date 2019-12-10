@@ -102,7 +102,6 @@ class PluginCard extends React.Component {
       this.props.plugin.id
     ) && (
       <div className="settings" onClick={this.handleClickSettings}>
-        {/* <i className="fa fa-cog" /> */}
         <FontAwesomeIcon icon="cog" />
         <FormattedMessage id="app.components.PluginCard.settings" />
       </div>
@@ -150,10 +149,7 @@ class PluginCard extends React.Component {
               />
             </div>
           </div>
-          <div className="cardDescription">
-            {descriptions.long}
-            {/* &nbsp;<FormattedMessage id="app.components.PluginCard.more-details" /> */}
-          </div>
+          <div className="cardDescription">{descriptions.long}</div>
           <div className="cardFooter" onClick={e => e.stopPropagation()}>
             <div className="cardFooterButton">
               <Button

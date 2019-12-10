@@ -22,7 +22,6 @@ import {
   generateFiltersFromSearch,
   generateSearchFromFilters,
 } from '../../utils/search';
-
 import ListViewProvider from '../ListViewProvider';
 import { onChangeListLabels, resetListLabels } from '../Main/actions';
 import { AddFilterCta, Img, Wrapper } from './components';
@@ -131,7 +130,6 @@ function ListView({
   const getListSchema = () => get(layouts, [...contentTypePath, 'schema'], {});
 
   const getName = () => {
-    // return getFeatureLabel(models, slug);
     return get(getListSchema(), ['info', 'name'], '');
   };
 

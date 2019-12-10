@@ -77,7 +77,6 @@ class Row extends React.Component {
             )}
             {isEmpty(this.props.plugin.logo) && (
               <div className="icoWrapper">
-                {/* <i className={`fa fa-${this.props.plugin.icon}`} /> */}
                 <FontAwesomeIcon icon={this.props.plugin.icon} />
               </div>
             )}

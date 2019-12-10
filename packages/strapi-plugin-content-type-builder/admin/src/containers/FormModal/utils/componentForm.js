@@ -11,9 +11,7 @@ const componentForm = {
           label: {
             id: getTrad('modalForm.attribute.form.base.name'),
           },
-          // description: {
-          //   id: getTrad('modalForm.attribute.form.base.name.description'),
-          // },
+
           validations: {
             required: true,
           },
