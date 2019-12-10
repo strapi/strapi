@@ -7,7 +7,7 @@ const CustomButton = styled(Button)`
   svg {
     height: 11px;
     width: 11px;
-    vertical-align: middle;
+    vertical-align: initial;
   }
 `;
 

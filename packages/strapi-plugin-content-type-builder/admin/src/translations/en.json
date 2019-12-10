@@ -43,7 +43,7 @@
   "contentType.displayName.label": "Display name",
   "form.attribute.component.option.add": "Add a component",
   "form.attribute.component.option.create": "Create a new component",
-  "form.attribute.component.option.create.description": "A component is shared across types, it will be available and accessible in your other components and content types as well.",
+  "form.attribute.component.option.create.description": "A component is shared across types and components, it will be available and accessible everywhere.",
   "form.attribute.component.option.repeatable": "Repeatable component",
   "form.attribute.component.option.repeatable.description": "Best for multiple instances (array) of ingredients, meta tags, etc..",
   "form.attribute.component.option.reuse-existing": "Use an existing component",

@@ -19,7 +19,8 @@
       "required": true
     },
     "city": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "postal_coder": {
       "type": "string"
@@ -40,7 +41,8 @@
       "required": false
     },
     "full_name": {
-      "type": "string"
+      "type": "string",
+      "required": true
     }
   }
 }

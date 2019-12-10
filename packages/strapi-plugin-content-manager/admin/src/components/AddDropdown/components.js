@@ -44,7 +44,7 @@ const Wrapper = styled.div`
         svg {
           fill: #007eff;
           margin-right: 7px;
-          vertical-align: middle;
+          vertical-align: initial;
         }
       }
     }

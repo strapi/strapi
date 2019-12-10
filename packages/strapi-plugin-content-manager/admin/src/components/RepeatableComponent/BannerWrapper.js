@@ -152,7 +152,7 @@ const BannerWrapper = styled.button`
     return `
       svg {
         path {
-          fill: ${fill};
+          fill: ${fill} !important;
         }
       }
     `;

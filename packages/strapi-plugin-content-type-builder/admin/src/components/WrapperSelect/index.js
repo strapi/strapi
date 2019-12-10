@@ -53,7 +53,13 @@ const WrapperSelect = ({ error, label, name, type, ...rest }) => {
       </SelectNav>
       <Component name={name} {...rest} styles={styles} />
 
-      {error && <ErrorMessage style={{ paddingTop: 9 }}>{error}</ErrorMessage>}
+      {error && (
+        <ErrorMessage
+          style={{ paddingTop: 11, paddingBottom: 0, marginBottom: 12 }}
+        >
+          {error}
+        </ErrorMessage>
+      )}
     </SelectWrapper>
   );
 };

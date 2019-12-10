@@ -21,6 +21,7 @@ const StyledCustomLink = styled.div`
     svg {
       margin-left: -3px;
       margin-right: 7px;
+      vertical-align: initial;
       -webkit-font-smoothing: subpixel-antialiased;
     }
   }

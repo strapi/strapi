@@ -5,7 +5,11 @@ import pluginId from '../../pluginId';
 import DynamicComponentCard from '../DynamicComponentCard';
 import Tooltip from './Tooltip';
 
-const DynamicComponent = ({ componentUid, setIsOverDynamicZone }) => {
+const DynamicComponent = ({
+  componentUid,
+  friendlyName,
+  setIsOverDynamicZone,
+}) => {
   const [state, setState] = useState(false);
   const { push } = useHistory();
 
@@ -17,6 +21,7 @@ const DynamicComponent = ({ componentUid, setIsOverDynamicZone }) => {
   return (
     <DynamicComponentCard
       componentUid={componentUid}
+      friendlyName={friendlyName}
       isOver={state}
       onClick={() => {
         push(
@@ -31,8 +36,13 @@ const DynamicComponent = ({ componentUid, setIsOverDynamicZone }) => {
   );
 };
 
+DynamicComponent.defaultProps = {
+  friendlyName: '',
+};
+
 DynamicComponent.propTypes = {
   componentUid: PropTypes.string.isRequired,
+  friendlyName: PropTypes.string,
   setIsOverDynamicZone: PropTypes.func.isRequired,
 };
 

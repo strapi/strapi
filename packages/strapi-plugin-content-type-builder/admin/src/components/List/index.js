@@ -8,6 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import { Plus } from '@buffetjs/icons';
+
 import pluginId from '../../pluginId';
 import useListView from '../../hooks/useListView';
 import useDataManager from '../../hooks/useDataManager';

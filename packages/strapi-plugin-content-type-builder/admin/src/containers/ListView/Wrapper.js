@@ -16,7 +16,7 @@ const Wrapper = styled(ViewContainer)`
     svg {
       height: 11px;
       width: 11px;
-      vertical-align: middle;
+      vertical-align: initial;
     }
   }
 `;

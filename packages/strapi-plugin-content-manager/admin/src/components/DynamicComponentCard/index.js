@@ -20,7 +20,6 @@ const DynamicComponentCard = ({
       }}
     >
       <button className="component-icon">
-        {/* <i className={`fa fa-${icon}`} /> */}
         <FontAwesomeIcon icon={icon} />
       </button>
 

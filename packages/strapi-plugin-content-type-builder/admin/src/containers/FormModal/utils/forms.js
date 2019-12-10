@@ -490,6 +490,7 @@ const forms = {
               validations: {},
             },
           ]);
+          items.push([{ type: 'spacer' }]);
         }
 
         if (type === 'text' || type === 'media') {
@@ -723,12 +724,10 @@ const forms = {
       isEditing = false,
       compoUid = null
     ) {
-      console.log({ isEditing, compoUid });
       const takenNames = isEditing
         ? alreadyTakenAttributes.filter(uid => uid !== compoUid)
         : alreadyTakenAttributes;
 
-      console.log({ takenNames });
       return yup.object().shape({
         name: yup
           .string()

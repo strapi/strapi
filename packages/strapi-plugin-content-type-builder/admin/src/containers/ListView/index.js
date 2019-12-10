@@ -320,7 +320,7 @@ const ListView = () => {
             >
               <Header {...headerProps} />
 
-              <ListWrapper>
+              <ListWrapper style={{ marginBottom: 80 }}>
                 <ListHeader actions={listActions} title={listTitle} />
                 <List
                   items={convertAttrObjToArray(attributes)}

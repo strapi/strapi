@@ -10,7 +10,7 @@ const Label = styled.div`
     content: '•';
     position: absolute;
     top: 15px;
-    left: 18.5px;
+    left: 21.25px;
     font-size: 15px;
     width: 8px;
     height: 8px;
@@ -23,7 +23,7 @@ const Label = styled.div`
     content: '&';
     position: absolute;
     top: 22px;
-    left: 22px;
+    left: 24.5px;
     height: 100%;
     width: 2px;
     background-color: #e6f0fb;

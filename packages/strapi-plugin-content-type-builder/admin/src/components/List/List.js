@@ -90,6 +90,7 @@ const Wrapper = styled(List)`
         top: 0;
         left: 0;
         z-index: 2;
+        padding-top: 18px;
         padding-left: 86px;
         padding-right: 30px;
         .nav-tabs {
@@ -107,7 +108,7 @@ const Wrapper = styled(List)`
           }
         }
         & + .tab-content {
-          padding-top: 90px;
+          padding-top: 126px;
           position: relative;
           z-index: 1;
         }
