@@ -18,7 +18,7 @@ module.exports = async ({ optimization }) => {
 
   if (!fs.existsSync(envConfigDir)) {
     console.log(
-      `Missing envrionnment config for env: ${green(
+      `Missing environment config for env: ${green(
         env
       )}.\nMake sure the directory ${yellow(
         `./config/environments/${env}`
