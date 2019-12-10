@@ -60,7 +60,7 @@ const formatAttribute = (key, attribute, { model }) => {
   const relation = (model.associations || []).find(
     assoc => assoc.alias === key
   );
-  const { plugin } = attribute;
+  const { plugin, configurable } = attribute;
   let targetEntity = attribute.model || attribute.collection;
 
   if (plugin === 'upload' && targetEntity === 'file') {
@@ -68,6 +68,7 @@ const formatAttribute = (key, attribute, { model }) => {
       type: 'media',
       multiple: attribute.collection ? true : false,
       required: attribute.required ? true : false,
+      configurable: configurable === false ? false : undefined,
     };
   } else {
     return {
@@ -77,6 +78,7 @@ const formatAttribute = (key, attribute, { model }) => {
       dominant: attribute.dominant ? true : false,
       targetAttribute: attribute.via || undefined,
       columnName: attribute.columnName || undefined,
+      configurable: configurable === false ? false : undefined,
       targetColumnName: _.get(
         strapi.getModel(targetEntity, plugin),
         ['attributes', attribute.via, 'columnName'],
