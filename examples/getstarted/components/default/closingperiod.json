@@ -4,7 +4,7 @@
   "info": {
     "name": "closingperiod",
     "description": "",
-    "icon": "briefcase"
+    "icon": "angry"
   },
   "attributes": {
     "label": {
@@ -21,7 +21,8 @@
     "media": {
       "model": "file",
       "via": "related",
-      "plugin": "upload"
+      "plugin": "upload",
+      "required": false
     },
     "dish": {
       "component": "default.dish",

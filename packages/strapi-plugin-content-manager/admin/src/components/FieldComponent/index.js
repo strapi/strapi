@@ -44,7 +44,7 @@ const FieldComponent = ({
     <Wrapper className="col-12" isFromDynamicZone={isFromDynamicZone}>
       {isFromDynamicZone && (
         <ComponentIcon title={componentFriendlyName}>
-          <FontAwesomeIcon icon={icon} />
+          <FontAwesomeIcon icon={icon} title={componentFriendlyName} />
         </ComponentIcon>
       )}
       <Label>

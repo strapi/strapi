@@ -717,13 +717,24 @@ const forms = {
     },
   },
   component: {
-    schema(alreadyTakenAttributes, componentCategory) {
+    schema(
+      alreadyTakenAttributes,
+      componentCategory,
+      isEditing = false,
+      compoUid = null
+    ) {
+      console.log({ isEditing, compoUid });
+      const takenNames = isEditing
+        ? alreadyTakenAttributes.filter(uid => uid !== compoUid)
+        : alreadyTakenAttributes;
+
+      console.log({ takenNames });
       return yup.object().shape({
         name: yup
           .string()
           .unique(
             errorsTrads.unique,
-            alreadyTakenAttributes,
+            takenNames,
             createComponentUid,
             componentCategory
           )

@@ -331,7 +331,9 @@ const FormModal = () => {
     } else if (isCreatingComponent) {
       schema = forms.component.schema(
         Object.keys(components),
-        modifiedData.category || ''
+        modifiedData.category || '',
+        state.actionType === 'edit',
+        get(allDataSchema, [...state.pathToSchema, 'uid'], null)
       );
 
       // Check for validity for creating a component
@@ -888,6 +890,7 @@ const FormModal = () => {
         type: 'RESET_PROPS',
       });
     } catch (err) {
+      console.log({ err });
       const errors = getYupInnerErrors(err);
 
       dispatch({

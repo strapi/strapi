@@ -29,7 +29,7 @@ function Add({ data, onClick, pStyle, style }) {
           <FormattedMessage id="content-manager.containers.SettingPage.addField">
             {msg => (
               <p style={pStyle}>
-                <Plus fill="#007eff" />
+                <Plus fill="#007eff" height="11px" width="11px" />
                 {msg}
               </p>
             )}

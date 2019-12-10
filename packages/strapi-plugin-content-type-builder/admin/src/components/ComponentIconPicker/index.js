@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Label, ErrorMessage } from '@buffetjs/styles';
 import { AutoSizer, Collection } from 'react-virtualized';
 import PropTypes from 'prop-types';
@@ -15,13 +15,17 @@ const ComponentIconPicker = ({
   value,
 }) => {
   const { allIcons, allComponentsIconAlreadyTaken } = useDataManager();
+  const [originalIcon] = useState(value);
 
   const icons = allIcons.filter(ico => {
     if (isCreating) {
       return !allComponentsIconAlreadyTaken.includes(ico);
     }
 
-    return true;
+    // Edition
+    return !allComponentsIconAlreadyTaken
+      .filter(icon => icon !== originalIcon)
+      .includes(ico);
   });
 
   const cellCount = icons.length;
