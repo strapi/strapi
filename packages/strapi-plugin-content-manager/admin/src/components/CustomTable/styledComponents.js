@@ -143,7 +143,8 @@ const ActionContainer = styled.td`
     margin-left: 15px;
     font-size: 1rem;
     height: 1rem;
-    color: #0e1622;
+    // color: #0e1622;
+    color: #333740;
 
     &:first-of-type {
       margin-left: 0px;

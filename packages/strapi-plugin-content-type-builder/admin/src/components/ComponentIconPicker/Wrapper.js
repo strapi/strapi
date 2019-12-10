@@ -17,6 +17,11 @@ const Wrapper = styled.div`
         `;
       }
     }}
+
+    &:focus,
+    :active {
+      outline: 0;
+    }
   }
 
   .noCells {

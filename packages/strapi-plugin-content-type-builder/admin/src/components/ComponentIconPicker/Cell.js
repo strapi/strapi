@@ -7,6 +7,7 @@ const Cell = styled.div`
   justify-content: center;
   align-items: center;
   position: absolute;
+  cursor: pointer;
 
   ${({ isSelected }) => {
     if (isSelected) {

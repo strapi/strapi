@@ -126,7 +126,7 @@ function ListRow({
           <FormattedMessage id={`${pluginId}.attribute.${readableType}`} />
         )}
       </td>
-      <td>
+      <td className="button-container">
         {isInDevelopmentMode && (
           <>
             {configurable ? (
@@ -150,7 +150,7 @@ function ListRow({
                 </button>
               </>
             ) : (
-              <button>
+              <button type="button">
                 <FontAwesomeIcon icon="lock" />
               </button>
             )}
