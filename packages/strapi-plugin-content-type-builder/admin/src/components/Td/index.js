@@ -9,8 +9,24 @@ const Td = styled.td`
     top: -7px;
     left: 45px;
     color: transparent;
-    background-color: ${({ isFromDynamicZone }) =>
-      isFromDynamicZone ? '#AED4FB' : '#f3f4f4'} !important;
+    ${({ isFromDynamicZone, isChildOfDynamicZone }) => {
+      if (isChildOfDynamicZone) {
+        return `
+          z-index: -1;
+          background-color: transparent !important;
+        `;
+      }
+
+      if (isFromDynamicZone) {
+        return `
+        background-color: #AED4FB !important;
+        `;
+      }
+
+      return `
+      background-color: #f3f4f4 !important;
+      `;
+    }}
 
     border-radius: 3px;
   }

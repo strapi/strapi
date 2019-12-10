@@ -29,17 +29,6 @@ const Wrapper = styled(List)`
       > div {
         box-shadow: none;
       }
-      &::before {
-        content: '&';
-        width: 5px;
-        height: calc(100% - 15px);
-        position: absolute;
-        top: -7px;
-        left: 45px;
-        color: transparent;
-        background-color: #f3f4f4;
-        border-radius: 3px;
-      }
     }
     tr.component-row {
       &:not(:first-of-type) {
