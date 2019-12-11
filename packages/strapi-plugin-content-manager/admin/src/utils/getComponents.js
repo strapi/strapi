@@ -13,11 +13,11 @@ const getInjectedComponents = (
   currentEnvironment,
   slug,
   emitEvent,
-  push
+  push,
+  ...rest
 ) => {
   const componentsToInject = Object.keys(plugins).reduce((acc, current) => {
     // Retrieve injected compos from plugin
-    // if compo can be injected in left.links area push the compo in the array
     const currentPlugin = plugins[current];
     const injectedComponents = get(currentPlugin, 'injectedComponents', []);
 
@@ -32,16 +32,14 @@ const getInjectedComponents = (
 
         return (
           <Component
+            viewProps={rest}
             currentEnvironment={currentEnvironment}
             getModelName={() => slug}
-            getContentTypeBuilderBaseUrl={() =>
-              '/plugins/content-type-builder/content-types/'
-            }
             push={push}
             {...compo.props}
             key={compo.key}
             onClick={() => {
-              emitEvent('willEditEditLayout');
+              emitEvent('willEditLayout');
             }}
           />
         );

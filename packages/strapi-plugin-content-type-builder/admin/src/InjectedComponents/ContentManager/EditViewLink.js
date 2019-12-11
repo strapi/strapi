@@ -11,7 +11,7 @@ import { LiLink } from 'strapi-helper-plugin';
 // Create link from content-type-builder to content-manager
 function EditViewLink(props) {
   // Retrieve URL from props
-  const url = `${props.getContentTypeBuilderBaseUrl()}${props.getModelName()}`;
+  const url = `/plugins/content-type-builder/content-types/${props.getModelName()}`;
 
   if (props.getModelName() === 'strapi::administrator') {
     return null;
@@ -22,7 +22,6 @@ function EditViewLink(props) {
 
 EditViewLink.propTypes = {
   currentEnvironment: PropTypes.string.isRequired,
-  getContentTypeBuilderBaseUrl: PropTypes.func.isRequired,
   getModelName: PropTypes.func.isRequired,
 };
 

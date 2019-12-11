@@ -7,17 +7,40 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useGlobalContext } from 'strapi-helper-plugin';
+import { get } from 'lodash';
 import { Button } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import getTrad from '../../utils/getTrad';
 
 // Create link from content-type-builder to content-manager
 function EditViewButton(props) {
   const { formatMessage } = useGlobalContext();
   // Retrieve URL from props
-  const url = `${props.getContentTypeBuilderBaseUrl()}${props.getModelName()}`;
+  const { componentSlug, type } = get(
+    props,
+    ['viewProps', '0'],
+
+    {
+      componentSlug: '',
+    }
+  );
+
+  const baseUrl = `/plugins/content-type-builder/${
+    type === 'content-types' ? type : 'component-categories'
+  }`;
+  let splitted = [];
+
+  if (componentSlug) {
+    splitted = componentSlug.split('.');
+  }
+
+  const suffixUrl =
+    type === 'content-types'
+      ? props.getModelName()
+      : `${splitted[0]}/${componentSlug}`;
 
   const handleClick = () => {
-    props.push(url);
+    props.push(`${baseUrl}/${suffixUrl}`);
   };
 
   if (props.getModelName() === 'strapi::administrator') {
@@ -30,7 +53,9 @@ function EditViewButton(props) {
       onClick={handleClick}
       icon={<FontAwesomeIcon icon="cog" style={{ fontSize: 13 }} />}
       label={formatMessage({
-        id: 'content-manager.containers.Edit.Link.Model',
+        id: getTrad(
+          `injected-components.content-manager.edit-settings-view.link.${type}`
+        ),
       })}
       style={{
         paddingLeft: 15,
@@ -44,7 +69,6 @@ function EditViewButton(props) {
 
 EditViewButton.propTypes = {
   currentEnvironment: PropTypes.string.isRequired,
-  getContentTypeBuilderBaseUrl: PropTypes.func.isRequired,
   getModelName: PropTypes.func.isRequired,
   push: PropTypes.func.isRequired,
 };

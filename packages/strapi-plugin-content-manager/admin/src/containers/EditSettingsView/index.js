@@ -401,7 +401,8 @@ const EditSettingsView = ({
                   currentEnvironment,
                   slug,
                   emitEvent,
-                  push
+                  push,
+                  { componentSlug, type }
                 )}
               </div>
             </div>
