@@ -11913,6 +11913,11 @@ memory-fs@^0.5.0:
     errno "^0.1.3"
     readable-stream "^2.0.1"
 
+memory-pager@^1.0.2:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/memory-pager/-/memory-pager-1.5.0.tgz#d8751655d22d384682741c972f2c3d6dfa3e66b5"
+  integrity sha512-ZS4Bp4r/Zoeq6+NLJpP+0Zzm0pR8whtGPf1XExKLJBAczGMnSi3It14OiNCStjQjM6NU1okjQGSxgEZN8eBYKg==
+
 memorystream@^0.3.1:
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/memorystream/-/memorystream-0.3.1.tgz#86d7090b30ce455d63fbae12dda51a47ddcaf9b2"
@@ -12264,6 +12269,17 @@ mongodb@3.3.2:
     require_optional "^1.0.1"
     safe-buffer "^5.1.2"
 
+mongodb@3.3.5:
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/mongodb/-/mongodb-3.3.5.tgz#38d531013afede92b0dd282e3b9f3c08c9bdff3b"
+  integrity sha512-6NAv5gTFdwRyVfCz+O+KDszvjpyxmZw+VlmqmqKR2GmpkeKrKFRv/ZslgTtZba2dc9JYixIf99T5Gih7TIWv7Q==
+  dependencies:
+    bson "^1.1.1"
+    require_optional "^1.0.1"
+    safe-buffer "^5.1.2"
+  optionalDependencies:
+    saslprep "^1.0.0"
+
 mongoose-float@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/mongoose-float/-/mongoose-float-1.0.4.tgz#abdda2c66320a8acf8a13a8b704c9b7ea4b5b840"
@@ -12279,7 +12295,24 @@ mongoose-long@^0.2.1:
   resolved "https://registry.yarnpkg.com/mongoose-long/-/mongoose-long-0.2.1.tgz#2d4f560430338bfbe7129e31a543c497a2d6a4db"
   integrity sha512-cbzEW5rShz8MxoTMFUidf13KObGkauA4ILeR3XcIdI7VLzMXwwXy///gLAbN2fD6vYy2ZAMDnCopQrCkNH9VNQ==
 
-mongoose@5.7.4, mongoose@^5.5.13:
+mongoose@5.8.0:
+  version "5.8.0"
+  resolved "https://registry.yarnpkg.com/mongoose/-/mongoose-5.8.0.tgz#ddbfd6849632ed5840ec3e5faeaab1945bb3b650"
+  integrity sha512-+VqrLGmHoDW/72yaXgiXSF7E/JcZ8Iyt7etrd4x3+Bj0z7k6GHHUBgGHP5ySPoG4J412RFuvHqx6xEOIuUrcfQ==
+  dependencies:
+    bson "~1.1.1"
+    kareem "2.3.1"
+    mongodb "3.3.5"
+    mongoose-legacy-pluralize "1.0.2"
+    mpath "0.6.0"
+    mquery "3.2.2"
+    ms "2.1.2"
+    regexp-clone "1.0.0"
+    safe-buffer "5.1.2"
+    sift "7.0.1"
+    sliced "1.0.1"
+
+mongoose@^5.5.13:
   version "5.7.4"
   resolved "https://registry.yarnpkg.com/mongoose/-/mongoose-5.7.4.tgz#b6a77a9217dace917ab028fa5dc72f400f2faf4b"
   integrity sha512-IgqQS5HIaZ8tG2cib6QllfIw2Wc/A0QVOsdKLsSqRolqJFWOjI0se3vsKXLNkbEcuJ1xziW3e/jPhBs65678Hg==
@@ -16090,6 +16123,13 @@ sanitize.css@^4.1.0:
   resolved "https://registry.yarnpkg.com/sanitize.css/-/sanitize.css-4.1.0.tgz#0bafc3c513699f2fe8c7980c6d37edf21d3f5448"
   integrity sha1-C6/DxRNpny/ox5gMbTft8h0/VEg=
 
+saslprep@^1.0.0:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/saslprep/-/saslprep-1.0.3.tgz#4c02f946b56cf54297e347ba1093e7acac4cf226"
+  integrity sha512-/MY/PEMbk2SuY5sScONwhUDsV2p77Znkb/q3nSVstq/yQzYJOH/Azh29p9oJLsl3LnQwSvZDKagDGBsBwSooag==
+  dependencies:
+    sparse-bitfield "^3.0.3"
+
 sax@1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.1.tgz#7b8e656190b228e81a66aea748480d828cd2d37a"
@@ -16863,6 +16903,13 @@ sourcemap-codec@^1.4.4:
   version "1.4.6"
   resolved "https://registry.yarnpkg.com/sourcemap-codec/-/sourcemap-codec-1.4.6.tgz#e30a74f0402bad09807640d39e971090a08ce1e9"
   integrity sha512-1ZooVLYFxC448piVLBbtOxFcXwnymH9oUF8nRd3CuYDVvkRBxRl6pB4Mtas5a4drtL+E8LDgFkQNcgIw6tc8Hg==
+
+sparse-bitfield@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/sparse-bitfield/-/sparse-bitfield-3.0.3.tgz#ff4ae6e68656056ba4b3e792ab3334d38273ca11"
+  integrity sha1-/0rm5oZWBWuks+eSqzM004JzyhE=
+  dependencies:
+    memory-pager "^1.0.2"
 
 spdx-correct@^3.0.0:
   version "3.1.0"
