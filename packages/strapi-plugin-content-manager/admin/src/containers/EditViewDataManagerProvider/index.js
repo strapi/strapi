@@ -38,8 +38,6 @@ const EditViewDataManagerProvider = ({
     shouldCheckErrors,
   } = reducerState.toJS();
 
-  console.log({ formErrors });
-
   const currentContentTypeLayout = get(allLayoutData, ['contentType'], {});
   const abortController = new AbortController();
   const { signal } = abortController;

@@ -15,7 +15,7 @@ yup.addMethod(yup.array, 'notEmptyMin', function(min) {
     if (isEmpty(value)) {
       return true;
     }
-    return value.length > min;
+    return value.length >= min;
   });
 });
 
