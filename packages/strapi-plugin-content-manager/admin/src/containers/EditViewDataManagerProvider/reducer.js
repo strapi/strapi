@@ -104,31 +104,47 @@ const reducer = (state, action) => {
         }
       );
     case 'MOVE_COMPONENT_UP':
-      return state.updateIn(['modifiedData', action.dynamicZoneName], list => {
-        return list
-          .delete(action.currentIndex)
-          .insert(
-            action.currentIndex - 1,
-            state.getIn([
-              'modifiedData',
-              action.dynamicZoneName,
-              action.currentIndex,
-            ])
-          );
-      });
+      return state
+        .update('shouldCheckErrors', v => {
+          if (action.shouldCheckErrors) {
+            return !v;
+          }
+
+          return v;
+        })
+        .updateIn(['modifiedData', action.dynamicZoneName], list => {
+          return list
+            .delete(action.currentIndex)
+            .insert(
+              action.currentIndex - 1,
+              state.getIn([
+                'modifiedData',
+                action.dynamicZoneName,
+                action.currentIndex,
+              ])
+            );
+        });
     case 'MOVE_COMPONENT_DOWN':
-      return state.updateIn(['modifiedData', action.dynamicZoneName], list => {
-        return list
-          .delete(action.currentIndex)
-          .insert(
-            action.currentIndex + 1,
-            state.getIn([
-              'modifiedData',
-              action.dynamicZoneName,
-              action.currentIndex,
-            ])
-          );
-      });
+      return state
+        .update('shouldCheckErrors', v => {
+          if (action.shouldCheckErrors) {
+            return !v;
+          }
+
+          return v;
+        })
+        .updateIn(['modifiedData', action.dynamicZoneName], list => {
+          return list
+            .delete(action.currentIndex)
+            .insert(
+              action.currentIndex + 1,
+              state.getIn([
+                'modifiedData',
+                action.dynamicZoneName,
+                action.currentIndex,
+              ])
+            );
+        });
     case 'MOVE_FIELD':
       return state.updateIn(['modifiedData', ...action.keys], list => {
         return list

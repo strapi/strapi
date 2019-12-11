@@ -288,6 +288,7 @@ const EditViewDataManagerProvider = ({
       type: 'MOVE_COMPONENT_DOWN',
       dynamicZoneName,
       currentIndex,
+      shouldCheckErrors: shouldCheckDZErrors(dynamicZoneName),
     });
   };
   const moveComponentUp = (dynamicZoneName, currentIndex) => {
@@ -296,6 +297,7 @@ const EditViewDataManagerProvider = ({
       type: 'MOVE_COMPONENT_UP',
       dynamicZoneName,
       currentIndex,
+      shouldCheckErrors: shouldCheckDZErrors(dynamicZoneName),
     });
   };
   const moveComponentField = (pathToComponent, dragIndex, hoverIndex) => {
@@ -323,19 +325,23 @@ const EditViewDataManagerProvider = ({
     });
   };
 
-  const removeComponentFromDynamicZone = (dynamicZoneName, index) => {
-    emitEvent('removeComponentFromDynamicZone');
-
+  const shouldCheckDZErrors = dzName => {
     const doesDZHaveError = Object.keys(formErrors).some(
-      key => key.split('.')[0] === dynamicZoneName
+      key => key.split('.')[0] === dzName
     );
     const shouldCheckErrors = !isEmpty(formErrors) && doesDZHaveError;
+
+    return shouldCheckErrors;
+  };
+
+  const removeComponentFromDynamicZone = (dynamicZoneName, index) => {
+    emitEvent('removeComponentFromDynamicZone');
 
     dispatch({
       type: 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE',
       dynamicZoneName,
       index,
-      shouldCheckErrors,
+      shouldCheckErrors: shouldCheckDZErrors(dynamicZoneName),
     });
   };
   const removeComponentFromField = (keys, componentUid) => {
