@@ -68,7 +68,7 @@ module.exports = ({ model, modelKey, strapi }) => {
 
           const componentsArr = components.map(componentEntry => ({
             kind: componentModel.globalId,
-            ref: componentEntry,
+            ref: componentEntry.id,
           }));
 
           entry[key] = componentsArr;
@@ -83,7 +83,7 @@ module.exports = ({ model, modelKey, strapi }) => {
           entry[key] = [
             {
               kind: componentModel.globalId,
-              ref: componentEntry,
+              ref: componentEntry.id,
             },
           ];
           await entry.save();
@@ -125,7 +125,7 @@ module.exports = ({ model, modelKey, strapi }) => {
 
           return {
             kind: componentModel.globalId,
-            ref: entity,
+            ref: entity.id,
           };
         });
 
@@ -180,7 +180,7 @@ module.exports = ({ model, modelKey, strapi }) => {
           );
           const componentsArr = components.map(component => ({
             kind: componentModel.globalId,
-            ref: component,
+            ref: component.id,
           }));
 
           entry[key] = componentsArr;
@@ -203,7 +203,7 @@ module.exports = ({ model, modelKey, strapi }) => {
           entry[key] = [
             {
               kind: componentModel.globalId,
-              ref: component,
+              ref: component.id,
             },
           ];
           await entry.save();
@@ -238,7 +238,7 @@ module.exports = ({ model, modelKey, strapi }) => {
 
           return {
             kind: componentModel.globalId,
-            ref: entity,
+            ref: entity.id,
           };
         });
 
