@@ -3,7 +3,7 @@ import pluginPkg from '../../package.json';
 import App from './containers/App';
 import Initializer from './containers/Initializer';
 import Link from './InjectedComponents/ContentManager/EditViewLink';
-import Button from './InjectedComponents/ContentManager/EditViewButton';
+import Button from './InjectedComponents/ContentManager/EditSettingViewButton';
 import lifecycles from './lifecycles';
 import trads from './translations';
 import pluginId from './pluginId';

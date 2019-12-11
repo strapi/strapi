@@ -403,7 +403,7 @@ const EditSettingsView = ({
                   slug,
                   emitEvent,
                   push,
-                  { componentSlug, type }
+                  { componentSlug, type, modifiedData }
                 )}
               </div>
             </div>

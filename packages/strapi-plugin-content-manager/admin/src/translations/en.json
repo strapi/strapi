@@ -50,7 +50,7 @@
   "components.TableEmpty.withoutFilter": "There is no {contentType}...",
 
   "containers.Edit.addAnItem": "Add an item...",
-  "containers.Edit.pluginHeader.title.new": "Create an Entry",
+  "containers.Edit.pluginHeader.title.new": "Create an entry",
   "containers.Edit.clickToJump": "Click to jump to the entry",
   "containers.Edit.delete": "Delete",
   "containers.Edit.editing": "Editing...",

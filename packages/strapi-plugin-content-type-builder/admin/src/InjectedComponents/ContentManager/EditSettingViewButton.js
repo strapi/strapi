@@ -16,7 +16,7 @@ import getTrad from '../../utils/getTrad';
 function EditViewButton(props) {
   const { formatMessage } = useGlobalContext();
   // Retrieve URL from props
-  const { componentSlug, type } = get(
+  const { modifiedData, componentSlug, type } = get(
     props,
     ['viewProps', '0'],
 
@@ -28,16 +28,12 @@ function EditViewButton(props) {
   const baseUrl = `/plugins/content-type-builder/${
     type === 'content-types' ? type : 'component-categories'
   }`;
-  let splitted = [];
-
-  if (componentSlug) {
-    splitted = componentSlug.split('.');
-  }
+  const category = get(modifiedData, 'category', '');
 
   const suffixUrl =
     type === 'content-types'
       ? props.getModelName()
-      : `${splitted[0]}/${componentSlug}`;
+      : `${category}/${componentSlug}`;
 
   const handleClick = () => {
     props.push(`${baseUrl}/${suffixUrl}`);
