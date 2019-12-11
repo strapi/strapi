@@ -46,7 +46,6 @@ const NonRepeatableComponent = ({
               return (
                 <div key={field.name} className={`col-${field.size}`}>
                   <Inputs
-                    autoFocus={false}
                     keys={keys}
                     layout={schema}
                     name={field.name}

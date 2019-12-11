@@ -28,12 +28,11 @@ const ComponentButton = styled.button`
     }
   }
   p {
+    margin-top: 5px;
     font-size: 13px;
     font-weight: bold;
     color: #2c3138;
     line-height: normal;
-    // margin-top: 7px;
-    margin-top: 5px;
   }
 `;
 

@@ -52,7 +52,6 @@ ComponentCard.defaultProps = {
   isActive: false,
   isInDevelopmentMode: false,
   onClick: () => {},
-  onRemoveClick: () => {},
 };
 
 ComponentCard.propTypes = {

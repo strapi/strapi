@@ -53,29 +53,6 @@ const GlobalStyle = createGlobalStyle`
     opacity: 0.15;
   }
 
-  // TODO - New modal transition in progress
-  // .modal {
-  //   &::before {
-  //     content: '';
-  //     display: block;
-  //     width: 100%;
-  //     height: 100%;
-  //     position: absolute;
-  //     z-index: 0;
-  //     left: 0;
-  //     top: 0;
-  //     transition-delay: 0.05s;
-  //     transition-duration: 0.3s;
-  //     transition-property: background-color;
-  //   }
-  //   &.show::before  {
-  //     background-color: rgba(0,0,0,0.5);
-  //   }
-  // }
-  // .modal-backdrop, .modal-backdrop.show {
-  //   opacity: 0;
-  //   background-color: transparent;
-  // }
 
   .modal-content {
     border-radius: .2rem;
