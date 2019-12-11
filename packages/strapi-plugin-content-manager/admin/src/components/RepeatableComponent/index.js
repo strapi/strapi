@@ -130,9 +130,9 @@ const RepeatableComponent = ({
             dispatch({
               type: 'ADD_NEW_FIELD',
             });
-          } else if (componentValueLength > max) {
+          } else if (componentValueLength >= max) {
             strapi.notification.info(
-              `${pluginId}.components.components.notification.info.maximum-requirement`
+              `${pluginId}.components.notification.info.maximum-requirement`
             );
           }
         }}
