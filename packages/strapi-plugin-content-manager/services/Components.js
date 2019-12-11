@@ -17,6 +17,7 @@ module.exports = {
     return {
       component: {
         uid,
+        category: component.category,
         schema: ctService.formatContentTypeSchema(component),
         ...configurations,
       },
