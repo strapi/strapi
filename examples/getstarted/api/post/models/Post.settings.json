@@ -20,6 +20,15 @@
       "via": "related",
       "plugin": "upload"
     },
+    "images": {
+      "collection": "file",
+      "via": "related",
+      "plugin": "upload"
+    },
+    "author": {
+      "model": "user",
+      "plugin": "users-permissions"
+    },
     "metas": {
       "type": "component",
       "component": "default.metas",

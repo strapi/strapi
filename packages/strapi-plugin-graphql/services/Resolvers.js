@@ -108,7 +108,7 @@ const mutateAssocAttributes = (associations = [], attributes) => {
     });
 };
 
-const buildAssocResolvers = (model, name, { plugin }) => {
+const buildAssocResolvers = model => {
   const contentManager =
     strapi.plugins['content-manager'].services['contentmanager'];
 
@@ -117,100 +117,44 @@ const buildAssocResolvers = (model, name, { plugin }) => {
   return associations
     .filter(association => model.attributes[association.alias].private !== true)
     .reduce((resolver, association) => {
+      const target = association.model || association.collection;
+      const targetModel = strapi.getModel(target, association.plugin);
+
       switch (association.nature) {
-        case 'oneToManyMorph': {
-          resolver[association.alias] = async obj => {
-            const entry = await contentManager.fetch(
-              {
-                id: obj[primaryKey],
-                model: name,
-              },
-              plugin,
-              [association.alias]
-            );
-
-            // Set the _type only when the value is defined
-            if (entry[association.alias]) {
-              entry[association.alias]._type = _.upperFirst(association.model);
-            }
-
-            return entry[association.alias];
-          };
-          break;
-        }
+        case 'oneToManyMorph':
         case 'manyMorphToOne':
         case 'manyMorphToMany':
         case 'manyToManyMorph': {
           resolver[association.alias] = async obj => {
-            // eslint-disable-line no-unused-vars
-            const [withRelated, withoutRelated] = await Promise.all([
-              contentManager.fetch(
-                {
-                  id: obj[primaryKey],
-                  model: name,
-                },
-                plugin,
-                [association.alias],
-                false
-              ),
-              contentManager.fetch(
-                {
-                  id: obj[primaryKey],
-                  model: name,
-                },
-                plugin,
-                []
-              ),
-            ]);
+            if (obj[association.alias]) {
+              return obj[association.alias];
+            }
 
-            const entry =
-              withRelated && withRelated.toJSON
-                ? withRelated.toJSON()
-                : withRelated;
-
-            entry[association.alias].map((entry, index) => {
-              const type =
-                _.get(withoutRelated, `${association.alias}.${index}.kind`) ||
-                _.upperFirst(
-                  _.camelCase(
-                    _.get(
-                      withoutRelated,
-                      `${association.alias}.${index}.${association.alias}_type`
-                    )
-                  )
-                ) ||
-                _.upperFirst(_.camelCase(association[association.type]));
-
-              entry._type = type;
-
-              return entry;
-            });
+            const entry = await contentManager.fetch(
+              {
+                id: obj[primaryKey],
+                model: model.uid,
+              },
+              [association.alias]
+            );
 
             return entry[association.alias];
           };
           break;
         }
-
         default: {
           resolver[association.alias] = async (obj, options) => {
             // Construct parameters object to retrieve the correct related entries.
             const params = {
-              model: association.model || association.collection,
+              model: targetModel.uid,
             };
 
-            let queryOpts = {
-              source: association.plugin,
-            };
-
-            // Get refering model.
-            const ref = association.plugin
-              ? strapi.plugins[association.plugin].models[params.model]
-              : strapi.models[params.model];
+            let queryOpts = {};
 
             if (association.type === 'model') {
-              params[ref.primaryKey] = _.get(
+              params[targetModel.primaryKey] = _.get(
                 obj,
-                [association.alias, ref.primaryKey],
+                [association.alias, targetModel.primaryKey],
                 obj[association.alias]
               );
             } else {
@@ -229,10 +173,10 @@ const buildAssocResolvers = (model, name, { plugin }) => {
               ) {
                 _.set(
                   queryOpts,
-                  ['query', ref.primaryKey],
+                  ['query', targetModel.primaryKey],
                   obj[association.alias]
                     ? obj[association.alias]
-                        .map(val => val[ref.primaryKey] || val)
+                        .map(val => val[targetModel.primaryKey] || val)
                         .sort()
                     : []
                 );
@@ -240,25 +184,21 @@ const buildAssocResolvers = (model, name, { plugin }) => {
                 _.set(
                   queryOpts,
                   ['query', association.via],
-                  obj[ref.primaryKey]
+                  obj[targetModel.primaryKey]
                 );
               }
             }
 
-            const loaderName = association.plugin
-              ? `${association.plugin}__${params.model}`
-              : params.model;
-
             return association.model
               ? strapi.plugins.graphql.services.loaders.loaders[
-                  loaderName
+                  targetModel.uid
                 ].load({
                   params,
                   options: queryOpts,
                   single: true,
                 })
               : strapi.plugins.graphql.services.loaders.loaders[
-                  loaderName
+                  targetModel.uid
                 ].load({
                   options: queryOpts,
                   association,
@@ -272,16 +212,12 @@ const buildAssocResolvers = (model, name, { plugin }) => {
     }, {});
 };
 
-const buildModel = (
-  model,
-  name,
-  { schema, plugin, isComponent = false } = {}
-) => {
+const buildModel = (model, { schema, isComponent = false } = {}) => {
   const { globalId, primaryKey } = model;
 
   schema.resolvers[globalId] = {
     id: obj => obj[primaryKey],
-    ...buildAssocResolvers(model, name, { plugin }),
+    ...buildAssocResolvers(model),
   };
 
   const initialState = {
@@ -552,7 +488,7 @@ const buildShadowCRUD = (models, plugin) => {
     }
 
     // Build associations queries.
-    acc.resolvers[globalId] = buildAssocResolvers(model, name, { plugin });
+    _.assign(acc.resolvers[globalId], buildAssocResolvers(model));
 
     return acc;
   }, initialState);
