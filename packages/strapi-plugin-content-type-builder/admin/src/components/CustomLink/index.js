@@ -2,16 +2,16 @@ import React, { memo } from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Plus } from '@buffetjs/icons';
-
+import P from './P';
 import StyledCustomLink from './StyledCustomLink';
 
 const CustomLink = ({ disabled, id, onClick }) => (
   <StyledCustomLink disabled={disabled}>
     <button onClick={onClick} role="button" disabled={disabled}>
-      <p>
+      <P>
         <Plus fill="#007EFF" width="11px" height="11px" />
         {id && <FormattedMessage id={id} />}
-      </p>
+      </P>
     </button>
   </StyledCustomLink>
 );
