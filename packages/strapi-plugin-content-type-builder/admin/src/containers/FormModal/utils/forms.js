@@ -108,6 +108,10 @@ const forms = {
             schema = schema.integer();
           }
 
+          if (attributeType === 'dynamiczone') {
+            schema = schema.positive();
+          }
+
           return schema.nullable();
         }),
         min: yup.lazy(() => {
@@ -121,14 +125,15 @@ const forms = {
             schema = schema.integer();
           }
 
+          if (attributeType === 'dynamiczone') {
+            schema = schema.positive();
+          }
+
           return schema
             .nullable()
             .when('max', (max, schema) => {
               if (max) {
-                return schema.lessThan(
-                  max,
-                  getTrad('error.validation.minSupMax')
-                );
+                return schema.max(max, getTrad('error.validation.minSupMax'));
               } else {
                 return schema;
               }
@@ -146,7 +151,7 @@ const forms = {
           .integer()
           .when('maxLength', (maxLength, schema) => {
             if (maxLength) {
-              return schema.lessThan(
+              return schema.max(
                 maxLength,
                 getTrad('error.validation.minSupMax')
               );

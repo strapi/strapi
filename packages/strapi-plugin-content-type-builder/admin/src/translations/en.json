@@ -41,6 +41,7 @@
   "contentType.collectionName.description": "Useful when the name of your Content Type and your table name differ",
   "contentType.collectionName.label": "Collection name",
   "contentType.displayName.label": "Display name",
+  "error.validation.minSupMax": "Can't be superior",
   "form.attribute.component.option.add": "Add a component",
   "form.attribute.component.option.create": "Create a new component",
   "form.attribute.component.option.create.description": "A component is shared across types and components, it will be available and accessible everywhere.",
@@ -96,6 +97,7 @@
   "form.button.save": "Save",
   "form.button.select-component": "Select a component",
   "from": "from",
+
   "injected-components.content-manager.edit-settings-view.link.content-types": "Edit the content type",
   "injected-components.content-manager.edit-settings-view.link.components": "Edit the component",
   "menu.section.components.name.plural": "Components",

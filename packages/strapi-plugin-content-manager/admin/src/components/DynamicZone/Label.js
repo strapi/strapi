@@ -10,7 +10,7 @@ const Label = styled.div`
     content: '•';
     position: absolute;
     top: 15px;
-    left: 21.25px;
+    left: 21.5px;
     font-size: 15px;
     width: 8px;
     height: 8px;

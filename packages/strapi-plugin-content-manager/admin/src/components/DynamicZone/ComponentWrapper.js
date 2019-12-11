@@ -25,7 +25,7 @@ const ComponentWrapper = styled.div`
         content: '&';
         position: absolute;
         top: -30px;
-        left: 22px;
+        left: 24.5px;
         height: 100%;
         width: 2px;
         background-color: #e6f0fb;

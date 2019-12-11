@@ -43,6 +43,15 @@
     "full_name": {
       "type": "string",
       "required": true
+    },
+    "dz": {
+      "type": "dynamiczone",
+      "components": [
+        "default.dish",
+        "default.openingtimes",
+        "default.restaurantservice"
+      ],
+      "min": 2
     }
   }
 }

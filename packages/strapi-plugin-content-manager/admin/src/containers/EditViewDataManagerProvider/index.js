@@ -33,9 +33,12 @@ const EditViewDataManagerProvider = ({
     initialData,
     isLoading,
     modifiedData,
+    modifiedDZName,
     shouldShowLoadingState,
     shouldCheckErrors,
   } = reducerState.toJS();
+
+  console.log({ formErrors });
 
   const currentContentTypeLayout = get(allLayoutData, ['contentType'], {});
   const abortController = new AbortController();
@@ -167,6 +170,17 @@ const EditViewDataManagerProvider = ({
       await schema.validate(updatedData, { abortEarly: false });
     } catch (err) {
       errors = getYupInnerErrors(err);
+
+      if (modifiedDZName) {
+        errors = Object.keys(errors).reduce((acc, current) => {
+          const dzName = current.split('.')[0];
+
+          if (dzName !== modifiedDZName) {
+            acc[current] = errors[current];
+          }
+          return acc;
+        }, {});
+      }
     }
 
     dispatch({
@@ -313,10 +327,17 @@ const EditViewDataManagerProvider = ({
 
   const removeComponentFromDynamicZone = (dynamicZoneName, index) => {
     emitEvent('removeComponentFromDynamicZone');
+
+    const doesDZHaveError = Object.keys(formErrors).some(
+      key => key.split('.')[0] === dynamicZoneName
+    );
+    const shouldCheckErrors = !isEmpty(formErrors) && doesDZHaveError;
+
     dispatch({
       type: 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE',
       dynamicZoneName,
       index,
+      shouldCheckErrors,
     });
   };
   const removeComponentFromField = (keys, componentUid) => {

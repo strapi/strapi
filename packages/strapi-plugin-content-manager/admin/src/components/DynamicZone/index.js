@@ -72,6 +72,10 @@ const DynamicZone = ({ max, min, name }) => {
     get(dynamicZoneErrors, [0, 'id'], '').includes('min');
 
   const hasRequiredError = hasError && !hasMinError;
+  const hasMaxError =
+    hasError &&
+    get(dynamicZoneErrors, [0, 'id'], '') ===
+      'components.Input.error.validation.max';
 
   return (
     <DynamicZoneWrapper>
@@ -144,8 +148,13 @@ const DynamicZone = ({ max, min, name }) => {
             }
           }}
         />
-        {hasRequiredError && !isOpen && (
+        {hasRequiredError && !isOpen && !hasMaxError && (
           <div className="error-label">Component is required</div>
+        )}
+        {hasMaxError && !isOpen && (
+          <div className="error-label">
+            <FormattedMessage id="components.Input.error.validation.max" />
+          </div>
         )}
         {hasMinError && !isOpen && (
           <div className="error-label">
