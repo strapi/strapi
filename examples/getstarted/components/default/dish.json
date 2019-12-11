@@ -26,6 +26,9 @@
     },
     "very_long_description": {
       "type": "richtext"
+    },
+    "category": {
+      "model": "category"
     }
   }
 }

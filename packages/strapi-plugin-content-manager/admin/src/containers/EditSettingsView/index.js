@@ -182,6 +182,7 @@ const EditSettingsView = ({
       delete body.schema;
       delete body.uid;
       delete body.isComponent;
+      delete body.category;
 
       await request(getRequestUrl(`${type}/${slug || componentSlug}`), {
         method: 'PUT',
