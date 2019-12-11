@@ -9,8 +9,8 @@ class DatabaseManager {
   constructor(strapi) {
     this.strapi = strapi;
 
-    // throw if connections and schemas aren't arrays
     this.initialized = false;
+
     this.queries = new Map();
     this.connectors = new Map();
     this.models = new Map();
