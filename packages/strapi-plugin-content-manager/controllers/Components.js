@@ -10,7 +10,10 @@ module.exports = {
    */
   async listComponents(ctx) {
     const data = Object.keys(strapi.components).map(uid => {
-      return contentTypeService.formatContentType(strapi.components[uid]);
+      return {
+        category: strapi.components[uid].category,
+        ...contentTypeService.formatContentType(strapi.components[uid]),
+      };
     });
 
     ctx.body = { data };

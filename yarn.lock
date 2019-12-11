@@ -10554,13 +10554,6 @@ jmespath@0.15.0:
   resolved "https://registry.yarnpkg.com/jmespath/-/jmespath-0.15.0.tgz#a3f222a9aae9f966f5d27c796510e28091764217"
   integrity sha1-o/Iiqarp+Wb10nx5ZRDigJF2Qhc=
 
-joi-json@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/joi-json/-/joi-json-2.1.0.tgz#4829cca91e531d19c4cad1205a08d61549a0c051"
-  integrity sha512-0NKQSqMeBzzU5FLoIPnmTNV3ZwA7TeN1itCpiYnumq9WIQGFAgIuEyEuBJ4xHhxa57E980zKU2596E9pODcYAg==
-  dependencies:
-    vandium-utils "^1.1.0"
-
 js-beautify@^1.6.12:
   version "1.10.2"
   resolved "https://registry.yarnpkg.com/js-beautify/-/js-beautify-1.10.2.tgz#88c9099cd6559402b124cfab18754936f8a7b178"
@@ -18392,11 +18385,6 @@ value-equal@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/value-equal/-/value-equal-1.0.1.tgz#1e0b794c734c5c0cade179c437d356d931a34d6c"
   integrity sha512-NOJ6JZCAWr0zlxZt+xqCHNTEKOsrks2HQd4MqhP1qy4z1SkbEP467eNx6TgDKXMvUOb+OENfJCZwM+16n7fRfw==
-
-vandium-utils@^1.1.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/vandium-utils/-/vandium-utils-1.2.0.tgz#44735de4b7641a05de59ebe945f174e582db4f59"
-  integrity sha1-RHNd5LdkGgXeWevpRfF05YLbT1k=
 
 vary@^1.1.2, vary@~1.1.2:
   version "1.1.2"

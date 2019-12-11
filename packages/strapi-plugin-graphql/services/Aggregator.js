@@ -519,14 +519,11 @@ const formatModelConnectionsGQL = function(
           });
 
           const policiesFn = [
-            policyUtils.globalPolicy(
-              undefined,
-              {
-                handler: `${name}.find`,
-              },
-              undefined,
-              plugin
-            ),
+            policyUtils.globalPolicy({
+              controller: name,
+              action: 'find',
+              plugin,
+            }),
           ];
 
           policyUtils.get(

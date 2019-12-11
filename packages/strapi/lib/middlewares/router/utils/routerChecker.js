@@ -8,13 +8,15 @@
 const _ = require('lodash');
 
 // Strapi utilities.
-const finder = require('strapi-utils').finder;
-const regex = require('strapi-utils').regex;
-const policyUtils = require('strapi-utils').policy;
+const { finder, policy: policyUtils } = require('strapi-utils');
+
+const getMethod = route => _.trim(_.toLower(route.method));
+const getEndpoint = route => _.trim(route.path);
 
 module.exports = strapi =>
-  function routerChecker(value, endpoint, plugin) {
-    const route = regex.detectRoute(endpoint);
+  function routerChecker(value, plugin) {
+    const method = getMethod(value);
+    const endpoint = getEndpoint(value);
 
     // Define controller and action names.
     const [controllerName, actionName] = _.trim(value.handler).split('.');
@@ -43,7 +45,15 @@ module.exports = strapi =>
     const policies = [];
 
     // Add the `globalPolicy`.
-    policies.push(policyUtils.globalPolicy(endpoint, value, route, plugin));
+    policies.push(
+      policyUtils.globalPolicy({
+        controller,
+        action: actionName,
+        method,
+        endpoint,
+        plugin,
+      })
+    );
 
     // Allow string instead of array of policies.
     if (
@@ -58,7 +68,13 @@ module.exports = strapi =>
       !_.isEmpty(_.get(value, 'config.policies'))
     ) {
       _.forEach(value.config.policies, policy => {
-        policyUtils.get(policy, plugin, policies, endpoint, currentApiName);
+        policyUtils.get(
+          policy,
+          plugin,
+          policies,
+          `${method} ${endpoint}`,
+          currentApiName
+        );
       });
     }
 
@@ -72,7 +88,8 @@ module.exports = strapi =>
     });
 
     return {
-      route,
+      method,
+      endpoint,
       policies,
       action,
     };
