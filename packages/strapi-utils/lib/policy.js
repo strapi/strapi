@@ -108,10 +108,10 @@ module.exports = {
     return async (ctx, next) => {
       ctx.request.route = {
         endpoint: `${method} ${endpoint}`,
-        controller,
-        action,
+        controller: _.toLower(controller),
+        action: _.toLower(action),
         splittedEndpoint: endpoint,
-        verb: method,
+        verb: _.toLower(method),
         plugin,
       };
 

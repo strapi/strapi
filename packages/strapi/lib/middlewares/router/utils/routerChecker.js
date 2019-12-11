@@ -47,7 +47,7 @@ module.exports = strapi =>
     // Add the `globalPolicy`.
     policies.push(
       policyUtils.globalPolicy({
-        controller,
+        controller: controllerKey,
         action: actionName,
         method,
         endpoint,
