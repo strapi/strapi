@@ -26,10 +26,13 @@ const DEFAULT_TYPES = [
   'boolean',
 ];
 
+const FORBIDDEN_ATTRIBUTE_NAMES = ['__component', '__contentType'];
+
 module.exports = {
   DEFAULT_TYPES,
   modelTypes: {
     CONTENT_TYPE,
     COMPONENT,
   },
+  FORBIDDEN_ATTRIBUTE_NAMES,
 };

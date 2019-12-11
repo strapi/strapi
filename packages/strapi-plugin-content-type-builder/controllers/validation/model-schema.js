@@ -3,6 +3,7 @@
 const _ = require('lodash');
 const yup = require('yup');
 
+const { FORBIDDEN_ATTRIBUTE_NAMES } = require('./constants');
 const { isValidName, isValidKey } = require('./common');
 const { getTypeShape } = require('./types');
 const getRelationValidator = require('./relations');
@@ -25,6 +26,16 @@ const createSchema = (types, relations, { modelType } = {}) =>
           .object()
           .shape(
             _.mapValues(attributes, (attribute, key) => {
+              if (FORBIDDEN_ATTRIBUTE_NAMES.includes(key)) {
+                return yup.object().test({
+                  name: 'forbiddenKeys',
+                  message: `Attribute keys cannot be one of ${FORBIDDEN_ATTRIBUTE_NAMES.join(
+                    ', '
+                  )}`,
+                  test: () => false,
+                });
+              }
+
               if (_.has(attribute, 'type')) {
                 const shape = {
                   type: yup

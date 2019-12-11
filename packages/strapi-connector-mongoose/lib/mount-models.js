@@ -222,6 +222,19 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       _.get(definition, 'options.minimize', false) === true
     );
 
+    const refToStrapiRef = obj => {
+      const ref = obj.ref;
+
+      let plainData = typeof ref.toJSON === 'function' ? ref.toJSON() : ref;
+
+      if (typeof plainData !== 'object') return ref;
+
+      return {
+        __contentType: obj.kind,
+        ...ref,
+      };
+    };
+
     schema.options.toObject = schema.options.toJSON = {
       virtuals: true,
       transform: function(doc, returned) {
@@ -241,13 +254,16 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
             // Reformat data by bypassing the many-to-many relationship.
             switch (association.nature) {
               case 'oneMorphToOne':
-                returned[association.alias] =
-                  returned[association.alias][0].ref;
+                returned[association.alias] = refToStrapiRef(
+                  returned[association.alias][0]
+                );
+
                 break;
+
               case 'manyMorphToMany':
               case 'manyMorphToOne':
                 returned[association.alias] = returned[association.alias].map(
-                  obj => obj.ref
+                  obj => refToStrapiRef(obj)
                 );
                 break;
               default:
