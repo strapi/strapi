@@ -7,6 +7,28 @@ const Wrapper = styled.div`
   button {
     outline: 0;
   }
+
+  .count-info {
+    margin-top: 2px;
+    padding: 1px 3px;
+    height: 14px;
+    min-width: 14px;
+    display: inline-block;
+
+    text-align: center;
+    border-radius: 2px;
+    position: relative;
+    &:before {
+      content: attr(datadescr);
+      position: absolute;
+      top: 1px;
+      height: 14px;
+      min-width: 14px;
+      padding: 0px 3px;
+      background-color: ${colors.leftMenu.lightGrey};
+      border-radius: 2px;
+    }
+  }
   .list-header {
     color: ${colors.leftMenu.darkGrey};
     > div {
@@ -23,15 +45,9 @@ const Wrapper = styled.div`
       letter-spacing: 0.1rem;
       font-weight: bold;
       text-transform: uppercase;
-      span:last-of-type {
-        margin-top: 2px;
-        padding: 1px 3px;
-        height: 14px;
-        min-width: 14px;
-        display: inline-block;
-        background-color: ${colors.leftMenu.lightGrey};
-        text-align: center;
-      }
+      // span:last-of-type {
+
+      // }
       & + button {
         position: absolute;
         top: 2px;

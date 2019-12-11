@@ -100,7 +100,10 @@ function LeftMenuList({ customLink, links, title }) {
           <div className="title-wrapper">
             <h3>
               <FormattedMessage id={getTitle()} />
-              &nbsp;&nbsp;<span>{getCount()}</span>
+              &nbsp;&nbsp;
+              <span className="count-info" datadescr={getCount()}>
+                {getCount()}
+              </span>
             </h3>
             <button onClick={toggleSearch}>
               <FontAwesomeIcon icon="search" />
