@@ -16,7 +16,7 @@ module.exports = async (ctx, next) => {
       if (isAdmin) {
         ctx.state.admin = await strapi
           .query('administrator', 'admin')
-          .findOne({ id }, ['role']);
+          .findOne({ id }, []);
       } else {
         ctx.state.user = await strapi
           .query('user', 'users-permissions')

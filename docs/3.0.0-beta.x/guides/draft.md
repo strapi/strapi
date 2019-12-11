@@ -99,7 +99,7 @@ module.exports = {
 
     ctx.query = {
       ...ctx.query,
-      status: 'published
+      status: 'published'
     };
 
     if (ctx.query._q) {
