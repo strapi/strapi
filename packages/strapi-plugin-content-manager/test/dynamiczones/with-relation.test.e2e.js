@@ -78,6 +78,7 @@ describe.each([
     await modelsUtils.deleteComponent('default.with-nested');
     await modelsUtils.deleteComponent('default.with-one-way');
     await modelsUtils.deleteComponent('default.with-many-way');
+    await modelsUtils.deleteContentType('related-to');
     await modelsUtils.deleteContentType('withdynamiczone');
   }, 60000);
 

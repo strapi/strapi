@@ -171,8 +171,8 @@ describe.each([
 
   describe('Getting one entry', () => {
     test('The entry has its dynamic zone populated', async () => {
-      const createReq = await createEntry();
-      const entryId = createReq.body.id;
+      const createRes = await createEntry();
+      const entryId = createRes.body.id;
 
       const res = await rq.get(`/${entryId}`);
 
@@ -221,10 +221,10 @@ describe.each([
 
   describe('Edition', () => {
     test('Can empty non required dynamic zone', async () => {
-      const createReq = await createEntry();
+      const createRes = await createEntry();
 
-      expect(createReq.statusCode).toBe(200);
-      const entryId = createReq.body.id;
+      expect(createRes.statusCode).toBe(200);
+      const entryId = createRes.body.id;
 
       const res = await rq.put(`/${entryId}`, {
         body: {
@@ -238,10 +238,10 @@ describe.each([
     });
 
     test('Can add items to empty dynamic zone', async () => {
-      const createReq = await createEmpty();
+      const createRes = await createEmpty();
 
-      expect(createReq.statusCode).toBe(200);
-      const entryId = createReq.body.id;
+      expect(createRes.statusCode).toBe(200);
+      const entryId = createRes.body.id;
 
       const res = await rq.put(`/${entryId}`, {
         body: defaultBody,
@@ -269,10 +269,10 @@ describe.each([
     });
 
     test('Can remove items from dynamic zone', async () => {
-      const createReq = await createEntry();
+      const createRes = await createEntry();
 
-      expect(createReq.statusCode).toBe(200);
-      const entryId = createReq.body.id;
+      expect(createRes.statusCode).toBe(200);
+      const entryId = createRes.body.id;
 
       const res = await rq.put(`/${entryId}`, {
         body: {
@@ -308,10 +308,10 @@ describe.each([
     });
 
     test('Respects min items', async () => {
-      const createReq = await createEntry();
+      const createRes = await createEntry();
 
-      expect(createReq.statusCode).toBe(200);
-      const entryId = createReq.body.id;
+      expect(createRes.statusCode).toBe(200);
+      const entryId = createRes.body.id;
 
       const res = await rq.put(`/${entryId}`, {
         body: {
@@ -328,10 +328,10 @@ describe.each([
     });
 
     test('Respects max items', async () => {
-      const createReq = await createEntry();
+      const createRes = await createEntry();
 
-      expect(createReq.statusCode).toBe(200);
-      const entryId = createReq.body.id;
+      expect(createRes.statusCode).toBe(200);
+      const entryId = createRes.body.id;
 
       const res = await rq.put(`/${entryId}`, {
         body: {
@@ -347,7 +347,26 @@ describe.each([
   });
 
   describe('Deletion', () => {
-    test.todo('Returns the entry with its paths populated');
-    test.todo('Cannot get the entry once deleted');
+    test('Returns the entry with its paths populated', async () => {
+      const createRes = await createEntry();
+
+      expect(createRes.statusCode).toBe(200);
+      const entryId = createRes.body.id;
+
+      const res = await rq.delete(`/${entryId}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body.field)).toBe(true);
+      expect(res.body).toEqual(
+        expect.objectContaining({
+          field: expect.arrayContaining([
+            expect.objectContaining({
+              id: expect.anything(),
+              __component: expect.any(String),
+            }),
+          ]),
+        })
+      );
+    });
   });
 });
