@@ -462,6 +462,8 @@ const DataManagerProvider = ({ allIcons, children }) => {
     });
   };
 
+  console.log({ isLoadingForDataToBeSet });
+
   return (
     <DataManagerContext.Provider
       value={{

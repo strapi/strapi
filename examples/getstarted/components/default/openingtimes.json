@@ -14,12 +14,6 @@
     },
     "time": {
       "type": "string"
-    },
-    "dish": {
-      "component": "default.dish",
-      "type": "component",
-      "repeatable": true,
-      "min": 3
     }
   }
 }

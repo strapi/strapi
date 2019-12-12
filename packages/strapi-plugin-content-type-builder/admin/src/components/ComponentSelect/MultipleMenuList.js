@@ -107,6 +107,7 @@ const MultipleMenuList = ({
                       display: 'flex',
                       width: '150px',
                       textAlign: 'right',
+                      flexGrow: 2,
                     }}
                     onClick={e => {
                       e.stopPropagation();

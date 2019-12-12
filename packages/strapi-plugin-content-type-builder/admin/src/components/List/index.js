@@ -81,7 +81,6 @@ function List({
           <tbody>
             {items.map(item => {
               const { type } = item;
-
               const CustomRow = customRowComponent;
 
               return (

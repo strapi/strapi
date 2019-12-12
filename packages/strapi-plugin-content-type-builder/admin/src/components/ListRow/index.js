@@ -6,6 +6,7 @@ import { AttributeIcon } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
+import getTrad from '../../utils/getTrad';
 import Curve from '../../icons/Curve';
 import UpperFist from '../UpperFirst';
 import Wrapper from './Wrapper';
@@ -24,6 +25,7 @@ function ListRow({
   firstLoopComponentName,
   firstLoopComponentUid,
   isFromDynamicZone,
+  repeatable,
   secondLoopComponentName,
   secondLoopComponentUid,
 }) {
@@ -123,7 +125,13 @@ function ListRow({
             </FormattedMessage>
           </div>
         ) : (
-          <FormattedMessage id={`${pluginId}.attribute.${readableType}`} />
+          <>
+            <FormattedMessage id={`${pluginId}.attribute.${readableType}`} />
+            &nbsp;
+            {repeatable && (
+              <FormattedMessage id={getTrad('component.repeatable')} />
+            )}
+          </>
         )}
       </td>
       <td className="button-container">
@@ -170,6 +178,7 @@ ListRow.defaultProps = {
   onClick: () => {},
   onClickDelete: () => {},
   plugin: null,
+  repeatable: false,
   secondLoopComponentName: null,
   secondLoopComponentUid: null,
   target: null,
@@ -188,6 +197,7 @@ ListRow.propTypes = {
   nature: PropTypes.string,
   onClick: PropTypes.func,
   plugin: PropTypes.string,
+  repeatable: PropTypes.bool,
   secondLoopComponentName: PropTypes.string,
   secondLoopComponentUid: PropTypes.string,
   target: PropTypes.string,

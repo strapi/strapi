@@ -5,9 +5,6 @@ const Close = styled(Remove)`
   > g {
     > path {
       fill: #007eff;
-      &:hover {
-        fill: #aed4fb;
-      }
     }
   }
 `;

@@ -2,17 +2,16 @@ import React, { memo, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Plus } from '@buffetjs/icons';
-
 import {
   ButtonDropdown,
   DropdownToggle,
   DropdownMenu,
   DropdownItem,
 } from 'reactstrap';
-
+import getTrad from '../../utils/getTrad';
 import { Wrapper } from './components';
 
-function Add({ data, onClick, pStyle, style }) {
+function Add({ data, isRelation, onClick, pStyle, style }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -26,7 +25,13 @@ function Add({ data, onClick, pStyle, style }) {
         }}
       >
         <DropdownToggle>
-          <FormattedMessage id="content-manager.containers.SettingPage.addField">
+          <FormattedMessage
+            id={getTrad(
+              `containers.SettingPage.${
+                isRelation ? 'add.relational-field' : 'add.field'
+              }`
+            )}
+          >
             {msg => (
               <p style={pStyle}>
                 <Plus fill="#007eff" height="11px" width="11px" />
@@ -54,6 +59,7 @@ function Add({ data, onClick, pStyle, style }) {
 
 Add.defaultProps = {
   data: [],
+  isRelation: false,
   onClick: () => {},
   pStyle: {},
   style: {},
@@ -61,6 +67,7 @@ Add.defaultProps = {
 
 Add.propTypes = {
   data: PropTypes.array,
+  isRelation: PropTypes.bool,
   onClick: PropTypes.func,
   pStyle: PropTypes.object,
   style: PropTypes.object,

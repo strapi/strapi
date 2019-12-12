@@ -47,9 +47,7 @@
     "dz": {
       "type": "dynamiczone",
       "components": [
-        "default.dish",
-        "default.openingtimes",
-        "default.restaurantservice"
+        "default.compo"
       ],
       "min": 2
     }

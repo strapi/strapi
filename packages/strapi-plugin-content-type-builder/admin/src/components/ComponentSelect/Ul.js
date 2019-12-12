@@ -7,6 +7,8 @@ const Ul = styled.ul`
   font-size: 13px;
   > li {
     label {
+      flex-shrink: 1;
+      width: fit-content !important;
       cursor: pointer;
     }
 

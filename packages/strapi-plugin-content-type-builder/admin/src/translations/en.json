@@ -36,6 +36,7 @@
   "button.model.create": "Create new content-type",
   "components.componentSelect.value-component": "{number} component selected",
   "components.componentSelect.value-components": "{number} components selected",
+  "component.repeatable": "(repeatable)",
   "configurations": "configurations",
   "contentType.UID.description": "The UID is used to generate the API routes and databases tables/collections",
   "contentType.collectionName.description": "Useful when the name of your Content Type and your table name differ",

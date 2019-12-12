@@ -1315,7 +1315,10 @@ const FormModal = () => {
                   color={
                     (isCreatingContentType ||
                       isCreatingComponent ||
-                      isEditingCategory) &&
+                      isEditingCategory ||
+                      (state.modalType === 'addComponentToDynamicZone' &&
+                        state.step === '1' &&
+                        !isCreatingComponentFromAView)) &&
                     !isCreating
                       ? 'success'
                       : 'primary'

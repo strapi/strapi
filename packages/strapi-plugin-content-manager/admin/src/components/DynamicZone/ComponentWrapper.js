@@ -36,6 +36,7 @@ const ComponentWrapper = styled.div`
       padding-top: 6px;
       padding-bottom: 5px;
       margin-bottom: 22px;
+      border-radius: 2px;
     }
   }
 `;
