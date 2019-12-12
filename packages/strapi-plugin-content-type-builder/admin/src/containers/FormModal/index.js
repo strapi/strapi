@@ -1310,31 +1310,60 @@ const FormModal = () => {
                     {formatMessage({ id: getTrad('button.delete.title') })}
                   </Button>
                 )}
-                <CustomButton
-                  type={isCreating ? 'submit' : 'button'}
-                  color={
-                    (isCreatingContentType ||
-                      isCreatingComponent ||
-                      isEditingCategory ||
+                {isCreating && state.attributeType === 'dynamiczone' && (
+                  <CustomButton
+                    type={isCreating ? 'submit' : 'button'}
+                    color={
+                      (isCreatingContentType ||
+                        isCreatingComponent ||
+                        isEditingCategory ||
+                        (state.modalType === 'addComponentToDynamicZone' &&
+                          state.step === '1' &&
+                          !isCreatingComponentFromAView)) &&
+                      !isCreating
+                        ? 'success'
+                        : 'primary'
+                    }
+                    onClick={e => handleSubmit(e, true)}
+                    icon={
+                      (isCreatingAttribute &&
+                        !isCreatingComponentFromAView &&
+                        state.step !== '1') ||
                       (state.modalType === 'addComponentToDynamicZone' &&
-                        state.step === '1' &&
-                        !isCreatingComponentFromAView)) &&
-                    !isCreating
-                      ? 'success'
-                      : 'primary'
-                  }
-                  onClick={e => handleSubmit(e, true)}
-                  icon={
-                    (isCreatingAttribute &&
-                      !isCreatingComponentFromAView &&
-                      state.step !== '1') ||
-                    (state.modalType === 'addComponentToDynamicZone' &&
-                      isCreatingComponentFromAView) ||
-                    (isCreatingComponentFromAView && state.step === '2')
-                  }
-                >
-                  {getButtonSubmitMessage()}
-                </CustomButton>
+                        isCreatingComponentFromAView) ||
+                      (isCreatingComponentFromAView && state.step === '2')
+                    }
+                  >
+                    {getButtonSubmitMessage()}
+                  </CustomButton>
+                )}
+                {state.attributeType !== 'dynamiczone' && (
+                  <CustomButton
+                    type={isCreating ? 'submit' : 'button'}
+                    color={
+                      (isCreatingContentType ||
+                        isCreatingComponent ||
+                        isEditingCategory ||
+                        (state.modalType === 'addComponentToDynamicZone' &&
+                          state.step === '1' &&
+                          !isCreatingComponentFromAView)) &&
+                      !isCreating
+                        ? 'success'
+                        : 'primary'
+                    }
+                    onClick={e => handleSubmit(e, true)}
+                    icon={
+                      (isCreatingAttribute &&
+                        !isCreatingComponentFromAView &&
+                        state.step !== '1') ||
+                      (state.modalType === 'addComponentToDynamicZone' &&
+                        isCreatingComponentFromAView) ||
+                      (isCreatingComponentFromAView && state.step === '2')
+                    }
+                  >
+                    {getButtonSubmitMessage()}
+                  </CustomButton>
+                )}
               </div>
             </section>
           </ModalFooter>
