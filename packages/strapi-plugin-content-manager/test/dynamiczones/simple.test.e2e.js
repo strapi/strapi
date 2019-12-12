@@ -184,12 +184,27 @@ describe.each([
         ],
       });
     });
-    test.todo('Order of elements is respected');
   });
 
   describe('Listing entries', () => {
-    test.todo('The entry has its dynamic zone populated');
-    test.todo('Order of elements is respected');
+    test('The entries have their dynamic zones populated', async () => {
+      const res = await rq.get('/');
+
+      expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            field: expect.arrayContaining([
+              expect.objectContaining({
+                id: expect.anything(),
+                __component: expect.any(String),
+              }),
+            ]),
+          }),
+        ])
+      );
+    });
   });
 
   describe('Edition', () => {
