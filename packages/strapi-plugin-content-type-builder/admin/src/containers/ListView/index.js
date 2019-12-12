@@ -33,7 +33,7 @@ const ListView = () => {
     toggleModalCancel,
   } = useDataManager();
 
-  const { formatMessage } = useGlobalContext();
+  const { emitEvent, formatMessage } = useGlobalContext();
   const { push, goBack } = useHistory();
   const { search } = useLocation();
   const [enablePrompt, togglePrompt] = useState(true);
@@ -219,6 +219,10 @@ const ListView = () => {
               icon: 'pencil-alt',
               onClick: async () => {
                 await wait();
+
+                if (firstMainDataPath === 'contentType') {
+                  emitEvent('willEditNameOfContentType');
+                }
 
                 push({
                   search: makeSearch({
