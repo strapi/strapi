@@ -387,6 +387,7 @@ const getType = ({ definition, attribute, name, tableExists = false }) => {
         return null;
     }
   }
+  let customTypes = strapi.config.customTypes || {};
 
   switch (attribute.type) {
     case 'uuid':
@@ -407,9 +408,9 @@ const getType = ({ definition, attribute, name, tableExists = false }) => {
       if (client === 'sqlite3') return 'bigint(53)'; // no choice until the sqlite3 package supports returning strings for big integers
       return 'bigint';
     case 'float':
-      return client === 'pg' ? 'double precision' : 'double';
+      return customTypes[attribute.type] || (client === 'pg' ?  'double precision' : 'double');
     case 'decimal':
-      return 'decimal(10,2)';
+      return customTypes[attribute.type] || 'decimal(10,2)';
     // TODO: split time types as they should be different
     case 'date':
     case 'time':
