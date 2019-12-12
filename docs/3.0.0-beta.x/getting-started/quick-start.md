@@ -17,7 +17,7 @@ _For a step-by-step guide, please take a look at the [detailed tutorial](quick-s
 ::: tab yarn
 
 ```bash
-yarn create strapi-app my-project --quickstart
+yarn create-strapi-app my-project --quickstart
 ```
 
 :::
