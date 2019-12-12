@@ -13,34 +13,37 @@ const createComponentModels = async ({ model, definition, ORM, GLOBALS }) => {
     // create component model
     const joinTable = `${collectionName}_components`;
     const joinColumn = `${pluralize.singular(collectionName)}_${primaryKey}`;
+
+    const relatedComponents = componentAttributes
+      .map(key => {
+        const attr = definition.attributes[key];
+        const { type } = attr;
+
+        switch (type) {
+          case 'component': {
+            const { component } = attr;
+            return strapi.components[component];
+          }
+          case 'dynamiczone': {
+            const { components } = attr;
+            return components.map(component => strapi.components[component]);
+          }
+          default: {
+            throw new Error(`Invalid type for attribute ${key}: ${type}`);
+          }
+        }
+      })
+      .reduce((acc, arr) => acc.concat(arr), []);
+
     const joinModel = ORM.Model.extend({
       requireFetch: false,
       tableName: joinTable,
       component() {
         return this.morphTo(
           'component',
-          ...componentAttributes
-            .map(key => {
-              const attr = definition.attributes[key];
-              const { type } = attr;
-
-              switch (type) {
-                case 'component': {
-                  const { component } = attr;
-                  return GLOBALS[strapi.components[component].globalId];
-                }
-                case 'dynamiczone': {
-                  const { components } = attr;
-                  return components.map(
-                    component => GLOBALS[strapi.components[component].globalId]
-                  );
-                }
-                default: {
-                  throw new Error(`Invalid type for attribute ${key}: ${type}`);
-                }
-              }
-            })
-            .reduce((acc, arr) => acc.concat(arr), [])
+          ...relatedComponents.map(component => {
+            return GLOBALS[component.globalId];
+          })
         );
       },
     });
@@ -51,7 +54,12 @@ const createComponentModels = async ({ model, definition, ORM, GLOBALS }) => {
     componentAttributes.forEach(name => {
       model[name] = function relation() {
         return this.hasMany(joinModel).query(qb => {
-          qb.where('field', name).orderBy('order');
+          qb.where('field', name)
+            .whereIn(
+              'component_type',
+              relatedComponents.map(component => component.collectionName)
+            )
+            .orderBy('order');
         });
       };
     });
