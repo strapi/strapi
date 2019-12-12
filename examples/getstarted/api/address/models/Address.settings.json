@@ -46,9 +46,7 @@
     },
     "dz": {
       "type": "dynamiczone",
-      "components": [
-        "default.compo"
-      ],
+      "components": [],
       "min": 2
     }
   }
