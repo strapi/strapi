@@ -12,11 +12,11 @@ describe('Test type boolean', () => {
 
     modelsUtils = createModelsUtils({ rq });
 
-    await modelsUtils.createModelWithType('withboolean', 'boolean');
+    await modelsUtils.createContentTypeWithType('withboolean', 'boolean');
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteModel('withboolean');
+    await modelsUtils.deleteContentType('withboolean');
   }, 60000);
 
   test('Create entry with value input JSON', async () => {

@@ -108,13 +108,13 @@ describe('Filtering API', () => {
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
-    await modelsUtils.createModels([product]);
+    await modelsUtils.createContentTypes([product]);
     await createFixtures();
   }, 60000);
 
   afterAll(async () => {
     await deleteFixtures();
-    await modelsUtils.deleteModels(['product']);
+    await modelsUtils.deleteContentTypes(['product']);
   }, 60000);
 
   describe('Basic filters', () => {

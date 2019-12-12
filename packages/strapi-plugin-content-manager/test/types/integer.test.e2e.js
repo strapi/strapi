@@ -12,11 +12,11 @@ describe('Test type integer', () => {
 
     modelsUtils = createModelsUtils({ rq });
 
-    await modelsUtils.createModelWithType('withinteger', 'integer');
+    await modelsUtils.createContentTypeWithType('withinteger', 'integer');
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteModel('withinteger');
+    await modelsUtils.deleteContentType('withinteger');
   }, 60000);
 
   test('Create entry with value input JSON', async () => {

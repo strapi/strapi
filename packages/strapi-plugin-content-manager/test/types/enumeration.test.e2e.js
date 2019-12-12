@@ -12,13 +12,17 @@ describe('Test type enumeration', () => {
 
     modelsUtils = createModelsUtils({ rq });
 
-    await modelsUtils.createModelWithType('withenumeration', 'enumeration', {
-      enum: ['one', 'two'],
-    });
+    await modelsUtils.createContentTypeWithType(
+      'withenumeration',
+      'enumeration',
+      {
+        enum: ['one', 'two'],
+      }
+    );
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteModel('withenumeration');
+    await modelsUtils.deleteContentType('withenumeration');
   }, 60000);
 
   test('Create entry value enumeration input JSON', async () => {
