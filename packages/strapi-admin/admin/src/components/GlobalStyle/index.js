@@ -40,30 +40,41 @@ const GlobalStyle = createGlobalStyle`
    */
 
   .modal {
+    background: transparent;
     .modal-dialog {
       max-width: 74.5rem;
       margin: 16rem auto 3rem calc(50% - #{$left-menu-width});
+      position: relative;
+      z-index: 999;
     }
   }
+
+  .modal-backdrop.show {
+    opacity: 0.15;
+  }
+
 
   .modal-content {
     border-radius: .2rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     border: none;
-  }
 
-  .modal-backdrop.show {
-    opacity: 0.3;
   }
 
   .modal-header {
     button {
       &.close {
         margin: 0;
+        padding: 2rem;
       }
     }
   }
 
+  .modal-body {
+    .video-react {
+      background: transparent;
+    }
+  }
   form .row {
     text-align: left;
   }

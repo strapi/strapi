@@ -128,7 +128,8 @@ const BannerWrapper = styled.button`
       svg {
         font-size: 10px;
         path {
-          fill: #292b2c;
+          // fill: #292b2c;
+          fill: #4B515A;
         }
       }
     }
@@ -139,20 +140,31 @@ const BannerWrapper = styled.button`
   }
 
   ${({ hasErrors, isOpen }) => {
-    let fill = '#B4B6BA';
+    // let fill = '#B4B6BA';
+    let fill = '#ABB3C2';
+    let trashFill = '#4B515A';
 
     if (isOpen) {
       fill = '#007EFF';
+      trashFill = '#007EFF';
     }
 
     if (hasErrors) {
-      fill = '#F64D0A';
+      fill = '#FAA684';
+      trashFill = '#F64D0A';
     }
 
     return `
       svg {
         path {
-          fill: ${fill};
+          fill: ${fill} !important;
+        }
+      }
+      .trash-icon {
+        svg {
+          path {
+            fill: ${trashFill} !important;
+          }
         }
       }
     `;

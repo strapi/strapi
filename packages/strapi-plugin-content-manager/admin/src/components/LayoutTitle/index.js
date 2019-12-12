@@ -8,7 +8,7 @@ const LayoutTitle = styled.div`
 
   p {
     margin-top: 2px;
-    margin-bottom: 29px;
+    margin-bottom: 13px;
     color: #9ea7b8;
     font-size: 12px;
     font-weight: 400;

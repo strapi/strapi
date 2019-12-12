@@ -3,7 +3,7 @@ import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Arrow } from '@buffetjs/icons';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import useEditView from '../../hooks/useEditView';
@@ -42,12 +42,12 @@ const DynamicZone = ({ max, min, name }) => {
     return schema;
   };
 
-  const getDynamicComponentIcon = componentUid => {
+  const getDynamicComponentInfos = componentUid => {
     const {
-      info: { icon },
+      info: { icon, name },
     } = getDynamicComponentSchemaData(componentUid);
 
-    return icon;
+    return { icon, name };
   };
 
   const dynamicZoneErrors = Object.keys(formErrors)
@@ -72,6 +72,10 @@ const DynamicZone = ({ max, min, name }) => {
     get(dynamicZoneErrors, [0, 'id'], '').includes('min');
 
   const hasRequiredError = hasError && !hasMinError;
+  const hasMaxError =
+    hasError &&
+    get(dynamicZoneErrors, [0, 'id'], '') ===
+      'components.Input.error.validation.max';
 
   return (
     <DynamicZoneWrapper>
@@ -113,11 +117,14 @@ const DynamicZone = ({ max, min, name }) => {
               <RoundCTA
                 onClick={() => removeComponentFromDynamicZone(name, index)}
               >
-                <i className="far fa-trash-alt" />
+                <FontAwesomeIcon icon={'trash'} />
               </RoundCTA>
               <FieldComponent
                 componentUid={componentUid}
-                icon={getDynamicComponentIcon(componentUid)}
+                componentFriendlyName={
+                  getDynamicComponentInfos(componentUid).name
+                }
+                icon={getDynamicComponentInfos(componentUid).icon}
                 label=""
                 name={`${name}.${index}`}
                 isFromDynamicZone={true}
@@ -136,13 +143,18 @@ const DynamicZone = ({ max, min, name }) => {
               setIsOpen(prev => !prev);
             } else {
               strapi.notification.info(
-                `${pluginId}.components.components.notification.info.maximum-requirement`
+                `${pluginId}.components.notification.info.maximum-requirement`
               );
             }
           }}
         />
-        {hasRequiredError && !isOpen && (
+        {hasRequiredError && !isOpen && !hasMaxError && (
           <div className="error-label">Component is required</div>
+        )}
+        {hasMaxError && !isOpen && (
+          <div className="error-label">
+            <FormattedMessage id="components.Input.error.validation.max" />
+          </div>
         )}
         {hasMinError && !isOpen && (
           <div className="error-label">
@@ -169,11 +181,16 @@ const DynamicZone = ({ max, min, name }) => {
             </p>
             <div className="componentsList">
               {dynamicZoneAvailableComponents.map(componentUid => {
+                const { icon, name: friendlyName } = getDynamicComponentInfos(
+                  componentUid
+                );
+
                 return (
                   <DynamicComponentCard
                     key={componentUid}
                     componentUid={componentUid}
-                    icon={getDynamicComponentIcon(componentUid)}
+                    friendlyName={friendlyName}
+                    icon={icon}
                     onClick={() => {
                       setIsOpen(false);
                       const shouldCheckErrors = hasError;

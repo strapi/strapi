@@ -18,7 +18,7 @@ import {
 import { Inputs as Input } from '@buffetjs/custom';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
-import getFeatureLabel from '../../utils/getFeatureLabel';
+
 import getRequestUrl from '../../utils/getRequestUrl';
 import FieldsReorder from '../../components/FieldsReorder';
 import FormTitle from '../../components/FormTitle';
@@ -34,13 +34,11 @@ import getInjectedComponents from '../../utils/getComponents';
 import reducer, { initialState } from './reducer';
 
 const EditSettingsView = ({
-  components,
   currentEnvironment,
   deleteLayout,
   deleteLayouts,
   componentsAndModelsMainPossibleMainFields,
   history: { push },
-  models,
   plugins,
   slug,
 }) => {
@@ -67,6 +65,10 @@ const EditSettingsView = ({
     return get(modifiedData, ['schema', 'attributes'], {});
   }, [modifiedData]);
 
+  const getName = useMemo(() => {
+    return get(modifiedData, ['schema', 'info', 'name'], '');
+  }, [modifiedData]);
+
   const getEditLayout = useCallback(() => {
     return get(modifiedData, ['layouts', 'edit'], []);
   }, [modifiedData]);
@@ -75,12 +77,6 @@ const EditSettingsView = ({
     Object.keys(
       get(modifiedData, ['metadatas', metaToEdit, 'edit'], {})
     ).filter(meta => meta !== 'visible');
-
-  const getName = () => {
-    return type === 'content-types'
-      ? getFeatureLabel(models, slug)
-      : getFeatureLabel(components, componentSlug);
-  };
 
   const getRelationsLayout = useCallback(() => {
     return get(modifiedData, ['layouts', 'editRelations'], []);
@@ -186,6 +182,7 @@ const EditSettingsView = ({
       delete body.schema;
       delete body.uid;
       delete body.isComponent;
+      delete body.category;
 
       await request(getRequestUrl(`${type}/${slug || componentSlug}`), {
         method: 'PUT',
@@ -368,7 +365,7 @@ const EditSettingsView = ({
         initialData={initialData}
         isLoading={isLoading}
         modifiedData={modifiedData}
-        name={getName()}
+        name={getName}
         onChange={handleChange}
         onConfirmReset={() => {
           dispatch({
@@ -399,12 +396,13 @@ const EditSettingsView = ({
                 }}
               >
                 {getInjectedComponents(
+                  'editSettingsView',
                   'left.links',
                   plugins,
                   currentEnvironment,
                   slug,
-                  emitEvent,
-                  push
+                  push,
+                  { componentSlug, type, modifiedData }
                 )}
               </div>
             </div>

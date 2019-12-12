@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { get, size } from 'lodash';
 import { FormattedMessage } from 'react-intl';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import useEditView from '../../hooks/useEditView';
@@ -14,6 +15,7 @@ import Reset from './ResetComponent';
 import Wrapper from './Wrapper';
 
 const FieldComponent = ({
+  componentFriendlyName,
   componentUid,
   icon,
   isFromDynamicZone,
@@ -41,8 +43,13 @@ const FieldComponent = ({
   return (
     <Wrapper className="col-12" isFromDynamicZone={isFromDynamicZone}>
       {isFromDynamicZone && (
-        <ComponentIcon>
-          <i className={`fas fa-${icon}`}></i>
+        <ComponentIcon title={componentFriendlyName}>
+          <div className="component_name">
+            <div className="component_icon">
+              <FontAwesomeIcon icon={icon} title={componentFriendlyName} />
+            </div>
+            <p>{componentFriendlyName}</p>
+          </div>
         </ComponentIcon>
       )}
       <Label>
@@ -91,6 +98,7 @@ const FieldComponent = ({
 };
 
 FieldComponent.defaultProps = {
+  componentFriendlyName: null,
   icon: 'smile',
   isFromDynamicZone: false,
   isRepeatable: false,
@@ -99,6 +107,7 @@ FieldComponent.defaultProps = {
 };
 
 FieldComponent.propTypes = {
+  componentFriendlyName: PropTypes.string,
   componentUid: PropTypes.string.isRequired,
   icon: PropTypes.string,
   isFromDynamicZone: PropTypes.bool,

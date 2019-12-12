@@ -50,7 +50,7 @@
   "components.TableEmpty.withoutFilter": "There is no {contentType}...",
 
   "containers.Edit.addAnItem": "Add an item...",
-  "containers.Edit.pluginHeader.title.new": "Create an Entry",
+  "containers.Edit.pluginHeader.title.new": "Create an entry",
   "containers.Edit.clickToJump": "Click to jump to the entry",
   "containers.Edit.delete": "Delete",
   "containers.Edit.editing": "Editing...",
@@ -75,8 +75,8 @@
   "containers.ListSettingsView.modal-form.edit-label": "Edit the label",
   "containers.EditSettingsView.modal-form.edit-field": "Edit the field",
 
-  "containers.SettingPage.addField": "Add new field",
-  "containers.SettingPage.addRelationalField": "Add new relational field",
+  "containers.SettingPage.add.field": "Insert another field",
+  "containers.SettingPage.add.relational-field": "Insert another relational field",
   "containers.SettingPage.attributes": "Attributes fields",
   "containers.SettingPage.attributes.description": "Define the order of the attributes",
   "containers.SettingPage.editSettings.description": "Drag & drop the fields to build the layout",

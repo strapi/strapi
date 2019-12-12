@@ -24,7 +24,6 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
             section.links
               .filter(link => link.isDisplayed !== false)
               .map(link => {
-                link.source = link.source || current;
                 link.plugin = !isEmpty(plugins[link.plugin])
                   ? link.plugin
                   : plugins[current].id;
@@ -54,7 +53,6 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
               label={link.label}
               destination={`/plugins/${link.plugin}/${link.destination ||
                 link.uid}`}
-              source={link.source}
             />
           ))}
         </ul>

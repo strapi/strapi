@@ -9,6 +9,7 @@ const initialState = fromJS({
   modifiedData: {},
   shouldShowLoadingState: false,
   shouldCheckErrors: false,
+  modifiedDZName: null,
 });
 
 const reducer = (state, action) => {
@@ -57,6 +58,7 @@ const reducer = (state, action) => {
 
           return fromJS([defaultDataStructure]);
         })
+        .update('modifiedDZName', () => action.keys[0])
         .update('shouldCheckErrors', v => {
           if (action.shouldCheckErrors === true) {
             return !v;
@@ -102,31 +104,47 @@ const reducer = (state, action) => {
         }
       );
     case 'MOVE_COMPONENT_UP':
-      return state.updateIn(['modifiedData', action.dynamicZoneName], list => {
-        return list
-          .delete(action.currentIndex)
-          .insert(
-            action.currentIndex - 1,
-            state.getIn([
-              'modifiedData',
-              action.dynamicZoneName,
-              action.currentIndex,
-            ])
-          );
-      });
+      return state
+        .update('shouldCheckErrors', v => {
+          if (action.shouldCheckErrors) {
+            return !v;
+          }
+
+          return v;
+        })
+        .updateIn(['modifiedData', action.dynamicZoneName], list => {
+          return list
+            .delete(action.currentIndex)
+            .insert(
+              action.currentIndex - 1,
+              state.getIn([
+                'modifiedData',
+                action.dynamicZoneName,
+                action.currentIndex,
+              ])
+            );
+        });
     case 'MOVE_COMPONENT_DOWN':
-      return state.updateIn(['modifiedData', action.dynamicZoneName], list => {
-        return list
-          .delete(action.currentIndex)
-          .insert(
-            action.currentIndex + 1,
-            state.getIn([
-              'modifiedData',
-              action.dynamicZoneName,
-              action.currentIndex,
-            ])
-          );
-      });
+      return state
+        .update('shouldCheckErrors', v => {
+          if (action.shouldCheckErrors) {
+            return !v;
+          }
+
+          return v;
+        })
+        .updateIn(['modifiedData', action.dynamicZoneName], list => {
+          return list
+            .delete(action.currentIndex)
+            .insert(
+              action.currentIndex + 1,
+              state.getIn([
+                'modifiedData',
+                action.dynamicZoneName,
+                action.currentIndex,
+              ])
+            );
+        });
     case 'MOVE_FIELD':
       return state.updateIn(['modifiedData', ...action.keys], list => {
         return list
@@ -152,11 +170,15 @@ const reducer = (state, action) => {
       });
     }
     case 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE':
-      return state.deleteIn([
-        'modifiedData',
-        action.dynamicZoneName,
-        action.index,
-      ]);
+      return state
+        .update('shouldCheckErrors', v => {
+          if (action.shouldCheckErrors) {
+            return !v;
+          }
+
+          return v;
+        })
+        .deleteIn(['modifiedData', action.dynamicZoneName, action.index]);
     case 'REMOVE_COMPONENT_FROM_FIELD': {
       const componentPathToRemove = ['modifiedData', ...action.keys];
 
@@ -190,7 +212,9 @@ const reducer = (state, action) => {
         .update('isLoading', () => false)
         .update('modifiedData', () => fromJS(action.contentTypeDataStructure));
     case 'SET_ERRORS':
-      return state.update('formErrors', () => fromJS(action.errors));
+      return state
+        .update('modifiedDZName', () => null)
+        .update('formErrors', () => fromJS(action.errors));
     case 'SUBMIT_ERRORS':
       return state
         .update('formErrors', () => fromJS(action.errors))

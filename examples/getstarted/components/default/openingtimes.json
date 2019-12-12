@@ -3,7 +3,8 @@
   "collectionName": "components_openingtimes",
   "info": {
     "name": "openingtimes",
-    "description": ""
+    "description": "",
+    "icon": "calendar"
   },
   "attributes": {
     "label": {
@@ -13,12 +14,6 @@
     },
     "time": {
       "type": "string"
-    },
-    "dish": {
-      "component": "default.dish",
-      "type": "component",
-      "repeatable": true,
-      "min": 3
     }
   }
 }

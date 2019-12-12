@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 
 const RoundCTA = styled.div`
-  height: 29px;
-  width: 29px;
+  height: 31px;
+  width: 31px;
   border-radius: 50%;
   background-color: #f2f3f4;
   border: 2px solid #ffffff;
@@ -16,7 +16,7 @@ const RoundCTA = styled.div`
   }
   &:not(.arrow-btn) {
     position: absolute;
-    top: -15px;
+    top: -16px;
     right: 10px;
     transition: all 200ms ease-in;
     &:hover {
@@ -25,13 +25,13 @@ const RoundCTA = styled.div`
     }
   }
   &.arrow-btn {
-    height: 24px;
-    width: 24px;
+    height: 22px;
+    width: 22px;
     background-color: #ffffff;
     border: 2px solid #ffffff;
     svg {
       font-size: 10px;
-      line-height: 24px;
+      line-height: 22px;
     }
     &:hover {
       background-color: #f2f3f4;

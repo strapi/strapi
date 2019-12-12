@@ -29,7 +29,6 @@ import reducer, { initialState } from './reducer';
 const EditView = ({
   components,
   currentEnvironment,
-  emitEvent,
   layouts,
   plugins,
   slug,
@@ -239,7 +238,7 @@ const EditView = ({
             <div className="col-md-12 col-lg-3">
               {currentContentTypeLayoutRelations.length > 0 && (
                 <SubWrapper
-                  style={{ padding: '0 20px 1px', marginBottom: '26px' }}
+                  style={{ padding: '0 20px 1px', marginBottom: '25px' }}
                 >
                   <div style={{ paddingTop: '22px' }}>
                     {currentContentTypeLayoutRelations.map(relationName => {
@@ -281,12 +280,11 @@ const EditView = ({
                     }}
                   />
                   {getInjectedComponents(
+                    'editView',
                     'right.links',
                     plugins,
                     currentEnvironment,
-                    slug,
-                    emitEvent,
-                    true
+                    slug
                   )}
                 </ul>
               </LinkWrapper>

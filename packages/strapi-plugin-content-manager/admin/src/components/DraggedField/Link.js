@@ -8,11 +8,9 @@ const Link = styled.div`
   color: #007eff;
   cursor: pointer;
   font-size: 13px;
-  &:before {
-    content: '\f013';
+  svg {
     margin-right: 7px;
-    font-family: 'FontAwesome';
-    font-size: 12px;
+    font-size: 11px;
   }
 `;
 

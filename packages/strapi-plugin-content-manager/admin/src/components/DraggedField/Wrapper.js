@@ -58,16 +58,16 @@ const Wrapper = styled.div`
       font-size: 13px;
       font-weight: 500;
 
-      ${({ isOverRemove }) =>
-        isOverRemove &&
-        css`
-          color: #f64d0a;
-        `}
-
       ${({ isOverEditBlock, isSelected }) =>
         (isSelected || isOverEditBlock) &&
         css`
           color: #007eff;
+        `}
+
+      ${({ isOverRemove }) =>
+        isOverRemove &&
+        css`
+          color: #f64d0a;
         `}
     }
     .grab {
@@ -75,19 +75,19 @@ const Wrapper = styled.div`
         ${({ isOverEditBlock, isOverRemove, isSelected }) =>
           getColor(isOverRemove, isSelected, isOverEditBlock)};
 
-      ${({ isOverRemove }) =>
-        isOverRemove &&
-        css`
-          g {
-            fill: #ffa784;
-          }
-        `}
-
       ${({ isOverEditBlock, isSelected }) =>
         (isSelected || isOverEditBlock) &&
         css`
           g {
             fill: #aed4fb;
+          }
+        `}
+
+      ${({ isOverRemove }) =>
+        isOverRemove &&
+        css`
+          g {
+            fill: #ffa784;
           }
         `}
     }
@@ -98,23 +98,23 @@ const Wrapper = styled.div`
       cursor: pointer;
       svg {
         align-self: center;
+
+        ${({ isOverEditBlock, isSelected }) =>
+          (isSelected || isOverEditBlock) &&
+          css`
+            path {
+              fill: #007eff;
+            }
+          `}
+
+        ${({ isOverRemove }) =>
+          isOverRemove &&
+          css`
+            path {
+              fill: #f64d0a;
+            }
+          `}
       }
-
-      ${({ isOverRemove }) =>
-        isOverRemove &&
-        css`
-          path {
-            fill: #f64d0a;
-          }
-        `}
-
-      ${({ isOverEditBlock, isSelected }) =>
-        (isSelected || isOverEditBlock) &&
-        css`
-          path {
-            fill: #007eff;
-          }
-        `}
     }
   }
 `;

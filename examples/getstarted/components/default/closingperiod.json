@@ -3,7 +3,8 @@
   "collectionName": "components_closingperiods",
   "info": {
     "name": "closingperiod",
-    "description": ""
+    "description": "",
+    "icon": "angry"
   },
   "attributes": {
     "label": {
@@ -20,7 +21,8 @@
     "media": {
       "model": "file",
       "via": "related",
-      "plugin": "upload"
+      "plugin": "upload",
+      "required": false
     },
     "dish": {
       "component": "default.dish",

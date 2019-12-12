@@ -1,4 +1,4 @@
-import { get, isBoolean, isNaN } from 'lodash';
+import { get, isBoolean, isEmpty, isNaN } from 'lodash';
 import * as yup from 'yup';
 import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
 
@@ -8,6 +8,15 @@ yup.addMethod(yup.mixed, 'defined', function() {
     errorsTrads.required,
     value => value !== undefined
   );
+});
+
+yup.addMethod(yup.array, 'notEmptyMin', function(min) {
+  return this.test('notEmptyMin', errorsTrads.min, value => {
+    if (isEmpty(value)) {
+      return true;
+    }
+    return value.length >= min;
+  });
 });
 
 const getAttributes = data => get(data, ['schema', 'attributes'], {});
@@ -110,7 +119,7 @@ const createYupSchema = (model, { components }) => {
           }
         } else {
           if (min) {
-            dynamicZoneSchema = dynamicZoneSchema.min(min, errorsTrads.min);
+            dynamicZoneSchema = dynamicZoneSchema.notEmptyMin(min);
           }
         }
 

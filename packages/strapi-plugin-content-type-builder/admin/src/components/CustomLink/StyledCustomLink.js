@@ -6,21 +6,16 @@
 
 import styled from 'styled-components';
 
-// Prepare for theming
-const colors = {
-  blue: '#1c8fe5',
-};
-
 const StyledCustomLink = styled.div`
-  p {
-    color: ${colors.blue};
-    i,
-    svg {
-      -webkit-font-smoothing: subpixel-antialiased;
-    }
-  }
+  padding-left: 15px;
+  padding-top: 9px;
+  line-height: 0;
+  margin-left: -3px;
+
   button {
-    cursor: pointer;
+    cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+    padding: 0;
+    line-height: 16px;
   }
 `;
 

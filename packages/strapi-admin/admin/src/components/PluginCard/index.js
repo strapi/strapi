@@ -8,6 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Button, PopUpWarning } from 'strapi-helper-plugin';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Wrapper from './Wrapper';
 
 const PLUGINS_WITH_CONFIG = ['content-manager', 'email', 'upload'];
@@ -101,7 +102,7 @@ class PluginCard extends React.Component {
       this.props.plugin.id
     ) && (
       <div className="settings" onClick={this.handleClickSettings}>
-        <i className="fa fa-cog" />
+        <FontAwesomeIcon icon="cog" />
         <FormattedMessage id="app.components.PluginCard.settings" />
       </div>
     );
@@ -148,10 +149,7 @@ class PluginCard extends React.Component {
               />
             </div>
           </div>
-          <div className="cardDescription">
-            {descriptions.long}
-            {/* &nbsp;<FormattedMessage id="app.components.PluginCard.more-details" /> */}
-          </div>
+          <div className="cardDescription">{descriptions.long}</div>
           <div className="cardFooter" onClick={e => e.stopPropagation()}>
             <div className="cardFooterButton">
               <Button

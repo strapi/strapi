@@ -8,8 +8,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { isObject } from 'lodash';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Li, { GlobalNotification } from './Li';
-
 class Notification extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   handleCloseClicked = () => {
@@ -18,22 +18,22 @@ class Notification extends React.Component {
 
   options = {
     success: {
-      icon: 'fa-check',
+      icon: 'check',
       title: 'Success',
       class: 'notificationSuccess',
     },
     warning: {
-      icon: 'fa-exclamation',
+      icon: 'exclamation',
       title: 'Warning',
       class: 'notificationWarning',
     },
     error: {
-      icon: 'fa-exclamation',
+      icon: 'exclamation',
       title: 'Error',
       class: 'notificationError',
     },
     info: {
-      icon: 'fa-info',
+      icon: 'info',
       title: 'Info',
       class: 'notificationInfo',
     },
@@ -66,14 +66,14 @@ class Notification extends React.Component {
         >
           <div className={`notificationIcon`}>
             <div>
-              <i className={`fa ${options.icon}`} />
+              <FontAwesomeIcon icon={options.icon} />
             </div>
           </div>
           <div className="notificationContent">
             <p className="notificationTitle">{content}</p>
           </div>
           <div className={`notificationClose`}>
-            <i className="fa fa-times" onClick={this.handleCloseClicked} />
+            <FontAwesomeIcon icon="times" onClick={this.handleCloseClicked} />
           </div>
         </Li>
       </>

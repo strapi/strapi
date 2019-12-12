@@ -7,39 +7,36 @@ import pluginId from '../pluginId';
  * @type {Array} List of external links to display
  */
 const getInjectedComponents = (
+  container,
   area,
   plugins,
   currentEnvironment,
   slug,
-  emitEvent,
-  push
+  push,
+  ...rest
 ) => {
   const componentsToInject = Object.keys(plugins).reduce((acc, current) => {
     // Retrieve injected compos from plugin
-    // if compo can be injected in left.links area push the compo in the array
     const currentPlugin = plugins[current];
     const injectedComponents = get(currentPlugin, 'injectedComponents', []);
 
     const compos = injectedComponents
       .filter(compo => {
-        return compo.plugin === `${pluginId}.editPage` && compo.area === area;
+        return (
+          compo.plugin === `${pluginId}.${container}` && compo.area === area
+        );
       })
       .map(compo => {
         const Component = compo.component;
 
         return (
           <Component
+            viewProps={rest}
             currentEnvironment={currentEnvironment}
             getModelName={() => slug}
-            getContentTypeBuilderBaseUrl={() =>
-              '/plugins/content-type-builder/models/'
-            }
             push={push}
             {...compo.props}
             key={compo.key}
-            onClick={() => {
-              emitEvent('willEditEditLayout');
-            }}
           />
         );
       });

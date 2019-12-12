@@ -8,7 +8,9 @@ const Wrapper = styled.div`
 
   ${({ isFromDynamicZone }) => {
     if (isFromDynamicZone) {
-      return `background-color: #fff`;
+      return `
+        background-color: #fff;
+      `;
     }
   }}
 `;

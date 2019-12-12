@@ -7,35 +7,47 @@
   },
   "options": {
     "increments": true,
-    "timestamps": ["created_at", "updated_at"],
+    "timestamps": [
+      "created_at",
+      "updated_at"
+    ],
     "comment": ""
   },
   "attributes": {
-    "full_name": {
-      "type": "string"
-    },
-    "postal_code": {
-      "type": "string"
-    },
-    "city": {
-      "type": "string"
-    },
     "geolocation": {
       "type": "json",
       "required": true
     },
-    "country": {
-      "model": "country"
+    "city": {
+      "type": "string",
+      "required": true
+    },
+    "postal_coder": {
+      "type": "string"
+    },
+    "category": {
+      "model": "category"
     },
     "cover": {
       "model": "file",
       "via": "related",
-      "plugin": "upload"
+      "plugin": "upload",
+      "required": false
     },
     "images": {
       "collection": "file",
       "via": "related",
-      "plugin": "upload"
+      "plugin": "upload",
+      "required": false
+    },
+    "full_name": {
+      "type": "string",
+      "required": true
+    },
+    "dz": {
+      "type": "dynamiczone",
+      "components": [],
+      "min": 2
     }
   }
 }

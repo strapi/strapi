@@ -33,6 +33,7 @@ const SortableList = ({ addItem, buttonData, moveItem, removeItem }) => {
         })}
         <Add
           data={buttonData}
+          isRelation
           onClick={addItem}
           style={{
             marginLeft: 10,

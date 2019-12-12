@@ -21,7 +21,7 @@ const NonRepeatableComponent = ({
       {fields.map((fieldRow, key) => {
         return (
           <div className="row" key={key}>
-            {fieldRow.map((field, i) => {
+            {fieldRow.map(field => {
               const currentField = getField(field.name);
               const isComponent = get(currentField, 'type', '') === 'component';
               const keys = `${name}.${field.name}`;
@@ -46,7 +46,6 @@ const NonRepeatableComponent = ({
               return (
                 <div key={field.name} className={`col-${field.size}`}>
                   <Inputs
-                    autoFocus={key === 0 && i === 0 && isFromDynamicZone}
                     keys={keys}
                     layout={schema}
                     name={field.name}

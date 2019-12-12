@@ -3,7 +3,8 @@
   "collectionName": "components_dishes",
   "info": {
     "name": "dish",
-    "description": ""
+    "description": "",
+    "icon": "address-book"
   },
   "attributes": {
     "name": {
@@ -17,12 +18,6 @@
     "price": {
       "type": "float"
     },
-    "address": {
-      "model": "address"
-    },
-    "addresses": {
-      "collection": "address"
-    },
     "picture": {
       "model": "file",
       "via": "related",
@@ -31,6 +26,9 @@
     },
     "very_long_description": {
       "type": "richtext"
+    },
+    "category": {
+      "model": "category"
     }
   }
 }

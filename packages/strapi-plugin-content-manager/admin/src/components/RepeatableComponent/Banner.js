@@ -2,6 +2,7 @@ import React, { forwardRef } from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Grab } from '@buffetjs/icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import pluginId from '../../pluginId';
 import BannerWrapper from './BannerWrapper';
 import PreviewCarret from '../PreviewCarret';
@@ -62,7 +63,7 @@ const Banner = forwardRef(
                 onClickRemove();
               }}
             >
-              <i className="fa fa-trash-alt" />
+              <FontAwesomeIcon icon="trash" />
             </span>
             <span className="grab" ref={refs ? refs.dragRef : null}>
               <Grab />

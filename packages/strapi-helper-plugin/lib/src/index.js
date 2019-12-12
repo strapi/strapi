@@ -73,6 +73,7 @@ export {
 } from './components/InputToggleWithErrors';
 
 export { default as Label } from './components/Label';
+export { default as LeftMenuList } from './components/LeftMenuList';
 export { default as LiLink } from './components/LiLink';
 export { default as List } from './components/List';
 export { default as ListRow } from './components/ListRow';
@@ -95,7 +96,8 @@ export { default as OverlayBlocker } from './components/OverlayBlocker';
 export { default as PageFooter } from './components/PageFooter';
 export { default as PluginHeader } from './components/PluginHeader';
 export { default as PopUpWarning } from './components/PopUpWarning';
-export { default as StyledLeftMenu } from './components/StyledLeftMenu';
+export { default as SelectNav } from './components/SelectNav';
+export { default as SelectWrapper } from './components/SelectWrapper';
 export { default as TrashButton } from './components/TrashButton';
 export { default as ViewContainer } from './components/ViewContainer';
 
@@ -123,3 +125,4 @@ export { default as getYupInnerErrors } from './utils/getYupInnerErrors';
 
 // SVGS
 export { default as LayoutIcon } from './svgs/Layout';
+export { default as Close } from './svgs/Close';
