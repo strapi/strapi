@@ -6,10 +6,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { LiLink } from 'strapi-helper-plugin';
+import { LiLink, useGlobalContext } from 'strapi-helper-plugin';
 
 // Create link from content-type-builder to content-manager
 function EditViewLink(props) {
+  const { emitEvent } = useGlobalContext();
   // Retrieve URL from props
   const url = `/plugins/content-type-builder/content-types/${props.getModelName()}`;
 
@@ -17,7 +18,15 @@ function EditViewLink(props) {
     return null;
   }
 
-  return <LiLink {...props} url={url} />;
+  return (
+    <LiLink
+      {...props}
+      url={url}
+      onClick={() => {
+        emitEvent('willEditEditLayout');
+      }}
+    />
+  );
 }
 
 EditViewLink.propTypes = {

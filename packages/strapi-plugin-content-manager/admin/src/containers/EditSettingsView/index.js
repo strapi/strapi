@@ -401,7 +401,6 @@ const EditSettingsView = ({
                   plugins,
                   currentEnvironment,
                   slug,
-                  emitEvent,
                   push,
                   { componentSlug, type, modifiedData }
                 )}

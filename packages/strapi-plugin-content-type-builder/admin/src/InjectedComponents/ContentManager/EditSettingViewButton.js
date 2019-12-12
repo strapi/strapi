@@ -14,7 +14,7 @@ import getTrad from '../../utils/getTrad';
 
 // Create link from content-type-builder to content-manager
 function EditViewButton(props) {
-  const { formatMessage } = useGlobalContext();
+  const { emitEvent, formatMessage } = useGlobalContext();
   // Retrieve URL from props
   const { modifiedData, componentSlug, type } = get(
     props,
@@ -36,6 +36,8 @@ function EditViewButton(props) {
       : `${category}/${componentSlug}`;
 
   const handleClick = () => {
+    // TODO
+    emitEvent('willEditEditLayout');
     props.push(`${baseUrl}/${suffixUrl}`);
   };
 

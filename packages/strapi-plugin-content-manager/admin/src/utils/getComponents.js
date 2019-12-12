@@ -12,7 +12,6 @@ const getInjectedComponents = (
   plugins,
   currentEnvironment,
   slug,
-  emitEvent,
   push,
   ...rest
 ) => {
@@ -38,9 +37,6 @@ const getInjectedComponents = (
             push={push}
             {...compo.props}
             key={compo.key}
-            onClick={() => {
-              emitEvent('willEditLayout');
-            }}
           />
         );
       });
