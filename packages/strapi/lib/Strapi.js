@@ -23,7 +23,7 @@ const {
   bootstrap,
   loadExtensions,
   initCoreStore,
-  loadGroups,
+  loadComponents,
 } = require('./core');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
@@ -312,7 +312,7 @@ class Strapi extends EventEmitter {
       middlewares,
       hook,
       extensions,
-      groups,
+      components,
     ] = await Promise.all([
       loadConfig(this),
       loadApis(this),
@@ -321,14 +321,14 @@ class Strapi extends EventEmitter {
       loadMiddlewares(this),
       loadHooks(this.config),
       loadExtensions(this.config),
-      loadGroups(this),
+      loadComponents(this),
     ]);
 
     _.merge(this.config, config);
 
     this.api = api;
     this.admin = admin;
-    this.groups = groups;
+    this.components = components;
     this.plugins = plugins;
     this.middleware = middlewares;
     this.hook = hook;

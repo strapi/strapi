@@ -64,7 +64,7 @@ const StyledButton = styled(Button)`
         font-weight: 400;
         &:before {
           margin-right: 10px;
-          content: '\f1f8';
+          content: '\f2ed';
           font-family: 'FontAwesome';
           font-size: 12 px;
         }

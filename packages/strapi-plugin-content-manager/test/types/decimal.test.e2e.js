@@ -21,11 +21,14 @@ describe('Test type decimal', () => {
 
   test('Create entry with value input JSON', async () => {
     const inputValue = 12.31;
-    const res = await rq.post('/content-manager/explorer/withdecimal', {
-      body: {
-        field: inputValue,
-      },
-    });
+    const res = await rq.post(
+      '/content-manager/explorer/application::withdecimal.withdecimal',
+      {
+        body: {
+          field: inputValue,
+        },
+      }
+    );
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
@@ -35,11 +38,14 @@ describe('Test type decimal', () => {
 
   test('Create entry with value input Formdata', async () => {
     const inputValue = 23.1;
-    const res = await rq.post('/content-manager/explorer/withdecimal', {
-      formData: {
-        data: JSON.stringify({ field: inputValue }),
-      },
-    });
+    const res = await rq.post(
+      '/content-manager/explorer/application::withdecimal.withdecimal',
+      {
+        formData: {
+          data: JSON.stringify({ field: inputValue }),
+        },
+      }
+    );
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
@@ -49,11 +55,14 @@ describe('Test type decimal', () => {
 
   test('Create entry with integer should convert to decimal', async () => {
     const inputValue = 1821;
-    const res = await rq.post('/content-manager/explorer/withdecimal', {
-      body: {
-        field: inputValue,
-      },
-    });
+    const res = await rq.post(
+      '/content-manager/explorer/application::withdecimal.withdecimal',
+      {
+        body: {
+          field: inputValue,
+        },
+      }
+    );
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
@@ -62,7 +71,9 @@ describe('Test type decimal', () => {
   });
 
   test('Reading entry, returns correct value', async () => {
-    const res = await rq.get('/content-manager/explorer/withdecimal');
+    const res = await rq.get(
+      '/content-manager/explorer/application::withdecimal.withdecimal'
+    );
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
@@ -72,14 +83,17 @@ describe('Test type decimal', () => {
   });
 
   test('Updating entry sets the right value and format', async () => {
-    const res = await rq.post('/content-manager/explorer/withdecimal', {
-      body: {
-        field: 11.2,
-      },
-    });
+    const res = await rq.post(
+      '/content-manager/explorer/application::withdecimal.withdecimal',
+      {
+        body: {
+          field: 11.2,
+        },
+      }
+    );
 
     const updateRes = await rq.put(
-      `/content-manager/explorer/withdecimal/${res.body.id}`,
+      `/content-manager/explorer/application::withdecimal.withdecimal/${res.body.id}`,
       {
         body: {
           field: 14,

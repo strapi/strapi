@@ -16,10 +16,9 @@ function ListItem({
   moveRelation,
   nextSearch,
   onRemove,
-  source,
   targetModel,
 }) {
-  const to = `/plugins/${pluginId}/${targetModel}/${data.id}?source=${source}&redirectUrl=${nextSearch}`;
+  const to = `/plugins/${pluginId}/${targetModel}/${data.id}?redirectUrl=${nextSearch}`;
 
   const originalIndex = findRelation(data.id).index;
   const [{ isDragging }, drag, preview] = useDrag({
@@ -73,7 +72,6 @@ ListItem.propTypes = {
   moveRelation: PropTypes.func,
   nextSearch: PropTypes.string,
   onRemove: PropTypes.func,
-  source: PropTypes.string.isRequired,
   targetModel: PropTypes.string,
 };
 

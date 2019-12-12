@@ -9,10 +9,11 @@ class DatabaseManager {
   constructor(strapi) {
     this.strapi = strapi;
 
-    // throw if connections and schemas aren't arrays
     this.initialized = false;
+
     this.queries = new Map();
     this.connectors = new Map();
+    this.models = new Map();
   }
 
   async initialize() {
@@ -38,7 +39,28 @@ class DatabaseManager {
       await connector.initialize();
     }
 
+    this.initializeModelsMap();
+
     return this;
+  }
+
+  initializeModelsMap() {
+    Object.keys(this.strapi.models).forEach(modelKey => {
+      const model = this.strapi.models[modelKey];
+      this.models.set(model.uid, model);
+    });
+
+    Object.keys(this.strapi.admin.models).forEach(modelKey => {
+      const model = this.strapi.admin.models[modelKey];
+      this.models.set(model.uid, model);
+    });
+
+    Object.keys(this.strapi.plugins).forEach(pluginKey => {
+      Object.keys(this.strapi.plugins[pluginKey].models).forEach(modelKey => {
+        const model = this.strapi.plugins[pluginKey].models[modelKey];
+        this.models.set(model.uid, model);
+      });
+    });
   }
 
   query(entity, plugin) {
@@ -48,7 +70,10 @@ class DatabaseManager {
 
     const normalizedName = entity.toLowerCase();
 
-    const model = this.getModel(normalizedName, plugin);
+    // get by uid or name / plugin
+    const model = this.models.has(entity)
+      ? this.models.get(entity)
+      : this.getModel(normalizedName, plugin);
 
     if (!model) {
       throw new Error(`The model ${entity} can't be found.`);
@@ -70,6 +95,8 @@ class DatabaseManager {
   getModel(name, plugin) {
     const key = _.toLower(name);
 
+    if (this.models.has(key)) return this.models.get(key);
+
     if (plugin === 'admin') {
       return _.get(strapi.admin, ['models', key]);
     }
@@ -77,8 +104,14 @@ class DatabaseManager {
     return (
       _.get(strapi.plugins, [plugin, 'models', key]) ||
       _.get(strapi, ['models', key]) ||
-      _.get(strapi, ['groups', key])
+      _.get(strapi, ['components', key])
     );
+  }
+
+  getModelByCollectionName(collectionName) {
+    return Array.from(this.models.values()).find(model => {
+      return model.collectionName === collectionName;
+    });
   }
 }
 

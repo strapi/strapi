@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty } from 'lodash';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // Design
 import {
   GlobalContext,
@@ -19,7 +20,7 @@ import {
 import Action from './Action';
 import Content from './Content';
 
-const PLUGINS_WITH_CONFIG = ['content-manager', 'email', 'upload'];
+const PLUGINS_WITH_CONFIG = ['email', 'upload'];
 
 class Row extends React.Component {
   static contextType = GlobalContext;
@@ -45,11 +46,7 @@ class Row extends React.Component {
     } = this.props;
     const { currentEnvironment } = this.context;
 
-    const settingsPath =
-      name === 'content-manager'
-        ? '/plugins/content-manager/ctm-configurations/models'
-        : `/plugins/${name}/configurations/${currentEnvironment}`;
-
+    const settingsPath = `/plugins/${name}/configurations/${currentEnvironment}`;
     const icons = [];
 
     if (PLUGINS_WITH_CONFIG.includes(name)) {
@@ -80,7 +77,7 @@ class Row extends React.Component {
             )}
             {isEmpty(this.props.plugin.logo) && (
               <div className="icoWrapper">
-                <i className={`fa fa-${this.props.plugin.icon}`} />
+                <FontAwesomeIcon icon={this.props.plugin.icon} />
               </div>
             )}
           </div>

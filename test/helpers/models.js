@@ -1,22 +1,26 @@
 const waitRestart = require('./waitRestart');
 
 module.exports = ({ rq }) => {
-  async function createGroup(data) {
+  async function createComponent(data) {
     await rq({
-      url: '/content-type-builder/groups',
+      url: '/content-type-builder/components',
       method: 'POST',
       body: {
-        connection: 'default',
-        ...data,
+        component: {
+          category: 'default',
+          icon: 'default',
+          connection: 'default',
+          ...data,
+        },
       },
     });
 
     await waitRestart();
   }
 
-  async function deleteGroup(name) {
+  async function deleteComponent(name) {
     await rq({
-      url: `/content-type-builder/groups/${name}`,
+      url: `/content-type-builder/components/${name}`,
       method: 'DELETE',
     });
 
@@ -27,25 +31,24 @@ module.exports = ({ rq }) => {
     return createModel({
       connection: 'default',
       name,
-      attributes: [
-        {
-          name: 'field',
-          params: {
-            type,
-            ...opts,
-          },
+      attributes: {
+        field: {
+          type,
+          ...opts,
         },
-      ],
+      },
     });
   }
 
   async function createModel(data) {
     await rq({
-      url: '/content-type-builder/models',
+      url: '/content-type-builder/content-types',
       method: 'POST',
       body: {
-        connection: 'default',
-        ...data,
+        contentType: {
+          connection: 'default',
+          ...data,
+        },
       },
     });
 
@@ -60,7 +63,7 @@ module.exports = ({ rq }) => {
 
   async function deleteModel(model) {
     await rq({
-      url: `/content-type-builder/models/${model}`,
+      url: `/content-type-builder/content-types/application::${model}.${model}`,
       method: 'DELETE',
     });
 
@@ -74,8 +77,8 @@ module.exports = ({ rq }) => {
   }
 
   return {
-    createGroup,
-    deleteGroup,
+    createComponent,
+    deleteComponent,
 
     createModels,
     createModel,

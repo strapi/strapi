@@ -54,21 +54,17 @@ export function* getData({ uid, params }) {
         method: 'GET',
       }),
     ]);
-
     yield put(getDataSucceeded(count, data));
   } catch (err) {
     strapi.notification.error(`${pluginId}.error.model.fetch`);
   }
 }
 
-export function* deleteData({ id, uid, source, emitEvent }) {
+export function* deleteData({ id, slug, emitEvent }) {
   try {
-    const params = { source };
-
     emitEvent('willDeleteEntry');
-    yield call(request, getRequestUrl(`${uid}/${id}`), {
+    yield call(request, getRequestUrl(`${slug}/${id}`), {
       method: 'DELETE',
-      params,
     });
 
     strapi.notification.success(`${pluginId}.success.record.delete`);
@@ -79,9 +75,9 @@ export function* deleteData({ id, uid, source, emitEvent }) {
   }
 }
 
-export function* deleteAll({ ids, slug, source }) {
+export function* deleteAll({ ids, slug }) {
   try {
-    const params = Object.assign(ids, { source });
+    const params = Object.assign(ids);
 
     yield call(request, getRequestUrl(`deleteAll/${slug}`), {
       method: 'DELETE',

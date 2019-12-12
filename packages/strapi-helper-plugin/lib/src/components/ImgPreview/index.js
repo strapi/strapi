@@ -169,7 +169,7 @@ class ImgPreview extends React.Component {
 
     return (
       <div className="fileIcon" onDrop={this.handleDrop}>
-        <i className={`fa fa-file-${fileType}-o`} />
+        <i className={`far fa-file-${fileType}`} />
       </div>
     );
   };

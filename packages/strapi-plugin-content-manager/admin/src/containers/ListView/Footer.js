@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import { FormattedMessage } from 'react-intl';
 
 import { GlobalPagination, InputSelect } from 'strapi-helper-plugin';
-import { useListView } from '../../contexts/ListView';
+import useListView from '../../hooks/useListView';
 import { FooterWrapper, SelectWrapper, Label } from './components';
 
 function Footer() {

@@ -146,6 +146,7 @@ module.exports = {
 
         // We have to find if they are a model linked to this key
         const model = models[association.model];
+
         const attribute = model.attributes[association.via];
 
         if (
@@ -457,9 +458,7 @@ module.exports = {
 
               if (
                 (attr.collection || attr.model || '').toLowerCase() ===
-                  model.toLowerCase() &&
-                strapi.plugins[current].models[entity].globalId !==
-                  definition.globalId
+                model.toLowerCase()
               ) {
                 acc.push(strapi.plugins[current].models[entity].globalId);
               }
@@ -477,8 +476,7 @@ module.exports = {
 
           if (
             (attr.collection || attr.model || '').toLowerCase() ===
-              model.toLowerCase() &&
-            strapi.models[entity].globalId !== definition.globalId
+            model.toLowerCase()
           ) {
             acc.push(strapi.models[entity].globalId);
           }
@@ -487,24 +485,28 @@ module.exports = {
         return acc;
       }, []);
 
-      const groupModels = Object.keys(strapi.groups).reduce((acc, entity) => {
-        Object.keys(strapi.groups[entity].attributes).forEach(attribute => {
-          const attr = strapi.groups[entity].attributes[attribute];
+      const componentModels = Object.keys(strapi.components).reduce(
+        (acc, entity) => {
+          Object.keys(strapi.components[entity].attributes).forEach(
+            attribute => {
+              const attr = strapi.components[entity].attributes[attribute];
 
-          if (
-            (attr.collection || attr.model || '').toLowerCase() ===
-              model.toLowerCase() &&
-            strapi.groups[entity].globalId !== definition.globalId
-          ) {
-            acc.push(strapi.groups[entity].globalId);
-          }
-        });
+              if (
+                (attr.collection || attr.model || '').toLowerCase() ===
+                model.toLowerCase()
+              ) {
+                acc.push(strapi.components[entity].globalId);
+              }
+            }
+          );
 
-        return acc;
-      }, []);
+          return acc;
+        },
+        []
+      );
 
       const models = _.uniq(
-        appModels.concat(pluginsModels).concat(groupModels)
+        appModels.concat(pluginsModels).concat(componentModels)
       );
 
       definition.associations.push({

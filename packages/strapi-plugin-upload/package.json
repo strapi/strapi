@@ -4,7 +4,7 @@
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Files Upload",
-    "icon": "cloud-upload",
+    "icon": "cloud-upload-alt",
     "description": "Description of upload plugin."
   },
   "scripts": {

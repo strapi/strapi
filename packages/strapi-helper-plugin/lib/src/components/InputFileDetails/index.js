@@ -8,6 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, startsWith } from 'lodash';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import EmptyWrapper from './EmptyWrapper';
 import Wrapper from './Wrapper';
 
@@ -36,12 +37,16 @@ function InputFileDetails(props) {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <i className="fa fa-external-link-square" />
+              <FontAwesomeIcon icon="external-link-alt" />
               <FormattedMessage id="app.components.InputFileDetails.open" />
             </a>
           )}
         </div>
-        <div className="removeContainer" onClick={props.onFileDelete}>
+        <div
+          className="removeContainer"
+          onClick={props.onFileDelete}
+          style={{ marginBottom: '-2px', paddingTop: '4px' }}
+        >
           <FormattedMessage id="app.components.InputFileDetails.remove" />
         </div>
       </div>

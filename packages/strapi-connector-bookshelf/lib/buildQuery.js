@@ -102,7 +102,8 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
 
     const externalKey =
       assoc.type === 'collection'
-        ? `${destinationInfo.alias}.${assoc.via}`
+        ? `${destinationInfo.alias}.${assoc.via ||
+            destinationInfo.model.primaryKey}`
         : `${destinationInfo.alias}.${destinationInfo.model.primaryKey}`;
 
     const internalKey =

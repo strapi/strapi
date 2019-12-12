@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const utilsModels = require('strapi-utils').models;
 const utils = require('./utils');
 const relations = require('./relations');
+const { findComponentByGlobalId } = require('./utils/helpers');
 
 module.exports = ({ models, target, plugin = false }, ctx) => {
   const { instance } = ctx;
@@ -27,13 +28,18 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       global[definition.globalName] = {};
     }
 
-    const groupAttributes = Object.keys(definition.attributes).filter(
-      key => definition.attributes[key].type === 'group'
+    const componentAttributes = Object.keys(definition.attributes).filter(key =>
+      ['component', 'dynamiczone'].includes(definition.attributes[key].type)
     );
 
     const scalarAttributes = Object.keys(definition.attributes).filter(key => {
       const { type } = definition.attributes[key];
-      return type !== undefined && type !== null && type !== 'group';
+      return (
+        type !== undefined &&
+        type !== null &&
+        type !== 'component' &&
+        type !== 'dynamiczone'
+      );
     });
 
     const relationalAttributes = Object.keys(definition.attributes).filter(
@@ -43,10 +49,10 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       }
     );
 
-    // handle gorup attrs
-    if (groupAttributes.length > 0) {
+    // handle component and dynamic zone attrs
+    if (componentAttributes.length > 0) {
       // create join morph collection thingy
-      groupAttributes.forEach(name => {
+      componentAttributes.forEach(name => {
         definition.loadedModel[name] = [
           {
             kind: String,
@@ -65,7 +71,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
       definition.loadedModel[name] = {
         ...attr,
-        type: utils(instance).convertType(attr.type),
+        ...utils(instance).convertType(attr.type),
       };
     });
 
@@ -115,7 +121,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
     );
 
     const populateFn = createOnFetchPopulateFn({
-      groupAttributes,
+      componentAttributes,
       morphAssociations,
       definition,
     });
@@ -129,8 +135,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
       if (_.isFunction(target[model.toLowerCase()][fn])) {
         schema.pre(key, function() {
-          return target[model.toLowerCase()]
-            [fn](this);
+          return target[model.toLowerCase()][fn](this);
         });
       }
     });
@@ -198,7 +203,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
         type: 'timestamp',
       };
       target[model].allAttributes[updatedAtCol] = {
-        type: 'timestampUpdate',
+        type: 'timestamp',
       };
     } else if (timestampsOption === true) {
       schema.set('timestamps', true);
@@ -209,13 +214,26 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
         type: 'timestamp',
       };
       target[model].allAttributes.updatedAt = {
-        type: 'timestampUpdate',
+        type: 'timestamp',
       };
     }
     schema.set(
       'minimize',
       _.get(definition, 'options.minimize', false) === true
     );
+
+    const refToStrapiRef = obj => {
+      const ref = obj.ref;
+
+      let plainData = typeof ref.toJSON === 'function' ? ref.toJSON() : ref;
+
+      if (typeof plainData !== 'object') return ref;
+
+      return {
+        __contentType: obj.kind,
+        ...ref,
+      };
+    };
 
     schema.options.toObject = schema.options.toJSON = {
       virtuals: true,
@@ -236,13 +254,16 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
             // Reformat data by bypassing the many-to-many relationship.
             switch (association.nature) {
               case 'oneMorphToOne':
-                returned[association.alias] =
-                  returned[association.alias][0].ref;
+                returned[association.alias] = refToStrapiRef(
+                  returned[association.alias][0]
+                );
+
                 break;
+
               case 'manyMorphToMany':
               case 'manyMorphToOne':
                 returned[association.alias] = returned[association.alias].map(
-                  obj => obj.ref
+                  obj => refToStrapiRef(obj)
                 );
                 break;
               default:
@@ -250,14 +271,30 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
           }
         });
 
-        groupAttributes.forEach(name => {
+        componentAttributes.forEach(name => {
           const attribute = definition.attributes[name];
+          const { type } = attribute;
 
-          if (Array.isArray(returned[name])) {
-            const groups = returned[name].map(el => el.ref);
-            // Reformat data by bypassing the many-to-many relationship.
-            returned[name] =
-              attribute.repeatable === true ? groups : _.first(groups) || null;
+          if (type === 'component') {
+            if (Array.isArray(returned[name])) {
+              const components = returned[name].map(el => el.ref);
+              // Reformat data by bypassing the many-to-many relationship.
+              returned[name] =
+                attribute.repeatable === true
+                  ? components
+                  : _.first(components) || null;
+            }
+          }
+
+          if (type === 'dynamiczone') {
+            const components = returned[name].map(el => {
+              return {
+                __component: findComponentByGlobalId(el.kind).uid,
+                ...el.ref,
+              };
+            });
+
+            returned[name] = components;
           }
         });
       },
@@ -299,122 +336,38 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
 const createOnFetchPopulateFn = ({
   morphAssociations,
-  groupAttributes,
+  componentAttributes,
   definition,
 }) => {
-  return function(next) {
+  return function() {
+    const populatedPaths = this.getPopulatedPaths();
+
     morphAssociations.forEach(association => {
-      if (
-        this._mongooseOptions.populate &&
-        this._mongooseOptions.populate[association.alias]
-      ) {
-        if (
-          association.nature === 'oneToManyMorph' ||
-          association.nature === 'manyToManyMorph'
-        ) {
-          this._mongooseOptions.populate[association.alias].match = {
+      const { alias, nature } = association;
+
+      if (['oneToManyMorph', 'manyToManyMorph'].includes(nature)) {
+        this.populate({
+          path: alias,
+          match: {
             [`${association.via}.${association.filter}`]: association.alias,
             [`${association.via}.kind`]: definition.globalId,
-          };
-
-          // Select last related to an entity.
-          this._mongooseOptions.populate[association.alias].options = {
+          },
+          options: {
             sort: '-createdAt',
-          };
-        } else {
-          this._mongooseOptions.populate[
-            association.alias
-          ].path = `${association.alias}.ref`;
-        }
-      } else {
-        if (!this._mongooseOptions.populate) {
-          this._mongooseOptions.populate = {};
-        }
-        // Images are not displayed in populated data.
-        // We automatically populate morph relations.
-        if (
-          association.nature === 'oneToManyMorph' ||
-          association.nature === 'manyToManyMorph'
-        ) {
-          this._mongooseOptions.populate[association.alias] = {
-            path: association.alias,
-            match: {
-              [`${association.via}.${association.filter}`]: association.alias,
-              [`${association.via}.kind`]: definition.globalId,
-            },
-            options: {
-              sort: '-createdAt',
-            },
-            select: undefined,
-            model: undefined,
-            _docs: {},
-          };
-        }
-      }
-    });
-
-    groupAttributes.forEach(name => {
-      const attr = definition.attributes[name];
-
-      const group = strapi.groups[attr.group];
-
-      const assocs = (group.associations || []).filter(
-        assoc => assoc.autoPopulate === true
-      );
-
-      let subpopulates = [];
-
-      assocs.forEach(assoc => {
-        if (isPolymorphic({ assoc })) {
-          if (
-            assoc.nature === 'oneToManyMorph' ||
-            assoc.nature === 'manyToManyMorph'
-          ) {
-            subpopulates.push({
-              path: assoc.alias,
-              match: {
-                [`${assoc.via}.${assoc.filter}`]: assoc.alias,
-                [`${assoc.via}.kind`]: definition.globalId,
-              },
-              options: {
-                sort: '-createdAt',
-              },
-              select: undefined,
-              model: undefined,
-              _docs: {},
-            });
-          } else {
-            subpopulates.push({ path: `${assoc.alias}.ref`, _docs: {} });
-          }
-        } else {
-          subpopulates.push({
-            path: assoc.alias,
-            _docs: {},
-          });
-        }
-      });
-
-      if (
-        this._mongooseOptions.populate &&
-        this._mongooseOptions.populate[name]
-      ) {
-        this._mongooseOptions.populate[name].path = `${name}.ref`;
-        this._mongooseOptions.populate[name].populate = subpopulates;
-      } else {
-        _.set(this._mongooseOptions, ['populate', name], {
-          path: `${name}.ref`,
-          populate: subpopulates,
-          _docs: {},
+          },
         });
+        return;
+      }
+
+      if (populatedPaths.includes(alias)) {
+        _.set(this._mongooseOptions.populate, [alias, 'path'], `${alias}.ref`);
       }
     });
 
-    next();
+    componentAttributes.forEach(key => {
+      this.populate({ path: `${key}.ref` });
+    });
   };
-};
-
-const isPolymorphic = ({ assoc }) => {
-  return assoc.nature.toLowerCase().indexOf('morph') !== -1;
 };
 
 const buildRelation = ({ definition, model, instance, attribute, name }) => {

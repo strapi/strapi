@@ -23,11 +23,14 @@ describe('Test type json', () => {
     const inputValue = {
       key: 'value',
     };
-    const res = await rq.post('/content-manager/explorer/withjson', {
-      body: {
-        field: inputValue,
-      },
-    });
+    const res = await rq.post(
+      '/content-manager/explorer/application::withjson.withjson',
+      {
+        body: {
+          field: inputValue,
+        },
+      }
+    );
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
@@ -44,11 +47,14 @@ describe('Test type json', () => {
         key: 'value',
       },
     ];
-    const res = await rq.post('/content-manager/explorer/withjson', {
-      body: {
-        field: inputValue,
-      },
-    });
+    const res = await rq.post(
+      '/content-manager/explorer/application::withjson.withjson',
+      {
+        body: {
+          field: inputValue,
+        },
+      }
+    );
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
@@ -60,11 +66,14 @@ describe('Test type json', () => {
     const inputValue = {
       number: '12',
     };
-    const res = await rq.post('/content-manager/explorer/withjson', {
-      formData: {
-        data: JSON.stringify({ field: inputValue }),
-      },
-    });
+    const res = await rq.post(
+      '/content-manager/explorer/application::withjson.withjson',
+      {
+        formData: {
+          data: JSON.stringify({ field: inputValue }),
+        },
+      }
+    );
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
@@ -73,7 +82,9 @@ describe('Test type json', () => {
   });
 
   test('Reading entry, returns correct value', async () => {
-    const res = await rq.get('/content-manager/explorer/withjson');
+    const res = await rq.get(
+      '/content-manager/explorer/application::withjson.withjson'
+    );
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
@@ -87,16 +98,19 @@ describe('Test type json', () => {
   test.todo('Throw when input is not a nested object');
 
   test('Updating entry sets the right value and format', async () => {
-    const res = await rq.post('/content-manager/explorer/withjson', {
-      body: {
-        field: {
-          key: 'value',
+    const res = await rq.post(
+      '/content-manager/explorer/application::withjson.withjson',
+      {
+        body: {
+          field: {
+            key: 'value',
+          },
         },
-      },
-    });
+      }
+    );
 
     const updateRes = await rq.put(
-      `/content-manager/explorer/withjson/${res.body.id}`,
+      `/content-manager/explorer/application::withjson.withjson/${res.body.id}`,
       {
         body: {
           field: {

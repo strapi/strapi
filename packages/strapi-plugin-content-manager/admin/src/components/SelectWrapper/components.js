@@ -122,6 +122,10 @@ const Nav = styled.nav`
     font-family: 'Lato';
     font-size: 1.2rem;
     margin-top: -5px;
+    max-width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
   }
 `;
 
