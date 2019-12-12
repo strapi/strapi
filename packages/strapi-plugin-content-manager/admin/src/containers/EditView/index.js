@@ -29,7 +29,6 @@ import reducer, { initialState } from './reducer';
 const EditView = ({
   components,
   currentEnvironment,
-  emitEvent,
   layouts,
   plugins,
   slug,
@@ -285,9 +284,7 @@ const EditView = ({
                     'right.links',
                     plugins,
                     currentEnvironment,
-                    slug,
-                    emitEvent,
-                    true
+                    slug
                   )}
                 </ul>
               </LinkWrapper>

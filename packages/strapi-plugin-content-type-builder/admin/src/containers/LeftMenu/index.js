@@ -30,7 +30,7 @@ function LeftMenu({ wait }) {
     isInDevelopmentMode,
     sortedContentTypesList,
   } = useDataManager();
-  const { formatMessage } = useGlobalContext();
+  const { emitEvent, formatMessage } = useGlobalContext();
   const { push } = useHistory();
 
   const componentsData = sortBy(
@@ -79,6 +79,13 @@ function LeftMenu({ wait }) {
 
   const handleClickOpenModal = async type => {
     if (canOpenModalCreateCTorComponent()) {
+      const eventName =
+        type === 'contentType'
+          ? 'willCreateContentType'
+          : 'willCreateComponent';
+
+      emitEvent(eventName);
+
       await wait();
       push({
         search: `modalType=${type}&actionType=create&settingType=base&forTarget=${type}`,

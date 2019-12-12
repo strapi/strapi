@@ -39,6 +39,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
   const [infoModals, toggleInfoModal] = useState({ cancel: false });
   const {
     currentEnvironment,
+    emitEvent,
     formatMessage,
     updatePlugin,
   } = useGlobalContext();
@@ -197,6 +198,10 @@ const DataManagerProvider = ({ allIcons, children }) => {
       mainDataKey === 'components'
         ? 'REMOVE_FIELD_FROM_DISPLAYED_COMPONENT'
         : 'REMOVE_FIELD';
+
+    if (mainDataKey === 'contentType') {
+      emitEvent('willDeleteFieldOfContentType');
+    }
 
     dispatch({
       type,
@@ -409,8 +414,12 @@ const DataManagerProvider = ({ allIcons, children }) => {
 
       if (isInContentTypeView) {
         body.contentType = formatMainDataType(modifiedData.contentType);
+
+        emitEvent('willSaveContentType');
       } else {
         body.component = formatMainDataType(modifiedData.component, true);
+
+        emitEvent('willSaveComponent');
       }
 
       const method = isCreating ? 'POST' : 'PUT';
@@ -422,11 +431,28 @@ const DataManagerProvider = ({ allIcons, children }) => {
       // Update the app menu
       await updateAppMenu();
 
+      // Submit ct tracking success
+      if (isInContentTypeView) {
+        emitEvent('didSaveContentType');
+
+        const oldName = get(body, ['contentType', 'schema', 'name'], '');
+        const newName = get(initialData, ['contentType', 'schema', 'name'], '');
+
+        if (!isCreating && oldName !== newName) {
+          emitEvent('didEditNameOfContentType');
+        }
+      } else {
+        emitEvent('didSaveComponent');
+      }
+
       // Reload the plugin so the cycle is new again
       dispatch({ type: 'RELOAD_PLUGIN' });
       // Refetch all the data
       getDataRef.current();
     } catch (err) {
+      if (!isInContentTypeView) {
+        emitEvent('didNotSaveComponent');
+      }
       console.error({ err });
       strapi.notification.error('notification.error');
     }
@@ -461,8 +487,6 @@ const DataManagerProvider = ({ allIcons, children }) => {
       uid: componentUID,
     });
   };
-
-  console.log({ isLoadingForDataToBeSet });
 
   return (
     <DataManagerContext.Provider

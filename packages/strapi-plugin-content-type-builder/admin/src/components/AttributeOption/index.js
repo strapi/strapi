@@ -14,6 +14,7 @@ import { AttributeIcon } from '@buffetjs/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { useHistory } from 'react-router-dom';
+import { useGlobalContext } from 'strapi-helper-plugin';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
 import useQuery from '../../hooks/useQuery';
@@ -25,6 +26,7 @@ const AttributeOption = forwardRef(({ tabIndex, type }, ref) => {
   const tabRef = useRef();
   const query = useQuery();
   const { push } = useHistory();
+  const { emitEvent } = useGlobalContext();
   tabRef.current = tabIndex;
 
   useImperativeHandle(ref, () => ({
@@ -57,6 +59,10 @@ const AttributeOption = forwardRef(({ tabIndex, type }, ref) => {
       headerDisplaySubCategory: query.get('headerDisplaySubCategory'),
       subTargetUid: query.get('subTargetUid'),
     });
+
+    if (forTarget === 'contentType') {
+      emitEvent('didSelectContentTypeFieldType', { type });
+    }
 
     push({
       search,

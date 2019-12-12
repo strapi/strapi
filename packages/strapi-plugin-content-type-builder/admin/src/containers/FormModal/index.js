@@ -44,7 +44,7 @@ const FormModal = () => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { push } = useHistory();
   const { search } = useLocation();
-  const { formatMessage } = useGlobalContext();
+  const { emitEvent, formatMessage } = useGlobalContext();
   const query = useQuery();
   const attributeOptionRef = useRef();
   const {
@@ -113,6 +113,14 @@ const FormModal = () => {
       // Reset all the modification when opening the edit category modal
       if (modalType === 'editCategory') {
         setModifiedData();
+      }
+
+      if (
+        actionType === 'edit' &&
+        modalType === 'attribute' &&
+        forTarget === 'contentType'
+      ) {
+        emitEvent('willEditFieldOfContentType');
       }
 
       // Case:
@@ -527,6 +535,7 @@ const FormModal = () => {
 
     try {
       await checkFormValidity();
+      sendButtonAddMoreFieldEvent(shouldContinue);
       const targetUid =
         state.forTarget === 'components' ? state.targetUid : uid;
 
@@ -750,6 +759,8 @@ const FormModal = () => {
             searchObj.targetUid = state.targetUid;
           }
 
+          emitEvent('willCreateComponentFromAttributesModal');
+
           push({
             search: makeNextSearch(searchObj, shouldContinue),
           });
@@ -912,6 +923,36 @@ const FormModal = () => {
       attributeOptionRef.current.focus();
     }
   };
+
+  const sendAdvancedTabEvent = tab => {
+    if (tab !== 'advanced') {
+      return;
+    }
+
+    if (isCreatingContentType) {
+      emitEvent('didSelectContentTypeSettings');
+
+      return;
+    }
+
+    if (state.forTarget === 'contentType') {
+      emitEvent('didSelectContentTypeFieldSettings');
+
+      return;
+    }
+  };
+
+  const sendButtonAddMoreFieldEvent = shouldContinue => {
+    if (
+      state.modalType === 'attribute' &&
+      state.forTarget === 'contentType' &&
+      state.attributeType !== 'dynamiczone' &&
+      shouldContinue
+    ) {
+      emitEvent('willAddMoreFieldToContentType');
+    }
+  };
+
   const shouldDisableAdvancedTab = () => {
     return (
       ((state.attributeType === 'component' ||
@@ -988,6 +1029,7 @@ const FormModal = () => {
                               ...prev,
                               settingType: link.id,
                             }));
+                            sendAdvancedTabEvent(link.id);
                             push({ search: getNextSearch(link.id, state) });
                           }}
                           nextTab={
@@ -1293,7 +1335,7 @@ const FormModal = () => {
                     }}
                     style={{ marginRight: '10px' }}
                   >
-                    Delete
+                    {formatMessage({ id: getTrad('form.button.delete') })}
                   </Button>
                 )}
                 {isEditingCategory && (
@@ -1307,7 +1349,7 @@ const FormModal = () => {
                     }}
                     style={{ marginRight: '10px' }}
                   >
-                    {formatMessage({ id: getTrad('button.delete.title') })}
+                    {formatMessage({ id: getTrad('form.button.delete') })}
                   </Button>
                 )}
                 {isCreating && state.attributeType === 'dynamiczone' && (
