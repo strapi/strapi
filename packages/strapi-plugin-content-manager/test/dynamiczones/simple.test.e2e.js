@@ -5,6 +5,35 @@ const { createAuthRequest } = require('../../../../test/helpers/request');
 let modelsUtils;
 let rq;
 
+const defaultBody = {
+  field: [
+    {
+      __component: 'default.simple-compo',
+      name: 'someString',
+    },
+    {
+      __component: 'default.compo-with-other-compo',
+      compo: {
+        name: 'someString',
+      },
+    },
+  ],
+};
+
+const createEntry = () => {
+  return rq.post('/', {
+    body: defaultBody,
+  });
+};
+
+const createEmpty = () => {
+  return rq.post('/', {
+    body: {
+      field: [],
+    },
+  });
+};
+
 describe.each([
   [
     'CONTENT MANAGER',
@@ -142,25 +171,8 @@ describe.each([
 
   describe('Getting one entry', () => {
     test('The entry has its dynamic zone populated', async () => {
-      const create = await rq.post('/', {
-        body: {
-          field: [
-            {
-              __component: 'default.simple-compo',
-              name: 'someString',
-            },
-            {
-              __component: 'default.compo-with-other-compo',
-              compo: {
-                name: 'someString',
-              },
-            },
-          ],
-        },
-      });
-
-      expect(create.statusCode).toBe(200);
-      const entryId = create.body.id;
+      const createReq = await createEntry();
+      const entryId = createReq.body.id;
 
       const res = await rq.get(`/${entryId}`);
 
@@ -208,15 +220,130 @@ describe.each([
   });
 
   describe('Edition', () => {
-    test.todo('Can empty non required dynamic zone');
-    test.todo('Can add items to empty dynamic zone');
-    test.todo('Can remove items from dynamic zone');
-    test.todo('Respects min items');
-    test.todo('Respects max items');
-    test.todo('Updates order of elements');
-    test.todo(
-      'Updates elements sent with ids, remove old ones and add new ones'
-    );
+    test('Can empty non required dynamic zone', async () => {
+      const createReq = await createEntry();
+
+      expect(createReq.statusCode).toBe(200);
+      const entryId = createReq.body.id;
+
+      const res = await rq.put(`/${entryId}`, {
+        body: {
+          field: [],
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body.field)).toBe(true);
+      expect(res.body.field).toEqual([]);
+    });
+
+    test('Can add items to empty dynamic zone', async () => {
+      const createReq = await createEmpty();
+
+      expect(createReq.statusCode).toBe(200);
+      const entryId = createReq.body.id;
+
+      const res = await rq.put(`/${entryId}`, {
+        body: defaultBody,
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body.field)).toBe(true);
+      expect(res.body).toMatchObject({
+        field: [
+          {
+            id: expect.anything(),
+            __component: 'default.simple-compo',
+            name: 'someString',
+          },
+          {
+            id: expect.anything(),
+            __component: 'default.compo-with-other-compo',
+            compo: {
+              id: expect.anything(),
+              name: 'someString',
+            },
+          },
+        ],
+      });
+    });
+
+    test('Can remove items from dynamic zone', async () => {
+      const createReq = await createEntry();
+
+      expect(createReq.statusCode).toBe(200);
+      const entryId = createReq.body.id;
+
+      const res = await rq.put(`/${entryId}`, {
+        body: {
+          field: [
+            {
+              __component: 'default.simple-compo',
+              name: 'otherString',
+            },
+            {
+              __component: 'default.simple-compo',
+              name: 'secondString',
+            },
+          ],
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body.field)).toBe(true);
+      expect(res.body).toMatchObject({
+        field: [
+          {
+            id: expect.anything(),
+            __component: 'default.simple-compo',
+            name: 'otherString',
+          },
+          {
+            id: expect.anything(),
+            __component: 'default.simple-compo',
+            name: 'secondString',
+          },
+        ],
+      });
+    });
+
+    test('Respects min items', async () => {
+      const createReq = await createEntry();
+
+      expect(createReq.statusCode).toBe(200);
+      const entryId = createReq.body.id;
+
+      const res = await rq.put(`/${entryId}`, {
+        body: {
+          field: [
+            {
+              __component: 'default.simple-compo',
+              name: 'otherString',
+            },
+          ],
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    test('Respects max items', async () => {
+      const createReq = await createEntry();
+
+      expect(createReq.statusCode).toBe(200);
+      const entryId = createReq.body.id;
+
+      const res = await rq.put(`/${entryId}`, {
+        body: {
+          field: Array(10).fill({
+            __component: 'default.simple-compo',
+            name: 'otherString',
+          }),
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+    });
   });
 
   describe('Deletion', () => {
