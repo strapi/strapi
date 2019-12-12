@@ -32,6 +32,7 @@ import HomePage from '../HomePage';
 import Marketplace from '../Marketplace';
 import NotFoundPage from '../NotFoundPage';
 import Onboarding from '../Onboarding';
+import SettingsPage from '../SettingsPage';
 import PluginDispatcher from '../PluginDispatcher';
 import {
   disableGlobalOverlayBlocker,
@@ -115,6 +116,8 @@ export class Admin extends React.Component {
 
   renderMarketPlace = props => <Marketplace {...props} {...this.props} />;
 
+  renderSettings = props => <SettingsPage {...props} {...this.props} />;
+
   renderPluginDispatcher = props => {
     // NOTE: Send the needed props instead of everything...
 
@@ -185,6 +188,7 @@ export class Admin extends React.Component {
                   render={this.renderMarketPlace}
                   exact
                 />
+                <Route path="/settings" render={this.renderSettings} />
                 <Route path="/configuration" component={ComingSoonPage} exact />
                 <Route key="7" path="" component={NotFoundPage} />
                 <Route key="8" path="404" component={NotFoundPage} />

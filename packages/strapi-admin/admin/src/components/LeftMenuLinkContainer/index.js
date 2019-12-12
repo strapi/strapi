@@ -102,6 +102,11 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
       label: messages.installNewPlugin.id,
       destination: '/marketplace',
     },
+    {
+      icon: 'cog',
+      label: messages.settings.id,
+      destination: '/settings/webhooks',
+    },
   ];
 
   return (

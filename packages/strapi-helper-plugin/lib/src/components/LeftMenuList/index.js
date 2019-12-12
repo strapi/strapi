@@ -12,7 +12,7 @@ import Search from './Search';
 import LeftMenuLink from '../LeftMenuLink';
 import LeftMenuSubList from '../LeftMenuSubList';
 
-function LeftMenuList({ customLink, links, title }) {
+function LeftMenuList({ customLink, links, name, title }) {
   const [search, setSearch] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const ref = createRef();
@@ -66,8 +66,16 @@ function LeftMenuList({ customLink, links, title }) {
     return matchSorter(links, search, { keys: ['title'] });
   };
 
-  const getTitle = () =>
-    getCount() > 1 ? `${title.id}plural` : `${title.id}singular`;
+  const getTitle = () => {
+    if (title) {
+      return getCount() > 1 ? (
+        <FormattedMessage id={`${title.id}plural`} />
+      ) : (
+        <FormattedMessage id={`${title.id}singular`} />
+      );
+    }
+    return <span>{name}</span>;
+  };
 
   const renderCompo = (link, i) => {
     const { links, name, title, ...rest } = link;
@@ -99,15 +107,19 @@ function LeftMenuList({ customLink, links, title }) {
         {!showSearch ? (
           <div className="title-wrapper">
             <h3>
-              <FormattedMessage id={getTitle()} />
+              {getTitle()}
               &nbsp;&nbsp;
-              <span className="count-info" datadescr={getCount()}>
-                {getCount()}
-              </span>
+              {!!title && (
+                <span className="count-info" datadescr={getCount()}>
+                  {getCount()}
+                </span>
+              )}
             </h3>
-            <button onClick={toggleSearch}>
-              <FontAwesomeIcon icon="search" />
-            </button>
+            {!!title && (
+              <button onClick={toggleSearch}>
+                <FontAwesomeIcon icon="search" />
+              </button>
+            )}
           </div>
         ) : (
           <div className="search-wrapper">
@@ -138,7 +150,7 @@ function LeftMenuList({ customLink, links, title }) {
 LeftMenuList.defaultProps = {
   customLink: null,
   links: [],
-  title: 'models',
+  title: null,
 };
 
 LeftMenuList.propTypes = {
@@ -150,6 +162,7 @@ LeftMenuList.propTypes = {
     }),
   }),
   links: PropTypes.array,
+  name: PropTypes.string.isRequired,
   title: PropTypes.string,
 };
 

@@ -73,6 +73,7 @@ export {
 } from './components/InputToggleWithErrors';
 
 export { default as Label } from './components/Label';
+export { default as LeftMenu } from './components/LeftMenu';
 export { default as LeftMenuList } from './components/LeftMenuList';
 export { default as LiLink } from './components/LiLink';
 export { default as List } from './components/List';
