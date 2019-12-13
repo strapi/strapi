@@ -245,7 +245,7 @@ You may add your first field, a **String** field for the **Restaurant** name.
 
 You are now ready to add the second field, a **Rich Text** field for the **Restaurant** description.
 
-![Field Section Panel](../assets/getting-started/tutorial/field-selection-panel.png 'Field Selection Panel')
+![Field Section Panel](../assets/getting-started/tutorial/field-selection-panel-after-restaurant-name.png 'Field Selection Panel')
 
 - Click the `Rich Text` field
 
@@ -257,7 +257,7 @@ You are now ready to add the second field, a **Rich Text** field for the **Resta
 
 You are now ready to add the third field, a **Media** field for the **Restaurant** thumbnail image.
 
-![Field Section Panel](../assets/getting-started/tutorial/field-selection-panel.png 'Field Selection Panel')
+![Field Section Panel](../assets/getting-started/tutorial/field-selection-panel-after-restaurant-description.png 'Field Selection Panel')
 
 - Click the `Media` field
 
@@ -280,7 +280,7 @@ Your new Content Type called **Restaurant** is ready to be **Saved**.
 
 - Wait for Strapi to restart
 
-![Strapi Restart](../assets/getting-started/tutorial/strapi-restart.png 'Strapi Restart')
+![Strapi Restart](../assets/getting-started/tutorial/restaurant-strapi-restart.png 'Strapi Restart')
 
 After Strapi has restarted, you are ready to continue to create the `Category` **Content Type**.
 
@@ -323,7 +323,7 @@ You are now ready to add the second field, a **Relation** field for creating a *
 
 - Click on the `Relation` field
 
-![Category Add Field Panel](../assets/getting-started/tutorial/category-add-field-panel.png 'Category Add Field Panel')
+![Category Add Field Panel](../assets/getting-started/tutorial/category-add-field-panel-after-category-name.png 'Category Add Field Panel')
 
 This brings you to the **Add New Relation** screen.
 
@@ -345,7 +345,7 @@ This brings you to the **Add New Relation** screen.
 
 - Wait for Strapi to restart
 
-![Category Save Strapi Restart](../assets/getting-started/tutorial/category-save-strapi-restart.png 'Category Save Strapi Restart')
+![Category Save Strapi Restart](../assets/getting-started/tutorial/categor-create-strapi-restart.png 'Category Save Strapi Restart')
 
 After Strapi has restarted, you are ready to create a `Component and Repeatable Field` called **"Hours of Operations."**
 
@@ -360,7 +360,7 @@ The `Restaurant` Content Type has a **Component** field named `Hours_of_operatio
 - Click the `+ Add A Component` link to add a new **Component**
 - Enter a **Name** for your new **Component** (call this `hours_of_operation`), and you can write `Hours of Operation` for the **Description**
 
-![Hours of Operation Add Component](../assets/getting-started/tutorial/hours-of-operation-add-group.png 'Hours of Operation Add Component')
+![Hours of Operation Add Component](../assets/getting-started/tutorial/hours-of-operation-add-compo.png 'Hours of Operation Add Component')
 
 - Click the `Done` button
 
@@ -439,6 +439,7 @@ To access the **Hours_of_operation** Component from within the **Restaurant** Co
 - Provide a **name** for this component in the **Restaurant** Content Type. E.g., `restaurant_hours`
 - Check the `Repeatable field` box
 
+![Restaurant Component Inputs](../assets/getting-started/tutorial/restaurant-group-inputs-use.png 'Restaurant Component Inputs')
 ![Restaurant Component Inputs](../assets/getting-started/tutorial/restaurant-group-inputs.png 'Restaurant Component Inputs')
 
 - Click on the `ADVANCED SETTINGS` tab
@@ -464,11 +465,11 @@ You can _drag and drop_ fields into a different layout, as well as, _rename the 
 
 - Navigate to and click on the `Content Manager`, under **PLUGINS** in the left-hand menu
 
-![Content Manager](../assets/getting-started/tutorial/content-manager.png 'Content Manager')
+![Content Manager](../assets/getting-started/tutorial/content-manager-restaurant.png 'Content Manager')
 
 - Click on the `Component(1)` tab
 
-![Content Manager Components Tab](../assets/getting-started/tutorial/content-manager-groups-tab.png 'Content Manager Components Tab')
+![Content Manager Components Tab](../assets/getting-started/tutorial/content-manager-restaurant-group.png 'Content Manager Components Tab')
 
 - Click on `Hours_of_operation` to modify the **View Settings**
 
@@ -592,8 +593,6 @@ By default, Strapi publishes all **Content Types** with restricted permissions. 
 ![Roles and Permissions Find Permissions](../assets/getting-started/tutorial/roles-and-permissions-find-permissions.png 'Roles And Permissions Find Permissions')
 
 - Scroll back to the top, and click the **Save** button
-
-![Roles and Permissions Save](../assets/getting-started/tutorial/roles-and-permissions-save.png 'Roles And Permissions Save')
 
 You have now opened the API and are ready to consume your content.
 
