@@ -1,36 +1,46 @@
+const fs = require('fs');
+
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
 const { createAuthRequest } = require('../../../../test/helpers/request');
 
 let modelsUtils;
 let rq;
+let authRq;
+const uploadImg = () => {
+  return authRq.post('/upload', {
+    formData: {
+      files: fs.createReadStream(__dirname + '/rec.jpg'),
+    },
+  });
+};
 
 describe.each([
   [
     'CONTENT MANAGER',
     '/content-manager/explorer/application::withdynamiczone.withdynamiczone',
   ],
-  ['GENERATED API', '/withdynamiczones'],
+  // ['GENERATED API', '/withdynamiczones'],
 ])('[%s] => Not required dynamiczone', (_, path) => {
   beforeAll(async () => {
     const token = await registerAndLogin();
-    const authRq = createAuthRequest(token);
+    authRq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq: authRq });
 
     await modelsUtils.createComponent({
-      name: 'single-image',
+      name: 'single-media',
       attributes: {
-        image: {
+        media: {
           type: 'media',
         },
       },
     });
 
     await modelsUtils.createComponent({
-      name: 'multiple-image',
+      name: 'multiple-media',
       attributes: {
-        image: {
+        media: {
           type: 'media',
           multiple: true,
         },
@@ -40,13 +50,13 @@ describe.each([
     await modelsUtils.createComponent({
       name: 'with-nested',
       attributes: {
-        singleImage: {
+        singleMedia: {
           type: 'component',
-          component: 'default.single-image',
+          component: 'default.single-media',
         },
-        multipleImage: {
+        multipleMedia: {
           type: 'component',
-          component: 'default.multiple-image',
+          component: 'default.multiple-media',
         },
       },
     });
@@ -56,8 +66,8 @@ describe.each([
       'dynamiczone',
       {
         components: [
-          'default.single-image',
-          'default.multiple-image',
+          'default.single-media',
+          'default.multiple-media',
           'default.with-nested',
         ],
       }
@@ -70,24 +80,222 @@ describe.each([
 
   afterAll(async () => {
     await modelsUtils.deleteComponent('default.with-nested');
-    await modelsUtils.deleteComponent('default.single-image');
-    await modelsUtils.deleteComponent('default.multiple-image');
+    await modelsUtils.deleteComponent('default.single-media');
+    await modelsUtils.deleteComponent('default.multiple-media');
     await modelsUtils.deleteContentType('withdynamiczone');
   }, 60000);
 
   describe('Contains components with medias', () => {
-    test.todo('The medias are correctly related to the components on creation');
-    test.todo('The medias are correctly related to the components on edition');
-    test.todo('The media are populated on the components');
+    test('The medias are correctly related to the components on creation', async () => {
+      const imgRes = await uploadImg();
+
+      expect(imgRes.statusCode).toBe(200);
+      const mediaId = imgRes.body[0].id;
+
+      const res = await rq.post('/', {
+        body: {
+          field: [
+            {
+              __component: 'default.single-media',
+              media: mediaId,
+            },
+            {
+              __component: 'default.multiple-media',
+              media: [mediaId, mediaId],
+            },
+          ],
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body.field)).toBe(true);
+      expect(res.body).toMatchObject({
+        field: [
+          {
+            id: expect.anything(),
+            __component: 'default.single-media',
+            media: {
+              id: mediaId,
+              url: expect.any(String),
+            },
+          },
+          {
+            id: expect.anything(),
+            __component: 'default.multiple-media',
+            media: expect.arrayContaining([
+              expect.objectContaining({
+                id: mediaId,
+                url: expect.any(String),
+              }),
+            ]),
+          },
+        ],
+      });
+    });
+
+    test('The medias are correctly related to the components on edition', async () => {
+      const imgRes = await uploadImg();
+
+      expect(imgRes.statusCode).toBe(200);
+      const mediaId = imgRes.body[0].id;
+
+      const res = await rq.post('/', {
+        body: {
+          field: [
+            {
+              __component: 'default.single-media',
+              media: mediaId,
+            },
+            {
+              __component: 'default.multiple-media',
+              media: [mediaId, mediaId],
+            },
+          ],
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body.field)).toBe(true);
+
+      const newImgRes = await uploadImg();
+
+      expect(newImgRes.statusCode).toBe(200);
+      const newMediaId = newImgRes.body[0].id;
+      const updateRes = await rq.put(`/${res.body.id}`, {
+        body: {
+          field: [
+            {
+              __component: 'default.single-media',
+              media: newMediaId,
+            },
+            {
+              __component: 'default.multiple-media',
+              media: [newMediaId, newMediaId],
+            },
+          ],
+        },
+      });
+
+      expect(updateRes.body).toMatchObject({
+        field: [
+          {
+            id: expect.anything(),
+            __component: 'default.single-media',
+            media: {
+              id: newMediaId,
+              url: expect.any(String),
+            },
+          },
+          {
+            id: expect.anything(),
+            __component: 'default.multiple-media',
+            media: expect.arrayContaining([
+              expect.objectContaining({
+                id: newMediaId,
+                url: expect.any(String),
+              }),
+            ]),
+          },
+        ],
+      });
+    });
+
+    test('The media are populated on the components', async () => {
+      const imgRes = await uploadImg();
+
+      expect(imgRes.statusCode).toBe(200);
+      const mediaId = imgRes.body[0].id;
+
+      const res = await rq.post('/', {
+        body: {
+          field: [
+            {
+              __component: 'default.single-media',
+              media: mediaId,
+            },
+            {
+              __component: 'default.multiple-media',
+              media: [mediaId, mediaId],
+            },
+          ],
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+
+      const getRes = await rq.get(`/${res.body.id}`);
+      expect(getRes.body).toMatchObject({
+        field: [
+          {
+            id: expect.anything(),
+            __component: 'default.single-media',
+            media: {
+              id: mediaId,
+              url: expect.any(String),
+            },
+          },
+          {
+            id: expect.anything(),
+            __component: 'default.multiple-media',
+            media: expect.arrayContaining([
+              expect.objectContaining({
+                id: mediaId,
+                url: expect.any(String),
+              }),
+            ]),
+          },
+        ],
+      });
+    });
   });
 
   describe('Contains components with nested components having medias', () => {
-    test.todo(
-      'The medias are correctly related to the nested components on creation'
-    );
-    test.todo(
-      'The medias are correctly related to the nested components on edition'
-    );
-    test.todo('The media are populated in nested components');
+    test('The medias are correctly related to the nested components on creation', async () => {
+      const imgRes = await uploadImg();
+
+      expect(imgRes.statusCode).toBe(200);
+      const mediaId = imgRes.body[0].id;
+
+      const res = await rq.post('/', {
+        body: {
+          field: [
+            {
+              __component: 'default.with-nested',
+              singleMedia: {
+                media: mediaId,
+              },
+              multipleMedia: {
+                media: [mediaId, mediaId],
+              },
+            },
+          ],
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body.field)).toBe(true);
+      expect(res.body).toMatchObject({
+        field: [
+          {
+            id: expect.anything(),
+            __component: 'default.with-nested',
+            singleMedia: {
+              media: {
+                id: mediaId,
+                url: expect.any(String),
+              },
+            },
+            multipleMedia: {
+              media: expect.arrayContaining([
+                expect.objectContaining({
+                  id: mediaId,
+                  url: expect.any(String),
+                }),
+              ]),
+            },
+          },
+        ],
+      });
+    });
   });
 });
