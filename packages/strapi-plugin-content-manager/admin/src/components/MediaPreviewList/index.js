@@ -1,9 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { isArray, includes, isEmpty } from 'lodash';
-
-import DefaultIcon from '../../assets/images/media/na.svg';
-
+import DefaultIcon from '../../icons/Na';
 import {
   StyledMediaPreviewList,
   MediaPreviewFile,
@@ -90,7 +88,8 @@ function MediaPreviewList({ hoverable, files }) {
     </StyledMediaPreviewList>
   ) : (
     <MediaPreviewItem>
-      <img src={DefaultIcon} alt="default" />
+      {/* <img src={DefaultIcon} alt="default" /> */}
+      <DefaultIcon />
     </MediaPreviewItem>
   );
 }

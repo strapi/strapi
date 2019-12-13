@@ -1,10 +1,18 @@
 import styled from 'styled-components';
 import { Button } from 'strapi-helper-plugin';
-
+import Filter from '../../icons/Filter';
 import RemoveIcon from '../../assets/images/icon-cross-blue.svg';
 
 const Wrapper = styled.div`
   padding-top: 1px;
+`;
+
+const FilterIcon = styled(Filter)`
+  padding: 0 !important;
+  margin: auto !important;
+  > g {
+    stroke: #282b2c;
+  }
 `;
 
 const AddFilterCta = styled(Button)`
@@ -119,6 +127,7 @@ const Remove = styled.span`
 
 export {
   AddFilterCta,
+  FilterIcon,
   FooterWrapper,
   Img,
   Label,
