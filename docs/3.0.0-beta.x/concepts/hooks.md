@@ -1,6 +1,6 @@
 # Hooks
 
-The hooks are modules that add functionality to the core. They are loaded during the server boot. For example, if your project needs to work with a SQL database, you will have to add the hook `strapi-hook-bookshelf` to be able to connect your app with your database.
+The hooks are modules that add functionality to the core. They are loaded during the server boot.
 
 **File structure**
 
@@ -86,28 +86,6 @@ To activate and configure your hook with custom options, you need to edit your `
   "hook-name": {
     "enabled": true,
     ...
-  }
-}
-```
-
-## Dependencies
-
-It happens that a hook has a dependency to another one. For example, the `strapi-hook-bookshelf` has a dependency to `strapi-hook-knex`. Without it, the `strapi-hook-bookshelf` can't work correctly. It also means that the `strapi-hook-knex` hook has to be loaded before.
-
-To handle this case, you need to update the `package.json` at the root of your hook.
-
-```json
-{
-  "name": "strapi-hook-bookshelf",
-  "version": "x.x.x",
-  "description": "Bookshelf hook for the Strapi framework",
-  "dependencies": {
-    ...
-  },
-  "strapi": {
-    "dependencies": [
-      "strapi-hook-knex"
-    ]
   }
 }
 ```

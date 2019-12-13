@@ -11,6 +11,7 @@ const Wrapper = styled.div`
   .buttonContainer {
     width: 100%;
     height: 34px;
+    padding-top: 13px;
     text-align: center;
     background-color: #fafafb;
     border-top: 0;
@@ -20,10 +21,11 @@ const Wrapper = styled.div`
     font-size: 12px;
     font-weight: 700;
     -webkit-font-smoothing: antialiased;
-    line-height: 35px;
+
     cursor: pointer;
     text-transform: uppercase;
-    > i {
+    > i,
+    > svg {
       margin-right: 10px;
     }
   }

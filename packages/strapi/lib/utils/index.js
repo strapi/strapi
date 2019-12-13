@@ -12,6 +12,7 @@ const {
   get,
   difference,
   intersection,
+  isEmpty,
   isObject,
   isFunction,
 } = require('lodash');
@@ -23,9 +24,22 @@ const exposer = require('./exposer');
 const openBrowser = require('./openBrowser');
 
 module.exports = {
-  init(config) {
-    if (config.init) {
-      fs.unlinkSync(path.resolve(config.appPath, 'config', '.init.json'));
+  /*
+   * Return false where there is no administrator, otherwise return true.
+   */
+  async isInitialised(strapi) {
+    try {
+      if (isEmpty(strapi.admin)) {
+        return true;
+      }
+
+      const numberOfAdministrators = await strapi
+        .query('administrator', 'admin')
+        .find({ _limit: 1 });
+
+      return numberOfAdministrators.length > 0;
+    } catch (err) {
+      strapi.stopWithError(err);
     }
   },
 

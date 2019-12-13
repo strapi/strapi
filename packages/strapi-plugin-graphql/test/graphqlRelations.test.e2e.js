@@ -12,22 +12,14 @@ let modelsUtils;
 const selectFields = doc => _.pick(doc, ['id', 'name']);
 
 const documentModel = {
-  attributes: [
-    {
-      name: 'name',
-      params: {
-        multiple: false,
-        type: 'richtext',
-      },
+  attributes: {
+    name: {
+      type: 'richtext',
     },
-    {
-      name: 'content',
-      params: {
-        multiple: false,
-        type: 'richtext',
-      },
+    content: {
+      type: 'richtext',
     },
-  ],
+  },
   connection: 'default',
   name: 'document',
   description: '',
@@ -35,24 +27,17 @@ const documentModel = {
 };
 
 const labelModel = {
-  attributes: [
-    {
-      name: 'name',
-      params: {
-        multiple: false,
-        type: 'richtext',
-      },
+  attributes: {
+    name: {
+      type: 'richtext',
     },
-    {
-      name: 'documents',
-      params: {
-        dominant: true,
-        nature: 'manyToMany',
-        target: 'document',
-        key: 'labels',
-      },
+    documents: {
+      dominant: true,
+      nature: 'manyToMany',
+      target: 'application::document.document',
+      targetAttribute: 'labels',
     },
-  ],
+  },
   connection: 'default',
   name: 'label',
   description: '',

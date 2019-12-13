@@ -35,7 +35,7 @@ Ico.propTypes = {
 };
 
 Ico.defaultProps = {
-  icoType: 'trash',
+  icoType: 'trash-alt',
   id: '',
   onClick: () => {},
 };

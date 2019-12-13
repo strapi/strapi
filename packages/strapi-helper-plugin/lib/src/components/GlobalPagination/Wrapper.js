@@ -23,7 +23,8 @@ const Wrapper = styled.div`
     text-align: center;
     line-height: 30px;
     font-size: 2rem;
-    i {
+    i,
+    svg {
       color: #97999e;
     }
 
@@ -54,7 +55,8 @@ const Wrapper = styled.div`
     }
 
     &[disabled] {
-      i {
+      i,
+      svg {
         opacity: 0.3;
       }
     }

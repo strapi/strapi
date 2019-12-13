@@ -14,6 +14,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
+
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { LoadingIndicatorPage, request } from 'strapi-helper-plugin';
@@ -46,16 +47,20 @@ function App(props) {
         const { uuid } = data;
 
         if (uuid) {
-          await fetch('https://analytics.strapi.io/track', {
-            method: 'POST',
-            body: JSON.stringify({
-              event: 'didInitializeAdministration',
-              uuid,
-            }),
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
+          try {
+            await fetch('https://analytics.strapi.io/track', {
+              method: 'POST',
+              body: JSON.stringify({
+                event: 'didInitializeAdministration',
+                uuid,
+              }),
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+          } catch (e) {
+            // Silent.
+          }
         }
 
         getDataRef.current(hasAdmin, data);

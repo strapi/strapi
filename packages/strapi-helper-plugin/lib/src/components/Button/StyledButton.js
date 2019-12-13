@@ -159,7 +159,8 @@ const StyledButton = styled.button`
       cursor: pointer;
       font-family: Lato;
       -webkit-font-smoothing: antialiased;
-      > i {
+      > i,
+      > svg {
         margin-right: 1.3rem;
         padding-top: 1px;
         font-weight: 600;

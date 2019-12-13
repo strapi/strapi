@@ -71,14 +71,21 @@ const Wrapper = styled.div`
       color: white;
       background: #0e7de7;
       box-shadow: 0px 2px 4px 0px rgba(227, 233, 243, 1);
-      i:last-of-type {
+      i,
+      svg {
+        margin: auto;
+      }
+      i:last-of-type,
+      svg:last-of-type {
         display: none;
       }
       &.active {
-        i:first-of-type {
+        i:first-of-type,
+        svg:first-of-type {
           display: none;
         }
-        i:last-of-type {
+        i:last-of-type,
+        svg:last-of-type {
           display: block;
         }
       }

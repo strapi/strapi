@@ -19,7 +19,8 @@ const Button = styled.button`
     font-size: 11px;
   }
 
-  > i {
+  > i,
+  > svg {
     margin-top: 1px;
     margin-right: 6px;
     vertical-align: -webkit-baseline-middle;

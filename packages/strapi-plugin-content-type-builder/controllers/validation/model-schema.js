@@ -1,0 +1,73 @@
+'use strict';
+
+const _ = require('lodash');
+const yup = require('yup');
+
+const { FORBIDDEN_ATTRIBUTE_NAMES } = require('./constants');
+const { isValidName, isValidKey } = require('./common');
+const { getTypeShape } = require('./types');
+const getRelationValidator = require('./relations');
+
+const createSchema = (types, relations, { modelType } = {}) =>
+  yup
+    .object({
+      name: yup
+        .string()
+        .min(1)
+        .required('name.required'),
+      description: yup.string(),
+      connection: yup.string(),
+      collectionName: yup
+        .string()
+        .nullable()
+        .test(isValidName),
+      attributes: yup.lazy(attributes => {
+        return yup
+          .object()
+          .shape(
+            _.mapValues(attributes, (attribute, key) => {
+              if (FORBIDDEN_ATTRIBUTE_NAMES.includes(key)) {
+                return yup.object().test({
+                  name: 'forbiddenKeys',
+                  message: `Attribute keys cannot be one of ${FORBIDDEN_ATTRIBUTE_NAMES.join(
+                    ', '
+                  )}`,
+                  test: () => false,
+                });
+              }
+
+              if (_.has(attribute, 'type')) {
+                const shape = {
+                  type: yup
+                    .string()
+                    .oneOf(types)
+                    .required(),
+                  configurable: yup.boolean().nullable(),
+                  ...getTypeShape(attribute, { modelType }),
+                };
+
+                return yup
+                  .object(shape)
+                  .test(isValidKey(key))
+                  .noUnknown();
+              } else if (_.has(attribute, 'target')) {
+                const shape = getRelationValidator(attribute, relations);
+
+                return yup
+                  .object(shape)
+                  .test(isValidKey(key))
+                  .noUnknown();
+              }
+              return yup.object().test({
+                name: 'mustHaveTypeOrTarget',
+                message: 'Attribute must have either a type or a target',
+                test: () => false,
+              });
+            })
+          )
+          .required('attributes.required');
+      }),
+    })
+    .noUnknown();
+
+module.exports = createSchema;
