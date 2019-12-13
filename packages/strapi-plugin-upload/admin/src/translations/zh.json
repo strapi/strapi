@@ -26,5 +26,7 @@
   "notification.dropFile.success": "您的檔案已上傳",
   "notification.dropFiles.success": "{number} 個檔案已上傳",
   "Upload.status.sizeLimit": "{file}大於配置的限制大小",
-  "Upload.status.disabled" : "文件上傳已禁用"
+  "Upload.status.disabled" : "文件上傳已禁用",
+  "plugin.description.long": "多媒體檔案管理.",
+  "plugin.description.short": "多媒體檔案管理."
 }

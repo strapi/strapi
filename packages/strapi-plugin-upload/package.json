@@ -5,7 +5,7 @@
   "strapi": {
     "name": "Files Upload",
     "icon": "cloud-upload",
-    "description": "Description of upload plugin."
+    "description": "upload.plugin.description"
   },
   "scripts": {
     "test": "echo \"no tests yet\""
