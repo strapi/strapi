@@ -10,6 +10,7 @@ import { useGlobalContext } from 'strapi-helper-plugin';
 import { List } from '@buffetjs/custom';
 
 import ListRow from '../../components/ListRow';
+import Wrapper from './Wrapper';
 
 function ListView() {
   const { formatMessage } = useGlobalContext();
@@ -111,13 +112,13 @@ function ListView() {
   };
 
   return (
-    <div>
+    <Wrapper>
       <Header {...headerProps} />
       <List
         {...listProps}
         customRowComponent={props => <ListRow {...props} />}
       />
-    </div>
+    </Wrapper>
   );
 }
 
