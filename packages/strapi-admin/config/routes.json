@@ -73,6 +73,36 @@
       "method": "POST",
       "path": "/auth/reset-password",
       "handler": "Auth.changePassword"
+    },
+    {
+      "method": "GET",
+      "path": "/webhooks",
+      "handler": "Webhooks.listWebhooks"
+    },
+    {
+      "method": "POST",
+      "path": "/webhooks",
+      "handler": "Webhooks.createWebhook"
+    },
+    {
+      "method": "GET",
+      "path": "/webhooks/:id",
+      "handler": "Webhooks.getWebhook"
+    },
+    {
+      "method": "PUT",
+      "path": "/webhooks/:id",
+      "handler": "Webhooks.updateWebhook"
+    },
+    {
+      "method": "DELETE",
+      "path": "/webhooks/:id",
+      "handler": "Webhooks.deleteWebhook"
+    },
+    {
+      "method": "POST",
+      "path": "/webhooks/:id/trigger",
+      "handler": "Webhooks.triggerWebhook"
     }
   ]
 }
