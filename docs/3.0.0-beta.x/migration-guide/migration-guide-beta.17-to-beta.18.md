@@ -136,7 +136,11 @@ If you were using the groups feature you will need to apply some changes:
 
 Start by renaming the `./groups` folder to `./components` in your project root folder.
 
-Components now are placed into `categories`. To reflect this you must move all your components inside a `category` folder.
+Components now are placed into `categories`. To reflect this you must move your components inside `category` folders.
+
+::: danger
+Make sure tu use `-` in your file names (Do not use spaces or underscores).
+:::
 
 ### Example
 
