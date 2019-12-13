@@ -21,7 +21,7 @@ module.exports = {
               return reject(err);
             }
 
-            file.url = `/uploads/${file.hash}${file.ext}`;
+            file.url = `${strapi.config.url}/uploads/${file.hash}${file.ext}`;
 
             resolve();
           });
