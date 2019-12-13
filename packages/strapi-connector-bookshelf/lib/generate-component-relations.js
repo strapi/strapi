@@ -92,7 +92,7 @@ const createComponentJoinTables = async ({ definition, ORM }) => {
         .notNullable();
 
       table
-        .foreign(joinColumn)
+        .foreign(joinColumn, `${joinColumn}_fk`)
         .references(primaryKey)
         .inTable(collectionName)
         .onDelete('CASCADE');

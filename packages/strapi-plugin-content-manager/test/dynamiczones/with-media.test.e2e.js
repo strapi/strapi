@@ -20,7 +20,7 @@ describe.each([
     'CONTENT MANAGER',
     '/content-manager/explorer/application::withdynamiczone.withdynamiczone',
   ],
-  // ['GENERATED API', '/withdynamiczones'],
+  ['GENERATED API', '/withdynamiczones'],
 ])('[%s] => Not required dynamiczone', (_, path) => {
   beforeAll(async () => {
     const token = await registerAndLogin();
