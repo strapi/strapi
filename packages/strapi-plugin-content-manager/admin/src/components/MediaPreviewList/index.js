@@ -88,7 +88,6 @@ function MediaPreviewList({ hoverable, files }) {
     </StyledMediaPreviewList>
   ) : (
     <MediaPreviewItem>
-      {/* <img src={DefaultIcon} alt="default" /> */}
       <DefaultIcon />
     </MediaPreviewItem>
   );
