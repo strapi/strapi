@@ -178,8 +178,9 @@ const getTypeShape = (attribute, { modelType } = {}) => {
         components: yup
           .array()
           .of(yup.string().required())
-          .min(1)
-          .required(),
+          .test('isArray', '${path} must be an array', value =>
+            Array.isArray(value)
+          ),
         min: yup.number(),
         max: yup.number(),
       };
