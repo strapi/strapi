@@ -12,10 +12,13 @@ const WebhooksDataManagerProvider = ({ children }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // TODO - Enable the request when create is available
+
         // const { data } = await request(`/admin/webhooks`, {
         //   method: 'GET',
         // });
 
+        // TODO - Fake list to remove when data is not empty anymore
         const list = [
           {
             id: 0,

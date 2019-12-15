@@ -20,9 +20,11 @@ function ListRow({ isEnabled, links, name, url }) {
         <p>{url}</p>
       </td>
       <td>
+        {/* TODO - Switch */}
         <p>{isEnabled ? 'true' : 'false'}</p>
       </td>
       <td>
+        {/* TODO - links events */}
         <IconLinks links={links} />
       </td>
     </Row>
