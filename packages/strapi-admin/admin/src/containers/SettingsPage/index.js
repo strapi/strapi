@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
+import { Route, Switch, useRouteMatch } from 'react-router-dom';
 import { LeftMenu, LeftMenuList } from 'strapi-helper-plugin';
 
 import Webhooks from '../Webhooks';
@@ -13,7 +13,7 @@ import Wrapper from './Wrapper';
 
 function SettingsPage() {
   let { path } = useRouteMatch();
-  const renderSettings = props => <Webhooks {...props} />;
+  const renderWebhooks = props => <Webhooks {...props} />;
 
   const menuItems = [
     {
@@ -41,13 +41,9 @@ function SettingsPage() {
             </LeftMenu>
           </div>
           <div className="col-md-9">
+            {/* TODO when needed - Routing */}
             <Switch>
-              <Redirect exact from={`${path}`} to={`${path}/webhooks`} />
-              <Route
-                exact
-                path={`${path}/webhooks`}
-                render={renderSettings}
-              ></Route>
+              <Route path={path} render={renderWebhooks} />
             </Switch>
           </div>
         </div>

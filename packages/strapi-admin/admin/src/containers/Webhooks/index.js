@@ -5,22 +5,20 @@
  */
 
 import React from 'react';
-import { Switch, Route, useRouteMatch } from 'react-router-dom';
+import { Switch, Route } from 'react-router-dom';
 import WebhooksDataManagerProvider from '../WebhooksDataManagerProvider';
 
 import ListView from './ListView';
 import EditView from './EditView';
 
 function Webhooks() {
-  const { path } = useRouteMatch();
-
   return (
     <WebhooksDataManagerProvider>
       <Switch>
-        <Route exact path={`${path}`}>
+        <Route exact path={`/settings/webhooks`}>
           <ListView />
         </Route>
-        <Route path={`${path}/:id`}>
+        <Route exact path={`/settings/webhooks/:id`}>
           <EditView />
         </Route>
       </Switch>
