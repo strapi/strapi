@@ -57,7 +57,7 @@ These configurations are accessible through `strapi.config.backendURL` and `stra
 
 The `./config/functions/` folder contains a set of JavaScript files in order to add dynamic and logic based configurations.
 
-All functions that are expose in this folder or in your `./config` folder are accessible via `strapi.config.functions['fileName']();`
+All functions that are exposed in this folder or in your `./config` folder are accessible via `strapi.config.functions['fileName']();`
 
 ### Bootstrap
 
