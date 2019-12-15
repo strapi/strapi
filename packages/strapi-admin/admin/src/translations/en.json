@@ -220,7 +220,7 @@
   "Settings.webhook.list.title": "Webhooks",
   "Settings.webhook.list.description": "Get POST changes notifications.",
   "Settings.webhook.list.button.add": "Add new webhook",
-  "Settings.webhook.list.button.delete": "delete",
+  "Settings.webhook.list.button.delete": "Delete",
   "Settings.webhook.list.label.sing": "webhook",
   "Settings.webhook.list.label.plur": "webhooks",
   "app.containers.App.notification.error.init": "An error occured while requesting the API",

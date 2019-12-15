@@ -4,7 +4,8 @@
  *
  */
 
-import React from 'react';
+import React, { memo } from 'react';
+
 import { Header } from '@buffetjs/custom';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import { List } from '@buffetjs/custom';
@@ -12,60 +13,11 @@ import { List } from '@buffetjs/custom';
 import ListRow from '../../components/ListRow';
 import Wrapper from './Wrapper';
 
+import useDataManager from '../../hooks/useDataManager';
+
 function ListView() {
   const { formatMessage } = useGlobalContext();
-
-  // Fake data for now
-  const data = [
-    {
-      id: 0,
-      name: 'gatsby',
-      isEnabled: false,
-      url: 'http://thisisanexample.com/1234867874',
-      headers: {
-        Authorisation: 'x-secret',
-      },
-      hooks: ['createEntry', 'editEntry', 'deleteEntry', 'createMedia'],
-      links: [
-        {
-          icon: 'pencil',
-          onClick: () => {
-            console.log('edit');
-          },
-        },
-        {
-          icon: 'trash',
-          onClick: () => {
-            console.log('delete');
-          },
-        },
-      ],
-    },
-    {
-      id: 1,
-      name: 'gatsby',
-      isEnabled: false,
-      url: 'http://thisisanexample.com/1234867874',
-      headers: {
-        Authorisation: 'x-secret',
-      },
-      hooks: ['createEntry', 'editEntry', 'deleteEntry', 'createMedia'],
-      links: [
-        {
-          icon: 'pencil',
-          onClick: () => {
-            console.log('edit');
-          },
-        },
-        {
-          icon: 'trash',
-          onClick: () => {
-            console.log('delete');
-          },
-        },
-      ],
-    },
-  ];
+  const { webhooks } = useDataManager();
 
   // Header props
   const actions = [
@@ -91,8 +43,7 @@ function ListView() {
   };
 
   // List props
-
-  const rowsCount = data.length;
+  const rowsCount = webhooks.length;
   const titleLabel = `${
     rowsCount > 1
       ? formatMessage({ id: `Settings.webhook.list.label.plur` })
@@ -108,7 +59,7 @@ function ListView() {
   const listProps = {
     title,
     button: buttonProps,
-    items: data,
+    items: webhooks,
   };
 
   return (
@@ -122,4 +73,4 @@ function ListView() {
   );
 }
 
-export default ListView;
+export default memo(ListView);
