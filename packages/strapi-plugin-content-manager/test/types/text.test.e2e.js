@@ -12,11 +12,11 @@ describe('Test type text', () => {
 
     modelsUtils = createModelsUtils({ rq });
 
-    await modelsUtils.createModelWithType('withtext', 'text');
+    await modelsUtils.createContentTypeWithType('withtext', 'text');
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteModel('withtext');
+    await modelsUtils.deleteContentType('withtext');
   }, 60000);
 
   test('Creates an entry with JSON', async () => {
