@@ -12,11 +12,11 @@ describe('Test type decimal', () => {
 
     modelsUtils = createModelsUtils({ rq });
 
-    await modelsUtils.createModelWithType('withdecimal', 'decimal');
+    await modelsUtils.createContentTypeWithType('withdecimal', 'decimal');
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteModel('withdecimal');
+    await modelsUtils.deleteContentType('withdecimal');
   }, 60000);
 
   test('Create entry with value input JSON', async () => {

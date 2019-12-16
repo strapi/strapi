@@ -12,11 +12,11 @@ describe('Test type email', () => {
 
     modelsUtils = createModelsUtils({ rq });
 
-    await modelsUtils.createModelWithType('withemail', 'email');
+    await modelsUtils.createContentTypeWithType('withemail', 'email');
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteModel('withemail');
+    await modelsUtils.deleteContentType('withemail');
   }, 60000);
 
   test('Create entry with value input JSON', async () => {
