@@ -1,46 +1,21 @@
-import React, { createRef, isValidElement, useEffect, useState } from 'react';
+import React, { isValidElement, useState } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
 import { isEmpty } from 'lodash';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import matchSorter from 'match-sorter';
 
 import Wrapper from './Wrapper';
 import List from './List';
-import Search from './Search';
 
 import LeftMenuLink from '../LeftMenuLink';
 import LeftMenuSubList from '../LeftMenuSubList';
+import LeftMenuHeader from '../LeftMenuHeader';
 
-function LeftMenuList({ customLink, links, name, title }) {
+function LeftMenuList({ customLink, links, title, searchable }) {
   const [search, setSearch] = useState('');
-  const [showSearch, setShowSearch] = useState(false);
-  const ref = createRef();
-
-  useEffect(() => {
-    if (showSearch && ref.current) {
-      ref.current.focus();
-    }
-  }, [ref, showSearch]);
 
   const { Component, componentProps } = customLink || {
     Component: null,
     componentProps: {},
-  };
-
-  const toggleSearch = () => setShowSearch(!showSearch);
-
-  const handleClose = () => {
-    clearSearch();
-    toggleSearch();
-  };
-
-  const clearSearch = () => {
-    setSearch('');
-  };
-
-  const handleChange = ({ target: { value } }) => {
-    setSearch(value);
   };
 
   const hasChildObject = () => links.some(link => !isEmpty(link.links));
@@ -64,17 +39,6 @@ function LeftMenuList({ customLink, links, name, title }) {
       });
     }
     return matchSorter(links, search, { keys: ['title'] });
-  };
-
-  const getTitle = () => {
-    if (title) {
-      return getCount() > 1 ? (
-        <FormattedMessage id={`${title.id}plural`} />
-      ) : (
-        <FormattedMessage id={`${title.id}singular`} />
-      );
-    }
-    return <span>{name}</span>;
   };
 
   const renderCompo = (link, i) => {
@@ -101,41 +65,18 @@ function LeftMenuList({ customLink, links, name, title }) {
     );
   };
 
+  const headerProps = {
+    count: getCount(),
+    search,
+    searchable,
+    setSearch,
+    title,
+  };
+
   return (
     <Wrapper>
       <div className="list-header">
-        {!showSearch ? (
-          <div className="title-wrapper">
-            <h3>
-              {getTitle()}
-              &nbsp;&nbsp;
-              {!!title && (
-                <span className="count-info" datadescr={getCount()}>
-                  {getCount()}
-                </span>
-              )}
-            </h3>
-            {!!title && (
-              <button onClick={toggleSearch}>
-                <FontAwesomeIcon icon="search" />
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="search-wrapper">
-            <FontAwesomeIcon icon="search" />
-            <button onClick={toggleSearch}></button>
-            <Search
-              ref={ref}
-              onChange={handleChange}
-              value={search}
-              placeholder="search…"
-            />
-            <button onClick={handleClose}>
-              <FontAwesomeIcon icon="times" />
-            </button>
-          </div>
-        )}
+        <LeftMenuHeader {...headerProps} />
       </div>
       <div>
         <List>{getList().map((link, i) => renderCompo(link, i))}</List>
@@ -151,6 +92,7 @@ LeftMenuList.defaultProps = {
   customLink: null,
   links: [],
   title: null,
+  searchable: false,
 };
 
 LeftMenuList.propTypes = {
@@ -162,8 +104,10 @@ LeftMenuList.propTypes = {
     }),
   }),
   links: PropTypes.array,
-  name: PropTypes.string.isRequired,
-  title: PropTypes.string,
+  title: PropTypes.shape({
+    id: PropTypes.string,
+  }),
+  searchable: PropTypes.bool,
 };
 
 export default LeftMenuList;
