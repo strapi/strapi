@@ -130,7 +130,10 @@ class ConfigPage extends React.Component {
                 label: formatMessage({ id: 'upload.ConfigPage.title' }),
               }}
             />
-            <HeaderNav links={this.generateLinks()} />
+            <HeaderNav
+              links={this.generateLinks()}
+              style={{ marginTop: '4.6rem' }}
+            />
             <EditForm
               didCheckErrors={this.props.didCheckErrors}
               formErrors={this.props.formErrors}
