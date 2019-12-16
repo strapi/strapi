@@ -5,18 +5,20 @@
  */
 
 import React from 'react';
-import { LeftMenu, LeftMenuList } from 'strapi-helper-plugin';
+import { useGlobalContext, LeftMenu, LeftMenuList } from 'strapi-helper-plugin';
 
 import Webhooks from '../Webhooks';
 import Wrapper from './Wrapper';
 
 function SettingsPage() {
+  const { formatMessage } = useGlobalContext();
+
   const menuItems = [
     {
       title: { id: 'app.components.LeftMenuLinkContainer.general' },
       links: [
         {
-          title: 'webhooks',
+          title: formatMessage({ id: `Settings.webhooks.title` }),
           to: '/settings/webhooks',
           name: 'webhooks',
         },
@@ -31,7 +33,9 @@ function SettingsPage() {
           <div className="col-md-3">
             <LeftMenu>
               {menuItems.map(item => {
-                return <LeftMenuList {...item} key={item.title} />;
+                return (
+                  <LeftMenuList {...item} key={JSON.stringify(item.title)} />
+                );
               })}
             </LeftMenu>
           </div>

@@ -79,7 +79,6 @@ function LeftMenuHeader({ count, search, searchable, setSearch, title }) {
 
 LeftMenuHeader.defaultProps = {
   count: 0,
-  title: null,
   search: null,
   searchable: false,
   setSearch: () => {},
@@ -88,8 +87,8 @@ LeftMenuHeader.defaultProps = {
 LeftMenuHeader.propTypes = {
   count: PropTypes.number,
   title: PropTypes.shape({
-    id: PropTypes.string,
-  }),
+    id: PropTypes.string.isRequired,
+  }).isRequired,
   search: PropTypes.string,
   searchable: PropTypes.bool,
   setSearch: PropTypes.func,
