@@ -12,23 +12,14 @@ import { bindActionCreators, compose } from 'redux';
 import { clone, get, includes, isEqual, isEmpty } from 'lodash';
 import { Header } from '@buffetjs/custom';
 import { GlobalContext, HeaderNav } from 'strapi-helper-plugin';
-
 import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
 import { HomePageContextProvider } from '../../contexts/HomePage';
-
-// Design
 import EditForm from '../../components/EditForm';
 import List from '../../components/List';
 import PopUpForm from '../../components/PopUpForm';
-
-// Selectors
 import selectHomePage from './selectors';
-
-// Styles
 import Wrapper from './Wrapper';
-
-// Actions
 import {
   cancelChanges,
   deleteData,
@@ -40,12 +31,9 @@ import {
   submit,
   unsetDataToEdit,
 } from './actions';
-
 import reducer from './reducer';
 import saga from './saga';
-
 import checkFormValidity from './checkFormValidity';
-
 const keyBoardShortCuts = [18, 78];
 
 export class HomePage extends React.Component {
@@ -153,19 +141,19 @@ export class HomePage extends React.Component {
   headerNavLinks = [
     {
       name: getTrad('HeaderNav.link.roles'),
-      to: '/plugins/users-permissions/roles',
+      to: `/plugins/${pluginId}/roles`,
     },
     {
       name: getTrad('HeaderNav.link.providers'),
-      to: '/plugins/users-permissions/providers',
+      to: `/plugins/${pluginId}/providers`,
     },
     {
       name: getTrad('HeaderNav.link.emailTemplates'),
-      to: '/plugins/users-permissions/email-templates',
+      to: `/plugins/${pluginId}/email-templates`,
     },
     {
       name: getTrad('HeaderNav.link.advancedSettings'),
-      to: '/plugins/users-permissions/advanced',
+      to: `/plugins/${pluginId}/advanced`,
     },
   ];
 
