@@ -77,32 +77,50 @@
     {
       "method": "GET",
       "path": "/webhooks",
-      "handler": "Webhooks.listWebhooks"
+      "handler": "Webhooks.listWebhooks",
+      "config": {
+        "policies": []
+      }
     },
     {
       "method": "POST",
       "path": "/webhooks",
-      "handler": "Webhooks.createWebhook"
+      "handler": "Webhooks.createWebhook",
+      "config": {
+        "policies": []
+      }
     },
     {
       "method": "GET",
       "path": "/webhooks/:id",
-      "handler": "Webhooks.getWebhook"
+      "handler": "Webhooks.getWebhook",
+      "config": {
+        "policies": []
+      }
     },
     {
       "method": "PUT",
       "path": "/webhooks/:id",
-      "handler": "Webhooks.updateWebhook"
+      "handler": "Webhooks.updateWebhook",
+      "config": {
+        "policies": []
+      }
     },
     {
       "method": "DELETE",
       "path": "/webhooks/:id",
-      "handler": "Webhooks.deleteWebhook"
+      "handler": "Webhooks.deleteWebhook",
+      "config": {
+        "policies": []
+      }
     },
     {
       "method": "POST",
       "path": "/webhooks/:id/trigger",
-      "handler": "Webhooks.triggerWebhook"
+      "handler": "Webhooks.triggerWebhook",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }
