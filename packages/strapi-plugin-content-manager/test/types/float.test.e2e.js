@@ -12,11 +12,11 @@ describe('Test type float', () => {
 
     modelsUtils = createModelsUtils({ rq });
 
-    await modelsUtils.createModelWithType('withfloat', 'float');
+    await modelsUtils.createContentTypeWithType('withfloat', 'float');
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteModel('withfloat');
+    await modelsUtils.deleteContentType('withfloat');
   }, 60000);
 
   test('Create entry with value input JSON', async () => {

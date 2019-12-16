@@ -12,11 +12,11 @@ describe('Test type date', () => {
 
     modelsUtils = createModelsUtils({ rq });
 
-    await modelsUtils.createModelWithType('withdate', 'date');
+    await modelsUtils.createContentTypeWithType('withdate', 'date');
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteModel('withdate');
+    await modelsUtils.deleteContentType('withdate');
   }, 60000);
 
   test('Create entry with valid value JSON', async () => {

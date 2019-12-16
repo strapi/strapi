@@ -31,10 +31,10 @@ describe('Simple API', () => {
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
-    await modelsUtils.createModels([product]);
+    await modelsUtils.createContentTypes([product]);
   }, 60000);
 
-  afterAll(() => modelsUtils.deleteModels(['product']), 60000);
+  afterAll(() => modelsUtils.deleteContentTypes(['product']), 60000);
 
   test('Create Products', async () => {
     const product = {

@@ -59,10 +59,10 @@ describe('Test Graphql Relations API End to End', () => {
 
     modelsUtils = createModelsUtils({ rq });
 
-    await modelsUtils.createModels([documentModel, labelModel]);
+    await modelsUtils.createContentTypes([documentModel, labelModel]);
   }, 60000);
 
-  afterAll(() => modelsUtils.deleteModels(['document', 'label']), 60000);
+  afterAll(() => modelsUtils.deleteContentTypes(['document', 'label']), 60000);
 
   describe('Test relations features', () => {
     let data = {
