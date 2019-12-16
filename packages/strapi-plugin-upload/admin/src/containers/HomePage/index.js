@@ -120,6 +120,7 @@ export class HomePage extends React.Component {
               actions={[
                 {
                   Component: this.renderInputSearch,
+                  key: 'input-search',
                 },
               ]}
               title={{
