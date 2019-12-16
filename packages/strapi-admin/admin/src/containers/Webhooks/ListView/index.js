@@ -6,11 +6,14 @@
 
 import React, { useEffect, useReducer } from 'react';
 
-import { Header } from '@buffetjs/custom';
-import { request, useGlobalContext } from 'strapi-helper-plugin';
-import { List } from '@buffetjs/custom';
+import { Header, List } from '@buffetjs/custom';
+import { Button } from '@buffetjs/core';
+import { Plus } from '@buffetjs/icons';
+
+import { request, useGlobalContext, ListButton } from 'strapi-helper-plugin';
 
 import ListRow from '../../../components/ListRow';
+import EmptyList from '../../../components/EmptyList';
 import Wrapper from './Wrapper';
 
 import reducer, { initialState } from './reducer';
@@ -45,13 +48,23 @@ function ListView() {
     fetchData();
   }, []);
 
+  const addBtnLabel = formatMessage({
+    id: `Settings.webhooks.list.button.add`,
+  });
+
+  const newButtonProps = {
+    label: addBtnLabel,
+    onClick: () => {},
+    color: 'primary',
+    type: 'button',
+    icon: <Plus fill="#007eff" />,
+  };
+
   // Header props
   const actions = [
     {
-      title: formatMessage({ id: `Settings.webhook.list.button.add` }),
-      onClick: () => {},
-      color: 'primary',
-      type: 'button',
+      ...newButtonProps,
+      title: addBtnLabel,
       icon: true,
       style: {
         paddingLeft: 15,
@@ -62,9 +75,9 @@ function ListView() {
 
   const headerProps = {
     title: {
-      label: formatMessage({ id: `Settings.webhook.list.title` }),
+      label: formatMessage({ id: `Settings.webhooks.title` }),
     },
-    content: formatMessage({ id: `Settings.webhook.list.description` }),
+    content: formatMessage({ id: `Settings.webhooks.list.description` }),
     actions: actions,
   };
 
@@ -72,16 +85,18 @@ function ListView() {
   const rowsCount = webhooks.length;
   const titleLabel = `${
     rowsCount > 1
-      ? formatMessage({ id: `Settings.webhook.list.label.plur` })
-      : formatMessage({ id: `Settings.webhook.list.label.sing` })
+      ? formatMessage({ id: `Settings.webhooks.title` })
+      : formatMessage({ id: `Settings.webhooks.singular` })
   }`;
   const title = `${rowsCount} ${titleLabel}`;
+
   const buttonProps = {
     color: 'secondary',
-    label: formatMessage({ id: `Settings.webhook.list.button.delete` }),
+    label: formatMessage({ id: `Settings.webhooks.list.button.delete` }),
     onClick: () => {},
     type: 'button',
   };
+
   const listProps = {
     title,
     button: buttonProps,
@@ -91,10 +106,19 @@ function ListView() {
   return (
     <Wrapper>
       <Header {...headerProps} />
-      <List
-        {...listProps}
-        customRowComponent={props => <ListRow {...props} />}
-      />
+      <div className="list-wrapper">
+        {rowsCount > 0 ? (
+          <List
+            {...listProps}
+            customRowComponent={props => <ListRow {...props} />}
+          />
+        ) : (
+          <EmptyList />
+        )}
+        <ListButton>
+          <Button {...newButtonProps} />
+        </ListButton>
+      </div>
     </Wrapper>
   );
 }
