@@ -108,7 +108,7 @@ Previously the ctx.state.user was populated with the user informations, its role
 
 ## File model
 
-The file model has been update. The `size` field is now a decimal number, allowing correct sorting behavior.
+The file model has been updated. The `size` field is now a decimal number, allowing correct sorting behavior.
 
 You will need to clear some database indexes if you are using either Mysql or PostgreSQL.
 
@@ -139,7 +139,7 @@ Start by renaming the `./groups` folder to `./components` in your project root f
 Components now are placed into `categories`. To reflect this you must move your components inside `category` folders.
 
 ::: danger
-Make sure tu use `-` in your file names (Do not use spaces or underscores).
+Make sure to use `-` in your file names (Do not use spaces or underscores).
 :::
 
 ### Example
@@ -162,7 +162,7 @@ components/
     └── image-text.json
 ```
 
-Now that you have moved your component into categories. You need to update your content-types to references them correctly.
+Now that you have moved your component into categories. You need to update your content-types to reference them correctly.
 
 **Before**
 `./api/restaurant/models/Restaurant.settings.json`
