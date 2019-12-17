@@ -20,8 +20,30 @@ const NON_LISTABLES = [
   'dynamiczone',
 ];
 
+// hidden fields are fields that are configured to be hidden from list, and edit views
+const isHidden = (schema, name) => {
+  if (!_.has(schema.attributes, name)) {
+    return false;
+  }
+
+  const isHidden = _.get(
+    schema,
+    ['config', 'attributes', name, 'hidden'],
+    false
+  );
+  if (isHidden === true) {
+    return true;
+  }
+
+  return false;
+};
+
 const isListable = (schema, name) => {
   if (!_.has(schema.attributes, name)) {
+    return false;
+  }
+
+  if (isHidden(schema, name)) {
     return false;
   }
 
@@ -57,6 +79,10 @@ const isVisible = (schema, name) => {
     return false;
   }
 
+  if (isHidden(schema, name)) {
+    return false;
+  }
+
   if (isTimestamp(schema, name) || name === 'id') {
     return false;
   }
@@ -86,6 +112,10 @@ const hasRelationAttribute = (schema, name) => {
     return false;
   }
 
+  if (isHidden(schema, name)) {
+    return false;
+  }
+
   if (!isVisible(schema, name)) {
     return false;
   }
@@ -95,6 +125,10 @@ const hasRelationAttribute = (schema, name) => {
 
 const hasEditableAttribute = (schema, name) => {
   if (!_.has(schema.attributes, name)) {
+    return false;
+  }
+
+  if (isHidden(schema, name)) {
     return false;
   }
 
