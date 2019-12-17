@@ -12,44 +12,26 @@ let data = {
 
 // complete list of existing fields and tests
 const product = {
-  attributes: [
-    {
-      name: 'name',
-      params: {
-        type: 'string',
-      },
+  attributes: {
+    name: {
+      type: 'string',
     },
-    {
-      name: 'description',
-      params: {
-        type: 'text',
-      },
+    description: {
+      type: 'text',
     },
-    {
-      name: 'price',
-      params: {
-        type: 'float',
-      },
+    price: {
+      type: 'float',
     },
-    {
-      name: 'decimal_field',
-      params: {
-        type: 'decimal',
-      },
+    decimal_field: {
+      type: 'decimal',
     },
-    {
-      name: 'rank',
-      params: {
-        type: 'integer',
-      },
+    rank: {
+      type: 'integer',
     },
-    {
-      name: 'big_rank',
-      params: {
-        type: 'biginteger',
-      },
+    big_rank: {
+      type: 'biginteger',
     },
-  ],
+  },
   connection: 'default',
   name: 'product',
   description: '',
@@ -126,13 +108,13 @@ describe('Filtering API', () => {
     rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
-    await modelsUtils.createModels([product]);
+    await modelsUtils.createContentTypes([product]);
     await createFixtures();
   }, 60000);
 
   afterAll(async () => {
     await deleteFixtures();
-    await modelsUtils.deleteModels(['product']);
+    await modelsUtils.deleteContentTypes(['product']);
   }, 60000);
 
   describe('Basic filters', () => {

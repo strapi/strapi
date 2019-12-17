@@ -3,6 +3,14 @@
 const _ = require('lodash');
 const { isSortable } = require('./attributes');
 
+/** General settings */
+const DEFAULT_SETTINGS = {
+  bulkable: true,
+  filterable: true,
+  searchable: true,
+  pageSize: 10,
+};
+
 const getDefaultMainField = schema =>
   Object.keys(schema.attributes).find(
     key => schema.attributes[key].type === 'string'
@@ -12,14 +20,10 @@ const getDefaultMainField = schema =>
  * Retunrs a configuration default settings
  */
 async function createDefaultSettings(schema) {
-  const generalSettings = await strapi.plugins[
-    'content-manager'
-  ].services.generalsettings.getGeneralSettings();
-
   let defaultField = getDefaultMainField(schema);
 
   return {
-    ...generalSettings,
+    ...DEFAULT_SETTINGS,
     mainField: defaultField,
     defaultSortBy: defaultField,
     defaultSortOrder: 'ASC',

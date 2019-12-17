@@ -12,21 +12,36 @@ module.exports = async (entry, files, { model, source }) => {
   const findModelFromUploadPath = path => {
     if (path.length === 0) return { model, source };
 
-    // exclude array indexes from path
-    const parts = path.filter(p => !_.isFinite(_.toNumber(p)));
-
+    let currentPath = [];
     let tmpModel = entity;
     let modelName = model;
     let sourceName;
-    for (let part of parts) {
+
+    for (let i = 0; i < path.length; i++) {
       if (!tmpModel) return {};
+      const part = path[i];
       const attr = tmpModel.attributes[part];
+
+      currentPath.push(part);
+
+      // ignore array indexes => handled in the dynamic zone section
+      if (_.isFinite(_.toNumber(path[i]))) {
+        continue;
+      }
 
       if (!attr) return {};
 
-      if (attr.type === 'group') {
-        modelName = attr.group;
-        tmpModel = strapi.groups[attr.group];
+      if (attr.type === 'component') {
+        modelName = attr.component;
+        tmpModel = strapi.components[attr.component];
+      } else if (attr.type === 'dynamiczone') {
+        const entryIdx = path[i + 1]; // get component index
+        const value = _.get(entry, [...currentPath, entryIdx]);
+
+        if (!value) return {};
+
+        modelName = value.__component; // get component type
+        tmpModel = strapi.components[modelName];
       } else if (_.has(attr, 'model') || _.has(attr, 'collection')) {
         sourceName = attr.plugin;
         modelName = attr.model || attr.collection;
@@ -47,8 +62,9 @@ module.exports = async (entry, files, { model, source }) => {
 
     if (model) {
       const id = _.get(entry, path.concat('id'));
+
       return uploadService.uploadToEntity(
-        { id, model: model },
+        { id, model },
         { [field]: files },
         source
       );

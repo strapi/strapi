@@ -13,7 +13,6 @@ import InputAddonWithErrors from '../InputAddonWithErrors';
 import InputCheckboxWithErrors from '../InputCheckboxWithErrors';
 import InputDateWithErrors from '../InputDateWithErrors';
 import InputEmailWithErrors from '../InputEmailWithErrors';
-import InputFileWithErrors from '../InputFileWithErrors';
 import InputNumberWithErrors from '../InputNumberWithErrors';
 import InputSearchWithErrors from '../InputSearchWithErrors';
 import InputSelectWithErrors from '../InputSelectWithErrors';
@@ -33,7 +32,6 @@ const inputs = {
   checkbox: InputCheckboxWithErrors,
   date: InputDateWithErrors,
   email: InputEmailWithErrors,
-  file: InputFileWithErrors,
   number: InputNumberWithErrors,
   password: InputPasswordWithErrors,
   search: InputSearchWithErrors,
@@ -54,9 +52,6 @@ function InputsIndex(props) {
       break;
     case 'number':
       inputValue = props.value === 0 ? props.value : props.value || '';
-      break;
-    case 'file':
-      inputValue = props.value || [];
       break;
     case 'json':
       inputValue = props.value || null;

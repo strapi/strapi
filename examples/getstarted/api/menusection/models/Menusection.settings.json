@@ -20,8 +20,8 @@
       "minLength": 6
     },
     "dishes": {
-      "group": "dish",
-      "type": "group",
+      "component": "default.dish",
+      "type": "component",
       "repeatable": true
     },
     "menu": {

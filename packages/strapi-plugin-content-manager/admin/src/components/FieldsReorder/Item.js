@@ -4,13 +4,14 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 
-import { useLayoutDnd } from '../../contexts/LayoutDnd';
-import FieldItem from '../FieldItem';
+import useLayoutDnd from '../../hooks/useLayoutDnd';
+import DraggedFieldWithPreview from '../DraggedFieldWithPreview';
 
 import ItemTypes from '../../utils/ItemTypes';
 
 const Item = ({
-  groupUid,
+  componentUid,
+  dynamicZoneComponents,
   itemIndex,
   moveItem,
   moveRow,
@@ -22,17 +23,20 @@ const Item = ({
 }) => {
   const {
     goTo,
+    componentLayouts,
     metadatas,
-    selectedItemName,
     setEditFieldToSelect,
+    selectedItemName,
+    setIsDraggingSibling,
   } = useLayoutDnd();
-  const ref = useRef(null);
+  const dragRef = useRef(null);
+  const dropRef = useRef(null);
   const [{ clientOffset, isOver }, drop] = useDrop({
     // Source code from http://react-dnd.github.io/react-dnd/examples/sortable/simple
     // And also from https://codesandbox.io/s/6v7l7z68jk
     accept: ItemTypes.EDIT_FIELD,
     hover(item, monitor) {
-      if (!ref.current) {
+      if (!dropRef.current) {
         return;
       }
 
@@ -52,7 +56,7 @@ const Item = ({
       }
 
       // Determine rectangle on screen
-      const hoverBoundingRect = ref.current.getBoundingClientRect();
+      const hoverBoundingRect = dropRef.current.getBoundingClientRect();
 
       // Get vertical middle
       const hoverMiddleY =
@@ -85,7 +89,7 @@ const Item = ({
       return;
     },
     drop(item, monitor) {
-      if (!ref.current) {
+      if (!dropRef.current) {
         return;
       }
 
@@ -105,7 +109,7 @@ const Item = ({
       }
 
       // Determine rectangle on screen
-      const hoverBoundingRect = ref.current.getBoundingClientRect();
+      const hoverBoundingRect = dropRef.current.getBoundingClientRect();
 
       // Scroll window if mouse near vertical edge(100px)
 
@@ -144,6 +148,9 @@ const Item = ({
     }),
   });
   const [{ isDragging, getItem }, drag, preview] = useDrag({
+    begin: () => {
+      setIsDraggingSibling(true);
+    },
     canDrag() {
       // Each row of the layout has a max size of 12 (based on bootstrap grid system)
       // So in order to offer a better drop zone we add the _TEMP_ div to complete the remaining substract (12 - existing)
@@ -152,13 +159,13 @@ const Item = ({
       // We will need to add a 12 size _TEMP_ div to offer a drop target between each existing row.
       return name !== '_TEMP_';
     },
-    begin() {
-      setEditFieldToSelect(name, type);
-    },
     collect: monitor => ({
       isDragging: monitor.isDragging(),
       getItem: monitor.getItem(),
     }),
+    end: () => {
+      setIsDraggingSibling(false);
+    },
     item: { type: ItemTypes.EDIT_FIELD, itemIndex, rowIndex, name, size },
   });
 
@@ -168,14 +175,19 @@ const Item = ({
     preview(getEmptyImage(), { captureDraggingState: true });
   }, [preview]);
 
-  // Create the ref
-  drag(drop(ref));
+  // Create the refs
+  // We need 1 for the drop target
+  // 1 for the drag target
+  const refs = {
+    dragRef: drag(dragRef),
+    dropRef: drop(dropRef),
+  };
 
   let showLeftCarret = false;
   let showRightCarret = false;
 
-  if (ref.current && clientOffset) {
-    const hoverBoundingRect = ref.current.getBoundingClientRect();
+  if (dropRef.current && clientOffset) {
+    const hoverBoundingRect = dropRef.current.getBoundingClientRect();
 
     showLeftCarret =
       isOver &&
@@ -195,31 +207,38 @@ const Item = ({
   }
 
   return (
-    <FieldItem
-      groupUid={groupUid}
+    <DraggedFieldWithPreview
+      goTo={goTo}
+      componentUid={componentUid}
+      componentLayouts={componentLayouts}
+      dynamicZoneComponents={dynamicZoneComponents}
       isDragging={isDragging}
-      isSelected={name === selectedItemName}
       label={get(metadatas, [name, 'edit', 'label'], '')}
       name={name}
-      onClickEdit={() => setEditFieldToSelect(name, type)}
-      onClickRemove={() => removeField(rowIndex, itemIndex)}
-      push={goTo}
+      onClickEdit={setEditFieldToSelect}
+      onClickRemove={e => {
+        e.stopPropagation();
+        removeField(rowIndex, itemIndex);
+      }}
+      selectedItem={selectedItemName}
       showLeftCarret={showLeftCarret}
       showRightCarret={showRightCarret}
       size={size}
       type={type}
-      ref={ref}
+      ref={refs}
     />
   );
 };
 
 Item.defaultProps = {
-  groupUid: '',
+  componentUid: '',
+  dynamicZoneComponents: [],
   type: 'string',
 };
 
 Item.propTypes = {
-  groupUid: PropTypes.string,
+  componentUid: PropTypes.string,
+  dynamicZoneComponents: PropTypes.array,
   itemIndex: PropTypes.number.isRequired,
   moveItem: PropTypes.func.isRequired,
   moveRow: PropTypes.func.isRequired,

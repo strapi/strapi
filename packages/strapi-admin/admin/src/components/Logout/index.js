@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { withRouter } from 'react-router-dom';
 import { get } from 'lodash';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   ButtonDropdown,
   DropdownItem,
@@ -32,8 +33,7 @@ const Logout = ({ history: { push } }) => {
   };
   const handleGoToAdministrator = () => {
     push({
-      pathname: '/plugins/content-manager/administrator',
-      search: '?source=admin',
+      pathname: '/plugins/content-manager/strapi::administrator',
     });
   };
   const handleLogout = () => {
@@ -46,7 +46,7 @@ const Logout = ({ history: { push } }) => {
       <ButtonDropdown isOpen={isOpen} toggle={toggle}>
         <DropdownToggle>
           {get(auth.getUserInfo(), 'username')}
-          <i className="fa fa-caret-down" alt={`${isOpen}`} />
+          <FontAwesomeIcon icon="caret-down" />
         </DropdownToggle>
         <DropdownMenu className="dropDownContent">
           <DropdownItem onClick={handleGoTo} className="item">
@@ -57,7 +57,7 @@ const Logout = ({ history: { push } }) => {
           </DropdownItem>
           <DropdownItem onClick={handleLogout}>
             <FormattedMessage id="app.components.Logout.logout" />
-            <i className="fa fa-sign-out" />
+            <FontAwesomeIcon icon="sign-out-alt" />
           </DropdownItem>
         </DropdownMenu>
       </ButtonDropdown>
