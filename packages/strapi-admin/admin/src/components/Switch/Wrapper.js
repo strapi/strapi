@@ -39,6 +39,9 @@ const Wrapper = styled.div`
     .button-rect {
       background-color: #faa684;
     }
+    .button-circle {
+      left: 0;
+    }
   }
   .button,
   p {
