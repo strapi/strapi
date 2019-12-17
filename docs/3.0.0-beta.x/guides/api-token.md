@@ -2,14 +2,14 @@
 
 In this guide we will see how you can create an API token system to execute request as an authenticated user.
 
-This feature is in our [backlog there](https://portal.productboard.com/strapi/1-public-roadmap/c/40-api-access-token-with-permissions).
-So this guide is about customization, to help you to have this feature. It will be no longer useful when we will release the feature.
+This feature is in our [roadmap](https://portal.productboard.com/strapi/1-public-roadmap/c/40-api-access-token-with-permissions).
+This guide is a workaround to achieve this feature before we support it natively in strapi.
 
 ## Introduction
 
-The objective is to be able to request your API endpoints by using a query parameters `token` and be authenticated as a user. eg. `/restaurants?token=my-secret-token`.
+The goal is to be able to request API endpoints with a query parameter `token` that authenticates as a user. `eg. /restaurants?token=my-secret-token`.
 
-To achive this feature development, we will have to customize the `users-permissions` plugin. To do so we will use the [customization concept](../concepts/customization.md), this documentation will help you to understand how to customize all your application.
+To achieve this feature development, we will have to customize the `users-permissions` plugin. To do so we will use the [customization concept](../concepts/customization.md), this documentation will help you understand how to customize all your applications
 
 ## Create the Token Content Type
 
@@ -22,15 +22,15 @@ Then add some users and create some token linked to these users.
 
 ## Setup the file to override
 
-We now have to customize the function that verify the `JWT`. Strapi has an Authentification process that use JWT, we will use this function to add our new way to be authenticated.
+We now have to customize the function that verifies the `token` token. Strapi has an Authentication process that uses `JWT` tokens, we will reuse this function to customize the verification.
 
 [Here is the function](https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-users-permissions/config/policies/permissions.js) that manage the JWT validation.
 
-To be able to customize it, you will have to create an new file in your application `./extensions/users-permissions/config/policies/permissions.js`.
+To be able to customize it, you will have to create a new file in your application `./extensions/users-permissions/config/policies/permissions.js`.
 
 Then copy the original function that is on GitHub and paste it in your new file.
 
-When it's done, the Strapi application will use this function instead of the core one. We are readdy to customize it.
+When it's done, the Strapi application will use this function instead of the core one. We are ready to customize it.
 
 ## Add token validation logic
 
