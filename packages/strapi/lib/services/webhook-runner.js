@@ -6,8 +6,9 @@
 const fetch = require('node-fetch');
 
 class WebhookRunner {
-  constructor({ eventHub }) {
+  constructor({ eventHub, logger }) {
     this.eventHub = eventHub;
+    this.logger = logger;
   }
 
   run(webhook, event, info = {}) {
@@ -25,20 +26,23 @@ class WebhookRunner {
         'X-Strapi-Event': event,
         'Content-Type': 'application/json',
       },
+      timeout: 10000,
     })
       .then(res => {
-        console.log(res.status);
+        this.logger.info(res.status);
       })
       .catch(err => {
-        console.log('Error', err);
+        this.logger.error('Error', err);
       });
   }
 
-  register(webhook) {
-    const { events } = webhook;
+  register(webhooks) {
+    webhooks.forEach(webhook => {
+      const { events } = webhook;
 
-    events.forEach(event => {
-      this.eventHub.on(event, this.run.bind(this, webhook, event));
+      events.forEach(event => {
+        this.eventHub.on(event, info => this.run(webhook, event, info));
+      });
     });
   }
 }

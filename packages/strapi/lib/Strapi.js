@@ -90,7 +90,10 @@ class Strapi extends EventEmitter {
     // internal services.
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
-    this.webhookRunner = createWebhookRunner({ eventHub: this.eventHub });
+    this.webhookRunner = createWebhookRunner({
+      eventHub: this.eventHub,
+      logger: this.log,
+    });
 
     this.initConfig(opts);
     this.requireProjectBootstrap();
@@ -377,9 +380,16 @@ class Strapi extends EventEmitter {
 
     this.webhookStore = createWebhookStore({ db: this.db });
 
+    await this.startWebhooks();
+
     // Initialize hooks and middlewares.
     await initializeMiddlewares.call(this);
     await initializeHooks.call(this);
+  }
+
+  async startWebhooks() {
+    const webhooks = await this.webhookStore.findWebhooks();
+    this.webhookRunner.register(webhooks);
   }
 
   reload() {

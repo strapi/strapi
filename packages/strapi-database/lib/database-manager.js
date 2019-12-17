@@ -8,6 +8,7 @@ const { createQuery } = require('./queries');
 class DatabaseManager {
   constructor(strapi) {
     this.strapi = strapi;
+    this.eventHub = strapi.eventHub;
 
     this.initialized = false;
 
@@ -87,7 +88,12 @@ class DatabaseManager {
       .get(model.orm)
       .queries({ model, modelKey: normalizedName, strapi });
 
-    const query = createQuery({ connectorQuery, model });
+    const query = createQuery({
+      connectorQuery,
+      model,
+      eventHub: this.eventHub,
+    });
+
     this.queries.set(model.uid, query);
     return query;
   }
