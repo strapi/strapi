@@ -22,7 +22,6 @@ const {
   loadHooks,
   bootstrap,
   loadExtensions,
-  initCoreStore,
   loadComponents,
 } = require('./core');
 const initializeMiddlewares = require('./middlewares');
@@ -31,6 +30,9 @@ const createStrapiFs = require('./core/fs');
 const getPrefixedDeps = require('./utils/get-prefixed-dependencies');
 
 const createEventHub = require('./services/event-hub');
+const createWebhookRunner = require('./services/webhook-runner');
+const createWebhookStore = require('./services/webhook-store');
+const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const { createDatabaseManager } = require('strapi-database');
 
 const CONFIG_PATHS = {
@@ -88,6 +90,7 @@ class Strapi extends EventEmitter {
     // internal services.
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
+    this.webhookRunner = createWebhookRunner({ eventHub: this.eventHub });
 
     this.initConfig(opts);
     this.requireProjectBootstrap();
@@ -362,10 +365,17 @@ class Strapi extends EventEmitter {
     await utils.usage(this.config);
 
     // Init core store
-    initCoreStore(this);
+    this.models['core_store'] = coreStoreModel;
 
     this.db = createDatabaseManager(this);
     await this.db.initialize();
+
+    this.store = createCoreStore({
+      environment: this.config.environment,
+      db: this.db,
+    });
+
+    this.webhookStore = createWebhookStore({ db: this.db });
 
     // Initialize hooks and middlewares.
     await initializeMiddlewares.call(this);

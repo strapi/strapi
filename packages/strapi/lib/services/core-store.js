@@ -1,10 +1,5 @@
 'use strict';
 
-module.exports = strapi => {
-  strapi.models['core_store'] = coreStoreModel;
-  strapi.store = createStore(strapi);
-};
-
 const coreStoreModel = {
   connection: 'default',
   info: {
@@ -32,18 +27,16 @@ const coreStoreModel = {
   collectionName: 'core_store',
 };
 
-const createStore = strapi => {
+const createCoreStore = ({ environment: defaultEnv, db }) => {
   return (source = {}) => {
-    const get = async (params = {}) => {
-      Object.assign(source, params);
-
+    async function get(params = {}) {
       const {
         key,
-        environment = strapi.config.environment,
+        environment = defaultEnv,
         type = 'core',
         name = '',
         tag = '',
-      } = source;
+      } = Object.assign({}, source, params);
 
       const prefix = `${type}${name ? `_${name}` : ''}`;
 
@@ -53,15 +46,7 @@ const createStore = strapi => {
         tag,
       };
 
-      let data;
-      if (strapi.models['core_store'].orm === 'mongoose') {
-        data = await strapi.models['core_store'].findOne(where);
-      } else {
-        data = await strapi.models['core_store']
-          .forge(where)
-          .fetch()
-          .then(config => config && config.toJSON());
-      }
+      const data = await db.query('core_store').findOne(where);
 
       if (!data) {
         return null;
@@ -82,19 +67,17 @@ const createStore = strapi => {
       } else {
         return null;
       }
-    };
+    }
 
-    const set = async (params = {}) => {
-      Object.assign(source, params);
-
+    async function set(params = {}) {
       const {
         key,
         value,
-        environment = strapi.config.environment,
+        environment = defaultEnv,
         type,
         name,
         tag = '',
-      } = source;
+      } = Object.assign({}, source, params);
 
       const prefix = `${type}${name ? `_${name}` : ''}`;
 
@@ -104,15 +87,7 @@ const createStore = strapi => {
         tag,
       };
 
-      let data;
-      if (strapi.models['core_store'].orm === 'mongoose') {
-        data = await strapi.models['core_store'].findOne(where);
-      } else {
-        data = await strapi.models['core_store']
-          .forge(where)
-          .fetch()
-          .then(config => config && config.toJSON());
-      }
+      const data = await db.query('core_store').findOne(where);
 
       if (data) {
         Object.assign(data, {
@@ -120,33 +95,26 @@ const createStore = strapi => {
           type: (typeof value).toString(),
         });
 
-        if (strapi.models['core_store'].orm === 'mongoose') {
-          await strapi.models['core_store'].updateOne({ _id: data._id }, data, {
-            strict: false,
-          });
-        } else {
-          await strapi.models['core_store']
-            .forge({ id: data.id })
-            .save(data, { patch: true });
-        }
+        await db.query('core_store').update({ id: data.id }, data);
       } else {
-        Object.assign(where, {
+        const data = Object.assign({}, where, {
           value: JSON.stringify(value) || value.toString(),
           type: (typeof value).toString(),
           tag,
         });
 
-        if (strapi.models['core_store'].orm === 'mongoose') {
-          await strapi.models['core_store'].create(where);
-        } else {
-          await strapi.models['core_store'].forge().save(where);
-        }
+        await db.query('core_store').create(data);
       }
-    };
+    }
 
     return {
       get,
       set,
     };
   };
+};
+
+module.exports = {
+  coreStoreModel,
+  createCoreStore,
 };
