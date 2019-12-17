@@ -23,7 +23,8 @@ const ButtonWrapper = styled.div`
       font-size: 1.3rem;
       margin-right: 13px;
     }
-    > i {
+    > i,
+    > svg {
       margin-right: 1.3rem;
       font-weight: 600;
       padding-top: 1px;

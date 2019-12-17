@@ -1,86 +1,89 @@
 const waitRestart = require('./waitRestart');
 
 module.exports = ({ rq }) => {
-  async function createGroup(data) {
+  async function createComponent(data) {
     await rq({
-      url: '/content-type-builder/groups',
+      url: '/content-type-builder/components',
       method: 'POST',
       body: {
-        connection: 'default',
-        ...data,
+        component: {
+          category: 'default',
+          icon: 'default',
+          connection: 'default',
+          ...data,
+        },
       },
     });
 
     await waitRestart();
   }
 
-  async function deleteGroup(name) {
+  async function deleteComponent(name) {
     await rq({
-      url: `/content-type-builder/groups/${name}`,
+      url: `/content-type-builder/components/${name}`,
       method: 'DELETE',
     });
 
     await waitRestart();
   }
 
-  function createModelWithType(name, type, opts = {}) {
-    return createModel({
+  function createContentTypeWithType(name, type, opts = {}) {
+    return createContentType({
       connection: 'default',
       name,
-      attributes: [
-        {
-          name: 'field',
-          params: {
-            type,
-            ...opts,
-          },
+      attributes: {
+        field: {
+          type,
+          ...opts,
         },
-      ],
+      },
     });
   }
 
-  async function createModel(data) {
+  async function createContentType(data) {
     await rq({
-      url: '/content-type-builder/models',
+      url: '/content-type-builder/content-types',
       method: 'POST',
       body: {
-        connection: 'default',
-        ...data,
+        contentType: {
+          connection: 'default',
+          ...data,
+        },
       },
     });
 
     await waitRestart();
   }
 
-  async function createModels(models) {
+  async function createContentTypes(models) {
     for (let model of models) {
-      await createModel(model);
+      await createContentType(model);
     }
   }
 
-  async function deleteModel(model) {
+  async function deleteContentType(model) {
     await rq({
-      url: `/content-type-builder/models/${model}`,
+      url: `/content-type-builder/content-types/application::${model}.${model}`,
       method: 'DELETE',
     });
 
     await waitRestart();
   }
 
-  async function deleteModels(models) {
+  async function deleteContentTypes(models) {
     for (let model of models) {
-      await deleteModel(model);
+      await deleteContentType(model);
     }
   }
 
   return {
-    createGroup,
-    deleteGroup,
+    createComponent,
+    deleteComponent,
 
-    createModels,
-    createModel,
-    createModelWithType,
-    deleteModel,
-    deleteModels,
+    createContentType,
+    createContentTypes,
+    createContentTypeWithType,
+    deleteContentType,
+    deleteContentTypes,
   };
 };

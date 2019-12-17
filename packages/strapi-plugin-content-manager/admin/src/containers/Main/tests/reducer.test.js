@@ -12,38 +12,46 @@ describe('Content Manager | Main | reducer', () => {
 
   beforeEach(() => {
     state = {
-      groupsAndModelsMainPossibleMainFields: {},
-      groups: [],
+      componentsAndModelsMainPossibleMainFields: {},
+      components: [],
       initialLayouts: {
         test: {
-          layouts: {
-            edit: [],
-            editRelations: [],
-            list: ['test'],
+          contentType: {
+            layouts: {
+              edit: [],
+              editRelations: [],
+              list: ['test'],
+            },
           },
         },
         otherTest: {
-          layouts: {
-            edit: [],
-            editRelations: [],
-            list: ['otherTest'],
+          contentType: {
+            layouts: {
+              edit: [],
+              editRelations: [],
+              list: ['otherTest'],
+            },
           },
         },
       },
       isLoading: true,
       layouts: {
         test: {
-          layouts: {
-            edit: [],
-            editRelations: [],
-            list: ['test'],
+          contentType: {
+            layouts: {
+              edit: [],
+              editRelations: [],
+              list: ['test'],
+            },
           },
         },
         otherTest: {
-          layouts: {
-            edit: [],
-            editRelations: [],
-            list: ['otherTest'],
+          contentType: {
+            layouts: {
+              edit: [],
+              editRelations: [],
+              list: ['otherTest'],
+            },
           },
         },
       },
@@ -55,7 +63,11 @@ describe('Content Manager | Main | reducer', () => {
     const expected = {
       ...state,
       layouts: {
-        test: { layouts: { edit: [], editRelations: [], list: ['test'] } },
+        test: {
+          contentType: {
+            layouts: { edit: [], editRelations: [], list: ['test'] },
+          },
+        },
       },
     };
 
@@ -72,17 +84,23 @@ describe('Content Manager | Main | reducer', () => {
   });
 
   it('should handle the resetListLabels action correctly', () => {
-    state.layouts.test.layouts.list.push('label');
+    state.layouts.test.contentType.layouts.list.push('label');
 
     const expected = {
       ...state,
       layouts: {
-        test: { layouts: { edit: [], editRelations: [], list: ['test'] } },
+        test: {
+          contentType: {
+            layouts: { edit: [], editRelations: [], list: ['test'] },
+          },
+        },
         otherTest: {
-          layouts: {
-            edit: [],
-            editRelations: [],
-            list: ['otherTest'],
+          contentType: {
+            layouts: {
+              edit: [],
+              editRelations: [],
+              list: ['otherTest'],
+            },
           },
         },
       },
@@ -99,34 +117,12 @@ describe('Content Manager | Main | reducer', () => {
       layouts: {
         ...state.layouts,
         otherTest: {
-          layouts: {
-            edit: [],
-            editRelations: [],
-            list: ['otherTest', 'foo'],
-          },
-        },
-      },
-    };
-
-    expect(
-      mainReducer(
-        fromJS(state),
-        onChangeListLabels({ target: { name: 'otherTest.foo', value: true } })
-      ).toJS()
-    ).toEqual(expected);
-  });
-
-  it('should handle the onChangeListLabels action correctly when removing a label', () => {
-    state.layouts.otherTest.layouts.list = ['otherTest', 'foo'];
-    const expected = {
-      ...state,
-      layouts: {
-        ...state.layouts,
-        otherTest: {
-          layouts: {
-            edit: [],
-            editRelations: [],
-            list: ['foo'],
+          contentType: {
+            layouts: {
+              edit: [],
+              editRelations: [],
+              list: ['otherTest', 'foo'],
+            },
           },
         },
       },
@@ -136,7 +132,39 @@ describe('Content Manager | Main | reducer', () => {
       mainReducer(
         fromJS(state),
         onChangeListLabels({
-          target: { name: 'otherTest.otherTest', value: false },
+          target: { name: 'foo', slug: 'otherTest', value: true },
+        })
+      ).toJS()
+    ).toEqual(expected);
+  });
+
+  it('should handle the onChangeListLabels action correctly when removing a label', () => {
+    state.layouts.otherTest.contentType.layouts.list = ['otherTest', 'foo'];
+    const expected = {
+      ...state,
+      layouts: {
+        ...state.layouts,
+        otherTest: {
+          contentType: {
+            layouts: {
+              edit: [],
+              editRelations: [],
+              list: ['foo'],
+            },
+          },
+        },
+      },
+    };
+
+    expect(
+      mainReducer(
+        fromJS(state),
+        onChangeListLabels({
+          target: {
+            name: 'otherTest',
+            slug: 'otherTest',
+            value: false,
+          },
         })
       ).toJS()
     ).toEqual(expected);

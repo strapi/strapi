@@ -9,6 +9,7 @@ import { startsWith, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import en from '../../translations/en.json';
 import Li from './Li';
 
@@ -45,7 +46,8 @@ function LeftMenuLink(props) {
   );
 
   // Icon.
-  const icon = <i className={`linkIcon fa-${props.icon} fa`} />;
+
+  const icon = <FontAwesomeIcon className={`linkIcon`} icon={props.icon} />;
 
   // Create external or internal link.
   const link = props.destination.includes('http') ? (

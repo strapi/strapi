@@ -10,13 +10,13 @@ import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import { isEmpty } from 'lodash';
-
+import { Header } from '@buffetjs/custom';
 import {
   getQueryParameters,
   ContainerFluid,
   InputSearch,
   PageFooter,
-  PluginHeader,
+  GlobalContext,
 } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
@@ -41,6 +41,8 @@ import reducer from './reducer';
 import saga from './saga';
 
 export class HomePage extends React.Component {
+  static contextType = GlobalContext;
+
   UNSAFE_componentWillMount() {
     if (!isEmpty(this.props.location.search)) {
       const _page = parseInt(this.getURLParams('_page'), 10);
@@ -102,24 +104,33 @@ export class HomePage extends React.Component {
       name="search"
       onChange={this.props.onSearch}
       placeholder="upload.HomePage.InputSearch.placeholder"
-      style={{ marginTop: '-10px' }}
+      style={{ marginTop: '-11px' }}
       value={this.props.search}
     />
   );
 
   render() {
+    const { formatMessage } = this.context;
+
     return (
       <HomePageContextProvider deleteData={this.props.deleteData}>
-        <ContainerFluid>
+        <ContainerFluid className="container-fluid">
           <Wrapper>
-            <PluginHeader
+            <Header
+              actions={[
+                {
+                  Component: this.renderInputSearch,
+                  key: 'input-search',
+                },
+              ]}
               title={{
-                id: 'upload.HomePage.title',
+                label: formatMessage({
+                  id: 'upload.HomePage.title',
+                }),
               }}
-              description={{
+              content={formatMessage({
                 id: 'upload.HomePage.description',
-              }}
-              overrideRendering={this.renderInputSearch}
+              })}
             />
           </Wrapper>
           <PluginInputFile

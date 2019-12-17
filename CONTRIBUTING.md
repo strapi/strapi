@@ -90,12 +90,12 @@ The server (API) is available at http://localhost:1337
 
 The built administration panel is available at http://localhost:1337/admin
 
-**Start the administration panel server for development**	
+**Start the administration panel server for development**
 
-```bash	
-cd strapi/packages/strapi-admin	
-yarn develop	
-```	
+```bash
+cd strapi/packages/strapi-admin
+yarn develop
+```
 
 The administration panel will be available at http://localhost:4000/admin
 

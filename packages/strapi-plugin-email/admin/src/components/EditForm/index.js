@@ -40,6 +40,7 @@ class EditForm extends React.Component {
             inputDescription={{
               id: 'email.EditForm.Input.select.inputDescription',
             }}
+            className="input-wrapper"
             inputClassName="inputStyle"
             label={{ id: 'email.EditForm.Input.select.label' }}
             name="provider"

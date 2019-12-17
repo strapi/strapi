@@ -20,48 +20,48 @@ module.exports = scope => {
       routes: [
         {
           method: 'GET',
-          path: '/' + scope.idPluralized,
-          handler: scope.globalID + '.find',
+          path: '/' + scope.route,
+          handler: scope.name + '.find',
           config: {
             policies: [],
           },
         },
         {
           method: 'GET',
-          path: '/' + scope.idPluralized + '/count',
-          handler: scope.globalID + '.count',
+          path: '/' + scope.route + '/count',
+          handler: scope.name + '.count',
           config: {
             policies: [],
           },
         },
         {
           method: 'GET',
-          path: '/' + scope.idPluralized + '/:id',
-          handler: scope.globalID + '.findOne',
+          path: '/' + scope.route + '/:id',
+          handler: scope.name + '.findOne',
           config: {
             policies: [],
           },
         },
         {
           method: 'POST',
-          path: '/' + scope.idPluralized,
-          handler: scope.globalID + '.create',
+          path: '/' + scope.route,
+          handler: scope.name + '.create',
           config: {
             policies: [],
           },
         },
         {
           method: 'PUT',
-          path: '/' + scope.idPluralized + '/:id',
-          handler: scope.globalID + '.update',
+          path: '/' + scope.route + '/:id',
+          handler: scope.name + '.update',
           config: {
             policies: [],
           },
         },
         {
           method: 'DELETE',
-          path: '/' + scope.idPluralized + '/:id',
-          handler: scope.globalID + '.delete',
+          path: '/' + scope.route + '/:id',
+          handler: scope.name + '.delete',
           config: {
             policies: [],
           },

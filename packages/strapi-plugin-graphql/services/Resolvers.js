@@ -7,12 +7,15 @@
  */
 
 const _ = require('lodash');
-const pluralize = require('pluralize');
+
+const DynamicZoneScalar = require('../types/dynamiczoneScalar');
+
 const Aggregator = require('./Aggregator');
 const Query = require('./Query.js');
 const Mutation = require('./Mutation.js');
 const Types = require('./Types.js');
 const Schema = require('./Schema.js');
+const { toSingular, toPlural } = require('./naming');
 
 const convertAttributes = (attributes, globalId) => {
   return Object.keys(attributes)
@@ -41,6 +44,58 @@ const generateEnumDefinitions = (attributes, globalId) => {
     .join('');
 };
 
+const generateDynamicZoneDefinitions = (attributes, globalId, schema) => {
+  Object.keys(attributes)
+    .filter(attribute => attributes[attribute].type === 'dynamiczone')
+    .forEach(attribute => {
+      const { components } = attributes[attribute];
+
+      const typeName = `${globalId}${_.upperFirst(
+        _.camelCase(attribute)
+      )}DynamicZone`;
+
+      if (components.length === 0) {
+        // Create dummy type because graphql doesn't support empty ones
+
+        schema.definition += `type ${typeName} { _:Boolean}`;
+        schema.definition += `\nscalar EmptyQuery\n`;
+      } else {
+        const componentsTypeNames = components.map(componentUID => {
+          const compo = strapi.components[componentUID];
+          if (!compo) {
+            throw new Error(
+              `Trying to creating dynamiczone type with unkown component ${componentUID}`
+            );
+          }
+
+          return compo.globalId;
+        });
+
+        const unionType = `union ${typeName} = ${componentsTypeNames.join(
+          ' | '
+        )}`;
+
+        schema.definition += `\n${unionType}\n`;
+      }
+
+      const inputTypeName = `${typeName}Input`;
+      schema.definition += `\nscalar ${inputTypeName}\n`;
+
+      schema.resolvers[typeName] = {
+        __resolveType(obj) {
+          return strapi.components[obj.__component].globalId;
+        },
+      };
+
+      schema.resolvers[inputTypeName] = new DynamicZoneScalar({
+        name: inputTypeName,
+        attribute,
+        globalId,
+        components,
+      });
+    });
+};
+
 const mutateAssocAttributes = (associations = [], attributes) => {
   associations
     .filter(association => association.type === 'collection')
@@ -53,7 +108,7 @@ const mutateAssocAttributes = (associations = [], attributes) => {
     });
 };
 
-const buildAssocResolvers = (model, name, { plugin }) => {
+const buildAssocResolvers = model => {
   const contentManager =
     strapi.plugins['content-manager'].services['contentmanager'];
 
@@ -62,100 +117,44 @@ const buildAssocResolvers = (model, name, { plugin }) => {
   return associations
     .filter(association => model.attributes[association.alias].private !== true)
     .reduce((resolver, association) => {
+      const target = association.model || association.collection;
+      const targetModel = strapi.getModel(target, association.plugin);
+
       switch (association.nature) {
-        case 'oneToManyMorph': {
-          resolver[association.alias] = async obj => {
-            const entry = await contentManager.fetch(
-              {
-                id: obj[primaryKey],
-                model: name,
-              },
-              plugin,
-              [association.alias]
-            );
-
-            // Set the _type only when the value is defined
-            if (entry[association.alias]) {
-              entry[association.alias]._type = _.upperFirst(association.model);
-            }
-
-            return entry[association.alias];
-          };
-          break;
-        }
+        case 'oneToManyMorph':
         case 'manyMorphToOne':
         case 'manyMorphToMany':
         case 'manyToManyMorph': {
           resolver[association.alias] = async obj => {
-            // eslint-disable-line no-unused-vars
-            const [withRelated, withoutRelated] = await Promise.all([
-              contentManager.fetch(
-                {
-                  id: obj[primaryKey],
-                  model: name,
-                },
-                plugin,
-                [association.alias],
-                false
-              ),
-              contentManager.fetch(
-                {
-                  id: obj[primaryKey],
-                  model: name,
-                },
-                plugin,
-                []
-              ),
-            ]);
+            if (obj[association.alias]) {
+              return obj[association.alias];
+            }
 
-            const entry =
-              withRelated && withRelated.toJSON
-                ? withRelated.toJSON()
-                : withRelated;
-
-            entry[association.alias].map((entry, index) => {
-              const type =
-                _.get(withoutRelated, `${association.alias}.${index}.kind`) ||
-                _.upperFirst(
-                  _.camelCase(
-                    _.get(
-                      withoutRelated,
-                      `${association.alias}.${index}.${association.alias}_type`
-                    )
-                  )
-                ) ||
-                _.upperFirst(_.camelCase(association[association.type]));
-
-              entry._type = type;
-
-              return entry;
-            });
+            const entry = await contentManager.fetch(
+              {
+                id: obj[primaryKey],
+                model: model.uid,
+              },
+              [association.alias]
+            );
 
             return entry[association.alias];
           };
           break;
         }
-
         default: {
           resolver[association.alias] = async (obj, options) => {
             // Construct parameters object to retrieve the correct related entries.
             const params = {
-              model: association.model || association.collection,
+              model: targetModel.uid,
             };
 
-            let queryOpts = {
-              source: association.plugin,
-            };
-
-            // Get refering model.
-            const ref = association.plugin
-              ? strapi.plugins[association.plugin].models[params.model]
-              : strapi.models[params.model];
+            let queryOpts = {};
 
             if (association.type === 'model') {
-              params[ref.primaryKey] = _.get(
+              params[targetModel.primaryKey] = _.get(
                 obj,
-                [association.alias, ref.primaryKey],
+                [association.alias, targetModel.primaryKey],
                 obj[association.alias]
               );
             } else {
@@ -174,10 +173,10 @@ const buildAssocResolvers = (model, name, { plugin }) => {
               ) {
                 _.set(
                   queryOpts,
-                  ['query', ref.primaryKey],
+                  ['query', targetModel.primaryKey],
                   obj[association.alias]
                     ? obj[association.alias]
-                        .map(val => val[ref.primaryKey] || val)
+                        .map(val => val[targetModel.primaryKey] || val)
                         .sort()
                     : []
                 );
@@ -185,25 +184,21 @@ const buildAssocResolvers = (model, name, { plugin }) => {
                 _.set(
                   queryOpts,
                   ['query', association.via],
-                  obj[ref.primaryKey]
+                  obj[targetModel.primaryKey]
                 );
               }
             }
 
-            const loaderName = association.plugin
-              ? `${association.plugin}__${params.model}`
-              : params.model;
-
             return association.model
               ? strapi.plugins.graphql.services.loaders.loaders[
-                  loaderName
+                  targetModel.uid
                 ].load({
                   params,
                   options: queryOpts,
                   single: true,
                 })
               : strapi.plugins.graphql.services.loaders.loaders[
-                  loaderName
+                  targetModel.uid
                 ].load({
                   options: queryOpts,
                   association,
@@ -217,10 +212,14 @@ const buildAssocResolvers = (model, name, { plugin }) => {
     }, {});
 };
 
-const buildModel = (model, name, { plugin, isGroup = false } = {}) => {
+const buildModel = (model, { schema, isComponent = false } = {}) => {
   const { globalId, primaryKey } = model;
 
-  let definition = '';
+  schema.resolvers[globalId] = {
+    id: obj => obj[primaryKey],
+    ...buildAssocResolvers(model),
+  };
+
   const initialState = {
     id: 'ID!',
     [primaryKey]: 'ID!',
@@ -236,28 +235,17 @@ const buildModel = (model, name, { plugin, isGroup = false } = {}) => {
   mutateAssocAttributes(model.associations, attributes);
   _.merge(attributes, initialState);
 
-  definition += generateEnumDefinitions(model.attributes, globalId);
+  schema.definition += generateEnumDefinitions(model.attributes, globalId);
+  generateDynamicZoneDefinitions(model.attributes, globalId, schema);
 
   const description = Schema.getDescription({}, model);
   const fields = Schema.formatGQL(attributes, {}, model);
   const typeDef = `${description}type ${globalId} {${fields}}\n`;
 
-  definition += typeDef;
-  definition += Types.generateInputModel(model, globalId, {
-    allowIds: isGroup,
+  schema.definition += typeDef;
+  schema.definition += Types.generateInputModel(model, globalId, {
+    allowIds: isComponent,
   });
-
-  const resolver = {
-    [globalId]: {
-      id: obj => obj[primaryKey],
-      ...buildAssocResolvers(model, name, { plugin }),
-    },
-  };
-
-  return {
-    definition,
-    resolver,
-  };
 };
 
 /**
@@ -271,7 +259,7 @@ const buildShadowCRUD = (models, plugin) => {
     definition: '',
     query: {},
     mutation: {},
-    resolver: { Query: {}, Mutation: {} },
+    resolvers: { Query: {}, Mutation: {} },
   };
 
   if (_.isEmpty(models)) {
@@ -282,6 +270,7 @@ const buildShadowCRUD = (models, plugin) => {
     const model = models[name];
 
     const { globalId, primaryKey } = model;
+
     // Setup initial state with default attribute that should be displayed
     // but these attributes are not properly defined in the models.
     const initialState = {
@@ -293,7 +282,7 @@ const buildShadowCRUD = (models, plugin) => {
       initialState['id'] = 'ID!';
     }
 
-    acc.resolver[globalId] = {
+    acc.resolvers[globalId] = {
       // define the default id resolver
       id(parent) {
         return parent[model.primaryKey];
@@ -319,6 +308,7 @@ const buildShadowCRUD = (models, plugin) => {
     _.merge(attributes, initialState);
 
     acc.definition += generateEnumDefinitions(model.attributes, globalId);
+    generateDynamicZoneDefinitions(model.attributes, globalId, acc);
 
     const description = Schema.getDescription(type[globalId], model);
     const fields = Schema.formatGQL(attributes, type[globalId], model);
@@ -334,8 +324,8 @@ const buildShadowCRUD = (models, plugin) => {
       return acc;
     }
 
-    const singularName = pluralize.singular(name);
-    const pluralName = pluralize.plural(name);
+    const singularName = toSingular(name);
+    const pluralName = toPlural(name);
     // Build resolvers.
     const queries = {
       singular:
@@ -372,7 +362,7 @@ const buildShadowCRUD = (models, plugin) => {
         query: {
           [`${singularName}(id: ID!)`]: model.globalId,
         },
-        resolver: {
+        resolvers: {
           Query: {
             [singularName]: queries.singular,
           },
@@ -385,7 +375,7 @@ const buildShadowCRUD = (models, plugin) => {
         query: {
           [`${pluralName}(sort: String, limit: Int, start: Int, where: JSON)`]: `[${model.globalId}]`,
         },
-        resolver: {
+        resolvers: {
           Query: {
             [pluralName]: queries.plural,
           },
@@ -396,7 +386,7 @@ const buildShadowCRUD = (models, plugin) => {
     // TODO:
     // - Implement batch methods (need to update the content-manager as well).
     // - Implement nested transactional methods (create/update).
-    const capitalizedName = _.capitalize(name);
+    const capitalizedName = _.upperFirst(singularName);
     const mutations = {
       create:
         _.get(resolver, `Mutation.create${capitalizedName}`) !== false
@@ -467,7 +457,7 @@ const buildShadowCRUD = (models, plugin) => {
         // Assign mutation definition to global definition.
         _.merge(acc, {
           mutation: mutationDefinition,
-          resolver: {
+          resolvers: {
             Mutation: {
               [`${mutationName}`]: mutations[type],
             },
@@ -476,8 +466,7 @@ const buildShadowCRUD = (models, plugin) => {
       }
     });
 
-    // TODO:
-    // - Add support for Graphql Aggregation in Bookshelf ORM
+    // TODO: Add support for Graphql Aggregation in Bookshelf ORM
     if (model.orm === 'mongoose') {
       // Generation the aggregation for the given model
       const modelAggregator = Aggregator.formatModelConnectionsGQL(
@@ -489,19 +478,17 @@ const buildShadowCRUD = (models, plugin) => {
       );
       if (modelAggregator) {
         acc.definition += modelAggregator.type;
-        if (!acc.resolver[modelAggregator.globalId]) {
-          acc.resolver[modelAggregator.globalId] = {};
+        if (!acc.resolvers[modelAggregator.globalId]) {
+          acc.resolvers[modelAggregator.globalId] = {};
         }
 
-        _.merge(acc.resolver, modelAggregator.resolver);
+        _.merge(acc.resolvers, modelAggregator.resolver);
         _.merge(acc.query, modelAggregator.query);
       }
     }
 
     // Build associations queries.
-    _.merge(acc.resolver, {
-      [globalId]: buildAssocResolvers(model, name, { plugin }),
-    });
+    _.assign(acc.resolvers[globalId], buildAssocResolvers(model));
 
     return acc;
   }, initialState);

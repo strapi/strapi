@@ -25,6 +25,25 @@ By default, the administration panel is exposed via [http://localhost:1337/admin
 }
 ```
 
+## Change the host
+
+By default, the administration panel client host name is `localhost`. However, you can change this setting by updating the `admin` configuration:
+
+**Path —** `./config/environment/**/server.json`.
+
+```json
+{
+  "host": "localhost",
+  "port": 1337,
+  "cron": {
+    "enabled": false
+  },
+  "admin": {
+    "host": "my-host"
+  }
+}
+```
+
 The panel will be available through [http://localhost:1337/dashboard](http://localhost:1337/dashboard) with the configurations above.
 
 ## Development mode
@@ -168,6 +187,25 @@ Add the following configuration:
 
 ```js
 export const SHOW_TUTORIALS = false;
+```
+
+### Changing the port
+
+By default, the front-development server runs on the `8000` port. However, you can change this setting by updating the following configuration:
+
+**Path —** `./config/environment/**/server.json`.
+
+```json
+{
+  "host": "localhost",
+  "port": 1337,
+  "cron": {
+    "enabled": false
+  },
+  "admin": {
+    "port": 3000
+  }
+}
 ```
 
 ## Build

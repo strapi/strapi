@@ -1,6 +1,6 @@
 /**
  *
- * StyledViewContainer
+ * ViewContainer
  *
  */
 
@@ -8,9 +8,9 @@ import styled from 'styled-components';
 
 import sizes from '../../assets/styles/sizes';
 
-const StyledViewContainer = styled.div`
+const ViewContainer = styled.div`
   min-height: calc(100vh - ${sizes.header.height});
-  .components-container {
+  .content {
     padding: 1.8rem 1.5rem;
     > div:not(:first-of-type):not(:last-of-type) {
       > div:first-of-type {
@@ -44,4 +44,4 @@ const StyledViewContainer = styled.div`
   }
 `;
 
-export default StyledViewContainer;
+export default ViewContainer;

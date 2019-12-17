@@ -2,11 +2,48 @@
 
 const _ = require('lodash');
 
-const NON_SORTABLES = ['group', 'json', 'relation', 'media'];
-const NON_LISTABLES = ['group', 'json', 'relation', 'password'];
+const NON_SORTABLES = [
+  'component',
+  'json',
+  'relation',
+  'media',
+  'richtext',
+  'dynamiczone',
+];
+
+const NON_LISTABLES = [
+  'component',
+  'json',
+  'relation',
+  'password',
+  'richtext',
+  'dynamiczone',
+];
+
+// hidden fields are fields that are configured to be hidden from list, and edit views
+const isHidden = (schema, name) => {
+  if (!_.has(schema.attributes, name)) {
+    return false;
+  }
+
+  const isHidden = _.get(
+    schema,
+    ['config', 'attributes', name, 'hidden'],
+    false
+  );
+  if (isHidden === true) {
+    return true;
+  }
+
+  return false;
+};
 
 const isListable = (schema, name) => {
   if (!_.has(schema.attributes, name)) {
+    return false;
+  }
+
+  if (isHidden(schema, name)) {
     return false;
   }
 
@@ -23,7 +60,7 @@ const isSortable = (schema, name) => {
     return false;
   }
 
-  if (schema.modelType === 'group' && name === 'id') return false;
+  if (schema.modelType === 'component' && name === 'id') return false;
 
   const attribute = schema.attributes[name];
   if (NON_SORTABLES.includes(attribute.type)) {
@@ -39,6 +76,10 @@ const isSearchable = (schema, name) => {
 
 const isVisible = (schema, name) => {
   if (!_.has(schema.attributes, name)) {
+    return false;
+  }
+
+  if (isHidden(schema, name)) {
     return false;
   }
 
@@ -71,6 +112,10 @@ const hasRelationAttribute = (schema, name) => {
     return false;
   }
 
+  if (isHidden(schema, name)) {
+    return false;
+  }
+
   if (!isVisible(schema, name)) {
     return false;
   }
@@ -83,12 +128,16 @@ const hasEditableAttribute = (schema, name) => {
     return false;
   }
 
+  if (isHidden(schema, name)) {
+    return false;
+  }
+
   if (!isVisible(schema, name)) {
     return false;
   }
 
   if (isRelation(schema.attributes[name])) {
-    if (schema.modelType === 'group') return true;
+    if (schema.modelType === 'component') return true;
     return false;
   }
 
