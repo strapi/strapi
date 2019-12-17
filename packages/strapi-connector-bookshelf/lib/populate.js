@@ -46,7 +46,16 @@ const populateAssociations = (definition, { prefix = '' } = {}) => {
 const populateBareAssociations = (definition, { prefix = '' } = {}) => {
   return definition.associations
     .filter(ast => ast.autoPopulate !== false)
-    .map(assoc => `${prefix}${assoc.alias}`);
+    .map(assoc => {
+      if (isPolymorphic({ assoc })) {
+        return formatPolymorphicPopulate({
+          assoc,
+          prefix,
+        });
+      }
+
+      return `${prefix}${assoc.alias}`;
+    });
 };
 
 const formatAssociationPopulate = ({ assoc, prefix = '' }) => {
