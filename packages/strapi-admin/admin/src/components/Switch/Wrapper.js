@@ -17,7 +17,7 @@ const Wrapper = styled.div`
     .button-rect {
       width: 30px;
       height: 12px;
-      background-color: #6dbb1a;
+      background-color: #faa684;
       border-radius: 6px;
       margin-top: 2px;
     }
@@ -37,7 +37,7 @@ const Wrapper = styled.div`
   }
   input:checked + .button {
     .button-rect {
-      background-color: #faa684;
+      background-color: #6dbb1a;
     }
     .button-circle {
       left: 0;

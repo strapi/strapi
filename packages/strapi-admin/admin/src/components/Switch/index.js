@@ -28,7 +28,7 @@ function Switch({ name, value, onChange }) {
         <div className="button-circle"></div>
       </div>
       <p>
-        {!value
+        {value
           ? formatMessage({ id: 'Settings.webhooks.enabled' })
           : formatMessage({ id: 'Settings.webhooks.disabled' })}
       </p>

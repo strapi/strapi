@@ -132,7 +132,7 @@ function ListView() {
 
       dispatch({
         type: 'SET_WEBHOOK_ENABLED',
-        keys: [webhookIndex(), 'isEnabled'],
+        keys: [webhookIndex(id), 'isEnabled'],
         value: value,
       });
     } catch (err) {

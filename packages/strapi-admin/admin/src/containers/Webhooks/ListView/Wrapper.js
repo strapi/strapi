@@ -5,6 +5,7 @@
  */
 
 import styled from 'styled-components';
+import { sizes } from 'strapi-helper-plugin';
 
 const Wrapper = styled.div`
   > div:first-of-type {
@@ -31,11 +32,19 @@ const Wrapper = styled.div`
           padding-left: 30px;
           width: 65px;
         }
-        &:nth-of-type(3) {
+        &:nth-of-type(2) {
           max-width: 158px;
         }
         &:nth-of-type(3) {
-          max-width: 250px;
+          max-width: 300px;
+        }
+        &:nth-of-type(4) {
+          min-width: 125px;
+        }
+        @media (min-width: ${sizes.wide}) {
+          &:nth-of-type(3) {
+            max-width: 400px;
+          }
         }
       }
     }
