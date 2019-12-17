@@ -91,7 +91,7 @@ function ListView() {
   const title = `${rowsCount} ${titleLabel}`;
 
   const buttonProps = {
-    color: 'secondary',
+    color: 'delete',
     label: formatMessage({ id: `Settings.webhooks.list.button.delete` }),
     onClick: () => {},
     type: 'button',
@@ -103,6 +103,45 @@ function ListView() {
     items: webhooks,
   };
 
+  const handleEditClick = id => {
+    console.log(id);
+  };
+
+  const handleDeleteClick = id => {
+    console.log(id);
+  };
+
+  const webhookById = id => webhooks.find(webhook => webhook.id === id);
+  const webhookIndex = id => webhooks.findIndex(webhook => webhook.id === id);
+
+  const handleEnabledChange = async (value, id) => {
+    const initialWebhookProps = webhookById(id);
+    const body = {
+      ...initialWebhookProps,
+      isEnabled: value,
+    };
+
+    try {
+      await request(`/admin/webhooks/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body,
+      });
+
+      dispatch({
+        type: 'SET_WEBHOOK_ENABLED',
+        keys: [webhookIndex(), 'isEnabled'],
+        value: value,
+      });
+    } catch (err) {
+      if (err.code !== 20) {
+        strapi.notification.error('notification.error');
+      }
+    }
+  };
+
   return (
     <Wrapper>
       <Header {...headerProps} />
@@ -110,7 +149,14 @@ function ListView() {
         {rowsCount > 0 ? (
           <List
             {...listProps}
-            customRowComponent={props => <ListRow {...props} />}
+            customRowComponent={props => (
+              <ListRow
+                {...props}
+                onEditClick={handleEditClick}
+                onDeleteCLick={handleDeleteClick}
+                onEnabledChange={handleEnabledChange}
+              />
+            )}
           />
         ) : (
           <EmptyList />

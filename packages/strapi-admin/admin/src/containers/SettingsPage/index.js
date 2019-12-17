@@ -28,21 +28,19 @@ function SettingsPage() {
 
   return (
     <Wrapper>
-      <div className="container">
-        <div className="row">
-          <div className="col-md-3">
-            <LeftMenu>
-              {menuItems.map(item => {
-                return (
-                  <LeftMenuList {...item} key={JSON.stringify(item.title)} />
-                );
-              })}
-            </LeftMenu>
-          </div>
-          <div className="col-md-9">
-            {/* TODO when needed - Routing */}
-            <Webhooks />
-          </div>
+      <div className="row">
+        <div className="col-md-3">
+          <LeftMenu>
+            {menuItems.map(item => {
+              return (
+                <LeftMenuList {...item} key={JSON.stringify(item.title)} />
+              );
+            })}
+          </LeftMenu>
+        </div>
+        <div className="col-md-9">
+          {/* TODO when needed - Routing */}
+          <Webhooks />
         </div>
       </div>
     </Wrapper>

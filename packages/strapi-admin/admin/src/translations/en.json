@@ -225,6 +225,8 @@
   "Settings.webhooks.list.empty.title": "There are no webhooks yet",
   "Settings.webhooks.list.empty.description": "Add your first one to this list.",
   "Settings.webhooks.list.empty.link": "See our documentation",
+  "Settings.webhooks.enabled": "Enabled",
+  "Settings.webhooks.disabled": "Disabled",
   "app.containers.App.notification.error.init": "An error occured while requesting the API",
   "components.Input.error.password.noMatch": "Passwords do not match",
   "form.button.done": "Done",
