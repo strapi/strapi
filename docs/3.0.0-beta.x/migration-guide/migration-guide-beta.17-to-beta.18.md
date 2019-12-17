@@ -444,6 +444,12 @@ db.getCollection('contentTypeCollection').update(
 );
 ```
 
+## Adding new root page files
+
+We created new home pages when your go to your api url.
+You will need to copy `index.html` and `production.html` into your `public` folder.
+You can find those two files [here](https://github.com/strapi/strapi/tree/master/packages/strapi-generate-new/lib/resources/files/public).
+
 ## Rebuilding your administration panel
 
 Now delete the `.cache` and `build` folders. Then run `yarn develop`.
