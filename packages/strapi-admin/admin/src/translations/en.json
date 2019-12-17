@@ -220,5 +220,6 @@
   "components.Input.error.password.noMatch": "Passwords do not match",
   "form.button.done": "Done",
   "form.button.finish": "Finish",
-  "notification.form.error.fields": "The form contains some errors"
+  "notification.form.error.fields": "The form contains some errors",
+  "global.prompt.unsaved": "Are you sure you want to leave this page? All your modifications will be lost"
 }

@@ -10,25 +10,16 @@ import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import { clone, get, includes, isEqual, isEmpty } from 'lodash';
-
-import { GlobalContext, HeaderNav, PluginHeader } from 'strapi-helper-plugin';
-
+import { Header } from '@buffetjs/custom';
+import { GlobalContext, HeaderNav } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
-
+import getTrad from '../../utils/getTrad';
 import { HomePageContextProvider } from '../../contexts/HomePage';
-
-// Design
 import EditForm from '../../components/EditForm';
 import List from '../../components/List';
 import PopUpForm from '../../components/PopUpForm';
-
-// Selectors
 import selectHomePage from './selectors';
-
-// Styles
 import Wrapper from './Wrapper';
-
-// Actions
 import {
   cancelChanges,
   deleteData,
@@ -40,12 +31,9 @@ import {
   submit,
   unsetDataToEdit,
 } from './actions';
-
 import reducer from './reducer';
 import saga from './saga';
-
 import checkFormValidity from './checkFormValidity';
-
 const keyBoardShortCuts = [18, 78];
 
 export class HomePage extends React.Component {
@@ -152,20 +140,20 @@ export class HomePage extends React.Component {
 
   headerNavLinks = [
     {
-      name: 'users-permissions.HeaderNav.link.roles',
-      to: '/plugins/users-permissions/roles',
+      name: getTrad('HeaderNav.link.roles'),
+      to: `/plugins/${pluginId}/roles`,
     },
     {
-      name: 'users-permissions.HeaderNav.link.providers',
-      to: '/plugins/users-permissions/providers',
+      name: getTrad('HeaderNav.link.providers'),
+      to: `/plugins/${pluginId}/providers`,
     },
     {
-      name: 'users-permissions.HeaderNav.link.emailTemplates',
-      to: '/plugins/users-permissions/email-templates',
+      name: getTrad('HeaderNav.link.emailTemplates'),
+      to: `/plugins/${pluginId}/email-templates`,
     },
     {
-      name: 'users-permissions.HeaderNav.link.advancedSettings',
-      to: '/plugins/users-permissions/advanced',
+      name: getTrad('HeaderNav.link.advancedSettings'),
+      to: `/plugins/${pluginId}/advanced`,
     },
   ];
 
@@ -175,16 +163,22 @@ export class HomePage extends React.Component {
 
   pluginHeaderActions = [
     {
-      label: 'users-permissions.EditPage.cancel',
-      kind: 'secondary',
+      label: this.context.formatMessage({
+        id: getTrad('EditPage.cancel'),
+      }),
+      color: 'cancel',
       onClick: () => this.props.cancelChanges(),
       type: 'button',
+      key: 'button-cancel',
     },
     {
-      kind: 'primary',
-      label: 'users-permissions.EditPage.submit',
+      color: 'success',
+      label: this.context.formatMessage({
+        id: getTrad('EditPage.submit'),
+      }),
       onClick: () => this.props.submit(this.props.match.params.settingType),
       type: 'submit',
+      key: 'button-submit',
     },
   ];
 
@@ -211,6 +205,7 @@ export class HomePage extends React.Component {
       match,
       dataToEdit,
     } = this.props;
+    const { formatMessage } = this.context;
     const headerActions =
       match.params.settingType === 'advanced' &&
       !isEqual(modifiedData, initialData)
@@ -231,14 +226,21 @@ export class HomePage extends React.Component {
       >
         <form onSubmit={e => e.preventDefault()}>
           <Wrapper className="container-fluid">
-            <PluginHeader
-              title={{ id: 'users-permissions.HomePage.header.title' }}
-              description={{
-                id: 'users-permissions.HomePage.header.description',
+            <Header
+              title={{
+                label: formatMessage({
+                  id: getTrad('HomePage.header.title'),
+                }),
               }}
+              content={formatMessage({
+                id: getTrad('HomePage.header.description'),
+              })}
               actions={headerActions}
             />
-            <HeaderNav links={this.headerNavLinks} />
+            <HeaderNav
+              links={this.headerNavLinks}
+              style={{ marginTop: '4.6rem' }}
+            />
             {!this.isAdvanded() ? (
               <List
                 data={get(data, this.getEndPoint(), [])}

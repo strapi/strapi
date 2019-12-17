@@ -1,6 +1,6 @@
 import React from 'react';
 import * as yup from 'yup';
-import { get, isEmpty, toLower } from 'lodash';
+import { get, isEmpty, toLower, trim } from 'lodash';
 import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../../pluginId';
@@ -9,6 +9,7 @@ import { createComponentUid, createUid, nameToSlug } from './createUid';
 import componentForm from './componentForm';
 import fields from './staticFields';
 import { NAME_REGEX, ENUM_REGEX } from './attributesRegexes';
+import RESERVED_NAMES from './reservedNames';
 
 yup.addMethod(yup.mixed, 'defined', function() {
   return this.test(
@@ -38,6 +39,16 @@ yup.addMethod(yup.string, 'unique', function(
 yup.addMethod(yup.array, 'hasNotEmptyValues', function(message) {
   return this.test('hasNotEmptyValues', message, function(array) {
     return !array.some(value => isEmpty(value));
+  });
+});
+
+yup.addMethod(yup.string, 'isAllowed', function(message) {
+  return this.test('isAllowed', message, function(string) {
+    if (!string) {
+      return false;
+    }
+
+    return !RESERVED_NAMES.includes(toLower(trim(string)));
   });
 });
 
@@ -662,6 +673,7 @@ const forms = {
         name: yup
           .string()
           .unique(errorsTrads.unique, takenNames, createUid)
+          .isAllowed(getTrad('error.contentTypeName.reserved-name'))
           .required(errorsTrads.required),
         collectionName: yup.string(),
       });
@@ -742,6 +754,7 @@ const forms = {
             createComponentUid,
             componentCategory
           )
+          .isAllowed(getTrad('error.contentTypeName.reserved-name'))
           .required(errorsTrads.required),
         category: yup
           .string()
