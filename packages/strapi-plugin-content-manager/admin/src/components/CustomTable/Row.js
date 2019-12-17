@@ -73,7 +73,7 @@ function Row({ goTo, isBulkable, row, headers }) {
     [row, schema]
   );
 
-  const { emitEvent } = useGlobalContext;
+  const { emitEvent } = useGlobalContext();
 
   return (
     <>
