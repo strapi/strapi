@@ -133,7 +133,6 @@ class ConfigPage extends React.Component {
           <ContainerFluid>
             <Header
               actions={this.pluginHeaderActions}
-              contenet="iii"
               content={formatMessage({
                 id: 'email.ConfigPage.description',
               })}
