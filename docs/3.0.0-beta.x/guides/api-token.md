@@ -16,7 +16,7 @@ To achieve this feature development, we will have to customize the `users-permis
 To manage your tokens, you will have to create a new Content Type named `token`.
 
 - `string` attribute named `token`
-- `relation` attribute **Token** (`user`) - **Token**  has and belongs to one **User** - **User** (`token`)
+- `relation` attribute **Token** (`user`) - **Token** has and belongs to one **User** - **User** (`token`)
 
 Then add some users and create some token linked to these users.
 
@@ -59,7 +59,7 @@ module.exports = async (ctx, next) => {
         const [token] = await strapi.query('token').find({token: ctx.request.query.token});
 
         if (!token) {
-          throw new Error('Invalid token: This token not exist');
+          throw new Error(`Invalid token: This token doesn't exist`);
         } else {
           if (token.user && typeof token.token === 'string') {
             id = token.user.id;
