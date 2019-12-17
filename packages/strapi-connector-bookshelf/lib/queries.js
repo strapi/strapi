@@ -4,13 +4,9 @@
  */
 
 const _ = require('lodash');
-const {
-  convertRestQueryParams,
-  buildQuery,
-  models: modelUtils,
-} = require('strapi-utils');
+const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
-module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
+module.exports = function createQueryBuilder({ model, strapi }) {
   /* Utils */
   // association key
   const assocKeys = model.associations.map(ast => ast.alias);
@@ -196,23 +192,27 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   }
 
   function search(params, populate) {
-    // Convert `params` object to filters compatible with Bookshelf.
-    const filters = modelUtils.convertParams(modelKey, params);
+    const filters = convertRestQueryParams(params);
 
     return model
       .query(qb => {
         buildSearchQuery(qb, model, params);
 
-        if (filters.sort) {
-          qb.orderBy(filters.sort.key, filters.sort.order);
+        if (_.has(filters, 'sort')) {
+          qb.orderBy(
+            filters.sort.map(({ field, order }) => ({
+              column: field,
+              order,
+            }))
+          );
         }
 
-        if (filters.start) {
-          qb.offset(_.toNumber(filters.start));
+        if (_.has(filters, 'start')) {
+          qb.offset(filters.start);
         }
 
-        if (filters.limit) {
-          qb.limit(_.toNumber(filters.limit));
+        if (_.has(filters, 'limit') && filters.limit >= 0) {
+          qb.limit(filters.limit);
         }
       })
       .fetchAll({
@@ -222,11 +222,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   }
 
   function countSearch(params) {
-    return model
-      .query(qb => {
-        buildSearchQuery(qb, model, params);
-      })
-      .count();
+    return model.query(qb => buildSearchQuery(qb, model, params)).count();
   }
 
   async function createComponents(entry, values, { transacting }) {

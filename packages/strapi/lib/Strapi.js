@@ -8,7 +8,7 @@ const fse = require('fs-extra');
 const Koa = require('koa');
 const Router = require('koa-router');
 const _ = require('lodash');
-const { logger, models } = require('strapi-utils');
+const { logger } = require('strapi-utils');
 const chalk = require('chalk');
 const CLITable = require('cli-table3');
 
@@ -55,11 +55,6 @@ class Strapi extends EventEmitter {
 
     // Logger.
     this.log = logger;
-
-    // Utils.
-    this.utils = {
-      models,
-    };
 
     // Exclude EventEmitter, Koa and HTTP server to be freezed.
     this.propertiesToNotFreeze = Object.keys(this);

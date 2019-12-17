@@ -4,11 +4,7 @@
  */
 
 const _ = require('lodash');
-const {
-  convertRestQueryParams,
-  buildQuery,
-  models: modelUtils,
-} = require('strapi-utils');
+const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
 const { findComponentByGlobalId } = require('./utils/helpers');
 
@@ -16,7 +12,7 @@ const hasPK = (obj, model) => _.has(obj, model.primaryKey) || _.has(obj, 'id');
 const getPK = (obj, model) =>
   _.has(obj, model.primaryKey) ? obj[model.primaryKey] : obj.id;
 
-module.exports = ({ model, modelKey, strapi }) => {
+module.exports = ({ model, strapi }) => {
   const assocKeys = model.associations.map(ast => ast.alias);
   const componentKeys = Object.keys(model.attributes).filter(key =>
     ['component', 'dynamiczone'].includes(model.attributes[key].type)
@@ -547,15 +543,33 @@ module.exports = ({ model, modelKey, strapi }) => {
 
   function search(params, populate) {
     // Convert `params` object to filters compatible with Mongo.
-    const filters = modelUtils.convertParams(modelKey, params);
+    const filters = convertRestQueryParams(params);
 
     const $or = buildSearchOr(model, params._q);
 
-    return model
-      .find({ $or })
-      .sort(filters.sort)
-      .skip(filters.start)
-      .limit(filters.limit)
+    let query = model.find({ $or });
+
+    if (_.has(filters, 'sort')) {
+      const sortFilter = filters.sort.reduce((acc, sort) => {
+        const { field, order } = sort;
+        acc[field] = order === 'asc' ? 1 : -1;
+        return acc;
+      }, {});
+
+      query = query.sort(sortFilter);
+    }
+
+    // Apply start param
+    if (_.has(filters, 'start')) {
+      query = query.skip(filters.start);
+    }
+
+    // Apply limit param
+    if (_.has(filters, 'limit') && filters.limit >= 0) {
+      query = query.limit(filters.limit);
+    }
+
+    return query
       .populate(populate || defaultPopulate)
       .then(results =>
         results.map(result => (result ? result.toObject() : null))

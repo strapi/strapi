@@ -44,6 +44,9 @@ class DatabaseManager {
     return this;
   }
 
+  /**
+   * Creates a map with every model
+   */
   initializeModelsMap() {
     Object.keys(this.strapi.models).forEach(modelKey => {
       const model = this.strapi.models[modelKey];
@@ -63,20 +66,25 @@ class DatabaseManager {
     });
   }
 
-  query(entity, plugin) {
-    if (!entity) {
-      throw new Error(`argument entity is required`);
+  /**
+   * Return a model queries by uid or (name, plugin)
+   */
+  query(name, plugin) {
+    if (!name) {
+      throw new Error(
+        `strapi.query must be called with the entity name and plugin strapi.query(name, plugin)`
+      );
     }
 
-    const normalizedName = entity.toLowerCase();
+    const key = _.toLower(name);
 
     // get by uid or name / plugin
-    const model = this.models.has(entity)
-      ? this.models.get(entity)
-      : this.getModel(normalizedName, plugin);
+    const model = this.models.has(key)
+      ? this.models.get(key)
+      : this.getModel(key, plugin);
 
     if (!model) {
-      throw new Error(`The model ${entity} can't be found.`);
+      throw new Error(`The model ${name} can't be found.`);
     }
 
     if (this.queries.has(model.uid)) {
@@ -85,13 +93,16 @@ class DatabaseManager {
 
     const connectorQuery = this.connectors
       .get(model.orm)
-      .queries({ model, modelKey: normalizedName, strapi });
+      .queries({ model, strapi });
 
     const query = createQuery({ connectorQuery, model });
     this.queries.set(model.uid, query);
     return query;
   }
 
+  /**
+   * Return a model by uid or (name, plugin)
+   */
   getModel(name, plugin) {
     const key = _.toLower(name);
 
@@ -108,6 +119,10 @@ class DatabaseManager {
     );
   }
 
+  /**
+   * Returns a model by its collectionName
+   * @param {*} collectionName
+   */
   getModelByCollectionName(collectionName) {
     return Array.from(this.models.values()).find(model => {
       return model.collectionName === collectionName;
