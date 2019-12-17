@@ -309,7 +309,7 @@ RENAME COLUMN group_id to component_id;
 
 ---
 
-You might notice that you still have some tables containg the `group` keyword. Those are the tables that contain the groups data.
+You might notice that you still have some tables with a name containing the `group` keyword. Those are the tables that contain the groups data.
 
 If you want to rename them you have 3 steps to follow:
 
