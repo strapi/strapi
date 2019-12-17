@@ -30,7 +30,23 @@ const initializeHooks = require('./hooks');
 const createStrapiFs = require('./core/fs');
 const getPrefixedDeps = require('./utils/get-prefixed-dependencies');
 
+const createEventHub = require('./services/event-hub');
 const { createDatabaseManager } = require('strapi-database');
+
+const CONFIG_PATHS = {
+  admin: 'admin',
+  api: 'api',
+  config: 'config',
+  controllers: 'controllers',
+  models: 'models',
+  plugins: 'plugins',
+  policies: 'policies',
+  tmp: '.tmp',
+  services: 'services',
+  static: 'public',
+  validators: 'validators',
+  views: 'views',
+};
 
 /**
  * Construct an Strapi instance.
@@ -39,7 +55,7 @@ const { createDatabaseManager } = require('strapi-database');
  */
 
 class Strapi extends EventEmitter {
-  constructor({ dir, autoReload = false, serveAdminPanel = true } = {}) {
+  constructor(opts) {
     super();
 
     this.setMaxListeners(100);
@@ -64,16 +80,22 @@ class Strapi extends EventEmitter {
     // Exclude EventEmitter, Koa and HTTP server to be freezed.
     this.propertiesToNotFreeze = Object.keys(this);
 
-    // Expose `admin`.
+    this.dir = opts.dir || process.cwd();
     this.admin = {};
-
-    // Expose `plugin`.
     this.plugins = {};
+    this.config = {};
 
-    this.dir = dir || process.cwd();
+    // internal services.
+    this.fs = createStrapiFs(this);
+    this.eventHub = createEventHub();
+
+    this.initConfig(opts);
+    this.requireProjectBootstrap();
+  }
+
+  initConfig({ autoReload = false, serveAdminPanel = true } = {}) {
     const pkgJSON = require(path.resolve(this.dir, 'package.json'));
 
-    // Default configurations.
     this.config = {
       serveAdminPanel,
       launchedAt: Date.now(),
@@ -84,20 +106,7 @@ class Strapi extends EventEmitter {
       environment: _.toLower(process.env.NODE_ENV) || 'development',
       environments: {},
       admin: {},
-      paths: {
-        admin: 'admin',
-        api: 'api',
-        config: 'config',
-        controllers: 'controllers',
-        models: 'models',
-        plugins: 'plugins',
-        policies: 'policies',
-        tmp: '.tmp',
-        services: 'services',
-        static: 'public',
-        validators: 'validators',
-        views: 'views',
-      },
+      paths: CONFIG_PATHS,
       middleware: {},
       hook: {},
       functions: {},
@@ -107,9 +116,6 @@ class Strapi extends EventEmitter {
       installedMiddlewares: getPrefixedDeps('strapi-middleware', pkgJSON),
       installedHooks: getPrefixedDeps('strapi-hook', pkgJSON),
     };
-
-    this.fs = createStrapiFs(this);
-    this.requireProjectBootstrap();
   }
 
   requireProjectBootstrap() {

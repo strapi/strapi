@@ -94,6 +94,7 @@ module.exports = {
       url,
       headers,
       events,
+      isEnabled: true,
     });
 
     ctx.body = { data: webhook };
@@ -108,7 +109,7 @@ module.exports = {
 
   async updateWebhook(ctx) {
     const { id } = ctx.params;
-    const { name, url, headers, events } = ctx.request.body;
+    const { name, url, headers, events, isEnabled } = ctx.request.body;
 
     const webhook = await webhookHandler.findWebhook(id);
 
@@ -121,6 +122,7 @@ module.exports = {
       url,
       headers,
       events,
+      isEnabled,
     });
 
     ctx.body = { data: updatedWebhook };
