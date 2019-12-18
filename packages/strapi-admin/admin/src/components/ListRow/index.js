@@ -4,12 +4,13 @@
  *
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-
-import { CustomRow as Row } from '@buffetjs/styles';
+import { PopUpWarning } from 'strapi-helper-plugin';
 import { Checkbox, IconLinks } from '@buffetjs/core';
+
 import Switch from '../Switch';
+import StyledListRow from './StyledListRow';
 
 function ListRow({
   id,
@@ -20,6 +21,8 @@ function ListRow({
   onDeleteCLick,
   onEditClick,
 }) {
+  const [showModal, setShowModal] = useState(false);
+
   const links = [
     {
       icon: 'pencil',
@@ -30,7 +33,7 @@ function ListRow({
     {
       icon: 'trash',
       onClick: () => {
-        onDeleteCLick(id);
+        setShowModal(true);
       },
     },
   ];
@@ -39,28 +42,43 @@ function ListRow({
     onEnabledChange(value, id);
   };
 
+  const handleDeleteConfirm = () => {
+    onDeleteCLick(id);
+    setShowModal(false);
+  };
+
   return (
-    <Row>
-      <td>
-        <Checkbox name={name} value={false} onChange={() => {}} />
-      </td>
-      <td>
-        <p>{name}</p>
-      </td>
-      <td>
-        <p>{url}</p>
-      </td>
-      <td>
-        <Switch
-          name={name}
-          value={isEnabled}
-          onChange={handleEnabledChange}
-        ></Switch>
-      </td>
-      <td>
-        <IconLinks links={links} />
-      </td>
-    </Row>
+    <>
+      <StyledListRow>
+        <td>
+          <Checkbox name={name} value={false} onChange={() => {}} />
+        </td>
+        <td>
+          <p>{name}</p>
+        </td>
+        <td>
+          <p>{url}</p>
+        </td>
+        <td>
+          <Switch
+            name={name}
+            value={isEnabled}
+            onChange={handleEnabledChange}
+          ></Switch>
+        </td>
+        <td>
+          <IconLinks links={links} />
+          <div className="popup-wrapper">
+            <PopUpWarning
+              isOpen={showModal}
+              toggleModal={() => setShowModal(!showModal)}
+              popUpWarningType="danger"
+              onConfirm={handleDeleteConfirm}
+            />
+          </div>
+        </td>
+      </StyledListRow>
+    </>
   );
 }
 

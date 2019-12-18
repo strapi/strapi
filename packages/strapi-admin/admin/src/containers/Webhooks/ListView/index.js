@@ -29,9 +29,6 @@ function ListView() {
       try {
         const { data } = await request(`/admin/webhooks`, {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
         });
 
         dispatch({
@@ -48,6 +45,9 @@ function ListView() {
     fetchData();
   }, []);
 
+  const webhookIndex = id => webhooks.findIndex(webhook => webhook.id === id);
+
+  // New button
   const addBtnLabel = formatMessage({
     id: `Settings.webhooks.list.button.add`,
   });
@@ -108,14 +108,28 @@ function ListView() {
   };
 
   const handleDeleteClick = id => {
-    console.log(id);
+    deleteWebhook(id);
   };
 
-  const webhookById = id => webhooks.find(webhook => webhook.id === id);
-  const webhookIndex = id => webhooks.findIndex(webhook => webhook.id === id);
+  const deleteWebhook = async id => {
+    try {
+      await request(`/admin/webhooks/${id}`, {
+        method: 'DELETE',
+      });
+
+      dispatch({
+        type: 'WEBHOOK_DELETED',
+        index: webhookIndex(id),
+      });
+    } catch (err) {
+      if (err.code !== 20) {
+        strapi.notification.error('notification.error');
+      }
+    }
+  };
 
   const handleEnabledChange = async (value, id) => {
-    const initialWebhookProps = webhookById(id);
+    const initialWebhookProps = webhooks[webhookIndex];
     const body = {
       ...initialWebhookProps,
       isEnabled: value,
@@ -124,9 +138,6 @@ function ListView() {
     try {
       await request(`/admin/webhooks/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body,
       });
 
