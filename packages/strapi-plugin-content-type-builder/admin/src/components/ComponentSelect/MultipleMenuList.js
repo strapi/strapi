@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { components } from 'react-select';
 import { get } from 'lodash';
@@ -11,7 +11,7 @@ import Ul from './Ul';
 import hasSubArray from './utils/hasSubArray';
 
 const MultipleMenuList = ({
-  selectProps: { name, addComponentsToDynamicZone, /*refState, */ value },
+  selectProps: { name, addComponentsToDynamicZone, inputValue, value },
   ...rest
 }) => {
   const { componentsGroupedByCategory } = useDataManager();
@@ -24,6 +24,50 @@ const MultipleMenuList = ({
     {}
   );
   const [collapses, setCollapses] = useState(collapsesObject);
+  const [options, setOptions] = useState(componentsGroupedByCategory);
+
+  // Search for component
+  useEffect(() => {
+    const formattedOptions = Object.keys(componentsGroupedByCategory).reduce(
+      (acc, current) => {
+        const filteredComponents = componentsGroupedByCategory[current].filter(
+          ({ schema: { name } }) => {
+            return name.includes(inputValue);
+          }
+        );
+
+        if (filteredComponents.length > 0) {
+          acc[current] = filteredComponents;
+        }
+
+        return acc;
+      },
+      {}
+    );
+
+    setOptions(formattedOptions);
+
+    const categoriesToOpen = Object.keys(formattedOptions);
+
+    if (inputValue !== '') {
+      // Close collapses
+      Object.keys(componentsGroupedByCategory)
+        .filter(cat => categoriesToOpen.indexOf(cat) === -1)
+        .forEach(catName => {
+          setCollapses(prevState => ({ ...prevState, [catName]: false }));
+        });
+
+      categoriesToOpen.forEach(catName => {
+        setCollapses(prevState => ({ ...prevState, [catName]: true }));
+      });
+    } else {
+      // Close all collapses
+      categoriesToOpen.forEach(catName => {
+        setCollapses(prevState => ({ ...prevState, [catName]: false }));
+      });
+    }
+  }, [componentsGroupedByCategory, inputValue]);
+
   const toggleCollapse = catName => {
     setCollapses(prevState => ({
       ...prevState,
@@ -33,18 +77,15 @@ const MultipleMenuList = ({
 
   const Component = components.MenuList;
 
-  const allComponentsCategory = Object.keys(componentsGroupedByCategory).reduce(
-    (acc, current) => {
-      const categoryCompos = componentsGroupedByCategory[current].map(compo => {
-        return compo.uid;
-      });
+  const allComponentsCategory = Object.keys(options).reduce((acc, current) => {
+    const categoryCompos = options[current].map(compo => {
+      return compo.uid;
+    });
 
-      acc[current] = categoryCompos;
+    acc[current] = categoryCompos;
 
-      return acc;
-    },
-    {}
-  );
+    return acc;
+  }, {});
 
   const getCategoryValue = categoryName => {
     const componentsCategory = allComponentsCategory[categoryName];
@@ -79,7 +120,7 @@ const MultipleMenuList = ({
           maxHeight: 150,
         }}
       >
-        {Object.keys(componentsGroupedByCategory).map(categoryName => {
+        {Object.keys(options).map(categoryName => {
           const isChecked = getCategoryValue(categoryName);
           const target = { name: categoryName, value: !isChecked };
 
@@ -124,7 +165,7 @@ const MultipleMenuList = ({
                 </CheckboxWrapper>
               </div>
               <SubUl tag="ul" isOpen={collapses[categoryName]}>
-                {componentsGroupedByCategory[categoryName].map(component => {
+                {options[categoryName].map(component => {
                   const isChecked = get(value, 'value', []).includes(
                     component.uid
                   );
@@ -165,6 +206,7 @@ const MultipleMenuList = ({
 
 MultipleMenuList.defaultProps = {
   selectProps: {
+    inputValue: '',
     refState: {
       current: {
         select: {
@@ -179,6 +221,7 @@ MultipleMenuList.defaultProps = {
 MultipleMenuList.propTypes = {
   selectProps: PropTypes.shape({
     addComponentsToDynamicZone: PropTypes.func.isRequired,
+    inputValue: PropTypes.string,
     name: PropTypes.string.isRequired,
     refState: PropTypes.object,
     value: PropTypes.object,
