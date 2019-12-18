@@ -1,6 +1,6 @@
 import React from 'react';
 import * as yup from 'yup';
-import { get, isEmpty, toLower, trim } from 'lodash';
+import { get, isEmpty, toLower, trim, toNumber } from 'lodash';
 import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../../pluginId';
@@ -49,6 +49,20 @@ yup.addMethod(yup.string, 'isAllowed', function(message) {
     }
 
     return !RESERVED_NAMES.includes(toLower(trim(string)));
+  });
+});
+
+yup.addMethod(yup.string, 'isInferior', function(message, max) {
+  return this.test('isInferior', message, function(min) {
+    if (!min) {
+      return false;
+    }
+
+    if (Number.isNaN(toNumber(min))) {
+      return true;
+    }
+
+    return toNumber(max) >= toNumber(min);
   });
 });
 
@@ -210,11 +224,50 @@ const forms = {
         case 'integer':
         case 'biginteger':
         case 'float':
-        case 'decimal':
+        case 'decimal': {
+          if (dataToValidate.type === 'biginteger') {
+            return yup.object().shape({
+              ...commonShape,
+              default: yup
+                .string()
+                .nullable()
+                .matches(/^\d*$/),
+              min: yup
+                .string()
+                .nullable()
+                .matches(/^\d*$/)
+                .when('max', (max, schema) => {
+                  if (max) {
+                    return schema.isInferior(
+                      getTrad('error.validation.minSupMax'),
+                      max
+                    );
+                  } else {
+                    return schema;
+                  }
+                }),
+
+              max: yup
+                .string()
+                .nullable()
+                .matches(/^\d*$/),
+            });
+          }
+
+          let defaultType = yup.number();
+
+          if (dataToValidate.type === 'integer') {
+            defaultType = yup
+              .number()
+              .integer('component.Input.error.validation.integer');
+          }
+
           return yup.object().shape({
             ...commonShape,
+            default: defaultType.nullable(),
             ...numberTypeShape,
           });
+        }
         case 'relation':
           return yup.object().shape({
             name: yup
@@ -311,6 +364,24 @@ const forms = {
         }
 
         const items = defaultItems.slice();
+
+        if (type === 'number' && data.type !== 'biginteger') {
+          const step =
+            data.type === 'decimal' || data.type === 'float' ? 'any' : '1';
+
+          items.splice(0, 1, [
+            {
+              autoFocus: true,
+              name: 'default',
+              type: 'number',
+              step,
+              label: {
+                id: getTrad('form.attribute.settings.default'),
+              },
+              validations: {},
+            },
+          ]);
+        }
 
         if (type === 'media') {
           items.splice(0, 1);

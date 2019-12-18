@@ -10,8 +10,18 @@ import { isEmpty, isNumber } from 'lodash';
 import { Inputs } from '@buffetjs/custom';
 import StyledCustomCheckbox from './StyledCustomCheckbox';
 
-const CustomCheckbox = ({ label, name, onChange, value, ...rest }) => {
+const CustomCheckbox = ({
+  label,
+  modifiedData,
+  name,
+  onChange,
+  value,
+  ...rest
+}) => {
   const [checked, setChecked] = useState(isNumber(value) || !isEmpty(value));
+  const type = modifiedData.type === 'biginteger' ? 'text' : 'number';
+  const step = ['decimal', 'float'].includes(modifiedData.type) ? 'any' : '1';
+  const disabled = !modifiedData.type;
 
   return (
     <StyledCustomCheckbox>
@@ -38,8 +48,10 @@ const CustomCheckbox = ({ label, name, onChange, value, ...rest }) => {
             {...rest}
             name={name}
             onChange={onChange}
+            step={step}
+            disabled={disabled}
             value={value}
-            type="number"
+            type={type}
           />
         </div>
       )}
@@ -49,12 +61,14 @@ const CustomCheckbox = ({ label, name, onChange, value, ...rest }) => {
 
 CustomCheckbox.defaultProps = {
   label: null,
+  modifiedData: {},
   name: '',
   value: null,
 };
 
 CustomCheckbox.propTypes = {
   label: PropTypes.string,
+  modifiedData: PropTypes.object,
   name: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
