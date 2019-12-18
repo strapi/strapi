@@ -4,7 +4,7 @@
  *
  */
 
-import React, { useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 
 import { Header, List } from '@buffetjs/custom';
 import { Button } from '@buffetjs/core';
@@ -20,32 +20,37 @@ import reducer, { initialState } from './reducer';
 
 function ListView() {
   const { formatMessage } = useGlobalContext();
+  const [webhooksToDelete, setWebhooksToDelete] = useState([]);
   const [reducerState, dispatch] = useReducer(reducer, initialState);
 
-  const { webhooks } = reducerState.toJS();
+  const { shouldRefetchData, webhooks } = reducerState.toJS();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const { data } = await request(`/admin/webhooks`, {
-          method: 'GET',
-        });
-
-        dispatch({
-          type: 'GET_DATA_SUCCEEDED',
-          data,
-        });
-      } catch (err) {
-        if (err.code !== 20) {
-          strapi.notification.error('notification.error');
-        }
-      }
-    };
-
     fetchData();
   }, []);
 
+  useEffect(() => {
+    fetchData();
+  }, [shouldRefetchData]);
+
   const webhookIndex = id => webhooks.findIndex(webhook => webhook.id === id);
+
+  const fetchData = async () => {
+    try {
+      const { data } = await request(`/admin/webhooks`, {
+        method: 'GET',
+      });
+
+      dispatch({
+        type: 'GET_DATA_SUCCEEDED',
+        data,
+      });
+    } catch (err) {
+      if (err.code !== 20) {
+        strapi.notification.error('notification.error');
+      }
+    }
+  };
 
   // New button
   const addBtnLabel = formatMessage({
@@ -92,8 +97,9 @@ function ListView() {
 
   const buttonProps = {
     color: 'delete',
+    disabled: webhooksToDelete.length > 0 ? false : true,
     label: formatMessage({ id: `Settings.webhooks.list.button.delete` }),
-    onClick: () => {},
+    onClick: () => handleDeleteAllClick(),
     type: 'button',
   };
 
@@ -103,8 +109,42 @@ function ListView() {
     items: webhooks,
   };
 
+  const handleCheckChange = (value, id) => {
+    if (value && !webhooksToDelete.includes(id)) {
+      setWebhooksToDelete([...webhooksToDelete, id]);
+    }
+
+    if (!value && webhooksToDelete.includes(id)) {
+      setWebhooksToDelete([
+        ...webhooksToDelete.filter(webhookId => webhookId !== id),
+      ]);
+    }
+  };
+
   const handleEditClick = id => {
     console.log(id);
+  };
+
+  const handleDeleteAllClick = async () => {
+    const ids = webhooksToDelete.reduce((acc, current, index) => {
+      acc = index === 0 ? `ids=${current}` : `${acc}&ids=${current}`;
+
+      return acc;
+    }, '');
+
+    try {
+      await request(`/admin/webhooks?${ids}`, {
+        method: 'DELETE',
+      });
+
+      dispatch({
+        type: 'WEBHOOKS_DELETED',
+      });
+    } catch (err) {
+      if (err.code !== 20) {
+        strapi.notification.error('notification.error');
+      }
+    }
   };
 
   const handleDeleteClick = id => {
@@ -129,7 +169,8 @@ function ListView() {
   };
 
   const handleEnabledChange = async (value, id) => {
-    const initialWebhookProps = webhooks[webhookIndex];
+    const initialWebhookProps = webhooks[webhookIndex(id)];
+
     const body = {
       ...initialWebhookProps,
       isEnabled: value,
@@ -160,14 +201,18 @@ function ListView() {
         {rowsCount > 0 ? (
           <List
             {...listProps}
-            customRowComponent={props => (
-              <ListRow
-                {...props}
-                onEditClick={handleEditClick}
-                onDeleteCLick={handleDeleteClick}
-                onEnabledChange={handleEnabledChange}
-              />
-            )}
+            customRowComponent={props => {
+              return (
+                <ListRow
+                  {...props}
+                  onCheckChange={handleCheckChange}
+                  onEditClick={handleEditClick}
+                  onDeleteCLick={handleDeleteClick}
+                  onEnabledChange={handleEnabledChange}
+                  itemsToDelete={webhooksToDelete}
+                />
+              );
+            }}
           />
         ) : (
           <EmptyList />

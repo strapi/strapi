@@ -15,8 +15,10 @@ import StyledListRow from './StyledListRow';
 function ListRow({
   id,
   isEnabled,
+  itemsToDelete,
   name,
   url,
+  onCheckChange,
   onEnabledChange,
   onDeleteCLick,
   onEditClick,
@@ -38,8 +40,14 @@ function ListRow({
     },
   ];
 
+  const isChecked = itemsToDelete.includes(id);
+
   const handleEnabledChange = ({ target: { value } }) => {
     onEnabledChange(value, id);
+  };
+
+  const handleCheckChange = ({ target: { value } }) => {
+    onCheckChange(value, id);
   };
 
   const handleDeleteConfirm = () => {
@@ -51,7 +59,11 @@ function ListRow({
     <>
       <StyledListRow>
         <td>
-          <Checkbox name={name} value={false} onChange={() => {}} />
+          <Checkbox
+            name={name}
+            value={isChecked}
+            onChange={handleCheckChange}
+          />
         </td>
         <td>
           <p>{name}</p>
@@ -83,8 +95,10 @@ function ListRow({
 }
 
 ListRow.defaultProps = {
+  itemsToDelete: [],
   isEnabled: false,
   name: null,
+  onCheckChange: () => {},
   onDeleteCLick: () => {},
   onEditClick: () => {},
   onEnabledChange: () => {},
@@ -95,8 +109,10 @@ ListRow.defaultProps = {
 
 ListRow.propTypes = {
   id: PropTypes.string.isRequired,
+  itemsToDelete: PropTypes.instanceOf(Array),
   isEnabled: PropTypes.bool,
   name: PropTypes.string,
+  onCheckChange: PropTypes.func,
   onDeleteCLick: PropTypes.func,
   onEditClick: PropTypes.func,
   onEnabledChange: PropTypes.func,
