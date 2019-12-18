@@ -34,8 +34,7 @@ function homePageReducer(state = initialState, action) {
         .update('form', () => fromJS(action.data.form))
         .update('versionToDelete', () => '');
     case ON_CHANGE:
-      return state
-        .updateIn(action.keys, () => action.value);
+      return state.updateIn(action.keys, () => action.value);
     case ON_CLICK_DELETE_DOC:
       return state.update('versionToDelete', () => action.version);
     case SET_FORM_ERRORS:

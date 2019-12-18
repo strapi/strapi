@@ -18,7 +18,7 @@ import {
 } from 'draft-js';
 import { List, OrderedSet, Repeat, fromJS } from 'immutable';
 import { isEmpty, toArray } from 'lodash';
-import { WysiwygContext } from '../../contexts/Wysiwyg';
+import WysiwygContext from '../../contexts/Wysiwyg';
 import WysiwygEditor from '../WysiwygEditor';
 import converter from './converter';
 import {

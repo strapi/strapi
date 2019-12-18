@@ -43,6 +43,21 @@ const populateAssociations = (definition, { prefix = '' } = {}) => {
     .reduce((acc, val) => acc.concat(val), []);
 };
 
+const populateBareAssociations = (definition, { prefix = '' } = {}) => {
+  return definition.associations
+    .filter(ast => ast.autoPopulate !== false)
+    .map(assoc => {
+      if (isPolymorphic({ assoc })) {
+        return formatPolymorphicPopulate({
+          assoc,
+          prefix,
+        });
+      }
+
+      return `${prefix}${assoc.alias}`;
+    });
+};
+
 const formatAssociationPopulate = ({ assoc, prefix = '' }) => {
   const path = `${prefix}${assoc.alias}`;
   const assocModel = findModelByAssoc({ assoc });
@@ -76,17 +91,19 @@ const populateComponents = (definition, { prefix = '' } = {}) => {
 
 const populateComponent = (key, attr, { prefix = '' } = {}) => {
   const path = `${prefix}${key}.component`;
+  const componentPrefix = `${path}.`;
+
   if (attr.type === 'dynamiczone') {
     const componentKeys = attr.components;
 
     return componentKeys.reduce((acc, key) => {
       const component = strapi.components[key];
-      const assocs = populateAssociations(component, {
-        prefix: `${path}.`,
+      const assocs = populateBareAssociations(component, {
+        prefix: componentPrefix,
       });
 
       const components = populateComponents(component, {
-        prefix: `${path}.`,
+        prefix: componentPrefix,
       });
 
       return acc.concat([path, ...assocs, ...components]);
@@ -94,12 +111,12 @@ const populateComponent = (key, attr, { prefix = '' } = {}) => {
   }
 
   const component = strapi.components[attr.component];
-  const assocs = populateAssociations(component, {
-    prefix: `${path}.`,
+  const assocs = populateBareAssociations(component, {
+    prefix: componentPrefix,
   });
 
   const components = populateComponents(component, {
-    prefix: `${path}.`,
+    prefix: componentPrefix,
   });
 
   return [path, ...assocs, ...components];

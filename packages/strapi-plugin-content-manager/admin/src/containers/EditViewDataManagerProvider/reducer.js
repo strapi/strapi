@@ -210,6 +210,7 @@ const reducer = (state, action) => {
     case 'SET_DEFAULT_MODIFIED_DATA_STRUCTURE':
       return state
         .update('isLoading', () => false)
+        .update('initialData', () => fromJS(action.contentTypeDataStructure))
         .update('modifiedData', () => fromJS(action.contentTypeDataStructure));
     case 'SET_ERRORS':
       return state
@@ -219,6 +220,9 @@ const reducer = (state, action) => {
       return state
         .update('formErrors', () => fromJS(action.errors))
         .update('shouldShowLoadingState', () => false);
+    case 'SUBMIT_SUCCESS':
+    case 'DELETE_SUCCEEDED':
+      return state.update('initialData', () => state.get('modifiedData'));
     default:
       return state;
   }

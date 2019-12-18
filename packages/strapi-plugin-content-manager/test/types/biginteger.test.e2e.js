@@ -12,11 +12,11 @@ describe('Test type biginteger', () => {
 
     modelsUtils = createModelsUtils({ rq });
 
-    await modelsUtils.createModelWithType('withbiginteger', 'biginteger');
+    await modelsUtils.createContentTypeWithType('withbiginteger', 'biginteger');
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteModel('withbiginteger');
+    await modelsUtils.deleteContentType('withbiginteger');
   }, 60000);
 
   test('Create entry with value input JSON', async () => {
