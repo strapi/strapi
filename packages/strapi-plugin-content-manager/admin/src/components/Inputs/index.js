@@ -14,7 +14,6 @@ const getInputType = (type = '') => {
   switch (toLower(type)) {
     case 'boolean':
       return 'bool';
-    case 'biginteger':
     case 'decimal':
     case 'float':
     case 'integer':
@@ -114,6 +113,14 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
     inputValue = [];
   }
 
+  let step;
+
+  if (type === 'float' || type === 'decimal') {
+    step = 'any';
+  } else {
+    step = '1';
+  }
+
   return (
     <FormattedMessage id={errorId}>
       {error => {
@@ -141,6 +148,7 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
             onBlur={onBlur}
             onChange={onChange}
             options={get(attribute, 'enum', [])}
+            step={step}
             type={getInputType(type)}
             validations={validations}
             value={inputValue}

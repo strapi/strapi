@@ -1238,6 +1238,7 @@ const FormModal = () => {
                             >
                               <Inputs
                                 {...input}
+                                modifiedData={modifiedData}
                                 addComponentsToDynamicZone={
                                   handleClickAddComponentsToDynamicZone
                                 }
