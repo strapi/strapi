@@ -33,7 +33,8 @@ const Container = styled.div`
   }
 
   .spinner {
-    > i {
+    > i,
+    svg {
       animation: ${spin} 4s linear infinite;
     }
   }
@@ -60,7 +61,8 @@ const Container = styled.div`
     background: linear-gradient(315deg, #0097f6 0%, #005eea 100%);
     color: white;
 
-    > i {
+    > i,
+    svg {
       margin-right: 1.3rem;
       padding-top: 1px;
       font-weight: 600;

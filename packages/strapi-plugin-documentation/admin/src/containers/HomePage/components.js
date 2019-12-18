@@ -22,7 +22,7 @@ const ContainerFluid = styled.div`
 `;
 
 const StyledRow = styled.div`
-  padding-top: 8px;
+  padding-top: 11px;
   > div:last-child {
     > div {
       padding-bottom: 0 !important;

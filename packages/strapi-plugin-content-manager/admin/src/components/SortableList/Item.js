@@ -3,9 +3,9 @@ import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { useLayoutDnd } from '../../contexts/LayoutDnd';
+import useLayoutDnd from '../../hooks/useLayoutDnd';
 
-import FieldItem from '../FieldItem';
+import DraggedFieldWithPreview from '../DraggedFieldWithPreview';
 
 import ItemTypes from '../../utils/ItemTypes';
 
@@ -15,14 +15,16 @@ const Item = ({ index, move, name, removeItem }) => {
     metadatas,
     selectedItemName,
     setEditFieldToSelect,
+    setIsDraggingSibling,
   } = useLayoutDnd();
-  const ref = useRef(null);
+  const dragRef = useRef(null);
+  const dropRef = useRef(null);
 
   // from: https://codesandbox.io/s/github/react-dnd/react-dnd/tree/gh-pages/examples_hooks_js/04-sortable/simple?from-embed
   const [, drop] = useDrop({
     accept: ItemTypes.EDIT_RELATION,
     hover(item, monitor) {
-      if (!ref.current) {
+      if (!dropRef.current) {
         return;
       }
       const dragIndex = item.index;
@@ -32,7 +34,7 @@ const Item = ({ index, move, name, removeItem }) => {
         return;
       }
       // Determine rectangle on screen
-      const hoverBoundingRect = ref.current.getBoundingClientRect();
+      const hoverBoundingRect = dropRef.current.getBoundingClientRect();
       // Get vertical middle
       const hoverMiddleY =
         (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
@@ -61,33 +63,49 @@ const Item = ({ index, move, name, removeItem }) => {
     },
   });
   const [{ isDragging }, drag, preview] = useDrag({
-    begin() {
-      setEditFieldToSelect(name, 'relation');
-    },
     item: { type: ItemTypes.EDIT_RELATION, id: name, name, index },
+    begin: () => {
+      // Remove the over state from other components
+      // Since it's a dynamic list where items are replaced on the fly we need to disable all the over state
+      setIsDraggingSibling(true);
+    },
+    end: () => {
+      setIsDraggingSibling(false);
+    },
     collect: monitor => ({
       isDragging: monitor.isDragging(),
     }),
   });
 
   useEffect(() => {
-    preview(getEmptyImage(), { captureDraggingState: true });
+    preview(getEmptyImage(), { captureDraggingState: false });
   }, [preview]);
 
-  drag(drop(ref));
+  // Create the refs
+  // We need 1 for the drop target
+  // 1 for the drag target
+  const refs = {
+    dragRef: drag(dragRef),
+    dropRef: drop(dropRef),
+  };
 
   return (
-    <FieldItem
+    <DraggedFieldWithPreview
       isDragging={isDragging}
-      isSelected={name === selectedItemName}
       label={get(metadatas, [name, 'edit', 'label'], '')}
       name={name}
-      onClickEdit={() => setEditFieldToSelect(name, 'relation')}
-      onClickRemove={() => removeItem(index)}
+      onClickEdit={() => setEditFieldToSelect(name)}
+      onClickRemove={e => {
+        e.stopPropagation();
+        removeItem(index);
+      }}
       push={goTo}
-      ref={ref}
+      ref={refs}
+      selectedItem={selectedItemName}
       size={12}
       style={{ marginBottom: 6, paddingLeft: 5, paddingRight: 5 }}
+      type="relation"
+      i={index === 0}
     />
   );
 };

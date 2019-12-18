@@ -189,7 +189,6 @@ build
 
 ## Migrating `config`
 
-
 ### Remove the `server.autoReload` key
 
 You need to remove the `server.autoReload` key in `./config/environments/**/server.json`.

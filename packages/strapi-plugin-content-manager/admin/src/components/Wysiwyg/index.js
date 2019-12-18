@@ -18,7 +18,7 @@ import { isEmpty, isNaN, replace, words } from 'lodash';
 import cn from 'classnames';
 
 import { request } from 'strapi-helper-plugin';
-import { WysiwygProvider } from '../../contexts/Wysiwyg';
+import WysiwygProvider from '../../containers/WysiwygProvider';
 import Controls from '../WysiwygInlineControls';
 import Drop from '../WysiwygDropUpload';
 import WysiwygBottomControls from '../WysiwygBottomControls';

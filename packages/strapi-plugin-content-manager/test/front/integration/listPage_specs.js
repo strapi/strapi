@@ -45,7 +45,7 @@ describe('Testing Content Manager ListPages', function() {
         .children('i')
         .should('be.visible')
         .invoke('attr', 'class')
-        .should('includes', 'fa-sort-asc');
+        .should('includes', 'fa-sort-up');
     });
 
     it('Should change the default sort of product to name ASC then name DESC', () => {

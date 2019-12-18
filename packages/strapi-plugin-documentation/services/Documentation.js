@@ -655,12 +655,12 @@ module.exports = {
             default:
               acc.properties[current] = associationSchema;
           }
-        } else if (type === 'group') {
-          const { repeatable, group, min, max } = attribute;
+        } else if (type === 'component') {
+          const { repeatable, component, min, max } = attribute;
 
           const cmp = this.generateMainComponent(
-            strapi.groups[group].attributes,
-            strapi.groups[group].associations
+            strapi.components[component].attributes,
+            strapi.components[component].associations
           );
 
           if (repeatable) {
@@ -672,7 +672,6 @@ module.exports = {
               },
               minItems: min,
               maxItems: max,
-              description,
             };
           } else {
             acc.properties[current] = {
@@ -681,6 +680,36 @@ module.exports = {
               description,
             };
           }
+        } else if (type === 'dynamiczone') {
+          const { components, min, max } = attribute;
+
+          const cmps = components.map(component => {
+            const schema = this.generateMainComponent(
+              strapi.components[component].attributes,
+              strapi.components[component].associations
+            );
+
+            return _.merge(
+              {
+                properties: {
+                  __component: {
+                    type: 'string',
+                    enum: components,
+                  },
+                },
+              },
+              schema
+            );
+          });
+
+          acc.properties[current] = {
+            type: 'array',
+            items: {
+              oneOf: cmps,
+            },
+            minItems: min,
+            maxItems: max,
+          };
         } else {
           acc.properties[current] = {
             type,

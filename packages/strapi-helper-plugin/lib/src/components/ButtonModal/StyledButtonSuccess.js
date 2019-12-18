@@ -1,7 +1,5 @@
 import styled from 'styled-components';
 import { Button } from 'reactstrap';
-
-import img from '../../assets/icons/icon_check.png';
 import colors from '../../assets/styles/colors';
 
 const StyledButtonModalSuccess = styled(Button)`
@@ -20,16 +18,6 @@ const StyledButtonModalSuccess = styled(Button)`
   span {
     display: inline-block;
     vertical-align: middle;
-  }
-  &::before {
-    content: '';
-    width: 9px;
-    height: 7px;
-    margin-right: 1rem;
-    background-image: url(${img});
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
   }
   &:hover,
   &:active,

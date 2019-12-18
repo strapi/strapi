@@ -4,62 +4,22 @@
  *
  */
 
-import React from 'react';
+import { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-
 import pluginId from '../../pluginId';
 
-class Initializer extends React.PureComponent {
-  // eslint-disable-line react/prefer-stateless-function
-  componentDidMount() {
-    const {
-      global: { autoReload, currentEnvironment },
-    } = this.props;
+const Initializer = ({ updatePlugin }) => {
+  const ref = useRef();
+  ref.current = updatePlugin;
 
-    let preventComponentRendering;
-    let blockerComponentProps;
+  useEffect(() => {
+    ref.current(pluginId, 'isReady', true);
+  }, []);
 
-    if (currentEnvironment === 'production') {
-      preventComponentRendering = true;
-      blockerComponentProps = {
-        blockerComponentTitle: 'components.ProductionBlocker.header',
-        blockerComponentDescription: 'components.ProductionBlocker.description',
-        blockerComponentIcon: 'fa-ban',
-        blockerComponentContent: 'renderButton',
-      };
-    } else {
-      // Don't render the plugin if the server autoReload is disabled
-      preventComponentRendering = !autoReload;
-      blockerComponentProps = {
-        blockerComponentTitle: 'components.AutoReloadBlocker.header',
-        blockerComponentDescription: 'components.AutoReloadBlocker.description',
-        blockerComponentIcon: 'fa-refresh',
-        blockerComponentContent: 'renderIde',
-      };
-    }
-
-    // Prevent the plugin from being rendered if currentEnvironment === PRODUCTION
-    this.props.updatePlugin(
-      pluginId,
-      'preventComponentRendering',
-      preventComponentRendering
-    );
-    this.props.updatePlugin(
-      pluginId,
-      'blockerComponentProps',
-      blockerComponentProps
-    );
-    // Emit the event plugin ready
-    this.props.updatePlugin(pluginId, 'isReady', true);
-  }
-
-  render() {
-    return null;
-  }
-}
+  return null;
+};
 
 Initializer.propTypes = {
-  global: PropTypes.object.isRequired,
   updatePlugin: PropTypes.func.isRequired,
 };
 

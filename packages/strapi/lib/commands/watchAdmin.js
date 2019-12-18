@@ -14,6 +14,7 @@ module.exports = async function() {
   const port = _.get(serverConfig, 'port', 1337);
   const host = _.get(serverConfig, 'host', 'localhost');
   const adminPort = _.get(serverConfig, 'admin.port', 8000);
+  const adminHost = _.get(serverConfig, 'admin.host', 'localhost');
   const adminBackend = _.get(
     serverConfig,
     'admin.build.backend',
@@ -24,6 +25,7 @@ module.exports = async function() {
   strapiAdmin.watchAdmin({
     dir,
     port: adminPort,
+    host: adminHost,
     options: {
       backend: adminBackend,
       publicPath: addSlash(adminPath),

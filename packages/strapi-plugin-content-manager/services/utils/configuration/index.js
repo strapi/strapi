@@ -24,6 +24,7 @@ async function createDefaultConfiguration(model) {
   // convert model to schema
 
   const schema = formatContentTypeSchema(model);
+  schema.primaryKey = model.primaryKey;
 
   if (model.config) {
     await validateCustomConfig(model, schema);
@@ -40,6 +41,7 @@ async function createDefaultConfiguration(model) {
 async function syncConfiguration(conf, model) {
   // convert model to schema
   const schema = formatContentTypeSchema(model);
+  schema.primaryKey = model.primaryKey;
 
   if (model.config) {
     await validateCustomConfig(model, schema);
