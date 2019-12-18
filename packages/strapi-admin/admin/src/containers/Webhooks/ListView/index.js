@@ -5,6 +5,7 @@
  */
 
 import React, { useEffect, useReducer, useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 
 import { Header, List } from '@buffetjs/custom';
 import { Button } from '@buffetjs/core';
@@ -28,6 +29,8 @@ function ListView() {
   const [webhooksToDelete, setWebhooksToDelete] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState);
+  const { push } = useHistory();
+  const location = useLocation();
 
   const { shouldRefetchData, webhooks } = reducerState.toJS();
 
@@ -130,7 +133,7 @@ function ListView() {
   };
 
   const handleEditClick = id => {
-    console.log(id);
+    push(`${location.pathname}/${id}`);
   };
 
   const handleDeleteAllConfirm = () => {

@@ -28,19 +28,24 @@ function ListRow({
   const links = [
     {
       icon: 'pencil',
-      onClick: () => {
-        onEditClick(id);
+      onClick: e => {
+        handleEditClick(e);
       },
     },
     {
       icon: 'trash',
-      onClick: () => {
+      onClick: e => {
+        e.stopPropagation();
         setShowModal(true);
       },
     },
   ];
 
   const isChecked = itemsToDelete.includes(id);
+
+  const handleEditClick = () => {
+    onEditClick(id);
+  };
 
   const handleEnabledChange = ({ target: { value } }) => {
     onEnabledChange(value, id);
@@ -57,11 +62,12 @@ function ListRow({
 
   return (
     <>
-      <StyledListRow>
+      <StyledListRow onClick={handleEditClick}>
         <td>
           <Checkbox
             name={name}
             value={isChecked}
+            onClick={e => e.stopPropagation()}
             onChange={handleCheckChange}
           />
         </td>
@@ -69,14 +75,16 @@ function ListRow({
           <p>{name}</p>
         </td>
         <td>
-          <p>{url}</p>
+          <p title={url}>{url}</p>
         </td>
         <td>
-          <Switch
-            name={name}
-            value={isEnabled}
-            onChange={handleEnabledChange}
-          ></Switch>
+          <div onClick={e => e.stopPropagation()}>
+            <Switch
+              name={name}
+              value={isEnabled}
+              onChange={handleEnabledChange}
+            ></Switch>
+          </div>
         </td>
         <td>
           <IconLinks links={links} />
