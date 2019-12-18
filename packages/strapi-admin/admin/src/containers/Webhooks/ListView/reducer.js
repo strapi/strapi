@@ -8,7 +8,9 @@ const initialState = fromJS({
 const reducer = (state, action) => {
   switch (action.type) {
     case 'GET_DATA_SUCCEEDED':
-      return state.update('webhooks', () => fromJS(action.data));
+      return state
+        .update('webhooks', () => fromJS(action.data))
+        .update('shouldRefetchData', () => false);
     case 'SET_WEBHOOK_ENABLED':
       return state.updateIn(['webhooks', ...action.keys], () => action.value);
     case 'WEBHOOK_DELETED': {

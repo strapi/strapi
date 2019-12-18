@@ -10,7 +10,12 @@ import { Header, List } from '@buffetjs/custom';
 import { Button } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
 
-import { request, useGlobalContext, ListButton } from 'strapi-helper-plugin';
+import {
+  request,
+  useGlobalContext,
+  ListButton,
+  PopUpWarning,
+} from 'strapi-helper-plugin';
 
 import ListRow from '../../../components/ListRow';
 import EmptyList from '../../../components/EmptyList';
@@ -21,6 +26,7 @@ import reducer, { initialState } from './reducer';
 function ListView() {
   const { formatMessage } = useGlobalContext();
   const [webhooksToDelete, setWebhooksToDelete] = useState([]);
+  const [showModal, setShowModal] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState);
 
   const { shouldRefetchData, webhooks } = reducerState.toJS();
@@ -30,7 +36,9 @@ function ListView() {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    if (shouldRefetchData) {
+      fetchData();
+    }
   }, [shouldRefetchData]);
 
   const webhookIndex = id => webhooks.findIndex(webhook => webhook.id === id);
@@ -99,7 +107,7 @@ function ListView() {
     color: 'delete',
     disabled: webhooksToDelete.length > 0 ? false : true,
     label: formatMessage({ id: `Settings.webhooks.list.button.delete` }),
-    onClick: () => handleDeleteAllClick(),
+    onClick: () => setShowModal(true),
     type: 'button',
   };
 
@@ -125,21 +133,27 @@ function ListView() {
     console.log(id);
   };
 
-  const handleDeleteAllClick = async () => {
-    const ids = webhooksToDelete.reduce((acc, current, index) => {
-      acc = index === 0 ? `ids=${current}` : `${acc}&ids=${current}`;
+  const handleDeleteAllConfirm = () => {
+    handleDeleteAllClick();
+    setShowModal(false);
+  };
 
-      return acc;
-    }, '');
+  const handleDeleteAllClick = async () => {
+    const body = {
+      ids: webhooksToDelete,
+    };
 
     try {
-      await request(`/admin/webhooks?${ids}`, {
-        method: 'DELETE',
+      await request(`/admin/webhooks/batch-delete`, {
+        method: 'POST',
+        body,
       });
 
       dispatch({
         type: 'WEBHOOKS_DELETED',
       });
+
+      setWebhooksToDelete([]);
     } catch (err) {
       if (err.code !== 20) {
         strapi.notification.error('notification.error');
@@ -221,6 +235,12 @@ function ListView() {
           <Button {...newButtonProps} />
         </ListButton>
       </div>
+      <PopUpWarning
+        isOpen={showModal}
+        toggleModal={() => setShowModal(!showModal)}
+        popUpWarningType="danger"
+        onConfirm={handleDeleteAllConfirm}
+      />
     </Wrapper>
   );
 }
