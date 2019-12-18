@@ -105,6 +105,9 @@
   "app.components.listPlugins.title.plural": "{number} plugins are installed",
   "app.components.listPlugins.title.singular": "{number} plugin is installed",
   "app.components.listPluginsPage.deletePlugin.error": "An error occurred while uninstalling the plugin",
+
+  "app.links.configure-view": "Configure the view",
+
   "app.utils.SelectOption.defaultMessage": " ",
   "app.utils.defaultMessage": " ",
   "app.utils.placeholder.defaultMessage": " ",
@@ -125,7 +128,9 @@
   "components.Input.error.validation.minSupMax": "Can't be superior",
   "components.Input.error.validation.regex": "The value not match the regex.",
   "components.Input.error.validation.required": "This value is required.",
+  "components.Input.error.validation.unique": "This value is already used.",
   "components.InputSelect.option.placeholder": "Choose here",
+  "component.Input.error.validation.integer": "The value must be an integer",
   "components.ListRow.empty": "There is no data to be shown.",
   "components.OverlayBlocker.description": "You're using a feature that needs the server to restart. Please wait until the server is up.",
   "components.OverlayBlocker.description.serverError": "The server should have restarted, please check your logs in the terminal.",
@@ -215,5 +220,7 @@
   "app.containers.App.notification.error.init": "An error occured while requesting the API",
   "components.Input.error.password.noMatch": "Passwords do not match",
   "form.button.done": "Done",
-  "notification.form.error.fields": "The form contains some errors"
+  "form.button.finish": "Finish",
+  "notification.form.error.fields": "The form contains some errors",
+  "global.prompt.unsaved": "Are you sure you want to leave this page? All your modifications will be lost"
 }

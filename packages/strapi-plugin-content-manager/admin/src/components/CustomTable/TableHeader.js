@@ -1,9 +1,9 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 
-import { useListView } from '../../contexts/ListView';
+import useListView from '../../hooks/useListView';
 import CustomInputCheckbox from '../CustomInputCheckbox';
-import { Icon, Thead } from './styledComponents';
+import { Arrow, Thead } from './styledComponents';
 
 function TableHeader({ headers, isBulkable }) {
   const {
@@ -59,11 +59,9 @@ function TableHeader({ headers, isBulkable }) {
             >
               <span className={header.sortable ? 'sortable' : ''}>
                 {header.label}
+
                 {sortBy === header.name && (
-                  <Icon
-                    className="fa fa-sort-asc"
-                    isAsc={sortOrder === 'ASC'}
-                  />
+                  <Arrow className={`${sortOrder === 'ASC' && 'isAsc'}`} />
                 )}
               </span>
             </th>

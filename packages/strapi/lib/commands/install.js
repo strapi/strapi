@@ -1,18 +1,10 @@
 const { join } = require('path');
 const { existsSync } = require('fs-extra');
 const ora = require('ora');
-const { cyan } = require('chalk');
 const execa = require('execa');
-const { cli } = require('strapi-utils');
 const findPackagePath = require('../load/package-path');
 
 module.exports = async plugins => {
-  if (!cli.isStrapiApp()) {
-    return console.log(
-      `⛔️ ${cyan('strapi install')} can only be used inside a Strapi project.`
-    );
-  }
-
   const loader = ora();
   const dir = process.cwd();
 

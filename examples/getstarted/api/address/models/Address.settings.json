@@ -14,20 +14,40 @@
     "comment": ""
   },
   "attributes": {
-    "full_name": {
-      "type": "string"
-    },
-    "postal_code": {
-      "type": "string"
+    "geolocation": {
+      "type": "json",
+      "required": true
     },
     "city": {
+      "type": "string",
+      "required": true
+    },
+    "postal_coder": {
       "type": "string"
     },
-    "geolocation": {
-      "type": "json"
+    "category": {
+      "model": "category"
     },
-    "country": {
-      "model": "country"
+    "cover": {
+      "model": "file",
+      "via": "related",
+      "plugin": "upload",
+      "required": false
+    },
+    "images": {
+      "collection": "file",
+      "via": "related",
+      "plugin": "upload",
+      "required": false
+    },
+    "full_name": {
+      "type": "string",
+      "required": true
+    },
+    "dz": {
+      "type": "dynamiczone",
+      "components": [],
+      "min": 2
     }
   }
 }

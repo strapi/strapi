@@ -4,9 +4,8 @@ import PropTypes from 'prop-types';
 import Logo from '../../assets/images/logo-strapi.png';
 
 const Wrapper = styled.div`
-  background: ${props => props.theme.main.colors.leftMenu['link-hover']};
+  background-color: #007eff;
   height: ${props => props.theme.main.sizes.header.height};
-  background: linear-gradient(100deg, #1c5de7, #1c91e7);
 
   .leftMenuHeaderLink {
     &:hover {

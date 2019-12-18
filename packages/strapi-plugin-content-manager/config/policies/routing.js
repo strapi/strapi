@@ -4,35 +4,29 @@ const parseMultipartBody = require('../../utils/parse-multipart');
 const uploadFiles = require('../../utils/upload-files');
 
 module.exports = async (ctx, next) => {
-  const { source } = ctx.request.query;
   const { model } = ctx.params;
 
-  const target = source === 'admin' ? strapi.admin : strapi.plugins[source];
+  const ct = strapi.contentTypes[model];
 
-  if (
-    source &&
-    _.get(target, [
-      'config',
-      'layout',
-      model,
-      'actions',
-      ctx.request.route.action,
-    ])
-  ) {
-    const [controller, action] = _.get(
-      target,
-      [
-        'config',
-        'layout',
-        ctx.params.model,
-        'actions',
-        ctx.request.route.action,
-      ],
-      []
-    ).split('.');
+  if (!ct) {
+    return ctx.send({ error: 'contentType.notFound' }, 404);
+  }
+
+  const target =
+    ct.plugin === 'admin' ? strapi.admin : strapi.plugins[ct.plugin];
+
+  const actionPath = [
+    'config',
+    'layout',
+    ct.modelName,
+    'actions',
+    ctx.request.route.action,
+  ];
+
+  if (_.has(target, actionPath)) {
+    const [controller, action] = _.get(target, actionPath, []).split('.');
 
     if (controller && action) {
-      // TODO: handle in the targeted controller directly
       if (ctx.is('multipart')) {
         const { data, files } = parseMultipartBody(ctx);
         ctx.request.body = data;
@@ -43,7 +37,10 @@ module.exports = async (ctx, next) => {
 
         if (ctx.status >= 300) return;
 
-        await uploadFiles(resBody, files, { model, source });
+        await uploadFiles(resBody, files, {
+          model: ct.modelName,
+          source: ct.plugin,
+        });
 
         return ctx.send(resBody);
       }

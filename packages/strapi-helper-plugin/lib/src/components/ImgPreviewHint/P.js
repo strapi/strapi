@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 const P = styled.p`
   position: absolute;
-  top: 49px;
+  top: 52px;
   display: block;
   width: 100%;
   padding: 12px 75px 0 75px;

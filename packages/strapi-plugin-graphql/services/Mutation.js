@@ -73,14 +73,11 @@ module.exports = {
 
         // Push global policy to make sure the permissions will work as expected.
         policiesFn.push(
-          policyUtils.globalPolicy(
-            undefined,
-            {
-              handler: `${name}.${action}`,
-            },
-            undefined,
-            plugin
-          )
+          policyUtils.globalPolicy({
+            controller: name,
+            action,
+            plugin,
+          })
         );
 
         // Return the controller.
@@ -109,14 +106,11 @@ module.exports = {
       // Push global policy to make sure the permissions will work as expected.
       // We're trying to detect the controller name.
       policiesFn.push(
-        policyUtils.globalPolicy(
-          undefined,
-          {
-            handler: `${name}.${action}`,
-          },
-          undefined,
-          plugin
-        )
+        policyUtils.globalPolicy({
+          controller: name,
+          action,
+          plugin,
+        })
       );
 
       // Make the query compatible with our controller by
@@ -149,14 +143,11 @@ module.exports = {
         );
       }
 
-      policiesFn[0] = policyUtils.globalPolicy(
-        undefined,
-        {
-          handler: `${name}.${action}`,
-        },
-        undefined,
-        plugin
-      );
+      policiesFn[0] = policyUtils.globalPolicy({
+        controller: name,
+        action,
+        plugin,
+      });
     }
 
     if (strapi.plugins['users-permissions']) {
@@ -214,7 +205,7 @@ module.exports = {
 
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
-        const normalizedName = _.toLower(name);
+        const normalizedName = _.camelCase(name);
 
         if (isController) {
           const values = await resolver.call(null, context);

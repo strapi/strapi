@@ -36,6 +36,9 @@ describe('<Admin />', () => {
         strapiVersion: '3',
         uuid: false,
       },
+      intl: {
+        formatMessage: jest.fn(),
+      },
       location: {},
       setAppError: jest.fn(),
       showGlobalAppBlocker: jest.fn(),

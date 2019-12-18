@@ -30,7 +30,7 @@ function LiLink(props) {
 
   return (
     <li>
-      <StyledLink to={props.url}>
+      <StyledLink to={props.url} onClick={props.onClick}>
         {icon}
         {content}
       </StyledLink>
@@ -42,6 +42,7 @@ LiLink.defaultProps = {
   children: '',
   icon: '',
   message: '',
+  onClick: () => {},
   url: '',
 };
 
@@ -56,6 +57,7 @@ LiLink.propTypes = {
       params: PropTypes.object,
     }),
   ]),
+  onClick: PropTypes.func,
   url: PropTypes.string,
 };
 

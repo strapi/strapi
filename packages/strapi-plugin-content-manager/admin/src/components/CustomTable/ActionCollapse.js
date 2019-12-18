@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
-import { useListView } from '../../contexts/ListView';
+import useListView from '../../hooks/useListView';
 import { DeletAllSpan, DeleteSpan, TableDelete } from './styledComponents';
 
 function ActionCollapse({ colSpan }) {

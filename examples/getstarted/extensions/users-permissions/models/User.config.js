@@ -16,10 +16,6 @@ module.exports = {
           name: 'password',
           size: 6,
         },
-        {
-          name: 'provider',
-          size: 6,
-        },
       ],
       [
         {
