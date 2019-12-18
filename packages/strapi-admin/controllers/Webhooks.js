@@ -61,7 +61,7 @@ module.exports = {
   },
 
   async deleteWebhooks(ctx) {
-    const { ids } = ctx.query;
+    const { ids } = ctx.request.body;
 
     if (!Array.isArray(ids) || ids.length === 0) {
       return ctx.badRequest('ids must be an array of id');

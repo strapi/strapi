@@ -115,8 +115,8 @@
       }
     },
     {
-      "method": "DELETE",
-      "path": "/webhooks",
+      "method": "POST",
+      "path": "/webhooks/batch-delete",
       "handler": "Webhooks.deleteWebhooks",
       "config": {
         "policies": []
