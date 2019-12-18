@@ -96,7 +96,6 @@ module.exports = async () => {
       secret: '',
       callback: '/auth/vk/callback',
       scope: ['email'],
-      custom_params: { v: '5.103', display: 'page' },
     },
   };
   const prevGrantConfig = (await pluginStore.get({ key: 'grant' })) || {};
