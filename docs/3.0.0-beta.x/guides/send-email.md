@@ -1,4 +1,4 @@
-# Send email programaticaly
+# Send email programmatically
 
 In this guide we will see how to use the Email plugin to send email where you want in your app.
 
