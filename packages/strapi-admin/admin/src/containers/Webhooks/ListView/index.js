@@ -70,7 +70,7 @@ function ListView() {
 
   const newButtonProps = {
     label: addBtnLabel,
-    onClick: () => {},
+    onClick: () => handleCreateClick(),
     color: 'primary',
     type: 'button',
     icon: <Plus fill="#007eff" />,
@@ -130,6 +130,10 @@ function ListView() {
         ...webhooksToDelete.filter(webhookId => webhookId !== id),
       ]);
     }
+  };
+
+  const handleCreateClick = () => {
+    push(`${location.pathname}/create`);
   };
 
   const handleEditClick = id => {
