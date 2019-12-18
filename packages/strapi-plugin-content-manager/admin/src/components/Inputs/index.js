@@ -117,9 +117,9 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
   let step;
 
   if (type === 'float' || type === 'decimal') {
-    step = 0.01;
+    step = 'any';
   } else {
-    step = 1;
+    step = '1';
   }
 
   return (
