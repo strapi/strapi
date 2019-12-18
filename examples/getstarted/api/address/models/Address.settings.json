@@ -46,8 +46,17 @@
     },
     "dz": {
       "type": "dynamiczone",
-      "components": [],
+      "components": [
+        "blog.meta"
+      ],
       "min": 2
+    },
+    "couou": {
+      "type": "enumeration",
+      "enum": [
+        "un"
+      ],
+      "default": "un"
     }
   }
 }
