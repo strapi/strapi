@@ -14,7 +14,6 @@ const getInputType = (type = '') => {
   switch (toLower(type)) {
     case 'boolean':
       return 'bool';
-    case 'biginteger':
     case 'decimal':
     case 'float':
     case 'integer':

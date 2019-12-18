@@ -196,6 +196,10 @@ const EditViewDataManagerProvider = ({
       inputValue = null;
     }
 
+    if (type === 'biginteger' && value === '') {
+      inputValue = null;
+    }
+
     dispatch({
       type: 'ON_CHANGE',
       keys: name.split('.'),
