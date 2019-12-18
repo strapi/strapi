@@ -3,7 +3,7 @@
 module.exports = {
   async listWebhooks(ctx) {
     const webhooks = await strapi.webhookStore.findWebhooks();
-    ctx.body = { data: webhooks };
+    ctx.send({ data: webhooks });
   },
 
   async createWebhook(ctx) {
@@ -17,14 +17,14 @@ module.exports = {
       isEnabled: true,
     });
 
-    ctx.body = { data: webhook };
+    ctx.created({ data: webhook });
   },
 
   async getWebhook(ctx) {
     const { id } = ctx.params;
     const webhook = await strapi.webhookStore.findWebhook(id);
 
-    ctx.body = { data: webhook };
+    ctx.send({ data: webhook });
   },
 
   async updateWebhook(ctx) {
@@ -45,7 +45,7 @@ module.exports = {
       isEnabled,
     });
 
-    ctx.body = { data: updatedWebhook };
+    ctx.send({ data: updatedWebhook });
   },
 
   async deleteWebhook(ctx) {
@@ -58,6 +58,18 @@ module.exports = {
 
     await strapi.webhookStore.deleteWebhook(id);
     ctx.body = { data: webhook };
+  },
+
+  async deleteWebhooks(ctx) {
+    const { ids } = ctx.query;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return ctx.badRequest('ids must be an array of id');
+    }
+
+    await Promise.all(ids.map(id => strapi.webhookStore.deleteWebhook(id)));
+
+    ctx.send({ data: ids });
   },
 
   triggerWebhook(ctx) {

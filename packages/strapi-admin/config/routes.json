@@ -115,6 +115,14 @@
       }
     },
     {
+      "method": "DELETE",
+      "path": "/webhooks",
+      "handler": "Webhooks.deleteWebhooks",
+      "config": {
+        "policies": []
+      }
+    },
+    {
       "method": "POST",
       "path": "/webhooks/:id/trigger",
       "handler": "Webhooks.triggerWebhook",
