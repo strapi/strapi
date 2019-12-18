@@ -43,24 +43,6 @@
     "full_name": {
       "type": "string",
       "required": true
-    },
-    "dz": {
-      "type": "dynamiczone",
-      "components": [
-        "blog.meta",
-        "default.closingperiod",
-        "default.dish",
-        "default.openingtimes",
-        "default.restaurantservice"
-      ],
-      "min": 2
-    },
-    "couou": {
-      "type": "enumeration",
-      "enum": [
-        "un"
-      ],
-      "default": "un"
     }
   }
 }
