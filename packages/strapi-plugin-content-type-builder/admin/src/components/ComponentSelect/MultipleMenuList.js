@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { components } from 'react-select';
+import { FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
 import { Checkbox, CheckboxWrapper, Label } from '@buffetjs/styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useDataManager from '../../hooks/useDataManager';
+import useQuery from '../../hooks/useQuery';
+import getTrad from '../../utils/getTrad';
 import UpperFirst from '../UpperFirst';
 import SubUl from './SubUl';
 import Ul from './Ul';
@@ -14,36 +17,57 @@ const MultipleMenuList = ({
   selectProps: { name, addComponentsToDynamicZone, inputValue, value },
   ...rest
 }) => {
-  const { componentsGroupedByCategory } = useDataManager();
-  const collapsesObject = Object.keys(componentsGroupedByCategory).reduce(
-    (acc, current) => {
-      acc[current] = false;
-
-      return acc;
-    },
-    {}
+  const { componentsGroupedByCategory, modifiedData } = useDataManager();
+  const query = useQuery();
+  const dzName = query.get('dynamicZoneTarget');
+  const alreadyUsedComponents = get(
+    modifiedData,
+    ['contentType', 'schema', 'attributes', dzName, 'components'],
+    []
   );
+  const filteredComponentsGroupedByCategory = Object.keys(
+    componentsGroupedByCategory
+  ).reduce((acc, current) => {
+    const filteredComponents = componentsGroupedByCategory[current].filter(
+      ({ uid }) => {
+        return !alreadyUsedComponents.includes(uid);
+      }
+    );
+
+    if (filteredComponents.length > 0) {
+      acc[current] = filteredComponents;
+    }
+
+    return acc;
+  }, {});
+
+  const collapsesObject = Object.keys(
+    filteredComponentsGroupedByCategory
+  ).reduce((acc, current) => {
+    acc[current] = false;
+
+    return acc;
+  }, {});
   const [collapses, setCollapses] = useState(collapsesObject);
-  const [options, setOptions] = useState(componentsGroupedByCategory);
+  const [options, setOptions] = useState(filteredComponentsGroupedByCategory);
 
   // Search for component
   useEffect(() => {
-    const formattedOptions = Object.keys(componentsGroupedByCategory).reduce(
-      (acc, current) => {
-        const filteredComponents = componentsGroupedByCategory[current].filter(
-          ({ schema: { name } }) => {
-            return name.includes(inputValue);
-          }
-        );
+    const formattedOptions = Object.keys(
+      filteredComponentsGroupedByCategory
+    ).reduce((acc, current) => {
+      const filteredComponents = filteredComponentsGroupedByCategory[
+        current
+      ].filter(({ schema: { name } }) => {
+        return name.includes(inputValue);
+      });
 
-        if (filteredComponents.length > 0) {
-          acc[current] = filteredComponents;
-        }
+      if (filteredComponents.length > 0) {
+        acc[current] = filteredComponents;
+      }
 
-        return acc;
-      },
-      {}
-    );
+      return acc;
+    }, {});
 
     setOptions(formattedOptions);
 
@@ -51,7 +75,7 @@ const MultipleMenuList = ({
 
     if (inputValue !== '') {
       // Close collapses
-      Object.keys(componentsGroupedByCategory)
+      Object.keys(filteredComponentsGroupedByCategory)
         .filter(cat => categoriesToOpen.indexOf(cat) === -1)
         .forEach(catName => {
           setCollapses(prevState => ({ ...prevState, [catName]: false }));
@@ -66,7 +90,8 @@ const MultipleMenuList = ({
         setCollapses(prevState => ({ ...prevState, [catName]: false }));
       });
     }
-  }, [componentsGroupedByCategory, inputValue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputValue]);
 
   const toggleCollapse = catName => {
     setCollapses(prevState => ({
@@ -120,6 +145,17 @@ const MultipleMenuList = ({
           maxHeight: 150,
         }}
       >
+        {Object.keys(options).length === 0 && (
+          <FormattedMessage
+            id={getTrad(
+              `components.componentSelect.no-component-available${
+                inputValue === '' ? '' : '.with-search'
+              }`
+            )}
+          >
+            {msg => <li style={{ paddingTop: 11 }}>{msg}</li>}
+          </FormattedMessage>
+        )}
         {Object.keys(options).map(categoryName => {
           const isChecked = getCategoryValue(categoryName);
           const target = { name: categoryName, value: !isChecked };

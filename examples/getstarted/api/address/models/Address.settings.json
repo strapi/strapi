@@ -47,7 +47,11 @@
     "dz": {
       "type": "dynamiczone",
       "components": [
-        "blog.meta"
+        "blog.meta",
+        "default.closingperiod",
+        "default.dish",
+        "default.openingtimes",
+        "default.restaurantservice"
       ],
       "min": 2
     },

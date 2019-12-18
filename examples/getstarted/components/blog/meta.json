@@ -1,0 +1,14 @@
+{
+  "info": {
+    "name": "meta",
+    "icon": "air-freshener"
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    }
+  },
+  "connection": "default",
+  "collectionName": "components_blog_metas"
+}
