@@ -107,7 +107,7 @@ async function testDatabaseConnection({ scope, configuration }) {
   const connectivityFile = join(
     scope.tmpPath,
     'node_modules',
-    configuration.connection.connector,
+    `strapi-connector-${configuration.connection.connector}`,
     'lib',
     'utils',
     'connectivity.js'
@@ -164,19 +164,19 @@ async function askDatabaseInfos(scope) {
 }
 
 async function installDatabaseTestingDep({ scope, configuration }) {
-  let packageCmd = scope.useYarn
-    ? `yarnpkg --cwd ${scope.tmpPath} add`
-    : `npm install --prefix ${scope.tmpPath}`;
+  let packageManager = scope.useYarn ? 'yarnpkg' : 'npm;';
+  let cmd = scope.useYarn
+    ? ['--cwd', scope.tmpPath, 'add']
+    : ['install', '--prefix', scope.tmpPath];
 
   // Manually create the temp directory for yarn
   if (scope.useYarn) {
     await fse.ensureDir(scope.tmpPath);
   }
 
-  const depArgs = Object.keys(configuration.dependencies).map(dep => {
+  const deps = Object.keys(configuration.dependencies).map(dep => {
     return `${dep}@${configuration.dependencies[dep]}`;
   });
 
-  const cmd = `${packageCmd} ${depArgs.join(' ')}`;
-  await execa.shell(cmd);
+  await execa(packageManager, cmd.concat(deps));
 }
