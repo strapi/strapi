@@ -450,6 +450,45 @@ We created new home pages when your go to your api url.
 You will need to copy `index.html` and `production.html` into your `public` folder.
 You can find those two files [here](https://github.com/strapi/strapi/tree/master/packages/strapi-generate-new/lib/resources/files/public).
 
+## Updating `csp` options
+
+The admin panel contains certain assets that use `data:img;base64` images. To allow rendering of those assets you can update the files `./config/environments/{env}/security.json` as follows:
+
+**Before**
+
+```json
+{
+  "csp": {
+    "enabled": true,
+    "policy": [
+      {
+        "img-src": "'self' http:"
+      },
+      "block-all-mixed-content"
+    ]
+  }
+  //....
+}
+```
+
+**After**
+
+```json
+{
+  "csp": {
+    "enabled": true,
+    "policy": ["block-all-mixed-content"]
+  }
+  //....
+}
+```
+
+If you need more fine control you can also simply add the `data:` option to the `img-src` option.
+
 ## Rebuilding your administration panel
 
 Now delete the `.cache` and `build` folders. Then run `yarn develop`.
+
+```
+
+```
