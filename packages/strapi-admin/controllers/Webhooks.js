@@ -9,6 +9,8 @@ module.exports = {
   async createWebhook(ctx) {
     const { name, url, headers, events } = ctx.request.body;
 
+    // TODO: validate input
+
     const webhook = await strapi.webhookStore.createWebhook({
       name,
       url,
@@ -16,6 +18,8 @@ module.exports = {
       events,
       isEnabled: true,
     });
+
+    strapi.webhookRunner.add(webhook);
 
     ctx.created({ data: webhook });
   },
@@ -29,21 +33,24 @@ module.exports = {
 
   async updateWebhook(ctx) {
     const { id } = ctx.params;
-    const { name, url, headers, events, isEnabled } = ctx.request.body;
+    const { body } = ctx.request;
 
     const webhook = await strapi.webhookStore.findWebhook(id);
+
+    // TODO: validate input
 
     if (!webhook) {
       return ctx.send({ error: 'webhook.notFound' }, 404);
     }
 
-    const updatedWebhook = await strapi.webhookStore.updateWebhook(id, {
-      name,
-      url,
-      headers,
-      events,
-      isEnabled,
-    });
+    const updatedWebhook = {
+      ...webhook,
+      ...body,
+    };
+
+    await strapi.webhookStore.updateWebhook(id, updatedWebhook);
+
+    strapi.webhookRunner.update(webhook);
 
     ctx.send({ data: updatedWebhook });
   },
@@ -57,6 +64,9 @@ module.exports = {
     }
 
     await strapi.webhookStore.deleteWebhook(id);
+
+    strapi.webhookRunner.remove(webhook);
+
     ctx.body = { data: webhook };
   },
 
@@ -68,13 +78,28 @@ module.exports = {
     }
 
     for (const id of ids) {
+      const webhook = await strapi.webhookStore.findWebhook(id);
+
+      if (!webhook) continue;
+
       await strapi.webhookStore.deleteWebhook(id);
+      strapi.webhookRunner.remove(webhook);
     }
 
     ctx.send({ data: ids });
   },
 
-  triggerWebhook(ctx) {
-    ctx.body = { data: {} };
+  async triggerWebhook(ctx) {
+    const { id } = ctx.params;
+
+    const webhook = await strapi.webhookStore.findWebhook(id);
+
+    const response = await strapi.webhookRunner.run(
+      webhook,
+      'trigger-test',
+      {}
+    );
+
+    ctx.body = { data: response };
   },
 };

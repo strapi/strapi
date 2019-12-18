@@ -79,9 +79,6 @@ class Strapi extends EventEmitter {
       models,
     };
 
-    // Exclude EventEmitter, Koa and HTTP server to be freezed.
-    this.propertiesToNotFreeze = Object.keys(this);
-
     this.dir = opts.dir || process.cwd();
     this.admin = {};
     this.plugins = {};
@@ -389,7 +386,7 @@ class Strapi extends EventEmitter {
 
   async startWebhooks() {
     const webhooks = await this.webhookStore.findWebhooks();
-    this.webhookRunner.register(webhooks);
+    webhooks.forEach(webhook => this.webhookRunner.add(webhook));
   }
 
   reload() {
@@ -469,16 +466,11 @@ class Strapi extends EventEmitter {
   }
 
   async freeze() {
-    const propertiesToNotFreeze = this.propertiesToNotFreeze || [];
-
-    // Remove object from tree.
-    delete this.propertiesToNotFreeze;
-
-    return Object.keys(this)
-      .filter(x => !_.includes(propertiesToNotFreeze, x))
-      .forEach(key => {
-        Object.freeze(this[key]);
-      });
+    Object.freeze(this.config);
+    Object.freeze(this.dir);
+    Object.freeze(this.admin);
+    Object.freeze(this.plugins);
+    Object.freeze(this.api);
   }
 
   getModel(modelKey, plugin) {

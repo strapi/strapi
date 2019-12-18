@@ -3,12 +3,57 @@
  */
 'use strict';
 
+const debug = require('debug')('strapi:webhook');
 const fetch = require('node-fetch');
 
 class WebhookRunner {
   constructor({ eventHub, logger }) {
     this.eventHub = eventHub;
     this.logger = logger;
+    this.webhooksMap = new Map();
+    this.listeners = new Map();
+    debug('Runner initialized');
+  }
+
+  deleteListener(event) {
+    debug(`Deleting listener for event '${event}'`);
+    if (this.listeners.has(event)) {
+      const fn = this.listeners.get(event);
+
+      this.eventHub.off(event, fn);
+      this.listeners.delete(event);
+    }
+  }
+
+  createListener(event) {
+    debug(`Creating listener for event '${event}'`);
+    if (this.listeners.has(event)) {
+      this.logger.error(
+        `The webhook runner is already listening for the event '${event}'. Did you mean to call .register() ?`
+      );
+    }
+
+    const listen = info => {
+      this.executeListener(event, info);
+    };
+
+    this.listeners.set(event, listen);
+    this.eventHub.on(event, listen);
+  }
+
+  async executeListener(event, info) {
+    debug(`Executing webhook for event '${event}'`);
+    const webhooks = this.webhooksMap.get(event) || [];
+    const activeWebhooks = webhooks.filter(
+      webhook => webhook.isEnabled === true
+    );
+
+    for (const webhook of activeWebhooks) {
+      await this.run(webhook, event, info).catch(error => {
+        this.logger.error('Error running webhook');
+        this.logger.error(error);
+      });
+    }
   }
 
   run(webhook, event, info = {}) {
@@ -29,20 +74,52 @@ class WebhookRunner {
       timeout: 10000,
     })
       .then(res => {
-        this.logger.info(res.status);
+        return {
+          statusCode: res.status,
+        };
       })
       .catch(err => {
-        this.logger.error('Error', err);
+        return {
+          statusCode: err.status,
+          body: err.body,
+        };
       });
   }
 
-  register(webhooks) {
-    webhooks.forEach(webhook => {
-      const { events } = webhook;
+  add(webhook) {
+    debug(`Registering webhook '${webhook.id}'`);
+    const { events } = webhook;
 
-      events.forEach(event => {
-        this.eventHub.on(event, info => this.run(webhook, event, info));
-      });
+    events.forEach(event => {
+      if (this.webhooksMap.has(event)) {
+        this.webhooksMap.get(event).push(webhook);
+      } else {
+        this.webhooksMap.set(event, [webhook]);
+        this.createListener(event);
+      }
+    });
+  }
+
+  update(webhook) {
+    debug(`Refreshing webhook '${webhook.id}'`);
+    this.unregister(webhook);
+    this.register(webhook);
+  }
+
+  remove(webhook) {
+    debug(`Unregistering webhook '${webhook.id}'`);
+
+    this.webhooksMap.forEach((webhooks, event) => {
+      const filteredWebhooks = webhooks.filter(
+        value => value.id !== webhook.id
+      );
+
+      this.webhooksMap.set(event, filteredWebhooks);
+
+      // Cleanup hanging listeners
+      if (filteredWebhooks.length === 0) {
+        this.deleteListener(event);
+      }
     });
   }
 }
