@@ -67,7 +67,9 @@ module.exports = {
       return ctx.badRequest('ids must be an array of id');
     }
 
-    await Promise.all(ids.map(id => strapi.webhookStore.deleteWebhook(id)));
+    for (const id of ids) {
+      await strapi.webhookStore.deleteWebhook(id);
+    }
 
     ctx.send({ data: ids });
   },
