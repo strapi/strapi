@@ -33,7 +33,7 @@ module.exports = strapi => {
       );
 
       // Open the file.
-      const filename =
+      const filename = strapi.config.currentEnvironment.server.indexFile ||
         strapi.config.environment === 'development' ? 'index' : 'production';
 
       const index = fs.readFileSync(
