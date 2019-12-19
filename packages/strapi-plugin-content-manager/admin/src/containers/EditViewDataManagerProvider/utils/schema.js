@@ -109,7 +109,26 @@ const createYupSchema = (model, { components }) => {
                   .nullable();
 
           if (min) {
-            componentSchema = componentSchema.min(min, errorsTrads.min);
+            componentSchema = yup.lazy(array => {
+              if (attribute.required) {
+                return yup
+                  .array()
+                  .of(componentFieldSchema)
+                  .defined()
+                  .min(min, errorsTrads.min);
+              }
+
+              let schema = yup
+                .array()
+                .of(componentFieldSchema)
+                .nullable();
+
+              if (array && !isEmpty(array)) {
+                schema = schema.min(min, errorsTrads.min);
+              }
+
+              return schema;
+            });
           }
 
           if (max) {
