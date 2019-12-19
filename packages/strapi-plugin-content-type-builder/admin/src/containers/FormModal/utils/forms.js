@@ -42,7 +42,11 @@ yup.addMethod(yup.string, 'unique', function(
 
 yup.addMethod(yup.array, 'hasNotEmptyValues', function(message) {
   return this.test('hasNotEmptyValues', message, function(array) {
-    return !array.some(value => isEmpty(value));
+    return (
+      !array.some(value => {
+        return isEmpty(value);
+      }) && array.every(value => ENUM_REGEX.test(value))
+    );
   });
 });
 
