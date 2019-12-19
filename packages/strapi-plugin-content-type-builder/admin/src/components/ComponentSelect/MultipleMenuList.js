@@ -9,6 +9,7 @@ import UpperFirst from '../UpperFirst';
 import SubUl from './SubUl';
 import Ul from './Ul';
 import hasSubArray from './utils/hasSubArray';
+import hasSomeSubArray from './utils/HasSomeSubArray';
 
 const MultipleMenuList = ({
   selectProps: { name, addComponentsToDynamicZone, /*refState, */ value },
@@ -52,6 +53,12 @@ const MultipleMenuList = ({
     return hasSubArray(value.value, componentsCategory);
   };
 
+  const doesCategoryHasSomeElements = categoryName => {
+    const componentsCategory = allComponentsCategory[categoryName];
+
+    return hasSomeSubArray(value.value, componentsCategory);
+  };
+
   const handleChangeCategory = ({ target }) => {
     // refState.current.select.blur();
     const dataTarget = {
@@ -81,6 +88,8 @@ const MultipleMenuList = ({
       >
         {Object.keys(componentsGroupedByCategory).map(categoryName => {
           const isChecked = getCategoryValue(categoryName);
+          const someChecked =
+            !isChecked && doesCategoryHasSomeElements(categoryName);
           const target = { name: categoryName, value: !isChecked };
 
           return (
@@ -95,9 +104,10 @@ const MultipleMenuList = ({
                   >
                     <Checkbox
                       id="checkCategory"
+                      checked={isChecked}
                       name={categoryName}
                       onChange={() => {}}
-                      checked={getCategoryValue(categoryName)}
+                      someChecked={someChecked}
                       style={{ marginRight: 10 }}
                     />
                     <UpperFirst content={categoryName} />
