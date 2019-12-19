@@ -132,6 +132,16 @@ Run the following statement in your database:
 :::
 ::::
 
+## Date type changes
+
+We introduced new types in the admin panel: `date`, `datetime` and `time`. Before all of those types where saved as `datetime`.
+
+You will need to change the type of your fields from `date` to `datetime` if you don't want to migrate your data.
+
+- To migrate yout old `date` to `datetime`, change the field type from `date` to `datetime`. NO data migration is required.
+- To migrate your old `date` to new `date`, you will need to migrate yout data to be of the format: `YYYY-MM-DD`
+- To migrate your old `date` to the new `time`, change the field type from `date` to `time`. You will also need to transform them to be of the format: `HH:mm:ss.SSS`
+
 ## Groups become Components
 
 If you were using the groups feature you will need to apply some changes:
