@@ -202,6 +202,7 @@ module.exports = {
             '/3.0.0-beta.x/guides/external-data',
             '/3.0.0-beta.x/guides/custom-data-response',
             '/3.0.0-beta.x/guides/custom-admin',
+            '/3.0.0-beta.x/guides/client',
             '/3.0.0-beta.x/guides/draft',
             '/3.0.0-beta.x/guides/slug',
             '/3.0.0-beta.x/guides/send-email',

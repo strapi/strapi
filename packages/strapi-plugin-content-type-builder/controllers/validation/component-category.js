@@ -3,7 +3,7 @@
 const yup = require('yup');
 const formatYupErrors = require('./yup-formatter');
 
-const { isValidName } = require('./common');
+const { isValidCategoryName } = require('./common');
 
 module.exports = data => {
   return componentCategorySchema
@@ -19,7 +19,7 @@ const componentCategorySchema = yup
     name: yup
       .string()
       .min(3)
-      .test(isValidName)
+      .test(isValidCategoryName)
       .required('name.required'),
   })
   .noUnknown();
