@@ -380,9 +380,18 @@ _Repeat this query for every join table where you are using this component._
 
 ```sql
 UPDATE restaurant_components
-SET component_type = 'groups_old_table_name'
-WHERE component_type = 'components_new_table_name';
+SET component_type = 'components_new_table_name'
+WHERE component_type = 'groups_old_table_name';
 ```
+
+**4. If you store files in groups, update the `related_type` values**
+
+```sql
+UPDATE upload_file_morph
+SET related_type = 'components_new_table_name'
+WHERE related_type = 'groups_old_table_name';
+```
+
 
 #### Mongo
 
