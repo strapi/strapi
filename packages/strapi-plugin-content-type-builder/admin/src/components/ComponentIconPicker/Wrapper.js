@@ -36,6 +36,17 @@ const Wrapper = styled.div`
     font-size: 1em;
     color: #bdbdbd;
   }
+
+  .search {
+    display: flex;
+    padding-top: 2px;
+    color: #919bae;
+    > button {
+      margin-top: -8px;
+      font-size: 1.3rem;
+      outline: 0;
+    }
+  }
 `;
 
 Wrapper.defaultProps = {
