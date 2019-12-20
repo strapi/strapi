@@ -364,6 +364,14 @@ const createOnFetchPopulateFn = ({
       }
     });
 
+    if (definition.modelType === 'component') {
+      definition.associations
+        .filter(ast => ast.autoPopulate !== false)
+        .forEach(ast => {
+          this.populate({ path: ast.alias });
+        });
+    }
+
     componentAttributes.forEach(key => {
       this.populate({ path: `${key}.ref` });
     });
