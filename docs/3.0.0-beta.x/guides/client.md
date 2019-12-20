@@ -1,6 +1,6 @@
 # Setup a third party client
 
-This guide will explain how to setup a connection with a tiers client and use it everywhere in your code.
+This guide will explain how to setup a connection with a third party client and use it everywhere in your code.
 
 In our example we will use the GitHub Node.JS client [OctoKit REST.js](https://github.com/octokit/rest.js/).
 
@@ -8,7 +8,7 @@ This guide could also be used to setup an Axios client instance.
 
 ## Installation
 
-First you will have to install the client node_module in your application by running one of the following command.
+First you will have to install the client package in your application by running one of the following command.
 
 :::: tabs
 
@@ -24,7 +24,7 @@ First you will have to install the client node_module in your application by run
 
 ## Create a hook
 
-To init the client, we will use [Strapi hooks system](../concepts/hooks.md). Hooks let you add new features in your Strapi application.
+To init the client, we will use the [hooks system](../concepts/hooks.md). Hooks let you add new features in your Strapi application.
 
 Hooks are loaded one time, at the server start.
 
@@ -34,13 +34,11 @@ Lets create our GitHub hook.
 
 ```js
 module.exports = strapi => {
-  const hook = {
-    initialize: async () => {
+  return {
+    async initialize() {
       console.log('my hook is loaded');
     },
   };
-
-  return hook;
 };
 ```
 
@@ -84,18 +82,16 @@ Now we have to load the GitHub client.
 const GitHubAPI = require('@octokit/rest');
 
 module.exports = strapi => {
-  const hook = {
-    initialize: async () => {
+  return {
+    async initialize() {
       const { token } = strapi.config.hook.github;
 
-      strapi.github = new GitHubAPI({
+      strapi.services.github = new GitHubAPI({
         userAgent: `${strapi.config.info.name} v${strapi.config.info.version}`,
         auth: `token ${token}`,
       });
     },
   };
-
-  return hook;
 };
 ```
 
@@ -109,7 +105,7 @@ To simply test if it works, lets update the `bootstrap.js` function to log your 
 
 ```js
 module.exports = async () => {
-  const data = await strapi.github.users.getAuthenticated();
+  const data = await strapi.services.github.users.getAuthenticated();
   console.log(data);
 };
 ```
@@ -122,7 +118,7 @@ You would probably want specific configurations for development and production e
 
 To do so, we will update some configurations.
 
-You have to cut your `github` configs from `./config/hook.json` to set them in `./config/environments/development.json`.
+You have to move your `github` configs from `./config/hook.json` to `./config/environments/development.json`, then remove it from the `hook.json` file.
 
 And in your GitHub hook, you will have to replace `strapi.config.hook.github` by `strapi.config.currentEnvironment.github` to access to the configs.
 
@@ -143,17 +139,15 @@ And in your GitHub hook, you will have to replace `strapi.config.hook.github` by
 const GitHubAPI = require('@octokit/rest');
 
 module.exports = strapi => {
-  const hook = {
-    initialize: async () => {
+  return {
+    async initialize() {
       const { token } = strapi.config.currentEnvironment.github;
 
-      strapi.github = new GitHubAPI({
+      strapi.services.github = new GitHubAPI({
         userAgent: `${strapi.config.info.name} v${strapi.config.info.version}`,
         auth: `token ${token}`,
       });
     },
   };
-
-  return hook;
 };
 ```
