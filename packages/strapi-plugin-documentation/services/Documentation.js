@@ -471,7 +471,7 @@ module.exports = {
           current.handler,
           key,
           endPoint.split('/')[1],
-          current.config.description
+          _.get(current, 'config.description')
         ),
         responses: this.generateResponses(verb, current, key),
         summary: '',
