@@ -30,10 +30,10 @@ To check if bad words are in the comment we will use `bad-words` [node module](h
 
 ## Override controller action
 
-To customize the function that create a comment we will have to override the `create` function.
+To customize the function that creates a comment we will have to override the `create` function.
 
 First, to see the difference, let's request `POST /comment` with `that is fucking good!` for the `content` attribute.
-You will see your comment is well created.
+You will see your comment is successfully created.
 
 Now let's start the customization.
 
@@ -51,7 +51,7 @@ After saving the new function, let's restart the `POST /comment` request. We wil
 
 ## Get the comment creation back
 
-We now know the function we have to update. Lets back to the original function.
+We now know the function we have to update. Let's get back to the original function.
 
 In the [controller documentation](../concepts/controllers.html#extending-a-model-controller) you will find the default implementation of every actions. It will help you overwrite the create logic.
 
@@ -78,9 +78,9 @@ And now the comment creation is back.
 
 ## Apply our changes
 
-Here we want check if the content of the comment contains a bad words.
+We want to check if the content of the comment contains a bad words.
 
-And if it is, send an email by using the [programmatic usage](../plugins/email.md) of the Email plugin.
+If it does, we want to send an email using the [Email plugin](../plugins/email.md)
 
 **Path —** `./api/comment/controller/Comment.js`
 
