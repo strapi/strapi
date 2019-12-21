@@ -19,22 +19,6 @@ module.exports = {
     UsersPermissionsPermission: false, // Make this type NOT queriable.
   },
   definition: `
-    type UsersPermissionsMe {
-      id: ID!
-      username: String!
-      email: String!
-      confirmed: Boolean
-      blocked: Boolean
-      role: UsersPermissionsMeRole
-    }
-
-    type UsersPermissionsMeRole {
-      id: ID!
-      name: String!
-      description: String
-      type: String
-    }
-
     input UsersPermissionsLoginInput {
       identifier: String!
       password: String!
@@ -47,7 +31,7 @@ module.exports = {
     }
   `,
   query: `
-    me: UsersPermissionsMe
+    me: UsersPermissionsUser
   `,
   mutation: `
     login(input: UsersPermissionsLoginInput!): UsersPermissionsLoginPayload!
@@ -195,10 +179,10 @@ module.exports = {
         resolverOf: 'Auth.register',
         resolver: async (obj, options, {context}) => {
           context.request.body = _.toPlainObject(options.input);
-          
+
           await strapi.plugins['users-permissions'].controllers.auth.register(context);
           let output = context.body.toJSON ? context.body.toJSON() : context.body;
-          
+
           checkBadRequest(output);
           return {
             user: output.user || output, jwt: output.jwt
