@@ -15,6 +15,22 @@ const INITIAL_STATE_DATA = {
   step: null,
   subTargetUid: null,
   targetUid: null,
+  headerId: null,
+  header_label_1: null,
+  header_icon_name_1: null,
+  header_icon_isCustom_1: null,
+  header_info_category_1: null,
+  header_info_name_1: null,
+  header_label_2: null,
+  header_icon_name_2: null,
+  header_icon_isCustom_2: null,
+  header_info_category_2: null,
+  header_info_name_2: null,
+  header_label_3: null,
+  header_icon_name_3: null,
+  header_icon_isCustom_3: null,
+  header_info_category_3: null,
+  header_info_name_3: null,
 };
 
 export { NAVLINKS, INITIAL_STATE_DATA };

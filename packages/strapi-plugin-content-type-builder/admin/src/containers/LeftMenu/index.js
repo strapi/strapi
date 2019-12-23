@@ -83,10 +83,19 @@ function LeftMenu({ wait }) {
           : 'willCreateComponent';
 
       emitEvent(eventName);
+      console.log(type);
+
+      //     header_label_1: null,
+      // header_icon_name_1: null,
+      // header_icon_isCustom_1: null,
+      // header_info_category_1: null,
+      // header_info_name_1: null,
 
       await wait();
       push({
-        search: `modalType=${type}&actionType=create&settingType=base&forTarget=${type}`,
+        search: `modalType=${type}&actionType=create&settingType=base&forTarget=${type}&headerId=${getTrad(
+          `modalForm.${type}.header-create`
+        )}&header_icon_name_1:${type}&header_icon_isCustom_1=false`,
       });
     } else {
       displayNotificationCTNotSaved();

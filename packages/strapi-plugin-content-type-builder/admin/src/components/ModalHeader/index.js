@@ -6,7 +6,6 @@ import { AttributeIcon } from '@buffetjs/core';
 import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useDataManager from '../../hooks/useDataManager';
-import pluginId from '../../pluginId';
 import ComponentIcon from './ComponentIcon';
 import Header from './Header';
 
@@ -46,9 +45,7 @@ const ModalHeader = ({
             style={{ margin: 'auto 20px auto 0' }}
           />
         )}
-        {headerId && (
-          <FormattedMessage id={`${pluginId}.${headerId}`} values={{ name }} />
-        )}
+        {headerId && <FormattedMessage id={headerId} values={{ name }} />}
         {!headerId && (
           <Header
             category={category}

@@ -87,6 +87,12 @@ const FormModal = () => {
       const targetUid = query.get('targetUid');
       const settingType = query.get('settingType');
       const subTargetUid = query.get('subTargetUid');
+      const headerId = query.get('headerId');
+      const header_label_1 = query.get('header_label_1');
+      const header_icon_name_1 = query.get('header_icon_name_1');
+      const header_icon_isCustom_1 = query.get('header_icon_isCustom_1');
+      const header_info_category_1 = query.get('header_info_category_1');
+      const header_info_name_1 = query.get('header_info_name_1');
       const step = query.get('step');
       const pathToSchema =
         forTarget === 'contentType' || forTarget === 'component'
@@ -108,6 +114,12 @@ const FormModal = () => {
         subTargetUid,
         step,
         targetUid,
+        header_label_1,
+        header_icon_name_1,
+        header_icon_isCustom_1,
+        header_info_name_1,
+        header_info_category_1,
+        headerId,
       });
 
       // Reset all the modification when opening the edit category modal
@@ -310,13 +322,13 @@ const FormModal = () => {
   const isPickingAttribute = state.modalType === 'chooseAttribute';
   const uid = createUid(modifiedData.name || '');
 
-  let headerId = isCreating
-    ? `modalForm.${state.modalType}.header-create`
-    : 'modalForm.header-edit';
+  // let headerId = isCreating
+  //   ? `modalForm.${state.modalType}.header-create`
+  //   : 'modalForm.header-edit';
 
-  if (!['contentType', 'component'].includes(state.modalType)) {
-    headerId = null;
-  }
+  // if (!['contentType', 'component'].includes(state.modalType)) {
+  //   headerId = null;
+  // }
 
   const checkFormValidity = async () => {
     let schema;
@@ -977,6 +989,7 @@ const FormModal = () => {
     ? { paddingTop: '0.5rem', paddingBottom: '3rem' }
     : {};
 
+  console.log(state.headerId);
   return (
     <Modal
       isOpen={isOpen}
@@ -989,7 +1002,7 @@ const FormModal = () => {
         <ModalHeader
           name={state.headerDisplayName}
           category={state.headerDisplayCategory}
-          headerId={headerId}
+          headerId={state.headerId}
           iconType={iconType || 'contentType'}
           subCategory={state.headerDisplaySubCategory}
           subTargetUid={state.subTargetUid}
