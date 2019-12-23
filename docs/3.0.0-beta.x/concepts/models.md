@@ -349,7 +349,7 @@ xhr.send(
 
 ::: tab "Many-to-Many" id="many-to-many"
 
-One-to-Many relationships are usefull when an entry can be liked to multiple entries of an other Content Type. And an entry of the other Content Type can be linked to many entries.
+Many-to-Many relationships are usefull when an entry can be liked to multiple entries of an other Content Type. And an entry of the other Content Type can be linked to many entries.
 
 #### Example
 
