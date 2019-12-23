@@ -3,16 +3,21 @@
  */
 'use strict';
 
-const debug = require('debug')('strapi:webhook');
+const debug = require('debug')('strapi');
 const fetch = require('node-fetch');
 
+const WorkerQueue = require('./worker-queue');
+
 class WebhookRunner {
-  constructor({ eventHub, logger }) {
+  constructor({ eventHub, logger, queue }) {
+    debug('Initialized webhook runer');
     this.eventHub = eventHub;
     this.logger = logger;
     this.webhooksMap = new Map();
     this.listeners = new Map();
-    debug('Runner initialized');
+
+    this.queue = queue || new WorkerQueue({ logger, concurency: 5 });
+    this.queue.subscribe(this.executeListener.bind(this));
   }
 
   deleteListener(event) {
@@ -34,14 +39,14 @@ class WebhookRunner {
     }
 
     const listen = info => {
-      this.executeListener(event, info);
+      this.queue.enqueue({ event, info });
     };
 
     this.listeners.set(event, listen);
     this.eventHub.on(event, listen);
   }
 
-  async executeListener(event, info) {
+  async executeListener({ event, info }) {
     debug(`Executing webhook for event '${event}'`);
     const webhooks = this.webhooksMap.get(event) || [];
     const activeWebhooks = webhooks.filter(
