@@ -25,7 +25,7 @@ module.exports = ctx => {
 
     if (fullPath.length <= 1 || fullPath[0] !== 'files') {
       throw strapi.errors.badRequest(
-        `When using multipart/form-data you need to provide your files by prefixing them witht the 'files'.`
+        `When using multipart/form-data you need to provide your files by prefixing them with the 'files'.`
       );
     }
 
