@@ -16,7 +16,6 @@ module.exports = {
       url,
       headers,
       events,
-      isEnabled: true,
     });
 
     strapi.webhookRunner.add(webhook);
@@ -27,6 +26,10 @@ module.exports = {
   async getWebhook(ctx) {
     const { id } = ctx.params;
     const webhook = await strapi.webhookStore.findWebhook(id);
+
+    if (!webhook) {
+      return ctx.notFound('webhook.notFound');
+    }
 
     ctx.send({ data: webhook });
   },

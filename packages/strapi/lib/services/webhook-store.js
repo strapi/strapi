@@ -3,81 +3,104 @@
  */
 'use strict';
 
-const uuid = require('uuid');
-
-module.exports = ({ db }) => ({
-  async findWebhooks() {
-    const row = await db.query('core_store').findOne({
-      key: 'webhooks',
-    });
-
-    return row ? JSON.parse(row.value) : [];
+const webhookModel = {
+  uid: 'strapi::webhooks',
+  internal: true,
+  connection: 'default',
+  globalId: 'StrapiWebhooks',
+  collectionName: 'strapi_webhooks',
+  info: {
+    name: 'Strapi webhooks',
+    description: '',
   },
-
-  async findWebhook(id) {
-    const webhooks = await this.findWebhooks();
-    return webhooks.find(hook => hook.id === id);
+  attributes: {
+    name: {
+      type: 'string',
+    },
+    url: {
+      type: 'text',
+    },
+    headers: {
+      type: 'json',
+    },
+    events: {
+      type: 'json',
+    },
+    enabled: {
+      type: 'boolean',
+    },
   },
+};
 
-  async createWebhook(data) {
-    const webhooks = await this.findWebhooks();
+const formatWebhookInfo = webhook => {
+  return {
+    id: webhook.id,
+    name: webhook.name,
+    url: webhook.url,
+    headers: webhook.headers,
+    events: webhook.events,
+    isEnabled: webhook.enabled,
+  };
+};
 
-    const webhook = {
-      id: uuid(),
-      ...data,
-    };
+const createWebhookStore = ({ db }) => {
+  const webhookQueries = db.query('strapi_webhooks');
 
-    const res = await db.query('core_store').findOne({
-      key: 'webhooks',
-    });
+  return {
+    async findWebhooks() {
+      const results = await webhookQueries.find();
 
-    if (!res) {
-      await db
-        .query('core_store')
-        .create({ key: 'webhooks', value: JSON.stringify([webhook]) });
-    } else {
-      await db
-        .query('core_store')
-        .update(
-          { key: 'webhooks' },
-          { value: JSON.stringify(webhooks.concat(webhook)) }
-        );
-    }
+      return results.map(formatWebhookInfo);
+    },
 
-    return webhook;
-  },
+    async findWebhook(id) {
+      const result = await webhookQueries.findOne({ id });
+      return result ? formatWebhookInfo(result) : null;
+    },
 
-  async updateWebhook(id, data) {
-    const oldWebhook = await this.findWebhook(id);
-    const webhooks = await this.findWebhooks();
+    createWebhook(data) {
+      const { name, url, headers, events } = data;
 
-    const updatedWebhook = {
-      ...oldWebhook,
-      ...data,
-    };
+      const webhook = {
+        name,
+        url,
+        headers,
+        events,
+        enabled: true,
+      };
 
-    const updatedWebhooks = webhooks.map(webhook => {
-      if (webhook.id === id) {
-        return updatedWebhook;
+      return webhookQueries.create(webhook).then(formatWebhookInfo);
+    },
+
+    async updateWebhook(id, data) {
+      const oldWebhook = await this.findWebhook(id);
+
+      if (!oldWebhook) {
+        throw new Error('webhook.notFound');
       }
 
-      return webhook;
-    });
+      const { name, url, headers, events, isEnabled } = data;
 
-    await db
-      .query('core_store')
-      .update({ key: 'webhooks' }, { value: JSON.stringify(updatedWebhooks) });
+      const updatedWebhook = {
+        name,
+        url,
+        headers,
+        events,
+        enabled: isEnabled,
+      };
 
-    return updatedWebhook;
-  },
+      return webhookQueries
+        .update({ id }, updatedWebhook)
+        .then(formatWebhookInfo);
+    },
 
-  async deleteWebhook(id) {
-    const webhooks = await this.findWebhooks();
+    deleteWebhook(id) {
+      return webhookQueries.delete({ id });
+    },
+  };
+};
 
-    const updatedWebhooks = webhooks.filter(webhook => webhook.id !== id);
-
-    await db
-      .query('core_store')
-      .update({ key: 'webhooks' }, { value: JSON.stringify(updatedWebhooks) });
-  },
-});
+module.exports = {
+  webhookModel,
+  createWebhookStore,
+};

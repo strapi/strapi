@@ -31,7 +31,10 @@ const getPrefixedDeps = require('./utils/get-prefixed-dependencies');
 
 const createEventHub = require('./services/event-hub');
 const createWebhookRunner = require('./services/webhook-runner');
-const createWebhookStore = require('./services/webhook-store');
+const {
+  webhookModel,
+  createWebhookStore,
+} = require('./services/webhook-store');
 const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const { createDatabaseManager } = require('strapi-database');
 
@@ -366,6 +369,7 @@ class Strapi extends EventEmitter {
 
     // Init core store
     this.models['core_store'] = coreStoreModel;
+    this.models['strapi_webhooks'] = webhookModel;
 
     this.db = createDatabaseManager(this);
     await this.db.initialize();

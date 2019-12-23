@@ -1,6 +1,8 @@
 'use strict';
 
 const coreStoreModel = {
+  uid: 'strapi::core-store',
+  internal: true,
   connection: 'default',
   info: {
     name: 'core_store',

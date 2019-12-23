@@ -107,8 +107,8 @@ class WebhookRunner {
 
   update(webhook) {
     debug(`Refreshing webhook '${webhook.id}'`);
-    this.unregister(webhook);
-    this.register(webhook);
+    this.remove(webhook);
+    this.add(webhook);
   }
 
   remove(webhook) {
