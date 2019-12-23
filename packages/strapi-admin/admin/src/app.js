@@ -12,6 +12,8 @@ import 'sanitize.css/sanitize.css';
 import 'react-datetime/css/react-datetime.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'font-awesome/css/font-awesome.min.css';
+import '@fortawesome/fontawesome-free/css/all.css';
+import '@fortawesome/fontawesome-free/js/all.min.js';
 
 import React from 'react';
 import ReactDOM from 'react-dom';

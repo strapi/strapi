@@ -19,8 +19,8 @@
       "via": "menu"
     },
     "restaurant": {
-      "model": "restaurant",
-      "via": "menu"
+      "via": "menu",
+      "model": "restaurant"
     }
   }
 }

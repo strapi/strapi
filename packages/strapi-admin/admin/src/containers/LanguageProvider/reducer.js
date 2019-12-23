@@ -5,7 +5,7 @@
  */
 
 import { fromJS } from 'immutable';
-import { first, get, includes, split } from 'lodash';
+import { get, includes, split } from 'lodash';
 
 // Import supported languages from the translations folder
 import trads from '../../translations';
@@ -33,7 +33,7 @@ if (!foundLanguage) {
 }
 
 const initialState = fromJS({
-  locale: foundLanguage || first(languages) || 'en',
+  locale: foundLanguage || 'en',
 });
 
 function languageProviderReducer(state = initialState, action) {

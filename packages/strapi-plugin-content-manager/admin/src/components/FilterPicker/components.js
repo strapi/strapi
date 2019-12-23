@@ -29,7 +29,7 @@ const Span = styled.span`
 const Flex = styled.div`
   display: flex;
   justify-content: flex-end;
-  padding: 0 0 12px 30px !important;
+  padding: 0 0 10px 30px !important;
   margin-top: -10px;
   color: #c3c5c8;
   font-size: 13px;

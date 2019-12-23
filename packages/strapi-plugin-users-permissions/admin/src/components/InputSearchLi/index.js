@@ -22,7 +22,7 @@ function InputSearchLi({ onClick, isAdding, item }) {
         <div>
           {username}
           <a href={`${path}`} target="_blank" rel="noopener noreferrer">
-            <i className="fa fa-external-link" />
+            <i className="fa fa-external-link-alt" />
           </a>
         </div>
         <div

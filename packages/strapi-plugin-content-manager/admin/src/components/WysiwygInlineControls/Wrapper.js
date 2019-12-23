@@ -6,16 +6,16 @@ const Wrapper = styled.div`
   padding: 8px 3px 0 10px;
   background-color: #f3f4f4;
   user-select: none;
-  overflow-x: scroll;
-  > div:nth-child(even) {
+  overflow-x: auto;
+  > button:nth-child(even) {
     border-left: 0;
     border-right: 0;
   }
-  > div:first-child {
+  > button:first-child {
     border-top-left-radius: 3px;
     border-bottom-left-radius: 3px;
   }
-  > div:last-child {
+  > button:last-child {
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
     border-right: 1px solid rgba(16, 22, 34, 0.1);

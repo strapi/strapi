@@ -3,7 +3,6 @@
 const _ = require('lodash');
 
 const keys = {
-  GENERAL_SETTINGS: 'general_settings',
   CONFIGURATION: 'configuration',
 };
 
@@ -14,19 +13,6 @@ const getStore = () => {
     name: 'content_manager',
   });
 };
-
-/** General settings */
-
-const getGeneralSettings = () =>
-  getStore().get({
-    key: keys.GENERAL_SETTINGS,
-  });
-
-const setGeneralSettings = value =>
-  getStore().set({
-    key: keys.GENERAL_SETTINGS,
-    value,
-  });
 
 /** Model configuration */
 const EMPTY_CONFIG = {
@@ -39,14 +25,7 @@ const configurationKey = key => `${keys.CONFIGURATION}_${key}`;
 
 const getModelConfiguration = async key => {
   const config = await getStore().get({ key: configurationKey(key) });
-  return _.merge(
-    {},
-    EMPTY_CONFIG,
-    {
-      settings: await getGeneralSettings(),
-    },
-    config
-  );
+  return _.merge({}, EMPTY_CONFIG, config);
 };
 
 const setModelConfiguration = async (key, value) => {
@@ -104,9 +83,6 @@ const getAllConfigurations = () =>
   findByKey('plugin_content_manager_configuration');
 
 module.exports = {
-  getGeneralSettings,
-  setGeneralSettings,
-
   getAllConfigurations,
   findByKey,
   getModelConfiguration,

@@ -18,7 +18,7 @@ const Wrapper = styled.div`
   }
 
   .form-wrapper {
-    padding-top: 18px;
+    padding-top: 21px;
   }
 
   .form-container {

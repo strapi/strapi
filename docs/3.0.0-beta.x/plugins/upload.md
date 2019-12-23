@@ -76,7 +76,7 @@ You have to send FormData in your request body
 
 ## Upload files related to an entry
 
-To upload files that will be liked to an specific entry.
+To upload files that will be linked to an specific entry.
 
 ### Request parameters
 
@@ -213,8 +213,8 @@ And for your files, they have to be prefixed by `files`.
 Example here with cover attribute `files.cover`.
 
 ::: tip
-If you want to upload files for a group, you will have to specify the inidex of the item you wan to add the file.
-Example `files.my_group_name[the_index].attribute_name`
+If you want to upload files for a component, you will have to specify the inidex of the item you wan to add the file.
+Example `files.my_component_name[the_index].attribute_name`
 :::
 
 ::: warning
