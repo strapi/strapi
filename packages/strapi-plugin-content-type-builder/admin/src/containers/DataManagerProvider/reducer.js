@@ -132,7 +132,9 @@ const reducer = (state, action) => {
             dynamicZoneTarget,
             'components',
           ],
-          () => fromJS(makeUnique(newComponents))
+          list => {
+            return fromJS(makeUnique([...list.toJS(), ...newComponents]));
+          }
         )
         .updateIn(['modifiedData', 'components'], old => {
           const componentsSchema = newComponents.reduce((acc, current) => {

@@ -8,6 +8,7 @@ const errorsTrads = {
   regex: 'components.Input.error.validation.regex',
   required: 'components.Input.error.validation.required',
   unique: 'components.Input.error.validation.unique',
+  integer: 'component.Input.error.validation.integer',
 };
 
 export default errorsTrads;

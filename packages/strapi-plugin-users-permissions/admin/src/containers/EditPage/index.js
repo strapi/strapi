@@ -18,14 +18,14 @@ import {
   InputsIndex as Input,
   LoadingIndicator,
   LoadingIndicatorPage,
-  PluginHeader,
 } from 'strapi-helper-plugin';
+import { Header } from '@buffetjs/custom';
 import { EditPageContextProvider } from '../../contexts/EditPage';
 import InputSearch from '../../components/InputSearchContainer';
 import Plugins from '../../components/Plugins';
 import Policies from '../../components/Policies';
 import pluginId from '../../pluginId';
-
+import getTrad from '../../utils/getTrad';
 // Actions
 import {
   addUser,
@@ -84,10 +84,10 @@ export class EditPage extends React.Component {
     }
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
+  componentDidUpdate(prevProps) {
     // Redirect user to HomePage if submit ok
-    if (nextProps.editPage.didSubmit !== this.props.editPage.didSubmit) {
-      this.props.history.push('/plugins/users-permissions/roles');
+    if (prevProps.editPage.didSubmit !== this.props.editPage.didSubmit) {
+      this.props.history.push(`/plugins/${pluginId}/roles`);
     }
   }
 
@@ -105,7 +105,7 @@ export class EditPage extends React.Component {
       return this.props.setErrors([
         {
           name: 'name',
-          errors: [{ id: 'users-permissions.EditPage.form.roles.name.error' }],
+          errors: [{ id: getTrad('EditPage.form.roles.name.error') }],
         },
       ]);
     }
@@ -145,7 +145,7 @@ export class EditPage extends React.Component {
               'errors',
             ])}
             didCheckErrors={this.props.editPage.didCheckErrors}
-            label={{ id: 'users-permissions.EditPage.form.roles.label.name' }}
+            label={{ id: getTrad('EditPage.form.roles.label.name') }}
             name="name"
             onChange={this.props.onChangeInput}
             type="text"
@@ -157,7 +157,7 @@ export class EditPage extends React.Component {
           <Input
             customBootstrapClass="col-md-12"
             label={{
-              id: 'users-permissions.EditPage.form.roles.label.description',
+              id: getTrad('EditPage.form.roles.label.description'),
             }}
             name="description"
             onChange={this.props.onChangeInput}
@@ -174,7 +174,7 @@ export class EditPage extends React.Component {
         didGetUsers={this.props.editPage.didGetUsers}
         getUser={this.props.getUser}
         label={{
-          id: 'users-permissions.EditPage.form.roles.label.users',
+          id: getTrad('EditPage.form.roles.label.users'),
           params: {
             number: size(get(this.props.editPage, ['modifiedData', 'users'])),
           },
@@ -197,30 +197,33 @@ export class EditPage extends React.Component {
   );
 
   render() {
+    const { formatMessage } = this.context;
     const pluginHeaderTitle =
       this.props.match.params.actionType === 'create'
-        ? 'users-permissions.EditPage.header.title.create'
-        : 'users-permissions.EditPage.header.title';
+        ? getTrad('EditPage.header.title.create')
+        : getTrad('EditPage.header.title');
     const pluginHeaderDescription =
       this.props.match.params.actionType === 'create'
-        ? 'users-permissions.EditPage.header.description.create'
-        : 'users-permissions.EditPage.header.description';
+        ? getTrad('EditPage.header.description.create')
+        : getTrad('EditPage.header.description');
     const pluginHeaderActions = [
       {
-        label: 'users-permissions.EditPage.cancel',
-        kind: 'secondary',
+        label: formatMessage({ id: getTrad('EditPage.cancel') }),
+        color: 'cancel',
         onClick: this.props.onCancel,
         type: 'button',
+        key: 'button-cancel',
       },
       {
-        kind: 'primary',
-        label: 'users-permissions.EditPage.submit',
+        color: 'success',
+        label: formatMessage({ id: getTrad('EditPage.submit') }),
         onClick: this.handleSubmit,
         type: 'submit',
         disabled: isEqual(
           this.props.editPage.modifiedData,
           this.props.editPage.initialData
         ),
+        key: 'button-submit',
       },
     ];
 
@@ -241,27 +244,42 @@ export class EditPage extends React.Component {
         <Wrapper>
           <BackHeader onClick={() => this.props.history.goBack()} />
           <div className="container-fluid">
-            <PluginHeader
-              title={{
-                id: pluginHeaderTitle,
-                values: {
-                  name: get(this.props.editPage.initialData, 'name'),
-                },
+            <FormattedMessage
+              id={pluginHeaderTitle}
+              values={{ name: get(this.props.editPage.initialData, 'name') }}
+            >
+              {title => {
+                return (
+                  <FormattedMessage
+                    id={pluginHeaderDescription}
+                    values={{
+                      description: get(
+                        this.props.editPage.initialData,
+                        'description',
+                        ''
+                      ),
+                    }}
+                  >
+                    {description => {
+                      return (
+                        <Header
+                          title={{
+                            label: title,
+                          }}
+                          content={description}
+                          actions={pluginHeaderActions}
+                        />
+                      );
+                    }}
+                  </FormattedMessage>
+                );
               }}
-              description={{
-                id: pluginHeaderDescription,
-                values: {
-                  description:
-                    get(this.props.editPage.initialData, 'description') || '',
-                },
-              }}
-              actions={pluginHeaderActions}
-            />
+            </FormattedMessage>
             <div className="form-wrapper row">
               <div className="col-md-12">
                 <div className="form-container">
                   <Title>
-                    <FormattedMessage id="users-permissions.EditPage.form.roles" />
+                    <FormattedMessage id={getTrad('EditPage.form.roles')} />
                   </Title>
                   <form>
                     <div className="row">

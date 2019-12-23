@@ -17,7 +17,7 @@ function NotFound({ history }) {
         onClick={e => {
           e.stopPropagation();
 
-          history.goBack();
+          history.push('/');
         }}
       />
     </Wrapper>
@@ -26,7 +26,7 @@ function NotFound({ history }) {
 
 NotFound.propTypes = {
   history: PropTypes.shape({
-    goBack: PropTypes.func,
+    push: PropTypes.func,
   }).isRequired,
 };
 

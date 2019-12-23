@@ -48,7 +48,7 @@ function App(props) {
 
         if (uuid) {
           try {
-            await fetch('https://analytics.strapi.io/track', {
+            fetch('https://analytics.strapi.io/track', {
               method: 'POST',
               body: JSON.stringify({
                 event: 'didInitializeAdministration',
