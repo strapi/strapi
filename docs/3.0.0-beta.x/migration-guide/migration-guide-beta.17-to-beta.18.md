@@ -1,4 +1,4 @@
-# Migration guide from beta.18 through beta.17.8 to beta.18
+# Migration guide from beta.17.4 through beta.17.8 to beta.18
 
 Upgrading your Strapi application to `v3.0.0-beta.18`.
 
@@ -131,6 +131,16 @@ Run the following statement in your database:
 
 :::
 ::::
+
+## Date type changes
+
+We introduced new types in the admin panel: `date`, `datetime` and `time`. Before all of those types where saved as `datetime`.
+
+You will need to change the type of your fields from `date` to `datetime` if you don't want to migrate your data.
+
+- To migrate yout old `date` to `datetime`, change the field type from `date` to `datetime`. NO data migration is required.
+- To migrate your old `date` to new `date`, you will need to migrate yout data to be of the format: `YYYY-MM-DD`
+- To migrate your old `date` to the new `time`, change the field type from `date` to `time`. You will also need to transform them to be of the format: `HH:mm:ss.SSS`
 
 ## Groups become Components
 
@@ -370,9 +380,18 @@ _Repeat this query for every join table where you are using this component._
 
 ```sql
 UPDATE restaurant_components
-SET component_type = 'groups_old_table_name'
-WHERE component_type = 'components_new_table_name';
+SET component_type = 'components_new_table_name'
+WHERE component_type = 'groups_old_table_name';
 ```
+
+**4. If you store files in groups, update the `related_type` values**
+
+```sql
+UPDATE upload_file_morph
+SET related_type = 'components_new_table_name'
+WHERE related_type = 'groups_old_table_name';
+```
+
 
 #### Mongo
 
@@ -450,6 +469,45 @@ We created new home pages when your go to your api url.
 You will need to copy `index.html` and `production.html` into your `public` folder.
 You can find those two files [here](https://github.com/strapi/strapi/tree/master/packages/strapi-generate-new/lib/resources/files/public).
 
+## Updating `csp` options
+
+The admin panel contains certain assets that use `data:img;base64` images. To allow rendering of those assets you can update the files `./config/environments/{env}/security.json` as follows:
+
+**Before**
+
+```json
+{
+  "csp": {
+    "enabled": true,
+    "policy": [
+      {
+        "img-src": "'self' http:"
+      },
+      "block-all-mixed-content"
+    ]
+  }
+  //....
+}
+```
+
+**After**
+
+```json
+{
+  "csp": {
+    "enabled": true,
+    "policy": ["block-all-mixed-content"]
+  }
+  //....
+}
+```
+
+If you need more fine control you can also simply add the `data:` option to the `img-src` option.
+
 ## Rebuilding your administration panel
 
 Now delete the `.cache` and `build` folders. Then run `yarn develop`.
+
+```
+
+```

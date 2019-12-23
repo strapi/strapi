@@ -52,6 +52,7 @@ const RepeatableComponent = ({
   const errorsArray = componentErrorKeys.map(key =>
     get(formErrors, [key, 'id'], '')
   );
+
   const hasMinError =
     get(errorsArray, [0], '').includes('min') &&
     !collapses.some(obj => obj.isOpen === true);

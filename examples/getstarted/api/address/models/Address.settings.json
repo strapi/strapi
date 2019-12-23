@@ -43,11 +43,6 @@
     "full_name": {
       "type": "string",
       "required": true
-    },
-    "dz": {
-      "type": "dynamiczone",
-      "components": [],
-      "min": 2
     }
   }
 }
