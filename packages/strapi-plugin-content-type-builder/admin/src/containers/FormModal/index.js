@@ -334,19 +334,6 @@ const FormModal = () => {
     items: [],
   }));
 
-  // TODO improve icon logic
-  let iconType = ['component', 'contentType'].includes(state.modalType)
-    ? state.modalType
-    : state.forTarget;
-
-  if (state.modalType === 'addComponentToDynamicZone') {
-    iconType = 'dynamiczone';
-  }
-
-  if (state.modalType === 'editCategory') {
-    iconType = 'component';
-  }
-
   const isCreatingContentType = state.modalType === 'contentType';
   const isCreatingComponent = state.modalType === 'component';
   const isCreatingAttribute = state.modalType === 'attribute';
@@ -362,14 +349,6 @@ const FormModal = () => {
   const isOpen = !isEmpty(search);
   const isPickingAttribute = state.modalType === 'chooseAttribute';
   const uid = createUid(modifiedData.name || '');
-
-  // let headerId = isCreating
-  //   ? `modalForm.${state.modalType}.header-create`
-  //   : 'modalForm.header-edit';
-
-  // if (!['contentType', 'component'].includes(state.modalType)) {
-  //   headerId = null;
-  // }
 
   const checkFormValidity = async () => {
     let schema;
@@ -1042,14 +1021,7 @@ const FormModal = () => {
     >
       <HeaderModal>
         <ModalHeader
-          name={state.headerDisplayName}
-          category={state.headerDisplayCategory}
           headerId={state.headerId}
-          iconType={iconType || 'contentType'}
-          subCategory={state.headerDisplaySubCategory}
-          subTargetUid={state.subTargetUid}
-          target={state.forTarget}
-          targetUid={state.targetUid}
           headers={createHeadersArray(state)}
         />
         <section>

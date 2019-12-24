@@ -44,8 +44,6 @@ const AttributeOption = forwardRef(({ tabIndex, type }, ref) => {
   const handleClick = () => {
     const forTarget = query.get('forTarget');
     const targetUid = query.get('targetUid');
-    // TODO to remove
-    const headerDisplayName = query.get('headerDisplayName');
     const header_label_1 = query.get('header_label_1');
     const header_info_category_1 = query.get('header_info_category_1');
     const header_info_name_1 = query.get('header_info_name_1');
@@ -72,12 +70,7 @@ const AttributeOption = forwardRef(({ tabIndex, type }, ref) => {
       forTarget,
       targetUid,
       attributeType: type,
-      headerDisplayName,
       step: type === 'component' ? '1' : null,
-      // TODO to remove
-      headerDisplayCategory: query.get('headerDisplayCategory'),
-      // TODO to remove
-      headerDisplaySubCategory: query.get('headerDisplaySubCategory'),
       subTargetUid: query.get('subTargetUid'),
       header_label_1,
       header_info_name_1,

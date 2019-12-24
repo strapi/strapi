@@ -76,27 +76,13 @@ const ModalHeader = ({ headerId, headers }) => {
 };
 
 ModalHeader.defaultProps = {
-  category: null,
   headerId: '',
   headers: [],
-  iconType: 'contentType',
-  name: '',
-  target: null,
-  targetUid: null,
-  subCategory: null,
-  subTargetUid: null,
 };
 
 ModalHeader.propTypes = {
-  category: PropTypes.string,
   headerId: PropTypes.string,
   headers: PropTypes.array,
-  iconType: PropTypes.string,
-  name: PropTypes.string,
-  target: PropTypes.string,
-  targetUid: PropTypes.string,
-  subCategory: PropTypes.string,
-  subTargetUid: PropTypes.string,
 };
 
 export default ModalHeader;

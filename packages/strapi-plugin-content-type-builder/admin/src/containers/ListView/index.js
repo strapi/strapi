@@ -114,8 +114,6 @@ const ListView = () => {
       settingType: 'base',
       step: '1',
       actionType: 'edit',
-      // TODO to remove
-      headerDisplayName: dzName,
       ...firstHeaderObject,
       ...secondHeaderObj,
     };
