@@ -1,10 +1,10 @@
 # Authenticated request
 
-In this guide we will see how you can request the API as an authenticated user.
+In this guide you will see how you can request the API as an authenticated user.
 
 ## Introduction
 
-To let you understand many concepts mainly on the [roles and permissions](../plugins/users-permissions.md#manage-roles-permissions) part, we will user many users and roles.
+To show you many of the concepts on the [roles and permissions](../plugins/users-permissions.md#manage-roles-permissions) part, we will use many users and roles.
 
 After that we will see the [authentication workflow](../plugins/users-permissions.md#authentication) to get a `JWT` and use it for an API request.
 
@@ -165,8 +165,8 @@ const {data} = await axios
 console.log(data);
 ```
 
-If you request this as a **Reader user**, you will receive a **403 error**. It's because the **Reader role** not have access to the `create` function of the **Article** Content Type.
+If you request this as a **Reader user**, you will receive a **403 error**. It's because the **Reader role** does not have access to the create function of the **Article** Content Type.
 
-To fix that you will have to login with the **Author user** and use his `JWT` into the request to create an **Article**.
+To fix that you will have to login with the **Author user** and use its `JWT` into the request to create an **Article**.
 
 With that done, you will be able to create an **Article**.
