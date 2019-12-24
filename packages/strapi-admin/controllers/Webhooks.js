@@ -101,9 +101,14 @@ module.exports = {
         abortEarly: false,
       });
     } catch (error) {
-      return ctx.badRequest('ValidationError', {
-        error: formatYupErrors(error),
-      });
+      return ctx.send(
+        {
+          statusCode: 400,
+          message: 'ValidationError',
+          error: formatYupErrors(error),
+        },
+        400
+      );
     }
 
     const webhook = await strapi.webhookStore.findWebhook(id);
