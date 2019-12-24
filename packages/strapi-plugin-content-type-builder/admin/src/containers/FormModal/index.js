@@ -76,7 +76,7 @@ const FormModal = () => {
   useEffect(() => {
     if (!isEmpty(search)) {
       const actionType = query.get('actionType');
-      // Return 'null' if there isn't any attributeType search params
+      // Returns 'null' if there isn't any attributeType search params
       const attributeName = query.get('attributeName');
       const attributeType = query.get('attributeType');
       const dynamicZoneTarget = query.get('dynamicZoneTarget');

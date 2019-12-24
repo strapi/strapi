@@ -6,6 +6,7 @@ import { AttributeIcon } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
+import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
 import getTrad from '../../utils/getTrad';
 import Curve from '../../icons/Curve';
 import UpperFist from '../UpperFirst';
@@ -70,25 +71,7 @@ function ListRow({
       );
 
       const attrType = nature ? 'relation' : type;
-      let icoType;
-
-      switch (attrType) {
-        case 'integer':
-        case 'biginteger':
-        case 'decimal':
-        case 'float':
-          icoType = 'number';
-          break;
-        case 'string':
-        case 'text':
-          icoType = 'text';
-          break;
-        case '':
-          icoType = 'relation';
-          break;
-        default:
-          icoType = type;
-      }
+      const icoType = getAttributeDisplayedType(attrType);
 
       let firstHeaderObject = {
         header_label_1: mainTypeName,

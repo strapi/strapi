@@ -11,6 +11,7 @@ import {
 import { Header } from '@buffetjs/custom';
 import ListViewContext from '../../contexts/ListViewContext';
 import convertAttrObjToArray from '../../utils/convertAttrObjToArray';
+import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
 import ListRow from '../../components/ListRow';
@@ -78,8 +79,6 @@ const ListView = () => {
     secondHeaderObj,
     thirdHeaderObj,
     fourthHeaderObj
-    // TODO remove
-    // subTargetUid
   ) => {
     // disable the prompt
     await wait();
@@ -137,25 +136,7 @@ const ListView = () => {
     fourthHeaderObj,
     fifthHeaderObj
   ) => {
-    let attributeType;
-
-    switch (type) {
-      case 'integer':
-      case 'biginteger':
-      case 'decimal':
-      case 'float':
-        attributeType = 'number';
-        break;
-      case 'string':
-      case 'text':
-        attributeType = 'text';
-        break;
-      case '':
-        attributeType = 'relation';
-        break;
-      default:
-        attributeType = type;
-    }
+    const attributeType = getAttributeDisplayedType(type);
 
     await wait();
 
