@@ -45,6 +45,10 @@ const AttributeOption = forwardRef(({ tabIndex, type }, ref) => {
     const forTarget = query.get('forTarget');
     const targetUid = query.get('targetUid');
     const headerDisplayName = query.get('headerDisplayName');
+    const header_label_1 = query.get('header_label_1');
+
+    const header_info_category_1 = query.get('header_info_category_1');
+    const header_info_name_1 = query.get('header_info_name_1');
 
     const search = makeSearch({
       modalType: 'attribute',
@@ -55,9 +59,16 @@ const AttributeOption = forwardRef(({ tabIndex, type }, ref) => {
       attributeType: type,
       headerDisplayName,
       step: type === 'component' ? '1' : null,
+      // TODO to remove
       headerDisplayCategory: query.get('headerDisplayCategory'),
+      // TODO to remove
       headerDisplaySubCategory: query.get('headerDisplaySubCategory'),
       subTargetUid: query.get('subTargetUid'),
+      header_label_1,
+      header_icon_isCustom_1: false,
+      header_info_category_1,
+      header_info_name_1,
+      header_icon_name_1: type,
     });
 
     if (forTarget === 'contentType') {

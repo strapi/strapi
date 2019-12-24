@@ -31,6 +31,7 @@ import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
 import getAttributes from './utils/attributes';
 import forms from './utils/forms';
+import createHeadersArray from './utils/createHeadersArray';
 import { createComponentUid, createUid } from './utils/createUid';
 import getModalTitleSubHeader from './utils/getModalTitleSubHeader';
 import getNextSearch from './utils/getNextSearch';
@@ -93,6 +94,11 @@ const FormModal = () => {
       const header_icon_isCustom_1 = query.get('header_icon_isCustom_1');
       const header_info_category_1 = query.get('header_info_category_1');
       const header_info_name_1 = query.get('header_info_name_1');
+      const header_label_2 = query.get('header_label_2');
+      const header_icon_name_2 = query.get('header_icon_name_2');
+      const header_icon_isCustom_2 = query.get('header_icon_isCustom_2');
+      const header_info_category_2 = query.get('header_info_category_2');
+      const header_info_name_2 = query.get('header_info_name_2');
       const step = query.get('step');
       const pathToSchema =
         forTarget === 'contentType' || forTarget === 'component'
@@ -119,6 +125,11 @@ const FormModal = () => {
         header_icon_isCustom_1,
         header_info_name_1,
         header_info_category_1,
+        header_label_2,
+        header_icon_name_2,
+        header_icon_isCustom_2,
+        header_info_name_2,
+        header_info_category_2,
         headerId,
       });
 
@@ -989,7 +1000,6 @@ const FormModal = () => {
     ? { paddingTop: '0.5rem', paddingBottom: '3rem' }
     : {};
 
-  console.log(state.headerId);
   return (
     <Modal
       isOpen={isOpen}
@@ -1008,6 +1018,7 @@ const FormModal = () => {
           subTargetUid={state.subTargetUid}
           target={state.forTarget}
           targetUid={state.targetUid}
+          headers={createHeadersArray(state)}
         />
         <section>
           <HeaderModalTitle>

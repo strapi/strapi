@@ -31,6 +31,16 @@ const INITIAL_STATE_DATA = {
   header_icon_isCustom_3: null,
   header_info_category_3: null,
   header_info_name_3: null,
+  header_label_4: null,
+  header_icon_name_4: null,
+  header_icon_isCustom_4: null,
+  header_info_category_4: null,
+  header_info_name_4: null,
+  header_label_5: null,
+  header_icon_name_5: null,
+  header_icon_isCustom_5: null,
+  header_info_category_5: null,
+  header_info_name_5: null,
 };
 
 export { NAVLINKS, INITIAL_STATE_DATA };
