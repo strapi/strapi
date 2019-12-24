@@ -74,9 +74,10 @@ const ListView = () => {
   const handleClickAddField = async (
     forTarget,
     targetUid,
-    firstHeaderObj
-    // secondHeaderObj,
-    // thirdHeaderObj,
+    firstHeaderObj,
+    secondHeaderObj,
+    thirdHeaderObj,
+    fourthHeaderObj
     // subTargetUid
   ) => {
     // disable the prompt
@@ -87,34 +88,37 @@ const ListView = () => {
       forTarget,
       targetUid,
       ...firstHeaderObj,
+      ...secondHeaderObj,
+      ...thirdHeaderObj,
+      ...fourthHeaderObj,
     };
 
     push({ search: makeSearch(searchObj) });
   };
 
-  const handleClickOpenModalAddField = async (
-    forTarget,
-    targetUid,
-    headerDisplayName,
-    headerDisplayCategory = null,
-    headerDisplaySubCategory = null,
-    subTargetUid = null
-  ) => {
-    const searchObj = {
-      modalType: 'chooseAttribute',
-      forTarget,
-      targetUid,
-      headerDisplayName,
-      headerDisplayCategory,
-      headerDisplaySubCategory,
-      subTargetUid,
-    };
+  // const handleClickOpenModalAddField = async (
+  //   forTarget,
+  //   targetUid,
+  //   headerDisplayName,
+  //   headerDisplayCategory = null,
+  //   headerDisplaySubCategory = null,
+  //   subTargetUid = null
+  // ) => {
+  //   const searchObj = {
+  //     modalType: 'chooseAttribute',
+  //     forTarget,
+  //     targetUid,
+  //     headerDisplayName,
+  //     headerDisplayCategory,
+  //     headerDisplaySubCategory,
+  //     subTargetUid,
+  //   };
 
-    // Disable the prompt
-    await wait();
+  //   // Disable the prompt
+  //   await wait();
 
-    push({ search: makeSearch(searchObj, true) });
-  };
+  //   push({ search: makeSearch(searchObj, true) });
+  // };
 
   const handleClickAddComponentToDZ = async dzName => {
     const firstHeaderObject = {
@@ -349,7 +353,8 @@ const ListView = () => {
 
   return (
     <ListViewContext.Provider
-      value={{ openModalAddField: handleClickOpenModalAddField }}
+      // value={{ openModalAddField: handleClickOpenModalAddField }}
+      value={{ openModalAddField: handleClickAddField }}
     >
       <Wrapper>
         <BackHeader onClick={goBack} />

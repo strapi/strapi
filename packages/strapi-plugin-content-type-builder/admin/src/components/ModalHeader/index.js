@@ -6,48 +6,15 @@ import { AttributeIcon } from '@buffetjs/core';
 import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // import useDataManager from '../../hooks/useDataManager';
-// import ComponentIcon from './ComponentIcon';
+import ComponentIcon from './ComponentIcon';
 // import Header from './Header';
 import IconWrapper from './IconWrapper';
 import UpperFirst from '../UpperFirst';
 
-const ModalHeader = ({
-  // category,
-  headerId,
-  headers,
-  // iconType,
-  // name,
-  // target,
-  // targetUid,
-  // subCategory,
-  // subTargetUid,
-}) => {
-  // const { modifiedData } = useDataManager();
-  // const currentComponent = get(modifiedData, ['components', targetUid], {});
-  // const shouldDisplayComponentCatInfos = target === 'components';
-  // const currentComponentIcon = get(currentComponent, ['schema', 'icon'], '');
-  console.log({ headers });
-  // let iconName;
-
-  // if (iconType === 'components') {
-  //   iconName = 'component';
-  // } else {
-  //   iconName = iconType;
-  // }
-
+const ModalHeader = ({ headerId, headers }) => {
   return (
     <section>
       <HeaderModalTitle style={{ textTransform: 'none' }}>
-        {/* {shouldDisplayComponentCatInfos ? (
-          <ComponentIcon isSelected>
-            <FontAwesomeIcon icon={currentComponentIcon} />
-          </ComponentIcon>
-        ) : (
-          <AttributeIcon
-            type={iconName}
-            style={{ margin: 'auto 20px auto 0' }}
-          />
-        )} */}
         {headerId && (
           <>
             <AttributeIcon
@@ -62,13 +29,23 @@ const ModalHeader = ({
         )}
         {!headerId &&
           headers.map((header, index) => {
+            const iconName = get(header, ['icon', 'name'], '');
+            const iconType = iconName === null ? '' : iconName;
+            const icon = get(header, ['icon', 'isCustom'], false) ? (
+              <ComponentIcon isSelected>
+                <FontAwesomeIcon icon={iconType} />
+              </ComponentIcon>
+            ) : (
+              <AttributeIcon
+                type={iconType}
+                style={{ margin: 'auto 20px auto 0' }}
+              />
+            );
+
             if (index === 0) {
               return (
                 <Fragment key={index}>
-                  <AttributeIcon
-                    type={get(header, ['icon', 'name'], '')}
-                    style={{ margin: 'auto 20px auto 0' }}
-                  />
+                  {icon}
                   <span>
                     <UpperFirst content={get(header, ['label'], '')} />
                   </span>
@@ -81,10 +58,7 @@ const ModalHeader = ({
                 <IconWrapper>
                   <FontAwesomeIcon icon="chevron-right" />
                 </IconWrapper>
-                <AttributeIcon
-                  type={get(header, ['icon', 'name'], '')}
-                  style={{ margin: 'auto 20px auto 0' }}
-                />
+                {icon}
                 <span>
                   <UpperFirst content={get(header, ['label'], '')} />
                 </span>

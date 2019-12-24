@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { get } from 'lodash';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import { Plus } from '@buffetjs/icons';
 
@@ -26,34 +27,102 @@ function List({
   mainTypeName,
   editTarget,
   isFromDynamicZone,
+  isNestedInDZComponent,
   isMain,
   firstLoopComponentName,
   firstLoopComponentUid,
   secondLoopComponentName,
   secondLoopComponentUid,
   isSub,
+  dzName,
 }) {
   const { formatMessage } = useGlobalContext();
-  const { isInDevelopmentMode } = useDataManager();
+  const { isInDevelopmentMode, modifiedData } = useDataManager();
   const { openModalAddField } = useListView();
+  // console.log({ modifiedData });
   const onClickAddField = () => {
-    let headerDisplayName = mainTypeName;
+    let firstHeaderObject = {
+      header_label_1: mainTypeName,
+      header_icon_name_1: 'contentType',
+      header_icon_isCustom_1: false,
+      header_info_category_1: null,
+      header_info_name_1: null,
+    };
+    let secondHeaderObject = {
+      header_label_2: firstLoopComponentName,
+      header_icon_name_2: 'component',
+      header_icon_isCustom_2: false,
+      header_info_category_2: null,
+      header_info_name_2: null,
+    };
+    let thirdHeaderObject = {
+      header_icon_name_3: 'component',
+      header_icon_isCustom_3: false,
+      header_info_category_3: null,
+      header_info_name_3: null,
+    };
+    let fourthHeaderObject = {
+      header_icon_name_4: null,
+      header_icon_isCustom_4: false,
+      header_info_category_4: null,
+      header_info_name_4: null,
+    };
+
+    const firstComponentIcon = get(
+      modifiedData,
+      ['components', firstLoopComponentUid, 'schema', 'icon'],
+      ''
+    );
+    const secondComponentIcon = get(
+      modifiedData,
+      ['components', secondLoopComponentUid, 'schema', 'icon'],
+      ''
+    );
 
     if (firstLoopComponentName) {
-      headerDisplayName = firstLoopComponentName;
+      firstHeaderObject = {
+        ...firstHeaderObject,
+        header_icon_name_1: firstComponentIcon,
+        header_icon_isCustom_1: true,
+      };
     }
 
     if (secondLoopComponentUid) {
-      headerDisplayName = secondLoopComponentName;
+      firstHeaderObject = {
+        ...firstHeaderObject,
+        header_icon_name_1: secondComponentIcon,
+        header_icon_isCustom_1: true,
+      };
+      thirdHeaderObject = {
+        ...thirdHeaderObject,
+        header_label_3: secondLoopComponentName,
+      };
+    }
+
+    if (isFromDynamicZone || isNestedInDZComponent) {
+      secondHeaderObject = {
+        ...secondHeaderObject,
+        header_label_2: dzName,
+        header_icon_name_2: 'dynamiczone',
+        header_icon_isCustom_2: false,
+      };
+      thirdHeaderObject = {
+        ...thirdHeaderObject,
+        header_label_3: firstLoopComponentName,
+      };
+      fourthHeaderObject = {
+        ...fourthHeaderObject,
+        header_label_4: secondLoopComponentName,
+      };
     }
 
     openModalAddField(
       editTarget,
       targetUid,
-      headerDisplayName,
-      firstLoopComponentUid ? mainTypeName : null,
-      secondLoopComponentName ? firstLoopComponentName : null,
-      secondLoopComponentUid ? firstLoopComponentUid : null
+      firstHeaderObject,
+      secondHeaderObject,
+      thirdHeaderObject,
+      fourthHeaderObject
     );
   };
 
@@ -104,7 +173,8 @@ function List({
                       customRowComponent={customRowComponent}
                       targetUid={targetUid}
                       // NEW PROPS
-
+                      dzName={dzName}
+                      isNestedInDZComponent={isFromDynamicZone}
                       mainTypeName={mainTypeName}
                       editTarget={editTarget}
                       firstLoopComponentName={firstLoopComponentName}
@@ -147,9 +217,11 @@ List.defaultProps = {
   addComponentToDZ: () => {},
   className: null,
   customRowComponent: null,
+  dzName: null,
   firstLoopComponentName: null,
   firstLoopComponentUid: null,
   isFromDynamicZone: false,
+  isNestedInDZComponent: false,
   isMain: false,
   isSub: false,
   items: [],
@@ -162,10 +234,12 @@ List.propTypes = {
   addComponentToDZ: PropTypes.func,
   className: PropTypes.string,
   customRowComponent: PropTypes.func,
+  dzName: PropTypes.string,
   editTarget: PropTypes.string.isRequired,
   firstLoopComponentName: PropTypes.string,
   firstLoopComponentUid: PropTypes.string,
   isFromDynamicZone: PropTypes.bool,
+  isNestedInDZComponent: PropTypes.bool,
   isMain: PropTypes.bool,
   items: PropTypes.instanceOf(Array),
   mainTypeName: PropTypes.string.isRequired,
