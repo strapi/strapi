@@ -564,6 +564,7 @@ const FormModal = () => {
       ...rest,
     });
   };
+
   const handleSubmit = async (e, shouldContinue = isCreating) => {
     e.preventDefault();
 
@@ -603,7 +604,9 @@ const FormModal = () => {
             modalType: 'chooseAttribute',
             forTarget: state.forTarget,
             targetUid,
-            headerDisplayName: modifiedData.name,
+            header_label_1: modifiedData.name,
+            header_icon_name_1: 'contentType',
+            header_icon_isCustom_1: null,
           }),
         });
       } else if (isCreatingComponent) {
@@ -622,7 +625,9 @@ const FormModal = () => {
               modalType: 'chooseAttribute',
               forTarget: state.forTarget,
               targetUid: componentUid,
-              headerDisplayName: modifiedData.name,
+              header_label_1: modifiedData.name,
+              header_icon_name_1: 'contentType',
+              header_icon_isCustom_1: null,
             }),
             pathname: `/plugins/${pluginId}/component-categories/${category}/${componentUid}`,
           });
@@ -636,6 +641,7 @@ const FormModal = () => {
         }
       } else if (isEditingCategory) {
         if (toLower(initialData.name) === toLower(modifiedData.name)) {
+          // Close the modal
           push({ search: '' });
 
           return;

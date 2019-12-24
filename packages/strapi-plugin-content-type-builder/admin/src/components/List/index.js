@@ -182,7 +182,6 @@ function List({
                     dzName={dzName}
                     isNestedInDZComponent={isNestedInDZComponent}
                     targetUid={targetUid}
-                    // NEW props
                     mainTypeName={mainTypeName}
                     editTarget={editTarget}
                     firstLoopComponentName={firstLoopComponentName}
@@ -197,7 +196,6 @@ function List({
                       {...item}
                       customRowComponent={customRowComponent}
                       targetUid={targetUid}
-                      // NEW PROPS
                       dzName={dzName}
                       isNestedInDZComponent={isFromDynamicZone}
                       mainTypeName={mainTypeName}
