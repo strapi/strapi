@@ -111,3 +111,42 @@ If you want to create your own provider without publishing it on **npm** you can
 ```
 
 - Finally, run `yarn install` or `npm install` to install your new custom provider.
+
+## Trouble shooting
+
+You receive an `Auth.form.error.email.invalid` error even if the email is valid and exist in your database.
+
+Here is the error response you get from the API.
+
+```json
+{
+  "statusCode": 400,
+  "error": "Bad Request",
+  "message": [
+    {
+      "messages": [
+        {
+          "id": "Auth.form.error.email.invalid"
+        }
+      ]
+    }
+  ]
+}
+```
+
+It's due to your IP connection. By default, Strapi use the [`sendmail`](https://github.com/guileen/node-sendmail) node module.
+
+This package send email from your machine. And depending of your internet connection, the connection to the SMTP server could fail.
+
+Here is the `sendmail` error.
+
+```
+Error: SMTP code:550 msg:550-5.7.1 [87.88.179.13] The IP you're using to send mail is not authorized to
+550-5.7.1 send email directly to our servers. Please use the SMTP relay at your
+550-5.7.1 service provider instead. Learn more at
+550 5.7.1  https://support.google.com/mail/?p=NotAuthorizedError 30si2132728pjz.75 - gsmtp
+```
+
+To fix it, I suggest you to use another email provider that uses third party to send emails.
+
+With this way you will never have this error again and you will probably be able to have an analytics of your emails.
