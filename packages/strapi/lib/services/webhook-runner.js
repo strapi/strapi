@@ -78,15 +78,22 @@ class WebhookRunner {
       },
       timeout: 10000,
     })
-      .then(res => {
+      .then(async res => {
+        if (res.ok) {
+          return {
+            statusCode: res.status,
+          };
+        }
+
         return {
           statusCode: res.status,
+          message: await res.text(),
         };
       })
       .catch(err => {
         return {
-          statusCode: err.status,
-          body: err.body,
+          statusCode: 500,
+          message: err.message,
         };
       });
   }

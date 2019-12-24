@@ -32,14 +32,24 @@ const webhookModel = {
   },
 };
 
-const formatWebhookInfo = webhook => {
+const toDBObject = data => {
   return {
-    id: webhook.id,
-    name: webhook.name,
-    url: webhook.url,
-    headers: webhook.headers,
-    events: webhook.events,
-    isEnabled: webhook.enabled,
+    name: data.name,
+    url: data.url,
+    headers: data.headers,
+    events: data.events,
+    enabled: data.isEnabled,
+  };
+};
+
+const fromDBObject = row => {
+  return {
+    id: row.id,
+    name: row.name,
+    url: row.url,
+    headers: row.headers,
+    events: row.events,
+    isEnabled: row.enabled,
   };
 };
 
@@ -50,52 +60,28 @@ const createWebhookStore = ({ db }) => {
     async findWebhooks() {
       const results = await webhookQueries.find();
 
-      return results.map(formatWebhookInfo);
+      return results.map(fromDBObject);
     },
 
     async findWebhook(id) {
       const result = await webhookQueries.findOne({ id });
-      return result ? formatWebhookInfo(result) : null;
+      return result ? fromDBObject(result) : null;
     },
 
     createWebhook(data) {
-      const { name, url, headers, events } = data;
-
-      const webhook = {
-        name,
-        url,
-        headers,
-        events,
-        enabled: true,
-      };
-
-      return webhookQueries.create(webhook).then(formatWebhookInfo);
+      return webhookQueries
+        .create(toDBObject({ ...data, isEnabled: true }))
+        .then(fromDBObject);
     },
 
     async updateWebhook(id, data) {
-      const oldWebhook = await this.findWebhook(id);
-
-      if (!oldWebhook) {
-        throw new Error('webhook.notFound');
-      }
-
-      const { name, url, headers, events, isEnabled } = data;
-
-      const updatedWebhook = {
-        name,
-        url,
-        headers,
-        events,
-        enabled: isEnabled,
-      };
-
-      return webhookQueries
-        .update({ id }, updatedWebhook)
-        .then(formatWebhookInfo);
+      const webhook = await webhookQueries.update({ id }, toDBObject(data));
+      return webhook ? fromDBObject(webhook) : null;
     },
 
-    deleteWebhook(id) {
-      return webhookQueries.delete({ id });
+    async deleteWebhook(id) {
+      const webhook = await webhookQueries.delete({ id });
+      return webhook ? fromDBObject(webhook) : null;
     },
   };
 };

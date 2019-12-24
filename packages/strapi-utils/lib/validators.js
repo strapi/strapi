@@ -1,6 +1,7 @@
 'use strict';
 
-const { ValidationError } = require('yup');
+const yup = require('yup');
+const { ValidationError } = yup;
 
 /**
  * Returns a formatted error for http responses
@@ -22,4 +23,7 @@ const formatYupErrors = validationError => {
   }, {});
 };
 
-module.exports = formatYupErrors;
+module.exports = {
+  yup,
+  formatYupErrors,
+};

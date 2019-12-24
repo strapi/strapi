@@ -1,26 +1,57 @@
 'use strict';
 
+const _ = require('lodash');
+const { yup, formatYupErrors } = require('strapi-utils');
+
+const ALLOWED_EVENTS = [
+  'entry.create',
+  'entry.update',
+  'entry.delete',
+  'media.create',
+  'media.delete',
+];
+
+const webhookValidator = yup
+  .object({
+    name: yup.string().required(),
+    url: yup.string().required(),
+    headers: yup.lazy(data => {
+      if (typeof data !== 'object') {
+        return yup.object().required();
+      }
+
+      return yup
+        .object(
+          _.mapValues(data, () => {
+            yup
+              .string()
+              .min(1)
+              .required();
+          })
+        )
+        .required();
+    }),
+    events: yup
+      .array()
+      .of(
+        yup
+          .string()
+          .oneOf(ALLOWED_EVENTS)
+          .required()
+      )
+      .min(1)
+      .required(),
+  })
+  .noUnknown();
+
+const updateWebhookValidator = webhookValidator.shape({
+  isEnabled: yup.boolean(),
+});
+
 module.exports = {
   async listWebhooks(ctx) {
     const webhooks = await strapi.webhookStore.findWebhooks();
     ctx.send({ data: webhooks });
-  },
-
-  async createWebhook(ctx) {
-    const { name, url, headers, events } = ctx.request.body;
-
-    // TODO: validate input
-
-    const webhook = await strapi.webhookStore.createWebhook({
-      name,
-      url,
-      headers,
-      events,
-    });
-
-    strapi.webhookRunner.add(webhook);
-
-    ctx.created({ data: webhook });
   },
 
   async getWebhook(ctx) {
@@ -34,26 +65,63 @@ module.exports = {
     ctx.send({ data: webhook });
   },
 
+  async createWebhook(ctx) {
+    const { body } = ctx.request;
+
+    try {
+      await webhookValidator.validate(body, {
+        strict: true,
+        abortEarly: false,
+      });
+    } catch (error) {
+      return ctx.send(
+        {
+          statusCode: 400,
+          message: 'ValidationError',
+          error: formatYupErrors(error),
+        },
+        400
+      );
+    }
+
+    const webhook = await strapi.webhookStore.createWebhook(body);
+
+    strapi.webhookRunner.add(webhook);
+
+    ctx.created({ data: webhook });
+  },
+
   async updateWebhook(ctx) {
     const { id } = ctx.params;
     const { body } = ctx.request;
 
-    const webhook = await strapi.webhookStore.findWebhook(id);
-
-    // TODO: validate input
-
-    if (!webhook) {
-      return ctx.send({ error: 'webhook.notFound' }, 404);
+    try {
+      await updateWebhookValidator.validate(body, {
+        strict: true,
+        abortEarly: false,
+      });
+    } catch (error) {
+      return ctx.badRequest('ValidationError', {
+        error: formatYupErrors(error),
+      });
     }
 
-    const updatedWebhook = {
+    const webhook = await strapi.webhookStore.findWebhook(id);
+
+    if (!webhook) {
+      return ctx.notFound('webhook.notFound');
+    }
+
+    const updatedWebhook = await strapi.webhookStore.updateWebhook(id, {
       ...webhook,
       ...body,
-    };
+    });
 
-    await strapi.webhookStore.updateWebhook(id, updatedWebhook);
+    if (!updatedWebhook) {
+      return ctx.notFound('webhook.notFound');
+    }
 
-    strapi.webhookRunner.update(webhook);
+    strapi.webhookRunner.update(updatedWebhook);
 
     ctx.send({ data: updatedWebhook });
   },
@@ -63,7 +131,7 @@ module.exports = {
     const webhook = await strapi.webhookStore.findWebhook(id);
 
     if (!webhook) {
-      return ctx.send({ error: 'webhook.notFound' }, 404);
+      return ctx.notFound('webhook.notFound');
     }
 
     await strapi.webhookStore.deleteWebhook(id);
