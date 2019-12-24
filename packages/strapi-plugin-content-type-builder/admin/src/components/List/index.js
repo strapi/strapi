@@ -179,6 +179,8 @@ function List({
                 <React.Fragment key={item.name}>
                   <CustomRow
                     {...item}
+                    dzName={dzName}
+                    isNestedInDZComponent={isNestedInDZComponent}
                     targetUid={targetUid}
                     // NEW props
                     mainTypeName={mainTypeName}

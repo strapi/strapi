@@ -97,30 +97,6 @@ const ListView = () => {
     push({ search: makeSearch(searchObj) });
   };
 
-  // const handleClickOpenModalAddField = async (
-  //   forTarget,
-  //   targetUid,
-  //   headerDisplayName,
-  //   headerDisplayCategory = null,
-  //   headerDisplaySubCategory = null,
-  //   subTargetUid = null
-  // ) => {
-  //   const searchObj = {
-  //     modalType: 'chooseAttribute',
-  //     forTarget,
-  //     targetUid,
-  //     headerDisplayName,
-  //     headerDisplayCategory,
-  //     headerDisplaySubCategory,
-  //     subTargetUid,
-  //   };
-
-  //   // Disable the prompt
-  //   await wait();
-
-  //   push({ search: makeSearch(searchObj, true) });
-  // };
-
   const handleClickAddComponentToDZ = async dzName => {
     const firstHeaderObject = {
       header_label_1: currentDataName,
@@ -155,10 +131,11 @@ const ListView = () => {
     targetUid,
     attributeName,
     type,
-    headerDisplayName,
-    headerDisplayCategory = null,
-    headerDisplaySubCategory = null,
-    subTargetUid = null
+    firstHeaderObj,
+    secondHeaderObj,
+    thirdHeaderObj,
+    fourthHeaderObj,
+    fifthHeaderObj
   ) => {
     let attributeType;
 
@@ -190,11 +167,12 @@ const ListView = () => {
       targetUid,
       attributeName,
       attributeType,
-      headerDisplayName,
-      headerDisplayCategory,
-      headerDisplaySubCategory,
       step: type === 'component' ? '2' : null,
-      subTargetUid,
+      ...firstHeaderObj,
+      ...secondHeaderObj,
+      ...thirdHeaderObj,
+      ...fourthHeaderObj,
+      ...fifthHeaderObj,
     };
 
     await wait();
@@ -328,8 +306,6 @@ const ListView = () => {
     ? [{ ...configureButtonProps }, { ...addButtonProps }]
     : [configureButtonProps];
 
-  const handleClickOnTrashIcon = () => {};
-
   const CustomRow = props => {
     const { name } = props;
 
@@ -339,7 +315,6 @@ const ListView = () => {
         attributeName={name}
         name={name}
         onClick={handleClickEditField}
-        onClickDelete={handleClickOnTrashIcon}
       />
     );
   };
@@ -354,7 +329,6 @@ const ListView = () => {
 
   return (
     <ListViewContext.Provider
-      // value={{ openModalAddField: handleClickOpenModalAddField }}
       value={{ openModalAddField: handleClickAddField }}
     >
       <Wrapper>
