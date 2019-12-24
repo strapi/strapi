@@ -114,7 +114,7 @@ If you want to create your own provider without publishing it on **npm** you can
 
 ## Trouble shooting
 
-You receive an `Auth.form.error.email.invalid` error even if the email is valid and exist in your database.
+You received an Auth.form.error.email.invalid error even though the email is valid and exists in the database.
 
 Here is the error response you get from the API.
 
@@ -134,9 +134,9 @@ Here is the error response you get from the API.
 }
 ```
 
-It's due to your IP connection. By default, Strapi use the [`sendmail`](https://github.com/guileen/node-sendmail) node module.
+This error is due to your IP connection. By default, Strapi uses the [`sendmail`](https://github.com/guileen/node-sendmail) package.
 
-This package send email from your machine. And depending of your internet connection, the connection to the SMTP server could fail.
+This package sends an email from the server it runs on. Depending on the network you are on, the connection to the SMTP server could fail.
 
 Here is the `sendmail` error.
 
@@ -149,4 +149,4 @@ Error: SMTP code:550 msg:550-5.7.1 [87.88.179.13] The IP you're using to send ma
 
 To fix it, I suggest you to use another email provider that uses third party to send emails.
 
-With this way you will never have this error again and you will probably be able to have an analytics of your emails.
+When using a third party provider, you avoid having to setup a mail server on your server and get extra features such as email analytics.
