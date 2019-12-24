@@ -39,11 +39,40 @@ function List({
   const { formatMessage } = useGlobalContext();
   const { isInDevelopmentMode, modifiedData } = useDataManager();
   const { openModalAddField } = useListView();
-  // console.log({ modifiedData });
   const onClickAddField = () => {
+    const firstComponentIcon = get(
+      modifiedData,
+      ['components', firstLoopComponentUid, 'schema', 'icon'],
+      ''
+    );
+    const firstComponentCategory = get(
+      modifiedData,
+      ['components', firstLoopComponentUid, 'category'],
+      null
+    );
+    const firstComponentFriendlyName = get(
+      modifiedData,
+      ['components', firstLoopComponentUid, 'schema', 'name'],
+      null
+    );
+    const secondComponentCategory = get(
+      modifiedData,
+      ['components', secondLoopComponentUid, 'category'],
+      null
+    );
+    const secondComponentFriendlyName = get(
+      modifiedData,
+      ['components', secondLoopComponentUid, 'schema', 'name'],
+      null
+    );
+    const secondComponentIcon = get(
+      modifiedData,
+      ['components', secondLoopComponentUid, 'schema', 'icon'],
+      ''
+    );
     let firstHeaderObject = {
       header_label_1: mainTypeName,
-      header_icon_name_1: 'contentType',
+      header_icon_name_1: editTarget,
       header_icon_isCustom_1: false,
       header_info_category_1: null,
       header_info_name_1: null,
@@ -52,32 +81,21 @@ function List({
       header_label_2: firstLoopComponentName,
       header_icon_name_2: 'component',
       header_icon_isCustom_2: false,
-      header_info_category_2: null,
-      header_info_name_2: null,
+      header_info_category_2: firstComponentCategory,
+      header_info_name_2: firstComponentFriendlyName,
     };
     let thirdHeaderObject = {
       header_icon_name_3: 'component',
       header_icon_isCustom_3: false,
-      header_info_category_3: null,
-      header_info_name_3: null,
+      header_info_category_3: secondComponentCategory,
+      header_info_name_3: secondComponentFriendlyName,
     };
     let fourthHeaderObject = {
       header_icon_name_4: null,
       header_icon_isCustom_4: false,
-      header_info_category_4: null,
-      header_info_name_4: null,
+      header_info_category_4: secondComponentCategory,
+      header_info_name_4: secondComponentFriendlyName,
     };
-
-    const firstComponentIcon = get(
-      modifiedData,
-      ['components', firstLoopComponentUid, 'schema', 'icon'],
-      ''
-    );
-    const secondComponentIcon = get(
-      modifiedData,
-      ['components', secondLoopComponentUid, 'schema', 'icon'],
-      ''
-    );
 
     if (firstLoopComponentName) {
       firstHeaderObject = {
@@ -105,10 +123,15 @@ function List({
         header_label_2: dzName,
         header_icon_name_2: 'dynamiczone',
         header_icon_isCustom_2: false,
+        header_info_category_2: null,
+        header_info_name_2: null,
       };
       thirdHeaderObject = {
         ...thirdHeaderObject,
+        header_icon_name_3: isNestedInDZComponent ? 'component' : null,
         header_label_3: firstLoopComponentName,
+        header_info_category_3: firstComponentCategory,
+        header_info_name_3: firstComponentFriendlyName,
       };
       fourthHeaderObject = {
         ...fourthHeaderObject,

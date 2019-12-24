@@ -5,9 +5,8 @@ import { get } from 'lodash';
 import { AttributeIcon } from '@buffetjs/core';
 import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// import useDataManager from '../../hooks/useDataManager';
 import ComponentIcon from './ComponentIcon';
-// import Header from './Header';
+import ComponentInfos from './ComponentInfos';
 import IconWrapper from './IconWrapper';
 import UpperFirst from '../UpperFirst';
 
@@ -62,19 +61,15 @@ const ModalHeader = ({ headerId, headers }) => {
                 <span>
                   <UpperFirst content={get(header, ['label'], '')} />
                 </span>
+                {header.info.category && (
+                  <ComponentInfos
+                    category={header.info.category}
+                    name={header.info.name}
+                  />
+                )}
               </Fragment>
             );
           })}
-        {/* {!headerId && (
-          <Header
-            category={category}
-            name={name}
-            target={target}
-            targetUid={targetUid}
-            subCategory={subCategory}
-            subTargetUid={subTargetUid}
-          />
-        )} */}
       </HeaderModalTitle>
     </section>
   );
