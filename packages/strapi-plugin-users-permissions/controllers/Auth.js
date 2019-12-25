@@ -444,9 +444,11 @@ module.exports = {
       );
     }
 
+    const roleType = params.role || settings.default_role
+
     const role = await strapi
-      .query('role', 'users-permissions')
-      .findOne({ type: settings.default_role }, []);
+    query('role', 'users-permissions')
+      .findOne({ type: roleType }, []);
 
     if (!role) {
       return ctx.badRequest(
@@ -580,9 +582,9 @@ module.exports = {
     } catch (err) {
       const adminError = _.includes(err.message, 'username')
         ? {
-            id: 'Auth.form.error.username.taken',
-            message: 'Username already taken',
-          }
+          id: 'Auth.form.error.username.taken',
+          message: 'Username already taken',
+        }
         : { id: 'Auth.form.error.email.taken', message: 'Email already taken' };
 
       ctx.badRequest(null, formatError(adminError));
