@@ -56,7 +56,7 @@ const getDisplayedValue = (type, value, name) => {
         second,
       };
       const date = moment().set(timeObj);
-      return dateToUtcTime(date).format(DATE_FORMATS.time);
+      return date.format(DATE_FORMATS.time);
     }
     default:
       return '-';
