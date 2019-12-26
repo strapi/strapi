@@ -54,8 +54,21 @@ const populateBareAssociations = (definition, { prefix = '' } = {}) => {
         });
       }
 
-      return `${prefix}${assoc.alias}`;
-    });
+      const path = `${prefix}${assoc.alias}`;
+      const assocModel = findModelByAssoc({ assoc });
+
+      const polyAssocs = assocModel.associations
+        .filter(assoc => isPolymorphic({ assoc }))
+        .map(assoc =>
+          formatPolymorphicPopulate({
+            assoc,
+            prefix: `${path}.`,
+          })
+        );
+
+      return [path, ...polyAssocs];
+    })
+    .reduce((acc, val) => acc.concat(val), []);
 };
 
 const formatAssociationPopulate = ({ assoc, prefix = '' }) => {
