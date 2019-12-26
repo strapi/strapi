@@ -60,7 +60,11 @@ const InputWrapperDate = styled.div`
     right: -5px !important;
   }
   .rc-input-number-input-wrap {
+    max-width: 210px;
     overflow: visible;
+  }
+  > div {
+    width: 210px;
   }
 `;
 
