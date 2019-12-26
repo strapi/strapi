@@ -5,11 +5,12 @@ import { get, isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import moment from 'moment';
 import { IcoContainer, useGlobalContext } from 'strapi-helper-plugin';
 import useListView from '../../hooks/useListView';
-
 import CustomInputCheckbox from '../CustomInputCheckbox';
 import MediaPreviewList from '../MediaPreviewList';
-
 import { ActionContainer, Truncate, Truncated } from './styledComponents';
+import DATE_FORMATS from './DATE_FORMATS';
+
+const dateToUtcTime = date => moment.parseZone(date).utc();
 
 const getDisplayedValue = (type, value, name) => {
   switch (toLower(type)) {
@@ -28,7 +29,6 @@ const getDisplayedValue = (type, value, name) => {
     case 'boolean':
       return value !== null ? toString(value) : '-';
     case 'date':
-    case 'time':
     case 'datetime':
     case 'timestamp': {
       if (value == null) {
@@ -40,10 +40,7 @@ const getDisplayedValue = (type, value, name) => {
           ? JSON.stringify(value)
           : value;
 
-      return moment
-        .parseZone(date)
-        .utc()
-        .format('dddd, MMMM Do YYYY');
+      return dateToUtcTime(date).format(DATE_FORMATS[type]);
     }
     case 'password':
       return '••••••••';
@@ -51,6 +48,16 @@ const getDisplayedValue = (type, value, name) => {
     case 'file':
     case 'files':
       return value;
+    case 'time': {
+      const [hour, minute, second] = value.split(':');
+      const timeObj = {
+        hour,
+        minute,
+        second,
+      };
+      const date = moment().set(timeObj);
+      return dateToUtcTime(date).format(DATE_FORMATS.time);
+    }
     default:
       return '-';
   }
