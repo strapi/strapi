@@ -71,7 +71,7 @@ const AttributeOption = forwardRef(({ tabIndex, type }, ref) => {
       targetUid,
       attributeType: type,
       step: type === 'component' ? '1' : null,
-      subTargetUid: query.get('subTargetUid'),
+
       header_label_1,
       header_info_name_1,
       header_info_category_1,

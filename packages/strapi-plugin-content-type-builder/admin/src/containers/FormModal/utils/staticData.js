@@ -10,7 +10,6 @@ const INITIAL_STATE_DATA = {
   pathToSchema: [],
   settingType: null,
   step: null,
-  subTargetUid: null,
   targetUid: null,
   headerId: null,
   header_label_1: null,

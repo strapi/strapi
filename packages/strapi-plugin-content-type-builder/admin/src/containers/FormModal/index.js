@@ -85,7 +85,6 @@ const FormModal = () => {
       const modalType = query.get('modalType');
       const targetUid = query.get('targetUid');
       const settingType = query.get('settingType');
-      const subTargetUid = query.get('subTargetUid');
       const headerId = query.get('headerId');
       const header_label_1 = query.get('header_label_1');
       const header_icon_name_1 = query.get('header_icon_name_1');
@@ -127,7 +126,6 @@ const FormModal = () => {
         modalType,
         pathToSchema,
         settingType,
-        subTargetUid,
         step,
         targetUid,
         header_label_1,
