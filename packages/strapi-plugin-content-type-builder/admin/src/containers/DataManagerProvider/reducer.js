@@ -1,5 +1,6 @@
 import { fromJS, OrderedMap } from 'immutable';
 import { get, has } from 'lodash';
+import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
 import makeUnique from '../../utils/makeUnique';
 
 const initialState = fromJS({
@@ -140,13 +141,45 @@ const reducer = (state, action) => {
           const componentsSchema = newComponents.reduce((acc, current) => {
             const addedCompoSchema = state.getIn(['components', current]);
             const isTemporaryComponent = addedCompoSchema.get('isTemporary');
+            const currentComponentSchema = addedCompoSchema.getIn([
+              'schema',
+              'attributes',
+            ]);
+            const hasComponentAlreadyBeenAdded =
+              state.getIn(['modifiedData', 'components', current]) !==
+              undefined;
 
             // created components are already in the modifiedData.components
-            if (isTemporaryComponent) {
+            // We don't add them because all modifications will be lost
+            if (isTemporaryComponent || hasComponentAlreadyBeenAdded) {
               return acc;
             }
+            // Add the added components to the modifiedData.compontnes
+            let newAcc = acc.set(current, addedCompoSchema);
+            const nestedComponents = retrieveComponentsFromSchema(
+              currentComponentSchema.toJS(),
+              state.get('components').toJS()
+            );
 
-            return acc.set(current, addedCompoSchema);
+            // We need to add the nested components to the modifiedData.components as well
+            nestedComponents.forEach(componentUid => {
+              const isTemporary =
+                state.getIn(['components', componentUid, 'isTemporary']) ||
+                false;
+              const hasNestedComponentAlreadyBeenAdded =
+                state.getIn(['modifiedData', 'components', componentUid]) !==
+                undefined;
+
+              // Same logic here otherwise we will lose the modifications added to the components
+              if (!isTemporary && !hasNestedComponentAlreadyBeenAdded) {
+                newAcc = newAcc.set(
+                  componentUid,
+                  state.getIn(['components', componentUid])
+                );
+              }
+            });
+
+            return newAcc;
           }, old);
 
           return componentsSchema;
