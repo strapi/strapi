@@ -114,7 +114,7 @@ If you want to create your own provider without publishing it on **npm** you can
 
 ## Trouble shooting
 
-You received an Auth.form.error.email.invalid error even though the email is valid and exists in the database.
+You received an `Auth.form.error.email.invalid` error even though the email is valid and exists in the database.
 
 Here is the error response you get from the API.
 
