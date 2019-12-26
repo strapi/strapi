@@ -9,8 +9,11 @@ import ComponentIcon from './ComponentIcon';
 import ComponentInfos from './ComponentInfos';
 import IconWrapper from './IconWrapper';
 import UpperFirst from '../UpperFirst';
+import DropdownInfos from './DropdownInfos';
 
 const ModalHeader = ({ headerId, headers }) => {
+  const shouldDisplayDrodDrown = headers.length > 3;
+
   return (
     <section>
       <HeaderModalTitle style={{ textTransform: 'none' }}>
@@ -41,6 +44,24 @@ const ModalHeader = ({ headerId, headers }) => {
               />
             );
 
+            if (shouldDisplayDrodDrown && index === 1) {
+              return (
+                <Fragment key={index}>
+                  <IconWrapper>
+                    <FontAwesomeIcon icon="chevron-right" />
+                  </IconWrapper>
+                  <DropdownInfos
+                    headers={[headers[1], headers[2]]}
+                    shouldDisplaySecondHeader={headers.length > 4}
+                  />
+                </Fragment>
+              );
+            }
+
+            if (shouldDisplayDrodDrown && index === 2 && headers.length > 4) {
+              return null;
+            }
+
             if (index === 0) {
               return (
                 <Fragment key={index}>
@@ -57,7 +78,7 @@ const ModalHeader = ({ headerId, headers }) => {
                 <IconWrapper>
                   <FontAwesomeIcon icon="chevron-right" />
                 </IconWrapper>
-                {icon}
+
                 <span>
                   <UpperFirst content={get(header, ['label'], '')} />
                 </span>
