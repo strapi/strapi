@@ -77,6 +77,8 @@
   "form.attribute.item.requiredField": "Required field",
   "form.attribute.item.requiredField.description": "You won't be able to create an entry if this field is empty",
   "form.attribute.item.settings.name": "Settings",
+  "form.attribute.item.privateField": "Private field",
+  "form.attribute.item.privateField.description": "This field will not show up in the API response",
   "form.attribute.item.uniqueField": "Unique field",
   "form.attribute.item.uniqueField.description": "You won't be able to create an entry if there is an existing entry with identical content",
   "form.attribute.media.option.multiple": "Multiple media",
