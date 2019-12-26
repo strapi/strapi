@@ -197,6 +197,7 @@ module.exports = {
             '/3.0.0-beta.x/guides/process-manager',
             '/3.0.0-beta.x/guides/jwt-validation',
             '/3.0.0-beta.x/guides/api-token',
+            '/3.0.0-beta.x/guides/auth-request',
             '/3.0.0-beta.x/guides/error-catching',
             '/3.0.0-beta.x/guides/secure-your-app',
             '/3.0.0-beta.x/guides/external-data',
