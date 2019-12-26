@@ -1,4 +1,6 @@
 {
+  "connection": "default",
+  "collectionName": "customs",
   "info": {
     "name": "custom"
   },
@@ -13,7 +15,5 @@
         "default.closingperiod"
       ]
     }
-  },
-  "connection": "default",
-  "collectionName": "customs"
+  }
 }
