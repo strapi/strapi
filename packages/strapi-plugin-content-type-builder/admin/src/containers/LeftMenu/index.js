@@ -43,7 +43,7 @@ function LeftMenu({ wait }) {
           actionType: 'edit',
           modalType: 'editCategory',
           categoryName: data.name,
-          headerDisplayName: data.name,
+
           headerDisplayCategory: formatMessage({
             id: getTrad('modalForm.header.categories'),
           }),

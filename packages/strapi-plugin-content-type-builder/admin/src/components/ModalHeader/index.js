@@ -11,7 +11,6 @@ import IconWrapper from './IconWrapper';
 import UpperFirst from '../UpperFirst';
 
 const ModalHeader = ({ headerId, headers }) => {
-  console.log({ headers });
   return (
     <section>
       <HeaderModalTitle style={{ textTransform: 'none' }}>
