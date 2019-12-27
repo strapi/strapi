@@ -4,7 +4,7 @@ This guide will show you how to upgrade your application to the latest version o
 
 ## Upgrading your dependencies
 
-Start by upgrading all of your strapi package version.
+Start by upgrading your strapi package versions.
 
 For example moving from `3.0.0-beta.16` to `3.0.0-beta.17`
 
