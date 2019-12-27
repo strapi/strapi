@@ -1,6 +1,6 @@
 # Draft system
 
-This guide will explain how to create draft system. That will you manage draft, published, archive status.
+This guide will explain how to create a draft system to manage draft, published, archive statuses of your content.
 
 ## Introduction
 
@@ -99,7 +99,7 @@ module.exports = {
 
     ctx.query = {
       ...ctx.query,
-      status: 'published'
+      status: 'published',
     };
 
     if (ctx.query._q) {
@@ -120,4 +120,3 @@ And tada! Draft and archived articles disapeared.
 ::: tip
 This guide can be applied to any other controller action.
 :::
-

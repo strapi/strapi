@@ -4,7 +4,7 @@ sidebarDepth: 2
 
 # Process manager
 
-In this guide we will see how you can start a Strapi application using a process manager.
+In this guide we will show you how you can start a Strapi application using a process manager.
 
 ::: tip
 In this example we will use [PM2](https://pm2.keymetrics.io/).
