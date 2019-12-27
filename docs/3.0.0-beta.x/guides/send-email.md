@@ -1,8 +1,8 @@
 # Send email programmatically
 
-In this guide we will see how to use the Email plugin to send email where you want in your app.
+In this guide we will see how to use the Email plugin to send an email where you want in your app.
 
-For this example we want to receive an email when a new article's comment is posted and if it contains bad words.
+For this example, we want to receive an email when a new article's comment is posted and if it contains bad words.
 
 ## Introduction
 

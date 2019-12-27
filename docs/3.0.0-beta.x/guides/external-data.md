@@ -1,8 +1,8 @@
 # Fetching external data
 
-This guide explains how to fetch data from an external service to use it in your app.
+This guide explains how to fetch data from an external service to use in your app.
 
-In this example we will see how to daily fetch Docker pull count to store the result in your database.
+In this example we will see how to daily fetch Docker pull count and store the result in your database.
 
 ## Content Type settings
 

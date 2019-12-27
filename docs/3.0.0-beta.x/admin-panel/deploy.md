@@ -1,6 +1,6 @@
 # Deployment
 
-The administration is nothing more than a React front-end application calling an API. The front-end and the back-end are independent and can be deployed on different servers which brings us to different scenarios:
+The administration panel is nothing more than a React front-end application calling an API. The front-end and the back-end are independent and can be deployed on different servers which brings us two different options for deployment:
 
 1. Deploy the entire project on the same server.
 2. Deploy the administration panel on another server (AWS S3, Azure, etc) than the API.
@@ -44,7 +44,7 @@ It's very common to deploy the front-end and the back-end on different servers. 
     "enabled": false
   },
   "admin": {
-    "path": "/", // Note: The administration will be accessible from the root of the domain (ex: http//yourfrontend.com/)
+    "path": "/", // Note: The administration will be accessible from the root of the domain (ex: http://yourfrontend.com/)
     "build": {
       "backend": "http://yourbackend.com"
     }

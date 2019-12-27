@@ -2,7 +2,7 @@
 
 If you are using a static website generator (or framework with build option) with Strapi (Gatsby, Nuxt, Next, etc.) it is necessary to rebuild it when the content is updated in Strapi. In a Headless CMS, this is typically called a [Webhook feature](https://strapi.io/marketplace/webhooks). Unfortunately it is not available yet in Strapi even if [it has been requested](https://portal.productboard.com/strapi/c/27-webhooks).
 
-But what we like at Strapi is to help developers. So even if the feature is not developed yet, here is an easy to implement work around!
+However, at Strapi it is our desire to help developers. So even if the feature is not developed yet, here is an easy to implement a workaround!
 
 ### Discovering the lifecycle callbacks 🔍
 

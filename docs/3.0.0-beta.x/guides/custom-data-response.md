@@ -16,7 +16,7 @@ And that is what we will do to manage our custom data response.
 
 ## Example
 
-In our example we will use a restaurant type with a chef.. By default when you fetch restaurants, you will got all information of the chef.
+In our example, we will use a restaurant type with a chef.. By default when you fetch restaurants, you will got all information of the chef.
 Let's consider you don't want to expose the chef's email for privacy reasons.
 
 To enforce this rule we will customize the action that fetchs all restaurants and remove the email from the returned data.

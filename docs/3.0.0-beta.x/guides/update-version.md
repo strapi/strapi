@@ -1,10 +1,10 @@
 # Update Strapi version
 
-How to upgrade your application to the latest version of Strapi.
+This guide will show you how to upgrade your application to the latest version of Strapi.
 
 ## Upgrading your dependencies
 
-Start by upgrading all your strapi package version.
+Start by upgrading all of your strapi package version.
 
 For example moving from `3.0.0-beta.16` to `3.0.0-beta.17`
 
@@ -92,6 +92,6 @@ If the operation doesn't work, you should probably remove the `.cache` folder to
 
 Sometimes Strapi introduces changes that need more than just the previous updates.
 
-That is the reason of the [Migration Guide](../migration-guide/README.md) page.
+This is the reason of the [Migration Guide](../migration-guide/README.md) page.
 
-Just make sure when you update your version that a migration guide exist or not.
+Make sure when you update your version to see if a migration guide exists for your current version to help you with your migration process!

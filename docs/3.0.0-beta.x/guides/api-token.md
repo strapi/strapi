@@ -1,9 +1,9 @@
 # API tokens
 
-In this guide we will see how you can create an API token system to execute request as an authenticated user.
+In this guide we will show you how you can create an API token system to execute a request as an authenticated user.
 
 This feature is in our [roadmap](https://portal.productboard.com/strapi/1-public-roadmap/c/40-api-access-token-with-permissions).
-This guide is a workaround to achieve this feature before we support it natively in strapi.
+In this guide, you will find a workaround to achieve this feature before we support it natively in strapi.
 
 ## Introduction
 

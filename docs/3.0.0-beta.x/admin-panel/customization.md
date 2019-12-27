@@ -1,6 +1,6 @@
 # Customization
 
-The administration panel can be customized according to your needs, so you can make it reflects your identity.
+The administration panel can be customized according to your needs, so you can make it reflect your identity and brand personality.
 
 ::: warning
 To apply your changes you need to [rebuild](#build) your admin panel
@@ -8,7 +8,7 @@ To apply your changes you need to [rebuild](#build) your admin panel
 
 ## Change access URL
 
-By default, the administration panel is exposed via [http://localhost:1337/admin](http://localhost:1337/admin). However, for security reasons, you can easily update this path.
+By default, the administration panel is exposed via [http://localhost:1337/admin](http://localhost:1337/admin). However, for security reasons you can easily update this path.
 
 **Path —** `./config/environment/**/server.json`.
 

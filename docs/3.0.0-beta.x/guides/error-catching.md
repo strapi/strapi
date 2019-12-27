@@ -1,6 +1,6 @@
 # Error catching
 
-In this guide we will see how you can catch errors and send them to the Application Monitoring / Error Tracking Software you want.
+In this guide we will see how you can catch errors and send them to the Application Monitoring / Error Tracking Software you want to utilize.
 
 ::: tip
 In this example we will use [Sentry](https://sentry.io).
