@@ -39,11 +39,16 @@ class ConfigPage extends React.Component {
     }
   }
 
-  getSelectedProviderIndex = () =>
-    findIndex(this.props.settings.providers, [
+  getSelectedProviderIndex = () => {
+    const selectedProviderIndex = findIndex(this.props.settings.providers, [
       'provider',
       get(this.props.modifiedData, 'provider'),
     ]);
+    if (selectedProviderIndex === -1) {
+      return 0;
+    }
+    return selectedProviderIndex;
+  };
 
   /**
    * Get Settings depending on the props
