@@ -354,6 +354,7 @@ const forms = {
             },
           ],
           [fields.divider],
+          [fields.private],
           [fields.required],
           [fields.unique],
         ];

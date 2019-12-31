@@ -82,6 +82,18 @@ const fields = {
     },
     validations: {},
   },
+  private: {
+    autoFocus: false,
+    name: 'private',
+    type: 'checkbox',
+    label: {
+      id: getTrad('form.attribute.item.privateField'),
+    },
+    description: {
+      id: getTrad('form.attribute.item.privateField.description'),
+    },
+    validations: {},
+  },
   unique: {
     autoFocus: false,
     name: 'unique',
