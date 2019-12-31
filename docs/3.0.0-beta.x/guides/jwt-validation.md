@@ -17,6 +17,10 @@ When you sign in with the authentication route `POST /auth/local`, Strapi genera
 
 These users are managed in the application's database and can be managed via the admin dashboard.
 
+::: warning
+Please note: In the code example we use default jwt secret which is used for signing tokens. For security reasons it's recommended to set custom secret in `./your-app/extensions/users-permissions/config/jwt.json` or preferably via environment variable `JWT_SECRET`
+:::
+
 We can now imagine you have a `JWT` that comes from [Auth0](https://auth0.com) and you want to make sure the `JWT` is correct before allowing the user to use the Strapi API endpoints.
 
 ## Customize the JWT validation function
