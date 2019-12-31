@@ -1,7 +1,7 @@
 const _ = require('lodash');
 
 module.exports = async (ctx, next) => {
-  let role;
+  let roles = [];
 
   if (ctx.request && ctx.request.header && ctx.request.header.authorization) {
     try {
@@ -44,9 +44,13 @@ module.exports = async (ctx, next) => {
       return handleErrors(ctx, 'User Not Found', 'unauthorized');
     }
 
-    role = ctx.state.user.role;
+    if (Array.isArray(ctx.state.user.role)) {
+      roles = ctx.state.user.role;
+    } else {
+      roles = ctx.state.user.role ? [ctx.state.user.role] : [];
+    }
 
-    if (role.type === 'root') {
+    if (roles.some(r => r.type === 'root')) {
       return await next();
     }
 
@@ -77,18 +81,18 @@ module.exports = async (ctx, next) => {
   }
 
   // Retrieve `public` role.
-  if (!role) {
-    role = await strapi
+  if (!roles.length) {
+    roles = await strapi
       .query('role', 'users-permissions')
-      .findOne({ type: 'public' }, []);
+      .find({ type: 'public' }, []);
   }
 
   const route = ctx.request.route;
-  const permission = await strapi
+  const permissions = await strapi
     .query('permission', 'users-permissions')
-    .findOne(
+    .find(
       {
-        role: role.id,
+        role_in: roles.map(r => r.id),
         type: route.plugin || 'application',
         controller: route.controller,
         action: route.action,
@@ -97,14 +101,14 @@ module.exports = async (ctx, next) => {
       []
     );
 
-  if (!permission) {
+  if (!permissions.length) {
     return handleErrors(ctx, undefined, 'forbidden');
   }
 
   // Execute the policies.
-  if (permission.policy) {
+  if (permissions[0].policy) {
     return await strapi.plugins['users-permissions'].config.policies[
-      permission.policy
+      permissions[0].policy
     ](ctx, next);
   }
 

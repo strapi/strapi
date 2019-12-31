@@ -61,21 +61,27 @@ module.exports = {
   async deleteRole(roleID, publicRoleID) {
     const role = await strapi
       .query('role', 'users-permissions')
-      .findOne({ id: roleID }, ['users', 'permissions']);
+      .findOne({ id: roleID }, ['users.role', 'permissions']);
 
     if (!role) {
       throw new Error('Cannot found this role');
     }
 
-    // Move users to guest role.
+    // Remain roles except for the role you delete.
+    // If no role remains, give user a public role.
     const arrayOfPromises = role.users.reduce((acc, user) => {
+      const role = (user.role || []).reduce(
+        (arr, r) => (`${r.id}` === `${roleID}` ? arr : arr.concat(r)),
+        []
+      );
+
       acc.push(
         strapi.query('user', 'users-permissions').update(
           {
             id: user.id,
           },
           {
-            role: publicRoleID,
+            role: role.length ? role : [publicRoleID],
           }
         )
       );
@@ -186,7 +192,7 @@ module.exports = {
   async getRole(roleID, plugins) {
     const role = await strapi
       .query('role', 'users-permissions')
-      .findOne({ id: roleID }, ['users', 'permissions']);
+      .findOne({ id: roleID }, ['users.role', 'permissions']);
 
     if (!role) {
       throw new Error('Cannot find this role');
@@ -228,7 +234,7 @@ module.exports = {
     for (let i = 0; i < roles.length; ++i) {
       roles[i].nb_users = await strapi
         .query('user', 'users-permissions')
-        .count({ role: roles[i].id });
+        .count({ role_in: roles[i].id });
     }
 
     return roles;
@@ -538,18 +544,31 @@ module.exports = {
 
     // Add user to this role.
     const newUsers = _.differenceBy(body.users, role.users, 'id');
-    await Promise.all(newUsers.map(user => this.updateUserRole(user, roleID)));
+    await Promise.all(
+      newUsers.map(user => this.updateUserRole(user, 'add', roleID))
+    );
 
     const oldUsers = _.differenceBy(role.users, body.users, 'id');
     await Promise.all(
-      oldUsers.map(user => this.updateUserRole(user, authenticated.id))
+      oldUsers.map(user =>
+        this.updateUserRole(user, 'delete', roleID, authenticated.id)
+      )
     );
   },
 
-  async updateUserRole(user, role) {
+  async updateUserRole(user, action, roleID, authenticatedRoleID) {
+    const oldRole = (user.role || []).map(r => r.id);
+    let newRole = [];
+    if (action === 'add') {
+      newRole = oldRole.concat(roleID);
+    } else if (action === 'delete') {
+      newRole = oldRole.filter(id => `${id}` !== `${roleID}`);
+    }
+    if (!newRole.length) newRole = [authenticatedRoleID];
+
     return strapi
       .query('user', 'users-permissions')
-      .update({ id: user.id }, { role });
+      .update({ id: user.id }, { role: newRole });
   },
 
   template(layout, data) {
