@@ -127,6 +127,15 @@ export { languages, translationMessages };
 With this modification only English and French will be available in your admin
 :::
 
+::: tip
+If you need 4+ languages to show in the dropdown you can change the css by copying the file from cache and customizing the css yourself 
+:::
+cp .cache/admin/src/containers/LocaleToggle/Wrapper.js admin/src/containers/LocaleToggle/Wrapper.js
+edit Wrapper.js:67 "max-height: 192px !important;"  
+to  "max-height: 192px !important;"
+voila, now the dropdown fits 5 languages
+
+
 ### Customize a plugin
 
 Similarly to the back-end override system any file added in `my-app/extensions/<plugin-name>/admin/` will be copied and used instead of the original one (use with care).
