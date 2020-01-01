@@ -22,7 +22,8 @@
     "node-fetch": "^1.7.3",
     "node-machine-id": "^1.1.10",
     "ora": "^3.4.0",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "to-slug-case": "1.0.0"
   },
   "scripts": {
     "test": "echo \"no tests yet\""
