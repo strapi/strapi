@@ -10,7 +10,7 @@ As an **example** let's consider the following models:
 
 **Components**:
 
-- `Openning hours` (category: `restaurant`)
+- `Opening hours` (category: `restaurant`)
 - `Title With Subtitle` (category: `content`)
 - `Image With Description` (category: `content`)
 
