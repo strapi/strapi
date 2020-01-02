@@ -10,12 +10,13 @@ const createSchemaHandler = require('./schema-handler');
 
 module.exports = function createComponentBuilder() {
   return {
-    setRelation({ key, modelName, attribute }) {
+    setRelation({ key, modelName, plugin, attribute }) {
       this.contentTypes.get(attribute.target).setAttribute(
         attribute.targetAttribute,
         generateRelation({
           key,
           attribute,
+          plugin,
           modelName,
         })
       );
@@ -93,6 +94,7 @@ module.exports = function createComponentBuilder() {
           this.setRelation({
             key,
             modelName: contentType.modelName,
+            plugin: contentType.plugin,
             attribute,
           });
         }
@@ -153,6 +155,7 @@ module.exports = function createComponentBuilder() {
           return this.setRelation({
             key,
             modelName: contentType.modelName,
+            plugin: contentType.plugin,
             attribute: newAttributes[key],
           });
         }
@@ -172,6 +175,7 @@ module.exports = function createComponentBuilder() {
           return this.setRelation({
             key,
             modelName: contentType.modelName,
+            plugin: contentType.plugin,
             attribute: newAttribute,
           });
         }
@@ -185,6 +189,7 @@ module.exports = function createComponentBuilder() {
           this.setRelation({
             key,
             modelName: contentType.modelName,
+            plugin: contentType.plugin,
             attribute,
           });
         }
@@ -227,9 +232,10 @@ module.exports = function createComponentBuilder() {
 const createContentTypeUID = ({ name }) =>
   `application::${nameToSlug(name)}.${nameToSlug(name)}`;
 
-const generateRelation = ({ key, attribute, modelName }) => {
+const generateRelation = ({ key, attribute, plugin, modelName }) => {
   const opts = {
     via: key,
+    plugin,
     columnName: attribute.targetColumnName || undefined,
   };
 

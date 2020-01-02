@@ -1,6 +1,6 @@
 import React from 'react';
 import * as yup from 'yup';
-import { get, isEmpty, toLower, trim } from 'lodash';
+import { get, isEmpty, toLower, trim, toNumber } from 'lodash';
 import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../../pluginId';
@@ -8,7 +8,11 @@ import getTrad from '../../../utils/getTrad';
 import { createComponentUid, createUid, nameToSlug } from './createUid';
 import componentForm from './componentForm';
 import fields from './staticFields';
-import { NAME_REGEX, ENUM_REGEX } from './attributesRegexes';
+import {
+  NAME_REGEX,
+  ENUM_REGEX,
+  CATEGORY_NAME_REGEX,
+} from './attributesRegexes';
 import RESERVED_NAMES from './reservedNames';
 
 yup.addMethod(yup.mixed, 'defined', function() {
@@ -49,6 +53,20 @@ yup.addMethod(yup.string, 'isAllowed', function(message) {
     }
 
     return !RESERVED_NAMES.includes(toLower(trim(string)));
+  });
+});
+
+yup.addMethod(yup.string, 'isInferior', function(message, max) {
+  return this.test('isInferior', message, function(min) {
+    if (!min) {
+      return false;
+    }
+
+    if (Number.isNaN(toNumber(min))) {
+      return true;
+    }
+
+    return toNumber(max) >= toNumber(min);
   });
 });
 
@@ -210,11 +228,50 @@ const forms = {
         case 'integer':
         case 'biginteger':
         case 'float':
-        case 'decimal':
+        case 'decimal': {
+          if (dataToValidate.type === 'biginteger') {
+            return yup.object().shape({
+              ...commonShape,
+              default: yup
+                .string()
+                .nullable()
+                .matches(/^\d*$/),
+              min: yup
+                .string()
+                .nullable()
+                .matches(/^\d*$/)
+                .when('max', (max, schema) => {
+                  if (max) {
+                    return schema.isInferior(
+                      getTrad('error.validation.minSupMax'),
+                      max
+                    );
+                  } else {
+                    return schema;
+                  }
+                }),
+
+              max: yup
+                .string()
+                .nullable()
+                .matches(/^\d*$/),
+            });
+          }
+
+          let defaultType = yup.number();
+
+          if (dataToValidate.type === 'integer') {
+            defaultType = yup
+              .number()
+              .integer('component.Input.error.validation.integer');
+          }
+
           return yup.object().shape({
             ...commonShape,
+            default: defaultType.nullable(),
             ...numberTypeShape,
           });
+        }
         case 'relation':
           return yup.object().shape({
             name: yup
@@ -286,6 +343,7 @@ const forms = {
             },
           ],
           [fields.divider],
+          [fields.private],
           [fields.required],
           [fields.unique],
         ];
@@ -311,6 +369,24 @@ const forms = {
         }
 
         const items = defaultItems.slice();
+
+        if (type === 'number' && data.type !== 'biginteger') {
+          const step =
+            data.type === 'decimal' || data.type === 'float' ? 'any' : '1';
+
+          items.splice(0, 1, [
+            {
+              autoFocus: true,
+              name: 'default',
+              type: 'number',
+              step,
+              label: {
+                id: getTrad('form.attribute.settings.default'),
+              },
+              validations: {},
+            },
+          ]);
+        }
 
         if (type === 'media') {
           items.splice(0, 1);
@@ -758,7 +834,7 @@ const forms = {
           .required(errorsTrads.required),
         category: yup
           .string()
-          .matches(NAME_REGEX, errorsTrads.regex)
+          .matches(CATEGORY_NAME_REGEX, errorsTrads.regex)
           .required(errorsTrads.required),
         icon: yup.string().required(errorsTrads.required),
         collectionName: yup.string().nullable(),
@@ -821,6 +897,7 @@ const forms = {
       return yup.object().shape({
         name: yup
           .string()
+          .matches(CATEGORY_NAME_REGEX, errorsTrads.regex)
           .unique(errorsTrads.unique, allowedCategories, toLower)
           .required(errorsTrads.required),
       });

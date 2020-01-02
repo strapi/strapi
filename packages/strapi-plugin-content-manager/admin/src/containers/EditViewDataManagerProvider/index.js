@@ -196,6 +196,10 @@ const EditViewDataManagerProvider = ({
       inputValue = null;
     }
 
+    if (type === 'biginteger' && value === '') {
+      inputValue = null;
+    }
+
     dispatch({
       type: 'ON_CHANGE',
       keys: name.split('.'),
@@ -262,7 +266,7 @@ const EditViewDataManagerProvider = ({
         });
         redirectToPreviousPage();
       } catch (err) {
-        console.log({ err });
+        console.error({ err });
         const error = get(
           err,
           ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
@@ -277,6 +281,7 @@ const EditViewDataManagerProvider = ({
       }
     } catch (err) {
       const errors = getYupInnerErrors(err);
+      console.error({ err, errors });
 
       dispatch({
         type: 'SUBMIT_ERRORS',
