@@ -8,6 +8,7 @@ import Tooltip from './Tooltip';
 const DynamicComponent = ({
   componentUid,
   friendlyName,
+  icon,
   setIsOverDynamicZone,
 }) => {
   const [state, setState] = useState(false);
@@ -22,6 +23,7 @@ const DynamicComponent = ({
     <DynamicComponentCard
       componentUid={componentUid}
       friendlyName={friendlyName}
+      icon={icon}
       isOver={state}
       onClick={() => {
         push(
@@ -38,11 +40,13 @@ const DynamicComponent = ({
 
 DynamicComponent.defaultProps = {
   friendlyName: '',
+  icon: 'smile',
 };
 
 DynamicComponent.propTypes = {
   componentUid: PropTypes.string.isRequired,
   friendlyName: PropTypes.string,
+  icon: PropTypes.string,
   setIsOverDynamicZone: PropTypes.func.isRequired,
 };
 

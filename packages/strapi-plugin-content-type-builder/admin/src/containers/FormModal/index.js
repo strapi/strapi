@@ -213,8 +213,10 @@ const FormModal = () => {
         );
         const attributeToEdit = {
           ...attributeToEditNotFormatted,
+          // We filter the available components
+          // Because this modal is only used for adding components
+          components: [],
           name: dynamicZoneTarget,
-          // createComponent: true,
           createComponent: false,
           componentToCreate: { type: 'component' },
         };

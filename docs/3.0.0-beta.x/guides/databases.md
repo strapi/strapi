@@ -172,7 +172,7 @@ MongoDB must already be running in the background.
 ::: tab yarn
 
 ```
-yarn create strapi-app new my-project
+yarn create strapi-app my-project
 ```
 
 :::

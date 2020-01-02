@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { createRef, useEffect, useState } from 'react';
 import { Label, ErrorMessage } from '@buffetjs/styles';
 import { AutoSizer, Collection } from 'react-virtualized';
 import PropTypes from 'prop-types';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useDataManager from '../../hooks/useDataManager';
 import CellRenderer from './CellRenderer';
+import Search from './Search';
+import SearchWrapper from './SearchWrapper';
 import Wrapper from './Wrapper';
 
 const ComponentIconPicker = ({
@@ -15,9 +18,7 @@ const ComponentIconPicker = ({
   value,
 }) => {
   const { allIcons, allComponentsIconAlreadyTaken } = useDataManager();
-  const [originalIcon] = useState(value);
-
-  const icons = allIcons.filter(ico => {
+  const initialIcons = allIcons.filter(ico => {
     if (isCreating) {
       return !allComponentsIconAlreadyTaken.includes(ico);
     }
@@ -27,6 +28,18 @@ const ComponentIconPicker = ({
       .filter(icon => icon !== originalIcon)
       .includes(ico);
   });
+  const ref = createRef();
+  const [originalIcon] = useState(value);
+  const [showSearch, setShowSearch] = useState(false);
+  const [search, setSearch] = useState('');
+  const [icons, setIcons] = useState(initialIcons);
+  const toggleSearch = () => setShowSearch(prev => !prev);
+
+  useEffect(() => {
+    if (showSearch && ref.current) {
+      ref.current.focus();
+    }
+  }, [ref, showSearch]);
 
   const cellCount = icons.length;
 
@@ -54,9 +67,42 @@ const ComponentIconPicker = ({
 
   return (
     <Wrapper error={error !== null}>
-      <Label htmlFor={name} style={{ marginBottom: 12 }}>
-        {label}
-      </Label>
+      <div className="search">
+        <Label htmlFor={name} style={{ marginBottom: 12 }}>
+          {label}
+        </Label>
+        {!showSearch ? (
+          <button onClick={toggleSearch} type="button">
+            <FontAwesomeIcon icon="search" />
+          </button>
+        ) : (
+          <SearchWrapper>
+            <FontAwesomeIcon icon="search" />
+            <button onClick={toggleSearch}></button>
+            <Search
+              ref={ref}
+              onChange={({ target: { value } }) => {
+                setSearch(value);
+                setIcons(() =>
+                  initialIcons.filter(icon => icon.includes(value))
+                );
+              }}
+              value={search}
+              placeholder="search…"
+            />
+            <button
+              onClick={() => {
+                setSearch('');
+                setIcons(initialIcons);
+                toggleSearch();
+              }}
+              type="button"
+            >
+              <FontAwesomeIcon icon="times" />
+            </button>
+          </SearchWrapper>
+        )}
+      </div>
       <AutoSizer disableHeight>
         {({ width }) => {
           return (
