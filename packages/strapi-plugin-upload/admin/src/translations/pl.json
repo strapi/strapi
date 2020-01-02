@@ -26,5 +26,7 @@
   "notification.dropFile.success": "Plik został przesłany",
   "notification.dropFiles.success": "{number} plików zostało przesłanych",
   "Upload.status.sizeLimit": "{plik} jest większy niż skonfigurowany rozmiar limitu",
-  "Upload.status.disabled" : "Przesyłanie plików jest wyłączone"
+  "Upload.status.disabled" : "Przesyłanie plików jest wyłączone",
+  "plugin.description.long": "Zarządzanie plikami multimedialnymi.",
+  "plugin.description.short": "Zarządzanie plikami multimedialnymi."
 }

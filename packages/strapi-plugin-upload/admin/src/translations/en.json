@@ -27,5 +27,7 @@
   "notification.config.success": "The settings has been updated",
   "notification.delete.success": "The file has been deleted",
   "notification.dropFile.success": "Your file has been uploaded",
-  "notification.dropFiles.success": "{number} files have been uploaded"
+  "notification.dropFiles.success": "{number} files have been uploaded",
+  "plugin.description.long": "Media file management.",
+  "plugin.description.short": "Media file management."
 }

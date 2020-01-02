@@ -6,7 +6,7 @@
 
 /* eslint-disable prefer-template */
 // Public node modules.
-const _ = require('lodash');
+const isObject = require('lodash/isObject');
 const mailgunFactory = require('mailgun-js');
 
 /* eslint-disable no-unused-vars */
@@ -47,21 +47,21 @@ module.exports = {
       send: (options, cb) => {
         return new Promise((resolve, reject) => {
           // Default values.
-          options = _.isObject(options) ? options : {};
-          options.from = options.from || config.mailgun_default_from;
-          options.replyTo = options.replyTo || config.mailgun_default_replyto;
-          options.text = options.text || options.html;
-          options.html = options.html || options.text;
+          options = isObject(options) ? options : {};
 
           let msg = {
-            from: options.from,
+            from: options.from || config.mailgun_default_from,
             to: options.to,
             subject: options.subject,
-            text: options.text,
-            html: options.html,
+            ...(options.text && { text: options.text }),
+            ...(options.html && { html: options.html }),
+            ...(options.template && { template: options.template }),
+            ...(options['h:X-Mailgun-Variables'] && {
+              'h:X-Mailgun-Variables': options['h:X-Mailgun-Variables'],
+            }),
             ...(options.attachment && { attachment: options.attachment }),
           };
-          msg['h:Reply-To'] = options.replyTo;
+          msg['h:Reply-To'] = options.replyTo || config.mailgun_default_replyto;
 
           mailgun.messages().send(msg, function(err) {
             if (err) {

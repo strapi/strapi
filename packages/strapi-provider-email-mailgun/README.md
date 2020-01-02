@@ -1,4 +1,4 @@
-# strapi-provider-email-sendmail
+# strapi-provider-email-mailgun
 
 ## Resources
 
