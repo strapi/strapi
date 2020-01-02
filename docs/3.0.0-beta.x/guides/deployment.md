@@ -97,6 +97,12 @@ strapi(/* {...} */).start();
 
 If you want to host the administration on another server than the API, [please take a look at this dedicated section](../admin-panel/deploy.md).
 
+## Docker
+
+In this section, you will not find a specific guide to deploy your app with [Docker](https://www.docker.com/).
+
+We recently updated the [strapi/strapi-docker](https://github.com/strapi/strapi-docker) GitHub repository that contains all informations needed to user Strapi with Docker.
+
 ## Amazon AWS
 
 This is a step-by-step guide for deploying a Strapi project to [Amazon AWS EC2](https://aws.amazon.com/ec2/). This guide will connect to an [Amazon AWS RDS](https://aws.amazon.com/rds/) for managing and hosting the database. Optionally, this guide will show you how to connect host and serve images on [Amazon AWS S3](https://aws.amazon.com/s3/). Prior to starting this guide, you should have created a [Strapi project](../getting-started/quick-start.md), to use for deploying on AWS.
@@ -487,7 +493,7 @@ sudo nano ecosystem.config.js
 module.exports = {
   apps : [{
     name: 'your-app-name',
-    cwd: '/home/ubuntu/my-strapi-project/my-project'
+    cwd: '/home/ubuntu/my-strapi-project/my-project',
     script: 'npm',
     args: 'start',
     env: {
@@ -995,7 +1001,7 @@ npm install pm2@latest -g
 
 ### The ecosystem.config.js file
 
-- You will need to configure an `ecosystem.config.js` file. This file will manage the **database connection variables** Strapi needs to connect to your database. The `ecosystem.config.js` will also be used by `pm2` to restart your project whenever any changes are made to files within the Strapi file system itself (such as when an update arrives from GitHub). You can read more about this file [here](https://pm2.io/doc/en/runtime/guide/development-tools/).
+- You will need to configure an `ecosystem.config.js` file. This file will manage the **database connection variables** Strapi needs to connect to your database. The `ecosystem.config.js` will also be used by `pm2` to restart your project whenever any changes are made to files within the Strapi file system itself (such as when an update arrives from GitHub). You can read more about this file [here](https://pm2.keymetrics.io/docs/usage/pm2-doc-single-page/).
 
   - You will need to open your `nano` editor and then `copy/paste` the following:
 

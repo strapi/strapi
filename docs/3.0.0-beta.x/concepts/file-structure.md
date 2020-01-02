@@ -2,13 +2,15 @@
 
 By default, your project's structure will look like this:
 
+- `/.cache`: contains files used to build your admin panel.
+- [`/admin`](../admin-panel/customization.md): contains your admin customization files.
 - `/api`: contains the business logic of your project split in sub-folder per API.
   - `**`
     - `/config`: contains the API's configurations ([`routes`](./routing.md), [`policies`](./policies.md), etc).
     - [`/controllers`](./controllers.md): contains the API's custom controllers.
     - [`/models`](./models.md): contains the API's models.
     - [`/services`](./services.md): contains the API's custom services.
-- `/node_modules`: contains the npm's packages used by the project.
+- `/build`: contains your admin panel UI build.
 - [`/config`](./configurations.md)
   - [`/environments`](./configurations.md#environments): contains the project's configurations per environment.
     - `/**`
@@ -27,11 +29,9 @@ By default, your project's structure will look like this:
   - [`custom.json`](./configurations.md#custom): contains the custom configurations of the project.
   - [`hook.json`](./configurations.md#hook): contains the hook settings of the project.
   - [`middleware.json`](./configurations.md#middleware): contains the middleware settings of the project.
+- [`/extensions`](./customization.md): contains the files to extend installed plugins.
 - [`/hooks`](./hooks.md): contains the custom hooks of the project.
 - [`/middlewares`](./middlewares.md): contains the custom middlewares of the project.
-- [`/admin`](../admin-panel/customization.md): contains your admin customization files.
-- [`/extensions`](./customization.md): contains the files to extend installed plugins.
 - [`/plugins`](./plugins.md): contains your local plugins.
 - [`/public`](./public-assets.md): contains the file accessible to the outside world.
-- `/build`: contains your admin panel UI build.
-- `/.cache`: contains files used to build your admin panel.
+- `/node_modules`: contains the npm's packages used by the project.

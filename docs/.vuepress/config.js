@@ -2,8 +2,16 @@ module.exports = {
   title: 'Strapi Documentation',
   description: 'The headless CMS developers love.',
   base: '/documentation/',
-  ga: 'UA-54313258-1',
-  plugins: ['@vuepress/medium-zoom', 'vuepress-plugin-element-tabs'],
+  plugins: [
+    '@vuepress/medium-zoom',
+    'vuepress-plugin-element-tabs',
+    [
+      '@vuepress/google-analytics',
+      {
+        ga: 'UA-54313258-1',
+      },
+    ],
+  ],
   head: [
     [
       'link',
@@ -116,7 +124,7 @@ module.exports = {
       },
       {
         text: 'Website',
-        link: 'https://strapi',
+        link: 'https://strapi.io',
       },
       {
         text: 'Slack',
@@ -186,9 +194,14 @@ module.exports = {
             '/3.0.0-beta.x/guides/update-version',
             '/3.0.0-beta.x/guides/databases',
             '/3.0.0-beta.x/guides/deployment',
+            '/3.0.0-beta.x/guides/process-manager',
             '/3.0.0-beta.x/guides/jwt-validation',
             '/3.0.0-beta.x/guides/error-catching',
+            '/3.0.0-beta.x/guides/secure-your-app',
             '/3.0.0-beta.x/guides/external-data',
+            '/3.0.0-beta.x/guides/custom-data-response',
+            '/3.0.0-beta.x/guides/custom-admin',
+            '/3.0.0-beta.x/guides/draft',
             '/3.0.0-beta.x/guides/slug',
             '/3.0.0-beta.x/guides/webhooks',
           ],

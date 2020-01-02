@@ -3,7 +3,7 @@
 Strapi gives you the option to choose the most appropriate database for your project. It currently supports **PostgreSQL**, **MongoDB**, **SQLite**, **MySQL** and
 **MariaDB**. The following documentation covers how to install these databases locally (for development purposes) and on various hosted or cloud server solutions (for staging or production purposes).
 
-:::note
+::: tip
 Deploying **Strapi** itself is covered in the [Deployment Guide](deployment.md).
 :::
 
@@ -20,7 +20,7 @@ Simply use one of the following commands.
 ::: tab yarn
 
 ```bash
-yarn create strapi-app new my-project --quickstart
+yarn create strapi-app my-project --quickstart
 ```
 
 :::
