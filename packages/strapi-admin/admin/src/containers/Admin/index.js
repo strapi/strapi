@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import { Switch, Route } from 'react-router-dom';
+import { injectIntl } from 'react-intl';
 import { isEmpty } from 'lodash';
 // Components from strapi-helper-plugin
 import {
@@ -23,7 +24,6 @@ import { SHOW_TUTORIALS } from '../../config';
 import Header from '../../components/Header/index';
 import Logout from '../../components/Logout';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
-import ComingSoonPage from '../ComingSoonPage';
 import LeftMenu from '../LeftMenu';
 import ListPluginsPage from '../ListPluginsPage';
 import LocaleToggle from '../LocaleToggle';
@@ -67,6 +67,10 @@ export class Admin extends React.Component {
 
     // Display the error log component which is not designed yet
     this.props.setAppError();
+  }
+
+  componentDidMount() {
+    this.props.emitEvent('didAccessAuthenticatedAdministration');
   }
 
   hasApluginNotReady = props => {
@@ -145,6 +149,7 @@ export class Admin extends React.Component {
         currentEnvironment={this.props.global.currentEnvironment}
         disableGlobalOverlayBlocker={this.props.disableGlobalOverlayBlocker}
         enableGlobalOverlayBlocker={this.props.enableGlobalOverlayBlocker}
+        formatMessage={this.props.intl.formatMessage}
         plugins={this.props.global.plugins}
         updatePlugin={this.props.updatePlugin}
       >
@@ -168,7 +173,6 @@ export class Admin extends React.Component {
                   path="/plugins/:pluginId"
                   render={this.renderPluginDispatcher}
                 />
-                <Route path="/plugins" component={ComingSoonPage} />
                 <Route
                   path="/list-plugins"
                   render={props => this.renderRoute(props, ListPluginsPage)}
@@ -179,7 +183,6 @@ export class Admin extends React.Component {
                   render={this.renderMarketPlace}
                   exact
                 />
-                <Route path="/configuration" component={ComingSoonPage} exact />
                 <Route key="7" path="" component={NotFoundPage} />
                 <Route key="8" path="404" component={NotFoundPage} />
               </Switch>
@@ -212,6 +215,9 @@ Admin.propTypes = {
     showGlobalAppBlocker: PropTypes.bool,
     strapiVersion: PropTypes.string,
   }).isRequired,
+  intl: PropTypes.shape({
+    formatMessage: PropTypes.func,
+  }),
   location: PropTypes.object.isRequired,
   setAppError: PropTypes.func.isRequired,
   updatePlugin: PropTypes.func.isRequired,
@@ -243,6 +249,7 @@ const withReducer = injectReducer({ key: 'admin', reducer });
 const withSaga = injectSaga({ key: 'admin', saga });
 
 export default compose(
+  injectIntl,
   withReducer,
   withSaga,
   withConnect

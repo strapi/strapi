@@ -2,7 +2,7 @@ import React, { memo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 
-import { useLayoutDnd } from '../../contexts/LayoutDnd';
+import useLayoutDnd from '../../hooks/useLayoutDnd';
 
 import Add from '../AddDropdown';
 import SortWrapper from '../SortWrapper';
@@ -19,9 +19,10 @@ const FieldsReorder = ({ className }) => {
     onAddData,
     removeField,
   } = useLayoutDnd();
-  const getGroup = useCallback(
+
+  const getComponent = useCallback(
     attributeName => {
-      return get(attributes, [attributeName, 'group'], '');
+      return get(attributes, [attributeName, 'component'], '');
     },
     [attributes]
   );
@@ -33,10 +34,26 @@ const FieldsReorder = ({ className }) => {
     },
     [attributes]
   );
+  const getDynamicZoneComponents = useCallback(
+    attributeName => {
+      const attribute = get(attributes, [attributeName], {});
+
+      return attribute.components || [];
+    },
+    [attributes]
+  );
 
   return (
     <div className={className}>
-      <SortWrapper style={{ paddingLeft: 5, paddingRight: 5 }}>
+      <SortWrapper
+        style={{
+          marginTop: 7,
+          paddingTop: 11,
+          paddingLeft: 5,
+          paddingRight: 5,
+          border: '1px dashed #e3e9f3',
+        }}
+      >
         {layout.map((row, rowIndex) => {
           return (
             <Wrapper key={row.rowId} style={{}}>
@@ -45,7 +62,8 @@ const FieldsReorder = ({ className }) => {
 
                 return (
                   <Item
-                    groupUid={getGroup(name)}
+                    componentUid={getComponent(name)}
+                    dynamicZoneComponents={getDynamicZoneComponents(name)}
                     itemIndex={index}
                     key={name}
                     moveRow={moveRow}
@@ -66,7 +84,6 @@ const FieldsReorder = ({ className }) => {
             data={buttonData}
             onClick={onAddData}
             style={{ width: '100%', margin: '0 5px' }}
-            pStyle={{ marginTop: '-2px' }}
           />
         </Wrapper>
       </SortWrapper>

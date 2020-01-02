@@ -14,7 +14,8 @@ const List = styled.div`
   overflow-x: scroll;
   border-radius: 3px;
   background: white;
-  i {
+  i,
+  svg {
     display: inline-block;
     text-rendering: auto;
     font-weight: 600;

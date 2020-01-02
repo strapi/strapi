@@ -11,7 +11,8 @@ import { Helmet } from 'react-helmet';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
-import { PluginHeader, LoadingIndicatorPage } from 'strapi-helper-plugin';
+import { LoadingIndicatorPage } from 'strapi-helper-plugin';
+import { Header } from '@buffetjs/custom';
 import ListPlugins from '../../components/ListPlugins';
 import injectSaga from '../../utils/injectSaga';
 import injectReducer from '../../utils/injectReducer';
@@ -36,6 +37,10 @@ export class ListPluginsPage extends React.Component {
   }
 
   render() {
+    const {
+      intl: { formatMessage },
+    } = this.props;
+
     if (this.props.isLoading) {
       return <LoadingIndicatorPage />;
     }
@@ -54,13 +59,15 @@ export class ListPluginsPage extends React.Component {
           )}
         </FormattedMessage>
         <Wrapper className="container-fluid">
-          <PluginHeader
+          <Header
             title={{
-              id: 'app.components.ListPluginsPage.title',
+              label: formatMessage({
+                id: 'app.components.ListPluginsPage.title',
+              }),
             }}
-            description={{
+            content={formatMessage({
               id: 'app.components.ListPluginsPage.description',
-            }}
+            })}
             actions={[]}
           />
           <ListPlugins
@@ -82,6 +89,9 @@ ListPluginsPage.propTypes = {
   }),
   getPlugins: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
+  intl: PropTypes.shape({
+    formatMessage: PropTypes.func.isRequired,
+  }).isRequired,
   isLoading: PropTypes.bool.isRequired,
   onDeletePluginClick: PropTypes.func.isRequired,
   onDeletePluginConfirm: PropTypes.func.isRequired,

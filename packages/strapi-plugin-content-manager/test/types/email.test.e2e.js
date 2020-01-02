@@ -12,19 +12,22 @@ describe('Test type email', () => {
 
     modelsUtils = createModelsUtils({ rq });
 
-    await modelsUtils.createModelWithType('withemail', 'email');
+    await modelsUtils.createContentTypeWithType('withemail', 'email');
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteModel('withemail');
+    await modelsUtils.deleteContentType('withemail');
   }, 60000);
 
   test('Create entry with value input JSON', async () => {
-    const res = await rq.post('/content-manager/explorer/withemail', {
-      body: {
-        field: 'someemail',
-      },
-    });
+    const res = await rq.post(
+      '/content-manager/explorer/application::withemail.withemail',
+      {
+        body: {
+          field: 'someemail',
+        },
+      }
+    );
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
@@ -35,11 +38,14 @@ describe('Test type email', () => {
   test.todo('Should Throw on invalid email');
 
   test('Create entry with value input Formdata', async () => {
-    const res = await rq.post('/content-manager/explorer/withemail', {
-      body: {
-        field: 1234567,
-      },
-    });
+    const res = await rq.post(
+      '/content-manager/explorer/application::withemail.withemail',
+      {
+        body: {
+          field: 1234567,
+        },
+      }
+    );
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
@@ -48,7 +54,9 @@ describe('Test type email', () => {
   });
 
   test('Reading entry returns correct value', async () => {
-    const res = await rq.get('/content-manager/explorer/withemail');
+    const res = await rq.get(
+      '/content-manager/explorer/application::withemail.withemail'
+    );
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
@@ -62,14 +70,17 @@ describe('Test type email', () => {
   });
 
   test('Updating entry sets the right value and format', async () => {
-    const res = await rq.post('/content-manager/explorer/withemail', {
-      body: {
-        field: 'someemail',
-      },
-    });
+    const res = await rq.post(
+      '/content-manager/explorer/application::withemail.withemail',
+      {
+        body: {
+          field: 'someemail',
+        },
+      }
+    );
 
     const updateRes = await rq.put(
-      `/content-manager/explorer/withemail/${res.body.id}`,
+      `/content-manager/explorer/application::withemail.withemail/${res.body.id}`,
       {
         body: {
           field: 'otherPwd',

@@ -18,14 +18,16 @@ module.exports = {
     // Create loaders for each relational field (exclude core models).
     Object.keys(strapi.models)
       .filter(model => model !== 'core_store')
-      .forEach(model => {
-        this.createLoader(model);
+      .forEach(modelKey => {
+        const model = strapi.models[modelKey];
+        this.createLoader(model.uid);
       });
 
     // Reproduce the same pattern for each plugin.
     Object.keys(strapi.plugins).forEach(plugin => {
-      Object.keys(strapi.plugins[plugin].models).forEach(model => {
-        this.createLoader(model, plugin);
+      Object.keys(strapi.plugins[plugin].models).forEach(modelKey => {
+        const model = strapi.plugins[plugin].models[modelKey];
+        this.createLoader(model.uid);
       });
     });
   },
@@ -34,29 +36,25 @@ module.exports = {
     this.loaders = {};
   },
 
-  createLoader: function(model, plugin) {
-    const name = plugin ? `${plugin}__${model}` : model;
-
-    // Exclude polymorphic from loaders.
-    if (name === undefined) {
-      return;
+  createLoader: function(modelUID) {
+    if (this.loaders[modelUID]) {
+      return this.loaders[modelUID];
     }
 
-    if (this.loaders[name]) {
-      return this.loaders[name];
-    }
-
-    this.loaders[name] = new DataLoader(
+    this.loaders[modelUID] = new DataLoader(
       keys => {
         // Extract queries from keys and merge similar queries.
-        const { queries, map } = this.extractQueries(model, _.cloneDeep(keys));
+        const { queries, map } = this.extractQueries(
+          modelUID,
+          _.cloneDeep(keys)
+        );
 
         // Run queries in parallel.
         return Promise.all(
-          queries.map(query => this.makeQuery(model, query))
+          queries.map(query => this.makeQuery(modelUID, query))
         ).then(results => {
           // Use to match initial queries order.
-          return this.mapData(model, keys, map, results);
+          return this.mapData(modelUID, keys, map, results);
         });
       },
       {
@@ -67,7 +65,7 @@ module.exports = {
     );
   },
 
-  mapData: function(model, originalMap, map, results) {
+  mapData: function(modelUID, originalMap, map, results) {
     // Use map to re-dispatch data correctly based on initial keys.
     return originalMap.map((query, index) => {
       // Find the index of where we should extract the results.
@@ -77,7 +75,7 @@ module.exports = {
       const data = results[indexResults];
 
       // Retrieving referring model.
-      const ref = this.retrieveModel(model, query.options.source);
+      const ref = strapi.getModel(modelUID);
 
       if (query.single) {
         // Return object instead of array for one-to-many relationship.
@@ -98,8 +96,8 @@ module.exports = {
 
       const ast = ref.associations.find(ast => ast.alias === ids.alias);
       const astModel = ast
-        ? this.retrieveModel(ast.model || ast.collection, ast.plugin)
-        : this.retrieveModel(model);
+        ? strapi.getModel(ast.model || ast.collection, ast.plugin)
+        : strapi.getModel(modelUID);
 
       if (!_.isArray(ids)) {
         return data
@@ -144,12 +142,12 @@ module.exports = {
     };
   },
 
-  makeQuery: async function(model, query = {}) {
+  makeQuery: async function(modelUID, query = {}) {
     if (_.isEmpty(query.ids)) {
       return [];
     }
 
-    const ref = this.retrieveModel(model, query.options.source);
+    const ref = strapi.getModel(modelUID);
     const ast = ref.associations.find(ast => ast.alias === query.alias);
 
     const params = {
@@ -169,15 +167,10 @@ module.exports = {
     // Run query and remove duplicated ID.
     return strapi.plugins['content-manager'].services[
       'contentmanager'
-    ].fetchAll({ model }, params);
+    ].fetchAll({ model: modelUID }, params);
   },
 
-  retrieveModel: function(model, source) {
-    // Retrieve refering model.
-    return source ? strapi.plugins[source].models[model] : strapi.models[model];
-  },
-
-  extractQueries: function(model, keys) {
+  extractQueries: function(modelUID, keys) {
     const queries = [];
     const map = [];
 
@@ -188,16 +181,16 @@ module.exports = {
       const { query = {}, ...options } = current.options;
 
       // Retrieving referring model.
-      const ref = this.retrieveModel(model, options.source);
+      const { primaryKey } = strapi.getModel(modelUID);
 
       // Generate array of IDs to fetch.
       const ids = [];
 
       // Only one entry to fetch.
       if (single) {
-        ids.push(params[ref.primaryKey]);
-      } else if (_.isArray(query[ref.primaryKey])) {
-        ids.push(...query[ref.primaryKey]);
+        ids.push(params[primaryKey]);
+      } else if (_.isArray(query[primaryKey])) {
+        ids.push(...query[primaryKey]);
       } else {
         ids.push(query[association.via]);
       }
@@ -205,7 +198,7 @@ module.exports = {
       queries.push({
         ids,
         options,
-        alias: _.first(Object.keys(query)) || ref.primaryKey,
+        alias: _.first(Object.keys(query)) || primaryKey,
       });
 
       map[queries.length - 1 > 0 ? queries.length - 1 : 0] = [];

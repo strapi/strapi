@@ -7,6 +7,7 @@
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PropTypes from 'prop-types';
 import ButtonWrapper from './ButtonWrapper';
 import Ide from './Ide';
@@ -35,7 +36,7 @@ function BlockerComponent({
     <Wrapper>
       <div className="header">
         <div className="icoContainer">
-          <i className={cn('fa', blockerComponentIcon)} />
+          <FontAwesomeIcon icon={blockerComponentIcon} />
         </div>
         <div>
           <h4>
@@ -80,14 +81,14 @@ const renderButton = () => (
 BlockerComponent.defaultProps = {
   blockerComponentContent: '',
   blockerComponentDescription: 'app.utils.defaultMessage',
-  blockerComponentIcon: '',
+  blockerComponentIcon: 'lock',
   blockerComponentTitle: 'app.utils.defaultMessage',
 };
 
 BlockerComponent.propTypes = {
   blockerComponentContent: PropTypes.string,
   blockerComponentDescription: PropTypes.string.isRequired,
-  blockerComponentIcon: PropTypes.string.isRequired,
+  blockerComponentIcon: PropTypes.string,
   blockerComponentTitle: PropTypes.string.isRequired,
 };
 

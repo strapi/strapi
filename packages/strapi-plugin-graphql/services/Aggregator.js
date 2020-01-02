@@ -489,7 +489,7 @@ const formatModelConnectionsGQL = function(
     groupBy: `${globalId}GroupBy`,
     aggregate: `${globalId}Aggregator`,
   };
-  const pluralName = pluralize.plural(name);
+  const pluralName = pluralize.plural(_.camelCase(name));
 
   let modelConnectionTypes = `type ${connectionGlobalId} {${Schema.formatGQL(
     connectionFields
@@ -519,14 +519,11 @@ const formatModelConnectionsGQL = function(
           });
 
           const policiesFn = [
-            policyUtils.globalPolicy(
-              undefined,
-              {
-                handler: `${name}.find`,
-              },
-              undefined,
-              plugin
-            ),
+            policyUtils.globalPolicy({
+              controller: name,
+              action: 'find',
+              plugin,
+            }),
           ];
 
           policyUtils.get(

@@ -6,20 +6,20 @@ const GlobalNotification = createGlobalStyle`
   position: relative;
   display: block;
   width: 60px;
-  text-align: center;
-  font-size: 2.4rem;
-
-  &:before {
+  height: 60px;
+  > div {
     position: absolute;
-    top: calc(50% - 10px); left: calc(50% - 10px);
     width: 20px;
     height: 20px;
-    padding-top: 4px;
-    border-radius: 100%;
+    top: 20px; left:20px;
+    border-radius: 10px;
     border: 1px solid ${props => props.theme.main.colors.green};
-    color: ${props => props.theme.main.colors.green}
-    font-size: 1.2rem;
-    text-align: center;
+    display: flex;
+    i, svg {
+      margin: auto;
+      font-size: 1.2rem;
+      color: ${props => props.theme.main.colors.green};
+    }
   }
 }
 
@@ -44,8 +44,7 @@ const GlobalNotification = createGlobalStyle`
   cursor: pointer;
   opacity: 0.6;
   position: relative;
-  display: block;
-
+  display: flex;
   width: 20px;
   font-size: 1.4rem;
   color: #BBC2BF;
@@ -56,10 +55,8 @@ const GlobalNotification = createGlobalStyle`
     opacity: 1;
   }
 
-  &:before {
-    position: absolute;
-    top: calc(50% - 6px);
-    height: 100%;
+  svg {
+    margin: auto;
     font-size: 1.3rem;
     font-weight: 100!important;
   }

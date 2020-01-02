@@ -6,7 +6,7 @@ import pluginId from '../../pluginId';
 import Title from './Title';
 
 const SectionTitle = ({ isSettings }) => {
-  const suffix = isSettings ? 'settings' : 'layout';
+  const suffix = isSettings ? 'settings' : 'view';
   const msgId = `${pluginId}.containers.SettingPage.${suffix}`;
 
   return (

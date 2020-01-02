@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-graphql",
-  "version": "3.0.0-beta.17.8",
+  "version": "3.0.0-beta.18.3",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "graphql",
@@ -11,19 +11,19 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "apollo-server-koa": "^2.9.0",
+    "apollo-server-koa": "2.9.12",
     "dataloader": "^1.4.0",
     "glob": "^7.1.4",
     "graphql": "^14.3.0",
     "graphql-depth-limit": "^1.1.0",
+    "graphql-iso-date": "^3.6.1",
     "graphql-playground-middleware-koa": "^1.6.0",
-    "graphql-tools": "^4.0.4",
-    "graphql-type-datetime": "^0.2.4",
-    "graphql-type-json": "^0.3.0",
+    "graphql-tools": "4.0.6",
+    "graphql-type-json": "0.3.1",
     "graphql-type-long": "^0.1.1",
     "koa-compose": "^4.1.0",
     "pluralize": "^7.0.0",
-    "strapi-utils": "3.0.0-beta.17.8"
+    "strapi-utils": "3.0.0-beta.18.3"
   },
   "devDependencies": {
     "cross-env": "^5.2.0",

@@ -3,7 +3,6 @@ import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 import svg from 'rollup-plugin-svg';
 import postcss from 'rollup-plugin-postcss';
-import rebasePlugin from 'rollup-plugin-rebase';
 import { terser } from 'rollup-plugin-terser';
 import replace from 'rollup-plugin-replace';
 import filesize from 'rollup-plugin-filesize';
@@ -42,7 +41,6 @@ export default {
       modules: true,
       minimize: true,
     }),
-    rebasePlugin(),
     resolve(),
     babel({
       exclude: 'node_modules/**',
@@ -53,7 +51,7 @@ export default {
     filesize(),
     replace({
       'process.env.NODE_ENV': JSON.stringify('production'),
-    })
+    }),
   ],
 
   external: [

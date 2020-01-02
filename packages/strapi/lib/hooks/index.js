@@ -19,12 +19,6 @@ module.exports = async function() {
   // list of enabled hooks
   const enableddHook = Object.keys(this.hook).filter(hookEnabled);
 
-  const addDependencies = (acc, hookKey) => {
-    const deps = this.hook[hookKey].dependencies || [];
-    if (deps.length === 0) return acc.concat(hookKey);
-    else return acc.concat(deps).concat(hookKey);
-  };
-
   // Method to initialize hooks and emit an event.
   const initialize = hookKey => {
     if (this.hook[hookKey].loaded == true) return;
@@ -79,25 +73,22 @@ module.exports = async function() {
 
   const hooksBefore = get(hookConfig, 'load.before', [])
     .filter(hookExists)
-    .filter(hookEnabled)
-    .reduce(addDependencies, []);
+    .filter(hookEnabled);
 
   const hooksAfter = get(hookConfig, 'load.after', [])
     .filter(hookExists)
-    .filter(hookEnabled)
-    .reduce(addDependencies, []);
+    .filter(hookEnabled);
 
   const hooksOrder = get(hookConfig, 'load.order', [])
     .filter(hookExists)
-    .filter(hookEnabled)
-    .reduce(addDependencies, []);
+    .filter(hookEnabled);
 
   const unspecifieddHook = difference(
     enableddHook,
     hooksBefore,
     hooksOrder,
     hooksAfter
-  ).reduce(addDependencies, []);
+  );
 
   // before
   await initdHookSeq(hooksBefore);

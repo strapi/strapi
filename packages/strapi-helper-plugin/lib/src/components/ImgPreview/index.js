@@ -11,9 +11,9 @@ import PropTypes from 'prop-types';
 import { get, has, isArray, isEmpty, startsWith, size } from 'lodash';
 import cn from 'classnames';
 
-import BkgImg from '../../assets/icons/icon_upload.svg';
 import ImgPreviewArrow from '../ImgPreviewArrow';
 import ImgPreviewHint from '../ImgPreviewHint';
+import IconUpload from './IconUpload';
 import Wrapper from './Wrapper';
 
 /* eslint-disable react/no-unused-state */
@@ -169,7 +169,7 @@ class ImgPreview extends React.Component {
 
     return (
       <div className="fileIcon" onDrop={this.handleDrop}>
-        <i className={`fa fa-file-${fileType}-o`} />
+        <i className={`far fa-file-${fileType}`} />
       </div>
     );
   };
@@ -180,9 +180,7 @@ class ImgPreview extends React.Component {
 
     const containerStyle = isEmpty(imgURL)
       ? {
-          backgroundImage: `url(${BkgImg})`,
-          backgroundRepeat: 'no-repeat',
-          backgroundPosition: 'center',
+          display: 'flex',
           zIndex: 9999,
         }
       : {};
@@ -193,6 +191,7 @@ class ImgPreview extends React.Component {
         onDragEnter={this.handleDragEnter}
         style={containerStyle}
       >
+        {isEmpty(imgURL) && <IconUpload />}
         <div
           className={cn(this.state.isDraging && 'overlay')}
           onDragLeave={this.handleDragLeave}
