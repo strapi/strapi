@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 const Wrapper = styled.div`
   padding-top: 0.7rem;
   position: absolute;
-  top: 60px;
+  top: 6rem;
   right: 0;
   bottom: 0;
   left: 0;
