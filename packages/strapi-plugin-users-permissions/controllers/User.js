@@ -140,7 +140,7 @@ module.exports = {
         .query('role', 'users-permissions')
         .findOne({ type: advanced.default_role }, []);
 
-      user.role = defaultRole.id;
+      user.role = [defaultRole.id];
     }
 
     try {
