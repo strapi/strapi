@@ -473,7 +473,7 @@ module.exports = {
       );
     }
 
-    params.role = role.id;
+    params.role = [role.id];
     params.password = await strapi.plugins[
       'users-permissions'
     ].services.user.hashPassword(params);
