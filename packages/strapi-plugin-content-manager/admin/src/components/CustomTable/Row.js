@@ -3,8 +3,8 @@ import { withRouter } from 'react-router';
 import PropTypes from 'prop-types';
 import { get, isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import moment from 'moment';
-import { IcoContainer } from 'strapi-helper-plugin';
-import { useListView } from '../../contexts/ListView';
+import { IcoContainer, useGlobalContext } from 'strapi-helper-plugin';
+import useListView from '../../hooks/useListView';
 
 import CustomInputCheckbox from '../CustomInputCheckbox';
 import MediaPreviewList from '../MediaPreviewList';
@@ -73,6 +73,8 @@ function Row({ goTo, isBulkable, row, headers }) {
     [row, schema]
   );
 
+  const { emitEvent } = useGlobalContext();
+
   return (
     <>
       {isBulkable && (
@@ -104,11 +106,12 @@ function Row({ goTo, isBulkable, row, headers }) {
       })}
       <ActionContainer>
         <IcoContainer
-          style={{ minWidth: 'inherit', width: '100%' }}
+          style={{ minWidth: 'inherit', width: '100%', lineHeight: 48 }}
           icons={[
             {
-              icoType: 'pencil',
+              icoType: 'pencil-alt',
               onClick: () => {
+                emitEvent('willEditEntryFromList');
                 goTo(row.id);
               },
             },
@@ -116,6 +119,7 @@ function Row({ goTo, isBulkable, row, headers }) {
               id: row.id,
               icoType: 'trash',
               onClick: () => {
+                emitEvent('willDeleteEntryFromList');
                 onClickDelete(row.id);
               },
             },

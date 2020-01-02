@@ -1,25 +1,12 @@
 'use strict';
 
 const yup = require('yup');
-const {
-  validators,
-  VALID_TYPES,
-  isValidName,
-  isValidEnum,
-} = require('./common');
+const { validators, isValidName, isValidEnum } = require('./common');
+const { hasComponent } = require('../../utils/attributes');
+const { modelTypes } = require('./constants');
 
-module.exports = obj => {
-  return {
-    type: yup
-      .string()
-      .oneOf(VALID_TYPES)
-      .required(),
-    ...getTypeShape(obj),
-  };
-};
-
-const getTypeShape = obj => {
-  switch (obj.type) {
+const getTypeShape = (attribute, { modelType } = {}) => {
+  switch (attribute.type) {
     /**
      * complexe types
      */
@@ -63,7 +50,12 @@ const getTypeShape = obj => {
       return {
         enum: yup
           .array()
-          .of(yup.string().test(isValidEnum))
+          .of(
+            yup
+              .string()
+              .test(isValidEnum)
+              .required()
+          )
           .min(1)
           .required(),
         default: yup
@@ -149,8 +141,57 @@ const getTypeShape = obj => {
         unique: validators.unique,
       };
     }
+
+    case 'component': {
+      return {
+        required: validators.required,
+        repeatable: yup.boolean(),
+        component: yup
+          .string()
+          .test({
+            name: 'Check max component nesting is 1 lvl',
+            test: function(compoUID) {
+              const targetCompo = strapi.components[compoUID];
+              if (!targetCompo) return true; // ignore this error as it will fail beforehand
+
+              if (
+                modelType === modelTypes.COMPONENT &&
+                hasComponent(targetCompo)
+              ) {
+                return this.createError({
+                  path: this.path,
+                  message: `${targetCompo.modelName} already as a nested compoent. You cannot have more than one level of nesting inside your components.`,
+                });
+              }
+              return true;
+            },
+          })
+          .required(),
+        min: yup.number(),
+        max: yup.number(),
+      };
+    }
+
+    case 'dynamiczone': {
+      return {
+        required: validators.required,
+        components: yup
+          .array()
+          .of(yup.string().required())
+          .test('isArray', '${path} must be an array', value =>
+            Array.isArray(value)
+          ),
+        min: yup.number(),
+        max: yup.number(),
+      };
+    }
+
     default: {
       return {};
     }
   }
+};
+
+module.exports = {
+  getTypeShape,
 };

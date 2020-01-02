@@ -16,7 +16,8 @@
   "attributes": {
     "name": {
       "type": "string",
-      "required": true
+      "required": true,
+      "minLength": 3
     },
     "code": {
       "type": "string",

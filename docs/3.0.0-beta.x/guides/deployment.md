@@ -409,7 +409,7 @@ Copy/paste the following:
   "defaultConnection": "default",
   "connections": {
     "default": {
-      "connector": "strapi-hook-bookshelf",
+      "connector": "bookshelf",
       "settings": {
         "client": "postgres",
         "host": "${process.env.DATABASE_HOST || '127.0.0.1'}",
@@ -491,20 +491,22 @@ sudo nano ecosystem.config.js
 
 ```js
 module.exports = {
-  apps : [{
-    name: 'your-app-name',
-    cwd: '/home/ubuntu/my-strapi-project/my-project',
-    script: 'npm',
-    args: 'start',
-    env: {
-      NODE_ENV: 'production',
-      DATABASE_HOST: 'your-unique-url.rds.amazonaws.com', // database Endpoint under 'Connectivity & Security' tab
-      DATABASE_PORT: '5432',
-      DATABASE_NAME: 'strapi',  // DB name under 'Configuration' tab
-      DATABASE_USERNAME: 'postgres', // default username
-      DATABASE_PASSWORD: 'Password',
+  apps: [
+    {
+      name: 'your-app-name',
+      cwd: '/home/ubuntu/my-strapi-project/my-project',
+      script: 'npm',
+      args: 'start',
+      env: {
+        NODE_ENV: 'production',
+        DATABASE_HOST: 'your-unique-url.rds.amazonaws.com', // database Endpoint under 'Connectivity & Security' tab
+        DATABASE_PORT: '5432',
+        DATABASE_NAME: 'strapi', // DB name under 'Configuration' tab
+        DATABASE_USERNAME: 'postgres', // default username
+        DATABASE_PASSWORD: 'Password',
+      },
     },
-  }],
+  ],
 };
 ```
 
@@ -922,7 +924,7 @@ In your code editor, you will need to edit a file called `database.json`. Replac
   "defaultConnection": "default",
   "connections": {
     "default": {
-      "connector": "strapi-hook-bookshelf",
+      "connector": "bookshelf",
       "settings": {
         "client": "postgres",
         "host": "${process.env.DATABASE_HOST || '127.0.0.1'}",
@@ -1433,7 +1435,7 @@ Replace the contents of `database.json` with the following:
   "defaultConnection": "default",
   "connections": {
     "default": {
-      "connector": "strapi-hook-bookshelf",
+      "connector": "bookshelf",
       "settings": {
         "client": "postgres",
         "host": "${process.env.DATABASE_HOST}",
@@ -1500,7 +1502,7 @@ Replace the contents of `database.json` with the following:
   "defaultConnection": "default",
   "connections": {
     "default": {
-      "connector": "strapi-hook-mongoose",
+      "connector": "mongoose",
       "settings": {
         "uri": "${process.env.DATABASE_URI}",
         "database": "${process.env.DATABASE_NAME}"

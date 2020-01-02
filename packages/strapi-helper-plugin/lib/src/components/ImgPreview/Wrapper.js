@@ -32,6 +32,9 @@ const Wrapper = styled.div`
     color: #fff;
     justify-content: space-around;
     font-size: 30px;
+    svg {
+      margin: auto;
+    }
   }
 
   .overlay {

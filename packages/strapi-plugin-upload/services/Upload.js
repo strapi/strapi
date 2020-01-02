@@ -80,7 +80,7 @@ module.exports = {
       delete file.buffer;
       file.provider = provider.provider;
 
-      const res = await strapi.plugins['upload'].services.upload.add(file);
+      const res = await this.add(file);
 
       // Remove temp file
       if (file.tmpPath) {

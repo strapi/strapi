@@ -13,6 +13,7 @@ const EditorWrapper = styled.div`
         display: flex;
         background-color: transparent;
         z-index: 99999;
+
         > div {
           min-width: 50%;
         }
@@ -24,6 +25,9 @@ const EditorWrapper = styled.div`
           border-left: 0;
           border-top-left-radius: 0;
           border-bottom-left-radius: 0;
+        }
+        .editorWrapper {
+          border-color: #f3f4f4 !important;
         }
       `;
     }

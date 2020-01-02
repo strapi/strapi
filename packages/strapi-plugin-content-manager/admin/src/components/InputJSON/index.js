@@ -123,6 +123,13 @@ class InputJSON extends React.Component {
     const { name, onChange } = this.props;
     let value = this.codeMirror.getValue();
 
+    if (!hasInitValue) {
+      this.setState({ hasInitValue: true });
+
+      // Fix for the input firing on onChange event on mount
+      return;
+    }
+
     if (value === '') {
       value = null;
     }
@@ -135,10 +142,6 @@ class InputJSON extends React.Component {
         type: 'json',
       },
     });
-
-    if (!hasInitValue) {
-      this.setState({ hasInitValue: true });
-    }
 
     // Remove higlight error
     if (this.state.markedText) {

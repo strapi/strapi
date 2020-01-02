@@ -37,7 +37,7 @@ module.exports = async () => {
     },
     discord: {
       enabled: false,
-      icon: 'comments',
+      icon: 'discord',
       key: '',
       secret: '',
       callback: '/auth/discord/callback',
@@ -45,7 +45,7 @@ module.exports = async () => {
     },
     facebook: {
       enabled: false,
-      icon: 'facebook-official',
+      icon: 'facebook-square',
       key: '',
       secret: '',
       callback: '/auth/facebook/callback',
@@ -89,6 +89,14 @@ module.exports = async () => {
       secret: '',
       callback: '/auth/instagram/callback',
     },
+    vk: {
+      enabled: false,
+      icon: 'vk',
+      key: '',
+      secret: '',
+      callback: '/auth/vk/callback',
+      scope: ['email'],
+    },
   };
   const prevGrantConfig = (await pluginStore.get({ key: 'grant' })) || {};
   // store grant auth config to db
@@ -111,7 +119,7 @@ module.exports = async () => {
     const value = {
       reset_password: {
         display: 'Email.template.reset_password',
-        icon: 'refresh',
+        icon: 'sync',
         options: {
           from: {
             name: 'Administration Panel',
@@ -130,7 +138,7 @@ module.exports = async () => {
       },
       email_confirmation: {
         display: 'Email.template.email_confirmation',
-        icon: 'check-square-o',
+        icon: 'check-square',
         options: {
           from: {
             name: 'Administration Panel',

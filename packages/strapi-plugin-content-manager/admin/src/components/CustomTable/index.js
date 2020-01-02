@@ -4,7 +4,7 @@ import { withRouter } from 'react-router';
 import { FormattedMessage } from 'react-intl';
 import { upperFirst } from 'lodash';
 import pluginId from '../../pluginId';
-import { useListView } from '../../contexts/ListView';
+import useListView from '../../hooks/useListView';
 import TableHeader from './TableHeader';
 import { Table, TableEmpty, TableRow } from './styledComponents';
 import ActionCollapse from './ActionCollapse';
@@ -22,6 +22,7 @@ function CustomTable({
   const {
     emitEvent,
     entriesToDelete,
+    label,
     searchParams: { filters, _q },
     slug,
   } = useListView();
@@ -30,14 +31,14 @@ function CustomTable({
   const colSpanLength = isBulkable ? headers.length + 2 : headers.length + 1;
 
   const handleGoTo = id => {
-    emitEvent('willEditEntry');
+    emitEvent('willEditEntryFromList');
     push({
       pathname: `/plugins/${pluginId}/${slug}/${id}`,
       search: redirectUrl,
     });
   };
 
-  const values = { contentType: upperFirst(slug), search: _q };
+  const values = { contentType: upperFirst(label), search: _q };
   let tableEmptyMsgId = filters.length > 0 ? 'withFilters' : 'withoutFilter';
 
   if (_q !== '') {

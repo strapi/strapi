@@ -1,6 +1,7 @@
 const colors = {
   beige: '#eff3f6',
   black: '#3b3b3b',
+  blue: '#007EFF',
   brightGrey: '#f0f3f8',
   green: '#27b70f',
   grey: '#f7f8f8',
@@ -13,6 +14,7 @@ const colors = {
     grey: '#666B74',
     mediumGrey: '#f2f3f4',
     lightGrey: '#E9EAEB',
+    darkGrey: '#919bae',
   },
 
   // Specific colors for relations

@@ -1,24 +1,27 @@
 import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { get, omit } from 'lodash';
+import { get, isEmpty, omit, toLower } from 'lodash';
+import { FormattedMessage } from 'react-intl';
+import { Inputs as InputsIndex } from '@buffetjs/custom';
 
-import { InputsIndex } from 'strapi-helper-plugin';
-import { useEditView } from '../../contexts/EditView';
+import useDataManager from '../../hooks/useDataManager';
 import InputJSONWithErrors from '../InputJSONWithErrors';
+import InputFileWithErrors from '../InputFileWithErrors';
+import SelectWrapper from '../SelectWrapper';
 import WysiwygWithErrors from '../WysiwygWithErrors';
 
 const getInputType = (type = '') => {
-  switch (type.toLowerCase()) {
+  switch (toLower(type)) {
     case 'boolean':
-      return 'toggle';
-    case 'biginteger':
+      return 'bool';
     case 'decimal':
     case 'float':
     case 'integer':
       return 'number';
     case 'date':
     case 'datetime':
-      return 'date';
+    case 'time':
+      return type;
     case 'email':
       return 'email';
     case 'enumeration':
@@ -32,7 +35,7 @@ const getInputType = (type = '') => {
     case 'media':
     case 'file':
     case 'files':
-      return 'file';
+      return 'media';
     case 'json':
       return 'json';
     case 'wysiwyg':
@@ -44,16 +47,14 @@ const getInputType = (type = '') => {
   }
 };
 
-function Inputs({
-  autoFocus,
-  keys,
-  layout,
-  modifiedData,
-  name,
-  onBlur,
-  onChange,
-}) {
-  const { didCheckErrors, errors } = useEditView();
+function Inputs({ autoFocus, keys, layout, name, onBlur }) {
+  const {
+    didCheckErrors,
+    formErrors,
+    modifiedData,
+    onChange,
+  } = useDataManager();
+
   const attribute = useMemo(
     () => get(layout, ['schema', 'attributes', name], {}),
     [layout, name]
@@ -66,7 +67,7 @@ function Inputs({
     metadatas,
   ]);
   const type = useMemo(() => get(attribute, 'type', null), [attribute]);
-  const inputStyle = type === 'text' ? { height: '196px' } : {};
+
   const validations = omit(attribute, [
     'type',
     'model',
@@ -77,37 +78,85 @@ function Inputs({
     'enum',
   ]);
   const { description, visible } = metadatas;
-  const value = get(modifiedData, keys);
+  const value = get(modifiedData, keys, null);
 
   if (visible === false) {
     return null;
   }
-  const inputErrors = get(errors, keys, []);
-  const withOptionPlaceholder = get(attribute, 'type', '') === 'enumeration';
+  const temporaryErrorIdUntilBuffetjsSupportsFormattedMessage =
+    'app.utils.defaultMessage';
+  const errorId = get(
+    formErrors,
+    [keys, 'id'],
+    temporaryErrorIdUntilBuffetjsSupportsFormattedMessage
+  );
+
+  if (type === 'relation') {
+    return (
+      <div className="col-6" key={keys}>
+        <SelectWrapper
+          {...metadatas}
+          name={keys}
+          plugin={attribute.plugin}
+          relationType={attribute.relationType}
+          targetModel={attribute.targetModel}
+          value={get(modifiedData, keys)}
+        />
+      </div>
+    );
+  }
+
+  let inputValue = value;
+
+  // Fix for input file multipe
+  if (type === 'media' && !value) {
+    inputValue = [];
+  }
+
+  let step;
+
+  if (type === 'float' || type === 'decimal') {
+    step = 'any';
+  } else {
+    step = '1';
+  }
 
   return (
-    <InputsIndex
-      {...metadatas}
-      autoFocus={autoFocus}
-      didCheckErrors={didCheckErrors}
-      disabled={disabled}
-      errors={inputErrors}
-      inputDescription={description}
-      inputStyle={inputStyle}
-      customInputs={{
-        json: InputJSONWithErrors,
-        wysiwyg: WysiwygWithErrors,
+    <FormattedMessage id={errorId}>
+      {error => {
+        return (
+          <InputsIndex
+            {...metadatas}
+            autoFocus={autoFocus}
+            didCheckErrors={didCheckErrors}
+            disabled={disabled}
+            error={
+              isEmpty(error) ||
+              errorId === temporaryErrorIdUntilBuffetjsSupportsFormattedMessage
+                ? null
+                : error
+            }
+            inputDescription={description}
+            description={description}
+            customInputs={{
+              media: InputFileWithErrors,
+              json: InputJSONWithErrors,
+              wysiwyg: WysiwygWithErrors,
+            }}
+            multiple={get(attribute, 'multiple', false)}
+            name={keys}
+            onBlur={onBlur}
+            onChange={onChange}
+            options={get(attribute, 'enum', [])}
+            step={step}
+            type={getInputType(type)}
+            validations={validations}
+            value={inputValue}
+            withDefaultValue={false}
+          />
+        );
       }}
-      multiple={get(attribute, 'multiple', false)}
-      name={name}
-      onBlur={onBlur}
-      onChange={onChange}
-      selectOptions={get(attribute, 'enum', [])}
-      type={getInputType(type)}
-      validations={validations}
-      value={value}
-      withOptionPlaceholder={withOptionPlaceholder}
-    />
+    </FormattedMessage>
   );
 }
 
@@ -120,7 +169,6 @@ Inputs.propTypes = {
   autoFocus: PropTypes.bool,
   keys: PropTypes.string.isRequired,
   layout: PropTypes.object.isRequired,
-  modifiedData: PropTypes.object.isRequired,
   name: PropTypes.string.isRequired,
   onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,

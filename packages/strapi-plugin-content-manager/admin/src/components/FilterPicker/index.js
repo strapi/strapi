@@ -7,7 +7,7 @@ import { FormattedMessage } from 'react-intl';
 import { PluginHeader } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
-import { useListView } from '../../contexts/ListView';
+import useListView from '../../hooks/useListView';
 import Container from '../Container';
 
 import getFilterType from '../FilterPickerOption/utils';
@@ -17,7 +17,13 @@ import FilterPickerOption from '../FilterPickerOption';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
-const NOT_ALLOWED_FILTERS = ['json', 'group', 'relation', 'media', 'richtext'];
+const NOT_ALLOWED_FILTERS = [
+  'json',
+  'component',
+  'relation',
+  'media',
+  'richtext',
+];
 
 function FilterPicker({
   actions,

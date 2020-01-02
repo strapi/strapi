@@ -1,98 +1,82 @@
-import styled, { css } from 'styled-components';
+import React from 'react';
+import PropTypes from 'prop-types';
+import Bold from '../../icons/Bold';
+import Code from '../../icons/Code';
+import Media from '../../icons/Media';
+import Italic from '../../icons/Italic';
+import Link from '../../icons/Link';
+import Ol from '../../icons/Ol';
+import Quote from '../../icons/Quote';
+import Striked from '../../icons/Striked';
+import Ul from '../../icons/Ul';
+import Underline from '../../icons/Underline';
+import StyledButton from './StyledButton';
 
-import Bold from '../../assets/icons/icon_bold.svg';
-import Italic from '../../assets/icons/icon_italic.svg';
-import Underline from '../../assets/icons/icon_underline.svg';
-import Ul from '../../assets/icons/icon_bullet-list.svg';
-import Ol from '../../assets/icons/icon_numbered-list.svg';
-import Quote from '../../assets/icons/icon_quote-block.svg';
-import Code from '../../assets/icons/icon_code-block.svg';
-import Link from '../../assets/icons/icon_link.svg';
-import Striked from '../../assets/icons/icon_barred.svg';
-import Img from '../../assets/icons/icon_media.svg';
+const icons = {
+  bold: Bold,
+  italic: Italic,
+  underline: Underline,
+  ul: Ul,
+  ol: Ol,
+  link: Link,
+  quote: Quote,
+  code: Code,
+  striked: Striked,
+  img: Media,
+};
 
-const Button = styled.div`
-  height: 32px;
-  min-width: 32px;
-  background-color: #ffffff;
-  border: 1px solid rgba(16, 22, 34, 0.1);
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 32px;
-  text-align: center;
-  cursor: pointer;
+const Button = ({
+  active,
+  disabled,
+  className: type,
+  handler,
+  handlers,
+  hideLabel,
+  label,
+  style,
+  text,
+}) => {
+  const handleClick = e => {
+    e.preventDefault();
 
-  &:hover {
-    background-color: #f3f4f4;
-  }
+    handlers[handler](text, style);
+  };
 
-  ${({ active, disabled }) => {
-    if (active) {
-      return css`
-        border: 0;
-        background: rgba(16, 22, 34, 0);
-        box-shadow: inset 0 -1px 0 0 rgba(16, 22, 34, 0.04),
-          inset 0 1px 0 0 rgba(16, 22, 34, 0.04);
-      `;
-    }
+  const Icon = icons[type];
 
-    if (disabled) {
-      return css`
-        opacity: 0.7;
-        cursor: not-allowed;
-      `;
-    }
-  }}
+  return (
+    <StyledButton
+      active={active}
+      disabled={disabled}
+      onClick={handleClick}
+      type={type}
+    >
+      {icons[type] && <Icon />}
+      {!hideLabel && label}
+    </StyledButton>
+  );
+};
 
-  ${({ type }) => {
-    switch (type) {
-      case 'bold':
-        return css`
-          background-image: url(${Bold});
-        `;
-      case 'italic':
-        return css`
-          background-image: url(${Italic});
-        `;
-      case 'underline':
-        return css`
-          background-image: url(${Underline});
-        `;
-      case 'ul':
-        return css`
-          background-image: url(${Ul});
-        `;
-      case 'ol':
-        return css`
-          background-image: url(${Ol});
-        `;
-      case 'link':
-        return css`
-          background-image: url(${Link});
-        `;
-      case 'quote':
-        return css`
-          background-image: url(${Quote});
-        `;
-      case 'code':
-        return css`
-          background-image: url(${Code});
-        `;
-      case 'striked':
-        return css`
-          background-image: url(${Striked});
-        `;
-      case 'img':
-        return css`
-          background-image: url(${Img});
-        `;
-      default:
-        return css``;
-    }
-  }}
+Button.defaultProps = {
+  active: false,
+  className: '',
+  disabled: false,
+  hideLabel: false,
+  label: '',
+  style: '',
+  text: '',
+};
 
-  background-position: center;
-  background-repeat: no-repeat;
-`;
+Button.propTypes = {
+  active: PropTypes.bool,
+  className: PropTypes.string,
+  disabled: PropTypes.bool,
+  handler: PropTypes.string.isRequired,
+  handlers: PropTypes.object.isRequired,
+  hideLabel: PropTypes.bool,
+  label: PropTypes.string,
+  style: PropTypes.string,
+  text: PropTypes.string,
+};
 
 export default Button;

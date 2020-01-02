@@ -16,6 +16,7 @@ const HeaderModalNavContainer = styled.div`
   font-weight: 500;
   letter-spacing: 0.7px;
   text-transform: uppercase;
+
   > div:last-child {
     margin-left: 3rem;
   }

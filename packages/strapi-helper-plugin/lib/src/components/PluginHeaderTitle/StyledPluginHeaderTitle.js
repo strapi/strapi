@@ -23,7 +23,8 @@ const StyledPluginHeaderTitle = styled.div`
       text-transform: capitalize;
       padding-right: 18px;
     }
-    i {
+    i,
+    svg {
       position: absolute;
       right: 0;
       top: 0;

@@ -33,7 +33,8 @@ const Wrapper = styled.div`
         z-index: 9;
       }
 
-      > i {
+      > i,
+      > svg {
         margin-left: 10px;
         transition: transform 0.3s ease-out;
 
@@ -104,7 +105,8 @@ const Wrapper = styled.div`
 
     > button:last-child {
       color: #f75b1d;
-      > i {
+      > i,
+      svg {
         margin-left: 10px;
       }
     }
