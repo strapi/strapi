@@ -13,6 +13,14 @@ const reducer = (state, action) => {
         .update('initialWebhook', () => fromJS(action.data))
         .update('modifiedWebhook', () => fromJS(action.data))
         .update('shouldRefetchData', () => false);
+    case 'ON_CHANGE':
+      return state.updateIn(
+        ['modifiedWebhook', ...action.keys],
+        () => action.value
+      );
+    case 'SET_ERRORS': {
+      return state.update('formErrors', () => fromJS(action.errors));
+    }
     default:
       return state;
   }

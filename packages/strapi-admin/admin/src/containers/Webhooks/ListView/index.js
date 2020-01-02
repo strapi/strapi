@@ -73,7 +73,7 @@ function ListView() {
     onClick: () => handleCreateClick(),
     color: 'primary',
     type: 'button',
-    icon: <Plus fill="#007eff" />,
+    icon: <Plus fill="#007eff" width="11px" height="11px" />,
   };
 
   // Header props

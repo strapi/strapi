@@ -10,9 +10,11 @@ import { isEmpty, difference } from 'lodash';
 import { Header } from '@buffetjs/custom';
 import { request, useGlobalContext } from 'strapi-helper-plugin';
 
-import Wrapper from './Wrapper';
-
 import reducer, { initialState } from './reducer';
+import form from './utils/form';
+
+import Inputs from '../../../components/Inputs';
+import Wrapper from './Wrapper';
 
 function EditView() {
   const { formatMessage } = useGlobalContext();
@@ -37,6 +39,8 @@ function EditView() {
       const { data } = await request(`/admin/webhooks/${id}`, {
         method: 'GET',
       });
+
+      console.log(data);
 
       dispatch({
         type: 'GET_DATA_SUCCEEDED',
@@ -107,10 +111,38 @@ function EditView() {
     actions: actions,
   };
 
+  const handleChange = ({ target: { name, value } }) => {
+    dispatch({
+      type: 'ON_CHANGE',
+      keys: name.split('.'),
+      value,
+    });
+  };
+
   return (
     <Wrapper>
       <Header {...headerProps} />
-      <p>Edit</p>
+      <div className="form-wrapper">
+        <div className="row">
+          {Object.keys(form).map(key => {
+            return (
+              <div key={key} className={form[key].styleName}>
+                <Inputs
+                  {...form[key]}
+                  // customInputs={{
+                  //   headers: InputFileWithErrors,
+                  //   events: InputJSONWithErrors,
+                  // }}
+                  name={key}
+                  onChange={handleChange}
+                  validations={form[key].validations}
+                  value={modifiedWebhook[key] || form[key].value}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </Wrapper>
   );
 }
