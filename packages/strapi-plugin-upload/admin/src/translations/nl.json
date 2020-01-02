@@ -26,5 +26,7 @@
   "notification.dropFile.success": "Je bestand is geüpload",
   "notification.dropFiles.success": "{number} bestanden zijn geüpload",
   "Upload.status.sizeLimit": "{file} is groter dan de geconfigureerde limietgrootte",
-  "Upload.status.disabled" : "Bestand uploaden is uitgeschakeld"
+  "Upload.status.disabled" : "Bestand uploaden is uitgeschakeld",
+  "plugin.description.long": "Multimediabestandsbeheer.",
+  "plugin.description.short": "Multimediabestandsbeheer."
 }

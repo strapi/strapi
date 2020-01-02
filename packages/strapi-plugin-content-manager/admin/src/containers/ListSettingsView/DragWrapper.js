@@ -14,7 +14,7 @@ const DragWrapper = styled.div`
   }
   > div > div {
     overflow-x: auto;
-    overflow-y: hidden;
+    overflow-y: scroll;
   }
 `;
 

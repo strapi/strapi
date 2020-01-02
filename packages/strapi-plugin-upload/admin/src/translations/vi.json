@@ -27,5 +27,7 @@
   "notification.config.success": "Các cấu hình đã được cập nhật",
   "notification.delete.success": "Tập tin đã được xoá",
   "notification.dropFile.success": "Các tập tin của bạn đã được tải lên",
-  "notification.dropFiles.success": "{number} tập tin đã được tải lên"
+  "notification.dropFiles.success": "{number} tập tin đã được tải lên",
+  "plugin.description.long": "Quản lý tập tin đa phương tiện.",
+  "plugin.description.short": "Quản lý tập tin đa phương tiện."
 }
