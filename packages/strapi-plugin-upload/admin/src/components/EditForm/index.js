@@ -76,7 +76,7 @@ class EditForm extends React.Component {
             </div>
           </div>
         )}
-        <Separator />
+        <Separator style={{ marginBottom: 17 }} />
         <div className="row">
           <Input
             inputClassName="inputStyle"

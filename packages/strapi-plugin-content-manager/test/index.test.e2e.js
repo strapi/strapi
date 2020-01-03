@@ -22,7 +22,7 @@ describe('Content Manager End to End', () => {
 
     modelsUtils = createModelsUtils({ rq });
 
-    await modelsUtils.createModels([
+    await modelsUtils.createContentTypes([
       form.article,
       form.tag,
       form.category,
@@ -34,7 +34,7 @@ describe('Content Manager End to End', () => {
 
   afterAll(
     () =>
-      modelsUtils.deleteModels([
+      modelsUtils.deleteContentTypes([
         'article',
         'tag',
         'category',

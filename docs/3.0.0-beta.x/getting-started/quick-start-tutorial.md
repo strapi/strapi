@@ -212,9 +212,9 @@ You need to create a new **Content Type** for `Restaurants`.
 
 1. Complete these steps to **Add a Restaurant Content Type**
 
-- Click the `+ Add A Content Type` link (under existing **CONTENT TYPES**)
-- Enter a **Name** for your new **Content Type** (call this `restaurant`), and you can write `Restaurant Listings` for the **Description**
-- Click the `Done` button
+- Click the `+ Create new content-type` link (under existing **CONTENT TYPES**)
+- Enter a **Name** for your new **Content Type** (call this `restaurant`)
+- Click the `Continue` button
 
 ![Singular Name Entries for Content Type](../assets/getting-started/tutorial/singular-name-entry.png 'Singular Name Entries or Content Type')
 
@@ -226,11 +226,11 @@ The Content Type **Name** is always **singular**. For example, `restaurant` not 
 
 2. You are now at the **Field Selection** panel
 
-You may add your first field, a **String** field for the **Restaurant** name.
+You may add your first field, a **Text** field for the **Restaurant** name.
 
 ![Field Section Panel](../assets/getting-started/tutorial/field-selection-panel.png 'Field Selection Panel')
 
-- Click on the `String` field
+- Click on the `Text` field
 - In the **Name** field, type `name`
 
 ![Restaurant Name Input Field](../assets/getting-started/tutorial/restaurant-name-input-field.png 'Restuarant Name Input Field')
@@ -241,11 +241,11 @@ You may add your first field, a **String** field for the **Restaurant** name.
 
 ![Restaurant Name Advanced Settings](../assets/getting-started/tutorial/restaurant-name-advanced-settings.png 'Restuarant Name Advanced Settings')
 
-- Click the `+ Add Another Field` button
+- Click the `+ Add another field` button
 
 You are now ready to add the second field, a **Rich Text** field for the **Restaurant** description.
 
-![Field Section Panel](../assets/getting-started/tutorial/field-selection-panel.png 'Field Selection Panel')
+![Field Section Panel](../assets/getting-started/tutorial/field-selection-panel-after-restaurant-name.png 'Field Selection Panel')
 
 - Click the `Rich Text` field
 
@@ -253,11 +253,11 @@ You are now ready to add the second field, a **Rich Text** field for the **Resta
 
 ![Restaurant Rich Text Field](../assets/getting-started/tutorial/restaurant-rich-text-field.png 'Restuarant Rich Text Field')
 
-- Click the `+ Add Another Field` button
+- Click the `+ Add another field` button
 
 You are now ready to add the third field, a **Media** field for the **Restaurant** thumbnail image.
 
-![Field Section Panel](../assets/getting-started/tutorial/field-selection-panel.png 'Field Selection Panel')
+![Field Section Panel](../assets/getting-started/tutorial/field-selection-panel-after-restaurant-description.png 'Field Selection Panel')
 
 - Click the `Media` field
 
@@ -270,7 +270,7 @@ You are now ready to add the third field, a **Media** field for the **Restaurant
 
 ![Restaurant Rich Image Field Advanced Settings](../assets/getting-started/tutorial/restaurant-image-field-advanced-settings.png 'Restuarant Rich Image Field Advanced Settings')
 
-- Click the `Done` button
+- Click the `Finish` button
 
 Your new Content Type called **Restaurant** is ready to be **Saved**.
 
@@ -280,7 +280,7 @@ Your new Content Type called **Restaurant** is ready to be **Saved**.
 
 - Wait for Strapi to restart
 
-![Strapi Restart](../assets/getting-started/tutorial/strapi-restart.png 'Strapi Restart')
+![Strapi Restart](../assets/getting-started/tutorial/restaurant-strapi-restart.png 'Strapi Restart')
 
 After Strapi has restarted, you are ready to continue to create the `Category` **Content Type**.
 
@@ -288,25 +288,24 @@ After Strapi has restarted, you are ready to continue to create the `Category` *
 
 ### The Category Content Type
 
-The `Category` **Content Type** will have a **String** field named `category`, and a **Relation field** with a **Many to Many** relationship.
+The `Category` **Content Type** will have a **Text** field named `category`, and a **Relation field** with a **Many to Many** relationship.
 
 ![Category Add Content Type](../assets/getting-started/tutorial/category-add-content-type.png 'Category Add Content Type')
 
 1. Complete these steps to **add a Category Content Type**:
 
-- Click the `+ Add A Content Type` link
+- Click the `+ Create new content-type` link
 - Enter a **Name** for your new **Content Type** (call this `category`)
-- Enter `Restaurant Categories` for the **Description**
 
 ![Category Name Field](../assets/getting-started/tutorial/category-name-field.png 'Category Name Field')
 
-- Click the `Done` button
+- Click the `Continue` button
 
 2. Now, you are ready to add fields to your **Category**:
 
 ![Category Fields](../assets/getting-started/tutorial/category-fields.png 'Category Fields')
 
-- Click on the `String` field
+- Click on the `Text` field
 - In the **Name** field, type `name`
 
 ![Category Name Entry Field](../assets/getting-started/tutorial/category-name-entry-field.png 'Category Name Entry Fields')
@@ -317,13 +316,13 @@ The `Category` **Content Type** will have a **String** field named `category`, a
 
 ![Category Advanced Settings](../assets/getting-started/tutorial/category-advanced-settings.png 'Category Advanced Settings')
 
-- Click the `+ Add Another Field` button
+- Click the `+ Add another field` button
 
 You are now ready to add the second field, a **Relation** field for creating a **Many to Many** relationship between the **Category** and **Restaurant** Content Types.
 
 - Click on the `Relation` field
 
-![Category Add Field Panel](../assets/getting-started/tutorial/category-add-field-panel.png 'Category Add Field Panel')
+![Category Add Field Panel](../assets/getting-started/tutorial/category-add-field-panel-after-category-name.png 'Category Add Field Panel')
 
 This brings you to the **Add New Relation** screen.
 
@@ -337,7 +336,7 @@ This brings you to the **Add New Relation** screen.
 
 ![Category Relation Many to Many](../assets/getting-started/tutorial/category-relation-many-to-many.png 'Category Relation Many to Many')
 
-- Click the `Done` button
+- Click the `Finish` button
 
 ![Category Save](../assets/getting-started/tutorial/category-save.png 'Category Save')
 
@@ -345,30 +344,32 @@ This brings you to the **Add New Relation** screen.
 
 - Wait for Strapi to restart
 
-![Category Save Strapi Restart](../assets/getting-started/tutorial/category-save-strapi-restart.png 'Category Save Strapi Restart')
+![Category Save Strapi Restart](../assets/getting-started/tutorial/categor-create-strapi-restart.png 'Category Save Strapi Restart')
 
-After Strapi has restarted, you are ready to create a `Group and Repeatable Field` called **"Hours of Operations."**
+After Strapi has restarted, you are ready to create a `Component` called **"Hours of Operations."**
 
-## 5. Create a new Group, and Repeatable Field called, "Hours of Operation"
+## 5. Create a new Component called, "Hours of Operation"
 
-### The Hours of Operation Group
+### The Hours of Operation Component
 
-The `Restaurant` Content Type has a **Group** field named `Hours_of_operation`. This Group is **Repeatable** and for displaying the **Opening hours** and **Closing hours** of a **Restaurant**.
+The `Restaurant` Content Type has a **Component** field named `Hours_of_operation`. This Component is **Repeatable** and for displaying the **Opening hours** and **Closing hours** of a **Restaurant**.
 
-1. Complete these steps to **add a new Group**:
+1. Complete these steps to **add a new Component**:
 
-- Click the `+ Add A Group` link to add a new **Group**
-- Enter a **Name** for your new **Group** (call this `hours_of_operation`), and you can write `Hours of Operation` for the **Description**
+- Click the `+ Create new component` link to add a new **Component**
+- Enter a **Name** for your new **Component** (call this `hours_of_operation`)
+- Select the icon of your choice
+- Create a new category for your **Component** (call it `hours`)
 
-![Hours of Operation Add Group](../assets/getting-started/tutorial/hours-of-operation-add-group.png 'Hours of Operation Add Group')
+![Hours of Operation Add Component](../assets/getting-started/tutorial/hours-of-operation-add-compo.png 'Hours of Operation Add Component')
 
-- Click the `Done` button
+- Click the `continue` button
 
-2. Now, you are ready to add fields to your **Group**:
+2. Now, you are ready to add fields to your **Component**:
 
 ![Hours of Operation Add Fields](../assets/getting-started/tutorial/hours-of-operation-add-fields.png 'Hours of Operation Add Fields')
 
-- Click on the `String` field
+- Click on the `Text` field
 - In the **Name** field, type `day_interval`. This is to enter the **Day (or Days)** with **Hours of Operation**
 
 ![Hours of Operation Days](../assets/getting-started/tutorial/hours-of-operation-days.png 'Hours of Operation Days')
@@ -378,29 +379,29 @@ The `Restaurant` Content Type has a **Group** field named `Hours_of_operation`. 
 
 ![Hours of Operation Days Advanced Settings](../assets/getting-started/tutorial/hours-of-operation-days-advanced-settings.png 'Hours of Operation Days Advanced Settings')
 
-- Click the `+ Add Another Field`
+- Click the `+ Add another field`
 
-You are now ready to add a second field, another **String** field for the **Opening Hours**.
+You are now ready to add a second field, another **Text** field for the **Opening Hours**.
 
 ![Hours of Operation Opening Hours](../assets/getting-started/tutorial/hours-of-operation-opening-hours.png 'Hours of Operation Opening Hours')
 
-- Click on the `String` field
+- Click on the `Text` field
 - In the **Name** field, type `opening_hours`
 
 ![Hours of Operation Opening Hours Name](../assets/getting-started/tutorial/hours-of-operation-opening-hours-name.png 'Hours of Operation Opening Hours Name')
 
-- Click the `+ Add Another Field` button
+- Click the `+ Add another field` button
 
-You are now ready to add a third field, another **String** field for the **Closing Hours**.
+You are now ready to add a third field, another **Text** field for the **Closing Hours**.
 
 ![Hours of Operation Closing Hours](../assets/getting-started/tutorial/hours-of-operation-closing-hours.png 'Hours of Operation Closing Hours')
 
-- Click on the `String` field
+- Click on the `Text` field
 - In the **Name** field, type `closing_hours`
 
 ![Hours of Operation Closing Hours Name](../assets/getting-started/tutorial/hours-of-operation-closing-hours-name.png 'Hours of Operation Closing Hours Name')
 
-- Click the `Done` button
+- Click the `Finish` button
 
 ![Hours of Operation Save](../assets/getting-started/tutorial/hours-of-operation-save.png 'Hours of Operation Save')
 
@@ -409,17 +410,17 @@ You are now ready to add a third field, another **String** field for the **Closi
 
 ![Hours of Operation Strapi Restart](../assets/getting-started/tutorial/hours-of-operation-strapi-restart.png 'Hours of Operation Strapi Restart')
 
-After Strapi has restarted, you are ready to assign this **Hours_of_operation** group to the **Restaurant** Content Type.
+After Strapi has restarted, you are ready to assign this **Hours_of_operation** Component to the **Restaurant** Content Type.
 
 ::: tip NOTE
 
-It would be possible to assign the **Hours_of_operation** group to another **Content Type**, let's say, a **Cafe** Content Type. You have the option to reuse this group across your application.
+It would be possible to assign the **Hours_of_operation** Component to another **Content Type**, let's say, a **Cafe** Content Type. You have the option to reuse this component across your application.
 
 :::
 
-3. Next, you need to assign the **Hours_of_operation** Group to the **Restaurant** Content Type.
+3. Next, you need to assign the **Hours_of_operation** Component to the **Restaurant** Content Type.
 
-To access the **Hours_of_operation** Group from within the **Restaurant** Content Type, you need to **edit** the **Restaurant** Content Type in the **Content Type Builder**.
+To access the **Hours_of_operation** Component from within the **Restaurant** Content Type, you need to **edit** the **Restaurant** Content Type in the **Content Type Builder**.
 
 - If needed, navigate back to the **Content Type Builder**
 
@@ -429,50 +430,50 @@ To access the **Hours_of_operation** Group from within the **Restaurant** Conten
 
 ![Edit Restaurant Add Another Field](../assets/getting-started/tutorial/edit-restaurant-add-another-field.png 'Edit Restaurant Add Another Field')
 
-- Click one of the `+ Add Another Field` buttons, to add the **Group**
+- Click one of the `+ Add another field` button, to add the **Component**
 
-![Edit Restaurant Group Field](../assets/getting-started/tutorial/edit-restaurant-group-field.png 'Edit Restaurant Group Field')
+![Edit Restaurant Component Field](../assets/getting-started/tutorial/edit-restaurant-group-field.png 'Edit Restaurant Component Field')
 
-- Click on the `Group` field
+- Click on the `Component` field
+- Select `Use an existing component` option
+- Click on the `continue` button
 
-- Ensure `hours_of_operation` is displayed in the **Select a group** dropdown
-- Provide a **name** for this group in the **Restaurant** Content Type. E.g., `restaurant_hours`
-- Check the `Repeatable field` box
+![Restaurant Component Inputs](../assets/getting-started/tutorial/restaurant-group-inputs-use.png 'Restaurant Component Inputs')
 
-![Restaurant Group Inputs](../assets/getting-started/tutorial/restaurant-group-inputs.png 'Restaurant Group Inputs')
+- Ensure `hours_of_operation` is displayed in the **Select a component** dropdown
+- Provide a **name** for this component in the **Restaurant** Content Type. E.g., `restaurant_hours`
+- Select the `Repeatable component` option
+
+![Restaurant Component Inputs](../assets/getting-started/tutorial/restaurant-group-inputs.png 'Restaurant Component Inputs')
 
 - Click on the `ADVANCED SETTINGS` tab
 - Check the `Required field` checkbox
 
-![Restaurant Group Advanced Settings](../assets/getting-started/tutorial/restaurant-group-advanced-settings.png 'Restaurant Group Advanced Settings')
+![Restaurant Component Advanced Settings](../assets/getting-started/tutorial/restaurant-group-advanced-settings.png 'Restaurant Component Advanced Settings')
 
-- Click the `Done` button
+- Click the `Finish` button
 
-![Restaurant Group Save](../assets/getting-started/tutorial/restaurant-group-save.png 'Restaurant Group save')
+![Restaurant Component Save](../assets/getting-started/tutorial/restaurant-group-save.png 'Restaurant Component save')
 
 - Click the `Save` button
 
 - Wait for Strapi to restart
 
-![Restaurant Group Strapi Restart](../assets/getting-started/tutorial/restaurant-group-strapi-restart.png 'Restaurant Group Strapi Restart')
+![Restaurant Component Strapi Restart](../assets/getting-started/tutorial/restaurant-group-strapi-restart.png 'Restaurant Component Strapi Restart')
 
 After Strapi has restarted, you are ready to continue to the next section where you customize the user-interface of your **Restaurant** Content Type.
 
-4. Next, you edit the **View Settings** for the new **Hoursofoperation Group** from within the **Content Manager**.
+4. Next, you edit the **View Settings** for the new **Hoursofoperation Component** from within the **Content Manager**.
 
 You can _drag and drop_ fields into a different layout, as well as, _rename the labels_ as two examples of how you can customize the user interface for your **Content Types**.
 
-- Navigate to and click on the `Content Manager`, under **PLUGINS** in the left-hand menu
+- Click on the `Configure the view`, button
 
-![Content Manager](../assets/getting-started/tutorial/content-manager.png 'Content Manager')
+![Content Manager](../assets/getting-started/tutorial/content-manager-restaurant.png 'Content Manager')
 
-- Click on the `Groups(1)` tab
+- Click on the `Set the component's layout`
 
-![Content Manager Groups Tab](../assets/getting-started/tutorial/content-manager-groups-tab.png 'Content Manager Groups Tab')
-
-- Click on `Hours_of_operation` to modify the **View Settings**
-
-![Content Manager Hoursofoperation](../assets/getting-started/tutorial/content-manager-hoursofoperation.png 'Content Manager Hoursofoperation')
+![Content Manager Components Tab](../assets/getting-started/tutorial/content-manager-restaurant-group.png 'Content Manager Components Tab')
 
 - Rearrange the fields and make them more user friendly. Grab the `opening_hours` and slide it next to `closing_hours`
 
@@ -592,8 +593,6 @@ By default, Strapi publishes all **Content Types** with restricted permissions. 
 ![Roles and Permissions Find Permissions](../assets/getting-started/tutorial/roles-and-permissions-find-permissions.png 'Roles And Permissions Find Permissions')
 
 - Scroll back to the top, and click the **Save** button
-
-![Roles and Permissions Save](../assets/getting-started/tutorial/roles-and-permissions-save.png 'Roles And Permissions Save')
 
 You have now opened the API and are ready to consume your content.
 

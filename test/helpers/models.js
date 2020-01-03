@@ -27,8 +27,8 @@ module.exports = ({ rq }) => {
     await waitRestart();
   }
 
-  function createModelWithType(name, type, opts = {}) {
-    return createModel({
+  function createContentTypeWithType(name, type, opts = {}) {
+    return createContentType({
       connection: 'default',
       name,
       attributes: {
@@ -40,7 +40,7 @@ module.exports = ({ rq }) => {
     });
   }
 
-  async function createModel(data) {
+  async function createContentType(data) {
     await rq({
       url: '/content-type-builder/content-types',
       method: 'POST',
@@ -55,13 +55,13 @@ module.exports = ({ rq }) => {
     await waitRestart();
   }
 
-  async function createModels(models) {
+  async function createContentTypes(models) {
     for (let model of models) {
-      await createModel(model);
+      await createContentType(model);
     }
   }
 
-  async function deleteModel(model) {
+  async function deleteContentType(model) {
     await rq({
       url: `/content-type-builder/content-types/application::${model}.${model}`,
       method: 'DELETE',
@@ -70,9 +70,9 @@ module.exports = ({ rq }) => {
     await waitRestart();
   }
 
-  async function deleteModels(models) {
+  async function deleteContentTypes(models) {
     for (let model of models) {
-      await deleteModel(model);
+      await deleteContentType(model);
     }
   }
 
@@ -80,10 +80,10 @@ module.exports = ({ rq }) => {
     createComponent,
     deleteComponent,
 
-    createModels,
-    createModel,
-    createModelWithType,
-    deleteModel,
-    deleteModels,
+    createContentType,
+    createContentTypes,
+    createContentTypeWithType,
+    deleteContentType,
+    deleteContentTypes,
   };
 };

@@ -17,9 +17,7 @@ import makeSearch from '../../utils/makeSearch';
 import Wrapper from './Wrapper';
 
 const displayNotificationCTNotSaved = () => {
-  strapi.notification.info(
-    `${pluginId}.notification.info.contentType.creating.notSaved`
-  );
+  strapi.notification.info(`${pluginId}.notification.info.creating.notSaved`);
 };
 
 function LeftMenu({ wait }) {

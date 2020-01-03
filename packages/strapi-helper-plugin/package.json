@@ -1,6 +1,6 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.0.0-beta.17.8",
+  "version": "3.0.0-beta.18.3",
   "description": "Helper for Strapi plugins development",
   "files": [
     "dist"
@@ -45,7 +45,6 @@
     "rollup-plugin-filesize": "^6.0.1",
     "rollup-plugin-node-resolve": "^4.2.3",
     "rollup-plugin-postcss": "^2.0.3",
-    "rollup-plugin-rebase": "^3.1.1",
     "rollup-plugin-replace": "^2.2.0",
     "rollup-plugin-svg": "^1.0.1",
     "rollup-plugin-terser": "^4.0.4"

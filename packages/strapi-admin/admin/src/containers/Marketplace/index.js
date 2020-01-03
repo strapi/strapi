@@ -9,7 +9,8 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
-import { LoadingIndicatorPage, PluginHeader } from 'strapi-helper-plugin';
+import { LoadingIndicatorPage } from 'strapi-helper-plugin';
+import { Header } from '@buffetjs/custom';
 import { MarketPlaceContextProvider } from '../../contexts/MarketPlace';
 // Design
 import PageTitle from '../../components/PageTitle';
@@ -70,7 +71,11 @@ class Marketplace extends React.Component {
   };
 
   render() {
-    const { availablePlugins, isLoading } = this.props;
+    const {
+      availablePlugins,
+      intl: { formatMessage },
+      isLoading,
+    } = this.props;
 
     if (isLoading) {
       return <LoadingIndicatorPage />;
@@ -83,14 +88,18 @@ class Marketplace extends React.Component {
             {this.renderHelmet}
           </FormattedMessage>
           <Wrapper className="container-fluid">
-            <PluginHeader
-              title={{ id: 'app.components.InstallPluginPage.title' }}
-              description={{
-                id: 'app.components.InstallPluginPage.description',
+            <Header
+              title={{
+                label: formatMessage({
+                  id: 'app.components.InstallPluginPage.title',
+                }),
               }}
+              content={formatMessage({
+                id: 'app.components.InstallPluginPage.description',
+              })}
               actions={[]}
             />
-            <div className="row" style={{ paddingTop: '3.8rem' }}>
+            <div className="row" style={{ paddingTop: '4.1rem' }}>
               {Object.keys(availablePlugins).map(this.renderPluginCard)}
             </div>
           </Wrapper>
@@ -112,6 +121,9 @@ Marketplace.propTypes = {
   }),
   history: PropTypes.object.isRequired,
   installedPlugins: PropTypes.array.isRequired,
+  intl: PropTypes.shape({
+    formatMessage: PropTypes.func.isRequired,
+  }).isRequired,
   isLoading: PropTypes.bool.isRequired,
   resetProps: PropTypes.func.isRequired,
 };

@@ -4,7 +4,7 @@ const _ = require('lodash');
 const yup = require('yup');
 
 const { FORBIDDEN_ATTRIBUTE_NAMES } = require('./constants');
-const { isValidName, isValidKey } = require('./common');
+const { isValidCollectionName, isValidKey } = require('./common');
 const { getTypeShape } = require('./types');
 const getRelationValidator = require('./relations');
 
@@ -20,7 +20,7 @@ const createSchema = (types, relations, { modelType } = {}) =>
       collectionName: yup
         .string()
         .nullable()
-        .test(isValidName),
+        .test(isValidCollectionName),
       attributes: yup.lazy(attributes => {
         return yup
           .object()
@@ -43,6 +43,7 @@ const createSchema = (types, relations, { modelType } = {}) =>
                     .oneOf(types)
                     .required(),
                   configurable: yup.boolean().nullable(),
+                  private: yup.boolean().nullable(),
                   ...getTypeShape(attribute, { modelType }),
                 };
 

@@ -15,7 +15,11 @@ module.exports = function createSchemaHandler(infos) {
     uid,
     dir,
     filename,
-    schema: schema || {},
+    schema: schema || {
+      info: {},
+      options: {},
+      attributes: {},
+    },
   };
 
   const state = _.cloneDeep(initialState);
