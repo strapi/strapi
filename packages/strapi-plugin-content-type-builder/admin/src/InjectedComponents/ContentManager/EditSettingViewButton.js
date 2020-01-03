@@ -14,7 +14,7 @@ import getTrad from '../../utils/getTrad';
 
 // Create link from content-type-builder to content-manager
 function EditViewButton(props) {
-  const { emitEvent, formatMessage } = useGlobalContext();
+  const { currentEnvironment, emitEvent, formatMessage } = useGlobalContext();
   // Retrieve URL from props
   const { modifiedData, componentSlug, type } = get(
     props,
@@ -40,6 +40,10 @@ function EditViewButton(props) {
     emitEvent('willEditEditLayout');
     props.push(`${baseUrl}/${suffixUrl}`);
   };
+
+  if (currentEnvironment !== 'development') {
+    return null;
+  }
 
   if (props.getModelName() === 'strapi::administrator') {
     return null;
