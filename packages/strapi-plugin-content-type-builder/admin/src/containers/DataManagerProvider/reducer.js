@@ -87,12 +87,49 @@ const reducer = (state, action) => {
         )
         .updateIn(['modifiedData', 'components'], existingCompos => {
           if (action.shouldAddComponentToData) {
+            const componentToAddUid = rest.component;
             const componentToAdd = state.getIn(['components', rest.component]);
+            const isTemporary = componentToAdd.get('isTemporary');
+            const currentComponentSchema = componentToAdd.getIn([
+              'schema',
+              'attributes',
+            ]);
+            const hasComponentAlreadyBeenAdded =
+              state.getIn(['modifiedData', 'components', componentToAddUid]) !==
+              undefined;
 
-            return existingCompos.update(
+            if (isTemporary || hasComponentAlreadyBeenAdded) {
+              return existingCompos;
+            }
+
+            let updatedCompos = existingCompos.update(
               componentToAdd.get('uid'),
               () => componentToAdd
             );
+            const nestedComponents = retrieveComponentsFromSchema(
+              currentComponentSchema.toJS(),
+              state.get('components').toJS()
+            );
+
+            // We need to add the nested components to the modifiedData.components as well
+            nestedComponents.forEach(componentUid => {
+              const isTemporary =
+                state.getIn(['components', componentUid, 'isTemporary']) ||
+                false;
+              const hasNestedComponentAlreadyBeenAdded =
+                state.getIn(['modifiedData', 'components', componentUid]) !==
+                undefined;
+
+              // Same logic here otherwise we will lose the modifications added to the components
+              if (!isTemporary && !hasNestedComponentAlreadyBeenAdded) {
+                updatedCompos = updatedCompos.set(
+                  componentUid,
+                  state.getIn(['components', componentUid])
+                );
+              }
+            });
+
+            return updatedCompos;
           }
 
           return existingCompos;
