@@ -25,15 +25,15 @@ const form = {
     type: 'headers',
     value: [{ key: '', value: '' }],
   },
-  // events: {
-  //   styleName: 'col-12',
-  //   label: 'Hooks',
-  //   type: 'custom',
-  //   value: null,
-  //   validations: {
-  //     required: true,
-  //   },
-  // },
+  events: {
+    styleName: 'col-12',
+    label: 'Hooks',
+    type: 'events',
+    value: [],
+    validations: {
+      required: true,
+    },
+  },
 };
 
 export default form;

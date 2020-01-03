@@ -2,7 +2,9 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import CreatableSelect from 'react-select/creatable';
 import PropTypes from 'prop-types';
-import { InputText, Button } from '@buffetjs/core';
+import { CircleButton } from 'strapi-helper-plugin';
+import { InputText } from '@buffetjs/core';
+import { Plus } from '@buffetjs/icons';
 
 import Wrapper from './Wrapper';
 
@@ -30,6 +32,15 @@ const HeadersInput = ({ onClick, onChange, name, value }) => {
     onClick(name);
   };
 
+  const handleRemoveItem = index => {
+    if (index === 0 && value.length === 1) {
+      console.log('clear', index);
+    } else {
+      console.log('remove', index);
+    }
+  };
+
+  console.log(value);
   return (
     <Wrapper>
       <ul>
@@ -62,13 +73,21 @@ const HeadersInput = ({ onClick, onChange, name, value }) => {
               <section>
                 <InputText value={value} name={`${name}.${index}.value`} />
               </section>
+              <div>
+                <CircleButton
+                  type="button"
+                  isRemoveButton
+                  onClick={() => handleRemoveItem(index)}
+                />
+              </div>
             </li>
           );
         })}
       </ul>
-      <Button onClick={handleClick} color="secondary" icon>
+      <button onClick={handleClick}>
+        <Plus fill="#007eff" width="10px" />
         <FormattedMessage id="Settings.webhooks.create.header" />
-      </Button>
+      </button>
     </Wrapper>
   );
 };

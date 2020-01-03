@@ -10,6 +10,7 @@ export { default as BackHeader } from './components/BackHeader';
 export { default as BlockerComponent } from './components/BlockerComponent';
 export { default as Button } from './components/Button';
 export { default as ButtonModal } from './components/ButtonModal';
+export { default as CircleButton } from './components/CircleButton';
 export { default as ContainerFluid } from './components/ContainerFluid';
 export {
   default as EmptyAttributesBlock,

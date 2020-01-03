@@ -8,7 +8,7 @@ import styled from 'styled-components';
 
 const Wrapper = styled.div`
   background-color: #fafafb;
-  padding: 23px 24px;
+  padding: 23px 24px 30px 24px;
   margin-top: 12px;
   ul {
     list-style-type: none;
@@ -17,16 +17,26 @@ const Wrapper = styled.div`
     & + button {
       color: #007eff;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 500;
       padding: 0;
+      outline: 0;
+      svg,
+      span {
+        vertical-align: middle;
+      }
+      svg {
+        margin-right: 10px;
+      }
     }
   }
   li {
+    position: relative;
+    padding-right: 30px;
     &:not(:first-of-type) {
       margin-bottom: 20px;
     }
     &:last-of-type {
-      margin-bottom: 9px;
+      margin-bottom: 6px;
     }
     > section {
       width: 50%;
@@ -67,6 +77,14 @@ const Wrapper = styled.div`
         > span + div:first-of-type {
           border-color: #78caff;
           box-shadow: none;
+        }
+      }
+      & + div {
+        position: absolute;
+        top: 7px;
+        right: 0;
+        button {
+          margin: 0;
         }
       }
     }

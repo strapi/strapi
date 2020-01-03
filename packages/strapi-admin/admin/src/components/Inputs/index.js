@@ -22,6 +22,31 @@ function Inputs({
   validations,
   value,
 }) {
+  const renderInput = ({ hasError, onBlur, handleChange }, type) => {
+    if (type === 'headers') {
+      return (
+        <HeadersInput
+          value={value}
+          name={name}
+          onClick={onClick}
+          onChange={handleChange}
+        />
+      );
+    } else if (type === 'events') {
+      return <p>hooks</p>;
+    } else {
+      return (
+        <InputText
+          error={hasError}
+          onBlur={onBlur}
+          onChange={handleChange}
+          value={value}
+          name={name}
+        />
+      );
+    }
+  };
+
   return (
     <Error
       inputError={inputError}
@@ -31,51 +56,30 @@ function Inputs({
     >
       {({ canCheck, onBlur, error, dispatch }) => {
         const hasError = error && error !== null;
+        const handleChange = e => {
+          if (!canCheck) {
+            dispatch({
+              type: 'SET_CHECK',
+            });
+          }
+
+          dispatch({
+            type: 'SET_ERROR',
+            error: null,
+          });
+          onChange(e);
+        };
+
+        const inputProps = {
+          onBlur: onBlur,
+          handleChange: handleChange,
+          hasError: hasError,
+        };
+
         return (
           <Wrapper>
             <Label htmlFor={name}>{label}</Label>
-
-            {type === 'text' ? (
-              <InputText
-                error={hasError}
-                onBlur={onBlur}
-                onChange={e => {
-                  if (!canCheck) {
-                    dispatch({
-                      type: 'SET_CHECK',
-                    });
-                  }
-
-                  dispatch({
-                    type: 'SET_ERROR',
-                    error: null,
-                  });
-                  onChange(e);
-                }}
-                value={value}
-                name={name}
-              />
-            ) : (
-              <HeadersInput
-                value={value}
-                name={name}
-                onClick={onClick}
-                onChange={e => {
-                  if (!canCheck) {
-                    dispatch({
-                      type: 'SET_CHECK',
-                    });
-                  }
-
-                  dispatch({
-                    type: 'SET_ERROR',
-                    error: null,
-                  });
-                  onChange(e);
-                }}
-              />
-            )}
-
+            {renderInput(inputProps, type)}
             {hasError && <ErrorMessage>{error}</ErrorMessage>}
           </Wrapper>
         );
@@ -90,7 +94,7 @@ Inputs.defaultProps = {
   onClick: () => {},
   type: 'text',
   validations: {},
-  value: '',
+  value: null,
 };
 
 Inputs.propTypes = {
