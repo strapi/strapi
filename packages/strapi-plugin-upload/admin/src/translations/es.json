@@ -27,5 +27,7 @@
   "notification.dropFiles.success": "{number} archivos han sido cargados",
   "Upload.status.sizeLimit": "{file} es más grande que el tamaño límite configurado",
   "Upload.status.disabled" : "La carga de archivos está deshabilitada",
-  "Upload.status.empty": "Los archivos están vacíos"
+  "Upload.status.empty": "Los archivos están vacíos",
+  "plugin.description.long": "Gestión de archivos multimedia.",
+  "plugin.description.short": "Gestión de archivos multimedia."
 }
