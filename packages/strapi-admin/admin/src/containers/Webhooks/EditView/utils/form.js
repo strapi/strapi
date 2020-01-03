@@ -19,12 +19,12 @@ const form = {
       regex: new RegExp('(^$)|((https?://.*)(d*)/?(.*))'),
     },
   },
-  // headers: {
-  //   styleName: 'col-12',
-  //   label: 'Headers',
-  //   type: 'headers',
-  //   value: '',
-  // },
+  headers: {
+    styleName: 'col-12',
+    label: 'Headers',
+    type: 'headers',
+    value: [{ key: '', value: '' }],
+  },
   // events: {
   //   styleName: 'col-12',
   //   label: 'Hooks',

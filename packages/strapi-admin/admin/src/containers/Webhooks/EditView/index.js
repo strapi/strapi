@@ -40,8 +40,6 @@ function EditView() {
         method: 'GET',
       });
 
-      console.log(data);
-
       dispatch({
         type: 'GET_DATA_SUCCEEDED',
         data,
@@ -119,28 +117,37 @@ function EditView() {
     });
   };
 
+  const handleClick = () => {
+    dispatch({
+      type: 'ADD_NEW_HEADER',
+      keys: ['headers'],
+    });
+  };
+
   return (
     <Wrapper>
       <Header {...headerProps} />
       <div className="form-wrapper">
-        <div className="row">
-          {Object.keys(form).map(key => {
-            return (
-              <div key={key} className={form[key].styleName}>
-                <Inputs
-                  {...form[key]}
-                  // customInputs={{
-                  //   headers: InputFileWithErrors,
-                  //   events: InputJSONWithErrors,
-                  // }}
-                  name={key}
-                  onChange={handleChange}
-                  validations={form[key].validations}
-                  value={modifiedWebhook[key] || form[key].value}
-                />
-              </div>
-            );
-          })}
+        <div className="form-card">
+          <div className="row">
+            {Object.keys(form).map(key => {
+              return (
+                <div key={key} className={form[key].styleName}>
+                  <Inputs
+                    {...form[key]}
+                    // customInputs={{
+                    //   headers: HeadersInput,
+                    // }}
+                    name={key}
+                    onChange={handleChange}
+                    onClick={handleClick}
+                    validations={form[key].validations}
+                    value={modifiedWebhook[key] || form[key].value}
+                  />
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </Wrapper>
