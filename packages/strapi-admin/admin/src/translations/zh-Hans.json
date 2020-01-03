@@ -137,7 +137,7 @@
   "Auth.advanced.allow_register": "",
   "Auth.form.button.forgot-password": "发送电子邮件",
   "Auth.form.button.forgot-password.success": "再次发送",
-  "Auth.form.button.login": "登陆",
+  "Auth.form.button.login": "登录",
   "Auth.form.button.register": "准备开始",
   "Auth.form.button.register-success": "再次发送",
   "Auth.form.button.reset-password": "修改密码",
@@ -176,6 +176,6 @@
   "Auth.form.register.username.placeholder": "John Doe",
   "Auth.header.register.description": "要完成安装并保护您的应用程序，请通过输入必要的信息来创建第一个用户（root管理员）。",
   "Auth.link.forgot-password": "忘记密码了吗？",
-  "Auth.link.ready": "准备好登陆？",
+  "Auth.link.ready": "准备好登录？",
   "components.Input.error.password.noMatch": "密码不匹配"
 }
