@@ -116,7 +116,7 @@ Then run either `yarn install` or `npm install`.
 
 ## Database configuration
 
-Now that you have installed the new database package. You need to update your `database.json` configuration files located in `./config/environments/{env}/database.json`.
+Now that you have installed the new database package, You need to update your `database.json` configuration files located in `./config/environments/{env}/database.json`.
 
 You can now only use the connector name instead of the complete package name.
 
@@ -206,7 +206,7 @@ You can now only use the connector name instead of the complete package name.
 
 ## Adding new root page files
 
-We created new home pages when your go to your api url.
+We have created new home pages for your api url.
 You will need to copy `index.html` and `production.html` into your `public` folder.
 You can find those two files [here](https://github.com/strapi/strapi/tree/master/packages/strapi-generate-new/lib/resources/files/public).
 
@@ -275,17 +275,17 @@ Run the following statement in your database:
 
 ## Date type changes
 
-We introduced new types in the admin panel: `date`, `datetime` and `time`. Before all of those types where saved as `datetime`.
+We have introduced new types in the admin panel: `date`, `datetime` and `time`. Previously all of those types where saved as `datetime`.
 
 You will need to change the type of your fields from `date` to `datetime` if you don't want to migrate your data.
 
-- To migrate yout old `date` to `datetime`, change the field type from `date` to `datetime`. NO data migration is required.
-- To migrate your old `date` to new `date`, you will need to migrate yout data to be of the format: `YYYY-MM-DD`
+- To migrate your old `date` to `datetime`, change the field type from `date` to `datetime`. NO data migration is required.
+- To migrate your old `date` to new `date`, you will need to migrate your data to be of the format: `YYYY-MM-DD`
 - To migrate your old `date` to the new `time`, change the field type from `date` to `time`. You will also need to transform them to be of the format: `HH:mm:ss.SSS`
 
 ## Groups become Components
 
-If you were using the groups feature you will need to apply some changes:
+If you were using the groups feature, you will need to apply some changes:
 
 Start by renaming the `./groups` folder to `./components` in your project root folder.
 
@@ -460,7 +460,7 @@ RENAME COLUMN group_id to component_id;
 
 ---
 
-You might notice that you still have some tables with a name containing the `group` keyword. Those are the tables that contain the groups data.
+You might notice that you still have some tables with names containing the `group` keyword. Those are the tables that contain the groups data.
 
 If you want to rename them you have 3 steps to follow:
 
