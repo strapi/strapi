@@ -105,6 +105,9 @@
   "app.components.listPlugins.title.plural": "{number} zásuvných modulů je instalováno",
   "app.components.listPlugins.title.singular": "{number} zásuvný modul je nainstalován",
   "app.components.listPluginsPage.deletePlugin.error": "Došlo k chybě při odinstalaci zásuvného modulu",
+
+  "app.links.configure-view": "Upravit vzhled",
+
   "app.utils.SelectOption.defaultMessage": " ",
   "app.utils.defaultMessage": " ",
   "app.utils.placeholder.defaultMessage": " ",
@@ -123,9 +126,11 @@
   "components.Input.error.validation.min": "Hodnota je příliš nízká.",
   "components.Input.error.validation.minLength": "Hodnota je příliš krátká.",
   "components.Input.error.validation.minSupMax": "Nemůže být nadřazený",
-  "components.Input.error.validation.regex": "Hodnota neodpovídá regexu.",
+  "components.Input.error.validation.regex": "Hodnota neodpovídá požadovanému vzoru.",
   "components.Input.error.validation.required": "Tato hodnota je povinná.",
+  "components.Input.error.validation.unique": "Tato hodnota již byla použita.",
   "components.InputSelect.option.placeholder": "Vyberte zde",
+  "component.Input.error.validation.integer": "Tato hodnota musí být celé číslo",
   "components.ListRow.empty": "Žádná data k zobrazení.",
   "components.OverlayBlocker.description": "Používáte funkcionalitu, která potřebuje restartovat server. Počkejte, až se server opět spustí.",
   "components.OverlayBlocker.description.serverError": "Server by měl být restartován, zkontrolujte prosím protokoly v terminálu.",
