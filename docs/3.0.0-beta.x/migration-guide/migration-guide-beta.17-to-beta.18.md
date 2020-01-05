@@ -496,7 +496,7 @@ RENAME TABLE groups_old_table_name TO components_new_table_name;
 **2. Change the `collectionName` of the component**
 
 **Before**
-`./api/components/category/component.json`
+`./components/component.json`
 
 ```json
 {
@@ -506,7 +506,7 @@ RENAME TABLE groups_old_table_name TO components_new_table_name;
 ```
 
 **After**
-`./api/components/category/component.json`
+`./components/component.json`
 
 ```json
 {
@@ -532,7 +532,6 @@ UPDATE upload_file_morph
 SET related_type = 'components_new_table_name'
 WHERE related_type = 'groups_old_table_name';
 ```
-
 
 #### Mongo
 
@@ -566,7 +565,7 @@ db.collection.renameCollection('groups_my_group', 'components_my_component');
 **3. Change the `collectionName` of the component**
 
 **Before**
-`./api/components/category/component.json`
+`./components/component.json`
 
 ```json
 {
@@ -576,7 +575,7 @@ db.collection.renameCollection('groups_my_group', 'components_my_component');
 ```
 
 **After**
-`./api/components/category/component.json`
+`./components/component.json`
 
 ```json
 {

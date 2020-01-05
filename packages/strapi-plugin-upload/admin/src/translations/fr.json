@@ -26,5 +26,7 @@
   "notification.dropFile.success": "Votre fichier a été téléchargé",
   "notification.dropFiles.success": "{number} fichiers ont été téléchargées",
   "Upload.status.sizeLimit": "{file} est plus grand que la taille limite configurée",
-  "Upload.status.disabled" : "Le téléchargement de fichier est désactivé"
+  "Upload.status.disabled" : "Le téléchargement de fichier est désactivé",
+  "plugin.description.long": "Gestion de fichiers multimédia.",
+  "plugin.description.short": "Gestion de fichiers multimédia."
 }
