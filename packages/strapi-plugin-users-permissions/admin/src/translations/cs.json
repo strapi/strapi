@@ -37,7 +37,7 @@
   "Email.template.reset_password": "Obnovit heslo",
   "Email.template.success_register": "Registrace proběhla úspěšně",
   "HeaderNav.link.advancedSettings": "Pokročilá nastavení",
-  "HeaderNav.link.emailTemplates": "Emailové šablony",
+  "HeaderNav.link.emailTemplates": "E-mailové šablony",
   "HeaderNav.link.providers": "Poskytovatelé",
   "HeaderNav.link.roles": "Role & Práva",
   "HomePage.header.description": "Definujte role a práva vašim uživatelům.",
