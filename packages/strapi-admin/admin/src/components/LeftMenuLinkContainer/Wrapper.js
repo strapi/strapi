@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 const Wrapper = styled.div`
   padding-top: 0.7rem;
   position: absolute;
-  top: 60px;
+  top: 6rem;
   right: 0;
   bottom: 0;
   left: 0;
@@ -28,6 +28,12 @@ const Wrapper = styled.div`
     list-style: none;
     padding: 0;
     margin-bottom: 2rem;
+    &.models-list {
+      li a svg {
+        font-size: 0.74rem;
+        top: calc(50% - 0.35rem);
+      }
+    }
   }
 
   .noPluginsInstalled {

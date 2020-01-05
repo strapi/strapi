@@ -1,5 +1,4 @@
 import ar from './ar.json';
-import cs from './cs.json';
 import de from './de.json';
 import en from './en.json';
 import es from './es.json';
@@ -19,7 +18,6 @@ import zh from './zh.json';
 
 const trads = {
   ar,
-  cs,
   de,
   en,
   es,

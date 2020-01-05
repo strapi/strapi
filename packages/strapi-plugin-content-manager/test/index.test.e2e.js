@@ -22,7 +22,7 @@ describe('Content Manager End to End', () => {
 
     modelsUtils = createModelsUtils({ rq });
 
-    await modelsUtils.createModels([
+    await modelsUtils.createContentTypes([
       form.article,
       form.tag,
       form.category,
@@ -34,7 +34,7 @@ describe('Content Manager End to End', () => {
 
   afterAll(
     () =>
-      modelsUtils.deleteModels([
+      modelsUtils.deleteContentTypes([
         'article',
         'tag',
         'category',
@@ -55,7 +55,8 @@ describe('Content Manager End to End', () => {
 
     test('Create tag1', async () => {
       let { body } = await rq({
-        url: '/content-manager/explorer/tag/?source=content-manager',
+        url:
+          '/content-manager/explorer/application::tag.tag/?source=content-manager',
         method: 'POST',
         body: {
           name: 'tag1',
@@ -71,7 +72,8 @@ describe('Content Manager End to End', () => {
 
     test('Create tag2', async () => {
       let { body } = await rq({
-        url: '/content-manager/explorer/tag/?source=content-manager',
+        url:
+          '/content-manager/explorer/application::tag.tag/?source=content-manager',
         method: 'POST',
         body: {
           name: 'tag2',
@@ -87,7 +89,8 @@ describe('Content Manager End to End', () => {
 
     test('Create tag3', async () => {
       let { body } = await rq({
-        url: '/content-manager/explorer/tag/?source=content-manager',
+        url:
+          '/content-manager/explorer/application::tag.tag/?source=content-manager',
         method: 'POST',
         body: {
           name: 'tag3',
@@ -109,7 +112,8 @@ describe('Content Manager End to End', () => {
       };
 
       let { body } = await rq({
-        url: '/content-manager/explorer/article/?source=content-manager',
+        url:
+          '/content-manager/explorer/application::article.article/?source=content-manager',
         method: 'POST',
         body: entry,
       });
@@ -131,7 +135,8 @@ describe('Content Manager End to End', () => {
       };
 
       let { body } = await rq({
-        url: '/content-manager/explorer/article/?source=content-manager',
+        url:
+          '/content-manager/explorer/application::article.article/?source=content-manager',
         method: 'POST',
         body: entry,
       });
@@ -154,7 +159,7 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        url: `/content-manager/explorer/application::article.article/${entry.id}?source=content-manager`,
         method: 'PUT',
         body: entry,
       });
@@ -177,7 +182,7 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        url: `/content-manager/explorer/application::article.article/${entry.id}?source=content-manager`,
         method: 'PUT',
         body: entry,
       });
@@ -198,7 +203,7 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        url: `/content-manager/explorer/application::article.article/${entry.id}?source=content-manager`,
         method: 'PUT',
         body: entry,
       });
@@ -220,7 +225,7 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        url: `/content-manager/explorer/application::article.article/${entry.id}?source=content-manager`,
         method: 'PUT',
         body: entry,
       });
@@ -236,7 +241,8 @@ describe('Content Manager End to End', () => {
 
     test('Delete all articles should remove the association in each tags related to them', async () => {
       const { body: createdTag } = await rq({
-        url: '/content-manager/explorer/tag/?source=content-manager',
+        url:
+          '/content-manager/explorer/application::tag.tag/?source=content-manager',
         method: 'POST',
         body: {
           name: 'tag11',
@@ -244,7 +250,8 @@ describe('Content Manager End to End', () => {
       });
 
       const { body: article12 } = await rq({
-        url: '/content-manager/explorer/article/?source=content-manager',
+        url:
+          '/content-manager/explorer/application::article.article/?source=content-manager',
         method: 'POST',
         body: {
           title: 'article12',
@@ -254,12 +261,13 @@ describe('Content Manager End to End', () => {
       });
 
       const { body: updatedTag } = await rq({
-        url: `/content-manager/explorer/tag/${createdTag.id}?source=content-manager`,
+        url: `/content-manager/explorer/application::tag.tag/${createdTag.id}?source=content-manager`,
         method: 'GET',
       });
 
       const { body: article13 } = await rq({
-        url: '/content-manager/explorer/article/?source=content-manager',
+        url:
+          '/content-manager/explorer/application::article.article/?source=content-manager',
         method: 'POST',
         body: {
           title: 'article13',
@@ -276,7 +284,7 @@ describe('Content Manager End to End', () => {
       expect(articles[1].tags.length).toBe(1);
 
       let { body: tagToGet } = await rq({
-        url: `/content-manager/explorer/tag/${createdTag.id}?source=content-manager`,
+        url: `/content-manager/explorer/application::tag.tag/${createdTag.id}?source=content-manager`,
         method: 'GET',
       });
 
@@ -284,14 +292,14 @@ describe('Content Manager End to End', () => {
       expect(tagToGet.articles.length).toBe(2);
 
       await rq({
-        url: `/content-manager/explorer/deleteAll/article/?source=content-manager&${articles
+        url: `/content-manager/explorer/deleteAll/application::article.article/?source=content-manager&${articles
           .map((article, index) => `${index}=${article.id}`)
           .join('&')}`,
         method: 'DELETE',
       });
 
       let { body: tagToGet2 } = await rq({
-        url: `/content-manager/explorer/tag/${createdTag.id}?source=content-manager`,
+        url: `/content-manager/explorer/application::tag.tag/${createdTag.id}?source=content-manager`,
         method: 'GET',
       });
 
@@ -307,7 +315,8 @@ describe('Content Manager End to End', () => {
       };
 
       let { body } = await rq({
-        url: '/content-manager/explorer/articlewithtag/?source=content-manager',
+        url:
+          '/content-manager/explorer/application::articlewithtag.articlewithtag/?source=content-manager',
         method: 'POST',
         body: entry,
       });
@@ -329,7 +338,8 @@ describe('Content Manager End to End', () => {
 
     test('Create cat1', async () => {
       let { body } = await rq({
-        url: '/content-manager/explorer/category/?source=content-manager',
+        url:
+          '/content-manager/explorer/application::category.category/?source=content-manager',
         method: 'POST',
         body: {
           name: 'cat1',
@@ -345,7 +355,8 @@ describe('Content Manager End to End', () => {
 
     test('Create cat2', async () => {
       let { body } = await rq({
-        url: '/content-manager/explorer/category/?source=content-manager',
+        url:
+          '/content-manager/explorer/application::category.category/?source=content-manager',
         method: 'POST',
         body: {
           name: 'cat2',
@@ -367,7 +378,8 @@ describe('Content Manager End to End', () => {
       };
 
       let { body } = await rq({
-        url: '/content-manager/explorer/article/?source=content-manager',
+        url:
+          '/content-manager/explorer/application::article.article/?source=content-manager',
         method: 'POST',
         body: entry,
       });
@@ -389,7 +401,7 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        url: `/content-manager/explorer/application::article.article/${entry.id}?source=content-manager`,
         method: 'PUT',
         body: entry,
       });
@@ -410,7 +422,8 @@ describe('Content Manager End to End', () => {
       };
 
       let { body } = await rq({
-        url: '/content-manager/explorer/article?source=content-manager',
+        url:
+          '/content-manager/explorer/application::article.article?source=content-manager',
         method: 'POST',
         body: entry,
       });
@@ -431,7 +444,7 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        url: `/content-manager/explorer/application::article.article/${entry.id}?source=content-manager`,
         method: 'PUT',
         body: entry,
       });
@@ -452,7 +465,7 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/explorer/category/${entry.id}?source=content-manager`,
+        url: `/content-manager/explorer/application::category.category/${entry.id}?source=content-manager`,
         method: 'PUT',
         body: entry,
       });
@@ -472,7 +485,8 @@ describe('Content Manager End to End', () => {
       };
 
       let { body } = await rq({
-        url: '/content-manager/explorer/category/?source=content-manager',
+        url:
+          '/content-manager/explorer/application::category.category/?source=content-manager',
         method: 'POST',
         body: entry,
       });
@@ -487,7 +501,7 @@ describe('Content Manager End to End', () => {
 
     test('Get article1 with cat3', async () => {
       let { body } = await rq({
-        url: `/content-manager/explorer/article/${data.articles[0].id}?source=content-manager`,
+        url: `/content-manager/explorer/application::article.article/${data.articles[0].id}?source=content-manager`,
         method: 'GET',
       });
 
@@ -497,7 +511,7 @@ describe('Content Manager End to End', () => {
 
     test('Get article2 with cat2', async () => {
       let { body } = await rq({
-        url: `/content-manager/explorer/article/${data.articles[1].id}?source=content-manager`,
+        url: `/content-manager/explorer/application::article.article/${data.articles[1].id}?source=content-manager`,
         method: 'GET',
       });
 
@@ -507,7 +521,7 @@ describe('Content Manager End to End', () => {
 
     test('Get cat1 without relations', async () => {
       let { body } = await rq({
-        url: `/content-manager/explorer/category/${data.categories[0].id}?source=content-manager`,
+        url: `/content-manager/explorer/application::category.category/${data.categories[0].id}?source=content-manager`,
         method: 'GET',
       });
 
@@ -517,7 +531,7 @@ describe('Content Manager End to End', () => {
 
     test('Get cat2 with article2', async () => {
       let { body } = await rq({
-        url: `/content-manager/explorer/category/${data.categories[1].id}?source=content-manager`,
+        url: `/content-manager/explorer/application::category.category/${data.categories[1].id}?source=content-manager`,
         method: 'GET',
       });
 
@@ -528,7 +542,7 @@ describe('Content Manager End to End', () => {
 
     test('Get cat3 with article1', async () => {
       let { body } = await rq({
-        url: `/content-manager/explorer/category/${data.categories[2].id}?source=content-manager`,
+        url: `/content-manager/explorer/application::category.category/${data.categories[2].id}?source=content-manager`,
         method: 'GET',
       });
 
@@ -548,7 +562,8 @@ describe('Content Manager End to End', () => {
 
     test('Create ref1', async () => {
       let { body } = await rq({
-        url: '/content-manager/explorer/reference/?source=content-manager',
+        url:
+          '/content-manager/explorer/application::reference.reference/?source=content-manager',
         method: 'POST',
         body: {
           name: 'ref1',
@@ -568,7 +583,8 @@ describe('Content Manager End to End', () => {
       };
 
       let { body } = await rq({
-        url: '/content-manager/explorer/article?source=content-manager',
+        url:
+          '/content-manager/explorer/application::article.article?source=content-manager',
         method: 'POST',
         body: entry,
       });
@@ -588,7 +604,7 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        url: `/content-manager/explorer/application::article.article/${entry.id}?source=content-manager`,
         method: 'PUT',
         body: entry,
       });
@@ -609,7 +625,8 @@ describe('Content Manager End to End', () => {
       };
 
       let { body } = await rq({
-        url: '/content-manager/explorer/article?source=content-manager',
+        url:
+          '/content-manager/explorer/application::article.article?source=content-manager',
         method: 'POST',
         body: entry,
       });
@@ -626,7 +643,8 @@ describe('Content Manager End to End', () => {
   describe('Test oneWay relation (reference - tag) with Content Manager', () => {
     test('Attach Tag to a Reference', async () => {
       const { body: tagToCreate } = await rq({
-        url: '/content-manager/explorer/tag/?source=content-manager',
+        url:
+          '/content-manager/explorer/application::tag.tag/?source=content-manager',
         method: 'POST',
         body: {
           name: 'tag111',
@@ -634,7 +652,8 @@ describe('Content Manager End to End', () => {
       });
 
       const { body: referenceToCreate } = await rq({
-        url: '/content-manager/explorer/reference/?source=content-manager',
+        url:
+          '/content-manager/explorer/application::reference.reference/?source=content-manager',
         method: 'POST',
         body: {
           name: 'cat111',
@@ -647,7 +666,8 @@ describe('Content Manager End to End', () => {
 
     test('Detach Tag to a Reference', async () => {
       const { body: tagToCreate } = await rq({
-        url: '/content-manager/explorer/tag/?source=content-manager',
+        url:
+          '/content-manager/explorer/application::tag.tag/?source=content-manager',
         method: 'POST',
         body: {
           name: 'tag111',
@@ -655,7 +675,8 @@ describe('Content Manager End to End', () => {
       });
 
       const { body: referenceToCreate } = await rq({
-        url: '/content-manager/explorer/reference/?source=content-manager',
+        url:
+          '/content-manager/explorer/application::reference.reference/?source=content-manager',
         method: 'POST',
         body: {
           name: 'cat111',
@@ -666,7 +687,7 @@ describe('Content Manager End to End', () => {
       expect(referenceToCreate.tag.id).toBe(tagToCreate.id);
 
       const { body: referenceToUpdate } = await rq({
-        url: `/content-manager/explorer/reference/${referenceToCreate.id}?source=content-manager`,
+        url: `/content-manager/explorer/application::reference.reference/${referenceToCreate.id}?source=content-manager`,
         method: 'PUT',
         body: {
           tag: null,
@@ -678,7 +699,8 @@ describe('Content Manager End to End', () => {
 
     test('Delete Tag so the relation in the Reference side should be removed', async () => {
       const { body: tagToCreate } = await rq({
-        url: '/content-manager/explorer/tag/?source=content-manager',
+        url:
+          '/content-manager/explorer/application::tag.tag/?source=content-manager',
         method: 'POST',
         body: {
           name: 'tag111',
@@ -686,7 +708,8 @@ describe('Content Manager End to End', () => {
       });
 
       const { body: referenceToCreate } = await rq({
-        url: '/content-manager/explorer/reference/?source=content-manager',
+        url:
+          '/content-manager/explorer/application::reference.reference/?source=content-manager',
         method: 'POST',
         body: {
           name: 'cat111',
@@ -695,12 +718,12 @@ describe('Content Manager End to End', () => {
       });
 
       await rq({
-        url: `/content-manager/explorer/tag/${tagToCreate.id}?source=content-manager`,
+        url: `/content-manager/explorer/application::tag.tag/${tagToCreate.id}?source=content-manager`,
         method: 'DELETE',
       });
 
       const { body: referenceToGet } = await rq({
-        url: `/content-manager/explorer/reference/${referenceToCreate.id}?source=content-manager`,
+        url: `/content-manager/explorer/application::reference.reference/${referenceToCreate.id}?source=content-manager`,
         method: 'GET',
       });
 

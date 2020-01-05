@@ -26,5 +26,7 @@
   "notification.dropFile.success": "Il file è stato caricato",
   "notification.dropFiles.success": "{number} file sono stati caricati",
   "Upload.status.sizeLimit": "{file} è più grande della dimensione limite configurata",
-  "Upload.status.disabled" : "Il caricamento del file è disabilitato"
+  "Upload.status.disabled" : "Il caricamento del file è disabilitato",
+  "plugin.description.long": "Gestione dei file multimediali.",
+  "plugin.description.short": "Gestione dei file multimediali."
 }

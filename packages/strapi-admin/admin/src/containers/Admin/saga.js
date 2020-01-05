@@ -22,9 +22,7 @@ export function* emitter(action) {
         }
       );
     }
-  } catch (err) {
-    console.log(err); // eslint-disable-line no-console
-  }
+  } catch (err) {}
 }
 
 // Individual exports for testing

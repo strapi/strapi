@@ -4,31 +4,26 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { capitalize, get, sortBy } from 'lodash';
 import { FormattedMessage } from 'react-intl';
+import { Header } from '@buffetjs/custom';
 import {
-  ButtonDropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
-} from 'reactstrap';
-import {
-  PluginHeader,
   PopUpWarning,
   getQueryParameters,
+  useGlobalContext,
 } from 'strapi-helper-plugin';
+
 import pluginId from '../../pluginId';
-import { ListViewProvider } from '../../contexts/ListView';
-import FilterLogo from '../../assets/images/icon_filter.png';
+import DisplayedFieldsDropdown from '../../components/DisplayedFieldsDropdown';
 import Container from '../../components/Container';
 import CustomTable from '../../components/CustomTable';
 import FilterPicker from '../../components/FilterPicker';
-import InputCheckbox from '../../components/InputCheckbox';
 import Search from '../../components/Search';
 import {
   generateFiltersFromSearch,
   generateSearchFromFilters,
 } from '../../utils/search';
+import ListViewProvider from '../ListViewProvider';
 import { onChangeListLabels, resetListLabels } from '../Main/actions';
-import { AddFilterCta, DropDownWrapper, Img, Wrapper } from './components';
+import { AddFilterCta, FilterIcon, Wrapper } from './components';
 import Filter from './Filter';
 import Footer from './Footer';
 import {
@@ -53,11 +48,7 @@ function ListView({
   location: { pathname, search },
   getData,
   layouts,
-  isLoading,
   history: { push },
-  match: {
-    params: { slug },
-  },
   onChangeBulk,
   onChangeBulkSelectall,
   onChangeListLabels,
@@ -67,20 +58,22 @@ function ListView({
   resetProps,
   shouldRefetchData,
   showWarningDelete,
+  slug,
   toggleModalDelete,
   showWarningDeleteAll,
   toggleModalDeleteAll,
 }) {
   strapi.useInjectReducer({ key: 'listView', reducer, pluginId });
   strapi.useInjectSaga({ key: 'listView', saga, pluginId });
-
+  const { formatMessage } = useGlobalContext();
   const getLayoutSettingRef = useRef();
   const [isLabelPickerOpen, setLabelPickerState] = useState(false);
   const [isFilterPickerOpen, setFilterPickerState] = useState(false);
   const [idToDelete, setIdToDelete] = useState(null);
+  const contentTypePath = [slug, 'contentType'];
 
   getLayoutSettingRef.current = settingName =>
-    get(layouts, [slug, 'settings', settingName], '');
+    get(layouts, [...contentTypePath, 'settings', settingName], '');
 
   const getSearchParams = useCallback(
     (updatedParams = {}) => {
@@ -95,7 +88,6 @@ function ListView({
           `${getLayoutSettingRef.current(
             'defaultSortBy'
           )}:${getLayoutSettingRef.current('defaultSortOrder')}`,
-        source: getQueryParameters(search, 'source'),
         filters: generateFiltersFromSearch(search),
         ...updatedParams,
       };
@@ -114,27 +106,44 @@ function ListView({
 
   const toggleLabelPickerState = () => {
     if (!isLabelPickerOpen) {
-      emitEvent('willChangeDisplayedFields');
+      emitEvent('willChangeListFieldsSettings');
     }
 
     setLabelPickerState(prevState => !prevState);
   };
   const toggleFilterPickerState = () => {
+    if (!isFilterPickerOpen) {
+      emitEvent('willFilterEntries');
+    }
+
     setFilterPickerState(prevState => !prevState);
   };
 
   // Helpers
   const getMetaDatas = (path = []) =>
-    get(layouts, [slug, 'metadatas', ...path], {});
-  const getListLayout = () => get(layouts, [slug, 'layouts', 'list'], []);
+    get(layouts, [...contentTypePath, 'metadatas', ...path], {});
+
+  const getListLayout = () =>
+    get(layouts, [...contentTypePath, 'layouts', 'list'], []);
+
+  const getListSchema = () => get(layouts, [...contentTypePath, 'schema'], {});
+
+  const getName = () => {
+    return get(getListSchema(), ['info', 'name'], '');
+  };
+
   const getAllLabels = () => {
     return sortBy(
       Object.keys(getMetaDatas())
         .filter(
           key =>
-            !['json', 'group', 'relation', 'richtext'].includes(
-              get(layouts, [slug, 'schema', 'attributes', key, 'type'], '')
-            )
+            ![
+              'json',
+              'component',
+              'dynamiczone',
+              'relation',
+              'richtext',
+            ].includes(get(getListSchema(), ['attributes', key, 'type'], ''))
         )
         .map(label => ({
           name: label,
@@ -143,6 +152,7 @@ function ListView({
       ['label', 'name']
     );
   };
+
   const getFirstSortableElement = (name = '') => {
     return get(
       getListLayout().filter(h => {
@@ -177,8 +187,13 @@ function ListView({
         },
       });
     }
+
     onChangeListLabels({
-      target: { name: `${slug}.${name}`, value: !value },
+      target: {
+        name,
+        slug,
+        value: !value,
+      },
     });
   };
 
@@ -219,14 +234,17 @@ function ListView({
       type: 'submit',
     },
   ];
-  const pluginHeaderActions = [
+
+  const headerAction = [
     {
-      id: 'addEntry',
-      label: 'content-manager.containers.List.addAnEntry',
-      labelValues: {
-        entity: capitalize(slug) || 'Content Manager',
-      },
-      kind: 'primaryAddShape',
+      title: formatMessage(
+        {
+          id: 'content-manager.containers.List.addAnEntry',
+        },
+        {
+          entity: capitalize(getName()) || 'Content Manager',
+        }
+      ),
       onClick: () => {
         emitEvent('willCreateEntry');
         push({
@@ -234,8 +252,32 @@ function ListView({
           search: `redirectUrl=${pathname}${search}`,
         });
       },
+      color: 'primary',
+      type: 'button',
+      icon: true,
+      style: {
+        paddingLeft: 15,
+        paddingRight: 15,
+        fontWeight: 600,
+      },
     },
   ];
+
+  const headerProps = {
+    title: {
+      label: getName() || 'Content Manager',
+    },
+    content: formatMessage(
+      {
+        id:
+          count > 1
+            ? `${pluginId}.containers.List.pluginHeaderDescription`
+            : `${pluginId}.containers.List.pluginHeaderDescription.singular`,
+      },
+      { label: count }
+    ),
+    actions: headerAction,
+  };
 
   return (
     <>
@@ -245,12 +287,13 @@ function ListView({
         entriesToDelete={entriesToDelete}
         emitEvent={emitEvent}
         firstSortableElement={getFirstSortableElement()}
+        label={getName()}
         onChangeBulk={onChangeBulk}
         onChangeBulkSelectall={onChangeBulkSelectall}
         onChangeParams={handleChangeParams}
         onClickDelete={handleClickDelete}
         onDeleteSeveralData={onDeleteSeveralData}
-        schema={get(layouts, [slug, 'schema'], {})}
+        schema={getListSchema()}
         searchParams={getSearchParams()}
         slug={slug}
         toggleModalDeleteAll={toggleModalDeleteAll}
@@ -258,39 +301,22 @@ function ListView({
         <FilterPicker
           actions={filterPickerActions}
           isOpen={isFilterPickerOpen}
-          name={slug}
+          name={getName()}
           toggleFilterPickerState={toggleFilterPickerState}
           onSubmit={handleSubmit}
         />
         <Container className="container-fluid">
-          {!isFilterPickerOpen && (
-            <PluginHeader
-              actions={pluginHeaderActions}
-              description={{
-                id:
-                  count > 1
-                    ? `${pluginId}.containers.List.pluginHeaderDescription`
-                    : `${pluginId}.containers.List.pluginHeaderDescription.singular`,
-                values: {
-                  label: count,
-                },
-              }}
-              title={{
-                id: slug || 'Content Manager',
-              }}
-              withDescriptionAnim={isLoading}
-            />
-          )}
+          {!isFilterPickerOpen && <Header {...headerProps} />}
           {getLayoutSettingRef.current('searchable') && (
             <Search
               changeParams={handleChangeParams}
               initValue={getQueryParameters(search, '_q') || ''}
-              model={slug}
+              model={getName()}
               value={getQueryParameters(search, '_q') || ''}
             />
           )}
           <Wrapper>
-            <div className="row" style={{ marginBottom: '6px' }}>
+            <div className="row" style={{ marginBottom: '5px' }}>
               <div className="col-10">
                 <div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
                   {getLayoutSettingRef.current('filterable') && (
@@ -299,7 +325,7 @@ function ListView({
                         type="button"
                         onClick={toggleFilterPickerState}
                       >
-                        <Img src={FilterLogo} alt="filter_logo" />
+                        <FilterIcon />
                         <FormattedMessage
                           id={`${pluginId}.components.AddFilterCTA.add`}
                         />
@@ -310,7 +336,7 @@ function ListView({
                           changeParams={handleChangeParams}
                           filters={getSearchParams().filters}
                           index={key}
-                          schema={get(layouts, [slug, 'schema'], {})}
+                          schema={getListSchema()}
                           key={key}
                           toggleFilterPickerState={toggleFilterPickerState}
                           isFilterPickerOpen={isFilterPickerOpen}
@@ -321,63 +347,25 @@ function ListView({
                 </div>
               </div>
               <div className="col-2">
-                <DropDownWrapper style={{ marginBottom: '6px' }}>
-                  <ButtonDropdown
-                    isOpen={isLabelPickerOpen}
-                    toggle={toggleLabelPickerState}
-                    direction="left"
-                  >
-                    <DropdownToggle />
-                    <DropdownMenu>
-                      <FormattedMessage id="content-manager.containers.ListPage.displayedFields">
-                        {msg => (
-                          <DropdownItem
-                            onClick={() => {
-                              resetListLabels(slug);
-                            }}
-                          >
-                            <div
-                              style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                              }}
-                            >
-                              <span>{msg}</span>
-                              <FormattedMessage id="content-manager.containers.Edit.reset" />
-                            </div>
-                          </DropdownItem>
-                        )}
-                      </FormattedMessage>
-                      {getAllLabels().map(label => {
-                        return (
-                          <DropdownItem
-                            key={label.name}
-                            toggle={false}
-                            onClick={() => handleChangeListLabels(label)}
-                          >
-                            <div>
-                              <InputCheckbox
-                                onChange={() => handleChangeListLabels(label)}
-                                name={label.name}
-                                value={label.value}
-                              />
-                            </div>
-                          </DropdownItem>
-                        );
-                      })}
-                    </DropdownMenu>
-                  </ButtonDropdown>
-                </DropDownWrapper>
+                <DisplayedFieldsDropdown
+                  isOpen={isLabelPickerOpen}
+                  items={getAllLabels()}
+                  onChange={handleChangeListLabels}
+                  onClickReset={() => {
+                    resetListLabels(slug);
+                  }}
+                  slug={slug}
+                  toggle={toggleLabelPickerState}
+                />
               </div>
             </div>
-            <div className="row" style={{ paddingTop: '30px' }}>
+            <div className="row" style={{ paddingTop: '12px' }}>
               <div className="col-12">
                 <CustomTable
                   data={data}
                   headers={getTableHeaders()}
                   isBulkable={getLayoutSettingRef.current('bulkable')}
                   onChangeParams={handleChangeParams}
-                  slug={slug}
                 />
                 <Footer />
               </div>
@@ -395,7 +383,7 @@ function ListView({
           }}
           popUpWarningType="danger"
           onConfirm={() => {
-            onDeleteData(idToDelete, slug, getSearchParams().source, emitEvent);
+            onDeleteData(idToDelete, slug, emitEvent);
           }}
         />
         <PopUpWarning
@@ -411,11 +399,7 @@ function ListView({
           }}
           popUpWarningType="danger"
           onConfirm={() => {
-            onDeleteSeveralData(
-              entriesToDelete,
-              slug,
-              getSearchParams().source
-            );
+            onDeleteSeveralData(entriesToDelete, slug);
           }}
         />
       </ListViewProvider>
@@ -436,15 +420,10 @@ ListView.propTypes = {
     pathname: PropTypes.string.isRequired,
     search: PropTypes.string.isRequired,
   }),
+  models: PropTypes.array.isRequired,
   getData: PropTypes.func.isRequired,
-  isLoading: PropTypes.bool.isRequired,
   history: PropTypes.shape({
     push: PropTypes.func.isRequired,
-  }),
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      slug: PropTypes.string.isRequired,
-    }),
   }),
   onChangeBulk: PropTypes.func.isRequired,
   onChangeBulkSelectall: PropTypes.func.isRequired,
@@ -456,6 +435,7 @@ ListView.propTypes = {
   shouldRefetchData: PropTypes.bool.isRequired,
   showWarningDelete: PropTypes.bool.isRequired,
   showWarningDeleteAll: PropTypes.bool.isRequired,
+  slug: PropTypes.string.isRequired,
   toggleModalDelete: PropTypes.func.isRequired,
   toggleModalDeleteAll: PropTypes.func.isRequired,
 };

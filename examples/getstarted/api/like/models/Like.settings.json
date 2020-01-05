@@ -11,9 +11,9 @@
     "comment": ""
   },
   "attributes": {
-    "author": {
-      "model": "user",
-      "plugin": "users-permissions"
+    "authore": {
+      "plugin": "users-permissions",
+      "model": "user"
     },
     "review": {
       "model": "review",

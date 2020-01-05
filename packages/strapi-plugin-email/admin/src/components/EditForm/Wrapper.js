@@ -10,6 +10,10 @@ const Wrapper = styled.div`
     max-width: 358px;
   }
 
+  .input-wrapper {
+    margin-bottom: 1.1rem;
+  }
+
   .subFormWrapper {
     margin-bottom: 14px;
     padding: 23px 30px 0 30px;

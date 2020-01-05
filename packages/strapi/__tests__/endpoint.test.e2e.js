@@ -23,7 +23,7 @@ describe('Create Strapi API End to End', () => {
 
     modelsUtils = createModelsUtils({ rq });
 
-    await modelsUtils.createModels([
+    await modelsUtils.createContentTypes([
       form.article,
       form.tag,
       form.category,
@@ -33,7 +33,7 @@ describe('Create Strapi API End to End', () => {
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteModels([
+    await modelsUtils.deleteContentTypes([
       'article',
       'tag',
       'category',

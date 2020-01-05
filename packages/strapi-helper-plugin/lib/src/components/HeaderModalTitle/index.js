@@ -15,7 +15,6 @@ const HeaderModalTitle = styled.div`
   }
   span {
     margin auto 0;
-    text-transform: capitalize;
   }
 `;
 

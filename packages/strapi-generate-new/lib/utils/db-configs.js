@@ -5,7 +5,7 @@
  */
 module.exports = {
   sqlite: {
-    connector: 'strapi-hook-bookshelf',
+    connector: 'bookshelf',
     settings: {
       client: 'sqlite',
       filename: '.tmp/data.db',
@@ -15,18 +15,18 @@ module.exports = {
     },
   },
   postgres: {
-    connector: 'strapi-hook-bookshelf',
+    connector: 'bookshelf',
     settings: {
       client: 'postgres',
     },
   },
   mysql: {
-    connector: 'strapi-hook-bookshelf',
+    connector: 'bookshelf',
     settings: {
       client: 'mysql',
     },
   },
   mongo: {
-    connector: 'strapi-hook-mongoose',
+    connector: 'mongoose',
   },
 };

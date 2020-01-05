@@ -6,9 +6,12 @@ const Div = styled.div`
   color: #0e1622;
   opacity: 0.75;
   -webkit-font-smoothing: antialiased;
-  > i {
+  > i,
+  > svg {
     z-index: 0;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
+    height: 1.2rem;
+    vertical-align: inherit;
   }
 `;
 
