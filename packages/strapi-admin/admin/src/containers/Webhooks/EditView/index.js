@@ -4,8 +4,8 @@
  *
  */
 
-import React, { useEffect, useReducer } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect, useReducer, useCallback } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { cloneDeep, isEmpty, isEqual, set } from 'lodash';
 import { Header } from '@buffetjs/custom';
 import { Play } from '@buffetjs/icons';
@@ -22,12 +22,14 @@ function EditView() {
   const { formatMessage } = useGlobalContext();
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const location = useLocation();
+  const { goBack } = useHistory();
 
   const {
     modifiedWebhook,
     initialWebhook,
     isTriggering,
     triggerResponse,
+    shouldRefetchData,
   } = reducerState.toJS();
 
   const { name } = modifiedWebhook;
@@ -41,7 +43,13 @@ function EditView() {
     }
   }, [fetchData, isCreatingWebhook]);
 
-  const fetchData = async () => {
+  useEffect(() => {
+    if (shouldRefetchData) {
+      fetchData();
+    }
+  }, [fetchData, shouldRefetchData]);
+
+  const fetchData = useCallback(async () => {
     try {
       const { data } = await request(`/admin/webhooks/${id}`, {
         method: 'GET',
@@ -56,7 +64,7 @@ function EditView() {
         strapi.notification.error('notification.error');
       }
     }
-  };
+  }, [id]);
 
   // Header props
   const headerTitle = isCreatingWebhook
@@ -175,7 +183,11 @@ function EditView() {
 
   const handleSubmit = e => {
     e.preventDefault();
-    createWebhooks();
+    if (!isCreatingWebhook) {
+      updateWebhook();
+    } else {
+      createWebhooks();
+    }
   };
 
   const createWebhooks = async () => {
@@ -191,9 +203,30 @@ function EditView() {
         body,
       });
 
+      strapi.notification.success(`app.notification.success`);
+      goBack();
+    } catch (err) {
+      strapi.notification.error('notification.error');
+    }
+  };
+
+  const updateWebhook = async () => {
+    const body = cloneDeep(modifiedWebhook);
+    set(body, 'headers', unformatLayout(modifiedWebhook.headers));
+
+    try {
+      const body = cloneDeep(modifiedWebhook);
+      set(body, 'headers', unformatLayout(modifiedWebhook.headers));
+
+      await request(`/admin/webhooks/${id}`, {
+        method: 'PUT',
+        body,
+      });
+
       dispatch({
         type: 'SUBMIT_SUCCEEDED',
       });
+      strapi.notification.success(`app.notification.success`);
     } catch (err) {
       strapi.notification.error('notification.error');
     }

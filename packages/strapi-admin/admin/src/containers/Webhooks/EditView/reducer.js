@@ -59,6 +59,9 @@ const reducer = (state, action) => {
     case 'SET_ERRORS': {
       return state.update('formErrors', () => fromJS(action.errors));
     }
+    case 'SUBMIT_SUCCEEDED': {
+      return state.update('shouldRefetchData', () => true);
+    }
     default:
       return state;
   }
