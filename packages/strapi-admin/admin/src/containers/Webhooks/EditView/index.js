@@ -37,6 +37,10 @@ function EditView() {
   const id = location.pathname.split('/')[3];
   const isCreatingWebhook = id === 'create';
 
+  const abortController = new AbortController();
+
+  const { signal } = abortController;
+
   useEffect(() => {
     if (!isCreatingWebhook) {
       fetchData();
@@ -83,26 +87,35 @@ function EditView() {
     });
 
     try {
-      const response = await request(`/admin/webhooks/${id}/trigger`, {
+      const { data } = await request(`/admin/webhooks/${id}/trigger`, {
         method: 'POST',
+        signal,
       });
 
       dispatch({
         type: 'TRIGGER_SUCCEEDED',
-        response,
+        response: data,
       });
     } catch (err) {
-      const { message } = err;
-
-      dispatch({
-        type: 'TRIGGER_SUCCEEDED',
-        response: { error: message },
-      });
-
       if (err.code !== 20) {
         strapi.notification.error('notification.error');
       }
     }
+  };
+
+  const onCancelTrigger = () => {
+    console.log('abort');
+    abortController.abort();
+
+    dispatch({
+      type: 'ON_TRIGGER_CANCELED',
+    });
+  };
+
+  const handleReset = () => {
+    dispatch({
+      type: 'RESET',
+    });
   };
 
   const actions = [
@@ -134,7 +147,9 @@ function EditView() {
       ),
     },
     {
-      onClick: () => {},
+      onClick: () => {
+        handleReset();
+      },
       color: 'cancel',
       disabled: actionsAreDisabled,
       type: 'button',
@@ -147,7 +162,6 @@ function EditView() {
       },
     },
     {
-      onClick: () => {},
       color: 'success',
       disabled: actionsAreDisabled,
       type: 'submit',
@@ -217,6 +231,7 @@ function EditView() {
     try {
       const body = cloneDeep(modifiedWebhook);
       set(body, 'headers', unformatLayout(modifiedWebhook.headers));
+      delete body.id;
 
       await request(`/admin/webhooks/${id}`, {
         method: 'PUT',
@@ -234,6 +249,13 @@ function EditView() {
 
   // utils
   const unformatLayout = headers => {
+    if (headers.length === 1) {
+      const { key, value } = headers[0];
+      if ((key === '') & (value === '')) {
+        return {};
+      }
+    }
+
     const newHeader = headers.reduce((obj, item) => {
       const { key, value } = item;
       return {
@@ -245,6 +267,20 @@ function EditView() {
     return newHeader;
   };
 
+  const handleBlur = async ({ target }) => {
+    if (canCheck) {
+      try {
+        await createYupSchema(type, validations, translatedErrors).validate(
+          target.value
+        );
+        resetError();
+      } catch (err) {
+        const { message } = err;
+        setError(message);
+      }
+    }
+  };
+
   return (
     <Wrapper>
       <form onSubmit={handleSubmit}>
@@ -254,6 +290,7 @@ function EditView() {
             <TriggerContainer
               isPending={isTriggering}
               response={triggerResponse}
+              onCancel={onCancelTrigger}
             />
           </div>
         )}
@@ -269,6 +306,7 @@ function EditView() {
                       //   headers: HeadersInput,
                       // }}
                       name={key}
+                      //onBlur={handleBlur}
                       onChange={handleChange}
                       onClick={handleClick}
                       validations={form[key].validations}

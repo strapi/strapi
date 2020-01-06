@@ -15,8 +15,8 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
   ];
 
   const events = {
-    entry: ['createEntry', 'updateEntry', 'deleteEntry'],
-    media: ['createMedia', 'updateMedia', 'deleteMedia'],
+    entry: ['entry.create', 'entry.update', 'entry.delete'],
+    media: ['media.create', 'media.update', 'media.delete'],
   };
 
   const handleChange = ({ target: { name, value } }) => {

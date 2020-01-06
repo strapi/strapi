@@ -87,7 +87,7 @@ const HeadersInput = ({ onClick, onChange, name, value }) => {
           );
         })}
       </ul>
-      <button onClick={handleClick}>
+      <button onClick={handleClick} type="button">
         <Plus fill="#007eff" width="10px" />
         <FormattedMessage id="Settings.webhooks.create.header" />
       </button>

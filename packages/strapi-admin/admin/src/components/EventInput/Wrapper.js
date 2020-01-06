@@ -37,7 +37,7 @@ const Wrapper = styled.div`
   thead {
     background-color: #fafafb;
     td {
-      height: 43px;
+      height: 41px;
       text-align: center;
     }
   }

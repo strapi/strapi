@@ -47,6 +47,11 @@ const reducer = (state, action) => {
     case 'ON_TRIGGER': {
       return state.update('isTriggering', () => true);
     }
+    case 'ON_TRIGGER_CANCELED': {
+      return state
+        .update('isTriggering', () => false)
+        .update('triggerResponse', () => {});
+    }
     case 'ON_CHANGE':
       return state.updateIn(
         ['modifiedWebhook', ...action.keys],
@@ -56,6 +61,11 @@ const reducer = (state, action) => {
       return state.updateIn(['modifiedWebhook', ...action.keys], arr =>
         arr.push(fromJS({ key: '', value: '' }))
       );
+    case 'RESET': {
+      return state.update('modifiedWebhook', () =>
+        fromJS(state.get('initialWebhook'))
+      );
+    }
     case 'SET_ERRORS': {
       return state.update('formErrors', () => fromJS(action.errors));
     }

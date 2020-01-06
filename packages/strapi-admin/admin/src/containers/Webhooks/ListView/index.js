@@ -196,6 +196,8 @@ function ListView() {
       isEnabled: value,
     };
 
+    delete body.id;
+
     try {
       await request(`/admin/webhooks/${id}`, {
         method: 'PUT',

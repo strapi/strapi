@@ -26,8 +26,6 @@ const Wrapper = styled.div`
       }
     }
   }
-  .trigger-wrapper {
-  }
   .form-wrapper {
     padding-top: 4px;
   }
@@ -36,6 +34,7 @@ const Wrapper = styled.div`
     background-color: #ffffff;
     border-radius: 2px;
     box-shadow: 0 2px 4px 0 #e3e9f3;
+    margin-bottom: 30px;
   }
   .row > div {
     margin-bottom: 4px;
