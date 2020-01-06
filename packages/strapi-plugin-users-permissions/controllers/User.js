@@ -171,6 +171,10 @@ module.exports = {
     const { id } = ctx.params;
     const { email, username, password } = ctx.request.body;
 
+    const user = await strapi.plugins['users-permissions'].services.user.fetch({
+      id,
+    });
+
     if (_.has(ctx.request.body, 'email') && !email) {
       return ctx.badRequest('email.notNull');
     }
@@ -179,7 +183,11 @@ module.exports = {
       return ctx.badRequest('username.notNull');
     }
 
-    if (_.has(ctx.request.body, 'password') && !password) {
+    if (
+      _.has(ctx.request.body, 'password') &&
+      !password &&
+      user.provider === 'local'
+    ) {
       return ctx.badRequest('password.notNull');
     }
 
@@ -216,10 +224,6 @@ module.exports = {
         );
       }
     }
-
-    const user = await strapi.plugins['users-permissions'].services.user.fetch({
-      id,
-    });
 
     let updateData = {
       ...ctx.request.body,

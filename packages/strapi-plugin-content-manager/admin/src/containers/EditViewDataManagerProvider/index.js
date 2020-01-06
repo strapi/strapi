@@ -196,7 +196,8 @@ const EditViewDataManagerProvider = ({
       inputValue = null;
     }
 
-    if (type === 'biginteger' && value === '') {
+    // Allow to reset enum
+    if (type === 'select-one' && value === '') {
       inputValue = null;
     }
 

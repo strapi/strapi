@@ -121,6 +121,29 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
     step = '1';
   }
 
+  const options = get(attribute, 'enum', []).map(v => {
+    return (
+      <option key={v} value={v}>
+        {v}
+      </option>
+    );
+  });
+
+  const isRequired = get(validations, ['required'], false);
+  const enumOptions = [
+    <FormattedMessage
+      id="components.InputSelect.option.placeholder"
+      key="__enum_option_null"
+    >
+      {msg => (
+        <option disabled={isRequired} hidden={isRequired} value="">
+          {msg}
+        </option>
+      )}
+    </FormattedMessage>,
+    ...options,
+  ];
+
   return (
     <FormattedMessage id={errorId}>
       {error => {
@@ -147,7 +170,7 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
             name={keys}
             onBlur={onBlur}
             onChange={onChange}
-            options={get(attribute, 'enum', [])}
+            options={enumOptions}
             step={step}
             type={getInputType(type)}
             validations={validations}
