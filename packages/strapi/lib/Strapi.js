@@ -280,7 +280,7 @@ class Strapi extends EventEmitter {
     return this.stop();
   }
 
-  stop() {
+  stop(exitCode = 1) {
     // Destroy server and available connections.
     this.server.destroy();
 
@@ -289,7 +289,7 @@ class Strapi extends EventEmitter {
     }
 
     // Kill process.
-    process.exit(1);
+    process.exit(exitCode);
   }
 
   async load() {
