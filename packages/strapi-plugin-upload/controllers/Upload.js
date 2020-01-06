@@ -101,20 +101,7 @@ module.exports = {
     const uploadedFiles = await uploadService.upload(enhancedFiles, config);
 
     // Send 200 `ok`
-    ctx.send(
-      uploadedFiles.map(file => {
-        // If is local server upload, add backend host as prefix
-        if (file.url && file.url[0] === '/') {
-          file.url = strapi.config.url + file.url;
-        }
-
-        if (_.isArray(file.related)) {
-          file.related = file.related.map(obj => obj.ref || obj);
-        }
-
-        return file;
-      })
-    );
+    ctx.send(uploadedFiles);
   },
 
   async getEnvironments(ctx) {
@@ -161,16 +148,7 @@ module.exports = {
     );
 
     // Send 200 `ok`
-    ctx.send(
-      data.map(file => {
-        // if is local server upload, add backend host as prefix
-        if (file.url[0] === '/') {
-          file.url = strapi.config.url + file.url;
-        }
-
-        return file;
-      })
-    );
+    ctx.send(data);
   },
 
   async findOne(ctx) {
@@ -180,11 +158,6 @@ module.exports = {
 
     if (!data) {
       return ctx.notFound('file.notFound');
-    }
-
-    // if is local server upload, add backend host as prefix
-    if (data.url[0] === '/') {
-      data.url = strapi.config.url + data.url;
     }
 
     ctx.send(data);
@@ -248,9 +221,11 @@ const searchQueries = {
     return ({ id }) => {
       const re = new RegExp(id, 'i');
 
-      return model.find({
-        $or: [{ hash: re }, { name: re }],
-      });
+      return model
+        .find({
+          $or: [{ hash: re }, { name: re }],
+        })
+        .lean();
     };
   },
 };
