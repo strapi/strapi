@@ -116,7 +116,7 @@ ListRow.defaultProps = {
 };
 
 ListRow.propTypes = {
-  id: PropTypes.string.isRequired,
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   itemsToDelete: PropTypes.instanceOf(Array),
   isEnabled: PropTypes.bool,
   name: PropTypes.string,

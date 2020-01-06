@@ -19,42 +19,11 @@ function Inputs({
   name,
   onChange,
   onClick,
+  onRemove,
   type,
   validations,
   value,
 }) {
-  const renderInput = ({ hasError, onBlur, handleChange }, type) => {
-    if (type === 'headers') {
-      return (
-        <HeadersInput
-          value={value}
-          name={name}
-          onClick={onClick}
-          onChange={handleChange}
-        />
-      );
-    }
-    if (type === 'events') {
-      return (
-        <EventInput
-          value={value}
-          name={name}
-          onClick={onClick}
-          onChange={handleChange}
-        />
-      );
-    }
-    return (
-      <InputText
-        error={hasError}
-        onBlur={onBlur}
-        onChange={handleChange}
-        value={value}
-        name={name}
-      />
-    );
-  };
-
   return (
     <Error
       inputError={inputError}
@@ -78,16 +47,34 @@ function Inputs({
           onChange(e);
         };
 
-        const inputProps = {
-          onBlur: onBlur,
-          handleChange: handleChange,
-          hasError: hasError,
-        };
-
         return (
           <Wrapper>
             <Label htmlFor={name}>{label}</Label>
-            {renderInput(inputProps, type)}
+
+            {type === 'headers' ? (
+              <HeadersInput
+                value={value}
+                name={name}
+                onClick={onClick}
+                onChange={handleChange}
+                onRemove={onRemove}
+              />
+            ) : type === 'events' ? (
+              <EventInput
+                value={value}
+                name={name}
+                onClick={onClick}
+                onChange={handleChange}
+              />
+            ) : (
+              <InputText
+                error={hasError}
+                onBlur={onBlur}
+                onChange={handleChange}
+                value={value}
+                name={name}
+              />
+            )}
             {hasError && <ErrorMessage>{error}</ErrorMessage>}
           </Wrapper>
         );
@@ -100,6 +87,7 @@ Inputs.defaultProps = {
   error: null,
   label: '',
   onClick: () => {},
+  onRemove: () => {},
   type: 'text',
   validations: {},
   value: null,
@@ -111,6 +99,7 @@ Inputs.propTypes = {
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   onClick: PropTypes.func,
+  onRemove: PropTypes.func,
   type: PropTypes.string,
   validations: PropTypes.object,
   value: PropTypes.oneOfType([

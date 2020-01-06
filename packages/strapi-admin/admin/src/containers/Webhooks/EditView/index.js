@@ -267,6 +267,14 @@ function EditView() {
     return newHeader;
   };
 
+  const handleRemove = ({ event, index }) => {
+    dispatch({
+      type: 'ON_HEADER_REMOVE',
+      index,
+      event,
+    });
+  };
+
   const handleBlur = async ({ target }) => {
     if (canCheck) {
       try {
@@ -309,6 +317,7 @@ function EditView() {
                       //onBlur={handleBlur}
                       onChange={handleChange}
                       onClick={handleClick}
+                      onRemove={handleRemove}
                       validations={form[key].validations}
                       value={modifiedWebhook[key] || form[key].value}
                     />

@@ -61,6 +61,18 @@ const reducer = (state, action) => {
       return state.updateIn(['modifiedWebhook', ...action.keys], arr =>
         arr.push(fromJS({ key: '', value: '' }))
       );
+    case 'ON_HEADER_REMOVE': {
+      if (action.event === 'remove') {
+        return state.updateIn(['modifiedWebhook', 'headers'], headers =>
+          headers.splice(action.index, 1)
+        );
+      } else {
+        return state.updateIn(
+          ['modifiedWebhook', 'headers', action.index],
+          () => fromJS({ key: '', value: '' })
+        );
+      }
+    }
     case 'RESET': {
       return state.update('modifiedWebhook', () =>
         fromJS(state.get('initialWebhook'))

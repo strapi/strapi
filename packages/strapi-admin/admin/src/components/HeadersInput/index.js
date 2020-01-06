@@ -10,7 +10,7 @@ import Wrapper from './Wrapper';
 
 import keys from './keys';
 
-const HeadersInput = ({ onClick, onChange, name, value }) => {
+const HeadersInput = ({ onClick, onChange, name, value, onRemove }) => {
   const handleChangeKey = (selected, name) => {
     if (selected === null) {
       onChange({ target: { name, value: '' } });
@@ -34,9 +34,9 @@ const HeadersInput = ({ onClick, onChange, name, value }) => {
 
   const handleRemoveItem = index => {
     if (index === 0 && value.length === 1) {
-      console.log('clear', index);
+      onRemove({ event: 'clear', index });
     } else {
-      console.log('remove', index);
+      onRemove({ event: 'remove', index });
     }
   };
 
@@ -98,6 +98,7 @@ const HeadersInput = ({ onClick, onChange, name, value }) => {
 HeadersInput.defaultProps = {
   handleClick: () => {},
   onClick: () => {},
+  onRemove: () => {},
 };
 
 HeadersInput.propTypes = {
@@ -105,6 +106,7 @@ HeadersInput.propTypes = {
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   onClick: PropTypes.func.isRequired,
+  onRemove: PropTypes.func,
   value: PropTypes.array,
 };
 
