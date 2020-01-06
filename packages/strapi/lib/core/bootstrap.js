@@ -376,6 +376,11 @@ module.exports = function(strapi) {
         ssl: proxy.ssl,
       })
     : url;
+
+  // check if proxy enabled and construct admin url
+  if (proxy.enabled === true) {
+    strapi.config.admin.url = new URL(adminPath, strapi.config.url).toString();
+  }
 };
 
 const enableHookNestedDependencies = function(
