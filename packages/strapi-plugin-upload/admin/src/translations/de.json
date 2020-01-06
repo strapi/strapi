@@ -26,5 +26,7 @@
   "notification.dropFile.success": "Deine Datei wurde hochgeladen",
   "notification.dropFiles.success": "{number} Dateien wurden hochgeladen",
   "Upload.status.sizeLimit": "{file} ist größer als die konfigurierte Begrenzungsgröße",
-  "Upload.status.disabled" : "Das Hochladen von Dateien ist deaktiviert"
+  "Upload.status.disabled" : "Das Hochladen von Dateien ist deaktiviert",
+  "plugin.description.long": "Multimedia-Dateiverwaltung.",
+  "plugin.description.short": "Multimedia-Dateiverwaltung."
 }

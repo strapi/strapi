@@ -24,5 +24,7 @@
   "notification.config.success": "As configurações foram atualizadas",
   "notification.delete.success": "O arquivo foi removido",
   "notification.dropFile.success": "Seu arquivo foi enviado com sucesso",
-  "notification.dropFiles.success": "{number} arquivos foram enviados com sucesso"
+  "notification.dropFiles.success": "{number} arquivos foram enviados com sucesso",
+  "plugin.description.long": "Gerenciamento de arquivos multimídia.",
+  "plugin.description.short": "Gerenciamento de arquivos multimídia."
 }

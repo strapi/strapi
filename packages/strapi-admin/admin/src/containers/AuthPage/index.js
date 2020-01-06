@@ -123,7 +123,7 @@ const AuthPage = ({
             password: formattedError,
           };
         } else if (authType === 'forgot-password') {
-          formErrors = { email: formattedError };
+          formErrors = { email: formattedError[0] };
         } else {
           strapi.notification.error(
             get(formattedError, '0.id', 'notification.error')
