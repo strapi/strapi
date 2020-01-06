@@ -441,4 +441,3 @@ JWT tokens can be verified and trusted because the information is digitally sign
 ```
   "jwtSecret": "${process.env.JWT_SECRET}"
 ```
-d
