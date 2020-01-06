@@ -177,7 +177,9 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
 
     const runDelete = async trx => {
       await deleteComponents(entry, { transacting: trx });
-      await model.where(params).destroy({ transacting: trx, require: false });
+      await model
+        .where({ id: entry.id })
+        .destroy({ transacting: trx, require: false });
       return entry.toJSON();
     };
 

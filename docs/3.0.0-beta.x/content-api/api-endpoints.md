@@ -10,7 +10,7 @@ As an **example** let's consider the following models:
 
 **Components**:
 
-- `Openning hours` (category: `restaurant`)
+- `Opening hours` (category: `restaurant`)
 - `Title With Subtitle` (category: `content`)
 - `Image With Description` (category: `content`)
 
@@ -52,10 +52,10 @@ As an **example** let's consider the following models:
 
 ### `Image With Description` Component
 
-| Fields      | Type   | Description          |
-| :---------- | :----- | :------------------- |
-| image       | media  | The image file       |
-| title       | string | the image title      |
+| Fields      | Type   | Description           |
+| :---------- | :----- | :-------------------- |
+| image       | media  | The image file        |
+| title       | string | the image title       |
 | description | text   | the image description |
 
 :::

@@ -26,5 +26,7 @@
   "notification.dropFile.success": "Ваш файл загружен",
   "notification.dropFiles.success": "Файлов загружено: {number}",
   "Upload.status.sizeLimit": "{file} больше настроенного предельного размера",
-  "Upload.status.disabled" : "Загрузка файла отключена"
+  "Upload.status.disabled" : "Загрузка файла отключена",
+  "plugin.description.long": "Управление мультимедийными файлами.",
+  "plugin.description.short": "Управление мультимедийными файлами."
 }
