@@ -56,6 +56,10 @@ You can access to any controllers, services or models thanks to the global varia
 
 To apply policies to a route, you need to associate an array of policies to it. There are two kinds of policies: global or scoped.
 
+::: warning
+To apply policies with GraphQL please see the [following guide](../plugins/graphql.md#execute-a-policy-before-a-resolver)
+:::
+
 ### Global policies
 
 The global policies can be associated to any routes in your project.
