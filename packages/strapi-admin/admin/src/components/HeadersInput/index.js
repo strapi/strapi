@@ -10,7 +10,7 @@ import Wrapper from './Wrapper';
 
 import keys from './keys';
 
-const HeadersInput = ({ onClick, onChange, name, value, onRemove }) => {
+const HeadersInput = ({ onClick, onChange, name, value, onRemove, error }) => {
   const handleChangeKey = (selected, name) => {
     if (selected === null) {
       onChange({ target: { name, value: '' } });
@@ -40,6 +40,53 @@ const HeadersInput = ({ onClick, onChange, name, value, onRemove }) => {
     }
   };
 
+  const customStyles = {
+    container: base => ({
+      ...base,
+      'z-index': 9999,
+    }),
+    control: (base, state) => ({
+      ...base,
+      border: state.isFocused
+        ? '1px solid #78caff !important'
+        : error
+        ? '1px solid red !important'
+        : '1px solid #E3E9F3 !important',
+      borderRadius: '2px !important',
+    }),
+    menu: base => {
+      return {
+        ...base,
+        padding: '0',
+        border: '1px solid #e3e9f3',
+        borderTop: '1px solid #78caff',
+        borderTopRightRadius: '0',
+        borderTopLeftRadius: '0',
+        borderBottomRightRadius: '3px',
+        borderBottomLeftRadius: '3px',
+        boxShadow: 'none',
+        marginTop: '-1px;',
+      };
+    },
+    menuList: base => ({
+      ...base,
+      maxHeight: '64px',
+      paddingTop: '0',
+    }),
+    option: (base, state) => {
+      return {
+        ...base,
+        backgroundColor:
+          state.isSelected || state.isFocused ? '#f6f6f6' : '#fff',
+        color: '#000000',
+        fontWeight: state.isSelected ? '600' : '400',
+        cursor: state.isFocused ? 'pointer' : 'initial',
+        height: '32px',
+        lineHeight: '16px',
+      };
+    },
+  };
+
   return (
     <Wrapper>
       <ul>
@@ -67,6 +114,7 @@ const HeadersInput = ({ onClick, onChange, name, value, onRemove }) => {
                   options={options}
                   name={`${name}.${index}.key`}
                   value={optionFormat(key)}
+                  styles={customStyles}
                 />
               </section>
               <section>
@@ -96,12 +144,14 @@ const HeadersInput = ({ onClick, onChange, name, value, onRemove }) => {
 };
 
 HeadersInput.defaultProps = {
+  error: null,
   handleClick: () => {},
   onClick: () => {},
   onRemove: () => {},
 };
 
 HeadersInput.propTypes = {
+  error: PropTypes.string,
   handleClick: PropTypes.func,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
