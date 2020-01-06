@@ -1,6 +1,6 @@
 {
-  "attribute.boolean": "Boolean",
-  "attribute.boolean.description": "Yes/no, 1/0, true/false",
+  "attribute.boolean": "Logická hodnota",
+  "attribute.boolean.description": "áno/nie, 1/0",
   "attribute.component": "Komponent",
   "attribute.component.description": "Skupina políčok, ktoré je možné opakovane používať",
   "attribute.date": "Dátum a čas",
@@ -50,7 +50,6 @@
   "form.attribute.component.option.create": "Vytvoriť nový komponent",
   "form.attribute.component.option.create.description": "Komponent je dostupný medzi všetkými typmi a komponentami.",
   "form.attribute.component.option.repeatable": "Znovu použiteľný komponent",
-  "form.attribute.component.option.repeatable.description": "Best for multiple instances (array) of ingredients, meta tags, etc..",
   "form.attribute.component.option.reuse-existing": "Použiť existujúci komponent",
   "form.attribute.component.option.reuse-existing.description": "Používajte už vytvorené komponenty pre uchovanie konzistentných dát medzi Typmi obsahu.",
   "form.attribute.component.option.single": "Jednoduchý komponent",
