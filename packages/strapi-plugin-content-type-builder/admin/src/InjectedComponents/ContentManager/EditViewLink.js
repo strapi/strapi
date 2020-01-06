@@ -10,9 +10,13 @@ import { LiLink, useGlobalContext } from 'strapi-helper-plugin';
 
 // Create link from content-type-builder to content-manager
 function EditViewLink(props) {
-  const { emitEvent } = useGlobalContext();
+  const { currentEnvironment, emitEvent } = useGlobalContext();
   // Retrieve URL from props
   const url = `/plugins/content-type-builder/content-types/${props.getModelName()}`;
+
+  if (currentEnvironment !== 'development') {
+    return null;
+  }
 
   if (props.getModelName() === 'strapi::administrator') {
     return null;
