@@ -116,7 +116,7 @@ Then run either `yarn install` or `npm install`.
 
 ## Database configuration
 
-Now that you have installed the new database package, You need to update your `database.json` configuration files located in `./config/environments/{env}/database.json`.
+Now that you have installed the new database package, you need to update your `database.json` configuration files located in `./config/environments/{env}/database.json`.
 
 You can now only use the connector name instead of the complete package name.
 
