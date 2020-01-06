@@ -11,6 +11,7 @@ import { Error, InputText } from '@buffetjs/core';
 
 import Wrapper from './Wrapper';
 import HeadersInput from '../HeadersInput';
+import EventInput from '../EventInput';
 
 function Inputs({
   error: inputError,
@@ -32,19 +33,26 @@ function Inputs({
           onChange={handleChange}
         />
       );
-    } else if (type === 'events') {
-      return <p>hooks</p>;
-    } else {
+    }
+    if (type === 'events') {
       return (
-        <InputText
-          error={hasError}
-          onBlur={onBlur}
-          onChange={handleChange}
+        <EventInput
           value={value}
           name={name}
+          onClick={onClick}
+          onChange={handleChange}
         />
       );
     }
+    return (
+      <InputText
+        error={hasError}
+        onBlur={onBlur}
+        onChange={handleChange}
+        value={value}
+        name={name}
+      />
+    );
   };
 
   return (

@@ -6,14 +6,16 @@
 
 import React, { useEffect, useReducer } from 'react';
 import { useLocation } from 'react-router-dom';
-import { isEmpty, difference } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import { Header } from '@buffetjs/custom';
+import { Play } from '@buffetjs/icons';
 import { request, useGlobalContext } from 'strapi-helper-plugin';
 
 import reducer, { initialState } from './reducer';
 import form from './utils/form';
 
 import Inputs from '../../../components/Inputs';
+import TriggerContainer from '../../../components/TriggerContainer';
 import Wrapper from './Wrapper';
 
 function EditView() {
@@ -21,7 +23,12 @@ function EditView() {
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const location = useLocation();
 
-  const { modifiedWebhook, initialWebhook } = reducerState.toJS();
+  const {
+    modifiedWebhook,
+    initialWebhook,
+    isTriggering,
+    triggerResponse,
+  } = reducerState.toJS();
 
   const { name } = modifiedWebhook;
 
@@ -58,30 +65,60 @@ function EditView() {
       })
     : name;
 
-  const actionsAreDisabled = isEmpty(
-    difference(initialWebhook, modifiedWebhook)
-  );
+  const actionsAreDisabled = isEqual(initialWebhook, modifiedWebhook);
+
+  const handleTrigger = async () => {
+    dispatch({
+      type: 'ON_TRIGGER',
+    });
+
+    try {
+      const response = await request(`/admin/webhooks/${id}/trigger`, {
+        method: 'POST',
+      });
+
+      dispatch({
+        type: 'TRIGGER_SUCCEEDED',
+        response,
+      });
+    } catch (err) {
+      const { message } = err;
+
+      dispatch({
+        type: 'TRIGGER_SUCCEEDED',
+        response: { error: message },
+      });
+
+      if (err.code !== 20) {
+        strapi.notification.error('notification.error');
+      }
+    }
+  };
 
   const actions = [
     {
-      onClick: () => {},
       color: 'primary',
-      disabled: actionsAreDisabled,
+      disabled:
+        isCreatingWebhook || (!isCreatingWebhook && !actionsAreDisabled),
       type: 'button',
-      title: formatMessage({
+      label: formatMessage({
         id: `Settings.webhooks.trigger`,
       }),
+      onClick: () => {
+        handleTrigger();
+      },
       style: {
         paddingRight: 15,
         paddingLeft: 15,
       },
+      icon: <Play width="6px" height="7px" />,
     },
     {
       onClick: () => {},
       color: 'cancel',
       disabled: actionsAreDisabled,
       type: 'button',
-      title: formatMessage({
+      label: formatMessage({
         id: `app.components.Button.reset`,
       }),
       style: {
@@ -94,7 +131,7 @@ function EditView() {
       color: 'success',
       disabled: actionsAreDisabled,
       type: 'submit',
-      title: formatMessage({
+      label: formatMessage({
         id: `app.components.Button.save`,
       }),
       style: {
@@ -127,6 +164,14 @@ function EditView() {
   return (
     <Wrapper>
       <Header {...headerProps} />
+      {(isTriggering || !isEmpty(triggerResponse)) && (
+        <div className="trigger-wrapper">
+          <TriggerContainer
+            isPending={isTriggering}
+            response={triggerResponse}
+          />
+        </div>
+      )}
       <div className="form-wrapper">
         <div className="form-card">
           <div className="row">

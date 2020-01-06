@@ -193,7 +193,7 @@ const ListView = () => {
             onClick: () => {
               toggleModalCancel();
             },
-            title: formatMessage({
+            label: formatMessage({
               id: `${pluginId}.form.button.cancel`,
             }),
             type: 'button',
@@ -203,7 +203,7 @@ const ListView = () => {
             className: 'button-submit',
             color: 'success',
             onClick: () => submitData(),
-            title: formatMessage({
+            label: formatMessage({
               id: `${pluginId}.form.button.save`,
             }),
             type: 'submit',

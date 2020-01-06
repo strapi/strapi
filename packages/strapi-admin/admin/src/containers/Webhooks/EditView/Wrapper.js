@@ -7,6 +7,27 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
+  .header-title + div {
+    button: first-of-type {
+      margin-right: 20px;
+      position: relative;
+      overflow: initial;
+      &::after {
+        content: '-';
+        width: 1px;
+        height: 20px;
+        background-color: #e9eaeb;
+        position: absolute;
+        top: 5px;
+        right: -20px;
+      }
+      span svg {
+        margin-top: -2px;
+      }
+    }
+  }
+  .trigger-wrapper {
+  }
   .form-wrapper {
     padding-top: 4px;
   }

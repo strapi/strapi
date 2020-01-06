@@ -80,7 +80,6 @@ function ListView() {
   const actions = [
     {
       ...newButtonProps,
-      title: addBtnLabel,
       icon: true,
       style: {
         paddingLeft: 15,

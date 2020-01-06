@@ -8,8 +8,9 @@ import styled from 'styled-components';
 
 const Wrapper = styled.div`
   background-color: #fafafb;
-  padding: 23px 24px 30px 24px;
+  padding: 23px 24px 26px 24px;
   margin-top: 12px;
+  border-radius: 3px;
   ul {
     list-style-type: none;
     padding: 0;

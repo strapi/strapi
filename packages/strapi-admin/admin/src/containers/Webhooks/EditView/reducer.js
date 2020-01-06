@@ -5,12 +5,15 @@ const initialWebhook = {
   name: null,
   url: null,
   headers: [{ key: '', value: '' }],
+  events: [],
 };
 
 const initialState = fromJS({
   initialWebhook: initialWebhook,
   modifiedWebhook: initialWebhook,
   shouldRefetchData: false,
+  triggerResponse: {},
+  isTriggering: false,
 });
 
 const reducer = (state, action) => {
@@ -27,6 +30,8 @@ const reducer = (state, action) => {
         );
 
         set(data, ['headers'], newHeaders);
+      } else {
+        set(data, ['headers'], get(initialWebhook, 'headers'));
       }
 
       return state
@@ -34,12 +39,19 @@ const reducer = (state, action) => {
         .update('modifiedWebhook', () => fromJS(data))
         .update('shouldRefetchData', () => false);
     }
-    case 'ON_CHANGE': {
+    case 'TRIGGER_SUCCEEDED': {
+      return state
+        .update('triggerResponse', () => fromJS(action.response))
+        .update('isTriggering', () => false);
+    }
+    case 'ON_TRIGGER': {
+      return state.update('isTriggering', () => true);
+    }
+    case 'ON_CHANGE':
       return state.updateIn(
         ['modifiedWebhook', ...action.keys],
         () => action.value
       );
-    }
     case 'ADD_NEW_HEADER':
       return state.updateIn(['modifiedWebhook', ...action.keys], arr =>
         arr.push(fromJS({ key: '', value: '' }))

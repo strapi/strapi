@@ -40,7 +40,6 @@ const HeadersInput = ({ onClick, onChange, name, value }) => {
     }
   };
 
-  console.log(value);
   return (
     <Wrapper>
       <ul>
