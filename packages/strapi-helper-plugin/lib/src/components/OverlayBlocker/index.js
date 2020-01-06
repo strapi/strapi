@@ -8,9 +8,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import cn from 'classnames';
-
-import styles from './styles.scss';
+import Container from './Container';
+import Overlay from './Overlay';
 
 const DELAY = 1000;
 
@@ -69,9 +70,9 @@ class OverlayBlocker extends React.Component {
     const { elapsed } = this.state;
 
     let button = (
-      <div className={styles.buttonContainer}>
+      <div className="buttonContainer">
         <a
-          className={cn(styles.primary, 'btn')}
+          className={cn('primary', 'btn')}
           href="https://strapi.io/documentation/configurations/configurations.html#server"
           target="_blank"
           rel="noopener noreferrer"
@@ -83,7 +84,7 @@ class OverlayBlocker extends React.Component {
 
     if (elapsed > 15) {
       button = null;
-      icon = 'fa fa-clock-o';
+      icon = ['far', 'clock'];
       description = 'components.OverlayBlocker.description.serverError';
       title = 'components.OverlayBlocker.title.serverError';
     }
@@ -91,9 +92,9 @@ class OverlayBlocker extends React.Component {
     const content = this.props.children ? (
       this.props.children
     ) : (
-      <div className={styles.container}>
-        <div className={cn(styles.icoContainer, elapsed < 15 && styles.spin)}>
-          <i className={icon} />
+      <Container>
+        <div className={cn('icoContainer', elapsed < 15 && 'spinner')}>
+          <FontAwesomeIcon icon={icon} />
         </div>
         <div>
           <h4>
@@ -104,14 +105,14 @@ class OverlayBlocker extends React.Component {
           </p>
           {button}
         </div>
-      </div>
+      </Container>
     );
 
     if (this.props.isOpen) {
       return ReactDOM.createPortal(
-        <div className={styles.overlay}>
+        <Overlay>
           <div>{content}</div>
-        </div>,
+        </Overlay>,
         this.overlayContainer
       );
     }
@@ -123,7 +124,7 @@ class OverlayBlocker extends React.Component {
 OverlayBlocker.defaultProps = {
   children: null,
   description: 'components.OverlayBlocker.description',
-  icon: 'fa fa-refresh',
+  icon: 'sync-alt',
   isOpen: false,
   title: 'components.OverlayBlocker.title',
 };

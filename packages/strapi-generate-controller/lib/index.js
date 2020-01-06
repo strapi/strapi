@@ -5,7 +5,6 @@
  */
 
 // Node.js core.
-const fs = require('fs');
 const path = require('path');
 
 /**
@@ -13,21 +12,11 @@ const path = require('path');
  */
 
 module.exports = {
-  templatesDirectory: scope => {
-    try {
-      // Try to reach the path. If it fail, throw an error.
-      fs.accessSync(path.resolve(__dirname, '..', 'templates', scope.args.tpl), fs.constants.R_OK | fs.constants.W_OK);
-
-      return path.resolve(__dirname, '..', 'templates', scope.args.tpl);
-    } catch (e) {
-      // Default template is Mongoose
-      return path.resolve(__dirname, '..', 'templates', 'mongoose');
-    }
-  },
+  templatesDirectory: path.resolve(__dirname, '..', 'templates'),
   before: require('./before'),
   targets: {
     ':filePath/:filename': {
-      template: 'controller.template'
-    }
-  }
+      template: 'controller.template',
+    },
+  },
 };

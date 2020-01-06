@@ -24,6 +24,7 @@ import pl from 'react-intl/locale-data/pl';
 import pt from 'react-intl/locale-data/pt';
 import ru from 'react-intl/locale-data/ru';
 import tr from 'react-intl/locale-data/tr';
+import vi from 'react-intl/locale-data/vi';
 import zh from 'react-intl/locale-data/zh';
 
 import trads from './translations';
@@ -43,6 +44,7 @@ const locales = {
   pt,
   ru,
   tr,
+  vi,
   zh,
 };
 const languages = Object.keys(trads);
@@ -62,7 +64,7 @@ const translationMessages = reduce(
 
     return obj;
   },
-  {},
+  {}
 );
 
 export { languages, translationMessages };

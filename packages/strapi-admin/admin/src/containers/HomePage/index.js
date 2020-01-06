@@ -161,7 +161,11 @@ const HomePage = ({ global: { plugins }, history: { push } }) => {
               )}
               <FormattedMessage id={linkProps.id}>
                 {msg => (
-                  <ALink rel="noopener noreferrer" {...linkProps}>
+                  <ALink
+                    rel="noopener noreferrer"
+                    {...linkProps}
+                    style={{ verticalAlign: ' bottom', marginBottom: 5 }}
+                  >
                     {msg}
                   </ALink>
                 )}
@@ -191,7 +195,7 @@ const HomePage = ({ global: { plugins }, history: { push } }) => {
             </Block>
           </div>
 
-          <div className="col-4">
+          <div className="col-md-12 col-lg-4">
             <Block style={{ paddingRight: 30, paddingBottom: 0 }}>
               <FormattedMessage id="HomePage.community">
                 {msg => <h2>{msg}</h2>}

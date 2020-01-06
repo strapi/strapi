@@ -26,7 +26,10 @@ module.exports = () => {
       quiet: true,
       historyApiFallback: {
         index: '/admin/',
+        disableDotRule: true,
       },
+      open: true,
+      openPage: '/admin',
     },
   };
 };

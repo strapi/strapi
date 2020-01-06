@@ -7,6 +7,8 @@ Read the [Migration guide from alpha.26 to beta](migration-guide-alpha.26-to-bet
 ## Beta guides
 
 - [Migration guide from beta.15 to beta.16](migration-guide-beta.15-to-beta.16.md)
+- [Migration guide from beta.16+ to beta.17.4](migration-guide-beta.16-to-beta.17.4.md)
+- [Migration guide from beta.17+ to beta.18](migration-guide-beta.17-to-beta.18.md)
 
 ## Alpha guides
 

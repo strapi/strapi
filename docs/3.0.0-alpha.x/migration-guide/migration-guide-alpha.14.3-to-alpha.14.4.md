@@ -1,12 +1,13 @@
 # Migration guide from alpha.14.3 to alpha.14.4
 
 **Useful links:**
+
 - Changelog: [https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.14.4.0](https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.14.4.0)
 - GitHub diff: [https://github.com/strapi/strapi/compare/v3.0.0-alpha.14.3...v3.0.0-alpha.14.4.0](https://github.com/strapi/strapi/compare/v3.0.0-alpha.14.3...v3.0.0-alpha.14.4.0)
 
 <br>
 
-::: note
+::: tip
 Feel free to [join us on Slack](http://slack.strapi.io) and ask questions about the migration process.
 :::
 
@@ -30,7 +31,7 @@ Run `npm install strapi@3.0.0-alpha.14.4.0 --save` to update your strapi version
 
 ## Update the Admin
 
-::: note
+::: tip
 If you performed updates in the Admin, you will have to manually migrate your changes.
 :::
 
@@ -40,7 +41,7 @@ Delete your old admin folder and replace it with the new one.
 
 ## Update the Plugins
 
-::: note
+::: tip
 If you did a custom update on one of the plugins, you will have to manually migrate your update.
 :::
 
@@ -56,7 +57,7 @@ We update generated API with bookshelf.
 
 In `fetchAll` function replace `if (_.isArray(where.value)) {` with `if (_.isArray(where.value) && where.symbol !== 'IN') {`
 
-::: note
+::: tip
 From this change [https://github.com/strapi/strapi/compare/v3.0.0-alpha.14.3...v3.0.0-alpha.14.4.0#diff-61ba361ed6161efcd5f4e583001cc9c9](https://github.com/strapi/strapi/compare/v3.0.0-alpha.14.3...v3.0.0-alpha.14.4.0#diff-61ba361ed6161efcd5f4e583001cc9c9)
 :::
 
@@ -74,7 +75,7 @@ await Promise.all(
     }
 ```
 
-::: note
+::: tip
 From this change [https://github.com/strapi/strapi/compare/v3.0.0-alpha.14.3...v3.0.0-alpha.14.4.0#diff-c36b911d1bc2922e1d7cf93ae692e054](https://github.com/strapi/strapi/compare/v3.0.0-alpha.14.3...v3.0.0-alpha.14.4.0#diff-c36b911d1bc2922e1d7cf93ae692e054)
 :::
 

@@ -2,15 +2,13 @@
 
 const _ = require('lodash');
 const parseMultipartBody = require('../utils/parse-multipart');
+const contentManagerService = require('../services/ContentManager');
 
 module.exports = {
   /**
    * Returns a list of entities of a content-type matching the query parameters
    */
   async find(ctx) {
-    const contentManagerService =
-      strapi.plugins['content-manager'].services['contentmanager'];
-
     let entities = [];
     if (_.has(ctx.request.query, '_q')) {
       entities = await contentManagerService.search(
@@ -30,11 +28,7 @@ module.exports = {
    * Returns an entity of a content type by id
    */
   async findOne(ctx) {
-    const { source } = ctx.request.query;
-    const contentManagerService =
-      strapi.plugins['content-manager'].services['contentmanager'];
-
-    const entry = await contentManagerService.fetch(ctx.params, source);
+    const entry = await contentManagerService.fetch(ctx.params);
 
     // Entry not found
     if (!entry) {
@@ -48,9 +42,6 @@ module.exports = {
    * Returns a count of entities of a content type matching query parameters
    */
   async count(ctx) {
-    const contentManagerService =
-      strapi.plugins['content-manager'].services['contentmanager'];
-
     let count;
     if (_.has(ctx.request.query, '_q')) {
       count = await contentManagerService.countSearch(
@@ -71,10 +62,6 @@ module.exports = {
    */
   async create(ctx) {
     const { model } = ctx.params;
-    const { source } = ctx.request.query;
-
-    const contentManagerService =
-      strapi.plugins['content-manager'].services['contentmanager'];
 
     try {
       if (ctx.is('multipart')) {
@@ -82,17 +69,15 @@ module.exports = {
         ctx.body = await contentManagerService.create(data, {
           files,
           model,
-          source,
         });
       } else {
         // Create an entry using `queries` system
         ctx.body = await contentManagerService.create(ctx.request.body, {
-          source,
           model,
         });
       }
 
-      strapi.emit('didCreateFirstContentTypeEntry', ctx.params, source);
+      strapi.emit('didCreateFirstContentTypeEntry', ctx.params);
     } catch (error) {
       strapi.log.error(error);
       ctx.badRequest(null, [
@@ -110,9 +95,6 @@ module.exports = {
    */
   async update(ctx) {
     const { model } = ctx.params;
-    const { source } = ctx.request.query;
-    const contentManagerService =
-      strapi.plugins['content-manager'].services['contentmanager'];
 
     try {
       if (ctx.is('multipart')) {
@@ -120,14 +102,13 @@ module.exports = {
         ctx.body = await contentManagerService.edit(ctx.params, data, {
           files,
           model,
-          source,
         });
       } else {
         // Return the last one which is the current model.
         ctx.body = await contentManagerService.edit(
           ctx.params,
           ctx.request.body,
-          { source, model }
+          { model }
         );
       }
     } catch (error) {
@@ -146,22 +127,13 @@ module.exports = {
    * Deletes one entity of a content type matching a query
    */
   async delete(ctx) {
-    const contentManagerService =
-      strapi.plugins['content-manager'].services['contentmanager'];
-
-    ctx.body = await contentManagerService.delete(
-      ctx.params,
-      ctx.request.query
-    );
+    ctx.body = await contentManagerService.delete(ctx.params);
   },
 
   /**
    * Deletes multiple entities of a content type matching a query
    */
   async deleteMany(ctx) {
-    const contentManagerService =
-      strapi.plugins['content-manager'].services['contentmanager'];
-
     ctx.body = await contentManagerService.deleteMany(
       ctx.params,
       ctx.request.query

@@ -111,13 +111,13 @@ module.exports = {
 
 #### Mongoose limitation
 
-Until September 2018, `remove` lifecycle callback [was not supported by Mongoose](https://github.com/Automattic/mongoose/issues/3054). This has been added but `strapi-hook-mongoose` is not adapted yet to this update.
+Until September 2018, `remove` lifecycle callback [was not supported by Mongoose](https://github.com/Automattic/mongoose/issues/3054). This has been added but `mongoose` is not adapted yet to this update.
 
 So, to trigger an url on delete, please add `request.post(strapi.config.currentEnvironment.staticWebsiteBuildURL, entry);` in:
 
 - `remove` action of `api/restaurant/services/Restaurant.js` (triggered by your public API).
 - `delete` action of `plugins/content-manager/services/ContentManager.js` (triggered by the Content Manager).
 
-::: note
+::: tip
 Do not forget to require `axios` at the top of these files.
 :::

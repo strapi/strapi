@@ -6,11 +6,11 @@ const _ = require('lodash');
 const { green, yellow } = require('chalk');
 const strapiAdmin = require('strapi-admin');
 const loadConfigFile = require('../load/load-config-files');
-
+const addSlash = require('../utils/addSlash');
 /**
  * `$ strapi build`
  */
-module.exports = async () => {
+module.exports = async ({ optimization }) => {
   const dir = process.cwd();
   const env = process.env.NODE_ENV || 'development';
 
@@ -18,7 +18,7 @@ module.exports = async () => {
 
   if (!fs.existsSync(envConfigDir)) {
     console.log(
-      `Missing envrionnment config for env: ${green(
+      `Missing environment config for env: ${green(
         env
       )}.\nMake sure the directory ${yellow(
         `./config/environments/${env}`
@@ -39,6 +39,7 @@ module.exports = async () => {
       dir,
       // front end build env is always production for now
       env: 'production',
+      optimize: optimization,
       options: {
         backend: adminBackend,
         publicPath: addSlash(adminPath),
@@ -52,12 +53,3 @@ module.exports = async () => {
       process.exit(1);
     });
 };
-
-function addSlash(path) {
-  if (typeof path !== 'string') throw new Error('admin.path must be a string');
-  if (path === '' || path === '/') return '/';
-
-  if (path[0] != '/') path = '/' + path;
-  if (path[path.length - 1] != '/') path = path + '/';
-  return path;
-}

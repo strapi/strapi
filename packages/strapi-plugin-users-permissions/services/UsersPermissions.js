@@ -100,12 +100,13 @@ module.exports = {
     return await Promise.all(arrayOfPromises);
   },
 
-  getPlugins(plugin, lang = 'en') {
+  getPlugins(lang = 'en') {
     return new Promise(resolve => {
       request(
         {
           uri: `https://marketplace.strapi.io/plugins?lang=${lang}`,
           json: true,
+          timeout: 3000,
           headers: {
             'cache-control': 'max-age=3600',
           },
@@ -389,7 +390,9 @@ module.exports = {
       };
 
       // Retrieve roles
-      const roles = await strapi.query('role', 'users-permissions').find();
+      const roles = await strapi
+        .query('role', 'users-permissions')
+        .find({}, []);
 
       // We have to know the difference to add or remove
       // the permissions entries in the database.

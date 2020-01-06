@@ -6,16 +6,16 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-
-import styles from './styles.scss';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Div from './Div';
 
 function ImgPreviewRemoveIcon(props) {
   const divStyle = props.show ? {} : { display: 'none' };
 
   return (
-    <div className={styles.iconContainer} onClick={props.onClick} style={divStyle}>
-      <i className="fa fa-times" />
-    </div>
+    <Div onClick={props.onClick} style={divStyle}>
+      <FontAwesomeIcon icon="times" />
+    </Div>
   );
 }
 

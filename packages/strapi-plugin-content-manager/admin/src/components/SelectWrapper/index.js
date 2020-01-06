@@ -1,12 +1,13 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { Link } from 'react-router-dom';
-import { isArray, isEmpty } from 'lodash';
+import { Link, useLocation } from 'react-router-dom';
+import { cloneDeep, get, isArray, isEmpty } from 'lodash';
 import { request } from 'strapi-helper-plugin';
-
 import pluginId from '../../pluginId';
-import { useEditView } from '../../contexts/EditView';
+import useDataManager from '../../hooks/useDataManager';
+import useEditView from '../../hooks/useEditView';
 
 import SelectOne from '../SelectOne';
 import SelectMany from '../SelectMany';
@@ -21,103 +22,125 @@ function SelectWrapper({
   relationType,
   targetModel,
   placeholder,
-  plugin,
-  value,
 }) {
+  const { pathname, search } = useLocation();
   const {
     addRelation,
+    modifiedData,
     moveRelation,
     onChange,
-    onRemove,
-    pathname,
-    search,
-  } = useEditView();
+    onRemoveRelation,
+  } = useDataManager();
+  const { isDraggingComponent } = useEditView();
+
+  const value = get(modifiedData, name, null);
   const [state, setState] = useState({
     _q: '',
     _limit: 20,
     _start: 0,
-    source: isEmpty(plugin) ? 'content-manager' : plugin,
   });
   const [options, setOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const abortController = new AbortController();
+  const { signal } = abortController;
   const ref = useRef();
   const startRef = useRef();
   startRef.current = state._start;
 
-  ref.current = async (signal, params = state) => {
-    try {
-      const requestUrl = `/${pluginId}/explorer/${targetModel}`;
+  ref.current = async () => {
+    if (!isDraggingComponent) {
+      try {
+        const params = cloneDeep(state);
+        const requestUrl = `/${pluginId}/explorer/${targetModel}`;
 
-      if (isEmpty(params._q)) {
-        delete params._q;
-      }
+        if (isEmpty(params._q)) {
+          delete params._q;
+        }
 
-      const data = await request(requestUrl, {
-        method: 'GET',
-        params: params,
-        signal,
-      });
-      const formattedData = data.map(obj => {
-        return { value: obj, label: obj[mainField] };
-      });
+        const data = await request(requestUrl, {
+          method: 'GET',
+          params: params,
+          signal,
+        });
 
-      if (!isEmpty(params._q)) {
-        setOptions(formattedData);
+        const formattedData = data.map(obj => {
+          return { value: obj, label: obj[mainField] };
+        });
 
-        return;
-      }
+        if (!isEmpty(params._q)) {
+          setOptions(formattedData);
 
-      setOptions(prevState =>
-        prevState.concat(formattedData).filter((obj, index) => {
-          const objIndex = prevState.findIndex(
-            el => el.value.id === obj.value.id
-          );
+          return;
+        }
 
-          if (objIndex === -1) {
-            return true;
-          }
-          return (
-            prevState.findIndex(el => el.value.id === obj.value.id) === index
-          );
-        })
-      );
-      setIsLoading(false);
-    } catch (err) {
-      if (err.code !== 20) {
-        strapi.notification.error('notification.error');
+        setOptions(prevState =>
+          prevState.concat(formattedData).filter((obj, index) => {
+            const objIndex = prevState.findIndex(
+              el => el.value.id === obj.value.id
+            );
+
+            if (objIndex === -1) {
+              return true;
+            }
+            return (
+              prevState.findIndex(el => el.value.id === obj.value.id) === index
+            );
+          })
+        );
+        setIsLoading(false);
+      } catch (err) {
+        if (err.code !== 20) {
+          strapi.notification.error('notification.error');
+        }
       }
     }
   };
 
   useEffect(() => {
-    const abortController = new AbortController();
-    const { signal } = abortController;
-    ref.current(signal);
+    ref.current();
 
     return () => {
       abortController.abort();
     };
   }, [ref]);
 
-  const onInputChange = inputValue => {
-    setState(prevState => {
-      if (prevState._q === inputValue) {
-        return prevState;
-      }
+  useEffect(() => {
+    if (state._q !== '') {
+      ref.current();
+    }
 
-      return { ...prevState, _q: inputValue };
-    });
+    return () => {
+      abortController.abort();
+    };
+  }, [state._q]);
 
-    ref.current();
+  useEffect(() => {
+    if (state._start !== 0) {
+      ref.current();
+    }
+
+    return () => {
+      abortController.abort();
+    };
+  }, [state._start]);
+
+  const onInputChange = (inputValue, { action }) => {
+    if (action === 'input-change') {
+      setState(prevState => {
+        if (prevState._q === inputValue) {
+          return prevState;
+        }
+        return { ...prevState, _q: inputValue };
+      });
+    }
 
     return inputValue;
   };
 
   const onMenuScrollToBottom = () => {
     setState(prevState => ({ ...prevState, _start: prevState._start + 1 }));
-
-    ref.current();
   };
+
   const isSingle = [
     'oneWay',
     'oneToOne',
@@ -177,7 +200,7 @@ function SelectWrapper({
           setState(prevState => ({ ...prevState, _q: '', _start: 0 }));
         }}
         onMenuScrollToBottom={onMenuScrollToBottom}
-        onRemove={onRemove}
+        onRemove={onRemoveRelation}
         placeholder={
           isEmpty(placeholder) ? (
             <FormattedMessage id={`${pluginId}.containers.Edit.addAnItem`} />
@@ -199,7 +222,6 @@ SelectWrapper.defaultProps = {
   label: '',
   plugin: '',
   placeholder: '',
-  value: null,
 };
 
 SelectWrapper.propTypes = {
@@ -212,7 +234,6 @@ SelectWrapper.propTypes = {
   plugin: PropTypes.string,
   relationType: PropTypes.string.isRequired,
   targetModel: PropTypes.string.isRequired,
-  value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
 };
 
 export default memo(SelectWrapper);

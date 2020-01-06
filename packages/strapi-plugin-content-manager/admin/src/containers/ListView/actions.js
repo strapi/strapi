@@ -42,12 +42,11 @@ export function onChangeBulkSelectall() {
   };
 }
 
-export function onDeleteData(id, uid, source, emitEvent) {
+export function onDeleteData(id, slug, emitEvent) {
   return {
     type: ON_DELETE_DATA,
     id,
-    uid,
-    source,
+    slug,
     emitEvent,
   };
 }

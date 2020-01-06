@@ -16,6 +16,7 @@
   "Username": "Nom d'utilisateur",
   "Users": "Utilisateurs",
   "Users & Permissions": "Utilisateurs et autorisations",
+
   "app.components.BlockLink.code": "Apps d'exemple",
   "app.components.BlockLink.code.content": "Apprenez en testant les projets développés par la communauté.",
   "app.components.BlockLink.documentation": "Voir la documentation",
@@ -104,9 +105,13 @@
   "app.components.listPlugins.title.plural": "{number} sont disponibles",
   "app.components.listPlugins.title.singular": "{number} est disponible",
   "app.components.listPluginsPage.deletePlugin.error": "Une erreur est survenue pendant la désintallation",
+
+  "app.links.configure-view": "Configurez la vue",
+
   "app.utils.SelectOption.defaultMessage": " ",
   "app.utils.defaultMessage": " ",
   "app.utils.placeholder.defaultMessage": " ",
+
   "components.AutoReloadBlocker.description": "Démarrez Strapi avec l'une des commandes suivantes:",
   "components.AutoReloadBlocker.header": "L'autoReload doit être activé pour ce plugin.",
   "components.ErrorBoundary.title": "Une erreur est survenue...",
@@ -212,5 +217,7 @@
   "Auth.link.forgot-password": "Mot de passe oublié ?",
   "Auth.link.ready": "Prêt à vous connecter ?",
   "app.containers.App.notification.error.init": "Une erreur est survenue en requêtant l'API",
-  "components.Input.error.password.noMatch": "Le mot de passe ne correspond pas"
+  "components.Input.error.password.noMatch": "Le mot de passe ne correspond pas",
+  "form.button.done": "Terminer",
+  "notification.form.error.fields": "Le formulaire contient des erreurs"
 }

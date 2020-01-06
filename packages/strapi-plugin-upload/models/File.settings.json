@@ -32,7 +32,7 @@
       "required": true
     },
     "size": {
-      "type": "string",
+      "type": "decimal",
       "configurable": false,
       "required": true
     },
@@ -46,8 +46,8 @@
       "configurable": false,
       "required": true
     },
-    "public_id": {
-      "type": "string",
+    "provider_metadata": {
+      "type": "json",
       "configurable": false
     },
     "related": {

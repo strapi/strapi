@@ -47,7 +47,7 @@ const Input = ({
         {content => (
           <span
             style={{ color: '#0097f7', cursor: 'pointer' }}
-            onClick={e => handleClick(e, 'policy')}
+            onClick={e => handleClick(e, 'privacy')}
           >
             {content}
           </span>
@@ -59,12 +59,14 @@ const Input = ({
     inputLabel = () => <CustomLabel id={label.id} values={{ terms, policy }} />;
   }
 
+  const inputErrors = get(errors, name, null);
+
   return (
     <Inputs
       autoFocus={autoFocus}
       customBootstrapClass={customBootstrapClass || 'col-12'}
       didCheckErrors={didCheckErrors}
-      errors={get(errors, name, [])}
+      errors={inputErrors ? [inputErrors] : []}
       label={inputLabel}
       name={name}
       noErrorsDescription={noErrorsDescription}

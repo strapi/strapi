@@ -3,87 +3,103 @@
     {
       "method": "GET",
       "path": "/connections",
-      "handler": "ContentTypeBuilder.getConnections",
+      "handler": "Connections.getConnections",
       "config": {
         "policies": []
       }
     },
     {
       "method": "GET",
-      "path": "/models",
-      "handler": "ContentTypeBuilder.getModels",
+      "path": "/content-types",
+      "handler": "ContentTypes.getContentTypes",
       "config": {
         "policies": []
       }
     },
     {
       "method": "GET",
-      "path": "/models/:model",
-      "handler": "ContentTypeBuilder.getModel",
+      "path": "/content-types/:uid",
+      "handler": "ContentTypes.getContentType",
       "config": {
         "policies": []
       }
     },
     {
       "method": "POST",
-      "path": "/models",
-      "handler": "ContentTypeBuilder.createModel",
+      "path": "/content-types",
+      "handler": "ContentTypes.createContentType",
       "config": {
         "policies": []
       }
     },
     {
       "method": "PUT",
-      "path": "/models/:model",
-      "handler": "ContentTypeBuilder.updateModel",
+      "path": "/content-types/:uid",
+      "handler": "ContentTypes.updateContentType",
       "config": {
         "policies": []
       }
     },
     {
       "method": "DELETE",
-      "path": "/models/:model",
-      "handler": "ContentTypeBuilder.deleteModel",
+      "path": "/content-types/:uid",
+      "handler": "ContentTypes.deleteContentType",
       "config": {
         "policies": []
       }
     },
     {
       "method": "GET",
-      "path": "/groups",
-      "handler": "Groups.getGroups",
+      "path": "/components",
+      "handler": "Components.getComponents",
       "config": {
         "policies": []
       }
     },
     {
       "method": "GET",
-      "path": "/groups/:uid",
-      "handler": "Groups.getGroup",
+      "path": "/components/:uid",
+      "handler": "Components.getComponent",
       "config": {
         "policies": []
       }
     },
     {
       "method": "POST",
-      "path": "/groups",
-      "handler": "Groups.createGroup",
+      "path": "/components",
+      "handler": "Components.createComponent",
       "config": {
         "policies": []
       }
     },
     {
       "method": "PUT",
-      "path": "/groups/:uid",
-      "handler": "Groups.updateGroup",
+      "path": "/components/:uid",
+      "handler": "Components.updateComponent",
       "config": {
         "policies": []
       }
     },
     {
       "method": "DELETE",
-      "path": "/groups/:uid",
-      "handler": "Groups.deleteGroup",
+      "path": "/components/:uid",
+      "handler": "Components.deleteComponent",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/component-categories/:name",
+      "handler": "ComponentCategories.editCategory",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/component-categories/:name",
+      "handler": "ComponentCategories.deleteCategory",
       "config": {
         "policies": []
       }

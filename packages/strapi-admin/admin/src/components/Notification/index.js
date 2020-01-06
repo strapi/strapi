@@ -8,54 +8,75 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { isObject } from 'lodash';
-
-import styles from './styles.scss';
-
-class Notification extends React.Component { // eslint-disable-line react/prefer-stateless-function
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Li, { GlobalNotification } from './Li';
+class Notification extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   handleCloseClicked = () => {
     this.props.onHideNotification(this.props.notification.id);
   };
 
   options = {
     success: {
-      icon: 'fa-check',
+      icon: 'check',
       title: 'Success',
       class: 'notificationSuccess',
     },
     warning: {
-      icon: 'fa-exclamation',
+      icon: 'exclamation',
       title: 'Warning',
       class: 'notificationWarning',
     },
     error: {
-      icon: 'fa-exclamation',
+      icon: 'exclamation',
       title: 'Error',
       class: 'notificationError',
     },
     info: {
-      icon: 'fa-info',
+      icon: 'info',
       title: 'Info',
       class: 'notificationInfo',
     },
   };
 
   render() {
-    const options = this.options[this.props.notification.status] || this.options.info;
-    const { notification: { message } } = this.props;
-    const content = isObject(message) && message.id ?
-      <FormattedMessage id={message.id} defaultMessage={message.id} values={message.values} />
-      : <FormattedMessage id={message} defaultMessage={message} />;
+    const options =
+      this.options[this.props.notification.status] || this.options.info;
+    const {
+      notification: { message },
+    } = this.props;
+    const content =
+      isObject(message) && message.id ? (
+        <FormattedMessage
+          id={message.id}
+          defaultMessage={message.id}
+          values={message.values}
+        />
+      ) : (
+        <FormattedMessage id={message} defaultMessage={message} />
+      );
 
     return (
-      <li key={this.props.notification.id} className={`${styles.notification} ${styles[options.class]}`} onClick={this.handleCloseClicked}>
-        <i className={`fa ${options.icon} ${styles.notificationIcon}`} />
-        <div className={styles.notificationContent}>
-          <p className={styles.notificationTitle}>
-            {content}
-          </p>
-        </div>
-        <i className={`fa fa-close ${styles.notificationClose}`} onClick={this.handleCloseClicked} />
-      </li>
+      <>
+        <GlobalNotification />
+        <Li
+          key={this.props.notification.id}
+          className={`${options.class}`}
+          onClick={this.handleCloseClicked}
+        >
+          <div className={`notificationIcon`}>
+            <div>
+              <FontAwesomeIcon icon={options.icon} />
+            </div>
+          </div>
+          <div className="notificationContent">
+            <p className="notificationTitle">{content}</p>
+          </div>
+          <div className={`notificationClose`}>
+            <FontAwesomeIcon icon="times" onClick={this.handleCloseClicked} />
+          </div>
+        </Li>
+      </>
     );
   }
 }

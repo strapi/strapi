@@ -5,13 +5,10 @@
  */
 
 import React from 'react';
-import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { isObject } from 'lodash';
-import cn from 'classnames';
-
-import styles from './styles.scss';
+import StyledLink from './StyledLink';
 
 function LiLink(props) {
   let content;
@@ -28,15 +25,15 @@ function LiLink(props) {
   let icon = <i className={`fa ${props.icon}`} />;
 
   if (props.icon === 'layout') {
-    icon = <i className={cn(styles.layout)} />;
+    icon = <i className="layout" />;
   }
 
   return (
     <li>
-      <Link to={props.url} className={cn(styles.navLink)}>
+      <StyledLink to={props.url} onClick={props.onClick}>
         {icon}
         {content}
-      </Link>
+      </StyledLink>
     </li>
   );
 }
@@ -45,6 +42,7 @@ LiLink.defaultProps = {
   children: '',
   icon: '',
   message: '',
+  onClick: () => {},
   url: '',
 };
 
@@ -59,6 +57,7 @@ LiLink.propTypes = {
       params: PropTypes.object,
     }),
   ]),
+  onClick: PropTypes.func,
   url: PropTypes.string,
 };
 

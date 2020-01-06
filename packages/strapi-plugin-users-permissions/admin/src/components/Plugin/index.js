@@ -7,16 +7,27 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Collapse } from 'reactstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { capitalize, get, isEmpty, map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-
+import { EditPageContext } from '../../contexts/EditPage';
 import Controller from '../Controller';
 
-import styles from './styles.scss';
+import {
+  Banner,
+  Chevron,
+  ControllerWrapper,
+  Description,
+  Icon,
+  Name,
+  Wrapper,
+} from './Components';
 
 class Plugin extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = { collapse: false };
+
+  static contextType = EditPageContext;
 
   componentDidMount() {
     // Open the application's permissions section if there are APIs
@@ -61,17 +72,15 @@ class Plugin extends React.Component {
     }
 
     return (
-      <div className={styles.plugin} style={divStyle}>
-        <div className={styles.banner} onClick={this.handleClick}>
+      <Wrapper style={divStyle}>
+        <Banner onClick={this.handleClick}>
           <div>
             {this.props.name !== 'application' && (
-              <div className={styles.iconContainer}>
-                {icon && <img src={icon} alt="icon" />}
-              </div>
+              <Icon>{icon && <img src={icon} alt="icon" />}</Icon>
             )}
-            <div className={styles.name}>{this.props.name}</div>
+            <Name>{this.props.name}</Name>
             &nbsp;—&nbsp;
-            <div className={styles.description}>
+            <Description>
               {this.props.name === 'application' ? (
                 <FormattedMessage id="users-permissions.Plugin.permissions.application.description" />
               ) : (
@@ -80,19 +89,21 @@ class Plugin extends React.Component {
                   values={{ name: capitalize(this.props.name) }}
                 />
               )}
-            </div>
+            </Description>
+            {emptyApplication && (
+              <Chevron>
+                {this.state.collapse ? (
+                  <FontAwesomeIcon icon="chevron-up" />
+                ) : (
+                  <FontAwesomeIcon icon="chevron-down" />
+                )}
+              </Chevron>
+            )}
           </div>
-          {emptyApplication && (
-            <div
-              className={
-                this.state.collapse ? styles.chevronUp : styles.chevronDown
-              }
-            ></div>
-          )}
-        </div>
+        </Banner>
         <Collapse isOpen={this.state.collapse}>
           <div />
-          <div className={styles.controllerContainer}>
+          <ControllerWrapper>
             {map(
               get(this.props.plugin, 'controllers'),
               (controllerActions, key) => (
@@ -106,17 +117,12 @@ class Plugin extends React.Component {
                 />
               )
             )}
-          </div>
+          </ControllerWrapper>
         </Collapse>
-      </div>
+      </Wrapper>
     );
   }
 }
-
-Plugin.contextTypes = {
-  plugins: PropTypes.object.isRequired,
-  resetShouldDisplayPoliciesHint: PropTypes.func.isRequired,
-};
 
 Plugin.defaultProps = {
   name: '',

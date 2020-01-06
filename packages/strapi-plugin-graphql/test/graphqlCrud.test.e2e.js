@@ -8,27 +8,17 @@ let graphqlQuery;
 let modelsUtils;
 
 const postModel = {
-  attributes: [
-    {
-      name: 'name',
-      params: {
-        multiple: false,
-        type: 'richtext',
-      },
+  attributes: {
+    name: {
+      type: 'richtext',
     },
-    {
-      name: 'bigint',
-      params: {
-        type: 'biginteger',
-      },
+    bigint: {
+      type: 'biginteger',
     },
-    {
-      name: 'nullable',
-      params: {
-        type: 'string',
-      },
+    nullable: {
+      type: 'string',
     },
-  ],
+  },
   connection: 'default',
   name: 'post',
   description: '',
@@ -50,10 +40,10 @@ describe('Test Graphql API End to End', () => {
 
     modelsUtils = createModelsUtils({ rq });
 
-    await modelsUtils.createModels([postModel]);
+    await modelsUtils.createContentTypes([postModel]);
   }, 60000);
 
-  afterAll(() => modelsUtils.deleteModels(['post']), 60000);
+  afterAll(() => modelsUtils.deleteContentTypes(['post']), 60000);
 
   describe('Test CRUD', () => {
     const postsPayload = [

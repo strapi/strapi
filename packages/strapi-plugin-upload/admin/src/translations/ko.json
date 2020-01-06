@@ -21,10 +21,13 @@
   "PluginInputFile.link": "선택",
   "PluginInputFile.loading": "파일을 업로드합니다.",
   "PluginInputFile.text": "업로드 할 파일을 끌어 넣거나 {link} 하세요",
+  "Upload.status.empty": "파일이 비어있습니다.",
+  "Upload.status.sizeLimit": "{file}이 (가) 구성된 제한 크기보다 큽니다.",
+  "Upload.status.disabled" : "파일 업로드가 사용 중지되었습니다.",
   "notification.config.success": "설정을 업데이트했습니다.",
   "notification.delete.success": "파일을 삭제했습니다.",
   "notification.dropFile.success": "파일을 업로드했습니다.",
   "notification.dropFiles.success": "{number}개의 파일을 업로드 했습니다.",
-  "Upload.status.sizeLimit": "{file}이 (가) 구성된 제한 크기보다 큽니다.",
-  "Upload.status.disabled" : "파일 업로드가 사용 중지되었습니다."
+  "plugin.description.long": "멀티미디어 파일 관리.",
+  "plugin.description.short": "멀티미디어 파일 관리."
 }

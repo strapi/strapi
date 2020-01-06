@@ -130,7 +130,7 @@ const schemaBuilder = {
 
   generateSchema: function() {
     // Generate type definition and query/mutation for models.
-    let shadowCRUD = { definition: '', query: '', mutation: '', resolver: '' };
+    let shadowCRUD = { definition: '', query: '', mutation: '', resolvers: {} };
 
     // build defaults schemas if shadowCRUD is enabled
     if (strapi.plugins.graphql.config.shadowCRUD !== false) {
@@ -143,7 +143,7 @@ const schemaBuilder = {
           definition,
           query,
           mutation,
-          resolver,
+          resolvers,
         } = Resolvers.buildShadowCRUD(strapi.plugins[plugin].models, plugin);
 
         // We cannot put this in the merge because it's a string.
@@ -151,28 +151,23 @@ const schemaBuilder = {
 
         return _.merge(acc, {
           query,
-          resolver,
+          resolvers,
           mutation,
         });
       }, modelCruds);
     }
 
-    let groups = Object.keys(strapi.groups)
-      .map(key =>
-        Resolvers.buildModel(strapi.groups[key], key, {
-          plugin: null,
-          isGroup: true,
-        })
-      )
-      .reduce(
-        (acc, group) => {
-          return {
-            definition: acc.definition + group.definition,
-            resolver: _.merge(acc.resolver, group.resolver),
-          };
-        },
-        { definition: '', resolver: {} }
-      );
+    const componentsSchema = {
+      definition: '',
+      resolvers: {},
+    };
+
+    Object.keys(strapi.components).forEach(key =>
+      Resolvers.buildModel(strapi.components[key], {
+        isComponent: true,
+        schema: componentsSchema,
+      })
+    );
 
     // Extract custom definition, query or resolver.
     const {
@@ -192,8 +187,8 @@ const schemaBuilder = {
     const resolvers =
       _.omitBy(
         _.merge(
-          shadowCRUD.resolver,
-          groups.resolver,
+          shadowCRUD.resolvers,
+          componentsSchema.resolvers,
           resolver,
           polymorphicResolver
         ),
@@ -202,6 +197,10 @@ const schemaBuilder = {
 
     // Transform object to only contain function.
     Object.keys(resolvers).reduce((acc, type) => {
+      if (graphql.isScalarType(acc[type])) {
+        return acc;
+      }
+
       return Object.keys(acc[type]).reduce((acc, resolverName) => {
         const resolverObj = acc[type][resolverName];
         // Disabled this query.
@@ -232,7 +231,7 @@ const schemaBuilder = {
               [name, action] = resolverObj.resolver.split('.');
             } else if (
               _.has(resolverObj, ['resolver', 'handler']) &&
-              _.isString(resolverObj.handler)
+              _.isString(resolverObj.resolver.handler)
             ) {
               [name, action] = resolverObj.resolver.handler.split('.');
             } else {
@@ -251,7 +250,7 @@ const schemaBuilder = {
             break;
           }
           case 'Query':
-          default:
+          default: {
             acc[type][resolverName] = Query.composeQueryResolver({
               _schema: strapi.plugins.graphql.config._schema.graphql,
               plugin,
@@ -259,6 +258,7 @@ const schemaBuilder = {
               isSingular: 'force', // Avoid singular/pluralize and force query name.
             });
             break;
+          }
         }
 
         return acc;
@@ -274,7 +274,7 @@ const schemaBuilder = {
     let typeDefs = `
       ${definition}
       ${shadowCRUD.definition}
-      ${groups.definition}
+      ${componentsSchema.definition}
       type Query {${shadowCRUD.query &&
         this.formatGQL(
           shadowCRUD.query,

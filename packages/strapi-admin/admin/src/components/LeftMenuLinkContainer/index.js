@@ -10,8 +10,7 @@ import { FormattedMessage } from 'react-intl';
 import { get, snakeCase, isEmpty, map, sortBy } from 'lodash';
 
 import LeftMenuLink from '../LeftMenuLink';
-
-import styles from './styles.scss';
+import Wrapper from './Wrapper';
 import messages from './messages.json';
 
 function LeftMenuLinkContainer({ plugins, ...rest }) {
@@ -25,7 +24,6 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
             section.links
               .filter(link => link.isDisplayed !== false)
               .map(link => {
-                link.source = link.source || current;
                 link.plugin = !isEmpty(plugins[link.plugin])
                   ? link.plugin
                   : plugins[current].id;
@@ -45,17 +43,16 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
 
     return (
       <div key={j}>
-        <p className={styles.title}>{pluginsSections[current].name}</p>
-        <ul className={styles.list}>
+        <p className="title">{pluginsSections[current].name}</p>
+        <ul className="list  models-list">
           {sortBy(contentTypes, 'label').map((link, i) => (
             <LeftMenuLink
               {...rest}
               key={`${i}-${link.label}`}
-              icon={link.icon || 'caret-right'}
+              icon={link.icon || 'circle'}
               label={link.label}
               destination={`/plugins/${link.plugin}/${link.destination ||
                 link.uid}`}
-              source={link.source}
             />
           ))}
         </ul>
@@ -66,7 +63,7 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
   // Check if the plugins list is empty or not and display plugins by name
   const pluginsLinks = !isEmpty(plugins) ? (
     map(sortBy(plugins, 'name'), plugin => {
-      if (plugin.id !== 'email' && plugin.id !== 'settings-manager') {
+      if (plugin.id !== 'email' && plugin.id !== 'content-manager') {
         const pluginSuffixUrl = plugin.suffixUrl
           ? plugin.suffixUrl(plugins)
           : '';
@@ -89,12 +86,11 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
       }
     })
   ) : (
-    <li key="emptyList" className={styles.noPluginsInstalled}>
+    <li key="emptyList" className="noPluginsInstalled">
       <FormattedMessage {...messages.noPluginsInstalled} key="noPlugins" />.
     </li>
   );
 
-  const hasSettingsManager = get(plugins, 'settings-manager', null);
   const staticLinks = [
     {
       icon: 'list',
@@ -109,33 +105,25 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
   ];
 
   return (
-    <div className={styles.leftMenuLinkContainer}>
+    <Wrapper>
       {linkSections}
       <div>
-        <p className={styles.title}>
+        <p className="title">
           <FormattedMessage {...messages.plugins} />
         </p>
-        <ul className={styles.list}>{pluginsLinks}</ul>
+        <ul className="list">{pluginsLinks}</ul>
       </div>
       <div>
-        <p className={styles.title}>
+        <p className="title">
           <FormattedMessage {...messages.general} />
         </p>
-        <ul className={styles.list}>
+        <ul className="list">
           {staticLinks.map(link => (
             <LeftMenuLink {...rest} key={link.destination} {...link} />
           ))}
-          {hasSettingsManager && (
-            <LeftMenuLink
-              {...rest}
-              icon="gear"
-              label={messages.configuration.id}
-              destination="/plugins/settings-manager"
-            />
-          )}
         </ul>
       </div>
-    </div>
+    </Wrapper>
   );
 }
 

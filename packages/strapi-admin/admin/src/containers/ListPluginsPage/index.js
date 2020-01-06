@@ -11,11 +11,9 @@ import { Helmet } from 'react-helmet';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
-
-import { PluginHeader, LoadingIndicatorPage } from 'strapi-helper-plugin';
-
+import { LoadingIndicatorPage } from 'strapi-helper-plugin';
+import { Header } from '@buffetjs/custom';
 import ListPlugins from '../../components/ListPlugins';
-
 import injectSaga from '../../utils/injectSaga';
 import injectReducer from '../../utils/injectReducer';
 import Wrapper from './Wrapper';
@@ -34,16 +32,15 @@ import reducer from './reducer';
 import saga from './saga';
 
 export class ListPluginsPage extends React.Component {
-  // eslint-disable-line react/prefer-stateless-function
-  getChildContext = () => ({
-    currentEnvironment: this.props.global.currentEnvironment,
-  });
-
   componentDidMount() {
     this.props.getPlugins();
   }
 
   render() {
+    const {
+      intl: { formatMessage },
+    } = this.props;
+
     if (this.props.isLoading) {
       return <LoadingIndicatorPage />;
     }
@@ -62,13 +59,15 @@ export class ListPluginsPage extends React.Component {
           )}
         </FormattedMessage>
         <Wrapper className="container-fluid">
-          <PluginHeader
+          <Header
             title={{
-              id: 'app.components.ListPluginsPage.title',
+              label: formatMessage({
+                id: 'app.components.ListPluginsPage.title',
+              }),
             }}
-            description={{
+            content={formatMessage({
               id: 'app.components.ListPluginsPage.description',
-            }}
+            })}
             actions={[]}
           />
           <ListPlugins
@@ -84,18 +83,15 @@ export class ListPluginsPage extends React.Component {
   }
 }
 
-ListPluginsPage.childContextTypes = {
-  currentEnvironment: PropTypes.string.isRequired,
-};
-
-ListPluginsPage.contextTypes = {};
-
 ListPluginsPage.propTypes = {
   global: PropTypes.shape({
     currentEnvironment: PropTypes.string.isRequired,
   }),
   getPlugins: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
+  intl: PropTypes.shape({
+    formatMessage: PropTypes.func.isRequired,
+  }).isRequired,
   isLoading: PropTypes.bool.isRequired,
   onDeletePluginClick: PropTypes.func.isRequired,
   onDeletePluginConfirm: PropTypes.func.isRequired,

@@ -15,7 +15,7 @@ await strapi.plugins['email'].services.email.send({
   replyTo: 'no-reply@strapi.io',
   subject: 'Use strapi email provider successfully',
   text: 'Hello world!',
-  html: 'Hello world!'
+  html: 'Hello world!',
 });
 ```
 
@@ -31,7 +31,7 @@ To install a new provider run:
 $ npm install strapi-provider-email-sendgrid@alpha --save
 ```
 
-::: note
+::: tip
 If the provider is not in the mono repo, you probably not need `@alpha` depending if the creator published it with this tag or not.
 :::
 

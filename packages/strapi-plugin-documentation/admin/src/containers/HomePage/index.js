@@ -11,24 +11,23 @@ import { injectIntl } from 'react-intl';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { bindActionCreators, compose } from 'redux';
 import { get, isEmpty } from 'lodash';
-import cn from 'classnames';
-
-// Components
+import { Header } from '@buffetjs/custom';
 import {
   auth,
-  PluginHeader,
   PopUpWarning,
   LoadingIndicatorPage,
   InputsIndex as Input,
+  GlobalContext,
 } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
+import getTrad from '../../utils/getTrad';
 
 import Block from '../../components/Block';
 import Row from '../../components/Row';
 
 import openWithNewTab from '../../utils/openWithNewTab';
-
+import { ContainerFluid, StyledRow, VersionWrapper } from './components';
 // Actions
 import {
   getDocInfos,
@@ -40,14 +39,12 @@ import {
 } from './actions';
 // Selectors
 import selectHomePage from './selectors';
-// Styles
-import styles from './styles.scss';
 import reducer from './reducer';
 import saga from './saga';
 
-const makeTranslation = txt => `${pluginId}.containers.HomePage.${txt}`;
-
 export class HomePage extends React.Component {
+  static contextType = GlobalContext;
+
   componentDidMount() {
     this.props.getDocInfos();
   }
@@ -61,22 +58,29 @@ export class HomePage extends React.Component {
   getPluginHeaderActions = () => {
     return [
       {
-        label: makeTranslation('Button.open'),
-        className: styles.buttonOutline,
+        color: 'none',
+        label: this.context.formatMessage({
+          id: getTrad('containers.HomePage.Button.open'),
+        }),
+        className: 'buttonOutline',
         onClick: this.openCurrentDocumentation,
         type: 'button',
+        key: 'button-open',
       },
       {
-        label: makeTranslation('Button.update'),
-        kind: 'primary',
+        label: this.context.formatMessage({
+          id: getTrad('containers.HomePage.Button.update'),
+        }),
+        color: 'success',
         onClick: () => {},
         type: 'submit',
+        key: 'button-submit',
       },
     ];
   };
 
   handleCopy = () => {
-    strapi.notification.info(makeTranslation('copied'));
+    strapi.notification.info(getTrad('containers.HomePage.copied'));
   };
 
   openCurrentDocumentation = () => {
@@ -139,32 +143,39 @@ export class HomePage extends React.Component {
       onSubmit,
       versionToDelete,
     } = this.props;
+    const { formatMessage } = this.context;
 
     if (isLoading) {
       return <LoadingIndicatorPage />;
     }
 
     return (
-      <div className={cn('container-fluid', styles.containerFluid)}>
+      <ContainerFluid className="container-fluid">
         <PopUpWarning
           isOpen={!isEmpty(versionToDelete)}
           toggleModal={this.toggleModal}
           content={{
             title: 'components.popUpWarning.title',
-            message: makeTranslation('PopUpWarning.message'),
+            message: getTrad('containers.HomePage.PopUpWarning.message'),
             cancel: 'app.components.Button.cancel',
-            confirm: makeTranslation('PopUpWarning.confirm'),
+            confirm: getTrad('containers.HomePage.PopUpWarning.confirm'),
           }}
           popUpWarningType="danger"
           onConfirm={onConfirmDeleteDoc}
         />
         <form onSubmit={onSubmit}>
-          <PluginHeader
+          <Header
             actions={this.getPluginHeaderActions()}
-            title={{ id: makeTranslation('PluginHeader.title') }}
-            description={{ id: makeTranslation('PluginHeader.description') }}
+            title={{
+              label: formatMessage({
+                id: getTrad('containers.HomePage.PluginHeader.title'),
+              }),
+            }}
+            content={formatMessage({
+              id: getTrad('containers.HomePage.PluginHeader.description'),
+            })}
           />
-          <div className={cn('row', styles.container)}>
+          <StyledRow className="row">
             <Block>
               <CopyToClipboard text={auth.getToken()} onCopy={this.handleCopy}>
                 <div className="row" style={{ zIndex: '99' }}>
@@ -175,24 +186,26 @@ export class HomePage extends React.Component {
                     value={auth.getToken()}
                     type="string"
                     onChange={() => {}}
-                    label={{ id: makeTranslation('form.jwtToken') }}
+                    label={{ id: getTrad('containers.HomePage.form.jwtToken') }}
                     inputDescription={{
-                      id: makeTranslation('form.jwtToken.description'),
+                      id: getTrad(
+                        'containers.HomePage.form.jwtToken.description'
+                      ),
                     }}
                   />
                 </div>
               </CopyToClipboard>
             </Block>
             <Block>{form.map(this.renderForm)}</Block>
-            <Block title={makeTranslation('Block.title')}>
-              <div className={styles.wrapper}>
+            <Block title={getTrad('containers.HomePage.Block.title')}>
+              <VersionWrapper>
                 <Row isHeader />
                 {docVersions.map(this.renderRow)}
-              </div>
+              </VersionWrapper>
             </Block>
-          </div>
+          </StyledRow>
         </form>
-      </div>
+      </ContainerFluid>
     );
   }
 }
@@ -238,7 +251,7 @@ function mapDispatchToProps(dispatch) {
       onSubmit,
       onUpdateDoc,
     },
-    dispatch,
+    dispatch
   );
 }
 
@@ -246,7 +259,7 @@ const mapStateToProps = selectHomePage();
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 const withReducer = strapi.injectReducer({
   key: 'homePage',
@@ -258,5 +271,5 @@ const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
+  withConnect
 )(injectIntl(HomePage));

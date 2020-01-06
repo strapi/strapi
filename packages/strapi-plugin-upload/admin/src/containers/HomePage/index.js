@@ -10,16 +10,17 @@ import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import { isEmpty } from 'lodash';
-
+import { Header } from '@buffetjs/custom';
 import {
   getQueryParameters,
   ContainerFluid,
   InputSearch,
   PageFooter,
-  PluginHeader,
+  GlobalContext,
 } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
+import { HomePageContextProvider } from '../../contexts/HomePage';
 
 // Plugin's component
 import EntriesNumber from '../../components/EntriesNumber';
@@ -40,9 +41,7 @@ import reducer from './reducer';
 import saga from './saga';
 
 export class HomePage extends React.Component {
-  getChildContext = () => ({
-    deleteData: this.props.deleteData,
-  });
+  static contextType = GlobalContext;
 
   UNSAFE_componentWillMount() {
     if (!isEmpty(this.props.location.search)) {
@@ -105,33 +104,43 @@ export class HomePage extends React.Component {
       name="search"
       onChange={this.props.onSearch}
       placeholder="upload.HomePage.InputSearch.placeholder"
-      style={{ marginTop: '-10px' }}
+      style={{ marginTop: '-11px' }}
       value={this.props.search}
     />
   );
 
   render() {
+    const { formatMessage } = this.context;
+
     return (
-      <ContainerFluid>
-        <Wrapper>
-          <PluginHeader
-            title={{
-              id: 'upload.HomePage.title',
-            }}
-            description={{
-              id: 'upload.HomePage.description',
-            }}
-            overrideRendering={this.renderInputSearch}
+      <HomePageContextProvider deleteData={this.props.deleteData}>
+        <ContainerFluid className="container-fluid">
+          <Wrapper>
+            <Header
+              actions={[
+                {
+                  Component: this.renderInputSearch,
+                  key: 'input-search',
+                },
+              ]}
+              title={{
+                label: formatMessage({
+                  id: 'upload.HomePage.title',
+                }),
+              }}
+              content={formatMessage({
+                id: 'upload.HomePage.description',
+              })}
+            />
+          </Wrapper>
+          <PluginInputFile
+            name="files"
+            onDrop={this.props.onDrop}
+            showLoader={this.props.uploadFilesLoading}
           />
-        </Wrapper>
-        <PluginInputFile
-          name="files"
-          onDrop={this.props.onDrop}
-          showLoader={this.props.uploadFilesLoading}
-        />
-        <EntriesWrapper>
-          <div>
-            {/* NOTE: Prepare for bulk actions}
+          <EntriesWrapper>
+            <div>
+              {/* NOTE: Prepare for bulk actions}
               <InputSelect
               name="bulkAction"
               onChange={() => console.log('change')}
@@ -139,34 +148,27 @@ export class HomePage extends React.Component {
               style={{ minWidth: '200px', height: '32px', marginTop: '-8px' }}
               />
             */}
-          </div>
-          <EntriesNumber number={this.props.entriesNumber} />
-        </EntriesWrapper>
-        <List
-          data={this.props.uploadedFiles}
-          changeSort={this.changeSort}
-          sort={this.props.params._sort}
-        />
-        <div className="col-md-12">
-          <PageFooter
-            count={this.props.entriesNumber}
-            context={{ emitEvent: () => {} }}
-            onChangeParams={this.handleChangeParams}
-            params={this.props.params}
+            </div>
+            <EntriesNumber number={this.props.entriesNumber} />
+          </EntriesWrapper>
+          <List
+            data={this.props.uploadedFiles}
+            changeSort={this.changeSort}
+            sort={this.props.params._sort}
           />
-        </div>
-      </ContainerFluid>
+          <div className="col-md-12">
+            <PageFooter
+              count={this.props.entriesNumber}
+              context={{ emitEvent: () => {} }}
+              onChangeParams={this.handleChangeParams}
+              params={this.props.params}
+            />
+          </div>
+        </ContainerFluid>
+      </HomePageContextProvider>
     );
   }
 }
-
-HomePage.childContextTypes = {
-  deleteData: PropTypes.func.isRequired,
-};
-
-HomePage.contextTypes = {
-  router: PropTypes.object,
-};
 
 HomePage.defaultProps = {
   params: {

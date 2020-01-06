@@ -6,23 +6,31 @@ Get ready to get Strapi up and running in **less than 5 minutes** 🚀.
 <iframe width="853" height="480" src="https://www.youtube.com/embed/4m1wKzzfs-M" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>
 
-_For a step-by-step guide, please take a look at the [detailed tutorial](quick-start-tutorial.html)._
+_For a step-by-step guide, please take a look at the [detailed tutorial](quick-start-tutorial.md)._
 
-(Before continuing, please make sure [Node.js and npm are properly installed](install-requirements.html) on your machine. You can [install the Yarn v1.2.0+ package here](https://yarnpkg.com/en/).)
+(Before continuing, please make sure [Node.js and npm are properly installed](install-requirements.md) on your machine. You can [install the Yarn v1.2.0+ package here](https://yarnpkg.com/en/).)
 
 ## 1. Install Strapi and Create a new project
+
+:::: tabs
+
+::: tab yarn
 
 ```bash
 yarn create strapi-app my-project --quickstart
 ```
 
-**or**
+:::
 
-- Use **npm/npx** to install the Strapi project.
+::: tab npx
 
 ```bash
 npx create-strapi-app my-project --quickstart
 ```
+
+:::
+
+::::
 
 ## 2. Create an Administrator user
 
@@ -111,7 +119,7 @@ Here we are! The list of **restaurants** is accessible at [`http://localhost:133
 👏 Congratulations, you have now completed the **Strapi Quick Start**. Where to go next?
 
 - Learn how to use Strapi with React ([Gatsby](https://blog.strapi.io/building-a-static-website-using-gatsby-and-strapi) or [Next.js](https://blog.strapi.io/strapi-next-setup/)) or Vue.js ([Nuxt.js](https://blog.strapi.io/cooking-a-deliveroo-clone-with-nuxt-vue-js-graphql-strapi-and-stripe-setup-part-1-7/)).
-- Read the [concepts](../concepts/concepts.html) and do the [Tutorial](/3.0.0-beta.x/getting-started/quick-start-tutorial.html) to deep dive into Strapi.
+- Read the **concepts** and do the [Tutorial](quick-start-tutorial.md) to deep dive into Strapi.
 - Get help on [StackOverflow](https://stackoverflow.com/questions/tagged/strapi).
 - Read the [source code](https://github.com/strapi/strapi), [contribute](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) or [give a star](https://github.com/strapi/strapi) on GitHub.
 - Follow us on [Twitter](https://twitter.com/strapijs) to get the latest news.

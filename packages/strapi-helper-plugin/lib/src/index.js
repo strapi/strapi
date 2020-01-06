@@ -1,14 +1,15 @@
-// // Assets
+// Assets
 export { default as colors } from './assets/styles/colors';
 export { default as sizes } from './assets/styles/sizes';
 
-// // CommonPropTypes
+// CommonPropTypes
 export { default as routerPropTypes } from './commonPropTypes/router';
 
-// // Components
+// Components
 export { default as BackHeader } from './components/BackHeader';
 export { default as BlockerComponent } from './components/BlockerComponent';
 export { default as Button } from './components/Button';
+export { default as ButtonModal } from './components/ButtonModal';
 export { default as ContainerFluid } from './components/ContainerFluid';
 export {
   default as EmptyAttributesBlock,
@@ -17,6 +18,8 @@ export { default as ErrorBoundary } from './components/ErrorBoundary';
 export { default as ExtendComponent } from './components/ExtendComponent';
 export { default as GlobalPagination } from './components/GlobalPagination';
 export { default as HeaderNav } from './components/HeaderNav';
+export { default as HeaderModal } from './components/HeaderModal';
+export { default as HeaderModalTitle } from './components/HeaderModalTitle';
 export { default as IcoContainer } from './components/IcoContainer';
 export { default as InputAddon } from './components/InputAddon';
 
@@ -38,9 +41,6 @@ export {
 } from './components/InputEmailWithErrors';
 export { default as InputErrors } from './components/InputErrors';
 export { default as InputFile } from './components/InputFile';
-export {
-  default as InputFileWithErrors,
-} from './components/InputFileWithErrors';
 export { default as InputNumber } from './components/InputNumber';
 export {
   default as InputNumberWithErrors,
@@ -73,6 +73,7 @@ export {
 } from './components/InputToggleWithErrors';
 
 export { default as Label } from './components/Label';
+export { default as LeftMenuList } from './components/LeftMenuList';
 export { default as LiLink } from './components/LiLink';
 export { default as List } from './components/List';
 export { default as ListRow } from './components/ListRow';
@@ -86,16 +87,31 @@ export {
   default as LoadingIndicatorPage,
 } from './components/LoadingIndicatorPage';
 
+export { default as Modal } from './components/Modal';
+export { default as ModalBody } from './components/BodyModal';
+export { default as ModalFooter } from './components/FooterModal';
+export { default as ModalForm } from './components/FormModal';
 export { default as NotFound } from './components/NotFound';
 export { default as OverlayBlocker } from './components/OverlayBlocker';
 export { default as PageFooter } from './components/PageFooter';
 export { default as PluginHeader } from './components/PluginHeader';
 export { default as PopUpWarning } from './components/PopUpWarning';
+export { default as SelectNav } from './components/SelectNav';
+export { default as SelectWrapper } from './components/SelectWrapper';
 export { default as TrashButton } from './components/TrashButton';
+export { default as ViewContainer } from './components/ViewContainer';
+
+// Contexts
+export {
+  GlobalContext,
+  GlobalContextProvider,
+  useGlobalContext,
+} from './contexts/GlobalContext';
 
 // Utils
 export { default as auth } from './utils/auth';
 export { default as cleanData } from './utils/cleanData';
+export { default as difference } from './utils/difference';
 export { default as translatedErrors } from './utils/translatedErrors';
 export { darken } from './utils/colors';
 export { default as getQueryParameters } from './utils/getQueryParameters';
@@ -106,3 +122,7 @@ export { default as request } from './utils/request';
 export { default as storeData } from './utils/storeData';
 export { default as templateObject } from './utils/templateObject';
 export { default as getYupInnerErrors } from './utils/getYupInnerErrors';
+
+// SVGS
+export { default as LayoutIcon } from './svgs/Layout';
+export { default as Close } from './svgs/Close';

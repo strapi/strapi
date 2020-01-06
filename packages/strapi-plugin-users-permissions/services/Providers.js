@@ -26,25 +26,18 @@ exports.connect = (provider, query) => {
 
   return new Promise((resolve, reject) => {
     if (!access_token) {
-      return reject(null, {
-        message: 'No access_token.',
-      });
+      return reject([null, { message: 'No access_token.' }]);
     }
 
     // Get the profile.
     getProfile(provider, query, async (err, profile) => {
       if (err) {
-        return reject(err);
+        return reject([null, err]);
       }
 
       // We need at least the mail.
       if (!profile.email) {
-        return reject([
-          {
-            message: 'Email was not available.',
-          },
-          null,
-        ]);
+        return reject([null, { message: 'Email was not available.' }]);
       }
 
       try {
@@ -98,6 +91,7 @@ exports.connect = (provider, query) => {
         const params = _.assign(profile, {
           provider: provider,
           role: defaultRole.id,
+          confirmed: true,
         });
 
         const createdUser = await strapi
@@ -256,15 +250,36 @@ const getProfile = async (provider, query, callback) => {
             .query()
             .get('user')
             .auth(body.split('&')[0].split('=')[1])
-            .request((err, res, body) => {
+            .request((err, res, userbody) => {
               if (err) {
-                callback(err);
-              } else {
-                callback(null, {
-                  username: body.login,
-                  email: body.email,
+                return callback(err);
+              }
+
+              // This is the public email on the github profile
+              if (userbody.email) {
+                return callback(null, {
+                  username: userbody.login,
+                  email: userbody.email,
                 });
               }
+
+              // Get the email with Github's user/emails API
+              github
+                .query()
+                .get('user/emails')
+                .auth(body.split('&')[0].split('=')[1])
+                .request((err, res, emailsbody) => {
+                  if (err) {
+                    return callback(err);
+                  }
+
+                  return callback(null, {
+                    username: userbody.login,
+                    email: Array.isArray(emailsbody)
+                      ? emailsbody.find(email => email.primary === true).email
+                      : null,
+                  });
+                });
             });
         }
       );
@@ -336,19 +351,42 @@ const getProfile = async (provider, query, callback) => {
       const instagram = new Purest({
         provider: 'instagram',
         key: grant.instagram.key,
-        secret: grant.instagram.secret
+        secret: grant.instagram.secret,
       });
-    
-      instagram.query().get('users/self').qs({access_token}).request((err, res, body) => {
-        if (err) {
-          callback(err);
-        } else {
-          callback(null, {
-            username: body.data.username,
-            email: `${body.data.username}@strapi.io` // dummy email as Instagram does not provide user email
-          });
-        }
-      });
+
+      instagram
+        .query()
+        .get('users/self')
+        .qs({ access_token })
+        .request((err, res, body) => {
+          if (err) {
+            callback(err);
+          } else {
+            callback(null, {
+              username: body.data.username,
+              email: `${body.data.username}@strapi.io`, // dummy email as Instagram does not provide user email
+            });
+          }
+        });
+      break;
+    }
+    case 'vk': {
+      const vk = new Purest({ provider: 'vk' });
+
+      vk.query()
+        .get('users.get')
+        .auth(access_token)
+        .qs({ id: query.raw.user_id, v: '5.013' })
+        .request((err, res, body) => {
+          if (err) {
+            callback(err);
+          } else {
+            callback(null, {
+              username: `${body.response[0].last_name} ${body.response[0].first_name}`,
+              email: query.raw.email,
+            });
+          }
+        });
       break;
     }
     default:

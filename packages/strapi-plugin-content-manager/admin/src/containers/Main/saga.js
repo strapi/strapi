@@ -9,13 +9,13 @@ import { GET_DATA, GET_LAYOUT } from './constants';
 
 const getRequestUrl = path => `/${pluginId}/${path}`;
 
-const createPossibleMainFieldsForModelsAndGroups = array => {
+const createPossibleMainFieldsForModelsAndComponents = array => {
   return array.reduce((acc, current) => {
     const attributes = get(current, ['schema', 'attributes'], {});
     const possibleMainFields = Object.keys(attributes).filter(attr => {
       return ![
         'boolean',
-        'group',
+        'component',
         'json',
         'media',
         'password',
@@ -33,33 +33,30 @@ const createPossibleMainFieldsForModelsAndGroups = array => {
 
 function* getData() {
   try {
-    const [{ data: groups }, { data: models }] = yield all(
-      ['groups', 'content-types'].map(endPoint =>
+    const [{ data: components }, { data: models }] = yield all(
+      ['components', 'content-types'].map(endPoint =>
         call(request, getRequestUrl(endPoint), { method: 'GET' })
       )
     );
 
     yield put(
-      getDataSucceeded(groups, models, {
-        ...createPossibleMainFieldsForModelsAndGroups(groups),
-        ...createPossibleMainFieldsForModelsAndGroups(models),
+      getDataSucceeded(components, models, {
+        ...createPossibleMainFieldsForModelsAndComponents(components),
+        ...createPossibleMainFieldsForModelsAndComponents(models),
       })
     );
   } catch (err) {
-    console.log({ err });
     strapi.notification.error('notification.error');
   }
 }
 
-function* getLayout({ source, uid }) {
+function* getLayout({ uid }) {
   try {
-    const params = source !== 'content-manager' ? { source } : {};
     const { data: layout } = yield call(
       request,
       getRequestUrl(`content-types/${uid}`),
       {
         method: 'GET',
-        params,
       }
     );
 

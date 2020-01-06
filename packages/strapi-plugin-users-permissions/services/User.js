@@ -45,8 +45,8 @@ module.exports = {
    * Promise to fetch a/an user.
    * @return {Promise}
    */
-  fetch(params) {
-    return strapi.query('user', 'users-permissions').findOne(params);
+  fetch(params, populate) {
+    return strapi.query('user', 'users-permissions').findOne(params, populate);
   },
 
   /**

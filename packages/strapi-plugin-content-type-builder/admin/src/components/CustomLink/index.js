@@ -1,27 +1,29 @@
 import React, { memo } from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import pluginId from '../../pluginId';
-
+import { Plus } from '@buffetjs/icons';
+import P from './P';
 import StyledCustomLink from './StyledCustomLink';
 
-const CustomLink = ({ featureType, onClick }) => (
-  <StyledCustomLink>
-    <button onClick={onClick} role="button">
-      <p>
-        <i className="fa fa-plus" />
-        <FormattedMessage id={`${pluginId}.button.${featureType}.add`} />
-      </p>
+const CustomLink = ({ disabled, id, onClick }) => (
+  <StyledCustomLink disabled={disabled}>
+    <button onClick={onClick} role="button" disabled={disabled}>
+      <P>
+        <Plus fill="#007EFF" width="11px" height="11px" />
+        {id && <FormattedMessage id={id} />}
+      </P>
     </button>
   </StyledCustomLink>
 );
 
 CustomLink.defaultProps = {
-  featureType: 'model',
+  disabled: false,
+  id: null,
 };
 
 CustomLink.propTypes = {
-  featureType: PropTypes.string,
+  disabled: PropTypes.bool,
+  id: PropTypes.string,
   onClick: PropTypes.func.isRequired,
 };
 

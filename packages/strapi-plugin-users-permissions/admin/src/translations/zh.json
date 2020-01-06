@@ -94,7 +94,7 @@
   "PopUpForm.button.save": "儲存",
   "PopUpForm.header.add.providers": "新增驗證方式",
   "PopUpForm.header.edit.email-templates": "編輯郵件範本",
-  "PopUpForm.header.edit.providers": "編輯 {provider} 驗證方式",
+  "PopUpForm.header.edit.providers": "編輯 驗證方式",
   "PopUpForm.inputSelect.providers.label": "選擇驗證方式",
 
   "components.Input.error.password.length": "密碼長度過短",

@@ -14,29 +14,6 @@
     "comment": ""
   },
   "attributes": {
-    "name": {
-      "maxLength": 50,
-      "required": true,
-      "minLength": 5,
-      "type": "string"
-    },
-    "cover": {
-      "model": "file",
-      "via": "related",
-      "plugin": "upload"
-    },
-    "images": {
-      "collection": "file",
-      "via": "related",
-      "plugin": "upload"
-    },
-    "menu": {
-      "model": "menu",
-      "via": "restaurant"
-    },
-    "categories": {
-      "collection": "category"
-    },
     "price_range": {
       "enum": [
         "very_cheap",
@@ -47,30 +24,68 @@
       ],
       "type": "enumeration"
     },
+    "closing_period": {
+      "component": "default.closingperiod",
+      "type": "component"
+    },
+    "name": {
+      "maxLength": 50,
+      "required": true,
+      "minLength": 5,
+      "type": "string"
+    },
+    "address": {
+      "model": "address"
+    },
+    "cover": {
+      "model": "file",
+      "via": "related",
+      "plugin": "upload",
+      "required": false
+    },
+    "images": {
+      "collection": "file",
+      "via": "related",
+      "plugin": "upload",
+      "required": false
+    },
+    "short_description": {
+      "type": "text"
+    },
+    "since": {
+      "type": "date"
+    },
+    "categories": {
+      "collection": "category"
+    },
     "description": {
       "type": "richtext",
       "required": true
     },
+    "services": {
+      "component": "default.restaurantservice",
+      "repeatable": true,
+      "type": "component"
+    },
+    "menu": {
+      "model": "menu",
+      "via": "restaurant"
+    },
     "opening_times": {
-      "group": "openingtimes",
-      "type": "group",
-      "required": true,
+      "component": "default.openingtimes",
+      "type": "component",
       "repeatable": true,
       "min": 1,
       "max": 10
     },
-    "closing_period": {
-      "group": "closingperiod",
-      "type": "group"
-    },
-    "services": {
-      "group": "restaurantservice",
-      "required": true,
-      "repeatable": true,
-      "type": "group"
-    },
-    "address": {
-      "model": "address"
+    "dz": {
+      "type": "dynamiczone",
+      "components": [
+        "default.closingperiod",
+        "default.dish",
+        "default.openingtimes",
+        "default.restaurantservice"
+      ]
     }
   }
 }
