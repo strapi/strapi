@@ -11,7 +11,7 @@ import Wrapper from './Wrapper';
 import keys from './keys';
 
 const HeadersInput = ({ onClick, onChange, name, value }) => {
-  const handleChange = (selected, name) => {
+  const handleChangeKey = (selected, name) => {
     if (selected === null) {
       onChange({ target: { name, value: '' } });
     } else {
@@ -63,14 +63,18 @@ const HeadersInput = ({ onClick, onChange, name, value }) => {
               <section>
                 <CreatableSelect
                   isClearable
-                  onChange={e => handleChange(e, `${name}.${index}.key`)}
+                  onChange={e => handleChangeKey(e, `${name}.${index}.key`)}
                   options={options}
                   name={`${name}.${index}.key`}
                   value={optionFormat(key)}
                 />
               </section>
               <section>
-                <InputText value={value} name={`${name}.${index}.value`} />
+                <InputText
+                  value={value}
+                  name={`${name}.${index}.value`}
+                  onChange={onChange}
+                />
               </section>
               <div>
                 <CircleButton

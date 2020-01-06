@@ -235,6 +235,7 @@
   "Settings.webhooks.trigger": "Trigger",
   "Settings.webhooks.trigger.title": "Save before Trigger",
   "Settings.webhooks.trigger.cancel": "Cancel trigger",
+  "Settings.webhooks.trigger.save": "Please save to trigger",
   "Settings.webhooks.events.create": "Create",
   "Settings.webhooks.events.edit": "Edit",
   "Settings.webhooks.events.delete": "Delete",

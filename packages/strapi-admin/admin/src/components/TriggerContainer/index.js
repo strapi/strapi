@@ -36,7 +36,7 @@ const TriggerContainer = ({ isPending, onCancel, response }) => {
                 ) : (
                   <>
                     <td>Error 403</td>
-                    <td>{error}</td>
+                    <td title={{ error }}>{error}</td>
                   </>
                 )}
               </>

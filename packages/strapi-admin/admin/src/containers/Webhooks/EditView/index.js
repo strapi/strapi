@@ -6,7 +6,7 @@
 
 import React, { useEffect, useReducer } from 'react';
 import { useLocation } from 'react-router-dom';
-import { isEmpty, isEqual } from 'lodash';
+import { cloneDeep, isEmpty, isEqual, set } from 'lodash';
 import { Header } from '@buffetjs/custom';
 import { Play } from '@buffetjs/icons';
 import { request, useGlobalContext } from 'strapi-helper-plugin';
@@ -66,6 +66,8 @@ function EditView() {
     : name;
 
   const actionsAreDisabled = isEqual(initialWebhook, modifiedWebhook);
+  const triggerActionIsDisabled =
+    isCreatingWebhook || (!isCreatingWebhook && !actionsAreDisabled);
 
   const handleTrigger = async () => {
     dispatch({
@@ -98,8 +100,7 @@ function EditView() {
   const actions = [
     {
       color: 'primary',
-      disabled:
-        isCreatingWebhook || (!isCreatingWebhook && !actionsAreDisabled),
+      disabled: triggerActionIsDisabled,
       type: 'button',
       label: formatMessage({
         id: `Settings.webhooks.trigger`,
@@ -111,7 +112,18 @@ function EditView() {
         paddingRight: 15,
         paddingLeft: 15,
       },
-      icon: <Play width="6px" height="7px" />,
+      title: triggerActionIsDisabled
+        ? formatMessage({
+            id: `Settings.webhooks.trigger.save`,
+          })
+        : null,
+      icon: (
+        <Play
+          width="6px"
+          height="7px"
+          fill={triggerActionIsDisabled ? '#b4b6ba' : '#ffffff'}
+        />
+      ),
     },
     {
       onClick: () => {},
@@ -161,40 +173,81 @@ function EditView() {
     });
   };
 
+  const handleSubmit = e => {
+    e.preventDefault();
+    createWebhooks();
+  };
+
+  const createWebhooks = async () => {
+    const body = cloneDeep(modifiedWebhook);
+    set(body, 'headers', unformatLayout(modifiedWebhook.headers));
+
+    try {
+      const body = cloneDeep(modifiedWebhook);
+      set(body, 'headers', unformatLayout(modifiedWebhook.headers));
+
+      await request(`/admin/webhooks`, {
+        method: 'POST',
+        body,
+      });
+
+      dispatch({
+        type: 'SUBMIT_SUCCEEDED',
+      });
+    } catch (err) {
+      strapi.notification.error('notification.error');
+    }
+  };
+
+  // utils
+  const unformatLayout = headers => {
+    const newHeader = headers.reduce((obj, item) => {
+      const { key, value } = item;
+      return {
+        ...obj,
+        [key]: value,
+      };
+    }, {});
+
+    return newHeader;
+  };
+
   return (
     <Wrapper>
-      <Header {...headerProps} />
-      {(isTriggering || !isEmpty(triggerResponse)) && (
-        <div className="trigger-wrapper">
-          <TriggerContainer
-            isPending={isTriggering}
-            response={triggerResponse}
-          />
-        </div>
-      )}
-      <div className="form-wrapper">
-        <div className="form-card">
-          <div className="row">
-            {Object.keys(form).map(key => {
-              return (
-                <div key={key} className={form[key].styleName}>
-                  <Inputs
-                    {...form[key]}
-                    // customInputs={{
-                    //   headers: HeadersInput,
-                    // }}
-                    name={key}
-                    onChange={handleChange}
-                    onClick={handleClick}
-                    validations={form[key].validations}
-                    value={modifiedWebhook[key] || form[key].value}
-                  />
-                </div>
-              );
-            })}
+      <form onSubmit={handleSubmit}>
+        <Header {...headerProps} />
+        {(isTriggering || !isEmpty(triggerResponse)) && (
+          <div className="trigger-wrapper">
+            <TriggerContainer
+              isPending={isTriggering}
+              response={triggerResponse}
+            />
+          </div>
+        )}
+        <div className="form-wrapper">
+          <div className="form-card">
+            <div className="row">
+              {Object.keys(form).map(key => {
+                return (
+                  <div key={key} className={form[key].styleName}>
+                    <Inputs
+                      {...form[key]}
+                      // customInputs={{
+                      //   headers: HeadersInput,
+                      // }}
+                      name={key}
+                      onChange={handleChange}
+                      onClick={handleClick}
+                      validations={form[key].validations}
+                      value={modifiedWebhook[key] || form[key].value}
+                    />
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
-      </div>
+      </form>
     </Wrapper>
   );
 }
