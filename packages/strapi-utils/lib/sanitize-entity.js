@@ -1,5 +1,7 @@
 'use strict';
 
+const _ = require('lodash');
+
 module.exports = function sanitizeEntity(data, { model, withPrivate = false }) {
   if (typeof data !== 'object' || data == null) return data;
 
@@ -7,10 +9,14 @@ module.exports = function sanitizeEntity(data, { model, withPrivate = false }) {
 
   if (typeof plainData !== 'object') return plainData;
 
+  const hiddenFields = _.get(strapi, ['config', 'currentEnvironment', 'response', 'hiddenFields'], []);
   const attributes = model.attributes;
   return Object.keys(plainData).reduce((acc, key) => {
     const attribute = attributes[key];
-    if (attribute && attribute.private === true && withPrivate !== true) {
+    if (
+      (hiddenFields.includes(key) && withPrivate !== true) ||
+      (attribute && attribute.private === true && withPrivate !== true)
+    ) {
       return acc;
     }
 
