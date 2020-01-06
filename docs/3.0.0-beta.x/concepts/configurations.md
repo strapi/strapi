@@ -402,6 +402,7 @@ The session doesn't work with `mongo` as a client. The package that we should us
 - `poweredBy`
   - `enabled` (boolean): Enable or not `X-Powered-By` header to response. Default value: `true`.
   - `value` (string): The value of the header. Default value: `Strapi <strapi.io>`
+- `hiddenFields`(array): Remove from response the given values via the sanitizeEntity from strapi-utils.
 
 ## Security
 
