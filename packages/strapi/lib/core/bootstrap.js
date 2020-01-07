@@ -350,20 +350,6 @@ module.exports = function(strapi) {
     _.get(strapi.config.currentEnvironment, 'server.host') ||
     strapi.config.host;
 
-  // Admin.
-  const url = getURLFromSegments({
-    hostname: strapi.config.host,
-    port: strapi.config.port,
-  });
-
-  const adminPath = _.get(
-    strapi.config.currentEnvironment.server,
-    'admin.path',
-    'admin'
-  );
-
-  strapi.config.admin.url = new URL(adminPath, url).toString();
-
   // proxy settings
   const proxy = _.get(strapi.config.currentEnvironment, 'server.proxy', {});
   strapi.config.proxy = proxy;
@@ -375,12 +361,18 @@ module.exports = function(strapi) {
         port: proxy.port,
         ssl: proxy.ssl,
       })
-    : url;
+    : getURLFromSegments({
+        hostname: strapi.config.host,
+        port: strapi.config.port,
+      });
 
-  // check if proxy enabled and construct admin url
-  if (proxy.enabled === true) {
-    strapi.config.admin.url = new URL(adminPath, strapi.config.url).toString();
-  }
+  const adminPath = _.get(
+    strapi.config.currentEnvironment.server,
+    'admin.path',
+    'admin'
+  );
+
+  strapi.config.admin.url = new URL(adminPath, strapi.config.url).toString();
 };
 
 const enableHookNestedDependencies = function(
