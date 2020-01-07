@@ -26,5 +26,7 @@
   "notification.dropFile.success": "تم تحميل ملفك",
   "notification.dropFiles.success": "{number} ملفات تم تحميلها",
   "Upload.status.sizeLimit": "{file} أكبر من حجم الحد الذي تمت تهيئته",
-  "Upload.status.disabled" : "تم تعطيل تحميل الملف"
+  "Upload.status.disabled" : "تم تعطيل تحميل الملف",
+  "plugin.description.long": "إدارة ملفات الوسائط المتعددة.",
+  "plugin.description.short": "إدارة ملفات الوسائط المتعددة."
 }

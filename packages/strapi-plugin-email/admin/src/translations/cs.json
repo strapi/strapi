@@ -1,0 +1,11 @@
+{
+  "ConfigPage.description": "Nastavení zásuvný modul odesílání e-mailů",
+  "ConfigPage.title": "E-mail - Nastavení",
+  "EditForm.Input.number.label": "Maximální povolená velikost (v MB)",
+  "EditForm.Input.select.inputDescription": "E-maily mohou být odeslány výchozím (Sendmail) nebo externím poskytovatelem.",
+  "EditForm.Input.select.label": "Poskytovatelé",
+  "EditForm.Input.toggle.label": "Povolit odesílání e-mailů",
+  "notification.config.success": "Nastavení bylo uloženo",
+  "plugin.description.long": "Odeslat e-maily.",
+  "plugin.description.short": "Odeslat e-maily."
+}
