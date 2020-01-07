@@ -96,43 +96,41 @@ const createYupSchema = (model, { components }) => {
 
         if (attribute.repeatable === true) {
           const { min, max } = attribute;
+          let componentSchema = yup
+            .array()
+            .of(componentFieldSchema)
+            .test('min', function(value) {
+              let hasMaxError = false;
 
-          let componentSchema =
-            attribute.required === true
-              ? yup
-                  .array()
-                  .of(componentFieldSchema)
-                  .defined()
-              : yup
-                  .array()
-                  .of(componentFieldSchema)
-                  .nullable();
-
-          if (min) {
-            componentSchema = yup.lazy(array => {
-              let schema = yup.array().of(componentFieldSchema);
-
-              if (max) {
-                schema = schema.max(max, errorsTrads.max);
+              if (max && value) {
+                hasMaxError = value.length > max;
               }
 
-              if (attribute.required) {
-                return schema.defined().min(min, errorsTrads.min);
+              if (min) {
+                const hasRequiredError =
+                  attribute.required &&
+                  (value === undefined || value.length < min);
+
+                if (
+                  hasRequiredError ||
+                  (value && value.length < min && value.length !== 0)
+                ) {
+                  return this.createError({
+                    path: this.path,
+                    message: errorsTrads.min,
+                  });
+                }
               }
 
-              schema = schema.nullable();
-
-              if (array && !isEmpty(array)) {
-                schema = schema.min(min, errorsTrads.min);
+              if (hasMaxError) {
+                return this.createError({
+                  path: this.path,
+                  message: errorsTrads.max,
+                });
               }
 
-              return schema;
+              return true;
             });
-          }
-
-          if (max && !min) {
-            componentSchema = componentSchema.max(max, errorsTrads.max);
-          }
 
           acc[current] = componentSchema;
 
