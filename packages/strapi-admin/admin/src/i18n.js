@@ -12,6 +12,7 @@ import { reduce } from 'lodash';
 // because dynamic imports causes webpack to build all the locales
 // see https://github.com/yahoo/react-intl/issues/1225
 import ar from 'react-intl/locale-data/ar';
+import cs from 'react-intl/locale-data/cs';
 import de from 'react-intl/locale-data/de';
 import en from 'react-intl/locale-data/en';
 import es from 'react-intl/locale-data/es';
@@ -26,12 +27,14 @@ import ru from 'react-intl/locale-data/ru';
 import tr from 'react-intl/locale-data/tr';
 import vi from 'react-intl/locale-data/vi';
 import zh from 'react-intl/locale-data/zh';
+import sk from 'react-intl/locale-data/sk';
 
 import trads from './translations';
 
 // We dismiss pt-BR and zh-Hans locales since they are not supported by react-intl
 const locales = {
   ar,
+  cs,
   de,
   en,
   es,
@@ -46,6 +49,7 @@ const locales = {
   tr,
   vi,
   zh,
+  sk,
 };
 const languages = Object.keys(trads);
 
