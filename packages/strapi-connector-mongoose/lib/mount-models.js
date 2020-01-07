@@ -75,7 +75,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
       definition.loadedModel[name] = {
         ...attr,
-        ...utils(instance).convertType(attr.type),
+        ...utils(instance).convertType(attr),
       };
     });
 

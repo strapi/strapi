@@ -42,7 +42,9 @@ yup.addMethod(yup.string, 'unique', function(
 
 yup.addMethod(yup.array, 'hasNotEmptyValues', function(message) {
   return this.test('hasNotEmptyValues', message, function(array) {
-    return !array.some(value => isEmpty(value));
+    return !array.some(value => {
+      return isEmpty(value);
+    });
   });
 });
 
@@ -67,6 +69,14 @@ yup.addMethod(yup.string, 'isInferior', function(message, max) {
     }
 
     return toNumber(max) >= toNumber(min);
+  });
+});
+
+yup.addMethod(yup.array, 'matchesEnumRegex', function(message) {
+  return this.test('matchesEnumRegex', message, function(array) {
+    return array.every(value => {
+      return ENUM_REGEX.test(value);
+    });
   });
 });
 
@@ -218,6 +228,7 @@ const forms = {
               .array()
               .of(yup.string())
               .min(1, errorsTrads.min)
+              .matchesEnumRegex(errorsTrads.regex)
               .hasNotEmptyValues(
                 'Empty strings are not allowed',
                 dataToValidate.enum
