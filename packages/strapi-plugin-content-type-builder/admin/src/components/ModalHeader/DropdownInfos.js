@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { AttributeIcon } from '@buffetjs/core';
 import UpperFirst from '../UpperFirst';
+import Icon from './Icon';
 import Item from './Item';
 import Menu from './Menu';
 import Toggle from './Toggle';
@@ -12,11 +12,7 @@ const DropdownInfos = ({ headers, shouldDisplaySecondHeader }) => {
 
   const toggle = () => setDropdownOpen(prevState => !prevState);
   return (
-    <Wrapper
-      isOpen={dropdownOpen}
-      toggle={toggle}
-      style={{ margin: 'auto 0px auto 0' }}
-    >
+    <Wrapper isOpen={dropdownOpen} toggle={toggle} style={{ margin: 'auto 0' }}>
       <Toggle>...</Toggle>
       <Menu style={{ top: '8px' }}>
         {headers.map((header, index) => {
@@ -26,10 +22,7 @@ const DropdownInfos = ({ headers, shouldDisplaySecondHeader }) => {
 
           return (
             <Item key={index}>
-              <AttributeIcon
-                type={header.icon.name}
-                style={{ margin: 'auto 20px auto 0' }}
-              />
+              <Icon type={header.icon.name} />
               <span>
                 <UpperFirst content={header.label} />
               </span>

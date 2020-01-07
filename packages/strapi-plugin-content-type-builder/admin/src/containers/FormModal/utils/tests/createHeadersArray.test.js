@@ -34,7 +34,7 @@ describe('FormModal | utils | createHeadersArray', () => {
     expect(createHeadersArray(data)).toEqual([]);
   });
 
-  it('should return an array containing an header object', () => {
+  it('should return an array containing a header object', () => {
     const data = {
       actionType: 'something',
       attributeName: null,

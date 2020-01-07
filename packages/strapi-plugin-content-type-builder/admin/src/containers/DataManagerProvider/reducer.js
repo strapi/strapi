@@ -175,9 +175,7 @@ const reducer = (state, action) => {
         )
         .updateIn(['modifiedData', 'components'], old => {
           const componentsSchema = newComponents.reduce((acc, current) => {
-            let newAcc = addComponentsToState(state, current, acc);
-
-            return newAcc;
+            return addComponentsToState(state, current, acc);
           }, old);
 
           return componentsSchema;

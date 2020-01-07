@@ -6,7 +6,7 @@ import ComponentInfosWrapper from './ComponentInfosWrapper';
 const ComponentInfos = ({ category, name }) => {
   return (
     <ComponentInfosWrapper>
-      &nbsp; (<UpperFirst content={category} />) &nbsp;—&nbsp;
+      &nbsp; (<UpperFirst content={category} /> &nbsp;—&nbsp;
       <UpperFirst content={name} />)
     </ComponentInfosWrapper>
   );

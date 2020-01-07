@@ -2,27 +2,24 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { HeaderModalTitle } from 'strapi-helper-plugin';
 import { get } from 'lodash';
-import { AttributeIcon } from '@buffetjs/core';
 import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ComponentIcon from './ComponentIcon';
 import ComponentInfos from './ComponentInfos';
+import Icon from './Icon';
 import IconWrapper from './IconWrapper';
 import UpperFirst from '../UpperFirst';
 import DropdownInfos from './DropdownInfos';
 
 const ModalHeader = ({ headerId, headers }) => {
-  const shouldDisplayDrodDrown = headers.length > 3;
+  const shouldDisplayDrodDown = headers.length > 3;
 
   return (
     <section>
       <HeaderModalTitle style={{ textTransform: 'none' }}>
         {headerId && (
           <>
-            <AttributeIcon
-              type={get(headers, [0, 'icon', 'name'], '')}
-              style={{ margin: 'auto 20px auto 0' }}
-            />
+            <Icon type={get(headers, [0, 'icon', 'name'], '')} />
             <FormattedMessage
               id={headerId}
               values={{ name: get(headers, [0, 'label'], '') }}
@@ -38,13 +35,10 @@ const ModalHeader = ({ headerId, headers }) => {
                 <FontAwesomeIcon icon={iconType} />
               </ComponentIcon>
             ) : (
-              <AttributeIcon
-                type={iconType}
-                style={{ margin: 'auto 20px auto 0' }}
-              />
+              <Icon type={iconType} />
             );
 
-            if (shouldDisplayDrodDrown && index === 1) {
+            if (shouldDisplayDrodDown && index === 1) {
               return (
                 <Fragment key={index}>
                   <IconWrapper>
@@ -58,7 +52,7 @@ const ModalHeader = ({ headerId, headers }) => {
               );
             }
 
-            if (shouldDisplayDrodDrown && index === 2 && headers.length > 4) {
+            if (shouldDisplayDrodDown && index === 2 && headers.length > 4) {
               return null;
             }
 

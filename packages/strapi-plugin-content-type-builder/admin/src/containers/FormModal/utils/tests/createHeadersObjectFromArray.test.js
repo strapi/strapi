@@ -1,7 +1,7 @@
 import createHeadersObjectFromArray from '../createHeadersObjectFromArray';
 
 describe('FormModal | utils | createHeadersArray', () => {
-  it('should return an headers object', () => {
+  it('should return a header object', () => {
     const data = [
       {
         label: 'test',
