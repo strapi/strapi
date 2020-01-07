@@ -6,7 +6,7 @@ const initialState = fromJS({
   components: {},
   contentTypes: {},
   initialComponents: {},
-  intialContentTypes: {},
+  initialContentTypes: {},
   initialData: {},
   modifiedData: {},
   isLoading: true,
@@ -358,7 +358,7 @@ const reducer = (state, action) => {
       );
     }
 
-    case 'GET_DATA_SUCCEEDED':
+    case 'GET_DATA_SUCCEEDED': {
       return state
         .update('components', () => fromJS(action.components))
         .update('initialComponents', () => fromJS(action.components))
@@ -366,7 +366,7 @@ const reducer = (state, action) => {
         .update('contentTypes', () => fromJS(action.contentTypes))
 
         .update('isLoading', () => false);
-
+    }
     case 'RELOAD_PLUGIN':
       return initialState;
     case 'REMOVE_FIELD_FROM_DISPLAYED_COMPONENT': {

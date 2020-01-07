@@ -86,7 +86,9 @@ const DataManagerProvider = ({ allIcons, children }) => {
           });
         })
       );
+
       const components = createDataObject(componentsArray);
+
       const contentTypes = createDataObject(contentTypesArray);
       const orderedComponents = orderAllDataAttributesWithImmutable({
         components,
@@ -94,6 +96,8 @@ const DataManagerProvider = ({ allIcons, children }) => {
       const orderedContenTypes = orderAllDataAttributesWithImmutable({
         components: contentTypes,
       });
+
+      console.log(orderedContenTypes.get('components').toJS());
 
       dispatch({
         type: 'GET_DATA_SUCCEEDED',
@@ -371,6 +375,8 @@ const DataManagerProvider = ({ allIcons, children }) => {
       hasJustCreatedSchema,
     });
   };
+
+  console.log({ modifiedData });
 
   const sortedContentTypesList = sortBy(
     Object.keys(contentTypes)
