@@ -76,7 +76,16 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
     'default',
     'plugin',
     'enum',
+    'regex',
   ]);
+
+  if (attribute['regex']) {
+    const regex = new RegExp(attribute['regex'])
+    if (regex) {
+      validations['regex'] = regex
+    }
+  }
+
   const { description, visible } = metadatas;
   const value = get(modifiedData, keys, null);
 
