@@ -55,6 +55,8 @@ NODE_ENV=production yarn build
 NODE_ENV=production npm run build
 ```
 
+:::
+
 ::: tab Windows
 
 ```bash
@@ -86,6 +88,8 @@ NODE_ENV=production yarn start
 ```bash
 NODE_ENV=production npm start
 ```
+
+:::
 
 ::: tab Windows
 
