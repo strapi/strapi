@@ -7,6 +7,17 @@ const formatError = error => [
   { messages: [{ id: error.id, message: error.message, field: error.field }] },
 ];
 
+const PLUGIN_NAME_REGEX = /^[A-Za-z][A-Za-z0-9-_]+$/;
+
+/**
+ * Validates a plugin name format
+ */
+const isValidPluginName = plugin => {
+  return (
+    _.isString(plugin) && !_.isEmpty(plugin) && PLUGIN_NAME_REGEX.test(plugin)
+  );
+};
+
 /**
  * A set of functions called "actions" for `Admin`
  */
@@ -67,7 +78,7 @@ module.exports = {
     try {
       const { plugin } = ctx.request.body;
 
-      if (!/^[A-Za-z0-9_-]+$/.test(plugin)) {
+      if (!isValidPluginName(plugin)) {
         return ctx.badRequest('Invalid plugin name');
       }
 
@@ -107,7 +118,7 @@ module.exports = {
     try {
       const { plugin } = ctx.params;
 
-      if (!/^[A-Za-z0-9_-]+$/.test(plugin)) {
+      if (!isValidPluginName(plugin)) {
         return ctx.badRequest('Invalid plugin name');
       }
 
