@@ -1,7 +1,7 @@
 'use strict';
 
 const yup = require('yup');
-const { validators, isValidName, isValidEnum } = require('./common');
+const { validators, isValidName, isValidEnum, isValidRegExpPattern } = require('./common');
 const { hasComponent } = require('../../utils/attributes');
 const { modelTypes } = require('./constants');
 
@@ -30,7 +30,7 @@ const getTypeShape = (attribute, { modelType } = {}) => {
         unique: validators.unique,
         minLength: validators.minLength,
         maxLength: validators.maxLength,
-        regex: yup.string(),
+        regex: yup.string().test(isValidRegExpPattern),
       };
     }
     case 'richtext': {

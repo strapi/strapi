@@ -58,6 +58,12 @@ const isValidEnum = {
   test: val => val === '' || ENUM_REGEX.test(val),
 };
 
+const isValidRegExpPattern = {
+  name: 'isValidRegExpPattern',
+  message: '${path} must be a valid RexExp pattern string',
+  test: val => val === '' || new RegExp(val),
+};
+
 module.exports = {
   validators,
 
@@ -67,4 +73,5 @@ module.exports = {
   isValidIcon,
   isValidKey,
   isValidEnum,
+  isValidRegExpPattern,
 };
