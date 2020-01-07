@@ -168,6 +168,10 @@ const createYupSchema = (model, { components }) => {
 
 const createYupSchemaAttribute = (type, validations) => {
   let schema = yup.mixed();
+    
+  if (validations.regex) {
+    validations.regex = new RegExp(validations.regex)
+  }
 
   if (['string', 'uid', 'text', 'richtext', 'email', 'password', 'enumeration'].includes(type)) {
     schema = yup.string();
