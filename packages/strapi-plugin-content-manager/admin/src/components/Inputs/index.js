@@ -68,6 +68,8 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
   ]);
   const type = useMemo(() => get(attribute, 'type', null), [attribute]);
 
+  const regex = useMemo(() => get(attribute, 'regex', null), [attribute]);
+
   const validations = omit(attribute, [
     'type',
     'model',
@@ -79,11 +81,8 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
     'regex',
   ]);
 
-  if (attribute['regex']) {
-    const regex = new RegExp(attribute['regex'])
-    if (regex) {
-      validations['regex'] = regex
-    }
+  if (regex) {
+    validations.regex = new RegExp(regex)
   }
 
   const { description, visible } = metadatas;
