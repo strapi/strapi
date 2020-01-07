@@ -70,6 +70,8 @@
   "form.attribute.item.enumeration.graphql": "Name override for GraphQL",
   "form.attribute.item.enumeration.placeholder": "Ex:\nmorning\nnoon\nevening",
   "form.attribute.item.enumeration.rules": "Values (one line per value)",
+  "form.attribute.item.text.regex": "RegExp pattern",
+  "form.attribute.item.text.regex.description": "The text of the regular expression",
   "form.attribute.item.maximum": "Maximum value",
   "form.attribute.item.maximumLength": "Maximum length",
   "form.attribute.item.minimum": "Minimum value",
