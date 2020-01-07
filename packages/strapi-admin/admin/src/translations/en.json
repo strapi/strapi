@@ -75,6 +75,7 @@
   "app.components.LeftMenuLinkContainer.general": "General",
   "app.components.LeftMenuLinkContainer.installNewPlugin": "Marketplace",
   "app.components.LeftMenuLinkContainer.listPlugins": "Plugins",
+  "app.components.LeftMenuLinkContainer.contentTypes": "Content Types",
   "app.components.LeftMenuLinkContainer.noPluginsInstalled": "No plugins installed yet",
   "app.components.LeftMenuLinkContainer.plugins": "Plugins",
   "app.components.ListPluginsPage.description": "List of the installed plugins in the project.",

@@ -11,7 +11,7 @@ To access the plugin admin panel, click on the **Users & Pemissions** link in th
 ## Concept
 
 When this plugin is installed, it adds an access layer on your application.
-The plugin uses [`jwt token`](https://fr.wikipedia.org/wiki/JSON_Web_Token) to authenticate users.
+The plugin uses [`jwt token`](https://en.wikipedia.org/wiki/JSON_Web_Token) to authenticate users.
 
 Each time an API request is sent, the server checks if an `Authorization` header is present and verifies if the user making the request has access to the resource..
 
@@ -33,7 +33,7 @@ This is the default role that is given to every **new user** if no role is provi
 
 By clicking on the **Role** name, you will be able to see all functions available in your application (and these function are related to a specific route)
 
-If you check a fonction name, it makes this route accessible by the current role you are editing.
+If you check a function name, it makes this route accessible by the current role you are editing.
 On the right sidebar you will be able to see the URL related to this function.
 
 ### Update the default role
@@ -435,3 +435,9 @@ You can update these template in the **Email Templates** tab in the admin panel.
   - ...and every other fields that you added manually in the model.
 - `CODE` corresponds to the CODE generated to be able confirm the user email.
 - `URL` is the Strapi backend URL that confirm the code (by default `/auth/email-confirmation`).
+
+## Security configuration
+JWT tokens can be verified and trusted because the information is digitally signed. To sign a token a *secret* is required. By default Strapi generates one that is stored in `./your-app/extensions/users-permissions/config/jwt.json`. This is useful during development but for security reasons it is **recommended** to set a custom token via an environment variable `JWT_SECRET` when deploying to production. It is also possible to modify `jwt.json` file to accept `JWT_TOKEN` automatically by doing following ([docs](https://strapi.io/documentation/3.0.0-beta.x/concepts/configurations.html#dynamic-configurations)).
+```
+  "jwtSecret": "${process.env.JWT_SECRET}"
+```

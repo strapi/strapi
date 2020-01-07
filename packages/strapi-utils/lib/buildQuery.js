@@ -17,7 +17,7 @@ const isAttribute = (model, field) =>
  * Returns the model, attribute name and association from a path of relation
  * @param {Object} options - Options
  * @param {string} options.model - Strapi model
- * @param {string} options.field - pathj of relation / attribute
+ * @param {string} options.field - path of relation / attribute
  */
 const getAssociationFromFieldKey = ({ model, field }) => {
   const fieldParts = field.split('.');
@@ -82,6 +82,22 @@ const castValue = ({ type, value, operator }) => {
   if (operator === 'null') return parseType({ type: 'boolean', value });
   return parseType({ type, value });
 };
+
+/**
+ *
+ * @param {Object} options - Options
+ * @param {string} options.model - The model
+ * @param {string} options.field - path of relation / attribute
+ */
+const normalizeFieldName = ({ model, field }) => {
+  const fieldPath = field.split('.');
+  return _.last(fieldPath) === 'id'
+    ? _.initial(fieldPath)
+        .concat(model.primaryKey)
+        .join('.')
+    : fieldPath.join('.');
+};
+
 /**
  *
  * @param {Object} options - Options
@@ -116,7 +132,7 @@ const buildQuery = ({ model, filters = {}, ...rest }) => {
         const castedValue = castInput({ type, operator, value });
 
         return {
-          field: field === 'id' ? model.primaryKey : field,
+          field: normalizeFieldName({ model, field }),
           operator,
           value: castedValue,
         };
