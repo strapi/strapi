@@ -30,6 +30,7 @@ const getTypeShape = (attribute, { modelType } = {}) => {
         unique: validators.unique,
         minLength: validators.minLength,
         maxLength: validators.maxLength,
+        regex: yup.string(),
       };
     }
     case 'richtext': {

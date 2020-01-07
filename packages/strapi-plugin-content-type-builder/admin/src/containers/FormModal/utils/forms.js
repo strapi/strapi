@@ -235,6 +235,12 @@ const forms = {
               ),
             enumName: yup.string().nullable(),
           });
+        case 'text':
+          return yup.object().shape({
+            ...commonShape,
+            ...fieldsThatSupportMaxAndMinLengthShape,
+            regex: yup.string().nullable(),
+          });
         case 'number':
         case 'integer':
         case 'biginteger':
@@ -399,7 +405,25 @@ const forms = {
           ]);
         }
 
-        if (type === 'media') {
+        if (type === 'text') {
+          items.splice(1, 0, [
+            {
+              autoFocus: false,
+              label: {
+                id: getTrad('form.attribute.item.text.regex'),
+              },
+              name: 'regex',
+              type: 'text',
+              validations: {},
+              description: {
+                id: getTrad(
+                  'form.attribute.item.text.regex.description'
+                ),
+              },
+            },
+          ]);
+        }
+        else if (type === 'media') {
           items.splice(0, 1);
         } else if (type === 'boolean') {
           items.splice(0, 1, [
