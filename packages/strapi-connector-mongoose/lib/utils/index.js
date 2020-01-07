@@ -100,6 +100,8 @@ module.exports = (mongoose = Mongoose) => {
   };
 
   const valueToId = value => {
+    if (Array.isArray(value)) return value.map(valueToId);
+
     if (isMongoId(value)) {
       return mongoose.Types.ObjectId(value);
     }
