@@ -6,13 +6,18 @@
 
 import React, { useEffect, useReducer, useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { cloneDeep, isEmpty, isEqual, set } from 'lodash';
+import { cloneDeep, get, isEmpty, isEqual, set } from 'lodash';
 import { Header } from '@buffetjs/custom';
 import { Play } from '@buffetjs/icons';
-import { request, useGlobalContext } from 'strapi-helper-plugin';
+import {
+  request,
+  useGlobalContext,
+  getYupInnerErrors,
+} from 'strapi-helper-plugin';
 
 import reducer, { initialState } from './reducer';
 import form from './utils/form';
+import createYupSchema from './utils/schema';
 
 import Inputs from '../../../components/Inputs';
 import TriggerContainer from '../../../components/TriggerContainer';
@@ -25,6 +30,7 @@ function EditView() {
   const { goBack } = useHistory();
 
   const {
+    formErrors,
     modifiedWebhook,
     initialWebhook,
     isTriggering,
@@ -42,16 +48,10 @@ function EditView() {
   const { signal } = abortController;
 
   useEffect(() => {
-    if (!isCreatingWebhook) {
+    if (!isCreatingWebhook || (!isCreatingWebhook && shouldRefetchData)) {
       fetchData();
     }
-  }, [fetchData, isCreatingWebhook]);
-
-  useEffect(() => {
-    if (shouldRefetchData) {
-      fetchData();
-    }
-  }, [fetchData, shouldRefetchData]);
+  }, [fetchData, isCreatingWebhook, shouldRefetchData]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -104,7 +104,6 @@ function EditView() {
   };
 
   const onCancelTrigger = () => {
-    console.log('abort');
     abortController.abort();
 
     dispatch({
@@ -173,6 +172,7 @@ function EditView() {
       },
     },
   ];
+
   const headerProps = {
     title: {
       label: headerTitle,
@@ -195,8 +195,20 @@ function EditView() {
     });
   };
 
+  const handleRemove = ({ event, index }) => {
+    dispatch({
+      type: 'ON_HEADER_REMOVE',
+      index,
+      event,
+    });
+  };
+
   const handleSubmit = e => {
     e.preventDefault();
+    checkFormErrors();
+  };
+
+  const submitForm = () => {
     if (!isCreatingWebhook) {
       updateWebhook();
     } else {
@@ -204,20 +216,62 @@ function EditView() {
     }
   };
 
-  const createWebhooks = async () => {
-    const body = cloneDeep(modifiedWebhook);
-    set(body, 'headers', unformatLayout(modifiedWebhook.headers));
+  const checkFormErrors = async () => {
+    const webhookToCheck = cloneDeep(modifiedWebhook);
+    set(webhookToCheck, 'headers', cleanHeaders());
 
     try {
-      const body = cloneDeep(modifiedWebhook);
-      set(body, 'headers', unformatLayout(modifiedWebhook.headers));
-
-      await request(`/admin/webhooks`, {
-        method: 'POST',
-        body,
+      await createYupSchema(form).validate(webhookToCheck, {
+        abortEarly: false,
       });
 
-      strapi.notification.success(`app.notification.success`);
+      resetErrors();
+      submitForm();
+    } catch (err) {
+      const errors = getYupInnerErrors(err);
+
+      setErrors(errors);
+    }
+  };
+
+  const cleanHeaders = () => {
+    const { headers } = modifiedWebhook;
+
+    if (Object.keys(headers).length === 1) {
+      const { key, value } = headers[0];
+      if (key.length === 0 && value.length === 0) return [];
+    }
+    return headers;
+  };
+
+  const resetErrors = () => {
+    dispatch({
+      type: 'SET_ERRORS',
+      errors: null,
+    });
+  };
+
+  const setErrors = errors => {
+    dispatch({
+      type: 'SET_ERRORS',
+      errors,
+    });
+  };
+
+  const formatWebhook = () => {
+    const webhooks = cloneDeep(modifiedWebhook);
+    set(webhooks, 'headers', unformatLayout(cleanHeaders()));
+    return webhooks;
+  };
+
+  const createWebhooks = async () => {
+    try {
+      await request(`/admin/webhooks`, {
+        method: 'POST',
+        body: formatWebhook(),
+      });
+
+      strapi.notification.success(`notification.success`);
       goBack();
     } catch (err) {
       strapi.notification.error('notification.error');
@@ -225,12 +279,8 @@ function EditView() {
   };
 
   const updateWebhook = async () => {
-    const body = cloneDeep(modifiedWebhook);
-    set(body, 'headers', unformatLayout(modifiedWebhook.headers));
-
     try {
-      const body = cloneDeep(modifiedWebhook);
-      set(body, 'headers', unformatLayout(modifiedWebhook.headers));
+      const body = formatWebhook();
       delete body.id;
 
       await request(`/admin/webhooks/${id}`, {
@@ -241,7 +291,7 @@ function EditView() {
       dispatch({
         type: 'SUBMIT_SUCCEEDED',
       });
-      strapi.notification.success(`app.notification.success`);
+      strapi.notification.success(`notification.success`);
     } catch (err) {
       strapi.notification.error('notification.error');
     }
@@ -249,44 +299,13 @@ function EditView() {
 
   // utils
   const unformatLayout = headers => {
-    if (headers.length === 1) {
-      const { key, value } = headers[0];
-      if ((key === '') & (value === '')) {
-        return {};
-      }
-    }
-
-    const newHeader = headers.reduce((obj, item) => {
+    return headers.reduce((obj, item) => {
       const { key, value } = item;
       return {
         ...obj,
         [key]: value,
       };
     }, {});
-
-    return newHeader;
-  };
-
-  const handleRemove = ({ event, index }) => {
-    dispatch({
-      type: 'ON_HEADER_REMOVE',
-      index,
-      event,
-    });
-  };
-
-  const handleBlur = async ({ target }) => {
-    if (canCheck) {
-      try {
-        await createYupSchema(type, validations, translatedErrors).validate(
-          target.value
-        );
-        resetError();
-      } catch (err) {
-        const { message } = err;
-        setError(message);
-      }
-    }
   };
 
   return (
@@ -310,11 +329,8 @@ function EditView() {
                   <div key={key} className={form[key].styleName}>
                     <Inputs
                       {...form[key]}
-                      // customInputs={{
-                      //   headers: HeadersInput,
-                      // }}
+                      error={get(formErrors, [key, 'id'], null)}
                       name={key}
-                      //onBlur={handleBlur}
                       onChange={handleChange}
                       onClick={handleClick}
                       onRemove={handleRemove}

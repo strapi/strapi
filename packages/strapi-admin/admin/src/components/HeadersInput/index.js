@@ -41,10 +41,6 @@ const HeadersInput = ({ onClick, onChange, name, value, onRemove, error }) => {
   };
 
   const customStyles = {
-    container: base => ({
-      ...base,
-      'z-index': 9999,
-    }),
     control: (base, state) => ({
       ...base,
       border: state.isFocused
@@ -79,6 +75,7 @@ const HeadersInput = ({ onClick, onChange, name, value, onRemove, error }) => {
         backgroundColor:
           state.isSelected || state.isFocused ? '#f6f6f6' : '#fff',
         color: '#000000',
+        fontSize: '13px',
         fontWeight: state.isSelected ? '600' : '400',
         cursor: state.isFocused ? 'pointer' : 'initial',
         height: '32px',

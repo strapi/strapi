@@ -54,7 +54,7 @@ const TriggerContainer = ({ isPending, onCancel, response }) => {
                   </p>
                 </td>
                 <td>
-                  <p title={{ message }}>{message}</p>
+                  <p title={message}>{message}</p>
                 </td>
               </>
             )}

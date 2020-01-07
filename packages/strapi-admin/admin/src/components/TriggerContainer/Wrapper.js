@@ -7,13 +7,14 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
+  overflow-x: auto;
+  margin-bottom: 23px;
   table {
     width: 100%;
     height: 67px;
     background-color: white;
     border-radius: 2px;
     box-shadow: 0 2px 4px 0 #e3e9f3;
-    margin-bottom: 23px;
     td {
       padding: 0 25px;
       p {
@@ -40,6 +41,7 @@ const Wrapper = styled.div`
       }
       &:last-of-type {
         text-align: right;
+        max-width: 400px;
         button {
           color: #b4b6ba;
           &,

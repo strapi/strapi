@@ -8,6 +8,7 @@ import styled from 'styled-components';
 
 const Wrapper = styled.div`
   padding-top: 3px;
+  padding-bottom: 8px;
   table {
     width: 100%;
     border-radius: 3px;
@@ -54,7 +55,7 @@ const Wrapper = styled.div`
         text-transform: capitalize;
         width: 200px;
         label {
-          margin-top: -3px;
+          margin-top: -1px;
           font-weight: 500;
         }
       }

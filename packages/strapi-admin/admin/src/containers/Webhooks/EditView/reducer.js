@@ -9,6 +9,7 @@ const initialWebhook = {
 };
 
 const initialState = fromJS({
+  formErrors: {},
   initialWebhook: initialWebhook,
   modifiedWebhook: initialWebhook,
   shouldRefetchData: false,

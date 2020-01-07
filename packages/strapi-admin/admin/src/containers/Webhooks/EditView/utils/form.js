@@ -24,6 +24,7 @@ const form = {
     label: 'Headers',
     type: 'headers',
     value: [{ key: '', value: '' }],
+    validations: {},
   },
   events: {
     styleName: 'col-12',
