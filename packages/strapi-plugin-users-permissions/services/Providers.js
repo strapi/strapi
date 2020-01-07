@@ -370,6 +370,25 @@ const getProfile = async (provider, query, callback) => {
         });
       break;
     }
+    case 'vk': {
+      const vk = new Purest({ provider: 'vk' });
+
+      vk.query()
+        .get('users.get')
+        .auth(access_token)
+        .qs({ id: query.raw.user_id, v: '5.013' })
+        .request((err, res, body) => {
+          if (err) {
+            callback(err);
+          } else {
+            callback(null, {
+              username: `${body.response[0].last_name} ${body.response[0].first_name}`,
+              email: query.raw.email,
+            });
+          }
+        });
+      break;
+    }
     default:
       callback({
         message: 'Unknown provider.',

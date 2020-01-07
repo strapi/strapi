@@ -515,20 +515,22 @@ sudo nano ecosystem.config.js
 
 ```js
 module.exports = {
-  apps : [{
-    name: 'your-app-name',
-    cwd: '/home/ubuntu/my-strapi-project/my-project',
-    script: 'npm',
-    args: 'start',
-    env: {
-      NODE_ENV: 'production',
-      DATABASE_HOST: 'your-unique-url.rds.amazonaws.com', // database Endpoint under 'Connectivity & Security' tab
-      DATABASE_PORT: '5432',
-      DATABASE_NAME: 'strapi',  // DB name under 'Configuration' tab
-      DATABASE_USERNAME: 'postgres', // default username
-      DATABASE_PASSWORD: 'Password',
+  apps: [
+    {
+      name: 'your-app-name',
+      cwd: '/home/ubuntu/my-strapi-project/my-project',
+      script: 'npm',
+      args: 'start',
+      env: {
+        NODE_ENV: 'production',
+        DATABASE_HOST: 'your-unique-url.rds.amazonaws.com', // database Endpoint under 'Connectivity & Security' tab
+        DATABASE_PORT: '5432',
+        DATABASE_NAME: 'strapi', // DB name under 'Configuration' tab
+        DATABASE_USERNAME: 'postgres', // default username
+        DATABASE_PASSWORD: 'Password',
+      },
     },
-  }],
+  ],
 };
 ```
 

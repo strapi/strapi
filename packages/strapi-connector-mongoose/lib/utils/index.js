@@ -27,8 +27,8 @@ module.exports = (mongoose = Mongoose) => {
     return this.toString();
   };
 
-  const convertType = mongooseType => {
-    switch (mongooseType.toLowerCase()) {
+  const convertType = attr => {
+    switch (attr.type.toLowerCase()) {
       case 'array':
         return { type: Array };
       case 'boolean':
@@ -67,8 +67,13 @@ module.exports = (mongoose = Mongoose) => {
         return { type: 'Number' };
       case 'uuid':
         return { type: 'ObjectId' };
-      case 'email':
       case 'enumeration':
+        return {
+          type: 'String',
+          enum: attr.enum.concat(null),
+          default: null,
+        };
+      case 'email':
       case 'password':
       case 'string':
       case 'text':
@@ -95,6 +100,8 @@ module.exports = (mongoose = Mongoose) => {
   };
 
   const valueToId = value => {
+    if (Array.isArray(value)) return value.map(valueToId);
+
     if (isMongoId(value)) {
       return mongoose.Types.ObjectId(value);
     }
