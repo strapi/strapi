@@ -5,7 +5,7 @@ const database = ({ scope }) => ({
   default: scope.name,
   validate: value => {
     if (value.includes('.')) {
-      return `The database name can't contains "."`;
+      return `The database name can't contain a "."`;
     }
 
     return true;
