@@ -75,6 +75,17 @@ yup.addMethod(yup.array, 'matchesEnumRegex', function(message) {
   });
 });
 
+yup.addMethod(yup.string, 'isValidRegExpPattern', function(message) {
+              return this.test('isValidRegExpPattern', message, function(string) {
+                               return new RegExp(string) !== null;
+                               });
+              });
+yup.addMethod(yup.string, 'isValidRegExpPattern', function(message) {
+  return this.test('isValidRegExpPattern', message, function(string) {
+    return new RegExp(string) !== null;
+  });
+});
+
 const ATTRIBUTES_THAT_DONT_HAVE_MIN_MAX_SETTINGS = ['boolean', 'date', 'enumeration', 'media'];
 
 const forms = {
@@ -232,7 +243,10 @@ const forms = {
           return yup.object().shape({
             ...commonShape,
             ...fieldsThatSupportMaxAndMinLengthShape,
-            regex: yup.string().nullable(),
+            regex: yup
+              .string()
+              .isValidRegExpPattern(getTrad('error.validation.regex'))
+              .nullable(),
           });
         case 'number':
         case 'integer':
