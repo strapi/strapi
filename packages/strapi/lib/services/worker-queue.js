@@ -1,5 +1,5 @@
 /**
- * SImple worker queue in memory
+ * Simple worker queue in memory
  */
 'use strict';
 
@@ -33,6 +33,7 @@ module.exports = class WorkerQueue {
   }
 
   pop() {
+    debug('Pop worker queue and execute');
     const payload = this.queue.pop();
 
     if (payload) {

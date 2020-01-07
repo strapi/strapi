@@ -126,11 +126,12 @@ class WebhookRunner {
         value => value.id !== webhook.id
       );
 
-      this.webhooksMap.set(event, filteredWebhooks);
-
       // Cleanup hanging listeners
       if (filteredWebhooks.length === 0) {
+        this.webhooksMap.delete(event);
         this.deleteListener(event);
+      } else {
+        this.webhooksMap.set(event, filteredWebhooks);
       }
     });
   }
