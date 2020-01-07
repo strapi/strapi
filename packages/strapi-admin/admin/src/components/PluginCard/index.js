@@ -11,7 +11,7 @@ import { Button, PopUpWarning } from 'strapi-helper-plugin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Wrapper from './Wrapper';
 
-const PLUGINS_WITH_CONFIG = ['content-manager', 'email', 'upload'];
+const PLUGINS_WITH_CONFIG = ['email', 'upload'];
 
 /* eslint-disable react/no-unused-state */
 class PluginCard extends React.Component {
@@ -57,10 +57,7 @@ class PluginCard extends React.Component {
   };
 
   handleClickSettings = e => {
-    const settingsPath =
-      this.props.plugin.id === 'content-manager'
-        ? '/plugins/content-manager/ctm-configurations/models'
-        : `/plugins/${this.props.plugin.id}/configurations/${this.props.currentEnvironment}`;
+    const settingsPath = `/plugins/${this.props.plugin.id}/configurations/${this.props.currentEnvironment}`;
 
     e.preventDefault();
     e.stopPropagation();

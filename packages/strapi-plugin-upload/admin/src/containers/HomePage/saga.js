@@ -65,12 +65,12 @@ function* uploadFiles(action) {
 
     if (newFiles.length > 1) {
       strapi.notification.success({
-        id: 'upload.notification.dropFile.success',
+        id: 'upload.notification.dropFiles.success',
+        values: { number: newFiles.length },
       });
     } else {
       strapi.notification.success({
-        id: 'upload.notification.dropFiles.success',
-        values: { number: newFiles.length },
+        id: 'upload.notification.dropFile.success',
       });
     }
   } catch (error) {

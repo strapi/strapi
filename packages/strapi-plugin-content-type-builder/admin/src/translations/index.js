@@ -15,6 +15,7 @@ import ru from './ru.json';
 import tr from './tr.json';
 import zhHans from './zh-Hans.json';
 import zh from './zh.json';
+import sk from './sk.json';
 
 const trads = {
   ar,
@@ -34,6 +35,7 @@ const trads = {
   tr,
   'zh-Hans': zhHans,
   zh,
+  sk,
 };
 
 export default trads;

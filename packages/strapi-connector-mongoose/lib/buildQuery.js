@@ -1,3 +1,5 @@
+'use strict';
+
 const _ = require('lodash');
 const utils = require('./utils')();
 
@@ -290,6 +292,15 @@ const buildLookupMatch = ({ assoc }) => {
         $match: {
           $expr: {
             $eq: ['$$localAlias', '$_id'],
+          },
+        },
+      };
+    }
+    case 'manyWay': {
+      return {
+        $match: {
+          $expr: {
+            $in: ['$_id', '$$localAlias'],
           },
         },
       };
