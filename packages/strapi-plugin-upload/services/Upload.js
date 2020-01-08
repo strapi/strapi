@@ -87,7 +87,7 @@ module.exports = {
         fs.unlinkSync(file.tmpPath);
       }
 
-      strapi.eventHub.emit('media.create', res);
+      strapi.eventHub.emit('media.create', { media: res });
       return res;
     };
 
@@ -132,7 +132,7 @@ module.exports = {
       id: file.id,
     });
 
-    strapi.eventHub.emit('media.delete', media);
+    strapi.eventHub.emit('media.delete', { media });
 
     return strapi.query('file', 'upload').delete({ id: file.id });
   },
