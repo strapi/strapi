@@ -172,6 +172,10 @@ module.exports = function createComponentBuilder() {
             this.unsetRelation(oldAttribute);
           }
 
+          if (Object.keys(oldAttribute).includes('autoPopulate')) {
+            newAttribute.autoPopulate = oldAttribute.autoPopulate;
+          }
+
           return this.setRelation({
             key,
             modelName: contentType.modelName,
