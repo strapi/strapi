@@ -95,42 +95,26 @@ const createYupSchema = (model, { components }) => {
         );
 
         if (attribute.repeatable === true) {
-          const { min, max } = attribute;
-          let componentSchema = yup
-            .array()
-            .of(componentFieldSchema)
-            .test('min', function(value) {
-              let hasMaxError = false;
+          const { min, max, required } = attribute;
+          let componentSchema = yup.lazy(value => {
+            let baseSchema = yup.array().of(componentFieldSchema);
 
-              if (max && value) {
-                hasMaxError = value.length > max;
+            if (min) {
+              if (required) {
+                baseSchema = baseSchema.min(min, errorsTrads.min);
+              } else if (required !== true && isEmpty(value)) {
+                baseSchema = baseSchema.nullable();
+              } else {
+                baseSchema = baseSchema.min(min, errorsTrads.min);
               }
+            }
 
-              if (min) {
-                const hasRequiredError =
-                  attribute.required &&
-                  (value === undefined || value.length < min);
+            if (max) {
+              baseSchema = baseSchema.max(max, errorsTrads.max);
+            }
 
-                if (
-                  hasRequiredError ||
-                  (value && value.length < min && value.length !== 0)
-                ) {
-                  return this.createError({
-                    path: this.path,
-                    message: errorsTrads.min,
-                  });
-                }
-              }
-
-              if (hasMaxError) {
-                return this.createError({
-                  path: this.path,
-                  message: errorsTrads.max,
-                });
-              }
-
-              return true;
-            });
+            return baseSchema;
+          });
 
           acc[current] = componentSchema;
 
