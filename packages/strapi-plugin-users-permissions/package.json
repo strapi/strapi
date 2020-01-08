@@ -12,6 +12,7 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
+    "@purest/providers": "^1.0.1",
     "bcryptjs": "^2.4.3",
     "classnames": "^2.2.6",
     "grant-koa": "^4.6.0",
