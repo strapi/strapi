@@ -36,6 +36,7 @@ const {
   createWebhookStore,
 } = require('./services/webhook-store');
 const { createCoreStore, coreStoreModel } = require('./services/core-store');
+const createEntityService = require('./services/entity-service');
 const { createDatabaseManager } = require('strapi-database');
 
 const CONFIG_PATHS = {
@@ -382,6 +383,11 @@ class Strapi extends EventEmitter {
     this.webhookStore = createWebhookStore({ db: this.db });
 
     await this.startWebhooks();
+
+    this.entityService = createEntityService({
+      db: this.db,
+      eventHub: this.eventHub,
+    });
 
     // Initialize hooks and middlewares.
     await initializeMiddlewares.call(this);

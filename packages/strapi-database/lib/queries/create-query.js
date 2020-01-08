@@ -5,8 +5,7 @@ module.exports = function createQuery(opts) {
 };
 
 class Query {
-  constructor({ model, connectorQuery, eventHub }) {
-    this.eventHub = eventHub;
+  constructor({ model, connectorQuery }) {
     this.connectorQuery = connectorQuery;
     this.model = model;
   }
@@ -44,41 +43,35 @@ class Query {
     return mapping[this.model.orm].call(this, { model: this.model });
   }
 
-  async find(...args) {
+  find(...args) {
     return this.connectorQuery.find(...args);
   }
 
-  async findOne(...args) {
+  findOne(...args) {
     return this.connectorQuery.findOne(...args);
   }
 
-  async create(...args) {
-    const entry = await this.connectorQuery.create(...args);
-    this.eventHub.emit('entry.create', entry);
-    return entry;
+  create(...args) {
+    return this.connectorQuery.create(...args);
   }
 
-  async update(...args) {
-    const entry = await this.connectorQuery.update(...args);
-    this.eventHub.emit('entry.update', entry);
-    return entry;
+  update(...args) {
+    return this.connectorQuery.update(...args);
   }
 
-  async delete(...args) {
-    const entry = await this.connectorQuery.delete(...args);
-    this.eventHub.emit('entry.delete', entry);
-    return entry;
+  delete(...args) {
+    return this.connectorQuery.delete(...args);
   }
 
-  async count(...args) {
+  count(...args) {
     return this.connectorQuery.count(...args);
   }
 
-  async search(...args) {
+  search(...args) {
     return this.connectorQuery.search(...args);
   }
 
-  async countSearch(...args) {
+  countSearch(...args) {
     return this.connectorQuery.countSearch(...args);
   }
 }
