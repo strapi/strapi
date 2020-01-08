@@ -11,7 +11,7 @@ let internals = {
     email: 'user1@strapi.io',
     password: 'test1234',
   },
-  role: [
+  roles: [
     {
       name: 'Test Role',
       description: 'Some random test role',
@@ -54,7 +54,7 @@ describe('Roles API', () => {
       method: 'POST',
       url: '/users-permissions/roles',
       body: {
-        ...internals.role[0],
+        ...internals.roles[0],
         permissions: [],
         users: [data.user],
       },
@@ -72,10 +72,10 @@ describe('Roles API', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body.roles).toEqual(
-      expect.arrayContaining([expect.objectContaining(internals.role[0])])
+      expect.arrayContaining([expect.objectContaining(internals.roles[0])])
     );
 
-    data.role = res.body.roles.find(r => r.name === internals.role[0].name);
+    data.role = res.body.roles.find(r => r.name === internals.roles[0].name);
   });
 
   test('Delete Role', async () => {

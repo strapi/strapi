@@ -338,7 +338,7 @@ module.exports = {
       USER: _.omit(user.toJSON ? user.toJSON() : user, [
         'password',
         'resetPasswordToken',
-        'role',
+        'roles',
         'provider',
       ]),
       TOKEN: resetPasswordToken,
@@ -350,7 +350,7 @@ module.exports = {
       USER: _.omit(user.toJSON ? user.toJSON() : user, [
         'password',
         'resetPasswordToken',
-        'role',
+        'roles',
         'provider',
       ]),
     });
@@ -473,7 +473,7 @@ module.exports = {
       );
     }
 
-    params.role = [role.id];
+    params.roles = [role.id];
     params.password = await strapi.plugins[
       'users-permissions'
     ].services.user.hashPassword(params);
@@ -536,7 +536,7 @@ module.exports = {
           USER: _.omit(user.toJSON ? user.toJSON() : user, [
             'password',
             'resetPasswordToken',
-            'role',
+            'roles',
             'provider',
           ]),
           CODE: jwt,
@@ -548,7 +548,7 @@ module.exports = {
           USER: _.omit(user.toJSON ? user.toJSON() : user, [
             'password',
             'resetPasswordToken',
-            'role',
+            'roles',
             'provider',
           ]),
         });
@@ -667,7 +667,7 @@ module.exports = {
       USER: _.omit(user.toJSON ? user.toJSON() : user, [
         'password',
         'resetPasswordToken',
-        'role',
+        'roles',
         'provider',
       ]),
       CODE: jwt,
@@ -679,7 +679,7 @@ module.exports = {
       USER: _.omit(user.toJSON ? user.toJSON() : user, [
         'password',
         'resetPasswordToken',
-        'role',
+        'roles',
         'provider',
       ]),
     });

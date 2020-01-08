@@ -69,12 +69,12 @@ module.exports = {
 
     const users = await strapi
       .query('user', 'users-permissions')
-      .find({ role_in: [roleID] });
+      .find({ roles_in: [roleID] });
 
     // Remain roles except for the role you delete.
     // If no role remains, give user a public role.
     const arrayOfPromises = users.reduce((acc, user) => {
-      const role = (user.role || []).reduce(
+      const roles = (user.roles || []).reduce(
         (arr, r) => (`${r.id}` === `${roleID}` ? arr : arr.concat(r)),
         []
       );
@@ -85,7 +85,7 @@ module.exports = {
             id: user.id,
           },
           {
-            role: role.length ? role : [publicRoleID],
+            roles: roles.length ? roles : [publicRoleID],
           }
         )
       );
@@ -204,7 +204,7 @@ module.exports = {
 
     const users = await strapi
       .query('user', 'users-permissions')
-      .find({ role_in: [roleID] });
+      .find({ roles_in: [roleID] });
 
     // Group by `type`.
     const permissions = role.permissions.reduce((acc, permission) => {
@@ -243,7 +243,7 @@ module.exports = {
     for (let i = 0; i < roles.length; ++i) {
       roles[i].nb_users = await strapi
         .query('user', 'users-permissions')
-        .count({ role_in: roles[i].id });
+        .count({ roles_in: roles[i].id });
     }
 
     return roles;
@@ -519,7 +519,7 @@ module.exports = {
 
     const users = await strapi
       .query('user', 'users-permissions')
-      .find({ role_in: [roleID] }, ['role']);
+      .find({ roles_in: [roleID] }, ['role']);
 
     await Promise.all(
       Object.keys(body.permissions || {}).reduce((acc, type) => {
@@ -570,20 +570,20 @@ module.exports = {
   },
 
   async updateUserRole(user, action, roleID, authenticatedRoleID) {
-    const oldRole = (user.role || []).map(r =>
+    const oldRoles = (user.roles || []).map(r =>
       typeof r === 'object' ? r.id : r
     );
-    let newRole = [];
+    let newRoles = [];
     if (action === 'add') {
-      newRole = oldRole.concat(roleID);
+      newRoles = oldRoles.concat(roleID);
     } else if (action === 'delete') {
-      newRole = oldRole.filter(id => `${id}` !== `${roleID}`);
+      newRoles = oldRoles.filter(id => `${id}` !== `${roleID}`);
     }
-    if (!newRole.length) newRole = [authenticatedRoleID];
+    if (!newRoles.length) newRoles = [authenticatedRoleID];
 
     return strapi
       .query('user', 'users-permissions')
-      .update({ id: user.id }, { role: newRole });
+      .update({ id: user.id }, { roles: newRoles });
   },
 
   template(layout, data) {

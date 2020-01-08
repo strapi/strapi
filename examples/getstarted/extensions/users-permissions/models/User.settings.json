@@ -50,17 +50,18 @@
       "default": false,
       "configurable": false
     },
-    "role": {
+    "roles": {
+      "plugin": "users-permissions",
       "collection": "role",
       "via": "users",
       "dominant": true,
-      "plugin": "users-permissions",
       "configurable": false
     },
     "picture": {
       "model": "file",
       "via": "related",
-      "plugin": "upload"
+      "plugin": "upload",
+      "required": false
     }
   }
 }

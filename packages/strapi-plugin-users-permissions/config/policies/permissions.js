@@ -20,7 +20,7 @@ module.exports = async (ctx, next) => {
       } else {
         ctx.state.user = await strapi
           .query('user', 'users-permissions')
-          .findOne({ id }, ['role']);
+          .findOne({ id }, ['roles']);
       }
     } catch (err) {
       strapi.log.error(err);
@@ -44,11 +44,7 @@ module.exports = async (ctx, next) => {
       return handleErrors(ctx, 'User Not Found', 'unauthorized');
     }
 
-    if (Array.isArray(ctx.state.user.role)) {
-      roles = ctx.state.user.role;
-    } else {
-      roles = ctx.state.user.role ? [ctx.state.user.role] : [];
-    }
+    roles = ctx.state.user.roles;
 
     if (roles.some(r => r.type === 'root')) {
       return await next();

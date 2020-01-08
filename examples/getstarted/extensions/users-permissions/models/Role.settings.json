@@ -1,6 +1,6 @@
 {
-  "collectionName": "users-permissions_role",
   "connection": "default",
+  "collectionName": "users-permissions_role",
   "info": {
     "name": "role",
     "description": ""
@@ -32,9 +32,11 @@
       "isVirtual": true
     },
     "users": {
+      "via": "roles",
+      "plugin": "users-permissions",
       "collection": "user",
-      "via": "role",
-      "plugin": "users-permissions"
+      "dominant": true,
+      "configurable": false
     }
   }
 }
