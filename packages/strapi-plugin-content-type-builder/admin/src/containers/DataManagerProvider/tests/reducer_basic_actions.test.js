@@ -1,5 +1,7 @@
 import { fromJS } from 'immutable';
+import { get } from 'lodash';
 import reducer, { initialState } from '../reducer';
+import testData from './data';
 
 describe('CTB | containers | reducer | basics actions ', () => {
   it('Should return the initial state', () => {
@@ -173,6 +175,152 @@ describe('CTB | containers | reducer | basics actions ', () => {
     });
   });
 
+  describe('CHANGE_DYNAMIC_ZONE_COMPONENTS', () => {
+    it('Should add the component to the dz field and to the modifiedData.components if the added component is not already in the modifiedData.components', () => {
+      const componentUID = 'default.openingtimes';
+      const component = get(testData, ['components', componentUID]);
+      const contentType = fromJS(
+        testData.contentTypes['application::address.address']
+      ).setIn(
+        ['schema', 'attributes', 'dz'],
+        fromJS({ type: 'dynamiczone', components: ['default.openingtimes'] })
+      );
+      const state = initialState
+        .setIn(['components'], fromJS(testData.components))
+        .setIn(['modifiedData', 'components', componentUID], fromJS(component))
+        .setIn(['modifiedData', 'contentType'], contentType);
+
+      const expected = state
+        .setIn(
+          ['modifiedData', 'components', 'default.dish'],
+          fromJS(get(testData, ['components', 'default.dish']))
+        )
+        .setIn(
+          [
+            'modifiedData',
+            'contentType',
+            'schema',
+            'attributes',
+            'dz',
+            'components',
+          ],
+          fromJS([componentUID, 'default.dish'])
+        );
+
+      expect(
+        reducer(state, {
+          type: 'CHANGE_DYNAMIC_ZONE_COMPONENTS',
+          dynamicZoneTarget: 'dz',
+          newComponents: ['default.dish'],
+        })
+      ).toEqual(expected);
+    });
+
+    it('Should add the component to the dz field and not to the modifiedData.components if the added component is already in the modifiedData.components', () => {
+      const componentUID = 'default.openingtimes';
+      const component = get(testData, ['components', componentUID]);
+      const contentType = fromJS(
+        testData.contentTypes['application::address.address']
+      ).setIn(
+        ['schema', 'attributes', 'dz'],
+        fromJS({ type: 'dynamiczone', components: ['default.openingtimes'] })
+      );
+      const state = initialState
+        .setIn(['components'], fromJS(testData.components))
+        .setIn(['modifiedData', 'components', componentUID], fromJS(component))
+        .setIn(
+          ['modifiedData', 'components', 'default.dish'],
+          fromJS(get(testData, ['components', 'default.dish']))
+        )
+        .setIn(['modifiedData', 'contentType'], contentType);
+
+      const expected = state.setIn(
+        [
+          'modifiedData',
+          'contentType',
+          'schema',
+          'attributes',
+          'dz',
+          'components',
+        ],
+        fromJS([componentUID, 'default.dish'])
+      );
+
+      expect(
+        reducer(state, {
+          type: 'CHANGE_DYNAMIC_ZONE_COMPONENTS',
+          dynamicZoneTarget: 'dz',
+          newComponents: ['default.dish'],
+        })
+      ).toEqual(expected);
+    });
+  });
+
+  describe('CREATE_COMPONENT_SCHEMA', () => {
+    it('Should add the created component schema to the components object when creating a component using the left menu link', () => {
+      const action = {
+        type: 'CREATE_COMPONENT_SCHEMA',
+        data: { name: 'new component', icon: 'arrow-alt-circle-down' },
+        componentCategory: 'test',
+        schemaType: 'component',
+        uid: 'test.new-component',
+        shouldAddComponentToData: false,
+      };
+
+      const state = initialState
+        .setIn(['components', fromJS(testData.components)])
+        .setIn(['initialComponents', fromJS(testData.components)]);
+
+      const expected = state.setIn(
+        ['components', action.uid],
+        fromJS({
+          uid: action.uid,
+          isTemporary: true,
+          category: action.componentCategory,
+          schema: {
+            ...action.data,
+            attributes: {},
+          },
+        })
+      );
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should add the created component schema to the components object, create the attribute and also add the created component to modifiedData.components when using the add attribute modal', () => {
+      const action = {
+        type: 'CREATE_COMPONENT_SCHEMA',
+        data: { name: 'new component', icon: 'arrow-alt-circle-down' },
+        componentCategory: 'test',
+        schemaType: 'component',
+        uid: 'test.new-component',
+        shouldAddComponentToData: true,
+      };
+      const compoToCreate = {
+        uid: action.uid,
+        isTemporary: true,
+        category: action.componentCategory,
+        schema: {
+          ...action.data,
+          attributes: {},
+        },
+      };
+
+      const state = initialState
+        .setIn(['components', fromJS(testData.components)])
+        .setIn(['initialComponents', fromJS(testData.components)]);
+
+      const expected = state
+        .setIn(['components', action.uid], fromJS(compoToCreate))
+        .setIn(
+          ['modifiedData', 'components', action.uid],
+          fromJS(compoToCreate)
+        );
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
   describe('CREATE_SCHEMA', () => {
     it('Should create a content type schema correctly', () => {
       const uid = 'application::test';
@@ -196,6 +344,26 @@ describe('CTB | containers | reducer | basics actions ', () => {
       expect(
         reducer(initialState, { type: 'CREATE_SCHEMA', uid, data })
       ).toEqual(expected);
+    });
+  });
+
+  describe('DELETE_NOT_SAVED_TYPE', () => {
+    it('Should reset the components and and contentTypes object', () => {
+      const state = initialState
+        .setIn(['components'], fromJS({ foo: {}, bar: {} }))
+        .setIn(['initialComponents'], fromJS({ foo: {} }))
+        .setIn(['contentTypes'], fromJS({ baz: {}, bat: {} }))
+        .setIn(['initialContentTypes'], fromJS({ baz: {} }));
+
+      const expected = initialState
+        .setIn(['components'], fromJS({ foo: {} }))
+        .setIn(['initialComponents'], fromJS({ foo: {} }))
+        .setIn(['contentTypes'], fromJS({ baz: {} }))
+        .setIn(['initialContentTypes'], fromJS({ baz: {} }));
+
+      expect(reducer(state, { type: 'DELETE_NOT_SAVED_TYPE' })).toEqual(
+        expected
+      );
     });
   });
 

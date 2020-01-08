@@ -15,6 +15,7 @@ const initialState = fromJS({
 });
 
 const ONE_SIDE_RELATIONS = ['oneWay', 'manyWay'];
+
 const getOppositeNature = originalNature => {
   if (originalNature === 'manyToOne') {
     return 'oneToMany';
@@ -517,4 +518,4 @@ const reducer = (state, action) => {
 };
 
 export default reducer;
-export { initialState };
+export { addComponentsToState, initialState };
