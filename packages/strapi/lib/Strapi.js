@@ -22,7 +22,6 @@ const {
   loadHooks,
   bootstrap,
   loadExtensions,
-  initCoreStore,
   loadComponents,
 } = require('./core');
 const initializeMiddlewares = require('./middlewares');
@@ -30,7 +29,29 @@ const initializeHooks = require('./hooks');
 const createStrapiFs = require('./core/fs');
 const getPrefixedDeps = require('./utils/get-prefixed-dependencies');
 
+const createEventHub = require('./services/event-hub');
+const createWebhookRunner = require('./services/webhook-runner');
+const {
+  webhookModel,
+  createWebhookStore,
+} = require('./services/webhook-store');
+const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const { createDatabaseManager } = require('strapi-database');
+
+const CONFIG_PATHS = {
+  admin: 'admin',
+  api: 'api',
+  config: 'config',
+  controllers: 'controllers',
+  models: 'models',
+  plugins: 'plugins',
+  policies: 'policies',
+  tmp: '.tmp',
+  services: 'services',
+  static: 'public',
+  validators: 'validators',
+  views: 'views',
+};
 
 /**
  * Construct an Strapi instance.
@@ -39,7 +60,7 @@ const { createDatabaseManager } = require('strapi-database');
  */
 
 class Strapi extends EventEmitter {
-  constructor({ dir, autoReload = false, serveAdminPanel = true } = {}) {
+  constructor(opts) {
     super();
 
     this.setMaxListeners(100);
@@ -61,19 +82,26 @@ class Strapi extends EventEmitter {
       models,
     };
 
-    // Exclude EventEmitter, Koa and HTTP server to be freezed.
-    this.propertiesToNotFreeze = Object.keys(this);
-
-    // Expose `admin`.
+    this.dir = opts.dir || process.cwd();
     this.admin = {};
-
-    // Expose `plugin`.
     this.plugins = {};
+    this.config = {};
 
-    this.dir = dir || process.cwd();
+    // internal services.
+    this.fs = createStrapiFs(this);
+    this.eventHub = createEventHub();
+    this.webhookRunner = createWebhookRunner({
+      eventHub: this.eventHub,
+      logger: this.log,
+    });
+
+    this.initConfig(opts);
+    this.requireProjectBootstrap();
+  }
+
+  initConfig({ autoReload = false, serveAdminPanel = true } = {}) {
     const pkgJSON = require(path.resolve(this.dir, 'package.json'));
 
-    // Default configurations.
     this.config = {
       serveAdminPanel,
       launchedAt: Date.now(),
@@ -84,20 +112,7 @@ class Strapi extends EventEmitter {
       environment: _.toLower(process.env.NODE_ENV) || 'development',
       environments: {},
       admin: {},
-      paths: {
-        admin: 'admin',
-        api: 'api',
-        config: 'config',
-        controllers: 'controllers',
-        models: 'models',
-        plugins: 'plugins',
-        policies: 'policies',
-        tmp: '.tmp',
-        services: 'services',
-        static: 'public',
-        validators: 'validators',
-        views: 'views',
-      },
+      paths: CONFIG_PATHS,
       middleware: {},
       hook: {},
       functions: {},
@@ -107,9 +122,6 @@ class Strapi extends EventEmitter {
       installedMiddlewares: getPrefixedDeps('strapi-middleware', pkgJSON),
       installedHooks: getPrefixedDeps('strapi-hook', pkgJSON),
     };
-
-    this.fs = createStrapiFs(this);
-    this.requireProjectBootstrap();
   }
 
   requireProjectBootstrap() {
@@ -356,14 +368,29 @@ class Strapi extends EventEmitter {
     await utils.usage(this.config);
 
     // Init core store
-    initCoreStore(this);
+    this.models['core_store'] = coreStoreModel;
+    this.models['strapi_webhooks'] = webhookModel;
 
     this.db = createDatabaseManager(this);
     await this.db.initialize();
 
+    this.store = createCoreStore({
+      environment: this.config.environment,
+      db: this.db,
+    });
+
+    this.webhookStore = createWebhookStore({ db: this.db });
+
+    await this.startWebhooks();
+
     // Initialize hooks and middlewares.
     await initializeMiddlewares.call(this);
     await initializeHooks.call(this);
+  }
+
+  async startWebhooks() {
+    const webhooks = await this.webhookStore.findWebhooks();
+    webhooks.forEach(webhook => this.webhookRunner.add(webhook));
   }
 
   reload() {
@@ -443,16 +470,11 @@ class Strapi extends EventEmitter {
   }
 
   async freeze() {
-    const propertiesToNotFreeze = this.propertiesToNotFreeze || [];
-
-    // Remove object from tree.
-    delete this.propertiesToNotFreeze;
-
-    return Object.keys(this)
-      .filter(x => !_.includes(propertiesToNotFreeze, x))
-      .forEach(key => {
-        Object.freeze(this[key]);
-      });
+    Object.freeze(this.config);
+    Object.freeze(this.dir);
+    Object.freeze(this.admin);
+    Object.freeze(this.plugins);
+    Object.freeze(this.api);
   }
 
   getModel(modelKey, plugin) {

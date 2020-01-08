@@ -1,11 +1,12 @@
 'use strict';
 
-module.exports = function createQuery({ connectorQuery, model }) {
-  return new Query(connectorQuery, model);
+module.exports = function createQuery(opts) {
+  return new Query(opts);
 };
 
 class Query {
-  constructor(connectorQuery, model) {
+  constructor({ model, connectorQuery, eventHub }) {
+    this.eventHub = eventHub;
     this.connectorQuery = connectorQuery;
     this.model = model;
   }
@@ -52,15 +53,21 @@ class Query {
   }
 
   async create(...args) {
-    return this.connectorQuery.create(...args);
+    const entry = await this.connectorQuery.create(...args);
+    this.eventHub.emit('entry.create', entry);
+    return entry;
   }
 
   async update(...args) {
-    return this.connectorQuery.update(...args);
+    const entry = await this.connectorQuery.update(...args);
+    this.eventHub.emit('entry.update', entry);
+    return entry;
   }
 
   async delete(...args) {
-    return this.connectorQuery.delete(...args);
+    const entry = await this.connectorQuery.delete(...args);
+    this.eventHub.emit('entry.delete', entry);
+    return entry;
   }
 
   async count(...args) {
