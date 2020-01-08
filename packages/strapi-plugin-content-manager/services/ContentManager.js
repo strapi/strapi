@@ -60,7 +60,7 @@ module.exports = {
     const { model } = params;
 
     const { primaryKey } = strapi.query(model);
-    const filter = { [`${primaryKey}_in`]: query, _limit: 100 };
+    const filter = { [`${primaryKey}_in`]: Object.values(query), _limit: 100 };
 
     return strapi.entityService.delete({ params: filter }, { model });
   },
