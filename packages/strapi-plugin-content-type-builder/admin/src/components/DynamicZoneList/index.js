@@ -85,6 +85,7 @@ function DynamicZoneList({
                       <ComponentList
                         {...props}
                         isFromDynamicZone
+                        dzName={name}
                         mainTypeName={mainTypeName}
                         targetUid={targetUid}
                         key={component}

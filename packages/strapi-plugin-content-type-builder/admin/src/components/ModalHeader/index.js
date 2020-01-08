@@ -1,89 +1,103 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { HeaderModalTitle } from 'strapi-helper-plugin';
 import { get } from 'lodash';
-import { AttributeIcon } from '@buffetjs/core';
 import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import useDataManager from '../../hooks/useDataManager';
-import pluginId from '../../pluginId';
 import ComponentIcon from './ComponentIcon';
-import Header from './Header';
+import ComponentInfos from './ComponentInfos';
+import Icon from './Icon';
+import IconWrapper from './IconWrapper';
+import UpperFirst from '../UpperFirst';
+import DropdownInfos from './DropdownInfos';
 
-const ModalHeader = ({
-  category,
-  headerId,
-  iconType,
-  name,
-  target,
-  targetUid,
-  subCategory,
-  subTargetUid,
-}) => {
-  const { modifiedData } = useDataManager();
-  const currentComponent = get(modifiedData, ['components', targetUid], {});
-  const shouldDisplayComponentCatInfos = target === 'components';
-  const currentComponentIcon = get(currentComponent, ['schema', 'icon'], '');
-
-  let iconName;
-
-  if (iconType === 'components') {
-    iconName = 'component';
-  } else {
-    iconName = iconType;
-  }
+const ModalHeader = ({ headerId, headers }) => {
+  const shouldDisplayDropDown = headers.length > 3;
 
   return (
     <section>
       <HeaderModalTitle style={{ textTransform: 'none' }}>
-        {shouldDisplayComponentCatInfos ? (
-          <ComponentIcon isSelected>
-            <FontAwesomeIcon icon={currentComponentIcon} />
-          </ComponentIcon>
-        ) : (
-          <AttributeIcon
-            type={iconName}
-            style={{ margin: 'auto 20px auto 0' }}
-          />
-        )}
         {headerId && (
-          <FormattedMessage id={`${pluginId}.${headerId}`} values={{ name }} />
+          <>
+            <Icon type={get(headers, [0, 'icon', 'name'], '')} />
+            <FormattedMessage
+              id={headerId}
+              values={{ name: get(headers, [0, 'label'], '') }}
+            />
+          </>
         )}
-        {!headerId && (
-          <Header
-            category={category}
-            name={name}
-            target={target}
-            targetUid={targetUid}
-            subCategory={subCategory}
-            subTargetUid={subTargetUid}
-          />
-        )}
+        {!headerId &&
+          headers.map((header, index) => {
+            const iconName = get(header, ['icon', 'name'], '');
+            const iconType = iconName === null ? '' : iconName;
+            const icon = get(header, ['icon', 'isCustom'], false) ? (
+              <ComponentIcon isSelected>
+                <FontAwesomeIcon icon={iconType} />
+              </ComponentIcon>
+            ) : (
+              <Icon type={iconType} />
+            );
+
+            if (shouldDisplayDropDown && index === 1) {
+              return (
+                <Fragment key={index}>
+                  <IconWrapper>
+                    <FontAwesomeIcon icon="chevron-right" />
+                  </IconWrapper>
+                  <DropdownInfos
+                    headers={[headers[1], headers[2]]}
+                    shouldDisplaySecondHeader={headers.length > 4}
+                  />
+                </Fragment>
+              );
+            }
+
+            if (shouldDisplayDropDown && index === 2 && headers.length > 4) {
+              return null;
+            }
+
+            if (index === 0) {
+              return (
+                <Fragment key={index}>
+                  {icon}
+                  <span>
+                    <UpperFirst content={get(header, ['label'], '')} />
+                  </span>
+                </Fragment>
+              );
+            }
+
+            return (
+              <Fragment key={index}>
+                <IconWrapper>
+                  <FontAwesomeIcon icon="chevron-right" />
+                </IconWrapper>
+
+                <span>
+                  <UpperFirst content={get(header, ['label'], '')} />
+                </span>
+                {header.info.category && (
+                  <ComponentInfos
+                    category={header.info.category}
+                    name={header.info.name}
+                  />
+                )}
+              </Fragment>
+            );
+          })}
       </HeaderModalTitle>
     </section>
   );
 };
 
 ModalHeader.defaultProps = {
-  category: null,
   headerId: '',
-  iconType: 'contentType',
-  name: '',
-  target: null,
-  targetUid: null,
-  subCategory: null,
-  subTargetUid: null,
+  headers: [],
 };
 
 ModalHeader.propTypes = {
-  category: PropTypes.string,
   headerId: PropTypes.string,
-  iconType: PropTypes.string,
-  name: PropTypes.string,
-  target: PropTypes.string,
-  targetUid: PropTypes.string,
-  subCategory: PropTypes.string,
-  subTargetUid: PropTypes.string,
+  headers: PropTypes.array,
 };
 
 export default ModalHeader;

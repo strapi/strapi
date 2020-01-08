@@ -15,8 +15,10 @@ import Td from '../Td';
 function ComponentList({
   customRowComponent,
   component,
+  dzName,
   mainTypeName,
   isFromDynamicZone,
+  isNestedInDZComponent,
   firstLoopComponentName,
   firstLoopComponentUid,
 }) {
@@ -32,6 +34,7 @@ function ComponentList({
       <Td colSpan={12} isChildOfDynamicZone={isFromDynamicZone}>
         <List
           customRowComponent={customRowComponent}
+          dzName={dzName}
           items={convertAttrObjToArray(attributes)}
           targetUid={component}
           mainTypeName={mainTypeName}
@@ -39,6 +42,7 @@ function ComponentList({
           firstLoopComponentUid={firstLoopComponentUid || component}
           editTarget="components"
           isFromDynamicZone={isFromDynamicZone}
+          isNestedInDZComponent={isNestedInDZComponent}
           isSub
           secondLoopComponentName={
             firstLoopComponentName ? componentName : null
@@ -53,15 +57,19 @@ function ComponentList({
 ComponentList.defaultProps = {
   component: null,
   customRowComponent: null,
+  dzName: null,
   isFromDynamicZone: false,
+  isNestedInDZComponent: false,
 };
 
 ComponentList.propTypes = {
   component: PropTypes.string,
   customRowComponent: PropTypes.func,
+  dzName: PropTypes.string,
   firstLoopComponentName: PropTypes.string,
   firstLoopComponentUid: PropTypes.string,
   isFromDynamicZone: PropTypes.bool,
+  isNestedInDZComponent: PropTypes.bool,
   mainTypeName: PropTypes.string.isRequired,
   targetUid: PropTypes.string.isRequired,
 };
