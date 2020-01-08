@@ -15,7 +15,7 @@ function SettingsPage() {
 
   const menuItems = [
     {
-      title: { id: 'app.components.LeftMenuLinkContainer.general' },
+      title: { id: 'Settings.global' },
       links: [
         {
           title: formatMessage({ id: `Settings.webhooks.title` }),

@@ -13,6 +13,7 @@ import {
   request,
   useGlobalContext,
   getYupInnerErrors,
+  BackHeader,
 } from 'strapi-helper-plugin';
 
 import reducer, { initialState } from './reducer';
@@ -292,7 +293,7 @@ function EditView() {
       dispatch({
         type: 'SUBMIT_SUCCEEDED',
       });
-      strapi.notification.success(`notification.success`);
+      strapi.notification.error('notification.form.success.fields');
     } catch (err) {
       strapi.notification.error('notification.error');
     }
@@ -311,6 +312,7 @@ function EditView() {
 
   return (
     <Wrapper>
+      <BackHeader onClick={goBack} />
       <form onSubmit={handleSubmit}>
         <Header {...headerProps} />
         {(isTriggering || !isEmpty(triggerResponse)) && (

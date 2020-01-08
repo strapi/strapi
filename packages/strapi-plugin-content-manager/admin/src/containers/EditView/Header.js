@@ -75,7 +75,7 @@ const Header = () => {
 
     if (!isCreatingEntry) {
       headerActions.unshift({
-        title: formatMessage({
+        label: formatMessage({
           id: 'app.utils.delete',
         }),
         color: 'delete',

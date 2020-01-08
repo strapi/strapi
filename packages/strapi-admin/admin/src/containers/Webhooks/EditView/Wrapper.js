@@ -7,6 +7,14 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
+  > div:first-of-type {
+    left: 24rem;
+  }
+  .header-title {
+    h1 {
+      text-transform: none;
+    }
+  }
   .header-title + div {
     button: first-of-type {
       margin-right: 30px;

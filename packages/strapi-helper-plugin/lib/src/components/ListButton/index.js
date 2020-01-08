@@ -8,9 +8,11 @@ const ListButton = styled.div`
     border-top: 1px solid #aed4fb;
     color: #007eff;
     font-weight: 500;
-    border-radius: 0;
     text-transform: uppercase;
-
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
     svg {
       vertical-align: initial;
     }

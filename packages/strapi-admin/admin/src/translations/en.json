@@ -218,6 +218,7 @@
   "Auth.header.register.description": "To finish setup and secure your app, please create the first user (root admin) by entering the necessary information below.",
   "Auth.link.forgot-password": "Forgot your password?",
   "Auth.link.ready": "Ready to sign in?",
+  "Settings.global": "Global Settings",
   "Settings.webhooks.title": "Webhooks",
   "Settings.webhooks.singular": "webhook",
   "Settings.webhooks.list.description": "Get POST changes notifications.",
@@ -243,5 +244,6 @@
   "components.Input.error.password.noMatch": "Passwords do not match",
   "form.button.done": "Done",
   "form.button.finish": "Finish",
-  "notification.form.error.fields": "The form contains some errors"
+  "notification.form.error.fields": "The form contains some errors",
+  "notification.form.success.fields": "Changes saved"
 }
