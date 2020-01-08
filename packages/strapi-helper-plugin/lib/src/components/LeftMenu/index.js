@@ -11,7 +11,8 @@ import sizes from '../../assets/styles/sizes';
 
 const LeftMenu = styled.div`
   width: 100%;
-  min-height: calc(100vh - ${sizes.header.height});
+  height: calc(100vh - ${sizes.header.height});
+  min-height: 100%;
   background-color: ${colors.leftMenu.mediumGrey};
   padding-top: 3.4rem;
   padding-left: 2rem;

@@ -22,7 +22,7 @@ const TriggerContainer = ({ isPending, onCancel, response }) => {
               <>
                 <td>
                   <p>
-                    <Pending fill="#6DBB1A" width="14px" height="15px" />
+                    <Pending fill="#6DBB1A" width="15px" height="15px" />
                     <span>Pending...</span>
                   </p>
                 </td>
@@ -49,7 +49,7 @@ const TriggerContainer = ({ isPending, onCancel, response }) => {
               <>
                 <td>
                   <p className="fail-label">
-                    <Fail fill="#f64d0a" width="14px" height="15px" />
+                    <Fail fill="#f64d0a" width="15px" height="15px" />
                     <span>Error {statusCode}</span>
                   </p>
                 </td>

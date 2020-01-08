@@ -228,8 +228,9 @@ function EditView() {
       resetErrors();
       submitForm();
     } catch (err) {
-      const errors = getYupInnerErrors(err);
+      strapi.notification.error('notification.form.error.fields');
 
+      const errors = getYupInnerErrors(err);
       setErrors(errors);
     }
   };

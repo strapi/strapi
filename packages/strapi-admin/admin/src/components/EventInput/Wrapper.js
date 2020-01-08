@@ -40,6 +40,8 @@ const Wrapper = styled.div`
     td {
       height: 41px;
       text-align: center;
+      font-size: 13px;
+      font-weight: 500;
     }
   }
   tbody {
@@ -55,8 +57,10 @@ const Wrapper = styled.div`
         text-transform: capitalize;
         width: 200px;
         label {
+          width: fit-content;
           margin-top: -1px;
           font-weight: 500;
+          cursor: pointer;
         }
       }
       &:not(:first-of-type) > div {

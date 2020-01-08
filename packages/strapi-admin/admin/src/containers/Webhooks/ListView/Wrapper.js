@@ -7,6 +7,7 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
+  margin-bottom: 60px;
   > div:first-of-type {
     margin-bottom: 33px;
   }

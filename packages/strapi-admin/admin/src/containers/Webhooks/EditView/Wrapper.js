@@ -9,7 +9,7 @@ import styled from 'styled-components';
 const Wrapper = styled.div`
   .header-title + div {
     button: first-of-type {
-      margin-right: 20px;
+      margin-right: 30px;
       position: relative;
       overflow: initial;
       &::after {
@@ -30,13 +30,13 @@ const Wrapper = styled.div`
     padding-top: 4px;
   }
   .form-card {
-    padding: 21px 25px;
+    padding: 21px 25px 0px 25px;
     background-color: #ffffff;
     border-radius: 2px;
     box-shadow: 0 2px 4px 0 #e3e9f3;
     margin-bottom: 30px;
   }
-  .row > div {
+  .row > div:not(:last-of-type) {
     margin-bottom: 4px;
   }
 `;
