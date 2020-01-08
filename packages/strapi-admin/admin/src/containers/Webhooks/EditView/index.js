@@ -4,7 +4,7 @@
  *
  */
 
-import React, { useEffect, useReducer, useCallback } from 'react';
+import React, { useEffect, useReducer, useCallback, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { cloneDeep, get, isEmpty, isEqual, set } from 'lodash';
 import { Header } from '@buffetjs/custom';
@@ -18,7 +18,7 @@ import {
 
 import reducer, { initialState } from './reducer';
 import form from './utils/form';
-import createYupSchema from './utils/schema';
+import { createYupSchema, createYupSchemaEntry } from './utils/schema';
 
 import Inputs from '../../../components/Inputs';
 import TriggerContainer from '../../../components/TriggerContainer';
@@ -26,9 +26,10 @@ import Wrapper from './Wrapper';
 
 function EditView() {
   const { formatMessage } = useGlobalContext();
+  const [submittedOnce, setSubmittedOnce] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const location = useLocation();
-  const { goBack } = useHistory();
+  const { goBack, push } = useHistory();
 
   const {
     formErrors,
@@ -78,7 +79,10 @@ function EditView() {
       })
     : name;
 
-  const actionsAreDisabled = isEqual(initialWebhook, modifiedWebhook);
+  const actionsAreDisabled =
+    isEqual(initialWebhook, modifiedWebhook) ||
+    Object.keys(formErrors).length > 0;
+
   const triggerActionIsDisabled =
     isCreatingWebhook || (!isCreatingWebhook && !actionsAreDisabled);
 
@@ -181,6 +185,10 @@ function EditView() {
     actions: actions,
   };
 
+  const handleBlur = ({ target }) => {
+    if (submittedOnce) checkFormError(target);
+  };
+
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
       type: 'ON_CHANGE',
@@ -206,6 +214,7 @@ function EditView() {
 
   const handleSubmit = e => {
     e.preventDefault();
+    setSubmittedOnce(true);
     checkFormErrors();
   };
 
@@ -214,6 +223,19 @@ function EditView() {
       updateWebhook();
     } else {
       createWebhooks();
+    }
+  };
+
+  const checkFormError = async target => {
+    const { name, value } = target;
+    const { type, validations } = form[name];
+
+    try {
+      await createYupSchemaEntry(type, validations).validate(value);
+
+      resetError(name);
+    } catch (err) {
+      setError(err.message, name);
     }
   };
 
@@ -246,11 +268,26 @@ function EditView() {
     return headers;
   };
 
-  const resetErrors = () => {
+  const resetError = name => {
+    const errors = formErrors;
+
+    if (errors[name]) {
+      delete errors[name];
+      resetErrors(errors);
+    }
+  };
+
+  const resetErrors = (errors = null) => {
     dispatch({
       type: 'SET_ERRORS',
-      errors: null,
+      errors: errors,
     });
+  };
+
+  const setError = (error, name) => {
+    const errors = formErrors;
+    set(errors, name, { id: error });
+    setErrors(errors);
   };
 
   const setErrors = errors => {
@@ -312,7 +349,7 @@ function EditView() {
 
   return (
     <Wrapper>
-      <BackHeader onClick={goBack} />
+      <BackHeader onClick={() => push('/settings/webhooks')} />
       <form onSubmit={handleSubmit}>
         <Header {...headerProps} />
         {(isTriggering || !isEmpty(triggerResponse)) && (
@@ -334,6 +371,7 @@ function EditView() {
                       {...form[key]}
                       error={get(formErrors, [key, 'id'], null)}
                       name={key}
+                      onBlur={handleBlur}
                       onChange={handleChange}
                       onClick={handleClick}
                       onRemove={handleRemove}

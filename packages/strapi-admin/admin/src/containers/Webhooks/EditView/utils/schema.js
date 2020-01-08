@@ -58,4 +58,4 @@ const createYupSchemaEntry = (type, validations) => {
   return schema;
 };
 
-export default createYupSchema;
+export { createYupSchema, createYupSchemaEntry };

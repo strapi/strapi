@@ -89,16 +89,9 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
   );
 };
 
-EventInput.defaultProps = {
-  handleClick: () => {},
-  onClick: () => {},
-};
-
 EventInput.propTypes = {
-  handleClick: PropTypes.func,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
-  onClick: PropTypes.func.isRequired,
   value: PropTypes.array,
 };
 

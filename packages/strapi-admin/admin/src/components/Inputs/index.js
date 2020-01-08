@@ -18,6 +18,7 @@ function Inputs({
   label,
   name,
   onChange,
+  onBlur: handleBlur,
   onClick,
   onRemove,
   type,
@@ -28,10 +29,10 @@ function Inputs({
     <Error
       inputError={inputError}
       name={name}
-      type={'text'}
+      type="text"
       validations={validations}
     >
-      {({ canCheck, onBlur, error, dispatch }) => {
+      {({ canCheck, error, dispatch }) => {
         const hasError = error && error !== null;
         const handleChange = e => {
           if (!canCheck) {
@@ -63,13 +64,15 @@ function Inputs({
               <EventInput
                 value={value}
                 name={name}
-                onClick={onClick}
-                onChange={handleChange}
+                onChange={e => {
+                  handleChange(e);
+                  handleBlur(e);
+                }}
               />
             ) : (
               <InputText
                 error={hasError}
-                onBlur={onBlur}
+                onBlur={handleBlur}
                 onChange={handleChange}
                 value={value}
                 name={name}
@@ -86,6 +89,7 @@ function Inputs({
 Inputs.defaultProps = {
   error: null,
   label: '',
+  onBlur: () => {},
   onClick: () => {},
   onRemove: () => {},
   type: 'text',
@@ -97,6 +101,7 @@ Inputs.propTypes = {
   error: PropTypes.string,
   label: PropTypes.oneOfType([PropTypes.string]),
   name: PropTypes.string.isRequired,
+  onBlur: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
   onClick: PropTypes.func,
   onRemove: PropTypes.func,

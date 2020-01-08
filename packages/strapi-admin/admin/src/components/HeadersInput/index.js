@@ -66,7 +66,7 @@ const HeadersInput = ({ onClick, onChange, name, value, onRemove, error }) => {
     },
     menuList: base => ({
       ...base,
-      maxHeight: '64px',
+      maxHeight: '224px',
       paddingTop: '0',
     }),
     option: (base, state) => {
