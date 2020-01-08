@@ -48,6 +48,7 @@
       "configurable": false
     },
     "roles": {
+      "model": "role",
       "collection": "role",
       "via": "users",
       "plugin": "users-permissions",
