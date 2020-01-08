@@ -51,4 +51,12 @@ module.exports = {
       version: '16.5.2',
     },
   },
+  overrides: [
+    {
+      files: ['packages/**/admin/src/**/**/*.js'],
+      rules: {
+        'no-nested-ternary': ['error'],
+      },
+    },
+  ],
 };
