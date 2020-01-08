@@ -95,45 +95,26 @@ const createYupSchema = (model, { components }) => {
         );
 
         if (attribute.repeatable === true) {
-          const { min, max } = attribute;
+          const { min, max, required } = attribute;
+          let componentSchema = yup.lazy(value => {
+            let baseSchema = yup.array().of(componentFieldSchema);
 
-          let componentSchema =
-            attribute.required === true
-              ? yup
-                  .array()
-                  .of(componentFieldSchema)
-                  .defined()
-              : yup
-                  .array()
-                  .of(componentFieldSchema)
-                  .nullable();
-
-          if (min) {
-            componentSchema = yup.lazy(array => {
-              if (attribute.required) {
-                return yup
-                  .array()
-                  .of(componentFieldSchema)
-                  .defined()
-                  .min(min, errorsTrads.min);
+            if (min) {
+              if (required) {
+                baseSchema = baseSchema.min(min, errorsTrads.min);
+              } else if (required !== true && isEmpty(value)) {
+                baseSchema = baseSchema.nullable();
+              } else {
+                baseSchema = baseSchema.min(min, errorsTrads.min);
               }
+            }
 
-              let schema = yup
-                .array()
-                .of(componentFieldSchema)
-                .nullable();
+            if (max) {
+              baseSchema = baseSchema.max(max, errorsTrads.max);
+            }
 
-              if (array && !isEmpty(array)) {
-                schema = schema.min(min, errorsTrads.min);
-              }
-
-              return schema;
-            });
-          }
-
-          if (max) {
-            componentSchema = componentSchema.max(max, errorsTrads.max);
-          }
+            return baseSchema;
+          });
 
           acc[current] = componentSchema;
 

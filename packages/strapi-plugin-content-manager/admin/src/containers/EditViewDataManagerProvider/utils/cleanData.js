@@ -22,7 +22,6 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
           try {
             cleanedData = JSON.parse(value);
           } catch (err) {
-            console.error(err);
             cleanedData = value;
           }
 

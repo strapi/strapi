@@ -1,0 +1,11 @@
+{
+  "ConfigPage.description": "Nastavenia odosielania e-mailov",
+  "ConfigPage.title": "Email - Nastavenia",
+  "EditForm.Input.number.label": "Maximálna povolená veľkosť (v MB)",
+  "EditForm.Input.select.inputDescription": "E-maily môžu byť posielané cez Sendmail alebo externého poskytovateľa",
+  "EditForm.Input.select.label": "Poskytovatelia",
+  "EditForm.Input.toggle.label": "Povoliť odosielanie emailov",
+  "notification.config.success": "Nastavenia boli upravené",
+  "plugin.description.long": "Posielanie e-mailov.",
+  "plugin.description.short": "Posielanie e-mailov."
+}
