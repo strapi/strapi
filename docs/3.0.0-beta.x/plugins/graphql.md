@@ -91,6 +91,23 @@ query {
 }
 ```
 
+### Fetch dynamic zone data
+
+Dynamic zones are union types in graphql so you need to use fragments to query the fields.
+
+```
+query {
+  restaurants {
+    dz {
+      __typename
+      ... on ComponentDefaultClosingperiod {
+        label
+      }
+    }
+  }
+}
+```
+
 ### Create a new entry
 
 - `input`: Object

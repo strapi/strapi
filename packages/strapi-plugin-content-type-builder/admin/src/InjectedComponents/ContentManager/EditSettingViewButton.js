@@ -36,7 +36,6 @@ function EditViewButton(props) {
       : `${category}/${componentSlug}`;
 
   const handleClick = () => {
-    // TODO
     emitEvent('willEditEditLayout');
     props.push(`${baseUrl}/${suffixUrl}`);
   };
