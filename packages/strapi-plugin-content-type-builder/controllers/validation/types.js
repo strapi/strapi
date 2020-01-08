@@ -127,6 +127,8 @@ const getTypeShape = (attribute, { modelType } = {}) => {
         max: yup.number(),
       };
     }
+    case 'time':
+    case 'datetime':
     case 'date': {
       return {
         default: yup.string(),
