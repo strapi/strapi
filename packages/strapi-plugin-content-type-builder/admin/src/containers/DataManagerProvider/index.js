@@ -14,6 +14,8 @@ import {
   Redirect,
 } from 'react-router-dom';
 import DataManagerContext from '../../contexts/DataManagerContext';
+import getTrad from '../../utils/getTrad';
+import makeUnique from '../../utils/makeUnique';
 import pluginId from '../../pluginId';
 import FormModal from '../FormModal';
 import init from './init';
@@ -26,13 +28,11 @@ import retrieveSpecificInfoFromComponents from './utils/retrieveSpecificInfoFrom
 import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
 import retrieveNestedComponents from './utils/retrieveNestedComponents';
 import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
-import makeUnique from '../../utils/makeUnique';
 import {
   getComponentsToPost,
   formatMainDataType,
   getCreatedAndModifiedComponents,
 } from './utils/cleanData';
-import getTrad from '../../utils/getTrad';
 
 const DataManagerProvider = ({ allIcons, children }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
