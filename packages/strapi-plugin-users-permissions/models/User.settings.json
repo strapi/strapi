@@ -50,6 +50,7 @@
     "roles": {
       "collection": "role",
       "via": "users",
+      "dominant": true,
       "plugin": "users-permissions",
       "configurable": false
     }

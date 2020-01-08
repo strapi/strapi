@@ -28,10 +28,9 @@
       "isVirtual": true
     },
     "users": {
-      "model": "user",
+      "collection": "user",
       "via": "roles",
       "configurable": false,
-      "dominant": true,
       "plugin": "users-permissions"
     }
   },
