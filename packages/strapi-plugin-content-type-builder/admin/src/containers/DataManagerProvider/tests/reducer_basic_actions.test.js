@@ -6,6 +6,199 @@ describe('CTB | containers | reducer | basics actions ', () => {
     expect(reducer(initialState, { type: 'TEST' })).toEqual(initialState);
   });
 
+  describe('ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE', () => {
+    it('should add the created component to the dynamic zone', () => {
+      const createdComponent = fromJS({
+        uid: 'default.test',
+        category: 'default',
+        isTemporary: true,
+        schema: {
+          icon: 'book',
+          name: 'test',
+          collectionName: '',
+          attributes: {},
+        },
+      });
+      const components = fromJS({
+        'default.test': createdComponent,
+        'default.other': {
+          uid: 'default.other',
+          category: 'default',
+
+          schema: {
+            icon: 'book',
+            name: 'test',
+            collectionName: '',
+            attributes: {},
+          },
+        },
+      });
+      const contentType = fromJS({
+        uid: 'application::test',
+        schema: {
+          name: 'test',
+          attributes: {
+            dz: {
+              type: 'dynamiczone',
+              components: ['default.other'],
+            },
+          },
+        },
+      });
+      const state = initialState
+        .setIn(['components'], components)
+        .setIn(['modifiedData', 'components'], components)
+
+        .setIn(['modifiedData', 'contentType'], contentType);
+
+      const expected = state.setIn(
+        [
+          'modifiedData',
+          'contentType',
+          'schema',
+          'attributes',
+          'dz',
+          'components',
+        ],
+        fromJS(['default.other', 'default.test'])
+      );
+
+      expect(
+        reducer(state, {
+          type: 'ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE',
+          dynamicZoneTarget: 'dz',
+          componentsToAdd: ['default.test'],
+        })
+      ).toEqual(expected);
+    });
+  });
+
+  describe('CANCEL_CHANGES', () => {
+    it('Should set the modifiedData and the components object with the initial ones', () => {
+      const state = fromJS({
+        components: {
+          test: {
+            something: true,
+          },
+          other: {
+            something: false,
+          },
+        },
+        initialComponents: {
+          test: {
+            something: false,
+          },
+          other: {
+            something: false,
+          },
+        },
+        modifiedData: {
+          components: {
+            test: {
+              something: true,
+            },
+            other: {
+              something: false,
+            },
+          },
+          contentType: {
+            uid: 'something',
+            name: 'test',
+          },
+        },
+        initialData: {
+          components: {
+            test: {
+              something: false,
+            },
+            other: {
+              something: false,
+            },
+          },
+          contentType: {
+            uid: 'something',
+            name: 'something',
+          },
+        },
+      });
+
+      const expected = fromJS({
+        components: {
+          test: {
+            something: false,
+          },
+          other: {
+            something: false,
+          },
+        },
+        initialComponents: {
+          test: {
+            something: false,
+          },
+          other: {
+            something: false,
+          },
+        },
+        modifiedData: {
+          components: {
+            test: {
+              something: false,
+            },
+            other: {
+              something: false,
+            },
+          },
+          contentType: {
+            uid: 'something',
+            name: 'something',
+          },
+        },
+        initialData: {
+          components: {
+            test: {
+              something: false,
+            },
+            other: {
+              something: false,
+            },
+          },
+          contentType: {
+            uid: 'something',
+            name: 'something',
+          },
+        },
+      });
+
+      expect(reducer(state, { type: 'CANCEL_CHANGES' })).toEqual(expected);
+    });
+  });
+
+  describe('CREATE_SCHEMA', () => {
+    it('Should create a content type schema correctly', () => {
+      const uid = 'application::test';
+      const data = {
+        collectionName: 'test',
+        name: 'test',
+      };
+      const expected = initialState.setIn(
+        ['contentTypes', uid],
+        fromJS({
+          uid,
+          isTemporary: true,
+          schema: {
+            collectionName: data.collectionName,
+            name: data.name,
+            attributes: {},
+          },
+        })
+      );
+
+      expect(
+        reducer(initialState, { type: 'CREATE_SCHEMA', uid, data })
+      ).toEqual(expected);
+    });
+  });
+
   describe('GET_DATA_SUCCEEDED', () => {
     const components = {
       'default.test': {
@@ -47,6 +240,355 @@ describe('CTB | containers | reducer | basics actions ', () => {
           type: 'RELOAD_PLUGIN',
         })
       ).toEqual(initialState);
+    });
+  });
+
+  describe('REMOVE_COMPONENT_FROM_DYNAMIC_ZONE', () => {
+    it('Should remove a component from a dynamic zone', () => {
+      const state = fromJS({
+        components: {
+          'default.openingtimes': {
+            uid: 'default.openingtimes',
+            category: 'default',
+            schema: {
+              icon: 'calendar',
+              name: 'openingtimes',
+              description: '',
+              connection: 'default',
+              collectionName: 'components_openingtimes',
+              attributes: {
+                label: {
+                  type: 'string',
+                  required: true,
+                  default: 'something',
+                },
+                time: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+          'default.dish': {
+            uid: 'default.dish',
+            category: 'default',
+            schema: {
+              icon: 'calendar',
+              name: 'dish',
+              description: '',
+              connection: 'default',
+              collectionName: 'components_dishes',
+              attributes: {
+                label: {
+                  type: 'string',
+                  required: true,
+                  default: 'something',
+                },
+                time: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+        },
+        modifiedData: {
+          components: {
+            'default.dish': {
+              uid: 'default.dish',
+              category: 'default',
+              schema: {
+                icon: 'calendar',
+                name: 'dish',
+                description: '',
+                connection: 'default',
+                collectionName: 'components_dishes',
+                attributes: {
+                  label: {
+                    type: 'string',
+                    required: true,
+                    default: 'something',
+                  },
+                  time: {
+                    type: 'string',
+                  },
+                },
+              },
+            },
+            'default.openingtimes': {
+              uid: 'default.openingtimes',
+              category: 'default',
+              schema: {
+                icon: 'calendar',
+                name: 'openingtimes',
+                description: '',
+                connection: 'default',
+                collectionName: 'components_openingtimes',
+                attributes: {
+                  label: {
+                    type: 'string',
+                    required: true,
+                    default: 'something',
+                  },
+                  time: {
+                    type: 'string',
+                  },
+                },
+              },
+            },
+          },
+          contentType: {
+            uid: 'application::address.address',
+            schema: {
+              name: 'address',
+              description: '',
+              connection: 'default',
+              collectionName: 'addresses',
+              attributes: {
+                geolocation: {
+                  type: 'json',
+                  required: true,
+                },
+                city: {
+                  type: 'string',
+                  required: true,
+                },
+                postal_coder: {
+                  type: 'string',
+                },
+                category: {
+                  model: 'category',
+                },
+                cover: {
+                  model: 'file',
+                  via: 'related',
+                  plugin: 'upload',
+                  required: false,
+                },
+                images: {
+                  collection: 'file',
+                  via: 'related',
+                  plugin: 'upload',
+                  required: false,
+                },
+                full_name: {
+                  type: 'string',
+                  required: true,
+                },
+                dz: {
+                  type: 'dynamiczone',
+                  components: ['default.openingtimes', 'default.dish'],
+                },
+                otherDz: {
+                  type: 'dynamiczone',
+                  components: ['default.openingtimes', 'default.dish'],
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const expected = fromJS({
+        components: {
+          'default.openingtimes': {
+            uid: 'default.openingtimes',
+            category: 'default',
+            schema: {
+              icon: 'calendar',
+              name: 'openingtimes',
+              description: '',
+              connection: 'default',
+              collectionName: 'components_openingtimes',
+              attributes: {
+                label: {
+                  type: 'string',
+                  required: true,
+                  default: 'something',
+                },
+                time: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+          'default.dish': {
+            uid: 'default.dish',
+            category: 'default',
+            schema: {
+              icon: 'calendar',
+              name: 'dish',
+              description: '',
+              connection: 'default',
+              collectionName: 'components_dishes',
+              attributes: {
+                label: {
+                  type: 'string',
+                  required: true,
+                  default: 'something',
+                },
+                time: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+        },
+        modifiedData: {
+          components: {
+            'default.dish': {
+              uid: 'default.dish',
+              category: 'default',
+              schema: {
+                icon: 'calendar',
+                name: 'dish',
+                description: '',
+                connection: 'default',
+                collectionName: 'components_dishes',
+                attributes: {
+                  label: {
+                    type: 'string',
+                    required: true,
+                    default: 'something',
+                  },
+                  time: {
+                    type: 'string',
+                  },
+                },
+              },
+            },
+            'default.openingtimes': {
+              uid: 'default.openingtimes',
+              category: 'default',
+              schema: {
+                icon: 'calendar',
+                name: 'openingtimes',
+                description: '',
+                connection: 'default',
+                collectionName: 'components_openingtimes',
+                attributes: {
+                  label: {
+                    type: 'string',
+                    required: true,
+                    default: 'something',
+                  },
+                  time: {
+                    type: 'string',
+                  },
+                },
+              },
+            },
+          },
+          contentType: {
+            uid: 'application::address.address',
+            schema: {
+              name: 'address',
+              description: '',
+              connection: 'default',
+              collectionName: 'addresses',
+              attributes: {
+                geolocation: {
+                  type: 'json',
+                  required: true,
+                },
+                city: {
+                  type: 'string',
+                  required: true,
+                },
+                postal_coder: {
+                  type: 'string',
+                },
+                category: {
+                  model: 'category',
+                },
+                cover: {
+                  model: 'file',
+                  via: 'related',
+                  plugin: 'upload',
+                  required: false,
+                },
+                images: {
+                  collection: 'file',
+                  via: 'related',
+                  plugin: 'upload',
+                  required: false,
+                },
+                full_name: {
+                  type: 'string',
+                  required: true,
+                },
+                dz: {
+                  type: 'dynamiczone',
+                  components: ['default.openingtimes'],
+                },
+                otherDz: {
+                  type: 'dynamiczone',
+                  components: ['default.openingtimes', 'default.dish'],
+                },
+              },
+            },
+          },
+        },
+      });
+
+      expect(
+        reducer(state, {
+          type: 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE',
+          dzName: 'dz',
+          componentToRemoveIndex: 1,
+        })
+      ).toEqual(expected);
+    });
+  });
+
+  describe('REMOVE_FIELD_FROM_DISPLAYED_COMPONENT', () => {
+    it('Should remove the selected field', () => {
+      const state = fromJS({
+        modifiedData: {
+          components: {
+            'default.test': {
+              schema: {
+                attributes: {
+                  text: {
+                    type: 'text',
+                  },
+                  other: {
+                    type: 'string',
+                  },
+                  last: {
+                    type: 'integer',
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const expected = fromJS({
+        modifiedData: {
+          components: {
+            'default.test': {
+              schema: {
+                attributes: {
+                  text: {
+                    type: 'text',
+                  },
+                  last: {
+                    type: 'integer',
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      expect(
+        reducer(state, {
+          type: 'REMOVE_FIELD_FROM_DISPLAYED_COMPONENT',
+          componentUid: 'default.test',
+          attributeToRemoveName: 'other',
+        })
+      ).toEqual(expected);
     });
   });
 
@@ -140,6 +682,94 @@ describe('CTB | containers | reducer | basics actions ', () => {
           type: 'UPDATE_SCHEMA',
           data,
           schemaType: 'contentType',
+        })
+      ).toEqual(expected);
+    });
+
+    it('Should update the modified data correctly if the schemaType is a component', () => {
+      const data = {
+        name: 'newTest',
+        collectionName: 'newTest',
+        category: 'test',
+        icon: 'test',
+      };
+      const state = fromJS({
+        components: {
+          test: {
+            uid: 'test',
+            category: 'default',
+            schema: {
+              name: 'test',
+              icon: 'book',
+              collectionName: 'components_tests',
+              attributes: {
+                something: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+        },
+        modifiedData: {
+          components: {},
+          component: {
+            uid: 'test',
+            category: 'default',
+            schema: {
+              name: 'test',
+              icon: 'book',
+              collectionName: 'components_tests',
+              attributes: {
+                something: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+        },
+      });
+      const expected = fromJS({
+        components: {
+          test: {
+            uid: 'test',
+            category: 'test',
+            schema: {
+              name: 'newTest',
+              icon: 'test',
+              collectionName: 'newTest',
+              attributes: {
+                something: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+        },
+        modifiedData: {
+          components: {},
+          component: {
+            uid: 'test',
+            category: 'test',
+            schema: {
+              name: 'newTest',
+              icon: 'test',
+              collectionName: 'newTest',
+              attributes: {
+                something: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      expect(
+        reducer(state, {
+          type: 'UPDATE_SCHEMA',
+          data,
+          schemaType: 'component',
+          uid: 'test',
         })
       ).toEqual(expected);
     });

@@ -43,6 +43,12 @@
     "full_name": {
       "type": "string",
       "required": true
+    },
+    "dz": {
+      "type": "dynamiczone",
+      "components": [
+        "default.openingtimes"
+      ]
     }
   }
 }

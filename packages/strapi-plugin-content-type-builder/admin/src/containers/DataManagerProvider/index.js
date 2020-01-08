@@ -97,8 +97,6 @@ const DataManagerProvider = ({ allIcons, children }) => {
         components: contentTypes,
       });
 
-      console.log(orderedContenTypes.get('components').toJS());
-
       dispatch({
         type: 'GET_DATA_SUCCEEDED',
         components: orderedComponents.get('components'),
@@ -376,7 +374,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
     });
   };
 
-  console.log({ modifiedData });
+  console.log({ modifiedData: reducerState.toJS() });
 
   const sortedContentTypesList = sortBy(
     Object.keys(contentTypes)
