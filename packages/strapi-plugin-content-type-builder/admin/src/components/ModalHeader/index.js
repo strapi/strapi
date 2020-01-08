@@ -12,7 +12,7 @@ import UpperFirst from '../UpperFirst';
 import DropdownInfos from './DropdownInfos';
 
 const ModalHeader = ({ headerId, headers }) => {
-  const shouldDisplayDrodDown = headers.length > 3;
+  const shouldDisplayDropDown = headers.length > 3;
 
   return (
     <section>
@@ -38,7 +38,7 @@ const ModalHeader = ({ headerId, headers }) => {
               <Icon type={iconType} />
             );
 
-            if (shouldDisplayDrodDown && index === 1) {
+            if (shouldDisplayDropDown && index === 1) {
               return (
                 <Fragment key={index}>
                   <IconWrapper>
@@ -52,7 +52,7 @@ const ModalHeader = ({ headerId, headers }) => {
               );
             }
 
-            if (shouldDisplayDrodDown && index === 2 && headers.length > 4) {
+            if (shouldDisplayDropDown && index === 2 && headers.length > 4) {
               return null;
             }
 
