@@ -57,6 +57,18 @@ NODE_ENV=production npm run build
 
 :::
 
+::: tab Windows
+
+```bash
+npm install cross-env
+```
+Then in your `package.json` scripts section:
+```bash 
+"production": "cross-env NODE_ENV=production npm run build"
+```
+
+:::
+
 ::::
 
 Run the server with the `production` settings.
@@ -75,6 +87,18 @@ NODE_ENV=production yarn start
 
 ```bash
 NODE_ENV=production npm start
+```
+
+:::
+
+::: tab Windows
+
+```bash
+npm install cross-env
+```
+Then in your `package.json` scripts section:
+```bash
+"production": "cross-env NODE_ENV=production npm start"
 ```
 
 :::

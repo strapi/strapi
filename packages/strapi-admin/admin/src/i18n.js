@@ -27,6 +27,7 @@ import ru from 'react-intl/locale-data/ru';
 import tr from 'react-intl/locale-data/tr';
 import vi from 'react-intl/locale-data/vi';
 import zh from 'react-intl/locale-data/zh';
+import sk from 'react-intl/locale-data/sk';
 
 import trads from './translations';
 
@@ -48,6 +49,7 @@ const locales = {
   tr,
   vi,
   zh,
+  sk,
 };
 const languages = Object.keys(trads);
 
