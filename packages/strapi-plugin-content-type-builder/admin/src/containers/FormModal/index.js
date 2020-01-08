@@ -31,6 +31,8 @@ import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
 import getAttributes from './utils/attributes';
 import forms from './utils/forms';
+import createHeadersArray from './utils/createHeadersArray';
+import createHeadersObjectFromArray from './utils/createHeadersObjectFromArray';
 import { createComponentUid, createUid } from './utils/createUid';
 import getModalTitleSubHeader from './utils/getModalTitleSubHeader';
 import getNextSearch from './utils/getNextSearch';
@@ -75,18 +77,40 @@ const FormModal = () => {
   useEffect(() => {
     if (!isEmpty(search)) {
       const actionType = query.get('actionType');
-      // Return 'null' if there isn't any attributeType search params
+      // Returns 'null' if there isn't any attributeType search params
       const attributeName = query.get('attributeName');
       const attributeType = query.get('attributeType');
       const dynamicZoneTarget = query.get('dynamicZoneTarget');
       const forTarget = query.get('forTarget');
-      const headerDisplayCategory = query.get('headerDisplayCategory');
-      const headerDisplayName = query.get('headerDisplayName');
-      const headerDisplaySubCategory = query.get('headerDisplaySubCategory');
       const modalType = query.get('modalType');
       const targetUid = query.get('targetUid');
       const settingType = query.get('settingType');
-      const subTargetUid = query.get('subTargetUid');
+      const headerId = query.get('headerId');
+      const header_label_1 = query.get('header_label_1');
+      const header_icon_name_1 = query.get('header_icon_name_1');
+      const header_icon_isCustom_1 = query.get('header_icon_isCustom_1');
+      const header_info_category_1 = query.get('header_info_category_1');
+      const header_info_name_1 = query.get('header_info_name_1');
+      const header_label_2 = query.get('header_label_2');
+      const header_icon_name_2 = query.get('header_icon_name_2');
+      const header_icon_isCustom_2 = query.get('header_icon_isCustom_2');
+      const header_info_category_2 = query.get('header_info_category_2');
+      const header_info_name_2 = query.get('header_info_name_2');
+      const header_label_3 = query.get('header_label_3');
+      const header_icon_name_3 = query.get('header_icon_name_3');
+      const header_icon_isCustom_3 = query.get('header_icon_isCustom_3');
+      const header_info_category_3 = query.get('header_info_category_3');
+      const header_info_name_3 = query.get('header_info_name_3');
+      const header_label_4 = query.get('header_label_4');
+      const header_icon_name_4 = query.get('header_icon_name_4');
+      const header_icon_isCustom_4 = query.get('header_icon_isCustom_4');
+      const header_info_category_4 = query.get('header_info_category_4');
+      const header_info_name_4 = query.get('header_info_name_4');
+      const header_label_5 = query.get('header_label_5');
+      const header_icon_name_5 = query.get('header_icon_name_5');
+      const header_icon_isCustom_5 = query.get('header_icon_isCustom_5');
+      const header_info_category_5 = query.get('header_info_category_5');
+      const header_info_name_5 = query.get('header_info_name_5');
       const step = query.get('step');
       const pathToSchema =
         forTarget === 'contentType' || forTarget === 'component'
@@ -98,16 +122,38 @@ const FormModal = () => {
         attributeName,
         attributeType,
         dynamicZoneTarget,
-        headerDisplayName,
-        headerDisplayCategory,
-        headerDisplaySubCategory,
         forTarget,
         modalType,
         pathToSchema,
         settingType,
-        subTargetUid,
         step,
         targetUid,
+        header_label_1,
+        header_icon_name_1,
+        header_icon_isCustom_1,
+        header_info_name_1,
+        header_info_category_1,
+        header_label_2,
+        header_icon_name_2,
+        header_icon_isCustom_2,
+        header_info_name_2,
+        header_info_category_2,
+        header_label_3,
+        header_icon_name_3,
+        header_icon_isCustom_3,
+        header_info_name_3,
+        header_info_category_3,
+        header_label_4,
+        header_icon_name_4,
+        header_icon_isCustom_4,
+        header_info_name_4,
+        header_info_category_4,
+        header_label_5,
+        header_icon_name_5,
+        header_icon_isCustom_5,
+        header_info_name_5,
+        header_info_category_5,
+        headerId,
       });
 
       // Reset all the modification when opening the edit category modal
@@ -280,19 +326,7 @@ const FormModal = () => {
   const form = get(forms, [state.modalType, 'form', state.settingType], () => ({
     items: [],
   }));
-
-  // TODO improve icon logic
-  let iconType = ['component', 'contentType'].includes(state.modalType)
-    ? state.modalType
-    : state.forTarget;
-
-  if (state.modalType === 'addComponentToDynamicZone') {
-    iconType = 'dynamiczone';
-  }
-
-  if (state.modalType === 'editCategory') {
-    iconType = 'component';
-  }
+  const headers = createHeadersArray(state);
 
   const isCreatingContentType = state.modalType === 'contentType';
   const isCreatingComponent = state.modalType === 'component';
@@ -309,14 +343,6 @@ const FormModal = () => {
   const isOpen = !isEmpty(search);
   const isPickingAttribute = state.modalType === 'chooseAttribute';
   const uid = createUid(modifiedData.name || '');
-
-  let headerId = isCreating
-    ? `modalForm.${state.modalType}.header-create`
-    : 'modalForm.header-edit';
-
-  if (!['contentType', 'component'].includes(state.modalType)) {
-    headerId = null;
-  }
 
   const checkFormValidity = async () => {
     let schema;
@@ -532,6 +558,7 @@ const FormModal = () => {
       ...rest,
     });
   };
+
   const handleSubmit = async (e, shouldContinue = isCreating) => {
     e.preventDefault();
 
@@ -541,17 +568,21 @@ const FormModal = () => {
       const targetUid =
         state.forTarget === 'components' ? state.targetUid : uid;
 
-      // TODO REMOVE and use makeSearch
-      const createNextSearch = searchUid => {
-        if (!shouldContinue) {
-          return '';
-        }
+      const headerIcon = ['contentType', 'component'].includes(state.forTarget)
+        ? state.forTarget
+        : get(
+            allDataSchema,
+            ['components', state.targetUid, 'schema', 'icon'],
+            ''
+          );
 
-        return `modalType=chooseAttribute&forTarget=${
-          state.forTarget
-        }&targetUid=${searchUid}&headerDisplayName=${state.headerDisplayName ||
-          modifiedData.name}`;
-      };
+      // Remove the last header when editing
+      if (state.actionType === 'edit') {
+        headers.pop();
+      }
+
+      const headersObject = createHeadersObjectFromArray(headers);
+      const nextHeaderIndex = headers.length + 1;
 
       if (isCreatingContentType) {
         // Create the content type schema
@@ -571,7 +602,9 @@ const FormModal = () => {
             modalType: 'chooseAttribute',
             forTarget: state.forTarget,
             targetUid,
-            headerDisplayName: modifiedData.name,
+            header_label_1: modifiedData.name,
+            header_icon_name_1: 'contentType',
+            header_icon_isCustom_1: null,
           }),
         });
       } else if (isCreatingComponent) {
@@ -590,7 +623,9 @@ const FormModal = () => {
               modalType: 'chooseAttribute',
               forTarget: state.forTarget,
               targetUid: componentUid,
-              headerDisplayName: modifiedData.name,
+              header_label_1: modifiedData.name,
+              header_icon_name_1: 'contentType',
+              header_icon_isCustom_1: null,
             }),
             pathname: `/plugins/${pluginId}/component-categories/${category}/${componentUid}`,
           });
@@ -604,6 +639,7 @@ const FormModal = () => {
         }
       } else if (isEditingCategory) {
         if (toLower(initialData.name) === toLower(modifiedData.name)) {
+          // Close the modal
           push({ search: '' });
 
           return;
@@ -629,20 +665,19 @@ const FormModal = () => {
           // Adding a component to a dynamiczone is not the same logic as creating a simple field
           // so the search is different
 
-          // For the modal header
-          const displayCategory = state.headerDisplayName;
-          const displayName = modifiedData.name;
-
           const dzSearch = makeNextSearch({
             modalType: 'addComponentToDynamicZone',
             forTarget: 'contentType',
             targetUid: state.targetUid,
-            headerDisplayName: displayName,
-            headerDisplayCategory: displayCategory,
+
             dynamicZoneTarget: modifiedData.name,
             settingType: 'base',
             step: '1',
             actionType: 'create',
+            ...headersObject,
+            header_label_2: modifiedData.name,
+            header_icon_name_2: null,
+            header_icon_isCustom_2: false,
           });
           const nextSearch = isDynamicZoneAttribute
             ? dzSearch
@@ -651,11 +686,12 @@ const FormModal = () => {
                   modalType: 'chooseAttribute',
                   forTarget: state.forTarget,
                   targetUid,
-                  headerDisplayName: state.headerDisplayName,
-                  headerDisplayCategory: state.headerDisplayCategory,
-                  // keep the old state
-                  headerDisplaySubCategory: state.headerDisplaySubCategory,
-                  subTargetUid: state.subTargetUid,
+                  ...headersObject,
+                  header_icon_isCustom_1: ![
+                    'contentType',
+                    'component',
+                  ].includes(state.forTarget),
+                  header_icon_name_1: headerIcon,
                 },
                 shouldContinue
               );
@@ -680,7 +716,6 @@ const FormModal = () => {
         } else {
           if (isInFirstComponentStep) {
             // Navigate the user to step 2
-            // TODO refacto
             const nextSearchObj = {
               modalType: 'attribute',
               actionType: state.actionType,
@@ -688,8 +723,12 @@ const FormModal = () => {
               forTarget: state.forTarget,
               targetUid: state.targetUid,
               attributeType: 'component',
-              headerDisplayName: state.headerDisplayName,
               step: '2',
+              ...headersObject,
+              header_icon_isCustom_1: !['contentType', 'component'].includes(
+                state.forTarget
+              ),
+              header_icon_name_1: headerIcon,
             };
 
             push({
@@ -723,9 +762,18 @@ const FormModal = () => {
               // This way we can add fields to the added component (if it wasn't there already)
               true
             );
+            const nextSearch = {
+              modalType: 'chooseAttribute',
+              forTarget: state.forTarget,
+              targetUid: state.targetUid,
+              ...headersObject,
+              header_icon_isCustom_1: !['contentType', 'component'].includes(
+                state.forTarget
+              ),
+              header_icon_name_1: headerIcon,
+            };
 
-            // TODO change the search so the modal header is kept
-            push({ search: shouldContinue ? createNextSearch(targetUid) : '' });
+            push({ search: makeSearch(nextSearch, shouldContinue) });
 
             // We don't need to end the loop here we want the reducer to be reinitialised
           }
@@ -736,7 +784,6 @@ const FormModal = () => {
         // even though the user didn't set any field
         // We need to prevent the component from being created if the user closes the modal at step 2 without any submission
       } else if (isCreatingAttribute && isCreatingComponentFromAView) {
-        const { headerDisplayCategory } = state;
         // Step 1
         if (isInFirstComponentStep) {
           // Here the search could be refactored since it is the same as the case from above
@@ -749,17 +796,11 @@ const FormModal = () => {
             forTarget: state.forTarget,
             targetUid: state.targetUid,
             attributeType: 'component',
-            headerDisplayName: state.headerDisplayName,
             step: '2',
+            ...headersObject,
+            header_icon_isCustom_1: false,
+            header_icon_name_1: 'component',
           };
-
-          // Modify the searchObj for the modal header
-          // This case is happening when creating a nestedComponent after creating a component
-          if (headerDisplayCategory) {
-            searchObj.headerDisplayCategory = state.headerDisplayCategory;
-            searchObj.headerDisplayName = state.headerDisplayName;
-            searchObj.targetUid = state.targetUid;
-          }
 
           emitEvent('willCreateComponentFromAttributesModal');
 
@@ -812,20 +853,15 @@ const FormModal = () => {
             modalType: 'chooseAttribute',
             forTarget: 'components',
             targetUid: componentUid,
-            headerDisplayName: modifiedData.name,
-            headerDisplayCategory:
-              state.headerDisplayCategory || state.headerDisplayName,
+            ...headersObject,
+            header_icon_isCustom_1: true,
+            header_icon_name_1: componentToCreate.icon,
+            [`header_label_${nextHeaderIndex}`]: modifiedData.name,
+            [`header_icon_name_${nextHeaderIndex}`]: 'component',
+            [`header_icon_isCustom_${nextHeaderIndex}`]: false,
+            [`header_info_category_${nextHeaderIndex}`]: category,
+            [`header_info_name_${nextHeaderIndex}`]: componentToCreate.name,
           };
-
-          // Then we inverse the headerDisplayName because it becomes the last one displayed
-          // The case is created a component then created a nested one
-          if (headerDisplayCategory) {
-            // This is allows to modify the modal header
-            searchToOpenModalAttributeToAddAttributesToAComponent.headerDisplaySubCategory =
-              state.headerDisplayName;
-            searchToOpenModalAttributeToAddAttributesToAComponent.subTargetUid =
-              state.targetUid;
-          }
 
           push({
             search: makeNextSearch(
@@ -869,13 +905,19 @@ const FormModal = () => {
             // The Dynamic Zone and the component is created created
             // Open the modal to add fields to the created component
 
-            // TODO search for modal header
             const searchToOpenAddField = {
               modalType: 'chooseAttribute',
               forTarget: 'components',
               targetUid: componentUid,
-              headerDisplayName: modifiedData.componentToCreate.name,
-              headerDisplayCategory: state.headerDisplayCategory,
+              ...headersObject,
+              header_icon_isCustom_1: true,
+              header_icon_name_1: modifiedData.componentToCreate.icon,
+              [`header_label_${nextHeaderIndex}`]: modifiedData.name,
+              [`header_icon_name_${nextHeaderIndex}`]: 'component',
+              [`header_icon_isCustom_${nextHeaderIndex}`]: false,
+              [`header_info_category_${nextHeaderIndex}`]: category,
+              [`header_info_name_${nextHeaderIndex}`]: modifiedData
+                .componentToCreate.name,
             };
 
             push({ search: makeSearch(searchToOpenAddField, true) });
@@ -901,7 +943,6 @@ const FormModal = () => {
         type: 'RESET_PROPS',
       });
     } catch (err) {
-      console.log({ err });
       const errors = getYupInnerErrors(err);
 
       dispatch({
@@ -986,16 +1027,7 @@ const FormModal = () => {
       withoverflow={toString(state.modalType === 'addComponentToDynamicZone')}
     >
       <HeaderModal>
-        <ModalHeader
-          name={state.headerDisplayName}
-          category={state.headerDisplayCategory}
-          headerId={headerId}
-          iconType={iconType || 'contentType'}
-          subCategory={state.headerDisplaySubCategory}
-          subTargetUid={state.subTargetUid}
-          target={state.forTarget}
-          targetUid={state.targetUid}
-        />
+        <ModalHeader headerId={state.headerId} headers={headers} />
         <section>
           <HeaderModalTitle>
             <FormattedMessage
@@ -1160,7 +1192,7 @@ const FormModal = () => {
                             return (
                               <RelationForm
                                 key="relation"
-                                mainBoxHeader={state.headerDisplayName}
+                                mainBoxHeader={get(headers, [0, 'label'], '')}
                                 modifiedData={modifiedData}
                                 naturePickerType={state.forTarget}
                                 onChange={handleChange}
