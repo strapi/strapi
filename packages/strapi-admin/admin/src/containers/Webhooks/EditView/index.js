@@ -210,6 +210,7 @@ function EditView() {
       index,
       event,
     });
+    resetError('headers');
   };
 
   const handleSubmit = e => {

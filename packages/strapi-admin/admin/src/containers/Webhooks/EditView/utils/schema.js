@@ -1,5 +1,6 @@
 import * as yup from 'yup';
 
+// TODO - Translation
 const translatedErrors = {
   required: 'This value is required',
   regex: 'This does not match the format',
