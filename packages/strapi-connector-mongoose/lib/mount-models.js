@@ -8,6 +8,10 @@ const utils = require('./utils');
 const relations = require('./relations');
 const { findComponentByGlobalId } = require('./utils/helpers');
 
+const isPolymorphicAssoc = assoc => {
+  return assoc.nature.toLowerCase().indexOf('morph') !== -1;
+};
+
 module.exports = ({ models, target, plugin = false }, ctx) => {
   const { instance } = ctx;
 
@@ -71,7 +75,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
       definition.loadedModel[name] = {
         ...attr,
-        ...utils(instance).convertType(attr.type),
+        ...utils(instance).convertType(attr),
       };
     });
 
@@ -117,7 +121,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       */
 
     const morphAssociations = definition.associations.filter(
-      association => association.nature.toLowerCase().indexOf('morph') !== -1
+      isPolymorphicAssoc
     );
 
     const populateFn = createOnFetchPopulateFn({
@@ -363,6 +367,15 @@ const createOnFetchPopulateFn = ({
         _.set(this._mongooseOptions.populate, [alias, 'path'], `${alias}.ref`);
       }
     });
+
+    if (definition.modelType === 'component') {
+      definition.associations
+        .filter(assoc => !isPolymorphicAssoc(assoc))
+        .filter(ast => ast.autoPopulate !== false)
+        .forEach(ast => {
+          this.populate({ path: ast.alias });
+        });
+    }
 
     componentAttributes.forEach(key => {
       this.populate({ path: `${key}.ref` });

@@ -43,7 +43,11 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
 
     return (
       <div key={j}>
-        <p className="title">{pluginsSections[current].name}</p>
+        <p className="title">
+          <FormattedMessage {...messages.contentTypes}>
+            {title => title}
+          </FormattedMessage>
+        </p>
         <ul className="list  models-list">
           {sortBy(contentTypes, 'label').map((link, i) => (
             <LeftMenuLink

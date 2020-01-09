@@ -26,5 +26,7 @@
   "notification.dropFile.success": "Dosyanız yüklendi",
   "notification.dropFiles.success": "{number} dosyalar yüklendi",
   "Upload.status.sizeLimit": "{file} yapılandırılmış sınır boyutundan daha büyük",
-  "Upload.status.disabled" : "Dosya yükleme devre dışı"
+  "Upload.status.disabled" : "Dosya yükleme devre dışı",
+  "plugin.description.long": "Multimedya Dosya Yönetimi.",
+  "plugin.description.short": "Multimedya Dosya Yönetimi."
 }

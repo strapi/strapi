@@ -26,9 +26,9 @@ const Logout = ({ history: { push } }) => {
     const id = get(auth.getUserInfo(), 'id');
 
     push({
-      pathname: `/plugins/content-manager/administrator/${id}`,
+      pathname: `/plugins/content-manager/strapi::administrator/${id}`,
       search:
-        '?redirectUrl=/plugins/content-manager/administrator/?page=0&limit=0&sort=id&source=admin',
+        '?redirectUrl=/plugins/content-manager/strapi::administrator/&_page=0&_limit=0&_sort=id',
     });
   };
   const handleGoToAdministrator = () => {

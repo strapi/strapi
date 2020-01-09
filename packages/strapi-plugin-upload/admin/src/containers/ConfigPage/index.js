@@ -9,20 +9,20 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { findIndex, get, isEmpty } from 'lodash';
-import { ContainerFluid, HeaderNav, PluginHeader } from 'strapi-helper-plugin';
-
+import { ContainerFluid, HeaderNav, GlobalContext } from 'strapi-helper-plugin';
+import { Header } from '@buffetjs/custom';
 import pluginId from '../../pluginId';
-
 // Plugin's components
 import EditForm from '../../components/EditForm';
-
+import Wrapper from './Wrapper';
 import { getSettings, onCancel, onChange, setErrors, submit } from './actions';
-
 import reducer from './reducer';
 import saga from './saga';
 import selectConfigPage from './selectors';
 
 class ConfigPage extends React.Component {
+  static contextType = GlobalContext;
+
   componentDidMount() {
     this.getSettings(this.props);
   }
@@ -39,11 +39,16 @@ class ConfigPage extends React.Component {
     }
   }
 
-  getSelectedProviderIndex = () =>
-    findIndex(this.props.settings.providers, [
+  getSelectedProviderIndex = () => {
+    const selectedProviderIndex = findIndex(this.props.settings.providers, [
       'provider',
       get(this.props.modifiedData, 'provider'),
     ]);
+    if (selectedProviderIndex === -1) {
+      return 0;
+    }
+    return selectedProviderIndex;
+  };
 
   /**
    * Get Settings depending on the props
@@ -100,30 +105,40 @@ class ConfigPage extends React.Component {
 
   pluginHeaderActions = [
     {
-      kind: 'secondary',
-      label: 'app.components.Button.cancel',
+      color: 'cancel',
+      label: this.context.formatMessage({ id: 'app.components.Button.cancel' }),
       onClick: this.props.onCancel,
       type: 'button',
+      key: 'button-cancel',
     },
     {
-      kind: 'primary',
-      label: 'app.components.Button.save',
+      color: 'success',
+      className: 'button-submit',
+      label: this.context.formatMessage({ id: 'app.components.Button.save' }),
       onClick: this.handleSubmit,
       type: 'submit',
+      key: 'button-submit',
     },
   ];
 
   render() {
+    const { formatMessage } = this.context;
+
     return (
-      <div>
+      <Wrapper>
         <form onSubmit={this.handleSubmit}>
           <ContainerFluid>
-            <PluginHeader
+            <Header
               actions={this.pluginHeaderActions}
-              description={{ id: 'upload.ConfigPage.description' }}
-              title={{ id: 'upload.ConfigPage.title' }}
+              content={formatMessage({ id: 'upload.ConfigPage.description' })}
+              title={{
+                label: formatMessage({ id: 'upload.ConfigPage.title' }),
+              }}
             />
-            <HeaderNav links={this.generateLinks()} />
+            <HeaderNav
+              links={this.generateLinks()}
+              style={{ marginTop: '4.6rem' }}
+            />
             <EditForm
               didCheckErrors={this.props.didCheckErrors}
               formErrors={this.props.formErrors}
@@ -134,7 +149,7 @@ class ConfigPage extends React.Component {
             />
           </ContainerFluid>
         </form>
-      </div>
+      </Wrapper>
     );
   }
 }

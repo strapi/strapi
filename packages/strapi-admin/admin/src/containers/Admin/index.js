@@ -24,7 +24,6 @@ import { SHOW_TUTORIALS } from '../../config';
 import Header from '../../components/Header/index';
 import Logout from '../../components/Logout';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
-import ComingSoonPage from '../ComingSoonPage';
 import LeftMenu from '../LeftMenu';
 import ListPluginsPage from '../ListPluginsPage';
 import LocaleToggle from '../LocaleToggle';
@@ -177,7 +176,6 @@ export class Admin extends React.Component {
                   path="/plugins/:pluginId"
                   render={this.renderPluginDispatcher}
                 />
-                <Route path="/plugins" component={ComingSoonPage} />
                 <Route
                   path="/list-plugins"
                   render={props => this.renderRoute(props, ListPluginsPage)}
@@ -189,7 +187,6 @@ export class Admin extends React.Component {
                   exact
                 />
                 <Route path="/settings" render={this.renderSettings} />
-                <Route path="/configuration" component={ComingSoonPage} exact />
                 <Route key="7" path="" component={NotFoundPage} />
                 <Route key="8" path="404" component={NotFoundPage} />
               </Switch>

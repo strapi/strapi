@@ -94,22 +94,20 @@ module.exports = {
    * Updates an entity of a content type
    */
   async update(ctx) {
-    const { model } = ctx.params;
+    const { id, model } = ctx.params;
 
     try {
       if (ctx.is('multipart')) {
         const { data, files } = parseMultipartBody(ctx);
-        ctx.body = await contentManagerService.edit(ctx.params, data, {
+        ctx.body = await contentManagerService.edit({ id }, data, {
           files,
           model,
         });
       } else {
         // Return the last one which is the current model.
-        ctx.body = await contentManagerService.edit(
-          ctx.params,
-          ctx.request.body,
-          { model }
-        );
+        ctx.body = await contentManagerService.edit({ id }, ctx.request.body, {
+          model,
+        });
       }
     } catch (error) {
       strapi.log.error(error);

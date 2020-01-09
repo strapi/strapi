@@ -1,4 +1,14 @@
-import { get, isBoolean, isEmpty, isNaN } from 'lodash';
+import {
+  get,
+  isBoolean,
+  isNumber,
+  isNull,
+  isObject,
+  isArray,
+  isEmpty,
+  isNaN,
+  toNumber,
+} from 'lodash';
 import * as yup from 'yup';
 import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
 
@@ -16,6 +26,34 @@ yup.addMethod(yup.array, 'notEmptyMin', function(min) {
       return true;
     }
     return value.length >= min;
+  });
+});
+
+yup.addMethod(yup.string, 'isInferior', function(message, max) {
+  return this.test('isInferior', message, function(value) {
+    if (!value) {
+      return true;
+    }
+
+    if (Number.isNaN(toNumber(value))) {
+      return true;
+    }
+
+    return toNumber(max) >= toNumber(value);
+  });
+});
+
+yup.addMethod(yup.string, 'isSuperior', function(message, min) {
+  return this.test('isSuperior', message, function(value) {
+    if (!value) {
+      return true;
+    }
+
+    if (Number.isNaN(toNumber(value))) {
+      return true;
+    }
+
+    return toNumber(value) >= toNumber(min);
   });
 });
 
@@ -57,26 +95,26 @@ const createYupSchema = (model, { components }) => {
         );
 
         if (attribute.repeatable === true) {
-          const { min, max } = attribute;
+          const { min, max, required } = attribute;
+          let componentSchema = yup.lazy(value => {
+            let baseSchema = yup.array().of(componentFieldSchema);
 
-          let componentSchema =
-            attribute.required === true
-              ? yup
-                  .array()
-                  .of(componentFieldSchema)
-                  .defined()
-              : yup
-                  .array()
-                  .of(componentFieldSchema)
-                  .nullable();
+            if (min) {
+              if (required) {
+                baseSchema = baseSchema.min(min, errorsTrads.min);
+              } else if (required !== true && isEmpty(value)) {
+                baseSchema = baseSchema.nullable();
+              } else {
+                baseSchema = baseSchema.min(min, errorsTrads.min);
+              }
+            }
 
-          if (min) {
-            componentSchema = componentSchema.min(min, errorsTrads.min);
-          }
+            if (max) {
+              baseSchema = baseSchema.max(max, errorsTrads.max);
+            }
 
-          if (max) {
-            componentSchema = componentSchema.max(max, errorsTrads.max);
-          }
+            return baseSchema;
+          });
 
           acc[current] = componentSchema;
 
@@ -137,6 +175,7 @@ const createYupSchema = (model, { components }) => {
 
 const createYupSchemaAttribute = (type, validations) => {
   let schema = yup.mixed();
+
   if (
     ['string', 'text', 'richtext', 'email', 'password', 'enumeration'].includes(
       type
@@ -144,11 +183,21 @@ const createYupSchemaAttribute = (type, validations) => {
   ) {
     schema = yup.string();
   }
+
   if (type === 'json') {
     schema = yup
       .mixed(errorsTrads.json)
       .test('isJSON', errorsTrads.json, value => {
         if (value === undefined) {
+          return true;
+        }
+
+        if (
+          isNumber(value) ||
+          isNull(value) ||
+          isObject(value) ||
+          isArray(value)
+        ) {
           return true;
         }
 
@@ -165,14 +214,20 @@ const createYupSchemaAttribute = (type, validations) => {
   if (type === 'email') {
     schema = schema.email(errorsTrads.email);
   }
+
   if (['number', 'integer', 'biginteger', 'float', 'decimal'].includes(type)) {
     schema = yup
       .number()
       .transform(cv => (isNaN(cv) ? undefined : cv))
       .typeError();
   }
+
   if (['date', 'datetime'].includes(type)) {
     schema = yup.date();
+  }
+
+  if (type === 'biginteger') {
+    schema = yup.string().matches(/^\d*$/);
   }
 
   Object.keys(validations).forEach(validation => {
@@ -187,15 +242,25 @@ const createYupSchemaAttribute = (type, validations) => {
         case 'required':
           schema = schema.required(errorsTrads.required);
           break;
-        case 'max':
-          schema = schema.max(validationValue, errorsTrads.max);
+        case 'max': {
+          if (type === 'biginteger') {
+            schema = schema.isInferior(errorsTrads.max, validationValue);
+          } else {
+            schema = schema.max(validationValue, errorsTrads.max);
+          }
           break;
+        }
         case 'maxLength':
           schema = schema.max(validationValue, errorsTrads.maxLength);
           break;
-        case 'min':
-          schema = schema.min(validationValue, errorsTrads.min);
+        case 'min': {
+          if (type === 'biginteger') {
+            schema = schema.isSuperior(errorsTrads.min, validationValue);
+          } else {
+            schema = schema.min(validationValue, errorsTrads.min);
+          }
           break;
+        }
         case 'minLength':
           schema = schema.min(validationValue, errorsTrads.minLength);
           break;
@@ -231,6 +296,7 @@ const createYupSchemaAttribute = (type, validations) => {
       }
     }
   });
+
   return schema;
 };
 

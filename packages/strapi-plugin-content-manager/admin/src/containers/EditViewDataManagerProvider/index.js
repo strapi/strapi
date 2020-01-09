@@ -1,7 +1,7 @@
 import React, { useEffect, useReducer } from 'react';
-import { useParams } from 'react-router-dom';
+import { Prompt, useParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { cloneDeep, get, isEmpty, set } from 'lodash';
+import { cloneDeep, get, isEmpty, isEqual, set } from 'lodash';
 import {
   request,
   LoadingIndicatorPage,
@@ -43,7 +43,7 @@ const EditViewDataManagerProvider = ({
   const { signal } = abortController;
   const isCreatingEntry = id === 'create';
 
-  const { emitEvent } = useGlobalContext();
+  const { emitEvent, formatMessage } = useGlobalContext();
 
   useEffect(() => {
     if (!isLoading) {
@@ -196,6 +196,11 @@ const EditViewDataManagerProvider = ({
       inputValue = null;
     }
 
+    // Allow to reset enum
+    if (type === 'select-one' && value === '') {
+      inputValue = null;
+    }
+
     dispatch({
       type: 'ON_CHANGE',
       keys: name.split('.'),
@@ -257,9 +262,12 @@ const EditViewDataManagerProvider = ({
           false
         );
         emitEvent(isCreatingEntry ? 'didCreateEntry' : 'didEditEntry');
+        dispatch({
+          type: 'SUBMIT_SUCCESS',
+        });
         redirectToPreviousPage();
       } catch (err) {
-        console.log({ err });
+        console.error({ err });
         const error = get(
           err,
           ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
@@ -274,6 +282,7 @@ const EditViewDataManagerProvider = ({
       }
     } catch (err) {
       const errors = getYupInnerErrors(err);
+      console.error({ err, errors });
 
       dispatch({
         type: 'SUBMIT_ERRORS',
@@ -375,6 +384,11 @@ const EditViewDataManagerProvider = ({
         addRepeatableComponentToField,
         allLayoutData,
         checkFormErrors,
+        deleteSuccess: () => {
+          dispatch({
+            type: 'DELETE_SUCCEEDED',
+          });
+        },
         formErrors,
         initialData,
         layout: currentContentTypeLayout,
@@ -402,7 +416,13 @@ const EditViewDataManagerProvider = ({
       {showLoader ? (
         <LoadingIndicatorPage />
       ) : (
-        <form onSubmit={handleSubmit}>{children}</form>
+        <>
+          <Prompt
+            when={!isEqual(modifiedData, initialData)}
+            message={formatMessage({ id: 'global.prompt.unsaved' })}
+          />
+          <form onSubmit={handleSubmit}>{children}</form>
+        </>
       )}
     </EditViewDataManagerContext.Provider>
   );

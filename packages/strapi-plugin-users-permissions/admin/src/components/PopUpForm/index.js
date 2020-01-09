@@ -70,6 +70,8 @@ class PopUpForm extends React.Component {
         return `${strapi.backendURL}/connect/twitter/callback`;
       case 'instagram':
         return `${strapi.backendURL}/connect/instagram/callback`;
+      case 'vk':
+        return `${strapi.backendURL}/connect/vk/callback`;
       default: {
         const value = get(this.props.values, 'callback', '');
 

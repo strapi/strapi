@@ -9,11 +9,12 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { findIndex, get, isEmpty } from 'lodash';
+import { Header } from '@buffetjs/custom';
 
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
 // or strapi/packages/strapi-helper-plugin/lib/src
-import { ContainerFluid, HeaderNav, PluginHeader } from 'strapi-helper-plugin';
+import { ContainerFluid, HeaderNav, GlobalContext } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
@@ -27,6 +28,8 @@ import saga from './saga';
 import selectConfigPage from './selectors';
 
 class ConfigPage extends React.Component {
+  static contextType = GlobalContext;
+
   componentDidMount() {
     this.getSettings(this.props);
   }
@@ -106,30 +109,39 @@ class ConfigPage extends React.Component {
 
   pluginHeaderActions = [
     {
-      kind: 'secondary',
-      label: 'app.components.Button.cancel',
+      color: 'cancel',
+      label: this.context.formatMessage({ id: 'app.components.Button.cancel' }),
       onClick: this.props.onCancel,
       type: 'button',
+      key: 'button-cancel',
     },
     {
-      kind: 'primary',
-      label: 'app.components.Button.save',
+      color: 'success',
+      label: this.context.formatMessage({ id: 'app.components.Button.save' }),
       onClick: this.handleSubmit,
       type: 'submit',
+      key: 'button-submit',
     },
   ];
 
   render() {
+    const { formatMessage } = this.context;
+
     return (
       <div>
         <form onSubmit={this.handleSubmit}>
           <ContainerFluid>
-            <PluginHeader
+            <Header
               actions={this.pluginHeaderActions}
-              description={{ id: 'email.ConfigPage.description' }}
-              title={{ id: 'email.ConfigPage.title' }}
+              content={formatMessage({
+                id: 'email.ConfigPage.description',
+              })}
+              title={{ label: formatMessage({ id: 'email.ConfigPage.title' }) }}
             />
-            <HeaderNav links={this.generateLinks()} />
+            <HeaderNav
+              links={this.generateLinks()}
+              style={{ marginTop: '4.6rem' }}
+            />
             <EditForm
               didCheckErrors={this.props.didCheckErrors}
               formErrors={this.props.formErrors}

@@ -21,6 +21,7 @@ const Header = () => {
   const { formatMessage, emitEvent } = useGlobalContext();
   const { id } = useParams();
   const {
+    deleteSuccess,
     initialData,
     layout,
     redirectToPreviousPage,
@@ -119,6 +120,7 @@ const Header = () => {
       });
 
       strapi.notification.success(`${pluginId}.success.record.delete`);
+      deleteSuccess();
       emitEvent('didDeleteEntry');
       redirectToPreviousPage();
     } catch (err) {

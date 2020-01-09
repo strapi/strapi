@@ -16,6 +16,8 @@ const validators = {
 };
 
 const NAME_REGEX = new RegExp('^[A-Za-z][_0-9A-Za-z]*$');
+const COLLECTION_NAME_REGEX = new RegExp('^[A-Za-z][-_0-9A-Za-z]*$');
+const CATEGORY_NAME_REGEX = new RegExp('^[A-Za-z][-_0-9A-Za-z]*$');
 const ENUM_REGEX = new RegExp('^[_A-Za-z][_0-9A-Za-z]*$');
 const ICON_REGEX = new RegExp('^[A-Za-z0-9][-A-Za-z0-9]*$');
 
@@ -23,6 +25,18 @@ const isValidName = {
   name: 'isValidName',
   message: '${path} must match the following regex: /^[A-Za-z][_0-9A-Za-z]*$/',
   test: val => val === '' || NAME_REGEX.test(val),
+};
+
+const isValidCategoryName = {
+  name: 'isValidCategoryName',
+  message: '${path} must match the following regex: /^[A-Za-z][_-0-9A-Za-z]*$/',
+  test: val => val === '' || CATEGORY_NAME_REGEX.test(val),
+};
+
+const isValidCollectionName = {
+  name: 'isValidCollectionName',
+  message: '${path} must match the following regex: /^[A-Za-z][-_0-9A-Za-z]*$/',
+  test: val => val === '' || COLLECTION_NAME_REGEX.test(val),
 };
 
 const isValidIcon = {
@@ -47,6 +61,8 @@ const isValidEnum = {
 module.exports = {
   validators,
 
+  isValidCollectionName,
+  isValidCategoryName,
   isValidName,
   isValidIcon,
   isValidKey,

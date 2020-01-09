@@ -11,7 +11,7 @@ const Wrapper = styled.div`
   .buttonContainer {
     width: 100%;
     height: 34px;
-    padding-top: 13px;
+    line-height: 34px;
     text-align: center;
     background-color: #fafafb;
     border-top: 0;

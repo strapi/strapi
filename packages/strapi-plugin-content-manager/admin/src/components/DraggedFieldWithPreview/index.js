@@ -46,8 +46,8 @@ const DraggedFieldWithPreview = forwardRef(
       'dynamiczone',
     ];
     const withLongerHeight = higherFields.includes(type) && !dragStart;
-    const getCompoFriendlyName = uid =>
-      get(componentLayouts, [uid, 'schema', 'info', 'name'], '');
+    const getCompoInfos = uid =>
+      get(componentLayouts, [uid, 'schema', 'info'], { name: '', icon: '' });
 
     const componentData = get(componentLayouts, [componentUid], {});
     const componentLayout = get(componentData, ['layouts', 'edit'], []);
@@ -146,11 +146,14 @@ const DraggedFieldWithPreview = forwardRef(
                 {type === 'dynamiczone' && (
                   <DynamicZoneWrapper>
                     {dynamicZoneComponents.map(compo => {
+                      const { name, icon } = getCompoInfos(compo);
+
                       return (
                         <DynamicComponent
                           key={compo}
                           componentUid={compo}
-                          friendlyName={getCompoFriendlyName(compo)}
+                          friendlyName={name}
+                          icon={icon}
                           setIsOverDynamicZone={setIsOverDynamicZone}
                         />
                       );

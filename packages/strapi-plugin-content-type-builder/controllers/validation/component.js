@@ -2,9 +2,9 @@
 
 const _ = require('lodash');
 const yup = require('yup');
+const { formatYupErrors } = require('strapi-utils');
 
-const { isValidName, isValidIcon } = require('./common');
-const formatYupErrors = require('./yup-formatter');
+const { isValidCategoryName, isValidIcon } = require('./common');
 const createSchema = require('./model-schema');
 const { modelTypes, DEFAULT_TYPES } = require('./constants');
 
@@ -23,7 +23,7 @@ const componentSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
     category: yup
       .string()
       .nullable()
-      .test(isValidName)
+      .test(isValidCategoryName)
       .required('category.required'),
   })
   .required()

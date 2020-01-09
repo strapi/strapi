@@ -12,11 +12,11 @@ describe('Test type password', () => {
 
     modelsUtils = createModelsUtils({ rq });
 
-    await modelsUtils.createModelWithType('withpassword', 'password');
+    await modelsUtils.createContentTypeWithType('withpassword', 'password');
   }, 60000);
 
   afterAll(async () => {
-    await modelsUtils.deleteModel('withpassword');
+    await modelsUtils.deleteContentType('withpassword');
   }, 60000);
 
   test('Create entry with value input JSON', async () => {

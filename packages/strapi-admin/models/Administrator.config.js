@@ -1,9 +1,7 @@
 module.exports = {
-  metadatas: {
+  attributes: {
     resetPasswordToken: {
-      edit: {
-        visible: false,
-      },
+      hidden: true,
     },
   },
 };

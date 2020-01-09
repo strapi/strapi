@@ -1,6 +1,6 @@
 import React from 'react';
 import * as yup from 'yup';
-import { get, isEmpty, toLower } from 'lodash';
+import { get, isEmpty, toLower, trim, toNumber } from 'lodash';
 import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../../pluginId';
@@ -8,7 +8,12 @@ import getTrad from '../../../utils/getTrad';
 import { createComponentUid, createUid, nameToSlug } from './createUid';
 import componentForm from './componentForm';
 import fields from './staticFields';
-import { NAME_REGEX, ENUM_REGEX } from './attributesRegexes';
+import {
+  NAME_REGEX,
+  ENUM_REGEX,
+  CATEGORY_NAME_REGEX,
+} from './attributesRegexes';
+import RESERVED_NAMES from './reservedNames';
 
 yup.addMethod(yup.mixed, 'defined', function() {
   return this.test(
@@ -37,7 +42,41 @@ yup.addMethod(yup.string, 'unique', function(
 
 yup.addMethod(yup.array, 'hasNotEmptyValues', function(message) {
   return this.test('hasNotEmptyValues', message, function(array) {
-    return !array.some(value => isEmpty(value));
+    return !array.some(value => {
+      return isEmpty(value);
+    });
+  });
+});
+
+yup.addMethod(yup.string, 'isAllowed', function(message) {
+  return this.test('isAllowed', message, function(string) {
+    if (!string) {
+      return false;
+    }
+
+    return !RESERVED_NAMES.includes(toLower(trim(string)));
+  });
+});
+
+yup.addMethod(yup.string, 'isInferior', function(message, max) {
+  return this.test('isInferior', message, function(min) {
+    if (!min) {
+      return false;
+    }
+
+    if (Number.isNaN(toNumber(min))) {
+      return true;
+    }
+
+    return toNumber(max) >= toNumber(min);
+  });
+});
+
+yup.addMethod(yup.array, 'matchesEnumRegex', function(message) {
+  return this.test('matchesEnumRegex', message, function(array) {
+    return array.every(value => {
+      return ENUM_REGEX.test(value);
+    });
   });
 });
 
@@ -189,6 +228,7 @@ const forms = {
               .array()
               .of(yup.string())
               .min(1, errorsTrads.min)
+              .matchesEnumRegex(errorsTrads.regex)
               .hasNotEmptyValues(
                 'Empty strings are not allowed',
                 dataToValidate.enum
@@ -199,11 +239,50 @@ const forms = {
         case 'integer':
         case 'biginteger':
         case 'float':
-        case 'decimal':
+        case 'decimal': {
+          if (dataToValidate.type === 'biginteger') {
+            return yup.object().shape({
+              ...commonShape,
+              default: yup
+                .string()
+                .nullable()
+                .matches(/^\d*$/),
+              min: yup
+                .string()
+                .nullable()
+                .matches(/^\d*$/)
+                .when('max', (max, schema) => {
+                  if (max) {
+                    return schema.isInferior(
+                      getTrad('error.validation.minSupMax'),
+                      max
+                    );
+                  } else {
+                    return schema;
+                  }
+                }),
+
+              max: yup
+                .string()
+                .nullable()
+                .matches(/^\d*$/),
+            });
+          }
+
+          let defaultType = yup.number();
+
+          if (dataToValidate.type === 'integer') {
+            defaultType = yup
+              .number()
+              .integer('component.Input.error.validation.integer');
+          }
+
           return yup.object().shape({
             ...commonShape,
+            default: defaultType.nullable(),
             ...numberTypeShape,
           });
+        }
         case 'relation':
           return yup.object().shape({
             name: yup
@@ -275,6 +354,7 @@ const forms = {
             },
           ],
           [fields.divider],
+          [fields.private],
           [fields.required],
           [fields.unique],
         ];
@@ -300,6 +380,24 @@ const forms = {
         }
 
         const items = defaultItems.slice();
+
+        if (type === 'number' && data.type !== 'biginteger') {
+          const step =
+            data.type === 'decimal' || data.type === 'float' ? 'any' : '1';
+
+          items.splice(0, 1, [
+            {
+              autoFocus: true,
+              name: 'default',
+              type: 'number',
+              step,
+              label: {
+                id: getTrad('form.attribute.settings.default'),
+              },
+              validations: {},
+            },
+          ]);
+        }
 
         if (type === 'media') {
           items.splice(0, 1);
@@ -662,6 +760,7 @@ const forms = {
         name: yup
           .string()
           .unique(errorsTrads.unique, takenNames, createUid)
+          .isAllowed(getTrad('error.contentTypeName.reserved-name'))
           .required(errorsTrads.required),
         collectionName: yup.string(),
       });
@@ -742,10 +841,11 @@ const forms = {
             createComponentUid,
             componentCategory
           )
+          .isAllowed(getTrad('error.contentTypeName.reserved-name'))
           .required(errorsTrads.required),
         category: yup
           .string()
-          .matches(NAME_REGEX, errorsTrads.regex)
+          .matches(CATEGORY_NAME_REGEX, errorsTrads.regex)
           .required(errorsTrads.required),
         icon: yup.string().required(errorsTrads.required),
         collectionName: yup.string().nullable(),
@@ -808,6 +908,7 @@ const forms = {
       return yup.object().shape({
         name: yup
           .string()
+          .matches(CATEGORY_NAME_REGEX, errorsTrads.regex)
           .unique(errorsTrads.unique, allowedCategories, toLower)
           .required(errorsTrads.required),
       });

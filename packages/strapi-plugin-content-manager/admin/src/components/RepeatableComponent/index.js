@@ -27,7 +27,9 @@ const RepeatableComponent = ({
   const [, drop] = useDrop({ accept: ItemTypes.COMPONENT });
 
   const componentErrorKeys = Object.keys(formErrors)
-    .filter(errorKey => errorKey.includes(name))
+    .filter(errorKey => {
+      return errorKey.split('.')[0] === name;
+    })
     .map(errorKey => {
       return errorKey
         .split('.')
@@ -52,6 +54,7 @@ const RepeatableComponent = ({
   const errorsArray = componentErrorKeys.map(key =>
     get(formErrors, [key, 'id'], '')
   );
+
   const hasMinError =
     get(errorsArray, [0], '').includes('min') &&
     !collapses.some(obj => obj.isOpen === true);
@@ -122,6 +125,7 @@ const RepeatableComponent = ({
         onClick={() => {
           if (componentValueLength < max) {
             const shouldCheckErrors = hasMinError;
+
             addRepeatableComponentToField(
               name,
               componentUid,

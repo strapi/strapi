@@ -57,6 +57,20 @@ NODE_ENV=production npm run build
 
 :::
 
+::: tab Windows
+
+```bash
+npm install cross-env
+```
+
+Then in your `package.json` scripts section:
+
+```bash
+"production": "cross-env NODE_ENV=production npm run build"
+```
+
+:::
+
 ::::
 
 Run the server with the `production` settings.
@@ -75,6 +89,20 @@ NODE_ENV=production yarn start
 
 ```bash
 NODE_ENV=production npm start
+```
+
+:::
+
+::: tab Windows
+
+```bash
+npm install cross-env
+```
+
+Then in your `package.json` scripts section:
+
+```bash
+"production": "cross-env NODE_ENV=production npm start"
 ```
 
 :::
@@ -491,20 +519,22 @@ sudo nano ecosystem.config.js
 
 ```js
 module.exports = {
-  apps : [{
-    name: 'your-app-name',
-    cwd: '/home/ubuntu/my-strapi-project/my-project',
-    script: 'npm',
-    args: 'start',
-    env: {
-      NODE_ENV: 'production',
-      DATABASE_HOST: 'your-unique-url.rds.amazonaws.com', // database Endpoint under 'Connectivity & Security' tab
-      DATABASE_PORT: '5432',
-      DATABASE_NAME: 'strapi',  // DB name under 'Configuration' tab
-      DATABASE_USERNAME: 'postgres', // default username
-      DATABASE_PASSWORD: 'Password',
+  apps: [
+    {
+      name: 'your-app-name',
+      cwd: '/home/ubuntu/my-strapi-project/my-project',
+      script: 'npm',
+      args: 'start',
+      env: {
+        NODE_ENV: 'production',
+        DATABASE_HOST: 'your-unique-url.rds.amazonaws.com', // database Endpoint under 'Connectivity & Security' tab
+        DATABASE_PORT: '5432',
+        DATABASE_NAME: 'strapi', // DB name under 'Configuration' tab
+        DATABASE_USERNAME: 'postgres', // default username
+        DATABASE_PASSWORD: 'Password',
+      },
     },
-  }],
+  ],
 };
 ```
 

@@ -57,7 +57,7 @@ These configurations are accessible through `strapi.config.backendURL` and `stra
 
 The `./config/functions/` folder contains a set of JavaScript files in order to add dynamic and logic based configurations.
 
-All functions that are expose in this folder or in your `./config` folder are accessible via `strapi.config.functions['fileName']();`
+All functions that are exposed in this folder or in your `./config` folder are accessible via `strapi.config.functions['fileName']();`
 
 ### Bootstrap
 
@@ -212,7 +212,7 @@ You can access the config of the current environment through `strapi.config.curr
       - `username` (string): Username used to establish the connection.
       - `password` (string): Password used to establish the connection.
       - `options` (object): List of additional options used by the connector.
-      - `timezone` (string): Set the default behavior for local time. Default value: `utc`.
+      - `timezone` (string): Set the default behavior for local time. Default value: `utc` [Timezone options](https://www.php.net/manual/en/timezones.php).
       - `schema` (string): Set the default database schema. **Used only for Postgres DB**
       - `ssl` (boolean): For ssl database connection.
     - `options` Options used for database connection.

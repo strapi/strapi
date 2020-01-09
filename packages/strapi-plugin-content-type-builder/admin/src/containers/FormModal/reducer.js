@@ -114,6 +114,7 @@ const reducer = (state, action) => {
         'componentToCreate',
       ]);
       const modifiedData = fromJS({
+        name: componentToCreate.get('name'),
         type: 'component',
         repeatable: false,
         component: createComponentUid(

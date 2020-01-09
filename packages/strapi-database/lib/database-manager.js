@@ -85,9 +85,13 @@ class DatabaseManager {
 
     const connectorQuery = this.connectors
       .get(model.orm)
-      .queries({ model, modelKey: normalizedName, strapi });
+      .queries({ model, modelKey: model.modelName, strapi });
 
-    const query = createQuery({ connectorQuery, model });
+    const query = createQuery({
+      connectorQuery,
+      model,
+    });
+
     this.queries.set(model.uid, query);
     return query;
   }

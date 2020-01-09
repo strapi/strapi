@@ -1,4 +1,8 @@
 {
+  "contentTypes": {
+    "id": "app.components.LeftMenuLinkContainer.contentTypes",
+    "defaultMessage": "Content Types"
+  },
   "listPlugins": {
     "id": "app.components.LeftMenuLinkContainer.listPlugins",
     "defaultMessage": "Plugins"
