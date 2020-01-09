@@ -5,6 +5,7 @@ const fse = require('fs-extra');
 const chalk = require('chalk');
 const execa = require('execa');
 const ora = require('ora');
+const _ = require('lodash');
 
 const stopProcess = require('./utils/stop-process');
 const { trackUsage, captureStderr } = require('./utils/usage');
@@ -42,7 +43,7 @@ module.exports = async function createProject(
         strapiDependencies: scope.strapiDependencies,
         additionalsDependencies: dependencies,
         strapiVersion: scope.strapiVersion,
-        projectName: scope.name,
+        projectName: _.kebabCase(scope.name),
         uuid: scope.uuid,
       }),
       {

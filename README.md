@@ -134,4 +134,4 @@ Check out our [roadmap](https://portal.productboard.com/strapi) to get informed 
 
 ## License
 
-[MIT License](LICENSE.md) Copyright (c) 2015-2019 [Strapi Solutions](https://strapi.io/).
+[MIT License](LICENSE.md) Copyright (c) 2015-2020 [Strapi Solutions](https://strapi.io/).

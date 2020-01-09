@@ -95,7 +95,7 @@
   "app.components.PluginCard.compatible": "Compatible with your app",
   "app.components.PluginCard.compatibleCommunity": "Compatible with the community",
   "app.components.PluginCard.more-details": "More details",
-  "app.components.PluginCard.PopUpWarning.install.impossible.autoReload.needed": "The autoReload feature needs to be unabled. Please start you app with `yarn develop`.",
+  "app.components.PluginCard.PopUpWarning.install.impossible.autoReload.needed": "The autoReload feature needs to be enabled. Please start your app with `yarn develop`.",
   "app.components.PluginCard.PopUpWarning.install.impossible.environment": "For security reasons, a plugin can only be downloaded in a development environment.",
   "app.components.PluginCard.PopUpWarning.install.impossible.confirm": "I understand!",
   "app.components.PluginCard.PopUpWarning.install.impossible.title": "Downloading is impossible",
