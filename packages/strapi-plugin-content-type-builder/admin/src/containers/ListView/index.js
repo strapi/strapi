@@ -11,6 +11,7 @@ import {
 import { Header } from '@buffetjs/custom';
 import ListViewContext from '../../contexts/ListViewContext';
 import convertAttrObjToArray from '../../utils/convertAttrObjToArray';
+import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
 import ListRow from '../../components/ListRow';
@@ -71,41 +72,49 @@ const ListView = () => {
   const hasModelBeenModified = !isEqual(modifiedData, initialData);
   const forTarget = isInContentTypeView ? 'contentType' : 'component';
 
-  const handleClickOpenModalAddField = async (
+  const handleClickAddField = async (
     forTarget,
     targetUid,
-    headerDisplayName,
-    headerDisplayCategory = null,
-    headerDisplaySubCategory = null,
-    subTargetUid = null
+    firstHeaderObj,
+    secondHeaderObj,
+    thirdHeaderObj,
+    fourthHeaderObj
   ) => {
+    // disable the prompt
+    await wait();
+
     const searchObj = {
       modalType: 'chooseAttribute',
       forTarget,
       targetUid,
-      headerDisplayName,
-      headerDisplayCategory,
-      headerDisplaySubCategory,
-      subTargetUid,
+      ...firstHeaderObj,
+      ...secondHeaderObj,
+      ...thirdHeaderObj,
+      ...fourthHeaderObj,
     };
 
-    // Disable the prompt
-    await wait();
-
-    push({ search: makeSearch(searchObj, true) });
+    push({ search: makeSearch(searchObj) });
   };
 
   const handleClickAddComponentToDZ = async dzName => {
+    const firstHeaderObject = {
+      header_label_1: currentDataName,
+      header_icon_name_1: 'dynamiczone',
+      header_icon_isCustom_1: false,
+    };
+    const secondHeaderObj = {
+      header_label_2: dzName,
+    };
     const search = {
       modalType: 'addComponentToDynamicZone',
       forTarget: 'contentType',
       targetUid,
-      headerDisplayCategory: currentDataName,
       dynamicZoneTarget: dzName,
       settingType: 'base',
       step: '1',
       actionType: 'edit',
-      headerDisplayName: dzName,
+      ...firstHeaderObject,
+      ...secondHeaderObj,
     };
 
     await wait();
@@ -118,30 +127,13 @@ const ListView = () => {
     targetUid,
     attributeName,
     type,
-    headerDisplayName,
-    headerDisplayCategory = null,
-    headerDisplaySubCategory = null,
-    subTargetUid = null
+    firstHeaderObj,
+    secondHeaderObj,
+    thirdHeaderObj,
+    fourthHeaderObj,
+    fifthHeaderObj
   ) => {
-    let attributeType;
-
-    switch (type) {
-      case 'integer':
-      case 'biginteger':
-      case 'decimal':
-      case 'float':
-        attributeType = 'number';
-        break;
-      case 'string':
-      case 'text':
-        attributeType = 'text';
-        break;
-      case '':
-        attributeType = 'relation';
-        break;
-      default:
-        attributeType = type;
-    }
+    const attributeType = getAttributeDisplayedType(type);
 
     await wait();
 
@@ -153,11 +145,12 @@ const ListView = () => {
       targetUid,
       attributeName,
       attributeType,
-      headerDisplayName,
-      headerDisplayCategory,
-      headerDisplaySubCategory,
       step: type === 'component' ? '2' : null,
-      subTargetUid,
+      ...firstHeaderObj,
+      ...secondHeaderObj,
+      ...thirdHeaderObj,
+      ...fourthHeaderObj,
+      ...fifthHeaderObj,
     };
 
     await wait();
@@ -181,6 +174,7 @@ const ListView = () => {
 
   const wait = async () => {
     togglePrompt(false);
+
     return new Promise(resolve => setTimeout(resolve, 100));
   };
   const label = get(modifiedData, [firstMainDataPath, 'schema', 'name'], '');
@@ -231,7 +225,10 @@ const ListView = () => {
                     settingType: 'base',
                     forTarget: firstMainDataPath,
                     targetUid,
-                    headerDisplayName: label,
+                    header_label_1: label,
+                    header_icon_isCustom_1: false,
+                    header_icon_name_1: firstMainDataPath,
+                    headerId: getTrad('modalForm.header-edit'),
                   }),
                 });
               },
@@ -258,7 +255,12 @@ const ListView = () => {
     color: 'primary',
     label: formatMessage({ id: `${pluginId}.button.attributes.add.another` }),
     onClick: () => {
-      handleClickOpenModalAddField(forTarget, targetUid, currentDataName);
+      const headerDisplayObject = {
+        header_label_1: currentDataName,
+        header_icon_name_1: forTarget,
+        header_icon_isCustom_1: false,
+      };
+      handleClickAddField(forTarget, targetUid, headerDisplayObject);
     },
   };
   const goToCMSettingsPage = () => {
@@ -281,8 +283,6 @@ const ListView = () => {
     ? [{ ...configureButtonProps }, { ...addButtonProps }]
     : [configureButtonProps];
 
-  const handleClickOnTrashIcon = () => {};
-
   const CustomRow = props => {
     const { name } = props;
 
@@ -292,7 +292,6 @@ const ListView = () => {
         attributeName={name}
         name={name}
         onClick={handleClickEditField}
-        onClickDelete={handleClickOnTrashIcon}
       />
     );
   };
@@ -307,7 +306,7 @@ const ListView = () => {
 
   return (
     <ListViewContext.Provider
-      value={{ openModalAddField: handleClickOpenModalAddField }}
+      value={{ openModalAddField: handleClickAddField }}
     >
       <Wrapper>
         <BackHeader onClick={goBack} />

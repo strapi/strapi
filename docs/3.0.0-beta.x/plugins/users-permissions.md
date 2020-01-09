@@ -33,7 +33,7 @@ This is the default role that is given to every **new user** if no role is provi
 
 By clicking on the **Role** name, you will be able to see all functions available in your application (and these function are related to a specific route)
 
-If you check a fonction name, it makes this route accessible by the current role you are editing.
+If you check a function name, it makes this route accessible by the current role you are editing.
 On the right sidebar you will be able to see the URL related to this function.
 
 ### Update the default role

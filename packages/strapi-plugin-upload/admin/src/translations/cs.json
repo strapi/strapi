@@ -19,13 +19,15 @@
   "ListHeader.type": "Typ",
   "ListHeader.updated": "Aktualizováno",
   "PluginInputFile.link": "prohlédnout",
-  "PluginInputFile.loading": "Vaše soubory jsou právě nahrávány...",
-  "PluginInputFile.text": "Přesuňte zde kurzorem vaše soubory do nebo {link} ze souboru k nahrání",
+  "PluginInputFile.loading": "Soubory se nahrávají...",
+  "PluginInputFile.text": "Přesuňte zde soubory kurzorem nebo {link} soubory v počítači",
   "Upload.status.empty": "Soubory jsou prázdné",
   "Upload.status.disabled": "Nahrávání souborů je zakázáno",
   "Upload.status.sizeLimit": "{file} soubor je větší než maximální povolená velikost!",
   "notification.config.success": "Nastavení bylo uloženo",
   "notification.delete.success": "Soubor byl odstraněn",
   "notification.dropFile.success": "Váš soubor byl nahrán",
-  "notification.dropFiles.success": "{number} soubory byly nahrány"
+  "notification.dropFiles.success": "soubory byly nahrány ({number})",
+  "plugin.description.long": "Správce multimediálních souborů.",
+  "plugin.description.short": "Správce multimediálních souborů."
 }
