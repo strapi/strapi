@@ -25,6 +25,23 @@ function Inputs({
   validations,
   value,
 }) {
+  if (type === 'headers') {
+    return (
+      <Wrapper>
+        <Label htmlFor={name}>{label}</Label>
+        <HeadersInput
+          value={value}
+          name={name}
+          onBlur={handleBlur}
+          onClick={onClick}
+          onChange={onChange}
+          onRemove={onRemove}
+          errors={inputError}
+        />
+        {inputError && <ErrorMessage>This value is required</ErrorMessage>}
+      </Wrapper>
+    );
+  }
   return (
     <Error
       inputError={inputError}
@@ -34,6 +51,7 @@ function Inputs({
     >
       {({ canCheck, error, dispatch }) => {
         const hasError = error && error !== null;
+
         const handleChange = e => {
           if (!canCheck) {
             dispatch({
@@ -52,15 +70,7 @@ function Inputs({
           <Wrapper>
             <Label htmlFor={name}>{label}</Label>
 
-            {type === 'headers' ? (
-              <HeadersInput
-                value={value}
-                name={name}
-                onClick={onClick}
-                onChange={handleChange}
-                onRemove={onRemove}
-              />
-            ) : type === 'events' ? (
+            {type === 'events' ? (
               <EventInput
                 value={value}
                 name={name}
@@ -78,6 +88,7 @@ function Inputs({
                 name={name}
               />
             )}
+
             {hasError && <ErrorMessage>{error}</ErrorMessage>}
           </Wrapper>
         );
@@ -98,7 +109,7 @@ Inputs.defaultProps = {
 };
 
 Inputs.propTypes = {
-  error: PropTypes.string,
+  error: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   label: PropTypes.oneOfType([PropTypes.string]),
   name: PropTypes.string.isRequired,
   onBlur: PropTypes.func.isRequired,

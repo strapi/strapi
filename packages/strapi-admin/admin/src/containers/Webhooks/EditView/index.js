@@ -6,7 +6,7 @@
 
 import React, { useEffect, useReducer, useCallback, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { cloneDeep, get, isEmpty, isEqual, set } from 'lodash';
+import { cloneDeep, get, isEmpty, isEqual, set, setWith } from 'lodash';
 import { Header } from '@buffetjs/custom';
 import { Play } from '@buffetjs/icons';
 import {
@@ -231,11 +231,13 @@ function EditView() {
     const { type, validations } = form[name];
 
     try {
-      await createYupSchemaEntry(type, validations).validate(value);
+      await createYupSchemaEntry(type, validations).validate(value, {
+        abortEarly: false,
+      });
 
       resetError(name);
     } catch (err) {
-      setError(err.message, name);
+      setError(err, name);
     }
   };
 
@@ -277,23 +279,46 @@ function EditView() {
     }
   };
 
-  const resetErrors = (errors = null) => {
+  const resetErrors = (errors = {}) => {
     dispatch({
       type: 'SET_ERRORS',
       errors: errors,
     });
   };
 
-  const setError = (error, name) => {
-    const errors = formErrors;
-    set(errors, name, { id: error });
-    setErrors(errors);
+  const setError = (errors, name) => {
+    const err =
+      name === 'headers'
+        ? getYupInnerErrors(errors)
+        : { [name]: errors.message };
+
+    const formattedErrors = formErrors;
+
+    const newErrors = Object.keys(err).reduce((acc, curr) => {
+      const path = name === 'headers' ? `${name}${curr}` : name;
+
+      setWith(acc, path, err[curr], Object);
+
+      return acc;
+    }, {});
+
+    set(formattedErrors, name, newErrors[name]);
+
+    setErrors(formattedErrors);
   };
 
   const setErrors = errors => {
+    const newErrors = Object.keys(errors).reduce((acc, curr) => {
+      const { id } = errors[curr];
+
+      setWith(acc, curr, id ? id : errors[curr], Object);
+
+      return acc;
+    }, {});
+
     dispatch({
       type: 'SET_ERRORS',
-      errors,
+      errors: newErrors,
     });
   };
 
@@ -369,7 +394,7 @@ function EditView() {
                   <div key={key} className={form[key].styleName}>
                     <Inputs
                       {...form[key]}
-                      error={get(formErrors, [key, 'id'], null)}
+                      error={get(formErrors, key, null)}
                       name={key}
                       onBlur={handleBlur}
                       onChange={handleChange}

@@ -90,6 +90,11 @@ const Wrapper = styled.div`
       }
     }
   }
+  .bordered {
+    input {
+      border: 1px solid #f64d0a;
+    }
+  }
 `;
 
 export default Wrapper;

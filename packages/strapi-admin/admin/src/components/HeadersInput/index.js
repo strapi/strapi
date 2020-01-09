@@ -2,6 +2,7 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import CreatableSelect from 'react-select/creatable';
 import PropTypes from 'prop-types';
+import { get } from 'lodash';
 import { CircleButton } from 'strapi-helper-plugin';
 import { InputText } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
@@ -10,7 +11,15 @@ import Wrapper from './Wrapper';
 
 import keys from './keys';
 
-const HeadersInput = ({ onClick, onChange, name, value, onRemove, error }) => {
+const HeadersInput = ({
+  onBlur,
+  onClick,
+  onChange,
+  name,
+  value,
+  onRemove,
+  errors,
+}) => {
   const handleChangeKey = (selected, name) => {
     if (selected === null) {
       onChange({ target: { name, value: '' } });
@@ -40,48 +49,54 @@ const HeadersInput = ({ onClick, onChange, name, value, onRemove, error }) => {
     }
   };
 
-  const customStyles = {
-    control: (base, state) => ({
-      ...base,
-      border: state.isFocused
-        ? '1px solid #78caff !important'
-        : error
-        ? '1px solid red !important'
-        : '1px solid #E3E9F3 !important',
-      borderRadius: '2px !important',
-    }),
-    menu: base => {
-      return {
+  const customStyles = hasError => {
+    return {
+      control: (base, state) => ({
         ...base,
-        padding: '0',
-        border: '1px solid #e3e9f3',
-        borderTop: '1px solid #78caff',
-        borderTopRightRadius: '0',
-        borderTopLeftRadius: '0',
-        borderBottomRightRadius: '3px',
-        borderBottomLeftRadius: '3px',
-        boxShadow: 'none',
-        marginTop: '-1px;',
-      };
-    },
-    menuList: base => ({
-      ...base,
-      maxHeight: '224px',
-      paddingTop: '0',
-    }),
-    option: (base, state) => {
-      return {
+        border: state.isFocused
+          ? '1px solid #78caff !important'
+          : hasError
+          ? '1px solid #F64D0A !important'
+          : '1px solid #E3E9F3 !important',
+        borderRadius: '2px !important',
+      }),
+      menu: base => {
+        return {
+          ...base,
+          padding: '0',
+          border: '1px solid #e3e9f3',
+          borderTop: '1px solid #78caff',
+          borderTopRightRadius: '0',
+          borderTopLeftRadius: '0',
+          borderBottomRightRadius: '3px',
+          borderBottomLeftRadius: '3px',
+          boxShadow: 'none',
+          marginTop: '-1px;',
+        };
+      },
+      menuList: base => ({
         ...base,
-        backgroundColor:
-          state.isSelected || state.isFocused ? '#f6f6f6' : '#fff',
-        color: '#000000',
-        fontSize: '13px',
-        fontWeight: state.isSelected ? '600' : '400',
-        cursor: state.isFocused ? 'pointer' : 'initial',
-        height: '32px',
-        lineHeight: '16px',
-      };
-    },
+        maxHeight: '224px',
+        paddingTop: '0',
+      }),
+      option: (base, state) => {
+        return {
+          ...base,
+          backgroundColor:
+            state.isSelected || state.isFocused ? '#f6f6f6' : '#fff',
+          color: '#000000',
+          fontSize: '13px',
+          fontWeight: state.isSelected ? '600' : '400',
+          cursor: state.isFocused ? 'pointer' : 'initial',
+          height: '32px',
+          lineHeight: '16px',
+        };
+      },
+    };
+  };
+
+  const handleBlur = () => {
+    onBlur({ target: { name, value } });
   };
 
   return (
@@ -101,21 +116,26 @@ const HeadersInput = ({ onClick, onChange, name, value, onRemove, error }) => {
         </li>
         {value.map((header, index) => {
           const { key, value } = header;
+          const entryErrors = get(errors, index, null);
 
           return (
             <li key={index}>
               <section>
                 <CreatableSelect
                   isClearable
+                  onBlur={handleBlur}
                   onChange={e => handleChangeKey(e, `${name}.${index}.key`)}
                   options={options}
                   name={`${name}.${index}.key`}
                   value={optionFormat(key)}
-                  styles={customStyles}
+                  styles={customStyles(entryErrors && entryErrors.key)}
                 />
               </section>
               <section>
                 <InputText
+                  onBlur={handleBlur}
+                  className={entryErrors && entryErrors.value && 'bordered'}
+                  error={entryErrors && entryErrors.value}
                   value={value}
                   name={`${name}.${index}.value`}
                   onChange={onChange}
@@ -141,16 +161,18 @@ const HeadersInput = ({ onClick, onChange, name, value, onRemove, error }) => {
 };
 
 HeadersInput.defaultProps = {
-  error: null,
+  errors: {},
   handleClick: () => {},
+  onBlur: () => {},
   onClick: () => {},
   onRemove: () => {},
 };
 
 HeadersInput.propTypes = {
-  error: PropTypes.string,
+  errors: PropTypes.object,
   handleClick: PropTypes.func,
   name: PropTypes.string.isRequired,
+  onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
   onClick: PropTypes.func.isRequired,
   onRemove: PropTypes.func,
