@@ -19,7 +19,6 @@
   - [.services](#strapi-services)
   - [.start()](#strapi-start)
   - [.stop()](#strapi-stop)
-  - [.utils](#strapi-utils)
 
 ## strapi.admin
 
@@ -98,7 +97,3 @@ Returns a function that loads the configurations, middlewares and hooks. Then, i
 ## strapi.stop
 
 Returns a function that shuts down the server and destroys the current connections.
-
-## strapi.utils
-
-Returns a set of utils.

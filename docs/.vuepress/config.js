@@ -185,6 +185,7 @@ module.exports = {
             '/3.0.0-beta.x/concepts/middlewares',
             '/3.0.0-beta.x/concepts/logging',
             '/3.0.0-beta.x/concepts/plugins',
+            '/3.0.0-beta.x/concepts/webhooks',
           ],
         },
         {
