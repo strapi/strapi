@@ -19,21 +19,21 @@ The way a webhook works is by delivering informations to a receiving application
 
 ### Delete a webhook
 
-## Webhooks payloads and events
+## Available events
 
 By default strapi webhook can be trigger by the following events:
 
-- Entry creation
-- Entry edition
-- Entry deletion
-- Media creation
-- Media deletion
+- Entry create
+- Entry update
+- Entry delete
+- Media create
+- Media delete
 
 ### Entry created
 
-This event is created when a new entry
+This event is triggered when a new entry is created.
 
-**payload**
+**Example payload**
 
 ```json
 {
@@ -57,7 +57,9 @@ This event is created when a new entry
 
 ### Entry updated
 
-**payload**
+This event is triggered when an entry is updated.
+
+**Example payload**
 
 ```json
 {
@@ -81,7 +83,9 @@ This event is created when a new entry
 
 ### Entry deleted
 
-**payload**
+This event is triggered when an entry is deleted.
+
+**Example payload**
 
 ```json
 {
@@ -107,7 +111,7 @@ This event is created when a new entry
 
 This event is triggered when you upload a file on entry creation or through the media interface.
 
-**payload**
+**Example payload**
 
 ```json
 {
@@ -135,7 +139,7 @@ This event is triggered when you upload a file on entry creation or through the 
 
 This event is triggered only when you delete a media through the media interface.
 
-**payload**
+**Example payload**
 
 ```json
 {
@@ -164,6 +168,25 @@ This event is triggered only when you delete a media through the media interface
 ### Architecture
 
 ![Webhooks architecture diagram](../assets/concepts/diagram-architecture.png)
+
+### Available configurations
+
+You can set webhooks configurations inside the file `./config/environments/{env}/server.json`.
+
+- `webhooks`
+  - `defaultHeaders`: You can set default headers to use for your webhook requests. This option is overwritten by the headers set in the webhook itself.
+
+**Example configuration**
+
+```json
+{
+  "webhooks": {
+    "defaultHeaders": {
+      "Custom-Header": "my-custom-header"
+    }
+  }
+}
+```
 
 ### Securing your webhooks
 
@@ -204,6 +227,6 @@ You can configure those global headers by updating the file at `./config/environ
 
 ::::
 
-### Available configurations
+If you are developing the webhook handler yourself you can now verify the token by reading the headers.
 
 ### Programmatic use
