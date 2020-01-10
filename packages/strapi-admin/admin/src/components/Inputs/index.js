@@ -82,7 +82,7 @@ function Inputs({
                   />
                 ) : (
                   <InputText
-                    error={hasError}
+                    className={hasError ? 'hasError' : ''}
                     name={name}
                     onBlur={onBlur}
                     onChange={handleChange}

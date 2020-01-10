@@ -4,7 +4,7 @@
  *
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { colors, sizes } from '@buffetjs/styles';
 
 const Wrapper = styled.div`
@@ -24,15 +24,11 @@ const Wrapper = styled.div`
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  ${({ error }) =>
-    !!error &&
-    css`
-      input,
-      textarea,
-      select {
-        border-color: ${colors.darkOrange};
-      }
-    `}
+  .hasError {
+    input {
+      border-color: ${colors.darkOrange};
+    }
+  }
 `;
 
 export default Wrapper;
