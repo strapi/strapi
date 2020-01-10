@@ -9,29 +9,28 @@ import styled from 'styled-components';
 const Wrapper = styled.div`
   position: relative;
   .button {
-    width: 30px;
-    height: 18px;
     position: relative;
     z-index: 2;
+    width: 30px;
+    height: 18px;
     margin-right: 12px;
     .button-rect {
       position: relative;
+      z-index: -2;
+      margin-top: 3px;
       width: 30px;
       height: 12px;
       background-color: #faa684;
       border-radius: 6px;
-      margin-top: 3px;
-      z-index: -2;
     }
     .button-circle {
-      background-color: #f1f1f1;
       position: absolute;
       top: 0;
       right: -1px;
       width: 17px;
       height: 17px;
       border-radius: 9px;
-
+      background-color: #f1f1f1;
       &:before {
         content: '';
         position: absolute;

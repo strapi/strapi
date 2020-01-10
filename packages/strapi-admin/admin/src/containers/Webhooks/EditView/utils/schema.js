@@ -7,8 +7,8 @@ const translatedErrors = {
   string: 'This is not a string',
 };
 
-const createYupSchema = form => {
-  const validation = yup.object().shape(
+const createYupSchema = form =>
+  yup.object().shape(
     Object.keys(form).reduce((acc, current) => {
       const { type, validations } = form[current];
       acc[current] = createYupSchemaEntry(type, validations);
@@ -16,9 +16,6 @@ const createYupSchema = form => {
       return acc;
     }, {})
   );
-
-  return validation;
-};
 
 const createYupSchemaEntry = (type, validations) => {
   let schema = yup.mixed();
@@ -38,6 +35,7 @@ const createYupSchemaEntry = (type, validations) => {
       )
       .nullable();
   }
+
   if (['events'].includes(type)) {
     schema = yup.array();
   }
@@ -59,4 +57,4 @@ const createYupSchemaEntry = (type, validations) => {
   return schema;
 };
 
-export { createYupSchema, createYupSchemaEntry };
+export default createYupSchema;

@@ -16,8 +16,8 @@ const StyledListRow = styled(Row)`
       white-space: nowrap;
     }
     &:first-of-type {
-      padding-left: 30px;
       width: 65px;
+      padding-left: 30px;
     }
     &:nth-of-type(2) {
       max-width: 158px;

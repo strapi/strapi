@@ -20,10 +20,10 @@ function LeftMenuHeader({ count, search, searchable, setSearch, title }) {
 
   const getTitle = () => {
     if (searchable) {
-      return count > 1 ? (
-        <FormattedMessage id={`${title.id}plural`} />
-      ) : (
-        <FormattedMessage id={`${title.id}singular`} />
+      return (
+        <FormattedMessage
+          id={`${title.id}${count > 1 ? 'plural' : 'singular'}`}
+        />
       );
     }
 

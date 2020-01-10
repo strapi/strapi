@@ -6,7 +6,7 @@
 
 import React, { useEffect, useReducer, useCallback, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { cloneDeep, get, isEmpty, isEqual, set, setWith } from 'lodash';
+import { get, isEmpty, isEqual, set, setWith } from 'lodash';
 import { Header } from '@buffetjs/custom';
 import { Play } from '@buffetjs/icons';
 import {
@@ -18,7 +18,7 @@ import {
 
 import reducer, { initialState } from './reducer';
 import form from './utils/form';
-import { createYupSchema, createYupSchemaEntry } from './utils/schema';
+import createYupSchema from './utils/schema';
 
 import Inputs from '../../../components/Inputs';
 import TriggerContainer from '../../../components/TriggerContainer';
@@ -29,7 +29,7 @@ function EditView() {
   const [submittedOnce, setSubmittedOnce] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const location = useLocation();
-  const { goBack, push } = useHistory();
+  const { push } = useHistory();
 
   const {
     formErrors,
@@ -43,17 +43,17 @@ function EditView() {
   const { name } = modifiedWebhook;
 
   const id = location.pathname.split('/')[3];
-  const isCreatingWebhook = id === 'create';
+  const isCreating = id === 'create';
 
   const abortController = new AbortController();
 
   const { signal } = abortController;
 
   useEffect(() => {
-    if (!isCreatingWebhook || (!isCreatingWebhook && shouldRefetchData)) {
+    if (!isCreating || (!isCreating && shouldRefetchData)) {
       fetchData();
     }
-  }, [fetchData, isCreatingWebhook, shouldRefetchData]);
+  }, [fetchData, isCreating, shouldRefetchData]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -72,8 +72,7 @@ function EditView() {
     }
   }, [id]);
 
-  // Header props
-  const headerTitle = isCreatingWebhook
+  const headerTitle = isCreating
     ? formatMessage({
         id: `Settings.webhooks.create`,
       })
@@ -84,7 +83,7 @@ function EditView() {
     Object.keys(formErrors).length > 0;
 
   const triggerActionIsDisabled =
-    isCreatingWebhook || (!isCreatingWebhook && !actionsAreDisabled);
+    isCreating || (!isCreating && !actionsAreDisabled);
 
   const handleTrigger = async () => {
     dispatch({
@@ -116,17 +115,15 @@ function EditView() {
     });
   };
 
-  const handleReset = () => {
+  const handleReset = () =>
     dispatch({
       type: 'RESET',
     });
-  };
 
   const actions = [
     {
       color: 'primary',
       disabled: triggerActionIsDisabled,
-      type: 'button',
       label: formatMessage({
         id: `Settings.webhooks.trigger`,
       }),
@@ -134,14 +131,14 @@ function EditView() {
         handleTrigger();
       },
       style: {
-        paddingRight: 15,
-        paddingLeft: 15,
+        padding: '0 15px',
       },
       title: triggerActionIsDisabled
         ? formatMessage({
             id: `Settings.webhooks.trigger.save`,
           })
         : null,
+      type: 'button',
       icon: (
         <Play
           width="6px"
@@ -151,30 +148,27 @@ function EditView() {
       ),
     },
     {
-      onClick: () => {
-        handleReset();
-      },
       color: 'cancel',
       disabled: actionsAreDisabled,
-      type: 'button',
       label: formatMessage({
         id: `app.components.Button.reset`,
       }),
+      onClick: () => handleReset(),
       style: {
-        paddingRight: 20,
-        paddingLeft: 20,
+        padding: '0 20px',
       },
+      type: 'button',
     },
     {
       color: 'success',
       disabled: actionsAreDisabled,
-      type: 'submit',
       label: formatMessage({
         id: `app.components.Button.save`,
       }),
       style: {
         minWidth: 140,
       },
+      type: 'submit',
     },
   ];
 
@@ -185,8 +179,8 @@ function EditView() {
     actions: actions,
   };
 
-  const handleBlur = ({ target }) => {
-    if (submittedOnce) checkFormError(target);
+  const handleBlur = () => {
+    if (submittedOnce) checkFormErrors();
   };
 
   const handleChange = ({ target: { name, value } }) => {
@@ -216,34 +210,19 @@ function EditView() {
   const handleSubmit = e => {
     e.preventDefault();
     setSubmittedOnce(true);
-    checkFormErrors();
+    checkFormErrors(true);
   };
 
   const submitForm = () => {
-    if (!isCreatingWebhook) {
+    if (!isCreating) {
       updateWebhook();
     } else {
       createWebhooks();
     }
   };
 
-  const checkFormError = async target => {
-    const { name, value } = target;
-    const { type, validations } = form[name];
-
-    try {
-      await createYupSchemaEntry(type, validations).validate(value, {
-        abortEarly: false,
-      });
-
-      resetError(name);
-    } catch (err) {
-      setError(err, name);
-    }
-  };
-
-  const checkFormErrors = async () => {
-    const webhookToCheck = cloneDeep(modifiedWebhook);
+  const checkFormErrors = async (submit = false) => {
+    const webhookToCheck = modifiedWebhook;
     set(webhookToCheck, 'headers', cleanHeaders());
 
     try {
@@ -251,13 +230,11 @@ function EditView() {
         abortEarly: false,
       });
 
-      resetErrors();
-      submitForm();
+      setErrors({});
+      if (submit) submitForm();
     } catch (err) {
-      strapi.notification.error('notification.form.error.fields');
-
-      const errors = getYupInnerErrors(err);
-      setErrors(errors);
+      setErrors(getYupInnerErrors(err));
+      if (submit) strapi.notification.error('notification.form.error.fields');
     }
   };
 
@@ -271,41 +248,15 @@ function EditView() {
     return headers;
   };
 
+  const goBack = () => push('/settings/webhooks');
+
   const resetError = name => {
     const errors = formErrors;
 
     if (errors[name]) {
       delete errors[name];
-      resetErrors(errors);
+      setErrors(errors);
     }
-  };
-
-  const resetErrors = (errors = {}) => {
-    dispatch({
-      type: 'SET_ERRORS',
-      errors: errors,
-    });
-  };
-
-  const setError = (errors, name) => {
-    const err =
-      name === 'headers'
-        ? getYupInnerErrors(errors)
-        : { [name]: errors.message };
-
-    const formattedErrors = formErrors;
-
-    const newErrors = Object.keys(err).reduce((acc, curr) => {
-      const path = name === 'headers' ? `${name}${curr}` : name;
-
-      setWith(acc, path, err[curr], Object);
-
-      return acc;
-    }, {});
-
-    set(formattedErrors, name, newErrors[name]);
-
-    setErrors(formattedErrors);
   };
 
   const setErrors = errors => {
@@ -321,12 +272,6 @@ function EditView() {
       type: 'SET_ERRORS',
       errors: newErrors,
     });
-  };
-
-  const formatWebhook = () => {
-    const webhooks = cloneDeep(modifiedWebhook);
-    set(webhooks, 'headers', unformatLayout(cleanHeaders()));
-    return webhooks;
   };
 
   const createWebhooks = async () => {
@@ -363,7 +308,13 @@ function EditView() {
   };
 
   // utils
-  const unformatLayout = headers => {
+  const formatWebhook = () => {
+    const webhooks = modifiedWebhook;
+    set(webhooks, 'headers', unformatHeaders(cleanHeaders()));
+    return webhooks;
+  };
+
+  const unformatHeaders = headers => {
     return headers.reduce((obj, item) => {
       const { key, value } = item;
       return {
@@ -375,7 +326,7 @@ function EditView() {
 
   return (
     <Wrapper>
-      <BackHeader onClick={() => push('/settings/webhooks')} />
+      <BackHeader onClick={goBack} />
       <form onSubmit={handleSubmit}>
         <Header {...headerProps} />
         {(isTriggering || !isEmpty(triggerResponse)) && (

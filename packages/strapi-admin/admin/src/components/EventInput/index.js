@@ -19,44 +19,35 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
     media: ['media.create', 'media.update', 'media.delete'],
   };
 
-  const handleChange = ({ target: { name, value } }) => {
-    let newValue = inputValue;
-
+  const formatValue = (name, value, newValue = inputValue) => {
     if (value) {
-      if (!inputValue.includes(name)) {
+      if (!newValue.includes(name)) {
         newValue.push(name);
       }
     } else {
-      if (inputValue.includes(name)) {
-        const index = inputValue.indexOf(name);
+      if (newValue.includes(name)) {
+        const index = newValue.indexOf(name);
         if (index > -1) {
           newValue.splice(index, 1);
         }
       }
     }
+    return newValue;
+  };
 
+  const handleChange = ({ target: { name, value } }) => {
+    const newValue = formatValue(name, value);
     onChange({ target: { name: inputName, value: newValue } });
   };
 
   const handleChangeAll = ({ target: { name, value } }) => {
     let newValue = inputValue;
 
-    if (value) {
-      events[name].map(event => {
-        if (!inputValue.includes(event)) {
-          newValue.push(event);
-        }
-      });
-    } else {
-      events[name].map(event => {
-        const index = inputValue.indexOf(event);
-        if (index > -1) {
-          newValue.splice(index, 1);
-        }
-      });
-    }
+    events[name].map(event => {
+      newValue = formatValue(event, value, newValue);
+    });
 
-    onChange({ target: { name: inputName, value: newValue } });
+    onChange({ target: { name: inputName, value: inputValue } });
   };
 
   return (

@@ -29,10 +29,8 @@ const Wrapper = styled.div`
           display: inline-block;
           vertical-align: bottom;
         }
-        svg {
-          & + span {
-            margin-left: 10px;
-          }
+        svg + span {
+          margin-left: 10px;
         }
         &.success-label {
           svg {
@@ -46,8 +44,8 @@ const Wrapper = styled.div`
         }
       }
       &:last-of-type {
-        text-align: right;
         max-width: 400px;
+        text-align: right;
         button {
           color: #b4b6ba;
           &,

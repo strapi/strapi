@@ -17,18 +17,18 @@ const Wrapper = styled.div`
   }
   .header-title + div {
     button: first-of-type {
-      margin-right: 30px;
       position: relative;
+      margin-right: 30px;
       overflow: initial;
       &::after {
         content: '-';
+        position: absolute;
+        top: 5px;
+        right: -20px;
         width: 1px;
         height: 20px;
         background-color: #e9eaeb;
         color: transparent;
-        position: absolute;
-        top: 5px;
-        right: -20px;
       }
       span svg {
         margin-top: -2px;
@@ -39,17 +39,17 @@ const Wrapper = styled.div`
     padding-top: 4px;
   }
   .form-card {
+    margin-bottom: 30px;
     padding: 21px 25px 0px 25px;
     background-color: #ffffff;
     border-radius: 2px;
     box-shadow: 0 2px 4px 0 #e3e9f3;
-    margin-bottom: 30px;
   }
   .row {
     > div {
       position: relative;
-      margin-bottom: 4px;
       z-index: 0;
+      margin-bottom: 4px;
       &:nth-of-type(3) {
         z-index: 1;
       }

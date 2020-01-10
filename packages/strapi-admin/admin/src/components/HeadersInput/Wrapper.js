@@ -7,19 +7,19 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
-  background-color: #fafafb;
-  padding: 23px 24px 26px 24px;
   margin-top: 12px;
+  padding: 23px 24px 26px 24px;
+  background-color: #fafafb;
   border-radius: 3px;
   ul {
-    list-style-type: none;
-    padding: 0;
     margin-bottom: 0;
+    padding: 0;
+    list-style-type: none;
     & + button {
+      padding: 0;
       color: #007eff;
       font-size: 13px;
       font-weight: 500;
-      padding: 0;
       outline: 0;
       svg,
       span {
@@ -40,8 +40,8 @@ const Wrapper = styled.div`
       margin-bottom: 6px;
     }
     > section {
-      width: 50%;
       display: inline-block;
+      width: 50%;
       vertical-align: top;
       &:nth-child(odd) {
         padding-right: 15px;

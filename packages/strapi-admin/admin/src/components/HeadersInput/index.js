@@ -7,19 +7,23 @@ import { CircleButton } from 'strapi-helper-plugin';
 import { InputText } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
 
+import keys from './keys';
 import Wrapper from './Wrapper';
 
-import keys from './keys';
-
 const HeadersInput = ({
+  errors,
+  name,
   onBlur,
   onClick,
   onChange,
-  name,
-  value,
   onRemove,
-  errors,
+  value,
 }) => {
+  const optionFormat = value => ({ value: value, label: value });
+  const options = keys.map(key => optionFormat(key));
+
+  const handleBlur = () => onBlur({ target: { name, value } });
+
   const handleChangeKey = (selected, name) => {
     if (selected === null) {
       onChange({ target: { name, value: '' } });
@@ -29,24 +33,11 @@ const HeadersInput = ({
     }
   };
 
-  const optionFormat = value => {
-    return { value: value, label: value };
-  };
-
-  const options = keys.map(key => {
-    return optionFormat(key);
-  });
-
-  const handleClick = () => {
-    onClick(name);
-  };
+  const handleClick = () => onClick(name);
 
   const handleRemoveItem = index => {
-    if (index === 0 && value.length === 1) {
-      onRemove({ event: 'clear', index });
-    } else {
-      onRemove({ event: 'remove', index });
-    }
+    const event = index === 0 && value.length === 1 ? 'clear' : 'remove';
+    onRemove({ event, index });
   };
 
   const customStyles = hasError => {
@@ -95,10 +86,6 @@ const HeadersInput = ({
     };
   };
 
-  const handleBlur = () => {
-    onBlur({ target: { name, value } });
-  };
-
   return (
     <Wrapper>
       <ul>
@@ -125,20 +112,19 @@ const HeadersInput = ({
                   isClearable
                   onBlur={handleBlur}
                   onChange={e => handleChangeKey(e, `${name}.${index}.key`)}
-                  options={options}
                   name={`${name}.${index}.key`}
-                  value={optionFormat(key)}
+                  options={options}
                   styles={customStyles(entryErrors && entryErrors.key)}
+                  value={optionFormat(key)}
                 />
               </section>
               <section>
                 <InputText
                   onBlur={handleBlur}
                   className={entryErrors && entryErrors.value && 'bordered'}
-                  error={entryErrors && entryErrors.value}
-                  value={value}
-                  name={`${name}.${index}.value`}
                   onChange={onChange}
+                  name={`${name}.${index}.value`}
+                  value={value}
                 />
               </section>
               <div>

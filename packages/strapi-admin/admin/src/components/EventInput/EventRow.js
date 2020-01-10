@@ -14,11 +14,11 @@ const EventRow = ({
   );
   const hasSomeCheckboxSelected = events.some(e => inputValue.indexOf(e) >= 0);
 
-  const handleChangeMultiple = ({ target: { name } }) => {
+  const onChangeAll = ({ target: { name } }) => {
     const valueToSet = !areAllCheckboxesSelected;
 
     handleChangeAll({
-      target: { name: name, value: valueToSet },
+      target: { name, value: valueToSet },
     });
   };
 
@@ -27,7 +27,7 @@ const EventRow = ({
       <td>
         <Checkbox
           name={name}
-          onChange={handleChangeMultiple}
+          onChange={onChangeAll}
           message={name}
           someChecked={hasSomeCheckboxSelected && !areAllCheckboxesSelected}
           value={areAllCheckboxesSelected}

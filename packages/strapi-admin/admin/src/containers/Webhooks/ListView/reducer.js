@@ -13,11 +13,10 @@ const reducer = (state, action) => {
         .update('shouldRefetchData', () => false);
     case 'SET_WEBHOOK_ENABLED':
       return state.updateIn(['webhooks', ...action.keys], () => action.value);
-    case 'WEBHOOK_DELETED': {
+    case 'WEBHOOK_DELETED':
       return state.update('webhooks', webhooks =>
         webhooks.splice(action.index, 1)
       );
-    }
     case 'WEBHOOKS_DELETED':
       return state.update('shouldRefetchData', v => !v);
     default:

@@ -29,7 +29,6 @@ const reducer = (state, action) => {
             return { key: key, value: headers[key] };
           })
         );
-
         set(data, ['headers'], newHeaders);
       } else {
         set(data, ['headers'], get(initialWebhook, 'headers'));
@@ -40,19 +39,16 @@ const reducer = (state, action) => {
         .update('modifiedWebhook', () => fromJS(data))
         .update('shouldRefetchData', () => false);
     }
-    case 'TRIGGER_SUCCEEDED': {
+    case 'TRIGGER_SUCCEEDED':
       return state
         .update('triggerResponse', () => fromJS(action.response))
         .update('isTriggering', () => false);
-    }
-    case 'ON_TRIGGER': {
+    case 'ON_TRIGGER':
       return state.update('isTriggering', () => true);
-    }
-    case 'ON_TRIGGER_CANCELED': {
+    case 'ON_TRIGGER_CANCELED':
       return state
         .update('isTriggering', () => false)
         .update('triggerResponse', () => {});
-    }
     case 'ON_CHANGE':
       return state.updateIn(
         ['modifiedWebhook', ...action.keys],
@@ -74,17 +70,14 @@ const reducer = (state, action) => {
         );
       }
     }
-    case 'RESET': {
+    case 'RESET':
       return state.update('modifiedWebhook', () =>
         fromJS(state.get('initialWebhook'))
       );
-    }
-    case 'SET_ERRORS': {
+    case 'SET_ERRORS':
       return state.update('formErrors', () => fromJS(action.errors));
-    }
-    case 'SUBMIT_SUCCEEDED': {
+    case 'SUBMIT_SUCCEEDED':
       return state.update('shouldRefetchData', () => true);
-    }
     default:
       return state;
   }

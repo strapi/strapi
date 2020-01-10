@@ -16,13 +16,13 @@ const Wrapper = styled.div`
   }
   > p {
     width 100%;
+    margin-bottom: -8px;
     padding-top: 10px;
     font-size: 13px;
     line-height: normal;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-bottom: -8px;
   }
   ${({ error }) =>
     !!error &&

@@ -28,9 +28,7 @@ function ListRow({
   const links = [
     {
       icon: 'pencil',
-      onClick: e => {
-        handleEditClick(e);
-      },
+      onClick: () => handleEditClick(),
     },
     {
       icon: 'trash',
@@ -43,17 +41,12 @@ function ListRow({
 
   const isChecked = itemsToDelete.includes(id);
 
-  const handleEditClick = () => {
-    onEditClick(id);
-  };
+  const handleEditClick = () => onEditClick(id);
 
-  const handleEnabledChange = ({ target: { value } }) => {
+  const handleEnabledChange = ({ target: { value } }) =>
     onEnabledChange(value, id);
-  };
 
-  const handleCheckChange = ({ target: { value } }) => {
-    onCheckChange(value, id);
-  };
+  const handleCheckChange = ({ target: { value } }) => onCheckChange(value, id);
 
   const handleDeleteConfirm = () => {
     onDeleteCLick(id);
@@ -61,44 +54,42 @@ function ListRow({
   };
 
   return (
-    <>
-      <StyledListRow onClick={handleEditClick}>
-        <td>
-          <Checkbox
+    <StyledListRow onClick={handleEditClick}>
+      <td>
+        <Checkbox
+          name={name}
+          value={isChecked}
+          onClick={e => e.stopPropagation()}
+          onChange={handleCheckChange}
+        />
+      </td>
+      <td>
+        <p>{name}</p>
+      </td>
+      <td>
+        <p title={url}>{url}</p>
+      </td>
+      <td>
+        <div onClick={e => e.stopPropagation()}>
+          <Switch
             name={name}
-            value={isChecked}
-            onClick={e => e.stopPropagation()}
-            onChange={handleCheckChange}
+            value={isEnabled}
+            onChange={handleEnabledChange}
+          ></Switch>
+        </div>
+      </td>
+      <td>
+        <IconLinks links={links} />
+        <div className="popup-wrapper">
+          <PopUpWarning
+            isOpen={showModal}
+            toggleModal={() => setShowModal(!showModal)}
+            popUpWarningType="danger"
+            onConfirm={handleDeleteConfirm}
           />
-        </td>
-        <td>
-          <p>{name}</p>
-        </td>
-        <td>
-          <p title={url}>{url}</p>
-        </td>
-        <td>
-          <div onClick={e => e.stopPropagation()}>
-            <Switch
-              name={name}
-              value={isEnabled}
-              onChange={handleEnabledChange}
-            ></Switch>
-          </div>
-        </td>
-        <td>
-          <IconLinks links={links} />
-          <div className="popup-wrapper">
-            <PopUpWarning
-              isOpen={showModal}
-              toggleModal={() => setShowModal(!showModal)}
-              popUpWarningType="danger"
-              onConfirm={handleDeleteConfirm}
-            />
-          </div>
-        </td>
-      </StyledListRow>
-    </>
+        </div>
+      </td>
+    </StyledListRow>
   );
 }
 
@@ -111,8 +102,6 @@ ListRow.defaultProps = {
   onEditClick: () => {},
   onEnabledChange: () => {},
   url: null,
-  headers: {},
-  hooks: [],
 };
 
 ListRow.propTypes = {
@@ -125,8 +114,6 @@ ListRow.propTypes = {
   onEditClick: PropTypes.func,
   onEnabledChange: PropTypes.func,
   url: PropTypes.string,
-  headers: PropTypes.object,
-  hooks: PropTypes.instanceOf(Array),
 };
 
 export default ListRow;

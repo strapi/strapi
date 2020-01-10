@@ -17,13 +17,16 @@ const TriggerContainer = ({ isPending, onCancel, response }) => {
             <td>
               <p>Test-trigger</p>
             </td>
-
             {isPending ? (
               <>
                 <td>
                   <p>
                     <Pending fill="#6DBB1A" width="15px" height="15px" />
-                    <span>Pending...</span>
+                    <span>
+                      {formatMessage({
+                        id: `Settings.webhooks.trigger.pending`,
+                      })}
+                    </span>
                   </p>
                 </td>
                 <td>
@@ -38,11 +41,19 @@ const TriggerContainer = ({ isPending, onCancel, response }) => {
                 <td>
                   <p className="success-label">
                     <Success fill="#6DBB1A" width="19px" height="19px" />
-                    <span>Success!</span>
+                    <span>
+                      {formatMessage({
+                        id: `Settings.webhooks.trigger.success`,
+                      })}
+                    </span>
                   </p>
                 </td>
                 <td>
-                  <p>Trigger succeded</p>
+                  <p>
+                    {formatMessage({
+                      id: `Settings.webhooks.trigger.success.label`,
+                    })}
+                  </p>
                 </td>
               </>
             ) : (
@@ -68,6 +79,7 @@ const TriggerContainer = ({ isPending, onCancel, response }) => {
 TriggerContainer.defaultProps = {
   isPending: false,
   onCancel: () => {},
+  response: {},
 };
 
 TriggerContainer.propTypes = {
