@@ -86,24 +86,19 @@ class Strapi extends EventEmitter {
     this.dir = opts.dir || process.cwd();
     this.admin = {};
     this.plugins = {};
-    this.config = {};
+    this.config = this.initConfig(opts);
 
     // internal services.
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
-    this.webhookRunner = createWebhookRunner({
-      eventHub: this.eventHub,
-      logger: this.log,
-    });
 
-    this.initConfig(opts);
     this.requireProjectBootstrap();
   }
 
   initConfig({ autoReload = false, serveAdminPanel = true } = {}) {
     const pkgJSON = require(path.resolve(this.dir, 'package.json'));
 
-    this.config = {
+    const config = {
       serveAdminPanel,
       launchedAt: Date.now(),
       appPath: this.dir,
@@ -123,6 +118,26 @@ class Strapi extends EventEmitter {
       installedMiddlewares: getPrefixedDeps('strapi-middleware', pkgJSON),
       installedHooks: getPrefixedDeps('strapi-hook', pkgJSON),
     };
+
+    Object.defineProperty(config, 'get', {
+      value(path, defaultValue = null) {
+        return _.get(config, path, defaultValue);
+      },
+      enumerable: false,
+      configurable: false,
+      writable: false,
+    });
+
+    Object.defineProperty(config, 'set', {
+      value(path, value) {
+        return _.set(config, path, value);
+      },
+      enumerable: false,
+      configurable: false,
+      writable: false,
+    });
+
+    return config;
   }
 
   requireProjectBootstrap() {
@@ -367,6 +382,13 @@ class Strapi extends EventEmitter {
 
     // Usage.
     await utils.usage(this.config);
+
+    // init webhook runner
+    this.webhookRunner = createWebhookRunner({
+      eventHub: this.eventHub,
+      logger: this.log,
+      configuration: this.config.get('currentEnvironment.server.webhooks', {}),
+    });
 
     // Init core store
     this.models['core_store'] = coreStoreModel;
