@@ -1,11 +1,5 @@
 import * as yup from 'yup';
-
-// TODO - Translation
-const translatedErrors = {
-  required: 'This value is required',
-  regex: 'This does not match the format',
-  string: 'This is not a string',
-};
+import { translatedErrors } from 'strapi-helper-plugin';
 
 const createYupSchema = form =>
   yup.object().shape(

@@ -89,7 +89,11 @@ function Inputs({
                     value={value}
                   />
                 )}
-                {hasError && <ErrorMessage>{error}</ErrorMessage>}
+                {hasError && (
+                  <ErrorMessage>
+                    <FormattedMessage id={error} />
+                  </ErrorMessage>
+                )}
               </>
             );
           }}
