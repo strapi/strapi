@@ -159,13 +159,50 @@ This event is triggered only when you delete a media through the media interface
 }
 ```
 
-## Securing your webhooks
-
-## Developer use
+## Developer documentation
 
 ### Architecture
 
 ![Webhooks architecture diagram](../assets/concepts/diagram-architecture.png)
+
+### Securing your webhooks
+
+Most of the time, webhooks make request to publicly avaialble URLs, therefore it is possible that someone find that URL and send it wrong informations.
+
+To prevent this from happening you can send a header with an authentication token. Using the Admin panel you would have to do it for every webhook.
+Another way is to define `defaultHeaders` to add to every webhook requests.
+
+You can configure those global headers by updating the file at `./config/environments/{env}/server.json`:
+
+:::: tabs
+
+::: tab "Simple token"
+
+```json
+{
+  "webhooks": {
+    "defaultHeaders": {
+      "Authroization": "Bearer my-very-secured-token"
+    }
+  }
+}
+```
+
+:::
+
+::: tab "Environment variable"
+
+```json
+{
+  "webhooks": {
+    "defaultHeaders": {
+      "Authroization": "Bearer ${ process.env.WEBHOOK_TOKEN }"
+    }
+  }
+}
+```
+
+::::
 
 ### Available configurations
 
