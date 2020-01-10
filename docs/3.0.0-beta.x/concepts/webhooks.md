@@ -23,11 +23,11 @@ The way a webhook works is by delivering informations to a receiving application
 
 By default strapi webhook can be trigger by the following events:
 
-- Entry create
-- Entry update
-- Entry delete
-- Media create
-- Media delete
+- `entry.create`: Entry create
+- `entry.update`: Entry update
+- `entry.delete`: Entry delete
+- `media.create`: Media create
+- `media.delete`: Media delete
 
 ### Entry created
 
