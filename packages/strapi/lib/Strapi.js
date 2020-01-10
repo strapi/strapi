@@ -61,7 +61,7 @@ const CONFIG_PATHS = {
  */
 
 class Strapi extends EventEmitter {
-  constructor(opts) {
+  constructor(opts = {}) {
     super();
 
     this.setMaxListeners(100);
