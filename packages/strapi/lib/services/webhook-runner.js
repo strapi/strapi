@@ -4,19 +4,32 @@
 'use strict';
 
 const debug = require('debug')('strapi');
+const _ = require('lodash');
 const fetch = require('node-fetch');
 
 const WorkerQueue = require('./worker-queue');
 
+const defaultConfiguration = {
+  defaultHeaders: {},
+};
+
 class WebhookRunner {
-  constructor({ eventHub, logger, queue }) {
+  constructor({ eventHub, logger, configuration = {} }) {
     debug('Initialized webhook runer');
     this.eventHub = eventHub;
     this.logger = logger;
     this.webhooksMap = new Map();
     this.listeners = new Map();
 
-    this.queue = queue || new WorkerQueue({ logger, concurency: 5 });
+    if (typeof configuration !== 'object') {
+      throw new Error(
+        'Invalid configuration provided to the webhookRunner.\nCheck your server.json -> webhooks configuration'
+      );
+    }
+
+    this.config = _.merge(defaultConfiguration, configuration);
+
+    this.queue = new WorkerQueue({ logger, concurency: 5 });
     this.queue.subscribe(this.executeListener.bind(this));
   }
 
@@ -72,6 +85,7 @@ class WebhookRunner {
         ...info,
       }),
       headers: {
+        ...this.config.defaultHeaders,
         ...headers,
         'X-Strapi-Event': event,
         'Content-Type': 'application/json',
