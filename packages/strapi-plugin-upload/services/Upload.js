@@ -128,7 +128,7 @@ module.exports = {
       await actions.delete(file);
     }
 
-    const media = strapi.query('file', 'upload').findOne({
+    const media = await strapi.query('file', 'upload').findOne({
       id: file.id,
     });
 
