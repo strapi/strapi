@@ -37,7 +37,6 @@ function EditView() {
     initialWebhook,
     isTriggering,
     triggerResponse,
-    shouldRefetchData,
   } = reducerState.toJS();
 
   const { name } = modifiedWebhook;
@@ -50,10 +49,10 @@ function EditView() {
   const { signal } = abortController;
 
   useEffect(() => {
-    if (!isCreating || (!isCreating && shouldRefetchData)) {
+    if (!isCreating) {
       fetchData();
     }
-  }, [fetchData, isCreating, shouldRefetchData]);
+  }, [fetchData, isCreating]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -298,9 +297,8 @@ function EditView() {
         body,
       });
 
-      dispatch({
-        type: 'SUBMIT_SUCCEEDED',
-      });
+      fetchData();
+
       strapi.notification.error('notification.form.success.fields');
     } catch (err) {
       strapi.notification.error('notification.error');
