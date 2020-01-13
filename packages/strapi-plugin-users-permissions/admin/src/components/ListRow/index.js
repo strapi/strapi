@@ -10,10 +10,9 @@ import { FormattedMessage } from 'react-intl';
 import { capitalize, get, includes } from 'lodash';
 
 import { IcoContainer, PopUpWarning } from 'strapi-helper-plugin';
+import en from '../../translations/en.json';
 import { HomePageContext } from '../../contexts/HomePage';
 import { Container, Flex, Row, Wrapper } from './Components';
-
-import en from '../../translations/en.json';
 
 class ListRow extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
