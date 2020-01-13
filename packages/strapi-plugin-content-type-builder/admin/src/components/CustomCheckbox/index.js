@@ -12,10 +12,12 @@ import { InputNumberWithErrors as InputNumber } from 'strapi-helper-plugin';
 
 import StyledCustomCheckbox from './StyledCustomCheckbox';
 
+const isDefined = value => value !== null && value !== undefined;
+
 class CustomCheckbox extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = {
-    isChecked: this.props.value !== null && this.props.value !== undefined,
+    isChecked: isDefined(this.props.value),
   };
 
   handleChange = ({ target: { checked } }) => {
@@ -66,7 +68,7 @@ class CustomCheckbox extends React.Component {
             errors={errors}
             name={name}
             onChange={this.handleInputNumberChange}
-            value={value || ''}
+            value={isDefined(value) ? value : ''}
           />
         )}
       </StyledCustomCheckbox>

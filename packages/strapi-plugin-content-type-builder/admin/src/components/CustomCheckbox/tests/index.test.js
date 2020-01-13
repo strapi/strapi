@@ -60,7 +60,7 @@ describe('<CustomCheckbox />', () => {
     const spyOnHandleChange = jest.spyOn(wrapper.instance(), 'handleChange');
     const spyOnHandleChangeNumber = jest.spyOn(
       wrapper.instance(),
-      'handleInputNumberChange',
+      'handleInputNumberChange'
     );
     wrapper.instance().forceUpdate();
 
@@ -86,6 +86,15 @@ describe('<CustomCheckbox />', () => {
     expect(props.onChange).toHaveBeenCalledWith({
       target: { name: 'test', value: null },
     });
+
+    wrapper.unmount();
+  });
+
+  it('should renred number input with 0 value', () => {
+    const wrapper = renderComponent({ ...props, value: 0 });
+
+    const numberInput = wrapper.find('input[type="number"]');
+    expect(numberInput.prop('value')).toBe(0);
 
     wrapper.unmount();
   });
