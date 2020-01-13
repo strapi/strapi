@@ -4,8 +4,8 @@ import PropTypes from 'prop-types';
 import { Grab } from '@buffetjs/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import pluginId from '../../pluginId';
-import BannerWrapper from './BannerWrapper';
 import PreviewCarret from '../PreviewCarret';
+import BannerWrapper from './BannerWrapper';
 import CarretTop from './CarretTop';
 
 const Banner = forwardRef(
