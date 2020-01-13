@@ -12,9 +12,9 @@ import { Plus } from '@buffetjs/icons';
 import useDataManager from '../../hooks/useDataManager';
 import getTrad from '../../utils/getTrad';
 import ComponentList from '../ComponentList';
-import ComponentButton from './ComponentButton';
 import ComponentCard from '../ComponentCard';
 import Td from '../Td';
+import ComponentButton from './ComponentButton';
 
 function DynamicZoneList({
   customRowComponent,

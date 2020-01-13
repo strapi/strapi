@@ -12,6 +12,7 @@
     "enzyme-adapter-react-16": "^1.12.1",
     "eslint": "^6.3.0",
     "eslint-config-prettier": "^6.2.0",
+    "eslint-plugin-import": "^2.19.1",
     "eslint-plugin-react": "^7.14.0",
     "eslint-plugin-react-hooks": "^2.0.0",
     "eslint-plugin-redux-saga": "^1.1.0",

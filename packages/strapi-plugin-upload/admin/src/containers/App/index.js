@@ -7,13 +7,11 @@
 
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
-
+import { NotFound } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
-
 // Containers
 import ConfigPage from '../ConfigPage';
 import HomePage from '../HomePage';
-import { NotFound } from 'strapi-helper-plugin';
 
 function App() {
   return (
