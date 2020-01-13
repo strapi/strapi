@@ -261,11 +261,11 @@ The `user` object is available to successfully authenticated requests.
 
 ```js
 create: async ctx => {
-  const { _id } = ctx.state.user;
+  const { id } = ctx.state.user;
 
   const depositObj = {
     ...ctx.request.body,
-    depositor: _id,
+    depositor: id,
   };
 
   const data = await strapi.services.deposit.add(depositObj);
@@ -437,7 +437,9 @@ You can update these template in the **Email Templates** tab in the admin panel.
 - `URL` is the Strapi backend URL that confirm the code (by default `/auth/email-confirmation`).
 
 ## Security configuration
-JWT tokens can be verified and trusted because the information is digitally signed. To sign a token a *secret* is required. By default Strapi generates one that is stored in `./your-app/extensions/users-permissions/config/jwt.json`. This is useful during development but for security reasons it is **recommended** to set a custom token via an environment variable `JWT_SECRET` when deploying to production. It is also possible to modify `jwt.json` file to accept `JWT_TOKEN` automatically by doing following ([docs](https://strapi.io/documentation/3.0.0-beta.x/concepts/configurations.html#dynamic-configurations)).
+
+JWT tokens can be verified and trusted because the information is digitally signed. To sign a token a _secret_ is required. By default Strapi generates one that is stored in `./your-app/extensions/users-permissions/config/jwt.json`. This is useful during development but for security reasons it is **recommended** to set a custom token via an environment variable `JWT_SECRET` when deploying to production. It is also possible to modify `jwt.json` file to accept `JWT_TOKEN` automatically by doing following ([docs](https://strapi.io/documentation/3.0.0-beta.x/concepts/configurations.html#dynamic-configurations)).
+
 ```
   "jwtSecret": "${process.env.JWT_SECRET}"
 ```

@@ -66,6 +66,17 @@ const InputWrapperDate = styled.div`
   > div {
     width: 210px;
   }
+
+  ${({ type }) => {
+    if (type === 'datetime') {
+      return `
+      > div {
+        width: 300px;
+      }
+
+      `;
+    }
+  }}
 `;
 
 const Input = styled.input`

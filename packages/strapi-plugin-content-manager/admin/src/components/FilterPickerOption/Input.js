@@ -6,10 +6,7 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 
-import { InputWrapperDate } from './components';
-
 import { DateTime } from '@buffetjs/custom';
-
 import {
   DatePicker,
   InputText,
@@ -17,6 +14,7 @@ import {
   Select,
   TimePicker,
 } from '@buffetjs/core';
+import { InputWrapperDate } from './components';
 
 const getInputType = attrType => {
   switch (attrType) {

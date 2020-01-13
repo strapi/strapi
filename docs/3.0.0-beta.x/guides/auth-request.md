@@ -152,7 +152,7 @@ To do so, you will have to request the `/articles` route in **POST**.
 import axios from 'axios';
 
 const {data} = await axios
-  .get('http://localhost:1337/articles',  {
+  .post('http://localhost:1337/articles',  {
     data: {
       title: 'my article'
       content: 'my super article content'
