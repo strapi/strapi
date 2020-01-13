@@ -261,11 +261,11 @@ The `user` object is available to successfully authenticated requests.
 
 ```js
 create: async ctx => {
-  const { _id } = ctx.state.user;
+  const { id } = ctx.state.user;
 
   const depositObj = {
     ...ctx.request.body,
-    depositor: _id,
+    depositor: id,
   };
 
   const data = await strapi.services.deposit.add(depositObj);

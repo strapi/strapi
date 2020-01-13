@@ -5,15 +5,13 @@
 
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-
-import { InputWrapperDate } from './components';
-
 import {
   InputDate,
   InputNumber,
   InputSelect,
   InputText,
 } from 'strapi-helper-plugin';
+import { InputWrapperDate } from './components';
 
 const getInputType = attrType => {
   switch (attrType) {

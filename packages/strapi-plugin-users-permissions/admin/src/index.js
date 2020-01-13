@@ -1,10 +1,10 @@
 import React from 'react';
 import pluginPkg from '../../package.json';
+import layout from '../../config/layout';
 import pluginId from './pluginId';
 import App from './containers/App';
 import Initializer from './containers/Initializer';
 import lifecycles from './lifecycles';
-import layout from '../../config/layout';
 import trads from './translations';
 
 const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;

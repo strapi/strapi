@@ -126,7 +126,7 @@ module.exports = async () => {
             email: 'no-reply@strapi.io',
           },
           response_email: '',
-          object: '­Reset password',
+          object: 'Reset password',
           message: `<p>We heard that you lost your password. Sorry about that!</p>
 
 <p>But don’t worry! You can use the following link to reset your password:</p>
