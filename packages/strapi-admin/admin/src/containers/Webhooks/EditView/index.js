@@ -16,12 +16,13 @@ import {
   BackHeader,
 } from 'strapi-helper-plugin';
 
+import Inputs from '../../../components/Inputs';
+import TriggerContainer from '../../../components/TriggerContainer';
+
 import reducer, { initialState } from './reducer';
 import form from './utils/form';
 import createYupSchema from './utils/schema';
 
-import Inputs from '../../../components/Inputs';
-import TriggerContainer from '../../../components/TriggerContainer';
 import Wrapper from './Wrapper';
 
 function EditView() {

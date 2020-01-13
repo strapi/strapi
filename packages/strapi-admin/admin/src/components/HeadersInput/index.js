@@ -41,14 +41,20 @@ const HeadersInput = ({
   };
 
   const customStyles = hasError => {
+    const selectBorder = isFocused => {
+      if (isFocused) {
+        return '1px solid #78caff !important';
+      }
+      if (hasError) {
+        return '1px solid #F64D0A !important';
+      }
+      return '1px solid #E3E9F3 !important';
+    };
+
     return {
       control: (base, state) => ({
         ...base,
-        border: state.isFocused
-          ? '1px solid #78caff !important'
-          : hasError
-          ? '1px solid #F64D0A !important'
-          : '1px solid #E3E9F3 !important',
+        border: selectBorder(state.isFocused),
         borderRadius: '2px !important',
       }),
       menu: base => {

@@ -17,7 +17,7 @@ const TriggerContainer = ({ isPending, onCancel, response }) => {
             <td>
               <p>Test-trigger</p>
             </td>
-            {isPending ? (
+            {isPending && (
               <>
                 <td>
                   <p>
@@ -36,7 +36,9 @@ const TriggerContainer = ({ isPending, onCancel, response }) => {
                   </button>
                 </td>
               </>
-            ) : statusCode >= 200 && statusCode < 300 ? (
+            )}
+
+            {!isPending && statusCode >= 200 && statusCode < 300 && (
               <>
                 <td>
                   <p className="success-label">
@@ -56,7 +58,9 @@ const TriggerContainer = ({ isPending, onCancel, response }) => {
                   </p>
                 </td>
               </>
-            ) : (
+            )}
+
+            {!isPending && statusCode >= 300 && (
               <>
                 <td>
                   <p className="fail-label">
