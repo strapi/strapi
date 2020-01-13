@@ -4,11 +4,11 @@ import { HeaderModalTitle } from 'strapi-helper-plugin';
 import { get } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import UpperFirst from '../UpperFirst';
 import ComponentIcon from './ComponentIcon';
 import ComponentInfos from './ComponentInfos';
 import Icon from './Icon';
 import IconWrapper from './IconWrapper';
-import UpperFirst from '../UpperFirst';
 import DropdownInfos from './DropdownInfos';
 
 const ModalHeader = ({ headerId, headers }) => {
