@@ -228,5 +228,3 @@ You can configure those global headers by updating the file at `./config/environ
 ::::
 
 If you are developing the webhook handler yourself you can now verify the token by reading the headers.
-
-### Programmatic use
