@@ -1,5 +1,4 @@
-import styled, { css } from 'styled-components';
-import Bckg from '../../assets/images/background_input.svg';
+import styled from 'styled-components';
 
 const Wrapper = styled.div`
   min-height: 38px;
@@ -18,39 +17,27 @@ const InputWrapper = styled.div`
 
 const InputWrapperDate = styled.div`
   margin-right: 10px;
+  span {
+    left: 5px;
+  }
+  .rc-input-number-handler-wrap {
+    right: -5px !important;
+  }
+  .rc-input-number-input-wrap {
+    max-width: 210px;
+    overflow: visible;
+  }
+  > div {
+    width: 210px;
+  }
+
   ${({ type }) => {
-    if (
-      type.includes('date') ||
-      type === 'timestampUpdate' ||
-      type === 'timestamp'
-    ) {
-      return css`
-        position: relative;
-        &:before {
-          content: '\f073';
-          position: absolute;
-          left: 6px;
-          top: 1px;
-          width: 32px;
-          height: 32px;
-          border-radius: 3px 0px 0px 3px;
-          background: #fafafb;
-          color: #b3b5b9;
-          text-align: center;
-          font-family: 'FontAwesome';
-          font-size: 1.4rem;
-          line-height: 32px;
-          z-index: 999;
-          -webkit-font-smoothing: none;
-        }
-        input {
-          width: 100%;
-          padding-left: 42px;
-          box-shadow: 0px 1px 1px rgba(104, 118, 142, 0.05);
-          &:focus {
-            outline: none;
-          }
-        }
+    if (type === 'datetime') {
+      return `
+      > div {
+        width: 300px;
+      }
+
       `;
     }
   }}
@@ -68,23 +55,4 @@ const Input = styled.input`
   font-family: 'Lato' !important;
   box-shadow: 0px 1px 1px rgba(104, 118, 142, 0.05);
 `;
-
-const Select = styled.select`
-  min-height: 3.4rem;
-  margin-top: 0.9rem;
-  padding-top: 0rem;
-  padding-left: 1rem;
-  background-position: right -1px center;
-  background-repeat: no-repeat;
-  background-image: url(${Bckg});
-  border: 1px solid #e3e9f3;
-  border-radius: 0.25rem;
-  line-height: 3.2rem;
-  font-size: 1.3rem;
-  font-family: 'Lato' !important;
-  -moz-appearance: none;
-  -webkit-appearance: none;
-  box-shadow: 0px 1px 1px rgba(104, 118, 142, 0.05);
-`;
-
-export { InputWrapper, Wrapper, InputWrapperDate, Input, Select };
+export { InputWrapper, Wrapper, InputWrapperDate, Input };

@@ -15,7 +15,7 @@ You can also use **yarn** if you want [here](https://yarnpkg.com/en/docs/getting
 
 Strapi is supporting multiple databases. If you are using the `--quickstart` or if you manually chose the `SQLite` database, you will not need to install any database on you local computer.
 
-If you want to use a custom database, here is versions you will have to respect:
+If you want to use a custom database, here are the versions you will have to respect:
 
 - **MongoDB** >= 3.6
 - **MySQL** >= 5.6

@@ -1,10 +1,12 @@
 import React, { memo } from 'react';
 import { get, isEmpty } from 'lodash';
 import PropTypes from 'prop-types';
+import { CircleButton } from 'strapi-helper-plugin';
+import { Select } from '@buffetjs/core';
 
-import { CircleButton, InputSelect } from 'strapi-helper-plugin';
 import { InputWrapper, Wrapper } from './components';
 import Input from './Input';
+import Option from './Option';
 import getFilters from './utils';
 
 const styles = {
@@ -46,7 +48,7 @@ function FilterPickerOption({
           isRemoveButton
           onClick={() => onRemoveFilter(index)}
         />
-        <InputSelect
+        <Select
           onChange={e => {
             // Change the attribute
             onChange(e);
@@ -55,13 +57,15 @@ function FilterPickerOption({
           }}
           name={`${index}.name`}
           value={get(modifiedData, [index, 'name'], '')}
-          selectOptions={allowedAttributes.map(attr => attr.name)}
+          options={allowedAttributes.map(attr => attr.name)}
           style={styles.select}
         />
-        <InputSelect
+        <Select
           onChange={onChange}
           name={`${index}.filter`}
-          selectOptions={filtersOptions}
+          options={filtersOptions.map(option => (
+            <Option {...option} key={option.value} />
+          ))}
           style={styles.selectMiddle}
           value={get(modifiedData, [index, 'filter'], '')}
         />
@@ -69,7 +73,7 @@ function FilterPickerOption({
           type={type}
           name={`${index}.value`}
           value={get(modifiedData, [index, 'value'], '')}
-          selectOptions={['true', 'false']}
+          options={['true', 'false']}
           onChange={onChange}
         />
         {showAddButton && (
