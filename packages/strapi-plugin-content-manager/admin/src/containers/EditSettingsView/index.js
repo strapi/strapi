@@ -27,9 +27,9 @@ import PopupForm from '../../components/PopupForm';
 import SettingsViewWrapper from '../../components/SettingsViewWrapper';
 import SortableList from '../../components/SortableList';
 import { unformatLayout } from '../../utils/layout';
+import getInjectedComponents from '../../utils/getComponents';
 import LayoutDndProvider from '../LayoutDndProvider';
 import getInputProps from './utils/getInputProps';
-import getInjectedComponents from '../../utils/getComponents';
 
 import reducer, { initialState } from './reducer';
 
