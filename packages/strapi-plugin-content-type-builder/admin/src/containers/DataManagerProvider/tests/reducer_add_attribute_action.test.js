@@ -344,4 +344,159 @@ describe('CTB | containers | reducer | ADD_ATTRIBUTE', () => {
       expect(reducer(state, action)).toEqual(expected);
     });
   });
+
+  describe('Adding a relation with another content type', () => {
+    it('Should add the relation attribute correctly for a content type', () => {
+      const contentTypeUID = 'application::address.address';
+      const targetContentTypeUID = 'application::category.category';
+      const action = {
+        type: 'ADD_ATTRIBUTE',
+        attributeToSet: {
+          name: 'categories',
+          nature: 'oneToMany',
+          targetAttribute: 'address',
+          target: targetContentTypeUID,
+          unique: false,
+          dominant: null,
+          columnName: null,
+          targetColumnName: null,
+        },
+        forTarget: 'contentType',
+        targetUid: contentTypeUID,
+        initialAttribute: {},
+        shouldAddComponentToData: false,
+      };
+
+      const state = initialState
+        .set('contentTypes', fromJS(testData.contentTypes))
+        .set('initialContentTypes', fromJS(testData.contentTypes))
+        .setIn(
+          ['modifiedData', 'contentType'],
+          fromJS(testData.contentTypes[contentTypeUID])
+        )
+        .setIn(['modifiedData', 'components'], fromJS({}));
+
+      const expected = state.setIn(
+        ['modifiedData', 'contentType', 'schema', 'attributes', 'categories'],
+        fromJS({
+          nature: 'oneToMany',
+          targetAttribute: 'address',
+          target: targetContentTypeUID,
+          unique: false,
+          dominant: null,
+          columnName: null,
+          targetColumnName: null,
+        })
+      );
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should add the relation attribute for a component', () => {
+      const componentUID = 'default.dish';
+      const targetContentTypeUID = 'application::category.category';
+      const action = {
+        type: 'ADD_ATTRIBUTE',
+        attributeToSet: {
+          name: 'address',
+          nature: 'oneWay',
+          targetAttribute: '-',
+          target: targetContentTypeUID,
+          unique: false,
+          dominant: null,
+          columnName: null,
+          targetColumnName: null,
+        },
+        forTarget: 'component',
+        targetUid: componentUID,
+        initialAttribute: {},
+        shouldAddComponentToData: false,
+      };
+
+      const state = initialState
+        .set('contentTypes', fromJS(testData.contentTypes))
+        .set('components', fromJS(testData.components))
+        .set('initialComponents', fromJS(testData.components))
+        .set('initialContentTypes', fromJS(testData.contentTypes))
+        .setIn(
+          ['modifiedData', 'component'],
+          fromJS(testData.components[componentUID])
+        )
+        .setIn(['modifiedData', 'components'], fromJS({}));
+
+      const expected = state.setIn(
+        ['modifiedData', 'component', 'schema', 'attributes', 'address'],
+        fromJS({
+          nature: 'oneWay',
+          targetAttribute: '-',
+          target: targetContentTypeUID,
+          unique: false,
+          dominant: null,
+          columnName: null,
+          targetColumnName: null,
+        })
+      );
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should add the relation correctly for a component from the modifiedData.components object', () => {
+      const componentUID = 'default.dish';
+      const targetContentTypeUID = 'application::category.category';
+      const action = {
+        type: 'ADD_ATTRIBUTE',
+        attributeToSet: {
+          name: 'address',
+          nature: 'oneWay',
+          targetAttribute: '-',
+          target: targetContentTypeUID,
+          unique: false,
+          dominant: null,
+          columnName: null,
+          targetColumnName: null,
+        },
+        forTarget: 'components',
+        targetUid: componentUID,
+        initialAttribute: {},
+        shouldAddComponentToData: false,
+      };
+
+      const state = initialState
+        .set('contentTypes', fromJS(testData.contentTypes))
+        .set('components', fromJS(testData.components))
+        .set('initialComponents', fromJS(testData.components))
+        .set('initialContentTypes', fromJS(testData.contentTypes))
+        .setIn(
+          ['modifiedData', 'contentType'],
+          fromJS(testData.contentTypes[targetContentTypeUID])
+        )
+        .setIn(
+          ['modifiedData', 'components', componentUID],
+          fromJS(testData.components[componentUID])
+        )
+        .setIn(['modifiedData', 'components'], fromJS({}));
+
+      const expected = state.setIn(
+        [
+          'modifiedData',
+          'components',
+          componentUID,
+          'schema',
+          'attributes',
+          'address',
+        ],
+        fromJS({
+          nature: 'oneWay',
+          targetAttribute: '-',
+          target: targetContentTypeUID,
+          unique: false,
+          dominant: null,
+          columnName: null,
+          targetColumnName: null,
+        })
+      );
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
 });
