@@ -8,7 +8,6 @@
     "enabled": false
   },
   "admin": {
-    "autoOpen": false,
-    "watchIgnoreFiles": []
+    "autoOpen": false
   }
 }
