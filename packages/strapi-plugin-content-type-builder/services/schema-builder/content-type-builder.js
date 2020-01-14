@@ -34,6 +34,8 @@ module.exports = function createComponentBuilder() {
       const targetCT = this.contentTypes.get(uid);
       const targetAttribute = targetCT.getAttribute(attribute.via);
 
+      if (!targetAttribute) return;
+
       // do not delete polymorphic relations
       if (targetAttribute.collection === '*' || targetAttribute.model === '*') {
         return;

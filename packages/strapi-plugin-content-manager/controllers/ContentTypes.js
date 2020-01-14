@@ -1,14 +1,14 @@
 'use strict';
 
 const { createModelConfigurationSchema } = require('./validation');
-const service = require('../services/ContentTypes');
-const componentService = require('../services/Components');
 
 module.exports = {
   /**
    * Returns the list of available content types
    */
   listContentTypes(ctx) {
+    const service = strapi.plugins['content-manager'].services.contenttypes;
+
     const contentTypes = Object.keys(strapi.contentTypes)
       .filter(uid => {
         if (uid.startsWith('strapi::')) return false;
@@ -42,6 +42,10 @@ module.exports = {
       return ctx.notFound('contentType.notFound');
     }
 
+    const service = strapi.plugins['content-manager'].services.contenttypes;
+    const componentService =
+      strapi.plugins['content-manager'].services.components;
+
     const contentTypeConfigurations = await service.getConfiguration(uid);
 
     const data = {
@@ -73,6 +77,8 @@ module.exports = {
     if (!contentType) {
       return ctx.notFound('contentType.notFound');
     }
+
+    const service = strapi.plugins['content-manager'].services.contenttypes;
 
     const schema = service.formatContentTypeSchema(contentType);
 
