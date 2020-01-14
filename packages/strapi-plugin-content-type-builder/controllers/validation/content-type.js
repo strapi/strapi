@@ -2,35 +2,66 @@
 
 const _ = require('lodash');
 const yup = require('yup');
+
 const formatYupErrors = require('./yup-formatter');
-
 const createSchema = require('./model-schema');
+const removeEmptyDefaults = require('./remove-empty-defaults');
 const { nestedComponentSchema } = require('./component');
-const { modelTypes, DEFAULT_TYPES } = require('./constants');
+const {
+  modelTypes,
+  DEFAULT_TYPES,
+  CONTENT_TYPE_KINDS,
+  typeKinds,
+} = require('./constants');
 
-const VALID_RELATIONS = [
-  'oneWay',
-  'manyWay',
-  'oneToOne',
-  'oneToMany',
-  'manyToOne',
-  'manyToMany',
-];
+/**
+ * Allowed relation per type kind
+ */
+const VALID_RELATIONS = {
+  [typeKinds.SINGLE_TYPE]: ['oneWay', 'manyWay'],
+  [typeKinds.COLLECTION_TYPE]: [
+    'oneWay',
+    'manyWay',
+    'oneToOne',
+    'oneToMany',
+    'manyToOne',
+    'manyToMany',
+  ],
+};
+
+/**
+ * Allowed types
+ */
 const VALID_TYPES = [...DEFAULT_TYPES, 'component', 'dynamiczone'];
 
-const contentTypeSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
-  modelType: modelTypes.CONTENT_TYPE,
-});
+/**
+ * Returns a yup schema to validate a content type payload
+ * @param {Object} data payload
+ */
+const createContentTypeSchema = data => {
+  const kind = _.get(data, 'kind', typeKinds.COLLECTION_TYPE);
 
-const createContentTypeSchema = yup
-  .object({
-    contentType: contentTypeSchema.required().noUnknown(),
-    components: nestedComponentSchema,
-  })
-  .noUnknown();
+  const contentTypeSchema = createSchema(
+    VALID_TYPES,
+    VALID_RELATIONS[kind] || [],
+    {
+      modelType: modelTypes.CONTENT_TYPE,
+    }
+  );
 
+  return yup
+    .object({
+      contentType: contentTypeSchema.required().noUnknown(),
+      components: nestedComponentSchema,
+    })
+    .noUnknown();
+};
+
+/**
+ * Validator for content type creation
+ */
 const validateContentTypeInput = data => {
-  return createContentTypeSchema
+  return createContentTypeSchema(data)
     .validate(data, {
       strict: true,
       abortEarly: false,
@@ -38,37 +69,34 @@ const validateContentTypeInput = data => {
     .catch(error => Promise.reject(formatYupErrors(error)));
 };
 
+/**
+ * Validator for content type edition
+ */
 const validateUpdateContentTypeInput = data => {
-  // convert zero length string on default attributes to undefined
-  if (_.has(data, 'attributes')) {
-    Object.keys(data.attributes).forEach(attribute => {
-      if (data.attributes[attribute].default === '') {
-        data.attributes[attribute].default = undefined;
-      }
-    });
-  }
+  removeEmptyDefaults(data);
 
-  if (_.has(data, 'components') && Array.isArray(data.components)) {
-    data.components.forEach(data => {
-      if (_.has(data, 'attributes') && _.has(data, 'uid')) {
-        Object.keys(data.attributes).forEach(attribute => {
-          if (data.attributes[attribute].default === '') {
-            data.attributes[attribute].default = undefined;
-          }
-        });
-      }
-    });
-  }
-
-  return createContentTypeSchema
+  return createContentTypeSchema(data)
     .validate(data, {
       strict: true,
       abortEarly: false,
     })
+    .catch(error => Promise.reject(formatYupErrors(error)));
+};
+
+/**
+ * Validates type kind
+ */
+const validateKind = kind => {
+  return yup
+    .string()
+    .oneOf(CONTENT_TYPE_KINDS)
+    .nullable()
+    .validate(kind)
     .catch(error => Promise.reject(formatYupErrors(error)));
 };
 
 module.exports = {
   validateContentTypeInput,
   validateUpdateContentTypeInput,
+  validateKind,
 };

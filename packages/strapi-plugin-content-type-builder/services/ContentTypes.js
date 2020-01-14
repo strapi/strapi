@@ -17,7 +17,7 @@ const { nameToSlug } = require('../utils/helpers');
  * @param {Object} contentType
  */
 const formatContentType = contentType => {
-  const { uid, plugin, connection, collectionName, info } = contentType;
+  const { uid, kind, plugin, connection, collectionName, info } = contentType;
 
   return {
     uid,
@@ -26,6 +26,7 @@ const formatContentType = contentType => {
       name: _.get(info, 'name') || _.upperFirst(pluralize(uid)),
       description: _.get(info, 'description', ''),
       connection,
+      kind: kind || 'collectionType',
       collectionName,
       attributes: formatAttributes(contentType),
     },

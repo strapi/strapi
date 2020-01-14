@@ -80,6 +80,7 @@ module.exports = function createComponentBuilder() {
       contentType
         .setUID(uid)
         .set('connection', infos.connection || defaultConnection)
+        .set('kind', infos.kind)
         .set('collectionName', infos.collectionName || defaultCollectionName)
         .set(['info', 'name'], infos.name)
         .set(['info', 'description'], infos.description)
@@ -197,9 +198,12 @@ module.exports = function createComponentBuilder() {
         }
       });
 
+      // TODO: handle kind change => update routes.json file somehow
+
       contentType
         .set('connection', infos.connection)
         .set('collectionName', infos.collectionName)
+        .set('kind', infos.kind)
         .set(['info', 'name'], infos.name)
         .set(['info', 'description'], infos.description)
         .setAttributes(this.convertAttributes(newAttributes));

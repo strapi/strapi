@@ -3,6 +3,9 @@
 const CONTENT_TYPE = 'CONTENT_TYPE';
 const COMPONENT = 'COMPONENT';
 
+const SINGLE_TYPE = 'singleType';
+const COLLECTION_TYPE = 'collectionType';
+
 const DEFAULT_TYPES = [
   // advanced types
   'media',
@@ -28,8 +31,15 @@ const DEFAULT_TYPES = [
 
 const FORBIDDEN_ATTRIBUTE_NAMES = ['__component', '__contentType'];
 
+const CONTENT_TYPE_KINDS = [SINGLE_TYPE, COLLECTION_TYPE];
+
 module.exports = {
   DEFAULT_TYPES,
+  CONTENT_TYPE_KINDS,
+  typeKinds: {
+    SINGLE_TYPE,
+    COLLECTION_TYPE,
+  },
   modelTypes: {
     CONTENT_TYPE,
     COMPONENT,

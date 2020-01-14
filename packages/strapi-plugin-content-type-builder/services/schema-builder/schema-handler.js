@@ -16,6 +16,7 @@ module.exports = function createSchemaHandler(infos) {
     dir,
     filename,
     schema: schema || {
+      kind: undefined,
       info: {},
       options: {},
       attributes: {},
