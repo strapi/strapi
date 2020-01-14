@@ -11,13 +11,16 @@ const createSchemaHandler = require('./schema-handler');
 module.exports = function createComponentBuilder() {
   return {
     setRelation({ key, modelName, plugin, attribute }) {
-      this.contentTypes.get(attribute.target).setAttribute(
+      const targetCT = this.contentTypes.get(attribute.target);
+      const targetAttribute = targetCT.getAttribute(attribute.targetAttribute);
+      targetCT.setAttribute(
         attribute.targetAttribute,
         generateRelation({
           key,
           attribute,
           plugin,
           modelName,
+          targetAttribute,
         })
       );
     },
@@ -234,11 +237,18 @@ module.exports = function createComponentBuilder() {
 const createContentTypeUID = ({ name }) =>
   `application::${nameToSlug(name)}.${nameToSlug(name)}`;
 
-const generateRelation = ({ key, attribute, plugin, modelName }) => {
+const generateRelation = ({
+  key,
+  attribute,
+  plugin,
+  modelName,
+  targetAttribute = {},
+}) => {
   const opts = {
     via: key,
     plugin,
     columnName: attribute.targetColumnName || undefined,
+    autoPopulate: targetAttribute.autoPopulate,
   };
 
   switch (attribute.nature) {
