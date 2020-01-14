@@ -112,7 +112,7 @@ const reducer = (state, action) => {
                 nature: getOppositeNature(nature),
                 target,
                 unique: rest.unique,
-                required: rest.required,
+                // required: rest.required,
                 dominant: nature === 'manyToMany' ? !rest.dominant : null,
                 targetAttribute: name,
                 columnName: rest.targetColumnName,

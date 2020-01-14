@@ -601,7 +601,6 @@ describe('CTB | containers | reducer | ADD_ATTRIBUTE', () => {
         dominant: null,
         columnName,
         targetColumnName,
-        required: false,
       };
       const action = {
         type: 'ADD_ATTRIBUTE',
@@ -617,7 +616,6 @@ describe('CTB | containers | reducer | ADD_ATTRIBUTE', () => {
         nature: 'oneToOne',
         target: contentTypeUID,
         unique: false,
-        required: false,
         targetAttribute: name,
         dominant: null,
         columnName: targetColumnName,
@@ -666,7 +664,6 @@ describe('CTB | containers | reducer | ADD_ATTRIBUTE', () => {
         dominant: null,
         columnName,
         targetColumnName,
-        required: false,
       };
       const action = {
         type: 'ADD_ATTRIBUTE',
@@ -682,7 +679,6 @@ describe('CTB | containers | reducer | ADD_ATTRIBUTE', () => {
         nature: 'manyToOne',
         target: contentTypeUID,
         unique: false,
-        required: false,
         targetAttribute: name,
         dominant: null,
         columnName: targetColumnName,
@@ -731,7 +727,6 @@ describe('CTB | containers | reducer | ADD_ATTRIBUTE', () => {
         dominant: null,
         columnName,
         targetColumnName,
-        required: false,
       };
       const action = {
         type: 'ADD_ATTRIBUTE',
@@ -747,7 +742,6 @@ describe('CTB | containers | reducer | ADD_ATTRIBUTE', () => {
         nature: 'oneToMany',
         target: contentTypeUID,
         unique: false,
-        required: false,
         targetAttribute: name,
         dominant: null,
         columnName: targetColumnName,
@@ -796,7 +790,6 @@ describe('CTB | containers | reducer | ADD_ATTRIBUTE', () => {
         dominant: true,
         columnName,
         targetColumnName,
-        required: false,
       };
       const action = {
         type: 'ADD_ATTRIBUTE',
@@ -812,7 +805,6 @@ describe('CTB | containers | reducer | ADD_ATTRIBUTE', () => {
         nature: 'manyToMany',
         target: contentTypeUID,
         unique: false,
-        required: false,
         targetAttribute: name,
         dominant: false,
         columnName: targetColumnName,
