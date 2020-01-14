@@ -134,13 +134,11 @@ axios
 
 #### Providers
 
-Thanks to [Grant](https://github.com/simov/grant) and [Purest](https://github.com/simov/purest), you can easily use OAuth and OAuth2
-providers to enable authentication in your application. By default,
-Strapi comes with the following providers:
+Thanks to [Grant](https://github.com/simov/grant) and [Purest](https://github.com/simov/purest), you can easily use OAuth and OAuth2 providers to enable authentication in your application.
 
-Before setting up you'll need to install globally `ngrok` node modules because some providers doesn't allow URLS from `localhost`.
+Before setting up a provider, you'll need to install the `ngrok` package globally to work with providers that don't allow `localhost` redirect URIs.
 
-For the following configuration, the frontend app will be the [react login](https://github.com/strapi/strapi-examples/tree/master/login-react) running on `http://localhost:3000`.
+In the following examples, the client app will be the [react login examples app](https://github.com/strapi/strapi-examples/tree/master/login-react). It will be running on `http://localhost:3000`.
 
 :::: tabs
 
@@ -148,7 +146,7 @@ For the following configuration, the frontend app will be the [react login](http
 
 ### Setup the server
 
-Use `ngrok` to serve the frontend app
+Use `ngrok` to serve the frontend app.
 
 ```
 ngrok http 3000
@@ -184,7 +182,7 @@ Then fill the informations:
 
 ### Setup the server
 
-Use `ngrok` to serve the server app
+Use `ngrok` to serve the server app.
 
 ```
 ngrok http 1337
@@ -230,7 +228,7 @@ Then fill the informations:
 - Then click **NEW PROJECT** button
 - Fill the **Project name** input and create
 
-Wait few second waiting the application creation.
+Wait a few seconds while the application is created.
 
 - On the project dropdown, select your new project
 - Click on **Go to APIs overview** Under the **APIs** card
@@ -268,7 +266,7 @@ Then fill the informations:
 
 ### Setup the server
 
-Use `ngrok` to serve the frontend app
+Use `ngrok` to serve the frontend app.
 
 ```
 ngrok http 3000
@@ -370,7 +368,7 @@ Then fill the informations:
 
 ### Setup the server
 
-Use `ngrok` to serve the server app
+Use `ngrok` to serve the server app.
 
 ```
 ngrok http 1337
