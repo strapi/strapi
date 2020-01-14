@@ -234,20 +234,21 @@ const reducer = (state, action) => {
         initialAttribute,
       } = action;
       let newState = state;
+      console.log(action);
 
       const initialAttributeName = get(initialAttribute, ['name'], '');
       const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
         ? [forTarget]
         : [forTarget, targetUid];
 
-      const isEditingComponentAttribute = rest.type === 'component';
+      // const isEditingComponentAttribute = rest.type === 'component';
 
-      if (isEditingComponentAttribute) {
-        newState = state.updateIn(
-          ['modifiedData', 'components', rest.component],
-          () => state.getIn(['components', rest.component])
-        );
-      }
+      // if (isEditingComponentAttribute) {
+      //   newState = state.updateIn(
+      //     ['modifiedData', 'components', rest.component],
+      //     () => state.getIn(['components', rest.component])
+      //   );
+      // }
 
       return newState.updateIn(
         ['modifiedData', ...pathToDataToEdit, 'schema'],
@@ -332,7 +333,7 @@ const reducer = (state, action) => {
                       nature: getOppositeNature(rest.nature),
                       target: rest.target,
                       unique: rest.unique,
-                      required: rest.required,
+                      // required: rest.required,
                       dominant:
                         rest.nature === 'manyToMany' ? !rest.dominant : null,
                       targetAttribute: name,
