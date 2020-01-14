@@ -85,7 +85,7 @@ const formatAttribute = (key, attribute, { model }) => {
         undefined
       ),
       unique: attribute.unique ? true : false,
-      autoPopulate: attribute.autoPopulate === false ? false : undefined,
+      autoPopulate: attribute.autoPopulate,
     };
   }
 };

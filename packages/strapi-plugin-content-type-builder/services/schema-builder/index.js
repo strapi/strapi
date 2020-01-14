@@ -126,7 +126,7 @@ function createSchemaBuilder({ components, contentTypes }) {
             unique: unique === true ? true : undefined,
             columnName: columnName || undefined,
             configurable: configurable === false ? false : undefined,
-            autoPopulate: autoPopulate === false ? false : undefined,
+            autoPopulate,
           };
 
           if (!this.contentTypes.has(target)) {
