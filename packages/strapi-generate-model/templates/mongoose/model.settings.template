@@ -6,7 +6,8 @@
     "description": "<%= description %>"
   },
   "options": {
-    "timestamps": true
+    "timestamps": true,
+    "isDisplayed": true
   },
   "attributes": {
     <%= attributes %>

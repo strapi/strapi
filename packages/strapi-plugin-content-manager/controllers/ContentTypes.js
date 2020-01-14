@@ -13,7 +13,11 @@ module.exports = {
       .filter(uid => {
         if (uid.startsWith('strapi::')) return false;
         if (uid === 'plugins::upload.file') return false;
-        if (strapi.contentTypes[uid] && strapi.contentTypes[uid].isDisplayed === false) return false;
+        if (
+          strapi.contentTypes[uid]
+          && strapi.contentTypes[uid].options
+          && strapi.contentTypes[uid].options.isDisplayed === false
+        ) return false;
 
         return true;
       })
