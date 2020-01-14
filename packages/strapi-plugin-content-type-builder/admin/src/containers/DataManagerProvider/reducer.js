@@ -75,7 +75,6 @@ const reducer = (state, action) => {
         forTarget,
         targetUid,
       } = action;
-      console.log(action);
       delete rest.createComponent;
 
       const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)

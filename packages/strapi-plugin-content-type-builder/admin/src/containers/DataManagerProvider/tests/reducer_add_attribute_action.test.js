@@ -499,4 +499,352 @@ describe('CTB | containers | reducer | ADD_ATTRIBUTE', () => {
       expect(reducer(state, action)).toEqual(expected);
     });
   });
+
+  describe('Adding a relation with the same content type', () => {
+    it('Should not create an opposite attribute if the relation is oneWay', () => {
+      const contentTypeUID = 'application::address.address';
+      const action = {
+        type: 'ADD_ATTRIBUTE',
+        forTarget: 'contentType',
+        targetUid: contentTypeUID,
+        attributeToSet: {
+          name: 'address',
+          nature: 'oneWay',
+          targetAttribute: '-',
+          target: contentTypeUID,
+          unique: false,
+          dominant: null,
+          columnName: null,
+          targetColumnName: null,
+        },
+        shouldAddComponentToData: false,
+      };
+      const state = initialState
+        .set('contentTypes', fromJS(testData.contentTypes))
+        .set('components', fromJS(testData.components))
+        .set('initialComponents', fromJS(testData.components))
+        .set('initialContentTypes', fromJS(testData.contentTypes))
+        .setIn(
+          ['modifiedData', 'contentType'],
+          fromJS(testData.contentTypes[contentTypeUID])
+        );
+      const expected = state.setIn(
+        ['modifiedData', 'contentType', 'schema', 'attributes', 'address'],
+        fromJS({
+          nature: 'oneWay',
+          targetAttribute: '-',
+          target: contentTypeUID,
+          unique: false,
+          dominant: null,
+          columnName: null,
+          targetColumnName: null,
+        })
+      );
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should not create an opposite attribute if the relation is manyWay', () => {
+      const contentTypeUID = 'application::address.address';
+      const action = {
+        type: 'ADD_ATTRIBUTE',
+        forTarget: 'contentType',
+        targetUid: contentTypeUID,
+        attributeToSet: {
+          name: 'address',
+          nature: 'manyWay',
+          targetAttribute: '-',
+          target: contentTypeUID,
+          unique: false,
+          dominant: null,
+          columnName: null,
+          targetColumnName: null,
+        },
+        shouldAddComponentToData: false,
+      };
+      const state = initialState
+        .set('contentTypes', fromJS(testData.contentTypes))
+        .set('components', fromJS(testData.components))
+        .set('initialComponents', fromJS(testData.components))
+        .set('initialContentTypes', fromJS(testData.contentTypes))
+        .setIn(
+          ['modifiedData', 'contentType'],
+          fromJS(testData.contentTypes[contentTypeUID])
+        );
+      const expected = state.setIn(
+        ['modifiedData', 'contentType', 'schema', 'attributes', 'address'],
+        fromJS({
+          nature: 'manyWay',
+          targetAttribute: '-',
+          target: contentTypeUID,
+          unique: false,
+          dominant: null,
+          columnName: null,
+          targetColumnName: null,
+        })
+      );
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should handle the oneToOne relation correctly and create the opposite attribute', () => {
+      const contentTypeUID = 'application::address.address';
+      const name = 'address_left_side';
+      const targetAttribute = 'address_right_side';
+      const columnName = 'left_side';
+      const targetColumnName = 'right_side';
+      const attribute = {
+        nature: 'oneToOne',
+        targetAttribute,
+        target: contentTypeUID,
+        unique: false,
+        dominant: null,
+        columnName,
+        targetColumnName,
+        required: false,
+      };
+      const action = {
+        type: 'ADD_ATTRIBUTE',
+        forTarget: 'contentType',
+        targetUid: contentTypeUID,
+        attributeToSet: {
+          name,
+          ...attribute,
+        },
+        shouldAddComponentToData: false,
+      };
+      const oppositeAttribute = {
+        nature: 'oneToOne',
+        target: contentTypeUID,
+        unique: false,
+        required: false,
+        targetAttribute: name,
+        dominant: null,
+        columnName: targetColumnName,
+        targetColumnName: columnName,
+      };
+      const state = initialState
+        .set('contentTypes', fromJS(testData.contentTypes))
+        .set('components', fromJS(testData.components))
+        .set('initialComponents', fromJS(testData.components))
+        .set('initialContentTypes', fromJS(testData.contentTypes))
+        .setIn(
+          ['modifiedData', 'contentType'],
+          fromJS(testData.contentTypes[contentTypeUID])
+        );
+
+      const expected = state
+        .setIn(
+          ['modifiedData', 'contentType', 'schema', 'attributes', name],
+          fromJS(attribute)
+        )
+        .setIn(
+          [
+            'modifiedData',
+            'contentType',
+            'schema',
+            'attributes',
+            targetAttribute,
+          ],
+          fromJS(oppositeAttribute)
+        );
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should handle the oneToMany relation correctly and create the opposite attribute', () => {
+      const contentTypeUID = 'application::address.address';
+      const name = 'address_left_side';
+      const targetAttribute = 'address_right_side';
+      const columnName = 'left_side';
+      const targetColumnName = 'right_side';
+      const attribute = {
+        nature: 'oneToMany',
+        targetAttribute,
+        target: contentTypeUID,
+        unique: false,
+        dominant: null,
+        columnName,
+        targetColumnName,
+        required: false,
+      };
+      const action = {
+        type: 'ADD_ATTRIBUTE',
+        forTarget: 'contentType',
+        targetUid: contentTypeUID,
+        attributeToSet: {
+          name,
+          ...attribute,
+        },
+        shouldAddComponentToData: false,
+      };
+      const oppositeAttribute = {
+        nature: 'manyToOne',
+        target: contentTypeUID,
+        unique: false,
+        required: false,
+        targetAttribute: name,
+        dominant: null,
+        columnName: targetColumnName,
+        targetColumnName: columnName,
+      };
+      const state = initialState
+        .set('contentTypes', fromJS(testData.contentTypes))
+        .set('components', fromJS(testData.components))
+        .set('initialComponents', fromJS(testData.components))
+        .set('initialContentTypes', fromJS(testData.contentTypes))
+        .setIn(
+          ['modifiedData', 'contentType'],
+          fromJS(testData.contentTypes[contentTypeUID])
+        );
+
+      const expected = state
+        .setIn(
+          ['modifiedData', 'contentType', 'schema', 'attributes', name],
+          fromJS(attribute)
+        )
+        .setIn(
+          [
+            'modifiedData',
+            'contentType',
+            'schema',
+            'attributes',
+            targetAttribute,
+          ],
+          fromJS(oppositeAttribute)
+        );
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should handle the manyToOne relation correctly and create the opposite attribute', () => {
+      const contentTypeUID = 'application::address.address';
+      const name = 'address_left_side';
+      const targetAttribute = 'address_right_side';
+      const columnName = 'left_side';
+      const targetColumnName = 'right_side';
+      const attribute = {
+        nature: 'manyToOne',
+        targetAttribute,
+        target: contentTypeUID,
+        unique: false,
+        dominant: null,
+        columnName,
+        targetColumnName,
+        required: false,
+      };
+      const action = {
+        type: 'ADD_ATTRIBUTE',
+        forTarget: 'contentType',
+        targetUid: contentTypeUID,
+        attributeToSet: {
+          name,
+          ...attribute,
+        },
+        shouldAddComponentToData: false,
+      };
+      const oppositeAttribute = {
+        nature: 'oneToMany',
+        target: contentTypeUID,
+        unique: false,
+        required: false,
+        targetAttribute: name,
+        dominant: null,
+        columnName: targetColumnName,
+        targetColumnName: columnName,
+      };
+      const state = initialState
+        .set('contentTypes', fromJS(testData.contentTypes))
+        .set('components', fromJS(testData.components))
+        .set('initialComponents', fromJS(testData.components))
+        .set('initialContentTypes', fromJS(testData.contentTypes))
+        .setIn(
+          ['modifiedData', 'contentType'],
+          fromJS(testData.contentTypes[contentTypeUID])
+        );
+
+      const expected = state
+        .setIn(
+          ['modifiedData', 'contentType', 'schema', 'attributes', name],
+          fromJS(attribute)
+        )
+        .setIn(
+          [
+            'modifiedData',
+            'contentType',
+            'schema',
+            'attributes',
+            targetAttribute,
+          ],
+          fromJS(oppositeAttribute)
+        );
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should handle the manyToMany relation correctly and create the opposite attribute', () => {
+      const contentTypeUID = 'application::address.address';
+      const name = 'address_left_side';
+      const targetAttribute = 'address_right_side';
+      const columnName = 'left_side';
+      const targetColumnName = 'right_side';
+      const attribute = {
+        nature: 'manyToMany',
+        targetAttribute,
+        target: contentTypeUID,
+        unique: false,
+        dominant: true,
+        columnName,
+        targetColumnName,
+        required: false,
+      };
+      const action = {
+        type: 'ADD_ATTRIBUTE',
+        forTarget: 'contentType',
+        targetUid: contentTypeUID,
+        attributeToSet: {
+          name,
+          ...attribute,
+        },
+        shouldAddComponentToData: false,
+      };
+      const oppositeAttribute = {
+        nature: 'manyToMany',
+        target: contentTypeUID,
+        unique: false,
+        required: false,
+        targetAttribute: name,
+        dominant: false,
+        columnName: targetColumnName,
+        targetColumnName: columnName,
+      };
+      const state = initialState
+        .set('contentTypes', fromJS(testData.contentTypes))
+        .set('components', fromJS(testData.components))
+        .set('initialComponents', fromJS(testData.components))
+        .set('initialContentTypes', fromJS(testData.contentTypes))
+        .setIn(
+          ['modifiedData', 'contentType'],
+          fromJS(testData.contentTypes[contentTypeUID])
+        );
+
+      const expected = state
+        .setIn(
+          ['modifiedData', 'contentType', 'schema', 'attributes', name],
+          fromJS(attribute)
+        )
+        .setIn(
+          [
+            'modifiedData',
+            'contentType',
+            'schema',
+            'attributes',
+            targetAttribute,
+          ],
+          fromJS(oppositeAttribute)
+        );
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
 });
