@@ -450,7 +450,7 @@ The session doesn't work with `mongo` as a client. The package that we should us
 - `admin`
   - `autoOpen` (boolean): Enable or disabled administration opening on start (default: `true`)
   - `path` (string): Allow to change the URL to access the admin (default: `/admin`).
-  - `watchIgnoreFiles` (array): Add custom files that should not be watched during development (default: `[]`)
+  - `watchIgnoreFiles` (array): Add custom files that should not be watched during development. See more [here](https://github.com/paulmillr/chokidar#path-filtering) (property `ignored`). Default value: `[]`
   - `build`
     - `backend` (string): URL that the admin panel and plugins will request (default: `http://localhost:1337`).
 
