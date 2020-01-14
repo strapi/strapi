@@ -17,12 +17,12 @@ import FormWrapper from '../../components/FormWrapper';
 import FieldComponent from '../../components/FieldComponent';
 import Inputs from '../../components/Inputs';
 import SelectWrapper from '../../components/SelectWrapper';
+import getInjectedComponents from '../../utils/getComponents';
 import EditViewDataManagerProvider from '../EditViewDataManagerProvider';
 import EditViewProvider from '../EditViewProvider';
 import Header from './Header';
 import createAttributesLayout from './utils/createAttributesLayout';
 import { LinkWrapper, SubWrapper } from './components';
-import getInjectedComponents from '../../utils/getComponents';
 import init from './init';
 import reducer, { initialState } from './reducer';
 

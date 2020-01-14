@@ -11,8 +11,8 @@ import useListView from '../../hooks/useListView';
 import Container from '../Container';
 
 import getFilterType from '../FilterPickerOption/utils';
-import { Flex, Span, Wrapper } from './components';
 import FilterPickerOption from '../FilterPickerOption';
+import { Flex, Span, Wrapper } from './components';
 
 import init from './init';
 import reducer, { initialState } from './reducer';

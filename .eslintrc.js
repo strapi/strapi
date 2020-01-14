@@ -7,7 +7,7 @@ module.exports = {
 
     'prettier',
   ],
-  plugins: ['react', 'redux-saga', 'react-hooks'],
+  plugins: ['react', 'redux-saga', 'react-hooks', 'import'],
   env: {
     browser: true,
     commonjs: true,
@@ -56,6 +56,7 @@ module.exports = {
       files: ['packages/**/admin/src/**/**/*.js'],
       rules: {
         'no-nested-ternary': ['error'],
+        'import/order': 2,
       },
     },
   ],

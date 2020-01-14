@@ -6,9 +6,8 @@
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
-
-import { Content, Wrapper } from './components';
 import Icon from '../../assets/icons/icon_success.svg';
+import { Content, Wrapper } from './components';
 
 function DownloadInfo() {
   return (

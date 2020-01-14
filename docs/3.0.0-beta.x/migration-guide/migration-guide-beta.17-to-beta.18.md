@@ -496,7 +496,7 @@ RENAME TABLE groups_old_table_name TO components_new_table_name;
 **2. Change the `collectionName` of the component**
 
 **Before**
-`./components/component.json`
+`./components/yourcategoryname/yourcomponentname.json`
 
 ```json
 {
@@ -506,7 +506,7 @@ RENAME TABLE groups_old_table_name TO components_new_table_name;
 ```
 
 **After**
-`./components/component.json`
+`./components/yourcategoryname/yourcomponentname.json`
 
 ```json
 {
@@ -565,7 +565,7 @@ db.collection.renameCollection('groups_my_group', 'components_my_component');
 **3. Change the `collectionName` of the component**
 
 **Before**
-`./components/component.json`
+`./components/yourcategoryname/yourcomponentname.json`
 
 ```json
 {
@@ -575,7 +575,7 @@ db.collection.renameCollection('groups_my_group', 'components_my_component');
 ```
 
 **After**
-`./components/component.json`
+`./components/yourcategoryname/yourcomponentname.json`
 
 ```json
 {
