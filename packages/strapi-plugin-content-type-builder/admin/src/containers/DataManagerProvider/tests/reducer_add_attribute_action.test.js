@@ -104,21 +104,244 @@ describe('CTB | containers | reducer | ADD_ATTRIBUTE', () => {
 
   describe('Adding a component field attribute', () => {
     it('Should create the component attribute and add the component to the modifiedData.components if the component is not in the object', () => {
-      expect(true).toBe(true);
+      const contentTypeUID = 'application::address.address';
+      const contentType = get(testData, ['contentTypes', contentTypeUID]);
+      const componentToAddUID = 'default.dish';
+
+      const state = initialState
+        .set('components', fromJS(testData.components))
+        .set('initialComponents', fromJS(testData.components))
+        .set('contentTypes', fromJS(testData.contentTypes))
+        .set('initialContentTypes', fromJS(testData.contentTypes))
+        .setIn(['modifiedData', 'contentType'], fromJS(contentType))
+        .setIn(['modifiedData', 'components'], fromJS({}));
+
+      const action = {
+        type: 'ADD_ATTRIBUTE',
+        attributeToSet: {
+          type: 'component',
+          repeatable: true,
+          name: 'compoField',
+          component: componentToAddUID,
+          required: true,
+          max: 2,
+          min: 1,
+        },
+        forTarget: 'contentType',
+        targetUid: 'application::address.address',
+        initialAttribute: {},
+        shouldAddComponentToData: true,
+      };
+
+      const expected = state
+        .setIn(
+          ['modifiedData', 'components', componentToAddUID],
+          fromJS(testData.components[componentToAddUID])
+        )
+        .setIn(
+          ['modifiedData', 'contentType', 'schema', 'attributes', 'compoField'],
+          fromJS({
+            type: 'component',
+            repeatable: true,
+
+            component: componentToAddUID,
+            required: true,
+            max: 2,
+            min: 1,
+          })
+        );
+
+      expect(reducer(state, action)).toEqual(expected);
     });
 
-    it('Should create the component attribute and not add the component to the modifiedData.components if the component is already in the object to keep the modifications', () => {
-      expect(true).toBe(true);
+    it('Should create the component attribute and add the component to the modifiedData.components and its nested components if none of the added components are in the object', () => {
+      const contentTypeUID = 'application::address.address';
+      const contentType = get(testData, ['contentTypes', contentTypeUID]);
+      const componentToAddUID = 'default.closingperiod';
+
+      const state = initialState
+        .set('components', fromJS(testData.components))
+        .set('initialComponents', fromJS(testData.components))
+        .set('contentTypes', fromJS(testData.contentTypes))
+        .set('initialContentTypes', fromJS(testData.contentTypes))
+        .setIn(['modifiedData', 'contentType'], fromJS(contentType))
+        .setIn(['modifiedData', 'components'], fromJS({}));
+
+      const action = {
+        type: 'ADD_ATTRIBUTE',
+        attributeToSet: {
+          type: 'component',
+          repeatable: true,
+          name: 'compoField',
+          component: componentToAddUID,
+          required: true,
+          max: 2,
+          min: 1,
+        },
+        forTarget: 'contentType',
+        targetUid: 'application::address.address',
+        initialAttribute: {},
+        shouldAddComponentToData: true,
+      };
+
+      const expected = state
+        .setIn(
+          ['modifiedData', 'components', componentToAddUID],
+          fromJS(testData.components[componentToAddUID])
+        )
+        .setIn(
+          ['modifiedData', 'components', 'default.dish'],
+          fromJS(testData.components['default.dish'])
+        )
+        .setIn(
+          ['modifiedData', 'contentType', 'schema', 'attributes', 'compoField'],
+          fromJS({
+            type: 'component',
+            repeatable: true,
+            component: componentToAddUID,
+            required: true,
+            max: 2,
+            min: 1,
+          })
+        );
+
+      expect(reducer(state, action)).toEqual(expected);
     });
 
-    it('Should create the component correctly in case the component is created on the fly', () => {
-      expect(true).toBe(true);
+    it('Should create the component attribute and add the component to the modifiedData.components and only add the nested components that are not in components are in the object to keep previous the modifications', () => {
+      const contentTypeUID = 'application::address.address';
+      const contentType = get(testData, ['contentTypes', contentTypeUID]);
+      const componentToAddUID = 'default.closingperiod';
+
+      const state = initialState
+        .set('components', fromJS(testData.components))
+        .set('initialComponents', fromJS(testData.components))
+        .set('contentTypes', fromJS(testData.contentTypes))
+        .set('initialContentTypes', fromJS(testData.contentTypes))
+        .setIn(['modifiedData', 'contentType'], fromJS(contentType))
+        .setIn(
+          ['modifiedData', 'components', 'default.dish'],
+          fromJS(testData.components['default.dish'])
+        );
+
+      const action = {
+        type: 'ADD_ATTRIBUTE',
+        attributeToSet: {
+          type: 'component',
+          repeatable: true,
+          name: 'compoField',
+          component: componentToAddUID,
+          required: true,
+          max: 2,
+          min: 1,
+        },
+        forTarget: 'contentType',
+        targetUid: contentTypeUID,
+        initialAttribute: {},
+        shouldAddComponentToData: true,
+      };
+
+      const expected = state
+        .setIn(
+          ['modifiedData', 'components', componentToAddUID],
+          fromJS(testData.components[componentToAddUID])
+        )
+
+        .setIn(
+          ['modifiedData', 'contentType', 'schema', 'attributes', 'compoField'],
+          fromJS({
+            type: 'component',
+            repeatable: true,
+            component: componentToAddUID,
+            required: true,
+            max: 2,
+            min: 1,
+          })
+        );
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should create the component correctly in case of creating the component on the fly', () => {
+      const componentToCreateUID = 'default.new-compo';
+      const componentToCreate = {
+        uid: componentToCreateUID,
+        isTemporary: true,
+        category: 'default',
+        schema: {
+          name: 'newCompo',
+          icon: 'ad',
+          attributes: {},
+        },
+      };
+      const contentTypeUID = 'application::address.address';
+      const action = {
+        type: 'ADD_ATTRIBUTE',
+        attributeToSet: {
+          name: 'newCompo',
+          type: 'component',
+          repeatable: false,
+          component: componentToCreateUID,
+        },
+        forTarget: 'contentType',
+        targetUid: contentTypeUID,
+        initialAttribute: undefined,
+        shouldAddComponentToData: false,
+      };
+
+      const state = initialState
+        .setIn(['components', componentToCreateUID], fromJS(componentToCreate))
+        .setIn(
+          ['modifiedData', 'components', componentToCreateUID],
+          fromJS(componentToCreate)
+        )
+        .setIn(
+          ['modifiedData', 'contentType'],
+          fromJS(testData.contentTypes[contentTypeUID])
+        );
+
+      const expected = state.setIn(
+        ['modifiedData', 'contentType', 'schema', 'attributes', 'newCompo'],
+        fromJS({
+          type: 'component',
+          repeatable: false,
+          component: componentToCreateUID,
+        })
+      );
+
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 
   describe('Adding a dynamic zone', () => {
     it('Should create the dynamiczone attribute correctly', () => {
-      expect(true).toBe(true);
+      const contentTypeUID = 'application::address.address';
+      const action = {
+        type: 'ADD_ATTRIBUTE',
+        attributeToSet: {
+          type: 'dynamiczone',
+          components: [],
+          name: 'dz',
+        },
+        forTarget: 'contentType',
+        targetUid: contentTypeUID,
+        initialAttribute: {},
+        shouldAddComponentToData: false,
+      };
+      const state = initialState.setIn(
+        ['modifiedData', 'contentType'],
+        fromJS(testData.contentTypes[contentTypeUID])
+      );
+
+      const expected = state.setIn(
+        ['modifiedData', 'contentType', 'schema', 'attributes', 'dz'],
+        fromJS({
+          type: 'dynamiczone',
+          components: [],
+        })
+      );
+
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 });
