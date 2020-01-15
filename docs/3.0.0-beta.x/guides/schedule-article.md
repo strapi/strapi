@@ -38,11 +38,8 @@ module.exports = {
 };
 ```
 
-<<<<<<< HEAD
 Make sure the enabled cron config is set to true in ./config/environments/**/server.json file.
 
-=======
->>>>>>> ecb9ac901bb0e8e04a0a1f54e9c1ffce293bb116
 ## Business login
 
 Now we can start to write the code that will fetch all draft Articles that have a `published_at` lower than the current date.
@@ -53,11 +50,7 @@ Then we will update the `status` of all these articles to `published`.
 
 ```js
 module.exports = {
-<<<<<<< HEAD
   '*/1 * * * *': async () => {
-=======
-  '*/1 * * * *': () => {
->>>>>>> ecb9ac901bb0e8e04a0a1f54e9c1ffce293bb116
     // fetch articles to publish
     const draftArticleToPublish = await strapi.api.article.services.article.find({
       status: 'draft',
