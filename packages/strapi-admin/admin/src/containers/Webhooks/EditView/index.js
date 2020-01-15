@@ -55,7 +55,8 @@ function EditView() {
         abortController.abort();
       };
     }
-  }, [abortController, fetchData, isCreating]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /* Header props */
 
