@@ -79,6 +79,7 @@ module.exports = function(strapi) {
         uid: `application::${apiName}.${modelName}`,
         apiName,
         modelName,
+        kind: model.kind || 'collectionType',
         globalId: model.globalId || _.upperFirst(_.camelCase(modelName)),
         collectionName:
           model.collectionName || `${modelName}`.toLocaleLowerCase(),
@@ -157,6 +158,7 @@ module.exports = function(strapi) {
     Object.assign(model, {
       __schema__: pickSchema(model),
       modelType: 'contentType',
+      kind: model.kind || 'collectionType',
       uid: `strapi::${key}`,
       plugin: 'admin',
       modelName: key,
@@ -192,6 +194,7 @@ module.exports = function(strapi) {
       Object.assign(model, {
         __schema__: pickSchema(model),
         modelType: 'contentType',
+        kind: model.kind || 'collectionType',
         modelName: key,
         uid: `plugins::${pluginName}.${key}`,
         plugin: pluginName,
