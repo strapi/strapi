@@ -82,7 +82,9 @@
       "type": "dynamiczone",
       "components": [
         "default.openingtimes",
-        "default.restaurantservice"
+        "default.restaurantservice",
+        "default.closingperiod",
+        "default.dish"
       ]
     }
   }

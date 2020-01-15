@@ -112,6 +112,7 @@ const reducer = (state, action) => {
                 nature: getOppositeNature(nature),
                 target,
                 unique: rest.unique,
+                // Leave this if we allow the required on the relation
                 // required: rest.required,
                 dominant: nature === 'manyToMany' ? !rest.dominant : null,
                 targetAttribute: name,
@@ -323,6 +324,7 @@ const reducer = (state, action) => {
                       nature: getOppositeNature(rest.nature),
                       target: rest.target,
                       unique: rest.unique,
+                      // Leave this if we allow the required on the relation
                       // required: rest.required,
                       dominant:
                         rest.nature === 'manyToMany' ? !rest.dominant : null,
