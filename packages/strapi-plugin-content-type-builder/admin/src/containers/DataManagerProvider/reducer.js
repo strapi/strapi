@@ -1,6 +1,7 @@
 import { fromJS, OrderedMap } from 'immutable';
 import { get, has } from 'lodash';
 import makeUnique from '../../utils/makeUnique';
+import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
 
 const initialState = fromJS({
   components: {},
@@ -22,6 +23,47 @@ const getOppositeNature = originalNature => {
   } else {
     return originalNature;
   }
+};
+
+const addComponentsToState = (state, componentToAddUid, objToUpdate) => {
+  let newObj = objToUpdate;
+  const componentToAdd = state.getIn(['components', componentToAddUid]);
+  const isTemporaryComponent = componentToAdd.get('isTemporary');
+  const componentToAddSchema = componentToAdd.getIn(['schema', 'attributes']);
+  const hasComponentAlreadyBeenAdded =
+    state.getIn(['modifiedData', 'components', componentToAddUid]) !==
+    undefined;
+
+  // created components are already in the modifiedData.components
+  // We don't add them because all modifications will be lost
+  if (isTemporaryComponent || hasComponentAlreadyBeenAdded) {
+    return newObj;
+  }
+
+  // Add the added components to the modifiedData.compontnes
+  newObj = newObj.set(componentToAddUid, componentToAdd);
+  const nestedComponents = retrieveComponentsFromSchema(
+    componentToAddSchema.toJS(),
+    state.get('components').toJS()
+  );
+
+  // We need to add the nested components to the modifiedData.components as well
+  nestedComponents.forEach(componentUid => {
+    const isTemporary =
+      state.getIn(['components', componentUid, 'isTemporary']) || false;
+    const hasNestedComponentAlreadyBeenAdded =
+      state.getIn(['modifiedData', 'components', componentUid]) !== undefined;
+
+    // Same logic here otherwise we will lose the modifications added to the components
+    if (!isTemporary && !hasNestedComponentAlreadyBeenAdded) {
+      newObj = newObj.set(
+        componentUid,
+        state.getIn(['components', componentUid])
+      );
+    }
+  });
+
+  return newObj;
 };
 
 const reducer = (state, action) => {
@@ -86,12 +128,7 @@ const reducer = (state, action) => {
         )
         .updateIn(['modifiedData', 'components'], existingCompos => {
           if (action.shouldAddComponentToData) {
-            const componentToAdd = state.getIn(['components', rest.component]);
-
-            return existingCompos.update(
-              componentToAdd.get('uid'),
-              () => componentToAdd
-            );
+            return addComponentsToState(state, rest.component, existingCompos);
           }
 
           return existingCompos;
@@ -138,15 +175,7 @@ const reducer = (state, action) => {
         )
         .updateIn(['modifiedData', 'components'], old => {
           const componentsSchema = newComponents.reduce((acc, current) => {
-            const addedCompoSchema = state.getIn(['components', current]);
-            const isTemporaryComponent = addedCompoSchema.get('isTemporary');
-
-            // created components are already in the modifiedData.components
-            if (isTemporaryComponent) {
-              return acc;
-            }
-
-            return acc.set(current, addedCompoSchema);
+            return addComponentsToState(state, current, acc);
           }, old);
 
           return componentsSchema;
