@@ -1,3 +1,5 @@
+import React from 'react';
+import { FormattedMessage } from 'react-intl';
 import getTrad from '../../../utils/getTrad';
 
 const fields = {
@@ -26,6 +28,50 @@ const fields = {
     ],
     validations: {},
   },
+
+  dateAttribute: {
+    label: {
+      id: getTrad('modalForm.attribute.text.type-selection'),
+    },
+    name: 'type',
+    type: 'select',
+    options: [
+      {
+        id: 'components.InputSelect.option.placeholder',
+        value: '',
+      },
+      {
+        id: 'form.attribute.item.date.type.date',
+        value: 'date',
+      },
+      {
+        id: 'form.attribute.item.date.type.datetime',
+        value: 'datetime',
+      },
+      // Not sure the ctm supports that one
+      // {
+      //   id: 'form.attribute.item.date.type.timestamp',
+      //   value: 'timestamp',
+      // },
+      { id: 'form.attribute.item.date.type.time', value: 'time' },
+    ].map(({ id, value }, index) => {
+      const disabled = index === 0;
+      const tradId = index === 0 ? id : getTrad(id);
+
+      return (
+        <FormattedMessage id={tradId} key={id}>
+          {msg => (
+            <option disabled={disabled} hidden={disabled} value={value}>
+              {msg}
+            </option>
+          )}
+        </FormattedMessage>
+      );
+    }),
+    validations: {
+      required: true,
+    },
+  },
   default: {
     autoFocus: true,
     name: 'default',
@@ -37,6 +83,21 @@ const fields = {
   },
   divider: {
     type: 'divider',
+  },
+  enumerationAttribute: {
+    autoFocus: false,
+    name: 'enum',
+    type: 'textarea',
+    size: 8,
+    label: {
+      id: getTrad('form.attribute.item.enumeration.rules'),
+    },
+    placeholder: {
+      id: getTrad('form.attribute.item.enumeration.placeholder'),
+    },
+    validations: {
+      required: true,
+    },
   },
   max: {
     autoFocus: false,
@@ -66,6 +127,51 @@ const fields = {
     description: {
       id: getTrad('modalForm.attribute.form.base.name.description'),
     },
+    validations: {
+      required: true,
+    },
+  },
+  numberAttribute: {
+    label: {
+      id: getTrad('form.attribute.item.number.type'),
+    },
+    name: 'type',
+    type: 'select',
+    options: [
+      {
+        id: 'components.InputSelect.option.placeholder',
+        value: '',
+      },
+      {
+        id: 'form.attribute.item.number.type.integer',
+        value: 'integer',
+      },
+      {
+        id: 'form.attribute.item.number.type.biginteger',
+        value: 'biginteger',
+      },
+      {
+        id: 'form.attribute.item.number.type.decimal',
+        value: 'decimal',
+      },
+      {
+        id: 'form.attribute.item.number.type.float',
+        value: 'float',
+      },
+    ].map(({ id, value }, index) => {
+      const disabled = index === 0;
+      const tradId = index === 0 ? id : getTrad(id);
+
+      return (
+        <FormattedMessage id={tradId} key={id}>
+          {msg => (
+            <option disabled={disabled} hidden={disabled} value={value}>
+              {msg}
+            </option>
+          )}
+        </FormattedMessage>
+      );
+    }),
     validations: {
       required: true,
     },

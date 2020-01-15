@@ -85,6 +85,7 @@ const ATTRIBUTES_THAT_DONT_HAVE_MIN_MAX_SETTINGS = [
   'date',
   'enumeration',
   'media',
+  'json',
 ];
 
 const forms = {
@@ -365,21 +366,43 @@ const forms = {
           [fields.min],
         ];
 
-        if (type === 'component') {
-          if (step === '1') {
-            return {
-              items: componentForm.advanced('componentToCreate.'),
-            };
-          } else {
-            const requiredItem = [[fields.required]];
-
-            return {
-              items: data.repeatable ? [...dynamiczoneItems] : requiredItem,
-            };
-          }
-        }
-
         const items = defaultItems.slice();
+
+        if (!ATTRIBUTES_THAT_DONT_HAVE_MIN_MAX_SETTINGS.includes(type)) {
+          items.push(
+            [
+              {
+                autoFocus: false,
+                name: type === 'number' ? 'max' : 'maxLength',
+                type: 'customCheckboxWithChildren',
+                label: {
+                  id: getTrad(
+                    `form.attribute.item.maximum${
+                      type === 'number' ? '' : 'Length'
+                    }`
+                  ),
+                },
+
+                validations: {},
+              },
+            ],
+            [
+              {
+                autoFocus: false,
+                name: type === 'number' ? 'min' : 'minLength',
+                type: 'customCheckboxWithChildren',
+                label: {
+                  id: getTrad(
+                    `form.attribute.item.minimum${
+                      type === 'number' ? '' : 'Length'
+                    }`
+                  ),
+                },
+                validations: {},
+              },
+            ]
+          );
+        }
 
         if (type === 'number' && data.type !== 'biginteger') {
           const step =
@@ -475,57 +498,31 @@ const forms = {
           ]);
         }
 
-        if (!ATTRIBUTES_THAT_DONT_HAVE_MIN_MAX_SETTINGS.includes(type)) {
-          items.push(
-            [
-              {
-                autoFocus: false,
-                name: type === 'number' ? 'max' : 'maxLength',
-                type: 'customCheckboxWithChildren',
-                label: {
-                  id: getTrad(
-                    `form.attribute.item.maximum${
-                      type === 'number' ? '' : 'Length'
-                    }`
-                  ),
-                },
+        if (type === 'component') {
+          if (step === '1') {
+            return {
+              items: componentForm.advanced('componentToCreate.'),
+            };
+          } else {
+            const requiredItem = [[fields.required]];
 
-                validations: {},
-              },
-            ],
-            [
-              {
-                autoFocus: false,
-                name: type === 'number' ? 'min' : 'minLength',
-                type: 'customCheckboxWithChildren',
-                label: {
-                  id: getTrad(
-                    `form.attribute.item.minimum${
-                      type === 'number' ? '' : 'Length'
-                    }`
-                  ),
-                },
-                validations: {},
-              },
-            ]
-          );
-        }
-
-        if (type === 'dynamiczone') {
+            return {
+              items: data.repeatable ? [...dynamiczoneItems] : requiredItem,
+            };
+          }
+        } else if (type === 'dynamiczone') {
           return {
             items: dynamiczoneItems,
           };
-        }
-
-        if (type === 'relation') {
+        } else if (type === 'relation') {
           return {
             items: relationItems,
           };
+        } else {
+          return {
+            items,
+          };
         }
-
-        return {
-          items,
-        };
       },
       base(data, type, step) {
         if (type === 'relation') {
@@ -540,213 +537,130 @@ const forms = {
           };
         }
 
-        const items = [[fields.name]];
+        if (type === 'component') {
+          if (step === '1') {
+            const createComponentItems = [[{ type: 'spacer' }]].concat(
+              data.createComponent === true
+                ? componentForm.base('componentToCreate.')
+                : []
+            );
 
-        if (type === 'component' && step === '1') {
-          const itemsToConcat =
-            data.createComponent === true
-              ? [[{ type: 'spacer' }]].concat(
-                  componentForm.base('componentToCreate.')
-                )
-              : [[{ type: 'spacer' }]];
-
+            return {
+              items: [[fields.createComponent], ...createComponentItems],
+            };
+          } else {
+            // step === '2'
+            return {
+              items: [
+                [
+                  fields.name,
+                  {
+                    name: 'component',
+                    type: 'componentSelect',
+                    label: {
+                      id: getTrad('modalForm.attributes.select-component'),
+                    },
+                    isMultiple: false,
+                  },
+                ],
+                [
+                  {
+                    label: {
+                      id: getTrad('modalForm.attribute.text.type-selection'),
+                    },
+                    name: 'repeatable',
+                    type: 'booleanBox',
+                    size: 12,
+                    options: [
+                      {
+                        headerId: getTrad(
+                          `form.attribute.component.option.repeatable`
+                        ),
+                        descriptionId: getTrad(
+                          `form.attribute.component.option.repeatable.description`
+                        ),
+                        value: true,
+                      },
+                      {
+                        headerId: getTrad(
+                          `form.attribute.component.option.single`
+                        ),
+                        descriptionId: getTrad(
+                          `form.attribute.component.option.single.description`
+                        ),
+                        value: false,
+                      },
+                    ],
+                    validations: {},
+                  },
+                ],
+                [{ type: 'spacer' }],
+              ],
+            };
+          }
+        } else if (type === 'text' || type === 'media') {
           return {
-            items: [[fields.createComponent], ...itemsToConcat],
+            items: [
+              [fields.name],
+              [
+                {
+                  label: {
+                    id: getTrad('modalForm.attribute.text.type-selection'),
+                  },
+                  name: type === 'text' ? 'type' : 'multiple',
+                  type: 'booleanBox',
+                  size: 12,
+                  options: [
+                    {
+                      headerId: getTrad(
+                        `form.attribute.${type}.option.${
+                          type === 'text' ? 'short-text' : 'multiple'
+                        }`
+                      ),
+                      descriptionId: getTrad(
+                        `form.attribute.${type}.option.${
+                          type === 'text' ? 'short-text' : 'multiple'
+                        }.description`
+                      ),
+                      value: type === 'text' ? 'string' : true,
+                    },
+                    {
+                      headerId: getTrad(
+                        `form.attribute.${type}.option.${
+                          type === 'text' ? 'long-text' : 'single'
+                        }`
+                      ),
+                      descriptionId: getTrad(
+                        `form.attribute.${type}.option.${
+                          type === 'text' ? 'long-text' : 'single'
+                        }.description`
+                      ),
+                      value: type === 'text' ? 'text' : false,
+                    },
+                  ],
+                  validations: {},
+                },
+              ],
+              [{ type: 'spacer-medium' }],
+            ],
+          };
+        } else if (type === 'number') {
+          return {
+            items: [[fields.name, fields.numberAttribute]],
+          };
+        } else if (type === 'date') {
+          return {
+            items: [[fields.name, fields.dateAttribute]],
+          };
+        } else if (type === 'enumeration') {
+          return {
+            items: [[fields.name], [fields.enumerationAttribute]],
+          };
+        } else {
+          return {
+            items: [[fields.name]],
           };
         }
-
-        if (type === 'component' && step === '2') {
-          items[0].push({
-            name: 'component',
-            type: 'componentSelect',
-            label: {
-              id: getTrad('modalForm.attributes.select-component'),
-            },
-            isMultiple: false,
-          });
-          items.push([
-            {
-              label: {
-                id: getTrad('modalForm.attribute.text.type-selection'),
-              },
-              name: 'repeatable',
-              type: 'booleanBox',
-              size: 12,
-              options: [
-                {
-                  headerId: getTrad(
-                    `form.attribute.component.option.repeatable`
-                  ),
-                  descriptionId: getTrad(
-                    `form.attribute.component.option.repeatable.description`
-                  ),
-                  value: true,
-                },
-                {
-                  headerId: getTrad(`form.attribute.component.option.single`),
-                  descriptionId: getTrad(
-                    `form.attribute.component.option.single.description`
-                  ),
-                  value: false,
-                },
-              ],
-              validations: {},
-            },
-          ]);
-          items.push([{ type: 'spacer' }]);
-        }
-
-        if (type === 'text' || type === 'media') {
-          items.push([
-            {
-              label: {
-                id: getTrad('modalForm.attribute.text.type-selection'),
-              },
-              name: type === 'text' ? 'type' : 'multiple',
-              type: 'booleanBox',
-              size: 12,
-              options: [
-                {
-                  headerId: getTrad(
-                    `form.attribute.${type}.option.${
-                      type === 'text' ? 'short-text' : 'multiple'
-                    }`
-                  ),
-                  descriptionId: getTrad(
-                    `form.attribute.${type}.option.${
-                      type === 'text' ? 'short-text' : 'multiple'
-                    }.description`
-                  ),
-                  value: type === 'text' ? 'string' : true,
-                },
-                {
-                  headerId: getTrad(
-                    `form.attribute.${type}.option.${
-                      type === 'text' ? 'long-text' : 'single'
-                    }`
-                  ),
-                  descriptionId: getTrad(
-                    `form.attribute.${type}.option.${
-                      type === 'text' ? 'long-text' : 'single'
-                    }.description`
-                  ),
-                  value: type === 'text' ? 'text' : false,
-                },
-              ],
-              validations: {},
-            },
-          ]);
-          items.push([{ type: 'spacer-medium' }]);
-        }
-
-        if (type === 'number') {
-          items[0].push({
-            label: {
-              id: getTrad('form.attribute.item.number.type'),
-            },
-            name: 'type',
-            type: 'select',
-            options: [
-              { id: 'components.InputSelect.option.placeholder', value: '' },
-              {
-                id: 'form.attribute.item.number.type.integer',
-                value: 'integer',
-              },
-              {
-                id: 'form.attribute.item.number.type.biginteger',
-                value: 'biginteger',
-              },
-              {
-                id: 'form.attribute.item.number.type.decimal',
-                value: 'decimal',
-              },
-              { id: 'form.attribute.item.number.type.float', value: 'float' },
-            ].map(({ id, value }, index) => {
-              const disabled = index === 0;
-              const tradId = index === 0 ? id : getTrad(id);
-
-              return (
-                <FormattedMessage id={tradId} key={id}>
-                  {msg => (
-                    <option disabled={disabled} hidden={disabled} value={value}>
-                      {msg}
-                    </option>
-                  )}
-                </FormattedMessage>
-              );
-            }),
-            validations: {
-              required: true,
-            },
-          });
-        }
-
-        if (type === 'date') {
-          items[0].push({
-            label: {
-              id: getTrad('modalForm.attribute.text.type-selection'),
-            },
-            name: 'type',
-            type: 'select',
-            options: [
-              { id: 'components.InputSelect.option.placeholder', value: '' },
-              {
-                id: 'form.attribute.item.date.type.date',
-                value: 'date',
-              },
-              {
-                id: 'form.attribute.item.date.type.datetime',
-                value: 'datetime',
-              },
-              // Not sure the ctm supports that one
-              // {
-              //   id: 'form.attribute.item.date.type.timestamp',
-              //   value: 'timestamp',
-              // },
-              { id: 'form.attribute.item.date.type.time', value: 'time' },
-            ].map(({ id, value }, index) => {
-              const disabled = index === 0;
-              const tradId = index === 0 ? id : getTrad(id);
-
-              return (
-                <FormattedMessage id={tradId} key={id}>
-                  {msg => (
-                    <option disabled={disabled} hidden={disabled} value={value}>
-                      {msg}
-                    </option>
-                  )}
-                </FormattedMessage>
-              );
-            }),
-            validations: {
-              required: true,
-            },
-          });
-        }
-
-        if (type === 'enumeration') {
-          items.push([
-            {
-              autoFocus: false,
-              name: 'enum',
-              type: 'textarea',
-              size: 8,
-              label: {
-                id: getTrad('form.attribute.item.enumeration.rules'),
-              },
-              placeholder: {
-                id: getTrad('form.attribute.item.enumeration.placeholder'),
-              },
-              validations: {
-                required: true,
-              },
-            },
-          ]);
-        }
-
-        return {
-          items,
-        };
       },
     },
   },
