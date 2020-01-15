@@ -62,8 +62,10 @@ NODE_ENV=production npm run build
 ```bash
 npm install cross-env
 ```
+
 Then in your `package.json` scripts section:
-```bash 
+
+```bash
 "production": "cross-env NODE_ENV=production npm run build"
 ```
 
@@ -96,7 +98,9 @@ NODE_ENV=production npm start
 ```bash
 npm install cross-env
 ```
+
 Then in your `package.json` scripts section:
+
 ```bash
 "production": "cross-env NODE_ENV=production npm start"
 ```
@@ -1340,9 +1344,29 @@ If you plan to use **MongoDB** with your project, [refer to the create a Strapi 
 
 `Path: ./`
 
+:::: tabs
+
+::: tab yarn
+
+Use **yarn** to install the Strapi project (**recommended**). [Install yarn with these docs](https://yarnpkg.com/lang/en/docs/install/)
+
 ```bash
-strapi new my-project --quickstart
+yarn create strapi-app my-project --quickstart
 ```
+
+:::
+
+::: tab npx
+
+Use **npm/npx** to install the Strapi project
+
+```bash
+npx create-strapi-app my-project --quickstart
+```
+
+:::
+
+::::
 
 ::: tip
 When you use `--quickstart` to create a Strapi project locally, a **SQLite database** is used which is not compatible with Heroku. Therefore, another database option [must be chosen](#_6-heroku-database-set-up).

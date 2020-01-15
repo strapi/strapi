@@ -112,7 +112,7 @@ module.exports = {
           formatError({
             id: 'Auth.form.error.password.local',
             message:
-              'This user never set a local password, please login thanks to the provider used during account creation.',
+              'This user never set a local password, please login with the provider used during account creation.',
           })
         );
       }
@@ -150,7 +150,7 @@ module.exports = {
         );
       }
 
-      // Connect the user thanks to the third-party provider.
+      // Connect the user with the third-party provider.
       let user, error;
       try {
         [user, error] = await strapi.plugins[
@@ -296,7 +296,7 @@ module.exports = {
       name: 'users-permissions',
     });
 
-    // Find the user user thanks to his email.
+    // Find the user by email.
     const user = await strapi
       .query('user', 'users-permissions')
       .findOne({ email });
