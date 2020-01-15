@@ -254,10 +254,11 @@ module.exports = {
     const [protocol, host] = strapi.config.url.split('://');
     _.defaultsDeep(grantConfig, { server: { protocol, host } });
 
+    const [requestPath] = ctx.request.url.split('?');
     const provider =
       process.platform === 'win32'
-        ? ctx.request.url.split('\\')[2]
-        : ctx.request.url.split('/')[2];
+        ? requestPath.split('\\')[2]
+        : requestPath.split('/')[2];
     const config = grantConfig[provider];
 
     if (!_.get(config, 'enabled')) {
