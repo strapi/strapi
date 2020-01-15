@@ -315,10 +315,6 @@ function EditView() {
 
   const goBack = () => push('/settings/webhooks');
 
-  const renderHeadersInput = () => props => (
-    <Inputs {...props} onClick={handleClick} onRemove={handleRemove} />
-  );
-
   return (
     <Wrapper>
       <BackHeader onClick={goBack} />
@@ -342,7 +338,7 @@ function EditView() {
                     <InputsIndex
                       {...form[key]}
                       customInputs={{
-                        headers: renderHeadersInput(),
+                        headers: Inputs,
                         events: Inputs,
                       }}
                       error={errorMessage(get(formErrors, key, null))}
@@ -351,6 +347,10 @@ function EditView() {
                       onChange={handleChange}
                       validations={form[key].validations}
                       value={modifiedData[key] || form[key].value}
+                      {...(form[key].type === 'headers' && {
+                        onClick: handleClick,
+                        onRemove: handleRemove,
+                      })}
                     />
                   </div>
                 );

@@ -9,10 +9,8 @@ const EventRow = ({
   handleChange,
   handleChangeAll,
 }) => {
-  const areAllCheckboxesSelected = events.every(
-    e => inputValue.indexOf(e) >= 0
-  );
-  const hasSomeCheckboxSelected = events.some(e => inputValue.indexOf(e) >= 0);
+  const areAllCheckboxesSelected = inputValue.length === 3;
+  const hasSomeCheckboxSelected = inputValue.length > 0;
 
   const onChangeAll = ({ target: { name } }) => {
     const valueToSet = !areAllCheckboxesSelected;

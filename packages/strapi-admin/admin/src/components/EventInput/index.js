@@ -19,35 +19,36 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
     media: ['media.create', 'media.update', 'media.delete'],
   };
 
-  const formatValue = (name, value, newValue = inputValue) => {
-    if (value) {
-      if (!newValue.includes(name)) {
-        newValue.push(name);
-      }
-    } else {
-      if (newValue.includes(name)) {
-        const index = newValue.indexOf(name);
-        if (index > -1) {
-          newValue.splice(index, 1);
-        }
-      }
+  const formatValue = inputValue.reduce((acc, curr) => {
+    const key = curr.split('.')[0];
+    if (!acc[key]) {
+      acc[key] = [];
     }
-    return newValue;
-  };
+    acc[key].push(curr);
+
+    return acc;
+  }, {});
 
   const handleChange = ({ target: { name, value } }) => {
-    const newValue = formatValue(name, value);
-    onChange({ target: { name: inputName, value: newValue } });
+    let set = new Set(inputValue);
+    if (value) {
+      set.add(name);
+    } else {
+      set.delete(name);
+    }
+    onChange({ target: { name: inputName, value: Array.from(set) } });
   };
 
   const handleChangeAll = ({ target: { name, value } }) => {
-    let newValue = inputValue;
+    let set = new Set(inputValue);
 
-    events[name].map(event => {
-      newValue = formatValue(event, value, newValue);
-    });
+    if (value) {
+      events[name].map(event => set.add(event));
+    } else {
+      events[name].map(event => set.delete(event));
+    }
 
-    onChange({ target: { name: inputName, value: inputValue } });
+    onChange({ target: { name: inputName, value: Array.from(set) } });
   };
 
   return (
@@ -68,7 +69,7 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
                 key={event}
                 name={event}
                 events={events[event]}
-                inputValue={inputValue}
+                inputValue={formatValue[event]}
                 handleChange={handleChange}
                 handleChangeAll={handleChangeAll}
               />
