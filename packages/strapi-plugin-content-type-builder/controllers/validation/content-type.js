@@ -7,12 +7,7 @@ const formatYupErrors = require('./yup-formatter');
 const createSchema = require('./model-schema');
 const removeEmptyDefaults = require('./remove-empty-defaults');
 const { nestedComponentSchema } = require('./component');
-const {
-  modelTypes,
-  DEFAULT_TYPES,
-  CONTENT_TYPE_KINDS,
-  typeKinds,
-} = require('./constants');
+const { modelTypes, DEFAULT_TYPES, typeKinds } = require('./constants');
 
 /**
  * Allowed relation per type kind
@@ -89,7 +84,7 @@ const validateUpdateContentTypeInput = data => {
 const validateKind = kind => {
   return yup
     .string()
-    .oneOf(CONTENT_TYPE_KINDS)
+    .oneOf([typeKinds.SINGLE_TYPE, typeKinds.COLLECTION_TYPE])
     .nullable()
     .validate(kind)
     .catch(error => Promise.reject(formatYupErrors(error)));

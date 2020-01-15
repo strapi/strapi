@@ -6,7 +6,7 @@ const yup = require('yup');
 const {
   modelTypes,
   FORBIDDEN_ATTRIBUTE_NAMES,
-  CONTENT_TYPE_KINDS,
+  typeKinds,
 } = require('./constants');
 const { isValidCollectionName, isValidKey } = require('./common');
 const { getTypeShape } = require('./types');
@@ -78,8 +78,8 @@ const createSchema = (types, relations, { modelType } = {}) => {
       .shape({
         kind: yup
           .string()
-          .oneOf(CONTENT_TYPE_KINDS)
-          .required('contentType.kind.required'),
+          .oneOf([typeKinds.SINGLE_TYPE, typeKinds.COLLECTION_TYPE])
+          .nullable(),
       })
       .noUnknown();
   }
