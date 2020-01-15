@@ -32,6 +32,8 @@ const Wrapper = styled.div`
       }
       span svg {
         margin-top: -2px;
+        margin-right: -10px;
+        margin-bottom: -5px;
       }
     }
   }

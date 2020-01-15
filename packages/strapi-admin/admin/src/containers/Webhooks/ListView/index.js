@@ -26,25 +26,19 @@ import reducer, { initialState } from './reducer';
 
 function ListView() {
   const { formatMessage } = useGlobalContext();
-  const [webhooksToDelete, setWebhooksToDelete] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const { push } = useHistory();
-  const location = useLocation();
+  const { pathname } = useLocation();
 
-  const { shouldRefetchData, webhooks } = reducerState.toJS();
+  const { webhooks, webhooksToDelete } = reducerState.toJS();
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    if (shouldRefetchData) {
-      fetchData();
-    }
-  }, [shouldRefetchData]);
-
-  const webhookIndex = id => webhooks.findIndex(webhook => webhook.id === id);
+  const getWebhookIndex = id =>
+    webhooks.findIndex(webhook => webhook.id === id);
 
   const fetchData = async () => {
     try {
@@ -70,7 +64,7 @@ function ListView() {
 
   const newButtonProps = {
     label: addBtnLabel,
-    onClick: () => handleCreateClick(),
+    onClick: () => handleGoTo('create'),
     color: 'primary',
     type: 'button',
     icon: <Plus fill="#007eff" width="11px" height="11px" />,
@@ -119,32 +113,27 @@ function ListView() {
     items: webhooks,
   };
 
-  const handleCheckChange = (value, id) => {
-    if (value && !webhooksToDelete.includes(id)) {
-      setWebhooksToDelete([...webhooksToDelete, id]);
-    }
+  const handleChange = (value, id) => {
+    const updatedWebhooksToDelete = value
+      ? [...webhooksToDelete, id]
+      : webhooksToDelete.filter(webhookId => webhookId !== id);
 
-    if (!value && webhooksToDelete.includes(id)) {
-      setWebhooksToDelete([
-        ...webhooksToDelete.filter(webhookId => webhookId !== id),
-      ]);
-    }
+    dispatch({
+      type: 'SET_WEBHOOKS_TO_DELETE',
+      webhooks: updatedWebhooksToDelete,
+    });
   };
 
-  const handleCreateClick = () => {
-    push(`${location.pathname}/create`);
+  const handleGoTo = to => {
+    push(`${pathname}/${to}`);
   };
 
-  const handleEditClick = id => {
-    push(`${location.pathname}/${id}`);
-  };
-
-  const handleDeleteAllConfirm = () => {
-    handleDeleteAllClick();
+  const handleDeleteAllConfirm = async () => {
+    await onDeleteAllCLick();
     setShowModal(false);
   };
 
-  const handleDeleteAllClick = async () => {
+  const onDeleteAllCLick = async () => {
     const body = {
       ids: webhooksToDelete,
     };
@@ -158,8 +147,6 @@ function ListView() {
       dispatch({
         type: 'WEBHOOKS_DELETED',
       });
-
-      setWebhooksToDelete([]);
     } catch (err) {
       if (err.code !== 20) {
         strapi.notification.error('notification.error');
@@ -167,11 +154,12 @@ function ListView() {
     }
   };
 
-  const handleDeleteClick = id => {
-    deleteWebhook(id);
+  const handleDeleteConfirm = async id => {
+    await onDeleteCLick(id);
+    setShowModal(false);
   };
 
-  const deleteWebhook = async id => {
+  const onDeleteCLick = async id => {
     try {
       await request(`/admin/webhooks/${id}`, {
         method: 'DELETE',
@@ -179,7 +167,7 @@ function ListView() {
 
       dispatch({
         type: 'WEBHOOK_DELETED',
-        index: webhookIndex(id),
+        index: getWebhookIndex(id),
       });
     } catch (err) {
       if (err.code !== 20) {
@@ -189,7 +177,10 @@ function ListView() {
   };
 
   const handleEnabledChange = async (value, id) => {
-    const initialWebhookProps = webhooks[webhookIndex(id)];
+    const webhookIndex = getWebhookIndex(id);
+
+    const initialWebhookProps = webhooks[webhookIndex];
+    const keys = [webhookIndex, 'isEnabled'];
 
     const body = {
       ...initialWebhookProps,
@@ -199,17 +190,23 @@ function ListView() {
     delete body.id;
 
     try {
+      dispatch({
+        type: 'SET_WEBHOOK_ENABLED',
+        keys,
+        value: value,
+      });
+
       await request(`/admin/webhooks/${id}`, {
         method: 'PUT',
         body,
       });
-
+    } catch (err) {
       dispatch({
         type: 'SET_WEBHOOK_ENABLED',
-        keys: [webhookIndex(id), 'isEnabled'],
-        value: value,
+        keys,
+        value: !value,
       });
-    } catch (err) {
+
       if (err.code !== 20) {
         strapi.notification.error('notification.error');
       }
@@ -227,9 +224,9 @@ function ListView() {
               return (
                 <ListRow
                   {...props}
-                  onCheckChange={handleCheckChange}
-                  onEditClick={handleEditClick}
-                  onDeleteCLick={handleDeleteClick}
+                  onCheckChange={handleChange}
+                  onEditClick={handleGoTo}
+                  onDeleteCLick={handleDeleteConfirm}
                   onEnabledChange={handleEnabledChange}
                   itemsToDelete={webhooksToDelete}
                 />

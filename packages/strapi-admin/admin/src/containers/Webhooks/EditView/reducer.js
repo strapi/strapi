@@ -1,79 +1,74 @@
 import { fromJS } from 'immutable';
-import { cloneDeep, set, get } from 'lodash';
+import { get } from 'lodash';
+
+const header = { key: '', value: '' };
 
 const initialWebhook = {
+  events: [],
+  headers: [header],
   name: null,
   url: null,
-  headers: [{ key: '', value: '' }],
-  events: [],
 };
 
 const initialState = fromJS({
   formErrors: {},
-  initialWebhook: initialWebhook,
-  modifiedWebhook: initialWebhook,
-  triggerResponse: {},
+  initialData: initialWebhook,
   isTriggering: false,
+  modifiedData: initialWebhook,
+  triggerResponse: {},
 });
 
 const reducer = (state, action) => {
   switch (action.type) {
+    case 'ADD_NEW_HEADER':
+      return state.updateIn(['modifiedData', ...action.keys], arr =>
+        arr.push(fromJS(header))
+      );
     case 'GET_DATA_SUCCEEDED': {
-      const data = cloneDeep(action.data);
-      const headers = get(data, 'headers');
+      const headers = get(action, ['data', 'headers'], {});
+      let formattedHeaders = [header];
 
       if (Object.keys(headers).length > 0) {
-        const newHeaders = fromJS(
-          Object.keys(headers).map(key => {
-            return { key: key, value: headers[key] };
-          })
-        );
-        set(data, ['headers'], newHeaders);
-      } else {
-        set(data, ['headers'], get(initialWebhook, 'headers'));
+        formattedHeaders = Object.keys(headers).map(key => {
+          return { key: key, value: headers[key] };
+        });
       }
 
+      const data = fromJS(action.data).update('headers', () =>
+        fromJS(formattedHeaders)
+      );
+
       return state
-        .update('initialWebhook', () => fromJS(data))
-        .update('modifiedWebhook', () => fromJS(data));
+        .update('initialData', () => data)
+        .update('modifiedData', () => data);
     }
+    case 'IS_TRIGGERING':
+      return state.update('isTriggering', isTriggering => !isTriggering);
+    case 'ON_CHANGE':
+      return state.updateIn(
+        ['modifiedData', ...action.keys],
+        () => action.value
+      );
+    case 'ON_HEADER_REMOVE': {
+      return state.updateIn(['modifiedData', 'headers'], headers => {
+        if (headers.size === 1) {
+          return fromJS([header]);
+        }
+        return headers.remove(action.index);
+      });
+    }
+    case 'ON_TRIGGER_CANCELED':
+      return state
+        .update('isTriggering', () => false)
+        .set('triggerResponse', fromJS({}));
+    case 'RESET_FORM':
+      return state.update('modifiedData', () => state.get('initialData'));
+    case 'SET_ERRORS':
+      return state.update('formErrors', () => fromJS(action.errors));
     case 'TRIGGER_SUCCEEDED':
       return state
         .update('triggerResponse', () => fromJS(action.response))
         .update('isTriggering', () => false);
-    case 'ON_TRIGGER':
-      return state.update('isTriggering', () => true);
-    case 'ON_TRIGGER_CANCELED':
-      return state
-        .update('isTriggering', () => false)
-        .update('triggerResponse', () => {});
-    case 'ON_CHANGE':
-      return state.updateIn(
-        ['modifiedWebhook', ...action.keys],
-        () => action.value
-      );
-    case 'ADD_NEW_HEADER':
-      return state.updateIn(['modifiedWebhook', ...action.keys], arr =>
-        arr.push(fromJS({ key: '', value: '' }))
-      );
-    case 'ON_HEADER_REMOVE': {
-      if (action.event === 'remove') {
-        return state.updateIn(['modifiedWebhook', 'headers'], headers =>
-          headers.splice(action.index, 1)
-        );
-      } else {
-        return state.updateIn(
-          ['modifiedWebhook', 'headers', action.index],
-          () => fromJS({ key: '', value: '' })
-        );
-      }
-    }
-    case 'RESET':
-      return state.update('modifiedWebhook', () =>
-        fromJS(state.get('initialWebhook'))
-      );
-    case 'SET_ERRORS':
-      return state.update('formErrors', () => fromJS(action.errors));
     default:
       return state;
   }

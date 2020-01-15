@@ -5,9 +5,9 @@
  */
 
 import React, { useEffect, useReducer, useCallback, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
-import { get, isEmpty, isEqual, set, setWith } from 'lodash';
-import { Header } from '@buffetjs/custom';
+import { useHistory, useParams } from 'react-router-dom';
+import { get, isEmpty, isEqual, set } from 'lodash';
+import { Header, Inputs as InputsIndex } from '@buffetjs/custom';
 import { Play } from '@buffetjs/icons';
 import {
   request,
@@ -21,7 +21,8 @@ import TriggerContainer from '../../../components/TriggerContainer';
 
 import reducer, { initialState } from './reducer';
 import form from './utils/form';
-import createYupSchema from './utils/schema';
+import schema from './utils/schema';
+import { cleanHeaders, cleanData, cleanErrors } from './utils/formatData';
 
 import Wrapper from './Wrapper';
 
@@ -29,31 +30,105 @@ function EditView() {
   const { formatMessage } = useGlobalContext();
   const [submittedOnce, setSubmittedOnce] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState);
-  const location = useLocation();
   const { push } = useHistory();
 
   const {
     formErrors,
-    modifiedWebhook,
-    initialWebhook,
+    modifiedData,
+    initialData,
     isTriggering,
     triggerResponse,
   } = reducerState.toJS();
 
-  const { name } = modifiedWebhook;
-
-  const id = location.pathname.split('/')[3];
+  const { name } = modifiedData;
+  const { id } = useParams();
   const isCreating = id === 'create';
 
   const abortController = new AbortController();
-
   const { signal } = abortController;
 
   useEffect(() => {
     if (!isCreating) {
       fetchData();
+
+      return () => {
+        abortController.abort();
+      };
     }
-  }, [fetchData, isCreating]);
+  }, [abortController, fetchData, isCreating]);
+
+  /* Header props */
+
+  const areActionDisabled =
+    isEqual(initialData, modifiedData) || Object.keys(formErrors).length > 0;
+
+  const headerTitle = isCreating
+    ? formatMessage({
+        id: `Settings.webhooks.create`,
+      })
+    : name;
+
+  const isTriggerActionDisabled =
+    isCreating || (!isCreating && !areActionDisabled) || isTriggering;
+
+  const actions = [
+    {
+      color: 'primary',
+      disabled: isTriggerActionDisabled,
+      label: formatMessage({
+        id: `Settings.webhooks.trigger`,
+      }),
+      onClick: handleTrigger,
+      style: {
+        padding: '0 15px',
+      },
+      title: isTriggerActionDisabled
+        ? formatMessage({
+            id: `Settings.webhooks.trigger.save`,
+          })
+        : null,
+      type: 'button',
+      icon: (
+        <Play
+          width="14px"
+          height="14px"
+          fill={isTriggerActionDisabled ? '#b4b6ba' : '#ffffff'}
+        />
+      ),
+    },
+    {
+      color: 'cancel',
+      disabled: areActionDisabled,
+      label: formatMessage({
+        id: `app.components.Button.reset`,
+      }),
+      onClick: handleReset,
+      style: {
+        padding: '0 20px',
+      },
+      type: 'button',
+    },
+    {
+      color: 'success',
+      disabled: areActionDisabled,
+      label: formatMessage({
+        id: `app.components.Button.save`,
+      }),
+      style: {
+        minWidth: 140,
+      },
+      type: 'submit',
+    },
+  ];
+
+  const headerProps = {
+    title: {
+      label: headerTitle,
+    },
+    actions: actions,
+  };
+
+  /* Data methods */
 
   const fetchData = useCallback(async () => {
     try {
@@ -72,115 +147,57 @@ function EditView() {
     }
   }, [id]);
 
-  const headerTitle = isCreating
-    ? formatMessage({
-        id: `Settings.webhooks.create`,
-      })
-    : name;
-
-  const actionsAreDisabled =
-    isEqual(initialWebhook, modifiedWebhook) ||
-    Object.keys(formErrors).length > 0;
-
-  const triggerActionIsDisabled =
-    isCreating || (!isCreating && !actionsAreDisabled);
-
-  const handleTrigger = async () => {
-    dispatch({
-      type: 'ON_TRIGGER',
-    });
-
-    try {
-      const { data } = await request(`/admin/webhooks/${id}/trigger`, {
-        method: 'POST',
-        signal,
-      });
-
-      dispatch({
-        type: 'TRIGGER_SUCCEEDED',
-        response: data,
-      });
-    } catch (err) {
-      if (err.code !== 20) {
-        strapi.notification.error('notification.error');
-      }
+  const submitForm = () => {
+    if (!isCreating) {
+      updateWebhook();
+    } else {
+      createWebhooks();
     }
   };
 
-  const onCancelTrigger = () => {
-    abortController.abort();
+  const createWebhooks = async () => {
+    try {
+      await request(`/admin/webhooks`, {
+        method: 'POST',
+        body: cleanData(modifiedData),
+      });
 
-    dispatch({
-      type: 'ON_TRIGGER_CANCELED',
-    });
+      strapi.notification.success(`notification.success`);
+      goBack();
+    } catch (err) {
+      strapi.notification.error('notification.error');
+    }
   };
+
+  const updateWebhook = async () => {
+    try {
+      const body = cleanData(modifiedData);
+      delete body.id;
+
+      await request(`/admin/webhooks/${id}`, {
+        method: 'PUT',
+        body,
+      });
+
+      fetchData();
+
+      strapi.notification.error('notification.form.success.fields');
+    } catch (err) {
+      strapi.notification.error('notification.error');
+    }
+  };
+
+  /* Form user interactions */
 
   const handleReset = () =>
     dispatch({
-      type: 'RESET',
+      type: 'RESET_FORM',
     });
 
-  const actions = [
-    {
-      color: 'primary',
-      disabled: triggerActionIsDisabled,
-      label: formatMessage({
-        id: `Settings.webhooks.trigger`,
-      }),
-      onClick: () => {
-        handleTrigger();
-      },
-      style: {
-        padding: '0 15px',
-      },
-      title: triggerActionIsDisabled
-        ? formatMessage({
-            id: `Settings.webhooks.trigger.save`,
-          })
-        : null,
-      type: 'button',
-      icon: (
-        <Play
-          width="6px"
-          height="7px"
-          fill={triggerActionIsDisabled ? '#b4b6ba' : '#ffffff'}
-        />
-      ),
-    },
-    {
-      color: 'cancel',
-      disabled: actionsAreDisabled,
-      label: formatMessage({
-        id: `app.components.Button.reset`,
-      }),
-      onClick: () => handleReset(),
-      style: {
-        padding: '0 20px',
-      },
-      type: 'button',
-    },
-    {
-      color: 'success',
-      disabled: actionsAreDisabled,
-      label: formatMessage({
-        id: `app.components.Button.save`,
-      }),
-      style: {
-        minWidth: 140,
-      },
-      type: 'submit',
-    },
-  ];
-
-  const headerProps = {
-    title: {
-      label: headerTitle,
-    },
-    actions: actions,
-  };
-
   const handleBlur = () => {
-    if (submittedOnce) checkFormErrors();
+    if (submittedOnce) {
+      checkFormErrors();
+    }
   };
 
   const handleChange = ({ target: { name, value } }) => {
@@ -198,11 +215,10 @@ function EditView() {
     });
   };
 
-  const handleRemove = ({ event, index }) => {
+  const handleRemove = index => {
     dispatch({
       type: 'ON_HEADER_REMOVE',
       index,
-      event,
     });
     resetError('headers');
   };
@@ -213,20 +229,14 @@ function EditView() {
     checkFormErrors(true);
   };
 
-  const submitForm = () => {
-    if (!isCreating) {
-      updateWebhook();
-    } else {
-      createWebhooks();
-    }
-  };
+  /* Validations */
 
   const checkFormErrors = async (submit = false) => {
-    const webhookToCheck = modifiedWebhook;
-    set(webhookToCheck, 'headers', cleanHeaders());
+    const webhookToCheck = modifiedData;
+    set(webhookToCheck, 'headers', cleanHeaders(modifiedData.headers));
 
     try {
-      await createYupSchema(form).validate(webhookToCheck, {
+      await schema.validate(webhookToCheck, {
         abortEarly: false,
       });
 
@@ -238,18 +248,6 @@ function EditView() {
     }
   };
 
-  const cleanHeaders = () => {
-    const { headers } = modifiedWebhook;
-
-    if (Object.keys(headers).length === 1) {
-      const { key, value } = headers[0];
-      if (key.length === 0 && value.length === 0) return [];
-    }
-    return headers;
-  };
-
-  const goBack = () => push('/settings/webhooks');
-
   const resetError = name => {
     const errors = formErrors;
 
@@ -260,68 +258,66 @@ function EditView() {
   };
 
   const setErrors = errors => {
-    const newErrors = Object.keys(errors).reduce((acc, curr) => {
-      const { id } = errors[curr];
-
-      setWith(acc, curr, id ? id : errors[curr], Object);
-
-      return acc;
-    }, {});
-
     dispatch({
       type: 'SET_ERRORS',
-      errors: newErrors,
+      errors: cleanErrors(errors),
     });
   };
 
-  const createWebhooks = async () => {
+  const errorMessage = error => {
+    if (!error) {
+      return null;
+    }
+    if (typeof error === 'string') {
+      return formatMessage({
+        id: error,
+      });
+    }
+    return error;
+  };
+
+  /* Trigger events */
+
+  const handleTrigger = async () => {
+    dispatch({
+      type: 'IS_TRIGGERING',
+    });
+
     try {
-      await request(`/admin/webhooks`, {
+      const { data } = await request(`/admin/webhooks/${id}/trigger`, {
         method: 'POST',
-        body: formatWebhook(),
+        signal,
       });
 
-      strapi.notification.success(`notification.success`);
-      goBack();
+      dispatch({
+        type: 'TRIGGER_SUCCEEDED',
+        response: data,
+      });
     } catch (err) {
-      strapi.notification.error('notification.error');
+      if (err.code !== 20) {
+        strapi.notification.error('notification.error');
+      }
+      dispatch({
+        type: 'IS_TRIGGERING',
+      });
     }
   };
 
-  const updateWebhook = async () => {
-    try {
-      const body = formatWebhook();
-      delete body.id;
+  const onCancelTrigger = () => {
+    abortController.abort();
 
-      await request(`/admin/webhooks/${id}`, {
-        method: 'PUT',
-        body,
-      });
-
-      fetchData();
-
-      strapi.notification.error('notification.form.success.fields');
-    } catch (err) {
-      strapi.notification.error('notification.error');
-    }
+    dispatch({
+      type: 'ON_TRIGGER_CANCELED',
+    });
   };
 
-  // utils
-  const formatWebhook = () => {
-    const webhooks = modifiedWebhook;
-    set(webhooks, 'headers', unformatHeaders(cleanHeaders()));
-    return webhooks;
-  };
+  /* Nav */
 
-  const unformatHeaders = headers => {
-    return headers.reduce((obj, item) => {
-      const { key, value } = item;
-      return {
-        ...obj,
-        [key]: value,
-      };
-    }, {});
-  };
+  const goBack = () => push('/settings/webhooks');
+
+  const renderHeadersInput = () => props => (
+    <Inputs {...props} onClick={handleClick} onRemove={handleRemove} />
+  );
 
   return (
     <Wrapper>
@@ -343,16 +339,18 @@ function EditView() {
               {Object.keys(form).map(key => {
                 return (
                   <div key={key} className={form[key].styleName}>
-                    <Inputs
+                    <InputsIndex
                       {...form[key]}
-                      error={get(formErrors, key, null)}
+                      customInputs={{
+                        headers: renderHeadersInput(),
+                        events: Inputs,
+                      }}
+                      error={errorMessage(get(formErrors, key, null))}
                       name={key}
                       onBlur={handleBlur}
                       onChange={handleChange}
-                      onClick={handleClick}
-                      onRemove={handleRemove}
                       validations={form[key].validations}
-                      value={modifiedWebhook[key] || form[key].value}
+                      value={modifiedData[key] || form[key].value}
                     />
                   </div>
                 );

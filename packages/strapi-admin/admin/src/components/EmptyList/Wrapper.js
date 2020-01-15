@@ -15,7 +15,6 @@ const Wrapper = styled.div`
     line-height: normal;
   }
   p {
-    line-height: normal;
     &:first-of-type {
       font-size: 18px;
       font-weight: 600;

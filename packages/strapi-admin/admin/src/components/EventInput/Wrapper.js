@@ -5,13 +5,14 @@
  */
 
 import styled from 'styled-components';
+import { sizes } from '@buffetjs/styles';
 
 const Wrapper = styled.div`
   padding-top: 3px;
   padding-bottom: 8px;
   table {
     width: 100%;
-    border-radius: 3px;
+    border-radius: ${sizes.borderRadius};
     overflow: hidden;
   }
   tr {
@@ -45,8 +46,8 @@ const Wrapper = styled.div`
     }
   }
   tbody {
-    border-bottom-left-radius: 3px;
-    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: ${sizes.borderRadius};
+    border-bottom-right-radius: ${sizes.borderRadius};
     box-shadow: inset 0px 0px 0px 1px #f6f6f6;
     td {
       height: 54px;

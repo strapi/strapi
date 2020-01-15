@@ -7,7 +7,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { ErrorMessage, Label } from '@buffetjs/styles';
-import { Error, InputText } from '@buffetjs/core';
+import { Error } from '@buffetjs/core';
 
 import HeadersInput from '../HeadersInput';
 import EventInput from '../EventInput';
@@ -71,29 +71,15 @@ function Inputs({
 
             return (
               <>
-                {type === 'events' ? (
-                  <EventInput
-                    name={name}
-                    onChange={e => {
-                      handleChange(e);
-                      onBlur(e);
-                    }}
-                    value={value}
-                  />
-                ) : (
-                  <InputText
-                    className={hasError ? 'hasError' : ''}
-                    name={name}
-                    onBlur={onBlur}
-                    onChange={handleChange}
-                    value={value}
-                  />
-                )}
-                {hasError && (
-                  <ErrorMessage>
-                    <FormattedMessage id={error} />
-                  </ErrorMessage>
-                )}
+                <EventInput
+                  name={name}
+                  onChange={e => {
+                    handleChange(e);
+                    onBlur(e);
+                  }}
+                  value={value}
+                />
+                {hasError && <ErrorMessage>{error}</ErrorMessage>}
               </>
             );
           }}

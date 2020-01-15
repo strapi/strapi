@@ -7,6 +7,7 @@ import { CircleButton } from 'strapi-helper-plugin';
 import { InputText } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
 
+import borderColor from './utils/borderColor';
 import keys from './keys';
 import Wrapper from './Wrapper';
 
@@ -19,8 +20,8 @@ const HeadersInput = ({
   onRemove,
   value,
 }) => {
-  const optionFormat = value => ({ value: value, label: value });
-  const options = keys.map(key => optionFormat(key));
+  const formatOption = value => ({ value: value, label: value });
+  const options = keys.map(key => formatOption(key));
 
   const handleBlur = () => onBlur({ target: { name, value } });
 
@@ -33,28 +34,14 @@ const HeadersInput = ({
     }
   };
 
-  const handleClick = () => onClick(name);
-
-  const handleRemoveItem = index => {
-    const event = index === 0 && value.length === 1 ? 'clear' : 'remove';
-    onRemove({ event, index });
-  };
-
   const customStyles = hasError => {
-    const selectBorder = isFocused => {
-      if (isFocused) {
-        return '1px solid #78caff !important';
-      }
-      if (hasError) {
-        return '1px solid #F64D0A !important';
-      }
-      return '1px solid #E3E9F3 !important';
-    };
-
     return {
       control: (base, state) => ({
         ...base,
-        border: selectBorder(state.isFocused),
+        border: `1px solid ${borderColor({
+          isFocused: state.isFocused,
+          hasError,
+        })} !important`,
         borderRadius: '2px !important',
       }),
       menu: base => {
@@ -121,7 +108,7 @@ const HeadersInput = ({
                   name={`${name}.${index}.key`}
                   options={options}
                   styles={customStyles(entryErrors && entryErrors.key)}
-                  value={optionFormat(key)}
+                  value={formatOption(key)}
                 />
               </section>
               <section>
@@ -137,14 +124,14 @@ const HeadersInput = ({
                 <CircleButton
                   type="button"
                   isRemoveButton
-                  onClick={() => handleRemoveItem(index)}
+                  onClick={() => onRemove(index)}
                 />
               </div>
             </li>
           );
         })}
       </ul>
-      <button onClick={handleClick} type="button">
+      <button onClick={() => onClick(name)} type="button">
         <Plus fill="#007eff" width="10px" />
         <FormattedMessage id="Settings.webhooks.create.header" />
       </button>

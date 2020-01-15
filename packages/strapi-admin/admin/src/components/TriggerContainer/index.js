@@ -15,13 +15,17 @@ const TriggerContainer = ({ isPending, onCancel, response }) => {
         <tbody>
           <tr>
             <td>
-              <p>Test-trigger</p>
+              <p>
+                {formatMessage({
+                  id: `Settings.webhooks.trigger.test`,
+                })}
+              </p>
             </td>
             {isPending && (
               <>
                 <td>
                   <p>
-                    <Pending fill="#6DBB1A" width="15px" height="15px" />
+                    <Pending fill="#ffb500" width="15px" height="15px" />
                     <span>
                       {formatMessage({
                         id: `Settings.webhooks.trigger.pending`,
@@ -65,7 +69,12 @@ const TriggerContainer = ({ isPending, onCancel, response }) => {
                 <td>
                   <p className="fail-label">
                     <Fail fill="#f64d0a" width="15px" height="15px" />
-                    <span>Error {statusCode}</span>
+                    <span>
+                      {formatMessage({
+                        id: `Settings.error`,
+                      })}{' '}
+                      {statusCode}
+                    </span>
                   </p>
                 </td>
                 <td>

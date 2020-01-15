@@ -28,7 +28,7 @@ function ListRow({
   const links = [
     {
       icon: 'pencil',
-      onClick: () => handleEditClick(),
+      onClick: () => onEditClick(id),
     },
     {
       icon: 'trash',
@@ -41,26 +41,19 @@ function ListRow({
 
   const isChecked = itemsToDelete.includes(id);
 
-  const handleEditClick = () => onEditClick(id);
-
-  const handleEnabledChange = ({ target: { value } }) =>
-    onEnabledChange(value, id);
-
-  const handleCheckChange = ({ target: { value } }) => onCheckChange(value, id);
-
-  const handleDeleteConfirm = () => {
-    onDeleteCLick(id);
+  const handleDeleteConfirm = async () => {
+    await onDeleteCLick(id);
     setShowModal(false);
   };
 
   return (
-    <StyledListRow onClick={handleEditClick}>
+    <StyledListRow onClick={() => onEditClick(id)}>
       <td>
         <Checkbox
           name={name}
           value={isChecked}
           onClick={e => e.stopPropagation()}
-          onChange={handleCheckChange}
+          onChange={({ target: { value } }) => onCheckChange(value, id)}
         />
       </td>
       <td>
@@ -74,7 +67,7 @@ function ListRow({
           <Switch
             name={name}
             value={isEnabled}
-            onChange={handleEnabledChange}
+            onChange={({ target: { value } }) => onEnabledChange(value, id)}
           ></Switch>
         </div>
       </td>

@@ -32,9 +32,7 @@ function SettingsPage() {
         <div className="col-md-3">
           <LeftMenu>
             {menuItems.map(item => {
-              return (
-                <LeftMenuList {...item} key={JSON.stringify(item.title)} />
-              );
+              return <LeftMenuList {...item} key={item.title.id} />;
             })}
           </LeftMenu>
         </div>
