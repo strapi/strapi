@@ -88,7 +88,6 @@ const DataManagerProvider = ({ allIcons, children }) => {
       );
 
       const components = createDataObject(componentsArray);
-
       const contentTypes = createDataObject(contentTypesArray);
       const orderedComponents = orderAllDataAttributesWithImmutable({
         components,
@@ -373,8 +372,6 @@ const DataManagerProvider = ({ allIcons, children }) => {
       hasJustCreatedSchema,
     });
   };
-
-  console.log({ modifiedData: reducerState.toJS() });
 
   const sortedContentTypesList = sortBy(
     Object.keys(contentTypes)

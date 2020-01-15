@@ -3,7 +3,7 @@ import { get } from 'lodash';
 import reducer, { initialState } from '../reducer';
 import testData from './data';
 
-describe('CTB | containers | reducer | basics actions ', () => {
+describe('CTB | containers | DataManagerProvider | reducer | basics actions ', () => {
   it('Should return the initial state', () => {
     expect(reducer(initialState, { type: 'TEST' })).toEqual(initialState);
   });

@@ -2,7 +2,7 @@ import { fromJS } from 'immutable';
 import reducer, { initialState } from '../reducer';
 import testData from './data';
 
-describe('CTB | containers | reducer | REMOVE_FIELD', () => {
+describe('CTB | containers | DataManagerProvider | reducer | REMOVE_FIELD', () => {
   describe('Removing a field that is not a relation', () => {
     it('Should remove the attribute correctly from the content type', () => {
       const contentTypeUID = 'application::address.address';

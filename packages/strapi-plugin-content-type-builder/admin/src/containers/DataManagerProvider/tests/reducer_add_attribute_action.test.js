@@ -3,7 +3,7 @@ import { get } from 'lodash';
 import reducer, { initialState } from '../reducer';
 import testData from './data';
 
-describe('CTB | containers | reducer | ADD_ATTRIBUTE', () => {
+describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () => {
   describe('Adding a common field that is not a relation', () => {
     it('Should add a text field to a content type correctly', () => {
       const state = initialState.setIn(

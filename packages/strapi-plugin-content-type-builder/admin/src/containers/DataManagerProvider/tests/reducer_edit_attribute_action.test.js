@@ -1,7 +1,7 @@
 import { fromJS, OrderedMap } from 'immutable';
 import reducer, { initialState } from '../reducer';
 
-describe('CTB | containers | reducer | EDIT_ATTRIBUTE', () => {
+describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', () => {
   describe('Editing a common attribute (string, integer, json, media, ...)', () => {
     it('Should edit the attribute correctly and preserve the order of the attributes for a content type', () => {
       const contentTypeUID = 'application::address.address';
@@ -633,22 +633,921 @@ describe('CTB | containers | reducer | EDIT_ATTRIBUTE', () => {
 
       describe('Changing the target of the relation', () => {
         it('Should handle the edition of the target correctly for a one way relation (oneWay, manyWay) with another content type and preserve the order of the attributes', () => {
-          expect(true).toBe(true);
+          const contentTypeUID = 'application::address.address';
+
+          const updatedTargetUID = 'application::category.category';
+          const contentType = fromJS({
+            uid: contentTypeUID,
+            schema: {
+              name: 'address',
+              description: '',
+              connection: 'default',
+              collectionName: '',
+              attributes: OrderedMap({
+                geolocation: fromJS({ type: 'json', required: true }),
+                city: fromJS({ type: 'string', required: true }),
+                postal_code: fromJS({ type: 'string' }),
+                address: fromJS({
+                  nature: 'oneWay',
+                  targetAttribute: '-',
+                  target: contentTypeUID,
+                  unique: true,
+                  dominant: null,
+                  columnName: 'test',
+                  targetColumnName: null,
+                }),
+                category: fromJS({
+                  nature: 'oneWay',
+                  target: 'application::category.category',
+                  dominant: false,
+                  unique: false,
+                }),
+                cover: fromJS({
+                  type: 'media',
+                  multiple: false,
+                  required: false,
+                }),
+                images: fromJS({
+                  type: 'media',
+                  multiple: true,
+                  required: false,
+                }),
+                full_name: fromJS({ type: 'string', required: true }),
+              }),
+            },
+          });
+          const action = {
+            type: 'EDIT_ATTRIBUTE',
+            attributeToSet: {
+              nature: 'oneWay',
+              targetAttribute: '-',
+              target: updatedTargetUID,
+              unique: false,
+              dominant: null,
+              columnName: null,
+              targetColumnName: null,
+              name: 'one_way',
+            },
+            forTarget: 'contentType',
+            targetUid: contentTypeUID,
+            initialAttribute: {
+              nature: 'oneWay',
+              targetAttribute: '-',
+              target: contentTypeUID,
+              unique: false,
+              dominant: null,
+              columnName: null,
+              targetColumnName: null,
+              name: 'address',
+            },
+            shouldAddComponentToData: false,
+          };
+
+          const expectedContentType = fromJS({
+            uid: contentTypeUID,
+            schema: {
+              name: 'address',
+              description: '',
+              connection: 'default',
+              collectionName: '',
+              attributes: OrderedMap({
+                geolocation: fromJS({ type: 'json', required: true }),
+                city: fromJS({ type: 'string', required: true }),
+                postal_code: fromJS({ type: 'string' }),
+                one_way: fromJS({
+                  nature: 'oneWay',
+                  targetAttribute: '-',
+                  target: updatedTargetUID,
+                  unique: false,
+                  dominant: null,
+                  columnName: null,
+                  targetColumnName: null,
+                }),
+                category: fromJS({
+                  nature: 'oneWay',
+                  target: 'application::category.category',
+                  dominant: false,
+                  unique: false,
+                }),
+                cover: fromJS({
+                  type: 'media',
+                  multiple: false,
+                  required: false,
+                }),
+                images: fromJS({
+                  type: 'media',
+                  multiple: true,
+                  required: false,
+                }),
+                full_name: fromJS({ type: 'string', required: true }),
+              }),
+            },
+          });
+
+          const state = initialState
+            .setIn(['contentTypes', contentTypeUID], contentType)
+            .setIn(['modifiedData', 'contentType'], contentType)
+            .setIn(['modifiedData', 'components'], fromJS({}));
+
+          const expected = state.setIn(
+            ['modifiedData', 'contentType'],
+            expectedContentType
+          );
+
+          expect(reducer(state, action)).toEqual(expected);
         });
 
         it('Should remove the opposite attribute and keep the order of the attributes if the relation nature is not a one side', () => {
-          expect(true).toBe(true);
+          const contentTypeUID = 'application::address.address';
+
+          const updatedTargetUID = 'application::category.category';
+          const contentType = fromJS({
+            uid: contentTypeUID,
+            schema: {
+              name: 'address',
+              description: '',
+              connection: 'default',
+              collectionName: '',
+              attributes: OrderedMap({
+                geolocation: fromJS({ type: 'json', required: true }),
+                city: fromJS({ type: 'string', required: true }),
+                postal_code: fromJS({ type: 'string' }),
+                many_to_many_left: fromJS({
+                  nature: 'manyToMany',
+                  targetAttribute: 'many_to_many_right',
+                  target: contentTypeUID,
+                  unique: false,
+                  dominant: true,
+                  columnName: null,
+                  targetColumnName: null,
+                }),
+                many_to_many_right: fromJS({
+                  nature: 'manyToMany',
+                  targetAttribute: 'many_to_many_left',
+                  target: contentTypeUID,
+                  unique: false,
+                  dominant: false,
+                  columnName: null,
+                  targetColumnName: null,
+                }),
+                category: fromJS({
+                  nature: 'oneWay',
+                  target: 'application::category.category',
+                  dominant: false,
+                  unique: false,
+                }),
+                cover: fromJS({
+                  type: 'media',
+                  multiple: false,
+                  required: false,
+                }),
+                images: fromJS({
+                  type: 'media',
+                  multiple: true,
+                  required: false,
+                }),
+                full_name: fromJS({ type: 'string', required: true }),
+              }),
+            },
+          });
+          const expectedContentType = fromJS({
+            uid: contentTypeUID,
+            schema: {
+              name: 'address',
+              description: '',
+              connection: 'default',
+              collectionName: '',
+              attributes: OrderedMap({
+                geolocation: fromJS({ type: 'json', required: true }),
+                city: fromJS({ type: 'string', required: true }),
+                postal_code: fromJS({ type: 'string' }),
+                many_to_many_left: fromJS({
+                  nature: 'manyToMany',
+                  targetAttribute: 'many_to_many_right',
+                  target: updatedTargetUID,
+                  unique: false,
+                  dominant: true,
+                  columnName: null,
+                  targetColumnName: null,
+                }),
+                category: fromJS({
+                  nature: 'oneWay',
+                  target: 'application::category.category',
+                  dominant: false,
+                  unique: false,
+                }),
+                cover: fromJS({
+                  type: 'media',
+                  multiple: false,
+                  required: false,
+                }),
+                images: fromJS({
+                  type: 'media',
+                  multiple: true,
+                  required: false,
+                }),
+                full_name: fromJS({ type: 'string', required: true }),
+              }),
+            },
+          });
+          const action = {
+            type: 'EDIT_ATTRIBUTE',
+            attributeToSet: {
+              nature: 'manyToMany',
+              targetAttribute: 'many_to_many_right',
+              target: updatedTargetUID,
+              unique: false,
+              dominant: true,
+              columnName: null,
+              targetColumnName: null,
+              name: 'many_to_many_left',
+            },
+            forTarget: 'contentType',
+            targetUid: contentTypeUID,
+            initialAttribute: {
+              nature: 'manyToMany',
+              targetAttribute: 'many_to_many_right',
+              target: contentTypeUID,
+              unique: false,
+              dominant: true,
+              columnName: null,
+              targetColumnName: null,
+              name: 'many_to_many_left',
+            },
+            shouldAddComponentToData: false,
+          };
+
+          const state = initialState
+            .setIn(['contentTypes', contentTypeUID], contentType)
+            .setIn(['modifiedData', 'contentType'], contentType)
+            .setIn(['modifiedData', 'components'], fromJS({}));
+
+          const expected = state.setIn(
+            ['modifiedData', 'contentType'],
+            expectedContentType
+          );
+
+          expect(reducer(state, action)).toEqual(expected);
         });
       });
 
       describe('Editing the other informations of the relation', () => {
-        it('Should handle the edition of the name of the relation correctly for a one side relation', () => {
-          expect(true).toBe(true);
+        it('Should handle the edition of the other properties correctly by updating the opposite attribute in the other cases', () => {
+          const contentTypeUID = 'application::address.address';
+          const contentType = fromJS({
+            uid: contentTypeUID,
+            schema: {
+              name: 'address',
+              description: '',
+              connection: 'default',
+              collectionName: '',
+              attributes: OrderedMap({
+                geolocation: fromJS({ type: 'json', required: true }),
+                city: fromJS({ type: 'string', required: true }),
+                postal_code: fromJS({ type: 'string' }),
+                many_to_many_left: fromJS({
+                  nature: 'manyToMany',
+                  targetAttribute: 'many_to_many_right',
+                  target: contentTypeUID,
+                  unique: false,
+                  dominant: true,
+                  columnName: null,
+                  targetColumnName: null,
+                }),
+                many_to_many_right: fromJS({
+                  nature: 'manyToMany',
+                  targetAttribute: 'many_to_many_left',
+                  target: contentTypeUID,
+                  unique: false,
+                  dominant: false,
+                  columnName: null,
+                  targetColumnName: null,
+                }),
+                category: fromJS({
+                  nature: 'oneWay',
+                  target: 'application::category.category',
+                  dominant: false,
+                  unique: false,
+                }),
+                cover: fromJS({
+                  type: 'media',
+                  multiple: false,
+                  required: false,
+                }),
+                images: fromJS({
+                  type: 'media',
+                  multiple: true,
+                  required: false,
+                }),
+                full_name: fromJS({ type: 'string', required: true }),
+              }),
+            },
+          });
+          const action = {
+            type: 'EDIT_ATTRIBUTE',
+            attributeToSet: {
+              nature: 'manyToMany',
+              targetAttribute: 'many_to_many_right_updated',
+              target: contentTypeUID,
+              unique: true,
+              dominant: true,
+              columnName: 'left',
+              targetColumnName: 'right',
+              name: 'many_to_many_left',
+            },
+            forTarget: 'contentType',
+            targetUid: contentTypeUID,
+            initialAttribute: {
+              nature: 'manyToMany',
+              targetAttribute: 'many_to_many_right',
+              target: contentTypeUID,
+              unique: false,
+              dominant: true,
+              columnName: null,
+              targetColumnName: null,
+              name: 'many_to_many_left',
+            },
+            shouldAddComponentToData: false,
+          };
+          const expectedContentType = fromJS({
+            uid: contentTypeUID,
+            schema: {
+              name: 'address',
+              description: '',
+              connection: 'default',
+              collectionName: '',
+              attributes: OrderedMap({
+                geolocation: fromJS({ type: 'json', required: true }),
+                city: fromJS({ type: 'string', required: true }),
+                postal_code: fromJS({ type: 'string' }),
+                many_to_many_left: fromJS({
+                  nature: 'manyToMany',
+                  targetAttribute: 'many_to_many_right_updated',
+                  target: contentTypeUID,
+                  unique: true,
+                  dominant: true,
+                  columnName: 'left',
+                  targetColumnName: 'right',
+                }),
+                many_to_many_right_updated: fromJS({
+                  nature: 'manyToMany',
+                  targetAttribute: 'many_to_many_left',
+                  target: contentTypeUID,
+                  unique: true,
+                  dominant: false,
+                  columnName: 'right',
+                  targetColumnName: 'left',
+                }),
+                category: fromJS({
+                  nature: 'oneWay',
+                  target: 'application::category.category',
+                  dominant: false,
+                  unique: false,
+                }),
+                cover: fromJS({
+                  type: 'media',
+                  multiple: false,
+                  required: false,
+                }),
+                images: fromJS({
+                  type: 'media',
+                  multiple: true,
+                  required: false,
+                }),
+                full_name: fromJS({ type: 'string', required: true }),
+              }),
+            },
+          });
+
+          const state = initialState
+            .setIn(['contentTypes', contentTypeUID], contentType)
+            .setIn(['modifiedData', 'contentType'], contentType)
+            .setIn(['modifiedData', 'components'], fromJS({}));
+
+          const expected = state.setIn(
+            ['modifiedData', 'contentType'],
+            expectedContentType
+          );
+
+          expect(reducer(state, action)).toEqual(expected);
         });
 
-        it('Should handle the edition of the other properties correctly by updating the opposite attribute in the other cases', () => {
-          expect(true).toBe(true);
+        it('Should handle the edition of the name of the relation correctly for a one side relation', () => {
+          const contentTypeUID = 'application::address.address';
+          const contentType = fromJS({
+            uid: contentTypeUID,
+            schema: {
+              name: 'address',
+              description: '',
+              connection: 'default',
+              collectionName: '',
+              attributes: OrderedMap({
+                geolocation: fromJS({ type: 'json', required: true }),
+                city: fromJS({ type: 'string', required: true }),
+                postal_code: fromJS({ type: 'string' }),
+                one_way: fromJS({
+                  nature: 'oneWay',
+                  targetAttribute: '-',
+                  target: contentTypeUID,
+                  unique: true,
+                  dominant: null,
+                  columnName: 'test',
+                  targetColumnName: null,
+                }),
+                category: fromJS({
+                  nature: 'oneWay',
+                  target: 'application::category.category',
+                  dominant: false,
+                  unique: false,
+                }),
+                cover: fromJS({
+                  type: 'media',
+                  multiple: false,
+                  required: false,
+                }),
+                images: fromJS({
+                  type: 'media',
+                  multiple: true,
+                  required: false,
+                }),
+                full_name: fromJS({ type: 'string', required: true }),
+              }),
+            },
+          });
+          const expectedContentType = fromJS({
+            uid: contentTypeUID,
+            schema: {
+              name: 'address',
+              description: '',
+              connection: 'default',
+              collectionName: '',
+              attributes: OrderedMap({
+                geolocation: fromJS({ type: 'json', required: true }),
+                city: fromJS({ type: 'string', required: true }),
+                postal_code: fromJS({ type: 'string' }),
+                one_way_updated: fromJS({
+                  nature: 'oneWay',
+                  targetAttribute: '-',
+                  target: contentTypeUID,
+                  unique: false,
+                  dominant: null,
+                  columnName: 'updated',
+                  targetColumnName: null,
+                }),
+                category: fromJS({
+                  nature: 'oneWay',
+                  target: 'application::category.category',
+                  dominant: false,
+                  unique: false,
+                }),
+                cover: fromJS({
+                  type: 'media',
+                  multiple: false,
+                  required: false,
+                }),
+                images: fromJS({
+                  type: 'media',
+                  multiple: true,
+                  required: false,
+                }),
+                full_name: fromJS({ type: 'string', required: true }),
+              }),
+            },
+          });
+
+          const action = {
+            type: 'EDIT_ATTRIBUTE',
+            attributeToSet: {
+              nature: 'oneWay',
+              targetAttribute: '-',
+              target: contentTypeUID,
+              unique: false,
+              dominant: null,
+              columnName: 'updated',
+              targetColumnName: null,
+              name: 'one_way_updated',
+            },
+            forTarget: 'contentType',
+            targetUid: contentTypeUID,
+            initialAttribute: {
+              nature: 'oneWay',
+              targetAttribute: '-',
+              target: contentTypeUID,
+              unique: true,
+              dominant: null,
+              columnName: 'test',
+              targetColumnName: null,
+              name: 'one_way',
+            },
+            shouldAddComponentToData: false,
+          };
+
+          const state = initialState
+            .setIn(['contentTypes', contentTypeUID], contentType)
+            .setIn(['modifiedData', 'contentType'], contentType)
+            .setIn(['modifiedData', 'components'], fromJS({}));
+
+          const expected = state.setIn(
+            ['modifiedData', 'contentType'],
+            expectedContentType
+          );
+
+          expect(reducer(state, action)).toEqual(expected);
         });
+      });
+    });
+
+    describe('Editing a relation with another content type', () => {
+      it('Should not create an opposite attribute if the target is the same content type and the nature is a one side relation (oneWay, manyWay)', () => {
+        const contentTypeUID = 'application::category.category';
+        const updatedTargetUID = 'application::address.address';
+        const contentType = fromJS({
+          uid: contentTypeUID,
+          schema: {
+            name: 'address',
+            description: '',
+            connection: 'default',
+            collectionName: '',
+            attributes: OrderedMap({
+              geolocation: fromJS({ type: 'json', required: true }),
+              city: fromJS({ type: 'string', required: true }),
+              postal_code: fromJS({ type: 'string' }),
+              one_way: fromJS({
+                nature: 'oneWay',
+                targetAttribute: '-',
+                target: contentTypeUID,
+                unique: true,
+                dominant: null,
+                columnName: 'test',
+                targetColumnName: null,
+              }),
+              category: fromJS({
+                nature: 'oneWay',
+                target: 'application::category.category',
+                dominant: false,
+                unique: false,
+              }),
+              cover: fromJS({
+                type: 'media',
+                multiple: false,
+                required: false,
+              }),
+              images: fromJS({
+                type: 'media',
+                multiple: true,
+                required: false,
+              }),
+              full_name: fromJS({ type: 'string', required: true }),
+            }),
+          },
+        });
+        const expectedContentType = fromJS({
+          uid: contentTypeUID,
+          schema: {
+            name: 'address',
+            description: '',
+            connection: 'default',
+            collectionName: '',
+            attributes: OrderedMap({
+              geolocation: fromJS({ type: 'json', required: true }),
+              city: fromJS({ type: 'string', required: true }),
+              postal_code: fromJS({ type: 'string' }),
+              one_way: fromJS({
+                nature: 'oneWay',
+                targetAttribute: '-',
+                target: updatedTargetUID,
+                unique: false,
+                dominant: null,
+                columnName: 'test',
+                targetColumnName: null,
+              }),
+              category: fromJS({
+                nature: 'oneWay',
+                target: 'application::category.category',
+                dominant: false,
+                unique: false,
+              }),
+              cover: fromJS({
+                type: 'media',
+                multiple: false,
+                required: false,
+              }),
+              images: fromJS({
+                type: 'media',
+                multiple: true,
+                required: false,
+              }),
+              full_name: fromJS({ type: 'string', required: true }),
+            }),
+          },
+        });
+
+        const action = {
+          type: 'EDIT_ATTRIBUTE',
+          attributeToSet: {
+            nature: 'oneWay',
+            targetAttribute: '-',
+            target: updatedTargetUID,
+            unique: false,
+            dominant: null,
+            columnName: 'test',
+            targetColumnName: null,
+            name: 'one_way',
+          },
+          forTarget: 'contentType',
+          targetUid: contentTypeUID,
+          initialAttribute: {
+            nature: 'oneWay',
+            targetAttribute: '-',
+            target: updatedTargetUID,
+            unique: false,
+            dominant: null,
+            columnName: 'test',
+            targetColumnName: null,
+            name: 'one_way',
+          },
+          shouldAddComponentToData: false,
+        };
+
+        const state = initialState
+          .setIn(['contentTypes', contentTypeUID], contentType)
+          .setIn(['modifiedData', 'contentType'], contentType)
+          .setIn(['modifiedData', 'components'], fromJS({}));
+
+        const expected = state.setIn(
+          ['modifiedData', 'contentType'],
+          expectedContentType
+        );
+
+        expect(reducer(state, action)).toEqual(expected);
+      });
+
+      it('Should create an opposite attribute if the target is the same content type and the nature is not a one side relation (oneToOne, ...)', () => {
+        const originalTargetUID = 'application::category.category';
+
+        const contentTypeUID = 'application::address.address';
+        const contentType = fromJS({
+          uid: contentTypeUID,
+          schema: {
+            name: 'address',
+            description: '',
+            connection: 'default',
+            collectionName: '',
+            attributes: OrderedMap({
+              geolocation: fromJS({ type: 'json', required: true }),
+              city: fromJS({ type: 'string', required: true }),
+              postal_code: fromJS({ type: 'string' }),
+              one_to_many: fromJS({
+                nature: 'oneToMany',
+                targetAttribute: 'many_to_one',
+                target: originalTargetUID,
+                unique: true,
+                dominant: null,
+                columnName: 'many_to_one',
+                targetColumnName: 'one_to_many',
+              }),
+              category: fromJS({
+                nature: 'oneWay',
+                target: 'application::category.category',
+                dominant: false,
+                unique: false,
+              }),
+              cover: fromJS({
+                type: 'media',
+                multiple: false,
+                required: false,
+              }),
+              images: fromJS({
+                type: 'media',
+                multiple: true,
+                required: false,
+              }),
+              full_name: fromJS({ type: 'string', required: true }),
+            }),
+          },
+        });
+        const expectedContentType = fromJS({
+          uid: contentTypeUID,
+          schema: {
+            name: 'address',
+            description: '',
+            connection: 'default',
+            collectionName: '',
+            attributes: OrderedMap({
+              geolocation: fromJS({ type: 'json', required: true }),
+              city: fromJS({ type: 'string', required: true }),
+              postal_code: fromJS({ type: 'string' }),
+              one_to_many: fromJS({
+                nature: 'oneToMany',
+                targetAttribute: 'many_to_one',
+                target: contentTypeUID,
+                unique: true,
+                dominant: null,
+                columnName: 'many_to_one',
+                targetColumnName: 'one_to_many',
+              }),
+              many_to_one: fromJS({
+                nature: 'manyToOne',
+                targetAttribute: 'one_to_many',
+                target: contentTypeUID,
+                unique: true,
+                dominant: null,
+                columnName: 'one_to_many',
+                targetColumnName: 'many_to_one',
+              }),
+              category: fromJS({
+                nature: 'oneWay',
+                target: 'application::category.category',
+                dominant: false,
+                unique: false,
+              }),
+              cover: fromJS({
+                type: 'media',
+                multiple: false,
+                required: false,
+              }),
+              images: fromJS({
+                type: 'media',
+                multiple: true,
+                required: false,
+              }),
+              full_name: fromJS({ type: 'string', required: true }),
+            }),
+          },
+        });
+
+        const action = {
+          type: 'EDIT_ATTRIBUTE',
+          attributeToSet: {
+            nature: 'oneToMany',
+            targetAttribute: 'many_to_one',
+            target: contentTypeUID,
+            unique: true,
+            dominant: null,
+            columnName: 'many_to_one',
+            targetColumnName: 'one_to_many',
+            name: 'one_to_many',
+          },
+          forTarget: 'contentType',
+          targetUid: contentTypeUID,
+          initialAttribute: {
+            nature: 'oneToMany',
+            targetAttribute: 'many_to_one',
+            target: originalTargetUID,
+            unique: true,
+            dominant: null,
+            columnName: 'many_to_one',
+            targetColumnName: 'one_to_many',
+            name: 'one_to_many',
+          },
+          shouldAddComponentToData: false,
+        };
+
+        const state = initialState
+          .setIn(['contentTypes', contentTypeUID], contentType)
+          .setIn(['modifiedData', 'contentType'], contentType)
+          .setIn(['modifiedData', 'components'], fromJS({}));
+
+        const expected = state.setIn(
+          ['modifiedData', 'contentType'],
+          expectedContentType
+        );
+
+        expect(reducer(state, action)).toEqual(expected);
+      });
+
+      it('Should create an opposite attribute if the target is the same content type and the nature is manyToMany', () => {
+        const originalTargetUID = 'application::category.category';
+
+        const contentTypeUID = 'application::address.address';
+        const contentType = fromJS({
+          uid: contentTypeUID,
+          schema: {
+            name: 'address',
+            description: '',
+            connection: 'default',
+            collectionName: '',
+            attributes: OrderedMap({
+              geolocation: fromJS({ type: 'json', required: true }),
+              city: fromJS({ type: 'string', required: true }),
+              postal_code: fromJS({ type: 'string' }),
+              many_to_many_left: fromJS({
+                nature: 'manyToMany',
+                targetAttribute: 'many_to_many_right',
+                target: originalTargetUID,
+                unique: true,
+                dominant: false,
+                columnName: null,
+                targetColumnName: null,
+              }),
+              category: fromJS({
+                nature: 'oneWay',
+                target: 'application::category.category',
+                dominant: false,
+                unique: false,
+              }),
+              cover: fromJS({
+                type: 'media',
+                multiple: false,
+                required: false,
+              }),
+              images: fromJS({
+                type: 'media',
+                multiple: true,
+                required: false,
+              }),
+              full_name: fromJS({ type: 'string', required: true }),
+            }),
+          },
+        });
+        const expectedContentType = fromJS({
+          uid: contentTypeUID,
+          schema: {
+            name: 'address',
+            description: '',
+            connection: 'default',
+            collectionName: '',
+            attributes: OrderedMap({
+              geolocation: fromJS({ type: 'json', required: true }),
+              city: fromJS({ type: 'string', required: true }),
+              postal_code: fromJS({ type: 'string' }),
+              many_to_many_left: fromJS({
+                nature: 'manyToMany',
+                targetAttribute: 'many_to_many_right',
+                target: contentTypeUID,
+                unique: true,
+                dominant: false,
+                columnName: null,
+                targetColumnName: null,
+              }),
+              many_to_many_right: fromJS({
+                nature: 'manyToMany',
+                targetAttribute: 'many_to_many_left',
+                target: contentTypeUID,
+                unique: true,
+                dominant: true,
+                columnName: null,
+                targetColumnName: null,
+              }),
+              category: fromJS({
+                nature: 'oneWay',
+                target: 'application::category.category',
+                dominant: false,
+                unique: false,
+              }),
+              cover: fromJS({
+                type: 'media',
+                multiple: false,
+                required: false,
+              }),
+              images: fromJS({
+                type: 'media',
+                multiple: true,
+                required: false,
+              }),
+              full_name: fromJS({ type: 'string', required: true }),
+            }),
+          },
+        });
+
+        const action = {
+          type: 'EDIT_ATTRIBUTE',
+          attributeToSet: {
+            nature: 'manyToMany',
+            targetAttribute: 'many_to_many_right',
+            target: contentTypeUID,
+            unique: true,
+            dominant: false,
+            columnName: null,
+            targetColumnName: null,
+            name: 'many_to_many_left',
+          },
+          forTarget: 'contentType',
+          targetUid: contentTypeUID,
+          initialAttribute: {
+            nature: 'manyToMany',
+            targetAttribute: 'many_to_many_right',
+            target: originalTargetUID,
+            unique: true,
+            dominant: false,
+            columnName: null,
+            targetColumnName: null,
+            name: 'many_to_many_left',
+          },
+          shouldAddComponentToData: false,
+        };
+
+        const state = initialState
+          .setIn(['contentTypes', contentTypeUID], contentType)
+          .setIn(['modifiedData', 'contentType'], contentType)
+          .setIn(['modifiedData', 'components'], fromJS({}));
+
+        const expected = state.setIn(
+          ['modifiedData', 'contentType'],
+          expectedContentType
+        );
+
+        expect(reducer(state, action)).toEqual(expected);
       });
     });
   });
