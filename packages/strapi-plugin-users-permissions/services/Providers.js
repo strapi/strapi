@@ -178,7 +178,7 @@ const getProfile = async (provider, query, callback) => {
             callback(err);
           } else {
             callback(null, {
-              username: body.name,
+              username: body.name + '#' + body.id,
               email: body.email,
             });
           }
