@@ -39,7 +39,7 @@ function Inputs({
             onRemove={onRemove}
             value={value}
           />
-          {inputError && (
+          {Object.keys(inputError).length > 0 && (
             <ErrorMessage>
               <FormattedMessage id="components.Input.error.validation.required" />
             </ErrorMessage>

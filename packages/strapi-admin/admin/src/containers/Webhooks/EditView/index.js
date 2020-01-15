@@ -220,7 +220,7 @@ function EditView() {
       type: 'ON_HEADER_REMOVE',
       index,
     });
-    resetError('headers');
+    resetHeadersErrors();
   };
 
   const handleSubmit = e => {
@@ -248,13 +248,16 @@ function EditView() {
     }
   };
 
-  const resetError = name => {
+  const resetHeadersErrors = () => {
     const errors = formErrors;
+    const newErrors = Object.keys(errors)
+      .filter(key => !key.includes('headers'))
+      .reduce((obj, key) => {
+        obj[key] = formErrors[key];
+        return obj;
+      }, {});
 
-    if (errors[name]) {
-      delete errors[name];
-      setErrors(errors);
-    }
+    setErrors(newErrors);
   };
 
   const setErrors = errors => {
@@ -315,6 +318,13 @@ function EditView() {
 
   const goBack = () => push('/settings/webhooks');
 
+  const formatError = Object.keys(formErrors)
+    .filter(key => key.includes('headers'))
+    .reduce((obj, key) => {
+      obj[key] = formErrors[key];
+      return obj;
+    }, {});
+
   return (
     <Wrapper>
       <BackHeader onClick={goBack} />
@@ -350,6 +360,7 @@ function EditView() {
                       {...(form[key].type === 'headers' && {
                         onClick: handleClick,
                         onRemove: handleRemove,
+                        error: formatError,
                       })}
                     />
                   </div>

@@ -1,4 +1,4 @@
-import { set, setWith } from 'lodash';
+import { set } from 'lodash';
 
 const cleanData = data => {
   const webhooks = data;
@@ -31,7 +31,7 @@ const cleanHeaders = headers => {
 const cleanErrors = errors => {
   return Object.keys(errors).reduce((acc, curr) => {
     const { id } = errors[curr];
-    setWith(acc, curr, id ? id : errors[curr], Object);
+    acc[curr] = id ? id : errors[curr];
 
     return acc;
   }, {});

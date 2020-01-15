@@ -96,7 +96,6 @@ const HeadersInput = ({
         </li>
         {value.map((header, index) => {
           const { key, value } = header;
-          const entryErrors = get(errors, index, null);
 
           return (
             <li key={index}>
@@ -107,14 +106,18 @@ const HeadersInput = ({
                   onChange={e => handleChangeKey(e, `${name}.${index}.key`)}
                   name={`${name}.${index}.key`}
                   options={options}
-                  styles={customStyles(entryErrors && entryErrors.key)}
+                  styles={customStyles(
+                    get(errors, `headers.${index}.key`, null)
+                  )}
                   value={formatOption(key)}
                 />
               </section>
               <section>
                 <InputText
                   onBlur={handleBlur}
-                  className={entryErrors && entryErrors.value && 'bordered'}
+                  className={
+                    get(errors, `headers.${index}.value`, null) && 'bordered'
+                  }
                   onChange={onChange}
                   name={`${name}.${index}.value`}
                   value={value}
