@@ -5,11 +5,12 @@ const _ = require('lodash');
 const { createController, createService } = require('../core-api');
 const getURLFromSegments = require('../utils/url-from-segments');
 
-const pickSchema = obj => {
-  const clone = _.cloneDeep(
-    _.pick(obj, [
+const getKind = obj => obj.kind || 'collectionType';
+
+const pickSchema = model => {
+  const schema = _.cloneDeep(
+    _.pick(model, [
       'connection',
-      'kind',
       'collectionName',
       'info',
       'options',
@@ -17,12 +18,8 @@ const pickSchema = obj => {
     ])
   );
 
-  return _.assign(
-    {
-      kind: 'collectionType',
-    },
-    clone
-  );
+  schema.kind = getKind(model);
+  return schema;
 };
 
 module.exports = function(strapi) {
@@ -84,6 +81,7 @@ module.exports = function(strapi) {
 
       Object.assign(model, {
         __schema__: pickSchema(model),
+        kind: getKind(model),
         modelType: 'contentType',
         uid: `application::${apiName}.${modelName}`,
         apiName,
@@ -167,6 +165,7 @@ module.exports = function(strapi) {
     Object.assign(model, {
       __schema__: pickSchema(model),
       modelType: 'contentType',
+      kind: getKind(model),
       uid: `strapi::${key}`,
       plugin: 'admin',
       modelName: key,
@@ -202,7 +201,7 @@ module.exports = function(strapi) {
       Object.assign(model, {
         __schema__: pickSchema(model),
         modelType: 'contentType',
-
+        kind: getKind(model),
         modelName: key,
         uid: `plugins::${pluginName}.${key}`,
         plugin: pluginName,
