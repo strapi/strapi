@@ -15,6 +15,7 @@ import Wrapper from './Wrapper';
 
 function Inputs({
   error: inputError,
+  customError,
   label,
   name,
   onChange,
@@ -31,7 +32,7 @@ function Inputs({
       {type === 'headers' ? (
         <>
           <HeadersInput
-            errors={inputError}
+            errors={customError}
             name={name}
             onBlur={onBlur}
             onClick={onClick}
@@ -39,7 +40,7 @@ function Inputs({
             onRemove={onRemove}
             value={value}
           />
-          {Object.keys(inputError).length > 0 && (
+          {Object.keys(customError).length > 0 && (
             <ErrorMessage>
               <FormattedMessage id="components.Input.error.validation.required" />
             </ErrorMessage>
@@ -91,6 +92,7 @@ function Inputs({
 
 Inputs.defaultProps = {
   error: null,
+  customError: {},
   label: '',
   onClick: () => {},
   onRemove: () => {},
@@ -100,7 +102,8 @@ Inputs.defaultProps = {
 };
 
 Inputs.propTypes = {
-  error: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
+  error: PropTypes.string,
+  customError: PropTypes.object,
   label: PropTypes.string,
   name: PropTypes.string.isRequired,
   onBlur: PropTypes.func.isRequired,

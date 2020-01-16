@@ -348,7 +348,7 @@ function EditView() {
                       {...(form[key].type === 'headers' && {
                         onClick: handleClick,
                         onRemove: handleRemove,
-                        error: formatError,
+                        customError: formatError,
                       })}
                     />
                   </div>
