@@ -57,7 +57,7 @@ jobs:
       name: 'Lint / Unit Tests '
       script:
         - yarn run -s lint
-        - yarn run -s test:unit && codecov -C -F unit
+        - yarn run -s test:unit --coverage && codecov -C -F unit
         - yarn run -s test:front && codecov -C -F front
 
     - <<: *e2e_tests
