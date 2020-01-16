@@ -67,38 +67,6 @@ describe('CTB | containers | DataManagerProvider | reducer | REMOVE_FIELD', () =
     });
   });
 
-  describe('Removing a relation attribute with another content type', () => {
-    it('Should remove the attribute correctly if the relation is made with another content type', () => {
-      const contentTypeUID = 'application::menusection.menusection';
-      const attributeToRemoveName = 'menu';
-      const action = {
-        type: 'REMOVE_FIELD',
-        mainDataKey: 'contentType',
-        attributeToRemoveName,
-        componentUid: '',
-      };
-
-      const state = initialState
-        .set('contentTypes', fromJS(testData.contentTypes))
-        .set('initialContentTypes', fromJS(testData.contentTypes))
-        .setIn(
-          ['modifiedData', 'contentType'],
-          fromJS(testData.contentTypes[contentTypeUID])
-        )
-        .setIn(['modifiedData', 'components'], fromJS({}));
-
-      const expected = state.removeIn([
-        'modifiedData',
-        'contentType',
-        'schema',
-        'attributes',
-        attributeToRemoveName,
-      ]);
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-  });
-
   describe('Removing a relation attribute with the same content type', () => {
     it('Should handle the removal of the one side (oneWay or manyWay) nature correctly', () => {
       const contentTypeUID = 'application::dummy.dummy';

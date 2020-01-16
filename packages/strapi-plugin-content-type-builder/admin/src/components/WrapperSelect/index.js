@@ -19,7 +19,7 @@ const WrapperSelect = ({ error, label, name, type, ...rest }) => {
       border: state.isFocused
         ? '1px solid #78caff !important'
         : error
-        ? '1px solid red !important'
+        ? '1px solid #F64D0A !important'
         : '1px solid #E3E9F3 !important',
       borderRadius: '2px !important',
     }),

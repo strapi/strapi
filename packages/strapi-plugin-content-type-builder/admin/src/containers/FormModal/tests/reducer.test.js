@@ -246,9 +246,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
   describe('RESET_PROPS_AND_SAVE_CURRENT_DATA', () => {
     it('Should reset the state and update the modifiedData and componentToCreate objects correctly', () => {
       const action = { type: 'RESET_PROPS_AND_SAVE_CURRENT_DATA' };
-      //       type: "component"
-      // createComponent: true
-      // componentToCreate: {type: "component", name: "ccc", icon: "air-freshener", category: "default"}
+
       const state = initialState.setIn(
         ['modifiedData'],
         fromJS({

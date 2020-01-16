@@ -208,7 +208,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
       expect(reducer(state, action)).toEqual(expected);
     });
 
-    it('Should create the component attribute and add the component to the modifiedData.components and only add the nested components that are not in components are in the object to keep previous the modifications', () => {
+    it('Should create the component attribute and add the component to the modifiedData.components and only add the nested components that are not in the modifiedData.components object to keep previous the modifications', () => {
       const contentTypeUID = 'application::address.address';
       const contentType = get(testData, ['contentTypes', contentTypeUID]);
       const componentToAddUID = 'default.closingperiod';
@@ -392,7 +392,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
       expect(reducer(state, action)).toEqual(expected);
     });
 
-    it('Should add the relation attribute for a component', () => {
+    it('Should add the relation attribute correctly for a component', () => {
       const componentUID = 'default.dish';
       const targetContentTypeUID = 'application::category.category';
       const action = {
@@ -440,7 +440,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
       expect(reducer(state, action)).toEqual(expected);
     });
 
-    it('Should add the relation correctly for a component from the modifiedData.components object', () => {
+    it('Should add the relation attribute correctly for a component from the modifiedData.components object', () => {
       const componentUID = 'default.dish';
       const targetContentTypeUID = 'application::category.category';
       const action = {
