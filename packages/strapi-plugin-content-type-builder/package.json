@@ -7,9 +7,6 @@
     "icon": "paint-brush",
     "description": "content-type-builder.plugin.description"
   },
-  "scripts": {
-    "test": "jest --verbose --config=jest.config.unit.js"
-  },
   "dependencies": {
     "@sindresorhus/slugify": "^0.9.1",
     "classnames": "^2.2.6",

@@ -61,7 +61,6 @@
     "strapi-utils": "3.0.0-beta.18.4"
   },
   "scripts": {
-    "test": "jest --verbose",
     "postinstall": "node lib/utils/success.js"
   },
   "author": {
