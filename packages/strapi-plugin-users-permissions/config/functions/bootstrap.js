@@ -11,19 +11,6 @@ const _ = require('lodash');
 const uuid = require('uuid/v4');
 
 module.exports = async () => {
-  if (!_.get(strapi.plugins['users-permissions'], 'config.jwtSecret')) {
-    const jwtSecret = uuid();
-    _.set(strapi.plugins['users-permissions'], 'config.jwtSecret', jwtSecret);
-
-    strapi.reload.isWatching = false;
-    await strapi.fs.writePluginFile(
-      'users-permissions',
-      'config/jwt.json',
-      JSON.stringify({ jwtSecret }, null, 2)
-    );
-    strapi.reload.isWatching = true;
-  }
-
   const pluginStore = strapi.store({
     environment: '',
     type: 'plugin',
@@ -173,7 +160,22 @@ module.exports = async () => {
     await pluginStore.set({ key: 'advanced', value });
   }
 
-  return strapi.plugins[
+  await strapi.plugins[
     'users-permissions'
   ].services.userspermissions.initialize();
+
+  if (!_.get(strapi.plugins['users-permissions'], 'config.jwtSecret')) {
+    const jwtSecret = uuid();
+    _.set(strapi.plugins['users-permissions'], 'config.jwtSecret', jwtSecret);
+
+    strapi.reload.isWatching = false;
+
+    await strapi.fs.writePluginFile(
+      'users-permissions',
+      'config/jwt.json',
+      JSON.stringify({ jwtSecret }, null, 2)
+    );
+
+    strapi.reload.isWatching = true;
+  }
 };

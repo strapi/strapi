@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Content Type Builder - Content types Collection Types Get collection type returns full schema and informations 1`] = `
+Object {
+  "data": Object {
+    "schema": Object {
+      "attributes": Object {
+        "title": Object {
+          "type": "string",
+        },
+      },
+      "collectionName": "test_collection_types",
+      "connection": "default",
+      "description": "",
+      "kind": "collectionType",
+      "name": "Test Collection Type",
+    },
+    "uid": "application::test-collection-type.test-collection-type",
+  },
+}
+`;
+
+exports[`Content Type Builder - Content types Single Types Get single type returns full schema and informations 1`] = `
+Object {
+  "data": Object {
+    "schema": Object {
+      "attributes": Object {
+        "title": Object {
+          "type": "string",
+        },
+      },
+      "collectionName": "test_single_types",
+      "connection": "default",
+      "description": "",
+      "kind": "singleType",
+      "name": "Test Single Type",
+    },
+    "uid": "application::test-single-type.test-single-type",
+  },
+}
+`;

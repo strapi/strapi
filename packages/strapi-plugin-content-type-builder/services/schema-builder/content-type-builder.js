@@ -6,6 +6,7 @@ const pluralize = require('pluralize');
 
 const { isRelation, toUID, isConfigurable } = require('../../utils/attributes');
 const { nameToSlug, nameToCollectionName } = require('../../utils/helpers');
+const { typeKinds } = require('../../controllers/validation/constants');
 const createSchemaHandler = require('./schema-handler');
 
 module.exports = function createComponentBuilder() {
@@ -80,6 +81,7 @@ module.exports = function createComponentBuilder() {
       contentType
         .setUID(uid)
         .set('connection', infos.connection || defaultConnection)
+        .set('kind', infos.kind || typeKinds.COLLECTION_TYPE)
         .set('collectionName', infos.collectionName || defaultCollectionName)
         .set(['info', 'name'], infos.name)
         .set(['info', 'description'], infos.description)
@@ -197,9 +199,12 @@ module.exports = function createComponentBuilder() {
         }
       });
 
+      // TODO: handle kind change => update routes.json file somehow
+
       contentType
         .set('connection', infos.connection)
         .set('collectionName', infos.collectionName)
+        .set('kind', infos.kind || contentType.schema.kind)
         .set(['info', 'name'], infos.name)
         .set(['info', 'description'], infos.description)
         .setAttributes(this.convertAttributes(newAttributes));
@@ -220,7 +225,6 @@ module.exports = function createComponentBuilder() {
         ct.removeContentType(uid);
       });
 
-      // TODO: clear api when a contentType is deleted
       return this.contentTypes.get(uid).delete();
     },
   };
