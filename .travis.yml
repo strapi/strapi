@@ -57,8 +57,8 @@ jobs:
       name: 'Lint / Unit Tests '
       script:
         - yarn run -s lint
-        - yarn run -s test:unit && codecov -F unit
-        - yarn run -s test:front && codecov -F front
+        - yarn run -s test:unit && codecov -c -F unit
+        - yarn run -s test:front && codecov -c -F front
 
     - <<: *e2e_tests
       name: 'E2E Postgresql'
