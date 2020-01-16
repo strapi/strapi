@@ -4,9 +4,8 @@
  *
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { PopUpWarning } from 'strapi-helper-plugin';
 import { Checkbox, IconLinks } from '@buffetjs/core';
 
 import Switch from '../Switch';
@@ -23,8 +22,6 @@ function ListRow({
   onDeleteCLick,
   onEditClick,
 }) {
-  const [showModal, setShowModal] = useState(false);
-
   const links = [
     {
       icon: 'pencil',
@@ -34,17 +31,12 @@ function ListRow({
       icon: 'trash',
       onClick: e => {
         e.stopPropagation();
-        setShowModal(true);
+        onDeleteCLick(id);
       },
     },
   ];
 
   const isChecked = itemsToDelete.includes(id);
-
-  const handleDeleteConfirm = async () => {
-    await onDeleteCLick(id);
-    setShowModal(false);
-  };
 
   return (
     <StyledListRow onClick={() => onEditClick(id)}>
@@ -73,14 +65,6 @@ function ListRow({
       </td>
       <td>
         <IconLinks links={links} />
-        <div className="popup-wrapper">
-          <PopUpWarning
-            isOpen={showModal}
-            toggleModal={() => setShowModal(!showModal)}
-            popUpWarningType="danger"
-            onConfirm={handleDeleteConfirm}
-          />
-        </div>
       </td>
     </StyledListRow>
   );

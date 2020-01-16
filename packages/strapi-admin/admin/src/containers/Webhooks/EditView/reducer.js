@@ -6,8 +6,8 @@ const header = { key: '', value: '' };
 const initialWebhook = {
   events: [],
   headers: [header],
-  name: null,
-  url: null,
+  name: '',
+  url: '',
 };
 
 const initialState = fromJS({
@@ -42,8 +42,6 @@ const reducer = (state, action) => {
         .update('initialData', () => data)
         .update('modifiedData', () => data);
     }
-    case 'IS_TRIGGERING':
-      return state.update('isTriggering', isTriggering => !isTriggering);
     case 'ON_CHANGE':
       return state.updateIn(
         ['modifiedData', ...action.keys],
@@ -65,6 +63,8 @@ const reducer = (state, action) => {
       return state.update('modifiedData', () => state.get('initialData'));
     case 'SET_ERRORS':
       return state.update('formErrors', () => fromJS(action.errors));
+    case 'SET_IS_TRIGGERING':
+      return state.update('isTriggering', isTriggering => !isTriggering);
     case 'TRIGGER_SUCCEEDED':
       return state
         .update('triggerResponse', () => fromJS(action.response))

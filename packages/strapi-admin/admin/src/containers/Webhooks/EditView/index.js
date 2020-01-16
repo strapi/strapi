@@ -4,9 +4,9 @@
  *
  */
 
-import React, { useEffect, useReducer, useCallback, useState } from 'react';
+import React, { useEffect, useReducer, useRef, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { get, isEmpty, isEqual, set } from 'lodash';
+import { get, isEmpty, isEqual } from 'lodash';
 import { Header, Inputs as InputsIndex } from '@buffetjs/custom';
 import { Play } from '@buffetjs/icons';
 import {
@@ -22,16 +22,20 @@ import TriggerContainer from '../../../components/TriggerContainer';
 import reducer, { initialState } from './reducer';
 import form from './utils/form';
 import schema from './utils/schema';
-import { cleanHeaders, cleanData, cleanErrors } from './utils/formatData';
+import { cleanData } from './utils/formatData';
 
 import Wrapper from './Wrapper';
 
 function EditView() {
+  const isMounted = useRef();
   const { formatMessage } = useGlobalContext();
   const [submittedOnce, setSubmittedOnce] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const { push } = useHistory();
   const { id } = useParams();
+  const abortController = new AbortController();
+  const { signal } = abortController;
+  const isCreating = id === 'create';
 
   const {
     formErrors,
@@ -42,36 +46,39 @@ function EditView() {
   } = reducerState.toJS();
 
   useEffect(() => {
+    isMounted.current = true;
+
+    const fetchData = async () => {
+      try {
+        const { data } = await request(`/admin/webhooks/${id}`, {
+          method: 'GET',
+        });
+
+        if (isMounted.current) {
+          dispatch({
+            type: 'GET_DATA_SUCCEEDED',
+            data,
+          });
+        }
+      } catch (err) {
+        if (isMounted.current) {
+          if (err.code !== 20) {
+            strapi.notification.error('notification.error');
+          }
+        }
+      }
+    };
+
     if (!isCreating) {
       fetchData();
-
-      return () => {
-        abortController.abort();
-      };
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
-  const fetchData = useCallback(async () => {
-    try {
-      const { data } = await request(`/admin/webhooks/${id}`, {
-        method: 'GET',
-      });
+    return () => {
+      isMounted.current = false;
+      abortController.abort();
+    };
+  }, [abortController, id, isCreating]);
 
-      dispatch({
-        type: 'GET_DATA_SUCCEEDED',
-        data,
-      });
-    } catch (err) {
-      if (err.code !== 20) {
-        strapi.notification.error('notification.error');
-      }
-    }
-  }, [id]);
-
-  const abortController = new AbortController();
-  const { signal } = abortController;
-  const isCreating = id === 'create';
   const { name } = modifiedData;
 
   const areActionDisabled =
@@ -80,7 +87,7 @@ function EditView() {
   const isTriggerActionDisabled =
     isCreating || (!isCreating && !areActionDisabled) || isTriggering;
 
-  const formatError = Object.keys(formErrors)
+  const formattedErrors = Object.keys(formErrors)
     .filter(key => key.includes('headers'))
     .reduce((obj, key) => {
       obj[key] = formErrors[key];
@@ -173,7 +180,7 @@ function EditView() {
 
   const handleTrigger = async () => {
     dispatch({
-      type: 'IS_TRIGGERING',
+      type: 'SET_IS_TRIGGERING',
     });
 
     try {
@@ -182,17 +189,21 @@ function EditView() {
         signal,
       });
 
-      dispatch({
-        type: 'TRIGGER_SUCCEEDED',
-        response: data,
-      });
-    } catch (err) {
-      if (err.code !== 20) {
-        strapi.notification.error('notification.error');
+      if (isMounted.current) {
+        dispatch({
+          type: 'TRIGGER_SUCCEEDED',
+          response: data,
+        });
       }
-      dispatch({
-        type: 'IS_TRIGGERING',
-      });
+    } catch (err) {
+      if (isMounted.current) {
+        if (err.code !== 20) {
+          strapi.notification.error('notification.error');
+        }
+        dispatch({
+          type: 'SET_IS_TRIGGERING',
+        });
+      }
     }
   };
 
@@ -216,32 +227,25 @@ function EditView() {
   };
 
   const checkFormErrors = async (submit = false) => {
-    const webhookToCheck = modifiedData;
-    set(webhookToCheck, 'headers', cleanHeaders(modifiedData.headers));
-
     try {
-      await schema.validate(webhookToCheck, {
-        abortEarly: false,
-      });
+      await schema.validate(modifiedData, { abortEarly: false });
 
-      setErrors({});
-      if (submit) submitForm();
+      if (isMounted.current) {
+        setErrors({});
+
+        if (submit) {
+          submitForm();
+        }
+      }
     } catch (err) {
-      setErrors(getYupInnerErrors(err));
-      if (submit) strapi.notification.error('notification.form.error.fields');
-    }
-  };
+      if (isMounted.current) {
+        setErrors(getYupInnerErrors(err));
 
-  const errorMessage = error => {
-    if (!error) {
-      return null;
+        if (submit) {
+          strapi.notification.error('notification.form.error.fields');
+        }
+      }
     }
-    if (typeof error === 'string') {
-      return formatMessage({
-        id: error,
-      });
-    }
-    return error;
   };
 
   const createWebhooks = async () => {
@@ -251,29 +255,25 @@ function EditView() {
         body: cleanData(modifiedData),
       });
 
-      strapi.notification.success(`notification.success`);
-      goBack();
+      if (isMounted.current) {
+        strapi.notification.success(`notification.success`);
+        goBack();
+      }
     } catch (err) {
-      strapi.notification.error('notification.error');
+      if (isMounted.current) {
+        strapi.notification.error('notification.error');
+      }
     }
   };
 
-  const updateWebhook = async () => {
-    try {
-      const body = cleanData(modifiedData);
-      delete body.id;
-
-      await request(`/admin/webhooks/${id}`, {
-        method: 'PUT',
-        body,
-      });
-
-      fetchData();
-
-      strapi.notification.error('notification.form.success.fields');
-    } catch (err) {
-      strapi.notification.error('notification.error');
+  const getErrorMessage = error => {
+    if (!error) {
+      return null;
     }
+
+    return formatMessage({
+      id: error.id,
+    });
   };
 
   const goBack = () => push('/settings/webhooks');
@@ -301,7 +301,7 @@ function EditView() {
   const setErrors = errors => {
     dispatch({
       type: 'SET_ERRORS',
-      errors: cleanErrors(errors),
+      errors: errors,
     });
   };
 
@@ -310,6 +310,22 @@ function EditView() {
       updateWebhook();
     } else {
       createWebhooks();
+    }
+  };
+
+  const updateWebhook = async () => {
+    try {
+      const body = cleanData(modifiedData);
+      delete body.id;
+
+      await request(`/admin/webhooks/${id}`, {
+        method: 'PUT',
+        body,
+      });
+
+      strapi.notification.error('notification.form.success.fields');
+    } catch (err) {
+      strapi.notification.error('notification.error');
     }
   };
 
@@ -339,7 +355,10 @@ function EditView() {
                         headers: Inputs,
                         events: Inputs,
                       }}
-                      error={errorMessage(get(formErrors, key, null))}
+                      label={formatMessage({
+                        id: form[key].label,
+                      })}
+                      error={getErrorMessage(get(formErrors, key, null))}
                       name={key}
                       onBlur={handleBlur}
                       onChange={handleChange}
@@ -348,7 +367,7 @@ function EditView() {
                       {...(form[key].type === 'headers' && {
                         onClick: handleClick,
                         onRemove: handleRemove,
-                        customError: formatError,
+                        customError: formattedErrors,
                       })}
                     />
                   </div>

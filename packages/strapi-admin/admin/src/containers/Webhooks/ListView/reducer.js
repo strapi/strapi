@@ -3,6 +3,7 @@ import { fromJS } from 'immutable';
 const initialState = fromJS({
   webhooks: [],
   webhooksToDelete: [],
+  webhookToDelete: null,
 });
 
 const reducer = (state, action) => {
@@ -11,8 +12,15 @@ const reducer = (state, action) => {
       return state.update('webhooks', () => fromJS(action.data));
     case 'SET_WEBHOOK_ENABLED':
       return state.updateIn(['webhooks', ...action.keys], () => action.value);
+    case 'SET_WEBHOOK_TO_DELETE':
+      return state.update('webhookToDelete', () => action.id);
     case 'SET_WEBHOOKS_TO_DELETE':
-      return state.update('webhooksToDelete', () => action.webhooks);
+      return state.update('webhooksToDelete', list => {
+        if (action.value) {
+          return list.push(action.id);
+        }
+        return list.filter(data => data !== action.id);
+      });
     case 'WEBHOOKS_DELETED':
       return state
         .update('webhooks', webhooks =>
@@ -22,9 +30,9 @@ const reducer = (state, action) => {
         )
         .update('webhooksToDelete', () => []);
     case 'WEBHOOK_DELETED':
-      return state.update('webhooks', webhooks =>
-        webhooks.splice(action.index, 1)
-      );
+      return state
+        .update('webhooks', webhooks => webhooks.remove(action.index))
+        .update('webhookToDelete', () => null);
     default:
       return state;
   }

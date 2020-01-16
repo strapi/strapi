@@ -1,25 +1,25 @@
 const form = {
   name: {
     styleName: 'col-6',
-    label: 'Name',
+    label: 'Settings.webhooks.form.name',
     type: 'text',
     value: '',
   },
   url: {
     styleName: 'col-12',
-    label: 'URL',
+    label: 'Settings.webhooks.form.url',
     type: 'text',
     value: '',
   },
   headers: {
     styleName: 'col-12',
-    label: 'Headers',
+    label: 'Settings.webhooks.form.headers',
     type: 'headers',
     value: [{ key: '', value: '' }],
   },
   events: {
     styleName: 'col-12',
-    label: 'Hooks',
+    label: 'Settings.webhooks.form.events',
     type: 'events',
     value: [],
   },

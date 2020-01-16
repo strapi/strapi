@@ -7,7 +7,7 @@ import { CircleButton } from 'strapi-helper-plugin';
 import { InputText } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
 
-import borderColor from './utils/borderColor';
+import getBorderColor from './utils/getBorderColor';
 import keys from './keys';
 import Wrapper from './Wrapper';
 
@@ -38,7 +38,7 @@ const HeadersInput = ({
     return {
       control: (base, state) => ({
         ...base,
-        border: `1px solid ${borderColor({
+        border: `1px solid ${getBorderColor({
           isFocused: state.isFocused,
           hasError,
         })} !important`,

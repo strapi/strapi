@@ -1,4 +1,4 @@
-const borderColor = ({ isFocused = false, hasError = false }) => {
+const getBorderColor = ({ isFocused = false, hasError = false }) => {
   if (isFocused) {
     return '#78caff';
   }
@@ -8,4 +8,4 @@ const borderColor = ({ isFocused = false, hasError = false }) => {
   return '#E3E9F3';
 };
 
-export default borderColor;
+export default getBorderColor;
