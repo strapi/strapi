@@ -31,6 +31,7 @@ function EditView() {
   const [submittedOnce, setSubmittedOnce] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const { push } = useHistory();
+  const { id } = useParams();
 
   const {
     formErrors,
@@ -39,13 +40,6 @@ function EditView() {
     isTriggering,
     triggerResponse,
   } = reducerState.toJS();
-
-  const { name } = modifiedData;
-  const { id } = useParams();
-  const isCreating = id === 'create';
-
-  const abortController = new AbortController();
-  const { signal } = abortController;
 
   useEffect(() => {
     if (!isCreating) {
@@ -58,10 +52,40 @@ function EditView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* Header props */
+  const fetchData = useCallback(async () => {
+    try {
+      const { data } = await request(`/admin/webhooks/${id}`, {
+        method: 'GET',
+      });
+
+      dispatch({
+        type: 'GET_DATA_SUCCEEDED',
+        data,
+      });
+    } catch (err) {
+      if (err.code !== 20) {
+        strapi.notification.error('notification.error');
+      }
+    }
+  }, [id]);
+
+  const abortController = new AbortController();
+  const { signal } = abortController;
+  const isCreating = id === 'create';
+  const { name } = modifiedData;
 
   const areActionDisabled =
     isEqual(initialData, modifiedData) || Object.keys(formErrors).length > 0;
+
+  const isTriggerActionDisabled =
+    isCreating || (!isCreating && !areActionDisabled) || isTriggering;
+
+  const formatError = Object.keys(formErrors)
+    .filter(key => key.includes('headers'))
+    .reduce((obj, key) => {
+      obj[key] = formErrors[key];
+      return obj;
+    }, {});
 
   const headerTitle = isCreating
     ? formatMessage({
@@ -69,10 +93,7 @@ function EditView() {
       })
     : name;
 
-  const isTriggerActionDisabled =
-    isCreating || (!isCreating && !areActionDisabled) || isTriggering;
-
-  const actions = [
+  const headersActions = [
     {
       color: 'primary',
       disabled: isTriggerActionDisabled,
@@ -126,34 +147,101 @@ function EditView() {
     title: {
       label: headerTitle,
     },
-    actions: actions,
+    actions: headersActions,
   };
 
-  /* Data methods */
+  const handleBlur = () => {
+    if (submittedOnce) {
+      checkFormErrors();
+    }
+  };
 
-  const fetchData = useCallback(async () => {
+  const handleChange = ({ target: { name, value } }) => {
+    dispatch({
+      type: 'ON_CHANGE',
+      keys: name.split('.'),
+      value,
+    });
+  };
+
+  const handleClick = () => {
+    dispatch({
+      type: 'ADD_NEW_HEADER',
+      keys: ['headers'],
+    });
+  };
+
+  const handleTrigger = async () => {
+    dispatch({
+      type: 'IS_TRIGGERING',
+    });
+
     try {
-      const { data } = await request(`/admin/webhooks/${id}`, {
-        method: 'GET',
+      const { data } = await request(`/admin/webhooks/${id}/trigger`, {
+        method: 'POST',
+        signal,
       });
 
       dispatch({
-        type: 'GET_DATA_SUCCEEDED',
-        data,
+        type: 'TRIGGER_SUCCEEDED',
+        response: data,
       });
     } catch (err) {
       if (err.code !== 20) {
         strapi.notification.error('notification.error');
       }
+      dispatch({
+        type: 'IS_TRIGGERING',
+      });
     }
-  }, [id]);
+  };
 
-  const submitForm = () => {
-    if (!isCreating) {
-      updateWebhook();
-    } else {
-      createWebhooks();
+  const handleRemove = index => {
+    dispatch({
+      type: 'ON_HEADER_REMOVE',
+      index,
+    });
+    resetHeadersErrors();
+  };
+
+  const handleReset = () =>
+    dispatch({
+      type: 'RESET_FORM',
+    });
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    setSubmittedOnce(true);
+    checkFormErrors(true);
+  };
+
+  const checkFormErrors = async (submit = false) => {
+    const webhookToCheck = modifiedData;
+    set(webhookToCheck, 'headers', cleanHeaders(modifiedData.headers));
+
+    try {
+      await schema.validate(webhookToCheck, {
+        abortEarly: false,
+      });
+
+      setErrors({});
+      if (submit) submitForm();
+    } catch (err) {
+      setErrors(getYupInnerErrors(err));
+      if (submit) strapi.notification.error('notification.form.error.fields');
     }
+  };
+
+  const errorMessage = error => {
+    if (!error) {
+      return null;
+    }
+    if (typeof error === 'string') {
+      return formatMessage({
+        id: error,
+      });
+    }
+    return error;
   };
 
   const createWebhooks = async () => {
@@ -188,65 +276,14 @@ function EditView() {
     }
   };
 
-  /* Form user interactions */
+  const goBack = () => push('/settings/webhooks');
 
-  const handleReset = () =>
+  const onCancelTrigger = () => {
+    abortController.abort();
+
     dispatch({
-      type: 'RESET_FORM',
+      type: 'ON_TRIGGER_CANCELED',
     });
-
-  const handleBlur = () => {
-    if (submittedOnce) {
-      checkFormErrors();
-    }
-  };
-
-  const handleChange = ({ target: { name, value } }) => {
-    dispatch({
-      type: 'ON_CHANGE',
-      keys: name.split('.'),
-      value,
-    });
-  };
-
-  const handleClick = () => {
-    dispatch({
-      type: 'ADD_NEW_HEADER',
-      keys: ['headers'],
-    });
-  };
-
-  const handleRemove = index => {
-    dispatch({
-      type: 'ON_HEADER_REMOVE',
-      index,
-    });
-    resetHeadersErrors();
-  };
-
-  const handleSubmit = e => {
-    e.preventDefault();
-    setSubmittedOnce(true);
-    checkFormErrors(true);
-  };
-
-  /* Validations */
-
-  const checkFormErrors = async (submit = false) => {
-    const webhookToCheck = modifiedData;
-    set(webhookToCheck, 'headers', cleanHeaders(modifiedData.headers));
-
-    try {
-      await schema.validate(webhookToCheck, {
-        abortEarly: false,
-      });
-
-      setErrors({});
-      if (submit) submitForm();
-    } catch (err) {
-      setErrors(getYupInnerErrors(err));
-      if (submit) strapi.notification.error('notification.form.error.fields');
-    }
   };
 
   const resetHeadersErrors = () => {
@@ -268,63 +305,13 @@ function EditView() {
     });
   };
 
-  const errorMessage = error => {
-    if (!error) {
-      return null;
-    }
-    if (typeof error === 'string') {
-      return formatMessage({
-        id: error,
-      });
-    }
-    return error;
-  };
-
-  /* Trigger events */
-
-  const handleTrigger = async () => {
-    dispatch({
-      type: 'IS_TRIGGERING',
-    });
-
-    try {
-      const { data } = await request(`/admin/webhooks/${id}/trigger`, {
-        method: 'POST',
-        signal,
-      });
-
-      dispatch({
-        type: 'TRIGGER_SUCCEEDED',
-        response: data,
-      });
-    } catch (err) {
-      if (err.code !== 20) {
-        strapi.notification.error('notification.error');
-      }
-      dispatch({
-        type: 'IS_TRIGGERING',
-      });
+  const submitForm = () => {
+    if (!isCreating) {
+      updateWebhook();
+    } else {
+      createWebhooks();
     }
   };
-
-  const onCancelTrigger = () => {
-    abortController.abort();
-
-    dispatch({
-      type: 'ON_TRIGGER_CANCELED',
-    });
-  };
-
-  /* Nav */
-
-  const goBack = () => push('/settings/webhooks');
-
-  const formatError = Object.keys(formErrors)
-    .filter(key => key.includes('headers'))
-    .reduce((obj, key) => {
-      obj[key] = formErrors[key];
-      return obj;
-    }, {});
 
   return (
     <Wrapper>

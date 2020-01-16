@@ -40,23 +40,6 @@ function ListView() {
   const getWebhookIndex = id =>
     webhooks.findIndex(webhook => webhook.id === id);
 
-  const fetchData = async () => {
-    try {
-      const { data } = await request(`/admin/webhooks`, {
-        method: 'GET',
-      });
-
-      dispatch({
-        type: 'GET_DATA_SUCCEEDED',
-        data,
-      });
-    } catch (err) {
-      if (err.code !== 20) {
-        strapi.notification.error('notification.error');
-      }
-    }
-  };
-
   // New button
   const addBtnLabel = formatMessage({
     id: `Settings.webhooks.list.button.add`,
@@ -113,6 +96,23 @@ function ListView() {
     items: webhooks,
   };
 
+  const fetchData = async () => {
+    try {
+      const { data } = await request(`/admin/webhooks`, {
+        method: 'GET',
+      });
+
+      dispatch({
+        type: 'GET_DATA_SUCCEEDED',
+        data,
+      });
+    } catch (err) {
+      if (err.code !== 20) {
+        strapi.notification.error('notification.error');
+      }
+    }
+  };
+
   const handleChange = (value, id) => {
     const updatedWebhooksToDelete = value
       ? [...webhooksToDelete, id]
@@ -124,56 +124,14 @@ function ListView() {
     });
   };
 
-  const handleGoTo = to => {
-    push(`${pathname}/${to}`);
-  };
-
   const handleDeleteAllConfirm = async () => {
     await onDeleteAllCLick();
     setShowModal(false);
   };
 
-  const onDeleteAllCLick = async () => {
-    const body = {
-      ids: webhooksToDelete,
-    };
-
-    try {
-      await request(`/admin/webhooks/batch-delete`, {
-        method: 'POST',
-        body,
-      });
-
-      dispatch({
-        type: 'WEBHOOKS_DELETED',
-      });
-    } catch (err) {
-      if (err.code !== 20) {
-        strapi.notification.error('notification.error');
-      }
-    }
-  };
-
   const handleDeleteConfirm = async id => {
     await onDeleteCLick(id);
     setShowModal(false);
-  };
-
-  const onDeleteCLick = async id => {
-    try {
-      await request(`/admin/webhooks/${id}`, {
-        method: 'DELETE',
-      });
-
-      dispatch({
-        type: 'WEBHOOK_DELETED',
-        index: getWebhookIndex(id),
-      });
-    } catch (err) {
-      if (err.code !== 20) {
-        strapi.notification.error('notification.error');
-      }
-    }
   };
 
   const handleEnabledChange = async (value, id) => {
@@ -207,6 +165,48 @@ function ListView() {
         value: !value,
       });
 
+      if (err.code !== 20) {
+        strapi.notification.error('notification.error');
+      }
+    }
+  };
+
+  const handleGoTo = to => {
+    push(`${pathname}/${to}`);
+  };
+
+  const onDeleteAllCLick = async () => {
+    const body = {
+      ids: webhooksToDelete,
+    };
+
+    try {
+      await request(`/admin/webhooks/batch-delete`, {
+        method: 'POST',
+        body,
+      });
+
+      dispatch({
+        type: 'WEBHOOKS_DELETED',
+      });
+    } catch (err) {
+      if (err.code !== 20) {
+        strapi.notification.error('notification.error');
+      }
+    }
+  };
+
+  const onDeleteCLick = async id => {
+    try {
+      await request(`/admin/webhooks/${id}`, {
+        method: 'DELETE',
+      });
+
+      dispatch({
+        type: 'WEBHOOK_DELETED',
+        index: getWebhookIndex(id),
+      });
+    } catch (err) {
       if (err.code !== 20) {
         strapi.notification.error('notification.error');
       }
