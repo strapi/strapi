@@ -1,6 +1,5 @@
 module.exports = {
-  name: 'setup',
-  displayName: 'Setup',
+  name: 'Api integration tests',
   testMatch: ['**/?(*.)+(spec|test).e2e.js'],
   testEnvironment: 'node',
   coveragePathIgnorePatterns: [

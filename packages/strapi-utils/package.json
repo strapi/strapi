@@ -14,9 +14,6 @@
     "lib": "./lib"
   },
   "main": "./lib",
-  "scripts": {
-    "test": "jest"
-  },
   "dependencies": {
     "date-fns": "^2.8.1",
     "knex": "^0.16.5",
