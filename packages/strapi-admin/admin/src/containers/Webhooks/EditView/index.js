@@ -77,9 +77,8 @@ function EditView() {
       isMounted.current = false;
       abortController.abort();
     };
-
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [abortController, id, isCreating]);
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, isCreating]);
 
   const { name } = modifiedData;
 
