@@ -76,8 +76,8 @@ function Inputs({
                   name={name}
                   onChange={e => {
                     handleChange(e);
-                    onBlur(e);
                   }}
+                  onBlur={onBlur}
                   value={value}
                 />
                 {hasError && <ErrorMessage>{error}</ErrorMessage>}

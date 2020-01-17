@@ -1,12 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useGlobalContext } from 'strapi-helper-plugin';
 
 import Wrapper from './Wrapper';
 import EventRow from './EventRow';
 
-const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
+const EventInput = ({
+  onBlur,
+  onChange,
+  name: inputName,
+  value: inputValue,
+}) => {
   const { formatMessage } = useGlobalContext();
+
+  useEffect(() => {
+    onBlur({ target: { name, value: inputValue } });
+  }, [inputValue, onBlur]);
 
   const headersName = [
     formatMessage({ id: `Settings.webhooks.events.create` }),
@@ -41,13 +50,11 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
 
   const handleChangeAll = ({ target: { name, value } }) => {
     let set = new Set(inputValue);
-
     if (value) {
       events[name].map(event => set.add(event));
     } else {
       events[name].map(event => set.delete(event));
     }
-
     onChange({ target: { name: inputName, value: Array.from(set) } });
   };
 
@@ -81,8 +88,13 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
   );
 };
 
+EventInput.defaultProps = {
+  onBlur: () => {},
+};
+
 EventInput.propTypes = {
   name: PropTypes.string.isRequired,
+  onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.array,
 };
