@@ -30,10 +30,16 @@ function StaticLinks() {
         const { icon, label, destination } = link;
 
         return (
-          <StyledLink to={destination} key={label}>
-            <FontAwesomeIcon icon={icon} />
-            <FormattedMessage id={`app.components.LeftMenuFooter.${label}`} />
-          </StyledLink>
+          <li key={label}>
+            <StyledLink
+              href={destination}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FontAwesomeIcon icon={icon} />
+              <FormattedMessage id={`app.components.LeftMenuFooter.${label}`} />
+            </StyledLink>
+          </li>
         );
       })}
     </ul>

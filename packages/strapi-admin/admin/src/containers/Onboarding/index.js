@@ -139,9 +139,7 @@ export class Onboarding extends React.Component {
               );
             })}
           </ul>
-          <div>
-            <StaticLinks />
-          </div>
+          <StaticLinks />
         </div>
 
         <div className="openBtn">
