@@ -1,23 +1,12 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { useGlobalContext } from 'strapi-helper-plugin';
 
 import Wrapper from './Wrapper';
 import EventRow from './EventRow';
 
-const EventInput = ({
-  onBlur,
-  onChange,
-  name: inputName,
-  value: inputValue,
-}) => {
+const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
   const { formatMessage } = useGlobalContext();
-  const onBlurRef = useRef();
-  onBlurRef.current = onBlur;
-
-  useEffect(() => {
-    onBlurRef.current();
-  }, [onBlurRef, inputValue]);
 
   const headersName = [
     formatMessage({ id: `Settings.webhooks.events.create` }),
@@ -101,4 +90,4 @@ EventInput.propTypes = {
   value: PropTypes.array,
 };
 
-export default React.memo(EventInput);
+export default EventInput;

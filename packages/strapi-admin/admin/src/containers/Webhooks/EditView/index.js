@@ -221,6 +221,10 @@ function EditView() {
       keys: name.split('.'),
       value,
     });
+
+    if (name === 'events' && submittedOnce) {
+      resetEventsErrors();
+    }
   };
 
   const handleClick = () => {
@@ -284,6 +288,12 @@ function EditView() {
     dispatch({
       type: 'ON_TRIGGER_CANCELED',
     });
+  };
+
+  const resetEventsErrors = () => {
+    const errors = formErrors;
+    delete errors.events;
+    setErrors(errors);
   };
 
   const resetHeadersErrors = () => {
