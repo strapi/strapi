@@ -60,7 +60,6 @@ const EventInput = ({
     onChange({ target: { name: inputName, value: Array.from(set) } });
   };
 
-  console.log('yoyo');
   return (
     <Wrapper>
       <table>
