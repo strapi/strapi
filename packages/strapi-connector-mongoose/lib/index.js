@@ -142,7 +142,6 @@ module.exports = function(strapi) {
         ({ connection }) => connection === connectionName
       ),
       target: strapi.components,
-      plugin: false,
     };
 
     return mountModels(options, ctx);
@@ -155,7 +154,6 @@ module.exports = function(strapi) {
         ({ connection }) => connection === connectionName
       ),
       target: strapi.models,
-      plugin: false,
     };
 
     return mountModels(options, ctx);
@@ -168,7 +166,6 @@ module.exports = function(strapi) {
         ({ connection }) => connection === connectionName
       ),
       target: strapi.admin.models,
-      plugin: false,
     };
 
     return mountModels(options, ctx);
@@ -185,7 +182,6 @@ module.exports = function(strapi) {
               ({ connection }) => connection === connectionName
             ),
             target: plugin.models,
-            plugin: name,
           },
           ctx
         );

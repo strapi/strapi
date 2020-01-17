@@ -1,7 +1,6 @@
 const _ = require('lodash');
 const { singular } = require('pluralize');
 
-/* global StrapiConfigs */
 module.exports = async ({
   ORM,
   loadedModel,
@@ -262,16 +261,20 @@ module.exports = async ({
     let previousAttributes;
     try {
       previousAttributes = JSON.parse(
-        (await StrapiConfigs.forge({
-          key: `db_model_${table}`,
-        }).fetch()).toJSON().value
+        (await strapi.models['core_store']
+          .forge({
+            key: `db_model_${table}`,
+          })
+          .fetch()).toJSON().value
       );
     } catch (err) {
       await storeTable(table, attributes);
       previousAttributes = JSON.parse(
-        (await StrapiConfigs.forge({
-          key: `db_model_${table}`,
-        }).fetch()).toJSON().value
+        (await strapi.models['core_store']
+          .forge({
+            key: `db_model_${table}`,
+          })
+          .fetch()).toJSON().value
       );
     }
 
@@ -494,23 +497,29 @@ const isColumn = ({ definition, attribute, name }) => {
 };
 
 const storeTable = async (table, attributes) => {
-  const existTable = await StrapiConfigs.forge({
-    key: `db_model_${table}`,
-  }).fetch();
+  const existTable = await strapi.models['core_store']
+    .forge({
+      key: `db_model_${table}`,
+    })
+    .fetch();
 
   if (existTable) {
-    return await StrapiConfigs.forge({
-      id: existTable.id,
-    }).save({
-      value: JSON.stringify(attributes),
-    });
+    return await strapi.models['core_store']
+      .forge({
+        id: existTable.id,
+      })
+      .save({
+        value: JSON.stringify(attributes),
+      });
   }
 
-  await StrapiConfigs.forge({
-    key: `db_model_${table}`,
-    type: 'object',
-    value: JSON.stringify(attributes),
-  }).save();
+  await strapi.models['core_store']
+    .forge({
+      key: `db_model_${table}`,
+      type: 'object',
+      value: JSON.stringify(attributes),
+    })
+    .save();
 };
 
 const uniqueColName = (table, key) => `${table}_${key}_unique`;
