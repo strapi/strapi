@@ -177,7 +177,7 @@ module.exports = function createComponentBuilder() {
             this.unsetRelation(oldAttribute);
           }
 
-          newAttribute.autoPopulate = oldAttribute.autoPopulate;
+          newAttribute.autoPopulate = newAttribute.autoPopulate || oldAttribute.autoPopulate;
 
           return this.setRelation({
             key,
