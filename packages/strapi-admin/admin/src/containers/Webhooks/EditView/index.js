@@ -157,6 +157,58 @@ function EditView() {
     actions: headersActions,
   };
 
+  const checkFormErrors = async (submit = false) => {
+    try {
+      await schema.validate(modifiedData, { abortEarly: false });
+
+      if (isMounted.current) {
+        setErrors({});
+
+        if (submit) {
+          submitForm();
+        }
+      }
+    } catch (err) {
+      if (isMounted.current) {
+        setErrors(getYupInnerErrors(err));
+
+        if (submit) {
+          strapi.notification.error('notification.form.error.fields');
+        }
+      }
+    }
+  };
+
+  const createWebhooks = async () => {
+    try {
+      await request(`/admin/webhooks`, {
+        method: 'POST',
+        body: cleanData(modifiedData),
+      });
+
+      if (isMounted.current) {
+        strapi.notification.success(`notification.success`);
+        goBack();
+      }
+    } catch (err) {
+      if (isMounted.current) {
+        strapi.notification.error('notification.error');
+      }
+    }
+  };
+
+  const getErrorMessage = error => {
+    if (!error) {
+      return null;
+    }
+
+    return formatMessage({
+      id: error.id,
+    });
+  };
+
+  const goBack = () => push('/settings/webhooks');
+
   const handleBlur = () => {
     if (submittedOnce) {
       checkFormErrors();
@@ -225,58 +277,6 @@ function EditView() {
     setSubmittedOnce(true);
     checkFormErrors(true);
   };
-
-  const checkFormErrors = async (submit = false) => {
-    try {
-      await schema.validate(modifiedData, { abortEarly: false });
-
-      if (isMounted.current) {
-        setErrors({});
-
-        if (submit) {
-          submitForm();
-        }
-      }
-    } catch (err) {
-      if (isMounted.current) {
-        setErrors(getYupInnerErrors(err));
-
-        if (submit) {
-          strapi.notification.error('notification.form.error.fields');
-        }
-      }
-    }
-  };
-
-  const createWebhooks = async () => {
-    try {
-      await request(`/admin/webhooks`, {
-        method: 'POST',
-        body: cleanData(modifiedData),
-      });
-
-      if (isMounted.current) {
-        strapi.notification.success(`notification.success`);
-        goBack();
-      }
-    } catch (err) {
-      if (isMounted.current) {
-        strapi.notification.error('notification.error');
-      }
-    }
-  };
-
-  const getErrorMessage = error => {
-    if (!error) {
-      return null;
-    }
-
-    return formatMessage({
-      id: error.id,
-    });
-  };
-
-  const goBack = () => push('/settings/webhooks');
 
   const onCancelTrigger = () => {
     abortController.abort();
