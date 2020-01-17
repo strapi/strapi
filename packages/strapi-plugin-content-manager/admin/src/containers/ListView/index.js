@@ -237,7 +237,7 @@ function ListView({
 
   const headerAction = [
     {
-      title: formatMessage(
+      label: formatMessage(
         {
           id: 'content-manager.containers.List.addAnEntry',
         },
