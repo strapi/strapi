@@ -12,7 +12,7 @@ const isPolymorphicAssoc = assoc => {
   return assoc.nature.toLowerCase().indexOf('morph') !== -1;
 };
 
-module.exports = ({ models, target, plugin = false }, ctx) => {
+module.exports = ({ models, target }, ctx) => {
   const { instance } = ctx;
 
   // Parse every authenticated model.
@@ -27,10 +27,6 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       primaryKey: '_id',
       primaryKeyType: 'string',
     });
-
-    if (!plugin) {
-      global[definition.globalName] = {};
-    }
 
     const componentAttributes = Object.keys(definition.attributes).filter(key =>
       ['component', 'dynamiczone'].includes(definition.attributes[key].type)
@@ -324,10 +320,6 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
         }
       }
     });
-
-    if (!plugin) {
-      global[definition.globalName] = Model;
-    }
 
     // Expose ORM functions through the `target` object.
     target[model] = _.assign(Model, target[model]);

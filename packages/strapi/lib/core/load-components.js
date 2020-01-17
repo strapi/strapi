@@ -3,11 +3,10 @@
 const _ = require('lodash');
 const { join } = require('path');
 const { exists } = require('fs-extra');
-const { LoadingError } = require('./errors');
 const loadFiles = require('../load/load-files');
 
-module.exports = async ({ dir }) => {
-  const componentsDir = join(dir, 'components');
+module.exports = async strapi => {
+  const componentsDir = join(strapi.dir, 'components');
 
   if (!(await exists(componentsDir))) {
     return {};
@@ -22,20 +21,22 @@ module.exports = async ({ dir }) => {
       const filePath = join(componentsDir, category, schema.__filename__);
 
       if (!schema.connection) {
-        throw new LoadingError(
-          `Component ${key} is missing a "connection" property. (Check file ${filePath})`
+        return strapi.stopWithError(
+          `Component ${key} is missing a "connection" property.\nVerify file ${filePath}.`
         );
       }
 
       if (!schema.collectionName) {
-        throw new LoadingError(
-          `Component ${key} is missing a "collectionName" property. (Check file ${filePath})`
+        return strapi.stopWithError(
+          `Component ${key} is missing a "collectionName" property.\nVerify file ${filePath}.`
         );
       }
 
-      acc[`${category}.${key}`] = Object.assign(schema, {
+      const uid = `${category}.${key}`;
+
+      acc[uid] = Object.assign(schema, {
         __schema__: _.cloneDeep(schema),
-        uid: key,
+        uid,
         category,
         modelType: 'component',
         modelName: key,
