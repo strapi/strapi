@@ -242,10 +242,10 @@ async function watchAdmin({ dir, host, port, options }) {
     );
   });
 
-  watchFiles(dir);
+  watchFiles(dir, options.watchIgnoreFiles);
 }
 
-async function watchFiles(dir) {
+async function watchFiles(dir, ignoreFiles = []) {
   const cacheDir = path.join(dir, '.cache');
   const pkgJSON = require(path.join(dir, 'package.json'));
   const admin = path.join(dir, 'admin');
@@ -268,6 +268,7 @@ async function watchFiles(dir) {
   const watcher = chokidar.watch(filesToWatch, {
     ignoreInitial: true,
     ignorePermissionErrors: true,
+    ignored: [...ignoreFiles],
   });
 
   watcher.on('all', async (event, filePath) => {
