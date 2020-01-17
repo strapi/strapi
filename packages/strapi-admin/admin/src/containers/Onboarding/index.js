@@ -14,6 +14,7 @@ import { GlobalContext } from 'strapi-helper-plugin';
 import injectSaga from '../../utils/injectSaga';
 import injectReducer from '../../utils/injectReducer';
 import OnboardingVideo from '../../components/OnboardingVideo';
+import StaticLinks from '../../components/StaticLinks';
 import Wrapper from './Wrapper';
 import {
   getVideos,
@@ -30,7 +31,7 @@ import saga from './saga';
 export class Onboarding extends React.Component {
   static contextType = GlobalContext;
 
-  state = { showVideos: false };
+  state = { showVideos: true };
 
   componentDidMount() {
     this.props.getVideos();
@@ -138,6 +139,9 @@ export class Onboarding extends React.Component {
               );
             })}
           </ul>
+          <div>
+            <StaticLinks />
+          </div>
         </div>
 
         <div className="openBtn">
