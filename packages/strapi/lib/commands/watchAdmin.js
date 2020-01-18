@@ -21,6 +21,11 @@ module.exports = async function() {
     `http://${host}:${port}`
   );
   const adminPath = _.get(serverConfig, 'admin.path', '/admin');
+  const adminWatchIgnoreFiles = _.get(
+    serverConfig,
+    'admin.watchIgnoreFiles',
+    []
+  );
 
   strapiAdmin.watchAdmin({
     dir,
@@ -29,6 +34,7 @@ module.exports = async function() {
     options: {
       backend: adminBackend,
       publicPath: addSlash(adminPath),
+      watchIgnoreFiles: adminWatchIgnoreFiles,
     },
   });
 };

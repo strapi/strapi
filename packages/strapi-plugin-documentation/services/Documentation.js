@@ -1931,7 +1931,7 @@ module.exports = {
             const overrideDocumentationPath = isPlugin
               ? path.resolve(
                   strapi.config.appPath,
-                  'plugins',
+                  'extensions',
                   current,
                   'documentation',
                   version,
