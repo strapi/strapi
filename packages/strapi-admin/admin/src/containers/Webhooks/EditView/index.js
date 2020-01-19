@@ -108,7 +108,7 @@ function EditView() {
       label: formatMessage({
         id: `Settings.webhooks.trigger`,
       }),
-      onClick: handleTrigger,
+      onClick: () => handleTrigger(),
       style: {
         padding: '0 15px',
       },
@@ -132,7 +132,7 @@ function EditView() {
       label: formatMessage({
         id: `app.components.Button.reset`,
       }),
-      onClick: handleReset,
+      onClick: () => handleReset(),
       style: {
         padding: '0 20px',
       },
@@ -236,6 +236,7 @@ function EditView() {
   };
 
   const handleTrigger = async () => {
+    console.log('triggering');
     dispatch({
       type: 'SET_IS_TRIGGERING',
     });
