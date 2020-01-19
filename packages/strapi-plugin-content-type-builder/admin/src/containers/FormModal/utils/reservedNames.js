@@ -29,7 +29,6 @@ const DB_RESERVED_SYNTAX = [
   'trigger',
   'work',
   'zone',
-
 ];
 
 const RESERVED_NAMES = [
