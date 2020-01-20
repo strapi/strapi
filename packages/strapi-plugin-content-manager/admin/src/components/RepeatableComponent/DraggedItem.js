@@ -195,7 +195,7 @@ const DraggedItem = ({
                           isRepeatable={currentField.repeatable}
                           key={field.name}
                           label={metas.label}
-                          isSub
+                          isNested
                           name={keys}
                           max={currentField.max}
                           min={currentField.min}

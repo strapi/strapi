@@ -20,7 +20,7 @@ const FieldComponent = ({
   icon,
   isFromDynamicZone,
   isRepeatable,
-  isSub,
+  isNested,
   label,
   max,
   min,
@@ -88,7 +88,7 @@ const FieldComponent = ({
           componentUid={componentUid}
           fields={displayedFields}
           isFromDynamicZone={isFromDynamicZone}
-          isSub={isSub}
+          isNested={isNested}
           max={max}
           min={min}
           name={name}
@@ -104,7 +104,7 @@ FieldComponent.defaultProps = {
   icon: 'smile',
   isFromDynamicZone: false,
   isRepeatable: false,
-  isSub: false,
+  isNested: false,
   max: Infinity,
   min: -Infinity,
 };
@@ -115,7 +115,7 @@ FieldComponent.propTypes = {
   icon: PropTypes.string,
   isFromDynamicZone: PropTypes.bool,
   isRepeatable: PropTypes.bool,
-  isSub: PropTypes.bool,
+  isNested: PropTypes.bool,
   label: PropTypes.string.isRequired,
   max: PropTypes.number,
   min: PropTypes.number,

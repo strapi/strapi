@@ -18,7 +18,7 @@ const RepeatableComponent = ({
   componentValue,
   componentValueLength,
   fields,
-  isSub,
+  isNested,
   max,
   min,
   name,
@@ -29,7 +29,7 @@ const RepeatableComponent = ({
 
   const componentErrorKeys = Object.keys(formErrors)
     .filter(errorKey => {
-      return take(errorKey.split('.'), isSub ? 3 : 1).join('.') === name;
+      return take(errorKey.split('.'), isNested ? 3 : 1).join('.') === name;
     })
     .map(errorKey => {
       return errorKey
@@ -164,7 +164,7 @@ RepeatableComponent.defaultProps = {
   componentValue: null,
   componentValueLength: 0,
   fields: [],
-  isSub: false,
+  isNested: false,
   max: Infinity,
   min: -Infinity,
 };
@@ -174,7 +174,7 @@ RepeatableComponent.propTypes = {
   componentValue: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   componentValueLength: PropTypes.number,
   fields: PropTypes.array,
-  isSub: PropTypes.bool,
+  isNested: PropTypes.bool,
   max: PropTypes.number,
   min: PropTypes.number,
   name: PropTypes.string.isRequired,
