@@ -228,7 +228,7 @@ function EditView() {
 
     if (submittedOnce) {
       if (name === 'events') {
-        resetError(name);
+        resetEventsError();
       }
       if (name.includes('headers')) {
         resetHeadersError(name);
@@ -300,9 +300,9 @@ function EditView() {
     });
   };
 
-  const resetError = name => {
+  const resetEventsError = () => {
     const errors = formErrors;
-    delete errors[name];
+    delete errors.events;
     setErrors(errors);
   };
 
