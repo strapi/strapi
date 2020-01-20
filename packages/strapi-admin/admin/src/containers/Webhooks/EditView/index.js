@@ -236,7 +236,6 @@ function EditView() {
   };
 
   const handleTrigger = async () => {
-    console.log('triggering');
     dispatch({
       type: 'SET_IS_TRIGGERING',
     });
