@@ -43,12 +43,14 @@ module.exports = {
           let msg = {
             from: options.from,
             to: options.to,
-            reply_to: options.replyTo,
+            replyTo: options.replyTo,
             subject: options.subject,
             text: options.text,
             html: options.html,
             templateId: options.templateId,
             dynamic_template_data: options.dynamic_template_data,
+            sendAt: options.sendAt,
+            batchId: options.batchId,
           };
 
           sendgrid.send(msg, function(err) {
