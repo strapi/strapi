@@ -29,6 +29,7 @@ program
   .option('--dbauth <dbauth>', 'Authentication Database')
   .option('--dbfile <dbfile>', 'Database file path for sqlite')
   .option('--dbforce', 'Overwrite database content if any')
+  .option('--starter <repository>', 'Bootstrap a Strapi application starter')
   .description('create a new application')
   .action(directory => {
     projectName = directory;
