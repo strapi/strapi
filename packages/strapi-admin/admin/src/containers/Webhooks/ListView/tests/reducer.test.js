@@ -63,4 +63,6 @@ describe('Admin | containers | Webhooks | ListView | reducer', () => {
     const expectedState = state.setIn(['webhooks', ...keys], action.value);
     expect(reducer(state, action)).toEqual(expectedState);
   });
+
+  it('should set a webhook id to webhookToDelete on SET_WEBHOOK_TO_DELETE', () => {});
 });
