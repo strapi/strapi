@@ -1,4 +1,4 @@
-# Schedule article
+# Scheduled publication
 
 This guide will explain how to create an article schedule system.
 
