@@ -6,7 +6,7 @@
 
 import React, { useEffect, useReducer, useRef, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { get, isEmpty, isEqual } from 'lodash';
+import { get, isEmpty, isEqual, omit } from 'lodash';
 import { Header, Inputs as InputsIndex } from '@buffetjs/custom';
 import { Play } from '@buffetjs/icons';
 import {
@@ -82,8 +82,7 @@ function EditView() {
 
   const { name } = modifiedData;
 
-  const areActionDisabled =
-    isEqual(initialData, modifiedData) || Object.keys(formErrors).length > 0;
+  const areActionDisabled = isEqual(initialData, modifiedData);
 
   const isTriggerActionDisabled =
     isCreating || (!isCreating && !areActionDisabled) || isTriggering;
@@ -188,7 +187,11 @@ function EditView() {
       });
 
       if (isMounted.current) {
-        strapi.notification.success(`notification.success`);
+        dispatch({
+          type: 'SUBMIT_SUCCEEDED',
+        });
+
+        strapi.notification.success(`Settings.webhooks.created`);
         goBack();
       }
     } catch (err) {
@@ -210,12 +213,6 @@ function EditView() {
 
   const goBack = () => push('/settings/webhooks');
 
-  const handleBlur = () => {
-    if (submittedOnce) {
-      checkFormErrors();
-    }
-  };
-
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
       type: 'ON_CHANGE',
@@ -223,8 +220,13 @@ function EditView() {
       value,
     });
 
-    if (name === 'events' && submittedOnce) {
-      resetEventsErrors();
+    if (submittedOnce) {
+      if (name === 'events') {
+        resetEventsError();
+      }
+      if (name.includes('headers')) {
+        resetHeadersError(name);
+      }
     }
   };
 
@@ -269,6 +271,7 @@ function EditView() {
       type: 'ON_HEADER_REMOVE',
       index,
     });
+
     resetHeadersErrors();
   };
 
@@ -291,10 +294,16 @@ function EditView() {
     });
   };
 
-  const resetEventsErrors = () => {
+  const resetEventsError = () => {
     const errors = formErrors;
     delete errors.events;
     setErrors(errors);
+  };
+
+  const resetHeadersError = keys => {
+    const errors = formErrors;
+
+    setErrors(omit(errors, [keys]));
   };
 
   const resetHeadersErrors = () => {
@@ -334,9 +343,16 @@ function EditView() {
         body,
       });
 
-      strapi.notification.error('notification.form.success.fields');
+      if (isMounted.current) {
+        dispatch({
+          type: 'SUBMIT_SUCCEEDED',
+        });
+        strapi.notification.success('notification.form.success.fields');
+      }
     } catch (err) {
-      strapi.notification.error('notification.error');
+      if (isMounted.current) {
+        strapi.notification.error('notification.error');
+      }
     }
   };
 
@@ -371,7 +387,6 @@ function EditView() {
                       })}
                       error={getErrorMessage(get(formErrors, key, null))}
                       name={key}
-                      onBlur={handleBlur}
                       onChange={handleChange}
                       validations={form[key].validations}
                       value={modifiedData[key] || form[key].value}

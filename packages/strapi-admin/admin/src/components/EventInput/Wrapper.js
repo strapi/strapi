@@ -52,6 +52,9 @@ const Wrapper = styled.div`
     td {
       height: 54px;
       padding-bottom: 3px;
+      input[type='checkbox']:disabled:before {
+        background-color: #e8e5e5;
+      }
       &:first-of-type {
         width: 200px;
         padding-left: 30px;

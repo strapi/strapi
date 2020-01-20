@@ -11,19 +11,9 @@ import getBorderColor from './utils/getBorderColor';
 import keys from './keys';
 import Wrapper from './Wrapper';
 
-const HeadersInput = ({
-  errors,
-  name,
-  onBlur,
-  onClick,
-  onChange,
-  onRemove,
-  value,
-}) => {
+const HeadersInput = ({ errors, name, onClick, onChange, onRemove, value }) => {
   const formatOption = value => ({ value: value, label: value });
   const options = keys.map(key => formatOption(key));
-
-  const handleBlur = () => onBlur({ target: { name, value } });
 
   const handleChangeKey = (selected, name) => {
     if (selected === null) {
@@ -102,7 +92,6 @@ const HeadersInput = ({
               <section>
                 <CreatableSelect
                   isClearable
-                  onBlur={handleBlur}
                   onChange={e => handleChangeKey(e, `${name}.${index}.key`)}
                   name={`${name}.${index}.key`}
                   options={options}
@@ -114,7 +103,6 @@ const HeadersInput = ({
               </section>
               <section>
                 <InputText
-                  onBlur={handleBlur}
                   className={
                     get(errors, `headers.${index}.value`, null) && 'bordered'
                   }
@@ -145,7 +133,6 @@ const HeadersInput = ({
 HeadersInput.defaultProps = {
   errors: {},
   handleClick: () => {},
-  onBlur: () => {},
   onClick: () => {},
   onRemove: () => {},
 };
@@ -154,7 +141,6 @@ HeadersInput.propTypes = {
   errors: PropTypes.object,
   handleClick: PropTypes.func,
   name: PropTypes.string.isRequired,
-  onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
   onClick: PropTypes.func.isRequired,
   onRemove: PropTypes.func,
