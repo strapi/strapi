@@ -188,7 +188,7 @@ function EditView() {
 
       if (isMounted.current) {
         dispatch({
-          type: 'DATA_SUBMITTED',
+          type: 'SUBMIT_SUCCEEDED',
         });
 
         strapi.notification.success(`Settings.webhooks.created`);
@@ -212,12 +212,6 @@ function EditView() {
   };
 
   const goBack = () => push('/settings/webhooks');
-
-  const handleBlur = () => {
-    if (submittedOnce) {
-      checkFormErrors();
-    }
-  };
 
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
@@ -351,7 +345,7 @@ function EditView() {
 
       if (isMounted.current) {
         dispatch({
-          type: 'DATA_SUBMITTED',
+          type: 'SUBMIT_SUCCEEDED',
         });
         strapi.notification.success('notification.form.success.fields');
       }
@@ -393,7 +387,6 @@ function EditView() {
                       })}
                       error={getErrorMessage(get(formErrors, key, null))}
                       name={key}
-                      onBlur={handleBlur}
                       onChange={handleChange}
                       validations={form[key].validations}
                       value={modifiedData[key] || form[key].value}
