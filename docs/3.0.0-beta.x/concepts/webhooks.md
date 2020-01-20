@@ -23,11 +23,23 @@ The way a webhook works is by delivering informations to a receiving application
 
 By default strapi webhook can be trigger by the following events:
 
-- `entry.create`: Entry create
-- `entry.update`: Entry update
-- `entry.delete`: Entry delete
-- `media.create`: Media create
-- `media.delete`: Media delete
+| Name           | Description                                     |
+| -------------- | ----------------------------------------------- |
+| `entry.create` | Triggered when a Content Type entry is created. |
+| `entry.update` | Triggered when a Content Type entry is updated. |
+| `entry.delete` | Triggered when a Content Type entry is deleted. |
+| `media.create` | Triggered when a media is created.              |
+| `media.delete` | Triggered when a media is deleted.              |
+
+## Payloads
+
+### Headers
+
+When a payload is delivered to your webhook's URL, it will contain specific headers:
+
+| Header           | Description                                |
+| ---------------- | ------------------------------------------ |
+| `X-Strapi-Event` | Name of the event type that was triggered. |
 
 ### Entry created
 
