@@ -61,9 +61,6 @@ describe('Admin | containers | Webhooks | ListView | reducer', () => {
     };
 
     const expectedState = state.setIn(['webhooks', ...keys], action.value);
-
     expect(reducer(state, action)).toEqual(expectedState);
-
-    //expect(true).toBe(true);
   });
 });
