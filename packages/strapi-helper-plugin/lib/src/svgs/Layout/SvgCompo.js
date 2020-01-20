@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const SvgCompo = props => (
-  <svg width="13" height="11" xmlns="http://www.w3.org/2000/svg" {...props}>
+  <svg width="13" height="13" xmlns="http://www.w3.org/2000/svg" {...props}>
     <g fill={props.fill} fillRule="evenodd">
       <rect x="4" y="8" width="9" height="3" rx="1.5" />
       <rect y="4" width="9" height="3" rx="1.5" />

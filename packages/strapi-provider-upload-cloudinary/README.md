@@ -4,7 +4,7 @@
 
 ```bash
 npm i --save strapi-provider-upload-cloudinary
-````
+```
 
 ## Resources
 
