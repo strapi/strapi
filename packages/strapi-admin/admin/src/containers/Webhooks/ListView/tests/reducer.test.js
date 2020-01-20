@@ -51,9 +51,7 @@ describe('Admin | containers | Webhooks | ListView | reducer', () => {
     const state = initialState;
 
     const webhookToUpdate = 1;
-
     const keys = [webhookToUpdate, 'isEnabled'];
-
     const action = {
       type: 'SET_WEBHOOK_ENABLED',
       keys: keys,
@@ -64,5 +62,64 @@ describe('Admin | containers | Webhooks | ListView | reducer', () => {
     expect(reducer(state, action)).toEqual(expectedState);
   });
 
-  it('should set a webhook id to webhookToDelete on SET_WEBHOOK_TO_DELETE', () => {});
+  it('should set a webhook id to webhookToDelete on SET_WEBHOOK_TO_DELETE', () => {
+    const state = initialState;
+
+    const webhookToDelete = 1;
+    const action = {
+      type: 'SET_WEBHOOK_TO_DELETE',
+      id: webhookToDelete,
+    };
+
+    const expectedState = state.set('webhookToDelete', action.id);
+    expect(reducer(state, action)).toEqual(expectedState);
+  });
+
+  it('should add a webhook id to the webhookToDelete array on SET_WEBHOOKS_TO_DELETE if value is true', () => {
+    const state = initialState;
+
+    const webhookToDelete = 1;
+    const action = {
+      type: 'SET_WEBHOOKS_TO_DELETE',
+      id: webhookToDelete,
+      value: true,
+    };
+
+    const expectedState = state.set(
+      'webhooksToDelete',
+      state.get('webhooksToDelete').push(webhookToDelete)
+    );
+    expect(reducer(state, action)).toEqual(expectedState);
+  });
+
+  it('should remove a webhook id to the webhookToDelete array on SET_WEBHOOKS_TO_DELETE if value is false', () => {
+    const state = initialState;
+
+    const webhookToDelete = 1;
+    const action = {
+      type: 'SET_WEBHOOKS_TO_DELETE',
+      id: webhookToDelete,
+      value: false,
+    };
+
+    const expectedState = state.set(
+      'webhooksToDelete',
+      state.get('webhooksToDelete').remove(webhookToDelete)
+    );
+    expect(reducer(state, action)).toEqual(expectedState);
+  });
+
+  it('should update webhooks and empty webhooksToDelete on WEBHOOKS_DELETED', () => {
+    const state = initialState;
+
+    const action = {
+      type: 'WEBHOOKS_DELETED',
+    };
+
+    const expectedState = state.set(
+      'webhooksToDelete',
+      initialState.get('webhooksToDelete')
+    );
+    expect(reducer(state, action)).toEqual(expectedState);
+  });
 });
