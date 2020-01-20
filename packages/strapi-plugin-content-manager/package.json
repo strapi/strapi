@@ -8,9 +8,6 @@
     "description": "content-manager.plugin.description",
     "required": true
   },
-  "scripts": {
-    "test": "jest services"
-  },
   "dependencies": {
     "classnames": "^2.2.6",
     "codemirror": "^5.46.0",

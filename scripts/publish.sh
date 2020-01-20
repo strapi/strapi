@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Force start from root folder
 cd "$(dirname "$0")/.."
 
@@ -6,7 +8,7 @@ set -e
 version=""
 
 echo "Please enter the version you want to publish"
-read version
+read -r version
 
 # publish packages
 ./node_modules/.bin/lerna publish --no-push --dist-tag beta --exact "$version"
