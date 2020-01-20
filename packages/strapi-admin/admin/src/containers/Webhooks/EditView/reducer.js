@@ -24,6 +24,8 @@ const reducer = (state, action) => {
       return state.updateIn(['modifiedData', ...action.keys], arr =>
         arr.push(fromJS(header))
       );
+    case 'DATA_SUBMITTED':
+      return state.update('initialData', () => state.get('modifiedData'));
     case 'GET_DATA_SUCCEEDED': {
       const headers = get(action, ['data', 'headers'], {});
       let formattedHeaders = [header];
