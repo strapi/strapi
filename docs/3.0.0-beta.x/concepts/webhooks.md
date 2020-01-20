@@ -9,15 +9,47 @@ The way a webhook works is by delivering informations to a receiving application
 
 ## How to use
 
+To access the webhook configuration panel, go to `Settings` > `Webhooks`.
+
+![Webhooks home](../assets/concepts/webhooks/home.png)
+
 ### Create a webhook
 
-### Test a webhook
+Click on `Add new webhook` and fill in the form.
 
-### Enabled and disable a webhook
+![create](../assets/concepts/webhooks/create.png)
+
+### Trigger a webhook
+
+You can test out a webhook with a test event: `trigger-test`. Open the webhook you want to trigger:
+
+![Trigger ](../assets/concepts/webhooks/trigger_start.png)
+
+Click on the `Trigger` button.
+
+![Trigger pending](../assets/concepts/webhooks/trigger.png)
+
+You will see the trigger request appear and get the result.
+
+![Trigger result](../assets/concepts/webhooks/trigger_result.png)
+
+### Enable and disable a webhook
+
+You can enable or disable a webhook from the list view directly
+
+![Disable webhook](../assets/concepts/webhooks/disable.png)
 
 ### Update a webhook
 
+You can edit any webhook by clicking on the `pen` icon in the webhook list view.
+
+![Update webhook](../assets/concepts/webhooks/list.png)
+
 ### Delete a webhook
+
+You can delete a webhook by clicking on the `trash` icon.
+
+![Delete webhook](../assets/concepts/webhooks/disable.png)
 
 ## Available events
 
@@ -176,10 +208,6 @@ This event is triggered only when you delete a media through the media interface
 ```
 
 ## Developer documentation
-
-### Architecture
-
-![Webhooks architecture diagram](../assets/concepts/diagram-architecture.png)
 
 ### Available configurations
 
