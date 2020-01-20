@@ -10,6 +10,7 @@ export { default as BackHeader } from './components/BackHeader';
 export { default as BlockerComponent } from './components/BlockerComponent';
 export { default as Button } from './components/Button';
 export { default as ButtonModal } from './components/ButtonModal';
+export { default as CircleButton } from './components/CircleButton';
 export { default as ContainerFluid } from './components/ContainerFluid';
 export {
   default as EmptyAttributesBlock,
@@ -73,9 +74,11 @@ export {
 } from './components/InputToggleWithErrors';
 
 export { default as Label } from './components/Label';
+export { default as LeftMenu } from './components/LeftMenu';
 export { default as LeftMenuList } from './components/LeftMenuList';
 export { default as LiLink } from './components/LiLink';
 export { default as List } from './components/List';
+export { default as ListButton } from './components/ListButton';
 export { default as ListRow } from './components/ListRow';
 export { default as ListWrapper } from './components/ListWrapper';
 export { default as ListHeader } from './components/ListHeader';

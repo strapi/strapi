@@ -2,8 +2,8 @@
 
 const _ = require('lodash');
 const yup = require('yup');
+const { formatYupErrors } = require('strapi-utils');
 
-const formatYupErrors = require('./yup-formatter');
 const createSchema = require('./model-schema');
 const removeEmptyDefaults = require('./remove-empty-defaults');
 const { nestedComponentSchema } = require('./component');

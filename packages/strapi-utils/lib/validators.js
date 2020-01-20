@@ -1,14 +1,14 @@
 'use strict';
 
-const { ValidationError } = require('yup');
+const yup = require('yup');
 
 /**
  * Returns a formatted error for http responses
  * @param {Object} validationError - a Yup ValidationError
  */
 const formatYupErrors = validationError => {
-  if (!(validationError instanceof ValidationError)) {
-    throw new Error('Error validation input');
+  if (!validationError.inner) {
+    throw new Error('invalid.input');
   }
 
   if (validationError.inner.length === 0) {
@@ -22,4 +22,7 @@ const formatYupErrors = validationError => {
   }, {});
 };
 
-module.exports = formatYupErrors;
+module.exports = {
+  yup,
+  formatYupErrors,
+};
