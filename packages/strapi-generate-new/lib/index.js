@@ -39,6 +39,7 @@ module.exports = (projectDirectory, cliArguments) => {
     strapiVersion: require('../package.json').version,
     debug: cliArguments.debug !== undefined,
     quick: cliArguments.quickstart !== undefined,
+    starter: cliArguments.starter,
     docker: process.env.DOCKER === 'true',
     uuid: uuid(),
     deviceId: machineIdSync(),

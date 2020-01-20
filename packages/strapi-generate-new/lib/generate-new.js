@@ -14,6 +14,7 @@ const stopProcess = require('./utils/stop-process');
 const createCLIDatabaseProject = require('./create-cli-db-project');
 const createCustomizeProject = require('./create-customized-project');
 const createQuickStartProject = require('./create-quickstart-project');
+const createStarterProject = require('./create-starter-project');
 
 module.exports = async scope => {
   const hasDatabaseConfig = Boolean(scope.database);
@@ -42,11 +43,15 @@ module.exports = async scope => {
 
   await trackUsage({ event: 'willCreateProject', scope });
 
+  // if cli starter create project
+  if (scope.starter) {
+    return createStarterProject(scope);
+  }
+
   // if database config is provided don't test the connection and create the project directly
   if (hasDatabaseConfig) {
     return createCLIDatabaseProject(scope);
   }
-
   // if cli quickstart create project with default sqlite options
   if (scope.quick === true) {
     return createQuickStartProject(scope);
