@@ -77,7 +77,8 @@ function EditView() {
       isMounted.current = false;
       abortController.abort();
     };
-  }, [abortController, id, isCreating]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, isCreating]);
 
   const { name } = modifiedData;
 
@@ -107,7 +108,7 @@ function EditView() {
       label: formatMessage({
         id: `Settings.webhooks.trigger`,
       }),
-      onClick: handleTrigger,
+      onClick: () => handleTrigger(),
       style: {
         padding: '0 15px',
       },
@@ -131,7 +132,7 @@ function EditView() {
       label: formatMessage({
         id: `app.components.Button.reset`,
       }),
-      onClick: handleReset,
+      onClick: () => handleReset(),
       style: {
         padding: '0 20px',
       },
@@ -221,6 +222,10 @@ function EditView() {
       keys: name.split('.'),
       value,
     });
+
+    if (name === 'events' && submittedOnce) {
+      resetEventsErrors();
+    }
   };
 
   const handleClick = () => {
@@ -284,6 +289,12 @@ function EditView() {
     dispatch({
       type: 'ON_TRIGGER_CANCELED',
     });
+  };
+
+  const resetEventsErrors = () => {
+    const errors = formErrors;
+    delete errors.events;
+    setErrors(errors);
   };
 
   const resetHeadersErrors = () => {
