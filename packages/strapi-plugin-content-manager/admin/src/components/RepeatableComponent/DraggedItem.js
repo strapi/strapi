@@ -35,6 +35,7 @@ const DraggedItem = ({
     modifiedData,
     moveComponentField,
     removeRepeatableField,
+    triggerFormValidation,
   } = useDataManager();
   const { setIsDraggingComponent, unsetIsDraggingComponent } = useEditView();
   const mainField = get(schema, ['settings', 'mainField'], 'id');
@@ -127,6 +128,8 @@ const DraggedItem = ({
     end: () => {
       // Enable the relations select to fire requests
       unsetIsDraggingComponent();
+      // Update the errors
+      triggerFormValidation();
     },
     collect: monitor => ({
       isDragging: monitor.isDragging(),
@@ -171,50 +174,53 @@ const DraggedItem = ({
         ref={refs}
       />
       <Collapse isOpen={isOpen} style={{ backgroundColor: '#FAFAFB' }}>
-        <FormWrapper hasErrors={hasErrors} isOpen={isOpen}>
-          {fields.map((fieldRow, key) => {
-            return (
-              <div className="row" key={key}>
-                {fieldRow.map(field => {
-                  const currentField = getField(field.name);
-                  const isComponent =
-                    get(currentField, 'type', '') === 'component';
-                  const keys = `${componentFieldName}.${field.name}`;
+        {!isDragging && (
+          <FormWrapper hasErrors={hasErrors} isOpen={isOpen}>
+            {fields.map((fieldRow, key) => {
+              return (
+                <div className="row" key={key}>
+                  {fieldRow.map(field => {
+                    const currentField = getField(field.name);
+                    const isComponent =
+                      get(currentField, 'type', '') === 'component';
+                    const keys = `${componentFieldName}.${field.name}`;
 
-                  if (isComponent) {
-                    const componentUid = currentField.component;
-                    const metas = getMeta(field.name);
+                    if (isComponent) {
+                      const componentUid = currentField.component;
+                      const metas = getMeta(field.name);
+
+                      return (
+                        <FieldComponent
+                          componentUid={componentUid}
+                          isRepeatable={currentField.repeatable}
+                          key={field.name}
+                          label={metas.label}
+                          isNested
+                          name={keys}
+                          max={currentField.max}
+                          min={currentField.min}
+                        />
+                      );
+                    }
 
                     return (
-                      <FieldComponent
-                        componentUid={componentUid}
-                        isRepeatable={currentField.repeatable}
-                        key={field.name}
-                        label={metas.label}
-                        name={keys}
-                        max={currentField.max}
-                        min={currentField.min}
-                      />
+                      <div key={field.name} className={`col-${field.size}`}>
+                        <Inputs
+                          autoFocus={false}
+                          keys={keys}
+                          layout={schema}
+                          name={field.name}
+                          onChange={() => {}}
+                          onBlur={hasErrors ? checkFormErrors : null}
+                        />
+                      </div>
                     );
-                  }
-
-                  return (
-                    <div key={field.name} className={`col-${field.size}`}>
-                      <Inputs
-                        autoFocus={false}
-                        keys={keys}
-                        layout={schema}
-                        name={field.name}
-                        onChange={() => {}}
-                        onBlur={hasErrors ? checkFormErrors : null}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })}
-        </FormWrapper>
+                  })}
+                </div>
+              );
+            })}
+          </FormWrapper>
+        )}
       </Collapse>
     </>
   );
