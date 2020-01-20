@@ -1,24 +1,23 @@
 # Front-end Development
 
-::: danger
-This feature is currently not available (coming soon).
-:::
+Strapi's admin panel and plugins system aim to be an easy and powerful way to create new features.
 
-<!--
+The admin panel is a [React](https://facebook.github.io/react/) application which can embed other React applications. These other React applications are the `admin` parts of each Strapi's plugins.
+
+## Environment setup
+
+To enable local plugin development, you need to start your application with the front-end development mode activated:
+
+```bash
+$ cd my-app
+$ yarn develop --watch-admin
+```
 
 ## Admin panel
 
 Strapi's admin panel and plugins system aim to be an easy and powerful way to create new features.
 
 The admin panel is a [React](https://facebook.github.io/react/) application which can embed other React applications. These other React applications are the `admin` parts of each Strapi's plugins.
-
-### Admin Lifecycle
-
-The admin package has the following lifecycle.
-
-1. Retrieve all the installed plugin and and store them into the main redux store
-2. Load until all the plugin emit the event `isReady`
-3. Runtime
 
 ### Strapi global variable
 
@@ -44,52 +43,6 @@ Display a loader that will prevent the user from interacting with the applicatio
 
 Remove the loader so the user can interact with the application
 
-#### `strapi.injectSaga`
-
-Dynamically inject a plugin's saga.
-
-**Path —** `plugins/my-plugin/admin/src/containers/App/index.js`.
-
-```js
-import React from 'react';
-import { compose } from 'redux';
-import pluginId from '../../pluginId';
-import saga from './saga';
-
-class App extends React.Component {
-  render() {
-    return null;
-  }
-}
-
-const withSaga = strapi.injectSaga({ key: 'app', saga, pluginId });
-
-export default compose(withSaga)(App);
-```
-
-#### `strapi.injectReducer`
-
-Dynamically inject a plugin's reducer.
-
-**Path —** `plugins/my-plugin/admin/src/containers/App/index.js`.
-
-```js
-import React from 'react';
-import { compose } from 'redux';
-import pluginId from '../../pluginId';
-import reducer from './reducer';
-
-class App extends React.Component {
-  render() {
-    return null;
-  }
-}
-
-const withReducer = strapi.injectReducer({ key: 'app', reducer, pluginId });
-
-export default compose(withReducer)(App);
-```
-
 #### `strapi.notification`
 
 Display a notification (works with i18n message id). Use this command anywhere in your code.
@@ -104,16 +57,6 @@ strapi.notification.warning('app.notification.warning');
 #### `strapi.remoteURL`
 
 The administration url (e.g. `http://localhost:4000/admin`).
-
-### Available hooks
-
-The Admin container exposes hooks in which a plugin can run custom code.
-
-(Documentation coming soon).
-
-## Plugin development
-
-(Coming soon).
 
 ### Main plugin object
 
@@ -190,12 +133,12 @@ class Initializer extends React.PureComponent {
     this.props.updatePlugin(
       pluginId,
       'preventComponentRendering',
-      preventComponentRendering,
+      preventComponentRendering
     );
     this.props.updatePlugin(
       pluginId,
       'blockerComponentProps',
-      blockerComponentProps,
+      blockerComponentProps
     );
     // Emit the event plugin ready
     this.props.updatePlugin(pluginId, 'isReady', true);
@@ -214,17 +157,13 @@ Initializer.propTypes = {
 export default Initializer;
 ```
 
-### Lifecycle
-
-(Coming soon)
-
 ### Injected Components
 
 (Coming soon)
 
 ### Routing
 
-The routing is based on the [React Router V4](https://reacttraining.com/react-router/web/guides/philosophy), due to it's implementation each route is declared in the `containers/App/index.js` file.
+The routing is based on the [React Router V5](https://reacttraining.com/react-router/web/guides/philosophy), due to it's implementation each route is declared in the `containers/App/index.js` file.
 
 ::: tip
 Each route defined in a plugin must be prefixed by the plugin's id.
@@ -251,7 +190,7 @@ class App extends React.Component {
 
   render() {
     return (
-      <div className={styles.myPlugin}>
+      <div>
         <Switch>
           <Route
             exact
@@ -266,6 +205,10 @@ class App extends React.Component {
 
 // ...
 ```
+
+### Styling
+
+The administration panel uses [styled-components](https://styled-components.com/) for writing css.
 
 ### i18n
 
@@ -314,4 +257,41 @@ export default Foo;
 ```
 
 See [the documentation](https://github.com/yahoo/react-intl/wiki/Components#formattedmessage) for more extensive usage.
--->
+
+### Global context
+
+All plugins are wrapped inside the `GlobalContextProvider`, in this object you will have access to all plugins object as well as other utilities.
+
+Usage:
+
+**Inside a functional component:**
+
+```js
+import React from 'react';
+import { useGlobalContext } from 'strapi-helper-plugin';
+
+const Foo = () => {
+  const globalContext = useGlobalContext();
+
+  console.log(globalContext);
+
+  return <div>Foo</div>;
+};
+```
+
+**Inside a class component:**
+
+```js
+import React from 'react';
+import { GlobalContext } from 'strapi-helper-plugin';
+
+class Foo extends React.Component {
+  static contextType = GlobalContext;
+
+  render() {
+    console.log(this.context);
+
+    return <div>Foo</div>;
+  }
+}
+```
