@@ -411,6 +411,11 @@ const EditViewDataManagerProvider = ({
         setIsSubmitting,
         shouldShowLoadingState,
         slug,
+        triggerFormValidation: () => {
+          dispatch({
+            type: 'TRIGGER_FORM_VALIDATION',
+          });
+        },
       }}
     >
       {showLoader ? (
