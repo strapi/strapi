@@ -1,8 +1,10 @@
 import React, { memo } from 'react';
 import { get, isEmpty } from 'lodash';
 import PropTypes from 'prop-types';
+import { CircleButton } from 'strapi-helper-plugin';
 import { Select } from '@buffetjs/core';
-import { Button, InputWrapper, Wrapper } from './components';
+
+import { InputWrapper, Wrapper } from './components';
 import Input from './Input';
 import Option from './Option';
 import getFilters from './utils';
@@ -41,7 +43,7 @@ function FilterPickerOption({
   return (
     <Wrapper borderLeft={!isEmpty(value)}>
       <InputWrapper>
-        <Button
+        <CircleButton
           type="button"
           isRemoveButton
           onClick={() => onRemoveFilter(index)}
@@ -74,7 +76,9 @@ function FilterPickerOption({
           options={['true', 'false']}
           onChange={onChange}
         />
-        {showAddButton && <Button type="button" onClick={onClickAddFilter} />}
+        {showAddButton && (
+          <CircleButton type="button" onClick={onClickAddFilter} />
+        )}
       </InputWrapper>
     </Wrapper>
   );

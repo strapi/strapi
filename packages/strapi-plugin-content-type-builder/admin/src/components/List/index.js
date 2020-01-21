@@ -8,7 +8,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext, ListButton } from 'strapi-helper-plugin';
+import { Button } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
 
 import pluginId from '../../pluginId';
@@ -16,7 +17,6 @@ import useListView from '../../hooks/useListView';
 import useDataManager from '../../hooks/useDataManager';
 import DynamicZoneList from '../DynamicZoneList';
 import ComponentList from '../ComponentList';
-import { ListButton } from '../ListButton';
 import Wrapper from './List';
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
@@ -224,8 +224,16 @@ function List({
             })}
           </tbody>
         </table>
-        {isMain && isInDevelopmentMode && <ListButton {...addButtonProps} />}
-        {!isMain && <ListButton {...addButtonProps} />}
+        {isMain && isInDevelopmentMode && (
+          <ListButton>
+            <Button {...addButtonProps} />
+          </ListButton>
+        )}
+        {!isMain && (
+          <ListButton>
+            <Button {...addButtonProps} />
+          </ListButton>
+        )}
       </Wrapper>
       {isSub && (
         <div className="plus-icon" onClick={onClickAddField}>

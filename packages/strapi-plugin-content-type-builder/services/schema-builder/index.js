@@ -119,12 +119,14 @@ function createSchemaBuilder({ components, contentTypes }) {
             targetAttribute,
             columnName,
             dominant,
+            autoPopulate,
           } = attribute;
 
           const attr = {
             unique: unique === true ? true : undefined,
             columnName: columnName || undefined,
             configurable: configurable === false ? false : undefined,
+            autoPopulate,
           };
 
           if (!this.contentTypes.has(target)) {

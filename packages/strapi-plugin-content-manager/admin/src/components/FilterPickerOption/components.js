@@ -1,4 +1,4 @@
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 /* eslint-disable */
 
@@ -15,42 +15,6 @@ const InputWrapper = styled.div`
   select {
     margin: 0px 5px !important;
   }
-`;
-
-const Button = styled.button`
-  display: flex;
-  justify-content: center;
-  height: 20px;
-  width: 20px;
-  margin: 8px 5px 0px 0px;
-  border-radius: 50%;
-  border: 1px solid #e3e9f3;
-  cursor: pointer;
-  &:focus {
-    outline: 0;
-  }
-  ${({ isRemoveButton }) => {
-    if (isRemoveButton) {
-      return css`
-        &:after {
-          content: '\f068';
-          font-family: FontAwesome;
-          font-size: 12px;
-          line-height: 18px;
-          color: #007eff;
-        }
-      `;
-    }
-    return css`
-      &:after {
-        content: '\f067';
-        font-family: FontAwesome;
-        font-size: 12px;
-        line-height: 18px;
-        color: #007eff;
-      }
-    `;
-  }}
 `;
 
 const InputWrapperDate = styled.div`
@@ -93,4 +57,4 @@ const Input = styled.input`
   font-family: 'Lato' !important;
   box-shadow: 0px 1px 1px rgba(104, 118, 142, 0.05);
 `;
-export { Button, InputWrapper, Wrapper, InputWrapperDate, Input };
+export { InputWrapper, Wrapper, InputWrapperDate, Input };

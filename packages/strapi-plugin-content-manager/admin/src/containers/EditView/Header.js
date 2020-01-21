@@ -53,7 +53,7 @@ const Header = () => {
           toggleWarningCancel();
         },
         color: 'cancel',
-        title: formatMessage({
+        label: formatMessage({
           id: `${pluginId}.containers.Edit.reset`,
         }),
         type: 'button',
@@ -65,7 +65,7 @@ const Header = () => {
       },
       {
         color: 'success',
-        title: formatMessage({
+        label: formatMessage({
           id: `${pluginId}.containers.Edit.submit`,
         }),
         type: 'submit',
@@ -78,7 +78,7 @@ const Header = () => {
 
     if (!isCreatingEntry) {
       headerActions.unshift({
-        title: formatMessage({
+        label: formatMessage({
           id: 'app.utils.delete',
         }),
         color: 'delete',
