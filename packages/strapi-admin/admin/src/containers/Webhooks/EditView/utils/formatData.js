@@ -11,6 +11,7 @@ const cleanData = data => {
 const unformatHeaders = headers => {
   return headers.reduce((acc, current) => {
     const { key, value } = current;
+
     if (key !== '') {
       return {
         ...acc,

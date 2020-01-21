@@ -45,8 +45,6 @@ import {
 } from './utils';
 import EditorWrapper from './EditorWrapper';
 
-/* eslint-disable react/jsx-handler-names */
-/* eslint-disable react/sort-comp */
 /* eslint-disable */
 
 class Wysiwyg extends React.Component {

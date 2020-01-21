@@ -5,7 +5,6 @@ module.exports = {
     'plugin:react/recommended',
     'plugin:redux-saga/recommended',
     'prettier',
-    // 'airbnb',
   ],
   plugins: ['react', 'redux-saga', 'react-hooks', 'import', 'jsx-a11y'],
   env: {

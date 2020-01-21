@@ -138,6 +138,7 @@ export const mapDataKeysToFilesToUpload = (filesMap, data) => {
     };
     const getFileToUpload = path => {
       const file = get(data, [...path, 0], '');
+
       if (file instanceof File) {
         return [file];
       }
