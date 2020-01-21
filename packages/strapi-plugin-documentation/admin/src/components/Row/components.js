@@ -72,6 +72,7 @@ const StyledButton = styled(Button)`
         }
       `;
     }
+
     return css`
       margin-left: 45px;
       font-weight: 400;

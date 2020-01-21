@@ -52,6 +52,7 @@ const reducer = (state, action) => {
         if (headers.size === 1) {
           return fromJS([header]);
         }
+
         return headers.remove(action.index);
       });
     }

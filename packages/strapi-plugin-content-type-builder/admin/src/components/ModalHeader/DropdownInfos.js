@@ -13,6 +13,7 @@ const DropdownInfos = ({ headers, shouldDisplaySecondHeader }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const toggle = () => setDropdownOpen(prevState => !prevState);
+
   return (
     <Wrapper isOpen={dropdownOpen} toggle={toggle} style={{ margin: 'auto 0' }}>
       <Toggle>...</Toggle>

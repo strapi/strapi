@@ -90,6 +90,7 @@ class ConfigPage extends React.Component {
           to: `/plugins/email/configurations/${current.name}`,
         });
         acc.push(link);
+
         return acc;
       }, [])
       .sort(link => link.name === 'production');
@@ -112,6 +113,7 @@ class ConfigPage extends React.Component {
           errors: [{ id: 'components.Input.error.validation.required' }],
         });
       }
+
       return acc;
     }, []);
 

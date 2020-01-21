@@ -11,6 +11,7 @@ import Wrapper from './Wrapper';
 
 function EmptyList() {
   const { formatMessage } = useGlobalContext();
+
   return (
     <Wrapper>
       <p>{formatMessage({ id: 'Settings.webhooks.list.empty.title' })}</p>

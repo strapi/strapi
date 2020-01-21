@@ -114,10 +114,12 @@ export const getMediaAttributes = (ctLayout, groupLayouts) => {
 export const helperCleanData = (value, key) => {
   if (isArray(value)) {
     return value.map(obj => (obj[key] ? obj[key] : obj));
-  } if (isObject(value)) {
+  }
+  if (isObject(value)) {
     return value[key];
   }
-    return value;
+
+  return value;
 };
 
 export const mapDataKeysToFilesToUpload = (filesMap, data) => {

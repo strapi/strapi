@@ -21,6 +21,7 @@ export class LanguageProvider extends React.Component {
       this.props.messages[this.props.locale],
       this.props.messages.en
     );
+
     return (
       <IntlProvider
         locale={this.props.locale}

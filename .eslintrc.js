@@ -96,6 +96,7 @@ module.exports = {
             ignoreTemplateLiterals: true,
           },
         ],
+        'newline-before-return': 2,
         'no-confusing-arrow': 0,
         'no-else-return': 1,
         'no-nested-ternary': ['error'],

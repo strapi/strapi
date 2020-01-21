@@ -11,10 +11,12 @@ const FormWrapper = styled.div`
     ${({ hasErrors, isOpen }) => {
       if (hasErrors) {
         return '#ffa784';
-      } if (isOpen) {
+      }
+      if (isOpen) {
         return '#AED4FB';
       }
-        return 'rgba(227, 233, 243, 0.75)';
+
+      return 'rgba(227, 233, 243, 0.75)';
     }};
 `;
 

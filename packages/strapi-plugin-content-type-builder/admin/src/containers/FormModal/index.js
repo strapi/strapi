@@ -720,70 +720,69 @@ const FormModal = () => {
 
           // Adding an existing component
         }
-          // eslint-disable-next-line no-lonely-if
-          if (isInFirstComponentStep) {
-            // Navigate the user to step 2
-            const nextSearchObj = {
-              modalType: 'attribute',
-              actionType: state.actionType,
-              settingType: 'base',
-              forTarget: state.forTarget,
-              targetUid: state.targetUid,
-              attributeType: 'component',
-              step: '2',
-              ...headersObject,
-              header_icon_isCustom_1: !['contentType', 'component'].includes(
-                state.forTarget
-              ),
-              header_icon_name_1: headerIcon,
-            };
+        // eslint-disable-next-line no-lonely-if
+        if (isInFirstComponentStep) {
+          // Navigate the user to step 2
+          const nextSearchObj = {
+            modalType: 'attribute',
+            actionType: state.actionType,
+            settingType: 'base',
+            forTarget: state.forTarget,
+            targetUid: state.targetUid,
+            attributeType: 'component',
+            step: '2',
+            ...headersObject,
+            header_icon_isCustom_1: !['contentType', 'component'].includes(
+              state.forTarget
+            ),
+            header_icon_name_1: headerIcon,
+          };
 
-            push({
-              search: makeNextSearch(nextSearchObj, shouldContinue),
-            });
+          push({
+            search: makeNextSearch(nextSearchObj, shouldContinue),
+          });
 
-            // Clear the reducer and prepare the modified data
-            // This way we don't have to add some logic to re-run the useEffect
-            // The first step is either needed to create a component or just to navigate
-            // To the modal for adding a "common field"
-            dispatch({
-              type: 'RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO',
-            });
+          // Clear the reducer and prepare the modified data
+          // This way we don't have to add some logic to re-run the useEffect
+          // The first step is either needed to create a component or just to navigate
+          // To the modal for adding a "common field"
+          dispatch({
+            type: 'RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO',
+          });
 
-            // We don't want all the props to be reset
-            return;
+          // We don't want all the props to be reset
+          return;
 
-            // Here we are in step 2
-            // The step 2 is also use to edit an attribute that is a component
-          }
-            addAttribute(
-              modifiedData,
-              state.forTarget,
-              state.targetUid,
-              // This change the dispatched type
-              // either 'EDIT_ATTRIBUTE' or 'ADD_ATTRIBUTE' in the DataManagerProvider
-              state.actionType === 'edit',
-              // This is for the edit part
-              initialData,
-              // Passing true will add the component to the components object
-              // This way we can add fields to the added component (if it wasn't there already)
-              true
-            );
-            const nextSearch = {
-              modalType: 'chooseAttribute',
-              forTarget: state.forTarget,
-              targetUid: state.targetUid,
-              ...headersObject,
-              header_icon_isCustom_1: !['contentType', 'component'].includes(
-                state.forTarget
-              ),
-              header_icon_name_1: headerIcon,
-            };
+          // Here we are in step 2
+          // The step 2 is also use to edit an attribute that is a component
+        }
+        addAttribute(
+          modifiedData,
+          state.forTarget,
+          state.targetUid,
+          // This change the dispatched type
+          // either 'EDIT_ATTRIBUTE' or 'ADD_ATTRIBUTE' in the DataManagerProvider
+          state.actionType === 'edit',
+          // This is for the edit part
+          initialData,
+          // Passing true will add the component to the components object
+          // This way we can add fields to the added component (if it wasn't there already)
+          true
+        );
+        const nextSearch = {
+          modalType: 'chooseAttribute',
+          forTarget: state.forTarget,
+          targetUid: state.targetUid,
+          ...headersObject,
+          header_icon_isCustom_1: !['contentType', 'component'].includes(
+            state.forTarget
+          ),
+          header_icon_name_1: headerIcon,
+        };
 
-            push({ search: makeSearch(nextSearch, shouldContinue) });
+        push({ search: makeSearch(nextSearch, shouldContinue) });
 
-            // We don't need to end the loop here we want the reducer to be reinitialised
-
+        // We don't need to end the loop here we want the reducer to be reinitialised
 
         // Logic for creating a component without clicking on the link in
         // the left menu
@@ -826,57 +825,58 @@ const FormModal = () => {
 
           // Step 2 of creating a component (which is setting the attribute name in the parent's schema)
         }
-          // We are destructuring because the modifiedData object doesn't have the appropriate format to create a field
-          const { category, type, ...rest } = componentToCreate;
-          // Create a the component temp UID
-          // This could be refactored but I think it's more understandable to separate the logic
-          const componentUid = createComponentUid(
-            componentToCreate.name,
-            category
-          );
-          // Create the component first and add it to the components data
-          createSchema(
-            // Component data
-            rest,
-            // Type will always be component
-            // It will dispatch the CREATE_COMPONENT_SCHEMA action
-            // So the component will be added in the main components object
-            // This might not be needed if we don't allow navigation between entries while editing
-            type,
-            componentUid,
-            category,
-            // This will add the created component in the datamanager modifiedData components key
-            // Like explained above we will be able to modify the created component structure
-            isCreatingComponentFromAView
-          );
-          // Add the field to the schema
-          addAttribute(modifiedData, state.forTarget, state.targetUid, false);
+        // We are destructuring because the modifiedData object doesn't have the appropriate format to create a field
+        const { category, type, ...rest } = componentToCreate;
+        // Create a the component temp UID
+        // This could be refactored but I think it's more understandable to separate the logic
+        const componentUid = createComponentUid(
+          componentToCreate.name,
+          category
+        );
+        // Create the component first and add it to the components data
+        createSchema(
+          // Component data
+          rest,
+          // Type will always be component
+          // It will dispatch the CREATE_COMPONENT_SCHEMA action
+          // So the component will be added in the main components object
+          // This might not be needed if we don't allow navigation between entries while editing
+          type,
+          componentUid,
+          category,
+          // This will add the created component in the datamanager modifiedData components key
+          // Like explained above we will be able to modify the created component structure
+          isCreatingComponentFromAView
+        );
+        // Add the field to the schema
+        addAttribute(modifiedData, state.forTarget, state.targetUid, false);
 
-          dispatch({ type: 'RESET_PROPS' });
+        dispatch({ type: 'RESET_PROPS' });
 
-          // Open modal attribute for adding attr to component
+        // Open modal attribute for adding attr to component
 
-          const searchToOpenModalAttributeToAddAttributesToAComponent = {
-            modalType: 'chooseAttribute',
-            forTarget: 'components',
-            targetUid: componentUid,
-            ...headersObject,
-            header_icon_isCustom_1: true,
-            header_icon_name_1: componentToCreate.icon,
-            [`header_label_${nextHeaderIndex}`]: modifiedData.name,
-            [`header_icon_name_${nextHeaderIndex}`]: 'component',
-            [`header_icon_isCustom_${nextHeaderIndex}`]: false,
-            [`header_info_category_${nextHeaderIndex}`]: category,
-            [`header_info_name_${nextHeaderIndex}`]: componentToCreate.name,
-          };
+        const searchToOpenModalAttributeToAddAttributesToAComponent = {
+          modalType: 'chooseAttribute',
+          forTarget: 'components',
+          targetUid: componentUid,
+          ...headersObject,
+          header_icon_isCustom_1: true,
+          header_icon_name_1: componentToCreate.icon,
+          [`header_label_${nextHeaderIndex}`]: modifiedData.name,
+          [`header_icon_name_${nextHeaderIndex}`]: 'component',
+          [`header_icon_isCustom_${nextHeaderIndex}`]: false,
+          [`header_info_category_${nextHeaderIndex}`]: category,
+          [`header_info_name_${nextHeaderIndex}`]: componentToCreate.name,
+        };
 
-          push({
-            search: makeNextSearch(
-              searchToOpenModalAttributeToAddAttributesToAComponent,
-              shouldContinue
-            ),
-          });
-          return;
+        push({
+          search: makeNextSearch(
+            searchToOpenModalAttributeToAddAttributesToAComponent,
+            shouldContinue
+          ),
+        });
+
+        return;
 
         // The modal is addComponentToDynamicZone
       } else {

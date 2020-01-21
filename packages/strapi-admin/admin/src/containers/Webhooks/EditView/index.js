@@ -91,6 +91,7 @@ function EditView() {
     .filter(key => key.includes('headers'))
     .reduce((obj, key) => {
       obj[key] = formErrors[key];
+
       return obj;
     }, {});
 
@@ -312,6 +313,7 @@ function EditView() {
       .filter(key => !key.includes('headers'))
       .reduce((obj, key) => {
         obj[key] = formErrors[key];
+
         return obj;
       }, {});
 

@@ -82,6 +82,7 @@ function SelectWrapper({
             if (objIndex === -1) {
               return true;
             }
+
             return (
               prevState.findIndex(el => el.value.id === obj.value.id) === index
             );
@@ -130,6 +131,7 @@ function SelectWrapper({
         if (prevState._q === inputValue) {
           return prevState;
         }
+
         return { ...prevState, _q: inputValue };
       });
     }

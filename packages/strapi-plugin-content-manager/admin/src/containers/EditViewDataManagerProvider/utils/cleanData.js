@@ -92,10 +92,12 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
 export const helperCleanData = (value, key) => {
   if (isArray(value)) {
     return value.map(obj => (obj[key] ? obj[key] : obj));
-  } if (isObject(value)) {
+  }
+  if (isObject(value)) {
     return value[key];
   }
-    return value;
+
+  return value;
 };
 
 export default cleanData;

@@ -177,7 +177,8 @@ const forms = {
               if (max) {
                 return schema.max(max, getTrad('error.validation.minSupMax'));
               }
-                return schema;
+
+              return schema;
             })
             .nullable();
         }),
@@ -197,7 +198,8 @@ const forms = {
                 getTrad('error.validation.minSupMax')
               );
             }
-              return schema;
+
+            return schema;
           })
           .nullable(),
       };
@@ -259,7 +261,8 @@ const forms = {
                       max
                     );
                   }
-                    return schema;
+
+                  return schema;
                 }),
 
               max: yup
@@ -296,6 +299,7 @@ const forms = {
               if (!['oneWay', 'manyWay'].includes(dataToValidate.nature)) {
                 schema = schema.matches(NAME_REGEX, errorsTrads.regex);
               }
+
               return schema
                 .unique(errorsTrads.unique, targetAttributeAlreadyTakenValue)
                 .required(errorsTrads.required);
@@ -371,11 +375,11 @@ const forms = {
               items: componentForm.advanced('componentToCreate.'),
             };
           }
-            const requiredItem = [[fields.required]];
+          const requiredItem = [[fields.required]];
 
-            return {
-              items: data.repeatable ? [...dynamiczoneItems] : requiredItem,
-            };
+          return {
+            items: data.repeatable ? [...dynamiczoneItems] : requiredItem,
+          };
         }
 
         const items = defaultItems.slice();

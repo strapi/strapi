@@ -25,6 +25,7 @@ const reducer = (state, action) => {
         if (shouldAddComponents) {
           return makeUnique(list.concat(components));
         }
+
         return makeUnique(
           list.filter(comp => {
             return components.indexOf(comp) === -1;

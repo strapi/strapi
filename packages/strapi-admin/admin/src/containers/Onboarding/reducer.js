@@ -46,6 +46,7 @@ function onboardingReducer(state = initialState, action) {
         return list.reduce((acc, current, index) => {
           if (index === action.index) {
             storedVideos[index].startTime = action.startTime;
+
             return acc.updateIn([index, 'startTime'], () => action.startTime);
           }
 

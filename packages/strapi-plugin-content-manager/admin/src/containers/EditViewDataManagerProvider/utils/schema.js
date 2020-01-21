@@ -25,6 +25,7 @@ yup.addMethod(yup.array, 'notEmptyMin', function(min) {
     if (isEmpty(value)) {
       return true;
     }
+
     return value.length >= min;
   });
 });
@@ -123,13 +124,13 @@ const createYupSchema = (model, { components }) => {
         const componentSchema = yup.lazy(obj => {
           if (obj !== undefined) {
             return attribute.required === true
-                ? componentFieldSchema.defined()
-                : componentFieldSchema.nullable();
+              ? componentFieldSchema.defined()
+              : componentFieldSchema.nullable();
           }
 
           return attribute.required === true
-              ? yup.object().defined()
-              : yup.object().nullable();
+            ? yup.object().defined()
+            : yup.object().nullable();
         });
 
         acc[current] = componentSchema;
@@ -203,6 +204,7 @@ const createYupSchemaAttribute = (type, validations) => {
 
         try {
           JSON.parse(value);
+
           return true;
         } catch (err) {
           return false;
