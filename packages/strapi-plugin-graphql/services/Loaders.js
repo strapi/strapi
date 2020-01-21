@@ -17,7 +17,7 @@ module.exports = {
 
     // Create loaders for each relational field (exclude core models).
     Object.keys(strapi.models)
-      .filter(model => model !== 'core_store')
+      .filter(model => model.internal !== true)
       .forEach(modelKey => {
         const model = strapi.models[modelKey];
         this.createLoader(model.uid);
