@@ -19,6 +19,9 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
     media: ['media.create', 'media.update', 'media.delete'],
   };
 
+  // Media update disabled for now - until the media libray is ready
+  const disabledEvents = ['media.update'];
+
   const formatValue = inputValue.reduce((acc, curr) => {
     const key = curr.split('.')[0];
     if (!acc[key]) {
@@ -42,7 +45,11 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
   const handleChangeAll = ({ target: { name, value } }) => {
     let set = new Set(inputValue);
     if (value) {
-      events[name].map(event => set.add(event));
+      events[name].map(event => {
+        if (!disabledEvents.includes(event)) {
+          set.add(event);
+        }
+      });
     } else {
       events[name].map(event => set.delete(event));
     }
@@ -64,6 +71,7 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
           {Object.keys(events).map(event => {
             return (
               <EventRow
+                disabledEvents={disabledEvents}
                 key={event}
                 name={event}
                 events={events[event]}

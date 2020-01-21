@@ -3,13 +3,19 @@ import PropTypes from 'prop-types';
 import { Checkbox } from '@buffetjs/core';
 
 const EventRow = ({
+  disabledEvents,
   name,
   events,
   inputValue,
   handleChange,
   handleChangeAll,
 }) => {
-  const areAllCheckboxesSelected = inputValue.length === 3;
+  const enabledCheckboxes = events.filter(event => {
+    return !disabledEvents.includes(event);
+  });
+
+  const areAllCheckboxesSelected =
+    inputValue.length === enabledCheckboxes.length;
   const hasSomeCheckboxSelected = inputValue.length > 0;
 
   const onChangeAll = ({ target: { name } }) => {
@@ -36,6 +42,7 @@ const EventRow = ({
         return (
           <td key={event}>
             <Checkbox
+              disabled={disabledEvents.includes(event)}
               name={event}
               value={inputValue.includes(event)}
               onChange={handleChange}
@@ -48,6 +55,7 @@ const EventRow = ({
 };
 
 EventRow.defaultProps = {
+  disabledEvents: [],
   events: [],
   inputValue: [],
   handleChange: () => {},
@@ -55,6 +63,7 @@ EventRow.defaultProps = {
 };
 
 EventRow.propTypes = {
+  disabledEvents: PropTypes.array,
   events: PropTypes.array,
   inputValue: PropTypes.array,
   handleChange: PropTypes.func,
