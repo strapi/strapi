@@ -144,7 +144,7 @@ HeadersInput.propTypes = {
   onChange: PropTypes.func.isRequired,
   onClick: PropTypes.func.isRequired,
   onRemove: PropTypes.func,
-  value: PropTypes.array,
+  value: PropTypes.array.isRequired,
 };
 
 export default HeadersInput;
