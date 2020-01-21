@@ -19,6 +19,7 @@ const getOppositeNature = originalNature => {
   if (originalNature === 'manyToOne') {
     return 'oneToMany';
   }
+
   if (originalNature === 'oneToMany') {
     return 'manyToOne';
   }

@@ -110,6 +110,11 @@ module.exports = {
         ],
         'object-curly-newline': [2, { multiline: true, consistent: true }],
         'operator-linebreak': 0,
+        'padding-line-between-statements': [
+          'error',
+          { blankLine: 'always', prev: '*', next: 'if' },
+          { blankLine: 'any', prev: 'block-like', next: 'if' },
+        ],
         'prefer-arrow-callback': 0,
         'prefer-const': 0,
         'prefer-destructuring': 0,
