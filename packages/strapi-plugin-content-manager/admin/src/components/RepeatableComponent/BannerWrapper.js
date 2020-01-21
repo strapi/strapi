@@ -150,7 +150,7 @@ const BannerWrapper = styled.button`
     }
 
     if (hasErrors) {
-      fill = '#FAA684';
+      fill = '#F64D0A';
       trashFill = '#F64D0A';
     }
 
