@@ -221,7 +221,7 @@ Then fill the informations:
 
 ::: tab Google
 
-### Facebook configuration
+### Google configuration
 
 - Visit the Google Developer Console <br> [https://console.developers.google.com/](https://console.developers.google.com/)
 - Click on the **Select a project** dropdown in the top menu
@@ -328,7 +328,7 @@ Then fill the informations:
 - **Enable**: `ON`
 - **Client ID**: 665118465148846081
 - **Client ID**: iJbr7mkyqyut-J2hGvvSDch_5Dw5U77J
-- **The redirect URL to your front-end app**: `http://localhost:3000/connect/twitter`
+- **The redirect URL to your front-end app**: `http://localhost:3000/connect/discord`
 
 :::
 
@@ -342,7 +342,7 @@ Then fill the informations:
 Then fill the informations:
 
 - **Name**: Strapi auth
-- **OAuth Redirect URLs**: `http://localhost:1337/connect/twitter/callback`
+- **OAuth Redirect URLs**: `http://localhost:1337/connect/twitch/callback`
 - **Category**: Chose a category
 
 To access the Consumer API keys:

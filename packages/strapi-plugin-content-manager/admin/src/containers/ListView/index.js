@@ -101,7 +101,7 @@ function ListView({
       resetProps();
       setFilterPickerState(false);
     };
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug, shouldRefetchData]);
 
   const toggleLabelPickerState = () => {
@@ -237,7 +237,7 @@ function ListView({
 
   const headerAction = [
     {
-      title: formatMessage(
+      label: formatMessage(
         {
           id: 'content-manager.containers.List.addAnEntry',
         },

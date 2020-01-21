@@ -73,6 +73,62 @@
       "method": "POST",
       "path": "/auth/reset-password",
       "handler": "Auth.changePassword"
+    },
+    {
+      "method": "GET",
+      "path": "/webhooks",
+      "handler": "Webhooks.listWebhooks",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/webhooks",
+      "handler": "Webhooks.createWebhook",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/webhooks/:id",
+      "handler": "Webhooks.getWebhook",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/webhooks/:id",
+      "handler": "Webhooks.updateWebhook",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/webhooks/:id",
+      "handler": "Webhooks.deleteWebhook",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/webhooks/batch-delete",
+      "handler": "Webhooks.deleteWebhooks",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/webhooks/:id/trigger",
+      "handler": "Webhooks.triggerWebhook",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }

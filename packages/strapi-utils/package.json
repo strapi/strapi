@@ -14,16 +14,14 @@
     "lib": "./lib"
   },
   "main": "./lib",
-  "scripts": {
-    "test": "jest"
-  },
   "dependencies": {
     "date-fns": "^2.8.1",
     "knex": "^0.16.5",
     "lodash": "^4.17.11",
     "pino": "^4.7.1",
     "pluralize": "^7.0.0",
-    "shelljs": "^0.8.3"
+    "shelljs": "^0.8.3",
+    "yup": "^0.28.0"
   },
   "author": {
     "email": "hi@strapi.io",

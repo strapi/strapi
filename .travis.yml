@@ -44,6 +44,7 @@ install_mongo: &install_mongo
 before_script:
   - yarn build
   - yarn global add -g wait-on
+  - yarn global add codecov
 
 jobs:
   include:
@@ -56,8 +57,8 @@ jobs:
       name: 'Lint / Unit Tests '
       script:
         - yarn run -s lint
-        - yarn run -s test:unit
-        - yarn run -s test:front
+        - yarn run -s test:unit --coverage && codecov -C -F unit
+        - yarn run -s test:front && codecov -C -F front
 
     - <<: *e2e_tests
       name: 'E2E Postgresql'

@@ -20,6 +20,7 @@
     "cli-table3": "^0.5.1",
     "commander": "^2.20.0",
     "cross-spawn": "^6.0.5",
+    "debug": "^4.1.1",
     "delegates": "^1.0.0",
     "execa": "^1.0.0",
     "fs-extra": "^7.0.0",
@@ -61,7 +62,6 @@
     "strapi-utils": "3.0.0-beta.18.4"
   },
   "scripts": {
-    "test": "jest --verbose",
     "postinstall": "node lib/utils/success.js"
   },
   "author": {

@@ -47,7 +47,7 @@ const SettingsViewWrapper = ({
       {
         color: 'cancel',
         onClick: toggleWarningCancel,
-        title: formatMessage({
+        label: formatMessage({
           id: `${pluginId}.popUpWarning.button.cancel`,
         }),
         type: 'button',
@@ -60,7 +60,7 @@ const SettingsViewWrapper = ({
       },
       {
         color: 'success',
-        title: formatMessage({
+        label: formatMessage({
           id: `${pluginId}.containers.Edit.submit`,
         }),
         type: 'submit',

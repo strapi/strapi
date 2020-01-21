@@ -2,9 +2,9 @@
 
 const _ = require('lodash');
 const yup = require('yup');
+const { formatYupErrors } = require('strapi-utils');
 
 const { isValidCategoryName, isValidIcon } = require('./common');
-const formatYupErrors = require('./yup-formatter');
 const createSchema = require('./model-schema');
 const { modelTypes, DEFAULT_TYPES } = require('./constants');
 

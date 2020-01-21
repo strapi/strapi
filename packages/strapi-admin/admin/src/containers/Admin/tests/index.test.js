@@ -88,12 +88,12 @@ describe('<Admin />', () => {
     });
   });
 
-  describe('renderMarketPlace instance', () => {
-    it('should return the MarketPlace container', () => {
+  describe('renderRoute instance', () => {
+    it('should render the routes', () => {
       const renderedComponent = shallow(<Admin {...props} />);
-      const { renderMarketPlace } = renderedComponent.instance();
+      const { renderRoute } = renderedComponent.instance();
 
-      expect(renderMarketPlace()).not.toBeNull();
+      expect(renderRoute()).not.toBeNull();
     });
   });
 

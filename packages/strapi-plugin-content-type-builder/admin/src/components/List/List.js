@@ -44,7 +44,7 @@ const Wrapper = styled(List)`
         }
       }
     }
-    table + button {
+    table + div button {
       position: relative;
       background-color: transparent;
       text-transform: initial;
