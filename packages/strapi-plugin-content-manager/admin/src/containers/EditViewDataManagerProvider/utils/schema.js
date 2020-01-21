@@ -66,6 +66,7 @@ const createYupSchema = (model, { components }) => {
   return yup.object().shape(
     Object.keys(attributes).reduce((acc, current) => {
       const attribute = attributes[current];
+
       if (
         attribute.type !== 'relation' &&
         attribute.type !== 'component' &&
@@ -234,6 +235,7 @@ const createYupSchemaAttribute = (type, validations) => {
 
   Object.keys(validations).forEach(validation => {
     const validationValue = validations[validation];
+
     if (
       !!validationValue ||
       ((!isBoolean(validationValue) &&

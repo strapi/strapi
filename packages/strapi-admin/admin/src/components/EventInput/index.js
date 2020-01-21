@@ -24,6 +24,7 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
 
   const formatValue = inputValue.reduce((acc, curr) => {
     const key = curr.split('.')[0];
+
     if (!acc[key]) {
       acc[key] = [];
     }
@@ -34,6 +35,7 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
 
   const handleChange = ({ target: { name, value } }) => {
     let set = new Set(inputValue);
+
     if (value) {
       set.add(name);
     } else {
@@ -44,6 +46,7 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
 
   const handleChangeAll = ({ target: { name, value } }) => {
     let set = new Set(inputValue);
+
     if (value) {
       events[name].forEach(event => {
         if (!disabledEvents.includes(event)) {

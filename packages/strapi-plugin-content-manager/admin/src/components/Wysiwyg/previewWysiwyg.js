@@ -125,6 +125,7 @@ const createContentBlock = (blockData = {}) => {
 
   if (inlineStyles || entityData) {
     let entityKey;
+
     if (entityData) {
       const { type, mutability, data } = entityData;
       entityKey = Entity.create(type, mutability, data);

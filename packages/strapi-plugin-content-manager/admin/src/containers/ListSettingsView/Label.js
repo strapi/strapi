@@ -27,6 +27,7 @@ const Label = ({
       }
       const dragIndex = item.index;
       const hoverIndex = index;
+
       // Don't replace items with themselves
       if (dragIndex === hoverIndex) {
         return;
