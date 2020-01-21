@@ -65,6 +65,8 @@ const reducer = (state, action) => {
       return state.update('formErrors', () => fromJS(action.errors));
     case 'SET_IS_TRIGGERING':
       return state.update('isTriggering', isTriggering => !isTriggering);
+    case 'SUBMIT_SUCCEEDED':
+      return state.update('initialData', () => state.get('modifiedData'));
     case 'TRIGGER_SUCCEEDED':
       return state
         .update('triggerResponse', () => fromJS(action.response))

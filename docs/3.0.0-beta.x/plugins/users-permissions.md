@@ -221,7 +221,7 @@ Then fill the informations:
 
 ::: tab Google
 
-### Facebook configuration
+### Google configuration
 
 - Visit the Google Developer Console <br> [https://console.developers.google.com/](https://console.developers.google.com/)
 - Click on the **Select a project** dropdown in the top menu

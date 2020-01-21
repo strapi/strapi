@@ -1,23 +1,12 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { useGlobalContext } from 'strapi-helper-plugin';
 
 import Wrapper from './Wrapper';
 import EventRow from './EventRow';
 
-const EventInput = ({
-  onBlur,
-  onChange,
-  name: inputName,
-  value: inputValue,
-}) => {
+const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
   const { formatMessage } = useGlobalContext();
-  const onBlurRef = useRef();
-  onBlurRef.current = onBlur;
-
-  useEffect(() => {
-    onBlurRef.current();
-  }, [onBlurRef, inputValue]);
 
   const headersName = [
     formatMessage({ id: `Settings.webhooks.events.create` }),
@@ -29,6 +18,9 @@ const EventInput = ({
     entry: ['entry.create', 'entry.update', 'entry.delete'],
     media: ['media.create', 'media.update', 'media.delete'],
   };
+
+  // Media update disabled for now - until the media libray is ready
+  const disabledEvents = ['media.update'];
 
   const formatValue = inputValue.reduce((acc, curr) => {
     const key = curr.split('.')[0];
@@ -53,7 +45,11 @@ const EventInput = ({
   const handleChangeAll = ({ target: { name, value } }) => {
     let set = new Set(inputValue);
     if (value) {
-      events[name].map(event => set.add(event));
+      events[name].map(event => {
+        if (!disabledEvents.includes(event)) {
+          set.add(event);
+        }
+      });
     } else {
       events[name].map(event => set.delete(event));
     }
@@ -75,6 +71,7 @@ const EventInput = ({
           {Object.keys(events).map(event => {
             return (
               <EventRow
+                disabledEvents={disabledEvents}
                 key={event}
                 name={event}
                 events={events[event]}
@@ -101,4 +98,4 @@ EventInput.propTypes = {
   value: PropTypes.array,
 };
 
-export default React.memo(EventInput);
+export default EventInput;

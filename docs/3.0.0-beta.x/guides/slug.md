@@ -69,7 +69,7 @@ module.exports = {
     }
   },
   beforeUpdate: async model => {
-    if (model.getUpdate().title) {
+    if (model.getUpdate() && model.getUpdate().title) {
       model.update({
         slug: slugify(model.getUpdate().title),
       });
