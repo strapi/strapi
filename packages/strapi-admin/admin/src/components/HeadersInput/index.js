@@ -132,19 +132,16 @@ const HeadersInput = ({ errors, name, onClick, onChange, onRemove, value }) => {
 
 HeadersInput.defaultProps = {
   errors: {},
-  handleClick: () => {},
-  onClick: () => {},
   onRemove: () => {},
 };
 
 HeadersInput.propTypes = {
   errors: PropTypes.object,
-  handleClick: PropTypes.func,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   onClick: PropTypes.func.isRequired,
   onRemove: PropTypes.func,
-  value: PropTypes.array,
+  value: PropTypes.array.isRequired,
 };
 
 export default HeadersInput;

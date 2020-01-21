@@ -1,9 +1,10 @@
 import React from 'react';
 import { shallow } from 'enzyme';
+import CreatableSelect from 'react-select/creatable';
 
+import { InputText } from '@buffetjs/core';
 import { CircleButton } from 'strapi-helper-plugin';
 import HeadersInput from '../index';
-
 
 describe('Admin | components | HeadersInput', () => {
   const props = {
@@ -22,6 +23,12 @@ describe('Admin | components | HeadersInput', () => {
     it('It should render properly', () => {
       shallow(<HeadersInput {...props} />);
     });
+
+    it('It should render as many key/value rows as value', () => {
+      const renderedComponent = shallow(<HeadersInput {...props} />);
+
+      expect(renderedComponent.find(CreatableSelect)).toHaveLength(1);
+    });
   });
 
   describe('Actions', () => {
@@ -31,7 +38,7 @@ describe('Admin | components | HeadersInput', () => {
       const removeButton = renderedComponent.find(CircleButton).at(0);
       removeButton.simulate('click');
 
-      expect(props.onRemove).toHaveBeenCalled();
+      expect(props.onRemove).toHaveBeenCalledWith(0);
     });
   });
 
@@ -42,5 +49,18 @@ describe('Admin | components | HeadersInput', () => {
     addButton.simulate('click');
 
     expect(props.onClick).toHaveBeenCalled();
+  });
+
+  it('It should call the onChange props on input text change', () => {
+    const renderedComponent = shallow(<HeadersInput {...props} />);
+
+    const input = renderedComponent.find(InputText).at(0);
+    input.simulate('change');
+
+    expect(props.onChange).toHaveBeenCalled();
+  });
+
+  it('should have default onRemove', () => {
+    expect(HeadersInput.defaultProps.onRemove).toBeDefined();
   });
 });
