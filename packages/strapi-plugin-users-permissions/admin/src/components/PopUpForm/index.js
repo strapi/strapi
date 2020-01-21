@@ -36,6 +36,8 @@ import { HomePageContext } from '../../contexts/HomePage';
 // Translations
 import en from '../../translations/en.json';
 
+/* eslint-disable react/sort-comp */
+/* eslint-disable no-shadow */
 class PopUpForm extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = { enabled: false, isEditing: false };
@@ -102,7 +104,7 @@ class PopUpForm extends React.Component {
       const { name, type } = e.target;
       const target = Object.assign(
         { name, type },
-        { value: `/auth/${this.props.dataToEdit}/callback` }
+        { value: `/auth/${this.props.dataToEdit}/callback` },
       );
       this.props.onChange({ target });
     }
@@ -132,13 +134,14 @@ class PopUpForm extends React.Component {
               return acc;
             }, [])
             .concat(acc);
-        } else if (current !== 'icon' && current !== 'scope') {
+        }
+        if (current !== 'icon' && current !== 'scope') {
           acc.push(`${name}${current}`);
         }
 
         return acc;
       },
-      []
+      [],
     );
 
     if (settingType === 'providers') {
@@ -166,7 +169,7 @@ class PopUpForm extends React.Component {
               errors={get(
                 formErrors,
                 [findIndex(formErrors, ['name', value]), 'errors'],
-                []
+                [],
               )}
               key={value}
               label={{
@@ -237,7 +240,7 @@ class PopUpForm extends React.Component {
             errors={get(
               this.props.formErrors,
               [findIndex(this.props.formErrors, ['name', value]), 'errors'],
-              []
+              [],
             )}
             label={{ id: `users-permissions.PopUpForm.Email.${value}.label` }}
             name={`${settingType}.${dataToEdit}.${value}`}
@@ -259,7 +262,7 @@ class PopUpForm extends React.Component {
             errors={get(
               this.props.formErrors,
               [findIndex(this.props.formErrors, ['name', value]), 'errors'],
-              []
+              [],
             )}
             label={{ id: `users-permissions.PopUpForm.Email.${value}.label` }}
             name={`${settingType}.${dataToEdit}.${value}`}
@@ -306,7 +309,7 @@ class PopUpForm extends React.Component {
       );
     }
 
-    let subHeader =
+    const subHeader =
       display && en[display] ? (
         <FormattedMessage id={`users-permissions.${display}`} />
       ) : (
