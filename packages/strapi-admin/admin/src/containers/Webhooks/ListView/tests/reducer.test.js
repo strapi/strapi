@@ -110,16 +110,37 @@ describe('Admin | containers | Webhooks | ListView | reducer', () => {
   });
 
   it('should update webhooks and empty webhooksToDelete on WEBHOOKS_DELETED', () => {
-    const state = initialState;
-
+    const state = initialState.set('webhooksToDelete', [1]);
     const action = {
       type: 'WEBHOOKS_DELETED',
     };
 
-    const expectedState = state.set(
-      'webhooksToDelete',
-      initialState.get('webhooksToDelete')
-    );
+    const expectedState = state
+      .set(
+        'webhooks',
+        state
+          .get('webhooks')
+          .filter(
+            webhook =>
+              !state.get('webhooksToDelete').includes(webhook.get('id'))
+          )
+      )
+      .set('webhooksToDelete', []);
+    expect(reducer(state, action)).toEqual(expectedState);
+  });
+
+  it('should update webhooks and empty webhookToDelete on WEBHOOK_DELETED', () => {
+    const state = initialState.set('webhookToDelete', 1);
+    const action = {
+      type: 'WEBHOOK_DELETED',
+    };
+
+    const expectedState = state
+      .set(
+        'webhooks',
+        state.get('webhooks').remove(state.get('webhookToDelete'))
+      )
+      .set('webhookToDelete', null);
     expect(reducer(state, action)).toEqual(expectedState);
   });
 });
