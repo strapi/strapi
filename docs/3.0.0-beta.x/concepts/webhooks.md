@@ -2,10 +2,10 @@
 
 ## What is a webhook
 
-A webhook is a way for an application to notify other applications that an event occured.
+A webhook is a way for an application to notify other applications that an event occurred.
 Using a webhook is a good way to tell third party providers to start some processing (CI, build, deployment...).
 
-The way a webhook works is by delivering informations to a receiving application through HTTP requests (typically POST requests).
+The way a webhook works is by delivering information to a receiving application through HTTP requests (typically POST requests).
 
 ## How to use
 
@@ -53,7 +53,7 @@ You can delete a webhook by clicking on the `trash` icon.
 
 ## Available events
 
-By default strapi webhook can be trigger by the following events:
+By default Strapi webhooks can be triggered by the following events:
 
 | Name           | Description                                     |
 | -------------- | ----------------------------------------------- |
@@ -73,7 +73,7 @@ When a payload is delivered to your webhook's URL, it will contain specific head
 | ---------------- | ------------------------------------------ |
 | `X-Strapi-Event` | Name of the event type that was triggered. |
 
-### Entry created
+### `entry.create`
 
 This event is triggered when a new entry is created.
 
@@ -99,7 +99,7 @@ This event is triggered when a new entry is created.
 }
 ```
 
-### Entry updated
+### `entry.update`
 
 This event is triggered when an entry is updated.
 
@@ -125,7 +125,7 @@ This event is triggered when an entry is updated.
 }
 ```
 
-### Entry deleted
+### `entry.delete`
 
 This event is triggered when an entry is deleted.
 
@@ -151,7 +151,7 @@ This event is triggered when an entry is deleted.
 }
 ```
 
-### Media created (uploaded)
+### `media.create`
 
 This event is triggered when you upload a file on entry creation or through the media interface.
 
@@ -179,7 +179,7 @@ This event is triggered when you upload a file on entry creation or through the 
 }
 ```
 
-### Media deleted
+### `media.delete`
 
 This event is triggered only when you delete a media through the media interface.
 
@@ -230,12 +230,12 @@ You can set webhooks configurations inside the file `./config/environments/{env}
 
 ### Securing your webhooks
 
-Most of the time, webhooks make request to publicly avaialble URLs, therefore it is possible that someone find that URL and send it wrong informations.
+Most of the time, webhooks make requests to public URLs, therefore it is possible that someone may find that URL and send it wrong information.
 
 To prevent this from happening you can send a header with an authentication token. Using the Admin panel you would have to do it for every webhook.
 Another way is to define `defaultHeaders` to add to every webhook requests.
 
-You can configure those global headers by updating the file at `./config/environments/{env}/server.json`:
+You can configure these global headers by updating the file at `./config/environments/{env}/server.json`:
 
 :::: tabs
 
