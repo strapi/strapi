@@ -1,5 +1,6 @@
 'use strict';
 
+const _ = require('lodash');
 const uploadFiles = require('./utils/upload-files');
 
 module.exports = ({ db, eventHub }) => ({
@@ -12,8 +13,16 @@ module.exports = ({ db, eventHub }) => ({
    *
    * @return {Promise}
    */
-  find({ params, populate }, { model }) {
-    return db.query(model).find(params, populate);
+  async find({ params, populate }, { model }) {
+    const { kind } = db.getModel(model);
+
+    const results = await db.query(model).find(params, populate);
+
+    if (kind === 'singleType') {
+      return _.first(results) || null;
+    }
+
+    return results;
   },
 
   /**
@@ -43,6 +52,18 @@ module.exports = ({ db, eventHub }) => ({
    */
 
   async create({ data, files }, { model }) {
+    const { kind } = db.getModel(model);
+
+    if (kind === 'singleType') {
+      // check if there is already on entry and throw
+      const count = await this.count({}, { model });
+      if (count >= 1) {
+        throw strapi.errors.badRequest(
+          'Single type entry can only be created once'
+        );
+      }
+    }
+
     let entry = await db.query(model).create(data);
 
     if (files) {
