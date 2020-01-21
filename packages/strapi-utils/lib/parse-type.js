@@ -32,9 +32,9 @@ const parseDate = value => {
 
     if (dates.isValid(date)) return dates.format(date, 'yyyy-MM-dd');
 
-    throw new Error(`Invalid format, expected an ISO compatble date`);
+    throw new Error(`Invalid format, expected an ISO compatible date`);
   } catch (error) {
-    throw new Error(`Invalid format, expected an ISO compatble date`);
+    throw new Error(`Invalid format, expected an ISO compatible date`);
   }
 };
 

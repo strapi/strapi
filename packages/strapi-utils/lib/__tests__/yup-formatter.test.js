@@ -1,5 +1,5 @@
 const yup = require('yup');
-const formatYupErrors = require('../yup-formatter');
+const { formatYupErrors } = require('../validators');
 
 describe('Format yup errors', () => {
   test('Format single errors', async () => {

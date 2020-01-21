@@ -135,7 +135,7 @@ const schemaBuilder = {
     // build defaults schemas if shadowCRUD is enabled
     if (strapi.plugins.graphql.config.shadowCRUD !== false) {
       const modelCruds = Resolvers.buildShadowCRUD(
-        _.omit(strapi.models, ['core_store'])
+        _.omitBy(strapi.models, model => model.internal === true)
       );
 
       shadowCRUD = Object.keys(strapi.plugins).reduce((acc, plugin) => {
