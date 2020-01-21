@@ -4,6 +4,7 @@ import { ListHeaderButton } from '../ListButton';
 import Title from './Title';
 import Wrapper from './Wrapper';
 
+/* eslint-disable react/jsx-one-expression-per-line */
 function ListHeader({ actions, title }) {
   return (
     <Wrapper>

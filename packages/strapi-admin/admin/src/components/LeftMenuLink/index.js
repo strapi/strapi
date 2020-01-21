@@ -13,6 +13,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import en from '../../translations/en.json';
 import Li from './Li';
 
+/* eslint-disable */
+
 function LeftMenuLink(props) {
   const isLinkActive = startsWith(
     props.location.pathname.replace('/admin', '').concat('/'),

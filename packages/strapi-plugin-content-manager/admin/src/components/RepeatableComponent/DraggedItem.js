@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
@@ -11,6 +12,8 @@ import Inputs from '../Inputs';
 import FieldComponent from '../FieldComponent';
 import Banner from './Banner';
 import FormWrapper from './FormWrapper';
+
+/* eslint-disable react/no-array-index-key */
 
 // Issues:
 // https://github.com/react-dnd/react-dnd/issues/1368
@@ -109,8 +112,6 @@ const DraggedItem = ({
       // but it's good here for the sake of performance
       // to avoid expensive index searches.
       item.originalPath = hoverPath;
-
-      return;
     },
   });
   const [{ isDragging }, drag, preview] = useDrag({

@@ -1,12 +1,9 @@
 /**
- * 
+ *
  * LocaleToggle actions
  */
 
-import {
-  RESET_DEFAULT_CLASSNAME,
-  SET_CUSTOM_CLASSNAME,
-} from './constants';
+import { RESET_DEFAULT_CLASSNAME, SET_CUSTOM_CLASSNAME } from './constants';
 
 export function resetLocaleDefaultClassName() {
   return {

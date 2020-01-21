@@ -5,6 +5,8 @@
 //  * Entry point of the application
 //  */
 
+/* eslint-disable */
+
 import '@babel/polyfill';
 import 'sanitize.css/sanitize.css';
 

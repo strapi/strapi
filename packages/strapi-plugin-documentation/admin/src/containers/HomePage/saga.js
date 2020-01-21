@@ -14,6 +14,8 @@ import {
   makeSelectForm,
 } from './selectors';
 
+/* eslint-disable consistent-return */
+
 function* getData() {
   try {
     const response = yield call(request, '/documentation/getInfos', {

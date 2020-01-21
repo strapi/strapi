@@ -37,12 +37,14 @@ const Header = () => {
   );
   const isCreatingEntry = id === 'create';
 
+  /* eslint-disable indent */
   const headerTitle = isCreatingEntry
     ? formatMessage({
         id: `${pluginId}.containers.Edit.pluginHeader.title.new`,
       })
     : templateObject({ mainField: currentContentTypeMainField }, initialData)
         .mainField;
+  /* eslint-enable indent */
 
   const getHeaderActions = () => {
     const headerActions = [

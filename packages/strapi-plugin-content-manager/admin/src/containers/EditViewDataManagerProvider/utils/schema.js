@@ -119,23 +119,22 @@ const createYupSchema = (model, { components }) => {
           acc[current] = componentSchema;
 
           return acc;
-        } else {
-          const componentSchema = yup.lazy(obj => {
-            if (obj !== undefined) {
-              return attribute.required === true
+        }
+        const componentSchema = yup.lazy(obj => {
+          if (obj !== undefined) {
+            return attribute.required === true
                 ? componentFieldSchema.defined()
                 : componentFieldSchema.nullable();
-            }
+          }
 
-            return attribute.required === true
+          return attribute.required === true
               ? yup.object().defined()
               : yup.object().nullable();
-          });
+        });
 
-          acc[current] = componentSchema;
+        acc[current] = componentSchema;
 
-          return acc;
-        }
+        return acc;
       }
 
       if (attribute.type === 'dynamiczone') {
@@ -156,6 +155,7 @@ const createYupSchema = (model, { components }) => {
               .required(errorsTrads.required);
           }
         } else {
+          // eslint-disable-next-line no-lonely-if
           if (min) {
             dynamicZoneSchema = dynamicZoneSchema.notEmptyMin(min);
           }

@@ -5,4 +5,4 @@ const Wrapper = styled.div`
   margin-bottom: 6px;
 `;
 
-export { Wrapper };
+export default Wrapper;

@@ -1,5 +1,7 @@
 import { get, isArray, isEmpty, isObject } from 'lodash';
 
+/* eslint-disable indent */
+
 export const cleanData = (retrievedData, ctLayout, groupLayouts) => {
   const getType = (schema, attrName) =>
     get(schema, ['attributes', attrName, 'type'], '');
@@ -112,11 +114,10 @@ export const getMediaAttributes = (ctLayout, groupLayouts) => {
 export const helperCleanData = (value, key) => {
   if (isArray(value)) {
     return value.map(obj => (obj[key] ? obj[key] : obj));
-  } else if (isObject(value)) {
+  } if (isObject(value)) {
     return value[key];
-  } else {
-    return value;
   }
+    return value;
 };
 
 export const mapDataKeysToFilesToUpload = (filesMap, data) => {

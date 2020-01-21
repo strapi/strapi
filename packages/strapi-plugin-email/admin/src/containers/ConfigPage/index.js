@@ -28,7 +28,22 @@ import saga from './saga';
 import selectConfigPage from './selectors';
 
 class ConfigPage extends React.Component {
-  static contextType = GlobalContext;
+  pluginHeaderActions = [
+    {
+      color: 'cancel',
+      label: this.context.formatMessage({ id: 'app.components.Button.cancel' }),
+      onClick: this.props.onCancel,
+      type: 'button',
+      key: 'button-cancel',
+    },
+    {
+      color: 'success',
+      label: this.context.formatMessage({ id: 'app.components.Button.save' }),
+      onClick: this.handleSubmit,
+      type: 'submit',
+      key: 'button-submit',
+    },
+  ];
 
   componentDidMount() {
     this.getSettings(this.props);
@@ -107,22 +122,7 @@ class ConfigPage extends React.Component {
     return this.props.submit();
   };
 
-  pluginHeaderActions = [
-    {
-      color: 'cancel',
-      label: this.context.formatMessage({ id: 'app.components.Button.cancel' }),
-      onClick: this.props.onCancel,
-      type: 'button',
-      key: 'button-cancel',
-    },
-    {
-      color: 'success',
-      label: this.context.formatMessage({ id: 'app.components.Button.save' }),
-      onClick: this.handleSubmit,
-      type: 'submit',
-      key: 'button-submit',
-    },
-  ];
+  static contextType = GlobalContext;
 
   render() {
     const { formatMessage } = this.context;

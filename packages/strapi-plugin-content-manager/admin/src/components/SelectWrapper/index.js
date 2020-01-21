@@ -59,7 +59,7 @@ function SelectWrapper({
 
         const data = await request(requestUrl, {
           method: 'GET',
-          params: params,
+          params,
           signal,
         });
 
@@ -220,7 +220,6 @@ SelectWrapper.defaultProps = {
   editable: true,
   description: '',
   label: '',
-  plugin: '',
   placeholder: '',
 };
 
@@ -231,7 +230,6 @@ SelectWrapper.propTypes = {
   mainField: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
-  plugin: PropTypes.string,
   relationType: PropTypes.string.isRequired,
   targetModel: PropTypes.string.isRequired,
 };

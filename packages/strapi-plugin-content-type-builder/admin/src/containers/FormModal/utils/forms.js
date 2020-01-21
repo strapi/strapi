@@ -15,6 +15,9 @@ import {
 } from './attributesRegexes';
 import RESERVED_NAMES from './reservedNames';
 
+/* eslint-disable indent */
+/* eslint-disable prefer-arrow-callback */
+
 yup.addMethod(yup.mixed, 'defined', function() {
   return this.test(
     'defined',
@@ -173,9 +176,8 @@ const forms = {
             .when('max', (max, schema) => {
               if (max) {
                 return schema.max(max, getTrad('error.validation.minSupMax'));
-              } else {
-                return schema;
               }
+                return schema;
             })
             .nullable();
         }),
@@ -194,9 +196,8 @@ const forms = {
                 maxLength,
                 getTrad('error.validation.minSupMax')
               );
-            } else {
-              return schema;
             }
+              return schema;
           })
           .nullable(),
       };
@@ -257,9 +258,8 @@ const forms = {
                       getTrad('error.validation.minSupMax'),
                       max
                     );
-                  } else {
-                    return schema;
                   }
+                    return schema;
                 }),
 
               max: yup
@@ -370,13 +370,12 @@ const forms = {
             return {
               items: componentForm.advanced('componentToCreate.'),
             };
-          } else {
+          }
             const requiredItem = [[fields.required]];
 
             return {
               items: data.repeatable ? [...dynamiczoneItems] : requiredItem,
             };
-          }
         }
 
         const items = defaultItems.slice();
@@ -427,7 +426,7 @@ const forms = {
               options: [
                 <FormattedMessage
                   key="hidden___value__placeholder"
-                  id={'components.InputSelect.option.placeholder'}
+                  id="components.InputSelect.option.placeholder"
                 >
                   {msg => <option value="">{msg}</option>}
                 </FormattedMessage>,
@@ -575,17 +574,17 @@ const forms = {
               options: [
                 {
                   headerId: getTrad(
-                    `form.attribute.component.option.repeatable`
+                    'form.attribute.component.option.repeatable'
                   ),
                   descriptionId: getTrad(
-                    `form.attribute.component.option.repeatable.description`
+                    'form.attribute.component.option.repeatable.description'
                   ),
                   value: true,
                 },
                 {
-                  headerId: getTrad(`form.attribute.component.option.single`),
+                  headerId: getTrad('form.attribute.component.option.single'),
                   descriptionId: getTrad(
-                    `form.attribute.component.option.single.description`
+                    'form.attribute.component.option.single.description'
                   ),
                   value: false,
                 },

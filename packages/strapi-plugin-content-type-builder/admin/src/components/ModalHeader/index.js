@@ -11,6 +11,8 @@ import Icon from './Icon';
 import IconWrapper from './IconWrapper';
 import DropdownInfos from './DropdownInfos';
 
+/* eslint-disable react/no-array-index-key */
+
 const ModalHeader = ({ headerId, headers }) => {
   const shouldDisplayDropDown = headers.length > 3;
 

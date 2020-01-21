@@ -33,6 +33,9 @@ import Link from './link';
 import Video from './video';
 
 /* eslint-disable react/no-unused-state */
+/* eslint-disable no-new */
+/* eslint-disable consistent-return */
+/* eslint-disable react/sort-comp */
 function getBlockStyle(block) {
   switch (block.getType()) {
     case 'blockquote':

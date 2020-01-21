@@ -22,6 +22,8 @@ const Button = styled(PlusButton)`
         }
       `;
     }
+
+    return '';
   }}
   &.isOpen {
     transform: rotate(-45deg);

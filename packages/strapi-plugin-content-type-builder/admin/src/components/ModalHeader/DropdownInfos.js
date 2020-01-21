@@ -7,6 +7,8 @@ import Menu from './Menu';
 import Toggle from './Toggle';
 import Wrapper from './Wrapper';
 
+/* eslint-disable react/no-array-index-key */
+
 const DropdownInfos = ({ headers, shouldDisplaySecondHeader }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 

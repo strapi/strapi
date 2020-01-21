@@ -289,7 +289,6 @@ ListRow.defaultProps = {
   isNestedInDZComponent: false,
   nature: null,
   onClick: () => {},
-  onClickDelete: () => {},
   plugin: null,
   repeatable: false,
   secondLoopComponentName: null,

@@ -12,10 +12,6 @@ import { DndProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import pluginId from '../../pluginId';
 import DragLayer from '../../components/DragLayer';
-
-const EditSettingsView = lazy(() => import('../EditSettingsView'));
-const RecursivePath = lazy(() => import('../RecursivePath'));
-
 import {
   deleteLayout,
   deleteLayouts,
@@ -26,6 +22,9 @@ import {
 import reducer from './reducer';
 import saga from './saga';
 import makeSelectMain from './selectors';
+
+const EditSettingsView = lazy(() => import('../EditSettingsView'));
+const RecursivePath = lazy(() => import('../RecursivePath'));
 
 function Main({
   deleteLayout,
@@ -122,15 +121,15 @@ Main.propTypes = {
   global: PropTypes.shape({
     currentEnvironment: PropTypes.string.isRequired,
     plugins: PropTypes.object,
-  }),
+  }).isRequired,
   components: PropTypes.array.isRequired,
   componentsAndModelsMainPossibleMainFields: PropTypes.object.isRequired,
-  isLoading: PropTypes.bool,
+  isLoading: PropTypes.bool.isRequired,
   layouts: PropTypes.object.isRequired,
   location: PropTypes.shape({
     pathname: PropTypes.string.isRequired,
     search: PropTypes.string,
-  }),
+  }).isRequired,
   models: PropTypes.array.isRequired,
   resetProps: PropTypes.func.isRequired,
 };

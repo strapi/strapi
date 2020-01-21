@@ -112,7 +112,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
 
   useEffect(() => {
     // We need to set the modifiedData after the data has been retrieved
-    //and also on pathname change
+    // and also on pathname change
     if (!isLoading) {
       setModifiedData();
     }
@@ -216,7 +216,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
       const requestURL = `/${pluginId}/component-categories/${categoryUid}`;
       const userConfirm = window.confirm(
         formatMessage({
-          id: getTrad(`popUpWarning.bodyMessage.category.delete`),
+          id: getTrad('popUpWarning.bodyMessage.category.delete'),
         })
       );
       // Close the modal

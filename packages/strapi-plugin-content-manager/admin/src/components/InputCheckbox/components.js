@@ -58,6 +58,8 @@ const Label = styled.label`
         }
       `;
     }
+
+    return '';
   }}
 `;
 

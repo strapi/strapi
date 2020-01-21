@@ -73,7 +73,6 @@ const Label = ({
 Label.defaultProps = {
   index: 0,
   label: '',
-  move: () => {},
   selectedItem: '',
 };
 

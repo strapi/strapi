@@ -51,7 +51,7 @@ const SettingsViewWrapper = ({
           id: `${pluginId}.popUpWarning.button.cancel`,
         }),
         type: 'button',
-        disabled: isEqual(modifiedData, initialData) ? true : false,
+        disabled: isEqual(modifiedData, initialData),
         style: {
           fontWeight: 600,
           paddingLeft: 15,
@@ -64,7 +64,7 @@ const SettingsViewWrapper = ({
           id: `${pluginId}.containers.Edit.submit`,
         }),
         type: 'submit',
-        disabled: isEqual(modifiedData, initialData) ? true : false,
+        disabled: isEqual(modifiedData, initialData),
         style: {
           minWidth: 150,
           fontWeight: 600,

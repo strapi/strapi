@@ -41,6 +41,9 @@ import init from './init';
 import reducer, { initialState } from './reducer';
 import CustomButton from './CustomButton';
 
+/* eslint-disable indent */
+/* eslint-disable react/no-array-index-key */
+
 const FormModal = () => {
   const [state, setState] = useState(INITIAL_STATE_DATA);
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
@@ -403,6 +406,8 @@ const FormModal = () => {
     } else {
       // The user is either in the addComponentToDynamicZone modal or
       // in step 1 of the add component (modalType=attribute&attributeType=component) but not creating a component
+
+      // eslint-disable-next-line no-lonely-if
       if (isInFirstComponentStep && isCreatingComponentFromAView) {
         schema = forms.component.schema(
           Object.keys(components),
@@ -511,6 +516,7 @@ const FormModal = () => {
         name === 'createComponent' ||
         name === 'repeatable')
     ) {
+      // eslint-disable-next-line no-unneeded-ternary
       val = value === 'false' ? false : true;
 
       // The boolean default accepts 3 different values
@@ -713,7 +719,8 @@ const FormModal = () => {
           return;
 
           // Adding an existing component
-        } else {
+        }
+          // eslint-disable-next-line no-lonely-if
           if (isInFirstComponentStep) {
             // Navigate the user to step 2
             const nextSearchObj = {
@@ -748,7 +755,7 @@ const FormModal = () => {
 
             // Here we are in step 2
             // The step 2 is also use to edit an attribute that is a component
-          } else {
+          }
             addAttribute(
               modifiedData,
               state.forTarget,
@@ -776,8 +783,8 @@ const FormModal = () => {
             push({ search: makeSearch(nextSearch, shouldContinue) });
 
             // We don't need to end the loop here we want the reducer to be reinitialised
-          }
-        }
+
+
         // Logic for creating a component without clicking on the link in
         // the left menu
         // We need to separate the logic otherwise the component would be created
@@ -818,7 +825,7 @@ const FormModal = () => {
           return;
 
           // Step 2 of creating a component (which is setting the attribute name in the parent's schema)
-        } else {
+        }
           // We are destructuring because the modifiedData object doesn't have the appropriate format to create a field
           const { category, type, ...rest } = componentToCreate;
           // Create a the component temp UID
@@ -870,7 +877,7 @@ const FormModal = () => {
             ),
           });
           return;
-        }
+
         // The modal is addComponentToDynamicZone
       } else {
         // The modal is addComponentToDynamicZone
@@ -980,8 +987,6 @@ const FormModal = () => {
 
     if (state.forTarget === 'contentType') {
       emitEvent('didSelectContentTypeFieldSettings');
-
-      return;
     }
   };
 
@@ -1001,7 +1006,7 @@ const FormModal = () => {
       ((state.attributeType === 'component' ||
         state.modalType === 'addComponentToDynamicZone') &&
         get(modifiedData, ['createComponent'], null) === false) ||
-      state.modalType == 'editCategory'
+      state.modalType === 'editCategory'
     );
   };
 
@@ -1159,22 +1164,16 @@ const FormModal = () => {
 
                           // The spacer type is used mainly to align the icon picker...
                           if (input.type === 'spacer') {
-                            return (
-                              <div key="spacer" style={{ height: 11 }}></div>
-                            );
+                            return <div key="spacer" style={{ height: 11 }} />;
                           }
 
                           // The spacer type is used mainly to align the icon picker...
                           if (input.type === 'spacer-small') {
-                            return (
-                              <div key="spacer" style={{ height: 4 }}></div>
-                            );
+                            return <div key="spacer" style={{ height: 4 }} />;
                           }
 
                           if (input.type === 'spacer-medium') {
-                            return (
-                              <div key="spacer" style={{ height: 8 }}></div>
-                            );
+                            return <div key="spacer" style={{ height: 8 }} />;
                           }
 
                           // This type is used in the addComponentToDynamicZone modal when selecting the option add an existing component
