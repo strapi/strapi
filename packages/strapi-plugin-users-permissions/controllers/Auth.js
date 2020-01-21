@@ -362,7 +362,7 @@ module.exports = {
         to: user.email,
         from:
           settings.from.email || settings.from.name
-            ? `"${settings.from.name}" <${settings.from.email}>`
+            ? `${settings.from.name} <${settings.from.email}>`
             : undefined,
         replyTo: settings.response_email,
         subject: settings.object,
@@ -560,7 +560,7 @@ module.exports = {
             to: (user.toJSON ? user.toJSON() : user).email,
             from:
               settings.from.email && settings.from.name
-                ? `"${settings.from.name}" <${settings.from.email}>`
+                ? `${settings.from.name} <${settings.from.email}>`
                 : undefined,
             replyTo: settings.response_email,
             subject: settings.object,
