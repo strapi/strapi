@@ -25,6 +25,8 @@ By default, the administration panel is exposed via [http://localhost:1337/admin
 }
 ```
 
+The panel will be available through [http://localhost:1337/dashboard](http://localhost:1337/dashboard) with the configurations above.
+
 ## Change the host
 
 By default, the administration panel client host name is `localhost`. However, you can change this setting by updating the `admin` configuration:
@@ -44,7 +46,7 @@ By default, the administration panel client host name is `localhost`. However, y
 }
 ```
 
-The panel will be available through [http://localhost:1337/dashboard](http://localhost:1337/dashboard) with the configurations above.
+The panel will be available through [http://my-host/admin](http://my-host/admin) with the configurations above.
 
 ## Development mode
 
