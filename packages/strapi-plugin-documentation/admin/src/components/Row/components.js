@@ -46,7 +46,8 @@ const StyledButton = styled(Button)`
           font-size: 10px;
         }
       `;
-    } else if (type === 'generateDocumentation') {
+    }
+    if (type === 'generateDocumentation') {
       return css`
         background: #e6f0fb;
         border: 1px solid #aed4fb;
@@ -58,7 +59,8 @@ const StyledButton = styled(Button)`
           font-size: 10px;
         }
       `;
-    } else if (type === 'trash') {
+    }
+    if (type === 'trash') {
       return css`
         margin-left: 25px;
         font-weight: 400;
@@ -69,12 +71,11 @@ const StyledButton = styled(Button)`
           font-size: 12 px;
         }
       `;
-    } else {
-      return css`
-        margin-left: 45px;
-        font-weight: 400;
-      `;
     }
+    return css`
+      margin-left: 45px;
+      font-weight: 400;
+    `;
   }}
 `;
 

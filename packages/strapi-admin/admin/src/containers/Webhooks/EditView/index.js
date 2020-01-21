@@ -96,8 +96,8 @@ function EditView() {
 
   const headerTitle = isCreating
     ? formatMessage({
-        id: `Settings.webhooks.create`,
-      })
+      id: 'Settings.webhooks.create',
+    })
     : name;
 
   const headersActions = [
@@ -105,7 +105,7 @@ function EditView() {
       color: 'primary',
       disabled: isTriggerActionDisabled,
       label: formatMessage({
-        id: `Settings.webhooks.trigger`,
+        id: 'Settings.webhooks.trigger',
       }),
       onClick: () => handleTrigger(),
       style: {
@@ -113,8 +113,8 @@ function EditView() {
       },
       title: isTriggerActionDisabled
         ? formatMessage({
-            id: `Settings.webhooks.trigger.save`,
-          })
+          id: 'Settings.webhooks.trigger.save',
+        })
         : null,
       type: 'button',
       icon: (
@@ -129,7 +129,7 @@ function EditView() {
       color: 'cancel',
       disabled: areActionDisabled,
       label: formatMessage({
-        id: `app.components.Button.reset`,
+        id: 'app.components.Button.reset',
       }),
       onClick: () => handleReset(),
       style: {
@@ -141,7 +141,7 @@ function EditView() {
       color: 'success',
       disabled: areActionDisabled,
       label: formatMessage({
-        id: `app.components.Button.save`,
+        id: 'app.components.Button.save',
       }),
       style: {
         minWidth: 140,
@@ -181,7 +181,7 @@ function EditView() {
 
   const createWebhooks = async () => {
     try {
-      await request(`/admin/webhooks`, {
+      await request('/admin/webhooks', {
         method: 'POST',
         body: cleanData(modifiedData),
       });
@@ -191,7 +191,7 @@ function EditView() {
           type: 'SUBMIT_SUCCEEDED',
         });
 
-        strapi.notification.success(`Settings.webhooks.created`);
+        strapi.notification.success('Settings.webhooks.created');
         goBack();
       }
     } catch (err) {
@@ -321,7 +321,7 @@ function EditView() {
   const setErrors = errors => {
     dispatch({
       type: 'SET_ERRORS',
-      errors: errors,
+      errors,
     });
   };
 

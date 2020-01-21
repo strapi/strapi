@@ -18,11 +18,11 @@ const ONE_SIDE_RELATIONS = ['oneWay', 'manyWay'];
 const getOppositeNature = originalNature => {
   if (originalNature === 'manyToOne') {
     return 'oneToMany';
-  } else if (originalNature === 'oneToMany') {
-    return 'manyToOne';
-  } else {
-    return originalNature;
   }
+  if (originalNature === 'oneToMany') {
+    return 'manyToOne';
+  }
+  return originalNature;
 };
 
 const addComponentsToState = (state, componentToAddUid, objToUpdate) => {

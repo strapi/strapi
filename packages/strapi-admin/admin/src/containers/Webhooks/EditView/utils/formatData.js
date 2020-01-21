@@ -21,4 +21,4 @@ const unformatHeaders = headers => {
   }, {});
 };
 
-export { cleanData };
+export { cleanData, unformatHeaders };

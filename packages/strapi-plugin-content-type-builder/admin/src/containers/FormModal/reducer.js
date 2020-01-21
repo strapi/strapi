@@ -24,13 +24,12 @@ const reducer = (state, action) => {
       return state.updateIn(['modifiedData', name], list => {
         if (shouldAddComponents) {
           return makeUnique(list.concat(components));
-        } else {
-          return makeUnique(
-            list.filter(comp => {
-              return components.indexOf(comp) === -1;
-            })
-          );
         }
+        return makeUnique(
+          list.filter(comp => {
+            return components.indexOf(comp) === -1;
+          })
+        );
       });
     }
     case 'ON_CHANGE':
