@@ -1,18 +1,38 @@
 'use strict';
 
-const { createModelConfigurationSchema } = require('./validation');
+const _ = require('lodash');
+
+const {
+  createModelConfigurationSchema,
+  validateKind,
+} = require('./validation');
 
 module.exports = {
   /**
    * Returns the list of available content types
    */
-  listContentTypes(ctx) {
+  async listContentTypes(ctx) {
+    const { kind } = ctx.query;
+
+    try {
+      await validateKind(kind);
+    } catch (error) {
+      return ctx.send({ error }, 400);
+    }
+
     const service = strapi.plugins['content-manager'].services.contenttypes;
 
     const contentTypes = Object.keys(strapi.contentTypes)
       .filter(uid => {
         if (uid.startsWith('strapi::')) return false;
         if (uid === 'plugins::upload.file') return false;
+
+        if (
+          kind &&
+          _.get(strapi.contentTypes[uid], 'kind', 'collectionType') !== kind
+        ) {
+          return false;
+        }
 
         return true;
       })
