@@ -1,6 +1,7 @@
 'use strict';
 
 const yup = require('yup');
+const { formatYupErrors } = require('strapi-utils');
 
 const createModelConfigurationSchema = require('./model-configuration');
 
@@ -14,8 +15,8 @@ const validateKind = kind => {
     .string()
     .oneOf(TYPES)
     .nullable()
-    .validate(kind);
-  // .catch(error => Promise.reject(formatYupErrors(error)));
+    .validate(kind)
+    .catch(error => Promise.reject(formatYupErrors(error)));
 };
 
 module.exports = {

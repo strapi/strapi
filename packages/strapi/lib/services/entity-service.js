@@ -16,13 +16,13 @@ module.exports = ({ db, eventHub }) => ({
   async find({ params, populate }, { model }) {
     const { kind } = db.getModel(model);
 
-    const results = await db.query(model).find(params, populate);
-
+    // return first element and ingore filters
     if (kind === 'singleType') {
+      const results = await db.query(model).find({ _limit: 1 }, populate);
       return _.first(results) || null;
     }
 
-    return results;
+    return db.query(model).find(params, populate);
   },
 
   /**
@@ -55,12 +55,10 @@ module.exports = ({ db, eventHub }) => ({
     const { kind } = db.getModel(model);
 
     if (kind === 'singleType') {
-      // check if there is already on entry and throw
-      const count = await this.count({}, { model });
+      // check if there is already one entry and throw
+      const count = await db.query(model).count();
       if (count >= 1) {
-        throw strapi.errors.badRequest(
-          'Single type entry can only be created once'
-        );
+        throw new Error('Single type entry can only be created once');
       }
     }
 

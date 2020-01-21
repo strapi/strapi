@@ -49,7 +49,6 @@ const deleteConfiguration = uid => {
 const formatContentType = contentType => {
   return {
     uid: contentType.uid,
-
     name: _.get(contentType, ['info', 'name']),
     label: formatContentTypeLabel(
       _.get(contentType, ['info', 'name'], contentType.modelName)
