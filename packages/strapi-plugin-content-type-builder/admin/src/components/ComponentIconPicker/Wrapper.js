@@ -2,6 +2,8 @@ import styled from 'styled-components';
 import { colors } from '@buffetjs/styles';
 import PropTypes from 'prop-types';
 
+/* eslint-disable indent */
+
 const Wrapper = styled.div`
   min-height: 199px;
   margin-top: -2px;
@@ -16,6 +18,8 @@ const Wrapper = styled.div`
           border-radius: 2px;
         `;
       }
+
+      return '';
     }}
 
     &:focus,

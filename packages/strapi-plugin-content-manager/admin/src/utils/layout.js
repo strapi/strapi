@@ -56,6 +56,7 @@ const formatLayout = arr => {
       if (row.rowContent.length === 1) {
         return row.rowContent[0].name !== '_TEMP_';
       }
+
       return true;
     });
 };

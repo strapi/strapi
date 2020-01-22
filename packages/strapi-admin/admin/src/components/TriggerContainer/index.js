@@ -17,7 +17,7 @@ const TriggerContainer = ({ isPending, onCancel, response }) => {
             <td>
               <p>
                 {formatMessage({
-                  id: `Settings.webhooks.trigger.test`,
+                  id: 'Settings.webhooks.trigger.test',
                 })}
               </p>
             </td>
@@ -28,14 +28,14 @@ const TriggerContainer = ({ isPending, onCancel, response }) => {
                     <Pending fill="#ffb500" width="15px" height="15px" />
                     <span>
                       {formatMessage({
-                        id: `Settings.webhooks.trigger.pending`,
+                        id: 'Settings.webhooks.trigger.pending',
                       })}
                     </span>
                   </p>
                 </td>
                 <td>
                   <button onClick={onCancel} type="button">
-                    {formatMessage({ id: `Settings.webhooks.trigger.cancel` })}
+                    {formatMessage({ id: 'Settings.webhooks.trigger.cancel' })}
                     <Remove fill="#b4b6ba" />
                   </button>
                 </td>
@@ -49,7 +49,7 @@ const TriggerContainer = ({ isPending, onCancel, response }) => {
                     <Success fill="#6DBB1A" width="19px" height="19px" />
                     <span>
                       {formatMessage({
-                        id: `Settings.webhooks.trigger.success`,
+                        id: 'Settings.webhooks.trigger.success',
                       })}
                     </span>
                   </p>
@@ -57,7 +57,7 @@ const TriggerContainer = ({ isPending, onCancel, response }) => {
                 <td>
                   <p>
                     {formatMessage({
-                      id: `Settings.webhooks.trigger.success.label`,
+                      id: 'Settings.webhooks.trigger.success.label',
                     })}
                   </p>
                 </td>
@@ -71,7 +71,7 @@ const TriggerContainer = ({ isPending, onCancel, response }) => {
                     <Fail fill="#f64d0a" width="15px" height="15px" />
                     <span>
                       {formatMessage({
-                        id: `Settings.error`,
+                        id: 'Settings.error',
                       })}{' '}
                       {statusCode}
                     </span>

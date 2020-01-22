@@ -10,16 +10,16 @@ const fields = {
     size: 12,
     options: [
       {
-        headerId: getTrad(`form.attribute.component.option.create`),
+        headerId: getTrad('form.attribute.component.option.create'),
         descriptionId: getTrad(
-          `form.attribute.component.option.create.description`
+          'form.attribute.component.option.create.description'
         ),
         value: true,
       },
       {
-        headerId: getTrad(`form.attribute.component.option.reuse-existing`),
+        headerId: getTrad('form.attribute.component.option.reuse-existing'),
         descriptionId: getTrad(
-          `form.attribute.component.option.reuse-existing.description`
+          'form.attribute.component.option.reuse-existing.description'
         ),
         value: false,
       },
@@ -43,7 +43,7 @@ const fields = {
     name: 'max',
     type: 'customCheckboxWithChildren',
     label: {
-      id: getTrad(`form.attribute.item.maximum`),
+      id: getTrad('form.attribute.item.maximum'),
     },
     validations: {},
   },
@@ -52,7 +52,7 @@ const fields = {
     name: 'min',
     type: 'customCheckboxWithChildren',
     label: {
-      id: getTrad(`form.attribute.item.minimum`),
+      id: getTrad('form.attribute.item.minimum'),
     },
     validations: {},
   },

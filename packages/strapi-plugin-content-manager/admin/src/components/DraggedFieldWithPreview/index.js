@@ -8,6 +8,8 @@ import DynamicZoneWrapper from './DynamicZoneWrapper';
 import Wrapper from './Wrapper';
 import DynamicComponent from './DynamicComponent';
 
+/* eslint-disable react/no-array-index-key */
+
 const DraggedFieldWithPreview = forwardRef(
   (
     {
@@ -136,7 +138,7 @@ const DraggedFieldWithPreview = forwardRef(
                                 withLongerHeight={higherFields.includes(
                                   fieldType
                                 )}
-                              ></DraggedField>
+                              />
                             </div>
                           );
                         })}

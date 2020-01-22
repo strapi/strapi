@@ -7,6 +7,8 @@ import { deletePluginSucceeded, getPluginsSucceeded } from './actions';
 import { GET_PLUGINS, ON_DELETE_PLUGIN_CONFIRM } from './constants';
 import { makeSelectPluginToDelete } from './selectors';
 
+/* eslint-disable */
+
 export function* deletePlugin() {
   try {
     const plugin = yield select(makeSelectPluginToDelete());
