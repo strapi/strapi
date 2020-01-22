@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import styled from 'styled-components';
 import getColor from './utils/getColor';
 import getHeight from './utils/getHeight';

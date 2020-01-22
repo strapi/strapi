@@ -36,6 +36,8 @@ const Button = styled.button`
         cursor: not-allowed;
       `;
     }
+
+    return '';
   }}
 
   > svg {

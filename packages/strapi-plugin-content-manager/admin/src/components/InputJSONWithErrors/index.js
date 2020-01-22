@@ -17,7 +17,6 @@ import Wrapper from './Wrapper';
 
 class InputJSONWithErrors extends React.Component {
   handleChange = e => {
-    this.setState({ errors: [] });
     this.props.onChange(e);
   };
 

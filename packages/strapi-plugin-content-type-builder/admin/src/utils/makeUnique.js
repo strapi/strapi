@@ -1,4 +1,3 @@
-const makeUnique = array =>
-  array.filter((key, index) => array.indexOf(key) === index && key !== '');
+const makeUnique = array => [...new Set(array)];
 
 export default makeUnique;

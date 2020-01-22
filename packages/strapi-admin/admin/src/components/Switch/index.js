@@ -20,12 +20,11 @@ function Switch({ name, value, onChange }) {
         checked={value}
         name={name}
         onChange={({ target: { checked } }) =>
-          onChange({ target: { name, value: checked } })
-        }
+          onChange({ target: { name, value: checked } })}
       />
       <div className="button">
-        <div className="button-rect"></div>
-        <div className="button-circle"></div>
+        <div className="button-rect" />
+        <div className="button-circle" />
       </div>
       <p>
         {value

@@ -55,12 +55,16 @@ function ListRow({
         <p title={url}>{url}</p>
       </td>
       <td>
-        <div onClick={e => e.stopPropagation()}>
+        <div
+          onClick={e => e.stopPropagation()}
+          role="button"
+          aria-hidden="true"
+        >
           <Switch
             name={name}
             value={isEnabled}
             onChange={({ target: { value } }) => onEnabledChange(value, id)}
-          ></Switch>
+          />
         </div>
       </td>
       <td>

@@ -6,13 +6,12 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
+import { NotFound } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 
 import EditPage from '../EditPage';
 import HomePage from '../HomePage';
-import NotFoundPage from '../NotFoundPage';
 
 const App = () => {
   return (
@@ -28,15 +27,10 @@ const App = () => {
           component={HomePage}
           exact
         />
-        <Route component={NotFoundPage} />
+        <Route component={NotFound} />
       </Switch>
     </div>
   );
-};
-
-App.propTypes = {
-  history: PropTypes.object.isRequired,
-  location: PropTypes.object.isRequired,
 };
 
 export default App;

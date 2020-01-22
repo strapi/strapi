@@ -20,6 +20,8 @@ const NameWrapper = styled.div`
       color: #007eff;
     `;
     }
+
+    return '';
   }}
 `;
 

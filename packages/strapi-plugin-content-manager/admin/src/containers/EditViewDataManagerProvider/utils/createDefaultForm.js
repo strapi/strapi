@@ -42,7 +42,7 @@ const createDefaultForm = (attributes, allComponentsSchema) => {
       if (min && repeatable === true && required) {
         acc[current] = [];
 
-        for (let i = 0; i < min; i++) {
+        for (let i = 0; i < min; i += 1) {
           acc[current].push(currentComponentDefaultForm);
         }
       }

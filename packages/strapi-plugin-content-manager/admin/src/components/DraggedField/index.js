@@ -14,6 +14,7 @@ import SubWrapper from './SubWrapper';
 import Wrapper from './Wrapper';
 import Close from './Close';
 
+/* eslint-disable */
 const DraggedField = forwardRef(
   (
     {
