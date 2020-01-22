@@ -5,6 +5,8 @@ import useListView from '../../hooks/useListView';
 import CustomInputCheckbox from '../CustomInputCheckbox';
 import { Arrow, Thead } from './styledComponents';
 
+/* eslint-disable jsx-a11y/control-has-associated-label */
+
 function TableHeader({ headers, isBulkable }) {
   const {
     data,
@@ -67,7 +69,7 @@ function TableHeader({ headers, isBulkable }) {
             </th>
           );
         })}
-        <th></th>
+        <th />
       </tr>
     </Thead>
   );

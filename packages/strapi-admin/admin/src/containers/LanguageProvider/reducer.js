@@ -9,10 +9,9 @@ import { get, includes, split } from 'lodash';
 
 // Import supported languages from the translations folder
 import trads from '../../translations';
+import { CHANGE_LOCALE } from './constants';
 
 const languages = Object.keys(trads);
-
-import { CHANGE_LOCALE } from './constants';
 
 // Define a key to store and get user preferences in local storage.
 const localStorageKey = 'strapi-admin-language';
@@ -24,6 +23,7 @@ const userLanguage =
   window.navigator.userLanguage;
 
 let foundLanguage = includes(languages, userLanguage) && userLanguage;
+
 if (!foundLanguage) {
   // Split user language in a correct format.
   const userLanguageShort = get(split(userLanguage, '-'), '0');

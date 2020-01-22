@@ -13,6 +13,8 @@ import { Player } from 'video-react';
 import 'video-react/dist/video-react.css';
 import Li from './Li';
 
+/* eslint-disable */
+
 class OnboardingVideo extends React.Component {
   componentDidMount() {
     this.hiddenPlayer.current.subscribeToStateChange(this.handleChangeState);

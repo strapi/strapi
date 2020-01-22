@@ -5,8 +5,9 @@
  */
 
 import styled from 'styled-components';
-
 import { colors } from 'strapi-helper-plugin';
+
+/* eslint-disable indent */
 
 const Wrapper = styled.tr`
   background-color: transparent;

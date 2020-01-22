@@ -7,6 +7,9 @@ import useQuery from '../../hooks/useQuery';
 import Category from './Category';
 import Ul from './Ul';
 
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+
 const MenuList = ({
   selectProps: {
     isAddingAComponentToAnotherComponent,
@@ -110,7 +113,7 @@ MenuList.propTypes = {
     onClickOption: PropTypes.func.isRequired,
     refState: PropTypes.object,
     value: PropTypes.object,
-  }).isRequired,
+  }),
 };
 
 export default MenuList;

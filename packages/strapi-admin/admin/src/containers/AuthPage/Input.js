@@ -6,6 +6,8 @@ import { get } from 'lodash';
 import { InputsIndex as Inputs } from 'strapi-helper-plugin';
 import CustomLabel from './CustomLabel';
 
+/* eslint-disable */
+
 const Input = ({
   autoFocus,
   customBootstrapClass,

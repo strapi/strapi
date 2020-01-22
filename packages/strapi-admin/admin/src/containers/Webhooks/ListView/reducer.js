@@ -19,6 +19,7 @@ const reducer = (state, action) => {
         if (action.value) {
           return list.push(action.id);
         }
+
         return list.filter(data => data !== action.id);
       });
     case 'WEBHOOKS_DELETED':

@@ -7,9 +7,9 @@ import EventRow from './EventRow';
 
 const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
   const headersName = [
-    `Settings.webhooks.events.create`,
-    `Settings.webhooks.events.edit`,
-    `Settings.webhooks.events.delete`,
+    'Settings.webhooks.events.create',
+    'Settings.webhooks.events.edit',
+    'Settings.webhooks.events.delete',
   ];
 
   const events = {
@@ -22,6 +22,7 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
 
   const formatValue = inputValue.reduce((acc, curr) => {
     const key = curr.split('.')[0];
+
     if (!acc[key]) {
       acc[key] = [];
     }
@@ -32,6 +33,7 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
 
   const handleChange = ({ target: { name, value } }) => {
     let set = new Set(inputValue);
+
     if (value) {
       set.add(name);
     } else {
@@ -42,14 +44,15 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
 
   const handleChangeAll = ({ target: { name, value } }) => {
     let set = new Set(inputValue);
+
     if (value) {
-      events[name].map(event => {
+      events[name].forEach(event => {
         if (!disabledEvents.includes(event)) {
           set.add(event);
         }
       });
     } else {
-      events[name].map(event => set.delete(event));
+      events[name].forEach(event => set.delete(event));
     }
     onChange({ target: { name: inputName, value: Array.from(set) } });
   };
@@ -59,7 +62,7 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
       <table>
         <thead>
           <tr>
-            <td></td>
+            <td />
             {headersName.map(header => {
               return (
                 <td key={header}>
@@ -89,15 +92,12 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
   );
 };
 
-EventInput.defaultProps = {
-  onBlur: () => {},
-};
+EventInput.defaultProps = {};
 
 EventInput.propTypes = {
   name: PropTypes.string.isRequired,
-  onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
-  value: PropTypes.array,
+  value: PropTypes.array.isRequired,
 };
 
 export default EventInput;
