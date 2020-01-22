@@ -97,8 +97,6 @@ function generateCollectionTypeRoutes({ route, name }) {
  */
 
 module.exports = scope => {
-  console.log(scope.contentTypeKind);
-
   const routes =
     scope.contentTypeKind === 'singleType'
       ? generateSingleTypeRoutes({
