@@ -15,6 +15,7 @@ import { Error } from '@buffetjs/core';
 import Wysiwyg from '../Wysiwyg';
 import Wrapper from './Wrapper';
 
+// eslint-disable-next-line react/prefer-stateless-function
 class WysiwygWithErrors extends React.Component {
   render() {
     const {
@@ -114,6 +115,7 @@ WysiwygWithErrors.defaultProps = {
   style: {},
   tabIndex: '0',
   validations: {},
+  value: null,
 };
 
 WysiwygWithErrors.propTypes = {

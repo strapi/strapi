@@ -3,7 +3,7 @@
  * ComponentList
  *
  */
-
+/* eslint-disable import/no-cycle */
 import React from 'react';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
@@ -58,6 +58,8 @@ ComponentList.defaultProps = {
   component: null,
   customRowComponent: null,
   dzName: null,
+  firstLoopComponentName: null,
+  firstLoopComponentUid: null,
   isFromDynamicZone: false,
   isNestedInDZComponent: false,
 };
@@ -71,7 +73,6 @@ ComponentList.propTypes = {
   isFromDynamicZone: PropTypes.bool,
   isNestedInDZComponent: PropTypes.bool,
   mainTypeName: PropTypes.string.isRequired,
-  targetUid: PropTypes.string.isRequired,
 };
 
 export default ComponentList;

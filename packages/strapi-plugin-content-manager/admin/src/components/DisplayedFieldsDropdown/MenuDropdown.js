@@ -17,6 +17,8 @@ const MenuDropdown = styled(DropdownMenu)`
         border-top-right-radius: 0;
       `;
     }
+
+    return '';
   }}
 `;
 

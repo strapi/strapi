@@ -14,6 +14,8 @@ import Ul from './Ul';
 import hasSubArray from './utils/hasSubArray';
 import hasSomeSubArray from './utils/HasSomeSubArray';
 
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+
 const MultipleMenuList = ({
   selectProps: { name, addComponentsToDynamicZone, inputValue, value },
   ...rest
@@ -138,7 +140,7 @@ const MultipleMenuList = ({
   const handleChange = ({ target }) => {
     const dataTarget = {
       name,
-      components: target.name,
+      components: [target.name],
       shouldAddComponents: target.value,
     };
 
@@ -271,7 +273,7 @@ MultipleMenuList.propTypes = {
     name: PropTypes.string.isRequired,
     refState: PropTypes.object,
     value: PropTypes.object,
-  }).isRequired,
+  }),
 };
 
 export default MultipleMenuList;

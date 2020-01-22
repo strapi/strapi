@@ -85,8 +85,6 @@ const Item = ({
 
       item.rowIndex = targetRow;
       item.itemIndex = hoverIndex;
-
-      return;
     },
     drop(item, monitor) {
       if (!dropRef.current) {
@@ -122,6 +120,7 @@ const Item = ({
 
         item.itemIndex = hoverIndex + 1;
         item.rowIndex = targetRow;
+
         return;
       }
 
@@ -136,8 +135,6 @@ const Item = ({
 
       item.itemIndex = hoverIndex;
       item.rowIndex = targetRow;
-
-      return;
     },
     collect: monitor => ({
       canDrop: monitor.canDrop(),

@@ -64,7 +64,7 @@ function EditViewButton(props) {
         outline: 0,
         fontWeight: 600,
       }}
-    ></Button>
+    />
   );
 }
 

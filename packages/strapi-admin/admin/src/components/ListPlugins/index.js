@@ -15,6 +15,8 @@ import { Button } from 'strapi-helper-plugin';
 import Row from '../Row';
 import Wrapper from './Wrapper';
 
+/* eslint-disable react/prefer-stateless-function */
+
 class ListPlugins extends React.Component {
   render() {
     const listSize = size(this.props.plugins);

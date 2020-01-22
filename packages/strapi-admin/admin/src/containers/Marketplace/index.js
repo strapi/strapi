@@ -118,7 +118,7 @@ Marketplace.propTypes = {
   global: PropTypes.shape({
     autoReload: PropTypes.bool.isRequired,
     currentEnvironment: PropTypes.string.isRequired,
-  }),
+  }).isRequired,
   history: PropTypes.object.isRequired,
   installedPlugins: PropTypes.array.isRequired,
   intl: PropTypes.shape({

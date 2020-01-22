@@ -14,6 +14,8 @@ const Wrapper = styled.div`
         padding: 0;
       `;
     }
+
+    return '';
   }}
   border-radius: 2px;
   > div {

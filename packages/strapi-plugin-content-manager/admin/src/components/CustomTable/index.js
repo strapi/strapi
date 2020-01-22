@@ -94,7 +94,6 @@ CustomTable.defaultProps = {
   data: [],
   headers: [],
   isBulkable: true,
-  slug: '',
 };
 
 CustomTable.propTypes = {
@@ -108,7 +107,6 @@ CustomTable.propTypes = {
     push: PropTypes.func.isRequired,
   }).isRequired,
   isBulkable: PropTypes.bool,
-  slug: PropTypes.string,
 };
 
 export default withRouter(memo(CustomTable));
