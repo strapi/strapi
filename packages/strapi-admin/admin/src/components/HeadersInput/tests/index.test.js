@@ -20,7 +20,7 @@ describe('Admin | components | HeadersInput', () => {
     onRemove: jest.fn(),
   };
   describe('Render', () => {
-    it('It should render properly', () => {
+    it('It should not crash', () => {
       shallow(<HeadersInput {...props} />);
     });
 

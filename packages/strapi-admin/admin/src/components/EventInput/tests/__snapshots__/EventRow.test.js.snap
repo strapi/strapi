@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<EventRow /> should render properly 1`] = `
+<tr>
+  <td>
+    <div
+      className="sc-bZQynM iXyeyW"
+    >
+      <input
+        autoComplete="off"
+        autoFocus={false}
+        checked={true}
+        className="sc-EHOje cqFDuP"
+        id="events"
+        name="events"
+        onChange={[Function]}
+        placeholder={null}
+        tabIndex="0"
+        type="checkbox"
+      />
+      <label
+        className="sc-kpOJdX kYXOPJ"
+        htmlFor="events"
+      >
+        events
+      </label>
+    </div>
+  </td>
+</tr>
+`;
