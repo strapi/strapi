@@ -144,6 +144,7 @@ export class Admin extends React.Component {
 
     return (
       <GlobalContextProvider
+        autoReload={this.props.global.autoReload}
         emitEvent={this.props.emitEvent}
         currentEnvironment={this.props.global.currentEnvironment}
         disableGlobalOverlayBlocker={this.props.disableGlobalOverlayBlocker}
@@ -216,6 +217,7 @@ Admin.propTypes = {
   emitEvent: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
   global: PropTypes.shape({
+    autoReload: PropTypes.bool,
     blockApp: PropTypes.bool,
     currentEnvironment: PropTypes.string,
     overlayBlockerData: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
