@@ -1,5 +1,7 @@
 import styled from 'styled-components';
 
+/* eslint-disable */
+
 const BannerWrapper = styled.button`
   display: flex;
   height: 36px;

@@ -40,6 +40,8 @@ import reducer from './reducer';
 import saga from './saga';
 import makeSelectListView from './selectors';
 
+/* eslint-disable react/no-array-index-key */
+
 function ListView({
   count,
   data,
@@ -419,12 +421,12 @@ ListView.propTypes = {
   location: PropTypes.shape({
     pathname: PropTypes.string.isRequired,
     search: PropTypes.string.isRequired,
-  }),
+  }).isRequired,
   models: PropTypes.array.isRequired,
   getData: PropTypes.func.isRequired,
   history: PropTypes.shape({
     push: PropTypes.func.isRequired,
-  }),
+  }).isRequired,
   onChangeBulk: PropTypes.func.isRequired,
   onChangeBulkSelectall: PropTypes.func.isRequired,
   onChangeListLabels: PropTypes.func.isRequired,

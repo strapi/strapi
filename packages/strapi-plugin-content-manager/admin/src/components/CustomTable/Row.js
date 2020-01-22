@@ -10,6 +10,8 @@ import MediaPreviewList from '../MediaPreviewList';
 import { ActionContainer, Truncate, Truncated } from './styledComponents';
 import DATE_FORMATS from './DATE_FORMATS';
 
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+
 const dateToUtcTime = date => moment.parseZone(date).utc();
 
 const getDisplayedValue = (type, value, name) => {
@@ -56,6 +58,7 @@ const getDisplayedValue = (type, value, name) => {
         second,
       };
       const date = moment().set(timeObj);
+
       return date.format(DATE_FORMATS.time);
     }
     default:
@@ -104,9 +107,7 @@ function Row({ goTo, isBulkable, row, headers }) {
                 <Truncated>{memoizedDisplayedValue(header.name)}</Truncated>
               </Truncate>
             ) : (
-              <MediaPreviewList
-                files={memoizedDisplayedValue(header.name)}
-              ></MediaPreviewList>
+              <MediaPreviewList files={memoizedDisplayedValue(header.name)} />
             )}
           </td>
         );

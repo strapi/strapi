@@ -14,13 +14,14 @@ import { IntlProvider } from 'react-intl';
 import { defaultsDeep } from 'lodash';
 import { selectLocale } from './selectors';
 
+// eslint-disable-next-line react/prefer-stateless-function
 export class LanguageProvider extends React.Component {
-  // eslint-disable-line react/prefer-stateless-function
   render() {
     const messages = defaultsDeep(
       this.props.messages[this.props.locale],
-      this.props.messages.en,
+      this.props.messages.en
     );
+
     return (
       <IntlProvider
         locale={this.props.locale}
@@ -41,7 +42,7 @@ LanguageProvider.propTypes = {
 
 const mapStateToProps = createSelector(
   selectLocale(),
-  locale => ({ locale }),
+  locale => ({ locale })
 );
 
 function mapDispatchToProps(dispatch) {
@@ -52,5 +53,5 @@ function mapDispatchToProps(dispatch) {
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 )(LanguageProvider);

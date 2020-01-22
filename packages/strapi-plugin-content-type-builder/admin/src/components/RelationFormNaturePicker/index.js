@@ -30,17 +30,17 @@ const RelationFormNaturePicker = ({
   target,
 }) => {
   const { contentTypes } = useDataManager();
+  const ctRelations = [
+    'oneWay',
+    'oneToOne',
+    'oneToMany',
+    'manyToOne',
+    'manyToMany',
+    'manyWay',
+  ];
+  const componentRelations = ['oneWay', 'manyWay'];
   const relationsType =
-    naturePickerType === 'contentType'
-      ? [
-          'oneWay',
-          'oneToOne',
-          'oneToMany',
-          'manyToOne',
-          'manyToMany',
-          'manyWay',
-        ]
-      : ['oneWay', 'manyWay'];
+    naturePickerType === 'contentType' ? ctRelations : componentRelations;
 
   const areDisplayedNamesInverted = nature === 'manyToOne';
   const targetLabel = get(contentTypes, [target, 'schema', 'name'], 'unknown');
@@ -88,7 +88,8 @@ const RelationFormNaturePicker = ({
         </div>
         <div className="nature-txt">
           <span>{truncate(leftDisplayedValue, { length: 24 })}</span>
-          &nbsp; <FormattedMessage id={getTrad(`relation.${nature}`)} />
+          &nbsp;
+          <FormattedMessage id={getTrad(`relation.${nature}`)} />
           &nbsp;
           <span>{truncate(rightDisplayedValue, { length: 24 })}</span>
         </div>

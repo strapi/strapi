@@ -1,5 +1,7 @@
 import { get, isEmpty } from 'lodash';
 
+/* eslint-disable no-restricted-syntax */
+
 const createAttributesLayout = (currentLayout, attributes) => {
   const getType = name => get(attributes, [name, 'type'], '');
   let currentRowIndex = 0;
