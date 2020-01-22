@@ -64,6 +64,7 @@ function SelectMany({
           if (!isEmpty(value)) {
             const isSelected =
               value.findIndex(item => item.id === candidate.value.id) !== -1;
+
             if (isSelected) {
               return false;
             }

@@ -4,6 +4,7 @@
  *
  */
 
+/* eslint-disable import/no-cycle */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
@@ -17,6 +18,8 @@ import useDataManager from '../../hooks/useDataManager';
 import DynamicZoneList from '../DynamicZoneList';
 import ComponentList from '../ComponentList';
 import Wrapper from './List';
+
+/* eslint-disable jsx-a11y/no-static-element-interactions */
 
 function List({
   className,
@@ -149,6 +152,7 @@ function List({
     );
   };
 
+  /* eslint-disable indent */
   const addButtonProps = {
     icon: !isSub ? <Plus fill="#007eff" width="11px" height="11px" /> : false,
     color: 'primary',
@@ -161,6 +165,7 @@ function List({
       : null,
     onClick: onClickAddField,
   };
+  /* eslint-enable indent */
 
   if (!targetUid) {
     return null;
@@ -242,7 +247,6 @@ function List({
 }
 
 List.defaultProps = {
-  addField: () => {},
   addComponentToDZ: () => {},
   className: null,
   customRowComponent: null,

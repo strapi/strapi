@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { Switch, Route, useRouteMatch, useParams } from 'react-router-dom';
 import { LoadingIndicatorPage } from 'strapi-helper-plugin';
+
 const EditView = lazy(() => import('../EditView'));
 const EditSettingsView = lazy(() => import('../EditSettingsView'));
 const ListView = lazy(() => import('../ListView'));

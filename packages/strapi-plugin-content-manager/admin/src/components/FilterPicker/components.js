@@ -48,6 +48,8 @@ const Div = styled.div`
         ? 'margin-top .3s ease-out, margin-bottom .2s ease-out'
         : 'margin .3s ease-in';
     }
+
+    return '';
   }};
 `;
 

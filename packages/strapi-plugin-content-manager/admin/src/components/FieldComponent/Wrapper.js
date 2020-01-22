@@ -12,6 +12,8 @@ const Wrapper = styled.div`
         background-color: #fff;
       `;
     }
+
+    return '';
   }}
 `;
 

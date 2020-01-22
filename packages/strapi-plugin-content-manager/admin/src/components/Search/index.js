@@ -12,10 +12,13 @@ import Cross from '../../icons/Cross';
 import Filter from '../../icons/Filter';
 import SearchIcon from '../../icons/Search';
 import { Wrapper, Infos, Clear } from './components';
+
 const WAIT = 400;
 
 class Search extends React.Component {
   state = { value: this.props.initValue };
+
+  timer = null;
 
   componentDidUpdate(prevProps) {
     const { model, value } = this.props;
@@ -27,8 +30,6 @@ class Search extends React.Component {
       this.resetState();
     }
   }
-
-  timer = null;
 
   resetState = () => this.setState({ value: '' });
 

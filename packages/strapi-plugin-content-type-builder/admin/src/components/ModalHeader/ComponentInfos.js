@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import UpperFirst from '../UpperFirst';
 import ComponentInfosWrapper from './ComponentInfosWrapper';
 
+/* eslint-disable react/jsx-one-expression-per-line */
+
 const ComponentInfos = ({ category, name }) => {
   return (
     <ComponentInfosWrapper>

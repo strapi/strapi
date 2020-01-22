@@ -334,7 +334,6 @@ ListSettingsView.propTypes = {
   location: PropTypes.shape({
     search: PropTypes.string.isRequired,
   }).isRequired,
-  models: PropTypes.array.isRequired,
   slug: PropTypes.string.isRequired,
 };
 

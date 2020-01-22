@@ -26,6 +26,8 @@ import { LinkWrapper, SubWrapper } from './components';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
+/* eslint-disable  react/no-array-index-key */
+
 const EditView = ({
   components,
   currentEnvironment,
@@ -274,7 +276,7 @@ const EditView = ({
                     }}
                     icon="layout"
                     key={`${pluginId}.link`}
-                    url={`ctm-configurations/edit-settings/content-types`}
+                    url="ctm-configurations/edit-settings/content-types"
                     onClick={() => {
                       // emitEvent('willEditContentTypeLayoutFromEditView');
                     }}
