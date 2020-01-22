@@ -3,7 +3,7 @@ import { get, isEmpty, isObject } from 'lodash';
 export default function checkFormValidity(
   settingType,
   data,
-  providerToEdit = '',
+  providerToEdit = ''
 ) {
   const formErrors = [];
 
