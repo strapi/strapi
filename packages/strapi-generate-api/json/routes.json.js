@@ -73,7 +73,7 @@ module.exports = scope => {
   }
 
   // We have to delete current file
-  if (!_.isEmpty(scope.parentId)) {
+  if (fs.existsSync(scope.rootPath)) {
     let current;
 
     try {
