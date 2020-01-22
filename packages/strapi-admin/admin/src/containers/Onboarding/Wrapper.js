@@ -3,8 +3,7 @@ import styled, { keyframes } from 'styled-components';
 const Wrapper = styled.div`
   position: fixed;
   right: 15px;
-  // bottom: 15px;
-  top: 70px;
+  bottom: 15px;
   button,
   button:focus,
   a {

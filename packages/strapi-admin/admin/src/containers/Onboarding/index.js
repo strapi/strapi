@@ -31,7 +31,7 @@ import saga from './saga';
 export class Onboarding extends React.Component {
   static contextType = GlobalContext;
 
-  state = { showVideos: true };
+  state = { showVideos: false };
 
   componentDidMount() {
     this.props.getVideos();
