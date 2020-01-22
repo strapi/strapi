@@ -71,7 +71,10 @@ const createContentType = async ({ contentType, components = [] }) => {
   });
 
   // generate api squeleton
-  await generateAPI(contentType.name);
+  await generateAPI({
+    name: contentType.name,
+    kind: contentType.kind,
+  });
 
   await builder.writeFiles();
   return newContentType;
@@ -81,7 +84,7 @@ const createContentType = async ({ contentType, components = [] }) => {
  * Generate an API squeleton
  * @param {string} name
  */
-const generateAPI = name => {
+const generateAPI = ({ name, kind = 'collectionType' }) => {
   return new Promise((resolve, reject) => {
     const scope = {
       generatorType: 'api',
@@ -90,6 +93,7 @@ const generateAPI = name => {
       rootPath: strapi.dir,
       args: {
         attributes: {},
+        kind,
       },
     };
 

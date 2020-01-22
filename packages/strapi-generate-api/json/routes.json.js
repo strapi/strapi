@@ -10,67 +10,105 @@ const fs = require('fs');
 // Public node modules.
 const _ = require('lodash');
 
+function generateSingleTypeRoutes({ route, name }) {
+  return [
+    {
+      method: 'GET',
+      path: '/' + route,
+      handler: name + '.find',
+      config: {
+        policies: [],
+      },
+    },
+    {
+      method: 'PUT',
+      path: '/' + route,
+      handler: name + '.update',
+      config: {
+        policies: [],
+      },
+    },
+    {
+      method: 'DELETE',
+      path: '/' + route,
+      handler: name + '.delete',
+      config: {
+        policies: [],
+      },
+    },
+  ];
+}
+
+function generateCollectionTypeRoutes({ route, name }) {
+  return [
+    {
+      method: 'GET',
+      path: '/' + route,
+      handler: name + '.find',
+      config: {
+        policies: [],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/' + route + '/count',
+      handler: name + '.count',
+      config: {
+        policies: [],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/' + route + '/:id',
+      handler: name + '.findOne',
+      config: {
+        policies: [],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/' + route,
+      handler: name + '.create',
+      config: {
+        policies: [],
+      },
+    },
+    {
+      method: 'PUT',
+      path: '/' + route + '/:id',
+      handler: name + '.update',
+      config: {
+        policies: [],
+      },
+    },
+    {
+      method: 'DELETE',
+      path: '/' + route + '/:id',
+      handler: name + '.delete',
+      config: {
+        policies: [],
+      },
+    },
+  ];
+}
+
 /**
  * Expose main routes of the generated API
  */
 
 module.exports = scope => {
-  function generateRoutes() {
-    const routes = {
-      routes: [
-        {
-          method: 'GET',
-          path: '/' + scope.route,
-          handler: scope.name + '.find',
-          config: {
-            policies: [],
-          },
-        },
-        {
-          method: 'GET',
-          path: '/' + scope.route + '/count',
-          handler: scope.name + '.count',
-          config: {
-            policies: [],
-          },
-        },
-        {
-          method: 'GET',
-          path: '/' + scope.route + '/:id',
-          handler: scope.name + '.findOne',
-          config: {
-            policies: [],
-          },
-        },
-        {
-          method: 'POST',
-          path: '/' + scope.route,
-          handler: scope.name + '.create',
-          config: {
-            policies: [],
-          },
-        },
-        {
-          method: 'PUT',
-          path: '/' + scope.route + '/:id',
-          handler: scope.name + '.update',
-          config: {
-            policies: [],
-          },
-        },
-        {
-          method: 'DELETE',
-          path: '/' + scope.route + '/:id',
-          handler: scope.name + '.delete',
-          config: {
-            policies: [],
-          },
-        },
-      ],
-    };
+  console.log(scope.contentTypeKind);
 
-    return routes;
-  }
+  const routes =
+    scope.contentTypeKind === 'singleType'
+      ? generateSingleTypeRoutes({
+          route: scope.route,
+          name: scope.name,
+        })
+      : generateCollectionTypeRoutes({
+          route: scope.route,
+          name: scope.name,
+        });
 
   // We have to delete current file
   if (fs.existsSync(scope.rootPath)) {
@@ -83,19 +121,17 @@ module.exports = scope => {
       // Remove current routes.json
       fs.unlinkSync(scope.rootPath);
     } catch (e) {
-      // Fake existing routes
+      console.error(e);
       current = {
         routes: [],
       };
     }
 
     try {
-      const newest = generateRoutes().routes;
-      // Merge both array of routes, and remove identical routes
       _.set(
         current,
         'routes',
-        _.concat(newest, _.differenceWith(current.routes, newest, _.isEqual))
+        _.concat(routes, _.differenceWith(current.routes, routes, _.isEqual))
       );
 
       return current;
@@ -105,5 +141,5 @@ module.exports = scope => {
     }
   }
 
-  return generateRoutes();
+  return { routes };
 };
