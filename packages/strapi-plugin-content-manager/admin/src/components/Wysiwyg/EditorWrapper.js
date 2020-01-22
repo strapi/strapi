@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components';
-
+/* eslint-disable */
 const EditorWrapper = styled.div`
   ${({ isFullscreen }) => {
     if (isFullscreen) {

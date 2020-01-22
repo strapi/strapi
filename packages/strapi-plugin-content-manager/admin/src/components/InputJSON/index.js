@@ -24,6 +24,8 @@ const stringify = JSON.stringify;
 const DEFAULT_THEME = '3024-night';
 
 class InputJSON extends React.Component {
+  timer = null;
+
   constructor(props) {
     super(props);
     this.editor = React.createRef();
@@ -88,7 +90,7 @@ class InputJSON extends React.Component {
     let content = this.getContentAtLine(line);
 
     if (content === '{') {
-      line = line + 1;
+      line += 1;
       content = this.getContentAtLine(line);
     }
     const chEnd = content.length;
@@ -100,8 +102,6 @@ class InputJSON extends React.Component {
     );
     this.setState({ markedText });
   };
-
-  timer = null;
 
   handleBlur = ({ target }) => {
     const { name, onBlur } = this.props;

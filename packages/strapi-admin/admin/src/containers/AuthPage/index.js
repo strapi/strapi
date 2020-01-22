@@ -1,8 +1,7 @@
 import React, { memo, useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { get, isEmpty, omit, set } from 'lodash';
+import { get, isEmpty, omit, set, upperFirst } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { upperFirst } from 'lodash';
 import { Link, Redirect } from 'react-router-dom';
 import {
   auth,
@@ -267,12 +266,12 @@ AuthPage.propTypes = {
   hasAdminUser: PropTypes.bool.isRequired,
   location: PropTypes.shape({
     search: PropTypes.string.isRequired,
-  }),
+  }).isRequired,
   match: PropTypes.shape({
     params: PropTypes.shape({
       authType: PropTypes.string,
-    }),
-  }),
+    }).isRequired,
+  }).isRequired,
 };
 
 export default memo(AuthPage);

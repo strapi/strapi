@@ -13,8 +13,8 @@ import EditView from './EditView';
 function Webhooks() {
   return (
     <Switch>
-      <Route exact path={`/settings/webhooks`} component={ListView} />
-      <Route exact path={`/settings/webhooks/:id`} component={EditView} />
+      <Route exact path="/settings/webhooks" component={ListView} />
+      <Route exact path="/settings/webhooks/:id" component={EditView} />
     </Switch>
   );
 }

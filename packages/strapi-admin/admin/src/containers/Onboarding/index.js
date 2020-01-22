@@ -28,9 +28,9 @@ import makeSelectOnboarding from './selectors';
 import reducer from './reducer';
 import saga from './saga';
 
-export class Onboarding extends React.Component {
-  static contextType = GlobalContext;
+/* eslint-disable react/no-array-index-key */
 
+export class Onboarding extends React.Component {
   state = { showVideos: false };
 
   componentDidMount() {
@@ -93,6 +93,8 @@ export class Onboarding extends React.Component {
     this.props.setVideoEnd(index, true);
   };
 
+  static contextType = GlobalContext;
+
   render() {
     const { videos, onClick, setVideoDuration } = this.props;
     const { showVideos } = this.state;
@@ -146,6 +148,7 @@ export class Onboarding extends React.Component {
           <button
             onClick={this.handleVideosToggle}
             className={this.state.showVideos ? 'active' : ''}
+            type="button"
           >
             <i className="fa fa-question" />
             <i className="fa fa-times" />

@@ -9,6 +9,8 @@ import Search from './Search';
 import SearchWrapper from './SearchWrapper';
 import Wrapper from './Wrapper';
 
+/* eslint-disable jsx-a11y/control-has-associated-label */
+
 const ComponentIconPicker = ({
   error,
   isCreating,
@@ -78,7 +80,7 @@ const ComponentIconPicker = ({
         ) : (
           <SearchWrapper>
             <FontAwesomeIcon icon="search" />
-            <button onClick={toggleSearch}></button>
+            <button onClick={toggleSearch} type="button" />
             <Search
               ref={ref}
               onChange={({ target: { value } }) => {
@@ -135,6 +137,10 @@ const ComponentIconPicker = ({
       )}
     </Wrapper>
   );
+};
+
+ComponentIconPicker.defaultProps = {
+  error: null,
 };
 
 ComponentIconPicker.propTypes = {

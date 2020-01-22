@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import styled, { css } from 'styled-components';
 import PropTypes from 'prop-types';
 import getColor from './utils/getColor';

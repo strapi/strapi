@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
@@ -11,6 +12,8 @@ import Inputs from '../Inputs';
 import FieldComponent from '../FieldComponent';
 import Banner from './Banner';
 import FormWrapper from './FormWrapper';
+
+/* eslint-disable react/no-array-index-key */
 
 // Issues:
 // https://github.com/react-dnd/react-dnd/issues/1368
@@ -35,6 +38,7 @@ const DraggedItem = ({
     modifiedData,
     moveComponentField,
     removeRepeatableField,
+    triggerFormValidation,
   } = useDataManager();
   const { setIsDraggingComponent, unsetIsDraggingComponent } = useEditView();
   const mainField = get(schema, ['settings', 'mainField'], 'id');
@@ -88,6 +92,7 @@ const DraggedItem = ({
       const clientOffset = monitor.getClientOffset();
       // Get pixels to the top
       const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+
       // Only perform the move when the mouse has crossed half of the items height
       // When dragging downwards, only move when the cursor is below 50%
       // When dragging upwards, only move when the cursor is above 50%
@@ -108,8 +113,6 @@ const DraggedItem = ({
       // but it's good here for the sake of performance
       // to avoid expensive index searches.
       item.originalPath = hoverPath;
-
-      return;
     },
   });
   const [{ isDragging }, drag, preview] = useDrag({
@@ -127,6 +130,8 @@ const DraggedItem = ({
     end: () => {
       // Enable the relations select to fire requests
       unsetIsDraggingComponent();
+      // Update the errors
+      triggerFormValidation();
     },
     collect: monitor => ({
       isDragging: monitor.isDragging(),
@@ -171,50 +176,53 @@ const DraggedItem = ({
         ref={refs}
       />
       <Collapse isOpen={isOpen} style={{ backgroundColor: '#FAFAFB' }}>
-        <FormWrapper hasErrors={hasErrors} isOpen={isOpen}>
-          {fields.map((fieldRow, key) => {
-            return (
-              <div className="row" key={key}>
-                {fieldRow.map(field => {
-                  const currentField = getField(field.name);
-                  const isComponent =
-                    get(currentField, 'type', '') === 'component';
-                  const keys = `${componentFieldName}.${field.name}`;
+        {!isDragging && (
+          <FormWrapper hasErrors={hasErrors} isOpen={isOpen}>
+            {fields.map((fieldRow, key) => {
+              return (
+                <div className="row" key={key}>
+                  {fieldRow.map(field => {
+                    const currentField = getField(field.name);
+                    const isComponent =
+                      get(currentField, 'type', '') === 'component';
+                    const keys = `${componentFieldName}.${field.name}`;
 
-                  if (isComponent) {
-                    const componentUid = currentField.component;
-                    const metas = getMeta(field.name);
+                    if (isComponent) {
+                      const componentUid = currentField.component;
+                      const metas = getMeta(field.name);
+
+                      return (
+                        <FieldComponent
+                          componentUid={componentUid}
+                          isRepeatable={currentField.repeatable}
+                          key={field.name}
+                          label={metas.label}
+                          isNested
+                          name={keys}
+                          max={currentField.max}
+                          min={currentField.min}
+                        />
+                      );
+                    }
 
                     return (
-                      <FieldComponent
-                        componentUid={componentUid}
-                        isRepeatable={currentField.repeatable}
-                        key={field.name}
-                        label={metas.label}
-                        name={keys}
-                        max={currentField.max}
-                        min={currentField.min}
-                      />
+                      <div key={field.name} className={`col-${field.size}`}>
+                        <Inputs
+                          autoFocus={false}
+                          keys={keys}
+                          layout={schema}
+                          name={field.name}
+                          onChange={() => {}}
+                          onBlur={hasErrors ? checkFormErrors : null}
+                        />
+                      </div>
                     );
-                  }
-
-                  return (
-                    <div key={field.name} className={`col-${field.size}`}>
-                      <Inputs
-                        autoFocus={false}
-                        keys={keys}
-                        layout={schema}
-                        name={field.name}
-                        onChange={() => {}}
-                        onBlur={hasErrors ? checkFormErrors : null}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })}
-        </FormWrapper>
+                  })}
+                </div>
+              );
+            })}
+          </FormWrapper>
+        )}
       </Collapse>
     </>
   );

@@ -19,7 +19,6 @@ function Inputs({
   label,
   name,
   onChange,
-  onBlur,
   onClick,
   onRemove,
   type,
@@ -34,7 +33,6 @@ function Inputs({
           <HeadersInput
             errors={customError}
             name={name}
-            onBlur={onBlur}
             onClick={onClick}
             onChange={onChange}
             onRemove={onRemove}
@@ -76,7 +74,6 @@ function Inputs({
                   name={name}
                   onChange={e => {
                     handleChange(e);
-                    onBlur(e);
                   }}
                   value={value}
                 />
@@ -106,7 +103,6 @@ Inputs.propTypes = {
   customError: PropTypes.object,
   label: PropTypes.string,
   name: PropTypes.string.isRequired,
-  onBlur: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
   onClick: PropTypes.func,
   onRemove: PropTypes.func,

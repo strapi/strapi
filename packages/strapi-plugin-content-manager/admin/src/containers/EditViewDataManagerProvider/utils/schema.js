@@ -25,6 +25,7 @@ yup.addMethod(yup.array, 'notEmptyMin', function(min) {
     if (isEmpty(value)) {
       return true;
     }
+
     return value.length >= min;
   });
 });
@@ -65,6 +66,7 @@ const createYupSchema = (model, { components }) => {
   return yup.object().shape(
     Object.keys(attributes).reduce((acc, current) => {
       const attribute = attributes[current];
+
       if (
         attribute.type !== 'relation' &&
         attribute.type !== 'component' &&
@@ -119,23 +121,22 @@ const createYupSchema = (model, { components }) => {
           acc[current] = componentSchema;
 
           return acc;
-        } else {
-          const componentSchema = yup.lazy(obj => {
-            if (obj !== undefined) {
-              return attribute.required === true
-                ? componentFieldSchema.defined()
-                : componentFieldSchema.nullable();
-            }
-
-            return attribute.required === true
-              ? yup.object().defined()
-              : yup.object().nullable();
-          });
-
-          acc[current] = componentSchema;
-
-          return acc;
         }
+        const componentSchema = yup.lazy(obj => {
+          if (obj !== undefined) {
+            return attribute.required === true
+              ? componentFieldSchema.defined()
+              : componentFieldSchema.nullable();
+          }
+
+          return attribute.required === true
+            ? yup.object().defined()
+            : yup.object().nullable();
+        });
+
+        acc[current] = componentSchema;
+
+        return acc;
       }
 
       if (attribute.type === 'dynamiczone') {
@@ -156,6 +157,7 @@ const createYupSchema = (model, { components }) => {
               .required(errorsTrads.required);
           }
         } else {
+          // eslint-disable-next-line no-lonely-if
           if (min) {
             dynamicZoneSchema = dynamicZoneSchema.notEmptyMin(min);
           }
@@ -203,6 +205,7 @@ const createYupSchemaAttribute = (type, validations) => {
 
         try {
           JSON.parse(value);
+
           return true;
         } catch (err) {
           return false;
@@ -232,6 +235,7 @@ const createYupSchemaAttribute = (type, validations) => {
 
   Object.keys(validations).forEach(validation => {
     const validationValue = validations[validation];
+
     if (
       !!validationValue ||
       ((!isBoolean(validationValue) &&

@@ -33,6 +33,7 @@ const PopupForm = ({
 
     return type;
   };
+
   return (
     <Modal isOpen={isOpen} onClosed={onClosed} onToggle={onToggle}>
       <HeaderModal>

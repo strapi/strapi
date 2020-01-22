@@ -1,7 +1,8 @@
+/* eslint-disable import/no-cycle */
 import React, { useReducer } from 'react';
 import { useDrop } from 'react-dnd';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
+import { get, take } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { ErrorMessage } from '@buffetjs/styles';
 import pluginId from '../../pluginId';
@@ -18,6 +19,7 @@ const RepeatableComponent = ({
   componentValue,
   componentValueLength,
   fields,
+  isNested,
   max,
   min,
   name,
@@ -28,7 +30,7 @@ const RepeatableComponent = ({
 
   const componentErrorKeys = Object.keys(formErrors)
     .filter(errorKey => {
-      return errorKey.split('.')[0] === name;
+      return take(errorKey.split('.'), isNested ? 3 : 1).join('.') === name;
     })
     .map(errorKey => {
       return errorKey
@@ -75,7 +77,7 @@ const RepeatableComponent = ({
             const doesPreviousFieldContainErrorsAndIsOpen =
               componentErrorKeys.includes(`${name}.${index - 1}`) &&
               index !== 0 &&
-              collapses[index - 1].isOpen === false;
+              get(collapses, [index - 1, 'isOpen'], false) === false;
             const hasErrors = componentErrorKeys.includes(componentFieldName);
 
             return (
@@ -88,8 +90,8 @@ const RepeatableComponent = ({
                 hasErrors={hasErrors}
                 hasMinError={hasMinError}
                 isFirst={index === 0}
-                isOpen={collapses[index].isOpen}
-                key={collapses[index]._temp__id}
+                isOpen={get(collapses, [index, 'isOpen'], false)}
+                key={get(collapses, [index, '_temp__id'], null)}
                 onClickToggle={() => {
                   // Close all other collapses and open the selected one
                   toggleCollapses(index);
@@ -107,6 +109,7 @@ const RepeatableComponent = ({
                     hoverIndex,
                   });
                 }}
+                parentName={name}
                 schema={schema}
                 toggleCollapses={toggleCollapses}
               />
@@ -162,6 +165,7 @@ RepeatableComponent.defaultProps = {
   componentValue: null,
   componentValueLength: 0,
   fields: [],
+  isNested: false,
   max: Infinity,
   min: -Infinity,
 };
@@ -171,6 +175,7 @@ RepeatableComponent.propTypes = {
   componentValue: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   componentValueLength: PropTypes.number,
   fields: PropTypes.array,
+  isNested: PropTypes.bool,
   max: PropTypes.number,
   min: PropTypes.number,
   name: PropTypes.string.isRequired,

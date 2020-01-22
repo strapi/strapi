@@ -7,23 +7,15 @@ import { CircleButton } from 'strapi-helper-plugin';
 import { InputText } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
 
-import borderColor from './utils/borderColor';
+import getBorderColor from './utils/getBorderColor';
 import keys from './keys';
 import Wrapper from './Wrapper';
 
-const HeadersInput = ({
-  errors,
-  name,
-  onBlur,
-  onClick,
-  onChange,
-  onRemove,
-  value,
-}) => {
-  const formatOption = value => ({ value: value, label: value });
-  const options = keys.map(key => formatOption(key));
+/* eslint-disable react/no-array-index-key */
 
-  const handleBlur = () => onBlur({ target: { name, value } });
+const HeadersInput = ({ errors, name, onClick, onChange, onRemove, value }) => {
+  const formatOption = value => ({ value, label: value });
+  const options = keys.map(key => formatOption(key));
 
   const handleChangeKey = (selected, name) => {
     if (selected === null) {
@@ -38,7 +30,7 @@ const HeadersInput = ({
     return {
       control: (base, state) => ({
         ...base,
-        border: `1px solid ${borderColor({
+        border: `1px solid ${getBorderColor({
           isFocused: state.isFocused,
           hasError,
         })} !important`,
@@ -102,7 +94,6 @@ const HeadersInput = ({
               <section>
                 <CreatableSelect
                   isClearable
-                  onBlur={handleBlur}
                   onChange={e => handleChangeKey(e, `${name}.${index}.key`)}
                   name={`${name}.${index}.key`}
                   options={options}
@@ -114,7 +105,6 @@ const HeadersInput = ({
               </section>
               <section>
                 <InputText
-                  onBlur={handleBlur}
                   className={
                     get(errors, `headers.${index}.value`, null) && 'bordered'
                   }
@@ -144,17 +134,13 @@ const HeadersInput = ({
 
 HeadersInput.defaultProps = {
   errors: {},
-  handleClick: () => {},
-  onBlur: () => {},
-  onClick: () => {},
   onRemove: () => {},
+  value: [],
 };
 
 HeadersInput.propTypes = {
   errors: PropTypes.object,
-  handleClick: PropTypes.func,
   name: PropTypes.string.isRequired,
-  onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
   onClick: PropTypes.func.isRequired,
   onRemove: PropTypes.func,

@@ -9,8 +9,8 @@ import { defineMessages, FormattedMessage } from 'react-intl';
 import { PropTypes } from 'prop-types';
 
 import Wrapper from './Wrapper';
-
 import messages from './messages.json';
+
 defineMessages(messages);
 
 function LeftMenuFooter({ version }) {

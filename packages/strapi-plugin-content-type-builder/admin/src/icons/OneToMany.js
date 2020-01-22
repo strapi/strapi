@@ -3,14 +3,16 @@ import PropTypes from 'prop-types';
 
 const OneToMany = ({ isSelected, ...rest }) => {
   const stroke = isSelected ? '#1C5DE7' : '#919BAE';
-  const rectProps = isSelected
-    ? {
-        stroke: '#1C5DE7',
-      }
-    : {
-        strokeOpacity: '.1',
-        stroke: '#1C5DE7',
-      };
+  let rectProps = {
+    strokeOpacity: '.1',
+    stroke: '#1C5DE7',
+  };
+
+  if (isSelected) {
+    rectProps = {
+      stroke: '#1C5DE7',
+    };
+  }
 
   return (
     <svg

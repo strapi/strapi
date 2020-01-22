@@ -6,8 +6,8 @@ const header = { key: '', value: '' };
 const initialWebhook = {
   events: [],
   headers: [header],
-  name: null,
-  url: null,
+  name: '',
+  url: '',
 };
 
 const initialState = fromJS({
@@ -30,7 +30,7 @@ const reducer = (state, action) => {
 
       if (Object.keys(headers).length > 0) {
         formattedHeaders = Object.keys(headers).map(key => {
-          return { key: key, value: headers[key] };
+          return { key, value: headers[key] };
         });
       }
 
@@ -42,8 +42,6 @@ const reducer = (state, action) => {
         .update('initialData', () => data)
         .update('modifiedData', () => data);
     }
-    case 'IS_TRIGGERING':
-      return state.update('isTriggering', isTriggering => !isTriggering);
     case 'ON_CHANGE':
       return state.updateIn(
         ['modifiedData', ...action.keys],
@@ -54,6 +52,7 @@ const reducer = (state, action) => {
         if (headers.size === 1) {
           return fromJS([header]);
         }
+
         return headers.remove(action.index);
       });
     }
@@ -65,6 +64,10 @@ const reducer = (state, action) => {
       return state.update('modifiedData', () => state.get('initialData'));
     case 'SET_ERRORS':
       return state.update('formErrors', () => fromJS(action.errors));
+    case 'SET_IS_TRIGGERING':
+      return state.update('isTriggering', isTriggering => !isTriggering);
+    case 'SUBMIT_SUCCEEDED':
+      return state.update('initialData', () => state.get('modifiedData'));
     case 'TRIGGER_SUCCEEDED':
       return state
         .update('triggerResponse', () => fromJS(action.response))

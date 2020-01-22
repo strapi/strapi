@@ -6,7 +6,7 @@ import useLayoutDnd from '../../hooks/useLayoutDnd';
 
 import Add from '../AddDropdown';
 import SortWrapper from '../SortWrapper';
-import { Wrapper } from './components';
+import Wrapper from './components';
 import Item from './Item';
 
 const FieldsReorder = ({ className }) => {

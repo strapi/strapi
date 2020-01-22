@@ -43,8 +43,6 @@ import reducer from './reducer';
 import saga from './saga';
 
 export class HomePage extends React.Component {
-  static contextType = GlobalContext;
-
   componentDidMount() {
     this.props.getDocInfos();
   }
@@ -133,6 +131,8 @@ export class HomePage extends React.Component {
       />
     );
   };
+
+  static contextType = GlobalContext;
 
   render() {
     const {

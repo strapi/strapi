@@ -1,5 +1,36 @@
 import styled, { keyframes } from 'styled-components';
 
+const fadeIn = keyframes`
+0% {
+  width: auto;
+  height: auto;
+  opacity: 0;
+}
+
+5% {
+  opacity: 0;
+}
+
+100% {
+  opacity: 1;
+}
+`;
+const fadeOut = keyframes`
+0% {
+  opacity: 1;
+}
+
+60% {
+  opacity: 0;
+}
+
+100% {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+`;
+
 const Wrapper = styled.div`
   position: fixed;
   right: 15px;
@@ -94,37 +125,6 @@ const Wrapper = styled.div`
       }
     }
   }
-`;
-
-const fadeIn = keyframes`
-0% {
-  width: auto;
-  height: auto;
-  opacity: 0;
-}
-
-5% {
-  opacity: 0;
-}
-
-100% {
-  opacity: 1;
-}
-`;
-const fadeOut = keyframes`
-0% {
-  opacity: 1;
-}
-
-60% {
-  opacity: 0;
-}
-
-100% {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
 `;
 
 export default Wrapper;

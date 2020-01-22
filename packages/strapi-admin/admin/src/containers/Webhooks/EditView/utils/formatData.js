@@ -2,39 +2,25 @@ import { set } from 'lodash';
 
 const cleanData = data => {
   const webhooks = data;
-  const headers = cleanHeaders(data.headers);
 
-  set(webhooks, 'headers', unformatHeaders(headers));
+  set(webhooks, 'headers', unformatHeaders(data.headers));
+
   return webhooks;
 };
 
 const unformatHeaders = headers => {
-  return headers.reduce((obj, item) => {
-    const { key, value } = item;
-    return {
-      ...obj,
-      [key]: value,
-    };
-  }, {});
-};
+  return headers.reduce((acc, current) => {
+    const { key, value } = current;
 
-const cleanHeaders = headers => {
-  if (Object.keys(headers).length === 1) {
-    const { key, value } = headers[0];
-    if (key.length === 0 && value.length === 0) {
-      return [];
+    if (key !== '') {
+      return {
+        ...acc,
+        [key]: value,
+      };
     }
-  }
-  return headers;
-};
-
-const cleanErrors = errors => {
-  return Object.keys(errors).reduce((acc, curr) => {
-    const { id } = errors[curr];
-    acc[curr] = id ? id : errors[curr];
 
     return acc;
   }, {});
 };
 
-export { cleanHeaders, cleanData, cleanErrors };
+export { cleanData, unformatHeaders };
