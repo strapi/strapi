@@ -6,7 +6,7 @@ const List = styled.ul`
   margin-bottom: 0;
   padding-left: 0;
   max-height: 251px;
-  overflow-y: scroll;
+  overflow-y: auto;
   li {
     position: relative;
     margin-bottom: 2px;
