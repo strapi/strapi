@@ -86,6 +86,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
           });
         })
       );
+
       const components = createDataObject(componentsArray);
       const contentTypes = createDataObject(contentTypesArray);
       const orderedComponents = orderAllDataAttributesWithImmutable({

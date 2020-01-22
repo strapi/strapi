@@ -7,7 +7,7 @@ const initialState = fromJS({
   components: {},
   contentTypes: {},
   initialComponents: {},
-  intialContentTypes: {},
+  initialContentTypes: {},
   initialData: {},
   modifiedData: {},
   isLoading: true,
@@ -15,6 +15,7 @@ const initialState = fromJS({
 });
 
 const ONE_SIDE_RELATIONS = ['oneWay', 'manyWay'];
+
 const getOppositeNature = originalNature => {
   if (originalNature === 'manyToOne') {
     return 'oneToMany';
@@ -113,7 +114,8 @@ const reducer = (state, action) => {
                 nature: getOppositeNature(nature),
                 target,
                 unique: rest.unique,
-                required: rest.required,
+                // Leave this if we allow the required on the relation
+                // required: rest.required,
                 dominant: nature === 'manyToMany' ? !rest.dominant : null,
                 targetAttribute: name,
                 columnName: rest.targetColumnName,
@@ -241,15 +243,6 @@ const reducer = (state, action) => {
         ? [forTarget]
         : [forTarget, targetUid];
 
-      const isEditingComponentAttribute = rest.type === 'component';
-
-      if (isEditingComponentAttribute) {
-        newState = state.updateIn(
-          ['modifiedData', 'components', rest.component],
-          () => state.getIn(['components', rest.component])
-        );
-      }
-
       return newState.updateIn(
         ['modifiedData', ...pathToDataToEdit, 'schema'],
         obj => {
@@ -333,7 +326,8 @@ const reducer = (state, action) => {
                       nature: getOppositeNature(rest.nature),
                       target: rest.target,
                       unique: rest.unique,
-                      required: rest.required,
+                      // Leave this if we allow the required on the relation
+                      // required: rest.required,
                       dominant:
                         rest.nature === 'manyToMany' ? !rest.dominant : null,
                       targetAttribute: name,
@@ -389,7 +383,7 @@ const reducer = (state, action) => {
       );
     }
 
-    case 'GET_DATA_SUCCEEDED':
+    case 'GET_DATA_SUCCEEDED': {
       return state
         .update('components', () => fromJS(action.components))
         .update('initialComponents', () => fromJS(action.components))
@@ -397,7 +391,7 @@ const reducer = (state, action) => {
         .update('contentTypes', () => fromJS(action.contentTypes))
 
         .update('isLoading', () => false);
-
+    }
     case 'RELOAD_PLUGIN':
       return initialState;
     case 'REMOVE_FIELD_FROM_DISPLAYED_COMPONENT': {
@@ -519,4 +513,4 @@ const reducer = (state, action) => {
 };
 
 export default reducer;
-export { initialState };
+export { addComponentsToState, initialState };
