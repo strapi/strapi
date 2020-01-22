@@ -223,7 +223,7 @@ export class EditPage extends React.Component {
         type: 'submit',
         disabled: isEqual(
           this.props.editPage.modifiedData,
-          this.props.editPage.initialData,
+          this.props.editPage.initialData
         ),
         key: 'button-submit',
       },
@@ -258,7 +258,7 @@ export class EditPage extends React.Component {
                       description: get(
                         this.props.editPage.initialData,
                         'description',
-                        '',
+                        ''
                       ),
                     }}
                   >
@@ -388,13 +388,13 @@ function mapDispatchToProps(dispatch) {
       resetProps,
       resetShouldDisplayPoliciesHint,
     },
-    dispatch,
+    dispatch
   );
 }
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 const withReducer = strapi.injectReducer({
   key: 'editPage',
@@ -406,5 +406,5 @@ const withSaga = strapi.injectSaga({ key: 'editPage', saga, pluginId });
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
+  withConnect
 )(EditPage);

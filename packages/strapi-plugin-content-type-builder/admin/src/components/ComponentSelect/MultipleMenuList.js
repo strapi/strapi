@@ -140,7 +140,7 @@ const MultipleMenuList = ({
   const handleChange = ({ target }) => {
     const dataTarget = {
       name,
-      components: target.name,
+      components: [target.name],
       shouldAddComponents: target.value,
     };
 
