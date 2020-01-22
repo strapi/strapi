@@ -1,2 +1,4 @@
 comment:
-  branch: master
+  branches:
+    - master
+    - develop
