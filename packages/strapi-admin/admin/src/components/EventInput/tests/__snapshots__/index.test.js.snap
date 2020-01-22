@@ -1,0 +1,222 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<EventInput /> should render properly 1`] = `
+<div
+  className="sc-bdVaJa ijTqpx"
+>
+  <table>
+    <thead>
+      <tr>
+        <td />
+        <td>
+          <span>
+            Settings.webhooks.events.create
+          </span>
+        </td>
+        <td>
+          <span>
+            Settings.webhooks.events.edit
+          </span>
+        </td>
+        <td>
+          <span>
+            Settings.webhooks.events.delete
+          </span>
+        </td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <div
+            className="sc-bxivhb hRdlIh"
+          >
+            <input
+              autoComplete="off"
+              autoFocus={false}
+              checked={false}
+              className="sc-htpNat BNnRX"
+              id="entry"
+              name="entry"
+              onChange={[Function]}
+              placeholder={null}
+              tabIndex="0"
+              type="checkbox"
+            />
+            <label
+              className="sc-chPdSV iXihgI"
+              htmlFor="entry"
+            >
+              entry
+            </label>
+          </div>
+        </td>
+        <td>
+          <div
+            className="sc-bxivhb hRdlIh"
+          >
+            <input
+              autoComplete="off"
+              autoFocus={false}
+              checked={false}
+              className="sc-htpNat BNnRX"
+              disabled={false}
+              id="entry.create"
+              name="entry.create"
+              onChange={[Function]}
+              placeholder={null}
+              tabIndex="0"
+              type="checkbox"
+            />
+            <label
+              className="sc-chPdSV iXihgI"
+              htmlFor="entry.create"
+            />
+          </div>
+        </td>
+        <td>
+          <div
+            className="sc-bxivhb hRdlIh"
+          >
+            <input
+              autoComplete="off"
+              autoFocus={false}
+              checked={false}
+              className="sc-htpNat BNnRX"
+              disabled={false}
+              id="entry.update"
+              name="entry.update"
+              onChange={[Function]}
+              placeholder={null}
+              tabIndex="0"
+              type="checkbox"
+            />
+            <label
+              className="sc-chPdSV iXihgI"
+              htmlFor="entry.update"
+            />
+          </div>
+        </td>
+        <td>
+          <div
+            className="sc-bxivhb hRdlIh"
+          >
+            <input
+              autoComplete="off"
+              autoFocus={false}
+              checked={false}
+              className="sc-htpNat BNnRX"
+              disabled={false}
+              id="entry.delete"
+              name="entry.delete"
+              onChange={[Function]}
+              placeholder={null}
+              tabIndex="0"
+              type="checkbox"
+            />
+            <label
+              className="sc-chPdSV iXihgI"
+              htmlFor="entry.delete"
+            />
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div
+            className="sc-bxivhb hRdlIh"
+          >
+            <input
+              autoComplete="off"
+              autoFocus={false}
+              checked={false}
+              className="sc-htpNat cllrAw"
+              id="media"
+              name="media"
+              onChange={[Function]}
+              placeholder={null}
+              tabIndex="0"
+              type="checkbox"
+            />
+            <label
+              className="sc-chPdSV iXihgI"
+              htmlFor="media"
+            >
+              media
+            </label>
+          </div>
+        </td>
+        <td>
+          <div
+            className="sc-bxivhb hRdlIh"
+          >
+            <input
+              autoComplete="off"
+              autoFocus={false}
+              checked={false}
+              className="sc-htpNat BNnRX"
+              disabled={false}
+              id="media.create"
+              name="media.create"
+              onChange={[Function]}
+              placeholder={null}
+              tabIndex="0"
+              type="checkbox"
+            />
+            <label
+              className="sc-chPdSV iXihgI"
+              htmlFor="media.create"
+            />
+          </div>
+        </td>
+        <td>
+          <div
+            className="sc-bxivhb hRdlIh"
+          >
+            <input
+              autoComplete="off"
+              autoFocus={false}
+              checked={false}
+              className="sc-htpNat BNnRX"
+              disabled={true}
+              id="media.update"
+              name="media.update"
+              onChange={[Function]}
+              placeholder={null}
+              tabIndex="0"
+              type="checkbox"
+            />
+            <label
+              className="sc-chPdSV iXihgI"
+              htmlFor="media.update"
+            />
+          </div>
+        </td>
+        <td>
+          <div
+            className="sc-bxivhb hRdlIh"
+          >
+            <input
+              autoComplete="off"
+              autoFocus={false}
+              checked={false}
+              className="sc-htpNat BNnRX"
+              disabled={false}
+              id="media.delete"
+              name="media.delete"
+              onChange={[Function]}
+              placeholder={null}
+              tabIndex="0"
+              type="checkbox"
+            />
+            <label
+              className="sc-chPdSV iXihgI"
+              htmlFor="media.delete"
+            />
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+`;

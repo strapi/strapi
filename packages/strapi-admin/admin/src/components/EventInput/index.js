@@ -1,17 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { FormattedMessage } from 'react-intl';
 
 import Wrapper from './Wrapper';
 import EventRow from './EventRow';
 
 const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
-  const { formatMessage } = useGlobalContext();
-
   const headersName = [
-    formatMessage({ id: `Settings.webhooks.events.create` }),
-    formatMessage({ id: `Settings.webhooks.events.edit` }),
-    formatMessage({ id: `Settings.webhooks.events.delete` }),
+    `Settings.webhooks.events.create`,
+    `Settings.webhooks.events.edit`,
+    `Settings.webhooks.events.delete`,
   ];
 
   const events = {
@@ -63,7 +61,11 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
           <tr>
             <td></td>
             {headersName.map(header => {
-              return <td key={header}>{header}</td>;
+              return (
+                <td key={header}>
+                  <FormattedMessage id={header} defaultMessage={header} />
+                </td>
+              );
             })}
           </tr>
         </thead>
