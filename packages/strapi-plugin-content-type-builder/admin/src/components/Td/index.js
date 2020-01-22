@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+/* eslint-disable indent */
 
 const Td = styled.td`
   &::before {
@@ -9,6 +10,7 @@ const Td = styled.td`
     top: -7px;
     left: 45px;
     color: transparent;
+
     ${({ isFromDynamicZone, isChildOfDynamicZone }) => {
       if (isChildOfDynamicZone) {
         return `
@@ -19,12 +21,12 @@ const Td = styled.td`
 
       if (isFromDynamicZone) {
         return `
-        background-color: #AED4FB !important;
+          background-color: #AED4FB !important;
         `;
       }
 
       return `
-      background-color: #f3f4f4 !important;
+        background-color: #f3f4f4 !important;
       `;
     }}
 

@@ -4,12 +4,14 @@ const cleanData = data => {
   const webhooks = data;
 
   set(webhooks, 'headers', unformatHeaders(data.headers));
+
   return webhooks;
 };
 
 const unformatHeaders = headers => {
   return headers.reduce((acc, current) => {
     const { key, value } = current;
+
     if (key !== '') {
       return {
         ...acc,
@@ -21,4 +23,4 @@ const unformatHeaders = headers => {
   }, {});
 };
 
-export { cleanData };
+export { cleanData, unformatHeaders };

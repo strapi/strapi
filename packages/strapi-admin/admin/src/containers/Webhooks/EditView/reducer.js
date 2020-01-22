@@ -30,7 +30,7 @@ const reducer = (state, action) => {
 
       if (Object.keys(headers).length > 0) {
         formattedHeaders = Object.keys(headers).map(key => {
-          return { key: key, value: headers[key] };
+          return { key, value: headers[key] };
         });
       }
 
@@ -52,6 +52,7 @@ const reducer = (state, action) => {
         if (headers.size === 1) {
           return fromJS([header]);
         }
+
         return headers.remove(action.index);
       });
     }

@@ -2,8 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { SelectWrapper, SelectNav } from 'strapi-helper-plugin';
 import { ErrorMessage } from '@buffetjs/styles';
-import CreatableSelect from '../CreatableSelect';
 import ComponentSelect from '../ComponentSelect';
+import CreatableSelect from '../CreatableSelect';
+
 /* eslint-disable no-nested-ternary */
 
 const WrapperSelect = ({ error, label, name, type, ...rest }) => {
@@ -19,7 +20,7 @@ const WrapperSelect = ({ error, label, name, type, ...rest }) => {
       border: state.isFocused
         ? '1px solid #78caff !important'
         : error
-        ? '1px solid red !important'
+        ? '1px solid #F64D0A !important'
         : '1px solid #E3E9F3 !important',
       borderRadius: '2px !important',
     }),

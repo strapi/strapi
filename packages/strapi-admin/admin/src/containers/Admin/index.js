@@ -52,6 +52,14 @@ import Content from './Content';
 export class Admin extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
 
+  helpers = {
+    updatePlugin: this.props.updatePlugin,
+  };
+
+  componentDidMount() {
+    this.props.emitEvent('didAccessAuthenticatedAdministration');
+  }
+
   shouldComponentUpdate(prevProps) {
     return !isEmpty(difference(prevProps, this.props));
   }
@@ -70,10 +78,6 @@ export class Admin extends React.Component {
     this.props.setAppError();
   }
 
-  componentDidMount() {
-    this.props.emitEvent('didAccessAuthenticatedAdministration');
-  }
-
   hasApluginNotReady = props => {
     const {
       global: { plugins },
@@ -82,10 +86,6 @@ export class Admin extends React.Component {
     return !Object.keys(plugins).every(
       plugin => plugins[plugin].isReady === true
     );
-  };
-
-  helpers = {
-    updatePlugin: this.props.updatePlugin,
   };
 
   /**
@@ -135,10 +135,10 @@ export class Admin extends React.Component {
     // We need the admin data in order to make the initializers work
     if (this.showLoader()) {
       return (
-        <React.Fragment>
+        <>
           {this.renderInitializers()}
           <LoadingIndicatorPage />
-        </React.Fragment>
+        </>
       );
     }
 
@@ -201,6 +201,12 @@ export class Admin extends React.Component {
     );
   }
 }
+
+Admin.defaultProps = {
+  intl: {
+    formatMessage: () => {},
+  },
+};
 
 Admin.propTypes = {
   admin: PropTypes.shape({

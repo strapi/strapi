@@ -21,6 +21,7 @@ function reducer(state, action) {
           if (action.value && action.value._isAMomentObject === true) {
             return moment(action.value, 'YYYY-MM-DD HH:mm:ss').format();
           }
+
           return action.value;
         })
         .updateIn(['modifiedData', index, 'value'], value => {

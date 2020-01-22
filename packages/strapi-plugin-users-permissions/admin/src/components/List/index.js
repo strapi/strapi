@@ -61,7 +61,9 @@ const generateListTitle = (data, settingType) => {
 
       return (
         <div>
-          {enabledProviders}&nbsp;{disabledProviders}
+          {enabledProviders}
+          &nbsp;
+          {disabledProviders}
         </div>
       );
     }
