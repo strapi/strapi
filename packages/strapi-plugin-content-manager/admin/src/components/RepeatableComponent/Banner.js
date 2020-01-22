@@ -8,6 +8,8 @@ import PreviewCarret from '../PreviewCarret';
 import BannerWrapper from './BannerWrapper';
 import CarretTop from './CarretTop';
 
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+
 const Banner = forwardRef(
   (
     {

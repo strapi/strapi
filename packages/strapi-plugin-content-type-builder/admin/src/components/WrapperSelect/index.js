@@ -4,7 +4,8 @@ import { SelectWrapper, SelectNav } from 'strapi-helper-plugin';
 import { ErrorMessage } from '@buffetjs/styles';
 import ComponentSelect from '../ComponentSelect';
 import CreatableSelect from '../CreatableSelect';
-/*eslint-disable no-nested-ternary */
+
+/* eslint-disable no-nested-ternary */
 
 const WrapperSelect = ({ error, label, name, type, ...rest }) => {
   const styles = {

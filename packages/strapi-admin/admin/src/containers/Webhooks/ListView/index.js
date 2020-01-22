@@ -46,7 +46,7 @@ function ListView() {
 
   // New button
   const addBtnLabel = formatMessage({
-    id: `Settings.webhooks.list.button.add`,
+    id: 'Settings.webhooks.list.button.add',
   });
 
   const newButtonProps = {
@@ -71,25 +71,25 @@ function ListView() {
 
   const headerProps = {
     title: {
-      label: formatMessage({ id: `Settings.webhooks.title` }),
+      label: formatMessage({ id: 'Settings.webhooks.title' }),
     },
-    content: formatMessage({ id: `Settings.webhooks.list.description` }),
-    actions: actions,
+    content: formatMessage({ id: 'Settings.webhooks.list.description' }),
+    actions,
   };
 
   // List props
   const rowsCount = webhooks.length;
   const titleLabel = `${
     rowsCount > 1
-      ? formatMessage({ id: `Settings.webhooks.title` })
-      : formatMessage({ id: `Settings.webhooks.singular` })
+      ? formatMessage({ id: 'Settings.webhooks.title' })
+      : formatMessage({ id: 'Settings.webhooks.singular' })
   }`;
   const title = `${rowsCount} ${titleLabel}`;
 
   const buttonProps = {
     color: 'delete',
-    disabled: webhooksToDelete.length > 0 ? false : true,
-    label: formatMessage({ id: `Settings.webhooks.list.button.delete` }),
+    disabled: !(webhooksToDelete.length > 0),
+    label: formatMessage({ id: 'Settings.webhooks.list.button.delete' }),
     onClick: () => setShowModal(true),
     type: 'button',
   };
@@ -102,7 +102,7 @@ function ListView() {
 
   const fetchData = async () => {
     try {
-      const { data } = await request(`/admin/webhooks`, {
+      const { data } = await request('/admin/webhooks', {
         method: 'GET',
       });
 
@@ -161,7 +161,7 @@ function ListView() {
     };
 
     try {
-      await request(`/admin/webhooks/batch-delete`, {
+      await request('/admin/webhooks/batch-delete', {
         method: 'POST',
         body,
       });
@@ -186,7 +186,7 @@ function ListView() {
 
     dispatch({
       type: 'SET_WEBHOOK_TO_DELETE',
-      id: id,
+      id,
     });
   };
 
@@ -207,7 +207,7 @@ function ListView() {
       dispatch({
         type: 'SET_WEBHOOK_ENABLED',
         keys,
-        value: value,
+        value,
       });
 
       await request(`/admin/webhooks/${id}`, {

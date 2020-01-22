@@ -18,7 +18,7 @@ function SettingsPage() {
       title: { id: 'Settings.global' },
       links: [
         {
-          title: formatMessage({ id: `Settings.webhooks.title` }),
+          title: formatMessage({ id: 'Settings.webhooks.title' }),
           to: '/settings/webhooks',
           name: 'webhooks',
         },

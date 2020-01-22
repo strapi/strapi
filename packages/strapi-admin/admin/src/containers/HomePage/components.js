@@ -1,3 +1,4 @@
+/* eslint-disable */
 import styled, { css } from 'styled-components';
 
 const Block = styled.div`

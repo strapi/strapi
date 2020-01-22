@@ -59,7 +59,7 @@ function SelectWrapper({
 
         const data = await request(requestUrl, {
           method: 'GET',
-          params: params,
+          params,
           signal,
         });
 
@@ -82,6 +82,7 @@ function SelectWrapper({
             if (objIndex === -1) {
               return true;
             }
+
             return (
               prevState.findIndex(el => el.value.id === obj.value.id) === index
             );
@@ -130,6 +131,7 @@ function SelectWrapper({
         if (prevState._q === inputValue) {
           return prevState;
         }
+
         return { ...prevState, _q: inputValue };
       });
     }
@@ -220,7 +222,6 @@ SelectWrapper.defaultProps = {
   editable: true,
   description: '',
   label: '',
-  plugin: '',
   placeholder: '',
 };
 
@@ -231,7 +232,6 @@ SelectWrapper.propTypes = {
   mainField: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
-  plugin: PropTypes.string,
   relationType: PropTypes.string.isRequired,
   targetModel: PropTypes.string.isRequired,
 };

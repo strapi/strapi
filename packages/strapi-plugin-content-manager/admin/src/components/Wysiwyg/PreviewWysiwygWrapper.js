@@ -1,5 +1,7 @@
 import styled, { css } from 'styled-components';
 
+/* eslint-disable */
+
 const PreviewWysiwygWrapper = styled.div`
   max-height: 555px;
   min-height: 294px;
