@@ -20,7 +20,7 @@ const GlobalNotification = createGlobalStyle`
         margin: auto;
         color: ${props => props.theme.main.colors.green};
         width: 10px;
-        height: 9px;
+        height: 10px;
       }
     }
   }
@@ -135,6 +135,15 @@ const Li = styled.li`
   overflow: hidden;
   z-index: 10;
   border-left: 2px solid ${props => props.theme.main.colors.green};
+  &.notificationError {
+    border-color: ${props => props.theme.main.colors.red};
+  }
+  &.notificationWarning {
+    border-color: ${props => props.theme.main.colors.orange};
+  }
+  &.notificationInfo {
+    border-color: ${props => props.theme.main.colors.blue};
+  }
 
   // The last notification must appear from
   // the background of the previous one.
