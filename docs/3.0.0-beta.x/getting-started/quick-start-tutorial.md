@@ -436,7 +436,7 @@ To access the **Hours_of_operation** Component from within the **Restaurant** Co
 
 - Click on the `Component` field
 - Select `Use an existing component` option
-- Click on the `continue` button
+- Click on the `Select a component` button
 
 ![Restaurant Component Inputs](../assets/getting-started/tutorial/restaurant-group-inputs-use.png 'Restaurant Component Inputs')
 
