@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 
-const { createController, createService } = require('../core-api');
+const { createCoreApi } = require('../core-api');
 const getURLFromSegments = require('../utils/url-from-segments');
 
 const getKind = obj => obj.kind || 'collectionType';
@@ -58,7 +58,9 @@ module.exports = function(strapi) {
 
   // Set models.
   strapi.models = Object.keys(strapi.api || []).reduce((acc, apiName) => {
-    for (let modelName in strapi.api[apiName].models) {
+    const api = strapi.api[apiName];
+
+    for (let modelName in api.models) {
       let model = strapi.api[apiName].models[modelName];
 
       Object.assign(model, {
@@ -77,28 +79,7 @@ module.exports = function(strapi) {
 
       strapi.contentTypes[model.uid] = model;
 
-      // find corresponding service and controller
-      const userService = _.get(
-        strapi.api[apiName],
-        ['services', modelName],
-        {}
-      );
-      const userController = _.get(
-        strapi.api[apiName],
-        ['controllers', modelName],
-        {}
-      );
-
-      const service = Object.assign(
-        createService({ model: modelName, strapi }),
-        userService
-      );
-
-      const controller = Object.assign(
-        createController({ service, model }),
-        userController,
-        { identity: userController.identity || _.upperFirst(modelName) }
-      );
+      const { service, controller } = createCoreApi({ model, api });
 
       _.set(strapi.api[apiName], ['services', modelName], service);
       _.set(strapi.api[apiName], ['controllers', modelName], controller);
