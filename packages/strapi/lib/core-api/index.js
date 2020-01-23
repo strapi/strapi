@@ -25,8 +25,7 @@ function createCoreApi({ api, model }) {
 
   const controller = Object.assign(
     createController({ service, model }),
-    userController,
-    { identity: userController.identity || _.upperFirst(modelName) }
+    userController
   );
 
   return {

@@ -526,13 +526,19 @@ const formatModelConnectionsGQL = function(
             }),
           ];
 
-          policyUtils.get(
-            'plugins.users-permissions.permissions',
-            plugin,
-            policiesFn,
-            `GraphQL connection "${name}" `,
-            name
-          );
+          try {
+            policiesFn.push(
+              policyUtils.get(
+                'plugins.users-permissions.permissions',
+                plugin,
+                name
+              )
+            );
+          } catch (error) {
+            strapi.stopWithError(
+              `Error building graphql connection "${queryName}": ${error.message}`
+            );
+          }
 
           // Execute policies stack.
           const policy = await compose(policiesFn)(ctx);

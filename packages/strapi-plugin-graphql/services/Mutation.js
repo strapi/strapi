@@ -155,15 +155,15 @@ module.exports = {
     }
 
     // Populate policies.
-    policies.forEach(policy =>
-      policyUtils.get(
-        policy,
-        plugin,
-        policiesFn,
-        `GraphQL query "${queryName}"`,
-        name
-      )
-    );
+    policies.forEach(policyName => {
+      try {
+        policiesFn.push(policyUtils.get(policyName, plugin, name));
+      } catch (error) {
+        strapi.stopWithError(
+          `Error building graphql mutation "${queryName}": ${error.message}`
+        );
+      }
+    });
 
     return async (obj, options, graphqlCtx) => {
       const { context } = graphqlCtx;
