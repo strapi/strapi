@@ -44,6 +44,7 @@ function ListRow({
     : type;
 
   let readableType = type;
+
   if (['integer', 'biginteger', 'float', 'decimal'].includes(type)) {
     readableType = 'number';
   } else if (['string'].includes(type)) {
@@ -289,7 +290,6 @@ ListRow.defaultProps = {
   isNestedInDZComponent: false,
   nature: null,
   onClick: () => {},
-  onClickDelete: () => {},
   plugin: null,
   repeatable: false,
   secondLoopComponentName: null,

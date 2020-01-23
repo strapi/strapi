@@ -12,8 +12,10 @@ const EmptyComponent = styled.div`
 
   ${({ hasMinError }) => {
     if (hasMinError) {
-      return `border-color: #FAA684`;
+      return 'border-color: #FAA684';
     }
+
+    return '';
   }}
 
   > p {

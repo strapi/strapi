@@ -1,7 +1,5 @@
 'use strict';
 
-const uploadFiles = require('./utils/upload-files');
-
 /**
  * default service
  *
@@ -10,16 +8,12 @@ const uploadFiles = require('./utils/upload-files');
 module.exports = ({ model, strapi }) => {
   return {
     /**
-     * expose some utils so the end users can use them
-     */
-    uploadFiles,
-    /**
      * Promise to fetch all records
      *
      * @return {Promise}
      */
     find(params, populate) {
-      return strapi.query(model).find(params, populate);
+      return strapi.entityService.find({ params, populate }, { model });
     },
 
     /**
@@ -29,7 +23,7 @@ module.exports = ({ model, strapi }) => {
      */
 
     findOne(params, populate) {
-      return strapi.query(model).findOne(params, populate);
+      return strapi.entityService.findOne({ params, populate }, { model });
     },
 
     /**
@@ -39,7 +33,7 @@ module.exports = ({ model, strapi }) => {
      */
 
     count(params) {
-      return strapi.query(model).count(params);
+      return strapi.entityService.count({ params }, { model });
     },
 
     /**
@@ -48,15 +42,8 @@ module.exports = ({ model, strapi }) => {
      * @return {Promise}
      */
 
-    async create(data, { files } = {}) {
-      const entry = await strapi.query(model).create(data);
-
-      if (files) {
-        await this.uploadFiles(entry, files, { model });
-        return this.findOne({ id: entry.id });
-      }
-
-      return entry;
+    create(data, { files } = {}) {
+      return strapi.entityService.create({ data, files }, { model });
     },
 
     /**
@@ -65,15 +52,8 @@ module.exports = ({ model, strapi }) => {
      * @return {Promise}
      */
 
-    async update(params, data, { files } = {}) {
-      const entry = await strapi.query(model).update(params, data);
-
-      if (files) {
-        await this.uploadFiles(entry, files, { model });
-        return this.findOne({ id: entry.id });
-      }
-
-      return entry;
+    update(params, data, { files } = {}) {
+      return strapi.entityService.update({ params, data, files }, { model });
     },
 
     /**
@@ -83,7 +63,7 @@ module.exports = ({ model, strapi }) => {
      */
 
     delete(params) {
-      return strapi.query(model).delete(params);
+      return strapi.entityService.delete({ params }, { model });
     },
 
     /**
@@ -93,7 +73,7 @@ module.exports = ({ model, strapi }) => {
      */
 
     search(params) {
-      return strapi.query(model).search(params);
+      return strapi.entityService.search({ params }, { model });
     },
 
     /**
@@ -102,7 +82,7 @@ module.exports = ({ model, strapi }) => {
      * @return {Promise}
      */
     countSearch(params) {
-      return strapi.query(model).countSearch(params);
+      return strapi.entityService.countSearch({ params }, { model });
     },
   };
 };

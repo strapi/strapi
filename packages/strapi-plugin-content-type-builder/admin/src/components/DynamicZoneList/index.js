@@ -4,6 +4,7 @@
  *
  */
 
+/* eslint-disable import/no-cycle */
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
@@ -28,7 +29,9 @@ function DynamicZoneList({
   const [activeTab, setActiveTab] = useState('0');
 
   const toggle = tab => {
-    if (activeTab !== tab) setActiveTab(tab);
+    if (activeTab !== tab) {
+      setActiveTab(tab);
+    }
   };
 
   const handleClickAdd = () => {
@@ -74,8 +77,8 @@ function DynamicZoneList({
           <TabContent activeTab={activeTab}>
             {components.map((component, index) => {
               const props = {
-                customRowComponent: customRowComponent,
-                component: component,
+                customRowComponent,
+                component,
               };
 
               return (

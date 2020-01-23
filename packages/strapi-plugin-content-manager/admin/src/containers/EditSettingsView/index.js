@@ -463,16 +463,13 @@ const EditSettingsView = ({
 };
 
 EditSettingsView.defaultProps = {
-  deleteAllLayouts: () => {},
   slug: null,
 };
 
 EditSettingsView.propTypes = {
-  components: PropTypes.array.isRequired,
-  models: PropTypes.array.isRequired,
-  currentEnvironment: PropTypes.string,
+  currentEnvironment: PropTypes.string.isRequired,
   deleteLayout: PropTypes.func.isRequired,
-  deleteLayouts: PropTypes.func,
+  deleteLayouts: PropTypes.func.isRequired,
   componentsAndModelsMainPossibleMainFields: PropTypes.object.isRequired,
   history: PropTypes.shape({
     push: PropTypes.func,
@@ -480,7 +477,7 @@ EditSettingsView.propTypes = {
   location: PropTypes.shape({
     search: PropTypes.string.isRequired,
   }).isRequired,
-  plugins: PropTypes.object,
+  plugins: PropTypes.object.isRequired,
   slug: PropTypes.string,
 };
 

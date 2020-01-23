@@ -22,6 +22,8 @@ import Content from './Content';
 
 const PLUGINS_WITH_CONFIG = ['email', 'upload'];
 
+/* eslint-disable */
+
 class Row extends React.Component {
   static contextType = GlobalContext;
   state = { showModal: false };

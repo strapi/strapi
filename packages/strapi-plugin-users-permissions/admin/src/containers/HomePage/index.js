@@ -34,12 +34,55 @@ import {
 import reducer from './reducer';
 import saga from './saga';
 import checkFormValidity from './checkFormValidity';
+
+/* eslint-disable consistent-return */
+/* eslint-disable react/sort-comp */
+/* eslint-disable react/no-access-state-in-setstate */
+
 const keyBoardShortCuts = [18, 78];
 
 export class HomePage extends React.Component {
   state = { mapKey: {}, showModalEdit: false };
 
-  static contextType = GlobalContext;
+  headerNavLinks = [
+    {
+      name: getTrad('HeaderNav.link.roles'),
+      to: `/plugins/${pluginId}/roles`,
+    },
+    {
+      name: getTrad('HeaderNav.link.providers'),
+      to: `/plugins/${pluginId}/providers`,
+    },
+    {
+      name: getTrad('HeaderNav.link.emailTemplates'),
+      to: `/plugins/${pluginId}/email-templates`,
+    },
+    {
+      name: getTrad('HeaderNav.link.advancedSettings'),
+      to: `/plugins/${pluginId}/advanced`,
+    },
+  ];
+
+  pluginHeaderActions = [
+    {
+      label: this.context.formatMessage({
+        id: getTrad('EditPage.cancel'),
+      }),
+      color: 'cancel',
+      onClick: () => this.props.cancelChanges(),
+      type: 'button',
+      key: 'button-cancel',
+    },
+    {
+      color: 'success',
+      label: this.context.formatMessage({
+        id: getTrad('EditPage.submit'),
+      }),
+      onClick: () => this.props.submit(this.props.match.params.settingType),
+      type: 'submit',
+      key: 'button-submit',
+    },
+  ];
 
   componentDidMount() {
     this.props.fetchData(this.props.match.params.settingType);
@@ -138,49 +181,9 @@ export class HomePage extends React.Component {
     }
   };
 
-  headerNavLinks = [
-    {
-      name: getTrad('HeaderNav.link.roles'),
-      to: `/plugins/${pluginId}/roles`,
-    },
-    {
-      name: getTrad('HeaderNav.link.providers'),
-      to: `/plugins/${pluginId}/providers`,
-    },
-    {
-      name: getTrad('HeaderNav.link.emailTemplates'),
-      to: `/plugins/${pluginId}/email-templates`,
-    },
-    {
-      name: getTrad('HeaderNav.link.advancedSettings'),
-      to: `/plugins/${pluginId}/advanced`,
-    },
-  ];
-
   isAdvanded = () => {
     return this.getEndPoint() === 'advanced';
   };
-
-  pluginHeaderActions = [
-    {
-      label: this.context.formatMessage({
-        id: getTrad('EditPage.cancel'),
-      }),
-      color: 'cancel',
-      onClick: () => this.props.cancelChanges(),
-      type: 'button',
-      key: 'button-cancel',
-    },
-    {
-      color: 'success',
-      label: this.context.formatMessage({
-        id: getTrad('EditPage.submit'),
-      }),
-      onClick: () => this.props.submit(this.props.match.params.settingType),
-      type: 'submit',
-      key: 'button-submit',
-    },
-  ];
 
   showLoaders = () => {
     const { data, isLoading, modifiedData } = this.props;
@@ -194,6 +197,8 @@ export class HomePage extends React.Component {
         get(modifiedData, this.getEndPoint()) === undefined)
     );
   };
+
+  static contextType = GlobalContext;
 
   render() {
     const {

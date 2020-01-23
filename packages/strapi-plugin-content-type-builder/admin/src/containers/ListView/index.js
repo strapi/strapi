@@ -24,6 +24,8 @@ import ListHeader from '../../components/ListHeader';
 import LeftMenu from '../LeftMenu';
 import Wrapper from './Wrapper';
 
+/* eslint-disable indent */
+
 const ListView = () => {
   const {
     initialData,
@@ -165,11 +167,12 @@ const ListView = () => {
       null
     );
 
-    return description
-      ? description
-      : formatMessage({
-          id: `${pluginId}.modelPage.contentHeader.emptyDescription.description`,
-        });
+    return (
+      description ||
+      formatMessage({
+        id: `${pluginId}.modelPage.contentHeader.emptyDescription.description`,
+      })
+    );
   };
 
   const wait = async () => {
@@ -187,21 +190,21 @@ const ListView = () => {
             onClick: () => {
               toggleModalCancel();
             },
-            title: formatMessage({
+            label: formatMessage({
               id: `${pluginId}.form.button.cancel`,
             }),
             type: 'button',
-            disabled: isEqual(modifiedData, initialData) ? true : false,
+            disabled: isEqual(modifiedData, initialData),
           },
           {
             className: 'button-submit',
             color: 'success',
             onClick: () => submitData(),
-            title: formatMessage({
+            label: formatMessage({
               id: `${pluginId}.form.button.save`,
             }),
             type: 'submit',
-            disabled: isEqual(modifiedData, initialData) ? true : false,
+            disabled: isEqual(modifiedData, initialData),
           },
         ]
       : [],
@@ -335,7 +338,7 @@ const ListView = () => {
                   mainTypeName={currentDataName}
                   editTarget={forTarget}
                   isMain
-                ></List>
+                />
               </ListWrapper>
             </div>
           </div>
