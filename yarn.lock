@@ -793,11 +793,12 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@buffetjs/core@2.0.0", "@buffetjs/core@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@buffetjs/core/-/core-2.0.0.tgz#5c4c6fc758499d26109283d12d9be0e16e237853"
-  integrity sha512-Qz7yJFwvMS8kcyJBFvyXavb9YRVqBb0jmv680+saI9vdLAJ/5uL2Wi6K3q4O1NZ5t7wXmG3+i2EGcW+WvgWzmA==
+"@buffetjs/core@2.1.0", "@buffetjs/core@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@buffetjs/core/-/core-2.1.0.tgz#04633d4fdbfa6c2b340283e5c9ae041ea1dcee74"
+  integrity sha512-ItK+PXFVxI2+suAPLumK0DwvZWQ2eQRFp7ntqo9sT+aQzhGXxQRjgo9uJIPXixx0XR1e14JpDQMPA9UXnjNoZg==
   dependencies:
+    "@buffetjs/hooks" "2.1.0"
     "@buffetjs/icons" "2.0.0"
     "@buffetjs/styles" "2.0.0"
     "@buffetjs/utils" "2.0.0"
@@ -811,16 +812,21 @@
     react-dates "^21.5.1"
     react-moment-proptypes "^1.7.0"
 
-"@buffetjs/custom@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@buffetjs/custom/-/custom-2.0.0.tgz#747d7cee30fe26f60c93fb487f2fc9694c8aafde"
-  integrity sha512-vVy2aMvJFqlc7QYmT92inAGWq0Xn8stzHqybs38wjJP34qZFO6VyQbrftzJIRg2gkwk7/WQGWgIW2yaK72SqXg==
+"@buffetjs/custom@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@buffetjs/custom/-/custom-2.1.0.tgz#629c40e09f8416860e953c283d01562faae6148e"
+  integrity sha512-lrDn5bYe/nkwphF0+5PylRC7PCd/yAPbZaeTTQGoD3xLWydD7c5vkpJDJDU1JdNLptA+P02sVvS05klDYgx39w==
   dependencies:
-    "@buffetjs/core" "2.0.0"
+    "@buffetjs/core" "2.1.0"
     "@buffetjs/styles" "2.0.0"
     "@buffetjs/utils" "2.0.0"
     moment "^2.24.0"
     react-moment-proptypes "^1.7.0"
+
+"@buffetjs/hooks@2.1.0", "@buffetjs/hooks@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@buffetjs/hooks/-/hooks-2.1.0.tgz#9b02012fa9b7d0a3fcaa1c019a70b9dc6df40870"
+  integrity sha512-2MFpRN4FPLvM9AG7wKrCln7yGn9msckrG9JAlW9kw/GoMp06Y689KTw/5Cx4iahmhGvzxMn9ZbwBFBUqsK8EQQ==
 
 "@buffetjs/icons@2.0.0", "@buffetjs/icons@^2.0.0":
   version "2.0.0"
