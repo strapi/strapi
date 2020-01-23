@@ -34,10 +34,10 @@ module.exports = {
     });
 
     return {
-      upload(file) {
+      upload(file, options) {
         return new Promise((resolve, reject) => {
           const upload_stream = cloudinary.uploader.upload_stream(
-            { resource_type: 'auto' },
+            { resource_type: 'auto', ...options },
             (err, image) => {
               if (err) {
                 return reject(err);

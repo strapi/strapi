@@ -74,7 +74,7 @@ module.exports = {
 
     // upload a single file
     const uploadFile = async file => {
-      await actions.upload(file);
+      await actions.upload(file, config.providerOptions);
 
       // Remove buffer to don't save it.
       delete file.buffer;
@@ -170,6 +170,11 @@ module.exports = {
 
           return file;
         });
+
+        config.providerOptions = {
+          // TODO: Get folder from config
+          folder: '',
+        };
 
         // Make upload async.
         return this.upload(enhancedFiles, config);
