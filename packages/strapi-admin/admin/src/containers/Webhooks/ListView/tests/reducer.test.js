@@ -3,19 +3,11 @@ import reducer from '../reducer';
 
 describe('Admin | containers | Webhooks | ListView | reducer', () => {
   const initialState = fromJS({
-    webhooks: [
-      {
-        id: 1,
-        name: 'webhook 1',
-        url: 'http://localhost:5000',
-        headers: {},
-        events: ['entry.create', 'entry.update', 'entry.delete'],
-        isEnabled: true,
-      },
-    ],
+    webhooks: [],
     webhooksToDelete: [],
     webhookToDelete: null,
   });
+
   it('It should update webhooks state with received data on GET_DATA_SUCCEEDED', () => {
     const state = initialState;
     const receivedData = [
@@ -49,12 +41,11 @@ describe('Admin | containers | Webhooks | ListView | reducer', () => {
 
   it('It should toggle webhook isEnabled state on SET_WEBHOOK_ENABLED', () => {
     const state = initialState;
-
     const webhookToUpdate = 1;
     const keys = [webhookToUpdate, 'isEnabled'];
     const action = {
       type: 'SET_WEBHOOK_ENABLED',
-      keys: keys,
+      keys,
       value: false,
     };
 
@@ -64,7 +55,6 @@ describe('Admin | containers | Webhooks | ListView | reducer', () => {
 
   it('should set a webhook id to webhookToDelete on SET_WEBHOOK_TO_DELETE', () => {
     const state = initialState;
-
     const webhookToDelete = 1;
     const action = {
       type: 'SET_WEBHOOK_TO_DELETE',
@@ -77,7 +67,6 @@ describe('Admin | containers | Webhooks | ListView | reducer', () => {
 
   it('should add a webhook id to the webhookToDelete array on SET_WEBHOOKS_TO_DELETE if value is true', () => {
     const state = initialState;
-
     const webhookToDelete = 1;
     const action = {
       type: 'SET_WEBHOOKS_TO_DELETE',
@@ -87,14 +76,13 @@ describe('Admin | containers | Webhooks | ListView | reducer', () => {
 
     const expectedState = state.set(
       'webhooksToDelete',
-      state.get('webhooksToDelete').push(webhookToDelete)
+      fromJS([...state.get('webhooksToDelete'), webhookToDelete])
     );
     expect(reducer(state, action)).toEqual(expectedState);
   });
 
   it('should remove a webhook id to the webhookToDelete array on SET_WEBHOOKS_TO_DELETE if value is false', () => {
     const state = initialState;
-
     const webhookToDelete = 1;
     const action = {
       type: 'SET_WEBHOOKS_TO_DELETE',
@@ -110,36 +98,107 @@ describe('Admin | containers | Webhooks | ListView | reducer', () => {
   });
 
   it('should update webhooks and empty webhooksToDelete on WEBHOOKS_DELETED', () => {
-    const state = initialState.set('webhooksToDelete', [1]);
+    const webhooks = [
+      {
+        id: 1,
+        name: 'webhook 1',
+        url: 'http://localhost:5000',
+        headers: {},
+        events: ['entry.create', 'entry.update', 'entry.delete'],
+        isEnabled: true,
+      },
+      {
+        id: 2,
+        name: 'webhook 2',
+        url: 'http://localhost:4000',
+        headers: {},
+        events: ['media.create', 'media.update'],
+        isEnabled: false,
+      },
+    ];
+    const updatedWebhooks = [
+      {
+        id: 2,
+        name: 'webhook 2',
+        url: 'http://localhost:4000',
+        headers: {},
+        events: ['media.create', 'media.update'],
+        isEnabled: false,
+      },
+    ];
+
+    const state = initialState
+      .set('webhooksToDelete', [1])
+      .set('webhooks', fromJS(webhooks));
     const action = {
       type: 'WEBHOOKS_DELETED',
     };
 
     const expectedState = state
-      .set(
-        'webhooks',
-        state
-          .get('webhooks')
-          .filter(
-            webhook =>
-              !state.get('webhooksToDelete').includes(webhook.get('id'))
-          )
-      )
+      .set('webhooks', fromJS(updatedWebhooks))
       .set('webhooksToDelete', []);
     expect(reducer(state, action)).toEqual(expectedState);
   });
 
   it('should update webhooks and empty webhookToDelete on WEBHOOK_DELETED', () => {
-    const state = initialState.set('webhookToDelete', 1);
+    const webhooks = [
+      {
+        id: 3,
+        name: 'webhook 1',
+        url: 'http://localhost:5000',
+        headers: {},
+        events: ['entry.create', 'entry.update', 'entry.delete'],
+        isEnabled: true,
+      },
+      {
+        id: 4,
+        name: 'webhook 2',
+        url: 'http://localhost:4000',
+        headers: {},
+        events: ['media.create', 'media.update'],
+        isEnabled: false,
+      },
+      {
+        id: 5,
+        name: 'webhook 2',
+        url: 'http://localhost:4000',
+        headers: {},
+        events: ['media.create', 'media.update'],
+        isEnabled: false,
+      },
+    ];
+    const updatedWebhooks = [
+      {
+        id: 3,
+        name: 'webhook 1',
+        url: 'http://localhost:5000',
+        headers: {},
+        events: ['entry.create', 'entry.update', 'entry.delete'],
+        isEnabled: true,
+      },
+      {
+        id: 5,
+        name: 'webhook 2',
+        url: 'http://localhost:4000',
+        headers: {},
+        events: ['media.create', 'media.update'],
+        isEnabled: false,
+      },
+    ];
+
+    const webhookIdToDelete = 4;
+
+    const state = initialState
+      .set('webhookToDelete', webhookIdToDelete)
+      .set('webhooks', fromJS(webhooks));
+
     const action = {
       type: 'WEBHOOK_DELETED',
+      index: webhooks.findIndex(webhook => webhook.id === webhookIdToDelete),
     };
 
     const expectedState = state
-      .set(
-        'webhooks',
-        state.get('webhooks').remove(state.get('webhookToDelete'))
-      )
+      .set('webhooks', fromJS(updatedWebhooks))
       .set('webhookToDelete', null);
     expect(reducer(state, action)).toEqual(expectedState);
   });
