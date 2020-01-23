@@ -397,7 +397,7 @@ module.exports = ({ model, modelKey, strapi }) => {
           await Promise.all(
             Object.keys(deleteMap).map(componentUID => {
               return strapi.query(componentUID).delete({
-                [`${model.primaryKey}_in`]: idsToDelete[componentUID],
+                [`${model.primaryKey}_in`]: deleteMap[componentUID],
               });
             })
           );
