@@ -56,13 +56,10 @@ describe('Admin | containers | Webhooks | EditView | reducer', () => {
       data: receivedData,
     };
 
-    const formattedHeaders = [header];
-    const data = fromJS(receivedData).update('headers', () =>
-      fromJS(formattedHeaders)
-    );
+    const data = { ...receivedData, headers: [header] };
     const expectedState = state
-      .update('initialData', () => data)
-      .update('modifiedData', () => data);
+      .set('initialData', fromJS(data))
+      .set('modifiedData', fromJS(data));
 
     expect(reducer(state, action)).toEqual(expectedState);
   });
@@ -87,16 +84,16 @@ describe('Admin | containers | Webhooks | EditView | reducer', () => {
       data: receivedData,
     };
 
-    const headers = receivedData.headers;
-    const formattedHeaders = Object.keys(headers).map(key => {
-      return { key: key, value: headers[key] };
-    });
-    const data = fromJS(receivedData).update('headers', () =>
-      fromJS(formattedHeaders)
-    );
+    const formattedHeaders = [
+      { key: 'accept', value: 'text/html' },
+      { key: 'authorization', value: 'Basic YWxhZGRpbjpvcGVuc2VzYW1l' },
+    ];
+
+    const data = { ...receivedData, headers: formattedHeaders };
+
     const expectedState = state
-      .update('initialData', () => data)
-      .update('modifiedData', () => data);
+      .update('initialData', () => fromJS(data))
+      .update('modifiedData', () => fromJS(data));
 
     expect(reducer(state, action)).toEqual(expectedState);
   });
@@ -119,54 +116,81 @@ describe('Admin | containers | Webhooks | EditView | reducer', () => {
   });
 
   it('should remove a header to modifiedData on ON_HEADER_REMOVE if header is not the last', () => {
-    const state = initialState;
+    const initialHeaders = [
+      { key: 'accept', value: 'text/html' },
+      { key: 'authorization', value: 'Basic YWxhZGRpbjpvcGVuc2VzYW1l' },
+    ];
+    const state = initialState
+      .setIn(['initialData', 'headers'], fromJS(initialHeaders))
+      .setIn(['modifiedData', 'headers'], fromJS(initialHeaders));
 
     const action = {
       type: 'ON_HEADER_REMOVE',
       index: 1,
     };
 
-    const expectedState = state.updateIn(
+    const updatedHeaders = [{ key: 'accept', value: 'text/html' }];
+
+    const expectedState = state.setIn(
       ['modifiedData', 'headers'],
-      headers => {
-        return headers.remove(action.index);
-      }
+      fromJS(updatedHeaders)
     );
 
     expect(reducer(state, action)).toEqual(expectedState);
   });
 
   it('should clear a header to modifiedData on ON_HEADER_REMOVE if header is the last', () => {
-    const state = initialState;
+    const initialHeaders = [{ key: 'accept', value: 'text/html' }];
+    const state = initialState
+      .setIn(['initialData', 'headers'], fromJS(initialHeaders))
+      .setIn(['modifiedData', 'headers'], fromJS(initialHeaders));
 
     const action = {
       type: 'ON_HEADER_REMOVE',
-      index: 1,
+      index: 0,
     };
 
-    const expectedState = state.updateIn(['modifiedData', 'headers'], () =>
-      fromJS([header])
+    const updatedHeaders = [header];
+
+    const expectedState = state.setIn(
+      ['modifiedData', 'headers'],
+      fromJS(updatedHeaders)
     );
 
     expect(reducer(state, action)).toEqual(expectedState);
   });
 
-  it('should update isTriggering and clear triggerResponse on ON_TRIGGER_CANCELED', () => {
-    const state = initialState;
+  it('should update isTriggering on ON_TRIGGER_CANCELED', () => {
+    const state = initialState.set('isTriggering', true);
 
     const action = {
       type: 'ON_TRIGGER_CANCELED',
     };
 
-    const expectedState = state
-      .update('isTriggering', () => false)
-      .update('triggerResponse', () => fromJS({}));
+    const expectedState = state.update('isTriggering', () => false);
+
+    expect(reducer(state, action)).toEqual(expectedState);
+  });
+
+  it('should clear triggerResponse on ON_TRIGGER_CANCELED', () => {
+    const state = initialState.set('triggerResponse', {
+      statusCode: 200,
+      message: 'succeed',
+    });
+
+    const action = {
+      type: 'ON_TRIGGER_CANCELED',
+    };
+
+    const expectedState = state.update('triggerResponse', () => fromJS({}));
 
     expect(reducer(state, action)).toEqual(expectedState);
   });
 
   it('should reset modifiedData with initialData values on RESET_FORM', () => {
-    const state = initialState;
+    const state = initialState
+      .setIn(['modifiedData', 'name'], 'updated name')
+      .setIn(['modifiedData', 'url'], 'updated url');
 
     const action = {
       type: 'RESET_FORM',
