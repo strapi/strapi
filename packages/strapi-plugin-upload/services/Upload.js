@@ -74,7 +74,7 @@ module.exports = {
 
     // upload a single file
     const uploadFile = async file => {
-      await actions.upload(file, config.providerOptions);
+      await actions.upload(file);
 
       // Remove buffer to don't save it.
       delete file.buffer;
