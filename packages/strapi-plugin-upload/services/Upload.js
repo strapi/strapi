@@ -152,11 +152,11 @@ module.exports = {
     // Asynchronous upload.
     return await Promise.all(
       Object.keys(files).map(async attribute => {
+        const details = model.attributes[attribute];
+
         // Bufferize files per attribute.
         const buffers = await this.bufferize(files[attribute]);
         const enhancedFiles = buffers.map(file => {
-          const details = model.attributes[attribute];
-
           // Add related information to be able to make
           // the relationships later.
           file[details.via] = [
@@ -172,8 +172,7 @@ module.exports = {
         });
 
         config.providerOptions = {
-          // TODO: Get folder from config
-          folder: '',
+          ...(details.folder && { folder: details.folder }),
         };
 
         // Make upload async.
