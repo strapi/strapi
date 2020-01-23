@@ -7,17 +7,48 @@ const { parseMultipartData, sanitizeEntity } = require('strapi-utils');
  *
  */
 module.exports = ({ service, model }) => {
-  return {
-    /**
-     * expose some utils so the end users can use them
-     */
+  if (model.kind === 'singleType') {
+    return {
+      /**
+       * Retrieve single type content
+       *
+       * @return {Object|Array}
+       */
+      async find() {
+        const entity = await service.find();
+        return sanitizeEntity(entity, { model });
+      },
 
+      /**
+       * Update single type content.
+       *
+       * @return {Object}
+       */
+      async update(ctx) {
+        let entity;
+        if (ctx.is('multipart')) {
+          const { data, files } = parseMultipartData(ctx);
+          entity = await service.createOrUpdate(data, { files });
+        } else {
+          entity = await service.createOrUpdate(ctx.request.body);
+        }
+
+        return sanitizeEntity(entity, { model });
+      },
+
+      async delete() {
+        const entity = await service.delete();
+        return sanitizeEntity(entity, { model });
+      },
+    };
+  }
+
+  return {
     /**
      * Retrieve records.
      *
      * @return {Object|Array}
      */
-
     async find(ctx) {
       let entities;
       if (ctx.query._q) {
@@ -34,7 +65,6 @@ module.exports = ({ service, model }) => {
      *
      * @return {Object}
      */
-
     async findOne(ctx) {
       const entity = await service.findOne(ctx.params);
       return sanitizeEntity(entity, { model });
@@ -45,7 +75,6 @@ module.exports = ({ service, model }) => {
      *
      * @return {Number}
      */
-
     count(ctx) {
       if (ctx.query._q) {
         return service.countSearch(ctx.query);
@@ -58,7 +87,6 @@ module.exports = ({ service, model }) => {
      *
      * @return {Object}
      */
-
     async create(ctx) {
       let entity;
       if (ctx.is('multipart')) {
@@ -75,7 +103,6 @@ module.exports = ({ service, model }) => {
      *
      * @return {Object}
      */
-
     async update(ctx) {
       let entity;
       if (ctx.is('multipart')) {
@@ -93,7 +120,6 @@ module.exports = ({ service, model }) => {
      *
      * @return {Object}
      */
-
     async delete(ctx) {
       const entity = await service.delete(ctx.params);
       return sanitizeEntity(entity, { model });

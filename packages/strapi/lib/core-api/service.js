@@ -6,6 +6,44 @@
  */
 
 module.exports = ({ model, strapi }) => {
+  if (model.kind === 'singleType') {
+    return {
+      find(populate) {
+        return strapi.entityService.find({ populate }, { model });
+      },
+
+      async createOrUpdate(data, { files } = {}) {
+        const entity = await this.find();
+
+        if (!entity) {
+          return strapi.entityService.create({ data, files }, { model });
+        } else {
+          return strapi.entityService.update(
+            {
+              params: {
+                id: entity.id,
+              },
+              data,
+              files,
+            },
+            { model }
+          );
+        }
+      },
+
+      async delete() {
+        const entity = await this.find();
+
+        if (!entity) return;
+
+        return strapi.entityService.delete(
+          { params: { id: entity.id } },
+          { model }
+        );
+      },
+    };
+  }
+
   return {
     /**
      * Promise to fetch all records
