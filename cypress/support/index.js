@@ -14,7 +14,7 @@
 // ***********************************************************
 
 // Import commands.js using ES2015 syntax:
-import './commands'
+import './commands';
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
@@ -28,6 +28,8 @@ Cypress.on('before:browser:launch', (browser = {}, args) => {
   if (browser.name === 'chrome') {
     args.push('--disable-site-isolation-trials');
 
-    return args
+    return args;
   }
-})
+
+  return args;
+});
