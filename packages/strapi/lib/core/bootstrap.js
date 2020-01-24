@@ -70,7 +70,6 @@ module.exports = function(strapi) {
         uid: `application::${apiName}.${modelName}`,
         apiName,
         modelName,
-
         globalId: model.globalId || _.upperFirst(_.camelCase(modelName)),
         collectionName:
           model.collectionName || `${modelName}`.toLocaleLowerCase(),

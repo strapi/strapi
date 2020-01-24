@@ -23,6 +23,7 @@ const schemaBuilder = {
 
   formatGQL: function(fields, description = {}, model = {}, type = 'field') {
     const typeFields = JSON.stringify(fields, null, 2).replace(/['",]+/g, '');
+
     const lines = typeFields.split('\n');
 
     // Try to add description for field.
@@ -144,7 +145,7 @@ const schemaBuilder = {
           query,
           mutation,
           resolvers,
-        } = Resolvers.buildShadowCRUD(strapi.plugins[plugin].models, plugin);
+        } = Resolvers.buildShadowCRUD(strapi.plugins[plugin].models);
 
         // We cannot put this in the merge because it's a string.
         acc.definition += definition || '';

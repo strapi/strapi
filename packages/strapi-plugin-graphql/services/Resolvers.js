@@ -17,6 +17,22 @@ const Types = require('./Types.js');
 const Schema = require('./Schema.js');
 const { toSingular, toPlural } = require('./naming');
 
+/**
+ * Merges
+ */
+const mergeSubSchema = (root, ...subs) => {
+  subs.forEach(sub => {
+    const { definition = '', query = {}, mutation = {}, resolvers = {} } = sub;
+
+    root.definition += '\n' + definition;
+    _.merge(root, {
+      query,
+      mutation,
+      resolvers,
+    });
+  });
+};
+
 const convertAttributes = (attributes, globalId) => {
   return Object.keys(attributes)
     .filter(attribute => attributes[attribute].private !== true)
@@ -254,8 +270,8 @@ const buildModel = (model, { schema, isComponent = false } = {}) => {
  * @return Object
  */
 
-const buildShadowCRUD = (models, plugin) => {
-  const initialState = {
+const buildShadowCRUD = models => {
+  const schema = {
     definition: '',
     query: {},
     mutation: {},
@@ -263,235 +279,220 @@ const buildShadowCRUD = (models, plugin) => {
   };
 
   if (_.isEmpty(models)) {
-    return initialState;
+    return schema;
   }
 
-  return Object.keys(models).reduce((acc, name) => {
-    const model = models[name];
+  const subSchemas = Object.values(models).map(model => {
+    const { kind } = model;
 
-    const { globalId, primaryKey } = model;
-
-    // Setup initial state with default attribute that should be displayed
-    // but these attributes are not properly defined in the models.
-    const initialState = {
-      [primaryKey]: 'ID!',
-    };
-
-    // always add an id field to make the api database agnostic
-    if (primaryKey !== 'id') {
-      initialState['id'] = 'ID!';
+    switch (kind) {
+      case 'singleType': {
+        // const type = buildSingleType(model);
+        // mergeSubSchema(type, schema);
+        break;
+      }
+      default:
+        return buildCollectionType(model);
     }
+  });
 
-    acc.resolvers[globalId] = {
-      // define the default id resolver
-      id(parent) {
-        return parent[model.primaryKey];
+  mergeSubSchema(schema, ...subSchemas);
+
+  return schema;
+};
+
+const buildCollectionType = model => {
+  const { globalId, primaryKey, plugin, modelName } = model;
+
+  const singularName = toSingular(modelName);
+  const pluralName = toPlural(modelName);
+
+  const _schema = _.cloneDeep(
+    _.get(strapi.plugins, 'graphql.config._schema.graphql', {})
+  );
+
+  const { type = {}, resolver = {} } = _schema;
+
+  const localSchema = {
+    definition: '',
+    query: {},
+    mutation: {},
+    resolvers: { Query: {}, Mutation: {} },
+  };
+
+  // Setup initial state with default attribute that should be displayed
+  // but these attributes are not properly defined in the models.
+  const initialState = {
+    [primaryKey]: 'ID!',
+    id: 'ID!',
+  };
+
+  localSchema.resolvers[globalId] = {
+    // define the default id resolver
+    id(parent) {
+      return parent[model.primaryKey] || parent.id;
+    },
+  };
+
+  // Add timestamps attributes.
+  if (_.isArray(_.get(model, 'options.timestamps'))) {
+    const [createdAtKey, updatedAtKey] = model.options.timestamps;
+    initialState[createdAtKey] = 'DateTime!';
+    initialState[updatedAtKey] = 'DateTime!';
+  }
+
+  // Convert our layer Model to the GraphQL DL.
+  const attributes = convertAttributes(model.attributes, globalId);
+  mutateAssocAttributes(model.associations, attributes);
+  _.merge(attributes, initialState);
+
+  localSchema.definition += generateEnumDefinitions(model.attributes, globalId);
+  generateDynamicZoneDefinitions(model.attributes, globalId, localSchema);
+
+  const description = Schema.getDescription(type[globalId], model);
+  const fields = Schema.formatGQL(attributes, type[globalId], model);
+  const typeDef = `${description}type ${globalId} {${fields}}\n`;
+
+  localSchema.definition += typeDef;
+
+  // Add definition to the schema but this type won't be "queriable" or "mutable".
+  if (
+    type[model.globalId] === false ||
+    _.get(type, `${model.globalId}.enabled`) === false
+  ) {
+    return localSchema;
+  }
+
+  const buildFindOneQuery = () => {
+    return _.get(resolver, `Query.${singularName}`) !== false
+      ? Query.composeQueryResolver({
+          _schema,
+          plugin,
+          name: modelName,
+          isSingular: true,
+        })
+      : null;
+  };
+
+  const buildFindQuery = () => {
+    return _.get(resolver, `Query.${pluralName}`) !== false
+      ? Query.composeQueryResolver({
+          _schema,
+          plugin,
+          name: modelName,
+          isSingular: false,
+        })
+      : null;
+  };
+
+  // Build resolvers.
+  const queries = {
+    singular: buildFindOneQuery(),
+    plural: buildFindQuery(),
+  };
+
+  if (_.isFunction(queries.singular)) {
+    _.merge(localSchema, {
+      query: {
+        [`${singularName}(id: ID!)`]: model.globalId,
       },
-    };
+      resolvers: {
+        Query: {
+          [singularName]: queries.singular,
+        },
+      },
+    });
+  }
 
-    // Add timestamps attributes.
-    if (_.isArray(_.get(model, 'options.timestamps'))) {
-      const [createdAtKey, updatedAtKey] = model.options.timestamps;
-      initialState[createdAtKey] = 'DateTime!';
-      initialState[updatedAtKey] = 'DateTime!';
-    }
+  if (_.isFunction(queries.plural)) {
+    _.merge(localSchema, {
+      query: {
+        [`${pluralName}(sort: String, limit: Int, start: Int, where: JSON)`]: `[${model.globalId}]`,
+      },
+      resolvers: {
+        Query: {
+          [pluralName]: queries.plural,
+        },
+      },
+    });
+  }
 
-    const _schema = _.cloneDeep(
-      _.get(strapi.plugins, 'graphql.config._schema.graphql', {})
+  // Add model Input definition.
+  localSchema.definition += Types.generateInputModel(model, modelName);
+
+  // build every mutation
+  ['create', 'update', 'delete'].forEach(action => {
+    const mutationScheam = buildMutation({ model, action }, { _schema });
+
+    mergeSubSchema(localSchema, mutationScheam);
+  });
+
+  // TODO: Add support for Graphql Aggregation in Bookshelf ORM
+  if (model.orm === 'mongoose') {
+    // Generation the aggregation for the given model
+    const modelAggregator = Aggregator.formatModelConnectionsGQL(
+      attributes,
+      model,
+      modelName,
+      queries.plural,
+      plugin
     );
 
-    const { type = {}, resolver = {} } = _schema;
+    if (modelAggregator) {
+      localSchema.definition += modelAggregator.type;
+      if (!localSchema.resolvers[modelAggregator.globalId]) {
+        localSchema.resolvers[modelAggregator.globalId] = {};
+      }
 
-    // Convert our layer Model to the GraphQL DL.
-    const attributes = convertAttributes(model.attributes, globalId);
-    mutateAssocAttributes(model.associations, attributes);
-    _.merge(attributes, initialState);
-
-    acc.definition += generateEnumDefinitions(model.attributes, globalId);
-    generateDynamicZoneDefinitions(model.attributes, globalId, acc);
-
-    const description = Schema.getDescription(type[globalId], model);
-    const fields = Schema.formatGQL(attributes, type[globalId], model);
-    const typeDef = `${description}type ${globalId} {${fields}}\n`;
-
-    acc.definition += typeDef;
-
-    // Add definition to the schema but this type won't be "queriable" or "mutable".
-    if (
-      type[model.globalId] === false ||
-      _.get(type, `${model.globalId}.enabled`) === false
-    ) {
-      return acc;
+      _.merge(localSchema.resolvers, modelAggregator.resolver);
+      _.merge(localSchema.query, modelAggregator.query);
     }
+  }
 
-    const singularName = toSingular(name);
-    const pluralName = toPlural(name);
-    // Build resolvers.
-    const queries = {
-      singular:
-        _.get(resolver, `Query.${singularName}`) !== false
-          ? Query.composeQueryResolver({
-              _schema,
-              plugin,
-              name,
-              isSingular: true,
-            })
-          : null,
-      plural:
-        _.get(resolver, `Query.${pluralName}`) !== false
-          ? Query.composeQueryResolver({
-              _schema,
-              plugin,
-              name,
-              isSingular: false,
-            })
-          : null,
+  // Build associations queries.
+  _.assign(localSchema.resolvers[globalId], buildAssocResolvers(model));
+  return localSchema;
+};
+
+// TODO:
+// - Implement batch methods (need to update the content-manager as well).
+// - Implement nested transactional methods (create/update).
+const buildMutation = ({ model, action }, { _schema }) => {
+  const capitalizedName = _.upperFirst(toSingular(model.modelName));
+  const mutationName = `${action}${capitalizedName}`;
+
+  const definition = Types.generateInputPayloadArguments({
+    model,
+    name: model.modelName,
+    mutationName,
+    action,
+  });
+
+  // ignore if disabled
+  if (_.get(_schema, ['resolver', 'Mutation', mutationName]) === false) {
+    return {
+      definition,
     };
+  }
 
-    // check if errors
-    Object.keys(queries).forEach(type => {
-      // The query cannot be built.
-      if (_.isError(queries[type])) {
-        strapi.log.error(queries[type]);
-        strapi.stop();
-      }
-    });
+  const mutationResolver = Mutation.composeMutationResolver({
+    _schema,
+    plugin: model.plugin,
+    name: model.modelName,
+    action,
+  });
 
-    if (_.isFunction(queries.singular)) {
-      _.merge(acc, {
-        query: {
-          [`${singularName}(id: ID!)`]: model.globalId,
-        },
-        resolvers: {
-          Query: {
-            [singularName]: queries.singular,
-          },
-        },
-      });
-    }
-
-    if (_.isFunction(queries.plural)) {
-      _.merge(acc, {
-        query: {
-          [`${pluralName}(sort: String, limit: Int, start: Int, where: JSON)`]: `[${model.globalId}]`,
-        },
-        resolvers: {
-          Query: {
-            [pluralName]: queries.plural,
-          },
-        },
-      });
-    }
-
-    // TODO:
-    // - Implement batch methods (need to update the content-manager as well).
-    // - Implement nested transactional methods (create/update).
-    const capitalizedName = _.upperFirst(singularName);
-    const mutations = {
-      create:
-        _.get(resolver, `Mutation.create${capitalizedName}`) !== false
-          ? Mutation.composeMutationResolver({
-              _schema,
-              plugin,
-              name,
-              action: 'create',
-            })
-          : null,
-      update:
-        _.get(resolver, `Mutation.update${capitalizedName}`) !== false
-          ? Mutation.composeMutationResolver({
-              _schema,
-              plugin,
-              name,
-              action: 'update',
-            })
-          : null,
-      delete:
-        _.get(resolver, `Mutation.delete${capitalizedName}`) !== false
-          ? Mutation.composeMutationResolver({
-              _schema,
-              plugin,
-              name,
-              action: 'delete',
-            })
-          : null,
-    };
-
-    // Add model Input definition.
-    acc.definition += Types.generateInputModel(model, name);
-
-    Object.keys(mutations).forEach(type => {
-      if (_.isFunction(mutations[type])) {
-        let mutationDefinition;
-        let mutationName = `${type}${capitalizedName}`;
-
-        // Generate the Input for this specific action.
-        acc.definition += Types.generateInputPayloadArguments(
-          model,
-          name,
-          type
-        );
-
-        switch (type) {
-          case 'create':
-            mutationDefinition = {
-              [`${mutationName}(input: ${mutationName}Input)`]: `${mutationName}Payload`,
-            };
-
-            break;
-          case 'update':
-            mutationDefinition = {
-              [`${mutationName}(input: ${mutationName}Input)`]: `${mutationName}Payload`,
-            };
-
-            break;
-          case 'delete':
-            mutationDefinition = {
-              [`${mutationName}(input: ${mutationName}Input)`]: `${mutationName}Payload`,
-            };
-            break;
-          default:
-          // Nothing.
-        }
-
-        // Assign mutation definition to global definition.
-        _.merge(acc, {
-          mutation: mutationDefinition,
-          resolvers: {
-            Mutation: {
-              [`${mutationName}`]: mutations[type],
-            },
-          },
-        });
-      }
-    });
-
-    // TODO: Add support for Graphql Aggregation in Bookshelf ORM
-    if (model.orm === 'mongoose') {
-      // Generation the aggregation for the given model
-      const modelAggregator = Aggregator.formatModelConnectionsGQL(
-        attributes,
-        model,
-        name,
-        queries.plural,
-        plugin
-      );
-      if (modelAggregator) {
-        acc.definition += modelAggregator.type;
-        if (!acc.resolvers[modelAggregator.globalId]) {
-          acc.resolvers[modelAggregator.globalId] = {};
-        }
-
-        _.merge(acc.resolvers, modelAggregator.resolver);
-        _.merge(acc.query, modelAggregator.query);
-      }
-    }
-
-    // Build associations queries.
-    _.assign(acc.resolvers[globalId], buildAssocResolvers(model));
-
-    return acc;
-  }, initialState);
+  return {
+    definition,
+    mutation: {
+      [`${mutationName}(input: ${mutationName}Input)`]: `${mutationName}Payload`,
+    },
+    resolvers: {
+      Mutation: {
+        [mutationName]: mutationResolver,
+      },
+    },
+  };
 };
 
 module.exports = {

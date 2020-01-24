@@ -14,7 +14,7 @@ const { GraphQLDate, GraphQLDateTime } = require('graphql-iso-date');
 const Time = require('../types/time');
 const GraphQLLong = require('graphql-type-long');
 
-const { toSingular } = require('./naming');
+const { toSingular, toInputName } = require('./naming');
 
 module.exports = {
   /**
@@ -290,32 +290,25 @@ module.exports = {
     return inputs;
   },
 
-  generateInputPayloadArguments(model, name, type, resolver) {
+  generateInputPayloadArguments({ model, name, mutationName, action }) {
     const singularName = toSingular(name);
-    if (
-      _.get(resolver, `Mutation.${type}${_.upperFirst(singularName)}`) === false
-    ) {
-      return '';
-    }
+    const inputName = toInputName(name);
 
-    const inputName = `${_.upperFirst(singularName)}Input`;
-    const payloadName = `${_.upperFirst(singularName)}Payload`;
-
-    switch (type) {
+    switch (action) {
       case 'create':
         return `
-          input ${type}${inputName} { data: ${inputName} }
-          type ${type}${payloadName} { ${singularName}: ${model.globalId} }
+          input ${mutationName}Input { data: ${inputName} }
+          type ${mutationName}Payload { ${singularName}: ${model.globalId} }
         `;
       case 'update':
         return `
-          input ${type}${inputName}  { where: InputID, data: edit${inputName} }
-          type ${type}${payloadName} { ${singularName}: ${model.globalId} }
+          input ${mutationName}Input  { where: InputID, data: edit${inputName} }
+          type ${mutationName}Payload { ${singularName}: ${model.globalId} }
         `;
       case 'delete':
         return `
-          input ${type}${inputName}  { where: InputID }
-          type ${type}${payloadName} { ${singularName}: ${model.globalId} }
+          input ${mutationName}Input  { where: InputID }
+          type ${mutationName}Payload { ${singularName}: ${model.globalId} }
         `;
       default:
       // Nothing

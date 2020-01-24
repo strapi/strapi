@@ -63,7 +63,7 @@ module.exports = {
           : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
         if (!controller) {
-          return new Error(
+          throw new Error(
             `Cannot find the controller's action ${name}.${action}`
           );
         }
@@ -98,7 +98,7 @@ module.exports = {
       const controller = _.get(controllers, `${name}.${action}`);
 
       if (!controller) {
-        return new Error(
+        throw new Error(
           `Cannot find the controller's action ${name}.${action}`
         );
       }
@@ -138,7 +138,7 @@ module.exports = {
         : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
       if (!controller) {
-        return new Error(
+        throw new Error(
           `Cannot find the controller's action ${name}.${action}`
         );
       }
