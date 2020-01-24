@@ -13,11 +13,7 @@ $ cd my-app
 $ yarn develop --watch-admin
 ```
 
-## Admin panel
-
-Strapi's admin panel and plugins system aim to be an easy and powerful way to create new features.
-
-The admin panel is a [React](https://facebook.github.io/react/) application which can embed other React applications. These other React applications are the `admin` parts of each Strapi's plugins.
+## API
 
 ### Strapi global variable
 
