@@ -14,6 +14,7 @@ import { GlobalContext } from 'strapi-helper-plugin';
 import injectSaga from '../../utils/injectSaga';
 import injectReducer from '../../utils/injectReducer';
 import OnboardingVideo from '../../components/OnboardingVideo';
+import StaticLinks from '../../components/StaticLinks';
 import Wrapper from './Wrapper';
 import {
   getVideos,
@@ -140,6 +141,7 @@ export class Onboarding extends React.Component {
               );
             })}
           </ul>
+          <StaticLinks />
         </div>
 
         <div className="openBtn">

@@ -9,7 +9,7 @@ const Wrapper = styled.div`
   bottom: 0;
   left: 0;
   overflow-y: auto;
-  height: calc(100vh - (6rem + 10.2rem));
+  height: calc(100vh - (6rem + 3rem));
   box-sizing: border-box;
 
   .title {
