@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { Collapse } from 'reactstrap';
@@ -49,6 +49,13 @@ const DraggedItem = ({
   );
   const dragRef = useRef(null);
   const dropRef = useRef(null);
+  const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setShowForm(true);
+    }
+  }, [isOpen]);
 
   const [, drop] = useDrop({
     accept: ItemTypes.COMPONENT,
@@ -175,52 +182,57 @@ const DraggedItem = ({
         }}
         ref={refs}
       />
-      <Collapse isOpen={isOpen} style={{ backgroundColor: '#FAFAFB' }}>
+      <Collapse
+        isOpen={isOpen}
+        style={{ backgroundColor: '#FAFAFB' }}
+        onExited={() => setShowForm(false)}
+      >
         {!isDragging && (
           <FormWrapper hasErrors={hasErrors} isOpen={isOpen}>
-            {fields.map((fieldRow, key) => {
-              return (
-                <div className="row" key={key}>
-                  {fieldRow.map(field => {
-                    const currentField = getField(field.name);
-                    const isComponent =
-                      get(currentField, 'type', '') === 'component';
-                    const keys = `${componentFieldName}.${field.name}`;
+            {showForm &&
+              fields.map((fieldRow, key) => {
+                return (
+                  <div className="row" key={key}>
+                    {fieldRow.map(field => {
+                      const currentField = getField(field.name);
+                      const isComponent =
+                        get(currentField, 'type', '') === 'component';
+                      const keys = `${componentFieldName}.${field.name}`;
 
-                    if (isComponent) {
-                      const componentUid = currentField.component;
-                      const metas = getMeta(field.name);
+                      if (isComponent) {
+                        const componentUid = currentField.component;
+                        const metas = getMeta(field.name);
+
+                        return (
+                          <FieldComponent
+                            componentUid={componentUid}
+                            isRepeatable={currentField.repeatable}
+                            key={field.name}
+                            label={metas.label}
+                            isNested
+                            name={keys}
+                            max={currentField.max}
+                            min={currentField.min}
+                          />
+                        );
+                      }
 
                       return (
-                        <FieldComponent
-                          componentUid={componentUid}
-                          isRepeatable={currentField.repeatable}
-                          key={field.name}
-                          label={metas.label}
-                          isNested
-                          name={keys}
-                          max={currentField.max}
-                          min={currentField.min}
-                        />
+                        <div key={field.name} className={`col-${field.size}`}>
+                          <Inputs
+                            autoFocus={false}
+                            keys={keys}
+                            layout={schema}
+                            name={field.name}
+                            onChange={() => {}}
+                            onBlur={hasErrors ? checkFormErrors : null}
+                          />
+                        </div>
                       );
-                    }
-
-                    return (
-                      <div key={field.name} className={`col-${field.size}`}>
-                        <Inputs
-                          autoFocus={false}
-                          keys={keys}
-                          layout={schema}
-                          name={field.name}
-                          onChange={() => {}}
-                          onBlur={hasErrors ? checkFormErrors : null}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
+                    })}
+                  </div>
+                );
+              })}
           </FormWrapper>
         )}
       </Collapse>
