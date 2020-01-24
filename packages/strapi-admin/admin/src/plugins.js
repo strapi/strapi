@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 const injectReducer = require('./utils/injectReducer').default;
 const useInjectReducer = require('./utils/injectReducer').useInjectReducer;
 const injectSaga = require('./utils/injectSaga').default;

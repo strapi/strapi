@@ -187,7 +187,17 @@ const reducer = (state, action) => {
     case 'REMOVE_REPEATABLE_FIELD': {
       const componentPathToRemove = ['modifiedData', ...action.keys];
 
-      return state.deleteIn(componentPathToRemove);
+      return state
+        .update('shouldCheckErrors', v => {
+          const hasErrors = state.get('formErrors').keySeq().size > 0;
+
+          if (hasErrors) {
+            return !v;
+          }
+
+          return v;
+        })
+        .deleteIn(componentPathToRemove);
     }
 
     case 'REMOVE_RELATION':
@@ -223,6 +233,16 @@ const reducer = (state, action) => {
     case 'SUBMIT_SUCCESS':
     case 'DELETE_SUCCEEDED':
       return state.update('initialData', () => state.get('modifiedData'));
+    case 'TRIGGER_FORM_VALIDATION':
+      return state.update('shouldCheckErrors', v => {
+        const hasErrors = state.get('formErrors').keySeq().size > 0;
+
+        if (hasErrors) {
+          return !v;
+        }
+
+        return v;
+      });
     default:
       return state;
   }

@@ -7,6 +7,8 @@ import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
 import IconRemove from '../../assets/images/icon_remove.svg';
 
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+
 const Relation = ({ data, mainField, onRemove, to }) => {
   return (
     <>

@@ -8,10 +8,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, snakeCase, isEmpty, map, sortBy } from 'lodash';
-
 import LeftMenuLink from '../LeftMenuLink';
 import Wrapper from './Wrapper';
 import messages from './messages.json';
+
+/* eslint-disable */
 
 function LeftMenuLinkContainer({ plugins, ...rest }) {
   // Generate the list of sections
@@ -105,6 +106,11 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
       icon: 'shopping-basket',
       label: messages.installNewPlugin.id,
       destination: '/marketplace',
+    },
+    {
+      icon: 'cog',
+      label: messages.settings.id,
+      destination: '/settings/webhooks',
     },
   ];
 

@@ -86,7 +86,7 @@ export class ListPluginsPage extends React.Component {
 ListPluginsPage.propTypes = {
   global: PropTypes.shape({
     currentEnvironment: PropTypes.string.isRequired,
-  }),
+  }).isRequired,
   getPlugins: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   intl: PropTypes.shape({

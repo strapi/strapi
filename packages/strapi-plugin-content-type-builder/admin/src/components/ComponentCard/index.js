@@ -13,6 +13,8 @@ import useDataManager from '../../hooks/useDataManager';
 import Wrapper from './Wrapper';
 import Close from './Close';
 
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+
 function ComponentCard({
   component,
   dzName,

@@ -78,6 +78,7 @@ const EditViewDataManagerProvider = ({
         get(allLayoutData, ['components', current, 'schema', 'attributes'], {}),
         allLayoutData.components
       );
+
       return acc;
     }, {});
     const contentTypeDataStructure = createDefaultForm(
@@ -176,6 +177,7 @@ const EditViewDataManagerProvider = ({
           if (dzName !== modifiedDZName) {
             acc[current] = errors[current];
           }
+
           return acc;
         }, {});
       }
@@ -411,6 +413,11 @@ const EditViewDataManagerProvider = ({
         setIsSubmitting,
         shouldShowLoadingState,
         slug,
+        triggerFormValidation: () => {
+          dispatch({
+            type: 'TRIGGER_FORM_VALIDATION',
+          });
+        },
       }}
     >
       {showLoader ? (

@@ -33,6 +33,9 @@ import Link from './link';
 import Video from './video';
 
 /* eslint-disable react/no-unused-state */
+/* eslint-disable no-new */
+/* eslint-disable consistent-return */
+/* eslint-disable react/sort-comp */
 function getBlockStyle(block) {
   switch (block.getType()) {
     case 'blockquote':
@@ -91,6 +94,7 @@ const wrapBlockSpec = blockSpec => {
   // stringify meta data and insert it as text content of temp HTML element. We will later extract
   // and parse it.
   tempEl.innerText = JSON.stringify(blockSpec);
+
   return tempEl;
 };
 
@@ -99,6 +103,7 @@ const replaceElement = (oldEl, newEl) => {
     return;
   }
   const parentNode = oldEl.parentNode;
+
   return parentNode.replaceChild(newEl, oldEl);
 };
 
@@ -120,6 +125,7 @@ const createContentBlock = (blockData = {}) => {
 
   if (inlineStyles || entityData) {
     let entityKey;
+
     if (entityData) {
       const { type, mutability, data } = entityData;
       entityKey = Entity.create(type, mutability, data);
@@ -133,6 +139,7 @@ const createContentBlock = (blockData = {}) => {
     );
     blockSpec.characterList = List(Repeat(charData, text.length));
   }
+
   return new ContentBlock(blockSpec);
 };
 

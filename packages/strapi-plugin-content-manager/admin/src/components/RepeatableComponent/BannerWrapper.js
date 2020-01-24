@@ -1,5 +1,7 @@
 import styled from 'styled-components';
 
+/* eslint-disable */
+
 const BannerWrapper = styled.button`
   display: flex;
   height: 36px;
@@ -150,7 +152,7 @@ const BannerWrapper = styled.button`
     }
 
     if (hasErrors) {
-      fill = '#FAA684';
+      fill = '#F64D0A';
       trashFill = '#F64D0A';
     }
 

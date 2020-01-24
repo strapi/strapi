@@ -16,6 +16,8 @@ import useDataManager from '../../hooks/useDataManager';
 import makeSearch from '../../utils/makeSearch';
 import Wrapper from './Wrapper';
 
+/* eslint-disable indent */
+
 const displayNotificationCTNotSaved = () => {
   strapi.notification.info(`${pluginId}.notification.info.creating.notSaved`);
 };

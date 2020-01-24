@@ -25,7 +25,7 @@ const BooleanBox = ({ label, name, onChange, options, value }) => {
               onChange={onChange}
               type="radio"
               value={option.value}
-            ></Enumeration>
+            />
           );
         })}
         {options.map(option => {

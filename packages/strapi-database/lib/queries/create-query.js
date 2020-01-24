@@ -1,11 +1,11 @@
 'use strict';
 
-module.exports = function createQuery({ connectorQuery, model }) {
-  return new Query(connectorQuery, model);
+module.exports = function createQuery(opts) {
+  return new Query(opts);
 };
 
 class Query {
-  constructor(connectorQuery, model) {
+  constructor({ model, connectorQuery }) {
     this.connectorQuery = connectorQuery;
     this.model = model;
   }
@@ -43,35 +43,35 @@ class Query {
     return mapping[this.model.orm].call(this, { model: this.model });
   }
 
-  async find(...args) {
+  find(...args) {
     return this.connectorQuery.find(...args);
   }
 
-  async findOne(...args) {
+  findOne(...args) {
     return this.connectorQuery.findOne(...args);
   }
 
-  async create(...args) {
+  create(...args) {
     return this.connectorQuery.create(...args);
   }
 
-  async update(...args) {
+  update(...args) {
     return this.connectorQuery.update(...args);
   }
 
-  async delete(...args) {
+  delete(...args) {
     return this.connectorQuery.delete(...args);
   }
 
-  async count(...args) {
+  count(...args) {
     return this.connectorQuery.count(...args);
   }
 
-  async search(...args) {
+  search(...args) {
     return this.connectorQuery.search(...args);
   }
 
-  async countSearch(...args) {
+  countSearch(...args) {
     return this.connectorQuery.countSearch(...args);
   }
 }
