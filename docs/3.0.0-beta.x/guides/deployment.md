@@ -1631,7 +1631,7 @@ In this guide we are going to:
 - configure PostgreSQL for the production enviroment
 - deploy the app to Google App Engine
   - (using Standard Environment, but Flexible would be possible and probably easier)
-- add the [Google Cloud Storage file uploading plugin](https://github.com/Lith/strapi-provider-upload-google-cloud-storage) by @Lith
+- add the [Google Cloud Storage file uploading plugin](https://github.com/Lith/strapi-provider-upload-google-cloud-storage) by [@Lith](https://github.com/Lith)
 
 ### New Strapi project
 
