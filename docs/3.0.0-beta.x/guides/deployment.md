@@ -1624,7 +1624,16 @@ Like with project updates on Heroku, the file system doesn't support local uploa
 Due to Heroku's filesystem you will need to use an upload provider such as AWS S3, Cloudinary, or Rackspace. You can view the documentation for installing providers [here](../plugins/upload.md#install-providers) and you can see a list of providers from both Strapi and the community on [npmjs.com](https://www.npmjs.com/search?q=strapi-provider-upload-&page=0&perPage=20).
 
 ## Google App Engine
-### New Strapi project (optional)
+
+In this guide we are going to:
+
+- create a new Strapi project
+- configure PostgreSQL for the production enviroment
+- deploy the app to Google App Engine
+  - (using Standard Environment, but Flexible would be possible and probably easier)
+- add the [Google Cloud Storage file uploading plugin](https://github.com/Lith/strapi-provider-upload-google-cloud-storage) by @Lith
+
+### New Strapi project
 
 ```
 yarn create strapi-app <YOUR_APP_NAME> --quickstart
@@ -1649,7 +1658,7 @@ The `sqlite` database is created at `.tmp/data.db`.
 
 Login, but don't add content types yet. Close the browser. Quit the running app.
 
-### Initial commit (optional)
+### Initial commit
 
 This may be a good point to create and empty root commit and add the files in their initial state.
 
