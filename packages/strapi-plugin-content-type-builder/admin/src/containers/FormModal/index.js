@@ -1244,7 +1244,7 @@ const FormModal = () => {
                           } else if (input.name === 'uid') {
                             value = input.value;
                           } else {
-                            value = retrievedValue;
+                            value = retrievedValue || input.value || '';
                           }
 
                           // The addon input is not present in @buffetjs so we are using the old lib
