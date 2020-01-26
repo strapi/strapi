@@ -1,0 +1,135 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders 1`] = `
+<DocumentFragment>
+  <div
+    class="sc-lhVmIH cvdvuq"
+  >
+    <div
+      class="sc-bdVaJa fgkLzW"
+    />
+    <form>
+      <div
+        class="sc-jzJRlG dRoksE"
+      >
+        <div>
+          <div
+            class="row"
+          >
+            <div
+              class="col-sm-6 header-title"
+            >
+              <div
+                class="sc-kAzzGY bmsQPa"
+              >
+                <h1 />
+              </div>
+              <p />
+            </div>
+            <div
+              class="col-sm-6 justify-content-end"
+            >
+              <div
+                class="sc-cSHVUG lhjwRj"
+              >
+                <button
+                  class="sc-bdVaJa kwkDoJ"
+                  color="primary"
+                  label="Settings.webhooks.trigger"
+                  style="padding: 0px 15px;"
+                  type="button"
+                >
+                  <span
+                    class="sc-bwzfXH kUxxJv"
+                  >
+                    <svg
+                      height="14px"
+                      viewBox="0 0 14 14"
+                      width="14px"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <g
+                        fill="none"
+                        fill-rule="evenodd"
+                        stroke="none"
+                        stroke-width="1"
+                      >
+                        <g
+                          fill="#ffffff"
+                          fill-rule="nonzero"
+                          transform="translate(-1018.000000, -100.000000)"
+                        >
+                          <g
+                            transform="translate(537.000000, 85.000000)"
+                          >
+                            <g
+                              transform="translate(461.000000, 4.000000)"
+                            >
+                              <g
+                                transform="translate(20.000000, 11.000000)"
+                              >
+                                <path
+                                  d="M5.90191898,3.63963964 L0.23880597,6.96396396 C0.173418621,7.003003 0.117270789,7.00750751 0.0703624733,6.97747748 C0.0234541578,6.94744745 0,6.89339339 0,6.81531532 L0,0.184684685 C0,0.106606607 0.0234541578,0.0525525526 0.0703624733,0.0225225225 C0.117270789,-0.00750750751 0.173418621,-0.003003003 0.23880597,0.036036036 L5.90191898,3.36036036 C5.96730633,3.3993994 6,3.44594595 6,3.5 C6,3.55405405 5.96730633,3.6006006 5.90191898,3.63963964 Z"
+                                />
+                              </g>
+                            </g>
+                          </g>
+                        </g>
+                      </g>
+                    </svg>
+                  </span>
+                  Settings.webhooks.trigger
+                </button>
+                <button
+                  class="sc-bdVaJa gILpUT"
+                  color="cancel"
+                  disabled=""
+                  label="app.components.Button.reset"
+                  style="padding: 0px 20px;"
+                  type="button"
+                >
+                  app.components.Button.reset
+                </button>
+                <button
+                  class="sc-bdVaJa icMrdU"
+                  color="success"
+                  disabled=""
+                  label="app.components.Button.save"
+                  style="min-width: 140px;"
+                  type="submit"
+                >
+                  app.components.Button.save
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="form-wrapper"
+      >
+        <div
+          class="form-card"
+        >
+          <div
+            class="row"
+          >
+            <div
+              class="col-6"
+            />
+            <div
+              class="col-12"
+            />
+            <div
+              class="col-12"
+            />
+            <div
+              class="col-12"
+            />
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</DocumentFragment>
+`;
