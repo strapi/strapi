@@ -1,7 +1,6 @@
 {
   "Analytics": "Analytics",
   "Content Manager": "Gestor de conteúdo",
-  "Content Type Builder": "Construtor de Tipo de Conteúdo",
   "Email": "Email",
   "HomePage.notification.newsLetter.success": "Subscrito à newsletter com sucesso",
   "New entry": "Nova entrada",
@@ -30,7 +29,6 @@
   "app.components.HomePage.button.quickStart": "COMEÇAR UM BREVE TUTORIAL",
   "app.components.HomePage.community": "Encontre a comunidade na web",
   "app.components.HomePage.community.content": "Converse com membros da equipe, colaboradores e desenvolvedores em diferentes canais.",
-  "app.components.HomePage.create": "Crie o seu primeiro Tipo de Conteúdo",
   "app.components.HomePage.createBlock.content.first": "A ",
   "app.components.HomePage.createBlock.content.second": " extensão irá ajudar-vos a definir a estrutura de dados de seus modelos. Se é novo aqui, nós recomendamos fortemente que você siga o nosso ",
   "app.components.HomePage.createBlock.content.tutorial": " tutorial.",
