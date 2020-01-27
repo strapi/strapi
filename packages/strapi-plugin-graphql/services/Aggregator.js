@@ -501,13 +501,25 @@ const formatModelConnectionsGQL = function(
 
   const queryName = `${pluralName}Connection(sort: String, limit: Int, start: Int, where: JSON)`;
 
+  const policiesFn = [
+    policyUtils.globalPolicy({
+      controller: name,
+      action: 'find',
+      plugin,
+    }),
+  ];
+
+  policiesFn.push(
+    policyUtils.get('plugins.users-permissions.permissions', plugin, name)
+  );
+
   return {
     globalId: connectionGlobalId,
-    type: modelConnectionTypes,
+    definition: modelConnectionTypes,
     query: {
       [queryName]: connectionGlobalId,
     },
-    resolver: {
+    resolvers: {
       Query: {
         async [`${pluralName}Connection`](obj, options, { context }) {
           // need to check
@@ -517,28 +529,6 @@ const formatModelConnectionsGQL = function(
               graphql: null,
             }),
           });
-
-          const policiesFn = [
-            policyUtils.globalPolicy({
-              controller: name,
-              action: 'find',
-              plugin,
-            }),
-          ];
-
-          try {
-            policiesFn.push(
-              policyUtils.get(
-                'plugins.users-permissions.permissions',
-                plugin,
-                name
-              )
-            );
-          } catch (error) {
-            strapi.stopWithError(
-              `Error building graphql connection "${queryName}": ${error.message}`
-            );
-          }
 
           // Execute policies stack.
           const policy = await compose(policiesFn)(ctx);
