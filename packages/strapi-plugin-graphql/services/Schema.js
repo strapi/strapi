@@ -13,6 +13,7 @@ const Query = require('./Query.js');
 const Mutation = require('./Mutation.js');
 const Types = require('./Types.js');
 const Resolvers = require('./Resolvers.js');
+const { mergeSchemas } = require('./utils');
 
 const schemaBuilder = {
   /**
@@ -158,17 +159,13 @@ const schemaBuilder = {
       }, modelCruds);
     }
 
-    const componentsSchema = {
-      definition: '',
-      resolvers: {},
-    };
-
-    Object.keys(strapi.components).forEach(key =>
-      Resolvers.buildModel(strapi.components[key], {
+    const componentSchemas = Object.values(strapi.components).map(compo => {
+      return Resolvers.buildModel(compo, {
         isComponent: true,
-        schema: componentsSchema,
-      })
-    );
+      });
+    });
+
+    mergeSchemas(shadowCRUD, ...componentSchemas);
 
     // Extract custom definition, query or resolver.
     const {
@@ -187,12 +184,7 @@ const schemaBuilder = {
     // Build resolvers.
     const resolvers =
       _.omitBy(
-        _.merge(
-          shadowCRUD.resolvers,
-          componentsSchema.resolvers,
-          resolver,
-          polymorphicResolver
-        ),
+        _.merge(shadowCRUD.resolvers, resolver, polymorphicResolver),
         _.isEmpty
       ) || {};
 
@@ -275,7 +267,6 @@ const schemaBuilder = {
     let typeDefs = `
       ${definition}
       ${shadowCRUD.definition}
-      ${componentsSchema.definition}
       type Query {${shadowCRUD.query &&
         this.formatGQL(
           shadowCRUD.query,

@@ -16,22 +16,7 @@ const Mutation = require('./Mutation.js');
 const Types = require('./Types.js');
 const Schema = require('./Schema.js');
 const { toSingular, toPlural } = require('./naming');
-
-/**
- * Merges
- */
-const mergeSubSchema = (root, ...subs) => {
-  subs.forEach(sub => {
-    const { definition = '', query = {}, mutation = {}, resolvers = {} } = sub;
-
-    root.definition += '\n' + definition;
-    _.merge(root, {
-      query,
-      mutation,
-      resolvers,
-    });
-  });
-};
+const { mergeSchemas } = require('./utils');
 
 const convertAttributes = (attributes, globalId) => {
   return Object.keys(attributes)
@@ -228,12 +213,17 @@ const buildAssocResolvers = model => {
     }, {});
 };
 
-const buildModel = (model, { schema, isComponent = false } = {}) => {
+const buildModel = (model, { isComponent = false } = {}) => {
   const { globalId, primaryKey } = model;
 
-  schema.resolvers[globalId] = {
-    id: obj => obj[primaryKey],
-    ...buildAssocResolvers(model),
+  const schema = {
+    definition: '',
+    resolvers: {
+      [globalId]: {
+        id: obj => obj[primaryKey],
+        ...buildAssocResolvers(model),
+      },
+    },
   };
 
   const initialState = {
@@ -262,6 +252,8 @@ const buildModel = (model, { schema, isComponent = false } = {}) => {
   schema.definition += Types.generateInputModel(model, globalId, {
     allowIds: isComponent,
   });
+
+  return schema;
 };
 
 /**
@@ -296,7 +288,7 @@ const buildShadowCRUD = models => {
     }
   });
 
-  mergeSubSchema(schema, ...subSchemas);
+  mergeSchemas(schema, ...subSchemas);
 
   return schema;
 };
@@ -424,7 +416,7 @@ const buildCollectionType = model => {
   ['create', 'update', 'delete'].forEach(action => {
     const mutationScheam = buildMutation({ model, action }, { _schema });
 
-    mergeSubSchema(localSchema, mutationScheam);
+    mergeSchemas(localSchema, mutationScheam);
   });
 
   // TODO: Add support for Graphql Aggregation in Bookshelf ORM
