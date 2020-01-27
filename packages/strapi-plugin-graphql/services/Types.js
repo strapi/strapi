@@ -16,6 +16,9 @@ const GraphQLLong = require('graphql-type-long');
 
 const { toSingular, toInputName } = require('./naming');
 
+const isScalarAttribute = ({ type }) =>
+  type && !['component', 'dynamiczone'].includes(type);
+
 module.exports = {
   /**
    * Convert Strapi type to GraphQL type.
@@ -27,22 +30,17 @@ module.exports = {
    */
 
   convertType({
-    definition = {},
+    attribute = {},
     modelName = '',
     attributeName = '',
     rootType = 'query',
     action = '',
   }) {
     // Type
-    if (
-      definition.type &&
-      definition.type !== 'component' &&
-      definition.type !== 'dynamiczone'
-    ) {
+    if (isScalarAttribute(attribute)) {
       let type = 'String';
 
-      switch (definition.type) {
-        // TODO: Handle fields of type Array, Perhaps default to [Int] or [String] ...
+      switch (attribute.type) {
         case 'boolean':
           type = 'Boolean';
           break;
@@ -52,10 +50,8 @@ module.exports = {
         case 'biginteger':
           type = 'Long';
           break;
-        case 'decimal':
-          type = 'Float';
-          break;
         case 'float':
+        case 'decimal':
           type = 'Float';
           break;
         case 'json':
@@ -72,21 +68,22 @@ module.exports = {
           type = 'DateTime';
           break;
         case 'enumeration':
-          type = this.convertEnumType(definition, modelName, attributeName);
+          type = this.convertEnumType(attribute, modelName, attributeName);
           break;
       }
 
-      if (definition.required && action !== 'update') {
+      if (attribute.required && action !== 'update') {
         type += '!';
       }
 
       return type;
     }
 
-    if (definition.type === 'component') {
-      const globalId = strapi.components[definition.component].globalId;
+    if (attribute.type === 'component') {
+      const { required, repeatable, component } = attribute;
 
-      const { required, repeatable } = definition;
+      const globalId = strapi.components[component].globalId;
+
       let typeName = required === true ? `${globalId}` : globalId;
 
       if (rootType === 'mutation') {
@@ -104,8 +101,8 @@ module.exports = {
       return `${typeName}`;
     }
 
-    if (definition.type === 'dynamiczone') {
-      const { required } = definition;
+    if (attribute.type === 'dynamiczone') {
+      const { required } = attribute;
 
       const unionName = `${modelName}${_.upperFirst(
         _.camelCase(attributeName)
@@ -120,15 +117,16 @@ module.exports = {
       return `[${typeName}]${required ? '!' : ''}`;
     }
 
-    const ref = definition.model || definition.collection;
+    const ref = attribute.model || attribute.collection;
 
     // Association
     if (ref && ref !== '*') {
       // Add bracket or not
-      const globalId = definition.plugin
-        ? strapi.plugins[definition.plugin].models[ref].globalId
+      const globalId = attribute.plugin
+        ? strapi.plugins[attribute.plugin].models[ref].globalId
         : strapi.models[ref].globalId;
-      const plural = !_.isEmpty(definition.collection);
+
+      const plural = !_.isEmpty(attribute.collection);
 
       if (plural) {
         if (rootType === 'mutation') {
@@ -146,10 +144,10 @@ module.exports = {
     }
 
     if (rootType === 'mutation') {
-      return definition.model ? 'ID' : '[ID]';
+      return attribute.model ? 'ID' : '[ID]';
     }
 
-    return definition.model ? 'Morph' : '[Morph]';
+    return attribute.model ? 'Morph' : '[Morph]';
   },
 
   /**
@@ -209,6 +207,7 @@ module.exports = {
 
   addPolymorphicUnionType(customDefs, defs) {
     const def = customDefs + defs;
+
     const types = graphql
       .parse(def)
       .definitions.filter(
@@ -261,11 +260,11 @@ module.exports = {
       input ${inputName} {
         
         ${Object.keys(model.attributes)
-          .map(attribute => {
-            return `${attribute}: ${this.convertType({
-              definition: model.attributes[attribute],
+          .map(attributeName => {
+            return `${attributeName}: ${this.convertType({
+              attribute: model.attributes[attributeName],
               modelName: globalId,
-              attributeName: attribute,
+              attributeName,
               rootType: 'mutation',
             })}`;
           })
@@ -275,11 +274,11 @@ module.exports = {
       input edit${inputName} {
         ${allowIds ? 'id: ID' : ''}
         ${Object.keys(model.attributes)
-          .map(attribute => {
-            return `${attribute}: ${this.convertType({
-              definition: model.attributes[attribute],
+          .map(attributeName => {
+            return `${attributeName}: ${this.convertType({
+              attribute: model.attributes[attributeName],
               modelName: globalId,
-              attributeName: attribute,
+              attributeName,
               rootType: 'mutation',
               action: 'update',
             })}`;

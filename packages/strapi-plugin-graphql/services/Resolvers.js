@@ -18,18 +18,53 @@ const Schema = require('./Schema.js');
 const { toSingular, toPlural } = require('./naming');
 const { mergeSchemas } = require('./utils');
 
-const convertAttributes = (attributes, globalId) => {
-  return Object.keys(attributes)
-    .filter(attribute => attributes[attribute].private !== true)
-    .reduce((acc, attribute) => {
+const isQueryEnabled = (schema, name) => {
+  return _.get(schema, ['resolver', 'Query', name]) !== false;
+};
+
+const isMutationEnabled = (schema, name) => {
+  return _.get(schema, ['resolver', 'Mutation', name]) !== false;
+};
+
+const buildTypeDefObj = model => {
+  const { associations = [], attributes, primaryKey, globalId } = model;
+
+  const typeDef = {
+    id: 'ID!',
+    [primaryKey]: 'ID!',
+  };
+
+  // Add timestamps attributes.
+  if (_.isArray(_.get(model, 'options.timestamps'))) {
+    const [createdAtKey, updatedAtKey] = model.options.timestamps;
+    typeDef[createdAtKey] = 'DateTime!';
+    typeDef[updatedAtKey] = 'DateTime!';
+  }
+
+  Object.keys(attributes)
+    .filter(attributeName => attributes[attributeName].private !== true)
+    .forEach(attributeName => {
+      const attribute = attributes[attributeName];
       // Convert our type to the GraphQL type.
-      acc[attribute] = Types.convertType({
-        definition: attributes[attribute],
+      typeDef[attributeName] = Types.convertType({
+        attribute,
         modelName: globalId,
-        attributeName: attribute,
+        attributeName,
       });
-      return acc;
-    }, {});
+    });
+
+  // Change field definition for collection relations
+  associations
+    .filter(association => association.type === 'collection')
+    .forEach(association => {
+      typeDef[
+        `${association.alias}(sort: String, limit: Int, start: Int, where: JSON)`
+      ] = typeDef[association.alias];
+
+      delete typeDef[association.alias];
+    });
+
+  return typeDef;
 };
 
 const generateEnumDefinitions = (attributes, globalId) => {
@@ -94,18 +129,6 @@ const generateDynamicZoneDefinitions = (attributes, globalId, schema) => {
         globalId,
         components,
       });
-    });
-};
-
-const mutateAssocAttributes = (associations = [], attributes) => {
-  associations
-    .filter(association => association.type === 'collection')
-    .forEach(association => {
-      attributes[
-        `${association.alias}(sort: String, limit: Int, start: Int, where: JSON)`
-      ] = attributes[association.alias];
-
-      delete attributes[association.alias];
     });
 };
 
@@ -213,7 +236,7 @@ const buildAssocResolvers = model => {
     }, {});
 };
 
-const buildModel = (model, { isComponent = false } = {}) => {
+const buildComponent = model => {
   const { globalId, primaryKey } = model;
 
   const schema = {
@@ -226,31 +249,18 @@ const buildModel = (model, { isComponent = false } = {}) => {
     },
   };
 
-  const initialState = {
-    id: 'ID!',
-    [primaryKey]: 'ID!',
-  };
-
-  if (_.isArray(_.get(model, 'options.timestamps'))) {
-    const [createdAtKey, updatedAtKey] = model.options.timestamps;
-    initialState[createdAtKey] = 'DateTime!';
-    initialState[updatedAtKey] = 'DateTime!';
-  }
-
-  const attributes = convertAttributes(model.attributes, globalId);
-  mutateAssocAttributes(model.associations, attributes);
-  _.merge(attributes, initialState);
+  const typeDefObj = buildTypeDefObj(model);
 
   schema.definition += generateEnumDefinitions(model.attributes, globalId);
   generateDynamicZoneDefinitions(model.attributes, globalId, schema);
 
   const description = Schema.getDescription({}, model);
-  const fields = Schema.formatGQL(attributes, {}, model);
+  const fields = Schema.formatGQL(typeDefObj, {}, model);
   const typeDef = `${description}type ${globalId} {${fields}}\n`;
 
   schema.definition += typeDef;
   schema.definition += Types.generateInputModel(model, globalId, {
-    allowIds: isComponent,
+    allowIds: true,
   });
 
   return schema;
@@ -294,7 +304,7 @@ const buildShadowCRUD = models => {
 };
 
 const buildCollectionType = model => {
-  const { globalId, primaryKey, plugin, modelName } = model;
+  const { globalId, plugin, modelName } = model;
 
   const singularName = toSingular(modelName);
   const pluralName = toPlural(modelName);
@@ -303,60 +313,41 @@ const buildCollectionType = model => {
     _.get(strapi.plugins, 'graphql.config._schema.graphql', {})
   );
 
-  const { type = {}, resolver = {} } = _schema;
+  const globalType = _.get(_schema, ['type', model.globalId], {});
 
   const localSchema = {
     definition: '',
     query: {},
     mutation: {},
-    resolvers: { Query: {}, Mutation: {} },
-  };
-
-  // Setup initial state with default attribute that should be displayed
-  // but these attributes are not properly defined in the models.
-  const initialState = {
-    [primaryKey]: 'ID!',
-    id: 'ID!',
-  };
-
-  localSchema.resolvers[globalId] = {
-    // define the default id resolver
-    id(parent) {
-      return parent[model.primaryKey] || parent.id;
+    resolvers: {
+      Query: {},
+      Mutation: {},
+      // define default resolver for this model
+      [globalId]: {
+        id: parent => parent[model.primaryKey] || parent.id,
+        ...buildAssocResolvers(model),
+      },
     },
   };
 
-  // Add timestamps attributes.
-  if (_.isArray(_.get(model, 'options.timestamps'))) {
-    const [createdAtKey, updatedAtKey] = model.options.timestamps;
-    initialState[createdAtKey] = 'DateTime!';
-    initialState[updatedAtKey] = 'DateTime!';
-  }
-
-  // Convert our layer Model to the GraphQL DL.
-  const attributes = convertAttributes(model.attributes, globalId);
-  mutateAssocAttributes(model.associations, attributes);
-  _.merge(attributes, initialState);
+  const typeDefObj = buildTypeDefObj(model);
 
   localSchema.definition += generateEnumDefinitions(model.attributes, globalId);
   generateDynamicZoneDefinitions(model.attributes, globalId, localSchema);
 
-  const description = Schema.getDescription(type[globalId], model);
-  const fields = Schema.formatGQL(attributes, type[globalId], model);
+  const description = Schema.getDescription(globalType, model);
+  const fields = Schema.formatGQL(typeDefObj, globalType, model);
   const typeDef = `${description}type ${globalId} {${fields}}\n`;
 
   localSchema.definition += typeDef;
 
   // Add definition to the schema but this type won't be "queriable" or "mutable".
-  if (
-    type[model.globalId] === false ||
-    _.get(type, `${model.globalId}.enabled`) === false
-  ) {
+  if (globalType === false) {
     return localSchema;
   }
 
   const buildFindOneQuery = () => {
-    return _.get(resolver, `Query.${singularName}`) !== false
+    return isQueryEnabled(_schema, singularName)
       ? Query.composeQueryResolver({
           _schema,
           plugin,
@@ -367,7 +358,7 @@ const buildCollectionType = model => {
   };
 
   const buildFindQuery = () => {
-    return _.get(resolver, `Query.${pluralName}`) !== false
+    return isQueryEnabled(_schema, pluralName)
       ? Query.composeQueryResolver({
           _schema,
           plugin,
@@ -423,7 +414,7 @@ const buildCollectionType = model => {
   if (model.orm === 'mongoose') {
     // Generation the aggregation for the given model
     const modelAggregator = Aggregator.formatModelConnectionsGQL(
-      attributes,
+      typeDefObj,
       model,
       modelName,
       queries.plural,
@@ -441,8 +432,6 @@ const buildCollectionType = model => {
     }
   }
 
-  // Build associations queries.
-  _.assign(localSchema.resolvers[globalId], buildAssocResolvers(model));
   return localSchema;
 };
 
@@ -461,7 +450,7 @@ const buildMutation = ({ model, action }, { _schema }) => {
   });
 
   // ignore if disabled
-  if (_.get(_schema, ['resolver', 'Mutation', mutationName]) === false) {
+  if (!isMutationEnabled(_schema, mutationName)) {
     return {
       definition,
     };
@@ -489,5 +478,5 @@ const buildMutation = ({ model, action }, { _schema }) => {
 
 module.exports = {
   buildShadowCRUD,
-  buildModel,
+  buildComponent,
 };

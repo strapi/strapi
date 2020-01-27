@@ -109,13 +109,10 @@ const schemaBuilder = {
    * @return String
    */
 
-  getDescription: (description, model = {}) => {
+  getDescription: (type, model = {}) => {
     const format = '"""\n';
 
-    const str =
-      _.get(description, '_description') || _.isString(description)
-        ? description
-        : undefined || _.get(model, 'info.description');
+    const str = _.get(type, '_description') || _.get(model, 'info.description');
 
     if (str) {
       return `${format}${str}\n${format}`;
@@ -159,11 +156,9 @@ const schemaBuilder = {
       }, modelCruds);
     }
 
-    const componentSchemas = Object.values(strapi.components).map(compo => {
-      return Resolvers.buildModel(compo, {
-        isComponent: true,
-      });
-    });
+    const componentSchemas = Object.values(strapi.components).map(compo =>
+      Resolvers.buildComponent(compo)
+    );
 
     mergeSchemas(shadowCRUD, ...componentSchemas);
 
