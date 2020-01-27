@@ -28,6 +28,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "lodash": "^4.17.11",
     "verror": "^1.10.0"
   }
 }

@@ -49,6 +49,7 @@ const LeftMenuSubList = ({
           <ul>
             {links.map(link => {
               const { name, title } = link;
+
               return (
                 <li key={name}>
                   <LeftMenuLink {...link}>{title}</LeftMenuLink>
