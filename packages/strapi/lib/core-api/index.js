@@ -18,10 +18,7 @@ function createCoreApi({ api, model }) {
   const userService = _.get(api, ['services', modelName], {});
   const userController = _.get(api, ['controllers', modelName], {});
 
-  const service = Object.assign(
-    createService({ model: modelName, strapi }),
-    userService
-  );
+  const service = Object.assign(createService({ model, strapi }), userService);
 
   const controller = Object.assign(
     createController({ service, model }),

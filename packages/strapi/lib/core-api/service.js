@@ -6,17 +6,22 @@
  */
 
 module.exports = ({ model, strapi }) => {
+  const { modelName } = model;
+
   if (model.kind === 'singleType') {
     return {
       find(populate) {
-        return strapi.entityService.find({ populate }, { model });
+        return strapi.entityService.find({ populate }, { model: modelName });
       },
 
       async createOrUpdate(data, { files } = {}) {
         const entity = await this.find();
 
         if (!entity) {
-          return strapi.entityService.create({ data, files }, { model });
+          return strapi.entityService.create(
+            { data, files },
+            { model: modelName }
+          );
         } else {
           return strapi.entityService.update(
             {
@@ -26,7 +31,7 @@ module.exports = ({ model, strapi }) => {
               data,
               files,
             },
-            { model }
+            { model: modelName }
           );
         }
       },
@@ -38,7 +43,7 @@ module.exports = ({ model, strapi }) => {
 
         return strapi.entityService.delete(
           { params: { id: entity.id } },
-          { model }
+          { model: modelName }
         );
       },
     };
@@ -51,7 +56,10 @@ module.exports = ({ model, strapi }) => {
      * @return {Promise}
      */
     find(params, populate) {
-      return strapi.entityService.find({ params, populate }, { model });
+      return strapi.entityService.find(
+        { params, populate },
+        { model: modelName }
+      );
     },
 
     /**
@@ -61,7 +69,10 @@ module.exports = ({ model, strapi }) => {
      */
 
     findOne(params, populate) {
-      return strapi.entityService.findOne({ params, populate }, { model });
+      return strapi.entityService.findOne(
+        { params, populate },
+        { model: modelName }
+      );
     },
 
     /**
@@ -71,7 +82,7 @@ module.exports = ({ model, strapi }) => {
      */
 
     count(params) {
-      return strapi.entityService.count({ params }, { model });
+      return strapi.entityService.count({ params }, { model: modelName });
     },
 
     /**
@@ -81,7 +92,7 @@ module.exports = ({ model, strapi }) => {
      */
 
     create(data, { files } = {}) {
-      return strapi.entityService.create({ data, files }, { model });
+      return strapi.entityService.create({ data, files }, { model: modelName });
     },
 
     /**
@@ -91,7 +102,10 @@ module.exports = ({ model, strapi }) => {
      */
 
     update(params, data, { files } = {}) {
-      return strapi.entityService.update({ params, data, files }, { model });
+      return strapi.entityService.update(
+        { params, data, files },
+        { model: modelName }
+      );
     },
 
     /**
@@ -101,7 +115,7 @@ module.exports = ({ model, strapi }) => {
      */
 
     delete(params) {
-      return strapi.entityService.delete({ params }, { model });
+      return strapi.entityService.delete({ params }, { model: modelName });
     },
 
     /**
@@ -111,7 +125,7 @@ module.exports = ({ model, strapi }) => {
      */
 
     search(params) {
-      return strapi.entityService.search({ params }, { model });
+      return strapi.entityService.search({ params }, { model: modelName });
     },
 
     /**
@@ -120,7 +134,7 @@ module.exports = ({ model, strapi }) => {
      * @return {Promise}
      */
     countSearch(params) {
-      return strapi.entityService.countSearch({ params }, { model });
+      return strapi.entityService.countSearch({ params }, { model: modelName });
     },
   };
 };

@@ -288,11 +288,8 @@ const buildShadowCRUD = models => {
     const { kind } = model;
 
     switch (kind) {
-      case 'singleType': {
-        // const type = buildSingleType(model);
-        // mergeSubSchema(type, schema);
-        break;
-      }
+      case 'singleType':
+        return buildSingleType(model);
       default:
         return buildCollectionType(model);
     }
@@ -301,6 +298,81 @@ const buildShadowCRUD = models => {
   mergeSchemas(schema, ...subSchemas);
 
   return schema;
+};
+
+const buildSingleType = model => {
+  const { globalId, plugin, modelName } = model;
+
+  const singularName = toSingular(modelName);
+
+  const _schema = _.cloneDeep(
+    _.get(strapi.plugins, 'graphql.config._schema.graphql', {})
+  );
+
+  const globalType = _.get(_schema, ['type', model.globalId], {});
+
+  const localSchema = {
+    definition: '',
+    query: {},
+    mutation: {},
+    resolvers: {
+      Query: {},
+      Mutation: {},
+      // define default resolver for this model
+      [globalId]: {
+        id: parent => parent[model.primaryKey] || parent.id,
+        ...buildAssocResolvers(model),
+      },
+    },
+  };
+
+  const typeDefObj = buildTypeDefObj(model);
+
+  localSchema.definition += generateEnumDefinitions(model.attributes, globalId);
+  generateDynamicZoneDefinitions(model.attributes, globalId, localSchema);
+
+  const description = Schema.getDescription(globalType, model);
+  const fields = Schema.formatGQL(typeDefObj, globalType, model);
+  const typeDef = `${description}type ${globalId} {${fields}}\n`;
+
+  localSchema.definition += typeDef;
+
+  // Add definition to the schema but this type won't be "queriable" or "mutable".
+  if (globalType === false) {
+    return localSchema;
+  }
+
+  if (isQueryEnabled(_schema, singularName)) {
+    const query = Query.composeQueryResolver({
+      _schema,
+      plugin,
+      name: singularName,
+    });
+
+    _.merge(localSchema, {
+      query: {
+        // TODO: support all the unique fields
+        [singularName]: model.globalId,
+      },
+      resolvers: {
+        Query: {
+          [singularName]: query,
+        },
+      },
+    });
+  }
+
+  // Add model Input definition.
+  localSchema.definition += Types.generateInputModel(model, modelName);
+
+  // build every mutation
+  ['update', 'delete'].forEach(action => {
+    const mutationScheam = buildMutation({ model, action }, { _schema });
+
+    mergeSchemas(localSchema, mutationScheam);
+  });
+
+  return localSchema;
 };
 
 const buildCollectionType = model => {
