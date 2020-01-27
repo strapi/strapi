@@ -166,6 +166,7 @@ If you're using SQL databases, you should use the native SQL constraints to appl
 - `index` (boolean) — adds an index on this property, this will create a [single field index](https://docs.mongodb.com/manual/indexes/#single-field) that will run in the background (_only supported by MongoDB_).
 - `max` (integer) — checks if the value is greater than or equal to the given minimum.
 - `min` (integer) — checks if the value is less than or equal to the given maximum.
+- `step` (integer) — for time and datetime content types defines step in minutes (value must be divisable by 60).
 
 **Security validations**
 To improve the Developer eXperience when developing or using the administration panel, the framework enhances the attributes with these "security validations":

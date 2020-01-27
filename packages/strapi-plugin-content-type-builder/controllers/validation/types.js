@@ -127,13 +127,20 @@ const getTypeShape = (attribute, { modelType } = {}) => {
         max: yup.number(),
       };
     }
-    case 'time':
-    case 'datetime':
     case 'date': {
       return {
         default: yup.string(),
         required: validators.required,
         unique: validators.unique,
+      };
+    }
+    case 'time':
+    case 'datetime': {
+      return {
+        default: yup.string(),
+        required: validators.required,
+        unique: validators.unique,
+        step: yup.number(),
       };
     }
     case 'boolean': {

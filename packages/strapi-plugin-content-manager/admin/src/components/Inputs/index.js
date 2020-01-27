@@ -115,7 +115,9 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
 
   let step;
 
-  if (type === 'float' || type === 'decimal') {
+  if (type === 'datetime' || type === 'time') {
+    step = attribute.step;
+  } else if (type === 'float' || type === 'decimal') {
     step = 'any';
   } else {
     step = '1';

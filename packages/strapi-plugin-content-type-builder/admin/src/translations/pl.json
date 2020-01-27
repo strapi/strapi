@@ -19,6 +19,7 @@
   "form.attribute.item.maximumLength": "Maksymalna długość",
   "form.attribute.item.minimum": "Minimalna wartość",
   "form.attribute.item.minimumLength": "Minimalna długość",
+  "form.attribute.item.timestep": "Podziałka wyboru czasu (minuty)",
   "form.attribute.item.number.type": "Forma",
   "form.attribute.item.number.type.decimal": "dziesiętna (np: 2.22)",
   "form.attribute.item.number.type.float": "zmiennoprzecinkowa (np: 3.33333333)",

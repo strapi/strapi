@@ -476,6 +476,10 @@ const forms = {
               disabled: data.type !== 'date',
             },
           ]);
+
+          if (data.type === 'datetime' || data.type === 'time') {
+            items.splice(1, 0, [fields.step]);
+          }
         }
 
         if (!ATTRIBUTES_THAT_DONT_HAVE_MIN_MAX_SETTINGS.includes(type)) {

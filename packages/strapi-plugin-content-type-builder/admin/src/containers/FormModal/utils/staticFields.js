@@ -56,6 +56,17 @@ const fields = {
     },
     validations: {},
   },
+  step: {
+    autoFocus: false,
+    name: 'step',
+    type: 'select',
+    label: {
+      id: getTrad('form.attribute.item.timestep'),
+    },
+    options: [60, 30, 20, 15, 10, 5, 1],
+    value: 30,
+    validations: {},
+  },
   name: {
     autoFocus: true,
     name: 'name',

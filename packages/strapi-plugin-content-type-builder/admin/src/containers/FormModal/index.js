@@ -533,6 +533,9 @@ const FormModal = () => {
       // We store an array for the enum
     } else if (name === 'enum') {
       val = value.split('\n');
+    } else if (name === 'step') {
+      // step accepts number enum values
+      val = +value.split('\n');
     } else {
       val = value;
     }
