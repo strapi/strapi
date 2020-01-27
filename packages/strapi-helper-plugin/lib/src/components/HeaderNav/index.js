@@ -38,8 +38,6 @@ function HeaderNav({ links, style }) {
             onClick={e => {
               if (link.disabled) {
                 e.preventDefault();
-
-                return;
               }
             }}
           >
