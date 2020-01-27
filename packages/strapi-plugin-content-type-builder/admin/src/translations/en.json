@@ -112,8 +112,11 @@
   "menu.section.components.name.singular": "Component",
   "menu.section.models.name.plural": "Collection Types",
   "menu.section.models.name.singular": "Collection Type",
+<<<<<<< HEAD
   "menu.section.single-types.name.plural": "Single Types",
   "menu.section.single-types.name.singular": "Single Type",
+=======
+>>>>>>> Update all translations
   "modalForm.attribute.form.base.name": "Name",
   "modalForm.attribute.form.base.name.description": "No space is allowed for the name of the attribute",
   "modalForm.attribute.text.type-selection": "Type",
@@ -123,7 +126,10 @@
   "modalForm.components.create-component.category.label": "Select a category or enter a name to create a new one",
   "modalForm.components.icon.label": "Icon",
   "modalForm.contentType.header-create": "Create a collection type",
+<<<<<<< HEAD
   "modalForm.singleType.header-create": "Create a single type",
+=======
+>>>>>>> Update all translations
   "modalForm.editCategory.base.name.description": "No space is allowed for the name of the category",
   "modalForm.header-edit": "Edit {name}",
   "modalForm.header.categories": "Categories",

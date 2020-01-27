@@ -11,7 +11,7 @@
   "attribute.text": "Texte",
   "button.attributes.add.another": "Ajouter un autre champ",
   "button.component.create": "Créer un composant",
-  "button.model.create": "Créer un type de collection",
+  "button.model.create": "Créer une collection",
   "form.attribute.item.customColumnName": "Nom de colonne personalisée",
   "form.attribute.item.customColumnName.description": "Pratique pour renommer la colonne de la db dans un format plus comprehensible pour les responses de l'API",
   "form.attribute.item.defineRelation.fieldName": "Nom du Champ",
