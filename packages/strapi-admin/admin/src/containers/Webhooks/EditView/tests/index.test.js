@@ -5,34 +5,38 @@ import { createMemoryHistory } from 'history';
 import { GlobalContextProvider } from 'strapi-helper-plugin';
 import { IntlProvider } from 'react-intl';
 
+import { translationMessages } from '../../../../i18n';
+
 import EditView from '../index';
 
 const history = createMemoryHistory();
 
-afterEach(cleanup);
+describe('Admin | containers | EditView', () => {
+  afterEach(cleanup);
 
-it('renders', () => {
-  const intlProvider = new IntlProvider(
-    {
-      locale: 'en',
-      formatMessage: jest.fn(),
-    },
-    {}
-  );
-  const { intl: originalIntl } = intlProvider.getChildContext();
+  it('should render EditView', () => {
+    const intlProvider = new IntlProvider(
+      {
+        locale: 'en',
+        messages: translationMessages.en,
+      },
+      {}
+    );
+    const { intl: originalIntl } = intlProvider.getChildContext();
 
-  const { asFragment } = render(
-    <IntlProvider locale="en" message={{}}>
-      <GlobalContextProvider formatMessage={originalIntl.formatMessage}>
-        <Router history={history}>
-          <Switch>
-            <Route>
-              <EditView />
-            </Route>
-          </Switch>
-        </Router>
-      </GlobalContextProvider>
-    </IntlProvider>
-  );
-  expect(asFragment()).toMatchSnapshot();
+    const { asFragment } = render(
+      <IntlProvider locale={intlProvider.locale}>
+        <GlobalContextProvider formatMessage={originalIntl.formatMessage}>
+          <Router history={history}>
+            <Switch>
+              <Route>
+                <EditView />
+              </Route>
+            </Switch>
+          </Router>
+        </GlobalContextProvider>
+      </IntlProvider>
+    );
+    expect(asFragment()).toMatchSnapshot();
+  });
 });
