@@ -205,11 +205,9 @@ module.exports = {
    * @return string
    */
 
-  addPolymorphicUnionType(customDefs, defs) {
-    const def = customDefs + defs;
-
+  addPolymorphicUnionType(definition) {
     const types = graphql
-      .parse(def)
+      .parse(definition)
       .definitions.filter(
         def => def.kind === 'ObjectTypeDefinition' && def.name.value !== 'Query'
       )
@@ -217,8 +215,8 @@ module.exports = {
 
     if (types.length > 0) {
       return {
-        polymorphicDef: `union Morph = ${types.join(' | ')}`,
-        polymorphicResolver: {
+        definition: `union Morph = ${types.join(' | ')}`,
+        resolvers: {
           Morph: {
             __resolveType(obj) {
               return obj.kind || obj.__contentType || null;
@@ -229,8 +227,8 @@ module.exports = {
     }
 
     return {
-      polymorphicDef: '',
-      polymorphicResolver: {},
+      definition: '',
+      resolvers: {},
     };
   },
 

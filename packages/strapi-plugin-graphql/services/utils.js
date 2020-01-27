@@ -19,6 +19,14 @@ const mergeSchemas = (root, ...subs) => {
   });
 };
 
+const createDefaultSchema = () => ({
+  definition: '',
+  query: '',
+  mutation: '',
+  resolvers: {},
+});
+
 module.exports = {
   mergeSchemas,
+  createDefaultSchema,
 };
