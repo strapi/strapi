@@ -98,15 +98,16 @@ function EditView() {
   const headerTitle = isCreating
     ? formatMessage({
       id: 'Settings.webhooks.create',
+      defaultMessage: 'Create a new Webhook',
     })
     : name;
-
   const headersActions = [
     {
       color: 'primary',
       disabled: isTriggerActionDisabled,
       label: formatMessage({
         id: 'Settings.webhooks.trigger',
+        defaultMessage: 'Trigger',
       }),
       onClick: () => handleTrigger(),
       style: {
@@ -115,6 +116,7 @@ function EditView() {
       title: isTriggerActionDisabled
         ? formatMessage({
           id: 'Settings.webhooks.trigger.save',
+          defaultMessage: 'Save before trigger',
         })
         : null,
       type: 'button',
@@ -131,6 +133,7 @@ function EditView() {
       disabled: areActionDisabled,
       label: formatMessage({
         id: 'app.components.Button.reset',
+        defaultMessage: 'Reset',
       }),
       onClick: () => handleReset(),
       style: {
@@ -143,6 +146,7 @@ function EditView() {
       disabled: areActionDisabled,
       label: formatMessage({
         id: 'app.components.Button.save',
+        defaultMessage: 'Save',
       }),
       style: {
         minWidth: 140,
@@ -209,6 +213,7 @@ function EditView() {
 
     return formatMessage({
       id: error.id,
+      defaultMessage: 'error',
     });
   };
 
@@ -386,6 +391,7 @@ function EditView() {
                       }}
                       label={formatMessage({
                         id: form[key].label,
+                        defaultMessage: form[key].label,
                       })}
                       error={getErrorMessage(get(formErrors, key, null))}
                       name={key}

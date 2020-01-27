@@ -1,10 +1,18 @@
 import React from 'react';
+import { Router, Route, Switch } from 'react-router-dom';
 import { shallow } from 'enzyme';
 import CreatableSelect from 'react-select/creatable';
-
+import { render, cleanup } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import { InputText } from '@buffetjs/core';
-import { CircleButton } from 'strapi-helper-plugin';
+import { CircleButton, GlobalContextProvider } from 'strapi-helper-plugin';
+import { IntlProvider } from 'react-intl';
+
+import { translationMessages } from '../../../i18n';
+
 import HeadersInput from '../index';
+
+const history = createMemoryHistory();
 
 describe('Admin | components | HeadersInput', () => {
   const props = {
@@ -19,9 +27,36 @@ describe('Admin | components | HeadersInput', () => {
     onClick: jest.fn(),
     onRemove: jest.fn(),
   };
-  describe('Render', () => {
+  describe('should render properly', () => {
+    afterEach(cleanup);
     it('It should not crash', () => {
       shallow(<HeadersInput {...props} />);
+    });
+
+    it('render component', () => {
+      const intlProvider = new IntlProvider(
+        {
+          locale: 'en',
+          messages: translationMessages.en,
+        },
+        {}
+      );
+      const { intl: originalIntl } = intlProvider.getChildContext();
+
+      const { asFragment } = render(
+        <IntlProvider locale={intlProvider.locale}>
+          <GlobalContextProvider formatMessage={originalIntl.formatMessage}>
+            <Router history={history}>
+              <Switch>
+                <Route>
+                  <HeadersInput {...props} />
+                </Route>
+              </Switch>
+            </Router>
+          </GlobalContextProvider>
+        </IntlProvider>
+      );
+      expect(asFragment()).toMatchSnapshot();
     });
 
     it('It should render as many key/value rows as value', () => {
