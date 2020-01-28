@@ -93,5 +93,36 @@ describe('Content Type Builder - Content types', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchSnapshot();
     });
+
+    test('Fails on invalid relations', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/content-type-builder/content-types',
+        body: {
+          contentType: {
+            kind: 'singleType',
+            name: 'test-st',
+            attributes: {
+              relation: {
+                nature: 'oneToOne',
+                target: 'plugins::users-permissions.user',
+                targetAttribute: 'test',
+              },
+            },
+          },
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toMatchObject({
+        error: {
+          ['contentType.attributes.relation.nature']: expect.arrayContaining([
+            expect.stringMatching(
+              'must be one of the following values: oneWay, manyWay'
+            ),
+          ]),
+        },
+      });
+    });
   });
 });

@@ -346,7 +346,7 @@ const buildSingleType = model => {
     const query = Query.composeQueryResolver({
       _schema,
       plugin,
-      name: singularName,
+      name: modelName,
     });
 
     _.merge(localSchema, {
