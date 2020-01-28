@@ -7,19 +7,22 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { map } from 'lodash';
-
-// modal
-import { Button } from 'reactstrap';
+import { Button } from '@buffetjs/core';
 import { FormattedMessage } from 'react-intl';
+
 import IcoDanger from '../../assets/icons/icon_danger.svg';
 import IcoNotFound from '../../assets/icons/icon_flag_not_found.svg';
 import IcoInfo from '../../assets/icons/icon_info.svg';
 import IcoSuccess from '../../assets/icons/icon_success.svg';
 import IcoWarning from '../../assets/icons/icon_warning.svg';
+
+import CloseButton from './CloseButton';
 import StyledModal from './StyledModal';
 import StyledHeader from './StyledHeader';
 import StyledBody from './StyledBody';
 import Wrapper from './Wrapper';
+
+import Close from '../../svgs/Close';
 
 const icons = {
   danger: IcoDanger,
@@ -39,24 +42,20 @@ function PopUpWarning({
 }) {
   const buttons = [
     {
-      className: 'secondary',
-      id: 'ctaCancel',
+      color: 'cancel',
       handleClick: toggleModal,
       message: content.cancel || 'components.popUpWarning.button.cancel',
-      style: {},
     },
     {
-      className: 'primary',
-      id: 'ctaConfirm',
+      color: 'delete',
       handleClick: onConfirm,
       message: content.confirm || 'components.popUpWarning.button.confirm',
-      style: {},
     },
   ];
+
   const singleButton = [
     {
-      className: 'primary',
-      id: 'ctaConfirm',
+      color: 'delete',
       handleClick: onConfirm,
       message: content.confirm || 'components.popUpWarning.button.confirm',
       style: { width: '100%' },
@@ -67,6 +66,9 @@ function PopUpWarning({
   return (
     <Wrapper>
       <StyledModal isOpen={isOpen} toggle={toggleModal}>
+        <CloseButton onClick={toggleModal}>
+          <Close fill="#c3c5c8" />
+        </CloseButton>
         <StyledHeader toggle={toggleModal}>
           <FormattedMessage
             id={content.title || 'components.popUpWarning.title'}
@@ -75,27 +77,21 @@ function PopUpWarning({
         <StyledBody>
           <div className="modalBodyContainerHelper">
             <img src={icons[popUpWarningType]} alt="icon" />
-            <FormattedMessage
-              id={content.message || 'components.popUpWarning.message'}
-            >
-              {message => <p>{message}</p>}
-            </FormattedMessage>
+            <p>
+              <FormattedMessage
+                id={content.message || 'components.popUpWarning.message'}
+              />
+            </p>
           </div>
           <div className="popUpWarningButtonContainer">
-            {map(footerButtons, button => (
-              <FormattedMessage id={button.message} key={button.id}>
-                {message => (
-                  <Button
-                    onClick={button.handleClick}
-                    className={button.className}
-                    id={button.id}
-                    style={button.style}
-                  >
-                    {message}
-                  </Button>
-                )}
-              </FormattedMessage>
-            ))}
+            {map(footerButtons, button => {
+              const { message, handleClick, ...rest } = button;
+              return (
+                <Button key={message} onClick={handleClick} {...rest}>
+                  <FormattedMessage id={message} />
+                </Button>
+              );
+            })}
           </div>
         </StyledBody>
       </StyledModal>
