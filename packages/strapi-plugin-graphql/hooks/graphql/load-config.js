@@ -1,3 +1,4 @@
+// eslint-disable-next-line node/no-extraneous-require
 const loadUtils = require('strapi/lib/load');
 const _ = require('lodash');
 

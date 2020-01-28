@@ -20,6 +20,8 @@ import reducer from './reducer';
 import saga from './saga';
 import selectConfigPage from './selectors';
 
+/* eslint-disable */
+
 class ConfigPage extends React.Component {
   static contextType = GlobalContext;
 

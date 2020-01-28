@@ -28,6 +28,8 @@ import List from '../../components/List';
 import PluginInputFile from '../../components/PluginInputFile';
 import { EntriesWrapper, Wrapper } from './components';
 
+/* eslint-disable */
+
 import {
   changeParams,
   deleteData,

@@ -78,7 +78,6 @@ module.exports = function(strapi) {
         redis.on('error', err => {
           strapi.log.error(err);
           process.exit(0);
-          return;
         });
 
         // Utils function.
