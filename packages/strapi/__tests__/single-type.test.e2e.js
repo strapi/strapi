@@ -26,14 +26,7 @@ describe('Content Manager single types', () => {
     });
   }, 60000);
 
-  afterAll(async () => {
-    await rq({
-      url: `/content-manager/explorer/${uid}`,
-      method: 'DELETE',
-    });
-
-    await modelsUtils.deleteContentType('single-type');
-  }, 60000);
+  afterAll(() => modelsUtils.deleteContentType('single-type'), 60000);
 
   test('find single type content returns 404 when not created', async () => {
     const res = await rq({

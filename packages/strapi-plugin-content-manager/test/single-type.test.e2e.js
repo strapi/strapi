@@ -5,7 +5,7 @@ const { createAuthRequest } = require('../../../test/helpers/request');
 
 let modelsUtils;
 let rq;
-let uid = 'application::single-type.single-type';
+let uid = 'application::single-type-model.single-type-model';
 
 describe('Content Manager single types', () => {
   beforeAll(async () => {
@@ -16,7 +16,7 @@ describe('Content Manager single types', () => {
 
     await modelsUtils.createContentType({
       kind: 'singleType',
-      name: 'single-type',
+      name: 'single-type-model',
       attributes: {
         title: {
           type: 'string',
@@ -25,14 +25,7 @@ describe('Content Manager single types', () => {
     });
   }, 60000);
 
-  afterAll(async () => {
-    await rq({
-      url: `/content-manager/explorer/${uid}`,
-      method: 'DELETE',
-    });
-
-    await modelsUtils.deleteContentType('single-type');
-  }, 60000);
+  afterAll(() => modelsUtils.deleteContentType('single-type'), 60000);
 
   test('find single type content returns 404 when not created', async () => {
     const res = await rq({

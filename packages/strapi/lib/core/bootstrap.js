@@ -78,7 +78,7 @@ module.exports = function(strapi) {
 
       strapi.contentTypes[model.uid] = model;
 
-      const { service, controller } = createCoreApi({ model, api });
+      const { service, controller } = createCoreApi({ model, api, strapi });
 
       _.set(strapi.api[apiName], ['services', modelName], service);
       _.set(strapi.api[apiName], ['controllers', modelName], controller);
