@@ -280,6 +280,12 @@ module.exports = {
   async forgotPassword(ctx) {
     const { email, url } = ctx.request.body;
 
+    const pluginStore = await strapi.store({
+      environment: '',
+      type: 'plugin',
+      name: 'users-permissions',
+    });
+
     if (!email) {
       return ctx.badRequest(
         null,
@@ -321,21 +327,50 @@ module.exports = {
     // Generate random token.
     const resetPasswordToken = crypto.randomBytes(64).toString('hex');
 
-    const settings = {
-      from: {
-        name: 'Administration Panel',
-        email: 'no-reply@strapi.io',
-      },
-      response_email: '',
-      object: 'Reset password',
-      message: `<p>We heard that you lost your password. Sorry about that!</p>
+    // Retrieve email settings from database. Enable the use of external email plugins.
+    const settings = await pluginStore
+      .get({ key: 'email' })
+      .then(storeEmail => {
+        try {
+          return storeEmail['reset_password'].options;
+        } catch (error) {
+          return {};
+        }
+      });
 
-<p>But don’t worry! You can use the following link to reset your password:</p>
+    // Overwrite the default message so that we can send the right url
+    settings.message = `<p>We heard that you lost your password. Sorry about that!</p>
+      <p>But don’t worry! You can use the following link to reset your password:</p>
+      <p>${url}?code=${resetPasswordToken}</p>
+      <p>Thanks.</p>`;
 
-<p>${url}?code=${resetPasswordToken}</p>
+    const advanced = await pluginStore.get({
+      key: 'advanced',
+    });
 
-<p>Thanks.</p>`,
-    };
+    settings.message = await strapi.plugins[
+      'users-permissions'
+    ].services.userspermissions.template(settings.message, {
+      URL: advanced.email_reset_password,
+      USER: _.omit(admin.toJSON ? admin.toJSON() : admin, [
+        'password',
+        'resetPasswordToken',
+        'role',
+        'provider',
+      ]),
+      TOKEN: resetPasswordToken,
+    });
+
+    settings.object = await strapi.plugins[
+      'users-permissions'
+    ].services.userspermissions.template(settings.object, {
+      USER: _.omit(admin.toJSON ? admin.toJSON() : admin, [
+        'password',
+        'resetPasswordToken',
+        'role',
+        'provider',
+      ]),
+    });
 
     try {
       // Send an email to the admin.
