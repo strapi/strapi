@@ -63,7 +63,7 @@ function LeftMenuHeader({ count, search, searchable, setSearch, title }) {
   ) : (
     <div className="search-wrapper">
       <FontAwesomeIcon icon="search" />
-      <button onClick={toggleSearch}></button>
+      <button onClick={toggleSearch} />
       <Search
         ref={ref}
         onChange={handleChange}

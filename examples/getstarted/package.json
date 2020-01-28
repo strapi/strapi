@@ -10,7 +10,7 @@
     "strapi": "strapi"
   },
   "dependencies": {
-    "knex": "^0.16.5",
+    "knex": "^0.20.0",
     "lodash": "^4.17.5",
     "mysql": "^2.17.1",
     "pg": "^7.10.0",

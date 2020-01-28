@@ -162,6 +162,7 @@ Cypress.Commands.add('deleteApi', (model, jwt) => {
 
 Cypress.Commands.add('login', () => {
   cy.createUser();
+
   return cy
     .request({
       url: `${backendUrl}/admin/auth/local`,

@@ -24,6 +24,7 @@ const CircleButton = styled.button`
         }
       `;
     }
+
     return css`
       &:after {
         content: '\f067';
