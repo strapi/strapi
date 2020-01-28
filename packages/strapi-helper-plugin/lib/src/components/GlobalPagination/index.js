@@ -136,7 +136,7 @@ class GlobalPagination extends React.Component {
             onClick={this.handlePreviousPageClick}
             disabled={this.isFirstPage()}
           >
-            <i className="fa fa-angle-left" aria-hidden="true"></i>
+            <i className="fa fa-angle-left" aria-hidden="true" />
           </a>
           <nav className="navWrapper">
             <ul className="navUl">{this.renderLinks()}</ul>
@@ -147,7 +147,7 @@ class GlobalPagination extends React.Component {
             onClick={this.handleNextPageClick}
             disabled={this.isLastPage()}
           >
-            <i className="fa fa-angle-right" aria-hidden="true"></i>
+            <i className="fa fa-angle-right" aria-hidden="true" />
           </a>
         </div>
       </Wrapper>
