@@ -3,18 +3,18 @@ import { Router, Route, Switch } from 'react-router-dom';
 import { render, cleanup } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { GlobalContextProvider } from 'strapi-helper-plugin';
-import { IntlProvider, defineMessages } from 'react-intl';
+import { IntlProvider } from 'react-intl';
 
-import translationMessages from '../../../../translations/en.json';
+import translationMessages from '../../../translations/en.json';
 
-import EditView from '../index';
+import SettingsPage from '../index';
 
 const history = createMemoryHistory();
 
-describe('Admin | containers | EditView', () => {
+describe('Admin | containers | SettingsPage', () => {
   afterEach(cleanup);
 
-  it('should render EditView', () => {
+  it('should render SettingsPage', () => {
     const intlProvider = new IntlProvider(
       {
         locale: 'en',
@@ -24,27 +24,17 @@ describe('Admin | containers | EditView', () => {
     );
     const { intl: originalIntl } = intlProvider.getChildContext();
 
-    const intl = {
-      ...originalIntl,
-      formatMessage: ({ id, defaultMessage }) => {
-        return originalIntl.formatMessage({
-          id,
-          defaultMessage: defaultMessage || id,
-        });
-      },
-    };
-
     const { asFragment } = render(
       <IntlProvider
         locale="en"
         defaultLocale="en"
-        messages={defineMessages(translationMessages)}
+        messages={translationMessages}
       >
-        <GlobalContextProvider formatMessage={intl.formatMessage}>
+        <GlobalContextProvider formatMessage={originalIntl.formatMessage}>
           <Router history={history}>
             <Switch>
               <Route>
-                <EditView />
+                <SettingsPage />
               </Route>
             </Switch>
           </Router>

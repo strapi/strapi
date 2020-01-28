@@ -10,14 +10,14 @@ exports[`Admin | components | HeadersInput should render properly render compone
         <section>
           <p>
             <span>
-              Settings.webhooks.key
+              Key
             </span>
           </p>
         </section>
         <section>
           <p>
             <span>
-              Settings.webhooks.value
+              Value
             </span>
           </p>
         </section>
@@ -155,7 +155,7 @@ exports[`Admin | components | HeadersInput should render properly render compone
         </g>
       </svg>
       <span>
-        Settings.webhooks.create.header
+        Create a new header
       </span>
     </button>
   </div>

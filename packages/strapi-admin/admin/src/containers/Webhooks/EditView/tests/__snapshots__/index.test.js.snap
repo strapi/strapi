@@ -200,14 +200,14 @@ exports[`Admin | containers | EditView should render EditView 1`] = `
                       <section>
                         <p>
                           <span>
-                            Settings.webhooks.key
+                            Key
                           </span>
                         </p>
                       </section>
                       <section>
                         <p>
                           <span>
-                            Settings.webhooks.value
+                            Value
                           </span>
                         </p>
                       </section>
@@ -345,7 +345,7 @@ exports[`Admin | containers | EditView should render EditView 1`] = `
                       </g>
                     </svg>
                     <span>
-                      Settings.webhooks.create.header
+                      Create a new header
                     </span>
                   </button>
                 </div>
@@ -372,17 +372,17 @@ exports[`Admin | containers | EditView should render EditView 1`] = `
                         <td />
                         <td>
                           <span>
-                            Settings.webhooks.events.create
+                            Create
                           </span>
                         </td>
                         <td>
                           <span>
-                            Settings.webhooks.events.edit
+                            Edit
                           </span>
                         </td>
                         <td>
                           <span>
-                            Settings.webhooks.events.delete
+                            Delete
                           </span>
                         </td>
                       </tr>
