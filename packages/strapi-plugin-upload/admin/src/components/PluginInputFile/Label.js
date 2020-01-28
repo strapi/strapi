@@ -46,6 +46,8 @@ const Label = styled.label`
         border: 2px dashed rgba(28, 93, 231, 0.1) !important;
       `;
     }
+
+    return '';
   }}
 
   ${({ showLoader }) => {
@@ -55,6 +57,8 @@ const Label = styled.label`
           linear infinite;
       `;
     }
+
+    return '';
   }}
 `;
 

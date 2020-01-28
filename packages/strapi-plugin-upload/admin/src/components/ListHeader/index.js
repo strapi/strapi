@@ -10,6 +10,9 @@ import PropTypes from 'prop-types';
 
 import StyledLi from './StyledLi';
 
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable react/no-array-index-key */
+
 function ListHeader({ changeSort, sort }) {
   const titles = [
     'hash',
