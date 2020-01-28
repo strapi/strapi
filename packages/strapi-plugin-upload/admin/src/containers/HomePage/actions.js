@@ -64,6 +64,7 @@ export function getDataSuccess(data, entriesNumber) {
 export function onDrop({ dataTransfer: { files } }) {
   const formData = Object.keys(files).reduce((acc, current) => {
     acc.append('files', files[current]);
+
     return acc;
   }, new FormData());
 

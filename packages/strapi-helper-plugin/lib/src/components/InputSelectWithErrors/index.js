@@ -22,6 +22,7 @@ class InputSelectWithErrors extends React.Component {
 
   componentDidMount() {
     const { errors } = this.props;
+
     // Display input error if it already has some
     if (!isEmpty(errors)) {
       this.setState({ errors });
