@@ -37,6 +37,8 @@ program
 
 if (projectName === undefined) {
   console.error('Please specify the <directory> of your project');
+
+  // eslint-disable-next-line no-process-exit
   process.exit(1);
 }
 

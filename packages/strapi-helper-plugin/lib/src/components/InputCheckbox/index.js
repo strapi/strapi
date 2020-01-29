@@ -95,6 +95,7 @@ class InputCheckbox extends React.Component {
         </FormattedMessage>
       );
     }
+
     return (
       <Wrapper
         className={cn('form-check', !isEmpty(className) && className)}

@@ -58,6 +58,7 @@ module.exports = function(strapi) {
           useUnifiedTopology,
         } = connection.settings;
 
+        // eslint-disable-next-line node/no-deprecated-api
         const uriOptions = uri ? url.parse(uri, true).query : {};
         const { authenticationDatabase, ssl, debug } = _.defaults(
           connection.options,

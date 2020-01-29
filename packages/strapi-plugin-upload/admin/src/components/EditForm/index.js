@@ -30,6 +30,7 @@ class EditForm extends React.Component {
           value: get(this.props.settings, ['providers', current, 'provider']),
         };
         acc.push(option);
+
         return acc;
       },
       []
