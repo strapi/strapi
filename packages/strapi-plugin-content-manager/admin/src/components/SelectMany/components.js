@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 
 const ListWrapper = styled.div`
   overflow: hidden;
@@ -145,4 +146,8 @@ const Li = styled.li`
   }
 `;
 
-export { ListShadow, ListWrapper, Li };
+const AddNewLink = styled(Link)`
+  text-decoration: none;
+`;
+
+export { AddNewLink, ListShadow, ListWrapper, Li };

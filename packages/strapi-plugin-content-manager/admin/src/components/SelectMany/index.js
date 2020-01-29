@@ -6,7 +6,7 @@ import { useDrop } from 'react-dnd';
 import Select, { createFilter } from 'react-select';
 import ItemTypes from '../../utils/ItemTypes';
 
-import { ListShadow, ListWrapper } from './components';
+import { AddNewLink, ListShadow, ListWrapper } from './components';
 import ListItem from './ListItem';
 
 function SelectMany({
@@ -22,7 +22,11 @@ function SelectMany({
   onMenuScrollToBottom,
   onRemove,
   options,
+  pathname,
   placeholder,
+  relationType,
+  sourceId,
+  sourceModel,
   targetModel,
   value,
 }) {
@@ -107,12 +111,33 @@ function SelectMany({
         )}
         {!isEmpty(value) && value.length > 4 && <ListShadow />}
       </ListWrapper>
+
+      <div style={{ marginBottom: 18 }} />
+
+      {sourceId &&
+        sourceModel &&
+        relationType === 'oneToMany' &&
+        sourceId !== 'create' && (
+        <AddNewLink
+          to={{
+            pathname: `/plugins/content-manager/${targetModel}/create`,
+            search: `redirectUrl=${pathname}`,
+            state: {
+              [`preselected_${sourceModel}`]: sourceId,
+            },
+          }}
+        >
+            Create new
+        </AddNewLink>
+      )}
     </>
   );
 }
 
 SelectMany.defaultProps = {
   move: () => {},
+  sourceId: null,
+  sourceModel: null,
   value: null,
 };
 
@@ -129,7 +154,11 @@ SelectMany.propTypes = {
   onMenuScrollToBottom: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   options: PropTypes.array.isRequired,
+  pathname: PropTypes.string.isRequired,
   placeholder: PropTypes.node.isRequired,
+  relationType: PropTypes.string.isRequired,
+  sourceId: PropTypes.string,
+  sourceModel: PropTypes.string,
   targetModel: PropTypes.string.isRequired,
   value: PropTypes.array,
 };

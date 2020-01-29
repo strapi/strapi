@@ -32,6 +32,9 @@ const EditView = ({
   components,
   currentEnvironment,
   layouts,
+  match: {
+    params: { id },
+  },
   plugins,
   slug,
 }) => {
@@ -262,6 +265,8 @@ const EditView = ({
                           key={relationName}
                           name={relationName}
                           relationsType={relation.relationType}
+                          sourceId={id}
+                          sourceModel={slug}
                         />
                       );
                     })}
@@ -309,6 +314,11 @@ EditView.propTypes = {
   components: PropTypes.array.isRequired,
   emitEvent: PropTypes.func,
   layouts: PropTypes.object.isRequired,
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      id: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
   slug: PropTypes.string.isRequired,
   plugins: PropTypes.object,
 };

@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import { cloneDeep, get, isArray, isEmpty } from 'lodash';
 import { request } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
@@ -20,10 +20,21 @@ function SelectWrapper({
   mainField,
   name,
   relationType,
+  sourceId,
+  sourceModel,
   targetModel,
   placeholder,
 }) {
-  const { pathname, search } = useLocation();
+  const { replace } = useHistory();
+  const {
+    hash,
+    pathname,
+    search,
+    state: {
+      [`preselected_${targetModel}`]: preselectedId,
+      ...locationState
+    } = {},
+  } = useLocation();
   const {
     addRelation,
     modifiedData,
@@ -104,6 +115,40 @@ function SelectWrapper({
       abortController.abort();
     };
   }, [ref]);
+
+  useEffect(() => {
+    if (preselectedId) {
+      (async () => {
+        const value = await request(
+          `/${pluginId}/explorer/${targetModel}/${preselectedId}`,
+          {
+            method: 'GET',
+          }
+        );
+
+        onChange({ target: { name, value } });
+      })();
+
+      // Remove "preselected_${targetModel}" from the state
+      replace({
+        hash,
+        pathname,
+        search,
+        state: locationState,
+      });
+    }
+  }, [
+    hash,
+    locationState,
+    name,
+    onChange,
+    pathname,
+    preselectedId,
+    replace,
+    search,
+    state,
+    targetModel,
+  ]);
 
   useEffect(() => {
     if (state._q !== '') {
@@ -203,6 +248,7 @@ function SelectWrapper({
         }}
         onMenuScrollToBottom={onMenuScrollToBottom}
         onRemove={onRemoveRelation}
+        pathname={pathname}
         placeholder={
           isEmpty(placeholder) ? (
             <FormattedMessage id={`${pluginId}.containers.Edit.addAnItem`} />
@@ -210,6 +256,9 @@ function SelectWrapper({
             placeholder
           )
         }
+        relationType={relationType}
+        sourceId={sourceId}
+        sourceModel={sourceModel}
         targetModel={targetModel}
         value={value}
       />
@@ -223,6 +272,8 @@ SelectWrapper.defaultProps = {
   description: '',
   label: '',
   placeholder: '',
+  sourceId: null,
+  sourceModel: null,
 };
 
 SelectWrapper.propTypes = {
@@ -233,6 +284,8 @@ SelectWrapper.propTypes = {
   name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
   relationType: PropTypes.string.isRequired,
+  sourceId: PropTypes.string,
+  sourceModel: PropTypes.string,
   targetModel: PropTypes.string.isRequired,
 };
 
