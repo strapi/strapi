@@ -41,6 +41,7 @@ describe('Admin | containers | SettingsPage', () => {
         </GlobalContextProvider>
       </IntlProvider>
     );
+
     expect(asFragment()).toMatchSnapshot();
   });
 });

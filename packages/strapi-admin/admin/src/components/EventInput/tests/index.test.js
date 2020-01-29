@@ -17,6 +17,7 @@ describe('<EventInput />', () => {
         <EventInput {...props} />
       </IntlProvider>
     );
+
     expect(tree).toMatchSnapshot();
   });
 });

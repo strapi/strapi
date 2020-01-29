@@ -22,6 +22,7 @@ describe('<Inputs />', () => {
         <Inputs {...props} />
       </IntlProvider>
     );
+
     expect(tree).toMatchSnapshot();
   });
 });
