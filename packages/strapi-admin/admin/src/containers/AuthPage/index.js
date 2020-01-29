@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import { get, isEmpty, omit, set, upperFirst } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Link, Redirect } from 'react-router-dom';
+import { Button } from '@buffetjs/core';
 import {
   auth,
-  Button,
   getQueryParameters,
   getYupInnerErrors,
   request,
@@ -223,14 +223,18 @@ const AuthPage = ({
                     }`}
                   >
                     <Button
+                      color="primary"
                       className={submitSuccess ? 'buttonForgotSuccess' : ''}
                       type="submit"
-                      label={`Auth.form.button.${
-                        submitSuccess ? 'forgot-password.success' : authType
-                      }`}
-                      primary={!submitSuccess}
+                      // primary={!submitSuccess}
                       style={authType === 'login' ? {} : { width: '100%' }}
-                    />
+                    >
+                      <FormattedMessage
+                        id={`Auth.form.button.${
+                          submitSuccess ? 'forgot-password.success' : authType
+                        }`}
+                      />
+                    </Button>
                   </div>
                 </div>
               </div>
