@@ -472,14 +472,16 @@ const formatConnectionAggregator = function(fields, model, modelName) {
  *  }
  *
  */
-const formatModelConnectionsGQL = function(
+const formatModelConnectionsGQL = function({
   fields,
   model,
   name,
-  modelResolver,
-  plugin
-) {
+  rootQuery,
+  plugin,
+}) {
   const { globalId } = model;
+
+  const _schema = strapi.plugins.graphql.config._schema.graphql;
 
   const connectionGlobalId = `${globalId}Connection`;
   const aggregatorFormat = formatConnectionAggregator(fields, model, name);
@@ -523,35 +525,23 @@ const formatModelConnectionsGQL = function(
       Query: {
         async [`${pluralName}Connection`](obj, options, { context }) {
           // need to check
+          const ctx = context.app.createContext(
+            _.clone(context.req),
+            _.clone(context.res)
+          );
 
-          const ctx = Object.assign(_.clone(context), {
-            request: Object.assign(_.clone(context.request), {
-              graphql: null,
-            }),
-          });
-
-          // Execute policies stack.
-          const policy = await compose(policiesFn)(ctx);
-
-          // Policy doesn't always return errors but they update the current context.
-          if (
-            _.isError(ctx.request.graphql) ||
-            _.get(ctx.request.graphql, 'isBoom')
-          ) {
-            return ctx.request.graphql;
-          }
-
-          // Something went wrong in the policy.
-          if (policy) {
-            return policy;
-          }
-
+          await compose(policiesFn)(ctx);
           return options;
         },
       },
       [connectionGlobalId]: {
         values(obj, options, context) {
-          return modelResolver(obj, obj, context);
+          // use base resolver
+          return _.get(_schema, ['resolver', 'Query', rootQuery])(
+            obj,
+            obj,
+            context
+          );
         },
         groupBy(obj, options, context) {
           return obj;

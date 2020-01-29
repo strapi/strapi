@@ -9,11 +9,12 @@
 const { gql, makeExecutableSchema } = require('apollo-server-koa');
 const _ = require('lodash');
 const graphql = require('graphql');
-const Query = require('./Query.js');
-const Mutation = require('./Mutation.js');
 const Types = require('./Types.js');
 const Resolvers = require('./Resolvers.js');
 const { mergeSchemas, createDefaultSchema } = require('./utils');
+
+const policyUtils = require('strapi-utils').policy;
+const compose = require('koa-compose');
 
 const schemaBuilder = {
   /**
@@ -136,13 +137,10 @@ const schemaBuilder = {
       ? this.buildShadowCRUD()
       : createDefaultSchema();
 
+    const _schema = strapi.plugins.graphql.config._schema.graphql;
+
     // Extract custom definition, query or resolver.
-    const {
-      definition,
-      query,
-      mutation,
-      resolver = {},
-    } = strapi.plugins.graphql.config._schema.graphql;
+    const { definition, query, mutation, resolver = {} } = _schema;
 
     // Polymorphic.
     const polymorphicSchema = Types.addPolymorphicUnionType(
@@ -155,6 +153,8 @@ const schemaBuilder = {
         _.merge(shadowCRUD.resolvers, resolver, polymorphicSchema.resolvers),
         _.isEmpty
       ) || {};
+
+    _schema.resolver = resolvers;
 
     this.buildResolvers(resolvers);
 
@@ -257,6 +257,7 @@ const schemaBuilder = {
 
       return Object.keys(acc[type]).reduce((acc, resolverName) => {
         const resolverObj = acc[type][resolverName];
+
         // Disabled this query.
         if (resolverObj === false) {
           delete acc[type][resolverName];
@@ -268,43 +269,14 @@ const schemaBuilder = {
           return acc;
         }
 
-        const plugin =
-          _.get(resolverObj, ['plugin']) ||
-          _.get(resolverObj, ['resolver', 'plugin']);
-
         switch (type) {
           case 'Mutation': {
-            const resolver =
-              _.get(resolverObj, ['resolver', 'handler']) ||
-              _.get(resolverObj, ['resolver']);
-
-            let name, action;
-
-            if (_.isString(resolver)) {
-              [name, action] = resolver.split('.');
-            } else {
-              name = null;
-              action = resolverName;
-            }
-
-            const mutationResolver = Mutation.composeMutationResolver({
-              _schema: strapi.plugins.graphql.config._schema.graphql,
-              plugin,
-              name: _.toLower(name),
-              action,
-            });
-
-            acc[type][resolverName] = mutationResolver;
+            acc[type][resolverName] = buildMutation(resolverName, resolverObj);
             break;
           }
           case 'Query':
           default: {
-            acc[type][resolverName] = Query.composeQueryResolver({
-              _schema: strapi.plugins.graphql.config._schema.graphql,
-              plugin,
-              name: resolverName,
-              isSingular: 'force', // Avoid singular/pluralize and force query name.
-            });
+            acc[type][resolverName] = buildQuery(resolverName, resolverObj);
             break;
           }
         }
@@ -313,6 +285,249 @@ const schemaBuilder = {
       }, acc);
     }, resolvers);
   },
+};
+
+// TODO: implement
+const buildMutation = (mutationName, config) => {
+  const { resolver, resolverOf, transformOutput = _.identity } = config;
+
+  if (_.isFunction(resolver) && !isResolvablePath(resolverOf)) {
+    throw new Error(
+      `Cannot create mutation "${mutationName}". Missing "resolverOf" option with custom resolver.`
+    );
+  }
+
+  const policiesMiddleware = compose(getPolicies(config));
+
+  // custom resolvers
+  if (_.isFunction(resolver)) {
+    return async (root, options = {}, graphqlContext) => {
+      const ctx = buildMutationContext({ options, graphqlContext });
+
+      await policiesMiddleware(ctx);
+      return resolver(root, options, graphqlContext);
+    };
+  }
+
+  const action = getAction(resolver);
+
+  return async (root, options = {}, graphqlContext) => {
+    const { context } = graphqlContext;
+    const ctx = buildMutationContext({ options, graphqlContext });
+
+    await policiesMiddleware(ctx);
+
+    const values = await action(context);
+    const result = ctx.body || values;
+
+    if (_.isError(result)) {
+      throw result;
+    }
+
+    return transformOutput(result);
+  };
+};
+
+const buildMutationContext = ({ options, graphqlContext }) => {
+  const { context } = graphqlContext;
+
+  if (options.input && options.input.where) {
+    context.params = convertToParams(options.input.where || {});
+  } else {
+    context.params = {};
+  }
+
+  if (options.input && options.input.data) {
+    context.request.body = options.input.data || {};
+  } else {
+    context.request.body = options;
+  }
+
+  const ctx = context.app.createContext(
+    _.clone(context.req),
+    _.clone(context.res)
+  );
+
+  return ctx;
+};
+
+const buildQuery = (queryName, config) => {
+  const { resolver, resolverOf } = config;
+
+  if (_.isFunction(resolver) && !isResolvablePath(resolverOf)) {
+    throw new Error(
+      `Cannot create query "${queryName}". Missing "resolverOf" option with custom resolver.`
+    );
+  }
+
+  const policiesMiddleware = compose(getPolicies(config));
+
+  // custom resolvers
+  if (_.isFunction(resolver)) {
+    return async (root, options = {}, graphqlContext) => {
+      const { ctx, opts } = buildQueryContext({ options, graphqlContext });
+
+      await policiesMiddleware(ctx);
+      return resolver(root, opts, graphqlContext);
+    };
+  }
+
+  const action = getAction(resolver);
+
+  return async (root, options = {}, graphqlContext) => {
+    const { ctx } = buildQueryContext({ options, graphqlContext });
+
+    // duplicate context
+    await policiesMiddleware(ctx);
+
+    const values = await action(ctx);
+    const result = ctx.body || values;
+
+    if (_.isError(result)) {
+      throw result;
+    }
+
+    return result;
+  };
+};
+
+const buildQueryContext = ({ options, graphqlContext }) => {
+  const { context } = graphqlContext;
+  const _options = _.cloneDeep(options);
+
+  const ctx = context.app.createContext(
+    _.clone(context.req),
+    _.clone(context.res)
+  );
+
+  // Note: we've to used the Object.defineProperties to reset the prototype. It seems that the cloning the context
+  // cause a lost of the Object prototype.
+  const opts = amountLimiting(_options);
+
+  ctx.query = {
+    ...convertToParams(_.omit(opts, 'where')),
+    ...convertToQuery(opts.where),
+  };
+
+  ctx.params = convertToParams(opts);
+
+  return { ctx, opts };
+};
+
+const convertToParams = params => {
+  return Object.keys(params).reduce((acc, current) => {
+    const key = current === 'id' ? 'id' : `_${current}`;
+    acc[key] = params[current];
+    return acc;
+  }, {});
+};
+
+const convertToQuery = params => {
+  const result = {};
+
+  _.forEach(params, (value, key) => {
+    if (_.isPlainObject(value)) {
+      const flatObject = convertToQuery(value);
+      _.forEach(flatObject, (_value, _key) => {
+        result[`${key}.${_key}`] = _value;
+      });
+    } else {
+      result[key] = value;
+    }
+  });
+
+  return result;
+};
+
+const amountLimiting = (params = {}) => {
+  const { amountLimit } = strapi.plugins.graphql.config;
+
+  if (!amountLimit) return params;
+
+  if (!params.limit || params.limit === -1 || params.limit > amountLimit) {
+    params.limit = amountLimit;
+  } else if (params.limit < 0) {
+    params.limit = 0;
+  }
+
+  return params;
+};
+
+const getAction = resolver => {
+  if (!_.isString(resolver)) {
+    throw new Error(`Error building query. Expected a string, got ${resolver}`);
+  }
+
+  const { controller, action, plugin, api } = getActionDetails(resolver);
+
+  let fn;
+
+  if (plugin) {
+    fn = _.get(strapi.plugins, [plugin, 'controllers', controller, action]);
+  } else {
+    fn = _.get(strapi.api, [api, 'controllers', controller, action]);
+  }
+
+  if (!fn) {
+    throw new Error(`Cannot find action ${resolver}`);
+  }
+
+  return fn;
+};
+
+const getActionDetails = resolver => {
+  if (resolver.startsWith('plugins::')) {
+    const [, path] = resolver.split('::');
+    const [plugin, controller, action] = path.split('.');
+
+    return { plugin, controller, action };
+  }
+
+  if (resolver.startsWith('application::')) {
+    const [, path] = resolver.split('::');
+    const [api, controller, action] = path.split('.');
+
+    return { api, controller, action };
+  }
+
+  // try to find legacy stuff
+  _.get(strapi.plugins);
+
+  throw new Error('Could not parse resolverString: ', resolver);
+};
+
+/**
+ * Checks if a resolverPath (resolver or resovlerOf) might be resolved
+ */
+const isResolvablePath = path => _.isString(path) && !_.isEmpty(path);
+
+const getPolicies = (config, { plugin, api } = {}) => {
+  const { resolver, policies = [], resolverOf } = config;
+
+  const policyFns = [];
+
+  const { controller, action } = isResolvablePath(resolverOf)
+    ? getActionDetails(resolverOf)
+    : getActionDetails(resolver);
+
+  const globalPolicy = policyUtils.globalPolicy({
+    controller,
+    action,
+    plugin,
+  });
+
+  policyFns.push(globalPolicy);
+
+  if (strapi.plugins['users-permissions']) {
+    policies.unshift('plugins.users-permissions.permissions');
+  }
+
+  policies.forEach(policy => {
+    const policyFn = policyUtils.get(policy, plugin, api);
+    policyFns.push(policyFn);
+  });
+
+  return policyFns;
 };
 
 module.exports = schemaBuilder;

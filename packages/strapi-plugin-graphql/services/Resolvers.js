@@ -12,7 +12,6 @@ const DynamicZoneScalar = require('../types/dynamiczoneScalar');
 
 const Aggregator = require('./Aggregator');
 const Query = require('./Query.js');
-const Mutation = require('./Mutation.js');
 const Types = require('./Types.js');
 const Schema = require('./Schema.js');
 const { toSingular, toPlural } = require('./naming');
@@ -301,7 +300,7 @@ const buildShadowCRUD = models => {
 };
 
 const buildSingleType = model => {
-  const { globalId, plugin, modelName } = model;
+  const { globalId, uid, modelName } = model;
 
   const singularName = toSingular(modelName);
 
@@ -343,11 +342,9 @@ const buildSingleType = model => {
   }
 
   if (isQueryEnabled(_schema, singularName)) {
-    const query = Query.composeQueryResolver({
-      _schema,
-      plugin,
-      name: modelName,
-    });
+    const resolverConfig = {
+      resolver: `${uid}.find`,
+    };
 
     _.merge(localSchema, {
       query: {
@@ -356,7 +353,7 @@ const buildSingleType = model => {
       },
       resolvers: {
         Query: {
-          [singularName]: query,
+          [singularName]: resolverConfig,
         },
       },
     });
@@ -418,55 +415,34 @@ const buildCollectionType = model => {
     return localSchema;
   }
 
-  const buildFindOneQuery = () => {
-    return isQueryEnabled(_schema, singularName)
-      ? Query.composeQueryResolver({
-          _schema,
-          plugin,
-          name: modelName,
-          isSingular: true,
-        })
-      : null;
-  };
-
-  const buildFindQuery = () => {
-    return isQueryEnabled(_schema, pluralName)
-      ? Query.composeQueryResolver({
-          _schema,
-          plugin,
-          name: modelName,
-          isSingular: false,
-        })
-      : null;
-  };
-
-  // Build resolvers.
-  const queries = {
-    singular: buildFindOneQuery(),
-    plural: buildFindQuery(),
-  };
-
-  if (_.isFunction(queries.singular)) {
+  if (isQueryEnabled(_schema, singularName)) {
     _.merge(localSchema, {
       query: {
         [`${singularName}(id: ID!)`]: model.globalId,
       },
       resolvers: {
         Query: {
-          [singularName]: queries.singular,
+          [singularName]: {
+            resolver: `${model.uid}.findOne`,
+          },
         },
       },
     });
   }
 
-  if (_.isFunction(queries.plural)) {
+  if (isQueryEnabled(_schema, pluralName)) {
+    const resolverObj = {
+      resolver: `${model.uid}.find`,
+      ..._.get(_schema, `resolver.Query.${pluralName}`),
+    };
+
     _.merge(localSchema, {
       query: {
         [`${pluralName}(sort: String, limit: Int, start: Int, where: JSON)`]: `[${model.globalId}]`,
       },
       resolvers: {
         Query: {
-          [pluralName]: queries.plural,
+          [pluralName]: resolverObj,
         },
       },
     });
@@ -485,13 +461,13 @@ const buildCollectionType = model => {
   // TODO: Add support for Graphql Aggregation in Bookshelf ORM
   if (model.orm === 'mongoose') {
     // Generation the aggregation for the given model
-    const aggregationSchema = Aggregator.formatModelConnectionsGQL(
-      typeDefObj,
+    const aggregationSchema = Aggregator.formatModelConnectionsGQL({
+      fields: typeDefObj,
       model,
-      modelName,
-      queries.plural,
-      plugin
-    );
+      name: modelName,
+      rootQuery: pluralName,
+      plugin,
+    });
 
     mergeSchemas(localSchema, aggregationSchema);
   }
@@ -503,6 +479,7 @@ const buildCollectionType = model => {
 // - Implement batch methods (need to update the content-manager as well).
 // - Implement nested transactional methods (create/update).
 const buildMutation = ({ model, action }, { _schema }) => {
+  const { uid } = model;
   const capitalizedName = _.upperFirst(toSingular(model.modelName));
   const mutationName = `${action}${capitalizedName}`;
 
@@ -520,13 +497,6 @@ const buildMutation = ({ model, action }, { _schema }) => {
     };
   }
 
-  const mutationResolver = Mutation.composeMutationResolver({
-    _schema,
-    plugin: model.plugin,
-    name: model.modelName,
-    action,
-  });
-
   return {
     definition,
     mutation: {
@@ -534,7 +504,12 @@ const buildMutation = ({ model, action }, { _schema }) => {
     },
     resolvers: {
       Mutation: {
-        [mutationName]: mutationResolver,
+        [mutationName]: {
+          resolver: `${uid}.${action}`,
+          transformOutput: result => ({
+            [toSingular(model.modelName)]: result,
+          }),
+        },
       },
     },
   };

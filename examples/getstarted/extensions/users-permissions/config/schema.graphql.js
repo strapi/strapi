@@ -4,21 +4,15 @@ module.exports = {
   `,
   resolver: {
     Mutation: {
-      updateUser: {
-        description: 'Updates a user',
-        policies: ['customPolicy'],
-        resolver: {
-          plugin: 'users-permissions',
-          handler: 'User.update',
-        },
-      },
+      // updateUser: {
+      //   description: 'Updates a user',
+      //   policies: ['customPolicy'],
+      //   resolver: 'plugins::users-permissions.user.update',
+      // },
     },
     Query: {
       userCustomRoute: {
-        resolver: {
-          plugin: 'users-permissions',
-          handler: 'UsersPermissions.customRoute',
-        },
+        resolver: 'plugins::users-permissions.userspermissions.customRoute',
       },
     },
   },

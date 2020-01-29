@@ -66,7 +66,7 @@ const generateTestApp = async ({ appName, database }) => {
  */
 const startTestApp = ({ appName }) => {
   return execa.shell('BROWSER=none strapi develop --no-build', {
-    stdio: 'inherit',
+    stdio: 'ignore',
     cwd: path.resolve(appName),
   });
 };

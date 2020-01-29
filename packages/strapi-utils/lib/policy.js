@@ -14,14 +14,24 @@ const get = (policy, plugin, apiName) => {
     return parsePolicy(getPluginPolicy(policy));
   }
 
+  if (APIPolicyExists(policy)) {
+    return parsePolicy(getAPIPolicy(policy));
+  }
+
+  let [absoluteApiName, policyName] = policy.split('.');
+  let absoluteApi = _.get(strapi.api, absoluteApiName);
+  if (policyExistsIn(absoluteApi, policyName)) {
+    return parsePolicy(getPolicyIn(absoluteApi, policyName));
+  }
+
   const pluginPolicy = `${PLUGIN_PREFIX}${plugin}.${policy}`;
 
-  if (!isGlobal(policy) && plugin && pluginPolicyExists(pluginPolicy)) {
+  if (plugin && pluginPolicyExists(pluginPolicy)) {
     return parsePolicy(getPluginPolicy(pluginPolicy));
   }
 
   const api = _.get(strapi.api, apiName);
-  if (!isGlobal(policy) && api && policyExistsIn(api, policy)) {
+  if (api && policyExistsIn(api, policy)) {
     return parsePolicy(getPolicyIn(api, policy));
   }
 
@@ -53,9 +63,10 @@ const parsePolicy = policy => {
 
 const GLOBAL_PREFIX = 'global.';
 const PLUGIN_PREFIX = 'plugins.';
+const APPLICATION_PREFIX = 'application::';
 
 const getPolicyIn = (container, policy) => {
-  return _.get(container, ['config', 'policies', policy.toLowerCase()]);
+  return _.get(container, ['config', 'policies', _.toLower(policy)]);
 };
 
 const policyExistsIn = (container, policy) => {
@@ -83,6 +94,18 @@ const pluginPolicyExists = policy => {
 };
 
 const isPluginPolicy = policy => _.startsWith(policy, PLUGIN_PREFIX);
+
+const getAPIPolicy = policy => {
+  const [, policyWithoutPrefix] = policy.split('::');
+  const [api = '', policyName = ''] = policyWithoutPrefix.split('.');
+  return getPolicyIn(_.get(strapi, ['api', api]), policyName);
+};
+
+const APIPolicyExists = policy => {
+  return isAPIPolicy(policy) && !_.isUndefined(getAPIPolicy(policy));
+};
+
+const isAPIPolicy = policy => _.startsWith(policy, APPLICATION_PREFIX);
 
 module.exports = {
   get,
