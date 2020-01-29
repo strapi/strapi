@@ -21,8 +21,10 @@ describe('Admin | components | HeadersInput', () => {
     onClick: jest.fn(),
     onRemove: jest.fn(),
   };
+
   describe('should render properly', () => {
     afterEach(cleanup);
+
     it('should not crash', () => {
       shallow(<HeadersInput {...props} />);
     });
@@ -33,6 +35,7 @@ describe('Admin | components | HeadersInput', () => {
           <HeadersInput {...props} />
         </IntlProvider>
       );
+
       expect(asFragment()).toMatchSnapshot();
     });
 

@@ -41,6 +41,7 @@ describe('Admin | containers | EditView', () => {
         </GlobalContextProvider>
       </IntlProvider>
     );
+
     expect(asFragment()).toMatchSnapshot();
   });
 });

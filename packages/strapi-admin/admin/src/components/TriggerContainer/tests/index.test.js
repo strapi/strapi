@@ -20,6 +20,7 @@ describe('<TriggerContainer />', () => {
         <TriggerContainer {...props} />
       </IntlProvider>
     );
+
     expect(tree).toMatchSnapshot();
   });
 });

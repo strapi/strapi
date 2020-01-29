@@ -7,8 +7,10 @@ describe('<EventRow />', () => {
   const props = {
     name: 'events',
   };
+
   it('should render properly', () => {
     const tree = renderer.create(<EventRow {...props} />).toJSON();
+
     expect(tree).toMatchSnapshot();
   });
 
