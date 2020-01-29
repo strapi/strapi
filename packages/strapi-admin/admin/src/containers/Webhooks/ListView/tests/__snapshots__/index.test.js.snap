@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Admin | containers | ListView should render ListView 1`] = `
+exports[`Admin | containers | ListView should render properly 1`] = `
 <DocumentFragment>
   <div
     class="sc-daURTG jBtszK"

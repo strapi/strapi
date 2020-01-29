@@ -14,7 +14,7 @@ const history = createMemoryHistory();
 describe('Admin | containers | ListView', () => {
   afterEach(cleanup);
 
-  it('should render ListView', () => {
+  it('should render properly', () => {
     const intlProvider = new IntlProvider(
       {
         locale: 'en',
