@@ -52,7 +52,7 @@
   "form.attribute.component.option.repeatable": "Repeatable component",
   "form.attribute.component.option.repeatable.description": "Best for multiple instances (array) of ingredients, meta tags, etc..",
   "form.attribute.component.option.reuse-existing": "Use an existing component",
-  "form.attribute.component.option.reuse-existing.description": "Reuse a component already created to keep your data consistent across collection types.",
+  "form.attribute.component.option.reuse-existing.description": "Reuse a component already created to keep your data consistent across content-types.",
   "form.attribute.component.option.single": "Single component",
   "form.attribute.component.option.single.description": "Best for grouping fields like full address, main information, etc...",
   "form.attribute.item.customColumnName": "Custom column names",
