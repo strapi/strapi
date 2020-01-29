@@ -3,14 +3,14 @@
 exports[`Admin | containers | EditView should render EditView 1`] = `
 <DocumentFragment>
   <div
-    class="sc-daURTG fMRnCr"
+    class="sc-bXGyLb bSpaUE"
   >
     <div
-      class="sc-bdVaJa fgkLzW"
+      class="sc-jlyJG huPVn"
     />
     <form>
       <div
-        class="sc-eXEjpC iCEvSZ"
+        class="sc-chPdSV jmcPdM"
       >
         <div
           class="sticky-wrapper"
@@ -22,7 +22,7 @@ exports[`Admin | containers | EditView should render EditView 1`] = `
               class="col-sm-6 header-title"
             >
               <div
-                class="sc-RefOD zPzYC"
+                class="sc-kGXeez idElYQ"
               >
                 <h1 />
               </div>
@@ -32,17 +32,17 @@ exports[`Admin | containers | EditView should render EditView 1`] = `
               class="col-sm-6 justify-content-end"
             >
               <div
-                class="sc-ibxdXY flSTRO"
+                class="sc-kgoBCf hhYBts"
               >
                 <button
-                  class="sc-btzYZH kxlTHJ"
+                  class="sc-bxivhb cRlNra"
                   color="primary"
                   label="Trigger"
                   style="padding: 0px 15px;"
                   type="button"
                 >
                   <span
-                    class="sc-bMVAic dKLfTw"
+                    class="sc-iRbamj bybvAC"
                   >
                     <svg
                       height="14px"
@@ -83,7 +83,7 @@ exports[`Admin | containers | EditView should render EditView 1`] = `
                   Trigger
                 </button>
                 <button
-                  class="sc-btzYZH fvqYKR"
+                  class="sc-bxivhb ceGfZA"
                   color="cancel"
                   disabled=""
                   label="Reset"
@@ -93,7 +93,7 @@ exports[`Admin | containers | EditView should render EditView 1`] = `
                   Reset
                 </button>
                 <button
-                  class="sc-btzYZH dUnkjl"
+                  class="sc-bxivhb hYSYfP"
                   color="success"
                   disabled=""
                   label="Save"
@@ -120,22 +120,22 @@ exports[`Admin | containers | EditView should render EditView 1`] = `
               class="col-6"
             >
               <div
-                class="sc-iujRgT fEHRdC"
+                class="sc-GMQeP gTHBhy"
               >
                 <label
-                  class="sc-iQKALj huPjOb"
+                  class="sc-kpOJdX kYXOPJ"
                   for="name"
                 >
                   Name
                 </label>
                 <div
-                  class="sc-kIPQKe lgGZs"
+                  class="sc-kAzzGY ibeNzJ"
                 >
                   <input
                     aria-describedby=" "
                     aria-invalid="false"
                     autocomplete="off"
-                    class="sc-esjQYD eqKmMI"
+                    class="sc-cSHVUG jRAEee"
                     id="name"
                     name="name"
                     tabindex="0"
@@ -152,22 +152,22 @@ exports[`Admin | containers | EditView should render EditView 1`] = `
               class="col-12"
             >
               <div
-                class="sc-iujRgT fEHRdC"
+                class="sc-GMQeP gTHBhy"
               >
                 <label
-                  class="sc-iQKALj huPjOb"
+                  class="sc-kpOJdX kYXOPJ"
                   for="url"
                 >
                   Url
                 </label>
                 <div
-                  class="sc-kIPQKe lgGZs"
+                  class="sc-kAzzGY ibeNzJ"
                 >
                   <input
                     aria-describedby=" "
                     aria-invalid="false"
                     autocomplete="off"
-                    class="sc-esjQYD eqKmMI"
+                    class="sc-cSHVUG jRAEee"
                     id="url"
                     name="url"
                     tabindex="0"
@@ -184,16 +184,16 @@ exports[`Admin | containers | EditView should render EditView 1`] = `
               class="col-12"
             >
               <div
-                class="sc-cQFLBn jtxpvN"
+                class="sc-gojNiO dfozLD"
               >
                 <label
-                  class="sc-iQKALj huPjOb"
+                  class="sc-kpOJdX kYXOPJ"
                   for="headers"
                 >
                   Headers
                 </label>
                 <div
-                  class="sc-GMQeP BdDxy"
+                  class="sc-exAgwC ccdFwD"
                 >
                   <ul>
                     <li>
@@ -302,11 +302,11 @@ exports[`Admin | containers | EditView should render EditView 1`] = `
                       </section>
                       <section>
                         <div
-                          class="sc-kIPQKe lgGZs"
+                          class="sc-kAzzGY ibeNzJ"
                         >
                           <input
                             autocomplete="off"
-                            class="sc-esjQYD eqKmMI"
+                            class="sc-cSHVUG jRAEee"
                             id="headers.0.value"
                             name="headers.0.value"
                             tabindex="0"
@@ -317,7 +317,7 @@ exports[`Admin | containers | EditView should render EditView 1`] = `
                       </section>
                       <div>
                         <button
-                          class="sc-gzVnrw gineUH"
+                          class="sc-fBuWsC imrARH"
                           type="button"
                         />
                       </div>
@@ -355,16 +355,16 @@ exports[`Admin | containers | EditView should render EditView 1`] = `
               class="col-12"
             >
               <div
-                class="sc-cQFLBn jtxpvN"
+                class="sc-gojNiO dfozLD"
               >
                 <label
-                  class="sc-iQKALj huPjOb"
+                  class="sc-kpOJdX kYXOPJ"
                   for="events"
                 >
                   Events
                 </label>
                 <div
-                  class="sc-exAgwC dGuqTZ"
+                  class="sc-cQFLBn fnroOZ"
                 >
                   <table>
                     <thead>
@@ -391,18 +391,18 @@ exports[`Admin | containers | EditView should render EditView 1`] = `
                       <tr>
                         <td>
                           <div
-                            class="sc-elJkPf goFnYl"
+                            class="sc-bZQynM iXyeyW"
                           >
                             <input
                               autocomplete="off"
-                              class="sc-bYSBpT fFzyOc"
+                              class="sc-EHOje cqFDuP"
                               id="entry"
                               name="entry"
                               tabindex="0"
                               type="checkbox"
                             />
                             <label
-                              class="sc-iQKALj huPjOb"
+                              class="sc-kpOJdX kYXOPJ"
                               for="entry"
                             >
                               entry
@@ -411,54 +411,54 @@ exports[`Admin | containers | EditView should render EditView 1`] = `
                         </td>
                         <td>
                           <div
-                            class="sc-elJkPf goFnYl"
+                            class="sc-bZQynM iXyeyW"
                           >
                             <input
                               autocomplete="off"
-                              class="sc-bYSBpT fFzyOc"
+                              class="sc-EHOje cqFDuP"
                               id="entry.create"
                               name="entry.create"
                               tabindex="0"
                               type="checkbox"
                             />
                             <label
-                              class="sc-iQKALj huPjOb"
+                              class="sc-kpOJdX kYXOPJ"
                               for="entry.create"
                             />
                           </div>
                         </td>
                         <td>
                           <div
-                            class="sc-elJkPf goFnYl"
+                            class="sc-bZQynM iXyeyW"
                           >
                             <input
                               autocomplete="off"
-                              class="sc-bYSBpT fFzyOc"
+                              class="sc-EHOje cqFDuP"
                               id="entry.update"
                               name="entry.update"
                               tabindex="0"
                               type="checkbox"
                             />
                             <label
-                              class="sc-iQKALj huPjOb"
+                              class="sc-kpOJdX kYXOPJ"
                               for="entry.update"
                             />
                           </div>
                         </td>
                         <td>
                           <div
-                            class="sc-elJkPf goFnYl"
+                            class="sc-bZQynM iXyeyW"
                           >
                             <input
                               autocomplete="off"
-                              class="sc-bYSBpT fFzyOc"
+                              class="sc-EHOje cqFDuP"
                               id="entry.delete"
                               name="entry.delete"
                               tabindex="0"
                               type="checkbox"
                             />
                             <label
-                              class="sc-iQKALj huPjOb"
+                              class="sc-kpOJdX kYXOPJ"
                               for="entry.delete"
                             />
                           </div>
@@ -467,18 +467,18 @@ exports[`Admin | containers | EditView should render EditView 1`] = `
                       <tr>
                         <td>
                           <div
-                            class="sc-elJkPf goFnYl"
+                            class="sc-bZQynM iXyeyW"
                           >
                             <input
                               autocomplete="off"
-                              class="sc-bYSBpT fFzyOc"
+                              class="sc-EHOje cqFDuP"
                               id="media"
                               name="media"
                               tabindex="0"
                               type="checkbox"
                             />
                             <label
-                              class="sc-iQKALj huPjOb"
+                              class="sc-kpOJdX kYXOPJ"
                               for="media"
                             >
                               media
@@ -487,29 +487,29 @@ exports[`Admin | containers | EditView should render EditView 1`] = `
                         </td>
                         <td>
                           <div
-                            class="sc-elJkPf goFnYl"
+                            class="sc-bZQynM iXyeyW"
                           >
                             <input
                               autocomplete="off"
-                              class="sc-bYSBpT fFzyOc"
+                              class="sc-EHOje cqFDuP"
                               id="media.create"
                               name="media.create"
                               tabindex="0"
                               type="checkbox"
                             />
                             <label
-                              class="sc-iQKALj huPjOb"
+                              class="sc-kpOJdX kYXOPJ"
                               for="media.create"
                             />
                           </div>
                         </td>
                         <td>
                           <div
-                            class="sc-elJkPf goFnYl"
+                            class="sc-bZQynM iXyeyW"
                           >
                             <input
                               autocomplete="off"
-                              class="sc-bYSBpT fFzyOc"
+                              class="sc-EHOje cqFDuP"
                               disabled=""
                               id="media.update"
                               name="media.update"
@@ -517,25 +517,25 @@ exports[`Admin | containers | EditView should render EditView 1`] = `
                               type="checkbox"
                             />
                             <label
-                              class="sc-iQKALj huPjOb"
+                              class="sc-kpOJdX kYXOPJ"
                               for="media.update"
                             />
                           </div>
                         </td>
                         <td>
                           <div
-                            class="sc-elJkPf goFnYl"
+                            class="sc-bZQynM iXyeyW"
                           >
                             <input
                               autocomplete="off"
-                              class="sc-bYSBpT fFzyOc"
+                              class="sc-EHOje cqFDuP"
                               id="media.delete"
                               name="media.delete"
                               tabindex="0"
                               type="checkbox"
                             />
                             <label
-                              class="sc-iQKALj huPjOb"
+                              class="sc-kpOJdX kYXOPJ"
                               for="media.delete"
                             />
                           </div>

@@ -2,7 +2,7 @@
 
 exports[`<Inputs /> should render properly 1`] = `
 <div
-  className="sc-GMQeP fCETID"
+  className="sc-exAgwC iCfkBI"
 >
   <label
     className="sc-chPdSV iXihgI"
@@ -11,7 +11,7 @@ exports[`<Inputs /> should render properly 1`] = `
     
   </label>
   <div
-    className="sc-iujRgT cbtFAn"
+    className="sc-GMQeP bmbDCX"
   >
     <table>
       <thead>
