@@ -29,7 +29,7 @@ describe('Admin | components | HeadersInput', () => {
       shallow(<HeadersInput {...props} />);
     });
 
-    it('render component', () => {
+    it('should match the snapshot', () => {
       const { asFragment } = render(
         <IntlProvider locale="en">
           <HeadersInput {...props} />
@@ -66,16 +66,20 @@ describe('Admin | components | HeadersInput', () => {
       const addButton = renderedComponent.find('ul + button');
       addButton.simulate('click');
 
-      expect(props.onClick).toHaveBeenCalled();
+      expect(props.onClick).toHaveBeenCalledWith('headers');
     });
 
     it('should call the onChange props on input text change', () => {
       const renderedComponent = shallow(<HeadersInput {...props} />);
 
       const input = renderedComponent.find(InputText).at(0);
-      input.simulate('change');
+      const event = {
+        target: { name: 'headers.0.key', value: 'test' },
+      };
 
-      expect(props.onChange).toHaveBeenCalled();
+      input.simulate('change', event);
+
+      expect(props.onChange).toHaveBeenCalledWith(event);
     });
   });
 });

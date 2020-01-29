@@ -2,6 +2,8 @@ import React from 'react';
 import renderer from 'react-test-renderer';
 import { IntlProvider } from 'react-intl';
 
+import translationMessages from '../../../translations/en.json';
+
 import EventInput from '../index';
 
 describe('<EventInput />', () => {
@@ -11,9 +13,9 @@ describe('<EventInput />', () => {
     onChange: jest.fn(),
   };
 
-  it('should render properly', () => {
+  it('should match the snapshot', () => {
     const tree = renderer.create(
-      <IntlProvider locale="en">
+      <IntlProvider locale="en" messages={translationMessages}>
         <EventInput {...props} />
       </IntlProvider>
     );

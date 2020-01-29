@@ -106,13 +106,12 @@ describe('Admin | containers | Webhooks | EditView | reducer', () => {
         keys: ['headers'],
       };
 
-      const updatedHeaders = state
-        .getIn(['modifiedData', 'headers'])
-        .push(fromJS(header));
-
       const expectedState = state.setIn(
-        ['modifiedData', ...action.keys],
-        updatedHeaders
+        ['modifiedData', 'headers'],
+        fromJS([
+          { key: '', value: '' },
+          { key: '', value: '' },
+        ])
       );
 
       expect(reducer(state, action)).toEqual(expectedState);
@@ -199,16 +198,13 @@ describe('Admin | containers | Webhooks | EditView | reducer', () => {
         type: 'SET_IS_TRIGGERING',
       };
 
-      const expectedState = state.update(
-        'isTriggering',
-        isTriggering => !isTriggering
-      );
+      const expectedState = state.set('isTriggering', true);
 
       expect(reducer(state, action)).toEqual(expectedState);
     });
 
     it('should update isTriggering and triggerResponse if trigger succeed', () => {
-      const state = initialState;
+      const state = initialState.set('isTriggering', true);
 
       const action = {
         type: 'TRIGGER_SUCCEEDED',
