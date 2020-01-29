@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs-extra');
 const _ = require('lodash');
 const { green, yellow } = require('chalk');
+// eslint-disable-next-line node/no-extraneous-require
 const strapiAdmin = require('strapi-admin');
 const loadConfigFile = require('../load/load-config-files');
 const addSlash = require('../utils/addSlash');

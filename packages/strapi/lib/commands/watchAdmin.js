@@ -1,5 +1,6 @@
 /* eslint-disable no-useless-escape */
 const path = require('path');
+// eslint-disable-next-line node/no-extraneous-require
 const strapiAdmin = require('strapi-admin');
 const _ = require('lodash');
 

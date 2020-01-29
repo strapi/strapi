@@ -26,6 +26,7 @@ function LeftMenuList({ customLink, links, title, searchable }) {
         return acc + current.links.length;
       }, 0);
     }
+
     return links.length;
   };
 
@@ -38,6 +39,7 @@ function LeftMenuList({ customLink, links, title, searchable }) {
         };
       });
     }
+
     return matchSorter(links, search, { keys: ['title'] });
   };
 

@@ -76,7 +76,7 @@ module.exports = {
           S3.upload(
             {
               Key: `${path}${file.hash}${file.ext}`,
-              Body: new Buffer(file.buffer, 'binary'),
+              Body: Buffer.from(file.buffer, 'binary'),
               ACL: 'public-read',
               ContentType: file.mime,
             },

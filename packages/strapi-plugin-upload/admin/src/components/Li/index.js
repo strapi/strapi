@@ -16,6 +16,8 @@ import FileIcon from '../FileIcon';
 import { StyledLi, Truncate, Wrapper, Checked } from './components';
 
 /* eslint-disable react/no-string-refs */
+/* eslint-disable react/sort-comp */
+/* eslint-disable react/no-array-index-key */
 class Li extends React.Component {
   static contextType = HomePageContext;
 
