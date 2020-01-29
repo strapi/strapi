@@ -226,7 +226,6 @@ const AuthPage = ({
                       color="primary"
                       className={submitSuccess ? 'buttonForgotSuccess' : ''}
                       type="submit"
-                      // primary={!submitSuccess}
                       style={authType === 'login' ? {} : { width: '100%' }}
                     >
                       <FormattedMessage

@@ -51,7 +51,7 @@ const Wrapper = styled.div`
     width: 41.6rem;
     margin: 1.4rem auto;
     margin-bottom: 0;
-    padding: 3.8rem 1.5rem 1.5rem 1.5rem;
+    padding: 3.9rem 1.5rem 1.5rem 1.5rem;
     border-radius: 2px;
     background-color: #ffffff;
     box-shadow: 0 2px 4px 0 #e3e9f3;
@@ -60,6 +60,7 @@ const Wrapper = styled.div`
   .form-check-label {
     input[type='checkbox'] + p {
       line-height: 1.8rem;
+      margin-bottom: 0;
     }
   }
 
