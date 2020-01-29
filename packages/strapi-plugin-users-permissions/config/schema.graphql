@@ -80,7 +80,7 @@ module.exports = {
         plugin: 'users-permissions',
         resolverOf: 'UsersPermissions.getRoles', // Apply the `getRoles` permissions on the resolver.
         resolver: async (obj, options, { context }) => {
-          context.params = {...context.params, ...options.input};
+          context.params = {...context.params, ...options};
 
           await strapi.plugins[
             'users-permissions'
