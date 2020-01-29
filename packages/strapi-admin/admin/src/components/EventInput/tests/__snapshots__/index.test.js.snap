@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<EventInput /> should render properly 1`] = `
+exports[`<EventInput /> should match the snapshot 1`] = `
 <div
   className="sc-jAaTju cbZcAq"
 >
@@ -10,17 +10,17 @@ exports[`<EventInput /> should render properly 1`] = `
         <td />
         <td>
           <span>
-            Settings.webhooks.events.create
+            Create
           </span>
         </td>
         <td>
           <span>
-            Settings.webhooks.events.edit
+            Edit
           </span>
         </td>
         <td>
           <span>
-            Settings.webhooks.events.delete
+            Delete
           </span>
         </td>
       </tr>

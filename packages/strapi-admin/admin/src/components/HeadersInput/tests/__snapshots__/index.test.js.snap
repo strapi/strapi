@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Admin | components | HeadersInput should render properly render component 1`] = `
+exports[`Admin | components | HeadersInput should render properly should match the snapshot 1`] = `
 <DocumentFragment>
   <div
     class="sc-bAeIUo feDjmh"

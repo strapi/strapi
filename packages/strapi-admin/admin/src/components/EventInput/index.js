@@ -66,7 +66,7 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
             {headersName.map(header => {
               return (
                 <td key={header}>
-                  <FormattedMessage id={header} defaultMessage={header} />
+                  <FormattedMessage id={header} />
                 </td>
               );
             })}

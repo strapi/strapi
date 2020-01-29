@@ -14,7 +14,7 @@ const history = createMemoryHistory();
 describe('Admin | containers | EditView', () => {
   afterEach(cleanup);
 
-  it('should render properly', () => {
+  it('should match the snapshot', () => {
     const intlProvider = new IntlProvider(
       {
         locale: 'en',

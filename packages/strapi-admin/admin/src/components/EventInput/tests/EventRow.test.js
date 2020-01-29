@@ -8,7 +8,7 @@ describe('<EventRow />', () => {
     name: 'events',
   };
 
-  it('should render properly', () => {
+  it('should match the snapshot', () => {
     const tree = renderer.create(<EventRow {...props} />).toJSON();
 
     expect(tree).toMatchSnapshot();
