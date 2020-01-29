@@ -14,6 +14,7 @@ import { GlobalContext } from 'strapi-helper-plugin';
 import injectSaga from '../../utils/injectSaga';
 import injectReducer from '../../utils/injectReducer';
 import OnboardingVideo from '../../components/OnboardingVideo';
+import StaticLinks from '../../components/StaticLinks';
 import Wrapper from './Wrapper';
 import {
   getVideos,
@@ -140,6 +141,7 @@ export class Onboarding extends React.Component {
               );
             })}
           </ul>
+          <StaticLinks />
         </div>
 
         <div className="openBtn">
@@ -195,10 +197,7 @@ function mapDispatchToProps(dispatch) {
   );
 }
 
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps
-);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
 /* Remove this line if the container doesn't have a route and
  *  check the documentation to see how to create the container's store
@@ -210,8 +209,4 @@ const withReducer = injectReducer({ key: 'onboarding', reducer });
  */
 const withSaga = injectSaga({ key: 'onboarding', saga });
 
-export default compose(
-  withReducer,
-  withSaga,
-  withConnect
-)(Onboarding);
+export default compose(withReducer, withSaga, withConnect)(Onboarding);

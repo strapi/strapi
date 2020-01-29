@@ -30,7 +30,9 @@ function createDefaultMainField(schema) {
   if (!schema) return 'id';
 
   const mainField = Object.keys(schema.attributes).find(
-    key => schema.attributes[key].type === 'string' && key !== schema.primaryKey
+    key =>
+      schema.attributes[key].type === 'string' &&
+      !['id', schema.primaryKey].includes(key)
   );
 
   return mainField || 'id';

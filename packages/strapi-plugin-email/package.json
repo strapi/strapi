@@ -12,6 +12,7 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
+    "lodash": "^4.17.11",
     "strapi-provider-email-sendmail": "3.0.0-beta.18.6",
     "strapi-utils": "3.0.0-beta.18.6"
   },

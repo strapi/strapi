@@ -45,7 +45,7 @@ const Wrapper = styled.div`
     margin-bottom: 0;
   }
   .videosHeader {
-    padding: 25px 15px 0 15px;
+    padding: 25px 15px 18px 15px;
     p {
       display: inline-block;
       vertical-align: top;
@@ -84,11 +84,14 @@ const Wrapper = styled.div`
       min-width: 0;
       animation: ${fadeOut} 0.5s forwards;
     }
-
     ul {
-      padding: 0 0 10px 0;
+      padding: 0 0 8px 0;
       margin-bottom: 0;
       list-style: none;
+      &:last-of-type {
+        padding: 8px 0 10px 0;
+        border-top: 1px solid #f6f6f6;
+      }
     }
   }
   .openBtn {
