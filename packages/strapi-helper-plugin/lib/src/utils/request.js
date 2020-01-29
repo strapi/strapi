@@ -1,6 +1,6 @@
 import 'whatwg-fetch';
-import auth from './auth';
 import _ from 'lodash';
+import auth from './auth';
 
 /**
  * Parses the JSON returned by a network request
@@ -170,6 +170,7 @@ export default function request(...args) {
       if (shouldWatchServerRestart) {
         // Display the global OverlayBlocker
         strapi.lockApp(shouldWatchServerRestart);
+
         return serverRestartWatcher(response);
       }
 

@@ -25,6 +25,7 @@ function InputDescription(props) {
   if (isFunction(props.message)) {
     content = props.message();
   }
+
   return (
     <Div
       className={cn(!isEmpty(props.className) && props.className)}

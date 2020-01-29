@@ -29,6 +29,7 @@
     "strapi-generate": "3.0.0-beta.18.6",
     "strapi-generate-api": "3.0.0-beta.18.6",
     "strapi-helper-plugin": "3.0.0-beta.18.6",
+    "strapi-utils": "3.0.0-beta.18.6",
     "yup": "^0.27.0"
   },
   "author": {
