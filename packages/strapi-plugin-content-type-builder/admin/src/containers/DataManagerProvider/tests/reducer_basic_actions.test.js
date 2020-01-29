@@ -385,6 +385,14 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
         },
       },
     };
+    const singleTypes = {
+      'application::aboutpage.aboutpage': {
+        uid: 'application::aboutpage.aboutpage',
+        schema: {
+          attributes: {},
+        },
+      },
+    };
     const expected = initialState
       .set('components', fromJS(components))
       .set('contentTypes', fromJS(contentTypes))
@@ -397,6 +405,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
         type: 'GET_DATA_SUCCEEDED',
         components,
         contentTypes,
+        singleTypes,
       })
     ).toEqual(expected);
   });

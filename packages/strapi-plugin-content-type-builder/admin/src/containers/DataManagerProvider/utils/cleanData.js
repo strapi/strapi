@@ -1,4 +1,6 @@
-import { get, has, isEqual, omit } from 'lodash';
+import { get, has, isEqual, omit, sortBy, camelCase } from 'lodash';
+
+import pluginId from '../../../pluginId';
 import makeUnique from '../../../utils/makeUnique';
 
 const getCreatedAndModifiedComponents = (allComponents, initialComponents) => {
@@ -157,9 +159,24 @@ const getComponentsToPost = (
   return formattedComponents;
 };
 
+const sortContentType = types =>
+  sortBy(
+    Object.keys(types)
+      .map(uid => ({
+        name: uid,
+        title: types[uid].schema.name,
+        uid,
+        to: `/plugins/${pluginId}/content-types/${uid}`,
+        kind: types[uid].schema.kind,
+      }))
+      .filter(obj => obj !== null),
+    obj => camelCase(obj.title)
+  );
+
 export {
   formatComponent,
   getComponentsToPost,
   getCreatedAndModifiedComponents,
   formatMainDataType,
+  sortContentType,
 };

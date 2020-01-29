@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { sortBy } from 'lodash';
+import { sortBy, camelCase, upperFirst } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { LeftMenuList, useGlobalContext } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
@@ -32,7 +32,6 @@ function LeftMenu({ wait }) {
   } = useDataManager();
   const { emitEvent, formatMessage } = useGlobalContext();
   const { push } = useHistory();
-
   const componentsData = sortBy(
     Object.keys(componentsGroupedByCategory).map(category => ({
       name: category,
@@ -86,18 +85,19 @@ function LeftMenu({ wait }) {
     );
   };
 
-  const handleClickOpenModal = async type => {
+  const handleClickOpenModal = async (type, kind = '') => {
     if (canOpenModalCreateCTorComponent()) {
-      const eventName =
-        type === 'contentType'
-          ? 'willCreateContentType'
-          : 'willCreateComponent';
-
-      emitEvent(eventName);
+      emitEvent(
+        `willCreate${upperFirst(
+          camelCase(kind === 'singleType' ? kind : type)
+        )}`
+      );
 
       await wait();
       push({
-        search: `modalType=${type}&actionType=create&settingType=base&forTarget=${type}&headerId=${getTrad(
+        search: `modalType=${type}${
+          kind ? `&kind=${kind}` : ''
+        }&actionType=create&settingType=base&forTarget=${type}&headerId=${getTrad(
           `modalForm.${type}.header-create`
         )}&header_icon_name_1=${type}&header_icon_isCustom_1=false&header_label_1=null`,
       });
@@ -105,7 +105,6 @@ function LeftMenu({ wait }) {
       displayNotificationCTNotSaved();
     }
   };
-
   const data = [
     {
       name: 'models',
@@ -119,12 +118,35 @@ function LeftMenu({ wait }) {
             componentProps: {
               id: `${pluginId}.button.model.create`,
               onClick: () => {
-                handleClickOpenModal('contentType');
+                handleClickOpenModal('contentType', 'collectionType');
               },
             },
           }
         : null,
-      links: sortedContentTypesList,
+      links: sortedContentTypesList.filter(
+        contentType => contentType.kind === 'collectionType'
+      ),
+    },
+    {
+      name: 'singleTypes',
+      title: {
+        id: `${pluginId}.menu.section.single-types.name.`,
+      },
+      searchable: true,
+      customLink: isInDevelopmentMode
+        ? {
+            Component: CustomLink,
+            componentProps: {
+              id: `${pluginId}.button.single-types.create`,
+              onClick: () => {
+                handleClickOpenModal('contentType', 'singleType');
+              },
+            },
+          }
+        : null,
+      links: sortedContentTypesList.filter(
+        singleType => singleType.kind === 'singleType'
+      ),
     },
     {
       name: 'components',
