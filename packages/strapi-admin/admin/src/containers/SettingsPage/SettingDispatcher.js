@@ -19,7 +19,7 @@ const SettingDispatcher = () => {
 
   const Compo = pluginToRender;
 
-  return <Compo baseURL="/settings" />;
+  return <Compo settingsBaseURL="/settings" />;
 };
 
 export default memo(SettingDispatcher);

@@ -1,5 +1,4 @@
 import pluginPkg from '../../package.json';
-
 import pluginId from './pluginId';
 
 export default strapi => {
