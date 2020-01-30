@@ -8,6 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, snakeCase, isEmpty, map, sortBy } from 'lodash';
+import { SETTINGS_BASE_URL } from '../../config';
 import LeftMenuLink from '../LeftMenuLink';
 import Wrapper from './Wrapper';
 import messages from './messages.json';
@@ -116,7 +117,7 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
     {
       icon: 'cog',
       label: messages.settings.id,
-      destination: '/settings',
+      destination: SETTINGS_BASE_URL,
     },
   ];
 

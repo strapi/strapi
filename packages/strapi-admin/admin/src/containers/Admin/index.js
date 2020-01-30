@@ -19,7 +19,7 @@ import {
   LoadingIndicatorPage,
   OverlayBlocker,
 } from 'strapi-helper-plugin';
-import { SHOW_TUTORIALS } from '../../config';
+import { SETTINGS_BASE_URL, SHOW_TUTORIALS } from '../../config';
 
 import Header from '../../components/Header/index';
 import Logout from '../../components/Logout';
@@ -150,7 +150,7 @@ export class Admin extends React.Component {
         enableGlobalOverlayBlocker={this.props.enableGlobalOverlayBlocker}
         formatMessage={this.props.intl.formatMessage}
         plugins={this.props.global.plugins}
-        settingsBaseURL="/settings"
+        settingsBaseURL={SETTINGS_BASE_URL}
         updatePlugin={this.props.updatePlugin}
       >
         <Wrapper>
@@ -187,7 +187,7 @@ export class Admin extends React.Component {
                   render={props => this.renderRoute(props, SettingsPage)}
                 />
                 <Route
-                  path="/settings"
+                  path={SETTINGS_BASE_URL}
                   render={props => this.renderRoute(props, SettingsPage)}
                   exact
                 />
