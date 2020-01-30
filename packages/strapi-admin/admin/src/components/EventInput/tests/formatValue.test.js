@@ -10,6 +10,6 @@ describe('utils | formatValue', () => {
 
     const formattedValue = formatValue(initialValue);
 
-    expect(expectedValue).toEqual(formattedValue);
+    expect(formattedValue).toEqual(expectedValue);
   });
 });
