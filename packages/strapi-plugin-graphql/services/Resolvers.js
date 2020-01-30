@@ -235,42 +235,11 @@ const buildAssocResolvers = model => {
     }, {});
 };
 
-const buildComponent = model => {
-  const { globalId, primaryKey } = model;
-
-  const schema = {
-    definition: '',
-    resolvers: {
-      [globalId]: {
-        id: obj => obj[primaryKey],
-        ...buildAssocResolvers(model),
-      },
-    },
-  };
-
-  const typeDefObj = buildTypeDefObj(model);
-
-  schema.definition += generateEnumDefinitions(model.attributes, globalId);
-  generateDynamicZoneDefinitions(model.attributes, globalId, schema);
-
-  const description = Schema.getDescription({}, model);
-  const fields = Schema.formatGQL(typeDefObj, {}, model);
-  const typeDef = `${description}type ${globalId} {${fields}}\n`;
-
-  schema.definition += typeDef;
-  schema.definition += Types.generateInputModel(model, globalId, {
-    allowIds: true,
-  });
-
-  return schema;
-};
-
 /**
  * Construct the GraphQL query & definition and apply the right resolvers.
  *
  * @return Object
  */
-
 const buildShadowCRUD = models => {
   const schema = {
     definition: '',
@@ -299,8 +268,49 @@ const buildShadowCRUD = models => {
   return schema;
 };
 
+const buildModelDefinition = model => {
+  const { globalId, primaryKey } = model;
+
+  const schema = {
+    definition: '',
+    query: {},
+    mutation: {},
+    resolvers: {
+      Query: {},
+      Mutation: {},
+      [globalId]: {
+        id: parent => parent[primaryKey] || parent.id,
+        ...buildAssocResolvers(model),
+      },
+    },
+  };
+
+  const typeDefObj = buildTypeDefObj(model);
+
+  schema.definition += generateEnumDefinitions(model.attributes, globalId);
+  generateDynamicZoneDefinitions(model.attributes, globalId, schema);
+
+  const description = Schema.getDescription({}, model);
+  const fields = Schema.formatGQL(typeDefObj, {}, model);
+  const typeDef = `${description}type ${globalId} {${fields}}\n`;
+
+  schema.definition += typeDef;
+  return schema;
+};
+
+const buildComponent = component => {
+  const { globalId } = component;
+  const schema = buildModelDefinition(component);
+
+  schema.definition += Types.generateInputModel(component, globalId, {
+    allowIds: true,
+  });
+
+  return schema;
+};
+
 const buildSingleType = model => {
-  const { globalId, uid, modelName } = model;
+  const { uid, modelName } = model;
 
   const singularName = toSingular(modelName);
 
@@ -310,31 +320,7 @@ const buildSingleType = model => {
 
   const globalType = _.get(_schema, ['type', model.globalId], {});
 
-  const localSchema = {
-    definition: '',
-    query: {},
-    mutation: {},
-    resolvers: {
-      Query: {},
-      Mutation: {},
-      // define default resolver for this model
-      [globalId]: {
-        id: parent => parent[model.primaryKey] || parent.id,
-        ...buildAssocResolvers(model),
-      },
-    },
-  };
-
-  const typeDefObj = buildTypeDefObj(model);
-
-  localSchema.definition += generateEnumDefinitions(model.attributes, globalId);
-  generateDynamicZoneDefinitions(model.attributes, globalId, localSchema);
-
-  const description = Schema.getDescription(globalType, model);
-  const fields = Schema.formatGQL(typeDefObj, globalType, model);
-  const typeDef = `${description}type ${globalId} {${fields}}\n`;
-
-  localSchema.definition += typeDef;
+  const localSchema = buildModelDefinition(model);
 
   // Add definition to the schema but this type won't be "queriable" or "mutable".
   if (globalType === false) {
