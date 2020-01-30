@@ -51,6 +51,8 @@ const StyledLi = styled.li`
         }
       `;
     }
+
+    return '';
   }}
 `;
 
