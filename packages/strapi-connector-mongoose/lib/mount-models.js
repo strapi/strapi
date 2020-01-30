@@ -229,7 +229,8 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
     const refToStrapiRef = obj => {
       const ref = obj.ref;
 
-      let plainData = typeof ref.toJSON === 'function' ? ref.toJSON() : ref;
+      let plainData =
+        ref && typeof ref.toJSON === 'function' ? ref.toJSON() : ref;
 
       if (typeof plainData !== 'object') return ref;
 
