@@ -1,7 +1,6 @@
 {
   "Analytics": "Phân Tích",
   "Content Manager": "Quản Lý Nội Dung",
-  "Content Type Builder": "Xây Dựng Loại Nội Dung",
   "Documentation": "Tài liệu",
   "Email": "Email",
   "Files Upload": "Tải Tâp Tin Lên",
@@ -31,7 +30,6 @@
   "app.components.HomePage.button.quickStart": "BẮT ĐẦU HƯỚNG DẪN KHỞI ĐẦU NHANH",
   "app.components.HomePage.community": "Tìm cộng đồng trên web",
   "app.components.HomePage.community.content": "Thảo luận với thành viên, người đóng góp và lập trình viên trên những kênh khác nhau.",
-  "app.components.HomePage.create": "Tạo Loại Nội Dung đầu tiên của bạn",
   "app.components.HomePage.createBlock.content.first": "Những ",
   "app.components.HomePage.createBlock.content.second": " plugin sẽ giúp bạn định nghĩa cấu trúc các loại nội dung. Nếu bạn thấy bỡ ngỡ, chúng tôi khuyến cáo bạn nên đi theo",
   "app.components.HomePage.createBlock.content.tutorial": " hướng dẫn.",
@@ -159,7 +157,6 @@
   "HomePage.helmet.title": "Trang chủ",
   "HomePage.welcome.congrats": "Chúc mừng!",
   "HomePage.welcome.congrats.content": "Bạn đã đăng nhập như là người quản trị đầu tiên. Để khám phá những tính năng mạnh mẽ được cung cấp bởi Strapi.",
-  "HomePage.welcome.congrats.content.bold": "chúng tôi khuyến khích bạn tạo Loại-Nội-Dung của bạn đầu tiên",
   "HomePage.community": "Tham gia vào Cộng đồng",
   "HomePage.roadmap": "Xem lộ trình của chúng tôi",
   "HomePage.greetings": "Chào {name}!",

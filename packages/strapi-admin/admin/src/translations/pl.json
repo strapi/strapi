@@ -1,7 +1,6 @@
 {
   "Analytics": "Analityka",
   "Content Manager": "Treści",
-  "Content Type Builder": "Modele",
   "Documentation": "Dokumentacja",
   "Email": "Email",
   "Files Upload": "Upload plików",
@@ -31,7 +30,6 @@
   "app.components.HomePage.button.quickStart": "ROZPOCZNIJ PORADNIK – SZYBKI START",
   "app.components.HomePage.community": "Odkryj internetową społeczność",
   "app.components.HomePage.community.content": "Dyskutuj z członkami zespołu, współtwórcami i programistami na różnych kanałach.",
-  "app.components.HomePage.create": "Stwórz swoją pierwszą zawartość",
   "app.components.HomePage.createBlock.content.first": "Wtyczka ",
   "app.components.HomePage.createBlock.content.second": " pomoże ci zdefiniować strukturę danych twoich modeli. Jeśli dopiero rozpoczynasz przygodę ze Strapi, zalecamy zapoznać się z poradnikiem ",
   "app.components.HomePage.createBlock.content.tutorial": " .",
@@ -159,7 +157,6 @@
   "HomePage.helmet.title": "Strona Główna",
   "HomePage.welcome.congrats": "Gratulacje!",
   "HomePage.welcome.congrats.content": "Jesteś zalogowany jako pierwszy administrator. Aby odkryć zaawansowane funkcje oferowane przez Strapi,",
-  "HomePage.welcome.congrats.content.bold": "zalecamy utworzenie pierwszego Modelu.",
   "HomePage.community": "Dołącz do społeczności",
   "HomePage.roadmap": "Zobacz harmonogram",
   "HomePage.greetings": "Cześć {name}!",
