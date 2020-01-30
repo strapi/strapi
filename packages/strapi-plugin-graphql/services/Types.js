@@ -291,6 +291,8 @@ module.exports = {
     const singularName = toSingular(name);
     const inputName = toInputName(name);
 
+    const { kind } = model;
+
     switch (action) {
       case 'create':
         return `
@@ -298,11 +300,24 @@ module.exports = {
           type ${mutationName}Payload { ${singularName}: ${model.globalId} }
         `;
       case 'update':
+        if (kind === 'singleType') {
+          return `
+          input ${mutationName}Input  { data: edit${inputName} }
+          type ${mutationName}Payload { ${singularName}: ${model.globalId} }
+        `;
+        }
+
         return `
           input ${mutationName}Input  { where: InputID, data: edit${inputName} }
           type ${mutationName}Payload { ${singularName}: ${model.globalId} }
         `;
       case 'delete':
+        if (kind === 'singleType') {
+          return `
+          type ${mutationName}Payload { ${singularName}: ${model.globalId} }
+        `;
+        }
+
         return `
           input ${mutationName}Input  { where: InputID }
           type ${mutationName}Payload { ${singularName}: ${model.globalId} }

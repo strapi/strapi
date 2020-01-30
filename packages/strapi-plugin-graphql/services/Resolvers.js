@@ -498,10 +498,17 @@ const buildMutation = ({ model, action }, { _schema }) => {
     };
   }
 
+  const { kind } = model;
+
+  let mutationDef = `${mutationName}(input: ${mutationName}Input)`;
+  if (kind === 'singleType' && action === 'delete') {
+    mutationDef = mutationName;
+  }
+
   return {
     definition,
     mutation: {
-      [`${mutationName}(input: ${mutationName}Input)`]: `${mutationName}Payload`,
+      [mutationDef]: `${mutationName}Payload`,
     },
     resolvers: {
       Mutation: {
