@@ -156,7 +156,6 @@ const successMessage = async (
 ) => {
   var npm = packageManager == 'npm' ? 'run' : '';
 
-  console.log(backendScripts.develop);
   console.log(`${chalk.green('\nSuccess!')} Cloned ${destinationName}`);
   console.log(
     `Inside that directory, you can run both of your frontend and backend server:
