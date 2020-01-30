@@ -86,20 +86,18 @@ function LeftMenu({ wait }) {
   };
 
   const handleClickOpenModal = async (type, kind = '') => {
+    const contentType = kind === 'singleType' ? kind : type;
+
     if (canOpenModalCreateCTorComponent()) {
-      emitEvent(
-        `willCreate${upperFirst(
-          camelCase(kind === 'singleType' ? kind : type)
-        )}`
-      );
+      emitEvent(`willCreate${upperFirst(camelCase(contentType))}`);
 
       await wait();
       push({
         search: `modalType=${type}${
           kind ? `&kind=${kind}` : ''
         }&actionType=create&settingType=base&forTarget=${type}&headerId=${getTrad(
-          `modalForm.${type}.header-create`
-        )}&header_icon_name_1=${type}&header_icon_isCustom_1=false&header_label_1=null`,
+          `modalForm.${contentType}.header-create`
+        )}&header_icon_name_1=${contentType}&header_icon_isCustom_1=false&header_label_1=null`,
       });
     } else {
       displayNotificationCTNotSaved();
