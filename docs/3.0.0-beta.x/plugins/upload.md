@@ -213,7 +213,7 @@ And for your files, they have to be prefixed by `files`.
 Example here with cover attribute `files.cover`.
 
 ::: tip
-If you want to upload files for a component, you will have to specify the inidex of the item you wan to add the file.
+If you want to upload files for a component, you will have to specify the index of the item you want to add the file.
 Example `files.my_component_name[the_index].attribute_name`
 :::
 
