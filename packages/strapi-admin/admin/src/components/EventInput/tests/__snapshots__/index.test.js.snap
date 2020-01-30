@@ -129,8 +129,8 @@ exports[`<EventInput /> should match the snapshot 1`] = `
             <input
               autoComplete="off"
               autoFocus={false}
-              checked={false}
-              className="sc-htpNat cllrAw"
+              checked={true}
+              className="sc-htpNat BNnRX"
               id="media"
               name="media"
               onChange={[Function]}
@@ -153,7 +153,7 @@ exports[`<EventInput /> should match the snapshot 1`] = `
             <input
               autoComplete="off"
               autoFocus={false}
-              checked={false}
+              checked={true}
               className="sc-htpNat BNnRX"
               disabled={false}
               id="media.create"
@@ -199,7 +199,7 @@ exports[`<EventInput /> should match the snapshot 1`] = `
             <input
               autoComplete="off"
               autoFocus={false}
-              checked={false}
+              checked={true}
               className="sc-htpNat BNnRX"
               disabled={false}
               id="media.delete"
