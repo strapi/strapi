@@ -124,12 +124,19 @@ export class Admin extends React.Component {
   render() {
     const {
       global: {
+        autoReload,
         blockApp,
+        currentEnvironment,
         overlayBlockerData,
         plugins,
         showGlobalAppBlocker,
         strapiVersion,
       },
+      disableGlobalOverlayBlocker,
+      emitEvent,
+      enableGlobalOverlayBlocker,
+      intl: { formatMessage },
+      updatePlugin,
     } = this.props;
 
     // We need the admin data in order to make the initializers work
@@ -144,13 +151,14 @@ export class Admin extends React.Component {
 
     return (
       <GlobalContextProvider
-        emitEvent={this.props.emitEvent}
-        currentEnvironment={this.props.global.currentEnvironment}
-        disableGlobalOverlayBlocker={this.props.disableGlobalOverlayBlocker}
-        enableGlobalOverlayBlocker={this.props.enableGlobalOverlayBlocker}
-        formatMessage={this.props.intl.formatMessage}
-        plugins={this.props.global.plugins}
-        updatePlugin={this.props.updatePlugin}
+        autoReload={autoReload}
+        emitEvent={emitEvent}
+        currentEnvironment={currentEnvironment}
+        disableGlobalOverlayBlocker={disableGlobalOverlayBlocker}
+        enableGlobalOverlayBlocker={enableGlobalOverlayBlocker}
+        formatMessage={formatMessage}
+        plugins={plugins}
+        updatePlugin={updatePlugin}
       >
         <Wrapper>
           <LeftMenu version={strapiVersion} plugins={plugins} />
@@ -216,6 +224,7 @@ Admin.propTypes = {
   emitEvent: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
   global: PropTypes.shape({
+    autoReload: PropTypes.bool,
     blockApp: PropTypes.bool,
     currentEnvironment: PropTypes.string,
     overlayBlockerData: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
