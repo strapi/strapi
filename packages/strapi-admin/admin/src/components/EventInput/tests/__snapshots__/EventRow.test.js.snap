@@ -9,8 +9,8 @@ exports[`<EventRow /> should match the snapshot 1`] = `
       <input
         autoComplete="off"
         autoFocus={false}
-        checked={true}
-        className="sc-EHOje cqFDuP"
+        checked={false}
+        className="sc-EHOje hsBftH"
         id="events"
         name="events"
         onChange={[Function]}
@@ -24,6 +24,75 @@ exports[`<EventRow /> should match the snapshot 1`] = `
       >
         events
       </label>
+    </div>
+  </td>
+  <td>
+    <div
+      className="sc-bZQynM iXyeyW"
+    >
+      <input
+        autoComplete="off"
+        autoFocus={false}
+        checked={true}
+        className="sc-EHOje cqFDuP"
+        disabled={false}
+        id="entry.create"
+        name="entry.create"
+        onChange={[Function]}
+        placeholder={null}
+        tabIndex="0"
+        type="checkbox"
+      />
+      <label
+        className="sc-kpOJdX kYXOPJ"
+        htmlFor="entry.create"
+      />
+    </div>
+  </td>
+  <td>
+    <div
+      className="sc-bZQynM iXyeyW"
+    >
+      <input
+        autoComplete="off"
+        autoFocus={false}
+        checked={false}
+        className="sc-EHOje cqFDuP"
+        disabled={false}
+        id="entry.update"
+        name="entry.update"
+        onChange={[Function]}
+        placeholder={null}
+        tabIndex="0"
+        type="checkbox"
+      />
+      <label
+        className="sc-kpOJdX kYXOPJ"
+        htmlFor="entry.update"
+      />
+    </div>
+  </td>
+  <td>
+    <div
+      className="sc-bZQynM iXyeyW"
+    >
+      <input
+        autoComplete="off"
+        autoFocus={false}
+        checked={false}
+        className="sc-EHOje cqFDuP"
+        disabled={false}
+        id="entry.delete"
+        name="entry.delete"
+        onChange={[Function]}
+        placeholder={null}
+        tabIndex="0"
+        type="checkbox"
+      />
+      <label
+        className="sc-kpOJdX kYXOPJ"
+        htmlFor="entry.delete"
+      />
     </div>
   </td>
 </tr>

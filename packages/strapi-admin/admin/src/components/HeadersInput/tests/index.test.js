@@ -52,7 +52,19 @@ describe('Admin | components | HeadersInput', () => {
 
   describe('Actions', () => {
     it('should call onRemove props on remove button click', () => {
-      const renderedComponent = shallow(<HeadersInput {...props} />);
+      const headers = [
+        {
+          key: 'Accept',
+          value: 'text/html',
+        },
+        {
+          key: 'Authorization',
+          value: 'Basic YWxhZGRpbjpvcGVuc2VzYW1l',
+        },
+      ];
+      const renderedComponent = shallow(
+        <HeadersInput {...props} value={headers} />
+      );
 
       const removeButton = renderedComponent.find(CircleButton).at(0);
       removeButton.simulate('click');
