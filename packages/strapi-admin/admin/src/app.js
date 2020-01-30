@@ -62,7 +62,10 @@ Object.keys(plugins).forEach(current => {
     return plugin;
   };
   const currentPluginFn = plugins[current];
-  const plugin = currentPluginFn({ registerPlugin });
+  const plugin = currentPluginFn({
+    registerPlugin,
+    settingsBaseURL: '/settings',
+  });
 
   const pluginTradsPrefixed = languages.reduce((acc, lang) => {
     const currentLocale = plugin.trads[lang];

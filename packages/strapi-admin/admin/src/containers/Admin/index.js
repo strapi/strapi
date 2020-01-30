@@ -150,6 +150,7 @@ export class Admin extends React.Component {
         enableGlobalOverlayBlocker={this.props.enableGlobalOverlayBlocker}
         formatMessage={this.props.intl.formatMessage}
         plugins={this.props.global.plugins}
+        settingsBaseURL="/settings"
         updatePlugin={this.props.updatePlugin}
       >
         <Wrapper>
@@ -182,8 +183,13 @@ export class Admin extends React.Component {
                   render={props => this.renderRoute(props, Marketplace)}
                 />
                 <Route
+                  path="/settings/:settingId"
+                  render={props => this.renderRoute(props, SettingsPage)}
+                />
+                <Route
                   path="/settings"
                   render={props => this.renderRoute(props, SettingsPage)}
+                  exact
                 />
                 <Route key="7" path="" component={NotFoundPage} />
                 <Route key="8" path="404" component={NotFoundPage} />

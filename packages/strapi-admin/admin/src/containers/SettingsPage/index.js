@@ -4,22 +4,20 @@
  *
  */
 
-import React, { Suspense, lazy } from 'react';
-import {
-  useGlobalContext,
-  LeftMenu,
-  LeftMenuList,
-  LoadingIndicatorPage,
-} from 'strapi-helper-plugin';
+import React, { memo } from 'react';
+import { useGlobalContext, LeftMenu, LeftMenuList } from 'strapi-helper-plugin';
 import { get } from 'lodash';
-import { Switch, Route } from 'react-router-dom';
+import { Switch, Redirect, Route, useParams } from 'react-router-dom';
 
-const EditView = lazy(() => import('../Webhooks/EditView'));
-const ListView = lazy(() => import('../Webhooks/ListView'));
-const Wrapper = lazy(() => import('./Wrapper'));
+import EditView from '../Webhooks/EditView';
+import ListView from '../Webhooks/ListView';
+import SettingDispatcher from './SettingDispatcher';
+import Wrapper from './Wrapper';
 
 function SettingsPage() {
-  const { formatMessage, plugins } = useGlobalContext();
+  const { settingId } = useParams();
+  const { formatMessage, plugins, settingsBaseURL } = useGlobalContext();
+
   const pluginsMenu = Object.keys(plugins).reduce((acc, current) => {
     const pluginMenu = get(plugins, [current, 'settings', 'menuSection'], null);
 
@@ -39,7 +37,7 @@ function SettingsPage() {
       links: [
         {
           title: formatMessage({ id: 'Settings.webhooks.title' }),
-          to: '/settings/webhooks',
+          to: `${settingsBaseURL}/webhooks`,
           name: 'webhooks',
         },
       ],
@@ -47,29 +45,44 @@ function SettingsPage() {
     ...pluginsMenu,
   ];
 
+  // Redirect to the first static link of the menu
+  // This is needed in order to keep the menu highlight
+  // The link points to /settings instead of /settings/webhooks
+  if (!settingId) {
+    return <Redirect to={`${settingsBaseURL}/webhooks`} />;
+  }
+
   return (
-    <Suspense fallback={<LoadingIndicatorPage />}>
-      <Wrapper>
-        <div className="row">
-          <div className="col-md-3">
-            <LeftMenu>
-              {menuItems.map(item => {
-                return <LeftMenuList {...item} key={item.id} />;
-              })}
-            </LeftMenu>
-          </div>
-          <div className="col-md-9">
-            {/* TODO when needed - Routing */}
-            {/* <Webhooks /> */}
-            <Switch>
-              <Route exact path="/settings/webhooks" component={ListView} />
-              <Route exact path="/settings/webhooks/:id" component={EditView} />
-            </Switch>
-          </div>
+    <Wrapper>
+      <div className="row">
+        <div className="col-md-3">
+          <LeftMenu>
+            {menuItems.map(item => {
+              return <LeftMenuList {...item} key={item.id} />;
+            })}
+          </LeftMenu>
         </div>
-      </Wrapper>
-    </Suspense>
+        <div className="col-md-9">
+          <Switch>
+            <Route
+              exact
+              path={`${settingsBaseURL}/webhooks`}
+              component={ListView}
+            />
+            <Route
+              exact
+              path={`${settingsBaseURL}/webhooks/:id`}
+              component={EditView}
+            />
+            <Route
+              path={`${settingsBaseURL}/:pluginId`}
+              component={SettingDispatcher}
+            />
+          </Switch>
+        </div>
+      </div>
+    </Wrapper>
   );
 }
 
-export default SettingsPage;
+export default memo(SettingsPage);

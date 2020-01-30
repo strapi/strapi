@@ -68,7 +68,7 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
   // Check if the plugins list is empty or not and display plugins by name
   const pluginsLinks = !isEmpty(plugins) ? (
     map(sortBy(plugins, 'name'), plugin => {
-      const shouldInjectPlugin = plugin.mainComponent !== null;
+      const shouldInjectPlugin = !!plugin.mainComponent;
 
       if (
         plugin.id !== 'email' &&
@@ -116,7 +116,7 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
     {
       icon: 'cog',
       label: messages.settings.id,
-      destination: '/settings/webhooks',
+      destination: '/settings',
     },
   ];
 
