@@ -16,7 +16,7 @@ const setPackageManager = async () => {
 const checkGitIsInstalled = async () => {
   console.log(chalk.yellow('Checking if git is installed...'));
   try {
-    await execa('gito', ['--version']);
+    await execa('git', ['--version']);
   } catch (e) {
     return !e.failed;
   }
@@ -137,7 +137,26 @@ const runSeed = async (packageManager, destination) => {
   });
 };
 
-const successMessage = async destinationName => {
+const getScripts = async destination => {
+  const backendFile = `${destination}/backend/package.json`;
+  const frontendFile = `${destination}/frontend/package.json`;
+
+  // Read the package.json inside the backend directory (strapi)
+  const packageJsonBackend = await fs.readJSON(backendFile);
+  const packageJsonFrontend = await fs.readJSON(frontendFile);
+
+  return [packageJsonBackend.scripts, packageJsonFrontend.scripts];
+};
+
+const successMessage = async (
+  destinationName,
+  backendScripts,
+  frontendScripts,
+  packageManager
+) => {
+  var npm = packageManager == 'npm' ? 'run' : '';
+
+  console.log(backendScripts.develop);
   console.log(`${chalk.green('\nSuccess!')} Cloned ${destinationName}`);
   console.log(
     `Inside that directory, you can run both of your frontend and backend server:
@@ -145,21 +164,24 @@ const successMessage = async destinationName => {
 
   backend
 
-  ${chalk.cyan(`cd ${destinationName}/backend`)}
-  ${chalk.cyan('yarn develop')}
-    Starts the development server.
+  ${chalk.cyan(`cd ${destinationName}/backend`)}`
+  );
+  for (var key in backendScripts) {
+    console.log(`  ${chalk.cyan(`${packageManager} ${npm} ${key}`)}`);
+  }
+  console.log(`
 
   -------------
 
   frontend
 
-  ${chalk.cyan(`cd ${destinationName}/frontend`)}
-  ${chalk.cyan('yarn start')}
-    Starts the development server.
-
+  ${chalk.cyan(`cd ${destinationName}/frontend`)}`);
+  for (var key2 in frontendScripts) {
+    console.log(`  ${chalk.cyan(`${packageManager} ${npm} ${key2}`)}`);
+  }
+  console.log(`
   Thanks for giving this starter a try!
-  `
-  );
+  `);
 };
 
 module.exports = async function createStarterProject(scope) {
@@ -176,9 +198,13 @@ module.exports = async function createStarterProject(scope) {
   let destination = scope.rootPath;
   let destinationName = scope.name;
 
+  let backendScripts = '';
+  let frontendScripts = '';
+
   // Archive from the github url
   const archive = repository.replace('.git', '/archive/master.zip');
   const archiveName = archive.split('/')[4].concat('-master');
+
   let hasGit = await checkGitIsInstalled();
 
   // If git is installed, clone the repository, else download the project
@@ -202,5 +228,11 @@ module.exports = async function createStarterProject(scope) {
   await runSeed(packageManager, destination);
   await iniGitRepository(destination, destinationName);
   await createInitialGitCommit(destination, destinationName, repository);
-  await successMessage(destinationName);
+  [backendScripts, frontendScripts] = await getScripts(destination);
+  await successMessage(
+    destinationName,
+    backendScripts,
+    frontendScripts,
+    packageManager
+  );
 };
