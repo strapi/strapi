@@ -9,6 +9,31 @@ import trads from './translations';
 export default strapi => {
   const pluginDescription =
     pluginPkg.strapi.description || pluginPkg.description;
+  const settings = {};
+  // const settings = {
+  //   menuSection: {
+  //     id: pluginId,
+  //     title: {
+  //       id: 'Permissions',
+  //     },
+  //     links: [
+  //       {
+  //         title: 'coucou2',
+  //         to: '/settings/webhooks',
+  //         name: 'coucou2',
+  //         links: [
+  //           {
+  //             title: {
+  //               id: 'coucou',
+  //             },
+  //             to: '/settings/webhooks',
+  //             name: 'webhooks',
+  //           },
+  //         ],
+  //       },
+  //     ],
+  //   },
+  // };
 
   const plugin = {
     blockerComponent: null,
@@ -25,6 +50,7 @@ export default strapi => {
     mainComponent: App,
     name: pluginPkg.strapi.name,
     preventComponentRendering: false,
+    settings,
     suffixUrl: () => '/roles',
     suffixUrlToReplaceForLeftMenuHighlight: '/roles',
     trads,
