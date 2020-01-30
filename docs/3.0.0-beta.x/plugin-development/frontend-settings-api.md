@@ -80,11 +80,11 @@ export default strapi => {
 };
 ```
 
-At this point, the plugin creates a new section (**_Super cool setting_**) which will contains two links `Setting page 1` and `Setting page 2` these links doesn't point to any component as the corresponding as not been declared yet.
+At this point, the plugin creates a new section (**_Super cool setting_**) which will contains two links `Setting page 1` and `Setting page 2` these links don't point to any component as the corresponding one as not been declared yet.
 
 ### Declaring the setting Component
 
-The exported Setting component which receives `settingsBaseURL` as props in order to generate a dynamic routing which should be used to associated the two endpoints created with their corresponding components.
+The exported Setting component which receives `settingsBaseURL` as props in order to generate a dynamic routing which should be used to associate the two endpoints created with their corresponding components.
 
 With the configuration from above we could easily create our plugin Settings view.
 

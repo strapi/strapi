@@ -183,7 +183,7 @@ export class Admin extends React.Component {
                   render={props => this.renderRoute(props, Marketplace)}
                 />
                 <Route
-                  path="/settings/:settingId"
+                  path={`${SETTINGS_BASE_URL}/:settingId`}
                   render={props => this.renderRoute(props, SettingsPage)}
                 />
                 <Route
