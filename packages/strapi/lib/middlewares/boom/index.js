@@ -95,8 +95,8 @@ module.exports = strapi => {
         }
 
         // Format `ctx.body` and `ctx.status`.
-        ctx.status = ctx.body.isBoom ? ctx.body.output.statusCode : ctx.status;
         ctx.body = ctx.body.isBoom ? ctx.body.output.payload : ctx.body;
+        ctx.status = ctx.body.isBoom ? ctx.body.output.statusCode : ctx.status;
       });
     },
 
