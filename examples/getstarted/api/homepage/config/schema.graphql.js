@@ -24,7 +24,7 @@ module.exports = {
         resolver: 'application::homepage.homepage.find',
       },
       q1: {
-        policies: ['homepage.test'],
+        policies: ['test'],
         resolverOf: 'application::restaurant.restaurant.find',
         resolver(root, args, ctx) {
           return {

@@ -424,6 +424,7 @@ const buildCollectionType = model => {
         Query: {
           [singularName]: {
             resolver: `${model.uid}.findOne`,
+            ..._.get(_schema, `resolver.Query.${singularName}`),
           },
         },
       },
@@ -431,7 +432,7 @@ const buildCollectionType = model => {
   }
 
   if (isQueryEnabled(_schema, pluralName)) {
-    const resolverObj = {
+    const resolverOpt = {
       resolver: `${model.uid}.find`,
       ..._.get(_schema, `resolver.Query.${pluralName}`),
     };
@@ -442,10 +443,24 @@ const buildCollectionType = model => {
       },
       resolvers: {
         Query: {
-          [pluralName]: resolverObj,
+          [pluralName]: resolverOpt,
         },
       },
     });
+
+    // TODO: Add support for Graphql Aggregation in Bookshelf ORM
+    if (model.orm === 'mongoose') {
+      // Generation the aggregation for the given model
+      const aggregationSchema = Aggregator.formatModelConnectionsGQL({
+        fields: typeDefObj,
+        model,
+        name: modelName,
+        resolver: resolverOpt,
+        plugin,
+      });
+
+      mergeSchemas(localSchema, aggregationSchema);
+    }
   }
 
   // Add model Input definition.
@@ -457,20 +472,6 @@ const buildCollectionType = model => {
 
     mergeSchemas(localSchema, mutationScheam);
   });
-
-  // TODO: Add support for Graphql Aggregation in Bookshelf ORM
-  if (model.orm === 'mongoose') {
-    // Generation the aggregation for the given model
-    const aggregationSchema = Aggregator.formatModelConnectionsGQL({
-      fields: typeDefObj,
-      model,
-      name: modelName,
-      rootQuery: pluralName,
-      plugin,
-    });
-
-    mergeSchemas(localSchema, aggregationSchema);
-  }
 
   return localSchema;
 };

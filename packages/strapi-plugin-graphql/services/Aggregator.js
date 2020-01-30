@@ -7,8 +7,6 @@
 const _ = require('lodash');
 const pluralize = require('pluralize');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
-const policyUtils = require('strapi-utils').policy;
-const compose = require('koa-compose');
 
 const Schema = require('./Schema.js');
 const GraphQLQuery = require('./Query.js');
@@ -204,14 +202,15 @@ const preProcessGroupByData = function({ result, fieldKey, filters, model }) {
   const _result = _.toArray(result);
   return _.map(_result, value => {
     return {
-      key: value._id,
+      key: value._id.toString(),
       connection: () => {
         // filter by the grouped by value in next connection
+
         return {
           ...filters,
           where: {
             ...(filters.where || {}),
-            [fieldKey]: value._id,
+            [fieldKey]: value._id.toString(),
           },
         };
       },
@@ -256,7 +255,7 @@ const createGroupByFieldsResolver = function(model, fields, name) {
       filters: convertRestQueryParams(params),
       aggregate: true,
     }).group({
-      _id: `$${fieldKey}`,
+      _id: `$${fieldKey === 'id' ? model.primaryKey : fieldKey}`,
     });
 
     return preProcessGroupByData({
@@ -476,14 +475,13 @@ const formatModelConnectionsGQL = function({
   fields,
   model,
   name,
-  rootQuery,
+  resolver,
   plugin,
 }) {
   const { globalId } = model;
 
-  const _schema = strapi.plugins.graphql.config._schema.graphql;
-
   const connectionGlobalId = `${globalId}Connection`;
+
   const aggregatorFormat = formatConnectionAggregator(fields, model, name);
   const groupByFormat = formatConnectionGroupBy(fields, model, name);
   const connectionFields = {
@@ -503,16 +501,9 @@ const formatModelConnectionsGQL = function({
 
   const queryName = `${pluralName}Connection(sort: String, limit: Int, start: Int, where: JSON)`;
 
-  const policiesFn = [
-    policyUtils.globalPolicy({
-      controller: name,
-      action: 'find',
-      plugin,
-    }),
-  ];
-
-  policiesFn.push(
-    policyUtils.get('plugins.users-permissions.permissions', plugin, name)
+  const connectionResolver = Schema.buildQuery(
+    `${pluralName}Connection.values`,
+    resolver
   );
 
   return {
@@ -523,25 +514,16 @@ const formatModelConnectionsGQL = function({
     },
     resolvers: {
       Query: {
-        async [`${pluralName}Connection`](obj, options, { context }) {
-          // need to check
-          const ctx = context.app.createContext(
-            _.clone(context.req),
-            _.clone(context.res)
-          );
-
-          await compose(policiesFn)(ctx);
-          return options;
+        [`${pluralName}Connection`]: {
+          resolverOf: resolver.resolverOf || resolver.resolver,
+          resolver(obj, options, { context }) {
+            return options;
+          },
         },
       },
       [connectionGlobalId]: {
-        values(obj, options, context) {
-          // use base resolver
-          return _.get(_schema, ['resolver', 'Query', rootQuery])(
-            obj,
-            obj,
-            context
-          );
+        values(obj, options, gqlCtx) {
+          return connectionResolver(obj, obj, gqlCtx);
         },
         groupBy(obj, options, context) {
           return obj;

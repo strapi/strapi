@@ -16,169 +16,167 @@ const { mergeSchemas, createDefaultSchema } = require('./utils');
 const policyUtils = require('strapi-utils').policy;
 const compose = require('koa-compose');
 
-const schemaBuilder = {
-  /**
-   * Receive an Object and return a string which is following the GraphQL specs.
-   *
-   * @return String
-   */
+/**
+ * Receive an Object and return a string which is following the GraphQL specs.
+ *
+ * @return String
+ */
 
-  formatGQL: function(fields, description = {}, model = {}, type = 'field') {
-    const typeFields = JSON.stringify(fields, null, 2).replace(/['",]+/g, '');
+const formatGQL = (fields, description = {}, model = {}, type = 'field') => {
+  const typeFields = JSON.stringify(fields, null, 2).replace(/['",]+/g, '');
 
-    const lines = typeFields.split('\n');
+  const lines = typeFields.split('\n');
 
-    // Try to add description for field.
-    if (type === 'field') {
-      return lines
-        .map(line => {
-          if (['{', '}'].includes(line)) {
-            return '';
-          }
-
-          const split = line.split(':');
-          const attribute = _.trim(split[0]);
-          const info =
-            (_.isString(description[attribute])
-              ? description[attribute]
-              : _.get(description[attribute], 'description')) ||
-            _.get(model, `attributes.${attribute}.description`);
-          const deprecated =
-            _.get(description[attribute], 'deprecated') ||
-            _.get(model, `attributes.${attribute}.deprecated`);
-
-          // Snakecase an attribute when we find a dash.
-          if (attribute.indexOf('-') !== -1) {
-            line = `  ${_.snakeCase(attribute)}: ${_.trim(split[1])}`;
-          }
-
-          if (info) {
-            line = `  """\n    ${info}\n  """\n${line}`;
-          }
-
-          if (deprecated) {
-            line = `${line} @deprecated(reason: "${deprecated}")`;
-          }
-
-          return line;
-        })
-        .join('\n');
-    } else if (type === 'query' || type === 'mutation') {
-      return lines
-        .map((line, index) => {
-          if (['{', '}'].includes(line)) {
-            return '';
-          }
-
-          const split = Object.keys(fields)[index - 1].split('(');
-          const attribute = _.trim(split[0]);
-          const info = _.get(description[attribute], 'description');
-          const deprecated = _.get(description[attribute], 'deprecated');
-
-          // Snakecase an attribute when we find a dash.
-          if (attribute.indexOf('-') !== -1) {
-            line = `  ${_.snakeCase(attribute)}(${_.trim(split[1])}`;
-          }
-
-          if (info) {
-            line = `  """\n    ${info}\n  """\n${line}`;
-          }
-
-          if (deprecated) {
-            line = `${line} @deprecated(reason: "${deprecated}")`;
-          }
-
-          return line;
-        })
-        .join('\n');
-    }
-
+  // Try to add description for field.
+  if (type === 'field') {
     return lines
-      .map((line, index) => {
-        if ([0, lines.length - 1].includes(index)) {
+      .map(line => {
+        if (['{', '}'].includes(line)) {
           return '';
+        }
+
+        const split = line.split(':');
+        const attribute = _.trim(split[0]);
+        const info =
+          (_.isString(description[attribute])
+            ? description[attribute]
+            : _.get(description[attribute], 'description')) ||
+          _.get(model, `attributes.${attribute}.description`);
+        const deprecated =
+          _.get(description[attribute], 'deprecated') ||
+          _.get(model, `attributes.${attribute}.deprecated`);
+
+        // Snakecase an attribute when we find a dash.
+        if (attribute.indexOf('-') !== -1) {
+          line = `  ${_.snakeCase(attribute)}: ${_.trim(split[1])}`;
+        }
+
+        if (info) {
+          line = `  """\n    ${info}\n  """\n${line}`;
+        }
+
+        if (deprecated) {
+          line = `${line} @deprecated(reason: "${deprecated}")`;
         }
 
         return line;
       })
       .join('\n');
-  },
+  } else if (type === 'query' || type === 'mutation') {
+    return lines
+      .map((line, index) => {
+        if (['{', '}'].includes(line)) {
+          return '';
+        }
 
-  /**
-   * Retrieve description from variable and return a string which follow the GraphQL specs.
-   *
-   * @return String
-   */
+        const split = Object.keys(fields)[index - 1].split('(');
+        const attribute = _.trim(split[0]);
+        const info = _.get(description[attribute], 'description');
+        const deprecated = _.get(description[attribute], 'deprecated');
 
-  getDescription: (type, model = {}) => {
-    const format = '"""\n';
+        // Snakecase an attribute when we find a dash.
+        if (attribute.indexOf('-') !== -1) {
+          line = `  ${_.snakeCase(attribute)}(${_.trim(split[1])}`;
+        }
 
-    const str = _.get(type, '_description') || _.get(model, 'info.description');
+        if (info) {
+          line = `  """\n    ${info}\n  """\n${line}`;
+        }
 
-    if (str) {
-      return `${format}${str}\n${format}`;
-    }
+        if (deprecated) {
+          line = `${line} @deprecated(reason: "${deprecated}")`;
+        }
 
-    return '';
-  },
+        return line;
+      })
+      .join('\n');
+  }
 
-  /**
-   * Generate GraphQL schema.
-   *
-   * @return Schema
-   */
+  return lines
+    .map((line, index) => {
+      if ([0, lines.length - 1].includes(index)) {
+        return '';
+      }
 
-  generateSchema: function() {
-    const shadowCRUDEnabled =
-      strapi.plugins.graphql.config.shadowCRUD !== false;
+      return line;
+    })
+    .join('\n');
+};
 
-    // Generate type definition and query/mutation for models.
-    const shadowCRUD = shadowCRUDEnabled
-      ? this.buildShadowCRUD()
-      : createDefaultSchema();
+/**
+ * Retrieve description from variable and return a string which follow the GraphQL specs.
+ *
+ * @return String
+ */
 
-    const _schema = strapi.plugins.graphql.config._schema.graphql;
+const getDescription = (type, model = {}) => {
+  const format = '"""\n';
 
-    // Extract custom definition, query or resolver.
-    const { definition, query, mutation, resolver = {} } = _schema;
+  const str = _.get(type, '_description') || _.get(model, 'info.description');
 
-    // Polymorphic.
-    const polymorphicSchema = Types.addPolymorphicUnionType(
-      definition + shadowCRUD.definition
-    );
+  if (str) {
+    return `${format}${str}\n${format}`;
+  }
 
-    // Build resolvers.
-    const resolvers =
-      _.omitBy(
-        _.merge(shadowCRUD.resolvers, resolver, polymorphicSchema.resolvers),
-        _.isEmpty
-      ) || {};
+  return '';
+};
 
-    _schema.resolver = resolvers;
+/**
+ * Generate GraphQL schema.
+ *
+ * @return Schema
+ */
 
-    this.buildResolvers(resolvers);
+const generateSchema = () => {
+  const shadowCRUDEnabled = strapi.plugins.graphql.config.shadowCRUD !== false;
 
-    // Return empty schema when there is no model.
-    if (_.isEmpty(shadowCRUD.definition) && _.isEmpty(definition)) {
-      return {};
-    }
+  // Generate type definition and query/mutation for models.
+  const shadowCRUD = shadowCRUDEnabled
+    ? buildShadowCRUD()
+    : createDefaultSchema();
 
-    const queryFields = this.formatGQL(
-      shadowCRUD.query,
-      resolver.Query,
-      null,
-      'query'
-    );
+  const _schema = strapi.plugins.graphql.config._schema.graphql;
 
-    const mutationFields = this.formatGQL(
-      shadowCRUD.mutation,
-      resolver.Mutation,
-      null,
-      'mutation'
-    );
+  // Extract custom definition, query or resolver.
+  const { definition, query, mutation, resolver = {} } = _schema;
 
-    // Concatenate.
-    let typeDefs = `
+  // Polymorphic.
+  const polymorphicSchema = Types.addPolymorphicUnionType(
+    definition + shadowCRUD.definition
+  );
+
+  // Build resolvers.
+  const resolvers =
+    _.omitBy(
+      _.merge(shadowCRUD.resolvers, resolver, polymorphicSchema.resolvers),
+      _.isEmpty
+    ) || {};
+
+  _schema.resolver = resolvers;
+
+  buildResolvers(resolvers);
+
+  // Return empty schema when there is no model.
+  if (_.isEmpty(shadowCRUD.definition) && _.isEmpty(definition)) {
+    return {};
+  }
+
+  const queryFields = formatGQL(
+    shadowCRUD.query,
+    resolver.Query,
+    null,
+    'query'
+  );
+
+  const mutationFields = formatGQL(
+    shadowCRUD.mutation,
+    resolver.Mutation,
+    null,
+    'mutation'
+  );
+
+  // Concatenate.
+  let typeDefs = `
       ${definition}
       ${shadowCRUD.definition}
       ${polymorphicSchema.definition}
@@ -198,93 +196,92 @@ const schemaBuilder = {
       ${Types.addCustomScalar(resolvers)}
     `;
 
-    // // Build schema.
-    if (!strapi.config.currentEnvironment.server.production) {
-      // Write schema.
-      const schema = makeExecutableSchema({
-        typeDefs,
-        resolvers,
-      });
+  // // Build schema.
+  if (!strapi.config.currentEnvironment.server.production) {
+    // Write schema.
+    const schema = makeExecutableSchema({
+      typeDefs,
+      resolvers,
+    });
 
-      this.writeGenerateSchema(graphql.printSchema(schema));
+    writeGenerateSchema(graphql.printSchema(schema));
+  }
+
+  // Remove custom scalar (like Upload);
+  typeDefs = Types.removeCustomScalar(typeDefs, resolvers);
+
+  return {
+    typeDefs: gql(typeDefs),
+    resolvers,
+  };
+};
+
+/**
+ * Save into a file the readable GraphQL schema.
+ *
+ * @return void
+ */
+
+const writeGenerateSchema = schema => {
+  return strapi.fs.writeAppFile('exports/graphql/schema.graphql', schema);
+};
+
+const buildShadowCRUD = () => {
+  const modelSchema = Resolvers.buildShadowCRUD(
+    _.omitBy(strapi.models, model => model.internal === true)
+  );
+
+  const pluginSchemas = Object.keys(strapi.plugins).reduce((acc, plugin) => {
+    const schemas = Resolvers.buildShadowCRUD(strapi.plugins[plugin].models);
+    return acc.concat(schemas);
+  }, []);
+
+  const componentSchemas = Object.values(strapi.components).map(compo =>
+    Resolvers.buildComponent(compo)
+  );
+
+  const schema = { definition: '', resolvers: {}, query: {}, mutation: {} };
+  mergeSchemas(schema, modelSchema, ...pluginSchemas, ...componentSchemas);
+
+  return schema;
+};
+
+const buildResolvers = resolvers => {
+  // Transform object to only contain function.
+  Object.keys(resolvers).reduce((acc, type) => {
+    if (graphql.isScalarType(acc[type])) {
+      return acc;
     }
 
-    // Remove custom scalar (like Upload);
-    typeDefs = Types.removeCustomScalar(typeDefs, resolvers);
+    return Object.keys(acc[type]).reduce((acc, resolverName) => {
+      const resolverObj = acc[type][resolverName];
 
-    return {
-      typeDefs: gql(typeDefs),
-      resolvers,
-    };
-  },
+      // Disabled this query.
+      if (resolverObj === false) {
+        delete acc[type][resolverName];
 
-  /**
-   * Save into a file the readable GraphQL schema.
-   *
-   * @return void
-   */
-
-  writeGenerateSchema: schema => {
-    return strapi.fs.writeAppFile('exports/graphql/schema.graphql', schema);
-  },
-
-  buildShadowCRUD() {
-    const modelSchema = Resolvers.buildShadowCRUD(
-      _.omitBy(strapi.models, model => model.internal === true)
-    );
-
-    const pluginSchemas = Object.keys(strapi.plugins).reduce((acc, plugin) => {
-      const schemas = Resolvers.buildShadowCRUD(strapi.plugins[plugin].models);
-      return acc.concat(schemas);
-    }, []);
-
-    const componentSchemas = Object.values(strapi.components).map(compo =>
-      Resolvers.buildComponent(compo)
-    );
-
-    const schema = { definition: '', resolvers: {}, query: {}, mutation: {} };
-    mergeSchemas(schema, modelSchema, ...pluginSchemas, ...componentSchemas);
-
-    return schema;
-  },
-
-  buildResolvers(resolvers) {
-    // Transform object to only contain function.
-    Object.keys(resolvers).reduce((acc, type) => {
-      if (graphql.isScalarType(acc[type])) {
         return acc;
       }
 
-      return Object.keys(acc[type]).reduce((acc, resolverName) => {
-        const resolverObj = acc[type][resolverName];
-
-        // Disabled this query.
-        if (resolverObj === false) {
-          delete acc[type][resolverName];
-
-          return acc;
-        }
-
-        if (_.isFunction(resolverObj)) {
-          return acc;
-        }
-
-        switch (type) {
-          case 'Mutation': {
-            acc[type][resolverName] = buildMutation(resolverName, resolverObj);
-            break;
-          }
-          case 'Query':
-          default: {
-            acc[type][resolverName] = buildQuery(resolverName, resolverObj);
-            break;
-          }
-        }
-
+      if (_.isFunction(resolverObj)) {
         return acc;
-      }, acc);
-    }, resolvers);
-  },
+      }
+
+      switch (type) {
+        case 'Mutation': {
+          acc[type][resolverName] = buildMutation(resolverName, resolverObj);
+          break;
+        }
+        case 'Query':
+        default: {
+          acc[type][resolverName] = buildQuery(resolverName, resolverObj);
+          break;
+        }
+      }
+
+      return acc;
+    }, acc);
+  }, resolvers);
 };
 
 // TODO: implement
@@ -501,19 +498,23 @@ const getActionDetails = resolver => {
  */
 const isResolvablePath = path => _.isString(path) && !_.isEmpty(path);
 
-const getPolicies = (config, { plugin, api } = {}) => {
+const getPolicies = config => {
   const { resolver, policies = [], resolverOf } = config;
+
+  const { api, plugin } = config['_metadatas'] || {};
 
   const policyFns = [];
 
-  const { controller, action } = isResolvablePath(resolverOf)
+  const { controller, action, plugin: pathPlugin } = isResolvablePath(
+    resolverOf
+  )
     ? getActionDetails(resolverOf)
     : getActionDetails(resolver);
 
   const globalPolicy = policyUtils.globalPolicy({
     controller,
     action,
-    plugin,
+    plugin: pathPlugin,
   });
 
   policyFns.push(globalPolicy);
@@ -530,4 +531,9 @@ const getPolicies = (config, { plugin, api } = {}) => {
   return policyFns;
 };
 
-module.exports = schemaBuilder;
+module.exports = {
+  generateSchema,
+  getDescription,
+  formatGQL,
+  buildQuery,
+};
