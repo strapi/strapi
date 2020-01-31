@@ -38,6 +38,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const [infoModals, toggleInfoModal] = useState({ cancel: false });
   const {
+    autoReload,
     currentEnvironment,
     emitEvent,
     formatMessage,
@@ -59,7 +60,10 @@ const DataManagerProvider = ({ allIcons, children }) => {
   const componentMatch = useRouteMatch(
     `/plugins/${pluginId}/component-categories/:categoryUid/:componentUid`
   );
-  const isInDevelopmentMode = currentEnvironment === 'development';
+  const formatMessageRef = useRef();
+  formatMessageRef.current = formatMessage;
+  const isInDevelopmentMode =
+    currentEnvironment === 'development' && autoReload;
 
   const isInContentTypeView = contentTypeMatch !== null;
   const firstKeyToMainSchema = isInContentTypeView
@@ -119,6 +123,16 @@ const DataManagerProvider = ({ allIcons, children }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, pathname]);
+
+  useEffect(() => {
+    if (currentEnvironment === 'development' && !autoReload) {
+      strapi.notification.info(
+        formatMessageRef.current({
+          id: getTrad('notification.info.autoreaload-disable'),
+        })
+      );
+    }
+  }, [autoReload, currentEnvironment]);
 
   const didModifiedComponents =
     getCreatedAndModifiedComponents(modifiedData.components || {}, components)
