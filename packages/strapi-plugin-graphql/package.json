@@ -29,7 +29,7 @@
   "devDependencies": {
     "cross-env": "^5.2.0",
     "koa": "^2.8.0",
-    "rimraf": "^2.6.3"
+    "rimraf": "3.0.0"
   },
   "author": {
     "name": "A Strapi developer",

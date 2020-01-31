@@ -180,9 +180,9 @@ class ImgPreview extends React.Component {
 
     const containerStyle = isEmpty(imgURL)
       ? {
-        display: 'flex',
-        zIndex: 9999,
-      }
+          display: 'flex',
+          zIndex: 9999,
+        }
       : {};
 
     return (
