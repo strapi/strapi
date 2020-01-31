@@ -203,6 +203,7 @@ describe('CleanData utils', () => {
         initialComponents,
         rawData: { components },
       } = rawData;
+
       expect(
         getCreatedAndModifiedComponents(components, initialComponents).sort()
       ).toEqual(componentsToFormat.sort());
@@ -215,8 +216,8 @@ describe('CleanData utils', () => {
       const {
         rawData: { contentTypesToSort },
       } = rawData;
-
       const actual = sortContentType(contentTypesToSort);
+
       expect(actual.sort()).toEqual(sortedContentTypes.sort());
     });
     it('should return an empty array if no content types', () => {
