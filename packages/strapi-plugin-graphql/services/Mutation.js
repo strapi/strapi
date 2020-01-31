@@ -185,6 +185,7 @@ module.exports = {
         request: Object.assign(_.clone(context.request), {
           graphql: null,
         }),
+        response: _.clone(context.response),
       });
 
       // Execute policies stack.

@@ -132,6 +132,7 @@
   "modelPage.attribute.relationWith": "Relation with",
   "modelPage.contentHeader.emptyDescription.description": "There is no description",
   "notification.info.creating.notSaved": "Please save your work before creating a new content type or component",
+  "notification.info.autoreaload-disable": "The autoReload feature is required to use this plugin. Start your server with `strapi develop`",
   "plugin.description.long": "Modelize the data structure of your API. Create new fields and relations in just a minute. The files are automatically created and updated in your project.",
   "plugin.description.short": "Modelize the data structure of your API.",
   "popUpForm.navContainer.advanced": "Advanced settings",
