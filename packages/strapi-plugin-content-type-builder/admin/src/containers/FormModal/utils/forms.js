@@ -766,6 +766,7 @@ const forms = {
           .isAllowed(getTrad('error.contentTypeName.reserved-name'))
           .required(errorsTrads.required),
         collectionName: yup.string(),
+        kind: yup.string().oneOf(['singleType', 'collectionType']),
       });
     },
     form: {
@@ -797,6 +798,32 @@ const forms = {
             readOnly: true,
             disabled: true,
             value: data.name ? nameToSlug(data.name) : '',
+          });
+        }
+
+        if (actionType === 'edit') {
+          items[0].push({
+            label: {
+              id: getTrad('modalForm.attribute.text.type-selection'),
+            },
+            name: 'kind',
+            type: 'booleanBox',
+            size: 12,
+            options: [
+              {
+                headerId: getTrad('menu.section.models.name.singular'),
+                descriptionId: getTrad(
+                  'form.button.collection-type.description'
+                ),
+                value: 'collectionType',
+              },
+              {
+                headerId: getTrad('menu.section.single-types.name.singular'),
+                descriptionId: getTrad('form.button.single-type.description'),
+                value: 'singleType',
+              },
+            ],
+            validations: {},
           });
         }
 

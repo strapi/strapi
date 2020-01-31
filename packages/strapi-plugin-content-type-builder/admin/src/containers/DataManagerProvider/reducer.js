@@ -478,7 +478,7 @@ const reducer = (state, action) => {
     }
     case 'UPDATE_SCHEMA': {
       const {
-        data: { name, collectionName, category, icon },
+        data: { name, collectionName, category, icon, kind },
         schemaType,
         uid,
       } = action;
@@ -492,6 +492,9 @@ const reducer = (state, action) => {
           updatedObj = updatedObj
             .update('category', () => category)
             .updateIn(['schema', 'icon'], () => icon);
+        }
+        if (action.schemaType === 'contentType') {
+          updatedObj = updatedObj.updateIn(['schema', 'kind'], () => kind);
         }
 
         return updatedObj;

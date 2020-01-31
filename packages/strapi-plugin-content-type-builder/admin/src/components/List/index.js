@@ -159,7 +159,11 @@ function List({
     label: isInDevelopmentMode
       ? formatMessage({
           id: !isSub
-            ? `${pluginId}.form.button.add.field.to.${editTarget}`
+            ? `${pluginId}.form.button.add.field.to.${
+                modifiedData.contentType
+                  ? modifiedData.contentType.schema.kind
+                  : editTarget
+              }`
             : `${pluginId}.form.button.add.field.to.component`,
         })
       : null,
