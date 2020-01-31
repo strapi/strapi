@@ -3,7 +3,7 @@
 exports[`Admin | containers | EditView should match the snapshot 1`] = `
 <DocumentFragment>
   <div
-    class="sc-bXGyLb bSpaUE"
+    class="sc-lkqHmb dYxvYT"
   >
     <div
       class="sc-jlyJG huPVn"
@@ -120,7 +120,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
               class="col-6"
             >
               <div
-                class="sc-GMQeP gTHBhy"
+                class="sc-exAgwC hhdCmD"
               >
                 <label
                   class="sc-kpOJdX kYXOPJ"
@@ -152,7 +152,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
               class="col-12"
             >
               <div
-                class="sc-GMQeP gTHBhy"
+                class="sc-exAgwC hhdCmD"
               >
                 <label
                   class="sc-kpOJdX kYXOPJ"
@@ -184,7 +184,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
               class="col-12"
             >
               <div
-                class="sc-gojNiO dfozLD"
+                class="sc-daURTG dlKLZk"
               >
                 <label
                   class="sc-kpOJdX kYXOPJ"
@@ -193,7 +193,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                   Headers
                 </label>
                 <div
-                  class="sc-exAgwC ccdFwD"
+                  class="sc-cQFLBn dsTZtH"
                 >
                   <ul>
                     <li>
@@ -355,7 +355,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
               class="col-12"
             >
               <div
-                class="sc-gojNiO dfozLD"
+                class="sc-daURTG dlKLZk"
               >
                 <label
                   class="sc-kpOJdX kYXOPJ"
@@ -364,7 +364,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                   Events
                 </label>
                 <div
-                  class="sc-cQFLBn fnroOZ"
+                  class="sc-gojNiO dIUIBx"
                 >
                   <table>
                     <thead>

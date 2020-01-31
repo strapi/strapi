@@ -20,6 +20,7 @@ import CloseButton from './CloseButton';
 import StyledModal from './StyledModal';
 import StyledHeader from './StyledHeader';
 import StyledBody from './StyledBody';
+import StyledFooter from './StyledFooter';
 import Wrapper from './Wrapper';
 
 import Close from '../../svgs/Close';
@@ -75,7 +76,7 @@ function PopUpWarning({
           />
         </StyledHeader>
         <StyledBody>
-          <div className="modalBodyContainerHelper">
+          <div>
             <img src={icons[popUpWarningType]} alt="icon" />
             <p>
               <FormattedMessage
@@ -83,17 +84,17 @@ function PopUpWarning({
               />
             </p>
           </div>
-          <div className="popUpWarningButtonContainer">
-            {map(footerButtons, button => {
-              const { message, handleClick, ...rest } = button;
-              return (
-                <Button key={message} onClick={handleClick} {...rest}>
-                  <FormattedMessage id={message} />
-                </Button>
-              );
-            })}
-          </div>
         </StyledBody>
+        <StyledFooter>
+          {map(footerButtons, button => {
+            const { message, handleClick, ...rest } = button;
+            return (
+              <Button key={message} onClick={handleClick} {...rest}>
+                <FormattedMessage id={message} />
+              </Button>
+            );
+          })}
+        </StyledFooter>
       </StyledModal>
     </Wrapper>
   );
