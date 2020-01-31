@@ -146,6 +146,7 @@ describe('CleanData utils', () => {
             rawData: { contentTypeToEdit },
           } = rawData;
           const expected = expectedData.contentTypeToEdit;
+
           expect(formatMainDataType(contentTypeToEdit)).toEqual(expected);
         });
       });
@@ -220,6 +221,7 @@ describe('CleanData utils', () => {
 
       expect(actual.sort()).toEqual(sortedContentTypes.sort());
     });
+
     it('should return an empty array if no content types', () => {
       expect(sortContentType({})).toEqual([]);
     });

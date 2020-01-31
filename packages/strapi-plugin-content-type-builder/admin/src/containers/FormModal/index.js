@@ -595,7 +595,11 @@ const FormModal = () => {
       if (isCreatingContentType) {
         // Create the content type schema
         if (isCreating) {
-          createSchema(modifiedData, state.modalType, uid);
+          createSchema(
+            { ...modifiedData, kind: state.contentTypeKind },
+            state.modalType,
+            uid
+          );
         } else {
           updateSchema(modifiedData, state.modalType);
           // Close the modal
