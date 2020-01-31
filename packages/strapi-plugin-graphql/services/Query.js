@@ -246,6 +246,7 @@ module.exports = {
         request: Object.assign(_.clone(context.request), {
           graphql: null,
         }),
+        response: _.clone(context.response),
       });
 
       // Note: we've to used the Object.defineProperties to reset the prototype. It seems that the cloning the context
