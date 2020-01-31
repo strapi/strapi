@@ -51,7 +51,8 @@ function InputDate(props) {
                 name: props.name,
                 value: moment,
               },
-            })}
+            })
+          }
           onChange={moment =>
             props.onChange({
               target: {
@@ -59,7 +60,8 @@ function InputDate(props) {
                 value: moment,
                 type: 'date',
               },
-            })}
+            })
+          }
           onFocus={props.onFocus}
           ref={props.inputRef}
           tabIndex={props.tabIndex}
