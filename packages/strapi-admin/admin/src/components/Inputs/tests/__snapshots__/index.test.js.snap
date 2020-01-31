@@ -286,7 +286,7 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
                   className=" css-1uccc91-singleValue"
                 />
                 <div
-                  className="css-b8ldur-Input"
+                  className="css-w8afj7-Input"
                 >
                   <div
                     className=""
@@ -344,7 +344,7 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
                 </div>
               </div>
               <div
-                className=" css-1hb7zxy-IndicatorsContainer"
+                className=" css-1g48xl4-IndicatorsContainer"
               >
                 <div
                   aria-hidden="true"
@@ -354,7 +354,7 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
                 >
                   <svg
                     aria-hidden="true"
-                    className="css-6q0nyr-Svg"
+                    className="css-tj5bde-Svg"
                     focusable="false"
                     height={20}
                     viewBox="0 0 20 20"
@@ -376,7 +376,7 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
                 >
                   <svg
                     aria-hidden="true"
-                    className="css-6q0nyr-Svg"
+                    className="css-tj5bde-Svg"
                     focusable="false"
                     height={20}
                     viewBox="0 0 20 20"

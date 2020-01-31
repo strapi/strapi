@@ -227,7 +227,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                                 class=" css-1uccc91-singleValue"
                               />
                               <div
-                                class="css-b8ldur-Input"
+                                class="css-w8afj7-Input"
                               >
                                 <div
                                   class=""
@@ -252,7 +252,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                               </div>
                             </div>
                             <div
-                              class=" css-1hb7zxy-IndicatorsContainer"
+                              class=" css-1g48xl4-IndicatorsContainer"
                             >
                               <div
                                 aria-hidden="true"
@@ -260,7 +260,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                               >
                                 <svg
                                   aria-hidden="true"
-                                  class="css-6q0nyr-Svg"
+                                  class="css-tj5bde-Svg"
                                   focusable="false"
                                   height="20"
                                   viewBox="0 0 20 20"
@@ -280,7 +280,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                               >
                                 <svg
                                   aria-hidden="true"
-                                  class="css-6q0nyr-Svg"
+                                  class="css-tj5bde-Svg"
                                   focusable="false"
                                   height="20"
                                   viewBox="0 0 20 20"

@@ -37,7 +37,7 @@ exports[`Admin | components | HeadersInput should render properly should match t
                   class=" css-1uccc91-singleValue"
                 />
                 <div
-                  class="css-b8ldur-Input"
+                  class="css-w8afj7-Input"
                 >
                   <div
                     class=""
@@ -62,7 +62,7 @@ exports[`Admin | components | HeadersInput should render properly should match t
                 </div>
               </div>
               <div
-                class=" css-1hb7zxy-IndicatorsContainer"
+                class=" css-1g48xl4-IndicatorsContainer"
               >
                 <div
                   aria-hidden="true"
@@ -70,7 +70,7 @@ exports[`Admin | components | HeadersInput should render properly should match t
                 >
                   <svg
                     aria-hidden="true"
-                    class="css-6q0nyr-Svg"
+                    class="css-tj5bde-Svg"
                     focusable="false"
                     height="20"
                     viewBox="0 0 20 20"
@@ -90,7 +90,7 @@ exports[`Admin | components | HeadersInput should render properly should match t
                 >
                   <svg
                     aria-hidden="true"
-                    class="css-6q0nyr-Svg"
+                    class="css-tj5bde-Svg"
                     focusable="false"
                     height="20"
                     viewBox="0 0 20 20"
