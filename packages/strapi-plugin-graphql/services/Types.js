@@ -182,8 +182,8 @@ module.exports = {
    * @return void
    */
 
-  addCustomScalar(resolvers) {
-    const scalars = {
+  getScalars() {
+    return {
       JSON: GraphQLJSON,
       DateTime: GraphQLDateTime,
       Time,
@@ -191,12 +191,6 @@ module.exports = {
       Long: GraphQLLong,
       Upload: GraphQLUpload,
     };
-
-    Object.assign(resolvers, scalars);
-
-    return Object.keys(scalars)
-      .map(key => `scalar ${key}`)
-      .join('\n');
   },
 
   /**

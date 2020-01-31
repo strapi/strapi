@@ -11,7 +11,7 @@ const _ = require('lodash');
 const graphql = require('graphql');
 const Types = require('./Types.js');
 const Resolvers = require('./Resolvers.js');
-const { mergeSchemas, createDefaultSchema } = require('./utils');
+const { mergeSchemas, createDefaultSchema, diffResolvers } = require('./utils');
 
 const policyUtils = require('strapi-utils').policy;
 const compose = require('koa-compose');
@@ -145,16 +145,15 @@ const generateSchema = () => {
     definition + shadowCRUD.definition
   );
 
-  // Build resolvers.
-  const resolvers =
-    _.omitBy(
-      _.merge(shadowCRUD.resolvers, resolver, polymorphicSchema.resolvers),
-      _.isEmpty
-    ) || {};
+  const builtResolvers = _.merge(
+    {},
+    shadowCRUD.resolvers,
+    polymorphicSchema.resolvers
+  );
 
-  _schema.resolver = resolvers;
+  const extraResolvers = diffResolvers(_schema.resolver, builtResolvers);
 
-  buildResolvers(resolvers);
+  const resolvers = _.merge({}, builtResolvers, buildResolvers(extraResolvers));
 
   // Return empty schema when there is no model.
   if (_.isEmpty(shadowCRUD.definition) && _.isEmpty(definition)) {
@@ -175,6 +174,13 @@ const generateSchema = () => {
     'mutation'
   );
 
+  const scalars = Types.getScalars();
+
+  Object.assign(resolvers, scalars);
+  const scalarDef = Object.keys(scalars)
+    .map(key => `scalar ${key}`)
+    .join('\n');
+
   // Concatenate.
   let typeDefs = `
       ${definition}
@@ -193,7 +199,7 @@ const generateSchema = () => {
         ${mutation}
       }
 
-      ${Types.addCustomScalar(resolvers)}
+      ${scalarDef}
     `;
 
   // // Build schema.
@@ -248,40 +254,44 @@ const buildShadowCRUD = () => {
 
 const buildResolvers = resolvers => {
   // Transform object to only contain function.
-  Object.keys(resolvers).reduce((acc, type) => {
-    if (graphql.isScalarType(acc[type])) {
+  return Object.keys(resolvers).reduce((acc, type) => {
+    if (graphql.isScalarType(resolvers[type])) {
       return acc;
     }
 
-    return Object.keys(acc[type]).reduce((acc, resolverName) => {
-      const resolverObj = acc[type][resolverName];
+    return Object.keys(resolvers[type]).reduce((acc, resolverName) => {
+      const resolverObj = resolvers[type][resolverName];
 
       // Disabled this query.
-      if (resolverObj === false) {
-        delete acc[type][resolverName];
-
-        return acc;
-      }
+      if (resolverObj === false) return acc;
 
       if (_.isFunction(resolverObj)) {
-        return acc;
+        return _.set(acc, [type, resolverName], resolverObj);
       }
 
       switch (type) {
         case 'Mutation': {
-          acc[type][resolverName] = buildMutation(resolverName, resolverObj);
+          _.set(
+            acc,
+            [type, resolverName],
+            buildMutation(resolverName, resolverObj)
+          );
+
           break;
         }
-        case 'Query':
         default: {
-          acc[type][resolverName] = buildQuery(resolverName, resolverObj);
+          _.set(
+            acc,
+            [type, resolverName],
+            buildQuery(resolverName, resolverObj)
+          );
           break;
         }
       }
 
       return acc;
     }, acc);
-  }, resolvers);
+  }, {});
 };
 
 // TODO: implement
@@ -536,4 +546,5 @@ module.exports = {
   getDescription,
   formatGQL,
   buildQuery,
+  buildMutation,
 };

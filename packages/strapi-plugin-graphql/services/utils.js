@@ -26,7 +26,22 @@ const createDefaultSchema = () => ({
   resolvers: {},
 });
 
+const diffResolvers = (object, base) => {
+  let newObj = {};
+
+  Object.keys(object).forEach(type => {
+    Object.keys(object[type]).forEach(resolver => {
+      if (!_.has(base, [type, resolver])) {
+        _.set(newObj, [type, resolver], _.get(object, [type, resolver]));
+      }
+    });
+  });
+
+  return newObj;
+};
+
 module.exports = {
+  diffResolvers,
   mergeSchemas,
   createDefaultSchema,
 };

@@ -506,6 +506,8 @@ const formatModelConnectionsGQL = function({
     resolver
   );
 
+  const connectionQueryName = `${pluralName}Connection`;
+
   return {
     globalId: connectionGlobalId,
     definition: modelConnectionTypes,
@@ -514,12 +516,12 @@ const formatModelConnectionsGQL = function({
     },
     resolvers: {
       Query: {
-        [`${pluralName}Connection`]: {
+        [connectionQueryName]: Schema.buildQuery(connectionQueryName, {
           resolverOf: resolver.resolverOf || resolver.resolver,
           resolver(obj, options, { context }) {
             return options;
           },
-        },
+        }),
       },
       [connectionGlobalId]: {
         values(obj, options, gqlCtx) {

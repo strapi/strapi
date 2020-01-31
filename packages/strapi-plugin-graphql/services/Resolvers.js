@@ -328,10 +328,6 @@ const buildSingleType = model => {
   }
 
   if (isQueryEnabled(_schema, singularName)) {
-    const resolverConfig = {
-      resolver: `${uid}.find`,
-    };
-
     _.merge(localSchema, {
       query: {
         // TODO: support all the unique fields
@@ -339,7 +335,10 @@ const buildSingleType = model => {
       },
       resolvers: {
         Query: {
-          [singularName]: resolverConfig,
+          [singularName]: Schema.buildQuery(singularName, {
+            resolver: `${uid}.find`,
+            ..._.get(_schema, ['resolver', 'Query', singularName], {}),
+          }),
         },
       },
     });
@@ -359,7 +358,7 @@ const buildSingleType = model => {
 };
 
 const buildCollectionType = model => {
-  const { globalId, plugin, modelName } = model;
+  const { globalId, plugin, modelName, uid } = model;
 
   const singularName = toSingular(modelName);
   const pluralName = toPlural(modelName);
@@ -408,20 +407,22 @@ const buildCollectionType = model => {
       },
       resolvers: {
         Query: {
-          [singularName]: {
-            resolver: `${model.uid}.findOne`,
-            ..._.get(_schema, `resolver.Query.${singularName}`),
-          },
+          [singularName]: Schema.buildQuery(singularName, {
+            resolver: `${uid}.findOne`,
+            ..._.get(_schema, ['resolver', 'Query', singularName], {}),
+          }),
         },
       },
     });
   }
 
   if (isQueryEnabled(_schema, pluralName)) {
-    const resolverOpt = {
-      resolver: `${model.uid}.find`,
-      ..._.get(_schema, `resolver.Query.${pluralName}`),
+    const resolverOpts = {
+      resolver: `${uid}.find`,
+      ..._.get(_schema, ['resolver', 'Query', pluralName], {}),
     };
+
+    const resolverFn = Schema.buildQuery(pluralName, resolverOpts);
 
     _.merge(localSchema, {
       query: {
@@ -429,7 +430,7 @@ const buildCollectionType = model => {
       },
       resolvers: {
         Query: {
-          [pluralName]: resolverOpt,
+          [pluralName]: resolverFn,
         },
       },
     });
@@ -441,7 +442,7 @@ const buildCollectionType = model => {
         fields: typeDefObj,
         model,
         name: modelName,
-        resolver: resolverOpt,
+        resolver: resolverOpts,
         plugin,
       });
 
@@ -498,12 +499,13 @@ const buildMutation = ({ model, action }, { _schema }) => {
     },
     resolvers: {
       Mutation: {
-        [mutationName]: {
+        [mutationName]: Schema.buildMutation(mutationName, {
           resolver: `${uid}.${action}`,
           transformOutput: result => ({
             [toSingular(model.modelName)]: result,
           }),
-        },
+          ..._.get(_schema, ['resolver', 'Mutation', mutationName], {}),
+        }),
       },
     },
   };
