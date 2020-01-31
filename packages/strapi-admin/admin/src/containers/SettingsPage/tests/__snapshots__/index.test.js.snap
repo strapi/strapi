@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Admin | containers | SettingsPage should render SettingsPage 1`] = `
+<DocumentFragment>
+  <div
+    class="sc-fYiAbW hHdluQ"
+  >
+    <div
+      class="row"
+    >
+      <div
+        class="col-md-3"
+      >
+        <div
+          class="sc-jlyJG ixoCZC"
+        >
+          <div
+            class="sc-gipzik kWsdnF"
+          >
+            <div
+              class="list-header"
+            >
+              <div
+                class="title-wrapper"
+              >
+                <h3>
+                  <span>
+                    Global Settings
+                  </span>
+                    
+                </h3>
+              </div>
+            </div>
+            <div>
+              <ul
+                class="sc-csuQGl gTZhqf"
+              >
+                <li>
+                  <a
+                    href="/settings/webhooks"
+                  >
+                    <p>
+                      Webhooks
+                    </p>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="col-md-9"
+      />
+    </div>
+  </div>
+</DocumentFragment>
+`;
