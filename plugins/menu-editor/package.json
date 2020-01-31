@@ -1,0 +1,32 @@
+{
+  "name": "strapi-plugin-menu-editor",
+  "version": "0.0.0",
+  "description": "This is the description of the plugin.",
+  "strapi": {
+    "name": "Menu editor",
+    "icon": "plug",
+    "description": "Description of menu-editor plugin."
+  },
+  "dependencies": {
+    "axios": "^0.19.0",
+    "axios-hooks": "^1.9.0",
+    "immutability-helper": "^3.0.1",
+    "nanoid": "^2.1.8",
+    "react-dnd": "^9.4.0",
+    "react-dnd-html5-backend": "^9.4.0",
+    "react-modal": "^3.11.1",
+    "react-select": "^3.0.8",
+    "react-sortly": "^3.0.4",
+    "use-debounce": "^3.1.0"
+  },
+  "author": {
+    "name": "martinn3",
+    "email": "",
+    "url": "https://github.com/MartinN3"
+  },
+  "engines": {
+    "node": ">=10.0.0",
+    "npm": ">=6.0.0"
+  },
+  "license": "MIT"
+}
