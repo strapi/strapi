@@ -1,6 +1,6 @@
 {
-  "models": "Types de Contenus",
-  "models.numbered": "Types de Contenus ({number})",
+  "models": "Types de Collection",
+  "models.numbered": "Types de Collection ({number})",
   "groups": "Groupes",
   "groups.numbered": "Groupes ({number})",
   "EditRelations.title": "Données associées",

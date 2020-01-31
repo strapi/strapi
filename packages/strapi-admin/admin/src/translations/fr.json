@@ -32,7 +32,7 @@
   "app.components.HomePage.button.quickStart": "VOIR LE QUICK START TUTORIEL",
   "app.components.HomePage.community": "Rejoignez la communauté",
   "app.components.HomePage.community.content": "Discutez avec les membres de l'équipe, contributeurs et développeurs sur différent supports.",
-  "app.components.HomePage.create": "Créez votre premier Collection",
+  "app.components.HomePage.create": "Créez votre première Collection",
   "app.components.HomePage.createBlock.content.first": "Le ",
   "app.components.HomePage.createBlock.content.second": " plugin vous permet de définir la structure de vos modèles. Nous vous conseillons fortement de suivre notre ",
   "app.components.HomePage.createBlock.content.tutorial": " tutoriel.",

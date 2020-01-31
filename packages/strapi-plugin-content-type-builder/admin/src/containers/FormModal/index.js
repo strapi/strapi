@@ -86,6 +86,7 @@ const FormModal = () => {
       const dynamicZoneTarget = query.get('dynamicZoneTarget');
       const forTarget = query.get('forTarget');
       const modalType = query.get('modalType');
+      const contentTypeKind = query.get('kind');
       const targetUid = query.get('targetUid');
       const settingType = query.get('settingType');
       const headerId = query.get('headerId');
@@ -157,6 +158,7 @@ const FormModal = () => {
         header_info_name_5,
         header_info_category_5,
         headerId,
+        contentTypeKind,
       });
 
       // Reset all the modification when opening the edit category modal

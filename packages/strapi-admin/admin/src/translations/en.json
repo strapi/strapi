@@ -167,7 +167,7 @@
   "HomePage.helmet.title": "Homepage",
   "HomePage.welcome.congrats": "Congrats!",
   "HomePage.welcome.congrats.content": "You are logged as the first administrator. To discover the powerful features provided by Strapi,",
-  "HomePage.welcome.congrats.content.bold": "we recommend you to create your first Content-Type.",
+  "HomePage.welcome.congrats.content.bold": "we recommend you to create your first Collection-Type.",
   "HomePage.community": "Join the Community",
   "HomePage.roadmap": "See our roadmap",
   "HomePage.greetings": "Hi {name}!",
