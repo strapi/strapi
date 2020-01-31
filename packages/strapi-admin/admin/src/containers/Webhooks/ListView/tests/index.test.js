@@ -14,7 +14,7 @@ const history = createMemoryHistory();
 describe('Admin | containers | ListView', () => {
   afterEach(cleanup);
 
-  it('should render ListView', () => {
+  it('should match the snapshot', () => {
     const intlProvider = new IntlProvider(
       {
         locale: 'en',
@@ -41,6 +41,7 @@ describe('Admin | containers | ListView', () => {
         </GlobalContextProvider>
       </IntlProvider>
     );
+
     expect(asFragment()).toMatchSnapshot();
   });
 });

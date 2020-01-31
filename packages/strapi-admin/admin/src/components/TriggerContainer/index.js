@@ -74,7 +74,8 @@ const TriggerContainer = ({ isPending, onCancel, response }) => {
                     <FormattedMessage
                       id="Settings.error"
                       defaultMessage="error"
-                    />{' '}
+                    />
+                    &nbsp;
                     {statusCode}
                   </p>
                 </td>

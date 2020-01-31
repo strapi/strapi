@@ -3,6 +3,8 @@ import renderer from 'react-test-renderer';
 import { shallow } from 'enzyme';
 import { IntlProvider } from 'react-intl';
 
+import translationMessages from '../../../translations/en.json';
+
 import Inputs from '../index';
 
 describe('<Inputs />', () => {
@@ -10,18 +12,30 @@ describe('<Inputs />', () => {
     name: 'events',
     value: ['media.create, media.delete'],
     onChange: jest.fn(),
+    type: 'events',
+  };
+
+  const renderWithIntl = (Compo, props) => {
+    return renderer.create(
+      <IntlProvider locale="en" messages={translationMessages}>
+        <Compo {...props} />
+      </IntlProvider>
+    );
   };
 
   it('should not crash', () => {
     shallow(<Inputs {...props} />);
   });
 
-  it('should render properly', () => {
-    const tree = renderer.create(
-      <IntlProvider locale="en">
-        <Inputs {...props} />
-      </IntlProvider>
-    );
+  it('should match the snapshot if type is events', () => {
+    const tree = renderWithIntl(Inputs, props);
+
+    expect(tree).toMatchSnapshot();
+  });
+
+  it('should match the snapshot if type is headers', () => {
+    const tree = renderWithIntl(Inputs, { ...props, type: 'headers' });
+
     expect(tree).toMatchSnapshot();
   });
 });

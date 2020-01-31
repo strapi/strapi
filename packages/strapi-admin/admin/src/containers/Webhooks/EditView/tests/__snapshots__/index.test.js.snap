@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Admin | containers | EditView should render EditView 1`] = `
+exports[`Admin | containers | EditView should match the snapshot 1`] = `
 <DocumentFragment>
   <div
     class="sc-bXGyLb bSpaUE"

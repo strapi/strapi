@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<TriggerContainer /> should render properly 1`] = `
+exports[`<TriggerContainer /> should match the snapshot 1`] = `
 <div
   className="sc-htpNat famwcA"
 >

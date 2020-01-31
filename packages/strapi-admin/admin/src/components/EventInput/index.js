@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
+import formatValue from './utils/formatValue';
 import Wrapper from './Wrapper';
 import EventRow from './EventRow';
 
@@ -20,16 +21,7 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
   // Media update disabled for now - until the media libray is ready
   const disabledEvents = ['media.update'];
 
-  const formatValue = inputValue.reduce((acc, curr) => {
-    const key = curr.split('.')[0];
-
-    if (!acc[key]) {
-      acc[key] = [];
-    }
-    acc[key].push(curr);
-
-    return acc;
-  }, {});
+  const formattedValue = formatValue(inputValue);
 
   const handleChange = ({ target: { name, value } }) => {
     let set = new Set(inputValue);
@@ -66,7 +58,7 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
             {headersName.map(header => {
               return (
                 <td key={header}>
-                  <FormattedMessage id={header} defaultMessage={header} />
+                  <FormattedMessage id={header} />
                 </td>
               );
             })}
@@ -80,7 +72,7 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
                 key={event}
                 name={event}
                 events={events[event]}
-                inputValue={formatValue[event]}
+                inputValue={formattedValue[event]}
                 handleChange={handleChange}
                 handleChangeAll={handleChangeAll}
               />
@@ -91,8 +83,6 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
     </Wrapper>
   );
 };
-
-EventInput.defaultProps = {};
 
 EventInput.propTypes = {
   name: PropTypes.string.isRequired,

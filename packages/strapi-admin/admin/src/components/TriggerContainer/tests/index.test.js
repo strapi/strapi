@@ -14,12 +14,13 @@ describe('<TriggerContainer />', () => {
     },
   };
 
-  it('should render properly', () => {
+  it('should match the snapshot', () => {
     const tree = renderer.create(
       <IntlProvider locale="en">
         <TriggerContainer {...props} />
       </IntlProvider>
     );
+
     expect(tree).toMatchSnapshot();
   });
 });

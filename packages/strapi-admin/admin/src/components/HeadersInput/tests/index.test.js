@@ -21,58 +21,77 @@ describe('Admin | components | HeadersInput', () => {
     onClick: jest.fn(),
     onRemove: jest.fn(),
   };
+
   describe('should render properly', () => {
     afterEach(cleanup);
+
     it('should not crash', () => {
       shallow(<HeadersInput {...props} />);
     });
 
-    it('render component', () => {
+    it('should match the snapshot', () => {
       const { asFragment } = render(
         <IntlProvider locale="en">
           <HeadersInput {...props} />
         </IntlProvider>
       );
+
       expect(asFragment()).toMatchSnapshot();
     });
 
-    it('It should render as many key/value rows as value', () => {
+    it('should render as many rows as value length', () => {
       const renderedComponent = shallow(<HeadersInput {...props} />);
 
       expect(renderedComponent.find(CreatableSelect)).toHaveLength(1);
     });
+
+    it('should have default onRemove', () => {
+      expect(HeadersInput.defaultProps.onRemove).toBeDefined();
+    });
   });
 
   describe('Actions', () => {
-    it('It should call the onClick props on remove button', () => {
-      const renderedComponent = shallow(<HeadersInput {...props} />);
+    it('should call onRemove props on remove button click', () => {
+      const headers = [
+        {
+          key: 'Accept',
+          value: 'text/html',
+        },
+        {
+          key: 'Authorization',
+          value: 'Basic YWxhZGRpbjpvcGVuc2VzYW1l',
+        },
+      ];
+      const renderedComponent = shallow(
+        <HeadersInput {...props} value={headers} />
+      );
 
       const removeButton = renderedComponent.find(CircleButton).at(0);
       removeButton.simulate('click');
 
       expect(props.onRemove).toHaveBeenCalledWith(0);
     });
-  });
 
-  it('It should call the onClick props on add button', () => {
-    const renderedComponent = shallow(<HeadersInput {...props} />);
+    it('should call onClick props on add button click', () => {
+      const renderedComponent = shallow(<HeadersInput {...props} />);
 
-    const addButton = renderedComponent.find('ul + button');
-    addButton.simulate('click');
+      const addButton = renderedComponent.find('ul + button');
+      addButton.simulate('click');
 
-    expect(props.onClick).toHaveBeenCalled();
-  });
+      expect(props.onClick).toHaveBeenCalledWith('headers');
+    });
 
-  it('It should call the onChange props on input text change', () => {
-    const renderedComponent = shallow(<HeadersInput {...props} />);
+    it('should call the onChange props on input text change', () => {
+      const renderedComponent = shallow(<HeadersInput {...props} />);
 
-    const input = renderedComponent.find(InputText).at(0);
-    input.simulate('change');
+      const input = renderedComponent.find(InputText).at(0);
+      const event = {
+        target: { name: 'headers.0.key', value: 'test' },
+      };
 
-    expect(props.onChange).toHaveBeenCalled();
-  });
+      input.simulate('change', event);
 
-  it('should have default onRemove', () => {
-    expect(HeadersInput.defaultProps.onRemove).toBeDefined();
+      expect(props.onChange).toHaveBeenCalledWith(event);
+    });
   });
 });

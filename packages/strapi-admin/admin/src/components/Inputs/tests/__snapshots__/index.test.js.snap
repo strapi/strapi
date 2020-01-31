@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<Inputs /> should render properly 1`] = `
+exports[`<Inputs /> should match the snapshot if type is events 1`] = `
 <div
   className="sc-exAgwC iCfkBI"
 >
@@ -19,17 +19,17 @@ exports[`<Inputs /> should render properly 1`] = `
           <td />
           <td>
             <span>
-              Settings.webhooks.events.create
+              Create
             </span>
           </td>
           <td>
             <span>
-              Settings.webhooks.events.edit
+              Edit
             </span>
           </td>
           <td>
             <span>
-              Settings.webhooks.events.delete
+              Delete
             </span>
           </td>
         </tr>
@@ -235,5 +235,219 @@ exports[`<Inputs /> should render properly 1`] = `
       }
     }
   />
+</div>
+`;
+
+exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
+<div
+  className="sc-GMQeP fCETID"
+>
+  <label
+    className="sc-chPdSV iXihgI"
+    htmlFor="events"
+  >
+    
+  </label>
+  <div
+    className="sc-bAeIUo feDjmh"
+  >
+    <ul>
+      <li>
+        <section>
+          <p>
+            <span>
+              Key
+            </span>
+          </p>
+        </section>
+        <section>
+          <p>
+            <span>
+              Value
+            </span>
+          </p>
+        </section>
+      </li>
+      <li>
+        <section>
+          <div
+            className=" css-2b097c-container"
+            onKeyDown={[Function]}
+          >
+            <div
+              className=" css-1w9ejix-control"
+              onMouseDown={[Function]}
+              onTouchEnd={[Function]}
+            >
+              <div
+                className=" css-1hwfws3"
+              >
+                <div
+                  className=" css-1uccc91-singleValue"
+                />
+                <div
+                  className="css-b8ldur-Input"
+                >
+                  <div
+                    className=""
+                    style={
+                      Object {
+                        "display": "inline-block",
+                      }
+                    }
+                  >
+                    <input
+                      aria-autocomplete="list"
+                      autoCapitalize="none"
+                      autoComplete="off"
+                      autoCorrect="off"
+                      disabled={false}
+                      id="react-select-2-input"
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      spellCheck="false"
+                      style={
+                        Object {
+                          "background": 0,
+                          "border": 0,
+                          "boxSizing": "content-box",
+                          "color": "inherit",
+                          "fontSize": "inherit",
+                          "label": "input",
+                          "opacity": 1,
+                          "outline": 0,
+                          "padding": 0,
+                          "width": "1px",
+                        }
+                      }
+                      tabIndex="0"
+                      type="text"
+                      value=""
+                    />
+                    <div
+                      style={
+                        Object {
+                          "height": 0,
+                          "left": 0,
+                          "overflow": "scroll",
+                          "position": "absolute",
+                          "top": 0,
+                          "visibility": "hidden",
+                          "whiteSpace": "pre",
+                        }
+                      }
+                    >
+                      
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                className=" css-1hb7zxy-IndicatorsContainer"
+              >
+                <div
+                  aria-hidden="true"
+                  className=" css-tlfecz-indicatorContainer"
+                  onMouseDown={[Function]}
+                  onTouchEnd={[Function]}
+                >
+                  <svg
+                    aria-hidden="true"
+                    className="css-6q0nyr-Svg"
+                    focusable="false"
+                    height={20}
+                    viewBox="0 0 20 20"
+                    width={20}
+                  >
+                    <path
+                      d="M14.348 14.849c-0.469 0.469-1.229 0.469-1.697 0l-2.651-3.030-2.651 3.029c-0.469 0.469-1.229 0.469-1.697 0-0.469-0.469-0.469-1.229 0-1.697l2.758-3.15-2.759-3.152c-0.469-0.469-0.469-1.228 0-1.697s1.228-0.469 1.697 0l2.652 3.031 2.651-3.031c0.469-0.469 1.228-0.469 1.697 0s0.469 1.229 0 1.697l-2.758 3.152 2.758 3.15c0.469 0.469 0.469 1.229 0 1.698z"
+                    />
+                  </svg>
+                </div>
+                <span
+                  className=" css-1okebmr-indicatorSeparator"
+                />
+                <div
+                  aria-hidden="true"
+                  className=" css-tlfecz-indicatorContainer"
+                  onMouseDown={[Function]}
+                  onTouchEnd={[Function]}
+                >
+                  <svg
+                    aria-hidden="true"
+                    className="css-6q0nyr-Svg"
+                    focusable="false"
+                    height={20}
+                    viewBox="0 0 20 20"
+                    width={20}
+                  >
+                    <path
+                      d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-4.695 4.502-0.217 0.223-0.502 0.335-0.787 0.335s-0.57-0.112-0.789-0.335c0 0-4.287-4.084-4.695-4.502s-0.436-1.17 0-1.615z"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+            <input
+              name="events.0.key"
+              type="hidden"
+            />
+          </div>
+        </section>
+        <section>
+          <div
+            className="sc-fjdhpX Nlsly"
+          >
+            <input
+              autoComplete="off"
+              autoFocus={false}
+              className="sc-jTzLTM dprvSb"
+              id="events.0.value"
+              name="events.0.value"
+              onChange={[MockFunction]}
+              placeholder={null}
+              tabIndex="0"
+              type="text"
+              value=""
+            />
+          </div>
+        </section>
+        <div>
+          <button
+            className="sc-fBuWsC imrARH"
+            onClick={[Function]}
+            type="button"
+          />
+        </div>
+      </li>
+    </ul>
+    <button
+      onClick={[Function]}
+      type="button"
+    >
+      <svg
+        fill="#007eff"
+        height="13px"
+        viewBox="0 0 13 13"
+        width="10px"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g
+          data-name="Layer 2"
+        >
+          <path
+            d="M6.5.5v12m6-6H.5"
+            fill="none"
+            stroke="#007eff"
+            strokeLinecap="round"
+          />
+        </g>
+      </svg>
+      <span>
+        Create a new header
+      </span>
+    </button>
+  </div>
 </div>
 `;
