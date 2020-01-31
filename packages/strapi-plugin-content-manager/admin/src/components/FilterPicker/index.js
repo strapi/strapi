@@ -7,17 +7,23 @@ import { FormattedMessage } from 'react-intl';
 import { PluginHeader } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
-import { useListView } from '../../contexts/ListView';
+import useListView from '../../hooks/useListView';
 import Container from '../Container';
 
 import getFilterType from '../FilterPickerOption/utils';
-import { Flex, Span, Wrapper } from './components';
 import FilterPickerOption from '../FilterPickerOption';
+import { Flex, Span, Wrapper } from './components';
 
 import init from './init';
 import reducer, { initialState } from './reducer';
 
-const NOT_ALLOWED_FILTERS = ['json', 'group', 'relation', 'media', 'richtext'];
+const NOT_ALLOWED_FILTERS = [
+  'json',
+  'component',
+  'relation',
+  'media',
+  'richtext',
+];
 
 function FilterPicker({
   actions,
@@ -109,7 +115,7 @@ function FilterPicker({
 
   return (
     <Collapse isOpen={isOpen} onEntering={handleEntering}>
-      <Container style={{ backgroundColor: 'white' }}>
+      <Container style={{ backgroundColor: 'white', paddingBottom: 0 }}>
         <form
           onSubmit={e => {
             e.preventDefault();
@@ -147,6 +153,7 @@ function FilterPicker({
                 }}
                 type={get(schema, ['attributes', filter.name, 'type'], '')}
                 showAddButton={key === modifiedData.length - 1}
+                // eslint-disable-next-line react/no-array-index-key
                 key={key}
               />
             ))}
@@ -174,8 +181,7 @@ FilterPicker.propTypes = {
   isOpen: PropTypes.bool,
   location: PropTypes.shape({
     search: PropTypes.string.isRequired,
-  }),
-
+  }).isRequired,
   name: PropTypes.string,
   onSubmit: PropTypes.func.isRequired,
   toggleFilterPickerState: PropTypes.func.isRequired,

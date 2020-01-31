@@ -36,7 +36,7 @@ describe('Testing Content Manager ListPages', function() {
 
     it('Should have the Id default sort', () => {
       cy.get(
-        `a[href="/admin/plugins/content-manager/product?source=content-manager"]`
+        'a[href="/admin/plugins/content-manager/product?source=content-manager"]'
       )
         .click()
         .wait(frontLoadingDelay);
@@ -45,7 +45,7 @@ describe('Testing Content Manager ListPages', function() {
         .children('i')
         .should('be.visible')
         .invoke('attr', 'class')
-        .should('includes', 'fa-sort-asc');
+        .should('includes', 'fa-sort-up');
     });
 
     it('Should change the default sort of product to name ASC then name DESC', () => {
@@ -160,7 +160,7 @@ describe('Testing Content Manager ListPages', function() {
 
     it('Should apply filters for product data', () => {
       cy.get(
-        `a[href="/admin/plugins/content-manager/product?source=content-manager"]`
+        'a[href="/admin/plugins/content-manager/product?source=content-manager"]'
       )
         .click()
         .wait(frontLoadingDelay);

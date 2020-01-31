@@ -1,19 +1,13 @@
 'use strict';
 
 const _ = require('lodash');
-const uploadFiles = require('../utils/upload-files');
+
 /**
  * A set of functions called "actions" for `ContentManager`
  */
 module.exports = {
-  fetch(params, source, populate) {
-    return strapi
-      .query(params.model, source)
-      .findOne({ id: params.id }, populate);
-  },
-
   fetchAll(params, query) {
-    const { query: request, source, populate, ...filters } = query;
+    const { query: request, populate, ...filters } = query;
 
     const queryFilter = !_.isEmpty(request)
       ? {
@@ -22,72 +16,65 @@ module.exports = {
         }
       : filters;
 
-    // Find entries using `queries` system
-    return strapi.query(params.model, source).find(queryFilter, populate);
+    return strapi.entityService.find(
+      { params: queryFilter, populate },
+      { model: params.model }
+    );
+  },
+
+  fetch(params, populate) {
+    const { id, model } = params;
+
+    return strapi.entityService.findOne(
+      {
+        params: {
+          id,
+        },
+        populate,
+      },
+      { model }
+    );
   },
 
   count(params, query) {
-    const { source, ...filters } = query;
-    return strapi.query(params.model, source).count(filters);
+    const { model } = params;
+    const { ...filters } = query;
+
+    return strapi.entityService.count({ params: filters }, { model });
   },
 
-  async createMultipart(data, { files = {}, model, source } = {}) {
-    const entry = await strapi.query(model, source).create(data);
-
-    await uploadFiles(entry, files, { model, source });
-
-    return strapi.query(model, source).findOne({ id: entry.id });
+  create(data, { files, model } = {}) {
+    return strapi.entityService.create({ data, files }, { model });
   },
 
-  async create(data, { files, model, source } = {}) {
-    const entry = await strapi.query(model, source).create(data);
-
-    if (files) {
-      await uploadFiles(entry, files, { model, source });
-      return strapi.query(model, source).findOne({ id: entry.id });
-    }
-
-    return entry;
+  edit(params, data, { model, files } = {}) {
+    return strapi.entityService.update({ params, data, files }, { model });
   },
 
-  async edit(params, data, { model, source, files } = {}) {
-    const entry = await strapi
-      .query(model, source)
-      .update({ id: params.id }, data);
-
-    if (files) {
-      await uploadFiles(entry, files, { model, source });
-      return strapi.query(model, source).findOne({ id: entry.id });
-    }
-
-    return entry;
-  },
-
-  delete(params, { source }) {
-    return strapi.query(params.model, source).delete({ id: params.id });
+  delete(params) {
+    const { id, model } = params;
+    return strapi.entityService.delete({ params: { id } }, { model });
   },
 
   deleteMany(params, query) {
-    const { source } = query;
     const { model } = params;
 
-    const toRemove = Object.values(_.omit(query, 'source'));
-    const { primaryKey } = strapi.query(model, source);
-    const filter = { [`${primaryKey}_in`]: toRemove, _limit: 100 };
+    const { primaryKey } = strapi.query(model);
+    const filter = { [`${primaryKey}_in`]: Object.values(query), _limit: 100 };
 
-    return strapi.query(model, source).delete(filter);
+    return strapi.entityService.delete({ params: filter }, { model });
   },
 
   search(params, query) {
     const { model } = params;
-    const { source } = query;
 
-    return strapi.query(model, source).search(query);
+    return strapi.entityService.search({ params: query }, { model });
   },
 
   countSearch(params, query) {
     const { model } = params;
-    const { source, _q } = query;
-    return strapi.query(model, source).countSearch({ _q });
+    const { _q } = query;
+
+    return strapi.entityService.countSearch({ params: { _q } }, { model });
   },
 };

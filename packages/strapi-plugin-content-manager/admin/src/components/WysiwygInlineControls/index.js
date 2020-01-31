@@ -6,37 +6,17 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import cn from 'classnames';
+import Button from './Button';
+import Wrapper from './Wrapper';
 
-import styles from './styles.scss';
-
-class StyleButton extends React.Component {
-  handleClick = (e) => {
-    e.preventDefault();
-
-    if (!this.props.disabled) {
-      this.props.handlers[this.props.handler](this.props.text, this.props.style);
-    }
-  }
-
-  render() {
-    return (
-      <div
-        className={cn(
-          this.props.active && styles.styleButtonActive,
-          styles.styleButton,
-          this.props.className && styles[this.props.className],
-          this.props.disabled && styles.styleButtonDisabled,
-        )}
-        onMouseDown={this.handleClick}
-      >
-        {!this.props.hideLabel && this.props.label}
-      </div>
-    );
-  }
-}
-
-const  WysiwygInlineControls = ({ buttons, disabled, editorState, handlers, onToggle, onToggleBlock }) => {
+const WysiwygInlineControls = ({
+  buttons,
+  disabled,
+  editorState,
+  handlers,
+  onToggle,
+  onToggleBlock,
+}) => {
   const selection = editorState.getSelection();
   const blockType = editorState
     .getCurrentContent()
@@ -46,9 +26,9 @@ const  WysiwygInlineControls = ({ buttons, disabled, editorState, handlers, onTo
   const currentStyle = editorState.getCurrentInlineStyle();
 
   return (
-    <div className={cn(styles.wysiwygInlineControls)}>
+    <Wrapper>
       {buttons.map(type => (
-        <StyleButton
+        <Button
           key={type.label}
           active={type.style === blockType || currentStyle.has(type.style)}
           className={type.className}
@@ -63,33 +43,8 @@ const  WysiwygInlineControls = ({ buttons, disabled, editorState, handlers, onTo
           text={type.text}
         />
       ))}
-    </div>
+    </Wrapper>
   );
-};
-
-/* eslint-disable react/default-props-match-prop-types */
-StyleButton.defaultProps = {
-  active: false,
-  className: '',
-  disabled: false,
-  hideLabel: false,
-  label: '',
-  onToggle: () => {},
-  onToggleBlock: () => {},
-  style: '',
-  text: '',
-};
-
-StyleButton.propTypes = {
-  active: PropTypes.bool,
-  className: PropTypes.string,
-  disabled: PropTypes.bool,
-  handler: PropTypes.string.isRequired,
-  handlers: PropTypes.object.isRequired,
-  hideLabel: PropTypes.bool,
-  label: PropTypes.string,
-  style: PropTypes.string,
-  text: PropTypes.string,
 };
 
 WysiwygInlineControls.defaultProps = {

@@ -29,11 +29,13 @@ function createDefaultMetadatas(schema) {
 function createDefaultMainField(schema) {
   if (!schema) return 'id';
 
-  return (
-    Object.keys(schema.attributes).find(
-      key => schema.attributes[key].type === 'string'
-    ) || 'id'
+  const mainField = Object.keys(schema.attributes).find(
+    key =>
+      schema.attributes[key].type === 'string' &&
+      !['id', schema.primaryKey].includes(key)
   );
+
+  return mainField || 'id';
 }
 
 function createDefaultMetadata(schema, name) {
@@ -150,7 +152,10 @@ const getTargetSchema = (name, plugin) => {
   const model = strapi.getModel(name, plugin);
   if (!model) return null;
 
-  return formatContentTypeSchema(model);
+  return {
+    ...formatContentTypeSchema(model),
+    primaryKey: model.primaryKey,
+  };
 };
 
 module.exports = {

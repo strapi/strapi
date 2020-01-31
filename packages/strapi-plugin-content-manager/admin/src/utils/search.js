@@ -12,8 +12,8 @@ const generateFiltersFromSearch = search => {
         !x.includes('_limit') &&
         !x.includes('_page') &&
         !x.includes('_sort') &&
-        !x.includes('source') &&
-        !x.includes('_q=')
+        !x.includes('_q=') &&
+        x !== ''
     )
     .reduce((acc, curr) => {
       const [name, value] = curr.split('=');
@@ -63,6 +63,7 @@ const generateSearchFromFilters = filters => {
             const key =
               curr.filter === '=' ? curr.name : `${curr.name}${curr.filter}`;
             acc.push(`${key}=${curr.value}`);
+
             return acc;
           }, [])
           .join('&');

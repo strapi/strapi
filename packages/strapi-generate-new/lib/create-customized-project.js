@@ -44,7 +44,7 @@ async function askDbInfosAndTest(scope) {
       dependencies: clientDependencies({ scope, client }),
     };
 
-    await testDatabaseConnection({
+    return testDatabaseConnection({
       scope,
       configuration,
     })
@@ -67,6 +67,7 @@ async function askDbInfosAndTest(scope) {
           });
         }
       )
+      .then(() => configuration)
       .catch(err => {
         if (retries < MAX_RETRIES - 1) {
           console.log();
@@ -88,8 +89,6 @@ async function askDbInfosAndTest(scope) {
           `️⛔️ Could not connect to your database after ${MAX_RETRIES} tries. Try to check your database configuration an retry.`
         );
       });
-
-    return configuration;
   }
 
   return loop();
@@ -108,7 +107,7 @@ async function testDatabaseConnection({ scope, configuration }) {
   const connectivityFile = join(
     scope.tmpPath,
     'node_modules',
-    configuration.connection.connector,
+    `strapi-connector-${configuration.connection.connector}`,
     'lib',
     'utils',
     'connectivity.js'
@@ -165,19 +164,19 @@ async function askDatabaseInfos(scope) {
 }
 
 async function installDatabaseTestingDep({ scope, configuration }) {
-  let packageCmd = scope.useYarn
-    ? `yarnpkg --cwd ${scope.tmpPath} add`
-    : `npm install --prefix ${scope.tmpPath}`;
+  let packageManager = scope.useYarn ? 'yarnpkg' : 'npm';
+  let cmd = scope.useYarn
+    ? ['--cwd', scope.tmpPath, 'add']
+    : ['install', '--prefix', scope.tmpPath];
 
   // Manually create the temp directory for yarn
   if (scope.useYarn) {
     await fse.ensureDir(scope.tmpPath);
   }
 
-  const depArgs = Object.keys(configuration.dependencies).map(dep => {
+  const deps = Object.keys(configuration.dependencies).map(dep => {
     return `${dep}@${configuration.dependencies[dep]}`;
   });
 
-  const cmd = `${packageCmd} ${depArgs.join(' ')}`;
-  await execa.shell(cmd);
+  await execa(packageManager, cmd.concat(deps));
 }

@@ -7,15 +7,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import styles from './componentsStyles.scss';
+import PreviewControlWrapper from './PreviewControlWrapper';
 
 const PreviewControl = ({ onClick }) => (
-  <div className={styles.previewControlsWrapper} onClick={onClick}>
+  <PreviewControlWrapper onClick={onClick}>
     <div />
-    <div className={styles.wysiwygCollapse}>
+    <div className="wysiwygCollapse">
       <FormattedMessage id="components.Wysiwyg.collapse" />
     </div>
-  </div>
+  </PreviewControlWrapper>
 );
 
 PreviewControl.defaultProps = {

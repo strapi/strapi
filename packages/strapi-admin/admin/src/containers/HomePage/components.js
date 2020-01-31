@@ -1,3 +1,4 @@
+/* eslint-disable */
 import styled, { css } from 'styled-components';
 
 const Block = styled.div`
@@ -97,6 +98,7 @@ const ALink = styled.a`
 
   &:before {
     content: '\f105';
+
     font-weight: 600;
     margin-right: 10px;
     font-family: 'FontAwesome';
@@ -148,7 +150,7 @@ const ALink = styled.a`
             color: #005fea;
           }
         `}
-  
+
   ${({ type }) =>
     type === 'blog' &&
     css`

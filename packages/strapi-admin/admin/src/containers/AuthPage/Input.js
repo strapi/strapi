@@ -6,6 +6,8 @@ import { get } from 'lodash';
 import { InputsIndex as Inputs } from 'strapi-helper-plugin';
 import CustomLabel from './CustomLabel';
 
+/* eslint-disable */
+
 const Input = ({
   autoFocus,
   customBootstrapClass,
@@ -59,12 +61,14 @@ const Input = ({
     inputLabel = () => <CustomLabel id={label.id} values={{ terms, policy }} />;
   }
 
+  const inputErrors = get(errors, name, null);
+
   return (
     <Inputs
       autoFocus={autoFocus}
       customBootstrapClass={customBootstrapClass || 'col-12'}
       didCheckErrors={didCheckErrors}
-      errors={get(errors, name, [])}
+      errors={inputErrors ? [inputErrors] : []}
       label={inputLabel}
       name={name}
       noErrorsDescription={noErrorsDescription}

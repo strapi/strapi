@@ -14,6 +14,8 @@ import {
   makeSelectForm,
 } from './selectors';
 
+/* eslint-disable consistent-return */
+
 function* getData() {
   try {
     const response = yield call(request, '/documentation/getInfos', {
@@ -67,7 +69,7 @@ function* submit() {
     }
 
     yield call(request, `${prefix}/updateSettings`, { method: 'PUT', body });
-    yield put(setFormErrors([]));
+    yield put(setFormErrors({}));
 
     strapi.notification.success('documentation.notification.update.success');
   } catch (err) {

@@ -1,35 +1,30 @@
 /**
-*
-* EmptyAttributesBlock
-*
-*/
+ *
+ * EmptyAttributesBlock
+ *
+ */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import Button from '../Button';
-import styles from './styles.scss';
+import Wrapper from './Wrapper';
 
 function EmptyAttributesBlock({ description, label, onClick, title, id }) {
   return (
-    <div className={styles.emptyAttributesBlock}>
+    <Wrapper>
       <div>
         <FormattedMessage id={title}>
-          {(msg) => <div className={styles.title}>{msg}</div>}
+          {msg => <div className="title">{msg}</div>}
         </FormattedMessage>
         <FormattedMessage id={description}>
-          {(msg) => <div className={styles.description}>{msg}</div>}
+          {msg => <div className="description">{msg}</div>}
         </FormattedMessage>
-        <div className={styles.buttonContainer}>
-          <Button
-            onClick={onClick}
-            primaryAddShape
-            label={label}
-            id={id}
-          />
+        <div className="buttonContainer">
+          <Button onClick={onClick} primaryAddShape label={label} id={id} />
         </div>
       </div>
-    </div>
+    </Wrapper>
   );
 }
 

@@ -1,5 +1,7 @@
 import { get, isArray, isEmpty, isObject } from 'lodash';
 
+/* eslint-disable indent */
+
 export const cleanData = (retrievedData, ctLayout, groupLayouts) => {
   const getType = (schema, attrName) =>
     get(schema, ['attributes', attrName, 'type'], '');
@@ -19,7 +21,7 @@ export const cleanData = (retrievedData, ctLayout, groupLayouts) => {
 
       switch (attrType) {
         case 'json':
-          cleanedData = value;
+          cleanedData = JSON.parse(value);
           break;
         case 'date':
           cleanedData =
@@ -112,11 +114,12 @@ export const getMediaAttributes = (ctLayout, groupLayouts) => {
 export const helperCleanData = (value, key) => {
   if (isArray(value)) {
     return value.map(obj => (obj[key] ? obj[key] : obj));
-  } else if (isObject(value)) {
-    return value[key];
-  } else {
-    return value;
   }
+  if (isObject(value)) {
+    return value[key];
+  }
+
+  return value;
 };
 
 export const mapDataKeysToFilesToUpload = (filesMap, data) => {
@@ -135,6 +138,7 @@ export const mapDataKeysToFilesToUpload = (filesMap, data) => {
     };
     const getFileToUpload = path => {
       const file = get(data, [...path, 0], '');
+
       if (file instanceof File) {
         return [file];
       }
@@ -157,7 +161,7 @@ export const mapDataKeysToFilesToUpload = (filesMap, data) => {
       const groupData = get(data, [key], []);
       const groupFiles = groupData.reduce((acc1, current, index) => {
         const files = isMultiple
-          ? getFileToUpload([key, index, targetKey])
+          ? getFilesToUpload([key, index, targetKey])
           : getFileToUpload([key, index, targetKey]);
 
         if (!isEmpty(files)) {

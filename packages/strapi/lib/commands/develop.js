@@ -1,5 +1,6 @@
 'use strict';
 
+const _ = require('lodash');
 const path = require('path');
 const cluster = require('cluster');
 const fs = require('fs-extra');
@@ -7,18 +8,28 @@ const chokidar = require('chokidar');
 const execa = require('execa');
 
 const { logger } = require('strapi-utils');
+const loadConfigFile = require('../load/load-config-files');
+
 const strapi = require('../index');
 
 /**
  * `$ strapi develop`
  *
  */
-module.exports = async function({ build }) {
+module.exports = async function({ build, watchAdmin }) {
   const dir = process.cwd();
+  const envConfigDir = path.join(dir, 'config', 'environments', 'development');
+  const serverConfig = await loadConfigFile(envConfigDir, 'server.+(js|json)');
+  const adminWatchIgnoreFiles = _.get(
+    serverConfig,
+    'admin.watchIgnoreFiles',
+    []
+  );
 
-  if (build && !fs.existsSync(path.join(dir, 'build'))) {
+  // Don't run the build process if the admin is in watch mode
+  if (build && !watchAdmin && !fs.existsSync(path.join(dir, 'build'))) {
     try {
-      execa.shellSync('npm run -s build', {
+      execa.shellSync('npm run -s build -- --no-optimization', {
         stdio: 'inherit',
       });
     } catch (err) {
@@ -27,9 +38,24 @@ module.exports = async function({ build }) {
   }
 
   try {
-    const strapiInstance = strapi({ dir, autoReload: true });
+    const strapiInstance = strapi({
+      dir,
+      autoReload: true,
+      serveAdminPanel: watchAdmin ? false : true,
+    });
 
     if (cluster.isMaster) {
+      //  Start the front-end dev server
+      if (watchAdmin) {
+        try {
+          execa('npm', ['run', '-s', 'strapi', 'watch-admin'], {
+            stdio: 'inherit',
+          });
+        } catch (err) {
+          process.exit(1);
+        }
+      }
+
       cluster.on('message', (worker, message) => {
         switch (message) {
           case 'reload':
@@ -43,7 +69,6 @@ module.exports = async function({ build }) {
           case 'stop':
             worker.kill();
             process.exit(1);
-            break;
           default:
             return;
         }
@@ -53,7 +78,11 @@ module.exports = async function({ build }) {
     }
 
     if (cluster.isWorker) {
-      watchFileChanges({ dir, strapiInstance });
+      watchFileChanges({
+        dir,
+        strapiInstance,
+        watchIgnoreFiles: adminWatchIgnoreFiles,
+      });
 
       process.on('message', message => {
         switch (message) {
@@ -80,8 +109,9 @@ module.exports = async function({ build }) {
  * @param {Object} options - Options object
  * @param {string} options.dir - This is the path where the app is located, the watcher will watch the files under this folder
  * @param {Strapi} options.strapi - Strapi instance
+ * @param {array} options.watchIgnoreFiles - Array of custom file paths that should not be watched
  */
-function watchFileChanges({ dir, strapiInstance }) {
+function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles }) {
   const restart = () => {
     if (
       strapiInstance.reload.isWatching &&
@@ -95,12 +125,12 @@ function watchFileChanges({ dir, strapiInstance }) {
   const watcher = chokidar.watch(dir, {
     ignoreInitial: true,
     ignored: [
-      /(^|[/\\])\../,
+      /(^|[/\\])\../, // dot files
       /tmp/,
       '**/admin',
       '**/admin/**',
-      '**/components',
-      '**/components/**',
+      'extensions/**/admin',
+      'extensions/**/admin/**',
       '**/documentation',
       '**/documentation/**',
       '**/node_modules',
@@ -113,6 +143,7 @@ function watchFileChanges({ dir, strapiInstance }) {
       '**/cypress/**',
       '**/*.db*',
       '**/exports/**',
+      ...watchIgnoreFiles,
     ],
   });
 

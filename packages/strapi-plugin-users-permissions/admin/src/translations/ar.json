@@ -88,7 +88,7 @@
   "PopUpForm.button.save": "حفظ",
   "PopUpForm.header.add.providers": "إضافة موفر جديد",
   "PopUpForm.header.edit.email-templates": "تحرير قوالب البريد الإلكتروني",
-  "PopUpForm.header.edit.providers": "تحرير موفر {provider}",
+  "PopUpForm.header.edit.providers": "تحرير موفر",
   "PopUpForm.inputSelect.providers.label": "اختر الموفر",
 
   "notification.error.delete": "حدث خطأ أثناء محاولة حذف العنصر",

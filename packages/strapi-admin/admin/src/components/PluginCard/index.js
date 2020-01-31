@@ -6,15 +6,12 @@
 /* eslint-disable */
 import React from 'react';
 import PropTypes from 'prop-types';
-import cn from 'classnames';
-import { isEmpty, replace } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-
 import { Button, PopUpWarning } from 'strapi-helper-plugin';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Wrapper from './Wrapper';
 
-import styles from './styles.scss';
-
-const PLUGINS_WITH_CONFIG = ['content-manager', 'email', 'upload'];
+const PLUGINS_WITH_CONFIG = ['email', 'upload'];
 
 /* eslint-disable react/no-unused-state */
 class PluginCard extends React.Component {
@@ -60,10 +57,7 @@ class PluginCard extends React.Component {
   };
 
   handleClickSettings = e => {
-    const settingsPath =
-      this.props.plugin.id === 'content-manager'
-        ? '/plugins/content-manager/ctm-configurations/models'
-        : `/plugins/${this.props.plugin.id}/configurations/${this.props.currentEnvironment}`;
+    const settingsPath = `/plugins/${this.props.plugin.id}/configurations/${this.props.currentEnvironment}`;
 
     e.preventDefault();
     e.stopPropagation();
@@ -94,8 +88,8 @@ class PluginCard extends React.Component {
 
   render() {
     const buttonClass = !this.props.isAlreadyInstalled
-      ? styles.primary
-      : styles.secondary;
+      ? 'primary'
+      : 'secondary';
     const buttonLabel = this.props.isAlreadyInstalled
       ? 'app.components.PluginCard.Button.label.install'
       : 'app.components.PluginCard.Button.label.download';
@@ -104,8 +98,8 @@ class PluginCard extends React.Component {
     const settingsComponent = PLUGINS_WITH_CONFIG.includes(
       this.props.plugin.id
     ) && (
-      <div className={styles.settings} onClick={this.handleClickSettings}>
-        <i className="fa fa-cog" />
+      <div className="settings" onClick={this.handleClickSettings}>
+        <FontAwesomeIcon icon="cog" />
         <FormattedMessage id="app.components.PluginCard.settings" />
       </div>
     );
@@ -132,17 +126,17 @@ class PluginCard extends React.Component {
     };
 
     return (
-      <div className={cn(this.state.boostrapCol, styles.pluginCard)}>
-        <div className={styles.wrapper}>
-          <div className={styles.cardTitle}>
-            <div className={styles.frame}>
-              <span className={styles.helper} />
+      <Wrapper className={this.state.boostrapCol}>
+        <div className="wrapper">
+          <div className="cardTitle">
+            <div className="frame">
+              <span className="helper" />
               <img src={this.props.plugin.logo} alt="icon" />
             </div>
             <div>
               {this.props.plugin.name}{' '}
               <i
-                className="fa fa-external-link"
+                className="fa fa-external-link-alt"
                 onClick={() =>
                   window.open(
                     `https://github.com/strapi/strapi/tree/master/packages/strapi-plugin-${this.props.plugin.id}`,
@@ -152,14 +146,11 @@ class PluginCard extends React.Component {
               />
             </div>
           </div>
-          <div className={styles.cardDescription}>
-            {descriptions.long}
-            {/* &nbsp;<FormattedMessage id="app.components.PluginCard.more-details" /> */}
-          </div>
-          <div className={styles.cardFooter} onClick={e => e.stopPropagation()}>
-            <div className={styles.cardFooterButton}>
+          <div className="cardDescription">{descriptions.long}</div>
+          <div className="cardFooter" onClick={e => e.stopPropagation()}>
+            <div className="cardFooterButton">
               <Button
-                className={cn(buttonClass, styles.button)}
+                className={`${buttonClass} button`}
                 label={buttonLabel}
                 onClick={this.handleDownloadPlugin}
               />
@@ -177,7 +168,7 @@ class PluginCard extends React.Component {
             {this.props.isAlreadyInstalled ? (
               settingsComponent
             ) : (
-              <div className={styles.compatible}>
+              <div className="compatible">
                 <i
                   className={`fa fa-${
                     this.props.plugin.isCompatible ? 'check' : 'times'
@@ -221,7 +212,7 @@ class PluginCard extends React.Component {
           onConfirm={() => this.setState({ showModalEnv: false })}
           popUpWarningType="warning"
         />
-      </div>
+      </Wrapper>
     );
   }
 }

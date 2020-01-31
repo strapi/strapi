@@ -1,4 +1,8 @@
 {
+  "contentTypes": {
+    "id": "app.components.LeftMenuLinkContainer.contentTypes",
+    "defaultMessage": "Content Types"
+  },
   "listPlugins": {
     "id": "app.components.LeftMenuLinkContainer.listPlugins",
     "defaultMessage": "Plugins"
@@ -22,5 +26,9 @@
   "noPluginsInstalled": {
     "id": "app.components.LeftMenuLinkContainer.noPluginsInstalled",
     "defaultMessage": "No plugins installed yet"
+  },
+  "settings": {
+    "id": "app.components.LeftMenuLinkContainer.settings",
+    "defaultMessage": "Settings"
   }
 }

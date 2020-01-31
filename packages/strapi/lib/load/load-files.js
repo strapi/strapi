@@ -34,6 +34,13 @@ const loadFiles = async (
     delete require.cache[absolutePath];
     const mod = requireFn(absolutePath);
 
+    Object.defineProperty(mod, '__filename__', {
+      enumerable: true,
+      configurable: false,
+      writable: false,
+      value: path.basename(file),
+    });
+
     const propPath = filePathToPath(file, shouldUseFileNameAsKey(file));
 
     if (propPath.length === 0) _.merge(root, mod);

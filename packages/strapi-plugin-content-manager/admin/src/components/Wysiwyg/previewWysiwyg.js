@@ -17,9 +17,8 @@ import {
   CharacterMetadata,
 } from 'draft-js';
 import { List, OrderedSet, Repeat, fromJS } from 'immutable';
-import cn from 'classnames';
 import { isEmpty, toArray } from 'lodash';
-
+import WysiwygContext from '../../contexts/Wysiwyg';
 import WysiwygEditor from '../WysiwygEditor';
 import converter from './converter';
 import {
@@ -28,23 +27,25 @@ import {
   findImageEntities,
   findVideoEntities,
 } from './strategies';
-
+import PreviewWysiwygWrapper from './PreviewWysiwygWrapper';
 import Image from './image';
 import Link from './link';
 import Video from './video';
 
-import styles from './componentsStyles.scss';
 /* eslint-disable react/no-unused-state */
+/* eslint-disable no-new */
+/* eslint-disable consistent-return */
+/* eslint-disable react/sort-comp */
 function getBlockStyle(block) {
   switch (block.getType()) {
     case 'blockquote':
-      return styles.editorBlockquote;
+      return 'editorBlockquote';
     case 'code-block':
-      return styles.editorCodeBlock;
+      return 'editorCodeBlock';
     case 'unstyled':
-      return styles.editorParagraph;
+      return 'editorParagraph';
     case 'unordered-list-item':
-      return styles.unorderedList;
+      return 'unorderedList';
     case 'ordered-list-item':
     case 'header-one':
     case 'header-two':
@@ -93,6 +94,7 @@ const wrapBlockSpec = blockSpec => {
   // stringify meta data and insert it as text content of temp HTML element. We will later extract
   // and parse it.
   tempEl.innerText = JSON.stringify(blockSpec);
+
   return tempEl;
 };
 
@@ -101,6 +103,7 @@ const replaceElement = (oldEl, newEl) => {
     return;
   }
   const parentNode = oldEl.parentNode;
+
   return parentNode.replaceChild(newEl, oldEl);
 };
 
@@ -122,6 +125,7 @@ const createContentBlock = (blockData = {}) => {
 
   if (inlineStyles || entityData) {
     let entityKey;
+
     if (entityData) {
       const { type, mutability, data } = entityData;
       entityKey = Entity.create(type, mutability, data);
@@ -135,11 +139,14 @@ const createContentBlock = (blockData = {}) => {
     );
     blockSpec.characterList = List(Repeat(charData, text.length));
   }
+
   return new ContentBlock(blockSpec);
 };
 
 class PreviewWysiwyg extends React.PureComponent {
   state = { editorState: EditorState.createEmpty(), isMounted: false };
+
+  static contextType = WysiwygContext;
 
   componentDidMount() {
     const { data } = this.props;
@@ -171,18 +178,6 @@ class PreviewWysiwyg extends React.PureComponent {
   componentWillUnmount() {
     this.setState({ isMounted: false });
   }
-
-  getClassName = () => {
-    if (this.context.isFullscreen) {
-      return cn(
-        styles.editor,
-        styles.editorFullScreen,
-        styles.fullscreenPreviewEditor
-      );
-    }
-
-    return styles.editor;
-  };
 
   previewHTML = rawContent => {
     const initHtml = isEmpty(rawContent) ? '<p></p>' : rawContent;
@@ -241,9 +236,9 @@ class PreviewWysiwyg extends React.PureComponent {
 
   render() {
     const { placeholder } = this.context;
-    // this.previewHTML2(this.props.data);
+
     return (
-      <div className={this.getClassName()}>
+      <PreviewWysiwygWrapper isFullscreen={this.context.isFullscreen}>
         <WysiwygEditor
           blockStyleFn={getBlockStyle}
           editorState={this.state.editorState}
@@ -251,20 +246,15 @@ class PreviewWysiwyg extends React.PureComponent {
           placeholder={placeholder}
         />
         <input
-          className={styles.editorInput}
+          className="editorInput"
           value=""
           onChange={() => {}}
           tabIndex="-1"
         />
-      </div>
+      </PreviewWysiwygWrapper>
     );
   }
 }
-
-PreviewWysiwyg.contextTypes = {
-  isFullscreen: PropTypes.bool,
-  placeholder: PropTypes.string,
-};
 
 PreviewWysiwyg.defaultProps = {
   data: '',

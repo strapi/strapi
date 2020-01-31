@@ -1,4 +1,5 @@
 import styled, { css } from 'styled-components';
+/* eslint-disable */
 
 const Wrapper = styled.div`
   margin-left: 29px;
@@ -9,7 +10,7 @@ const Wrapper = styled.div`
     background: #ffffff;
     color: #333740;
     border-radius: 2px;
-    border: solid 1px #006ced;
+    border: solid 1px #007eff;
 
     > button {
       cursor: pointer;
@@ -41,14 +42,10 @@ const Wrapper = styled.div`
         margin-top: -1px;
         color: #007eff !important;
         font-size: 13px !important;
-        > span {
-          &:before {
-            margin-right: 10px;
-            content: '\f067';
-            font-family: FontAwesome;
-            font-size: 13px;
-            color: #007eff;
-          }
+        svg {
+          fill: #007eff;
+          margin-right: 7px;
+          vertical-align: initial;
         }
       }
     }

@@ -8,13 +8,17 @@ import React, { memo } from 'react';
 import { isEmpty, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
+import Cross from '../../icons/Cross';
+import Filter from '../../icons/Filter';
+import SearchIcon from '../../icons/Search';
 import { Wrapper, Infos, Clear } from './components';
-import Logo from '../../assets/images/icon_filter_blue.svg';
 
 const WAIT = 400;
 
 class Search extends React.Component {
   state = { value: this.props.initValue };
+
+  timer = null;
 
   componentDidUpdate(prevProps) {
     const { model, value } = this.props;
@@ -26,8 +30,6 @@ class Search extends React.Component {
       this.resetState();
     }
   }
-
-  timer = null;
 
   resetState = () => this.setState({ value: '' });
 
@@ -57,6 +59,9 @@ class Search extends React.Component {
     return (
       <Wrapper>
         <div>
+          <SearchIcon />
+        </div>
+        <div>
           <FormattedMessage id="content-manager.components.Search.placeholder">
             {message => (
               <input
@@ -67,10 +72,14 @@ class Search extends React.Component {
               />
             )}
           </FormattedMessage>
-          {value !== '' && <Clear onClick={this.handleClick} />}
+          {value !== '' && (
+            <Clear onClick={this.handleClick}>
+              <Cross />
+            </Clear>
+          )}
         </div>
         <Infos>
-          <img src={Logo} alt="filter_logo" />
+          <Filter />
           {upperFirst(model)}
         </Infos>
       </Wrapper>

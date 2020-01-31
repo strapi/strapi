@@ -58,7 +58,7 @@ module.exports = {
     return Promise.all(files.map(stream => createBuffer(stream)));
   },
 
-  upload(files, config) {
+  async upload(files, config) {
     // Get upload provider settings to configure the provider to use.
     const provider = _.find(strapi.plugins.upload.config.providers, {
       provider: config.provider,
@@ -70,7 +70,7 @@ module.exports = {
       );
     }
 
-    const actions = provider.init(config);
+    const actions = await provider.init(config);
 
     // upload a single file
     const uploadFile = async file => {
@@ -80,12 +80,14 @@ module.exports = {
       delete file.buffer;
       file.provider = provider.provider;
 
-      const res = await strapi.plugins['upload'].services.upload.add(file);
+      const res = await this.add(file);
 
       // Remove temp file
       if (file.tmpPath) {
         fs.unlinkSync(file.tmpPath);
       }
+
+      strapi.eventHub.emit('media.create', { media: res });
       return res;
     };
 
@@ -125,6 +127,12 @@ module.exports = {
     if (file.provider === provider.provider) {
       await actions.delete(file);
     }
+
+    const media = await strapi.query('file', 'upload').findOne({
+      id: file.id,
+    });
+
+    strapi.eventHub.emit('media.delete', { media });
 
     return strapi.query('file', 'upload').delete({ id: file.id });
   },

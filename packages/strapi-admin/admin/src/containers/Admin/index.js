@@ -10,9 +10,11 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import { Switch, Route } from 'react-router-dom';
+import { injectIntl } from 'react-intl';
 import { isEmpty } from 'lodash';
 // Components from strapi-helper-plugin
 import {
+  difference,
   GlobalContextProvider,
   LoadingIndicatorPage,
   OverlayBlocker,
@@ -22,8 +24,6 @@ import { SHOW_TUTORIALS } from '../../config';
 import Header from '../../components/Header/index';
 import Logout from '../../components/Logout';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
-
-import ComingSoonPage from '../ComingSoonPage';
 import LeftMenu from '../LeftMenu';
 import ListPluginsPage from '../ListPluginsPage';
 import LocaleToggle from '../LocaleToggle';
@@ -31,28 +31,34 @@ import HomePage from '../HomePage';
 import Marketplace from '../Marketplace';
 import NotFoundPage from '../NotFoundPage';
 import Onboarding from '../Onboarding';
+import SettingsPage from '../SettingsPage';
 import PluginDispatcher from '../PluginDispatcher';
-
 import {
   disableGlobalOverlayBlocker,
   enableGlobalOverlayBlocker,
   updatePlugin,
 } from '../App/actions';
 import makeSelecApp from '../App/selectors';
-
 import injectSaga from '../../utils/injectSaga';
 import injectReducer from '../../utils/injectReducer';
-import difference from './utils/difference';
 
 import { emitEvent, setAppError } from './actions';
 import makeSelectAdmin from './selectors';
 import reducer from './reducer';
 import saga from './saga';
-
-import styles from './styles.scss';
+import Wrapper from './Wrapper';
+import Content from './Content';
 
 export class Admin extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
+
+  helpers = {
+    updatePlugin: this.props.updatePlugin,
+  };
+
+  componentDidMount() {
+    this.props.emitEvent('didAccessAuthenticatedAdministration');
+  }
 
   shouldComponentUpdate(prevProps) {
     return !isEmpty(difference(prevProps, this.props));
@@ -82,10 +88,6 @@ export class Admin extends React.Component {
     );
   };
 
-  helpers = {
-    updatePlugin: this.props.updatePlugin,
-  };
-
   /**
    * Display the app loader until the app is ready
    * @returns {Boolean}
@@ -111,8 +113,6 @@ export class Admin extends React.Component {
     }, []);
   };
 
-  renderMarketPlace = props => <Marketplace {...props} {...this.props} />;
-
   renderPluginDispatcher = props => {
     // NOTE: Send the needed props instead of everything...
 
@@ -124,43 +124,52 @@ export class Admin extends React.Component {
   render() {
     const {
       global: {
+        autoReload,
         blockApp,
+        currentEnvironment,
         overlayBlockerData,
         plugins,
         showGlobalAppBlocker,
         strapiVersion,
       },
+      disableGlobalOverlayBlocker,
+      emitEvent,
+      enableGlobalOverlayBlocker,
+      intl: { formatMessage },
+      updatePlugin,
     } = this.props;
 
     // We need the admin data in order to make the initializers work
     if (this.showLoader()) {
       return (
-        <React.Fragment>
+        <>
           {this.renderInitializers()}
           <LoadingIndicatorPage />
-        </React.Fragment>
+        </>
       );
     }
 
     return (
       <GlobalContextProvider
-        emitEvent={this.props.emitEvent}
-        currentEnvironment={this.props.global.currentEnvironment}
-        disableGlobalOverlayBlocker={this.props.disableGlobalOverlayBlocker}
-        enableGlobalOverlayBlocker={this.props.enableGlobalOverlayBlocker}
-        plugins={this.props.global.plugins}
-        updatePlugin={this.props.updatePlugin}
+        autoReload={autoReload}
+        emitEvent={emitEvent}
+        currentEnvironment={currentEnvironment}
+        disableGlobalOverlayBlocker={disableGlobalOverlayBlocker}
+        enableGlobalOverlayBlocker={enableGlobalOverlayBlocker}
+        formatMessage={formatMessage}
+        plugins={plugins}
+        updatePlugin={updatePlugin}
       >
-        <div className={styles.adminPage}>
+        <Wrapper>
           <LeftMenu version={strapiVersion} plugins={plugins} />
           <NavTopRightWrapper>
             {/* Injection zone not ready yet */}
             <Logout />
             <LocaleToggle isLogged />
           </NavTopRightWrapper>
-          <div className={styles.adminPageRightWrapper}>
+          <div className="adminPageRightWrapper">
             <Header />
-            <div className={styles.content}>
+            <Content>
               <Switch>
                 <Route
                   path="/"
@@ -171,7 +180,6 @@ export class Admin extends React.Component {
                   path="/plugins/:pluginId"
                   render={this.renderPluginDispatcher}
                 />
-                <Route path="/plugins" component={ComingSoonPage} />
                 <Route
                   path="/list-plugins"
                   render={props => this.renderRoute(props, ListPluginsPage)}
@@ -179,14 +187,16 @@ export class Admin extends React.Component {
                 />
                 <Route
                   path="/marketplace"
-                  render={this.renderMarketPlace}
-                  exact
+                  render={props => this.renderRoute(props, Marketplace)}
                 />
-                <Route path="/configuration" component={ComingSoonPage} exact />
+                <Route
+                  path="/settings"
+                  render={props => this.renderRoute(props, SettingsPage)}
+                />
                 <Route key="7" path="" component={NotFoundPage} />
                 <Route key="8" path="404" component={NotFoundPage} />
               </Switch>
-            </div>
+            </Content>
           </div>
           <OverlayBlocker
             key="overlayBlocker"
@@ -194,11 +204,17 @@ export class Admin extends React.Component {
             {...overlayBlockerData}
           />
           {SHOW_TUTORIALS && <Onboarding />}
-        </div>
+        </Wrapper>
       </GlobalContextProvider>
     );
   }
 }
+
+Admin.defaultProps = {
+  intl: {
+    formatMessage: () => {},
+  },
+};
 
 Admin.propTypes = {
   admin: PropTypes.shape({
@@ -208,6 +224,7 @@ Admin.propTypes = {
   emitEvent: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
   global: PropTypes.shape({
+    autoReload: PropTypes.bool,
     blockApp: PropTypes.bool,
     currentEnvironment: PropTypes.string,
     overlayBlockerData: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
@@ -215,6 +232,9 @@ Admin.propTypes = {
     showGlobalAppBlocker: PropTypes.bool,
     strapiVersion: PropTypes.string,
   }).isRequired,
+  intl: PropTypes.shape({
+    formatMessage: PropTypes.func,
+  }),
   location: PropTypes.object.isRequired,
   setAppError: PropTypes.func.isRequired,
   updatePlugin: PropTypes.func.isRequired,
@@ -246,6 +266,7 @@ const withReducer = injectReducer({ key: 'admin', reducer });
 const withSaga = injectSaga({ key: 'admin', saga });
 
 export default compose(
+  injectIntl,
   withReducer,
   withSaga,
   withConnect

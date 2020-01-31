@@ -72,7 +72,8 @@ const MediaPreviewFile = styled(MediaPreviewItem)`
       font-size: 10px;
       font-weight: 600;
     }
-    i {
+    i,
+    svg {
       position: absolute;
       left: 1px;
       top: -1px;

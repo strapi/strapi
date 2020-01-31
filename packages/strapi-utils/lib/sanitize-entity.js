@@ -5,6 +5,8 @@ module.exports = function sanitizeEntity(data, { model, withPrivate = false }) {
 
   let plainData = typeof data.toJSON === 'function' ? data.toJSON() : data;
 
+  if (typeof plainData !== 'object') return plainData;
+
   const attributes = model.attributes;
   return Object.keys(plainData).reduce((acc, key) => {
     const attribute = attributes[key];
@@ -14,10 +16,12 @@ module.exports = function sanitizeEntity(data, { model, withPrivate = false }) {
 
     if (
       attribute &&
-      (attribute.model || attribute.collection || attribute.type === 'group')
+      (attribute.model ||
+        attribute.collection ||
+        attribute.type === 'component')
     ) {
       const targetName =
-        attribute.model || attribute.collection || attribute.group;
+        attribute.model || attribute.collection || attribute.component;
 
       const targetModel = strapi.getModel(targetName, attribute.plugin);
 

@@ -9,6 +9,9 @@ const Koa = require('koa');
 const Router = require('koa-router');
 const _ = require('lodash');
 const { logger, models } = require('strapi-utils');
+const chalk = require('chalk');
+const CLITable = require('cli-table3');
+
 const utils = require('./utils');
 const {
   loadConfig,
@@ -19,34 +22,36 @@ const {
   loadHooks,
   bootstrap,
   loadExtensions,
-  initCoreStore,
-  loadGroups,
+  loadComponents,
 } = require('./core');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
 const createStrapiFs = require('./core/fs');
 const getPrefixedDeps = require('./utils/get-prefixed-dependencies');
 
-const createQueryManager = () => {
-  const _queries = new Map();
+const createEventHub = require('./services/event-hub');
+const createWebhookRunner = require('./services/webhook-runner');
+const {
+  webhookModel,
+  createWebhookStore,
+} = require('./services/webhook-store');
+const { createCoreStore, coreStoreModel } = require('./services/core-store');
+const createEntityService = require('./services/entity-service');
+const { createDatabaseManager } = require('strapi-database');
 
-  const toUid = (modelKey, plugin) => {
-    return plugin ? `plugins::${plugin}.${modelKey}` : modelKey;
-  };
-
-  return {
-    get({ modelKey, plugin }) {
-      return _queries.get(toUid(modelKey, plugin));
-    },
-    has({ modelKey, plugin }) {
-      return _queries.has(toUid(modelKey, plugin));
-    },
-    set({ modelKey, plugin }, query) {
-      const uid = toUid(modelKey, plugin);
-      _queries.set(uid, query);
-      return this;
-    },
-  };
+const CONFIG_PATHS = {
+  admin: 'admin',
+  api: 'api',
+  config: 'config',
+  controllers: 'controllers',
+  models: 'models',
+  plugins: 'plugins',
+  policies: 'policies',
+  tmp: '.tmp',
+  services: 'services',
+  static: 'public',
+  validators: 'validators',
+  views: 'views',
 };
 
 /**
@@ -56,7 +61,7 @@ const createQueryManager = () => {
  */
 
 class Strapi extends EventEmitter {
-  constructor({ dir, autoReload = false } = {}) {
+  constructor(opts = {}) {
     super();
 
     this.setMaxListeners(100);
@@ -78,20 +83,23 @@ class Strapi extends EventEmitter {
       models,
     };
 
-    // Exclude EventEmitter, Koa and HTTP server to be freezed.
-    this.propertiesToNotFreeze = Object.keys(this);
-
-    // Expose `admin`.
+    this.dir = opts.dir || process.cwd();
     this.admin = {};
-
-    // Expose `plugin`.
     this.plugins = {};
+    this.config = this.initConfig(opts);
 
-    this.dir = dir || process.cwd();
+    // internal services.
+    this.fs = createStrapiFs(this);
+    this.eventHub = createEventHub();
+
+    this.requireProjectBootstrap();
+  }
+
+  initConfig({ autoReload = false, serveAdminPanel = true } = {}) {
     const pkgJSON = require(path.resolve(this.dir, 'package.json'));
 
-    // Default configurations.
-    this.config = {
+    const config = {
+      serveAdminPanel,
       launchedAt: Date.now(),
       appPath: this.dir,
       autoReload,
@@ -100,20 +108,7 @@ class Strapi extends EventEmitter {
       environment: _.toLower(process.env.NODE_ENV) || 'development',
       environments: {},
       admin: {},
-      paths: {
-        admin: 'admin',
-        api: 'api',
-        config: 'config',
-        controllers: 'controllers',
-        models: 'models',
-        plugins: 'plugins',
-        policies: 'policies',
-        tmp: '.tmp',
-        services: 'services',
-        static: 'public',
-        validators: 'validators',
-        views: 'views',
-      },
+      paths: CONFIG_PATHS,
       middleware: {},
       hook: {},
       functions: {},
@@ -124,9 +119,25 @@ class Strapi extends EventEmitter {
       installedHooks: getPrefixedDeps('strapi-hook', pkgJSON),
     };
 
-    this.queryManager = createQueryManager();
-    this.fs = createStrapiFs(this);
-    this.requireProjectBootstrap();
+    Object.defineProperty(config, 'get', {
+      value(path, defaultValue = null) {
+        return _.get(config, path, defaultValue);
+      },
+      enumerable: false,
+      configurable: false,
+      writable: false,
+    });
+
+    Object.defineProperty(config, 'set', {
+      value(path, value) {
+        return _.set(config, path, value);
+      },
+      enumerable: false,
+      configurable: false,
+      writable: false,
+    });
+
+    return config;
   }
 
   requireProjectBootstrap() {
@@ -140,18 +151,84 @@ class Strapi extends EventEmitter {
     }
   }
 
+  logStats() {
+    const columns = Math.min(process.stderr.columns, 80) - 2;
+    console.log();
+    console.log(chalk.black.bgWhite(_.padEnd(' Project information', columns)));
+    console.log();
+
+    const infoTable = new CLITable({
+      colWidths: [20, 50],
+      chars: { mid: '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' },
+    });
+
+    infoTable.push(
+      [chalk.blue('Time'), `${new Date()}`],
+      [chalk.blue('Launched in'), Date.now() - this.config.launchedAt + ' ms'],
+      [chalk.blue('Environment'), this.config.environment],
+      [chalk.blue('Process PID'), process.pid],
+      [
+        chalk.blue('Version'),
+        `${this.config.info.strapi} (node v${this.config.info.node})`,
+      ]
+    );
+
+    console.log(infoTable.toString());
+    console.log();
+    console.log(chalk.black.bgWhite(_.padEnd(' Actions available', columns)));
+    console.log();
+  }
+
+  logFirstStartupMessage() {
+    this.logStats();
+
+    console.log(chalk.bold('One more thing...'));
+    console.log(
+      chalk.grey(
+        'Create your first administrator 💻 by going to the administration panel at:'
+      )
+    );
+    console.log();
+
+    const addressTable = new CLITable();
+    addressTable.push([chalk.bold(this.config.admin.url)]);
+    console.log(`${addressTable.toString()}`);
+    console.log();
+  }
+
+  logStartupMessage() {
+    this.logStats();
+
+    console.log(chalk.bold('Welcome back!'));
+
+    if (this.config.serveAdminPanel === true) {
+      console.log(
+        chalk.grey(
+          'To manage your project 🚀, go to the administration panel at:'
+        )
+      );
+      console.log(chalk.bold(this.config.admin.url));
+      console.log();
+    }
+
+    console.log(chalk.grey('To access the server ⚡️, go to:'));
+    console.log(chalk.bold(this.config.url));
+    console.log();
+  }
+
   async start(cb) {
     try {
       // Emit starting event.
       this.emit('server:starting');
 
       await this.load();
+
       // Run bootstrap function.
       await this.runBootstrapFunctions();
       // Freeze object.
       await this.freeze();
-      // Init first start
-      utils.init(this.config);
+      // Is the project initialised?
+      const isInitialised = await utils.isInitialised(this);
 
       this.app.use(this.router.routes()).use(this.router.allowedMethods());
 
@@ -159,20 +236,11 @@ class Strapi extends EventEmitter {
       this.server.listen(this.config.port, async err => {
         if (err) return this.stopWithError(err);
 
-        this.log.info('Time: ' + new Date());
-        this.log.info(
-          'Launched in: ' + (Date.now() - this.config.launchedAt) + ' ms'
-        );
-        this.log.info('Environment: ' + this.config.environment);
-        this.log.info('Process PID: ' + process.pid);
-        this.log.info(
-          `Version: ${this.config.info.strapi} (node v${this.config.info.node})`
-        );
-        this.log.info('To shut down your server, press <CTRL> + C at any time');
-        console.log();
-        this.log.info(`☄️  Admin panel: ${this.config.admin.url}`);
-        this.log.info(`⚡️ Server: ${this.config.url}`);
-        console.log();
+        if (!isInitialised) {
+          this.logFirstStartupMessage();
+        } else {
+          this.logStartupMessage();
+        }
 
         // Emit started event.
         this.emit('server:started');
@@ -188,7 +256,7 @@ class Strapi extends EventEmitter {
               'server.admin.autoOpen',
               true
             ) !== false) ||
-          this.config.init
+          !isInitialised
         ) {
           await utils.openBrowser.call(this);
         }
@@ -240,7 +308,7 @@ class Strapi extends EventEmitter {
     return this.stop();
   }
 
-  stop() {
+  stop(exitCode = 1) {
     // Destroy server and available connections.
     this.server.destroy();
 
@@ -249,7 +317,7 @@ class Strapi extends EventEmitter {
     }
 
     // Kill process.
-    process.exit(1);
+    process.exit(exitCode);
   }
 
   async load() {
@@ -272,7 +340,7 @@ class Strapi extends EventEmitter {
       middlewares,
       hook,
       extensions,
-      groups,
+      components,
     ] = await Promise.all([
       loadConfig(this),
       loadApis(this),
@@ -281,14 +349,14 @@ class Strapi extends EventEmitter {
       loadMiddlewares(this),
       loadHooks(this.config),
       loadExtensions(this.config),
-      loadGroups(this),
+      loadComponents(this),
     ]);
 
     _.merge(this.config, config);
 
     this.api = api;
     this.admin = admin;
-    this.groups = groups;
+    this.components = components;
     this.plugins = plugins;
     this.middleware = middlewares;
     this.hook = hook;
@@ -315,12 +383,42 @@ class Strapi extends EventEmitter {
     // Usage.
     await utils.usage(this.config);
 
+    // init webhook runner
+    this.webhookRunner = createWebhookRunner({
+      eventHub: this.eventHub,
+      logger: this.log,
+      configuration: this.config.get('currentEnvironment.server.webhooks', {}),
+    });
+
     // Init core store
-    initCoreStore(this);
+    this.models['core_store'] = coreStoreModel;
+    this.models['strapi_webhooks'] = webhookModel;
+
+    this.db = createDatabaseManager(this);
+    await this.db.initialize();
+
+    this.store = createCoreStore({
+      environment: this.config.environment,
+      db: this.db,
+    });
+
+    this.webhookStore = createWebhookStore({ db: this.db });
+
+    await this.startWebhooks();
+
+    this.entityService = createEntityService({
+      db: this.db,
+      eventHub: this.eventHub,
+    });
 
     // Initialize hooks and middlewares.
     await initializeMiddlewares.call(this);
     await initializeHooks.call(this);
+  }
+
+  async startWebhooks() {
+    const webhooks = await this.webhookStore.findWebhooks();
+    webhooks.forEach(webhook => this.webhookRunner.add(webhook));
   }
 
   reload() {
@@ -400,102 +498,24 @@ class Strapi extends EventEmitter {
   }
 
   async freeze() {
-    const propertiesToNotFreeze = this.propertiesToNotFreeze || [];
-
-    // Remove object from tree.
-    delete this.propertiesToNotFreeze;
-
-    return Object.keys(this)
-      .filter(x => !_.includes(propertiesToNotFreeze, x))
-      .forEach(key => {
-        Object.freeze(this[key]);
-      });
+    Object.freeze(this.config);
+    Object.freeze(this.dir);
+    Object.freeze(this.admin);
+    Object.freeze(this.plugins);
+    Object.freeze(this.api);
   }
 
   getModel(modelKey, plugin) {
-    return plugin === 'admin'
-      ? _.get(strapi.admin, ['models', modelKey], undefined)
-      : _.get(strapi.plugins, [plugin, 'models', modelKey]) ||
-          _.get(strapi, ['models', modelKey]) ||
-          _.get(strapi, ['groups', modelKey]) ||
-          undefined;
+    return this.db.getModel(modelKey, plugin);
   }
 
   /**
    * Binds queries with a specific model
    * @param {string} entity - entity name
    * @param {string} plugin - plugin name or null
-   * @param {Object} queriesMap - a map of orm to queries object factory (defaults to ./core-api/queries)
    */
   query(entity, plugin) {
-    if (!entity) {
-      throw new Error(
-        `You can't call the query method without passing the model's name as a first argument.`
-      );
-    }
-
-    const modelKey = entity.toLowerCase();
-
-    if (this.queryManager.has({ modelKey, plugin })) {
-      return this.queryManager.get({ modelKey, plugin });
-    }
-
-    const model =
-      plugin === 'admin'
-        ? _.get(strapi.admin, ['models', modelKey], undefined)
-        : _.get(strapi.plugins, [plugin, 'models', modelKey]) ||
-          _.get(strapi, ['models', modelKey]) ||
-          _.get(strapi, ['groups', modelKey]) ||
-          undefined;
-
-    if (!model) {
-      throw new Error(`The model ${modelKey} can't be found.`);
-    }
-
-    const connector = model.orm;
-
-    if (!connector) {
-      throw new Error(
-        `Impossible to determine the use ORM for the model ${modelKey}.`
-      );
-    }
-
-    const orm = strapi.hook[model.orm];
-    const query = orm.load.queries({ model, modelKey, strapi: this });
-    Object.assign(query, {
-      orm: connector,
-      primaryKey: model.primaryKey,
-      associations: model.associations,
-    });
-
-    // custom queries made easy
-    Object.assign(query, {
-      get model() {
-        return model;
-      },
-      custom(mapping) {
-        if (typeof mapping === 'function') {
-          return mapping.bind(query, { model, modelKey });
-        }
-
-        if (!mapping[connector]) {
-          throw new Error(`Missing mapping for orm ${connector}`);
-        }
-
-        if (typeof mapping[connector] !== 'function') {
-          throw new Error(
-            `Custom queries must be functions received ${typeof mapping[
-              connector
-            ]}`
-          );
-        }
-
-        return mapping[connector].call(query, { model, modelKey });
-      },
-    });
-
-    this.queryManager.set({ modelKey, plugin }, query);
-    return query;
+    return this.db.query(entity, plugin);
   }
 }
 

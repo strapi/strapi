@@ -250,7 +250,7 @@ module.exports = {
 
     const admin = await strapi
       .query('administrator', 'admin')
-      .findOne({ resetPasswordToken: code });
+      .findOne({ resetPasswordToken: `${code}` });
 
     if (!admin) {
       return ctx.badRequest(
@@ -308,6 +308,9 @@ module.exports = {
     if (!admin) {
       return ctx.badRequest(
         null,
+        // FIXME it's not a good security practice to let user know if the email address is registered
+        // it'd better to say something like "Email was sent to xyz@xyz.com"
+        // this way potential hacker doesn't know if email is registered or not
         formatError({
           id: 'Auth.form.error.user.not-exist',
           message: 'This email does not exit',
@@ -324,7 +327,7 @@ module.exports = {
         email: 'no-reply@strapi.io',
       },
       response_email: '',
-      object: '­Reset password',
+      object: 'Reset password',
       message: `<p>We heard that you lost your password. Sorry about that!</p>
 
 <p>But don’t worry! You can use the following link to reset your password:</p>
@@ -340,7 +343,7 @@ module.exports = {
         to: admin.email,
         from:
           settings.from.email || settings.from.name
-            ? `"${settings.from.name}" <${settings.from.email}>`
+            ? `${settings.from.name} <${settings.from.email}>`
             : undefined,
         replyTo: settings.response_email,
         subject: settings.object,

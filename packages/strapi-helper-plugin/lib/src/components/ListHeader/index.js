@@ -19,9 +19,7 @@ function ListHeader({
   return (
     <Wrapper style={style}>
       {button && <Button {...button} />}
-      {children ? (
-        children
-      ) : (
+      {children || (
         <FormattedMessage id={title} values={titleValues}>
           {msg => <Title>{msg}</Title>}
         </FormattedMessage>

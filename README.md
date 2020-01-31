@@ -72,7 +72,7 @@ Complete installation requirements can be found in the documentation under <a hr
 
 - Ubuntu 18.04/Debian 9.x
 - CentOS/RHEL 8
-- Mac O/S Mojave
+- macOS Mojave
 - Windows 10
 - Docker - [Docker-Repo](https://github.com/strapi/strapi-docker)
 
@@ -134,4 +134,4 @@ Check out our [roadmap](https://portal.productboard.com/strapi) to get informed 
 
 ## License
 
-[MIT License](LICENSE.md) Copyright (c) 2015-2019 [Strapi Solutions](https://strapi.io/).
+[MIT License](LICENSE.md) Copyright (c) 2015-2020 [Strapi Solutions](https://strapi.io/).

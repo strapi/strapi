@@ -15,16 +15,17 @@ import 'codemirror/addon/selection/mark-selection';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/3024-night.css';
 
-import { isEmpty, isObject, trimStart } from 'lodash';
+import { isEmpty, trimStart } from 'lodash';
 import jsonlint from './jsonlint';
 import Wrapper from './components';
 
 const WAIT = 600;
 const stringify = JSON.stringify;
-const parse = JSON.parse;
 const DEFAULT_THEME = '3024-night';
 
 class InputJSON extends React.Component {
+  timer = null;
+
   constructor(props) {
     super(props);
     this.editor = React.createRef();
@@ -43,6 +44,7 @@ class InputJSON extends React.Component {
       styleSelectedText: true,
       tabSize: 2,
       theme: DEFAULT_THEME,
+      fontSize: '13px',
     });
     this.codeMirror.on('change', this.handleChange);
     this.codeMirror.on('blur', this.handleBlur);
@@ -64,15 +66,14 @@ class InputJSON extends React.Component {
   setInitValue = () => {
     const { value } = this.props;
 
-    if (isObject(value) && value !== null) {
-      try {
-        parse(stringify(value));
-        this.setState({ hasInitValue: true });
+    try {
+      this.setState({ hasInitValue: true });
 
-        return this.codeMirror.setValue(stringify(value, null, 2));
-      } catch (err) {
-        return this.setState({ error: true });
-      }
+      if (value === null) return this.codeMirror.setValue('');
+
+      return this.codeMirror.setValue(stringify(value, null, 2));
+    } catch (err) {
+      return this.setState({ error: true });
     }
   };
 
@@ -89,7 +90,7 @@ class InputJSON extends React.Component {
     let content = this.getContentAtLine(line);
 
     if (content === '{') {
-      line = line + 1;
+      line += 1;
       content = this.getContentAtLine(line);
     }
     const chEnd = content.length;
@@ -101,8 +102,6 @@ class InputJSON extends React.Component {
     );
     this.setState({ markedText });
   };
-
-  timer = null;
 
   handleBlur = ({ target }) => {
     const { name, onBlur } = this.props;
@@ -124,10 +123,15 @@ class InputJSON extends React.Component {
     const { name, onChange } = this.props;
     let value = this.codeMirror.getValue();
 
-    try {
-      value = parse(value);
-    } catch (err) {
-      // Silent
+    if (!hasInitValue) {
+      this.setState({ hasInitValue: true });
+
+      // Fix for the input firing on onChange event on mount
+      return;
+    }
+
+    if (value === '') {
+      value = null;
     }
 
     // Update the parent
@@ -138,10 +142,6 @@ class InputJSON extends React.Component {
         type: 'json',
       },
     });
-
-    if (!hasInitValue) {
-      this.setState({ hasInitValue: true });
-    }
 
     // Remove higlight error
     if (this.state.markedText) {

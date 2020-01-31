@@ -26,6 +26,7 @@ class EditForm extends React.Component {
           value: get(this.props.settings, ['providers', current, 'provider']),
         };
         acc.push(option);
+
         return acc;
       },
       []
@@ -40,6 +41,7 @@ class EditForm extends React.Component {
             inputDescription={{
               id: 'email.EditForm.Input.select.inputDescription',
             }}
+            className="input-wrapper"
             inputClassName="inputStyle"
             label={{ id: 'email.EditForm.Input.select.label' }}
             name="provider"

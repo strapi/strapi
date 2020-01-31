@@ -107,8 +107,8 @@ describe('Content Manager | utils | layout', () => {
             attributes: {
               bool: { type: 'boolean' },
               ingredients: {
-                type: 'group',
-                group: 'ingredients',
+                type: 'component',
+                component: 'ingredients',
                 repeatable: true,
                 min: 1,
                 max: 10,
@@ -139,10 +139,10 @@ describe('Content Manager | utils | layout', () => {
       expect(getInputSize('text')).toBe(6);
     });
 
-    it('Should return 12 if the type is either json, group or richtext', () => {
+    it('Should return 12 if the type is either json, component or richtext', () => {
       expect(getInputSize('json')).toBe(12);
       expect(getInputSize('richtext')).toBe(12);
-      expect(getInputSize('group')).toBe(12);
+      expect(getInputSize('component')).toBe(12);
     });
 
     it('Should return 4 if the type is boolean', () => {

@@ -56,6 +56,7 @@ const formatLayout = arr => {
       if (row.rowContent.length === 1) {
         return row.rowContent[0].name !== '_TEMP_';
       }
+
       return true;
     });
 };
@@ -74,15 +75,16 @@ const getInputSize = type => {
   switch (type) {
     case 'boolean':
     case 'date':
-    case 'datetime':
     case 'integer':
     case 'float':
     case 'biginteger':
     case 'decimal':
+    case 'time':
       return 4;
     case 'json':
-    case 'group':
+    case 'component':
     case 'richtext':
+    case 'dynamiczone':
       return 12;
     default:
       return 6;
