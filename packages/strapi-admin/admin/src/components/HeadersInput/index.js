@@ -77,12 +77,18 @@ const HeadersInput = ({ errors, name, onClick, onChange, onRemove, value }) => {
         <li>
           <section>
             <p>
-              <FormattedMessage id="Settings.webhooks.key" />
+              <FormattedMessage
+                id="Settings.webhooks.key"
+                defaultMessage="Key"
+              />
             </p>
           </section>
           <section>
             <p>
-              <FormattedMessage id="Settings.webhooks.value" />
+              <FormattedMessage
+                id="Settings.webhooks.value"
+                defaultMessage="Value"
+              />
             </p>
           </section>
         </li>
@@ -126,7 +132,10 @@ const HeadersInput = ({ errors, name, onClick, onChange, onRemove, value }) => {
       </ul>
       <button onClick={() => onClick(name)} type="button">
         <Plus fill="#007eff" width="10px" />
-        <FormattedMessage id="Settings.webhooks.create.header" />
+        <FormattedMessage
+          id="Settings.webhooks.create.header"
+          defaultMessage="Create a new header"
+        />
       </button>
     </Wrapper>
   );
@@ -135,7 +144,6 @@ const HeadersInput = ({ errors, name, onClick, onChange, onRemove, value }) => {
 HeadersInput.defaultProps = {
   errors: {},
   onRemove: () => {},
-  value: [],
 };
 
 HeadersInput.propTypes = {
@@ -144,7 +152,7 @@ HeadersInput.propTypes = {
   onChange: PropTypes.func.isRequired,
   onClick: PropTypes.func.isRequired,
   onRemove: PropTypes.func,
-  value: PropTypes.array,
+  value: PropTypes.array.isRequired,
 };
 
 export default HeadersInput;
