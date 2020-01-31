@@ -16,7 +16,7 @@
     "async": "^2.1.2",
     "boom": "^7.3.0",
     "chalk": "^2.4.1",
-    "chokidar": "^2.1.2",
+    "chokidar": "3.3.1",
     "cli-table3": "^0.5.1",
     "commander": "^2.20.0",
     "cross-spawn": "^6.0.5",
