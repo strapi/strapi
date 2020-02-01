@@ -35,7 +35,13 @@ Now we are ready to create our custom validation code.
 First we have to define where write our code.
 
 ```js
-const _ = require('lodash');
+const handleErrors = (ctx, err = undefined, type) => {
+    if (ctx.request.graphql === null) {
+      return (ctx.request.graphql = strapi.errors[type](err));
+    }
+  
+    return ctx[type](err);
+  };
 
 module.exports = async (ctx, next) => {
   let role;
@@ -62,7 +68,6 @@ We will have to write our validation code before throwing an error.
 By using the [Auth0 get user profile](https://auth0.com/docs/api/authentication?http#get-user-info) documentation, you will verify a valid user matches with the current `JWT`
 
 ```js
-const _ = require('lodash');
 const axios = require('axios');
 
 module.exports = async (ctx, next) => {
