@@ -50,6 +50,7 @@
     "lint": "npm-run-all -p lint:code",
     "lint:code": "eslint .",
     "lint:fix": "eslint --fix .",
+    "lint:plugins": "eslint --fix plugins",
     "lint:other": "npm run prettier:other -- --check",
     "format": "npm-run-all -p format:*",
     "format:code": "npm run prettier:code -- --write",
