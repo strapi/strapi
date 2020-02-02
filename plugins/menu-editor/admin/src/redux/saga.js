@@ -1,3 +1,6 @@
+// FIXME: eslint-disable
+/* eslint-disable */
+
 import { call, fork, put, select, takeLatest } from 'redux-saga/effects';
 import { flatten, convert } from 'react-sortly';
 import { GET_MENU, SUBMIT } from './constants';

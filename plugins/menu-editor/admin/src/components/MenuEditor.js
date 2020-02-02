@@ -1,3 +1,5 @@
+// FIXME: eslint-disable
+/* eslint-disable */
 import { ContextProvider } from 'react-sortly';
 import { createDndContext, DndProvider } from 'react-dnd';
 import { FormattedMessage } from 'react-intl';
@@ -6,8 +8,8 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import nanoid from 'nanoid/non-secure';
 import PropTypes from 'prop-types';
 import React, { useCallback, useRef } from 'react';
-import SortableMenu from './SortableMenu';
 import styled from 'styled-components';
+import SortableMenu from './SortableMenu';
 
 const Wrapper = styled.div`
   display: flex;
@@ -15,7 +17,7 @@ const Wrapper = styled.div`
 `;
 
 const newItemLabel = (
-  <FormattedMessage id={'menu-editor.MenuEditor.addNewItem'} />
+  <FormattedMessage id="menu-editor.MenuEditor.addNewItem" />
 );
 
 function createNewItem(items) {
@@ -26,7 +28,6 @@ function createNewItem(items) {
   };
 }
 
-//TODO: add memo(), problems with PropTypes
 export default function MenuEditor({ onChange, editMode, menuItems }) {
   // Handling all changes in structure
   const handleChange = useCallback(
@@ -83,7 +84,7 @@ export default function MenuEditor({ onChange, editMode, menuItems }) {
 }
 
 MenuEditor.propTypes = {
-  editMode: PropTypes.bool.isRequired,
   menuItems: PropTypes.array.isRequired,
   onChange: PropTypes.func.isRequired,
+  editMode: PropTypes.bool.isRequired,
 };

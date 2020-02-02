@@ -1,3 +1,5 @@
+// FIXME: eslint-disable
+/* eslint-disable */
 import App from './containers/App';
 import Initializer from './utils/Initializer';
 import lifecycles from './lifecycles';
@@ -22,9 +24,9 @@ const plugin = {
   injectedComponents: [],
   isReady: false,
   layout: null,
+  lifecycles,
   leftMenuLinks: [],
   leftMenuSections: [],
-  lifecycles,
   mainComponent: Comp,
   name: pluginPkg.strapi.name,
   preventComponentRendering: false,

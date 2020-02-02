@@ -1,3 +1,5 @@
+// FIXME: eslint-disable
+/* eslint-disable */
 import { NotFound } from 'strapi-helper-plugin';
 import { Switch, Route } from 'react-router-dom';
 import MenuEditorPlugin from './MenuEditorPlugin';

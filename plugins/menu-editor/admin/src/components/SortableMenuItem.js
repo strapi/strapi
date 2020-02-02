@@ -1,9 +1,11 @@
+// FIXME: eslint-disable
+/* eslint-disable */
 import { faPen, faArrowsAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useDrag, useDrop } from 'react-sortly';
-import PropTypes from 'prop-types';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
+import PropTypes from 'prop-types';
 
 const Item = styled.div`
   margin-top: 5px;
@@ -63,35 +65,27 @@ const EditIcon = styled.div`
   }
 `;
 
-//TODO: add memo(), problems with PropTypes
 export default function SortableMenuItem({
-  depth,
-  editMode,
   id,
-  isNew,
-  myRef,
-  onClick,
-  onChange,
-  onKeyDown,
+  depth,
   value,
+  onChange,
+  onClick,
+  onKeyDown,
+  editMode,
+  myRef,
+  isNew,
 }) {
   // DnD for Sortly
-  //FIXME: no-unused-vars
-  // eslint-disable-next-line no-unused-vars
-  const [{ isDragging }, drag, preview] = useDrag({
+  const [drag, preview] = useDrag({
     collect: monitor => ({ isDragging: monitor.isDragging() }),
   });
   const [, drop] = useDrop();
 
   // Collect events here and invoke callbacks with usefull arguments
-  const handleClickItemDetail = useCallback(
-    //FIXME: no-unused-vars
-    // eslint-disable-next-line no-unused-vars
-    e => {
-      onClick(id);
-    },
-    [id, onClick]
-  );
+  const handleClickItemDetail = useCallback(() => {
+    onClick(id);
+  }, [id, onClick]);
 
   const handleChangeInputValue = useCallback(
     e => {
@@ -135,16 +129,16 @@ export default function SortableMenuItem({
 }
 
 SortableMenuItem.propTypes = {
-  depth: PropTypes.Number.isRequired,
-  editMode: PropTypes.bool.isRequired,
   id: PropTypes.Number.isRequired,
-  isNew: PropTypes.bool.isRequired,
-  onClick: PropTypes.func.isRequired,
-  onChange: PropTypes.func.isRequired,
-  onKeyDown: PropTypes.func.isRequired,
+  depth: PropTypes.Number.isRequired,
   value: PropTypes.String.isRequired,
+  onChange: PropTypes.func.isRequired,
+  onClick: PropTypes.func.isRequired,
+  onKeyDown: PropTypes.func.isRequired,
+  editMode: PropTypes.bool.isRequired,
   myRef: PropTypes.oneOfType([
     PropTypes.func,
     PropTypes.shape({ current: PropTypes.any }),
   ]),
+  isNew: PropTypes.bool.isRequired,
 };

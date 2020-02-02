@@ -1,17 +1,7 @@
+// FIXME: eslint-disable
+/* eslint-disable */
 import { fromJS, List } from 'immutable';
-
-import {
-  GET_MENU_SUCCEEDED,
-  GET_MENU,
-  ON_CANCEL,
-  ON_CHANGE,
-  //FIXME: no-unused-vars
-  // eslint-disable-next-line no-unused-vars
-  REDO,
-  //FIXME: no-unused-vars
-  // eslint-disable-next-line no-unused-vars
-  UNDO,
-} from './constants';
+import { GET_MENU, GET_MENU_SUCCEEDED, ON_CHANGE } from './constants';
 
 const initialState = fromJS({
   didCheckErrors: false,

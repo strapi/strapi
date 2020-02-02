@@ -4,6 +4,7 @@ const frontPaths = [
   'cypress/**/*.js',
   'packages/**/test/front/**/*.js',
   'test/config/front/**/*.js',
+  'plugins/**/*.js',
 ];
 
 module.exports = {

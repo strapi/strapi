@@ -1,12 +1,4 @@
-import {
-  GET_MENU_SUCCEEDED,
-  GET_MENU,
-  ON_CHANGE,
-  //FIXME: no-unused-vars
-  // eslint-disable-next-line no-unused-vars
-  SUBMIT_SUCCEEDED,
-  SUBMIT,
-} from './constants';
+import { ON_CHANGE, SUBMIT, GET_MENU, GET_MENU_SUCCEEDED } from './constants';
 
 export function getMenu() {
   return {

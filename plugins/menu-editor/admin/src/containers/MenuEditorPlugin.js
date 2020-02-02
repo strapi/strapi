@@ -1,7 +1,8 @@
+// FIXME: eslint-disable
+/* eslint-disable */
 import { bindActionCreators, compose } from 'redux';
-import { Button } from 'strapi-helper-plugin';
 import { connect } from 'react-redux';
-import { ContainerFluid, PluginHeader } from 'strapi-helper-plugin';
+import { ContainerFluid, PluginHeader, Button } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
 import { onChange, submit, getMenu } from '../redux/actions';
 import MenuEditor from '../components/MenuEditor';
@@ -32,6 +33,7 @@ class MenuEditorPlugin extends React.Component {
       modalOpen: false,
     };
   }
+
   componentDidMount() {
     this.getMenu();
   }
@@ -48,11 +50,9 @@ class MenuEditorPlugin extends React.Component {
     this.setState({ modalOpen: false });
   };
 
-  //FIXME: no-unused-vars
-  // eslint-disable-next-line no-unused-vars
-  handleSubmit = e => {
-    // e.preventDefault();
+  handleSubmit = () => {
     this.setState({ editMode: false, modalOpen: false });
+
     return this.props.submit();
   };
 
@@ -75,6 +75,7 @@ class MenuEditorPlugin extends React.Component {
       type: 'submit',
     },
   ];
+
   actionEdit = [
     {
       kind: 'primary',
@@ -86,7 +87,7 @@ class MenuEditorPlugin extends React.Component {
 
   render() {
     return (
-      <Fragment>
+      <>
         <ContainerFluid>
           <Modal
             isOpen={this.state.modalOpen}
@@ -95,15 +96,13 @@ class MenuEditorPlugin extends React.Component {
             contentLabel="Example Modal"
           >
             <p>
-              <FormattedMessage
-                id={'menu-editor.MenuEditor.confirmSaveStructure'}
-              />
+              <FormattedMessage id="menu-editor.MenuEditor.confirmSaveStructure" />
             </p>
             <Button kind="primary" onClick={this.handleSubmit}>
-              <FormattedMessage id={'menu-editor.MenuEditor.yes'} />
+              <FormattedMessage id="menu-editor.MenuEditor.yes" />
             </Button>
             <Button kind="secondary" onClick={this.handleCloseModal}>
-              <FormattedMessage id={'menu-editor.MenuEditor.no'} />
+              <FormattedMessage id="menu-editor.MenuEditor.no" />
             </Button>
           </Modal>
           <PluginHeader
@@ -119,7 +118,7 @@ class MenuEditorPlugin extends React.Component {
             onChange={this.props.onChange}
           />
         </ContainerFluid>
-      </Fragment>
+      </>
     );
   }
 }
@@ -129,8 +128,8 @@ MenuEditorPlugin.defaultProps = {
 };
 
 MenuEditorPlugin.propTypes = {
-  getMenu: PropTypes.func.isRequired,
   menuItems: PropTypes.array.isRequired,
+  getMenu: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
   submit: PropTypes.func.isRequired,
 };
@@ -148,10 +147,7 @@ function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = selectMenuEditorPlugin();
 
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps
-);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
 const withReducer = strapi.injectReducer({
   key: 'menuEditor',
