@@ -21,7 +21,7 @@
     "inquirer": "^6.3.1",
     "lodash": "^4.17.11",
     "pluralize": "^7.0.0",
-    "rimraf": "^2.6.3",
+    "rimraf": "3.0.0",
     "strapi-utils": "3.0.0-beta.18.7"
   },
   "peerDependencies": {
