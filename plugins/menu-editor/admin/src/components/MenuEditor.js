@@ -1,5 +1,5 @@
-// FIXME: eslint-disable
-/* eslint-disable */
+/* eslint-disable import/no-unresolved */
+import React, { useCallback, useRef } from 'react';
 import { ContextProvider } from 'react-sortly';
 import { createDndContext, DndProvider } from 'react-dnd';
 import { FormattedMessage } from 'react-intl';
@@ -7,7 +7,6 @@ import { useHistory } from 'react-router-dom';
 import HTML5Backend from 'react-dnd-html5-backend';
 import nanoid from 'nanoid/non-secure';
 import PropTypes from 'prop-types';
-import React, { useCallback, useRef } from 'react';
 import styled from 'styled-components';
 import SortableMenu from './SortableMenu';
 

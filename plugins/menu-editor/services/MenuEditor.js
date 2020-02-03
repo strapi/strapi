@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * MenuEditorPlugin.js service
  *

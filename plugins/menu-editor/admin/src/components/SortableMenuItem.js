@@ -1,5 +1,4 @@
-// FIXME: eslint-disable
-/* eslint-disable */
+/* eslint-disable import/no-unresolved */
 import { faPen, faArrowsAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useDrag, useDrop } from 'react-sortly';
@@ -129,9 +128,9 @@ export default function SortableMenuItem({
 }
 
 SortableMenuItem.propTypes = {
-  id: PropTypes.Number.isRequired,
-  depth: PropTypes.Number.isRequired,
-  value: PropTypes.String.isRequired,
+  id: PropTypes.number.isRequired,
+  depth: PropTypes.number.isRequired,
+  value: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   onClick: PropTypes.func.isRequired,
   onKeyDown: PropTypes.func.isRequired,
@@ -139,6 +138,6 @@ SortableMenuItem.propTypes = {
   myRef: PropTypes.oneOfType([
     PropTypes.func,
     PropTypes.shape({ current: PropTypes.any }),
-  ]),
+  ]).isRequired,
   isNew: PropTypes.bool.isRequired,
 };

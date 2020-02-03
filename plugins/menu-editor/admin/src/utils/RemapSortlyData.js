@@ -1,6 +1,7 @@
 export const remapSortlyInput = databaseOutput => {
   return databaseOutput.map(row => {
     const { id, child_order = 0, parent_id = 0, Name } = row;
+
     return {
       id,
       index: child_order,

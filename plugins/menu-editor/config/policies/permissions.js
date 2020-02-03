@@ -1,5 +1,6 @@
 const _ = require('lodash');
 
+// eslint-disable-next-line consistent-return
 module.exports = async (ctx, next) => {
   let role;
 
@@ -36,7 +37,8 @@ module.exports = async (ctx, next) => {
       }
 
       ctx.state.user = ctx.state.admin;
-      return await next();
+
+      return next();
     }
 
     if (!ctx.state.user) {
@@ -46,7 +48,7 @@ module.exports = async (ctx, next) => {
     role = ctx.state.user.role;
 
     if (role.type === 'root') {
-      return await next();
+      return next();
     }
 
     const store = await strapi.store({
@@ -100,9 +102,10 @@ module.exports = async (ctx, next) => {
 
   // Execute the policies.
   if (permission.policy) {
-    return await strapi.plugins['menu-editor'].config.policies[
-      permission.policy
-    ](ctx, next);
+    return strapi.plugins['menu-editor'].config.policies[permission.policy](
+      ctx,
+      next
+    );
   }
 
   // Execute the action.

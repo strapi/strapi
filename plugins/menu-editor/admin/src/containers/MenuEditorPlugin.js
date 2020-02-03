@@ -1,15 +1,14 @@
-// FIXME: eslint-disable
-/* eslint-disable */
+/* eslint-disable import/no-unresolved */
 import { bindActionCreators, compose } from 'redux';
 import { connect } from 'react-redux';
 import { ContainerFluid, PluginHeader, Button } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
+import Modal from 'react-modal';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { onChange, submit, getMenu } from '../redux/actions';
 import MenuEditor from '../components/MenuEditor';
-import Modal from 'react-modal';
 import pluginId from '../pluginId';
-import PropTypes from 'prop-types';
-import React, { Fragment } from 'react';
 import reducer from '../redux/reducer';
 import saga from '../redux/saga';
 import selectMenuEditorPlugin from '../redux/selectors';
@@ -26,6 +25,30 @@ const customStyles = {
 };
 
 class MenuEditorPlugin extends React.Component {
+  pluginHeaderActions = [
+    {
+      kind: 'secondary',
+      label: 'menu-editor.MenuEditor.cancelEditMode',
+      onClick: this.handleShowModal,
+      type: 'button',
+    },
+    {
+      kind: 'primary',
+      label: 'app.components.Button.save',
+      onClick: this.handleShowModal,
+      type: 'submit',
+    },
+  ];
+
+  actionEdit = [
+    {
+      kind: 'primary',
+      label: 'menu-editor.MenuEditor.editMode',
+      onClick: () => this.setState({ editMode: true }),
+      type: 'button',
+    },
+  ];
+
   constructor(props) {
     super(props);
     this.state = {
@@ -60,30 +83,6 @@ class MenuEditorPlugin extends React.Component {
     this.props.getMenu();
     this.setState({ editMode: false });
   };
-
-  pluginHeaderActions = [
-    {
-      kind: 'secondary',
-      label: 'menu-editor.MenuEditor.cancelEditMode',
-      onClick: this.handleShowModal,
-      type: 'button',
-    },
-    {
-      kind: 'primary',
-      label: 'app.components.Button.save',
-      onClick: this.handleShowModal,
-      type: 'submit',
-    },
-  ];
-
-  actionEdit = [
-    {
-      kind: 'primary',
-      label: 'menu-editor.MenuEditor.editMode',
-      onClick: () => this.setState({ editMode: true }),
-      type: 'button',
-    },
-  ];
 
   render() {
     return (
@@ -122,10 +121,6 @@ class MenuEditorPlugin extends React.Component {
     );
   }
 }
-
-MenuEditorPlugin.defaultProps = {
-  menuItems: [],
-};
 
 MenuEditorPlugin.propTypes = {
   menuItems: PropTypes.array.isRequired,

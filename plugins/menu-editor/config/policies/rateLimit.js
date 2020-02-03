@@ -1,6 +1,6 @@
 const lazyRateLimit = {
   get RateLimit() {
-    return require('koa2-ratelimit').RateLimit;
+    return import('koa2-ratelimit').RateLimit;
   },
 };
 

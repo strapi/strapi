@@ -1,15 +1,14 @@
-// FIXME: eslint-disable
-/* eslint-disable */
+/* eslint-disable import/no-unresolved */
 import { Button } from 'strapi-helper-plugin';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fontawesome/react-fontawesome';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import React, { useCallback, useRef, useEffect } from 'react';
-import SortableMenuItem from './SortableMenuItem';
 import Sortly, { insert } from 'react-sortly';
 import styled from 'styled-components';
 import update from 'immutability-helper';
+import SortableMenuItem from './SortableMenuItem';
 
 const ActionsMenu = styled.div`
   display: flex;
@@ -79,6 +78,7 @@ export default function SortableMenu({
   // Focus latest added input
   const ref = useRef(null);
   useEffect(() => {
+    // eslint-disable-next-line no-unused-expressions
     ref.current && ref.current.focus();
   }, [items.length]);
 

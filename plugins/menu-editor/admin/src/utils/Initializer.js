@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 import { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import pluginId from '../pluginId';
