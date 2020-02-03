@@ -20,9 +20,7 @@ import Inputs from '../../../components/Inputs';
 import TriggerContainer from '../../../components/TriggerContainer';
 
 import reducer, { initialState } from './reducer';
-import form from './utils/form';
-import schema from './utils/schema';
-import { cleanData } from './utils/formatData';
+import { cleanData, form, schema } from './utils';
 
 import Wrapper from './Wrapper';
 
@@ -100,7 +98,6 @@ function EditView() {
       id: 'Settings.webhooks.create',
     })
     : name;
-
   const headersActions = [
     {
       color: 'primary',
