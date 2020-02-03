@@ -1,19 +1,19 @@
 import React from 'react';
-// import renderer from 'react-test-renderer';
+import renderer from 'react-test-renderer';
 import { shallow } from 'enzyme';
-// import { IntlProvider } from 'react-intl';
+import { IntlProvider } from 'react-intl';
 
-// import translationMessages from '../../../translations/en.json';
+import translationMessages from '../../../translations/en.json';
 
 import Inputs from '../index';
 
-// const renderWithIntl = (Compo, props) => {
-//   return renderer.create(
-//     <IntlProvider locale="en" messages={translationMessages}>
-//       <Compo {...props} />
-//     </IntlProvider>
-//   );
-// };
+const renderWithIntl = (Compo, props) => {
+  return renderer.create(
+    <IntlProvider locale="en" messages={translationMessages}>
+      <Compo {...props} />
+    </IntlProvider>
+  );
+};
 
 describe('<Inputs />', () => {
   const props = {
@@ -27,16 +27,15 @@ describe('<Inputs />', () => {
     shallow(<Inputs {...props} />);
   });
 
-  // FIXME
-  // it('should match the snapshot if type is events', () => {
-  //   const tree = renderWithIntl(Inputs, props);
+  it('should match the snapshot if type is events', () => {
+    const tree = renderWithIntl(Inputs, props);
 
-  //   expect(tree).toMatchSnapshot();
-  // });
+    expect(tree).toMatchSnapshot();
+  });
 
-  // it('should match the snapshot if type is headers', () => {
-  //   const tree = renderWithIntl(Inputs, { ...props, type: 'headers' });
+  it('should match the snapshot if type is headers', () => {
+    const tree = renderWithIntl(Inputs, { ...props, type: 'headers' });
 
-  //   expect(tree).toMatchSnapshot();
-  // });
+    expect(tree).toMatchSnapshot();
+  });
 });
