@@ -36,7 +36,6 @@
     "@babel/plugin-proposal-class-properties": "^7.4.0",
     "@babel/preset-env": "^7.4.3",
     "@babel/preset-react": "^7.0.0",
-    "babel-plugin-styled-components": "^1.10.7",
     "enzyme": "^3.8.0",
     "enzyme-adapter-react-16": "^1.8.0",
     "rimraf": "3.0.0",
