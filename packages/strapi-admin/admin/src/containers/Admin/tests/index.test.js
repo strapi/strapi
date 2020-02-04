@@ -93,7 +93,7 @@ describe('<Admin />', () => {
       const renderedComponent = shallow(<Admin {...props} />);
       const { renderRoute } = renderedComponent.instance();
 
-      expect(renderRoute()).not.toBeNull();
+      expect(renderRoute({}, () => null)).not.toBeNull();
     });
   });
 
