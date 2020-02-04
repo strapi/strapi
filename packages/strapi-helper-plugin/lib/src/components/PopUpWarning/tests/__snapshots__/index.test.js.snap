@@ -1,13 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<PopUpWarning /> should render properly render component 1`] = `
-<DocumentFragment>
-  <div
-    class="sc-hzDkRC bkTtUc"
-  />
-</DocumentFragment>
-`;
-
 exports[`<PopUpWarning /> should render properly render match snapshot if onlyConfirmButton is false 1`] = `
 <DocumentFragment>
   <div

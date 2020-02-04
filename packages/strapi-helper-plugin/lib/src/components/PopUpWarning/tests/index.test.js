@@ -55,17 +55,4 @@ describe('<PopUpWarning />', () => {
       expect(asFragment()).toMatchSnapshot();
     });
   });
-
-  describe('Actions', () => {
-    it('It should call the onConfirm props on confirm button click', () => {
-      const renderedComponent = shallow(<PopUpWarning {...props} />).debug();
-
-      expect(true).toBe(true);
-
-      // const confirmButton = renderedComponent.find('button').at(0);
-      // confirmButton.simulate('click');
-
-      // expect(props.onConfirm).toHaveBeenCalled();
-    });
-  });
 });

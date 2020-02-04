@@ -3,14 +3,14 @@
 exports[`Admin | containers | EditView should match the snapshot 1`] = `
 <DocumentFragment>
   <div
-    class="sc-lkqHmb dYxvYT"
+    class="sc-daURTG fMRnCr"
   >
     <div
-      class="sc-jlyJG huPVn"
+      class="sc-bdVaJa fgkLzW"
     />
     <form>
       <div
-        class="sc-chPdSV jmcPdM"
+        class="sc-eXEjpC iCEvSZ"
       >
         <div
           class="sticky-wrapper"
@@ -22,7 +22,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
               class="col-sm-6 header-title"
             >
               <div
-                class="sc-kGXeez idElYQ"
+                class="sc-RefOD zPzYC"
               >
                 <h1 />
               </div>
@@ -32,17 +32,17 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
               class="col-sm-6 justify-content-end"
             >
               <div
-                class="sc-kgoBCf hhYBts"
+                class="sc-ibxdXY flSTRO"
               >
                 <button
-                  class="sc-bxivhb cRlNra"
+                  class="sc-btzYZH kxlTHJ"
                   color="primary"
                   label="Trigger"
                   style="padding: 0px 15px;"
                   type="button"
                 >
                   <span
-                    class="sc-iRbamj bybvAC"
+                    class="sc-bMVAic dKLfTw"
                   >
                     <svg
                       height="14px"
@@ -83,7 +83,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                   Trigger
                 </button>
                 <button
-                  class="sc-bxivhb ceGfZA"
+                  class="sc-btzYZH fvqYKR"
                   color="cancel"
                   disabled=""
                   label="Reset"
@@ -93,7 +93,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                   Reset
                 </button>
                 <button
-                  class="sc-bxivhb hYSYfP"
+                  class="sc-btzYZH dUnkjl"
                   color="success"
                   disabled=""
                   label="Save"
@@ -120,22 +120,22 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
               class="col-6"
             >
               <div
-                class="sc-exAgwC hhdCmD"
+                class="sc-iujRgT fEHRdC"
               >
                 <label
-                  class="sc-kpOJdX kYXOPJ"
+                  class="sc-iQKALj huPjOb"
                   for="name"
                 >
                   Name
                 </label>
                 <div
-                  class="sc-kAzzGY ibeNzJ"
+                  class="sc-kIPQKe lgGZs"
                 >
                   <input
                     aria-describedby=" "
                     aria-invalid="false"
                     autocomplete="off"
-                    class="sc-cSHVUG jRAEee"
+                    class="sc-esjQYD eqKmMI"
                     id="name"
                     name="name"
                     tabindex="0"
@@ -152,22 +152,22 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
               class="col-12"
             >
               <div
-                class="sc-exAgwC hhdCmD"
+                class="sc-iujRgT fEHRdC"
               >
                 <label
-                  class="sc-kpOJdX kYXOPJ"
+                  class="sc-iQKALj huPjOb"
                   for="url"
                 >
                   Url
                 </label>
                 <div
-                  class="sc-kAzzGY ibeNzJ"
+                  class="sc-kIPQKe lgGZs"
                 >
                   <input
                     aria-describedby=" "
                     aria-invalid="false"
                     autocomplete="off"
-                    class="sc-cSHVUG jRAEee"
+                    class="sc-esjQYD eqKmMI"
                     id="url"
                     name="url"
                     tabindex="0"
@@ -184,16 +184,16 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
               class="col-12"
             >
               <div
-                class="sc-daURTG dlKLZk"
+                class="sc-cQFLBn jtxpvN"
               >
                 <label
-                  class="sc-kpOJdX kYXOPJ"
+                  class="sc-iQKALj huPjOb"
                   for="headers"
                 >
                   Headers
                 </label>
                 <div
-                  class="sc-cQFLBn dsTZtH"
+                  class="sc-GMQeP BdDxy"
                 >
                   <ul>
                     <li>
@@ -302,11 +302,11 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                       </section>
                       <section>
                         <div
-                          class="sc-kAzzGY ibeNzJ"
+                          class="sc-kIPQKe lgGZs"
                         >
                           <input
                             autocomplete="off"
-                            class="sc-cSHVUG jRAEee"
+                            class="sc-esjQYD eqKmMI"
                             id="headers.0.value"
                             name="headers.0.value"
                             tabindex="0"
@@ -317,7 +317,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                       </section>
                       <div>
                         <button
-                          class="sc-fBuWsC imrARH"
+                          class="sc-gzVnrw gineUH"
                           type="button"
                         />
                       </div>
@@ -355,16 +355,16 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
               class="col-12"
             >
               <div
-                class="sc-daURTG dlKLZk"
+                class="sc-cQFLBn jtxpvN"
               >
                 <label
-                  class="sc-kpOJdX kYXOPJ"
+                  class="sc-iQKALj huPjOb"
                   for="events"
                 >
                   Events
                 </label>
                 <div
-                  class="sc-gojNiO dIUIBx"
+                  class="sc-exAgwC dGuqTZ"
                 >
                   <table>
                     <thead>
@@ -391,18 +391,18 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                       <tr>
                         <td>
                           <div
-                            class="sc-bZQynM iXyeyW"
+                            class="sc-elJkPf goFnYl"
                           >
                             <input
                               autocomplete="off"
-                              class="sc-EHOje cqFDuP"
+                              class="sc-bYSBpT fFzyOc"
                               id="entry"
                               name="entry"
                               tabindex="0"
                               type="checkbox"
                             />
                             <label
-                              class="sc-kpOJdX kYXOPJ"
+                              class="sc-iQKALj huPjOb"
                               for="entry"
                             >
                               entry
@@ -411,54 +411,54 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                         </td>
                         <td>
                           <div
-                            class="sc-bZQynM iXyeyW"
+                            class="sc-elJkPf goFnYl"
                           >
                             <input
                               autocomplete="off"
-                              class="sc-EHOje cqFDuP"
+                              class="sc-bYSBpT fFzyOc"
                               id="entry.create"
                               name="entry.create"
                               tabindex="0"
                               type="checkbox"
                             />
                             <label
-                              class="sc-kpOJdX kYXOPJ"
+                              class="sc-iQKALj huPjOb"
                               for="entry.create"
                             />
                           </div>
                         </td>
                         <td>
                           <div
-                            class="sc-bZQynM iXyeyW"
+                            class="sc-elJkPf goFnYl"
                           >
                             <input
                               autocomplete="off"
-                              class="sc-EHOje cqFDuP"
+                              class="sc-bYSBpT fFzyOc"
                               id="entry.update"
                               name="entry.update"
                               tabindex="0"
                               type="checkbox"
                             />
                             <label
-                              class="sc-kpOJdX kYXOPJ"
+                              class="sc-iQKALj huPjOb"
                               for="entry.update"
                             />
                           </div>
                         </td>
                         <td>
                           <div
-                            class="sc-bZQynM iXyeyW"
+                            class="sc-elJkPf goFnYl"
                           >
                             <input
                               autocomplete="off"
-                              class="sc-EHOje cqFDuP"
+                              class="sc-bYSBpT fFzyOc"
                               id="entry.delete"
                               name="entry.delete"
                               tabindex="0"
                               type="checkbox"
                             />
                             <label
-                              class="sc-kpOJdX kYXOPJ"
+                              class="sc-iQKALj huPjOb"
                               for="entry.delete"
                             />
                           </div>
@@ -467,18 +467,18 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                       <tr>
                         <td>
                           <div
-                            class="sc-bZQynM iXyeyW"
+                            class="sc-elJkPf goFnYl"
                           >
                             <input
                               autocomplete="off"
-                              class="sc-EHOje cqFDuP"
+                              class="sc-bYSBpT fFzyOc"
                               id="media"
                               name="media"
                               tabindex="0"
                               type="checkbox"
                             />
                             <label
-                              class="sc-kpOJdX kYXOPJ"
+                              class="sc-iQKALj huPjOb"
                               for="media"
                             >
                               media
@@ -487,29 +487,29 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                         </td>
                         <td>
                           <div
-                            class="sc-bZQynM iXyeyW"
+                            class="sc-elJkPf goFnYl"
                           >
                             <input
                               autocomplete="off"
-                              class="sc-EHOje cqFDuP"
+                              class="sc-bYSBpT fFzyOc"
                               id="media.create"
                               name="media.create"
                               tabindex="0"
                               type="checkbox"
                             />
                             <label
-                              class="sc-kpOJdX kYXOPJ"
+                              class="sc-iQKALj huPjOb"
                               for="media.create"
                             />
                           </div>
                         </td>
                         <td>
                           <div
-                            class="sc-bZQynM iXyeyW"
+                            class="sc-elJkPf goFnYl"
                           >
                             <input
                               autocomplete="off"
-                              class="sc-EHOje cqFDuP"
+                              class="sc-bYSBpT fFzyOc"
                               disabled=""
                               id="media.update"
                               name="media.update"
@@ -517,25 +517,25 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                               type="checkbox"
                             />
                             <label
-                              class="sc-kpOJdX kYXOPJ"
+                              class="sc-iQKALj huPjOb"
                               for="media.update"
                             />
                           </div>
                         </td>
                         <td>
                           <div
-                            class="sc-bZQynM iXyeyW"
+                            class="sc-elJkPf goFnYl"
                           >
                             <input
                               autocomplete="off"
-                              class="sc-EHOje cqFDuP"
+                              class="sc-bYSBpT fFzyOc"
                               id="media.delete"
                               name="media.delete"
                               tabindex="0"
                               type="checkbox"
                             />
                             <label
-                              class="sc-kpOJdX kYXOPJ"
+                              class="sc-iQKALj huPjOb"
                               for="media.delete"
                             />
                           </div>

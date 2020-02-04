@@ -2,7 +2,7 @@
 
 exports[`<Inputs /> should match the snapshot if type is events 1`] = `
 <div
-  className="sc-cQFLBn jtxpvN"
+  className="sc-GMQeP fCETID"
 >
   <label
     className="sc-chPdSV iXihgI"
@@ -11,7 +11,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
     
   </label>
   <div
-    className="sc-exAgwC dGuqTZ"
+    className="sc-iujRgT cbtFAn"
   >
     <table>
       <thead>
@@ -240,7 +240,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
 
 exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
 <div
-  className="sc-cQFLBn jtxpvN"
+  className="sc-GMQeP fCETID"
 >
   <label
     className="sc-chPdSV iXihgI"
@@ -249,7 +249,7 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
     
   </label>
   <div
-    className="sc-GMQeP BdDxy"
+    className="sc-bAeIUo feDjmh"
   >
     <ul>
       <li>

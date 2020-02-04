@@ -3,7 +3,7 @@
 exports[`Admin | containers | SettingsPage should render SettingsPage 1`] = `
 <DocumentFragment>
   <div
-    class="sc-dUjcNx iRbaZN"
+    class="sc-fYiAbW hHdluQ"
   >
     <div
       class="row"
@@ -12,10 +12,10 @@ exports[`Admin | containers | SettingsPage should render SettingsPage 1`] = `
         class="col-md-3"
       >
         <div
-          class="sc-btzYZH gUGPcg"
+          class="sc-jlyJG ixoCZC"
         >
           <div
-            class="sc-lhVmIH bEnJaD"
+            class="sc-gipzik kWsdnF"
           >
             <div
               class="list-header"
@@ -33,7 +33,7 @@ exports[`Admin | containers | SettingsPage should render SettingsPage 1`] = `
             </div>
             <div>
               <ul
-                class="sc-bYSBpT fRcGZe"
+                class="sc-csuQGl gTZhqf"
               >
                 <li>
                   <a

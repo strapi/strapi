@@ -3,10 +3,10 @@
 exports[`Admin | containers | ListView should match the snapshot 1`] = `
 <DocumentFragment>
   <div
-    class="sc-lkqHmb hhodzv"
+    class="sc-daURTG jBtszK"
   >
     <div
-      class="sc-chPdSV jmcPdM"
+      class="sc-eXEjpC iCEvSZ"
     >
       <div
         class="sticky-wrapper"
@@ -18,7 +18,7 @@ exports[`Admin | containers | ListView should match the snapshot 1`] = `
             class="col-sm-6 header-title"
           >
             <div
-              class="sc-kGXeez idElYQ"
+              class="sc-RefOD zPzYC"
             >
               <h1>
                 Webhooks
@@ -32,10 +32,10 @@ exports[`Admin | containers | ListView should match the snapshot 1`] = `
             class="col-sm-6 justify-content-end"
           >
             <div
-              class="sc-kgoBCf hhYBts"
+              class="sc-ibxdXY flSTRO"
             >
               <button
-                class="sc-bxivhb cRlNra"
+                class="sc-btzYZH kxlTHJ"
                 color="primary"
                 label="Add new webhook"
                 style="padding-left: 15px; padding-right: 15px;"
@@ -70,7 +70,7 @@ exports[`Admin | containers | ListView should match the snapshot 1`] = `
       class="list-wrapper"
     >
       <div
-        class="sc-bXGyLb hZlyAi"
+        class="sc-gojNiO hrpaCp"
       >
         <p>
           There are no webhooks yet
@@ -87,16 +87,16 @@ exports[`Admin | containers | ListView should match the snapshot 1`] = `
         </a>
       </div>
       <div
-        class="sc-gxMtzJ gUEbUR"
+        class="sc-fBuWsC cmSjhr"
       >
         <button
-          class="sc-bxivhb cRlNra"
+          class="sc-btzYZH kxlTHJ"
           color="primary"
           label="Add new webhook"
           type="button"
         >
           <span
-            class="sc-iRbamj bybvAC"
+            class="sc-bMVAic dKLfTw"
           >
             <svg
               fill="#007eff"
@@ -122,7 +122,7 @@ exports[`Admin | containers | ListView should match the snapshot 1`] = `
       </div>
     </div>
     <div
-      class="sc-cLQEGU lkXHAF"
+      class="sc-tilXH bUvrMY"
     />
   </div>
 </DocumentFragment>
