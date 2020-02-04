@@ -316,3 +316,32 @@ If you want to create your own provider without publishing it on **npm** you can
 ```
 
 - Finally, run `yarn install` or `npm install` to install your new custom provider.
+
+## Server file size upload limit
+
+Servers like Nginx have a file size upload of 1Mb by default. This limitation may produce some errors while uploading content, not necessarily single files, this also affect to forms which could have multiple image load option.
+
+You will have to edit the server configuration to increase this default configuration.
+
+You can edit the configuration file with the following command:
+
+```
+$ vi /etc/nginx/nginx.conf
+```
+
+Then add the following line into the server block and save the file
+
+```json
+server {
+    client_max_body_size 10M;
+    
+    ...
+}
+```
+
+Remember to restart the server
+
+```
+$ systemctl restart nginx
+$ service nginx restart
+```
