@@ -27,9 +27,9 @@ import PopupForm from '../../components/PopupForm';
 import SettingsViewWrapper from '../../components/SettingsViewWrapper';
 import SortableList from '../../components/SortableList';
 import { unformatLayout } from '../../utils/layout';
+import getInjectedComponents from '../../utils/getComponents';
 import LayoutDndProvider from '../LayoutDndProvider';
 import getInputProps from './utils/getInputProps';
-import getInjectedComponents from '../../utils/getComponents';
 
 import reducer, { initialState } from './reducer';
 
@@ -463,16 +463,13 @@ const EditSettingsView = ({
 };
 
 EditSettingsView.defaultProps = {
-  deleteAllLayouts: () => {},
   slug: null,
 };
 
 EditSettingsView.propTypes = {
-  components: PropTypes.array.isRequired,
-  models: PropTypes.array.isRequired,
-  currentEnvironment: PropTypes.string,
+  currentEnvironment: PropTypes.string.isRequired,
   deleteLayout: PropTypes.func.isRequired,
-  deleteLayouts: PropTypes.func,
+  deleteLayouts: PropTypes.func.isRequired,
   componentsAndModelsMainPossibleMainFields: PropTypes.object.isRequired,
   history: PropTypes.shape({
     push: PropTypes.func,
@@ -480,7 +477,7 @@ EditSettingsView.propTypes = {
   location: PropTypes.shape({
     search: PropTypes.string.isRequired,
   }).isRequired,
-  plugins: PropTypes.object,
+  plugins: PropTypes.object.isRequired,
   slug: PropTypes.string,
 };
 

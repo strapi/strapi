@@ -8,8 +8,9 @@
 const _ = require('lodash');
 const request = require('request');
 
-// Purest strategies.<
-const Purest = require('purest');
+// Purest strategies.
+const purest = require('purest')({ request });
+const purestConfig = require('@purest/providers');
 
 /**
  * Connect thanks to a third-party provider.
@@ -127,7 +128,7 @@ const getProfile = async (provider, query, callback) => {
 
   switch (provider) {
     case 'discord': {
-      const discord = new Purest({
+      const discord = purest({
         provider: 'discord',
         config: {
           discord: {
@@ -165,8 +166,9 @@ const getProfile = async (provider, query, callback) => {
       break;
     }
     case 'facebook': {
-      const facebook = new Purest({
+      const facebook = purest({
         provider: 'facebook',
+        config: purestConfig,
       });
 
       facebook
@@ -186,29 +188,7 @@ const getProfile = async (provider, query, callback) => {
       break;
     }
     case 'google': {
-      const config = {
-        google: {
-          'https://www.googleapis.com': {
-            __domain: {
-              auth: {
-                auth: { bearer: '[0]' },
-              },
-            },
-            '{endpoint}': {
-              __path: {
-                alias: '__default',
-              },
-            },
-            'oauth/[version]/{endpoint}': {
-              __path: {
-                alias: 'oauth',
-                version: 'v3',
-              },
-            },
-          },
-        },
-      };
-      const google = new Purest({ provider: 'google', config });
+      const google = purest({ provider: 'google', config: purestConfig });
 
       google
         .query('oauth')
@@ -227,8 +207,9 @@ const getProfile = async (provider, query, callback) => {
       break;
     }
     case 'github': {
-      const github = new Purest({
+      const github = purest({
         provider: 'github',
+        config: purestConfig,
         defaults: {
           headers: {
             'user-agent': 'strapi',
@@ -286,25 +267,9 @@ const getProfile = async (provider, query, callback) => {
       break;
     }
     case 'microsoft': {
-      const microsoft = new Purest({
+      const microsoft = purest({
         provider: 'microsoft',
-        config: {
-          microsoft: {
-            'https://graph.microsoft.com': {
-              __domain: {
-                auth: {
-                  auth: { bearer: '[0]' },
-                },
-              },
-              '[version]/{endpoint}': {
-                __path: {
-                  alias: '__default',
-                  version: 'v1.0',
-                },
-              },
-            },
-          },
-        },
+        config: purestConfig,
       });
 
       microsoft
@@ -324,8 +289,9 @@ const getProfile = async (provider, query, callback) => {
       break;
     }
     case 'twitter': {
-      const twitter = new Purest({
+      const twitter = purest({
         provider: 'twitter',
+        config: purestConfig,
         key: grant.twitter.key,
         secret: grant.twitter.secret,
       });
@@ -348,7 +314,8 @@ const getProfile = async (provider, query, callback) => {
       break;
     }
     case 'instagram': {
-      const instagram = new Purest({
+      const instagram = purest({
+        config: purestConfig,
         provider: 'instagram',
         key: grant.instagram.key,
         secret: grant.instagram.secret,
@@ -371,7 +338,10 @@ const getProfile = async (provider, query, callback) => {
       break;
     }
     case 'vk': {
-      const vk = new Purest({ provider: 'vk' });
+      const vk = purest({
+        provider: 'vk',
+        config: purestConfig,
+      });
 
       vk.query()
         .get('users.get')

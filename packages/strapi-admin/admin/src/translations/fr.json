@@ -78,6 +78,7 @@
   "app.components.LeftMenuLinkContainer.listPlugins": "Plugins",
   "app.components.LeftMenuLinkContainer.noPluginsInstalled": "Aucun plugin installé",
   "app.components.LeftMenuLinkContainer.plugins": "Plugins",
+  "app.components.LeftMenuLinkContainer.settings": "Paramètres",
   "app.components.ListPluginsPage.description": "Liste des plugins installés dans le projet.",
   "app.components.ListPluginsPage.helmet.title": "List plugins",
   "app.components.Logout.profile": "Profil",

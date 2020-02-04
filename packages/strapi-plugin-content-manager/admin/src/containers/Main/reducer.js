@@ -50,6 +50,7 @@ function mainReducer(state = initialState, action) {
           if (value) {
             return list.push(name);
           }
+
           return list.filter(l => l !== name);
         }
       );

@@ -16,6 +16,8 @@ import useDataManager from '../../hooks/useDataManager';
 import makeSearch from '../../utils/makeSearch';
 import Wrapper from './Wrapper';
 
+/* eslint-disable indent */
+
 const displayNotificationCTNotSaved = () => {
   strapi.notification.info(`${pluginId}.notification.info.creating.notSaved`);
 };
@@ -43,10 +45,19 @@ function LeftMenu({ wait }) {
           actionType: 'edit',
           modalType: 'editCategory',
           categoryName: data.name,
-          headerDisplayName: data.name,
-          headerDisplayCategory: formatMessage({
+          header_label_1: formatMessage({
             id: getTrad('modalForm.header.categories'),
           }),
+          header_icon_name_1: 'component',
+          header_icon_isCustom_1: false,
+          header_info_category_1: null,
+          header_info_name_1: null,
+          header_label_2: data.name,
+          header_icon_name_2: null,
+          header_icon_isCustom_2: false,
+          header_info_category_2: null,
+          header_info_name_2: null,
+
           settingType: 'base',
         });
 
@@ -86,7 +97,9 @@ function LeftMenu({ wait }) {
 
       await wait();
       push({
-        search: `modalType=${type}&actionType=create&settingType=base&forTarget=${type}`,
+        search: `modalType=${type}&actionType=create&settingType=base&forTarget=${type}&headerId=${getTrad(
+          `modalForm.${type}.header-create`
+        )}&header_icon_name_1=${type}&header_icon_isCustom_1=false&header_label_1=null`,
       });
     } else {
       displayNotificationCTNotSaved();

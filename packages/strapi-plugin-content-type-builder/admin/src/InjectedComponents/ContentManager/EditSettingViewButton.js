@@ -36,7 +36,6 @@ function EditViewButton(props) {
       : `${category}/${componentSlug}`;
 
   const handleClick = () => {
-    // TODO
     emitEvent('willEditEditLayout');
     props.push(`${baseUrl}/${suffixUrl}`);
   };
@@ -65,7 +64,7 @@ function EditViewButton(props) {
         outline: 0,
         fontWeight: 600,
       }}
-    ></Button>
+    />
   );
 }
 

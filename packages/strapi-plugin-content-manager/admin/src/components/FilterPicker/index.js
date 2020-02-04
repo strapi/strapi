@@ -11,8 +11,8 @@ import useListView from '../../hooks/useListView';
 import Container from '../Container';
 
 import getFilterType from '../FilterPickerOption/utils';
-import { Flex, Span, Wrapper } from './components';
 import FilterPickerOption from '../FilterPickerOption';
+import { Flex, Span, Wrapper } from './components';
 
 import init from './init';
 import reducer, { initialState } from './reducer';
@@ -153,6 +153,7 @@ function FilterPicker({
                 }}
                 type={get(schema, ['attributes', filter.name, 'type'], '')}
                 showAddButton={key === modifiedData.length - 1}
+                // eslint-disable-next-line react/no-array-index-key
                 key={key}
               />
             ))}
@@ -180,8 +181,7 @@ FilterPicker.propTypes = {
   isOpen: PropTypes.bool,
   location: PropTypes.shape({
     search: PropTypes.string.isRequired,
-  }),
-
+  }).isRequired,
   name: PropTypes.string,
   onSubmit: PropTypes.func.isRequired,
   toggleFilterPickerState: PropTypes.func.isRequired,

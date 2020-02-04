@@ -17,14 +17,16 @@ import FormWrapper from '../../components/FormWrapper';
 import FieldComponent from '../../components/FieldComponent';
 import Inputs from '../../components/Inputs';
 import SelectWrapper from '../../components/SelectWrapper';
+import getInjectedComponents from '../../utils/getComponents';
 import EditViewDataManagerProvider from '../EditViewDataManagerProvider';
 import EditViewProvider from '../EditViewProvider';
 import Header from './Header';
 import createAttributesLayout from './utils/createAttributesLayout';
 import { LinkWrapper, SubWrapper } from './components';
-import getInjectedComponents from '../../utils/getComponents';
 import init from './init';
 import reducer, { initialState } from './reducer';
+
+/* eslint-disable  react/no-array-index-key */
 
 const EditView = ({
   components,
@@ -274,7 +276,7 @@ const EditView = ({
                     }}
                     icon="layout"
                     key={`${pluginId}.link`}
-                    url={`ctm-configurations/edit-settings/content-types`}
+                    url="ctm-configurations/edit-settings/content-types"
                     onClick={() => {
                       // emitEvent('willEditContentTypeLayoutFromEditView');
                     }}

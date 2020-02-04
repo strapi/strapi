@@ -1,12 +1,13 @@
 import { fromJS, OrderedMap } from 'immutable';
 import { get, has } from 'lodash';
 import makeUnique from '../../utils/makeUnique';
+import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
 
 const initialState = fromJS({
   components: {},
   contentTypes: {},
   initialComponents: {},
-  intialContentTypes: {},
+  initialContentTypes: {},
   initialData: {},
   modifiedData: {},
   isLoading: true,
@@ -14,14 +15,58 @@ const initialState = fromJS({
 });
 
 const ONE_SIDE_RELATIONS = ['oneWay', 'manyWay'];
+
 const getOppositeNature = originalNature => {
   if (originalNature === 'manyToOne') {
     return 'oneToMany';
-  } else if (originalNature === 'oneToMany') {
-    return 'manyToOne';
-  } else {
-    return originalNature;
   }
+
+  if (originalNature === 'oneToMany') {
+    return 'manyToOne';
+  }
+
+  return originalNature;
+};
+
+const addComponentsToState = (state, componentToAddUid, objToUpdate) => {
+  let newObj = objToUpdate;
+  const componentToAdd = state.getIn(['components', componentToAddUid]);
+  const isTemporaryComponent = componentToAdd.get('isTemporary');
+  const componentToAddSchema = componentToAdd.getIn(['schema', 'attributes']);
+  const hasComponentAlreadyBeenAdded =
+    state.getIn(['modifiedData', 'components', componentToAddUid]) !==
+    undefined;
+
+  // created components are already in the modifiedData.components
+  // We don't add them because all modifications will be lost
+  if (isTemporaryComponent || hasComponentAlreadyBeenAdded) {
+    return newObj;
+  }
+
+  // Add the added components to the modifiedData.compontnes
+  newObj = newObj.set(componentToAddUid, componentToAdd);
+  const nestedComponents = retrieveComponentsFromSchema(
+    componentToAddSchema.toJS(),
+    state.get('components').toJS()
+  );
+
+  // We need to add the nested components to the modifiedData.components as well
+  nestedComponents.forEach(componentUid => {
+    const isTemporary =
+      state.getIn(['components', componentUid, 'isTemporary']) || false;
+    const hasNestedComponentAlreadyBeenAdded =
+      state.getIn(['modifiedData', 'components', componentUid]) !== undefined;
+
+    // Same logic here otherwise we will lose the modifications added to the components
+    if (!isTemporary && !hasNestedComponentAlreadyBeenAdded) {
+      newObj = newObj.set(
+        componentUid,
+        state.getIn(['components', componentUid])
+      );
+    }
+  });
+
+  return newObj;
 };
 
 const reducer = (state, action) => {
@@ -69,7 +114,8 @@ const reducer = (state, action) => {
                 nature: getOppositeNature(nature),
                 target,
                 unique: rest.unique,
-                required: rest.required,
+                // Leave this if we allow the required on the relation
+                // required: rest.required,
                 dominant: nature === 'manyToMany' ? !rest.dominant : null,
                 targetAttribute: name,
                 columnName: rest.targetColumnName,
@@ -86,12 +132,7 @@ const reducer = (state, action) => {
         )
         .updateIn(['modifiedData', 'components'], existingCompos => {
           if (action.shouldAddComponentToData) {
-            const componentToAdd = state.getIn(['components', rest.component]);
-
-            return existingCompos.update(
-              componentToAdd.get('uid'),
-              () => componentToAdd
-            );
+            return addComponentsToState(state, rest.component, existingCompos);
           }
 
           return existingCompos;
@@ -138,15 +179,7 @@ const reducer = (state, action) => {
         )
         .updateIn(['modifiedData', 'components'], old => {
           const componentsSchema = newComponents.reduce((acc, current) => {
-            const addedCompoSchema = state.getIn(['components', current]);
-            const isTemporaryComponent = addedCompoSchema.get('isTemporary');
-
-            // created components are already in the modifiedData.components
-            if (isTemporaryComponent) {
-              return acc;
-            }
-
-            return acc.set(current, addedCompoSchema);
+            return addComponentsToState(state, current, acc);
           }, old);
 
           return componentsSchema;
@@ -209,15 +242,6 @@ const reducer = (state, action) => {
       const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
         ? [forTarget]
         : [forTarget, targetUid];
-
-      const isEditingComponentAttribute = rest.type === 'component';
-
-      if (isEditingComponentAttribute) {
-        newState = state.updateIn(
-          ['modifiedData', 'components', rest.component],
-          () => state.getIn(['components', rest.component])
-        );
-      }
 
       return newState.updateIn(
         ['modifiedData', ...pathToDataToEdit, 'schema'],
@@ -302,7 +326,8 @@ const reducer = (state, action) => {
                       nature: getOppositeNature(rest.nature),
                       target: rest.target,
                       unique: rest.unique,
-                      required: rest.required,
+                      // Leave this if we allow the required on the relation
+                      // required: rest.required,
                       dominant:
                         rest.nature === 'manyToMany' ? !rest.dominant : null,
                       targetAttribute: name,
@@ -358,7 +383,7 @@ const reducer = (state, action) => {
       );
     }
 
-    case 'GET_DATA_SUCCEEDED':
+    case 'GET_DATA_SUCCEEDED': {
       return state
         .update('components', () => fromJS(action.components))
         .update('initialComponents', () => fromJS(action.components))
@@ -366,7 +391,7 @@ const reducer = (state, action) => {
         .update('contentTypes', () => fromJS(action.contentTypes))
 
         .update('isLoading', () => false);
-
+    }
     case 'RELOAD_PLUGIN':
       return initialState;
     case 'REMOVE_FIELD_FROM_DISPLAYED_COMPONENT': {
@@ -488,4 +513,4 @@ const reducer = (state, action) => {
 };
 
 export default reducer;
-export { initialState };
+export { addComponentsToState, initialState };

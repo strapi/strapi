@@ -31,6 +31,8 @@ import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
 import getAttributes from './utils/attributes';
 import forms from './utils/forms';
+import createHeadersArray from './utils/createHeadersArray';
+import createHeadersObjectFromArray from './utils/createHeadersObjectFromArray';
 import { createComponentUid, createUid } from './utils/createUid';
 import getModalTitleSubHeader from './utils/getModalTitleSubHeader';
 import getNextSearch from './utils/getNextSearch';
@@ -38,6 +40,9 @@ import { NAVLINKS, INITIAL_STATE_DATA } from './utils/staticData';
 import init from './init';
 import reducer, { initialState } from './reducer';
 import CustomButton from './CustomButton';
+
+/* eslint-disable indent */
+/* eslint-disable react/no-array-index-key */
 
 const FormModal = () => {
   const [state, setState] = useState(INITIAL_STATE_DATA);
@@ -75,18 +80,40 @@ const FormModal = () => {
   useEffect(() => {
     if (!isEmpty(search)) {
       const actionType = query.get('actionType');
-      // Return 'null' if there isn't any attributeType search params
+      // Returns 'null' if there isn't any attributeType search params
       const attributeName = query.get('attributeName');
       const attributeType = query.get('attributeType');
       const dynamicZoneTarget = query.get('dynamicZoneTarget');
       const forTarget = query.get('forTarget');
-      const headerDisplayCategory = query.get('headerDisplayCategory');
-      const headerDisplayName = query.get('headerDisplayName');
-      const headerDisplaySubCategory = query.get('headerDisplaySubCategory');
       const modalType = query.get('modalType');
       const targetUid = query.get('targetUid');
       const settingType = query.get('settingType');
-      const subTargetUid = query.get('subTargetUid');
+      const headerId = query.get('headerId');
+      const header_label_1 = query.get('header_label_1');
+      const header_icon_name_1 = query.get('header_icon_name_1');
+      const header_icon_isCustom_1 = query.get('header_icon_isCustom_1');
+      const header_info_category_1 = query.get('header_info_category_1');
+      const header_info_name_1 = query.get('header_info_name_1');
+      const header_label_2 = query.get('header_label_2');
+      const header_icon_name_2 = query.get('header_icon_name_2');
+      const header_icon_isCustom_2 = query.get('header_icon_isCustom_2');
+      const header_info_category_2 = query.get('header_info_category_2');
+      const header_info_name_2 = query.get('header_info_name_2');
+      const header_label_3 = query.get('header_label_3');
+      const header_icon_name_3 = query.get('header_icon_name_3');
+      const header_icon_isCustom_3 = query.get('header_icon_isCustom_3');
+      const header_info_category_3 = query.get('header_info_category_3');
+      const header_info_name_3 = query.get('header_info_name_3');
+      const header_label_4 = query.get('header_label_4');
+      const header_icon_name_4 = query.get('header_icon_name_4');
+      const header_icon_isCustom_4 = query.get('header_icon_isCustom_4');
+      const header_info_category_4 = query.get('header_info_category_4');
+      const header_info_name_4 = query.get('header_info_name_4');
+      const header_label_5 = query.get('header_label_5');
+      const header_icon_name_5 = query.get('header_icon_name_5');
+      const header_icon_isCustom_5 = query.get('header_icon_isCustom_5');
+      const header_info_category_5 = query.get('header_info_category_5');
+      const header_info_name_5 = query.get('header_info_name_5');
       const step = query.get('step');
       const pathToSchema =
         forTarget === 'contentType' || forTarget === 'component'
@@ -98,16 +125,38 @@ const FormModal = () => {
         attributeName,
         attributeType,
         dynamicZoneTarget,
-        headerDisplayName,
-        headerDisplayCategory,
-        headerDisplaySubCategory,
         forTarget,
         modalType,
         pathToSchema,
         settingType,
-        subTargetUid,
         step,
         targetUid,
+        header_label_1,
+        header_icon_name_1,
+        header_icon_isCustom_1,
+        header_info_name_1,
+        header_info_category_1,
+        header_label_2,
+        header_icon_name_2,
+        header_icon_isCustom_2,
+        header_info_name_2,
+        header_info_category_2,
+        header_label_3,
+        header_icon_name_3,
+        header_icon_isCustom_3,
+        header_info_name_3,
+        header_info_category_3,
+        header_label_4,
+        header_icon_name_4,
+        header_icon_isCustom_4,
+        header_info_name_4,
+        header_info_category_4,
+        header_label_5,
+        header_icon_name_5,
+        header_icon_isCustom_5,
+        header_info_name_5,
+        header_info_category_5,
+        headerId,
       });
 
       // Reset all the modification when opening the edit category modal
@@ -280,19 +329,7 @@ const FormModal = () => {
   const form = get(forms, [state.modalType, 'form', state.settingType], () => ({
     items: [],
   }));
-
-  // TODO improve icon logic
-  let iconType = ['component', 'contentType'].includes(state.modalType)
-    ? state.modalType
-    : state.forTarget;
-
-  if (state.modalType === 'addComponentToDynamicZone') {
-    iconType = 'dynamiczone';
-  }
-
-  if (state.modalType === 'editCategory') {
-    iconType = 'component';
-  }
+  const headers = createHeadersArray(state);
 
   const isCreatingContentType = state.modalType === 'contentType';
   const isCreatingComponent = state.modalType === 'component';
@@ -309,14 +346,6 @@ const FormModal = () => {
   const isOpen = !isEmpty(search);
   const isPickingAttribute = state.modalType === 'chooseAttribute';
   const uid = createUid(modifiedData.name || '');
-
-  let headerId = isCreating
-    ? `modalForm.${state.modalType}.header-create`
-    : 'modalForm.header-edit';
-
-  if (!['contentType', 'component'].includes(state.modalType)) {
-    headerId = null;
-  }
 
   const checkFormValidity = async () => {
     let schema;
@@ -377,6 +406,8 @@ const FormModal = () => {
     } else {
       // The user is either in the addComponentToDynamicZone modal or
       // in step 1 of the add component (modalType=attribute&attributeType=component) but not creating a component
+
+      // eslint-disable-next-line no-lonely-if
       if (isInFirstComponentStep && isCreatingComponentFromAView) {
         schema = forms.component.schema(
           Object.keys(components),
@@ -485,6 +516,7 @@ const FormModal = () => {
         name === 'createComponent' ||
         name === 'repeatable')
     ) {
+      // eslint-disable-next-line no-unneeded-ternary
       val = value === 'false' ? false : true;
 
       // The boolean default accepts 3 different values
@@ -532,6 +564,7 @@ const FormModal = () => {
       ...rest,
     });
   };
+
   const handleSubmit = async (e, shouldContinue = isCreating) => {
     e.preventDefault();
 
@@ -541,17 +574,21 @@ const FormModal = () => {
       const targetUid =
         state.forTarget === 'components' ? state.targetUid : uid;
 
-      // TODO REMOVE and use makeSearch
-      const createNextSearch = searchUid => {
-        if (!shouldContinue) {
-          return '';
-        }
+      const headerIcon = ['contentType', 'component'].includes(state.forTarget)
+        ? state.forTarget
+        : get(
+            allDataSchema,
+            ['components', state.targetUid, 'schema', 'icon'],
+            ''
+          );
 
-        return `modalType=chooseAttribute&forTarget=${
-          state.forTarget
-        }&targetUid=${searchUid}&headerDisplayName=${state.headerDisplayName ||
-          modifiedData.name}`;
-      };
+      // Remove the last header when editing
+      if (state.actionType === 'edit') {
+        headers.pop();
+      }
+
+      const headersObject = createHeadersObjectFromArray(headers);
+      const nextHeaderIndex = headers.length + 1;
 
       if (isCreatingContentType) {
         // Create the content type schema
@@ -571,7 +608,9 @@ const FormModal = () => {
             modalType: 'chooseAttribute',
             forTarget: state.forTarget,
             targetUid,
-            headerDisplayName: modifiedData.name,
+            header_label_1: modifiedData.name,
+            header_icon_name_1: 'contentType',
+            header_icon_isCustom_1: null,
           }),
         });
       } else if (isCreatingComponent) {
@@ -590,7 +629,9 @@ const FormModal = () => {
               modalType: 'chooseAttribute',
               forTarget: state.forTarget,
               targetUid: componentUid,
-              headerDisplayName: modifiedData.name,
+              header_label_1: modifiedData.name,
+              header_icon_name_1: 'contentType',
+              header_icon_isCustom_1: null,
             }),
             pathname: `/plugins/${pluginId}/component-categories/${category}/${componentUid}`,
           });
@@ -604,6 +645,7 @@ const FormModal = () => {
         }
       } else if (isEditingCategory) {
         if (toLower(initialData.name) === toLower(modifiedData.name)) {
+          // Close the modal
           push({ search: '' });
 
           return;
@@ -629,20 +671,19 @@ const FormModal = () => {
           // Adding a component to a dynamiczone is not the same logic as creating a simple field
           // so the search is different
 
-          // For the modal header
-          const displayCategory = state.headerDisplayName;
-          const displayName = modifiedData.name;
-
           const dzSearch = makeNextSearch({
             modalType: 'addComponentToDynamicZone',
             forTarget: 'contentType',
             targetUid: state.targetUid,
-            headerDisplayName: displayName,
-            headerDisplayCategory: displayCategory,
+
             dynamicZoneTarget: modifiedData.name,
             settingType: 'base',
             step: '1',
             actionType: 'create',
+            ...headersObject,
+            header_label_2: modifiedData.name,
+            header_icon_name_2: null,
+            header_icon_isCustom_2: false,
           });
           const nextSearch = isDynamicZoneAttribute
             ? dzSearch
@@ -651,11 +692,12 @@ const FormModal = () => {
                   modalType: 'chooseAttribute',
                   forTarget: state.forTarget,
                   targetUid,
-                  headerDisplayName: state.headerDisplayName,
-                  headerDisplayCategory: state.headerDisplayCategory,
-                  // keep the old state
-                  headerDisplaySubCategory: state.headerDisplaySubCategory,
-                  subTargetUid: state.subTargetUid,
+                  ...headersObject,
+                  header_icon_isCustom_1: ![
+                    'contentType',
+                    'component',
+                  ].includes(state.forTarget),
+                  header_icon_name_1: headerIcon,
                 },
                 shouldContinue
               );
@@ -677,66 +719,77 @@ const FormModal = () => {
           return;
 
           // Adding an existing component
-        } else {
-          if (isInFirstComponentStep) {
-            // Navigate the user to step 2
-            // TODO refacto
-            const nextSearchObj = {
-              modalType: 'attribute',
-              actionType: state.actionType,
-              settingType: 'base',
-              forTarget: state.forTarget,
-              targetUid: state.targetUid,
-              attributeType: 'component',
-              headerDisplayName: state.headerDisplayName,
-              step: '2',
-            };
-
-            push({
-              search: makeNextSearch(nextSearchObj, shouldContinue),
-            });
-
-            // Clear the reducer and prepare the modified data
-            // This way we don't have to add some logic to re-run the useEffect
-            // The first step is either needed to create a component or just to navigate
-            // To the modal for adding a "common field"
-            dispatch({
-              type: 'RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO',
-            });
-
-            // We don't want all the props to be reset
-            return;
-
-            // Here we are in step 2
-            // The step 2 is also use to edit an attribute that is a component
-          } else {
-            addAttribute(
-              modifiedData,
-              state.forTarget,
-              state.targetUid,
-              // This change the dispatched type
-              // either 'EDIT_ATTRIBUTE' or 'ADD_ATTRIBUTE' in the DataManagerProvider
-              state.actionType === 'edit',
-              // This is for the edit part
-              initialData,
-              // Passing true will add the component to the components object
-              // This way we can add fields to the added component (if it wasn't there already)
-              true
-            );
-
-            // TODO change the search so the modal header is kept
-            push({ search: shouldContinue ? createNextSearch(targetUid) : '' });
-
-            // We don't need to end the loop here we want the reducer to be reinitialised
-          }
         }
+        // eslint-disable-next-line no-lonely-if
+        if (isInFirstComponentStep) {
+          // Navigate the user to step 2
+          const nextSearchObj = {
+            modalType: 'attribute',
+            actionType: state.actionType,
+            settingType: 'base',
+            forTarget: state.forTarget,
+            targetUid: state.targetUid,
+            attributeType: 'component',
+            step: '2',
+            ...headersObject,
+            header_icon_isCustom_1: !['contentType', 'component'].includes(
+              state.forTarget
+            ),
+            header_icon_name_1: headerIcon,
+          };
+
+          push({
+            search: makeNextSearch(nextSearchObj, shouldContinue),
+          });
+
+          // Clear the reducer and prepare the modified data
+          // This way we don't have to add some logic to re-run the useEffect
+          // The first step is either needed to create a component or just to navigate
+          // To the modal for adding a "common field"
+          dispatch({
+            type: 'RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO',
+          });
+
+          // We don't want all the props to be reset
+          return;
+
+          // Here we are in step 2
+          // The step 2 is also use to edit an attribute that is a component
+        }
+        addAttribute(
+          modifiedData,
+          state.forTarget,
+          state.targetUid,
+          // This change the dispatched type
+          // either 'EDIT_ATTRIBUTE' or 'ADD_ATTRIBUTE' in the DataManagerProvider
+          state.actionType === 'edit',
+          // This is for the edit part
+          initialData,
+          // Passing true will add the component to the components object
+          // This way we can add fields to the added component (if it wasn't there already)
+          true
+        );
+        const nextSearch = {
+          modalType: 'chooseAttribute',
+          forTarget: state.forTarget,
+          targetUid: state.targetUid,
+          ...headersObject,
+          header_icon_isCustom_1: !['contentType', 'component'].includes(
+            state.forTarget
+          ),
+          header_icon_name_1: headerIcon,
+        };
+
+        push({ search: makeSearch(nextSearch, shouldContinue) });
+
+        // We don't need to end the loop here we want the reducer to be reinitialised
+
         // Logic for creating a component without clicking on the link in
         // the left menu
         // We need to separate the logic otherwise the component would be created
         // even though the user didn't set any field
         // We need to prevent the component from being created if the user closes the modal at step 2 without any submission
       } else if (isCreatingAttribute && isCreatingComponentFromAView) {
-        const { headerDisplayCategory } = state;
         // Step 1
         if (isInFirstComponentStep) {
           // Here the search could be refactored since it is the same as the case from above
@@ -749,17 +802,11 @@ const FormModal = () => {
             forTarget: state.forTarget,
             targetUid: state.targetUid,
             attributeType: 'component',
-            headerDisplayName: state.headerDisplayName,
             step: '2',
+            ...headersObject,
+            header_icon_isCustom_1: false,
+            header_icon_name_1: 'component',
           };
-
-          // Modify the searchObj for the modal header
-          // This case is happening when creating a nestedComponent after creating a component
-          if (headerDisplayCategory) {
-            searchObj.headerDisplayCategory = state.headerDisplayCategory;
-            searchObj.headerDisplayName = state.headerDisplayName;
-            searchObj.targetUid = state.targetUid;
-          }
 
           emitEvent('willCreateComponentFromAttributesModal');
 
@@ -777,64 +824,60 @@ const FormModal = () => {
           return;
 
           // Step 2 of creating a component (which is setting the attribute name in the parent's schema)
-        } else {
-          // We are destructuring because the modifiedData object doesn't have the appropriate format to create a field
-          const { category, type, ...rest } = componentToCreate;
-          // Create a the component temp UID
-          // This could be refactored but I think it's more understandable to separate the logic
-          const componentUid = createComponentUid(
-            componentToCreate.name,
-            category
-          );
-          // Create the component first and add it to the components data
-          createSchema(
-            // Component data
-            rest,
-            // Type will always be component
-            // It will dispatch the CREATE_COMPONENT_SCHEMA action
-            // So the component will be added in the main components object
-            // This might not be needed if we don't allow navigation between entries while editing
-            type,
-            componentUid,
-            category,
-            // This will add the created component in the datamanager modifiedData components key
-            // Like explained above we will be able to modify the created component structure
-            isCreatingComponentFromAView
-          );
-          // Add the field to the schema
-          addAttribute(modifiedData, state.forTarget, state.targetUid, false);
-
-          dispatch({ type: 'RESET_PROPS' });
-
-          // Open modal attribute for adding attr to component
-
-          const searchToOpenModalAttributeToAddAttributesToAComponent = {
-            modalType: 'chooseAttribute',
-            forTarget: 'components',
-            targetUid: componentUid,
-            headerDisplayName: modifiedData.name,
-            headerDisplayCategory:
-              state.headerDisplayCategory || state.headerDisplayName,
-          };
-
-          // Then we inverse the headerDisplayName because it becomes the last one displayed
-          // The case is created a component then created a nested one
-          if (headerDisplayCategory) {
-            // This is allows to modify the modal header
-            searchToOpenModalAttributeToAddAttributesToAComponent.headerDisplaySubCategory =
-              state.headerDisplayName;
-            searchToOpenModalAttributeToAddAttributesToAComponent.subTargetUid =
-              state.targetUid;
-          }
-
-          push({
-            search: makeNextSearch(
-              searchToOpenModalAttributeToAddAttributesToAComponent,
-              shouldContinue
-            ),
-          });
-          return;
         }
+        // We are destructuring because the modifiedData object doesn't have the appropriate format to create a field
+        const { category, type, ...rest } = componentToCreate;
+        // Create a the component temp UID
+        // This could be refactored but I think it's more understandable to separate the logic
+        const componentUid = createComponentUid(
+          componentToCreate.name,
+          category
+        );
+        // Create the component first and add it to the components data
+        createSchema(
+          // Component data
+          rest,
+          // Type will always be component
+          // It will dispatch the CREATE_COMPONENT_SCHEMA action
+          // So the component will be added in the main components object
+          // This might not be needed if we don't allow navigation between entries while editing
+          type,
+          componentUid,
+          category,
+          // This will add the created component in the datamanager modifiedData components key
+          // Like explained above we will be able to modify the created component structure
+          isCreatingComponentFromAView
+        );
+        // Add the field to the schema
+        addAttribute(modifiedData, state.forTarget, state.targetUid, false);
+
+        dispatch({ type: 'RESET_PROPS' });
+
+        // Open modal attribute for adding attr to component
+
+        const searchToOpenModalAttributeToAddAttributesToAComponent = {
+          modalType: 'chooseAttribute',
+          forTarget: 'components',
+          targetUid: componentUid,
+          ...headersObject,
+          header_icon_isCustom_1: true,
+          header_icon_name_1: componentToCreate.icon,
+          [`header_label_${nextHeaderIndex}`]: modifiedData.name,
+          [`header_icon_name_${nextHeaderIndex}`]: 'component',
+          [`header_icon_isCustom_${nextHeaderIndex}`]: false,
+          [`header_info_category_${nextHeaderIndex}`]: category,
+          [`header_info_name_${nextHeaderIndex}`]: componentToCreate.name,
+        };
+
+        push({
+          search: makeNextSearch(
+            searchToOpenModalAttributeToAddAttributesToAComponent,
+            shouldContinue
+          ),
+        });
+
+        return;
+
         // The modal is addComponentToDynamicZone
       } else {
         // The modal is addComponentToDynamicZone
@@ -869,13 +912,19 @@ const FormModal = () => {
             // The Dynamic Zone and the component is created created
             // Open the modal to add fields to the created component
 
-            // TODO search for modal header
             const searchToOpenAddField = {
               modalType: 'chooseAttribute',
               forTarget: 'components',
               targetUid: componentUid,
-              headerDisplayName: modifiedData.componentToCreate.name,
-              headerDisplayCategory: state.headerDisplayCategory,
+              ...headersObject,
+              header_icon_isCustom_1: true,
+              header_icon_name_1: modifiedData.componentToCreate.icon,
+              [`header_label_${nextHeaderIndex}`]: modifiedData.name,
+              [`header_icon_name_${nextHeaderIndex}`]: 'component',
+              [`header_icon_isCustom_${nextHeaderIndex}`]: false,
+              [`header_info_category_${nextHeaderIndex}`]: category,
+              [`header_info_name_${nextHeaderIndex}`]: modifiedData
+                .componentToCreate.name,
             };
 
             push({ search: makeSearch(searchToOpenAddField, true) });
@@ -901,7 +950,6 @@ const FormModal = () => {
         type: 'RESET_PROPS',
       });
     } catch (err) {
-      console.log({ err });
       const errors = getYupInnerErrors(err);
 
       dispatch({
@@ -939,8 +987,6 @@ const FormModal = () => {
 
     if (state.forTarget === 'contentType') {
       emitEvent('didSelectContentTypeFieldSettings');
-
-      return;
     }
   };
 
@@ -960,7 +1006,7 @@ const FormModal = () => {
       ((state.attributeType === 'component' ||
         state.modalType === 'addComponentToDynamicZone') &&
         get(modifiedData, ['createComponent'], null) === false) ||
-      state.modalType == 'editCategory'
+      state.modalType === 'editCategory'
     );
   };
 
@@ -986,16 +1032,7 @@ const FormModal = () => {
       withoverflow={toString(state.modalType === 'addComponentToDynamicZone')}
     >
       <HeaderModal>
-        <ModalHeader
-          name={state.headerDisplayName}
-          category={state.headerDisplayCategory}
-          headerId={headerId}
-          iconType={iconType || 'contentType'}
-          subCategory={state.headerDisplaySubCategory}
-          subTargetUid={state.subTargetUid}
-          target={state.forTarget}
-          targetUid={state.targetUid}
-        />
+        <ModalHeader headerId={state.headerId} headers={headers} />
         <section>
           <HeaderModalTitle>
             <FormattedMessage
@@ -1127,22 +1164,16 @@ const FormModal = () => {
 
                           // The spacer type is used mainly to align the icon picker...
                           if (input.type === 'spacer') {
-                            return (
-                              <div key="spacer" style={{ height: 11 }}></div>
-                            );
+                            return <div key="spacer" style={{ height: 11 }} />;
                           }
 
                           // The spacer type is used mainly to align the icon picker...
                           if (input.type === 'spacer-small') {
-                            return (
-                              <div key="spacer" style={{ height: 4 }}></div>
-                            );
+                            return <div key="spacer" style={{ height: 4 }} />;
                           }
 
                           if (input.type === 'spacer-medium') {
-                            return (
-                              <div key="spacer" style={{ height: 8 }}></div>
-                            );
+                            return <div key="spacer" style={{ height: 8 }} />;
                           }
 
                           // This type is used in the addComponentToDynamicZone modal when selecting the option add an existing component
@@ -1160,7 +1191,7 @@ const FormModal = () => {
                             return (
                               <RelationForm
                                 key="relation"
-                                mainBoxHeader={state.headerDisplayName}
+                                mainBoxHeader={get(headers, [0, 'label'], '')}
                                 modifiedData={modifiedData}
                                 naturePickerType={state.forTarget}
                                 onChange={handleChange}

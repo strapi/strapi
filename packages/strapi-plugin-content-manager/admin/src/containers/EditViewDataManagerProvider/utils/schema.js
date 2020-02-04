@@ -25,6 +25,7 @@ yup.addMethod(yup.array, 'notEmptyMin', function(min) {
     if (isEmpty(value)) {
       return true;
     }
+
     return value.length >= min;
   });
 });
@@ -65,6 +66,7 @@ const createYupSchema = (model, { components }) => {
   return yup.object().shape(
     Object.keys(attributes).reduce((acc, current) => {
       const attribute = attributes[current];
+
       if (
         attribute.type !== 'relation' &&
         attribute.type !== 'component' &&
@@ -95,66 +97,46 @@ const createYupSchema = (model, { components }) => {
         );
 
         if (attribute.repeatable === true) {
-          const { min, max } = attribute;
+          const { min, max, required } = attribute;
+          let componentSchema = yup.lazy(value => {
+            let baseSchema = yup.array().of(componentFieldSchema);
 
-          let componentSchema =
-            attribute.required === true
-              ? yup
-                  .array()
-                  .of(componentFieldSchema)
-                  .defined()
-              : yup
-                  .array()
-                  .of(componentFieldSchema)
-                  .nullable();
-
-          if (min) {
-            componentSchema = yup.lazy(array => {
-              if (attribute.required) {
-                return yup
-                  .array()
-                  .of(componentFieldSchema)
-                  .defined()
-                  .min(min, errorsTrads.min);
+            if (min) {
+              if (required) {
+                baseSchema = baseSchema.min(min, errorsTrads.min);
+              } else if (required !== true && isEmpty(value)) {
+                baseSchema = baseSchema.nullable();
+              } else {
+                baseSchema = baseSchema.min(min, errorsTrads.min);
               }
-
-              let schema = yup
-                .array()
-                .of(componentFieldSchema)
-                .nullable();
-
-              if (array && !isEmpty(array)) {
-                schema = schema.min(min, errorsTrads.min);
-              }
-
-              return schema;
-            });
-          }
-
-          if (max) {
-            componentSchema = componentSchema.max(max, errorsTrads.max);
-          }
-
-          acc[current] = componentSchema;
-
-          return acc;
-        } else {
-          const componentSchema = yup.lazy(obj => {
-            if (obj !== undefined) {
-              return attribute.required === true
-                ? componentFieldSchema.defined()
-                : componentFieldSchema.nullable();
             }
 
-            return attribute.required === true
-              ? yup.object().defined()
-              : yup.object().nullable();
+            if (max) {
+              baseSchema = baseSchema.max(max, errorsTrads.max);
+            }
+
+            return baseSchema;
           });
 
           acc[current] = componentSchema;
 
           return acc;
         }
+        const componentSchema = yup.lazy(obj => {
+          if (obj !== undefined) {
+            return attribute.required === true
+              ? componentFieldSchema.defined()
+              : componentFieldSchema.nullable();
+          }
+
+          return attribute.required === true
+            ? yup.object().defined()
+            : yup.object().nullable();
+        });
+
+        acc[current] = componentSchema;
+
+        return acc;
       }
 
       if (attribute.type === 'dynamiczone') {
@@ -175,6 +157,7 @@ const createYupSchema = (model, { components }) => {
               .required(errorsTrads.required);
           }
         } else {
+          // eslint-disable-next-line no-lonely-if
           if (min) {
             dynamicZoneSchema = dynamicZoneSchema.notEmptyMin(min);
           }
@@ -222,6 +205,7 @@ const createYupSchemaAttribute = (type, validations) => {
 
         try {
           JSON.parse(value);
+
           return true;
         } catch (err) {
           return false;
@@ -251,6 +235,7 @@ const createYupSchemaAttribute = (type, validations) => {
 
   Object.keys(validations).forEach(validation => {
     const validationValue = validations[validation];
+
     if (
       !!validationValue ||
       ((!isBoolean(validationValue) &&

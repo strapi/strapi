@@ -19,16 +19,16 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { LoadingIndicatorPage, request } from 'strapi-helper-plugin';
 
+import GlobalStyle from '../../components/GlobalStyle';
 import Admin from '../Admin';
 import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
+// eslint-disable-next-line import/no-cycle
 import NotificationProvider from '../NotificationProvider';
 import PrivateRoute from '../PrivateRoute';
 import Theme from '../Theme';
 
 import { Content, Wrapper } from './components';
-
-import GlobalStyle from '../../components/GlobalStyle';
 
 import { getDataSucceeded } from './actions';
 

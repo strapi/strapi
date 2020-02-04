@@ -14,9 +14,9 @@ You will also need another `string` field that contains the slugified value of y
 
 Let's configure the layout of the **edit page** to make it more user friendly for the content editor.
 
-- Click on the **Content Manager** link in the left menu.
-- Then on the `Article` Content Type.
-- And finally on the **Edit View** tab.
+- Click on the **Article** link in the left menu.
+- Then on the `+ Add New Article` button.
+- And finally on the `Configure the view` button.
 
 Here we will be able to setup the `slug` field.
 
@@ -69,7 +69,7 @@ module.exports = {
     }
   },
   beforeUpdate: async model => {
-    if (model.getUpdate().title) {
+    if (model.getUpdate() && model.getUpdate().title) {
       model.update({
         slug: slugify(model.getUpdate().title),
       });

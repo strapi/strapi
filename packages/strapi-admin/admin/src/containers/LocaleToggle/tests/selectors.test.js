@@ -11,7 +11,7 @@ describe('<LocaleToggle /> selectors', () => {
       const mockedState = fromJS({
         localeToggle: state,
       });
-      
+
       expect(selectLocaleToggle()(mockedState)).toEqual(state);
     });
   });
@@ -29,5 +29,3 @@ describe('<LocaleToggle /> selectors', () => {
     });
   });
 });
-
-

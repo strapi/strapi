@@ -7,12 +7,10 @@ const LayoutWrapper = styled(Link)`
   text-decoration: none;
   color: #333740;
   font-size: 13px;
-
   svg {
     margin-right: 10px;
-    vertical-align: baseline;
+    vertical-align: middle;
   }
-
   &:hover {
     text-decoration: none;
     span {

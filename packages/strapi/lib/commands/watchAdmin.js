@@ -1,5 +1,6 @@
 /* eslint-disable no-useless-escape */
 const path = require('path');
+// eslint-disable-next-line node/no-extraneous-require
 const strapiAdmin = require('strapi-admin');
 const _ = require('lodash');
 
@@ -21,6 +22,11 @@ module.exports = async function() {
     `http://${host}:${port}`
   );
   const adminPath = _.get(serverConfig, 'admin.path', '/admin');
+  const adminWatchIgnoreFiles = _.get(
+    serverConfig,
+    'admin.watchIgnoreFiles',
+    []
+  );
 
   strapiAdmin.watchAdmin({
     dir,
@@ -29,6 +35,7 @@ module.exports = async function() {
     options: {
       backend: adminBackend,
       publicPath: addSlash(adminPath),
+      watchIgnoreFiles: adminWatchIgnoreFiles,
     },
   });
 };

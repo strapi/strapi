@@ -36,6 +36,8 @@ import { HomePageContext } from '../../contexts/HomePage';
 // Translations
 import en from '../../translations/en.json';
 
+/* eslint-disable react/sort-comp */
+/* eslint-disable no-shadow */
 class PopUpForm extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = { enabled: false, isEditing: false };
@@ -132,7 +134,8 @@ class PopUpForm extends React.Component {
               return acc;
             }, [])
             .concat(acc);
-        } else if (current !== 'icon' && current !== 'scope') {
+        }
+        if (current !== 'icon' && current !== 'scope') {
           acc.push(`${name}${current}`);
         }
 
@@ -306,7 +309,7 @@ class PopUpForm extends React.Component {
       );
     }
 
-    let subHeader =
+    const subHeader =
       display && en[display] ? (
         <FormattedMessage id={`users-permissions.${display}`} />
       ) : (

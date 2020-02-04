@@ -1,5 +1,7 @@
 import { get, isArray, isObject } from 'lodash';
 
+/* eslint-disable indent */
+
 const cleanData = (retrievedData, currentSchema, componentsSchema) => {
   const getType = (schema, attrName) =>
     get(schema, ['attributes', attrName, 'type'], '');
@@ -22,7 +24,6 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
           try {
             cleanedData = JSON.parse(value);
           } catch (err) {
-            console.error(err);
             cleanedData = value;
           }
 
@@ -91,11 +92,12 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
 export const helperCleanData = (value, key) => {
   if (isArray(value)) {
     return value.map(obj => (obj[key] ? obj[key] : obj));
-  } else if (isObject(value)) {
-    return value[key];
-  } else {
-    return value;
   }
+  if (isObject(value)) {
+    return value[key];
+  }
+
+  return value;
 };
 
 export default cleanData;
