@@ -38,8 +38,8 @@
     "request-promise-native": "^1.0.7",
     "rimraf": "3.0.0",
     "snyk": "^1.290.1",
-    "strapi": "3.0.0-beta.18.6",
-    "strapi-generate-new": "3.0.0-beta.18.6",
+    "strapi": "^3.0.0-beta.18.7",
+    "strapi-generate-new": "^3.0.0-beta.18.7",
     "wait-on": "^3.2.0",
     "yargs": "^13.2.2"
   },
