@@ -44,12 +44,12 @@ function PopUpWarning({
   const buttons = [
     {
       color: 'cancel',
-      handleClick: toggleModal,
+      onClick: toggleModal,
       message: content.cancel || 'components.popUpWarning.button.cancel',
     },
     {
       color: 'delete',
-      handleClick: onConfirm,
+      onClick: onConfirm,
       message: content.confirm || 'components.popUpWarning.button.confirm',
     },
   ];
@@ -57,7 +57,7 @@ function PopUpWarning({
   const singleButton = [
     {
       color: 'delete',
-      handleClick: onConfirm,
+      onClick: onConfirm,
       message: content.confirm || 'components.popUpWarning.button.confirm',
       style: { width: '100%' },
     },
@@ -87,9 +87,9 @@ function PopUpWarning({
         </StyledBody>
         <StyledFooter>
           {map(footerButtons, button => {
-            const { message, handleClick, ...rest } = button;
+            const { message, onClick, ...rest } = button;
             return (
-              <Button key={message} onClick={handleClick} {...rest}>
+              <Button key={message} onClick={onClick} {...rest}>
                 <FormattedMessage id={message} />
               </Button>
             );

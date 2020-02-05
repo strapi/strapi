@@ -1,12 +1,12 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { shallow } from 'enzyme';
-import { render, cleanup } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
+import { fireEvent } from '@testing-library/react';
 
 import renderWithIntl from '../../../testUtils/renderWithIntl';
 import PopUpWarning from '../index';
 
-const translationMessage = {
+const translationMessages = {
   'components.popUpWarning.button.cancel': 'Cancel',
   'components.popUpWarning.button.confirm': 'Confirm',
   'components.popUpWarning.message': 'Are you sure you want to delete this?',
@@ -24,35 +24,67 @@ describe('<PopUpWarning />', () => {
     isOpen: true,
     onConfirm: jest.fn(),
     onlyConfirmButton: false,
-    popUpWarningType: 'danger',
+    popUpWarningType: 'warning',
     toggleModal: jest.fn(),
   };
 
+  beforeAll(() => {
+    ReactDOM.createPortal = jest.fn(element => {
+      return element;
+    });
+  });
+
+  afterEach(() => {
+    ReactDOM.createPortal.mockClear();
+  });
+
   describe('should render properly', () => {
-    afterEach(cleanup);
     it('should not crash', () => {
       shallow(<PopUpWarning {...props} />);
     });
 
-    it('render match snapshot if onlyConfirmButton is false', () => {
-      const { asFragment } = render(
-        <IntlProvider
-          locale="en"
-          defaultLocale="en"
-          messages={translationMessage}
-        >
-          <PopUpWarning {...props} />
-        </IntlProvider>
+    it('should match snapshot if onlyConfirmButton is false', () => {
+      const { asFragment } = renderWithIntl(
+        <PopUpWarning {...props} />,
+        translationMessages
       );
+
       expect(asFragment()).toMatchSnapshot();
     });
 
-    it('render match snapshot if onlyConfirmButton is true', () => {
+    it('should match snapshot if onlyConfirmButton is true', () => {
       const { asFragment } = renderWithIntl(
         <PopUpWarning {...props} onlyConfirmButton={true} />,
-        translationMessage
+        translationMessages
       );
+
       expect(asFragment()).toMatchSnapshot();
+    });
+  });
+
+  describe('should call methods properly', () => {
+    it('should call onConfirm props on confirm button click', () => {
+      const { getByText } = renderWithIntl(
+        <PopUpWarning {...props} />,
+        translationMessages
+      );
+
+      const node = getByText('Confirm');
+      fireEvent.click(node);
+
+      expect(props.onConfirm).toHaveBeenCalled();
+    });
+
+    it('should call toggleModal props on cancel button click', () => {
+      const { getByText } = renderWithIntl(
+        <PopUpWarning {...props} />,
+        translationMessages
+      );
+
+      const node = getByText('Cancel');
+      fireEvent.click(node);
+
+      expect(props.toggleModal).toHaveBeenCalled();
     });
   });
 });
