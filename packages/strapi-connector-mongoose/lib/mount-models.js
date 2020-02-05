@@ -225,7 +225,8 @@ module.exports = ({ models, target }, ctx) => {
     const refToStrapiRef = obj => {
       const ref = obj.ref;
 
-      let plainData = typeof ref.toJSON === 'function' ? ref.toJSON() : ref;
+      let plainData =
+        ref && typeof ref.toJSON === 'function' ? ref.toJSON() : ref;
 
       if (typeof plainData !== 'object') return ref;
 
@@ -262,9 +263,9 @@ module.exports = ({ models, target }, ctx) => {
 
               case 'manyMorphToMany':
               case 'manyMorphToOne':
-                returned[association.alias] = returned[association.alias].map(
-                  obj => refToStrapiRef(obj)
-                );
+                returned[association.alias] = returned[
+                  association.alias
+                ].map(obj => refToStrapiRef(obj));
                 break;
               default:
             }
