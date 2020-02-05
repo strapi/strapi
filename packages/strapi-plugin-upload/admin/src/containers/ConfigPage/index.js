@@ -195,10 +195,7 @@ function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = selectConfigPage();
 
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps
-);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
 const withReducer = strapi.injectReducer({
   key: 'configPage',
@@ -207,8 +204,4 @@ const withReducer = strapi.injectReducer({
 });
 const withSaga = strapi.injectSaga({ key: 'configPage', saga, pluginId });
 
-export default compose(
-  withReducer,
-  withSaga,
-  withConnect
-)(ConfigPage);
+export default compose(withReducer, withSaga, withConnect)(ConfigPage);
