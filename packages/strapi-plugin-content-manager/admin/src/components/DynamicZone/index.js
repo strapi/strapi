@@ -17,6 +17,8 @@ import Label from './Label';
 import RoundCTA from './RoundCTA';
 import Wrapper from './Wrapper';
 
+/* eslint-disable react/no-array-index-key */
+
 const DynamicZone = ({ max, min, name }) => {
   const [isOpen, setIsOpen] = useState(false);
   const {
@@ -117,7 +119,7 @@ const DynamicZone = ({ max, min, name }) => {
               <RoundCTA
                 onClick={() => removeComponentFromDynamicZone(name, index)}
               >
-                <FontAwesomeIcon icon={'trash'} />
+                <FontAwesomeIcon icon="trash" />
               </RoundCTA>
               <FieldComponent
                 componentUid={componentUid}
@@ -127,7 +129,7 @@ const DynamicZone = ({ max, min, name }) => {
                 icon={getDynamicComponentInfos(componentUid).icon}
                 label=""
                 name={`${name}.${index}`}
-                isFromDynamicZone={true}
+                isFromDynamicZone
               />
             </div>
           );

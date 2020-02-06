@@ -57,6 +57,8 @@ import saga from './saga';
 
 import { Loader, Title, Separator, Wrapper } from './Components';
 
+/* eslint-disable react/sort-comp */
+
 export class EditPage extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   getChildContext = () => ({
@@ -110,7 +112,7 @@ export class EditPage extends React.Component {
       ]);
     }
 
-    this.props.submit(this.context);
+    return this.props.submit(this.context);
   };
 
   showLoaderForm = () => {

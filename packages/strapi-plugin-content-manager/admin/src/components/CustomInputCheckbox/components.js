@@ -1,4 +1,5 @@
 import styled, { css } from 'styled-components';
+/* eslint-disable */
 
 const Label = styled.label`
   cursor: pointer;

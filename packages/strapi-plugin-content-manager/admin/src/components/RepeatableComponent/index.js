@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import React, { useReducer } from 'react';
 import { useDrop } from 'react-dnd';
 import PropTypes from 'prop-types';

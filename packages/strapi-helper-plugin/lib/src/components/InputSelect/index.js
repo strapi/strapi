@@ -51,9 +51,9 @@ function InputSelect(props) {
                 {option.label}
               </option>
             );
-          } else {
-            return <SelectOption key={key} {...option} />;
           }
+
+          return <SelectOption key={key} {...option} />;
         }
 
         return (

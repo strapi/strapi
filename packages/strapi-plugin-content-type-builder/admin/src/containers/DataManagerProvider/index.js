@@ -38,6 +38,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const [infoModals, toggleInfoModal] = useState({ cancel: false });
   const {
+    autoReload,
     currentEnvironment,
     emitEvent,
     formatMessage,
@@ -59,7 +60,10 @@ const DataManagerProvider = ({ allIcons, children }) => {
   const componentMatch = useRouteMatch(
     `/plugins/${pluginId}/component-categories/:categoryUid/:componentUid`
   );
-  const isInDevelopmentMode = currentEnvironment === 'development';
+  const formatMessageRef = useRef();
+  formatMessageRef.current = formatMessage;
+  const isInDevelopmentMode =
+    currentEnvironment === 'development' && autoReload;
 
   const isInContentTypeView = contentTypeMatch !== null;
   const firstKeyToMainSchema = isInContentTypeView
@@ -86,6 +90,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
           });
         })
       );
+
       const components = createDataObject(componentsArray);
       const contentTypes = createDataObject(contentTypesArray);
       const orderedComponents = orderAllDataAttributesWithImmutable({
@@ -112,12 +117,22 @@ const DataManagerProvider = ({ allIcons, children }) => {
 
   useEffect(() => {
     // We need to set the modifiedData after the data has been retrieved
-    //and also on pathname change
+    // and also on pathname change
     if (!isLoading) {
       setModifiedData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, pathname]);
+
+  useEffect(() => {
+    if (currentEnvironment === 'development' && !autoReload) {
+      strapi.notification.info(
+        formatMessageRef.current({
+          id: getTrad('notification.info.autoreaload-disable'),
+        })
+      );
+    }
+  }, [autoReload, currentEnvironment]);
 
   const didModifiedComponents =
     getCreatedAndModifiedComponents(modifiedData.components || {}, components)
@@ -216,7 +231,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
       const requestURL = `/${pluginId}/component-categories/${categoryUid}`;
       const userConfirm = window.confirm(
         formatMessage({
-          id: getTrad(`popUpWarning.bodyMessage.category.delete`),
+          id: getTrad('popUpWarning.bodyMessage.category.delete'),
         })
       );
       // Close the modal

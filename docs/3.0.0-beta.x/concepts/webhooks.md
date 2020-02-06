@@ -245,7 +245,7 @@ You can configure these global headers by updating the file at `./config/environ
 {
   "webhooks": {
     "defaultHeaders": {
-      "Authroization": "Bearer my-very-secured-token"
+      "Authorization": "Bearer my-very-secured-token"
     }
   }
 }
@@ -259,7 +259,7 @@ You can configure these global headers by updating the file at `./config/environ
 {
   "webhooks": {
     "defaultHeaders": {
-      "Authroization": "Bearer ${ process.env.WEBHOOK_TOKEN }"
+      "Authorization": "Bearer ${ process.env.WEBHOOK_TOKEN }"
     }
   }
 }

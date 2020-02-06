@@ -52,6 +52,14 @@ import Content from './Content';
 export class Admin extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
 
+  helpers = {
+    updatePlugin: this.props.updatePlugin,
+  };
+
+  componentDidMount() {
+    this.props.emitEvent('didAccessAuthenticatedAdministration');
+  }
+
   shouldComponentUpdate(prevProps) {
     return !isEmpty(difference(prevProps, this.props));
   }
@@ -70,10 +78,6 @@ export class Admin extends React.Component {
     this.props.setAppError();
   }
 
-  componentDidMount() {
-    this.props.emitEvent('didAccessAuthenticatedAdministration');
-  }
-
   hasApluginNotReady = props => {
     const {
       global: { plugins },
@@ -82,10 +86,6 @@ export class Admin extends React.Component {
     return !Object.keys(plugins).every(
       plugin => plugins[plugin].isReady === true
     );
-  };
-
-  helpers = {
-    updatePlugin: this.props.updatePlugin,
   };
 
   /**
@@ -124,33 +124,41 @@ export class Admin extends React.Component {
   render() {
     const {
       global: {
+        autoReload,
         blockApp,
+        currentEnvironment,
         overlayBlockerData,
         plugins,
         showGlobalAppBlocker,
         strapiVersion,
       },
+      disableGlobalOverlayBlocker,
+      emitEvent,
+      enableGlobalOverlayBlocker,
+      intl: { formatMessage },
+      updatePlugin,
     } = this.props;
 
     // We need the admin data in order to make the initializers work
     if (this.showLoader()) {
       return (
-        <React.Fragment>
+        <>
           {this.renderInitializers()}
           <LoadingIndicatorPage />
-        </React.Fragment>
+        </>
       );
     }
 
     return (
       <GlobalContextProvider
-        emitEvent={this.props.emitEvent}
-        currentEnvironment={this.props.global.currentEnvironment}
-        disableGlobalOverlayBlocker={this.props.disableGlobalOverlayBlocker}
-        enableGlobalOverlayBlocker={this.props.enableGlobalOverlayBlocker}
-        formatMessage={this.props.intl.formatMessage}
-        plugins={this.props.global.plugins}
-        updatePlugin={this.props.updatePlugin}
+        autoReload={autoReload}
+        emitEvent={emitEvent}
+        currentEnvironment={currentEnvironment}
+        disableGlobalOverlayBlocker={disableGlobalOverlayBlocker}
+        enableGlobalOverlayBlocker={enableGlobalOverlayBlocker}
+        formatMessage={formatMessage}
+        plugins={plugins}
+        updatePlugin={updatePlugin}
       >
         <Wrapper>
           <LeftMenu version={strapiVersion} plugins={plugins} />
@@ -202,6 +210,12 @@ export class Admin extends React.Component {
   }
 }
 
+Admin.defaultProps = {
+  intl: {
+    formatMessage: () => {},
+  },
+};
+
 Admin.propTypes = {
   admin: PropTypes.shape({
     appError: PropTypes.bool,
@@ -210,6 +224,7 @@ Admin.propTypes = {
   emitEvent: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
   global: PropTypes.shape({
+    autoReload: PropTypes.bool,
     blockApp: PropTypes.bool,
     currentEnvironment: PropTypes.string,
     overlayBlockerData: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),

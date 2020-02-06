@@ -15,6 +15,7 @@ describe('Testing build and schema core_store', () => {
     cy.login()
       .then(data => {
         jwt = data.jwt;
+
         return cy.createCTMApis(data.jwt);
       })
       .wait(1000);

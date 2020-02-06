@@ -52,7 +52,7 @@ export function fetchData(endPoint) {
 export function fetchDataSucceeded(data) {
   if (!isArray(data)) {
     const list = Object.keys(data).reduce((acc, current) => {
-      const obj = Object.assign({ name: current}, data[current]);
+      const obj = Object.assign({ name: current }, data[current]);
       acc.push(obj);
 
       return acc;

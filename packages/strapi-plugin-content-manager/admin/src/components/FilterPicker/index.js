@@ -153,6 +153,7 @@ function FilterPicker({
                 }}
                 type={get(schema, ['attributes', filter.name, 'type'], '')}
                 showAddButton={key === modifiedData.length - 1}
+                // eslint-disable-next-line react/no-array-index-key
                 key={key}
               />
             ))}
@@ -180,8 +181,7 @@ FilterPicker.propTypes = {
   isOpen: PropTypes.bool,
   location: PropTypes.shape({
     search: PropTypes.string.isRequired,
-  }),
-
+  }).isRequired,
   name: PropTypes.string,
   onSubmit: PropTypes.func.isRequired,
   toggleFilterPickerState: PropTypes.func.isRequired,
