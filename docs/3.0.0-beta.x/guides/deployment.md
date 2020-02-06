@@ -1627,32 +1627,38 @@ Due to Heroku's filesystem you will need to use an upload provider such as AWS S
 
 In this guide we are going to:
 
-- create a new Strapi project
-- configure PostgreSQL for the production enviroment
-- deploy the app to Google App Engine
-  - (using Standard Environment, but Flexible would be possible and probably easier)
-- add the [Google Cloud Storage file uploading plugin](https://github.com/Lith/strapi-provider-upload-google-cloud-storage) by [@Lith](https://github.com/Lith)
+- Create a new Strapi project
+- Configure PostgreSQL for the production enviroment
+- Deploy the app to Google App Engine
+- Add the [Google Cloud Storage file uploading plugin](https://github.com/Lith/strapi-provider-upload-google-cloud-storage) by [@Lith](https://github.com/Lith)
 
 ### New Strapi project
 
-```
-yarn create strapi-app <YOUR_APP_NAME> --quickstart
-```
+:::: tabs
 
-The setup:
+::: tab yarn
 
-- Creates the initial files, configured to use `sqlite` database
-- Runs `strapi build "--no-optimization"` to build the admin UI
-- Runs `strapi develop`, which starts the app in `development` mode
-- Open a the admin user registration form in the browser
+Use **yarn** to install the Strapi project (**recommended**). [Install yarn with these docs](https://yarnpkg.com/lang/en/docs/install/)
 
-```
-: One more thing...                                                                                                                        
-: Create your first administrator 💻 by going to the administration panel at:
-: http://localhost:1337/admin
+```bash
+yarn create strapi-app my-project --quickstart
 ```
 
-Setup an admin user. This user will be only relevant in local development.
+:::
+
+::: tab npx
+
+Use **npm/npx** to install the Strapi project
+
+```bash
+npx create-strapi-app my-project --quickstart
+```
+
+:::
+
+::::
+
+When the setup completes, register an admin user using the form which opens in the browser. This user will be only relevant in local development.
 
 The `sqlite` database is created at `.tmp/data.db`.
 
@@ -1660,18 +1666,18 @@ Login, but don't add content types yet. Close the browser. Quit the running app.
 
 ### Initial commit
 
-This may be a good point to create and empty root commit and add the files in their initial state.
+This may be a good point to commit the files in their initial state.
 
-```
+``` bash
+cd my-project
 git init
-git commit -m initial --allow-empty
-git add -A .
+git add .
 git commit -m first
 ```
 
 ### Install the Cloud SDK CLI tool
 
-https://cloud.google.com/sdk/
+[Cloud SDK: Command Line Interface](https://cloud.google.com/sdk/)
 
 ### New App Engine project
 
@@ -1687,15 +1693,15 @@ The Flexible enviroment is also available, but incurs more cost.
 
 Create the project. Take note of the instance identifier, which is in the form of `<instance_id>:<region>:<instance_name>`.
 
-and see if `gcloud` lists it:
+Check if `gcloud` lists the project:
 
-```
+``` bash
 gcloud projects list
 ```
 
 Run `init` to authenticate the cli, and select current cloud project.
 
-```
+``` bash
 gcloud init
 ```
 
@@ -1703,11 +1709,11 @@ gcloud init
 
 Create the [Cloud SQL database](https://cloud.google.com/sql/docs/postgres/create-manage-databases) which the app is going to use.
 
-Take note of the user name (default is `postgres'`) and password.
+Take note of the user name (default is `postgres`) and password.
 
 The first database will be created with name `default`. This cannot be deleted.
 
-Create another database, named `strapi`. It may be useful to delete and and re-create this while you are experimenting with the application setup.
+Create another database, named `strapi` for example. It may be useful to delete and and re-create this while you are experimenting with the application setup.
 
 ### Create app.yaml and .gcloudignore
 
@@ -1734,9 +1740,10 @@ beta_settings:
   cloud_sql_instances: '<instance_identifier>'
 ```
 
-Create `.gcloudignore` in the project root.
+Create `.gcloudignore` in the project root, include `app.yaml` here as well.
 
 ```
+app.yaml
 .gcloudignore
 .git
 .gitignore
@@ -1752,7 +1759,7 @@ the `.gitignore` entries.
 
 The `PostgreSQL` database will need the `pg` package.
 
-```
+``` bash
 yarn add pg
 ```
 
@@ -1822,13 +1829,13 @@ In `package.json`, add the `gcp-build` command to `scripts`:
 
 ### Deploy
 
-```
+``` bash
 gcloud app deploy app.yaml --project myapi-123456
 ```
 
 Watch the logs:
 
-```
+``` bash
 gcloud app logs tail --project=myapi-123456 -s default
 ```
 
@@ -1842,11 +1849,13 @@ https://myapp-123456.appspot.com/admin/
 
 Open in develoment mode locally.
 
-```
+``` bash
 yarn develop
 ```
 
 Content Type Builder > Create new content type
+
+Create a `Book` type:
 
 ```
 model name: book
@@ -1855,6 +1864,8 @@ description: rich text
 ```
 
 Save.
+
+Create an `Author` type:
 
 ```
 model name: author
@@ -1877,11 +1888,11 @@ The `api/` folder now includes `book` and `author`.
 
 Deploy.
 
-```
+``` bash
 gcloud app deploy app.yaml --project myapi-123456
 ```
 
-It might say `Uploading 0 files`, but if you look the service sources, you should see the new version.
+It might say `Uploading 0 files`, but if you look at the service sources, you should see the new version.
 
 App Engine > Services > myapi (2 versions) > Source
 
@@ -1889,17 +1900,23 @@ The contents of the `api` folder were deployed, you can inspect the `book` and `
 
 Visit and reload the app URL so that the new version is started up.
 
+```
 https://myapi-123456.appspot.com
+```
 
 Login to the admin UI.
 
+```
 https://myapi-123456.appspot.com/admin
+```
 
 Open Books and Authors, add records and create relations.
 
 If you haven't enabled the permission yet, the API will respond with `403 Forbidden`.
 
+```
 https://myapi-123456.appspot.com/books
+```
 
 Update Permissions:
 
@@ -1907,29 +1924,31 @@ Roles and Permissions > Public
 
 Enable `count`, `find`, `findone` for `author` and `book`.
 
+```
 https://myapi-123456.appspot.com/books
+```
 
-Should returns the JSON data.
+Should return the JSON data.
 
 ### File uploading to Google Cloud Storage
 
-https://github.com/Lith/strapi-provider-upload-google-cloud-storage
+[Lith/strapi-provider-upload-google-cloud-storage](https://github.com/Lith/strapi-provider-upload-google-cloud-storage)
 
-```
+``` bash
 yarn add strapi-provider-upload-google-cloud-storage
 ```
 
-Deploy so that the server app includes the dependency from =package.json=.
+Deploy so that the server app includes the dependency from `package.json`.
 
 Create a Google service account key.
 
-https://console.cloud.google.com/apis/credentials/serviceaccountkey
+<https://console.cloud.google.com/apis/credentials/serviceaccountkey>
 
 Save the JSON credentials file.
 
 Plugins > File Upload > Settings > Production tab
 
-By default localhost is selected. Select the Google Cloud Storage plugin.
+By default `localhost` is selected. Select the `Google Cloud Storage` plugin.
 
 Copy the JSON key and set the regions.
 
@@ -1945,19 +1964,21 @@ Roles & Permissions > Public > Upload
 
 Enable `count` and `findone`.
 
+```
 https://myapi-123456.appspot.com/upload/files/count
+```
 
 Should return `{"count":"0"}`.
 
 Files Upload > upload a file.
 
-`/files/count` should new return `1`.
+`/files/count` should now return `1`.
 
 Logout.
 
 Start the local dev server and login to the Admin UI.
 
-```
+``` bash
 yarn develop
 ```
 
@@ -1978,11 +1999,13 @@ Open one of the books and add downloads. Save.
 
 The `/books` api should display the associated files.
 
+```
 https://myapi-123456.appspot.com/books
+```
 
 ### Success!
 
-Read to go!
+Ready to go!
 
 ### Post-setup configuration
 
@@ -1994,7 +2017,7 @@ CORS is enabled by default, allowing `*` origin. You may want to limit the allow
 config/environments/production/security.json
 ```
 
-**Changing the admin url.**
+**Changing the admin url**
 
 ```
 config/environments/production/server.json
