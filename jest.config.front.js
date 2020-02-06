@@ -32,8 +32,13 @@ module.exports = {
       '<rootDir>/test/config/front/mocks/image.js',
   },
   rootDir: process.cwd(),
-  setupFilesAfterEnv: ['<rootDir>/test/config/front/test-bundler.js'],
-  setupFiles: [
+  setupFiles: ['<rootDir>/test/config/front/test-bundler.js'],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '<rootDir>/examples/getstarted/',
+    '<rootDir>/packages/strapi-helper-plugin/dist/',
+  ],
+  setupFilesAfterEnv: [
     '<rootDir>/test/config/front/enzyme-setup.js',
     '<rootDir>/test/config/front/strapi.js',
   ],

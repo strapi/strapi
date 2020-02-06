@@ -8,6 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, snakeCase, isEmpty, map, sortBy } from 'lodash';
+import { SETTINGS_BASE_URL } from '../../config';
 import LeftMenuLink from '../LeftMenuLink';
 import Wrapper from './Wrapper';
 import messages from './messages.json';
@@ -68,7 +69,13 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
   // Check if the plugins list is empty or not and display plugins by name
   const pluginsLinks = !isEmpty(plugins) ? (
     map(sortBy(plugins, 'name'), plugin => {
-      if (plugin.id !== 'email' && plugin.id !== 'content-manager') {
+      const shouldInjectPlugin = !!plugin.mainComponent;
+
+      if (
+        plugin.id !== 'email' &&
+        plugin.id !== 'content-manager' &&
+        shouldInjectPlugin
+      ) {
         const pluginSuffixUrl = plugin.suffixUrl
           ? plugin.suffixUrl(plugins)
           : '';
@@ -110,7 +117,7 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
     {
       icon: 'cog',
       label: messages.settings.id,
-      destination: '/settings/webhooks',
+      destination: SETTINGS_BASE_URL,
     },
   ];
 
