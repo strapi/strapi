@@ -92,8 +92,9 @@ describe('<Admin />', () => {
     it('should render the routes', () => {
       const renderedComponent = shallow(<Admin {...props} />);
       const { renderRoute } = renderedComponent.instance();
+      const Compo = () => <div>compo</div>;
 
-      expect(renderRoute({}, () => null)).not.toBeNull();
+      expect(renderRoute({}, Compo)).not.toBeNull();
     });
   });
 
