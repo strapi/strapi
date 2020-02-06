@@ -1,17 +1,278 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<Inputs /> should match the snapshot if type is events 1`] = `
+.c4 {
+  cursor: pointer;
+  margin: 0;
+  position: relative;
+  width: 14px;
+  font-weight: 100;
+}
+
+.c4:focus,
+.c4:active {
+  outline: 0;
+}
+
+.c4:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  margin-top: calc(-14px / 2);
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(16,22,34,0.15);
+  background-color: #fdfdfd;
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+
+.c4:after {
+  display: none;
+  content: '\\f00c';
+  font-family: 'FontAwesome';
+  position: absolute;
+  left: 0px;
+  top: 55%;
+  margin-top: calc(-14px / 2);
+  width: 14px;
+  height: 14px;
+  text-align: center;
+  font-size: 9px;
+  font-weight: 400;
+  color: #1C5DE7;
+  line-height: 14px;
+}
+
+.c4:checked:after {
+  display: block;
+}
+
+.c4:disabled {
+  background-color: #FAFAFB;
+  cursor: initial;
+}
+
+.c4 + label {
+  display: inline-block;
+  font-weight: 400;
+  font-size: 1.3rem;
+}
+
+.c5 {
+  cursor: pointer;
+  margin: 0;
+  position: relative;
+  width: 14px;
+  font-weight: 100;
+}
+
+.c5:focus,
+.c5:active {
+  outline: 0;
+}
+
+.c5:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  margin-top: calc(-14px / 2);
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(16,22,34,0.15);
+  background-color: #fdfdfd;
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+
+.c5:after {
+  display: none;
+  content: '\\f00c';
+  font-family: 'FontAwesome';
+  position: absolute;
+  left: 0px;
+  top: 55%;
+  margin-top: calc(-14px / 2);
+  width: 14px;
+  height: 14px;
+  text-align: center;
+  font-size: 9px;
+  font-weight: 400;
+  color: #1C5DE7;
+  line-height: 14px;
+}
+
+.c5:checked:after {
+  display: block;
+}
+
+.c5:after {
+  content: '\\f068';
+  display: block;
+  top: 50%;
+  font-size: 10px;
+}
+
+.c5:disabled {
+  background-color: #FAFAFB;
+  cursor: initial;
+}
+
+.c5 + label {
+  display: inline-block;
+  font-weight: 400;
+  font-size: 1.3rem;
+}
+
+.c3 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  height: 18px;
+  line-height: 18px;
+}
+
+.c3 input label {
+  cursor: pointer;
+  margin-bottom: 0 !important;
+}
+
+.c3 input + label {
+  margin-left: 10px;
+  margin-bottom: 0;
+}
+
+.c1 {
+  width: 100%;
+  font-weight: 500;
+  font-size: 1.3rem;
+  color: #333740;
+}
+
+.c2 {
+  padding-top: 3px;
+  padding-bottom: 8px;
+}
+
+.c2 table {
+  width: 100%;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.c2 tr:before {
+  content: '-';
+  position: absolute;
+  left: 20px;
+  display: inline-block;
+  width: calc(100% - 40px);
+  height: 1px;
+  margin-top: -1px;
+  line-height: 1.1em;
+  color: transparent;
+  background-color: #f6f6f6;
+}
+
+.c2 tr:first-of-type:before {
+  left: 0;
+  height: 2px;
+  width: 100%;
+  background-color: #fafafb;
+  z-index: 1;
+}
+
+.c2 thead {
+  background-color: #fafafb;
+}
+
+.c2 thead td {
+  height: 41px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.c2 tbody {
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+  box-shadow: inset 0px 0px 0px 1px #f6f6f6;
+}
+
+.c2 tbody td {
+  height: 54px;
+  padding-bottom: 3px;
+}
+
+.c2 tbody td input[type='checkbox']:disabled:before {
+  background-color: #e8e5e5;
+}
+
+.c2 tbody td:first-of-type {
+  width: 200px;
+  padding-left: 30px;
+  text-transform: capitalize;
+}
+
+.c2 tbody td:first-of-type label {
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  margin-top: -1px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.c2 tbody td:not(:first-of-type) > div {
+  display: block;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+.c0 {
+  position: relative;
+  padding-bottom: 23px;
+}
+
+.c0 label {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.c0 > p {
+  width: 100%;
+  margin-bottom: -8px;
+  padding-top: 10px;
+  font-size: 13px;
+  line-height: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.c0 .hasError input {
+  border-color: #F64D0A;
+}
+
 <div
-  className="sc-GMQeP fCETID"
+  className="c0"
 >
   <label
-    className="sc-chPdSV iXihgI"
+    className="c1"
     htmlFor="events"
   >
     
   </label>
   <div
-    className="sc-iujRgT cbtFAn"
+    className="c2"
   >
     <table>
       <thead>
@@ -38,13 +299,13 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
         <tr>
           <td>
             <div
-              className="sc-bxivhb hRdlIh"
+              className="c3"
             >
               <input
                 autoComplete="off"
                 autoFocus={false}
                 checked={false}
-                className="sc-htpNat BNnRX"
+                className="c4"
                 id="entry"
                 name="entry"
                 onChange={[Function]}
@@ -53,7 +314,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
                 type="checkbox"
               />
               <label
-                className="sc-chPdSV iXihgI"
+                className="c1"
                 htmlFor="entry"
               >
                 entry
@@ -62,13 +323,13 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
           </td>
           <td>
             <div
-              className="sc-bxivhb hRdlIh"
+              className="c3"
             >
               <input
                 autoComplete="off"
                 autoFocus={false}
                 checked={false}
-                className="sc-htpNat BNnRX"
+                className="c4"
                 disabled={false}
                 id="entry.create"
                 name="entry.create"
@@ -78,20 +339,20 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
                 type="checkbox"
               />
               <label
-                className="sc-chPdSV iXihgI"
+                className="c1"
                 htmlFor="entry.create"
               />
             </div>
           </td>
           <td>
             <div
-              className="sc-bxivhb hRdlIh"
+              className="c3"
             >
               <input
                 autoComplete="off"
                 autoFocus={false}
                 checked={false}
-                className="sc-htpNat BNnRX"
+                className="c4"
                 disabled={false}
                 id="entry.update"
                 name="entry.update"
@@ -101,20 +362,20 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
                 type="checkbox"
               />
               <label
-                className="sc-chPdSV iXihgI"
+                className="c1"
                 htmlFor="entry.update"
               />
             </div>
           </td>
           <td>
             <div
-              className="sc-bxivhb hRdlIh"
+              className="c3"
             >
               <input
                 autoComplete="off"
                 autoFocus={false}
                 checked={false}
-                className="sc-htpNat BNnRX"
+                className="c4"
                 disabled={false}
                 id="entry.delete"
                 name="entry.delete"
@@ -124,7 +385,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
                 type="checkbox"
               />
               <label
-                className="sc-chPdSV iXihgI"
+                className="c1"
                 htmlFor="entry.delete"
               />
             </div>
@@ -133,13 +394,13 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
         <tr>
           <td>
             <div
-              className="sc-bxivhb hRdlIh"
+              className="c3"
             >
               <input
                 autoComplete="off"
                 autoFocus={false}
                 checked={false}
-                className="sc-htpNat cllrAw"
+                className="c5"
                 id="media"
                 name="media"
                 onChange={[Function]}
@@ -148,7 +409,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
                 type="checkbox"
               />
               <label
-                className="sc-chPdSV iXihgI"
+                className="c1"
                 htmlFor="media"
               >
                 media
@@ -157,13 +418,13 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
           </td>
           <td>
             <div
-              className="sc-bxivhb hRdlIh"
+              className="c3"
             >
               <input
                 autoComplete="off"
                 autoFocus={false}
                 checked={false}
-                className="sc-htpNat BNnRX"
+                className="c4"
                 disabled={false}
                 id="media.create"
                 name="media.create"
@@ -173,20 +434,20 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
                 type="checkbox"
               />
               <label
-                className="sc-chPdSV iXihgI"
+                className="c1"
                 htmlFor="media.create"
               />
             </div>
           </td>
           <td>
             <div
-              className="sc-bxivhb hRdlIh"
+              className="c3"
             >
               <input
                 autoComplete="off"
                 autoFocus={false}
                 checked={false}
-                className="sc-htpNat BNnRX"
+                className="c4"
                 disabled={true}
                 id="media.update"
                 name="media.update"
@@ -196,20 +457,20 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
                 type="checkbox"
               />
               <label
-                className="sc-chPdSV iXihgI"
+                className="c1"
                 htmlFor="media.update"
               />
             </div>
           </td>
           <td>
             <div
-              className="sc-bxivhb hRdlIh"
+              className="c3"
             >
               <input
                 autoComplete="off"
                 autoFocus={false}
                 checked={false}
-                className="sc-htpNat BNnRX"
+                className="c4"
                 disabled={false}
                 id="media.delete"
                 name="media.delete"
@@ -219,7 +480,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
                 type="checkbox"
               />
               <label
-                className="sc-chPdSV iXihgI"
+                className="c1"
                 htmlFor="media.delete"
               />
             </div>
@@ -239,17 +500,257 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
 `;
 
 exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
+.c4 {
+  width: 100%;
+  height: 3.4rem;
+  padding: 0 1rem;
+  font-weight: 400;
+  font-size: 1.3rem;
+  cursor: text;
+  outline: 0;
+  border: 1px solid #E3E9F3;
+  border-radius: 2px;
+  color: #333740;
+  background-color: transparent;
+}
+
+.c4::-webkit-input-placeholder {
+  color: #919BAE;
+}
+
+.c4:focus {
+  border-color: #78caff;
+}
+
+.c4:disabled {
+  background-color: #FAFAFB;
+}
+
+.c3 {
+  position: relative;
+  background-color: #ffffff;
+}
+
+.c3 button[type='button'] {
+  width: 3.4rem;
+  height: 3.4rem;
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  cursor: pointer;
+  outline: 0;
+  border: 0;
+  background: transparent;
+}
+
+.c3 button[type='button']:hover span::before {
+  color: #000000;
+}
+
+.c3 button[type='button'].shown span::before {
+  color: #000000;
+}
+
+.c3 button[type='button'].shown + input[type='text'] {
+  padding-right: calc(3.4rem + 1rem);
+}
+
+.c3 span {
+  z-index: 0;
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
+}
+
+.c3 input {
+  position: relative;
+  z-index: 1;
+}
+
+.c1 {
+  width: 100%;
+  font-weight: 500;
+  font-size: 1.3rem;
+  color: #333740;
+}
+
+.c5 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 20px;
+  width: 20px;
+  margin: 8px 5px 0px 0px;
+  border-radius: 50%;
+  border: 1px solid #e3e9f3;
+  cursor: pointer;
+}
+
+.c5:focus {
+  outline: 0;
+}
+
+.c5:after {
+  content: '\\f068';
+  font-family: FontAwesome;
+  font-size: 9px;
+  line-height: 18px;
+  color: #007eff;
+}
+
+.c2 {
+  margin-top: 12px;
+  padding: 23px 24px 26px 24px;
+  background-color: #fafafb;
+  border-radius: 2px;
+}
+
+.c2 > ul {
+  margin-bottom: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+.c2 > ul + button {
+  padding: 0;
+  color: #007eff;
+  font-size: 13px;
+  font-weight: 500;
+  outline: 0;
+}
+
+.c2 > ul + button svg,
+.c2 > ul + button span {
+  vertical-align: middle;
+}
+
+.c2 > ul + button svg {
+  margin-right: 10px;
+}
+
+.c2 > ul li {
+  position: relative;
+  padding-right: 30px;
+}
+
+.c2 > ul li:not(:first-of-type) {
+  margin-bottom: 20px;
+}
+
+.c2 > ul li:last-of-type {
+  margin-bottom: 6px;
+}
+
+.c2 > ul li > section {
+  display: inline-block;
+  width: 50%;
+  vertical-align: top;
+}
+
+.c2 > ul li > section:nth-child(odd) {
+  padding-right: 15px;
+}
+
+.c2 > ul li > section:nth-child(even) {
+  padding-left: 15px;
+}
+
+.c2 > ul li > section > p {
+  font-size: 13px;
+  color: #333740;
+  font-weight: 500;
+}
+
+.c2 > ul li > section > div:first-of-type {
+  height: 34px;
+}
+
+.c2 > ul li > section > div:first-of-type > div:first-of-type {
+  height: 34px;
+  min-height: 34px;
+  border: 1px solid #e3e9f3;
+  border-radius: 2px;
+  font-size: 13px;
+  color: #333740;
+  -webkit-align-items: normal;
+  -webkit-box-align: normal;
+  -ms-flex-align: normal;
+  align-items: normal;
+}
+
+.c2 > ul li > section > div:first-of-type > div:first-of-type > div:first-of-type {
+  height: 32px;
+  padding: 0 1rem;
+}
+
+.c2 > ul li > section > div:first-of-type > div:first-of-type > div:last-of-type {
+  display: none;
+}
+
+.c2 > ul li > section > div:first-of-type > div:first-of-type:hover {
+  cursor: text;
+}
+
+.c2 > ul li > section > div:first-of-type > span + div:first-of-type {
+  border-color: #78caff;
+  box-shadow: none;
+}
+
+.c2 > ul li > section + div {
+  position: absolute;
+  top: 7px;
+  right: 0;
+}
+
+.c2 > ul li > section + div button {
+  margin: 0;
+}
+
+.c2 .bordered input {
+  border: 1px solid #f64d0a;
+}
+
+.c0 {
+  position: relative;
+  padding-bottom: 23px;
+}
+
+.c0 label {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.c0 > p {
+  width: 100%;
+  margin-bottom: -8px;
+  padding-top: 10px;
+  font-size: 13px;
+  line-height: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.c0 .hasError input {
+  border-color: #F64D0A;
+}
+
 <div
-  className="sc-GMQeP fCETID"
+  className="c0"
 >
   <label
-    className="sc-chPdSV iXihgI"
+    className="c1"
     htmlFor="events"
   >
     
   </label>
   <div
-    className="sc-bAeIUo feDjmh"
+    className="c2"
   >
     <ul>
       <li>
@@ -397,12 +898,12 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
         </section>
         <section>
           <div
-            className="sc-fjdhpX Nlsly"
+            className="c3"
           >
             <input
               autoComplete="off"
               autoFocus={false}
-              className="sc-jTzLTM dprvSb"
+              className="c4"
               id="events.0.value"
               name="events.0.value"
               onChange={[MockFunction]}
@@ -415,7 +916,7 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
         </section>
         <div>
           <button
-            className="sc-fBuWsC imrARH"
+            className="c5"
             onClick={[Function]}
             type="button"
           />

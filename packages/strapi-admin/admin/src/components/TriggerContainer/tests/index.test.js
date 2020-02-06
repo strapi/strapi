@@ -1,7 +1,6 @@
 import React from 'react';
 import renderer from 'react-test-renderer';
 import { IntlProvider } from 'react-intl';
-
 import TriggerContainer from '../index';
 
 describe('<TriggerContainer />', () => {

@@ -2,9 +2,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { IntlProvider } from 'react-intl';
 import renderer from 'react-test-renderer';
-
 import translationMessages from '../../../translations/en.json';
-
 import EventInput from '../index';
 import EventRow from '../EventRow';
 

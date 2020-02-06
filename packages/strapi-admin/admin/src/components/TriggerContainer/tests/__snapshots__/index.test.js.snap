@@ -1,8 +1,70 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<TriggerContainer /> should match the snapshot 1`] = `
+.c0 {
+  overflow-x: auto;
+  margin-bottom: 22px;
+  box-shadow: 0 2px 4px 0 #e3e9f3;
+}
+
+.c0 table {
+  width: 100%;
+  height: 68px;
+  background-color: white;
+  border-radius: 2px;
+}
+
+.c0 table td {
+  padding: 0 25px;
+}
+
+.c0 table td p {
+  margin-bottom: 0;
+  font-size: 13px;
+  line-height: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.c0 table td p svg,
+.c0 table td p span {
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+.c0 table td p svg + span {
+  margin-left: 10px;
+}
+
+.c0 table td p.success-label svg {
+  margin-bottom: -2px;
+}
+
+.c0 table td:first-of-type p {
+  font-weight: 500;
+}
+
+.c0 table td:last-of-type {
+  max-width: 400px;
+  text-align: right;
+}
+
+.c0 table td:last-of-type button {
+  color: #b4b6ba;
+}
+
+.c0 table td:last-of-type button,
+.c0 table td:last-of-type button:focus {
+  outline: 0;
+}
+
+.c0 table td:last-of-type button svg {
+  margin-left: 10px;
+}
+
 <div
-  className="sc-htpNat famwcA"
+  className="c0"
 >
   <table>
     <tbody>
