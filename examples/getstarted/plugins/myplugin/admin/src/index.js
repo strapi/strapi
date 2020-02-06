@@ -1,29 +1,26 @@
 import pluginPkg from '../../package.json';
-import App from './containers/App';
-import Initializer from './containers/Initializer';
-import lifecycles from './lifecycles';
-import trads from './translations';
 import pluginId from './pluginId';
 
 export default strapi => {
   const pluginDescription =
     pluginPkg.strapi.description || pluginPkg.description;
+
   const plugin = {
     blockerComponent: null,
     blockerComponentProps: {},
     description: pluginDescription,
     icon: pluginPkg.strapi.icon,
     id: pluginId,
-    initializer: Initializer,
+    initializer: () => null,
     injectedComponents: [],
-    layout: null,
-    lifecycles,
+    isReady: true,
     leftMenuLinks: [],
     leftMenuSections: [],
-    mainComponent: App,
+    mainComponent: null,
     name: pluginPkg.strapi.name,
     preventComponentRendering: false,
-    trads,
+    settings: null,
+    trads: {},
   };
 
   return strapi.registerPlugin(plugin);
