@@ -2,8 +2,173 @@
 
 exports[`<PopUpWarning /> should render properly should match snapshot if onlyConfirmButton is false 1`] = `
 <DocumentFragment>
-  <div
-    class="sc-hzDkRC bkTtUc"
+  .c6 {
+  height: 30px;
+  padding: 0 15px;
+  font-weight: 500;
+  font-size: 1.3rem;
+  line-height: normal;
+  border-radius: 2px;
+  cursor: pointer;
+  outline: 0;
+  background-color: #ffffff;
+  background-color: transparent;
+  border: 1px solid #9ea7b8;
+  color: #9ea7b8;
+}
+
+.c6:hover {
+  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  box-shadow: inset 0 0 30px [object Object];
+}
+
+.c6:active {
+  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  box-shadow: inset 0 0 30px [object Object];
+}
+
+.c6:focus {
+  outline: 0;
+}
+
+.c6 > svg {
+  margin-right: 10px;
+  vertical-align: initial;
+}
+
+.c7 {
+  height: 30px;
+  padding: 0 15px;
+  font-weight: 500;
+  font-size: 1.3rem;
+  line-height: normal;
+  border-radius: 2px;
+  cursor: pointer;
+  outline: 0;
+  background-color: #ffffff;
+  background-color: #F64D0A;
+  border: 1px solid #F64D0A;
+  color: #ffffff;
+  padding: 0 15px;
+}
+
+.c7:hover {
+  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  box-shadow: inset 0 0 30px [object Object];
+}
+
+.c7:active {
+  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  box-shadow: inset 0 0 30px [object Object];
+}
+
+.c7:focus {
+  outline: 0;
+}
+
+.c7 > svg {
+  margin-right: 10px;
+  vertical-align: initial;
+}
+
+.c2 {
+  position: absolute;
+  top: 18px;
+  right: 30px;
+}
+
+.c2 > svg {
+  fill: #c3c5c8;
+}
+
+.c1 {
+  width: 41.6rem !important;
+  margin: 14.4rem auto !important;
+}
+
+.c1 > div {
+  width: 41.6rem;
+  padding: 0 !important;
+  border: none;
+  border-radius: 2px;
+}
+
+.c3 {
+  padding-left: 30px;
+  padding-right: 30px;
+  padding-top: 17px;
+  padding-bottom: 22px !important;
+  border: 0;
+  background-color: #fafafa;
+}
+
+.c3 > h5 {
+  width: 100%;
+  text-align: center;
+  font-family: Lato;
+  font-weight: bold !important;
+  font-size: 1.8rem !important;
+  line-height: normal;
+}
+
+.c3 > button {
+  display: none;
+}
+
+.c4 {
+  padding: 0;
+}
+
+.c4 > div {
+  padding: 21px 30px 15px 30px !important;
+  color: #f64d0a;
+  text-align: center;
+  font-family: Lato;
+  font-size: 1.3rem;
+}
+
+.c4 > div > img {
+  width: 2.5rem;
+  margin-bottom: 2.2rem;
+}
+
+.c4 > div > p {
+  line-height: 1.8rem;
+  margin-bottom: 0;
+  min-height: 36px;
+}
+
+.c5 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  width: 100%;
+  margin-top: 18px;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  background-color: #eff3f6;
+  padding: 15px 30px 17px 30px;
+}
+
+.c5 > button {
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
+.c0 {
+  width: 41.6rem !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+<div
+    class="c0"
   >
     <div
       class=""
@@ -15,14 +180,14 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
         tabindex="-1"
       >
         <div
-          class="modal-dialog sc-gipzik jooNfa"
+          class="modal-dialog c1"
           role="document"
         >
           <div
             class="modal-content"
           >
             <div
-              class="sc-jlyJG pLrUt"
+              class="c2"
             >
               <svg
                 fill="#c3c5c8"
@@ -37,7 +202,7 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
               </svg>
             </div>
             <div
-              class="sc-csuQGl dNleFC modal-header"
+              class="c3 modal-header"
             >
               <h5
                 class="modal-title"
@@ -59,7 +224,7 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
               </button>
             </div>
             <div
-              class="sc-Rmtcm cyYCTj modal-body"
+              class="c4 modal-body"
             >
               <div>
                 <img
@@ -74,10 +239,10 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
               </div>
             </div>
             <div
-              class="sc-bRBYWo drTxOF"
+              class="c5"
             >
               <button
-                class="sc-bxivhb ceGfZA"
+                class="c6"
                 color="cancel"
                 type="button"
               >
@@ -86,7 +251,7 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
                 </span>
               </button>
               <button
-                class="sc-bxivhb dKqGnf"
+                class="c7"
                 color="delete"
                 type="button"
               >
@@ -108,8 +273,137 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
 
 exports[`<PopUpWarning /> should render properly should match snapshot if onlyConfirmButton is true 1`] = `
 <DocumentFragment>
-  <div
-    class="sc-hzDkRC bkTtUc"
+  .c6 {
+  height: 30px;
+  padding: 0 15px;
+  font-weight: 500;
+  font-size: 1.3rem;
+  line-height: normal;
+  border-radius: 2px;
+  cursor: pointer;
+  outline: 0;
+  background-color: #ffffff;
+  background-color: #F64D0A;
+  border: 1px solid #F64D0A;
+  color: #ffffff;
+  padding: 0 15px;
+}
+
+.c6:hover {
+  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  box-shadow: inset 0 0 30px [object Object];
+}
+
+.c6:active {
+  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  box-shadow: inset 0 0 30px [object Object];
+}
+
+.c6:focus {
+  outline: 0;
+}
+
+.c6 > svg {
+  margin-right: 10px;
+  vertical-align: initial;
+}
+
+.c2 {
+  position: absolute;
+  top: 18px;
+  right: 30px;
+}
+
+.c2 > svg {
+  fill: #c3c5c8;
+}
+
+.c1 {
+  width: 41.6rem !important;
+  margin: 14.4rem auto !important;
+}
+
+.c1 > div {
+  width: 41.6rem;
+  padding: 0 !important;
+  border: none;
+  border-radius: 2px;
+}
+
+.c3 {
+  padding-left: 30px;
+  padding-right: 30px;
+  padding-top: 17px;
+  padding-bottom: 22px !important;
+  border: 0;
+  background-color: #fafafa;
+}
+
+.c3 > h5 {
+  width: 100%;
+  text-align: center;
+  font-family: Lato;
+  font-weight: bold !important;
+  font-size: 1.8rem !important;
+  line-height: normal;
+}
+
+.c3 > button {
+  display: none;
+}
+
+.c4 {
+  padding: 0;
+}
+
+.c4 > div {
+  padding: 21px 30px 15px 30px !important;
+  color: #f64d0a;
+  text-align: center;
+  font-family: Lato;
+  font-size: 1.3rem;
+}
+
+.c4 > div > img {
+  width: 2.5rem;
+  margin-bottom: 2.2rem;
+}
+
+.c4 > div > p {
+  line-height: 1.8rem;
+  margin-bottom: 0;
+  min-height: 36px;
+}
+
+.c5 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  width: 100%;
+  margin-top: 18px;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  background-color: #eff3f6;
+  padding: 15px 30px 17px 30px;
+}
+
+.c5 > button {
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
+.c0 {
+  width: 41.6rem !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+<div
+    class="c0"
   >
     <div
       class=""
@@ -121,14 +415,14 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
         tabindex="-1"
       >
         <div
-          class="modal-dialog sc-gipzik jooNfa"
+          class="modal-dialog c1"
           role="document"
         >
           <div
             class="modal-content"
           >
             <div
-              class="sc-jlyJG pLrUt"
+              class="c2"
             >
               <svg
                 fill="#c3c5c8"
@@ -143,7 +437,7 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
               </svg>
             </div>
             <div
-              class="sc-csuQGl dNleFC modal-header"
+              class="c3 modal-header"
             >
               <h5
                 class="modal-title"
@@ -165,7 +459,7 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
               </button>
             </div>
             <div
-              class="sc-Rmtcm cyYCTj modal-body"
+              class="c4 modal-body"
             >
               <div>
                 <img
@@ -180,10 +474,10 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
               </div>
             </div>
             <div
-              class="sc-bRBYWo drTxOF"
+              class="c5"
             >
               <button
-                class="sc-bxivhb dKqGnf"
+                class="c6"
                 color="delete"
                 style="width: 100%;"
                 type="button"
