@@ -826,7 +826,7 @@
     "@babel/parser" "^7.8.3"
     "@babel/types" "^7.8.3"
 
-"@babel/traverse@^7.0.0", "@babel/traverse@^7.1.0", "@babel/traverse@^7.4.3", "@babel/traverse@^7.8.3", "@babel/traverse@^7.8.4":
+"@babel/traverse@^7.0.0", "@babel/traverse@^7.1.0", "@babel/traverse@^7.4.3", "@babel/traverse@^7.4.5", "@babel/traverse@^7.8.3", "@babel/traverse@^7.8.4":
   version "7.8.4"
   resolved "https://registry.yarnpkg.com/@babel/traverse/-/traverse-7.8.4.tgz#f0845822365f9d5b0e312ed3959d3f827f869e3c"
   integrity sha512-NGLJPZwnVEyBPLI+bl9y9aSnxMhsKz42so7ApAv9D+b4vAFPpY013FTS9LdKxcABoIYFU52HcYga1pPlx454mg==
@@ -850,14 +850,14 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@buffetjs/core@2.1.0", "@buffetjs/core@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@buffetjs/core/-/core-2.1.0.tgz#04633d4fdbfa6c2b340283e5c9ae041ea1dcee74"
-  integrity sha512-ItK+PXFVxI2+suAPLumK0DwvZWQ2eQRFp7ntqo9sT+aQzhGXxQRjgo9uJIPXixx0XR1e14JpDQMPA9UXnjNoZg==
+"@buffetjs/core@2.1.1-next.1":
+  version "2.1.1-next.1"
+  resolved "https://registry.yarnpkg.com/@buffetjs/core/-/core-2.1.1-next.1.tgz#1d1c880e57c82d3ffaad842ad9496d6ff2a686d0"
+  integrity sha512-B+wh5y0DsTNhEPeYz0qWb9UHkv67rl1kVNay/9voqQK0BxgQxAubh0+2rTmyVkinHpHpstcyRGuXBLzTqqctlA==
   dependencies:
-    "@buffetjs/hooks" "2.1.0"
-    "@buffetjs/icons" "2.0.0"
-    "@buffetjs/styles" "2.0.0"
+    "@buffetjs/hooks" "2.1.1-next.1"
+    "@buffetjs/icons" "2.1.1-next.1"
+    "@buffetjs/styles" "2.1.1-next.1"
     "@buffetjs/utils" "2.0.0"
     "@fortawesome/fontawesome-svg-core" "^1.2.25"
     "@fortawesome/free-regular-svg-icons" "^5.11.2"
@@ -869,31 +869,31 @@
     react-dates "^21.5.1"
     react-moment-proptypes "^1.7.0"
 
-"@buffetjs/custom@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@buffetjs/custom/-/custom-2.1.0.tgz#629c40e09f8416860e953c283d01562faae6148e"
-  integrity sha512-lrDn5bYe/nkwphF0+5PylRC7PCd/yAPbZaeTTQGoD3xLWydD7c5vkpJDJDU1JdNLptA+P02sVvS05klDYgx39w==
+"@buffetjs/custom@2.1.1-next.1":
+  version "2.1.1-next.1"
+  resolved "https://registry.yarnpkg.com/@buffetjs/custom/-/custom-2.1.1-next.1.tgz#c6763e3129ab9b61d853ef3d99055e430ccc692c"
+  integrity sha512-jaRhgxTGN4vTswZNXTqcy6lioCfLn5mvZCfrZNdAqRGsqkm2QR6DLKm9GCZm5DgWfeLfMnwYnn63kPOKPSoSrg==
   dependencies:
-    "@buffetjs/core" "2.1.0"
-    "@buffetjs/styles" "2.0.0"
+    "@buffetjs/core" "2.1.1-next.1"
+    "@buffetjs/styles" "2.1.1-next.1"
     "@buffetjs/utils" "2.0.0"
     moment "^2.24.0"
     react-moment-proptypes "^1.7.0"
 
-"@buffetjs/hooks@2.1.0", "@buffetjs/hooks@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@buffetjs/hooks/-/hooks-2.1.0.tgz#9b02012fa9b7d0a3fcaa1c019a70b9dc6df40870"
-  integrity sha512-2MFpRN4FPLvM9AG7wKrCln7yGn9msckrG9JAlW9kw/GoMp06Y689KTw/5Cx4iahmhGvzxMn9ZbwBFBUqsK8EQQ==
+"@buffetjs/hooks@2.1.1-next.1":
+  version "2.1.1-next.1"
+  resolved "https://registry.yarnpkg.com/@buffetjs/hooks/-/hooks-2.1.1-next.1.tgz#2385698bd30b84b699dce9f3124cb09c64534903"
+  integrity sha512-WsJ300cfK/b/jmFp8ZBz0c4q+0s5Vd1z8kq6PUk+rYeZfLtX9Fhla/W3WxayMvZ5dJPr/r1st3sKyKUl1HpMvg==
 
-"@buffetjs/icons@2.0.0", "@buffetjs/icons@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@buffetjs/icons/-/icons-2.0.0.tgz#947b9133010dad72d82acae6cb589e292edaab65"
-  integrity sha512-+T2Rztmmif1OEDNX3x7wwHl94D5XyveY8sVQ6hBL6JX//ehE+I+ks359iHq1tCABKjvTDs9c0ogEuKYF5J5MLQ==
+"@buffetjs/icons@2.1.1-next.1":
+  version "2.1.1-next.1"
+  resolved "https://registry.yarnpkg.com/@buffetjs/icons/-/icons-2.1.1-next.1.tgz#cd44a1571a4f42b1474d347581af2053e9151fa6"
+  integrity sha512-TfFE60MKzKIaToFb97yNluo1uib2jLY3uFr06XFlJ5f/6RM36gucnNHRUpsHoomNBpRf6wVARlINBveXuaaSwg==
 
-"@buffetjs/styles@2.0.0", "@buffetjs/styles@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@buffetjs/styles/-/styles-2.0.0.tgz#e694d69a0b670b326d4518087552dda4ea5dc44b"
-  integrity sha512-MFXRg7hThO2273uHYPnVs1XFpFupX8OiB2kF/RDihPXa/p7xLnE36/yl3bg/7CI+Mtv9bEbm7dxRvkp8XQjQ1w==
+"@buffetjs/styles@2.1.1-next.1":
+  version "2.1.1-next.1"
+  resolved "https://registry.yarnpkg.com/@buffetjs/styles/-/styles-2.1.1-next.1.tgz#95e50076b4226eb372e9a95feca8b350b50a133f"
+  integrity sha512-WfLyDIum2mNM0XjbWM8uUMcX2JEfUJAWw/idy27F5HMTYSBN4BUalwDHWyWqytC65cDoqZ+X/2m3mCl5v2aDug==
   dependencies:
     "@fortawesome/fontawesome-free" "^5.12.0"
     "@fortawesome/fontawesome-svg-core" "^1.2.22"
@@ -971,7 +971,7 @@
   resolved "https://registry.yarnpkg.com/@emotion/hash/-/hash-0.7.4.tgz#f14932887422c9056b15a8d222a9074a7dfa2831"
   integrity sha512-fxfMSBMX3tlIbKUdtGKxqB1fyrH6gVrX39Gsv3y8lRYKUqlgDt3UMqQyGnR1bQMa2B8aGnhLZokZgg8vT0Le+A==
 
-"@emotion/is-prop-valid@^0.8.1":
+"@emotion/is-prop-valid@^0.8.3":
   version "0.8.6"
   resolved "https://registry.yarnpkg.com/@emotion/is-prop-valid/-/is-prop-valid-0.8.6.tgz#4757646f0a58e9dec614c47c838e7147d88c263c"
   integrity sha512-mnZMho3Sq8BfzkYYRVc8ilQTnc8U02Ytp6J1AwM6taQStZ3AhsEJBX2LzhA/LJirNCwM2VtHL3VFIZ+sNJUgUQ==
@@ -999,12 +999,12 @@
   resolved "https://registry.yarnpkg.com/@emotion/sheet/-/sheet-0.9.4.tgz#894374bea39ec30f489bbfc3438192b9774d32e5"
   integrity sha512-zM9PFmgVSqBw4zL101Q0HrBVTGmpAxFZH/pYx/cjJT5advXguvcgjHFTCaIO3enL/xr89vK2bh0Mfyj9aa0ANA==
 
-"@emotion/stylis@0.8.5":
+"@emotion/stylis@0.8.5", "@emotion/stylis@^0.8.4":
   version "0.8.5"
   resolved "https://registry.yarnpkg.com/@emotion/stylis/-/stylis-0.8.5.tgz#deacb389bd6ee77d1e7fcaccce9e16c5c7e78e04"
   integrity sha512-h6KtPihKFn3T9fuIrwvXXUOwlx3rfUvfZIcP5a6rh8Y7zjE3O06hT5Ss4S/YI1AYhuZ1kjaE/5EaOOI2NqSylQ==
 
-"@emotion/unitless@0.7.5", "@emotion/unitless@^0.7.0":
+"@emotion/unitless@0.7.5", "@emotion/unitless@^0.7.4":
   version "0.7.5"
   resolved "https://registry.yarnpkg.com/@emotion/unitless/-/unitless-0.7.5.tgz#77211291c1900a700b8a78cfafda3160d76949ed"
   integrity sha512-OWORNpfjMsSSUBVrRBVGECkhWcULOAJz9ZW8uK9qgxD+87M7jHRcvh/A96XXNhXTLmKcoYSQtBEX7lHMO7YRwg==
@@ -5796,14 +5796,14 @@ css-selector-tokenizer@^0.7.0:
     fastparse "^1.1.1"
     regexpu-core "^1.0.0"
 
-css-to-react-native@^2.2.2:
-  version "2.3.2"
-  resolved "https://registry.yarnpkg.com/css-to-react-native/-/css-to-react-native-2.3.2.tgz#e75e2f8f7aa385b4c3611c52b074b70a002f2e7d"
-  integrity sha512-VOFaeZA053BqvvvqIA8c9n0+9vFppVBAHCp6JgFTtTMU3Mzi+XnelJ9XC9ul3BqFzZyQ5N+H0SnwsWT2Ebchxw==
+css-to-react-native@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/css-to-react-native/-/css-to-react-native-3.0.0.tgz#62dbe678072a824a689bcfee011fc96e02a7d756"
+  integrity sha512-Ro1yETZA813eoyUp2GDBhG2j+YggidUmzO1/v9eYBKR2EHVEniE2MI/NqpTQ954BMpTPZFsGNPm46qFB9dpaPQ==
   dependencies:
     camelize "^1.0.0"
     css-color-keywords "^1.0.0"
-    postcss-value-parser "^3.3.0"
+    postcss-value-parser "^4.0.2"
 
 css-tree@1.0.0-alpha.37:
   version "1.0.0-alpha.37"
@@ -5833,7 +5833,7 @@ css.escape@^1.5.1:
   resolved "https://registry.yarnpkg.com/css.escape/-/css.escape-1.5.1.tgz#42e27d4fa04ae32f931a4b4d4191fa9cddee97cb"
   integrity sha1-QuJ9T6BK4y+TGktNQZH6nN3ul8s=
 
-css@^2.2.3:
+css@^2.2.3, css@^2.2.4:
   version "2.2.4"
   resolved "https://registry.yarnpkg.com/css/-/css-2.2.4.tgz#c646755c73971f2bba6a601e2cf2fd71b1298929"
   integrity sha512-oUnjmWpy0niI3x/mPL8dVEI1l7MnG3+HHyRPHf+YFSbK+svOhXpmSOcDURUh2aOCgl2grzrOPt1nHLuCVFULLw==
@@ -8727,7 +8727,7 @@ hoek@6.x.x:
   resolved "https://registry.yarnpkg.com/hoek/-/hoek-6.1.3.tgz#73b7d33952e01fe27a38b0457294b79dd8da242c"
   integrity sha512-YXXAAhmF9zpQbC7LEcREFtXfGq5K1fmd+4PHkBq8NUqmzW3G+Dq10bI/i0KucLRwss3YYFQ0fSfoxBZYiGUqtQ==
 
-hoist-non-react-statics@^3.1.0, hoist-non-react-statics@^3.2.1, hoist-non-react-statics@^3.3.0:
+hoist-non-react-statics@^3.0.0, hoist-non-react-statics@^3.1.0, hoist-non-react-statics@^3.2.1, hoist-non-react-statics@^3.3.0:
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/hoist-non-react-statics/-/hoist-non-react-statics-3.3.2.tgz#ece0acaf71d62c2969c2ec59feff42a4b1a85b45"
   integrity sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==
@@ -9797,11 +9797,6 @@ is-utf8@^0.2.0:
   resolved "https://registry.yarnpkg.com/is-utf8/-/is-utf8-0.2.1.tgz#4b0da1442104d1b336340e80797e865cf39f7d72"
   integrity sha1-Sw2hRCEE0bM2NA6AeX6GXPOffXI=
 
-is-what@^3.3.1:
-  version "3.5.1"
-  resolved "https://registry.yarnpkg.com/is-what/-/is-what-3.5.1.tgz#069d31d97afc62bcbfb281ef6a1dd89461ebee76"
-  integrity sha512-NHeqazf97ZVerGNEDmYG4+J4UY3uDQOjaJNMIMXw2i/tFfMconSgSK8Z27Y4VWMbM96E9ylroUSnD7jXRjzBwA==
-
 is-whitespace@^0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/is-whitespace/-/is-whitespace-0.3.0.tgz#1639ecb1be036aec69a54cbb401cfbed7114ab7f"
@@ -10239,6 +10234,13 @@ jest-snapshot@^24.9.0:
     natural-compare "^1.4.0"
     pretty-format "^24.9.0"
     semver "^6.2.0"
+
+jest-styled-components@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/jest-styled-components/-/jest-styled-components-7.0.0.tgz#3e1b7dcd077800ea5191e1cc95b314917a2ed668"
+  integrity sha512-A1nl8q1ptZj1t5wd0x/UYjnqfld1GhZwRDPS9w0eD5P5R8G+Q4uHaBAbUjf+Arjexqh2BxfrGkTc3tDuhtdifg==
+  dependencies:
+    css "^2.2.4"
 
 jest-util@^24.9.0:
   version "24.9.0"
@@ -11655,13 +11657,6 @@ meow@^5.0.0:
     redent "^2.0.0"
     trim-newlines "^2.0.0"
     yargs-parser "^10.0.0"
-
-merge-anything@^2.2.4:
-  version "2.4.4"
-  resolved "https://registry.yarnpkg.com/merge-anything/-/merge-anything-2.4.4.tgz#6226b2ac3d3d3fc5fb9e8d23aa400df25f98fdf0"
-  integrity sha512-l5XlriUDJKQT12bH+rVhAHjwIuXWdAIecGwsYjv2LJo+dA1AeRTmeQS+3QBpO6lEthBMDi2IUMpLC1yyRvGlwQ==
-  dependencies:
-    is-what "^3.3.1"
 
 merge-descriptors@1.0.1:
   version "1.0.1"
@@ -16982,23 +16977,20 @@ style-loader@^0.23.1:
     loader-utils "^1.1.0"
     schema-utils "^1.0.0"
 
-styled-components@^4.2.0, styled-components@^4.3.1:
-  version "4.4.1"
-  resolved "https://registry.yarnpkg.com/styled-components/-/styled-components-4.4.1.tgz#e0631e889f01db67df4de576fedaca463f05c2f2"
-  integrity sha512-RNqj14kYzw++6Sr38n7197xG33ipEOktGElty4I70IKzQF1jzaD1U4xQ+Ny/i03UUhHlC5NWEO+d8olRCDji6g==
+styled-components@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/styled-components/-/styled-components-5.0.0.tgz#fc59932c9b574571fa3cd462c862af1956114ff2"
+  integrity sha512-F7VhIXIbUXJ8KO3pU9wap2Hxdtqa6PZ1uHrx+YXTgRjyxGlwvBHb8LULXPabmDA+uEliTXRJM5WcZntJnKNn3g==
   dependencies:
     "@babel/helper-module-imports" "^7.0.0"
-    "@babel/traverse" "^7.0.0"
-    "@emotion/is-prop-valid" "^0.8.1"
-    "@emotion/unitless" "^0.7.0"
+    "@babel/traverse" "^7.4.5"
+    "@emotion/is-prop-valid" "^0.8.3"
+    "@emotion/stylis" "^0.8.4"
+    "@emotion/unitless" "^0.7.4"
     babel-plugin-styled-components ">= 1"
-    css-to-react-native "^2.2.2"
-    memoize-one "^5.0.0"
-    merge-anything "^2.2.4"
-    prop-types "^15.5.4"
-    react-is "^16.6.0"
-    stylis "^3.5.0"
-    stylis-rule-sheet "^0.0.10"
+    css-to-react-native "^3.0.0"
+    hoist-non-react-statics "^3.0.0"
+    shallowequal "^1.1.0"
     supports-color "^5.5.0"
 
 stylehacks@^4.0.0:
@@ -17009,16 +17001,6 @@ stylehacks@^4.0.0:
     browserslist "^4.0.0"
     postcss "^7.0.0"
     postcss-selector-parser "^3.0.0"
-
-stylis-rule-sheet@^0.0.10:
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/stylis-rule-sheet/-/stylis-rule-sheet-0.0.10.tgz#44e64a2b076643f4b52e5ff71efc04d8c3c4a430"
-  integrity sha512-nTbZoaqoBnmK+ptANthb10ZRZOGC+EmTLLUxeYIuHNkEKcmKgXX1XWKkUBT2Ac4es3NybooPe0SmvKdhKJZAuw==
-
-stylis@^3.5.0:
-  version "3.5.4"
-  resolved "https://registry.yarnpkg.com/stylis/-/stylis-3.5.4.tgz#f665f25f5e299cf3d64654ab949a57c768b73fbe"
-  integrity sha512-8/3pSmthWM7lsPBKv7NXkzn2Uc9W7NotcwGNpJaa3k7WMM1XDCA4MgT5k/8BIexd5ydZdboXtU90XH9Ec4Bv/Q==
 
 subscriptions-transport-ws@^0.9.11:
   version "0.9.16"

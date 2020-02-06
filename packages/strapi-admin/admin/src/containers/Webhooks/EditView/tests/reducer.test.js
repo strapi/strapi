@@ -108,7 +108,10 @@ describe('Admin | containers | Webhooks | EditView | reducer', () => {
 
       const expectedState = state.setIn(
         ['modifiedData', 'headers'],
-        fromJS([{ key: '', value: '' }, { key: '', value: '' }])
+        fromJS([
+          { key: '', value: '' },
+          { key: '', value: '' },
+        ])
       );
 
       expect(reducer(state, action)).toEqual(expectedState);

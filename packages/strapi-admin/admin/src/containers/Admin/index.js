@@ -264,16 +264,8 @@ export function mapDispatchToProps(dispatch) {
   );
 }
 
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps
-);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
 const withReducer = injectReducer({ key: 'admin', reducer });
 const withSaga = injectSaga({ key: 'admin', saga });
 
-export default compose(
-  injectIntl,
-  withReducer,
-  withSaga,
-  withConnect
-)(Admin);
+export default compose(injectIntl, withReducer, withSaga, withConnect)(Admin);
