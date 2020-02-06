@@ -197,10 +197,7 @@ function mapDispatchToProps(dispatch) {
   );
 }
 
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps
-);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
 /* Remove this line if the container doesn't have a route and
  *  check the documentation to see how to create the container's store
@@ -212,8 +209,4 @@ const withReducer = injectReducer({ key: 'onboarding', reducer });
  */
 const withSaga = injectSaga({ key: 'onboarding', saga });
 
-export default compose(
-  withReducer,
-  withSaga,
-  withConnect
-)(Onboarding);
+export default compose(withReducer, withSaga, withConnect)(Onboarding);
