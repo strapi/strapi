@@ -214,7 +214,10 @@ function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = selectHomePage();
 
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps
+);
 
 const withReducer = strapi.injectReducer({
   key: 'homePage',

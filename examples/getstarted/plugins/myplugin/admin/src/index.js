@@ -1,10 +1,5 @@
 import pluginPkg from '../../package.json';
-import layout from '../../config/layout';
 import pluginId from './pluginId';
-import App from './containers/App';
-import Initializer from './containers/Initializer';
-import lifecycles from './lifecycles';
-import trads from './translations';
 
 export default strapi => {
   const pluginDescription =
@@ -16,19 +11,16 @@ export default strapi => {
     description: pluginDescription,
     icon: pluginPkg.strapi.icon,
     id: pluginId,
-    initializer: Initializer,
+    initializer: () => null,
     injectedComponents: [],
-    layout,
-    lifecycles,
+    isReady: true,
     leftMenuLinks: [],
     leftMenuSections: [],
-    mainComponent: App,
+    mainComponent: null,
     name: pluginPkg.strapi.name,
     preventComponentRendering: false,
-    settings: {},
-    suffixUrl: () => '/roles',
-    suffixUrlToReplaceForLeftMenuHighlight: '/roles',
-    trads,
+    settings: null,
+    trads: {},
   };
 
   return strapi.registerPlugin(plugin);
