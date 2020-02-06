@@ -1,17 +1,23 @@
 import React, { isValidElement, useState } from 'react';
 import PropTypes from 'prop-types';
-import { isEmpty } from 'lodash';
+import { get, isEmpty, isObject } from 'lodash';
 import matchSorter from 'match-sorter';
-
-import Wrapper from './Wrapper';
-import List from './List';
-
+import useFormattedMessage from '../../hooks/useFormattedMessage';
 import LeftMenuLink from '../LeftMenuLink';
 import LeftMenuSubList from '../LeftMenuSubList';
 import LeftMenuHeader from '../LeftMenuHeader';
+import List from './List';
+import Wrapper from './Wrapper';
 
 function LeftMenuList({ customLink, links, title, searchable }) {
   const [search, setSearch] = useState('');
+  const formatTitleWithIntl = title => {
+    if (isObject(title) && title.id) {
+      return { ...title, defaultMessage: title.defaultMessage || title.id };
+    }
+
+    return { id: title, defaultMessage: title };
+  };
 
   const { Component, componentProps } = customLink || {
     Component: null,
@@ -23,7 +29,7 @@ function LeftMenuList({ customLink, links, title, searchable }) {
   const getCount = () => {
     if (hasChildObject()) {
       return links.reduce((acc, current) => {
-        return acc + current.links.length;
+        return acc + get(current, 'links', []).length;
       }, 0);
     }
 
@@ -62,7 +68,7 @@ function LeftMenuList({ customLink, links, title, searchable }) {
 
     return (
       <li key={name}>
-        <LeftMenuLink {...link}>{title}</LeftMenuLink>
+        <LeftMenuLink {...link}>{useFormattedMessage(title)}</LeftMenuLink>
       </li>
     );
   };
@@ -72,7 +78,7 @@ function LeftMenuList({ customLink, links, title, searchable }) {
     search,
     searchable,
     setSearch,
-    title,
+    title: formatTitleWithIntl(title),
   };
 
   return (

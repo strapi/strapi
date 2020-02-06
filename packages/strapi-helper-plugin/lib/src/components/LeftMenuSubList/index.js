@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Collapse } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import Dropdown from './Dropdown';
+import useFormattedMessage from '../../hooks/useFormattedMessage';
 import LeftMenuLink from '../LeftMenuLink';
+import Dropdown from './Dropdown';
 
 const LeftMenuSubList = ({
   isEditable,
@@ -52,7 +53,9 @@ const LeftMenuSubList = ({
 
               return (
                 <li key={name}>
-                  <LeftMenuLink {...link}>{title}</LeftMenuLink>
+                  <LeftMenuLink {...link}>
+                    {useFormattedMessage(title)}
+                  </LeftMenuLink>
                 </li>
               );
             })}

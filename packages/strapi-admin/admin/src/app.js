@@ -42,6 +42,7 @@ import App from './containers/App';
 import LanguageProvider from './containers/LanguageProvider';
 
 import configureStore from './configureStore';
+import { SETTINGS_BASE_URL } from './config';
 
 // Import i18n messages
 import { translationMessages, languages } from './i18n';
@@ -62,7 +63,10 @@ Object.keys(plugins).forEach(current => {
     return plugin;
   };
   const currentPluginFn = plugins[current];
-  const plugin = currentPluginFn({ registerPlugin });
+  const plugin = currentPluginFn({
+    registerPlugin,
+    settingsBaseURL: SETTINGS_BASE_URL,
+  });
 
   const pluginTradsPrefixed = languages.reduce((acc, lang) => {
     const currentLocale = plugin.trads[lang];
