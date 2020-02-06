@@ -399,7 +399,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
     return <Redirect to={`/plugins/${pluginId}/content-types/${firstCTUid}`} />;
   }
 
-  const submitData = async () => {
+  const submitData = async additionalContentTypeData => {
     try {
       const isCreating = get(
         modifiedData,
@@ -416,7 +416,10 @@ const DataManagerProvider = ({ allIcons, children }) => {
       };
 
       if (isInContentTypeView) {
-        body.contentType = formatMainDataType(modifiedData.contentType);
+        body.contentType = {
+          ...formatMainDataType(modifiedData.contentType),
+          ...additionalContentTypeData,
+        };
 
         emitEvent('willSaveContentType');
       } else {

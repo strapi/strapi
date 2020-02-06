@@ -1,5 +1,4 @@
 {
-  "kind": "singleType",
   "connection": "default",
   "collectionName": "homepage",
   "info": {
@@ -7,12 +6,16 @@
   },
   "options": {
     "increments": true,
-    "timestamps": ["created_at", "updated_at"]
+    "timestamps": [
+      "created_at",
+      "updated_at"
+    ]
   },
   "attributes": {
     "title": {
       "type": "string",
       "required": true
     }
-  }
+  },
+  "kind": "singleType"
 }
