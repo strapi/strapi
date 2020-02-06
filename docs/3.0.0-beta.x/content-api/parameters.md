@@ -66,7 +66,7 @@ Strapi doesn't support the `AND` opperator for now.
 ## Deep filtering
 
 Find restaurants owned by a chef who belongs to a restaurant with star equal to 5
-`GET /restaurants?chef.restraurant.star=5`
+`GET /restaurants?chef.restaurant.star=5`
 
 ::: warning
 Querying your API with deep filters may cause performance issues.
