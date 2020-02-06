@@ -13,6 +13,10 @@
   "attributes": {
     "name": {
       "type": "string"
+    },
+    "addresses": {
+      "via": "categories",
+      "collection": "address"
     }
   }
 }
