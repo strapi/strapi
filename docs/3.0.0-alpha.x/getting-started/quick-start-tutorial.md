@@ -1,5 +1,11 @@
 # Tutorial
 
+::: danger
+
+The Alpha version of Strapi is no longer supported, please use the Beta version. You can find the relevant [documentation here](https://strapi.io/documentation/).
+
+:::
+
 This Tutorial is written for developers who prefer a more detailed step-by-step introduction. (A less detailed introduction can be found at [Quick Start Guide](/3.0.0-alpha.x/getting-started/quick-start.html).)
 
 <div class="video-container">
