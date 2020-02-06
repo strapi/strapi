@@ -47,11 +47,7 @@ function Input({ type, ...rest }) {
   }
   const styles =
     type === 'boolean' ? { minWidth: '100px', maxWidth: '200px' } : style;
-  const wrapperStyle =
-    type === 'boolean' ||
-    ['date', 'timestamp', 'time', 'datetime'].includes(type)
-      ? { marginRight: '20px' }
-      : { marginRight: '10px' };
+  const wrapperStyle = { marginRight: '20px' };
 
   return (
     <InputWrapperDate type={type || 'text'} style={wrapperStyle}>
