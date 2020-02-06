@@ -572,6 +572,7 @@ const FormModal = () => {
 
   const handleSubmit = async (e, shouldContinue = isCreating) => {
     e.preventDefault();
+
     try {
       await checkFormValidity();
       sendButtonAddMoreFieldEvent(shouldContinue);

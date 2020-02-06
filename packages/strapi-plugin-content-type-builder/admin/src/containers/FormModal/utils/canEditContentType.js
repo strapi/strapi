@@ -7,20 +7,17 @@ const canEditContentType = (data, modifiedData) => {
   if (kind === 'singleType' || kind === modifiedData.kind) {
     return true;
   }
+
   const contentTypeAttributes = get(
     data,
     ['contentType', 'schema', 'attributes'],
     ''
   );
   const relationAttributes = Object.values(contentTypeAttributes).filter(
-    attribute => attribute.nature
+    ({ nature }) => nature && !['oneWay', 'manyWay'].includes(nature)
   );
 
-  if (relationAttributes.length < 1) return true;
-
-  return relationAttributes.every(
-    attribute => attribute.nature === 'oneWay' || attribute.nature === 'manyWay'
-  );
+  return relationAttributes.length === 0;
 };
 
 export default canEditContentType;
