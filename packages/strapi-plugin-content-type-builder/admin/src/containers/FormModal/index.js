@@ -1281,7 +1281,6 @@ const FormModal = () => {
                             <div
                               className={`col-${input.size || 6}`}
                               key={input.name}
-                              // style={style}
                             >
                               <Inputs
                                 {...input}
