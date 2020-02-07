@@ -11,7 +11,7 @@ const getAttributes = (dataTarget = '', targetUid, nestedComponents) => {
       'media',
       'boolean',
       'json',
-      // 'uid',
+      'uid',
       'relation',
     ],
   ];

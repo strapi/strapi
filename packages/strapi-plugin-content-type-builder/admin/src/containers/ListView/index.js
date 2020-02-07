@@ -181,6 +181,7 @@ const ListView = () => {
     return new Promise(resolve => setTimeout(resolve, 100));
   };
   const label = get(modifiedData, [firstMainDataPath, 'schema', 'name'], '');
+  const kind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], '');
 
   const headerProps = {
     actions: isInDevelopmentMode
@@ -217,8 +218,13 @@ const ListView = () => {
               onClick: async () => {
                 await wait();
 
-                if (firstMainDataPath === 'contentType') {
+                const contentType = kind || firstMainDataPath;
+
+                if (contentType === 'collectionType') {
                   emitEvent('willEditNameOfContentType');
+                }
+                if (contentType === 'singleType') {
+                  emitEvent('willEditNameOfSingleType');
                 }
 
                 push({
@@ -230,7 +236,10 @@ const ListView = () => {
                     targetUid,
                     header_label_1: label,
                     header_icon_isCustom_1: false,
-                    header_icon_name_1: firstMainDataPath,
+                    header_icon_name_1:
+                      contentType === 'singleType'
+                        ? contentType
+                        : firstMainDataPath,
                     headerId: getTrad('modalForm.header-edit'),
                   }),
                 });

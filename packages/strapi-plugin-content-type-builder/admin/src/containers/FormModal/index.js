@@ -40,6 +40,7 @@ import { NAVLINKS, INITIAL_STATE_DATA } from './utils/staticData';
 import init from './init';
 import reducer, { initialState } from './reducer';
 import CustomButton from './CustomButton';
+import canEditContentType from './utils/canEditContentType';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
@@ -63,6 +64,7 @@ const FormModal = () => {
     deleteCategory,
     deleteData,
     editCategory,
+    submitData,
     modifiedData: allDataSchema,
     nestedComponents,
     setModifiedData,
@@ -86,6 +88,7 @@ const FormModal = () => {
       const dynamicZoneTarget = query.get('dynamicZoneTarget');
       const forTarget = query.get('forTarget');
       const modalType = query.get('modalType');
+      const contentTypeKind = query.get('kind');
       const targetUid = query.get('targetUid');
       const settingType = query.get('settingType');
       const headerId = query.get('headerId');
@@ -124,6 +127,7 @@ const FormModal = () => {
         actionType,
         attributeName,
         attributeType,
+        contentTypeKind,
         dynamicZoneTarget,
         forTarget,
         modalType,
@@ -215,7 +219,7 @@ const FormModal = () => {
         state.modalType !== 'contentType' &&
         actionType === 'edit'
       ) {
-        const { name, collectionName } = get(
+        const { name, collectionName, kind } = get(
           allDataSchema,
           [...pathToSchema, 'schema'],
           { name: null, collectionName: null }
@@ -226,6 +230,7 @@ const FormModal = () => {
           data: {
             name,
             collectionName,
+            kind,
           },
         });
       }
@@ -593,11 +598,20 @@ const FormModal = () => {
       if (isCreatingContentType) {
         // Create the content type schema
         if (isCreating) {
-          createSchema(modifiedData, state.modalType, uid);
+          createSchema(
+            { ...modifiedData, kind: state.contentTypeKind },
+            state.modalType,
+            uid
+          );
         } else {
-          updateSchema(modifiedData, state.modalType);
-          // Close the modal
-          push({ search: '' });
+          if (canEditContentType(allDataSchema, modifiedData)) {
+            push({ search: '' });
+            submitData(modifiedData);
+          } else {
+            strapi.notification.error(
+              'notification.contentType.relations.conflict'
+            );
+          }
 
           return;
         }
@@ -1267,7 +1281,6 @@ const FormModal = () => {
                             <div
                               className={`col-${input.size || 6}`}
                               key={input.name}
-                              // style={style}
                             >
                               <Inputs
                                 {...input}
@@ -1340,13 +1353,13 @@ const FormModal = () => {
         </ModalForm>
         {!isPickingAttribute && (
           <ModalFooter>
-            <section>
+            <section style={{ alignItems: 'center' }}>
               <Button type="button" color="cancel" onClick={handleToggle}>
                 {formatMessage({
                   id: 'components.popUpWarning.button.cancel',
                 })}
               </Button>
-              <div style={{ margin: 'auto 0' }}>
+              <div>
                 {isCreatingAttribute && !isInFirstComponentStep && (
                   <Button
                     type={isCreating ? 'button' : 'submit'}

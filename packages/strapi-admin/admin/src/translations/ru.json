@@ -1,7 +1,6 @@
 {
   "Analytics": "Аналитика",
   "Content Manager": "Редактор контента",
-  "Content Type Builder": "Конструктор типов контента",
   "Documentation": "Документация",
   "Email": "E-mail",
   "Files Upload": "Загрузка файлов",
@@ -31,7 +30,6 @@
   "app.components.HomePage.button.quickStart": "ОЗНАКОМИТЬСЯ С РУКОВОДСТВОМ ПО БЫСТРОМУ СТАРТУ",
   "app.components.HomePage.community": "Найдите сообщество в интернете",
   "app.components.HomePage.community.content": "Обсуждайте с членами команды и разработчиками в разных каналах.",
-  "app.components.HomePage.create": "Создайте ваш первый Тип Контента",
   "app.components.HomePage.createBlock.content.first": " ",
   "app.components.HomePage.createBlock.content.second": " — плагин, который поможет вам определить структуру ваших моделей данных. Если вы новичок, мы настоятельно рекомендуем вам изучить наше ",
   "app.components.HomePage.createBlock.content.tutorial": " руководство.",
@@ -159,7 +157,6 @@
   "HomePage.helmet.title": "Домашняя страница",
   "HomePage.welcome.congrats": "Поздравляем!",
   "HomePage.welcome.congrats.content": "Вы вошли как первый администратор. Чтобы открыть для себя мощные функции, предоставляемые Strapi,",
-  "HomePage.welcome.congrats.content.bold": "мы рекомендуем вам создать свой первый тип контента.",
   "HomePage.community": "Присоединяйтесь к сообществу",
   "HomePage.roadmap": "Смотрите нашу дорожную карту",
   "HomePage.greetings": "Привет {name}!",

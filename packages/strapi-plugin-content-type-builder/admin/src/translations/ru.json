@@ -41,7 +41,6 @@
   "component.repeatable": "(повторяется)",
   "configurations": "конфигурации",
   "contentType.UID.description": "Идентификатор, используемый для генерации маршрутов и таблиц в API",
-  "contentType.collectionName.description": "Полезно, когда имя типа контента и таблицы различаются",
   "contentType.collectionName.label": "Имя таблицы/коллекции",
   "contentType.displayName.label": "Отображаемое имя",
   "error.contentTypeName.reserved-name": "Это название зарезервировано и не может быть использовано в проекте",

@@ -1,7 +1,6 @@
 {
   "Analytics": "分析",
   "Content Manager": "内容管理",
-  "Content Type Builder": "内容类型生成器",
   "Email": "邮件",
   "HomePage.notification.newsLetter.success": "成功订阅简讯",
   "New entry": "新入口",
@@ -27,7 +26,6 @@
   "app.components.HomePage.button.quickStart": "快速入门教程",
   "app.components.HomePage.community": "在网络上找到社区",
   "app.components.HomePage.community.content": "与团队成员、贡献者和开发人员在不同的渠道进行讨论。",
-  "app.components.HomePage.create": "创建第一个Content Type",
   "app.components.HomePage.createBlock.content.first": "The ",
   "app.components.HomePage.createBlock.content.second": " 插件将帮助您定义模型的数据结构。如果你是刚接触Strapi，我们强烈推荐你跟随我们。 ",
   "app.components.HomePage.createBlock.content.tutorial": " tutorial.",

@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useReducer, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { camelCase, get, groupBy, set, size, sortBy } from 'lodash';
+import { get, groupBy, set, size } from 'lodash';
 import {
   request,
   LoadingIndicatorPage,
@@ -32,6 +32,7 @@ import {
   getComponentsToPost,
   formatMainDataType,
   getCreatedAndModifiedComponents,
+  sortContentType,
 } from './utils/cleanData';
 
 const DataManagerProvider = ({ allIcons, children }) => {
@@ -90,7 +91,6 @@ const DataManagerProvider = ({ allIcons, children }) => {
           });
         })
       );
-
       const components = createDataObject(componentsArray);
       const contentTypes = createDataObject(contentTypesArray);
       const orderedComponents = orderAllDataAttributesWithImmutable({
@@ -387,18 +387,6 @@ const DataManagerProvider = ({ allIcons, children }) => {
     });
   };
 
-  const sortedContentTypesList = sortBy(
-    Object.keys(contentTypes)
-      .map(uid => ({
-        name: uid,
-        title: contentTypes[uid].schema.name,
-        uid,
-        to: `/plugins/${pluginId}/content-types/${uid}`,
-      }))
-      .filter(obj => obj !== null),
-    obj => camelCase(obj.title)
-  );
-
   const shouldRedirect = () => {
     const dataSet = isInContentTypeView ? contentTypes : components;
 
@@ -411,7 +399,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
     return <Redirect to={`/plugins/${pluginId}/content-types/${firstCTUid}`} />;
   }
 
-  const submitData = async () => {
+  const submitData = async additionalContentTypeData => {
     try {
       const isCreating = get(
         modifiedData,
@@ -428,7 +416,10 @@ const DataManagerProvider = ({ allIcons, children }) => {
       };
 
       if (isInContentTypeView) {
-        body.contentType = formatMainDataType(modifiedData.contentType);
+        body.contentType = {
+          ...formatMainDataType(modifiedData.contentType),
+          ...additionalContentTypeData,
+        };
 
         emitEvent('willSaveContentType');
       } else {
@@ -534,7 +525,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
         removeAttribute,
         removeComponentFromDynamicZone,
         setModifiedData,
-        sortedContentTypesList,
+        sortedContentTypesList: sortContentType(contentTypes),
         submitData,
         toggleModalCancel,
         updateSchema,

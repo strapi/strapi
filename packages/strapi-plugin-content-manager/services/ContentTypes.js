@@ -54,7 +54,10 @@ const formatContentType = contentType => {
       _.get(contentType, ['info', 'name'], contentType.modelName)
     ),
     isDisplayed: HIDDEN_CONTENT_TYPES.includes(contentType.uid) ? false : true,
-    schema: formatContentTypeSchema(contentType),
+    schema: {
+      ...formatContentTypeSchema(contentType),
+      kind: contentType.kind || 'collectionType',
+    },
   };
 };
 

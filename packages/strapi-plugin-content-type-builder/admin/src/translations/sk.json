@@ -41,7 +41,6 @@
   "component.repeatable": "(opakujúce)",
   "configurations": "nastavenia",
   "contentType.UID.description": "UID sa používa pre vygenerovanie API URL adries a databázových tabuliek",
-  "contentType.collectionName.description": "Vhodné ak sa mená Typu obsahu a tabuľky líšia",
   "contentType.collectionName.label": "Interný názov",
   "contentType.displayName.label": "Názov",
   "error.contentTypeName.reserved-name": "Tento názov je vyhradený a nemôže byť použitý",

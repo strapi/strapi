@@ -17,7 +17,7 @@ const { nameToSlug } = require('../utils/helpers');
  * @param {Object} contentType
  */
 const formatContentType = contentType => {
-  const { uid, plugin, connection, collectionName, info } = contentType;
+  const { uid, kind, plugin, connection, collectionName, info } = contentType;
 
   return {
     uid,
@@ -26,6 +26,7 @@ const formatContentType = contentType => {
       name: _.get(info, 'name') || _.upperFirst(pluralize(uid)),
       description: _.get(info, 'description', ''),
       connection,
+      kind: kind || 'collectionType',
       collectionName,
       attributes: formatAttributes(contentType),
     },
@@ -70,7 +71,10 @@ const createContentType = async ({ contentType, components = [] }) => {
   });
 
   // generate api squeleton
-  await generateAPI(contentType.name);
+  await generateAPI({
+    name: contentType.name,
+    kind: contentType.kind,
+  });
 
   await builder.writeFiles();
   return newContentType;
@@ -80,7 +84,7 @@ const createContentType = async ({ contentType, components = [] }) => {
  * Generate an API squeleton
  * @param {string} name
  */
-const generateAPI = name => {
+const generateAPI = ({ name, kind = 'collectionType' }) => {
   return new Promise((resolve, reject) => {
     const scope = {
       generatorType: 'api',
@@ -89,6 +93,7 @@ const generateAPI = name => {
       rootPath: strapi.dir,
       args: {
         attributes: {},
+        kind,
       },
     };
 
