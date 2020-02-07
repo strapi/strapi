@@ -121,7 +121,6 @@ module.exports = {
 
     await service.setConfiguration(uid, input);
     const contentTypeConfigurations = await service.getConfiguration(uid);
-
     const data = {
       uid,
       schema,
