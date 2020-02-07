@@ -21,13 +21,20 @@ function Filter({
   let displayedValue = toString(value);
 
   if (type.includes('date')) {
-    const date = moment(value.slice(0, -1), moment.ISO_8601);
-    const format =
-      date.valueOf() === date.startOf('day').valueOf()
-        ? 'MMMM Do YYYY'
-        : 'MMMM Do YYYY, h:mm:ss a';
+    const date = moment(value, moment.ISO_8601);
 
-    displayedValue = date.format(format);
+    let format;
+
+    if (type === 'date') {
+      format = 'MM/DD/YY';
+    } else {
+      format = 'MM/DD/YY HH:MM';
+    }
+
+    displayedValue = moment
+      .parseZone(date)
+      .utc()
+      .format(format);
   }
 
   return (

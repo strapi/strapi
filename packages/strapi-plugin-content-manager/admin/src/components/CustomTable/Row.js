@@ -51,6 +51,10 @@ const getDisplayedValue = (type, value, name) => {
     case 'files':
       return value;
     case 'time': {
+      if (!value) {
+        return '-';
+      }
+
       const [hour, minute, second] = value.split(':');
       const timeObj = {
         hour,
