@@ -398,13 +398,40 @@ const FormModal = () => {
       const type =
         state.attributeType === 'relation' ? 'relation' : modifiedData.type;
 
+      let alreadyTakenTargetContentTypeAttributes = [];
+
+      if (type === 'relation') {
+        const targetContentTypeUID = get(modifiedData, ['target'], null);
+        const targetContentTypeAttributes = get(
+          contentTypes,
+          [targetContentTypeUID, 'schema', 'attributes'],
+          {}
+        );
+
+        // Create an array with all the targetContentType attributes name
+        // in order to prevent the user from creating a relation with a targetAttribute
+        // that may exist in the other content type
+        alreadyTakenTargetContentTypeAttributes = Object.keys(
+          targetContentTypeAttributes
+        ).filter(attrName => {
+          // Keep all the target content type attributes when creating a relation
+          if (state.actionType !== 'edit') {
+            return true;
+          }
+
+          // Remove the already created one when editing
+          return attrName !== initialData.targetAttribute;
+        });
+      }
+
       schema = forms[state.modalType].schema(
         get(allDataSchema, state.pathToSchema, {}),
         type,
         modifiedData,
         state.actionType === 'edit',
         state.attributeName,
-        initialData
+        initialData,
+        alreadyTakenTargetContentTypeAttributes
       );
     } else if (isEditingCategory) {
       schema = forms.editCategory.schema(allComponentsCategories, initialData);
