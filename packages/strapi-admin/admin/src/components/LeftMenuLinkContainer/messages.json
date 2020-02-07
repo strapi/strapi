@@ -3,6 +3,10 @@
     "id": "app.components.LeftMenuLinkContainer.contentTypes",
     "defaultMessage": "Collection Types"
   },
+  "singleTypes": {
+    "id": "app.components.LeftMenuLinkContainer.singleTypes",
+    "defaultMessage": "Single Types"
+  },
   "listPlugins": {
     "id": "app.components.LeftMenuLinkContainer.listPlugins",
     "defaultMessage": "Plugins"

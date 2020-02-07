@@ -77,6 +77,7 @@
   "app.components.LeftMenuLinkContainer.installNewPlugin": "Marketplace",
   "app.components.LeftMenuLinkContainer.listPlugins": "Plugins",
   "app.components.LeftMenuLinkContainer.contentTypes": "Collection Types",
+  "app.components.LeftMenuLinkContainer.singleTypes": "Single Types",
   "app.components.LeftMenuLinkContainer.noPluginsInstalled": "No plugins installed yet",
   "app.components.LeftMenuLinkContainer.plugins": "Plugins",
   "app.components.LeftMenuLinkContainer.settings": "Settings",

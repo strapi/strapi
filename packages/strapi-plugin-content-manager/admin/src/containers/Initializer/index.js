@@ -21,11 +21,18 @@ const Initializer = ({ updatePlugin }) => {
 
       try {
         const { data } = await request(requestURL, { method: 'GET' });
-
         const menu = [
           {
             name: 'Content Types',
-            links: data,
+            links: data.filter(
+              contentType => contentType.schema.kind === 'collectionType'
+            ),
+          },
+          {
+            name: 'Single Types',
+            links: data.filter(
+              contentType => contentType.schema.kind === 'singleType'
+            ),
           },
         ];
 
