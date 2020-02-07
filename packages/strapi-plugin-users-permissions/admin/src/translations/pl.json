@@ -2,6 +2,7 @@
   "BoundRoute.title": "Wywoływanie",
   "Controller.input.label": "{label} ",
   "Controller.selectAll": "Zaznacz wszystko",
+  "Controller.unselectAll": "Odznacz wszystko",
   "EditForm.inputSelect.description.role": "Połączy nowego uwierzytelnionego użytkownika z wybraną rolą.",
   "EditForm.inputSelect.durations.description": "Liczba godzin podczas których użytkownik nie może dołączyć.",
   "EditForm.inputSelect.durations.label": "Okres",
@@ -13,9 +14,11 @@
   "EditForm.inputToggle.description.email-confirmation-redirection": "Po potwierdzeniu adresu email, wybierz gdzie zostaniesz przekierowany.",
   "EditForm.inputToggle.description.sign-up": "Po wyłączeniu (OFF) proces rejestracji jest zabroniony. Nikt nie może już dołączyć bez względu na używanego dostawcę.",
   "EditForm.inputToggle.label.email": "Jedno konto na adres email",
+  "EditForm.inputToggle.description.email-reset-password": "Adres URL strony resetowania hasła aplikacji",
   "EditForm.inputToggle.label.email-confirmation": "Zezwól na potwierdzenie adresu email",
   "EditForm.inputToggle.label.email-confirmation-redirection": "url przekierowania",
   "EditForm.inputToggle.label.sign-up": "Rejestracja",
+  "EditForm.inputToggle.label.email-reset-password": "Straona resetowania hasła",
   "EditPage.cancel": "Anuluj",
   "EditPage.form.roles": "Szczegóły",
   "EditPage.form.roles.label.description": "Opis",
@@ -106,5 +109,6 @@
   "notification.success.delete": "Pozycja została usunięta",
   "notification.success.submit": "Ustawienia zostały zaktualizowane",
   "plugin.description.long": "Chroń API za pomocą procesu pełnego uwierzytelniania opartego na JWT. Ta wtyczka zawiera również strategię ACL, która pozwala zarządzać uprawnieniami między grupami użytkowników.",
-  "plugin.description.short": "Chroń API za pomocą procesu pełnego uwierzytelniania opartego na JWT"
+  "plugin.description.short": "Chroń API za pomocą procesu pełnego uwierzytelniania opartego na JWT",
+  "PopUpForm.Providers.vk.providerConfig.redirectURL": "Adres URL przekierowania do dodania w konfiguracji aplikacji VK"
 }
