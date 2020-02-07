@@ -9,7 +9,13 @@ import LeftMenuHeader from '../LeftMenuHeader';
 import List from './List';
 import Wrapper from './Wrapper';
 
-function LeftMenuList({ customLink, links, title, searchable }) {
+function LeftMenuList({
+  customLink,
+  links,
+  title,
+  searchable,
+  numberOfVisibleItems,
+}) {
   const [search, setSearch] = useState('');
   const formatTitleWithIntl = title => {
     if (isObject(title) && title.id) {
@@ -87,7 +93,9 @@ function LeftMenuList({ customLink, links, title, searchable }) {
         <LeftMenuHeader {...headerProps} />
       </div>
       <div>
-        <List>{getList().map((link, i) => renderCompo(link, i))}</List>
+        <List numberOfVisibleItems={numberOfVisibleItems}>
+          {getList().map((link, i) => renderCompo(link, i))}
+        </List>
         {Component && isValidElement(<Component />) && (
           <Component {...componentProps} />
         )}
@@ -101,6 +109,7 @@ LeftMenuList.defaultProps = {
   links: [],
   title: null,
   searchable: false,
+  numberOfVisibleItems: null,
 };
 
 LeftMenuList.propTypes = {
@@ -116,6 +125,7 @@ LeftMenuList.propTypes = {
     id: PropTypes.string,
   }),
   searchable: PropTypes.bool,
+  numberOfVisibleItems: PropTypes.number,
 };
 
 export default LeftMenuList;

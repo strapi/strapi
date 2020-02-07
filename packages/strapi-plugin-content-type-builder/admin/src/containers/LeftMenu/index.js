@@ -177,7 +177,9 @@ function LeftMenu({ wait }) {
   return (
     <Wrapper className="col-md-3">
       {data.map(list => {
-        return <LeftMenuList {...list} key={list.name} />;
+        return (
+          <LeftMenuList numberOfVisibleItems={5} {...list} key={list.name} />
+        );
       })}
     </Wrapper>
   );
