@@ -47,6 +47,7 @@
   "contentType.UID.description": "The UID is used to generate the API routes and databases tables/collections",
   "error.contentTypeName.reserved-name": "This name cannot be used in your project as it might break other functionalities",
   "error.validation.minSupMax": "Can't be superior",
+  "error.validation.relation.targetAttribute-taken": "This name exists in the target",
   "form.attribute.component.option.add": "Add a component",
   "form.attribute.component.option.create.description": "A component is shared across types and components, it will be available and accessible everywhere.",
   "form.attribute.component.option.create": "Create a new component",
