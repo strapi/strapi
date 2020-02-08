@@ -144,7 +144,6 @@ const HeadersInput = ({ errors, name, onClick, onChange, onRemove, value }) => {
 HeadersInput.defaultProps = {
   errors: {},
   onRemove: () => {},
-  value: [],
 };
 
 HeadersInput.propTypes = {

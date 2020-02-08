@@ -8,9 +8,9 @@ import EventRow from './EventRow';
 
 const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
   const headersName = [
-    `Settings.webhooks.events.create`,
-    `Settings.webhooks.events.edit`,
-    `Settings.webhooks.events.delete`,
+    'Settings.webhooks.events.create',
+    'Settings.webhooks.events.edit',
+    'Settings.webhooks.events.delete',
   ];
 
   const events = {
