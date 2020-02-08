@@ -10,6 +10,12 @@ Users love Strapi because it is open source, MIT licensed, fully customizable an
 
 ### Get Started
 
+::: danger
+
+The Alpha version of Strapi is no longer supported, please use the Beta version. You can find the relevant [documentation here](https://strapi.io/documentation/).
+
+:::
+
 You are invited to get started using Strapi. You may explore Strapi by:
 
 1. A [Quick Start Guide](../getting-started/quick-start.html) for more intermediate to advanced developers.

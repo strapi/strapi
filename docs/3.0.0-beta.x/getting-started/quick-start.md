@@ -43,34 +43,34 @@ Navigate to [**http://localhost:1337/admin**](http://localhost:1337/admin).
 
 Navigate to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/admin/plugins/content-type-builder), in the left-hand menu.
 
-- Click the **"+ Add Content Type"** link
+- Click the **"+ Create new content-type"** link
 - Enter `restaurant`, and click `Done`
 - A window opens with fields options:
-  - Click the **String** field.
-  - Type `name` in the **Name** field.
-  - Click over to the **ADVANCED SETTINGS** tab, and check the `Required field` and the `Unique field`.
-  - Click the **"+ Add New Field"** button.
-  - Click the **Rich Text** field.
-  - Type `description` under the **BASE SETTINGS** tab, in the **Name** field.
-  - Click `Done`.
-- Click the **Save** button and wait for Strapi to restart.
+  - Click the **Text** field
+  - Type `name` in the **Name** field
+  - Click over to the **ADVANCED SETTINGS** tab, and check the `Required field` and the `Unique field`
+  - Click the **"+ Add another Field"** button
+  - Click the **Rich Text** field
+  - Type `description` under the **BASE SETTINGS** tab, in the **Name** field
+  - Click `Finish`
+- Click the **Save** button and wait for Strapi to restart
 
 ## 4. Create a Category Content type
 
 Navigate back to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/admin/plugins/content-type-builder), in the left-hand menu.
 
-- Click the **"+ Add Content Type"** link.
-- Enter `category`, and click `Done`.
+- Click the **"+ Create new content-type"** link
+- Enter `category`, and click `Continue`
 - A window opens with fields options:
-  - Click the **String** field.
-  - Type `name` under the **BASE SETTINGS** tab, in the **Name** field.
-  - Click over to the **ADVANCED SETTINGS** tab, and check the `Required field` and the `Unique field`.
-  - Click the **"+ Add New Field"** button.
-  - Click the **Relation** field.
-  - On the right side, click the **Permissions** dropdown and select `Restaurant`,
-  - In the center, select the icon that represents `many-to-many`. The text should read, `Categories has and belongs to many Restaurants`.
-  - Click `Done`.
-- Click the **Save** button and wait for Strapi to restart.
+  - Click the **Text** field
+  - Type `name` under the **BASE SETTINGS** tab, in the **Name** field
+  - Click over to the **ADVANCED SETTINGS** tab, and check the `Required field` and the `Unique field`
+  - Click the **"+ Add another field"** button
+  - Click the **Relation** field
+  - On the right side, click the **Category** dropdown and select, `Restaurant`
+  - In the center, select the icon that represents `many-to-many`. The text should read, `Categories has and belongs to many Restaurants`
+  - Click `Finish`
+- Click the **Save** button and wait for Strapi to restart
 
 ## 5. Add content to "Restaurant" Content Type
 

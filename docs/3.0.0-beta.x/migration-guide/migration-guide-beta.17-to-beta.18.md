@@ -606,7 +606,3 @@ db.getCollection('contentTypeCollection').update(
 ## Rebuilding your administration panel
 
 Now delete the `.cache` and `build` folders. Then run `yarn develop`.
-
-```
-
-```
