@@ -334,7 +334,6 @@ class Strapi extends EventEmitter {
 
     const [
       config,
-      api,
       admin,
       plugins,
       middlewares,
@@ -343,7 +342,6 @@ class Strapi extends EventEmitter {
       components,
     ] = await Promise.all([
       loadConfig(this),
-      loadApis(this),
       loadAdmin(this),
       loadPlugins(this),
       loadMiddlewares(this),
@@ -353,6 +351,9 @@ class Strapi extends EventEmitter {
     ]);
 
     _.merge(this.config, config);
+
+    // api is loaded later, because depends on config
+    const api = await loadApis(this);
 
     this.api = api;
     this.admin = admin;

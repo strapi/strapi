@@ -35,6 +35,7 @@ Contains the main configurations relative to your project.
 - `public`
   - `path` (string): Path to the public folder. Default value: `./public`.
   - `maxAge` (integer): Cache-control max-age directive in ms. Default value: `60000`.
+- `omitFilenamesPrefix` (string): filename prefix which will be omitted when setting global `strapi` object. By default all filenames inside `/api/controllers`, `/api/services` and `/api/models` will be accessible in global objects: `strapi.controllers`, `strapi.services`, `strapi.models`. For instance file `/api/services/Foo` will be accessible through: `strapi.services.foo`. In some cases you may not want that, then just set `"omitFilenamesPrefix": "_"` (or another key). Files named e.g `/api/controllers/_Foo` will be omitted from `strapi` object.
 
 ## Custom
 
