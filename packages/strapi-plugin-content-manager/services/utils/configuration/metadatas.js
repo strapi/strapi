@@ -62,6 +62,7 @@ function createDefaultMetadata(schema, name) {
       'visible',
       'editable',
       'mainField',
+      'accept',
     ])
   );
 

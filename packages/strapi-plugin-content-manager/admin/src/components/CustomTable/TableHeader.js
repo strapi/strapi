@@ -61,7 +61,6 @@ function TableHeader({ headers, isBulkable }) {
             >
               <span className={header.sortable ? 'sortable' : ''}>
                 {header.label}
-
                 {sortBy === header.name && (
                   <Arrow className={`${sortOrder === 'ASC' && 'isAsc'}`} />
                 )}

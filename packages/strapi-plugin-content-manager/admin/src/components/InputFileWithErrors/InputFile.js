@@ -11,6 +11,7 @@ function InputFile({
   name,
   value,
   setLabel,
+  accept,
 }) {
   useEffect(() => {
     dispatch({
@@ -20,6 +21,7 @@ function InputFile({
 
   return (
     <Input
+      accept={accept}
       multiple={multiple}
       error={error}
       name={name}
@@ -38,6 +40,7 @@ function InputFile({
 }
 
 InputFile.defaultProps = {
+  accept: null,
   dispatch: () => {},
   error: false,
   multiple: false,
@@ -47,6 +50,7 @@ InputFile.defaultProps = {
 };
 
 InputFile.propTypes = {
+  accept: PropTypes.string,
   dispatch: PropTypes.func,
   error: PropTypes.bool,
   multiple: PropTypes.bool,

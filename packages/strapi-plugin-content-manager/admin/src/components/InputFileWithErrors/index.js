@@ -13,6 +13,7 @@ import InputFile from './InputFile';
 import Container from './Container';
 
 function InputFileWithErrors({
+  accept,
   className,
   error: inputError,
   inputDescription,
@@ -60,6 +61,7 @@ function InputFileWithErrors({
 
             <InputFile
               {...props}
+              accept={accept}
               error={hasError}
               onChange={onChange}
               value={value}
@@ -80,6 +82,7 @@ function InputFileWithErrors({
 }
 
 InputFileWithErrors.defaultProps = {
+  accept: null,
   className: '',
   error: null,
   inputDescription: '',
@@ -91,6 +94,7 @@ InputFileWithErrors.defaultProps = {
 };
 
 InputFileWithErrors.propTypes = {
+  accept: PropTypes.string,
   className: PropTypes.string,
   error: PropTypes.string,
   inputDescription: PropTypes.oneOfType([

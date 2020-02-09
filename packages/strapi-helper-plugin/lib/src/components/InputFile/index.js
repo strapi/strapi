@@ -113,7 +113,7 @@ class InputFile extends React.Component {
   };
 
   render() {
-    const { multiple, name, onChange, value } = this.props;
+    const { accept, multiple, name, onChange, value } = this.props;
 
     return (
       <Wrapper>
@@ -138,6 +138,7 @@ class InputFile extends React.Component {
           />
           <label style={{ marginBottom: 0, width: '100%' }}>
             <input
+              accept={accept}
               className="inputFile"
               multiple={multiple}
               name={name}
@@ -173,6 +174,7 @@ InputFile.defaultProps = {
 };
 
 InputFile.propTypes = {
+  accept: PropTypes.string,
   error: PropTypes.bool,
   multiple: PropTypes.bool,
   name: PropTypes.string.isRequired,
