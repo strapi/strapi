@@ -35,7 +35,7 @@ const generateSchema = () => {
 
   // Generate type definition and query/mutation for models.
   const shadowCRUD = shadowCRUDEnabled
-    ? buildShadowCRUD()
+    ? buildModelsShadowCRUD()
     : createDefaultSchema();
 
   const _schema = strapi.plugins.graphql.config._schema.graphql;
@@ -128,24 +128,21 @@ const writeGenerateSchema = schema => {
   return strapi.fs.writeAppFile('exports/graphql/schema.graphql', schema);
 };
 
-const buildShadowCRUD = () => {
-  const modelSchema = Resolvers.buildShadowCRUD(
-    _.omitBy(strapi.models, model => model.internal === true)
+const buildModelsShadowCRUD = () => {
+  const models = Object.values(strapi.models).filter(
+    model => model.internal !== true
   );
 
-  const pluginSchemas = Object.keys(strapi.plugins).reduce((acc, plugin) => {
-    const schemas = Resolvers.buildShadowCRUD(strapi.plugins[plugin].models);
-    return acc.concat(schemas);
-  }, []);
+  const pluginModels = Object.values(strapi.plugins)
+    .map(plugin => Object.values(plugin.models) || [])
+    .reduce((acc, arr) => acc.concat(arr), []);
 
-  const componentSchemas = Object.values(strapi.components).map(compo =>
-    Resolvers.buildComponent(compo)
+  const components = Object.values(strapi.components);
+
+  return mergeSchemas(
+    createDefaultSchema(),
+    ...Resolvers.buildModels([...models, ...pluginModels, ...components])
   );
-
-  const schema = { definition: '', resolvers: {}, query: {}, mutation: {} };
-  mergeSchemas(schema, modelSchema, ...pluginSchemas, ...componentSchemas);
-
-  return schema;
 };
 
 const buildResolvers = resolvers => {

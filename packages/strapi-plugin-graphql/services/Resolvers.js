@@ -245,20 +245,13 @@ const buildAssocResolvers = model => {
  *
  * @return Object
  */
-const buildShadowCRUD = models => {
-  const schema = {
-    definition: '',
-    query: {},
-    mutation: {},
-    resolvers: { Query: {}, Mutation: {} },
-  };
+const buildModels = models => {
+  return models.map(model => {
+    const { kind, modelType } = model;
 
-  if (_.isEmpty(models)) {
-    return schema;
-  }
-
-  const subSchemas = Object.values(models).map(model => {
-    const { kind } = model;
+    if (modelType === 'component') {
+      return buildComponent(model);
+    }
 
     switch (kind) {
       case 'singleType':
@@ -267,10 +260,6 @@ const buildShadowCRUD = models => {
         return buildCollectionType(model);
     }
   });
-
-  mergeSchemas(schema, ...subSchemas);
-
-  return schema;
 };
 
 const buildModelDefinition = (model, globalType = {}) => {
@@ -517,6 +506,5 @@ const buildMutation = ({ model, action }, { _schema }) => {
 };
 
 module.exports = {
-  buildShadowCRUD,
-  buildComponent,
+  buildModels,
 };

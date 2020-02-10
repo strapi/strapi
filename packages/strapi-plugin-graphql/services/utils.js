@@ -17,6 +17,8 @@ const mergeSchemas = (root, ...subs) => {
       resolvers,
     });
   });
+
+  return root;
 };
 
 const createDefaultSchema = () => ({
