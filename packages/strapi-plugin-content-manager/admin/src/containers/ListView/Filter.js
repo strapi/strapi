@@ -4,6 +4,7 @@ import { FormattedMessage } from 'react-intl';
 import { get, toString, upperFirst } from 'lodash';
 import moment from 'moment';
 import pluginId from '../../pluginId';
+import DATE_FORMATS from '../../utils/DATE_FORMATS';
 import { FilterWrapper, Remove, Separator } from './components';
 
 function Filter({
@@ -20,15 +21,15 @@ function Filter({
   const type = get(schema, ['attributes', name, 'type'], 'string');
   let displayedValue = toString(value);
 
-  if (type.includes('date')) {
+  if (type.includes('date') || type.includes('timestamp')) {
     const date = moment(value, moment.ISO_8601);
 
     let format;
 
-    if (type === 'date') {
-      format = 'MM/DD/YY';
+    if (type === 'date' || type === 'timestamp') {
+      format = DATE_FORMATS.date;
     } else {
-      format = 'MM/DD/YY HH:MM';
+      format = DATE_FORMATS.datetime;
     }
 
     displayedValue = moment
