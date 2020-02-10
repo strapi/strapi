@@ -9,8 +9,8 @@ import {
   PopUpWarning,
   getQueryParameters,
   useGlobalContext,
+  request,
 } from 'strapi-helper-plugin';
-
 import pluginId from '../../pluginId';
 import DisplayedFieldsDropdown from '../../components/DisplayedFieldsDropdown';
 import Container from '../../components/Container';
@@ -27,18 +27,19 @@ import { AddFilterCta, FilterIcon, Wrapper } from './components';
 import Filter from './Filter';
 import Footer from './Footer';
 import {
-  getData,
+  getDataSucceeded,
   onChangeBulk,
   onChangeBulkSelectall,
-  onDeleteData,
-  onDeleteSeveralData,
+  onDeleteDataSucceeded,
+  onDeleteSeveralDataSucceeded,
   resetProps,
   toggleModalDelete,
   toggleModalDeleteAll,
 } from './actions';
 import reducer from './reducer';
-import saga from './saga';
 import makeSelectListView from './selectors';
+import getRequestUrl from '../../utils/getRequestUrl';
+import generateSearchFromObject from './utils/generateSearchFromObject';
 
 /* eslint-disable react/no-array-index-key */
 
@@ -48,14 +49,14 @@ function ListView({
   emitEvent,
   entriesToDelete,
   location: { pathname, search },
-  getData,
+  getDataSucceeded,
   layouts,
   history: { push },
   onChangeBulk,
   onChangeBulkSelectall,
   onChangeListLabels,
-  onDeleteData,
-  onDeleteSeveralData,
+  onDeleteDataSucceeded,
+  onDeleteSeveralDataSucceeded,
   resetListLabels,
   resetProps,
   shouldRefetchData,
@@ -66,13 +67,33 @@ function ListView({
   toggleModalDeleteAll,
 }) {
   strapi.useInjectReducer({ key: 'listView', reducer, pluginId });
-  strapi.useInjectSaga({ key: 'listView', saga, pluginId });
+
   const { formatMessage } = useGlobalContext();
   const getLayoutSettingRef = useRef();
+  const getDataRef = useRef();
   const [isLabelPickerOpen, setLabelPickerState] = useState(false);
   const [isFilterPickerOpen, setFilterPickerState] = useState(false);
   const [idToDelete, setIdToDelete] = useState(null);
   const contentTypePath = [slug, 'contentType'];
+
+  getDataRef.current = async (uid, params) => {
+    try {
+      const generatedSearch = generateSearchFromObject(params);
+
+      const [{ count }, data] = await Promise.all([
+        request(getRequestUrl(`explorer/${uid}/count?${generatedSearch}`), {
+          method: 'GET',
+        }),
+        request(getRequestUrl(`explorer/${uid}?${generatedSearch}`), {
+          method: 'GET',
+        }),
+      ]);
+
+      getDataSucceeded(count, data);
+    } catch (err) {
+      strapi.notification.error(`${pluginId}.error.model.fetch`);
+    }
+  };
 
   getLayoutSettingRef.current = settingName =>
     get(layouts, [...contentTypePath, 'settings', settingName], '');
@@ -96,8 +117,42 @@ function ListView({
     },
     [getLayoutSettingRef, search]
   );
+
+  const handleConfirmDeleteData = useCallback(async () => {
+    try {
+      emitEvent('willDeleteEntry');
+
+      await request(getRequestUrl(`explorer/${slug}/${idToDelete}`), {
+        method: 'DELETE',
+      });
+
+      strapi.notification.success(`${pluginId}.success.record.delete`);
+
+      // Close the modal and refetch data
+      onDeleteDataSucceeded();
+      emitEvent('didDeleteEntry');
+    } catch (err) {
+      strapi.notification.error(`${pluginId}.error.record.delete`);
+    }
+  }, [emitEvent, idToDelete, onDeleteDataSucceeded, slug]);
+
+  const handleConfirmDeleteAllData = useCallback(async () => {
+    const params = Object.assign(entriesToDelete);
+
+    try {
+      await request(getRequestUrl(`explorer/deleteAll/${slug}`), {
+        method: 'DELETE',
+        params,
+      });
+
+      onDeleteSeveralDataSucceeded();
+    } catch (err) {
+      strapi.notification.error(`${pluginId}.error.record.delete`);
+    }
+  }, [entriesToDelete, onDeleteSeveralDataSucceeded, slug]);
+
   useEffect(() => {
-    getData(slug, getSearchParams());
+    getDataRef.current(slug, getSearchParams());
 
     return () => {
       resetProps();
@@ -209,7 +264,7 @@ function ListView({
 
     push({ search: newSearch });
     resetProps();
-    getData(slug, updatedSearch);
+    getDataRef.current(slug, updatedSearch);
   };
   const handleClickDelete = id => {
     setIdToDelete(id);
@@ -294,7 +349,6 @@ function ListView({
         onChangeBulkSelectall={onChangeBulkSelectall}
         onChangeParams={handleChangeParams}
         onClickDelete={handleClickDelete}
-        onDeleteSeveralData={onDeleteSeveralData}
         schema={getListSchema()}
         searchParams={getSearchParams()}
         slug={slug}
@@ -383,10 +437,8 @@ function ListView({
             cancel: `${pluginId}.popUpWarning.button.cancel`,
             confirm: `${pluginId}.popUpWarning.button.confirm`,
           }}
+          onConfirm={handleConfirmDeleteData}
           popUpWarningType="danger"
-          onConfirm={() => {
-            onDeleteData(idToDelete, slug, emitEvent);
-          }}
         />
         <PopUpWarning
           isOpen={showWarningDeleteAll}
@@ -400,9 +452,7 @@ function ListView({
             confirm: `${pluginId}.popUpWarning.button.confirm`,
           }}
           popUpWarningType="danger"
-          onConfirm={() => {
-            onDeleteSeveralData(entriesToDelete, slug);
-          }}
+          onConfirm={handleConfirmDeleteAllData}
         />
       </ListViewProvider>
     </>
@@ -423,15 +473,15 @@ ListView.propTypes = {
     search: PropTypes.string.isRequired,
   }).isRequired,
   models: PropTypes.array.isRequired,
-  getData: PropTypes.func.isRequired,
+  getDataSucceeded: PropTypes.func.isRequired,
   history: PropTypes.shape({
     push: PropTypes.func.isRequired,
   }).isRequired,
   onChangeBulk: PropTypes.func.isRequired,
   onChangeBulkSelectall: PropTypes.func.isRequired,
   onChangeListLabels: PropTypes.func.isRequired,
-  onDeleteData: PropTypes.func.isRequired,
-  onDeleteSeveralData: PropTypes.func.isRequired,
+  onDeleteDataSucceeded: PropTypes.func.isRequired,
+  onDeleteSeveralDataSucceeded: PropTypes.func.isRequired,
   resetListLabels: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
   shouldRefetchData: PropTypes.bool.isRequired,
@@ -447,12 +497,12 @@ const mapStateToProps = makeSelectListView();
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
-      getData,
+      getDataSucceeded,
       onChangeBulk,
       onChangeBulkSelectall,
       onChangeListLabels,
-      onDeleteData,
-      onDeleteSeveralData,
+      onDeleteDataSucceeded,
+      onDeleteSeveralDataSucceeded,
       resetListLabels,
       resetProps,
       toggleModalDelete,
@@ -461,12 +511,6 @@ export function mapDispatchToProps(dispatch) {
     dispatch
   );
 }
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps
-);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
-export default compose(
-  withConnect,
-  memo
-)(ListView);
+export default compose(withConnect, memo)(ListView);
