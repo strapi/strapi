@@ -117,6 +117,8 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
 
   if (type === 'float' || type === 'decimal') {
     step = 'any';
+  } else if (type === 'time' || type === 'datetime') {
+    step = 30;
   } else {
     step = '1';
   }

@@ -125,6 +125,8 @@ module.exports = function(strapi) {
           connection,
         };
 
+        _.set(strapi, `connections.${connectionName}`, instance);
+
         return Promise.all([
           mountComponents(connectionName, ctx),
           mountApis(connectionName, ctx),

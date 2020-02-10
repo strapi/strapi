@@ -45,6 +45,7 @@ function SelectWrapper({
   const { signal } = abortController;
   const ref = useRef();
   const startRef = useRef();
+
   startRef.current = state._start;
 
   ref.current = async () => {
@@ -55,6 +56,9 @@ function SelectWrapper({
 
         if (isEmpty(params._q)) {
           delete params._q;
+        } else {
+          delete params._limit;
+          delete params._start;
         }
 
         const data = await request(requestUrl, {
@@ -69,6 +73,7 @@ function SelectWrapper({
 
         if (!isEmpty(params._q)) {
           setOptions(formattedData);
+          setState(prev => ({ ...prev, _start: 0 }));
 
           return;
         }
@@ -98,17 +103,15 @@ function SelectWrapper({
   };
 
   useEffect(() => {
-    ref.current();
-
-    return () => {
-      abortController.abort();
-    };
-  }, [ref]);
-
-  useEffect(() => {
     if (state._q !== '') {
-      ref.current();
+      let timer = setTimeout(() => {
+        ref.current();
+      }, 300);
+
+      return () => clearTimeout(timer);
     }
+
+    ref.current();
 
     return () => {
       abortController.abort();
@@ -140,7 +143,7 @@ function SelectWrapper({
   };
 
   const onMenuScrollToBottom = () => {
-    setState(prevState => ({ ...prevState, _start: prevState._start + 1 }));
+    setState(prevState => ({ ...prevState, _start: prevState._start + 20 }));
   };
 
   const isSingle = [
