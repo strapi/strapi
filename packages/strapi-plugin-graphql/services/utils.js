@@ -21,8 +21,8 @@ const mergeSchemas = (root, ...subs) => {
 
 const createDefaultSchema = () => ({
   definition: '',
-  query: '',
-  mutation: '',
+  query: {},
+  mutation: {},
   resolvers: {},
 });
 

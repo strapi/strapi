@@ -10,6 +10,7 @@ const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
 const Schema = require('./Schema.js');
 const { convertToParams, convertToQuery } = require('./utils');
+const { toSDL } = require('./schema-definitions');
 
 /**
  * Returns all fields of type primitive
@@ -287,9 +288,9 @@ const generateConnectionFieldsTypes = function(fields, model) {
   return Object.keys(primitiveFields)
     .map(
       fieldKey =>
-        `type ${globalId}Connection${_.upperFirst(
-          fieldKey
-        )} {${Schema.formatGQL(connectionFields[fieldKey])}}`
+        `type ${globalId}Connection${_.upperFirst(fieldKey)} {${toSDL(
+          connectionFields[fieldKey]
+        )}}`
     )
     .join('\n\n');
 };
@@ -307,9 +308,7 @@ const formatConnectionGroupBy = function(fields, model) {
   );
 
   // Get the generated field types
-  let groupByTypes = `type ${groupByGlobalId} {${Schema.formatGQL(
-    groupByFields
-  )}}\n\n`;
+  let groupByTypes = `type ${groupByGlobalId} {${toSDL(groupByFields)}}\n\n`;
   groupByTypes += generateConnectionFieldsTypes(fields, model);
 
   return {
@@ -341,8 +340,8 @@ const formatConnectionAggregator = function(fields, model, modelName) {
     });
   }
 
-  const gqlNumberFormat = Schema.formatGQL(numericFields);
-  let aggregatorTypes = `type ${aggregatorGlobalId} {${Schema.formatGQL(
+  const gqlNumberFormat = toSDL(numericFields);
+  let aggregatorTypes = `type ${aggregatorGlobalId} {${toSDL(
     initialFields
   )}}\n\n`;
 
@@ -479,7 +478,7 @@ const formatModelConnectionsGQL = function({ fields, model, name, resolver }) {
   };
   const pluralName = pluralize.plural(_.camelCase(name));
 
-  let modelConnectionTypes = `type ${connectionGlobalId} {${Schema.formatGQL(
+  let modelConnectionTypes = `type ${connectionGlobalId} {${toSDL(
     connectionFields
   )}}\n\n`;
   if (aggregatorFormat) {

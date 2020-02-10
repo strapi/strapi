@@ -19,6 +19,7 @@ const {
   convertToQuery,
   amountLimiting,
 } = require('./utils');
+const { toSDL, getTypeDescription } = require('./schema-definitions');
 const { toSingular, toPlural } = require('./naming');
 
 const isQueryEnabled = (schema, name) => {
@@ -272,7 +273,7 @@ const buildShadowCRUD = models => {
   return schema;
 };
 
-const buildModelDefinition = model => {
+const buildModelDefinition = (model, globalType = {}) => {
   const { globalId, primaryKey } = model;
 
   const schema = {
@@ -294,8 +295,8 @@ const buildModelDefinition = model => {
   schema.definition += generateEnumDefinitions(model.attributes, globalId);
   generateDynamicZoneDefinitions(model.attributes, globalId, schema);
 
-  const description = Schema.getDescription({}, model);
-  const fields = Schema.formatGQL(typeDefObj, {}, model);
+  const description = getTypeDescription(globalType, model);
+  const fields = toSDL(typeDefObj, globalType, model);
   const typeDef = `${description}type ${globalId} {${fields}}\n`;
 
   schema.definition += typeDef;
@@ -324,7 +325,7 @@ const buildSingleType = model => {
 
   const globalType = _.get(_schema, ['type', model.globalId], {});
 
-  const localSchema = buildModelDefinition(model);
+  const localSchema = buildModelDefinition(model, globalType);
 
   // Add definition to the schema but this type won't be "queriable" or "mutable".
   if (globalType === false) {
@@ -393,8 +394,8 @@ const buildCollectionType = model => {
   localSchema.definition += generateEnumDefinitions(model.attributes, globalId);
   generateDynamicZoneDefinitions(model.attributes, globalId, localSchema);
 
-  const description = Schema.getDescription(globalType, model);
-  const fields = Schema.formatGQL(typeDefObj, globalType, model);
+  const description = getTypeDescription(globalType, model);
+  const fields = toSDL(typeDefObj, globalType, model);
   const typeDef = `${description}type ${globalId} {${fields}}\n`;
 
   localSchema.definition += typeDef;

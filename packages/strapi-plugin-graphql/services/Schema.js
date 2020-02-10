@@ -19,114 +19,10 @@ const {
   convertToQuery,
   amountLimiting,
 } = require('./utils');
+const { toSDL } = require('./schema-definitions');
 
 const policyUtils = require('strapi-utils').policy;
 const compose = require('koa-compose');
-
-/**
- * Receive an Object and return a string which is following the GraphQL specs.
- *
- * @return String
- */
-
-const formatGQL = (fields, description = {}, model = {}, type = 'field') => {
-  const typeFields = JSON.stringify(fields, null, 2).replace(/['",]+/g, '');
-
-  const lines = typeFields.split('\n');
-
-  // Try to add description for field.
-  if (type === 'field') {
-    return lines
-      .map(line => {
-        if (['{', '}'].includes(line)) {
-          return '';
-        }
-
-        const split = line.split(':');
-        const attribute = _.trim(split[0]);
-        const info =
-          (_.isString(description[attribute])
-            ? description[attribute]
-            : _.get(description[attribute], 'description')) ||
-          _.get(model, `attributes.${attribute}.description`);
-        const deprecated =
-          _.get(description[attribute], 'deprecated') ||
-          _.get(model, `attributes.${attribute}.deprecated`);
-
-        // Snakecase an attribute when we find a dash.
-        if (attribute.indexOf('-') !== -1) {
-          line = `  ${_.snakeCase(attribute)}: ${_.trim(split[1])}`;
-        }
-
-        if (info) {
-          line = `  """\n    ${info}\n  """\n${line}`;
-        }
-
-        if (deprecated) {
-          line = `${line} @deprecated(reason: "${deprecated}")`;
-        }
-
-        return line;
-      })
-      .join('\n');
-  } else if (type === 'query' || type === 'mutation') {
-    return lines
-      .map((line, index) => {
-        if (['{', '}'].includes(line)) {
-          return '';
-        }
-
-        const split = Object.keys(fields)[index - 1].split('(');
-        const attribute = _.trim(split[0]);
-        const info = _.get(description[attribute], 'description');
-        const deprecated = _.get(description[attribute], 'deprecated');
-
-        // Snakecase an attribute when we find a dash.
-        if (attribute.indexOf('-') !== -1) {
-          line = `  ${_.snakeCase(attribute)}(${_.trim(split[1])}`;
-        }
-
-        if (info) {
-          line = `  """\n    ${info}\n  """\n${line}`;
-        }
-
-        if (deprecated) {
-          line = `${line} @deprecated(reason: "${deprecated}")`;
-        }
-
-        return line;
-      })
-      .join('\n');
-  }
-
-  return lines
-    .map((line, index) => {
-      if ([0, lines.length - 1].includes(index)) {
-        return '';
-      }
-
-      return line;
-    })
-    .join('\n');
-};
-
-/**
- * Retrieve description from variable and return a string which follow the GraphQL specs.
- *
- * @return String
- */
-
-const getDescription = (type, model = {}) => {
-  const format = '"""\n';
-
-  const str = _.get(type, '_description') || _.get(model, 'info.description');
-
-  if (str) {
-    return `${format}${str}\n${format}`;
-  }
-
-  return '';
-};
 
 /**
  * Generate GraphQL schema.
@@ -168,12 +64,11 @@ const generateSchema = () => {
   }
 
   const queryFields =
-    shadowCRUD.query &&
-    formatGQL(shadowCRUD.query, resolver.Query, null, 'query');
+    shadowCRUD.query && toSDL(shadowCRUD.query, resolver.Query, null, 'query');
 
   const mutationFields =
     shadowCRUD.mutation &&
-    formatGQL(shadowCRUD.mutation, resolver.Mutation, null, 'mutation');
+    toSDL(shadowCRUD.mutation, resolver.Mutation, null, 'mutation');
 
   const scalars = Types.getScalars();
 
@@ -548,8 +443,6 @@ const getPolicies = config => {
 
 module.exports = {
   generateSchema,
-  getDescription,
-  formatGQL,
   buildQuery,
   buildMutation,
 };
