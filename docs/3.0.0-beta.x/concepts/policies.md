@@ -74,7 +74,7 @@ The global policies can be associated to any route in your project.
       "path": "/restaurants",
       "handler": "Restaurant.find",
       "config": {
-        "policies": ["global.isAuthenticated"]
+        "policies": ["global::isAuthenticated"]
       }
     }
   ]
@@ -101,7 +101,7 @@ Plugins can add and expose policies into your app. For example, the plugin **Use
       "path": "/restaurants",
       "handler": "Restaurant.find",
       "config": {
-        "policies": ["plugins.users-permissions.isAuthenticated"]
+        "policies": ["plugins::users-permissions.isAuthenticated"]
       }
     }
   ]

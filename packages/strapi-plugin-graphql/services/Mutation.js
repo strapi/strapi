@@ -151,7 +151,7 @@ module.exports = {
     }
 
     if (strapi.plugins['users-permissions']) {
-      policies.unshift('plugins.users-permissions.permissions');
+      policies.unshift('plugins::users-permissions.permissions');
     }
 
     // Populate policies.

@@ -353,12 +353,12 @@ const buildMutationContext = ({ options, graphqlContext }) => {
 };
 
 const buildQuery = (queryName, config) => {
-  const { resolver, resolverOf } = config;
+  const { resolver } = config;
 
-  if (_.isFunction(resolver) && !isResolvablePath(resolverOf)) {
-    throw new Error(
-      `Cannot create query "${queryName}". Missing "resolverOf" option with custom resolver.`
-    );
+  try {
+    validateResolverOption(config);
+  } catch (error) {
+    throw new Error(`Cannot create query "${queryName}": ${error.message}`);
   }
 
   const policiesMiddleware = compose(getPolicies(config));
@@ -390,6 +390,23 @@ const buildQuery = (queryName, config) => {
 
     return result;
   };
+};
+
+const validateResolverOption = config => {
+  const { resolver, resolverOf, policies } = config;
+
+  if (_.isFunction(resolver) && !isResolvablePath(resolverOf)) {
+    throw new Error(`Missing "resolverOf" option with custom resolver.`);
+  }
+
+  if (
+    !_.isUndefined(policies) &&
+    (!Array.isArray(policies) || !_.every(policies, _.isString))
+  ) {
+    throw new Error('Policies option must be an array of string.');
+  }
+
+  return true;
 };
 
 const buildQueryContext = ({ options, graphqlContext }) => {
@@ -459,21 +476,36 @@ const getAction = resolver => {
     throw new Error(`Error building query. Expected a string, got ${resolver}`);
   }
 
-  const { controller, action, plugin, api } = getActionDetails(resolver);
+  const actionDetails = getActionDetails(resolver);
+  const actionFn = getActionFn(actionDetails);
 
-  let fn;
+  if (!actionFn) {
+    throw new Error(
+      `[GraphQL] Cannot find action "${resolver}". Check your graphql configurations.`
+    );
+  }
+
+  return actionFn;
+};
+
+const getActionFn = details => {
+  const { controller, action, plugin, api } = details;
 
   if (plugin) {
-    fn = _.get(strapi.plugins, [plugin, 'controllers', controller, action]);
-  } else {
-    fn = _.get(strapi.api, [api, 'controllers', controller, action]);
+    return _.get(strapi.plugins, [
+      _.toLower(plugin),
+      'controllers',
+      _.toLower(controller),
+      action,
+    ]);
   }
 
-  if (!fn) {
-    throw new Error(`Cannot find action ${resolver}`);
-  }
-
-  return fn;
+  return _.get(strapi.api, [
+    _.toLower(api),
+    'controllers',
+    _.toLower(controller),
+    action,
+  ]);
 };
 
 const getActionDetails = resolver => {
@@ -491,10 +523,22 @@ const getActionDetails = resolver => {
     return { api, controller, action };
   }
 
-  // try to find legacy stuff
-  _.get(strapi.plugins);
+  const args = resolver.split('.');
 
-  throw new Error('Could not parse resolverString: ', resolver);
+  if (args.length === 3) {
+    const [api, controller, action] = args;
+    return { api, controller, action };
+  }
+
+  // if direct api access
+  if (args.length === 2) {
+    const [controller, action] = args;
+    return { api: controller, controller, action };
+  }
+
+  throw new Error(
+    `[GraphQL] Could not find action for resolver "${resolver}". Check your graphql configurations.`
+  );
 };
 
 /**
@@ -524,7 +568,7 @@ const getPolicies = config => {
   policyFns.push(globalPolicy);
 
   if (strapi.plugins['users-permissions']) {
-    policies.unshift('plugins.users-permissions.permissions');
+    policies.unshift('plugins::users-permissions.permissions');
   }
 
   policies.forEach(policy => {

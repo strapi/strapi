@@ -61,8 +61,8 @@ const parsePolicy = policy => {
   return policy.handler;
 };
 
-const GLOBAL_PREFIX = 'global.';
-const PLUGIN_PREFIX = 'plugins.';
+const GLOBAL_PREFIX = 'global::';
+const PLUGIN_PREFIX = 'plugins::';
 const APPLICATION_PREFIX = 'application::';
 
 const getPolicyIn = (container, policy) => {
@@ -85,7 +85,8 @@ const globalPolicyExists = policy => {
 };
 
 const getPluginPolicy = policy => {
-  const [, plugin = '', policyName = ''] = policy.split('.');
+  const strippedPolicy = policy.replace(PLUGIN_PREFIX, '');
+  const [plugin = '', policyName = ''] = strippedPolicy.split('.');
   return getPolicyIn(_.get(strapi, ['plugins', plugin]), policyName);
 };
 
