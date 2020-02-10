@@ -179,7 +179,8 @@ module.exports = function createComponentBuilder() {
             this.unsetRelation(oldAttribute);
           }
 
-          newAttribute.autoPopulate = newAttribute.autoPopulate || oldAttribute.autoPopulate;
+          newAttribute.autoPopulate =
+            newAttribute.autoPopulate || oldAttribute.autoPopulate;
 
           return this.setRelation({
             key,
@@ -203,8 +204,6 @@ module.exports = function createComponentBuilder() {
           });
         }
       });
-
-      // TODO: handle kind change => update routes.json file somehow
 
       contentType
         .set('connection', infos.connection)

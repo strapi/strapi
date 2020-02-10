@@ -1,4 +1,7 @@
 {
+  "kind": "singleType",
+  "connection": "default",
+  "collectionName": "homepages",
   "info": {
     "name": "Homepage"
   },
@@ -10,8 +13,5 @@
     "title": {
       "type": "string"
     }
-  },
-  "connection": "default",
-  "kind": "singleType",
-  "collectionName": "homepages"
+  }
 }
