@@ -11,9 +11,9 @@ const { GraphQLUpload } = require('apollo-server-koa');
 const graphql = require('graphql');
 const { GraphQLJSON } = require('graphql-type-json');
 const { GraphQLDate, GraphQLDateTime } = require('graphql-iso-date');
-const Time = require('../types/time');
 const GraphQLLong = require('graphql-type-long');
 
+const Time = require('../types/time');
 const { toSingular, toInputName } = require('./naming');
 
 const isScalarAttribute = ({ type }) =>

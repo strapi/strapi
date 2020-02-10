@@ -10,9 +10,8 @@ const _ = require('lodash');
 
 const DynamicZoneScalar = require('../types/dynamiczoneScalar');
 
-const Aggregator = require('./Aggregator');
-const Types = require('./Types.js');
-const Schema = require('./Schema.js');
+const { formatModelConnectionsGQL } = require('./build-aggregation');
+const types = require('./type-builder');
 const {
   mergeSchemas,
   convertToParams,
@@ -21,6 +20,7 @@ const {
 } = require('./utils');
 const { toSDL, getTypeDescription } = require('./schema-definitions');
 const { toSingular, toPlural } = require('./naming');
+const { buildQuery, buildMutation } = require('./resolvers-builder');
 
 const isQueryEnabled = (schema, name) => {
   return _.get(schema, ['resolver', 'Query', name]) !== false;
@@ -50,7 +50,7 @@ const buildTypeDefObj = model => {
     .forEach(attributeName => {
       const attribute = attributes[attributeName];
       // Convert our type to the GraphQL type.
-      typeDef[attributeName] = Types.convertType({
+      typeDef[attributeName] = types.convertType({
         attribute,
         modelName: globalId,
         attributeName,
@@ -77,7 +77,7 @@ const generateEnumDefinitions = (attributes, globalId) => {
     .map(attribute => {
       const definition = attributes[attribute];
 
-      const name = Types.convertEnumType(definition, globalId, attribute);
+      const name = types.convertEnumType(definition, globalId, attribute);
       const values = definition.enum.map(v => `\t${v}`).join('\n');
       return `enum ${name} {\n${values}\n}\n`;
     })
@@ -218,14 +218,14 @@ const buildAssocResolvers = model => {
             }
 
             return association.model
-              ? strapi.plugins.graphql.services.loaders.loaders[
+              ? strapi.plugins.graphql.services['data-loaders'].loaders[
                   targetModel.uid
                 ].load({
                   params,
                   options: queryOpts,
                   single: true,
                 })
-              : strapi.plugins.graphql.services.loaders.loaders[
+              : strapi.plugins.graphql.services['data-loaders'].loaders[
                   targetModel.uid
                 ].load({
                   options: queryOpts,
@@ -296,7 +296,7 @@ const buildComponent = component => {
   const { globalId } = component;
   const schema = buildModelDefinition(component);
 
-  schema.definition += Types.generateInputModel(component, globalId, {
+  schema.definition += types.generateInputModel(component, globalId, {
     allowIds: true,
   });
 
@@ -329,7 +329,7 @@ const buildSingleType = model => {
       },
       resolvers: {
         Query: {
-          [singularName]: Schema.buildQuery(singularName, {
+          [singularName]: buildQuery(singularName, {
             resolver: `${uid}.find`,
             ..._.get(_schema, ['resolver', 'Query', singularName], {}),
           }),
@@ -339,11 +339,11 @@ const buildSingleType = model => {
   }
 
   // Add model Input definition.
-  localSchema.definition += Types.generateInputModel(model, modelName);
+  localSchema.definition += types.generateInputModel(model, modelName);
 
   // build every mutation
   ['update', 'delete'].forEach(action => {
-    const mutationScheam = buildMutation({ model, action }, { _schema });
+    const mutationScheam = buildMutationTypeDef({ model, action }, { _schema });
 
     mergeSchemas(localSchema, mutationScheam);
   });
@@ -401,7 +401,7 @@ const buildCollectionType = model => {
       },
       resolvers: {
         Query: {
-          [singularName]: Schema.buildQuery(singularName, {
+          [singularName]: buildQuery(singularName, {
             resolver: `${uid}.findOne`,
             ..._.get(_schema, ['resolver', 'Query', singularName], {}),
           }),
@@ -416,7 +416,7 @@ const buildCollectionType = model => {
       ..._.get(_schema, ['resolver', 'Query', pluralName], {}),
     };
 
-    const resolverFn = Schema.buildQuery(pluralName, resolverOpts);
+    const resolverFn = buildQuery(pluralName, resolverOpts);
 
     _.merge(localSchema, {
       query: {
@@ -432,7 +432,7 @@ const buildCollectionType = model => {
     // TODO: Add support for Graphql Aggregation in Bookshelf ORM
     if (model.orm === 'mongoose') {
       // Generation the aggregation for the given model
-      const aggregationSchema = Aggregator.formatModelConnectionsGQL({
+      const aggregationSchema = formatModelConnectionsGQL({
         fields: typeDefObj,
         model,
         name: modelName,
@@ -445,11 +445,11 @@ const buildCollectionType = model => {
   }
 
   // Add model Input definition.
-  localSchema.definition += Types.generateInputModel(model, modelName);
+  localSchema.definition += types.generateInputModel(model, modelName);
 
   // build every mutation
   ['create', 'update', 'delete'].forEach(action => {
-    const mutationScheam = buildMutation({ model, action }, { _schema });
+    const mutationScheam = buildMutationTypeDef({ model, action }, { _schema });
 
     mergeSchemas(localSchema, mutationScheam);
   });
@@ -460,12 +460,12 @@ const buildCollectionType = model => {
 // TODO:
 // - Implement batch methods (need to update the content-manager as well).
 // - Implement nested transactional methods (create/update).
-const buildMutation = ({ model, action }, { _schema }) => {
+const buildMutationTypeDef = ({ model, action }, { _schema }) => {
   const { uid } = model;
   const capitalizedName = _.upperFirst(toSingular(model.modelName));
   const mutationName = `${action}${capitalizedName}`;
 
-  const definition = Types.generateInputPayloadArguments({
+  const definition = types.generateInputPayloadArguments({
     model,
     name: model.modelName,
     mutationName,
@@ -493,7 +493,7 @@ const buildMutation = ({ model, action }, { _schema }) => {
     },
     resolvers: {
       Mutation: {
-        [mutationName]: Schema.buildMutation(mutationName, {
+        [mutationName]: buildMutation(mutationName, {
           resolver: `${uid}.${action}`,
           transformOutput: result => ({
             [toSingular(model.modelName)]: result,

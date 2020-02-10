@@ -4,11 +4,13 @@
  * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
 
+'use strict';
+
 const _ = require('lodash');
 const pluralize = require('pluralize');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
-const Schema = require('./Schema.js');
+const { buildQuery: buildQueryResolver } = require('./resolvers-builder');
 const { convertToParams, convertToQuery } = require('./utils');
 const { toSDL } = require('./schema-definitions');
 
@@ -488,7 +490,7 @@ const formatModelConnectionsGQL = function({ fields, model, name, resolver }) {
 
   const queryName = `${pluralName}Connection(sort: String, limit: Int, start: Int, where: JSON)`;
 
-  const connectionResolver = Schema.buildQuery(
+  const connectionResolver = buildQueryResolver(
     `${pluralName}Connection.values`,
     resolver
   );
@@ -503,7 +505,7 @@ const formatModelConnectionsGQL = function({ fields, model, name, resolver }) {
     },
     resolvers: {
       Query: {
-        [connectionQueryName]: Schema.buildQuery(connectionQueryName, {
+        [connectionQueryName]: buildQueryResolver(connectionQueryName, {
           resolverOf: resolver.resolverOf || resolver.resolver,
           resolver(obj, options) {
             return options;

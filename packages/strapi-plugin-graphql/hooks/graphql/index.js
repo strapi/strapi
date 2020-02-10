@@ -82,10 +82,9 @@ module.exports = strapi => {
     },
 
     initialize() {
-      const {
-        typeDefs,
-        resolvers,
-      } = strapi.plugins.graphql.services.schema.generateSchema();
+      const { typeDefs, resolvers } = strapi.plugins.graphql.services[
+        'schema-generator'
+      ].generateSchema();
 
       if (_.isEmpty(typeDefs)) {
         strapi.log.warn(
@@ -101,7 +100,8 @@ module.exports = strapi => {
         context: ({ ctx }) => {
           // Initiliase loaders for this request.
           // TODO: set loaders in the context not globally
-          strapi.plugins.graphql.services.loaders.initializeLoader();
+
+          strapi.plugins.graphql.services['data-loaders'].initializeLoader();
 
           return {
             context: ctx,
