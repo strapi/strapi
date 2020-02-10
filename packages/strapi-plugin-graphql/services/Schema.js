@@ -160,19 +160,13 @@ const generateSchema = () => {
     return {};
   }
 
-  const queryFields = formatGQL(
-    shadowCRUD.query,
-    resolver.Query,
-    null,
-    'query'
-  );
+  const queryFields =
+    shadowCRUD.query &&
+    formatGQL(shadowCRUD.query, resolver.Query, null, 'query');
 
-  const mutationFields = formatGQL(
-    shadowCRUD.mutation,
-    resolver.Mutation,
-    null,
-    'mutation'
-  );
+  const mutationFields =
+    shadowCRUD.mutation &&
+    formatGQL(shadowCRUD.mutation, resolver.Mutation, null, 'mutation');
 
   const scalars = Types.getScalars();
 
