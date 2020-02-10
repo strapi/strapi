@@ -23,6 +23,7 @@ class InputCheckboxWithErrors extends React.Component {
   componentDidMount() {
     // Display input error if it already has some
     const { errors } = this.props;
+
     if (!isEmpty(errors)) {
       this.setState({ errors });
     }
@@ -63,7 +64,7 @@ class InputCheckboxWithErrors extends React.Component {
       value,
     } = this.props;
 
-    const handleBlur = onBlur ? onBlur : () => {};
+    const handleBlur = onBlur || (() => {});
     let inputTitle = '';
 
     let spacer = !isEmpty(inputDescription) ? <InputSpacer /> : <div />;

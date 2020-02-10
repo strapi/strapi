@@ -16,7 +16,9 @@ describe('Test CTB', () => {
   context('Check create and update API', () => {
     beforeEach(() => {
       cy.server();
-      cy.route(`${backendUrl}/content-type-builder/autoReload`).as('initContentTypeBuilder');
+      cy.route(`${backendUrl}/content-type-builder/autoReload`).as(
+        'initContentTypeBuilder'
+      );
       cy.login().then(data => {
         jwt = data.jwt;
         userId = data.user._id || data.user.id;
@@ -58,8 +60,12 @@ describe('Test CTB', () => {
     it('Should create a TAG API', function() {
       cy.server();
       cy.route('GET', `${backendUrl}/content-type-builder/models`).as('models');
-      cy.route('POST', `${backendUrl}/content-type-builder/models`).as('createModel');
-      cy.route('DELETE', `${backendUrl}/content-type-builder/models/tag`).as('deleteTag');
+      cy.route('POST', `${backendUrl}/content-type-builder/models`).as(
+        'createModel'
+      );
+      cy.route('DELETE', `${backendUrl}/content-type-builder/models/tag`).as(
+        'deleteTag'
+      );
 
       cy.get('a[href="/admin/plugins/content-type-builder"')
         .click()
@@ -75,7 +81,7 @@ describe('Test CTB', () => {
       cy.get('.modal').invoke('show');
 
       // Fill the form
-      Object.keys(TAG_API).map(key => {
+      Object.keys(TAG_API).forEach(key => {
         cy.log(key);
         cy.get(`#${key}`).type(TAG_API[key]);
       });
@@ -133,8 +139,12 @@ describe('Test CTB', () => {
     it('Should update PRODUCT API field and visit the create product page', () => {
       cy.server();
       cy.createProductAndTagApis(jwt);
-      cy.route(`${backendUrl}/content-type-builder/models/product?`).as('getProductModel');
-      cy.route('PUT', `${backendUrl}/content-type-builder/models/product`).as('updateProductModel');
+      cy.route(`${backendUrl}/content-type-builder/models/product?`).as(
+        'getProductModel'
+      );
+      cy.route('PUT', `${backendUrl}/content-type-builder/models/product`).as(
+        'updateProductModel'
+      );
 
       cy.visit(
         '/admin/plugins/content-type-builder/models/product#editproduct::attributestring::baseSettings::0'
@@ -161,7 +171,9 @@ describe('Test CTB', () => {
         .wait(frontLoadingDelay);
 
       // Check that we can still go to the create page
-      cy.get('a[href="/admin/plugins/content-manager/product?source=content-manager"')
+      cy.get(
+        'a[href="/admin/plugins/content-manager/product?source=content-manager"'
+      )
         .click()
         .get('button[label="content-manager.containers.List.addAnEntry"')
         .click();
@@ -198,8 +210,12 @@ describe('Test CTB', () => {
     it('Should update PRODUCT API name and visit the create product page', () => {
       cy.server();
       // cy.createProductAndTagApis(jwt);
-      cy.route(`${backendUrl}/content-type-builder/models/product?`).as('getProductModel');
-      cy.route('PUT', `${backendUrl}/content-type-builder/models/product`).as('updateProductModel');
+      cy.route(`${backendUrl}/content-type-builder/models/product?`).as(
+        'getProductModel'
+      );
+      cy.route('PUT', `${backendUrl}/content-type-builder/models/product`).as(
+        'updateProductModel'
+      );
 
       cy.visit(
         '/admin/plugins/content-type-builder/models/product#editproduct::contentType::baseSettings'
@@ -218,7 +234,9 @@ describe('Test CTB', () => {
         .wait(frontLoadingDelay);
 
       // Check that we can still go to the create page
-      cy.get('a[href="/admin/plugins/content-manager/produit?source=content-manager"')
+      cy.get(
+        'a[href="/admin/plugins/content-manager/produit?source=content-manager"'
+      )
         .click()
         .wait(frontLoadingDelay)
         .get('button[label="content-manager.containers.List.addAnEntry"')

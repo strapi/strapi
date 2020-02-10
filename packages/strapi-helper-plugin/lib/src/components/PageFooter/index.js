@@ -18,7 +18,7 @@ function PageFooter(props) {
         <form className="form-inline">
           <div className="pageFooterSelectWrapper">
             <select
-              className={`form-control`}
+              className="form-control"
               id="params._limit"
               name="params._limit"
               onChange={e => {

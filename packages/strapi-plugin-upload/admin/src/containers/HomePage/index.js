@@ -28,6 +28,8 @@ import List from '../../components/List';
 import PluginInputFile from '../../components/PluginInputFile';
 import { EntriesWrapper, Wrapper } from './components';
 
+/* eslint-disable */
+
 import {
   changeParams,
   deleteData,
@@ -212,10 +214,7 @@ function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = selectHomePage();
 
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps
-);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
 const withReducer = strapi.injectReducer({
   key: 'homePage',

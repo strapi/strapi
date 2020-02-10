@@ -2,8 +2,9 @@ import { Map } from 'immutable';
 import { isEmpty, get, isObject } from 'lodash';
 import { all, call, fork, put, select, takeLatest } from 'redux-saga/effects';
 import { request } from 'strapi-helper-plugin';
-
 import pluginId from '../../pluginId';
+
+/* eslint-disable */
 
 import {
   deleteSuccess,

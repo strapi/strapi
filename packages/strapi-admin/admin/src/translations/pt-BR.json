@@ -213,5 +213,9 @@
   "Auth.link.forgot-password": "Esqueceu sua senha?",
   "Auth.link.ready": "Pronto para entrar?",
   "app.containers.App.notification.error.init": "Ocorreu um erro ao solicitar a API",
-  "components.Input.error.password.noMatch": "As senhas não conferem"
+  "components.Input.error.password.noMatch": "As senhas não conferem",
+  "form.button.done": "Terminar",
+  "form.button.finish": "Finalizar",
+  "notification.form.error.fields": "O formulário contém alguns erros",
+  "global.prompt.unsaved": "Você tem certeza que deseja sair desta página? Todas as suas modificacões serão perdidas"
 }
