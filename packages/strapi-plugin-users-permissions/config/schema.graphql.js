@@ -1,4 +1,5 @@
 const _ = require('lodash');
+// eslint-disable-next-line node/no-extraneous-require
 const { ApolloError } = require('apollo-server-koa');
 
 /**
