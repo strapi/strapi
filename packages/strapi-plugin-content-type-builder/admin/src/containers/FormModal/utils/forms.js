@@ -98,8 +98,8 @@ const forms = {
       dataToValidate,
       isEditing,
       attributeToEditName,
-      initialData
-      // componentCategory
+      initialData,
+      alreadyTakenTargetContentTypeAttributes
     ) {
       const alreadyTakenAttributes = Object.keys(
         get(currentSchema, ['schema', 'attributes'], {})
@@ -302,6 +302,10 @@ const forms = {
 
               return schema
                 .unique(errorsTrads.unique, targetAttributeAlreadyTakenValue)
+                .unique(
+                  getTrad('error.validation.relation.targetAttribute-taken'),
+                  alreadyTakenTargetContentTypeAttributes
+                )
                 .required(errorsTrads.required);
             }),
             target: yup.string().required(errorsTrads.required),
