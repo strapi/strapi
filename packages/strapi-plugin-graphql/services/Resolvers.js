@@ -11,11 +11,15 @@ const _ = require('lodash');
 const DynamicZoneScalar = require('../types/dynamiczoneScalar');
 
 const Aggregator = require('./Aggregator');
-const Query = require('./Query.js');
 const Types = require('./Types.js');
 const Schema = require('./Schema.js');
+const {
+  mergeSchemas,
+  convertToParams,
+  convertToQuery,
+  amountLimiting,
+} = require('./utils');
 const { toSingular, toPlural } = require('./naming');
-const { mergeSchemas } = require('./utils');
 
 const isQueryEnabled = (schema, name) => {
   return _.get(schema, ['resolver', 'Query', name]) !== false;
@@ -181,11 +185,11 @@ const buildAssocResolvers = model => {
                 obj[association.alias]
               );
             } else {
-              const queryParams = Query.amountLimiting(options);
+              const queryParams = amountLimiting(options);
               queryOpts = {
                 ...queryOpts,
-                ...Query.convertToParams(_.omit(queryParams, 'where')), // Convert filters (sort, limit and start/skip)
-                ...Query.convertToQuery(queryParams.where),
+                ...convertToParams(_.omit(queryParams, 'where')), // Convert filters (sort, limit and start/skip)
+                ...convertToQuery(queryParams.where),
               };
 
               if (

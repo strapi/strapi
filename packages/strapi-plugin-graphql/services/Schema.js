@@ -11,7 +11,14 @@ const _ = require('lodash');
 const graphql = require('graphql');
 const Types = require('./Types.js');
 const Resolvers = require('./Resolvers.js');
-const { mergeSchemas, createDefaultSchema, diffResolvers } = require('./utils');
+const {
+  mergeSchemas,
+  createDefaultSchema,
+  diffResolvers,
+  convertToParams,
+  convertToQuery,
+  amountLimiting,
+} = require('./utils');
 
 const policyUtils = require('strapi-utils').policy;
 const compose = require('koa-compose');
@@ -288,7 +295,6 @@ const buildResolvers = resolvers => {
   }, {});
 };
 
-// TODO: implement
 const buildMutation = (mutationName, config) => {
   const { resolver, resolverOf, transformOutput = _.identity } = config;
 
@@ -430,45 +436,6 @@ const buildQueryContext = ({ options, graphqlContext }) => {
   ctx.params = convertToParams(opts);
 
   return { ctx, opts };
-};
-
-const convertToParams = params => {
-  return Object.keys(params).reduce((acc, current) => {
-    const key = current === 'id' ? 'id' : `_${current}`;
-    acc[key] = params[current];
-    return acc;
-  }, {});
-};
-
-const convertToQuery = params => {
-  const result = {};
-
-  _.forEach(params, (value, key) => {
-    if (_.isPlainObject(value)) {
-      const flatObject = convertToQuery(value);
-      _.forEach(flatObject, (_value, _key) => {
-        result[`${key}.${_key}`] = _value;
-      });
-    } else {
-      result[key] = value;
-    }
-  });
-
-  return result;
-};
-
-const amountLimiting = (params = {}) => {
-  const { amountLimit } = strapi.plugins.graphql.config;
-
-  if (!amountLimit) return params;
-
-  if (!params.limit || params.limit === -1 || params.limit > amountLimit) {
-    params.limit = amountLimit;
-  } else if (params.limit < 0) {
-    params.limit = 0;
-  }
-
-  return params;
 };
 
 const getAction = resolver => {

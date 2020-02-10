@@ -40,8 +40,50 @@ const diffResolvers = (object, base) => {
   return newObj;
 };
 
+const convertToParams = params => {
+  return Object.keys(params).reduce((acc, current) => {
+    const key = current === 'id' ? 'id' : `_${current}`;
+    acc[key] = params[current];
+    return acc;
+  }, {});
+};
+
+const convertToQuery = params => {
+  const result = {};
+
+  _.forEach(params, (value, key) => {
+    if (_.isPlainObject(value)) {
+      const flatObject = convertToQuery(value);
+      _.forEach(flatObject, (_value, _key) => {
+        result[`${key}.${_key}`] = _value;
+      });
+    } else {
+      result[key] = value;
+    }
+  });
+
+  return result;
+};
+
+const amountLimiting = (params = {}) => {
+  const { amountLimit } = strapi.plugins.graphql.config;
+
+  if (!amountLimit) return params;
+
+  if (!params.limit || params.limit === -1 || params.limit > amountLimit) {
+    params.limit = amountLimit;
+  } else if (params.limit < 0) {
+    params.limit = 0;
+  }
+
+  return params;
+};
+
 module.exports = {
   diffResolvers,
   mergeSchemas,
   createDefaultSchema,
+  convertToParams,
+  convertToQuery,
+  amountLimiting,
 };

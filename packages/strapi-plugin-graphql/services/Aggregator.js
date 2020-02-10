@@ -9,8 +9,7 @@ const pluralize = require('pluralize');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
 const Schema = require('./Schema.js');
-const GraphQLQuery = require('./Query.js');
-/* eslint-disable no-unused-vars */
+const { convertToParams, convertToQuery } = require('./utils');
 
 /**
  * Returns all fields of type primitive
@@ -86,7 +85,7 @@ const fieldResolver = (field, key) => {
   return object => {
     const resolver =
       field.resolve ||
-      function resolver(obj, options, context) {
+      function resolver(obj) {
         // eslint-disable-line no-unused-vars
         return obj[key];
       };
@@ -179,8 +178,8 @@ const createAggregationFieldsResolver = function(
     fields,
     async (obj, options, context, fieldResolver, fieldKey) => {
       const filters = convertRestQueryParams({
-        ...GraphQLQuery.convertToParams(_.omit(obj, 'where')),
-        ...GraphQLQuery.convertToQuery(obj.where),
+        ...convertToParams(_.omit(obj, 'where')),
+        ...convertToQuery(obj.where),
       });
 
       return buildQuery({ model, filters, aggregate: true })
@@ -198,7 +197,7 @@ const createAggregationFieldsResolver = function(
 /**
  * Correctly format the data returned by the group by
  */
-const preProcessGroupByData = function({ result, fieldKey, filters, model }) {
+const preProcessGroupByData = function({ result, fieldKey, filters }) {
   const _result = _.toArray(result);
   return _.map(_result, value => {
     return {
@@ -237,7 +236,7 @@ const preProcessGroupByData = function({ result, fieldKey, filters, model }) {
  *   email: function emailResolver() { .... }
  * }
  */
-const createGroupByFieldsResolver = function(model, fields, name) {
+const createGroupByFieldsResolver = function(model, fields) {
   const resolver = async (
     filters,
     options,
@@ -246,8 +245,8 @@ const createGroupByFieldsResolver = function(model, fields, name) {
     fieldKey
   ) => {
     const params = {
-      ...GraphQLQuery.convertToParams(_.omit(filters, 'where')),
-      ...GraphQLQuery.convertToQuery(filters.where),
+      ...convertToParams(_.omit(filters, 'where')),
+      ...convertToQuery(filters.where),
     };
 
     const result = await buildQuery({
@@ -262,7 +261,6 @@ const createGroupByFieldsResolver = function(model, fields, name) {
       result,
       fieldKey,
       filters,
-      model,
     });
   };
 
@@ -296,7 +294,7 @@ const generateConnectionFieldsTypes = function(fields, model) {
     .join('\n\n');
 };
 
-const formatConnectionGroupBy = function(fields, model, name) {
+const formatConnectionGroupBy = function(fields, model) {
   const { globalId } = model;
   const groupByGlobalId = `${globalId}GroupBy`;
 
@@ -318,11 +316,7 @@ const formatConnectionGroupBy = function(fields, model, name) {
     globalId: groupByGlobalId,
     type: groupByTypes,
     resolver: {
-      [groupByGlobalId]: createGroupByFieldsResolver(
-        model,
-        groupByFields,
-        name
-      ),
+      [groupByGlobalId]: createGroupByFieldsResolver(model, groupByFields),
     },
   };
 };
@@ -354,8 +348,8 @@ const formatConnectionAggregator = function(fields, model, modelName) {
 
   let resolvers = {
     [aggregatorGlobalId]: {
-      count(obj, options, context) {
-        const opts = GraphQLQuery.convertToQuery(obj.where);
+      count(obj) {
+        const opts = convertToQuery(obj.where);
 
         if (opts._q) {
           // allow search param
@@ -363,7 +357,7 @@ const formatConnectionAggregator = function(fields, model, modelName) {
         }
         return strapi.query(modelName, model.plugin).count(opts);
       },
-      totalCount(obj, options, context) {
+      totalCount() {
         return strapi.query(modelName, model.plugin).count({});
       },
     },
@@ -372,7 +366,7 @@ const formatConnectionAggregator = function(fields, model, modelName) {
   // Only add the aggregator's operations types and resolver if there are some numeric fields
   if (!_.isEmpty(numericFields)) {
     // Returns the actual object and handle aggregation in the query resolvers
-    const defaultAggregatorFunc = (obj, options, context) => {
+    const defaultAggregatorFunc = obj => {
       // eslint-disable-line no-unused-vars
       return obj;
     };
@@ -471,19 +465,13 @@ const formatConnectionAggregator = function(fields, model, modelName) {
  *  }
  *
  */
-const formatModelConnectionsGQL = function({
-  fields,
-  model,
-  name,
-  resolver,
-  plugin,
-}) {
+const formatModelConnectionsGQL = function({ fields, model, name, resolver }) {
   const { globalId } = model;
 
   const connectionGlobalId = `${globalId}Connection`;
 
   const aggregatorFormat = formatConnectionAggregator(fields, model, name);
-  const groupByFormat = formatConnectionGroupBy(fields, model, name);
+  const groupByFormat = formatConnectionGroupBy(fields, model);
   const connectionFields = {
     values: `[${globalId}]`,
     groupBy: `${globalId}GroupBy`,
@@ -518,7 +506,7 @@ const formatModelConnectionsGQL = function({
       Query: {
         [connectionQueryName]: Schema.buildQuery(connectionQueryName, {
           resolverOf: resolver.resolverOf || resolver.resolver,
-          resolver(obj, options, { context }) {
+          resolver(obj, options) {
             return options;
           },
         }),
@@ -527,10 +515,10 @@ const formatModelConnectionsGQL = function({
         values(obj, options, gqlCtx) {
           return connectionResolver(obj, obj, gqlCtx);
         },
-        groupBy(obj, options, context) {
+        groupBy(obj) {
           return obj;
         },
-        aggregate(obj, options, context) {
+        aggregate(obj) {
           return obj;
         },
       },
