@@ -7,8 +7,6 @@ module.exports = {
       testQuery: {
         policies: ['plugins::users-permissions.isAuthenticated'],
         resolver: 'application::homepage.homepage.find',
-        // resolver: 'homepage.homepage.find'
-        // resolver: 'homepage.find'
       },
     },
   },

@@ -34,12 +34,11 @@ const buildMutation = (mutationName, config) => {
   const action = getAction(resolver);
 
   return async (root, options = {}, graphqlContext) => {
-    const { context } = graphqlContext;
     const ctx = buildMutationContext({ options, graphqlContext });
 
     await policiesMiddleware(ctx);
 
-    const values = await action(context);
+    const values = await action(ctx);
     const result = ctx.body || values;
 
     if (_.isError(result)) {
@@ -53,22 +52,22 @@ const buildMutation = (mutationName, config) => {
 const buildMutationContext = ({ options, graphqlContext }) => {
   const { context } = graphqlContext;
 
-  if (options.input && options.input.where) {
-    context.params = convertToParams(options.input.where || {});
-  } else {
-    context.params = {};
-  }
-
-  if (options.input && options.input.data) {
-    context.request.body = options.input.data || {};
-  } else {
-    context.request.body = options;
-  }
-
   const ctx = context.app.createContext(
     _.clone(context.req),
     _.clone(context.res)
   );
+
+  if (options.input && options.input.where) {
+    ctx.params = convertToParams(options.input.where || {});
+  } else {
+    ctx.params = {};
+  }
+
+  if (options.input && options.input.data) {
+    ctx.request.body = options.input.data || {};
+  } else {
+    ctx.request.body = options;
+  }
 
   return ctx;
 };
