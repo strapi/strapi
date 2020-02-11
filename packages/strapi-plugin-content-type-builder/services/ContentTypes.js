@@ -119,7 +119,7 @@ const editContentType = async (uid, { contentType, components = [] }) => {
   if (newKind !== previousKind && newKind === 'singleType') {
     const entryCount = await strapi.query(uid).count();
     if (entryCount > 1) {
-      throw new Error(
+      throw strapi.errors.badRequest(
         'You cannot convert a collectionType to a singleType when having multiple entries in DB'
       );
     }
