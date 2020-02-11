@@ -2,7 +2,7 @@
 
 When you create a `Content Type` you will have a certain number of **REST API endpoints** available to interact with it.
 
-As an **example** let's consider the following models:
+As an **example**, let's consider the following models:
 
 **Content Type**:
 
@@ -46,7 +46,7 @@ As an **example** let's consider the following models:
 | Fields   | Type   | Description   |
 | :------- | :----- | :------------ |
 | title    | string | The title     |
-| subTitle | string | the sub title |
+| subTitle | string | The sub title |
 
 ---
 
@@ -55,8 +55,8 @@ As an **example** let's consider the following models:
 | Fields      | Type   | Description           |
 | :---------- | :----- | :-------------------- |
 | image       | media  | The image file        |
-| title       | string | the image title       |
-| description | text   | the image description |
+| title       | string | The image title       |
+| description | text   | The image description |
 
 :::
 
@@ -64,7 +64,7 @@ As an **example** let's consider the following models:
 
 ## Endpoints
 
-Here is the list of endpoints generated for each of your **Content Types**
+Here is the list of endpoints generated for each of your **Content Types**.
 
 <style lang="stylus">
 #endpoint-table
@@ -104,7 +104,7 @@ Here is the list of endpoints generated for each of your **Content Types**
 
 </div>
 
-### Here some Content Type examples
+### Here are some Content Type examples
 
 :::: tabs
 
