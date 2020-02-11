@@ -78,6 +78,8 @@ async function rollback(uid) {
  * @param {string} baseName
  */
 const createDeleteApiFunction = baseName => {
+  const startWithBaseName = startWithName(baseName + '.');
+
   /**
    * Delets a file in an api.
    * Will only update routes.json instead of deleting it if other routes are present
@@ -85,7 +87,6 @@ const createDeleteApiFunction = baseName => {
    */
   return async filePath => {
     const fileName = path.basename(filePath);
-    const startWithBaseName = startWithName(baseName + '.');
 
     if (startWithBaseName(fileName)) return fse.remove(filePath);
 

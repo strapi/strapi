@@ -27,6 +27,22 @@ describe('Content Manager single types', () => {
 
   afterAll(() => modelsUtils.deleteContentType('single-type'), 60000);
 
+  test('Label is not pluralized', async () => {
+    const res = await rq({
+      url: `/content-manager/content-types?kind=singleType`,
+      method: 'GET',
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: 'Single-type-model',
+        }),
+      ])
+    );
+  });
+
   test('find single type content returns 404 when not created', async () => {
     const res = await rq({
       url: `/content-manager/explorer/${uid}`,

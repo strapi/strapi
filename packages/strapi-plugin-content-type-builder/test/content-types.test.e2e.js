@@ -124,5 +124,61 @@ describe('Content Type Builder - Content types', () => {
         },
       });
     });
+
+    test('Cannot switch collectionType to singleType when multiple entries in DB', async () => {
+      const createRes = await rq({
+        method: 'POST',
+        url: '/content-type-builder/content-types',
+        body: {
+          contentType: {
+            kind: 'collectionType',
+            name: 'test-collection',
+            attributes: {
+              title: {
+                type: 'string',
+              },
+            },
+          },
+        },
+      });
+
+      expect(createRes.statusCode).toBe(201);
+
+      await waitRestart();
+
+      const { uid } = createRes.body.data;
+
+      // create data
+      for (let i = 0; i < 2; i++) {
+        const res = await rq({
+          method: 'POST',
+          url: `/test-collections`,
+          body: {
+            title: 'Test',
+          },
+        });
+
+        expect(res.statusCode).toBe(200);
+      }
+
+      const updateRes = await rq({
+        method: 'PUT',
+        url: `/content-type-builder/content-types/${uid}`,
+        body: {
+          contentType: {
+            kind: 'singleType',
+            name: 'test-collection',
+            attributes: {
+              title: {
+                type: 'string',
+              },
+            },
+          },
+        },
+      });
+
+      expect(updateRes.statusCode).toBe(400);
+      expect(updateRes.body.error).toMatch('multiple entries in DB');
+    });
   });
 });

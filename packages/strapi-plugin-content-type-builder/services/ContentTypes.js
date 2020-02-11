@@ -5,7 +5,7 @@ const pluralize = require('pluralize');
 const generator = require('strapi-generate');
 
 const createBuilder = require('./schema-builder');
-const apiCleaner = require('./clear-api');
+const apiHandler = require('./api-handler');
 const {
   formatAttributes,
   replaceTemporaryUIDs,
@@ -34,7 +34,7 @@ const formatContentType = contentType => {
 };
 
 /**
- * Creates a component and handle the nested components sent with it
+ * Creates a content type and handle the nested components sent with it
  * @param {Object} params params object
  * @param {Object} params.contentType Main component to create
  * @param {Array<Object>} params.components List of nested components to created or edit
@@ -113,10 +113,22 @@ const generateAPI = ({ name, kind = 'collectionType' }) => {
 const editContentType = async (uid, { contentType, components = [] }) => {
   const builder = createBuilder();
 
+  const previousKind = builder.contentTypes.get(uid).schema.kind;
+  const newKind = contentType.kind || previousKind;
+
+  if (newKind !== previousKind && newKind === 'singleType') {
+    const entryCount = await strapi.query(uid).count();
+    if (entryCount > 1) {
+      throw strapi.errors.badRequest(
+        'You cannot convert a collectionType to a singleType when having multiple entries in DB'
+      );
+    }
+  }
+
   const uidMap = builder.createNewComponentUIDMap(components);
   const replaceTmpUIDs = replaceTemporaryUIDs(uidMap);
 
-  const updatedComponent = builder.editContentType({
+  const updatedContentType = builder.editContentType({
     uid,
     ...replaceTmpUIDs(contentType),
   });
@@ -129,8 +141,29 @@ const editContentType = async (uid, { contentType, components = [] }) => {
     return builder.editComponent(replaceTmpUIDs(component));
   });
 
+  if (newKind !== previousKind) {
+    await apiHandler.backup(uid);
+
+    try {
+      await apiHandler.clear(uid);
+
+      // generate new api squeleton
+      await generateAPI({
+        name: updatedContentType.schema.info.name,
+        kind: updatedContentType.schema.kind,
+      });
+
+      await builder.writeFiles();
+    } catch (error) {
+      strapi.log.error(error);
+      await apiHandler.rollback(uid);
+    }
+
+    return updatedContentType;
+  }
+
   await builder.writeFiles();
-  return updatedComponent;
+  return updatedContentType;
 };
 
 /**
@@ -141,15 +174,15 @@ const deleteContentType = async uid => {
   const builder = createBuilder();
 
   // make a backup
-  await apiCleaner.backup(uid);
+  await apiHandler.backup(uid);
 
   const component = builder.deleteContentType(uid);
 
   try {
     await builder.writeFiles();
-    await apiCleaner.clear(uid);
+    await apiHandler.clear(uid);
   } catch (error) {
-    await apiCleaner.rollback(uid);
+    await apiHandler.rollback(uid);
   }
 
   return component;
