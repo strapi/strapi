@@ -23,6 +23,7 @@ module.exports = {
         ctx.request.query
       );
     }
+
     ctx.body = entities;
   },
 

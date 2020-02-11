@@ -4,15 +4,15 @@
  * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
 
+'use strict';
+
 const _ = require('lodash');
 const pluralize = require('pluralize');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
-const policyUtils = require('strapi-utils').policy;
-const compose = require('koa-compose');
 
-const Schema = require('./Schema.js');
-const GraphQLQuery = require('./Query.js');
-/* eslint-disable no-unused-vars */
+const { buildQuery: buildQueryResolver } = require('./resolvers-builder');
+const { convertToParams, convertToQuery } = require('./utils');
+const { toSDL } = require('./schema-definitions');
 
 /**
  * Returns all fields of type primitive
@@ -88,7 +88,7 @@ const fieldResolver = (field, key) => {
   return object => {
     const resolver =
       field.resolve ||
-      function resolver(obj, options, context) {
+      function resolver(obj) {
         // eslint-disable-line no-unused-vars
         return obj[key];
       };
@@ -181,8 +181,8 @@ const createAggregationFieldsResolver = function(
     fields,
     async (obj, options, context, fieldResolver, fieldKey) => {
       const filters = convertRestQueryParams({
-        ...GraphQLQuery.convertToParams(_.omit(obj, 'where')),
-        ...GraphQLQuery.convertToQuery(obj.where),
+        ...convertToParams(_.omit(obj, 'where')),
+        ...convertToQuery(obj.where),
       });
 
       return buildQuery({ model, filters, aggregate: true })
@@ -200,18 +200,19 @@ const createAggregationFieldsResolver = function(
 /**
  * Correctly format the data returned by the group by
  */
-const preProcessGroupByData = function({ result, fieldKey, filters, model }) {
+const preProcessGroupByData = function({ result, fieldKey, filters }) {
   const _result = _.toArray(result);
   return _.map(_result, value => {
     return {
-      key: value._id,
+      key: value._id.toString(),
       connection: () => {
         // filter by the grouped by value in next connection
+
         return {
           ...filters,
           where: {
             ...(filters.where || {}),
-            [fieldKey]: value._id,
+            [fieldKey]: value._id.toString(),
           },
         };
       },
@@ -238,7 +239,7 @@ const preProcessGroupByData = function({ result, fieldKey, filters, model }) {
  *   email: function emailResolver() { .... }
  * }
  */
-const createGroupByFieldsResolver = function(model, fields, name) {
+const createGroupByFieldsResolver = function(model, fields) {
   const resolver = async (
     filters,
     options,
@@ -247,8 +248,8 @@ const createGroupByFieldsResolver = function(model, fields, name) {
     fieldKey
   ) => {
     const params = {
-      ...GraphQLQuery.convertToParams(_.omit(filters, 'where')),
-      ...GraphQLQuery.convertToQuery(filters.where),
+      ...convertToParams(_.omit(filters, 'where')),
+      ...convertToQuery(filters.where),
     };
 
     const result = await buildQuery({
@@ -256,14 +257,13 @@ const createGroupByFieldsResolver = function(model, fields, name) {
       filters: convertRestQueryParams(params),
       aggregate: true,
     }).group({
-      _id: `$${fieldKey}`,
+      _id: `$${fieldKey === 'id' ? model.primaryKey : fieldKey}`,
     });
 
     return preProcessGroupByData({
       result,
       fieldKey,
       filters,
-      model,
     });
   };
 
@@ -290,14 +290,14 @@ const generateConnectionFieldsTypes = function(fields, model) {
   return Object.keys(primitiveFields)
     .map(
       fieldKey =>
-        `type ${globalId}Connection${_.upperFirst(
-          fieldKey
-        )} {${Schema.formatGQL(connectionFields[fieldKey])}}`
+        `type ${globalId}Connection${_.upperFirst(fieldKey)} {${toSDL(
+          connectionFields[fieldKey]
+        )}}`
     )
     .join('\n\n');
 };
 
-const formatConnectionGroupBy = function(fields, model, name) {
+const formatConnectionGroupBy = function(fields, model) {
   const { globalId } = model;
   const groupByGlobalId = `${globalId}GroupBy`;
 
@@ -310,20 +310,14 @@ const formatConnectionGroupBy = function(fields, model, name) {
   );
 
   // Get the generated field types
-  let groupByTypes = `type ${groupByGlobalId} {${Schema.formatGQL(
-    groupByFields
-  )}}\n\n`;
+  let groupByTypes = `type ${groupByGlobalId} {${toSDL(groupByFields)}}\n\n`;
   groupByTypes += generateConnectionFieldsTypes(fields, model);
 
   return {
     globalId: groupByGlobalId,
     type: groupByTypes,
     resolver: {
-      [groupByGlobalId]: createGroupByFieldsResolver(
-        model,
-        groupByFields,
-        name
-      ),
+      [groupByGlobalId]: createGroupByFieldsResolver(model, groupByFields),
     },
   };
 };
@@ -348,15 +342,15 @@ const formatConnectionAggregator = function(fields, model, modelName) {
     });
   }
 
-  const gqlNumberFormat = Schema.formatGQL(numericFields);
-  let aggregatorTypes = `type ${aggregatorGlobalId} {${Schema.formatGQL(
+  const gqlNumberFormat = toSDL(numericFields);
+  let aggregatorTypes = `type ${aggregatorGlobalId} {${toSDL(
     initialFields
   )}}\n\n`;
 
   let resolvers = {
     [aggregatorGlobalId]: {
-      count(obj, options, context) {
-        const opts = GraphQLQuery.convertToQuery(obj.where);
+      count(obj) {
+        const opts = convertToQuery(obj.where);
 
         if (opts._q) {
           // allow search param
@@ -364,7 +358,7 @@ const formatConnectionAggregator = function(fields, model, modelName) {
         }
         return strapi.query(modelName, model.plugin).count(opts);
       },
-      totalCount(obj, options, context) {
+      totalCount() {
         return strapi.query(modelName, model.plugin).count({});
       },
     },
@@ -373,7 +367,7 @@ const formatConnectionAggregator = function(fields, model, modelName) {
   // Only add the aggregator's operations types and resolver if there are some numeric fields
   if (!_.isEmpty(numericFields)) {
     // Returns the actual object and handle aggregation in the query resolvers
-    const defaultAggregatorFunc = (obj, options, context) => {
+    const defaultAggregatorFunc = obj => {
       // eslint-disable-line no-unused-vars
       return obj;
     };
@@ -472,18 +466,13 @@ const formatConnectionAggregator = function(fields, model, modelName) {
  *  }
  *
  */
-const formatModelConnectionsGQL = function(
-  fields,
-  model,
-  name,
-  modelResolver,
-  plugin
-) {
+const formatModelConnectionsGQL = function({ fields, model, name, resolver }) {
   const { globalId } = model;
 
   const connectionGlobalId = `${globalId}Connection`;
+
   const aggregatorFormat = formatConnectionAggregator(fields, model, name);
-  const groupByFormat = formatConnectionGroupBy(fields, model, name);
+  const groupByFormat = formatConnectionGroupBy(fields, model);
   const connectionFields = {
     values: `[${globalId}]`,
     groupBy: `${globalId}GroupBy`,
@@ -491,7 +480,7 @@ const formatModelConnectionsGQL = function(
   };
   const pluralName = pluralize.plural(_.camelCase(name));
 
-  let modelConnectionTypes = `type ${connectionGlobalId} {${Schema.formatGQL(
+  let modelConnectionTypes = `type ${connectionGlobalId} {${toSDL(
     connectionFields
   )}}\n\n`;
   if (aggregatorFormat) {
@@ -501,66 +490,36 @@ const formatModelConnectionsGQL = function(
 
   const queryName = `${pluralName}Connection(sort: String, limit: Int, start: Int, where: JSON)`;
 
+  const connectionResolver = buildQueryResolver(
+    `${pluralName}Connection.values`,
+    resolver
+  );
+
+  const connectionQueryName = `${pluralName}Connection`;
+
   return {
     globalId: connectionGlobalId,
-    type: modelConnectionTypes,
+    definition: modelConnectionTypes,
     query: {
       [queryName]: connectionGlobalId,
     },
-    resolver: {
+    resolvers: {
       Query: {
-        async [`${pluralName}Connection`](obj, options, { context }) {
-          // need to check
-
-          const ctx = Object.assign(_.clone(context), {
-            request: Object.assign(_.clone(context.request), {
-              graphql: null,
-            }),
-          });
-
-          const policiesFn = [
-            policyUtils.globalPolicy({
-              controller: name,
-              action: 'find',
-              plugin,
-            }),
-          ];
-
-          policyUtils.get(
-            'plugins.users-permissions.permissions',
-            plugin,
-            policiesFn,
-            `GraphQL connection "${name}" `,
-            name
-          );
-
-          // Execute policies stack.
-          const policy = await compose(policiesFn)(ctx);
-
-          // Policy doesn't always return errors but they update the current context.
-          if (
-            _.isError(ctx.request.graphql) ||
-            _.get(ctx.request.graphql, 'isBoom')
-          ) {
-            return ctx.request.graphql;
-          }
-
-          // Something went wrong in the policy.
-          if (policy) {
-            return policy;
-          }
-
-          return options;
-        },
+        [connectionQueryName]: buildQueryResolver(connectionQueryName, {
+          resolverOf: resolver.resolverOf || resolver.resolver,
+          resolver(obj, options) {
+            return options;
+          },
+        }),
       },
       [connectionGlobalId]: {
-        values(obj, options, context) {
-          return modelResolver(obj, obj, context);
+        values(obj, options, gqlCtx) {
+          return connectionResolver(obj, obj, gqlCtx);
         },
-        groupBy(obj, options, context) {
+        groupBy(obj) {
           return obj;
         },
-        aggregate(obj, options, context) {
+        aggregate(obj) {
           return obj;
         },
       },

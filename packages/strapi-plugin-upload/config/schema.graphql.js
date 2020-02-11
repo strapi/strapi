@@ -23,10 +23,7 @@ module.exports = {
     Query: {
       file: false,
       files: {
-        resolver: {
-          plugin: 'upload',
-          handler: 'Upload.find'
-        }
+        resolver: 'plugins::upload.upload.find',
       },
     },
     Mutation: {
@@ -35,8 +32,7 @@ module.exports = {
       deleteFile: false,
       upload: {
         description: 'Upload one file',
-        plugin: 'upload',
-        resolverOf: 'Upload.upload',
+        resolverOf: 'plugins::upload.upload.upload',
         resolver: async (obj, { file: upload, ...fields }) => {
           const file = await formatFile(upload, fields);
 
@@ -59,8 +55,7 @@ module.exports = {
       },
       multipleUpload: {
         description: 'Upload one file',
-        plugin: 'upload',
-        resolverOf: 'Upload.upload',
+        resolverOf: 'plugins::upload.upload.upload',
         resolver: async (obj, { files: uploads, ...fields }) => {
           const files = await Promise.all(
             uploads.map(upload => formatFile(upload, fields))

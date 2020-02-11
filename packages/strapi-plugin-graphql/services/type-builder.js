@@ -11,10 +11,13 @@ const { GraphQLUpload } = require('apollo-server-koa');
 const graphql = require('graphql');
 const { GraphQLJSON } = require('graphql-type-json');
 const { GraphQLDate, GraphQLDateTime } = require('graphql-iso-date');
-const Time = require('../types/time');
 const GraphQLLong = require('graphql-type-long');
 
-const { toSingular } = require('./naming');
+const Time = require('../types/time');
+const { toSingular, toInputName } = require('./naming');
+
+const isScalarAttribute = ({ type }) =>
+  type && !['component', 'dynamiczone'].includes(type);
 
 module.exports = {
   /**
@@ -27,22 +30,17 @@ module.exports = {
    */
 
   convertType({
-    definition = {},
+    attribute = {},
     modelName = '',
     attributeName = '',
     rootType = 'query',
     action = '',
   }) {
     // Type
-    if (
-      definition.type &&
-      definition.type !== 'component' &&
-      definition.type !== 'dynamiczone'
-    ) {
+    if (isScalarAttribute(attribute)) {
       let type = 'String';
 
-      switch (definition.type) {
-        // TODO: Handle fields of type Array, Perhaps default to [Int] or [String] ...
+      switch (attribute.type) {
         case 'boolean':
           type = 'Boolean';
           break;
@@ -52,10 +50,8 @@ module.exports = {
         case 'biginteger':
           type = 'Long';
           break;
-        case 'decimal':
-          type = 'Float';
-          break;
         case 'float':
+        case 'decimal':
           type = 'Float';
           break;
         case 'json':
@@ -72,21 +68,22 @@ module.exports = {
           type = 'DateTime';
           break;
         case 'enumeration':
-          type = this.convertEnumType(definition, modelName, attributeName);
+          type = this.convertEnumType(attribute, modelName, attributeName);
           break;
       }
 
-      if (definition.required && action !== 'update') {
+      if (attribute.required && action !== 'update') {
         type += '!';
       }
 
       return type;
     }
 
-    if (definition.type === 'component') {
-      const globalId = strapi.components[definition.component].globalId;
+    if (attribute.type === 'component') {
+      const { required, repeatable, component } = attribute;
 
-      const { required, repeatable } = definition;
+      const globalId = strapi.components[component].globalId;
+
       let typeName = required === true ? `${globalId}` : globalId;
 
       if (rootType === 'mutation') {
@@ -104,8 +101,8 @@ module.exports = {
       return `${typeName}`;
     }
 
-    if (definition.type === 'dynamiczone') {
-      const { required } = definition;
+    if (attribute.type === 'dynamiczone') {
+      const { required } = attribute;
 
       const unionName = `${modelName}${_.upperFirst(
         _.camelCase(attributeName)
@@ -120,15 +117,16 @@ module.exports = {
       return `[${typeName}]${required ? '!' : ''}`;
     }
 
-    const ref = definition.model || definition.collection;
+    const ref = attribute.model || attribute.collection;
 
     // Association
     if (ref && ref !== '*') {
       // Add bracket or not
-      const globalId = definition.plugin
-        ? strapi.plugins[definition.plugin].models[ref].globalId
+      const globalId = attribute.plugin
+        ? strapi.plugins[attribute.plugin].models[ref].globalId
         : strapi.models[ref].globalId;
-      const plural = !_.isEmpty(definition.collection);
+
+      const plural = !_.isEmpty(attribute.collection);
 
       if (plural) {
         if (rootType === 'mutation') {
@@ -146,10 +144,10 @@ module.exports = {
     }
 
     if (rootType === 'mutation') {
-      return definition.model ? 'ID' : '[ID]';
+      return attribute.model ? 'ID' : '[ID]';
     }
 
-    return definition.model ? 'Morph' : '[Morph]';
+    return attribute.model ? 'Morph' : '[Morph]';
   },
 
   /**
@@ -184,8 +182,8 @@ module.exports = {
    * @return void
    */
 
-  addCustomScalar(resolvers) {
-    const scalars = {
+  getScalars() {
+    return {
       JSON: GraphQLJSON,
       DateTime: GraphQLDateTime,
       Time,
@@ -193,12 +191,6 @@ module.exports = {
       Long: GraphQLLong,
       Upload: GraphQLUpload,
     };
-
-    Object.assign(resolvers, scalars);
-
-    return Object.keys(scalars)
-      .map(key => `scalar ${key}`)
-      .join('\n');
   },
 
   /**
@@ -207,10 +199,9 @@ module.exports = {
    * @return string
    */
 
-  addPolymorphicUnionType(customDefs, defs) {
-    const def = customDefs + defs;
+  addPolymorphicUnionType(definition) {
     const types = graphql
-      .parse(def)
+      .parse(definition)
       .definitions.filter(
         def => def.kind === 'ObjectTypeDefinition' && def.name.value !== 'Query'
       )
@@ -218,8 +209,8 @@ module.exports = {
 
     if (types.length > 0) {
       return {
-        polymorphicDef: `union Morph = ${types.join(' | ')}`,
-        polymorphicResolver: {
+        definition: `union Morph = ${types.join(' | ')}`,
+        resolvers: {
           Morph: {
             __resolveType(obj) {
               return obj.kind || obj.__contentType || null;
@@ -230,8 +221,8 @@ module.exports = {
     }
 
     return {
-      polymorphicDef: '',
-      polymorphicResolver: {},
+      definition: '',
+      resolvers: {},
     };
   },
 
@@ -261,11 +252,11 @@ module.exports = {
       input ${inputName} {
         
         ${Object.keys(model.attributes)
-          .map(attribute => {
-            return `${attribute}: ${this.convertType({
-              definition: model.attributes[attribute],
+          .map(attributeName => {
+            return `${attributeName}: ${this.convertType({
+              attribute: model.attributes[attributeName],
               modelName: globalId,
-              attributeName: attribute,
+              attributeName,
               rootType: 'mutation',
             })}`;
           })
@@ -275,11 +266,11 @@ module.exports = {
       input edit${inputName} {
         ${allowIds ? 'id: ID' : ''}
         ${Object.keys(model.attributes)
-          .map(attribute => {
-            return `${attribute}: ${this.convertType({
-              definition: model.attributes[attribute],
+          .map(attributeName => {
+            return `${attributeName}: ${this.convertType({
+              attribute: model.attributes[attributeName],
               modelName: globalId,
-              attributeName: attribute,
+              attributeName,
               rootType: 'mutation',
               action: 'update',
             })}`;
@@ -290,32 +281,40 @@ module.exports = {
     return inputs;
   },
 
-  generateInputPayloadArguments(model, name, type, resolver) {
+  generateInputPayloadArguments({ model, name, mutationName, action }) {
     const singularName = toSingular(name);
-    if (
-      _.get(resolver, `Mutation.${type}${_.upperFirst(singularName)}`) === false
-    ) {
-      return '';
-    }
+    const inputName = toInputName(name);
 
-    const inputName = `${_.upperFirst(singularName)}Input`;
-    const payloadName = `${_.upperFirst(singularName)}Payload`;
+    const { kind } = model;
 
-    switch (type) {
+    switch (action) {
       case 'create':
         return `
-          input ${type}${inputName} { data: ${inputName} }
-          type ${type}${payloadName} { ${singularName}: ${model.globalId} }
+          input ${mutationName}Input { data: ${inputName} }
+          type ${mutationName}Payload { ${singularName}: ${model.globalId} }
         `;
       case 'update':
+        if (kind === 'singleType') {
+          return `
+          input ${mutationName}Input  { data: edit${inputName} }
+          type ${mutationName}Payload { ${singularName}: ${model.globalId} }
+        `;
+        }
+
         return `
-          input ${type}${inputName}  { where: InputID, data: edit${inputName} }
-          type ${type}${payloadName} { ${singularName}: ${model.globalId} }
+          input ${mutationName}Input  { where: InputID, data: edit${inputName} }
+          type ${mutationName}Payload { ${singularName}: ${model.globalId} }
         `;
       case 'delete':
+        if (kind === 'singleType') {
+          return `
+          type ${mutationName}Payload { ${singularName}: ${model.globalId} }
+        `;
+        }
+
         return `
-          input ${type}${inputName}  { where: InputID }
-          type ${type}${payloadName} { ${singularName}: ${model.globalId} }
+          input ${mutationName}Input  { where: InputID }
+          type ${mutationName}Payload { ${singularName}: ${model.globalId} }
         `;
       default:
       // Nothing

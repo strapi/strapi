@@ -34,7 +34,7 @@ const VALID_TYPES = [...DEFAULT_TYPES, 'component', 'dynamiczone'];
  * @param {Object} data payload
  */
 const createContentTypeSchema = data => {
-  const kind = _.get(data, 'kind', typeKinds.COLLECTION_TYPE);
+  const kind = _.get(data, 'contentType.kind', typeKinds.COLLECTION_TYPE);
 
   const contentTypeSchema = createSchema(
     VALID_TYPES,
@@ -85,7 +85,6 @@ const validateKind = kind => {
   return yup
     .string()
     .oneOf([typeKinds.SINGLE_TYPE, typeKinds.COLLECTION_TYPE])
-    .nullable()
     .validate(kind)
     .catch(error => Promise.reject(formatYupErrors(error)));
 };
