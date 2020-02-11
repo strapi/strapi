@@ -17,7 +17,7 @@ import ListPlugins from '../../components/ListPlugins';
 import injectSaga from '../../utils/injectSaga';
 import injectReducer from '../../utils/injectReducer';
 import Wrapper from './Wrapper';
-
+import { makeSelectPluginsFromMarketplace } from '../Admin/selectors';
 import {
   makeSelectPluginDeleteAction,
   makeSelectPlugins,
@@ -40,6 +40,8 @@ export class ListPluginsPage extends React.Component {
     const {
       intl: { formatMessage },
     } = this.props;
+
+    console.log(this.props);
 
     if (this.props.isLoading) {
       return <LoadingIndicatorPage />;
@@ -101,6 +103,7 @@ ListPluginsPage.propTypes = {
 
 const mapStateToProps = createStructuredSelector({
   isLoading: makeSelectIsLoading(),
+  pluginsFromMarketplace: makeSelectPluginsFromMarketplace(),
   pluginActionSucceeded: makeSelectPluginDeleteAction(),
   plugins: makeSelectPlugins(),
 });
@@ -116,10 +119,7 @@ function mapDispatchToProps(dispatch) {
   );
 }
 
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps
-);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
 /* Remove this line if the container doesn't have a route and
  *  check the documentation to see how to create the container's store
@@ -131,8 +131,4 @@ const withReducer = injectReducer({ key: 'listPluginsPage', reducer });
  */
 const withSaga = injectSaga({ key: 'listPluginsPage', saga });
 
-export default compose(
-  withReducer,
-  withSaga,
-  withConnect
-)(ListPluginsPage);
+export default compose(withReducer, withSaga, withConnect)(ListPluginsPage);
