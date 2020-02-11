@@ -1,4 +1,5 @@
 import pluginPkg from '../../package.json';
+import pluginLogo from './assets/images/logo.svg';
 import layout from '../../config/layout';
 import pluginId from './pluginId';
 import App from './containers/App';
@@ -24,6 +25,7 @@ export default strapi => {
     leftMenuSections: [],
     mainComponent: App,
     name: pluginPkg.strapi.name,
+    pluginLogo,
     preventComponentRendering: false,
     settings: {},
     suffixUrl: () => '/roles',
