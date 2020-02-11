@@ -10,9 +10,9 @@ const SvgCompo = props => (
     {...props}
   >
     <g fill={props.fill} fillRule="evenodd">
-      <rect id="Rectangle" x="4" y="8" width="9" height="3" rx="1.5"></rect>
-      <rect id="Rectangle" x="0" y="4" width="9" height="3" rx="1.5"></rect>
-      <rect id="Rectangle" x="3" y="0" width="9" height="3" rx="1.5"></rect>
+      <rect id="Rectangle" x="4" y="8" width="9" height="3" rx="1.5" />
+      <rect id="Rectangle" x="0" y="4" width="9" height="3" rx="1.5" />
+      <rect id="Rectangle" x="3" y="0" width="9" height="3" rx="1.5" />
     </g>
   </svg>
 );

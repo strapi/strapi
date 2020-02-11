@@ -25,9 +25,7 @@ const primary = css`
   min-width: 14rem;
   font-weight: 500;
   border: 1px solid;
-  background-color: #007EFF;
-
-  background: 
+  background-color: #007eff;
   -webkit-font-smoothing: antialiased;
   color: white;
   &:active {
