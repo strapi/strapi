@@ -1,6 +1,6 @@
 const formatVideosArray = array => {
   const alreadyFetchedVideos = JSON.parse(localStorage.getItem('videos')) || [];
-  const didWatchVideos = alreadyFetchedVideos.length !== array.length;
+  const didWatchVideos = alreadyFetchedVideos.length === array.length;
   let videos;
 
   if (!didWatchVideos) {

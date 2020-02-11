@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
+import { isNaN } from 'lodash';
 
 import { Modal, ModalHeader, ModalBody } from 'reactstrap';
 import { Player } from 'video-react';
@@ -17,7 +18,9 @@ import Li from './Li';
 
 class OnboardingVideo extends React.Component {
   componentDidMount() {
-    this.hiddenPlayer.current.subscribeToStateChange(this.handleChangeState);
+    if (this.hiddenPlayer.current) {
+      this.hiddenPlayer.current.subscribeToStateChange(this.handleChangeState);
+    }
   }
 
   hiddenPlayer = React.createRef();
@@ -28,7 +31,7 @@ class OnboardingVideo extends React.Component {
     const { duration } = state;
     const { id } = this.props;
 
-    if (duration !== prevState.duration) {
+    if (duration !== prevState.duration && !isNaN(duration)) {
       this.props.setVideoDuration(id, duration);
     }
   };
