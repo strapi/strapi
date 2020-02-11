@@ -114,6 +114,16 @@ const editContentType = async (uid, { contentType, components = [] }) => {
   const builder = createBuilder();
 
   const previousKind = builder.contentTypes.get(uid).schema.kind;
+  const newKind = contentType.kind || previousKind;
+
+  if (newKind !== previousKind && newKind === 'singleType') {
+    const entryCount = await strapi.query(uid).count();
+    if (entryCount > 1) {
+      throw new Error(
+        'You cannot convert a collectionType to a singleType when having multiple entries in DB'
+      );
+    }
+  }
 
   const uidMap = builder.createNewComponentUIDMap(components);
   const replaceTmpUIDs = replaceTemporaryUIDs(uidMap);
@@ -130,8 +140,6 @@ const editContentType = async (uid, { contentType, components = [] }) => {
 
     return builder.editComponent(replaceTmpUIDs(component));
   });
-
-  const newKind = updatedContentType.schema.kind;
 
   if (newKind !== previousKind) {
     await apiHandler.backup(uid);
