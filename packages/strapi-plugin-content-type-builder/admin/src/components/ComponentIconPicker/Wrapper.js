@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 /* eslint-disable indent */
 
 const Wrapper = styled.div`
-  min-height: 199px;
+  min-height: 198px;
   margin-top: -2px;
   margin-bottom: -2px;
 
