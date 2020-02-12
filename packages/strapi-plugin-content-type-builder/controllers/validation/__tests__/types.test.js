@@ -182,5 +182,60 @@ describe('Type validators', () => {
         'cannot define a default UID if the targetField is set'
       );
     });
+
+    test('maxLength cannot be smaller then minLength', () => {
+      const attributes = {
+        slug: {
+          type: 'uid',
+          minLength: 120,
+          maxLength: 119,
+        },
+      };
+
+      const validator = getTypeValidator(attributes.slug, {
+        types: ['uid'],
+        modelType: 'collectionType',
+        attributes,
+      });
+
+      expect(() => validator.validateSync(attributes.slug)).toThrow(
+        'maxLength must be greater or equal to minLength'
+      );
+    });
+
+    test('maxLength can be equal to minLength', () => {
+      const attributes = {
+        slug: {
+          type: 'uid',
+          minLength: 120,
+          maxLength: 120,
+        },
+      };
+
+      const validator = getTypeValidator(attributes.slug, {
+        types: ['uid'],
+        modelType: 'collectionType',
+        attributes,
+      });
+
+      expect(validator.isValidSync(attributes.slug)).toBe(true);
+    });
+
+    test('maxLength cannot be over 256', () => {
+      const attributes = {
+        slug: {
+          type: 'uid',
+          maxLength: 257,
+        },
+      };
+
+      const validator = getTypeValidator(attributes.slug, {
+        types: ['uid'],
+        modelType: 'collectionType',
+        attributes,
+      });
+
+      expect(validator.isValidSync(attributes.slug)).toBe(false);
+    });
   });
 });

@@ -12,6 +12,23 @@ const {
 const { hasComponent } = require('../../utils/attributes');
 const { modelTypes, VALID_UID_TARGETS } = require('./constants');
 
+const maxLengthIsGreaterThanOrEqualToMinLength = {
+  name: 'isGreaterThanMin',
+  message: 'maxLength must be greater or equal to minLength',
+  test: function(value) {
+    const { minLength } = this.parent;
+    if (
+      !_.isUndefined(minLength) &&
+      !_.isUndefined(value) &&
+      value < minLength
+    ) {
+      return false;
+    }
+
+    return true;
+  },
+};
+
 const getTypeValidator = (attribute, { types, modelType, attributes }) => {
   return yup.object({
     type: yup
@@ -65,7 +82,9 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
           )
           .test(isValidUID),
         minLength: validators.minLength,
-        maxLength: validators.maxLength,
+        maxLength: validators.maxLength
+          .max(256)
+          .test(maxLengthIsGreaterThanOrEqualToMinLength),
       };
     }
 
