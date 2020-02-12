@@ -1,9 +1,9 @@
 {
-  "contentTypes": {
-    "id": "app.components.LeftMenuLinkContainer.contentTypes",
+  "collectionType": {
+    "id": "app.components.LeftMenuLinkContainer.collectionTypes",
     "defaultMessage": "Collection Types"
   },
-  "singleTypes": {
+  "singleType": {
     "id": "app.components.LeftMenuLinkContainer.singleTypes",
     "defaultMessage": "Single Types"
   },

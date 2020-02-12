@@ -1,25 +1,13 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import matchSorter from 'match-sorter';
-import styled from 'styled-components';
 import { sortBy } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
 import LeftMenuLink from '../LeftMenuLink';
 import LeftMenuLinkHeader from '../LeftMenuLinkHeader';
-
-const LeftMenuListLink = styled.div`
-  max-height: 180px;
-  overflow: auto;
-`;
-const EmptyLinksList = styled.div`
-  color: ${props => props.theme.main.colors.white};
-  padding-left: 1.6rem;
-  padding-right: 1.6rem;
-  font-weight: 300;
-  min-height: 3.6rem;
-  padding-top: 0.2rem;
-`;
+import EmptyLinksList from './EmptyLinksList';
+import LeftMenuListLink from './LeftMenuListLink';
 
 const LeftMenuLinksSection = ({
   section,

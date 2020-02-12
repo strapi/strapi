@@ -37,7 +37,7 @@ const LeftMenuLinkContainer = ({ plugins }) => {
     return acc;
   }, {});
 
-  // Generate the list of plugin links
+  // Generate the list of plugin links (plugins without a mainComponent should not appear in the left menu)
   const pluginsLinks = Object.values(plugins)
     .filter(
       plugin =>
