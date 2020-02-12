@@ -29,7 +29,7 @@ const DEFAULT_TYPES = [
   'boolean',
 ];
 
-const VALID_UID_TARGETS = ['string'];
+const VALID_UID_TARGETS = ['string', 'text'];
 
 const FORBIDDEN_ATTRIBUTE_NAMES = ['__component', '__contentType'];
 

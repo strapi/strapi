@@ -48,10 +48,7 @@ const createAttributesValidator = ({ types, modelType, relations }) => {
           }
 
           if (_.has(attribute, 'type')) {
-            return yup
-              .object(
-                getTypeValidator(attribute, { types, modelType, attributes })
-              )
+            return getTypeValidator(attribute, { types, modelType, attributes })
               .test(isValidKey(key))
               .noUnknown();
           }

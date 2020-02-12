@@ -3,12 +3,17 @@
 const _ = require('lodash');
 const yup = require('yup');
 
-const { validators, isValidName, isValidEnum } = require('./common');
+const {
+  validators,
+  isValidName,
+  isValidEnum,
+  isValidUID,
+} = require('./common');
 const { hasComponent } = require('../../utils/attributes');
 const { modelTypes, VALID_UID_TARGETS } = require('./constants');
 
 const getTypeValidator = (attribute, { types, modelType, attributes }) => {
-  return {
+  return yup.object({
     type: yup
       .string()
       .oneOf(types)
@@ -16,7 +21,7 @@ const getTypeValidator = (attribute, { types, modelType, attributes }) => {
     configurable: yup.boolean().nullable(),
     private: yup.boolean().nullable(),
     ...getTypeShape(attribute, { modelType, attributes }),
-  };
+  });
 };
 
 const getTypeShape = (attribute, { modelType, attributes } = {}) => {
@@ -44,6 +49,21 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
             )
           )
           .nullable(),
+        default: yup
+          .string()
+          .test(
+            'isValidDefaultUID',
+            'cannot define a default UID if the targetField is set',
+            function(value) {
+              const { targetField } = this.parent;
+              if (_.isNil(targetField) || _.isNil(value)) {
+                return true;
+              }
+
+              return false;
+            }
+          )
+          .test(isValidUID),
         minLength: validators.minLength,
         maxLength: validators.maxLength,
       };
