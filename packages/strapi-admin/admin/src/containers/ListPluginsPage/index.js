@@ -34,14 +34,13 @@ import saga from './saga';
 export class ListPluginsPage extends React.Component {
   componentDidMount() {
     this.props.getPlugins();
+    // TODO: set plugins retrieved from the marketplace into the admin reducer
   }
 
   render() {
     const {
       intl: { formatMessage },
     } = this.props;
-
-    console.log(this.props);
 
     if (this.props.isLoading) {
       return <LoadingIndicatorPage />;
