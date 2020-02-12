@@ -52,6 +52,18 @@ module.exports = {
       label: 'Bucket',
       type: 'text',
     },
+    cloudfrontIsEnabled: {
+      label: 'Enable Cloudfront',
+      type: 'enum',
+      values: [
+        'Yes',
+        'No'
+      ],
+    },
+    cloudfrontURL: {
+      label: 'Cloudfront URL (only considered if Cloudfront is Enabled)',
+      type: 'text'
+    },
   },
   init: config => {
     // configure AWS S3 bucket connection
@@ -86,7 +98,12 @@ module.exports = {
               }
 
               // set the bucket file url
-              file.url = data.Location;
+              if (trimParam(config.cloudfrontIsEnabled) === "Yes")
+                // with Cloudfront is enabled
+                file.url = config.cloudfrontURL + "/" + data.key;
+              else
+                // or the s3 bucket public URL
+                file.url = data.Location;
 
               resolve();
             }
