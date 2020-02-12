@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { AttributeIcon } from '@buffetjs/core';
+import { AttributeIcon, IconLinks } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
@@ -250,26 +250,45 @@ function ListRow({
         {isInDevelopmentMode && (
           <>
             {configurable ? (
-              <>
-                <button type="button" onClick={handleClick}>
-                  <FontAwesomeIcon className="link-icon" icon="pencil-alt" />
-                </button>
-                <button
-                  type="button"
-                  onClick={e => {
-                    e.stopPropagation();
-
-                    removeAttribute(
-                      editTarget,
-                      name,
-                      secondLoopComponentUid || firstLoopComponentUid || ''
-                    );
-                  }}
-                >
-                  <FontAwesomeIcon className="link-icon" icon="trash" />
-                </button>
-              </>
+              <IconLinks
+                links={[
+                  {
+                    icon: <FontAwesomeIcon icon="pencil-alt" />,
+                    onClick: () => handleClick(),
+                  },
+                  {
+                    icon: <FontAwesomeIcon icon="trash-alt" />,
+                    onClick: e => {
+                      e.stopPropagation();
+                      removeAttribute(
+                        editTarget,
+                        name,
+                        secondLoopComponentUid || firstLoopComponentUid || ''
+                      );
+                    },
+                  },
+                ]}
+              />
             ) : (
+              // <>
+              //   <button type="button" onClick={handleClick}>
+              //     <FontAwesomeIcon className="link-icon" icon="pencil-alt" />
+              //   </button>
+              //   <button
+              //     type="button"
+              //     onClick={e => {
+              //       e.stopPropagation();
+
+              //       removeAttribute(
+              //         editTarget,
+              //         name,
+              //         secondLoopComponentUid || firstLoopComponentUid || ''
+              //       );
+              //     }}
+              //   >
+              //     <FontAwesomeIcon className="link-icon" icon="trash-alt" />
+              //   </button>
+              // </>
               <button type="button">
                 <FontAwesomeIcon icon="lock" />
               </button>
