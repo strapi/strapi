@@ -6,7 +6,7 @@ const { formatYupErrors } = require('strapi-utils');
 
 const { isValidCategoryName, isValidIcon } = require('./common');
 const createSchema = require('./model-schema');
-const removeEmptyDefaults = require('./remove-empty-defaults');
+const { removeEmptyDefaults } = require('./data-transform');
 const { modelTypes, DEFAULT_TYPES } = require('./constants');
 
 const VALID_RELATIONS = ['oneWay', 'manyWay'];
@@ -64,7 +64,17 @@ const validateComponentInput = data => {
 };
 
 const validateUpdateComponentInput = data => {
-  removeEmptyDefaults(data);
+  if (_.has(data, 'component')) {
+    removeEmptyDefaults(data.component);
+  }
+
+  if (_.has(data, 'components') && Array.isArray(data.components)) {
+    data.components.forEach(data => {
+      if (_.has(data, 'uid')) {
+        removeEmptyDefaults(data);
+      }
+    });
+  }
 
   return yup
     .object({

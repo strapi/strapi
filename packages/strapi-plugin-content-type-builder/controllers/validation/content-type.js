@@ -5,7 +5,10 @@ const yup = require('yup');
 const { formatYupErrors } = require('strapi-utils');
 
 const createSchema = require('./model-schema');
-const removeEmptyDefaults = require('./remove-empty-defaults');
+const {
+  removeEmptyDefaults,
+  removeDeletedUIDTargetFields,
+} = require('./data-transform');
 const { nestedComponentSchema } = require('./component');
 const { modelTypes, DEFAULT_TYPES, typeKinds } = require('./constants');
 
@@ -68,7 +71,19 @@ const validateContentTypeInput = data => {
  * Validator for content type edition
  */
 const validateUpdateContentTypeInput = data => {
-  removeEmptyDefaults(data);
+  if (_.has(data, 'contentType')) {
+    removeEmptyDefaults(data.contentType);
+  }
+
+  if (_.has(data, 'components') && Array.isArray(data.components)) {
+    data.components.forEach(data => {
+      if (_.has(data, 'uid')) {
+        removeEmptyDefaults(data);
+      }
+    });
+  }
+
+  removeDeletedUIDTargetFields(data.contentType);
 
   return createContentTypeSchema(data)
     .validate(data, {
