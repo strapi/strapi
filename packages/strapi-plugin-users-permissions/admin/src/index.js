@@ -25,6 +25,7 @@ export default strapi => {
     mainComponent: App,
     name: pluginPkg.strapi.name,
     preventComponentRendering: false,
+    settings: {},
     suffixUrl: () => '/roles',
     suffixUrlToReplaceForLeftMenuHighlight: '/roles',
     trads,

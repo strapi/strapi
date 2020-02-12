@@ -43,33 +43,33 @@ Navigate to [**http://localhost:1337/admin**](http://localhost:1337/admin).
 
 Navigate to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/admin/plugins/content-type-builder), in the left-hand menu.
 
-- Click the **"+ Add Content Type"** link
+- Click the **"+ Create new content-type"** link
 - Enter `restaurant`, and click `Done`
 - A window opens with fields options:
-  - Click the **String** field
+  - Click the **Text** field
   - Type `name` in the **Name** field
   - Click over to the **ADVANCED SETTINGS** tab, and check the `Required field` and the `Unique field`
-  - Click the **"+ Add New Field"** button
+  - Click the **"+ Add another Field"** button
   - Click the **Rich Text** field
   - Type `description` under the **BASE SETTINGS** tab, in the **Name** field
-  - Click `Done`
+  - Click `Finish`
 - Click the **Save** button and wait for Strapi to restart
 
 ## 4. Create a Category Content type
 
 Navigate back to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/admin/plugins/content-type-builder), in the left-hand menu.
 
-- Click the **"+ Add Content Type"** link
-- Enter `category`, and click `Done`
+- Click the **"+ Create new content-type"** link
+- Enter `category`, and click `Continue`
 - A window opens with fields options:
-  - Click the **String** field
+  - Click the **Text** field
   - Type `name` under the **BASE SETTINGS** tab, in the **Name** field
   - Click over to the **ADVANCED SETTINGS** tab, and check the `Required field` and the `Unique field`
-  - Click the **"+ Add New Field"** button
+  - Click the **"+ Add another field"** button
   - Click the **Relation** field
-  - On the right side, click the **Permissions** dropdown and select, `Restaurant`
+  - On the right side, click the **Category** dropdown and select, `Restaurant`
   - In the center, select the icon that represents `many-to-many`. The text should read, `Categories has and belongs to many Restaurants`
-  - Click `Done`
+  - Click `Finish`
 - Click the **Save** button and wait for Strapi to restart
 
 ## 5. Add content to "Restaurant" Content Type
@@ -85,7 +85,7 @@ You will see your restaurant listed in the entries.
 
 Navigate to [**CONTENT TYPES** - **Categories**](http://localhost:1337/admin/plugins/content-manager/category?source=content-manager).
 
-- Click on **+ Add New Category** button. Type `French Food` in the **Category** field. Select `Biscotte Restaurant`, on the right, from **Restaurant (0)**
+- Click on **+ Add New Category** button. Type `French Food` in the **Category** field. Select `Biscotte Restaurant`, on the right from **Restaurant (0)**.
 - Click **Save**.
 
 You will see the **French Food** category listed in the entries.
@@ -97,7 +97,7 @@ You will see the **Brunch** category listed in the entries.
 
 Navigate back to [**CONTENT TYPES** - **Restaurants**](http://localhost:1337/admin/plugins/content-manager/restaurant?source=content-manager).
 
-- Click on `Biscotte Restaurant`
+- Click on `Biscotte Restaurant`.
 - On the right, under **Categories(1)**, `select` the `Add an item...`, and add **Brunch** as a category for this restaurant, and click the **Save** button.
 
 You have now seen **two different ways** to use the **relation** field type to add and connect relations between Content Types.

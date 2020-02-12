@@ -7,16 +7,16 @@ Each route of the project can be associated to an array of policies. For example
 
 Policies can be:
 
-- `global`: so they can be used within the entire project.
-- `scoped`: used by single API or plugin.
+- `global`: Can be used within the entire project.
+- `scoped`: Can only be used by single API or plugin.
 
 ### Where are the policies defined?
 
-The API and plugins policies (scoped) are defined in each `./api/**/config/policies/` folders and plugins. They are respectively exposed through `strapi.api.**.config.policies` and `strapi.plugins.**.config.policies`. The global policies are defined at `./config/policies/` and accessible via `strapi.config.policies`.
+The API and scoped plugin policies are defined in each `./api/**/config/policies/` folders and plugins. They are respectively exposed through `strapi.api.**.config.policies` and `strapi.plugins.**.config.policies`. The global policies are defined at `./config/policies/` and accessible via `strapi.config.policies`.
 
 ### Global policies
 
-Global policies are reusable through the entire app.
+Global policies are reusable throughout the entire app.
 
 ### Scoped policies
 
@@ -49,20 +49,20 @@ module.exports = async (ctx, next) => {
 In this example, we are verifying that a session is open. If it is the case, we call the `next()` method that will execute the next policy or controller's action. Otherwise, a 401 error is returned.
 
 ::: tip
-You can access to any controllers, services or models thanks to the global variable `strapi` in a policy.
+You can access any controller, service or model thanks to the global variable `strapi` in a policy.
 :::
 
 ## Usage
 
-To apply policies to a route, you need to associate an array of policies to it. There are two kinds of policies: global or scoped.
+To apply policies to a route, you need to associate an array of policies to it. There are two kinds of policies: global and scoped.
 
 ::: warning
-To apply policies with GraphQL please see the [following guide](../plugins/graphql.md#execute-a-policy-before-a-resolver)
+To apply policies with GraphQL please see the [following guide](../plugins/graphql.md#execute-a-policy-before-a-resolver).
 :::
 
 ### Global policies
 
-The global policies can be associated to any routes in your project.
+The global policies can be associated to any route in your project.
 
 **Path —** `./api/restaurant/routes.json`.
 

@@ -2,6 +2,7 @@
   "private": true,
   "dependencies": {},
   "devDependencies": {
+    "@babel/plugin-transform-modules-commonjs": "^7.8.3",
     "@testing-library/jest-dom": "^4.0.0",
     "@testing-library/react": "^9.1.0",
     "@testing-library/react-hooks": "^2.0.0",
@@ -28,6 +29,7 @@
     "istanbul": "~0.4.2",
     "jest": "^24.5.0",
     "jest-cli": "^24.5.0",
+    "jest-styled-components": "^7.0.0",
     "lerna": "^3.13.1",
     "lint-staged": "^9.2.0",
     "npm-run-all": "^4.1.5",
@@ -37,10 +39,10 @@
     "request-promise-native": "^1.0.7",
     "rimraf": "3.0.0",
     "snyk": "^1.99.0",
-    "wait-on": "^3.2.0",
-    "yargs": "^13.2.2",
     "strapi": "3.0.0-beta.18.6",
-    "strapi-generate-new": "3.0.0-beta.18.6"
+    "strapi-generate-new": "3.0.0-beta.18.6",
+    "wait-on": "^3.2.0",
+    "yargs": "^13.2.2"
   },
   "scripts": {
     "setup": "yarn && yarn build",
