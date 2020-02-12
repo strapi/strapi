@@ -79,7 +79,6 @@ function ListView({
   getDataRef.current = async (uid, params) => {
     try {
       const generatedSearch = generateSearchFromObject(params);
-
       const [{ count }, data] = await Promise.all([
         request(getRequestUrl(`explorer/${uid}/count?${generatedSearch}`), {
           method: 'GET',
