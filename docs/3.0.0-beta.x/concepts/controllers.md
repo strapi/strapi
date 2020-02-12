@@ -21,7 +21,7 @@ The controllers are defined in each `./api/**/controllers/` folders. Every JavaS
 
 ## Core controllers
 
-When you create a new Content type or a new model. You will see a new empty controller has been created. It is because Strapi builds a generic controller for your models by default and allows you to override and extend it in the generated files.
+When you create a new `Content Type` or a new model. You will see a new empty controller has been created. It is because Strapi builds a generic controller for your models by default and allows you to override and extend it in the generated files.
 
 ### Extending a Model Controller
 
@@ -29,7 +29,7 @@ Here are the core methods (and their current implementation).
 You can simply copy and paste this code in your own controller file to customize the methods.
 
 ::: warning
-In the following example we will consider your controller, service and model is named `restaurant`
+In the following example we will assume your controller, service and model are named `restaurant`
 :::
 
 #### Utils

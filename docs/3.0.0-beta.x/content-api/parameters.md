@@ -19,11 +19,11 @@ The available operators are separated in four different categories:
 
 Filters are used as a suffix of a field name:
 
-- Not suffix or `eq`: Equals
+- No suffix or `eq`: Equals
 - `ne`: Not equals
-- `lt`: Lower than
+- `lt`: Less than
 - `gt`: Greater than
-- `lte`: Lower than or equal to
+- `lte`: Less than or equal to
 - `gte`: Greater than or equal to
 - `in`: Included in an array of values
 - `nin`: Isn't included in an array of values
@@ -45,7 +45,7 @@ or
 
 `GET /restaurants?price_gte=3`
 
-#### Find multiple restaurant with id 3, 6, 8
+#### Find multiple restaurant with id 3, 6, 8.
 
 `GET /restaurants?id_in=3&id_in=6&id_in=8`
 
@@ -57,7 +57,7 @@ If you use the same operator (except for in and nin) the values will be used to 
 
 ::: warning
 
-If you want to use `AND` for your query you will have to create a custom query by using the [Query](../concepts/query.md) documentation.
+If you want to use `AND` for your query you will have to create a custom query by using the [Query](../concepts/queries.md) documentation.
 
 Strapi doesn't support the `AND` opperator for now.
 
@@ -74,12 +74,13 @@ If one of your deep filtering queries is too slow, we recommend building a custo
 :::
 
 ::: tip
-This feature doesn't allow you to filter nested models, e.g `Find users and only return their posts older than yesterday`.
+This feature doesn't allow you to filter nested models, e.g. `Find users and only return their posts older than yesterday`.
 
-To achieve this, there are two options:
+To achieve this, there are three options:
 
-- Either build a custom route or modify your services
-- Use [GraphQL](../plugins/graphql.md#query-api)
+- Build a custom route.
+- Modify your services.
+- Use [GraphQL](../plugins/graphql.md#query-api).
   :::
 
 ::: warning
@@ -112,7 +113,7 @@ Limit the size of the returned results.
 
 `GET /users?_limit=30`
 
-You can require the full data set by passing a limit equal to `-1`
+You can require the full data set by passing a limit equal to `-1`.
 
 ## Start
 

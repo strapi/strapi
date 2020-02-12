@@ -1,4 +1,11 @@
 {
+  "ConfigPage.description": "配置电子邮件插件",
+  "ConfigPage.title": "电子邮件 - 设置",
+  "EditForm.Input.number.label": "最大文件限制 (单位:MB)",
+  "EditForm.Input.select.inputDescription": "可以使用默认提供商（Sendmail）或外部提供商发送电子邮件",
+  "EditForm.Input.select.label": "提供商",
+  "EditForm.Input.toggle.label": "启用电子邮件发送",
+  "notification.config.success": "设置已更新",
   "plugin.description.long": "发送电子邮件。",
   "plugin.description.short": "发送电子邮件。"
 }
