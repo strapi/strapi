@@ -1,11 +1,25 @@
 'use strict';
 
+const _ = require('lodash');
 const yup = require('yup');
+
 const { validators, isValidName, isValidEnum } = require('./common');
 const { hasComponent } = require('../../utils/attributes');
-const { modelTypes } = require('./constants');
+const { modelTypes, VALID_UID_TARGETS } = require('./constants');
 
-const getTypeShape = (attribute, { modelType } = {}) => {
+const getTypeValidator = (attribute, { types, modelType, attributes }) => {
+  return {
+    type: yup
+      .string()
+      .oneOf(types)
+      .required(),
+    configurable: yup.boolean().nullable(),
+    private: yup.boolean().nullable(),
+    ...getTypeShape(attribute, { modelType, attributes }),
+  };
+};
+
+const getTypeShape = (attribute, { modelType, attributes } = {}) => {
   switch (attribute.type) {
     /**
      * complexe types
@@ -16,6 +30,22 @@ const getTypeShape = (attribute, { modelType } = {}) => {
         multiple: yup.boolean(),
         required: validators.required,
         unique: validators.unique,
+      };
+    }
+
+    case 'uid': {
+      return {
+        required: validators.required,
+        targetField: yup
+          .string()
+          .oneOf(
+            Object.keys(attributes).filter(key =>
+              VALID_UID_TARGETS.includes(_.get(attributes[key], 'type'))
+            )
+          )
+          .nullable(),
+        minLength: validators.minLength,
+        maxLength: validators.maxLength,
       };
     }
 
@@ -194,6 +224,4 @@ const getTypeShape = (attribute, { modelType } = {}) => {
   }
 };
 
-module.exports = {
-  getTypeShape,
-};
+module.exports = getTypeValidator;
