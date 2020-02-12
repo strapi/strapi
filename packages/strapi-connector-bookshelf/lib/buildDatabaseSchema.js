@@ -262,16 +262,20 @@ module.exports = async ({
     let previousAttributes;
     try {
       previousAttributes = JSON.parse(
-        (await StrapiConfigs.forge({
-          key: `db_model_${table}`,
-        }).fetch()).toJSON().value
+        (
+          await StrapiConfigs.forge({
+            key: `db_model_${table}`,
+          }).fetch()
+        ).toJSON().value
       );
     } catch (err) {
       await storeTable(table, attributes);
       previousAttributes = JSON.parse(
-        (await StrapiConfigs.forge({
-          key: `db_model_${table}`,
-        }).fetch()).toJSON().value
+        (
+          await StrapiConfigs.forge({
+            key: `db_model_${table}`,
+          }).fetch()
+        ).toJSON().value
       );
     }
 
@@ -448,11 +452,19 @@ module.exports = async ({
 
       const defAttr = definition.attributes[alias];
 
+      const targetCol = `${targetAttr.attribute}_${targetAttr.column}`;
+      let rootCol = `${defAttr.attribute}_${defAttr.column}`;
+
+      // manyWay with same CT
+      if (rootCol === targetCol) {
+        rootCol = `related_${rootCol}`;
+      }
+
       const attributes = {
-        [`${targetAttr.attribute}_${targetAttr.column}`]: {
+        [targetCol]: {
           type: targetCollection.primaryKeyType,
         },
-        [`${defAttr.attribute}_${defAttr.column}`]: {
+        [rootCol]: {
           type: definition.primaryKeyType,
         },
       };
