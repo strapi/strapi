@@ -259,7 +259,11 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
               definition.primaryKey
             }`;
 
-            const otherKey = `${details.attribute}_${details.column}`;
+            let otherKey = `${details.attribute}_${details.column}`;
+
+            if (otherKey === foreignKey) {
+              otherKey = `related_${otherKey}`;
+            }
 
             loadedModel[name] = function() {
               const targetBookshelfModel = GLOBALS[globalId];
