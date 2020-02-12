@@ -103,11 +103,14 @@ export class Admin extends React.Component {
 
     return Object.keys(plugins).reduce((acc, current) => {
       const InitializerComponent = plugins[current].initializer;
-      const key = plugins[current].id;
 
-      acc.push(
-        <InitializerComponent key={key} {...this.props} {...this.helpers} />
-      );
+      if (InitializerComponent) {
+        const key = plugins[current].id;
+
+        acc.push(
+          <InitializerComponent key={key} {...this.props} {...this.helpers} />
+        );
+      }
 
       return acc;
     }, []);
