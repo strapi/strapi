@@ -29,6 +29,8 @@ const DEFAULT_TYPES = [
   'boolean',
 ];
 
+const VALID_UID_TARGETS = ['string', 'text'];
+
 const FORBIDDEN_ATTRIBUTE_NAMES = ['__component', '__contentType'];
 
 module.exports = {
@@ -42,4 +44,5 @@ module.exports = {
     COMPONENT,
   },
   FORBIDDEN_ATTRIBUTE_NAMES,
+  VALID_UID_TARGETS,
 };
