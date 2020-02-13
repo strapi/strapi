@@ -3,6 +3,8 @@
   "header.content.assets-empty": "No asset",
   "header.content.assets-multiple": "{number} assets",
   "header.content.assets-single": "1 asset",
+  "plugin.name": "Media Library",
   "plugin.description.long": "Media file management.",
-  "plugin.description.short": "Media file management."
+  "plugin.description.short": "Media file management.",
+  "search.placeholder": "Search for an asset..."
 }

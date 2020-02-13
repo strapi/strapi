@@ -1,21 +1,28 @@
 import React, { useReducer } from 'react';
 import { Header } from '@buffetjs/custom';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { HeaderSearch, useGlobalContext } from 'strapi-helper-plugin';
 import getTrad from '../../utils/getTrad';
 import Container from '../../components/Container';
-// import List from '../List';
+// import List from '../../components/List';
 import getHeaderLabel from './utils/getHeaderLabel';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
 const HomePage = () => {
   const { formatMessage } = useGlobalContext();
-  const [reducerState] = useReducer(reducer, initialState, init);
-  const { data, dataToDelete } = reducerState.toJS();
+  const [reducerState, dispatch] = useReducer(reducer, initialState, init);
+  const { data, dataToDelete, _q } = reducerState.toJS();
+  const pluginName = formatMessage({ id: getTrad('plugin.name') });
+
+  const handleClearSearch = () => {
+    dispatch({
+      type: 'ON_CLEAR_SEARCH',
+    });
+  };
 
   const headerProps = {
     title: {
-      label: 'Media Library',
+      label: pluginName,
     },
     content: formatMessage(
       {
@@ -45,6 +52,14 @@ const HomePage = () => {
 
   return (
     <Container>
+      <HeaderSearch
+        label={pluginName}
+        // TODO: search
+        onChange={() => {}}
+        onClear={handleClearSearch}
+        placeholder={formatMessage({ id: getTrad('search.placeholder') })}
+        value={_q}
+      />
       <Header {...headerProps} />
       {/* <List data={data} /> */}
     </Container>
