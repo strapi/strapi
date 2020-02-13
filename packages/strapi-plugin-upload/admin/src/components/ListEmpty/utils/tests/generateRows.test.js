@@ -19,7 +19,7 @@ describe('MEDIA LIBRARY | components | ListEmpty | utils', () => {
         },
         {
           key: 3,
-          rows: [0, 1, 2, 3],
+          rows: [0, 1, 2],
         },
       ];
 

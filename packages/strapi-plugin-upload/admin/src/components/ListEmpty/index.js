@@ -8,7 +8,7 @@ import CardEmpty from '../CardEmpty';
 import Wrapper from './Wrapper';
 
 const ListEmpty = ({ onClick }) => {
-  const rows = generateRows(4);
+  const rows = generateRows(3);
 
   return (
     <Wrapper className="container-fluid">
