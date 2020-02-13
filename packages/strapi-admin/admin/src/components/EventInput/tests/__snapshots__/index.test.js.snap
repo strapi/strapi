@@ -141,7 +141,7 @@ exports[`<EventInput /> should match the snapshot 1`] = `
 
 .c0 tbody td {
   height: 54px;
-  padding-bottom: 3px;
+  padding-top: 3px;
 }
 
 .c0 tbody td input[type='checkbox']:disabled:before {
@@ -158,7 +158,6 @@ exports[`<EventInput /> should match the snapshot 1`] = `
   width: -webkit-fit-content;
   width: -moz-fit-content;
   width: fit-content;
-  margin-top: -1px;
   font-weight: 500;
   cursor: pointer;
 }

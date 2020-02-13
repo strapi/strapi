@@ -642,7 +642,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
 
 .c16 tbody td {
   height: 54px;
-  padding-bottom: 3px;
+  padding-top: 3px;
 }
 
 .c16 tbody td input[type='checkbox']:disabled:before {
@@ -659,7 +659,6 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
   width: -webkit-fit-content;
   width: -moz-fit-content;
   width: fit-content;
-  margin-top: -1px;
   font-weight: 500;
   cursor: pointer;
 }
@@ -674,7 +673,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
 
 .c13 {
   position: relative;
-  padding-bottom: 23px;
+  padding-bottom: 27px;
 }
 
 .c13 label {
@@ -743,15 +742,10 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
 .c0 .row > div {
   position: relative;
   z-index: 0;
-  margin-bottom: 4px;
 }
 
 .c0 .row > div:nth-of-type(3) {
   z-index: 1;
-}
-
-.c0 .row > div:nth-of-type(4) {
-  margin-bottom: 0;
 }
 
 <div
