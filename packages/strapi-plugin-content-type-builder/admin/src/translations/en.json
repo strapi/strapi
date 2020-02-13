@@ -44,6 +44,7 @@
   "contentType.collectionName.description": "Useful when the name of your Content Type and your table name differ",
   "contentType.collectionName.label": "Collection name",
   "contentType.displayName.label": "Display name",
+  "contentType.kind.change.warning": "You just changed the kind of a content type: API will be reset (routes, controllers, and services will be overwritten).",
   "contentType.UID.description": "The UID is used to generate the API routes and databases tables/collections",
   "error.contentTypeName.reserved-name": "This name cannot be used in your project as it might break other functionalities",
   "error.validation.minSupMax": "Can't be superior",

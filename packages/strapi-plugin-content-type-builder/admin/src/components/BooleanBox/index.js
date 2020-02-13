@@ -7,8 +7,20 @@ import Enumeration from './Enumeration';
 import EnumerationWrapper from './EnumerationWrapper';
 import Wrapper from './Wrapper';
 
-const BooleanBox = ({ label, name, onChange, options, value }) => {
+const BooleanBox = ({
+  label,
+  name,
+  onChange,
+  onChangeCallback,
+  options,
+  value,
+}) => {
   const { formatMessage } = useGlobalContext();
+
+  const handleChange = e => {
+    onChange(e);
+    onChangeCallback();
+  };
 
   return (
     <Div>
@@ -22,7 +34,7 @@ const BooleanBox = ({ label, name, onChange, options, value }) => {
             className="option-input"
             checked={option.value === value}
             name={name}
-            onChange={onChange}
+            onChange={handleChange}
             type="radio"
             value={option.value}
           />
@@ -48,12 +60,14 @@ const BooleanBox = ({ label, name, onChange, options, value }) => {
 BooleanBox.defaultProps = {
   label: '',
   options: [],
+  onChangeCallback: () => {},
 };
 
 BooleanBox.propTypes = {
   label: PropTypes.string,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
+  onChangeCallback: PropTypes.func,
   options: PropTypes.array,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]).isRequired,
 };
