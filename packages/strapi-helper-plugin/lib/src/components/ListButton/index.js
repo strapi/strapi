@@ -4,6 +4,7 @@ const ListButton = styled.div`
   button {
     width: 100%;
     height: 54px;
+    border: 0;
     border-top: 1px solid #aed4fb;
     color: #007eff;
     font-weight: 500;

@@ -12,7 +12,6 @@ export { default as Button } from './components/Button';
 export { default as ButtonModal } from './components/ButtonModal';
 export { default as CircleButton } from './components/CircleButton';
 export { default as ContainerFluid } from './components/ContainerFluid';
-export { default as EmptyAttributesBlock } from './components/EmptyAttributesBlock';
 export { default as ErrorBoundary } from './components/ErrorBoundary';
 export { default as ExtendComponent } from './components/ExtendComponent';
 export { default as GlobalPagination } from './components/GlobalPagination';
