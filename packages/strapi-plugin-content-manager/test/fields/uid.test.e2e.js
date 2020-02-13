@@ -1,9 +1,6 @@
 const { registerAndLogin } = require('../../../../test/helpers/auth');
 const createModelsUtils = require('../../../../test/helpers/models');
-const {
-  createAuthRequest,
-  waitRestart,
-} = require('../../../../test/helpers/request');
+const { createAuthRequest } = require('../../../../test/helpers/request');
 
 let modelsUtils;
 let rq;
@@ -30,7 +27,6 @@ describe('Test type UID', () => {
 
     afterAll(async () => {
       await modelsUtils.deleteContentType('withuid');
-      await waitRestart();
     }, 60000);
 
     test('Creates an entry successfully', async () => {
@@ -80,7 +76,9 @@ describe('Test type UID', () => {
       const res = await rq.post(
         '/content-manager/explorer/application::withuid.withuid',
         {
-          body: {},
+          body: {
+            slug: null,
+          },
         }
       );
 
@@ -106,7 +104,6 @@ describe('Test type UID', () => {
 
     afterAll(async () => {
       await modelsUtils.deleteContentType('withrequireduid');
-      await waitRestart();
     }, 60000);
 
     test('Creates an entry successfully', async () => {
@@ -163,8 +160,4 @@ describe('Test type UID', () => {
       expect(res.statusCode).toBe(400);
     });
   });
-
-  test.todo(
-    'Should auto generate the uid if the targetField is set and the uid field is not set (must be required=false)'
-  );
 });
