@@ -1,6 +1,6 @@
 import pluginPkg from '../../package.json';
 // import App from './containers/App';
-// import trads from './translations';
+import trads from './translations';
 import pluginId from './pluginId';
 
 export default strapi => {
@@ -19,10 +19,10 @@ export default strapi => {
     lifecycles: null,
     leftMenuLinks: [],
     leftMenuSections: [],
-    mainComponent: null,
+    mainComponent: () => null,
     name: pluginPkg.strapi.name,
     preventComponentRendering: false,
-    trads: {},
+    trads,
   };
 
   return strapi.registerPlugin(plugin);
