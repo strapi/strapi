@@ -37,6 +37,7 @@ module.exports = {
     '/node_modules/',
     '<rootDir>/examples/getstarted/',
     '<rootDir>/packages/strapi-helper-plugin/dist/',
+    '/OLD/',
   ],
   setupFilesAfterEnv: [
     '<rootDir>/test/config/front/enzyme-setup.js',

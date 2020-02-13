@@ -1,4 +1,8 @@
 {
+  "header.actions.upload-assets": "Upload assets",
+  "header.content.assets-empty": "No asset",
+  "header.content.assets-multiple": "{number} assets",
+  "header.content.assets-single": "1 asset",
   "plugin.description.long": "Media file management.",
   "plugin.description.short": "Media file management."
 }
