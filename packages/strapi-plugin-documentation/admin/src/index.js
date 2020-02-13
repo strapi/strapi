@@ -1,5 +1,6 @@
 import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
+import pluginLogo from './assets/images/logo.svg';
 import App from './containers/App';
 import Initializer from './containers/Initializer';
 import lifecycles from './lifecycles';
@@ -23,6 +24,7 @@ export default strapi => {
     leftMenuSections: [],
     mainComponent: App,
     name: pluginPkg.strapi.name,
+    pluginLogo,
     preventComponentRendering: false,
     trads,
   };

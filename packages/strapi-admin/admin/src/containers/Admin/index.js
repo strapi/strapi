@@ -30,7 +30,7 @@ import LocaleToggle from '../LocaleToggle';
 import HomePage from '../HomePage';
 import Marketplace from '../Marketplace';
 import NotFoundPage from '../NotFoundPage';
-import Onboarding from '../Onboarding';
+import OnboardingVideos from '../Onboarding';
 import SettingsPage from '../SettingsPage';
 import PluginDispatcher from '../PluginDispatcher';
 import {
@@ -209,7 +209,7 @@ export class Admin extends React.Component {
             isOpen={blockApp && showGlobalAppBlocker}
             {...overlayBlockerData}
           />
-          {SHOW_TUTORIALS && <Onboarding />}
+          {SHOW_TUTORIALS && <OnboardingVideos />}
         </Wrapper>
       </GlobalContextProvider>
     );
