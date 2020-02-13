@@ -5,22 +5,23 @@ import { bindActionCreators, compose } from 'redux';
 import { Switch, Route } from 'react-router-dom';
 import {
   LoadingIndicatorPage,
-  getQueryParameters,
   useGlobalContext,
+  request,
 } from 'strapi-helper-plugin';
 import { DndProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import pluginId from '../../pluginId';
 import DragLayer from '../../components/DragLayer';
+import getRequestUrl from '../../utils/getRequestUrl';
+import createPossibleMainFieldsForModelsAndComponents from './utils/createPossibleMainFieldsForModelsAndComponents';
 import {
   deleteLayout,
   deleteLayouts,
-  getData,
-  getLayout,
+  getDataSucceeded,
+  getLayoutSucceeded,
   resetProps,
 } from './actions';
 import reducer from './reducer';
-import saga from './saga';
 import makeSelectMain from './selectors';
 
 const EditSettingsView = lazy(() => import('../EditSettingsView'));
@@ -29,28 +30,55 @@ const RecursivePath = lazy(() => import('../RecursivePath'));
 function Main({
   deleteLayout,
   deleteLayouts,
-  getData,
-  getLayout,
+  getDataSucceeded,
+  getLayoutSucceeded,
   components,
   componentsAndModelsMainPossibleMainFields,
   isLoading,
   layouts,
-  location: { pathname, search },
+  location: { pathname },
   global: { currentEnvironment, plugins },
   models,
   resetProps,
 }) {
+  // FIXME: when new store injector available
   strapi.useInjectReducer({ key: 'main', reducer, pluginId });
-  strapi.useInjectSaga({ key: 'main', saga, pluginId });
+
   const { emitEvent } = useGlobalContext();
   const slug = pathname.split('/')[3];
-  const source = getQueryParameters(search, 'source');
   const getDataRef = useRef();
   const getLayoutRef = useRef();
   const resetPropsRef = useRef();
 
-  getDataRef.current = getData;
-  getLayoutRef.current = getLayout;
+  getDataRef.current = async () => {
+    try {
+      const [{ data: components }, { data: models }] = await Promise.all(
+        ['components', 'content-types'].map(endPoint =>
+          request(getRequestUrl(endPoint), { method: 'GET' })
+        )
+      );
+
+      getDataSucceeded(components, models, {
+        ...createPossibleMainFieldsForModelsAndComponents(components),
+        ...createPossibleMainFieldsForModelsAndComponents(models),
+      });
+    } catch (err) {
+      strapi.notification.error('notification.error');
+    }
+  };
+
+  getLayoutRef.current = async uid => {
+    try {
+      const { data: layout } = await request(
+        getRequestUrl(`content-types/${uid}`),
+        { method: 'GET' }
+      );
+
+      getLayoutSucceeded(layout, uid);
+    } catch (err) {
+      strapi.notification.error('notification.error');
+    }
+  };
   resetPropsRef.current = resetProps;
 
   const shouldShowLoader =
@@ -63,11 +91,12 @@ function Main({
       resetPropsRef.current();
     };
   }, [getDataRef]);
+
   useEffect(() => {
     if (shouldShowLoader) {
-      getLayoutRef.current(slug, source);
+      getLayoutRef.current(slug);
     }
-  }, [getLayoutRef, shouldShowLoader, slug, source]);
+  }, [getLayoutRef, shouldShowLoader, slug]);
 
   if (isLoading || shouldShowLoader) {
     return <LoadingIndicatorPage />;
@@ -116,8 +145,8 @@ function Main({
 Main.propTypes = {
   deleteLayout: PropTypes.func.isRequired,
   deleteLayouts: PropTypes.func.isRequired,
-  getData: PropTypes.func.isRequired,
-  getLayout: PropTypes.func.isRequired,
+  getDataSucceeded: PropTypes.func.isRequired,
+  getLayoutSucceeded: PropTypes.func.isRequired,
   global: PropTypes.shape({
     currentEnvironment: PropTypes.string.isRequired,
     plugins: PropTypes.object,
@@ -141,16 +170,13 @@ export function mapDispatchToProps(dispatch) {
     {
       deleteLayout,
       deleteLayouts,
-      getData,
-      getLayout,
+      getDataSucceeded,
+      getLayoutSucceeded,
       resetProps,
     },
     dispatch
   );
 }
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps
-);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
 export default compose(withConnect)(Main);
