@@ -270,25 +270,6 @@ function ListRow({
                 ]}
               />
             ) : (
-              // <>
-              //   <button type="button" onClick={handleClick}>
-              //     <FontAwesomeIcon className="link-icon" icon="pencil-alt" />
-              //   </button>
-              //   <button
-              //     type="button"
-              //     onClick={e => {
-              //       e.stopPropagation();
-
-              //       removeAttribute(
-              //         editTarget,
-              //         name,
-              //         secondLoopComponentUid || firstLoopComponentUid || ''
-              //       );
-              //     }}
-              //   >
-              //     <FontAwesomeIcon className="link-icon" icon="trash-alt" />
-              //   </button>
-              // </>
               <button type="button">
                 <FontAwesomeIcon icon="lock" />
               </button>

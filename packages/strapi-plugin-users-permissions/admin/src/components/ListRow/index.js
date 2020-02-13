@@ -75,7 +75,7 @@ class ListRow extends React.Component {
           </Wrapper>
         );
       case 'providers':
-        links.pop(); // Remove the icon-trash
+        links.pop(); // Remove the delete CTA
 
         return (
           <Wrapper className="row">
@@ -108,7 +108,7 @@ class ListRow extends React.Component {
         );
 
       case 'email-templates':
-        links.pop();
+        links.pop(); // Remove the delete CTA
 
         return (
           <Wrapper className="row">
