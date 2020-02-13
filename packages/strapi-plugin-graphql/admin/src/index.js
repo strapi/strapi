@@ -1,30 +1,29 @@
 import pluginPkg from '../../package.json';
-import pluginLogo from './assets/images/logo.svg';
-import App from './containers/App';
-import trads from './translations';
 import pluginId from './pluginId';
+import pluginLogo from './assets/images/logo.svg';
 
 export default strapi => {
   const pluginDescription =
     pluginPkg.strapi.description || pluginPkg.description;
+
   const plugin = {
     blockerComponent: null,
     blockerComponentProps: {},
     description: pluginDescription,
     icon: pluginPkg.strapi.icon,
     id: pluginId,
-    initializer: null,
-    injectedComponents: [],
     isReady: true,
+    initializer: () => null,
+    injectedComponents: [],
     layout: null,
-    lifecycles: null,
+    lifecycles: () => {},
     leftMenuLinks: [],
     leftMenuSections: [],
-    mainComponent: App,
+    mainComponent: null,
     name: pluginPkg.strapi.name,
     pluginLogo,
     preventComponentRendering: false,
-    trads,
+    trads: {},
   };
 
   return strapi.registerPlugin(plugin);
