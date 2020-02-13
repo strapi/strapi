@@ -17,10 +17,9 @@ const BooleanBox = ({
 }) => {
   const { formatMessage } = useGlobalContext();
 
-  const handleOnchange = e => {
+  const handleChange = e => {
     onChange(e);
-
-    if (onChangeCallback) onChangeCallback();
+    onChangeCallback();
   };
 
   return (
@@ -35,7 +34,7 @@ const BooleanBox = ({
             className="option-input"
             checked={option.value === value}
             name={name}
-            onChange={handleOnchange}
+            onChange={handleChange}
             type="radio"
             value={option.value}
           />
