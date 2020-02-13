@@ -3,7 +3,10 @@ import { withRouter } from 'react-router';
 import PropTypes from 'prop-types';
 import { get, isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import moment from 'moment';
-import { IcoContainer, useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from 'strapi-helper-plugin';
+import { IconLinks } from '@buffetjs/core';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import useListView from '../../hooks/useListView';
 import DATE_FORMATS from '../../utils/DATE_FORMATS';
 import CustomInputCheckbox from '../CustomInputCheckbox';
@@ -89,6 +92,24 @@ function Row({ goTo, isBulkable, row, headers }) {
 
   const { emitEvent } = useGlobalContext();
 
+  const links = [
+    {
+      icon: <FontAwesomeIcon icon="pencil-alt" />,
+      onClick: () => {
+        emitEvent('willEditEntryFromList');
+        goTo(row.id);
+      },
+    },
+    {
+      icon: <FontAwesomeIcon icon="trash-alt" />,
+      onClick: e => {
+        e.stopPropagation();
+        emitEvent('willDeleteEntryFromList');
+        onClickDelete(row.id);
+      },
+    },
+  ];
+
   return (
     <>
       {isBulkable && (
@@ -117,26 +138,7 @@ function Row({ goTo, isBulkable, row, headers }) {
         );
       })}
       <ActionContainer>
-        <IcoContainer
-          style={{ minWidth: 'inherit', width: '100%', lineHeight: 48 }}
-          icons={[
-            {
-              icoType: 'pencil-alt',
-              onClick: () => {
-                emitEvent('willEditEntryFromList');
-                goTo(row.id);
-              },
-            },
-            {
-              id: row.id,
-              icoType: 'trash',
-              onClick: () => {
-                emitEvent('willDeleteEntryFromList');
-                onClickDelete(row.id);
-              },
-            },
-          ]}
-        />
+        <IconLinks links={links} />
       </ActionContainer>
     </>
   );
