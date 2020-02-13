@@ -7,6 +7,7 @@ import ControlsWrapper from '../../components/ControlsWrapper';
 import SelectAll from '../../components/SelectAll';
 import SortPicker from '../../components/SortPicker';
 // import List from '../../components/List';
+import ListEmpty from '../../components/ListEmpty';
 import getHeaderLabel from './utils/getHeaderLabel';
 import init from './init';
 import reducer, { initialState } from './reducer';
@@ -72,6 +73,10 @@ const HomePage = () => {
         </SortPicker>
         <AddFilterCTA />
       </ControlsWrapper>
+      <ListEmpty
+        // TODO
+        onClick={() => {}}
+      />
       {/* <List data={data} /> */}
     </Container>
   );
