@@ -2,7 +2,63 @@
 
 exports[`Admin | containers | EditView should match the snapshot 1`] = `
 <DocumentFragment>
-  .c5 {
+  .c1 {
+  position: fixed;
+  top: 0;
+  height: 6rem;
+  width: 6.5rem;
+  line-height: 6rem;
+  z-index: 1050;
+  text-align: center;
+  background-color: #ffffff;
+  color: #81848a;
+  border-top: 1px solid #f3f4f4;
+  border-right: 1px solid #f3f4f4;
+  border-left: 1px solid #f3f4f4;
+  cursor: pointer;
+}
+
+.c1:before {
+  content: '\\f053';
+  font-family: 'FontAwesome';
+  font-size: 1.8rem;
+  font-weight: bolder;
+}
+
+.c1:hover {
+  background-color: #f3f4f4;
+}
+
+.c15 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 20px;
+  width: 20px;
+  margin: 8px 5px 0px 0px;
+  border-radius: 50%;
+  border: 1px solid #e3e9f3;
+  cursor: pointer;
+}
+
+.c15:focus {
+  outline: 0;
+}
+
+.c15:after {
+  content: '\\f068';
+  font-family: FontAwesome;
+  font-size: 9px;
+  line-height: 18px;
+  color: #007eff;
+}
+
+.c5 {
   height: 30px;
   padding: 0 15px;
   font-weight: 500;
@@ -400,62 +456,6 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
 .c6 {
   margin-right: 10px;
   font-size: 0.94em;
-}
-
-.c1 {
-  position: fixed;
-  top: 0;
-  height: 6rem;
-  width: 6.5rem;
-  line-height: 6rem;
-  z-index: 1050;
-  text-align: center;
-  background-color: #ffffff;
-  color: #81848a;
-  border-top: 1px solid #f3f4f4;
-  border-right: 1px solid #f3f4f4;
-  border-left: 1px solid #f3f4f4;
-  cursor: pointer;
-}
-
-.c1:before {
-  content: '\\f053';
-  font-family: 'FontAwesome';
-  font-size: 1.8rem;
-  font-weight: bolder;
-}
-
-.c1:hover {
-  background-color: #f3f4f4;
-}
-
-.c15 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 20px;
-  width: 20px;
-  margin: 8px 5px 0px 0px;
-  border-radius: 50%;
-  border: 1px solid #e3e9f3;
-  cursor: pointer;
-}
-
-.c15:focus {
-  outline: 0;
-}
-
-.c15:after {
-  content: '\\f068';
-  font-family: FontAwesome;
-  font-size: 9px;
-  line-height: 18px;
-  color: #007eff;
 }
 
 .c9 {
