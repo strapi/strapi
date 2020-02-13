@@ -90,32 +90,30 @@ const OnboardingVideos = () => {
           </p>
         </div>
         <ul className="onboardingList">
-          {videos.map((video, index) => {
-            return (
-              <Video
-                key={video.id || index}
-                id={index}
-                video={video}
-                onClick={() => handleClickOpenVideo(index)}
-                setVideoDuration={(_, duration) => {
-                  setVideoDuration(index, duration);
-                }}
-                getVideoCurrentTime={(_, elapsedTime) => {
-                  handleUpdateVideoStartTime(index, elapsedTime);
-                }}
-                didPlayVideo={(_, elapsedTime) => {
-                  const eventName = `didPlay${index}GetStartedVideo`;
+          {videos.map((video, index) => (
+            <Video
+              key={video.id || index}
+              id={index}
+              video={video}
+              onClick={() => handleClickOpenVideo(index)}
+              setVideoDuration={(_, duration) => {
+                setVideoDuration(index, duration);
+              }}
+              getVideoCurrentTime={(_, elapsedTime) => {
+                handleUpdateVideoStartTime(index, elapsedTime);
+              }}
+              didPlayVideo={(_, elapsedTime) => {
+                const eventName = `didPlay${index}GetStartedVideo`;
 
-                  emitEvent(eventName, { timestamp: elapsedTime });
-                }}
-                didStopVideo={(_, elapsedTime) => {
-                  const eventName = `didStop${index}Video`;
+                emitEvent(eventName, { timestamp: elapsedTime });
+              }}
+              didStopVideo={(_, elapsedTime) => {
+                const eventName = `didStop${index}Video`;
 
-                  emitEvent(eventName, { timestamp: elapsedTime });
-                }}
-              />
-            );
-          })}
+                emitEvent(eventName, { timestamp: elapsedTime });
+              }}
+            />
+          ))}
         </ul>
       </div>
       <div className="openBtn">
