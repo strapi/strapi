@@ -14,8 +14,9 @@ const Wrapper = styled.div`
     color: #9ea7b8;
     > p {
       max-width: calc(100% - 20px);
-      margin-top: -1px;
+      margin-top: -2px;
       line-height: 18px;
+      margin-bottom: 1.4rem;
     }
   }
 

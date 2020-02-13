@@ -10,7 +10,7 @@ import {
   useGlobalContext,
   InputsIndex,
 } from 'strapi-helper-plugin';
-import { Button } from '@buffetjs/core';
+import { Button, Label } from '@buffetjs/core';
 import { Inputs } from '@buffetjs/custom';
 import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
@@ -1134,11 +1134,7 @@ const FormModal = () => {
                     state.actionType
                   ).items.map((row, index) => {
                     return (
-                      <div
-                        className="row"
-                        key={index}
-                        style={{ marginBottom: 4 }}
-                      >
+                      <div className="row" key={index}>
                         {row.map((input, i) => {
                           // The divider type is used mainly the advanced tab
                           // It is the one responsible for displaying the settings label
@@ -1148,23 +1144,25 @@ const FormModal = () => {
                                 className="col-12"
                                 style={{
                                   marginBottom: '1.4rem',
-                                  marginTop: -2,
+                                  lineHeight: 'normal',
                                   fontWeight: 500,
                                 }}
                                 key="divider"
                               >
-                                <FormattedMessage
-                                  id={getTrad(
-                                    'form.attribute.item.settings.name'
-                                  )}
-                                />
+                                <Label htmlFor="divider-no-for">
+                                  <FormattedMessage
+                                    id={getTrad(
+                                      'form.attribute.item.settings.name'
+                                    )}
+                                  />
+                                </Label>
                               </div>
                             );
                           }
 
                           // The spacer type is used mainly to align the icon picker...
                           if (input.type === 'spacer') {
-                            return <div key="spacer" style={{ height: 11 }} />;
+                            return <div key="spacer" style={{ height: 8 }} />;
                           }
 
                           // The spacer type is used mainly to align the icon picker...
@@ -1258,7 +1256,7 @@ const FormModal = () => {
                                 type="string"
                                 onChange={handleChange}
                                 value={value}
-                                style={{ marginTop: 8, marginBottom: 11 }}
+                                style={{ marginBottom: 11 }}
                               />
                             );
                           }
@@ -1267,7 +1265,6 @@ const FormModal = () => {
                             <div
                               className={`col-${input.size || 6}`}
                               key={input.name}
-                              // style={style}
                             >
                               <Inputs
                                 {...input}
