@@ -57,6 +57,7 @@ const HomePage = () => {
 
   return (
     <Container>
+      <Header {...headerProps} />
       <HeaderSearch
         label={pluginName}
         // TODO: search
@@ -65,7 +66,7 @@ const HomePage = () => {
         placeholder={formatMessage({ id: getTrad('search.placeholder') })}
         value={_q}
       />
-      <Header {...headerProps} />
+
       <ControlsWrapper>
         <SelectAll />
         <SortPicker>
