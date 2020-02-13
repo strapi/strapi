@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Checkbox, IconLinks } from '@buffetjs/core';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import Switch from '../Switch';
 import StyledListRow from './StyledListRow';
@@ -24,11 +25,11 @@ function ListRow({
 }) {
   const links = [
     {
-      icon: 'pencil',
+      icon: <FontAwesomeIcon icon="pencil-alt" />,
       onClick: () => onEditClick(id),
     },
     {
-      icon: 'trash',
+      icon: <FontAwesomeIcon icon="trash-alt" />,
       onClick: e => {
         e.stopPropagation();
         onDeleteCLick(id);

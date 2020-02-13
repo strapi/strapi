@@ -9,8 +9,10 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import moment from 'moment';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { IconLinks } from '@buffetjs/core';
 
-import { IcoContainer, PopUpWarning } from 'strapi-helper-plugin';
+import { PopUpWarning } from 'strapi-helper-plugin';
 import { HomePageContext } from '../../contexts/HomePage';
 import FileIcon from '../FileIcon';
 import { StyledLi, Truncate, Wrapper, Checked } from './components';
@@ -87,18 +89,17 @@ class Li extends React.Component {
       return this.renderLiCopied();
     }
 
-    const icons = [
-      // {
-      //   icoType: item.private ? 'lock' : 'unlock',
-      //   onClick: () => {},
-      // },
+    const links = [
       {
-        icoType: 'eye',
+        icon: <FontAwesomeIcon icon="eye" />,
         onClick: this.handleClick,
       },
       {
-        icoType: 'trash',
-        onClick: () => this.setState({ isOpen: true }),
+        icon: <FontAwesomeIcon icon="trash-alt" />,
+        onClick: e => {
+          e.stopPropagation();
+          this.setState({ isOpen: true });
+        },
       },
     ];
 
@@ -149,7 +150,7 @@ class Li extends React.Component {
                   return <Truncate key={key}>{item[value]}</Truncate>;
                 }
 
-                return <IcoContainer key={key} icons={icons} />;
+                return <IconLinks key={key} links={links} />;
               }
             )}
           </Wrapper>
