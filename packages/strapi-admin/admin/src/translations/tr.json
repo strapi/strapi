@@ -73,7 +73,6 @@
   "app.components.LeftMenuLinkContainer.general": "Genel",
   "app.components.LeftMenuLinkContainer.installNewPlugin": "Mağaza",
   "app.components.LeftMenuLinkContainer.listPlugins": "Eklentiler",
-  "app.components.LeftMenuLinkContainer.contentTypes": "İçerik Tipi",
   "app.components.LeftMenuLinkContainer.noPluginsInstalled": "Yüklenen eklenti bulunmamaktadır.",
   "app.components.LeftMenuLinkContainer.plugins": "Eklentiler",
   "app.components.LeftMenuLinkContainer.settings": "Ayarlar",

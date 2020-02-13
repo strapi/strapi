@@ -6,6 +6,7 @@
 
 import { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
+import { chain } from 'lodash';
 import { request } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 
@@ -22,14 +23,14 @@ const Initializer = ({ updatePlugin }) => {
       try {
         const { data } = await request(requestURL, { method: 'GET' });
 
-        const menu = [
-          {
-            name: 'Content Types',
-            links: data,
-          },
-        ];
-
-        ref.current(pluginId, 'leftMenuSections', menu);
+        ref.current(
+          pluginId,
+          'leftMenuSections',
+          chain(data)
+            .groupBy('schema.kind')
+            .map((value, key) => ({ name: key, links: value }))
+            .value()
+        );
         ref.current(pluginId, 'isReady', true);
       } catch (err) {
         strapi.notification.error('content-manager.error.model.fetch');

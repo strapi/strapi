@@ -74,7 +74,6 @@
   "app.components.LeftMenuLinkContainer.general": "Ogólne",
   "app.components.LeftMenuLinkContainer.installNewPlugin": "Sklep",
   "app.components.LeftMenuLinkContainer.listPlugins": "Wtyczki",
-  "app.components.LeftMenuLinkContainer.contentTypes": "Modele",
   "app.components.LeftMenuLinkContainer.noPluginsInstalled": "Brak zainstalowanych wtyczek",
   "app.components.LeftMenuLinkContainer.plugins": "Wtyczki",
   "app.components.LeftMenuLinkContainer.settings": "Ustawienia",
