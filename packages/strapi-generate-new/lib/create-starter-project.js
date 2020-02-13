@@ -68,9 +68,9 @@ const manageGitConfigs = async destination => {
 const installDependencies = async (packageManager, destination) => {
   console.log(chalk.yellow('\nInstalling dependencies...'));
 
-  var args = [`setup-${packageManager}`];
+  var args = [`setup:${packageManager}`];
   if (packageManager == 'npm') args.unshift('run');
-  await execa('yarn', args, {
+  await execa(packageManager, args, {
     stdio: 'inherit',
     cwd: destination,
   });
@@ -128,59 +128,34 @@ const createInitialGitCommit = async (
   }
 };
 
-const runSeed = async (packageManager, destination) => {
-  console.log(chalk.yellow(`Creating content types...`));
-  var args = [`seed`];
+const buildBackend = async (packageManager, destination) => {
+  console.log(chalk.yellow('\nBuilding Strapi'));
+
+  var args = [`build:${packageManager}`];
   if (packageManager == 'npm') args.unshift('run');
+
   await execa(packageManager, args, {
-    cwd: `${destination}/backend`,
+    stdio: 'inherit',
+    cwd: destination,
   });
 };
 
-const getScripts = async destination => {
-  const backendFile = `${destination}/backend/package.json`;
-  const frontendFile = `${destination}/frontend/package.json`;
-
-  // Read the package.json inside the backend directory (strapi)
-  const packageJsonBackend = await fs.readJSON(backendFile);
-  const packageJsonFrontend = await fs.readJSON(frontendFile);
-
-  return [packageJsonBackend.scripts, packageJsonFrontend.scripts];
-};
-
-const successMessage = async (
-  destinationName,
-  backendScripts,
-  frontendScripts,
-  packageManager
-) => {
-  var npm = packageManager == 'npm' ? 'run' : '';
-
+const successMessage = async destinationName => {
   console.log(`${chalk.green('\nSuccess!')} Cloned ${destinationName}`);
   console.log(
-    `Inside that directory, you can run both of your frontend and backend server:
-  ${chalk.yellow(`\nYou should start by running your strapi server`)}
+    `Inside that directory, you can run both of your backend and server:
 
-  backend
+  ${chalk.cyan(`cd ${destinationName}`)}
 
-  ${chalk.cyan(`cd ${destinationName}/backend`)}`
-  );
-  for (var key in backendScripts) {
-    console.log(`  ${chalk.cyan(`${packageManager} ${npm} ${key}`)}`);
-  }
-  console.log(`
+  Using npm
+  ${chalk.cyan('npm run develop:npm')}
 
   -------------
 
-  frontend
-
-  ${chalk.cyan(`cd ${destinationName}/frontend`)}`);
-  for (var key2 in frontendScripts) {
-    console.log(`  ${chalk.cyan(`${packageManager} ${npm} ${key2}`)}`);
-  }
-  console.log(`
-  Thanks for giving this starter a try!
-  `);
+  Using yarn
+  ${chalk.cyan('yarn develop:yarn')}
+  `
+  );
 };
 
 module.exports = async function createStarterProject(scope) {
@@ -196,9 +171,6 @@ module.exports = async function createStarterProject(scope) {
 
   let destination = scope.rootPath;
   let destinationName = scope.name;
-
-  let backendScripts = '';
-  let frontendScripts = '';
 
   // Archive from the github url
   const archive = repository.replace('.git', '/archive/master.zip');
@@ -223,15 +195,9 @@ module.exports = async function createStarterProject(scope) {
 
   // Install dependencies thanks to the package.json inside the starter repo
   await installDependencies(packageManager, destination);
+  await buildBackend(packageManager, destination);
   await updateUuid(destination);
-  await runSeed(packageManager, destination);
   await iniGitRepository(destination, destinationName);
   await createInitialGitCommit(destination, destinationName, repository);
-  [backendScripts, frontendScripts] = await getScripts(destination);
-  await successMessage(
-    destinationName,
-    backendScripts,
-    frontendScripts,
-    packageManager
-  );
+  await successMessage(destinationName, packageManager);
 };
