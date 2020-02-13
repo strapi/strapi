@@ -148,7 +148,7 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
   display: -ms-flexbox;
   display: flex;
   width: 100%;
-  margin-top: 18px;
+  margin-top: 19px;
   -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
   -ms-flex-pack: justify;
@@ -383,7 +383,7 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
   display: -ms-flexbox;
   display: flex;
   width: 100%;
-  margin-top: 18px;
+  margin-top: 19px;
   -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
   -ms-flex-pack: justify;

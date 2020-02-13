@@ -39,7 +39,7 @@ const Verb = styled.div`
   border-radius: 3px;
   color: #ffffff;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   &.get {

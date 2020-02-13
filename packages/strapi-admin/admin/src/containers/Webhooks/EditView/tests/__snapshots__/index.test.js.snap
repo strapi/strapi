@@ -789,16 +789,15 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                 <button
                   class="c5"
                   color="primary"
-                  style="padding: 0px 15px;"
                   type="button"
                 >
                   <span
                     class="c6"
                   >
                     <svg
-                      height="14px"
+                      height="10px"
                       viewBox="0 0 14 14"
-                      width="14px"
+                      width="8px"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <g
@@ -837,7 +836,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                   class="c7"
                   color="cancel"
                   disabled=""
-                  style="padding: 0px 20px;"
+                  style="padding-left: 20px; padding-right: 20px;"
                   type="button"
                 >
                   Reset

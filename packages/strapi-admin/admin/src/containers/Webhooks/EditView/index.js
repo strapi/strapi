@@ -106,9 +106,6 @@ function EditView() {
         id: 'Settings.webhooks.trigger',
       }),
       onClick: () => handleTrigger(),
-      style: {
-        padding: '0 15px',
-      },
       title: isTriggerActionDisabled
         ? formatMessage({
           id: 'Settings.webhooks.trigger.save',
@@ -117,8 +114,8 @@ function EditView() {
       type: 'button',
       icon: (
         <Play
-          width="14px"
-          height="14px"
+          width="8px"
+          height="10px"
           fill={isTriggerActionDisabled ? '#b4b6ba' : '#ffffff'}
         />
       ),
@@ -131,7 +128,8 @@ function EditView() {
       }),
       onClick: () => handleReset(),
       style: {
-        padding: '0 20px',
+        paddingLeft: '20px',
+        paddingRight: '20px',
       },
       type: 'button',
     },
