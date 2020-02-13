@@ -164,6 +164,7 @@
   "notification.error.layout": "Couldn't retrieve the layout",
   "request.error.model.unknown": "This model doesn't exist",
   "app.utils.delete": "Delete",
+  "app.utils.filters": "Filters",
   "HomePage.helmet.title": "Homepage",
   "HomePage.welcome.congrats": "Congrats!",
   "HomePage.welcome.congrats.content": "You are logged as the first administrator. To discover the powerful features provided by Strapi,",

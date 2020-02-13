@@ -3,10 +3,14 @@ import { Header } from '@buffetjs/custom';
 import { HeaderSearch, useGlobalContext } from 'strapi-helper-plugin';
 import getTrad from '../../utils/getTrad';
 import Container from '../../components/Container';
+import ControlsWrapper from '../../components/ControlsWrapper';
+import SelectAll from '../../components/SelectAll';
+import SortPicker from '../../components/SortPicker';
 // import List from '../../components/List';
 import getHeaderLabel from './utils/getHeaderLabel';
 import init from './init';
 import reducer, { initialState } from './reducer';
+import AddFilterCTA from '../../components/AddFilterCTA';
 
 const HomePage = () => {
   const { formatMessage } = useGlobalContext();
@@ -61,6 +65,13 @@ const HomePage = () => {
         value={_q}
       />
       <Header {...headerProps} />
+      <ControlsWrapper>
+        <SelectAll />
+        <SortPicker>
+          <span> Sort By</span>
+        </SortPicker>
+        <AddFilterCTA />
+      </ControlsWrapper>
       {/* <List data={data} /> */}
     </Container>
   );
