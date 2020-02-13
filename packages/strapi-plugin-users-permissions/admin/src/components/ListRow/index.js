@@ -8,8 +8,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { capitalize, get, includes } from 'lodash';
+import { IconLinks } from '@buffetjs/core';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { IcoContainer, PopUpWarning } from 'strapi-helper-plugin';
+import { PopUpWarning } from 'strapi-helper-plugin';
 import en from '../../translations/en.json';
 import { HomePageContext } from '../../contexts/HomePage';
 import { Container, Flex, Row, Wrapper } from './Components';
@@ -28,14 +30,15 @@ class ListRow extends React.Component {
   undeletableIDs = ['public', 'authenticated'];
 
   generateContent = () => {
-    let icons = [
+    let links = [
       {
-        icoType: 'pencil-alt',
+        icon: <FontAwesomeIcon icon="pencil-alt" />,
         onClick: this.handleClick,
       },
       {
-        icoType: 'trash',
-        onClick: () => {
+        icon: <FontAwesomeIcon icon="trash-alt" />,
+        onClick: e => {
+          e.stopPropagation();
           this.setState({ showModalDelete: true });
         },
       },
@@ -44,11 +47,16 @@ class ListRow extends React.Component {
     switch (this.props.settingType) {
       case 'roles':
         if (includes(this.protectedRoleIDs, get(this.props.item, 'type', ''))) {
-          icons = [];
+          links = [];
         }
 
         if (includes(this.undeletableIDs, get(this.props.item, 'type', ''))) {
-          icons = [{ icoType: 'pencil-alt', onClick: this.handleClick }];
+          links = [
+            {
+              icon: <FontAwesomeIcon icon="pencil-alt" />,
+              onClick: this.handleClick,
+            },
+          ];
         }
 
         return (
@@ -62,12 +70,12 @@ class ListRow extends React.Component {
               {this.props.item.nb_users > 1 ? 'users' : 'user'}
             </div>
             <div className="col-md-2">
-              <IcoContainer icons={icons} />
+              <IconLinks links={links} />
             </div>
           </Wrapper>
         );
       case 'providers':
-        icons.pop(); // Remove the icon-trash
+        links.pop(); // Remove the delete CTA
 
         return (
           <Wrapper className="row">
@@ -94,13 +102,13 @@ class ListRow extends React.Component {
               )}
             </div>
             <div className="col-md-2">
-              <IcoContainer icons={icons} />
+              <IconLinks links={links} />
             </div>
           </Wrapper>
         );
 
       case 'email-templates':
-        icons.pop();
+        links.pop(); // Remove the delete CTA
 
         return (
           <Wrapper className="row">
@@ -121,7 +129,7 @@ class ListRow extends React.Component {
               </Flex>
             </div>
             <div className="col-md-8">
-              <IcoContainer icons={icons} />
+              <IconLinks links={links} />
             </div>
           </Wrapper>
         );

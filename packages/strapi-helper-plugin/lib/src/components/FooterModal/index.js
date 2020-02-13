@@ -13,7 +13,7 @@ const FooterModal = styled.div`
   padding-top: ${sizes.margin * 0.9}px;
   section {
     display: flex;
-    height: 72px;
+    height: 73px;
     padding: 0 ${sizes.margin * 3}px;
     justify-content: flex-end;
     &:last-of-type {

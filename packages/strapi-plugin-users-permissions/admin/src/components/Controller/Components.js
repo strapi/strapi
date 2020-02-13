@@ -63,10 +63,9 @@ const Label = styled.label`
       content: '\f068';
       position: absolute;
       top: 0px;
-      left: 3px;
+      left: 2px;
       font-size: 10px;
       font-family: 'FontAwesome';
-      font-weight: 100;
       color: #1c5de7;
     }
   }

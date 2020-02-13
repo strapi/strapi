@@ -138,6 +138,9 @@ const BannerWrapper = styled.button`
 
     .grab {
       cursor: move;
+      svg {
+        vertical-align: initial;
+      }
     }
   }
 

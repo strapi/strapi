@@ -23,8 +23,8 @@ const TrashButton = styled.div`
     padding: 0 10px;
     font-size: 13px;
     &:before {
-      content: '\f1f8';
-      font-size: 14px;
+      content: '\f2ed';
+      font-size: 10px;
       font-family: FontAwesome;
       margin-right: 10px;
     }

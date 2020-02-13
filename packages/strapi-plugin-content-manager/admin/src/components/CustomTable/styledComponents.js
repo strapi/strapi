@@ -171,9 +171,9 @@ const DeletAllSpan = styled.span`
   &:after {
     position: relative;
     top: -1px;
-    content: '\f1f8';
+    content: '\f2ed';
     margin-left: 7px;
-    font-size: 13px;
+    font-size: 10px;
     font-family: FontAwesome;
     -webkit-font-smoothing: antialiased;
   }
