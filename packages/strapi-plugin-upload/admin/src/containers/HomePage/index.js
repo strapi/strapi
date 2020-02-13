@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useState } from 'react';
 import { Header } from '@buffetjs/custom';
 import { HeaderSearch, useGlobalContext } from 'strapi-helper-plugin';
 import getTrad from '../../utils/getTrad';
@@ -8,6 +8,7 @@ import SelectAll from '../../components/SelectAll';
 import SortPicker from '../../components/SortPicker';
 // import List from '../../components/List';
 import ListEmpty from '../../components/ListEmpty';
+import UploadModal from '../UploadModal';
 import getHeaderLabel from './utils/getHeaderLabel';
 import init from './init';
 import reducer, { initialState } from './reducer';
@@ -16,9 +17,13 @@ import AddFilterCTA from '../../components/AddFilterCTA';
 const HomePage = () => {
   const { formatMessage } = useGlobalContext();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
+  const [isOpen, setIsOpen] = useState(true);
   const { data, dataToDelete, _q } = reducerState.toJS();
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
 
+  const handleClickToggleModal = () => {
+    setIsOpen(prev => !prev);
+  };
   const handleClearSearch = () => {
     dispatch({
       type: 'ON_CLEAR_SEARCH',
@@ -49,7 +54,7 @@ const HomePage = () => {
         disabled: false,
         color: 'primary',
         label: formatMessage({ id: getTrad('header.actions.upload-assets') }),
-        onClick: () => {},
+        onClick: handleClickToggleModal,
         type: 'button',
       },
     ],
@@ -76,9 +81,10 @@ const HomePage = () => {
       </ControlsWrapper>
       <ListEmpty
         // TODO
-        onClick={() => {}}
+        onClick={handleClickToggleModal}
       />
       {/* <List data={data} /> */}
+      <UploadModal isOpen={isOpen} onToggle={handleClickToggleModal} />
     </Container>
   );
 };
