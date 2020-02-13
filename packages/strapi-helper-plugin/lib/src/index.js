@@ -19,6 +19,7 @@ export { default as GlobalPagination } from './components/GlobalPagination';
 export { default as HeaderNav } from './components/HeaderNav';
 export { default as HeaderModal } from './components/HeaderModal';
 export { default as HeaderModalTitle } from './components/HeaderModalTitle';
+export { default as HeaderSearch } from './components/HeaderSearch';
 export { default as IcoContainer } from './components/IcoContainer';
 export { default as InputAddon } from './components/InputAddon';
 

@@ -10,7 +10,7 @@ List.defaultProps = {
 };
 
 List.propTypes = {
-  data: PropTypes.arrayOf(PropTypes.object),
+  data: PropTypes.array,
 };
 
 export default List;

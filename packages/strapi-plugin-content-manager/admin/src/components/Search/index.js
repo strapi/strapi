@@ -8,9 +8,8 @@ import React, { memo } from 'react';
 import { isEmpty, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { SearchIcon, SearchInfo } from 'strapi-helper-plugin';
-import Cross from '../../icons/Cross';
-import { Wrapper, Clear } from './components';
+import { HeaderSearch } from 'strapi-helper-plugin';
+import getTrad from '../../utils/getTrad';
 
 const WAIT = 400;
 
@@ -56,29 +55,17 @@ class Search extends React.Component {
     const { value } = this.state;
 
     return (
-      <Wrapper>
-        <div>
-          <SearchIcon />
-        </div>
-        <div>
-          <FormattedMessage id="content-manager.components.Search.placeholder">
-            {message => (
-              <input
-                onChange={this.handleChange}
-                placeholder={message}
-                type="text"
-                value={value}
-              />
-            )}
-          </FormattedMessage>
-          {value !== '' && (
-            <Clear onClick={this.handleClick}>
-              <Cross />
-            </Clear>
-          )}
-        </div>
-        <SearchInfo label={upperFirst(model)} />
-      </Wrapper>
+      <FormattedMessage id={getTrad('components.Search.placeholder')}>
+        {placeholder => (
+          <HeaderSearch
+            label={upperFirst(model)}
+            onChange={this.handleChange}
+            onClear={this.handleClick}
+            placeholder={placeholder}
+            value={value}
+          />
+        )}
+      </FormattedMessage>
     );
   }
 }
