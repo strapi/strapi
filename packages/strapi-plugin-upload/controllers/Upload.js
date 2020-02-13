@@ -55,7 +55,7 @@ module.exports = {
     const buffers = await uploadService.bufferize(files);
 
     const enhancedFiles = buffers.map(file => {
-      if (file.size > config.sizeLimit) {
+      if (parseFloat(file.size) > parseFloat(config.sizeLimit)) {
         return ctx.badRequest(null, [
           {
             messages: [
@@ -208,10 +208,9 @@ const searchQueries = {
     return ({ id }) => {
       return model
         .query(qb => {
-          qb.whereRaw('LOWER(hash) LIKE ?', [`%${id}%`]).orWhereRaw(
-            'LOWER(name) LIKE ?',
-            [`%${id}%`]
-          );
+          qb.whereRaw('LOWER(hash) LIKE ?', [
+            `%${id}%`,
+          ]).orWhereRaw('LOWER(name) LIKE ?', [`%${id}%`]);
         })
         .fetchAll()
         .then(results => results.toJSON());
