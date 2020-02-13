@@ -10,13 +10,10 @@ import { withRouter } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty } from 'lodash';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { IconLinks } from '@buffetjs/core';
+
 // Design
-import {
-  GlobalContext,
-  IcoContainer,
-  ListRow,
-  PopUpWarning,
-} from 'strapi-helper-plugin';
+import { GlobalContext, ListRow, PopUpWarning } from 'strapi-helper-plugin';
 import Action from './Action';
 import Content from './Content';
 
@@ -49,11 +46,12 @@ class Row extends React.Component {
     const { currentEnvironment } = this.context;
 
     const settingsPath = `/plugins/${name}/configurations/${currentEnvironment}`;
-    const icons = [];
+
+    const links = [];
 
     if (PLUGINS_WITH_CONFIG.includes(name)) {
-      icons.push({
-        icoType: 'cog',
+      links.push({
+        icon: <FontAwesomeIcon icon="cog" />,
         onClick: e => {
           e.preventDefault();
           e.stopPropagation();
@@ -63,8 +61,8 @@ class Row extends React.Component {
     }
 
     if (!required && currentEnvironment === 'development') {
-      icons.push({
-        icoType: 'trash',
+      links.push({
+        icon: <FontAwesomeIcon icon="trash-alt" />,
         id: name,
         onClick: this.handleClick,
       });
@@ -93,7 +91,7 @@ class Row extends React.Component {
         </Content>
         <div className="col-md-1">
           <Action>
-            <IcoContainer icons={icons} />
+            <IconLinks links={links} />
           </Action>
         </div>
         <PopUpWarning
