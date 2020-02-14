@@ -6,7 +6,7 @@ import Container from '../../components/Container';
 import ControlsWrapper from '../../components/ControlsWrapper';
 import SelectAll from '../../components/SelectAll';
 import SortPicker from '../../components/SortPicker';
-// import List from '../../components/List';
+import List from '../../components/List';
 import ListEmpty from '../../components/ListEmpty';
 import getHeaderLabel from './utils/getHeaderLabel';
 import init from './init';
@@ -78,7 +78,7 @@ const HomePage = () => {
         // TODO
         onClick={() => {}}
       />
-      {/* <List data={data} /> */}
+      <List data={data} />
     </Container>
   );
 };
