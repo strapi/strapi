@@ -97,7 +97,7 @@ module.exports = strapi => {
 
 And here it is.
 
-You can now use `strapi.github` everywhere in your code to use the GitHub client.
+You can now use `strapi.services.github` everywhere in your code to use the GitHub client.
 
 To simply test if it works, lets update the `bootstrap.js` function to log your GitHub profile.
 
@@ -133,7 +133,7 @@ And in your GitHub hook, you will have to replace `strapi.config.hook.github` by
 }
 ```
 
-**Path —** `./hooks/github/inde.js`
+**Path —** `./hooks/github/index.js`
 
 ```js
 const GitHubAPI = require('@octokit/rest');
