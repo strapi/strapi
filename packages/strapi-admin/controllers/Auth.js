@@ -327,7 +327,7 @@ module.exports = {
     // Generate random token.
     const resetPasswordToken = crypto.randomBytes(64).toString('hex');
 
-    // Retrieve email settings from database. Enable the use of external email plugins.
+    // Retrieve email settings from database.
     const settings = await pluginStore
       .get({ key: 'email' })
       .then(storeEmail => {
