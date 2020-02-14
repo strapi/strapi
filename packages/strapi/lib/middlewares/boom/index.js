@@ -42,6 +42,22 @@ const boomMethods = [
   'gatewayTimeout',
 ];
 
+const formatBoomPayload = boomError => {
+  if (!Boom.isBoom(boomError)) {
+    boomError = Boom.boomify(boomError, {
+      statusCode: boomError.status || 500,
+    });
+  }
+
+  const { output } = boomError;
+
+  if (output.statusCode < 500 && !_.isNil(boomError.data)) {
+    output.payload.data = boomError.data;
+  }
+
+  return { status: output.statusCode, body: output.payload };
+};
+
 module.exports = strapi => {
   return {
     /**
@@ -68,35 +84,19 @@ module.exports = strapi => {
           // Log error.
           strapi.log.error(error);
 
-          // if the error is a boom error (e.g throw strapi.errors.badRequest)
-          if (error.isBoom) {
-            ctx.status = error.output.statusCode;
-            ctx.body = error.output.payload;
-          } else {
-            // Wrap error into a Boom's response.
-            ctx.status = error.status || 500;
-            ctx.body = _.get(ctx.body, 'isBoom')
-              ? ctx.body || (error && error.message)
-              : Boom.boomify(error, { statusCode: ctx.status });
-          }
+          const { status, body } = formatBoomPayload(error);
+          ctx.body = body;
+          ctx.status = status;
         }
+      });
 
-        if (ctx.response.headers.location) {
-          return;
-        }
+      strapi.app.use(async (ctx, next) => {
+        await next();
 
         // Empty body is considered as `notFound` response.
         if (!ctx.body && ctx.body !== 0) {
           ctx.notFound();
         }
-
-        if (ctx.body.isBoom && ctx.body.data) {
-          ctx.body.output.payload.message = ctx.body.data;
-        }
-
-        // Format `ctx.body` and `ctx.status`.
-        ctx.status = ctx.body.isBoom ? ctx.body.output.statusCode : ctx.status;
-        ctx.body = ctx.body.isBoom ? ctx.body.output.payload : ctx.body;
       });
     },
 
@@ -104,10 +104,12 @@ module.exports = strapi => {
     createResponses() {
       boomMethods.forEach(method => {
         strapi.app.response[method] = function(...rest) {
-          const error = Boom[method](...rest) || {};
+          const boomError = Boom[method](...rest) || {};
 
-          this.status = error.isBoom ? error.output.statusCode : this.status;
-          this.body = error;
+          const { status, body } = formatBoomPayload(boomError);
+
+          this.body = body;
+          this.status = status;
         };
 
         this.delegator.method(method);

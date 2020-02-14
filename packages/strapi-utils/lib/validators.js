@@ -1,6 +1,11 @@
 'use strict';
 
 const yup = require('yup');
+const _ = require('lodash');
+
+yup.addMethod(yup.mixed, 'defined', function(msg = '${path} must be defined') {
+  return this.test('defined', msg, value => !_.isNil(value));
+});
 
 /**
  * Returns a formatted error for http responses

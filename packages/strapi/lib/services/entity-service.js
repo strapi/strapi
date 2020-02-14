@@ -2,6 +2,39 @@
 
 const _ = require('lodash');
 const uploadFiles = require('./utils/upload-files');
+const { yup, formatYupErrors } = require('strapi-utils');
+
+const createAttributeValidator = attr => {
+  switch (attr.type) {
+    case 'string': {
+      const { minLength, maxLength } = attr;
+      return yup
+        .string()
+        .nullable()
+        .min(minLength)
+        .max(maxLength);
+    }
+    default:
+      return yup.mixed();
+  }
+};
+
+const createValidator = model => {
+  return yup
+    .object(
+      _.mapValues(model.attributes, attr => {
+        const { required } = attr;
+
+        const validator = createAttributeValidator(attr);
+
+        if (required) {
+          return validator.defined();
+        }
+        return validator;
+      })
+    )
+    .required();
+};
 
 module.exports = ({ db, eventHub }) => ({
   /**
@@ -60,6 +93,15 @@ module.exports = ({ db, eventHub }) => ({
       if (count >= 1) {
         throw new Error('Single type entry can only be created once');
       }
+    }
+
+    try {
+      await createValidator(db.getModel(model)).validate(data, {
+        strict: true,
+        abortEarly: false,
+      });
+    } catch (err) {
+      throw strapi.errors.badRequest('Validation error', formatYupErrors(err));
     }
 
     let entry = await db.query(model).create(data);
