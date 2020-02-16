@@ -153,7 +153,7 @@ Create the `docker-compose.yaml` in the application root and write your configur
 version: '3'
 services:
   strapi-cms:
-    image: node:10
+    image: strapi/base
     working_dir: /src
     command: yarn develop # or npm run develop
     volumes:
