@@ -174,7 +174,7 @@ services:
   # the database service name below matches the
   # name of our database host env variable
   strapi-db:
-    image: postgres:11
+    image: postgres:12
     ports:
       - ${DATABASE_PORT}:${DATABASE_PORT}
     environment:
