@@ -234,6 +234,33 @@ steps:
 
 :::
 
+::: tab "GitHub Actions"
+
+This pipeline builds the image, tags it with a unique id, and pushes to Docker Hub.
+
+```yaml
+name: Docker Image CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Docker login
+        run: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+      - name: Build the Docker image
+        run: docker build -t "$DOCKER_USERNAME/$APP_NAME:$(date +%s)" .
+      - name: Push the Docker image
+        run: docker push "$DOCKER_USERNAME/$APP_NAME"
+    env:
+      DOCKER_USERNAME: dockerhubaccount
+      DOCKER_PASSWORD: ${{ secrets.your_secret }}
+      APP_NAME: project
+```
+
 ::::
 
 ## Deployment
