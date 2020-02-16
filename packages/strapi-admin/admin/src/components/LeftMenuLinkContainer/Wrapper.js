@@ -4,12 +4,12 @@ import PropTypes from 'prop-types';
 const Wrapper = styled.div`
   padding-top: 0.7rem;
   position: absolute;
-  top: ${props => props.theme.main.sizes.header.height};
+  top: ${props => props.theme.main.sizes.leftMenu.height};
   right: 0;
   bottom: 0;
   left: 0;
   overflow-y: auto;
-  height: calc(100vh - (${props => props.theme.main.sizes.header.height} + 10.2rem));
+  height: calc(100vh - (${props => props.theme.main.sizes.leftMenu.height} + 10.2rem));
   box-sizing: border-box;
 
   .title {
