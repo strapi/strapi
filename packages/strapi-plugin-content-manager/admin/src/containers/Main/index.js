@@ -25,7 +25,12 @@ import reducer from './reducer';
 import makeSelectMain from './selectors';
 
 const EditSettingsView = lazy(() => import('../EditSettingsView'));
-const RecursivePath = lazy(() => import('../RecursivePath'));
+const CollectionTypeRecursivePath = lazy(() =>
+  import('../CollectionTypeRecursivePath')
+);
+const SingleTypeRecursivePath = lazy(() =>
+  import('../SingleTypeRecursivePath')
+);
 
 function Main({
   deleteLayout,
@@ -45,7 +50,7 @@ function Main({
   strapi.useInjectReducer({ key: 'main', reducer, pluginId });
 
   const { emitEvent } = useGlobalContext();
-  const slug = pathname.split('/')[3];
+  const slug = pathname.split('/')[4];
   const getDataRef = useRef();
   const getLayoutRef = useRef();
   const resetPropsRef = useRef();
@@ -123,7 +128,8 @@ function Main({
       path: 'ctm-configurations/edit-settings/:type/:componentSlug',
       comp: EditSettingsView,
     },
-    { path: ':slug', comp: RecursivePath },
+    { path: 'singleType/:slug', comp: SingleTypeRecursivePath },
+    { path: 'collectionType/:slug', comp: CollectionTypeRecursivePath },
   ].map(({ path, comp }) => (
     <Route
       key={path}

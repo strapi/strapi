@@ -26,9 +26,15 @@ const LeftMenuLinksSection = ({
   );
 
   const getLinkDestination = link => {
-    return ['plugins', 'general'].includes(section)
-      ? link.destination
-      : `/plugins/${link.plugin}/${link.destination || link.uid}`;
+    if (['plugins', 'general'].includes(section)) {
+      return link.destination;
+    }
+    if (link.schema && link.schema.kind) {
+      return `/plugins/${link.plugin}/${link.schema.kind}/${link.destination ||
+        link.uid}`;
+    }
+
+    return `/plugins/${link.plugin}/${link.destination || link.uid}`;
   };
 
   return (

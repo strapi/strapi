@@ -3,14 +3,13 @@ import PropTypes from 'prop-types';
 import { withRouter } from 'react-router';
 import { FormattedMessage } from 'react-intl';
 import { upperFirst } from 'lodash';
-import pluginId from '../../pluginId';
 import useListView from '../../hooks/useListView';
 import TableHeader from './TableHeader';
 import { Table, TableEmpty, TableRow } from './styledComponents';
 import ActionCollapse from './ActionCollapse';
 import Row from './Row';
 
-function CustomTable({
+const CustomTable = ({
   data,
   headers,
   history: {
@@ -18,13 +17,12 @@ function CustomTable({
     push,
   },
   isBulkable,
-}) {
+}) => {
   const {
     emitEvent,
     entriesToDelete,
     label,
     searchParams: { filters, _q },
-    slug,
   } = useListView();
 
   const redirectUrl = `redirectUrl=${pathname}${search}`;
@@ -33,7 +31,7 @@ function CustomTable({
   const handleGoTo = id => {
     emitEvent('willEditEntryFromList');
     push({
-      pathname: `/plugins/${pluginId}/${slug}/${id}`,
+      pathname: `${pathname}/${id}`,
       search: redirectUrl,
     });
   };
@@ -88,7 +86,7 @@ function CustomTable({
       </tbody>
     </Table>
   );
-}
+};
 
 CustomTable.defaultProps = {
   data: [],

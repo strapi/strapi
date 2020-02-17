@@ -4,10 +4,8 @@ import { LoadingIndicatorPage } from 'strapi-helper-plugin';
 
 const EditView = lazy(() => import('../EditView'));
 const EditSettingsView = lazy(() => import('../EditSettingsView'));
-const ListView = lazy(() => import('../ListView'));
-const ListSettingsView = lazy(() => import('../ListSettingsView'));
 
-const RecursivePath = props => {
+const SingleTypeRecursivePath = props => {
   const { url } = useRouteMatch();
   const { slug } = useParams();
 
@@ -17,15 +15,10 @@ const RecursivePath = props => {
 
   const routes = [
     {
-      path: 'ctm-configurations/list-settings',
-      comp: ListSettingsView,
-    },
-    {
       path: 'ctm-configurations/edit-settings/:type',
       comp: EditSettingsView,
     },
-    { path: ':id', comp: EditView },
-    { path: '', comp: ListView },
+    { path: '', comp: EditView },
   ].map(({ path, comp }) => (
     <Route
       key={path}
@@ -41,4 +34,4 @@ const RecursivePath = props => {
   );
 };
 
-export default RecursivePath;
+export default SingleTypeRecursivePath;

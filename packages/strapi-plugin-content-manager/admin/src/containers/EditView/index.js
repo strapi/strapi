@@ -39,8 +39,8 @@ const EditView = ({
   formatLayoutRef.current = createAttributesLayout;
   // Retrieve push to programmatically navigate between views
   const { push } = useHistory();
-  // Retrieve the search
-  const { search } = useLocation();
+  // Retrieve the search and the location
+  const { search, pathname } = useLocation();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState)
@@ -129,6 +129,7 @@ const EditView = ({
     .filter((_, index) => index !== 0)
     .join('');
   const redirectToPreviousPage = () => push(redirectURL);
+  const isSingleType = pathname.includes('singleType');
 
   return (
     <EditViewProvider
@@ -152,7 +153,7 @@ const EditView = ({
         redirectToPreviousPage={redirectToPreviousPage}
         slug={slug}
       >
-        <BackHeader onClick={() => redirectToPreviousPage()} />
+        <BackHeader onClick={redirectToPreviousPage} />
         <Container className="container-fluid">
           <Header />
           <div className="row" style={{ paddingTop: 3 }}>
@@ -276,7 +277,9 @@ const EditView = ({
                     }}
                     icon="layout"
                     key={`${pluginId}.link`}
-                    url="ctm-configurations/edit-settings/content-types"
+                    url={`${
+                      isSingleType ? `${pathname}/` : ''
+                    }ctm-configurations/edit-settings/content-types`}
                     onClick={() => {
                       // emitEvent('willEditContentTypeLayoutFromEditView');
                     }}

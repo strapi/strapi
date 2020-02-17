@@ -482,6 +482,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
         chain(data)
           .groupBy('schema.kind')
           .map((value, key) => ({ name: key, links: value }))
+          .sortBy('name')
           .value()
       );
     } catch (err) {
