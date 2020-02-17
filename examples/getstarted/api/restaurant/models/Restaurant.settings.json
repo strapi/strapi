@@ -7,33 +7,28 @@
   },
   "options": {
     "increments": true,
-    "timestamps": [
-      "created_at",
-      "updated_at"
-    ],
+    "timestamps": ["created_at", "updated_at"],
     "comment": ""
   },
   "attributes": {
-    "price_range": {
-      "enum": [
-        "very_cheap",
-        "cheap",
-        "average",
-        "expensive",
-        "very_expensive"
-      ],
-      "type": "enumeration"
-    },
-    "closing_period": {
-      "component": "default.closingperiod",
-      "type": "component"
-    },
     "name": {
       "maxLength": 50,
       "required": true,
       "minLength": 5,
       "type": "string"
     },
+    "slug": {
+      "type": "uid"
+    },
+    "price_range": {
+      "enum": ["very_cheap", "cheap", "average", "expensive", "very_expensive"],
+      "type": "enumeration"
+    },
+    "closing_period": {
+      "component": "default.closingperiod",
+      "type": "component"
+    },
+
     "address": {
       "model": "address"
     },

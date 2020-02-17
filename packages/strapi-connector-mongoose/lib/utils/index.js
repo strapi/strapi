@@ -27,7 +27,7 @@ module.exports = (mongoose = Mongoose) => {
     return this.toString();
   };
 
-  const convertType = attr => {
+  const convertType = (name, attr) => {
     switch (attr.type.toLowerCase()) {
       case 'array':
         return { type: Array };
@@ -79,6 +79,15 @@ module.exports = (mongoose = Mongoose) => {
       case 'text':
       case 'richtext':
         return { type: 'String' };
+      case 'uid': {
+        return {
+          type: 'String',
+          index: {
+            unique: true,
+            partialFilterExpression: { [name]: { $type: 'string' } },
+          },
+        };
+      }
       default:
         return undefined;
     }

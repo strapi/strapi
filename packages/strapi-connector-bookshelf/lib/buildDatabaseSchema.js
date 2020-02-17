@@ -60,6 +60,10 @@ module.exports = async ({
     switch (attribute.type) {
       case 'uuid':
         return table.uuid(name);
+      case 'uid': {
+        table.unique(name);
+        return table.string(name);
+      }
       case 'richtext':
       case 'text':
         return table.text(name, 'longtext');
