@@ -1508,6 +1508,12 @@ Unless you originally installed Strapi with PostgreSQL, you need to install the 
 ```bash
 npm install pg --save
 ```
+The yarn.lock file needs to be updated to reflect this update or Heroku will not launch:
+`Path: ./my-project/`
+
+```bash
+yarn install
+```
 
 :::
 
