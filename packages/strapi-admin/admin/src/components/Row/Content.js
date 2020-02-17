@@ -29,6 +29,7 @@ const Content = styled.div`
 
     .icoWrapper {
       display: flex;
+      align-items: center;
       height: 100%;
       flex-direction: column;
       justify-content: space-around;
