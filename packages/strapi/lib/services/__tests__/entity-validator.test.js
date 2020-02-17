@@ -28,10 +28,7 @@ describe('Entity validator', () => {
       expect.hasAssertions();
 
       await entityValidator.validateEntity(model, input).catch(() => {
-        expect(errors.badRequest).toHaveBeenCalledWith(
-          'ValidationError',
-          expect.any(Object)
-        );
+        expect(errors.badRequest).toHaveBeenCalledWith('ValidationError', expect.any(Object));
       });
     });
 

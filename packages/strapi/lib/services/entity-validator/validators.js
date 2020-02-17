@@ -35,9 +35,7 @@ const enumerationValidator = attr => {
     .oneOf(Array.isArray(attr.enum) ? attr.enum : [attr.enum]);
 };
 
-const emailValidator = composeValidators(stringValidator, (attr, validator) =>
-  validator.email()
-);
+const emailValidator = composeValidators(stringValidator, (attr, validator) => validator.email());
 
 const minIntegerValidator = ({ min }, validator) =>
   _.isNumber(min) ? validator.min(_.toInteger(min)) : validator;
@@ -78,7 +76,7 @@ module.exports = {
   password: stringValidator,
   email: emailValidator,
   enumeration: enumerationValidator,
-  boolean: () => yup.boolean(),
+  boolean: () => yup.boolean().nullable(),
   uid: uidValidator,
   json: () => yup.mixed(),
   integer: integerValidator,

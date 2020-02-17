@@ -3,8 +3,10 @@
 const yup = require('yup');
 const _ = require('lodash');
 
-function isDefined(msg = '${path} must be defined') {
-  return this.test('defined', msg, value => !_.isNil(value));
+const isNotNil = value => !_.isNil(value);
+
+function isDefined(msg = '${path} must be defined.') {
+  return this.test('defined', msg, isNotNil);
 }
 
 yup.addMethod(yup.mixed, 'defined', isDefined);

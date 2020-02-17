@@ -52,6 +52,9 @@
       "plugin": "upload",
       "required": false
     },
+    "timestamp": {
+      "type": "timestamp"
+    },
     "images": {
       "collection": "file",
       "via": "related",
