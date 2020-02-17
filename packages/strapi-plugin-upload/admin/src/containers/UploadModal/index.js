@@ -13,10 +13,16 @@ import { FormattedMessage } from 'react-intl';
 import getTrad from '../../utils/getTrad';
 import ModalNav from '../../components/ModalNav';
 import NavLink from '../../components/NavLink';
+import Cloud from '../../icons/Cloud';
 
 const UploadModal = ({ isOpen, onToggle }) => {
   return (
-    <Modal isOpen={isOpen} onToggle={onToggle}>
+    <Modal
+      isOpen={isOpen}
+      onToggle={onToggle}
+      // TODO: reset to initialState
+      onClosed={() => {}}
+    >
       <HeaderModal>
         <section>
           <HeaderModalTitle>
@@ -40,6 +46,7 @@ const UploadModal = ({ isOpen, onToggle }) => {
               <div className="row">
                 <div className="col-12">
                   <p>COMING SOON</p>
+                  <Cloud />
                 </div>
               </div>
             </div>
