@@ -28,6 +28,57 @@ const stringValidator = composeValidators(
   addMaxLengthValidator
 );
 
+const enumerationValidator = attr => {
+  return yup
+    .string()
+    .nullable()
+    .oneOf(Array.isArray(attr.enum) ? attr.enum : [attr.enum]);
+};
+
+const emailValidator = composeValidators(stringValidator, (attr, validator) =>
+  validator.email()
+);
+
+const minIntegerValidator = ({ min }, validator) =>
+  _.isNumber(min) ? validator.min(_.toInteger(min)) : validator;
+
+const maxIntegerValidator = ({ max }, validator) =>
+  _.isNumber(max) ? validator.max(_.toInteger(max)) : validator;
+
+const integerValidator = composeValidators(
+  () => yup.number().integer(),
+  minIntegerValidator,
+  maxIntegerValidator
+);
+
+const minFloatValidator = ({ min }, validator) =>
+  _.isNumber(min) ? validator.min(min) : validator;
+
+const maxFloatValidator = ({ max }, validator) =>
+  _.isNumber(max) ? validator.max(max) : validator;
+
+const floatValidator = composeValidators(
+  () => yup.number(),
+  minFloatValidator,
+  maxFloatValidator
+);
+
 module.exports = {
   string: stringValidator,
+  text: stringValidator,
+  richtext: stringValidator,
+  password: stringValidator,
+  email: emailValidator,
+  enumeration: enumerationValidator,
+  boolean: () => yup.boolean(),
+  uid: () => yup.mixed(),
+  json: () => yup.mixed(),
+  integer: integerValidator,
+  biginteger: () => yup.mixed(),
+  float: floatValidator,
+  decimal: floatValidator,
+  date: () => yup.mixed(),
+  time: () => yup.mixed(),
+  datetime: () => yup.mixed(),
+  timestamp: () => yup.mixed(),
 };

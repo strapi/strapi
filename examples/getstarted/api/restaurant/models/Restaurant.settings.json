@@ -28,8 +28,17 @@
       "component": "default.closingperiod",
       "type": "component"
     },
-
+    "contact_email": {
+      "type": "email"
+    },
+    "stars": {
+      "required": true,
+      "type": "integer",
+      "min": 0,
+      "max": 3
+    },
     "address": {
+      "required": true,
       "model": "address"
     },
     "cover": {
@@ -55,7 +64,8 @@
     },
     "description": {
       "type": "richtext",
-      "required": true
+      "required": true,
+      "minLength": 10
     },
     "services": {
       "component": "default.restaurantservice",

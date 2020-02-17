@@ -3,9 +3,11 @@
 const yup = require('yup');
 const _ = require('lodash');
 
-yup.addMethod(yup.mixed, 'defined', function(msg = '${path} must be defined') {
+function isDefined(msg = '${path} must be defined') {
   return this.test('defined', msg, value => !_.isNil(value));
-});
+}
+
+yup.addMethod(yup.mixed, 'defined', isDefined);
 
 /**
  * Returns a formatted error for http responses
