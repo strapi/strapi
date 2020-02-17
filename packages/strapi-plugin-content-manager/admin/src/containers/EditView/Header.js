@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { Header as PluginHeader } from '@buffetjs/custom';
 
 import {
@@ -20,6 +20,7 @@ const Header = () => {
 
   const { formatMessage, emitEvent } = useGlobalContext();
   const { id } = useParams();
+  const { pathname } = useLocation();
   const {
     deleteSuccess,
     initialData,
@@ -28,23 +29,28 @@ const Header = () => {
     resetData,
     setIsSubmitting,
     slug,
+    clearData,
   } = useDataManager();
+  const isSingleType = pathname.split('/')[3] === 'singleType';
 
   const currentContentTypeMainField = get(
     layout,
     ['settings', 'mainField'],
     'id'
   );
+  const currentContentTypeName = get(layout, ['schema', 'info', 'name']);
+  const apiId = layout.uid.split('.')[1];
   const isCreatingEntry = id === 'create';
 
   /* eslint-disable indent */
-  const headerTitle = isCreatingEntry
+  const entryHeaderTitle = isCreatingEntry
     ? formatMessage({
         id: `${pluginId}.containers.Edit.pluginHeader.title.new`,
       })
     : templateObject({ mainField: currentContentTypeMainField }, initialData)
         .mainField;
   /* eslint-enable indent */
+  const headerTitle = isSingleType ? currentContentTypeName : entryHeaderTitle;
 
   const getHeaderActions = () => {
     const headerActions = [
@@ -101,6 +107,9 @@ const Header = () => {
     title: {
       label: headerTitle && headerTitle.toString(),
     },
+    content: isSingleType
+      ? `${formatMessage({ id: `${pluginId}.api.id` })} : ${apiId}`
+      : '',
     actions: getHeaderActions(),
   };
 
@@ -114,17 +123,21 @@ const Header = () => {
   const handleConfirmDelete = async () => {
     toggleWarningDelete();
     setIsSubmitting();
-
     try {
       emitEvent('willDeleteEntry');
-      await request(getRequestUrl(`${slug}/${id}`), {
+      await request(getRequestUrl(`${slug}/${initialData.id}`), {
         method: 'DELETE',
       });
 
       strapi.notification.success(`${pluginId}.success.record.delete`);
       deleteSuccess();
       emitEvent('didDeleteEntry');
-      redirectToPreviousPage();
+
+      if (!isSingleType) {
+        redirectToPreviousPage();
+      } else {
+        clearData();
+      }
     } catch (err) {
       setIsSubmitting(false);
       emitEvent('didNotDeleteEntry', { error: err });

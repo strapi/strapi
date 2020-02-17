@@ -88,7 +88,7 @@ const FormModal = () => {
       const dynamicZoneTarget = query.get('dynamicZoneTarget');
       const forTarget = query.get('forTarget');
       const modalType = query.get('modalType');
-      const contentTypeKind = query.get('kind');
+      const kind = query.get('kind');
       const targetUid = query.get('targetUid');
       const settingType = query.get('settingType');
       const headerId = query.get('headerId');
@@ -127,7 +127,7 @@ const FormModal = () => {
         actionType,
         attributeName,
         attributeType,
-        contentTypeKind,
+        kind,
         dynamicZoneTarget,
         forTarget,
         modalType,
@@ -626,7 +626,7 @@ const FormModal = () => {
         // Create the content type schema
         if (isCreating) {
           createSchema(
-            { ...modifiedData, kind: state.contentTypeKind },
+            { ...modifiedData, kind: state.kind },
             state.modalType,
             uid
           );

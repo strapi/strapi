@@ -1,4 +1,5 @@
 {
+  "api.id": "API ID",
   "models": "Collection Types",
   "models.numbered": "Collection Types ({number})",
   "groups": "Groups",
