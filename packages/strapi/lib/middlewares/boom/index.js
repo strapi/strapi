@@ -75,9 +75,7 @@ module.exports = strapi => {
           await next();
         } catch (error) {
           // emit error if configured
-          if (
-            _.get(strapi, 'config.currentEnvironment.server.emitErrors', false)
-          ) {
+          if (_.get(strapi, 'config.currentEnvironment.server.emitErrors', false)) {
             strapi.app.emit('error', error, ctx);
           }
 
@@ -107,6 +105,9 @@ module.exports = strapi => {
           const boomError = Boom[method](...rest) || {};
 
           const { status, body } = formatBoomPayload(boomError);
+
+          // keep retro-compatibility for old error formats
+          body.message = body.data;
 
           this.body = body;
           this.status = status;
