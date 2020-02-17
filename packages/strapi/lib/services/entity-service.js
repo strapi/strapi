@@ -2,41 +2,8 @@
 
 const _ = require('lodash');
 const uploadFiles = require('./utils/upload-files');
-const { yup, formatYupErrors } = require('strapi-utils');
 
-const createAttributeValidator = attr => {
-  switch (attr.type) {
-    case 'string': {
-      const { minLength, maxLength } = attr;
-      return yup
-        .string()
-        .nullable()
-        .min(minLength)
-        .max(maxLength);
-    }
-    default:
-      return yup.mixed();
-  }
-};
-
-const createValidator = model => {
-  return yup
-    .object(
-      _.mapValues(model.attributes, attr => {
-        const { required } = attr;
-
-        const validator = createAttributeValidator(attr);
-
-        if (required) {
-          return validator.defined();
-        }
-        return validator;
-      })
-    )
-    .required();
-};
-
-module.exports = ({ db, eventHub }) => ({
+module.exports = ({ db, eventHub, entityValidator }) => ({
   /**
    * expose some utils so the end users can use them
    */
@@ -95,14 +62,7 @@ module.exports = ({ db, eventHub }) => ({
       }
     }
 
-    try {
-      await createValidator(db.getModel(model)).validate(data, {
-        strict: true,
-        abortEarly: false,
-      });
-    } catch (err) {
-      throw strapi.errors.badRequest('Validation error', formatYupErrors(err));
-    }
+    await entityValidator.validateEntity(db.getModel(model), data);
 
     let entry = await db.query(model).create(data);
 
