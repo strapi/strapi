@@ -11,7 +11,6 @@ const Wrapper = styled.div`
   background: rgba(0, 126, 255, 0.08);
   border: 1px solid rgba(0, 126, 255, 0.24);
   border-radius: 2px;
-  line-height: 22px;
   color: #007eff;
   font-size: 13px;
   font-weight: 400;

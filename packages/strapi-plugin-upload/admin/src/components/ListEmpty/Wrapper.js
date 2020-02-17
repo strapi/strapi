@@ -8,7 +8,6 @@ const Wrapper = styled.div`
   .btn-wrapper {
     position: absolute;
     top: 161px;
-    // left: 50%;
     height: 100px;
     width: 100%;
     margin-left: -50px;
