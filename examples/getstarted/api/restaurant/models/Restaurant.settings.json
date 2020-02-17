@@ -37,6 +37,11 @@
       "min": 0,
       "max": 3
     },
+    "averagePrice": {
+      "type": "float",
+      "min": 0,
+      "max": 35.12
+    },
     "address": {
       "required": true,
       "model": "address"

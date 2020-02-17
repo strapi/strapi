@@ -46,7 +46,11 @@ const maxIntegerValidator = ({ max }, validator) =>
   _.isNumber(max) ? validator.max(_.toInteger(max)) : validator;
 
 const integerValidator = composeValidators(
-  () => yup.number().integer(),
+  () =>
+    yup
+      .number()
+      .integer()
+      .nullable(),
   minIntegerValidator,
   maxIntegerValidator
 );
@@ -58,9 +62,13 @@ const maxFloatValidator = ({ max }, validator) =>
   _.isNumber(max) ? validator.max(max) : validator;
 
 const floatValidator = composeValidators(
-  () => yup.number(),
+  () => yup.number().nullable(),
   minFloatValidator,
   maxFloatValidator
+);
+
+const uidValidator = composeValidators(stringValidator, (attr, validator) =>
+  validator.matches(new RegExp('^[A-Za-z0-9-_.~]*$'))
 );
 
 module.exports = {
@@ -71,7 +79,7 @@ module.exports = {
   email: emailValidator,
   enumeration: enumerationValidator,
   boolean: () => yup.boolean(),
-  uid: () => yup.mixed(),
+  uid: uidValidator,
   json: () => yup.mixed(),
   integer: integerValidator,
   biginteger: () => yup.mixed(),

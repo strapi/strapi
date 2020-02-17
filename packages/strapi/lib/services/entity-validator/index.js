@@ -43,6 +43,7 @@ const createValidator = model => {
         if (required) {
           return validator.defined();
         }
+
         return validator;
       })
     )
