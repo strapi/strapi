@@ -11,9 +11,9 @@ import {
 import { Button } from '@buffetjs/core';
 import { FormattedMessage } from 'react-intl';
 import getTrad from '../../utils/getTrad';
+import InputFile from '../../components/InputFile';
 import ModalNav from '../../components/ModalNav';
 import NavLink from '../../components/NavLink';
-import Cloud from '../../icons/Cloud';
 
 const UploadModal = ({ isOpen, onToggle }) => {
   return (
@@ -41,12 +41,11 @@ const UploadModal = ({ isOpen, onToggle }) => {
           </HeaderModalTitle>
         </section>
         <ModalForm>
-          <ModalBody>
+          <ModalBody style={{ paddingTop: 35, paddingBottom: 18 }}>
             <div className="container-fluid">
               <div className="row">
                 <div className="col-12">
-                  <p>COMING SOON</p>
-                  <Cloud />
+                  <InputFile />
                 </div>
               </div>
             </div>
