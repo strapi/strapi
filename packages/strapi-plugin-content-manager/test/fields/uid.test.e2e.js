@@ -153,7 +153,9 @@ describe('Test type UID', () => {
       const res = await rq.post(
         '/content-manager/explorer/application::withrequireduid.withrequireduid',
         {
-          body: {},
+          body: {
+            slug: null,
+          },
         }
       );
 
