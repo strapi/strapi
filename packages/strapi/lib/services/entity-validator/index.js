@@ -20,14 +20,10 @@ module.exports = ({ strapi }) => ({
 
     return validator
       .validate(data, {
-        strict: true,
         abortEarly: false,
       })
       .catch(error => {
-        throw strapi.errors.badRequest(
-          'ValidationError',
-          formatYupErrors(error)
-        );
+        throw strapi.errors.badRequest('ValidationError', formatYupErrors(error));
       });
   },
 });
