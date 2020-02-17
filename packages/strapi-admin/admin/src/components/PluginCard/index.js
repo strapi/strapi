@@ -11,7 +11,7 @@ import { Button, PopUpWarning } from 'strapi-helper-plugin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Wrapper from './Wrapper';
 
-const PLUGINS_WITH_CONFIG = ['email', 'upload'];
+const PLUGINS_WITH_CONFIG = ['email'];
 
 /* eslint-disable react/no-unused-state */
 class PluginCard extends React.Component {

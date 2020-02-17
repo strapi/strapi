@@ -34,31 +34,30 @@ function configPageReducer(state = initialState, action) {
     case GET_SETTINGS_SUCCEEDED:
       return state
         .update('appEnvironments', () => List(action.appEnvironments))
-        .update('didCheckErrors', (v) => v = !v)
+        .update('didCheckErrors', v => (v = !v))
         .update('formErrors', () => List([]))
         .update('initialData', () => Map(action.initialData))
         .update('modifiedData', () => Map(action.initialData))
         .update('settings', () => action.settings);
     case ON_CANCEL:
       return state
-        .update('didCheckErrors', (v) => v = !v)
+        .update('didCheckErrors', v => (v = !v))
         .update('formErrors', () => List([]))
         .update('modifiedData', () => state.get('initialData'));
     case ON_CHANGE:
-      return state
-        .updateIn(action.keys, () => action.value);
+      return state.updateIn(action.keys, () => action.value);
     case SET_ERRORS:
     case SUBMIT_ERROR:
       return state
-        .update('didCheckErrors', (v) => v = !v)
+        .update('didCheckErrors', v => (v = !v))
         .update('formErrors', () => List(action.errors));
     case SUBMIT_SUCCEEDED:
       return state
-        .update('didCheckErrors', (v) => v = !v)
+        .update('didCheckErrors', v => (v = !v))
         .update('formErrors', () => List([]))
         .update('initialData', () => Map(action.data))
         .update('modifiedData', () => Map(action.data))
-        .update('submitSuccess', (v) => v = !v);
+        .update('submitSuccess', v => (v = !v));
     default:
       return state;
   }

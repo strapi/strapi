@@ -1,6 +1,5 @@
 import styled from 'styled-components';
-import { Button } from 'strapi-helper-plugin';
-import Filter from '../../icons/Filter';
+import { Button, FilterIcon as Filter } from 'strapi-helper-plugin';
 import RemoveIcon from '../../assets/images/icon-cross-blue.svg';
 
 const Wrapper = styled.div`

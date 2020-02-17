@@ -1,8 +1,6 @@
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import App from './containers/App';
-import Initializer from './containers/Initializer';
-import lifecycles from './lifecycles';
 import trads from './translations';
 import pluginId from './pluginId';
 
@@ -15,10 +13,11 @@ export default strapi => {
     description: pluginDescription,
     icon: pluginPkg.strapi.icon,
     id: pluginId,
-    initializer: Initializer,
+    initializer: null,
     injectedComponents: [],
+    isReady: true,
     layout: null,
-    lifecycles,
+    lifecycles: null,
     leftMenuLinks: [],
     leftMenuSections: [],
     mainComponent: App,

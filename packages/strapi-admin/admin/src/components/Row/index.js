@@ -20,7 +20,7 @@ import {
 import Action from './Action';
 import Content from './Content';
 
-const PLUGINS_WITH_CONFIG = ['email', 'upload'];
+const PLUGINS_WITH_CONFIG = ['email'];
 
 /* eslint-disable */
 

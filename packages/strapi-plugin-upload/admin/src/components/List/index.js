@@ -1,48 +1,16 @@
-/**
- *
- * List
- *
- */
-
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
 
-import Li from '../Li';
-import ListHeader from '../ListHeader';
-import EmptyLi from './EmptyLi';
-import Wrapper from './Wrapper';
-
-function List(props) {
-  return (
-    <Wrapper className="container-fluid">
-      <div className="row">
-        <ul className="list">
-          <ListHeader changeSort={props.changeSort} sort={props.sort} />
-          {props.data.map((item, key) => (
-            <Li key={item.hash || key} item={item} />
-          ))}
-          {props.data.length === 0 && (
-            <EmptyLi>
-              <div>
-                <FormattedMessage id="upload.EmptyLi.message" />
-              </div>
-            </EmptyLi>
-          )}
-        </ul>
-      </div>
-    </Wrapper>
-  );
-}
+const List = ({ data }) => {
+  return <div>Coming soon {data.length} </div>;
+};
 
 List.defaultProps = {
-  sort: 'id',
+  data: [],
 };
 
 List.propTypes = {
-  changeSort: PropTypes.func.isRequired,
-  data: PropTypes.arrayOf(PropTypes.object).isRequired,
-  sort: PropTypes.string,
+  data: PropTypes.array,
 };
 
 export default List;

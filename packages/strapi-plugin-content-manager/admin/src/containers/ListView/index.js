@@ -381,9 +381,7 @@ function ListView({
                         onClick={toggleFilterPickerState}
                       >
                         <FilterIcon />
-                        <FormattedMessage
-                          id={`${pluginId}.components.AddFilterCTA.add`}
-                        />
+                        <FormattedMessage id="app.utils.filters" />
                       </AddFilterCta>
                       {getSearchParams().filters.map((filter, key) => (
                         <Filter

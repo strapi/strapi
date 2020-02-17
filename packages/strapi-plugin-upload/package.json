@@ -3,7 +3,7 @@
   "version": "3.0.0-beta.18.7",
   "description": "This is the description of the plugin.",
   "strapi": {
-    "name": "Files Upload",
+    "name": "Media Library",
     "icon": "cloud-upload-alt",
     "description": "upload.plugin.description"
   },
