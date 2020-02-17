@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const Cross = ({ fill, height, width, ...rest }) => {
+const ClearIcon = ({ fill, height, width, ...rest }) => {
   return (
     <svg
       {...rest}
@@ -18,16 +18,16 @@ const Cross = ({ fill, height, width, ...rest }) => {
   );
 };
 
-Cross.defaultProps = {
+ClearIcon.defaultProps = {
   fill: '#b3b5b9',
   height: '8',
   width: '8',
 };
 
-Cross.propTypes = {
+ClearIcon.propTypes = {
   fill: PropTypes.string,
   height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
 };
 
-export default Cross;
+export default ClearIcon;
