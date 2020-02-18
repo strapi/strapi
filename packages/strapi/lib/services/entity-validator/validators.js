@@ -13,52 +13,84 @@ const composeValidators = (...fns) => attr => {
   }, yup.mixed());
 };
 
-/* minLength validator */
+/* Validator utils */
+
+/**
+ * Adds minLength validator
+ * @param {Object} attribute model attribute
+ * @param {Object} validator yup validator
+ */
 const addMinLengthValidator = ({ minLength }, validator) =>
   _.isInteger(minLength) ? validator.min(minLength) : validator;
 
-/* maxLength validator */
+/**
+ * Adds maxLength validator
+ * @param {Object} attribute model attribute
+ * @param {Object} validator yup validator
+ */
 const addMaxLengthValidator = ({ maxLength }, validator) =>
   _.isInteger(maxLength) ? validator.max(maxLength) : validator;
 
-/* string validator */
+/**
+ * Adds min integer validator
+ * @param {Object} attribute model attribute
+ * @param {Object} validator yup validator
+ */
+const addMinIntegerValidator = ({ min }, validator) =>
+  _.isNumber(min) ? validator.min(_.toInteger(min)) : validator;
+
+/**
+ * Adds max integer validator
+ * @param {Object} attribute model attribute
+ * @param {Object} validator yup validator
+ */
+const addMaxIntegerValidator = ({ max }, validator) =>
+  _.isNumber(max) ? validator.max(_.toInteger(max)) : validator;
+
+/**
+ * Adds min float/decimal validatore
+ * @param {Object} attribute model attribute
+ * @param {Object} validator yup validator
+ */
+const addMinFloatValidator = ({ min }, validator) =>
+  _.isNumber(min) ? validator.min(min) : validator;
+
+/**
+ * Adds max float/decimal validatore
+ * @param {Object} attribute model attribute
+ * @param {Object} validator yup validator
+ */
+const addMaxFloatValidator = ({ max }, validator) =>
+  _.isNumber(max) ? validator.max(max) : validator;
+
+/* Type validators */
+
 const stringValidator = composeValidators(
   () => yup.string(),
   addMinLengthValidator,
   addMaxLengthValidator
 );
 
-const enumerationValidator = attr => {
-  return yup
-    .string()
-
-    .oneOf((Array.isArray(attr.enum) ? attr.enum : [attr.enum]).concat(null));
-};
-
 const emailValidator = composeValidators(stringValidator, (attr, validator) => validator.email());
-
-const minIntegerValidator = ({ min }, validator) =>
-  _.isNumber(min) ? validator.min(_.toInteger(min)) : validator;
-
-const maxIntegerValidator = ({ max }, validator) =>
-  _.isNumber(max) ? validator.max(_.toInteger(max)) : validator;
-
-const integerValidator = composeValidators(
-  () => yup.number().integer(),
-  minIntegerValidator,
-  maxIntegerValidator
-);
-
-const minFloatValidator = ({ min }, validator) =>
-  _.isNumber(min) ? validator.min(min) : validator;
-
-const maxFloatValidator = ({ max }, validator) =>
-  _.isNumber(max) ? validator.max(max) : validator;
-
-const floatValidator = composeValidators(() => yup.number(), minFloatValidator, maxFloatValidator);
 
 const uidValidator = composeValidators(stringValidator, (attr, validator) =>
   validator.matches(new RegExp('^[A-Za-z0-9-_.~]*$'))
+);
+
+const enumerationValidator = attr => {
+  return yup.string().oneOf((Array.isArray(attr.enum) ? attr.enum : [attr.enum]).concat(null));
+};
+
+const integerValidator = composeValidators(
+  () => yup.number().integer(),
+  addMinIntegerValidator,
+  addMaxIntegerValidator
+);
+
+const floatValidator = composeValidators(
+  () => yup.number(),
+  addMinFloatValidator,
+  addMaxFloatValidator
 );
 
 module.exports = {
