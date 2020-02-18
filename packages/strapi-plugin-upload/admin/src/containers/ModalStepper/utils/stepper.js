@@ -1,25 +1,28 @@
 import UploadForm from '../../../components/UploadForm';
+import UploadList from '../../../components/UploadList';
 import getTrad from '../../../utils/getTrad';
 
 const stepper = {
   browse: {
+    Component: UploadForm,
+    generateFooter: () => [],
+    headerTradId: getTrad('modal.header.browse'),
     prev: null,
     next: 'upload',
-    Component: UploadForm,
-    headerTradId: getTrad('modal.header.browse'),
-    generateFooter: () => [],
   },
   upload: {
-    prev: 'browse',
-    next: null,
-    Component: null,
+    Component: UploadList,
+    headerTradId: getTrad('modal.header.select-files'),
     generateFooter: () => [],
+    next: null,
+    prev: 'browse',
   },
   'edit-new': {
-    prev: 'upload',
-    next: null,
     Component: null,
+    headerTradId: 'coming soon',
     generateFooter: () => [],
+    next: null,
+    prev: 'upload',
   },
 };
 

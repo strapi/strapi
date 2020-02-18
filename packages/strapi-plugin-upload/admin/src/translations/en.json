@@ -9,6 +9,7 @@
   "list.assets-empty.title": "There is no asset yet",
   "list.assets-empty.subtitle": "Add a first one to the list.",
   "modal.header.browse": "Upload assets",
+  "modal.header.select-files": "Selected files",
   "modal.nav.computer": "from computer",
   "modal.nav.url": "from url",
   "plugin.name": "Media Library",

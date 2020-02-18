@@ -16,13 +16,34 @@ import reducer, { initialState } from './reducer';
 const ModalStepper = ({ isOpen, onToggle }) => {
   const { formatMessage } = useGlobalContext();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
-  const { currentStep } = reducerState.toJS();
-  const currentStepObject = stepper[currentStep];
-  const { Component } = currentStepObject;
+  const { currentStep, filesToUpload } = reducerState.toJS();
+  const { Component, headerTradId, next, prev } = stepper[currentStep];
+
+  const addFilesToUpload = ({ target: { value } }) => {
+    dispatch({
+      type: 'ADD_FILES_TO_UPLOAD',
+      filesToUpload: value,
+    });
+
+    goTo(next);
+  };
 
   const handleClosed = () => {
     dispatch({
       type: 'RESET_PROPS',
+    });
+  };
+
+  // FIXME: when back button needed
+  // eslint-disable-next-line no-unused-vars
+  const goBack = () => {
+    goTo(prev);
+  };
+
+  const goTo = to => {
+    dispatch({
+      type: 'GO_TO',
+      to,
     });
   };
 
@@ -37,12 +58,17 @@ const ModalStepper = ({ isOpen, onToggle }) => {
       <HeaderModal>
         <section>
           <HeaderModalTitle>
-            <FormattedMessage id={currentStepObject.headerTradId} />
+            <FormattedMessage id={headerTradId} />
           </HeaderModalTitle>
         </section>
       </HeaderModal>
-      {/* body */}
-      {Component && <Component />}
+      {/* body of the modal */}
+      {Component && (
+        <Component
+          addFilesToUpload={addFilesToUpload}
+          filesToUpload={filesToUpload}
+        />
+      )}
 
       <ModalFooter>
         <section>
