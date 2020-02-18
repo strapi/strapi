@@ -8,7 +8,7 @@ import SelectAll from '../../components/SelectAll';
 import SortPicker from '../../components/SortPicker';
 // import List from '../../components/List';
 import ListEmpty from '../../components/ListEmpty';
-import UploadModal from '../UploadModal';
+import ModalStepper from '../ModalStepper';
 import getHeaderLabel from './utils/getHeaderLabel';
 import init from './init';
 import reducer, { initialState } from './reducer';
@@ -84,7 +84,7 @@ const HomePage = () => {
         onClick={handleClickToggleModal}
       />
       {/* <List data={data} /> */}
-      <UploadModal isOpen={isOpen} onToggle={handleClickToggleModal} />
+      <ModalStepper isOpen={isOpen} onToggle={handleClickToggleModal} />
     </Container>
   );
 };

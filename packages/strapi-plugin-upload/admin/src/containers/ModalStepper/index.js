@@ -15,7 +15,7 @@ import InputFile from '../../components/InputFile';
 import ModalNav from '../../components/ModalNav';
 import NavLink from '../../components/NavLink';
 
-const UploadModal = ({ isOpen, onToggle }) => {
+const ModalStepper = ({ isOpen, onToggle }) => {
   return (
     <Modal
       isOpen={isOpen}
@@ -64,13 +64,13 @@ const UploadModal = ({ isOpen, onToggle }) => {
   );
 };
 
-UploadModal.defaultProps = {
+ModalStepper.defaultProps = {
   onToggle: () => {},
 };
 
-UploadModal.propTypes = {
+ModalStepper.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onToggle: PropTypes.func,
 };
 
-export default UploadModal;
+export default ModalStepper;
