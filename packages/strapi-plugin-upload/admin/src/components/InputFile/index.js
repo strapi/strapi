@@ -56,7 +56,6 @@ const InputFile = ({ name, onChange }) => {
           name="button"
           color="primary"
           onClick={() => {
-            console.log('oc');
             ref.current.click();
           }}
         >
@@ -69,7 +68,9 @@ const InputFile = ({ name, onChange }) => {
           name={name}
           onChange={handleChange}
         />
-        <div className="dragzone" onDragLeave={handleDragLeave} />
+        {isDragging && (
+          <div className="dragzone" onDragLeave={handleDragLeave} />
+        )}
       </Label>
     </>
   );
