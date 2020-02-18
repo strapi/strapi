@@ -1,9 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import { Button } from '@buffetjs/core';
+import getTrad from '../../utils/getTrad';
 import HeaderWrapper from './HeaderWrapper';
 
-const UploadList = ({ filesToUpload }) => {
+const UploadList = ({ filesToUpload, onGoToAddBrowseFiles }) => {
+  const filesToUploadLength = filesToUpload.length;
+  const titleId = `modal.upload-list.sub-header-title.${
+    filesToUploadLength > 1 ? 'plural' : 'singular'
+  }`;
+
   console.log(filesToUpload);
 
   return (
@@ -11,18 +18,29 @@ const UploadList = ({ filesToUpload }) => {
       <HeaderWrapper>
         <div>
           <div className="assets-selected">
-            <span>4 selected assets</span>
+            <FormattedMessage
+              id={getTrad(titleId)}
+              values={{ number: filesToUploadLength }}
+            />
           </div>
           <div className="infos">
-            <span>
-              Manage the assets before adding them to the Media Library
-            </span>
+            <FormattedMessage
+              id={getTrad('modal.upload-list.sub-header-subtitle')}
+              values={{ number: filesToUploadLength }}
+            />
           </div>
         </div>
         <div>
-          <Button type="button" color="primary">
-            Add More assets
-          </Button>
+          <FormattedMessage id={getTrad('modal.upload-list.sub-header.button')}>
+            {label => (
+              <Button
+                type="button"
+                color="primary"
+                label={label}
+                onClick={onGoToAddBrowseFiles}
+              />
+            )}
+          </FormattedMessage>
         </div>
       </HeaderWrapper>
     </>
@@ -31,10 +49,12 @@ const UploadList = ({ filesToUpload }) => {
 
 UploadList.defaultProps = {
   filesToUpload: [],
+  onGoToAddBrowseFiles: () => {},
 };
 
 UploadList.propTypes = {
   filesToUpload: PropTypes.array,
+  onGoToAddBrowseFiles: PropTypes.func,
 };
 
 export default UploadList;

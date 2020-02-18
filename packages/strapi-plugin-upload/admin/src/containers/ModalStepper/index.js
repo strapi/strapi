@@ -67,6 +67,7 @@ const ModalStepper = ({ isOpen, onToggle }) => {
         <Component
           addFilesToUpload={addFilesToUpload}
           filesToUpload={filesToUpload}
+          onGoToAddBrowseFiles={goBack}
         />
       )}
 

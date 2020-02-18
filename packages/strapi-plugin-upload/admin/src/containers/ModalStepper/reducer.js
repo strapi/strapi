@@ -1,8 +1,9 @@
 import { fromJS } from 'immutable';
+import createNewFilesToUploadArray from './utils/createNewFilesToUploadArray';
 
 const initialState = fromJS({
-  // currentStep: 'browse',
-  currentStep: 'upload',
+  currentStep: 'browse',
+  // currentStep: 'upload',
   filesToUpload: [],
 });
 
@@ -11,12 +12,7 @@ const reducer = (state, action) => {
     case 'ADD_FILES_TO_UPLOAD':
       return state
         .update('filesToUpload', list =>
-          list.concat(
-            Object.keys(action.filesToUpload).reduce(
-              (acc, current) => [...acc, action.filesToUpload[current]],
-              []
-            )
-          )
+          list.concat(fromJS(createNewFilesToUploadArray(action.filesToUpload)))
         )
         .update('currentStep', () => action.nextStep);
     case 'GO_TO':
