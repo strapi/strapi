@@ -12,13 +12,9 @@ describe('Test type enumeration', () => {
 
     modelsUtils = createModelsUtils({ rq });
 
-    await modelsUtils.createContentTypeWithType(
-      'withenumeration',
-      'enumeration',
-      {
-        enum: ['one', 'two'],
-      }
-    );
+    await modelsUtils.createContentTypeWithType('withenumeration', 'enumeration', {
+      enum: ['one', 'two'],
+    });
   }, 60000);
 
   afterAll(async () => {
@@ -95,8 +91,32 @@ describe('Test type enumeration', () => {
     });
   });
 
-  /*
-   * Waiting validation of input to work
-   */
-  test.todo('Throws an error when the enumeration value is not in the options');
+  test('Allows null value', async () => {
+    const res = await rq.post(
+      '/content-manager/explorer/application::withenumeration.withenumeration',
+      {
+        body: {
+          field: null,
+        },
+      }
+    );
+
+    expect(res.statusCode).toBe(200); // should return 201
+    expect(res.body).toMatchObject({
+      field: null,
+    });
+  });
+
+  test('Throws an error when the enumeration value is not in the options', async () => {
+    const res = await rq.post(
+      '/content-manager/explorer/application::withenumeration.withenumeration',
+      {
+        body: {
+          field: 'invalid-value',
+        },
+      }
+    );
+
+    expect(res.statusCode).toBe(400);
+  });
 });

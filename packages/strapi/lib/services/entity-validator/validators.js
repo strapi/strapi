@@ -23,7 +23,7 @@ const addMaxLengthValidator = ({ maxLength }, validator) =>
 
 /* string validator */
 const stringValidator = composeValidators(
-  () => yup.string().nullable(),
+  () => yup.string(),
   addMinLengthValidator,
   addMaxLengthValidator
 );
@@ -31,8 +31,8 @@ const stringValidator = composeValidators(
 const enumerationValidator = attr => {
   return yup
     .string()
-    .nullable()
-    .oneOf(Array.isArray(attr.enum) ? attr.enum : [attr.enum]);
+
+    .oneOf((Array.isArray(attr.enum) ? attr.enum : [attr.enum]).concat(null));
 };
 
 const emailValidator = composeValidators(stringValidator, (attr, validator) => validator.email());
@@ -44,11 +44,7 @@ const maxIntegerValidator = ({ max }, validator) =>
   _.isNumber(max) ? validator.max(_.toInteger(max)) : validator;
 
 const integerValidator = composeValidators(
-  () =>
-    yup
-      .number()
-      .integer()
-      .nullable(),
+  () => yup.number().integer(),
   minIntegerValidator,
   maxIntegerValidator
 );
@@ -59,11 +55,7 @@ const minFloatValidator = ({ min }, validator) =>
 const maxFloatValidator = ({ max }, validator) =>
   _.isNumber(max) ? validator.max(max) : validator;
 
-const floatValidator = composeValidators(
-  () => yup.number().nullable(),
-  minFloatValidator,
-  maxFloatValidator
-);
+const floatValidator = composeValidators(() => yup.number(), minFloatValidator, maxFloatValidator);
 
 const uidValidator = composeValidators(stringValidator, (attr, validator) =>
   validator.matches(new RegExp('^[A-Za-z0-9-_.~]*$'))
@@ -76,7 +68,7 @@ module.exports = {
   password: stringValidator,
   email: emailValidator,
   enumeration: enumerationValidator,
-  boolean: () => yup.boolean().nullable(),
+  boolean: () => yup.boolean(),
   uid: uidValidator,
   json: () => yup.mixed(),
   integer: integerValidator,

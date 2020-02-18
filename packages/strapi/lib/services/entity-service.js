@@ -86,7 +86,9 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
    */
 
   async update({ params, data, files }, { model }) {
-    let entry = await db.query(model).update(params, data);
+    const validData = await entityValidator.validateEntityUpdate(db.getModel(model), data);
+
+    let entry = await db.query(model).update(params, validData);
 
     if (files) {
       await this.uploadFiles(entry, files, { model });

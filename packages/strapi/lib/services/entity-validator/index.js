@@ -26,6 +26,23 @@ module.exports = ({ strapi }) => ({
         throw strapi.errors.badRequest('ValidationError', formatYupErrors(error));
       });
   },
+
+  /**
+   * Validate some input for updating based on a model schema
+   * @param {Object} model model schema
+   * @param {Object} data input data
+   */
+  async validateEntityUpdate(model, data) {
+    const validator = createUpdateValidator(model);
+
+    return validator
+      .validate(data, {
+        abortEarly: false,
+      })
+      .catch(error => {
+        throw strapi.errors.badRequest('ValidationError', formatYupErrors(error));
+      });
+  },
 });
 
 const createValidator = model => {
@@ -34,10 +51,29 @@ const createValidator = model => {
       _.mapValues(model.attributes, attr => {
         const { required } = attr;
 
+        const validator = createAttributeValidator(attr).nullable();
+
+        if (required) {
+          return validator.notNil();
+        }
+
+        return validator;
+      })
+    )
+    .required();
+};
+
+const createUpdateValidator = model => {
+  return yup
+    .object(
+      _.mapValues(model.attributes, attr => {
+        const { required } = attr;
+
         const validator = createAttributeValidator(attr);
 
         if (required) {
-          return validator.defined();
+          // on edit you can omit a key to leave it unchanged, but if it is required you cannot set it to null
+          return validator.notNull();
         }
 
         return validator;

@@ -3,13 +3,19 @@
 const yup = require('yup');
 const _ = require('lodash');
 
-const isNotNil = value => !_.isNil(value);
+const isNotNilTest = value => !_.isNil(value);
 
-function isDefined(msg = '${path} must be defined.') {
-  return this.test('defined', msg, isNotNil);
+function isNotNill(msg = '${path} must be defined.') {
+  return this.test('defined', msg, isNotNilTest);
 }
 
-yup.addMethod(yup.mixed, 'defined', isDefined);
+const isNotNullTest = value => !_.isNull(value);
+function isNotNull(msg = '${path} cannot be null.') {
+  return this.test('defined', msg, isNotNullTest);
+}
+
+yup.addMethod(yup.mixed, 'notNil', isNotNill);
+yup.addMethod(yup.mixed, 'notNull', isNotNull);
 
 /**
  * Returns a formatted error for http responses
