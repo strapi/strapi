@@ -66,7 +66,7 @@ const addMaxFloatValidator = ({ max }, validator) =>
 /* Type validators */
 
 const stringValidator = composeValidators(
-  () => yup.string(),
+  () => yup.string().strict(),
   addMinLengthValidator,
   addMaxLengthValidator
 );

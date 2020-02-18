@@ -23,7 +23,7 @@ describe('Entity validator', () => {
         },
       };
 
-      const input = { title: 123 };
+      const input = { title: 1234 };
 
       expect.hasAssertions();
 
@@ -57,6 +57,39 @@ describe('Entity validator', () => {
 
       const data = await entityValidator.validateEntity(model, input);
       expect(data).toEqual(input);
+    });
+
+    it('Returns casted data when possible', async () => {
+      const errors = {
+        badRequest: jest.fn(),
+      };
+
+      const entityValidator = createEntityValidator({
+        strapi: {
+          errors,
+        },
+      });
+
+      const model = {
+        attributes: {
+          title: {
+            type: 'string',
+          },
+          number: {
+            type: 'integer',
+          },
+        },
+      };
+
+      const input = { title: 'Test', number: '123' };
+
+      expect.hasAssertions();
+
+      const data = await entityValidator.validateEntity(model, input);
+      expect(data).toEqual({
+        title: 'Test',
+        number: 123,
+      });
     });
 
     test('Throws on required not respected', async () => {
