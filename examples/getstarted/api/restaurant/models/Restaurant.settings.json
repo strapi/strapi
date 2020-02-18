@@ -28,8 +28,22 @@
       "component": "default.closingperiod",
       "type": "component"
     },
-
+    "contact_email": {
+      "type": "email"
+    },
+    "stars": {
+      "required": true,
+      "type": "integer",
+      "min": 0,
+      "max": 3
+    },
+    "averagePrice": {
+      "type": "float",
+      "min": 0,
+      "max": 35.12
+    },
     "address": {
+      "required": true,
       "model": "address"
     },
     "cover": {
@@ -37,6 +51,9 @@
       "via": "related",
       "plugin": "upload",
       "required": false
+    },
+    "timestamp": {
+      "type": "timestamp"
     },
     "images": {
       "collection": "file",
@@ -55,7 +72,8 @@
     },
     "description": {
       "type": "richtext",
-      "required": true
+      "required": true,
+      "minLength": 10
     },
     "services": {
       "component": "default.restaurantservice",

@@ -42,9 +42,7 @@ describe('convertRestQueryParams', () => {
       expect(() => convertRestQueryParams({ _sort: {} })).toThrow();
       expect(() => convertRestQueryParams({ _sort: 'id,,test' })).toThrow();
       expect(() => convertRestQueryParams({ _sort: 'id,test,' })).toThrow();
-      expect(() =>
-        convertRestQueryParams({ _sort: 'id:asc,test:dasc' })
-      ).toThrow();
+      expect(() => convertRestQueryParams({ _sort: 'id:asc,test:dasc' })).toThrow();
       expect(() => convertRestQueryParams({ _sort: 'id:asc,:asc' })).toThrow();
     });
 
@@ -56,15 +54,24 @@ describe('convertRestQueryParams', () => {
       ['id:asc', [{ field: 'id', order: 'asc' }]],
       [
         'id,price',
-        [{ field: 'id', order: 'asc' }, { field: 'price', order: 'asc' }],
+        [
+          { field: 'id', order: 'asc' },
+          { field: 'price', order: 'asc' },
+        ],
       ],
       [
         'id:desc,price',
-        [{ field: 'id', order: 'desc' }, { field: 'price', order: 'asc' }],
+        [
+          { field: 'id', order: 'desc' },
+          { field: 'price', order: 'asc' },
+        ],
       ],
       [
         'id:desc,price:desc',
-        [{ field: 'id', order: 'desc' }, { field: 'price', order: 'desc' }],
+        [
+          { field: 'id', order: 'desc' },
+          { field: 'price', order: 'desc' },
+        ],
       ],
       [
         'id:asc,price,date:desc',
@@ -105,14 +112,15 @@ describe('convertRestQueryParams', () => {
       expect(() => convertRestQueryParams({ _start: {} })).toThrow();
     });
 
-    test.each([['1', 1], ['12', 12], ['0', 0]])(
-      'Converts start query "%s" correctly',
-      (input, expected) => {
-        expect(convertRestQueryParams({ _start: input })).toMatchObject({
-          start: expected,
-        });
-      }
-    );
+    test.each([
+      ['1', 1],
+      ['12', 12],
+      ['0', 0],
+    ])('Converts start query "%s" correctly', (input, expected) => {
+      expect(convertRestQueryParams({ _start: input })).toMatchObject({
+        start: expected,
+      });
+    });
   });
 
   describe('Limit param', () => {
@@ -131,25 +139,20 @@ describe('convertRestQueryParams', () => {
       expect(() => convertRestQueryParams({ _limit: {} })).toThrow();
     });
 
-    test.each([['1', 1], ['12', 12], ['0', 0]])(
-      'Converts start query "%s" correctly',
-      (input, expected) => {
-        expect(convertRestQueryParams({ _start: input })).toMatchObject({
-          start: expected,
-        });
-      }
-    );
-  });
-
-  describe('Populate', () => {
-    test.todo('Not Eq');
+    test.each([
+      ['1', 1],
+      ['12', 12],
+      ['0', 0],
+    ])('Converts start query "%s" correctly', (input, expected) => {
+      expect(convertRestQueryParams({ _start: input })).toMatchObject({
+        start: expected,
+      });
+    });
   });
 
   describe('Filters', () => {
     test('Can combine filters', () => {
-      expect(
-        convertRestQueryParams({ id: '1', test_ne: 'text', test_: 'content' })
-      ).toMatchObject({
+      expect(convertRestQueryParams({ id: '1', test_ne: 'text', test_: 'content' })).toMatchObject({
         where: [
           {
             field: 'id',
@@ -186,9 +189,7 @@ describe('convertRestQueryParams', () => {
         ],
       });
 
-      expect(
-        convertRestQueryParams({ id_eq: '1', test_eq: 'text' })
-      ).toMatchObject({
+      expect(convertRestQueryParams({ id_eq: '1', test_eq: 'text' })).toMatchObject({
         where: [
           {
             field: 'id',
@@ -203,9 +204,7 @@ describe('convertRestQueryParams', () => {
         ],
       });
 
-      expect(
-        convertRestQueryParams({ published_at: '2019-01-01:00:00:00' })
-      ).toMatchObject({
+      expect(convertRestQueryParams({ published_at: '2019-01-01:00:00:00' })).toMatchObject({
         where: [
           {
             field: 'published_at',
@@ -325,9 +324,7 @@ describe('convertRestQueryParams', () => {
     });
 
     test('Not Contains', () => {
-      expect(
-        convertRestQueryParams({ sub_title_ncontains: 'text' })
-      ).toMatchObject({
+      expect(convertRestQueryParams({ sub_title_ncontains: 'text' })).toMatchObject({
         where: [
           {
             field: 'sub_title',
@@ -339,9 +336,7 @@ describe('convertRestQueryParams', () => {
     });
 
     test('Not Contains sensitive', () => {
-      expect(
-        convertRestQueryParams({ content_text_ncontainss: 'test' })
-      ).toMatchObject({
+      expect(convertRestQueryParams({ content_text_ncontainss: 'test' })).toMatchObject({
         where: [
           {
             field: 'content_text',
@@ -353,9 +348,7 @@ describe('convertRestQueryParams', () => {
     });
 
     test('Not Contains sensitive', () => {
-      expect(
-        convertRestQueryParams({ 'content.text_ncontainss': 'test' })
-      ).toMatchObject({
+      expect(convertRestQueryParams({ 'content.text_ncontainss': 'test' })).toMatchObject({
         where: [
           {
             field: 'content.text',
@@ -367,9 +360,7 @@ describe('convertRestQueryParams', () => {
     });
 
     test('Null', () => {
-      expect(
-        convertRestQueryParams({ 'content.text_null': true })
-      ).toMatchObject({
+      expect(convertRestQueryParams({ 'content.text_null': true })).toMatchObject({
         where: [
           {
             field: 'content.text',
@@ -381,9 +372,7 @@ describe('convertRestQueryParams', () => {
     });
 
     test('Not Null', () => {
-      expect(
-        convertRestQueryParams({ 'content.text_null': false })
-      ).toMatchObject({
+      expect(convertRestQueryParams({ 'content.text_null': false })).toMatchObject({
         where: [
           {
             field: 'content.text',

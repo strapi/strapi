@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const uploadFiles = require('./utils/upload-files');
 
-module.exports = ({ db, eventHub }) => ({
+module.exports = ({ db, eventHub, entityValidator }) => ({
   /**
    * expose some utils so the end users can use them
    */
@@ -62,7 +62,9 @@ module.exports = ({ db, eventHub }) => ({
       }
     }
 
-    let entry = await db.query(model).create(data);
+    const validData = await entityValidator.validateEntity(db.getModel(model), data);
+
+    let entry = await db.query(model).create(validData);
 
     if (files) {
       await this.uploadFiles(entry, files, { model });
@@ -84,7 +86,9 @@ module.exports = ({ db, eventHub }) => ({
    */
 
   async update({ params, data, files }, { model }) {
-    let entry = await db.query(model).update(params, data);
+    const validData = await entityValidator.validateEntityUpdate(db.getModel(model), data);
+
+    let entry = await db.query(model).update(params, validData);
 
     if (files) {
       await this.uploadFiles(entry, files, { model });
