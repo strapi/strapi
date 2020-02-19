@@ -1,14 +1,17 @@
 import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
+import { get } from 'lodash';
 import {
   HeaderModal,
   HeaderModalTitle,
   Modal,
   ModalFooter,
   useGlobalContext,
+  request,
 } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
 import { FormattedMessage } from 'react-intl';
+import pluginId from '../../pluginId';
 import stepper from './utils/stepper';
 import init from './init';
 import reducer, { initialState } from './reducer';
@@ -28,16 +31,70 @@ const ModalStepper = ({ isOpen, onToggle }) => {
     goTo(next);
   };
 
+  const handleCancelFileToUpload = fileIndex => {
+    const fileToCancel = get(filesToUpload, fileIndex, {});
+
+    // Cancel upload
+    fileToCancel.abortController.abort();
+
+    dispatch({
+      type: 'REMOVE_FILE_TO_UPLOAD',
+      fileIndex,
+    });
+  };
+
   const handleClosed = () => {
     dispatch({
       type: 'RESET_PROPS',
     });
   };
 
+  const handleUploadFiles = async () => {
+    dispatch({
+      type: 'SET_FILES_UPLOADING_STATE',
+    });
+
+    try {
+      const requests = filesToUpload.map(({ file, abortController }) => {
+        const formData = new FormData();
+        const headers = {};
+        formData.append('files', file);
+
+        return request(
+          `/${pluginId}`,
+          {
+            method: 'POST',
+            headers,
+            body: formData,
+            signal: abortController.signal,
+          },
+          false,
+          false
+        );
+      });
+
+      await Promise.all(requests);
+
+      goNext();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   // FIXME: when back button needed
   // eslint-disable-next-line no-unused-vars
   const goBack = () => {
     goTo(prev);
+  };
+
+  const goNext = () => {
+    if (next === null) {
+      onToggle();
+
+      return;
+    }
+
+    goTo(next);
   };
 
   const goTo = to => {
@@ -67,6 +124,7 @@ const ModalStepper = ({ isOpen, onToggle }) => {
         <Component
           addFilesToUpload={addFilesToUpload}
           filesToUpload={filesToUpload}
+          onClickCancelUpload={handleCancelFileToUpload}
           onGoToAddBrowseFiles={goBack}
         />
       )}
@@ -74,6 +132,9 @@ const ModalStepper = ({ isOpen, onToggle }) => {
       <ModalFooter>
         <section>
           <Button type="button" color="cancel" onClick={onToggle}>
+            {formatMessage({ id: 'app.components.Button.cancel' })}
+          </Button>
+          <Button type="button" color="success" onClick={handleUploadFiles}>
             {formatMessage({ id: 'app.components.Button.cancel' })}
           </Button>
         </section>

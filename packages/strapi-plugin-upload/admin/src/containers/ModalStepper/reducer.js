@@ -17,8 +17,14 @@ const reducer = (state, action) => {
         .update('currentStep', () => action.nextStep);
     case 'GO_TO':
       return state.update('currentStep', () => action.to);
+    case 'REMOVE_FILE_TO_UPLOAD':
+      return state.removeIn(['filesToUpload', action.fileIndex]);
     case 'RESET_PROPS':
       return initialState;
+    case 'SET_FILES_UPLOADING_STATE':
+      return state.update('filesToUpload', list =>
+        list.map(data => data.set('isUploading', true))
+      );
     default:
       return state;
   }

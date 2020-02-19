@@ -10,7 +10,11 @@ import CardImgWrapper from '../CardImgWrapper';
 import InfiniteLoadingIndicator from '../InfiniteLoadingIndicator';
 import HeaderWrapper from './HeaderWrapper';
 
-const UploadList = ({ filesToUpload, onGoToAddBrowseFiles }) => {
+const UploadList = ({
+  filesToUpload,
+  onClickCancelUpload,
+  onGoToAddBrowseFiles,
+}) => {
   const matrix = createMatrix(filesToUpload);
   const filesToUploadLength = filesToUpload.length;
   const titleId = `modal.upload-list.sub-header-title.${
@@ -60,14 +64,18 @@ const UploadList = ({ filesToUpload, onGoToAddBrowseFiles }) => {
           {matrix.map((row, i) => {
             return (
               <div className="row" key={i}>
-                {row.map((content, j) => {
+                {row.map(({ file, isUploading, originalIndex }, j) => {
                   return (
                     <div className="col-3" key={j}>
                       <div>
                         <CardImgWrapper isSmall>
-                          {content.isUploading && <InfiniteLoadingIndicator />}
+                          {isUploading && (
+                            <InfiniteLoadingIndicator
+                              onClick={() => onClickCancelUpload(originalIndex)}
+                            />
+                          )}
                         </CardImgWrapper>
-                        <p style={{ marginBottom: 14 }}>{content.file.name}</p>
+                        <p style={{ marginBottom: 14 }}>{file.name}</p>
                       </div>
                     </div>
                   );
@@ -83,11 +91,13 @@ const UploadList = ({ filesToUpload, onGoToAddBrowseFiles }) => {
 
 UploadList.defaultProps = {
   filesToUpload: [],
+  onClickCancelUpload: () => {},
   onGoToAddBrowseFiles: () => {},
 };
 
 UploadList.propTypes = {
   filesToUpload: PropTypes.array,
+  onClickCancelUpload: PropTypes.func,
   onGoToAddBrowseFiles: PropTypes.func,
 };
 
