@@ -5,7 +5,6 @@ import getTrad from '../../../utils/getTrad';
 const stepper = {
   browse: {
     Component: UploadForm,
-    generateFooter: () => [],
     headerTradId: getTrad('modal.header.browse'),
     prev: null,
     next: 'upload',
@@ -13,14 +12,12 @@ const stepper = {
   upload: {
     Component: UploadList,
     headerTradId: getTrad('modal.header.select-files'),
-    generateFooter: () => [],
     next: null,
     prev: 'browse',
   },
   'edit-new': {
     Component: null,
     headerTradId: 'coming soon',
-    generateFooter: () => [],
     next: null,
     prev: 'upload',
   },
