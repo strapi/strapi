@@ -105,6 +105,7 @@ export { default as getYupInnerErrors } from './utils/getYupInnerErrors';
 
 // SVGS
 export { default as LayoutIcon } from './svgs/Layout';
+export { default as ClearIcon } from './svgs/Clear';
 export { default as Close } from './svgs/Close';
 export { default as FilterIcon } from './svgs/Filter';
 export { default as SearchIcon } from './svgs/Search';

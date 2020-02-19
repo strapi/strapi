@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import ClearIcon from '../../svgs/Clear';
 import SearchIcon from '../../svgs/Search';
 import SearchInfo from '../SearchInfo';
 import Clear from './Clear';
-import ClearIcon from './ClearIcon';
 import Wrapper from './Wrapper';
 
 const HeaderSearch = ({ label, onChange, onClear, placeholder, value }) => {

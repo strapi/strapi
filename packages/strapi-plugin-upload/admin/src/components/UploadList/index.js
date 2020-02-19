@@ -7,6 +7,7 @@ import { Button } from '@buffetjs/core';
 import createMatrix from '../../utils/createMatrix';
 import getTrad from '../../utils/getTrad';
 import CardImgWrapper from '../CardImgWrapper';
+import InfiniteLoadingIndicator from '../InfiniteLoadingIndicator';
 import HeaderWrapper from './HeaderWrapper';
 
 const UploadList = ({ filesToUpload, onGoToAddBrowseFiles }) => {
@@ -49,7 +50,12 @@ const UploadList = ({ filesToUpload, onGoToAddBrowseFiles }) => {
       <ModalBody>
         <div
           className="container"
-          style={{ marginTop: -4, overflow: 'auto', maxHeight: 450 }}
+          style={{
+            marginTop: -4,
+            marginBottom: 4,
+            overflow: 'auto',
+            maxHeight: 350,
+          }}
         >
           {matrix.map((row, i) => {
             return (
@@ -58,7 +64,9 @@ const UploadList = ({ filesToUpload, onGoToAddBrowseFiles }) => {
                   return (
                     <div className="col-3" key={j}>
                       <div>
-                        <CardImgWrapper isSmall />
+                        <CardImgWrapper isSmall>
+                          {content.isUploading && <InfiniteLoadingIndicator />}
+                        </CardImgWrapper>
                         <p style={{ marginBottom: 14 }}>{content.file.name}</p>
                       </div>
                     </div>
