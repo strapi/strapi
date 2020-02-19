@@ -99,20 +99,29 @@ module.exports = {
 
     const { model } = ctx.params;
 
-    if (ctx.is('multipart')) {
-      const { data, files } = parseMultipartBody(ctx);
-      ctx.body = await contentManagerService.create(data, {
-        files,
-        model,
-      });
-    } else {
-      // Create an entry using `queries` system
-      ctx.body = await contentManagerService.create(ctx.request.body, {
-        model,
-      });
-    }
+    try {
+      if (ctx.is('multipart')) {
+        const { data, files } = parseMultipartBody(ctx);
+        ctx.body = await contentManagerService.create(data, {
+          files,
+          model,
+        });
+      } else {
+        // Create an entry using `queries` system
+        ctx.body = await contentManagerService.create(ctx.request.body, {
+          model,
+        });
+      }
 
-    strapi.emit('didCreateFirstContentTypeEntry', ctx.params);
+      strapi.emit('didCreateFirstContentTypeEntry', ctx.params);
+    } catch (error) {
+      strapi.log.error(error);
+      ctx.badRequest(null, [
+        {
+          messages: [{ id: error.message, message: error.message, field: error.field }],
+        },
+      ]);
+    }
   },
 
   /**
@@ -123,17 +132,26 @@ module.exports = {
 
     const contentManagerService = strapi.plugins['content-manager'].services.contentmanager;
 
-    if (ctx.is('multipart')) {
-      const { data, files } = parseMultipartBody(ctx);
-      ctx.body = await contentManagerService.edit({ id }, data, {
-        files,
-        model,
-      });
-    } else {
-      // Return the last one which is the current model.
-      ctx.body = await contentManagerService.edit({ id }, ctx.request.body, {
-        model,
-      });
+    try {
+      if (ctx.is('multipart')) {
+        const { data, files } = parseMultipartBody(ctx);
+        ctx.body = await contentManagerService.edit({ id }, data, {
+          files,
+          model,
+        });
+      } else {
+        // Return the last one which is the current model.
+        ctx.body = await contentManagerService.edit({ id }, ctx.request.body, {
+          model,
+        });
+      }
+    } catch (error) {
+      strapi.log.error(error);
+      ctx.badRequest(null, [
+        {
+          messages: [{ id: error.message, message: error.message, field: error.field }],
+        },
+      ]);
     }
   },
 

@@ -3,6 +3,7 @@
 exports[`Content Type Builder - Content types Collection Types Get collection type returns full schema and informations 1`] = `
 Object {
   "data": Object {
+    "apiID": "test-collection-type",
     "schema": Object {
       "attributes": Object {
         "title": Object {
@@ -23,6 +24,7 @@ Object {
 exports[`Content Type Builder - Content types Single Types Get single type returns full schema and informations 1`] = `
 Object {
   "data": Object {
+    "apiID": "test-single-type",
     "schema": Object {
       "attributes": Object {
         "title": Object {

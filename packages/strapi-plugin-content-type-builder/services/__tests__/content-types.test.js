@@ -7,6 +7,7 @@ describe('Content types service', () => {
       kind: 'singleType',
       plugin: 'some-plugin',
       connection: 'default',
+      modelName: 'my-name',
       collectionName: 'tests',
       info: {
         name: 'My name',
