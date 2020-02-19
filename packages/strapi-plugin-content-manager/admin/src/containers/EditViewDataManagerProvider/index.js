@@ -1,12 +1,8 @@
 import { cloneDeep, get, isEmpty, isEqual, set } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { useEffect, useReducer, useState } from 'react';
-import { Prompt, useParams, useLocation } from 'react-router-dom';
-import {
-  LoadingIndicatorPage,
-  request,
-  useGlobalContext,
-} from 'strapi-helper-plugin';
+import { Prompt, useParams, useRouteMatch } from 'react-router-dom';
+import { LoadingIndicatorPage, request, useGlobalContext } from 'strapi-helper-plugin';
 import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
 import pluginId from '../../pluginId';
 import init from './init';
@@ -21,14 +17,8 @@ import {
 
 const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 
-const EditViewDataManagerProvider = ({
-  allLayoutData,
-  children,
-  redirectToPreviousPage,
-  slug,
-}) => {
+const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPreviousPage, slug }) => {
   const { id } = useParams();
-  const { pathname } = useLocation();
   // Retrieve the search
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const {
@@ -45,7 +35,10 @@ const EditViewDataManagerProvider = ({
   const abortController = new AbortController();
   const { signal } = abortController;
   const { emitEvent, formatMessage } = useGlobalContext();
-  const isSingleType = pathname.split('/')[3] === 'singleType';
+  const {
+    params: { contentType },
+  } = useRouteMatch('/plugins/content-manager/:contentType');
+  const isSingleType = contentType === 'singleType';
 
   useEffect(() => {
     if (!isLoading) {
@@ -76,9 +69,7 @@ const EditViewDataManagerProvider = ({
       }
     };
 
-    const componentsDataStructure = Object.keys(
-      allLayoutData.components
-    ).reduce((acc, current) => {
+    const componentsDataStructure = Object.keys(allLayoutData.components).reduce((acc, current) => {
       acc[current] = createDefaultForm(
         get(allLayoutData, ['components', current, 'schema', 'attributes'], {}),
         allLayoutData.components
@@ -115,11 +106,7 @@ const EditViewDataManagerProvider = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, slug, isCreatingEntry]);
 
-  const addComponentToDynamicZone = (
-    keys,
-    componentUid,
-    shouldCheckErrors = false
-  ) => {
+  const addComponentToDynamicZone = (keys, componentUid, shouldCheckErrors = false) => {
     emitEvent('addComponentToDynamicZone');
     dispatch({
       type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE',
@@ -145,11 +132,7 @@ const EditViewDataManagerProvider = ({
     });
   };
 
-  const addRepeatableComponentToField = (
-    keys,
-    componentUid,
-    shouldCheckErrors = false
-  ) => {
+  const addRepeatableComponentToField = (keys, componentUid, shouldCheckErrors = false) => {
     dispatch({
       type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
       keys: keys.split('.'),
@@ -253,6 +236,9 @@ const EditViewDataManagerProvider = ({
       const method = isCreatingEntry ? 'POST' : 'PUT';
       let endPoint;
 
+      // All endpoints for creation and edition are the same for both content types
+      // But, the id from the URL didn't exist for the single types.
+      // So, we use the id of the modified data if this one is setted.
       if (isCreatingEntry) {
         endPoint = slug;
       } else if (modifiedData) {
@@ -356,9 +342,7 @@ const EditViewDataManagerProvider = ({
   };
 
   const shouldCheckDZErrors = dzName => {
-    const doesDZHaveError = Object.keys(formErrors).some(
-      key => key.split('.')[0] === dzName
-    );
+    const doesDZHaveError = Object.keys(formErrors).some(key => key.split('.')[0] === dzName);
     const shouldCheckErrors = !isEmpty(formErrors) && doesDZHaveError;
 
     return shouldCheckErrors;
@@ -407,6 +391,10 @@ const EditViewDataManagerProvider = ({
   };
 
   const clearData = () => {
+    if (isSingleType) {
+      setIsCreatingEntry(true);
+    }
+
     dispatch({
       type: 'SET_DEFAULT_MODIFIED_DATA_STRUCTURE',
       contentTypeDataStructure: {},

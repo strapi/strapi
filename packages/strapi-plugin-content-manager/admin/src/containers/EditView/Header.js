@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useRouteMatch } from 'react-router-dom';
 import { Header as PluginHeader } from '@buffetjs/custom';
 
-import {
-  PopUpWarning,
-  request,
-  templateObject,
-  useGlobalContext,
-} from 'strapi-helper-plugin';
+import { PopUpWarning, request, templateObject, useGlobalContext } from 'strapi-helper-plugin';
 import { get } from 'lodash';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
@@ -20,7 +15,6 @@ const Header = () => {
 
   const { formatMessage, emitEvent } = useGlobalContext();
   const { id } = useParams();
-  const { pathname } = useLocation();
   const {
     deleteSuccess,
     initialData,
@@ -31,15 +25,13 @@ const Header = () => {
     slug,
     clearData,
   } = useDataManager();
-  const isSingleType = pathname.split('/')[3] === 'singleType';
+  const {
+    params: { contentType },
+  } = useRouteMatch('/plugins/content-manager/:contentType');
+  const isSingleType = contentType === 'singleType';
 
-  const currentContentTypeMainField = get(
-    layout,
-    ['settings', 'mainField'],
-    'id'
-  );
+  const currentContentTypeMainField = get(layout, ['settings', 'mainField'], 'id');
   const currentContentTypeName = get(layout, ['schema', 'info', 'name']);
-  const apiId = layout.uid.split('.')[1];
   const isCreatingEntry = id === 'create';
 
   /* eslint-disable indent */
@@ -47,8 +39,7 @@ const Header = () => {
     ? formatMessage({
         id: `${pluginId}.containers.Edit.pluginHeader.title.new`,
       })
-    : templateObject({ mainField: currentContentTypeMainField }, initialData)
-        .mainField;
+    : templateObject({ mainField: currentContentTypeMainField }, initialData).mainField;
   /* eslint-enable indent */
   const headerTitle = isSingleType ? currentContentTypeName : entryHeaderTitle;
 
@@ -107,9 +98,7 @@ const Header = () => {
     title: {
       label: headerTitle && headerTitle.toString(),
     },
-    content: isSingleType
-      ? `${formatMessage({ id: `${pluginId}.api.id` })} : ${apiId}`
-      : '',
+    content: isSingleType ? `${formatMessage({ id: `${pluginId}.api.id` })} : ${layout.apiID}` : '',
     actions: getHeaderActions(),
   };
 

@@ -2,12 +2,8 @@ import React, { Suspense, lazy, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { Switch, Route } from 'react-router-dom';
-import {
-  LoadingIndicatorPage,
-  useGlobalContext,
-  request,
-} from 'strapi-helper-plugin';
+import { Switch, Route, useRouteMatch } from 'react-router-dom';
+import { LoadingIndicatorPage, useGlobalContext, request } from 'strapi-helper-plugin';
 import { DndProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import pluginId from '../../pluginId';
@@ -25,12 +21,8 @@ import reducer from './reducer';
 import makeSelectMain from './selectors';
 
 const EditSettingsView = lazy(() => import('../EditSettingsView'));
-const CollectionTypeRecursivePath = lazy(() =>
-  import('../CollectionTypeRecursivePath')
-);
-const SingleTypeRecursivePath = lazy(() =>
-  import('../SingleTypeRecursivePath')
-);
+const CollectionTypeRecursivePath = lazy(() => import('../CollectionTypeRecursivePath'));
+const SingleTypeRecursivePath = lazy(() => import('../SingleTypeRecursivePath'));
 
 function Main({
   deleteLayout,
@@ -50,7 +42,9 @@ function Main({
   strapi.useInjectReducer({ key: 'main', reducer, pluginId });
 
   const { emitEvent } = useGlobalContext();
-  const slug = pathname.split('/')[4];
+  const {
+    params: { slug },
+  } = useRouteMatch('/plugins/content-manager/:contentType/:slug');
   const getDataRef = useRef();
   const getLayoutRef = useRef();
   const resetPropsRef = useRef();
@@ -74,10 +68,9 @@ function Main({
 
   getLayoutRef.current = async uid => {
     try {
-      const { data: layout } = await request(
-        getRequestUrl(`content-types/${uid}`),
-        { method: 'GET' }
-      );
+      const { data: layout } = await request(getRequestUrl(`content-types/${uid}`), {
+        method: 'GET',
+      });
 
       getLayoutSucceeded(layout, uid);
     } catch (err) {
@@ -86,8 +79,7 @@ function Main({
   };
   resetPropsRef.current = resetProps;
 
-  const shouldShowLoader =
-    !pathname.includes('ctm-configurations/') && layouts[slug] === undefined;
+  const shouldShowLoader = !pathname.includes('ctm-configurations/') && layouts[slug] === undefined;
 
   useEffect(() => {
     getDataRef.current();
@@ -114,9 +106,7 @@ function Main({
       deleteLayouts={deleteLayouts}
       emitEvent={emitEvent}
       components={components}
-      componentsAndModelsMainPossibleMainFields={
-        componentsAndModelsMainPossibleMainFields
-      }
+      componentsAndModelsMainPossibleMainFields={componentsAndModelsMainPossibleMainFields}
       layouts={layouts}
       models={models}
       plugins={plugins}

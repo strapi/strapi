@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { withRouter } from 'react-router';
+import { useLocation, useHistory } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { upperFirst } from 'lodash';
 import useListView from '../../hooks/useListView';
@@ -9,21 +9,15 @@ import { Table, TableEmpty, TableRow } from './styledComponents';
 import ActionCollapse from './ActionCollapse';
 import Row from './Row';
 
-const CustomTable = ({
-  data,
-  headers,
-  history: {
-    location: { pathname, search },
-    push,
-  },
-  isBulkable,
-}) => {
+const CustomTable = ({ data, headers, isBulkable }) => {
   const {
     emitEvent,
     entriesToDelete,
     label,
     searchParams: { filters, _q },
   } = useListView();
+  const { pathname, search } = useLocation();
+  const { push } = useHistory();
 
   const redirectUrl = `redirectUrl=${pathname}${search}`;
   const colSpanLength = isBulkable ? headers.length + 2 : headers.length + 1;
@@ -107,4 +101,4 @@ CustomTable.propTypes = {
   isBulkable: PropTypes.bool,
 };
 
-export default withRouter(memo(CustomTable));
+export default memo(CustomTable);
