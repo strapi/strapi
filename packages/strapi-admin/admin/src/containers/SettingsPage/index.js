@@ -31,6 +31,8 @@ function SettingsPage() {
       return refArray.findIndex(obj => obj.key === route.key) === index;
     });
 
+  console.log(createdRoutes);
+
   const menuItems = [
     {
       id: 'global',
