@@ -6,29 +6,30 @@
 
 import React, { memo } from 'react';
 import { useGlobalContext, LeftMenu, LeftMenuList } from 'strapi-helper-plugin';
-import { get } from 'lodash';
 import { Switch, Redirect, Route, useParams } from 'react-router-dom';
-
 import EditView from '../Webhooks/EditView';
 import ListView from '../Webhooks/ListView';
 import SettingDispatcher from './SettingDispatcher';
 import Wrapper from './Wrapper';
+import retrieveGlobalLinks from './utils/retrieveGlobalLinks';
+import retrievePluginsMenu from './utils/retrievePluginsMenu';
 
 function SettingsPage() {
   const { settingId } = useParams();
   const { formatMessage, plugins, settingsBaseURL } = useGlobalContext();
+  // Retrieve the links that will be injected into the global section
+  const globalLinks = retrieveGlobalLinks(plugins);
+  // Create the plugins settings section
+  // Note it is currently not possible to add a link into a plugin section
+  const pluginsMenu = retrievePluginsMenu(plugins);
 
-  const pluginsMenu = Object.keys(plugins).reduce((acc, current) => {
-    const pluginMenu = get(plugins, [current, 'settings', 'menuSection'], null);
-
-    if (!pluginMenu) {
-      return acc;
-    }
-
-    acc.push(pluginMenu);
-
-    return acc;
-  }, []);
+  const createdRoutes = globalLinks
+    .map(({ to, Component, exact }) => (
+      <Route path={to} key={to} component={Component} exact={exact || false} />
+    ))
+    .filter((route, index, refArray) => {
+      return refArray.findIndex(obj => obj.key === route.key) === index;
+    });
 
   const menuItems = [
     {
@@ -40,6 +41,7 @@ function SettingsPage() {
           to: `${settingsBaseURL}/webhooks`,
           name: 'webhooks',
         },
+        ...globalLinks,
       ],
     },
     ...pluginsMenu,
@@ -74,6 +76,7 @@ function SettingsPage() {
               path={`${settingsBaseURL}/webhooks/:id`}
               component={EditView}
             />
+            {createdRoutes}
             <Route
               path={`${settingsBaseURL}/:pluginId`}
               component={SettingDispatcher}
