@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import {
@@ -23,6 +23,15 @@ const ModalStepper = ({ isOpen, onToggle }) => {
   const { currentStep, filesToUpload } = reducerState.toJS();
   const { Component, headerTradId, next, prev } = stepper[currentStep];
   const filesToUploadLength = filesToUpload.length;
+  const toggleRef = useRef();
+  toggleRef.current = onToggle;
+
+  useEffect(() => {
+    if (currentStep === 'upload' && filesToUploadLength === 0) {
+      // Close modal when file uploading is over
+      toggleRef.current();
+    }
+  }, [filesToUploadLength, currentStep]);
 
   const addFilesToUpload = ({ target: { value } }) => {
     dispatch({
@@ -57,38 +66,43 @@ const ModalStepper = ({ isOpen, onToggle }) => {
     });
 
     try {
-      const requests = filesToUpload.map(({ file, abortController }) => {
-        const formData = new FormData();
-        const headers = {};
-        formData.append('files', file);
+      const requests = filesToUpload.map(
+        async ({ file, originalIndex, abortController }) => {
+          const formData = new FormData();
+          const headers = {};
+          formData.append('files', file);
 
-        return request(
-          `/${pluginId}`,
-          {
-            method: 'POST',
-            headers,
-            body: formData,
-            signal: abortController.signal,
-          },
-          false,
-          false
-        );
-      });
+          await request(
+            `/${pluginId}`,
+            {
+              method: 'POST',
+              headers,
+              body: formData,
+              signal: abortController.signal,
+            },
+            false,
+            false
+          );
+
+          dispatch({
+            type: 'REMOVE_FILE_TO_UPLOAD',
+            fileIndex: originalIndex,
+          });
+        }
+      );
 
       await Promise.all(requests);
-
-      goNext();
     } catch (err) {
-      console.log(err);
+      // Silent
     }
   };
 
-  // FIXME: when back button needed
-  // eslint-disable-next-line no-unused-vars
   const goBack = () => {
     goTo(prev);
   };
 
+  // FIXME: when back button needed
+  // eslint-disable-next-line no-unused-vars
   const goNext = () => {
     if (next === null) {
       onToggle();

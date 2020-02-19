@@ -8,7 +8,6 @@ const createNewFilesToUploadArray = filesObject => {
       file: currentFile,
       isUploading: false,
       originalIndex: index,
-      // signal,
     });
 
     return acc;
