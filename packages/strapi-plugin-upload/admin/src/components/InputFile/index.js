@@ -19,6 +19,10 @@ const InputFile = ({ name, onChange }) => {
     onChange({ target: { name, value: files } });
   };
 
+  const handleClick = () => {
+    ref.current.click();
+  };
+
   const handleDragEnter = () => {
     setIsDragging(true);
   };
@@ -35,44 +39,38 @@ const InputFile = ({ name, onChange }) => {
   };
 
   return (
-    <>
-      <Label
-        htmlFor={name}
-        isDragging={isDragging}
-        onDragOver={handleAllowDrop}
-        onDragEnter={handleDragEnter}
-        onDrop={handleDrop}
+    <Label
+      htmlFor={name}
+      isDragging={isDragging}
+      onDragOver={handleAllowDrop}
+      onDragEnter={handleDragEnter}
+      onDrop={handleDrop}
+    >
+      <Cloud />
+      <P>
+        <span className="bold">
+          {formatMessage({ id: getTrad('input.label-bold') })}&nbsp;
+        </span>
+        <span>{formatMessage({ id: getTrad('input.label-normal') })}</span>
+      </P>
+      <Button
+        type="button"
+        id="button"
+        name="button"
+        color="primary"
+        onClick={handleClick}
       >
-        <Cloud />
-        <P>
-          <span className="bold">
-            {formatMessage({ id: getTrad('input.label-bold') })}&nbsp;
-          </span>
-          <span>{formatMessage({ id: getTrad('input.label-normal') })}</span>
-        </P>
-        <Button
-          type="button"
-          id="button"
-          name="button"
-          color="primary"
-          onClick={() => {
-            ref.current.click();
-          }}
-        >
-          {formatMessage({ id: getTrad('input.button.label') })}
-        </Button>
-        <Input
-          ref={ref}
-          type="file"
-          multiple
-          name={name}
-          onChange={handleChange}
-        />
-        {isDragging && (
-          <div className="dragzone" onDragLeave={handleDragLeave} />
-        )}
-      </Label>
-    </>
+        {formatMessage({ id: getTrad('input.button.label') })}
+      </Button>
+      <Input
+        ref={ref}
+        type="file"
+        multiple
+        name={name}
+        onChange={handleChange}
+      />
+      {isDragging && <div className="dragzone" onDragLeave={handleDragLeave} />}
+    </Label>
   );
 };
 

@@ -21,8 +21,8 @@ const Label = styled.label`
   ${({ isDragging }) => {
     if (isDragging) {
       return `
-        background-color: rgba(28, 93, 231, 0.01) !important;
-        border: 2px dashed rgba(28, 93, 231, 0.1) !important;
+        background-color: rgba(28, 93, 231, 0.01);
+        border: 2px dashed rgba(28, 93, 231, 0.1);
       `;
     }
 

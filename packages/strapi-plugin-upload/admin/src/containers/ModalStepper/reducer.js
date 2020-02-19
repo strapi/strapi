@@ -47,7 +47,12 @@ const reducer = (state, action) => {
       });
     case 'SET_FILES_UPLOADING_STATE':
       return state.update('filesToUpload', list =>
-        list.map(data => data.set('isUploading', true))
+        list.map(data =>
+          data
+            .set('isUploading', true)
+            .set('hasError', false)
+            .set('errorMessage', null)
+        )
       );
 
     default:

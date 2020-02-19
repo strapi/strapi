@@ -1,19 +1,33 @@
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
+import PropTypes from 'prop-types';
 
-const Wrapper = styled.div`
-  ${({ isActive }) => {
-    if (isActive) {
-      return css`
-        height: 3rem;
-        color: #007eff;
-        font-weight: 600;
-        border-bottom: 2px solid #007eff;
-        z-index: 99;
-      `;
-    }
+const Wrapper = styled.div(({ isActive, isDisabled }) => {
+  const cursor = isDisabled ? 'not-allowed' : 'pointer';
 
-    return '';
-  }}
-`;
+  if (isActive) {
+    return {
+      height: '3rem',
+      cursor,
+      color: '#007eff',
+      fontWeight: 600,
+      borderBottom: '2px solid #007eff',
+      zIndex: 99,
+    };
+  }
+
+  return {
+    cursor,
+  };
+});
+
+Wrapper.defaultProps = {
+  isActive: false,
+  isDisabled: false,
+};
+
+Wrapper.propTypes = {
+  isActive: PropTypes.bool,
+  isDisabled: PropTypes.bool,
+};
 
 export default Wrapper;

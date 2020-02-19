@@ -402,8 +402,8 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             abortController: new AbortController(),
             file: { ok: true },
             hasError: false,
-            errorMessage: null,
-            isUploading: false,
+            errorMessage: 'test',
+            isUploading: true,
             originalIndex: 0,
           },
           {

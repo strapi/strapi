@@ -79,10 +79,7 @@ const HomePage = () => {
         </SortPicker>
         <AddFilterCTA />
       </ControlsWrapper>
-      <ListEmpty
-        // TODO
-        onClick={handleClickToggleModal}
-      />
+      <ListEmpty onClick={handleClickToggleModal} />
       {/* <List data={data} /> */}
       <ModalStepper isOpen={isOpen} onToggle={handleClickToggleModal} />
     </Container>

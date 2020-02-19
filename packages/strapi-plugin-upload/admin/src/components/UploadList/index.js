@@ -6,9 +6,8 @@ import { ModalBody } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
 import createMatrix from '../../utils/createMatrix';
 import getTrad from '../../utils/getTrad';
-import CardImgWrapper from '../CardImgWrapper';
-import InfiniteLoadingIndicator from '../InfiniteLoadingIndicator';
 import HeaderWrapper from './HeaderWrapper';
+import RowItem from './RowItem';
 
 const UploadList = ({
   filesToUpload,
@@ -61,40 +60,16 @@ const UploadList = ({
             maxHeight: 350,
           }}
         >
-          {matrix.map((row, i) => {
+          {matrix.map(({ key, rowContent }) => {
             return (
-              <div className="row" key={i}>
-                {row.map(
-                  (
-                    {
-                      file,
-                      hasError,
-                      errorMessage,
-                      isUploading,
-                      originalIndex,
-                    },
-                    j
-                  ) => {
-                    return (
-                      <div className="col-3" key={j}>
-                        <div>
-                          <CardImgWrapper isSmall hasError={hasError}>
-                            {isUploading && (
-                              <InfiniteLoadingIndicator
-                                onClick={() => {
-                                  onClickCancelUpload(originalIndex);
-                                }}
-                              />
-                            )}
-                          </CardImgWrapper>
-                          <p style={{ marginBottom: 14 }}>
-                            {errorMessage || file.name}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  }
-                )}
+              <div className="row" key={key}>
+                {rowContent.map(data => (
+                  <RowItem
+                    {...data}
+                    onClick={onClickCancelUpload}
+                    key={data.originalIndex}
+                  />
+                ))}
               </div>
             );
           })}

@@ -13,7 +13,7 @@ const createMatrix = refArray => {
         start = i;
       }
 
-      matrix.push(row);
+      matrix.push({ key: matrix.length, rowContent: row });
       row = [];
     }
   }
@@ -22,7 +22,7 @@ const createMatrix = refArray => {
     row.push(refArray[i]);
 
     if (i === refArray.length - 1) {
-      matrix.push(row);
+      matrix.push({ key: matrix.length, rowContent: row });
     }
   }
 

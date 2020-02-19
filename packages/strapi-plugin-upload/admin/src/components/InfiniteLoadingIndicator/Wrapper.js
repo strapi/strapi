@@ -5,7 +5,6 @@ const Wrapper = styled.div`
   top: calc(50% - 2px);
   left: calc(50% - 22%);
   width: 44%;
-
   text-align: center;
 `;
 

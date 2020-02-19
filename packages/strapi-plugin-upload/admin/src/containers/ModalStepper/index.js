@@ -73,59 +73,46 @@ const ModalStepper = ({ isOpen, onToggle }) => {
       type: 'SET_FILES_UPLOADING_STATE',
     });
 
-    try {
-      const requests = filesToUpload.map(
-        async ({ file, originalIndex, abortController }) => {
-          const formData = new FormData();
-          const headers = {};
-          formData.append('files', file);
+    const requests = filesToUpload.map(
+      async ({ file, originalIndex, abortController }) => {
+        const formData = new FormData();
+        const headers = {};
+        formData.append('files', file);
 
-          try {
-            await request(
-              `/${pluginId}`,
-              {
-                method: 'POST',
-                headers,
-                body: formData,
-                signal: abortController.signal,
-              },
-              false,
-              false
-            );
+        try {
+          await request(
+            `/${pluginId}`,
+            {
+              method: 'POST',
+              headers,
+              body: formData,
+              signal: abortController.signal,
+            },
+            false,
+            false
+          );
 
-            dispatch({
-              type: 'REMOVE_FILE_TO_UPLOAD',
-              fileIndex: originalIndex,
-            });
-          } catch (err) {
-            const errorMessage = get(
-              err,
-              [
-                'response',
-                'payload',
-                'message',
-                '0',
-                'messages',
-                '0',
-                'message',
-              ],
-              null
-            );
-            console.log({ err: errorMessage, p: err.response, originalIndex });
+          dispatch({
+            type: 'REMOVE_FILE_TO_UPLOAD',
+            fileIndex: originalIndex,
+          });
+        } catch (err) {
+          const errorMessage = get(
+            err,
+            ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
+            null
+          );
 
-            dispatch({
-              type: 'SET_FILE_ERROR',
-              fileIndex: originalIndex,
-              errorMessage,
-            });
-          }
+          dispatch({
+            type: 'SET_FILE_ERROR',
+            fileIndex: originalIndex,
+            errorMessage,
+          });
         }
-      );
+      }
+    );
 
-      await Promise.all(requests);
-    } catch (err) {
-      // Silent
-    }
+    await Promise.all(requests);
   };
 
   const goBack = () => {
@@ -152,12 +139,7 @@ const ModalStepper = ({ isOpen, onToggle }) => {
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onToggle={onToggle}
-      // TODO: reset to initialState
-      onClosed={handleClosed}
-    >
+    <Modal isOpen={isOpen} onToggle={onToggle} onClosed={handleClosed}>
       {/* header title */}
       <HeaderModal>
         <section>
