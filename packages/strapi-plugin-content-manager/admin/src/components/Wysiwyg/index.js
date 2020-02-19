@@ -79,6 +79,10 @@ class Wysiwyg extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
+    if (nextProps.value !== this.props.value && !this.state.isFocused) {
+      return true;
+    }
+
     if (nextState.editorState !== this.state.editorState) {
       return true;
     }
@@ -119,6 +123,11 @@ class Wysiwyg extends React.Component {
     if (prevProps.resetProps !== this.props.resetProps) {
       this.setInitialValue(this.props);
     }
+
+    // Update the content when used in a dynamiczone
+    if (prevProps.value !== this.props.value && !this.state.isFocused) {
+      this.setInitialValue(this.props);
+    }
   }
 
   /**
@@ -126,6 +135,10 @@ class Wysiwyg extends React.Component {
    * @param {[type]} props [description]
    */
   setInitialValue = props => {
+    if (isEmpty(props.value)) {
+      return this.setState({ editorState: EditorState.createEmpty() });
+    }
+
     const contentState = ContentState.createFromText(props.value);
     const newEditorState = EditorState.createWithContent(contentState);
     const editorState = this.state.isFocused
