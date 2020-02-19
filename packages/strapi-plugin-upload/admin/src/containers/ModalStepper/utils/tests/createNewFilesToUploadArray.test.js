@@ -8,10 +8,11 @@ describe('UPLOAD | containers | ModalStepper | utils', () => {
       };
       const expected = [
         {
-          file: { ok: true },
           abortController: new AbortController(),
+          file: { ok: true },
+          hasError: false,
+          errorMessage: null,
           isUploading: false,
-          originalIndex: 0,
         },
       ];
 

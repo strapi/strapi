@@ -60,6 +60,14 @@ const ModalStepper = ({ isOpen, onToggle }) => {
     });
   };
 
+  const handleGoToAddBrowseFiles = () => {
+    dispatch({
+      type: 'CLEAN_FILES_ERROR',
+    });
+
+    goBack();
+  };
+
   const handleUploadFiles = async () => {
     dispatch({
       type: 'SET_FILES_UPLOADING_STATE',
@@ -72,22 +80,45 @@ const ModalStepper = ({ isOpen, onToggle }) => {
           const headers = {};
           formData.append('files', file);
 
-          await request(
-            `/${pluginId}`,
-            {
-              method: 'POST',
-              headers,
-              body: formData,
-              signal: abortController.signal,
-            },
-            false,
-            false
-          );
+          try {
+            await request(
+              `/${pluginId}`,
+              {
+                method: 'POST',
+                headers,
+                body: formData,
+                signal: abortController.signal,
+              },
+              false,
+              false
+            );
 
-          dispatch({
-            type: 'REMOVE_FILE_TO_UPLOAD',
-            fileIndex: originalIndex,
-          });
+            dispatch({
+              type: 'REMOVE_FILE_TO_UPLOAD',
+              fileIndex: originalIndex,
+            });
+          } catch (err) {
+            const errorMessage = get(
+              err,
+              [
+                'response',
+                'payload',
+                'message',
+                '0',
+                'messages',
+                '0',
+                'message',
+              ],
+              null
+            );
+            console.log({ err: errorMessage, p: err.response, originalIndex });
+
+            dispatch({
+              type: 'SET_FILE_ERROR',
+              fileIndex: originalIndex,
+              errorMessage,
+            });
+          }
         }
       );
 
@@ -141,7 +172,7 @@ const ModalStepper = ({ isOpen, onToggle }) => {
           addFilesToUpload={addFilesToUpload}
           filesToUpload={filesToUpload}
           onClickCancelUpload={handleCancelFileToUpload}
-          onGoToAddBrowseFiles={goBack}
+          onGoToAddBrowseFiles={handleGoToAddBrowseFiles}
         />
       )}
 
