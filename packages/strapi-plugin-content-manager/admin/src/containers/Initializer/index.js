@@ -23,10 +23,10 @@ const Initializer = ({ updatePlugin }) => {
       try {
         const { data } = await request(requestURL, { method: 'GET' });
 
-        // Two thinks to know here:
+        // Two things to know here:
         // First, we group content types by schema.kind to get an object with two separated content types (singleTypes, collectionTypes)
         // Then, we sort by name to keep collection types at the first position everytime.
-        // As all content types are sort by name, if a single type name start with abc, the single types section will be at the first position.
+        // As all content types are sorted by name, if a single type name starts with abc, the single types section will be at the first position.
         // However, we want to keep collection types at the first position in the admin menu
         ref.current(
           pluginId,

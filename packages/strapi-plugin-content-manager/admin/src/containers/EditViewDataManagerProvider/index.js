@@ -1,7 +1,7 @@
 import { cloneDeep, get, isEmpty, isEqual, set } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { useEffect, useReducer, useState } from 'react';
-import { Prompt, useParams, useLocation } from 'react-router-dom';
+import { Prompt, useParams, useRouteMatch } from 'react-router-dom';
 import {
   LoadingIndicatorPage,
   request,
@@ -28,7 +28,6 @@ const EditViewDataManagerProvider = ({
   slug,
 }) => {
   const { id } = useParams();
-  const { pathname } = useLocation();
   // Retrieve the search
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const {
@@ -45,7 +44,7 @@ const EditViewDataManagerProvider = ({
   const abortController = new AbortController();
   const { signal } = abortController;
   const { emitEvent, formatMessage } = useGlobalContext();
-  const isSingleType = pathname.split('/')[3] === 'singleType';
+  const isSingleType = useRouteMatch('/plugins/content-manager/singleType');
 
   useEffect(() => {
     if (!isLoading) {
@@ -253,6 +252,9 @@ const EditViewDataManagerProvider = ({
       const method = isCreatingEntry ? 'POST' : 'PUT';
       let endPoint;
 
+      // All endpoints for creation and edition are the same for both content types
+      // But, the id from the URL didn't exist for the single types.
+      // So, we use the id of the modified data if this one is setted.
       if (isCreatingEntry) {
         endPoint = slug;
       } else if (modifiedData) {
@@ -407,6 +409,10 @@ const EditViewDataManagerProvider = ({
   };
 
   const clearData = () => {
+    if (isSingleType) {
+      setIsCreatingEntry(true);
+    }
+
     dispatch({
       type: 'SET_DEFAULT_MODIFIED_DATA_STRUCTURE',
       contentTypeDataStructure: {},

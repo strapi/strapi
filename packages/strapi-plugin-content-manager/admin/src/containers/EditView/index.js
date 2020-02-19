@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
 import { BackHeader, LiLink } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import Container from '../../components/Container';
@@ -39,9 +39,9 @@ const EditView = ({
   formatLayoutRef.current = createAttributesLayout;
   // Retrieve push to programmatically navigate between views
   const { push } = useHistory();
-  // Retrieve the search and the location
+  // Retrieve the search and the pathname
   const { search, pathname } = useLocation();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const isSingleType = useRouteMatch('/plugins/content-manager/singleType');
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState)
   );
@@ -129,7 +129,6 @@ const EditView = ({
     .filter((_, index) => index !== 0)
     .join('');
   const redirectToPreviousPage = () => push(redirectURL);
-  const isSingleType = pathname.includes('singleType');
 
   return (
     <EditViewProvider

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useRouteMatch } from 'react-router-dom';
 import { Header as PluginHeader } from '@buffetjs/custom';
 
 import {
@@ -20,7 +20,6 @@ const Header = () => {
 
   const { formatMessage, emitEvent } = useGlobalContext();
   const { id } = useParams();
-  const { pathname } = useLocation();
   const {
     deleteSuccess,
     initialData,
@@ -31,7 +30,7 @@ const Header = () => {
     slug,
     clearData,
   } = useDataManager();
-  const isSingleType = pathname.split('/')[3] === 'singleType';
+  const isSingleType = useRouteMatch('/plugins/content-manager/singleType');
 
   const currentContentTypeMainField = get(
     layout,
