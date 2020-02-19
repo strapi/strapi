@@ -1622,3 +1622,43 @@ heroku open
 Like with project updates on Heroku, the file system doesn't support local uploading of files as they will be wiped when Heroku "Cycles" the dyno. This type of file system is called [ephemeral](https://devcenter.heroku.com/articles/dynos#ephemeral-filesystem), which means the file system only lasts until the dyno is restarted (with Heroku this happens any time you redeploy or during their regular restart which can happen every few hours or every day).
 
 Due to Heroku's filesystem you will need to use an upload provider such as AWS S3, Cloudinary, or Rackspace. You can view the documentation for installing providers [here](../plugins/upload.md#install-providers) and you can see a list of providers from both Strapi and the community on [npmjs.com](https://www.npmjs.com/search?q=strapi-provider-upload-&page=0&perPage=20).
+
+## Platform.sh
+
+[Plateform.sh](https://console.platform.sh/) provide you an easy way to getting start and deploy your Strapi applciation.
+
+<a href="https://console.platform.sh/projects/create-project?template=https://raw.githubusercontent.com/platformsh/template-builder/master/templates/strapi/.platform.template.yaml&utm_content=strapi&utm_source=github&utm_medium=button&utm_campaign=deploy_on_platform">
+    <img src="https://platform.sh/images/deploy/lg-blue.svg" alt="Deploy on Platform.sh" width="180px" />
+</a>
+
+You can find the template [source code](https://github.com/platformsh-templates/strapi#customizations) on Platform.sh GitHub for more information.
+
+### Platform.sh requirement
+
+You must have a [Plateform.js](https://platform.sh/) account before doing these steps.
+
+### Create a project
+
+You can use the One-Click button or follow these steps.
+
+- Click on `+ Add project` button
+- Select `Use a template` option and click `Next`
+- Fill your `Project name` and `Region` then click `Next`
+
+Search for the Strapi template using the search bar.
+
+- Click on the search bar
+- Fill `strapi`
+- Select the Strapi template
+- Click `Next`
+
+After few second a Strapi application will be setup with a Postgres database.
+
+### Visit your app
+
+Now to visit your application.
+
+- Click on `Settings`
+- Then `Domains` in the left menu
+
+You will see the Platform.sh domain name that is used for your app.
