@@ -6,10 +6,7 @@ const generator = require('strapi-generate');
 
 const createBuilder = require('./schema-builder');
 const apiHandler = require('./api-handler');
-const {
-  formatAttributes,
-  replaceTemporaryUIDs,
-} = require('../utils/attributes');
+const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
 const { nameToSlug } = require('../utils/helpers');
 
 /**
@@ -17,11 +14,12 @@ const { nameToSlug } = require('../utils/helpers');
  * @param {Object} contentType
  */
 const formatContentType = contentType => {
-  const { uid, kind, plugin, connection, collectionName, info } = contentType;
+  const { uid, kind, modelName, plugin, connection, collectionName, info } = contentType;
 
   return {
     uid,
     plugin,
+    apiID: modelName,
     schema: {
       name: _.get(info, 'name') || _.upperFirst(pluralize(uid)),
       description: _.get(info, 'description', ''),
