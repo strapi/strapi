@@ -25,7 +25,7 @@ describe('Content Manager single types', () => {
     });
   }, 60000);
 
-  afterAll(() => modelsUtils.deleteContentType('single-type'), 60000);
+  afterAll(() => modelsUtils.deleteContentType('single-type-model'), 60000);
 
   test('Label is not pluralized', async () => {
     const res = await rq({

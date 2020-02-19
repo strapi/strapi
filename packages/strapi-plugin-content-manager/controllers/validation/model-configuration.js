@@ -1,6 +1,6 @@
 'use strict';
 
-const yup = require('yup');
+const { yup } = require('strapi-utils');
 const {
   isListable,
   hasRelationAttribute,
@@ -26,9 +26,7 @@ module.exports = (model, schema, opts = {}) =>
     .noUnknown();
 
 const createSettingsSchema = (model, schema) => {
-  const validAttributes = Object.keys(schema.attributes).filter(key =>
-    isListable(schema, key)
-  );
+  const validAttributes = Object.keys(schema.attributes).filter(key => isListable(schema, key));
 
   return yup
     .object()
@@ -98,14 +96,11 @@ const createMetadasSchema = (model, schema) => {
 const createArrayTest = ({ allowUndefined = false } = {}) => ({
   name: 'isArray',
   message: '${path} is required and must be an array',
-  test: val =>
-    allowUndefined === true && val === undefined ? true : Array.isArray(val),
+  test: val => (allowUndefined === true && val === undefined ? true : Array.isArray(val)),
 });
 
 const createLayoutsSchema = (model, schema, opts = {}) => {
-  const validAttributes = Object.keys(schema.attributes).filter(key =>
-    isListable(schema, key)
-  );
+  const validAttributes = Object.keys(schema.attributes).filter(key => isListable(schema, key));
 
   const editAttributes = Object.keys(schema.attributes).filter(key =>
     hasEditableAttribute(schema, key)

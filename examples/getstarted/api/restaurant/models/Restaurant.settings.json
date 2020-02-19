@@ -18,7 +18,8 @@
       "type": "string"
     },
     "slug": {
-      "type": "uid"
+      "type": "uid",
+      "targetField": "name"
     },
     "price_range": {
       "enum": ["very_cheap", "cheap", "average", "expensive", "very_expensive"],
