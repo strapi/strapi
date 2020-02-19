@@ -15,12 +15,14 @@ import pluginId from '../../pluginId';
 import stepper from './utils/stepper';
 import init from './init';
 import reducer, { initialState } from './reducer';
+import getTrad from '../../utils/getTrad';
 
 const ModalStepper = ({ isOpen, onToggle }) => {
   const { formatMessage } = useGlobalContext();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { currentStep, filesToUpload } = reducerState.toJS();
   const { Component, headerTradId, next, prev } = stepper[currentStep];
+  const filesToUploadLength = filesToUpload.length;
 
   const addFilesToUpload = ({ target: { value } }) => {
     dispatch({
@@ -134,9 +136,20 @@ const ModalStepper = ({ isOpen, onToggle }) => {
           <Button type="button" color="cancel" onClick={onToggle}>
             {formatMessage({ id: 'app.components.Button.cancel' })}
           </Button>
-          <Button type="button" color="success" onClick={handleUploadFiles}>
-            {formatMessage({ id: 'app.components.Button.cancel' })}
-          </Button>
+          {currentStep === 'upload' && (
+            <Button type="button" color="success" onClick={handleUploadFiles}>
+              {formatMessage(
+                {
+                  id: getTrad(
+                    `modal.upload-list.footer.button.${
+                      filesToUploadLength > 1 ? 'plural' : 'singular'
+                    }`
+                  ),
+                },
+                { number: filesToUploadLength }
+              )}
+            </Button>
+          )}
         </section>
       </ModalFooter>
     </Modal>
