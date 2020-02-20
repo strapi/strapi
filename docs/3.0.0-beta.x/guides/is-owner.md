@@ -1,12 +1,12 @@
 # Create is owner policy
 
-This guide will explain how to create an update restriction for the entry's author only.
+This guide will explain how to restrict content edition to content authors only.
 
 ## Introduction
 
-In many cases you would like that only the author of an entry has the ability to update or delete it's own entries.
+It is often required that the author of an entry is the only user allowed to edit or delete the entry.
 
-This is a feature that is requested many times and in this guide you will see how implement it by yourself.
+This is a feature that is requested a lot and in this guide we will see how to implement it.
 
 ## Example
 
@@ -22,9 +22,9 @@ Now we are ready to start customization.
 
 ## Apply the author by default
 
-When we are creating a new Article via `POST /articles` we would like to apply the authenticated user that execute the request as author of this article.
+When we are creating a new Article via `POST /articles` we will need to set the authenticated user as the author of the article.
 
-To do that we will customize the `create` controller function of the Article API.
+To do so we will customize the `create` controller function of the Article API.
 
 **Concepts we will use:**
 Here is the code of [core controllers](../concepts/controllers.html#core-controllers).
