@@ -17,8 +17,14 @@ const stepper = {
   },
   'edit-new': {
     Component: () => null,
+    // TODO: I'll leave it there for the moment
+    // because I am not sure about the design since it seems inconsistent
+    // headers: [
+    //   getTrad('modal.header.select-files'),
+    //   getTrad('modal.header.file-detail'),
+    // ],
     headers: [
-      getTrad('modal.header.select-files'),
+      // getTrad('modal.header.select-files'),
       getTrad('modal.header.file-detail'),
     ],
     next: null,

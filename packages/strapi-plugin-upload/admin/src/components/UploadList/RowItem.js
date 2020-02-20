@@ -11,20 +11,28 @@ const RowItem = ({
   errorMessage,
   isUploading,
   onClick,
+  onClickEdit,
   originalIndex,
 }) => {
   const handleClick = () => {
     onClick(originalIndex);
   };
 
+  const handleClickEdit = () => {
+    onClickEdit(originalIndex);
+  };
+
+  // FIXME:
+  const isImg = file.type.includes('image');
+
   return (
     <div className="col-3" key={originalIndex}>
       <div>
         <CardImgWrapper isSmall hasError={hasError}>
           {isUploading && <InfiniteLoadingIndicator onClick={handleClick} />}
-          {!isUploading && (
+          {!isUploading && isImg && (
             <CardControlsWrapper className="card-control-wrapper">
-              <CardControl />
+              <CardControl onClick={handleClickEdit} />
             </CardControlsWrapper>
           )}
         </CardImgWrapper>
@@ -44,6 +52,7 @@ RowItem.propTypes = {
   errorMessage: PropTypes.string,
   isUploading: PropTypes.bool.isRequired,
   onClick: PropTypes.func.isRequired,
+  onClickEdit: PropTypes.func.isRequired,
   originalIndex: PropTypes.number.isRequired,
 };
 

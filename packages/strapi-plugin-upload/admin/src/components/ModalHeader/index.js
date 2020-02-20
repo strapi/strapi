@@ -8,8 +8,10 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { HeaderModalTitle } from 'strapi-helper-plugin';
 import ModalSection from '../ModalSection';
+import Text from '../Text';
 import Wrapper from './Wrapper';
 
 const ModalHeader = ({ headers }) => {
@@ -17,8 +19,22 @@ const ModalHeader = ({ headers }) => {
     <Wrapper>
       <ModalSection>
         <HeaderModalTitle>
-          {headers.map(({ key, element }) => {
-            return <Fragment key={key}>{element}</Fragment>;
+          {headers.map(({ key, element }, index) => {
+            const shouldDisplayChevron = index < headers.length - 1;
+
+            return (
+              <Fragment key={key}>
+                {element}
+                {shouldDisplayChevron && (
+                  <Text as="span" fontSize="xs" color="#919bae">
+                    <FontAwesomeIcon
+                      icon="chevron-right"
+                      style={{ margin: '0 10px' }}
+                    />
+                  </Text>
+                )}
+              </Fragment>
+            );
           })}
         </HeaderModalTitle>
       </ModalSection>

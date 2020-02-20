@@ -14,6 +14,7 @@ import RowItem from './RowItem';
 const UploadList = ({
   filesToUpload,
   onClickCancelUpload,
+  onClickEditNewFile,
   onGoToAddBrowseFiles,
 }) => {
   const matrix = createMatrix(filesToUpload);
@@ -63,6 +64,7 @@ const UploadList = ({
                   <RowItem
                     {...data}
                     onClick={onClickCancelUpload}
+                    onClickEdit={onClickEditNewFile}
                     key={data.originalIndex}
                   />
                 ))}
@@ -78,12 +80,14 @@ const UploadList = ({
 UploadList.defaultProps = {
   filesToUpload: [],
   onClickCancelUpload: () => {},
+  onClickEditNewFile: () => {},
   onGoToAddBrowseFiles: () => {},
 };
 
 UploadList.propTypes = {
   filesToUpload: PropTypes.array,
   onClickCancelUpload: PropTypes.func,
+  onClickEditNewFile: PropTypes.func,
   onGoToAddBrowseFiles: PropTypes.func,
 };
 

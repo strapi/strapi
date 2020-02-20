@@ -3,8 +3,9 @@ import createNewFilesToUploadArray from './utils/createNewFilesToUploadArray';
 
 const initialState = fromJS({
   // currentStep: 'browse',
-  currentStep: 'upload',
+  currentStep: 'edit-new',
   filesToUpload: [],
+  fileToEdit: null,
 });
 
 const reducer = (state, action) => {
@@ -46,6 +47,10 @@ const reducer = (state, action) => {
           return data;
         });
       });
+    case 'SET_FILE_TO_EDIT':
+      return state.update('fileToEdit', () =>
+        state.getIn(['filesToUpload', action.fileIndex])
+      );
     case 'SET_FILES_UPLOADING_STATE':
       return state.update('filesToUpload', list =>
         list.map(data =>

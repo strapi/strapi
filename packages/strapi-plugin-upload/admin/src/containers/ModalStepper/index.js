@@ -19,11 +19,13 @@ import getTrad from '../../utils/getTrad';
 const ModalStepper = ({ isOpen, onToggle }) => {
   const { formatMessage } = useGlobalContext();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
-  const { currentStep, filesToUpload } = reducerState.toJS();
+  const { currentStep, fileToEdit, filesToUpload } = reducerState.toJS();
   const { Component, headers, next, prev } = stepper[currentStep];
   const filesToUploadLength = filesToUpload.length;
   const toggleRef = useRef();
   toggleRef.current = onToggle;
+
+  console.log(fileToEdit);
 
   useEffect(() => {
     if (currentStep === 'upload' && filesToUploadLength === 0) {
@@ -57,6 +59,15 @@ const ModalStepper = ({ isOpen, onToggle }) => {
     dispatch({
       type: 'RESET_PROPS',
     });
+  };
+
+  const handleGoToEditNewFile = fileIndex => {
+    dispatch({
+      type: 'SET_FILE_TO_EDIT',
+      fileIndex,
+    });
+
+    goTo('edit-new');
   };
 
   const handleGoToAddBrowseFiles = () => {
@@ -153,6 +164,7 @@ const ModalStepper = ({ isOpen, onToggle }) => {
           filesToUpload={filesToUpload}
           onClickCancelUpload={handleCancelFileToUpload}
           onGoToAddBrowseFiles={handleGoToAddBrowseFiles}
+          onClickEditNewFile={handleGoToEditNewFile}
         />
       )}
 
@@ -173,6 +185,11 @@ const ModalStepper = ({ isOpen, onToggle }) => {
                 },
                 { number: filesToUploadLength }
               )}
+            </Button>
+          )}
+          {currentStep === 'edit-new' && (
+            <Button color="success" type="button">
+              {formatMessage({ id: 'form.button.finish' })}
             </Button>
           )}
         </section>
