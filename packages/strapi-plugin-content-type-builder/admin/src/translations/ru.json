@@ -28,7 +28,7 @@
   "attribute.text": "Text",
   "attribute.text.description": "Простой текст для заголовка или описания",
   "attribute.time": "Time",
-  "attribute.uid": "Uuid",
+  "attribute.uid": "Uid",
   "attribute.uid.description": "Уникальный идентификатор",
   "button.attributes.add.another": "Ещё поле",
   "button.component.add": "Добавить компонент",

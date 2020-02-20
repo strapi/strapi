@@ -327,6 +327,7 @@ const FormModal = () => {
   const isOpen = !isEmpty(search);
   const isPickingAttribute = state.modalType === 'chooseAttribute';
   const uid = createUid(modifiedData.name || '');
+  const attributes = get(allDataSchema, [...state.pathToSchema, 'schema', 'attributes'], null);
 
   const checkFormValidity = async () => {
     let schema;
@@ -394,7 +395,6 @@ const FormModal = () => {
           }
         );
       }
-
       schema = forms[state.modalType].schema(
         get(allDataSchema, state.pathToSchema, {}),
         type,
@@ -1090,180 +1090,184 @@ const FormModal = () => {
                       </div>
                     );
                   })
-                : form(modifiedData, state.attributeType, state.step, state.actionType).items.map(
-                    (row, index) => {
-                      return (
-                        <div className="row" key={index} style={{ marginBottom: 4 }}>
-                          {row.map((input, i) => {
-                            // The divider type is used mainly the advanced tab
-                            // It is the one responsible for displaying the settings label
-                            if (input.type === 'divider') {
-                              return (
-                                <div
-                                  className="col-12"
-                                  style={{
-                                    marginBottom: '1.4rem',
-                                    marginTop: -2,
-                                    fontWeight: 500,
-                                  }}
-                                  key="divider"
-                                >
-                                  <FormattedMessage
-                                    id={getTrad('form.attribute.item.settings.name')}
-                                  />
-                                </div>
-                              );
-                            }
-
-                            // The spacer type is used mainly to align the icon picker...
-                            if (input.type === 'spacer') {
-                              return <div key="spacer" style={{ height: 11 }} />;
-                            }
-
-                            // The spacer type is used mainly to align the icon picker...
-                            if (input.type === 'spacer-small') {
-                              return <div key="spacer" style={{ height: 4 }} />;
-                            }
-
-                            if (input.type === 'spacer-medium') {
-                              return <div key="spacer" style={{ height: 8 }} />;
-                            }
-
-                            // This type is used in the addComponentToDynamicZone modal when selecting the option add an existing component
-                            // It pushes select the components to the right
-                            if (input.type === 'pushRight') {
-                              return <div key={`${index}.${i}`} className={`col-${input.size}`} />;
-                            }
-
-                            if (input.type === 'relation') {
-                              return (
-                                <RelationForm
-                                  key="relation"
-                                  mainBoxHeader={get(headers, [0, 'label'], '')}
-                                  modifiedData={modifiedData}
-                                  naturePickerType={state.forTarget}
-                                  onChange={handleChange}
-                                  errors={formErrors}
-                                />
-                              );
-                            }
-
-                            // Retrieve the error for a specific input
-                            const errorId = get(
-                              formErrors,
-                              [
-                                ...input.name
-                                  .split('.')
-                                  // The filter here is used when creating a component
-                                  // in the component step 1 modal
-                                  // Since the component info is stored in the
-                                  // componentToCreate object we can access the error
-                                  // By removing the key
-                                  .filter(key => key !== 'componentToCreate'),
-                                'id',
-                              ],
-                              null
-                            );
-
-                            const retrievedValue = get(modifiedData, input.name, '');
-
-                            let value;
-
-                            // Condition for the boolean default value
-                            // The radio input doesn't accept false, true or null as value
-                            // So we pass them as string
-                            // This way the data stays accurate and we don't have to operate
-                            // any data mutation
-                            if (input.name === 'default' && state.attributeType === 'boolean') {
-                              value = toString(retrievedValue);
-                              // Same here for the enum
-                            } else if (input.name === 'enum' && Array.isArray(retrievedValue)) {
-                              value = retrievedValue.join('\n');
-                            } else if (input.name === 'uid') {
-                              value = input.value;
-                            } else {
-                              value = retrievedValue;
-                            }
-
-                            // The addon input is not present in @buffetjs so we are using the old lib
-                            // for the moment that's why we don't want them be passed to buffet
-                            // like the other created inputs
-                            if (input.type === 'addon') {
-                              return (
-                                <InputsIndex
-                                  key={input.name}
-                                  {...input}
-                                  type="string"
-                                  onChange={handleChange}
-                                  value={value}
-                                  style={{ marginTop: 8, marginBottom: 11 }}
-                                />
-                              );
-                            }
-
+                : form(
+                    modifiedData,
+                    state.attributeType,
+                    state.step,
+                    state.actionType,
+                    attributes
+                  ).items.map((row, index) => {
+                    return (
+                      <div className="row" key={index} style={{ marginBottom: 4 }}>
+                        {row.map((input, i) => {
+                          // The divider type is used mainly the advanced tab
+                          // It is the one responsible for displaying the settings label
+                          if (input.type === 'divider') {
                             return (
-                              <div className={`col-${input.size || 6}`} key={input.name}>
-                                <Inputs
-                                  {...input}
-                                  modifiedData={modifiedData}
-                                  addComponentsToDynamicZone={handleClickAddComponentsToDynamicZone}
-                                  customInputs={{
-                                    componentIconPicker: ComponentIconPicker,
-                                    componentSelect: WrapperSelect,
-                                    creatableSelect: WrapperSelect,
-                                    customCheckboxWithChildren: CustomCheckbox,
-                                    booleanBox: BooleanBox,
-                                  }}
-                                  isCreating={isCreating}
-                                  // Props for the componentSelect
-                                  isCreatingComponentWhileAddingAField={
-                                    isCreatingComponentWhileAddingAField
-                                  }
-                                  // Props for the componentSelect
-                                  // Since the component is created after adding it to a type
-                                  // its name and category can't be retrieved from the data manager
-                                  componentCategoryNeededForAddingAfieldWhileCreatingAComponent={get(
-                                    componentToCreate,
-                                    'category',
-                                    null
-                                  )}
-                                  // Props for the componentSelect same explanation
-                                  componentNameNeededForAddingAfieldWhileCreatingAComponent={get(
-                                    componentToCreate,
-                                    'name',
-                                    null
-                                  )}
-                                  isAddingAComponentToAnotherComponent={
-                                    state.forTarget === 'components' ||
-                                    state.forTarget === 'component'
-                                  }
-                                  value={value}
-                                  error={isEmpty(errorId) ? null : formatMessage({ id: errorId })}
-                                  onChange={handleChange}
-                                  onBlur={() => {}}
-                                  description={
-                                    get(input, 'description.id', null)
-                                      ? formatMessage(input.description)
-                                      : input.description
-                                  }
-                                  placeholder={
-                                    get(input, 'placeholder.id', null)
-                                      ? formatMessage(input.placeholder)
-                                      : input.placeholder
-                                  }
-                                  label={
-                                    get(input, 'label.id', null)
-                                      ? formatMessage(input.label)
-                                      : input.label
-                                  }
+                              <div
+                                className="col-12"
+                                style={{
+                                  marginBottom: '1.4rem',
+                                  marginTop: -2,
+                                  fontWeight: 500,
+                                }}
+                                key="divider"
+                              >
+                                <FormattedMessage
+                                  id={getTrad('form.attribute.item.settings.name')}
                                 />
                               </div>
                             );
-                          })}
-                        </div>
-                      );
-                    }
-                  )}
+                          }
+
+                          // The spacer type is used mainly to align the icon picker...
+                          if (input.type === 'spacer') {
+                            return <div key="spacer" style={{ height: 11 }} />;
+                          }
+
+                          // The spacer type is used mainly to align the icon picker...
+                          if (input.type === 'spacer-small') {
+                            return <div key="spacer" style={{ height: 4 }} />;
+                          }
+
+                          if (input.type === 'spacer-medium') {
+                            return <div key="spacer" style={{ height: 8 }} />;
+                          }
+
+                          // This type is used in the addComponentToDynamicZone modal when selecting the option add an existing component
+                          // It pushes select the components to the right
+                          if (input.type === 'pushRight') {
+                            return <div key={`${index}.${i}`} className={`col-${input.size}`} />;
+                          }
+
+                          if (input.type === 'relation') {
+                            return (
+                              <RelationForm
+                                key="relation"
+                                mainBoxHeader={get(headers, [0, 'label'], '')}
+                                modifiedData={modifiedData}
+                                naturePickerType={state.forTarget}
+                                onChange={handleChange}
+                                errors={formErrors}
+                              />
+                            );
+                          }
+
+                          // Retrieve the error for a specific input
+                          const errorId = get(
+                            formErrors,
+                            [
+                              ...input.name
+                                .split('.')
+                                // The filter here is used when creating a component
+                                // in the component step 1 modal
+                                // Since the component info is stored in the
+                                // componentToCreate object we can access the error
+                                // By removing the key
+                                .filter(key => key !== 'componentToCreate'),
+                              'id',
+                            ],
+                            null
+                          );
+
+                          const retrievedValue = get(modifiedData, input.name, '');
+
+                          let value;
+
+                          // Condition for the boolean default value
+                          // The radio input doesn't accept false, true or null as value
+                          // So we pass them as string
+                          // This way the data stays accurate and we don't have to operate
+                          // any data mutation
+                          if (input.name === 'default' && state.attributeType === 'boolean') {
+                            value = toString(retrievedValue);
+                            // Same here for the enum
+                          } else if (input.name === 'enum' && Array.isArray(retrievedValue)) {
+                            value = retrievedValue.join('\n');
+                          } else if (input.name === 'uid') {
+                            value = input.value;
+                          } else {
+                            value = retrievedValue;
+                          }
+
+                          // The addon input is not present in @buffetjs so we are using the old lib
+                          // for the moment that's why we don't want them be passed to buffet
+                          // like the other created inputs
+                          if (input.type === 'addon') {
+                            return (
+                              <InputsIndex
+                                key={input.name}
+                                {...input}
+                                type="string"
+                                onChange={handleChange}
+                                value={value}
+                                style={{ marginTop: 8, marginBottom: 11 }}
+                              />
+                            );
+                          }
+
+                          return (
+                            <div className={`col-${input.size || 6}`} key={input.name}>
+                              <Inputs
+                                {...input}
+                                modifiedData={modifiedData}
+                                addComponentsToDynamicZone={handleClickAddComponentsToDynamicZone}
+                                customInputs={{
+                                  componentIconPicker: ComponentIconPicker,
+                                  componentSelect: WrapperSelect,
+                                  creatableSelect: WrapperSelect,
+                                  customCheckboxWithChildren: CustomCheckbox,
+                                  booleanBox: BooleanBox,
+                                }}
+                                isCreating={isCreating}
+                                // Props for the componentSelect
+                                isCreatingComponentWhileAddingAField={
+                                  isCreatingComponentWhileAddingAField
+                                }
+                                // Props for the componentSelect
+                                // Since the component is created after adding it to a type
+                                // its name and category can't be retrieved from the data manager
+                                componentCategoryNeededForAddingAfieldWhileCreatingAComponent={get(
+                                  componentToCreate,
+                                  'category',
+                                  null
+                                )}
+                                // Props for the componentSelect same explanation
+                                componentNameNeededForAddingAfieldWhileCreatingAComponent={get(
+                                  componentToCreate,
+                                  'name',
+                                  null
+                                )}
+                                isAddingAComponentToAnotherComponent={
+                                  state.forTarget === 'components' ||
+                                  state.forTarget === 'component'
+                                }
+                                value={value}
+                                error={isEmpty(errorId) ? null : formatMessage({ id: errorId })}
+                                onChange={handleChange}
+                                onBlur={() => {}}
+                                description={
+                                  get(input, 'description.id', null)
+                                    ? formatMessage(input.description)
+                                    : input.description
+                                }
+                                placeholder={
+                                  get(input, 'placeholder.id', null)
+                                    ? formatMessage(input.placeholder)
+                                    : input.placeholder
+                                }
+                                label={
+                                  get(input, 'label.id', null)
+                                    ? formatMessage(input.label)
+                                    : input.label
+                                }
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
             </div>
           </ModalBody>
         </ModalForm>
