@@ -16,10 +16,6 @@ This repository contains the core of Strapi. It means the admin panel, core plug
 
 This is the code used to generate the official Docker images for Strapi. These images are available through our [Docker Hub](https://hub.docker.com/r/strapi/strapi).
 
-## Feature request
+## Contributing guide
 
-## Report issues
-
-## Translation
-
-## Documentation
+To contribute to the project please follow instructions present in the [`CONTRIBUTING.md`](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) file on GitHub.

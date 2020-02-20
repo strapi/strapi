@@ -1,6 +1,6 @@
 # 🚀 Welcome to the Strapi documentation!
 
-> Strapi is the open source [headless CMS](https://strapi.io) developers love.
+**Strapi is the open source [headless CMS](https://strapi.io) developers love.**
 
 ## What is Strapi?
 
@@ -15,15 +15,15 @@ It's the origin purpose of the project.
 
 ### Custom content structure
 
-Create the content structure that match your needs. There is no constrains, be creative.
+With the admin panel of Strapi, you will be able to create the content structure that match your needs. Create it in just few clicks. Really fast to getting started.
 
 ### Manage content
 
-Strapi provide you a admin panel that let you manage your content.
+The Strapi's admin panel provide you an intuitive interface to create edit and delete your content.
 
 ### Developer-friendly API
 
-Your content have to be displayed on your devices, an API is required. Strapi provide you an API that match your need.
+Your content have to be displayed on your devices, an API is required. Strapi provide you an API that match your need. Fetch the data you want via a REST API or via the GraphQL endpoint.
 
 ### Roles & permissions
 
@@ -31,11 +31,12 @@ A User system is built in Strapi, that let you manage how can access to what.
 
 ### Plugin system
 
-You wan a new feature in you application, fetch a plugin in the market place and tada! You can install a GraphQL in one command.
+You want a new feature in you application, fetch a plugin in the market place and tada! You can install a GraphQL endpoint in one command.
 
 ### Customization
 
-You can customize every single point of your application. The architecture of Strapi let you customize your app to match your exact need.
+You can customize every single pice of your application. The architecture of Strapi let you customize your app to match your exact needs.
+
 Don't stay stuck by the techno you choose.
 
 ## The Strapi Ecosystem
@@ -46,7 +47,8 @@ Strapi is an Open Source project, all the source code is under the MIT licence. 
 
 ### Marketplace
 
-For now, the Strapi marketplace is not open to everyone. In the marketplace section of the admin panel, you will only found official Strapi plugins.
+In the marketplace section of the admin panel, you will only found official Strapi plugins. For now, the Strapi marketplace is not open to everyone but will be soon, stay tuned.
+
 But you already can develop yours and publish them on npm.
 
 ### Roadmap

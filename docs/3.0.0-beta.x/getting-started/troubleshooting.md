@@ -17,3 +17,9 @@ Strapi is offered as free and open-source for users who wish to self-host the so
 [StackOverflow](https://stackoverflow.com/search?q=strapi) is great first place to reach out for help. Our community and Core developers often check this platform and answer posts tagged with `strapi`.
 
 Another option to get help is our [Community Slack](https://slack.strapi.io). Please keep all questions on the `#help` channel, be considerate, and remember that _you are getting free help for a free product_.
+
+### Enterprise support
+
+Looking for an enterprise support?
+
+Fill in the form that is in the [Support page](https://strapi.io/support) of the Strapi website.

@@ -51,3 +51,5 @@
 	}
 }
 </style>
+
+<!-- Copyrigth Directus - https://github.com/directus/docs/blob/master/.vuepress/theme/global-components/InstallLink.vue -->
