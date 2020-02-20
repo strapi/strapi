@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const ClearIcon = ({ fill, height, width, ...rest }) => {
+const Clear = ({ fill, height, width, ...rest }) => {
   return (
     <svg
       {...rest}
@@ -18,16 +18,16 @@ const ClearIcon = ({ fill, height, width, ...rest }) => {
   );
 };
 
-ClearIcon.defaultProps = {
+Clear.defaultProps = {
   fill: '#b3b5b9',
   height: '8',
   width: '8',
 };
 
-ClearIcon.propTypes = {
+Clear.propTypes = {
   fill: PropTypes.string,
   height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
 };
 
-export default ClearIcon;
+export default Clear;
