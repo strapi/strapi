@@ -1,13 +1,16 @@
-/* eslint-disable react/no-array-index-key */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { ModalBody } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
 import createMatrix from '../../utils/createMatrix';
 import getTrad from '../../utils/getTrad';
-import HeaderWrapper from './HeaderWrapper';
+import ContainerFluid from '../ContainerFluid';
+import ModalSection from '../ModalSection';
+import Text from '../Text';
+import ButtonWrapper from './ButtonWrapper';
+import TextWrapper from './TextWrapper';
 import RowItem from './RowItem';
+import ListWrapper from './ListWrapper';
 
 const UploadList = ({
   filesToUpload,
@@ -22,22 +25,23 @@ const UploadList = ({
 
   return (
     <>
-      <HeaderWrapper>
-        <div>
-          <div className="assets-selected">
+      <ModalSection justifyContent="space-between">
+        <TextWrapper>
+          <Text fontSize="md" fontWeight="bold">
             <FormattedMessage
               id={getTrad(titleId)}
               values={{ number: filesToUploadLength }}
             />
-          </div>
-          <div className="infos">
+          </Text>
+
+          <Text fontSize="sm" color="grey">
             <FormattedMessage
               id={getTrad('modal.upload-list.sub-header-subtitle')}
               values={{ number: filesToUploadLength }}
             />
-          </div>
-        </div>
-        <div>
+          </Text>
+        </TextWrapper>
+        <ButtonWrapper>
           <FormattedMessage id={getTrad('modal.upload-list.sub-header.button')}>
             {label => (
               <Button
@@ -48,33 +52,28 @@ const UploadList = ({
               />
             )}
           </FormattedMessage>
-        </div>
-      </HeaderWrapper>
-      <ModalBody>
-        <div
-          className="container"
-          style={{
-            marginTop: -4,
-            marginBottom: 4,
-            overflow: 'auto',
-            maxHeight: 350,
-          }}
-        >
-          {matrix.map(({ key, rowContent }) => {
-            return (
-              <div className="row" key={key}>
-                {rowContent.map(data => (
-                  <RowItem
-                    {...data}
-                    onClick={onClickCancelUpload}
-                    key={data.originalIndex}
-                  />
-                ))}
-              </div>
-            );
-          })}
-        </div>
-      </ModalBody>
+        </ButtonWrapper>
+      </ModalSection>
+
+      <ModalSection>
+        <ContainerFluid>
+          <ListWrapper>
+            {matrix.map(({ key, rowContent }) => {
+              return (
+                <div className="row" key={key}>
+                  {rowContent.map(data => (
+                    <RowItem
+                      {...data}
+                      onClick={onClickCancelUpload}
+                      key={data.originalIndex}
+                    />
+                  ))}
+                </div>
+              );
+            })}
+          </ListWrapper>
+        </ContainerFluid>
+      </ModalSection>
     </>
   );
 };

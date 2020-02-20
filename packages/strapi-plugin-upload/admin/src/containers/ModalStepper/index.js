@@ -2,8 +2,6 @@ import React, { useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import {
-  // HeaderModal,
-  // HeaderModalTitle,
   Modal,
   ModalFooter,
   useGlobalContext,
