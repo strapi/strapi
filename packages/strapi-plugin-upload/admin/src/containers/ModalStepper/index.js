@@ -20,7 +20,7 @@ const ModalStepper = ({ isOpen, onToggle }) => {
   const { formatMessage } = useGlobalContext();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { currentStep, filesToUpload } = reducerState.toJS();
-  const { Component, headerTradId, next, prev } = stepper[currentStep];
+  const { Component, headers, next, prev } = stepper[currentStep];
   const filesToUploadLength = filesToUpload.length;
   const toggleRef = useRef();
   toggleRef.current = onToggle;
@@ -28,7 +28,7 @@ const ModalStepper = ({ isOpen, onToggle }) => {
   useEffect(() => {
     if (currentStep === 'upload' && filesToUploadLength === 0) {
       // Close modal when file uploading is over
-      toggleRef.current();
+      // toggleRef.current();
     }
   }, [filesToUploadLength, currentStep]);
 
@@ -141,12 +141,10 @@ const ModalStepper = ({ isOpen, onToggle }) => {
     <Modal isOpen={isOpen} onToggle={onToggle} onClosed={handleClosed}>
       {/* header title */}
       <ModalHeader
-        headers={[
-          {
-            key: headerTradId,
-            element: <FormattedMessage id={headerTradId} />,
-          },
-        ]}
+        headers={headers.map(headerTrad => ({
+          key: headerTrad,
+          element: <FormattedMessage id={headerTrad} />,
+        }))}
       />
       {/* body of the modal */}
       {Component && (

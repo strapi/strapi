@@ -4,13 +4,12 @@ import { FormattedMessage } from 'react-intl';
 import { Button } from '@buffetjs/core';
 import createMatrix from '../../utils/createMatrix';
 import getTrad from '../../utils/getTrad';
-import ContainerFluid from '../ContainerFluid';
 import ModalSection from '../ModalSection';
 import Text from '../Text';
+import Container from './Container';
 import ButtonWrapper from './ButtonWrapper';
 import TextWrapper from './TextWrapper';
 import RowItem from './RowItem';
-import ListWrapper from './ListWrapper';
 
 const UploadList = ({
   filesToUpload,
@@ -56,23 +55,21 @@ const UploadList = ({
       </ModalSection>
 
       <ModalSection>
-        <ContainerFluid>
-          <ListWrapper>
-            {matrix.map(({ key, rowContent }) => {
-              return (
-                <div className="row" key={key}>
-                  {rowContent.map(data => (
-                    <RowItem
-                      {...data}
-                      onClick={onClickCancelUpload}
-                      key={data.originalIndex}
-                    />
-                  ))}
-                </div>
-              );
-            })}
-          </ListWrapper>
-        </ContainerFluid>
+        <Container>
+          {matrix.map(({ key, rowContent }) => {
+            return (
+              <div className="row" key={key}>
+                {rowContent.map(data => (
+                  <RowItem
+                    {...data}
+                    onClick={onClickCancelUpload}
+                    key={data.originalIndex}
+                  />
+                ))}
+              </div>
+            );
+          })}
+        </Container>
       </ModalSection>
     </>
   );

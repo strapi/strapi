@@ -10,6 +10,7 @@
   "list.assets-empty.subtitle": "Add a first one to the list.",
   "modal.header.browse": "Upload assets",
   "modal.header.select-files": "Selected files",
+  "modal.header.file-detail": "Details",
   "modal.nav.computer": "from computer",
   "modal.nav.url": "from url",
   "modal.upload-list.sub-header-title.plural": "{number} assets selected",
