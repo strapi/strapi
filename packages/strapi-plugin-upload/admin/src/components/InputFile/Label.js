@@ -3,8 +3,10 @@ import PropTypes from 'prop-types';
 
 const Label = styled.label`
   position: relative;
-  height: 204px;
+  height: 203px;
   width: 100%;
+  margin-top: 36px;
+  margin-bottom: 18px;
   padding-top: 46px;
   border: 2px dashed #e3e9f3;
   border-radius: 2px;

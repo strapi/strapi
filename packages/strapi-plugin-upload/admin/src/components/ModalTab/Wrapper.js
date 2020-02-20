@@ -1,23 +1,30 @@
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
-const Wrapper = styled.div(({ isActive, isDisabled }) => {
+const Wrapper = styled.div(({ isActive, isDisabled, theme }) => {
   const cursor = isDisabled ? 'not-allowed' : 'pointer';
+  const baseStyle = {
+    color: '#9ea7b8',
+    cursor,
+    fontSize: theme.main.fontSizes.sm,
+    fontWeight: theme.main.fontWeights.bold,
+    letterSpacing: '0.7px',
+    marginTop: '34px',
+    marginRight: '30px',
+    textTransform: 'uppercase',
+  };
 
   if (isActive) {
     return {
+      ...baseStyle,
       height: '3rem',
-      cursor,
       color: '#007eff',
-      fontWeight: 600,
       borderBottom: '2px solid #007eff',
       zIndex: 99,
     };
   }
 
-  return {
-    cursor,
-  };
+  return baseStyle;
 });
 
 Wrapper.defaultProps = {

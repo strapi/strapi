@@ -2,8 +2,6 @@ import React, { useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import {
-  HeaderModal,
-  HeaderModalTitle,
   Modal,
   ModalFooter,
   useGlobalContext,
@@ -12,6 +10,7 @@ import {
 import { Button } from '@buffetjs/core';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
+import ModalHeader from '../../components/ModalHeader';
 import stepper from './utils/stepper';
 import init from './init';
 import reducer, { initialState } from './reducer';
@@ -141,13 +140,14 @@ const ModalStepper = ({ isOpen, onToggle }) => {
   return (
     <Modal isOpen={isOpen} onToggle={onToggle} onClosed={handleClosed}>
       {/* header title */}
-      <HeaderModal>
-        <section>
-          <HeaderModalTitle>
-            <FormattedMessage id={headerTradId} />
-          </HeaderModalTitle>
-        </section>
-      </HeaderModal>
+      <ModalHeader
+        headers={[
+          {
+            key: headerTradId,
+            element: <FormattedMessage id={headerTradId} />,
+          },
+        ]}
+      />
       {/* body of the modal */}
       {Component && (
         <Component
