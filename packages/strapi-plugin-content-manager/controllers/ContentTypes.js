@@ -2,10 +2,7 @@
 
 const _ = require('lodash');
 
-const {
-  createModelConfigurationSchema,
-  validateKind,
-} = require('./validation');
+const { createModelConfigurationSchema, validateKind } = require('./validation');
 
 module.exports = {
   /**
@@ -27,10 +24,7 @@ module.exports = {
         if (uid.startsWith('strapi::')) return false;
         if (uid === 'plugins::upload.file') return false;
 
-        if (
-          kind &&
-          _.get(strapi.contentTypes[uid], 'kind', 'collectionType') !== kind
-        ) {
+        if (kind && _.get(strapi.contentTypes[uid], 'kind', 'collectionType') !== kind) {
           return false;
         }
 
@@ -63,14 +57,14 @@ module.exports = {
     }
 
     const service = strapi.plugins['content-manager'].services.contenttypes;
-    const componentService =
-      strapi.plugins['content-manager'].services.components;
+    const componentService = strapi.plugins['content-manager'].services.components;
 
     const contentTypeConfigurations = await service.getConfiguration(uid);
 
     const data = {
       contentType: {
         uid,
+        apiID: contentType.modelName,
         schema: service.formatContentTypeSchema(contentType),
         ...contentTypeConfigurations,
       },
@@ -104,10 +98,7 @@ module.exports = {
 
     let input;
     try {
-      input = await createModelConfigurationSchema(
-        contentType,
-        schema
-      ).validate(body, {
+      input = await createModelConfigurationSchema(contentType, schema).validate(body, {
         abortEarly: false,
         stripUnknown: true,
         strict: true,
