@@ -1625,7 +1625,7 @@ Due to Heroku's filesystem you will need to use an upload provider such as AWS S
 
 ## Platform.sh
 
-[Plateform.sh](https://console.platform.sh/) provide you an easy way to getting start and deploy your Strapi applciation.
+[Plateform.sh](https://console.platform.sh/) provide you an easy way to getting start and deploy your Strapi application.
 
 <a href="https://console.platform.sh/projects/create-project?template=https://raw.githubusercontent.com/platformsh/template-builder/master/templates/strapi/.platform.template.yaml&utm_content=strapi&utm_source=github&utm_medium=button&utm_campaign=deploy_on_platform">
     <img src="https://platform.sh/images/deploy/lg-blue.svg" alt="Deploy on Platform.sh" width="180px" />
@@ -1635,7 +1635,7 @@ You can find the template [source code](https://github.com/platformsh-templates/
 
 ### Platform.sh requirement
 
-You must have a [Plateform.js](https://platform.sh/) account before doing these steps.
+You must have a [Plateform.sh](https://platform.sh/) account before doing these steps.
 
 ### Create a project
 
