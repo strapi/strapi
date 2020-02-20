@@ -1,5 +1,5 @@
 const colors = {
-  black: '#000000',
+  black: '#3b3b3b',
   white: '#ffffff',
   red: '#ff203c',
   orange: '#ff5d00',
@@ -14,6 +14,10 @@ const colors = {
   'gray-light': '#636c72',
   'gray-lighter': '#eceeef',
   'gray-lightest': '#f7f7f9',
+  brightGrey: '#f0f3f8',
+  lightGrey: '#fafafa',
+  grey: '#9ea7b8',
+  greyDark: '#292b2c',
 
   content: {
     background: '#fafafb',

@@ -4,7 +4,7 @@ export { default as sizes } from './assets/styles/sizes';
 
 // CommonPropTypes
 export { default as routerPropTypes } from './commonPropTypes/router';
-
+export { default as themePropTypes } from './commonPropTypes/themeShape';
 // Components
 export { default as BackHeader } from './components/BackHeader';
 export { default as BlockerComponent } from './components/BlockerComponent';
@@ -17,7 +17,6 @@ export { default as ErrorBoundary } from './components/ErrorBoundary';
 export { default as ExtendComponent } from './components/ExtendComponent';
 export { default as GlobalPagination } from './components/GlobalPagination';
 export { default as HeaderNav } from './components/HeaderNav';
-export { default as HeaderNavWrapper } from './components/HeaderNavWrapper';
 export { default as HeaderModal } from './components/HeaderModal';
 export { default as HeaderModalTitle } from './components/HeaderModalTitle';
 export { default as HeaderSearch } from './components/HeaderSearch';

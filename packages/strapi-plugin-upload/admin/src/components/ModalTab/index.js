@@ -1,6 +1,6 @@
 /**
  *
- * HeaderNavLink
+ * ModalTab
  *
  */
 
@@ -10,7 +10,7 @@ import { FormattedMessage } from 'react-intl';
 import getTrad from '../../utils/getTrad';
 import Wrapper from './Wrapper';
 
-const HeaderNavLink = ({ isDisabled, to, isActive, onClick }) => {
+const ModalTab = ({ isDisabled, label, to, isActive, onClick }) => {
   const handleClick = e => {
     if (isDisabled) {
       e.preventDefault();
@@ -23,22 +23,23 @@ const HeaderNavLink = ({ isDisabled, to, isActive, onClick }) => {
 
   return (
     <Wrapper isActive={isActive} isDisabled={isDisabled} onClick={handleClick}>
-      <FormattedMessage id={getTrad(`modal.nav.${to}`)} />
+      <FormattedMessage id={getTrad(`modal.nav.${label}`)} />
     </Wrapper>
   );
 };
 
-HeaderNavLink.defaultProps = {
+ModalTab.defaultProps = {
   isActive: false,
   isDisabled: false,
   onClick: () => {},
 };
 
-HeaderNavLink.propTypes = {
+ModalTab.propTypes = {
   to: PropTypes.string.isRequired,
   isActive: PropTypes.bool,
   isDisabled: PropTypes.bool,
+  label: PropTypes.string.isRequired,
   onClick: PropTypes.func,
 };
 
-export default HeaderNavLink;
+export default ModalTab;
