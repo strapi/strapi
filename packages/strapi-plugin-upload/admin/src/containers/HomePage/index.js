@@ -63,14 +63,6 @@ const HomePage = () => {
     };
   };
 
-  const handleClearSearch = () => {
-    handleChangeSearch({ target: { value: '' } });
-  };
-
-  const handleClickToggleModal = () => {
-    setIsOpen(prev => !prev);
-  };
-
   const handleChangeParams = ({ target: { name, value } }) => {
     const updatedSearch = getUpdatedSearchParams({ [name]: value });
     const newSearch = generateSearchFromFilters(updatedSearch);
@@ -90,6 +82,29 @@ const HomePage = () => {
         value,
       },
     });
+  };
+
+  const handleChangeSort = ({ target: { value } }) => {
+    dispatch({
+      type: 'ON_QUERY_CHANGE',
+      key: '_sort',
+      value,
+    });
+
+    handleChangeParams({
+      target: {
+        name: '_sort',
+        value,
+      },
+    });
+  };
+
+  const handleClearSearch = () => {
+    handleChangeSearch({ target: { value: '' } });
+  };
+
+  const handleClickToggleModal = () => {
+    setIsOpen(prev => !prev);
   };
 
   const headerProps = {
@@ -135,9 +150,7 @@ const HomePage = () => {
 
       <ControlsWrapper>
         <SelectAll />
-        <SortPicker>
-          <span> Sort By {_sort}</span>
-        </SortPicker>
+        <SortPicker onChange={handleChangeSort} value={_sort} />
         <AddFilterCTA />
       </ControlsWrapper>
       <ListEmpty onClick={handleClickToggleModal} />

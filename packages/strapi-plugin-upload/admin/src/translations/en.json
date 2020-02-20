@@ -21,5 +21,12 @@
   "plugin.name": "Media Library",
   "plugin.description.long": "Media file management.",
   "plugin.description.short": "Media file management.",
-  "search.placeholder": "Search for an asset..."
+  "search.placeholder": "Search for an asset...",
+  "sort.label": "Sort by",
+  "sort.created_at_asc": "Most recent uploads",
+  "sort.created_at_desc": "Oldest uploads",
+  "sort.name_asc": "Alphabetical order (A to Z)",
+  "sort.name_desc": "Reverse alphabetical order (Z to A)",
+  "sort.updated_at_asc": "Most recent updates",
+  "sort.updated_at_desc": "Oldest updates"
 }
