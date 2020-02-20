@@ -6,26 +6,32 @@ If you're already familiar with Docker, you are probably looking for our officia
 
 ## Step 1: Create a `docker-compose.yaml` file
 
+Create this `docker-compose.yaml` file in an empty folder. <br>
+A fresh new Strapi application will be created where the `docker-compose.yaml` file is located.
+
 This docker-compose defines our database and Strapi service and links them.
 
 :::: tabs
 
 ::: tab SQLite
+
 ```yaml
-version: "3"
+version: '3'
 services:
   strapi:
     image: strapi/strapi
     volumes:
       - ./:/srv/app
     ports:
-      - "1337:1337"
+      - '1337:1337'
 ```
+
 :::
 
 ::: tab Postgres
+
 ```yaml
-version: "3"
+version: '3'
 services:
   strapi:
     image: strapi/strapi
@@ -41,7 +47,7 @@ services:
     volumes:
       - ./app:/srv/app
     ports:
-      - "1337:1337"
+      - '1337:1337'
 
   postgres:
     image: postgres
@@ -49,15 +55,17 @@ services:
       POSTGRES_USER: strapi
       POSTGRES_PASSWORD: strapi
     volumes:
-       - ./data:/data/postgres
+      - ./data:/data/postgres
     ports:
-      - "5432:5432"
+      - '5432:5432'
 ```
+
 :::
 
 ::: tab MongoDB
+
 ```yaml
-version: "3"
+version: '3'
 services:
   strapi:
     image: strapi/strapi
@@ -73,7 +81,7 @@ services:
     volumes:
       - ./app:/srv/app
     ports:
-      - "1337:1337"
+      - '1337:1337'
 
   mongo:
     image: postgres
@@ -81,10 +89,11 @@ services:
       MONGO_INITDB_ROOT_USERNAME: strapi
       MONGO_INITDB_ROOT_PASSWORD: strapi
     volumes:
-       - ./data/db:/data/db
+      - ./data/db:/data/db
     ports:
-      - "27017:27017"
+      - '27017:27017'
 ```
+
 :::
 
 ::::
