@@ -1,8 +1,8 @@
 import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
-import { ModalBody } from 'strapi-helper-plugin';
 import InputFile from '../InputFile';
 import ModalNavWrapper from '../ModalNavWrapper';
+import ModalSection from '../ModalSection';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
@@ -24,12 +24,10 @@ const UploadForm = ({ addFilesToUpload }) => {
   return (
     <>
       <ModalNavWrapper links={links} to={to} onClickGoTo={handleClickGoTo} />
-      <ModalBody style={{ paddingTop: 35, paddingBottom: 18 }}>
-        <div className="col-12">
-          {to === 'computer' && <InputFile onChange={addFilesToUpload} />}
-          {to === 'url' && <div>COMING SOON</div>}
-        </div>
-      </ModalBody>
+      <ModalSection>
+        {to === 'computer' && <InputFile onChange={addFilesToUpload} />}
+        {to === 'url' && <div>COMING SOON</div>}
+      </ModalSection>
     </>
   );
 };
