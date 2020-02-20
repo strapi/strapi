@@ -55,7 +55,9 @@ module.exports = {
         );
       }
 
-      const query = {};
+      const query = {
+        provider,
+      };
 
       // Check if the provided identifier is an email or not.
       const isEmail = emailRegExp.test(params.identifier);

@@ -85,7 +85,7 @@ You will see your restaurant listed in the entries.
 
 Navigate to [**CONTENT TYPES** - **Categories**](http://localhost:1337/admin/plugins/content-manager/category?source=content-manager).
 
-- Click on **+ Add New Category** button. Type `French Food` in the **Category** field. Select `Biscotte Restaurant`, on the right, from **Restaurant (0)**
+- Click on **+ Add New Category** button. Type `French Food` in the **Category** field. Select `Biscotte Restaurant`, on the right from **Restaurant (0)**.
 - Click **Save**.
 
 You will see the **French Food** category listed in the entries.
@@ -97,7 +97,7 @@ You will see the **Brunch** category listed in the entries.
 
 Navigate back to [**CONTENT TYPES** - **Restaurants**](http://localhost:1337/admin/plugins/content-manager/restaurant?source=content-manager).
 
-- Click on `Biscotte Restaurant`
+- Click on `Biscotte Restaurant`.
 - On the right, under **Categories(1)**, `select` the `Add an item...`, and add **Brunch** as a category for this restaurant, and click the **Save** button.
 
 You have now seen **two different ways** to use the **relation** field type to add and connect relations between Content Types.

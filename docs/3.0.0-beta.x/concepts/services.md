@@ -6,17 +6,17 @@ Services are a set of reusable functions. They are particularly useful to respec
 
 ## Core services
 
-When you create a new Content type or a new model. You will see a new empty service has been created. It is because Strapi builds a generic service for your models by default and allows you to override and extend it in the generated files.
+When you create a new `Content Type` or a new model. You will see a new empty service has been created. It is because Strapi builds a generic service for your models by default and allows you to override and extend it in the generated files.
 
 ### Extending a Model Service
 
 Here are the core methods (and their current implementation).
 You can simply copy and paste this code to your own service file to customize the methods.
 
-You can read about `strapi.query` calls [here](./queries.md)
+You can read about `strapi.query` calls [here](./queries.md).
 
 ::: tip
-In the following example your controller, service and model is named `restaurant`
+In the following example your controller, service and model are named `restaurant`.
 :::
 
 :::: tabs
