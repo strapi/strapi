@@ -17,7 +17,7 @@ $ yarn develop --watch-admin
 
 ### Strapi global variable
 
-The administration exposes a global variable thqt is accessible for all the plugins.
+The administration exposes a global variable that is accessible for all the plugins.
 
 #### `strapi.backendURL`
 
