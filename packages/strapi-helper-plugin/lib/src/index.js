@@ -17,7 +17,6 @@ export { default as ErrorBoundary } from './components/ErrorBoundary';
 export { default as ExtendComponent } from './components/ExtendComponent';
 export { default as GlobalPagination } from './components/GlobalPagination';
 export { default as HeaderNav } from './components/HeaderNav';
-export { default as HeaderNavWrapper } from './components/HeaderNavWrapper';
 export { default as HeaderModal } from './components/HeaderModal';
 export { default as HeaderModalTitle } from './components/HeaderModalTitle';
 export { default as HeaderSearch } from './components/HeaderSearch';
