@@ -445,20 +445,7 @@ const forms = {
           ]);
         } else if (type === 'uid') {
           const uidItems = [
-            [
-              { ...fields.default, disabled: Boolean(data.targetField), type: 'text' },
-              {
-                autoFocus: false,
-                disabled: nameValue === null,
-                name: 'columnName',
-                type: 'text',
-                addon: nameValue,
-                label: {
-                  id: getTrad('form.attribute.item.customColumnName'),
-                },
-                validations: {},
-              },
-            ],
+            [{ ...fields.default, disabled: Boolean(data.targetField), type: 'text' }],
             [fields.divider],
             [fields.required],
           ];
