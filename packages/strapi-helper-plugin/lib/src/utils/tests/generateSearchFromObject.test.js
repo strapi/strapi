@@ -1,6 +1,6 @@
 import generateSearchFromObject from '../generateSearchFromObject';
 
-describe('CONTENT MANAGER | containers | ListView | utils', () => {
+describe('HELPER PLUGIN | containers | ListView | utils', () => {
   describe('generateSearchFromObject', () => {
     it('should return a string containing the _limit, _start and order', () => {
       const search = { _page: 1, _limit: 10, _sort: 'city:ASC' };

@@ -1,6 +1,12 @@
-import React, { useReducer, useState } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
-import { HeaderSearch, useGlobalContext } from 'strapi-helper-plugin';
+import {
+  HeaderSearch,
+  useGlobalContext,
+  generateSearchFromFilters,
+} from 'strapi-helper-plugin';
+import useQuery from '../../hooks/useQuery';
 import getTrad from '../../utils/getTrad';
 import Container from '../../components/Container';
 import ControlsWrapper from '../../components/ControlsWrapper';
@@ -17,16 +23,72 @@ import AddFilterCTA from '../../components/AddFilterCTA';
 const HomePage = () => {
   const { formatMessage } = useGlobalContext();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
-  const [isOpen, setIsOpen] = useState(true);
-  const { data, dataToDelete, _q } = reducerState.toJS();
+  const [isOpen, setIsOpen] = useState(false);
+  const { push } = useHistory();
+  const { search } = useLocation();
+  const query = useQuery();
+  const { data, dataToDelete, _sort, _q } = reducerState.toJS();
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
+
+  useEffect(() => {
+    // TODO - Get data
+  }, []);
+
+  useEffect(() => {
+    const searchParams = getSearchParams();
+
+    Object.keys(searchParams).map(key => {
+      return dispatch({
+        type: 'ON_QUERY_CHANGE',
+        key,
+        value: searchParams[key],
+      });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
+
+  const getSearchParams = () => {
+    const params = {};
+    query.forEach((value, key) => {
+      params[key] = value;
+    });
+
+    return params;
+  };
+
+  const getUpdatedSearchParams = updatedParams => {
+    return {
+      ...getSearchParams(),
+      ...updatedParams,
+    };
+  };
+
+  const handleClearSearch = () => {
+    handleChangeSearch({ target: { value: '' } });
+  };
 
   const handleClickToggleModal = () => {
     setIsOpen(prev => !prev);
   };
-  const handleClearSearch = () => {
+
+  const handleChangeParams = ({ target: { name, value } }) => {
+    const updatedSearch = getUpdatedSearchParams({ [name]: value });
+    const newSearch = generateSearchFromFilters(updatedSearch);
+    push({ search: newSearch });
+  };
+
+  const handleChangeSearch = ({ target: { value } }) => {
     dispatch({
-      type: 'ON_CLEAR_SEARCH',
+      type: 'ON_QUERY_CHANGE',
+      key: '_q',
+      value,
+    });
+
+    handleChangeParams({
+      target: {
+        name: '_q',
+        value,
+      },
     });
   };
 
@@ -65,8 +127,7 @@ const HomePage = () => {
       <Header {...headerProps} />
       <HeaderSearch
         label={pluginName}
-        // TODO: search
-        onChange={() => {}}
+        onChange={handleChangeSearch}
         onClear={handleClearSearch}
         placeholder={formatMessage({ id: getTrad('search.placeholder') })}
         value={_q}
@@ -75,7 +136,7 @@ const HomePage = () => {
       <ControlsWrapper>
         <SelectAll />
         <SortPicker>
-          <span> Sort By</span>
+          <span> Sort By {_sort}</span>
         </SortPicker>
         <AddFilterCTA />
       </ControlsWrapper>

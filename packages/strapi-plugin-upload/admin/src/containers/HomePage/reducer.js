@@ -3,14 +3,16 @@ import { fromJS } from 'immutable';
 const initialState = fromJS({
   data: [],
   dataToDelete: [],
-  // TODO: set to empty string
-  _q: 'super asset',
+  _q: '',
+  _page: 1,
+  _limit: 10,
+  _sort: '',
 });
 
 const reducer = (state, action) => {
   switch (action.type) {
-    case 'ON_CLEAR_SEARCH':
-      return state.update('_q', () => '');
+    case 'ON_QUERY_CHANGE':
+      return state.update(action.key, () => action.value);
     default:
       return state;
   }
