@@ -1,22 +1,29 @@
 import React, { isValidElement, useState } from 'react';
 import PropTypes from 'prop-types';
 import { get, isEmpty, isObject } from 'lodash';
+import { useGlobalContext } from '../../contexts/GlobalContext';
 import matchSorter from 'match-sorter';
-import useFormattedMessage from '../../hooks/useFormattedMessage';
 import LeftMenuLink from '../LeftMenuLink';
 import LeftMenuSubList from '../LeftMenuSubList';
 import LeftMenuHeader from '../LeftMenuHeader';
 import List from './List';
 import Wrapper from './Wrapper';
 
-function LeftMenuList({
-  customLink,
-  links,
-  title,
-  searchable,
-  numberOfVisibleItems,
-}) {
+function LeftMenuList({ customLink, links, title, searchable, numberOfVisibleItems }) {
   const [search, setSearch] = useState('');
+  const { formatMessage } = useGlobalContext();
+
+  const getLabel = message => {
+    if (isObject(message) && message.id) {
+      return formatMessage({
+        ...message,
+        defaultMessage: message.defaultMessage || message.id,
+      });
+    }
+
+    return message;
+  };
+
   const formatTitleWithIntl = title => {
     if (isObject(title) && title.id) {
       return { ...title, defaultMessage: title.defaultMessage || title.id };
@@ -74,7 +81,7 @@ function LeftMenuList({
 
     return (
       <li key={name}>
-        <LeftMenuLink {...link}>{useFormattedMessage(title)}</LeftMenuLink>
+        <LeftMenuLink {...link}>{getLabel(title)}</LeftMenuLink>
       </li>
     );
   };
@@ -96,9 +103,7 @@ function LeftMenuList({
         <List numberOfVisibleItems={numberOfVisibleItems}>
           {getList().map((link, i) => renderCompo(link, i))}
         </List>
-        {Component && isValidElement(<Component />) && (
-          <Component {...componentProps} />
-        )}
+        {Component && isValidElement(<Component />) && <Component {...componentProps} />}
       </div>
     </Wrapper>
   );

@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useReducer, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { get, groupBy, set, size } from 'lodash';
+import { get, groupBy, set, size, chain } from 'lodash';
 import {
   request,
   LoadingIndicatorPage,
@@ -476,9 +476,15 @@ const DataManagerProvider = ({ allIcons, children }) => {
     try {
       const { data } = await request(requestURL, { method: 'GET' });
 
-      const menu = [{ name: 'Content Types', links: data }];
-
-      updatePlugin('content-manager', 'leftMenuSections', menu);
+      updatePlugin(
+        'content-manager',
+        'leftMenuSections',
+        chain(data)
+          .groupBy('schema.kind')
+          .map((value, key) => ({ name: key, links: value }))
+          .sortBy('name')
+          .value()
+      );
     } catch (err) {
       console.error({ err });
       strapi.notification.error('notification.error');
