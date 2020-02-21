@@ -131,6 +131,111 @@ describe('Test uid service', () => {
 
       expect(uidWithEmptyTarget).toBe('my-test-model');
     });
+
+    test('Ignores minLength attribute (should be handle by the user)', async () => {
+      global.strapi = {
+        contentTypes: {
+          'my-model': {
+            modelName: 'myTestModel',
+            attributes: {
+              title: {
+                type: 'string',
+              },
+              slug: {
+                type: 'uid',
+                targetField: 'title',
+                minLength: 100,
+              },
+            },
+          },
+        },
+        db: {
+          query() {
+            return {
+              find: async () => [],
+            };
+          },
+        },
+      };
+
+      const uid = await uidService.generateUIDField({
+        contentTypeUID: 'my-model',
+        field: 'slug',
+        data: {
+          title: 'Test UID',
+        },
+      });
+
+      expect(uid).toBe('test-uid');
+    });
+
+    test('Ignores maxLength attribute (should be handled user side)', async () => {
+      global.strapi = {
+        contentTypes: {
+          'my-model': {
+            modelName: 'myTestModel',
+            attributes: {
+              title: {
+                type: 'string',
+              },
+              slug: {
+                type: 'uid',
+                targetField: 'title',
+                maxLength: 10,
+              },
+            },
+          },
+        },
+        db: {
+          query() {
+            return {
+              find: async () => [],
+            };
+          },
+        },
+      };
+
+      const uid = await uidService.generateUIDField({
+        contentTypeUID: 'my-model',
+        field: 'slug',
+        data: {
+          title: 'Test with a 999 very long title',
+        },
+      });
+
+      expect(uid).toBe('test-with-a-999-very-long-title');
+    });
+
+    test('Generates a UID using the default value if necessary', async () => {
+      global.strapi = {
+        contentTypes: {
+          'my-model': {
+            modelName: 'myTestModel',
+            attributes: {
+              slug: {
+                type: 'uid',
+                default: 'slug-default',
+              },
+            },
+          },
+        },
+        db: {
+          query() {
+            return {
+              find: async () => [],
+            };
+          },
+        },
+      };
+
+      const uid = await uidService.generateUIDField({
+        contentTypeUID: 'my-model',
+        field: 'slug',
+        data: {},
+      });
+
+      expect(uid).toBe('slug-default');
+    });
   });
 
   describe('findUniqueUID', () => {

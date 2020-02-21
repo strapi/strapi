@@ -8,7 +8,7 @@ module.exports = {
     const contentType = strapi.contentTypes[contentTypeUID];
     const { attributes } = contentType;
 
-    const targetField = _.get(attributes, [field, 'targetField']);
+    const { targetField, default: defaultValue } = attributes[field];
     const targetValue = _.get(data, targetField);
 
     if (!_.isEmpty(targetValue)) {
@@ -22,7 +22,7 @@ module.exports = {
     return this.findUniqueUID({
       contentTypeUID,
       field,
-      value: slugify(contentType.modelName),
+      value: slugify(defaultValue || contentType.modelName),
     });
   },
 
