@@ -25,7 +25,7 @@ const CardImgWrapper = styled.div`
 
   &:hover {
     .card-control-wrapper {
-      display: block;
+      display: flex;
     }
   }
 `;

@@ -22,15 +22,12 @@ const RowItem = ({
     onClickEdit(originalIndex);
   };
 
-  // FIXME:
-  const isImg = file.type.includes('image');
-
   return (
     <div className="col-3" key={originalIndex}>
       <div>
         <CardImgWrapper isSmall hasError={hasError}>
           {isUploading && <InfiniteLoadingIndicator onClick={handleClick} />}
-          {!isUploading && isImg && (
+          {!isUploading && (
             <CardControlsWrapper className="card-control-wrapper">
               <CardControl onClick={handleClickEdit} />
             </CardControlsWrapper>

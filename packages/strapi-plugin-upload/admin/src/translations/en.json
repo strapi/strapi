@@ -1,4 +1,8 @@
 {
+  "form.input.label.file-alt": "Alternative text",
+  "form.input.decription.file-alt": "This text will be displayed if the asset can’t be shown.",
+  "form.input.label.file-caption": "Caption",
+  "form.input.label.file-name": "File name",
   "header.actions.upload-assets": "Upload assets",
   "header.content.assets-empty": "No asset",
   "header.content.assets-multiple": "{number} assets",

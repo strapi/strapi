@@ -1,3 +1,4 @@
+import EditForm from '../../../components/EditForm';
 import UploadForm from '../../../components/UploadForm';
 import UploadList from '../../../components/UploadList';
 import getTrad from '../../../utils/getTrad';
@@ -16,7 +17,7 @@ const stepper = {
     prev: 'browse',
   },
   'edit-new': {
-    Component: () => null,
+    Component: EditForm,
     // TODO: I'll leave it there for the moment
     // because I am not sure about the design since it seems inconsistent
     // headers: [

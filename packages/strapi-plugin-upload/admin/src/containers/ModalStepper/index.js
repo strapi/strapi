@@ -25,8 +25,6 @@ const ModalStepper = ({ isOpen, onToggle }) => {
   const toggleRef = useRef();
   toggleRef.current = onToggle;
 
-  console.log(fileToEdit);
-
   useEffect(() => {
     if (currentStep === 'upload' && filesToUploadLength === 0) {
       // Close modal when file uploading is over
@@ -161,6 +159,7 @@ const ModalStepper = ({ isOpen, onToggle }) => {
       {Component && (
         <Component
           addFilesToUpload={addFilesToUpload}
+          fileToEdit={fileToEdit}
           filesToUpload={filesToUpload}
           onClickCancelUpload={handleCancelFileToUpload}
           onGoToAddBrowseFiles={handleGoToAddBrowseFiles}
