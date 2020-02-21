@@ -10,6 +10,22 @@ const FileWrapper = styled(CardImgWrapper)`
     object-fit: contain;
     margin: auto;
   }
+
+  .cropper-view-box {
+    outline-color: #ffffff;
+  }
+  .cropper-point {
+    background-color: #ffffff;
+    border-radius: 50%;
+  }
+
+  .point-se {
+    &:before {
+      display: none;
+    }
+    height: 5px;
+    width: 5px;
+  }
 `;
 
 export default FileWrapper;

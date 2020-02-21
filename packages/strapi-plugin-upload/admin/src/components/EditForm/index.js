@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, createRef, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Inputs } from '@buffetjs/custom';
 import { useGlobalContext } from 'strapi-helper-plugin';
+import Cropper from 'cropperjs';
+import 'cropperjs/dist/cropper.css';
 import CardControl from '../CardControl';
 import CardControlsWrapper from '../CardControlsWrapper';
 import ModalSection from '../ModalSection';
@@ -15,9 +17,45 @@ import form from './utils/form';
 const EditForm = ({ onChange, onSubmit }) => {
   const { formatMessage } = useGlobalContext();
   const [isCropping, setIsCropping] = useState(false);
+  const [cropResult, setCropResult] = useState(null);
+
+  const imgRef = createRef();
+  let cropper = useRef();
+
+  useEffect(() => {
+    if (isCropping) {
+      cropper.current = new Cropper(imgRef.current, {
+        modal: false,
+        initialAspectRatio: 16 / 9,
+        movable: true,
+        zoomable: false,
+        cropBoxResizable: true,
+        background: false,
+      });
+    } else if (cropper.current) {
+      cropper.current.destroy();
+    }
+
+    return () => {
+      if (cropper.current) {
+        cropper.current.destroy();
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cropper, isCropping]);
 
   const handleToggleCropMode = () => {
     setIsCropping(prev => !prev);
+  };
+
+  const handleClick = () => {
+    if (cropper) {
+      const canvas = cropper.current.getCroppedCanvas();
+
+      setCropResult(canvas.toDataURL());
+    }
+
+    setIsCropping(false);
   };
 
   return (
@@ -43,14 +81,29 @@ const EditForm = ({ onChange, onSubmit }) => {
                       color="#F64D0A"
                       onClick={handleToggleCropMode}
                     />
-                    <CardControl type="check" color="#6DBB1A" />
+                    <CardControl
+                      type="check"
+                      color="#6DBB1A"
+                      onClick={handleClick}
+                    />
                   </>
                 )}
               </CardControlsWrapper>
-              <img
-                src="https://images.unsplash.com/photo-1558980664-ce6960be307d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80"
-                alt=""
-              />
+              {isCropping ? (
+                <img
+                  src="https://images.unsplash.com/photo-1558980664-ce6960be307d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80"
+                  alt=""
+                  ref={imgRef}
+                />
+              ) : (
+                <img
+                  src={
+                    cropResult ||
+                    'https://images.unsplash.com/photo-1558980664-ce6960be307d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80'
+                  }
+                  alt=""
+                />
+              )}
             </FileWrapper>
           </div>
           <div className="col-6">
