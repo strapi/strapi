@@ -47,6 +47,10 @@ const EditForm = ({ onChange, onSubmit }) => {
                   </>
                 )}
               </CardControlsWrapper>
+              <img
+                src="https://images.unsplash.com/photo-1558980664-ce6960be307d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80"
+                alt=""
+              />
             </FileWrapper>
           </div>
           <div className="col-6">
