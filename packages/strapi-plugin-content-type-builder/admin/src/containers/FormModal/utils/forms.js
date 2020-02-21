@@ -704,7 +704,7 @@ const forms = {
 
         if (type === 'uid') {
           const options = Object.keys(attributes)
-            .filter(key => attributes[key].type === 'string')
+            .filter(key => ['string', 'text'].includes(attributes[key].type))
             .map(key => ({ id: key, value: key }));
 
           items[0].push({

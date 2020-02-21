@@ -32,7 +32,7 @@ const Header = () => {
 
   const currentContentTypeMainField = get(layout, ['settings', 'mainField'], 'id');
   const currentContentTypeName = get(layout, ['schema', 'info', 'name']);
-  const isCreatingEntry = id === 'create';
+  const isCreatingEntry = id === 'create' || (isSingleType && !initialData.created_at);
 
   /* eslint-disable indent */
   const entryHeaderTitle = isCreatingEntry

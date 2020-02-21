@@ -10,6 +10,8 @@ const colors = {
   pink: '#ff5b77',
   purple: '#613d7c',
   gray: '#464a4c',
+  border: '#E3E9F3',
+  'border-active': '#78caff',
   'gray-dark': '#292b2c',
   'gray-light': '#636c72',
   'gray-lighter': '#eceeef',

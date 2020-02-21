@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 const A = styled.a`
   position: relative;
-  padding-top: 0.8rem;
+  padding-top: 0.7rem;
   padding-bottom: 0.2rem;
   padding-left: 1.6rem;
   min-height: 3.6rem;

@@ -9,6 +9,7 @@ import InputJSONWithErrors from '../InputJSONWithErrors';
 import InputFileWithErrors from '../InputFileWithErrors';
 import SelectWrapper from '../SelectWrapper';
 import WysiwygWithErrors from '../WysiwygWithErrors';
+import InputUID from '../InputUID';
 
 const getInputType = (type = '') => {
   switch (toLower(type)) {
@@ -48,26 +49,11 @@ const getInputType = (type = '') => {
 };
 
 function Inputs({ autoFocus, keys, layout, name, onBlur }) {
-  const {
-    didCheckErrors,
-    formErrors,
-    modifiedData,
-    onChange,
-  } = useDataManager();
-
-  const attribute = useMemo(
-    () => get(layout, ['schema', 'attributes', name], {}),
-    [layout, name]
-  );
-  const metadatas = useMemo(
-    () => get(layout, ['metadatas', name, 'edit'], {}),
-    [layout, name]
-  );
-  const disabled = useMemo(() => !get(metadatas, 'editable', true), [
-    metadatas,
-  ]);
+  const { didCheckErrors, formErrors, modifiedData, onChange } = useDataManager();
+  const attribute = useMemo(() => get(layout, ['schema', 'attributes', name], {}), [layout, name]);
+  const metadatas = useMemo(() => get(layout, ['metadatas', name, 'edit'], {}), [layout, name]);
+  const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
   const type = useMemo(() => get(attribute, 'type', null), [attribute]);
-
   const validations = omit(attribute, [
     'type',
     'model',
@@ -83,13 +69,13 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
   if (visible === false) {
     return null;
   }
-  const temporaryErrorIdUntilBuffetjsSupportsFormattedMessage =
-    'app.utils.defaultMessage';
+  const temporaryErrorIdUntilBuffetjsSupportsFormattedMessage = 'app.utils.defaultMessage';
   const errorId = get(
     formErrors,
     [keys, 'id'],
     temporaryErrorIdUntilBuffetjsSupportsFormattedMessage
   );
+  const isRequired = get(validations, ['required'], false);
 
   if (type === 'relation') {
     return (
@@ -103,6 +89,28 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
           value={get(modifiedData, keys)}
         />
       </div>
+    );
+  }
+
+  if (type === 'uid') {
+    return (
+      <FormattedMessage id={errorId}>
+        {error => (
+          <InputUID
+            required={isRequired}
+            name={keys}
+            value={get(modifiedData, keys)}
+            contentTypeUID={layout.uid}
+            validations={validations}
+            onChange={onChange}
+            error={
+              isEmpty(error) || errorId === temporaryErrorIdUntilBuffetjsSupportsFormattedMessage
+                ? null
+                : error
+            }
+          />
+        )}
+      </FormattedMessage>
     );
   }
 
@@ -131,12 +139,8 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
     );
   });
 
-  const isRequired = get(validations, ['required'], false);
   const enumOptions = [
-    <FormattedMessage
-      id="components.InputSelect.option.placeholder"
-      key="__enum_option_null"
-    >
+    <FormattedMessage id="components.InputSelect.option.placeholder" key="__enum_option_null">
       {msg => (
         <option disabled={isRequired} hidden={isRequired} value="">
           {msg}
@@ -156,8 +160,7 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
             didCheckErrors={didCheckErrors}
             disabled={disabled}
             error={
-              isEmpty(error) ||
-              errorId === temporaryErrorIdUntilBuffetjsSupportsFormattedMessage
+              isEmpty(error) || errorId === temporaryErrorIdUntilBuffetjsSupportsFormattedMessage
                 ? null
                 : error
             }

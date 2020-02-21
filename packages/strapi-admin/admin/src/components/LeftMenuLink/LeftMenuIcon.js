@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const FaIcon = styled(({ small, ...props }) => <FontAwesomeIcon {...props} />)`
   position: absolute;
-  top: calc(50% - 0.9rem + 0.5rem);
+  top: calc(50% - 0.9rem + 0.3rem);
   left: 1.6rem;
   margin-right: 1.2rem;
   font-size: ${props => (props.small ? '1rem' : '1.4rem')};
@@ -14,9 +14,7 @@ const FaIcon = styled(({ small, ...props }) => <FontAwesomeIcon {...props} />)`
   text-align: center;
 `;
 
-const LeftMenuIcon = ({ icon }) => (
-  <FaIcon small={icon === 'circle'} icon={icon} />
-);
+const LeftMenuIcon = ({ icon }) => <FaIcon small={icon === 'circle'} icon={icon} />;
 
 LeftMenuIcon.propTypes = {
   icon: PropTypes.string,

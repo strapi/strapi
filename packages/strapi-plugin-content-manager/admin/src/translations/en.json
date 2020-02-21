@@ -50,6 +50,12 @@
   "components.TableEmpty.withSearch": "There is no {contentType} corresponding to the search ({search})...",
   "components.TableEmpty.withoutFilter": "There is no {contentType}...",
 
+  "components.uid.available": "available",
+  "components.uid.apply": "apply",
+  "components.uid.regenerate": "regenerate",
+  "components.uid.suggested": "suggested",
+  "components.uid.unavailable": "unavailable",
+
   "containers.Edit.addAnItem": "Add an item...",
   "containers.Edit.pluginHeader.title.new": "Create an entry",
   "containers.Edit.clickToJump": "Click to jump to the entry",
