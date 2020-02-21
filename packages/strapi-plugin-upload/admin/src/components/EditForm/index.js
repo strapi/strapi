@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Inputs } from '@buffetjs/custom';
 import { useGlobalContext } from 'strapi-helper-plugin';
@@ -14,6 +14,11 @@ import form from './utils/form';
 
 const EditForm = ({ onChange, onSubmit }) => {
   const { formatMessage } = useGlobalContext();
+  const [isCropping, setIsCropping] = useState(false);
+
+  const handleToggleCropMode = () => {
+    setIsCropping(prev => !prev);
+  };
 
   return (
     <ModalSection>
@@ -22,8 +27,25 @@ const EditForm = ({ onChange, onSubmit }) => {
           <div className="col-6">
             <FileWrapper>
               <CardControlsWrapper className="card-control-wrapper">
-                <CardControl color="#9EA7B8" type="trash" />
-                <CardControl type="crop" color="#9EA7B8" />
+                {!isCropping ? (
+                  <>
+                    <CardControl color="#9EA7B8" type="trash" />
+                    <CardControl
+                      type="crop"
+                      color="#9EA7B8"
+                      onClick={handleToggleCropMode}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <CardControl
+                      type="clear"
+                      color="#F64D0A"
+                      onClick={handleToggleCropMode}
+                    />
+                    <CardControl type="check" color="#6DBB1A" />
+                  </>
+                )}
               </CardControlsWrapper>
             </FileWrapper>
           </div>
