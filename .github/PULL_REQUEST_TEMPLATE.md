@@ -9,29 +9,3 @@ To help us merge your PR, make sure to follow the instructions below:
 -->
 
 #### Description of what you did:
-
-<!--
-Replace [ ] by [x] to check these checkboxes!
--->
-
-#### My PR is a:
-
-- [ ] 💥 Breaking change
-- [ ] 🐛 Bug fix
-- [ ] 💅 Enhancement
-- [ ] 🚀 New feature
-
-#### Main update on the:
-
-- [ ] Admin
-- [ ] Documentation
-- [ ] Framework
-- [ ] Plugin
-
-#### Manual testing done on the following databases:
-
-- [ ] Not applicable
-- [ ] MongoDB
-- [ ] MySQL
-- [ ] Postgres
-- [ ] SQLite
