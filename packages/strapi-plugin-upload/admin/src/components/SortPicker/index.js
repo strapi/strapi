@@ -12,15 +12,6 @@ import SortListItem from './SortListItem';
 const SortPicker = ({ onChange, value }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const toggle = () => {
-    setIsOpen(!isOpen);
-  };
-
-  const handleChange = value => {
-    onChange({ target: { value } });
-    toggle();
-  };
-
   const orders = {
     created_at_asc: 'created_at:ASC',
     created_at_desc: 'created_at:DESC',
@@ -30,9 +21,19 @@ const SortPicker = ({ onChange, value }) => {
     updated_at_desc: 'updated_at:DESC',
   };
 
+  const handleChange = value => {
+    onChange({ target: { value } });
+
+    hangleToggle();
+  };
+
+  const hangleToggle = () => {
+    setIsOpen(!isOpen);
+  };
+
   return (
     <Wrapper>
-      <SortButton onClick={toggle} isActive={isOpen}>
+      <SortButton onClick={hangleToggle} isActive={isOpen}>
         <FormattedMessage id={getTrad('sort.label')} />
       </SortButton>
       <SortList isOpen={isOpen}>

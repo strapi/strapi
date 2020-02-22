@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import PropTypes from 'prop-types';
 import { themePropTypes } from 'strapi-helper-plugin';
 
 const SortListItem = styled.li`
@@ -17,7 +18,12 @@ const SortListItem = styled.li`
   `}
 `;
 
+SortListItem.defaultProps = {
+  isActive: false,
+};
+
 SortListItem.propTypes = {
+  isActive: PropTypes.bool,
   ...themePropTypes,
 };
 

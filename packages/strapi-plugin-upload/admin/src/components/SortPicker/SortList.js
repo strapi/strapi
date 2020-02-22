@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import PropTypes from 'prop-types';
 import { themePropTypes } from 'strapi-helper-plugin';
 
 const SortList = styled.ul`
@@ -18,7 +19,12 @@ const SortList = styled.ul`
   ${({ isOpen }) => isOpen && 'display: block;'}
 `;
 
+SortList.defaultProps = {
+  isOpen: false,
+};
+
 SortList.propTypes = {
+  isOpen: PropTypes.bool,
   ...themePropTypes,
 };
 

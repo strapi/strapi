@@ -20,15 +20,15 @@ const SortButton = styled.button`
   ${({ isActive, theme }) =>
     isActive
       ? `
-    background-color: ${theme.main.colors.filters.button.active.background};
-    border: 1px solid ${theme.main.colors.filters.button.active.border};
-    color: ${theme.main.colors.filters.button.active.color};
-  `
+      background-color: ${theme.main.colors.filters.button.active.background};
+      border: 1px solid ${theme.main.colors.filters.button.active.border};
+      color: ${theme.main.colors.filters.button.active.color};
+    `
       : `
-    &:hover {
-      background-color: ${theme.main.colors.filters.button.hover.background};
-    }
-  `}
+      &:hover {
+        background-color: ${theme.main.colors.filters.button.hover.background};
+      }
+    `}
 `;
 
 SortButton.defaultProps = {
@@ -36,8 +36,8 @@ SortButton.defaultProps = {
 };
 
 SortButton.propTypes = {
-  ...themePropTypes,
   isActive: PropTypes.bool,
+  ...themePropTypes,
 };
 
 export default SortButton;

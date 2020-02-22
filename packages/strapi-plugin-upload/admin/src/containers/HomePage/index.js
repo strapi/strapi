@@ -31,10 +31,6 @@ const HomePage = () => {
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
 
   useEffect(() => {
-    // TODO - Get data
-  }, []);
-
-  useEffect(() => {
     const searchParams = getSearchParams();
 
     Object.keys(searchParams).map(key => {
@@ -63,39 +59,30 @@ const HomePage = () => {
     };
   };
 
-  const handleChangeParams = ({ target: { name, value } }) => {
-    const updatedSearch = getUpdatedSearchParams({ [name]: value });
+  const handleChangeParams = ({ key, value }) => {
+    const updatedSearch = getUpdatedSearchParams({ [key]: value });
     const newSearch = generateSearchFromFilters(updatedSearch);
     push({ search: newSearch });
   };
 
   const handleChangeSearch = ({ target: { value } }) => {
-    dispatch({
-      type: 'ON_QUERY_CHANGE',
-      key: '_q',
-      value,
-    });
-
-    handleChangeParams({
-      target: {
-        name: '_q',
-        value,
-      },
-    });
+    handleChangeQuery({ key: '_q', value });
   };
 
   const handleChangeSort = ({ target: { value } }) => {
+    handleChangeQuery({ key: '_sort', value });
+  };
+
+  const handleChangeQuery = ({ key, value }) => {
     dispatch({
       type: 'ON_QUERY_CHANGE',
-      key: '_sort',
+      key,
       value,
     });
 
     handleChangeParams({
-      target: {
-        name: '_sort',
-        value,
-      },
+      key,
+      value,
     });
   };
 
