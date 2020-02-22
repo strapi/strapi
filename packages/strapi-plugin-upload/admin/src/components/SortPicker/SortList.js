@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { themePropTypes } from 'strapi-helper-plugin';
 
 const SortList = styled.ul`
   display: none;
@@ -10,15 +11,15 @@ const SortList = styled.ul`
   min-width: 230px;
   z-index: 1;
   list-style-type: none;
-  font-size: 13px;
-  background-color: #ffffff;
-  border: 1px solid #e3e9f3;
-  box-shadow: 0 2px 4px rgba(227, 233, 243, 0.5);
-  ${({ isOpen }) =>
-    isOpen &&
-    `
-    display: block;
-  `}
+  font-size: ${({ theme }) => theme.main.fontSizes.md};
+  background-color: ${({ theme }) => theme.main.colors.filters.background};
+  border: 1px solid ${({ theme }) => theme.main.colors.filters.border};
+  box-shadow: 0 2px 4px ${({ theme }) => theme.main.colors.filters.shadow};
+  ${({ isOpen }) => isOpen && 'display: block;'}
 `;
+
+SortList.propTypes = {
+  ...themePropTypes,
+};
 
 export default SortList;

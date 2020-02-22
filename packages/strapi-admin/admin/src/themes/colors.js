@@ -18,6 +18,7 @@ const colors = {
   lightGrey: '#fafafa',
   grey: '#9ea7b8',
   greyDark: '#292b2c',
+  greyLightest: '#e3e9f3',
 
   content: {
     background: '#fafafb',
@@ -34,6 +35,27 @@ const colors = {
     'blue-darker': '#18202e',
     'blue-dark': '#151c2e',
     blue: '#0097f7',
+  },
+  filters: {
+    border: '#e3e9f3',
+    background: '#ffffff',
+    color: '#292b2c',
+    shadow: 'rgba(227, 233, 243, 0.5)',
+    button: {
+      hover: {
+        background: '#F7F8F8',
+      },
+      active: {
+        background: '#E6F0FB',
+        border: '#AED4FB',
+        color: '#007EFF',
+      },
+    },
+    list: {
+      hover: {
+        background: '#f6f6f6',
+      },
+    },
   },
 };
 

@@ -1,27 +1,43 @@
 import styled from 'styled-components';
+import PropTypes from 'prop-types';
+import { themePropTypes } from 'strapi-helper-plugin';
 
 const SortButton = styled.button`
   height: 32px;
-  background: #ffffff;
-  color: #292b2c;
-  line-height: 30px;
-  border: 1px solid #e3e9f3;
-  border-radius: 2px;
-  font-weight: 500;
   padding: 0 10px;
-  font-size: 13px;
+  line-height: 30px;
+  background-color: ${({ theme }) => theme.main.colors.filters.background};
+  border: 1px solid ${({ theme }) => theme.main.colors.filters.border};
+  color: ${({ theme }) => theme.main.colors.filters.color};
+  font-weight: ${({ theme }) => theme.main.fontWeights.semiBold};
+  font-size: ${({ theme }) => theme.main.fontSizes.md};
+  border-radius: ${({ theme }) => theme.main.sizes.borderRadius};
   &:active,
   &:focus {
     outline: 0;
   }
 
-  ${({ isActive }) =>
-    isActive &&
-    `
-    color #007EFF;
-    border-color: #AED4FB;
-    background-color: #E6F0FB;
+  ${({ isActive, theme }) =>
+    isActive
+      ? `
+    background-color: ${theme.main.colors.filters.button.active.background};
+    border: 1px solid ${theme.main.colors.filters.button.active.border};
+    color: ${theme.main.colors.filters.button.active.color};
+  `
+      : `
+    &:hover {
+      background-color: ${theme.main.colors.filters.button.hover.background};
+    }
   `}
 `;
+
+SortButton.defaultProps = {
+  isActive: false,
+};
+
+SortButton.propTypes = {
+  ...themePropTypes,
+  isActive: PropTypes.bool,
+};
 
 export default SortButton;
