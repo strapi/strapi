@@ -43,7 +43,6 @@ const Wrapper = styled.tr`
     }}
     p {
       font-weight: 500;
-      text-transform: capitalize;
     }
   }
   td:last-child {
