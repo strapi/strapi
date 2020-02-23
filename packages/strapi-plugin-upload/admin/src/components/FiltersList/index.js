@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import { Remove } from '@buffetjs/icons';
+
 import FiltersListItem from './FiltersListItem';
 
 const FiltersList = ({ filters, onDelete }) => {
@@ -11,7 +13,7 @@ const FiltersList = ({ filters, onDelete }) => {
           <FiltersListItem key={filter}>
             <span>{filter}</span>
             <button type="button" onClick={() => onDelete(index)}>
-              X
+              <Remove width="11px" height="11px" fill="#007eff" />
             </button>
           </FiltersListItem>
         );
@@ -22,7 +24,16 @@ const FiltersList = ({ filters, onDelete }) => {
 
 FiltersList.defaultProps = {
   onDelete: () => {},
-  filters: ['created_at is 0-01-22 00:00:00'],
+  filters: [
+    'created_at is 0-01-22 00:00:00',
+    'created_at is 0-01-22 00:00:00',
+    'created_at is 0-01-22 00:00:00',
+    'created_at is 0-01-22 00:00:00',
+    'created_at is 0-01-22 00:00:00',
+    'created_at is 0-01-22 00:00:00',
+    'created_at is 0-01-22 00:00:00',
+    'created_at is 0-01-22 00:00:00',
+  ],
 };
 
 FiltersList.propTypes = {
