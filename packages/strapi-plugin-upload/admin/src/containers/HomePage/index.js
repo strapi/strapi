@@ -3,6 +3,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
 import {
   HeaderSearch,
+  PageFooter,
   useGlobalContext,
   generateSearchFromFilters,
 } from 'strapi-helper-plugin';
@@ -28,7 +29,7 @@ const HomePage = () => {
   const { push } = useHistory();
   const { search } = useLocation();
   const query = useQuery();
-  const { data, dataToDelete, _sort, _q } = reducerState.toJS();
+  const { data, dataToDelete, _limit, _page, _sort, _q } = reducerState.toJS();
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
 
   useEffect(() => {
@@ -58,6 +59,12 @@ const HomePage = () => {
       ...getSearchParams(),
       ...updatedParams,
     };
+  };
+
+  const handleChangeListParams = ({ target: { name, value } }) => {
+    const key = name.split('.').pop();
+
+    handleChangeQuery({ key, value });
   };
 
   const handleChangeParams = ({ key, value }) => {
@@ -125,6 +132,11 @@ const HomePage = () => {
     ],
   };
 
+  const params = {
+    _limit: parseInt(_limit, 10),
+    _page: parseInt(_page, 10),
+  };
+
   return (
     <Container>
       <Header {...headerProps} />
@@ -144,6 +156,13 @@ const HomePage = () => {
       </ControlsWrapper>
       <ListEmpty onClick={handleClickToggleModal} />
       {/* <List data={data} /> */}
+
+      <PageFooter
+        count={50}
+        context={{ emitEvent: () => {} }}
+        onChangeParams={handleChangeListParams}
+        params={params}
+      />
       <ModalStepper isOpen={isOpen} onToggle={handleClickToggleModal} />
     </Container>
   );

@@ -8,7 +8,7 @@ const FiltersList = ({ filters, onDelete }) => {
     <>
       {filters.map((filter, index) => {
         return (
-          <FiltersListItem>
+          <FiltersListItem key={filter}>
             <span>{filter}</span>
             <button type="button" onClick={() => onDelete(index)}>
               X
