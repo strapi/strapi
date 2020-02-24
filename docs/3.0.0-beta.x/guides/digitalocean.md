@@ -25,7 +25,7 @@ To create a project head over to the Strapi [listing on the marketplace](https:/
 - (optional) Enable backups
 - Finally hit Create Droplet!
 
-### Step 4: Visit your app
+### Step 3: Visit your app
 
 Please note that it may take anywhere from 30 seconds to a few minutes for the droplet to startup, when it does you should see it in your [droplets list](https://cloud.digitalocean.com/droplets).
 
@@ -35,8 +35,70 @@ You can also SSH into the virtual machine using `root` as the SSH user and your 
 
 ## Using the Service Account
 
+By default the Strapi application will be running under a "service account", this is an account that is extremely limited into what it can do and access. The purpose of using a service account is to project your system from security threats.
+
+### Accessing the service account
+
+The first step in accessing your service account is to SSH into the root user, depending on your Operating System or your SSH client there may be multiple ways to do this. You should refer to your SSH clients documentation for clarification on using SSH keys.
+
+After you have successfully logged into the root user you can now run `sudo su strapi` and this will take you to the `strapi` user's shell. To go back to the root user simplely run `exit`.
+
+::: warning
+Please note that by default the `strapi` user **cannot run sudo commands** this is intended!
+:::
+
+### Controlling the Strapi service and viewing logs
+
+Once you are in the Strapi service account you can now use [PM2](https://pm2.keymetrics.io/docs/usage/quick-start/#managing-processes) to manage the Strapi process and view the logs.
+
+The default service is called `strapi-develop` and should be running with an ID of `0`. Below are some example commands for PM2:
+
+```bash
+pm2 list # Will show you a list of all running processes
+pm2 restart strapi-develop # Restart the Strapi process manually
+pm2 stop strapi-develop # Stop the Strapi process
+pm2 start strapi-develop # Start the Strapi process
+pm2 logs strapi-develop # Show the logs in real time (to exit use ctrl +c)
+```
+
+Strapi will automatically start if the virtual machine is rebooted, you can also manually view the log files under `/srv/strapi/.pm2/logs` if you encounter any errors during the bootup.
+
 ## Changing the PostgreSQL Password
 
-## Keeping your Project's Source code in Git
+Because of how the virtual machine is created, your database is setup with a long and random password, however for security you should change this password before moving into a production-like setting.
+
+Use the following steps to change the PostgreSQL password and update Strapi's config:
+
+- Make sure you are logged into the `strapi` service user
+- Stop the current strapi process and change the password for the `strapi` database user
+
+```bash
+pm2 stop strapi-develop
+psql -c "ALTER USER strapi with password 'your-new-password';"
+```
+
+- Update the `/srv/strapi/strapi/config/environments/development/database.json` file with the new password.
+
+```json
+...
+"settings": {
+  "client": "postgres",
+  "host": "127.0.0.1",
+  "port": "5432",
+  "database": "strapi",
+  "username": "strapi",
+  "password": "your-new-password"
+},
+...
+```
+
+- Restart Strapi and confirm the password change was successful
+
+```bash
+pm2 start strapi-develop
+pm2 logs strapi-develop
+```
 
 ## Migration to Production
+
+-wip-
