@@ -50,7 +50,7 @@ module.exports = {
             : '',
         buffer,
         mime: stream.type,
-        size: (stream.size / 1000).toFixed(2),
+        size: parseFloat((stream.size / 1000).toFixed(2)),
       };
     };
 
@@ -175,5 +175,16 @@ module.exports = {
         return this.upload(enhancedFiles, config);
       })
     );
+  },
+  async getConfig() {
+    const config = await strapi
+      .store({
+        environment: strapi.config.environment,
+        type: 'plugin',
+        name: 'upload',
+      })
+      .get({ key: 'provider' });
+
+    return { ...config, sizeLimit: parseFloat(config.sizeLimit) };
   },
 };

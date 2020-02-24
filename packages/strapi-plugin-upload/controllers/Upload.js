@@ -13,13 +13,7 @@ module.exports = {
     const uploadService = strapi.plugins.upload.services.upload;
 
     // Retrieve provider configuration.
-    const config = await strapi
-      .store({
-        environment: strapi.config.environment,
-        type: 'plugin',
-        name: 'upload',
-      })
-      .get({ key: 'provider' });
+    const config = await uploadService.getConfig();
 
     // Verify if the file upload is enable.
     if (config.enabled === false) {
@@ -55,7 +49,7 @@ module.exports = {
     const buffers = await uploadService.bufferize(files);
 
     const enhancedFiles = buffers.map(file => {
-      if (parseFloat(file.size) > parseFloat(config.sizeLimit)) {
+      if (file.size > config.sizeLimit) {
         return ctx.badRequest(null, [
           {
             messages: [
@@ -131,13 +125,19 @@ module.exports = {
   },
 
   async updateSettings(ctx) {
+    const {
+      request: { body: newSettings },
+    } = ctx;
     await strapi
       .store({
         environment: ctx.params.environment,
         type: 'plugin',
         name: 'upload',
       })
-      .set({ key: 'provider', value: ctx.request.body });
+      .set({
+        key: 'provider',
+        value: { ...newSettings, sizeLimit: parseFloat(newSettings.sizeLimit) },
+      });
 
     ctx.send({ ok: true });
   },
