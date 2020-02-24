@@ -551,8 +551,10 @@ module.exports = ({ model, modelKey, strapi }) => {
 
     const $or = buildSearchOr(model, params._q);
 
+    delete filters.where._q;
+
     return model
-      .find({ $or })
+      .find({ $and: [filters.where, { $or }] })
       .sort(filters.sort)
       .skip(filters.start)
       .limit(filters.limit)
@@ -563,8 +565,14 @@ module.exports = ({ model, modelKey, strapi }) => {
   }
 
   function countSearch(params) {
+    // Convert `params` object to filters compatible with Mongo.
+    const filters = modelUtils.convertParams(modelKey, params);
+
     const $or = buildSearchOr(model, params._q);
-    return model.find({ $or }).countDocuments();
+
+    delete filters.where._q;
+
+    return model.find({ $and: [filters.where, { $or }] }).countDocuments();
   }
 
   return {
@@ -625,7 +633,7 @@ function validateRepeatableInput(value, { key, min, max, required }) {
 
   if (
     (required === true || (required !== true && value.length > 0)) &&
-    (min && value.length < min)
+    min && value.length < min
   ) {
     const err = new Error(
       `Component ${key} must contain at least ${min} items`
@@ -691,7 +699,7 @@ function validateDynamiczoneInput(
 
   if (
     (required === true || (required !== true && value.length > 0)) &&
-    (min && value.length < min)
+    min && value.length < min
   ) {
     const err = new Error(
       `Dynamiczone ${key} must contain at least ${min} items`
