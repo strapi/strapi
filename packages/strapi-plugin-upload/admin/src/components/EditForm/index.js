@@ -1,4 +1,5 @@
 import React, { useState, createRef, useEffect, useRef } from 'react';
+import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { Inputs } from '@buffetjs/custom';
 import { useGlobalContext } from 'strapi-helper-plugin';
@@ -13,11 +14,14 @@ import Form from './Form';
 import Row from './Row';
 import Wrapper from './Wrapper';
 import form from './utils/form';
+import isImageType from './utils/isImageType';
 
-const EditForm = ({ onChange, onSubmit }) => {
+const EditForm = ({ fileToEdit, onChange, onSubmit, ...rest }) => {
   const { formatMessage } = useGlobalContext();
   const [isCropping, setIsCropping] = useState(false);
   const [cropResult, setCropResult] = useState(null);
+  const canCrop = isImageType(get(fileToEdit, 'file', null));
+  console.log(rest);
 
   const imgRef = createRef();
   let cropper = useRef();
@@ -68,11 +72,13 @@ const EditForm = ({ onChange, onSubmit }) => {
                 {!isCropping ? (
                   <>
                     <CardControl color="#9EA7B8" type="trash" />
-                    <CardControl
-                      type="crop"
-                      color="#9EA7B8"
-                      onClick={handleToggleCropMode}
-                    />
+                    {canCrop && (
+                      <CardControl
+                        type="crop"
+                        color="#9EA7B8"
+                        onClick={handleToggleCropMode}
+                      />
+                    )}
                   </>
                 ) : (
                   <>
@@ -89,21 +95,17 @@ const EditForm = ({ onChange, onSubmit }) => {
                   </>
                 )}
               </CardControlsWrapper>
-              {isCropping ? (
-                <img
-                  src="https://images.unsplash.com/photo-1558980664-ce6960be307d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80"
-                  alt=""
-                  ref={imgRef}
-                />
-              ) : (
+
+              {canCrop ? (
                 <img
                   src={
                     cropResult ||
                     'https://images.unsplash.com/photo-1558980664-ce6960be307d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80'
                   }
                   alt=""
+                  ref={isCropping ? imgRef : null}
                 />
-              )}
+              ) : null}
             </FileWrapper>
           </div>
           <div className="col-6">
@@ -141,11 +143,13 @@ const EditForm = ({ onChange, onSubmit }) => {
 };
 
 EditForm.defaultProps = {
+  fileToEdit: null,
   onChange: () => {},
   onSubmit: e => e.preventDefault(),
 };
 
 EditForm.propTypes = {
+  fileToEdit: PropTypes.object,
   onChange: PropTypes.func,
   onSubmit: PropTypes.func,
 };

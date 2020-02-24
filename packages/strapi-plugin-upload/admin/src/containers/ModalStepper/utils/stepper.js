@@ -30,6 +30,7 @@ const stepper = {
     ],
     next: null,
     prev: 'upload',
+    withBackButton: true,
   },
 };
 

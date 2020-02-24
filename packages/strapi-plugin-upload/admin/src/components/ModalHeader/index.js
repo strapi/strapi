@@ -12,13 +12,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { HeaderModalTitle } from 'strapi-helper-plugin';
 import ModalSection from '../ModalSection';
 import Text from '../Text';
+import BackHeader from './BackButton';
 import Wrapper from './Wrapper';
 
-const ModalHeader = ({ headers }) => {
+const ModalHeader = ({ goBack, headers, withBackButton }) => {
   return (
     <Wrapper>
       <ModalSection>
         <HeaderModalTitle>
+          {withBackButton && <BackHeader onClick={goBack} type="button" />}
           {headers.map(({ key, element }, index) => {
             const shouldDisplayChevron = index < headers.length - 1;
 
@@ -43,11 +45,15 @@ const ModalHeader = ({ headers }) => {
 };
 
 ModalHeader.defaultProps = {
+  goBack: () => {},
   headers: [],
+  withBackButton: false,
 };
 
 ModalHeader.propTypes = {
+  goBack: PropTypes.func,
   headers: PropTypes.array,
+  withBackButton: PropTypes.bool,
 };
 
 export default ModalHeader;
