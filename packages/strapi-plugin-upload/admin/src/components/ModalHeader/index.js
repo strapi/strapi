@@ -12,7 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { HeaderModalTitle } from 'strapi-helper-plugin';
 import ModalSection from '../ModalSection';
 import Text from '../Text';
-import BackHeader from './BackButton';
+import BackButton from './BackButton';
 import Wrapper from './Wrapper';
 
 const ModalHeader = ({ goBack, headers, withBackButton }) => {
@@ -20,7 +20,7 @@ const ModalHeader = ({ goBack, headers, withBackButton }) => {
     <Wrapper>
       <ModalSection>
         <HeaderModalTitle>
-          {withBackButton && <BackHeader onClick={goBack} type="button" />}
+          {withBackButton && <BackButton onClick={goBack} type="button" />}
           {headers.map(({ key, element }, index) => {
             const shouldDisplayChevron = index < headers.length - 1;
 
