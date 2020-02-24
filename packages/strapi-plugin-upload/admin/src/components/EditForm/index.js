@@ -2,8 +2,7 @@ import React, { useState, createRef, useEffect, useRef } from 'react';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { Inputs } from '@buffetjs/custom';
-import { Button } from '@buffetjs/core';
-import { ModalFooter, useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from 'strapi-helper-plugin';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
 import CardControl from '../CardControl';
@@ -17,11 +16,14 @@ import Wrapper from './Wrapper';
 import form from './utils/form';
 import isImageType from './utils/isImageType';
 
-const EditForm = ({ fileToEdit, onChange, onSubmitEditNewFile, onToggle }) => {
+const EditForm = ({
+  fileToEdit,
+  onChange,
+  onSubmitEditNewFile,
+  setCropResult,
+}) => {
   const { formatMessage } = useGlobalContext();
   const [isCropping, setIsCropping] = useState(false);
-  const [cropResultURL, setCropResultURL] = useState(null);
-  const [cropResultFile, setCropResultFile] = useState(null);
   const [src, setSrc] = useState(null);
 
   const mimeType = get(fileToEdit, ['file', 'type'], '');
@@ -33,7 +35,6 @@ const EditForm = ({ fileToEdit, onChange, onSubmitEditNewFile, onToggle }) => {
   useEffect(() => {
     if (canCrop) {
       // TODO: update when editing existing file
-
       const reader = new FileReader();
 
       reader.onloadend = () => {
@@ -78,14 +79,14 @@ const EditForm = ({ fileToEdit, onChange, onSubmitEditNewFile, onToggle }) => {
           file: { lastModifiedDate, lastModified, name },
         } = fileToEdit;
 
-        blob.lastModified = lastModified;
-        blob.lastModifiedDate = lastModifiedDate;
-        blob.name = name;
-
-        setCropResultFile(blob);
-      }, mimeType);
-
-      setCropResultURL(canvas.toDataURL());
+        setCropResult(
+          new File([blob], name, {
+            type: mimeType,
+            lastModified,
+            lastModifiedDate,
+          })
+        );
+      });
     }
 
     setIsCropping(false);
@@ -94,7 +95,7 @@ const EditForm = ({ fileToEdit, onChange, onSubmitEditNewFile, onToggle }) => {
   const handleSubmit = e => {
     e.preventDefault();
 
-    onSubmitEditNewFile({ file: cropResultFile || fileToEdit.file });
+    onSubmitEditNewFile(e);
   };
 
   return (
@@ -133,11 +134,7 @@ const EditForm = ({ fileToEdit, onChange, onSubmitEditNewFile, onToggle }) => {
                 </CardControlsWrapper>
 
                 {canCrop ? (
-                  <img
-                    src={cropResultURL || src}
-                    alt=""
-                    ref={isCropping ? imgRef : null}
-                  />
+                  <img src={src} alt="" ref={isCropping ? imgRef : null} />
                 ) : null}
               </FileWrapper>
             </div>
@@ -171,17 +168,10 @@ const EditForm = ({ fileToEdit, onChange, onSubmitEditNewFile, onToggle }) => {
             </div>
           </div>
         </Wrapper>
+        <button type="submit" style={{ display: 'none' }}>
+          hidden button to make to get the native form event
+        </button>
       </ModalSection>
-      <ModalFooter>
-        <section>
-          <Button type="button" color="cancel" onClick={onToggle}>
-            {formatMessage({ id: 'app.components.Button.cancel' })}
-          </Button>
-          <Button color="success" type="submit">
-            {formatMessage({ id: 'form.button.finish' })}
-          </Button>
-        </section>
-      </ModalFooter>
     </form>
   );
 };
@@ -190,14 +180,14 @@ EditForm.defaultProps = {
   fileToEdit: null,
   onChange: () => {},
   onSubmitEditNewFile: e => e.preventDefault(),
-  onToggle: () => {},
+  setCropResult: () => {},
 };
 
 EditForm.propTypes = {
   fileToEdit: PropTypes.object,
   onChange: PropTypes.func,
   onSubmitEditNewFile: PropTypes.func,
-  onToggle: PropTypes.func,
+  setCropResult: PropTypes.func,
 };
 
 export default EditForm;

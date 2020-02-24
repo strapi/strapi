@@ -25,9 +25,9 @@ const stepper = {
     //   getTrad('modal.header.file-detail'),
     // ],
     headers: [getTrad('modal.header.file-detail')],
-    next: null,
+    next: 'upload',
     prev: 'upload',
-    withoutFooter: true,
+    withBackButton: true,
   },
 };
 
