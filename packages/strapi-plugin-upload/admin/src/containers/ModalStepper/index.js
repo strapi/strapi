@@ -95,6 +95,21 @@ const ModalStepper = ({ isOpen, onToggle }) => {
     goNext();
   };
 
+  const handleToggle = () => {
+    if (filesToUploadLength > 0) {
+      // eslint-disable-next-line no-alert
+      const confirm = window.confirm(
+        formatMessage({ id: getTrad('window.confirm.close-modal') })
+      );
+
+      if (!confirm) {
+        return;
+      }
+    }
+
+    onToggle();
+  };
+
   const handleUploadFiles = async () => {
     dispatch({
       type: 'SET_FILES_UPLOADING_STATE',
@@ -166,7 +181,7 @@ const ModalStepper = ({ isOpen, onToggle }) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onToggle={onToggle} onClosed={handleClosed}>
+    <Modal isOpen={isOpen} onToggle={handleToggle} onClosed={handleClosed}>
       {/* header title */}
       <ModalHeader
         goBack={goBack}
@@ -186,7 +201,7 @@ const ModalStepper = ({ isOpen, onToggle }) => {
           onClickEditNewFile={handleGoToEditNewFile}
           onGoToAddBrowseFiles={handleGoToAddBrowseFiles}
           onSubmitEditNewFile={handleSubmitEditNewFile}
-          onToggle={onToggle}
+          onToggle={handleToggle}
           setCropResult={handleSetCropResult}
           withBackButton={withBackButton}
         />
@@ -194,7 +209,7 @@ const ModalStepper = ({ isOpen, onToggle }) => {
 
       <ModalFooter>
         <section>
-          <Button type="button" color="cancel" onClick={onToggle}>
+          <Button type="button" color="cancel" onClick={handleToggle}>
             {formatMessage({ id: 'app.components.Button.cancel' })}
           </Button>
           {currentStep === 'upload' && (

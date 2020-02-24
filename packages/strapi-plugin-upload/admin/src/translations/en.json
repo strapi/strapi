@@ -26,5 +26,6 @@
   "plugin.name": "Media Library",
   "plugin.description.long": "Media file management.",
   "plugin.description.short": "Media file management.",
-  "search.placeholder": "Search for an asset..."
+  "search.placeholder": "Search for an asset...",
+  "window.confirm.close-modal": "Are you sure? You have some files that have not been uploaded yet."
 }
