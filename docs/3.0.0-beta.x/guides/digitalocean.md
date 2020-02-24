@@ -101,4 +101,14 @@ pm2 logs strapi-develop
 
 ## Migration to Production
 
--wip-
+### Creating a Github repository
+
+### Pushing your project code
+
+### Mirroring your development environment
+
+#### Creating a new database
+
+#### Cloning your project code
+
+#### Running a production process
