@@ -244,6 +244,71 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
     });
   });
 
+  describe('ON_SUBMIT_EDIT_NEW_FILE', () => {
+    it('should update the filesToUploadList with the fileToEdit data', () => {
+      const action = {
+        type: 'ON_SUBMIT_EDIT_NEW_FILE',
+      };
+      const state = fromJS({
+        currentStep: 'edit-new',
+        filesToUpload: [
+          {
+            originalIndex: 0,
+            file: {
+              name: 'test',
+            },
+          },
+          {
+            originalIndex: 1,
+            file: {
+              test: false,
+            },
+          },
+          {
+            originalIndex: 2,
+            file: {
+              name: 'test2',
+            },
+          },
+        ],
+        fileToEdit: {
+          originalIndex: 1,
+          file: {
+            test: true,
+            otherTest: true,
+          },
+        },
+      });
+      const expected = fromJS({
+        currentStep: 'edit-new',
+        filesToUpload: [
+          {
+            originalIndex: 0,
+            file: {
+              name: 'test',
+            },
+          },
+          {
+            originalIndex: 1,
+            file: {
+              test: true,
+              otherTest: true,
+            },
+          },
+          {
+            originalIndex: 2,
+            file: {
+              name: 'test2',
+            },
+          },
+        ],
+        fileToEdit: null,
+      });
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
   describe('REMOVE_FILE_TO_UPLOAD', () => {
     it('should remove the file from the filesToUpload array', () => {
       const action = {
@@ -313,6 +378,34 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
       const expected = fromJS({
         currentStep: 'browse',
         filesToUpload: [],
+        fileToEdit: null,
+      });
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
+  describe('SET_CROP_RESULT', () => {
+    it('should update the fileToEditEntry with the passed data', () => {
+      const action = {
+        type: 'SET_CROP_RESULT',
+        blob: {
+          test: true,
+        },
+      };
+      const state = fromJS({
+        fileToEdit: {
+          originalIndex: 1,
+          file: null,
+        },
+      });
+      const expected = fromJS({
+        fileToEdit: {
+          originalIndex: 1,
+          file: {
+            test: true,
+          },
+        },
       });
 
       expect(reducer(state, action)).toEqual(expected);
@@ -382,6 +475,68 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             errorMessage: null,
             isUploading: true,
             originalIndex: 2,
+          },
+        ],
+      });
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
+  describe('SET_FILE_TO_EDIT', () => {
+    it('should set the fileToEdit key with the file at the passed index from the filesToUpload list', () => {
+      const action = {
+        type: 'SET_FILE_TO_EDIT',
+        fileIndex: 1,
+      };
+      const state = fromJS({
+        fileToEdit: null,
+        filesToUpload: [
+          {
+            originalIndex: 0,
+            file: {
+              name: 'test0',
+            },
+          },
+          {
+            originalIndex: 1,
+            file: {
+              name: 'test1',
+            },
+          },
+          {
+            originalIndex: 2,
+            file: {
+              name: 'test2',
+            },
+          },
+        ],
+      });
+      const expected = fromJS({
+        fileToEdit: {
+          originalIndex: 1,
+          file: {
+            name: 'test1',
+          },
+        },
+        filesToUpload: [
+          {
+            originalIndex: 0,
+            file: {
+              name: 'test0',
+            },
+          },
+          {
+            originalIndex: 1,
+            file: {
+              name: 'test1',
+            },
+          },
+          {
+            originalIndex: 2,
+            file: {
+              name: 'test2',
+            },
           },
         ],
       });
