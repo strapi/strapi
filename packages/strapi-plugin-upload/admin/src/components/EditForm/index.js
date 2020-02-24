@@ -141,7 +141,7 @@ const EditForm = ({
               </FileWrapper>
             </div>
             <div className="col-6">
-              <FileDetailsBox />
+              <FileDetailsBox file={fileToEdit.file} />
               <FormWrapper>
                 {form.map(({ key, inputs }) => {
                   return (

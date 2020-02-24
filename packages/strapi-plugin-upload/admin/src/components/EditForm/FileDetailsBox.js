@@ -1,14 +1,17 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import { get } from 'lodash';
 import Flex from '../Flex';
 import Text from '../Text';
 import FileDetailsBoxWrapper from './FileDetailsBoxWrapper';
+import formatBytes from './utils/formatBytes';
 
-const FileDetailsBox = () => {
+const FileDetailsBox = ({ file }) => {
   const sections = [
     {
       key: 0,
       rows: [
-        { label: 'size', value: '560MB' },
+        { label: 'size', value: formatBytes(get(file, 'size', 0), 0) },
         { label: 'date', value: '-' },
       ],
     },
@@ -57,6 +60,18 @@ const FileDetailsBox = () => {
       })}
     </FileDetailsBoxWrapper>
   );
+};
+
+FileDetailsBox.defaultProps = {
+  file: {
+    size: 0,
+  },
+};
+
+FileDetailsBox.propTypes = {
+  file: PropTypes.shape({
+    size: PropTypes.number,
+  }),
 };
 
 export default FileDetailsBox;
