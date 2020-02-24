@@ -10,7 +10,7 @@ import colors from '../../assets/styles/colors';
 import sizes from '../../assets/styles/sizes';
 
 const FooterModal = styled.div`
-  padding-top: ${sizes.margin * 0.9}px;
+  padding-top: ${sizes.margin * 0.8}px;
   section {
     display: flex;
     height: 73px;

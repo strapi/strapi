@@ -130,12 +130,7 @@ class InputAddonWithErrors extends React.Component {
         <InputDescription
           className={inputDescriptionClassName}
           message={inputDescription}
-          style={{
-            marginTop: '1.1rem',
-            marginBottom: '0.3rem',
-            lineHeight: 'normal',
-            ...inputDescriptionStyle,
-          }}
+          style={inputDescriptionStyle}
         />
         <InputErrors
           className={errorsClassName}

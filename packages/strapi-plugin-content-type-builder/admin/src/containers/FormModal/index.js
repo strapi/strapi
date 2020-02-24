@@ -1256,7 +1256,6 @@ const FormModal = () => {
                                 type="string"
                                 onChange={handleChange}
                                 value={value}
-                                style={{ marginBottom: 11 }}
                               />
                             );
                           }
