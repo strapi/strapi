@@ -391,18 +391,15 @@ const reducer = (state, action) => {
         }
       }
 
-      const attributes = state.getIn(['modifiedData', mainDataKey, 'schema', 'attributes']).toJS();
-      const uidField = Object.entries(attributes).find(
-        ([, value]) => attributeToRemoveName === value.targetField
-      );
+      return state.removeIn(pathToAttributeToRemove).updateIn([...pathToAttributes], attributes => {
+        return attributes.keySeq().reduce((acc, current) => {
+          if (acc.getIn([current, 'targetField']) === attributeToRemoveName) {
+            return acc.removeIn([current, 'targetField']);
+          }
 
-      if (uidField) {
-        return state
-          .removeIn(pathToAttributeToRemove)
-          .removeIn([...pathToAttributes, uidField[0], 'targetField']);
-      }
-
-      return state.removeIn(pathToAttributeToRemove);
+          return acc;
+        }, attributes);
+      });
     }
     case 'SET_MODIFIED_DATA': {
       let newState = state
