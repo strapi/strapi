@@ -1147,7 +1147,7 @@ const FormModal = () => {
                                   lineHeight: 'normal',
                                   fontWeight: 500,
                                 }}
-                                key="divider"
+                                key={`${index}.${i}`}
                               >
                                 <Label htmlFor="divider-no-for">
                                   <FormattedMessage
@@ -1162,16 +1162,31 @@ const FormModal = () => {
 
                           // The spacer type is used mainly to align the icon picker...
                           if (input.type === 'spacer') {
-                            return <div key="spacer" style={{ height: 8 }} />;
+                            return (
+                              <div
+                                key={`${index}.${i}`}
+                                style={{ height: 8 }}
+                              />
+                            );
                           }
 
                           // The spacer type is used mainly to align the icon picker...
                           if (input.type === 'spacer-small') {
-                            return <div key="spacer" style={{ height: 4 }} />;
+                            return (
+                              <div
+                                key={`${index}.${i}`}
+                                style={{ height: 4 }}
+                              />
+                            );
                           }
 
                           if (input.type === 'spacer-medium') {
-                            return <div key="spacer" style={{ height: 8 }} />;
+                            return (
+                              <div
+                                key={`${index}.${i}`}
+                                style={{ height: 8 }}
+                              />
+                            );
                           }
 
                           // This type is used in the addComponentToDynamicZone modal when selecting the option add an existing component
@@ -1188,7 +1203,7 @@ const FormModal = () => {
                           if (input.type === 'relation') {
                             return (
                               <RelationForm
-                                key="relation"
+                                key={`${index}.${i}`}
                                 mainBoxHeader={get(headers, [0, 'label'], '')}
                                 modifiedData={modifiedData}
                                 naturePickerType={state.forTarget}
