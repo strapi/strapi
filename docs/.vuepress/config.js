@@ -197,6 +197,7 @@ module.exports = {
             '/3.0.0-beta.x/guides/update-version',
             '/3.0.0-beta.x/guides/databases',
             '/3.0.0-beta.x/guides/deployment',
+            '/3.0.0-beta.x/guides/digitalocean',
             '/3.0.0-beta.x/guides/process-manager',
             '/3.0.0-beta.x/guides/jwt-validation',
             '/3.0.0-beta.x/guides/api-token',
