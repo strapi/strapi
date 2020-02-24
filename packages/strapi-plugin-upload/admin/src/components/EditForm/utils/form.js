@@ -16,7 +16,7 @@ const form = [
     key: 2,
     inputs: [
       {
-        description: { id: getTrad('form.input.label.file-alt') },
+        description: { id: getTrad('form.input.decription.file-alt') },
         label: { id: getTrad('form.input.label.file-alt') },
         name: 'alt',
         value: '',

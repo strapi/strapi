@@ -27,13 +27,15 @@ const EditForm = ({
   const [src, setSrc] = useState(null);
 
   const mimeType = get(fileToEdit, ['file', 'type'], '');
-  const canCrop = isImageType(mimeType);
+  const isImg = isImageType(mimeType);
+  // TODO
+  const canCrop = isImg && !mimeType.includes('svg');
 
   const imgRef = createRef();
   let cropper = useRef();
 
   useEffect(() => {
-    if (canCrop) {
+    if (isImg) {
       // TODO: update when editing existing file
       const reader = new FileReader();
 
@@ -43,7 +45,7 @@ const EditForm = ({
 
       reader.readAsDataURL(fileToEdit.file);
     }
-  }, [canCrop, fileToEdit]);
+  }, [isImg, fileToEdit]);
 
   useEffect(() => {
     if (isCropping) {
@@ -133,7 +135,7 @@ const EditForm = ({
                   )}
                 </CardControlsWrapper>
 
-                {canCrop ? (
+                {isImg ? (
                   <img src={src} alt="" ref={isCropping ? imgRef : null} />
                 ) : null}
               </FileWrapper>
