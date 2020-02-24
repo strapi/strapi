@@ -28,6 +28,7 @@
   "attribute.text.description": "Small or long text like title or description",
   "attribute.text": "Text",
   "attribute.time": "Time",
+  "attribute.timestamp": "Timestamp",
   "attribute.uid.description": "Unique identifier",
   "attribute.uid": "Uid",
   "button.attributes.add.another": "Add another field",
