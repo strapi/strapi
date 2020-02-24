@@ -257,8 +257,9 @@ const ListView = () => {
   };
   const goToCMSettingsPage = () => {
     const endPoint = isInContentTypeView
-      ? `/plugins/content-manager/${targetUid}/ctm-configurations/edit-settings/content-types`
+      ? `/plugins/content-manager/${contentTypeKind}/${targetUid}/ctm-configurations/edit-settings/content-types`
       : `/plugins/content-manager/ctm-configurations/edit-settings/components/${targetUid}/`;
+
     push(endPoint);
   };
 
