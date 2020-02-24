@@ -2,7 +2,8 @@ import React, { useState, createRef, useEffect, useRef } from 'react';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { Inputs } from '@buffetjs/custom';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { Button } from '@buffetjs/core';
+import { ModalFooter, useGlobalContext } from 'strapi-helper-plugin';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
 import CardControl from '../CardControl';
@@ -10,21 +11,38 @@ import CardControlsWrapper from '../CardControlsWrapper';
 import ModalSection from '../ModalSection';
 import FileDetailsBox from './FileDetailsBox';
 import FileWrapper from './FileWrapper';
-import Form from './Form';
+import FormWrapper from './FormWrapper';
 import Row from './Row';
 import Wrapper from './Wrapper';
 import form from './utils/form';
 import isImageType from './utils/isImageType';
 
-const EditForm = ({ fileToEdit, onChange, onSubmit, ...rest }) => {
+const EditForm = ({ fileToEdit, onChange, onSubmitEditNewFile, onToggle }) => {
   const { formatMessage } = useGlobalContext();
   const [isCropping, setIsCropping] = useState(false);
-  const [cropResult, setCropResult] = useState(null);
-  const canCrop = isImageType(get(fileToEdit, 'file', null));
-  console.log(rest);
+  const [cropResultURL, setCropResultURL] = useState(null);
+  const [cropResultFile, setCropResultFile] = useState(null);
+  const [src, setSrc] = useState(null);
+
+  const mimeType = get(fileToEdit, ['file', 'type'], '');
+  const canCrop = isImageType(mimeType);
 
   const imgRef = createRef();
   let cropper = useRef();
+
+  useEffect(() => {
+    if (canCrop) {
+      // TODO: update when editing existing file
+
+      const reader = new FileReader();
+
+      reader.onloadend = () => {
+        setSrc(reader.result);
+      };
+
+      reader.readAsDataURL(fileToEdit.file);
+    }
+  }, [canCrop, fileToEdit]);
 
   useEffect(() => {
     if (isCropping) {
@@ -55,103 +73,131 @@ const EditForm = ({ fileToEdit, onChange, onSubmit, ...rest }) => {
   const handleClick = () => {
     if (cropper) {
       const canvas = cropper.current.getCroppedCanvas();
+      canvas.toBlob(blob => {
+        const {
+          file: { lastModifiedDate, lastModified, name },
+        } = fileToEdit;
 
-      setCropResult(canvas.toDataURL());
+        blob.lastModified = lastModified;
+        blob.lastModifiedDate = lastModifiedDate;
+        blob.name = name;
+
+        setCropResultFile(blob);
+      }, mimeType);
+
+      setCropResultURL(canvas.toDataURL());
     }
 
     setIsCropping(false);
   };
 
+  const handleSubmit = e => {
+    e.preventDefault();
+
+    onSubmitEditNewFile({ file: cropResultFile || fileToEdit.file });
+  };
+
   return (
-    <ModalSection>
-      <Wrapper>
-        <div className="row">
-          <div className="col-6">
-            <FileWrapper>
-              <CardControlsWrapper className="card-control-wrapper">
-                {!isCropping ? (
-                  <>
-                    <CardControl color="#9EA7B8" type="trash" />
-                    {canCrop && (
+    <form onSubmit={handleSubmit}>
+      <ModalSection>
+        <Wrapper>
+          <div className="row">
+            <div className="col-6">
+              <FileWrapper>
+                <CardControlsWrapper className="card-control-wrapper">
+                  {!isCropping ? (
+                    <>
+                      <CardControl color="#9EA7B8" type="trash" />
+                      {canCrop && (
+                        <CardControl
+                          type="crop"
+                          color="#9EA7B8"
+                          onClick={handleToggleCropMode}
+                        />
+                      )}
+                    </>
+                  ) : (
+                    <>
                       <CardControl
-                        type="crop"
-                        color="#9EA7B8"
+                        type="clear"
+                        color="#F64D0A"
                         onClick={handleToggleCropMode}
                       />
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <CardControl
-                      type="clear"
-                      color="#F64D0A"
-                      onClick={handleToggleCropMode}
-                    />
-                    <CardControl
-                      type="check"
-                      color="#6DBB1A"
-                      onClick={handleClick}
-                    />
-                  </>
-                )}
-              </CardControlsWrapper>
+                      <CardControl
+                        type="check"
+                        color="#6DBB1A"
+                        onClick={handleClick}
+                      />
+                    </>
+                  )}
+                </CardControlsWrapper>
 
-              {canCrop ? (
-                <img
-                  src={
-                    cropResult ||
-                    'https://images.unsplash.com/photo-1558980664-ce6960be307d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80'
-                  }
-                  alt=""
-                  ref={isCropping ? imgRef : null}
-                />
-              ) : null}
-            </FileWrapper>
+                {canCrop ? (
+                  <img
+                    src={cropResultURL || src}
+                    alt=""
+                    ref={isCropping ? imgRef : null}
+                  />
+                ) : null}
+              </FileWrapper>
+            </div>
+            <div className="col-6">
+              <FileDetailsBox />
+              <FormWrapper>
+                {form.map(({ key, inputs }) => {
+                  return (
+                    <Row key={key}>
+                      {inputs.map(input => {
+                        return (
+                          <div className="col-12" key={input.name}>
+                            <Inputs
+                              type="text"
+                              onChange={onChange}
+                              {...input}
+                              label={formatMessage(input.label)}
+                              description={
+                                input.description
+                                  ? formatMessage(input.description)
+                                  : null
+                              }
+                            />
+                          </div>
+                        );
+                      })}
+                    </Row>
+                  );
+                })}
+              </FormWrapper>
+            </div>
           </div>
-          <div className="col-6">
-            <FileDetailsBox />
-            <Form onSubmit={onSubmit}>
-              {form.map(({ key, inputs }) => {
-                return (
-                  <Row key={key}>
-                    {inputs.map(input => {
-                      return (
-                        <div className="col-12" key={input.name}>
-                          <Inputs
-                            type="text"
-                            onChange={onChange}
-                            {...input}
-                            label={formatMessage(input.label)}
-                            description={
-                              input.description
-                                ? formatMessage(input.description)
-                                : null
-                            }
-                          />
-                        </div>
-                      );
-                    })}
-                  </Row>
-                );
-              })}
-            </Form>
-          </div>
-        </div>
-      </Wrapper>
-    </ModalSection>
+        </Wrapper>
+      </ModalSection>
+      <ModalFooter>
+        <section>
+          <Button type="button" color="cancel" onClick={onToggle}>
+            {formatMessage({ id: 'app.components.Button.cancel' })}
+          </Button>
+          <Button color="success" type="submit">
+            {formatMessage({ id: 'form.button.finish' })}
+          </Button>
+        </section>
+      </ModalFooter>
+    </form>
   );
 };
 
 EditForm.defaultProps = {
   fileToEdit: null,
   onChange: () => {},
-  onSubmit: e => e.preventDefault(),
+  onSubmitEditNewFile: e => e.preventDefault(),
+  onToggle: () => {},
 };
 
 EditForm.propTypes = {
   fileToEdit: PropTypes.object,
   onChange: PropTypes.func,
-  onSubmit: PropTypes.func,
+  onSubmitEditNewFile: PropTypes.func,
+  onToggle: PropTypes.func,
 };
 
 export default EditForm;

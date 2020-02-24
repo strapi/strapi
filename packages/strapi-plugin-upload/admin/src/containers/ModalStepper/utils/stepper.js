@@ -24,13 +24,10 @@ const stepper = {
     //   getTrad('modal.header.select-files'),
     //   getTrad('modal.header.file-detail'),
     // ],
-    headers: [
-      // getTrad('modal.header.select-files'),
-      getTrad('modal.header.file-detail'),
-    ],
+    headers: [getTrad('modal.header.file-detail')],
     next: null,
     prev: 'upload',
-    withBackButton: true,
+    withoutFooter: true,
   },
 };
 
