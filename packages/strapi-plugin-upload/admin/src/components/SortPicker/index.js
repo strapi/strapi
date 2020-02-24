@@ -4,6 +4,8 @@ import { FormattedMessage } from 'react-intl';
 
 import getTrad from '../../utils/getTrad';
 
+import Carret from '../../icons/Carret';
+
 import DropdownButton from '../DropdownButton';
 import DropdownSection from '../DropdownSection';
 import Wrapper from './Wrapper';
@@ -36,6 +38,7 @@ const SortPicker = ({ onChange, value }) => {
     <Wrapper>
       <DropdownButton onClick={hangleToggle} isActive={isOpen}>
         <FormattedMessage id={getTrad('sort.label')} />
+        <Carret isUp={!isOpen} />
       </DropdownButton>
       <DropdownSection isOpen={isOpen}>
         <SortList>
