@@ -255,7 +255,7 @@ export default strapi => {
           to: `${strapi.settingsBaseURL}/setting-link-1`,
           name: 'settingLink1',
           Component: SettingLink,
-          // True or false
+          // Bool : https://reacttraining.com/react-router/web/api/Route/exact-bool
           exact: false,
         },
       ],
