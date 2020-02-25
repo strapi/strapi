@@ -20,6 +20,7 @@ import isImageType from './utils/isImageType';
 const EditForm = ({
   fileToEdit,
   onChange,
+  onClickDeleteFileToUpload,
   onSubmitEditNewFile,
   setCropResult,
 }) => {
@@ -123,6 +124,10 @@ const EditForm = ({
     setIsCropping(false);
   };
 
+  const handleClickDelete = () => {
+    onClickDeleteFileToUpload(fileToEdit.originalIndex);
+  };
+
   const handleSubmit = e => {
     e.preventDefault();
 
@@ -139,7 +144,11 @@ const EditForm = ({
                 <CardControlsWrapper className="card-control-wrapper">
                   {!isCropping ? (
                     <>
-                      <CardControl color="#9EA7B8" type="trash-alt" />
+                      <CardControl
+                        color="#9EA7B8"
+                        type="trash-alt"
+                        onClick={handleClickDelete}
+                      />
                       {canCrop && (
                         <CardControl
                           type="crop"
@@ -234,6 +243,7 @@ const EditForm = ({
 EditForm.defaultProps = {
   fileToEdit: null,
   onChange: () => {},
+  onClickDeleteFileToUpload: () => {},
   onSubmitEditNewFile: e => e.preventDefault(),
   setCropResult: () => {},
 };
@@ -241,6 +251,7 @@ EditForm.defaultProps = {
 EditForm.propTypes = {
   fileToEdit: PropTypes.object,
   onChange: PropTypes.func,
+  onClickDeleteFileToUpload: PropTypes.func,
   onSubmitEditNewFile: PropTypes.func,
   setCropResult: PropTypes.func,
 };

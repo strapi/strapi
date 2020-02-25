@@ -55,6 +55,21 @@ const ModalStepper = ({ isOpen, onToggle }) => {
     });
   };
 
+  const handleClickDeleteFileToUpload = fileIndex => {
+    dispatch({
+      type: 'REMOVE_FILE_TO_UPLOAD',
+      fileIndex,
+    });
+
+    if (currentStep === 'edit-new') {
+      dispatch({
+        type: 'RESET_FILE_TO_EDIT',
+      });
+
+      goNext();
+    }
+  };
+
   const handleClosed = () => {
     dispatch({
       type: 'RESET_PROPS',
@@ -198,6 +213,7 @@ const ModalStepper = ({ isOpen, onToggle }) => {
           fileToEdit={fileToEdit}
           filesToUpload={filesToUpload}
           onClickCancelUpload={handleCancelFileToUpload}
+          onClickDeleteFileToUpload={handleClickDeleteFileToUpload}
           onClickEditNewFile={handleGoToEditNewFile}
           onGoToAddBrowseFiles={handleGoToAddBrowseFiles}
           onSubmitEditNewFile={handleSubmitEditNewFile}

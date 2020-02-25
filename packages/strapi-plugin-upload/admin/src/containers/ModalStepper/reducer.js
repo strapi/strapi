@@ -40,6 +40,8 @@ const reducer = (state, action) => {
           data => data.get('originalIndex') !== action.fileIndex
         );
       });
+    case 'RESET_FILE_TO_EDIT':
+      return state.update('fileToEdit', () => null);
     case 'RESET_PROPS':
       return initialState;
     case 'SET_CROP_RESULT': {
