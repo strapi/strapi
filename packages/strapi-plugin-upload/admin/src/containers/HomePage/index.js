@@ -59,22 +59,14 @@ const HomePage = () => {
     return queryParams[key];
   };
 
-  const handleChangeParams = ({ name, value }) => {
+  const handleChangeParams = ({ target: { name, value } }) => {
     const updatedSearch = getUpdatedSearchParams({ [name]: value });
     const newSearch = generateSearchFromFilters(updatedSearch);
     push({ search: newSearch });
   };
 
-  const handleChangeSearch = ({ target: { value } }) => {
-    handleChangeParams({ name: '_q', value });
-  };
-
-  const handleChangeSort = ({ target: { value } }) => {
-    handleChangeParams({ name: '_sort', value });
-  };
-
   const handleClearSearch = () => {
-    handleChangeSearch({ target: { value: '' } });
+    handleChangeParams({ target: { name: '_q', value: '' } });
   };
 
   const handleClickToggleModal = () => {
@@ -116,16 +108,17 @@ const HomePage = () => {
       <Header {...headerProps} />
       <HeaderSearch
         label={pluginName}
-        onChange={handleChangeSearch}
+        onChange={handleChangeParams}
         onClear={handleClearSearch}
         placeholder={formatMessage({ id: getTrad('search.placeholder') })}
+        name="_q"
         value={getQueryValue('_q') || ''}
       />
 
       <ControlsWrapper>
         <SelectAll />
         <SortPicker
-          onChange={handleChangeSort}
+          onChange={handleChangeParams}
           value={getQueryValue('_sort') || null}
         />
         <AddFilterCTA />
