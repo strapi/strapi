@@ -15,7 +15,6 @@ const sizes = {
     // TODO
     md: '30px',
   },
-  borderRadius: '2px',
 };
 
 export default sizes;
