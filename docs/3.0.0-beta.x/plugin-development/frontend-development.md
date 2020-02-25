@@ -291,3 +291,12 @@ class Foo extends React.Component {
   }
 }
 ```
+### Backend requests
+When making requests as admin to plugin routes the authorization token needs to be included. The easiest way to accomplish this is to use _request_ method from _strapi-helper-plugin_ package.
+
+```js
+import { request } from 'strapi-helper-plugin';
+...
+const result = await request(url, { method: "GET" });
+```
+This method wraps the _fetch_ method from [whatwg-fetch](https://www.npmjs.com/package/whatwg-fetch) and populates some basic options automatically, including the authorization header. For more details inspect the [source code](https://github.com/strapi/strapi/blob/master/packages/strapi-helper-plugin/lib/src/utils/request.js) of the _request_ method.
