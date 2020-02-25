@@ -50,7 +50,7 @@ module.exports = {
             : '',
         buffer,
         mime: stream.type,
-        size: parseFloat((stream.size / 1000).toFixed(2)),
+        size: (stream.size / 1000).toFixed(2),
       };
     };
 
