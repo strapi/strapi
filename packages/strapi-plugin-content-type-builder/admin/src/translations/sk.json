@@ -28,7 +28,7 @@
   "attribute.text": "Text",
   "attribute.text.description": "Krátky alebo dlhší text",
   "attribute.time": "Čas",
-  "attribute.uid": "Uuid",
+  "attribute.uid": "Uid",
   "attribute.uid.description": "Unikátny identifikátor",
   "button.attributes.add.another": "Pridať ďalšie políčko",
   "button.component.add": "Pridať komponent",

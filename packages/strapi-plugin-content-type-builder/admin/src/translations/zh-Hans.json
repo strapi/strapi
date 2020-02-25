@@ -28,7 +28,7 @@
   "attribute.text": "文本",
   "attribute.text.description": "较短或较长的文字，例如标题或说明",
   "attribute.time": "时间",
-  "attribute.uid": "Uuid",
+  "attribute.uid": "Uid",
   "attribute.uid.description": "唯一标识符",
   "button.attributes.add.another": "添加一个新字段",
   "button.component.add": "添加组件",
