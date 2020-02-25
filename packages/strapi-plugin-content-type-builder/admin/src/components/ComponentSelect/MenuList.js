@@ -2,8 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { components } from 'react-select';
 import { upperFirst } from 'lodash';
+import { useQuery } from 'strapi-helper-plugin';
 import useDataManager from '../../hooks/useDataManager';
-import useQuery from '../../hooks/useQuery';
 import Category from './Category';
 import Ul from './Ul';
 

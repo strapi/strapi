@@ -6,9 +6,9 @@ const SortButton = styled.button`
   height: 32px;
   padding: 0 10px;
   line-height: 30px;
-  background-color: ${({ theme }) => theme.main.colors.filters.background};
-  border: 1px solid ${({ theme }) => theme.main.colors.filters.border};
-  color: ${({ theme }) => theme.main.colors.filters.color};
+  background-color: ${({ theme }) => theme.main.colors.white};
+  border: 1px solid ${({ theme }) => theme.main.colors.darkGrey};
+  color: ${({ theme }) => theme.main.colors.greyDark};
   font-weight: ${({ theme }) => theme.main.fontWeights.semiBold};
   font-size: ${({ theme }) => theme.main.fontSizes.md};
   border-radius: ${({ theme }) => theme.main.sizes.borderRadius};
@@ -20,13 +20,13 @@ const SortButton = styled.button`
   ${({ isActive, theme }) =>
     isActive
       ? `
-      background-color: ${theme.main.colors.filters.button.active.background};
-      border: 1px solid ${theme.main.colors.filters.button.active.border};
-      color: ${theme.main.colors.filters.button.active.color};
+      background-color: ${theme.main.colors.lightBlue};
+      border: 1px solid ${theme.main.colors.darkBlue};
+      color: ${theme.main.colors.mediumBlue};
     `
       : `
       &:hover {
-        background-color: ${theme.main.colors.filters.button.hover.background};
+        background-color: ${theme.main.colors.lightestGrey};
       }
     `}
 `;

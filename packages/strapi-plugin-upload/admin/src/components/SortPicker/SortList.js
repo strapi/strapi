@@ -13,9 +13,9 @@ const SortList = styled.ul`
   z-index: 1;
   list-style-type: none;
   font-size: ${({ theme }) => theme.main.fontSizes.md};
-  background-color: ${({ theme }) => theme.main.colors.filters.background};
-  border: 1px solid ${({ theme }) => theme.main.colors.filters.border};
-  box-shadow: 0 2px 4px ${({ theme }) => theme.main.colors.filters.shadow};
+  background-color: ${({ theme }) => theme.main.colors.white};
+  border: 1px solid ${({ theme }) => theme.main.colors.darkGrey};
+  box-shadow: 0 2px 4px ${({ theme }) => theme.main.colors.greyAlpha};
   ${({ isOpen }) => isOpen && 'display: block;'}
 `;
 
