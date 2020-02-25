@@ -1,8 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Label } from '@buffetjs/core';
 import { useGlobalContext } from 'strapi-helper-plugin';
-import Div from './Div';
+import CustomLabel from './Label';
 import Enumeration from './Enumeration';
 import EnumerationWrapper from './EnumerationWrapper';
 import Wrapper from './Wrapper';
@@ -11,8 +10,8 @@ const BooleanBox = ({ label, name, onChange, options, value }) => {
   const { formatMessage } = useGlobalContext();
 
   return (
-    <Div>
-      <Label htmlFor={name}>{label}</Label>
+    <div>
+      <CustomLabel htmlFor={name}>{label}</CustomLabel>
       <Wrapper>
         {options.map(option => {
           return (
@@ -44,7 +43,7 @@ const BooleanBox = ({ label, name, onChange, options, value }) => {
           );
         })}
       </Wrapper>
-    </Div>
+    </div>
   );
 };
 

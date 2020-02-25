@@ -207,7 +207,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
 
 .c2 tbody td {
   height: 54px;
-  padding-bottom: 3px;
+  padding-top: 3px;
 }
 
 .c2 tbody td input[type='checkbox']:disabled:before {
@@ -224,7 +224,6 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
   width: -webkit-fit-content;
   width: -moz-fit-content;
   width: fit-content;
-  margin-top: -1px;
   font-weight: 500;
   cursor: pointer;
 }
@@ -239,7 +238,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
 
 .c0 {
   position: relative;
-  padding-bottom: 23px;
+  padding-bottom: 27px;
 }
 
 .c0 label {
@@ -717,7 +716,7 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
 
 .c0 {
   position: relative;
-  padding-bottom: 23px;
+  padding-bottom: 27px;
 }
 
 .c0 label {

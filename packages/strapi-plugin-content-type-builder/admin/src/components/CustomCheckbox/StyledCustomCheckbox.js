@@ -30,6 +30,7 @@ const StyledCustomCheckbox = styled.div`
     }
   }
   .no-label {
+    margin-top: -25px;
     label {
       display: none;
     }
