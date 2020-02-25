@@ -5,6 +5,7 @@ import {
   HeaderSearch,
   PageFooter,
   useGlobalContext,
+  generateFiltersFromSearch,
   generateSearchFromFilters,
 } from 'strapi-helper-plugin';
 import useQuery from '../../hooks/useQuery';
@@ -59,6 +60,10 @@ const HomePage = () => {
       ...getSearchParams(),
       ...updatedParams,
     };
+  };
+
+  const handleChangeFilters = () => {
+    console.log('change filter');
   };
 
   const handleChangeListParams = ({ target: { name, value } }) => {
@@ -151,8 +156,8 @@ const HomePage = () => {
       <ControlsWrapper>
         <SelectAll />
         <SortPicker onChange={handleChangeSort} value={_sort} />
-        <FiltersPicker />
-        <FiltersList />
+        <FiltersPicker onChange={handleChangeFilters} />
+        <FiltersList filters={generateFiltersFromSearch(search)} />
       </ControlsWrapper>
       <ListEmpty onClick={handleClickToggleModal} />
       {/* <List data={data} /> */}

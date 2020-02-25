@@ -20,11 +20,6 @@ const styles = {
     marginLeft: '10px',
     marginRight: '10px',
   },
-  input: {
-    width: '210px',
-    marginRight: '10px',
-    paddingTop: '4px',
-  },
 };
 
 function FilterPickerOption({

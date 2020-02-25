@@ -1,31 +1,34 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { Remove } from '@buffetjs/icons';
-
-import FiltersListItem from './FiltersListItem';
+import { FilterButton } from 'strapi-helper-plugin';
 
 const FiltersList = ({ filters, onDelete }) => {
   return filters.map((filter, index) => {
     return (
-      <FiltersListItem key={filter}>
-        <span>{filter}</span>
-        <button type="button" onClick={() => onDelete(index)}>
-          <Remove width="11px" height="11px" fill="#007eff" />
-        </button>
-      </FiltersListItem>
+      <FilterButton
+        onClick={onDelete(index)}
+        key={JSON.stringify(filter)}
+        label={filter}
+      />
     );
   });
 };
 
 FiltersList.defaultProps = {
   onDelete: () => {},
-  filters: ['created_at is 0-01-22 00:00:00'],
+  filters: [],
 };
 
 FiltersList.propTypes = {
   onDelete: PropTypes.func,
-  filters: PropTypes.array,
+  filters: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      filter: PropTypes.string.isRequired,
+      value: PropTypes.string.isRequired,
+    })
+  ),
 };
 
 export default FiltersList;

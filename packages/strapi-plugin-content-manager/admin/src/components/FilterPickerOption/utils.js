@@ -6,44 +6,43 @@ const getFilters = type => {
     case 'email':
       return [
         {
-          id: 'content-manager.components.FilterOptions.FILTER_TYPES.=',
+          id: 'components.FilterOptions.FILTER_TYPES.=',
           value: '=',
         },
         {
-          id: 'content-manager.components.FilterOptions.FILTER_TYPES._ne',
+          id: 'components.FilterOptions.FILTER_TYPES._ne',
           value: '_ne',
         },
         {
-          id: 'content-manager.components.FilterOptions.FILTER_TYPES._lt',
+          id: 'components.FilterOptions.FILTER_TYPES._lt',
           value: '_lt',
         },
         {
-          id: 'content-manager.components.FilterOptions.FILTER_TYPES._lte',
+          id: 'components.FilterOptions.FILTER_TYPES._lte',
           value: '_lte',
         },
         {
-          id: 'content-manager.components.FilterOptions.FILTER_TYPES._gt',
+          id: 'components.FilterOptions.FILTER_TYPES._gt',
           value: '_gt',
         },
         {
-          id: 'content-manager.components.FilterOptions.FILTER_TYPES._gte',
+          id: 'components.FilterOptions.FILTER_TYPES._gte',
           value: '_gte',
         },
         {
-          id: 'content-manager.components.FilterOptions.FILTER_TYPES._contains',
+          id: 'components.FilterOptions.FILTER_TYPES._contains',
           value: '_contains',
         },
         {
-          id:
-            'content-manager.components.FilterOptions.FILTER_TYPES._containss',
+          id: 'components.FilterOptions.FILTER_TYPES._containss',
           value: '_containss',
         },
         {
-          id: 'content-manager.components.FilterOptions.FILTER_TYPES._in',
+          id: 'components.FilterOptions.FILTER_TYPES._in',
           value: '_in',
         },
         {
-          id: 'content-manager.components.FilterOptions.FILTER_TYPES._nin',
+          id: 'components.FilterOptions.FILTER_TYPES._nin',
           value: '_nin',
         },
       ];
@@ -58,48 +57,48 @@ const getFilters = type => {
     case 'timestampUpdate':
       return [
         {
-          id: 'content-manager.components.FilterOptions.FILTER_TYPES.=',
+          id: 'components.FilterOptions.FILTER_TYPES.=',
           value: '=',
         },
         {
-          id: 'content-manager.components.FilterOptions.FILTER_TYPES._ne',
+          id: 'components.FilterOptions.FILTER_TYPES._ne',
           value: '_ne',
         },
         {
-          id: 'content-manager.components.FilterOptions.FILTER_TYPES._lt',
+          id: 'components.FilterOptions.FILTER_TYPES._lt',
           value: '_lt',
         },
         {
-          id: 'content-manager.components.FilterOptions.FILTER_TYPES._lte',
+          id: 'components.FilterOptions.FILTER_TYPES._lte',
           value: '_lte',
         },
         {
-          id: 'content-manager.components.FilterOptions.FILTER_TYPES._gt',
+          id: 'components.FilterOptions.FILTER_TYPES._gt',
           value: '_gt',
         },
         {
-          id: 'content-manager.components.FilterOptions.FILTER_TYPES._gte',
+          id: 'components.FilterOptions.FILTER_TYPES._gte',
           value: '_gte',
         },
         // FIXME: commenting these filters as I am not sure if the UI
         // corresponds to the filter
         // {
-        //   id: 'content-manager.components.FilterOptions.FILTER_TYPES._in',
+        //   id: 'components.FilterOptions.FILTER_TYPES._in',
         //   value: '_in',
         // },
         // {
-        //   id: 'content-manager.components.FilterOptions.FILTER_TYPES._nin',
+        //   id: 'components.FilterOptions.FILTER_TYPES._nin',
         //   value: '_nin',
         // },
       ];
     default:
       return [
         {
-          id: 'content-manager.components.FilterOptions.FILTER_TYPES.=',
+          id: 'components.FilterOptions.FILTER_TYPES.=',
           value: '=',
         },
         {
-          id: 'content-manager.components.FilterOptions.FILTER_TYPES._ne',
+          id: 'components.FilterOptions.FILTER_TYPES._ne',
           value: '_ne',
         },
       ];
