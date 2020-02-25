@@ -4,6 +4,7 @@ import createNewFilesToUploadArray from './utils/createNewFilesToUploadArray';
 const initialState = fromJS({
   currentStep: 'browse',
   filesToUpload: [],
+  fileToEdit: null,
 });
 
 const reducer = (state, action) => {
@@ -24,14 +25,28 @@ const reducer = (state, action) => {
       );
     case 'GO_TO':
       return state.update('currentStep', () => action.to);
+    case 'ON_SUBMIT_EDIT_NEW_FILE': {
+      const originalIndex = state.getIn(['fileToEdit', 'originalIndex']);
+
+      return state
+        .updateIn(['filesToUpload', originalIndex], () =>
+          state.get('fileToEdit')
+        )
+        .update('fileToEdit', () => null);
+    }
     case 'REMOVE_FILE_TO_UPLOAD':
       return state.update('filesToUpload', list => {
         return list.filter(
           data => data.get('originalIndex') !== action.fileIndex
         );
       });
+    case 'RESET_FILE_TO_EDIT':
+      return state.update('fileToEdit', () => null);
     case 'RESET_PROPS':
       return initialState;
+    case 'SET_CROP_RESULT': {
+      return state.updateIn(['fileToEdit', 'file'], () => fromJS(action.blob));
+    }
     case 'SET_FILE_ERROR':
       return state.update('filesToUpload', list => {
         return list.map(data => {
@@ -45,6 +60,10 @@ const reducer = (state, action) => {
           return data;
         });
       });
+    case 'SET_FILE_TO_EDIT':
+      return state.update('fileToEdit', () =>
+        state.getIn(['filesToUpload', action.fileIndex])
+      );
     case 'SET_FILES_UPLOADING_STATE':
       return state.update('filesToUpload', list =>
         list.map(data =>
