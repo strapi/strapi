@@ -11,7 +11,6 @@ const form = [
       },
     ],
   },
-
   {
     key: 2,
     inputs: [

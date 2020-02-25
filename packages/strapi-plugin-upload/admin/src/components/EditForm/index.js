@@ -139,7 +139,7 @@ const EditForm = ({
                 <CardControlsWrapper className="card-control-wrapper">
                   {!isCropping ? (
                     <>
-                      <CardControl color="#9EA7B8" type="trash" />
+                      <CardControl color="#9EA7B8" type="trash-alt" />
                       {canCrop && (
                         <CardControl
                           type="crop"
@@ -166,7 +166,11 @@ const EditForm = ({
 
                 {isImg ? (
                   <>
-                    <img src={src} alt="" ref={isCropping ? imgRef : null} />
+                    <img
+                      src={src}
+                      alt={get(fileToEdit, ['file', 'name'], '')}
+                      ref={isCropping ? imgRef : null}
+                    />
                     {isCropping && (
                       <Text
                         fontSize="md"
