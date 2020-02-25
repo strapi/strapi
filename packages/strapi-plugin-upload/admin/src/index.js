@@ -1,6 +1,7 @@
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import App from './containers/App';
+
 import trads from './translations';
 import pluginId from './pluginId';
 import getTrad from './utils/getTrad';

@@ -1,5 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import CardControl from '../CardControl';
+import CardControlsWrapper from '../CardControlsWrapper';
 import CardImgWrapper from '../CardImgWrapper';
 import InfiniteLoadingIndicator from '../InfiniteLoadingIndicator';
 
@@ -9,10 +11,15 @@ const RowItem = ({
   errorMessage,
   isUploading,
   onClick,
+  onClickEdit,
   originalIndex,
 }) => {
   const handleClick = () => {
     onClick(originalIndex);
+  };
+
+  const handleClickEdit = () => {
+    onClickEdit(originalIndex);
   };
 
   return (
@@ -20,6 +27,11 @@ const RowItem = ({
       <div>
         <CardImgWrapper isSmall hasError={hasError}>
           {isUploading && <InfiniteLoadingIndicator onClick={handleClick} />}
+          {!isUploading && (
+            <CardControlsWrapper className="card-control-wrapper">
+              <CardControl onClick={handleClickEdit} />
+            </CardControlsWrapper>
+          )}
         </CardImgWrapper>
         <p style={{ marginBottom: 14 }}>{errorMessage || file.name}</p>
       </div>
@@ -37,6 +49,7 @@ RowItem.propTypes = {
   errorMessage: PropTypes.string,
   isUploading: PropTypes.bool.isRequired,
   onClick: PropTypes.func.isRequired,
+  onClickEdit: PropTypes.func.isRequired,
   originalIndex: PropTypes.number.isRequired,
 };
 
