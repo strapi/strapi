@@ -19,8 +19,10 @@ import getTrad from '../../utils/getTrad';
 const ModalStepper = ({ isOpen, onToggle }) => {
   const { formatMessage } = useGlobalContext();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
-  const { currentStep, filesToUpload } = reducerState.toJS();
-  const { Component, headerTradId, next, prev } = stepper[currentStep];
+  const { currentStep, fileToEdit, filesToUpload } = reducerState.toJS();
+  const { Component, headers, next, prev, withBackButton } = stepper[
+    currentStep
+  ];
   const filesToUploadLength = filesToUpload.length;
   const toggleRef = useRef();
   toggleRef.current = onToggle;
@@ -53,10 +55,34 @@ const ModalStepper = ({ isOpen, onToggle }) => {
     });
   };
 
+  const handleClickDeleteFileToUpload = fileIndex => {
+    dispatch({
+      type: 'REMOVE_FILE_TO_UPLOAD',
+      fileIndex,
+    });
+
+    if (currentStep === 'edit-new') {
+      dispatch({
+        type: 'RESET_FILE_TO_EDIT',
+      });
+
+      goNext();
+    }
+  };
+
   const handleClosed = () => {
     dispatch({
       type: 'RESET_PROPS',
     });
+  };
+
+  const handleGoToEditNewFile = fileIndex => {
+    dispatch({
+      type: 'SET_FILE_TO_EDIT',
+      fileIndex,
+    });
+
+    goTo('edit-new');
   };
 
   const handleGoToAddBrowseFiles = () => {
@@ -65,6 +91,38 @@ const ModalStepper = ({ isOpen, onToggle }) => {
     });
 
     goBack();
+  };
+
+  const handleSetCropResult = blob => {
+    dispatch({
+      type: 'SET_CROP_RESULT',
+      blob,
+    });
+  };
+
+  const handleSubmitEditNewFile = e => {
+    e.preventDefault();
+
+    dispatch({
+      type: 'ON_SUBMIT_EDIT_NEW_FILE',
+    });
+
+    goNext();
+  };
+
+  const handleToggle = () => {
+    if (filesToUploadLength > 0) {
+      // eslint-disable-next-line no-alert
+      const confirm = window.confirm(
+        formatMessage({ id: getTrad('window.confirm.close-modal') })
+      );
+
+      if (!confirm) {
+        return;
+      }
+    }
+
+    onToggle();
   };
 
   const handleUploadFiles = async () => {
@@ -138,29 +196,36 @@ const ModalStepper = ({ isOpen, onToggle }) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onToggle={onToggle} onClosed={handleClosed}>
+    <Modal isOpen={isOpen} onToggle={handleToggle} onClosed={handleClosed}>
       {/* header title */}
       <ModalHeader
-        headers={[
-          {
-            key: headerTradId,
-            element: <FormattedMessage id={headerTradId} />,
-          },
-        ]}
+        goBack={goBack}
+        headers={headers.map(headerTrad => ({
+          key: headerTrad,
+          element: <FormattedMessage id={headerTrad} />,
+        }))}
+        withBackButton={withBackButton}
       />
       {/* body of the modal */}
       {Component && (
         <Component
           addFilesToUpload={addFilesToUpload}
+          fileToEdit={fileToEdit}
           filesToUpload={filesToUpload}
           onClickCancelUpload={handleCancelFileToUpload}
+          onClickDeleteFileToUpload={handleClickDeleteFileToUpload}
+          onClickEditNewFile={handleGoToEditNewFile}
           onGoToAddBrowseFiles={handleGoToAddBrowseFiles}
+          onSubmitEditNewFile={handleSubmitEditNewFile}
+          onToggle={handleToggle}
+          setCropResult={handleSetCropResult}
+          withBackButton={withBackButton}
         />
       )}
 
       <ModalFooter>
         <section>
-          <Button type="button" color="cancel" onClick={onToggle}>
+          <Button type="button" color="cancel" onClick={handleToggle}>
             {formatMessage({ id: 'app.components.Button.cancel' })}
           </Button>
           {currentStep === 'upload' && (
@@ -175,6 +240,15 @@ const ModalStepper = ({ isOpen, onToggle }) => {
                 },
                 { number: filesToUploadLength }
               )}
+            </Button>
+          )}
+          {currentStep === 'edit-new' && (
+            <Button
+              color="success"
+              type="button"
+              onClick={handleSubmitEditNewFile}
+            >
+              {formatMessage({ id: 'form.button.finish' })}
             </Button>
           )}
         </section>
