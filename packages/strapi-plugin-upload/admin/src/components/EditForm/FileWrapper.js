@@ -12,10 +12,10 @@ const FileWrapper = styled(CardImgWrapper)`
   }
 
   .cropper-view-box {
-    outline-color: #ffffff;
+    outline-color: ${({ theme }) => theme.main.colors.white};
   }
   .cropper-point {
-    background-color: #ffffff;
+    background-color: ${({ theme }) => theme.main.colors.white};
     border-radius: 50%;
   }
 
