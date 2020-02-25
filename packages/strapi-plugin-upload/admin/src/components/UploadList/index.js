@@ -4,17 +4,17 @@ import { FormattedMessage } from 'react-intl';
 import { Button } from '@buffetjs/core';
 import createMatrix from '../../utils/createMatrix';
 import getTrad from '../../utils/getTrad';
-import ContainerFluid from '../ContainerFluid';
 import ModalSection from '../ModalSection';
 import Text from '../Text';
+import Container from './Container';
 import ButtonWrapper from './ButtonWrapper';
 import TextWrapper from './TextWrapper';
 import RowItem from './RowItem';
-import ListWrapper from './ListWrapper';
 
 const UploadList = ({
   filesToUpload,
   onClickCancelUpload,
+  onClickEditNewFile,
   onGoToAddBrowseFiles,
 }) => {
   const matrix = createMatrix(filesToUpload);
@@ -56,23 +56,22 @@ const UploadList = ({
       </ModalSection>
 
       <ModalSection>
-        <ContainerFluid>
-          <ListWrapper>
-            {matrix.map(({ key, rowContent }) => {
-              return (
-                <div className="row" key={key}>
-                  {rowContent.map(data => (
-                    <RowItem
-                      {...data}
-                      onClick={onClickCancelUpload}
-                      key={data.originalIndex}
-                    />
-                  ))}
-                </div>
-              );
-            })}
-          </ListWrapper>
-        </ContainerFluid>
+        <Container>
+          {matrix.map(({ key, rowContent }) => {
+            return (
+              <div className="row" key={key}>
+                {rowContent.map(data => (
+                  <RowItem
+                    {...data}
+                    onClick={onClickCancelUpload}
+                    onClickEdit={onClickEditNewFile}
+                    key={data.originalIndex}
+                  />
+                ))}
+              </div>
+            );
+          })}
+        </Container>
       </ModalSection>
     </>
   );
@@ -81,12 +80,14 @@ const UploadList = ({
 UploadList.defaultProps = {
   filesToUpload: [],
   onClickCancelUpload: () => {},
+  onClickEditNewFile: () => {},
   onGoToAddBrowseFiles: () => {},
 };
 
 UploadList.propTypes = {
   filesToUpload: PropTypes.array,
   onClickCancelUpload: PropTypes.func,
+  onClickEditNewFile: PropTypes.func,
   onGoToAddBrowseFiles: PropTypes.func,
 };
 

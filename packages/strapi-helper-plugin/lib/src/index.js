@@ -87,6 +87,9 @@ export {
   useGlobalContext,
 } from './contexts/GlobalContext';
 
+// Hooks
+export { default as useQuery } from './hooks/useQuery';
+
 // Utils
 export { default as auth } from './utils/auth';
 export { default as cleanData } from './utils/cleanData';

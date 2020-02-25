@@ -25,7 +25,7 @@ const SortPicker = ({ onChange, value }) => {
   };
 
   const handleChange = value => {
-    onChange({ target: { value } });
+    onChange({ target: { name: '_sort', value } });
 
     hangleToggle();
   };

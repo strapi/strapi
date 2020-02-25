@@ -8,13 +8,12 @@ const SortListItem = styled.li`
   line-height: 27px;
   &:hover {
     cursor: pointer;
-    background-color: ${({ theme }) =>
-    theme.main.colors.filters.list.hover.background};
+    background-color: ${({ theme }) => theme.main.colors.mediumGrey};
   }
   ${({ isActive, theme }) =>
     isActive &&
     `
-    background-color: ${theme.main.colors.filters.list.hover.background};
+    background-color: ${theme.main.colors.mediumGrey};
   `}
 `;
 

@@ -1,13 +1,13 @@
-import React, { useEffect, useReducer, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import React, { useReducer, useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
 import {
   HeaderSearch,
   PageFooter,
   useGlobalContext,
+  useQuery,
   generateSearchFromFilters,
 } from 'strapi-helper-plugin';
-import useQuery from '../../hooks/useQuery';
 import getTrad from '../../utils/getTrad';
 import Container from '../../components/Container';
 import ControlsWrapper from '../../components/ControlsWrapper';
@@ -27,23 +27,17 @@ const HomePage = () => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const [isOpen, setIsOpen] = useState(false);
   const { push } = useHistory();
-  const { search } = useLocation();
   const query = useQuery();
-  const { data, dataToDelete, _limit, _page, _sort, _q } = reducerState.toJS();
+  const { data, dataToDelete } = reducerState.toJS();
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
 
   useEffect(() => {
-    const searchParams = getSearchParams();
-
-    Object.keys(searchParams).map(key => {
-      return dispatch({
-        type: 'ON_QUERY_CHANGE',
-        key,
-        value: searchParams[key],
-      });
+    // TODO - Retrieve data
+    dispatch({
+      type: 'GET_DATA_SUCCEEDED',
+      data: [],
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
+  }, []);
 
   const getSearchParams = () => {
     const params = {};
@@ -64,38 +58,23 @@ const HomePage = () => {
   const handleChangeListParams = ({ target: { name, value } }) => {
     const key = name.split('.').pop();
 
-    handleChangeQuery({ key, value });
+    handleChangeParams({ target: { name: key, value } });
   };
 
-  const handleChangeParams = ({ key, value }) => {
-    const updatedSearch = getUpdatedSearchParams({ [key]: value });
+  const getQueryValue = key => {
+    const queryParams = getSearchParams();
+
+    return queryParams[key];
+  };
+
+  const handleChangeParams = ({ target: { name, value } }) => {
+    const updatedSearch = getUpdatedSearchParams({ [name]: value });
     const newSearch = generateSearchFromFilters(updatedSearch);
     push({ search: newSearch });
   };
 
-  const handleChangeSearch = ({ target: { value } }) => {
-    handleChangeQuery({ key: '_q', value });
-  };
-
-  const handleChangeSort = ({ target: { value } }) => {
-    handleChangeQuery({ key: '_sort', value });
-  };
-
-  const handleChangeQuery = ({ key, value }) => {
-    dispatch({
-      type: 'ON_QUERY_CHANGE',
-      key,
-      value,
-    });
-
-    handleChangeParams({
-      key,
-      value,
-    });
-  };
-
   const handleClearSearch = () => {
-    handleChangeSearch({ target: { value: '' } });
+    handleChangeParams({ target: { name: '_q', value: '' } });
   };
 
   const handleClickToggleModal = () => {
@@ -133,8 +112,8 @@ const HomePage = () => {
   };
 
   const params = {
-    _limit: parseInt(_limit, 10),
-    _page: parseInt(_page, 10),
+    _limit: parseInt(getQueryValue('_limit'), 10) || 10,
+    _page: parseInt(getQueryValue('_page'), 10) || 1,
   };
 
   return (
@@ -142,15 +121,19 @@ const HomePage = () => {
       <Header {...headerProps} />
       <HeaderSearch
         label={pluginName}
-        onChange={handleChangeSearch}
+        onChange={handleChangeParams}
         onClear={handleClearSearch}
         placeholder={formatMessage({ id: getTrad('search.placeholder') })}
-        value={_q}
+        name="_q"
+        value={getQueryValue('_q') || ''}
       />
 
       <ControlsWrapper>
         <SelectAll />
-        <SortPicker onChange={handleChangeSort} value={_sort} />
+        <SortPicker
+          onChange={handleChangeParams}
+          value={getQueryValue('_sort') || null}
+        />
         <FiltersPicker />
         <FiltersList />
       </ControlsWrapper>
