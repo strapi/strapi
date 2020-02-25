@@ -18,8 +18,8 @@ const BackButton = styled.button`
   &:before {
     content: '\f053';
     font-family: 'FontAwesome';
-    font-size: 1.8rem;
-    font-weight: bolder;
+    font-size: ${({ theme }) => theme.main.fontSizes.lg};
+    font-weight: ${({ theme }) => theme.main.fontWeights.bold};
   }
   &:hover {
     background-color: #f3f4f4;
