@@ -371,6 +371,22 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
     });
   });
 
+  describe('RESET_FILE_TO_UPLOAD', () => {
+    it('should set the fileToEdit key to null', () => {
+      const action = {
+        type: 'RESET_FILE_TO_EDIT',
+      };
+      const state = fromJS({
+        fileToEdit: 'test',
+      });
+      const expected = fromJS({
+        fileToEdit: null,
+      });
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
   describe('RESET_PROPS', () => {
     it('should return the initialState', () => {
       const action = { type: 'RESET_PROPS' };
