@@ -29,7 +29,7 @@ SortListItem.propTypes = {
   selectedItem: PropTypes.string,
   label: PropTypes.string,
   onClick: PropTypes.func,
-  value: PropTypes.number,
+  value: PropTypes.string,
 };
 
 export default SortListItem;
