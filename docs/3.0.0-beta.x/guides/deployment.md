@@ -1711,7 +1711,7 @@ Create the [Cloud SQL database](https://cloud.google.com/sql/docs/postgres/creat
 
 Take note of the user name (default is `postgres`) and password.
 
-The first database will be created with name `default`. This cannot be deleted.
+The first database will be created with the name `postgres`. This cannot be deleted.
 
 Create another database, named `strapi` for example. It may be useful to delete and and re-create this while you are experimenting with the application setup.
 
@@ -2030,4 +2030,3 @@ config/environments/production/server.json
   }
 }
 ```
-
