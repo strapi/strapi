@@ -17,8 +17,8 @@ function Filter({ label, onClick }) {
         id={`components.FilterOptions.FILTER_TYPES.${filter}`}
       />
       <span>&nbsp;{value}</span>
-      <RemoveButton type="button" onClick={() => onDelete(index)}>
-        <Close onClick={onClick} width="11px" height="11px" fill="#007eff" />
+      <RemoveButton type="button" onClick={onClick}>
+        <Close width="11px" height="11px" fill="#007eff" />
       </RemoveButton>
     </Wrapper>
   );

@@ -74,6 +74,16 @@ const HomePage = () => {
     }
   };
 
+  const handleDeleteFilter = index => {
+    // Remove filter
+    const updatedFilters = generateFiltersFromSearch(search);
+    updatedFilters.splice(index, 1);
+
+    handleChangeParams({
+      target: { name: 'filters', value: updatedFilters },
+    });
+  };
+
   const handleChangeListParams = ({ target: { name, value } }) => {
     const key = name.split('.').pop();
 
@@ -155,7 +165,10 @@ const HomePage = () => {
           value={getQueryValue('_sort') || null}
         />
         <FiltersPicker onChange={handleChangeFilters} filters={filtersForm} />
-        <FiltersList filters={generateFiltersFromSearch(search)} />
+        <FiltersList
+          filters={generateFiltersFromSearch(search)}
+          onClick={handleDeleteFilter}
+        />
       </ControlsWrapper>
       <ListEmpty onClick={handleClickToggleModal} />
       {/* <List data={data} /> */}

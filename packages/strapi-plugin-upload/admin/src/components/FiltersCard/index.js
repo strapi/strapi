@@ -86,9 +86,7 @@ FiltersCard.defaultProps = {
 };
 
 FiltersCard.propTypes = {
-  filters: PropTypes.shape({
-    type: PropTypes.string.isRequired,
-  }),
+  filters: PropTypes.object,
   onChange: PropTypes.func,
 };
 

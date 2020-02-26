@@ -47,18 +47,12 @@ const FiltersPicker = ({ filters, onChange }) => {
 };
 
 FiltersPicker.defaultProps = {
-  filters: [],
+  filters: {},
   onChange: () => {},
 };
 
 FiltersPicker.propTypes = {
-  filters: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      filter: PropTypes.string.isRequired,
-      value: PropTypes.string.isRequired,
-    })
-  ),
+  filters: PropTypes.object,
   onChange: PropTypes.func,
 };
 
