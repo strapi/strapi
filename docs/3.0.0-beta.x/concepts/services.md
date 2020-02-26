@@ -97,7 +97,9 @@ module.exports = {
 
     if (files) {
       // automatically uploads the files based on the entry and the model
-      await this.uploadFiles(entry, files, { model: strapi.models.restaurant });
+      await strapi.entityService.uploadFiles(entry, files, {
+        model: strapi.models.restaurant,
+      });
       return this.findOne({ id: entry.id });
     }
 
@@ -125,7 +127,9 @@ module.exports = {
 
     if (files) {
       // automatically uploads the files based on the entry and the model
-      await this.uploadFiles(entry, files, { model: strapi.models.restaurant });
+      await strapi.entityService.uploadFiles(entry, files, {
+        model: strapi.models.restaurant,
+      });
       return this.findOne({ id: entry.id });
     }
 
