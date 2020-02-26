@@ -1,11 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
-
-import getTrad from '../../utils/getTrad';
 
 import Wrapper from './Wrapper';
-import SortListItem from './SortListItem';
+import SortListItem from '../SortListItem';
 
 const SortList = ({ isShown, list, onClick, selected }) => {
   return (
@@ -14,13 +11,11 @@ const SortList = ({ isShown, list, onClick, selected }) => {
         return (
           <SortListItem
             key={item}
-            isActive={list[item] === selected}
-            onClick={() => {
-              onClick(list[item]);
-            }}
-          >
-            <FormattedMessage id={getTrad(`sort.${item}`)} />
-          </SortListItem>
+            label={item}
+            value={list[item]}
+            onClick={onClick}
+            selectedItem={selected}
+          />
         );
       })}
     </Wrapper>
