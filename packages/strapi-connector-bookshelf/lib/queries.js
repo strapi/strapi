@@ -4,13 +4,9 @@
  */
 
 const _ = require('lodash');
-const {
-  convertRestQueryParams,
-  buildQuery,
-  models: modelUtils,
-} = require('strapi-utils');
+const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
-module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
+module.exports = function createQueryBuilder({ model, strapi }) {
   /* Utils */
   // association key
   const assocKeys = model.associations.map(ast => ast.alias);
@@ -198,24 +194,19 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   }
 
   function search(params, populate) {
-    // Convert `params` object to filters compatible with Bookshelf.
-    const filters = modelUtils.convertParams(modelKey, params);
+    const filterParams = _.clone(params);
+
+    _.unset(filterParams, '_q');
+
+    const filters = convertRestQueryParams(filterParams);
 
     return model
       .query(qb => {
         buildSearchQuery(qb, model, params);
-
-        if (filters.sort) {
-          qb.orderBy(filters.sort.key, filters.sort.order);
-        }
-
-        if (filters.start) {
-          qb.offset(_.toNumber(filters.start));
-        }
-
-        if (filters.limit) {
-          qb.limit(_.toNumber(filters.limit));
-        }
+      })
+      .query(buildQuery({ model, filters }))
+      .query(qb => {
+        console.log(qb.toString());
       })
       .fetchAll({
         withRelated: populate,
@@ -224,10 +215,17 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   }
 
   function countSearch(params) {
+    const filterParams = _.clone(params);
+
+    _.unset(filterParams, '_q');
+
+    const filters = convertRestQueryParams(filterParams);
+
     return model
       .query(qb => {
         buildSearchQuery(qb, model, params);
       })
+      .query(buildQuery({ model, filters }))
       .count();
   }
 
@@ -805,7 +803,8 @@ function validateRepeatableInput(value, { key, min, max, required }) {
 
   if (
     (required === true || (required !== true && value.length > 0)) &&
-    (min && value.length < min)
+    min &&
+    value.length < min
   ) {
     const err = new Error(
       `Component ${key} must contain at least ${min} items`
@@ -871,7 +870,8 @@ function validateDynamiczoneInput(
 
   if (
     (required === true || (required !== true && value.length > 0)) &&
-    (min && value.length < min)
+    min &&
+    value.length < min
   ) {
     const err = new Error(
       `Dynamiczone ${key} must contain at least ${min} items`
