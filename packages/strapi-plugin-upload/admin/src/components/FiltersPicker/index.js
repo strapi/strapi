@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
+import { isObject } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { FilterIcon } from 'strapi-helper-plugin';
 
@@ -22,7 +23,10 @@ const FiltersPicker = ({ filters, onChange }) => {
           value.value,
           'YYYY-MM-DD HH:mm:ss'
         ).format();
+      } else if (isObject(value)) {
+        formattedValue.value = Object.values(value.value).join('');
       }
+
       onChange({ target: { value: formattedValue } });
     }
 

@@ -1,9 +1,10 @@
 import { fromJS } from 'immutable';
+import moment from 'moment';
 
 const initialState = fromJS({
   name: 'created_at',
-  filter: '',
-  value: '',
+  filter: '=',
+  value: moment(),
 });
 
 function reducer(state, action) {

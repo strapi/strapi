@@ -19,6 +19,9 @@ const FiltersCard = ({ filters, onChange }) => {
 
   const name = state.get('name');
   const type = filters[name].type;
+
+  const defaultValue = filters[name].defaultValue;
+
   const filtersOptions = getFilterType(type);
 
   const handleChange = ({ target: { name, value } }) => {
@@ -44,8 +47,14 @@ const FiltersCard = ({ filters, onChange }) => {
           onChange={e => {
             // Change the attribute
             handleChange(e);
-            // Change the default filter so it reset to the common one which is '='
+            // Change other inputs so it reset values
+            const {
+              target: { value },
+            } = e;
             handleChange({ target: { name: 'filter', value: '=' } });
+            handleChange({
+              target: { name: 'value', value: filters[value].defaultValue },
+            });
           }}
           name="name"
           options={Object.keys(filters)}
@@ -70,7 +79,7 @@ const FiltersCard = ({ filters, onChange }) => {
           onChange={handleChange}
           name="value"
           options={['image', 'video', 'files']}
-          value={state.get('value')}
+          value={state.get('value') || defaultValue}
         />
       </InputWrapper>
       <Button icon onClick={addFilter}>

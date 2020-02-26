@@ -10,13 +10,13 @@ import { InputNumber, Select } from '@buffetjs/core';
 
 import Wrapper from './Wrapper';
 
-function SizeInput({ onChange, ...rest }) {
+function SizeInput({ onChange, value, ...rest }) {
   const options = ['KB', 'MB', 'GB'];
-  const [value, setValue] = useState(0);
+  const [size, setSize] = useState(0);
   const [format, setFormat] = useState('KB');
 
   const handleChangeValue = ({ target: { value } }) => {
-    setValue(value);
+    setSize(value);
 
     handleChange();
   };
@@ -29,34 +29,51 @@ function SizeInput({ onChange, ...rest }) {
 
   const handleChange = () => {
     onChange({
-      target: { name: 'value', value: `${value}${format}` },
+      target: {
+        name: 'value',
+        value: {
+          size,
+          format,
+        },
+      },
     });
   };
 
   return (
     <Wrapper>
-      <InputNumber
-        {...rest}
-        name="size_value"
-        onChange={handleChangeValue}
-        value={value}
-      />
-      <Select
-        name="size_type"
-        onChange={handleChangeFormat}
-        options={options}
-        value={format}
-      />
+      <div className="row">
+        <div className="col-6">
+          <InputNumber
+            {...rest}
+            name="size_value"
+            onChange={handleChangeValue}
+            value={value.size}
+          />
+        </div>
+        <div className="col-6">
+          <Select
+            name="format_value"
+            onChange={handleChangeFormat}
+            options={options}
+            value={value.format}
+          />
+        </div>
+      </div>
     </Wrapper>
   );
 }
 
 SizeInput.defaultProps = {
   onChange: () => {},
+  value: {},
 };
 
 SizeInput.propTypes = {
   onChange: PropTypes.func,
+  value: PropTypes.shape({
+    size: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    format: PropTypes.string,
+  }),
 };
 
 export default SizeInput;
