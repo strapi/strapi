@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import Wrapper from './Wrapper';
 import SortListItem from '../SortListItem';
 
-const SortList = ({ isShown, list, onClick, selected }) => {
+const SortList = ({ isShown, list, onClick, selectedItem }) => {
   return (
     <Wrapper isShown={isShown}>
       {Object.keys(list).map(item => {
@@ -14,7 +14,7 @@ const SortList = ({ isShown, list, onClick, selected }) => {
             label={item}
             value={list[item]}
             onClick={onClick}
-            selectedItem={selected}
+            selectedItem={selectedItem}
           />
         );
       })}
@@ -26,14 +26,14 @@ SortList.defaultProps = {
   list: {},
   isShown: false,
   onClick: () => {},
-  selected: null,
+  selectedItem: null,
 };
 
 SortList.propTypes = {
   list: PropTypes.object,
   isShown: PropTypes.bool,
   onClick: PropTypes.func,
-  selected: PropTypes.string,
+  selectedItem: PropTypes.string,
 };
 
 export default SortList;

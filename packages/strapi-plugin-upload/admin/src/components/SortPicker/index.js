@@ -38,7 +38,7 @@ const SortPicker = ({ onChange, value }) => {
       <SortList
         isShown={isOpen}
         list={orders}
-        selected={value}
+        selectedItem={value}
         onClick={handleChange}
       />
     </Wrapper>
