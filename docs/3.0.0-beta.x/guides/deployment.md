@@ -1952,9 +1952,11 @@ By default `localhost` is selected. Select the `Google Cloud Storage` plugin.
 
 Copy the JSON key and set the regions.
 
-Cloud Console > Storage > Browser
+Open the `Cloud Console > Storage > Browser` menu.
 
 Copy the bucket name to the plugin settings, the default is the app ID, such as `myapi-123456.appspot.com`.
+
+(Note that the `Access control` setting of the bucket has to be `Fine-grained`, which is the default.)
 
 Save.
 
