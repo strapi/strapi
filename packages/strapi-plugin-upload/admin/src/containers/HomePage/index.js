@@ -62,7 +62,8 @@ const HomePage = () => {
   const handleChangeParams = ({ target: { name, value } }) => {
     const updatedSearch = getUpdatedSearchParams({ [name]: value });
     const newSearch = generateSearchFromFilters(updatedSearch);
-    push({ search: newSearch });
+
+    push({ search: encodeURI(newSearch) });
   };
 
   const handleClearSearch = () => {

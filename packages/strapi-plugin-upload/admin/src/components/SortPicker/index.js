@@ -6,8 +6,7 @@ import getTrad from '../../utils/getTrad';
 
 import Wrapper from './Wrapper';
 import SortButton from './SortButton';
-import SortList from './SortList';
-import SortListItem from './SortListItem';
+import SortList from '../SortList';
 
 const SortPicker = ({ onChange, value }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -28,7 +27,7 @@ const SortPicker = ({ onChange, value }) => {
   };
 
   const hangleToggle = () => {
-    setIsOpen(!isOpen);
+    setIsOpen(v => !v);
   };
 
   return (
@@ -36,21 +35,12 @@ const SortPicker = ({ onChange, value }) => {
       <SortButton onClick={hangleToggle} isActive={isOpen}>
         <FormattedMessage id={getTrad('sort.label')} />
       </SortButton>
-      <SortList isOpen={isOpen}>
-        {Object.keys(orders).map(order => {
-          return (
-            <SortListItem
-              key={order}
-              isActive={orders[order] === value}
-              onClick={() => {
-                handleChange(orders[order]);
-              }}
-            >
-              <FormattedMessage id={getTrad(`sort.${order}`)} />
-            </SortListItem>
-          );
-        })}
-      </SortList>
+      <SortList
+        isShown={isOpen}
+        list={orders}
+        selected={value}
+        onClick={handleChange}
+      />
     </Wrapper>
   );
 };

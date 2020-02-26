@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { themePropTypes } from 'strapi-helper-plugin';
 
-const SortList = styled.ul`
+const Wrapper = styled.ul`
   display: none;
   position: absolute;
   top: 38px;
@@ -16,16 +16,16 @@ const SortList = styled.ul`
   background-color: ${({ theme }) => theme.main.colors.white};
   border: 1px solid ${({ theme }) => theme.main.colors.darkGrey};
   box-shadow: 0 2px 4px ${({ theme }) => theme.main.colors.greyAlpha};
-  ${({ isOpen }) => isOpen && 'display: block;'}
+  ${({ isShown }) => isShown && 'display: block;'}
 `;
 
-SortList.defaultProps = {
-  isOpen: false,
+Wrapper.defaultProps = {
+  isShown: false,
 };
 
-SortList.propTypes = {
-  isOpen: PropTypes.bool,
+Wrapper.propTypes = {
+  isShown: PropTypes.bool,
   ...themePropTypes,
 };
 
-export default SortList;
+export default Wrapper;
