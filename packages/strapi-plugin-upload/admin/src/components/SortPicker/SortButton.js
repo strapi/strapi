@@ -6,14 +6,18 @@ import { themePropTypes } from 'strapi-helper-plugin';
 import Text from '../Text';
 
 const SortButton = styled(props => (
-  <Text as="button" fontWeight="semiBold" {...props} />
+  <Text
+    as="button"
+    fontWeight="semiBold"
+    color={props.isActive ? 'mediumBlue' : 'greyDark'}
+    {...props}
+  />
 ))`
   height: 32px;
   padding: 0 10px;
   line-height: 30px;
   background-color: ${({ theme }) => theme.main.colors.white};
   border: 1px solid ${({ theme }) => theme.main.colors.darkGrey};
-  color: ${({ theme }) => theme.main.colors.greyDark};
   border-radius: ${({ theme }) => theme.main.sizes.borderRadius};
   &:active,
   &:focus {
@@ -25,7 +29,6 @@ const SortButton = styled(props => (
       ? `
       background-color: ${theme.main.colors.lightBlue};
       border: 1px solid ${theme.main.colors.darkBlue};
-      color: ${theme.main.colors.mediumBlue};
     `
       : `
       &:hover {
