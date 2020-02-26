@@ -447,16 +447,24 @@ module.exports = {
       );
     }
 
-    const role = await strapi
+    let role;
+    // If the user specifies the role type. Pick up that and override default_role
+    if (params.role) {
+      role = await strapi
+      .query('role', 'users-permissions')
+      .findOne({ type: params.role }, []);
+    } else {
+      role = await strapi
       .query('role', 'users-permissions')
       .findOne({ type: settings.default_role }, []);
+    }
 
     if (!role) {
       return ctx.badRequest(
         null,
         formatError({
           id: 'Auth.form.error.role.notFound',
-          message: 'Impossible to find the default role.',
+          message: params.role ? 'Specify the role type on the param "role"': 'Impossible to find the default role.',
         })
       );
     }
