@@ -17,13 +17,6 @@ module.exports = async () => {
     key: 'settings',
   });
 
-  Object.assign(strapi.plugins.upload.config, {
-    enabled: true,
-    provider: 'local',
-    sizeLimit: 1000000,
-    providers: [],
-  });
-
   const installedProviders = Object.keys(strapi.config.info.dependencies)
     .filter(d => d.includes('strapi-provider-upload-'))
     .concat('strapi-provider-upload-local');

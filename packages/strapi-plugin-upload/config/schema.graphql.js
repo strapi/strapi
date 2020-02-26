@@ -36,9 +36,7 @@ module.exports = {
         resolver: async (obj, { file: upload, ...fields }) => {
           const file = await formatFile(upload, fields);
 
-          const config = strapi.plugins.upload.config;
-
-          const uploadedFiles = await strapi.plugins.upload.services.upload.upload([file], config);
+          const uploadedFiles = await strapi.plugins.upload.services.upload.upload([file]);
 
           // Return response.
           return uploadedFiles.length === 1 ? uploadedFiles[0] : uploadedFiles;
@@ -50,9 +48,7 @@ module.exports = {
         resolver: async (obj, { files: uploads, ...fields }) => {
           const files = await Promise.all(uploads.map(upload => formatFile(upload, fields)));
 
-          const config = strapi.plugins.upload.config;
-
-          const uploadedFiles = await strapi.plugins.upload.services.upload.upload(files, config);
+          const uploadedFiles = await strapi.plugins.upload.services.upload.upload(files);
 
           // Return response.
           return uploadedFiles;
@@ -79,7 +75,7 @@ const formatFile = async (upload, fields) => {
     ext: path.extname(filename),
     buffer,
     mime: mimetype,
-    size: (buffer.length / 1000).toFixed(2),
+    size: Math.round((stream.size / 1000) * 100) / 100,
   };
 
   const { refId, ref, source, field } = fields;
