@@ -43,6 +43,8 @@ const getInputType = (type = '') => {
     case 'WYSIWYG':
     case 'richtext':
       return 'wysiwyg';
+    case 'uid':
+      return 'uid';
     default:
       return 'text';
   }
@@ -89,28 +91,6 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
           value={get(modifiedData, keys)}
         />
       </div>
-    );
-  }
-
-  if (type === 'uid') {
-    return (
-      <FormattedMessage id={errorId}>
-        {error => (
-          <InputUID
-            required={isRequired}
-            name={keys}
-            value={get(modifiedData, keys)}
-            contentTypeUID={layout.uid}
-            validations={validations}
-            onChange={onChange}
-            error={
-              isEmpty(error) || errorId === temporaryErrorIdUntilBuffetjsSupportsFormattedMessage
-                ? null
-                : error
-            }
-          />
-        )}
-      </FormattedMessage>
     );
   }
 
@@ -166,12 +146,15 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
             }
             inputDescription={description}
             description={description}
+            contentTypeUID={layout.uid}
             customInputs={{
               media: InputFileWithErrors,
               json: InputJSONWithErrors,
               wysiwyg: WysiwygWithErrors,
+              uid: InputUID,
             }}
             multiple={get(attribute, 'multiple', false)}
+            attribute={attribute}
             name={keys}
             onBlur={onBlur}
             onChange={onChange}

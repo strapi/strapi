@@ -3,10 +3,11 @@ import PropTypes from 'prop-types';
 import { Sync } from '@buffetjs/icons';
 import { ErrorMessage as BaseErrorMessage } from '@buffetjs/styles';
 import { Label, Error } from '@buffetjs/core';
-import { useDebounce } from '@buffetjs/hooks';
+import { useDebounce, useClickAwayListener } from '@buffetjs/hooks';
 import styled from 'styled-components';
-import { request, LoadingIndicator, useClickAwayListener } from 'strapi-helper-plugin';
+import { request, LoadingIndicator } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
+import { isEmpty } from 'lodash';
 
 import pluginId from '../../pluginId';
 import getRequestUrl from '../../utils/getRequestUrl';
@@ -40,23 +41,27 @@ const Name = styled(Label)`
 // TODO : Use the Compounds components pattern
 // https://blog.bitsrc.io/understanding-compound-components-in-react-23c4b84535b5
 const InputUID = ({
-  error: inputError,
-  required,
-  name,
-  value,
+  attribute,
   contentTypeUID,
-  validations,
+  error: inputError,
+  name,
   onChange,
+  required,
+  validations,
+  value,
 }) => {
   const { modifiedData, initialData } = useDataManager();
   const [isLoading, setIsLoading] = useState(false);
   const [availability, setAvailability] = useState(null);
   const [isSuggestionOpen, setIsSuggestionOpen] = useState(true);
+  const [isCustomized, setIsCustomized] = useState(false);
   const [label, setLabel] = useState();
   const debouncedValue = useDebounce(value, 300);
+  const debouncedTargetFieldValue = useDebounce(modifiedData[attribute.targetField], 300);
   const wrapperRef = useRef(null);
   const generateUid = useRef();
   const initialValue = initialData[name];
+  const isCreation = isEmpty(initialData);
 
   generateUid.current = async () => {
     setIsLoading(true);
@@ -110,8 +115,7 @@ const InputUID = ({
   }, []);
 
   useEffect(() => {
-    // if (debouncedValue && debouncedValue !== initialValue) {
-    if (debouncedValue) {
+    if (debouncedValue && debouncedValue !== initialValue) {
       checkAvailability();
     }
     if (!debouncedValue) {
@@ -135,6 +139,12 @@ const InputUID = ({
       }
     };
   }, [availability]);
+
+  useEffect(() => {
+    if (!isCustomized && isCreation && debouncedTargetFieldValue !== null) {
+      generateUid.current();
+    }
+  }, [debouncedTargetFieldValue, isCustomized, isCreation]);
 
   useClickAwayListener(wrapperRef, () => setIsSuggestionOpen(false));
 
@@ -169,6 +179,10 @@ const InputUID = ({
       error: null,
     });
 
+    if (e.target.value && isCreation) {
+      setIsCustomized(true);
+    }
+
     onChange(e);
   };
 
@@ -188,7 +202,8 @@ const InputUID = ({
                 onChange={e => handleChange(e, canCheck, dispatch)}
                 type="text"
                 onBlur={onBlur}
-                value={value}
+                // eslint-disable-next-line no-irregular-whitespace
+                value={value || ''}
               />
               <RightContent>
                 <RightLabel availability={availability} label={label} />
@@ -230,6 +245,7 @@ const InputUID = ({
 };
 
 InputUID.propTypes = {
+  attribute: PropTypes.object.isRequired,
   contentTypeUID: PropTypes.string.isRequired,
   error: PropTypes.string,
   name: PropTypes.string.isRequired,

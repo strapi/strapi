@@ -12,7 +12,7 @@ import getTrad from '../../utils/getTrad';
 const RightContentLabel = styled.div`
   padding: 0 5px;
   text-transform: capitalize;
-  color: ${props => props.theme.main.colors[props.color]};
+  color: ${({ theme, color }) => theme.main.colors[color]};
 `;
 
 const RightLabel = ({ label, availability }) => {

@@ -3,7 +3,7 @@ import styled from 'styled-components';
 const RightContent = styled.div`
   display: flex;
   z-index: 10;
-  background-color: white;
+  background-color: ${({ theme }) => theme.main.colors.white};
   align-items: center;
   line-height: 32px;
   right: 1px;
