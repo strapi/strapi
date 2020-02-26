@@ -58,12 +58,7 @@ const CustomTable = ({ data, headers, isBulkable }) => {
               handleGoTo(row.id);
             }}
           >
-            <Row
-              isBulkable={isBulkable}
-              headers={headers}
-              row={row}
-              goTo={handleGoTo}
-            />
+            <Row isBulkable={isBulkable} headers={headers} row={row} goTo={handleGoTo} />
           </TableRow>
         );
       })
@@ -73,9 +68,7 @@ const CustomTable = ({ data, headers, isBulkable }) => {
     <Table className="table">
       <TableHeader headers={headers} isBulkable={isBulkable} />
       <tbody>
-        {entriesToDelete.length > 0 && (
-          <ActionCollapse colSpan={colSpanLength} />
-        )}
+        {entriesToDelete.length > 0 && <ActionCollapse colSpan={colSpanLength} />}
         {content}
       </tbody>
     </Table>
@@ -91,13 +84,6 @@ CustomTable.defaultProps = {
 CustomTable.propTypes = {
   data: PropTypes.array,
   headers: PropTypes.array,
-  history: PropTypes.shape({
-    location: PropTypes.shape({
-      pathname: PropTypes.string,
-      search: PropTypes.string,
-    }),
-    push: PropTypes.func.isRequired,
-  }).isRequired,
   isBulkable: PropTypes.bool,
 };
 

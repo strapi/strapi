@@ -6,7 +6,7 @@ const EmptyLinksList = styled.div`
   padding-right: 1.6rem;
   font-weight: 300;
   min-height: 3.6rem;
-  padding-top: 0.2rem;
+  padding-top: 0.6rem;
 `;
 
 EmptyLinksList.defaultProps = {

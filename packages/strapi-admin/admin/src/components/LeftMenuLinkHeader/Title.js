@@ -5,13 +5,14 @@ const Title = styled.div`
   justify-content: space-between;
   padding-left: 2rem;
   padding-right: 1.6rem;
-  padding-top: 0.7rem;
+  padding-top: 1rem;
   margin-bottom: 0.8rem;
   color: ${props => props.theme.main.colors.leftMenu['title-color']};
   text-transform: uppercase;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   letter-spacing: 0.1rem;
   font-weight: 800;
+  max-height: 28px;
 `;
 
 Title.defaultProps = {
