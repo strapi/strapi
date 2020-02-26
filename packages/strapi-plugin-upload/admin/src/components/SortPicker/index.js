@@ -8,9 +8,8 @@ import Carret from '../../icons/Carret';
 
 import DropdownButton from '../DropdownButton';
 import DropdownSection from '../DropdownSection';
+import SortList from '../SortList';
 import Wrapper from './Wrapper';
-import SortList from './SortList';
-import SortListItem from './SortListItem';
 
 const SortPicker = ({ onChange, value }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,7 +30,7 @@ const SortPicker = ({ onChange, value }) => {
   };
 
   const hangleToggle = () => {
-    setIsOpen(!isOpen);
+    setIsOpen(v => !v);
   };
 
   return (
@@ -41,21 +40,7 @@ const SortPicker = ({ onChange, value }) => {
         <Carret isUp={!isOpen} />
       </DropdownButton>
       <DropdownSection isOpen={isOpen}>
-        <SortList>
-          {Object.keys(orders).map(order => {
-            return (
-              <SortListItem
-                key={order}
-                isActive={orders[order] === value}
-                onClick={() => {
-                  handleChange(orders[order]);
-                }}
-              >
-                <FormattedMessage id={getTrad(`sort.${order}`)} />
-              </SortListItem>
-            );
-          })}
-        </SortList>
+        <SortList list={orders} selected={value} onClick={handleChange} />
       </DropdownSection>
     </Wrapper>
   );
