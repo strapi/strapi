@@ -32,6 +32,24 @@ Then run either `yarn install` or `npm install`.
 
 ## Policies syntax change
 
+We decided to change the policies naming convention to match with the future naming convetion we will be using throughout the project.
+
+**Before**
+
+- Global policy: `global.{policy}`.
+- Plugin policy: `plugins.{pluginName}.{policy}`.
+
+**After**
+
+- Global policy: `global::{policy}`.
+- Plugin policy: `plugins::{pluginName}.{policy}`.
+
+We are also introductin application naming so you can access an api policy easily or reference it absolutely when the context doesn't allow forto find out directly.
+
+You can now reference a policy located at `./api/{apiName}/config/policies/{policy}` with the following syntax: `{apiName}.{policy}`.
+
+Although we do not recommend it (error prone), you can still access a local policy with the syntax `{policy}` . This syntax will only allow access to a policy declared in the api you are referencing it from. (e.g, polici in `restaurant` api and route in `restaurant` api only).
+
 ## Rebuilding your administration panel
 
 Now delete the `.cache` and `build` folders. Then run `yarn develop`.
