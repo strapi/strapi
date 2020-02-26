@@ -100,7 +100,7 @@ const HomePage = () => {
     const updatedSearch = getUpdatedSearchParams({ [name]: value });
     const newSearch = generateSearchFromFilters(updatedSearch);
 
-    push({ search: newSearch });
+    push({ search: encodeURI(newSearch) });
   };
 
   const handleClearSearch = () => {

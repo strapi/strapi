@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { themePropTypes } from 'strapi-helper-plugin';
 
-const SortList = styled.ul`
+const Wrapper = styled.ul`
   margin-bottom: 0;
   padding: 0;
   min-width: 230px;
@@ -10,11 +10,11 @@ const SortList = styled.ul`
   background-color: ${({ theme }) => theme.main.colors.white};
   border: 1px solid ${({ theme }) => theme.main.colors.darkGrey};
   box-shadow: 0 2px 4px ${({ theme }) => theme.main.colors.greyAlpha};
-  ${({ isOpen }) => isOpen && 'display: block;'}
+  ${({ isShown }) => isShown && 'display: block;'}
 `;
 
-SortList.propTypes = {
+Wrapper.propTypes = {
   ...themePropTypes,
 };
 
-export default SortList;
+export default Wrapper;
