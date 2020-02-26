@@ -191,3 +191,85 @@ export default strapi => {
   return strapi.registerPlugin(plugin);
 };
 ```
+
+## Adding a setting into the global section
+
+In order to add a link into the global section of the settings view you need to create a global array containing the links you want to add;
+
+**Path —** `plugins/my-plugin/admin/src/index.js`.
+
+```
+import pluginPkg from '../../package.json';
+// Import the component
+import Settings from './containers/Settings';
+import SettingLink from './components/SettingLink';
+import pluginId from './pluginId';
+
+export default strapi => {
+  const pluginDescription =
+  pluginPkg.strapi.description || pluginPkg.description;
+
+  // Declare the links that will be injected into the settings menu
+  const menuSection = {
+    id: pluginId,
+    title: {
+      id: `${pluginId}.foo`,
+      defaultMessage: 'Super cool setting',
+    },
+    links: [
+      {
+        title: 'Setting page 1',
+        to: `${strapi.settingsBaseURL}/${pluginId}/setting1`,
+        name: 'setting1',
+      },
+      {
+        title: {
+        id: `${pluginId}.bar`,
+        defaultMessage: 'Setting page 2',
+      },
+        to: `${strapi.settingsBaseURL}/${pluginId}/setting2`,
+        name: 'setting2',
+      },
+    ],
+  };
+
+  const plugin = {
+    blockerComponent: null,
+    blockerComponentProps: {},
+    description: pluginDescription,
+    icon: pluginPkg.strapi.icon,
+    id: pluginId,
+    initializer: () => null,
+    injectedComponents: [],
+    isReady: true,
+    leftMenuLinks: [],
+    leftMenuSections: [],
+    mainComponent: null,
+    name: pluginPkg.strapi.name,
+    preventComponentRendering: false,
+    settings: {
+      // Add a link into the global section of the settings view
+      global: [
+        {
+          title: 'Setting link 1',
+          to: `${strapi.settingsBaseURL}/setting-link-1`,
+          name: 'settingLink1',
+          Component: SettingLink,
+          // Bool : https://reacttraining.com/react-router/web/api/Route/exact-bool
+          exact: false,
+        },
+      ],
+      mainComponent: Settings,
+      menuSection,
+    },
+    trads: {},
+  };
+
+  return strapi.registerPlugin(plugin);
+};
+
+```
+
+::: danger
+It is currently not possible to add a link into another plugin's setting section
+:::

@@ -14,10 +14,9 @@ import { AttributeIcon } from '@buffetjs/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { useHistory } from 'react-router-dom';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext, useQuery } from 'strapi-helper-plugin';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
-import useQuery from '../../hooks/useQuery';
 import Button from './Button';
 import Card from './Card';
 

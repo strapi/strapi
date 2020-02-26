@@ -1,8 +1,13 @@
 {
+  "form.input.label.file-alt": "Alternative text",
+  "form.input.decription.file-alt": "This text will be displayed if the asset can’t be shown.",
+  "form.input.label.file-caption": "Caption",
+  "form.input.label.file-name": "File name",
   "header.actions.upload-assets": "Upload assets",
   "header.content.assets-empty": "No asset",
   "header.content.assets-multiple": "{number} assets",
   "header.content.assets-single": "1 asset",
+  "filter.add": "Add filter",
   "input.label-bold": "Drag & drop",
   "input.label-normal": "to upload or",
   "input.button.label": "Browse files",
@@ -10,6 +15,7 @@
   "list.assets-empty.subtitle": "Add a first one to the list.",
   "modal.header.browse": "Upload assets",
   "modal.header.select-files": "Selected files",
+  "modal.header.file-detail": "Details",
   "modal.nav.computer": "from computer",
   "modal.nav.url": "from url",
   "modal.upload-list.sub-header-title.plural": "{number} assets selected",
@@ -28,5 +34,6 @@
   "sort.name_asc": "Alphabetical order (A to Z)",
   "sort.name_desc": "Reverse alphabetical order (Z to A)",
   "sort.updated_at_asc": "Most recent updates",
-  "sort.updated_at_desc": "Oldest updates"
+  "sort.updated_at_desc": "Oldest updates",
+  "window.confirm.close-modal": "Are you sure? You have some files that have not been uploaded yet."
 }

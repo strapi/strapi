@@ -1,4 +1,5 @@
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useReducer, useState, useEffect } from 'react';
+import { includes } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
 import {
@@ -6,9 +7,9 @@ import {
   PageFooter,
   useGlobalContext,
   generateFiltersFromSearch,
+  useQuery,
   generateSearchFromFilters,
 } from 'strapi-helper-plugin';
-import useQuery from '../../hooks/useQuery';
 import getTrad from '../../utils/getTrad';
 import Container from '../../components/Container';
 import ControlsWrapper from '../../components/ControlsWrapper';
@@ -20,6 +21,7 @@ import FiltersList from '../../components/FiltersList';
 import ListEmpty from '../../components/ListEmpty';
 import ModalStepper from '../ModalStepper';
 import getHeaderLabel from './utils/getHeaderLabel';
+import filtersForm from './utils/filtersForm';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
@@ -30,26 +32,24 @@ const HomePage = () => {
   const { push } = useHistory();
   const { search } = useLocation();
   const query = useQuery();
-  const { data, dataToDelete, _limit, _page, _sort, _q } = reducerState.toJS();
+  const { data, dataToDelete } = reducerState.toJS();
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
+  const paramsKeys = ['_limit', '_page', '_q', '_sort'];
 
   useEffect(() => {
-    const searchParams = getSearchParams();
-
-    Object.keys(searchParams).map(key => {
-      return dispatch({
-        type: 'ON_QUERY_CHANGE',
-        key,
-        value: searchParams[key],
-      });
+    // TODO - Retrieve data
+    dispatch({
+      type: 'GET_DATA_SUCCEEDED',
+      data: [],
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
+  }, []);
 
   const getSearchParams = () => {
     const params = {};
     query.forEach((value, key) => {
-      params[key] = value;
+      if (includes(paramsKeys, key)) {
+        params[key] = value;
+      }
     });
 
     return params;
@@ -62,45 +62,39 @@ const HomePage = () => {
     };
   };
 
-  const handleChangeFilters = () => {
-    console.log('change filter');
+  const handleChangeFilters = ({ target: { value } }) => {
+    if (value) {
+      // Add filter
+      const updatedFilters = generateFiltersFromSearch(search);
+      updatedFilters.push(value);
+
+      handleChangeParams({
+        target: { name: 'filters', value: updatedFilters },
+      });
+    }
   };
 
   const handleChangeListParams = ({ target: { name, value } }) => {
     const key = name.split('.').pop();
 
-    handleChangeQuery({ key, value });
+    handleChangeParams({ target: { name: key, value } });
   };
 
-  const handleChangeParams = ({ key, value }) => {
-    const updatedSearch = getUpdatedSearchParams({ [key]: value });
+  const getQueryValue = key => {
+    const queryParams = getSearchParams();
+
+    return queryParams[key];
+  };
+
+  const handleChangeParams = ({ target: { name, value } }) => {
+    const updatedSearch = getUpdatedSearchParams({ [name]: value });
     const newSearch = generateSearchFromFilters(updatedSearch);
+
     push({ search: newSearch });
   };
 
-  const handleChangeSearch = ({ target: { value } }) => {
-    handleChangeQuery({ key: '_q', value });
-  };
-
-  const handleChangeSort = ({ target: { value } }) => {
-    handleChangeQuery({ key: '_sort', value });
-  };
-
-  const handleChangeQuery = ({ key, value }) => {
-    dispatch({
-      type: 'ON_QUERY_CHANGE',
-      key,
-      value,
-    });
-
-    handleChangeParams({
-      key,
-      value,
-    });
-  };
-
   const handleClearSearch = () => {
-    handleChangeSearch({ target: { value: '' } });
+    handleChangeParams({ target: { name: '_q', value: '' } });
   };
 
   const handleClickToggleModal = () => {
@@ -138,8 +132,8 @@ const HomePage = () => {
   };
 
   const params = {
-    _limit: parseInt(_limit, 10),
-    _page: parseInt(_page, 10),
+    _limit: parseInt(getQueryValue('_limit'), 10) || 10,
+    _page: parseInt(getQueryValue('_page'), 10) || 1,
   };
 
   return (
@@ -147,16 +141,20 @@ const HomePage = () => {
       <Header {...headerProps} />
       <HeaderSearch
         label={pluginName}
-        onChange={handleChangeSearch}
+        onChange={handleChangeParams}
         onClear={handleClearSearch}
         placeholder={formatMessage({ id: getTrad('search.placeholder') })}
-        value={_q}
+        name="_q"
+        value={getQueryValue('_q') || ''}
       />
 
       <ControlsWrapper>
         <SelectAll />
-        <SortPicker onChange={handleChangeSort} value={_sort} />
-        <FiltersPicker onChange={handleChangeFilters} />
+        <SortPicker
+          onChange={handleChangeParams}
+          value={getQueryValue('_sort') || null}
+        />
+        <FiltersPicker onChange={handleChangeFilters} filters={filtersForm} />
         <FiltersList filters={generateFiltersFromSearch(search)} />
       </ControlsWrapper>
       <ListEmpty onClick={handleClickToggleModal} />

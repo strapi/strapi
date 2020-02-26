@@ -88,6 +88,9 @@ export {
   useGlobalContext,
 } from './contexts/GlobalContext';
 
+// Hooks
+export { default as useQuery } from './hooks/useQuery';
+
 // Utils
 export { default as auth } from './utils/auth';
 export { default as cleanData } from './utils/cleanData';
@@ -95,6 +98,7 @@ export { default as difference } from './utils/difference';
 export { default as dateFormats } from './utils/dateFormats';
 export { default as translatedErrors } from './utils/translatedErrors';
 export { darken } from './utils/colors';
+export { default as getFilterType } from './utils/getFilterType';
 export { default as getQueryParameters } from './utils/getQueryParameters';
 export { default as injectHooks } from './utils/injectHooks';
 export { default as validateInput } from './utils/inputsValidations';

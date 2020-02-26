@@ -5,12 +5,11 @@ import { themePropTypes } from 'strapi-helper-plugin';
 const DropdownButton = styled.button`
   display: flex;
   align-items: center;
-  height: 32px;
+  height: 30px;
   padding: 0 10px;
-  line-height: 30px;
-  background-color: ${({ theme }) => theme.main.colors.filters.background};
-  border: 1px solid ${({ theme }) => theme.main.colors.filters.border};
-  color: ${({ theme }) => theme.main.colors.filters.color};
+  background-color: ${({ theme }) => theme.main.colors.white};
+  border: 1px solid ${({ theme }) => theme.main.colors.darkGrey};
+  color: ${({ theme }) => theme.main.colors.greyDark};
   font-weight: ${({ theme }) => theme.main.fontWeights.semiBold};
   font-size: ${({ theme }) => theme.main.fontSizes.md};
   border-radius: ${({ theme }) => theme.main.sizes.borderRadius};
@@ -24,24 +23,24 @@ const DropdownButton = styled.button`
     margin-left: 10px;
   }
   > svg g {
-    stroke: ${({ theme }) => theme.main.colors.filters.color};
+    stroke: ${({ theme }) => theme.main.colors.greyDark};
   }
 
   ${({ isActive, theme }) =>
     isActive
       ? `
-      background-color: ${theme.main.colors.filters.button.active.background};
-      border: 1px solid ${theme.main.colors.filters.button.active.border};
-      color: ${theme.main.colors.filters.button.active.color};
-      > svg g {
-        stroke: ${theme.main.colors.filters.button.active.color};
-      }
-    `
+        background-color: ${theme.main.colors.lightBlue};
+        border: 1px solid ${theme.main.colors.darkBlue};
+        color: ${theme.main.colors.mediumBlue};
+        > svg g {
+          stroke: ${theme.main.colors.mediumBlue};
+        }
+      `
       : `
-      &:hover {
-        background-color: ${theme.main.colors.filters.button.hover.background};
-      }
-    `}
+        &:hover {
+          background-color: ${theme.main.colors.lightestGrey};
+        }
+      `}
 `;
 
 DropdownButton.defaultProps = {

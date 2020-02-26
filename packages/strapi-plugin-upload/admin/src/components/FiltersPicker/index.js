@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import moment from 'moment';
 import { FormattedMessage } from 'react-intl';
 import { FilterIcon } from 'strapi-helper-plugin';
 
@@ -9,12 +10,21 @@ import DropdownSection from '../DropdownSection';
 import Wrapper from './Wrapper';
 import FiltersCard from '../FiltersCard';
 
-// TODO - MOVE IN THE HELPER PLUGIN TO BE USED IN THE CTM TOO
-const FiltersPicker = ({ onChange }) => {
+const FiltersPicker = ({ filters, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleChange = value => {
-    onChange({ target: { value } });
+  const handleChange = ({ target: { value } }) => {
+    if (value.value) {
+      let formattedValue = value;
+
+      if (value.value._isAMomentObject === true) {
+        formattedValue.value = moment(
+          value.value,
+          'YYYY-MM-DD HH:mm:ss'
+        ).format();
+      }
+      onChange({ target: { value: formattedValue } });
+    }
 
     hangleToggle();
   };
@@ -30,17 +40,25 @@ const FiltersPicker = ({ onChange }) => {
         <FormattedMessage id="app.utils.filters" />
       </DropdownButton>
       <DropdownSection isOpen={isOpen}>
-        <FiltersCard handleChange={handleChange} />
+        <FiltersCard onChange={handleChange} filters={filters} />
       </DropdownSection>
     </Wrapper>
   );
 };
 
 FiltersPicker.defaultProps = {
+  filters: [],
   onChange: () => {},
 };
 
 FiltersPicker.propTypes = {
+  filters: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      filter: PropTypes.string.isRequired,
+      value: PropTypes.string.isRequired,
+    })
+  ),
   onChange: PropTypes.func,
 };
 

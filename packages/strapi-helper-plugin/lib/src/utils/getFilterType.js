@@ -1,4 +1,4 @@
-const getFilters = type => {
+const getFilterType = type => {
   switch (type) {
     case 'string':
     case 'text':
@@ -105,4 +105,4 @@ const getFilters = type => {
   }
 };
 
-export default getFilters;
+export default getFilterType;

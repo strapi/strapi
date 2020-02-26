@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 const Wrapper = styled.div`
   position: relative;
-  margin-top: 25px;
+  margin-top: 19px;
   padding: 0;
 
   .btn-wrapper {

@@ -1,0 +1,23 @@
+{
+  "connection": "default",
+  "info": {
+    "name": "test",
+    "description": ""
+  },
+  "attributes": {
+    "type": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "enum": {
+      "type": "enumeration",
+      "enum": [
+        "yo",
+        "yoyo",
+        "yoyoyo"
+      ]
+    }
+  },
+  "collectionName": "myplugin_test"
+}
