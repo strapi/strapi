@@ -95,7 +95,6 @@ export { default as request } from './utils/request';
 export { default as storeData } from './utils/storeData';
 export { default as templateObject } from './utils/templateObject';
 export { default as getYupInnerErrors } from './utils/getYupInnerErrors';
-export { default as useDebounce } from './hooks/useDebounce';
 export { default as useClickAwayListener } from './hooks/useClickAwayListener';
 
 // SVGS

@@ -5,8 +5,10 @@ import styled from 'styled-components';
 import { useGlobalContext } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
+import getTrad from '../../utils/getTrad';
 
-// This component is only used in this file so there is no need to create a separated file.
+// Note you don't need to create a specific file for this one
+// as it will soon be replaced by the Text one so you can leave it in this file.
 const RightContentLabel = styled.div`
   padding: 0 5px;
   text-transform: capitalize;
@@ -20,7 +22,7 @@ const RightLabel = ({ label, availability }) => {
     return (
       <RightContentLabel color="blue">
         {formatMessage({
-          id: `${pluginId}.components.uid.regenerate`,
+          id: getTrad('components.uid.regenerate'),
         })}
       </RightContentLabel>
     );
@@ -42,7 +44,7 @@ const RightLabel = ({ label, availability }) => {
         <Remove fill="#ff203c" width="12px" height="12px" />
         <RightContentLabel color="red">
           {formatMessage({
-            id: `${pluginId}.components.uid.unavailable`,
+            id: getTrad('components.uid.unavailable'),
           })}
         </RightContentLabel>
       </>

@@ -1,13 +1,15 @@
 import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Regenerate } from '@buffetjs/icons';
+import { Sync } from '@buffetjs/icons';
 import { ErrorMessage as BaseErrorMessage } from '@buffetjs/styles';
 import { Label, Error } from '@buffetjs/core';
+import { useDebounce } from '@buffetjs/hooks';
 import styled from 'styled-components';
-import { request, LoadingIndicator, useClickAwayListener, useDebounce } from 'strapi-helper-plugin';
+import { request, LoadingIndicator, useClickAwayListener } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
 
 import pluginId from '../../pluginId';
+import getRequestUrl from '../../utils/getRequestUrl';
 import useDataManager from '../../hooks/useDataManager';
 import RightLabel from './RightLabel';
 import Options from './Options';
@@ -53,11 +55,32 @@ const InputUID = ({
   const [label, setLabel] = useState();
   const debouncedValue = useDebounce(value, 300);
   const wrapperRef = useRef(null);
+  const generateUid = useRef();
   const initialValue = initialData[name];
+
+  generateUid.current = async () => {
+    setIsLoading(true);
+    const requestURL = getRequestUrl('explorer/uid/generate');
+    try {
+      const { data } = await request(requestURL, {
+        method: 'POST',
+        body: {
+          contentTypeUID,
+          field: name,
+          data: modifiedData,
+        },
+      });
+      onChange({ target: { name, value: data, type: 'text' } });
+      setIsLoading(false);
+    } catch (err) {
+      console.error({ err });
+      setIsLoading(false);
+    }
+  };
 
   const checkAvailability = async () => {
     setIsLoading(true);
-    const requestURL = '/content-manager/explorer/uid/check-availability';
+    const requestURL = getRequestUrl('explorer/uid/check-availability');
     try {
       const data = await request(requestURL, {
         method: 'POST',
@@ -79,42 +102,23 @@ const InputUID = ({
     }
   };
 
-  const generate = async () => {
-    setIsLoading(true);
-    const requestURL = '/content-manager/explorer/uid/generate';
-    try {
-      const { data } = await request(requestURL, {
-        method: 'POST',
-        body: {
-          contentTypeUID,
-          field: name,
-          data: modifiedData,
-        },
-      });
-      onChange({ target: { name, value: data, type: 'text' } });
-      setIsLoading(false);
-    } catch (err) {
-      console.error({ err });
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
     if (!value && required) {
-      generate();
+      generateUid.current();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (debouncedValue && debouncedValue !== initialValue) {
+    // if (debouncedValue && debouncedValue !== initialValue) {
+    if (debouncedValue) {
       checkAvailability();
     }
     if (!debouncedValue) {
       setAvailability(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedValue]);
+  }, [debouncedValue, initialValue]);
 
   useEffect(() => {
     let timer;
@@ -191,12 +195,12 @@ const InputUID = ({
                 <RegenerateButton
                   onMouseEnter={handleGenerateMouseEnter}
                   onMouseLeave={handleGenerateMouseLeave}
-                  onClick={generate}
+                  onClick={generateUid.current}
                 >
                   {isLoading ? (
                     <LoadingIndicator />
                   ) : (
-                    <Regenerate fill={label ? '#007EFF' : '#B5B7BB'} width="15px" height="15px" />
+                    <Sync fill={label ? '#007EFF' : '#B5B7BB'} width="15px" height="15px" />
                   )}
                 </RegenerateButton>
               </RightContent>

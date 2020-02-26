@@ -4,10 +4,11 @@ const RegenerateButton = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
-  background-color: #fafafb;
   width: 40px;
   height: 32px;
+  background-color: #fafafb;
+  z-index: 10;
+  
   &:hover {
     cursor: pointer;
     background-color: #aed4fb;
