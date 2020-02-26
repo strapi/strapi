@@ -203,7 +203,7 @@ You can access the config of the current environment through `strapi.config.curr
 - `defaultConnection` (string): Connection by default for models which are not related to a specific `connection`. Default value: `default`.
 - `connections` List of all available connections.
   - `default`
-    - `connector` (string): Connector used by the current connection. Will be `bookshelf`.
+    - `connector` (string): Connector used by the current connection. Will be `strapi-hook-bookshelf`.
     - `settings` Useful for external session stores such as Redis.
       - `client` (string): Database client to create the connection. `sqlite` or `postgres` or `mysql`.
       - `host` (string): Database host name. Default value: `localhost`.
@@ -234,7 +234,7 @@ You can access the config of the current environment through `strapi.config.curr
 - `defaultConnection` (string): Connection by default for models which are not related to a specific `connection`. Default value: `default`.
 - `connections` List of all available connections.
   - `default`
-    - `connector` (string): Connector used by the current connection. Will be `mongoose`.
+    - `connector` (string): Connector used by the current connection. Will be `strapi-hook-mongoose`.
     - `settings` Useful for external session stores such as Redis.
       - `client` (string): Database client to create the connection. Will be `mongo`.
       - `host` (string): Database host name. Default value: `localhost`.
