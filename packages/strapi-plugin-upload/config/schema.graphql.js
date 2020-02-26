@@ -25,8 +25,8 @@ module.exports = {
       files: {
         resolver: {
           plugin: 'upload',
-          handler: 'Upload.find'
-        }
+          handler: 'Upload.find',
+        },
       },
     },
     Mutation: {
@@ -40,11 +40,8 @@ module.exports = {
         resolver: async (obj, { file: upload, ...fields }) => {
           const file = await formatFile(upload, fields);
 
-          const config = strapi.plugins.upload.config;
-
           const uploadedFiles = await strapi.plugins.upload.services.upload.upload(
-            [file],
-            config
+            [file]
           );
 
           // Return response.
@@ -60,11 +57,8 @@ module.exports = {
             uploads.map(upload => formatFile(upload, fields))
           );
 
-          const config = strapi.plugins.upload.config;
-
           const uploadedFiles = await strapi.plugins.upload.services.upload.upload(
-            files,
-            config
+            files
           );
 
           // Return response.
@@ -94,7 +88,7 @@ const formatFile = async (upload, fields) => {
     ext: path.extname(filename),
     buffer,
     mime: mimetype,
-    size: (buffer.length / 1000).toFixed(2),
+    size: Math.round((stream.size / 1000) * 100) / 100,
   };
 
   const { refId, ref, source, field } = fields;
