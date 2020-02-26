@@ -205,9 +205,6 @@ module.exports = function createQueryBuilder({ model, strapi }) {
         buildSearchQuery(qb, model, params);
       })
       .query(buildQuery({ model, filters }))
-      .query(qb => {
-        console.log(qb.toString());
-      })
       .fetchAll({
         withRelated: populate,
       })
