@@ -25,6 +25,7 @@ import pl from 'react-intl/locale-data/pl';
 import pt from 'react-intl/locale-data/pt';
 import ru from 'react-intl/locale-data/ru';
 import tr from 'react-intl/locale-data/tr';
+import uk from 'react-intl/locale-data/uk';
 import vi from 'react-intl/locale-data/vi';
 import zh from 'react-intl/locale-data/zh';
 import sk from 'react-intl/locale-data/sk';
@@ -47,6 +48,7 @@ const locales = {
   pt,
   ru,
   tr,
+  uk,
   vi,
   zh,
   sk,
