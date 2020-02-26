@@ -40,7 +40,12 @@ const SortPicker = ({ onChange, value }) => {
         <Carret isUp={!isOpen} />
       </DropdownButton>
       <DropdownSection isOpen={isOpen}>
-        <SortList list={orders} selected={value} onClick={handleChange} />
+        <SortList
+          isShown={isOpen}
+          list={orders}
+          selectedItem={value}
+          onClick={handleChange}
+        />
       </DropdownSection>
     </Wrapper>
   );

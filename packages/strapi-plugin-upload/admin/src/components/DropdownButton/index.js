@@ -1,8 +1,13 @@
+import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { themePropTypes } from 'strapi-helper-plugin';
 
-const DropdownButton = styled.button`
+import Text from '../Text';
+
+const DropdownButton = styled(props => (
+  <Text as="button" fontWeight="semiBold" {...props} />
+))`
   display: flex;
   align-items: center;
   height: 30px;
@@ -10,8 +15,6 @@ const DropdownButton = styled.button`
   background-color: ${({ theme }) => theme.main.colors.white};
   border: 1px solid ${({ theme }) => theme.main.colors.darkGrey};
   color: ${({ theme }) => theme.main.colors.greyDark};
-  font-weight: ${({ theme }) => theme.main.fontWeights.semiBold};
-  font-size: ${({ theme }) => theme.main.fontSizes.md};
   border-radius: ${({ theme }) => theme.main.sizes.borderRadius};
   &:active,
   &:focus {

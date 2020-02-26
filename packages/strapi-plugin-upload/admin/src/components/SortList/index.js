@@ -1,26 +1,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
-
-import getTrad from '../../utils/getTrad';
 
 import Wrapper from './Wrapper';
-import SortListItem from './SortListItem';
+import SortListItem from '../SortListItem';
 
-const SortList = ({ list, onClick, selected }) => {
+const SortList = ({ list, onClick, selectedItem }) => {
   return (
     <Wrapper>
       {Object.keys(list).map(item => {
         return (
           <SortListItem
             key={item}
-            isActive={list[item] === selected}
-            onClick={() => {
-              onClick(list[item]);
-            }}
-          >
-            <FormattedMessage id={getTrad(`sort.${item}`)} />
-          </SortListItem>
+            label={item}
+            value={list[item]}
+            onClick={onClick}
+            selectedItem={selectedItem}
+          />
         );
       })}
     </Wrapper>
@@ -30,13 +25,13 @@ const SortList = ({ list, onClick, selected }) => {
 SortList.defaultProps = {
   list: {},
   onClick: () => {},
-  selected: null,
+  selectedItem: null,
 };
 
 SortList.propTypes = {
   list: PropTypes.object,
   onClick: PropTypes.func,
-  selected: PropTypes.string,
+  selectedItem: PropTypes.string,
 };
 
 export default SortList;
