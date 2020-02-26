@@ -9,15 +9,20 @@
  */
 const _ = require('lodash');
 
-module.exports = async () => {
+module.exports = async strapi => {
   // set plugin store
-  const pluginStore = strapi.store({
-    environment: strapi.config.environment,
+  const configurator = strapi.store({
     type: 'plugin',
     name: 'upload',
+    key: 'settings',
   });
 
-  strapi.plugins.upload.config.providers = [];
+  Object.assign(strapi.plugins.upload.config, {
+    enabled: true,
+    provider: 'local',
+    sizeLimit: 1000000,
+    providers: [],
+  });
 
   const installedProviders = Object.keys(strapi.config.info.dependencies)
     .filter(d => d.includes('strapi-provider-upload-'))
@@ -28,19 +33,15 @@ module.exports = async () => {
   }
 
   // if provider config does not exist set one by default
-  const config = await pluginStore.get({ key: 'provider' });
+  const config = await configurator.get();
 
   if (!config) {
-    const provider = _.find(strapi.plugins.upload.config.providers, {
-      provider: 'local',
+    await configurator.set({
+      value: {
+        sizeOptimization: true,
+        responsiveDimensions: true,
+        videoPreview: true,
+      },
     });
-
-    const value = _.assign({}, provider, {
-      enabled: true,
-      // by default limit size to 1 GB
-      sizeLimit: 1000000,
-    });
-
-    await pluginStore.set({ key: 'provider', value });
   }
 };
