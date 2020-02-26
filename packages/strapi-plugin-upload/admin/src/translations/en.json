@@ -27,5 +27,12 @@
   "plugin.description.long": "Media file management.",
   "plugin.description.short": "Media file management.",
   "search.placeholder": "Search for an asset...",
+  "sort.label": "Sort by",
+  "sort.created_at_asc": "Most recent uploads",
+  "sort.created_at_desc": "Oldest uploads",
+  "sort.name_asc": "Alphabetical order (A to Z)",
+  "sort.name_desc": "Reverse alphabetical order (Z to A)",
+  "sort.updated_at_asc": "Most recent updates",
+  "sort.updated_at_desc": "Oldest updates",
   "window.confirm.close-modal": "Are you sure? You have some files that have not been uploaded yet."
 }
