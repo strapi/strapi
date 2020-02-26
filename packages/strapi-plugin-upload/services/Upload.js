@@ -176,4 +176,15 @@ module.exports = {
       })
     );
   },
+  async getConfig() {
+    const config = await strapi
+      .store({
+        environment: strapi.config.environment,
+        type: 'plugin',
+        name: 'upload',
+      })
+      .get({ key: 'provider' });
+
+    return { ...config, sizeLimit: parseFloat(config.sizeLimit) };
+  },
 };
