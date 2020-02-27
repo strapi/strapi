@@ -140,6 +140,7 @@
   "modalForm.sub-header.chooseAttribute.component": "Select a field for your component",
   "modalForm.sub-header.chooseAttribute.contentType": "Select a field for your collection type",
   "modelPage.attribute.relationWith": "Relation with",
+  "modelPage.attribute.relation-polymorphic": "Relation (polymorphic)",
   "modelPage.contentHeader.emptyDescription.description": "There is no description",
   "none": "None",
   "notification.info.creating.notSaved": "Please save your work before creating a new collection type or component",
