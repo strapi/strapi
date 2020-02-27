@@ -55,10 +55,8 @@ const HomePage = () => {
     };
   };
 
-  const handleChangeListParams = ({ target: { name, value } }) => {
-    const key = name.split('.').pop();
-
-    handleChangeParams({ target: { name: key, value } });
+  const handleChangeListParams = ({ target: { value } }) => {
+    handleChangeParams({ target: { name: '_page', value } });
   };
 
   const getQueryValue = key => {
