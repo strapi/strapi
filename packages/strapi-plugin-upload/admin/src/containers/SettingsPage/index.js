@@ -1,5 +1,6 @@
 import React, { useEffect, useReducer, useRef } from 'react';
 import { Header, Inputs } from '@buffetjs/custom';
+import { useIsMounted } from '@buffetjs/hooks';
 import { isEqual } from 'lodash';
 import {
   LoadingIndicatorPage,
@@ -19,18 +20,23 @@ const SettingsPage = () => {
   const { formatMessage } = useGlobalContext();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { initialData, isLoading, modifiedData } = reducerState.toJS();
+  const isMounted = useIsMounted();
   const getDataRef = useRef();
+  const abortController = new AbortController();
 
   getDataRef.current = async () => {
     try {
+      const { signal } = abortController;
       const { data } = await request(
-        getRequestUrl('settings', { method: 'GET' })
+        getRequestUrl('settings', { method: 'GET', signal })
       );
 
-      dispatch({
-        type: 'GET_DATA_SUCCEEDED',
-        data,
-      });
+      if (isMounted) {
+        dispatch({
+          type: 'GET_DATA_SUCCEEDED',
+          data,
+        });
+      }
     } catch (err) {
       console.error(err);
     }
@@ -39,7 +45,11 @@ const SettingsPage = () => {
   useEffect(() => {
     // TODO: uncomment when API ready
     // getDataRef.current();
-  }, []);
+
+    return () => {
+      abortController.abort();
+    };
+  }, [abortController]);
 
   const handleSubmit = async () => {
     try {
@@ -48,10 +58,11 @@ const SettingsPage = () => {
       //   method: 'PUT',
       //   body: modifiedData,
       // });
-
-      dispatch({
-        type: 'SUBMIT_SUCCEEDED',
-      });
+      if (isMounted) {
+        dispatch({
+          type: 'SUBMIT_SUCCEEDED',
+        });
+      }
 
       strapi.notification.success('notification.form.success.fields');
     } catch (err) {
