@@ -61,25 +61,12 @@ module.exports = {
   async upload(files) {
     const config = strapi.plugins.upload.config;
 
-    // Get upload provider settings to configure the provider to use.
-    const provider = _.find(strapi.plugins.upload.config.providers, {
-      provider: config.provider,
-    });
-
-    if (!provider) {
-      throw new Error(
-        `The provider package isn't installed. Please run \`npm install strapi-provider-upload-${config.provider}\``
-      );
-    }
-
-    const actions = await provider.init(config.providerOptions);
-
     // upload a single file
     const uploadFile = async file => {
-      await actions.upload(file);
+      await strapi.plugins.upload.provider.upload(file);
 
       delete file.buffer;
-      file.provider = provider.provider;
+      file.provider = config.provider;
 
       const res = await this.add(file);
 
@@ -112,16 +99,9 @@ module.exports = {
   async remove(file) {
     const config = strapi.plugins.upload.config;
 
-    // get upload provider settings to configure the provider to use
-    const provider = _.find(strapi.plugins.upload.config.providers, {
-      provider: config.provider,
-    });
-
-    const actions = provider.init(config.providerOptions);
-
     // execute delete function of the provider
     if (file.provider === config.provider) {
-      await actions.delete(file);
+      await strapi.plugins.upload.provider.delete(file);
     }
 
     const media = await strapi.query('file', 'upload').findOne({

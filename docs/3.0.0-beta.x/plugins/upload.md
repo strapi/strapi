@@ -272,44 +272,83 @@ In our second example, you can upload and attach multiple pictures to the restau
 }
 ```
 
-## Install providers
+## Using a provider
 
-By default Strapi provides a local file upload system. You might want to upload your files on AWS S3 or another provider.
+By default Strapi provides a provider that upload files to a local directory. You might want to upload your files to another provider like AWS S3.
 
 You can check all the available providers developed by the community on npmjs.org - [Providers list](https://www.npmjs.com/search?q=strapi-provider-upload-)
 
 To install a new provider run:
 
 ```
-$ npm install strapi-provider-upload-aws-s3@beta --save
+$ npm install strapi-provider-upload-aws-s3 --save
 ```
 
-::: tip
-If the provider is not in the mono repo, you probably don't need `@beta` depending if the creator published it with this tag or not.
-:::
+or
 
-Then, visit [http://localhost:1337/admin/plugins/upload/configurations/development](http://localhost:1337/admin/plugins/upload/configurations/development) on your web browser and configure the provider.
+```
+$ yarn add strapi-provider-upload-aws-s3
+```
+
+To enable the provider, create or edit the file at `./extensions/upload/config/settings.json`
+
+```json
+{
+  "provider": "aws-s3",
+  "providerOptions": {
+    "accessKeyId": "dev-key",
+    "secretAccessKey": "dev-secret",
+    "region": "aws-region",
+    "params": {
+      "Bucket": "my-bucket"
+    }
+  }
+}
+```
+
+Make sure to read the provider's `README` to know what are the possible parameters.
 
 ## Create providers
 
-If you want to create your own, make sure the name starts with `strapi-provider-upload-` (duplicating an existing one will be easier to create), modify the `auth` config object and customize the `upload` and `delete` functions.
+You can create a Node.js module to implement a custom provider. Read the official documentation [here](https://docs.npmjs.com/creating-node-js-modules).
 
-To use it you will have to publish it on **npm**.
+To work with strapi, your provider name must match the pattern `strapi-provider-upload-{provider-name}`.
+
+Your provider need to export the following interface:
+
+```js
+module.exports = {
+  init(providerOptions) {
+    // init your provider if necessary
+
+    return {
+      upload(file) {
+        // upload the file in the provider
+      },
+      delete(file) {
+        // delete the file in the provider
+      },
+    };
+  },
+};
+```
+
+You can then publish it to make it available to the community.
 
 ### Create a local provider
 
 If you want to create your own provider without publishing it on **npm** you can follow these steps:
 
-- Create a `providers` folder in your application.
-- Create your provider as explained in the documentation eg. `./providers/strapi-provider-upload-[...]/...`
-- Then update your `package.json` to link your `strapi-provider-upload-[...]` dependency to the [local path](https://docs.npmjs.com/files/package.json#local-paths) of your new provider.
+- Create a `./providers/strapi-provider-upload-{provider-name}` folder in your root application folder.
+- Create your provider as explained in the [documentation](#create-providers) above.
+- Then update your `package.json` to link your `strapi-provider-upload-{provider-name}` dependency to point to the [local path](https://docs.npmjs.com/files/package.json#local-paths) of your provider.
 
 ```json
 {
   ...
   "dependencies": {
     ...
-    "strapi-provider-upload-[...]": "file:providers/strapi-provider-upload-[...]",
+    "strapi-provider-upload-{provider-name}": "file:providers/strapi-provider-upload-{provider-name}"
     ...
   }
 }
