@@ -63,7 +63,10 @@ function TableHeader({ headers, isBulkable }) {
                 {header.label}
 
                 {sortBy === header.name && (
-                  <Arrow className={`${sortOrder === 'ASC' && 'isAsc'}`} />
+                  <Arrow
+                    fill="#212529"
+                    isUp={sortOrder === 'ASC' && 'isAsc'}
+                  />
                 )}
               </span>
             </th>

@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
+import { Carret } from '@buffetjs/icons';
 import getTrad from '../../utils/getTrad';
-
-import Carret from '../../icons/Carret';
 
 import DropdownButton from '../DropdownButton';
 import DropdownSection from '../DropdownSection';
@@ -37,7 +36,7 @@ const SortPicker = ({ onChange, value }) => {
     <Wrapper>
       <DropdownButton onClick={hangleToggle} isActive={isOpen}>
         <FormattedMessage id={getTrad('sort.label')} />
-        <Carret isUp={!isOpen} />
+        <Carret fill={isOpen ? '#007EFF' : '#292b2c'} />
       </DropdownButton>
       <DropdownSection isOpen={isOpen}>
         <SortList
