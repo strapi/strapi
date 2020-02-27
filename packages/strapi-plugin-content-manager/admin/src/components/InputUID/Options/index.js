@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
-import getTrad from '../../../utils/getTrad'
+import getTrad from '../../../utils/getTrad';
 import OptionsWrapper from './wrapper';
 import Option from './Option';
 import OptionsTitle from './OptionsTitle';

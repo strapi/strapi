@@ -215,6 +215,15 @@ const forms = {
               .array()
               .of(yup.string())
               .min(1, errorsTrads.min)
+              .test({
+                name: 'areEnumValuesUnique',
+                message: getTrad('error.validation.enum-duplicate'),
+                test: values => {
+                  const filtered = [...new Set(values)];
+
+                  return filtered.length === values.length;
+                },
+              })
               .matchesEnumRegex(errorsTrads.regex)
               .hasNotEmptyValues('Empty strings are not allowed', dataToValidate.enum),
             enumName: yup.string().nullable(),

@@ -5,6 +5,7 @@ const yup = require('yup');
 
 const {
   validators,
+  areEnumValuesUnique,
   isValidName,
   isValidEnum,
   isValidUID,
@@ -17,11 +18,7 @@ const maxLengthIsGreaterThanOrEqualToMinLength = {
   message: 'maxLength must be greater or equal to minLength',
   test: function(value) {
     const { minLength } = this.parent;
-    if (
-      !_.isUndefined(minLength) &&
-      !_.isUndefined(value) &&
-      value < minLength
-    ) {
+    if (!_.isUndefined(minLength) && !_.isUndefined(value) && value < minLength) {
       return false;
     }
 
@@ -82,9 +79,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
           )
           .test(isValidUID),
         minLength: validators.minLength,
-        maxLength: validators.maxLength
-          .max(256)
-          .test(maxLengthIsGreaterThanOrEqualToMinLength),
+        maxLength: validators.maxLength.max(256).test(maxLengthIsGreaterThanOrEqualToMinLength),
       };
     }
 
@@ -126,10 +121,9 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
               .required()
           )
           .min(1)
+          .test(areEnumValuesUnique)
           .required(),
-        default: yup
-          .string()
-          .when('enum', enumVal => yup.string().oneOf(enumVal)),
+        default: yup.string().when('enum', enumVal => yup.string().oneOf(enumVal)),
         enumName: yup.string().test(isValidName),
         required: validators.required,
         unique: validators.unique,
@@ -225,10 +219,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
               const targetCompo = strapi.components[compoUID];
               if (!targetCompo) return true; // ignore this error as it will fail beforehand
 
-              if (
-                modelType === modelTypes.COMPONENT &&
-                hasComponent(targetCompo)
-              ) {
+              if (modelType === modelTypes.COMPONENT && hasComponent(targetCompo)) {
                 return this.createError({
                   path: this.path,
                   message: `${targetCompo.modelName} already as a nested compoent. You cannot have more than one level of nesting inside your components.`,
@@ -249,9 +240,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
         components: yup
           .array()
           .of(yup.string().required())
-          .test('isArray', '${path} must be an array', value =>
-            Array.isArray(value)
-          ),
+          .test('isArray', '${path} must be an array', value => Array.isArray(value)),
         min: yup.number(),
         max: yup.number(),
       };

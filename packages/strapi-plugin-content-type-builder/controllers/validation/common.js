@@ -64,9 +64,19 @@ const isValidEnum = {
   test: val => val === '' || ENUM_REGEX.test(val),
 };
 
+const areEnumValuesUnique = {
+  name: 'areEnumValuesUnique',
+  message: '${path} cannot contain duplicate values',
+  test: values => {
+    const filtered = [...new Set(values)];
+
+    return filtered.length === values.length;
+  },
+};
+
 module.exports = {
   validators,
-
+  areEnumValuesUnique,
   isValidCollectionName,
   isValidCategoryName,
   isValidName,
