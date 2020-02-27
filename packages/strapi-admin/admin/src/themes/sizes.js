@@ -1,4 +1,5 @@
 const sizes = {
+  borderRadius: '2px',
   header: {
     height: '6rem',
   },
@@ -14,7 +15,6 @@ const sizes = {
     // TODO
     md: '30px',
   },
-  borderRadius: '2px',
 };
 
 export default sizes;
