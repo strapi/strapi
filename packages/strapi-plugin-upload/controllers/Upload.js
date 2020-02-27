@@ -13,13 +13,7 @@ module.exports = {
     const uploadService = strapi.plugins.upload.services.upload;
 
     // Retrieve provider configuration.
-    const config = await strapi
-      .store({
-        environment: strapi.config.environment,
-        type: 'plugin',
-        name: 'upload',
-      })
-      .get({ key: 'provider' });
+    const config = await uploadService.getConfig();
 
     // Verify if the file upload is enable.
     if (config.enabled === false) {
@@ -131,13 +125,19 @@ module.exports = {
   },
 
   async updateSettings(ctx) {
+    const {
+      request: { body: newSettings },
+    } = ctx;
     await strapi
       .store({
         environment: ctx.params.environment,
         type: 'plugin',
         name: 'upload',
       })
-      .set({ key: 'provider', value: ctx.request.body });
+      .set({
+        key: 'provider',
+        value: { ...newSettings, sizeLimit: parseFloat(newSettings.sizeLimit) },
+      });
 
     ctx.send({ ok: true });
   },
@@ -208,10 +208,9 @@ const searchQueries = {
     return ({ id }) => {
       return model
         .query(qb => {
-          qb.whereRaw('LOWER(hash) LIKE ?', [`%${id}%`]).orWhereRaw(
-            'LOWER(name) LIKE ?',
-            [`%${id}%`]
-          );
+          qb.whereRaw('LOWER(hash) LIKE ?', [
+            `%${id}%`,
+          ]).orWhereRaw('LOWER(name) LIKE ?', [`%${id}%`]);
         })
         .fetchAll()
         .then(results => results.toJSON());
