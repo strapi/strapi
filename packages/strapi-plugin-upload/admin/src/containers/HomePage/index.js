@@ -18,7 +18,12 @@ import FiltersList from '../../components/FiltersList';
 // import List from '../../components/List';
 import ListEmpty from '../../components/ListEmpty';
 import ModalStepper from '../ModalStepper';
-import getHeaderLabel from './utils/getHeaderLabel';
+
+import {
+  generatePageFromStart,
+  generateStartFromPage,
+  getHeaderLabel,
+} from './utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
@@ -55,8 +60,14 @@ const HomePage = () => {
     };
   };
 
-  const handleChangeListParams = ({ target: { value } }) => {
-    handleChangeParams({ target: { name: '_page', value } });
+  const handleChangeListParams = ({ target: { name, value } }) => {
+    if (name.includes('_page')) {
+      handleChangeParams({
+        target: { name: '_start', value: generateStartFromPage(value, limit) },
+      });
+    } else {
+      handleChangeParams({ target: { name: '_limit', value } });
+    }
   };
 
   const getQueryValue = key => {
@@ -110,9 +121,12 @@ const HomePage = () => {
     ],
   };
 
+  const limit = parseInt(getQueryValue('_limit'), 10) || 10;
+  const start = parseInt(getQueryValue('_start'), 10) || 0;
+
   const params = {
     _limit: parseInt(getQueryValue('_limit'), 10) || 10,
-    _page: parseInt(getQueryValue('_page'), 10) || 1,
+    _page: generatePageFromStart(start, limit),
   };
 
   return (
