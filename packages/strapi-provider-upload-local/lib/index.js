@@ -9,9 +9,7 @@ const fs = require('fs');
 const path = require('path');
 
 module.exports = {
-  provider: 'local',
-  name: 'Local server',
-  init: ({ sizeLimit = 1000000 } = {}) => {
+  init({ sizeLimit = 1000000 } = {}) {
     const verifySize = file => {
       if (file.size > sizeLimit) {
         throw strapi.errors.badRequest('FileToBig', {
@@ -27,7 +25,7 @@ module.exports = {
     };
 
     return {
-      upload: file => {
+      upload(file) {
         verifySize(file);
 
         return new Promise((resolve, reject) => {
@@ -50,7 +48,7 @@ module.exports = {
           );
         });
       },
-      delete: file => {
+      delete(file) {
         return new Promise((resolve, reject) => {
           const filePath = path.join(
             strapi.config.public.path,

@@ -7,7 +7,6 @@
  * This gives you an opportunity to set up your data model,
  * run jobs, or perform some special logic.
  */
-const _ = require('lodash');
 
 module.exports = async () => {
   // set plugin store
@@ -17,13 +16,9 @@ module.exports = async () => {
     key: 'settings',
   });
 
-  const installedProviders = Object.keys(strapi.config.info.dependencies)
-    .filter(d => d.includes('strapi-provider-upload-'))
-    .concat('strapi-provider-upload-local');
-
-  for (let installedProvider of _.uniq(installedProviders)) {
-    strapi.plugins.upload.config.providers.push(require(installedProvider));
-  }
+  strapi.plugins.upload.provider = createProvider(
+    strapi.plugins.upload.config || {}
+  );
 
   // if provider config does not exist set one by default
   const config = await configurator.get();
@@ -36,5 +31,16 @@ module.exports = async () => {
         videoPreview: true,
       },
     });
+  }
+};
+
+const createProvider = ({ provider, providerOptions }) => {
+  try {
+    return require(`strapi-provider-upload-${provider}`).init(providerOptions);
+  } catch (err) {
+    strapi.log.error(err);
+    throw new Error(
+      `The provider package isn't installed. Please run \`npm install strapi-provider-upload-${provider}\``
+    );
   }
 };
