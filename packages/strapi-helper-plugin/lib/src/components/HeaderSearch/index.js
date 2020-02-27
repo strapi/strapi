@@ -1,12 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import ClearIcon from '../../svgs/Clear';
 import SearchIcon from '../../svgs/Search';
 import SearchInfo from '../SearchInfo';
 import Clear from './Clear';
-import ClearIcon from './ClearIcon';
 import Wrapper from './Wrapper';
 
-const HeaderSearch = ({ label, onChange, onClear, placeholder, value }) => {
+const HeaderSearch = ({
+  label,
+  name,
+  onChange,
+  onClear,
+  placeholder,
+  value,
+}) => {
   return (
     <Wrapper>
       <div>
@@ -14,6 +21,7 @@ const HeaderSearch = ({ label, onChange, onClear, placeholder, value }) => {
       </div>
       <div>
         <input
+          name={name}
           onChange={onChange}
           placeholder={placeholder}
           type="text"
@@ -32,6 +40,7 @@ const HeaderSearch = ({ label, onChange, onClear, placeholder, value }) => {
 
 HeaderSearch.defaultProps = {
   label: '',
+  name: '',
   onChange: () => {},
   onClear: () => {},
   placeholder: 'Search for an entry',
@@ -40,6 +49,7 @@ HeaderSearch.defaultProps = {
 
 HeaderSearch.propTypes = {
   label: PropTypes.string,
+  name: PropTypes.string,
   onChange: PropTypes.func,
   onClear: PropTypes.func,
   placeholder: PropTypes.string,

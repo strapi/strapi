@@ -8,6 +8,7 @@ import {
   ModalForm,
   getYupInnerErrors,
   useGlobalContext,
+  useQuery,
   InputsIndex,
 } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
@@ -16,7 +17,6 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { get, has, isEmpty, set, toLower, toString, upperFirst } from 'lodash';
 import pluginId from '../../pluginId';
-import useQuery from '../../hooks/useQuery';
 import useDataManager from '../../hooks/useDataManager';
 import AttributeOption from '../../components/AttributeOption';
 import BooleanBox from '../../components/BooleanBox';

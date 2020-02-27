@@ -249,6 +249,7 @@ async function watchFiles(dir, ignoreFiles = []) {
   const cacheDir = path.join(dir, '.cache');
   const pkgJSON = require(path.join(dir, 'package.json'));
   const admin = path.join(dir, 'admin');
+  const extensionsPath = path.join(dir, 'extensions');
 
   const appPlugins = Object.keys(pkgJSON.dependencies).filter(
     dep =>
@@ -256,12 +257,7 @@ async function watchFiles(dir, ignoreFiles = []) {
       fs.existsSync(path.resolve(getPkgPath(dep), 'admin', 'src', 'index.js'))
   );
   const pluginsToWatch = appPlugins.map(plugin =>
-    path.join(
-      dir,
-      'extensions',
-      plugin.replace(/^strapi-plugin-/i, ''),
-      'admin'
-    )
+    path.join(extensionsPath, plugin.replace(/^strapi-plugin-/i, ''), 'admin')
   );
   const filesToWatch = [admin, ...pluginsToWatch];
 
@@ -272,20 +268,20 @@ async function watchFiles(dir, ignoreFiles = []) {
   });
 
   watcher.on('all', async (event, filePath) => {
-    const re = /\/extensions\/([^\/]*)\/.*$/gm;
-    const matched = re.exec(filePath);
-    const isExtension = matched !== null;
-    const pluginName = isExtension ? matched[1] : '';
+    const isExtension = filePath.includes(extensionsPath);
+    const pluginName = isExtension
+      ? filePath.replace(extensionsPath, '').split(path.sep)[1]
+      : '';
 
     const packageName = isExtension
       ? `strapi-plugin-${pluginName}`
       : 'strapi-admin';
 
     const targetPath = isExtension
-      ? filePath
-          .split(`${path.sep}extensions${path.sep}`)[1]
-          .replace(pluginName, '')
-      : filePath.split(`${path.sep}admin`)[1];
+      ? path.normalize(
+          filePath.split(extensionsPath)[1].replace(pluginName, '')
+        )
+      : path.normalize(filePath.split(admin)[1]);
 
     const destFolder = isExtension
       ? path.join(cacheDir, 'plugins', packageName)

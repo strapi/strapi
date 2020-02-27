@@ -4,7 +4,7 @@ export { default as sizes } from './assets/styles/sizes';
 
 // CommonPropTypes
 export { default as routerPropTypes } from './commonPropTypes/router';
-
+export { default as themePropTypes } from './commonPropTypes/themeShape';
 // Components
 export { default as BackHeader } from './components/BackHeader';
 export { default as BlockerComponent } from './components/BlockerComponent';
@@ -87,6 +87,9 @@ export {
   useGlobalContext,
 } from './contexts/GlobalContext';
 
+// Hooks
+export { default as useQuery } from './hooks/useQuery';
+
 // Utils
 export { default as auth } from './utils/auth';
 export { default as cleanData } from './utils/cleanData';
@@ -101,9 +104,13 @@ export { default as request } from './utils/request';
 export { default as storeData } from './utils/storeData';
 export { default as templateObject } from './utils/templateObject';
 export { default as getYupInnerErrors } from './utils/getYupInnerErrors';
+export { default as generateFiltersFromSearch } from './utils/generateFiltersFromSearch';
+export { default as generateSearchFromFilters } from './utils/generateSearchFromFilters';
+export { default as generateSearchFromObject } from './utils/generateSearchFromObject';
 
 // SVGS
 export { default as LayoutIcon } from './svgs/Layout';
+export { default as ClearIcon } from './svgs/Clear';
 export { default as Close } from './svgs/Close';
 export { default as FilterIcon } from './svgs/Filter';
 export { default as SearchIcon } from './svgs/Search';

@@ -7,20 +7,21 @@ import { FormattedMessage } from 'react-intl';
 import { Header } from '@buffetjs/custom';
 import {
   PopUpWarning,
+  generateFiltersFromSearch,
+  generateSearchFromFilters,
+  generateSearchFromObject,
   getQueryParameters,
   useGlobalContext,
   request,
 } from 'strapi-helper-plugin';
+
 import pluginId from '../../pluginId';
 import DisplayedFieldsDropdown from '../../components/DisplayedFieldsDropdown';
 import Container from '../../components/Container';
 import CustomTable from '../../components/CustomTable';
 import FilterPicker from '../../components/FilterPicker';
 import Search from '../../components/Search';
-import {
-  generateFiltersFromSearch,
-  generateSearchFromFilters,
-} from '../../utils/search';
+
 import ListViewProvider from '../ListViewProvider';
 import { onChangeListLabels, resetListLabels } from '../Main/actions';
 import { AddFilterCta, FilterIcon, Wrapper } from './components';
@@ -39,7 +40,6 @@ import {
 import reducer from './reducer';
 import makeSelectListView from './selectors';
 import getRequestUrl from '../../utils/getRequestUrl';
-import generateSearchFromObject from './utils/generateSearchFromObject';
 
 /* eslint-disable react/no-array-index-key */
 
