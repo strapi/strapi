@@ -25,11 +25,7 @@ const loadFiles = async (
   } = {}
 ) => {
   const root = {};
-  const files = await glob(pattern, {
-    cwd: dir,
-    ...globArgs,
-    ignore: ['**/__tests__/**'],
-  });
+  const files = await glob(pattern, { cwd: dir, ...globArgs });
 
   for (let file of files) {
     const absolutePath = path.resolve(dir, file);

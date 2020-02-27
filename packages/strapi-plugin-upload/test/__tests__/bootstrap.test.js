@@ -1,4 +1,4 @@
-const bootstrap = require('../config/functions/bootstrap');
+const bootstrap = require('../../config/functions/bootstrap');
 
 describe('Upload plugin bootstrap function', () => {
   test('Sets default config if id does not exist', async () => {
