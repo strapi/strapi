@@ -33,6 +33,78 @@ From here you will see the public ipv4 address that you can use to visit your St
 
 You can also SSH into the virtual machine using `root` as the SSH user and your public ipv4 address, there is no password for SSH as DigitalOcean uses SSH keys by default with password authentication disabled.
 
+## Default server configuration
+
+From the inital startup you should not need to configure anything to get started, there is some included software that is configured:
+
+- Node.js v12 (installed via the offical [apt repository](https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions))
+- Yarn Latest Stable (installed via the official [apt repository](https://classic.yarnpkg.com/en/docs/install/#debian-stable))
+- Nginx Latest (Ubuntu default repository)
+- UFW (Uncomplicated Firewall)
+  - Configured to only allow incoming ports: 80 (HTTP), 443 (HTTPS), and 22 (SSH)
+- PostgreSQL Latest (Ubuntu default repository)
+- PM2 (Installed globally using Yarn)
+
+## File and Software paths
+
+### Nginx
+
+The DigitalOcean one-click application uses Nginx to proxy http on port 80 to Strapi, this is to ensure the system is secure as running any application on ports below 1024 require root permissions.
+
+The example config included by default is located at `/etc/nginx/sites-available/strapi.conf` and the upstream block is located at `/etc/nginx/conf.d/upstream.conf`
+
+To learn more about the Nginx proxy options you can view the Nginx proxy [documentation](http://nginx.org/en/docs/http/ngx_http_proxy_module.html).
+
+:::: tabs
+
+::: tab strapi.conf
+Path: `/etc/nginx/sites-available/strapi.conf`
+
+```
+server {
+
+# Listen HTTP
+    listen 80;
+    server_name _;
+
+# Proxy Config
+    location / {
+        proxy_pass http://strapi;
+        proxy_http_version 1.1;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Server $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host $http_host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_pass_request_headers on;
+    }
+}
+```
+
+:::
+
+::: tab upstream.conf
+Path: `/etc/nginx/conf.d/upstream.conf`
+
+```
+upstream strapi {
+    server 127.0.0.1:1337;
+}
+```
+
+:::
+
+::::
+
+### Strapi
+
+In the DigitalOcean one-click application a service user is used in which it's home directory is located at `/srv/strapi`. Likewise the actual Strapi application is located within this home directory at `/srv/strapi/strapi`.
+
+Please note that with this application it is intially created and ran in the `development` environment to allow for creating models. **You should not use this directly in production**, it is recommended that you configure a private git repository to commit changes into and create a new application directory within the service user's home (Example: `/srv/strapi/strapi-production`). To run the new `production` or `staging` environments you can refer to the [PM2 Documentation](https://pm2.keymetrics.io/docs/usage/quick-start/#managing-processes).
+
 ## Using the Service Account
 
 By default the Strapi application will be running under a "service account", this is an account that is extremely limited into what it can do and access. The purpose of using a service account is to project your system from security threats.
@@ -98,95 +170,3 @@ psql -c "ALTER USER strapi with password 'your-new-password';"
 pm2 start strapi-develop
 pm2 logs strapi-develop
 ```
-
-## Migration to Production
-
-The default environment for Strapi's one-click is using `development` as to allow you to create content-types and configure key settings. However if you wish to use this in a `production` environment there will need to be a few key steps. Each of these steps is to ensure you have a stable environment that can be rolled back if there is problems.
-
-### Creating a Github repository
-
-Creating a Github or Gitlab repository is useful for keeping track of changes you have made in development and pushing those changes onto your production instance. This allows you to change things and test them before actually deploying those changes for your users.
-
-If you don't already have one you will need to create a [Github Account](https://github.com/join?source=header-home), after that you will want to create a [new repository](https://github.com/new). This is where you can choose to make it public or private. Private repositories can only be seen by you and people you invite, as a personal user you can create unlimited private repositories.
-
-#### Ignoring secret files
-
-After you have created the new repository we need to push our current code, however before we do that we need to make a few changes to ensure none of our private information is pushed into Github like passwords.
-
-Use any editor (Nano, VIM, Emacs, ect) to edit the `/srv/strapi/strapi/.gitignore` file, we need to add the following under the Strapi block:
-
-```txt
-extensions/users-permissions/config/jwt.json
-config/environments/development/database.json
-config/staging/development/database.json
-config/production/development/database.json
-```
-
-This will prevent leaking of your JSON Web Token secret and database password.
-
-#### Initialize your repository and pushing your project code
-
-Now that we have created our repository on Github we need to initalize it on the server and push our changes to Github. While in the `/srv/strapi/strapi` directory:
-
-```bash
-# Initialize the Git Repo
-git init
-
-# Configure your git user and email
-git config --global user.name "Your Name"
-git config --global user.email "youremail@example.com"
-
-# Adding and commiting your files
-git add .
-git commit -m "My first commit!"
-```
-
-Now we have made the commit locally on the server but we haven't sent it to our Github repository yet. Before we do that we need to setup authentication first. For the sake of this guide we will be using SSH keys. We will be generating a new one, adding it to Github, and finally linking our server repository to our Github one.
-
-```bash
-# Create your ssh key, follow prompts
-ssh-keygen
-
-# After prompts lets grab our public key
-cat ~/.ssh/id_rsa.pub
-```
-
-Now from here you will need to [create a new SSH key](https://github.com/settings/ssh/new) by pasting the output of the last command into the key box (it should start with `ssh-rsa`). Now we can push our code, you should see on your Github repository to "push an existing repository from the command line".
-
-```bash
-git remote add origin git@github.com:yourusername/yourrepositoryname.git
-git push -u origin master
-```
-
-You should now be able to refresh your Github page and see your code!
-
-### Mirroring your development environment
-
-Now that we have our development code in Github, we can mirror it into production. First thing to note is you should not use the same database for both environments. As you could accidently break your production environment by making a change in development.
-
-#### Creating a new database
-
-First we will create a new PostgreSQL database for the production environment. We will be issuing most of the command while in a `psql` shell so they may look a bit different than typical bash. **You will need to do the following commands as the `root` user**
-
-```bash
-# Enter the PostgreSQL shell
-sudo -u postgres psql
-```
-
-```sql
-/* Create the new Database */
-create database strapi_production;
-
-/* Grant the strapi user permissions */
-grant all privileges on database strapi_production to strapi;
-```
-
-You now should be able to connect to the new `strapi_production` database when setting up the production Strapi environment later on.
-
-#### Cloning your project code
-
-#### Running a production process
-
-### Reconfiguring Nginx
-
-### Future changes to Development and how to migrate to production
