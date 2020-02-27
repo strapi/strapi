@@ -1,5 +1,5 @@
-const generateStartFromPage = (page, limit) => {
-  return Math.floor(page / limit) + 1;
+const generatePageFromStart = (start, limit) => {
+  return Math.floor(start / limit) + 1;
 };
 
-export default generateStartFromPage;
+export default generatePageFromStart;
