@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useGlobalContext } from 'strapi-helper-plugin';
 
-const useFetch = () => {
+const useFetchPluginsFromMarketPlace = () => {
   const { currentLocale } = useGlobalContext();
   const [state, setState] = useState({
     error: false,
@@ -49,4 +49,4 @@ const useFetch = () => {
   return state;
 };
 
-export default useFetch;
+export default useFetchPluginsFromMarketPlace;

@@ -10,7 +10,7 @@ import { Header } from '@buffetjs/custom';
 import PageTitle from '../../components/PageTitle';
 import PluginCard from '../../components/PluginCard';
 import Wrapper from './Wrapper';
-import useFetch from './useFetch';
+import useFetchPluginsFromMarketPlace from '../../hooks/useFetchPluginsFromMarketPlace';
 
 const MarketPlacePage = ({ history }) => {
   const {
@@ -19,7 +19,7 @@ const MarketPlacePage = ({ history }) => {
     formatMessage,
     plugins,
   } = useGlobalContext();
-  const { error, isLoading, data } = useFetch();
+  const { error, isLoading, data } = useFetchPluginsFromMarketPlace();
 
   if (isLoading || error) {
     return <LoadingIndicatorPage />;
