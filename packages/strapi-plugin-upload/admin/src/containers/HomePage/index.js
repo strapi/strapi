@@ -13,8 +13,6 @@ import Container from '../../components/Container';
 import ControlsWrapper from '../../components/ControlsWrapper';
 import SelectAll from '../../components/SelectAll';
 import SortPicker from '../../components/SortPicker';
-import FiltersPicker from '../../components/FiltersPicker';
-import FiltersList from '../../components/FiltersList';
 // import List from '../../components/List';
 import ListEmpty from '../../components/ListEmpty';
 import ModalStepper from '../ModalStepper';
@@ -147,8 +145,6 @@ const HomePage = () => {
           onChange={handleChangeParams}
           value={getQueryValue('_sort') || null}
         />
-        <FiltersPicker />
-        <FiltersList />
       </ControlsWrapper>
       <ListEmpty onClick={handleClickToggleModal} />
       {/* <List data={data} /> */}

@@ -844,14 +844,14 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@buffetjs/core@3.0.0-next.1":
-  version "3.0.0-next.1"
-  resolved "https://registry.yarnpkg.com/@buffetjs/core/-/core-3.0.0-next.1.tgz#e0e1cac708b976655028e8ff666c42fb47d6cc17"
-  integrity sha512-lgfQ/4MRxnUYl2e+Ewrihog5u4Y+2j97ZT7ZJ+mKpm8YyJoAvrzTpCEpMVBXjub/LfzLiSyfiIdpxJLOGzcCcQ==
+"@buffetjs/core@3.0.0-next.3":
+  version "3.0.0-next.3"
+  resolved "https://registry.yarnpkg.com/@buffetjs/core/-/core-3.0.0-next.3.tgz#b9833c7851275ed597966241f005acc991b9a0c6"
+  integrity sha512-sqzlKwBAIxZnuEc+EZL0LLTj6+KdNeotXLwTKq3NfChNi4Vqi/NOzkHdj2nXN419KK7J7TY1nlEeNHspxaqSkQ==
   dependencies:
-    "@buffetjs/hooks" "3.0.0-next.1"
-    "@buffetjs/icons" "3.0.0-next.1"
-    "@buffetjs/styles" "3.0.0-next.1"
+    "@buffetjs/hooks" "3.0.0-next.3"
+    "@buffetjs/icons" "3.0.0-next.3"
+    "@buffetjs/styles" "3.0.0-next.3"
     "@buffetjs/utils" "2.0.0"
     "@fortawesome/fontawesome-svg-core" "^1.2.25"
     "@fortawesome/free-regular-svg-icons" "^5.11.2"
@@ -863,31 +863,31 @@
     react-dates "^21.5.1"
     react-moment-proptypes "^1.7.0"
 
-"@buffetjs/custom@3.0.0-next.1":
-  version "3.0.0-next.1"
-  resolved "https://registry.yarnpkg.com/@buffetjs/custom/-/custom-3.0.0-next.1.tgz#59c5c2ee1ce25de0069d4b7bcd87953abc046f44"
-  integrity sha512-nEWAd4lfo18WZov3G04asrw2SO86UM35efXP7xZMNBaom2VH34zIsfq4d7KtUbQ+CfNO0pui6XPPpCnDbXg+5g==
+"@buffetjs/custom@3.0.0-next.3":
+  version "3.0.0-next.3"
+  resolved "https://registry.yarnpkg.com/@buffetjs/custom/-/custom-3.0.0-next.3.tgz#a7bc51448f34b5f14ed1d66c76fe33c221db89b1"
+  integrity sha512-SiM//rjoqfa7Rhr+e7/ObF+rIRXPyUw/KLn316GEbRtXEeDBp/dHpkd1f9NaKd/YgvX+OC3LA5dYpajVbDbReQ==
   dependencies:
-    "@buffetjs/core" "3.0.0-next.1"
-    "@buffetjs/styles" "3.0.0-next.1"
+    "@buffetjs/core" "3.0.0-next.3"
+    "@buffetjs/styles" "3.0.0-next.3"
     "@buffetjs/utils" "2.0.0"
     moment "^2.24.0"
     react-moment-proptypes "^1.7.0"
 
-"@buffetjs/hooks@3.0.0-next.1":
-  version "3.0.0-next.1"
-  resolved "https://registry.yarnpkg.com/@buffetjs/hooks/-/hooks-3.0.0-next.1.tgz#9a274d034c285f02eaf6794568db29ac06a01f53"
-  integrity sha512-iujDzVEVNP0aYyba7n+awx6rBn2IaEN4Sz/Mv30zAIVOJCJd6hnMoMhNKKjpHNLLTpkJ+yZaS15IKODK1SfhFw==
+"@buffetjs/hooks@3.0.0-next.3":
+  version "3.0.0-next.3"
+  resolved "https://registry.yarnpkg.com/@buffetjs/hooks/-/hooks-3.0.0-next.3.tgz#b96b97901ae39261062d416cc835a5c3d2997cc1"
+  integrity sha512-YkP+6sya0dhIdlqNLuWTHLOrDOLJhaftvjhKHTyhK2kXiJW2Og/KZtfFZSKtzjkVOER0J2zAwWcasP/uHxKatQ==
 
-"@buffetjs/icons@3.0.0-next.1":
-  version "3.0.0-next.1"
-  resolved "https://registry.yarnpkg.com/@buffetjs/icons/-/icons-3.0.0-next.1.tgz#3d4f787275951736f4e6f3a1bd5c56737bc0bd44"
-  integrity sha512-N1K9nMF4fw3xMWaK7JDQSU5BpOH+h1tePSIPNGoa9B6YKzyicBT4MWG4E0NvgFyiZ3+3aUn93ct9X0PDKqHGtg==
+"@buffetjs/icons@3.0.0-next.3":
+  version "3.0.0-next.3"
+  resolved "https://registry.yarnpkg.com/@buffetjs/icons/-/icons-3.0.0-next.3.tgz#0357fa9fc6efa782fd88a2cc946c2829069ee276"
+  integrity sha512-YEjYA1ihACtYGpIvpAGddXlqeogKJD1l46qhb/JORIPIMFSIB1cZMRZ+UF72ZHPsSiyrYGjRuVOH3rZXY1LkyQ==
 
-"@buffetjs/styles@3.0.0-next.1":
-  version "3.0.0-next.1"
-  resolved "https://registry.yarnpkg.com/@buffetjs/styles/-/styles-3.0.0-next.1.tgz#d390a21bb170f058e291f27c9841bc3ffab84f46"
-  integrity sha512-Ug6iHUQHmMd4wYtL3dmz633tAHdm2A6JnqISrWLXRrSdV2zVGY+EVXBez/QPeEN+cR0xQUKXXJM6dnR4aDv1RA==
+"@buffetjs/styles@3.0.0-next.3":
+  version "3.0.0-next.3"
+  resolved "https://registry.yarnpkg.com/@buffetjs/styles/-/styles-3.0.0-next.3.tgz#b68b99a18ab89f939b14b6acaa4b16883d15060c"
+  integrity sha512-azmVGFS1JfPppt5fG8sNEiRpQvQrmHyaJbKBS5KZNakeR/ZhWZ81ni3GLVtDa4AlqRUL9tmFbKglWsddsCi03w==
   dependencies:
     "@fortawesome/fontawesome-free" "^5.12.0"
     "@fortawesome/fontawesome-svg-core" "^1.2.22"
@@ -940,9 +940,9 @@
     "@emotion/weak-memoize" "0.2.5"
 
 "@emotion/core@^10.0.9":
-  version "10.0.27"
-  resolved "https://registry.yarnpkg.com/@emotion/core/-/core-10.0.27.tgz#7c3f78be681ab2273f3bf11ca3e2edc4a9dd1fdc"
-  integrity sha512-XbD5R36pVbohQMnKfajHv43g8EbN4NHdF6Zh9zg/C0nr0jqwOw3gYnC07Xj3yG43OYSRyrGsoQ5qPwc8ycvLZw==
+  version "10.0.28"
+  resolved "https://registry.yarnpkg.com/@emotion/core/-/core-10.0.28.tgz#bb65af7262a234593a9e952c041d0f1c9b9bef3d"
+  integrity sha512-pH8UueKYO5jgg0Iq+AmCLxBsvuGtvlmiDCOuv8fGNYn3cowFpLN98L8zO56U0H1PjDIyAlXymgL3Wu7u7v6hbA==
   dependencies:
     "@babel/runtime" "^7.5.5"
     "@emotion/cache" "^10.0.27"
@@ -4016,9 +4016,9 @@ autoprefixer@^9.5.1:
     postcss-value-parser "^4.0.2"
 
 aws-sdk@^2.382.0, aws-sdk@^2.457.0:
-  version "2.627.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.627.0.tgz#e5449ad493f47e81f61a6c941be2cba2bab660ab"
-  integrity sha512-78XdgRYkxpfMpmYQT8uuOClTAxlyDL81WC8TG7XHonXr3l4l+Mbo38wvIRwUiqTvuDIMMni5S5fUeugG2fZxSQ==
+  version "2.628.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.628.0.tgz#bd4b54d3f8243af5c20bbd8aea5043aaef91c5ea"
+  integrity sha512-k0yQqqgTuwCWqPvLe09vGGSJ88oKaWPPCC6uyxQKv7pPQcz9cFZjmjLe6QdGJZeCmeb3rGIZlG+N4Z+9LnwCNg==
   dependencies:
     buffer "4.9.1"
     events "1.1.1"
@@ -7584,11 +7584,11 @@ fastparse@^1.1.1:
   integrity sha512-483XLLxTVIwWK3QTrMGRqUfUpoOs/0hbQrl2oz4J0pAcm3A3bu84wxTFqGqkJzewCLdME38xJLJAxBABfQT8sQ==
 
 fastq@^1.6.0:
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/fastq/-/fastq-1.6.0.tgz#4ec8a38f4ac25f21492673adb7eae9cfef47d1c2"
-  integrity sha512-jmxqQ3Z/nXoeyDmWAzF9kH1aGZSis6e/SbfPmJpUnyZ0ogr6iscHQaml4wsEepEWSdtmpy+eVXmCRIMpxaXqOA==
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/fastq/-/fastq-1.6.1.tgz#4570c74f2ded173e71cf0beb08ac70bb85826791"
+  integrity sha512-mpIH5sKYueh3YyeJwqtVo8sORi0CgtmkVbK6kZStpQlZBYQuTzG2CZ7idSiJuA7bY0SFCWUc5WIs+oYumGCQNw==
   dependencies:
-    reusify "^1.0.0"
+    reusify "^1.0.4"
 
 faye-websocket@^0.10.0:
   version "0.10.0"
@@ -15433,7 +15433,7 @@ retry@^0.10.0:
   resolved "https://registry.yarnpkg.com/retry/-/retry-0.10.1.tgz#e76388d217992c252750241d3d3956fed98d8ff4"
   integrity sha1-52OI0heZLCUnUCQdPTlW/tmNj/Q=
 
-reusify@^1.0.0:
+reusify@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/reusify/-/reusify-1.0.4.tgz#90da382b1e126efc02146e90845a88db12925d76"
   integrity sha512-U9nH88a3fc/ekCF1l0/UP1IosiuIjyTh7hBvXVMHYgVcfGvt897Xguj2UOLDeI5BG2m7/uwyaLVT6fbtCwTyzw==
@@ -15594,9 +15594,9 @@ rollup-pluginutils@^2.0.1, rollup-pluginutils@^2.6.0, rollup-pluginutils@^2.8.1:
     estree-walker "^0.6.1"
 
 rollup@^1.10.0:
-  version "1.31.1"
-  resolved "https://registry.yarnpkg.com/rollup/-/rollup-1.31.1.tgz#4170d6f87148d46e5fbe29b493f8f3ea3453c96f"
-  integrity sha512-2JREN1YdrS/kpPzEd33ZjtuNbOuBC3ePfuZBdKEybvqcEcszW1ckyVqzcEiEe0nE8sqHK+pbJg+PsAgRJ8+1dg==
+  version "1.32.0"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-1.32.0.tgz#c65ce134850aca1ce595fcac07d1dc5d53bf227c"
+  integrity sha512-ab2tF5pdDqm2zuI8j02ceyrJSScl9V2C24FgWQ1v1kTFTu1UrG5H0hpP++mDZlEFyZX4k0chtGEHU2i+pAzBgA==
   dependencies:
     "@types/estree" "*"
     "@types/node" "*"
@@ -17611,9 +17611,9 @@ tslib@1.9.3:
   integrity sha512-4krF8scpejhaOgqzBEcGM7yDIEfi0/8+8zDRZhNZZ2kjmHJ4hv3zCbQWxoJGz1iw5U0Jl0nma13xzHXcncMavQ==
 
 tslib@^1, tslib@^1.10.0, tslib@^1.9.0, tslib@^1.9.3:
-  version "1.11.0"
-  resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.11.0.tgz#f1f3528301621a53220d58373ae510ff747a66bc"
-  integrity sha512-BmndXUtiTn/VDDrJzQE7Mm22Ix3PxgLltW9bSNLoeCY31gnG2OPx0QqJnuc9oMIKioYrz487i6K9o4Pdn0j+Kg==
+  version "1.11.1"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.11.1.tgz#eb15d128827fbee2841549e171f45ed338ac7e35"
+  integrity sha512-aZW88SY8kQbU7gpV19lN24LtXh/yD4ZZg6qieAJDDg+YBsJcSmLGK9QpnUjAKVG/xefmvJGd1WUmfpT/g6AJGA==
 
 tsscmp@1.0.6, tsscmp@^1.0.6:
   version "1.0.6"
