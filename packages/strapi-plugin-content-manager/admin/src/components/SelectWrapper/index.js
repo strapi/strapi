@@ -24,6 +24,8 @@ function SelectWrapper({
   placeholder,
 }) {
   const { pathname, search } = useLocation();
+  // Disable the input in case of a polymorphic relation
+  const isMorph = relationType.toLowerCase().includes('morph');
   const {
     addRelation,
     modifiedData,
@@ -49,6 +51,12 @@ function SelectWrapper({
   startRef.current = state._start;
 
   ref.current = async () => {
+    if (isMorph) {
+      setIsLoading(false);
+
+      return;
+    }
+
     if (!isDraggingComponent) {
       try {
         const params = cloneDeep(state);
@@ -189,7 +197,7 @@ function SelectWrapper({
           addRelation({ target: { name, value } });
         }}
         id={name}
-        isDisabled={!editable}
+        isDisabled={!editable || isMorph}
         isLoading={isLoading}
         isClearable
         mainField={mainField}
