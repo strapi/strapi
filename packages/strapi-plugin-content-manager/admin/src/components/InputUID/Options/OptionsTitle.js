@@ -1,12 +1,12 @@
 import styled from 'styled-components';
 
 const OptionsTitle = styled.div`
-  line-height: 2.1rem;
+  padding: 0.7rem 1rem;
   font-size: 1.2rem;
-  padding: 5px;
+  font-weight: bold;
+  line-height: 2.1rem;
   text-transform: uppercase;
-  color: ${({ theme }) => theme.main.colors.grayLight};
-  border-bottom: 1px solid ${({ theme }) => theme.main.colors.border};
+  color: #9ea7b8;
 `;
 
 export default OptionsTitle;

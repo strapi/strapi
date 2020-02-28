@@ -14,7 +14,6 @@ const Options = ({ options, title }) => (
     {options.map(option => (
       <Option key={option.id} onClick={option.onClick}>
         <div>{option.label}</div>
-
         <FormattedMessage id={getTrad('components.uid.apply')}>
           {msg => <RightOptionLabel className="right-label">{msg}</RightOptionLabel>}
         </FormattedMessage>

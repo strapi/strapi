@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Sync } from '@buffetjs/icons';
-import { ErrorMessage as BaseErrorMessage } from '@buffetjs/styles';
+import { ErrorMessage, Description } from '@buffetjs/styles';
 import { Label, Error } from '@buffetjs/core';
 import { useDebounce, useClickAwayListener } from '@buffetjs/hooks';
 import styled from 'styled-components';
@@ -17,17 +17,12 @@ import Options from './Options';
 import RegenerateButton from './RegenerateButton';
 import RightContent from './RightContent';
 import Input from './InputUID';
+import Wrapper from './Wrapper';
+import SubLabel from './SubLabel';
+import UID_REGEX from './regex';
 
-// There is no need to create additional files for those little components.
-const Wrapper = styled.div`
-  position: relative;
-  padding-bottom: 23px;
-`;
 const InputContainer = styled.div`
   position: relative;
-`;
-const ErrorMessage = styled(BaseErrorMessage)`
-  padding-top: 10px;
 `;
 const Name = styled(Label)`
   display: block;
@@ -43,12 +38,15 @@ const Name = styled(Label)`
 const InputUID = ({
   attribute,
   contentTypeUID,
+  description,
   error: inputError,
   name,
   onChange,
   required,
   validations,
   value,
+  editable,
+  ...inputProps
 }) => {
   const { modifiedData, initialData } = useDataManager();
   const [isLoading, setIsLoading] = useState(false);
@@ -92,7 +90,7 @@ const InputUID = ({
         body: {
           contentTypeUID,
           field: name,
-          value: value || null,
+          value: value ? value.trim() : null,
         },
       });
       setAvailability(data);
@@ -115,7 +113,11 @@ const InputUID = ({
   }, []);
 
   useEffect(() => {
-    if (debouncedValue && debouncedValue !== initialValue) {
+    if (
+      debouncedValue &&
+      debouncedValue.trim().match(UID_REGEX) &&
+      debouncedValue !== initialValue
+    ) {
       checkAvailability();
     }
     if (!debouncedValue) {
@@ -187,7 +189,12 @@ const InputUID = ({
   };
 
   return (
-    <Error name={name} inputError={inputError} type="text" validations={validations}>
+    <Error
+      name={name}
+      inputError={inputError}
+      type="text"
+      validations={{ ...validations, regex: UID_REGEX }}
+    >
       {({ canCheck, onBlur, error, dispatch }) => {
         const hasError = error && error !== null;
 
@@ -196,6 +203,8 @@ const InputUID = ({
             <Name htmlFor={name}>{name}</Name>
             <InputContainer>
               <Input
+                {...inputProps}
+                editable={editable}
                 error={hasError}
                 onFocus={handleFocus}
                 name={name}
@@ -207,17 +216,19 @@ const InputUID = ({
               />
               <RightContent>
                 <RightLabel availability={availability} label={label} />
-                <RegenerateButton
-                  onMouseEnter={handleGenerateMouseEnter}
-                  onMouseLeave={handleGenerateMouseLeave}
-                  onClick={generateUid.current}
-                >
-                  {isLoading ? (
-                    <LoadingIndicator />
-                  ) : (
-                    <Sync fill={label ? '#007EFF' : '#B5B7BB'} width="15px" height="15px" />
-                  )}
-                </RegenerateButton>
+                {editable && (
+                  <RegenerateButton
+                    onMouseEnter={handleGenerateMouseEnter}
+                    onMouseLeave={handleGenerateMouseLeave}
+                    onClick={generateUid.current}
+                  >
+                    {isLoading ? (
+                      <LoadingIndicator small />
+                    ) : (
+                      <Sync fill={label ? '#007EFF' : '#B5B7BB'} width="11px" height="11px" />
+                    )}
+                  </RegenerateButton>
+                )}
               </RightContent>
               {availability && availability.suggestion && isSuggestionOpen && (
                 <FormattedMessage id={`${pluginId}.components.uid.suggested`}>
@@ -236,7 +247,8 @@ const InputUID = ({
                 </FormattedMessage>
               )}
             </InputContainer>
-            {hasError && <ErrorMessage>{error}</ErrorMessage>}
+            {!hasError && description && <SubLabel as={Description}>{description}</SubLabel>}
+            {hasError && <SubLabel as={ErrorMessage}>{error}</SubLabel>}
           </Wrapper>
         );
       }}
@@ -247,6 +259,8 @@ const InputUID = ({
 InputUID.propTypes = {
   attribute: PropTypes.object.isRequired,
   contentTypeUID: PropTypes.string.isRequired,
+  description: PropTypes.string,
+  editable: PropTypes.bool,
   error: PropTypes.string,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
@@ -256,6 +270,8 @@ InputUID.propTypes = {
 };
 
 InputUID.defaultProps = {
+  description: '',
+  editable: false,
   error: null,
   required: false,
   validations: {},

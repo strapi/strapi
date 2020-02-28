@@ -1,12 +1,11 @@
 import styled from 'styled-components';
 
-const EmptyLinksList = styled.div`
-  color: ${props => props.theme.main.colors.white};
-  padding-left: 1.6rem;
-  padding-right: 1.6rem;
-  font-weight: 300;
+const EmptyLinksList = styled.span`
   min-height: 3.6rem;
-  padding-top: 0.6rem;
+  padding: 0.6rem 1.6rem 2.6rem 0;
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: ${({ theme }) => theme.main.colors.leftMenu['link-color']};
 `;
 
 EmptyLinksList.defaultProps = {

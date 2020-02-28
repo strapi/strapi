@@ -12,6 +12,7 @@ import getTrad from '../../utils/getTrad';
 const RightContentLabel = styled.div`
   padding: 0 5px;
   text-transform: capitalize;
+  font-size: 1.3rem;
   color: ${({ theme, color }) => theme.main.colors[color]};
 `;
 
@@ -41,7 +42,7 @@ const RightLabel = ({ label, availability }) => {
       </>
     ) : (
       <>
-        <Remove fill="#ff203c" width="12px" height="12px" />
+        <Remove fill="#ff203c" width="9px" height="9px" />
         <RightContentLabel color="red">
           {formatMessage({
             id: getTrad('components.uid.unavailable'),

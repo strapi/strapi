@@ -420,7 +420,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
         emitEvent('didNotSaveComponent');
       }
       console.error({ err });
-      strapi.notification.error('notification.error');
+      strapi.notification.error(err.response.payload.error || 'notification.error');
     }
   };
 
