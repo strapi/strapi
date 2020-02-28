@@ -31,7 +31,6 @@ const Row = ({ logo, name, description, isRequired, id, icon, onConfirm }) => {
 
   const handleClickConfirm = () => {
     handleToggle();
-    // console.log(onConfirm);
     onConfirm(id);
   };
 

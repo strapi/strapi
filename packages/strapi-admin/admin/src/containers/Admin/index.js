@@ -82,11 +82,15 @@ export class Admin extends React.Component {
     } = this.props;
 
     if (uuid) {
-      axios.post('https://analytics.strapi.io/track', {
-        event,
-        properties,
-        uuid,
-      });
+      try {
+        await axios.post('https://analytics.strapi.io/track', {
+          event,
+          properties,
+          uuid,
+        });
+      } catch (err) {
+        // Silent
+      }
     }
   };
 
