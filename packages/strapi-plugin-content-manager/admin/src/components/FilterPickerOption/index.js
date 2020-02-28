@@ -1,12 +1,13 @@
 import React, { memo } from 'react';
 import { get, isEmpty } from 'lodash';
 import PropTypes from 'prop-types';
-import { CircleButton, getFilterType } from 'strapi-helper-plugin';
+import { CircleButton } from 'strapi-helper-plugin';
 import { Select } from '@buffetjs/core';
 
 import { InputWrapper, Wrapper } from './components';
 import Input from './Input';
 import Option from './Option';
+import getFilters from './utils';
 
 const styles = {
   select: {
@@ -18,6 +19,11 @@ const styles = {
     maxWidth: '200px',
     marginLeft: '10px',
     marginRight: '10px',
+  },
+  input: {
+    width: '210px',
+    marginRight: '10px',
+    paddingTop: '4px',
   },
 };
 
@@ -32,7 +38,7 @@ function FilterPickerOption({
   showAddButton,
   type,
 }) {
-  const filtersOptions = getFilterType(type);
+  const filtersOptions = getFilters(type);
 
   return (
     <Wrapper borderLeft={!isEmpty(value)}>

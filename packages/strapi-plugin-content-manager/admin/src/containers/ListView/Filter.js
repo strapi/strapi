@@ -1,8 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { get, toString } from 'lodash';
+import { FormattedMessage } from 'react-intl';
+import { get, toString, upperFirst } from 'lodash';
 import moment from 'moment';
-import { dateFormats, FilterButton } from 'strapi-helper-plugin';
+import pluginId from '../../pluginId';
+import DATE_FORMATS from '../../utils/DATE_FORMATS';
+import { FilterWrapper, Remove, Separator } from './components';
 
 function Filter({
   changeParams,
@@ -24,9 +27,9 @@ function Filter({
     let format;
 
     if (type === 'date' || type === 'timestamp') {
-      format = dateFormats.date;
+      format = DATE_FORMATS.date;
     } else {
-      format = dateFormats.datetime;
+      format = DATE_FORMATS.datetime;
     }
 
     displayedValue = moment
@@ -35,25 +38,25 @@ function Filter({
       .format(format);
   }
 
-  const label = {
-    name,
-    filter,
-    value: displayedValue,
-  };
-
   return (
-    <FilterButton
-      onClick={() => {
-        const updatedFilters = filters.slice().filter((_, i) => i !== index);
+    <FilterWrapper>
+      <span>{upperFirst(name)}&nbsp;</span>
+      <FormattedMessage
+        id={`${pluginId}.components.FilterOptions.FILTER_TYPES.${filter}`}
+      />
+      <span>&nbsp;{displayedValue}</span>
+      <Separator />
+      <Remove
+        onClick={() => {
+          const updatedFilters = filters.slice().filter((_, i) => i !== index);
 
-        if (isFilterPickerOpen) {
-          toggleFilterPickerState();
-        }
-        changeParams({ target: { name: 'filters', value: updatedFilters } });
-      }}
-      label={label}
-      type={type}
-    />
+          if (isFilterPickerOpen) {
+            toggleFilterPickerState();
+          }
+          changeParams({ target: { name: 'filters', value: updatedFilters } });
+        }}
+      />
+    </FilterWrapper>
   );
 }
 

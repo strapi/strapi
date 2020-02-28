@@ -1,7 +1,6 @@
 /* eslint-disable */
-import React from 'react';
+
 import styled, { css } from 'styled-components';
-import { Carret } from '@buffetjs/icons';
 
 const Table = styled.table`
   border-radius: 3px;
@@ -95,14 +94,21 @@ const TableRow = styled.tr`
   }
 `;
 
-const Arrow = styled(props => <Carret {...props} />)`
-  margin-left: 5px;
-  ${({ isUp }) =>
-    isUp &&
-    `
-    transform: rotateZ(180deg);
-
-  `}
+const Arrow = styled.div`
+  &:after {
+    content: '\f0d8';
+    font-family: 'FontAwesome';
+    font-size: 13px;
+    font-weight: 600;
+    position: absolute;
+    top: 0px;
+    right: -12px;
+  }
+  &.isAsc {
+    &:after {
+      transform: rotateZ(180deg);
+    }
+  }
 `;
 
 const Truncate = styled.div``;

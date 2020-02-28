@@ -1,11 +1,12 @@
 import React, { forwardRef } from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Carret, Grab } from '@buffetjs/icons';
+import { Grab } from '@buffetjs/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import pluginId from '../../pluginId';
 import PreviewCarret from '../PreviewCarret';
 import BannerWrapper from './BannerWrapper';
+import CarretTop from './CarretTop';
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 
@@ -44,7 +45,7 @@ const Banner = forwardRef(
         {isDragging && <PreviewCarret isComponent />}
         <>
           <span className="img-wrapper" style={{ display }}>
-            <Carret isOpen={isOpen} hasErrors={hasErrors} />
+            <CarretTop isOpen={isOpen} hasErrors={hasErrors} />
           </span>
 
           <FormattedMessage

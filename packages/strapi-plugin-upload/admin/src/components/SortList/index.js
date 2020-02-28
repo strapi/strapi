@@ -4,9 +4,9 @@ import PropTypes from 'prop-types';
 import Wrapper from './Wrapper';
 import SortListItem from '../SortListItem';
 
-const SortList = ({ list, onClick, selectedItem }) => {
+const SortList = ({ isShown, list, onClick, selectedItem }) => {
   return (
-    <Wrapper>
+    <Wrapper isShown={isShown}>
       {Object.keys(list).map(item => {
         return (
           <SortListItem
@@ -24,12 +24,14 @@ const SortList = ({ list, onClick, selectedItem }) => {
 
 SortList.defaultProps = {
   list: {},
+  isShown: false,
   onClick: () => {},
   selectedItem: null,
 };
 
 SortList.propTypes = {
   list: PropTypes.object,
+  isShown: PropTypes.bool,
   onClick: PropTypes.func,
   selectedItem: PropTypes.string,
 };
