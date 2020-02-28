@@ -28,7 +28,8 @@ import LeftMenu from '../LeftMenu';
 import ListPluginsPage from '../ListPluginsPage';
 import LocaleToggle from '../LocaleToggle';
 import HomePage from '../HomePage';
-import Marketplace from '../Marketplace';
+// import Marketplace from '../Marketplace';
+import Marketplace from '../MarketplacePage';
 import NotFoundPage from '../NotFoundPage';
 import OnboardingVideos from '../Onboarding';
 import SettingsPage from '../SettingsPage';
@@ -135,7 +136,7 @@ export class Admin extends React.Component {
       disableGlobalOverlayBlocker,
       emitEvent,
       enableGlobalOverlayBlocker,
-      intl: { formatMessage },
+      intl: { formatMessage, locale },
       updatePlugin,
     } = this.props;
 
@@ -154,6 +155,7 @@ export class Admin extends React.Component {
         autoReload={autoReload}
         emitEvent={emitEvent}
         currentEnvironment={currentEnvironment}
+        currentLocale={locale}
         disableGlobalOverlayBlocker={disableGlobalOverlayBlocker}
         enableGlobalOverlayBlocker={enableGlobalOverlayBlocker}
         formatMessage={formatMessage}
@@ -219,6 +221,7 @@ export class Admin extends React.Component {
 Admin.defaultProps = {
   intl: {
     formatMessage: () => {},
+    locale: 'en',
   },
 };
 
@@ -240,6 +243,7 @@ Admin.propTypes = {
   }).isRequired,
   intl: PropTypes.shape({
     formatMessage: PropTypes.func,
+    locale: PropTypes.string,
   }),
   location: PropTypes.object.isRequired,
   setAppError: PropTypes.func.isRequired,
