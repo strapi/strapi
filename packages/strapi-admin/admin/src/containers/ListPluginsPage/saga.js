@@ -40,7 +40,7 @@ export function* pluginsGet() {
       call(request, '/admin/plugins', { method: 'GET' }),
     ]);
     const locale = yield select(selectLocale());
-
+    console.log({ response });
     const opts = {
       method: 'GET',
       headers: {

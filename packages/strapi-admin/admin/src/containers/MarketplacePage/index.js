@@ -6,11 +6,10 @@ import {
   request,
 } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
-
+import useFetchPluginsFromMarketPlace from '../../hooks/useFetchPluginsFromMarketPlace';
 import PageTitle from '../../components/PageTitle';
 import PluginCard from '../../components/PluginCard';
 import Wrapper from './Wrapper';
-import useFetchPluginsFromMarketPlace from '../../hooks/useFetchPluginsFromMarketPlace';
 
 const MarketPlacePage = ({ history }) => {
   const {
@@ -66,7 +65,7 @@ const MarketPlacePage = ({ history }) => {
           id: 'app.components.InstallPluginPage.helmet',
         })}
       />
-      <Wrapper className="container-fluid">
+      <Wrapper>
         <Header
           title={{
             label: formatMessage({

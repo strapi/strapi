@@ -1,7 +1,7 @@
 import styled from 'styled-components';
+import ContainerFluid from '../../components/ContainerFluid';
 
-const Wrapper = styled.div`
-  padding: 18px 30px !important;
+const Wrapper = styled(ContainerFluid)`
   > div:first-child {
     margin-bottom: 11px;
   }

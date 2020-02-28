@@ -38,6 +38,7 @@ export default strapi => {
         key: 'content-type-builder.form',
       },
     ],
+    isRequired: pluginPkg.strapi.required || false,
     layout: null,
     lifecycles,
     leftMenuLinks: [],

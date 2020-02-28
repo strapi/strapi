@@ -46,6 +46,8 @@ export class ListPluginsPage extends React.Component {
       return <LoadingIndicatorPage />;
     }
 
+    console.log(this.props.plugins);
+
     return (
       <div>
         <FormattedMessage id="app.components.ListPluginsPage.helmet.title">
