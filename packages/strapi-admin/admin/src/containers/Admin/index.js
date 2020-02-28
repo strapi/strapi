@@ -28,8 +28,7 @@ import LeftMenu from '../LeftMenu';
 import ListPluginsPage from '../ListPluginsPage';
 import LocaleToggle from '../LocaleToggle';
 import HomePage from '../HomePage';
-// import Marketplace from '../Marketplace';
-import Marketplace from '../MarketplacePage';
+import MarketplacePage from '../MarketplacePage';
 import NotFoundPage from '../NotFoundPage';
 import OnboardingVideos from '../Onboarding';
 import SettingsPage from '../SettingsPage';
@@ -190,7 +189,7 @@ export class Admin extends React.Component {
                 />
                 <Route
                   path="/marketplace"
-                  render={props => this.renderRoute(props, Marketplace)}
+                  render={props => this.renderRoute(props, MarketplacePage)}
                 />
                 <Route
                   path={`${SETTINGS_BASE_URL}/:settingId`}
