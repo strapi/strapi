@@ -6,16 +6,11 @@ import { FormattedMessage } from 'react-intl';
 
 import LeftMenuLink from '../LeftMenuLink';
 import LeftMenuLinkHeader from '../LeftMenuLinkHeader';
-import EmptyLinksList from './EmptyLinksList';
 import LeftMenuListLink from './LeftMenuListLink';
+import EmptyLinksList from './EmptyLinksList';
+import EmptyLinksListWrapper from './EmptyLinksListWrapper';
 
-const LeftMenuLinksSection = ({
-  section,
-  searchable,
-  location,
-  links,
-  emptyLinksListMessage,
-}) => {
+const LeftMenuLinksSection = ({ section, searchable, location, links, emptyLinksListMessage }) => {
   const [search, setSearch] = useState('');
 
   const filteredList = sortBy(
@@ -30,8 +25,7 @@ const LeftMenuLinksSection = ({
       return link.destination;
     }
     if (link.schema && link.schema.kind) {
-      return `/plugins/${link.plugin}/${link.schema.kind}/${link.destination ||
-        link.uid}`;
+      return `/plugins/${link.plugin}/${link.schema.kind}/${link.destination || link.uid}`;
     }
 
     return `/plugins/${link.plugin}/${link.destination || link.uid}`;
@@ -59,12 +53,11 @@ const LeftMenuLinksSection = ({
             />
           ))
         ) : (
-          <EmptyLinksList>
-            <FormattedMessage
-              id={emptyLinksListMessage}
-              defaultMessage="No plugins installed yet"
-            />
-          </EmptyLinksList>
+          <EmptyLinksListWrapper>
+            <FormattedMessage id={emptyLinksListMessage} defaultMessage="No plugins installed yet">
+              {msg => <EmptyLinksList>{msg}</EmptyLinksList>}
+            </FormattedMessage>
+          </EmptyLinksListWrapper>
         )}
       </LeftMenuListLink>
     </>

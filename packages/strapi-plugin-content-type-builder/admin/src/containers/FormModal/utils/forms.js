@@ -716,28 +716,40 @@ const forms = {
             .filter(key => ['string', 'text'].includes(attributes[key].type))
             .map(key => ({ id: key, value: key }));
 
-          items[0].push({
-            label: {
-              id: getTrad('modalForm.attribute.target-field'),
-            },
-            name: 'targetField',
-            type: 'select',
-            options: [{ id: getTrad('none'), value: '' }, ...options].map((option, index) => (
-              // eslint-disable-next-line react/no-array-index-key
-              <Fragment key={index}>
-                {index === 0 ? (
-                  <FormattedMessage id={option.id}>
-                    {msg => <option value={option.value}>{msg}</option>}
-                  </FormattedMessage>
-                ) : (
-                  <option value={option.value}>{option.value}</option>
-                )}
-              </Fragment>
-            )),
-            validations: {
-              required: true,
-            },
-          });
+          return {
+            items: [
+              [
+                {
+                  ...fields.name,
+                  placeholder: {
+                    id: getTrad('modalForm.attribute.form.base.name.placeholder'),
+                  },
+                },
+                {
+                  label: {
+                    id: getTrad('modalForm.attribute.target-field'),
+                  },
+                  name: 'targetField',
+                  type: 'select',
+                  options: [{ id: getTrad('none'), value: '' }, ...options].map((option, index) => (
+                    // eslint-disable-next-line react/no-array-index-key
+                    <Fragment key={index}>
+                      {index === 0 ? (
+                        <FormattedMessage id={option.id}>
+                          {msg => <option value={option.value}>{msg}</option>}
+                        </FormattedMessage>
+                      ) : (
+                        <option value={option.value}>{option.value}</option>
+                      )}
+                    </Fragment>
+                  )),
+                  validations: {
+                    required: true,
+                  },
+                },
+              ],
+            ],
+          };
         }
 
         return {

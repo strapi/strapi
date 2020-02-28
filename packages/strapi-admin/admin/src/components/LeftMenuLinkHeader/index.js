@@ -8,6 +8,7 @@ import messages from '../LeftMenuLinkContainer/messages.json';
 import Search from './Search';
 import Title from './Title';
 import SearchButton from './SearchButton';
+import SearchWrapper from './SearchWrapper';
 
 const LeftMenuLinkHeader = ({ section, searchable, setSearch, search }) => {
   const [showSearch, setShowSearch] = useState(false);
@@ -33,33 +34,32 @@ const LeftMenuLinkHeader = ({ section, searchable, setSearch, search }) => {
     setShowSearch(false);
   };
 
-  return !showSearch ? (
+  return (
     <Title>
-      <FormattedMessage id={id} defaultMessage={defaultMessage} />
-      {searchable && (
-        <SearchButton onClick={toggleSearch}>
-          <FontAwesomeIcon icon="search" />
-        </SearchButton>
+      {!showSearch ? (
+        <>
+          <FormattedMessage id={id} defaultMessage={defaultMessage} />
+          {searchable && (
+            <SearchButton onClick={toggleSearch}>
+              <FontAwesomeIcon icon="search" />
+            </SearchButton>
+          )}
+        </>
+      ) : (
+        <SearchWrapper>
+          <div>
+            <FontAwesomeIcon style={{ fontSize: 12 }} icon="search" />
+          </div>
+          <FormattedMessage id="components.Search.placeholder">
+            {message => (
+              <Search ref={ref} onChange={handleChange} value={search} placeholder={message} />
+            )}
+          </FormattedMessage>
+          <SearchButton onClick={clearSearch}>
+            <FontAwesomeIcon icon="times" />
+          </SearchButton>
+        </SearchWrapper>
       )}
-    </Title>
-  ) : (
-    <Title>
-      <div>
-        <FontAwesomeIcon icon="search" />
-      </div>
-      <FormattedMessage id="components.Search.placeholder">
-        {message => (
-          <Search
-            ref={ref}
-            onChange={handleChange}
-            value={search}
-            placeholder={message}
-          />
-        )}
-      </FormattedMessage>
-      <SearchButton onClick={clearSearch}>
-        <FontAwesomeIcon icon="times" />
-      </SearchButton>
     </Title>
   );
 };

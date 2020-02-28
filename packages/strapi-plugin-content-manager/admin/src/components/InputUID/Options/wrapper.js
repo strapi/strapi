@@ -7,7 +7,7 @@ const wrapper = styled.div`
   border: 1px solid ${props => props.theme.main.colors.border};
   border-radius: 2px;
   background-color: white;
-  z-index: 10;
+  z-index: 11;
 `;
 
 export default wrapper;

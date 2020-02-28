@@ -8,7 +8,8 @@ const FaIcon = styled(({ small, ...props }) => <FontAwesomeIcon {...props} />)`
   top: calc(50% - 0.9rem + 0.3rem);
   left: 1.6rem;
   margin-right: 1.2rem;
-  font-size: ${props => (props.small ? '1rem' : '1.4rem')};
+  margin-top: ${({ small }) => (small ? '.3rem' : null)};
+  font-size: ${({ small }) => (small ? '.9rem' : '1.4rem')};
   width: 1.4rem;
   padding-bottom: 0.2rem;
   text-align: center;
