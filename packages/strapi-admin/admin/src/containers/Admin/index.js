@@ -25,8 +25,7 @@ import Header from '../../components/Header/index';
 import Logout from '../../components/Logout';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import LeftMenu from '../LeftMenu';
-// import ListPluginsPage from '../ListPluginsPage';
-import ListPluginsPage from '../InstalledPluginsPage';
+import InstalledPluginsPage from '../InstalledPluginsPage';
 import LocaleToggle from '../LocaleToggle';
 import HomePage from '../HomePage';
 import MarketplacePage from '../MarketplacePage';
@@ -185,7 +184,8 @@ export class Admin extends React.Component {
                 />
                 <Route
                   path="/list-plugins"
-                  render={props => this.renderRoute(props, ListPluginsPage)}
+                  render={props =>
+                    this.renderRoute(props, InstalledPluginsPage)}
                   exact
                 />
                 <Route

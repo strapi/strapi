@@ -1,23 +1,44 @@
-/* eslint-disable */
 import React from 'react';
-import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
-import { LoadingIndicatorPage, useGlobalContext } from 'strapi-helper-plugin';
-import { Header } from '@buffetjs/custom';
+import { useGlobalContext, request } from 'strapi-helper-plugin';
+import { Header, List } from '@buffetjs/custom';
 import PageTitle from '../../components/PageTitle';
-import useFetchPluginsFromMarketPlace from '../../hooks/useFetchPluginsFromMarketPlace';
 import ContainerFluid from '../../components/ContainerFluid';
-// import ListPlugins from '../../components/ListPlugins';
 import ListWrapper from './ListWrapper';
+import Row from './Row';
+import generateRows from './utils/generateRows';
 
-const InstalledPluginsPage = ({ history }) => {
+const InstalledPluginsPage = () => {
   const { formatMessage, plugins } = useGlobalContext();
-  console.log(plugins);
-  const { error, isLoading, data } = useFetchPluginsFromMarketPlace();
+  const onConfirm = async id => {
+    try {
+      const requestUrl = `/admin/plugins/uninstall/${id}`;
+      // Force the Overlayblocker to be displayed
+      const overlayblockerParams = {
+        enabled: true,
+        title: 'app.components.InstallPluginPage.Download.title',
+        description: 'app.components.InstallPluginPage.Download.description',
+      };
+      // Lock the app
+      strapi.lockApp(overlayblockerParams);
+      const response = await request(
+        requestUrl,
+        { method: 'DELETE' },
+        overlayblockerParams
+      );
 
-  if (isLoading || error) {
-    return <LoadingIndicatorPage />;
-  }
+      if (response.ok) {
+        // Reload the app
+        window.location.reload();
+      }
+    } catch (err) {
+      strapi.unlockApp();
+      strapi.notification.error(
+        'app.components.listPluginsPage.deletePlugin.error'
+      );
+    }
+  };
+
+  const rows = generateRows(plugins, onConfirm);
 
   return (
     <div>
@@ -38,6 +59,16 @@ const InstalledPluginsPage = ({ history }) => {
           })}
           actions={[]}
         />
+        <ListWrapper>
+          <List
+            title={formatMessage(
+              { id: 'app.components.listPlugins.title.plural' },
+              { number: rows.length }
+            )}
+            items={rows}
+            customRowComponent={Row}
+          />
+        </ListWrapper>
       </ContainerFluid>
     </div>
   );
