@@ -10,7 +10,6 @@ const Wrapper = styled.ul`
   background-color: ${({ theme }) => theme.main.colors.white};
   border: 1px solid ${({ theme }) => theme.main.colors.darkGrey};
   box-shadow: 0 2px 4px ${({ theme }) => theme.main.colors.greyAlpha};
-  ${({ isShown }) => isShown && 'display: block;'}
 `;
 
 Wrapper.propTypes = {
