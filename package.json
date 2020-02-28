@@ -6,6 +6,7 @@
     "@testing-library/jest-dom": "^4.0.0",
     "@testing-library/react": "^9.1.0",
     "@testing-library/react-hooks": "^2.0.0",
+    "axios-mock-adapter": "^1.17.0",
     "babel-eslint": "^10.0.0",
     "chokidar": "3.3.1",
     "cross-env": "^5.2.0",

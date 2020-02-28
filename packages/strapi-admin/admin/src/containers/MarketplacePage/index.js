@@ -19,9 +19,9 @@ const MarketPlacePage = ({ history }) => {
     formatMessage,
     plugins,
   } = useGlobalContext();
-  const { isLoading, data } = useFetch();
+  const { error, isLoading, data } = useFetch();
 
-  if (isLoading) {
+  if (isLoading || error) {
     return <LoadingIndicatorPage />;
   }
 
