@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
+import { Carret } from '@buffetjs/icons';
 import getTrad from '../../utils/getTrad';
 
-import Wrapper from './Wrapper';
-import SortButton from './SortButton';
+import DropdownButton from '../DropdownButton';
+import DropdownSection from '../DropdownSection';
 import SortList from '../SortList';
+import Wrapper from './Wrapper';
 
 const SortPicker = ({ onChange, value }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,15 +34,18 @@ const SortPicker = ({ onChange, value }) => {
 
   return (
     <Wrapper>
-      <SortButton onClick={hangleToggle} isActive={isOpen}>
+      <DropdownButton onClick={hangleToggle} isActive={isOpen}>
         <FormattedMessage id={getTrad('sort.label')} />
-      </SortButton>
-      <SortList
-        isShown={isOpen}
-        list={orders}
-        selectedItem={value}
-        onClick={handleChange}
-      />
+        <Carret fill={isOpen ? '#007EFF' : '#292b2c'} />
+      </DropdownButton>
+      <DropdownSection isOpen={isOpen}>
+        <SortList
+          isShown={isOpen}
+          list={orders}
+          selectedItem={value}
+          onClick={handleChange}
+        />
+      </DropdownSection>
     </Wrapper>
   );
 };
