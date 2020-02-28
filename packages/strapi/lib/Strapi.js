@@ -476,7 +476,7 @@ class Strapi extends EventEmitter {
 
       const timer = warnOnTimeout();
       try {
-        await fn(this);
+        await fn();
       } finally {
         clearTimeout(timer);
       }

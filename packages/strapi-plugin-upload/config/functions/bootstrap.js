@@ -9,7 +9,7 @@
  */
 const _ = require('lodash');
 
-module.exports = async strapi => {
+module.exports = async () => {
   // set plugin store
   const configurator = strapi.store({
     type: 'plugin',

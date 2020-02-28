@@ -4,7 +4,7 @@ describe('Upload plugin bootstrap function', () => {
   test('Sets default config if id does not exist', async () => {
     const setStore = jest.fn(() => {});
 
-    const strapi = {
+    global.strapi = {
       config: {
         info: {
           dependencies: {},
@@ -23,7 +23,7 @@ describe('Upload plugin bootstrap function', () => {
       },
     };
 
-    await bootstrap(strapi);
+    await bootstrap();
 
     expect(setStore).toHaveBeenCalledWith({
       value: {
