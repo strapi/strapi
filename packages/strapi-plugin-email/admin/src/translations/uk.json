@@ -1,9 +1,9 @@
 {
   "ConfigPage.description": "Налаштування плагіну електронної пошти",
-  "ConfigPage.title": "Електронна пошта - Налаштування",
+  "ConfigPage.title": "Email - Налаштування",
   "EditForm.Input.number.label": "Максимально дозволений розмір (в MB)",
   "EditForm.Input.select.inputDescription": "Електронні листи можна надсилати постачальником за замовчуванням (Sendmail) або за допомогою зовнішнього постачальника",
-  "EditForm.Input.select.label": "Постачальники",
+  "EditForm.Input.select.label": "Постачальник",
   "EditForm.Input.toggle.label": "Активувати відправку листів",
   "notification.config.success": "Налаштування успішно оновлені",
   "plugin.description.long": "Відправка електронної пошти.",
