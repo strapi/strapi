@@ -471,7 +471,7 @@ class Strapi extends EventEmitter {
         this.log.warn('Make sure you call it?');
       }, timeoutMs);
 
-    async function execBootstrap(fn) {
+    const execBootstrap = async fn => {
       if (!fn) return;
 
       const timer = warnOnTimeout();
@@ -480,7 +480,7 @@ class Strapi extends EventEmitter {
       } finally {
         clearTimeout(timer);
       }
-    }
+    };
 
     const pluginBoostraps = Object.keys(this.plugins).map(plugin => {
       return execBootstrap(

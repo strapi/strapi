@@ -1,5 +1,5 @@
 import { fromJS } from 'immutable';
-import getFilterType from '../FilterPickerOption/utils';
+import { getFilterType } from 'strapi-helper-plugin';
 
 function init(initialState, { name, type }) {
   // Create the first filter

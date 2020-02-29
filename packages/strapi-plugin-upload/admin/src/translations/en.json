@@ -7,6 +7,7 @@
   "header.content.assets-empty": "No asset",
   "header.content.assets-multiple": "{number} assets",
   "header.content.assets-single": "1 asset",
+  "filter.add": "Add filter",
   "input.label-bold": "Drag & drop",
   "input.label-normal": "to upload or",
   "input.button.label": "Browse files",

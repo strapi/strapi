@@ -9,7 +9,9 @@ const Wrapper = styled.div`
   bottom: 0;
   left: 0;
   overflow-y: auto;
-  height: calc(100vh - (${props => props.theme.main.sizes.leftMenu.height} + 10.2rem));
+  height: calc(
+    100vh - (${props => props.theme.main.sizes.leftMenu.height} + 10.2rem)
+  );
   box-sizing: border-box;
 
   .title {

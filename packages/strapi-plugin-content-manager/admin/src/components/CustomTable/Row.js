@@ -3,9 +3,12 @@ import { withRouter } from 'react-router';
 import PropTypes from 'prop-types';
 import { get, isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import moment from 'moment';
-import { IcoContainer, useGlobalContext } from 'strapi-helper-plugin';
+import {
+  IcoContainer,
+  useGlobalContext,
+  dateFormats,
+} from 'strapi-helper-plugin';
 import useListView from '../../hooks/useListView';
-import DATE_FORMATS from '../../utils/DATE_FORMATS';
 import CustomInputCheckbox from '../CustomInputCheckbox';
 import MediaPreviewList from '../MediaPreviewList';
 import { ActionContainer, Truncate, Truncated } from './styledComponents';
@@ -42,7 +45,7 @@ const getDisplayedValue = (type, value, name) => {
           ? JSON.stringify(value)
           : value;
 
-      return dateToUtcTime(date).format(DATE_FORMATS[type]);
+      return dateToUtcTime(date).format(dateFormats[type]);
     }
     case 'password':
       return '••••••••';
@@ -63,7 +66,7 @@ const getDisplayedValue = (type, value, name) => {
       };
       const date = moment().set(timeObj);
 
-      return date.format(DATE_FORMATS.time);
+      return date.format(dateFormats.time);
     }
     default:
       return '-';
