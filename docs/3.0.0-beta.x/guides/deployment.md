@@ -1685,11 +1685,10 @@ Create a new [App Engine](https://console.cloud.google.com/appengine/) project.
 
 Select the region, such as `europe-west`.
 
-Language: Node JS
+- Language: Node JS
+- Environment: Standard (or Flexible)
 
-Environment: Standard
-
-The Flexible enviroment is also available, but incurs more cost.
+(*A note on performance and cost*: the `Standard Environment` is sufficient for development, but it may not be for production. Review the resources your application will need to determine the cost. When you sign up for Google App Engine, it offers a certain amount of free credits which will not be billed.)
 
 Create the project. Take note of the instance identifier, which is in the form of `<instance_id>:<region>:<instance_name>`.
 
@@ -1723,6 +1722,12 @@ Add `app.yaml` to `.gitignore`.
 
 The instance identifier looks like `myapi-123456:europe-west1:myapi`.
 
+The following is an example config for `Standard Environment` or `Flexible Environment`.
+
+:::: tabs
+
+::: tab Standard Environment
+
 ``` yaml
 runtime: nodejs10
 
@@ -1739,6 +1744,31 @@ env_variables:
 beta_settings:
   cloud_sql_instances: '<instance_identifier>'
 ```
+
+:::
+
+::: tab Flexible Environment
+
+``` yaml
+runtime: nodejs10
+
+env: flex
+
+env_variables:
+  HOST: '<instance_id>.appspot.com'
+  NODE_ENV: 'production'
+  DATABASE_NAME: 'strapi'
+  DATABASE_USERNAME: 'postgres'
+  DATABASE_PASSWORD: '<password>'
+  INSTANCE_CONNECTION_NAME: '<instance_identifier>'
+
+beta_settings:
+  cloud_sql_instances: '<instance_identifier>'
+```
+
+:::
+
+::::
 
 Create `.gcloudignore` in the project root, include `app.yaml` here as well.
 
