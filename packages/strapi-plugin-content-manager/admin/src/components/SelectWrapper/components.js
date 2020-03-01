@@ -3,6 +3,7 @@ import styled from 'styled-components';
 const Wrapper = styled.div`
   position: relative;
   margin-bottom: 27px;
+  z-index: 2;
 
   label {
     width: 100%;
