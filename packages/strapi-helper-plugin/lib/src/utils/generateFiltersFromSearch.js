@@ -11,6 +11,7 @@ const generateFiltersFromSearch = search => {
         !x.includes('_limit') &&
         !x.includes('_page') &&
         !x.includes('_sort') &&
+        !x.includes('_start') &&
         !x.includes('_q=') &&
         x !== ''
     )

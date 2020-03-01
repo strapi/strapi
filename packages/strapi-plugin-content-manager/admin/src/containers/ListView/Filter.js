@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { get, toString } from 'lodash';
 import moment from 'moment';
 import { FilterButton } from 'strapi-helper-plugin';
-import formats from '../../utils/formats';
+import dateFormats from '../../utils/dateFormats';
 
 function Filter({
   changeParams,
@@ -25,9 +25,9 @@ function Filter({
     let format;
 
     if (type === 'date' || type === 'timestamp') {
-      format = formats.date;
+      format = dateFormats.date;
     } else {
-      format = formats.datetime;
+      format = dateFormats.datetime;
     }
 
     displayedValue = moment

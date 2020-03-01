@@ -1,5 +1,5 @@
 import React, { useReducer, useState, useEffect } from 'react';
-import { includes } from 'lodash';
+import { includes, some } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
 import {
@@ -38,7 +38,7 @@ const HomePage = () => {
   const query = useQuery();
   const { data, dataToDelete } = reducerState.toJS();
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
-  const paramsKeys = ['_limit', '_page', '_q', '_sort'];
+  const paramsKeys = ['_limit', '_start', '_q', '_sort'];
 
   useEffect(() => {
     // TODO - Retrieve data
@@ -62,19 +62,23 @@ const HomePage = () => {
   const getUpdatedSearchParams = updatedParams => {
     return {
       ...getSearchParams(),
+      filters: generateFiltersFromSearch(search),
       ...updatedParams,
     };
   };
 
   const handleChangeFilters = ({ target: { value } }) => {
     if (value) {
-      // Add filter
       const updatedFilters = generateFiltersFromSearch(search);
-      updatedFilters.push(value);
 
-      handleChangeParams({
-        target: { name: 'filters', value: updatedFilters },
-      });
+      // Add filter if it doesn't exist yet
+      if (!some(updatedFilters, value)) {
+        updatedFilters.push(value);
+
+        handleChangeParams({
+          target: { name: 'filters', value: updatedFilters },
+        });
+      }
     }
   };
 
