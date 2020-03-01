@@ -124,7 +124,7 @@ const HomePage = () => {
         />
         <AddFilterCTA />
       </ControlsWrapper>
-      <List data={data} />
+      <List />
       <ListEmpty onClick={handleClickToggleModal} />
       <ModalStepper isOpen={isOpen} onToggle={handleClickToggleModal} />
     </Container>

@@ -8,7 +8,7 @@ const CardImgWrapper = styled.div`
   padding-top: ${({ isSmall }) =>
     isSmall ? 'calc(156 / 245 * 100%)' : 'calc(397 / 431 * 100%)'};
   border-radius: 2px;
-  background: ${({ withOverlay }) => (withOverlay ? '#F6F6F6' : '#333740')};
+  background-color: #f6f6f6;
   overflow: hidden;
 
   ${({ hasError }) => {
@@ -21,6 +21,9 @@ const CardImgWrapper = styled.div`
 
     return '';
   }}
+
+  ${({ isSelected }) =>
+    isSelected && 'border: 2px solid #007EFF;'}
 
   .card-control-wrapper {
     display: none;
@@ -36,14 +39,14 @@ const CardImgWrapper = styled.div`
 
 CardImgWrapper.defaultProps = {
   hasError: false,
+  isSelected: false,
   isSmall: false,
-  withOverlay: false,
 };
 
 CardImgWrapper.propTypes = {
   hasError: PropTypes.bool,
+  isSelected: PropTypes.bool,
   isSmall: PropTypes.bool,
-  withOverlay: PropTypes.bool,
 };
 
 export default CardImgWrapper;
