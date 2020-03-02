@@ -11,27 +11,6 @@ const CardImgWrapper = styled.div`
   background-color: #f6f6f6;
   overflow: hidden;
 
-  ${({ hasError }) => {
-    if (hasError) {
-      return `
-        background: #F2F3F4;
-        border: 1px solid #FF5D00;
-      `;
-    }
-
-    return '';
-  }}
-
-  ${({ isSelected }) =>
-    isSelected &&
-    `
-    border: 2px solid #007EFF;
-    .card-control-wrapper {
-      display: flex;
-      z-index: 1050;
-    }
-  `}
-
   .card-control-wrapper {
     display: none;
     position: absolute;
@@ -48,6 +27,27 @@ const CardImgWrapper = styled.div`
       z-index: 1050;
     }
   }
+
+  ${({ hasError }) => {
+    if (hasError) {
+      return `
+        background: #F2F3F4;
+        border: 1px solid #FF5D00;
+      `;
+    }
+
+    return '';
+  }}
+
+  ${({ isSelected }) =>
+    isSelected &&
+    `
+    .card-control-wrapper {
+      display: flex;
+      z-index: 1050;
+      border: 2px solid #007EFF;
+    }
+  `}
 `;
 
 CardImgWrapper.defaultProps = {

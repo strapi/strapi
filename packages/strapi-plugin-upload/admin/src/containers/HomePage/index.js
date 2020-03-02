@@ -59,6 +59,14 @@ const HomePage = () => {
     return queryParams[key];
   };
 
+  const handleChangeCheck = ({ target: { name, value } }) => {
+    dispatch({
+      type: 'ON_CHANGE_DATA_TO_DELETE',
+      id: name,
+      value,
+    });
+  };
+
   const handleChangeParams = ({ target: { name, value } }) => {
     const updatedSearch = getUpdatedSearchParams({ [name]: value });
     const newSearch = generateSearchFromFilters(updatedSearch);
@@ -124,7 +132,7 @@ const HomePage = () => {
         />
         <AddFilterCTA />
       </ControlsWrapper>
-      <List />
+      <List onChange={handleChangeCheck} selectedItems={dataToDelete} />
       <ListEmpty onClick={handleClickToggleModal} />
       <ModalStepper isOpen={isOpen} onToggle={handleClickToggleModal} />
     </Container>

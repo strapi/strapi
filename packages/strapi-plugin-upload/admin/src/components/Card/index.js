@@ -8,7 +8,7 @@ import Wrapper from './Wrapper';
 import Title from './Title';
 import Description from './Description';
 
-const Card = ({ abort, error, file, isSmall, isUploading, isSelected }) => {
+const Card = ({ file, id, isSmall, isSelected, onChange }) => {
   // TODO - adapt with the real data
   const { type, size, name } = file;
 
@@ -18,7 +18,7 @@ const Card = ({ abort, error, file, isSmall, isUploading, isSelected }) => {
         <CardImgWrapper isSmall={isSmall} isSelected={isSelected}>
           <CardPreview {...file} />
           <div className="card-control-wrapper">
-            <Checkbox name={`select-${name}`} />
+            <Checkbox name={id} onChange={onChange} value={isSelected} />
           </div>
         </CardImgWrapper>
         <Title>{name}</Title>
@@ -29,21 +29,18 @@ const Card = ({ abort, error, file, isSmall, isUploading, isSelected }) => {
 };
 
 Card.defaultProps = {
-  abort: () => {},
-  error: '',
   file: null,
   isSelected: false,
   isSmall: false,
-  isUploading: false,
+  onChange: () => {},
 };
 
 Card.propTypes = {
-  abort: PropTypes.func,
-  error: PropTypes.string,
+  id: PropTypes.string.isRequired,
   file: PropTypes.object,
   isSelected: PropTypes.bool,
   isSmall: PropTypes.bool,
-  isUploading: PropTypes.bool,
+  onChange: PropTypes.func,
 };
 
 export default Card;
