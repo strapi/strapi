@@ -43,21 +43,21 @@ const SettingsPage = () => {
   };
 
   useEffect(() => {
-    // TODO: uncomment when API ready
-    // getDataRef.current();
+    getDataRef.current();
 
     return () => {
       abortController.abort();
     };
-  }, [abortController]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSubmit = async () => {
     try {
-      // TODO: uncomment when API ready
-      // await request(getRequestUrl('settings'), {
-      //   method: 'PUT',
-      //   body: modifiedData,
-      // });
+      await request(getRequestUrl('settings'), {
+        method: 'PUT',
+        body: modifiedData,
+      });
+
       if (isMounted) {
         dispatch({
           type: 'SUBMIT_SUCCEEDED',
@@ -117,7 +117,7 @@ const SettingsPage = () => {
     <>
       <Header {...headerProps} />
       <Wrapper>
-        <div className="container">
+        <div className="container-fluid">
           <div className="row">
             <SectionTitleWrapper className="col-12">
               <Text fontSize="xs" fontWeight="semiBold" color="#787E8F">

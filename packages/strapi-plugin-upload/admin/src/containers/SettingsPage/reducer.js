@@ -1,8 +1,7 @@
 import { fromJS } from 'immutable';
 
 const initialState = fromJS({
-  // TODO: switch to true when API is ready
-  isLoading: false,
+  isLoading: true,
   initialData: {
     responsiveDimensions: true,
     sizeOptimization: true,
