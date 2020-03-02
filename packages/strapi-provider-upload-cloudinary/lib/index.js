@@ -5,39 +5,18 @@
  */
 
 // Public node modules.
-/* eslint-disable prefer-template */
 const cloudinary = require('cloudinary').v2;
 const intoStream = require('into-stream');
 
 module.exports = {
-  provider: 'cloudinary',
-  name: 'Cloudinary',
-  auth: {
-    cloud_name: {
-      label: 'Cloud name',
-      type: 'text',
-    },
-    api_key: {
-      label: 'API Key',
-      type: 'text',
-    },
-    api_secret: {
-      label: 'API Secret',
-      type: 'password',
-    },
-  },
-  init: config => {
-    cloudinary.config({
-      cloud_name: config.cloud_name,
-      api_key: config.api_key,
-      api_secret: config.api_secret,
-    });
+  init(config) {
+    cloudinary.config(config);
 
     return {
-      upload(file) {
+      upload(file, customConfig = {}) {
         return new Promise((resolve, reject) => {
           const upload_stream = cloudinary.uploader.upload_stream(
-            { resource_type: 'auto' },
+            { resource_type: 'auto', ...customConfig },
             (err, image) => {
               if (err) {
                 return reject(err);
@@ -50,16 +29,19 @@ module.exports = {
               resolve();
             }
           );
+
           intoStream(file.buffer).pipe(upload_stream);
         });
       },
-      async delete(file) {
+      async delete(file, customConfig = {}) {
         try {
           const { resource_type, public_id } = file.provider_metadata;
           const response = await cloudinary.uploader.destroy(public_id, {
             invalidate: true,
             resource_type: resource_type || 'image',
+            ...customConfig,
           });
+
           if (response.result !== 'ok') {
             throw {
               error: new Error(response.result),

@@ -45,7 +45,7 @@ module.exports = {
         ext: stream.name.split('.').length > 1 ? `.${_.last(stream.name.split('.'))}` : '',
         buffer,
         mime: stream.type,
-        size: (stream.size / 1000).toFixed(2),
+        size: Math.round((stream.size / 1000) * 100) / 100,
       };
     };
 
@@ -53,34 +53,17 @@ module.exports = {
     return Promise.all(files.map(stream => createBuffer(stream)));
   },
 
-  async upload(files, config) {
-    // Get upload provider settings to configure the provider to use.
-    const provider = _.find(strapi.plugins.upload.config.providers, {
-      provider: config.provider,
-    });
-
-    if (!provider) {
-      throw new Error(
-        `The provider package isn't installed. Please run \`npm install strapi-provider-upload-${config.provider}\``
-      );
-    }
-
-    const actions = await provider.init(config);
+  async upload(files) {
+    const config = strapi.plugins.upload.config;
 
     // upload a single file
     const uploadFile = async file => {
-      await actions.upload(file);
+      await strapi.plugins.upload.provider.upload(file);
 
-      // Remove buffer to don't save it.
       delete file.buffer;
-      file.provider = provider.provider;
+      file.provider = config.provider;
 
       const res = await this.add(file);
-
-      // Remove temp file
-      if (file.tmpPath) {
-        fs.unlinkSync(file.tmpPath);
-      }
 
       strapi.eventHub.emit('media.create', { media: res });
       return res;
@@ -108,19 +91,12 @@ module.exports = {
     return strapi.query('file', 'upload').count(params);
   },
 
-  async remove(file, config) {
-    // get upload provider settings to configure the provider to use
-    const provider = _.cloneDeep(
-      _.find(strapi.plugins.upload.config.providers, {
-        provider: config.provider,
-      })
-    );
-    _.assign(provider, config);
-    const actions = provider.init(config);
+  async remove(file) {
+    const config = strapi.plugins.upload.config;
 
     // execute delete function of the provider
-    if (file.provider === provider.provider) {
-      await actions.delete(file);
+    if (file.provider === config.provider) {
+      await strapi.plugins.upload.provider.delete(file);
     }
 
     const media = await strapi.query('file', 'upload').findOne({
@@ -133,9 +109,6 @@ module.exports = {
   },
 
   async uploadToEntity(params, files, source) {
-    // Retrieve provider settings from database.
-    const config = strapi.plugins.upload.config;
-
     const model = strapi.getModel(params.model, source);
 
     // Asynchronous upload.
@@ -161,7 +134,7 @@ module.exports = {
         });
 
         // Make upload async.
-        return this.upload(enhancedFiles, config);
+        return this.upload(enhancedFiles);
       })
     );
   },

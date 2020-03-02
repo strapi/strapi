@@ -93,9 +93,6 @@ describe('Upload plugin end to end tests', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(res.body).toMatchObject({
-        message: [{ messages: [{ message: 'Files are empty' }] }],
-      });
     });
   });
 
