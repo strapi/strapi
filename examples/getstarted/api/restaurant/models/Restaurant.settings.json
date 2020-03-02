@@ -7,34 +7,44 @@
   },
   "options": {
     "increments": true,
-    "timestamps": [
-      "created_at",
-      "updated_at"
-    ],
+    "timestamps": ["created_at", "updated_at"],
     "comment": ""
   },
   "attributes": {
-    "price_range": {
-      "enum": [
-        "very_cheap",
-        "cheap",
-        "average",
-        "expensive",
-        "very_expensive"
-      ],
-      "type": "enumeration"
-    },
-    "closing_period": {
-      "component": "default.closingperiod",
-      "type": "component"
-    },
     "name": {
       "maxLength": 50,
       "required": true,
       "minLength": 5,
       "type": "string"
     },
+    "slug": {
+      "type": "uid",
+      "targetField": "name"
+    },
+    "price_range": {
+      "enum": ["very_cheap", "cheap", "average", "expensive", "very_expensive"],
+      "type": "enumeration"
+    },
+    "closing_period": {
+      "component": "default.closingperiod",
+      "type": "component"
+    },
+    "contact_email": {
+      "type": "email"
+    },
+    "stars": {
+      "required": true,
+      "type": "integer",
+      "min": 0,
+      "max": 3
+    },
+    "averagePrice": {
+      "type": "float",
+      "min": 0,
+      "max": 35.12
+    },
     "address": {
+      "required": true,
       "model": "address"
     },
     "cover": {
@@ -42,6 +52,9 @@
       "via": "related",
       "plugin": "upload",
       "required": false
+    },
+    "timestamp": {
+      "type": "timestamp"
     },
     "images": {
       "collection": "file",
@@ -60,7 +73,8 @@
     },
     "description": {
       "type": "richtext",
-      "required": true
+      "required": true,
+      "minLength": 10
     },
     "services": {
       "component": "default.restaurantservice",

@@ -29,7 +29,7 @@ const RelationFormNaturePicker = ({
   oneThatIsCreatingARelationWithAnother,
   target,
 }) => {
-  const { contentTypes } = useDataManager();
+  const { contentTypes, modifiedData } = useDataManager();
   const ctRelations = [
     'oneWay',
     'oneToOne',
@@ -39,8 +39,12 @@ const RelationFormNaturePicker = ({
     'manyWay',
   ];
   const componentRelations = ['oneWay', 'manyWay'];
+  const dataType =
+    naturePickerType === 'contentType'
+      ? get(modifiedData, [naturePickerType, 'schema', 'kind'], '')
+      : naturePickerType;
   const relationsType =
-    naturePickerType === 'contentType' ? ctRelations : componentRelations;
+    dataType === 'collectionType' ? ctRelations : componentRelations;
 
   const areDisplayedNamesInverted = nature === 'manyToOne';
   const targetLabel = get(contentTypes, [target, 'schema', 'name'], 'unknown');

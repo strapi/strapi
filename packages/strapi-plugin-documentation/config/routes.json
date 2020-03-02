@@ -5,7 +5,7 @@
       "path": "/",
       "handler": "Documentation.index",
       "config": {
-        "policies": ["plugins.documentation.index"]
+        "policies": ["plugins::documentation.index"]
       }
     },
     {
@@ -13,7 +13,7 @@
       "path": "/v:major(\\d+).:minor(\\d+).:patch(\\d+)",
       "handler": "Documentation.index",
       "config": {
-        "policies": ["plugins.documentation.index"]
+        "policies": ["plugins::documentation.index"]
       }
     },
     {
