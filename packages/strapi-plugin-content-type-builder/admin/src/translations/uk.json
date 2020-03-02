@@ -131,7 +131,7 @@
   "modelPage.attribute.relationWith": "Зв'язано з",
   "modelPage.contentHeader.emptyDescription.description": "Опису немає",
   "notification.info.creating.notSaved": "Збережіть свою роботу перед створенням нового типу вмісту чи компонента",
-  "notification.info.autoreaload-disable": "Для використання цього плагіна потрібна функція автоперезавантаження. Запустіть сервер за допомогою команди `strapi develop`",
+  "notification.info.autoreaload-disable": "Для використання цього плагіна потрібна функція автоперезавантаження.",
   "plugin.description.long": "Моделюйте структуру даних вашого API. Створюйте нові поля та зв'язки. Файли у вашому проєкті автоматично створюються та оновлюються.",
   "plugin.description.short": "Моделюйте структуру даних вашого API.",
   "popUpForm.navContainer.advanced": "Розширені налаштування",
