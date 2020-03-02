@@ -37,7 +37,7 @@ const setModelConfiguration = async (key, value) => {
     }
   });
 
-  if(_.isEqual(currentConfig, storedConfig) == false) {
+  if(!_.isEqual(currentConfig, storedConfig)) {
     return getStore().set({
       key: configurationKey(key),
       value: currentConfig,
