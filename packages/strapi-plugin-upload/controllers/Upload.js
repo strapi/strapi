@@ -3,23 +3,17 @@
 /**
  * Upload.js controller
  *
- * @description: A set of functions called "actions" of the `upload` plugin.
  */
 
 const _ = require('lodash');
+const validateSettings = require('./validation/settings');
 
 module.exports = {
   async upload(ctx) {
     const uploadService = strapi.plugins.upload.services.upload;
 
     // Retrieve provider configuration.
-    const config = await strapi
-      .store({
-        environment: strapi.config.environment,
-        type: 'plugin',
-        name: 'upload',
-      })
-      .get({ key: 'provider' });
+    const config = strapi.plugins.upload.config;
 
     // Verify if the file upload is enable.
     if (config.enabled === false) {
@@ -104,42 +98,32 @@ module.exports = {
     ctx.send(uploadedFiles);
   },
 
-  async getEnvironments(ctx) {
-    const environments = Object.keys(strapi.config.environments).map(
-      environment => ({
-        name: environment,
-        active: strapi.config.environment === environment,
-      })
-    );
-
-    ctx.send({ environments });
-  },
-
   async getSettings(ctx) {
     const config = await strapi
       .store({
-        environment: ctx.params.environment,
         type: 'plugin',
         name: 'upload',
+        key: 'settings',
       })
-      .get({ key: 'provider' });
+      .get();
 
     ctx.send({
-      providers: strapi.plugins.upload.config.providers,
-      config,
+      data: config,
     });
   },
 
   async updateSettings(ctx) {
-    await strapi
-      .store({
-        environment: ctx.params.environment,
-        type: 'plugin',
-        name: 'upload',
-      })
-      .set({ key: 'provider', value: ctx.request.body });
+    const configurator = strapi.store({
+      type: 'plugin',
+      name: 'upload',
+      key: 'settings',
+    });
 
-    ctx.send({ ok: true });
+    const data = await validateSettings(ctx.request.body);
+
+    await configurator.set({ key: 'settings', value: data });
+
+    ctx.body = { data };
   },
 
   async find(ctx) {
@@ -173,13 +157,7 @@ module.exports = {
 
   async destroy(ctx) {
     const { id } = ctx.params;
-    const config = await strapi
-      .store({
-        environment: strapi.config.environment,
-        type: 'plugin',
-        name: 'upload',
-      })
-      .get({ key: 'provider' });
+    const config = strapi.plugins.upload.config;
 
     const file = await strapi.plugins['upload'].services.upload.fetch({ id });
 
@@ -208,10 +186,9 @@ const searchQueries = {
     return ({ id }) => {
       return model
         .query(qb => {
-          qb.whereRaw('LOWER(hash) LIKE ?', [`%${id}%`]).orWhereRaw(
-            'LOWER(name) LIKE ?',
-            [`%${id}%`]
-          );
+          qb.whereRaw('LOWER(hash) LIKE ?', [
+            `%${id}%`,
+          ]).orWhereRaw('LOWER(name) LIKE ?', [`%${id}%`]);
         })
         .fetchAll()
         .then(results => results.toJSON());

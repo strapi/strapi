@@ -127,7 +127,8 @@ const EditView = ({
   const redirectURL = search
     .split('redirectUrl=')
     .filter((_, index) => index !== 0)
-    .join('');
+    .join('redirectUrl=');
+
   const redirectToPreviousPage = () => push(redirectURL);
 
   return (

@@ -40,13 +40,7 @@ module.exports = {
         resolver: async (obj, { file: upload, ...fields }) => {
           const file = await formatFile(upload, fields);
 
-          const config = await strapi
-            .store({
-              environment: strapi.config.environment,
-              type: 'plugin',
-              name: 'upload',
-            })
-            .get({ key: 'provider' });
+          const config = strapi.plugins.upload.config;
 
           const uploadedFiles = await strapi.plugins.upload.services.upload.upload(
             [file],
@@ -66,13 +60,7 @@ module.exports = {
             uploads.map(upload => formatFile(upload, fields))
           );
 
-          const config = await strapi
-            .store({
-              environment: strapi.config.environment,
-              type: 'plugin',
-              name: 'upload',
-            })
-            .get({ key: 'provider' });
+          const config = strapi.plugins.upload.config;
 
           const uploadedFiles = await strapi.plugins.upload.services.upload.upload(
             files,

@@ -139,13 +139,7 @@ module.exports = {
 
   async uploadToEntity(params, files, source) {
     // Retrieve provider settings from database.
-    const config = await strapi
-      .store({
-        environment: strapi.config.environment,
-        type: 'plugin',
-        name: 'upload',
-      })
-      .get({ key: 'provider' });
+    const config = strapi.plugins.upload.config;
 
     const model = strapi.getModel(params.model, source);
 
@@ -175,5 +169,16 @@ module.exports = {
         return this.upload(enhancedFiles, config);
       })
     );
+  },
+  async getConfig() {
+    const config = await strapi
+      .store({
+        environment: strapi.config.environment,
+        type: 'plugin',
+        name: 'upload',
+      })
+      .get({ key: 'provider' });
+
+    return { ...config, sizeLimit: parseFloat(config.sizeLimit) };
   },
 };
