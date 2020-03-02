@@ -19,7 +19,6 @@ const FiltersCard = ({ filters, onChange }) => {
 
   const name = state.get('name');
   const type = filters[name].type;
-
   const defaultValue = filters[name].defaultValue;
 
   const filtersOptions = getFilterType(type);
@@ -48,12 +47,9 @@ const FiltersCard = ({ filters, onChange }) => {
             // Change the attribute
             handleChange(e);
             // Change other inputs so it reset values
-            const {
-              target: { value },
-            } = e;
             handleChange({ target: { name: 'filter', value: '=' } });
             handleChange({
-              target: { name: 'value', value: filters[value].defaultValue },
+              target: { name: 'value', value: defaultValue },
             });
           }}
           name="name"

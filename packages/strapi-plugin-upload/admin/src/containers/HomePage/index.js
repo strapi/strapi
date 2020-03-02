@@ -50,6 +50,7 @@ const HomePage = () => {
 
   const getSearchParams = () => {
     const params = {};
+
     query.forEach((value, key) => {
       if (includes(paramsKeys, key)) {
         params[key] = value;
@@ -59,7 +60,7 @@ const HomePage = () => {
     return params;
   };
 
-  const getUpdatedSearchParams = updatedParams => {
+  const getUpdatedQueryParams = updatedParams => {
     return {
       ...getSearchParams(),
       filters: generateFiltersFromSearch(search),
@@ -68,17 +69,15 @@ const HomePage = () => {
   };
 
   const handleChangeFilters = ({ target: { value } }) => {
-    if (value) {
-      const updatedFilters = generateFiltersFromSearch(search);
+    const updatedFilters = generateFiltersFromSearch(search);
 
-      // Add filter if it doesn't exist yet
-      if (!some(updatedFilters, value)) {
-        updatedFilters.push(value);
+    // Add filter if it doesn't exist yet
+    if (!some(updatedFilters, value)) {
+      updatedFilters.push(value);
 
-        handleChangeParams({
-          target: { name: 'filters', value: updatedFilters },
-        });
-      }
+      handleChangeParams({
+        target: { name: 'filters', value: updatedFilters },
+      });
     }
   };
 
@@ -109,8 +108,8 @@ const HomePage = () => {
   };
 
   const handleChangeParams = ({ target: { name, value } }) => {
-    const updatedSearch = getUpdatedSearchParams({ [name]: value });
-    const newSearch = generateSearchFromFilters(updatedSearch);
+    const updatedQueryParams = getUpdatedQueryParams({ [name]: value });
+    const newSearch = generateSearchFromFilters(updatedQueryParams);
 
     push({ search: encodeURI(newSearch) });
   };

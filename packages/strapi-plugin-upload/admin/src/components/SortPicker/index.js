@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
 import { Carret } from '@buffetjs/icons';
 import getTrad from '../../utils/getTrad';
+import useOutsideClick from '../../hooks/useOutsideClick';
 
 import DropdownButton from '../DropdownButton';
 import DropdownSection from '../DropdownSection';
@@ -12,6 +13,13 @@ import Wrapper from './Wrapper';
 
 const SortPicker = ({ onChange, value }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef();
+
+  useOutsideClick(dropdownRef, () => {
+    if (isOpen) {
+      setIsOpen(false);
+    }
+  });
 
   const orders = {
     created_at_asc: 'created_at:ASC',
@@ -38,7 +46,7 @@ const SortPicker = ({ onChange, value }) => {
         <FormattedMessage id={getTrad('sort.label')} />
         <Carret fill={isOpen ? '#007EFF' : '#292b2c'} />
       </DropdownButton>
-      <DropdownSection isOpen={isOpen}>
+      <DropdownSection isOpen={isOpen} ref={dropdownRef}>
         <SortList
           isShown={isOpen}
           list={orders}
