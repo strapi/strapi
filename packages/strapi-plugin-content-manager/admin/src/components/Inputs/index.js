@@ -152,6 +152,7 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
         return (
           <InputsIndex
             {...metadatas}
+            autoComplete="new-password"
             autoFocus={autoFocus}
             didCheckErrors={didCheckErrors}
             disabled={disabled}
