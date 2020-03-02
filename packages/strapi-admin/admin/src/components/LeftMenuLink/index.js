@@ -5,98 +5,57 @@
  */
 
 import React from 'react';
-import { startsWith, upperFirst } from 'lodash';
+import { upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
-import { Link } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import en from '../../translations/en.json';
-import Li from './Li';
 
-/* eslint-disable */
+import LeftMenuLinkContent from './LeftMenuLinkContent';
+import Plugin from './Plugin';
 
-function LeftMenuLink(props) {
-  const isLinkActive = startsWith(
-    props.location.pathname.replace('/admin', '').concat('/'),
-
-    props.destination
-      .replace(props.suffixUrlToReplaceForLeftMenuHighlight, '')
-      .concat('/')
-  );
-
+const LeftMenuLink = ({
+  destination,
+  iconName,
+  label,
+  location,
+  source,
+  suffixUrlToReplaceForLeftMenuHighlight,
+}) => {
   const plugin =
-    props.source !== 'content-manager' && props.source !== '' ? (
-      <div className="plugin">
-        <span>{upperFirst(props.source.split('-').join(' '))}</span>
-      </div>
+    source !== 'content-manager' && source !== '' ? (
+      <Plugin>
+        <span>{upperFirst(source.split('-').join(' '))}</span>
+      </Plugin>
     ) : (
       ''
     );
 
-  // Check if messageId exists in en locale to prevent warning messages
-  const content = en[props.label] ? (
-    <FormattedMessage
-      id={props.label}
-      defaultMessage="{label}"
-      values={{
-        label: `${props.label}`,
-      }}
-      className="linkLabel"
-    />
-  ) : (
-    <span className="linkLabel">{props.label}</span>
-  );
-
-  // Icon.
-
-  const icon = <FontAwesomeIcon className={`linkIcon`} icon={props.icon} />;
-
-  // Create external or internal link.
-  const link = props.destination.includes('http') ? (
-    <a
-      className={`link ${isLinkActive ? 'linkActive' : ''}`}
-      href={props.destination}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      {icon}
-      {content}
-    </a>
-  ) : (
-    <Link
-      className={`link ${isLinkActive ? 'linkActive' : ''}`}
-      to={{
-        pathname: props.destination,
-        search: props.source ? `?source=${props.source}` : '',
-      }}
-    >
-      {icon}
-      {content}
-    </Link>
-  );
-
   return (
-    <Li>
-      {link}
+    <>
+      <LeftMenuLinkContent
+        destination={destination}
+        iconName={iconName}
+        label={label}
+        location={location}
+        source={source}
+        suffixUrlToReplaceForLeftMenuHighlight={suffixUrlToReplaceForLeftMenuHighlight}
+      />
       {plugin}
-    </Li>
+    </>
   );
-}
+};
 
 LeftMenuLink.propTypes = {
   destination: PropTypes.string.isRequired,
-  icon: PropTypes.string.isRequired,
+  iconName: PropTypes.string,
   label: PropTypes.string.isRequired,
   location: PropTypes.shape({
     pathname: PropTypes.string,
   }).isRequired,
-  pluginSuffixUrl: PropTypes.string,
   source: PropTypes.string,
   suffixUrlToReplaceForLeftMenuHighlight: PropTypes.string,
 };
 
 LeftMenuLink.defaultProps = {
-  pluginSuffixUrl: '',
+  iconName: 'circle',
   source: '',
   suffixUrlToReplaceForLeftMenuHighlight: '',
 };

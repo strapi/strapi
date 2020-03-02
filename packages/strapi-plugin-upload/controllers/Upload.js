@@ -127,18 +127,14 @@ module.exports = {
   },
 
   async find(ctx) {
-    const data = await strapi.plugins['upload'].services.upload.fetchAll(
-      ctx.query
-    );
+    const data = await strapi.plugins['upload'].services.upload.fetchAll(ctx.query);
 
     // Send 200 `ok`
     ctx.send(data);
   },
 
   async findOne(ctx) {
-    const data = await strapi.plugins['upload'].services.upload.fetch(
-      ctx.params
-    );
+    const data = await strapi.plugins['upload'].services.upload.fetch(ctx.params);
 
     if (!data) {
       return ctx.notFound('file.notFound');
@@ -148,9 +144,7 @@ module.exports = {
   },
 
   async count(ctx) {
-    const data = await strapi.plugins['upload'].services.upload.count(
-      ctx.query
-    );
+    const data = await strapi.plugins['upload'].services.upload.count(ctx.query);
 
     ctx.send({ count: data });
   },
@@ -186,9 +180,9 @@ const searchQueries = {
     return ({ id }) => {
       return model
         .query(qb => {
-          qb.whereRaw('LOWER(hash) LIKE ?', [
+          qb.whereRaw('LOWER(hash) LIKE ?', [`%${id}%`]).orWhereRaw('LOWER(name) LIKE ?', [
             `%${id}%`,
-          ]).orWhereRaw('LOWER(name) LIKE ?', [`%${id}%`]);
+          ]);
         })
         .fetchAll()
         .then(results => results.toJSON());

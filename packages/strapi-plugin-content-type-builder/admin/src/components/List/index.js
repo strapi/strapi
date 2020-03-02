@@ -73,9 +73,14 @@ function List({
       ['components', secondLoopComponentUid, 'schema', 'icon'],
       ''
     );
+    const headerIconName1 =
+      editTarget === 'contentType'
+        ? get(modifiedData, ['contentType', 'schema', 'kind'], null)
+        : editTarget;
+
     let firstHeaderObject = {
       header_label_1: mainTypeName,
-      header_icon_name_1: editTarget,
+      header_icon_name_1: headerIconName1,
       header_icon_isCustom_1: false,
       header_info_category_1: null,
       header_info_name_1: null,
@@ -159,7 +164,9 @@ function List({
     label: isInDevelopmentMode
       ? formatMessage({
           id: !isSub
-            ? `${pluginId}.form.button.add.field.to.${editTarget}`
+            ? `${pluginId}.form.button.add.field.to.${
+                modifiedData.contentType ? modifiedData.contentType.schema.kind : editTarget
+              }`
             : `${pluginId}.form.button.add.field.to.component`,
         })
       : null,
@@ -237,9 +244,7 @@ function List({
       </Wrapper>
       {isSub && (
         <div className="plus-icon" onClick={onClickAddField}>
-          {isInDevelopmentMode && (
-            <Plus fill={isFromDynamicZone ? '#007EFF' : '#b4b6ba'} />
-          )}
+          {isInDevelopmentMode && <Plus fill={isFromDynamicZone ? '#007EFF' : '#b4b6ba'} />}
         </div>
       )}
     </>

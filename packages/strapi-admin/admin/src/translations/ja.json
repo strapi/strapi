@@ -1,7 +1,6 @@
 {
   "Analytics": "分析",
   "Content Manager": "コンテンツ管理",
-  "Content Type Builder": "コンテンツタイプ作成",
   "Email": "Eメール",
   "Files Upload": "ファイルアップロード",
   "HomePage.notification.newsLetter.success": "ニュースレターの購読しました。",
@@ -30,7 +29,6 @@
   "app.components.HomePage.button.quickStart": "クイックスタートチュートリアルで始める",
   "app.components.HomePage.community": "コミュニティで見つける",
   "app.components.HomePage.community.content": "異なるチャンネルでチームメンバー、コントリビューターやデベロッパーと議論する",
-  "app.components.HomePage.create": "コンテンツタイプを作成する",
   "app.components.HomePage.createBlock.content.first": " ",
   "app.components.HomePage.createBlock.content.second": "プラグインを使用すると、モデルのデータ構造を定義するのに役立ちます。ここで新しい方には、",
   "app.components.HomePage.createBlock.content.tutorial": "チュートリアル",

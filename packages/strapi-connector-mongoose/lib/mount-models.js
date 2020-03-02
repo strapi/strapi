@@ -12,7 +12,7 @@ const isPolymorphicAssoc = assoc => {
   return assoc.nature.toLowerCase().indexOf('morph') !== -1;
 };
 
-module.exports = ({ models, target, plugin = false }, ctx) => {
+module.exports = ({ models, target }, ctx) => {
   const { instance } = ctx;
 
   // Parse every authenticated model.
@@ -28,30 +28,19 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       primaryKeyType: 'string',
     });
 
-    if (!plugin) {
-      global[definition.globalName] = {};
-    }
-
     const componentAttributes = Object.keys(definition.attributes).filter(key =>
       ['component', 'dynamiczone'].includes(definition.attributes[key].type)
     );
 
     const scalarAttributes = Object.keys(definition.attributes).filter(key => {
       const { type } = definition.attributes[key];
-      return (
-        type !== undefined &&
-        type !== null &&
-        type !== 'component' &&
-        type !== 'dynamiczone'
-      );
+      return type !== undefined && type !== null && type !== 'component' && type !== 'dynamiczone';
     });
 
-    const relationalAttributes = Object.keys(definition.attributes).filter(
-      key => {
-        const { type } = definition.attributes[key];
-        return type === undefined;
-      }
-    );
+    const relationalAttributes = Object.keys(definition.attributes).filter(key => {
+      const { type } = definition.attributes[key];
+      return type === undefined;
+    });
 
     // handle component and dynamic zone attrs
     if (componentAttributes.length > 0) {
@@ -75,7 +64,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
       definition.loadedModel[name] = {
         ...attr,
-        ...utils(instance).convertType(attr),
+        ...utils(instance).convertType(name, attr),
       };
     });
 
@@ -107,12 +96,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       save: 'beforeSave',
     };
 
-    const findLifecycles = [
-      'find',
-      'findOne',
-      'findOneAndUpdate',
-      'findOneAndRemove',
-    ];
+    const findLifecycles = ['find', 'findOne', 'findOneAndUpdate', 'findOneAndRemove'];
 
     /*
         Override populate path for polymorphic association.
@@ -120,9 +104,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
         instead of Upload.find().populate('related.item')
       */
 
-    const morphAssociations = definition.associations.filter(
-      isPolymorphicAssoc
-    );
+    const morphAssociations = definition.associations.filter(isPolymorphicAssoc);
 
     const populateFn = createOnFetchPopulateFn({
       componentAttributes,
@@ -193,10 +175,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
     // Use provided timestamps if the elemnets in the array are string else use default.
     const timestampsOption = _.get(definition, 'options.timestamps', true);
     if (_.isArray(timestampsOption)) {
-      const [
-        createAtCol = 'createdAt',
-        updatedAtCol = 'updatedAt',
-      ] = timestampsOption;
+      const [createAtCol = 'createdAt', updatedAtCol = 'updatedAt'] = timestampsOption;
 
       schema.set('timestamps', {
         createdAt: createAtCol,
@@ -221,16 +200,12 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
         type: 'timestamp',
       };
     }
-    schema.set(
-      'minimize',
-      _.get(definition, 'options.minimize', false) === true
-    );
+    schema.set('minimize', _.get(definition, 'options.minimize', false) === true);
 
     const refToStrapiRef = obj => {
       const ref = obj.ref;
 
-      let plainData =
-        ref && typeof ref.toJSON === 'function' ? ref.toJSON() : ref;
+      let plainData = ref && typeof ref.toJSON === 'function' ? ref.toJSON() : ref;
 
       if (typeof plainData !== 'object') return ref;
 
@@ -259,16 +234,14 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
             // Reformat data by bypassing the many-to-many relationship.
             switch (association.nature) {
               case 'oneMorphToOne':
-                returned[association.alias] = refToStrapiRef(
-                  returned[association.alias][0]
-                );
+                returned[association.alias] = refToStrapiRef(returned[association.alias][0]);
 
                 break;
 
               case 'manyMorphToMany':
               case 'manyMorphToOne':
-                returned[association.alias] = returned[association.alias].map(
-                  obj => refToStrapiRef(obj)
+                returned[association.alias] = returned[association.alias].map(obj =>
+                  refToStrapiRef(obj)
                 );
                 break;
               default:
@@ -285,9 +258,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
               const components = returned[name].map(el => el.ref);
               // Reformat data by bypassing the many-to-many relationship.
               returned[name] =
-                attribute.repeatable === true
-                  ? components
-                  : _.first(components) || null;
+                attribute.repeatable === true ? components : _.first(components) || null;
             }
           }
 
@@ -306,11 +277,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
     };
 
     // Instantiate model.
-    const Model = instance.model(
-      definition.globalId,
-      schema,
-      definition.collectionName
-    );
+    const Model = instance.model(definition.globalId, schema, definition.collectionName);
 
     Model.on('index', error => {
       if (error) {
@@ -319,16 +286,10 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
             `Unique constraint fails, make sure to update your data and restart to apply the unique constraint.\n\t- ${error.message}`
           );
         } else {
-          strapi.log.error(
-            `An index error happened, it wasn't applied.\n\t- ${error.message}`
-          );
+          strapi.log.error(`An index error happened, it wasn't applied.\n\t- ${error.message}`);
         }
       }
     });
-
-    if (!plugin) {
-      global[definition.globalName] = Model;
-    }
 
     // Expose ORM functions through the `target` object.
     target[model] = _.assign(Model, target[model]);
@@ -339,11 +300,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
   });
 };
 
-const createOnFetchPopulateFn = ({
-  morphAssociations,
-  componentAttributes,
-  definition,
-}) => {
+const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, definition }) => {
   return function() {
     const populatedPaths = this.getPopulatedPaths();
 
@@ -386,16 +343,10 @@ const createOnFetchPopulateFn = ({
 
 const buildRelation = ({ definition, model, instance, attribute, name }) => {
   const { nature, verbose } =
-    utilsModels.getNature(attribute, name, undefined, model.toLowerCase()) ||
-    {};
+    utilsModels.getNature(attribute, name, undefined, model.toLowerCase()) || {};
 
   // Build associations key
-  utilsModels.defineAssociations(
-    model.toLowerCase(),
-    definition,
-    attribute,
-    name
-  );
+  utilsModels.defineAssociations(model.toLowerCase(), definition, attribute, name);
 
   switch (verbose) {
     case 'hasOne': {

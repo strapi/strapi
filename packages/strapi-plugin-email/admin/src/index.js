@@ -7,8 +7,7 @@ import lifecycles from './lifecycles';
 import trads from './translations';
 
 export default strapi => {
-  const pluginDescription =
-    pluginPkg.strapi.description || pluginPkg.description;
+  const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 
   const plugin = {
     blockerComponent: null,
@@ -18,6 +17,7 @@ export default strapi => {
     id: pluginId,
     initializer: Initializer,
     injectedComponents: [],
+    isRequired: pluginPkg.strapi.required || false,
     layout: null,
     lifecycles,
     leftMenuLinks: [],

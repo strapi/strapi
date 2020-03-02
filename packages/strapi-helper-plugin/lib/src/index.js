@@ -82,11 +82,7 @@ export { default as TrashButton } from './components/TrashButton';
 export { default as ViewContainer } from './components/ViewContainer';
 
 // Contexts
-export {
-  GlobalContext,
-  GlobalContextProvider,
-  useGlobalContext,
-} from './contexts/GlobalContext';
+export { GlobalContext, GlobalContextProvider, useGlobalContext } from './contexts/GlobalContext';
 
 // Hooks
 export { default as useQuery } from './hooks/useQuery';

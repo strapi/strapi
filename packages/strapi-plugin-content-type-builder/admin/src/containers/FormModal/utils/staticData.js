@@ -7,6 +7,7 @@ const INITIAL_STATE_DATA = {
   dynamicZoneTarget: null,
   forTarget: null,
   modalType: null,
+  kind: null,
   pathToSchema: [],
   settingType: null,
   step: null,
