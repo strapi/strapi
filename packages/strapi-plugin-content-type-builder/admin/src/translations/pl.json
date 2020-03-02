@@ -68,7 +68,7 @@
   "attribute.richtext.description": "Edytor tekstu z możliwością formatowania",
   "attribute.text.description": "Krótki lub długi tekst jak tytuł lub opis",
   "attribute.time": "Czas",
-  "attribute.uid": "Uuid",
+  "attribute.uid": "UID",
   "attribute.uid.description": "Unikalny identyfikator",
   "button.attributes.add.another": "Dodaj kolejne pole",
   "button.component.add": "Dodaj komponent",

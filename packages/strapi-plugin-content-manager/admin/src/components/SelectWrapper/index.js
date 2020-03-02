@@ -26,13 +26,7 @@ function SelectWrapper({
   const { pathname, search } = useLocation();
   // Disable the input in case of a polymorphic relation
   const isMorph = relationType.toLowerCase().includes('morph');
-  const {
-    addRelation,
-    modifiedData,
-    moveRelation,
-    onChange,
-    onRemoveRelation,
-  } = useDataManager();
+  const { addRelation, modifiedData, moveRelation, onChange, onRemoveRelation } = useDataManager();
   const { isDraggingComponent } = useEditView();
 
   const value = get(modifiedData, name, null);
@@ -88,17 +82,13 @@ function SelectWrapper({
 
         setOptions(prevState =>
           prevState.concat(formattedData).filter((obj, index) => {
-            const objIndex = prevState.findIndex(
-              el => el.value.id === obj.value.id
-            );
+            const objIndex = prevState.findIndex(el => el.value.id === obj.value.id);
 
             if (objIndex === -1) {
               return true;
             }
 
-            return (
-              prevState.findIndex(el => el.value.id === obj.value.id) === index
-            );
+            return prevState.findIndex(el => el.value.id === obj.value.id) === index;
           })
         );
         setIsLoading(false);
@@ -154,21 +144,15 @@ function SelectWrapper({
     setState(prevState => ({ ...prevState, _start: prevState._start + 20 }));
   };
 
-  const isSingle = [
-    'oneWay',
-    'oneToOne',
-    'manyToOne',
-    'oneToManyMorph',
-    'oneToOneMorph',
-  ].includes(relationType);
+  const isSingle = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'].includes(
+    relationType
+  );
   const nextSearch = `${pathname}${search}`;
   const to = `/plugins/${pluginId}/${targetModel}/${
     value ? value.id : null
   }?redirectUrl=${nextSearch}`;
   const link =
-    value === null ||
-    value === undefined ||
-    ['role', 'permission'].includes(targetModel) ? null : (
+    value === null || value === undefined || ['role', 'permission'].includes(targetModel) ? null : (
       <Link to={to}>
         <FormattedMessage id="content-manager.containers.Edit.seeDetails" />
       </Link>
@@ -183,9 +167,7 @@ function SelectWrapper({
           <label htmlFor={name}>
             {label}
             {!isSingle && (
-              <span style={{ fontWeight: 400, fontSize: 12 }}>
-                &nbsp;({associationsLength})
-              </span>
+              <span style={{ fontWeight: 400, fontSize: 12 }}>&nbsp;({associationsLength})</span>
             )}
           </label>
           {isSingle && link}

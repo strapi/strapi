@@ -5,7 +5,7 @@
       "path": "/custom-route",
       "handler": "UsersPermissions.customRoute",
       "config": {
-        "policies": ["plugins.users-permissions.customPolicy"]
+        "policies": ["plugins::users-permissions.customPolicy"]
       }
     },
     {
@@ -13,7 +13,7 @@
       "path": "/",
       "handler": "UsersPermissions.index",
       "config": {
-        "policies": ["plugins.users-permissions.customPolicy"]
+        "policies": ["plugins::users-permissions.customPolicy"]
       }
     }
   ]
