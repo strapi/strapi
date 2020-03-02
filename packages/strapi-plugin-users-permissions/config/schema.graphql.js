@@ -1,6 +1,4 @@
 const _ = require('lodash');
-// eslint-disable-next-line node/no-extraneous-require
-const { ApolloError } = require('apollo-server-koa');
 
 /**
  * Throws an ApolloError if context body contains a bad request
@@ -11,7 +9,7 @@ function checkBadRequest(contextBody) {
   if (_.get(contextBody, 'output.payload.statusCode', 200) !== 200) {
     const statusCode = _.get(contextBody, 'output.payload.statusCode', 400);
     const message = _.get(contextBody, 'output.payload.message', 'Bad Request');
-    throw new ApolloError(message, statusCode, _.omit(contextBody, ['output']));
+    throw new Error(message, statusCode, _.omit(contextBody, ['output']));
   }
 }
 
@@ -64,9 +62,7 @@ module.exports = {
         resolver: async (obj, options, { context }) => {
           context.params = { ...context.params, ...options.input };
 
-          await strapi.plugins[
-            'users-permissions'
-          ].controllers.userspermissions.getRole(context);
+          await strapi.plugins['users-permissions'].controllers.userspermissions.getRole(context);
 
           return context.body.role;
         },
@@ -77,9 +73,7 @@ module.exports = {
         resolver: async (obj, options, { context }) => {
           context.params = { ...context.params, ...options.input };
 
-          await strapi.plugins[
-            'users-permissions'
-          ].controllers.userspermissions.getRoles(context);
+          await strapi.plugins['users-permissions'].controllers.userspermissions.getRoles(context);
 
           return context.body.roles;
         },
@@ -90,9 +84,9 @@ module.exports = {
         description: 'Create a new role',
         resolverOf: 'plugins::users-permissions.userspermissions.createRole',
         resolver: async (obj, options, { context }) => {
-          await strapi.plugins[
-            'users-permissions'
-          ].controllers.userspermissions.createRole(context);
+          await strapi.plugins['users-permissions'].controllers.userspermissions.createRole(
+            context
+          );
 
           return { ok: true };
         },
@@ -101,9 +95,7 @@ module.exports = {
         description: 'Update an existing role',
         resolverOf: 'plugins::users-permissions.userspermissions.updateRole',
         resolver: async (obj, options, { context }) => {
-          await strapi.plugins[
-            'users-permissions'
-          ].controllers.userspermissions.updateRole(
+          await strapi.plugins['users-permissions'].controllers.userspermissions.updateRole(
             context.params,
             context.body
           );
@@ -115,9 +107,9 @@ module.exports = {
         description: 'Delete an existing role',
         resolverOf: 'plugins::users-permissions.userspermissions.deleteRole',
         resolver: async (obj, options, { context }) => {
-          await strapi.plugins[
-            'users-permissions'
-          ].controllers.userspermissions.deleteRole(context);
+          await strapi.plugins['users-permissions'].controllers.userspermissions.deleteRole(
+            context
+          );
 
           return { ok: true };
         },
@@ -129,9 +121,7 @@ module.exports = {
           context.params = _.toPlainObject(options.input.where);
           context.request.body = _.toPlainObject(options.input.data);
 
-          await strapi.plugins['users-permissions'].controllers.user.create(
-            context
-          );
+          await strapi.plugins['users-permissions'].controllers.user.create(context);
 
           return {
             user: context.body.toJSON ? context.body.toJSON() : context.body,
@@ -145,9 +135,7 @@ module.exports = {
           context.params = _.toPlainObject(options.input.where);
           context.request.body = _.toPlainObject(options.input.data);
 
-          await strapi.plugins['users-permissions'].controllers.user.update(
-            context
-          );
+          await strapi.plugins['users-permissions'].controllers.user.update(context);
 
           return {
             user: context.body.toJSON ? context.body.toJSON() : context.body,
@@ -164,18 +152,12 @@ module.exports = {
 
           // Retrieve user to be able to return it because
           // Bookshelf doesn't return the row once deleted.
-          await strapi.plugins['users-permissions'].controllers.user.findOne(
-            context
-          );
+          await strapi.plugins['users-permissions'].controllers.user.findOne(context);
           // Assign result to user.
-          const user = context.body.toJSON
-            ? context.body.toJSON()
-            : context.body;
+          const user = context.body.toJSON ? context.body.toJSON() : context.body;
 
           // Run destroy query.
-          await strapi.plugins['users-permissions'].controllers.user.destroy(
-            context
-          );
+          await strapi.plugins['users-permissions'].controllers.user.destroy(context);
 
           return {
             user,
@@ -188,12 +170,8 @@ module.exports = {
         resolver: async (obj, options, { context }) => {
           context.request.body = _.toPlainObject(options.input);
 
-          await strapi.plugins['users-permissions'].controllers.auth.register(
-            context
-          );
-          let output = context.body.toJSON
-            ? context.body.toJSON()
-            : context.body;
+          await strapi.plugins['users-permissions'].controllers.auth.register(context);
+          let output = context.body.toJSON ? context.body.toJSON() : context.body;
 
           checkBadRequest(output);
           return {
@@ -211,12 +189,8 @@ module.exports = {
           };
           context.request.body = _.toPlainObject(options.input);
 
-          await strapi.plugins['users-permissions'].controllers.auth.callback(
-            context
-          );
-          let output = context.body.toJSON
-            ? context.body.toJSON()
-            : context.body;
+          await strapi.plugins['users-permissions'].controllers.auth.callback(context);
+          let output = context.body.toJSON ? context.body.toJSON() : context.body;
 
           checkBadRequest(output);
           return {
