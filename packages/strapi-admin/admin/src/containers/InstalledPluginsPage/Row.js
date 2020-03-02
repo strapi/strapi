@@ -9,7 +9,7 @@ import { faTrash, faCog } from '@fortawesome/free-solid-svg-icons';
 import Text from '../../components/Text';
 import LogoContainer from './Logo';
 
-// TODO:
+// TODO: remove the upload plugin when the media lib feature is merged.
 const PLUGINS_WITH_CONFIG = ['email', 'upload'];
 
 const Row = ({ logo, name, description, isRequired, id, icon, onConfirm }) => {
@@ -104,7 +104,7 @@ Row.propTypes = {
   isRequired: PropTypes.bool,
   logo: PropTypes.string,
   name: PropTypes.string.isRequired,
-  onConfirm: () => {},
+  onConfirm: PropTypes.func,
 };
 
 export default Row;

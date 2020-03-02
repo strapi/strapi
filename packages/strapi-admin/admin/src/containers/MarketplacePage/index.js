@@ -1,10 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  LoadingIndicatorPage,
-  useGlobalContext,
-  request,
-} from 'strapi-helper-plugin';
+import { LoadingIndicatorPage, useGlobalContext, request } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
 import useFetchPluginsFromMarketPlace from '../../hooks/useFetchPluginsFromMarketPlace';
 import PageTitle from '../../components/PageTitle';
@@ -12,12 +8,7 @@ import PluginCard from '../../components/PluginCard';
 import Wrapper from './Wrapper';
 
 const MarketPlacePage = ({ history }) => {
-  const {
-    autoReload,
-    currentEnvironment,
-    formatMessage,
-    plugins,
-  } = useGlobalContext();
+  const { autoReload, currentEnvironment, formatMessage, plugins } = useGlobalContext();
   const { error, isLoading, data } = useFetchPluginsFromMarketPlace();
 
   if (isLoading || error) {
@@ -42,11 +33,7 @@ const MarketPlacePage = ({ history }) => {
           port: window.location.port,
         },
       };
-      const response = await request(
-        '/admin/plugins/install',
-        opts,
-        overlayblockerParams
-      );
+      const response = await request('/admin/plugins/install', opts, overlayblockerParams);
 
       if (response.ok) {
         // Reload the app
@@ -75,7 +62,6 @@ const MarketPlacePage = ({ history }) => {
           content={formatMessage({
             id: 'app.components.InstallPluginPage.description',
           })}
-          actions={[]}
         />
         <div className="row" style={{ paddingTop: '4.1rem' }}>
           {data.map(plugin => {

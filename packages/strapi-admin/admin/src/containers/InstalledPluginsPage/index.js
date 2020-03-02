@@ -20,11 +20,7 @@ const InstalledPluginsPage = () => {
       };
       // Lock the app
       strapi.lockApp(overlayblockerParams);
-      const response = await request(
-        requestUrl,
-        { method: 'DELETE' },
-        overlayblockerParams
-      );
+      const response = await request(requestUrl, { method: 'DELETE' }, overlayblockerParams);
 
       if (response.ok) {
         // Reload the app
@@ -32,9 +28,7 @@ const InstalledPluginsPage = () => {
       }
     } catch (err) {
       strapi.unlockApp();
-      strapi.notification.error(
-        'app.components.listPluginsPage.deletePlugin.error'
-      );
+      strapi.notification.error('app.components.listPluginsPage.deletePlugin.error');
     }
   };
 
@@ -57,7 +51,6 @@ const InstalledPluginsPage = () => {
           content={formatMessage({
             id: 'app.components.ListPluginsPage.description',
           })}
-          actions={[]}
         />
         <ListWrapper>
           <List
