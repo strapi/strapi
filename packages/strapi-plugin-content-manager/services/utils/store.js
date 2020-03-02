@@ -37,13 +37,13 @@ const setModelConfiguration = async (key, value) => {
     }
   });
 
-  if(JSON.stringify(currentConfig) != JSON.stringify(storedConfig)) {
+  if(_.isEqual(currentConfig, storedConfig) == false) {
     return getStore().set({
       key: configurationKey(key),
       value: currentConfig,
     });
   }
- 
+
 };
 
 const deleteKey = key => {
