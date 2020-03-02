@@ -128,7 +128,7 @@
   "modalForm.sub-header.attribute.create.step": "添加新的组件 ({step}/2)",
   "modalForm.sub-header.attribute.edit": "编辑 {name}",
   "modalForm.sub-header.chooseAttribute.component": "为您的组件选择一个字段",
-  "modalForm.sub-header.chooseAttribute.contentType": "为您的 Content Type 选择一个字段",
+  "modalForm.sub-header.chooseAttribute.collectionType": "为您的 Content Type 选择一个字段",
   "modelPage.attribute.relationWith": "关联",
   "modelPage.contentHeader.emptyDescription.description": "该Collection Type没有任何描述",
   "notification.info.creating.notSaved": "在创建新的内容类型或组件之前，请保存您的工作",

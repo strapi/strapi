@@ -140,7 +140,7 @@
   "modalForm.sub-header.attribute.create.step": "Dodaj nowy komponent ({step}/2)",
   "modalForm.sub-header.attribute.edit": "Edytuj {name}",
   "modalForm.sub-header.chooseAttribute.component": "Wybierz pole dla komponentu",
-  "modalForm.sub-header.chooseAttribute.contentType": "Wybierz pole dla typu zawartości",
+  "modalForm.sub-header.chooseAttribute.collectionType": "Wybierz pole dla typu zawartości",
   "notification.info.creating.notSaved": "Zapisz swoją pracę przed utworzeniem nowego typu treści lub komponentu",
   "popUpWarning.bodyMessage.cancel-modifications": "Czy na pewno chcesz anulować swoje modyfikacje?",
   "popUpWarning.bodyMessage.cancel-modifications.with-components": "Czy na pewno chcesz anulować swoje modyfikacje? Niektóre komponenty zostały utworzone lub zmodyfikowane ...",
