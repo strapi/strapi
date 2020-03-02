@@ -1,5 +1,5 @@
 import React, { useReducer, useState, useEffect } from 'react';
-import { includes, some } from 'lodash';
+import { includes } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
 import {
@@ -21,7 +21,6 @@ import FiltersList from '../../components/FiltersList';
 import ListEmpty from '../../components/ListEmpty';
 import ModalStepper from '../ModalStepper';
 import {
-  filtersForm,
   generatePageFromStart,
   generateStartFromPage,
   getHeaderLabel,
@@ -68,27 +67,10 @@ const HomePage = () => {
     };
   };
 
-  const handleChangeFilters = ({ target: { value } }) => {
-    const updatedFilters = generateFiltersFromSearch(search);
+  const getQueryValue = key => {
+    const queryParams = getSearchParams();
 
-    // Add filter if it doesn't exist yet
-    if (!some(updatedFilters, value)) {
-      updatedFilters.push(value);
-
-      handleChangeParams({
-        target: { name: 'filters', value: updatedFilters },
-      });
-    }
-  };
-
-  const handleDeleteFilter = index => {
-    // Remove filter
-    const updatedFilters = generateFiltersFromSearch(search);
-    updatedFilters.splice(index, 1);
-
-    handleChangeParams({
-      target: { name: 'filters', value: updatedFilters },
-    });
+    return queryParams[key];
   };
 
   const handleChangeListParams = ({ target: { name, value } }) => {
@@ -99,12 +81,6 @@ const HomePage = () => {
     } else {
       handleChangeParams({ target: { name: '_limit', value } });
     }
-  };
-
-  const getQueryValue = key => {
-    const queryParams = getSearchParams();
-
-    return queryParams[key];
   };
 
   const handleChangeParams = ({ target: { name, value } }) => {
@@ -120,6 +96,16 @@ const HomePage = () => {
 
   const handleClickToggleModal = () => {
     setIsOpen(prev => !prev);
+  };
+
+  const handleDeleteFilter = index => {
+    // Remove filter
+    const updatedFilters = generateFiltersFromSearch(search);
+    updatedFilters.splice(index, 1);
+
+    handleChangeParams({
+      target: { name: 'filters', value: updatedFilters },
+    });
   };
 
   const headerProps = {
@@ -178,7 +164,7 @@ const HomePage = () => {
           onChange={handleChangeParams}
           value={getQueryValue('_sort') || null}
         />
-        <FiltersPicker onChange={handleChangeFilters} filters={filtersForm} />
+        <FiltersPicker onChange={handleChangeParams} />
         <FiltersList
           filters={generateFiltersFromSearch(search)}
           onClick={handleDeleteFilter}
@@ -189,7 +175,6 @@ const HomePage = () => {
 
       <PageFooter
         count={50}
-        context={{ emitEvent: () => {} }}
         onChangeParams={handleChangeListParams}
         params={params}
       />

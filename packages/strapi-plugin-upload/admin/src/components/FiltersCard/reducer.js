@@ -13,6 +13,10 @@ function reducer(state, action) {
       return state.update(action.name, () => action.value);
     case 'RESET_FORM':
       return initialState;
+    case 'RESET_VALUE':
+      return state
+        .update('filter', () => '=')
+        .update('value', () => action.value);
     default:
       return state;
   }

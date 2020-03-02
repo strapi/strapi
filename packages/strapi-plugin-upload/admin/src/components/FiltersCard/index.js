@@ -8,20 +8,23 @@ import getTrad from '../../utils/getTrad';
 
 import reducer, { initialState } from './reducer';
 
+import filters from './utils/filtersForm';
+
 import Wrapper from './Wrapper';
 import Button from './Button';
 import InputWrapper from './InputWrapper';
 
 import Input from '../FilterInput';
 
-const FiltersCard = ({ filters, onChange }) => {
+const FiltersCard = ({ onChange }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const name = state.get('name');
-  const type = filters[name].type;
-  const defaultValue = filters[name].defaultValue;
+  const { name, filter, value } = state.toJS();
 
+  const type = filters[name].type;
   const filtersOptions = getFilterType(type);
+
+  const getDefaultValue = name => filters[name].defaultValue;
 
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
@@ -29,6 +32,13 @@ const FiltersCard = ({ filters, onChange }) => {
       name,
       value,
     });
+
+    if (name === 'name') {
+      dispatch({
+        type: 'RESET_VALUE',
+        value: getDefaultValue(value),
+      });
+    }
   };
 
   const addFilter = () => {
@@ -39,19 +49,19 @@ const FiltersCard = ({ filters, onChange }) => {
     });
   };
 
+  const renderFiltersOptions = () => {
+    return filtersOptions.map(({ id, value }) => (
+      <FormattedMessage id={id} key={id}>
+        {msg => <option value={value}>{msg}</option>}
+      </FormattedMessage>
+    ));
+  };
+
   return (
     <Wrapper>
       <InputWrapper>
         <Select
-          onChange={e => {
-            // Change the attribute
-            handleChange(e);
-            // Change other inputs so it reset values
-            handleChange({ target: { name: 'filter', value: '=' } });
-            handleChange({
-              target: { name: 'value', value: defaultValue },
-            });
-          }}
+          onChange={handleChange}
           name="name"
           options={Object.keys(filters)}
           value={name}
@@ -61,12 +71,8 @@ const FiltersCard = ({ filters, onChange }) => {
         <Select
           onChange={handleChange}
           name="filter"
-          options={filtersOptions.map(({ id, value }) => (
-            <FormattedMessage id={id} key={id}>
-              {msg => <option value={value}>{msg}</option>}
-            </FormattedMessage>
-          ))}
-          value={state.get('filter')}
+          options={renderFiltersOptions()}
+          value={filter}
         />
       </InputWrapper>
       <InputWrapper>
@@ -75,7 +81,7 @@ const FiltersCard = ({ filters, onChange }) => {
           onChange={handleChange}
           name="value"
           options={['image', 'video', 'files']}
-          value={state.get('value') || defaultValue}
+          value={value}
         />
       </InputWrapper>
       <Button icon onClick={addFilter}>
@@ -86,12 +92,10 @@ const FiltersCard = ({ filters, onChange }) => {
 };
 
 FiltersCard.defaultProps = {
-  filters: {},
   onChange: () => {},
 };
 
 FiltersCard.propTypes = {
-  filters: PropTypes.object,
   onChange: PropTypes.func,
 };
 

@@ -18,23 +18,21 @@ function SizeInput({ onChange, value, ...rest }) {
   const handleChangeValue = ({ target: { value } }) => {
     setSize(value);
 
-    handleChange();
+    onChange({
+      target: {
+        name: 'value',
+        value: `${value}${format}`,
+      },
+    });
   };
 
   const handleChangeFormat = ({ target: { value } }) => {
     setFormat(value);
 
-    handleChange();
-  };
-
-  const handleChange = () => {
     onChange({
       target: {
         name: 'value',
-        value: {
-          size,
-          format,
-        },
+        value: `${size}${value}`,
       },
     });
   };
@@ -47,7 +45,7 @@ function SizeInput({ onChange, value, ...rest }) {
             {...rest}
             name="size_value"
             onChange={handleChangeValue}
-            value={value.size}
+            value={size}
           />
         </div>
         <div className="col-6">
@@ -55,7 +53,7 @@ function SizeInput({ onChange, value, ...rest }) {
             name="format_value"
             onChange={handleChangeFormat}
             options={options}
-            value={value.format}
+            value={format}
           />
         </div>
       </div>
@@ -65,15 +63,12 @@ function SizeInput({ onChange, value, ...rest }) {
 
 SizeInput.defaultProps = {
   onChange: () => {},
-  value: {},
+  value: null,
 };
 
 SizeInput.propTypes = {
   onChange: PropTypes.func,
-  value: PropTypes.shape({
-    size: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    format: PropTypes.string,
-  }),
+  value: PropTypes.string,
 };
 
 export default SizeInput;
