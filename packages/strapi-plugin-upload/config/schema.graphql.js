@@ -75,7 +75,7 @@ const formatFile = async (upload, fields) => {
     ext: path.extname(filename),
     buffer,
     mime: mimetype,
-    size: Math.round((stream.size / 1000) * 100) / 100,
+    size: Math.round((buffer.length / 1000) * 100) / 100,
   };
 
   const { refId, ref, source, field } = fields;
