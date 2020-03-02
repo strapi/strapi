@@ -15,6 +15,7 @@ const loadPluginsGraphqlConfig = async installedPlugins => {
       pluginDir,
       'config/*.graphql?(.js)'
     );
+
     _.set(root, ['plugins', pluginName], result);
   }
 

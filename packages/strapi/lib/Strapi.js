@@ -13,17 +13,8 @@ const chalk = require('chalk');
 const CLITable = require('cli-table3');
 
 const utils = require('./utils');
-const {
-  loadConfig,
-  loadApis,
-  loadAdmin,
-  loadPlugins,
-  loadMiddlewares,
-  loadHooks,
-  bootstrap,
-  loadExtensions,
-  loadComponents,
-} = require('./core');
+const loadModules = require('./core/load-modules');
+const bootstrap = require('./core/bootstrap');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
 const createStrapiFs = require('./core/fs');
@@ -37,6 +28,7 @@ const {
 } = require('./services/webhook-store');
 const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const createEntityService = require('./services/entity-service');
+const createEntityValidator = require('./services/entity-validator');
 const { createDatabaseManager } = require('strapi-database');
 
 const CONFIG_PATHS = {
@@ -332,51 +324,16 @@ class Strapi extends EventEmitter {
       }
     });
 
-    const [
-      config,
-      api,
-      admin,
-      plugins,
-      middlewares,
-      hook,
-      extensions,
-      components,
-    ] = await Promise.all([
-      loadConfig(this),
-      loadApis(this),
-      loadAdmin(this),
-      loadPlugins(this),
-      loadMiddlewares(this),
-      loadHooks(this.config),
-      loadExtensions(this.config),
-      loadComponents(this),
-    ]);
+    const modules = await loadModules(this);
 
-    _.merge(this.config, config);
+    _.merge(this.config, modules.config);
 
-    this.api = api;
-    this.admin = admin;
-    this.components = components;
-    this.plugins = plugins;
-    this.middleware = middlewares;
-    this.hook = hook;
-
-    /**
-     * Handle plugin extensions
-     */
-    // merge extensions config folders
-    _.mergeWith(this.plugins, extensions.merges, (objValue, srcValue, key) => {
-      // concat routes
-      if (_.isArray(srcValue) && _.isArray(objValue) && key === 'routes') {
-        return srcValue.concat(objValue);
-      }
-    });
-    // overwrite plugins with extensions overwrites
-    extensions.overwrites.forEach(({ path, mod }) => {
-      _.assign(_.get(this.plugins, path), mod);
-    });
-
-    // Populate AST with configurations.
+    this.api = modules.api;
+    this.admin = modules.admin;
+    this.components = modules.components;
+    this.plugins = modules.plugins;
+    this.middleware = modules.middlewares;
+    this.hook = modules.hook;
 
     await bootstrap(this);
 
@@ -406,9 +363,14 @@ class Strapi extends EventEmitter {
 
     await this.startWebhooks();
 
+    this.entityValidator = createEntityValidator({
+      strapi: this,
+    });
+
     this.entityService = createEntityService({
       db: this.db,
       eventHub: this.eventHub,
+      entityValidator: this.entityValidator,
     });
 
     // Initialize hooks and middlewares.

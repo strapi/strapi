@@ -32,16 +32,9 @@ function ListRow({
   secondLoopComponentUid,
   isNestedInDZComponent,
 }) {
-  const {
-    contentTypes,
-    isInDevelopmentMode,
-    modifiedData,
-    removeAttribute,
-  } = useDataManager();
-
-  const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type)
-    ? 'number'
-    : type;
+  const { contentTypes, isInDevelopmentMode, modifiedData, removeAttribute } = useDataManager();
+  const isMorph = target === '*';
+  const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type) ? 'number' : type;
 
   let readableType = type;
 
@@ -51,14 +44,14 @@ function ListRow({
     readableType = 'text';
   }
 
-  const contentTypeFriendlyName = get(
-    contentTypes,
-    [target, 'schema', 'name'],
-    ''
-  );
+  const contentTypeFriendlyName = get(contentTypes, [target, 'schema', 'name'], '');
   const src = target ? 'relation' : ico;
 
   const handleClick = () => {
+    if (isMorph) {
+      return;
+    }
+
     if (configurable !== false) {
       const firstComponentCategory = get(
         modifiedData,
@@ -206,10 +199,7 @@ function ListRow({
   return (
     <Wrapper
       onClick={handleClick}
-      className={[
-        target ? 'relation-row' : '',
-        configurable ? 'clickable' : '',
-      ]}
+      className={[target ? 'relation-row' : '', configurable ? 'clickable' : '']}
       loopNumber={loopNumber}
     >
       <td>
@@ -223,7 +213,9 @@ function ListRow({
         {target ? (
           <div>
             <FormattedMessage
-              id={`${pluginId}.modelPage.attribute.relationWith`}
+              id={`${pluginId}.modelPage.attribute.${
+                isMorph ? 'relation-polymorphic' : 'relationWith'
+              }`}
             />
             &nbsp;
             <FormattedMessage id={`${pluginId}.from`}>
@@ -240,9 +232,7 @@ function ListRow({
           <>
             <FormattedMessage id={`${pluginId}.attribute.${readableType}`} />
             &nbsp;
-            {repeatable && (
-              <FormattedMessage id={getTrad('component.repeatable')} />
-            )}
+            {repeatable && <FormattedMessage id={getTrad('component.repeatable')} />}
           </>
         )}
       </td>
@@ -251,9 +241,11 @@ function ListRow({
           <>
             {configurable ? (
               <>
-                <button type="button" onClick={handleClick}>
-                  <FontAwesomeIcon className="link-icon" icon="pencil-alt" />
-                </button>
+                {!isMorph && (
+                  <button type="button" onClick={handleClick}>
+                    <FontAwesomeIcon className="link-icon" icon="pencil-alt" />
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={e => {

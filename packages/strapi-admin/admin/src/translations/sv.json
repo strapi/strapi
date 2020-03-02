@@ -1,7 +1,6 @@
 {
   "Analytics": "Analytics",
   "Content Manager": "Innehållshantering",
-  "Content Type Builder": "Innehållstypsverktyg",
   "Email": "E-post",
   "Files Upload": "Uppladdning av filer",
   "HomePage.notification.newsLetter.success": "Prenumererade på nyhetsbrevet",
@@ -30,7 +29,6 @@
   "app.components.HomePage.button.quickStart": "Snabb introduktion",
   "app.components.HomePage.community": "Hitta gemenskapen på webben",
   "app.components.HomePage.community.content": "Diskutera med teammedlemmar, bidragsgivare och utvecklare på olika kanaler.",
-  "app.components.HomePage.create": "Skapa din första innehållstyp",
   "app.components.HomePage.createBlock.content.first": "De",
   "app.components.HomePage.createBlock.content.second": "plugin hjälper dig att definiera datastrukturen för dina modeller. Om du är ny här rekommenderar vi dig starkt att följa vår",
   "app.components.HomePage.createBlock.content.tutorial": "snabbguide.",

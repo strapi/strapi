@@ -5,6 +5,7 @@ const getAttributeDisplayedType = type => {
     case 'date':
     case 'datetime':
     case 'time':
+    case 'timestamp':
       displayedType = 'date';
       break;
     case 'integer':
