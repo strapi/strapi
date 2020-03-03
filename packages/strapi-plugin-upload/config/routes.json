@@ -31,6 +31,14 @@
     },
     {
       "method": "GET",
+      "path": "/media-types",
+      "handler": "Upload.getMediaTypes",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
       "path": "/files/count",
       "handler": "Upload.count",
       "config": {

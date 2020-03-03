@@ -2,7 +2,6 @@
   "enabled": true,
   "provider": "local",
   "providerOptions": {
-    "sizeLimit": 1000
-  },
-  "providers": []
+    "sizeLimit": 1000000
+  }
 }
