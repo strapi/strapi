@@ -5,7 +5,7 @@ import Logo from '../../assets/images/logo-strapi.png';
 
 const Wrapper = styled.div`
   background-color: #007eff;
-  height: ${props => props.theme.main.sizes.header.height};
+  height: ${props => props.theme.main.sizes.leftMenu.height};
 
   .leftMenuHeaderLink {
     &:hover {
@@ -18,7 +18,7 @@ const Wrapper = styled.div`
     height: 100%;
     width: 100%;
     text-align: center;
-    height: ${props => props.theme.main.sizes.header.height};
+    height: ${props => props.theme.main.sizes.leftMenu.height};
     vertical-align: middle;
     font-size: 2rem;
     letter-spacing: 0.2rem;
