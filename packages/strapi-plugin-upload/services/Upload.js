@@ -7,50 +7,76 @@
  */
 
 const fs = require('fs');
+const path = require('path');
 const crypto = require('crypto');
 const _ = require('lodash');
 const toArray = require('stream-to-array');
-const uuid = require('uuid/v4');
+const filenamify = require('filenamify');
 
-function niceHash(buffer) {
-  return crypto
-    .createHash('sha256')
-    .update(buffer)
-    .digest('base64')
-    .replace(/=/g, '')
-    .replace(/\//g, '-')
-    .replace(/\+/, '_');
-}
+const randomSuffix = () => crypto.randomBytes(5).toString('hex');
+const generateFileName = name => {
+  const baseName = filenamify(name, { replacement: '_' }).replace(/\s/g, '_');
+
+  return `${baseName}_${randomSuffix()}`;
+};
 
 module.exports = {
-  bufferize: async files => {
-    if (_.isEmpty(files) === 0) {
-      throw 'Missing files.';
-    }
+  formatFileInfo({ filename, type, size }, fileInfo, metas) {
+    const ext = path.extname(filename);
+    const baseName = path.basename(filename, ext);
 
-    // files is always an array to map on
-    files = _.isArray(files) ? files : [files];
+    const usedName = fileInfo.name || baseName;
 
-    const createBuffer = async stream => {
-      const parts = await toArray(fs.createReadStream(stream.path));
-      const buffers = parts.map(part => (_.isBuffer(part) ? part : Buffer.from(part)));
-
-      const buffer = Buffer.concat(buffers);
-
-      return {
-        tmpPath: stream.path,
-        name: stream.name,
-        sha256: niceHash(buffer),
-        hash: uuid().replace(/-/g, ''),
-        ext: stream.name.split('.').length > 1 ? `.${_.last(stream.name.split('.'))}` : '',
-        buffer,
-        mime: stream.type,
-        size: Math.round((stream.size / 1000) * 100) / 100,
-      };
+    const entity = {
+      name: usedName,
+      alternativeText: fileInfo.alternativeText,
+      caption: fileInfo.caption,
+      // sha256: niceHash(buffer),
+      hash: generateFileName(usedName),
+      ext,
+      mime: type,
+      size: Math.round((size / 1000) * 100) / 100,
     };
 
-    // transform all files in buffer
-    return Promise.all(files.map(stream => createBuffer(stream)));
+    const { refId, ref, source, field } = metas;
+
+    if (refId && ref && field) {
+      entity.related = [
+        {
+          refId,
+          ref,
+          source,
+          field,
+        },
+      ];
+    }
+
+    if (metas.path) {
+      entity.path = metas.path;
+    }
+
+    return entity;
+  },
+
+  async enhanceFile(file, fileInfo, metas) {
+    const parts = await toArray(fs.createReadStream(file.path));
+    const buffers = parts.map(part => (_.isBuffer(part) ? part : Buffer.from(part)));
+
+    const buffer = Buffer.concat(buffers);
+
+    const formattedFile = this.formatFileInfo(
+      {
+        filename: file.name,
+        type: file.type,
+        size: file.size,
+      },
+      fileInfo,
+      metas
+    );
+
+    return _.assign(formattedFile, {
+      buffer,
+    });
   },
 
   async upload(files) {
@@ -109,35 +135,25 @@ module.exports = {
   },
 
   async uploadToEntity(params, files, source) {
-    const model = strapi.getModel(params.model, source);
+    const { id, model, field } = params;
 
-    // Asynchronous upload.
-    return await Promise.all(
-      Object.keys(files).map(async attribute => {
-        // Bufferize files per attribute.
-        const buffers = await this.bufferize(files[attribute]);
-        const enhancedFiles = buffers.map(file => {
-          const details = model.attributes[attribute];
-
-          // Add related information to be able to make
-          // the relationships later.
-          file[details.via] = [
-            {
-              refId: params.id,
-              ref: params.model,
-              source,
-              field: attribute,
-            },
-          ];
-
-          return file;
-        });
-
-        // Make upload async.
-        return this.upload(enhancedFiles);
+    const arr = Array.isArray(files) ? files : [files];
+    return Promise.all(
+      arr.map(file => {
+        return this.enhanceFile(
+          file,
+          {},
+          {
+            refId: id,
+            ref: model,
+            source,
+            field,
+          }
+        );
       })
-    );
+    ).then(files => this.upload(files));
   },
+
   async getConfig() {
     const config = await strapi
       .store({
