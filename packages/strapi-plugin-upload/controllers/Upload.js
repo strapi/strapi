@@ -106,12 +106,6 @@ module.exports = {
     ctx.body = { data };
   },
 
-  async getMediaTypes(ctx) {
-    const data = _.get(strapi.plugins.upload, 'config.mediaTypes');
-
-    ctx.body = { data };
-  },
-
   async find(ctx) {
     const data = await strapi.plugins['upload'].services.upload.fetchAll(ctx.query);
 

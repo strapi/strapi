@@ -1,9 +1,5 @@
 'use strict';
 
-const db = require('mime-db');
-const mime = require('mime-type')(db);
-const _ = require('lodash');
-
 /**
  * An asynchronous bootstrap function that runs before
  * your application gets started.
@@ -18,13 +14,6 @@ module.exports = async () => {
     type: 'plugin',
     name: 'upload',
     key: 'settings',
-  });
-
-  _.defaults(strapi.plugins.upload.config, {
-    mediaTypes: {
-      images: mime.glob('image/*'),
-      videos: mime.glob('video/*'),
-    },
   });
 
   strapi.plugins.upload.provider = createProvider(strapi.plugins.upload.config || {});
