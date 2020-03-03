@@ -1,7 +1,6 @@
 {
   "Analytics": "Analýzy",
   "Content Manager": "Správce obsahu",
-  "Content Type Builder": "Tvůrce Typů obsahu",
   "Documentation": "Dokumentace",
   "Email": "E-mailová adresa",
   "Files Upload": "Nahrát soubory",
@@ -31,7 +30,6 @@
   "app.components.HomePage.button.quickStart": "ZAČÍT KRÁTKÝM NÁVODEM",
   "app.components.HomePage.community": "Najděte komunitu na webu",
   "app.components.HomePage.community.content": "Diskutujte s členy, přispěvateli a vývojáři na různých kanálech.",
-  "app.components.HomePage.create": "Vytvořte svůj první Typ obsahu",
   "app.components.HomePage.createBlock.content.first": "Tento ",
   "app.components.HomePage.createBlock.content.second": " zásuvný modul vám pomůže definovat datovou strukturu vašich modelů. Pokud jste zde nový, velmi doporučujeme postupovat dle našeho ",
   "app.components.HomePage.createBlock.content.tutorial": " návodu.",
@@ -174,7 +172,6 @@
   "HomePage.helmet.title": "Úvodní stránka",
   "HomePage.welcome.congrats": "Gratulujeme!",
   "HomePage.welcome.congrats.content": "Jste poprvé přihlášeni jako správce. Chcete-li objevit výkonné funkce poskytované Strapi,",
-  "HomePage.welcome.congrats.content.bold": "doporučujeme vám vytvořit první Content-Type.",
   "HomePage.community": "Připojit se ke komunitě",
   "HomePage.roadmap": "Podívejte se na náš harmonogram prací",
   "HomePage.greetings": "Ahoj {name}!",

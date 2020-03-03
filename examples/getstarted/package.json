@@ -29,6 +29,8 @@
     "strapi-plugin-users-permissions": "3.0.0-beta.18.7",
     "strapi-provider-email-mailgun": "3.0.0-beta.18.7",
     "strapi-provider-upload-aws-s3": "3.0.0-beta.18.7",
+    "strapi-provider-upload-cloudinary": "3.0.0-beta.18.7",
+    "strapi-provider-upload-rackspace": "3.0.0-beta.18.7",
     "strapi-utils": "3.0.0-beta.18.7"
   },
   "strapi": {

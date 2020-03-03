@@ -1,3 +1,4 @@
 {
-  "amountLimit": 5
+  "amountLimit": 5,
+  "depthLimit": 10
 }

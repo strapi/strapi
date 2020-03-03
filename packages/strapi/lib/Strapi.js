@@ -13,17 +13,8 @@ const chalk = require('chalk');
 const CLITable = require('cli-table3');
 
 const utils = require('./utils');
-const {
-  loadConfig,
-  loadApis,
-  loadAdmin,
-  loadPlugins,
-  loadMiddlewares,
-  loadHooks,
-  bootstrap,
-  loadExtensions,
-  loadComponents,
-} = require('./core');
+const loadModules = require('./core/load-modules');
+const bootstrap = require('./core/bootstrap');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
 const createStrapiFs = require('./core/fs');
@@ -31,12 +22,10 @@ const getPrefixedDeps = require('./utils/get-prefixed-dependencies');
 
 const createEventHub = require('./services/event-hub');
 const createWebhookRunner = require('./services/webhook-runner');
-const {
-  webhookModel,
-  createWebhookStore,
-} = require('./services/webhook-store');
+const { webhookModel, createWebhookStore } = require('./services/webhook-store');
 const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const createEntityService = require('./services/entity-service');
+const createEntityValidator = require('./services/entity-validator');
 const { createDatabaseManager } = require('strapi-database');
 
 const CONFIG_PATHS = {
@@ -141,10 +130,7 @@ class Strapi extends EventEmitter {
   }
 
   requireProjectBootstrap() {
-    const bootstrapPath = path.resolve(
-      this.dir,
-      'config/functions/bootstrap.js'
-    );
+    const bootstrapPath = path.resolve(this.dir, 'config/functions/bootstrap.js');
 
     if (fse.existsSync(bootstrapPath)) {
       require(bootstrapPath);
@@ -167,10 +153,7 @@ class Strapi extends EventEmitter {
       [chalk.blue('Launched in'), Date.now() - this.config.launchedAt + ' ms'],
       [chalk.blue('Environment'), this.config.environment],
       [chalk.blue('Process PID'), process.pid],
-      [
-        chalk.blue('Version'),
-        `${this.config.info.strapi} (node v${this.config.info.node})`,
-      ]
+      [chalk.blue('Version'), `${this.config.info.strapi} (node v${this.config.info.node})`]
     );
 
     console.log(infoTable.toString());
@@ -184,9 +167,7 @@ class Strapi extends EventEmitter {
 
     console.log(chalk.bold('One more thing...'));
     console.log(
-      chalk.grey(
-        'Create your first administrator 💻 by going to the administration panel at:'
-      )
+      chalk.grey('Create your first administrator 💻 by going to the administration panel at:')
     );
     console.log();
 
@@ -202,11 +183,7 @@ class Strapi extends EventEmitter {
     console.log(chalk.bold('Welcome back!'));
 
     if (this.config.serveAdminPanel === true) {
-      console.log(
-        chalk.grey(
-          'To manage your project 🚀, go to the administration panel at:'
-        )
-      );
+      console.log(chalk.grey('To manage your project 🚀, go to the administration panel at:'));
       console.log(chalk.bold(this.config.admin.url));
       console.log();
     }
@@ -251,11 +228,7 @@ class Strapi extends EventEmitter {
 
         if (
           (this.config.environment === 'development' &&
-            _.get(
-              this.config.currentEnvironment,
-              'server.admin.autoOpen',
-              true
-            ) !== false) ||
+            _.get(this.config.currentEnvironment, 'server.admin.autoOpen', true) !== false) ||
           !isInitialised
         ) {
           await utils.openBrowser.call(this);
@@ -273,9 +246,7 @@ class Strapi extends EventEmitter {
     // handle port in use cleanly
     this.server.on('error', err => {
       if (err.code === 'EADDRINUSE') {
-        return this.stopWithError(
-          `The port ${err.port} is already used by another application.`
-        );
+        return this.stopWithError(`The port ${err.port} is already used by another application.`);
       }
 
       this.log.error(err);
@@ -332,51 +303,16 @@ class Strapi extends EventEmitter {
       }
     });
 
-    const [
-      config,
-      api,
-      admin,
-      plugins,
-      middlewares,
-      hook,
-      extensions,
-      components,
-    ] = await Promise.all([
-      loadConfig(this),
-      loadApis(this),
-      loadAdmin(this),
-      loadPlugins(this),
-      loadMiddlewares(this),
-      loadHooks(this.config),
-      loadExtensions(this.config),
-      loadComponents(this),
-    ]);
+    const modules = await loadModules(this);
 
-    _.merge(this.config, config);
+    _.merge(this.config, modules.config);
 
-    this.api = api;
-    this.admin = admin;
-    this.components = components;
-    this.plugins = plugins;
-    this.middleware = middlewares;
-    this.hook = hook;
-
-    /**
-     * Handle plugin extensions
-     */
-    // merge extensions config folders
-    _.mergeWith(this.plugins, extensions.merges, (objValue, srcValue, key) => {
-      // concat routes
-      if (_.isArray(srcValue) && _.isArray(objValue) && key === 'routes') {
-        return srcValue.concat(objValue);
-      }
-    });
-    // overwrite plugins with extensions overwrites
-    extensions.overwrites.forEach(({ path, mod }) => {
-      _.assign(_.get(this.plugins, path), mod);
-    });
-
-    // Populate AST with configurations.
+    this.api = modules.api;
+    this.admin = modules.admin;
+    this.components = modules.components;
+    this.plugins = modules.plugins;
+    this.middleware = modules.middlewares;
+    this.hook = modules.hook;
 
     await bootstrap(this);
 
@@ -406,9 +342,14 @@ class Strapi extends EventEmitter {
 
     await this.startWebhooks();
 
+    this.entityValidator = createEntityValidator({
+      strapi: this,
+    });
+
     this.entityService = createEntityService({
       db: this.db,
       eventHub: this.eventHub,
+      entityValidator: this.entityValidator,
     });
 
     // Initialize hooks and middlewares.
@@ -471,7 +412,7 @@ class Strapi extends EventEmitter {
         this.log.warn('Make sure you call it?');
       }, timeoutMs);
 
-    async function execBootstrap(fn) {
+    const execBootstrap = async fn => {
       if (!fn) return;
 
       const timer = warnOnTimeout();
@@ -480,12 +421,10 @@ class Strapi extends EventEmitter {
       } finally {
         clearTimeout(timer);
       }
-    }
+    };
 
     const pluginBoostraps = Object.keys(this.plugins).map(plugin => {
-      return execBootstrap(
-        _.get(this.plugins[plugin], 'config.functions.bootstrap')
-      ).catch(err => {
+      return execBootstrap(_.get(this.plugins[plugin], 'config.functions.bootstrap')).catch(err => {
         strapi.log.error(`Bootstrap function in plugin "${plugin}" failed`);
         strapi.log.error(err);
         strapi.stop();

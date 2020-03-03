@@ -15,15 +15,7 @@
     },
     {
       "method": "GET",
-      "path": "/environments",
-      "handler": "Upload.getEnvironments",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/settings/:environment",
+      "path": "/settings",
       "handler": "Upload.getSettings",
       "config": {
         "policies": []
@@ -31,7 +23,7 @@
     },
     {
       "method": "PUT",
-      "path": "/settings/:environment",
+      "path": "/settings",
       "handler": "Upload.updateSettings",
       "config": {
         "policies": []

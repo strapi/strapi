@@ -3,8 +3,7 @@ import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
 
 export default strapi => {
-  const pluginDescription =
-    pluginPkg.strapi.description || pluginPkg.description;
+  const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 
   const plugin = {
     blockerComponent: null,
@@ -15,6 +14,7 @@ export default strapi => {
     isReady: true,
     initializer: () => null,
     injectedComponents: [],
+    isRequired: pluginPkg.strapi.required || false,
     layout: null,
     lifecycles: () => {},
     leftMenuLinks: [],

@@ -45,6 +45,30 @@ describe('Content Manager End to End', () => {
     60000
   );
 
+  describe('Conent Types api', () => {
+    test('Label is pluralized', async () => {
+      const res = await rq({
+        url: `/content-manager/content-types`,
+        method: 'GET',
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            label: 'Articles',
+          }),
+          expect.objectContaining({
+            label: 'Tags',
+          }),
+          expect.objectContaining({
+            label: 'Categories',
+          }),
+        ])
+      );
+    });
+  });
+
   describe('Test manyToMany relation (article - tag) with Content Manager', () => {
     beforeAll(async () => {
       data = {
@@ -307,8 +331,7 @@ describe('Content Manager End to End', () => {
       };
 
       let { body } = await rq({
-        url:
-          '/content-manager/explorer/application::articlewithtag.articlewithtag',
+        url: '/content-manager/explorer/application::articlewithtag.articlewithtag',
         method: 'POST',
         body: entry,
       });
@@ -705,8 +728,7 @@ describe('Content Manager End to End', () => {
         method: 'GET',
       });
 
-      if (!referenceToGet.tag || Object.keys(referenceToGet.tag).length == 0)
-        return;
+      if (!referenceToGet.tag || Object.keys(referenceToGet.tag).length == 0) return;
       expect(referenceToGet.tag).toBe(null);
     });
   });

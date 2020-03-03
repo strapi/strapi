@@ -8,85 +8,22 @@ const { createAuthRequest } = require('../../../test/helpers/request');
 
 let rq;
 
-const defaultProviderConfig = {
-  provider: 'local',
-  name: 'Local server',
-  enabled: true,
-  sizeLimit: 1000000,
-};
-
-const resetProviderConfigToDefault = () => {
-  return setConfigOptions(defaultProviderConfig);
-};
-
-const setConfigOptions = assign => {
-  return rq.put('/upload/settings/development', {
-    body: {
-      ...defaultProviderConfig,
-      ...assign,
-    },
-  });
-};
-
 describe('Upload plugin end to end tests', () => {
   beforeAll(async () => {
     const token = await registerAndLogin();
     rq = createAuthRequest(token);
   }, 60000);
 
-  afterEach(async () => {
-    await resetProviderConfigToDefault();
-  });
-
-  describe('GET /upload/environments => List available environments', () => {
-    test('Returns the list of envrionments and which one is currently active', async () => {
-      const res = await rq.get('/upload/environments');
+  describe('GET /upload/settings => Get settings for an environment', () => {
+    test('Returns the settings', async () => {
+      const res = await rq.get('/upload/settings');
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toEqual({
-        environments: expect.arrayContaining([
-          {
-            name: 'development',
-            active: true,
-          },
-          {
-            name: 'staging',
-            active: false,
-          },
-          {
-            name: 'production',
-            active: false,
-          },
-        ]),
-      });
-    });
-  });
-
-  describe('GET /upload/settings/:environment => Get settings for an environment', () => {
-    test('Lists the available providers', async () => {
-      const res = await rq.get('/upload/settings/development');
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject({
-        providers: [
-          {
-            provider: 'local',
-            name: 'Local server',
-          },
-        ],
-      });
-    });
-
-    test('Return the default provider config', async () => {
-      const res = await rq.get('/upload/settings/development');
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject({
-        config: {
-          provider: 'local',
-          name: 'Local server',
-          enabled: true,
-          sizeLimit: 1000000,
+        data: {
+          sizeOptimization: true,
+          videoPreview: true,
+          responsiveDimensions: true,
         },
       });
     });
@@ -94,24 +31,32 @@ describe('Upload plugin end to end tests', () => {
 
   describe('PUT /upload/settings/:environment', () => {
     test('Updates an envrionment config correctly', async () => {
-      const updateRes = await rq.put('/upload/settings/development', {
+      const updateRes = await rq.put('/upload/settings', {
         body: {
-          provider: 'test',
-          enabled: false,
-          sizeLimit: 1000,
+          sizeOptimization: true,
+          videoPreview: false,
+          responsiveDimensions: true,
         },
       });
 
       expect(updateRes.statusCode).toBe(200);
-      expect(updateRes.body).toEqual({ ok: true });
+      expect(updateRes.body).toEqual({
+        data: {
+          sizeOptimization: true,
+          videoPreview: false,
+          responsiveDimensions: true,
+        },
+      });
 
-      const getRes = await rq.get('/upload/settings/development');
+      const getRes = await rq.get('/upload/settings');
 
       expect(getRes.statusCode).toBe(200);
-      expect(getRes.body.config).toEqual({
-        provider: 'test',
-        enabled: false,
-        sizeLimit: 1000,
+      expect(getRes.body).toEqual({
+        data: {
+          sizeOptimization: true,
+          videoPreview: false,
+          responsiveDimensions: true,
+        },
       });
     });
   });
@@ -142,51 +87,12 @@ describe('Upload plugin end to end tests', () => {
       );
     });
 
-    test('Rejects when provider is not enabled', async () => {
-      await setConfigOptions({ enabled: false });
-
-      const res = await rq.post('/upload', {
-        formData: {
-          files: fs.createReadStream(__dirname + '/rec.jpg'),
-        },
-      });
-
-      expect(res.statusCode).toBe(400);
-      expect(res.body).toMatchObject({
-        message: [{ messages: [{ message: 'File upload is disabled' }] }],
-      });
-    });
-
     test('Rejects when no files are provided', async () => {
       const res = await rq.post('/upload', {
         formData: {},
       });
 
       expect(res.statusCode).toBe(400);
-      expect(res.body).toMatchObject({
-        message: [{ messages: [{ message: 'Files are empty' }] }],
-      });
-    });
-
-    test('Rejects when any file if over the configured size limit', async () => {
-      await setConfigOptions({
-        sizeLimit: 0,
-      });
-
-      const res = await rq.post('/upload', {
-        formData: {
-          files: fs.createReadStream(__dirname + '/rec.jpg'),
-        },
-      });
-
-      expect(res.statusCode).toBe(400);
-      expect(res.body).toMatchObject({
-        message: [
-          {
-            messages: [{ message: 'rec.jpg file is bigger than limit size!' }],
-          },
-        ],
-      });
     });
   });
 

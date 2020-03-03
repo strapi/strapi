@@ -1,7 +1,6 @@
 {
   "Analytics": "分析器",
   "Content Manager": "資料管理",
-  "Content Type Builder": "建立和更新資料結構",
   "Email": "電子郵件",
   "Files Upload": "檔案上傳",
   "HomePage.notification.newsLetter.success": "成功訂閱電子報",
@@ -30,7 +29,6 @@
   "app.components.HomePage.button.quickStart": "開始新手教學",
   "app.components.HomePage.community": "探索開發社群",
   "app.components.HomePage.community.content": "在不同的社群中與其他成員、貢獻者以及開發者討論。",
-  "app.components.HomePage.create": "建立您的第一個資料結構",
   "app.components.HomePage.createBlock.content.first": " ",
   "app.components.HomePage.createBlock.content.second": " 這個擴充功能可以幫助您定義自己的資料結構。如果您是第一次使用，我們推薦您先閱讀 ",
   "app.components.HomePage.createBlock.content.tutorial": " 教學。",

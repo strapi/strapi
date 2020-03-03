@@ -9,8 +9,7 @@ import trads from './translations';
 import pluginId from './pluginId';
 
 export default strapi => {
-  const pluginDescription =
-    pluginPkg.strapi.description || pluginPkg.description;
+  const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
   const plugin = {
     blockerComponent: null,
     blockerComponentProps: {},
@@ -38,6 +37,7 @@ export default strapi => {
         key: 'content-type-builder.form',
       },
     ],
+    isRequired: pluginPkg.strapi.required || false,
     layout: null,
     lifecycles,
     leftMenuLinks: [],
