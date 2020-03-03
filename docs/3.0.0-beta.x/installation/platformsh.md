@@ -1,6 +1,6 @@
 # Installing using Platform.sh
 
-[Plateform.sh](https://console.platform.sh/) provide you an easy way to getting start and deploy your Strapi application.
+[Plateform.sh](https://console.platform.sh/) gives you an easy way to get started and deploy your Strapi application.
 
 You can find the template [source code](https://github.com/platformsh-templates/strapi#customizations) on Platform.sh GitHub for more information.
 

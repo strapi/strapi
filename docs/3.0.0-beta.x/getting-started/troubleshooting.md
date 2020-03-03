@@ -20,6 +20,6 @@ Another option to get help is our [Community Slack](https://slack.strapi.io). Pl
 
 ### Enterprise support
 
-Looking for an enterprise support?
+Looking for enterprise support?
 
-Fill in the form that is in the [Support page](https://strapi.io/support) of the Strapi website.
+Fill out the form on the [Support page](https://strapi.io/support) of the Strapi website.

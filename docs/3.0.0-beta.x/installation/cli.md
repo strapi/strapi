@@ -10,10 +10,10 @@ Fast-track local install for getting Strapi running on your computer.
 
 Strapi only requires [Node.js](https://nodejs.org). The current recommended version to run strapi is Node v12 (current LTS).
 
-This is all that is needed before Strapi can run on your local environment.
+This is everything you need to run Strapi on your local environment.
 
 | Software | Minimum version |
-|----------|-----------------|
+| -------- | --------------- |
 | Node.js  | 12.x            |
 | npm      | 6.x             |
 
@@ -23,10 +23,10 @@ You can also use **yarn** if you want [here](https://yarnpkg.com/en/docs/getting
 
 #### Databases
 
-Strapi is supporting multiple databases.
+Strapi currently support the following databases.
 
 | Database   | Minimum version |
-|------------|-----------------|
+| ---------- | --------------- |
 | SQLite     | 3               |
 | PostgreSQL | 10              |
 | MySQL      | 5.6             |
@@ -38,15 +38,19 @@ Strapi is supporting multiple databases.
 :::: tabs
 
 ::: tab yarn
+
 ```bash
 yarn create strapi-app my-project --quickstart
 ```
+
 :::
 
 ::: tab npx
+
 ```bash
 npx create-strapi-app my-project --quickstart
 ```
+
 :::
 
 ::::
@@ -66,15 +70,19 @@ To start your Strapi application you will have to run the following command in y
 :::: tabs
 
 ::: tab yarn
+
 ```bash
 yarn develop
 ```
+
 :::
 
 ::: tab npm
+
 ```bash
 npm run develop
 ```
+
 :::
 
 ::::

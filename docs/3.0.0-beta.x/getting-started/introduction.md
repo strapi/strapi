@@ -15,11 +15,11 @@ It's the origin purpose of the project.
 
 ### Custom content structure
 
-With the admin panel of Strapi, you will be able to create the content structure that match your needs. Create it in just few clicks. Really fast to getting started.
+With the admin panel of Strapi, You can generate the admin panel in just a few clicks, and get your whole CMS setup in a few minutes.
 
 ### Manage content
 
-The Strapi's admin panel provide you an intuitive interface to create edit and delete your content.
+The Strapi's admin panel gives you an intuitive interface to create edit and delete your content.
 
 ### Developer-friendly API
 
