@@ -476,6 +476,8 @@ const forms = {
               disabled: data.type !== 'date',
             },
           ]);
+        } else if (type === 'richtext') {
+          items.splice(4, 1);
         }
 
         if (!ATTRIBUTES_THAT_DONT_HAVE_MIN_MAX_SETTINGS.includes(type)) {
