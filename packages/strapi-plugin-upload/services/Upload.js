@@ -21,7 +21,7 @@ const generateFileName = name => {
 };
 
 module.exports = {
-  formatFileInfo({ filename, type, size }, fileInfo, metas) {
+  formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
     const ext = path.extname(filename);
     const baseName = path.basename(filename, ext);
 
