@@ -8,7 +8,7 @@ import Label from './Label';
 import Input from './Input';
 import P from './P';
 
-const InputFile = ({ name, onChange }) => {
+const InputFileModal = ({ name, onChange }) => {
   const [isDragging, setIsDragging] = useState(false);
   const { formatMessage } = useGlobalContext();
   const ref = createRef();
@@ -48,40 +48,26 @@ const InputFile = ({ name, onChange }) => {
     >
       <Cloud />
       <P>
-        <span className="bold">
-          {formatMessage({ id: getTrad('input.label-bold') })}&nbsp;
-        </span>
+        <span className="bold">{formatMessage({ id: getTrad('input.label-bold') })}&nbsp;</span>
         <span>{formatMessage({ id: getTrad('input.label-normal') })}</span>
       </P>
-      <Button
-        type="button"
-        id="button"
-        name="button"
-        color="primary"
-        onClick={handleClick}
-      >
+      <Button type="button" id="button" name="button" color="primary" onClick={handleClick}>
         {formatMessage({ id: getTrad('input.button.label') })}
       </Button>
-      <Input
-        ref={ref}
-        type="file"
-        multiple
-        name={name}
-        onChange={handleChange}
-      />
+      <Input ref={ref} type="file" multiple name={name} onChange={handleChange} />
       {isDragging && <div className="dragzone" onDragLeave={handleDragLeave} />}
     </Label>
   );
 };
 
-InputFile.defaultProps = {
+InputFileModal.defaultProps = {
   name: 'files',
   onChange: () => {},
 };
 
-InputFile.propTypes = {
+InputFileModal.propTypes = {
   name: PropTypes.string,
   onChange: PropTypes.func,
 };
 
-export default InputFile;
+export default InputFileModal;
