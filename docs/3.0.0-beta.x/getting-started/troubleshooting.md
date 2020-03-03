@@ -32,12 +32,12 @@ With the release of the Strapi beta version a fundamental change occurred in tha
 
 In the future Strapi does plan to implement a solution where Administrators could use the REST and GraphQL routes like a standard 3rd party provider, but there is no intention of allowing for the reverse. Instead within Q1/Q2 2020 we plan to offer a plugin called [Administrators Roles & Permissions](https://portal.productboard.com/strapi/1-public-roadmap/c/8-administrators-roles-permissions) that will allow you to control access to Administrators within the admin panel. As of right now there is no work around to currently do this, anyone with access to the admin panel will have full access to all parts of it.
 
-When this new plugin releases, there will be two versions:
+When this new plugin release, there will be two versions:
 
 - Community Edition
 - Enterprise Edition
 
-By default, the Community Edition will include 3 administrators and 3 pre-defined roles (Administrators, Editor, Author). Upgrading to the Enterprise Edition will unlock an unlimited numbers of administrators and roles.
+By default, the Community Edition will include 3 administrators and 3 pre-defined roles (Administrators, Editor, Author). Upgrading to the Enterprise Edition will unlock an unlimited number of administrators and roles.
 
 ### Relations aren't maintaining their sort order
 
@@ -45,7 +45,7 @@ With the components there is a hidden field called `order` that allows entries t
 
 For the time being there is no recommended way to handle this automatically and instead it may be required for you to create custom controllers to handle this within your own project.
 
-### Why is my app's database resetting on Heroku
+### Why is my app's database and uploads resetting on Heroku
 
 If you used `--quickstart` to create your Strapi project, by default this uses the SQLite database. Heroku's file system is [ephemeral](https://devcenter.heroku.com/articles/dynos#ephemeral-filesystem) meaning that each time a dyno (container) is reset all filesystem changes are lost. And since both SQLite and local uploads are stored on the filesystem, any changes made to these since the last dyno reset will be deleted. Typically dynos are reset at least once a day, and in most cases multiple times per day or when new code is pushed to Heroku.
 
@@ -75,4 +75,4 @@ Due to these two issues, it is recommended you use a proxy application such as N
 
 ### Is X feature available yet
 
-You can see the [ProductBoard roadmap](https://portal.productboard.com/strapi) to see which feature requests are currently being worked on and which have not.
+You can see the [ProductBoard roadmap](https://portal.productboard.com/strapi) to see which feature requests are currently being worked on and which have not been started yet.
