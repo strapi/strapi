@@ -203,6 +203,11 @@ const EditViewDataManagerProvider = ({
       inputValue = null;
     }
 
+    // Allow to reset number input
+    if (type === 'number' && value === '') {
+      inputValue = null;
+    }
+
     dispatch({
       type: 'ON_CHANGE',
       keys: name.split('.'),
