@@ -12,7 +12,7 @@ import DropdownButton from '../DropdownButton';
 import DropdownSection from '../DropdownSection';
 
 import Wrapper from './Wrapper';
-import FiltersCard from '../FiltersCard';
+import FiltersCard from './FiltersCard';
 
 const FiltersPicker = ({ onChange }) => {
   const [isOpen, setIsOpen] = useState(false);

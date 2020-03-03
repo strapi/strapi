@@ -4,17 +4,16 @@ import { FormattedMessage } from 'react-intl';
 
 import { Select } from '@buffetjs/core';
 import { getFilterType } from 'strapi-helper-plugin';
-import getTrad from '../../utils/getTrad';
+import getTrad from '../../../utils/getTrad';
 
 import reducer, { initialState } from './reducer';
 
 import filters from './utils/filtersForm';
 
 import Wrapper from './Wrapper';
-import Button from './Button';
 import InputWrapper from './InputWrapper';
-
-import Input from '../FilterInput';
+import FilterButton from './FilterButton';
+import FilterInput from './FilterInput';
 
 const FiltersCard = ({ onChange }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -31,14 +30,8 @@ const FiltersCard = ({ onChange }) => {
       type: 'ON_CHANGE',
       name,
       value,
+      defaultValue: filters[value] ? getDefaultValue(value) : null,
     });
-
-    if (name === 'name') {
-      dispatch({
-        type: 'RESET_VALUE',
-        value: getDefaultValue(value),
-      });
-    }
   };
 
   const addFilter = () => {
@@ -60,12 +53,7 @@ const FiltersCard = ({ onChange }) => {
   return (
     <Wrapper>
       <InputWrapper>
-        <Select
-          onChange={handleChange}
-          name="name"
-          options={Object.keys(filters)}
-          value={name}
-        />
+        <Select onChange={handleChange} name="name" options={Object.keys(filters)} value={name} />
       </InputWrapper>
       <InputWrapper>
         <Select
@@ -76,7 +64,7 @@ const FiltersCard = ({ onChange }) => {
         />
       </InputWrapper>
       <InputWrapper>
-        <Input
+        <FilterInput
           type={type}
           onChange={handleChange}
           name="value"
@@ -84,9 +72,9 @@ const FiltersCard = ({ onChange }) => {
           value={value}
         />
       </InputWrapper>
-      <Button icon onClick={addFilter}>
+      <FilterButton icon onClick={addFilter}>
         <FormattedMessage id={getTrad('filter.add')} />
-      </Button>
+      </FilterButton>
     </Wrapper>
   );
 };

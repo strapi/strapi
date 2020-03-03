@@ -9,14 +9,20 @@ const initialState = fromJS({
 
 function reducer(state, action) {
   switch (action.type) {
-    case 'ON_CHANGE':
-      return state.update(action.name, () => action.value);
+    case 'ON_CHANGE': {
+      const { defaultValue, name, value } = action;
+
+      if (name === 'name') {
+        return state
+          .update(name, () => value)
+          .update('filter', () => '=')
+          .update('value', () => defaultValue);
+      }
+
+      return state.update(name, () => value);
+    }
     case 'RESET_FORM':
       return initialState;
-    case 'RESET_VALUE':
-      return state
-        .update('filter', () => '=')
-        .update('value', () => action.value);
     default:
       return state;
   }

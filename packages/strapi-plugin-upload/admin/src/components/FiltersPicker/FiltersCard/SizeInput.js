@@ -8,7 +8,8 @@ import PropTypes from 'prop-types';
 
 import { InputNumber, Select } from '@buffetjs/core';
 
-import Wrapper from './Wrapper';
+import Flex from '../../Flex';
+import Padded from '../../Padded';
 
 function SizeInput({ onChange, value, ...rest }) {
   const options = ['KB', 'MB', 'GB'];
@@ -38,26 +39,11 @@ function SizeInput({ onChange, value, ...rest }) {
   };
 
   return (
-    <Wrapper>
-      <div className="row">
-        <div className="col-6">
-          <InputNumber
-            {...rest}
-            name="size_value"
-            onChange={handleChangeValue}
-            value={size}
-          />
-        </div>
-        <div className="col-6">
-          <Select
-            name="format_value"
-            onChange={handleChangeFormat}
-            options={options}
-            value={format}
-          />
-        </div>
-      </div>
-    </Wrapper>
+    <Flex justifyContent="space-between">
+      <InputNumber {...rest} name="size_value" onChange={handleChangeValue} value={size} />
+      <Padded left />
+      <Select name="format_value" onChange={handleChangeFormat} options={options} value={format} />
+    </Flex>
   );
 }
 

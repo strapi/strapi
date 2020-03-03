@@ -17,14 +17,11 @@ import SelectAll from '../../components/SelectAll';
 import SortPicker from '../../components/SortPicker';
 import FiltersPicker from '../../components/FiltersPicker';
 import FiltersList from '../../components/FiltersList';
+import Filters from '../../components/Filters';
 // import List from '../../components/List';
 import ListEmpty from '../../components/ListEmpty';
 import ModalStepper from '../ModalStepper';
-import {
-  generatePageFromStart,
-  generateStartFromPage,
-  getHeaderLabel,
-} from './utils';
+import { generatePageFromStart, generateStartFromPage, getHeaderLabel } from './utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
@@ -157,27 +154,24 @@ const HomePage = () => {
         name="_q"
         value={getQueryValue('_q') || ''}
       />
-
       <ControlsWrapper>
         <SelectAll />
-        <SortPicker
+        <SortPicker onChange={handleChangeParams} value={getQueryValue('_sort') || null} />
+        <Filters
           onChange={handleChangeParams}
-          value={getQueryValue('_sort') || null}
-        />
-        <FiltersPicker onChange={handleChangeParams} />
-        <FiltersList
           filters={generateFiltersFromSearch(search)}
           onClick={handleDeleteFilter}
         />
+        {/* <FiltersPicker onChange={handleChangeParams} />
+        <FiltersList
+          filters={generateFiltersFromSearch(search)}
+          onClick={handleDeleteFilter}
+        /> */}
       </ControlsWrapper>
       <ListEmpty onClick={handleClickToggleModal} />
       {/* <List data={data} /> */}
 
-      <PageFooter
-        count={50}
-        onChangeParams={handleChangeListParams}
-        params={params}
-      />
+      <PageFooter count={50} onChangeParams={handleChangeListParams} params={params} />
       <ModalStepper isOpen={isOpen} onToggle={handleClickToggleModal} />
     </Container>
   );
