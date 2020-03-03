@@ -3,6 +3,7 @@ import {
   formatMainDataType,
   getComponentsToPost,
   getCreatedAndModifiedComponents,
+  sortContentType,
 } from '../cleanData';
 import rawData from './rawData';
 import expectedData from './expectedFormattedData';
@@ -15,11 +16,7 @@ describe('CleanData utils', () => {
           const component = rawData.rawData.components['components.main-compo'];
 
           expect(
-            formatComponent(
-              component,
-              'application::test-content-type.test-content-type',
-              true
-            )
+            formatComponent(component, 'application::test-content-type.test-content-type', true)
           ).not.toHaveProperty('uid');
         });
 
@@ -27,25 +24,16 @@ describe('CleanData utils', () => {
           const component = rawData.rawData.components['components.main-compo'];
 
           expect(
-            formatComponent(
-              component,
-              'application::test-content-type.test-content-type',
-              true
-            )
+            formatComponent(component, 'application::test-content-type.test-content-type', true)
           ).toHaveProperty('tmpUID');
         });
 
         it('should format the component correctly', () => {
           const component = rawData.rawData.components['components.main-compo'];
-          const expectedComponent =
-            expectedData.formattedComponents['components.main-compo'];
+          const expectedComponent = expectedData.formattedComponents['components.main-compo'];
 
           expect(
-            formatComponent(
-              component,
-              'application::test-content-type.test-content-type',
-              true
-            )
+            formatComponent(component, 'application::test-content-type.test-content-type', true)
           ).toEqual(expectedComponent);
         });
       });
@@ -53,15 +41,10 @@ describe('CleanData utils', () => {
       describe('Formatting existing component', () => {
         it('should format the component correctly', () => {
           const component = rawData.rawData.components['blog.quote'];
-          const expectedComponent =
-            expectedData.formattedComponents['blog.quote'];
+          const expectedComponent = expectedData.formattedComponents['blog.quote'];
 
           expect(
-            formatComponent(
-              component,
-              'application::test-content-type.test-content-type',
-              true
-            )
+            formatComponent(component, 'application::test-content-type.test-content-type', true)
           ).toEqual(expectedComponent);
         });
       });
@@ -73,11 +56,7 @@ describe('CleanData utils', () => {
           const component = rawData.rawData.components['components.main-compo'];
 
           expect(
-            formatComponent(
-              component,
-              'application::test-content-type.test-content-type',
-              false
-            )
+            formatComponent(component, 'application::test-content-type.test-content-type', false)
           ).not.toHaveProperty('uid');
         });
 
@@ -85,11 +64,7 @@ describe('CleanData utils', () => {
           const component = rawData.rawData.components['components.main-compo'];
 
           expect(
-            formatComponent(
-              component,
-              'application::test-content-type.test-content-type',
-              false
-            )
+            formatComponent(component, 'application::test-content-type.test-content-type', false)
           ).toHaveProperty('tmpUID');
         });
 
@@ -99,11 +74,7 @@ describe('CleanData utils', () => {
             expectedData.formattedComponentsForEdit['components.main-compo'];
 
           expect(
-            formatComponent(
-              component,
-              'application::test-content-type.test-content-type',
-              false
-            )
+            formatComponent(component, 'application::test-content-type.test-content-type', false)
           ).toEqual(expectedComponent);
         });
       });
@@ -111,15 +82,10 @@ describe('CleanData utils', () => {
       describe('Formatting existing component', () => {
         it('should format the component correctly', () => {
           const component = rawData.rawData.components['blog.quote'];
-          const expectedComponent =
-            expectedData.formattedComponents['blog.quote'];
+          const expectedComponent = expectedData.formattedComponents['blog.quote'];
 
           expect(
-            formatComponent(
-              component,
-              'application::test-content-type.test-content-type',
-              true
-            )
+            formatComponent(component, 'application::test-content-type.test-content-type', true)
           ).toEqual(expectedComponent);
         });
       });
@@ -145,6 +111,7 @@ describe('CleanData utils', () => {
             rawData: { contentTypeToEdit },
           } = rawData;
           const expected = expectedData.contentTypeToEdit;
+
           expect(formatMainDataType(contentTypeToEdit)).toEqual(expected);
         });
       });
@@ -202,9 +169,26 @@ describe('CleanData utils', () => {
         initialComponents,
         rawData: { components },
       } = rawData;
-      expect(
-        getCreatedAndModifiedComponents(components, initialComponents).sort()
-      ).toEqual(componentsToFormat.sort());
+
+      expect(getCreatedAndModifiedComponents(components, initialComponents).sort()).toEqual(
+        componentsToFormat.sort()
+      );
+    });
+  });
+
+  describe('sortContentType', () => {
+    it('should return sorted collection types array', () => {
+      const { sortedContentTypes } = expectedData;
+      const {
+        rawData: { contentTypesToSort },
+      } = rawData;
+      const actual = sortContentType(contentTypesToSort);
+
+      expect(actual.sort()).toEqual(sortedContentTypes.sort());
+    });
+
+    it('should return an empty array if no content types', () => {
+      expect(sortContentType({})).toEqual([]);
     });
   });
 });

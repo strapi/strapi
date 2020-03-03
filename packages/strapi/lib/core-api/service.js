@@ -6,6 +6,75 @@
  */
 
 module.exports = ({ model, strapi }) => {
+  if (model.kind === 'singleType') {
+    return createSingleTypeService({ model, strapi });
+  }
+
+  return createCollectionTypeService({ model, strapi });
+};
+
+/**
+ * Returns a single type service to handle default core-api actions
+ */
+const createSingleTypeService = ({ model, strapi }) => {
+  const { modelName } = model;
+
+  return {
+    /**
+     * Returns single type content
+     *
+     * @return {Promise}
+     */
+    find(populate) {
+      return strapi.entityService.find({ populate }, { model: modelName });
+    },
+
+    /**
+     * Creates or update the single- type content
+     *
+     * @return {Promise}
+     */
+    async createOrUpdate(data, { files } = {}) {
+      const entity = await this.find();
+
+      if (!entity) {
+        return strapi.entityService.create({ data, files }, { model: modelName });
+      } else {
+        return strapi.entityService.update(
+          {
+            params: {
+              id: entity.id,
+            },
+            data,
+            files,
+          },
+          { model: modelName }
+        );
+      }
+    },
+
+    /**
+     * Deletes the single type content
+     *
+     * @return {Promise}
+     */
+    async delete() {
+      const entity = await this.find();
+
+      if (!entity) return;
+
+      return strapi.entityService.delete({ params: { id: entity.id } }, { model: modelName });
+    },
+  };
+};
+
+/**
+ *
+ * Returns a collection type service to handle default core-api actions
+ */
+const createCollectionTypeService = ({ model, strapi }) => {
+  const { modelName } = model;
+
   return {
     /**
      * Promise to fetch all records
@@ -13,7 +82,7 @@ module.exports = ({ model, strapi }) => {
      * @return {Promise}
      */
     find(params, populate) {
-      return strapi.entityService.find({ params, populate }, { model });
+      return strapi.entityService.find({ params, populate }, { model: modelName });
     },
 
     /**
@@ -23,7 +92,7 @@ module.exports = ({ model, strapi }) => {
      */
 
     findOne(params, populate) {
-      return strapi.entityService.findOne({ params, populate }, { model });
+      return strapi.entityService.findOne({ params, populate }, { model: modelName });
     },
 
     /**
@@ -33,7 +102,7 @@ module.exports = ({ model, strapi }) => {
      */
 
     count(params) {
-      return strapi.entityService.count({ params }, { model });
+      return strapi.entityService.count({ params }, { model: modelName });
     },
 
     /**
@@ -43,7 +112,7 @@ module.exports = ({ model, strapi }) => {
      */
 
     create(data, { files } = {}) {
-      return strapi.entityService.create({ data, files }, { model });
+      return strapi.entityService.create({ data, files }, { model: modelName });
     },
 
     /**
@@ -53,7 +122,7 @@ module.exports = ({ model, strapi }) => {
      */
 
     update(params, data, { files } = {}) {
-      return strapi.entityService.update({ params, data, files }, { model });
+      return strapi.entityService.update({ params, data, files }, { model: modelName });
     },
 
     /**
@@ -63,7 +132,7 @@ module.exports = ({ model, strapi }) => {
      */
 
     delete(params) {
-      return strapi.entityService.delete({ params }, { model });
+      return strapi.entityService.delete({ params }, { model: modelName });
     },
 
     /**
@@ -73,7 +142,7 @@ module.exports = ({ model, strapi }) => {
      */
 
     search(params) {
-      return strapi.entityService.search({ params }, { model });
+      return strapi.entityService.search({ params }, { model: modelName });
     },
 
     /**
@@ -82,7 +151,7 @@ module.exports = ({ model, strapi }) => {
      * @return {Promise}
      */
     countSearch(params) {
-      return strapi.entityService.countSearch({ params }, { model });
+      return strapi.entityService.countSearch({ params }, { model: modelName });
     },
   };
 };

@@ -81,12 +81,8 @@ module.exports = function(strapi) {
 
   function mountComponents(connectionName, ctx) {
     const options = {
-      models: _.pickBy(
-        strapi.components,
-        ({ connection }) => connection === connectionName
-      ),
+      models: _.pickBy(strapi.components, ({ connection }) => connection === connectionName),
       target: strapi.components,
-      plugin: false,
     };
 
     return mountModels(options, ctx);
@@ -94,12 +90,8 @@ module.exports = function(strapi) {
 
   function mountApis(connectionName, ctx) {
     const options = {
-      models: _.pickBy(
-        strapi.models,
-        ({ connection }) => connection === connectionName
-      ),
+      models: _.pickBy(strapi.models, ({ connection }) => connection === connectionName),
       target: strapi.models,
-      plugin: false,
     };
 
     return mountModels(options, ctx);
@@ -107,12 +99,8 @@ module.exports = function(strapi) {
 
   function mountAdmin(connectionName, ctx) {
     const options = {
-      models: _.pickBy(
-        strapi.admin.models,
-        ({ connection }) => connection === connectionName
-      ),
+      models: _.pickBy(strapi.admin.models, ({ connection }) => connection === connectionName),
       target: strapi.admin.models,
-      plugin: false,
     };
 
     return mountModels(options, ctx);
@@ -124,12 +112,8 @@ module.exports = function(strapi) {
         const plugin = strapi.plugins[name];
         return mountModels(
           {
-            models: _.pickBy(
-              plugin.models,
-              ({ connection }) => connection === connectionName
-            ),
+            models: _.pickBy(plugin.models, ({ connection }) => connection === connectionName),
             target: plugin.models,
-            plugin: name,
           },
           ctx
         );

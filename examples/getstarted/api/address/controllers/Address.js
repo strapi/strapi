@@ -5,4 +5,4 @@
  * to customize this controller
  */
 
-module.exports = {};
+module.exports = { test() {} };

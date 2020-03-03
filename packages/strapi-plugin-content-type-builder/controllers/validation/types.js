@@ -1,11 +1,44 @@
 'use strict';
 
+const _ = require('lodash');
 const yup = require('yup');
-const { validators, isValidName, isValidEnum } = require('./common');
-const { hasComponent } = require('../../utils/attributes');
-const { modelTypes } = require('./constants');
 
-const getTypeShape = (attribute, { modelType } = {}) => {
+const {
+  validators,
+  areEnumValuesUnique,
+  isValidName,
+  isValidEnum,
+  isValidUID,
+} = require('./common');
+const { hasComponent } = require('../../utils/attributes');
+const { modelTypes, VALID_UID_TARGETS } = require('./constants');
+
+const maxLengthIsGreaterThanOrEqualToMinLength = {
+  name: 'isGreaterThanMin',
+  message: 'maxLength must be greater or equal to minLength',
+  test: function(value) {
+    const { minLength } = this.parent;
+    if (!_.isUndefined(minLength) && !_.isUndefined(value) && value < minLength) {
+      return false;
+    }
+
+    return true;
+  },
+};
+
+const getTypeValidator = (attribute, { types, modelType, attributes }) => {
+  return yup.object({
+    type: yup
+      .string()
+      .oneOf(types)
+      .required(),
+    configurable: yup.boolean().nullable(),
+    private: yup.boolean().nullable(),
+    ...getTypeShape(attribute, { modelType, attributes }),
+  });
+};
+
+const getTypeShape = (attribute, { modelType, attributes } = {}) => {
   switch (attribute.type) {
     /**
      * complexe types
@@ -16,6 +49,37 @@ const getTypeShape = (attribute, { modelType } = {}) => {
         multiple: yup.boolean(),
         required: validators.required,
         unique: validators.unique,
+      };
+    }
+
+    case 'uid': {
+      return {
+        required: validators.required,
+        targetField: yup
+          .string()
+          .oneOf(
+            Object.keys(attributes).filter(key =>
+              VALID_UID_TARGETS.includes(_.get(attributes[key], 'type'))
+            )
+          )
+          .nullable(),
+        default: yup
+          .string()
+          .test(
+            'isValidDefaultUID',
+            'cannot define a default UID if the targetField is set',
+            function(value) {
+              const { targetField } = this.parent;
+              if (_.isNil(targetField) || _.isNil(value)) {
+                return true;
+              }
+
+              return false;
+            }
+          )
+          .test(isValidUID),
+        minLength: validators.minLength,
+        maxLength: validators.maxLength.max(256).test(maxLengthIsGreaterThanOrEqualToMinLength),
       };
     }
 
@@ -57,10 +121,9 @@ const getTypeShape = (attribute, { modelType } = {}) => {
               .required()
           )
           .min(1)
+          .test(areEnumValuesUnique)
           .required(),
-        default: yup
-          .string()
-          .when('enum', enumVal => yup.string().oneOf(enumVal)),
+        default: yup.string().when('enum', enumVal => yup.string().oneOf(enumVal)),
         enumName: yup.string().test(isValidName),
         required: validators.required,
         unique: validators.unique,
@@ -156,10 +219,7 @@ const getTypeShape = (attribute, { modelType } = {}) => {
               const targetCompo = strapi.components[compoUID];
               if (!targetCompo) return true; // ignore this error as it will fail beforehand
 
-              if (
-                modelType === modelTypes.COMPONENT &&
-                hasComponent(targetCompo)
-              ) {
+              if (modelType === modelTypes.COMPONENT && hasComponent(targetCompo)) {
                 return this.createError({
                   path: this.path,
                   message: `${targetCompo.modelName} already as a nested compoent. You cannot have more than one level of nesting inside your components.`,
@@ -180,9 +240,7 @@ const getTypeShape = (attribute, { modelType } = {}) => {
         components: yup
           .array()
           .of(yup.string().required())
-          .test('isArray', '${path} must be an array', value =>
-            Array.isArray(value)
-          ),
+          .test('isArray', '${path} must be an array', value => Array.isArray(value)),
         min: yup.number(),
         max: yup.number(),
       };
@@ -194,6 +252,4 @@ const getTypeShape = (attribute, { modelType } = {}) => {
   }
 };
 
-module.exports = {
-  getTypeShape,
-};
+module.exports = getTypeValidator;

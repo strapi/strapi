@@ -8,8 +8,7 @@ import pluginId from './pluginId';
 import getTrad from './utils/getTrad';
 
 export default strapi => {
-  const pluginDescription =
-    pluginPkg.strapi.description || pluginPkg.description;
+  const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
   const plugin = {
     blockerComponent: null,
     blockerComponentProps: {},
@@ -19,6 +18,7 @@ export default strapi => {
     initializer: null,
     injectedComponents: [],
     isReady: true,
+    isRequired: pluginPkg.strapi.required || false,
     layout: null,
     lifecycles: null,
     leftMenuLinks: [],

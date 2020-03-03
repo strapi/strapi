@@ -5,13 +5,20 @@ describe('Upload plugin bootstrap function', () => {
     const setStore = jest.fn(() => {});
 
     global.strapi = {
+      log: {
+        error() {},
+      },
       config: {
         info: {
           dependencies: {},
         },
       },
       plugins: {
-        upload: { config: {} },
+        upload: {
+          config: {
+            provider: 'local',
+          },
+        },
       },
       store() {
         return {

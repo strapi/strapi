@@ -13,24 +13,15 @@ module.exports = {
     const uploadService = strapi.plugins.upload.services.upload;
 
     // Retrieve provider configuration.
-    const config = strapi.plugins.upload.config;
+    const { enabled } = strapi.plugins.upload.config;
 
     // Verify if the file upload is enable.
-    if (config.enabled === false) {
-      return ctx.badRequest(
-        null,
-
-        [
-          {
-            messages: [
-              {
-                id: 'Upload.status.disabled',
-                message: 'File upload is disabled',
-              },
-            ],
-          },
-        ]
-      );
+    if (enabled === false) {
+      throw strapi.errors.badRequest(null, {
+        errors: [
+          { id: 'Upload.status.disabled', message: 'File upload is disabled' },
+        ],
+      });
     }
 
     // Extract optional relational data.
@@ -38,31 +29,15 @@ module.exports = {
     const { files = {} } = ctx.request.files || {};
 
     if (_.isEmpty(files)) {
-      return ctx.badRequest(null, [
-        {
-          messages: [{ id: 'Upload.status.empty', message: 'Files are empty' }],
-        },
-      ]);
+      throw strapi.errors.badRequest(null, {
+        errors: [{ id: 'Upload.status.empty', message: 'Files are empty' }],
+      });
     }
 
     // Transform stream files to buffer
     const buffers = await uploadService.bufferize(files);
 
     const enhancedFiles = buffers.map(file => {
-      if (file.size > config.sizeLimit) {
-        return ctx.badRequest(null, [
-          {
-            messages: [
-              {
-                id: 'Upload.status.sizeLimit',
-                message: `${file.name} file is bigger than limit size!`,
-                values: { file: file.name },
-              },
-            ],
-          },
-        ]);
-      }
-
       // Add details to the file to be able to create the relationships.
       if (refId && ref && field) {
         Object.assign(file, {
@@ -92,7 +67,7 @@ module.exports = {
       return;
     }
 
-    const uploadedFiles = await uploadService.upload(enhancedFiles, config);
+    const uploadedFiles = await uploadService.upload(enhancedFiles);
 
     // Send 200 `ok`
     ctx.send(uploadedFiles);
@@ -127,18 +102,14 @@ module.exports = {
   },
 
   async find(ctx) {
-    const data = await strapi.plugins['upload'].services.upload.fetchAll(
-      ctx.query
-    );
+    const data = await strapi.plugins['upload'].services.upload.fetchAll(ctx.query);
 
     // Send 200 `ok`
     ctx.send(data);
   },
 
   async findOne(ctx) {
-    const data = await strapi.plugins['upload'].services.upload.fetch(
-      ctx.params
-    );
+    const data = await strapi.plugins['upload'].services.upload.fetch(ctx.params);
 
     if (!data) {
       return ctx.notFound('file.notFound');
@@ -148,16 +119,13 @@ module.exports = {
   },
 
   async count(ctx) {
-    const data = await strapi.plugins['upload'].services.upload.count(
-      ctx.query
-    );
+    const data = await strapi.plugins['upload'].services.upload.count(ctx.query);
 
     ctx.send({ count: data });
   },
 
   async destroy(ctx) {
     const { id } = ctx.params;
-    const config = strapi.plugins.upload.config;
 
     const file = await strapi.plugins['upload'].services.upload.fetch({ id });
 
@@ -165,7 +133,7 @@ module.exports = {
       return ctx.notFound('file.notFound');
     }
 
-    await strapi.plugins['upload'].services.upload.remove(file, config);
+    await strapi.plugins['upload'].services.upload.remove(file);
 
     ctx.send(file);
   },
@@ -186,9 +154,9 @@ const searchQueries = {
     return ({ id }) => {
       return model
         .query(qb => {
-          qb.whereRaw('LOWER(hash) LIKE ?', [
+          qb.whereRaw('LOWER(hash) LIKE ?', [`%${id}%`]).orWhereRaw('LOWER(name) LIKE ?', [
             `%${id}%`,
-          ]).orWhereRaw('LOWER(name) LIKE ?', [`%${id}%`]);
+          ]);
         })
         .fetchAll()
         .then(results => results.toJSON());

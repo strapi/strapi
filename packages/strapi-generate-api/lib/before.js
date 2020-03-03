@@ -29,10 +29,15 @@ module.exports = (scope, cb) => {
   const name = scope.name || _.trim(_.camelCase(scope.id));
   const environment = process.env.NODE_ENV || 'development';
 
+  scope.contentTypeKind = scope.args.kind || 'collectionType';
+
   // `scope.args` are the raw command line arguments.
   _.defaults(scope, {
     name,
-    route: _.kebabCase(pluralize(scope.id)),
+    route:
+      scope.contentTypeKind === 'singleType'
+        ? _.kebabCase(scope.id)
+        : _.kebabCase(pluralize(scope.id)),
   });
 
   let filePath;
@@ -74,9 +79,7 @@ module.exports = (scope, cb) => {
 
         // Handle invalid attributes.
         if (!parts[1] || !parts[0]) {
-          invalidAttributes.push(
-            'Error: Invalid attribute notation `' + attribute + '`.'
-          );
+          invalidAttributes.push('Error: Invalid attribute notation `' + attribute + '`.');
           return;
         }
 
@@ -121,9 +124,7 @@ module.exports = (scope, cb) => {
     : _.snakeCase(pluralize(name));
 
   // Set description
-  scope.description = _.has(scope.args, 'description')
-    ? scope.args.description
-    : '';
+  scope.description = _.has(scope.args, 'description') ? scope.args.description : '';
 
   // Get default connection
   try {
@@ -132,13 +133,7 @@ module.exports = (scope, cb) => {
       try {
         scope.connection = JSON.parse(
           fs.readFileSync(
-            path.resolve(
-              scope.rootPath,
-              'config',
-              'environments',
-              environment,
-              'database.json'
-            )
+            path.resolve(scope.rootPath, 'config', 'environments', environment, 'database.json')
           )
         ).defaultConnection;
       } catch (err) {

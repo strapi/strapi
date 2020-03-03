@@ -5,23 +5,33 @@ const _ = require('lodash');
 const {
   validateContentTypeInput,
   validateUpdateContentTypeInput,
+  validateKind,
 } = require('./validation/content-type');
 
 module.exports = {
-  getContentTypes(ctx) {
-    const contentTypeService =
-      strapi.plugins['content-type-builder'].services.contenttypes;
+  async getContentTypes(ctx) {
+    const { kind } = ctx.query;
+
+    try {
+      await validateKind(kind);
+    } catch (error) {
+      return ctx.send({ error }, 400);
+    }
+
+    const contentTypeService = strapi.plugins['content-type-builder'].services.contenttypes;
 
     const contentTypes = Object.keys(strapi.contentTypes)
       .filter(uid => {
         if (uid.startsWith('strapi::')) return false;
         if (uid === 'plugins::upload.file') return false; // TODO: add a flag in the content type instead
 
+        if (kind && _.get(strapi.contentTypes[uid], 'kind', 'collectionType') !== kind) {
+          return false;
+        }
+
         return true;
       })
-      .map(uid =>
-        contentTypeService.formatContentType(strapi.contentTypes[uid])
-      );
+      .map(uid => contentTypeService.formatContentType(strapi.contentTypes[uid]));
 
     ctx.send({
       data: contentTypes,
@@ -37,8 +47,7 @@ module.exports = {
       return ctx.send({ error: 'contentType.notFound' }, 404);
     }
 
-    const contentTypeService =
-      strapi.plugins['content-type-builder'].services.contenttypes;
+    const contentTypeService = strapi.plugins['content-type-builder'].services.contenttypes;
 
     ctx.send({ data: contentTypeService.formatContentType(contentType) });
   },
@@ -55,8 +64,7 @@ module.exports = {
     try {
       strapi.reload.isWatching = false;
 
-      const contentTypeService =
-        strapi.plugins['content-type-builder'].services.contenttypes;
+      const contentTypeService = strapi.plugins['content-type-builder'].services.contenttypes;
 
       const component = await contentTypeService.createContentType({
         contentType: body.contentType,
@@ -96,8 +104,7 @@ module.exports = {
     try {
       strapi.reload.isWatching = false;
 
-      const contentTypeService =
-        strapi.plugins['content-type-builder'].services.contenttypes;
+      const contentTypeService = strapi.plugins['content-type-builder'].services.contenttypes;
 
       const component = await contentTypeService.editContentType(uid, {
         contentType: body.contentType,
@@ -123,8 +130,7 @@ module.exports = {
     try {
       strapi.reload.isWatching = false;
 
-      const contentTypeService =
-        strapi.plugins['content-type-builder'].services.contenttypes;
+      const contentTypeService = strapi.plugins['content-type-builder'].services.contenttypes;
 
       const component = await contentTypeService.deleteContentType(uid);
 

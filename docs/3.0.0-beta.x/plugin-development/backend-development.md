@@ -77,7 +77,7 @@ A plugin can also use a globally exposed policy in the current Strapi project.
       "path": "/",
       "handler": "MyPlugin.index",
       "config": {
-        "policies": ["global.isAuthenticated"]
+        "policies": ["global::isAuthenticated"]
       }
     }
   ]
@@ -96,7 +96,7 @@ A plugin can have its own policies, such as adding security rules. For instance,
       "path": "/",
       "handler": "MyPlugin.index",
       "config": {
-        "policies": ["plugins.myPlugin.isAuthenticated"]
+        "policies": ["plugins::myplugin.isAuthenticated"]
       }
     }
   ]
