@@ -119,6 +119,7 @@ module.exports = {
       ctx.badRequest(null, [
         {
           messages: [{ id: error.message, message: error.message, field: error.field }],
+          errors: _.get(error, 'data.errors'),
         },
       ]);
     }
@@ -150,6 +151,7 @@ module.exports = {
       ctx.badRequest(null, [
         {
           messages: [{ id: error.message, message: error.message, field: error.field }],
+          errors: _.get(error, 'data.errors'),
         },
       ]);
     }
