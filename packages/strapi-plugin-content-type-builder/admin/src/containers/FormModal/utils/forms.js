@@ -452,6 +452,8 @@ const forms = {
               disabled: data.type !== 'date',
             },
           ]);
+        } else if (type === 'richtext') {
+          items.splice(4, 1);
         } else if (type === 'uid') {
           const uidItems = [
             [{ ...fields.default, disabled: Boolean(data.targetField), type: 'text' }],

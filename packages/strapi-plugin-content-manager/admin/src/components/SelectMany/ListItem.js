@@ -18,7 +18,7 @@ function ListItem({
   onRemove,
   targetModel,
 }) {
-  const to = `/plugins/${pluginId}/${targetModel}/${data.id}?redirectUrl=${nextSearch}`;
+  const to = `/plugins/${pluginId}/collectionType/${targetModel}/${data.id}?redirectUrl=${nextSearch}`;
 
   const originalIndex = findRelation(data.id).index;
   const [{ isDragging }, drag, preview] = useDrag({

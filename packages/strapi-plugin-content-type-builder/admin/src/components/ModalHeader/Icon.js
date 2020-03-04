@@ -5,11 +5,15 @@ import PropTypes from 'prop-types';
 const Icon = ({ type }) => {
   const icoName = type === 'collectionType' ? 'contentType' : type;
 
-  return <AttributeIcon type={icoName} style={{ margin: 'auto 20px auto 0' }} />;
+  return <AttributeIcon type={icoName || 'dynamiczone'} style={{ margin: 'auto 20px auto 0' }} />;
+};
+
+Icon.defaultProps = {
+  type: 'dynamiczone',
 };
 
 Icon.propTypes = {
-  type: PropTypes.string.isRequired,
+  type: PropTypes.string,
 };
 
 export default Icon;

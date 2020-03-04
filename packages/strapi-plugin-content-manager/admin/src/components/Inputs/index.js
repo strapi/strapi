@@ -3,10 +3,11 @@ import PropTypes from 'prop-types';
 import { get, isEmpty, omit, toLower } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Inputs as InputsIndex } from '@buffetjs/custom';
+import { useGlobalContext } from 'strapi-helper-plugin';
 
 import useDataManager from '../../hooks/useDataManager';
 import InputJSONWithErrors from '../InputJSONWithErrors';
-import InputFileWithErrors from '../InputFileWithErrors';
+// import InputFileWithErrors from '../InputFileWithErrors';
 import SelectWrapper from '../SelectWrapper';
 import WysiwygWithErrors from '../WysiwygWithErrors';
 import InputUID from '../InputUID';
@@ -51,6 +52,10 @@ const getInputType = (type = '') => {
 };
 
 function Inputs({ autoFocus, keys, layout, name, onBlur }) {
+  // FIXME: this is really temporary until the Field API is ready
+  // but this way development aren't dependent of the upcoming API
+  const { plugins } = useGlobalContext();
+  const InputMedia = get(plugins, ['upload', 'fields', 'media'], () => {});
   const { didCheckErrors, formErrors, modifiedData, onChange } = useDataManager();
   const attribute = useMemo(() => get(layout, ['schema', 'attributes', name], {}), [layout, name]);
   const metadatas = useMemo(() => get(layout, ['metadatas', name, 'edit'], {}), [layout, name]);
@@ -81,7 +86,7 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
 
   if (type === 'relation') {
     return (
-      <div className="col-6" key={keys}>
+      <div key={keys}>
         <SelectWrapper
           {...metadatas}
           name={keys}
@@ -149,7 +154,8 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
             description={description}
             contentTypeUID={layout.uid}
             customInputs={{
-              media: InputFileWithErrors,
+              // media: InputFileWithErrors,
+              media: InputMedia,
               json: InputJSONWithErrors,
               wysiwyg: WysiwygWithErrors,
               uid: InputUID,

@@ -3,9 +3,8 @@ import { withRouter } from 'react-router';
 import PropTypes from 'prop-types';
 import { get, isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import moment from 'moment';
-import { IcoContainer, useGlobalContext } from 'strapi-helper-plugin';
+import { IcoContainer, useGlobalContext, dateFormats } from 'strapi-helper-plugin';
 import useListView from '../../hooks/useListView';
-import dateFormats from '../../utils/dateFormats';
 import CustomInputCheckbox from '../CustomInputCheckbox';
 import MediaPreviewList from '../MediaPreviewList';
 import { ActionContainer, Truncate, Truncated } from './styledComponents';
@@ -20,9 +19,8 @@ const getDisplayedValue = (type, value, name) => {
     case 'text':
     case 'email':
     case 'enumeration':
-      return (value && !isEmpty(toString(value))) || name === 'id'
-        ? toString(value)
-        : '-';
+    case 'uid':
+      return (value && !isEmpty(toString(value))) || name === 'id' ? toString(value) : '-';
     case 'float':
     case 'integer':
     case 'biginteger':
@@ -38,9 +36,7 @@ const getDisplayedValue = (type, value, name) => {
       }
 
       const date =
-        value && isObject(value) && value._isAMomentObject === true
-          ? JSON.stringify(value)
-          : value;
+        value && isObject(value) && value._isAMomentObject === true ? JSON.stringify(value) : value;
 
       return dateToUtcTime(date).format(dateFormats[type]);
     }
@@ -71,12 +67,7 @@ const getDisplayedValue = (type, value, name) => {
 };
 
 function Row({ goTo, isBulkable, row, headers }) {
-  const {
-    entriesToDelete,
-    onChangeBulk,
-    onClickDelete,
-    schema,
-  } = useListView();
+  const { entriesToDelete, onChangeBulk, onClickDelete, schema } = useListView();
 
   const memoizedDisplayedValue = useCallback(
     name => {
@@ -96,10 +87,7 @@ function Row({ goTo, isBulkable, row, headers }) {
           <CustomInputCheckbox
             name={row.id}
             onChange={onChangeBulk}
-            value={
-              entriesToDelete.filter(id => toString(id) === toString(row.id))
-                .length > 0
-            }
+            value={entriesToDelete.filter(id => toString(id) === toString(row.id)).length > 0}
           />
         </td>
       )}

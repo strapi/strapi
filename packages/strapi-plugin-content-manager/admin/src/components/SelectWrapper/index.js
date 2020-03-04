@@ -148,11 +148,15 @@ function SelectWrapper({
     relationType
   );
   const nextSearch = `${pathname}${search}`;
-  const to = `/plugins/${pluginId}/${targetModel}/${
+  const to = `/plugins/${pluginId}/collectionType/${targetModel}/${
     value ? value.id : null
   }?redirectUrl=${nextSearch}`;
   const link =
-    value === null || value === undefined || ['role', 'permission'].includes(targetModel) ? null : (
+    value === null ||
+    value === undefined ||
+    ['plugins::users-permissions.role', 'plugins::users-permissions.permission'].includes(
+      targetModel
+    ) ? null : (
       <Link to={to}>
         <FormattedMessage id="content-manager.containers.Edit.seeDetails" />
       </Link>
