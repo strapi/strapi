@@ -2,21 +2,23 @@ import React, { useReducer, useState, useEffect } from 'react';
 import { includes } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
+import { useDebounce } from '@buffetjs/hooks';
 import {
   HeaderSearch,
   PageFooter,
   useGlobalContext,
   generateFiltersFromSearch,
-  useQuery,
   generateSearchFromFilters,
+  request,
+  useQuery,
 } from 'strapi-helper-plugin';
+
 import getTrad from '../../utils/getTrad';
+import getRequestUrl from '../../utils/getRequestUrl';
 import Container from '../../components/Container';
 import ControlsWrapper from '../../components/ControlsWrapper';
 import SelectAll from '../../components/SelectAll';
 import SortPicker from '../../components/SortPicker';
-import FiltersPicker from '../../components/FiltersPicker';
-import FiltersList from '../../components/FiltersList';
 import Filters from '../../components/Filters';
 // import List from '../../components/List';
 import ListEmpty from '../../components/ListEmpty';
@@ -32,17 +34,10 @@ const HomePage = () => {
   const { push } = useHistory();
   const { search } = useLocation();
   const query = useQuery();
+
   const { data, dataToDelete } = reducerState.toJS();
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
   const paramsKeys = ['_limit', '_start', '_q', '_sort'];
-
-  useEffect(() => {
-    // TODO - Retrieve data
-    dispatch({
-      type: 'GET_DATA_SUCCEEDED',
-      data: [],
-    });
-  }, []);
 
   const getSearchParams = () => {
     const params = {};
@@ -55,19 +50,49 @@ const HomePage = () => {
 
     return params;
   };
-
-  const getUpdatedQueryParams = updatedParams => {
-    return {
-      ...getSearchParams(),
-      filters: generateFiltersFromSearch(search),
-      ...updatedParams,
-    };
-  };
-
   const getQueryValue = key => {
     const queryParams = getSearchParams();
 
     return queryParams[key];
+  };
+
+  const debouncedSearch = useDebounce(search, 300);
+
+  useEffect(() => {
+    fetchData();
+
+    return () => {};
+  }, [debouncedSearch]);
+
+  const fetchData = async () => {
+    const requestURL = getRequestUrl('files');
+
+    try {
+      const data = await request(`${requestURL}${search}`, {
+        method: 'GET',
+      });
+
+      dispatch({
+        type: 'GET_DATA_SUCCEEDED',
+        data,
+      });
+    } catch (err) {
+      strapi.notification.error('notification.error');
+    }
+  };
+
+  const getQueryParams = () => {
+    return {
+      ...getSearchParams(),
+      filters: generateFiltersFromSearch(search),
+    };
+  };
+
+  const getUpdatedQueryParams = updatedParams => {
+    return {
+      ...getQueryParams(),
+      ...updatedParams,
+    };
   };
 
   const handleChangeListParams = ({ target: { name, value } }) => {
@@ -91,8 +116,12 @@ const HomePage = () => {
     handleChangeParams({ target: { name: '_q', value: '' } });
   };
 
-  const handleClickToggleModal = () => {
+  const handleClickToggleModal = (refetch = false) => {
     setIsOpen(prev => !prev);
+
+    if (refetch) {
+      fetchData();
+    }
   };
 
   const handleDeleteFilter = index => {
@@ -129,7 +158,7 @@ const HomePage = () => {
         disabled: false,
         color: 'primary',
         label: formatMessage({ id: getTrad('header.actions.upload-assets') }),
-        onClick: handleClickToggleModal,
+        onClick: () => handleClickToggleModal(),
         type: 'button',
       },
     ],
@@ -162,13 +191,8 @@ const HomePage = () => {
           filters={generateFiltersFromSearch(search)}
           onClick={handleDeleteFilter}
         />
-        {/* <FiltersPicker onChange={handleChangeParams} />
-        <FiltersList
-          filters={generateFiltersFromSearch(search)}
-          onClick={handleDeleteFilter}
-        /> */}
       </ControlsWrapper>
-      <ListEmpty onClick={handleClickToggleModal} />
+      <ListEmpty onClick={() => handleClickToggleModal()} />
       {/* <List data={data} /> */}
 
       <PageFooter count={50} onChangeParams={handleChangeListParams} params={params} />

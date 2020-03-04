@@ -8,7 +8,7 @@ import Wrapper from './Wrapper';
 
 const SortListItem = ({ onClick, selectedItem, label, value }) => {
   const handleClick = () => {
-    onClick(value);
+    onClick({ target: { name: '_sort', value } });
   };
 
   return (

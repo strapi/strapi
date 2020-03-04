@@ -5,26 +5,17 @@ import { useLocation } from 'react-router-dom';
 import moment from 'moment';
 import { FormattedMessage } from 'react-intl';
 import { FilterIcon, generateFiltersFromSearch } from 'strapi-helper-plugin';
+import { useClickAwayListener } from '@buffetjs/hooks';
 
-import useOutsideClick from '../../hooks/useOutsideClick';
-
-import DropdownButton from '../DropdownButton';
-import DropdownSection from '../DropdownSection';
-
-import Wrapper from './Wrapper';
 import FiltersCard from './FiltersCard';
+import Picker from '../Picker';
 
 const FiltersPicker = ({ onChange }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const { search } = useLocation();
   const dropdownRef = useRef();
   const filters = generateFiltersFromSearch(search);
 
-  useOutsideClick(dropdownRef, () => {
-    if (isOpen) {
-      setIsOpen(false);
-    }
-  });
+  useClickAwayListener(dropdownRef, () => setIsOpen(false));
 
   const handleChange = ({ target: { value } }) => {
     let formattedValue = value;
@@ -40,24 +31,25 @@ const FiltersPicker = ({ onChange }) => {
 
       onChange({ target: { name: 'filters', value: filters } });
     }
-
-    hangleToggle();
-  };
-
-  const hangleToggle = () => {
-    setIsOpen(!isOpen);
   };
 
   return (
-    <Wrapper>
-      <DropdownButton onClick={hangleToggle} isActive={isOpen}>
-        <FilterIcon />
-        <FormattedMessage id="app.utils.filters" />
-      </DropdownButton>
-      <DropdownSection isOpen={isOpen} ref={dropdownRef}>
-        <FiltersCard onChange={handleChange} />
-      </DropdownSection>
-    </Wrapper>
+    <Picker
+      renderButtonContent={() => (
+        <>
+          <FilterIcon />
+          <FormattedMessage id="app.utils.filters" />
+        </>
+      )}
+      renderSectionContent={onToggle => (
+        <FiltersCard
+          onChange={e => {
+            handleChange(e);
+            onToggle();
+          }}
+        />
+      )}
+    />
   );
 };
 

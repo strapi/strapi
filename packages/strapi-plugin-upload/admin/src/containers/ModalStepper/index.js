@@ -1,12 +1,7 @@
 import React, { useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import {
-  Modal,
-  ModalFooter,
-  useGlobalContext,
-  request,
-} from 'strapi-helper-plugin';
+import { Modal, ModalFooter, useGlobalContext, request } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
@@ -20,9 +15,7 @@ const ModalStepper = ({ isOpen, onToggle }) => {
   const { formatMessage } = useGlobalContext();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { currentStep, fileToEdit, filesToUpload } = reducerState.toJS();
-  const { Component, headers, next, prev, withBackButton } = stepper[
-    currentStep
-  ];
+  const { Component, headers, next, prev, withBackButton } = stepper[currentStep];
   const filesToUploadLength = filesToUpload.length;
   const toggleRef = useRef();
   toggleRef.current = onToggle;
@@ -30,7 +23,8 @@ const ModalStepper = ({ isOpen, onToggle }) => {
   useEffect(() => {
     if (currentStep === 'upload' && filesToUploadLength === 0) {
       // Close modal when file uploading is over
-      toggleRef.current();
+
+      toggleRef.current(true);
     }
   }, [filesToUploadLength, currentStep]);
 
@@ -113,9 +107,7 @@ const ModalStepper = ({ isOpen, onToggle }) => {
   const handleToggle = () => {
     if (filesToUploadLength > 0) {
       // eslint-disable-next-line no-alert
-      const confirm = window.confirm(
-        formatMessage({ id: getTrad('window.confirm.close-modal') })
-      );
+      const confirm = window.confirm(formatMessage({ id: getTrad('window.confirm.close-modal') }));
 
       if (!confirm) {
         return;
@@ -130,44 +122,42 @@ const ModalStepper = ({ isOpen, onToggle }) => {
       type: 'SET_FILES_UPLOADING_STATE',
     });
 
-    const requests = filesToUpload.map(
-      async ({ file, originalIndex, abortController }) => {
-        const formData = new FormData();
-        const headers = {};
-        formData.append('files', file);
+    const requests = filesToUpload.map(async ({ file, originalIndex, abortController }) => {
+      const formData = new FormData();
+      const headers = {};
+      formData.append('files', file);
 
-        try {
-          await request(
-            `/${pluginId}`,
-            {
-              method: 'POST',
-              headers,
-              body: formData,
-              signal: abortController.signal,
-            },
-            false,
-            false
-          );
+      try {
+        await request(
+          `/${pluginId}`,
+          {
+            method: 'POST',
+            headers,
+            body: formData,
+            signal: abortController.signal,
+          },
+          false,
+          false
+        );
 
-          dispatch({
-            type: 'REMOVE_FILE_TO_UPLOAD',
-            fileIndex: originalIndex,
-          });
-        } catch (err) {
-          const errorMessage = get(
-            err,
-            ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
-            null
-          );
+        dispatch({
+          type: 'REMOVE_FILE_TO_UPLOAD',
+          fileIndex: originalIndex,
+        });
+      } catch (err) {
+        const errorMessage = get(
+          err,
+          ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
+          null
+        );
 
-          dispatch({
-            type: 'SET_FILE_ERROR',
-            fileIndex: originalIndex,
-            errorMessage,
-          });
-        }
+        dispatch({
+          type: 'SET_FILE_ERROR',
+          fileIndex: originalIndex,
+          errorMessage,
+        });
       }
-    );
+    });
 
     await Promise.all(requests);
   };
@@ -243,11 +233,7 @@ const ModalStepper = ({ isOpen, onToggle }) => {
             </Button>
           )}
           {currentStep === 'edit-new' && (
-            <Button
-              color="success"
-              type="button"
-              onClick={handleSubmitEditNewFile}
-            >
+            <Button color="success" type="button" onClick={handleSubmitEditNewFile}>
               {formatMessage({ id: 'form.button.finish' })}
             </Button>
           )}
