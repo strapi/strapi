@@ -1,21 +1,17 @@
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { some } from 'lodash';
 import { useLocation } from 'react-router-dom';
 import moment from 'moment';
 import { FormattedMessage } from 'react-intl';
 import { FilterIcon, generateFiltersFromSearch } from 'strapi-helper-plugin';
-import { useClickAwayListener } from '@buffetjs/hooks';
 
 import FiltersCard from './FiltersCard';
 import Picker from '../Picker';
 
 const FiltersPicker = ({ onChange }) => {
   const { search } = useLocation();
-  const dropdownRef = useRef();
   const filters = generateFiltersFromSearch(search);
-
-  useClickAwayListener(dropdownRef, () => setIsOpen(false));
 
   const handleChange = ({ target: { value } }) => {
     let formattedValue = value;

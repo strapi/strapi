@@ -6,6 +6,7 @@ import getTrad from '../../utils/getTrad';
 import generateRows from './utils/generateRows';
 import CardEmpty from '../CardEmpty';
 import Wrapper from './Wrapper';
+import Text from '../Text';
 
 const ListEmpty = ({ onClick }) => {
   const rows = generateRows(3);
@@ -27,21 +28,23 @@ const ListEmpty = ({ onClick }) => {
       })}
       <div className="btn-wrapper">
         <FormattedMessage id={getTrad('list.assets-empty.title')}>
-          {content => <p className="title">{content}</p>}
+          {content => (
+            <Text fontSize="lg" fontWeight="semiBold">
+              {content}
+            </Text>
+          )}
         </FormattedMessage>
         <FormattedMessage id={getTrad('list.assets-empty.subtitle')}>
-          {content => <p className="subtitle">{content}</p>}
+          {content => (
+            <Text fontSize="md" lineHeight="19px">
+              {content}
+            </Text>
+          )}
         </FormattedMessage>
 
+        <div style={{ paddingBottom: '1.1rem' }} />
         <FormattedMessage id={getTrad('header.actions.upload-assets')}>
-          {label => (
-            <Button
-              color="primary"
-              label={label}
-              onClick={onClick}
-              type="button"
-            />
-          )}
+          {label => <Button color="primary" label={label} onClick={onClick} type="button" />}
         </FormattedMessage>
       </div>
     </Wrapper>

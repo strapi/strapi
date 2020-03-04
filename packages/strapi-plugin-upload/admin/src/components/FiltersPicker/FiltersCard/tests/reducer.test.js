@@ -1,5 +1,3 @@
-import { fromJS } from 'immutable';
-import moment from 'moment';
 import reducer, { initialState } from '../reducer';
 
 describe('Upload | components | FiltersCard | reducer', () => {

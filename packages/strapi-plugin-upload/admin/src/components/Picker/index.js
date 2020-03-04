@@ -28,13 +28,13 @@ const Picker = ({ renderButtonContent, renderSectionContent }) => {
 };
 
 Picker.defaultProps = {
-  onChange: () => {},
-  value: null,
+  renderButtonContent: () => {},
+  renderSectionContent: () => {},
 };
 
 Picker.propTypes = {
-  onChange: PropTypes.func,
-  value: PropTypes.string,
+  renderButtonContent: PropTypes.func,
+  renderSectionContent: PropTypes.func,
 };
 
 export default Picker;
