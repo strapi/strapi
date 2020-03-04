@@ -106,6 +106,44 @@ module.exports = {
     ctx.body = { data };
   },
 
+  async replaceFile(ctx) {
+    const { id } = ctx.params;
+
+    const uploadService = strapi.plugins.upload.services.upload;
+
+    // Retrieve provider configuration.
+    const { enabled } = strapi.plugins.upload.config;
+
+    // Verify if the file upload is enable.
+    if (enabled === false) {
+      throw strapi.errors.badRequest(null, {
+        errors: [{ id: 'Upload.status.disabled', message: 'File upload is disabled' }],
+      });
+    }
+
+    const data = await strapi.plugins['upload'].services.upload.fetch({ id });
+
+    if (!data) {
+      return ctx.notFound('file.notFound');
+    }
+
+    const { fileInfo } = await validateUploadBody(uploadSchema, ctx.request.body);
+
+    const { file = {} } = ctx.request.files || {};
+
+    if (_.isUndefined(file)) {
+      throw strapi.errors.badRequest(null, {
+        errors: [{ id: 'Upload.status.empty', message: 'File is missing' }],
+      });
+    }
+
+    const enhancedFile = uploadService.enhanceFile(file, fileInfo);
+
+    const updatedFile = await uploadService.update(id, enhancedFile);
+
+    ctx.send(updatedFile);
+  },
+
   async find(ctx) {
     const data = await strapi.plugins['upload'].services.upload.fetchAll(ctx.query);
 

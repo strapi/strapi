@@ -99,6 +99,35 @@ module.exports = {
     return Promise.all(files.map(file => uploadFile(file)));
   },
 
+  async replace(dbFile, file) {
+    const config = strapi.plugins.upload.config;
+
+    // keep a constant hash
+    _.assign(file, {
+      hash: dbFile.hash,
+      ext: dbFile.ext,
+    });
+
+    // execute delete function of the provider
+    if (dbFile.provider === config.provider) {
+      await strapi.plugins.upload.provider.delete(dbFile);
+    }
+
+    await strapi.plugins.upload.provider.upload(file);
+
+    delete file.buffer;
+    file.provider = config.provider;
+
+    const res = await this.update({ id: dbFile.id }, {});
+    strapi.eventHub.emit('media.update', { media: res });
+
+    return res;
+  },
+
+  update(id, values) {
+    return strapi.query('file', 'upload').update({ id }, values);
+  },
+
   add(values) {
     return strapi.query('file', 'upload').create(values);
   },

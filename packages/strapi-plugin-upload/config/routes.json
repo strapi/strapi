@@ -1,19 +1,6 @@
 {
   "routes": [
     {
-      "method": "POST",
-      "path": "/",
-      "handler": "Upload.upload",
-      "config": {
-        "policies": [],
-        "description": "Upload a file",
-        "tag": {
-          "plugin": "upload",
-          "name": "File"
-        }
-      }
-    },
-    {
       "method": "GET",
       "path": "/settings",
       "handler": "Upload.getSettings",
@@ -27,6 +14,28 @@
       "handler": "Upload.updateSettings",
       "config": {
         "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/",
+      "handler": "Upload.upload",
+      "config": {
+        "policies": [],
+        "description": "Upload a file",
+        "tag": {
+          "plugin": "upload",
+          "name": "File"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/files/replace/:id",
+      "handler": "Upload.replaceFile",
+      "config": {
+        "policies": [],
+        "description": "Replace a file"
       }
     },
     {
