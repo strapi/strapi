@@ -5,10 +5,10 @@ import { get, isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import moment from 'moment';
 import { IcoContainer, useGlobalContext } from 'strapi-helper-plugin';
 import useListView from '../../hooks/useListView';
+import DATE_FORMATS from '../../utils/DATE_FORMATS';
 import CustomInputCheckbox from '../CustomInputCheckbox';
 import MediaPreviewList from '../MediaPreviewList';
 import { ActionContainer, Truncate, Truncated } from './styledComponents';
-import DATE_FORMATS from './DATE_FORMATS';
 
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
@@ -51,6 +51,10 @@ const getDisplayedValue = (type, value, name) => {
     case 'files':
       return value;
     case 'time': {
+      if (!value) {
+        return '-';
+      }
+
       const [hour, minute, second] = value.split(':');
       const timeObj = {
         hour,

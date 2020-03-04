@@ -11,7 +11,6 @@ const getAttributes = (dataTarget = '', targetUid, nestedComponents) => {
       'media',
       'boolean',
       'json',
-      // 'uid',
       'relation',
     ],
   ];
@@ -23,6 +22,7 @@ const getAttributes = (dataTarget = '', targetUid, nestedComponents) => {
   const items = defaultAttributes.slice();
 
   if (isPickingAttributeForAContentType) {
+    items[0].push('uid');
     items.push(['component', 'dynamiczone']);
   }
 

@@ -42,6 +42,7 @@ import App from './containers/App';
 import LanguageProvider from './containers/LanguageProvider';
 
 import configureStore from './configureStore';
+import { SETTINGS_BASE_URL } from './config';
 
 // Import i18n messages
 import { translationMessages, languages } from './i18n';
@@ -57,16 +58,23 @@ const { dispatch } = store;
 const MOUNT_NODE =
   document.getElementById('app') || document.createElement('div');
 
-Object.keys(plugins).forEach(plugin => {
-  const currentPlugin = plugins[plugin];
+Object.keys(plugins).forEach(current => {
+  const registerPlugin = plugin => {
+    return plugin;
+  };
+  const currentPluginFn = plugins[current];
+  const plugin = currentPluginFn({
+    registerPlugin,
+    settingsBaseURL: SETTINGS_BASE_URL,
+  });
 
   const pluginTradsPrefixed = languages.reduce((acc, lang) => {
-    const currentLocale = currentPlugin.trads[lang];
+    const currentLocale = plugin.trads[lang];
 
     if (currentLocale) {
       const localeprefixedWithPluginId = Object.keys(currentLocale).reduce(
         (acc2, current) => {
-          acc2[`${plugins[plugin].id}.${current}`] = currentLocale[current];
+          acc2[`${plugin.id}.${current}`] = currentLocale[current];
 
           return acc2;
         },
@@ -81,7 +89,7 @@ Object.keys(plugins).forEach(plugin => {
 
   try {
     merge(translationMessages, pluginTradsPrefixed);
-    dispatch(pluginLoaded(currentPlugin));
+    dispatch(pluginLoaded(plugin));
   } catch (err) {
     console.log({ err });
   }

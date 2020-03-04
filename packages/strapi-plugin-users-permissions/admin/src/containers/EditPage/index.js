@@ -199,7 +199,7 @@ export class EditPage extends React.Component {
   );
 
   render() {
-    const { formatMessage } = this.context;
+    const { formatMessage, plugins: appPlugins } = this.context;
     const pluginHeaderTitle =
       this.props.match.params.actionType === 'create'
         ? getTrad('EditPage.header.title.create')
@@ -235,6 +235,7 @@ export class EditPage extends React.Component {
 
     return (
       <EditPageContextProvider
+        appPlugins={appPlugins}
         onChange={this.props.onChangeInput}
         selectAllActions={this.props.selectAllActions}
         setInputPoliciesPath={this.props.setInputPoliciesPath}
@@ -392,10 +393,7 @@ function mapDispatchToProps(dispatch) {
   );
 }
 
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps
-);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
 const withReducer = strapi.injectReducer({
   key: 'editPage',
   reducer,
@@ -403,8 +401,4 @@ const withReducer = strapi.injectReducer({
 });
 const withSaga = strapi.injectSaga({ key: 'editPage', saga, pluginId });
 
-export default compose(
-  withReducer,
-  withSaga,
-  withConnect
-)(EditPage);
+export default compose(withReducer, withSaga, withConnect)(EditPage);

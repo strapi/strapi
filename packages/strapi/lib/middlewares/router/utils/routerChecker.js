@@ -41,40 +41,34 @@ module.exports = strapi =>
       controller
     );
 
-    // Init policies array.
-    const policies = [];
-
     // Add the `globalPolicy`.
-    policies.push(
-      policyUtils.globalPolicy({
-        controller: controllerKey,
-        action: actionName,
-        method,
-        endpoint,
-        plugin,
-      })
-    );
+    const globalPolicy = policyUtils.globalPolicy({
+      controller: controllerKey,
+      action: actionName,
+      method,
+      endpoint,
+      plugin,
+    });
+
+    // Init policies array.
+    const policies = [globalPolicy];
+
+    let policyOption = _.get(value, 'config.policies');
 
     // Allow string instead of array of policies.
-    if (
-      !_.isArray(_.get(value, 'config.policies')) &&
-      !_.isEmpty(_.get(value, 'config.policies'))
-    ) {
-      value.config.policies = [value.config.policies];
+    if (_.isString(policyOption) && !_.isEmpty(policyOption)) {
+      policyOption = [policyOption];
     }
 
-    if (
-      _.isArray(_.get(value, 'config.policies')) &&
-      !_.isEmpty(_.get(value, 'config.policies'))
-    ) {
-      _.forEach(value.config.policies, policy => {
-        policyUtils.get(
-          policy,
-          plugin,
-          policies,
-          `${method} ${endpoint}`,
-          currentApiName
-        );
+    if (_.isArray(policyOption)) {
+      policyOption.forEach(policyName => {
+        try {
+          policies.push(policyUtils.get(policyName, plugin, currentApiName));
+        } catch (error) {
+          strapi.stopWithError(
+            `Error creating endpoint ${method} ${endpoint}: ${error.message}`
+          );
+        }
       });
     }
 

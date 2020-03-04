@@ -1,78 +1,67 @@
-/*
- *
- * Onboarding reducer
- *
- */
-
 import { fromJS } from 'immutable';
-import {
-  GET_VIDEOS_SUCCEEDED,
-  SHOULD_OPEN_MODAL,
-  ON_CLICK,
-  SET_VIDEOS_DURATION,
-  UPDATE_VIDEO_START_TIME,
-  SET_VIDEO_END,
-  REMOVE_VIDEOS,
-} from './constants';
 
 const initialState = fromJS({
-  videos: fromJS([]),
+  isLoading: true,
+  isOpen: false,
+  videos: [],
 });
 
-function onboardingReducer(state = initialState, action) {
+const reducer = (state, action) => {
   switch (action.type) {
-    case GET_VIDEOS_SUCCEEDED:
-      return state.update('videos', () => fromJS(action.videos));
-    case SHOULD_OPEN_MODAL:
-      return state.update('shouldOpenModal', () => action.opened);
-    case ON_CLICK:
-      return state.updateIn(['videos'], list => {
-        return list.reduce((acc, current, index) => {
-          if (index === action.index) {
-            return acc.updateIn([index, 'isOpen'], v => !v);
+    case 'GET_DATA_SUCCEEDED':
+      return state
+        .update('isOpen', () => !action.didWatchVideos)
+        .update('isLoading', () => false)
+        .update('videos', () => fromJS(action.videos));
+    case 'SET_IS_OPEN':
+      return state.update('isOpen', v => !v);
+    case 'SET_VIDEO_DURATION':
+      return state.updateIn(['videos', action.videoIndex, 'duration'], () => {
+        return parseFloat(action.duration, 10);
+      });
+    case 'TOGGLE_VIDEO_MODAL':
+      return state.update('videos', list => {
+        return list.map((item, index) => {
+          if (index === action.videoIndexToOpen) {
+            return item.update('isOpen', v => !v);
           }
 
-          return acc.updateIn([index, 'isOpen'], () => false);
-        }, list);
+          return item.set('isOpen', false);
+        });
       });
-    case SET_VIDEOS_DURATION:
-      return state.updateIn(
-        ['videos', action.index, 'duration'],
-        () => action.duration
+    case 'UPDATE_VIDEO_STARTED_TIME_AND_PLAYED_INFOS': {
+      const updatedState = state.updateIn(
+        ['videos', action.videoIndex],
+        video => {
+          const elapsedTime = parseFloat(action.elapsedTime, 10);
+          const videoDuration = parseFloat(video.get('duration', 10));
+          const percentElapsedTime = (elapsedTime * 100) / videoDuration;
+
+          return video
+            .update('startTime', () => elapsedTime)
+            .update('end', oldValue => {
+              if (oldValue === true) {
+                return true;
+              }
+
+              return percentElapsedTime > 80;
+            });
+        }
       );
-    case UPDATE_VIDEO_START_TIME: {
-      const storedVideos = JSON.parse(localStorage.getItem('videos'));
-      const videos = state.updateIn(['videos'], list => {
-        return list.reduce((acc, current, index) => {
-          if (index === action.index) {
-            storedVideos[index].startTime = action.startTime;
 
-            return acc.updateIn([index, 'startTime'], () => action.startTime);
-          }
+      const videos = updatedState
+        .get('videos')
+        .map(video => video.set('isOpen', false));
 
-          storedVideos[index].startTime = 0;
+      // Update the local storage
+      localStorage.setItem('videos', JSON.stringify(videos.toJS()));
 
-          return acc.updateIn([index, 'startTime'], () => 0);
-        }, list);
-      });
-
-      localStorage.setItem('videos', JSON.stringify(storedVideos));
-
-      return videos;
+      return updatedState;
     }
-    case SET_VIDEO_END: {
-      const storedVideos = JSON.parse(localStorage.getItem('videos'));
-
-      storedVideos[action.index].end = action.end;
-      localStorage.setItem('videos', JSON.stringify(storedVideos));
-
-      return state.updateIn(['videos', action.index, 'end'], () => action.end);
-    }
-    case REMOVE_VIDEOS:
-      return initialState;
     default:
       return state;
   }
-}
+};
 
-export default onboardingReducer;
+export default reducer;
+export { initialState };

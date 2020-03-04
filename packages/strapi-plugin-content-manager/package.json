@@ -9,6 +9,7 @@
     "required": true
   },
   "dependencies": {
+    "@sindresorhus/slugify": "0.9.1",
     "classnames": "^2.2.6",
     "codemirror": "^5.46.0",
     "draft-js": "^0.10.5",
@@ -31,7 +32,6 @@
     "showdown": "^1.9.0",
     "strapi-helper-plugin": "3.0.0-beta.18.8",
     "strapi-utils": "3.0.0-beta.18.8",
-    "styled-components": "^4.2.0",
     "yup": "^0.27.0"
   },
   "author": {
