@@ -2,6 +2,7 @@ import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import App from './containers/App';
 import SettingsPage from './containers/SettingsPage';
+import InputMedia from './components/InputMedia';
 
 import trads from './translations';
 import pluginId from './pluginId';
@@ -13,6 +14,11 @@ export default strapi => {
     blockerComponent: null,
     blockerComponentProps: {},
     description: pluginDescription,
+    // TODO: this is a really temporary API that will temporary allow
+    // this plugin to add a new type into the content manager, the final API will be different
+    fields: {
+      media: InputMedia,
+    },
     icon: pluginPkg.strapi.icon,
     id: pluginId,
     initializer: null,
