@@ -35,4 +35,6 @@ module.exports = {
     .default,
   'strapi-plugin-upload': require('../../../strapi-plugin-upload/admin/src')
     .default,
+  'strapi-plugin-graphql': require('../../../strapi-plugin-graphql/admin/src')
+    .default,
 };

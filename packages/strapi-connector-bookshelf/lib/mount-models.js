@@ -46,7 +46,7 @@ const getDatabaseName = connection => {
   }
 };
 
-module.exports = ({ models, target, plugin = false }, ctx) => {
+module.exports = ({ models, target }, ctx) => {
   const { GLOBALS, connection, ORM } = ctx;
 
   // Parse every authenticated model.
@@ -129,12 +129,6 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
         return attributes;
       };
-    }
-
-    // Initialize the global variable with the
-    // capitalized model name.
-    if (!plugin) {
-      global[definition.globalName] = {};
     }
 
     await createComponentModels({
@@ -704,12 +698,6 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       );
 
       GLOBALS[definition.globalId] = ORM.Model.extend(loadedModel);
-
-      if (!plugin) {
-        // Only expose as real global variable the models which
-        // are not scoped in a plugin.
-        global[definition.globalId] = GLOBALS[definition.globalId];
-      }
 
       // Expose ORM functions through the `strapi.models[xxx]`
       // or `strapi.plugins[xxx].models[yyy]` object.

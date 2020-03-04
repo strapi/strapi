@@ -2,8 +2,8 @@ const loadConfig = require('../load-config');
 const fs = require('fs-extra');
 
 describe('Load config', () => {
-  test('Throw on non existant config folder', () => {
+  test('Throw on non existant config folder', async () => {
     fs.existsSync = jest.fn(() => false);
-    expect(loadConfig({ dir: '/' })).rejects.toThrow();
+    await expect(loadConfig({ dir: '/' })).rejects.toThrow();
   });
 });
