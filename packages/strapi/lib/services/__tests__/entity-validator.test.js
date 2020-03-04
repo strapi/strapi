@@ -116,13 +116,13 @@ describe('Entity validator', () => {
 
       await entityValidator.validateEntity(model, {}).catch(() => {
         expect(errors.badRequest).toHaveBeenCalledWith('ValidationError', {
-          title: [expect.stringMatching('must be defined')],
+          errors: { title: [expect.stringMatching('must be defined')] },
         });
       });
 
       await entityValidator.validateEntity(model, { title: null }).catch(() => {
         expect(errors.badRequest).toHaveBeenCalledWith('ValidationError', {
-          title: [expect.stringMatching('must be defined')],
+          errors: { title: [expect.stringMatching('must be defined')] },
         });
       });
     });
@@ -155,7 +155,7 @@ describe('Entity validator', () => {
 
       await entityValidator.validateEntity(model, input).catch(() => {
         expect(errors.badRequest).toHaveBeenCalledWith('ValidationError', {
-          title: [expect.stringMatching('at least 10 characters')],
+          errors: { title: [expect.stringMatching('at least 10 characters')] },
         });
       });
     });
@@ -186,7 +186,7 @@ describe('Entity validator', () => {
 
       await entityValidator.validateEntity(model, input).catch(() => {
         expect(errors.badRequest).toHaveBeenCalledWith('ValidationError', {
-          title: [expect.stringMatching('at most 2 characters')],
+          errors: { title: [expect.stringMatching('at most 2 characters')] },
         });
       });
     });
