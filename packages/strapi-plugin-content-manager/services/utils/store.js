@@ -29,18 +29,21 @@ const getModelConfiguration = async key => {
 };
 
 const setModelConfiguration = async (key, value) => {
-  const config = (await getStore().get({ key: configurationKey(key) })) || {};
-
+  const storedConfig = (await getStore().get({ key: configurationKey(key) })) || {};
+  const currentConfig = { ...storedConfig };
   Object.keys(value).forEach(key => {
     if (value[key] !== null && value[key] !== undefined) {
-      _.set(config, key, value[key]);
+      _.set(currentConfig, key, value[key]);
     }
   });
 
-  return getStore().set({
-    key: configurationKey(key),
-    value: config,
-  });
+  if(!_.isEqual(currentConfig, storedConfig)) {
+    return getStore().set({
+      key: configurationKey(key),
+      value: currentConfig,
+    });
+  }
+
 };
 
 const deleteKey = key => {
