@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { sortBy } from 'lodash';
+import { sortBy, camelCase, upperFirst } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { LeftMenuList, useGlobalContext } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
@@ -32,7 +32,6 @@ function LeftMenu({ wait }) {
   } = useDataManager();
   const { emitEvent, formatMessage } = useGlobalContext();
   const { push } = useHistory();
-
   const componentsData = sortBy(
     Object.keys(componentsGroupedByCategory).map(category => ({
       name: category,
@@ -86,26 +85,31 @@ function LeftMenu({ wait }) {
     );
   };
 
-  const handleClickOpenModal = async type => {
-    if (canOpenModalCreateCTorComponent()) {
-      const eventName =
-        type === 'contentType'
-          ? 'willCreateContentType'
-          : 'willCreateComponent';
+  const handleClickOpenModal = async (modalType, kind = '') => {
+    const type = kind === 'singleType' ? kind : modalType;
 
-      emitEvent(eventName);
+    if (canOpenModalCreateCTorComponent()) {
+      emitEvent(`willCreate${upperFirst(camelCase(type))}`);
 
       await wait();
+      const search = makeSearch({
+        modalType,
+        kind,
+        actionType: 'create',
+        settingType: 'base',
+        forTarget: modalType,
+        headerId: getTrad(`modalForm.${type}.header-create`),
+        header_icon_isCustom_1: 'false',
+        header_icon_name_1: type,
+        header_label_1: 'null',
+      });
       push({
-        search: `modalType=${type}&actionType=create&settingType=base&forTarget=${type}&headerId=${getTrad(
-          `modalForm.${type}.header-create`
-        )}&header_icon_name_1=${type}&header_icon_isCustom_1=false&header_label_1=null`,
+        search,
       });
     } else {
       displayNotificationCTNotSaved();
     }
   };
-
   const data = [
     {
       name: 'models',
@@ -119,12 +123,35 @@ function LeftMenu({ wait }) {
             componentProps: {
               id: `${pluginId}.button.model.create`,
               onClick: () => {
-                handleClickOpenModal('contentType');
+                handleClickOpenModal('contentType', 'collectionType');
               },
             },
           }
         : null,
-      links: sortedContentTypesList,
+      links: sortedContentTypesList.filter(
+        contentType => contentType.kind === 'collectionType'
+      ),
+    },
+    {
+      name: 'singleTypes',
+      title: {
+        id: `${pluginId}.menu.section.single-types.name.`,
+      },
+      searchable: true,
+      customLink: isInDevelopmentMode
+        ? {
+            Component: CustomLink,
+            componentProps: {
+              id: `${pluginId}.button.single-types.create`,
+              onClick: () => {
+                handleClickOpenModal('contentType', 'singleType');
+              },
+            },
+          }
+        : null,
+      links: sortedContentTypesList.filter(
+        singleType => singleType.kind === 'singleType'
+      ),
     },
     {
       name: 'components',
@@ -150,7 +177,9 @@ function LeftMenu({ wait }) {
   return (
     <Wrapper className="col-md-3">
       {data.map(list => {
-        return <LeftMenuList {...list} key={list.name} />;
+        return (
+          <LeftMenuList numberOfVisibleItems={5} {...list} key={list.name} />
+        );
       })}
     </Wrapper>
   );

@@ -1,7 +1,6 @@
 {
   "Analytics": "Analytics",
   "Content Manager": "Gestione Contenuti",
-  "Content Type Builder": "Generatore di Tipo Contenuti",
   "Documentation": "Documentazione",
   "Email": "Email",
   "Files Upload": "Caricamento Files",
@@ -31,7 +30,6 @@
   "app.components.HomePage.button.quickStart": "INIZIA IL TUTORIAL QUICK START",
   "app.components.HomePage.community": "Trova la community sul web",
   "app.components.HomePage.community.content": "Discuti con i membri del team, i contributori e gli sviluppatori tramite diversi canali.",
-  "app.components.HomePage.create": "Crea il tuo primo Tipo Di Contenuto",
   "app.components.HomePage.createBlock.content.first": "Il ",
   "app.components.HomePage.createBlock.content.second": "  è un plugin che ti aiuterà a definire la struttura dati dei tuoi modelli. Se sei nuovo qui, ti consigliamo vivamente di seguire il nostro ",
   "app.components.HomePage.createBlock.content.tutorial": " tutorial.",
@@ -159,7 +157,6 @@
   "HomePage.helmet.title": "Homepage",
   "HomePage.welcome.congrats": "Congratulazioni!",
   "HomePage.welcome.congrats.content": "Ti sei loggato come primo amministratore. Per scoprire le funzionalità di Strapi,",
-  "HomePage.welcome.congrats.content.bold": "ti suggeriamo di creare il tuo primo Content-Type.",
   "HomePage.community": "Unisciti alla Community",
   "HomePage.roadmap": "Guarda la nostra roadmap",
   "HomePage.greetings": "Ciao {name}!",
