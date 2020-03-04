@@ -40,8 +40,7 @@ module.exports = async strapi => {
         category,
         modelType: 'component',
         modelName: key,
-        globalId:
-          schema.globalId || _.upperFirst(_.camelCase(`component_${key}`)),
+        globalId: schema.globalId || _.upperFirst(_.camelCase(`component_${uid}`)),
       });
     });
     return acc;
