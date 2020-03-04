@@ -3,7 +3,11 @@ import getTrad from '../../../utils/getTrad';
 const getModalTitleSubHeader = state => {
   switch (state.modalType) {
     case 'chooseAttribute':
-      return getTrad(`modalForm.sub-header.chooseAttribute.${state.header_icon_name_1}`);
+      return getTrad(
+        `modalForm.sub-header.chooseAttribute.${
+          state.forTarget.includes('component') ? 'component' : state.kind
+        }`
+      );
     case 'attribute': {
       return getTrad(
         `modalForm.sub-header.attribute.${state.actionType}${
