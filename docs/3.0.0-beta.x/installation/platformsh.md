@@ -6,11 +6,11 @@ You can find the template [source code](https://github.com/platformsh-templates/
 
 [[toc]]
 
-### Step 1: Create a Platform.sh account
+## Step 1: Create a Platform.sh account
 
 You must have a [Plateform.sh](https://platform.sh/) account before doing these steps.
 
-### Step 2: Create a project
+## Step 2: Create a project
 
 You can use the **One-Click** button or follow these steps.
 
@@ -35,7 +35,7 @@ Search for the Strapi template using the search bar.
 After few second a Strapi application will be setup with a Postgres database.
 :::
 
-### Step 4: Visit your app
+## Step 4: Visit your app
 
 Now to visit your application.
 
