@@ -69,7 +69,6 @@ module.exports = async ({
           ? table.jsonb(name)
           : table.text(name, 'longtext');
       case 'enumeration':
-        return table.enu(name, attribute.enum || []);
       case 'string':
       case 'password':
       case 'email':
