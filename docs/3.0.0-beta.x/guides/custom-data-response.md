@@ -6,9 +6,9 @@ In this guide we will see how you can customize your API's response..
 
 To be able to update the default data response you have first to understand how it works.
 
-When you create a content type, it generates an API with the following list of [endpoints](../content-api/endpoint).
+When you create a content type, it generates an API with the following list of [endpoints](../content-api/api-endpoints.md).
 
-Each of these endpoint triggers a controller action. Here is the list of [controller actions](../concepts/controller.md) that exist by default when a content type is created.
+Each of these endpoint triggers a controller action. Here is the list of [controller actions](../concepts/controllers.md) that exist by default when a content type is created.
 
 If you check the controller file of your generated API `./api/{content-type}/controller/{Content-Type}.js`, you will see an empty file. It is because all the default logic is managed by Strapi. But you can override these actions with your own code.
 
@@ -68,9 +68,7 @@ module.exports = {
       entities = await strapi.services.restaurant.find(ctx.query);
     }
 
-    return entities.map(entity =>
-      sanitizeEntity(entity, { model: strapi.models.restaurant })
-    );
+    return entities.map(entity => sanitizeEntity(entity, { model: strapi.models.restaurant }));
   },
 };
 ```

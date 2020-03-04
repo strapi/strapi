@@ -1,13 +1,7 @@
 const _ = require('lodash');
 const { singular } = require('pluralize');
 
-module.exports = async ({
-  ORM,
-  loadedModel,
-  definition,
-  connection,
-  model,
-}) => {
+module.exports = async ({ ORM, loadedModel, definition, connection, model }) => {
   const createIdType = (table, definition) => {
     if (definition.primaryKeyType === 'uuid' && definition.client === 'pg') {
       return table
@@ -68,11 +62,8 @@ module.exports = async ({
       case 'text':
         return table.text(name, 'longtext');
       case 'json':
-        return definition.client === 'pg'
-          ? table.jsonb(name)
-          : table.text(name, 'longtext');
+        return definition.client === 'pg' ? table.jsonb(name) : table.text(name, 'longtext');
       case 'enumeration':
-        return table.enu(name, attribute.enum || []);
       case 'string':
       case 'password':
       case 'email':
@@ -150,8 +141,7 @@ module.exports = async ({
             // Create GIN indexes for every column.
             const indexes = columns.map(column => {
               const indexName = `${_.snakeCase(table)}_${column}`;
-              const attribute =
-                _.toLower(column) === column ? column : `"${column}"`;
+              const attribute = _.toLower(column) === column ? column : `"${column}"`;
 
               return ORM.knex.raw(
                 `CREATE INDEX IF NOT EXISTS search_${_.toLower(
@@ -298,9 +288,7 @@ module.exports = async ({
 
         // drop possible conflicting indexes
         await Promise.all(
-          columns.map(key =>
-            trx.raw('DROP INDEX IF EXISTS ??', uniqueColName(table, key))
-          )
+          columns.map(key => trx.raw('DROP INDEX IF EXISTS ??', uniqueColName(table, key)))
         );
 
         // create the table
@@ -341,9 +329,7 @@ module.exports = async ({
       }
     } else {
       const columnsToAlter = columns.filter(
-        key =>
-          JSON.stringify(previousAttributes[key]) !==
-          JSON.stringify(attributes[key])
+        key => JSON.stringify(previousAttributes[key]) !== JSON.stringify(attributes[key])
       );
 
       const alterTable = async trx => {
