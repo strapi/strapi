@@ -1,7 +1,7 @@
 const _ = require('lodash');
 
 module.exports = async (ctx, next) => {
-  let role;
+  let roles = [];
 
   if (ctx.request && ctx.request.header && ctx.request.header.authorization) {
     try {
@@ -16,7 +16,7 @@ module.exports = async (ctx, next) => {
       if (isAdmin) {
         ctx.state.admin = await strapi.query('administrator', 'admin').findOne({ id }, []);
       } else {
-        ctx.state.user = await strapi.query('user', 'users-permissions').findOne({ id }, ['role']);
+        ctx.state.user = await strapi.query('user', 'users-permissions').findOne({ id }, ['roles']);
       }
     } catch (err) {
       return handleErrors(ctx, err, 'unauthorized');
@@ -39,9 +39,9 @@ module.exports = async (ctx, next) => {
       return handleErrors(ctx, 'User Not Found', 'unauthorized');
     }
 
-    role = ctx.state.user.role;
+    roles = ctx.state.user.roles;
 
-    if (role.type === 'root') {
+    if (roles.some(r => r.type === 'root')) {
       return await next();
     }
 
@@ -68,29 +68,35 @@ module.exports = async (ctx, next) => {
   }
 
   // Retrieve `public` role.
-  if (!role) {
-    role = await strapi.query('role', 'users-permissions').findOne({ type: 'public' }, []);
+  if (!roles.length) {
+    roles = await strapi.query('role', 'users-permissions').findOne({ type: 'public' }, []);
   }
 
   const route = ctx.request.route;
-  const permission = await strapi.query('permission', 'users-permissions').findOne(
-    {
-      role: role.id,
-      type: route.plugin || 'application',
-      controller: route.controller,
-      action: route.action,
-      enabled: true,
-    },
-    []
-  );
+  const permissions = await strapi
+    .query('permission', 'users-permissions')
+    .find(
+      {
+        role_in: roles.map(r => r.id),
+        type: route.plugin || 'application',
+        controller: route.controller,
+        action: route.action,
+        enabled: true,
+      },
+      []
+    );
 
-  if (!permission) {
+  if (!permissions.length) {
     return handleErrors(ctx, undefined, 'forbidden');
   }
 
   // Execute the policies.
-  if (permission.policy) {
-    return await strapi.plugins['users-permissions'].config.policies[permission.policy](ctx, next);
+  const { policy } = permissions.find(p => p.policy) || {};
+  if (policy) {
+    return await strapi.plugins['users-permissions'].config.policies[policy](
+      ctx,
+      next
+    );
   }
 
   // Execute the action.

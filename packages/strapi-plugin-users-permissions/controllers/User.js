@@ -84,7 +84,7 @@ module.exports = {
       })
       .get();
 
-    const { email, username, password, role } = ctx.request.body;
+    const { email, username, password, roles } = ctx.request.body;
 
     if (!email) return ctx.badRequest('missing.email');
     if (!username) return ctx.badRequest('missing.username');
@@ -126,12 +126,12 @@ module.exports = {
       provider: 'local',
     };
 
-    if (!role) {
+    if (!roles || [].length) {
       const defaultRole = await strapi
         .query('role', 'users-permissions')
         .findOne({ type: advanced.default_role }, []);
 
-      user.role = defaultRole.id;
+      user.roles = [defaultRole.id];
     }
 
     try {

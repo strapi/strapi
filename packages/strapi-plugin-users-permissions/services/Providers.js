@@ -91,7 +91,7 @@ exports.connect = (provider, query) => {
         // Create the new user.
         const params = _.assign(profile, {
           provider: provider,
-          role: defaultRole.id,
+          roles: [defaultRole.id],
           confirmed: true,
         });
 

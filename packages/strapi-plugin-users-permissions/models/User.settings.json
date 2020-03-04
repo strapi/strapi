@@ -46,8 +46,8 @@
       "default": false,
       "configurable": false
     },
-    "role": {
-      "model": "role",
+    "roles": {
+      "collection": "role",
       "via": "users",
       "plugin": "users-permissions",
       "configurable": false

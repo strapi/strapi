@@ -67,15 +67,25 @@ module.exports = {
       throw new Error('Cannot found this role');
     }
 
-    // Move users to guest role.
-    const arrayOfPromises = role.users.reduce((acc, user) => {
+    const users = await strapi
+      .query('user', 'users-permissions')
+      .find({ roles_in: [roleID] });
+
+    // Remain roles except for the role you delete.
+    // If no role remains, give user a public role.
+    const arrayOfPromises = users.reduce((acc, user) => {
+      const roles = (user.roles || []).reduce(
+        (arr, r) => (`${r.id}` === `${roleID}` ? arr : arr.concat(r)),
+        []
+      );
+
       acc.push(
         strapi.query('user', 'users-permissions').update(
           {
             id: user.id,
           },
           {
-            role: publicRoleID,
+            roles: roles.length ? roles : [publicRoleID],
           }
         )
       );
@@ -186,11 +196,15 @@ module.exports = {
   async getRole(roleID, plugins) {
     const role = await strapi
       .query('role', 'users-permissions')
-      .findOne({ id: roleID }, ['users', 'permissions']);
+      .findOne({ id: roleID }, ['permissions']);
 
     if (!role) {
       throw new Error('Cannot find this role');
     }
+
+    const users = await strapi
+      .query('user', 'users-permissions')
+      .find({ roles_in: [roleID] });
 
     // Group by `type`.
     const permissions = role.permissions.reduce((acc, permission) => {
@@ -198,7 +212,7 @@ module.exports = {
         acc,
         `${permission.type}.controllers.${permission.controller}.${permission.action}`,
         {
-          enabled: _.toNumber(permission.enabled) == true,
+          enabled: _.toNumber(permission.enabled) === 1,
           policy: permission.policy,
         }
       );
@@ -216,6 +230,7 @@ module.exports = {
 
     return {
       ...role,
+      users,
       permissions,
     };
   },
@@ -228,7 +243,7 @@ module.exports = {
     for (let i = 0; i < roles.length; ++i) {
       roles[i].nb_users = await strapi
         .query('user', 'users-permissions')
-        .count({ role: roles[i].id });
+        .count({ roles_in: roles[i].id });
     }
 
     return roles;
@@ -501,6 +516,10 @@ module.exports = {
       .query('role', 'users-permissions')
       .update({ id: roleID }, _.pick(body, ['name', 'description']));
 
+    const users = await strapi
+      .query('user', 'users-permissions')
+      .find({ roles_in: [roleID] }, ['role']);
+
     await Promise.all(
       Object.keys(body.permissions || {}).reduce((acc, type) => {
         Object.keys(body.permissions[type].controllers).forEach(controller => {
@@ -536,19 +555,34 @@ module.exports = {
     );
 
     // Add user to this role.
-    const newUsers = _.differenceBy(body.users, role.users, 'id');
-    await Promise.all(newUsers.map(user => this.updateUserRole(user, roleID)));
-
-    const oldUsers = _.differenceBy(role.users, body.users, 'id');
+    const newUsers = _.differenceBy(body.users, users, 'id');
     await Promise.all(
-      oldUsers.map(user => this.updateUserRole(user, authenticated.id))
+      newUsers.map(user => this.updateUserRole(user, 'add', roleID))
+    );
+
+    const oldUsers = _.differenceBy(users, body.users, 'id');
+    await Promise.all(
+      oldUsers.map(user =>
+        this.updateUserRole(user, 'delete', roleID, authenticated.id)
+      )
     );
   },
 
-  async updateUserRole(user, role) {
+  async updateUserRole(user, action, roleID, authenticatedRoleID) {
+    const oldRoles = (user.roles || []).map(r =>
+      typeof r === 'object' ? r.id : r
+    );
+    let newRoles = [];
+    if (action === 'add') {
+      newRoles = oldRoles.concat(roleID);
+    } else if (action === 'delete') {
+      newRoles = oldRoles.filter(id => `${id}` !== `${roleID}`);
+    }
+    if (!newRoles.length) newRoles = [authenticatedRoleID];
+
     return strapi
       .query('user', 'users-permissions')
-      .update({ id: user.id }, { role });
+      .update({ id: user.id }, { roles: newRoles });
   },
 
   template(layout, data) {
