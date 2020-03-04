@@ -81,16 +81,10 @@ const HomePage = () => {
     }
   };
 
-  const getQueryParams = () => {
+  const getUpdatedQueryParams = updatedParams => {
     return {
       ...getSearchParams(),
       filters: generateFiltersFromSearch(search),
-    };
-  };
-
-  const getUpdatedQueryParams = updatedParams => {
-    return {
-      ...getQueryParams(),
       ...updatedParams,
     };
   };
