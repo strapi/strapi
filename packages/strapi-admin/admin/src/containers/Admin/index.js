@@ -99,9 +99,7 @@ export class Admin extends React.Component {
       global: { plugins },
     } = props;
 
-    return !Object.keys(plugins).every(
-      plugin => plugins[plugin].isReady === true
-    );
+    return !Object.keys(plugins).every(plugin => plugins[plugin].isReady === true);
   };
 
   /**
@@ -121,9 +119,7 @@ export class Admin extends React.Component {
       const InitializerComponent = plugins[current].initializer;
       const key = plugins[current].id;
 
-      acc.push(
-        <InitializerComponent key={key} {...this.props} {...this.helpers} />
-      );
+      acc.push(<InitializerComponent key={key} {...this.props} {...this.helpers} />);
 
       return acc;
     }, []);
@@ -174,7 +170,7 @@ export class Admin extends React.Component {
         enableGlobalOverlayBlocker={enableGlobalOverlayBlocker}
         formatMessage={formatMessage}
         plugins={plugins}
-        settingsBaseURL={SETTINGS_BASE_URL}
+        settingsBaseURL={SETTINGS_BASE_URL || '/settings'}
         updatePlugin={updatePlugin}
       >
         <Wrapper>
@@ -188,19 +184,11 @@ export class Admin extends React.Component {
             <Header />
             <Content>
               <Switch>
-                <Route
-                  path="/"
-                  render={props => this.renderRoute(props, HomePage)}
-                  exact
-                />
-                <Route
-                  path="/plugins/:pluginId"
-                  render={this.renderPluginDispatcher}
-                />
+                <Route path="/" render={props => this.renderRoute(props, HomePage)} exact />
+                <Route path="/plugins/:pluginId" render={this.renderPluginDispatcher} />
                 <Route
                   path="/list-plugins"
-                  render={props =>
-                    this.renderRoute(props, InstalledPluginsPage)}
+                  render={props => this.renderRoute(props, InstalledPluginsPage)}
                   exact
                 />
                 <Route
@@ -208,11 +196,11 @@ export class Admin extends React.Component {
                   render={props => this.renderRoute(props, MarketplacePage)}
                 />
                 <Route
-                  path={`${SETTINGS_BASE_URL}/:settingId`}
+                  path={`${SETTINGS_BASE_URL || '/settings'}/:settingId`}
                   render={props => this.renderRoute(props, SettingsPage)}
                 />
                 <Route
-                  path={SETTINGS_BASE_URL}
+                  path={SETTINGS_BASE_URL || '/settings'}
                   render={props => this.renderRoute(props, SettingsPage)}
                   exact
                 />

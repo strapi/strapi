@@ -24,12 +24,7 @@ import { BrowserRouter } from 'react-router-dom';
 
 import { merge } from 'lodash';
 import { Fonts } from '@buffetjs/styles';
-import {
-  freezeApp,
-  pluginLoaded,
-  unfreezeApp,
-  updatePlugin,
-} from './containers/App/actions';
+import { freezeApp, pluginLoaded, unfreezeApp, updatePlugin } from './containers/App/actions';
 import { showNotification } from './containers/NotificationProvider/actions';
 
 import basename from './utils/basename';
@@ -55,8 +50,7 @@ import plugins from './plugins';
 const initialState = {};
 const store = configureStore(initialState, history);
 const { dispatch } = store;
-const MOUNT_NODE =
-  document.getElementById('app') || document.createElement('div');
+const MOUNT_NODE = document.getElementById('app') || document.createElement('div');
 
 Object.keys(plugins).forEach(current => {
   const registerPlugin = plugin => {
@@ -65,21 +59,18 @@ Object.keys(plugins).forEach(current => {
   const currentPluginFn = plugins[current];
   const plugin = currentPluginFn({
     registerPlugin,
-    settingsBaseURL: SETTINGS_BASE_URL,
+    settingsBaseURL: SETTINGS_BASE_URL || '/settings',
   });
 
   const pluginTradsPrefixed = languages.reduce((acc, lang) => {
     const currentLocale = plugin.trads[lang];
 
     if (currentLocale) {
-      const localeprefixedWithPluginId = Object.keys(currentLocale).reduce(
-        (acc2, current) => {
-          acc2[`${plugin.id}.${current}`] = currentLocale[current];
+      const localeprefixedWithPluginId = Object.keys(currentLocale).reduce((acc2, current) => {
+        acc2[`${plugin.id}.${current}`] = currentLocale[current];
 
-          return acc2;
-        },
-        {}
-      );
+        return acc2;
+      }, {});
 
       acc[lang] = localeprefixedWithPluginId;
     }
@@ -139,9 +130,7 @@ window.strapi = Object.assign(window.strapi || {}, {
       render(merge({}, translationMessages, translationMessagesUpdated));
     },
     leftMenuSections: leftMenuSectionsUpdated => {
-      store.dispatch(
-        updatePlugin(pluginId, 'leftMenuSections', leftMenuSectionsUpdated)
-      );
+      store.dispatch(updatePlugin(pluginId, 'leftMenuSections', leftMenuSectionsUpdated));
     },
   }),
   router: history,
