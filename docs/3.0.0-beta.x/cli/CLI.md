@@ -74,9 +74,9 @@ options: [--no-optimization]
 ```
 
 - **strapi build**<br/>
-  Builds the administration panel without minimizing the assets
+  Builds the administration panel and minimizing the assets
 - **strapi build --no-optimization**<br/>
-  Builds the administration panel without minizing the assets. The build duration is faster.
+  Builds the administration panel without minimizing the assets. The build duration is faster.
 
 ::: tip
 You can specify a NODE_ENV to use the configurations in the `./config/environments/[development|staging|production]` folder.
