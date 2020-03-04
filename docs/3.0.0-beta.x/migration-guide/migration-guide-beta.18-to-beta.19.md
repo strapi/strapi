@@ -32,7 +32,7 @@ Then run either `yarn install` or `npm install`.
 
 ## Policies syntax change
 
-We decided to change the policies naming convention to match with the future naming convetion we will be using throughout the project.
+We decided to change the policies naming convention to match the future naming convention we will be using throughout the project.
 
 **Before**
 
