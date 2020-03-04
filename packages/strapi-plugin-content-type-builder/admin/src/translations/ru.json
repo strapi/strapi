@@ -124,7 +124,7 @@
   "modalForm.sub-header.attribute.create.step": "Добавить новый компонент ({step}/2)",
   "modalForm.sub-header.attribute.edit": "Изменение {name}",
   "modalForm.sub-header.chooseAttribute.component": "Выбрать имя поля компонента",
-  "modalForm.sub-header.chooseAttribute.contentType": "Выбрать имя поля типа контента",
+  "modalForm.sub-header.chooseAttribute.collectionType": "Выбрать имя поля типа контента",
   "modelPage.attribute.relationWith": "Связь с",
   "modelPage.contentHeader.emptyDescription.description": "Для этого типа контента нет описания",
   "notification.info.creating.notSaved": "Пожалуйста, сохраните изменения перед созданием нового компонента типа контента ",

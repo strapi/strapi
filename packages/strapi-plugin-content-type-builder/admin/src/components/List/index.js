@@ -168,6 +168,7 @@ function List({
                 modifiedData.contentType ? modifiedData.contentType.schema.kind : editTarget
               }`
             : `${pluginId}.form.button.add.field.to.component`,
+          defaultMessage: 'Add another field',
         })
       : null,
     onClick: onClickAddField,
