@@ -15,6 +15,29 @@ const Wrapper = styled.div`
   height: 100vh;
   width: ${props => props.theme.main.sizes.leftMenu.width};
   background: ${props => props.theme.main.colors.strapi['blue-darker']};
+
+  // scrollbar overrides
+  * {
+    ::-webkit-scrollbar {
+      width: 7px;
+    }
+
+    ::-webkit-scrollbar-track,
+    ::-webkit-scrollbar-track:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(255, 255, 255, 0.5);
+    }
+
+    // firefox
+    scrollbar-color: rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.1);
+  }
 `;
 
 Wrapper.defaultProps = {
