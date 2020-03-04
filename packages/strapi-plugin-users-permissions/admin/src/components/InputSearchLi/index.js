@@ -17,7 +17,7 @@ function InputSearchLi({ onClick, isAdding, item }) {
   const icon = isAdding ? 'fa-plus' : 'fa-minus-circle';
   const liStyle = isAdding ? { cursor: 'pointer' } : {};
   const handleClick = isAdding ? () => onClick(item) : () => {};
-  const path = `/admin/plugins/content-manager/user/${id}?redirectUrl=/plugins/content-manager/user/?page=1&limit=20&sort=id&source=users-permissions`;
+  const path = `/admin/plugins/content-manager/collectionType/plugins::users-permissions.user/${id}?redirectUrl=/plugins/content-manager/collectionType/plugins::users-permissions.user`;
 
   return (
     <Wrapper style={liStyle} onClick={handleClick}>
