@@ -77,6 +77,7 @@ const Wrapper = styled.div`
         top: 4px;
       }
       & + div {
+        z-index: 2;
         height: fit-content;
         padding: 0;
         margin-top: -2px;
