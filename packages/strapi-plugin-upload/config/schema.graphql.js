@@ -1,18 +1,5 @@
-const path = require('path');
 const _ = require('lodash');
-const crypto = require('crypto');
 const toArray = require('stream-to-array');
-const uuid = require('uuid/v4');
-
-function niceHash(buffer) {
-  return crypto
-    .createHash('sha256')
-    .update(buffer)
-    .digest('base64')
-    .replace(/=/g, '')
-    .replace(/\//g, '-')
-    .replace(/\+/, '_');
-}
 
 module.exports = {
   mutation: `
@@ -58,7 +45,7 @@ module.exports = {
   },
 };
 
-const formatFile = async (upload, fields) => {
+const formatFile = async (upload, metas) => {
   const { filename, mimetype, createReadStream } = await upload;
 
   const stream = createReadStream();
@@ -68,29 +55,16 @@ const formatFile = async (upload, fields) => {
 
   const buffer = Buffer.concat(buffers);
 
-  const fileData = {
-    name: filename,
-    sha256: niceHash(buffer),
-    hash: uuid().replace(/-/g, ''),
-    ext: path.extname(filename),
-    buffer,
-    mime: mimetype,
-    size: Math.round((buffer.length / 1000) * 100) / 100,
-  };
+  const { formatFileInfo } = strapi.plugins.upload.services.upload;
+  const fileInfo = formatFileInfo(
+    {
+      filename,
+      type: mimetype,
+      size: buffer.length,
+    },
+    {},
+    metas
+  );
 
-  const { refId, ref, source, field } = fields;
-
-  // Add details to the file to be able to create the relationships.
-  if (refId && ref && field) {
-    fileData.related = [
-      {
-        refId,
-        ref,
-        source,
-        field,
-      },
-    ];
-  }
-
-  return fileData;
+  return _.assign(fileInfo, { buffer });
 };
