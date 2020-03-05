@@ -20,6 +20,16 @@ const generateFileName = name => {
   return `${baseName}_${randomSuffix()}`;
 };
 
+const sharp = require('sharp');
+
+console.log(sharp.format);
+
+const getDimensions = buffer =>
+  sharp(buffer)
+    .metadata()
+    .then(({ width, height }) => ({ width, height }));
+// .catch()
+
 module.exports = {
   formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
     const ext = path.extname(filename);
@@ -100,8 +110,14 @@ module.exports = {
     const config = strapi.plugins.upload.config;
     await strapi.plugins.upload.provider.upload(fileData);
 
+    const { width, height } = await getDimensions(fileData.buffer);
     delete fileData.buffer;
-    fileData.provider = config.provider;
+
+    _.assign(fileData, {
+      provider: config.provider,
+      width,
+      height,
+    });
 
     const res = await this.add(fileData);
 
