@@ -36,13 +36,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
 
   const toggleModalForm = () => setIsModalFormOpen(prevState => !prevState);
 
-  const {
-    labelForm,
-    labelToEdit,
-    initialData,
-    modifiedData,
-    isLoading,
-  } = reducerState.toJS();
+  const { labelForm, labelToEdit, initialData, modifiedData, isLoading } = reducerState.toJS();
 
   const abortController = new AbortController();
   const { signal } = abortController;
@@ -82,8 +76,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
     return get(modifiedData, ['schema', 'info', 'name'], '');
   }, [modifiedData]);
 
-  const getListDisplayedFields = () =>
-    get(modifiedData, ['layouts', 'list'], []);
+  const getListDisplayedFields = () => get(modifiedData, ['layouts', 'list'], []);
 
   const getListRemainingFields = () => {
     const metadatas = get(modifiedData, ['metadatas'], {});
@@ -93,10 +86,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
       .filter(key => {
         const type = get(attributes, [key, 'type'], '');
 
-        return (
-          !['json', 'component', 'richtext', 'relation'].includes(type) &&
-          !!type
-        );
+        return !['json', 'component', 'richtext', 'relation'].includes(type) && !!type;
       })
       .filter(field => {
         return !getListDisplayedFields().includes(field);
@@ -137,6 +127,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
     try {
       const body = cloneDeep(modifiedData);
 
+      delete body.apiID;
       delete body.schema;
       delete body.uid;
 
@@ -171,9 +162,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
       <div className="col-6" style={{ marginBottom: 4 }}>
         <FormattedMessage id={`${pluginId}.form.Input.label`}>
           {label => (
-            <FormattedMessage
-              id={`${pluginId}.form.Input.label.inputDescription`}
-            >
+            <FormattedMessage id={`${pluginId}.form.Input.label.inputDescription`}>
               {description => (
                 <Input
                   description={description}
@@ -238,11 +227,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
                 }}
               >
                 {getListDisplayedFields().map((item, index) => {
-                  const label = get(
-                    modifiedData,
-                    ['metadatas', item, 'list', 'label'],
-                    ''
-                  );
+                  const label = get(modifiedData, ['metadatas', item, 'list', 'label'], '');
 
                   return (
                     <Label
@@ -258,9 +243,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
                         e.stopPropagation();
 
                         if (getListDisplayedFields().length === 1) {
-                          strapi.notification.info(
-                            `${pluginId}.notification.info.minimumFields`
-                          );
+                          strapi.notification.info(`${pluginId}.notification.info.minimumFields`);
                         } else {
                           dispatch({
                             type: 'REMOVE_FIELD',
