@@ -16,13 +16,10 @@ const List = ({ data, onChange, selectedItems }) => {
           <div className="row" key={key}>
             {rowContent.map(item => {
               return (
-                <div
-                  className="col-xs-12 col-md-6 col-xl-3"
-                  key={JSON.stringify(item)}
-                >
+                <div className="col-xs-12 col-md-6 col-xl-3" key={JSON.stringify(item)}>
                   <Card
-                    isSmall
-                    isSelected={selectedItems.includes(item.id)}
+                    small
+                    selected={selectedItems.includes(item.id)}
                     onChange={onChange}
                     {...item}
                   />
@@ -54,8 +51,7 @@ List.defaultProps = {
         name: 'Chat portrait',
         size: 17329,
         type: 'image/png',
-        url:
-          'https://emiliedammedumoulin.com/wp-content/uploads/2018/07/contact-chat-accueil.jpg',
+        url: 'https://emiliedammedumoulin.com/wp-content/uploads/2018/07/contact-chat-accueil.jpg',
       },
     },
     {
@@ -81,8 +77,7 @@ List.defaultProps = {
     {
       id: '4',
       file: {
-        name:
-          'That kitten is so beautiful that I am not sure to have the place to describe it',
+        name: 'That kitten is so beautiful that I am not sure to have the place to describe it',
         size: 17329,
         type: 'image/png',
         url:

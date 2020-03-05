@@ -34,14 +34,7 @@ const ListEmpty = ({ onClick }) => {
         </FormattedMessage>
 
         <FormattedMessage id={getTrad('header.actions.upload-assets')}>
-          {label => (
-            <Button
-              color="primary"
-              label={label}
-              onClick={onClick}
-              type="button"
-            />
-          )}
+          {label => <Button color="primary" label={label} onClick={onClick} type="button" />}
         </FormattedMessage>
       </div>
     </Wrapper>

@@ -6,8 +6,8 @@ import Wrapper from './Wrapper';
 const CardEmpty = () => {
   return (
     <Wrapper>
-      <CardImgWrapper isSmall />
-      <Bar isSmall />
+      <CardImgWrapper small />
+      <Bar small />
       <Bar />
     </Wrapper>
   );
