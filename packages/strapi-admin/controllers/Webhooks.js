@@ -18,7 +18,7 @@ const webhookValidator = yup
     name: yup.string().required(),
     url: yup
       .string()
-      .matches(urlRegex, 'url must be a valid URL')
+      .matches(urlRegex, { message: 'url must be a valid URL', excludeEmptyString: true })
       .required(),
     headers: yup.lazy(data => {
       if (typeof data !== 'object') {
@@ -165,11 +165,7 @@ module.exports = {
 
     const webhook = await strapi.webhookStore.findWebhook(id);
 
-    const response = await strapi.webhookRunner.run(
-      webhook,
-      'trigger-test',
-      {}
-    );
+    const response = await strapi.webhookRunner.run(webhook, 'trigger-test', {});
 
     ctx.body = { data: response };
   },
