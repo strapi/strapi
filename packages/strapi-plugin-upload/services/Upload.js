@@ -131,6 +131,10 @@ module.exports = {
   async replace(id, { data, file }) {
     const config = strapi.plugins.upload.config;
 
+    const { getDimensions, generateThumbnail } = strapi.plugins.upload.services[
+      'image-manipulation'
+    ];
+
     const dbFile = await this.fetch({ id });
 
     if (!dbFile) {
@@ -139,8 +143,6 @@ module.exports = {
 
     const { fileInfo } = data;
     const fileData = await this.enhanceFile(file, fileInfo);
-
-    // TODO: maybe check if same extension ??
 
     // keep a constant hash
     _.assign(fileData, {
@@ -151,12 +153,29 @@ module.exports = {
     // execute delete function of the provider
     if (dbFile.provider === config.provider) {
       await strapi.plugins.upload.provider.delete(dbFile);
+
+      if (dbFile.thumbnail !== null) {
+        await strapi.plugins.upload.provider.delete(dbFile.thumbnail);
+      }
     }
 
     await strapi.plugins.upload.provider.upload(fileData);
 
+    const thumbnailFile = await generateThumbnail(fileData);
+    if (thumbnailFile) {
+      await strapi.plugins.upload.provider.upload(thumbnailFile);
+      delete thumbnailFile.buffer;
+      fileData.thumbnail = thumbnailFile;
+    }
+
+    const { width, height } = await getDimensions(fileData.buffer);
     delete fileData.buffer;
-    fileData.provider = config.provider;
+
+    _.assign(fileData, {
+      provider: config.provider,
+      width,
+      height,
+    });
 
     const res = await this.update({ id }, fileData);
     strapi.eventHub.emit('media.update', { media: res });
