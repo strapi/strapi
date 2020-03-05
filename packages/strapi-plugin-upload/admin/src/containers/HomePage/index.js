@@ -78,7 +78,7 @@ const HomePage = () => {
     return params;
   };
 
-  const getUpdatedQueryParams = updatedParams => {
+  const generateNewSearch = updatedParams => {
     return {
       ...getSearchParams(),
       filters: generateFiltersFromSearch(search),
@@ -97,7 +97,7 @@ const HomePage = () => {
   };
 
   const handleChangeParams = ({ target: { name, value } }) => {
-    const updatedQueryParams = getUpdatedQueryParams({ [name]: value });
+    const updatedQueryParams = generateNewSearch({ [name]: value });
     const newSearch = generateSearchFromFilters(updatedQueryParams);
 
     push({ search: encodeURI(newSearch) });

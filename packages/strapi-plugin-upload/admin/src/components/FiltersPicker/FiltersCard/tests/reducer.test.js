@@ -8,7 +8,6 @@ describe('Upload | components | FiltersCard | reducer', () => {
       type: 'ON_CHANGE',
       name: 'name',
       value: 'size',
-      defaultValue: '0KB',
     };
 
     const actual = reducer(state, action);
@@ -24,7 +23,6 @@ describe('Upload | components | FiltersCard | reducer', () => {
       type: 'ON_CHANGE',
       name: 'filter',
       value: '>',
-      defaultValue: '0KB',
     };
 
     const actual = reducer(state, action);

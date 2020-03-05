@@ -1,6 +1,8 @@
 import { fromJS } from 'immutable';
 import moment from 'moment';
 
+import filters from './utils/filtersForm';
+
 const initialState = fromJS({
   name: 'created_at',
   filter: '=',
@@ -10,13 +12,13 @@ const initialState = fromJS({
 function reducer(state, action) {
   switch (action.type) {
     case 'ON_CHANGE': {
-      const { defaultValue, name, value } = action;
+      const { name, value } = action;
 
       if (name === 'name') {
         return state
           .update(name, () => value)
           .update('filter', () => '=')
-          .update('value', () => defaultValue);
+          .update('value', () => filters[value].defaultValue);
       }
 
       return state.update(name, () => value);

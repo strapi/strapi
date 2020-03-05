@@ -23,14 +23,11 @@ const FiltersCard = ({ onChange }) => {
   const type = filters[name].type;
   const filtersOptions = getFilterType(type);
 
-  const getDefaultValue = name => filters[name].defaultValue;
-
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
       type: 'ON_CHANGE',
       name,
       value,
-      defaultValue: filters[value] ? getDefaultValue(value) : null,
     });
   };
 
