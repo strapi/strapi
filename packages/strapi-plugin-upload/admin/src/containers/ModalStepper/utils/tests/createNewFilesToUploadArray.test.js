@@ -4,12 +4,17 @@ describe('UPLOAD | containers | ModalStepper | utils', () => {
   describe('createNewFilesToUploadArray', () => {
     it('should create an array containing the data', () => {
       const data = {
-        test: { ok: true },
+        test: { name: 'test', ok: true },
       };
       const expected = [
         {
           abortController: new AbortController(),
-          file: { ok: true },
+          file: { name: 'test', ok: true },
+          fileInfo: {
+            alternativeText: '',
+            caption: '',
+            name: 'test',
+          },
           hasError: false,
           errorMessage: null,
           isUploading: false,

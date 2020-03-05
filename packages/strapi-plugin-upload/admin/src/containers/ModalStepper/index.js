@@ -1,12 +1,7 @@
 import React, { useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import {
-  Modal,
-  ModalFooter,
-  useGlobalContext,
-  request,
-} from 'strapi-helper-plugin';
+import { Modal, ModalFooter, useGlobalContext, request } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
@@ -20,9 +15,7 @@ const ModalStepper = ({ isOpen, onToggle }) => {
   const { formatMessage } = useGlobalContext();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { currentStep, fileToEdit, filesToUpload } = reducerState.toJS();
-  const { Component, headers, next, prev, withBackButton } = stepper[
-    currentStep
-  ];
+  const { Component, headers, next, prev, withBackButton } = stepper[currentStep];
   const filesToUploadLength = filesToUpload.length;
   const toggleRef = useRef();
   toggleRef.current = onToggle;
@@ -52,6 +45,14 @@ const ModalStepper = ({ isOpen, onToggle }) => {
     dispatch({
       type: 'REMOVE_FILE_TO_UPLOAD',
       fileIndex,
+    });
+  };
+
+  const handleChange = ({ target: { name, value } }) => {
+    dispatch({
+      type: 'ON_CHANGE',
+      keys: name,
+      value,
     });
   };
 
@@ -113,9 +114,7 @@ const ModalStepper = ({ isOpen, onToggle }) => {
   const handleToggle = () => {
     if (filesToUploadLength > 0) {
       // eslint-disable-next-line no-alert
-      const confirm = window.confirm(
-        formatMessage({ id: getTrad('window.confirm.close-modal') })
-      );
+      const confirm = window.confirm(formatMessage({ id: getTrad('window.confirm.close-modal') }));
 
       if (!confirm) {
         return;
@@ -131,10 +130,11 @@ const ModalStepper = ({ isOpen, onToggle }) => {
     });
 
     const requests = filesToUpload.map(
-      async ({ file, originalIndex, abortController }) => {
+      async ({ file, fileInfo, originalIndex, abortController }) => {
         const formData = new FormData();
         const headers = {};
         formData.append('files', file);
+        formData.append('fileInfo', JSON.stringify(fileInfo));
 
         try {
           await request(
@@ -212,6 +212,7 @@ const ModalStepper = ({ isOpen, onToggle }) => {
           addFilesToUpload={addFilesToUpload}
           fileToEdit={fileToEdit}
           filesToUpload={filesToUpload}
+          onChange={handleChange}
           onClickCancelUpload={handleCancelFileToUpload}
           onClickDeleteFileToUpload={handleClickDeleteFileToUpload}
           onClickEditNewFile={handleGoToEditNewFile}
@@ -243,11 +244,7 @@ const ModalStepper = ({ isOpen, onToggle }) => {
             </Button>
           )}
           {currentStep === 'edit-new' && (
-            <Button
-              color="success"
-              type="button"
-              onClick={handleSubmitEditNewFile}
-            >
+            <Button color="success" type="button" onClick={handleSubmitEditNewFile}>
               {formatMessage({ id: 'form.button.finish' })}
             </Button>
           )}

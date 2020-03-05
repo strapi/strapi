@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -87,8 +88,8 @@ const LeftMenuLinkContainer = ({ plugins }) => {
 
   return (
     <Wrapper>
-      {menus.map(section => (
-        <MenuSection>
+      {menus.map((section, index) => (
+        <MenuSection key={index}>
           {Object.entries(section).map(([key, value]) => (
             <LeftMenuLinkSection
               key={key}
