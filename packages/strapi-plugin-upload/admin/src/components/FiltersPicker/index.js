@@ -1,62 +1,59 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
+import { some } from 'lodash';
+import { useLocation } from 'react-router-dom';
 import moment from 'moment';
-import { isObject } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { FilterIcon } from 'strapi-helper-plugin';
+import { FilterIcon, generateFiltersFromSearch } from 'strapi-helper-plugin';
 
-import DropdownButton from '../DropdownButton';
-import DropdownSection from '../DropdownSection';
+import FiltersCard from './FiltersCard';
+import Picker from '../Picker';
 
-import Wrapper from './Wrapper';
-import FiltersCard from '../FiltersCard';
-
-const FiltersPicker = ({ filters, onChange }) => {
-  const [isOpen, setIsOpen] = useState(false);
+const FiltersPicker = ({ onChange }) => {
+  const { search } = useLocation();
+  const filters = generateFiltersFromSearch(search);
 
   const handleChange = ({ target: { value } }) => {
-    if (value.value) {
-      let formattedValue = value;
+    let formattedValue = value;
 
-      if (value.value._isAMomentObject === true) {
-        formattedValue.value = moment(
-          value.value,
-          'YYYY-MM-DD HH:mm:ss'
-        ).format();
-      } else if (isObject(value)) {
-        formattedValue.value = Object.values(value.value).join('');
-      }
-
-      onChange({ target: { value: formattedValue } });
+    // moment format if datetime value
+    if (value.value._isAMomentObject === true) {
+      formattedValue.value = moment(value.value).format();
     }
 
-    hangleToggle();
-  };
+    // Send updated filters
+    if (!some(filters, formattedValue)) {
+      filters.push(formattedValue);
 
-  const hangleToggle = () => {
-    setIsOpen(!isOpen);
+      onChange({ target: { name: 'filters', value: filters } });
+    }
   };
 
   return (
-    <Wrapper>
-      <DropdownButton onClick={hangleToggle} isActive={isOpen}>
-        <FilterIcon />
-        <FormattedMessage id="app.utils.filters" />
-      </DropdownButton>
-      <DropdownSection isOpen={isOpen}>
-        <FiltersCard onChange={handleChange} filters={filters} />
-      </DropdownSection>
-    </Wrapper>
+    <Picker
+      renderButtonContent={() => (
+        <>
+          <FilterIcon />
+          <FormattedMessage id="app.utils.filters" />
+        </>
+      )}
+      renderSectionContent={onToggle => (
+        <FiltersCard
+          onChange={e => {
+            handleChange(e);
+            onToggle();
+          }}
+        />
+      )}
+    />
   );
 };
 
 FiltersPicker.defaultProps = {
-  filters: {},
   onChange: () => {},
 };
 
 FiltersPicker.propTypes = {
-  filters: PropTypes.object,
   onChange: PropTypes.func,
 };
 

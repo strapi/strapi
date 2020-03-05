@@ -11,10 +11,7 @@ const filtersForm = {
   },
   size: {
     type: 'size',
-    defaultValue: {
-      size: 0,
-      format: 'KB',
-    },
+    defaultValue: '0KB',
   },
   file_type: {
     type: 'enum',
