@@ -21,7 +21,9 @@ const Card = ({ file, id, isSmall, isSelected, onChange }) => {
             <Checkbox name={id} onChange={onChange} value={isSelected} />
           </div>
         </CardImgWrapper>
-        <Title>{name}</Title>
+        <Title fontSize="md" fontWeight="bold" ellipsis color="">
+          {name}
+        </Title>
         <Description>{`${type} - ${size}`}</Description>
       </div>
     </Wrapper>
