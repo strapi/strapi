@@ -13,6 +13,8 @@ const sizes = {
   },
   padding: {
     // TODO
+    xs: '5px',
+    sm: '10px',
     md: '30px',
   },
 };

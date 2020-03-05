@@ -1,18 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
 import { Carret } from '@buffetjs/icons';
 import getTrad from '../../utils/getTrad';
 
-import DropdownButton from '../DropdownButton';
-import DropdownSection from '../DropdownSection';
 import SortList from '../SortList';
-import Wrapper from './Wrapper';
+import Picker from '../Picker';
 
 const SortPicker = ({ onChange, value }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
   const orders = {
     created_at_asc: 'created_at:ASC',
     created_at_desc: 'created_at:DESC',
@@ -22,31 +18,25 @@ const SortPicker = ({ onChange, value }) => {
     updated_at_desc: 'updated_at:DESC',
   };
 
-  const handleChange = value => {
-    onChange({ target: { name: '_sort', value } });
-
-    hangleToggle();
-  };
-
-  const hangleToggle = () => {
-    setIsOpen(v => !v);
-  };
-
   return (
-    <Wrapper>
-      <DropdownButton onClick={hangleToggle} isActive={isOpen}>
-        <FormattedMessage id={getTrad('sort.label')} />
-        <Carret fill={isOpen ? '#007EFF' : '#292b2c'} />
-      </DropdownButton>
-      <DropdownSection isOpen={isOpen}>
+    <Picker
+      renderButtonContent={isOpen => (
+        <>
+          <FormattedMessage id={getTrad('sort.label')} />
+          <Carret fill={isOpen ? '#007EFF' : '#292b2c'} />
+        </>
+      )}
+      renderSectionContent={onToggle => (
         <SortList
-          isShown={isOpen}
           list={orders}
           selectedItem={value}
-          onClick={handleChange}
+          onClick={e => {
+            onChange(e);
+            onToggle();
+          }}
         />
-      </DropdownSection>
-    </Wrapper>
+      )}
+    />
   );
 };
 
