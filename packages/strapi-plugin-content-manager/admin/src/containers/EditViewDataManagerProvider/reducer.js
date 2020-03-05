@@ -232,7 +232,9 @@ const reducer = (state, action) => {
         .update('shouldShowLoadingState', () => false);
     case 'SUBMIT_SUCCESS':
     case 'DELETE_SUCCEEDED':
-      return state.update('initialData', () => state.get('modifiedData'));
+      return state
+        .update('isLoading', () => false)
+        .update('initialData', () => state.get('modifiedData'));
     case 'TRIGGER_FORM_VALIDATION':
       return state.update('shouldCheckErrors', v => {
         const hasErrors = state.get('formErrors').keySeq().size > 0;

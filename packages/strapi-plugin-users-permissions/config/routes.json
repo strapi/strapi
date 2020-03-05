@@ -191,7 +191,7 @@
       "path": "/connect/*",
       "handler": "Auth.connect",
       "config": {
-        "policies": ["plugins.users-permissions.ratelimit"],
+        "policies": ["plugins::users-permissions.ratelimit"],
         "prefix": "",
         "description": "Connect a provider",
         "tag": {
@@ -205,7 +205,7 @@
       "path": "/auth/local",
       "handler": "Auth.callback",
       "config": {
-        "policies": ["plugins.users-permissions.ratelimit"],
+        "policies": ["plugins::users-permissions.ratelimit"],
         "prefix": "",
         "description": "Login a user using the identifiers email and password",
         "tag": {
@@ -219,7 +219,7 @@
       "path": "/auth/local/register",
       "handler": "Auth.register",
       "config": {
-        "policies": ["plugins.users-permissions.ratelimit"],
+        "policies": ["plugins::users-permissions.ratelimit"],
         "prefix": "",
         "description": "Register a new user with the default role",
         "tag": {
@@ -248,7 +248,7 @@
       "path": "/auth/forgot-password",
       "handler": "Auth.forgotPassword",
       "config": {
-        "policies": ["plugins.users-permissions.ratelimit"],
+        "policies": ["plugins::users-permissions.ratelimit"],
         "prefix": "",
         "description": "Send the reset password email link",
         "tag": {
@@ -262,7 +262,7 @@
       "path": "/auth/reset-password",
       "handler": "Auth.changePassword",
       "config": {
-        "policies": ["plugins.users-permissions.ratelimit"],
+        "policies": ["plugins::users-permissions.ratelimit"],
         "prefix": "",
         "description": "Change a user's password",
         "tag": {

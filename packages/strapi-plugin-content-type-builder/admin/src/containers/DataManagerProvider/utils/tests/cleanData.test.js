@@ -3,6 +3,7 @@ import {
   formatMainDataType,
   getComponentsToPost,
   getCreatedAndModifiedComponents,
+  sortContentType,
 } from '../cleanData';
 import rawData from './rawData';
 import expectedData from './expectedFormattedData';
@@ -145,6 +146,7 @@ describe('CleanData utils', () => {
             rawData: { contentTypeToEdit },
           } = rawData;
           const expected = expectedData.contentTypeToEdit;
+
           expect(formatMainDataType(contentTypeToEdit)).toEqual(expected);
         });
       });
@@ -202,9 +204,26 @@ describe('CleanData utils', () => {
         initialComponents,
         rawData: { components },
       } = rawData;
+
       expect(
         getCreatedAndModifiedComponents(components, initialComponents).sort()
       ).toEqual(componentsToFormat.sort());
+    });
+  });
+
+  describe('sortContentType', () => {
+    it('should return sorted collection types array', () => {
+      const { sortedContentTypes } = expectedData;
+      const {
+        rawData: { contentTypesToSort },
+      } = rawData;
+      const actual = sortContentType(contentTypesToSort);
+
+      expect(actual.sort()).toEqual(sortedContentTypes.sort());
+    });
+
+    it('should return an empty array if no content types', () => {
+      expect(sortContentType({})).toEqual([]);
     });
   });
 });

@@ -5,17 +5,13 @@ const getModalTitleSubHeader = state => {
     case 'chooseAttribute':
       return getTrad(
         `modalForm.sub-header.chooseAttribute.${
-          state.forTarget === 'contentType' ? 'contentType' : 'component'
+          state.forTarget.includes('component') ? 'component' : state.kind
         }`
       );
     case 'attribute': {
       return getTrad(
         `modalForm.sub-header.attribute.${state.actionType}${
-          state.step !== 'null' &&
-          state.step !== null &&
-          state.actionType !== 'edit'
-            ? '.step'
-            : ''
+          state.step !== 'null' && state.step !== null && state.actionType !== 'edit' ? '.step' : ''
         }`
       );
     }
