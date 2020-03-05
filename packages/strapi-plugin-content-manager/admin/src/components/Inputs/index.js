@@ -6,6 +6,7 @@ import { Inputs as InputsIndex } from '@buffetjs/custom';
 import { useStrapi } from 'strapi-helper-plugin';
 
 import useDataManager from '../../hooks/useDataManager';
+import InputJSONWithErrors from '../InputJSONWithErrors';
 // import InputFileWithErrors from '../InputFileWithErrors';
 import SelectWrapper from '../SelectWrapper';
 import WysiwygWithErrors from '../WysiwygWithErrors';
@@ -153,6 +154,7 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
             description={description}
             contentTypeUID={layout.uid}
             customInputs={{
+              json: InputJSONWithErrors,
               wysiwyg: WysiwygWithErrors,
               uid: InputUID,
               ...fieldApi.getFields(),
