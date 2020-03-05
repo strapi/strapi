@@ -376,7 +376,7 @@ module.exports = function(strapi) {
   const shouldServeAdmin = _.get(
     strapi.config.currentEnvironment.server,
     'admin.serveAdminPanel',
-    true
+    strapi.config.serveAdminPanel
   );
   if (!shouldServeAdmin) {
     strapi.config.serveAdminPanel = false;
