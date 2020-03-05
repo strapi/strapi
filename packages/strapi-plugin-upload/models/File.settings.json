@@ -29,6 +29,10 @@
       "type": "integer",
       "configurable": false
     },
+    "thumbnail": {
+      "type": "json",
+      "configurable": false
+    },
     "hash": {
       "type": "string",
       "configurable": false,

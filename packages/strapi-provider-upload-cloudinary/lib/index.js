@@ -16,7 +16,7 @@ module.exports = {
       upload(file, customConfig = {}) {
         return new Promise((resolve, reject) => {
           const upload_stream = cloudinary.uploader.upload_stream(
-            { resource_type: 'auto', ...customConfig },
+            { resource_type: 'auto', public_id: file.hash, ...customConfig },
             (err, image) => {
               if (err) {
                 return reject(err);

@@ -20,16 +20,6 @@ const generateFileName = name => {
   return `${baseName}_${randomSuffix()}`;
 };
 
-const sharp = require('sharp');
-
-console.log(sharp.format);
-
-const getDimensions = buffer =>
-  sharp(buffer)
-    .metadata()
-    .then(({ width, height }) => ({ width, height }));
-// .catch()
-
 module.exports = {
   formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
     const ext = path.extname(filename);
@@ -108,9 +98,22 @@ module.exports = {
 
   async uploadFileAndPersist(fileData) {
     const config = strapi.plugins.upload.config;
+
+    const { getDimensions, generateThumbnail } = strapi.plugins.upload.services[
+      'image-manipulation'
+    ];
+
     await strapi.plugins.upload.provider.upload(fileData);
 
+    const thumbnailFile = await generateThumbnail(fileData);
+    if (thumbnailFile) {
+      await strapi.plugins.upload.provider.upload(thumbnailFile);
+      delete thumbnailFile.buffer;
+      fileData.thumbnail = thumbnailFile;
+    }
+
     const { width, height } = await getDimensions(fileData.buffer);
+
     delete fileData.buffer;
 
     _.assign(fileData, {
@@ -187,6 +190,10 @@ module.exports = {
     // execute delete function of the provider
     if (file.provider === config.provider) {
       await strapi.plugins.upload.provider.delete(file);
+
+      if (file.thumbnail !== null) {
+        await strapi.plugins.upload.provider.delete(file.thumbnail);
+      }
     }
 
     const media = await strapi.query('file', 'upload').findOne({
