@@ -11,8 +11,9 @@ const Wrapper = styled.div`
   overflow-y: auto;
   height: calc(100vh - (${props => props.theme.main.sizes.leftMenu.height} + 10.2rem));
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
+  // I am keeping these lines if we want to join the scrollbars again
+  // display: flex;
+  // flex-direction: column;
 
   .title {
     padding-left: 2rem;

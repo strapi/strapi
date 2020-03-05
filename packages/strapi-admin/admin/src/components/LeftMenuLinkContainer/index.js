@@ -6,7 +6,6 @@ import { get, snakeCase, isEmpty } from 'lodash';
 
 import { SETTINGS_BASE_URL } from '../../config';
 import Wrapper from './Wrapper';
-import MenuSection from './MenuSection';
 import messages from './messages.json';
 
 import LeftMenuLinkSection from '../LeftMenuLinkSection';
@@ -21,7 +20,6 @@ const LeftMenuLinkContainer = ({ plugins }) => {
         acc[snakeCase(section.name)] = {
           name: section.name,
           searchable: true,
-          shrink: true,
           links: get(acc[snakeCase(section.name)], 'links', []).concat(
             section.links
               .filter(link => link.isDisplayed !== false)
@@ -53,55 +51,48 @@ const LeftMenuLinkContainer = ({ plugins }) => {
       };
     });
 
-  const menus = [
-    contentTypesSections,
-    {
-      plugins: {
-        searchable: false,
-        name: 'plugins',
-        emptyLinksListMessage: messages.noPluginsInstalled.id,
-        links: pluginsLinks,
-      },
-      general: {
-        searchable: false,
-        name: 'general',
-        links: [
-          {
-            icon: 'list',
-            label: messages.listPlugins.id,
-            destination: '/list-plugins',
-          },
-          {
-            icon: 'shopping-basket',
-            label: messages.installNewPlugin.id,
-            destination: '/marketplace',
-          },
-          {
-            icon: 'cog',
-            label: messages.settings.id,
-            destination: SETTINGS_BASE_URL || '/settings',
-          },
-        ],
-      },
+  const menu = {
+    ...contentTypesSections,
+    plugins: {
+      searchable: false,
+      name: 'plugins',
+      emptyLinksListMessage: messages.noPluginsInstalled.id,
+      links: pluginsLinks,
     },
-  ];
+    general: {
+      searchable: false,
+      name: 'general',
+      links: [
+        {
+          icon: 'list',
+          label: messages.listPlugins.id,
+          destination: '/list-plugins',
+        },
+        {
+          icon: 'shopping-basket',
+          label: messages.installNewPlugin.id,
+          destination: '/marketplace',
+        },
+        {
+          icon: 'cog',
+          label: messages.settings.id,
+          destination: SETTINGS_BASE_URL,
+        },
+      ],
+    },
+  };
 
   return (
     <Wrapper>
-      {menus.map(section => (
-        <MenuSection>
-          {Object.entries(section).map(([key, value]) => (
-            <LeftMenuLinkSection
-              key={key}
-              shrink={value.shrink}
-              links={value.links}
-              section={key}
-              location={location}
-              searchable={value.searchable}
-              emptyLinksListMessage={value.emptyLinksListMessage}
-            />
-          ))}
-        </MenuSection>
+      {Object.keys(menu).map(current => (
+        <LeftMenuLinkSection
+          key={current}
+          links={menu[current].links}
+          section={current}
+          location={location}
+          searchable={menu[current].searchable}
+          emptyLinksListMessage={menu[current].emptyLinksListMessage}
+        />
       ))}
     </Wrapper>
   );
