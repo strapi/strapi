@@ -126,7 +126,7 @@
   "modalForm.sub-header.attribute.create.step": "Pridať nový komponent ({step}/2)",
   "modalForm.sub-header.attribute.edit": "Upraviť {name}",
   "modalForm.sub-header.chooseAttribute.component": "Vyberte typ políčka pre komponent",
-  "modalForm.sub-header.chooseAttribute.contentType": "Vyberte typ políčka pre Typ obsahu",
+  "modalForm.sub-header.chooseAttribute.collectionType": "Vyberte typ políčka pre Typ obsahu",
   "modelPage.attribute.relationWith": "Prepojenie s",
   "modelPage.contentHeader.emptyDescription.description": "Žiaden popis",
   "notification.info.creating.notSaved": "Uložte zmeny pred vytvorením nového Typu obsahu alebo komponentu",

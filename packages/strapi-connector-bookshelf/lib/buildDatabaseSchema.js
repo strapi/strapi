@@ -64,7 +64,6 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
       case 'json':
         return definition.client === 'pg' ? table.jsonb(name) : table.text(name, 'longtext');
       case 'enumeration':
-        return table.enu(name, attribute.enum || []);
       case 'string':
       case 'password':
       case 'email':

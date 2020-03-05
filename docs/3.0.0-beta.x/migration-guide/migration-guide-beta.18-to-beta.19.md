@@ -53,3 +53,15 @@ Although we do not recommend it (error prone), you can still access a local poli
 ## Rebuilding your administration panel
 
 Now delete the `.cache` and `build` folders. Then run `yarn develop`.
+
+::: warning NOTE
+
+If you have modified the `admin/src/config.js` file you need to update its content with:
+
+```
+export const LOGIN_LOGO = null;
+export const SHOW_TUTORIALS = false;
+export const SETTINGS_BASE_URL = '/settings';
+```
+
+:::

@@ -23,7 +23,7 @@ module.exports = ({ strapi }) => ({
         abortEarly: false,
       })
       .catch(error => {
-        throw strapi.errors.badRequest('ValidationError', formatYupErrors(error));
+        throw strapi.errors.badRequest('ValidationError', { errors: formatYupErrors(error) });
       });
   },
 
@@ -40,15 +40,23 @@ module.exports = ({ strapi }) => ({
         abortEarly: false,
       })
       .catch(error => {
-        throw strapi.errors.badRequest('ValidationError', formatYupErrors(error));
+        throw strapi.errors.badRequest('ValidationError', { errors: formatYupErrors(error) });
       });
   },
 });
+
+const isMedia = attr => {
+  return (attr.collection || attr.model) === 'file' && attr.plugin === 'upload';
+};
 
 const createValidator = model => {
   return yup
     .object(
       _.mapValues(model.attributes, attr => {
+        if (isMedia(attr)) {
+          return yup.mixed().nullable();
+        }
+
         const { required } = attr;
 
         const validator = createAttributeValidator(attr).nullable();
@@ -67,9 +75,13 @@ const createUpdateValidator = model => {
   return yup
     .object(
       _.mapValues(model.attributes, attr => {
+        if (isMedia(attr)) {
+          return yup.mixed().nullable();
+        }
+
         const { required } = attr;
 
-        const validator = createAttributeValidator(attr);
+        const validator = createAttributeValidator(attr).nullable();
 
         if (required) {
           // on edit you can omit a key to leave it unchanged, but if it is required you cannot set it to null

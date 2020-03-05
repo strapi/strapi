@@ -13,6 +13,14 @@
       "configurable": false,
       "required": true
     },
+    "alternativeText": {
+      "type": "string",
+      "configurable": false
+    },
+    "caption": {
+      "type": "string",
+      "configurable": false
+    },
     "hash": {
       "type": "string",
       "configurable": false,

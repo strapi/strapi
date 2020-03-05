@@ -7,6 +7,27 @@
 
 const _ = require('lodash');
 const validateSettings = require('./validation/settings');
+const { yup, formatYupErrors } = require('strapi-utils');
+
+const fileInfoSchema = yup.object({
+  name: yup.string().nullable(),
+  alternativeText: yup.string().nullable(),
+  caption: yup.string().nullable(),
+});
+
+const uploadSchema = yup.object({
+  fileInfo: fileInfoSchema,
+});
+
+const multiUploadSchema = yup.object({
+  fileInfo: yup.array().of(fileInfoSchema),
+});
+
+const validateUploadBody = (schema, data = {}) => {
+  return schema.validate(data, { abortEarly: false }).catch(err => {
+    throw strapi.errors.badRequest('ValidationError', { errors: formatYupErrors(err) });
+  });
+};
 
 module.exports = {
   async upload(ctx) {
@@ -18,15 +39,11 @@ module.exports = {
     // Verify if the file upload is enable.
     if (enabled === false) {
       throw strapi.errors.badRequest(null, {
-        errors: [
-          { id: 'Upload.status.disabled', message: 'File upload is disabled' },
-        ],
+        errors: [{ id: 'Upload.status.disabled', message: 'File upload is disabled' }],
       });
     }
 
-    // Extract optional relational data.
-    const { refId, ref, source, field, path } = ctx.request.body || {};
-    const { files = {} } = ctx.request.files || {};
+    const files = _.get(ctx.request.files, 'files');
 
     if (_.isEmpty(files)) {
       throw strapi.errors.badRequest(null, {
@@ -34,38 +51,26 @@ module.exports = {
       });
     }
 
-    // Transform stream files to buffer
-    const buffers = await uploadService.bufferize(files);
-
-    const enhancedFiles = buffers.map(file => {
-      // Add details to the file to be able to create the relationships.
-      if (refId && ref && field) {
-        Object.assign(file, {
-          related: [
-            {
-              refId,
-              ref,
-              source,
-              field,
-            },
-          ],
-        });
-      }
-
-      // Update uploading folder path for the file.
-      if (path) {
-        Object.assign(file, {
-          path,
-        });
-      }
-
-      return file;
-    });
-
-    // Something is wrong (size limit)...
-    if (ctx.status === 400) {
-      return;
+    let data;
+    if (Array.isArray(files)) {
+      data = await validateUploadBody(multiUploadSchema, ctx.request.body);
+    } else {
+      data = await validateUploadBody(uploadSchema, ctx.request.body);
     }
+
+    const { refId, ref, source, field, path, fileInfo } = data;
+
+    const fileArray = Array.isArray(files) ? files : [files];
+    const fileInfoArray = Array.isArray(fileInfo) ? fileInfo : [fileInfo];
+
+    // Transform stream files to buffer
+    const enhancedFiles = await Promise.all(
+      fileArray.map((file, idx) => {
+        const fileInfo = fileInfoArray[idx] || {};
+
+        return uploadService.enhanceFile(file, fileInfo, { refId, ref, source, field, path });
+      })
+    );
 
     const uploadedFiles = await uploadService.upload(enhancedFiles);
 

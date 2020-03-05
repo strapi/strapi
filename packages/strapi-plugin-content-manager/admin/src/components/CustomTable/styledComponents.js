@@ -95,7 +95,7 @@ const TableRow = styled.tr`
   }
 `;
 
-const Arrow = styled(props => <Carret {...props} />)`
+const Arrow = styled(({ isUp, ...rest }) => <Carret {...rest} />)`
   margin-left: 5px;
   ${({ isUp }) =>
     isUp &&
