@@ -86,6 +86,10 @@ export { GlobalContext, GlobalContextProvider, useGlobalContext } from './contex
 
 // Hooks
 export { default as useQuery } from './hooks/useQuery';
+export { default as useStrapi } from './hooks/useStrapi';
+
+// Providers
+export { default as StrapiProvider } from './providers/StrapiProvider';
 
 // Utils
 export { default as auth } from './utils/auth';

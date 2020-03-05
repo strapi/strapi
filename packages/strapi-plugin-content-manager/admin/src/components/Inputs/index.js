@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { get, isEmpty, omit, toLower } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Inputs as InputsIndex } from '@buffetjs/custom';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useStrapi } from 'strapi-helper-plugin';
 
 import useDataManager from '../../hooks/useDataManager';
 import InputJSONWithErrors from '../InputJSONWithErrors';
@@ -52,10 +52,10 @@ const getInputType = (type = '') => {
 };
 
 function Inputs({ autoFocus, keys, layout, name, onBlur }) {
-  // FIXME: this is really temporary until the Field API is ready
-  // but this way development aren't dependent of the upcoming API
-  const { plugins } = useGlobalContext();
-  const InputMedia = get(plugins, ['upload', 'fields', 'media'], () => {});
+  const {
+    strapi: { fieldApi },
+  } = useStrapi();
+
   const { didCheckErrors, formErrors, modifiedData, onChange } = useDataManager();
   const attribute = useMemo(() => get(layout, ['schema', 'attributes', name], {}), [layout, name]);
   const metadatas = useMemo(() => get(layout, ['metadatas', name, 'edit'], {}), [layout, name]);
@@ -154,11 +154,10 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
             description={description}
             contentTypeUID={layout.uid}
             customInputs={{
-              // media: InputFileWithErrors,
-              media: InputMedia,
               json: InputJSONWithErrors,
               wysiwyg: WysiwygWithErrors,
               uid: InputUID,
+              ...fieldApi.getFields(),
             }}
             multiple={get(attribute, 'multiple', false)}
             attribute={attribute}
