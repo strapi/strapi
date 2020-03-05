@@ -30,15 +30,6 @@
       }
     },
     {
-      "method": "POST",
-      "path": "/files/replace/:id",
-      "handler": "Upload.replaceFile",
-      "config": {
-        "policies": [],
-        "description": "Replace a file"
-      }
-    },
-    {
       "method": "GET",
       "path": "/files/count",
       "handler": "Upload.count",

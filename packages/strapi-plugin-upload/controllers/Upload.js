@@ -29,53 +29,50 @@ const validateUploadBody = (schema, data = {}) => {
   });
 };
 
+const isUploadDisabled = () => _.get(strapi.plugins, 'upload.config.enabled', true) === false;
+
+const disabledPluginError = () =>
+  strapi.errors.badRequest(null, {
+    errors: [{ id: 'Upload.status.disabled', message: 'File upload is disabled' }],
+  });
+
+const emptyFileError = () =>
+  strapi.errors.badRequest(null, {
+    errors: [{ id: 'Upload.status.empty', message: 'Files are empty' }],
+  });
+
 module.exports = {
   async upload(ctx) {
-    const uploadService = strapi.plugins.upload.services.upload;
-
-    // Retrieve provider configuration.
-    const { enabled } = strapi.plugins.upload.config;
-
-    // Verify if the file upload is enable.
-    if (enabled === false) {
-      throw strapi.errors.badRequest(null, {
-        errors: [{ id: 'Upload.status.disabled', message: 'File upload is disabled' }],
-      });
+    if (isUploadDisabled()) {
+      throw disabledPluginError();
     }
 
     const files = _.get(ctx.request.files, 'files');
-
     if (_.isEmpty(files)) {
-      throw strapi.errors.badRequest(null, {
-        errors: [{ id: 'Upload.status.empty', message: 'Files are empty' }],
-      });
+      throw emptyFileError();
     }
 
-    let data;
-    if (Array.isArray(files)) {
-      data = await validateUploadBody(multiUploadSchema, ctx.request.body);
+    const { id } = ctx.query;
+
+    const uploadService = strapi.plugins.upload.services.upload;
+
+    const validationSchema = Array.isArray(files) ? multiUploadSchema : uploadSchema;
+    const data = await validateUploadBody(validationSchema, ctx.request.body);
+
+    if (id) {
+      // cannot replace with more than one file
+      if (Array.isArray(files)) {
+        throw strapi.errors.badRequest(null, {
+          errors: [
+            { id: 'Upload.replace.single', message: 'Cannot replace a file with multiple ones' },
+          ],
+        });
+      }
+
+      ctx.body = await uploadService.replace(id, { data, file: files });
     } else {
-      data = await validateUploadBody(uploadSchema, ctx.request.body);
+      ctx.body = await uploadService.upload({ data, files });
     }
-
-    const { refId, ref, source, field, path, fileInfo } = data;
-
-    const fileArray = Array.isArray(files) ? files : [files];
-    const fileInfoArray = Array.isArray(fileInfo) ? fileInfo : [fileInfo];
-
-    // Transform stream files to buffer
-    const enhancedFiles = await Promise.all(
-      fileArray.map((file, idx) => {
-        const fileInfo = fileInfoArray[idx] || {};
-
-        return uploadService.enhanceFile(file, fileInfo, { refId, ref, source, field, path });
-      })
-    );
-
-    const uploadedFiles = await uploadService.upload(enhancedFiles);
-
-    // Send 200 `ok`
-    ctx.send(uploadedFiles);
   },
 
   async getSettings(ctx) {

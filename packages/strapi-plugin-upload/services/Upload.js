@@ -58,7 +58,7 @@ module.exports = {
     return entity;
   },
 
-  async enhanceFile(file, fileInfo, metas) {
+  async enhanceFile(file, fileInfo = {}, metas = {}) {
     const parts = await toArray(fs.createReadStream(file.path));
     const buffers = parts.map(part => (_.isBuffer(part) ? part : Buffer.from(part)));
 
@@ -79,31 +79,52 @@ module.exports = {
     });
   },
 
-  async upload(files) {
-    const config = strapi.plugins.upload.config;
+  async upload({ data, files }) {
+    const { fileInfo, ...metas } = data;
 
-    // upload a single file
-    const uploadFile = async file => {
-      await strapi.plugins.upload.provider.upload(file);
+    const fileArray = Array.isArray(files) ? files : [files];
+    const fileInfoArray = Array.isArray(fileInfo) ? fileInfo : [fileInfo];
 
-      delete file.buffer;
-      file.provider = config.provider;
+    const doUpload = async (file, fileInfo) => {
+      const fileData = await this.enhanceFile(file, fileInfo, metas);
 
-      const res = await this.add(file);
-
-      strapi.eventHub.emit('media.create', { media: res });
-      return res;
+      return this.uploadFileAndPersist(fileData);
     };
 
-    // Execute upload function of the provider for all files.
-    return Promise.all(files.map(file => uploadFile(file)));
+    return await Promise.all(
+      fileArray.map((file, idx) => doUpload(file, fileInfoArray[idx] || {}))
+    );
   },
 
-  async replace(dbFile, file) {
+  async uploadFileAndPersist(fileData) {
+    const config = strapi.plugins.upload.config;
+    await strapi.plugins.upload.provider.upload(fileData);
+
+    delete fileData.buffer;
+    fileData.provider = config.provider;
+
+    const res = await this.add(fileData);
+
+    strapi.eventHub.emit('media.create', { media: res });
+    return res;
+  },
+
+  async replace(id, { data, file }) {
     const config = strapi.plugins.upload.config;
 
+    const dbFile = await this.fetch({ id });
+
+    if (!dbFile) {
+      throw new Error('file not found');
+    }
+
+    const { fileInfo } = data;
+    const fileData = await this.enhanceFile(file, fileInfo);
+
+    // TODO: maybe check if same extension ??
+
     // keep a constant hash
-    _.assign(file, {
+    _.assign(fileData, {
       hash: dbFile.hash,
       ext: dbFile.ext,
     });
@@ -113,19 +134,19 @@ module.exports = {
       await strapi.plugins.upload.provider.delete(dbFile);
     }
 
-    await strapi.plugins.upload.provider.upload(file);
+    await strapi.plugins.upload.provider.upload(fileData);
 
-    delete file.buffer;
-    file.provider = config.provider;
+    delete fileData.buffer;
+    fileData.provider = config.provider;
 
-    const res = await this.update({ id: dbFile.id }, {});
+    const res = await this.update({ id }, fileData);
     strapi.eventHub.emit('media.update', { media: res });
 
     return res;
   },
 
-  update(id, values) {
-    return strapi.query('file', 'upload').update({ id }, values);
+  update(params, values) {
+    return strapi.query('file', 'upload').update(params, values);
   },
 
   add(values) {
@@ -133,9 +154,7 @@ module.exports = {
   },
 
   fetch(params) {
-    return strapi.query('file', 'upload').findOne({
-      id: params.id,
-    });
+    return strapi.query('file', 'upload').findOne(params);
   },
 
   fetchAll(params) {
@@ -180,7 +199,7 @@ module.exports = {
           }
         );
       })
-    ).then(files => this.upload(files));
+    ).then(files => this.uploadFileAndPersist(files));
   },
 
   async getConfig() {
