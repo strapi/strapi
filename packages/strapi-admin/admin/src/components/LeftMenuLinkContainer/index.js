@@ -88,8 +88,8 @@ const LeftMenuLinkContainer = ({ plugins }) => {
 
   return (
     <Wrapper>
-      {menus.map((section, index) => (
-        <MenuSection key={index}>
+      {menus.map(section => (
+        <MenuSection>
           {Object.entries(section).map(([key, value]) => (
             <LeftMenuLinkSection
               key={key}

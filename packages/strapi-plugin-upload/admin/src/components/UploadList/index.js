@@ -23,6 +23,8 @@ const UploadList = ({
     filesToUploadLength > 1 ? 'plural' : 'singular'
   }`;
 
+  // TODO: use <IntlText ... /> instead of FormattedMessage
+
   return (
     <>
       <ModalSection justifyContent="space-between">
