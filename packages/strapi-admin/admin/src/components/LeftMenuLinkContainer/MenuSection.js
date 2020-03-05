@@ -1,3 +1,4 @@
+// I am keeping this file if we want to join the scrollbars again
 import styled from 'styled-components';
 
 const LeftMenuSection = styled.div`
@@ -8,7 +9,7 @@ const LeftMenuSection = styled.div`
 
   &:first-child {
     overflow: hidden;
-    min-height: 175px;
+    max-height: 180px;
     height: auto;
     flex: 0 1 auto;
   }
