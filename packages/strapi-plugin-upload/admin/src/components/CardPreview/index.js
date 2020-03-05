@@ -6,15 +6,9 @@ import Wrapper from './Wrapper';
 import Image from './Image';
 
 const CardPreview = ({ url, type }) => {
-  const renderFile = () => {
-    if (!url) {
-      return <FileIcon fileType={type} />;
-    }
-
-    return <Image src={url} />;
-  };
-
-  return <Wrapper isImg={!!url}>{renderFile()}</Wrapper>;
+  return (
+    <Wrapper isImg={!!url}>{!url ? <FileIcon fileType={type} /> : <Image src={url} />}</Wrapper>
+  );
 };
 
 CardPreview.defaultProps = {

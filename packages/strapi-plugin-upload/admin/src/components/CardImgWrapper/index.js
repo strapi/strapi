@@ -38,8 +38,8 @@ const CardImgWrapper = styled.div`
     return '';
   }}
 
-  ${({ selected }) =>
-    selected &&
+  ${({ checked }) =>
+    checked &&
     `
     .card-control-wrapper {
       display: flex;
@@ -50,14 +50,14 @@ const CardImgWrapper = styled.div`
 `;
 
 CardImgWrapper.defaultProps = {
+  checked: false,
   hasError: false,
-  selected: false,
   small: false,
 };
 
 CardImgWrapper.propTypes = {
+  checked: PropTypes.bool,
   hasError: PropTypes.bool,
-  selected: PropTypes.bool,
   small: PropTypes.bool,
 };
 

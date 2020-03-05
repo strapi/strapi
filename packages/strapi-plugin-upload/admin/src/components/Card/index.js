@@ -8,17 +8,15 @@ import CardPreview from '../CardPreview';
 import Wrapper from './Wrapper';
 import Title from './Title';
 
-const Card = ({ file, id, small, selected, onChange }) => {
-  // TODO - adapt with the real data
-  const { type, size, name } = file;
-
+// TODO - adapt with the real data
+const Card = ({ checked, id, name, size, small, type, onChange, url }) => {
   return (
     <Wrapper>
       <div>
-        <CardImgWrapper small={small} selected={selected}>
-          <CardPreview {...file} />
+        <CardImgWrapper small={small} checked={checked}>
+          <CardPreview type={type} url={url} />
           <div className="card-control-wrapper">
-            <Checkbox name={id} onChange={onChange} value={selected} />
+            <Checkbox name={id} onChange={onChange} value={checked} />
           </div>
         </CardImgWrapper>
         <Title fontSize="md" fontWeight="bold" ellipsis>
@@ -31,18 +29,24 @@ const Card = ({ file, id, small, selected, onChange }) => {
 };
 
 Card.defaultProps = {
-  file: null,
+  checked: false,
+  name: null,
   onChange: () => {},
+  size: 0,
   small: false,
-  selected: false,
+  type: null,
+  url: null,
 };
 
 Card.propTypes = {
+  checked: PropTypes.bool,
+  name: PropTypes.string,
   id: PropTypes.string.isRequired,
-  file: PropTypes.object,
   onChange: PropTypes.func,
+  size: PropTypes.number,
   small: PropTypes.bool,
-  selected: PropTypes.bool,
+  type: PropTypes.string,
+  url: PropTypes.string,
 };
 
 export default Card;

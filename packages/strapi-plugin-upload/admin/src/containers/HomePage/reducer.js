@@ -19,9 +19,7 @@ const reducer = (state, action) => {
       }
       const index = state.get('dataToDelete').findIndex(item => item === id);
 
-      return state.update('dataToDelete', dataToDelete => {
-        return dataToDelete.splice(index, 1);
-      });
+      return state.removeIn(['dataToDelete', index]);
     }
     default:
       return state;
