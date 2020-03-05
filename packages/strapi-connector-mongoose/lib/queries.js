@@ -4,17 +4,12 @@
  */
 
 const _ = require('lodash');
-const {
-  convertRestQueryParams,
-  buildQuery,
-  models: modelUtils,
-} = require('strapi-utils');
+const { convertRestQueryParams, buildQuery, models: modelUtils } = require('strapi-utils');
 
 const { findComponentByGlobalId } = require('./utils/helpers');
 
 const hasPK = (obj, model) => _.has(obj, model.primaryKey) || _.has(obj, 'id');
-const getPK = (obj, model) =>
-  _.has(obj, model.primaryKey) ? obj[model.primaryKey] : obj.id;
+const getPK = (obj, model) => (_.has(obj, model.primaryKey) ? obj[model.primaryKey] : obj.id);
 
 module.exports = ({ model, modelKey, strapi }) => {
   const assocKeys = model.associations.map(ast => ast.alias);
@@ -77,9 +72,7 @@ module.exports = ({ model, modelKey, strapi }) => {
           validateNonRepeatableInput(componentValue, { key, ...attr });
           if (componentValue === null) continue;
 
-          const componentEntry = await strapi
-            .query(component)
-            .create(componentValue);
+          const componentEntry = await strapi.query(component).create(componentValue);
           entry[key] = [
             {
               kind: componentModel.globalId,
@@ -174,9 +167,7 @@ module.exports = ({ model, modelKey, strapi }) => {
           });
 
           const components = await Promise.all(
-            componentValue.map(value =>
-              updateOrCreateComponent({ componentUID, value })
-            )
+            componentValue.map(value => updateOrCreateComponent({ componentUID, value }))
           );
           const componentsArr = components.map(component => ({
             kind: componentModel.globalId,
@@ -222,14 +213,12 @@ module.exports = ({ model, modelKey, strapi }) => {
         const dynamiczones = await Promise.all(
           dynamiczoneValues.map(value => {
             const componentUID = value.__component;
-            return updateOrCreateComponent({ componentUID, value }).then(
-              entity => {
-                return {
-                  componentUID,
-                  entity,
-                };
-              }
-            );
+            return updateOrCreateComponent({ componentUID, value }).then(entity => {
+              return {
+                componentUID,
+                entity,
+              };
+            });
           })
         );
 
@@ -273,9 +262,7 @@ module.exports = ({ model, modelKey, strapi }) => {
 
     // verify the provided ids are realted to this entity.
     idsToKeep.forEach(({ id, componentUID }) => {
-      if (
-        !allIds.find(el => el.id === id && el.componentUID === componentUID)
-      ) {
+      if (!allIds.find(el => el.id === id && el.componentUID === componentUID)) {
         const err = new Error(
           `Some of the provided components in ${key} are not related to the entity`
         );
@@ -285,9 +272,7 @@ module.exports = ({ model, modelKey, strapi }) => {
     });
 
     const idsToDelete = allIds.reduce((acc, { id, componentUID }) => {
-      if (
-        !idsToKeep.find(el => el.id === id && el.componentUID === componentUID)
-      ) {
+      if (!idsToKeep.find(el => el.id === id && el.componentUID === componentUID)) {
         acc.push({
           id,
           componentUID,
@@ -317,14 +302,8 @@ module.exports = ({ model, modelKey, strapi }) => {
     }
   }
 
-  async function deleteOldComponents(
-    entry,
-    componentValue,
-    { key, componentModel }
-  ) {
-    const componentArr = Array.isArray(componentValue)
-      ? componentValue
-      : [componentValue];
+  async function deleteOldComponents(entry, componentValue, { key, componentModel }) {
+    const componentArr = Array.isArray(componentValue) ? componentValue : [componentValue];
 
     const idsToKeep = componentArr
       .filter(val => hasPK(val, componentModel))
@@ -352,9 +331,7 @@ module.exports = ({ model, modelKey, strapi }) => {
     }, []);
 
     if (idsToDelete.length > 0) {
-      await strapi
-        .query(componentModel.uid)
-        .delete({ [`${model.primaryKey}_in`]: idsToDelete });
+      await strapi.query(componentModel.uid).delete({ [`${model.primaryKey}_in`]: idsToDelete });
     }
   }
 
@@ -415,23 +392,11 @@ module.exports = ({ model, modelKey, strapi }) => {
       model,
       filters,
       populate: populateOpt,
-    }).then(results =>
-      results.map(result => (result ? result.toObject() : null))
-    );
+    }).then(results => results.map(result => (result ? result.toObject() : null)));
   }
 
   async function findOne(params, populate) {
-    const primaryKey = getPK(params, model);
-
-    if (primaryKey) {
-      params = {
-        [model.primaryKey]: primaryKey,
-      };
-    }
-
-    const entry = await model
-      .findOne(params)
-      .populate(populate || defaultPopulate);
+    const entry = await model.findOne(params).populate(populate || defaultPopulate);
 
     return entry ? entry.toObject() : null;
   }
@@ -463,14 +428,6 @@ module.exports = ({ model, modelKey, strapi }) => {
   }
 
   async function update(params, values) {
-    const primaryKey = getPK(params, model);
-
-    if (primaryKey) {
-      params = {
-        [model.primaryKey]: primaryKey,
-      };
-    }
-
     const entry = await model.findOne(params);
 
     if (!entry) {
@@ -498,12 +455,12 @@ module.exports = ({ model, modelKey, strapi }) => {
     if (primaryKey) return deleteOne(params);
 
     const entries = await find(params);
-    return await Promise.all(entries.map(entry => deleteOne({ id: entry.id })));
+    return Promise.all(entries.map(entry => deleteOne(entry[model.primaryKey])));
   }
 
-  async function deleteOne(params) {
+  async function deleteOne(id) {
     const entry = await model
-      .findOneAndRemove({ [model.primaryKey]: getPK(params, model) })
+      .findOneAndRemove({ [model.primaryKey]: id })
       .populate(defaultPopulate);
 
     if (!entry) {
@@ -521,21 +478,17 @@ module.exports = ({ model, modelKey, strapi }) => {
         }
 
         const search =
-          _.endsWith(association.nature, 'One') ||
-          association.nature === 'oneToMany'
+          _.endsWith(association.nature, 'One') || association.nature === 'oneToMany'
             ? { [association.via]: entry._id }
             : { [association.via]: { $in: [entry._id] } };
         const update =
-          _.endsWith(association.nature, 'One') ||
-          association.nature === 'oneToMany'
+          _.endsWith(association.nature, 'One') || association.nature === 'oneToMany'
             ? { [association.via]: null }
             : { $pull: { [association.via]: entry._id } };
 
         // Retrieve model.
         const model = association.plugin
-          ? strapi.plugins[association.plugin].models[
-              association.model || association.collection
-            ]
+          ? strapi.plugins[association.plugin].models[association.model || association.collection]
           : strapi.models[association.model || association.collection];
 
         return model.updateMany(search, update);
@@ -557,9 +510,7 @@ module.exports = ({ model, modelKey, strapi }) => {
       .skip(filters.start)
       .limit(filters.limit)
       .populate(populate || defaultPopulate)
-      .then(results =>
-        results.map(result => (result ? result.toObject() : null))
-      );
+      .then(results => results.map(result => (result ? result.toObject() : null)));
   }
 
   function countSearch(params) {
@@ -623,13 +574,8 @@ function validateRepeatableInput(value, { key, min, max, required }) {
     }
   });
 
-  if (
-    (required === true || (required !== true && value.length > 0)) &&
-    (min && value.length < min)
-  ) {
-    const err = new Error(
-      `Component ${key} must contain at least ${min} items`
-    );
+  if ((required === true || (required !== true && value.length > 0)) && min && value.length < min) {
+    const err = new Error(`Component ${key} must contain at least ${min} items`);
     err.status = 400;
     throw err;
   }
@@ -655,10 +601,7 @@ function validateNonRepeatableInput(value, { key, required }) {
   }
 }
 
-function validateDynamiczoneInput(
-  value,
-  { key, min, max, components, required }
-) {
+function validateDynamiczoneInput(value, { key, min, max, components, required }) {
   if (!Array.isArray(value)) {
     const err = new Error(`Dynamiczone ${key} is invalid. Expected an array`);
     err.status = 400;
@@ -689,20 +632,13 @@ function validateDynamiczoneInput(
     }
   });
 
-  if (
-    (required === true || (required !== true && value.length > 0)) &&
-    (min && value.length < min)
-  ) {
-    const err = new Error(
-      `Dynamiczone ${key} must contain at least ${min} items`
-    );
+  if ((required === true || (required !== true && value.length > 0)) && min && value.length < min) {
+    const err = new Error(`Dynamiczone ${key} must contain at least ${min} items`);
     err.status = 400;
     throw err;
   }
   if (max && value.length > max) {
-    const err = new Error(
-      `Dynamiczone ${key} must contain at most ${max} items`
-    );
+    const err = new Error(`Dynamiczone ${key} must contain at most ${max} items`);
     err.status = 400;
     throw err;
   }
