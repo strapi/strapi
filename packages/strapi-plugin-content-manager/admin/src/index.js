@@ -3,6 +3,7 @@ import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
 import App from './containers/Main';
 import Initializer from './containers/Initializer';
+import InputJSONWithErrors from './components/InputJSONWithErrors';
 import lifecycles from './lifecycles';
 import trads from './translations';
 
@@ -30,6 +31,8 @@ export default strapi => {
     suffixUrlToReplaceForLeftMenuHighlight: '/models',
     trads,
   };
+
+  strapi.registerField({ type: 'json', Component: InputJSONWithErrors });
 
   return strapi.registerPlugin(plugin);
 };
