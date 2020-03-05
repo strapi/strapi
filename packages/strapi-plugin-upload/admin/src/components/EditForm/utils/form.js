@@ -6,8 +6,7 @@ const form = [
     inputs: [
       {
         label: { id: getTrad('form.input.label.file-name') },
-        name: 'name',
-        value: '',
+        name: 'fileInfo.name',
       },
     ],
   },
@@ -17,8 +16,7 @@ const form = [
       {
         description: { id: getTrad('form.input.decription.file-alt') },
         label: { id: getTrad('form.input.label.file-alt') },
-        name: 'alt',
-        value: '',
+        name: 'fileInfo.alternativeText',
       },
     ],
   },
@@ -27,8 +25,7 @@ const form = [
     inputs: [
       {
         label: { id: getTrad('form.input.label.file-caption') },
-        name: 'caption',
-        value: '',
+        name: 'fileInfo.caption',
       },
     ],
   },

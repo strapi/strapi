@@ -173,7 +173,7 @@ export class Admin extends React.Component {
         enableGlobalOverlayBlocker={enableGlobalOverlayBlocker}
         formatMessage={formatMessage}
         plugins={plugins}
-        settingsBaseURL={SETTINGS_BASE_URL}
+        settingsBaseURL={SETTINGS_BASE_URL || '/settings'}
         updatePlugin={updatePlugin}
       >
         <Wrapper>
@@ -199,11 +199,11 @@ export class Admin extends React.Component {
                   render={props => this.renderRoute(props, MarketplacePage)}
                 />
                 <Route
-                  path={`${SETTINGS_BASE_URL}/:settingId`}
+                  path={`${SETTINGS_BASE_URL || '/settings'}/:settingId`}
                   render={props => this.renderRoute(props, SettingsPage)}
                 />
                 <Route
-                  path={SETTINGS_BASE_URL}
+                  path={SETTINGS_BASE_URL || '/settings'}
                   render={props => this.renderRoute(props, SettingsPage)}
                   exact
                 />
