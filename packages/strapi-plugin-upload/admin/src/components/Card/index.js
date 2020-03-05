@@ -2,11 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Checkbox } from '@buffetjs/core';
 
+import Text from '../Text';
 import CardImgWrapper from '../CardImgWrapper';
 import CardPreview from '../CardPreview';
 import Wrapper from './Wrapper';
 import Title from './Title';
-import Description from './Description';
 
 const Card = ({ file, id, small, selected, onChange }) => {
   // TODO - adapt with the real data
@@ -21,10 +21,10 @@ const Card = ({ file, id, small, selected, onChange }) => {
             <Checkbox name={id} onChange={onChange} value={selected} />
           </div>
         </CardImgWrapper>
-        <Title fontSize="md" fontWeight="bold" ellipsis color="">
+        <Title fontSize="md" fontWeight="bold" ellipsis>
           {name}
         </Title>
-        <Description>{`${type} - ${size}`}</Description>
+        <Text color="grey" fontSize="xs" ellipsis>{`${type} - ${size}`}</Text>
       </div>
     </Wrapper>
   );
