@@ -80,9 +80,13 @@ module.exports = strapi => {
           }
 
           // Log error.
-          strapi.log.error(error);
 
           const { status, body } = formatBoomPayload(error);
+
+          if (status >= 500) {
+            strapi.log.error(error);
+          }
+
           ctx.body = body;
           ctx.status = status;
         }
@@ -107,7 +111,7 @@ module.exports = strapi => {
           const { status, body } = formatBoomPayload(boomError);
 
           // keep retro-compatibility for old error formats
-          body.message = body.data;
+          body.message = body.message || body.data;
 
           this.body = body;
           this.status = status;
