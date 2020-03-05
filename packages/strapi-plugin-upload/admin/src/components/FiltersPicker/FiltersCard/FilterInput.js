@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { DateTime } from '@buffetjs/custom';
 import { InputText, Select } from '@buffetjs/core';
 
-import SizeInput from '../SizeInput';
+import SizeInput from './SizeInput';
 
 const getInputType = type => {
   switch (type) {

@@ -4,26 +4,11 @@ const Wrapper = styled.div`
   position: relative;
   margin-top: 19px;
   padding: 0;
-
   .btn-wrapper {
     position: absolute;
-    top: 161px;
-    height: 100px;
+    top: 109px;
     width: 100%;
-    margin-top: -50px;
     text-align: center;
-    > p {
-      line-height: 18px;
-    }
-    .title {
-      margin-bottom: 2px;
-
-      font-size: 18px;
-      font-weight: 500;
-    }
-    .subtitle {
-      font-size: 13px;
-    }
   }
 `;
 

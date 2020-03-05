@@ -2,10 +2,13 @@ import React from 'react';
 import { Button } from '@buffetjs/core';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
+
 import getTrad from '../../utils/getTrad';
 import generateRows from './utils/generateRows';
+
 import CardEmpty from '../CardEmpty';
 import Wrapper from './Wrapper';
+import IntlText from '../IntlText';
 
 const ListEmpty = ({ onClick }) => {
   const rows = generateRows(3);
@@ -26,16 +29,12 @@ const ListEmpty = ({ onClick }) => {
         );
       })}
       <div className="btn-wrapper">
-        <FormattedMessage id={getTrad('list.assets-empty.title')}>
-          {content => <p className="title">{content}</p>}
-        </FormattedMessage>
-        <FormattedMessage id={getTrad('list.assets-empty.subtitle')}>
-          {content => <p className="subtitle">{content}</p>}
-        </FormattedMessage>
-
-        <FormattedMessage id={getTrad('header.actions.upload-assets')}>
-          {label => <Button color="primary" label={label} onClick={onClick} type="button" />}
-        </FormattedMessage>
+        <IntlText id={getTrad('list.assets-empty.title')} fontSize="lg" fontWeight="semiBold" />
+        <IntlText id={getTrad('list.assets-empty.subtitle')} fontSize="md" lineHeight="19px" />
+        <div style={{ paddingBottom: '1.1rem' }} />
+        <Button color="primary" onClick={onClick} type="button">
+          <FormattedMessage id={getTrad('header.actions.upload-assets')} />
+        </Button>
       </div>
     </Wrapper>
   );
