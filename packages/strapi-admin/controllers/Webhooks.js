@@ -165,7 +165,11 @@ module.exports = {
 
     const webhook = await strapi.webhookStore.findWebhook(id);
 
-    const response = await strapi.webhookRunner.run(webhook, 'trigger-test', {});
+    const response = await strapi.webhookRunner.run(
+      webhook,
+      'trigger-test',
+      {}
+    );
 
     ctx.body = { data: response };
   },
