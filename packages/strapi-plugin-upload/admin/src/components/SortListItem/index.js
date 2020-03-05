@@ -13,7 +13,7 @@ const SortListItem = ({ onClick, selectedItem, label, value }) => {
 
   return (
     <Wrapper isActive={selectedItem === value} onClick={handleClick}>
-      <IntlText id={getTrad(`sort.${label}`)} />
+      <IntlText id={getTrad(`sort.${label}`)} lineHeight="23px" />
     </Wrapper>
   );
 };

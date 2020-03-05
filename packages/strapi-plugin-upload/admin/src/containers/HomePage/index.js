@@ -30,39 +30,24 @@ import reducer, { initialState } from './reducer';
 const HomePage = () => {
   const { formatMessage } = useGlobalContext();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
+  const query = useQuery();
   const [isOpen, setIsOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState(query.get('_q') || '');
   const { push } = useHistory();
   const { search } = useLocation();
-  const query = useQuery();
 
   const { data, dataToDelete } = reducerState.toJS();
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
   const paramsKeys = ['_limit', '_start', '_q', '_sort'];
+  const debouncedSearch = useDebounce(searchValue, 300);
 
-  const getSearchParams = () => {
-    const params = {};
-
-    query.forEach((value, key) => {
-      if (includes(paramsKeys, key)) {
-        params[key] = value;
-      }
-    });
-
-    return params;
-  };
-  const getQueryValue = key => {
-    const queryParams = getSearchParams();
-
-    return queryParams[key];
-  };
-
-  const debouncedSearch = useDebounce(search, 300);
+  useEffect(() => {
+    handleChangeParams({ target: { name: '_q', value: searchValue } });
+  }, [debouncedSearch]);
 
   useEffect(() => {
     fetchData();
-
-    return () => {};
-  }, [debouncedSearch]);
+  }, [search]);
 
   const fetchData = async () => {
     const requestURL = getRequestUrl('files');
@@ -79,6 +64,18 @@ const HomePage = () => {
     } catch (err) {
       strapi.notification.error('notification.error');
     }
+  };
+
+  const getSearchParams = () => {
+    const params = {};
+
+    query.forEach((value, key) => {
+      if (includes(paramsKeys, key)) {
+        params[key] = value;
+      }
+    });
+
+    return params;
   };
 
   const getUpdatedQueryParams = updatedParams => {
@@ -106,8 +103,12 @@ const HomePage = () => {
     push({ search: encodeURI(newSearch) });
   };
 
+  const handleChangeSearchValue = ({ target: { value } }) => {
+    setSearchValue(value);
+  };
+
   const handleClearSearch = () => {
-    handleChangeParams({ target: { name: '_q', value: '' } });
+    setSearchValue('');
   };
 
   const handleClickToggleModal = (refetch = false) => {
@@ -158,11 +159,11 @@ const HomePage = () => {
     ],
   };
 
-  const limit = parseInt(getQueryValue('_limit'), 10) || 10;
-  const start = parseInt(getQueryValue('_start'), 10) || 0;
+  const limit = parseInt(query.get('_limit'), 10) || 10;
+  const start = parseInt(query.get('_start'), 10) || 0;
 
   const params = {
-    _limit: parseInt(getQueryValue('_limit'), 10) || 10,
+    _limit: parseInt(query.get('_limit'), 10) || 10,
     _page: generatePageFromStart(start, limit),
   };
 
@@ -171,15 +172,15 @@ const HomePage = () => {
       <Header {...headerProps} />
       <HeaderSearch
         label={pluginName}
-        onChange={handleChangeParams}
+        onChange={handleChangeSearchValue}
         onClear={handleClearSearch}
         placeholder={formatMessage({ id: getTrad('search.placeholder') })}
         name="_q"
-        value={getQueryValue('_q') || ''}
+        value={searchValue}
       />
       <ControlsWrapper>
         <SelectAll />
-        <SortPicker onChange={handleChangeParams} value={getQueryValue('_sort') || null} />
+        <SortPicker onChange={handleChangeParams} value={query.get('_sort') || null} />
         <Filters
           onChange={handleChangeParams}
           filters={generateFiltersFromSearch(search)}
@@ -189,7 +190,12 @@ const HomePage = () => {
       <ListEmpty onClick={() => handleClickToggleModal()} />
       {/* <List data={data} /> */}
 
-      <PageFooter count={50} onChangeParams={handleChangeListParams} params={params} />
+      <PageFooter
+        context={{ emitEvent: () => {} }}
+        count={50}
+        onChangeParams={handleChangeListParams}
+        params={params}
+      />
       <ModalStepper isOpen={isOpen} onToggle={handleClickToggleModal} />
     </Container>
   );
