@@ -24,19 +24,19 @@ const Wrapper = styled.div`
 
     ::-webkit-scrollbar-track,
     ::-webkit-scrollbar-track:hover {
-      background-color: rgba(255, 255, 255, 0.1);
+      background-color: transparent;
     }
 
     ::-webkit-scrollbar-thumb {
-      background-color: rgba(255, 255, 255, 0.3);
+      background-color: ${props => props.theme.main.colors.leftMenu['title-color']};
     }
 
     ::-webkit-scrollbar-thumb:hover {
-      background-color: rgba(255, 255, 255, 0.5);
+      background-color: ${props => props.theme.main.colors.leftMenu['link-color']};
     }
 
     // firefox
-    scrollbar-color: rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.1);
+    scrollbar-color: ${props => props.theme.main.colors.leftMenu['title-color']} transparent;
   }
 `;
 
