@@ -1,14 +1,7 @@
 const _ = require('lodash');
 const { singular } = require('pluralize');
 
-/* global StrapiConfigs */
-module.exports = async ({
-  ORM,
-  loadedModel,
-  definition,
-  connection,
-  model,
-}) => {
+module.exports = async ({ ORM, loadedModel, definition, connection, model }) => {
   const createIdType = (table, definition) => {
     if (definition.primaryKeyType === 'uuid' && definition.client === 'pg') {
       return table
@@ -61,15 +54,16 @@ module.exports = async ({
     switch (attribute.type) {
       case 'uuid':
         return table.uuid(name);
+      case 'uid': {
+        table.unique(name);
+        return table.string(name);
+      }
       case 'richtext':
       case 'text':
         return table.text(name, 'longtext');
       case 'json':
-        return definition.client === 'pg'
-          ? table.jsonb(name)
-          : table.text(name, 'longtext');
+        return definition.client === 'pg' ? table.jsonb(name) : table.text(name, 'longtext');
       case 'enumeration':
-        return table.enu(name, attribute.enum || []);
       case 'string':
       case 'password':
       case 'email':
@@ -147,8 +141,7 @@ module.exports = async ({
             // Create GIN indexes for every column.
             const indexes = columns.map(column => {
               const indexName = `${_.snakeCase(table)}_${column}`;
-              const attribute =
-                _.toLower(column) === column ? column : `"${column}"`;
+              const attribute = _.toLower(column) === column ? column : `"${column}"`;
 
               return ORM.knex.raw(
                 `CREATE INDEX IF NOT EXISTS search_${_.toLower(
@@ -263,18 +256,22 @@ module.exports = async ({
     try {
       previousAttributes = JSON.parse(
         (
-          await StrapiConfigs.forge({
-            key: `db_model_${table}`,
-          }).fetch()
+          await strapi.models['core_store']
+            .forge({
+              key: `db_model_${table}`,
+            })
+            .fetch()
         ).toJSON().value
       );
     } catch (err) {
       await storeTable(table, attributes);
       previousAttributes = JSON.parse(
         (
-          await StrapiConfigs.forge({
-            key: `db_model_${table}`,
-          }).fetch()
+          await strapi.models['core_store']
+            .forge({
+              key: `db_model_${table}`,
+            })
+            .fetch()
         ).toJSON().value
       );
     }
@@ -291,9 +288,7 @@ module.exports = async ({
 
         // drop possible conflicting indexes
         await Promise.all(
-          columns.map(key =>
-            trx.raw('DROP INDEX IF EXISTS ??', uniqueColName(table, key))
-          )
+          columns.map(key => trx.raw('DROP INDEX IF EXISTS ??', uniqueColName(table, key)))
         );
 
         // create the table
@@ -334,9 +329,7 @@ module.exports = async ({
       }
     } else {
       const columnsToAlter = columns.filter(
-        key =>
-          JSON.stringify(previousAttributes[key]) !==
-          JSON.stringify(attributes[key])
+        key => JSON.stringify(previousAttributes[key]) !== JSON.stringify(attributes[key])
       );
 
       const alterTable = async trx => {
@@ -506,23 +499,29 @@ const isColumn = ({ definition, attribute, name }) => {
 };
 
 const storeTable = async (table, attributes) => {
-  const existTable = await StrapiConfigs.forge({
-    key: `db_model_${table}`,
-  }).fetch();
+  const existTable = await strapi.models['core_store']
+    .forge({
+      key: `db_model_${table}`,
+    })
+    .fetch();
 
   if (existTable) {
-    return await StrapiConfigs.forge({
-      id: existTable.id,
-    }).save({
-      value: JSON.stringify(attributes),
-    });
+    return await strapi.models['core_store']
+      .forge({
+        id: existTable.id,
+      })
+      .save({
+        value: JSON.stringify(attributes),
+      });
   }
 
-  await StrapiConfigs.forge({
-    key: `db_model_${table}`,
-    type: 'object',
-    value: JSON.stringify(attributes),
-  }).save();
+  await strapi.models['core_store']
+    .forge({
+      key: `db_model_${table}`,
+      type: 'object',
+      value: JSON.stringify(attributes),
+    })
+    .save();
 };
 
 const uniqueColName = (table, key) => `${table}_${key}_unique`;

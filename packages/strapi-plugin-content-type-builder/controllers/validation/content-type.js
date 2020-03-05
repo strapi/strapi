@@ -5,32 +5,54 @@ const yup = require('yup');
 const { formatYupErrors } = require('strapi-utils');
 
 const createSchema = require('./model-schema');
+const { removeEmptyDefaults, removeDeletedUIDTargetFields } = require('./data-transform');
 const { nestedComponentSchema } = require('./component');
-const { modelTypes, DEFAULT_TYPES } = require('./constants');
+const { modelTypes, DEFAULT_TYPES, typeKinds } = require('./constants');
 
-const VALID_RELATIONS = [
-  'oneWay',
-  'manyWay',
-  'oneToOne',
-  'oneToMany',
-  'manyToOne',
-  'manyToMany',
-];
-const VALID_TYPES = [...DEFAULT_TYPES, 'component', 'dynamiczone'];
+/**
+ * Allowed relation per type kind
+ */
+const VALID_RELATIONS = {
+  [typeKinds.SINGLE_TYPE]: ['oneWay', 'manyWay'],
+  [typeKinds.COLLECTION_TYPE]: [
+    'oneWay',
+    'manyWay',
+    'oneToOne',
+    'oneToMany',
+    'manyToOne',
+    'manyToMany',
+  ],
+};
 
-const contentTypeSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
-  modelType: modelTypes.CONTENT_TYPE,
-});
+/**
+ * Allowed types
+ */
+const VALID_TYPES = [...DEFAULT_TYPES, 'uid', 'component', 'dynamiczone'];
 
-const createContentTypeSchema = yup
-  .object({
-    contentType: contentTypeSchema.required().noUnknown(),
-    components: nestedComponentSchema,
-  })
-  .noUnknown();
+/**
+ * Returns a yup schema to validate a content type payload
+ * @param {Object} data payload
+ */
+const createContentTypeSchema = data => {
+  const kind = _.get(data, 'contentType.kind', typeKinds.COLLECTION_TYPE);
 
+  const contentTypeSchema = createSchema(VALID_TYPES, VALID_RELATIONS[kind] || [], {
+    modelType: modelTypes.CONTENT_TYPE,
+  });
+
+  return yup
+    .object({
+      contentType: contentTypeSchema.required().noUnknown(),
+      components: nestedComponentSchema,
+    })
+    .noUnknown();
+};
+
+/**
+ * Validator for content type creation
+ */
 const validateContentTypeInput = data => {
-  return createContentTypeSchema
+  return createContentTypeSchema(data)
     .validate(data, {
       strict: true,
       abortEarly: false,
@@ -38,37 +60,45 @@ const validateContentTypeInput = data => {
     .catch(error => Promise.reject(formatYupErrors(error)));
 };
 
+/**
+ * Validator for content type edition
+ */
 const validateUpdateContentTypeInput = data => {
-  // convert zero length string on default attributes to undefined
-  if (_.has(data, 'attributes')) {
-    Object.keys(data.attributes).forEach(attribute => {
-      if (data.attributes[attribute].default === '') {
-        data.attributes[attribute].default = undefined;
-      }
-    });
+  if (_.has(data, 'contentType')) {
+    removeEmptyDefaults(data.contentType);
   }
 
   if (_.has(data, 'components') && Array.isArray(data.components)) {
     data.components.forEach(data => {
-      if (_.has(data, 'attributes') && _.has(data, 'uid')) {
-        Object.keys(data.attributes).forEach(attribute => {
-          if (data.attributes[attribute].default === '') {
-            data.attributes[attribute].default = undefined;
-          }
-        });
+      if (_.has(data, 'uid')) {
+        removeEmptyDefaults(data);
       }
     });
   }
 
-  return createContentTypeSchema
+  removeDeletedUIDTargetFields(data.contentType);
+
+  return createContentTypeSchema(data)
     .validate(data, {
       strict: true,
       abortEarly: false,
     })
+    .catch(error => Promise.reject(formatYupErrors(error)));
+};
+
+/**
+ * Validates type kind
+ */
+const validateKind = kind => {
+  return yup
+    .string()
+    .oneOf([typeKinds.SINGLE_TYPE, typeKinds.COLLECTION_TYPE])
+    .validate(kind)
     .catch(error => Promise.reject(formatYupErrors(error)));
 };
 
 module.exports = {
   validateContentTypeInput,
   validateUpdateContentTypeInput,
+  validateKind,
 };

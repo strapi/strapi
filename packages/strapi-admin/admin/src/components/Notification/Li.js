@@ -123,7 +123,7 @@ const GlobalNotification = createGlobalStyle`
 const Li = styled.li`
   position: relative;
   display: flex;
-  align-items: stretch;
+  align-items: center;
   width: 300px;
   min-height: 60px;
   margin-bottom: 14px;
@@ -134,6 +134,7 @@ const Li = styled.li`
   transition: all 0.15s ease;
   overflow: hidden;
   z-index: 10;
+  padding: 1rem;
   border-left: 2px solid ${props => props.theme.main.colors.green};
   &.notificationError {
     border-color: ${props => props.theme.main.colors.red};

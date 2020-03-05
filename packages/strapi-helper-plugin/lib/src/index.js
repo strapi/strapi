@@ -77,11 +77,7 @@ export { default as SelectWrapper } from './components/SelectWrapper';
 export { default as ViewContainer } from './components/ViewContainer';
 
 // Contexts
-export {
-  GlobalContext,
-  GlobalContextProvider,
-  useGlobalContext,
-} from './contexts/GlobalContext';
+export { GlobalContext, GlobalContextProvider, useGlobalContext } from './contexts/GlobalContext';
 
 // Utils
 export { default as auth } from './utils/auth';

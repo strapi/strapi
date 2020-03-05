@@ -17,13 +17,12 @@ function LeftMenuFooter({ version }) {
   return (
     <Wrapper>
       <div className="poweredBy">
-        <FormattedMessage {...messages.poweredBy} key="poweredBy" />
-        <a
-          key="website"
-          href="https://strapi.io"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <FormattedMessage
+          id={messages.poweredBy.id}
+          defaultMessage={messages.poweredBy.defaultMessage}
+          key="poweredBy"
+        />
+        <a key="website" href="https://strapi.io" target="_blank" rel="noopener noreferrer">
           Strapi
         </a>
         &nbsp;

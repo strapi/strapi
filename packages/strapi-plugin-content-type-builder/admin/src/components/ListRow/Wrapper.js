@@ -53,11 +53,7 @@ const Wrapper = styled.tr`
     }
   }
   &.relation-row {
-    background: linear-gradient(
-      135deg,
-      rgba(28, 93, 231, 0.05),
-      rgba(239, 243, 253, 0)
-    );
+    background: linear-gradient(135deg, rgba(28, 93, 231, 0.05), rgba(239, 243, 253, 0));
   }
   &.clickable {
     &:hover {
@@ -73,6 +69,7 @@ const Wrapper = styled.tr`
   .button-container {
     svg {
       color: #333740;
+      vertical-align: middle;
     }
   }
 `;

@@ -18,7 +18,7 @@ const Wrapper = styled.div`
     font-weight: 400;
     letter-spacing: 0.05rem;
     vertical-align: middle;
-    color: ${props => props.theme.main.colors.strapi['gray-light']};
+    color: ${({ theme }) => theme.main.colors.strapi.grayLight};
   }
 `;
 

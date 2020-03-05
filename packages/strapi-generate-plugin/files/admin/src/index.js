@@ -21,6 +21,7 @@ const plugin = {
   initializer: Initializer,
   injectedComponents: [],
   isReady: false,
+  isRequired: pluginPkg.strapi.required || false,
   layout: null,
   lifecycles,
   leftMenuLinks: [],
