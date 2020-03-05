@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 
+// TODO : Review this code when API is done
 const Wrapper = styled.div`
   font-size: 54px;
   margin: auto;

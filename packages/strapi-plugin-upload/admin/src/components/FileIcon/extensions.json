@@ -1,5 +1,6 @@
+// TODO : Review this code when API is done
 {
-  "archive":  ["rar", "zip"],
+  "archive": ["rar", "zip"],
   "code": ["js", "json", "rb", "erb", "txt", "css", "scss", "html", "jsx", "svg"],
   "img": ["jpg", "jpeg", "png", "gif", "ico"],
   "pdf": ["pdf"],

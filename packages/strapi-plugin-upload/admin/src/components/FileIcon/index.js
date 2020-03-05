@@ -4,6 +4,7 @@
  * FileIcon
  */
 
+// TODO : Review this code when API is done
 import React from 'react';
 import PropTypes from 'prop-types';
 import { trim } from 'lodash';
