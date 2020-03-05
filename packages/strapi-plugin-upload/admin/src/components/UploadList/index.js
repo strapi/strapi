@@ -23,15 +23,14 @@ const UploadList = ({
     filesToUploadLength > 1 ? 'plural' : 'singular'
   }`;
 
+  // TODO: use <IntlText ... /> instead of FormattedMessage
+
   return (
     <>
       <ModalSection justifyContent="space-between">
         <TextWrapper>
           <Text fontSize="md" fontWeight="bold">
-            <FormattedMessage
-              id={getTrad(titleId)}
-              values={{ number: filesToUploadLength }}
-            />
+            <FormattedMessage id={getTrad(titleId)} values={{ number: filesToUploadLength }} />
           </Text>
 
           <Text fontSize="sm" color="grey">
@@ -44,12 +43,7 @@ const UploadList = ({
         <ButtonWrapper>
           <FormattedMessage id={getTrad('modal.upload-list.sub-header.button')}>
             {label => (
-              <Button
-                type="button"
-                color="primary"
-                label={label}
-                onClick={onGoToAddBrowseFiles}
-              />
+              <Button type="button" color="primary" label={label} onClick={onGoToAddBrowseFiles} />
             )}
           </FormattedMessage>
         </ButtonWrapper>
@@ -60,14 +54,16 @@ const UploadList = ({
           {matrix.map(({ key, rowContent }) => {
             return (
               <div className="row" key={key}>
-                {rowContent.map(data => (
-                  <RowItem
-                    {...data}
-                    onClick={onClickCancelUpload}
-                    onClickEdit={onClickEditNewFile}
-                    key={data.originalIndex}
-                  />
-                ))}
+                {rowContent.map(data => {
+                  return (
+                    <RowItem
+                      {...data}
+                      onClick={onClickCancelUpload}
+                      onClickEdit={onClickEditNewFile}
+                      key={data.originalIndex}
+                    />
+                  );
+                })}
               </div>
             );
           })}

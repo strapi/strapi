@@ -25,20 +25,18 @@ const reducer = (state, action) => {
       );
     case 'GO_TO':
       return state.update('currentStep', () => action.to);
+    case 'ON_CHANGE':
+      return state.updateIn(['fileToEdit', ...action.keys.split('.')], () => action.value);
     case 'ON_SUBMIT_EDIT_NEW_FILE': {
       const originalIndex = state.getIn(['fileToEdit', 'originalIndex']);
 
       return state
-        .updateIn(['filesToUpload', originalIndex], () =>
-          state.get('fileToEdit')
-        )
+        .updateIn(['filesToUpload', originalIndex], () => state.get('fileToEdit'))
         .update('fileToEdit', () => null);
     }
     case 'REMOVE_FILE_TO_UPLOAD':
       return state.update('filesToUpload', list => {
-        return list.filter(
-          data => data.get('originalIndex') !== action.fileIndex
-        );
+        return list.filter(data => data.get('originalIndex') !== action.fileIndex);
       });
     case 'RESET_FILE_TO_EDIT':
       return state.update('fileToEdit', () => null);
@@ -61,9 +59,7 @@ const reducer = (state, action) => {
         });
       });
     case 'SET_FILE_TO_EDIT':
-      return state.update('fileToEdit', () =>
-        state.getIn(['filesToUpload', action.fileIndex])
-      );
+      return state.update('fileToEdit', () => state.getIn(['filesToUpload', action.fileIndex]));
     case 'SET_FILES_UPLOADING_STATE':
       return state.update('filesToUpload', list =>
         list.map(data =>

@@ -6,6 +6,11 @@ const createNewFilesToUploadArray = filesObject => {
     acc.push({
       abortController,
       file: currentFile,
+      fileInfo: {
+        alternativeText: '',
+        caption: '',
+        name: currentFile.name,
+      },
       hasError: false,
       errorMessage: null,
       isUploading: false,

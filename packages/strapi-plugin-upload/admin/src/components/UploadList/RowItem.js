@@ -6,7 +6,8 @@ import CardImgWrapper from '../CardImgWrapper';
 import InfiniteLoadingIndicator from '../InfiniteLoadingIndicator';
 
 const RowItem = ({
-  file,
+  // file,
+  fileInfo,
   hasError,
   errorMessage,
   isUploading,
@@ -33,7 +34,7 @@ const RowItem = ({
             </CardControlsWrapper>
           )}
         </CardImgWrapper>
-        <p style={{ marginBottom: 14 }}>{errorMessage || file.name}</p>
+        <p style={{ marginBottom: 14 }}>{errorMessage || fileInfo.name}</p>
       </div>
     </div>
   );
@@ -44,7 +45,10 @@ RowItem.defaultProps = {
 };
 
 RowItem.propTypes = {
-  file: PropTypes.object.isRequired,
+  // file: PropTypes.object.isRequired,
+  fileInfo: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+  }).isRequired,
   hasError: PropTypes.bool.isRequired,
   errorMessage: PropTypes.string,
   isUploading: PropTypes.bool.isRequired,

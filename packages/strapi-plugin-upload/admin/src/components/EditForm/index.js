@@ -88,9 +88,7 @@ const EditForm = ({
       cropBox.left +
       width -
       margin -
-      ((roundedHeight.toString().length +
-        roundedWidth.toString().length +
-        xSignWidth) *
+      ((roundedHeight.toString().length + roundedWidth.toString().length + xSignWidth) *
         pixelWidth) /
         2;
     const top = cropBox.top + height - pixelWidth - margin;
@@ -144,31 +142,15 @@ const EditForm = ({
                 <CardControlsWrapper className="card-control-wrapper">
                   {!isCropping ? (
                     <>
-                      <CardControl
-                        color="#9EA7B8"
-                        type="trash-alt"
-                        onClick={handleClickDelete}
-                      />
+                      <CardControl color="#9EA7B8" type="trash-alt" onClick={handleClickDelete} />
                       {canCrop && (
-                        <CardControl
-                          type="crop"
-                          color="#9EA7B8"
-                          onClick={handleToggleCropMode}
-                        />
+                        <CardControl type="crop" color="#9EA7B8" onClick={handleToggleCropMode} />
                       )}
                     </>
                   ) : (
                     <>
-                      <CardControl
-                        type="clear"
-                        color="#F64D0A"
-                        onClick={handleToggleCropMode}
-                      />
-                      <CardControl
-                        type="check"
-                        color="#6DBB1A"
-                        onClick={handleClick}
-                      />
+                      <CardControl type="clear" color="#F64D0A" onClick={handleToggleCropMode} />
+                      <CardControl type="check" color="#6DBB1A" onClick={handleClick} />
                     </>
                   )}
                 </CardControlsWrapper>
@@ -212,15 +194,14 @@ const EditForm = ({
                         return (
                           <div className="col-12" key={input.name}>
                             <Inputs
-                              type="text"
-                              onChange={onChange}
                               {...input}
-                              label={formatMessage(input.label)}
                               description={
-                                input.description
-                                  ? formatMessage(input.description)
-                                  : null
+                                input.description ? formatMessage(input.description) : null
                               }
+                              label={formatMessage(input.label)}
+                              onChange={onChange}
+                              type="text"
+                              value={get(fileToEdit, input.name, '')}
                             />
                           </div>
                         );

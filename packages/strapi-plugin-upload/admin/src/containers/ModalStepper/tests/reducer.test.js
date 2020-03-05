@@ -20,8 +20,8 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
       const action = {
         type: 'ADD_FILES_TO_UPLOAD',
         filesToUpload: {
-          0: { ok: true },
-          1: { ok: false },
+          0: { name: 'test1', ok: true },
+          1: { name: 'test2', ok: false },
         },
         nextStep: 'test',
       };
@@ -34,7 +34,12 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
         filesToUpload: [
           {
             abortController: new AbortController(),
-            file: { ok: true },
+            file: { name: 'test1', ok: true },
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test1',
+            },
             hasError: false,
             errorMessage: null,
             isUploading: false,
@@ -42,7 +47,12 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
           },
           {
             abortController: new AbortController(),
-            file: { ok: false },
+            file: { name: 'test2', ok: false },
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test2',
+            },
             hasError: false,
             errorMessage: null,
             isUploading: false,
@@ -58,8 +68,8 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
       const action = {
         type: 'ADD_FILES_TO_UPLOAD',
         filesToUpload: {
-          0: { test: true },
-          1: { test: false },
+          0: { name: 'test2', test: true },
+          1: { name: 'test3', test: false },
         },
         nextStep: 'test',
       };
@@ -68,7 +78,12 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
         filesToUpload: [
           {
             abortController: new AbortController(),
-            file: { ok: true },
+            file: { name: 'test1', ok: true },
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test1',
+            },
             hasError: false,
             errorMessage: null,
             isUploading: false,
@@ -81,7 +96,12 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
         filesToUpload: [
           {
             abortController: new AbortController(),
-            file: { ok: true },
+            file: { name: 'test1', ok: true },
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test1',
+            },
             hasError: false,
             errorMessage: null,
             isUploading: false,
@@ -89,7 +109,12 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
           },
           {
             abortController: new AbortController(),
-            file: { test: true },
+            file: { name: 'test2', test: true },
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test2',
+            },
             hasError: false,
             errorMessage: null,
             isUploading: false,
@@ -97,7 +122,12 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
           },
           {
             abortController: new AbortController(),
-            file: { test: false },
+            file: { name: 'test3', test: false },
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test3',
+            },
             hasError: false,
             errorMessage: null,
             isUploading: false,
