@@ -20,7 +20,7 @@ import ControlsWrapper from '../../components/ControlsWrapper';
 import SelectAll from '../../components/SelectAll';
 import SortPicker from '../../components/SortPicker';
 import Filters from '../../components/Filters';
-// import List from '../../components/List';
+import List from '../../components/List';
 import ListEmpty from '../../components/ListEmpty';
 import ModalStepper from '../ModalStepper';
 import { generatePageFromStart, generateStartFromPage, getHeaderLabel } from './utils';
@@ -86,6 +86,14 @@ const HomePage = () => {
     };
   };
 
+  const handleChangeCheck = ({ target: { name, value } }) => {
+    dispatch({
+      type: 'ON_CHANGE_DATA_TO_DELETE',
+      id: name,
+      value,
+    });
+  };
+  
   const handleChangeListParams = ({ target: { name, value } }) => {
     if (name.includes('_page')) {
       handleChangeParams({
@@ -187,9 +195,8 @@ const HomePage = () => {
           onClick={handleDeleteFilter}
         />
       </ControlsWrapper>
+      <List onChange={handleChangeCheck} selectedItems={dataToDelete} />
       <ListEmpty onClick={() => handleClickToggleModal()} />
-      {/* <List data={data} /> */}
-
       <PageFooter
         context={{ emitEvent: () => {} }}
         count={50}

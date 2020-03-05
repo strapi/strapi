@@ -20,7 +20,7 @@ const ListEmpty = ({ onClick }) => {
           <div className="row" key={row.key}>
             {row.rows.map(key => {
               return (
-                <div className="col-md-3" key={key}>
+                <div className="col-xs-12 col-md-6 col-xl-3" key={key}>
                   <CardEmpty />
                 </div>
               );

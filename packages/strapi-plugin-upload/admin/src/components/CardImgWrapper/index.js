@@ -3,10 +3,29 @@ import PropTypes from 'prop-types';
 
 const CardImgWrapper = styled.div`
   position: relative;
-  height: ${({ isSmall }) => (isSmall ? '127px' : '156px')};
-  min-width: ${({ isSmall }) => (isSmall ? '100%' : '245px')};
+  width: 100%;
+  height: 0;
+  padding-top: ${({ small }) => (small ? 'calc(156 / 245 * 100%)' : 'calc(397 / 431 * 100%)')};
   border-radius: 2px;
-  background: ${({ withOverlay }) => (withOverlay ? '#F6F6F6' : '#333740')};
+  background-color: #f6f6f6;
+  overflow: hidden;
+
+  .card-control-wrapper {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+  }
+
+  &:hover {
+    .card-control-wrapper {
+      display: flex;
+      z-index: 1050;
+    }
+  }
 
   ${({ hasError }) => {
     if (hasError) {
@@ -19,26 +38,27 @@ const CardImgWrapper = styled.div`
     return '';
   }}
 
-  .card-control-wrapper {
-    display: none;
-  }
-
-  &:hover {
+  ${({ checked }) =>
+    checked &&
+    `
     .card-control-wrapper {
       display: flex;
       z-index: 1050;
+      border: 2px solid #007EFF;
     }
-  }
+  `}
 `;
 
 CardImgWrapper.defaultProps = {
+  checked: false,
   hasError: false,
-  isSmall: false,
+  small: false,
 };
 
 CardImgWrapper.propTypes = {
+  checked: PropTypes.bool,
   hasError: PropTypes.bool,
-  isSmall: PropTypes.bool,
+  small: PropTypes.bool,
 };
 
 export default CardImgWrapper;
