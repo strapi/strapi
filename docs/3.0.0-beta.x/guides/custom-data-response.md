@@ -68,9 +68,7 @@ module.exports = {
       entities = await strapi.services.restaurant.find(ctx.query);
     }
 
-    return entities.map(entity =>
-      sanitizeEntity(entity, { model: strapi.models.restaurant })
-    );
+    return entities.map(entity => sanitizeEntity(entity, { model: strapi.models.restaurant }));
   },
 };
 ```

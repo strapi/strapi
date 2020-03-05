@@ -2,12 +2,14 @@
 
 const _ = require('lodash');
 
-const { createController, createService } = require('../core-api');
+const { createCoreApi } = require('../core-api');
 const getURLFromSegments = require('../utils/url-from-segments');
 
-const pickSchema = obj =>
-  _.cloneDeep(
-    _.pick(obj, [
+const getKind = obj => obj.kind || 'collectionType';
+
+const pickSchema = model => {
+  const schema = _.cloneDeep(
+    _.pick(model, [
       'connection',
       'collectionName',
       'info',
@@ -15,6 +17,10 @@ const pickSchema = obj =>
       'attributes',
     ])
   );
+
+  schema.kind = getKind(model);
+  return schema;
+};
 
 module.exports = function(strapi) {
   // Retrieve Strapi version.
@@ -50,31 +56,16 @@ module.exports = function(strapi) {
 
   strapi.contentTypes = {};
 
-  Object.keys(strapi.components).forEach(key => {
-    const component = strapi.components[key];
-
-    if (!component.connection)
-      throw new Error(`Component ${key} is missing a connection attribute`);
-
-    if (!component.collectionName)
-      throw new Error(`Component ${key} is missing a collectionName attribute`);
-
-    Object.assign(component, {
-      __schema__: pickSchema(component),
-      uid: key,
-      modelType: 'component',
-      globalId:
-        component.globalId || _.upperFirst(_.camelCase(`component_${key}`)),
-    });
-  });
-
   // Set models.
   strapi.models = Object.keys(strapi.api || []).reduce((acc, apiName) => {
-    for (let modelName in strapi.api[apiName].models) {
+    const api = strapi.api[apiName];
+
+    for (let modelName in api.models) {
       let model = strapi.api[apiName].models[modelName];
 
       Object.assign(model, {
         __schema__: pickSchema(model),
+        kind: getKind(model),
         modelType: 'contentType',
         uid: `application::${apiName}.${modelName}`,
         apiName,
@@ -87,28 +78,7 @@ module.exports = function(strapi) {
 
       strapi.contentTypes[model.uid] = model;
 
-      // find corresponding service and controller
-      const userService = _.get(
-        strapi.api[apiName],
-        ['services', modelName],
-        {}
-      );
-      const userController = _.get(
-        strapi.api[apiName],
-        ['controllers', modelName],
-        {}
-      );
-
-      const service = Object.assign(
-        createService({ model: modelName, strapi }),
-        userService
-      );
-
-      const controller = Object.assign(
-        createController({ service, model }),
-        userController,
-        { identity: userController.identity || _.upperFirst(modelName) }
-      );
+      const { service, controller } = createCoreApi({ model, api, strapi });
 
       _.set(strapi.api[apiName], ['services', modelName], service);
       _.set(strapi.api[apiName], ['controllers', modelName], controller);
@@ -157,6 +127,7 @@ module.exports = function(strapi) {
     Object.assign(model, {
       __schema__: pickSchema(model),
       modelType: 'contentType',
+      kind: getKind(model),
       uid: `strapi::${key}`,
       plugin: 'admin',
       modelName: key,
@@ -192,6 +163,7 @@ module.exports = function(strapi) {
       Object.assign(model, {
         __schema__: pickSchema(model),
         modelType: 'contentType',
+        kind: getKind(model),
         modelName: key,
         uid: `plugins::${pluginName}.${key}`,
         plugin: pluginName,

@@ -5,10 +5,19 @@ const _ = require('lodash');
 const {
   validateContentTypeInput,
   validateUpdateContentTypeInput,
+  validateKind,
 } = require('./validation/content-type');
 
 module.exports = {
-  getContentTypes(ctx) {
+  async getContentTypes(ctx) {
+    const { kind } = ctx.query;
+
+    try {
+      await validateKind(kind);
+    } catch (error) {
+      return ctx.send({ error }, 400);
+    }
+
     const contentTypeService =
       strapi.plugins['content-type-builder'].services.contenttypes;
 
@@ -16,6 +25,13 @@ module.exports = {
       .filter(uid => {
         if (uid.startsWith('strapi::')) return false;
         if (uid === 'plugins::upload.file') return false; // TODO: add a flag in the content type instead
+
+        if (
+          kind &&
+          _.get(strapi.contentTypes[uid], 'kind', 'collectionType') !== kind
+        ) {
+          return false;
+        }
 
         return true;
       })

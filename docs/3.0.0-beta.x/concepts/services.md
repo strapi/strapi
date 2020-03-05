@@ -262,12 +262,7 @@ module.exports = {
     const user = await User.create(ctx.params);
 
     // Send an email to validate his subscriptions.
-    strapi.services.email.send(
-      'welcome@mysite.com',
-      user.email,
-      'Welcome',
-      '...'
-    );
+    strapi.services.email.send('welcome@mysite.com', user.email, 'Welcome', '...');
 
     // Send response to the server.
     ctx.send({

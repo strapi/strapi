@@ -42,11 +42,10 @@ const databases = {
 };
 
 const test = async args => {
-  return execa.shell(`yarn -s test:e2e ${args}`, {
+  return execa('yarn', ['-s', 'test:e2e', ...args.split(' ')], {
     stdio: 'inherit',
     cwd: path.resolve(__dirname, '..'),
     env: {
-      CI: true,
       FORCE_COLOR: 1,
     },
   });

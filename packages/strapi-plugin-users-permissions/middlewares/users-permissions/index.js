@@ -17,7 +17,7 @@ module.exports = strapi => {
       _.forEach(strapi.admin.config.routes, value => {
         if (_.get(value.config, 'policies')) {
           value.config.policies.unshift(
-            'plugins.users-permissions.permissions'
+            'plugins::users-permissions.permissions'
           );
         }
       });
@@ -25,7 +25,7 @@ module.exports = strapi => {
       _.forEach(strapi.config.routes, value => {
         if (_.get(value.config, 'policies')) {
           value.config.policies.unshift(
-            'plugins.users-permissions.permissions'
+            'plugins::users-permissions.permissions'
           );
         }
       });
@@ -35,7 +35,7 @@ module.exports = strapi => {
           _.forEach(plugin.config.routes, value => {
             if (_.get(value.config, 'policies')) {
               value.config.policies.unshift(
-                'plugins.users-permissions.permissions'
+                'plugins::users-permissions.permissions'
               );
             }
           });
