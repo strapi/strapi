@@ -238,6 +238,8 @@ module.exports = {
             '/3.0.0-beta.x/plugin-development/plugin-architecture',
             '/3.0.0-beta.x/plugin-development/backend-development',
             '/3.0.0-beta.x/plugin-development/frontend-development',
+            '/3.0.0-beta.x/plugin-development/frontend-field-api',
+            '/3.0.0-beta.x/plugin-development/frontend-settings-api',
           ],
         },
         {
