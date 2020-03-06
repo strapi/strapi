@@ -11,7 +11,9 @@ For this example, we will see how to change the WYSIWYG with [CKEditor](https://
 1. Create a new project:
 
 ```bash
-yarn create strapi-app my-app
+# Create an application using SQLite and prevent the server from starting automatically as we will create a plugin
+# right after the project generation
+yarn create strapi-app my-app --quickstart --no-run
 ```
 
 2. Generate a plugin:
@@ -91,6 +93,7 @@ const Wysiwyg = ({
 
 Wysiwyg.defaultProps = {
   errors: [],
+  inputDescription: null,
   label: '',
   noErrorsDescription: false,
   value: '',
@@ -171,7 +174,7 @@ At this point we have simply created a new plugin which is mounted in our projec
 
 ### Registering a our new Field
 
-Since the goal of our plugin is to override the current WYSIWYG we don't want it to be display in the administration panel but we need it to register a our new **Field**. In order to do so we will simply modify the front-end entry point of our plugin:
+Since the goal of our plugin is to override the current WYSIWYG we don't want it to be displayed in the administration panel but we need it to register our new **Field**. In order to do so we will simply modify the front-end entry point of our plugin:
 
 **Path —** `./plugins/wysiwyg/admin/src/index.js`
 

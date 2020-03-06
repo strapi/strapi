@@ -1,6 +1,6 @@
 # Plugin's front-end Field API
 
-As plugins developer you may need to add custom fields in for your application. To do so, a **Field API** is available in order for a plugin to register a field which will be available for all plugins.
+As plugins developer you may need to add custom fields in your application. To do so, a **Field API** is available in order for a plugin to register a field which will be available for all plugins.
 
 ::: warning NOTE
 
@@ -180,7 +180,7 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
   // ...
 
   return (
-<FormattedMessage id={errorId}>
+    <FormattedMessage id={errorId}>
       {error => {
         return (
           <InputsIndex
@@ -219,6 +219,7 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
           />
         );
       }}
+    </FormattedMessage>
   );
 }
 ```
