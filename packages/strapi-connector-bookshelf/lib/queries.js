@@ -127,8 +127,8 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     return wrapTransaction(runUpdate, { transacting });
   }
 
-  async function deleteOne(id, { transacting } = {}) {
-    const entry = await model.where({ id }).fetch({ transacting });
+  async function deleteOne(params, { transacting } = {}) {
+    const entry = await model.where(params).fetch({ transacting });
 
     if (!entry) {
       const err = new Error('entry.notFound');
@@ -155,7 +155,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       }
     });
 
-    await model.updateRelations({ [model.primaryKey]: id, values }, { transacting });
+    await model.updateRelations({ ...params, values }, { transacting });
 
     const runDelete = async trx => {
       await deleteComponents(entry, { transacting: trx });
@@ -167,10 +167,16 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   }
 
   async function deleteMany(params, { transacting } = {}) {
+    if (params[model.primaryKey]) {
+      const entries = await find(params, null, { transacting });
+      if (entries.length > 0) {
+        return deleteOne({ id: entries[0][model.primaryKey] }, { transacting });
+      }
+      return new Promise(resolve => resolve);
+    }
+
     const entries = await find(params, null, { transacting });
-    return await Promise.all(
-      entries.map(entry => deleteOne(entry[model.primaryKey], { transacting }))
-    );
+    return await Promise.all(entries.map(entry => deleteOne({ id: entry.id }, { transacting })));
   }
 
   function search(params, populate) {

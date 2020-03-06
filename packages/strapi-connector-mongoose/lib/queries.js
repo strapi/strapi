@@ -450,9 +450,13 @@ module.exports = ({ model, modelKey, strapi }) => {
   }
 
   async function deleteMany(params) {
-    const primaryKey = getPK(params, model);
-
-    if (primaryKey) return deleteOne(params);
+    if (params[model.primaryKey]) {
+      const entries = await find(params);
+      if (entries.length > 0) {
+        return deleteOne({ id: entries[0][model.primaryKey] });
+      }
+      return new Promise(resolve => resolve);
+    }
 
     const entries = await find(params);
     return Promise.all(entries.map(entry => deleteOne(entry[model.primaryKey])));
