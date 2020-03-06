@@ -37,7 +37,6 @@ module.exports = {
       ext,
       mime: type,
       size: bytesToKbytes(size),
-      thumbnail: null,
     };
 
     const { refId, ref, source, field } = metas;
