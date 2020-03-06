@@ -308,6 +308,10 @@ To enable the provider, create or edit the file at `./extensions/upload/config/s
 
 Make sure to read the provider's `README` to know what are the possible parameters.
 
+::: tip
+Some providers may have additional settings such as the AWS S3 needs an API endpoint URL. You can find a list of these for AWS [here](https://docs.aws.amazon.com/general/latest/gr/ses.html)
+:::
+
 ## Create providers
 
 You can create a Node.js module to implement a custom provider. Read the official documentation [here](https://docs.npmjs.com/creating-node-js-modules).
