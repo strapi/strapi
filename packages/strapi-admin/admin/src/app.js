@@ -1,9 +1,16 @@
-// /**
-//  *
-//  * app.js
-//  *
-//  * Entry point of the application
-//  */
+/**
+ *
+ * app.js
+ *
+ * Entry point of the application
+ */
+
+// NOTE TO PLUGINS DEVELOPERS:
+// If you modify this file by adding new options to a plugin entry point
+// Here's the file: strapi/docs/3.0.0-beta.x/plugin-development/frontend-field-api.md
+// Here's the file: strapi/docs/3.0.0-beta.x/guides/registering-a-field-in-admin.md
+// Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
+// IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 
 /* eslint-disable */
 
@@ -61,6 +68,10 @@ Object.keys(plugins).forEach(current => {
     return plugin;
   };
   const currentPluginFn = plugins[current];
+
+  // By updating this by adding required methods
+  // to load a plugin you need to update this file
+  // strapi-generate-plugins/files/admin/src/index.js needs to be updated
   const plugin = currentPluginFn({
     registerField: strapi.fieldApi.registerField,
     registerPlugin,

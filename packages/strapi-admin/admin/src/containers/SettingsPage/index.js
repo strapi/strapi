@@ -4,6 +4,11 @@
  *
  */
 
+// NOTE TO PLUGINS DEVELOPERS:
+// If you modify this file you also need to update the documentation accordingly
+// Here's the file: strapi/docs/3.0.0-beta.x/plugin-development/frontend-settings-api.md
+// IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
+
 import React, { memo } from 'react';
 import { useGlobalContext, LeftMenu, LeftMenuList } from 'strapi-helper-plugin';
 import { Switch, Redirect, Route, useParams } from 'react-router-dom';
@@ -66,21 +71,10 @@ function SettingsPage() {
         </div>
         <div className="col-md-9">
           <Switch>
-            <Route
-              exact
-              path={`${settingsBaseURL}/webhooks`}
-              component={ListView}
-            />
-            <Route
-              exact
-              path={`${settingsBaseURL}/webhooks/:id`}
-              component={EditView}
-            />
+            <Route exact path={`${settingsBaseURL}/webhooks`} component={ListView} />
+            <Route exact path={`${settingsBaseURL}/webhooks/:id`} component={EditView} />
             {createdRoutes}
-            <Route
-              path={`${settingsBaseURL}/:pluginId`}
-              component={SettingDispatcher}
-            />
+            <Route path={`${settingsBaseURL}/:pluginId`} component={SettingDispatcher} />
           </Switch>
         </div>
       </div>
