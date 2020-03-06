@@ -25,60 +25,53 @@ module.exports = strapi => {
 
     async initialize() {
       const { maxAge } = strapi.config.middleware.settings.public;
-
       const staticDir = path.resolve(
         strapi.dir,
-        strapi.config.middleware.settings.public.path ||
-          strapi.config.paths.static
+        strapi.config.middleware.settings.public.path || strapi.config.paths.static
       );
+      const indexFileName = 'index.html';
+      const indexPath = path.join(staticDir, indexFileName);
 
-      // Open the file.
-      const filename =
-        strapi.config.environment === 'development' ? 'index' : 'production';
+      if (fs.existsSync(indexPath)) {
+        const index = fs.readFileSync(indexPath, 'utf8');
+        const renderer = _.template(index); // Is the project initialized?
 
-      const index = fs.readFileSync(
-        path.join(staticDir, `${filename}.html`),
-        'utf8'
-      );
+        const renderIndexPage = async () => {
+          const isInitialised = await utils.isInitialised(strapi);
 
-      // Is the project initialized?
-      const renderer = _.template(index);
+          const data = {
+            serverTime: new Date().toUTCString(),
+            isInitialised,
+            ..._.pick(strapi, [
+              'config.info.version',
+              'config.info.name',
+              'config.admin.url',
+              'config.environment',
+            ]),
+          };
 
-      const renderIndexPage = async () => {
-        const isInitialised = await utils.isInitialised(strapi);
-
-        const data = {
-          serverTime: new Date().toUTCString(),
-          isInitialised,
-          ..._.pick(strapi, [
-            'config.info.version',
-            'config.info.name',
-            'config.admin.url',
-            'config.environment',
-          ]),
+          return renderer(data);
         };
 
-        return renderer(data);
-      };
+        const serveIndexPage = async ctx => {
+          ctx.url = indexFileName;
 
-      const serveIndexPage = async ctx => {
-        ctx.url = path.basename(`${ctx.url}/${filename}.html`);
+          const content = await renderIndexPage();
+          const body = stream.Readable({
+            read() {
+              this.push(Buffer.from(content));
+              this.push(null);
+            },
+          });
+          // Serve static.
+          ctx.type = 'html';
+          ctx.body = body;
+        };
 
-        const content = await renderIndexPage();
-        const body = stream.Readable({
-          read() {
-            this.push(Buffer.from(content));
-            this.push(null);
-          },
-        });
-        // Serve static.
-        ctx.type = 'html';
-        ctx.body = body;
-      };
-
-      // Serve /public index page.
-      strapi.router.get('/', serveIndexPage);
-      strapi.router.get('/(index.html|production.html)', serveIndexPage);
+        // Serve /public index page.
+        strapi.router.get('/', serveIndexPage);
+        strapi.router.get(`/${indexFileName}`, serveIndexPage);
+      }
 
       // Match every route with an extension.
       // The file without extension will not be served.
@@ -99,10 +92,7 @@ module.exports = strapi => {
 
       if (!strapi.config.serveAdminPanel) return;
 
-      const basename = _.get(
-        strapi.config.currentEnvironment.server,
-        'admin.path'
-      )
+      const basename = _.get(strapi.config.currentEnvironment.server, 'admin.path')
         ? strapi.config.currentEnvironment.server.admin.path
         : '/admin';
 
@@ -116,7 +106,7 @@ module.exports = strapi => {
           await next();
         },
         koaStatic(buildDir, {
-          index: 'index.html',
+          index: indexFileName,
           maxage: maxAge,
           defer: false,
         })
