@@ -1,3 +1,9 @@
+// NOTE TO PLUGINS DEVELOPERS:
+// If you modify this file you need to update the documentation accordingly
+// Here's the file: strapi/docs/3.0.0-beta.x/guides/custom-admin.md#update-the-content-manager
+// Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
+// IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
+
 import { dateFormats as defaultDateFormats } from 'strapi-helper-plugin';
 
 const dateFormats = {
