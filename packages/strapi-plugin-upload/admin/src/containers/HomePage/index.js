@@ -43,10 +43,12 @@ const HomePage = () => {
 
   useEffect(() => {
     handleChangeParams({ target: { name: '_q', value: searchValue } });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch]);
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
   const fetchData = async () => {

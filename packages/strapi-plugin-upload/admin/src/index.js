@@ -14,11 +14,6 @@ export default strapi => {
     blockerComponent: null,
     blockerComponentProps: {},
     description: pluginDescription,
-    // TODO: this is a really temporary API that will temporary allow
-    // this plugin to add a new type into the content manager, the final API will be different
-    fields: {
-      media: InputMedia,
-    },
     icon: pluginPkg.strapi.icon,
     id: pluginId,
     initializer: null,
@@ -49,6 +44,8 @@ export default strapi => {
     },
     trads,
   };
+
+  strapi.registerField({ type: 'media', Component: InputMedia });
 
   return strapi.registerPlugin(plugin);
 };

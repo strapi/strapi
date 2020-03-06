@@ -21,7 +21,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
-
+// Strapi provider with the internal APIs
+import { StrapiProvider } from 'strapi-helper-plugin';
 import { merge } from 'lodash';
 import { Fonts } from '@buffetjs/styles';
 import { freezeApp, pluginLoaded, unfreezeApp, updatePlugin } from './containers/App/actions';
@@ -30,6 +31,7 @@ import { showNotification } from './containers/NotificationProvider/actions';
 import basename from './utils/basename';
 import injectReducer from './utils/injectReducer';
 import injectSaga from './utils/injectSaga';
+import Strapi from './utils/Strapi';
 
 // Import root component
 import App from './containers/App';
@@ -47,6 +49,8 @@ import history from './utils/history';
 
 import plugins from './plugins';
 
+const strapi = Strapi();
+
 const initialState = {};
 const store = configureStore(initialState, history);
 const { dispatch } = store;
@@ -58,6 +62,7 @@ Object.keys(plugins).forEach(current => {
   };
   const currentPluginFn = plugins[current];
   const plugin = currentPluginFn({
+    registerField: strapi.fieldApi.registerField,
     registerPlugin,
     settingsBaseURL: SETTINGS_BASE_URL || '/settings',
   });
@@ -150,12 +155,14 @@ window.strapi = Object.assign(window.strapi || {}, {
 const render = messages => {
   ReactDOM.render(
     <Provider store={store}>
-      <Fonts />
-      <LanguageProvider messages={messages}>
-        <BrowserRouter basename={basename}>
-          <App store={store} />
-        </BrowserRouter>
-      </LanguageProvider>
+      <StrapiProvider strapi={strapi}>
+        <Fonts />
+        <LanguageProvider messages={messages}>
+          <BrowserRouter basename={basename}>
+            <App store={store} />
+          </BrowserRouter>
+        </LanguageProvider>
+      </StrapiProvider>
     </Provider>,
     MOUNT_NODE
   );
