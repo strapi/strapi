@@ -95,7 +95,7 @@ const HomePage = () => {
       value,
     });
   };
-  
+
   const handleChangeListParams = ({ target: { name, value } }) => {
     if (name.includes('_page')) {
       handleChangeParams({

@@ -16,9 +16,7 @@ module.exports = async () => {
     key: 'settings',
   });
 
-  strapi.plugins.upload.provider = createProvider(
-    strapi.plugins.upload.config || {}
-  );
+  strapi.plugins.upload.provider = createProvider(strapi.plugins.upload.config || {});
 
   // if provider config does not exist set one by default
   const config = await configurator.get();
