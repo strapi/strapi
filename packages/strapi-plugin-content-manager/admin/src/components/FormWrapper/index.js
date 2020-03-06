@@ -11,7 +11,6 @@ const FormWrapper = styled.div`
     margin-left: 0;
   }
   .row {
-    margin-bottom: 4px;
     &:last-of-type {
       margin-bottom: 0;
     }
