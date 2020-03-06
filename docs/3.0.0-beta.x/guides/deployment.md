@@ -1722,6 +1722,8 @@ Add `app.yaml` to `.gitignore`.
 
 The instance identifier looks like `myapi-123456:europe-west1:myapi`.
 
+The `myapi-123456` part is the project identifier. (The number is automatically added to short project names).
+
 The following is an example config for `Standard Environment` or `Flexible Environment`.
 
 :::: tabs
@@ -1734,7 +1736,7 @@ runtime: nodejs10
 instance_class: F2
 
 env_variables:
-  HOST: '<instance_id>.appspot.com'
+  HOST: '<project_id>.appspot.com'
   NODE_ENV: 'production'
   DATABASE_NAME: 'strapi'
   DATABASE_USERNAME: 'postgres'
@@ -1755,7 +1757,7 @@ runtime: nodejs10
 env: flex
 
 env_variables:
-  HOST: '<instance_id>.appspot.com'
+  HOST: '<project_id>.appspot.com'
   NODE_ENV: 'production'
   DATABASE_NAME: 'strapi'
   DATABASE_USERNAME: 'postgres'
@@ -1875,91 +1877,6 @@ Open the admin page and register and admin user.
 https://myapp-123456.appspot.com/admin/
 ```
 
-### Creating new content types
-
-Open in develoment mode locally.
-
-``` bash
-yarn develop
-```
-
-Content Type Builder > Create new content type
-
-Create a `Book` type:
-
-```
-model name: book
-title: text
-description: rich text
-```
-
-Save.
-
-Create an `Author` type:
-
-```
-model name: author
-name: text
-```
-
-Save.
-
-Open the `Book` type, add a relation:
-
-```
-book has and belongs to many authors
-```
-
-Save.
-
-Logout, quit the quit running app.
-
-The `api/` folder now includes `book` and `author`.
-
-Deploy.
-
-``` bash
-gcloud app deploy app.yaml --project myapi-123456
-```
-
-It might say `Uploading 0 files`, but if you look at the service sources, you should see the new version.
-
-App Engine > Services > myapi (2 versions) > Source
-
-The contents of the `api` folder were deployed, you can inspect the `book` and `author` folders.
-
-Visit and reload the app URL so that the new version is started up.
-
-```
-https://myapi-123456.appspot.com
-```
-
-Login to the admin UI.
-
-```
-https://myapi-123456.appspot.com/admin
-```
-
-Open Books and Authors, add records and create relations.
-
-If you haven't enabled the permission yet, the API will respond with `403 Forbidden`.
-
-```
-https://myapi-123456.appspot.com/books
-```
-
-Update Permissions:
-
-Roles and Permissions > Public
-
-Enable `count`, `find`, `findone` for `author` and `book`.
-
-```
-https://myapi-123456.appspot.com/books
-```
-
-Should return the JSON data.
-
 ### File uploading to Google Cloud Storage
 
 [Lith/strapi-provider-upload-google-cloud-storage](https://github.com/Lith/strapi-provider-upload-google-cloud-storage)
@@ -1988,56 +1905,7 @@ Copy the bucket name to the plugin settings, the default is the app ID, such as 
 
 (Note that the `Access control` setting of the bucket has to be `Fine-grained`, which is the default.)
 
-Save.
-
-In the Strapi Admin UI:
-
-Roles & Permissions > Public > Upload
-
-Enable `count` and `findone`.
-
-```
-https://myapi-123456.appspot.com/upload/files/count
-```
-
-Should return `{"count":"0"}`.
-
-Files Upload > upload a file.
-
-`/files/count` should now return `1`.
-
-Logout.
-
-Start the local dev server and login to the Admin UI.
-
-``` bash
-yarn develop
-```
-
-Add a Media field to the Book type.
-
-Content Types > Book > Add another field > Media field
-
-```
-name: downloads
-Multiple media
-```
-
-Save.
-
-Deploy, and login to the server Admin UI.
-
-Open one of the books and add downloads. Save.
-
-The `/books` api should display the associated files.
-
-```
-https://myapi-123456.appspot.com/books
-```
-
-### Success!
-
-Ready to go!
+Click `Save`, and it's ready to go!
 
 ### Post-setup configuration
 
