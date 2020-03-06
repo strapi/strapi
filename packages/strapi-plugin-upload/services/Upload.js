@@ -12,6 +12,7 @@ const crypto = require('crypto');
 const _ = require('lodash');
 const toArray = require('stream-to-array');
 const filenamify = require('filenamify');
+const { bytesToKbytes } = require('../utils/file');
 
 const randomSuffix = () => crypto.randomBytes(5).toString('hex');
 const generateFileName = name => {
@@ -27,8 +28,6 @@ module.exports = {
 
     const usedName = fileInfo.name || baseName;
 
-    const imageManipulator = strapi.plugins.upload.services['image-manipulation'];
-
     const entity = {
       name: usedName,
       alternativeText: fileInfo.alternativeText,
@@ -37,7 +36,8 @@ module.exports = {
       hash: generateFileName(usedName),
       ext,
       mime: type,
-      size: imageManipulator.bytesToKbytes(size),
+      size: bytesToKbytes(size),
+      thumbnail: null,
     };
 
     const { refId, ref, source, field } = metas;

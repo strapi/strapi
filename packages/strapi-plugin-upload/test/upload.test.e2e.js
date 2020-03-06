@@ -84,7 +84,6 @@ describe('Upload plugin end to end tests', () => {
           height: expect.any(Number),
           url: expect.any(String),
           provider: 'local',
-          thumbnail: null,
         })
       );
     });

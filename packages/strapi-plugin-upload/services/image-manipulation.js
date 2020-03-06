@@ -2,10 +2,9 @@
 /**
  * Image manipulation functions
  */
-
 const sharp = require('sharp');
 
-const bytesToKbytes = bytes => Math.round((bytes / 1000) * 100) / 100;
+const { bytesToKbytes } = require('../utils/file');
 
 const getMetadatas = buffer =>
   sharp(buffer)
