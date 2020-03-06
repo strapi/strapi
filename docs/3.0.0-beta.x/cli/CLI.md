@@ -76,7 +76,7 @@ options: [--no-optimization]
 - **strapi build**<br/>
   Builds the administration panel without minimizing the assets
 - **strapi build --no-optimization**<br/>
-  Builds the administration panel without minizing the assets. The build duration is faster.
+  Builds the administration panel without minimizing the assets. The build duration is faster.
 
 ::: tip
 You can specify a NODE_ENV to use the configurations in the `./config/environments/[development|staging|production]` folder.
@@ -278,7 +278,7 @@ options [--delete-files]
 - **strapi uninstall &#60;name&#62; --delete-files**<br/>
   Uninstalls a plugin called **&#60;name&#62;** and removes the files in `./extensions/name/`
 
-  Example: `strapi uninstall graphql` will remove the plugin `strapi-plugin-graphql` and all the files in `./extensions/graphql`
+  Example: `strapi uninstall graphql --delete-files` will remove the plugin `strapi-plugin-graphql` and all the files in `./extensions/graphql`
 
 ::: warning
 Some plugins have admin panel integrations, your admin panel might have to be rebuilt. This can take some time.
@@ -286,7 +286,7 @@ Some plugins have admin panel integrations, your admin panel might have to be re
 
 ## strapi console
 
-Start the server and let you eval commands into your application in real time.
+Start the server and eval commands in your application in real time.
 
 ```bash
 strapi console

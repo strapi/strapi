@@ -104,7 +104,7 @@ Here is the list of endpoints generated for each of your **Content Types**
 
 </div>
 
-### Here some Content Type examples
+### Here are some Content Type examples
 
 :::: tabs
 

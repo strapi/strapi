@@ -4,7 +4,7 @@
 
 `./api/**/config/routes.json` files define all available endpoints for the clients.
 
-By default Strapi generate endpoints for all your Content Type. More information in the [Content API](../content-api/api-endpoints.md) documentation.
+By default, Strapi generates endpoints for all your Content Types. More information is in the [Content API](../content-api/api-endpoints.md) documentation.
 
 ## How to create a route?
 
@@ -47,7 +47,7 @@ You have to edit the `routes.json` file in one of your APIs folders (`./api/**/c
 - `path` (string): URL starting with `/` (ex: `/restaurants`)
 - `handler` (string): Action to executed when the route is hit following this syntax `<Controller>.<action>`
 - `config`
-  - `policies` (array): Array of policies names or path ([see more](./policies.md))
+  - `policies` (array): Array of policy names or paths ([see more](./policies.md))
   - `prefix` (string): Set a prefix to this route. Also, it will be loaded into the main router (useful feature for plugin)
 
 ## Dynamic parameters

@@ -47,11 +47,11 @@ module.exports = {
 }
 ```
 
-In this example, there is a `Restaurant` model which contains two attributes `cover`, `name` and `description`.
+In this example, there is a `Restaurant` model which contains three attributes `cover`, `name` and `description`.
 
 ### Where are the models defined?
 
-The models are defined in each `./api/**/models/` folder. Every JavaScript or JSON file in these folders will be loaded as a model. They are also available through the `strapi.models` and `strapi.api.**.models` global variables. Usable everywhere in the project, they contain the ORM model object that they are refer to. By convention, models' names should be written in lowercase.
+The models are defined in each `./api/**/models/` folder. Every JavaScript or JSON file in these folders will be loaded as a model. They are also available through the `strapi.models` and `strapi.api.**.models` global variables. Usable everywhere in the project, they contain the ORM model object that they refer to. By convention, a model's name should be written in lowercase.
 
 ## How to create a model?
 
@@ -199,7 +199,7 @@ To improve the Developer eXperience when developing or using the administration 
 
 ## Relations
 
-Relations let your create links (relations) between your Content Types.
+Relations let you create links (relations) between your Content Types.
 
 :::: tabs
 
