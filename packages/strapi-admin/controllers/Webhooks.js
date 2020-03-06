@@ -18,7 +18,7 @@ const webhookValidator = yup
     name: yup.string().required(),
     url: yup
       .string()
-      .matches(urlRegex, { message: 'url must be a valid URL', excludeEmptyString: true })
+      .matches(urlRegex, 'url must be a valid URL')
       .required(),
     headers: yup.lazy(data => {
       if (typeof data !== 'object') {
