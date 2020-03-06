@@ -238,4 +238,74 @@ describe('Type validators', () => {
       expect(validator.isValidSync(attributes.slug)).toBe(false);
     });
   });
+
+  describe('media type', () => {
+    test('Validates allowedTypes', () => {
+      const attributes = {
+        img: {
+          type: 'media',
+          allowedTypes: ['nonexistent'],
+        },
+      };
+
+      const validator = getTypeValidator(attributes.img, {
+        types: ['media'],
+        modelType: 'collectionType',
+        attributes,
+      });
+
+      expect(validator.isValidSync(attributes.img)).toBe(false);
+    });
+
+    test('Cannot set all with other allowedTypes', () => {
+      const attributes = {
+        img: {
+          type: 'media',
+          allowedTypes: ['all', 'videos'],
+        },
+      };
+
+      const validator = getTypeValidator(attributes.img, {
+        types: ['media'],
+        modelType: 'collectionType',
+        attributes,
+      });
+
+      expect(validator.isValidSync(attributes.img)).toBe(false);
+    });
+
+    test('Can set multiple allowedTypes', () => {
+      const attributes = {
+        img: {
+          type: 'media',
+          allowedTypes: ['files', 'videos'],
+        },
+      };
+
+      const validator = getTypeValidator(attributes.img, {
+        types: ['media'],
+        modelType: 'collectionType',
+        attributes,
+      });
+
+      expect(validator.isValidSync(attributes.img)).toBe(true);
+    });
+
+    test.each(['all', 'images', 'files', 'videos'])('%s is an allowed types', type => {
+      const attributes = {
+        img: {
+          type: 'media',
+          allowedTypes: [type],
+        },
+      };
+
+      const validator = getTypeValidator(attributes.img, {
+        types: ['media'],
+        modelType: 'collectionType',
+        attributes,
+      });
+
+      expect(validator.isValidSync(attributes.img)).toBe(true);
+    });
+  });
 });
