@@ -27,6 +27,8 @@ module.exports = {
 
     const usedName = fileInfo.name || baseName;
 
+    const imageManipulator = strapi.plugins.upload.services['image-manipulation'];
+
     const entity = {
       name: usedName,
       alternativeText: fileInfo.alternativeText,
@@ -35,7 +37,7 @@ module.exports = {
       hash: generateFileName(usedName),
       ext,
       mime: type,
-      size: Math.round((size / 1000) * 100) / 100,
+      size: imageManipulator.bytesToKbytes(size),
     };
 
     const { refId, ref, source, field } = metas;

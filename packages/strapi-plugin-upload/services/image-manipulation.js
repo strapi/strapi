@@ -5,41 +5,56 @@
 
 const sharp = require('sharp');
 
-const getDimensions = buffer =>
+const bytesToKbytes = bytes => Math.round((bytes / 1000) * 100) / 100;
+
+const getMetadatas = buffer =>
   sharp(buffer)
     .metadata()
-    .then(({ width, height }) => ({ width, height }))
-    .catch(err => {
-      // ignore invali formats
-      console.log(err);
-      return {};
-    });
+    .catch(() => ({})); // ingore errors
 
-const ThUMBNAIL_RESIZE_OPTIONS = {
+const getDimensions = buffer =>
+  getMetadatas(buffer)
+    .then(({ width, height }) => ({ width, height }))
+    .catch(() => ({})); // ingore errors
+
+const THUMBNAIL_RESIZE_OPTIONS = {
   width: 245,
   height: 156,
   fit: 'inside',
 };
 
-const generateThumbnail = file => {
-  return sharp(file.buffer)
-    .resize(ThUMBNAIL_RESIZE_OPTIONS)
+const resizeTo = (buffer, options) =>
+  sharp(buffer)
+    .resize(options)
     .toBuffer()
-    .then(buffer => {
-      return getDimensions(buffer).then(dimensions => ({
-        ...dimensions,
+    .catch(() => null);
+
+const generateThumbnail = async file => {
+  const { width, height } = await getDimensions(file.buffer);
+
+  if (width > THUMBNAIL_RESIZE_OPTIONS.width || height > THUMBNAIL_RESIZE_OPTIONS.height) {
+    const newBuff = await resizeTo(file.buffer, THUMBNAIL_RESIZE_OPTIONS);
+
+    if (newBuff) {
+      const { width, height, size } = await getMetadatas(newBuff);
+
+      return {
         hash: `thumb_${file.hash}`,
         ext: file.ext,
-        buffer,
-      }));
-    })
-    .catch(err => {
-      console.log(err);
-      return null;
-    });
+        mime: file.mime,
+        width,
+        height,
+        size: bytesToKbytes(size),
+        buffer: newBuff,
+      };
+    }
+  }
+
+  return null;
 };
 
 module.exports = {
   getDimensions,
   generateThumbnail,
+  bytesToKbytes,
 };
