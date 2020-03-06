@@ -9,6 +9,7 @@ describe('adminReducer', () => {
   beforeEach(() => {
     state = fromJS({
       appError: false,
+      pluginsFromMarketplace: [],
     });
   });
 

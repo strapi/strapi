@@ -217,10 +217,7 @@ module.exports = {
         {
           collapsable: true,
           title: '⚙️️ Admin Panel',
-          children: [
-            '/3.0.0-beta.x/admin-panel/customization',
-            '/3.0.0-beta.x/admin-panel/deploy',
-          ],
+          children: ['/3.0.0-beta.x/admin-panel/customization', '/3.0.0-beta.x/admin-panel/deploy'],
         },
         {
           collapsable: true,
@@ -260,10 +257,7 @@ module.exports = {
           collapsable: false,
           title: '📚 Resources',
           children: [
-            [
-              'https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md',
-              'Contributing guide',
-            ],
+            ['https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md', 'Contributing guide'],
             '/3.0.0-beta.x/migration-guide/',
           ],
         },
@@ -342,10 +336,7 @@ module.exports = {
           collapsable: false,
           title: '📚 Resources',
           children: [
-            [
-              'https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md',
-              'Contributing guide',
-            ],
+            ['https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md', 'Contributing guide'],
             '/3.0.0-alpha.x/migration-guide/',
             '/3.0.0-alpha.x/articles/',
           ],

@@ -4,9 +4,10 @@ When you create a `Content Type` you will have a certain number of **REST API en
 
 As an **example**, let's consider the following models:
 
-**Content Type**:
+**Content Types**:
 
-- `Restaurant`
+- `Restaurant` **(Collection Type)**
+- `Homepage` **(Single Type)**
 
 **Components**:
 
@@ -14,18 +15,31 @@ As an **example**, let's consider the following models:
 - `Title With Subtitle` (category: `content`)
 - `Image With Description` (category: `content`)
 
+---
+
 :::: tabs
 
 ::: tab "Content Types"
 
 ### `Restaurant` Content Type
 
-| Fields        | Type        | Description                          | Options      |
-| :------------ | :---------- | :----------------------------------- | :----------- |
-| name          | string      | Restaurant's title                   |              |
-| cover         | media       | Restaurant's cover image             |              |
-| content       | dynamiczone | The restaurant profile content       |              |
-| opening_hours | component   | Restaurant's opening hours component | `repeatable` |
+| Fields        | Type        | Description                          | Options              |
+| :------------ | :---------- | :----------------------------------- | :------------------- |
+| name          | string      | Restaurant's title                   |                      |
+| slug          | uid         | Restaurant's slug                    | `targetField="name"` |
+| cover         | media       | Restaurant's cover image             |                      |
+| content       | dynamiczone | The restaurant profile content       |                      |
+| opening_hours | component   | Restaurant's opening hours component | `repeatable`         |
+
+---
+
+### `Homepage` Content Type
+
+| Fields   | Type        | Description        | Options |
+| :------- | :---------- | :----------------- | :------ |
+| title    | string      | Homepage title     |         |
+| subTitle | string      | Homepage sub title |         |
+| content  | dynamiczone | Homepage content   |         |
 
 :::
 
@@ -91,20 +105,66 @@ Here is the list of endpoints generated for each of your **Content Types**.
 
 </style>
 
+:::: tabs
+
+::: tab "Collection Type"
+
 <div id="endpoint-table">
 
-| Method | Path                                            | Description                          |
-| :----- | :---------------------------------------------- | :----------------------------------- |
-| GET    | [/{content-type}](#get-restaurants)             | Get a list of {content-type} entries |
-| GET    | [/{content-type}/:id](#get-restaurants-id)      | Get a specific {content-type} entry  |
-| GET    | [/{content-type}/count](#get-restaurants-count) | Count {content-type} entries         |
-| POST   | [/{content-type}](#post-restaurants)            | Create a {content-type} entry        |
-| DELETE | [/{content-type}/:id](#delete-restaurants-id)   | Delete a {content-type} entry        |
-| PUT    | [/{content-type}/:id](#put-restaurants-id)      | Update a {content-type} entry        |
+| Method | Path                    | Description                          |
+| :----- | :---------------------- | :----------------------------------- |
+| GET    | `/{content-type}`       | Get a list of {content-type} entries |
+| GET    | `/{content-type}/:id`   | Get a specific {content-type} entry  |
+| GET    | `/{content-type}/count` | Count {content-type} entries         |
+| POST   | `/{content-type}`       | Create a {content-type} entry        |
+| DELETE | `/{content-type}/:id`   | Delete a {content-type} entry        |
+| PUT    | `/{content-type}/:id`   | Update a {content-type} entry        |
 
 </div>
 
+:::
+
+::: tab "Single Type"
+
+<div id="endpoint-table">
+
+| Method | Path              | Description                       |
+| :----- | :---------------- | :-------------------------------- |
+| GET    | `/{content-type}` | Get a the {content-type} content  |
+| PUT    | `/{content-type}` | Update the {content-type} content |
+| DELETE | `/{content-type}` | Delete the {content-type} content |
+
+</div>
+
+:::
+
+::::
+
 ### Here are some Content Type examples
+
+### Single Types
+
+:::: tabs
+
+::: tab Homepage
+
+`Homepage` **Content Type**
+
+<div id="endpoint-table">
+
+| Method | Path        | Description                 |
+| :----- | :---------- | :-------------------------- |
+| GET    | `/homepage` | Get the homepage content    |
+| PUT    | `/homepage` | Update the homepage content |
+| DELETE | `/homepage` | Delete the homepage content |
+
+</div>
+
+:::
+
+::::
+
+### Collection Types
 
 :::: tabs
 
@@ -114,14 +174,14 @@ Here is the list of endpoints generated for each of your **Content Types**.
 
 <div id="endpoint-table">
 
-| Method | Path               | Description               |
-| :----- | :----------------- | :------------------------ |
-| GET    | /restaurants       | Get a list of restaurants |
-| GET    | /restaurants/:id   | Get a specific restaurant |
-| GET    | /restaurants/count | Count restaurants         |
-| POST   | /restaurants       | Create a restaurant       |
-| DELETE | /restaurants/:id   | Delete a restaurant       |
-| PUT    | /restaurants/:id   | Update a restaurant       |
+| Method | Path                 | Description               |
+| :----- | :------------------- | :------------------------ |
+| GET    | `/restaurants`       | Get a list of restaurants |
+| GET    | `/restaurants/:id`   | Get a specific restaurant |
+| GET    | `/restaurants/count` | Count restaurants         |
+| POST   | `/restaurants`       | Create a restaurant       |
+| DELETE | `/restaurants/:id`   | Delete a restaurant       |
+| PUT    | `/restaurants/:id`   | Update a restaurant       |
 
 </div>
 
@@ -133,14 +193,14 @@ Here is the list of endpoints generated for each of your **Content Types**.
 
 <div id="endpoint-table">
 
-| Method | Path            | Description            |
-| :----- | :-------------- | :--------------------- |
-| GET    | /articles       | Get a list of articles |
-| GET    | /articles/:id   | Get a specific article |
-| GET    | /articles/count | Count articles         |
-| POST   | /articles       | Create a article       |
-| DELETE | /articles/:id   | Delete a article       |
-| PUT    | /articles/:id   | Update a article       |
+| Method | Path              | Description            |
+| :----- | :---------------- | :--------------------- |
+| GET    | `/articles`       | Get a list of articles |
+| GET    | `/articles/:id`   | Get a specific article |
+| GET    | `/articles/count` | Count articles         |
+| POST   | `/articles`       | Create a article       |
+| DELETE | `/articles/:id`   | Delete a article       |
+| PUT    | `/articles/:id`   | Update a article       |
 
 </div>
 
@@ -152,14 +212,14 @@ Here is the list of endpoints generated for each of your **Content Types**.
 
 <div id="endpoint-table">
 
-| Method | Path            | Description            |
-| :----- | :-------------- | :--------------------- |
-| GET    | /products       | Get a list of products |
-| GET    | /products/:id   | Get a specific product |
-| GET    | /products/count | Count products         |
-| POST   | /products       | Create a product       |
-| DELETE | /products/:id   | Delete a product       |
-| PUT    | /products/:id   | Update a product       |
+| Method | Path              | Description            |
+| :----- | :---------------- | :--------------------- |
+| GET    | `/products`       | Get a list of products |
+| GET    | `/products/:id`   | Get a specific product |
+| GET    | `/products/count` | Count products         |
+| POST   | `/products`       | Create a product       |
+| DELETE | `/products/:id`   | Delete a product       |
+| PUT    | `/products/:id`   | Update a product       |
 
 </div>
 
@@ -171,14 +231,14 @@ Here is the list of endpoints generated for each of your **Content Types**.
 
 <div id="endpoint-table">
 
-| Method | Path              | Description              |
-| :----- | :---------------- | :----------------------- |
-| GET    | /categories       | Get a list of categories |
-| GET    | /categories/:id   | Get a specific category  |
-| GET    | /categories/count | Count categories         |
-| POST   | /categories       | Create a category        |
-| DELETE | /categories/:id   | Delete a category        |
-| PUT    | /categories/:id   | Update a category        |
+| Method | Path                | Description              |
+| :----- | :------------------ | :----------------------- |
+| GET    | `/categories`       | Get a list of categories |
+| GET    | `/categories/:id`   | Get a specific category  |
+| GET    | `/categories/count` | Count categories         |
+| POST   | `/categories`       | Create a category        |
+| DELETE | `/categories/:id`   | Delete a category        |
+| PUT    | `/categories/:id`   | Update a category        |
 
 </div>
 
@@ -190,14 +250,14 @@ Here is the list of endpoints generated for each of your **Content Types**.
 
 <div id="endpoint-table">
 
-| Method | Path        | Description        |
-| :----- | :---------- | :----------------- |
-| GET    | /tags       | Get a list of tags |
-| GET    | /tags/:id   | Get a specific tag |
-| GET    | /tags/count | Count tags         |
-| POST   | /tags       | Create a tag       |
-| DELETE | /tags/:id   | Delete a tag       |
-| PUT    | /tags/:id   | Update a tag       |
+| Method | Path          | Description        |
+| :----- | :------------ | :----------------- |
+| GET    | `/tags`       | Get a list of tags |
+| GET    | `/tags/:id`   | Get a specific tag |
+| GET    | `/tags/count` | Count tags         |
+| POST   | `/tags`       | Create a tag       |
+| DELETE | `/tags/:id`   | Delete a tag       |
+| PUT    | `/tags/:id`   | Update a tag       |
 
 </div>
 

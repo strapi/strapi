@@ -37,19 +37,16 @@ const setModelConfiguration = async (key, value) => {
     }
   });
 
-  if(!_.isEqual(currentConfig, storedConfig)) {
+  if (!_.isEqual(currentConfig, storedConfig)) {
     return getStore().set({
       key: configurationKey(key),
       value: currentConfig,
     });
   }
-
 };
 
 const deleteKey = key => {
-  return strapi
-    .query('core_store')
-    .delete({ key: `plugin_content_manager_configuration_${key}` });
+  return strapi.query('core_store').delete({ key: `plugin_content_manager_configuration_${key}` });
 };
 
 function findByKeyQuery({ model }, key) {
@@ -82,8 +79,7 @@ const moveKey = (oldKey, newKey) => {
   );
 };
 
-const getAllConfigurations = () =>
-  findByKey('plugin_content_manager_configuration');
+const getAllConfigurations = () => findByKey('plugin_content_manager_configuration');
 
 module.exports = {
   getAllConfigurations,

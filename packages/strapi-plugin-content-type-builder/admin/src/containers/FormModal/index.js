@@ -40,6 +40,7 @@ import { NAVLINKS, INITIAL_STATE_DATA } from './utils/staticData';
 import init from './init';
 import reducer, { initialState } from './reducer';
 import CustomButton from './CustomButton';
+import canEditContentType from './utils/canEditContentType';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
@@ -63,6 +64,7 @@ const FormModal = () => {
     deleteCategory,
     deleteData,
     editCategory,
+    submitData,
     modifiedData: allDataSchema,
     nestedComponents,
     setModifiedData,
@@ -86,6 +88,7 @@ const FormModal = () => {
       const dynamicZoneTarget = query.get('dynamicZoneTarget');
       const forTarget = query.get('forTarget');
       const modalType = query.get('modalType');
+      const kind = query.get('kind') || get(allDataSchema, ['contentType', 'schema', 'kind'], null);
       const targetUid = query.get('targetUid');
       const settingType = query.get('settingType');
       const headerId = query.get('headerId');
@@ -124,6 +127,7 @@ const FormModal = () => {
         actionType,
         attributeName,
         attributeType,
+        kind,
         dynamicZoneTarget,
         forTarget,
         modalType,
@@ -164,11 +168,7 @@ const FormModal = () => {
         setModifiedData();
       }
 
-      if (
-        actionType === 'edit' &&
-        modalType === 'attribute' &&
-        forTarget === 'contentType'
-      ) {
+      if (actionType === 'edit' && modalType === 'attribute' && forTarget === 'contentType') {
         emitEvent('willEditFieldOfContentType');
       }
 
@@ -178,11 +178,8 @@ const FormModal = () => {
       // then goes to step 1 (the modal is addComponentToDynamicZone) and finally reloads the app.
       // In this particular if the user tries to add components to the zone it will pop an error since the dz is unknown
       const shouldCloseModalToPreventErrorWhenCreatingADZ =
-        get(
-          allDataSchema,
-          [...pathToSchema, 'schema', 'attributes', dynamicZoneTarget],
-          null
-        ) === null && modalType === 'addComponentToDynamicZone';
+        get(allDataSchema, [...pathToSchema, 'schema', 'attributes', dynamicZoneTarget], null) ===
+          null && modalType === 'addComponentToDynamicZone';
 
       // Similarly when creating a component on the fly if the user reloads the app
       // The previous data is lost
@@ -192,10 +189,7 @@ const FormModal = () => {
         // modalType === 'chooseAttribute' &&
         forTarget === 'components';
 
-      if (
-        shouldCloseModalToPreventErrorWhenCreatingADZ ||
-        shouldCloseModalChooseAttribute
-      ) {
+      if (shouldCloseModalToPreventErrorWhenCreatingADZ || shouldCloseModalChooseAttribute) {
         push({ search: '' });
       }
 
@@ -215,27 +209,23 @@ const FormModal = () => {
         state.modalType !== 'contentType' &&
         actionType === 'edit'
       ) {
-        const { name, collectionName } = get(
-          allDataSchema,
-          [...pathToSchema, 'schema'],
-          { name: null, collectionName: null }
-        );
+        const { name, collectionName, kind } = get(allDataSchema, [...pathToSchema, 'schema'], {
+          name: null,
+          collectionName: null,
+        });
 
         dispatch({
           type: 'SET_DATA_TO_EDIT',
           data: {
             name,
             collectionName,
+            kind,
           },
         });
       }
 
       // Edit component
-      if (
-        modalType === 'component' &&
-        state.modalType !== 'component' &&
-        actionType === 'edit'
-      ) {
+      if (modalType === 'component' && state.modalType !== 'component' && actionType === 'edit') {
         const data = get(allDataSchema, pathToSchema, {});
 
         dispatch({
@@ -301,21 +291,14 @@ const FormModal = () => {
           }
         }
 
-        if (
-          attributeType === 'relation' &&
-          !has(attributeToEdit, ['targetAttribute'])
-        ) {
+        if (attributeType === 'relation' && !has(attributeToEdit, ['targetAttribute'])) {
           set(attributeToEdit, ['targetAttribute'], '-');
         }
 
         dispatch({
           type: 'SET_ATTRIBUTE_DATA_SCHEMA',
           attributeType,
-          nameToSetForRelation: get(
-            sortedContentTypesList,
-            ['0', 'title'],
-            'error'
-          ),
+          nameToSetForRelation: get(sortedContentTypesList, ['0', 'title'], 'error'),
           targetUid: get(sortedContentTypesList, ['0', 'uid'], 'error'),
           isEditing: actionType === 'edit',
           modifiedDataToSetForEditing: attributeToEdit,
@@ -334,18 +317,17 @@ const FormModal = () => {
   const isCreatingContentType = state.modalType === 'contentType';
   const isCreatingComponent = state.modalType === 'component';
   const isCreatingAttribute = state.modalType === 'attribute';
-  const isComponentAttribute =
-    state.attributeType === 'component' && isCreatingAttribute;
+  const isComponentAttribute = state.attributeType === 'component' && isCreatingAttribute;
 
   const isCreating = state.actionType === 'create';
   const isCreatingComponentFromAView =
-    get(modifiedData, 'createComponent', false) ||
-    isCreatingComponentWhileAddingAField;
+    get(modifiedData, 'createComponent', false) || isCreatingComponentWhileAddingAField;
   const isInFirstComponentStep = state.step === '1';
   const isEditingCategory = state.modalType === 'editCategory';
   const isOpen = !isEmpty(search);
   const isPickingAttribute = state.modalType === 'chooseAttribute';
   const uid = createUid(modifiedData.name || '');
+  const attributes = get(allDataSchema, [...state.pathToSchema, 'schema', 'attributes'], null);
 
   const checkFormValidity = async () => {
     let schema;
@@ -377,11 +359,7 @@ const FormModal = () => {
       // This is happening when the user creates a component "on the fly"
       // Since we temporarily store the component info in another object
       // The data is set in the componentToCreate key
-    } else if (
-      isComponentAttribute &&
-      isCreatingComponentFromAView &&
-      isInFirstComponentStep
-    ) {
+    } else if (isComponentAttribute && isCreatingComponentFromAView && isInFirstComponentStep) {
       schema = forms.component.schema(
         Object.keys(components),
         get(modifiedData, 'componentToCreate.category', '')
@@ -390,16 +368,41 @@ const FormModal = () => {
       // Check form validity for creating a 'common attribute'
       // We need to make sure that it is independent from the step
     } else if (isCreatingAttribute && !isInFirstComponentStep) {
-      const type =
-        state.attributeType === 'relation' ? 'relation' : modifiedData.type;
+      const type = state.attributeType === 'relation' ? 'relation' : modifiedData.type;
 
+      let alreadyTakenTargetContentTypeAttributes = [];
+
+      if (type === 'relation') {
+        const targetContentTypeUID = get(modifiedData, ['target'], null);
+        const targetContentTypeAttributes = get(
+          contentTypes,
+          [targetContentTypeUID, 'schema', 'attributes'],
+          {}
+        );
+
+        // Create an array with all the targetContentType attributes name
+        // in order to prevent the user from creating a relation with a targetAttribute
+        // that may exist in the other content type
+        alreadyTakenTargetContentTypeAttributes = Object.keys(targetContentTypeAttributes).filter(
+          attrName => {
+            // Keep all the target content type attributes when creating a relation
+            if (state.actionType !== 'edit') {
+              return true;
+            }
+
+            // Remove the already created one when editing
+            return attrName !== initialData.targetAttribute;
+          }
+        );
+      }
       schema = forms[state.modalType].schema(
         get(allDataSchema, state.pathToSchema, {}),
         type,
         modifiedData,
         state.actionType === 'edit',
         state.attributeName,
-        initialData
+        initialData,
+        alreadyTakenTargetContentTypeAttributes
       );
     } else if (isEditingCategory) {
       schema = forms.editCategory.schema(allComponentsCategories, initialData);
@@ -433,9 +436,7 @@ const FormModal = () => {
       case 'contentType':
       case 'component':
       case 'editCategory':
-        tradId = !isCreating
-          ? getTrad('form.button.finish')
-          : getTrad('form.button.continue');
+        tradId = !isCreating ? getTrad('form.button.finish') : getTrad('form.button.continue');
         break;
       case 'addComponentToDynamicZone': {
         tradId = isCreatingAComponent
@@ -495,19 +496,10 @@ const FormModal = () => {
   };
 
   const handleChange = ({ target: { name, value, type, ...rest } }) => {
-    const namesThatCanResetToNullValue = [
-      'enumName',
-      'max',
-      'min',
-      'maxLength',
-      'minLength',
-    ];
+    const namesThatCanResetToNullValue = ['enumName', 'max', 'min', 'maxLength', 'minLength'];
     let val;
 
-    if (
-      ['default', ...namesThatCanResetToNullValue].includes(name) &&
-      value === ''
-    ) {
+    if (['default', ...namesThatCanResetToNullValue].includes(name) && value === '') {
       val = null;
     } else if (
       type === 'radio' &&
@@ -571,16 +563,18 @@ const FormModal = () => {
     try {
       await checkFormValidity();
       sendButtonAddMoreFieldEvent(shouldContinue);
-      const targetUid =
-        state.forTarget === 'components' ? state.targetUid : uid;
+      const targetUid = state.forTarget === 'components' ? state.targetUid : uid;
+      let headerIcon;
 
-      const headerIcon = ['contentType', 'component'].includes(state.forTarget)
-        ? state.forTarget
-        : get(
-            allDataSchema,
-            ['components', state.targetUid, 'schema', 'icon'],
-            ''
-          );
+      if (state.forTarget === 'contentType') {
+        const currentKind = get(allDataSchema, ['contentType', 'schema', 'kind'], 'contentType');
+
+        headerIcon = state.kind || currentKind;
+      } else if (state.forTarget === 'component') {
+        headerIcon = 'component';
+      } else {
+        headerIcon = get(allDataSchema, ['components', state.targetUid, 'schema', 'icon'], '');
+      }
 
       // Remove the last header when editing
       if (state.actionType === 'edit') {
@@ -593,11 +587,14 @@ const FormModal = () => {
       if (isCreatingContentType) {
         // Create the content type schema
         if (isCreating) {
-          createSchema(modifiedData, state.modalType, uid);
+          createSchema({ ...modifiedData, kind: state.kind }, state.modalType, uid);
         } else {
-          updateSchema(modifiedData, state.modalType);
-          // Close the modal
-          push({ search: '' });
+          if (canEditContentType(allDataSchema, modifiedData)) {
+            push({ search: '' });
+            submitData(modifiedData);
+          } else {
+            strapi.notification.error('notification.contentType.relations.conflict');
+          }
 
           return;
         }
@@ -609,17 +606,14 @@ const FormModal = () => {
             forTarget: state.forTarget,
             targetUid,
             header_label_1: modifiedData.name,
-            header_icon_name_1: 'contentType',
+            header_icon_name_1: headerIcon,
             header_icon_isCustom_1: null,
           }),
         });
       } else if (isCreatingComponent) {
         if (isCreating) {
           // Create the component schema
-          const componentUid = createComponentUid(
-            modifiedData.name,
-            modifiedData.category
-          );
+          const componentUid = createComponentUid(modifiedData.name, modifiedData.category);
           const { category, ...rest } = modifiedData;
 
           createSchema(rest, 'component', componentUid, category);
@@ -693,10 +687,7 @@ const FormModal = () => {
                   forTarget: state.forTarget,
                   targetUid,
                   ...headersObject,
-                  header_icon_isCustom_1: ![
-                    'contentType',
-                    'component',
-                  ].includes(state.forTarget),
+                  header_icon_isCustom_1: !['contentType', 'component'].includes(state.forTarget),
                   header_icon_name_1: headerIcon,
                 },
                 shouldContinue
@@ -732,9 +723,7 @@ const FormModal = () => {
             attributeType: 'component',
             step: '2',
             ...headersObject,
-            header_icon_isCustom_1: !['contentType', 'component'].includes(
-              state.forTarget
-            ),
+            header_icon_isCustom_1: !['contentType', 'component'].includes(state.forTarget),
             header_icon_name_1: headerIcon,
           };
 
@@ -774,9 +763,7 @@ const FormModal = () => {
           forTarget: state.forTarget,
           targetUid: state.targetUid,
           ...headersObject,
-          header_icon_isCustom_1: !['contentType', 'component'].includes(
-            state.forTarget
-          ),
+          header_icon_isCustom_1: !['contentType', 'component'].includes(state.forTarget),
           header_icon_name_1: headerIcon,
         };
 
@@ -829,10 +816,7 @@ const FormModal = () => {
         const { category, type, ...rest } = componentToCreate;
         // Create a the component temp UID
         // This could be refactored but I think it's more understandable to separate the logic
-        const componentUid = createComponentUid(
-          componentToCreate.name,
-          category
-        );
+        const componentUid = createComponentUid(componentToCreate.name, category);
         // Create the component first and add it to the components data
         createSchema(
           // Component data
@@ -884,10 +868,7 @@ const FormModal = () => {
         if (isInFirstComponentStep) {
           if (isCreatingComponentFromAView) {
             const { category, type, ...rest } = modifiedData.componentToCreate;
-            const componentUid = createComponentUid(
-              modifiedData.componentToCreate.name,
-              category
-            );
+            const componentUid = createComponentUid(modifiedData.componentToCreate.name, category);
             // Create the component first and add it to the components data
             createSchema(
               // Component data
@@ -905,9 +886,7 @@ const FormModal = () => {
             );
             // Add the created component to the DZ
             // We don't want to remove the old ones
-            addCreatedComponentToDynamicZone(state.dynamicZoneTarget, [
-              componentUid,
-            ]);
+            addCreatedComponentToDynamicZone(state.dynamicZoneTarget, [componentUid]);
 
             // The Dynamic Zone and the component is created created
             // Open the modal to add fields to the created component
@@ -923,17 +902,13 @@ const FormModal = () => {
               [`header_icon_name_${nextHeaderIndex}`]: 'component',
               [`header_icon_isCustom_${nextHeaderIndex}`]: false,
               [`header_info_category_${nextHeaderIndex}`]: category,
-              [`header_info_name_${nextHeaderIndex}`]: modifiedData
-                .componentToCreate.name,
+              [`header_info_name_${nextHeaderIndex}`]: modifiedData.componentToCreate.name,
             };
 
             push({ search: makeSearch(searchToOpenAddField, true) });
           } else {
             // Add the components to the DZ
-            changeDynamicZoneComponents(
-              state.dynamicZoneTarget,
-              modifiedData.components
-            );
+            changeDynamicZoneComponents(state.dynamicZoneTarget, modifiedData.components);
 
             // TODO nav
             // Search to open modal add fields for the main type (content type)
@@ -1003,8 +978,7 @@ const FormModal = () => {
 
   const shouldDisableAdvancedTab = () => {
     return (
-      ((state.attributeType === 'component' ||
-        state.modalType === 'addComponentToDynamicZone') &&
+      ((state.attributeType === 'component' || state.modalType === 'addComponentToDynamicZone') &&
         get(modifiedData, ['createComponent'], null) === false) ||
       state.modalType === 'editCategory'
     );
@@ -1019,9 +993,7 @@ const FormModal = () => {
   );
 
   // Styles
-  const modalBodyStyle = isPickingAttribute
-    ? { paddingTop: '0.5rem', paddingBottom: '3rem' }
-    : {};
+  const modalBodyStyle = isPickingAttribute ? { paddingTop: '0.5rem', paddingBottom: '3rem' } : {};
 
   return (
     <Modal
@@ -1071,9 +1043,7 @@ const FormModal = () => {
                             sendAdvancedTabEvent(link.id);
                             push({ search: getNextSearch(link.id, state) });
                           }}
-                          nextTab={
-                            index === NAVLINKS.length - 1 ? 0 : index + 1
-                          }
+                          nextTab={index === NAVLINKS.length - 1 ? 0 : index + 1}
                         />
                       );
                     })}
@@ -1104,10 +1074,7 @@ const FormModal = () => {
                           />
                         )}
                         {row.map((attr, index) => {
-                          const tabIndex =
-                            i === 0
-                              ? index
-                              : displayedAttributes[0].length + index;
+                          const tabIndex = i === 0 ? index : displayedAttributes[0].length + index;
 
                           return (
                             <AttributeOption
@@ -1115,11 +1082,7 @@ const FormModal = () => {
                               tabIndex={tabIndex}
                               isDisplayed
                               onClick={() => {}}
-                              ref={
-                                i === 0 && index === 0
-                                  ? attributeOptionRef
-                                  : null
-                              }
+                              ref={i === 0 && index === 0 ? attributeOptionRef : null}
                               type={attr}
                             />
                           );
@@ -1131,14 +1094,11 @@ const FormModal = () => {
                     modifiedData,
                     state.attributeType,
                     state.step,
-                    state.actionType
+                    state.actionType,
+                    attributes
                   ).items.map((row, index) => {
                     return (
-                      <div
-                        className="row"
-                        key={index}
-                        style={{ marginBottom: 4 }}
-                      >
+                      <div className="row" key={index} style={{ marginBottom: 4 }}>
                         {row.map((input, i) => {
                           // The divider type is used mainly the advanced tab
                           // It is the one responsible for displaying the settings label
@@ -1154,9 +1114,7 @@ const FormModal = () => {
                                 key="divider"
                               >
                                 <FormattedMessage
-                                  id={getTrad(
-                                    'form.attribute.item.settings.name'
-                                  )}
+                                  id={getTrad('form.attribute.item.settings.name')}
                                 />
                               </div>
                             );
@@ -1179,12 +1137,7 @@ const FormModal = () => {
                           // This type is used in the addComponentToDynamicZone modal when selecting the option add an existing component
                           // It pushes select the components to the right
                           if (input.type === 'pushRight') {
-                            return (
-                              <div
-                                key={`${index}.${i}`}
-                                className={`col-${input.size}`}
-                              />
-                            );
+                            return <div key={`${index}.${i}`} className={`col-${input.size}`} />;
                           }
 
                           if (input.type === 'relation') {
@@ -1217,11 +1170,7 @@ const FormModal = () => {
                             null
                           );
 
-                          const retrievedValue = get(
-                            modifiedData,
-                            input.name,
-                            ''
-                          );
+                          const retrievedValue = get(modifiedData, input.name, '');
 
                           let value;
 
@@ -1230,16 +1179,10 @@ const FormModal = () => {
                           // So we pass them as string
                           // This way the data stays accurate and we don't have to operate
                           // any data mutation
-                          if (
-                            input.name === 'default' &&
-                            state.attributeType === 'boolean'
-                          ) {
+                          if (input.name === 'default' && state.attributeType === 'boolean') {
                             value = toString(retrievedValue);
                             // Same here for the enum
-                          } else if (
-                            input.name === 'enum' &&
-                            Array.isArray(retrievedValue)
-                          ) {
+                          } else if (input.name === 'enum' && Array.isArray(retrievedValue)) {
                             value = retrievedValue.join('\n');
                           } else if (input.name === 'uid') {
                             value = input.value;
@@ -1264,17 +1207,11 @@ const FormModal = () => {
                           }
 
                           return (
-                            <div
-                              className={`col-${input.size || 6}`}
-                              key={input.name}
-                              // style={style}
-                            >
+                            <div className={`col-${input.size || 6}`} key={input.name}>
                               <Inputs
                                 {...input}
                                 modifiedData={modifiedData}
-                                addComponentsToDynamicZone={
-                                  handleClickAddComponentsToDynamicZone
-                                }
+                                addComponentsToDynamicZone={handleClickAddComponentsToDynamicZone}
                                 customInputs={{
                                   componentIconPicker: ComponentIconPicker,
                                   componentSelect: WrapperSelect,
@@ -1306,11 +1243,7 @@ const FormModal = () => {
                                   state.forTarget === 'component'
                                 }
                                 value={value}
-                                error={
-                                  isEmpty(errorId)
-                                    ? null
-                                    : formatMessage({ id: errorId })
-                                }
+                                error={isEmpty(errorId) ? null : formatMessage({ id: errorId })}
                                 onChange={handleChange}
                                 onBlur={() => {}}
                                 description={
@@ -1340,13 +1273,13 @@ const FormModal = () => {
         </ModalForm>
         {!isPickingAttribute && (
           <ModalFooter>
-            <section>
+            <section style={{ alignItems: 'center' }}>
               <Button type="button" color="cancel" onClick={handleToggle}>
                 {formatMessage({
                   id: 'components.popUpWarning.button.cancel',
                 })}
               </Button>
-              <div style={{ margin: 'auto 0' }}>
+              <div>
                 {isCreatingAttribute && !isInFirstComponentStep && (
                   <Button
                     type={isCreating ? 'button' : 'submit'}
