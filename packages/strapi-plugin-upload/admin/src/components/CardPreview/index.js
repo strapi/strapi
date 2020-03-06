@@ -6,14 +6,16 @@ import Wrapper from './Wrapper';
 import Image from './Image';
 
 const CardPreview = ({ url, type }) => {
+  const isFile = !type.includes('image') && !type.includes('video');
+
   return (
-    <Wrapper isImg={!!url}>{!url ? <FileIcon fileType={type} /> : <Image src={url} />}</Wrapper>
+    <Wrapper isFile={isFile}>{isFile ? <FileIcon fileType={type} /> : <Image src={url} />}</Wrapper>
   );
 };
 
 CardPreview.defaultProps = {
   url: null,
-  type: null,
+  type: '',
 };
 
 CardPreview.propTypes = {

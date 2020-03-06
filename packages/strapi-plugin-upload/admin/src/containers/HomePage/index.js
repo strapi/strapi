@@ -93,7 +93,7 @@ const HomePage = () => {
       value,
     });
   };
-  
+
   const handleChangeListParams = ({ target: { name, value } }) => {
     if (name.includes('_page')) {
       handleChangeParams({
@@ -195,7 +195,7 @@ const HomePage = () => {
           onClick={handleDeleteFilter}
         />
       </ControlsWrapper>
-      <List onChange={handleChangeCheck} selectedItems={dataToDelete} />
+      <List data={data} onChange={handleChangeCheck} selectedItems={dataToDelete} />
       <ListEmpty onClick={() => handleClickToggleModal()} />
       <PageFooter
         context={{ emitEvent: () => {} }}

@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Checkbox } from '@buffetjs/core';
 
 import Text from '../Text';
 import CardImgWrapper from '../CardImgWrapper';
@@ -9,20 +8,31 @@ import Wrapper from './Wrapper';
 import Title from './Title';
 
 // TODO - adapt with the real data
-const Card = ({ checked, id, name, size, small, type, onChange, url }) => {
+const Card = ({
+  checked,
+  children,
+  errorMessage,
+  hasError,
+  mime,
+  name,
+  onChange,
+  small,
+  size,
+  type,
+  url,
+}) => {
   return (
     <Wrapper>
       <div>
-        <CardImgWrapper small={small} checked={checked}>
-          <CardPreview type={type} url={url} />
-          <div className="card-control-wrapper">
-            <Checkbox name={id} onChange={onChange} value={checked} />
-          </div>
+        <CardImgWrapper small={small} checked={checked} hasError={hasError}>
+          <CardPreview type={mime || type} url={url} />
+          {children}
         </CardImgWrapper>
         <Title fontSize="md" fontWeight="bold" ellipsis>
           {name}
         </Title>
-        <Text color="grey" fontSize="xs" ellipsis>{`${type} - ${size}`}</Text>
+        {!hasError && <Text color="grey" fontSize="xs" ellipsis>{`${type} - ${size}`}</Text>}
+        {hasError && <p style={{ marginBottom: 14 }}>{errorMessage}</p>}
       </div>
     </Wrapper>
   );
@@ -30,6 +40,8 @@ const Card = ({ checked, id, name, size, small, type, onChange, url }) => {
 
 Card.defaultProps = {
   checked: false,
+  children: null,
+  hasError: false,
   name: null,
   onChange: () => {},
   size: 0,
@@ -40,8 +52,10 @@ Card.defaultProps = {
 
 Card.propTypes = {
   checked: PropTypes.bool,
+  children: PropTypes.node,
+  hasError: PropTypes.bool,
   name: PropTypes.string,
-  id: PropTypes.string.isRequired,
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   onChange: PropTypes.func,
   size: PropTypes.number,
   small: PropTypes.bool,
