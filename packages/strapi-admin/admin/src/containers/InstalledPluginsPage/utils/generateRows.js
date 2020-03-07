@@ -9,7 +9,7 @@ const generateRows = (obj, onConfirm) => {
         id,
         description,
         isRequired,
-        withSetting,
+        withSetting: withSetting || false,
         icon,
         onConfirm,
       };
