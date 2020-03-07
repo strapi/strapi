@@ -93,7 +93,7 @@ class PluginCard extends React.Component {
       : 'app.components.PluginCard.Button.label.download';
 
     // Display settings link for a selection of plugins.
-    const settingsComponent = this.props.plugin.withSetting && (
+    const settingsComponent = this.props.withSetting && (
       <div className="settings" onClick={this.handleClickSettings}>
         <FontAwesomeIcon icon="cog" />
         <FormattedMessage id="app.components.PluginCard.settings" />
@@ -231,6 +231,7 @@ PluginCard.propTypes = {
   history: PropTypes.object.isRequired,
   isAlreadyInstalled: PropTypes.bool,
   plugin: PropTypes.object,
+  withSetting: PropTypes.bool,
 };
 
 export default PluginCard;

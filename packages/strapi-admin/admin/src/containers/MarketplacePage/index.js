@@ -74,6 +74,7 @@ const MarketPlacePage = ({ history }) => {
                 history={history}
                 plugin={plugin}
                 showSupportUsButton={false}
+                withSetting={plugins[plugin.id].withSetting || false}
                 isAlreadyInstalled={plugins[plugin.id] !== undefined}
               />
             );
