@@ -22,6 +22,7 @@ module.exports = scope => {
       name: scope.id,
       icon: 'plug',
       description: `Description of ${scope.id} plugin.`,
+      setting: false
     },
     dependencies: {},
     author: {
