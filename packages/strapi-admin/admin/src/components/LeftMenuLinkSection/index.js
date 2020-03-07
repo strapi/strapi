@@ -10,7 +10,14 @@ import LeftMenuListLink from './LeftMenuListLink';
 import EmptyLinksList from './EmptyLinksList';
 import EmptyLinksListWrapper from './EmptyLinksListWrapper';
 
-const LeftMenuLinksSection = ({ section, searchable, location, links, emptyLinksListMessage }) => {
+const LeftMenuLinksSection = ({
+  section,
+  searchable,
+  location,
+  links,
+  emptyLinksListMessage,
+  shrink,
+}) => {
   const [search, setSearch] = useState('');
 
   const filteredList = sortBy(
@@ -39,7 +46,7 @@ const LeftMenuLinksSection = ({ section, searchable, location, links, emptyLinks
         setSearch={setSearch}
         search={search}
       />
-      <LeftMenuListLink>
+      <LeftMenuListLink shrink={shrink}>
         {filteredList.length > 0 ? (
           filteredList.map((link, index) => (
             <LeftMenuLink
@@ -64,9 +71,14 @@ const LeftMenuLinksSection = ({ section, searchable, location, links, emptyLinks
   );
 };
 
+LeftMenuLinksSection.defaultProps = {
+  shrink: false,
+};
+
 LeftMenuLinksSection.propTypes = {
   section: PropTypes.string.isRequired,
   searchable: PropTypes.bool.isRequired,
+  shrink: PropTypes.bool,
   location: PropTypes.shape({
     pathname: PropTypes.string,
   }).isRequired,
