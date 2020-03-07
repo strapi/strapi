@@ -191,6 +191,11 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPrevio
       inputValue = null;
     }
 
+    // Allow to reset number input
+    if (type === 'number' && value === '') {
+      inputValue = null;
+    }
+
     dispatch({
       type: 'ON_CHANGE',
       keys: name.split('.'),

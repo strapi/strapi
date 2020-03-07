@@ -23,9 +23,7 @@ const LeftMenuLinkContainer = ({ plugins }) => {
             section.links
               .filter(link => link.isDisplayed !== false)
               .map(link => {
-                link.plugin = !isEmpty(plugins[link.plugin])
-                  ? link.plugin
-                  : plugins[current].id;
+                link.plugin = !isEmpty(plugins[link.plugin]) ? link.plugin : plugins[current].id;
 
                 return link;
               })
@@ -40,10 +38,7 @@ const LeftMenuLinkContainer = ({ plugins }) => {
   // Generate the list of plugin links (plugins without a mainComponent should not appear in the left menu)
   const pluginsLinks = Object.values(plugins)
     .filter(
-      plugin =>
-        plugin.id !== 'email' &&
-        plugin.id !== 'content-manager' &&
-        !!plugin.mainComponent
+      plugin => plugin.id !== 'email' && plugin.id !== 'content-manager' && !!plugin.mainComponent
     )
     .map(plugin => {
       const pluginSuffixUrl = plugin.suffixUrl ? plugin.suffixUrl(plugins) : '';

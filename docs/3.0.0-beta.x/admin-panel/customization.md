@@ -186,7 +186,9 @@ To disable the information box containing the tutorial videos, create a file at 
 Add the following configuration:
 
 ```js
+export const LOGIN_LOGO = null;
 export const SHOW_TUTORIALS = false;
+export const SETTINGS_BASE_URL = '/settings';
 ```
 
 ### Changing the port

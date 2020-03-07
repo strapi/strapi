@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-email",
-  "version": "3.0.0-beta.19",
+  "version": "3.0.0-beta.19.3",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Email",
@@ -13,13 +13,13 @@
   },
   "dependencies": {
     "lodash": "^4.17.11",
-    "strapi-provider-email-sendmail": "3.0.0-beta.19",
-    "strapi-utils": "3.0.0-beta.19"
+    "strapi-provider-email-sendmail": "3.0.0-beta.19.3",
+    "strapi-utils": "3.0.0-beta.19.3"
   },
   "devDependencies": {
     "react-copy-to-clipboard": "5.0.1",
     "rimraf": "3.0.0",
-    "strapi-helper-plugin": "3.0.0-beta.19"
+    "strapi-helper-plugin": "3.0.0-beta.19.3"
   },
   "author": {
     "name": "Strapi team",

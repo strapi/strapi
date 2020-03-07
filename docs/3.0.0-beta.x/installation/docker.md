@@ -84,7 +84,7 @@ services:
       - '1337:1337'
 
   mongo:
-    image: postgres
+    image: mongo
     environment:
       MONGO_INITDB_ROOT_USERNAME: strapi
       MONGO_INITDB_ROOT_PASSWORD: strapi
