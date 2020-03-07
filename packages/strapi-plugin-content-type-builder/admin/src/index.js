@@ -39,6 +39,7 @@ export default strapi => {
       },
     ],
     isRequired: pluginPkg.strapi.required || false,
+    withSetting: pluginPkg.strapi.setting || false,
     layout: null,
     lifecycles,
     leftMenuLinks: [],

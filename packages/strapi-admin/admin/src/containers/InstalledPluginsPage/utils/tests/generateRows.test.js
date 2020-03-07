@@ -14,6 +14,7 @@ describe('ADMIN | container | InstalledPlugins | utils | generateRows', () => {
         icon: null,
         description: 'test test',
         foo: 'bar',
+        withSetting: false,
         isRequired: false,
       },
       ctb: {
@@ -23,6 +24,7 @@ describe('ADMIN | container | InstalledPlugins | utils | generateRows', () => {
         icon: 'plug',
         description: 'test',
         foo: 'bar',
+        withSetting: true,
         isRequired: true,
       },
     };
@@ -36,6 +38,7 @@ describe('ADMIN | container | InstalledPlugins | utils | generateRows', () => {
         icon: 'plug',
         description: 'test',
         onConfirm,
+        withSetting: true,
         isRequired: true,
       },
       {
@@ -45,6 +48,7 @@ describe('ADMIN | container | InstalledPlugins | utils | generateRows', () => {
         icon: null,
         description: 'test test',
         onConfirm,
+        withSetting: false,
         isRequired: false,
       },
     ];

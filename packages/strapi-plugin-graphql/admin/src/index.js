@@ -16,6 +16,7 @@ export default strapi => {
     initializer: () => null,
     injectedComponents: [],
     isRequired: pluginPkg.strapi.required || false,
+    withSetting: pluginPkg.strapi.setting || false,
     layout: null,
     lifecycles: () => {},
     leftMenuLinks: [],

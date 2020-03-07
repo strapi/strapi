@@ -10,15 +10,14 @@ import CustomRow from './CustomRow';
 import LogoContainer from './Logo';
 
 // TODO: remove the upload plugin when the media lib feature is merged.
-const PLUGINS_WITH_CONFIG = ['email', 'upload'];
 
-const Row = ({ logo, name, description, isRequired, id, icon, onConfirm }) => {
+const Row = ({ logo, name, description, isRequired, withSetting, id, icon, onConfirm }) => {
   const { currentEnvironment, formatMessage } = useGlobalContext();
   const [isOpen, setIsOpen] = useState(false);
   const { push } = useHistory();
   const links = [];
 
-  if (PLUGINS_WITH_CONFIG.includes(id)) {
+  if (withSetting) {
     links.push({
       icon: <FontAwesomeIcon icon={faCog} />,
       onClick: () => {
@@ -93,6 +92,7 @@ const Row = ({ logo, name, description, isRequired, id, icon, onConfirm }) => {
 Row.defaultProps = {
   icon: 'plug',
   isRequired: false,
+  withSetting: false,
   logo: null,
   onConfirm: () => {},
 };
@@ -102,6 +102,7 @@ Row.propTypes = {
   icon: PropTypes.string,
   id: PropTypes.string.isRequired,
   isRequired: PropTypes.bool,
+  withSetting: PropTypes.bool,
   logo: PropTypes.string,
   name: PropTypes.string.isRequired,
   onConfirm: PropTypes.func,
