@@ -52,8 +52,26 @@ const generateThumbnail = async file => {
   return null;
 };
 
+// TODO: return new size
+const optimize = async buffer => {
+  const { sizeOptimization = false } = strapi.plugins.upload.services.upload.getSettings();
+
+  if (!sizeOptimization) return buffer;
+
+  const { format } = await getMetadatas(buffer);
+
+  if (format !== undefined) {
+    return sharp(buffer)
+      .toFormat(format, { quality: 100 })
+      .toBuffer({ resolveWithObject: true });
+  }
+
+  return buffer;
+};
+
 module.exports = {
   getDimensions,
   generateThumbnail,
   bytesToKbytes,
+  optimize,
 };

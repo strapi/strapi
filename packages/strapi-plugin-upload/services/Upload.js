@@ -245,15 +245,26 @@ module.exports = {
     ).then(files => this.uploadFileAndPersist(files));
   },
 
-  async getConfig() {
+  async getSettings() {
     const config = await strapi
       .store({
         environment: strapi.config.environment,
         type: 'plugin',
         name: 'upload',
+        key: 'settings',
       })
-      .get({ key: 'provider' });
+      .get();
 
-    return { ...config, sizeLimit: parseFloat(config.sizeLimit) };
+    return config;
+  },
+
+  async setSettings(value) {
+    await strapi
+      .store({
+        type: 'plugin',
+        name: 'upload',
+        key: 'settings',
+      })
+      .set({ value });
   },
 };

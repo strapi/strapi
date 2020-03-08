@@ -76,29 +76,15 @@ module.exports = {
   },
 
   async getSettings(ctx) {
-    const config = await strapi
-      .store({
-        type: 'plugin',
-        name: 'upload',
-        key: 'settings',
-      })
-      .get();
+    const data = await strapi.plugins.upload.services.upload.getSettings();
 
-    ctx.send({
-      data: config,
-    });
+    ctx.body = { data };
   },
 
   async updateSettings(ctx) {
-    const configurator = strapi.store({
-      type: 'plugin',
-      name: 'upload',
-      key: 'settings',
-    });
-
     const data = await validateSettings(ctx.request.body);
 
-    await configurator.set({ key: 'settings', value: data });
+    await strapi.plugins.upload.services.upload.setSettings(data);
 
     ctx.body = { data };
   },
@@ -138,14 +124,13 @@ module.exports = {
 
     const updatedFile = await uploadService.update(id, enhancedFile);
 
-    ctx.send(updatedFile);
+    ctx.body = updatedFile;
   },
 
   async find(ctx) {
     const data = await strapi.plugins['upload'].services.upload.fetchAll(ctx.query);
 
-    // Send 200 `ok`
-    ctx.send(data);
+    ctx.body = data;
   },
 
   async findOne(ctx) {
@@ -155,13 +140,13 @@ module.exports = {
       return ctx.notFound('file.notFound');
     }
 
-    ctx.send(data);
+    ctx.body = data;
   },
 
   async count(ctx) {
     const data = await strapi.plugins['upload'].services.upload.count(ctx.query);
 
-    ctx.send({ count: data });
+    ctx.body = { count: data };
   },
 
   async destroy(ctx) {
@@ -175,7 +160,7 @@ module.exports = {
 
     await strapi.plugins['upload'].services.upload.remove(file);
 
-    ctx.send(file);
+    ctx.body = file;
   },
 
   async search(ctx) {
@@ -185,7 +170,7 @@ module.exports = {
       id,
     });
 
-    ctx.send(data);
+    ctx.body = data;
   },
 };
 
