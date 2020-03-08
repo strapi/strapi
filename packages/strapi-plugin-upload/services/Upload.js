@@ -10,7 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const _ = require('lodash');
-const toArray = require('stream-to-array');
+const util = require('util');
 const filenamify = require('filenamify');
 const { bytesToKbytes } = require('../utils/file');
 
@@ -60,10 +60,11 @@ module.exports = {
   },
 
   async enhanceFile(file, fileInfo = {}, metas = {}) {
-    const parts = await toArray(fs.createReadStream(file.path));
-    const buffers = parts.map(part => (_.isBuffer(part) ? part : Buffer.from(part)));
+    const readBuffer = await util.promisify(fs.readFile)(file.path);
 
-    const buffer = Buffer.concat(buffers);
+    const { optimize } = strapi.plugins.upload.services['image-manipulation'];
+
+    const { buffer, info } = await optimize(readBuffer);
 
     const formattedFile = this.formatFileInfo(
       {
@@ -75,7 +76,7 @@ module.exports = {
       metas
     );
 
-    return _.assign(formattedFile, {
+    return _.assign(formattedFile, info, {
       buffer,
     });
   },
@@ -245,21 +246,18 @@ module.exports = {
     ).then(files => this.uploadFileAndPersist(files));
   },
 
-  async getSettings() {
-    const config = await strapi
+  getSettings() {
+    return strapi
       .store({
-        environment: strapi.config.environment,
         type: 'plugin',
         name: 'upload',
         key: 'settings',
       })
       .get();
-
-    return config;
   },
 
-  async setSettings(value) {
-    await strapi
+  setSettings(value) {
+    return strapi
       .store({
         type: 'plugin',
         name: 'upload',

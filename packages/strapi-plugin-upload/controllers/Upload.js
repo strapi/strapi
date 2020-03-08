@@ -48,7 +48,7 @@ module.exports = {
     }
 
     const files = _.get(ctx.request.files, 'files');
-    if (_.isEmpty(files)) {
+    if (_.isEmpty(files) || files.size === 0) {
       throw emptyFileError();
     }
 
