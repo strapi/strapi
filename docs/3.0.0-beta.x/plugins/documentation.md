@@ -101,7 +101,14 @@ Here are the file that needs to be created in order to change the documentation 
   },
   "x-strapi-config": {
     "path": "/documentation",
-    "showGeneratedFiles": true
+    "showGeneratedFiles": true",
+    "generateDocForAllPlugins": true,
+    "pluginsForWhichToGenerateDoc": [
+      "email",
+      "upload",
+      "users-permissions"
+    ],
+    "pluginNameSeperator": "-"
   },
   "servers": [
     {
@@ -170,6 +177,46 @@ To access your documentation on a custom path, you will have to update the `path
   }
 }
 ```
+
+### Specify the plugin name seperator for the OPEN API components schema name and tags name
+
+To change the default plugin name seperator `-` that is used to generate your components schema name and tags name (e.g. plugin users-permissions [component schema name => `Users-PermissionsUser`, tag name => `UsersPermissions - User`]), you will have to update the `pluginNameSeperator` key. This parameter could be set to an empty character so it would generate a component schema name that is without any separator which is then looking like `UsersPermissionsUser` and becomes compatible with AWS API Gateway import API capability.
+
+```
+{
+  "x-strapi-config": {
+    "pluginNameSeperator": "-"
+  }
+}
+```
+
+### Indicate which plugins documentation to generate
+
+To generate all plugins documentation, you will have to update the `generateDocForAllPlugins` key. When the value of this key is set to `true` then the `pluginsForWhichToGenerateDoc` is ignored.
+
+```
+{
+  "x-strapi-config": {
+    "generateDocForAllPlugins": true
+  }
+}
+```
+
+if the value of the `generateDocForAllPlugins` key is set to `false`, you will then need to indicate the list of all the plugins for which to you wish to generate documentation. In order to do that you need to update the `pluginsForWhichToGenerateDoc` key. Leaving this key with an empty array `[]` means that not any plugin documentation will be generated.
+
+```
+{
+  "x-strapi-config": {
+    "generateDocForAllPlugins": false,
+    "pluginsForWhichToGenerateDoc": [
+      "email",
+      "upload"
+    ],
+  }
+}
+```
+
+In this example, we will be generating documentation for the upload and email plugins only.
 
 ## File structure
 

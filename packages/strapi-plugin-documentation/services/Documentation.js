@@ -57,14 +57,30 @@ module.exports = {
   },
 
   checkIfPluginDocNeedsUpdate: function(pluginName) {
-    const prevDocumentation = this.createDocObject(
-      this.retrieveDocumentation(pluginName, true)
-    );
-    const currentDocumentation = this.createDocObject(
-      this.createPluginDocumentationFile(pluginName, false)
-    );
+    // check if any plugin documentation should be generated
+    if(strapi.plugins.documentation.config['x-strapi-config'].generateDocForAllPlugins) {
+      const filteredPlugins = 
+        strapi.plugins.documentation.config['x-strapi-config'].pluginsForWhichToGenerateDoc
+          .filter(pluginNameForWhichToGenerateDoc => pluginNameForWhichToGenerateDoc === pluginName);
+      // check if the current plugin name matches with the list of plugin names for which we want to generate documentation
+      if(filteredPlugins.length > 0) {
+        const prevDocumentation = this.createDocObject(
+          this.retrieveDocumentation(pluginName, true)
+        );
+        const currentDocumentation = this.createDocObject(
+          this.createPluginDocumentationFile(pluginName, false)
+        );
+    
+        return !this.areObjectsEquals(prevDocumentation, currentDocumentation);
+      } else {
+        // No documentation will be generated for this plugin
+        return false;
+      }
 
-    return !this.areObjectsEquals(prevDocumentation, currentDocumentation);
+    } else {
+      // No documentation will be generated for this plugin
+      return false;
+    }
   },
 
   checkIfApiDefaultDocumentationFileExist: function(apiName, docName) {
@@ -366,7 +382,7 @@ module.exports = {
     const formattedPluginName = plugin
       .split('-')
       .map(i => _.upperFirst(i))
-      .join('-');
+      .join(strapi.plugins.documentation.config['x-strapi-config'].pluginNameSeperator);
     const formattedName = _.upperFirst(name);
 
     if (withoutSpace) {

@@ -17,7 +17,14 @@
   },
   "x-strapi-config": {
     "path": "/documentation",
-    "showGeneratedFiles": true
+    "showGeneratedFiles": true,
+    "generateDocForAllPlugins": true,
+    "pluginsForWhichToGenerateDoc": [
+      "email",
+      "upload",
+      "users-permissions"
+    ],
+    "pluginNameSeperator": "-"
   },
   "servers": [
     {
