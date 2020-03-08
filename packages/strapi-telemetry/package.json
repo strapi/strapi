@@ -1,0 +1,29 @@
+{
+  "name": "strapi-telemetry",
+  "version": "3.0.0-beta.19.3",
+  "description": "Strapi telemetry",
+  "keywords": [
+    "telemetry"
+  ],
+  "homepage": "http://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git",
+    "directory": "packages/strapi-telemetry"
+  },
+  "license": "MIT",
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
+  "dependencies": {
+    "node-fetch": "2.6.0"
+  },
+  "engines": {
+    "node": ">=10.0.0",
+    "npm": ">=6.0.0"
+  }
+}
