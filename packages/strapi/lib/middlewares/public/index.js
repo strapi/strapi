@@ -17,10 +17,6 @@ const utils = require('../../utils');
  * Public assets hook
  */
 
-const defaults = {
-  defaultIndex: true,
-};
-
 module.exports = strapi => {
   return {
     /**
@@ -28,15 +24,8 @@ module.exports = strapi => {
      */
 
     async initialize() {
-      const { defaultIndex, maxAge } = Object.assign(
-        {},
-        defaults,
-        strapi.config.middleware.settings.public
-      );
-      const staticDir = path.resolve(
-        strapi.dir,
-        strapi.config.middleware.settings.public.path || strapi.config.paths.static
-      );
+      const { defaultIndex, maxAge, path: publicPath } = strapi.config.middleware.settings.public;
+      const staticDir = path.resolve(strapi.dir, publicPath || strapi.config.paths.static);
 
       // Match every route with an extension.
       // The file without extension will not be served.
@@ -55,7 +44,7 @@ module.exports = strapi => {
         })
       );
 
-      if (defaultIndex) {
+      if (defaultIndex === true) {
         const index = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 
         const serveIndexPage = async ctx => {
@@ -103,7 +92,7 @@ module.exports = strapi => {
           await next();
         },
         koaStatic(buildDir, {
-          index: '/',
+          index: '/index.html',
           maxage: maxAge,
           defer: false,
         })

@@ -165,14 +165,7 @@ module.exports = function(strapi) {
 
   // Flatten middlewares configurations.
   const flattenMiddlewaresConfig = middlewareCategories.reduce((acc, index) => {
-    const current = _.merge(strapi.config.currentEnvironment[index], {
-      public: _.defaults(strapi.config.public, {
-        enabled: true,
-      }),
-      favicon: _.defaults(strapi.config.favicon, {
-        enabled: true,
-      }),
-    });
+    const current = strapi.config.currentEnvironment[index];
 
     if (_.isObject(current)) {
       acc = _.merge(acc, current);
