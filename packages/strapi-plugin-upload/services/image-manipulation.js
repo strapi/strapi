@@ -9,12 +9,12 @@ const { bytesToKbytes } = require('../utils/file');
 const getMetadatas = buffer =>
   sharp(buffer)
     .metadata()
-    .catch(() => ({})); // ingore errors
+    .catch(() => ({})); // ignore errors
 
 const getDimensions = buffer =>
   getMetadatas(buffer)
     .then(({ width, height }) => ({ width, height }))
-    .catch(() => ({})); // ingore errors
+    .catch(() => ({})); // ignore errors
 
 const THUMBNAIL_RESIZE_OPTIONS = {
   width: 245,
