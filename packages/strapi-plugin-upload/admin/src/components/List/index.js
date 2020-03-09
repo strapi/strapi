@@ -8,7 +8,7 @@ import Card from '../Card';
 import CardControlsWrapper from '../CardControlsWrapper';
 import Wrapper from './Wrapper';
 
-const List = ({ data, onChange, selectedItems }) => {
+const List = ({ data, onChange, selectedItems, canSelect }) => {
   const matrix = createMatrix(data);
 
   return (
@@ -18,14 +18,16 @@ const List = ({ data, onChange, selectedItems }) => {
           <div className="row" key={key}>
             {rowContent.map(item => {
               const { id, url } = item;
-              const checked = selectedItems.includes(id);
+              const checked = selectedItems.some(selectedItem => selectedItem.id === id);
 
               return (
                 <div className="col-xs-12 col-md-6 col-xl-3" key={JSON.stringify(item)}>
                   <Card small checked={checked} {...item} url={`${strapi.backendURL}${url}`}>
-                    <CardControlsWrapper leftAlign className="card-control-wrapper">
-                      <Checkbox name={`${id}`} onChange={onChange} value={checked} />
-                    </CardControlsWrapper>
+                    {(checked || canSelect) && (
+                      <CardControlsWrapper leftAlign className="card-control-wrapper">
+                        <Checkbox name={`${id}`} onChange={onChange} value={checked} />
+                      </CardControlsWrapper>
+                    )}
                   </Card>
                 </div>
               );
@@ -38,12 +40,14 @@ const List = ({ data, onChange, selectedItems }) => {
 };
 
 List.defaultProps = {
+  canSelect: true,
   data: [],
   onChange: () => {},
   selectedItems: [],
 };
 
 List.propTypes = {
+  canSelect: PropTypes.bool,
   data: PropTypes.array,
   onChange: PropTypes.func,
   selectedItems: PropTypes.array,

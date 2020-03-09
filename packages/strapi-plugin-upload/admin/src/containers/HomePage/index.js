@@ -31,7 +31,7 @@ const HomePage = () => {
   const { formatMessage } = useGlobalContext();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const query = useQuery();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setModalOpen] = useState(false);
   const [searchValue, setSearchValue] = useState(query.get('_q') || '');
   const { push } = useHistory();
   const { search } = useLocation();
@@ -146,7 +146,7 @@ const HomePage = () => {
   };
 
   const handleClickToggleModal = (refetch = false) => {
-    setIsOpen(prev => !prev);
+    setModalOpen(prev => !prev);
 
     if (refetch) {
       fetchData();
@@ -248,7 +248,7 @@ const HomePage = () => {
         onChangeParams={handleChangeListParams}
         params={params}
       />
-      <ModalStepper isOpen={isOpen} onToggle={handleClickToggleModal} />
+      <ModalStepper isOpen={isModalOpen} onToggle={handleClickToggleModal} />
     </Container>
   );
 };

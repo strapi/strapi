@@ -16,6 +16,13 @@ const sizes = {
     xs: '5px',
     sm: '10px',
     md: '30px',
+    lg: '40px',
+  },
+  font: {
+    xs: '11px',
+    sm: '12px',
+    md: '13px',
+    lg: '18px',
   },
 };
 

@@ -3,10 +3,9 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { Modal, ModalFooter, useGlobalContext, request } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
-import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
 import ModalHeader from '../../components/ModalHeader';
-import stepper from './utils/stepper';
+import stepper from './stepper';
 import init from './init';
 import reducer, { initialState } from './reducer';
 import { getTrad } from '../../utils';
@@ -198,14 +197,7 @@ const ModalStepper = ({ isOpen, onToggle }) => {
   return (
     <Modal isOpen={isOpen} onToggle={handleToggle} onClosed={handleClosed}>
       {/* header title */}
-      <ModalHeader
-        goBack={goBack}
-        headers={headers.map(headerTrad => ({
-          key: headerTrad,
-          element: <FormattedMessage id={headerTrad} />,
-        }))}
-        withBackButton={withBackButton}
-      />
+      <ModalHeader goBack={goBack} headers={headers} withBackButton={withBackButton} />
       {/* body of the modal */}
       {Component && (
         <Component

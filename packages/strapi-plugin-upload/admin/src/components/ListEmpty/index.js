@@ -10,8 +10,8 @@ import CardEmpty from '../CardEmpty';
 import Wrapper from './Wrapper';
 import IntlText from '../IntlText';
 
-const ListEmpty = ({ onClick }) => {
-  const rows = generateRows(3);
+const ListEmpty = ({ onClick, numberOfRows }) => {
+  const rows = generateRows(numberOfRows);
 
   return (
     <Wrapper className="container-fluid">
@@ -42,10 +42,12 @@ const ListEmpty = ({ onClick }) => {
 
 ListEmpty.defaultProps = {
   onClick: () => {},
+  numberOfRows: 3,
 };
 
 ListEmpty.propTypes = {
   onClick: PropTypes.func,
+  numberOfRows: PropTypes.number,
 };
 
 export default ListEmpty;

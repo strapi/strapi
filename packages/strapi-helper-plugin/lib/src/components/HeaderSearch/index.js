@@ -6,16 +6,9 @@ import SearchInfo from '../SearchInfo';
 import Clear from './Clear';
 import Wrapper from './Wrapper';
 
-const HeaderSearch = ({
-  label,
-  name,
-  onChange,
-  onClear,
-  placeholder,
-  value,
-}) => {
+const HeaderSearch = ({ label, name, onChange, onClear, placeholder, value, className }) => {
   return (
-    <Wrapper>
+    <Wrapper className={className}>
       <div>
         <SearchIcon />
       </div>
