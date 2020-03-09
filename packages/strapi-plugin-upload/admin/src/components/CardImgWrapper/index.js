@@ -21,24 +21,20 @@ const CardImgWrapper = styled.div`
     }
   }
 
-  ${({ hasError }) => {
-    if (hasError) {
-      return `
-        background: #F2F3F4;
-        border: 1px solid #FF5D00;
-      `;
-    }
-
-    return '';
-  }}
+  ${({ hasError }) =>
+    hasError &&
+    `
+      background: #F2F3F4;
+      border: 1px solid #FF5D00;
+    `}
 
   ${({ checked }) =>
     checked &&
     `
-    .card-control-wrapper {
-      display: flex;
-      z-index: 1050;
-    }
+      .card-control-wrapper {
+        display: flex;
+        z-index: 1050;
+      }
   `}
 `;
 

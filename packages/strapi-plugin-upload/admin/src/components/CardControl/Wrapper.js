@@ -10,7 +10,7 @@ const Wrapper = styled.div`
   height: 24px;
   margin-left: 5px;
   background-color: ${({ theme }) => theme.main.colors.white};
-  border: 1px solid #e3e9f3;
+  border: 1px solid ${({ theme }) => theme.main.colors.darkGrey};
   border-radius: ${({ theme }) => theme.main.sizes.borderRadius};
   cursor: pointer;
   font-size: 11px;
