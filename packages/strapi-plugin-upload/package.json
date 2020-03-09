@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-upload",
-  "version": "3.0.0-beta.19.2",
+  "version": "3.0.0-beta.19.3",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Media Library",
@@ -16,6 +16,8 @@
     "immutable": "^3.8.2",
     "invariant": "^2.2.1",
     "lodash": "^4.17.11",
+    "mime-db": "1.43.0",
+    "mime-type": "3.0.7",
     "react": "^16.9.0",
     "react-copy-to-clipboard": "^5.0.1",
     "react-dom": "^16.9.0",
@@ -25,9 +27,10 @@
     "react-router-dom": "^5.0.0",
     "react-transition-group": "^2.5.0",
     "reactstrap": "^5.0.0",
-    "strapi-helper-plugin": "3.0.0-beta.19.2",
-    "strapi-provider-upload-local": "3.0.0-beta.19.2",
-    "strapi-utils": "3.0.0-beta.19.2",
+    "sharp": "0.24.1",
+    "strapi-helper-plugin": "3.0.0-beta.19.3",
+    "strapi-provider-upload-local": "3.0.0-beta.19.3",
+    "strapi-utils": "3.0.0-beta.19.3",
     "stream-to-array": "^2.3.0",
     "uuid": "^3.2.1"
   },

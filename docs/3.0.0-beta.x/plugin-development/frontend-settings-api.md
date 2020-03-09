@@ -19,13 +19,12 @@ The menu section can be declared as follows:
 
 **Path —** `plugins/my-plugin/admin/src/index.js`.
 
-```
+```js
 import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 
 export default strapi => {
-  const pluginDescription =
-    pluginPkg.strapi.description || pluginPkg.description;
+  const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 
   // Declare the links that will be injected into the settings menu
   const menuSection = {
@@ -90,7 +89,7 @@ With the configuration from above we could easily create our plugin Settings vie
 
 **Path —** `plugins/my-plugin/admin/src/containers/Settings/index.js`.
 
-```
+```js
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
@@ -110,14 +109,8 @@ const SettingPage2 = () => (
 const Settings = ({ settingsBaseURL }) => {
   return (
     <Switch>
-      <Route
-        component={SettingPage1}
-        path={`${settingsBaseURL}/${pluginId}/setting1`}
-      />
-      <Route
-        component={SettingPage2}
-        path={`${settingsBaseURL}/${pluginId}/setting2`}
-      />
+      <Route component={SettingPage1} path={`${settingsBaseURL}/${pluginId}/setting1`} />
+      <Route component={SettingPage2} path={`${settingsBaseURL}/${pluginId}/setting2`} />
     </Switch>
   );
 };
@@ -133,15 +126,14 @@ Now that the `Settings` component is declared in your plugin the only thing left
 
 **Path —** `plugins/my-plugin/admin/src/index.js`.
 
-```
+```js
 import pluginPkg from '../../package.json';
 // Import the component
 import Settings from './containers/Settings';
 import pluginId from './pluginId';
 
 export default strapi => {
-  const pluginDescription =
-    pluginPkg.strapi.description || pluginPkg.description;
+  const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 
   // Declare the links that will be injected into the settings menu
   const menuSection = {
@@ -198,7 +190,7 @@ In order to add a link into the global section of the settings view you need to 
 
 **Path —** `plugins/my-plugin/admin/src/index.js`.
 
-```
+```js
 import pluginPkg from '../../package.json';
 // Import the component
 import Settings from './containers/Settings';
@@ -206,8 +198,7 @@ import SettingLink from './components/SettingLink';
 import pluginId from './pluginId';
 
 export default strapi => {
-  const pluginDescription =
-  pluginPkg.strapi.description || pluginPkg.description;
+  const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 
   // Declare the links that will be injected into the settings menu
   const menuSection = {
@@ -224,9 +215,9 @@ export default strapi => {
       },
       {
         title: {
-        id: `${pluginId}.bar`,
-        defaultMessage: 'Setting page 2',
-      },
+          id: `${pluginId}.bar`,
+          defaultMessage: 'Setting page 2',
+        },
         to: `${strapi.settingsBaseURL}/${pluginId}/setting2`,
         name: 'setting2',
       },
@@ -267,7 +258,6 @@ export default strapi => {
 
   return strapi.registerPlugin(plugin);
 };
-
 ```
 
 ::: danger

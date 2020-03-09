@@ -21,6 +21,18 @@
       "type": "string",
       "configurable": false
     },
+    "width": {
+      "type": "integer",
+      "configurable": false
+    },
+    "height": {
+      "type": "integer",
+      "configurable": false
+    },
+    "formats": {
+      "type": "json",
+      "configurable": false
+    },
     "hash": {
       "type": "string",
       "configurable": false,
