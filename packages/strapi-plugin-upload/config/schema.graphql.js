@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const toArray = require('stream-to-array');
+const { streamToBuffer } = require('../utils/file');
 
 module.exports = {
   mutation: `
@@ -49,12 +49,10 @@ module.exports = {
 const formatFile = async (upload, metas) => {
   const { filename, mimetype, createReadStream } = await upload;
 
-  const stream = createReadStream();
+  const { optimize } = strapi.plugins.upload.services['image-manipulation'];
+  const readBuffer = await streamToBuffer(createReadStream());
 
-  const parts = await toArray(stream);
-  const buffers = parts.map(part => (_.isBuffer(part) ? part : Buffer.from(part)));
-
-  const buffer = Buffer.concat(buffers);
+  const { buffer, info } = await optimize(readBuffer);
 
   const uploadService = strapi.plugins.upload.services.upload;
   const fileInfo = uploadService.formatFileInfo(
@@ -67,5 +65,5 @@ const formatFile = async (upload, metas) => {
     metas
   );
 
-  return _.assign(fileInfo, { buffer });
+  return _.assign(fileInfo, info, { buffer });
 };
