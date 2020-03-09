@@ -1,3 +1,6 @@
 {
-  "myCustomConfiguration": "This configuration is accessible through strapi.config.environments.development.myCustomConfiguration"
+  "myCustomConfiguration": "This configuration is accessible through strapi.config.environments.development.myCustomConfiguration",
+  "public": {
+    "defaultIndex": false
+  }
 }
