@@ -75,13 +75,15 @@ describe('Upload plugin end to end tests', () => {
       expect(res.body[0]).toEqual(
         expect.objectContaining({
           id: expect.anything(),
-          hash: expect.any(String),
-          size: expect.any(Number),
-          url: expect.any(String),
-          provider: 'local',
           name: 'rec',
           ext: '.jpg',
           mime: 'image/jpeg',
+          hash: expect.any(String),
+          size: expect.any(Number),
+          width: expect.any(Number),
+          height: expect.any(Number),
+          url: expect.any(String),
+          provider: 'local',
         })
       );
     });
@@ -92,6 +94,43 @@ describe('Upload plugin end to end tests', () => {
       });
 
       expect(res.statusCode).toBe(400);
+    });
+
+    test('Generates a thumbnail on large enough files', async () => {
+      const res = await rq.post('/upload', {
+        formData: {
+          files: fs.createReadStream(__dirname + '/thumbnail_target.png'),
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(1);
+      expect(res.body[0]).toEqual(
+        expect.objectContaining({
+          id: expect.anything(),
+          name: 'thumbnail_target',
+          ext: '.png',
+          mime: 'image/png',
+          hash: expect.any(String),
+          size: expect.any(Number),
+          width: expect.any(Number),
+          height: expect.any(Number),
+          url: expect.any(String),
+          provider: 'local',
+          formats: {
+            thumbnail: {
+              hash: expect.any(String),
+              ext: '.png',
+              mime: 'image/png',
+              size: expect.any(Number),
+              width: expect.any(Number),
+              height: expect.any(Number),
+              url: expect.any(String),
+            },
+          },
+        })
+      );
     });
   });
 
