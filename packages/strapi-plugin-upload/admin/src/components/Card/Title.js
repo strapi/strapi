@@ -4,8 +4,8 @@ import Text from '../Text';
 
 const Title = styled(props => <Text {...props} color="black" />)`
   width: 100%;
-  margin-bottom: 3px;
-  margin-top: 7px;
+  margin-bottom: 4px;
+  margin-top: 5px;
 `;
 
 export default Title;

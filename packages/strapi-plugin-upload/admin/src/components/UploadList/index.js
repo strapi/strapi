@@ -5,7 +5,7 @@ import { Button } from '@buffetjs/core';
 import createMatrix from '../../utils/createMatrix';
 import getTrad from '../../utils/getTrad';
 import ModalSection from '../ModalSection';
-import Text from '../Text';
+import IntlText from '../IntlText';
 import Container from './Container';
 import ButtonWrapper from './ButtonWrapper';
 import TextWrapper from './TextWrapper';
@@ -23,32 +23,34 @@ const UploadList = ({
     filesToUploadLength > 1 ? 'plural' : 'singular'
   }`;
 
-  // TODO: use <IntlText ... /> instead of FormattedMessage
-
   return (
     <>
       <ModalSection justifyContent="space-between">
         <TextWrapper>
-          <Text fontSize="md" fontWeight="bold">
-            <FormattedMessage id={getTrad(titleId)} values={{ number: filesToUploadLength }} />
-          </Text>
-
-          <Text fontSize="sm" color="grey">
-            <FormattedMessage
-              id={getTrad('modal.upload-list.sub-header-subtitle')}
-              values={{ number: filesToUploadLength }}
-            />
-          </Text>
+          <IntlText
+            id={getTrad(titleId)}
+            values={{ number: filesToUploadLength }}
+            fontSize="md"
+            fontWeight="bold"
+            lineHeight="19px"
+          />
+          <IntlText
+            id={getTrad('modal.upload-list.sub-header-subtitle')}
+            values={{ number: filesToUploadLength }}
+            fontSize="sm"
+            color="grey"
+          />
         </TextWrapper>
         <ButtonWrapper>
-          <FormattedMessage id={getTrad('modal.upload-list.sub-header.button')}>
-            {label => (
-              <Button type="button" color="primary" label={label} onClick={onGoToAddBrowseFiles} />
-            )}
-          </FormattedMessage>
+          <Button type="button" color="primary" onClick={onGoToAddBrowseFiles}>
+            <IntlText
+              id={getTrad('modal.upload-list.sub-header.button')}
+              fontWeight="bold"
+              color="white"
+            />
+          </Button>
         </ButtonWrapper>
       </ModalSection>
-
       <ModalSection>
         <Container>
           {matrix.map(({ key, rowContent }) => {

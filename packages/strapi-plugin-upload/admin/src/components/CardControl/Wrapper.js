@@ -8,6 +8,7 @@ const Wrapper = styled.div`
   align-items: center;
   width: 24px;
   height: 24px;
+  margin-left: auto;
   margin-right: 5px;
   background-color: ${({ theme }) => theme.main.colors.white};
   border: 1px solid #e3e9f3;

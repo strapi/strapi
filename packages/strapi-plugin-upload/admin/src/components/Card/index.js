@@ -31,7 +31,7 @@ const Card = ({
         <Title fontSize="md" fontWeight="bold" ellipsis>
           {name}
         </Title>
-        {!hasError && <Text color="grey" fontSize="xs" ellipsis>{`${type} - ${size}`}</Text>}
+        <Text color="grey" fontSize="xs" ellipsis>{`${type} - ${size}`}</Text>
         {hasError && <p style={{ marginBottom: 14 }}>{errorMessage}</p>}
       </div>
     </Wrapper>
@@ -55,7 +55,6 @@ Card.propTypes = {
   children: PropTypes.node,
   hasError: PropTypes.bool,
   name: PropTypes.string,
-  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   onChange: PropTypes.func,
   size: PropTypes.number,
   small: PropTypes.bool,
