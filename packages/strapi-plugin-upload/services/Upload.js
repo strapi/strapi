@@ -101,9 +101,11 @@ module.exports = {
   async uploadFileAndPersist(fileData) {
     const config = strapi.plugins.upload.config;
 
-    const { getDimensions, generateThumbnail } = strapi.plugins.upload.services[
-      'image-manipulation'
-    ];
+    const {
+      getDimensions,
+      generateThumbnail,
+      generateResponsiveFormats,
+    } = strapi.plugins.upload.services['image-manipulation'];
 
     await strapi.plugins.upload.provider.upload(fileData);
 
@@ -112,6 +114,18 @@ module.exports = {
       await strapi.plugins.upload.provider.upload(thumbnailFile);
       delete thumbnailFile.buffer;
       _.set(fileData, 'formats.thumbnail', thumbnailFile);
+    }
+
+    const formats = await generateResponsiveFormats(fileData);
+    for (const format of formats) {
+      if (!format) continue;
+
+      const { key, file } = format;
+
+      await strapi.plugins.upload.provider.upload(file);
+      delete file.buffer;
+
+      _.set(fileData, ['formats', key], file);
     }
 
     const { width, height } = await getDimensions(fileData.buffer);
@@ -133,9 +147,11 @@ module.exports = {
   async replace(id, { data, file }) {
     const config = strapi.plugins.upload.config;
 
-    const { getDimensions, generateThumbnail } = strapi.plugins.upload.services[
-      'image-manipulation'
-    ];
+    const {
+      getDimensions,
+      generateThumbnail,
+      generateResponsiveFormats,
+    } = strapi.plugins.upload.services['image-manipulation'];
 
     const dbFile = await this.fetch({ id });
 
@@ -156,8 +172,12 @@ module.exports = {
     if (dbFile.provider === config.provider) {
       await strapi.plugins.upload.provider.delete(dbFile);
 
-      if (_.has(dbFile, 'formats.thumbnail')) {
-        await strapi.plugins.upload.provider.delete(_.get(dbFile, 'formats.thumbnail'));
+      if (dbFile.formats) {
+        await Promise.all(
+          Object.keys(dbFile.formats).map(key => {
+            return strapi.plugins.upload.provider.delete(dbFile.formats[key]);
+          })
+        );
       }
     }
 
@@ -168,6 +188,18 @@ module.exports = {
       await strapi.plugins.upload.provider.upload(thumbnailFile);
       delete thumbnailFile.buffer;
       _.set(fileData, 'formats.thumbnail', thumbnailFile);
+    }
+
+    const formats = await generateResponsiveFormats(fileData);
+    for (const format of formats) {
+      if (!format) continue;
+
+      const { key, file } = format;
+
+      await strapi.plugins.upload.provider.upload(file);
+      delete file.buffer;
+
+      _.set(fileData, ['formats', key], file);
     }
 
     const { width, height } = await getDimensions(fileData.buffer);
@@ -212,8 +244,12 @@ module.exports = {
     if (file.provider === config.provider) {
       await strapi.plugins.upload.provider.delete(file);
 
-      if (_.has(file, 'formats.thumbnail')) {
-        await strapi.plugins.upload.provider.delete(_.get(file, 'formats.thumbnail'));
+      if (file.formats) {
+        await Promise.all(
+          Object.keys(file.formats).map(key => {
+            return strapi.plugins.upload.provider.delete(file.formats[key]);
+          })
+        );
       }
     }
 

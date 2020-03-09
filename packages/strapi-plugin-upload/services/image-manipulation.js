@@ -9,12 +9,12 @@ const { bytesToKbytes } = require('../utils/file');
 const getMetadatas = buffer =>
   sharp(buffer)
     .metadata()
-    .catch(() => ({})); // ingore errors
+    .catch(() => ({})); // ignore errors
 
 const getDimensions = buffer =>
   getMetadatas(buffer)
     .then(({ width, height }) => ({ width, height }))
-    .catch(() => ({})); // ingore errors
+    .catch(() => ({})); // ignore errors
 
 const THUMBNAIL_RESIZE_OPTIONS = {
   width: 245,
@@ -70,8 +70,64 @@ const optimize = async buffer => {
     .catch(() => ({ buffer }));
 };
 
+const BREAKPOINTS = {
+  large: 1000,
+  medium: 750,
+  small: 500,
+};
+
+const generateResponsiveFormats = async file => {
+  const {
+    responsiveDimensions = false,
+  } = await strapi.plugins.upload.services.upload.getSettings();
+
+  if (!responsiveDimensions) return {};
+
+  const originalDimensions = await getDimensions(file.buffer);
+
+  return Promise.all(
+    Object.keys(BREAKPOINTS).map(key => {
+      const breakpoint = BREAKPOINTS[key];
+
+      if (breakpointSmallerThan(breakpoint, originalDimensions)) {
+        return generateBreakpoint(key, { file, breakpoint, originalDimensions });
+      }
+    })
+  );
+};
+
+const generateBreakpoint = async (key, { file, breakpoint }) => {
+  const newBuff = await resizeTo(file.buffer, {
+    width: breakpoint,
+    height: breakpoint,
+    fit: 'inside',
+  });
+
+  if (newBuff) {
+    const { width, height, size } = await getMetadatas(newBuff);
+
+    return {
+      key,
+      file: {
+        hash: `${key}_${file.hash}`,
+        ext: file.ext,
+        mime: file.mime,
+        width,
+        height,
+        size: bytesToKbytes(size),
+        buffer: newBuff,
+      },
+    };
+  }
+};
+
+const breakpointSmallerThan = (breakpoint, { width, height }) => {
+  return breakpoint < width || breakpoint < height;
+};
+
 module.exports = {
   getDimensions,
+  generateResponsiveFormats,
   generateThumbnail,
   bytesToKbytes,
   optimize,
