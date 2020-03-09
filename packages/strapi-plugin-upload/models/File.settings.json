@@ -29,7 +29,7 @@
       "type": "integer",
       "configurable": false
     },
-    "thumbnail": {
+    "formats": {
       "type": "json",
       "configurable": false
     },

@@ -111,7 +111,7 @@ module.exports = {
     if (thumbnailFile) {
       await strapi.plugins.upload.provider.upload(thumbnailFile);
       delete thumbnailFile.buffer;
-      fileData.thumbnail = thumbnailFile;
+      _.set(fileData, 'formats.thumbnail', thumbnailFile);
     }
 
     const { width, height } = await getDimensions(fileData.buffer);
@@ -140,7 +140,7 @@ module.exports = {
     const dbFile = await this.fetch({ id });
 
     if (!dbFile) {
-      throw new Error('file not found');
+      throw strapi.errors.notFound('file not found');
     }
 
     const { fileInfo } = data;
@@ -156,8 +156,8 @@ module.exports = {
     if (dbFile.provider === config.provider) {
       await strapi.plugins.upload.provider.delete(dbFile);
 
-      if (dbFile.thumbnail !== null) {
-        await strapi.plugins.upload.provider.delete(dbFile.thumbnail);
+      if (_.has(dbFile, 'formats.thumbnail')) {
+        await strapi.plugins.upload.provider.delete(_.get(dbFile, 'formats.thumbnail'));
       }
     }
 
@@ -167,7 +167,7 @@ module.exports = {
     if (thumbnailFile) {
       await strapi.plugins.upload.provider.upload(thumbnailFile);
       delete thumbnailFile.buffer;
-      fileData.thumbnail = thumbnailFile;
+      _.set(fileData, 'formats.thumbnail', thumbnailFile);
     }
 
     const { width, height } = await getDimensions(fileData.buffer);
@@ -212,8 +212,8 @@ module.exports = {
     if (file.provider === config.provider) {
       await strapi.plugins.upload.provider.delete(file);
 
-      if (file.thumbnail !== null) {
-        await strapi.plugins.upload.provider.delete(file.thumbnail);
+      if (_.has(file, 'formats.thumbnail')) {
+        await strapi.plugins.upload.provider.delete(_.get(file, 'formats.thumbnail'));
       }
     }
 

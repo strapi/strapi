@@ -38,7 +38,7 @@ const generateThumbnail = async file => {
       const { width, height, size } = await getMetadatas(newBuff);
 
       return {
-        hash: `thumb_${file.hash}`,
+        hash: `thumbnail_${file.hash}`,
         ext: file.ext,
         mime: file.mime,
         width,
