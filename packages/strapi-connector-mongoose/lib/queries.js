@@ -454,7 +454,7 @@ module.exports = ({ model, modelKey, strapi }) => {
       if (entries.length > 0) {
         return deleteOne(entries[0][model.primaryKey]);
       }
-      return new Promise(resolve => resolve);
+      return null;
     }
 
     const entries = await find(params);

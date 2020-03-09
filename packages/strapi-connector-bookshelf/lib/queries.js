@@ -168,7 +168,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       if (entries.length > 0) {
         return deleteOne(entries[0][model.primaryKey], { transacting });
       }
-      return new Promise(resolve => resolve);
+      return null;
     }
 
     const entries = await find(params, null, { transacting });
