@@ -1,5 +1,6 @@
 // Shared constants
 import { fromJS } from 'immutable';
+import packageJSON from '../../../../package.json';
 
 import {
   DISABLE_GLOBAL_OVERLAY_BLOCKER,
@@ -23,7 +24,7 @@ const initialState = fromJS({
   overlayBlockerData: null,
   plugins: {},
   showGlobalAppBlocker: true,
-  strapiVersion: '3',
+  strapiVersion: packageJSON.version,
   uuid: false,
 });
 
@@ -44,7 +45,7 @@ function appReducer(state = initialState, action) {
     case GET_DATA_SUCCEEDED: {
       const {
         hasAdminUser,
-        data: { uuid, currentEnvironment, autoReload, strapiVersion },
+        data: { uuid, currentEnvironment, autoReload },
       } = action;
 
       return state
@@ -52,8 +53,7 @@ function appReducer(state = initialState, action) {
         .update('hasAdminUser', () => hasAdminUser)
         .update('uuid', () => uuid)
         .update('autoReload', () => autoReload)
-        .update('currentEnvironment', () => currentEnvironment)
-        .update('strapiVersion', () => strapiVersion);
+        .update('currentEnvironment', () => currentEnvironment);
     }
     case PLUGIN_LOADED:
       return state.setIn(['plugins', action.plugin.id], fromJS(action.plugin));
