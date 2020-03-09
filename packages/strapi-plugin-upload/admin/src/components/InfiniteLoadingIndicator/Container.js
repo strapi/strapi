@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { themePropTypes } from 'strapi-helper-plugin';
 
 const Container = styled.div`
   width: 44%;

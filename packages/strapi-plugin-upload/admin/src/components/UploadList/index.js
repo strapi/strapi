@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
 import { Button } from '@buffetjs/core';
 import createMatrix from '../../utils/createMatrix';
 import getTrad from '../../utils/getTrad';

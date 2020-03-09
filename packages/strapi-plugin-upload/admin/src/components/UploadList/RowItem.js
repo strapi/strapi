@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import Card from '../Card';
 import CardControl from '../CardControl';
 import CardControlsWrapper from '../CardControlsWrapper';
-import CardImgWrapper from '../CardImgWrapper';
 import InfiniteLoadingIndicator from '../InfiniteLoadingIndicator';
 
 const RowItem = ({

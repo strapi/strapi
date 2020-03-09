@@ -6,8 +6,8 @@ import CardImgWrapper from '../CardImgWrapper';
 import CardPreview from '../CardPreview';
 import Wrapper from './Wrapper';
 import Title from './Title';
+import Border from './Border';
 
-// TODO - adapt with the real data
 const Card = ({
   checked,
   children,
@@ -15,7 +15,6 @@ const Card = ({
   hasError,
   mime,
   name,
-  onChange,
   small,
   size,
   type,
@@ -26,6 +25,7 @@ const Card = ({
       <div>
         <CardImgWrapper small={small} checked={checked} hasError={hasError}>
           <CardPreview type={mime || type} url={url} />
+          <Border checked={checked} />
           {children}
         </CardImgWrapper>
         <Title fontSize="md" fontWeight="bold" ellipsis>
@@ -41,9 +41,10 @@ const Card = ({
 Card.defaultProps = {
   checked: false,
   children: null,
+  errorMessage: null,
   hasError: false,
+  mime: null,
   name: null,
-  onChange: () => {},
   size: 0,
   small: false,
   type: null,
@@ -53,9 +54,10 @@ Card.defaultProps = {
 Card.propTypes = {
   checked: PropTypes.bool,
   children: PropTypes.node,
+  errorMessage: PropTypes.string,
   hasError: PropTypes.bool,
+  mime: PropTypes.string,
   name: PropTypes.string,
-  onChange: PropTypes.func,
   size: PropTypes.number,
   small: PropTypes.bool,
   type: PropTypes.string,

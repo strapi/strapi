@@ -9,6 +9,9 @@ const FileWrapper = styled(CardImgWrapper)`
     width: 100%;
     object-fit: contain;
     margin: auto;
+    position: absolute;
+    top: 0;
+    left: 0;
   }
 
   .cropper-view-box {

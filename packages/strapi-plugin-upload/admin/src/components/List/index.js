@@ -5,6 +5,7 @@ import { Checkbox } from '@buffetjs/core';
 import createMatrix from '../../utils/createMatrix';
 
 import Card from '../Card';
+import CardControlsWrapper from '../CardControlsWrapper';
 import Wrapper from './Wrapper';
 
 const List = ({ data, onChange, selectedItems }) => {
@@ -22,9 +23,9 @@ const List = ({ data, onChange, selectedItems }) => {
               return (
                 <div className="col-xs-12 col-md-6 col-xl-3" key={JSON.stringify(item)}>
                   <Card small checked={checked} {...item} url={`${strapi.backendURL}${url}`}>
-                    <div className="card-control-wrapper">
+                    <CardControlsWrapper leftAlign className="card-control-wrapper">
                       <Checkbox name={`${id}`} onChange={onChange} value={checked} />
-                    </div>
+                    </CardControlsWrapper>
                   </Card>
                 </div>
               );
