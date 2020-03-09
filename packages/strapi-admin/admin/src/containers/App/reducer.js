@@ -14,6 +14,7 @@ import {
   UPDATE_PLUGIN,
 } from './constants';
 
+const packageVersion = packageJSON.version;
 const initialState = fromJS({
   autoReload: false,
   blockApp: false,
@@ -24,7 +25,7 @@ const initialState = fromJS({
   overlayBlockerData: null,
   plugins: {},
   showGlobalAppBlocker: true,
-  strapiVersion: packageJSON.version,
+  strapiVersion: packageVersion,
   uuid: false,
 });
 
@@ -45,8 +46,15 @@ function appReducer(state = initialState, action) {
     case GET_DATA_SUCCEEDED: {
       const {
         hasAdminUser,
-        data: { uuid, currentEnvironment, autoReload },
+        data: { uuid, currentEnvironment, autoReload, strapiVersion },
       } = action;
+
+      if (strapiVersion !== state.get('strapiVersion')) {
+        console.error(
+          `It seems that the built version ${packageVersion} is different than your project's one (${strapiVersion})`
+        );
+        console.error('Please delete your `.cache` and `build` folders and restart your app');
+      }
 
       return state
         .update('isLoading', () => false)
