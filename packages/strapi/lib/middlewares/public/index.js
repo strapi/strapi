@@ -92,7 +92,7 @@ module.exports = strapi => {
           await next();
         },
         koaStatic(buildDir, {
-          index: '/index.html',
+          index: 'index.html',
           maxage: maxAge,
           defer: false,
         })
