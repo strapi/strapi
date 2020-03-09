@@ -314,7 +314,7 @@ module.exports = ({ model, modelKey, strapi }) => {
       .filter(el => el.ref)
       .map(el => el.ref._id);
 
-    // verify the provided ids are realted to this entity.
+    // verify the provided ids are related to this entity.
     idsToKeep.forEach(id => {
       if (allIds.findIndex(currentId => currentId.toString() === id) === -1) {
         const err = new Error(
@@ -396,9 +396,8 @@ module.exports = ({ model, modelKey, strapi }) => {
   }
 
   async function findOne(params, populate) {
-    const entry = await model.findOne(params).populate(populate || defaultPopulate);
-
-    return entry ? entry.toObject() : null;
+    const entries = await find({ ...params, _limit: 1 }, populate);
+    return entries[0] || null;
   }
 
   function count(params) {
@@ -451,9 +450,9 @@ module.exports = ({ model, modelKey, strapi }) => {
 
   async function deleteMany(params) {
     if (params[model.primaryKey]) {
-      const entries = await find(params);
+      const entries = await find({ ...params, _limit: 1 });
       if (entries.length > 0) {
-        return deleteOne({ id: entries[0][model.primaryKey] });
+        return deleteOne(entries[0][model.primaryKey]);
       }
       return new Promise(resolve => resolve);
     }

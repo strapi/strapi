@@ -46,12 +46,8 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
    * Find one entry based on params
    */
   async function findOne(params, populate, { transacting } = {}) {
-    const entry = await model.where(params).fetch({
-      withRelated: populate,
-      transacting,
-    });
-
-    return entry ? entry.toJSON() : null;
+    const entries = await find({ ...params, _limit: 1 }, populate, { transacting });
+    return entries[0] || null;
   }
 
   /**
@@ -127,8 +123,8 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     return wrapTransaction(runUpdate, { transacting });
   }
 
-  async function deleteOne(params, { transacting } = {}) {
-    const entry = await model.where(params).fetch({ transacting });
+  async function deleteOne(id, { transacting } = {}) {
+    const entry = await model.where({ [model.primaryKey]: id }).fetch({ transacting });
 
     if (!entry) {
       const err = new Error('entry.notFound');
@@ -155,7 +151,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       }
     });
 
-    await model.updateRelations({ ...params, values }, { transacting });
+    await model.updateRelations({ [model.primaryKey]: id, values }, { transacting });
 
     const runDelete = async trx => {
       await deleteComponents(entry, { transacting: trx });
@@ -168,15 +164,15 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
 
   async function deleteMany(params, { transacting } = {}) {
     if (params[model.primaryKey]) {
-      const entries = await find(params, null, { transacting });
+      const entries = await find({ ...params, _limit: 1 }, null, { transacting });
       if (entries.length > 0) {
-        return deleteOne({ id: entries[0][model.primaryKey] }, { transacting });
+        return deleteOne(entries[0][model.primaryKey], { transacting });
       }
       return new Promise(resolve => resolve);
     }
 
     const entries = await find(params, null, { transacting });
-    return await Promise.all(entries.map(entry => deleteOne({ id: entry.id }, { transacting })));
+    return Promise.all(entries.map(entry => deleteOne(entry.id, { transacting })));
   }
 
   function search(params, populate) {
