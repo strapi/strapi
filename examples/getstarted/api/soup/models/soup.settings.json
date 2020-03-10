@@ -1,0 +1,29 @@
+{
+  "kind": "collectionType",
+  "connection": "default",
+  "collectionName": "soups",
+  "info": {
+    "name": "soup"
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true
+  },
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "multiple": {
+      "collection": "file",
+      "via": "related",
+      "plugin": "upload",
+      "required": false
+    },
+    "single": {
+      "model": "file",
+      "via": "related",
+      "plugin": "upload",
+      "required": false
+    }
+  }
+}
