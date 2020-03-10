@@ -6,6 +6,7 @@ import CardImgWrapper from '../CardImgWrapper';
 import CardPreview from '../CardPreview';
 import Wrapper from './Wrapper';
 import Title from './Title';
+import ErrorMessage from './ErrorMessage';
 import Border from './Border';
 
 const Card = ({
@@ -23,15 +24,15 @@ const Card = ({
   return (
     <Wrapper>
       <CardImgWrapper small={small} checked={checked} hasError={hasError}>
-        <CardPreview type={mime || type} url={url} />
-        <Border checked={checked} />
+        <CardPreview type={mime || type} url={url} hasError={hasError} />
+        <Border shown={checked || hasError} color={hasError ? 'orange' : 'mediumBlue'} />
         {children}
       </CardImgWrapper>
       <Title fontSize="md" fontWeight="bold" ellipsis>
         {name}
       </Title>
       <Text color="grey" fontSize="xs" ellipsis>{`${type} - ${size}`}</Text>
-      {hasError && <p style={{ marginBottom: 14 }}>{errorMessage}</p>}
+      {hasError && <ErrorMessage>yoyo {errorMessage}</ErrorMessage>}
     </Wrapper>
   );
 };

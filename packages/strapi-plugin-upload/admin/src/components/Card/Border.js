@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
+import { themePropTypes } from 'strapi-helper-plugin';
 
 const Border = styled.div`
   width: 100%;
@@ -8,16 +9,24 @@ const Border = styled.div`
   top: 0;
   left: 0;
   display: none;
-  border: 2px solid #007eff;
-  ${({ checked }) => checked && 'display: block;'}
+  border: 2px solid ${({ theme, color }) => theme.main.colors[color] || color};
+
+  ${({ shown }) =>
+    shown &&
+    `
+    display: block;
+  `}
 `;
 
 Border.defaultProps = {
-  checked: false,
+  color: 'mediumBlue',
+  shown: false,
 };
 
 Border.propTypes = {
-  checked: PropTypes.bool,
+  color: PropTypes.string,
+  shown: PropTypes.bool,
+  ...themePropTypes,
 };
 
 export default Border;

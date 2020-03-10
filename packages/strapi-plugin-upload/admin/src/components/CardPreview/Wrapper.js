@@ -8,6 +8,8 @@ const Wrapper = styled.div`
   top: 0;
   left: 0;
   display: flex;
+  justify-content: center;
+  align-items: center;
   background-color: ${({ isFile }) => (isFile ? '#F2F3F4' : '#333740')};
 `;
 

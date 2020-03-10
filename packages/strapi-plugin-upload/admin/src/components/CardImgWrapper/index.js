@@ -21,13 +21,6 @@ const CardImgWrapper = styled.div`
     }
   }
 
-  ${({ hasError }) =>
-    hasError &&
-    `
-      background: #F2F3F4;
-      border: 1px solid #FF5D00;
-    `}
-
   ${({ checked }) =>
     checked &&
     `
