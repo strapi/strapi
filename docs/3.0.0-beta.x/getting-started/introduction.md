@@ -15,7 +15,7 @@ It's the origin purpose of the project.
 
 ### Custom content structure
 
-With the admin panel of Strapi, you can generate the admin panel in just a few clicks, and get your whole CMS setup in a few minutes.
+You can generate the admin panel in a few clicks and get your whole CMS setup in a few minutes.
 
 ### Manage content
 
