@@ -1,25 +1,19 @@
 import React, { memo, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { InputFile as Input } from 'strapi-helper-plugin';
+// import { InputFile as Input } from 'strapi-helper-plugin';
+import InputMedia from './InputMedia';
 
-function InputFile({
-  onBlur,
-  onChange,
-  multiple,
-  error,
-  dispatch,
-  name,
-  value,
-  setLabel,
-}) {
+function InputFile({ onBlur, onChange, multiple, error, dispatch, name, value, setLabel }) {
   useEffect(() => {
     dispatch({
       type: 'SET_CHECK',
     });
   }, [dispatch]);
 
+  console.log({ name, value });
+
   return (
-    <Input
+    <InputMedia
       multiple={multiple}
       error={error}
       name={name}
@@ -54,11 +48,7 @@ InputFile.propTypes = {
   onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
   setLabel: PropTypes.func,
-  value: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.object,
-    PropTypes.array,
-  ]),
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.object, PropTypes.array]),
 };
 
 export default memo(InputFile);
