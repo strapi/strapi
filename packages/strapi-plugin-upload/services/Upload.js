@@ -10,7 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const _ = require('lodash');
-const toArray = require('stream-to-array');
+const util = require('util');
 const filenamify = require('filenamify');
 const { bytesToKbytes } = require('../utils/file');
 
@@ -37,7 +37,6 @@ module.exports = {
       ext,
       mime: type,
       size: bytesToKbytes(size),
-      thumbnail: null,
     };
 
     const { refId, ref, source, field } = metas;
@@ -61,10 +60,11 @@ module.exports = {
   },
 
   async enhanceFile(file, fileInfo = {}, metas = {}) {
-    const parts = await toArray(fs.createReadStream(file.path));
-    const buffers = parts.map(part => (_.isBuffer(part) ? part : Buffer.from(part)));
+    const readBuffer = await util.promisify(fs.readFile)(file.path);
 
-    const buffer = Buffer.concat(buffers);
+    const { optimize } = strapi.plugins.upload.services['image-manipulation'];
+
+    const { buffer, info } = await optimize(readBuffer);
 
     const formattedFile = this.formatFileInfo(
       {
@@ -76,7 +76,7 @@ module.exports = {
       metas
     );
 
-    return _.assign(formattedFile, {
+    return _.assign(formattedFile, info, {
       buffer,
     });
   },
@@ -101,9 +101,11 @@ module.exports = {
   async uploadFileAndPersist(fileData) {
     const config = strapi.plugins.upload.config;
 
-    const { getDimensions, generateThumbnail } = strapi.plugins.upload.services[
-      'image-manipulation'
-    ];
+    const {
+      getDimensions,
+      generateThumbnail,
+      generateResponsiveFormats,
+    } = strapi.plugins.upload.services['image-manipulation'];
 
     await strapi.plugins.upload.provider.upload(fileData);
 
@@ -112,6 +114,18 @@ module.exports = {
       await strapi.plugins.upload.provider.upload(thumbnailFile);
       delete thumbnailFile.buffer;
       _.set(fileData, 'formats.thumbnail', thumbnailFile);
+    }
+
+    const formats = await generateResponsiveFormats(fileData);
+    for (const format of formats) {
+      if (!format) continue;
+
+      const { key, file } = format;
+
+      await strapi.plugins.upload.provider.upload(file);
+      delete file.buffer;
+
+      _.set(fileData, ['formats', key], file);
     }
 
     const { width, height } = await getDimensions(fileData.buffer);
@@ -133,9 +147,11 @@ module.exports = {
   async replace(id, { data, file }) {
     const config = strapi.plugins.upload.config;
 
-    const { getDimensions, generateThumbnail } = strapi.plugins.upload.services[
-      'image-manipulation'
-    ];
+    const {
+      getDimensions,
+      generateThumbnail,
+      generateResponsiveFormats,
+    } = strapi.plugins.upload.services['image-manipulation'];
 
     const dbFile = await this.fetch({ id });
 
@@ -156,8 +172,12 @@ module.exports = {
     if (dbFile.provider === config.provider) {
       await strapi.plugins.upload.provider.delete(dbFile);
 
-      if (_.has(dbFile, 'formats.thumbnail')) {
-        await strapi.plugins.upload.provider.delete(_.get(dbFile, 'formats.thumbnail'));
+      if (dbFile.formats) {
+        await Promise.all(
+          Object.keys(dbFile.formats).map(key => {
+            return strapi.plugins.upload.provider.delete(dbFile.formats[key]);
+          })
+        );
       }
     }
 
@@ -168,6 +188,18 @@ module.exports = {
       await strapi.plugins.upload.provider.upload(thumbnailFile);
       delete thumbnailFile.buffer;
       _.set(fileData, 'formats.thumbnail', thumbnailFile);
+    }
+
+    const formats = await generateResponsiveFormats(fileData);
+    for (const format of formats) {
+      if (!format) continue;
+
+      const { key, file } = format;
+
+      await strapi.plugins.upload.provider.upload(file);
+      delete file.buffer;
+
+      _.set(fileData, ['formats', key], file);
     }
 
     const { width, height } = await getDimensions(fileData.buffer);
@@ -212,8 +244,12 @@ module.exports = {
     if (file.provider === config.provider) {
       await strapi.plugins.upload.provider.delete(file);
 
-      if (_.has(file, 'formats.thumbnail')) {
-        await strapi.plugins.upload.provider.delete(_.get(file, 'formats.thumbnail'));
+      if (file.formats) {
+        await Promise.all(
+          Object.keys(file.formats).map(key => {
+            return strapi.plugins.upload.provider.delete(file.formats[key]);
+          })
+        );
       }
     }
 
@@ -246,15 +282,23 @@ module.exports = {
     ).then(files => this.uploadFileAndPersist(files));
   },
 
-  async getConfig() {
-    const config = await strapi
+  getSettings() {
+    return strapi
       .store({
-        environment: strapi.config.environment,
         type: 'plugin',
         name: 'upload',
+        key: 'settings',
       })
-      .get({ key: 'provider' });
+      .get();
+  },
 
-    return { ...config, sizeLimit: parseFloat(config.sizeLimit) };
+  setSettings(value) {
+    return strapi
+      .store({
+        type: 'plugin',
+        name: 'upload',
+        key: 'settings',
+      })
+      .set({ value });
   },
 };

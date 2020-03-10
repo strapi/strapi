@@ -1,11 +1,8 @@
 'use strict';
-
 /**
- * An asynchronous bootstrap function that runs before
- * your application gets started.
+ * Upload plugin bootstrapi.
  *
- * This gives you an opportunity to set up your data model,
- * run jobs, or perform some special logic.
+ * It initializes the provider and sets the default settings in db.
  */
 
 module.exports = async () => {
