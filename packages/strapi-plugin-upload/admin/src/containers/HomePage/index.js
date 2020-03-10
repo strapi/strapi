@@ -139,6 +139,15 @@ const HomePage = () => {
     });
   };
 
+  const handleSelectAll = () => {
+    const valueToSet = !areAllCheckboxesSelected;
+
+    dispatch({
+      type: 'TOGGLE_SELECT_ALL',
+      value: valueToSet,
+    });
+  };
+
   const headerProps = {
     title: {
       label: pluginName,
@@ -177,6 +186,9 @@ const HomePage = () => {
     _page: generatePageFromStart(start, limit),
   };
 
+  const areAllCheckboxesSelected = data.length === dataToDelete.length;
+  const hasSomeCheckboxSelected = dataToDelete.length > 0;
+
   return (
     <Container>
       <Header {...headerProps} />
@@ -189,7 +201,11 @@ const HomePage = () => {
         value={searchValue}
       />
       <ControlsWrapper>
-        <SelectAll />
+        <SelectAll
+          onChange={handleSelectAll}
+          checked={areAllCheckboxesSelected}
+          someChecked={hasSomeCheckboxSelected && !areAllCheckboxesSelected}
+        />
         <SortPicker onChange={handleChangeParams} value={query.get('_sort') || null} />
         <Filters
           onChange={handleChangeParams}
