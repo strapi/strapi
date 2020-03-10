@@ -10,8 +10,6 @@ function InputFile({ onBlur, onChange, multiple, error, dispatch, name, value, s
     });
   }, [dispatch]);
 
-  console.log({ name, value });
-
   return (
     <InputMedia
       multiple={multiple}

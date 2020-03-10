@@ -68,6 +68,15 @@ class ImgPreview extends React.Component {
     if (isEmpty(nextProps.files)) {
       this.setState({ isImg: false, imgURL: null });
     }
+
+    if (nextProps.files !== this.props.files) {
+      const file = nextProps.files[nextProps.position] || nextProps.files || '';
+      this.generateImgURL(file);
+
+      if (!this.state.isInitValue) {
+        this.setState({ isInitValue: true });
+      }
+    }
   }
 
   componentDidCatch(error, info) {

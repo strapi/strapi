@@ -24,6 +24,12 @@ class InputFile extends React.Component {
     position: 0,
   };
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.value !== this.props.value) {
+      this.setState({ position: 0 });
+    }
+  }
+
   onDrop = e => {
     e.preventDefault();
     this.addFilesToProps(e.dataTransfer.files);
