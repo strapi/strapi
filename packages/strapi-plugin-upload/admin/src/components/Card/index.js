@@ -23,16 +23,16 @@ const Card = ({
 }) => {
   return (
     <Wrapper>
-      <CardImgWrapper small={small} checked={checked} hasError={hasError}>
-        <CardPreview type={mime || type} url={url} hasError={hasError} />
-        <Border shown={checked || hasError} color={hasError ? 'orange' : 'mediumBlue'} />
+      <CardImgWrapper checked={checked} small={small}>
+        <CardPreview hasError={hasError} url={url} type={mime || type} />
+        <Border color={hasError ? 'orange' : 'mediumBlue'} shown={checked || hasError} />
         {children}
       </CardImgWrapper>
       <Title fontSize="md" fontWeight="bold" ellipsis>
         {name}
       </Title>
       <Text color="grey" fontSize="xs" ellipsis>{`${type} - ${size}`}</Text>
-      {hasError && <ErrorMessage>yoyo {errorMessage}</ErrorMessage>}
+      {hasError && <ErrorMessage>{errorMessage}</ErrorMessage>}
     </Wrapper>
   );
 };

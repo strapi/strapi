@@ -9,13 +9,8 @@ const Border = styled.div`
   top: 0;
   left: 0;
   display: none;
+  ${({ shown }) => shown && 'display: block;'}
   border: 2px solid ${({ theme, color }) => theme.main.colors[color] || color};
-
-  ${({ shown }) =>
-    shown &&
-    `
-    display: block;
-  `}
 `;
 
 Border.defaultProps = {
