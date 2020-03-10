@@ -44,7 +44,7 @@ We decided to change the policies naming convention to match with the future nam
 - Global policy: `global::{policy}`.
 - Plugin policy: `plugins::{pluginName}.{policy}`.
 
-We are also introductin application naming so you can access an api policy easily or reference it absolutely when the context doesn't allow forto find out directly.
+We are also introducting application naming so you can access an api policy easily or reference it absolutely when the context doesn't allow to find out directly.
 
 You can now reference a policy located at `./api/{apiName}/config/policies/{policy}` with the following syntax: `{apiName}.{policy}`.
 
