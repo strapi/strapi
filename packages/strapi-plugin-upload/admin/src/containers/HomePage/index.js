@@ -140,11 +140,9 @@ const HomePage = () => {
   };
 
   const handleSelectAll = () => {
-    const valueToSet = !areAllCheckboxesSelected;
-
     dispatch({
       type: 'TOGGLE_SELECT_ALL',
-      value: valueToSet,
+      value: !areAllCheckboxesSelected,
     });
   };
 
