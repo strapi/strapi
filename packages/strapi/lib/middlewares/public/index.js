@@ -40,7 +40,7 @@ module.exports = strapi => {
         },
         koaStatic(staticDir, {
           maxage: maxAge,
-          defer: true,
+          defer: false,
         })
       );
 
