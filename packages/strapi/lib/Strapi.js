@@ -225,7 +225,7 @@ class Strapi extends EventEmitter {
       this.app.use(this.router.routes()).use(this.router.allowedMethods());
 
       // Launch server.
-      this.server.listen(this.config.port, async err => {
+      this.server.listen(this.config.port, this.config.host, async err => {
         if (err) return this.stopWithError(err);
 
         if (!isInitialised) {
