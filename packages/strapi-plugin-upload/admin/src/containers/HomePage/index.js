@@ -55,7 +55,7 @@ const HomePage = () => {
     const requestURL = getRequestUrl(`files/${id}`);
 
     try {
-      await request(`${requestURL}${search}`, {
+      await request(requestURL, {
         method: 'DELETE',
       });
     } catch (err) {
