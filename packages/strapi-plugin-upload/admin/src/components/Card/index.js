@@ -16,7 +16,7 @@ const Card = ({ checked, id, name, size, small, type, onChange, url }) => {
         <CardImgWrapper small={small} checked={checked}>
           <CardPreview type={type} url={url} />
           <div className="card-control-wrapper">
-            <Checkbox name={id} onChange={onChange} value={checked} />
+            <Checkbox name={`${id}`} onChange={onChange} value={checked} />
           </div>
         </CardImgWrapper>
         <Title fontSize="md" fontWeight="bold" ellipsis>
@@ -41,7 +41,7 @@ Card.defaultProps = {
 Card.propTypes = {
   checked: PropTypes.bool,
   name: PropTypes.string,
-  id: PropTypes.string.isRequired,
+  id: PropTypes.number.isRequired,
   onChange: PropTypes.func,
   size: PropTypes.number,
   small: PropTypes.bool,

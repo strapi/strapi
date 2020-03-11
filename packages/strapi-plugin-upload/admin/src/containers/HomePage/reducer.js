@@ -1,4 +1,4 @@
-import { fromJS } from 'immutable';
+import { List, fromJS } from 'immutable';
 
 const initialState = fromJS({
   data: [],
@@ -22,13 +22,13 @@ const reducer = (state, action) => {
       return state.removeIn(['dataToDelete', index]);
     }
     case 'TOGGLE_SELECT_ALL': {
-      const { value } = action;
+      const isSelected = List(state.get('data')).size === List(state.get('dataToDelete')).size;
 
-      if (!value) {
-        return state.update('dataToDelete', () => []);
+      if (isSelected) {
+        return state.update('dataToDelete', () => List([]));
       }
 
-      return state.update('dataToDelete', () => state.get('data').map(item => item.get('id')));
+      return state.update('dataToDelete', () => List(state.get('data').map(item => item.id)));
     }
     default:
       return state;

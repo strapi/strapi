@@ -51,6 +51,18 @@ const HomePage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
+  const deleteMedia = async id => {
+    const requestURL = getRequestUrl(`files/${id}`);
+
+    try {
+      await request(`${requestURL}${search}`, {
+        method: 'DELETE',
+      });
+    } catch (err) {
+      strapi.notification.error('notification.error');
+    }
+  };
+
   const fetchData = async () => {
     const requestURL = getRequestUrl('files');
 
@@ -91,7 +103,7 @@ const HomePage = () => {
   const handleChangeCheck = ({ target: { name, value } }) => {
     dispatch({
       type: 'ON_CHANGE_DATA_TO_DELETE',
-      id: name,
+      id: parseInt(name, 10),
       value,
     });
   };
@@ -139,10 +151,15 @@ const HomePage = () => {
     });
   };
 
+  const handleDeleteMedias = async () => {
+    await Promise.all(dataToDelete.map(id => deleteMedia(id)));
+
+    fetchData();
+  };
+
   const handleSelectAll = () => {
     dispatch({
       type: 'TOGGLE_SELECT_ALL',
-      value: !areAllCheckboxesSelected,
     });
   };
 
@@ -163,7 +180,7 @@ const HomePage = () => {
         color: 'cancel',
         // TradId from the strapi-admin package
         label: formatMessage({ id: 'app.utils.delete' }),
-        onClick: () => {},
+        onClick: handleDeleteMedias,
         type: 'button',
       },
       {
@@ -211,7 +228,7 @@ const HomePage = () => {
           onClick={handleDeleteFilter}
         />
       </ControlsWrapper>
-      <List onChange={handleChangeCheck} selectedItems={dataToDelete} />
+      <List data={data} onChange={handleChangeCheck} selectedItems={dataToDelete} />
       <ListEmpty onClick={() => handleClickToggleModal()} />
       <PageFooter
         context={{ emitEvent: () => {} }}
