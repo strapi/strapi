@@ -8,9 +8,10 @@ import { Checkbox, CheckboxWrapper, Label } from '@buffetjs/styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useDataManager from '../../hooks/useDataManager';
 import getTrad from '../../utils/getTrad';
+import Ul from '../SelectMenuUl';
+import SubUl from '../SelectMenuSubUl';
 import UpperFirst from '../UpperFirst';
-import SubUl from './SubUl';
-import Ul from './Ul';
+
 import hasSubArray from './utils/hasSubArray';
 import hasSomeSubArray from './utils/HasSomeSubArray';
 
@@ -28,41 +29,10 @@ const MultipleMenuList = ({
     ['contentType', 'schema', 'attributes', dzName, 'components'],
     []
   );
-  const filteredComponentsGroupedByCategory = Object.keys(
-    componentsGroupedByCategory
-  ).reduce((acc, current) => {
-    const filteredComponents = componentsGroupedByCategory[current].filter(
-      ({ uid }) => {
+  const filteredComponentsGroupedByCategory = Object.keys(componentsGroupedByCategory).reduce(
+    (acc, current) => {
+      const filteredComponents = componentsGroupedByCategory[current].filter(({ uid }) => {
         return !alreadyUsedComponents.includes(uid);
-      }
-    );
-
-    if (filteredComponents.length > 0) {
-      acc[current] = filteredComponents;
-    }
-
-    return acc;
-  }, {});
-
-  const collapsesObject = Object.keys(
-    filteredComponentsGroupedByCategory
-  ).reduce((acc, current) => {
-    acc[current] = false;
-
-    return acc;
-  }, {});
-  const [collapses, setCollapses] = useState(collapsesObject);
-  const [options, setOptions] = useState(filteredComponentsGroupedByCategory);
-
-  // Search for component
-  useEffect(() => {
-    const formattedOptions = Object.keys(
-      filteredComponentsGroupedByCategory
-    ).reduce((acc, current) => {
-      const filteredComponents = filteredComponentsGroupedByCategory[
-        current
-      ].filter(({ schema: { name } }) => {
-        return name.includes(inputValue);
       });
 
       if (filteredComponents.length > 0) {
@@ -70,7 +40,39 @@ const MultipleMenuList = ({
       }
 
       return acc;
-    }, {});
+    },
+    {}
+  );
+
+  const collapsesObject = Object.keys(filteredComponentsGroupedByCategory).reduce(
+    (acc, current) => {
+      acc[current] = false;
+
+      return acc;
+    },
+    {}
+  );
+  const [collapses, setCollapses] = useState(collapsesObject);
+  const [options, setOptions] = useState(filteredComponentsGroupedByCategory);
+
+  // Search for component
+  useEffect(() => {
+    const formattedOptions = Object.keys(filteredComponentsGroupedByCategory).reduce(
+      (acc, current) => {
+        const filteredComponents = filteredComponentsGroupedByCategory[current].filter(
+          ({ schema: { name } }) => {
+            return name.includes(inputValue);
+          }
+        );
+
+        if (filteredComponents.length > 0) {
+          acc[current] = filteredComponents;
+        }
+
+        return acc;
+      },
+      {}
+    );
 
     setOptions(formattedOptions);
 
@@ -167,8 +169,7 @@ const MultipleMenuList = ({
         )}
         {Object.keys(options).map(categoryName => {
           const isChecked = getCategoryValue(categoryName);
-          const someChecked =
-            !isChecked && doesCategoryHasSomeElements(categoryName);
+          const someChecked = !isChecked && doesCategoryHasSomeElements(categoryName);
           const target = { name: categoryName, value: !isChecked };
 
           return (
@@ -205,18 +206,14 @@ const MultipleMenuList = ({
                   >
                     <FontAwesomeIcon
                       className="chevron"
-                      icon={
-                        collapses[categoryName] ? 'chevron-up' : 'chevron-down'
-                      }
+                      icon={collapses[categoryName] ? 'chevron-up' : 'chevron-down'}
                     />
                   </div>
                 </CheckboxWrapper>
               </div>
               <SubUl tag="ul" isOpen={collapses[categoryName]}>
                 {options[categoryName].map(component => {
-                  const isChecked = get(value, 'value', []).includes(
-                    component.uid
-                  );
+                  const isChecked = get(value, 'value', []).includes(component.uid);
                   const target = { name: component.uid, value: !isChecked };
 
                   return (
