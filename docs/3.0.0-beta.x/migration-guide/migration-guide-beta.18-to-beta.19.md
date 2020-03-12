@@ -32,7 +32,7 @@ Then run either `yarn install` or `npm install`.
 
 ## Policies syntax change
 
-We decided to change the policies naming convention to match with the future naming convetion we will be using throughout the project.
+We decided to change the policies naming convention to match the future naming convention we will be using throughout the project.
 
 **Before**
 
@@ -44,11 +44,11 @@ We decided to change the policies naming convention to match with the future nam
 - Global policy: `global::{policy}`.
 - Plugin policy: `plugins::{pluginName}.{policy}`.
 
-We are also introductin application naming so you can access an api policy easily or reference it absolutely when the context doesn't allow forto find out directly.
+We are also introducing application naming so you can access an api policy more easily or reference it absolutely when the context otherwise wouldn't allow to find it directly.
 
 You can now reference a policy located at `./api/{apiName}/config/policies/{policy}` with the following syntax: `{apiName}.{policy}`.
 
-Although we do not recommend it (error prone), you can still access a local policy with the syntax `{policy}` . This syntax will only allow access to a policy declared in the api you are referencing it from. (e.g, polici in `restaurant` api and route in `restaurant` api only).
+Although we do not recommend it (as it is error prone), you can still access a given local policy with the syntax `{policy}`. This syntax will only allow access to a policy declared in the scope of the api you are referencing it from (e.g, a given policy within the `restaurant` api and a route within the `restaurant` api only).
 
 ## Rebuilding your administration panel
 
