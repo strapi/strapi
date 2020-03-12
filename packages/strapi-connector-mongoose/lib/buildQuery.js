@@ -14,6 +14,7 @@ const utils = require('./utils')();
 const buildQuery = ({
   model,
   filters = {},
+  search = {},
   populate = [],
   aggregate = false,
 } = {}) => {
@@ -22,7 +23,7 @@ const buildQuery = ({
   );
 
   if (deepFilters.length === 0 && aggregate === false) {
-    return buildSimpleQuery({ model, filters, populate });
+    return buildSimpleQuery({ model, filters, search, populate });
   }
 
   return buildDeepQuery({ model, filters, populate });
@@ -35,11 +36,15 @@ const buildQuery = ({
  * @param {Object} options.filers - An object with the possible filters (start, limit, sort, where)
  * @param {Object} options.populate - An array of paths to populate
  */
-const buildSimpleQuery = ({ model, filters, populate }) => {
+const buildSimpleQuery = ({ model, filters, search, populate }) => {
   const { where = [] } = filters;
 
   const wheres = where.map(buildWhereClause);
   const findCriteria = wheres.length > 0 ? { $and: wheres } : {};
+
+  if (search.length > 0 && findCriteria.$and) {
+    findCriteria.$and = [{ $and: findCriteria.$and }, { $or: search }];
+  }
 
   let query = model.find(findCriteria).populate(populate);
   query = applyQueryParams({ query, filters });

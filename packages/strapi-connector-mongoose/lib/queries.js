@@ -4,11 +4,7 @@
  */
 
 const _ = require('lodash');
-const {
-  convertRestQueryParams,
-  buildQuery,
-  models: modelUtils,
-} = require('strapi-utils');
+const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
 const { findComponentByGlobalId } = require('./utils/helpers');
 
@@ -16,7 +12,7 @@ const hasPK = (obj, model) => _.has(obj, model.primaryKey) || _.has(obj, 'id');
 const getPK = (obj, model) =>
   _.has(obj, model.primaryKey) ? obj[model.primaryKey] : obj.id;
 
-module.exports = ({ model, modelKey, strapi }) => {
+module.exports = ({ model, strapi }) => {
   const assocKeys = model.associations.map(ast => ast.alias);
   const componentKeys = Object.keys(model.attributes).filter(key =>
     ['component', 'dynamiczone'].includes(model.attributes[key].type)
@@ -546,33 +542,34 @@ module.exports = ({ model, modelKey, strapi }) => {
   }
 
   function search(params, populate) {
-    // Convert `params` object to filters compatible with Mongo.
-    const filters = modelUtils.convertParams(modelKey, params);
+    const populateOpt = populate || defaultPopulate;
 
-    const $or = buildSearchOr(model, params._q);
+    const search = buildSearchOr(model, params._q);
+    _.unset(params, '_q');
 
-    _.unset(filters, 'where._q');
+    const filters = convertRestQueryParams(params);
 
-    return model
-      .find({ $and: [filters.where, { $or }] })
-      .sort(filters.sort)
-      .skip(filters.start)
-      .limit(filters.limit)
-      .populate(populate || defaultPopulate)
-      .then(results =>
-        results.map(result => (result ? result.toObject() : null))
-      );
+    return buildQuery({
+      model,
+      filters,
+      search,
+      populate: populateOpt,
+    }).then(results =>
+      results.map(result => (result ? result.toObject() : null))
+    );
   }
 
   function countSearch(params) {
-    // Convert `params` object to filters compatible with Mongo.
-    const filters = modelUtils.convertParams(modelKey, params);
+    const search = buildSearchOr(model, params._q);
+    _.unset(params, '_q');
 
-    const $or = buildSearchOr(model, params._q);
+    const filters = convertRestQueryParams(params);
 
-    _.unset(filters, 'where._q');
-
-    return model.find({ $and: [filters.where, { $or }] }).countDocuments();
+    return buildQuery({
+      model,
+      filters,
+      search,
+    }).count();
   }
 
   return {

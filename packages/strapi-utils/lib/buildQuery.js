@@ -105,7 +105,7 @@ const normalizeFieldName = ({ model, field }) => {
  * @param {Object} options.filters - The filters for the query (start, sort, limit, and where clauses)
  * @param {Object} options.rest - In case the database layer requires any other params pass them
  */
-const buildQuery = ({ model, filters = {}, ...rest }) => {
+const buildQuery = ({ model, filters = {}, search = {}, ...rest }) => {
   // Validate query clauses
   if (filters.where && Array.isArray(filters.where)) {
     const deepFilters = filters.where.filter(
@@ -142,7 +142,7 @@ const buildQuery = ({ model, filters = {}, ...rest }) => {
   // call the orm's buildQuery implementation
   return strapi.db.connectors
     .get(model.orm)
-    .buildQuery({ model, filters, ...rest });
+    .buildQuery({ model, filters, search, ...rest });
 };
 
 module.exports = buildQuery;
