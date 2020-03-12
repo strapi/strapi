@@ -844,10 +844,10 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@buffetjs/core@3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@buffetjs/core/-/core-3.0.0.tgz#457d5a55246f2b0c7edfc85173b46e97b0348b42"
-  integrity sha512-fJIFG5Rwj6vY1XHbvxa6C347T/MffwUjC76jzJU6gxfgYpxI0TUftRIZ0WNKPQALOK8GbNcLJM5mKKzL5eF18w==
+"@buffetjs/core@3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@buffetjs/core/-/core-3.0.1.tgz#d508415a34d31f187008245b2e209e242c27e019"
+  integrity sha512-OLtHynNaaUJ03YRundxHRiXVs//IdFwep/fS3Xt8aYJH/xtVhPO5nqLGAkN8T6jyLVn+fxYZ7zy+T9ccrta3TQ==
   dependencies:
     "@buffetjs/hooks" "3.0.0"
     "@buffetjs/icons" "3.0.0"
@@ -863,12 +863,12 @@
     react-dates "^21.5.1"
     react-moment-proptypes "^1.7.0"
 
-"@buffetjs/custom@3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@buffetjs/custom/-/custom-3.0.0.tgz#193010fc111be51f1bd6f47e6f3f32d6fb61f9b5"
-  integrity sha512-qeZMbiHQPoiEnb7rSB4KVa6EZhAJ3Y1VWx8nqQuGQVQMZYZ3JGS8tmSO3XpA8k3SYjKirB0U+SDSlV7jlTM2Nw==
+"@buffetjs/custom@3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@buffetjs/custom/-/custom-3.0.1.tgz#41ced07dc35e0442ecc4ec263e304b181f576e8e"
+  integrity sha512-TmsO8iKsOZPFigwEoJ2xxwzk7w0qT26QbKldmKepV1Y9LZHjWaSjjHEJpSlpzgU1/5FxOhaeQmTJTzWHMrvcUQ==
   dependencies:
-    "@buffetjs/core" "3.0.0"
+    "@buffetjs/core" "3.0.1"
     "@buffetjs/styles" "3.0.0"
     "@buffetjs/utils" "3.0.0"
     moment "^2.24.0"
