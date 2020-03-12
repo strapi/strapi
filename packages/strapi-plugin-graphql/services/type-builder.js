@@ -16,8 +16,7 @@ const GraphQLLong = require('graphql-type-long');
 const Time = require('../types/time');
 const { toSingular, toInputName } = require('./naming');
 
-const isScalarAttribute = ({ type }) =>
-  type && !['component', 'dynamiczone'].includes(type);
+const isScalarAttribute = ({ type }) => type && !['component', 'dynamiczone'].includes(type);
 
 module.exports = {
   /**
@@ -90,9 +89,7 @@ module.exports = {
         typeName =
           action === 'update'
             ? `edit${_.upperFirst(toSingular(globalId))}Input`
-            : `${_.upperFirst(toSingular(globalId))}Input${
-                required ? '!' : ''
-              }`;
+            : `${_.upperFirst(toSingular(globalId))}Input${required ? '!' : ''}`;
       }
 
       if (repeatable === true) {
@@ -104,9 +101,7 @@ module.exports = {
     if (attribute.type === 'dynamiczone') {
       const { required } = attribute;
 
-      const unionName = `${modelName}${_.upperFirst(
-        _.camelCase(attributeName)
-      )}DynamicZone`;
+      const unionName = `${modelName}${_.upperFirst(_.camelCase(attributeName))}DynamicZone`;
 
       let typeName = unionName;
 
@@ -202,9 +197,7 @@ module.exports = {
   addPolymorphicUnionType(definition) {
     const types = graphql
       .parse(definition)
-      .definitions.filter(
-        def => def.kind === 'ObjectTypeDefinition' && def.name.value !== 'Query'
-      )
+      .definitions.filter(def => def.kind === 'ObjectTypeDefinition' && def.name.value !== 'Query')
       .map(def => def.name.value);
 
     if (types.length > 0) {
@@ -250,7 +243,7 @@ module.exports = {
 
     const inputs = `
       input ${inputName} {
-        
+
         ${Object.keys(model.attributes)
           .map(attributeName => {
             return `${attributeName}: ${this.convertType({
@@ -278,6 +271,7 @@ module.exports = {
           .join('\n')}
       }
     `;
+
     return inputs;
   },
 
