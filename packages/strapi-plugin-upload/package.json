@@ -16,8 +16,6 @@
     "immutable": "^3.8.2",
     "invariant": "^2.2.1",
     "lodash": "^4.17.11",
-    "mime-db": "1.43.0",
-    "mime-type": "3.0.7",
     "react": "^16.9.0",
     "react-copy-to-clipboard": "^5.0.1",
     "react-dom": "^16.9.0",
