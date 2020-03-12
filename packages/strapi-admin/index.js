@@ -7,8 +7,7 @@ const WebpackDevServer = require('webpack-dev-server');
 const chalk = require('chalk');
 const chokidar = require('chokidar');
 
-const getPkgPath = name =>
-  path.dirname(require.resolve(`${name}/package.json`));
+const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
 
 async function createPluginsJs(plugins, localPlugins, dest) {
   const content = `
@@ -51,10 +50,7 @@ module.exports = {
 }
   `;
 
-  return fs.writeFile(
-    path.resolve(dest, 'admin', 'src', 'plugins.js'),
-    content
-  );
+  return fs.writeFile(path.resolve(dest, 'admin', 'src', 'plugins.js'), content);
 }
 
 async function copyPlugin(name, dest) {
@@ -88,6 +84,9 @@ async function copyAdmin(dest) {
     path.resolve(adminPath, 'config', 'layout.js'),
     path.resolve(dest, 'config', 'layout.js')
   );
+
+  // Copy package.json
+  await fs.copy(path.resolve(adminPath, 'package.json'), path.resolve(dest, 'package.json'));
 }
 
 async function copyCustomAdmin(src, dest) {
@@ -110,9 +109,7 @@ async function createCacheDir(dir) {
     localPluginsToCopy = fs
       .readdirSync(path.join(dir, 'plugins'))
       .filter(plugin =>
-        fs.existsSync(
-          path.resolve(dir, 'plugins', plugin, 'admin', 'src', 'index.js')
-        )
+        fs.existsSync(path.resolve(dir, 'plugins', plugin, 'admin', 'src', 'index.js'))
       );
   }
 
@@ -235,11 +232,7 @@ async function watchAdmin({ dir, host, port, options }) {
 
     console.log(chalk.green('Starting the development server...'));
     console.log();
-    console.log(
-      chalk.green(
-        `Admin development at http://${host}:${port}${opts.publicPath}`
-      )
-    );
+    console.log(chalk.green(`Admin development at http://${host}:${port}${opts.publicPath}`));
   });
 
   watchFiles(dir, options.watchIgnoreFiles);
@@ -269,18 +262,12 @@ async function watchFiles(dir, ignoreFiles = []) {
 
   watcher.on('all', async (event, filePath) => {
     const isExtension = filePath.includes(extensionsPath);
-    const pluginName = isExtension
-      ? filePath.replace(extensionsPath, '').split(path.sep)[1]
-      : '';
+    const pluginName = isExtension ? filePath.replace(extensionsPath, '').split(path.sep)[1] : '';
 
-    const packageName = isExtension
-      ? `strapi-plugin-${pluginName}`
-      : 'strapi-admin';
+    const packageName = isExtension ? `strapi-plugin-${pluginName}` : 'strapi-admin';
 
     const targetPath = isExtension
-      ? path.normalize(
-          filePath.split(extensionsPath)[1].replace(pluginName, '')
-        )
+      ? path.normalize(filePath.split(extensionsPath)[1].replace(pluginName, ''))
       : path.normalize(filePath.split(admin)[1]);
 
     const destFolder = isExtension
@@ -320,9 +307,7 @@ async function watchFiles(dir, ignoreFiles = []) {
             filePath.split('/admin/src').filter(p => !!p).length === 1;
 
           if (
-            (event === 'unlinkDir' &&
-              !isExtension &&
-              shouldCopyPluginsJSFile) ||
+            (event === 'unlinkDir' && !isExtension && shouldCopyPluginsJSFile) ||
             (!isExtension && filePath.includes('plugins.js'))
           ) {
             await createPluginsJs(appPlugins, path.join(cacheDir));
