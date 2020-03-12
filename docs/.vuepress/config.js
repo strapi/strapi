@@ -213,6 +213,7 @@ module.exports = {
             '/3.0.0-beta.x/guides/slug',
             '/3.0.0-beta.x/guides/send-email',
             '/3.0.0-beta.x/guides/registering-field-in-admin',
+            '/3.0.0-beta.x/guides/count-graphql',
           ],
         },
         {
