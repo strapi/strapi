@@ -49,20 +49,10 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
         multiple: yup.boolean(),
         required: validators.required,
         unique: validators.unique,
-        allowedTypes: yup.lazy(value => {
-          if (Array.isArray(value) && value.includes('all')) {
-            return yup
-              .array()
-              .of(yup.string().oneOf(['all']))
-              .min(1)
-              .max(1);
-          }
-
-          return yup
-            .array()
-            .of(yup.string().oneOf(['images', 'videos', 'files']))
-            .min(1);
-        }),
+        allowedTypes: yup
+          .array()
+          .of(yup.string().oneOf(['images', 'videos', 'files']))
+          .min(1),
       };
     }
 
