@@ -32,7 +32,6 @@ module.exports = {
       name: usedName,
       alternativeText: fileInfo.alternativeText,
       caption: fileInfo.caption,
-      // sha256: niceHash(buffer),
       hash: generateFileName(usedName),
       ext,
       mime: type,
