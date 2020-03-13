@@ -495,6 +495,14 @@ const FormModal = () => {
     });
   };
 
+  const handleChangeMediaAllowedTypes = ({ target: { name, value } }) => {
+    dispatch({
+      type: 'ON_CHANGE_ALLOWED_TYPE',
+      name,
+      value,
+    });
+  };
+
   const handleChange = ({ target: { name, value, type, ...rest } }) => {
     const namesThatCanResetToNullValue = ['enumName', 'max', 'min', 'maxLength', 'minLength'];
     let val;
@@ -1001,7 +1009,10 @@ const FormModal = () => {
       onOpened={onOpened}
       onClosed={onClosed}
       onToggle={handleToggle}
-      withoverflow={toString(state.modalType === 'addComponentToDynamicZone')}
+      withoverflow={toString(
+        state.modalType === 'addComponentToDynamicZone' ||
+          (state.modalType === 'attribute' && state.attributeType === 'media')
+      )}
     >
       <HeaderModal>
         <ModalHeader headerId={state.headerId} headers={headers} />
@@ -1212,7 +1223,9 @@ const FormModal = () => {
                                 {...input}
                                 modifiedData={modifiedData}
                                 addComponentsToDynamicZone={handleClickAddComponentsToDynamicZone}
+                                changeMediaAllowedTypes={handleChangeMediaAllowedTypes}
                                 customInputs={{
+                                  allowedTypesSelect: WrapperSelect,
                                   componentIconPicker: ComponentIconPicker,
                                   componentSelect: WrapperSelect,
                                   creatableSelect: WrapperSelect,

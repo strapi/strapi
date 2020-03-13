@@ -4,20 +4,14 @@ import { components } from 'react-select';
 import { upperFirst } from 'lodash';
 import { useQuery } from 'strapi-helper-plugin';
 import useDataManager from '../../hooks/useDataManager';
+import Ul from '../SelectMenuUl';
 import Category from './Category';
-import Ul from './Ul';
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
 const MenuList = ({
-  selectProps: {
-    isAddingAComponentToAnotherComponent,
-    name,
-    onClickOption,
-    refState,
-    value,
-  },
+  selectProps: { isAddingAComponentToAnotherComponent, name, onClickOption, refState, value },
   ...rest
 }) => {
   const {
@@ -33,11 +27,7 @@ const MenuList = ({
 
   return (
     <Component {...rest}>
-      <Ul
-        style={{
-          maxHeight: 150,
-        }}
-      >
+      <Ul>
         {Object.keys(componentsGroupedByCategory)
           .sort()
           .map(categoryName => {

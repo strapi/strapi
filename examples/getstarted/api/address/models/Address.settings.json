@@ -7,10 +7,7 @@
   },
   "options": {
     "increments": true,
-    "timestamps": [
-      "created_at",
-      "updated_at"
-    ],
+    "timestamps": ["created_at", "updated_at"],
     "comment": ""
   },
   "attributes": {
@@ -34,13 +31,15 @@
       "model": "file",
       "via": "related",
       "plugin": "upload",
-      "required": false
+      "required": false,
+      "allowedTypes": ["images", "cover"]
     },
     "images": {
       "collection": "file",
       "via": "related",
       "plugin": "upload",
-      "required": false
+      "required": false,
+      "allowedTypes": []
     },
     "full_name": {
       "type": "string",
