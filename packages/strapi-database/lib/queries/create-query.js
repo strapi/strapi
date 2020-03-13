@@ -1,5 +1,7 @@
 'use strict';
 
+const { replaceIdByPrimaryKey } = require('../utils/primary-key');
+
 module.exports = function createQuery(opts) {
   return new Query(opts);
 };
@@ -35,43 +37,49 @@ class Query {
     }
 
     if (typeof mapping[this.orm] !== 'function') {
-      throw new Error(
-        `Custom queries must be functions received ${typeof mapping[this.orm]}`
-      );
+      throw new Error(`Custom queries must be functions received ${typeof mapping[this.orm]}`);
     }
 
     return mapping[this.model.orm].call(this, { model: this.model });
   }
 
-  find(...args) {
-    return this.connectorQuery.find(...args);
+  find(params = {}, ...args) {
+    const newParams = replaceIdByPrimaryKey(params, this.model);
+    return this.connectorQuery.find(newParams, ...args);
   }
 
-  findOne(...args) {
-    return this.connectorQuery.findOne(...args);
+  findOne(params = {}, ...args) {
+    const newParams = replaceIdByPrimaryKey(params, this.model);
+    return this.connectorQuery.findOne(newParams, ...args);
   }
 
-  create(...args) {
-    return this.connectorQuery.create(...args);
+  create(params = {}, ...args) {
+    const newParams = replaceIdByPrimaryKey(params, this.model);
+    return this.connectorQuery.create(newParams, ...args);
   }
 
-  update(...args) {
-    return this.connectorQuery.update(...args);
+  update(params = {}, ...args) {
+    const newParams = replaceIdByPrimaryKey(params, this.model);
+    return this.connectorQuery.update(newParams, ...args);
   }
 
-  delete(...args) {
-    return this.connectorQuery.delete(...args);
+  delete(params = {}, ...args) {
+    const newParams = replaceIdByPrimaryKey(params, this.model);
+    return this.connectorQuery.delete(newParams, ...args);
   }
 
-  count(...args) {
-    return this.connectorQuery.count(...args);
+  count(params = {}, ...args) {
+    const newParams = replaceIdByPrimaryKey(params, this.model);
+    return this.connectorQuery.count(newParams, ...args);
   }
 
-  search(...args) {
-    return this.connectorQuery.search(...args);
+  search(params = {}, ...args) {
+    const newParams = replaceIdByPrimaryKey(params, this.model);
+    return this.connectorQuery.search(newParams, ...args);
   }
 
-  countSearch(...args) {
-    return this.connectorQuery.countSearch(...args);
+  countSearch(params = {}, ...args) {
+    const newParams = replaceIdByPrimaryKey(params, this.model);
+    return this.connectorQuery.countSearch(newParams, ...args);
   }
 }
