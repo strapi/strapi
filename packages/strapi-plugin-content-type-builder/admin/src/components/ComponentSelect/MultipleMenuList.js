@@ -4,10 +4,11 @@ import { components } from 'react-select';
 import { FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
 import { useQuery } from 'strapi-helper-plugin';
-import { Checkbox, CheckboxWrapper, Label } from '@buffetjs/styles';
+import { CheckboxWrapper, Label } from '@buffetjs/styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useDataManager from '../../hooks/useDataManager';
 import getTrad from '../../utils/getTrad';
+import SelectCheckbox from '../SelectCheckbox';
 import Ul from '../SelectMenuUl';
 import SubUl from '../SelectMenuSubUl';
 import UpperFirst from '../UpperFirst';
@@ -151,11 +152,7 @@ const MultipleMenuList = ({
 
   return (
     <Component {...rest}>
-      <Ul
-        style={{
-          maxHeight: 150,
-        }}
-      >
+      <Ul>
         {Object.keys(options).length === 0 && (
           <FormattedMessage
             id={getTrad(
@@ -182,13 +179,12 @@ const MultipleMenuList = ({
                       handleChangeCategory({ target });
                     }}
                   >
-                    <Checkbox
+                    <SelectCheckbox
                       id="checkCategory"
                       checked={isChecked}
                       name={categoryName}
                       onChange={() => {}}
                       someChecked={someChecked}
-                      style={{ marginRight: 10 }}
                     />
                     <UpperFirst content={categoryName} />
                   </Label>
@@ -226,13 +222,12 @@ const MultipleMenuList = ({
                             handleChange({ target });
                           }}
                         >
-                          <Checkbox
+                          <SelectCheckbox
                             id="check"
                             name={component.uid}
                             // Remove the handler
                             onChange={() => {}}
                             checked={isChecked}
-                            style={{ marginRight: 10 }}
                           />
                           {component.schema.name}
                         </Label>

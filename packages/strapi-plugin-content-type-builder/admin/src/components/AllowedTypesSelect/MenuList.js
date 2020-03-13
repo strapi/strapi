@@ -2,20 +2,19 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { components } from 'react-select';
 import { useGlobalContext } from 'strapi-helper-plugin';
-import { Checkbox, CheckboxWrapper, Label } from '@buffetjs/styles';
+import { CheckboxWrapper, Label } from '@buffetjs/styles';
 import getTrad from '../../utils/getTrad';
-import UpperFirst from '../UpperFirst';
+import SelectCheckbox from '../SelectCheckbox';
 import SubUl from '../SelectMenuSubUl';
+import UpperFirst from '../UpperFirst';
 import Ul from '../SelectMenuUl';
+import Text from './Text';
 
 const MenuList = ({ selectProps: { changeMediaAllowedTypes, value }, ...rest }) => {
   const { formatMessage } = useGlobalContext();
   const Component = components.MenuList;
   const areAllAllowedTypesSelected = value.value.length === 3;
   const someChecked = !areAllAllowedTypesSelected && value.value.length > 1;
-
-  // getTrad('form.attribute.media.allowed-types.option-images')
-
   const options = [
     {
       name: 'images',
@@ -34,11 +33,7 @@ const MenuList = ({ selectProps: { changeMediaAllowedTypes, value }, ...rest }) 
 
   return (
     <Component {...rest}>
-      <Ul
-        style={{
-          maxHeight: 150,
-        }}
-      >
+      <Ul>
         <li className="li-multi-menu">
           <div style={{ marginTop: 3 }}>
             <CheckboxWrapper>
@@ -50,13 +45,12 @@ const MenuList = ({ selectProps: { changeMediaAllowedTypes, value }, ...rest }) 
                   });
                 }}
               >
-                <Checkbox
+                <SelectCheckbox
                   id="checkAll"
                   checked={areAllAllowedTypesSelected}
                   someChecked={someChecked}
                   name="all"
                   onChange={() => {}}
-                  style={{ marginRight: 10 }}
                 />
                 <UpperFirst content="All" />
               </Label>
@@ -76,31 +70,23 @@ const MenuList = ({ selectProps: { changeMediaAllowedTypes, value }, ...rest }) 
                         changeMediaAllowedTypes({ target });
                       }}
                     >
-                      <Checkbox
+                      <SelectCheckbox
                         id="check"
                         name={name}
                         // Remove the handler
                         onChange={() => {}}
                         checked={isChecked}
-                        style={{ marginRight: 10 }}
                       />
-                      <span style={{ display: 'contents' }}>
+                      <Text>
                         <UpperFirst
                           content={formatMessage({
                             id: getTrad(`form.attribute.media.allowed-types.option-${name}`),
                           })}
                         />
-                      </span>
-                      <span
-                        style={{
-                          display: 'contents',
-                          fontSize: 11,
-                          color: '#B3B5B9',
-                          textTransform: 'italic',
-                        }}
-                      >
+                      </Text>
+                      <Text fontSize="sm" color="#B3B5B9" textTransform="italic">
                         &nbsp;{infos}
-                      </span>
+                      </Text>
                     </Label>
                   </CheckboxWrapper>
                 </li>

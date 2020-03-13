@@ -27,11 +27,7 @@ const MenuList = ({
 
   return (
     <Component {...rest}>
-      <Ul
-        style={{
-          maxHeight: 150,
-        }}
-      >
+      <Ul>
         {Object.keys(componentsGroupedByCategory)
           .sort()
           .map(categoryName => {
