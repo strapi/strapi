@@ -14,7 +14,7 @@ const MenuList = ({ selectProps: { changeMediaAllowedTypes, value }, ...rest }) 
   const { formatMessage } = useGlobalContext();
   const Component = components.MenuList;
   const areAllAllowedTypesSelected = value.value.length === 3;
-  const someChecked = !areAllAllowedTypesSelected && value.value.length > 1;
+  const someChecked = !areAllAllowedTypesSelected && value.value.length > 0;
   const options = [
     {
       name: 'images',
