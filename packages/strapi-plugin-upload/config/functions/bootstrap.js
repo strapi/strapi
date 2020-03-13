@@ -23,7 +23,6 @@ module.exports = async () => {
       value: {
         sizeOptimization: true,
         responsiveDimensions: true,
-        videoPreview: true,
       },
     });
   }
