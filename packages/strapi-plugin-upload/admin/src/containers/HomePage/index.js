@@ -1,4 +1,4 @@
-import React, { useReducer, useState, useEffect } from 'react';
+import React, { useReducer, useState, useEffect, useRef } from 'react';
 import { includes } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
@@ -35,6 +35,7 @@ const HomePage = () => {
   const [searchValue, setSearchValue] = useState(query.get('_q') || '');
   const { push } = useHistory();
   const { search } = useLocation();
+  const isMounted = useRef();
 
   const { data, dataToDelete } = reducerState.toJS();
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
@@ -47,7 +48,12 @@ const HomePage = () => {
   }, [debouncedSearch]);
 
   useEffect(() => {
+    isMounted.current = true;
     fetchData();
+
+    return () => {
+      isMounted.current = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
@@ -59,7 +65,9 @@ const HomePage = () => {
         method: 'DELETE',
       });
     } catch (err) {
-      strapi.notification.error('notification.error');
+      if (isMounted.current) {
+        strapi.notification.error('notification.error');
+      }
     }
   };
 
@@ -71,12 +79,16 @@ const HomePage = () => {
         method: 'GET',
       });
 
-      dispatch({
-        type: 'GET_DATA_SUCCEEDED',
-        data,
-      });
+      if (isMounted.current) {
+        dispatch({
+          type: 'GET_DATA_SUCCEEDED',
+          data,
+        });
+      }
     } catch (err) {
-      strapi.notification.error('notification.error');
+      if (isMounted.current) {
+        strapi.notification.error('notification.error');
+      }
     }
   };
 
