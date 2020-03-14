@@ -28,18 +28,13 @@ module.exports = strapi => {
 
       const staticDir = path.resolve(
         strapi.dir,
-        strapi.config.middleware.settings.public.path ||
-          strapi.config.paths.static
+        strapi.config.middleware.settings.public.path || strapi.config.paths.static
       );
 
       // Open the file.
-      const filename =
-        strapi.config.environment === 'development' ? 'index' : 'production';
+      const filename = strapi.config.environment === 'development' ? 'index' : 'production';
 
-      const index = fs.readFileSync(
-        path.join(staticDir, `${filename}.html`),
-        'utf8'
-      );
+      const index = fs.readFileSync(path.join(staticDir, `${filename}.html`), 'utf8');
 
       // Is the project initialized?
       const renderer = _.template(index);
@@ -84,13 +79,7 @@ module.exports = strapi => {
       // The file without extension will not be served.
       // Note: This route could be override by the user.
       strapi.router.get(
-        '/*',
-        async (ctx, next) => {
-          const parse = path.parse(ctx.url);
-          ctx.url = path.join(parse.dir, parse.base);
-
-          await next();
-        },
+        '/(.*)',
         koaStatic(staticDir, {
           maxage: maxAge,
           defer: true,
@@ -99,10 +88,7 @@ module.exports = strapi => {
 
       if (!strapi.config.serveAdminPanel) return;
 
-      const basename = _.get(
-        strapi.config.currentEnvironment.server,
-        'admin.path'
-      )
+      const basename = _.get(strapi.config.currentEnvironment.server, 'admin.path')
         ? strapi.config.currentEnvironment.server.admin.path
         : '/admin';
 
