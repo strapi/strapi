@@ -4,7 +4,7 @@
 
 ## What is Strapi?
 
-Strapi is a flexible, open-source Headless CMS that gives developers the freedom to use their favorite tools and frameworks while also allowing editors to easily manage and distribute their content. By making the admin panel and API extensible through a plugin system, Strapi enables the world's largest companies to accelerate content delivery while building beautiful digital experiences.
+Strapi is a flexible, open-source Headless CMS that gives developers the freedom to choose their favorite tools and frameworks while also allowing editors to easily manage and distribute their content. By making the admin panel and API extensible through a plugin system, Strapi enables the world's largest companies to accelerate content delivery while building beautiful digital experiences.
 
 ::: tip Where does the name come from?
 **Strapi** comes from the word Bootstrap, and helps Boot**strap** your **API** 🎉<br>
@@ -15,7 +15,7 @@ This was the original purpose of this project.
 
 ### Custom Content Structure
 
-Using the admin panel of Strapi, you can generate a project in just a few clicks and get your whole CMS setup in a few minutes.
+Using the admin panel of Strapi, you can generate a project in just a few clicks and get your whole CMS setup little to no time.
 
 ### Easy Content Management
 
@@ -54,7 +54,7 @@ With that said you can still [develop & use your own plugins.](https://strapi.io
 ### Roadmap
 
 Strapi is a community-oriented project with an emphasis on transparency. We want to share our vision of the future of Strapi and have your help in realizing it.
-Your insights are very important and will help steer Strapi in the right direction, so please visit [The Roadmap](https://portal.productboard.com/strapi) and share your ideas.
+Your insights are very important and will help steer the project in the right direction, so please visit [The Roadmap](https://portal.productboard.com/strapi) and share your ideas.
 
 ### Tutorials and Guides
 
