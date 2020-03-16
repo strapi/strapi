@@ -11,16 +11,16 @@ import Image from './Image';
 const CardPreview = ({ hasError, url, type }) => {
   const isFile = getType(type) === 'file';
 
-  const renderFile = () => <FileIcon fileType={type} />;
-
-  const renderImage = () => <Image src={url} />;
+  if (hasError) {
+    return (
+      <Wrapper isFile>
+        <BrokenFile />
+      </Wrapper>
+    );
+  }
 
   return (
-    <Wrapper isFile={isFile || hasError}>
-      {!hasError && isFile && renderFile()}
-      {!hasError && !isFile && renderImage()}
-      {hasError && <BrokenFile />}
-    </Wrapper>
+    <Wrapper isFile={isFile}>{isFile ? <FileIcon fileType={type} /> : <Image src={url} />}</Wrapper>
   );
 };
 
