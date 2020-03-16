@@ -84,6 +84,9 @@ async function copyAdmin(dest) {
     path.resolve(adminPath, 'config', 'layout.js'),
     path.resolve(dest, 'config', 'layout.js')
   );
+
+  // Copy package.json
+  await fs.copy(path.resolve(adminPath, 'package.json'), path.resolve(dest, 'package.json'));
 }
 
 async function copyCustomAdmin(src, dest) {
