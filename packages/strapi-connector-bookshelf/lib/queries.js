@@ -145,6 +145,8 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
         case 'oneToMany':
         case 'manyToMany':
         case 'manyToManyMorph':
+        case 'manyMorphToMany':
+        case 'manyMorphToOne':
           values[association.alias] = [];
           break;
         default:

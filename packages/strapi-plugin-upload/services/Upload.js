@@ -265,7 +265,7 @@ module.exports = {
     const { id, model, field } = params;
 
     const arr = Array.isArray(files) ? files : [files];
-    return Promise.all(
+    const enhancedFiles = await Promise.all(
       arr.map(file => {
         return this.enhanceFile(
           file,
@@ -278,7 +278,9 @@ module.exports = {
           }
         );
       })
-    ).then(files => this.uploadFileAndPersist(files));
+    );
+
+    await Promise.all(enhancedFiles.map(file => this.uploadFileAndPersist(file)));
   },
 
   getSettings() {
