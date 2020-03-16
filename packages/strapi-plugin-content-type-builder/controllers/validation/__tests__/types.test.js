@@ -291,7 +291,7 @@ describe('Type validators', () => {
       expect(validator.isValidSync(attributes.img)).toBe(true);
     });
 
-    test.each(['all', 'images', 'files', 'videos'])('%s is an allowed types', type => {
+    test.each(['images', 'files', 'videos'])('%s is an allowed types', type => {
       const attributes = {
         img: {
           type: 'media',

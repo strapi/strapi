@@ -18,7 +18,7 @@ const List = ({ data, onChange, selectedItems }) => {
           <div className="row" key={key}>
             {rowContent.map(item => {
               const { id, url } = item;
-              const checked = selectedItems.includes(`${id}`);
+              const checked = selectedItems.includes(id);
 
               return (
                 <div className="col-xs-12 col-md-6 col-xl-3" key={JSON.stringify(item)}>

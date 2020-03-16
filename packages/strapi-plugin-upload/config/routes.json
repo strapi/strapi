@@ -93,14 +93,6 @@
           "name": "File"
         }
       }
-    },
-    {
-      "method": "GET",
-      "path": "/media-types",
-      "handler": "media-types.getMediaTypes",
-      "config": {
-        "policies": []
-      }
     }
   ]
 }
