@@ -1,4 +1,4 @@
-import React, { useReducer, useState, useEffect, useRef } from 'react';
+import React, { useReducer, useState, useEffect } from 'react';
 import { includes } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
@@ -35,7 +35,6 @@ const HomePage = () => {
   const [searchValue, setSearchValue] = useState(query.get('_q') || '');
   const { push } = useHistory();
   const { search } = useLocation();
-  const isMounted = useRef();
 
   const { data, dataToDelete } = reducerState.toJS();
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
@@ -48,28 +47,9 @@ const HomePage = () => {
   }, [debouncedSearch]);
 
   useEffect(() => {
-    isMounted.current = true;
     fetchData();
-
-    return () => {
-      isMounted.current = false;
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
-
-  const deleteMedia = async id => {
-    const requestURL = getRequestUrl(`files/${id}`);
-
-    try {
-      await request(requestURL, {
-        method: 'DELETE',
-      });
-    } catch (err) {
-      if (isMounted.current) {
-        strapi.notification.error('notification.error');
-      }
-    }
-  };
 
   const fetchData = async () => {
     const requestURL = getRequestUrl('files');
@@ -79,16 +59,12 @@ const HomePage = () => {
         method: 'GET',
       });
 
-      if (isMounted.current) {
-        dispatch({
-          type: 'GET_DATA_SUCCEEDED',
-          data,
-        });
-      }
+      dispatch({
+        type: 'GET_DATA_SUCCEEDED',
+        data,
+      });
     } catch (err) {
-      if (isMounted.current) {
-        strapi.notification.error('notification.error');
-      }
+      strapi.notification.error('notification.error');
     }
   };
 
@@ -115,7 +91,7 @@ const HomePage = () => {
   const handleChangeCheck = ({ target: { name, value } }) => {
     dispatch({
       type: 'ON_CHANGE_DATA_TO_DELETE',
-      id: parseInt(name, 10),
+      id: name,
       value,
     });
   };
@@ -163,18 +139,6 @@ const HomePage = () => {
     });
   };
 
-  const handleDeleteMedias = async () => {
-    await Promise.all(dataToDelete.map(id => deleteMedia(id)));
-
-    fetchData();
-  };
-
-  const handleSelectAll = () => {
-    dispatch({
-      type: 'TOGGLE_SELECT_ALL',
-    });
-  };
-
   const headerProps = {
     title: {
       label: pluginName,
@@ -192,7 +156,7 @@ const HomePage = () => {
         color: 'cancel',
         // TradId from the strapi-admin package
         label: formatMessage({ id: 'app.utils.delete' }),
-        onClick: handleDeleteMedias,
+        onClick: () => {},
         type: 'button',
       },
       {
@@ -213,9 +177,6 @@ const HomePage = () => {
     _page: generatePageFromStart(start, limit),
   };
 
-  const areAllCheckboxesSelected = data.length === dataToDelete.length;
-  const hasSomeCheckboxSelected = dataToDelete.length > 0;
-
   return (
     <Container>
       <Header {...headerProps} />
@@ -228,11 +189,7 @@ const HomePage = () => {
         value={searchValue}
       />
       <ControlsWrapper>
-        <SelectAll
-          onChange={handleSelectAll}
-          checked={areAllCheckboxesSelected}
-          someChecked={hasSomeCheckboxSelected && !areAllCheckboxesSelected}
-        />
+        <SelectAll />
         <SortPicker onChange={handleChangeParams} value={query.get('_sort') || null} />
         <Filters
           onChange={handleChangeParams}
@@ -240,7 +197,7 @@ const HomePage = () => {
           onClick={handleDeleteFilter}
         />
       </ControlsWrapper>
-      <List data={data} onChange={handleChangeCheck} selectedItems={dataToDelete} />
+      <List onChange={handleChangeCheck} selectedItems={dataToDelete} />
       <ListEmpty onClick={() => handleClickToggleModal()} />
       <PageFooter
         context={{ emitEvent: () => {} }}
