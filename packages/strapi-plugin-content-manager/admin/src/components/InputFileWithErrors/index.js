@@ -29,6 +29,8 @@ function InputFileWithErrors({
   useEffect(() => {
     if (isArray(value) && value.length > 0) {
       setFilelabel(1);
+    } else {
+      setFilelabel(null);
     }
   }, [value]);
 
@@ -37,12 +39,7 @@ function InputFileWithErrors({
   };
 
   return (
-    <Error
-      inputError={inputError}
-      name={name}
-      type="text"
-      validations={validations}
-    >
+    <Error inputError={inputError} name={name} type="text" validations={validations}>
       {props => {
         const { error } = props;
         const hasError = error && error !== null;
@@ -68,9 +65,7 @@ function InputFileWithErrors({
               multiple={multiple}
             />
 
-            {!hasError && inputDescription && (
-              <Description>{inputDescription}</Description>
-            )}
+            {!hasError && inputDescription && <Description>{inputDescription}</Description>}
             {hasError && <ErrorMessage>{error}</ErrorMessage>}
           </Container>
         );
@@ -114,11 +109,7 @@ InputFileWithErrors.propTypes = {
   onChange: PropTypes.func.isRequired,
   style: PropTypes.object,
   validations: PropTypes.object,
-  value: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.object,
-    PropTypes.array,
-  ]),
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.object, PropTypes.array]),
 };
 
 export default memo(InputFileWithErrors);
