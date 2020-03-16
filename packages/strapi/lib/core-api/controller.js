@@ -81,7 +81,7 @@ const createCollectionTypeController = ({ model, service }) => {
      * @return {Object}
      */
     async findOne(ctx) {
-      const entity = await service.findOne(ctx.params);
+      const entity = await service.findOne({ id: ctx.params.id });
       return sanitizeEntity(entity, { model });
     },
 
@@ -122,9 +122,9 @@ const createCollectionTypeController = ({ model, service }) => {
       let entity;
       if (ctx.is('multipart')) {
         const { data, files } = parseMultipartData(ctx);
-        entity = await service.update(ctx.params, data, { files });
+        entity = await service.update({ id: ctx.params.id }, data, { files });
       } else {
-        entity = await service.update(ctx.params, ctx.request.body);
+        entity = await service.update({ id: ctx.params.id }, ctx.request.body);
       }
 
       return sanitizeEntity(entity, { model });
@@ -136,7 +136,7 @@ const createCollectionTypeController = ({ model, service }) => {
      * @return {Object}
      */
     async delete(ctx) {
-      const entity = await service.delete(ctx.params);
+      const entity = await service.delete({ id: ctx.params.id });
       return sanitizeEntity(entity, { model });
     },
   };
