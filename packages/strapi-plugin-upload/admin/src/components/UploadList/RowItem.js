@@ -27,7 +27,7 @@ const RowItem = ({
   };
 
   return (
-    <div className="col-xs-12 col-md-6 col-xl-3" key={JSON.stringify(originalIndex)}>
+    <div className="col-xs-12 col-md-6 col-xl-3" key={originalIndex}>
       <Card
         small
         errorMessage={errorMessage}

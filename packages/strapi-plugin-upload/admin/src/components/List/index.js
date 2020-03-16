@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Checkbox } from '@buffetjs/core';
 
-import createMatrix from '../../utils/createMatrix';
+import { createMatrix } from '../../utils';
 
 import Card from '../Card';
 import CardControlsWrapper from '../CardControlsWrapper';

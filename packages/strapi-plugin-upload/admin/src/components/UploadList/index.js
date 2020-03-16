@@ -1,14 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Button } from '@buffetjs/core';
-import createMatrix from '../../utils/createMatrix';
-import getTrad from '../../utils/getTrad';
+
+import { createMatrix, getTrad } from '../../utils';
+
 import ModalSection from '../ModalSection';
 import IntlText from '../IntlText';
 import Container from './Container';
 import ButtonWrapper from './ButtonWrapper';
-import TextWrapper from './TextWrapper';
 import RowItem from './RowItem';
+import ListTitle from './ListTitle';
 
 const UploadList = ({
   filesToUpload,
@@ -25,21 +26,15 @@ const UploadList = ({
   return (
     <>
       <ModalSection justifyContent="space-between">
-        <TextWrapper>
-          <IntlText
-            id={getTrad(titleId)}
-            values={{ number: filesToUploadLength }}
-            fontSize="md"
-            fontWeight="bold"
-            lineHeight="19px"
-          />
+        <div>
+          <ListTitle id={getTrad(titleId)} values={{ number: filesToUploadLength }} />
           <IntlText
             id={getTrad('modal.upload-list.sub-header-subtitle')}
             values={{ number: filesToUploadLength }}
             fontSize="sm"
             color="grey"
           />
-        </TextWrapper>
+        </div>
         <ButtonWrapper>
           <Button type="button" color="primary" onClick={onGoToAddBrowseFiles}>
             <IntlText

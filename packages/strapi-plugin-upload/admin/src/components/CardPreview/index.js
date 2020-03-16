@@ -1,15 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import { getType } from '../../utils';
+
+import BrokenFile from '../../icons/BrokenFile';
 import FileIcon from '../FileIcon';
 import Wrapper from './Wrapper';
 import Image from './Image';
-import BrokenFile from '../../icons/BrokenFile';
 
 const CardPreview = ({ hasError, url, type }) => {
-  const isFile = !type.includes('image') && !type.includes('video');
-
-  const renderBrokenFile = () => <BrokenFile />;
+  const isFile = getType(type) === 'file';
 
   const renderFile = () => <FileIcon fileType={type} />;
 
@@ -19,7 +19,7 @@ const CardPreview = ({ hasError, url, type }) => {
     <Wrapper isFile={isFile || hasError}>
       {!hasError && isFile && renderFile()}
       {!hasError && !isFile && renderImage()}
-      {hasError && renderBrokenFile()}
+      {hasError && <BrokenFile />}
     </Wrapper>
   );
 };

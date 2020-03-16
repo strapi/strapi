@@ -4,7 +4,7 @@ import { FormattedMessage } from 'react-intl';
 
 import { Select } from '@buffetjs/core';
 import { getFilterType } from 'strapi-helper-plugin';
-import getTrad from '../../../utils/getTrad';
+import { getTrad } from '../../../utils';
 
 import reducer, { initialState } from './reducer';
 
