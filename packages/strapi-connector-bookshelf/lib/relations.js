@@ -42,6 +42,39 @@ const getModel = (model, plugin) => {
 
 const removeUndefinedKeys = obj => _.pickBy(obj, _.negate(_.isUndefined));
 
+const addRelationMorph = async (model, { params, transacting } = {}) => {
+  return await model.morph.forge().save(
+    {
+      [`${model.collectionName}_id`]: params.id,
+      [`${params.alias}_id`]: params.refId,
+      [`${params.alias}_type`]: params.ref,
+      field: params.field,
+      order: params.order,
+    },
+    { transacting }
+  );
+};
+
+const removeRelationMorph = async (model, { params, transacting } = {}) => {
+  return await model.morph
+    .forge()
+    .where(
+      _.omitBy(
+        {
+          [`${model.collectionName}_id`]: params.id,
+          [`${params.alias}_id`]: params.refId,
+          [`${params.alias}_type`]: params.ref,
+          field: params.field,
+        },
+        _.isUndefined
+      )
+    )
+    .destroy({
+      require: false,
+      transacting,
+    });
+};
+
 module.exports = {
   async findOne(params, populate, { transacting } = {}) {
     const record = await this.forge({
@@ -236,11 +269,7 @@ module.exports = {
                 if (Array.isArray(refs) && refs.length === 0) {
                   // clear related
                   relationUpdates.push(
-                    module.exports.removeRelationMorph.call(
-                      this,
-                      { id: primaryKeyValue },
-                      { transacting }
-                    )
+                    removeRelationMorph(this, { params: { id: primaryKeyValue }, transacting })
                   );
                   break;
                 }
@@ -259,97 +288,84 @@ module.exports = {
                   // can be related to this field.
                   if (reverseAssoc && reverseAssoc.nature === 'oneToManyMorph') {
                     relationUpdates.push(
-                      module.exports.removeRelationMorph
-                        .call(
-                          this,
-                          {
-                            alias: association.alias,
-                            ref: targetModel.collectionName,
-                            refId: obj.refId,
-                            field: obj.field,
-                          },
-                          { transacting }
-                        )
-                        .then(() =>
-                          module.exports.addRelationMorph.call(
-                            this,
-                            {
-                              id: response[this.primaryKey],
-                              alias: association.alias,
-                              ref: targetModel.collectionName,
-                              refId: obj.refId,
-                              field: obj.field,
-                            },
-                            { transacting }
-                          )
-                        )
-                    );
-                  } else {
-                    relationUpdates.push(
-                      module.exports.addRelationMorph.call(
-                        this,
-                        {
-                          id: response[this.primaryKey],
+                      removeRelationMorph(this, {
+                        params: {
                           alias: association.alias,
                           ref: targetModel.collectionName,
                           refId: obj.refId,
                           field: obj.field,
                         },
-                        { transacting }
+                        transacting,
+                      }).then(() =>
+                        addRelationMorph(this, {
+                          params: {
+                            id: response[this.primaryKey],
+                            alias: association.alias,
+                            ref: targetModel.collectionName,
+                            refId: obj.refId,
+                            field: obj.field,
+                          },
+                          transacting,
+                        })
                       )
                     );
+
+                    return;
                   }
+
+                  // TODO: recompute the order when adding a ref
+                  relationUpdates.push(
+                    addRelationMorph(this, {
+                      params: {
+                        id: response[this.primaryKey],
+                        alias: association.alias,
+                        ref: targetModel.collectionName,
+                        refId: obj.refId,
+                        field: obj.field,
+                      },
+                      transacting,
+                    })
+                  );
                 });
                 break;
               }
               case 'oneToManyMorph':
               case 'manyToManyMorph': {
-                // Compare array of ID to find deleted files.
-                const currentValue = transformToArrayID(response[current], association).map(id =>
-                  id.toString()
-                );
-                const storedValue = transformToArrayID(
+                const currentValue = transformToArrayID(
                   params.values[current],
                   association
                 ).map(id => id.toString());
 
-                const toAdd = _.difference(storedValue, currentValue);
-                const toRemove = _.difference(currentValue, storedValue);
-
                 const model = getModel(details.collection || details.model, details.plugin);
 
-                toAdd.forEach(id => {
-                  relationUpdates.push(
-                    module.exports.addRelationMorph.call(
-                      model,
-                      {
-                        id,
-                        alias: association.via,
-                        ref: this.collectionName,
-                        refId: response.id,
-                        field: association.alias,
-                      },
-                      { transacting }
-                    )
+                const promise = removeRelationMorph(model, {
+                  params: {
+                    alias: association.via,
+                    ref: this.collectionName,
+                    refId: response.id,
+                    field: association.alias,
+                  },
+                  transacting,
+                }).then(() => {
+                  return Promise.all(
+                    currentValue.map((id, idx) => {
+                      return addRelationMorph(model, {
+                        params: {
+                          id,
+                          alias: association.via,
+                          ref: this.collectionName,
+                          refId: response.id,
+                          field: association.alias,
+                          order: idx + 1,
+                        },
+                        transacting,
+                      });
+                    })
                   );
                 });
 
-                // Update the relational array.
-                toRemove.forEach(id => {
-                  relationUpdates.push(
-                    module.exports.removeRelationMorph.call(
-                      model,
-                      {
-                        id,
-                        alias: association.via,
-                        ref: this.collectionName,
-                        refId: response.id,
-                        field: association.alias,
-                      },
-                      { transacting }
-                    )
-                  );
-                });
+                relationUpdates.push(promise);
+
                 break;
               }
               case 'oneMorphToOne':
@@ -381,54 +397,5 @@ module.exports = {
     });
 
     return result && result.toJSON ? result.toJSON() : result;
-  },
-
-  async addRelationMorph(params, { transacting } = {}) {
-    const record = await this.morph
-      .forge()
-      .where({
-        [`${this.collectionName}_id`]: params.id,
-        [`${params.alias}_id`]: params.refId,
-        [`${params.alias}_type`]: params.ref,
-        field: params.field,
-      })
-      .fetch({
-        transacting,
-      });
-
-    const entry = record ? record.toJSON() : record;
-
-    if (entry) {
-      return Promise.resolve();
-    }
-
-    return await this.morph
-      .forge({
-        [`${this.collectionName}_id`]: params.id,
-        [`${params.alias}_id`]: params.refId,
-        [`${params.alias}_type`]: params.ref,
-        field: params.field,
-      })
-      .save(null, { transacting });
-  },
-
-  async removeRelationMorph(params, { transacting } = {}) {
-    return await this.morph
-      .forge()
-      .where(
-        _.omitBy(
-          {
-            [`${this.collectionName}_id`]: params.id,
-            [`${params.alias}_id`]: params.refId,
-            [`${params.alias}_type`]: params.ref,
-            field: params.field,
-          },
-          _.isUndefined
-        )
-      )
-      .destroy({
-        require: false,
-        transacting,
-      });
   },
 };

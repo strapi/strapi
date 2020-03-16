@@ -302,6 +302,7 @@ module.exports = ({ models, target }, ctx) => {
             : strapi.models[details.model];
 
           const globalId = `${model.collectionName}_morph`;
+          const filter = _.get(model, ['attributes', details.via, 'filter'], 'field');
 
           loadedModel[name] = function() {
             return this.morphOne(
@@ -309,7 +310,7 @@ module.exports = ({ models, target }, ctx) => {
               details.via,
               `${definition.collectionName}`
             ).query(qb => {
-              qb.where(_.get(model, ['attributes', details.via, 'filter'], 'field'), name);
+              qb.where(filter, name);
             });
           };
           break;
@@ -320,6 +321,7 @@ module.exports = ({ models, target }, ctx) => {
             : strapi.models[details.collection];
 
           const globalId = `${collection.collectionName}_morph`;
+          const filter = _.get(model, ['attributes', details.via, 'filter'], 'field');
 
           loadedModel[name] = function() {
             return this.morphMany(
@@ -327,7 +329,7 @@ module.exports = ({ models, target }, ctx) => {
               details.via,
               `${definition.collectionName}`
             ).query(qb => {
-              qb.where(_.get(model, ['attributes', details.via, 'filter'], 'field'), name);
+              qb.where(filter, name).orderBy('order');
             });
           };
           break;
