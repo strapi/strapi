@@ -21,6 +21,17 @@ module.exports = {
               if (err) {
                 return reject(err);
               }
+
+              if (image.resource_type === 'video') {
+                file.previewUrl = cloudinary.url(`${image.public_id}.gif`, {
+                  video_sampling: 6,
+                  delay: 200,
+                  width: 250,
+                  crop: 'scale',
+                  resource_type: 'video',
+                });
+              }
+
               file.url = image.secure_url;
               file.provider_metadata = {
                 public_id: image.public_id,
