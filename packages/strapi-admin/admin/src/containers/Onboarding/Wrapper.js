@@ -32,6 +32,7 @@ const fadeOut = keyframes`
 `;
 
 const Wrapper = styled.div`
+  max-width: ${({ isOpen }) => (isOpen ? 'initial' : '0px')};
   position: fixed;
   right: 15px;
   bottom: 15px;

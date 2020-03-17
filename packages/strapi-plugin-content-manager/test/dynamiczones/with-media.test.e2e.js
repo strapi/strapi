@@ -18,9 +18,9 @@ const uploadImg = () => {
 describe.each([
   [
     'CONTENT MANAGER',
-    '/content-manager/explorer/application::withdynamiczone.withdynamiczone',
+    '/content-manager/explorer/application::withdynamiczonemedia.withdynamiczonemedia',
   ],
-  ['GENERATED API', '/withdynamiczones'],
+  ['GENERATED API', '/withdynamiczonemedias'],
 ])('[%s] => Not required dynamiczone', (_, path) => {
   beforeAll(async () => {
     const token = await registerAndLogin();
@@ -61,17 +61,9 @@ describe.each([
       },
     });
 
-    await modelsUtils.createContentTypeWithType(
-      'withdynamiczone',
-      'dynamiczone',
-      {
-        components: [
-          'default.single-media',
-          'default.multiple-media',
-          'default.with-nested',
-        ],
-      }
-    );
+    await modelsUtils.createContentTypeWithType('withdynamiczonemedia', 'dynamiczone', {
+      components: ['default.single-media', 'default.multiple-media', 'default.with-nested'],
+    });
 
     rq = authRq.defaults({
       baseUrl: `http://localhost:1337${path}`,
@@ -82,7 +74,7 @@ describe.each([
     await modelsUtils.deleteComponent('default.with-nested');
     await modelsUtils.deleteComponent('default.single-media');
     await modelsUtils.deleteComponent('default.multiple-media');
-    await modelsUtils.deleteContentType('withdynamiczone');
+    await modelsUtils.deleteContentType('withdynamiczonemedia');
   }, 60000);
 
   describe('Contains components with medias', () => {

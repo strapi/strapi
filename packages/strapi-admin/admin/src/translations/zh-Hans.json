@@ -76,7 +76,7 @@
   "app.components.LeftMenuLinkContainer.general": "常规",
   "app.components.LeftMenuLinkContainer.installNewPlugin": "市场",
   "app.components.LeftMenuLinkContainer.listPlugins": "插件",
-  "app.components.LeftMenuLinkContainer.contentTypes": "Content Types",
+  "app.components.LeftMenuLinkContainer.collectionTypes": "Collection Types",
   "app.components.LeftMenuLinkContainer.noPluginsInstalled": "还没有安装插件",
   "app.components.LeftMenuLinkContainer.plugins": "插件",
   "app.components.LeftMenuLinkContainer.settings": "设置",

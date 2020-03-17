@@ -17,7 +17,7 @@ $ yarn develop --watch-admin
 
 ### Strapi global variable
 
-The administration exposes a global variable thqt is accessible for all the plugins.
+The administration exposes a global variable that is accessible for all the plugins.
 
 #### `strapi.backendURL`
 
@@ -56,7 +56,7 @@ The administration url (e.g. `http://localhost:4000/admin`).
 
 ### Main plugin object
 
-Each plugin exports all its configurations in a object. This object is located in `my-plugin/admin/src/index.js`
+Each plugin exports all its configurations in an object. This object is located in `my-plugin/admin/src/index.js`
 
 Here are its properties:
 
@@ -169,7 +169,7 @@ Each route defined in a plugin must be prefixed by the plugin's id.
 
 Let's say that you want to create a route `/user` with params `/:id` associated with the container UserPage.
 
-The declaration would be as followed :
+The declaration would be as follows :
 
 **Path —** `plugins/my-plugin/admin/src/containers/App/index.js`.
 

@@ -52,6 +52,8 @@ const getFilters = type => {
     case 'float':
     case 'decimal':
     case 'date':
+    case 'datetime':
+    case 'time':
     case 'timestamp':
     case 'timestampUpdate':
       return [
@@ -79,14 +81,16 @@ const getFilters = type => {
           id: 'content-manager.components.FilterOptions.FILTER_TYPES._gte',
           value: '_gte',
         },
-        {
-          id: 'content-manager.components.FilterOptions.FILTER_TYPES._in',
-          value: '_in',
-        },
-        {
-          id: 'content-manager.components.FilterOptions.FILTER_TYPES._nin',
-          value: '_nin',
-        },
+        // FIXME: commenting these filters as I am not sure if the UI
+        // corresponds to the filter
+        // {
+        //   id: 'content-manager.components.FilterOptions.FILTER_TYPES._in',
+        //   value: '_in',
+        // },
+        // {
+        //   id: 'content-manager.components.FilterOptions.FILTER_TYPES._nin',
+        //   value: '_nin',
+        // },
       ];
     default:
       return [

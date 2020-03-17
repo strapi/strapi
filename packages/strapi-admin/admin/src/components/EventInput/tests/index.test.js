@@ -1,10 +1,8 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { IntlProvider } from 'react-intl';
-// import renderer from 'react-test-renderer';
-
+import renderer from 'react-test-renderer';
 import translationMessages from '../../../translations/en.json';
-
 import EventInput from '../index';
 import EventRow from '../EventRow';
 
@@ -29,16 +27,15 @@ describe('<EventInput />', () => {
     onChange: jest.fn(),
   };
 
-  // FIXME: snapshots
-  // it('should match the snapshot', () => {
-  //   const tree = renderer.create(
-  //     <IntlProvider locale="en" messages={translationMessages}>
-  //       <EventInput {...props} />
-  //     </IntlProvider>
-  //   );
+  it('should match the snapshot', () => {
+    const tree = renderer.create(
+      <IntlProvider locale="en" messages={translationMessages}>
+        <EventInput {...props} />
+      </IntlProvider>
+    );
 
-  //   expect(tree).toMatchSnapshot();
-  // });
+    expect(tree).toMatchSnapshot();
+  });
 
   describe('OnChange prop called with right params', () => {
     it('should add an event on handleChange if value is true', () => {

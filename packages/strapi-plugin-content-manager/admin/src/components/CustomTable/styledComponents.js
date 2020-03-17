@@ -94,7 +94,7 @@ const TableRow = styled.tr`
   }
 `;
 
-const Arrow = styled.div`
+const Arrow = styled.span`
   &:after {
     content: '\f0d8';
     font-family: 'FontAwesome';
