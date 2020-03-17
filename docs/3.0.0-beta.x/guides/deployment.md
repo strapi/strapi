@@ -684,17 +684,14 @@ http
           .digest('hex');
 
       if (req.headers['x-hub-signature'] == sig) {
-        exec(
-          `cd ${repo} && git pull && ${PM2_CMD}`,
-          (error, stdout, stderr) => {
-            if (error) {
-              console.error(`exec error: ${error}`);
-              return;
-            }
-            console.log(`stdout: ${stdout}`);
-            console.log(`stderr: ${stderr}`);
+        exec(`cd ${repo} && git pull && ${PM2_CMD}`, (error, stdout, stderr) => {
+          if (error) {
+            console.error(`exec error: ${error}`);
+            return;
           }
-        );
+          console.log(`stdout: ${stdout}`);
+          console.log(`stderr: ${stderr}`);
+        });
       }
     });
 
@@ -1180,17 +1177,14 @@ http
           .digest('hex');
 
       if (req.headers['x-hub-signature'] == sig) {
-        exec(
-          `cd ${repo} && git pull && ${PM2_CMD}`,
-          (error, stdout, stderr) => {
-            if (error) {
-              console.error(`exec error: ${error}`);
-              return;
-            }
-            console.log(`stdout: ${stdout}`);
-            console.log(`stderr: ${stderr}`);
+        exec(`cd ${repo} && git pull && ${PM2_CMD}`, (error, stdout, stderr) => {
+          if (error) {
+            console.error(`exec error: ${error}`);
+            return;
           }
-        );
+          console.log(`stdout: ${stdout}`);
+          console.log(`stderr: ${stderr}`);
+        });
       }
     });
 
@@ -1622,3 +1616,226 @@ heroku open
 Like with project updates on Heroku, the file system doesn't support local uploading of files as they will be wiped when Heroku "Cycles" the dyno. This type of file system is called [ephemeral](https://devcenter.heroku.com/articles/dynos#ephemeral-filesystem), which means the file system only lasts until the dyno is restarted (with Heroku this happens any time you redeploy or during their regular restart which can happen every few hours or every day).
 
 Due to Heroku's filesystem you will need to use an upload provider such as AWS S3, Cloudinary, or Rackspace. You can view the documentation for installing providers [here](../plugins/upload.md#install-providers) and you can see a list of providers from both Strapi and the community on [npmjs.com](https://www.npmjs.com/search?q=strapi-provider-upload-&page=0&perPage=20).
+
+## Platform.sh
+
+### Migrating from a template
+
+Platform.sh provides a maintained [template project for Strapi](https://github.com/platformsh-templates/strapi), that you can quickly deploy by clicking the button below.
+
+<p align="center">
+<a href="https://console.platform.sh/projects/create-project?template=https://raw.githubusercontent.com/platformsh/template-builder/master/templates/strapi/.platform.template.yaml&utm_content=strapi&utm_source=github&utm_medium=button&utm_campaign=deploy_on_platform">
+    <img src="https://platform.sh/images/deploy/lg-blue.svg" alt="Deploy on Platform.sh" width="180px" />
+</a>
+</p>
+
+Clicking the button will direct you to create a free trial account on Platform.sh, create a new project, and then initialize and deploy the [Strapi template](https://github.com/platformsh-templates/strapi) from that project. After it has been deployed, visit `/admin` to create an admin user.
+
+Once you have registered the admin user, you will have access to the Admin Panel, and from there you can begin adding Content Types to build out the API. By default, no Content Types have been included in the installation and any Content Types you add will have secured API endpoints that will make them publicly inaccessible.
+
+The template uses [PostgreSQL](https://docs.platform.sh/configuration/services/postgresql.html) to store this information, so feel free to import your [data](https://docs.platform.sh/configuration/services/postgresql.html) and [files](https://docs.platform.sh/tutorials/migrating.html#platformsh-cli) using the [Platform.sh CLI](https://docs.platform.sh/development/cli.html) to complete your migration.
+
+### Migrating an existing Strapi project
+
+#### 1. Create an account and a new project on Platform.sh
+
+Platform.sh offers a 30 day free trial, which you can use to test out your Strapi application. [Create an account](https://accounts.platform.sh/platform/trial/general/setup), and then you will be directed to name and create an empty project.
+
+If you already have an account, you can create a new project using the CLI command `platform project:create`.
+
+#### 2. Install the Platform.sh CLI
+
+Some of the following steps require the use of the [Platform.sh CLI](https://docs.platform.sh/development/cli.html). Run the command below to install it.
+
+:::: tabs
+
+::: tab "OSX & Linux"
+
+```bash
+curl -sS https://platform.sh/cli/installer | php
+```
+
+:::
+
+::: tab "Windows"
+
+```bash
+curl https://platform.sh/cli/installer -o cli-installer.php
+php cli-installer.php
+```
+
+:::
+
+::::
+
+You can find the system requirements and more information in the [installation instructions on GitHub](https://github.com/platformsh/platformsh-cli/blob/master/README.md#installation).
+
+#### 3. Importing your application code
+
+First, retrieve the project ID for the project you just created with the command `platform project:list`. Then, `cd` into your repository and set Platform.sh as a remote:
+
+```bash
+platform project:set-remote <PROJECT ID>
+```
+
+#### 4. Add Platform.sh configuration files
+
+Each project on Platform.sh requires at least [three configuration files](https://docs.platform.sh/overview/structure.html) to describe and application. From your project root, run the following commands to create them:
+
+```bash
+mkdir .platform
+touch .platform/routes.yaml && touch .platform/services.yaml
+touch .platform.app.yaml
+```
+
+If your Strapi app depends on a [database](https://strapi.io/documentation/3.0.0-beta.x/guides/databases.html), you will need to include configuration for that [service](https://docs.platform.sh/configuration/services.html) in the `services.yaml` file. For example, the template described above uses PostgreSQL, and so its `services.yaml` includes the following:
+
+```yaml
+dbpostgres:
+  type: postgresql:X
+  disk: 256
+```
+
+::: warning NOTE
+If you would like to use PostgreSQL 11, modify the `type` placeholder to `postgresql:11` instead of the `X` placeholder shown above. You can view a full list of [supported versions](https://docs.platform.sh/configuration/services/postgresql.html) on the Platform.sh documentation.
+:::
+
+In your [`routes.yaml`](https://docs.platform.sh/configuration/routes.html) file, copy the following:
+
+```yaml
+'https://{default}/':
+  type: upstream
+  upstream: 'app:http'
+
+'https://www.{default}/':
+  type: redirect
+  to: 'https://{default}/'
+```
+
+This configuration directs requests to an application container called `app`, and sets an additional redirect for requests that do not include the `www` prefix.
+
+Lastly, in the [`.platform.app.yaml`](https://docs.platform.sh/configuration/app-containers.html) file, include the settings below:
+
+```yaml
+name: app
+
+type: nodejs:12
+
+dependencies:
+  nodejs:
+    yarn: '1.19.2'
+
+hooks:
+  build: !include
+    type: string
+    path: build.sh
+
+# You can uncomment or modify this block according to the services you have defined.
+# relationships:
+#   postgresdatabase: "dbpostgres:postgresql"
+
+web:
+  commands:
+    start: yarn develop
+
+disk: 1024
+
+mounts:
+  '/.cache':
+    source: local
+    source_path: cache
+  'api':
+    source: local
+    source_path: api
+  'components':
+    source: local
+    source_path: components
+  'public/uploads':
+    source: local
+    source_path: uploads
+  'extensions':
+    source: local
+    source_path: extensions
+```
+
+This file defines your Strapi app to run in a Node.js application container called `app`, with 1024Mb of persistent storage. Feel free to modify the `web.commands.start` to match the start command of your app. It is set in this example to `yarn develop` so that you can begin adding Content Types, but it is recommended to run in production mode (`yarn start`) once you have finished doing so. Consult the template's [start script](https://github.com/platformsh-templates/strapi/blob/master/backend/start.sh) and [README](https://github.com/platformsh-templates/strapi#customizations) for more information.
+
+::: warning NOTE
+If you would like to run the Strapi app on a `nodejs` container other than Node.js 12, simply modify the `type` key to read `'nodejs:<version>'` with another supported version listed in our [Node.js documentation](https://docs.platform.sh/languages/nodejs.html#supported-versions).
+:::
+
+A number of [`mounts`](https://docs.platform.sh/configuration/app/storage.html#mounts) are also defined to give write-access to Strapi where needed, which is necessary because by default Platform.sh provides a read-only file system [after the build process has completed](https://docs.platform.sh/overview/build-deploy.html#building-and-deploying-applicationss).
+
+#### 5. Add the Platform.sh Configuration Reader dependency
+
+Platform.sh stores most of its important project information (i.e. database credentials) in environment variables, so that they can be accessed by your projects. To help simplify the process of retrieving that information there is a [Configuration Reader Library for Node.js](https://github.com/platformsh/config-reader-nodejs) you should install as a dependency for your project.
+
+```bash
+yarn add platformsh-config
+```
+
+#### 6. Configure the server
+
+Create or modify your existing `config/(development|production|staging)/server.json` to read from the `PORT` environment variable:
+
+```json
+{
+  "host": "localhost",
+  "port": "${process.env.PORT}",
+  "production": true,
+  "proxy": {
+    "enabled": false
+  },
+  "cron": {
+    "enabled": false
+  },
+  "admin": {
+    "autoOpen": false
+```
+
+#### 7. Configure the database
+
+Create or modify the existing `config/(development|production|staging)/database.js` (replacing `database.json`) in order to read database credentials from the container and set up the database. For PostgreSQL, that configuration looks like this:
+
+```js
+const config = require('platformsh-config').config();
+
+const credentials = config.credentials('postgresdatabase');
+
+let settings = {
+  client: 'postgres',
+  host: credentials.ip,
+  port: credentials.port,
+  database: credentials.path,
+  username: credentials.username,
+  password: credentials.password,
+};
+
+module.exports = {
+  defaultConnection: 'default',
+  connections: {
+    default: {
+      connector: 'bookshelf',
+      settings,
+      options: {
+        ssl: false,
+        debug: false,
+        acquireConnectionTimeout: 100000,
+        pool: {
+          min: 0,
+          max: 10,
+          createTimeoutMillis: 30000,
+          acquireTimeoutMillis: 600000,
+          idleTimeoutMillis: 20000,
+          reapIntervalMillis: 20000,
+          createRetryIntervalMillis: 200,
+        },
+      },
+    },
+  },
+};
+```
+
+#### 8. Push
+
+Commit your changes, and push to Platform.sh. When the deployment has completed, Platform.sh will provide a generated url for your Master environment that will be displayed in the management console for that environment. Click the link on the left hand side (or the link exposed in the `URL` dropdown button in the top right) to visit the application. You can then finish the setup by creating an admin user at `/admin` off of that generated url.
