@@ -1,12 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+
+import Card from '../Card';
 import CardControl from '../CardControl';
 import CardControlsWrapper from '../CardControlsWrapper';
-import CardImgWrapper from '../CardImgWrapper';
 import InfiniteLoadingIndicator from '../InfiniteLoadingIndicator';
 
 const RowItem = ({
-  // file,
+  file,
   fileInfo,
   hasError,
   errorMessage,
@@ -15,6 +16,8 @@ const RowItem = ({
   onClickEdit,
   originalIndex,
 }) => {
+  const url = URL.createObjectURL(file);
+
   const handleClick = () => {
     onClick(originalIndex);
   };
@@ -24,18 +27,23 @@ const RowItem = ({
   };
 
   return (
-    <div className="col-3" key={originalIndex}>
-      <div>
-        <CardImgWrapper isSmall hasError={hasError}>
-          {isUploading && <InfiniteLoadingIndicator onClick={handleClick} />}
-          {!isUploading && (
-            <CardControlsWrapper className="card-control-wrapper">
-              <CardControl onClick={handleClickEdit} />
-            </CardControlsWrapper>
-          )}
-        </CardImgWrapper>
-        <p style={{ marginBottom: 14 }}>{errorMessage || fileInfo.name}</p>
-      </div>
+    <div className="col-xs-12 col-md-6 col-xl-3" key={originalIndex}>
+      <Card
+        small
+        errorMessage={errorMessage}
+        hasError={hasError}
+        type={file.type}
+        size={file.size}
+        url={url}
+        {...fileInfo}
+      >
+        {isUploading && <InfiniteLoadingIndicator onClick={handleClick} />}
+        {!isUploading && (
+          <CardControlsWrapper className="card-control-wrapper">
+            <CardControl onClick={handleClickEdit} />
+          </CardControlsWrapper>
+        )}
+      </Card>
     </div>
   );
 };
@@ -45,7 +53,7 @@ RowItem.defaultProps = {
 };
 
 RowItem.propTypes = {
-  // file: PropTypes.object.isRequired,
+  file: PropTypes.object.isRequired,
   fileInfo: PropTypes.shape({
     name: PropTypes.string.isRequired,
   }).isRequired,

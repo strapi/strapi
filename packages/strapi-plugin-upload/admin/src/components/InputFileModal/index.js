@@ -2,7 +2,7 @@ import React, { createRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Button } from '@buffetjs/core';
 import { useGlobalContext } from 'strapi-helper-plugin';
-import getTrad from '../../utils/getTrad';
+import { getTrad } from '../../utils';
 import Cloud from '../../icons/Cloud';
 import Label from './Label';
 import Input from './Input';

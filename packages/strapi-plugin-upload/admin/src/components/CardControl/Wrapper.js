@@ -8,9 +8,9 @@ const Wrapper = styled.div`
   align-items: center;
   width: 24px;
   height: 24px;
-  margin-right: 5px;
+  margin-left: 5px;
   background-color: ${({ theme }) => theme.main.colors.white};
-  border: 1px solid #e3e9f3;
+  border: 1px solid ${({ theme }) => theme.main.colors.darkGrey};
   border-radius: ${({ theme }) => theme.main.sizes.borderRadius};
   cursor: pointer;
   font-size: 11px;

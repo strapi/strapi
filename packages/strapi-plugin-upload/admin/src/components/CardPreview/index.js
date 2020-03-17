@@ -1,22 +1,37 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import { getType } from '../../utils';
+
+import BrokenFile from '../../icons/BrokenFile';
 import FileIcon from '../FileIcon';
 import Wrapper from './Wrapper';
 import Image from './Image';
 
-const CardPreview = ({ url, type }) => {
+const CardPreview = ({ hasError, url, type }) => {
+  const isFile = getType(type) === 'file';
+
+  if (hasError) {
+    return (
+      <Wrapper isFile>
+        <BrokenFile />
+      </Wrapper>
+    );
+  }
+
   return (
-    <Wrapper isImg={!!url}>{!url ? <FileIcon fileType={type} /> : <Image src={url} />}</Wrapper>
+    <Wrapper isFile={isFile}>{isFile ? <FileIcon fileType={type} /> : <Image src={url} />}</Wrapper>
   );
 };
 
 CardPreview.defaultProps = {
+  hasError: false,
   url: null,
-  type: null,
+  type: '',
 };
 
 CardPreview.propTypes = {
+  hasError: PropTypes.bool,
   url: PropTypes.string,
   type: PropTypes.string,
 };

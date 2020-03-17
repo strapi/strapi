@@ -29,6 +29,7 @@ const Indicator = styled.div`
   overflow: hidden;
   background-color: #515764;
   border-radius: 2px;
+  margin-top: 32px;
   &:before {
     content: '';
     display: block;

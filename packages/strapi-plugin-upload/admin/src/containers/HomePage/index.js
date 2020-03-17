@@ -13,8 +13,8 @@ import {
   useQuery,
 } from 'strapi-helper-plugin';
 
-import getTrad from '../../utils/getTrad';
-import getRequestUrl from '../../utils/getRequestUrl';
+import { getRequestUrl, getTrad } from '../../utils';
+
 import Container from '../../components/Container';
 import ControlsWrapper from '../../components/ControlsWrapper';
 import SelectAll from '../../components/SelectAll';

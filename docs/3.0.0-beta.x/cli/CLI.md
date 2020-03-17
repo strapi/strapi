@@ -20,7 +20,7 @@ options: [--no-run|--use-npm|--debug|--quickstart|--dbclient=<dbclient> --dbhost
 
 - **strapi new &#60;name&#62; --quickstart**<br/>
   Use the quickstart system to create your app.
-  
+
 - **strapi new &#60;name&#62; --quickstart --no-run**<br/>
   Use the quickstart system to create your app, and do not start the application after creation.
 
