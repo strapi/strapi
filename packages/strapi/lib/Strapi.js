@@ -61,9 +61,6 @@ class Strapi extends EventEmitter {
     this.app = new Koa();
     this.router = new Router();
 
-    // Mount the HTTP server.
-    this.server = http.createServer(this.app.callback());
-
     // Logger.
     this.log = logger;
 
@@ -204,36 +201,11 @@ class Strapi extends EventEmitter {
       await this.runBootstrapFunctions();
       // Freeze object.
       await this.freeze();
-      // Is the project initialised?
-      const isInitialised = await utils.isInitialised(this);
 
       this.app.use(this.router.routes()).use(this.router.allowedMethods());
 
       // Launch server.
-      this.server.listen(this.config.port, this.config.host, async err => {
-        if (err) return this.stopWithError(err);
-
-        if (!isInitialised) {
-          this.logFirstStartupMessage();
-        } else {
-          this.logStartupMessage();
-        }
-
-        // Emit started event.
-        this.emit('server:started');
-
-        if (cb && typeof cb === 'function') {
-          cb();
-        }
-
-        if (
-          (this.config.environment === 'development' &&
-            _.get(this.config.currentEnvironment, 'server.admin.autoOpen', true) !== false) ||
-          !isInitialised
-        ) {
-          await utils.openBrowser.call(this);
-        }
-      });
+      this.listen(cb);
     } catch (err) {
       this.stopWithError(err);
     }
@@ -242,7 +214,10 @@ class Strapi extends EventEmitter {
   /**
    * Add behaviors to the server
    */
-  async enhancer() {
+  async listen(cb) {
+    // Mount the HTTP server.
+    this.server = http.createServer(this.app.callback());
+
     // handle port in use cleanly
     this.server.on('error', err => {
       if (err.code === 'EADDRINUSE') {
@@ -271,6 +246,36 @@ class Strapi extends EventEmitter {
         connections[key].destroy();
       }
     };
+
+    const onListen = async err => {
+      if (err) return this.stopWithError(err);
+
+      // Is the project initialised?
+      const isInitialised = await utils.isInitialised(this);
+
+      if (!isInitialised) {
+        this.logFirstStartupMessage();
+      } else {
+        this.logStartupMessage();
+      }
+
+      // Emit started event.
+      this.emit('server:started');
+
+      if (cb && typeof cb === 'function') {
+        cb();
+      }
+
+      if (
+        (this.config.environment === 'development' &&
+          _.get(this.config.currentEnvironment, 'server.admin.autoOpen', true) !== false) ||
+        !isInitialised
+      ) {
+        await utils.openBrowser.call(this);
+      }
+    };
+
+    this.server.listen(this.config.port, this.config.host, err => onListen(err));
   }
 
   stopWithError(err, customMessage) {
@@ -295,8 +300,6 @@ class Strapi extends EventEmitter {
   }
 
   async load() {
-    await this.enhancer();
-
     this.app.use(async (ctx, next) => {
       if (ctx.request.url === '/_health' && ctx.request.method === 'HEAD') {
         ctx.set('strapi', 'You are so French!');
