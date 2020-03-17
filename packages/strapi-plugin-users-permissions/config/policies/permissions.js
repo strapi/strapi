@@ -113,9 +113,5 @@ module.exports = async (ctx, next) => {
 };
 
 const handleErrors = (ctx, err = undefined, type) => {
-  if (ctx.request.graphql === null) {
-    return (ctx.request.graphql = strapi.errors[type](err));
-  }
-
-  return ctx[type](err);
+  throw strapi.errors[type](err);
 };

@@ -11,15 +11,7 @@ import { auth } from 'strapi-helper-plugin';
 import PageTitle from '../../components/PageTitle';
 
 import useFetch from './hooks';
-import {
-  ALink,
-  Block,
-  Container,
-  LinkWrapper,
-  P,
-  Wave,
-  Separator,
-} from './components';
+import { ALink, Block, Container, LinkWrapper, P, Wave, Separator } from './components';
 import BlogPost from './BlogPost';
 import SocialLink from './SocialLink';
 
@@ -70,15 +62,13 @@ const HomePage = ({ global: { plugins }, history: { push } }) => {
     e.preventDefault();
 
     push(
-      '/plugins/content-type-builder/models/user&source=users-permissions?modalType=model&settingType=base&actionType=create'
+      '/plugins/content-type-builder/content-types/plugins::users-permissions.user?modalType=contentType&kind=collectionType&actionType=create&settingType=base&forTarget=contentType&headerId=content-type-builder.modalForm.contentType.header-create&header_icon_isCustom_1=false&header_icon_name_1=contentType&header_label_1=null'
     );
   };
   const hasAlreadyCreatedContentTypes =
-    get(
-      plugins,
-      ['content-manager', 'leftMenuSections', '0', 'links'],
-      []
-    ).filter(contentType => contentType.isDisplayed === true).length > 1;
+    get(plugins, ['content-manager', 'leftMenuSections', '0', 'links'], []).filter(
+      contentType => contentType.isDisplayed === true
+    ).length > 1;
 
   const headerId = hasAlreadyCreatedContentTypes
     ? 'HomePage.greetings'
@@ -133,7 +123,7 @@ const HomePage = ({ global: { plugins }, history: { push } }) => {
                                 return (
                                   <P>
                                     <b>{congrats}</b>&nbsp;
-                                    {content} &nbsp;
+                                    {content}&nbsp;
                                     <b>{boldContent}</b>
                                   </P>
                                 );
@@ -176,12 +166,7 @@ const HomePage = ({ global: { plugins }, history: { push } }) => {
                   const type = index === 0 ? 'doc' : 'code';
 
                   return (
-                    <LinkWrapper
-                      href={data.link}
-                      target="_blank"
-                      key={data.link}
-                      type={type}
-                    >
+                    <LinkWrapper href={data.link} target="_blank" key={data.link} type={type}>
                       <FormattedMessage id={data.titleId}>
                         {title => <p className="bold">{title}</p>}
                       </FormattedMessage>
@@ -197,13 +182,9 @@ const HomePage = ({ global: { plugins }, history: { push } }) => {
 
           <div className="col-md-12 col-lg-4">
             <Block style={{ paddingRight: 30, paddingBottom: 0 }}>
-              <FormattedMessage id="HomePage.community">
-                {msg => <h2>{msg}</h2>}
-              </FormattedMessage>
+              <FormattedMessage id="HomePage.community">{msg => <h2>{msg}</h2>}</FormattedMessage>
               <FormattedMessage id="app.components.HomePage.community.content">
-                {content => (
-                  <P style={{ marginTop: 7, marginBottom: 0 }}>{content}</P>
-                )}
+                {content => <P style={{ marginTop: 7, marginBottom: 0 }}>{content}</P>}
               </FormattedMessage>
               <FormattedMessage id="HomePage.roadmap">
                 {msg => (

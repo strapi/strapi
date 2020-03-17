@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 
 const ListWrapper = styled.div`
-  overflow: hidden;
   max-height: 116px;
 
   > ul {

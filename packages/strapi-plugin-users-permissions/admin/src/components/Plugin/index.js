@@ -63,8 +63,11 @@ class Plugin extends React.Component {
   };
 
   render() {
+    const { appPlugins } = this.context;
+    const { plugin } = this.props;
     const divStyle = this.state.collapse ? { marginBottom: '.4rem' } : {};
-    const icon = get(this.props.plugin, ['information', 'logo']);
+    const pluginId = get(plugin, ['information', 'id'], null);
+    const icon = get(appPlugins, [pluginId, 'pluginLogo'], null);
     const emptyApplication = !isEmpty(get(this.props.plugin, 'controllers'));
 
     if (!emptyApplication) {

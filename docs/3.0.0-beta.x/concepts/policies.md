@@ -5,26 +5,9 @@
 Policies are functions which have the ability to execute specific logic on each request before it reaches the controller's action. They are mostly used for securing business logic easily.
 Each route of the project can be associated to an array of policies. For example, you can create a policy named `isAdmin`, which obviously checks that the request is sent by an admin user, and use it for critical routes.
 
-Policies can be:
-
-- `global`: Can be used within the entire project.
-- `scoped`: Can only be used by single API or plugin.
-
 ### Where are the policies defined?
 
-The API and scoped plugin policies are defined in each `./api/**/config/policies/` folders and plugins. They are respectively exposed through `strapi.api.**.config.policies` and `strapi.plugins.**.config.policies`. The global policies are defined at `./config/policies/` and accessible via `strapi.config.policies`.
-
-### Global policies
-
-Global policies are reusable throughout the entire app.
-
-### Scoped policies
-
-A policy defined in an API or plugin is usable only from this API or plugin. You don't need any prefix to use it.
-
-### Plugin policies
-
-Plugin policies are usable from any app API.
+The policies are defined in each `./api/**/config/policies/` folders and plugins. They are respectively exposed through `strapi.api.**.config.policies` and `strapi.plugins.**.config.policies`. The global policies are defined at `./config/policies/` and accessible via `strapi.config.policies`.
 
 ## How to create a policy?
 
@@ -74,7 +57,7 @@ The global policies can be associated to any route in your project.
       "path": "/restaurants",
       "handler": "Restaurant.find",
       "config": {
-        "policies": ["global.isAuthenticated"]
+        "policies": ["global::isAuthenticated"]
       }
     }
   ]
@@ -101,7 +84,7 @@ Plugins can add and expose policies into your app. For example, the plugin **Use
       "path": "/restaurants",
       "handler": "Restaurant.find",
       "config": {
-        "policies": ["plugins.users-permissions.isAuthenticated"]
+        "policies": ["plugins::users-permissions.isAuthenticated"]
       }
     }
   ]
@@ -110,9 +93,9 @@ Plugins can add and expose policies into your app. For example, the plugin **Use
 
 The policy `isAuthenticated` located in the `users-permissions` plugin will be executed before the `find` action in the `Restaurant.js` controller.
 
-### Scoped Policies
+### Api Policies
 
-The scoped policies can only be associated to the routes defined in the API where they have been declared.
+The api policies can be associated to the routes defined in the API where they have been declared.
 
 **Path —** `./api/restaurant/config/policies/isAdmin.js`.
 
@@ -146,9 +129,26 @@ module.exports = async (ctx, next) => {
 
 The policy `isAdmin` located in `./api/restaurant/config/policies/isAdmin.js` will be executed before the `find` action in the `Restaurant.js` controller.
 
-::: tip
-The policy `isAdmin` can only be applied to the routes defined in the `/api/restaurant` folder.
-:::
+### Using a policy outside it's api
+
+To use a policy in another api you can reference it with the following syntax: `{apiName}.{policyName}`.
+
+**Path —** `./api/category/config/routes.json`.
+
+```json
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/categories",
+      "handler": "Category.find",
+      "config": {
+        "policies": ["restaurant.isAdmin"]
+      }
+    }
+  ]
+}
+```
 
 ## Advanced usage
 

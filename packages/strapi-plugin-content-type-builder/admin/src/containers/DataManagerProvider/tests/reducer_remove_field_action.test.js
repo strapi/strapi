@@ -17,10 +17,7 @@ describe('CTB | containers | DataManagerProvider | reducer | REMOVE_FIELD', () =
       const state = initialState
         .set('contentTypes', fromJS(testData.contentTypes))
         .set('initialContentTypes', fromJS(testData.contentTypes))
-        .setIn(
-          ['modifiedData', 'contentType'],
-          fromJS(testData.contentTypes[contentTypeUID])
-        )
+        .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]))
         .setIn(['modifiedData', 'components'], fromJS({}));
 
       const expected = state.removeIn([
@@ -49,10 +46,7 @@ describe('CTB | containers | DataManagerProvider | reducer | REMOVE_FIELD', () =
       const state = initialState
         .set('contentTypes', fromJS(testData.contentTypes))
         .set('initialContentTypes', fromJS(testData.contentTypes))
-        .setIn(
-          ['modifiedData', 'contentType'],
-          fromJS(testData.contentTypes[contentTypeUID])
-        )
+        .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]))
         .setIn(['modifiedData', 'components'], fromJS({}));
 
       const expected = state.removeIn([
@@ -163,10 +157,7 @@ describe('CTB | containers | DataManagerProvider | reducer | REMOVE_FIELD', () =
         .setIn(['contentTypes', contentTypeUID], fromJS(contentType))
         .setIn(['modifiedData', 'contentType'], fromJS(contentType));
 
-      const expected = state.setIn(
-        ['modifiedData', 'contentType'],
-        fromJS(expectedContentType)
-      );
+      const expected = state.setIn(['modifiedData', 'contentType'], fromJS(expectedContentType));
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -257,10 +248,7 @@ describe('CTB | containers | DataManagerProvider | reducer | REMOVE_FIELD', () =
         .setIn(['contentTypes', contentTypeUID], fromJS(contentType))
         .setIn(['modifiedData', 'contentType'], fromJS(contentType));
 
-      const expected = state.setIn(
-        ['modifiedData', 'contentType'],
-        fromJS(expectedContentType)
-      );
+      const expected = state.setIn(['modifiedData', 'contentType'], fromJS(expectedContentType));
 
       expect(reducer(state, action)).toEqual(expected);
       expect(
@@ -269,6 +257,37 @@ describe('CTB | containers | DataManagerProvider | reducer | REMOVE_FIELD', () =
           attributeToRemoveName: 'one_to_many_right',
         })
       ).toEqual(expected);
+    });
+  });
+  describe('Removing a field that is targeted by a UID field', () => {
+    it('Should remove the attribute correctly and remove the targetField from the UID field', () => {
+      const contentTypeUID = 'application::homepage.homepage';
+      const attributeToRemoveName = 'description';
+      const action = {
+        type: 'REMOVE_FIELD',
+        mainDataKey: 'contentType',
+        attributeToRemoveName,
+        componentUid: '',
+      };
+
+      const state = initialState
+        .set('contentTypes', fromJS(testData.contentTypes))
+        .set('initialContentTypes', fromJS(testData.contentTypes))
+        .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]))
+        .setIn(['modifiedData', 'components'], fromJS({}));
+
+      const expected = state
+        .removeIn(['modifiedData', 'contentType', 'schema', 'attributes', attributeToRemoveName])
+        .removeIn([
+          'modifiedData',
+          'contentType',
+          'schema',
+          'attributes',
+          'homepageuidfield',
+          'targetField',
+        ]);
+
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 });

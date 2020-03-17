@@ -1,0 +1,360 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Admin | containers | ListView should match the snapshot 1`] = `
+<DocumentFragment>
+  .c6 button {
+  width: 100%;
+  height: 54px;
+  border-top: 1px solid #aed4fb;
+  color: #007eff;
+  font-weight: 500;
+  text-transform: uppercase;
+  background-color: #e6f0fb;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+}
+
+.c6 button svg {
+  vertical-align: initial;
+}
+
+.c6 button:hover {
+  box-shadow: none;
+}
+
+.c6 button:focus {
+  outline: 0;
+}
+
+.c8 {
+  width: 37.5rem !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+.c4 {
+  height: 30px;
+  padding: 0 15px;
+  font-weight: 500;
+  font-size: 1.3rem;
+  line-height: normal;
+  border-radius: 2px;
+  cursor: pointer;
+  outline: 0;
+  background-color: #ffffff;
+  background-color: #007EFF;
+  border: 1px solid #007EFF;
+  color: #ffffff;
+}
+
+.c4:hover {
+  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  box-shadow: inset 0 0 30px [object Object];
+}
+
+.c4:active {
+  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  box-shadow: inset 0 0 30px [object Object];
+}
+
+.c4:focus {
+  outline: 0;
+}
+
+.c4 > svg {
+  margin-right: 10px;
+  vertical-align: initial;
+}
+
+.c1 {
+  margin-bottom: 30px;
+  position: relative;
+  width: 100%;
+  height: 50px;
+}
+
+.c1 .justify-content-end {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.c1 .header-title p {
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 1.3rem;
+  font-weight: 400;
+  line-height: normal;
+  color: #787e8f;
+}
+
+.c1 .sticky {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 1050;
+  background-color: white;
+  width: calc(100vw - 30.5rem);
+  padding-right: 15px;
+  height: 60px;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.c1 .sticky .row {
+  width: 100%;
+  margin: auto;
+}
+
+.c1 .sticky .row > div > div {
+  padding-top: 0;
+}
+
+.c1 .sticky .row > div > div button {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.c3 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+  -webkit-justify-content: flex-end;
+  -ms-flex-pack: end;
+  justify-content: flex-end;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  max-width: 100%;
+  padding-top: 1rem;
+}
+
+.c3 > button {
+  margin-right: 0;
+  margin-left: 1rem;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  outline: 0;
+}
+
+.c2 {
+  position: relative;
+  padding-top: 0.8rem;
+}
+
+.c2 h1 {
+  position: relative;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 2.4rem;
+  font-weight: 600;
+  margin-bottom: 1px;
+  padding-right: 18px;
+}
+
+.c2 svg {
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin-top: 11px;
+  font-size: 12px;
+  color: rgba(16,22,34,0.35);
+  cursor: pointer;
+  outline: 0;
+}
+
+.c7 {
+  margin-right: 10px;
+  font-size: 0.94em;
+}
+
+.c5 {
+  padding: 54px 30px 30px;
+  text-align: center;
+  background-color: white;
+}
+
+.c5 p,
+.c5 a {
+  line-height: normal;
+}
+
+.c5 p:first-of-type {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333740;
+  margin-bottom: 18px;
+}
+
+.c5 a {
+  color: #007eff;
+}
+
+.c0 {
+  margin-bottom: 60px;
+}
+
+.c0 > div:first-of-type {
+  margin-bottom: 33px;
+}
+
+.c0 .list-wrapper {
+  border-radius: 2px;
+  box-shadow: 0 2px 4px #e3e9f3;
+  background: white;
+}
+
+.c0 .list-wrapper > div,
+.c0 .list-wrapper > div > div:last-of-type {
+  box-shadow: none;
+  border-radius: 2px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.c0 p {
+  margin-bottom: 0;
+}
+
+<div
+    class="c0"
+  >
+    <div
+      class="c1"
+    >
+      <div
+        class="sticky-wrapper"
+      >
+        <div
+          class="row"
+        >
+          <div
+            class="col-sm-6 header-title"
+          >
+            <div
+              class="c2"
+            >
+              <h1>
+                Webhooks
+              </h1>
+            </div>
+            <p>
+              Get POST changes notifications.
+            </p>
+          </div>
+          <div
+            class="col-sm-6 justify-content-end"
+          >
+            <div
+              class="c3"
+            >
+              <button
+                class="c4"
+                color="primary"
+                style="padding-left: 15px; padding-right: 15px;"
+                type="button"
+              >
+                <svg
+                  fill="#ffffff"
+                  height="11px"
+                  viewBox="0 0 13 13"
+                  width="11px"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g
+                    data-name="Layer 2"
+                  >
+                    <path
+                      d="M6.5.5v12m6-6H.5"
+                      fill="none"
+                      stroke="#ffffff"
+                      stroke-linecap="round"
+                    />
+                  </g>
+                </svg>
+                Add new webhook
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="list-wrapper"
+    >
+      <div
+        class="c5"
+      >
+        <p>
+          There are no webhooks yet
+        </p>
+        <p>
+          Add your first one to this list.
+        </p>
+        <a
+          href="https://strapi.io/documentation/3.0.0-beta.x/guides/webhooks.html"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          See our documentation
+        </a>
+      </div>
+      <div
+        class="c6"
+      >
+        <button
+          class="c4"
+          color="primary"
+          type="button"
+        >
+          <span
+            class="c7"
+          >
+            <svg
+              fill="#007eff"
+              height="11px"
+              viewBox="0 0 13 13"
+              width="11px"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <g
+                data-name="Layer 2"
+              >
+                <path
+                  d="M6.5.5v12m6-6H.5"
+                  fill="none"
+                  stroke="#007eff"
+                  stroke-linecap="round"
+                />
+              </g>
+            </svg>
+          </span>
+          Add new webhook
+        </button>
+      </div>
+    </div>
+    <div
+      class="c8"
+    />
+  </div>
+</DocumentFragment>
+`;
