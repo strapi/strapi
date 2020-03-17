@@ -49,6 +49,22 @@
       }
     },
     {
+      "method": "POST",
+      "path": "/explorer/uid/generate",
+      "handler": "ContentManager.generateUID",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/explorer/uid/check-availability",
+      "handler": "ContentManager.checkUIDAvailability",
+      "config": {
+        "policies": []
+      }
+    },
+    {
       "method": "GET",
       "path": "/explorer/:model",
       "handler": "ContentManager.find",

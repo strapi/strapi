@@ -3,10 +3,7 @@
 const _ = require('lodash');
 const pluralize = require('pluralize');
 
-const {
-  formatAttributes,
-  replaceTemporaryUIDs,
-} = require('../utils/attributes');
+const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
 const createBuilder = require('./schema-builder');
 
 /**
@@ -15,11 +12,12 @@ const createBuilder = require('./schema-builder');
  * @param {Object} component - strapi component model
  */
 const formatComponent = component => {
-  const { uid, connection, collectionName, info, category } = component;
+  const { uid, modelName, connection, collectionName, info, category } = component;
 
   return {
     uid,
     category,
+    apiId: modelName,
     schema: {
       icon: _.get(info, 'icon'),
       name: _.get(info, 'name') || _.upperFirst(pluralize(uid)),

@@ -290,6 +290,10 @@ If the provider is not in the mono repo, you probably don't need `@beta` dependi
 
 Then, visit [http://localhost:1337/admin/plugins/upload/configurations/development](http://localhost:1337/admin/plugins/upload/configurations/development) on your web browser and configure the provider.
 
+::: tip
+Some providers may have additional settings such as the AWS S3 needs an API endpoint URL. You can find a list of these for AWS [here](https://docs.aws.amazon.com/general/latest/gr/ses.html)
+:::
+
 ## Create providers
 
 If you want to create your own, make sure the name starts with `strapi-provider-upload-` (duplicating an existing one will be easier to create), modify the `auth` config object and customize the `upload` and `delete` functions.

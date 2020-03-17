@@ -97,7 +97,9 @@ module.exports = {
 
     if (files) {
       // automatically uploads the files based on the entry and the model
-      await this.uploadFiles(entry, files, { model: strapi.models.restaurant });
+      await strapi.entityService.uploadFiles(entry, files, {
+        model: strapi.models.restaurant,
+      });
       return this.findOne({ id: entry.id });
     }
 
@@ -125,7 +127,9 @@ module.exports = {
 
     if (files) {
       // automatically uploads the files based on the entry and the model
-      await this.uploadFiles(entry, files, { model: strapi.models.restaurant });
+      await strapi.entityService.uploadFiles(entry, files, {
+        model: strapi.models.restaurant,
+      });
       return this.findOne({ id: entry.id });
     }
 
@@ -258,12 +262,7 @@ module.exports = {
     const user = await User.create(ctx.params);
 
     // Send an email to validate his subscriptions.
-    strapi.services.email.send(
-      'welcome@mysite.com',
-      user.email,
-      'Welcome',
-      '...'
-    );
+    strapi.services.email.send('welcome@mysite.com', user.email, 'Welcome', '...');
 
     // Send response to the server.
     ctx.send({

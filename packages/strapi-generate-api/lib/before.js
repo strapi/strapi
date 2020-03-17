@@ -29,10 +29,15 @@ module.exports = (scope, cb) => {
   const name = scope.name || _.trim(_.camelCase(scope.id));
   const environment = process.env.NODE_ENV || 'development';
 
+  scope.contentTypeKind = scope.args.kind || 'collectionType';
+
   // `scope.args` are the raw command line arguments.
   _.defaults(scope, {
     name,
-    route: _.kebabCase(pluralize(scope.id)),
+    route:
+      scope.contentTypeKind === 'singleType'
+        ? _.kebabCase(scope.id)
+        : _.kebabCase(pluralize(scope.id)),
   });
 
   let filePath;

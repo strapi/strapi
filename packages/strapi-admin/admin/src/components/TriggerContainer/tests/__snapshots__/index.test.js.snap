@@ -1,0 +1,195 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<TriggerContainer /> should match the snapshot 1`] = `
+.c0 {
+  overflow-x: auto;
+  margin-bottom: 22px;
+  box-shadow: 0 2px 4px 0 #e3e9f3;
+}
+
+.c0 table {
+  width: 100%;
+  height: 68px;
+  background-color: white;
+  border-radius: 2px;
+}
+
+.c0 table td {
+  padding: 0 25px;
+}
+
+.c0 table td p {
+  margin-bottom: 0;
+  font-size: 13px;
+  line-height: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.c0 table td p svg,
+.c0 table td p span {
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+.c0 table td p svg + span {
+  margin-left: 10px;
+}
+
+.c0 table td p.success-label svg {
+  margin-bottom: -2px;
+}
+
+.c0 table td:first-of-type p {
+  font-weight: 500;
+}
+
+.c0 table td:last-of-type {
+  max-width: 400px;
+  text-align: right;
+}
+
+.c0 table td:last-of-type button {
+  color: #b4b6ba;
+}
+
+.c0 table td:last-of-type button,
+.c0 table td:last-of-type button:focus {
+  outline: 0;
+}
+
+.c0 table td:last-of-type button svg {
+  margin-left: 10px;
+}
+
+<div
+  className="c0"
+>
+  <table>
+    <tbody>
+      <tr>
+        <td>
+          <p>
+            <span>
+              test-trigger
+            </span>
+          </p>
+        </td>
+        <td>
+          <p
+            className="success-label"
+          >
+            <svg
+              height="19px"
+              viewBox="0 0 28 28"
+              width="19px"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <filter
+                  filterUnits="objectBoundingBox"
+                  height="135.0%"
+                  id="filter-1"
+                  width="107.3%"
+                  x="-3.7%"
+                  y="-17.5%"
+                >
+                  <feOffset
+                    dx="0"
+                    dy="1"
+                    in="SourceAlpha"
+                    result="shadowOffsetOuter1"
+                  />
+                  <feGaussianBlur
+                    in="shadowOffsetOuter1"
+                    result="shadowBlurOuter1"
+                    stdDeviation="2"
+                  />
+                  <feColorMatrix
+                    in="shadowBlurOuter1"
+                    result="shadowMatrixOuter1"
+                    type="matrix"
+                    values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.1 0"
+                  />
+                  <feMerge>
+                    <feMergeNode
+                      in="shadowMatrixOuter1"
+                    />
+                    <feMergeNode
+                      in="SourceGraphic"
+                    />
+                  </feMerge>
+                </filter>
+              </defs>
+              <g
+                fill="none"
+                fillRule="evenodd"
+                stroke="none"
+                strokeWidth="1"
+              >
+                <g
+                  transform="translate(-702.000000, -89.000000)"
+                >
+                  <g
+                    filter="url(#filter-1)"
+                    transform="translate(686.000000, 72.000000)"
+                  >
+                    <g
+                      id="Check-Copy-2-Clipped"
+                    >
+                      <g
+                        id="Check-Copy-2"
+                        transform="translate(20.000000, 20.000000)"
+                      >
+                        <g
+                          id="Group"
+                        >
+                          <g
+                            id="check"
+                            transform="translate(0.500000, 0.000000)"
+                          >
+                            <g
+                              id="Group-6"
+                            >
+                              <path
+                                d="M14.3423951,8.3983456 C14.3423951,8.55907497 14.2861399,8.69569495 14.1736293,8.80820551 L9.80982666,13.1720081 L8.99010683,13.991728 C8.87759626,14.1042385 8.74097629,14.1604938 8.58024691,14.1604938 C8.41951753,14.1604938 8.28289756,14.1042385 8.170387,13.991728 L7.35066717,13.1720081 L5.16876585,10.9901068 C5.05625528,10.8775963 5,10.7409763 5,10.5802469 C5,10.4195175 5.05625528,10.2828976 5.16876585,10.170387 L5.98848568,9.35066717 C6.10099625,9.2381566 6.23761622,9.18190132 6.3983456,9.18190132 C6.55907497,9.18190132 6.69569495,9.2381566 6.80820551,9.35066717 L8.58024691,11.1287359 L12.5341896,7.16876585 C12.6467002,7.05625528 12.7833202,7 12.9440495,7 C13.1047789,7 13.2413989,7.05625528 13.3539095,7.16876585 L14.1736293,7.98848568 C14.2861399,8.10099625 14.3423951,8.23761622 14.3423951,8.3983456 Z"
+                                fill="#6DBB1A"
+                                fillRule="nonzero"
+                                id="Shape"
+                              />
+                              <rect
+                                height="19"
+                                id="Rectangle-2"
+                                rx="9.5"
+                                stroke="#6DBB1A"
+                                width="19"
+                                x="0"
+                                y="0.5"
+                              />
+                            </g>
+                          </g>
+                        </g>
+                      </g>
+                    </g>
+                  </g>
+                </g>
+              </g>
+            </svg>
+            <span>
+              success
+            </span>
+          </p>
+        </td>
+        <td>
+          <p>
+            <span>
+              success
+            </span>
+          </p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+`;

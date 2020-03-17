@@ -28,8 +28,8 @@ const mysql = {
   settings: {
     client: 'mysql',
     database: 'strapi',
-    username: 'root',
-    password: 'test123',
+    username: 'strapi',
+    password: 'strapi',
     port: 3306,
     host: 'localhost',
   },
@@ -58,6 +58,6 @@ const db = {
 module.exports = {
   defaultConnection: 'default',
   connections: {
-    default: db.mysql,
+    default: process.env.DB ? db[process.env.DB] || db.sqlite : db.sqlite,
   },
 };
