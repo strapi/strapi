@@ -40,7 +40,7 @@ const mongo = {
   connector: 'mongoose',
   settings: {
     database: 'strapi',
-    username: 'root',
+    username: 'root', 
     password: 'strapi',
     port: 27017,
     host: 'localhost',
