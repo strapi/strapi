@@ -27,7 +27,7 @@ const FiltersCard = ({ onChange }) => {
     dispatch({
       type: 'ON_CHANGE',
       name,
-      value,
+      value: value === 'file' ? 'application' : value,
     });
   };
 
@@ -47,10 +47,29 @@ const FiltersCard = ({ onChange }) => {
     ));
   };
 
+  const renderNamesOptions = () => {
+    return Object.keys(filters).map(key => {
+      if (key === 'mime') {
+        // the type name is different from param used by backend
+        return (
+          <option key={key} value={key}>
+            type
+          </option>
+        );
+      }
+
+      return (
+        <option key={key} value={key}>
+          {key}
+        </option>
+      );
+    });
+  };
+
   return (
     <Wrapper>
       <InputWrapper>
-        <Select onChange={handleChange} name="name" options={Object.keys(filters)} value={name} />
+        <Select onChange={handleChange} name="name" options={renderNamesOptions()} value={name} />
       </InputWrapper>
       <InputWrapper>
         <Select
@@ -65,7 +84,7 @@ const FiltersCard = ({ onChange }) => {
           type={type}
           onChange={handleChange}
           name="value"
-          options={['image', 'video', 'files']}
+          options={['image', 'video', 'file']}
           value={value}
         />
       </InputWrapper>

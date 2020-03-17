@@ -124,6 +124,7 @@
   "components.FilterOptions.FILTER_TYPES._lt": "inférieur à",
   "components.FilterOptions.FILTER_TYPES._lte": "inférieur ou égal à",
   "components.FilterOptions.FILTER_TYPES._ne": "n'est pas",
+  "components.FilterOptions.FILTER_TYPES._ncontains": "n'est pas",
   "components.Input.error.attribute.key.taken": "Cette valeur existe déjà",
   "components.Input.error.attribute.sameKeyAndName": "Ne peuvent pas être égaux",
   "components.Input.error.attribute.taken": "Ce champ existe déjà",

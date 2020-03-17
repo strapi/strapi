@@ -91,6 +91,17 @@ const getFilterType = type => {
         //   value: '_nin',
         // },
       ];
+    case 'enum':
+      return [
+        {
+          id: 'components.FilterOptions.FILTER_TYPES.=',
+          value: '_contains',
+        },
+        {
+          id: 'components.FilterOptions.FILTER_TYPES._ne',
+          value: '_ncontains',
+        },
+      ];
     default:
       return [
         {

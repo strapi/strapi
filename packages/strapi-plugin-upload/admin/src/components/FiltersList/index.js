@@ -7,7 +7,7 @@ import { dateFormats, FilterButton } from 'strapi-helper-plugin';
 const FiltersList = ({ filters, onClick }) => {
   return filters.map((filter, index) => {
     const dateToUtcTime = date => moment.parseZone(date).utc();
-    const { value } = filter;
+    const { name, value } = filter;
 
     let displayedValue = filter;
 
@@ -15,6 +15,15 @@ const FiltersList = ({ filters, onClick }) => {
       displayedValue = {
         ...filter,
         value: dateToUtcTime(value).format(dateFormats.datetime),
+      };
+    }
+
+    // Specific param values - Different wording used by backend for mime
+    if (name === 'mime') {
+      displayedValue = {
+        filter: filter.filter === '_ncontains' ? filter.filter : '=',
+        name: 'type',
+        value: value === 'application' ? 'file' : value,
       };
     }
 

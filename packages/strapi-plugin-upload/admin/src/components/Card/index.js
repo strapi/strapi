@@ -1,9 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import { formatBytes, getExtension, getType } from '../../utils';
+
+import Flex from '../Flex';
 import Text from '../Text';
 import CardImgWrapper from '../CardImgWrapper';
 import CardPreview from '../CardPreview';
+import Tag from '../Tag';
 import Wrapper from './Wrapper';
 import Title from './Title';
 import ErrorMessage from './ErrorMessage';
@@ -21,6 +25,10 @@ const Card = ({
   type,
   url,
 }) => {
+  const getSize = () => {
+    return formatBytes(size, 0);
+  };
+
   return (
     <Wrapper>
       <CardImgWrapper checked={checked} small={small}>
@@ -28,10 +36,13 @@ const Card = ({
         <Border color={hasError ? 'orange' : 'mediumBlue'} shown={checked || hasError} />
         {children}
       </CardImgWrapper>
-      <Title fontSize="md" fontWeight="bold" ellipsis>
-        {name}
-      </Title>
-      <Text color="grey" fontSize="xs" ellipsis>{`${type} - ${size}`}</Text>
+      <Flex>
+        <Title>{name}</Title>
+        <Tag label={getType(mime || type)} />
+      </Flex>
+      <Text color="grey" fontSize="xs" ellipsis>
+        {`${getExtension(mime || type)} - ${getSize()}`}
+      </Text>
       {hasError && <ErrorMessage>{errorMessage}</ErrorMessage>}
     </Wrapper>
   );

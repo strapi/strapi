@@ -37,10 +37,14 @@ const HomePage = () => {
   const { search } = useLocation();
   const isMounted = useRef();
 
-  const { data, dataToDelete } = reducerState.toJS();
+  const { data, dataCount, dataToDelete } = reducerState.toJS();
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
   const paramsKeys = ['_limit', '_start', '_q', '_sort'];
   const debouncedSearch = useDebounce(searchValue, 300);
+
+  useEffect(() => {
+    fetchDataCount();
+  }, []);
 
   useEffect(() => {
     handleChangeParams({ target: { name: '_q', value: searchValue } });
@@ -83,6 +87,27 @@ const HomePage = () => {
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
           data,
+        });
+      }
+    } catch (err) {
+      if (isMounted.current) {
+        strapi.notification.error('notification.error');
+      }
+    }
+  };
+
+  const fetchDataCount = async () => {
+    const requestURL = getRequestUrl('files/count');
+
+    try {
+      const { count } = await request(requestURL, {
+        method: 'GET',
+      });
+
+      if (isMounted.current) {
+        dispatch({
+          type: 'GET_DATA_COUNT_SUCCEEDED',
+          count,
         });
       }
     } catch (err) {
@@ -150,6 +175,7 @@ const HomePage = () => {
 
     if (refetch) {
       fetchData();
+      fetchDataCount();
     }
   };
 
@@ -166,7 +192,12 @@ const HomePage = () => {
   const handleDeleteMedias = async () => {
     await Promise.all(dataToDelete.map(id => deleteMedia(id)));
 
+    dispatch({
+      type: 'CLEAR_DATA_TO_DELETE',
+    });
+
     fetchData();
+    fetchDataCount();
   };
 
   const handleSelectAll = () => {
@@ -183,8 +214,7 @@ const HomePage = () => {
       {
         id: getTrad(getHeaderLabel(data)),
       },
-      // Values
-      { number: 1 }
+      { number: dataCount }
     ),
     actions: [
       {
@@ -213,8 +243,9 @@ const HomePage = () => {
     _page: generatePageFromStart(start, limit),
   };
 
-  const areAllCheckboxesSelected = data.length === dataToDelete.length;
   const hasSomeCheckboxSelected = dataToDelete.length > 0;
+  const areAllCheckboxesSelected = data.length === dataToDelete.length && hasSomeCheckboxSelected;
+  const paginationCount = data.length < limit ? data.length : dataCount;
 
   return (
     <Container>
@@ -240,14 +271,19 @@ const HomePage = () => {
           onClick={handleDeleteFilter}
         />
       </ControlsWrapper>
-      <List data={data} onChange={handleChangeCheck} selectedItems={dataToDelete} />
-      <ListEmpty onClick={() => handleClickToggleModal()} />
-      <PageFooter
-        context={{ emitEvent: () => {} }}
-        count={50}
-        onChangeParams={handleChangeListParams}
-        params={params}
-      />
+      {dataCount > 0 ? (
+        <>
+          <List data={data} onChange={handleChangeCheck} selectedItems={dataToDelete} />
+          <PageFooter
+            context={{ emitEvent: () => {} }}
+            count={paginationCount}
+            onChangeParams={handleChangeListParams}
+            params={params}
+          />
+        </>
+      ) : (
+        <ListEmpty onClick={() => handleClickToggleModal()} />
+      )}
       <ModalStepper isOpen={isOpen} onToggle={handleClickToggleModal} />
     </Container>
   );
