@@ -44,6 +44,41 @@ const labelModel = {
   collectionName: '',
 };
 
+const carModel = {
+  attributes: {
+    name: {
+      type: 'text',
+    },
+  },
+  connection: 'default',
+  name: 'car',
+  description: '',
+  collectionName: '',
+};
+
+const personModel = {
+  attributes: {
+    name: {
+      type: 'text',
+    },
+    privateName: {
+      type: 'text',
+      private: true,
+    },
+    privateCars: {
+      nature: 'oneToMany',
+      target: 'application::car.car',
+      dominant: false,
+      targetAttribute: 'person',
+      private: true,
+    },
+  },
+  connection: 'default',
+  name: 'person',
+  description: '',
+  collectionName: '',
+};
+
 describe('Test Graphql Relations API End to End', () => {
   beforeAll(async () => {
     const token = await registerAndLogin();
@@ -59,15 +94,17 @@ describe('Test Graphql Relations API End to End', () => {
 
     modelsUtils = createModelsUtils({ rq });
 
-    await modelsUtils.createContentTypes([documentModel, labelModel]);
+    await modelsUtils.createContentTypes([documentModel, labelModel, carModel, personModel]);
   }, 60000);
 
-  afterAll(() => modelsUtils.deleteContentTypes(['document', 'label']), 60000);
+  afterAll(() => modelsUtils.deleteContentTypes(['document', 'label', 'car', 'person']), 60000);
 
   describe('Test relations features', () => {
     let data = {
       labels: [],
       documents: [],
+      people: [],
+      cars: [],
     };
     const labelsPayload = [{ name: 'label 1' }, { name: 'label 2' }];
     const documentsPayload = [{ name: 'document 1' }, { name: 'document 2' }];
@@ -127,49 +164,46 @@ describe('Test Graphql Relations API End to End', () => {
       data.labels = res.body.data.labels;
     });
 
-    test.each(documentsPayload)(
-      'Create document linked to every labels %o',
-      async document => {
-        const res = await graphqlQuery({
-          query: /* GraphQL */ `
-            mutation createDocument($input: createDocumentInput) {
-              createDocument(input: $input) {
-                document {
+    test.each(documentsPayload)('Create document linked to every labels %o', async document => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          mutation createDocument($input: createDocumentInput) {
+            createDocument(input: $input) {
+              document {
+                name
+                labels {
+                  id
                   name
-                  labels {
-                    id
-                    name
-                  }
                 }
               }
             }
-          `,
-          variables: {
-            input: {
-              data: {
-                ...document,
-                labels: data.labels.map(t => t.id),
-              },
+          }
+        `,
+        variables: {
+          input: {
+            data: {
+              ...document,
+              labels: data.labels.map(t => t.id),
             },
           },
-        });
+        },
+      });
 
-        const { body } = res;
+      const { body } = res;
 
-        expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(200);
 
-        expect(body).toMatchObject({
-          data: {
-            createDocument: {
-              document: {
-                ...selectFields(document),
-                labels: expect.arrayContaining(data.labels.map(selectFields)),
-              },
+      expect(body).toMatchObject({
+        data: {
+          createDocument: {
+            document: {
+              ...selectFields(document),
+              labels: expect.arrayContaining(data.labels.map(selectFields)),
             },
           },
-        });
-      }
-    );
+        },
+      });
+    });
 
     test('List documents with labels', async () => {
       const res = await graphqlQuery({
@@ -229,9 +263,7 @@ describe('Test Graphql Relations API End to End', () => {
           labels: expect.arrayContaining(
             data.labels.map(label => ({
               ...selectFields(label),
-              documents: expect.arrayContaining(
-                data.documents.map(selectFields)
-              ),
+              documents: expect.arrayContaining(data.documents.map(selectFields)),
             }))
           ),
         },
@@ -404,6 +436,185 @@ describe('Test Graphql Relations API End to End', () => {
           },
         });
       }
+    });
+
+    test('Create person', async () => {
+      const person = {
+        name: 'Chuck Norris',
+        privateName: 'Jean-Eude',
+      };
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          mutation createPerson($input: createPersonInput) {
+            createPerson(input: $input) {
+              person {
+                id
+                name
+              }
+            }
+          }
+        `,
+        variables: {
+          input: {
+            data: person,
+          },
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual({
+        data: {
+          createPerson: {
+            person: {
+              id: expect.anything(),
+              name: person.name,
+            },
+          },
+        },
+      });
+      data.people.push(res.body.data.createPerson.person);
+    });
+
+    test("Can't list a private field", async () => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          {
+            people {
+              name
+              privateName
+            }
+          }
+        `,
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toMatchObject({
+        errors: [
+          {
+            message: 'Cannot query field "privateName" on type "Person".',
+          },
+        ],
+      });
+    });
+
+    test('Create a car linked to a person (oneToMany)', async () => {
+      const car = {
+        name: 'Peugeot 508',
+        person: data.people[0].id,
+      };
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          mutation createCar($input: createCarInput) {
+            createCar(input: $input) {
+              car {
+                id
+                name
+                person {
+                  id
+                  name
+                }
+              }
+            }
+          }
+        `,
+        variables: {
+          input: {
+            data: {
+              ...car,
+            },
+          },
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        data: {
+          createCar: {
+            car: {
+              id: expect.anything(),
+              name: car.name,
+              person: data.people[0],
+            },
+          },
+        },
+      });
+
+      data.cars.push({ id: res.body.data.createCar.car.id });
+    });
+
+    test("Can't list a private oneToMany relation", async () => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          {
+            people {
+              name
+              privateCars
+            }
+          }
+        `,
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toMatchObject({
+        errors: [
+          {
+            message: 'Cannot query field "privateCars" on type "Person".',
+          },
+        ],
+      });
+    });
+
+    test('Edit person/cars relations removes correctly a car', async () => {
+      const newPerson = {
+        name: 'Check Norris Junior',
+        privateCars: [],
+      };
+
+      const mutationRes = await graphqlQuery({
+        query: /* GraphQL */ `
+          mutation updatePerson($input: updatePersonInput) {
+            updatePerson(input: $input) {
+              person {
+                id
+              }
+            }
+          }
+        `,
+        variables: {
+          input: {
+            where: {
+              id: data.people[0].id,
+            },
+            data: {
+              ...newPerson,
+            },
+          },
+        },
+      });
+      expect(mutationRes.statusCode).toBe(200);
+
+      const queryRes = await graphqlQuery({
+        query: /* GraphQL */ `
+          query($id: ID!) {
+            car(id: $id) {
+              person {
+                id
+              }
+            }
+          }
+        `,
+        variables: {
+          id: data.cars[0].id,
+        },
+      });
+      expect(queryRes.statusCode).toBe(200);
+      expect(queryRes.body).toEqual({
+        data: {
+          car: {
+            person: null,
+          },
+        },
+      });
     });
   });
 });

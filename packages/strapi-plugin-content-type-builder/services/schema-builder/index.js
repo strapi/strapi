@@ -115,12 +115,14 @@ function createSchemaBuilder({ components, contentTypes }) {
             columnName,
             dominant,
             autoPopulate,
+            private: isPrivate,
           } = attribute;
 
           const attr = {
             unique: unique === true ? true : undefined,
             columnName: columnName || undefined,
             configurable: configurable === false ? false : undefined,
+            private: isPrivate === true ? true : undefined,
             autoPopulate,
           };
 

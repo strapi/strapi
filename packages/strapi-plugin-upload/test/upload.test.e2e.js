@@ -22,7 +22,6 @@ describe('Upload plugin end to end tests', () => {
       expect(res.body).toEqual({
         data: {
           sizeOptimization: true,
-          videoPreview: true,
           responsiveDimensions: true,
         },
       });
@@ -34,7 +33,6 @@ describe('Upload plugin end to end tests', () => {
       const updateRes = await rq.put('/upload/settings', {
         body: {
           sizeOptimization: true,
-          videoPreview: false,
           responsiveDimensions: true,
         },
       });
@@ -43,7 +41,6 @@ describe('Upload plugin end to end tests', () => {
       expect(updateRes.body).toEqual({
         data: {
           sizeOptimization: true,
-          videoPreview: false,
           responsiveDimensions: true,
         },
       });
@@ -54,7 +51,6 @@ describe('Upload plugin end to end tests', () => {
       expect(getRes.body).toEqual({
         data: {
           sizeOptimization: true,
-          videoPreview: false,
           responsiveDimensions: true,
         },
       });
