@@ -27,7 +27,7 @@ const FiltersCard = ({ onChange }) => {
     dispatch({
       type: 'ON_CHANGE',
       name,
-      value: value === 'file' ? 'application' : value,
+      value: value === 'file' ? 'application' : value, // the value is different from param used by backend
     });
   };
 
@@ -49,18 +49,9 @@ const FiltersCard = ({ onChange }) => {
 
   const renderNamesOptions = () => {
     return Object.keys(filters).map(key => {
-      if (key === 'mime') {
-        // the type name is different from param used by backend
-        return (
-          <option key={key} value={key}>
-            type
-          </option>
-        );
-      }
-
       return (
         <option key={key} value={key}>
-          {key}
+          {key === 'mime' ? 'type' : key}
         </option>
       );
     });
