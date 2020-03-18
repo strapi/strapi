@@ -1,7 +1,6 @@
 {
   "Analytics": "Monitoramento",
   "Content Manager": "Gestão de conteúdo",
-  "Content Type Builder": "Construtor de Conteúdo",
   "Documentation": "Documentação",
   "Email": "E-mail",
   "Files Upload": "Enviar arquivos",
@@ -31,7 +30,6 @@
   "app.components.HomePage.button.quickStart": "INICIAR TUTORIAL (Quick Start)",
   "app.components.HomePage.community": "Nossa comunidade na web",
   "app.components.HomePage.community.content": "Converse com membros da equipe, colaboradores e desenvolvedores em diversos canais.",
-  "app.components.HomePage.create": "Crie o seu primeiro Tipo de Conteúdo",
   "app.components.HomePage.createBlock.content.first": "A extensão ",
   "app.components.HomePage.createBlock.content.second": "  irá ajudar-lo definir a estrutura de dados de seus modelos. Se você é novo aqui, nós recomendamos imensamente que você siga o nosso tutorial ",
   "app.components.HomePage.createBlock.content.tutorial": " .",
@@ -159,7 +157,6 @@
   "HomePage.helmet.title": "Pagina inicial",
   "HomePage.welcome.congrats": "Parabéns!",
   "HomePage.welcome.congrats.content": "Você está logado como o primeiro administrador. Para descobrir os recursos avançados fornecidos pelo Strapi,",
-  "HomePage.welcome.congrats.content.bold": "recomendamos que você crie seu primeiro tipo de conteúdo.",
   "HomePage.community": "Participe da Comunidade",
   "HomePage.roadmap": "Veja nosso roadmap",
   "HomePage.greetings": "Olá {name}!",

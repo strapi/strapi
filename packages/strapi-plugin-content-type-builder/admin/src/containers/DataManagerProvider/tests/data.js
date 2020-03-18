@@ -417,13 +417,7 @@ const data = {
         collectionName: '',
         attributes: {
           price_range: {
-            enum: [
-              'very_cheap',
-              'cheap',
-              'average',
-              'expensive',
-              'very_expensive',
-            ],
+            enum: ['very_cheap', 'cheap', 'average', 'expensive', 'very_expensive'],
             type: 'enumeration',
           },
           closing_period: {
@@ -476,6 +470,17 @@ const data = {
               'default.restaurantservice',
             ],
           },
+        },
+      },
+    },
+    'application::homepage.homepage': {
+      uid: 'application::homepage.homepage',
+      schema: {
+        name: 'homepage',
+        attributes: {
+          title: { type: 'string' },
+          description: { type: 'string' },
+          homepageuidfield: { type: 'uid', targetField: 'description' },
         },
       },
     },

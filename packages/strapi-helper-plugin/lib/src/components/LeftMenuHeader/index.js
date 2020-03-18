@@ -23,11 +23,14 @@ function LeftMenuHeader({ count, search, searchable, setSearch, title }) {
       return (
         <FormattedMessage
           id={`${title.id}${count > 1 ? 'plural' : 'singular'}`}
+          defaultMessage={title.defaultMessage}
         />
       );
     }
 
-    return <FormattedMessage id={title.id} />;
+    return (
+      <FormattedMessage id={title.id} defaultMessage={title.defaultMessage} />
+    );
   };
 
   const handleClose = () => {
@@ -88,6 +91,7 @@ LeftMenuHeader.propTypes = {
   count: PropTypes.number,
   title: PropTypes.shape({
     id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string,
   }).isRequired,
   search: PropTypes.string,
   searchable: PropTypes.bool,

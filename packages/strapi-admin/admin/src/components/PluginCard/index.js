@@ -80,7 +80,7 @@ class PluginCard extends React.Component {
     } else if (currentEnvironment !== 'development') {
       this.setState({ showModalEnv: true });
     } else if (!isAlreadyInstalled) {
-      downloadPlugin(e);
+      downloadPlugin(id);
     } else {
       push('/list-plugins');
     }
@@ -152,6 +152,7 @@ class PluginCard extends React.Component {
               <Button
                 className={`${buttonClass} button`}
                 label={buttonLabel}
+                type="button"
                 onClick={this.handleDownloadPlugin}
               />
               <a
