@@ -33,13 +33,17 @@ const diffResolvers = (object, base) => {
 
   Object.keys(object).forEach(type => {
     Object.keys(object[type]).forEach(resolver => {
-      if (!_.has(base, [type, resolver])) {
+      if(type === 'Query' || type === 'Mutation') {
+        if (!_.has(base, [type, resolver])) {
+          _.set(newObj, [type, resolver], _.get(object, [type, resolver]));
+        }
+      } else {
         _.set(newObj, [type, resolver], _.get(object, [type, resolver]));
       }
     });
   });
 
-  return newObj;
+  return object;
 };
 
 const convertToParams = params => {
