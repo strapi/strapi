@@ -234,12 +234,7 @@ Return the second decade of users which have an email that contains `@strapi.io`
 
 ```graphql
 query {
-  users(
-    limit: 10
-    start: 10
-    sort: "username:asc"
-    where: { email_contains: "@strapi.io" }
-  ) {
+  users(limit: 10, start: 10, sort: "username:asc", where: { email_contains: "@strapi.io" }) {
     username
     email
   }
@@ -720,10 +715,7 @@ module.exports = {
     Mutation: {
       createRestaurant: {
         description: 'Create a new restaurant',
-        policies: [
-          'plugins::users-permissions.isAuthenticated',
-          'global::logging',
-        ],
+        policies: ['plugins::users-permissions.isAuthenticated', 'global::logging'],
       },
     },
   },
