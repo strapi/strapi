@@ -14,15 +14,14 @@ const utils = require('./utils')();
 const buildQuery = ({
   model,
   filters = {},
+  search = {},
   populate = [],
   aggregate = false,
 } = {}) => {
-  const deepFilters = (filters.where || []).filter(
-    ({ field }) => field.split('.').length > 1
-  );
+  const deepFilters = (filters.where || []).filter(({ field }) => field.split('.').length > 1);
 
   if (deepFilters.length === 0 && aggregate === false) {
-    return buildSimpleQuery({ model, filters, populate });
+    return buildSimpleQuery({ model, filters, search, populate });
   }
 
   return buildDeepQuery({ model, filters, populate });
@@ -32,14 +31,19 @@ const buildQuery = ({
  * Builds a simple find query when there are no deep filters
  * @param {Object} options - Query options
  * @param {Object} options.model - The model you are querying
- * @param {Object} options.filers - An object with the possible filters (start, limit, sort, where)
+ * @param {Object} options.filters - An object with the possible filters (start, limit, sort, where)
+ * @param {Object} options.search - An object with the possible search params
  * @param {Object} options.populate - An array of paths to populate
  */
-const buildSimpleQuery = ({ model, filters, populate }) => {
+const buildSimpleQuery = ({ model, filters, search, populate }) => {
   const { where = [] } = filters;
 
   const wheres = where.map(buildWhereClause);
   const findCriteria = wheres.length > 0 ? { $and: wheres } : {};
+
+  if (search.length > 0 && findCriteria.$and) {
+    findCriteria.$and = [{ $and: findCriteria.$and }, { $or: search }];
+  }
 
   let query = model.find(findCriteria).populate(populate);
   query = applyQueryParams({ query, filters });
@@ -108,9 +112,7 @@ const buildDeepQuery = ({ model, filters, populate }) => {
      * Maps to query.count
      */
     count() {
-      return query
-        .count('count')
-        .then(results => _.get(results, ['0', 'count'], 0));
+      return query.count('count').then(results => _.get(results, ['0', 'count'], 0));
     },
 
     /**
@@ -214,8 +216,7 @@ const computePopulatedPaths = ({ model, populate = [], where = [] }) => {
  * }
  * @param {Array<string>} paths - A list of paths to transform
  */
-const pathsToTree = paths =>
-  paths.reduce((acc, path) => _.merge(acc, _.set({}, path, {})), {});
+const pathsToTree = paths => paths.reduce((acc, path) => _.merge(acc, _.set({}, path, {})), {});
 
 /**
  * Builds the aggregations pipeling of the query
