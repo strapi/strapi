@@ -1,0 +1,7 @@
+{
+  "archive": ["rar", "tar", "zip"],
+  "code": ["js", "json", "rb", "erb", "txt", "css", "scss", "html", "jsx", "svg"],
+  "pdf": ["pdf"],
+  "powerpoint": ["ppt", "key", "xls"],
+  "word": ["doc", "docx", "pages"]
+}

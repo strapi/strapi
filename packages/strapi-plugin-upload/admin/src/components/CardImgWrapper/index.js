@@ -5,7 +5,8 @@ const CardImgWrapper = styled.div`
   position: relative;
   width: 100%;
   height: 0;
-  padding-top: ${({ small }) => (small ? 'calc(156 / 245 * 100%)' : 'calc(397 / 431 * 100%)')};
+  padding-top: calc(156 / 245 * 100%);
+  ${({ small }) => !small && 'margin-bottom: 7px'};
   border-radius: 2px;
   background-color: #f6f6f6;
   overflow: hidden;

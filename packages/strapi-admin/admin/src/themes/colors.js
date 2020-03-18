@@ -27,6 +27,14 @@ const colors = {
   mediumBlue: '#007EFF',
   darkBlue: '#AED4FB',
 
+  // Specific to file icons
+  file: {
+    archive: '#715A31',
+    code: '#515A6D',
+    default: '#BDBFC2',
+    pdf: '#E26D6D',
+  },
+
   content: {
     background: '#fafafb',
     'background-alpha': 'rgba(14, 22, 34, 0.02)',

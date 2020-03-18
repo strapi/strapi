@@ -21,8 +21,8 @@ const List = ({ data, onChange, selectedItems }) => {
               const checked = selectedItems.includes(id);
 
               return (
-                <div className="col-xs-12 col-md-6 col-xl-3" key={JSON.stringify(item)}>
-                  <Card small checked={checked} {...item} url={`${strapi.backendURL}${url}`}>
+                <div className="col-xs-12 col-md-4 col-lg-4 col-xl-2" key={JSON.stringify(item)}>
+                  <Card checked={checked} {...item} url={`${strapi.backendURL}${url}`}>
                     <CardControlsWrapper leftAlign className="card-control-wrapper">
                       <Checkbox name={`${id}`} onChange={onChange} value={checked} />
                     </CardControlsWrapper>
