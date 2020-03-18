@@ -57,30 +57,14 @@ module.exports = {
   },
 
   checkIfPluginDocNeedsUpdate: function(pluginName) {
-    // check if any plugin documentation should be generated
-    if(strapi.plugins.documentation.config['x-strapi-config'].generateDocForAllPlugins) {
-      const filteredPlugins = 
-        strapi.plugins.documentation.config['x-strapi-config'].pluginsForWhichToGenerateDoc
-          .filter(pluginNameForWhichToGenerateDoc => pluginNameForWhichToGenerateDoc === pluginName);
-      // check if the current plugin name matches with the list of plugin names for which we want to generate documentation
-      if(filteredPlugins.length > 0) {
-        const prevDocumentation = this.createDocObject(
-          this.retrieveDocumentation(pluginName, true)
-        );
-        const currentDocumentation = this.createDocObject(
-          this.createPluginDocumentationFile(pluginName, false)
-        );
-    
-        return !this.areObjectsEquals(prevDocumentation, currentDocumentation);
-      } else {
-        // No documentation will be generated for this plugin
-        return false;
-      }
+    const prevDocumentation = this.createDocObject(
+      this.retrieveDocumentation(pluginName, true)
+    );
+    const currentDocumentation = this.createDocObject(
+      this.createPluginDocumentationFile(pluginName, false)
+    );
 
-    } else {
-      // No documentation will be generated for this plugin
-      return false;
-    }
+    return !this.areObjectsEquals(prevDocumentation, currentDocumentation);
   },
 
   checkIfApiDefaultDocumentationFileExist: function(apiName, docName) {
@@ -382,8 +366,8 @@ module.exports = {
     const formattedPluginName = plugin
       .split('-')
       .map(i => _.upperFirst(i))
-      .join(strapi.plugins.documentation.config['x-strapi-config'].pluginNameSeperator);
-    const formattedName = _.upperFirst(name);
+      .join('');
+    const formattedName = _.upperFirst(name); 
 
     if (withoutSpace) {
       return `${formattedPluginName}${formattedName}`;
@@ -966,7 +950,7 @@ module.exports = {
       schema = this.generatePluginResponseSchema(tag);
     }
 
-    return {
+    const response = {
       200: {
         description: 'response',
         content: {
@@ -995,17 +979,24 @@ module.exports = {
           },
         },
       },
-      default: {
-        description: 'unexpected error',
-        content: {
-          'application/json': {
-            schema: {
-              $ref: '#/components/schemas/Error',
-            },
-          },
-        },
-      },
     };
+
+    const userWantsDefaultResponse = strapi.plugins.documentation.config['x-strapi-config'].generateDefaultResponse;
+
+    if (userWantsDefaultResponse) {
+      response.default = {
+          description: 'unexpected error',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Error',
+              },
+            },
+          }
+        }
+    }
+
+    return response;
   },
 
   /**
@@ -1025,7 +1016,7 @@ module.exports = {
       endPoint
     );
 
-    return {
+    const response = {
       200: {
         description,
         content: {
@@ -1054,17 +1045,24 @@ module.exports = {
           },
         },
       },
-      default: {
-        description: 'unexpected error',
-        content: {
-          'application/json': {
-            schema: {
-              $ref: '#/components/schemas/Error',
-            },
-          },
-        },
-      },
     };
+
+    const userWantsDefaultResponse = strapi.plugins.documentation.config['x-strapi-config'].generateDefaultResponse;
+
+    if (userWantsDefaultResponse) {
+      response.default = {
+          description: 'unexpected error',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Error',
+              },
+            },
+          }
+        }
+    }
+
+    return response;
   },
 
   /**
@@ -1786,11 +1784,12 @@ module.exports = {
    * @returns {Boolean}
    */
   isPluginDocumentationNeeded: function(pluginName) {
-    const pluginRoutesWithDescription = this.getPluginRoutesWithDescription(
-      pluginName
-    );
-
-    return pluginRoutesWithDescription.length > 0;
+    const pluginsDocWantedByUser = strapi.plugins.documentation.config['x-strapi-config'].pluginsForWhichToGenerateDoc;
+    if (Array.isArray(pluginsDocWantedByUser) && !pluginsDocWantedByUser.includes(pluginName)) {
+        return false;
+    } else {
+        return this.getPluginRoutesWithDescription(pluginName).length > 0;
+    }
   },
 
   /**

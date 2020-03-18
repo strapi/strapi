@@ -18,13 +18,12 @@
   "x-strapi-config": {
     "path": "/documentation",
     "showGeneratedFiles": true,
-    "generateDocForAllPlugins": true,
     "pluginsForWhichToGenerateDoc": [
       "email",
       "upload",
       "users-permissions"
     ],
-    "pluginNameSeperator": "-"
+    "generateDefaultResponse": true
   },
   "servers": [
     {

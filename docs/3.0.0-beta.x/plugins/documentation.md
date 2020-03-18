@@ -102,13 +102,11 @@ Here are the file that needs to be created in order to change the documentation 
   "x-strapi-config": {
     "path": "/documentation",
     "showGeneratedFiles": true",
-    "generateDocForAllPlugins": true,
     "pluginsForWhichToGenerateDoc": [
       "email",
       "upload",
       "users-permissions"
-    ],
-    "pluginNameSeperator": "-"
+    ]
   },
   "servers": [
     {
@@ -178,36 +176,13 @@ To access your documentation on a custom path, you will have to update the `path
 }
 ```
 
-### Specify the plugin name seperator for the OPEN API components schema name and tags name
-
-To change the default plugin name seperator `-` that is used to generate your components schema name and tags name (e.g. plugin users-permissions [component schema name => `Users-PermissionsUser`, tag name => `UsersPermissions - User`]), you will have to update the `pluginNameSeperator` key. This parameter could be set to an empty character so it would generate a component schema name that is without any separator which is then looking like `UsersPermissionsUser` and becomes compatible with AWS API Gateway import API capability.
-
-```
-{
-  "x-strapi-config": {
-    "pluginNameSeperator": "-"
-  }
-}
-```
-
 ### Indicate which plugins documentation to generate
 
-To generate all plugins documentation, you will have to update the `generateDocForAllPlugins` key. When the value of this key is set to `true` then the `pluginsForWhichToGenerateDoc` is ignored.
+To generate a plugin documentation, you will need to indicate the list of all the plugins for which to you wish to generate documentation. In order to do that you need to update the `pluginsForWhichToGenerateDoc` key. Leaving this key with an empty array `[]` means that not any plugin documentation will be generated.
 
 ```
 {
   "x-strapi-config": {
-    "generateDocForAllPlugins": true
-  }
-}
-```
-
-if the value of the `generateDocForAllPlugins` key is set to `false`, you will then need to indicate the list of all the plugins for which to you wish to generate documentation. In order to do that you need to update the `pluginsForWhichToGenerateDoc` key. Leaving this key with an empty array `[]` means that not any plugin documentation will be generated.
-
-```
-{
-  "x-strapi-config": {
-    "generateDocForAllPlugins": false,
     "pluginsForWhichToGenerateDoc": [
       "email",
       "upload"
@@ -217,6 +192,41 @@ if the value of the `generateDocForAllPlugins` key is set to `false`, you will t
 ```
 
 In this example, we will be generating documentation for the upload and email plugins only.
+
+### Default Response
+
+Sometimes, an operation can return multiple errors with different HTTP status codes, but all of them have the same response structure. You can use the default response to describe these errors collectively, not individually. “Default” means this response is used for all HTTP codes that are not covered individually for this operation.
+
+This is how it would looks like
+
+```
+responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        # Definition of all error statuses
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+```
+
+You can set the generation of the default response with the following attribute `generateDefaultResponse`
+
+```
+{
+  "x-strapi-config": {
+    "generateDefaultResponse": true
+  }
+}
+```
+
+Note: this is configurable as some API Gateways does not support a default response.
 
 ## File structure
 
