@@ -661,9 +661,10 @@ module.exports = ({ models, target }, ctx) => {
 
       await createComponentJoinTables({ definition, ORM });
     } catch (err) {
-      strapi.log.error(`Impossible to register the '${model}' model.`);
-      strapi.log.error(err);
-      strapi.stop();
+      if (err instanceof TypeError || err instanceof ReferenceError) {
+        strapi.stopWithError(err, `Impossible to register the '${model}' model.`);
+      }
+      strapi.stopWithError(err);
     }
   });
 

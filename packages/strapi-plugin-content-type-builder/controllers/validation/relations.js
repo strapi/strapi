@@ -35,5 +35,6 @@ module.exports = (obj, validNatures) => {
           .test(isValidName)
           .nullable(),
     targetColumnName: yup.string().nullable(),
+    private: yup.boolean().nullable(),
   };
 };

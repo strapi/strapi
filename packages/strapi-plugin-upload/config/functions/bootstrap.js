@@ -23,7 +23,6 @@ module.exports = async () => {
       value: {
         sizeOptimization: true,
         responsiveDimensions: true,
-        videoPreview: true,
       },
     });
   }
@@ -31,11 +30,25 @@ module.exports = async () => {
 
 const createProvider = ({ provider, providerOptions }) => {
   try {
-    return require(`strapi-provider-upload-${provider}`).init(providerOptions);
+    const providerInstance = require(`strapi-provider-upload-${provider}`).init(providerOptions);
+
+    return Object.assign(Object.create(baseProvider), providerInstance);
   } catch (err) {
     strapi.log.error(err);
     throw new Error(
       `The provider package isn't installed. Please run \`npm install strapi-provider-upload-${provider}\``
     );
   }
+};
+
+const baseProvider = {
+  extend(obj) {
+    Object.assign(this, obj);
+  },
+  upload() {
+    throw new Error('Provider upload method is not implemented');
+  },
+  delete() {
+    throw new Error('Provider delete method is not implemented');
+  },
 };
