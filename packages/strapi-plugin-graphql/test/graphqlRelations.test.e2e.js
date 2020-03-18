@@ -9,7 +9,25 @@ let graphqlQuery;
 let modelsUtils;
 
 // utils
-const selectFields = doc => _.pick(doc, ['id', 'name']);
+const selectFields = doc => _.pick(doc, ['id', 'name', 'color']);
+
+const rgbColorComponent = {
+  attributes: {
+    name: {
+      type: 'text',
+    },
+    red: {
+      type: 'integer',
+    },
+    green: {
+      type: 'integer',
+    },
+    blue: {
+      type: 'integer',
+    },
+  },
+  name: 'rgbColor',
+};
 
 const documentModel = {
   attributes: {
@@ -36,6 +54,11 @@ const labelModel = {
       nature: 'manyToMany',
       target: 'application::document.document',
       targetAttribute: 'labels',
+    },
+    color: {
+      type: 'component',
+      component: 'default.rgb-color',
+      repeatable: false,
     },
   },
   connection: 'default',
@@ -94,6 +117,7 @@ describe('Test Graphql Relations API End to End', () => {
 
     modelsUtils = createModelsUtils({ rq });
 
+    await modelsUtils.createComponent(rgbColorComponent);
     await modelsUtils.createContentTypes([documentModel, labelModel, carModel, personModel]);
   }, 60000);
 
@@ -106,7 +130,11 @@ describe('Test Graphql Relations API End to End', () => {
       people: [],
       cars: [],
     };
-    const labelsPayload = [{ name: 'label 1' }, { name: 'label 2' }];
+    const labelsPayload = [
+      { name: 'label 1', color: null },
+      { name: 'label 2', color: null },
+      { name: 'labelWithColor', color: { name: 'tomato', red: 255, green: 99, blue: 71 } },
+    ];
     const documentsPayload = [{ name: 'document 1' }, { name: 'document 2' }];
 
     test.each(labelsPayload)('Create label %o', async label => {
@@ -116,6 +144,12 @@ describe('Test Graphql Relations API End to End', () => {
             createLabel(input: $input) {
               label {
                 name
+                color {
+                  name
+                  red
+                  green
+                  blue
+                }
               }
             }
           }
@@ -127,10 +161,8 @@ describe('Test Graphql Relations API End to End', () => {
         },
       });
 
-      const { body } = res;
-
       expect(res.statusCode).toBe(200);
-      expect(body).toEqual({
+      expect(res.body).toEqual({
         data: {
           createLabel: {
             label,
@@ -146,6 +178,12 @@ describe('Test Graphql Relations API End to End', () => {
             labels {
               id
               name
+              color {
+                name
+                red
+                green
+                blue
+              }
             }
           }
         `,
@@ -161,7 +199,7 @@ describe('Test Graphql Relations API End to End', () => {
       });
 
       // assign for later use
-      data.labels = res.body.data.labels;
+      data.labels = data.labels.concat(res.body.data.labels);
     });
 
     test.each(documentsPayload)('Create document linked to every labels %o', async document => {
@@ -174,6 +212,12 @@ describe('Test Graphql Relations API End to End', () => {
                 labels {
                   id
                   name
+                  color {
+                    name
+                    red
+                    green
+                    blue
+                  }
                 }
               }
             }
@@ -215,6 +259,12 @@ describe('Test Graphql Relations API End to End', () => {
               labels {
                 id
                 name
+                color {
+                  name
+                  red
+                  green
+                  blue
+                }
               }
             }
           }
@@ -246,6 +296,12 @@ describe('Test Graphql Relations API End to End', () => {
             labels {
               id
               name
+              color {
+                name
+                red
+                green
+                blue
+              }
               documents {
                 id
                 name
@@ -283,6 +339,12 @@ describe('Test Graphql Relations API End to End', () => {
               labels {
                 id
                 name
+                color {
+                  name
+                  red
+                  green
+                  blue
+                }
               }
             }
           }
@@ -309,6 +371,12 @@ describe('Test Graphql Relations API End to End', () => {
                 labels {
                   id
                   name
+                  color {
+                    name
+                    red
+                    green
+                    blue
+                  }
                 }
               }
             }
@@ -348,6 +416,12 @@ describe('Test Graphql Relations API End to End', () => {
                 label {
                   id
                   name
+                  color {
+                    name
+                    red
+                    green
+                    blue
+                  }
                 }
               }
             }
@@ -382,6 +456,12 @@ describe('Test Graphql Relations API End to End', () => {
               labels {
                 id
                 name
+                color {
+                  name
+                  red
+                  green
+                  blue
+                }
               }
             }
           }
