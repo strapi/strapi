@@ -7,8 +7,10 @@ import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
 import CardControl from '../CardControl';
 import CardControlsWrapper from '../CardControlsWrapper';
+import CardPreview from '../CardPreview';
 import ModalSection from '../ModalSection';
 import Text from '../Text';
+import CropWrapper from './CropWrapper';
 import FileDetailsBox from './FileDetailsBox';
 import FileWrapper from './FileWrapper';
 import FormWrapper from './FormWrapper';
@@ -156,12 +158,13 @@ const EditForm = ({
                 </CardControlsWrapper>
 
                 {isImg ? (
-                  <>
+                  <CropWrapper>
                     <img
                       src={src}
                       alt={get(fileToEdit, ['file', 'name'], '')}
                       ref={isCropping ? imgRef : null}
                     />
+
                     {isCropping && (
                       <Text
                         fontSize="md"
@@ -180,8 +183,10 @@ const EditForm = ({
                         &nbsp;
                       </Text>
                     )}
-                  </>
-                ) : null}
+                  </CropWrapper>
+                ) : (
+                  <CardPreview url={src} />
+                )}
               </FileWrapper>
             </div>
             <div className="col-6">

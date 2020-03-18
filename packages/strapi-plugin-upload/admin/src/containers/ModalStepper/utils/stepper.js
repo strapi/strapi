@@ -1,7 +1,7 @@
 import EditForm from '../../../components/EditForm';
 import UploadForm from '../../../components/UploadForm';
 import UploadList from '../../../components/UploadList';
-import getTrad from '../../../utils/getTrad';
+import { getTrad } from '../../../utils';
 
 const stepper = {
   browse: {

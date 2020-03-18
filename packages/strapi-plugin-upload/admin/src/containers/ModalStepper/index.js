@@ -9,7 +9,7 @@ import ModalHeader from '../../components/ModalHeader';
 import stepper from './utils/stepper';
 import init from './init';
 import reducer, { initialState } from './reducer';
-import getTrad from '../../utils/getTrad';
+import { getTrad } from '../../utils';
 
 const ModalStepper = ({ isOpen, onToggle }) => {
   const { formatMessage } = useGlobalContext();
@@ -22,8 +22,8 @@ const ModalStepper = ({ isOpen, onToggle }) => {
 
   useEffect(() => {
     if (currentStep === 'upload' && filesToUploadLength === 0) {
-      // Close modal when file uploading is over
-      toggleRef.current();
+      // Passing true to the onToggle prop will refetch the data when the modal closes
+      toggleRef.current(true);
     }
   }, [filesToUploadLength, currentStep]);
 

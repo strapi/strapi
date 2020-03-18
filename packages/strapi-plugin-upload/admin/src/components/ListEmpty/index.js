@@ -3,7 +3,7 @@ import { Button } from '@buffetjs/core';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 
-import getTrad from '../../utils/getTrad';
+import { getTrad } from '../../utils';
 import generateRows from './utils/generateRows';
 
 import CardEmpty from '../CardEmpty';

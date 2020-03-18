@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import getTrad from '../../utils/getTrad';
+import { getTrad } from '../../utils';
 
 import Wrapper from './Wrapper';
 import IntlText from '../IntlText';
