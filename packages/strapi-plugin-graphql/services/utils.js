@@ -43,7 +43,7 @@ const diffResolvers = (object, base) => {
     });
   });
 
-  return object;
+  return newObj;
 };
 
 const convertToParams = params => {
