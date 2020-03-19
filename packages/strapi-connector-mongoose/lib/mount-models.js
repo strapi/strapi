@@ -312,20 +312,8 @@ const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, defin
       const { alias, nature } = association;
 
       if (['oneToManyMorph', 'manyToManyMorph'].includes(nature)) {
-        this.populate({
-          path: alias,
-          match: {
-            [`${association.via}.${association.filter}`]: association.alias,
-            [`${association.via}.kind`]: definition.globalId,
-          },
-          options: {
-            sort: '-createdAt',
-          },
-        });
-        return;
-      }
-
-      if (populatedPaths.includes(alias)) {
+        this.populate(alias);
+      } else if (populatedPaths.includes(alias)) {
         _.set(this._mongooseOptions.populate, [alias, 'path'], `${alias}.ref`);
       }
     });
