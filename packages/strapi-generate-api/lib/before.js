@@ -58,12 +58,6 @@ module.exports = (scope, cb) => {
     filePath,
   });
 
-  // Humanize output.
-  _.defaults(scope, {
-    humanizeId: name,
-    humanizedPath: filePath,
-  });
-
   // Validate optional attribute arguments.
   const invalidAttributes = [];
 
@@ -79,9 +73,7 @@ module.exports = (scope, cb) => {
 
         // Handle invalid attributes.
         if (!parts[1] || !parts[0]) {
-          invalidAttributes.push(
-            'Error: Invalid attribute notation `' + attribute + '`.'
-          );
+          invalidAttributes.push('Error: Invalid attribute notation `' + attribute + '`.');
           return;
         }
 
@@ -126,9 +118,7 @@ module.exports = (scope, cb) => {
     : _.snakeCase(pluralize(name));
 
   // Set description
-  scope.description = _.has(scope.args, 'description')
-    ? scope.args.description
-    : '';
+  scope.description = _.has(scope.args, 'description') ? scope.args.description : '';
 
   // Get default connection
   try {
@@ -137,13 +127,7 @@ module.exports = (scope, cb) => {
       try {
         scope.connection = JSON.parse(
           fs.readFileSync(
-            path.resolve(
-              scope.rootPath,
-              'config',
-              'environments',
-              environment,
-              'database.json'
-            )
+            path.resolve(scope.rootPath, 'config', 'environments', environment, 'database.json')
           )
         ).defaultConnection;
       } catch (err) {
