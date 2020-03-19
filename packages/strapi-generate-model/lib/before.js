@@ -34,30 +34,27 @@ module.exports = (scope, cb) => {
     );
   }
 
-  // Format `id`.
-  const name = scope.name || _.trim(_.camelCase(scope.id));
-
   // `scope.args` are the raw command line arguments.
   _.defaults(scope, {
-    name,
+    id: _.trim(_.deburr(scope.id)),
     idPluralized: pluralize.plural(_.trim(_.deburr(scope.id))),
     environment: process.env.NODE_ENV || 'development',
   });
 
   // Determine default values based on the available scope.
   _.defaults(scope, {
-    globalID: _.upperFirst(name),
+    globalID: _.upperFirst(_.camelCase(scope.id)),
     ext: '.js',
   });
 
   // Determine the destination path.
   let filePath;
   if (scope.args.api) {
-    filePath = `./api/${scope.args.api}/models`;
+    filePath = `./api/${scope.args.api}`;
   } else if (scope.args.plugin) {
     filePath = `./plugins/${scope.args.plugin}/models`;
   } else {
-    filePath = `./api/${name}/models`;
+    filePath = `./api/${scope.id}`;
   }
 
   // Take another pass to take advantage of the defaults absorbed in previous passes.
@@ -66,6 +63,12 @@ module.exports = (scope, cb) => {
     filePath,
     filename: scope.globalID + scope.ext,
     filenameSettings: scope.globalID + '.settings.json',
+  });
+
+  // Humanize output.
+  _.defaults(scope, {
+    humanizeId: _.camelCase(scope.id).toLowerCase(),
+    humanizedPath: '`' + scope.filePath + '`',
   });
 
   // Validate optional attribute arguments.
@@ -79,7 +82,9 @@ module.exports = (scope, cb) => {
 
     // Handle invalid attributes.
     if (!parts[1] || !parts[0]) {
-      invalidAttributes.push('Error: Invalid attribute notation `' + attribute + '`.');
+      invalidAttributes.push(
+        'Error: Invalid attribute notation `' + attribute + '`.'
+      );
       return;
     }
 
@@ -95,7 +100,9 @@ module.exports = (scope, cb) => {
     : undefined;
 
   // Set description
-  scope.description = _.has(scope.args, 'description') ? scope.args.description : undefined;
+  scope.description = _.has(scope.args, 'description')
+    ? scope.args.description
+    : undefined;
 
   // Handle invalid action arguments.
   // Send back invalidActions.
@@ -134,7 +141,13 @@ module.exports = (scope, cb) => {
       scope.args.connection ||
       JSON.parse(
         fs.readFileSync(
-          path.resolve(scope.rootPath, 'config', 'environments', scope.environment, 'database.json')
+          path.resolve(
+            scope.rootPath,
+            'config',
+            'environments',
+            scope.environment,
+            'database.json'
+          )
         )
       ).defaultConnection ||
       '';

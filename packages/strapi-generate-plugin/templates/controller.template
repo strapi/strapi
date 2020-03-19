@@ -3,7 +3,7 @@
 /**
  * <%= filename %> controller
  *
- * @description: A set of functions called "actions" of the `<%= name %>` plugin.
+ * @description: A set of functions called "actions" of the `<%= humanizeId %>` plugin.
  */
 
 module.exports = {

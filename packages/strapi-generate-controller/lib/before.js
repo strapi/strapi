@@ -22,12 +22,9 @@ module.exports = (scope, cb) => {
     );
   }
 
-  // Format `id`.
-  const name = scope.name || _.trim(_.camelCase(scope.id));
-
   // `scope.args` are the raw command line arguments.
   _.defaults(scope, {
-    name,
+    id: _.trim(_.deburr(scope.id)),
     api: scope.id,
   });
 
@@ -46,7 +43,7 @@ module.exports = (scope, cb) => {
   } else if (scope.args.extend) {
     filePath = `./extensions/${scope.args.extend}/controllers`;
   } else {
-    filePath = `./api/${name}/controllers`;
+    filePath = `./api/${scope.id}/controllers`;
   }
 
   // Take another pass to take advantage of the defaults absorbed in previous passes.
@@ -54,6 +51,12 @@ module.exports = (scope, cb) => {
     rootPath: scope.rootPath,
     filePath,
     filename: scope.globalID + scope.ext,
+  });
+
+  // Humanize output.
+  _.defaults(scope, {
+    humanizeId: _.camelCase(scope.id).toLowerCase(),
+    humanizedPath: '`' + scope.filePath + '`',
   });
 
   // Trigger callback with no error to proceed.
