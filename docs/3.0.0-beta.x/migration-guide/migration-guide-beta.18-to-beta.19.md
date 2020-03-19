@@ -14,16 +14,16 @@ Update your package.json accordingly:
 {
   //...
   "dependencies": {
-    "strapi": "3.0.0-beta.19",
-    "strapi-admin": "3.0.0-beta.19",
-    "strapi-connector-bookshelf": "3.0.0-beta.19",
-    "strapi-plugin-content-manager": "3.0.0-beta.19",
-    "strapi-plugin-content-type-builder": "3.0.0-beta.19",
-    "strapi-plugin-email": "3.0.0-beta.19",
-    "strapi-plugin-graphql": "3.0.0-beta.19",
-    "strapi-plugin-upload": "3.0.0-beta.19",
-    "strapi-plugin-users-permissions": "3.0.0-beta.19",
-    "strapi-utils": "3.0.0-beta.19"
+    "strapi": "3.0.0-beta.19.3",
+    "strapi-admin": "3.0.0-beta.19.3",
+    "strapi-connector-bookshelf": "3.0.0-beta.19.3",
+    "strapi-plugin-content-manager": "3.0.0-beta.19.3",
+    "strapi-plugin-content-type-builder": "3.0.0-beta.19.3",
+    "strapi-plugin-email": "3.0.0-beta.19.3",
+    "strapi-plugin-graphql": "3.0.0-beta.19.3",
+    "strapi-plugin-upload": "3.0.0-beta.19.3",
+    "strapi-plugin-users-permissions": "3.0.0-beta.19.3",
+    "strapi-utils": "3.0.0-beta.19.3"
   }
 }
 ```
