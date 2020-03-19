@@ -361,6 +361,8 @@ module.exports = {
       this.associations.map(async association => {
         const { nature, via, dominant } = association;
 
+        // TODO: delete all the ref to the model
+
         switch (nature) {
           case 'oneWay':
           case 'manyWay': {
@@ -368,7 +370,7 @@ module.exports = {
           }
           case 'oneToMany':
           case 'oneToOne': {
-            if (!via || dominant) {
+            if (!via) {
               return;
             }
 
