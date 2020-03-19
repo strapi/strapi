@@ -23,7 +23,12 @@ import Filters from '../../components/Filters';
 import List from '../../components/List';
 import ListEmpty from '../../components/ListEmpty';
 import ModalStepper from '../ModalStepper';
-import { generatePageFromStart, generateStartFromPage, getHeaderLabel } from './utils';
+import {
+  deleteFilters,
+  generatePageFromStart,
+  generateStartFromPage,
+  getHeaderLabel,
+} from './utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
@@ -179,10 +184,9 @@ const HomePage = () => {
     }
   };
 
-  const handleDeleteFilter = index => {
-    // Remove filter
-    const updatedFilters = generateFiltersFromSearch(search);
-    updatedFilters.splice(index, 1);
+  const handleDeleteFilter = filter => {
+    const currentFilters = generateFiltersFromSearch(search);
+    const updatedFilters = deleteFilters(currentFilters, filter);
 
     handleChangeParams({
       target: { name: 'filters', value: updatedFilters },

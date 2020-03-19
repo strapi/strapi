@@ -1,37 +1,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import moment from 'moment';
+import { FilterButton } from 'strapi-helper-plugin';
 
-import { dateFormats, FilterButton } from 'strapi-helper-plugin';
+import formatFilters from './utils/formatFilters';
+import formatFilter from './utils/formatFilter';
 
 const FiltersList = ({ filters, onClick }) => {
-  return filters.map((filter, index) => {
-    const dateToUtcTime = date => moment.parseZone(date).utc();
-    const { name, value } = filter;
+  const formattedFilters = formatFilters(filters);
 
-    let displayedValue = filter;
-
-    if (dateToUtcTime(value)._isUTC === true) {
-      displayedValue = {
-        ...filter,
-        value: dateToUtcTime(value).format(dateFormats.datetime),
-      };
-    }
-
-    // Specific param values - Different wording used by backend for mime
-    if (name === 'mime') {
-      displayedValue = {
-        filter: filter.filter === '_ncontains' ? filter.filter : '=',
-        name: 'type',
-        value: value === 'application' ? 'file' : value,
-      };
-    }
+  return formattedFilters.map(filter => {
+    const formattedValue = formatFilter(filter);
 
     return (
       <FilterButton
-        onClick={() => onClick(index)}
+        onClick={() => onClick(filter)}
         key={JSON.stringify(filter)}
-        label={displayedValue}
+        label={formattedValue}
       />
     );
   });

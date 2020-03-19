@@ -4,7 +4,6 @@ import { themePropTypes } from 'strapi-helper-plugin';
 
 const Wrapper = styled.div`
   font-size: 54px;
-
   color: ${({ theme, icon }) => theme.main.colors.file[icon]};
 `;
 

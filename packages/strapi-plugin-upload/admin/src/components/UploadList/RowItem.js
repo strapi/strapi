@@ -25,7 +25,6 @@ const RowItem = ({
   const handleClickEdit = () => {
     onClickEdit(originalIndex);
   };
-  console.log(file, fileInfo);
 
   return (
     <div className="col-xs-12 col-md-6 col-xl-3" key={originalIndex}>
