@@ -244,6 +244,7 @@ module.exports = {
           relationUpdates.push(updatePromise);
           return acc;
         }
+        // media -> model
         case 'manyMorphToMany':
         case 'manyMorphToOne': {
           // Update the relational array.
@@ -325,6 +326,7 @@ module.exports = {
           });
           break;
         }
+        // model -> media
         case 'oneToManyMorph':
         case 'manyToManyMorph': {
           const currentValue = transformToArrayID(params.values[current]);
@@ -390,5 +392,31 @@ module.exports = {
     });
 
     return result && result.toJSON ? result.toJSON() : result;
+  },
+
+  deleteRelations(id, { transacting }) {
+    const values = {};
+
+    this.associations.map(association => {
+      switch (association.nature) {
+        case 'oneWay':
+        case 'oneToOne':
+        case 'manyToOne':
+        case 'oneToManyMorph':
+          values[association.alias] = null;
+          break;
+        case 'manyWay':
+        case 'oneToMany':
+        case 'manyToMany':
+        case 'manyToManyMorph':
+        case 'manyMorphToMany':
+        case 'manyMorphToOne':
+          values[association.alias] = [];
+          break;
+        default:
+      }
+    });
+
+    return this.updateRelations({ [this.primaryKey]: id, values }, { transacting });
   },
 };

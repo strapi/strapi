@@ -219,6 +219,7 @@ module.exports = ({ models, target }, ctx) => {
       virtuals: true,
       transform: function(doc, returned) {
         // Remover $numberDecimal nested property.
+
         Object.keys(returned)
           .filter(key => returned[key] instanceof mongoose.Types.Decimal128)
           .forEach(key => {
@@ -239,11 +240,13 @@ module.exports = ({ models, target }, ctx) => {
                 break;
 
               case 'manyMorphToMany':
-              case 'manyMorphToOne':
+              case 'manyMorphToOne': {
                 returned[association.alias] = returned[association.alias].map(obj =>
                   refToStrapiRef(obj)
                 );
+
                 break;
+              }
               default:
             }
           }
@@ -297,6 +300,7 @@ module.exports = ({ models, target }, ctx) => {
     // Push attributes to be aware of model schema.
     target[model]._attributes = definition.attributes;
     target[model].updateRelations = relations.update;
+    target[model].deleteRelations = relations.deleteRelations;
   });
 };
 
@@ -343,48 +347,52 @@ const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, defin
 
 const buildRelation = ({ definition, model, instance, attribute, name }) => {
   const { nature, verbose } =
-    utilsModels.getNature(attribute, name, undefined, model.toLowerCase()) || {};
+    utilsModels.getNature({
+      attribute,
+      attributeName: name,
+      modelName: model.toLowerCase(),
+    }) || {};
 
   // Build associations key
   utilsModels.defineAssociations(model.toLowerCase(), definition, attribute, name);
 
+  const getRef = (name, plugin) => {
+    return plugin ? strapi.plugins[plugin].models[name].globalId : strapi.models[name].globalId;
+  };
+
+  const setField = (name, val) => {
+    definition.loadedModel[name] = val;
+  };
+
+  const { ObjectId } = instance.Schema.Types;
+
   switch (verbose) {
     case 'hasOne': {
-      const ref = attribute.plugin
-        ? strapi.plugins[attribute.plugin].models[attribute.model].globalId
-        : strapi.models[attribute.model].globalId;
+      const ref = getRef(attribute.model, attribute.plugin);
 
-      definition.loadedModel[name] = {
-        type: instance.Schema.Types.ObjectId,
-        ref,
-      };
+      setField(name, { type: ObjectId, ref });
+
       break;
     }
     case 'hasMany': {
       const FK = _.find(definition.associations, {
         alias: name,
       });
-      const ref = attribute.plugin
-        ? strapi.plugins[attribute.plugin].models[attribute.collection].globalId
-        : strapi.models[attribute.collection].globalId;
+
+      const ref = getRef(attribute.collection, attribute.plugin);
 
       if (FK) {
-        definition.loadedModel[name] = {
+        setField(name, {
           type: 'virtual',
           ref,
           via: FK.via,
           justOne: false,
-        };
+        });
 
         // Set this info to be able to see if this field is a real database's field.
         attribute.isVirtual = true;
       } else {
-        definition.loadedModel[name] = [
-          {
-            type: instance.Schema.Types.ObjectId,
-            ref,
-          },
-        ];
+        setField(name, [{ type: ObjectId, ref }]);
       }
       break;
     }
@@ -392,9 +400,8 @@ const buildRelation = ({ definition, model, instance, attribute, name }) => {
       const FK = _.find(definition.associations, {
         alias: name,
       });
-      const ref = attribute.plugin
-        ? strapi.plugins[attribute.plugin].models[attribute.model].globalId
-        : strapi.models[attribute.model].globalId;
+
+      const ref = getRef(attribute.model, attribute.plugin);
 
       if (
         FK &&
@@ -403,38 +410,26 @@ const buildRelation = ({ definition, model, instance, attribute, name }) => {
         FK.nature !== 'oneWay' &&
         FK.nature !== 'oneToMorph'
       ) {
-        definition.loadedModel[name] = {
+        setField(name, {
           type: 'virtual',
           ref,
           via: FK.via,
           justOne: true,
-        };
+        });
 
         // Set this info to be able to see if this field is a real database's field.
         attribute.isVirtual = true;
       } else {
-        definition.loadedModel[name] = {
-          type: instance.Schema.Types.ObjectId,
-          ref,
-        };
+        setField(name, { type: ObjectId, ref });
       }
 
       break;
     }
     case 'belongsToMany': {
-      const targetModel = attribute.plugin
-        ? strapi.plugins[attribute.plugin].models[attribute.collection]
-        : strapi.models[attribute.collection];
-
-      const ref = targetModel.globalId;
+      const ref = getRef(attribute.collection, attribute.plugin);
 
       if (nature === 'manyWay') {
-        definition.loadedModel[name] = [
-          {
-            type: instance.Schema.Types.ObjectId,
-            ref,
-          },
-        ];
+        setField(name, [{ type: ObjectId, ref }]);
       } else {
         const FK = _.find(definition.associations, {
           alias: name,
@@ -442,84 +437,81 @@ const buildRelation = ({ definition, model, instance, attribute, name }) => {
 
         // One-side of the relationship has to be a virtual field to be bidirectional.
         if ((FK && _.isUndefined(FK.via)) || attribute.dominant !== true) {
-          definition.loadedModel[name] = {
+          setField(name, {
             type: 'virtual',
             ref,
             via: FK.via,
-          };
+          });
 
           // Set this info to be able to see if this field is a real database's field.
           attribute.isVirtual = true;
         } else {
-          definition.loadedModel[name] = [
-            {
-              type: instance.Schema.Types.ObjectId,
-              ref,
-            },
-          ];
+          setField(name, [{ type: ObjectId, ref }]);
         }
       }
       break;
     }
     case 'morphOne': {
-      const FK = _.find(definition.associations, {
-        alias: name,
-      });
-      const ref = attribute.plugin
-        ? strapi.plugins[attribute.plugin].models[attribute.model].globalId
-        : strapi.models[attribute.model].globalId;
+      // const FK = _.find(definition.associations, {
+      //   alias: name,
+      // });
 
-      definition.loadedModel[name] = {
-        type: 'virtual',
-        ref,
-        via: `${FK.via}.ref`,
-        justOne: true,
-      };
+      // const ref = getRef(attribute.model, attribute.plugin);
 
-      // Set this info to be able to see if this field is a real database's field.
-      attribute.isVirtual = true;
+      // setField(name, {
+      //   type: 'virtual',
+      //   ref,
+      //   via: `${FK.via}.ref`,
+      //   justOne: true,
+      // });
+
+      // // Set this info to be able to see if this field is a real database's field.
+      // attribute.isVirtual = true;
+
+      const ref = getRef(attribute.model, attribute.plugin);
+
+      setField(name, { type: ObjectId, ref });
+
       break;
     }
     case 'morphMany': {
-      const FK = _.find(definition.associations, {
-        alias: name,
-      });
-      const ref = attribute.plugin
-        ? strapi.plugins[attribute.plugin].models[attribute.collection].globalId
-        : strapi.models[attribute.collection].globalId;
+      // const FK = _.find(definition.associations, {
+      //   alias: name,
+      // });
+      // const ref = getRef(attribute.collection, attribute.plugin);
 
-      definition.loadedModel[name] = {
-        type: 'virtual',
-        ref,
-        via: `${FK.via}.ref`,
-      };
+      // setField(name, {
+      //   type: 'virtual',
+      //   ref,
+      //   via: `${FK.via}.ref`,
+      // });
 
-      // Set this info to be able to see if this field is a real database's field.
-      attribute.isVirtual = true;
+      // // Set this info to be able to see if this field is a real database's field.
+      // attribute.isVirtual = true;
+
+      const ref = getRef(attribute.collection, attribute.plugin);
+
+      setField(name, [{ type: ObjectId, ref }]);
+
       break;
     }
+
     case 'belongsToMorph': {
-      definition.loadedModel[name] = {
+      setField(name, {
         kind: String,
         [attribute.filter]: String,
-        ref: {
-          type: instance.Schema.Types.ObjectId,
-          refPath: `${name}.kind`,
-        },
-      };
+        ref: { type: ObjectId, refPath: `${name}.kind` },
+      });
       break;
     }
     case 'belongsToManyMorph': {
-      definition.loadedModel[name] = [
+      setField(name, [
         {
           kind: String,
           [attribute.filter]: String,
-          ref: {
-            type: instance.Schema.Types.ObjectId,
-            refPath: `${name}.kind`,
-          },
+          ref: { type: ObjectId, refPath: `${name}.kind` },
         },
-      ];
+      ]);
       break;
     }
     default:

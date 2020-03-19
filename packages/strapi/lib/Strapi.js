@@ -289,7 +289,9 @@ class Strapi extends EventEmitter {
 
   stop(exitCode = 1) {
     // Destroy server and available connections.
-    this.server.destroy();
+    if (_.has(this, 'server.destroy')) {
+      this.server.destroy();
+    }
 
     if (this.config.autoReload) {
       process.send('stop');

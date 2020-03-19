@@ -142,7 +142,11 @@ module.exports = ({ models, target }, ctx) => {
       }
 
       const { nature, verbose } =
-        utilsModels.getNature(details, name, undefined, model.toLowerCase()) || {};
+        utilsModels.getNature({
+          attribute: details,
+          attributeName: name,
+          modelName: model.toLowerCase(),
+        }) || {};
 
       // Build associations key
       utilsModels.defineAssociations(model.toLowerCase(), definition, details, name);
@@ -652,6 +656,7 @@ module.exports = ({ models, target }, ctx) => {
       // Push attributes to be aware of model schema.
       target[model]._attributes = definition.attributes;
       target[model].updateRelations = relations.update;
+      target[model].deleteRelations = relations.deleteRelations;
 
       await buildDatabaseSchema({
         ORM,

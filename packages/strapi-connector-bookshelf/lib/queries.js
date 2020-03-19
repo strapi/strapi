@@ -132,28 +132,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       throw err;
     }
 
-    const values = {};
-    model.associations.map(association => {
-      switch (association.nature) {
-        case 'oneWay':
-        case 'oneToOne':
-        case 'manyToOne':
-        case 'oneToManyMorph':
-          values[association.alias] = null;
-          break;
-        case 'manyWay':
-        case 'oneToMany':
-        case 'manyToMany':
-        case 'manyToManyMorph':
-        case 'manyMorphToMany':
-        case 'manyMorphToOne':
-          values[association.alias] = [];
-          break;
-        default:
-      }
-    });
-
-    await model.updateRelations({ [model.primaryKey]: id, values }, { transacting });
+    await model.deleteRelations(id, { transacting });
 
     const runDelete = async trx => {
       await deleteComponents(entry, { transacting: trx });
