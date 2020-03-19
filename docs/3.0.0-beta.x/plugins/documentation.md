@@ -178,7 +178,7 @@ To access your documentation on a custom path, you will have to update the `path
 
 ### Indicate which plugins documentation to generate
 
-To generate a plugin documentation, you will need to indicate the list of all the plugins for which to you wish to generate documentation. In order to do that you need to update the `pluginsForWhichToGenerateDoc` key. Leaving this key with an empty array `[]` means that not any plugin documentation will be generated.
+To generate a plugin documentation, you will need to indicate the list of all the plugins for which to you wish to generate documentation. In order to do that you need to update the `pluginsForWhichToGenerateDoc` key. Leaving this key with an empty array `[]` means that not any plugin documentation will be generated. If you wish to generate documentation for all plugins, you just have to remove the key from the settings.json file.
 
 ```
 {
@@ -191,7 +191,21 @@ To generate a plugin documentation, you will need to indicate the list of all th
 }
 ```
 
-In this example, we will be generating documentation for the upload and email plugins only.
+In the previous example, you will be generating documentation for the upload and email plugins only.
+
+```
+{
+  "x-strapi-config": {
+    "pluginsForWhichToGenerateDoc": [
+      "email",
+      "upload",
+      "users-permissions"
+    ],
+  }
+}
+```
+
+In the previous example, you will generate documentation for the upload, email and users permissions (permissions and roles) puglins.
 
 ### Default Response
 
