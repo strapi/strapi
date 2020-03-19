@@ -22,20 +22,18 @@ module.exports = (scope, cb) => {
     return cb.invalid('Usage: `$ strapi generate:plugin pluginName`');
   }
 
-  // `scope.args` are the raw command line arguments.
-  _.defaults(scope, {
-    id: _.trim(_.deburr(scope.id)),
-  });
+  // Format `id`.
+  const name = scope.name || _.trim(_.camelCase(scope.id));
 
   // Determine default values based on the available scope.
   _.defaults(scope, {
-    globalID: _.upperFirst(_.camelCase(scope.id)),
+    globalID: _.upperFirst(name),
     ext: '.js',
   });
 
   // Plugin info.
   _.defaults(scope, {
-    name: scope.args.name || scope.id,
+    name,
     author: scope.author || 'A Strapi developer',
     email: scope.email || '',
     year: new Date().getFullYear(),
@@ -45,22 +43,14 @@ module.exports = (scope, cb) => {
   // Take another pass to take advantage of the defaults absorbed in previous passes.
   _.defaults(scope, {
     filename: `${scope.globalID}${scope.ext}`,
-  });
-
-  // Humanize output.
-  _.defaults(scope, {
-    humanizeId: scope.id.toLowerCase(),
-    humanizedPath: '`./plugins`',
+    filePath: './plugins',
   });
 
   const pluginDir = path.resolve(scope.rootPath, 'plugins');
   fs.ensureDirSync(pluginDir);
 
   // Copy the admin files.
-  fs.copySync(
-    path.resolve(__dirname, '..', 'files'),
-    path.resolve(pluginDir, scope.humanizeId)
-  );
+  fs.copySync(path.resolve(__dirname, '..', 'files'), path.resolve(pluginDir, name));
 
   // Trigger callback with no error to proceed.
   return cb.success();

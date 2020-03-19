@@ -18,8 +18,13 @@ const _ = require('lodash');
 /* eslint-disable prefer-template */
 module.exports = (scope, cb) => {
   if (!scope.rootPath || !scope.id) {
-    return cb.invalid('Usage: `$ strapi generate:policy policyName --api apiName --plugin pluginName`');
+    return cb.invalid(
+      'Usage: `$ strapi generate:policy policyName --api apiName --plugin pluginName`'
+    );
   }
+
+  // Format `id`.
+  const name = scope.name || _.trim(_.camelCase(scope.id));
 
   let filePath;
   if (scope.args.api) {
@@ -32,19 +37,14 @@ module.exports = (scope, cb) => {
 
   // Determine default values based on the available scope.
   _.defaults(scope, {
-    ext: '.js'
+    ext: '.js',
   });
 
   // Take another pass to take advantage of the defaults absorbed in previous passes.
   _.defaults(scope, {
+    name,
     filePath,
-    filename: scope.id + scope.ext
-  });
-
-  // Humanize output.
-  _.defaults(scope, {
-    humanizeId: scope.id,
-    humanizedPath: '`' + scope.filePath + '`'
+    filename: name + scope.ext,
   });
 
   // Trigger callback with no error to proceed.
