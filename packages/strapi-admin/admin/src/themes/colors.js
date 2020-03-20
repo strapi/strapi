@@ -3,6 +3,7 @@ const colors = {
   white: '#ffffff',
   red: '#ff203c',
   orange: '#ff5d00',
+  lightOrange: '#f64d0a',
   yellow: '#ffd500',
   green: '#27b70f',
   blue: '#0097f7',
@@ -26,15 +27,6 @@ const colors = {
   lightBlue: '#E6F0FB',
   mediumBlue: '#007EFF',
   darkBlue: '#AED4FB',
-
-  // Specific to file icons
-  file: {
-    archive: '#715A31',
-    code: '#515A6D',
-    default: '#BDBFC2',
-    pdf: '#E26D6D',
-  },
-
   content: {
     background: '#fafafb',
     'background-alpha': 'rgba(14, 22, 34, 0.02)',

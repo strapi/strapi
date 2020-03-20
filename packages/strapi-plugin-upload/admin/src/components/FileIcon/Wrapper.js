@@ -4,15 +4,16 @@ import { themePropTypes } from 'strapi-helper-plugin';
 
 const Wrapper = styled.div`
   font-size: 54px;
-  color: ${({ theme, icon }) => theme.main.colors.file[icon]};
+  color: ${({ theme, colored }) =>
+    colored ? theme.main.colors.lightOrange : theme.main.colors.grey};
 `;
 
 Wrapper.defaultProps = {
-  icon: 'default',
+  colored: false,
 };
 
 Wrapper.propTypes = {
-  icon: PropTypes.string,
+  colored: PropTypes.bool,
   ...themePropTypes,
 };
 

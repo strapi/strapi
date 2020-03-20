@@ -13,17 +13,17 @@ import extensions from './utils/extensions.json';
 import Wrapper from './Wrapper';
 
 const FileIcon = ({ ext }) => {
-  const iconName = Object.keys(extensions).find(key => extensions[key].includes(ext));
+  const iconName = Object.keys(extensions).find(key => extensions[key].includes(ext)) || 'alt';
 
   return (
-    <Wrapper type="file" icon={iconName}>
+    <Wrapper type="file" colored={iconName === 'pdf'}>
       <FontAwesomeIcon icon={['far', `file-${iconName}`]} />
     </Wrapper>
   );
 };
 
 FileIcon.defaultProps = {
-  ext: 'zip',
+  ext: 'alt',
 };
 
 FileIcon.propTypes = {
