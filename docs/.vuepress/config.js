@@ -212,6 +212,7 @@ module.exports = {
             '/3.0.0-beta.x/guides/scheduled-publication',
             '/3.0.0-beta.x/guides/slug',
             '/3.0.0-beta.x/guides/send-email',
+            '/3.0.0-beta.x/guides/count-graphql',
           ],
         },
         {
@@ -238,6 +239,7 @@ module.exports = {
             '/3.0.0-beta.x/plugin-development/plugin-architecture',
             '/3.0.0-beta.x/plugin-development/backend-development',
             '/3.0.0-beta.x/plugin-development/frontend-development',
+            '/3.0.0-beta.x/plugin-development/frontend-settings-api',
           ],
         },
         {

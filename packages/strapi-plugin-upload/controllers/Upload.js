@@ -148,7 +148,8 @@ module.exports = {
   },
 
   async findOne(ctx) {
-    const data = await strapi.plugins['upload'].services.upload.fetch(ctx.params);
+    const { id } = ctx.params;
+    const data = await strapi.plugins['upload'].services.upload.fetch({ id });
 
     if (!data) {
       return ctx.notFound('file.notFound');
