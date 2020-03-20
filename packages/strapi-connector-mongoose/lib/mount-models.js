@@ -440,47 +440,13 @@ const buildRelation = ({ definition, model, instance, attribute, name }) => {
       break;
     }
     case 'morphOne': {
-      // const FK = _.find(definition.associations, {
-      //   alias: name,
-      // });
-
-      // const ref = getRef(attribute.model, attribute.plugin);
-
-      // setField(name, {
-      //   type: 'virtual',
-      //   ref,
-      //   via: `${FK.via}.ref`,
-      //   justOne: true,
-      // });
-
-      // // Set this info to be able to see if this field is a real database's field.
-      // attribute.isVirtual = true;
-
       const ref = getRef(attribute.model, attribute.plugin);
-
       setField(name, { type: ObjectId, ref });
-
       break;
     }
     case 'morphMany': {
-      // const FK = _.find(definition.associations, {
-      //   alias: name,
-      // });
-      // const ref = getRef(attribute.collection, attribute.plugin);
-
-      // setField(name, {
-      //   type: 'virtual',
-      //   ref,
-      //   via: `${FK.via}.ref`,
-      // });
-
-      // // Set this info to be able to see if this field is a real database's field.
-      // attribute.isVirtual = true;
-
       const ref = getRef(attribute.collection, attribute.plugin);
-
       setField(name, [{ type: ObjectId, ref }]);
-
       break;
     }
 

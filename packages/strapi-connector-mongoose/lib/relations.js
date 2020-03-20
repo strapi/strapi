@@ -463,10 +463,8 @@ module.exports = {
 
             return;
           }
-
           case 'oneMorphToOne':
           case 'oneMorphToMany': {
-            // TODO: to implement
             return;
           }
         }
