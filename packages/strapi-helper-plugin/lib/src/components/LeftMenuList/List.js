@@ -5,8 +5,7 @@ import colors from '../../assets/styles/colors';
 const List = styled.ul`
   margin-bottom: 0;
   padding-left: 0;
-  max-height: ${props =>
-    props.numberOfVisibleItems ? `${props.numberOfVisibleItems * 35}px` : null};
+  max-height: 178px;
   overflow-y: scroll;
   li {
     position: relative;
