@@ -99,18 +99,20 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
       );
     } else if (assoc.nature === 'manyWay') {
       const joinTableAlias = generateAlias(assoc.tableCollectionName);
+      const isRelatedToSameTable =
+        destinationInfo.model.collectionName === originInfo.model.collectionName;
 
       qb.leftJoin(
         `${originInfo.model.databaseName}.${assoc.tableCollectionName} AS ${joinTableAlias}`,
-        `${joinTableAlias}.${singular(originInfo.alias)}_id`,
+        `${joinTableAlias}.${singular(originInfo.model.collectionName)}_id`,
         `${originInfo.alias}.${originInfo.model.primaryKey}`
       );
 
       qb.leftJoin(
         `${destinationInfo.model.databaseName}.${destinationInfo.model.collectionName} AS ${destinationInfo.alias}`,
-        `${joinTableAlias}.${singular(originInfo.model.attributes[assoc.alias].attribute)}_${
-          originInfo.model.attributes[assoc.alias].column
-        }`,
+        `${joinTableAlias}.${isRelatedToSameTable ? 'related_' : ''}${singular(
+          originInfo.model.attributes[assoc.alias].attribute
+        )}_${originInfo.model.attributes[assoc.alias].column}`,
         `${destinationInfo.alias}.${destinationInfo.model.primaryKey}`
       );
     } else {

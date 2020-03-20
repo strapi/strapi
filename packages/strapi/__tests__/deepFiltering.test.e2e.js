@@ -33,6 +33,11 @@ const collector = {
       target: 'application::panini-card.panini-card',
       unique: false,
     },
+    collector_friends: {
+      nature: 'manyWay',
+      target: '__self__',
+      unique: false,
+    },
   },
 };
 
@@ -72,6 +77,7 @@ async function createFixtures() {
     body: {
       name: 'Isabelle',
       panini_cards: [data.paniniCards[0].id],
+      collector_friends: [data.collectors[0].id],
     },
   });
   data.collectors.push(collector2Res.body);
@@ -135,6 +141,24 @@ describe('Deep Filtering API', () => {
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(1);
       expect(res.body[0]).toMatchObject(data.collectors[0]);
+    });
+  });
+
+  describe('Filter on a self manyWay relation', () => {
+    test('Should return 1 result', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/collectors',
+        qs: {
+          'collector_friends.name': data.collectors[0].name,
+        },
+      });
+
+      console.log('res', JSON.stringify(res.body, null, 2));
+
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(1);
+      expect(res.body[0]).toMatchObject(data.collectors[1]);
     });
   });
 });
