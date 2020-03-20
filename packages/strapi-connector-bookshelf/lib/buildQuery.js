@@ -79,14 +79,23 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
    * @param {Object} destinationInfo - destination with which we are making a join
    */
   const buildJoin = (qb, assoc, originInfo, destinationInfo) => {
-    if (assoc.nature === 'manyToMany') {
+    if (['manyToMany', 'manyWay'].includes(assoc.nature)) {
       const joinTableAlias = generateAlias(assoc.tableCollectionName);
+
+      let originColumnNameInJoinTable = `${joinTableAlias}.`;
+      if (assoc.nature === 'manyToMany') {
+        originColumnNameInJoinTable += `${singular(
+          destinationInfo.model.attributes[assoc.via].attribute
+        )}_${destinationInfo.model.attributes[assoc.via].column}`;
+      } else if (assoc.nature === 'manyWay') {
+        originColumnNameInJoinTable += `${singular(originInfo.model.collectionName)}_${
+          originInfo.model.primaryKey
+        }`;
+      }
 
       qb.leftJoin(
         `${originInfo.model.databaseName}.${assoc.tableCollectionName} AS ${joinTableAlias}`,
-        `${joinTableAlias}.${singular(destinationInfo.model.attributes[assoc.via].attribute)}_${
-          destinationInfo.model.attributes[assoc.via].column
-        }`,
+        originColumnNameInJoinTable,
         `${originInfo.alias}.${originInfo.model.primaryKey}`
       );
 
@@ -95,24 +104,6 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
         `${joinTableAlias}.${singular(originInfo.model.attributes[assoc.alias].attribute)}_${
           originInfo.model.attributes[assoc.alias].column
         }`,
-        `${destinationInfo.alias}.${destinationInfo.model.primaryKey}`
-      );
-    } else if (assoc.nature === 'manyWay') {
-      const joinTableAlias = generateAlias(assoc.tableCollectionName);
-      const isRelatedToSameTable =
-        destinationInfo.model.collectionName === originInfo.model.collectionName;
-
-      qb.leftJoin(
-        `${originInfo.model.databaseName}.${assoc.tableCollectionName} AS ${joinTableAlias}`,
-        `${joinTableAlias}.${singular(originInfo.model.collectionName)}_id`,
-        `${originInfo.alias}.${originInfo.model.primaryKey}`
-      );
-
-      qb.leftJoin(
-        `${destinationInfo.model.databaseName}.${destinationInfo.model.collectionName} AS ${destinationInfo.alias}`,
-        `${joinTableAlias}.${isRelatedToSameTable ? 'related_' : ''}${singular(
-          originInfo.model.attributes[assoc.alias].attribute
-        )}_${originInfo.model.attributes[assoc.alias].column}`,
         `${destinationInfo.alias}.${destinationInfo.model.primaryKey}`
       );
     } else {
