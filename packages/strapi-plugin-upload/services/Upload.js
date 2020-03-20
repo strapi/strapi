@@ -116,15 +116,17 @@ module.exports = {
     }
 
     const formats = await generateResponsiveFormats(fileData);
-    for (const format of formats) {
-      if (!format) continue;
+    if (Array.isArray(formats) && formats.length > 0) {
+      for (const format of formats) {
+        if (!format) continue;
 
-      const { key, file } = format;
+        const { key, file } = format;
 
-      await strapi.plugins.upload.provider.upload(file);
-      delete file.buffer;
+        await strapi.plugins.upload.provider.upload(file);
+        delete file.buffer;
 
-      _.set(fileData, ['formats', key], file);
+        _.set(fileData, ['formats', key], file);
+      }
     }
 
     const { width, height } = await getDimensions(fileData.buffer);
@@ -190,15 +192,17 @@ module.exports = {
     }
 
     const formats = await generateResponsiveFormats(fileData);
-    for (const format of formats) {
-      if (!format) continue;
+    if (Array.isArray(formats) && formats.length > 0) {
+      for (const format of formats) {
+        if (!format) continue;
 
-      const { key, file } = format;
+        const { key, file } = format;
 
-      await strapi.plugins.upload.provider.upload(file);
-      delete file.buffer;
+        await strapi.plugins.upload.provider.upload(file);
+        delete file.buffer;
 
-      _.set(fileData, ['formats', key], file);
+        _.set(fileData, ['formats', key], file);
+      }
     }
 
     const { width, height } = await getDimensions(fileData.buffer);
