@@ -8,6 +8,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 const _ = require('lodash');
+const { nameToSlug } = require('strapi-utils');
 
 /**
  * This `before` function is run before generating targets.
@@ -23,13 +24,7 @@ module.exports = (scope, cb) => {
   }
 
   // Format `id`.
-  const name = scope.name || _.trim(_.camelCase(scope.id));
-
-  // Determine default values based on the available scope.
-  _.defaults(scope, {
-    globalID: _.upperFirst(name),
-    ext: '.js',
-  });
+  const name = scope.name || nameToSlug(scope.id);
 
   // Plugin info.
   _.defaults(scope, {
@@ -42,7 +37,7 @@ module.exports = (scope, cb) => {
 
   // Take another pass to take advantage of the defaults absorbed in previous passes.
   _.defaults(scope, {
-    filename: `${scope.globalID}${scope.ext}`,
+    filename: `${name}.js`,
     filePath: './plugins',
   });
 

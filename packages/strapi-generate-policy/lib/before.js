@@ -6,6 +6,7 @@
 
 // Public node modules.
 const _ = require('lodash');
+const { nameToSlug } = require('strapi-utils');
 
 /**
  * This `before` function is run before generating targets.
@@ -24,7 +25,7 @@ module.exports = (scope, cb) => {
   }
 
   // Format `id`.
-  const name = scope.name || _.trim(_.camelCase(scope.id));
+  const name = scope.name || nameToSlug(scope.id);
 
   let filePath;
   if (scope.args.api) {
@@ -35,16 +36,11 @@ module.exports = (scope, cb) => {
     filePath = './config/policies';
   }
 
-  // Determine default values based on the available scope.
-  _.defaults(scope, {
-    ext: '.js',
-  });
-
   // Take another pass to take advantage of the defaults absorbed in previous passes.
   _.defaults(scope, {
     name,
     filePath,
-    filename: name + scope.ext,
+    filename: `${name}.js`,
   });
 
   // Trigger callback with no error to proceed.

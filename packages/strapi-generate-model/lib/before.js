@@ -11,6 +11,7 @@ const path = require('path');
 // Public node modules.
 const _ = require('lodash');
 const pluralize = require('pluralize');
+const { nameToSlug } = require('strapi-utils');
 
 // Fetch stub attribute template on initial load.
 const attributeTemplate = fs.readFileSync(
@@ -35,19 +36,13 @@ module.exports = (scope, cb) => {
   }
 
   // Format `id`.
-  const name = scope.name || _.trim(_.camelCase(scope.id));
+  const name = scope.name || nameToSlug(scope.id);
 
   // `scope.args` are the raw command line arguments.
   _.defaults(scope, {
     name,
     idPluralized: pluralize.plural(_.trim(_.deburr(scope.id))),
     environment: process.env.NODE_ENV || 'development',
-  });
-
-  // Determine default values based on the available scope.
-  _.defaults(scope, {
-    globalID: _.upperFirst(name),
-    ext: '.js',
   });
 
   // Determine the destination path.
@@ -64,8 +59,8 @@ module.exports = (scope, cb) => {
   _.defaults(scope, {
     rootPath: scope.rootPath,
     filePath,
-    filename: scope.globalID + scope.ext,
-    filenameSettings: scope.globalID + '.settings.json',
+    filename: `${name}.js`,
+    filenameSettings: `${name}.settings.json`,
   });
 
   // Validate optional attribute arguments.
