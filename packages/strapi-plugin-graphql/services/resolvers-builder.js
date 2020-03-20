@@ -27,6 +27,8 @@ const buildMutation = (mutationName, config) => {
       const ctx = buildMutationContext({ options, graphqlContext });
 
       await policiesMiddleware(ctx);
+      graphqlContext.context = ctx;
+
       return resolver(root, options, graphqlContext);
     };
   }
@@ -52,10 +54,7 @@ const buildMutation = (mutationName, config) => {
 const buildMutationContext = ({ options, graphqlContext }) => {
   const { context } = graphqlContext;
 
-  const ctx = context.app.createContext(
-    _.clone(context.req),
-    _.clone(context.res)
-  );
+  const ctx = context.app.createContext(_.clone(context.req), _.clone(context.res));
 
   if (options.input && options.input.where) {
     ctx.params = convertToParams(options.input.where || {});
@@ -89,6 +88,8 @@ const buildQuery = (queryName, config) => {
       const { ctx, opts } = buildQueryContext({ options, graphqlContext });
 
       await policiesMiddleware(ctx);
+      graphqlContext.context = ctx;
+
       return resolver(root, opts, graphqlContext);
     };
   }
@@ -119,10 +120,7 @@ const validateResolverOption = config => {
     throw new Error(`Missing "resolverOf" option with custom resolver.`);
   }
 
-  if (
-    !_.isUndefined(policies) &&
-    (!Array.isArray(policies) || !_.every(policies, _.isString))
-  ) {
+  if (!_.isUndefined(policies) && (!Array.isArray(policies) || !_.every(policies, _.isString))) {
     throw new Error('Policies option must be an array of string.');
   }
 
@@ -133,10 +131,7 @@ const buildQueryContext = ({ options, graphqlContext }) => {
   const { context } = graphqlContext;
   const _options = _.cloneDeep(options);
 
-  const ctx = context.app.createContext(
-    _.clone(context.req),
-    _.clone(context.res)
-  );
+  const ctx = context.app.createContext(_.clone(context.req), _.clone(context.res));
 
   // Note: we've to used the Object.defineProperties to reset the prototype. It seems that the cloning the context
   // cause a lost of the Object prototype.
@@ -173,20 +168,10 @@ const getActionFn = details => {
   const { controller, action, plugin, api } = details;
 
   if (plugin) {
-    return _.get(strapi.plugins, [
-      _.toLower(plugin),
-      'controllers',
-      _.toLower(controller),
-      action,
-    ]);
+    return _.get(strapi.plugins, [_.toLower(plugin), 'controllers', _.toLower(controller), action]);
   }
 
-  return _.get(strapi.api, [
-    _.toLower(api),
-    'controllers',
-    _.toLower(controller),
-    action,
-  ]);
+  return _.get(strapi.api, [_.toLower(api), 'controllers', _.toLower(controller), action]);
 };
 
 const getActionDetails = resolver => {
@@ -234,9 +219,7 @@ const getPolicies = config => {
 
   const policyFns = [];
 
-  const { controller, action, plugin: pathPlugin } = isResolvablePath(
-    resolverOf
-  )
+  const { controller, action, plugin: pathPlugin } = isResolvablePath(resolverOf)
     ? getActionDetails(resolverOf)
     : getActionDetails(resolver);
 
