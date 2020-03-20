@@ -27,7 +27,7 @@ const buildMutation = (mutationName, config) => {
       const ctx = buildMutationContext({ options, graphqlContext });
 
       await policiesMiddleware(ctx);
-      graphqlContext.context.state = ctx.state;
+      graphqlContext.context = ctx;
 
       return resolver(root, options, graphqlContext);
     };
@@ -88,7 +88,7 @@ const buildQuery = (queryName, config) => {
       const { ctx, opts } = buildQueryContext({ options, graphqlContext });
 
       await policiesMiddleware(ctx);
-      graphqlContext.context.state = ctx.state;
+      graphqlContext.context = ctx;
 
       return resolver(root, opts, graphqlContext);
     };
