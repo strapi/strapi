@@ -1,5 +1,5 @@
 const createMatrix = refArray => {
-  const maxNumberOfColumns = 6;
+  const maxNumberOfColumns = 4;
   const matrix = [];
 
   let row = [];
