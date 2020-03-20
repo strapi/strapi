@@ -981,9 +981,9 @@ module.exports = {
       },
     };
 
-    const userWantsDefaultResponse = strapi.plugins.documentation.config['x-strapi-config'].generateDefaultResponse;
+    const { generateDefaultResponse } = strapi.plugins.documentation.config['x-strapi-config'];
 
-    if (userWantsDefaultResponse) {
+    if (generateDefaultResponse) {
       response.default = {
           description: 'unexpected error',
           content: {
@@ -1047,9 +1047,9 @@ module.exports = {
       },
     };
 
-    const userWantsDefaultResponse = strapi.plugins.documentation.config['x-strapi-config'].generateDefaultResponse;
+    const { generateDefaultResponse } = strapi.plugins.documentation.config['x-strapi-config'];
 
-    if (userWantsDefaultResponse) {
+    if (generateDefaultResponse) {
       response.default = {
           description: 'unexpected error',
           content: {
@@ -1784,7 +1784,7 @@ module.exports = {
    * @returns {Boolean}
    */
   isPluginDocumentationNeeded: function(pluginName) {
-    const pluginsForWhichToGenerateDoc = strapi.plugins.documentation.config['x-strapi-config'].pluginsForWhichToGenerateDoc;
+    const { pluginsForWhichToGenerateDoc } = strapi.plugins.documentation.config['x-strapi-config'];
     if (Array.isArray(pluginsForWhichToGenerateDoc) && !pluginsForWhichToGenerateDoc.includes(pluginName)) {
         return false;
     } else {
