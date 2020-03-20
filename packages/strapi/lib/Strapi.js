@@ -22,10 +22,7 @@ const getPrefixedDeps = require('./utils/get-prefixed-dependencies');
 
 const createEventHub = require('./services/event-hub');
 const createWebhookRunner = require('./services/webhook-runner');
-const {
-  webhookModel,
-  createWebhookStore,
-} = require('./services/webhook-store');
+const { webhookModel, createWebhookStore } = require('./services/webhook-store');
 const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const createEntityService = require('./services/entity-service');
 const createEntityValidator = require('./services/entity-validator');
@@ -133,10 +130,7 @@ class Strapi extends EventEmitter {
   }
 
   requireProjectBootstrap() {
-    const bootstrapPath = path.resolve(
-      this.dir,
-      'config/functions/bootstrap.js'
-    );
+    const bootstrapPath = path.resolve(this.dir, 'config/functions/bootstrap.js');
 
     if (fse.existsSync(bootstrapPath)) {
       require(bootstrapPath);
@@ -159,10 +153,7 @@ class Strapi extends EventEmitter {
       [chalk.blue('Launched in'), Date.now() - this.config.launchedAt + ' ms'],
       [chalk.blue('Environment'), this.config.environment],
       [chalk.blue('Process PID'), process.pid],
-      [
-        chalk.blue('Version'),
-        `${this.config.info.strapi} (node v${this.config.info.node})`,
-      ]
+      [chalk.blue('Version'), `${this.config.info.strapi} (node v${this.config.info.node})`]
     );
 
     console.log(infoTable.toString());
@@ -176,9 +167,7 @@ class Strapi extends EventEmitter {
 
     console.log(chalk.bold('One more thing...'));
     console.log(
-      chalk.grey(
-        'Create your first administrator 💻 by going to the administration panel at:'
-      )
+      chalk.grey('Create your first administrator 💻 by going to the administration panel at:')
     );
     console.log();
 
@@ -194,11 +183,7 @@ class Strapi extends EventEmitter {
     console.log(chalk.bold('Welcome back!'));
 
     if (this.config.serveAdminPanel === true) {
-      console.log(
-        chalk.grey(
-          'To manage your project 🚀, go to the administration panel at:'
-        )
-      );
+      console.log(chalk.grey('To manage your project 🚀, go to the administration panel at:'));
       console.log(chalk.bold(this.config.admin.url));
       console.log();
     }
@@ -243,11 +228,7 @@ class Strapi extends EventEmitter {
 
         if (
           (this.config.environment === 'development' &&
-            _.get(
-              this.config.currentEnvironment,
-              'server.admin.autoOpen',
-              true
-            ) !== false) ||
+            _.get(this.config.currentEnvironment, 'server.admin.autoOpen', true) !== false) ||
           !isInitialised
         ) {
           await utils.openBrowser.call(this);
@@ -265,9 +246,7 @@ class Strapi extends EventEmitter {
     // handle port in use cleanly
     this.server.on('error', err => {
       if (err.code === 'EADDRINUSE') {
-        return this.stopWithError(
-          `The port ${err.port} is already used by another application.`
-        );
+        return this.stopWithError(`The port ${err.port} is already used by another application.`);
       }
 
       this.log.error(err);
@@ -294,8 +273,11 @@ class Strapi extends EventEmitter {
     };
   }
 
-  stopWithError(err) {
+  stopWithError(err, customMessage) {
     this.log.debug(`⛔️ Server wasn't able to start properly.`);
+    if (customMessage) {
+      this.log.error(customMessage);
+    }
     this.log.error(err);
     return this.stop();
   }
@@ -445,9 +427,7 @@ class Strapi extends EventEmitter {
     }
 
     const pluginBoostraps = Object.keys(this.plugins).map(plugin => {
-      return execBootstrap(
-        _.get(this.plugins[plugin], 'config.functions.bootstrap')
-      ).catch(err => {
+      return execBootstrap(_.get(this.plugins[plugin], 'config.functions.bootstrap')).catch(err => {
         strapi.log.error(`Bootstrap function in plugin "${plugin}" failed`);
         strapi.log.error(err);
         strapi.stop();
