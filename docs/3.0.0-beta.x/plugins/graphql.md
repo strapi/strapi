@@ -46,7 +46,7 @@ By default, the [Shadow CRUD](#shadow-crud) feature is enabled and the GraphQL i
 
 Security limits on maximum number of items in your response by default is limited to 100, however you can change this on the following config option `amountLimit`. This should only be changed after careful consideration of the drawbacks of a large query which can cause what would basically be a DDoS (Distributed Denial of Service). And may cause abnormal load on your Strapi server, as well as your database server.
 
-You can also enable the Apollo server tracing feature, which is supported by the playground to track the response time of each part of your query. To enable this feature just change/add the `"tracing": true` option in the GraphQL settings file. You can read more about the tracing feature from Apollo [here](https://www.apollographql.com/docs/engine/features/query-tracing.html).
+You can also enable the Apollo server tracing feature, which is supported by the playground to track the response time of each part of your query. To enable this feature just change/add the `"tracing": true` option in the GraphQL settings file. You can read more about the tracing feature from Apollo [here](https://www.apollographql.com/docs/apollo-server/federation/metrics/).
 
 You can edit these configurations by creating following file.
 
@@ -234,12 +234,7 @@ Return the second decade of users which have an email that contains `@strapi.io`
 
 ```graphql
 query {
-  users(
-    limit: 10
-    start: 10
-    sort: "username:asc"
-    where: { email_contains: "@strapi.io" }
-  ) {
+  users(limit: 10, start: 10, sort: "username:asc", where: { email_contains: "@strapi.io" }) {
     username
     email
   }
@@ -720,10 +715,7 @@ module.exports = {
     Mutation: {
       createRestaurant: {
         description: 'Create a new restaurant',
-        policies: [
-          'plugins::users-permissions.isAuthenticated',
-          'global::logging',
-        ],
+        policies: ['plugins::users-permissions.isAuthenticated', 'global::logging'],
       },
     },
   },

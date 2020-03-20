@@ -12,12 +12,7 @@ const DynamicZoneScalar = require('../types/dynamiczoneScalar');
 
 const { formatModelConnectionsGQL } = require('./build-aggregation');
 const types = require('./type-builder');
-const {
-  mergeSchemas,
-  convertToParams,
-  convertToQuery,
-  amountLimiting,
-} = require('./utils');
+const { mergeSchemas, convertToParams, convertToQuery, amountLimiting } = require('./utils');
 const { toSDL, getTypeDescription } = require('./schema-definitions');
 const { toSingular, toPlural } = require('./naming');
 const { buildQuery, buildMutation } = require('./resolvers-builder');
@@ -60,10 +55,10 @@ const buildTypeDefObj = model => {
   // Change field definition for collection relations
   associations
     .filter(association => association.type === 'collection')
+    .filter(association => attributes[association.alias].private !== true)
     .forEach(association => {
-      typeDef[
-        `${association.alias}(sort: String, limit: Int, start: Int, where: JSON)`
-      ] = typeDef[association.alias];
+      typeDef[`${association.alias}(sort: String, limit: Int, start: Int, where: JSON)`] =
+        typeDef[association.alias];
 
       delete typeDef[association.alias];
     });
@@ -90,9 +85,7 @@ const generateDynamicZoneDefinitions = (attributes, globalId, schema) => {
     .forEach(attribute => {
       const { components } = attributes[attribute];
 
-      const typeName = `${globalId}${_.upperFirst(
-        _.camelCase(attribute)
-      )}DynamicZone`;
+      const typeName = `${globalId}${_.upperFirst(_.camelCase(attribute))}DynamicZone`;
 
       if (components.length === 0) {
         // Create dummy type because graphql doesn't support empty ones
@@ -111,9 +104,7 @@ const generateDynamicZoneDefinitions = (attributes, globalId, schema) => {
           return compo.globalId;
         });
 
-        const unionType = `union ${typeName} = ${componentsTypeNames.join(
-          ' | '
-        )}`;
+        const unionType = `union ${typeName} = ${componentsTypeNames.join(' | ')}`;
 
         schema.definition += `\n${unionType}\n`;
       }
@@ -137,8 +128,7 @@ const generateDynamicZoneDefinitions = (attributes, globalId, schema) => {
 };
 
 const buildAssocResolvers = model => {
-  const contentManager =
-    strapi.plugins['content-manager'].services['contentmanager'];
+  const contentManager = strapi.plugins['content-manager'].services['contentmanager'];
 
   const { primaryKey, associations = [] } = model;
 
@@ -194,8 +184,7 @@ const buildAssocResolvers = model => {
               };
 
               if (
-                ((association.nature === 'manyToMany' &&
-                  association.dominant) ||
+                ((association.nature === 'manyToMany' && association.dominant) ||
                   association.nature === 'manyWay') &&
                 _.has(obj, association.alias) // if populated
               ) {
@@ -203,31 +192,21 @@ const buildAssocResolvers = model => {
                   queryOpts,
                   ['query', targetModel.primaryKey],
                   obj[association.alias]
-                    ? obj[association.alias]
-                        .map(val => val[targetModel.primaryKey] || val)
-                        .sort()
+                    ? obj[association.alias].map(val => val[targetModel.primaryKey] || val).sort()
                     : []
                 );
               } else {
-                _.set(
-                  queryOpts,
-                  ['query', association.via],
-                  obj[targetModel.primaryKey]
-                );
+                _.set(queryOpts, ['query', association.via], obj[targetModel.primaryKey]);
               }
             }
 
             return association.model
-              ? strapi.plugins.graphql.services['data-loaders'].loaders[
-                  targetModel.uid
-                ].load({
+              ? strapi.plugins.graphql.services['data-loaders'].loaders[targetModel.uid].load({
                   params,
                   options: queryOpts,
                   single: true,
                 })
-              : strapi.plugins.graphql.services['data-loaders'].loaders[
-                  targetModel.uid
-                ].load({
+              : strapi.plugins.graphql.services['data-loaders'].loaders[targetModel.uid].load({
                   options: queryOpts,
                   association,
                 });
@@ -308,9 +287,7 @@ const buildSingleType = model => {
 
   const singularName = toSingular(modelName);
 
-  const _schema = _.cloneDeep(
-    _.get(strapi.plugins, 'graphql.config._schema.graphql', {})
-  );
+  const _schema = _.cloneDeep(_.get(strapi.plugins, 'graphql.config._schema.graphql', {}));
 
   const globalType = _.get(_schema, ['type', model.globalId], {});
 
@@ -357,9 +334,7 @@ const buildCollectionType = model => {
   const singularName = toSingular(modelName);
   const pluralName = toPlural(modelName);
 
-  const _schema = _.cloneDeep(
-    _.get(strapi.plugins, 'graphql.config._schema.graphql', {})
-  );
+  const _schema = _.cloneDeep(_.get(strapi.plugins, 'graphql.config._schema.graphql', {}));
 
   const globalType = _.get(_schema, ['type', model.globalId], {});
 

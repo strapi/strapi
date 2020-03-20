@@ -344,6 +344,16 @@ module.exports = function(strapi) {
     'admin'
   );
 
+  // check if we should serve admin panel
+  const shouldServeAdmin = _.get(
+    strapi.config.currentEnvironment.server,
+    'admin.serveAdminPanel',
+    strapi.config.serveAdminPanel
+  );
+  if (!shouldServeAdmin) {
+    strapi.config.serveAdminPanel = false;
+  }
+
   strapi.config.admin.url = new URL(adminPath, strapi.config.url).toString();
 };
 
