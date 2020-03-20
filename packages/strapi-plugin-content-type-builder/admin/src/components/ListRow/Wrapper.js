@@ -43,7 +43,6 @@ const Wrapper = styled.tr`
     }}
     p {
       font-weight: 500;
-      text-transform: capitalize;
     }
   }
   td:last-child {
@@ -53,11 +52,7 @@ const Wrapper = styled.tr`
     }
   }
   &.relation-row {
-    background: linear-gradient(
-      135deg,
-      rgba(28, 93, 231, 0.05),
-      rgba(239, 243, 253, 0)
-    );
+    background: linear-gradient(135deg, rgba(28, 93, 231, 0.05), rgba(239, 243, 253, 0));
   }
   &.clickable {
     &:hover {
