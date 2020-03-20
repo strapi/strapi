@@ -27,7 +27,11 @@ To create a project head over to the Strapi [listing on the marketplace](https:/
 
 ### Step 3: Visit your app
 
-Please note that it may take anywhere from 30 seconds to a few minutes for the droplet to startup, when it does you should see it in your [droplets list](https://cloud.digitalocean.com/droplets). After the droplet has started, it will take a few more minutes to finish the Strapi installation.
+Please note that it may take anywhere from 30 seconds to a few minutes for the droplet to startup, when it does you should see it in your [droplets list](https://cloud.digitalocean.com/droplets). 
+
+::: warning
+After the droplet has started, it will take a few more minutes to finish the Strapi installation.
+:::
 
 From here you will see the public ipv4 address that you can use to visit your Strapi application, just open that in a browser and it should ask you to create your first administrator!
 
@@ -107,7 +111,7 @@ Please note that with this application it is intially created and ran in the `de
 
 ## Using the Service Account
 
-By default the Strapi application will be running under a "service account", this is an account that is extremely limited into what it can do and access. The purpose of using a service account is to project your system from security threats.
+By default the Strapi application will be running under a "service account", this is an account that is extremely limited into what it can do and access. The purpose of using a service account is to help protect your system from security threats.
 
 ### Accessing the service account
 
