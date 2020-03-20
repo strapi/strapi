@@ -44,7 +44,7 @@ module.exports = {
     });
 
     return {
-      send: (options, cb) => {
+      send: options => {
         return new Promise((resolve, reject) => {
           // Default values.
           options = isObject(options) ? options : {};

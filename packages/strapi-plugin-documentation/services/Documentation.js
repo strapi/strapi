@@ -366,8 +366,8 @@ module.exports = {
     const formattedPluginName = plugin
       .split('-')
       .map(i => _.upperFirst(i))
-      .join('-');
-    const formattedName = _.upperFirst(name);
+      .join('');
+    const formattedName = _.upperFirst(name); 
 
     if (withoutSpace) {
       return `${formattedPluginName}${formattedName}`;
@@ -950,7 +950,7 @@ module.exports = {
       schema = this.generatePluginResponseSchema(tag);
     }
 
-    return {
+    const response = {
       200: {
         description: 'response',
         content: {
@@ -979,17 +979,24 @@ module.exports = {
           },
         },
       },
-      default: {
-        description: 'unexpected error',
-        content: {
-          'application/json': {
-            schema: {
-              $ref: '#/components/schemas/Error',
-            },
-          },
-        },
-      },
     };
+
+    const { generateDefaultResponse } = strapi.plugins.documentation.config['x-strapi-config'];
+
+    if (generateDefaultResponse) {
+      response.default = {
+          description: 'unexpected error',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Error',
+              },
+            },
+          }
+        }
+    }
+
+    return response;
   },
 
   /**
@@ -1009,7 +1016,7 @@ module.exports = {
       endPoint
     );
 
-    return {
+    const response = {
       200: {
         description,
         content: {
@@ -1038,17 +1045,24 @@ module.exports = {
           },
         },
       },
-      default: {
-        description: 'unexpected error',
-        content: {
-          'application/json': {
-            schema: {
-              $ref: '#/components/schemas/Error',
-            },
-          },
-        },
-      },
     };
+
+    const { generateDefaultResponse } = strapi.plugins.documentation.config['x-strapi-config'];
+
+    if (generateDefaultResponse) {
+      response.default = {
+          description: 'unexpected error',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Error',
+              },
+            },
+          }
+        }
+    }
+
+    return response;
   },
 
   /**
@@ -1770,11 +1784,12 @@ module.exports = {
    * @returns {Boolean}
    */
   isPluginDocumentationNeeded: function(pluginName) {
-    const pluginRoutesWithDescription = this.getPluginRoutesWithDescription(
-      pluginName
-    );
-
-    return pluginRoutesWithDescription.length > 0;
+    const { pluginsForWhichToGenerateDoc } = strapi.plugins.documentation.config['x-strapi-config'];
+    if (Array.isArray(pluginsForWhichToGenerateDoc) && !pluginsForWhichToGenerateDoc.includes(pluginName)) {
+        return false;
+    } else {
+        return this.getPluginRoutesWithDescription(pluginName).length > 0;
+    }
   },
 
   /**

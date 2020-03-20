@@ -31,7 +31,7 @@ module.exports = {
     sendgrid.setApiKey(config.sendgrid_api_key);
 
     return {
-      send: (options, cb) => {
+      send: options => {
         return new Promise((resolve, reject) => {
           // Default values.
           options = _.isObject(options) ? options : {};
