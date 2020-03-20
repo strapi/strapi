@@ -1784,8 +1784,8 @@ module.exports = {
    * @returns {Boolean}
    */
   isPluginDocumentationNeeded: function(pluginName) {
-    const pluginsDocWantedByUser = strapi.plugins.documentation.config['x-strapi-config'].pluginsForWhichToGenerateDoc;
-    if (Array.isArray(pluginsDocWantedByUser) && !pluginsDocWantedByUser.includes(pluginName)) {
+    const pluginsForWhichToGenerateDoc = strapi.plugins.documentation.config['x-strapi-config'].pluginsForWhichToGenerateDoc;
+    if (Array.isArray(pluginsForWhichToGenerateDoc) && !pluginsForWhichToGenerateDoc.includes(pluginName)) {
         return false;
     } else {
         return this.getPluginRoutesWithDescription(pluginName).length > 0;
