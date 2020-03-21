@@ -38,29 +38,29 @@ describe('UPLOAD | components | FiltersPicker | utils', () => {
       const currentFilters = [
         {
           name: 'size',
-          filter: 'is',
+          filter: '=',
           value: '10KB',
         },
       ];
 
+      const value = moment.utc([1993, 6, 5]).set({ hour: 0, minute: 0, second: 0 }); // format from buffetjs datepicker
+
       const newFilter = {
         name: 'created_at',
-        filter: 'is',
-        value: moment([1993, 6, 5])
-          .set({ hour: 0, minute: 0, second: 0 })
-          .toISOString(), // format from buffetjs datepicker
+        filter: '=',
+        value,
       };
 
       const expected = [
         {
           name: 'size',
-          filter: 'is',
+          filter: '=',
           value: '10KB',
         },
         {
           name: 'created_at',
-          filter: 'is',
-          value: '1993-07-04T22:00:00.000Z',
+          filter: '=',
+          value: moment(value).format(),
         },
       ];
 
@@ -71,7 +71,7 @@ describe('UPLOAD | components | FiltersPicker | utils', () => {
       const currentFilters = [
         {
           name: 'size',
-          filter: 'is',
+          filter: '=',
           value: '10KB',
         },
       ];
@@ -85,7 +85,7 @@ describe('UPLOAD | components | FiltersPicker | utils', () => {
       const expected = [
         {
           name: 'size',
-          filter: 'is',
+          filter: '=',
           value: '10KB',
         },
         {
