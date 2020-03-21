@@ -286,7 +286,7 @@ const HomePage = () => {
           />
         </>
       ) : (
-        <ListEmpty onClick={() => handleClickToggleModal()} />
+        <ListEmpty onClick={handleClickToggleModal} />
       )}
       <ModalStepper isOpen={isOpen} onToggle={handleClickToggleModal} />
     </Container>

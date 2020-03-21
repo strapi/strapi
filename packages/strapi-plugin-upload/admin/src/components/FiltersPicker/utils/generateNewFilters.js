@@ -7,7 +7,7 @@ const generateNewFilters = (currentFilters, newFilter) => {
   let formattedValue = newFilter;
 
   if (isArray(value)) {
-    // Add new filters if several values sent
+    // Add new filters if several values are sent
     value.map(item => currentFilters.push({ ...newFilter, value: item }));
   } else {
     // moment format if datetime value

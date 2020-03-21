@@ -4,12 +4,11 @@ import { dateFormats } from 'strapi-helper-plugin';
 const dateToUtcTime = date => moment.parseZone(date).utc();
 
 const formatFilter = filterToFormat => {
-  let formattedFilter = filterToFormat;
-  const { name, filter, value } = formattedFilter;
+  const { name, filter, value } = filterToFormat;
 
-  // Display different wording than the backend
+  // Mime filter - Display different wording than the received ones
   if (name === 'mime') {
-    formattedFilter = {
+    return {
       ...filterToFormat,
       name: 'type',
       filter: filter === '_contains' ? '=' : '_ne',
@@ -18,13 +17,13 @@ const formatFilter = filterToFormat => {
 
   // Format date to readable format
   if (dateToUtcTime(value)._isUTC === true) {
-    formattedFilter = {
+    return {
       ...filterToFormat,
       value: dateToUtcTime(value).format(dateFormats.datetime),
     };
   }
 
-  return formattedFilter;
+  return filterToFormat;
 };
 
 export default formatFilter;

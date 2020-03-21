@@ -1,32 +1,31 @@
 import { isEqual } from 'lodash';
 
-const deleteFilters = (updatedFilters, item) => {
-  const filterToDelete = item;
+const deleteFilters = (updatedFilters, filterToDelete) => {
   const { name, filter, value } = filterToDelete;
 
-  // Display different wording than the backend
+  // Send different wording to backend than the one displayed
   if (name === 'mime' && value === 'file') {
-    const fileFilter = {
-      ...filterToDelete,
-      filter: filter === '_ncontains' ? '_contains' : '_ncontains',
-    };
+    const revertedFilter = filter === '_ncontains' ? '_contains' : '_ncontains';
+
     const imageFilter = {
-      ...fileFilter,
+      ...filterToDelete,
+      filter: revertedFilter,
       value: 'image',
     };
 
     const videoFilter = {
-      ...fileFilter,
+      ...filterToDelete,
+      filter: revertedFilter,
       value: 'video',
     };
 
-    return updatedFilters.filter(a => {
-      return !isEqual(a, imageFilter) && !isEqual(a, videoFilter);
+    return updatedFilters.filter(item => {
+      return !isEqual(item, imageFilter) && !isEqual(item, videoFilter);
     });
   }
 
-  return updatedFilters.filter(a => {
-    return !isEqual(a, filterToDelete);
+  return updatedFilters.filter(item => {
+    return !isEqual(item, filterToDelete);
   });
 };
 

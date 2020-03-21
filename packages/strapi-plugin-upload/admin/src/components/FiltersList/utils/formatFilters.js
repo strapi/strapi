@@ -1,5 +1,5 @@
 const formatFilters = filters => {
-  // Check existing filters to remove duplicata
+  // Check existing filters to avoid duplicata
   let existingFilters = [];
   let filtersToDisplay = [];
 
@@ -8,19 +8,16 @@ const formatFilters = filters => {
     const composedName = `${name}${filter}`;
 
     if (existingFilters.includes(composedName)) {
-      // Get filter index to update
-      const filterIndex = filtersToDisplay.findIndex(a => a.name === name && a.filter === filter);
-
-      // Display different wording than the backend
+      // Mime filter - Display different wording than the received ones
       if (value === 'image' || value === 'video') {
-        const filterToDisplay = filter === '_ncontains' ? '_contains' : '_ncontains';
-        const filterObject = {
+        // Get filter index to update values
+        const index = filtersToDisplay.findIndex(a => a.name === name && a.filter === filter);
+
+        filtersToDisplay[index] = {
           name,
-          filter: filterToDisplay,
+          filter: filter === '_ncontains' ? '_contains' : '_ncontains',
           value: 'file',
         };
-
-        filtersToDisplay[filterIndex] = filterObject;
       }
     } else {
       existingFilters.push(composedName);

@@ -12,7 +12,11 @@ const FiltersList = ({ filters, onClick }) => {
     const formattedValue = formatFilter(filter);
 
     return (
-      <FilterButton onClick={() => onClick(filter)} key={formattedValue} label={formattedValue} />
+      <FilterButton
+        onClick={() => onClick(filter)}
+        key={JSON.stringify(formattedValue)}
+        label={formattedValue}
+      />
     );
   });
 };
