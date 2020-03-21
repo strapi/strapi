@@ -46,7 +46,7 @@ describe('UPLOAD | components | FiltersPicker | utils', () => {
       const newFilter = {
         name: 'created_at',
         filter: 'is',
-        value: moment([1993, 6, 5]),
+        value: moment([1993, 6, 5]).toISOString(),
       };
 
       const expected = [
@@ -58,7 +58,7 @@ describe('UPLOAD | components | FiltersPicker | utils', () => {
         {
           name: 'created_at',
           filter: 'is',
-          value: '1993-07-05T00:00:00+02:00',
+          value: '1993-07-04T22:00:00.000Z',
         },
       ];
 
