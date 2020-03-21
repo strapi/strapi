@@ -17,7 +17,6 @@ This was the original purpose of this project.
 
 You can generate the admin panel in a few clicks and get your whole CMS setup in a few minutes.
 
-
 ### Easy Content Management
 
 Strapi's admin panel gives you an intuitive interface to create, edit and delete your content.
@@ -50,7 +49,7 @@ Strapi is an open-source project, all of Strapi's source code is under the MIT l
 
 Official Strapi plugins will be found in the marketplace section of the admin panel. Unfortunately, the Strapi marketplace is not open to outside contribution, but stay tuned as that may change in the near future.
 
-With that said you can still [develop & use your own plugins.](https://strapi.io/documentation/3.0.0-alpha.x/plugin-development/quick-start.html)
+With that said you can still [develop & use your own plugins.](https://strapi.io/documentation/3.0.0-beta.x/plugin-development/quick-start.html)
 
 ### Roadmap
 
