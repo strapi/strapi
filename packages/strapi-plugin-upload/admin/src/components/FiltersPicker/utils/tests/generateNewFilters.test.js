@@ -46,7 +46,9 @@ describe('UPLOAD | components | FiltersPicker | utils', () => {
       const newFilter = {
         name: 'created_at',
         filter: 'is',
-        value: moment([1993, 6, 5]).toISOString(),
+        value: moment([1993, 6, 5])
+          .set({ hour: 0, minute: 0, second: 0 })
+          .toISOString(), // format from buffetjs datepicker
       };
 
       const expected = [
