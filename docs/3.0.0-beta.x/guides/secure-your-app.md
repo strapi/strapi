@@ -6,11 +6,11 @@ In this guide we will see how you can secure your Strapi application by using a 
 In this example we will use [Sqreen](https://sqreen.com).
 :::
 
-There [onboarding](https://my.sqreen.com/new-application#nodejs-agent) is really easy to follow and understand.
+Their [onboarding](https://my.sqreen.com/new-application#nodejs-agent) is really easy to follow and understand.
 
 ## Install Sqreen
 
-Sqreen is an Application Security Management. That enable protections tailored to your stack, get unprecedented visibility into your security and scale it in production.
+Sqreen is an Application Security Management tool that enables protection tailored to your stack, allowing unprecedented visibility into your security and ability to scale it in production.
 
 You will have to install Sqreen node_module in your application.
 
