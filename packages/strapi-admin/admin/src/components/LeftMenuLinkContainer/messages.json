@@ -1,7 +1,11 @@
 {
-  "contentTypes": {
-    "id": "app.components.LeftMenuLinkContainer.contentTypes",
-    "defaultMessage": "Content Types"
+  "collectionType": {
+    "id": "app.components.LeftMenuLinkContainer.collectionTypes",
+    "defaultMessage": "Collection Types"
+  },
+  "singleType": {
+    "id": "app.components.LeftMenuLinkContainer.singleTypes",
+    "defaultMessage": "Single Types"
   },
   "listPlugins": {
     "id": "app.components.LeftMenuLinkContainer.listPlugins",

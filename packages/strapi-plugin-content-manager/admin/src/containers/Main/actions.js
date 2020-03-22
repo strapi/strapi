@@ -1,9 +1,7 @@
 import {
   DELETE_LAYOUT,
   DELETE_LAYOUTS,
-  GET_DATA,
   GET_DATA_SUCCEEDED,
-  GET_LAYOUT,
   GET_LAYOUT_SUCCEEDED,
   ON_CHANGE_LIST_LABELS,
   RESET_LIST_LABELS,
@@ -23,25 +21,12 @@ export function deleteLayouts() {
   };
 }
 
-export function getData() {
-  return {
-    type: GET_DATA,
-  };
-}
-
 export function getDataSucceeded(components, models, mainFields) {
   return {
     type: GET_DATA_SUCCEEDED,
     components,
     models: models.filter(model => model.isDisplayed === true),
     mainFields,
-  };
-}
-
-export function getLayout(uid) {
-  return {
-    type: GET_LAYOUT,
-    uid,
   };
 }
 

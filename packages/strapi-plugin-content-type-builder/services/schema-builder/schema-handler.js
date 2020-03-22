@@ -213,7 +213,19 @@ module.exports = function createSchemaHandler(infos) {
       }
       if (modified === true) {
         await fse.ensureFile(filePath);
-        await fse.writeJSON(filePath, state.schema, { spaces: 2 });
+
+        await fse.writeJSON(
+          filePath,
+          {
+            kind: state.schema.kind,
+            connection: state.schema.connection,
+            collectionName: state.schema.collectionName,
+            info: state.schema.info,
+            options: state.schema.options,
+            attributes: state.schema.attributes,
+          },
+          { spaces: 2 }
+        );
 
         // remove from oldPath
         if (initialPath !== filePath) {

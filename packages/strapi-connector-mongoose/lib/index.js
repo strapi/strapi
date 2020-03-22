@@ -58,6 +58,7 @@ module.exports = function(strapi) {
           useUnifiedTopology,
         } = connection.settings;
 
+        // eslint-disable-next-line node/no-deprecated-api
         const uriOptions = uri ? url.parse(uri, true).query : {};
         const { authenticationDatabase, ssl, debug } = _.defaults(
           connection.options,
@@ -124,6 +125,8 @@ module.exports = function(strapi) {
           connection,
         };
 
+        _.set(strapi, `connections.${connectionName}`, instance);
+
         return Promise.all([
           mountComponents(connectionName, ctx),
           mountApis(connectionName, ctx),
@@ -142,7 +145,6 @@ module.exports = function(strapi) {
         ({ connection }) => connection === connectionName
       ),
       target: strapi.components,
-      plugin: false,
     };
 
     return mountModels(options, ctx);
@@ -155,7 +157,6 @@ module.exports = function(strapi) {
         ({ connection }) => connection === connectionName
       ),
       target: strapi.models,
-      plugin: false,
     };
 
     return mountModels(options, ctx);
@@ -168,7 +169,6 @@ module.exports = function(strapi) {
         ({ connection }) => connection === connectionName
       ),
       target: strapi.admin.models,
-      plugin: false,
     };
 
     return mountModels(options, ctx);
@@ -185,7 +185,6 @@ module.exports = function(strapi) {
               ({ connection }) => connection === connectionName
             ),
             target: plugin.models,
-            plugin: name,
           },
           ctx
         );

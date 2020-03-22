@@ -4,6 +4,7 @@
  *
  */
 import React from 'react';
+import PropTypes from 'prop-types';
 import styled, { keyframes } from 'styled-components';
 
 const spin = keyframes`
@@ -20,8 +21,8 @@ const Loader = styled.div`
   justify-content: space-around;
   width: 100%;
   > div {
-    width: 26px;
-    height: 26px;
+    width: ${({ small }) => (small ? '11px' : '26px')};
+    height: ${({ small }) => (small ? '11px' : '26px')};
     border: 4px solid #f3f3f3;
     border-top: 4px solid #555555 !important;
     border-radius: 50%;
@@ -29,10 +30,18 @@ const Loader = styled.div`
   }
 `;
 
-const LoadingIndicator = () => (
-  <Loader>
+const LoadingIndicator = ({ small }) => (
+  <Loader small={small}>
     <div />
   </Loader>
 );
+
+LoadingIndicator.propTypes = {
+  small: PropTypes.bool,
+};
+
+LoadingIndicator.defaultProps = {
+  small: false,
+};
 
 export default LoadingIndicator;

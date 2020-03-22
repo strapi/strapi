@@ -151,8 +151,10 @@ module.exports = {
           collapsable: false,
           title: '🚀 Getting Started',
           children: [
-            '/3.0.0-beta.x/getting-started/introduction',
-            '/3.0.0-beta.x/getting-started/install-requirements',
+            ['/3.0.0-beta.x/getting-started/introduction', 'Introduction'],
+            ['/3.0.0-beta.x/getting-started/installation', 'Installation'],
+            ['/3.0.0-beta.x/getting-started/contributing', 'Contributing'],
+            ['/3.0.0-beta.x/getting-started/troubleshooting', 'Troubleshooting'],
             '/3.0.0-beta.x/getting-started/quick-start',
             '/3.0.0-beta.x/getting-started/quick-start-tutorial',
           ],
@@ -205,19 +207,18 @@ module.exports = {
             '/3.0.0-beta.x/guides/custom-data-response',
             '/3.0.0-beta.x/guides/custom-admin',
             '/3.0.0-beta.x/guides/client',
+            '/3.0.0-beta.x/guides/is-owner',
             '/3.0.0-beta.x/guides/draft',
             '/3.0.0-beta.x/guides/scheduled-publication',
             '/3.0.0-beta.x/guides/slug',
             '/3.0.0-beta.x/guides/send-email',
+            '/3.0.0-beta.x/guides/count-graphql',
           ],
         },
         {
           collapsable: true,
           title: '⚙️️ Admin Panel',
-          children: [
-            '/3.0.0-beta.x/admin-panel/customization',
-            '/3.0.0-beta.x/admin-panel/deploy',
-          ],
+          children: ['/3.0.0-beta.x/admin-panel/customization', '/3.0.0-beta.x/admin-panel/deploy'],
         },
         {
           collapsable: true,
@@ -238,6 +239,7 @@ module.exports = {
             '/3.0.0-beta.x/plugin-development/plugin-architecture',
             '/3.0.0-beta.x/plugin-development/backend-development',
             '/3.0.0-beta.x/plugin-development/frontend-development',
+            '/3.0.0-beta.x/plugin-development/frontend-settings-api',
           ],
         },
         {
@@ -257,10 +259,7 @@ module.exports = {
           collapsable: false,
           title: '📚 Resources',
           children: [
-            [
-              'https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md',
-              'Contributing guide',
-            ],
+            ['https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md', 'Contributing guide'],
             '/3.0.0-beta.x/migration-guide/',
           ],
         },
@@ -339,10 +338,7 @@ module.exports = {
           collapsable: false,
           title: '📚 Resources',
           children: [
-            [
-              'https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md',
-              'Contributing guide',
-            ],
+            ['https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md', 'Contributing guide'],
             '/3.0.0-alpha.x/migration-guide/',
             '/3.0.0-alpha.x/articles/',
           ],

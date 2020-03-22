@@ -69,7 +69,6 @@ module.exports = async function({ build, watchAdmin }) {
           case 'stop':
             worker.kill();
             process.exit(1);
-            break;
           default:
             return;
         }

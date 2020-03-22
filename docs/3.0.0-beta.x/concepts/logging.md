@@ -34,9 +34,9 @@ module.exports = {
 The global logger is configured by environment variables.
 
 - `STRAPI_LOG_LEVEL`: Can be fatal, error, warn, info, debug or trace.
-- `STRAPI_LOG_TIMESTAMP`: Can be true/false
-- `STRAPI_LOG_PRETTY_PRINT`: Can be true/false
-- `STRAPI_LOG_FORCE_COLOR`: Can be true/false
+- `STRAPI_LOG_TIMESTAMP`: Can be true/false.
+- `STRAPI_LOG_PRETTY_PRINT`: Can be true/false.
+- `STRAPI_LOG_FORCE_COLOR`: Can be true/false.
 
 ## Request logging middleware
 
@@ -54,8 +54,8 @@ To configure the request-logger middleware, you have to edit the following file 
 }
 ```
 
-- `level`: defines the desired logging level (fatal, error, warn, info, debug, trace).
-- `exposeInContext`: allows access to the logger through the context.
-- `requests`: incoming HTTP requests will be logged.
+- `level`: Defines the desired logging level (fatal, error, warn, info, debug, trace).
+- `exposeInContext`: Allows access to the logger through the context.
+- `requests`: Incoming HTTP requests will be logged.
 
 To find more details about the logger API, please refer to the [Pino documentation](http://getpino.io/#/).

@@ -88,9 +88,9 @@ The framework allows the application to override the default middlewares and add
 └─── api
 └─── config
 └─── middlewares
-│   └─── responseTime // It will override the core default responseTime middleware
+│   └─── responseTime // It will override the core default responseTime middleware.
 │        - index.js
-│   └─── views // It will be added into the stack of middleware
+│   └─── views // It will be added into the stack of middleware.
 │        - index.js
 └─── public
 - favicon.ico
@@ -119,11 +119,11 @@ The middlewares are injected into the Koa stack asynchronously. Sometimes it hap
 }
 ```
 
-- `timeout`: defines the maximum allowed milliseconds to load a middleware.
+- `timeout`: Defines the maximum allowed milliseconds to load a middleware.
 - `load`:
-  - `before`: array of middlewares that need to be loaded in the first place. The order of this array matters.
-  - `order`: array of middlewares that need to be loaded in a specific order.
-  - `after`: array of middlewares that need to be loaded at the end of the stack. The order of this array matters.
+  - `before`: Array of middlewares that need to be loaded in the first place. The order of this array matters.
+  - `order`: Array of middlewares that need to be loaded in a specific order.
+  - `after`: Array of middlewares that need to be loaded at the end of the stack. The order of this array matters.
 
 #### Examples
 
@@ -216,10 +216,10 @@ Here is the loader order:
 1. responseTime (loaded at the very first place)
 2. logger
 3. cors
-4. favicon (position order not guarantee)
+4. favicon (position order not guaranteed)
 5. p3p
-6. cron
+6. cron (position order not guaranteed)
 7. gzip (loaded after the p3p middlewares)
-8. response (position order not guarantee)
+8. response (position order not guaranteed)
 9. parser
-10. router (loaded at the very end place)
+10. router (loaded at the very last place)

@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Admin | containers | SettingsPage should render SettingsPage 1`] = `<DocumentFragment />`;

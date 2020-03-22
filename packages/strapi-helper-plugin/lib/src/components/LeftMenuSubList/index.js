@@ -1,22 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import { isObject } from 'lodash';
 import { Collapse } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import Dropdown from './Dropdown';
+import { useGlobalContext } from '../../contexts/GlobalContext';
 import LeftMenuLink from '../LeftMenuLink';
+import Dropdown from './Dropdown';
 
-const LeftMenuSubList = ({
-  isEditable,
-  isFirstItem,
-  isSearching,
-  links,
-  name,
-  onClickEdit,
-}) => {
+const LeftMenuSubList = ({ isEditable, isFirstItem, isSearching, links, name, onClickEdit }) => {
   const [collapse, setCollapse] = useState(isFirstItem);
+  const { formatMessage } = useGlobalContext();
 
   const toggle = () => {
     setCollapse(!collapse);
+  };
+
+  const getLabel = message => {
+    if (isObject(message) && message.id) {
+      return formatMessage({
+        ...message,
+        defaultMessage: message.defaultMessage || message.id,
+      });
+    }
+
+    return message;
   };
 
   useEffect(() => {
@@ -31,10 +38,7 @@ const LeftMenuSubList = ({
   return (
     links.length > 0 && (
       <Dropdown>
-        <button
-          onClick={toggle}
-          className={`editable ${collapse ? 'is-open' : ''}`}
-        >
+        <button onClick={toggle} className={`editable ${collapse ? 'is-open' : ''}`}>
           {name}
           {isEditable && (
             <FontAwesomeIcon
@@ -49,9 +53,10 @@ const LeftMenuSubList = ({
           <ul>
             {links.map(link => {
               const { name, title } = link;
+
               return (
                 <li key={name}>
-                  <LeftMenuLink {...link}>{title}</LeftMenuLink>
+                  <LeftMenuLink {...link}>{getLabel(title)}</LeftMenuLink>
                 </li>
               );
             })}

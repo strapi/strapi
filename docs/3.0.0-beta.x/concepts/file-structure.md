@@ -6,7 +6,7 @@ By default, your project's structure will look like this:
 - [`/admin`](../admin-panel/customization.md): contains your admin customization files.
 - `/api`: contains the business logic of your project split into sub-folders per API.
   - `**`
-    - `/config`: contains the API's configurations ([`routes`](./routing.md), [`policies`](./policies.md), etc).
+    - `/config`: contains the API's configurations ([`routes`](./routing.md), [`policies`](./policies.md), etc.).
     - [`/controllers`](./controllers.md): contains the API's custom controllers.
     - [`/models`](./models.md): contains the API's models.
     - [`/services`](./services.md): contains the API's custom services.

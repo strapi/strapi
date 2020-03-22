@@ -474,18 +474,17 @@ module.exports = {
     }
 
     // Create two first default roles.
-    await Promise.all([
-      strapi.query('role', 'users-permissions').create({
-        name: 'Authenticated',
-        description: 'Default role given to authenticated user.',
-        type: 'authenticated',
-      }),
-      strapi.query('role', 'users-permissions').create({
-        name: 'Public',
-        description: 'Default role given to unauthenticated user.',
-        type: 'public',
-      }),
-    ]);
+    await strapi.query('role', 'users-permissions').create({
+      name: 'Authenticated',
+      description: 'Default role given to authenticated user.',
+      type: 'authenticated',
+    });
+
+    await strapi.query('role', 'users-permissions').create({
+      name: 'Public',
+      description: 'Default role given to unauthenticated user.',
+      type: 'public',
+    });
 
     return this.updatePermissions();
   },

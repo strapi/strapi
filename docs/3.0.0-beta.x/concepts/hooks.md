@@ -32,7 +32,7 @@ module.exports = strapi => {
 };
 ```
 
-- `defaults` (object): Contains the defaults configurations. This object is merged to `strapi.config.hook.settings.**`.
+- `defaults` (object): Contains the default configurations. This object is merged into `strapi.config.hook.settings.**`.
 - `initialize` (function): Called during the server boot. The callback `cb` needs to be called. Otherwise, the hook won't be loaded.
 
 The hooks are accessible through the `strapi.hook` variable.

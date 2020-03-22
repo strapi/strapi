@@ -1,7 +1,7 @@
 {
   "Analytics": "Analytics",
   "Content Manager": "Content Manager",
-  "Content Type Builder": "Content Type Builder",
+  "Content Type Builder": "Types Builder",
   "Email": "Email",
   "Files Upload": "Files Upload",
   "HomePage.notification.newsLetter.success": "Successfully subscribed to the newsletter",
@@ -30,7 +30,6 @@
   "app.components.HomePage.button.quickStart": "START THE QUICK START TUTORIAL",
   "app.components.HomePage.community": "Find the community on the web",
   "app.components.HomePage.community.content": "Discuss with team members, contributors and developers on different channels.",
-  "app.components.HomePage.create": "Create your first Content Type",
   "app.components.HomePage.createBlock.content.first": "The ",
   "app.components.HomePage.createBlock.content.second": " plugin will help you to define the data structure of your models. If you’re new here, we highly recommend you to follow our ",
   "app.components.HomePage.createBlock.content.tutorial": " tutorial.",

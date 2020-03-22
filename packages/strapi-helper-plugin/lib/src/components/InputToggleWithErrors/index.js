@@ -18,6 +18,7 @@ import Container from './Container';
 
 class InputToggleWithErrors extends React.Component {
   state = { errors: [] };
+
   componentDidMount() {
     const { errors } = this.props;
 
