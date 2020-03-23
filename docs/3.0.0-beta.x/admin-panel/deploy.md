@@ -32,7 +32,7 @@ You might want to change the path to access to the administration panel. Here th
 
 ## Deploy the administration panel on another server (AWS S3, Azure, etc) than the API.
 
-It's very common to deploy the front-end and the back-end on different servers. Here the required configurations to handle this case:
+It's very common to deploy the front-end and the back-end on different servers. Here are the required configurations to handle this case:
 
 **Path —** `./config/environment/**/server.json`.
 

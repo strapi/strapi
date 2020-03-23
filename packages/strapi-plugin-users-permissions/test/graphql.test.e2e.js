@@ -1,10 +1,7 @@
 // Helpers.
 const { registerAndLogin } = require('../../../test/helpers/auth');
 
-const {
-  createAuthRequest,
-  createRequest,
-} = require('../../../test/helpers/request');
+const { createAuthRequest, createRequest } = require('../../../test/helpers/request');
 
 let authReq;
 const data = {};
@@ -24,11 +21,7 @@ describe('Test Graphql user service', () => {
         body: {
           query: /* GraphQL */ `
             mutation {
-              createUser(
-                input: {
-                  data: { username: "test", email: "test", password: "test" }
-                }
-              ) {
+              createUser(input: { data: { username: "test", email: "test", password: "test" } }) {
                 user {
                   id
                   username
@@ -60,13 +53,7 @@ describe('Test Graphql user service', () => {
           query: /* GraphQL */ `
             mutation {
               createUser(
-                input: {
-                  data: {
-                    username: "test"
-                    email: "test@strapi.io"
-                    password: "test"
-                  }
-                }
+                input: { data: { username: "test", email: "test@strapi.io", password: "test" } }
               ) {
                 user {
                   id
@@ -78,7 +65,7 @@ describe('Test Graphql user service', () => {
         },
       });
 
-      expect(res.statusCode).toBe(201);
+      expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject({
         data: {
           createUser: {
@@ -139,9 +126,7 @@ describe('Test Graphql user service', () => {
         body: {
           query: /* GraphQL */ `
             mutation updateUser($id: ID!) {
-              updateUser(
-                input: { where: { id: $id }, data: { username: "newUsername" } }
-              ) {
+              updateUser(input: { where: { id: $id }, data: { username: "newUsername" } }) {
                 user {
                   id
                   username

@@ -14,16 +14,11 @@ module.exports = async (ctx, next) => {
       }
 
       if (isAdmin) {
-        ctx.state.admin = await strapi
-          .query('administrator', 'admin')
-          .findOne({ id }, []);
+        ctx.state.admin = await strapi.query('administrator', 'admin').findOne({ id }, []);
       } else {
-        ctx.state.user = await strapi
-          .query('user', 'users-permissions')
-          .findOne({ id }, ['role']);
+        ctx.state.user = await strapi.query('user', 'users-permissions').findOne({ id }, ['role']);
       }
     } catch (err) {
-      strapi.log.error(err);
       return handleErrors(ctx, err, 'unauthorized');
     }
 
@@ -60,11 +55,7 @@ module.exports = async (ctx, next) => {
       _.get(await store.get({ key: 'advanced' }), 'email_confirmation') &&
       !ctx.state.user.confirmed
     ) {
-      return handleErrors(
-        ctx,
-        'Your account email is not confirmed.',
-        'unauthorized'
-      );
+      return handleErrors(ctx, 'Your account email is not confirmed.', 'unauthorized');
     }
 
     if (ctx.state.user.blocked) {
@@ -78,24 +69,20 @@ module.exports = async (ctx, next) => {
 
   // Retrieve `public` role.
   if (!role) {
-    role = await strapi
-      .query('role', 'users-permissions')
-      .findOne({ type: 'public' }, []);
+    role = await strapi.query('role', 'users-permissions').findOne({ type: 'public' }, []);
   }
 
   const route = ctx.request.route;
-  const permission = await strapi
-    .query('permission', 'users-permissions')
-    .findOne(
-      {
-        role: role.id,
-        type: route.plugin || 'application',
-        controller: route.controller,
-        action: route.action,
-        enabled: true,
-      },
-      []
-    );
+  const permission = await strapi.query('permission', 'users-permissions').findOne(
+    {
+      role: role.id,
+      type: route.plugin || 'application',
+      controller: route.controller,
+      action: route.action,
+      enabled: true,
+    },
+    []
+  );
 
   if (!permission) {
     return handleErrors(ctx, undefined, 'forbidden');
@@ -103,9 +90,7 @@ module.exports = async (ctx, next) => {
 
   // Execute the policies.
   if (permission.policy) {
-    return await strapi.plugins['users-permissions'].config.policies[
-      permission.policy
-    ](ctx, next);
+    return await strapi.plugins['users-permissions'].config.policies[permission.policy](ctx, next);
   }
 
   // Execute the action.

@@ -32,7 +32,7 @@ Now we are ready to create our custom validation code.
 
 ## Write our own logic
 
-First we have to define where write our code.
+First we have to define where we write our code.
 
 ```js
 const _ = require('lodash');
@@ -99,5 +99,5 @@ module.exports = async (ctx, next) => {
 ```
 
 ::: warning
-In the code example we use `axios` you will have to install the dependency to make it work. You can choose another library if you prefer.
+In the code example we use `axios`, so you will have to install the dependency to make it work. You can choose another library if you prefer.
 :::

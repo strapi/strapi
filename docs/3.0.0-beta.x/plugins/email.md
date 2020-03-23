@@ -20,7 +20,7 @@ await strapi.plugins['email'].services.email.send({
 
 ## Configure the plugin
 
-The plugin provide you a setting page to be able to define the email provider you want to use.
+The plugin provides you a settings page where you can define the email provider you want to use.
 You will also be able to add some configuration.
 
 - Click on **Plugins** in the left menu
@@ -86,8 +86,8 @@ module.exports = {
 
 In the `send` function you will have access to:
 
-- `config` that contain configuration you setup in your admin panel
-- `options` that contain option your send when you called the `send` function from the email plugin service
+- `config` that contains configurations you setup in your admin panel
+- `options` that contains options you send when you call the `send` function from the email plugin service
 
 To use it you will have to publish it on **npm**.
 
