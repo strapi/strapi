@@ -90,19 +90,10 @@ module.exports = async () => {
      * @returns {String}
      */
     const getDocTagsToString = documentation => {
-      const defaultGeneratedTags = [
-        'email',
-        'upload - file',
-        'users-permissions - role',
-        'authentication',
-        'users-permissions - user',
-      ];
-
       return _.get(documentation, 'tags', [])
         .map(tag => {
           return tag.name.toLowerCase();
         })
-        .filter(tag => defaultGeneratedTags.indexOf(tag) === -1)
         .sort((a, b) => a - b)
         .join('.');
     };

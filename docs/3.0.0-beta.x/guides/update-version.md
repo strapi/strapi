@@ -63,12 +63,12 @@ For example moving from `3.0.0-beta.16` to `3.0.0-beta.17`
 Then run either `yarn install` or `npm install` to install the specified version.
 
 ::: tip
-If the operation doesn't work, you should probably remove your `yarn.lock` or `package-lock.json`. And if it still not work let's run the hard mode `rm -Rf node_modules`
+If the operation doesn't work, you should probably remove your `yarn.lock` or `package-lock.json`. If it still does not work, let's run the hard mode `rm -Rf node_modules`
 :::
 
 ## Building your administration panel
 
-New release can introduces changes to the administration panel that require a rebuild.
+New releases can introduce changes to the administration panel that require a rebuild.
 
 Start by deleting your current build:
 
@@ -92,6 +92,6 @@ If the operation doesn't work, you should probably remove the `.cache` folder to
 
 Sometimes Strapi introduces changes that need more than just the previous updates.
 
-That is the reason of the [Migration Guide](../migration-guide/README.md) page.
+That is the reason for the [Migration Guide](../migration-guide/README.md) page.
 
-Just make sure when you update your version that a migration guide exist or not.
+Just make sure when you update your version that a migration guide exists or not.
