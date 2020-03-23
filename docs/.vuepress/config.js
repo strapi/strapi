@@ -153,6 +153,7 @@ module.exports = {
           children: [
             ['/3.0.0-beta.x/getting-started/introduction', 'Introduction'],
             ['/3.0.0-beta.x/getting-started/installation', 'Installation'],
+            ['/3.0.0-beta.x/getting-started/deployment', 'Deployment'],
             ['/3.0.0-beta.x/getting-started/contributing', 'Contributing'],
             ['/3.0.0-beta.x/getting-started/troubleshooting', 'Troubleshooting'],
             '/3.0.0-beta.x/getting-started/quick-start',
