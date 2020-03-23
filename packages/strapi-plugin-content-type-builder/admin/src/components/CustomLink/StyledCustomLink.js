@@ -8,7 +8,7 @@ import styled from 'styled-components';
 
 const StyledCustomLink = styled.div`
   padding-left: 15px;
-  padding-top: 9px;
+  padding-top: 10px;
   line-height: 0;
   margin-left: -3px;
 

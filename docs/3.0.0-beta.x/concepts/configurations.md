@@ -480,7 +480,7 @@ As an example using this configuration with Nginx your server would respond to `
 
 ## Dynamic configurations
 
-For security reasons, sometimes it's better to set variables through the server environment. It's also useful to push dynamic values into configurations files. To enable this feature into JSON files, Strapi embraces a JSON-file interpreter into its core to allow dynamic values in the JSON configuration files.
+For security reasons, sometimes it's better to set variables through the server environment. It's also useful to push dynamic values into configuration files. To enable this feature in JSON files, Strapi embraces a JSON-file interpreter into its core to allow dynamic values in the JSON configuration files.
 
 #### Syntax
 
@@ -488,7 +488,7 @@ The syntax is inspired by the [template literals ES2015 specifications](https://
 
 #### Usage
 
-In any JSON configuration files in your project, you can inject dynamic values like this:
+In any JSON configuration file in your project, you can inject dynamic values like this:
 
 **Path —** `./config/environments/production/database.json`.
 

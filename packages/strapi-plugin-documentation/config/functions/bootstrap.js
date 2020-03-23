@@ -26,24 +26,16 @@ module.exports = async () => {
   // Generate plugins' documentation
   const pluginsWithDocumentationNeeded = services.getPluginsWithDocumentationNeeded();
   pluginsWithDocumentationNeeded.forEach(plugin => {
-    const isDocExisting = services.checkIfPluginDocumentationFolderExists(
-      plugin
-    );
+    const isDocExisting = services.checkIfPluginDocumentationFolderExists(plugin);
 
     if (!isDocExisting) {
-      services.createDocumentationDirectory(
-        services.getPluginDocumentationPath(plugin)
-      );
+      services.createDocumentationDirectory(services.getPluginDocumentationPath(plugin));
       // create the overrides directory
-      services.createDocumentationDirectory(
-        services.getPluginOverrideDocumentationPath(plugin)
-      );
+      services.createDocumentationDirectory(services.getPluginOverrideDocumentationPath(plugin));
       services.createPluginDocumentationFile(plugin);
       shouldUpdateFullDoc = true;
     } else {
-      const needToUpdatePluginDoc = services.checkIfPluginDocNeedsUpdate(
-        plugin
-      );
+      const needToUpdatePluginDoc = services.checkIfPluginDocNeedsUpdate(plugin);
 
       if (needToUpdatePluginDoc) {
         services.createPluginDocumentationFile(plugin);
@@ -62,9 +54,7 @@ module.exports = async () => {
       // If the documentation directory doesn't exist create it
       services.createDocumentationDirectory(services.getDocumentationPath(api));
       // Create the overrides directory
-      services.createDocumentationDirectory(
-        services.getDocumentationOverridesPath(api)
-      );
+      services.createDocumentationDirectory(services.getDocumentationOverridesPath(api));
       // Create the documentation files per version
       services.createDocumentationFile(api); // Then create the {api}.json documentation file
       shouldUpdateFullDoc = true;
@@ -90,26 +80,14 @@ module.exports = async () => {
      * @returns {String}
      */
     const getDocTagsToString = documentation => {
-      const defaultGeneratedTags = [
-        'email',
-        'upload - file',
-        'users-permissions - role',
-        'authentication',
-        'users-permissions - user',
-      ];
-
       return _.get(documentation, 'tags', [])
         .map(tag => {
           return tag.name.toLowerCase();
         })
-        .filter(tag => defaultGeneratedTags.indexOf(tag) === -1)
         .sort((a, b) => a - b)
         .join('.');
     };
-    const oldDoc = require(path.resolve(
-      documentationPath,
-      'full_documentation.json'
-    ));
+    const oldDoc = require(path.resolve(documentationPath, 'full_documentation.json'));
     const oldDocTags = getDocTagsToString(oldDoc);
     const currentDocTags = getDocTagsToString(fullDoc);
 

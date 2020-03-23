@@ -416,6 +416,9 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
       [definition.attributes[morphRelation.alias].filter]: {
         type: 'text',
       },
+      order: {
+        type: 'integer',
+      },
     };
 
     if (connection.options && connection.options.autoMigration !== false) {
@@ -423,7 +426,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
     }
   }
 
-  // Equilize many to many releations
+  // Equilize many to many relations
   const manyRelations = definition.associations.filter(({ nature }) =>
     ['manyToMany', 'manyWay'].includes(nature)
   );

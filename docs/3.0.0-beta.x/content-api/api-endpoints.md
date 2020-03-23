@@ -162,7 +162,19 @@ Here is the list of endpoints generated for each of your **Content Types**.
 
 :::
 
-::::
+::: tab Contact
+
+`Contact` **Content Type**
+
+<div id="endpoint-table">
+
+| Method | Path       | Description                |
+| :----- | :--------- | :------------------------- |
+| GET    | `/contact` | Get the contact content    |
+| PUT    | `/contact` | Update the contact content |
+| DELETE | `/contact` | Delete the contact content |
+
+</div>
 
 ### Collection Types
 
