@@ -578,7 +578,6 @@ You have now entered your first **Restaurant** Content Type. You have also assig
 By default, Strapi publishes all **Content Types** with restricted permissions. Which means you have to explicitly give permissions to each **Content Type** you create. You are going to give **Public** API (or URL) access to both the **Restaurant** Content Type and **Category** Content Type.
 
 - Click on the `Roles & Permissions` menu item, under **PLUGINS** in the left-hand-menu.
-- Locate and click on the **Roles & Permissions** menu item under **PLUGINS** in the left-hand-menu.
 
 ![Roles and Permissions](../assets/getting-started/tutorial/roles-and-permissions.png 'Roles And Permissions')
 

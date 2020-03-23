@@ -2,26 +2,26 @@
 sidebarDepth: 2
 ---
 
-# Users & Permissions
+# Roles & Permissions
 
 This plugin provides a way to protect your API with a full authentication process based on JWT. This plugin comes also with an ACL strategy that allows you to manage the permissions between the groups of users.
 
-To access the plugin admin panel, click on the **Users & Pemissions** link in the left menu.
+To access the plugin admin panel, click on the **Roles & Pemissions** link in the left menu.
 
 ## Concept
 
 When this plugin is installed, it adds an access layer on your application.
 The plugin uses [`jwt token`](https://en.wikipedia.org/wiki/JSON_Web_Token) to authenticate users.
 
-Each time an API request is sent, the server checks if an `Authorization` header is present and verifies if the user making the request has access to the resource..
+Each time an API request is sent, the server checks if an `Authorization` header is present and verifies if the user making the request has access to the resource.
 
-To do so, your JWT contain your user ID and we are able to match the group your user is in and at the end to know if the group allows access to the route.
+To do so, your JWT contains your user ID and we are able to match the group your user is in and at the end to know if the group allows access to the route.
 
-## Manage roles permissions
+## Manage role permissions
 
 ### Public role
 
-This role is used when you receive a request that don't have `Authorization` header.
+This role is used when you receive a request that doesn't have an `Authorization` header.
 If you allow some permissions in this role, everybody will be able to access the endpoints you selected.
 This is common practice to select `find` / `findOne` endpoints when you want your front-end application to access all the content without developing user authentication and authorization.
 
@@ -31,7 +31,7 @@ This is the default role that is given to every **new user** if no role is provi
 
 ### Permissions management
 
-By clicking on the **Role** name, you will be able to see all functions available in your application (and these function are related to a specific route)
+By clicking on the **Role** name, you will be able to see all functions available in your application (and these functions are related to a specific route)
 
 If you check a function name, it makes this route accessible by the current role you are editing.
 On the right sidebar you will be able to see the URL related to this function.
@@ -50,7 +50,7 @@ A jwt token may be used for making permission-restricted API requests. To make a
 
 #### Usage
 
-- The `token` variable is the `data.jwt` received when login in or registering.
+- The `token` variable is the `data.jwt` received when logging in or registering.
 
 ```js
 import axios from 'axios';
@@ -105,7 +105,7 @@ axios
 
 ### Login
 
-Submit the user's identifier and password credentials for authentication. When the authentication is successful, the response data returned will have the users' information along with a jwt authentication token.
+Submit the user's identifier and password credentials for authentication. When the authentication is successful, the response data returned will have the user's information along with a jwt authentication token.
 
 #### Local
 
@@ -446,8 +446,8 @@ Then fill the informations:
 
 ::::
 
-Set your providers credentials in the admin interface (Plugin Users & Permissions > Providers).
-Then update and enable the provider you want use.
+Set your providers credentials in the admin interface (Plugin > Roles & Permissions > Providers).
+Then update and enable the provider you want to use.
 
 To authenticate the user, use the GET method to request the url, `/connect/:provider`. eg: `GET /connect/facebook`.
 
@@ -466,7 +466,7 @@ Response payload:
 
 ### Forgotten password
 
-This action sends an email to a user with the link of you reset password page. This link contains an URL param `code` which is required to reset user password.
+This action sends an email to a user with the link to your reset password page. This link contains a URL param `code` which is required to reset user password.
 
 #### Usage
 
@@ -490,10 +490,10 @@ axios
   });
 ```
 
-This action will send you an email that contains an URL with the needed code for the [reset password](#password-reset).
-The URL have to be your frontend application that contains your reset password form.
+This action will send the user an email that contains a URL with the needed code for the [reset password](#password-reset).
+The URL must link to your reset password form in your frontend application.
 
-To configure it you will have to got in the Users & Permissions settings and navigate in the Advanced tab.
+To configure it you will have to go in the Roles & Permissions settings and navigate to the Advanced Settings tab.
 
 ### Password reset
 
@@ -525,7 +525,7 @@ axios
 
 ### Email validation
 
-This action send an email to a user with the link to confirm the user.
+This action sends an email to the user with the link to confirm the user.
 
 #### Usage
 
@@ -714,16 +714,16 @@ These two change will set up the popup message that appears in the UI. That's it
 
 ## Templating emails
 
-By default, this plugin comes with only one template (reset password) for the moment. More templates will come later. The templates use Lodash' template() method to populate the variables.
+By default, this plugin comes with only two templates (reset password and email address confirmation) at the moment. More templates will come later. The templates use Lodash's template() method to populate the variables.
 
-You can update these template in the **Email Templates** tab in the admin panel.
+You can update these templates under **Plugins** > **Roles & Permissions** > **Email Templates** tab in the admin panel.
 
 ### Reset Password
 
 - `USER` (object)
   - `username`
   - `email`
-  - ...and every other fields that you added manually in the model.
+  - ...and any other field that you added manually in the model.
 - `TOKEN` corresponds to the token generated to be able to reset the password.
 - `URL` is the link where the user will be redirected after clicking on it in the email.
 
@@ -732,9 +732,9 @@ You can update these template in the **Email Templates** tab in the admin panel.
 - `USER` (object)
   - `username`
   - `email`
-  - ...and every other fields that you added manually in the model.
+  - ...and any other field that you added manually in the model.
 - `CODE` corresponds to the CODE generated to be able confirm the user email.
-- `URL` is the Strapi backend URL that confirm the code (by default `/auth/email-confirmation`).
+- `URL` is the Strapi backend URL that confirms the code (by default `/auth/email-confirmation`).
 
 ## Security configuration
 

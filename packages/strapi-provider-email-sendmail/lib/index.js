@@ -26,7 +26,7 @@ module.exports = {
   },
   init: config => {
     return {
-      send: (options, cb) => {
+      send: options => {
         return new Promise((resolve, reject) => {
           // Default values.
           options = _.isObject(options) ? options : {};
@@ -47,9 +47,7 @@ module.exports = {
             },
             function(err) {
               if (err) {
-                reject([
-                  { messages: [{ id: 'Auth.form.error.email.invalid' }] },
-                ]);
+                reject([{ messages: [{ id: 'Auth.form.error.email.invalid' }] }]);
               } else {
                 resolve();
               }
