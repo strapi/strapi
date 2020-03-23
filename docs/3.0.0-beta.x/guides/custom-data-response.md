@@ -1,6 +1,6 @@
 # Custom data response
 
-In this guide we will see how you can customize your API's response..
+In this guide we will see how you can customize your API's response.
 
 ## Introduction
 
@@ -16,7 +16,7 @@ And that is what we will do to manage our custom data response.
 
 ## Example
 
-In our example we will use a restaurant type with a chef.. By default when you fetch restaurants, you will got all information of the chef.
+In our example we will use a restaurant type with a chef. By default when you fetch restaurants, you will get all information for the chef.
 Let's consider you don't want to expose the chef's email for privacy reasons.
 
 To enforce this rule we will customize the action that fetchs all restaurants and remove the email from the returned data.
@@ -79,7 +79,7 @@ And now the data is back on `GET /restaurants`
 
 We can see the `find` function returns the result of the `map`. And the map function just sanitizes all entries.
 
-So instead of just return the sanitized entry, we will also remove the chef email of each restaurant.
+So instead of just returning the sanitized entry, we will also remove the chef email of each restaurant.
 
 **Path —** `./api/restaurant/controller/Restaurant.js`
 
@@ -108,7 +108,7 @@ module.exports = {
 };
 ```
 
-And tada! The email disapeared.
+And tada! The email disappeared.
 
 ::: tip
 This guide can be applied to any other controller action.

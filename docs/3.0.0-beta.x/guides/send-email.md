@@ -20,7 +20,7 @@ And that is what we will do to add our custom code.
 
 ## Example
 
-To keep the code example realy easy to follow, we will just have a `Comment` content type and omit the `Author` and `Article` relations.
+To keep the code example easy to follow, we will just have a `Comment` content type and omit the `Author` and `Article` relations.
 
 So lets create a `Comment` content type with just one **Text** field named `content`.
 
@@ -53,7 +53,7 @@ After saving the new function, let's restart the `POST /comment` request. We wil
 
 We now know the function we have to update. Let's get back to the original function.
 
-In the [controller documentation](../concepts/controllers.html#extending-a-model-controller) you will find the default implementation of every actions. It will help you overwrite the create logic.
+In the [controller documentation](../concepts/controllers.html#extending-a-model-controller) you will find the default implementation of every action. It will help you overwrite the create logic.
 
 **Path —** `./api/comment/controller/Comment.js`
 
@@ -78,7 +78,7 @@ And now the comment creation is back.
 
 ## Apply our changes
 
-We want to check if the content of the comment contains a bad words.
+We want to check if the content of the comment contains any bad words.
 
 If it does, we want to send an email using the [Email plugin](../plugins/email.md)
 
