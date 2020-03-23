@@ -2,19 +2,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FilterButton } from 'strapi-helper-plugin';
 
-import formatFilters from './utils/formatFilters';
 import formatFilter from './utils/formatFilter';
 
 const FiltersList = ({ filters, onClick }) => {
-  const formattedFilters = formatFilters(filters);
-
-  return formattedFilters.map(filter => {
-    const formattedValue = formatFilter(filter);
+  return filters.map(item => {
+    const formattedValue = formatFilter(item);
+    const { name, filter, value } = formattedValue;
 
     return (
       <FilterButton
-        onClick={() => onClick(filter)}
-        key={JSON.stringify(formattedValue)}
+        onClick={() => onClick(item)}
+        key={`${name}${filter}${value}`}
         label={formattedValue}
       />
     );

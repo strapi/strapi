@@ -1,8 +1,8 @@
-import React, { useReducer, useState, useEffect, useRef } from 'react';
+import React, { useReducer, useState, useEffect } from 'react';
 import { includes } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
-import { useDebounce } from '@buffetjs/hooks';
+import { useDebounce, useIsMounted } from '@buffetjs/hooks';
 import {
   HeaderSearch,
   PageFooter,
@@ -37,12 +37,12 @@ const HomePage = () => {
   const { formatMessage } = useGlobalContext();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const query = useQuery();
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [confirmPopupIsOpen, setConfirmPopupIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [searchValue, setSearchValue] = useState(query.get('_q') || '');
   const { push } = useHistory();
   const { search } = useLocation();
-  const isMounted = useRef();
+  const isMounted = useIsMounted();
 
   const { data, dataCount, dataToDelete } = reducerState.toJS();
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
@@ -50,21 +50,13 @@ const HomePage = () => {
   const debouncedSearch = useDebounce(searchValue, 300);
 
   useEffect(() => {
-    fetchDataCount();
-  }, []);
-
-  useEffect(() => {
     handleChangeParams({ target: { name: '_q', value: searchValue } });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch]);
 
   useEffect(() => {
-    isMounted.current = true;
-    fetchData();
+    fetchListData();
 
-    return () => {
-      isMounted.current = false;
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
@@ -76,31 +68,40 @@ const HomePage = () => {
         method: 'DELETE',
       });
     } catch (err) {
-      if (isMounted.current) {
+      if (isMounted) {
         strapi.notification.error('notification.error');
       }
     }
   };
 
+  const fetchListData = async () => {
+    const [data, count] = await Promise.all([fetchData(), fetchDataCount()]);
+
+    if (isMounted) {
+      dispatch({
+        type: 'GET_DATA_SUCCEEDED',
+        data,
+        count,
+      });
+    }
+  };
+
   const fetchData = async () => {
-    const requestURL = getRequestUrl('files');
+    const dataRequestURL = getRequestUrl('files');
 
     try {
-      const data = await request(`${requestURL}${search}`, {
+      const data = await request(`${dataRequestURL}${search}`, {
         method: 'GET',
       });
 
-      if (isMounted.current) {
-        dispatch({
-          type: 'GET_DATA_SUCCEEDED',
-          data,
-        });
-      }
+      return Promise.resolve(data);
     } catch (err) {
-      if (isMounted.current) {
+      if (isMounted) {
         strapi.notification.error('notification.error');
       }
     }
+
+    return null;
   };
 
   const fetchDataCount = async () => {
@@ -111,17 +112,14 @@ const HomePage = () => {
         method: 'GET',
       });
 
-      if (isMounted.current) {
-        dispatch({
-          type: 'GET_DATA_COUNT_SUCCEEDED',
-          count,
-        });
-      }
+      return Promise.resolve(count);
     } catch (err) {
-      if (isMounted.current) {
+      if (isMounted) {
         strapi.notification.error('notification.error');
       }
     }
+
+    return null;
   };
 
   const getSearchParams = () => {
@@ -178,16 +176,15 @@ const HomePage = () => {
   };
 
   const handleClickToggleModal = (refetch = false) => {
-    setModalIsOpen(prev => !prev);
+    setIsModalOpen(prev => !prev);
 
     if (refetch) {
-      fetchData();
-      fetchDataCount();
+      fetchListData();
     }
   };
 
   const handleClickTogglePopup = () => {
-    setConfirmPopupIsOpen(prev => !prev);
+    setIsPopupOpen(prev => !prev);
   };
 
   const handleDeleteFilter = filter => {
@@ -206,9 +203,8 @@ const HomePage = () => {
       type: 'CLEAR_DATA_TO_DELETE',
     });
 
-    setConfirmPopupIsOpen(false);
-    fetchData();
-    fetchDataCount();
+    setIsPopupOpen(false);
+    fetchListData();
   };
 
   const handleSelectAll = () => {
@@ -233,7 +229,7 @@ const HomePage = () => {
         color: 'cancel',
         // TradId from the strapi-admin package
         label: formatMessage({ id: 'app.utils.delete' }),
-        onClick: () => setConfirmPopupIsOpen(true),
+        onClick: () => setIsPopupOpen(true),
         type: 'button',
       },
       {
@@ -303,9 +299,9 @@ const HomePage = () => {
       ) : (
         <ListEmpty onClick={handleClickToggleModal} />
       )}
-      <ModalStepper isOpen={modalIsOpen} onToggle={handleClickToggleModal} />
+      <ModalStepper isOpen={isModalOpen} onToggle={handleClickToggleModal} />
       <PopUpWarning
-        isOpen={confirmPopupIsOpen}
+        isOpen={isPopupOpen}
         toggleModal={handleClickTogglePopup}
         popUpWarningType="danger"
         onConfirm={handleDeleteMedias}

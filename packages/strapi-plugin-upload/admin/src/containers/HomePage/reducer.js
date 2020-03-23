@@ -11,9 +11,9 @@ const reducer = (state, action) => {
     case 'CLEAR_DATA_TO_DELETE':
       return state.update('dataToDelete', () => fromJS([]));
     case 'GET_DATA_SUCCEEDED':
-      return state.update('data', () => fromJS(action.data));
-    case 'GET_DATA_COUNT_SUCCEEDED':
-      return state.update('dataCount', () => fromJS(action.count));
+      return state
+        .update('data', () => fromJS(action.data))
+        .update('dataCount', () => action.count);
     case 'ON_CHANGE_DATA_TO_DELETE': {
       const { value, id } = action;
 

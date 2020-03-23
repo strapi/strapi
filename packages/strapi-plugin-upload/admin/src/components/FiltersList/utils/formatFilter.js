@@ -1,7 +1,4 @@
-import moment from 'moment';
-import { dateFormats } from 'strapi-helper-plugin';
-
-const dateToUtcTime = date => moment.parseZone(date).utc();
+import { dateFormats, dateToUtcTime } from 'strapi-helper-plugin';
 
 const formatFilter = filterToFormat => {
   const { name, filter, value } = filterToFormat;

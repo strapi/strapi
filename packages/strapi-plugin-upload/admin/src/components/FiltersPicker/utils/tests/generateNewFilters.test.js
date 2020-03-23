@@ -66,41 +66,5 @@ describe('UPLOAD | components | FiltersPicker | utils', () => {
 
       expect(generateNewFilters(currentFilters, newFilter)).toEqual(expected);
     });
-
-    it('should return current filters with two new filters if value is an array', () => {
-      const currentFilters = [
-        {
-          name: 'size',
-          filter: '=',
-          value: '10KB',
-        },
-      ];
-
-      const newFilter = {
-        name: 'mime',
-        filter: '_contains',
-        value: ['image', 'video'],
-      };
-
-      const expected = [
-        {
-          name: 'size',
-          filter: '=',
-          value: '10KB',
-        },
-        {
-          name: 'mime',
-          filter: '_contains',
-          value: 'image',
-        },
-        {
-          name: 'mime',
-          filter: '_contains',
-          value: 'video',
-        },
-      ];
-
-      expect(generateNewFilters(currentFilters, newFilter)).toEqual(expected);
-    });
   });
 });

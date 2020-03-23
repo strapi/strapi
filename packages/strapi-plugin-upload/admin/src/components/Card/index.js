@@ -25,22 +25,22 @@ const Card = ({
   type,
   url,
 }) => {
-  const getFileSize = formatBytes(size, 0);
-  const getFileType = mime || type;
+  const fileSize = formatBytes(size, 0);
+  const fileType = mime || type;
 
   return (
     <Wrapper>
       <CardImgWrapper checked={checked} small={small}>
-        <CardPreview hasError={hasError} url={url} type={getFileType} />
+        <CardPreview hasError={hasError} url={url} type={fileType} />
         <Border color={hasError ? 'orange' : 'mediumBlue'} shown={checked || hasError} />
         {children}
       </CardImgWrapper>
       <Flex>
         <Title>{name}</Title>
-        <Tag label={getType(getFileType)} />
+        <Tag label={getType(fileType)} />
       </Flex>
       <Text color="grey" fontSize="xs" ellipsis>
-        {`${getExtension(getFileType)} - ${getFileSize}`}
+        {`${getExtension(fileType)} - ${fileSize}`}
       </Text>
       {hasError && <ErrorMessage>{errorMessage}</ErrorMessage>}
     </Wrapper>

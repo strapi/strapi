@@ -6,8 +6,6 @@ import { Select } from '@buffetjs/core';
 import { getFilterType } from 'strapi-helper-plugin';
 import { getTrad } from '../../../utils';
 
-import formatFilter from './utils/formatFilter';
-
 import reducer, { initialState } from './reducer';
 
 import filters from './utils/filtersForm';
@@ -34,7 +32,7 @@ const FiltersCard = ({ onChange }) => {
   };
 
   const addFilter = () => {
-    onChange({ target: { value: formatFilter(state.toJS()) } });
+    onChange({ target: { value: state.toJS() } });
 
     dispatch({
       type: 'RESET_FORM',
