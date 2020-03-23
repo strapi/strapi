@@ -11,7 +11,7 @@ const path = require('path');
 // Public node modules.
 const _ = require('lodash');
 const pluralize = require('pluralize');
-const { nameToSlug } = require('strapi-utils');
+const { nameToSlug, nameToCollectionName } = require('strapi-utils');
 
 // Fetch stub attribute template on initial load.
 const attributeTemplate = fs.readFileSync(
@@ -41,7 +41,6 @@ module.exports = (scope, cb) => {
   // `scope.args` are the raw command line arguments.
   _.defaults(scope, {
     name,
-    idPluralized: pluralize.plural(_.trim(_.deburr(scope.id))),
     environment: process.env.NODE_ENV || 'development',
   });
 
@@ -87,7 +86,7 @@ module.exports = (scope, cb) => {
   // Set collectionName
   scope.collectionName = _.has(scope.args, 'collectionName')
     ? scope.args.collectionName
-    : undefined;
+    : nameToCollectionName(pluralize(scope.id));
 
   // Set description
   scope.description = _.has(scope.args, 'description') ? scope.args.description : undefined;

@@ -1,4 +1,6 @@
-import { nameToSlug } from 'strapi-utils';
+import slugify from '@sindresorhus/slugify';
+
+const nameToSlug = name => slugify(name, { separator: '-' });
 
 const createUid = name => {
   const modelName = nameToSlug(name);
@@ -12,4 +14,4 @@ const createComponentUid = (name, category) => {
   return `${nameToSlug(category)}.${nameToSlug(name)}`;
 };
 
-export { createComponentUid, createUid };
+export { createComponentUid, createUid, nameToSlug };
