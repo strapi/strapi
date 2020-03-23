@@ -194,7 +194,7 @@ const HomePage = () => {
   };
 
   const handleDeleteMedias = async () => {
-    await Promise.all(dataToDelete.map(id => deleteMedia(id)));
+    await Promise.all(dataToDelete.map(item => deleteMedia(item.id)));
 
     dispatch({
       type: 'CLEAR_DATA_TO_DELETE',
@@ -247,9 +247,17 @@ const HomePage = () => {
     _page: generatePageFromStart(start, limit),
   };
 
-  const hasSomeCheckboxSelected = dataToDelete.length > 0;
-  const areAllCheckboxesSelected = data.length === dataToDelete.length && hasSomeCheckboxSelected;
   const paginationCount = data.length < limit ? data.length : dataCount;
+
+  const hasSomeCheckboxSelected = data.some(item =>
+    dataToDelete.find(itemToDelete => item.id === itemToDelete.id)
+  );
+
+  const areAllCheckboxesSelected =
+    data.every(item => dataToDelete.find(itemToDelete => item.id === itemToDelete.id)) &&
+    hasSomeCheckboxSelected;
+
+  const selectedItems = dataToDelete.map(item => item.id);
 
   return (
     <Container>
@@ -277,7 +285,7 @@ const HomePage = () => {
       </ControlsWrapper>
       {dataCount > 0 ? (
         <>
-          <List data={data} onChange={handleChangeCheck} selectedItems={dataToDelete} />
+          <List data={data} onChange={handleChangeCheck} selectedItems={selectedItems} />
           <PageFooter
             context={{ emitEvent: () => {} }}
             count={paginationCount}
