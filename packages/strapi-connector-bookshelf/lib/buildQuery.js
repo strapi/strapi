@@ -82,15 +82,15 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
     if (['manyToMany', 'manyWay'].includes(assoc.nature)) {
       const joinTableAlias = generateAlias(assoc.tableCollectionName);
 
-      let originColumnNameInJoinTable = `${joinTableAlias}.`;
+      let originColumnNameInJoinTable;
       if (assoc.nature === 'manyToMany') {
-        originColumnNameInJoinTable += `${singular(
+        originColumnNameInJoinTable = `${joinTableAlias}.${singular(
           destinationInfo.model.attributes[assoc.via].attribute
         )}_${destinationInfo.model.attributes[assoc.via].column}`;
       } else if (assoc.nature === 'manyWay') {
-        originColumnNameInJoinTable += `${singular(originInfo.model.collectionName)}_${
-          originInfo.model.primaryKey
-        }`;
+        originColumnNameInJoinTable = `${joinTableAlias}.${singular(
+          originInfo.model.collectionName
+        )}_${originInfo.model.primaryKey}`;
       }
 
       qb.leftJoin(
