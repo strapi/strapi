@@ -13,7 +13,7 @@ import {
   useQuery,
 } from 'strapi-helper-plugin';
 
-import { getRequestUrl, getTrad } from '../../utils';
+import { getRequestUrl, getTrad, generatePageFromStart, generateStartFromPage } from '../../utils';
 
 import Container from '../../components/Container';
 import ControlsWrapper from '../../components/ControlsWrapper';
@@ -23,7 +23,7 @@ import Filters from '../../components/Filters';
 import List from '../../components/List';
 import ListEmpty from '../../components/ListEmpty';
 import ModalStepper from '../ModalStepper';
-import { generatePageFromStart, generateStartFromPage, getHeaderLabel } from './utils';
+import getHeaderLabel from './utils/getHeaderLabel';
 import init from './init';
 import reducer, { initialState } from './reducer';
 

@@ -10,22 +10,23 @@ import useModalContext from '../../hooks/useModalContext';
 const InputModalStepper = ({ isOpen, onToggle }) => {
   const { formatMessage } = useGlobalContext();
   const {
-    currentStep,
-    goTo,
-    filesToUpload,
-    handleClose,
-    handleUploadFiles,
     addFilesToUpload,
-    handleCancelFileToUpload,
+    currentStep,
     fetchMediaLib,
-    handleSetCropResult,
-    selectedFiles,
+    filesToUpload,
+    fileToEdit,
+    goTo,
+    handleCancelFileToUpload,
     handleCleanFilesError,
+    handleClose,
+    handleFileToEditChange,
     handleGoToEditNewFile,
     handleRemoveFileToUpload,
     handleResetFileToEdit,
-    fileToEdit,
-    handleFileToEditChange,
+    handleSetCropResult,
+    handleUploadFiles,
+    onInputMediaChange,
+    selectedFiles,
   } = useModalContext();
   const { Component, headerBreadcrumbs, next, prev, withBackButton, HeaderComponent } = stepper[
     currentStep
@@ -66,9 +67,7 @@ const InputModalStepper = ({ isOpen, onToggle }) => {
   const handleSubmitEditNewFile = e => {
     e.preventDefault();
 
-    // dispatch({
-    //   type: 'ON_SUBMIT_EDIT_NEW_FILE',
-    // });
+    onInputMediaChange({ target: { value: selectedFiles } });
 
     goNext();
   };

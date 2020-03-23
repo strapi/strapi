@@ -26,13 +26,13 @@ const ModalNavWrapper = ({ children, links, renderRightContent, initialTab }) =>
 
               return (
                 <ModalTab
-                  key={link.to}
-                  label={link.label}
-                  to={link.to}
                   count={link.count}
                   isActive={isActive}
                   isDisabled={link.isDisabled}
+                  key={link.to}
+                  label={link.label}
                   onClick={() => handleGoTo(link)}
+                  to={link.to}
                 />
               );
             })}
@@ -49,18 +49,18 @@ const ModalNavWrapper = ({ children, links, renderRightContent, initialTab }) =>
 };
 
 ModalNavWrapper.defaultProps = {
-  links: [],
-  to: '',
-  renderRightContent: null,
   initialTab: null,
+  links: [],
+  renderRightContent: null,
+  to: '',
 };
 
 ModalNavWrapper.propTypes = {
   children: PropTypes.func.isRequired,
-  links: PropTypes.array,
-  to: PropTypes.string,
   initialTab: PropTypes.string,
+  links: PropTypes.array,
   renderRightContent: PropTypes.func,
+  to: PropTypes.string,
 };
 
 export default ModalNavWrapper;

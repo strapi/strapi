@@ -2,7 +2,7 @@ import React from 'react';
 
 import { PageFooter } from 'strapi-helper-plugin';
 
-import { generatePageFromStart, generateStartFromPage } from '../../containers/HomePage/utils';
+import { generatePageFromStart, generateStartFromPage } from '../../utils';
 import Filters from '../Filters';
 import Flex from '../Flex';
 import List from '../List';

@@ -9,7 +9,7 @@ import InputModalStepperContext from '../../contexts/InputModal/InputModalDataMa
 import pluginId from '../../pluginId';
 import reducer, { initialState } from './reducer';
 
-const InputModalStepperProvider = ({ isOpen, multiple, children }) => {
+const InputModalStepperProvider = ({ isOpen, multiple, children, onInputMediaChange }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { params, filesToUpload } = reducerState;
 
@@ -229,6 +229,7 @@ const InputModalStepperProvider = ({ isOpen, multiple, children }) => {
         handleSetCropResult,
         handleUploadFiles,
         multiple,
+        onInputMediaChange,
         removeFilter,
         setParam,
       }}
@@ -242,10 +243,12 @@ InputModalStepperProvider.propTypes = {
   children: PropTypes.node.isRequired,
   isOpen: PropTypes.bool,
   multiple: PropTypes.bool.isRequired,
+  onInputMediaChange: PropTypes.func,
 };
 
 InputModalStepperProvider.defaultProps = {
   isOpen: false,
+  onInputMediaChange: () => {},
 };
 
 export default InputModalStepperProvider;

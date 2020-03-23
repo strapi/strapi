@@ -11,7 +11,7 @@ const Wrapper = styled(Flex)`
   padding: 0 0.2rem;
   margin-top: 0.2rem;
   margin-left: ${({ theme }) => theme.main.sizes.paddings.xs};
-  border-radius: 0.2rem;
+  border-radius: ${({ theme }) => theme.main.sizes.borderRadius};
   background-color: #e9eaeb;
 `;
 

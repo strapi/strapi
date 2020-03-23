@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
 import CardPreview from '../CardPreview';
-import ModalStepper from '../../containers/InputModalStepper';
+import InputModalStepper from '../../containers/InputModalStepper';
 import Name from './Name';
+import CardPreviewWrapper from './CardPreviewWrapper';
 import Wrapper from './Wrapper';
 
 const InputMedia = ({ label, onChange, name, attribute }) => {
@@ -13,21 +14,21 @@ const InputMedia = ({ label, onChange, name, attribute }) => {
   };
 
   return (
-    <>
+    <Wrapper>
       <Name htmlFor={name}>{label}</Name>
-      <Wrapper onClick={handleClickToggleModal}>
+      <CardPreviewWrapper onClick={handleClickToggleModal}>
         <CardPreview url="https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=350" />
-      </Wrapper>
+      </CardPreviewWrapper>
 
       {isModalOpen && (
-        <ModalStepper
+        <InputModalStepper
           isOpen={isModalOpen}
           multiple={attribute.multiple}
-          onChange={onChange}
+          onInputMediaChange={onChange}
           onToggle={handleClickToggleModal}
         />
       )}
-    </>
+    </Wrapper>
   );
 };
 
