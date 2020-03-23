@@ -6,6 +6,7 @@ import { useDebounce } from '@buffetjs/hooks';
 import {
   HeaderSearch,
   PageFooter,
+  PopUpWarning,
   useGlobalContext,
   generateFiltersFromSearch,
   generateSearchFromFilters,
@@ -36,7 +37,8 @@ const HomePage = () => {
   const { formatMessage } = useGlobalContext();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const query = useQuery();
-  const [isOpen, setIsOpen] = useState(false);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [confirmPopupIsOpen, setConfirmPopupIsOpen] = useState(false);
   const [searchValue, setSearchValue] = useState(query.get('_q') || '');
   const { push } = useHistory();
   const { search } = useLocation();
@@ -176,12 +178,16 @@ const HomePage = () => {
   };
 
   const handleClickToggleModal = (refetch = false) => {
-    setIsOpen(prev => !prev);
+    setModalIsOpen(prev => !prev);
 
     if (refetch) {
       fetchData();
       fetchDataCount();
     }
+  };
+
+  const handleClickTogglePopup = () => {
+    setConfirmPopupIsOpen(prev => !prev);
   };
 
   const handleDeleteFilter = filter => {
@@ -200,6 +206,7 @@ const HomePage = () => {
       type: 'CLEAR_DATA_TO_DELETE',
     });
 
+    setConfirmPopupIsOpen(false);
     fetchData();
     fetchDataCount();
   };
@@ -226,7 +233,7 @@ const HomePage = () => {
         color: 'cancel',
         // TradId from the strapi-admin package
         label: formatMessage({ id: 'app.utils.delete' }),
-        onClick: handleDeleteMedias,
+        onClick: () => setConfirmPopupIsOpen(true),
         type: 'button',
       },
       {
@@ -296,7 +303,13 @@ const HomePage = () => {
       ) : (
         <ListEmpty onClick={handleClickToggleModal} />
       )}
-      <ModalStepper isOpen={isOpen} onToggle={handleClickToggleModal} />
+      <ModalStepper isOpen={modalIsOpen} onToggle={handleClickToggleModal} />
+      <PopUpWarning
+        isOpen={confirmPopupIsOpen}
+        toggleModal={handleClickTogglePopup}
+        popUpWarningType="danger"
+        onConfirm={handleDeleteMedias}
+      />
     </Container>
   );
 };
