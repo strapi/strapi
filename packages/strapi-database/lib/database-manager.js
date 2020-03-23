@@ -117,6 +117,12 @@ class DatabaseManager {
       return model.collectionName === collectionName;
     });
   }
+
+  getModelByGlobalId(globalId) {
+    return Array.from(this.models.values()).find(model => {
+      return model.globalId === globalId;
+    });
+  }
 }
 
 function createDatabaseManager(strapi) {

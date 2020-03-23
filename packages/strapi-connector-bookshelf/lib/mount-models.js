@@ -142,7 +142,11 @@ module.exports = ({ models, target }, ctx) => {
       }
 
       const { nature, verbose } =
-        utilsModels.getNature(details, name, undefined, model.toLowerCase()) || {};
+        utilsModels.getNature({
+          attribute: details,
+          attributeName: name,
+          modelName: model.toLowerCase(),
+        }) || {};
 
       // Build associations key
       utilsModels.defineAssociations(model.toLowerCase(), definition, details, name);
@@ -302,6 +306,7 @@ module.exports = ({ models, target }, ctx) => {
             : strapi.models[details.model];
 
           const globalId = `${model.collectionName}_morph`;
+          const filter = _.get(model, ['attributes', details.via, 'filter'], 'field');
 
           loadedModel[name] = function() {
             return this.morphOne(
@@ -309,7 +314,7 @@ module.exports = ({ models, target }, ctx) => {
               details.via,
               `${definition.collectionName}`
             ).query(qb => {
-              qb.where(_.get(model, ['attributes', details.via, 'filter'], 'field'), name);
+              qb.where(filter, name);
             });
           };
           break;
@@ -320,6 +325,7 @@ module.exports = ({ models, target }, ctx) => {
             : strapi.models[details.collection];
 
           const globalId = `${collection.collectionName}_morph`;
+          const filter = _.get(model, ['attributes', details.via, 'filter'], 'field');
 
           loadedModel[name] = function() {
             return this.morphMany(
@@ -327,7 +333,7 @@ module.exports = ({ models, target }, ctx) => {
               details.via,
               `${definition.collectionName}`
             ).query(qb => {
-              qb.where(_.get(model, ['attributes', details.via, 'filter'], 'field'), name);
+              qb.where(filter, name).orderBy('order');
             });
           };
           break;
@@ -650,6 +656,7 @@ module.exports = ({ models, target }, ctx) => {
       // Push attributes to be aware of model schema.
       target[model]._attributes = definition.attributes;
       target[model].updateRelations = relations.update;
+      target[model].deleteRelations = relations.deleteRelations;
 
       await buildDatabaseSchema({
         ORM,
