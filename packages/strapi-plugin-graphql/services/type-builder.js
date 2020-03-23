@@ -243,7 +243,7 @@ module.exports = {
 
     const inputs = `
       input ${inputName} {
-        
+
         ${Object.keys(model.attributes)
           .map(attributeName => {
             return `${attributeName}: ${this.convertType({
@@ -271,6 +271,7 @@ module.exports = {
           .join('\n')}
       }
     `;
+
     return inputs;
   },
 

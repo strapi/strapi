@@ -29,6 +29,10 @@ To create a project head over to the Strapi [listing on the marketplace](https:/
 
 Please note that it may take anywhere from 30 seconds to a few minutes for the droplet to startup, when it does you should see it in your [droplets list](https://cloud.digitalocean.com/droplets).
 
+::: warning
+After the droplet has started, it will take a few more minutes to finish the Strapi installation.
+:::
+
 From here you will see the public ipv4 address that you can use to visit your Strapi application, just open that in a browser and it should ask you to create your first administrator!
 
 You can also SSH into the virtual machine using `root` as the SSH user and your public ipv4 address, there is no password for SSH as DigitalOcean uses SSH keys by default with password authentication disabled.
@@ -101,13 +105,13 @@ upstream strapi {
 
 ### Strapi
 
-In the DigitalOcean one-click application a service user is used in which it's home directory is located at `/srv/strapi`. Likewise the actual Strapi application is located within this home directory at `/srv/strapi/strapi`.
+In the DigitalOcean one-click application a service user is used in which it's home directory is located at `/srv/strapi`. Likewise the actual Strapi application is located within this home directory at `/srv/strapi/strapi-development`.
 
 Please note that with this application it is intially created and ran in the `development` environment to allow for creating models. **You should not use this directly in production**, it is recommended that you configure a private git repository to commit changes into and create a new application directory within the service user's home (Example: `/srv/strapi/strapi-production`). To run the new `production` or `staging` environments you can refer to the [PM2 Documentation](https://pm2.keymetrics.io/docs/usage/quick-start/#managing-processes).
 
 ## Using the Service Account
 
-By default the Strapi application will be running under a "service account", this is an account that is extremely limited into what it can do and access. The purpose of using a service account is to project your system from security threats.
+By default the Strapi application will be running under a "service account", this is an account that is extremely limited into what it can do and access. The purpose of using a service account is to help protect your system from security threats.
 
 ### Accessing the service account
 
@@ -136,8 +140,6 @@ pm2 logs strapi-develop # Show the logs in real time (to exit use ctrl +c)
 Strapi will automatically start if the virtual machine is rebooted, you can also manually view the log files under `/srv/strapi/.pm2/logs` if you encounter any errors during the bootup.
 
 ## Changing the PostgreSQL Password
-
-Because of how the virtual machine is created, your database is setup with a long and random password, however for security you should change this password before moving into a production-like setting.
 
 Use the following steps to change the PostgreSQL password and update Strapi's config:
 
