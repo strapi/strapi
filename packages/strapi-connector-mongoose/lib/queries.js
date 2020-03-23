@@ -547,6 +547,7 @@ const buildSearchOr = (model, query) => {
       case 'string':
       case 'text':
       case 'password':
+      case 'uid':
         return acc.concat({ [curr]: { $regex: query, $options: 'i' } });
       case 'boolean':
         if (query === 'true' || query === 'false') {
