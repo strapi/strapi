@@ -15,7 +15,7 @@ const Wrapper = styled.div`
   line-height: 59px;
   background-color: ${({ theme }) => theme.main.colors.lightGrey};
   color: ${({ theme }) => theme.main.colors.black};
-  font-size: ${({ theme }) => theme.main.sizes.font.md};
+  font-size: ${({ theme }) => theme.main.sizes.fonts.md};
   font-weight: ${({ theme }) => theme.main.fontWeights.bold};
 `;
 

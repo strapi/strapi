@@ -1,17 +1,17 @@
 import React from 'react';
 import { Button } from '@buffetjs/core';
 
+import useModalContext from '../../hooks/useModalContext';
 import { getTrad } from '../../utils';
 import BrowseAssets from '../BrowseAssets';
 import ModalNavWrapper from '../ModalNavWrapper';
 import ModalSection from '../ModalSection';
 import SelectedAssets from '../SelectedAssets';
-import useModalContext from '../../hooks/useModalContext';
 import IntlText from '../IntlText';
 import BaselineAlignmentWrapper from './BaselineAlignmentWrapper';
 
 const ListModal = () => {
-  const { selectedFiles, goTo, tab } = useModalContext();
+  const { selectedFiles, goTo, currentTab } = useModalContext();
   const links = [
     { to: 'browse', label: 'browse', isDisabled: false },
     { to: 'selected', label: 'selected', count: selectedFiles.length, isDisabled: false },
@@ -34,7 +34,11 @@ const ListModal = () => {
   );
 
   return (
-    <ModalNavWrapper initialTab={tab} links={links} renderRightContent={renderUploadModalButton}>
+    <ModalNavWrapper
+      initialTab={currentTab}
+      links={links}
+      renderRightContent={renderUploadModalButton}
+    >
       {to => (
         <ModalSection>
           {to === 'browse' && <BrowseAssets />}

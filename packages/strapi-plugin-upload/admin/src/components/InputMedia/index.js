@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
-import ModalStepper from '../InputModalStepper';
 import CardPreview from '../CardPreview';
-import Wrapper from './Wrapper';
+import ModalStepper from '../../containers/InputModalStepper';
 import Name from './Name';
+import Wrapper from './Wrapper';
 
 const InputMedia = ({ label, onChange, name, attribute }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,8 +21,8 @@ const InputMedia = ({ label, onChange, name, attribute }) => {
 
       {isModalOpen && (
         <ModalStepper
-          multiple={attribute.multiple}
           isOpen={isModalOpen}
+          multiple={attribute.multiple}
           onChange={onChange}
           onToggle={handleClickToggleModal}
         />
@@ -32,14 +32,14 @@ const InputMedia = ({ label, onChange, name, attribute }) => {
 };
 
 InputMedia.propTypes = {
-  label: PropTypes.string,
-  onChange: PropTypes.func.isRequired,
-  name: PropTypes.string.isRequired,
   attribute: PropTypes.shape({
-    type: PropTypes.string,
     multiple: PropTypes.bool,
     required: PropTypes.bool,
+    type: PropTypes.string,
   }).isRequired,
+  label: PropTypes.string,
+  name: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
 };
 InputMedia.defaultProps = {
   label: '',

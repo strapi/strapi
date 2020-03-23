@@ -15,7 +15,6 @@ const ModalNavWrapper = ({ children, links, renderRightContent, initialTab }) =>
     setTo(link.to);
   };
 
-  // TODO : integration
   return (
     <Wrapper>
       <Padded left right size="md">

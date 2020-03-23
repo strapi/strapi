@@ -1,12 +1,12 @@
 import React, { useReducer, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { request, generateSearchFromFilters } from 'strapi-helper-plugin';
-import { omitBy, get } from 'lodash';
+import { get } from 'lodash';
 
-import InputModalStepperContext from '../../contexts/InputModal/InputModalDataManager';
-import getRequestUrl from '../../utils/getRequestUrl';
-import pluginId from '../../pluginId';
+import { getRequestUrl, compactParams } from '../../utils';
 import init from './init';
+import InputModalStepperContext from '../../contexts/InputModal/InputModalDataManager';
+import pluginId from '../../pluginId';
 import reducer, { initialState } from './reducer';
 
 const InputModalStepperProvider = ({ isOpen, multiple, children }) => {
@@ -62,7 +62,7 @@ const InputModalStepperProvider = ({ isOpen, multiple, children }) => {
     });
   };
 
-  const handleAllFileSelection = () => {
+  const handleAllFilesSelection = () => {
     dispatch({
       type: 'TOGGLE_SELECT_ALL',
     });
@@ -117,49 +117,43 @@ const InputModalStepperProvider = ({ isOpen, multiple, children }) => {
     const requestURL = getRequestUrl('files/count');
 
     try {
-      const data = await request(`${requestURL}`, {
+      return await request(`${requestURL}`, {
         method: 'GET',
-      });
-
-      dispatch({
-        type: 'GET_DATA_COUNT_SUCCEEDED',
-        data,
       });
     } catch (err) {
       strapi.notification.error('notification.error');
+
+      return err;
     }
   };
 
   const fetchMediaLib = async () => {
-    await Promise.all([fetchMediaLibFiles(), fetchMediaLibFilesCount()]);
+    const [files, count] = await Promise.all([fetchMediaLibFiles(), fetchMediaLibFilesCount()]);
+    dispatch({
+      type: 'GET_DATA_SUCCEEDED',
+      files,
+      countData: count,
+    });
   };
 
   const fetchMediaLibFiles = async () => {
     const requestURL = getRequestUrl('files');
 
-    const compactParams = omitBy(
-      params,
-      param =>
-        (typeof param === 'string' && param === '') || (Array.isArray(param) && param.length === 0)
-    );
-    const paramsToSend = generateSearchFromFilters(compactParams);
+    const compactedParams = compactParams(params);
+    const paramsToSend = generateSearchFromFilters(compactedParams);
 
     try {
-      const data = await request(`${requestURL}?${paramsToSend}`, {
+      return await request(`${requestURL}?${paramsToSend}`, {
         method: 'GET',
-      });
-
-      dispatch({
-        type: 'GET_DATA_SUCCEEDED',
-        data,
       });
     } catch (err) {
       strapi.notification.error('notification.error');
+
+      return err;
     }
   };
 
   const addFilesToUpload = ({ target: { value } }) => {
-    console.log(value);
     dispatch({
       type: 'ADD_FILES_TO_UPLOAD',
       filesToUpload: value,
@@ -173,7 +167,6 @@ const InputModalStepperProvider = ({ isOpen, multiple, children }) => {
 
     const requests = filesToUpload.map(
       async ({ file, fileInfo, originalIndex, abortController }) => {
-        console.log(file);
         const formData = new FormData();
         const headers = {};
         formData.append('files', file);
@@ -221,23 +214,23 @@ const InputModalStepperProvider = ({ isOpen, multiple, children }) => {
     <InputModalStepperContext.Provider
       value={{
         ...reducerState,
-        setParam,
-        handleFileSelection,
-        handleAllFileSelection,
-        fetchMediaLib,
-        removeFilter,
-        goTo,
-        handleClose,
-        handleUploadFiles,
-        handleCancelFileToUpload,
-        handleSetCropResult,
         addFilesToUpload,
+        fetchMediaLib,
+        goTo,
+        handleAllFilesSelection,
+        handleCancelFileToUpload,
         handleCleanFilesError,
-        multiple,
-        handleGoToEditNewFile,
-        handleResetFileToEdit,
-        handleRemoveFileToUpload,
+        handleClose,
+        handleFileSelection,
         handleFileToEditChange,
+        handleGoToEditNewFile,
+        handleRemoveFileToUpload,
+        handleResetFileToEdit,
+        handleSetCropResult,
+        handleUploadFiles,
+        multiple,
+        removeFilter,
+        setParam,
       }}
     >
       {children}
@@ -246,8 +239,8 @@ const InputModalStepperProvider = ({ isOpen, multiple, children }) => {
 };
 
 InputModalStepperProvider.propTypes = {
-  isOpen: PropTypes.bool,
   children: PropTypes.node.isRequired,
+  isOpen: PropTypes.bool,
   multiple: PropTypes.bool.isRequired,
 };
 

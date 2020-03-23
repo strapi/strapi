@@ -51,8 +51,8 @@ FiltersPicker.defaultProps = {
 FiltersPicker.propTypes = {
   filters: PropTypes.arrayOf(
     PropTypes.shape({
-      name: PropTypes.string.isRequired,
       filter: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
       value: PropTypes.string.isRequired,
     })
   ),

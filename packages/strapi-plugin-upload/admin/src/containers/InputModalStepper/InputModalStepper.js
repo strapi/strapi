@@ -1,13 +1,13 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, memo } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, ModalFooter, useGlobalContext } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
-import ModalHeader from '../ModalHeader';
+import ModalHeader from '../../components/ModalHeader';
 import stepper from './stepper';
 import getTrad from '../../utils/getTrad';
 import useModalContext from '../../hooks/useModalContext';
 
-const ModalStepper = ({ isOpen, onToggle }) => {
+const InputModalStepper = ({ isOpen, onToggle }) => {
   const { formatMessage } = useGlobalContext();
   const {
     currentStep,
@@ -31,8 +31,6 @@ const ModalStepper = ({ isOpen, onToggle }) => {
     currentStep
   ];
   const filesToUploadLength = filesToUpload.length;
-  const toggleRef = useRef();
-  toggleRef.current = onToggle;
 
   useEffect(() => {
     if (currentStep === 'upload' && filesToUploadLength === 0) {
@@ -46,7 +44,7 @@ const ModalStepper = ({ isOpen, onToggle }) => {
   const addFilesToUploadList = ({ target: { value } }) => {
     addFilesToUpload({ target: { value } });
 
-    goTo(next);
+    goNext();
   };
 
   const handleClickDeleteFileToUpload = fileIndex => {
@@ -67,7 +65,7 @@ const ModalStepper = ({ isOpen, onToggle }) => {
 
   const handleSubmitEditNewFile = e => {
     e.preventDefault();
-    console.log(e);
+
     // dispatch({
     //   type: 'ON_SUBMIT_EDIT_NEW_FILE',
     // });
@@ -160,13 +158,13 @@ const ModalStepper = ({ isOpen, onToggle }) => {
   );
 };
 
-ModalStepper.defaultProps = {
+InputModalStepper.defaultProps = {
   onToggle: () => {},
 };
 
-ModalStepper.propTypes = {
+InputModalStepper.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onToggle: PropTypes.func,
 };
 
-export default ModalStepper;
+export default memo(InputModalStepper);

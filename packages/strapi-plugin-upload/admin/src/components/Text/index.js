@@ -5,7 +5,7 @@ const Text = styled.p`
   margin: 0;
   line-height: ${({ lineHeight }) => lineHeight};
   color: ${({ theme, color }) => theme.main.colors[color] || color};
-  font-size: ${({ theme, fontSize }) => theme.main.sizes.font[fontSize]};
+  font-size: ${({ theme, fontSize }) => theme.main.sizes.fonts[fontSize]};
   font-weight: ${({ theme, fontWeight }) => theme.main.fontWeights[fontWeight]};
   text-transform: ${({ textTransform }) => textTransform};
   ${({ ellipsis }) =>

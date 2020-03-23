@@ -1,30 +1,31 @@
 import React from 'react';
 
 import { PageFooter } from 'strapi-helper-plugin';
-import ListEmpty from '../ListEmpty';
-import List from '../List';
-import useModalContext from '../../hooks/useModalContext';
-import Filters from '../Filters';
-import SortPicker from '../SortPicker';
-import Padded from '../Padded';
-import Flex from '../Flex';
-import SelectAll from '../SelectAll';
-import Wrapper from './Wrapper';
+
 import { generatePageFromStart, generateStartFromPage } from '../../containers/HomePage/utils';
+import Filters from '../Filters';
+import Flex from '../Flex';
+import List from '../List';
+import ListEmpty from '../ListEmpty';
+import Padded from '../Padded';
+import SelectAll from '../SelectAll';
+import SortPicker from '../SortPicker';
+import useModalContext from '../../hooks/useModalContext';
+import Wrapper from './Wrapper';
 
 const BrowseAssets = () => {
   const {
-    handleFileSelection,
-    handleAllFileSelection,
-    setParam,
-    removeFilter,
-    files,
-    params,
     count,
-    multiple,
-    sort,
-    selectedFiles,
+    files,
     goTo,
+    handleAllFilesSelection,
+    handleFileSelection,
+    multiple,
+    params,
+    removeFilter,
+    selectedFiles,
+    setParam,
+    sort,
   } = useModalContext();
 
   const handleChangeParams = ({ target: { name, value } }) => {
@@ -68,8 +69,8 @@ const BrowseAssets = () => {
           {multiple && (
             <Padded right size="sm">
               <SelectAll
-                onChange={handleAllFileSelection}
                 checked={areAllCheckboxesSelected}
+                onChange={handleAllFilesSelection}
                 someChecked={hasSomeCheckboxSelected && !areAllCheckboxesSelected}
               />
             </Padded>
@@ -77,9 +78,9 @@ const BrowseAssets = () => {
           <SortPicker onChange={handleChangeParams} value={sort} />
           <Padded left size="sm" />
           <Filters
+            filters={params.filters}
             onChange={handleChangeParams}
             onClick={handleDeleteFilter}
-            filters={params.filters}
           />
         </Flex>
       </Padded>
@@ -88,8 +89,8 @@ const BrowseAssets = () => {
       ) : (
         <>
           <List
-            data={files}
             canSelect={canSelectFile}
+            data={files}
             onChange={handleFileSelection}
             selectedItems={selectedFiles}
           />

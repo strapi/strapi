@@ -10,7 +10,7 @@ const Wrapper = styled(Flex)`
   height: 1.4rem;
   padding: 0 0.2rem;
   margin-top: 0.2rem;
-  margin-left: ${({ theme }) => theme.main.sizes.padding.xs};
+  margin-left: ${({ theme }) => theme.main.sizes.paddings.xs};
   border-radius: 0.2rem;
   background-color: #e9eaeb;
 `;

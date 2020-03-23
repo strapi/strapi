@@ -6,7 +6,7 @@ const Wrapper = styled.div(({ isActive, isDisabled, theme }) => {
   const baseStyle = {
     color: '#9ea7b8',
     cursor,
-    fontSize: theme.main.sizes.font.sm,
+    fontSize: theme.main.sizes.fonts.sm,
     fontWeight: theme.main.fontWeights.bold,
     letterSpacing: '0.7px',
     textTransform: 'uppercase',

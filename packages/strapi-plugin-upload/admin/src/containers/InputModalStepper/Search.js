@@ -1,16 +1,10 @@
 import React, { useState, useEffect, memo } from 'react';
-import styled from 'styled-components';
 import { useDebounce } from '@buffetjs/hooks';
-import { HeaderSearch as BaseHeaderSearch, useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from 'strapi-helper-plugin';
 
 import getTrad from '../../utils/getTrad';
 import useModalContext from '../../hooks/useModalContext';
-
-const HeaderSearch = styled(BaseHeaderSearch)`
-  position: relative;
-  background-color: transparent;
-  border-right: none;
-`;
+import HeaderSearch from './HeaderSearch';
 
 const Search = () => {
   const [value, setValue] = useState('');

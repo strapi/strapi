@@ -1,9 +1,9 @@
-import EditForm from '../EditForm';
-import UploadForm from '../UploadForm';
-import UploadList from '../UploadList';
+import EditForm from '../../components/EditForm';
 import getTrad from '../../utils/getTrad';
-import ListModal from '../ListModal';
+import ListModal from '../../components/ListModal';
 import Search from './Search';
+import UploadForm from '../../components/UploadForm';
+import UploadList from '../../components/UploadList';
 
 const stepper = {
   list: {

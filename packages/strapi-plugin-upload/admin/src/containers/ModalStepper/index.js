@@ -14,7 +14,7 @@ const ModalStepper = ({ isOpen, onToggle }) => {
   const { formatMessage } = useGlobalContext();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { currentStep, fileToEdit, filesToUpload } = reducerState.toJS();
-  const { Component, headers, next, prev, withBackButton } = stepper[currentStep];
+  const { Component, headerBreadcrumbs, next, prev, withBackButton } = stepper[currentStep];
   const filesToUploadLength = filesToUpload.length;
   const toggleRef = useRef();
   toggleRef.current = onToggle;
@@ -197,7 +197,11 @@ const ModalStepper = ({ isOpen, onToggle }) => {
   return (
     <Modal isOpen={isOpen} onToggle={handleToggle} onClosed={handleClosed}>
       {/* header title */}
-      <ModalHeader goBack={goBack} headers={headers} withBackButton={withBackButton} />
+      <ModalHeader
+        goBack={goBack}
+        headerBreadcrumbs={headerBreadcrumbs}
+        withBackButton={withBackButton}
+      />
       {/* body of the modal */}
       {Component && (
         <Component

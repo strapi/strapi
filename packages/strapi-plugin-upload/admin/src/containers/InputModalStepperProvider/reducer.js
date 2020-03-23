@@ -8,7 +8,7 @@ const initialState = {
   files: [],
   filesToUpload: [],
   fileToEdit: null,
-  tab: null,
+  currentTab: null,
   params: {
     _limit: 10,
     _start: 0,
@@ -26,12 +26,9 @@ const reducer = (state, action) =>
         draftState.fileToEdit[action.keys.split('.')] = action.value;
         break;
       }
-      case 'GET_DATA_COUNT_SUCCEEDED': {
-        draftState.count = action.data.count;
-        break;
-      }
       case 'GET_DATA_SUCCEEDED': {
-        draftState.files = action.data;
+        draftState.files = action.files;
+        draftState.count = action.countData.count;
         break;
       }
       case 'SET_PARAM': {
@@ -132,7 +129,7 @@ const reducer = (state, action) =>
           if (canAddToSelectedFiles) {
             draftState.selectedFiles = [...draftState.selectedFiles, ...action.addToSelectedFiles];
           }
-          draftState.tab = 'selected';
+          draftState.currentTab = 'selected';
         }
 
         const index = draftState.filesToUpload.findIndex(

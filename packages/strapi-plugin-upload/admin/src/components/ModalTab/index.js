@@ -43,19 +43,19 @@ const ModalTab = ({ isDisabled, label, to, isActive, onClick, count }) => {
 };
 
 ModalTab.defaultProps = {
+  count: null,
   isActive: false,
   isDisabled: false,
   onClick: () => {},
-  count: null,
 };
 
 ModalTab.propTypes = {
-  to: PropTypes.string.isRequired,
+  count: PropTypes.number,
   isActive: PropTypes.bool,
   isDisabled: PropTypes.bool,
   label: PropTypes.string.isRequired,
   onClick: PropTypes.func,
-  count: PropTypes.number,
+  to: PropTypes.string.isRequired,
 };
 
 export default ModalTab;

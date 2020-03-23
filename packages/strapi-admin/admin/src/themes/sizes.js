@@ -11,14 +11,14 @@ const sizes = {
     // TODO:
     sm: '10px',
   },
-  padding: {
+  paddings: {
     // TODO
     xs: '5px',
     sm: '10px',
     md: '30px',
     lg: '40px',
   },
-  font: {
+  fonts: {
     xs: '11px',
     sm: '12px',
     md: '13px',

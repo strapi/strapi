@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import InputModalStepperProvider from '../../containers/InputModalStepperProvider';
 import InputModalStepper from './InputModalStepper';
+import InputModalStepperProvider from '../InputModalStepperProvider';
 
 const ModalStepper = ({ isOpen, onToggle, onChange, multiple }) => {
   return (
@@ -13,15 +13,15 @@ const ModalStepper = ({ isOpen, onToggle, onChange, multiple }) => {
 };
 
 ModalStepper.defaultProps = {
-  onToggle: () => {},
   onChange: () => {},
+  onToggle: () => {},
 };
 
 ModalStepper.propTypes = {
   isOpen: PropTypes.bool.isRequired,
-  onToggle: PropTypes.func,
-  onChange: PropTypes.func,
   multiple: PropTypes.bool.isRequired,
+  onChange: PropTypes.func,
+  onToggle: PropTypes.func,
 };
 
 export default ModalStepper;
