@@ -3,7 +3,7 @@
 The logic of a plugin is located at its root directory `./plugins/**`. The admin panel related parts of each plugin are contained in the `/admin` folder.
 The folders and files structure are the following:
 
-<!-- ```
+```
 /plugin
 └─── admin // Contains the plugin's front-end
 |     └─── src // Source code directory
@@ -38,18 +38,4 @@ The folders and files structure are the following:
 └─── middlewares // Contains the plugin's middlewares
 └─── models // Contains the plugin's API models
 └─── services // Contains the plugin's API services
-``` -->
-
-```bash
-plugin/
-├── config/ # Contains the configurations of the plugin
-│     ├── functions/
-│     │    └── bootstrap.js # Asynchronous bootstrap function that runs before the app gets started
-│     ├── policies/ # Folder containing the plugin's policies
-│     ├── queries/ # Folder containing the plugin's models queries
-│     └── routes.json # Contains the plugin's API routes
-├── controllers/ # Contains the plugin's API controllers
-├── middlewares/ # Contains the plugin's middlewares
-├── models/ # Contains the plugin's API models
-└── services/ # Contains the plugin's API services
 ```
