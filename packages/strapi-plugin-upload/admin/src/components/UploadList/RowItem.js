@@ -46,8 +46,8 @@ const RowItem = ({
         {isUploading && <InfiniteLoadingIndicator onClick={handleClick} />}
         {!isUploading && (
           <CardControlsWrapper className="card-control-wrapper">
-            <CardControl onClick={handleClickDelete} type="trash-alt" />
-            <CardControl onClick={handleClickEdit} />
+            <CardControl onClick={handleClickDelete} type="trash-alt" small />
+            <CardControl onClick={handleClickEdit} small />
           </CardControlsWrapper>
         )}
       </Card>

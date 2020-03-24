@@ -199,11 +199,7 @@ const EditForm = forwardRef(
                               </a>
                             )}
                             <CopyToClipboard onCopy={handleCopy} text={prefixedFileURL}>
-                              <CardControl
-                                color="#9EA7B8"
-                                type="link"
-                                onClick={handleClickDelete}
-                              />
+                              <CardControl color="#9EA7B8" type="link" />
                             </CopyToClipboard>
                           </>
                         )}

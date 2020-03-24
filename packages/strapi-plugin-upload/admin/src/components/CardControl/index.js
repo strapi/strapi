@@ -6,9 +6,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import DownloadIcon from '../../icons/Download';
 import Wrapper from './Wrapper';
 
-const CardControl = ({ color, onClick, type }) => {
+const CardControl = ({ color, onClick, small, type }) => {
   return (
-    <Wrapper onClick={onClick} color={color} type={type}>
+    <Wrapper onClick={onClick} color={color} type={type} small={small}>
       {type === 'pencil' && <Pencil fill={color} />}
       {type === 'clear' && <ClearIcon fill={color} />}
       {type === 'download' && <DownloadIcon fill={color} />}
@@ -20,12 +20,14 @@ const CardControl = ({ color, onClick, type }) => {
 CardControl.defaultProps = {
   color: '#b3b5b9',
   onClick: () => {},
+  small: false,
   type: 'pencil',
 };
 
 CardControl.propTypes = {
   color: PropTypes.string,
   onClick: PropTypes.func,
+  small: PropTypes.bool,
   type: PropTypes.string,
 };
 

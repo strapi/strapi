@@ -74,19 +74,8 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
   };
 
   const handleConfirmDeleteFile = () => {
-    toggleModalWarning();
     setShouldDeleteFile(true);
-    // const { id } = fileToEdit;
-
-    // try {
-    //   const requestURL = getRequestUrl(`files/${id}`);
-
-    //   await request(requestURL, { method: 'DELETE' });
-
-    //   toggleRef.current(true);
-    // } catch (err) {
-    //   console.log(err);
-    // }
+    toggleModalWarning();
   };
 
   const handleClickDeleteFile = async () => {
@@ -177,45 +166,35 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
     const headers = {};
     const formData = new FormData();
 
-    // The endpoints are different when we want to just update the file infos
+    // If the file has been cropped we need to add it to the formData
+    // otherwise we just don't send it
     const didCropFile = fileToEdit.file instanceof File;
     const { abortController, id, file, fileInfo } = fileToEdit;
-    let requestURL = shouldDuplicateMedia ? `/${pluginId}` : `/${pluginId}?id=${id}`;
+    const requestURL = shouldDuplicateMedia ? `/${pluginId}` : `/${pluginId}?id=${id}`;
 
     if (didCropFile) {
       formData.append('files', file);
-      formData.append('fileInfo', JSON.stringify(fileInfo));
+    }
 
-      try {
-        await request(
-          requestURL,
-          {
-            method: 'POST',
-            headers,
-            body: formData,
-            signal: abortController.signal,
-          },
-          false,
-          false
-        );
+    formData.append('fileInfo', JSON.stringify(fileInfo));
 
-        // Close the modal and refetch data
-        toggleRef.current(true);
-      } catch (err) {
-        console.log(err);
-      }
-    } else {
-      requestURL = `/${pluginId}/files/${id}`;
+    try {
+      await request(
+        requestURL,
+        {
+          method: 'POST',
+          headers,
+          body: formData,
+          signal: abortController.signal,
+        },
+        false,
+        false
+      );
 
-      // The following will not work waiting for the back-end to be ready
-      try {
-        await request(requestURL, { method: 'PUT', body: fileInfo });
-        // Do something
-      } catch (err) {
-        // Do something with error
-
-        console.log('err');
-      }
+      // Close the modal and refetch data
+      toggleRef.current(true);
+    } catch (err) {
+      console.log(err);
     }
   };
 
