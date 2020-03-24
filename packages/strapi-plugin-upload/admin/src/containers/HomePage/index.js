@@ -18,6 +18,7 @@ import { getRequestUrl, getTrad } from '../../utils';
 
 import Container from '../../components/Container';
 import ControlsWrapper from '../../components/ControlsWrapper';
+import Padded from '../../components/Padded';
 import SelectAll from '../../components/SelectAll';
 import SortPicker from '../../components/SortPicker';
 import Filters from '../../components/Filters';
@@ -308,6 +309,8 @@ const HomePage = () => {
         popUpWarningType="danger"
         onConfirm={handleDeleteMedias}
       />
+      <Padded bottom size="sm" />
+      <Padded bottom size="md" />
     </Container>
   );
 };
