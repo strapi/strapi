@@ -8,7 +8,7 @@ import FileIcon from '../FileIcon';
 import Wrapper from './Wrapper';
 import Image from './Image';
 
-const CardPreview = ({ hasError, url, type }) => {
+const CardPreview = ({ hasError, url, type, withFileCaching }) => {
   const isFile = getType(type) === 'file';
 
   if (hasError) {
@@ -24,7 +24,7 @@ const CardPreview = ({ hasError, url, type }) => {
       {isFile ? (
         <FileIcon ext={getExtension(type)} />
       ) : (
-        <Image src={`${url}?${performance.now()}`} />
+        <Image src={`${url}${withFileCaching ? `?${performance.now()}` : ''}`} />
       )}
     </Wrapper>
   );
@@ -34,12 +34,14 @@ CardPreview.defaultProps = {
   hasError: false,
   url: null,
   type: '',
+  withFileCaching: true,
 };
 
 CardPreview.propTypes = {
   hasError: PropTypes.bool,
   url: PropTypes.string,
   type: PropTypes.string,
+  withFileCaching: PropTypes.bool,
 };
 
 export default CardPreview;

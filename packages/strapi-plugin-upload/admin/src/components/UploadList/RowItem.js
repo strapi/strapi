@@ -41,6 +41,7 @@ const RowItem = ({
         size={file.size}
         url={url}
         {...fileInfo}
+        withFileCaching={false}
       >
         {isUploading && <InfiniteLoadingIndicator onClick={handleClick} />}
         {!isUploading && (

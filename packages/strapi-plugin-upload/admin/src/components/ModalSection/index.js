@@ -5,7 +5,7 @@ import { themePropTypes } from 'strapi-helper-plugin';
 const ModalSection = styled.section`
   display: flex;
   justify-content: ${({ justifyContent }) => justifyContent};
-  padding: 0 ${({ theme }) => theme.main.sizes.padding.md};
+  padding: 0 ${({ theme }) => theme.main.sizes.paddings.md};
 `;
 
 ModalSection.defaultProps = {

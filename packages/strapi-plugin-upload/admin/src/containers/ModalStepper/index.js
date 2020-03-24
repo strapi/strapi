@@ -3,11 +3,10 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { Modal, ModalFooter, PopUpWarning, useGlobalContext, request } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
-import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
 import { getRequestUrl, getTrad } from '../../utils';
 import ModalHeader from '../../components/ModalHeader';
-import stepper from './utils/stepper';
+import stepper from './stepper';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
@@ -17,7 +16,7 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
   const [shouldDeleteFile, setShouldDeleteFile] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { currentStep, fileToEdit, filesToUpload } = reducerState.toJS();
-  const { Component, headers, next, prev, withBackButton } = stepper[currentStep];
+  const { Component, headerBreadcrumbs, next, prev, withBackButton } = stepper[currentStep];
   const filesToUploadLength = filesToUpload.length;
   const toggleRef = useRef(onToggle);
   const editModalRef = useRef();
@@ -318,12 +317,10 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
         {/* header title */}
         <ModalHeader
           goBack={goBack}
-          headers={headers.map(headerTrad => ({
-            key: headerTrad,
-            element: <FormattedMessage id={headerTrad} />,
-          }))}
+          headerBreadcrumbs={headerBreadcrumbs}
           withBackButton={withBackButton}
         />
+
         {/* body of the modal */}
         {Component && (
           <Component

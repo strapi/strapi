@@ -26,6 +26,7 @@ const Card = ({
   size,
   type,
   url,
+  withFileCaching,
 }) => {
   const fileSize = formatBytes(size, 0);
   const fileType = mime || type;
@@ -37,7 +38,12 @@ const Card = ({
   return (
     <Wrapper onClick={handleClick}>
       <CardImgWrapper checked={checked} small={small}>
-        <CardPreview hasError={hasError} url={url} type={fileType} />
+        <CardPreview
+          hasError={hasError}
+          url={url}
+          type={fileType}
+          withFileCaching={withFileCaching}
+        />
         <Border color={hasError ? 'orange' : 'mediumBlue'} shown={checked || hasError} />
         {children}
       </CardImgWrapper>
@@ -66,6 +72,7 @@ Card.defaultProps = {
   small: false,
   type: null,
   url: null,
+  withFileCaching: true,
 };
 
 Card.propTypes = {
@@ -81,6 +88,7 @@ Card.propTypes = {
   small: PropTypes.bool,
   type: PropTypes.string,
   url: PropTypes.string,
+  withFileCaching: PropTypes.bool,
 };
 
 export default Card;

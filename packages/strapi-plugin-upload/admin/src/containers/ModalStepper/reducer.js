@@ -1,5 +1,5 @@
 import { fromJS } from 'immutable';
-import createNewFilesToUploadArray from './utils/createNewFilesToUploadArray';
+import createNewFilesToUploadArray from '../../utils/createNewFilesToUploadArray';
 
 const initialState = fromJS({
   currentStep: 'browse',

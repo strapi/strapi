@@ -14,23 +14,24 @@ import {
   request,
   useQuery,
 } from 'strapi-helper-plugin';
-
-import { formatFileForEditing, getRequestUrl, getTrad } from '../../utils';
+import {
+  formatFileForEditing,
+  getRequestUrl,
+  getTrad,
+  generatePageFromStart,
+  generateStartFromPage,
+} from '../../utils';
 
 import Container from '../../components/Container';
 import ControlsWrapper from '../../components/ControlsWrapper';
+import Padded from '../../components/Padded';
 import SelectAll from '../../components/SelectAll';
 import SortPicker from '../../components/SortPicker';
 import Filters from '../../components/Filters';
 import List from '../../components/List';
 import ListEmpty from '../../components/ListEmpty';
 import ModalStepper from '../ModalStepper';
-import {
-  deleteFilters,
-  generatePageFromStart,
-  generateStartFromPage,
-  getHeaderLabel,
-} from './utils';
+import { deleteFilters, generateStringParamsFromQuery, getHeaderLabel } from './utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
@@ -95,9 +96,10 @@ const HomePage = () => {
     });
 
     const dataRequestURL = getRequestUrl('files');
+    const params = generateStringParamsFromQuery(query);
 
     try {
-      const data = await request(`${dataRequestURL}${search}`, {
+      const data = await request(`${dataRequestURL}?${params}`, {
         method: 'GET',
       });
 
@@ -112,7 +114,7 @@ const HomePage = () => {
       }
     }
 
-    return null;
+    return [];
   };
 
   const fetchDataCount = async () => {
@@ -289,8 +291,6 @@ const HomePage = () => {
     data.every(item => dataToDelete.find(itemToDelete => item.id === itemToDelete.id)) &&
     hasSomeCheckboxSelected;
 
-  const selectedItems = dataToDelete.map(item => item.id);
-
   if (isLoading) {
     return <LoadingIndicatorPage />;
   }
@@ -325,7 +325,7 @@ const HomePage = () => {
             data={data}
             onChange={handleChangeCheck}
             onClickEditFile={handleClickEditFile}
-            selectedItems={selectedItems}
+            selectedItems={dataToDelete}
           />
           <PageFooter
             context={{ emitEvent: () => {} }}
@@ -350,6 +350,8 @@ const HomePage = () => {
         popUpWarningType="danger"
         onConfirm={handleDeleteMedias}
       />
+      <Padded bottom size="sm" />
+      <Padded bottom size="md" />
     </Container>
   );
 };
