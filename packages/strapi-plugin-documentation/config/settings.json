@@ -17,7 +17,8 @@
   },
   "x-strapi-config": {
     "path": "/documentation",
-    "showGeneratedFiles": true
+    "showGeneratedFiles": true,
+    "generateDefaultResponse": true
   },
   "servers": [
     {

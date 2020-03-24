@@ -19,7 +19,7 @@ const LinkLabel = styled.span`
   display: inline-block;
   width: 100%;
   padding-right: 1rem;
-  padding-left: 2.6rem;
+  padding-left: 2.1rem;
 `;
 
 const LeftMenuLinkContent = ({
