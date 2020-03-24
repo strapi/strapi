@@ -58,8 +58,12 @@ const BrowseAssets = () => {
     _page: generatePageFromStart(start, limit),
   };
 
-  const areAllCheckboxesSelected = files.length === selectedFiles.length;
-  const hasSomeCheckboxSelected = selectedFiles.length > 0;
+  const hasSomeCheckboxSelected = files.some(file =>
+    selectedFiles.find(selectedFile => file.id === selectedFile.id)
+  );
+  const areAllCheckboxesSelected =
+    files.every(file => selectedFiles.find(selectedFile => file.id === selectedFile.id)) &&
+    hasSomeCheckboxSelected;
   const canSelectFile = multiple === true || (selectedFiles.length < 1 && !multiple);
 
   return (
