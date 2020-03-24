@@ -32,7 +32,7 @@ module.exports = async (ctx, next) => {
 In this example, we are verifying that a session is open. If it is the case, we call the `next()` method that will execute the next policy or controller's action. Otherwise, a 401 error is returned.
 
 ::: tip
-You can access any controller, service or model thanks to the global variable `strapi` in a policy.
+You can access any controller, service, or model thanks to the global variable `strapi` in a policy.
 :::
 
 ## Usage
@@ -67,7 +67,7 @@ The global policies can be associated to any route in your project.
 Before executing the `find` action in the `Restaurant.js` controller, the global policy `isAuthenticated` located in `./config/policies/isAuthenticated.js` will be called.
 
 ::: tip
-You can put as much policy you want in this array. However be careful about the performance impact.
+You can put as much policy as you want in this array. However be careful about the performance impact.
 :::
 
 ### Plugins policies

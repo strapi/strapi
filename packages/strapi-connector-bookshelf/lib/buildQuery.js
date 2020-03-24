@@ -8,7 +8,7 @@ const { singular } = require('pluralize');
  * @param {Object} options.filters - Filters params (start, limit, sort, where)
  */
 const buildQuery = ({ model, filters }) => qb => {
-  if (_.has(filters, 'where') && Array.isArray(filters.where)) {
+  if (_.has(filters, 'where') && Array.isArray(filters.where) && filters.where.length > 0) {
     qb.distinct();
     buildJoinsAndFilter(qb, model, filters.where);
   }
@@ -79,43 +79,50 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
    * @param {Object} destinationInfo - destination with which we are making a join
    */
   const buildJoin = (qb, assoc, originInfo, destinationInfo) => {
-    if (assoc.nature === 'manyToMany') {
+    if (['manyToMany', 'manyWay'].includes(assoc.nature)) {
       const joinTableAlias = generateAlias(assoc.tableCollectionName);
+
+      let originColumnNameInJoinTable;
+      if (assoc.nature === 'manyToMany') {
+        originColumnNameInJoinTable = `${joinTableAlias}.${singular(
+          destinationInfo.model.attributes[assoc.via].attribute
+        )}_${destinationInfo.model.attributes[assoc.via].column}`;
+      } else if (assoc.nature === 'manyWay') {
+        originColumnNameInJoinTable = `${joinTableAlias}.${singular(
+          originInfo.model.collectionName
+        )}_${originInfo.model.primaryKey}`;
+      }
 
       qb.leftJoin(
         `${originInfo.model.databaseName}.${assoc.tableCollectionName} AS ${joinTableAlias}`,
-        `${joinTableAlias}.${singular(
-          destinationInfo.model.attributes[assoc.via].attribute
-        )}_${destinationInfo.model.attributes[assoc.via].column}`,
+        originColumnNameInJoinTable,
         `${originInfo.alias}.${originInfo.model.primaryKey}`
       );
 
       qb.leftJoin(
         `${destinationInfo.model.databaseName}.${destinationInfo.model.collectionName} AS ${destinationInfo.alias}`,
-        `${joinTableAlias}.${singular(
-          originInfo.model.attributes[assoc.alias].attribute
-        )}_${originInfo.model.attributes[assoc.alias].column}`,
+        `${joinTableAlias}.${singular(originInfo.model.attributes[assoc.alias].attribute)}_${
+          originInfo.model.attributes[assoc.alias].column
+        }`,
         `${destinationInfo.alias}.${destinationInfo.model.primaryKey}`
       );
-      return;
+    } else {
+      const externalKey =
+        assoc.type === 'collection'
+          ? `${destinationInfo.alias}.${assoc.via || destinationInfo.model.primaryKey}`
+          : `${destinationInfo.alias}.${destinationInfo.model.primaryKey}`;
+
+      const internalKey =
+        assoc.type === 'collection'
+          ? `${originInfo.alias}.${originInfo.model.primaryKey}`
+          : `${originInfo.alias}.${assoc.alias}`;
+
+      qb.leftJoin(
+        `${destinationInfo.model.databaseName}.${destinationInfo.model.collectionName} AS ${destinationInfo.alias}`,
+        externalKey,
+        internalKey
+      );
     }
-
-    const externalKey =
-      assoc.type === 'collection'
-        ? `${destinationInfo.alias}.${assoc.via ||
-            destinationInfo.model.primaryKey}`
-        : `${destinationInfo.alias}.${destinationInfo.model.primaryKey}`;
-
-    const internalKey =
-      assoc.type === 'collection'
-        ? `${originInfo.alias}.${originInfo.model.primaryKey}`
-        : `${originInfo.alias}.${assoc.alias}`;
-
-    qb.leftJoin(
-      `${destinationInfo.model.databaseName}.${destinationInfo.model.collectionName} AS ${destinationInfo.alias}`,
-      externalKey,
-      internalKey
-    );
   };
 
   /**
@@ -208,9 +215,7 @@ const buildWhereClause = ({ qb, field, operator, value }) => {
   if (Array.isArray(value) && !['in', 'nin'].includes(operator)) {
     return qb.where(subQb => {
       for (let val of value) {
-        subQb.orWhere(q =>
-          buildWhereClause({ qb: q, field, operator, value: val })
-        );
+        subQb.orWhere(q => buildWhereClause({ qb: q, field, operator, value: val }));
       }
     });
   }
@@ -258,7 +263,6 @@ const findModelByAssoc = assoc => {
   return models[assoc.collection || assoc.model];
 };
 
-const findAssoc = (model, key) =>
-  model.associations.find(assoc => assoc.alias === key);
+const findAssoc = (model, key) => model.associations.find(assoc => assoc.alias === key);
 
 module.exports = buildQuery;

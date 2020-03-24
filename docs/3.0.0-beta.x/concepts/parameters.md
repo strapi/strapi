@@ -34,7 +34,7 @@ module.exports = {
 
 ## Querying data
 
-We added a new API to query data based on the new filters API.
+We added a new filters API to query the database.
 
 ```js
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
@@ -64,7 +64,7 @@ If you are using a mongo database, calling `buildQuery` returns either a [`Mongo
 #### Custom Query
 
 When using the deep filtering feature with mongo, we build an aggregation query to avoid too many round-trips to the Mongo DB.
-Doing that means we don't get a Mongoose object as a response but instead a plain JS Object. This brings some issues, like no virtual fields available and no Mongoose life cycles.
+Doing that means we don't get a Mongoose object as a response but instead a plain JS Object. This brings some issues, like no virtual fields available and no Mongoose lifecycles.
 
 To deliver the best possible experience, we decided to rehydrate the Mongoose models, forcing us to override the Mongoose query
 
@@ -80,6 +80,6 @@ returns a query with the following functions
 
 - `count` => Returns an integer equal to the number of matching entities.
 - `lean` => Returns the matching elements as Objects.
-- `then(onSucces, onFailure)` => Calls the onSucces with an array of Mongoose objects.
+- `then(onSuccess, onFailure)` => Calls the onSuccess with an array of Mongoose objects.
 - `catch(onError)` => Promise catch.
 - `group(options)` => Calls the aggregation group function of Mongoose.

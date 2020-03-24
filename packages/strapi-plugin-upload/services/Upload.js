@@ -116,15 +116,17 @@ module.exports = {
     }
 
     const formats = await generateResponsiveFormats(fileData);
-    for (const format of formats) {
-      if (!format) continue;
+    if (Array.isArray(formats) && formats.length > 0) {
+      for (const format of formats) {
+        if (!format) continue;
 
-      const { key, file } = format;
+        const { key, file } = format;
 
-      await strapi.plugins.upload.provider.upload(file);
-      delete file.buffer;
+        await strapi.plugins.upload.provider.upload(file);
+        delete file.buffer;
 
-      _.set(fileData, ['formats', key], file);
+        _.set(fileData, ['formats', key], file);
+      }
     }
 
     const { width, height } = await getDimensions(fileData.buffer);
@@ -190,15 +192,17 @@ module.exports = {
     }
 
     const formats = await generateResponsiveFormats(fileData);
-    for (const format of formats) {
-      if (!format) continue;
+    if (Array.isArray(formats) && formats.length > 0) {
+      for (const format of formats) {
+        if (!format) continue;
 
-      const { key, file } = format;
+        const { key, file } = format;
 
-      await strapi.plugins.upload.provider.upload(file);
-      delete file.buffer;
+        await strapi.plugins.upload.provider.upload(file);
+        delete file.buffer;
 
-      _.set(fileData, ['formats', key], file);
+        _.set(fileData, ['formats', key], file);
+      }
     }
 
     const { width, height } = await getDimensions(fileData.buffer);
@@ -229,6 +233,12 @@ module.exports = {
   },
 
   fetchAll(params) {
+    // FIXME: until we support boolean operators for querying we need to make mime_ncontains use AND instead of OR
+    if (_.has(params, 'mime_ncontains') && Array.isArray(params.mime_ncontains)) {
+      params._where = params.mime_ncontains.map(val => ({ mime_ncontains: val }));
+      delete params.mime_ncontains;
+    }
+
     return strapi.query('file', 'upload').find(params);
   },
 
@@ -265,7 +275,7 @@ module.exports = {
     const { id, model, field } = params;
 
     const arr = Array.isArray(files) ? files : [files];
-    return Promise.all(
+    const enhancedFiles = await Promise.all(
       arr.map(file => {
         return this.enhanceFile(
           file,
@@ -278,7 +288,9 @@ module.exports = {
           }
         );
       })
-    ).then(files => this.uploadFileAndPersist(files));
+    );
+
+    await Promise.all(enhancedFiles.map(file => this.uploadFileAndPersist(file)));
   },
 
   getSettings() {
