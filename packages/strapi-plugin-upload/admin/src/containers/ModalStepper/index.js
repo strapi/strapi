@@ -20,8 +20,6 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
   const toggleRef = useRef(onToggle);
   const editModalRef = useRef();
 
-  console.log(fileToEdit);
-
   useEffect(() => {
     if (currentStep === 'upload' && filesToUploadLength === 0) {
       // Passing true to the onToggle prop will refetch the data when the modal closes
@@ -181,9 +179,6 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
         console.log('err');
       }
     }
-
-    console.log('submit', shouldDuplicateMedia);
-    console.log({ fileToEdit });
   };
 
   const handleReplaceMedia = () => {
@@ -202,8 +197,6 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
 
     onToggle();
   };
-
-  console.log(fileToEdit);
 
   const handleUploadFiles = async () => {
     dispatch({

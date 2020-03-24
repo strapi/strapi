@@ -104,14 +104,19 @@ const EditForm = forwardRef(
       const margin = 15;
       const pixelWidth = 13;
 
-      const left =
+      let left =
         cropBox.left +
         width -
         margin -
         ((roundedHeight.toString().length + roundedWidth.toString().length + xSignWidth) *
           pixelWidth) /
           2;
-      const top = cropBox.top + height - pixelWidth - margin;
+      let top = cropBox.top + height - pixelWidth - margin;
+
+      if (width < 130) {
+        top = cropBox.top + height + 10;
+        left = cropBox.left + width + 10;
+      }
 
       setInfosCoordinates({ top, left });
       setInfos({ width: roundedWidth, height: roundedHeight });

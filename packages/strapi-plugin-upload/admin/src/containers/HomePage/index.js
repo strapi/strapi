@@ -198,7 +198,6 @@ const HomePage = () => {
     setIsModalOpen(prev => !prev);
 
     if (refetch) {
-      console.log('lllll');
       fetchListData();
     }
   };
