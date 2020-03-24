@@ -47,12 +47,20 @@ module.exports = {
       throw disabledPluginError();
     }
 
+    const { id } = ctx.query;
     const files = _.get(ctx.request.files, 'files');
+
+    // update only fileInfo if not file content sent
+    if (id && (_.isEmpty(files) || files.size === 0)) {
+      const data = await validateUploadBody(uploadSchema, ctx.request.body);
+
+      ctx.body = await strapi.plugins.upload.services.upload.updateFileInfo(id, data.fileInfo);
+      return;
+    }
+
     if (_.isEmpty(files) || files.size === 0) {
       throw emptyFileError();
     }
-
-    const { id } = ctx.query;
 
     const uploadService = strapi.plugins.upload.services.upload;
 
