@@ -27,6 +27,7 @@ import ModalStepper from '../ModalStepper';
 import {
   deleteFilters,
   generatePageFromStart,
+  generateStringParamsFromQuery,
   generateStartFromPage,
   getHeaderLabel,
 } from './utils';
@@ -88,9 +89,10 @@ const HomePage = () => {
 
   const fetchData = async () => {
     const dataRequestURL = getRequestUrl('files');
+    const params = generateStringParamsFromQuery(query);
 
     try {
-      const data = await request(`${dataRequestURL}${search}`, {
+      const data = await request(`${dataRequestURL}?${params}`, {
         method: 'GET',
       });
 
