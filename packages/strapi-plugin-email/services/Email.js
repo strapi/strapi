@@ -48,7 +48,7 @@ const getProviderConfig = async env => {
 
 module.exports = {
   getProviderConfig,
-  async send(options, config, cb) {
+  async send(options, config) {
     // Get email provider settings to configure the provider to use.
     if (!config) {
       config = await getProviderConfig(strapi.config.environment);
@@ -67,6 +67,6 @@ module.exports = {
     const actions = await provider.init(config);
 
     // Execute email function of the provider for all files.
-    return actions.send(options, cb);
+    return actions.send(options);
   },
 };

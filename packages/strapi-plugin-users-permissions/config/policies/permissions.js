@@ -19,7 +19,6 @@ module.exports = async (ctx, next) => {
         ctx.state.user = await strapi.query('user', 'users-permissions').findOne({ id }, ['role']);
       }
     } catch (err) {
-      strapi.log.error(err);
       return handleErrors(ctx, err, 'unauthorized');
     }
 

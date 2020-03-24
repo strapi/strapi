@@ -1,78 +1,76 @@
 # 🚀 Welcome to the Strapi documentation!
 
-**Strapi is the open source [headless CMS](https://strapi.io) developers love.**
+**Strapi is the open-source [Headless CMS](https://strapi.io) developers love.**
 
 ## What is Strapi?
 
-Strapi, the most flexible open-source Headless CMS gives developers the freedom to use their favorite tools and frameworks while helping editors to easily manage their content and distribute anywhere. By making the admin panel and API easily customizable and extensible through a plugin system, Strapi enables the world’s largest companies to accelerate content delivery while building better digital experiences.
+Strapi is a flexible, open-source Headless CMS that gives developers the freedom to choose their favorite tools and frameworks while also allowing editors to easily manage and distribute their content. By making the admin panel and API extensible through a plugin system, Strapi enables the world's largest companies to accelerate content delivery while building beautiful digital experiences.
 
-::: tip Where the name come from?
-**Strapi** come from Boot**strap** your **API** 🎉<br>
-It's the origin purpose of the project.
+::: tip Where does the name come from?
+**Strapi** comes from the word Bootstrap, and helps Boot**strap** your **API** 🎉<br>
+This was the original purpose of this project.
 :::
 
 ## Features
 
-### Custom content structure
+### Custom Content Structure
 
-With the admin panel of Strapi, You can generate the admin panel in just a few clicks, and get your whole CMS setup in a few minutes.
+You can generate the admin panel in a few clicks and get your whole CMS setup in a few minutes.
 
-### Manage content
+### Easy Content Management
 
-The Strapi's admin panel gives you an intuitive interface to create edit and delete your content.
+Strapi's admin panel gives you an intuitive interface to create, edit and delete your content.
 
-### Developer-friendly API
+### Developer-Friendly API
 
-Your content have to be displayed on your devices, an API is required. Strapi provide you an API that match your need. Fetch the data you want via a REST API or via the GraphQL endpoint.
+If your content has to be displayed to the world, an API is required. Strapi provides you with an API that will easily match your needs. Fetch any data you might need via a REST API or GraphQL endpoint.
 
-### Roles & permissions
+### Roles & Permissions
 
-A User system is built in Strapi, that let you manage how can access to what.
+Strapi has a built-in user system that allows you to manage who can access what.
 
 ### Plugin system
 
-You want a new feature in you application, fetch a plugin in the market place and tada! You can install a GraphQL endpoint in one command.
+Need a new feature for your application? Fetch a plugin in the marketplace and tadah! Installing a GraphQL endpoint has never been so easy.
 
 ### Customization
 
-You can customize every single pice of your application. The architecture of Strapi let you customize your app to match your exact needs.
+Every part of your application can be easily customized. Strapi's architecture allows you to extend your app to match your exact use case.
 
-Don't stay stuck by the techno you choose.
+Don't be bogged down by tech you don't need!
 
 ## The Strapi Ecosystem
 
-### Code Source
+### Source Code
 
-Strapi is an Open Source project, all the source code is under the MIT licence. The core project is in the [strapi/strapi](https://github.com/strapi/strapi) GitHub repository and you will find all other tools into the [Strapi](https://github.com/strapi) GitHub organization.
+Strapi is an open-source project, all of Strapi's source code is under the MIT license. The core project can be found at the [strapi/strapi](https://github.com/strapi/strapi) GitHub repository and you will find all other tools in the [Strapi](https://github.com/strapi) GitHub organization.
 
 ### Marketplace
 
-In the marketplace section of the admin panel, you will only found official Strapi plugins. For now, the Strapi marketplace is not open to everyone but will be soon, stay tuned.
+Official Strapi plugins will be found in the marketplace section of the admin panel. Unfortunately, the Strapi marketplace is not open to outside contribution, but stay tuned as that may change in the near future.
 
-But you already can develop yours and publish them on npm.
+With that said you can still [develop & use your own plugins.](https://strapi.io/documentation/3.0.0-beta.x/plugin-development/quick-start.html)
 
 ### Roadmap
 
-Strapi is a community oriented project. We are trying to be the more transparent as possible to let you have a vision on the future of the project.
-Your insights are really important too to help to develop the project in the right direction.
-The [Roadmap](https://portal.productboard.com/strapi) is open, feel free to add your insights.
+Strapi is a community-oriented project with an emphasis on transparency. We want to share our vision of the future of Strapi and have your help in realizing it.
+Your insights are very important and will help steer the project in the right direction, so please visit [The Roadmap](https://portal.productboard.com/strapi) and share your ideas.
 
 ### Tutorials and Guides
 
-To help you using Strapi, we and the community provide you a suite of resources to let you achieve your goals.
-You will find [tutorials](https://strapi.io/tutorials/) on the website and guides into the documentation.
+To help you get started with Strapi, we and the community have provided you with a plethora of resources! You will find [tutorials](https://strapi.io/tutorials/) on the official website as well as documentation.
 
 ### Demo
 
-You can discover Strapi in few minutes by watching the demo video or by requesting a live demo via the form present in the [Demo](https://strapi.io/demo) page.
+Want to see Strapi in action? check out the [demo video](https://strapi.io/demo) or request a live demo via the form present on the page.
 
 ### Blog
 
-For long-form news and announcements the best place to keep up to date with everything happening is our [blog](https://strapi.io/blog).
+For long term news and announcements, check out our [blog](https://strapi.io/blog).
 
 ### Social media
 
-We maintain a handful of social media accounts to keep in touch with the community directly and give them updates about what's new with Strapi. Here are the easiest ways to keep track of Strapi and everything hapening around the web:
+We maintain a handful of social media accounts in order to keep in touch with the community directly and give updates about what's new with Strapi:
 
 - ⭐️ [GitHub](https://github.com/strapi/strapi)
 - 🐧 [Twitter](https://twitter.com/strapijs)

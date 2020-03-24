@@ -81,7 +81,7 @@ const generateResponsiveFormats = async file => {
     responsiveDimensions = false,
   } = await strapi.plugins.upload.services.upload.getSettings();
 
-  if (!responsiveDimensions) return {};
+  if (!responsiveDimensions) return [];
 
   const originalDimensions = await getDimensions(file.buffer);
 

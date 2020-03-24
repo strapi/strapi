@@ -17,7 +17,7 @@ In this example, any time a web browser is pointed to the `/hello` URL on your a
 
 ### Where are the controllers defined?
 
-The controllers are defined in each `./api/**/controllers/` folders. Every JavaScript file put in these folders will be loaded as a controller. They are also available through the `strapi.controllers` and `strapi.api.**.controllers` global variables. By convention, controllers' names should be Pascal-cased, so that every word in the file (include the first one) is capitalized `User.js`, `LegalEntity.js`.
+The controllers are defined in each `./api/**/controllers/` folder. Every JavaScript file put in these folders will be loaded as a controller. They are also available through the `strapi.controllers` and `strapi.api.**.controllers` global variables. By convention, controllers' names should be Pascal-cased, so that every word in the file (including the first one) is capitalized `User.js`, `LegalEntity.js`.
 
 ## Core controllers
 
@@ -67,9 +67,7 @@ module.exports = {
       entities = await strapi.services.restaurant.find(ctx.query);
     }
 
-    return entities.map(entity =>
-      sanitizeEntity(entity, { model: strapi.models.restaurant })
-    );
+    return entities.map(entity => sanitizeEntity(entity, { model: strapi.models.restaurant }));
   },
 };
 ```
@@ -173,10 +171,7 @@ module.exports = {
         files,
       });
     } else {
-      entity = await strapi.services.restaurant.update(
-        ctx.params,
-        ctx.request.body
-      );
+      entity = await strapi.services.restaurant.update(ctx.params, ctx.request.body);
     }
 
     return sanitizeEntity(entity, { model: strapi.models.restaurant });

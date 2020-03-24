@@ -18,7 +18,7 @@ Extensions folder structure:
 
 ## Admin extension
 
-The admin panel is a `node_module` that is similar to a plugin, with the slight difference that it encapsulates all the installed plugin of your application.
+The admin panel is a `node_module` that is similar to a plugin, with the slight difference that it encapsulates all the installed plugins of your application.
 
 To extend this package you will have to create an `admin` folder at the root of your application.
 

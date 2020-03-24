@@ -20,9 +20,8 @@ const populateFetch = (definition, options) => {
   } else if (_.isEmpty(options.withRelated)) {
     options.withRelated = populateComponents(definition);
   } else {
-    options.withRelated = formatPopulateOptions(
-      definition,
-      options.withRelated
+    options.withRelated = formatPopulateOptions(definition, options.withRelated).concat(
+      populateComponents(definition)
     );
   }
 };
@@ -173,9 +172,7 @@ const formatPopulateOptions = (definition, withRelated) => {
         continue;
       }
 
-      const assoc = tmpModel.associations.find(
-        association => association.alias === part
-      );
+      const assoc = tmpModel.associations.find(association => association.alias === part);
 
       if (!assoc) return acc;
 
