@@ -7,7 +7,7 @@ const generator = require('strapi-generate');
 const createBuilder = require('./schema-builder');
 const apiHandler = require('./api-handler');
 const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
-const { nameToSlug } = require('../utils/helpers');
+const { nameToSlug } = require('strapi-utils');
 
 /**
  * Format a contentType info to be used by the front-end

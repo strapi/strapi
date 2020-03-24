@@ -6,6 +6,7 @@
 
 // Public node modules.
 const _ = require('lodash');
+const { nameToSlug } = require('strapi-utils');
 
 /**
  * This `before` function is run before generating targets.
@@ -18,19 +19,18 @@ const _ = require('lodash');
 /* eslint-disable prefer-template */
 module.exports = (scope, cb) => {
   if (!scope.rootPath || !scope.id) {
-    return cb.invalid('Usage: `$ strapi generate:service serviceName --api apiName --plugin pluginName`');
+    return cb.invalid(
+      'Usage: `$ strapi generate:service serviceName --api apiName --plugin pluginName`'
+    );
   }
+
+  // Format `id`.
+  const name = scope.name || nameToSlug(scope.id);
 
   // `scope.args` are the raw command line arguments.
   _.defaults(scope, {
-    id: _.trim(_.deburr(scope.id)),
-    api: scope.args.api || scope.id
-  });
-
-  // Determine default values based on the available scope.
-  _.defaults(scope, {
-    globalID: _.upperFirst(_.camelCase(scope.id)),
-    ext: '.js'
+    name,
+    api: scope.args.api || scope.id,
   });
 
   // Determine the destination path.
@@ -40,20 +40,14 @@ module.exports = (scope, cb) => {
   } else if (scope.args.plugin) {
     filePath = `./plugins/${scope.args.plugin}/services`;
   } else {
-    filePath = `./api/${scope.id}/services`;
+    filePath = `./api/${name}/services`;
   }
 
   // Take another pass to take advantage of the defaults absorbed in previous passes.
   _.defaults(scope, {
     rootPath: scope.rootPath,
     filePath,
-    filename: scope.globalID + scope.ext
-  });
-
-  // Humanize output.
-  _.defaults(scope, {
-    humanizeId: _.camelCase(scope.id).toLowerCase(),
-    humanizedPath: '`' + scope.filePath + '`'
+    filename: `${name}.js`,
   });
 
   // Trigger callback with no error to proceed.
