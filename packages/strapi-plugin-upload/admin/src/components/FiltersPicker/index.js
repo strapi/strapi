@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { FilterIcon } from 'strapi-helper-plugin';
-
 import generateNewFilters from './utils/generateNewFilters';
 
 import FiltersCard from './FiltersCard';

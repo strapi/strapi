@@ -14,7 +14,7 @@ import {
   useQuery,
 } from 'strapi-helper-plugin';
 
-import { getRequestUrl, getTrad } from '../../utils';
+import { getRequestUrl, getTrad, generatePageFromStart, generateStartFromPage } from '../../utils';
 
 import Container from '../../components/Container';
 import ControlsWrapper from '../../components/ControlsWrapper';
@@ -25,13 +25,7 @@ import Filters from '../../components/Filters';
 import List from '../../components/List';
 import ListEmpty from '../../components/ListEmpty';
 import ModalStepper from '../ModalStepper';
-import {
-  deleteFilters,
-  generatePageFromStart,
-  generateStringParamsFromQuery,
-  generateStartFromPage,
-  getHeaderLabel,
-} from './utils';
+import { deleteFilters, generateStringParamsFromQuery, getHeaderLabel } from './utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
@@ -104,7 +98,7 @@ const HomePage = () => {
       }
     }
 
-    return null;
+    return [];
   };
 
   const fetchDataCount = async () => {
@@ -263,8 +257,6 @@ const HomePage = () => {
     data.every(item => dataToDelete.find(itemToDelete => item.id === itemToDelete.id)) &&
     hasSomeCheckboxSelected;
 
-  const selectedItems = dataToDelete.map(item => item.id);
-
   return (
     <Container>
       <Header {...headerProps} />
@@ -291,7 +283,7 @@ const HomePage = () => {
       </ControlsWrapper>
       {dataCount > 0 ? (
         <>
-          <List data={data} onChange={handleChangeCheck} selectedItems={selectedItems} />
+          <List data={data} onChange={handleChangeCheck} selectedItems={dataToDelete} />
           <PageFooter
             context={{ emitEvent: () => {} }}
             count={paginationCount}
