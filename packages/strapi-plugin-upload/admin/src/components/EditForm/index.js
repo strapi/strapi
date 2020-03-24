@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { Inputs } from '@buffetjs/custom';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
+import { getTrad, prefixFileUrlWithBackendUrl } from '../../utils';
 import CardControl from '../CardControl';
 import CardControlsWrapper from '../CardControlsWrapper';
 import CardPreview from '../CardPreview';
@@ -32,7 +34,9 @@ const EditForm = ({
   const [infos, setInfos] = useState({ width: 0, height: 0 });
   const [src, setSrc] = useState(null);
 
-  const mimeType = get(fileToEdit, ['file', 'type'], '');
+  const fileURL = get(fileToEdit, ['file', 'url'], null);
+  const prefixedFileURL = fileURL ? prefixFileUrlWithBackendUrl(fileURL) : null;
+  const mimeType = get(fileToEdit, ['file', 'type'], null) || get(fileToEdit, ['file', 'mime'], '');
   const isImg = isImageType(mimeType);
   // TODO
   const canCrop = isImg && !mimeType.includes('svg');
@@ -42,16 +46,19 @@ const EditForm = ({
 
   useEffect(() => {
     if (isImg) {
-      // TODO: update when editing existing file
-      const reader = new FileReader();
+      if (prefixedFileURL) {
+        setSrc(prefixedFileURL);
+      } else {
+        const reader = new FileReader();
 
-      reader.onloadend = () => {
-        setSrc(reader.result);
-      };
+        reader.onloadend = () => {
+          setSrc(reader.result);
+        };
 
-      reader.readAsDataURL(fileToEdit.file);
+        reader.readAsDataURL(fileToEdit.file);
+      }
     }
-  }, [isImg, fileToEdit]);
+  }, [isImg, fileToEdit, prefixedFileURL]);
 
   useEffect(() => {
     if (isCropping) {
@@ -78,6 +85,7 @@ const EditForm = ({
   }, [cropper, isCropping]);
 
   const handleResize = () => {
+    // 130
     const cropBox = cropper.current.getCropBoxData();
     const { width, height } = cropBox;
     const roundedWidth = Math.round(width);
@@ -128,6 +136,10 @@ const EditForm = ({
     onClickDeleteFileToUpload(fileToEdit.originalIndex);
   };
 
+  const handleCopy = () => {
+    strapi.notification.info(getTrad('notification.link-copied'));
+  };
+
   const handleSubmit = e => {
     e.preventDefault();
 
@@ -145,6 +157,11 @@ const EditForm = ({
                   {!isCropping ? (
                     <>
                       <CardControl color="#9EA7B8" type="trash-alt" onClick={handleClickDelete} />
+                      {fileURL && (
+                        <CopyToClipboard onCopy={handleCopy} text={prefixedFileURL}>
+                          <CardControl color="#9EA7B8" type="link" onClick={handleClickDelete} />
+                        </CopyToClipboard>
+                      )}
                       {canCrop && (
                         <CardControl type="crop" color="#9EA7B8" onClick={handleToggleCropMode} />
                       )}

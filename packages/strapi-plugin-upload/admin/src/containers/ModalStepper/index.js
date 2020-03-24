@@ -11,7 +11,7 @@ import init from './init';
 import reducer, { initialState } from './reducer';
 import { getTrad } from '../../utils';
 
-const ModalStepper = ({ isOpen, onToggle }) => {
+const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onToggle }) => {
   const { formatMessage } = useGlobalContext();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { currentStep, fileToEdit, filesToUpload } = reducerState.toJS();
@@ -26,6 +26,22 @@ const ModalStepper = ({ isOpen, onToggle }) => {
       toggleRef.current(true);
     }
   }, [filesToUploadLength, currentStep]);
+
+  useEffect(() => {
+    if (isOpen) {
+      goTo(initialStep);
+
+      if (initialFileToEdit) {
+        dispatch({
+          type: 'INIT_FILE_TO_EDIT',
+          fileToEdit: initialFileToEdit,
+        });
+      }
+    }
+    // Disabling the rule because we just want to let the ability to open the modal
+    // at a specific step then we will let the stepper handle the navigation
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const addFilesToUpload = ({ target: { value } }) => {
     dispatch({
@@ -72,6 +88,8 @@ const ModalStepper = ({ isOpen, onToggle }) => {
   };
 
   const handleClosed = () => {
+    onClosed();
+
     dispatch({
       type: 'RESET_PROPS',
     });
@@ -255,11 +273,17 @@ const ModalStepper = ({ isOpen, onToggle }) => {
 };
 
 ModalStepper.defaultProps = {
+  initialFileToEdit: null,
+  initialStep: 'browse',
+  onClosed: () => {},
   onToggle: () => {},
 };
 
 ModalStepper.propTypes = {
+  initialFileToEdit: PropTypes.object,
+  initialStep: PropTypes.string,
   isOpen: PropTypes.bool.isRequired,
+  onClosed: PropTypes.func,
   onToggle: PropTypes.func,
 };
 

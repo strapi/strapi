@@ -1,5 +1,5 @@
 import React, { useReducer, useState, useEffect } from 'react';
-import { includes } from 'lodash';
+import { includes, toString } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
 import { useDebounce, useIsMounted } from '@buffetjs/hooks';
@@ -14,7 +14,7 @@ import {
   useQuery,
 } from 'strapi-helper-plugin';
 
-import { getRequestUrl, getTrad } from '../../utils';
+import { formatFileForEditing, getRequestUrl, getTrad } from '../../utils';
 
 import Container from '../../components/Container';
 import ControlsWrapper from '../../components/ControlsWrapper';
@@ -39,6 +39,8 @@ const HomePage = () => {
   const query = useQuery();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [fileToEdit, setFileToEdit] = useState(null);
+  const [modalInitialStep, setModalInitialStep] = useState('browse');
   const [searchValue, setSearchValue] = useState(query.get('_q') || '');
   const { push } = useHistory();
   const { search } = useLocation();
@@ -171,6 +173,14 @@ const HomePage = () => {
     setSearchValue(value);
   };
 
+  const handleClickEditFile = id => {
+    const file = formatFileForEditing(data.find(file => toString(file.id) === toString(id)));
+
+    setFileToEdit(file);
+    setModalInitialStep('edit');
+    handleClickToggleModal();
+  };
+
   const handleClearSearch = () => {
     setSearchValue('');
   };
@@ -205,6 +215,11 @@ const HomePage = () => {
 
     setIsPopupOpen(false);
     fetchListData();
+  };
+
+  const handleModalClose = () => {
+    setModalInitialStep('browse');
+    setFileToEdit(null);
   };
 
   const handleSelectAll = () => {
@@ -288,7 +303,12 @@ const HomePage = () => {
       </ControlsWrapper>
       {dataCount > 0 ? (
         <>
-          <List data={data} onChange={handleChangeCheck} selectedItems={selectedItems} />
+          <List
+            data={data}
+            onChange={handleChangeCheck}
+            onClickEditFile={handleClickEditFile}
+            selectedItems={selectedItems}
+          />
           <PageFooter
             context={{ emitEvent: () => {} }}
             count={paginationCount}
@@ -299,7 +319,13 @@ const HomePage = () => {
       ) : (
         <ListEmpty onClick={handleClickToggleModal} />
       )}
-      <ModalStepper isOpen={isModalOpen} onToggle={handleClickToggleModal} />
+      <ModalStepper
+        initialFileToEdit={fileToEdit}
+        initialStep={modalInitialStep}
+        isOpen={isModalOpen}
+        onClosed={handleModalClose}
+        onToggle={handleClickToggleModal}
+      />
       <PopUpWarning
         isOpen={isPopupOpen}
         toggleModal={handleClickTogglePopup}

@@ -29,6 +29,13 @@ const stepper = {
     prev: 'upload',
     withBackButton: true,
   },
+  edit: {
+    Component: EditForm,
+    headers: [getTrad('modal.header.file-detail')],
+    next: null,
+    prev: null,
+    withBackButton: false,
+  },
 };
 
 export default stepper;

@@ -7,7 +7,7 @@ import Wrapper from './Wrapper';
 
 const CardControl = ({ color, onClick, type }) => {
   return (
-    <Wrapper onClick={onClick} color={color}>
+    <Wrapper onClick={onClick} color={color} type={type}>
       {type === 'pencil' && <Pencil fill={color} />}
       {type === 'clear' && <ClearIcon fill={color} />}
       {!['pencil', 'clear'].includes(type) && <FontAwesomeIcon icon={type} />}

@@ -8,7 +8,7 @@ import Card from '../Card';
 import CardControlsWrapper from '../CardControlsWrapper';
 import Wrapper from './Wrapper';
 
-const List = ({ data, onChange, selectedItems }) => {
+const List = ({ data, onChange, onClickEditFile, selectedItems }) => {
   const matrix = createMatrix(data);
 
   return (
@@ -22,7 +22,12 @@ const List = ({ data, onChange, selectedItems }) => {
 
               return (
                 <div className="col-xs-12 col-md-6 col-xl-3" key={id}>
-                  <Card checked={checked} {...item} url={`${strapi.backendURL}${url}`}>
+                  <Card
+                    checked={checked}
+                    {...item}
+                    onClick={onClickEditFile}
+                    url={`${strapi.backendURL}${url}`}
+                  >
                     <CardControlsWrapper leftAlign className="card-control-wrapper">
                       <Checkbox name={`${id}`} onChange={onChange} value={checked} />
                     </CardControlsWrapper>
@@ -40,12 +45,14 @@ const List = ({ data, onChange, selectedItems }) => {
 List.defaultProps = {
   data: [],
   onChange: () => {},
+  onClickEditFile: () => {},
   selectedItems: [],
 };
 
 List.propTypes = {
   data: PropTypes.array,
   onChange: PropTypes.func,
+  onClickEditFile: PropTypes.func,
   selectedItems: PropTypes.array,
 };
 

@@ -1,0 +1,87 @@
+import formatFileForEditing from '../formatFileForEditing';
+
+describe('UPLOAD | utils | formatFileForEditing', () => {
+  it('should format a file correctly with bookshelf', () => {
+    const data = {
+      size: 22.8,
+      ext: '.png',
+      width: 110,
+      caption: 'test',
+      previewUrl: null,
+      height: 110,
+      created_at: '2020-03-23T11:43:46.729Z',
+      related: [],
+      name: 'test',
+      hash: 'Screenshot_2020-03-09_at_17.52.42.png_edbdfb6446',
+      url: '/uploads/Screenshot_2020-03-09_at_17.52.42.png_edbdfb6446.png',
+      provider: 'local',
+      mime: 'image/png',
+      updated_at: '2020-03-23T11:43:46.729Z',
+      alternativeText: 'test',
+      id: 12,
+      formats: null,
+      provider_metadata: null,
+    };
+
+    const expected = {
+      file: {
+        size: 22.8,
+        ext: '.png',
+        width: 110,
+        height: 110,
+        created_at: '2020-03-23T11:43:46.729Z',
+        url: '/uploads/Screenshot_2020-03-09_at_17.52.42.png_edbdfb6446.png',
+        mime: 'image/png',
+      },
+      fileInfo: {
+        caption: 'test',
+        alternativeText: 'test',
+        name: 'test',
+      },
+    };
+
+    expect(formatFileForEditing(data)).toEqual(expected);
+  });
+
+  it('should format a file correctly with mongoose', () => {
+    const data = {
+      size: 22.8,
+      ext: '.png',
+      width: 110,
+      caption: 'test',
+      previewUrl: null,
+      height: 110,
+      createdAt: '2020-03-23T11:43:46.729Z',
+      related: [],
+      name: 'test',
+      hash: 'Screenshot_2020-03-09_at_17.52.42.png_edbdfb6446',
+      url: '/uploads/Screenshot_2020-03-09_at_17.52.42.png_edbdfb6446.png',
+      provider: 'local',
+      mime: 'image/png',
+      updated_at: '2020-03-23T11:43:46.729Z',
+      alternativeText: 'test',
+      id: 12,
+      formats: null,
+      provider_metadata: null,
+    };
+
+    const expected = {
+      file: {
+        size: 22.8,
+        ext: '.png',
+        width: 110,
+        height: 110,
+        created_at: '2020-03-23T11:43:46.729Z',
+        url: '/uploads/Screenshot_2020-03-09_at_17.52.42.png_edbdfb6446.png',
+        mime: 'image/png',
+      },
+      fileInfo: {
+        alternativeText: 'test',
+        caption: 'test',
+        name: 'test',
+      },
+    };
+
+    expect(formatFileForEditing(data)).toEqual(expected);
+  });
+});

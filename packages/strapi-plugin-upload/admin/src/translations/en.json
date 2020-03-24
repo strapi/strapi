@@ -24,6 +24,7 @@
   "modal.upload-list.sub-header.button": "Add more assets",
   "modal.upload-list.footer.button.singular": "Upload {number} asset to the library",
   "modal.upload-list.footer.button.plural": "Upload {number} assets to the library",
+  "notification.link-copied": "Link copied into the clipboard",
   "plugin.name": "Media Library",
   "plugin.description.long": "Media file management.",
   "plugin.description.short": "Media file management.",

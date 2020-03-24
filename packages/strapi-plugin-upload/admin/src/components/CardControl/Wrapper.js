@@ -15,14 +15,22 @@ const Wrapper = styled.div`
   cursor: pointer;
   font-size: 11px;
   color: ${({ color }) => color};
+
+  ${({ type }) =>
+    type === 'link' &&
+    `
+    transform: rotate(90deg)
+  `};
 `;
 
 Wrapper.defaultProps = {
   color: '#b3b5b9',
+  type: null,
 };
 
 Wrapper.propTypes = {
   color: PropTypes.string,
+  type: PropTypes.string,
   ...themePropTypes,
 };
 
