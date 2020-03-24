@@ -60,7 +60,7 @@ module.exports = {
       role: {
         resolverOf: 'plugins::users-permissions.userspermissions.getRole',
         resolver: async (obj, options, { context }) => {
-          context.params = { ...context.params, ...options.input };
+          context.params = { ...context.params, ...options };
 
           await strapi.plugins['users-permissions'].controllers.userspermissions.getRole(context);
 
