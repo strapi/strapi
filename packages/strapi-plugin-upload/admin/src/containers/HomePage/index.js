@@ -13,7 +13,7 @@ import {
   useQuery,
 } from 'strapi-helper-plugin';
 
-import { getRequestUrl, getTrad } from '../../utils';
+import { getRequestUrl, getTrad, generatePageFromStart, generateStartFromPage } from '../../utils';
 
 import Container from '../../components/Container';
 import ControlsWrapper from '../../components/ControlsWrapper';
@@ -23,7 +23,7 @@ import Filters from '../../components/Filters';
 import List from '../../components/List';
 import ListEmpty from '../../components/ListEmpty';
 import ModalStepper from '../ModalStepper';
-import { generatePageFromStart, generateStartFromPage, getHeaderLabel } from './utils';
+import getHeaderLabel from './utils/getHeaderLabel';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
@@ -31,7 +31,7 @@ const HomePage = () => {
   const { formatMessage } = useGlobalContext();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const query = useQuery();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setModalOpen] = useState(false);
   const [searchValue, setSearchValue] = useState(query.get('_q') || '');
   const { push } = useHistory();
   const { search } = useLocation();
@@ -146,7 +146,7 @@ const HomePage = () => {
   };
 
   const handleClickToggleModal = (refetch = false) => {
-    setIsOpen(prev => !prev);
+    setModalOpen(prev => !prev);
 
     if (refetch) {
       fetchData();
@@ -248,7 +248,7 @@ const HomePage = () => {
         onChangeParams={handleChangeListParams}
         params={params}
       />
-      <ModalStepper isOpen={isOpen} onToggle={handleClickToggleModal} />
+      <ModalStepper isOpen={isModalOpen} onToggle={handleClickToggleModal} />
     </Container>
   );
 };
