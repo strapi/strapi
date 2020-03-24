@@ -6,6 +6,7 @@
 
 // Public node modules.
 const _ = require('lodash');
+const { nameToSlug } = require('strapi-utils');
 /* eslint-disable prefer-template */
 /**
  * This `before` function is run before generating targets.
@@ -22,16 +23,13 @@ module.exports = (scope, cb) => {
     );
   }
 
+  // Format `id`.
+  const name = scope.name || nameToSlug(scope.id);
+
   // `scope.args` are the raw command line arguments.
   _.defaults(scope, {
-    id: _.trim(_.deburr(scope.id)),
+    name,
     api: scope.id,
-  });
-
-  // Determine default values based on the available scope.
-  _.defaults(scope, {
-    globalID: _.upperFirst(_.camelCase(scope.id)),
-    ext: '.js',
   });
 
   // Determine the destination path.
@@ -43,20 +41,14 @@ module.exports = (scope, cb) => {
   } else if (scope.args.extend) {
     filePath = `./extensions/${scope.args.extend}/controllers`;
   } else {
-    filePath = `./api/${scope.id}/controllers`;
+    filePath = `./api/${name}/controllers`;
   }
 
   // Take another pass to take advantage of the defaults absorbed in previous passes.
   _.defaults(scope, {
     rootPath: scope.rootPath,
     filePath,
-    filename: scope.globalID + scope.ext,
-  });
-
-  // Humanize output.
-  _.defaults(scope, {
-    humanizeId: _.camelCase(scope.id).toLowerCase(),
-    humanizedPath: '`' + scope.filePath + '`',
+    filename: `${name}.js`,
   });
 
   // Trigger callback with no error to proceed.

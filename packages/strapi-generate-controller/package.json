@@ -14,7 +14,8 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "lodash": "^4.17.11"
+    "lodash": "^4.17.11",
+    "strapi-utils": "^3.0.0-beta.19.3"
   },
   "scripts": {
     "test": "echo \"no tests yet\""

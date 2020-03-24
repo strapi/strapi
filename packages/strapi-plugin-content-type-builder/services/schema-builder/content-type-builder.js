@@ -5,7 +5,7 @@ const _ = require('lodash');
 const pluralize = require('pluralize');
 
 const { isRelation, toUID, isConfigurable } = require('../../utils/attributes');
-const { nameToSlug, nameToCollectionName } = require('../../utils/helpers');
+const { nameToSlug, nameToCollectionName } = require('strapi-utils');
 const { typeKinds } = require('../../controllers/validation/constants');
 const createSchemaHandler = require('./schema-handler');
 
@@ -69,9 +69,7 @@ module.exports = function createComponentBuilder() {
         'default'
       );
 
-      const defaultCollectionName = `${nameToCollectionName(
-        pluralize(infos.name)
-      )}`;
+      const defaultCollectionName = `${nameToCollectionName(pluralize(infos.name))}`;
 
       // support self referencing content type relation
       Object.keys(infos.attributes).forEach(key => {
@@ -125,31 +123,18 @@ module.exports = function createComponentBuilder() {
         return _.has(oldAttributes, key) && !isConfigurable(oldAttributes[key]);
       });
 
-      const newKeys = _.difference(
-        Object.keys(newAttributes),
-        Object.keys(oldAttributes)
-      );
+      const newKeys = _.difference(Object.keys(newAttributes), Object.keys(oldAttributes));
 
-      const deletedKeys = _.difference(
-        Object.keys(oldAttributes),
-        Object.keys(newAttributes)
-      );
+      const deletedKeys = _.difference(Object.keys(oldAttributes), Object.keys(newAttributes));
 
-      const remainingKeys = _.intersection(
-        Object.keys(oldAttributes),
-        Object.keys(newAttributes)
-      );
+      const remainingKeys = _.intersection(Object.keys(oldAttributes), Object.keys(newAttributes));
 
       // remove old relations
       deletedKeys.forEach(key => {
         const attribute = oldAttributes[key];
 
         // if the old relation has a target attribute. we need to remove it
-        if (
-          isConfigurable(attribute) &&
-          isRelation(attribute) &&
-          _.has(attribute, 'via')
-        ) {
+        if (isConfigurable(attribute) && isRelation(attribute) && _.has(attribute, 'via')) {
           this.unsetRelation(attribute);
         }
       });
@@ -172,15 +157,11 @@ module.exports = function createComponentBuilder() {
         }
 
         if (isRelation(oldAttribute) && isRelation(newAttribute)) {
-          if (
-            _.has(oldAttribute, 'via') &&
-            oldAttribute.via !== newAttribute.targetAttribute
-          ) {
+          if (_.has(oldAttribute, 'via') && oldAttribute.via !== newAttribute.targetAttribute) {
             this.unsetRelation(oldAttribute);
           }
 
-          newAttribute.autoPopulate =
-            newAttribute.autoPopulate || oldAttribute.autoPopulate;
+          newAttribute.autoPopulate = newAttribute.autoPopulate || oldAttribute.autoPopulate;
 
           return this.setRelation({
             key,
@@ -239,16 +220,9 @@ module.exports = function createComponentBuilder() {
  * @param {Object} options options
  * @param {string} options.name component name
  */
-const createContentTypeUID = ({ name }) =>
-  `application::${nameToSlug(name)}.${nameToSlug(name)}`;
+const createContentTypeUID = ({ name }) => `application::${nameToSlug(name)}.${nameToSlug(name)}`;
 
-const generateRelation = ({
-  key,
-  attribute,
-  plugin,
-  modelName,
-  targetAttribute = {},
-}) => {
+const generateRelation = ({ key, attribute, plugin, modelName, targetAttribute = {} }) => {
   const opts = {
     via: key,
     plugin,
