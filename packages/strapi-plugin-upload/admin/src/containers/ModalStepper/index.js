@@ -17,8 +17,10 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
   const { currentStep, fileToEdit, filesToUpload } = reducerState.toJS();
   const { Component, headers, next, prev, withBackButton } = stepper[currentStep];
   const filesToUploadLength = filesToUpload.length;
-  const toggleRef = useRef();
-  toggleRef.current = onToggle;
+  const toggleRef = useRef(onToggle);
+  const editModalRef = useRef();
+
+  console.log(fileToEdit);
 
   useEffect(() => {
     if (currentStep === 'upload' && filesToUploadLength === 0) {
@@ -160,6 +162,9 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
           false,
           false
         );
+
+        // Close the modal and refetch data
+        toggleRef.current(true);
       } catch (err) {
         console.log(err);
       }
@@ -181,6 +186,10 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
     console.log({ fileToEdit });
   };
 
+  const handleReplaceMedia = () => {
+    editModalRef.current.click();
+  };
+
   const handleToggle = () => {
     if (filesToUploadLength > 0) {
       // eslint-disable-next-line no-alert
@@ -193,6 +202,8 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
 
     onToggle();
   };
+
+  console.log(fileToEdit);
 
   const handleUploadFiles = async () => {
     dispatch({
@@ -291,6 +302,7 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
             currentStep === 'edit-new' ? handleSubmitEditNewFile : handleSubmitEditExistingFile
           }
           onToggle={handleToggle}
+          ref={currentStep === 'edit' ? editModalRef : null}
           setCropResult={handleSetCropResult}
           withBackButton={withBackButton}
         />
@@ -321,9 +333,25 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
             </Button>
           )}
           {currentStep === 'edit' && (
-            <Button color="success" type="button" onClick={handleSubmitEditExistingFile}>
-              {formatMessage({ id: 'form.button.finish' })}
-            </Button>
+            <div style={{ margin: 'auto 0' }}>
+              <Button
+                key="replace"
+                color="primary"
+                onClick={handleReplaceMedia}
+                style={{ marginRight: 10 }}
+              >
+                Replace media
+              </Button>
+
+              <Button
+                key="success"
+                color="success"
+                type="button"
+                onClick={handleSubmitEditExistingFile}
+              >
+                {formatMessage({ id: 'form.button.finish' })}
+              </Button>
+            </div>
           )}
         </section>
       </ModalFooter>

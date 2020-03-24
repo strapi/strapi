@@ -36,7 +36,10 @@ describe('Upload | containers | HomePage | reducer', () => {
       count: receivedDataCount,
     };
 
-    const expectedState = state.set('data', receivedData).set('dataCount', receivedDataCount);
+    const expectedState = state
+      .set('data', receivedData)
+      .set('dataCount', receivedDataCount)
+      .set('isLoading', false);
 
     expect(reducer(state, action)).toEqual(expectedState);
   });

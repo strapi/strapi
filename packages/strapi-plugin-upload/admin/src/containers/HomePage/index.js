@@ -7,6 +7,7 @@ import {
   HeaderSearch,
   PageFooter,
   PopUpWarning,
+  LoadingIndicatorPage,
   useGlobalContext,
   generateFiltersFromSearch,
   generateSearchFromFilters,
@@ -46,7 +47,7 @@ const HomePage = () => {
   const { search } = useLocation();
   const isMounted = useIsMounted();
 
-  const { data, dataCount, dataToDelete } = reducerState.toJS();
+  const { data, dataCount, dataToDelete, isLoading } = reducerState.toJS();
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
   const paramsKeys = ['_limit', '_start', '_q', '_sort'];
   const debouncedSearch = useDebounce(searchValue, 300);
@@ -89,6 +90,10 @@ const HomePage = () => {
   };
 
   const fetchData = async () => {
+    dispatch({
+      type: 'GET_DATA',
+    });
+
     const dataRequestURL = getRequestUrl('files');
 
     try {
@@ -98,8 +103,12 @@ const HomePage = () => {
 
       return Promise.resolve(data);
     } catch (err) {
+      strapi.notification.error('notification.error');
+
       if (isMounted) {
-        strapi.notification.error('notification.error');
+        dispatch({
+          type: 'GET_DATA_ERROR',
+        });
       }
     }
 
@@ -189,6 +198,7 @@ const HomePage = () => {
     setIsModalOpen(prev => !prev);
 
     if (refetch) {
+      console.log('lllll');
       fetchListData();
     }
   };
@@ -276,6 +286,10 @@ const HomePage = () => {
     hasSomeCheckboxSelected;
 
   const selectedItems = dataToDelete.map(item => item.id);
+
+  if (isLoading) {
+    return <LoadingIndicatorPage />;
+  }
 
   return (
     <Container>

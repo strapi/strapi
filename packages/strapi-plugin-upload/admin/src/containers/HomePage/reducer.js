@@ -4,16 +4,22 @@ const initialState = fromJS({
   data: [],
   dataCount: 0,
   dataToDelete: [],
+  isLoading: true,
 });
 
 const reducer = (state, action) => {
   switch (action.type) {
     case 'CLEAR_DATA_TO_DELETE':
       return state.update('dataToDelete', () => fromJS([]));
+    case 'GET_DATA':
+      return state.update('isLoading', () => true);
+    case 'GET_DATA_ERROR':
+      return state.update('isLoading', () => false);
     case 'GET_DATA_SUCCEEDED':
       return state
         .update('data', () => fromJS(action.data))
-        .update('dataCount', () => action.count);
+        .update('dataCount', () => action.count)
+        .update('isLoading', () => false);
     case 'ON_CHANGE_DATA_TO_DELETE': {
       const { value, id } = action;
 

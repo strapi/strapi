@@ -21,7 +21,11 @@ const CardPreview = ({ hasError, url, type }) => {
 
   return (
     <Wrapper isFile={isFile}>
-      {isFile ? <FileIcon ext={getExtension(type)} /> : <Image src={url} />}
+      {isFile ? (
+        <FileIcon ext={getExtension(type)} />
+      ) : (
+        <Image src={`${url}?${performance.now()}`} />
+      )}
     </Wrapper>
   );
 };

@@ -29,7 +29,14 @@ const List = ({ data, onChange, onClickEditFile, selectedItems }) => {
                     url={`${strapi.backendURL}${url}`}
                   >
                     <CardControlsWrapper leftAlign className="card-control-wrapper">
-                      <Checkbox name={`${id}`} onChange={onChange} value={checked} />
+                      <Checkbox
+                        name={`${id}`}
+                        onChange={onChange}
+                        value={checked}
+                        onClick={e => {
+                          e.stopPropagation();
+                        }}
+                      />
                     </CardControlsWrapper>
                   </Card>
                 </div>
