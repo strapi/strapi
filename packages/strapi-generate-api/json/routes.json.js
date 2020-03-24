@@ -107,7 +107,6 @@ module.exports = scope => {
 
   // if routes.json already exists, then merge
   if (fs.existsSync(scope.rootPath)) {
-    console.log('pouet');
     let current = require(scope.rootPath);
     fs.unlinkSync(scope.rootPath);
     routes = _.concat(routes, _.differenceWith(current.routes, routes, _.isEqual));
