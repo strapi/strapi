@@ -6,7 +6,12 @@ import { Inputs } from '@buffetjs/custom';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
-import { getTrad, prefixFileUrlWithBackendUrl } from '../../utils';
+import {
+  canDownloadFile,
+  createFileToDownloadName,
+  getTrad,
+  prefixFileUrlWithBackendUrl,
+} from '../../utils';
 import CardControl from '../CardControl';
 import CardControlsWrapper from '../CardControlsWrapper';
 import CardPreview from '../CardPreview';
@@ -35,12 +40,14 @@ const EditForm = ({
   const [src, setSrc] = useState(null);
 
   const fileURL = get(fileToEdit, ['file', 'url'], null);
+  const isFileDownloadable = canDownloadFile(fileURL);
   const prefixedFileURL = fileURL ? prefixFileUrlWithBackendUrl(fileURL) : null;
+  const downloadFileName = isFileDownloadable ? createFileToDownloadName(fileToEdit) : null;
   const mimeType = get(fileToEdit, ['file', 'type'], null) || get(fileToEdit, ['file', 'mime'], '');
   const isImg = isImageType(mimeType);
-  // TODO
   const canCrop = isImg && !mimeType.includes('svg');
 
+  const aRef = useRef();
   const imgRef = useRef();
   let cropper = useRef();
 
@@ -140,6 +147,10 @@ const EditForm = ({
     strapi.notification.info(getTrad('notification.link-copied'));
   };
 
+  const handleClickDownload = () => {
+    aRef.current.click();
+  };
+
   const handleSubmit = e => {
     e.preventDefault();
 
@@ -158,9 +169,27 @@ const EditForm = ({
                     <>
                       <CardControl color="#9EA7B8" type="trash-alt" onClick={handleClickDelete} />
                       {fileURL && (
-                        <CopyToClipboard onCopy={handleCopy} text={prefixedFileURL}>
-                          <CardControl color="#9EA7B8" type="link" onClick={handleClickDelete} />
-                        </CopyToClipboard>
+                        <>
+                          <CardControl
+                            color="#9EA7B8"
+                            type="download"
+                            onClick={handleClickDownload}
+                          />
+                          {isFileDownloadable && (
+                            <a
+                              href={fileURL}
+                              title={fileToEdit.fileInfo.name}
+                              download={downloadFileName}
+                              style={{ display: 'none' }}
+                              ref={aRef}
+                            >
+                              hidden
+                            </a>
+                          )}
+                          <CopyToClipboard onCopy={handleCopy} text={prefixedFileURL}>
+                            <CardControl color="#9EA7B8" type="link" onClick={handleClickDelete} />
+                          </CopyToClipboard>
+                        </>
                       )}
                       {canCrop && (
                         <CardControl type="crop" color="#9EA7B8" onClick={handleToggleCropMode} />

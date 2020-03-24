@@ -1,3 +1,5 @@
+export { default as canDownloadFile } from './canDownloadFile';
+export { default as createFileToDownloadName } from './createFileToDownloadName';
 export { default as createMatrix } from './createMatrix';
 export { default as formatBytes } from './formatBytes';
 export { default as formatFileForEditing } from './formatFileForEditing';
