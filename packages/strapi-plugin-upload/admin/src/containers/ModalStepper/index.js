@@ -1,18 +1,20 @@
-import React, { useEffect, useReducer, useRef } from 'react';
+import React, { useEffect, useState, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { Modal, ModalFooter, useGlobalContext, request } from 'strapi-helper-plugin';
+import { Modal, ModalFooter, PopUpWarning, useGlobalContext, request } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
+import { getRequestUrl, getTrad } from '../../utils';
 import ModalHeader from '../../components/ModalHeader';
 import stepper from './utils/stepper';
 import init from './init';
 import reducer, { initialState } from './reducer';
-import { getTrad } from '../../utils';
 
 const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onToggle }) => {
   const { formatMessage } = useGlobalContext();
+  const [isWarningDeleteOpen, setIsWarningDeleteOpen] = useState(false);
+  const [shouldDeleteFile, setShouldDeleteFile] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { currentStep, fileToEdit, filesToUpload } = reducerState.toJS();
   const { Component, headers, next, prev, withBackButton } = stepper[currentStep];
@@ -72,6 +74,26 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
     });
   };
 
+  const handleConfirmDeleteFile = () => {
+    toggleModalWarning();
+    setShouldDeleteFile(true);
+    // const { id } = fileToEdit;
+
+    // try {
+    //   const requestURL = getRequestUrl(`files/${id}`);
+
+    //   await request(requestURL, { method: 'DELETE' });
+
+    //   toggleRef.current(true);
+    // } catch (err) {
+    //   console.log(err);
+    // }
+  };
+
+  const handleClickDeleteFile = async () => {
+    toggleModalWarning();
+  };
+
   const handleClickDeleteFileToUpload = fileIndex => {
     dispatch({
       type: 'REMOVE_FILE_TO_UPLOAD',
@@ -87,12 +109,29 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
     }
   };
 
-  const handleClosed = () => {
+  const handleClose = () => {
     onClosed();
 
     dispatch({
       type: 'RESET_PROPS',
     });
+  };
+
+  const handleCloseModalWarning = async () => {
+    if (shouldDeleteFile) {
+      const { id } = fileToEdit;
+
+      try {
+        const requestURL = getRequestUrl(`files/${id}`);
+
+        await request(requestURL, { method: 'DELETE' });
+
+        setShouldDeleteFile(false);
+        toggleRef.current(true);
+      } catch (err) {
+        console.log(err);
+      }
+    }
   };
 
   const handleGoToEditNewFile = fileIndex => {
@@ -269,86 +308,101 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
     });
   };
 
+  const toggleModalWarning = () => {
+    setIsWarningDeleteOpen(prev => !prev);
+  };
+
   return (
-    <Modal isOpen={isOpen} onToggle={handleToggle} onClosed={handleClosed}>
-      {/* header title */}
-      <ModalHeader
-        goBack={goBack}
-        headers={headers.map(headerTrad => ({
-          key: headerTrad,
-          element: <FormattedMessage id={headerTrad} />,
-        }))}
-        withBackButton={withBackButton}
-      />
-      {/* body of the modal */}
-      {Component && (
-        <Component
-          addFilesToUpload={addFilesToUpload}
-          fileToEdit={fileToEdit}
-          filesToUpload={filesToUpload}
-          onChange={handleChange}
-          onClickCancelUpload={handleCancelFileToUpload}
-          onClickDeleteFileToUpload={handleClickDeleteFileToUpload}
-          onClickEditNewFile={handleGoToEditNewFile}
-          onGoToAddBrowseFiles={handleGoToAddBrowseFiles}
-          onSubmitEdit={
-            currentStep === 'edit-new' ? handleSubmitEditNewFile : handleSubmitEditExistingFile
-          }
-          onToggle={handleToggle}
-          ref={currentStep === 'edit' ? editModalRef : null}
-          setCropResult={handleSetCropResult}
+    <>
+      <Modal isOpen={isOpen} onToggle={handleToggle} onClosed={handleClose}>
+        {/* header title */}
+        <ModalHeader
+          goBack={goBack}
+          headers={headers.map(headerTrad => ({
+            key: headerTrad,
+            element: <FormattedMessage id={headerTrad} />,
+          }))}
           withBackButton={withBackButton}
         />
-      )}
+        {/* body of the modal */}
+        {Component && (
+          <Component
+            addFilesToUpload={addFilesToUpload}
+            fileToEdit={fileToEdit}
+            filesToUpload={filesToUpload}
+            onChange={handleChange}
+            onClickCancelUpload={handleCancelFileToUpload}
+            onClickDeleteFileToUpload={
+              currentStep === 'edit-new' ? handleClickDeleteFileToUpload : handleClickDeleteFile
+            }
+            onClickEditNewFile={handleGoToEditNewFile}
+            onGoToAddBrowseFiles={handleGoToAddBrowseFiles}
+            onSubmitEdit={
+              currentStep === 'edit-new' ? handleSubmitEditNewFile : handleSubmitEditExistingFile
+            }
+            onToggle={handleToggle}
+            ref={currentStep === 'edit' ? editModalRef : null}
+            setCropResult={handleSetCropResult}
+            withBackButton={withBackButton}
+          />
+        )}
 
-      <ModalFooter>
-        <section>
-          <Button type="button" color="cancel" onClick={handleToggle}>
-            {formatMessage({ id: 'app.components.Button.cancel' })}
-          </Button>
-          {currentStep === 'upload' && (
-            <Button type="button" color="success" onClick={handleUploadFiles}>
-              {formatMessage(
-                {
-                  id: getTrad(
-                    `modal.upload-list.footer.button.${
-                      filesToUploadLength > 1 ? 'plural' : 'singular'
-                    }`
-                  ),
-                },
-                { number: filesToUploadLength }
-              )}
+        <ModalFooter>
+          <section>
+            <Button type="button" color="cancel" onClick={handleToggle}>
+              {formatMessage({ id: 'app.components.Button.cancel' })}
             </Button>
-          )}
-          {currentStep === 'edit-new' && (
-            <Button color="success" type="button" onClick={handleSubmitEditNewFile}>
-              {formatMessage({ id: 'form.button.finish' })}
-            </Button>
-          )}
-          {currentStep === 'edit' && (
-            <div style={{ margin: 'auto 0' }}>
-              <Button
-                key="replace"
-                color="primary"
-                onClick={handleReplaceMedia}
-                style={{ marginRight: 10 }}
-              >
-                Replace media
+            {currentStep === 'upload' && (
+              <Button type="button" color="success" onClick={handleUploadFiles}>
+                {formatMessage(
+                  {
+                    id: getTrad(
+                      `modal.upload-list.footer.button.${
+                        filesToUploadLength > 1 ? 'plural' : 'singular'
+                      }`
+                    ),
+                  },
+                  { number: filesToUploadLength }
+                )}
               </Button>
-
-              <Button
-                key="success"
-                color="success"
-                type="button"
-                onClick={handleSubmitEditExistingFile}
-              >
+            )}
+            {currentStep === 'edit-new' && (
+              <Button color="success" type="button" onClick={handleSubmitEditNewFile}>
                 {formatMessage({ id: 'form.button.finish' })}
               </Button>
-            </div>
-          )}
-        </section>
-      </ModalFooter>
-    </Modal>
+            )}
+            {currentStep === 'edit' && (
+              <div style={{ margin: 'auto 0' }}>
+                <Button
+                  key="replace"
+                  color="primary"
+                  onClick={handleReplaceMedia}
+                  style={{ marginRight: 10 }}
+                >
+                  Replace media
+                </Button>
+
+                <Button
+                  key="success"
+                  color="success"
+                  type="button"
+                  onClick={handleSubmitEditExistingFile}
+                >
+                  {formatMessage({ id: 'form.button.finish' })}
+                </Button>
+              </div>
+            )}
+          </section>
+        </ModalFooter>
+      </Modal>
+      <PopUpWarning
+        onClosed={handleCloseModalWarning}
+        isOpen={isWarningDeleteOpen}
+        toggleModal={toggleModalWarning}
+        popUpWarningType="danger"
+        onConfirm={handleConfirmDeleteFile}
+      />
+    </>
   );
 };
 

@@ -199,6 +199,7 @@ const HomePage = () => {
 
     if (refetch) {
       fetchListData();
+      resetModalState();
     }
   };
 
@@ -227,14 +228,18 @@ const HomePage = () => {
   };
 
   const handleModalClose = () => {
-    setModalInitialStep('browse');
-    setFileToEdit(null);
+    resetModalState();
   };
 
   const handleSelectAll = () => {
     dispatch({
       type: 'TOGGLE_SELECT_ALL',
     });
+  };
+
+  const resetModalState = () => {
+    setModalInitialStep('browse');
+    setFileToEdit(null);
   };
 
   const headerProps = {

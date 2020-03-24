@@ -36,6 +36,7 @@ function PopUpWarning({
   onlyConfirmButton,
   popUpWarningType,
   toggleModal,
+  ...rest
 }) {
   const buttons = [
     {
@@ -66,18 +67,14 @@ function PopUpWarning({
 
   return (
     <Wrapper>
-      <StyledModal isOpen={isOpen} toggle={toggleModal}>
+      <StyledModal isOpen={isOpen} toggle={toggleModal} {...rest}>
         <StyledHeader toggle={toggleModal}>
-          <FormattedMessage
-            id={content.title || 'components.popUpWarning.title'}
-          />
+          <FormattedMessage id={content.title || 'components.popUpWarning.title'} />
         </StyledHeader>
         <StyledBody>
           <div className="modalBodyContainerHelper">
             <img src={icons[popUpWarningType]} alt="icon" />
-            <FormattedMessage
-              id={content.message || 'components.popUpWarning.message'}
-            >
+            <FormattedMessage id={content.message || 'components.popUpWarning.message'}>
               {message => <p>{message}</p>}
             </FormattedMessage>
           </div>
