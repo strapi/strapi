@@ -129,6 +129,58 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
     goNext();
   };
 
+  const handleSubmitEditExistingFile = async (e, shouldDuplicateMedia = false) => {
+    e.preventDefault();
+
+    dispatch({
+      type: 'ON_SUBMIT_EDIT_EXISTING_FILE',
+    });
+
+    const headers = {};
+    const formData = new FormData();
+
+    // The endpoints are different when we want to just update the file infos
+    const didCropFile = fileToEdit.file instanceof File;
+    const { abortController, id, file, fileInfo } = fileToEdit;
+    let requestURL = shouldDuplicateMedia ? `/${pluginId}` : `/${pluginId}?id=${id}`;
+
+    if (didCropFile) {
+      formData.append('files', file);
+      formData.append('fileInfo', JSON.stringify(fileInfo));
+
+      try {
+        await request(
+          requestURL,
+          {
+            method: 'POST',
+            headers,
+            body: formData,
+            signal: abortController.signal,
+          },
+          false,
+          false
+        );
+      } catch (err) {
+        console.log(err);
+      }
+    } else {
+      requestURL = `/${pluginId}/files/${id}`;
+
+      // The following will not work waiting for the back-end to be ready
+      try {
+        await request(requestURL, { method: 'PUT', body: fileInfo });
+        // Do something
+      } catch (err) {
+        // Do something with error
+
+        console.log('err');
+      }
+    }
+
+    console.log('submit', shouldDuplicateMedia);
+    console.log({ fileToEdit });
+  };
+
   const handleToggle = () => {
     if (filesToUploadLength > 0) {
       // eslint-disable-next-line no-alert
@@ -235,7 +287,9 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
           onClickDeleteFileToUpload={handleClickDeleteFileToUpload}
           onClickEditNewFile={handleGoToEditNewFile}
           onGoToAddBrowseFiles={handleGoToAddBrowseFiles}
-          onSubmitEditNewFile={handleSubmitEditNewFile}
+          onSubmitEdit={
+            currentStep === 'edit-new' ? handleSubmitEditNewFile : handleSubmitEditExistingFile
+          }
           onToggle={handleToggle}
           setCropResult={handleSetCropResult}
           withBackButton={withBackButton}
@@ -263,6 +317,11 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
           )}
           {currentStep === 'edit-new' && (
             <Button color="success" type="button" onClick={handleSubmitEditNewFile}>
+              {formatMessage({ id: 'form.button.finish' })}
+            </Button>
+          )}
+          {currentStep === 'edit' && (
+            <Button color="success" type="button" onClick={handleSubmitEditExistingFile}>
               {formatMessage({ id: 'form.button.finish' })}
             </Button>
           )}

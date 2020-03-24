@@ -1,12 +1,19 @@
 import { pick } from 'lodash';
 
 const formatFileForEditing = file => {
+  const abortController = new AbortController();
+
   return {
+    abortController,
+    id: file.id,
     file: {
-      ...pick(file, ['size', 'ext', 'width', 'height', 'url', 'mime']),
+      ...pick(file, ['size', 'ext', 'width', 'height', 'url', 'mime', 'name']),
       created_at: file.created_at || file.createdAt,
     },
     fileInfo: pick(file, ['alternativeText', 'caption', 'name']),
+    hasError: false,
+    errorMessage: null,
+    isUploading: false,
   };
 };
 

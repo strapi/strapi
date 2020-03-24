@@ -30,7 +30,7 @@ const EditForm = ({
   fileToEdit,
   onChange,
   onClickDeleteFileToUpload,
-  onSubmitEditNewFile,
+  onSubmitEdit,
   setCropResult,
 }) => {
   const { formatMessage } = useGlobalContext();
@@ -154,7 +154,7 @@ const EditForm = ({
   const handleSubmit = e => {
     e.preventDefault();
 
-    onSubmitEditNewFile(e);
+    onSubmitEdit(e);
   };
 
   return (
@@ -276,7 +276,7 @@ EditForm.defaultProps = {
   fileToEdit: null,
   onChange: () => {},
   onClickDeleteFileToUpload: () => {},
-  onSubmitEditNewFile: e => e.preventDefault(),
+  onSubmitEdit: e => e.preventDefault(),
   setCropResult: () => {},
 };
 
@@ -284,7 +284,7 @@ EditForm.propTypes = {
   fileToEdit: PropTypes.object,
   onChange: PropTypes.func,
   onClickDeleteFileToUpload: PropTypes.func,
-  onSubmitEditNewFile: PropTypes.func,
+  onSubmitEdit: PropTypes.func,
   setCropResult: PropTypes.func,
 };
 

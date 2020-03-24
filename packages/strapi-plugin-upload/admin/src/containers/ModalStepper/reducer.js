@@ -36,6 +36,8 @@ const reducer = (state, action) => {
         .updateIn(['filesToUpload', originalIndex], () => state.get('fileToEdit'))
         .update('fileToEdit', () => null);
     }
+    case 'ON_SUBMIT_EDIT_EXISTING_FILE':
+      return state.updateIn(['fileToEdit', 'isUploading'], () => true);
     case 'REMOVE_FILE_TO_UPLOAD':
       return state.update('filesToUpload', list => {
         return list.filter(data => data.get('originalIndex') !== action.fileIndex);

@@ -22,10 +22,14 @@ describe('UPLOAD | utils | formatFileForEditing', () => {
       formats: null,
       provider_metadata: null,
     };
+    const abortController = new AbortController();
 
     const expected = {
+      abortController,
+      id: 12,
       file: {
         size: 22.8,
+        name: 'test',
         ext: '.png',
         width: 110,
         height: 110,
@@ -38,6 +42,9 @@ describe('UPLOAD | utils | formatFileForEditing', () => {
         alternativeText: 'test',
         name: 'test',
       },
+      hasError: false,
+      errorMessage: null,
+      isUploading: false,
     };
 
     expect(formatFileForEditing(data)).toEqual(expected);
@@ -64,11 +71,14 @@ describe('UPLOAD | utils | formatFileForEditing', () => {
       formats: null,
       provider_metadata: null,
     };
-
+    const abortController = new AbortController();
     const expected = {
+      abortController,
+      id: 12,
       file: {
         size: 22.8,
         ext: '.png',
+        name: 'test',
         width: 110,
         height: 110,
         created_at: '2020-03-23T11:43:46.729Z',
@@ -80,6 +90,9 @@ describe('UPLOAD | utils | formatFileForEditing', () => {
         caption: 'test',
         name: 'test',
       },
+      hasError: false,
+      errorMessage: null,
+      isUploading: false,
     };
 
     expect(formatFileForEditing(data)).toEqual(expected);
