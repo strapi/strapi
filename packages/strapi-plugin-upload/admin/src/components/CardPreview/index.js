@@ -5,11 +5,13 @@ import { getExtension, getType } from '../../utils';
 
 import BrokenFile from '../../icons/BrokenFile';
 import FileIcon from '../FileIcon';
+import VideoPreview from '../VideoPreview';
 import Wrapper from './Wrapper';
 import Image from './Image';
 
 const CardPreview = ({ hasError, url, type }) => {
   const isFile = getType(type) === 'file';
+  const isVideo = getType(type) === 'video';
 
   if (hasError) {
     return (
@@ -19,9 +21,27 @@ const CardPreview = ({ hasError, url, type }) => {
     );
   }
 
+  if (isFile) {
+    return (
+      <Wrapper isFile>
+        <FileIcon ext={getExtension(type)} />
+      </Wrapper>
+    );
+  }
+
   return (
-    <Wrapper isFile={isFile}>
-      {isFile ? <FileIcon ext={getExtension(type)} /> : <Image src={url} />}
+    <Wrapper>
+      {isVideo ? (
+        <VideoPreview
+          src={url}
+          thumebnailHandler={thumbnail => console.log(thumbnail)}
+          // width={120}
+          // height={80}
+          snapshotAtTime={0}
+        />
+      ) : (
+        <Image src={url} />
+      )}
     </Wrapper>
   );
 };
