@@ -139,10 +139,23 @@ module.exports = {
       height,
     });
 
-    const res = await this.add(fileData);
+    return this.add(fileData);
+  },
 
-    strapi.eventHub.emit('media.create', { media: res });
-    return res;
+  async updateFileInfo(id, { name, alternativeText, caption }) {
+    const dbFile = await this.fetch({ id });
+
+    if (!dbFile) {
+      throw strapi.errors.notFound('file not found');
+    }
+
+    const newInfos = _.assign({}, dbFile, {
+      name: _.isNil(name) ? dbFile.name : name,
+      alternativeText: _.isNil(alternativeText) ? dbFile.alternativeText : alternativeText,
+      caption: _.isNil(caption) ? dbFile.caption : caption,
+    });
+
+    return this.update({ id }, newInfos);
   },
 
   async replace(id, { data, file }) {
@@ -214,18 +227,19 @@ module.exports = {
       height,
     });
 
-    const res = await this.update({ id }, fileData);
-    strapi.eventHub.emit('media.update', { media: res });
+    return this.update({ id }, fileData);
+  },
 
+  async update(params, values) {
+    const res = await strapi.query('file', 'upload').update(params, values);
+    strapi.eventHub.emit('media.update', { media: res });
     return res;
   },
 
-  update(params, values) {
-    return strapi.query('file', 'upload').update(params, values);
-  },
-
-  add(values) {
-    return strapi.query('file', 'upload').create(values);
+  async add(values) {
+    const res = await strapi.query('file', 'upload').create(values);
+    strapi.eventHub.emit('media.create', { media: res });
+    return res;
   },
 
   fetch(params) {
