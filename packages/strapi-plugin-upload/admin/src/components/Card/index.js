@@ -1,52 +1,94 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Checkbox } from '@buffetjs/core';
 
+import { formatBytes, getExtension, getType } from '../../utils';
+
+import Flex from '../Flex';
 import Text from '../Text';
 import CardImgWrapper from '../CardImgWrapper';
 import CardPreview from '../CardPreview';
+import Tag from '../Tag';
 import Wrapper from './Wrapper';
 import Title from './Title';
+import ErrorMessage from './ErrorMessage';
+import Border from './Border';
 
-// TODO - adapt with the real data
-const Card = ({ checked, id, name, size, small, type, onChange, url }) => {
+const Card = ({
+  id,
+  checked,
+  children,
+  errorMessage,
+  hasError,
+  mime,
+  name,
+  onClick,
+  small,
+  size,
+  type,
+  url,
+  withFileCaching,
+}) => {
+  const fileSize = formatBytes(size, 0);
+  const fileType = mime || type;
+
+  const handleClick = () => {
+    onClick(id);
+  };
+
   return (
-    <Wrapper>
-      <div>
-        <CardImgWrapper small={small} checked={checked}>
-          <CardPreview type={type} url={url} />
-          <div className="card-control-wrapper">
-            <Checkbox name={id} onChange={onChange} value={checked} />
-          </div>
-        </CardImgWrapper>
-        <Title fontSize="md" fontWeight="bold" ellipsis>
-          {name}
-        </Title>
-        <Text color="grey" fontSize="xs" ellipsis>{`${type} - ${size}`}</Text>
-      </div>
+    <Wrapper onClick={handleClick}>
+      <CardImgWrapper checked={checked} small={small}>
+        <CardPreview
+          hasError={hasError}
+          url={url}
+          type={fileType}
+          withFileCaching={withFileCaching}
+        />
+        <Border color={hasError ? 'orange' : 'mediumBlue'} shown={checked || hasError} />
+        {children}
+      </CardImgWrapper>
+      <Flex>
+        <Title>{name}</Title>
+        <Tag label={getType(fileType)} />
+      </Flex>
+      <Text color="grey" fontSize="xs" ellipsis>
+        {`${getExtension(fileType)} - ${fileSize}`}
+      </Text>
+      {hasError && <ErrorMessage>{errorMessage}</ErrorMessage>}
     </Wrapper>
   );
 };
 
 Card.defaultProps = {
   checked: false,
+  children: null,
+  errorMessage: null,
+  id: null,
+  hasError: false,
+  mime: null,
   name: null,
-  onChange: () => {},
+  onClick: () => {},
   size: 0,
   small: false,
   type: null,
   url: null,
+  withFileCaching: true,
 };
 
 Card.propTypes = {
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   checked: PropTypes.bool,
+  children: PropTypes.node,
+  errorMessage: PropTypes.string,
+  hasError: PropTypes.bool,
+  mime: PropTypes.string,
   name: PropTypes.string,
-  id: PropTypes.string.isRequired,
-  onChange: PropTypes.func,
+  onClick: PropTypes.func,
   size: PropTypes.number,
   small: PropTypes.bool,
   type: PropTypes.string,
   url: PropTypes.string,
+  withFileCaching: PropTypes.bool,
 };
 
 export default Card;

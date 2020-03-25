@@ -6,19 +6,16 @@ const Wrapper = styled.div(({ isActive, isDisabled, theme }) => {
   const baseStyle = {
     color: '#9ea7b8',
     cursor,
-    fontSize: theme.main.fontSizes.sm,
+    fontSize: theme.main.sizes.fonts.sm,
     fontWeight: theme.main.fontWeights.bold,
     letterSpacing: '0.7px',
-    marginTop: '34px',
-    marginRight: '30px',
     textTransform: 'uppercase',
+    height: '3rem',
   };
 
   if (isActive) {
     return {
       ...baseStyle,
-      height: '3rem',
-      color: '#007eff',
       borderBottom: '2px solid #007eff',
       zIndex: 99,
     };

@@ -7,7 +7,7 @@ import FiltersPicker from '../FiltersPicker';
 const Filters = ({ onChange, onClick, filters }) => {
   return (
     <>
-      <FiltersPicker onChange={onChange} />
+      <FiltersPicker filters={filters} onChange={onChange} />
       <FiltersList filters={filters} onClick={onClick} />
     </>
   );

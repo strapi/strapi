@@ -2,15 +2,11 @@ import React, { useEffect, useReducer, useRef } from 'react';
 import { Header, Inputs } from '@buffetjs/custom';
 import { useIsMounted } from '@buffetjs/hooks';
 import { isEqual } from 'lodash';
-import {
-  LoadingIndicatorPage,
-  useGlobalContext,
-  request,
-} from 'strapi-helper-plugin';
-import getRequestUrl from '../../utils/getRequestUrl';
-import getTrad from '../../utils/getTrad';
+import { LoadingIndicatorPage, useGlobalContext, request } from 'strapi-helper-plugin';
+
+import { getRequestUrl, getTrad } from '../../utils';
 import Text from '../../components/Text';
-import Divider from './Divider';
+// import Divider from './Divider';
 import SectionTitleWrapper from './SectionTitleWrapper';
 import Wrapper from './Wrapper';
 import init from './init';
@@ -27,9 +23,7 @@ const SettingsPage = () => {
   getDataRef.current = async () => {
     try {
       const { signal } = abortController;
-      const { data } = await request(
-        getRequestUrl('settings', { method: 'GET', signal })
-      );
+      const { data } = await request(getRequestUrl('settings', { method: 'GET', signal }));
 
       if (isMounted) {
         dispatch({
@@ -150,6 +144,8 @@ const SettingsPage = () => {
               />
             </div>
           </div>
+
+          {/*
           <Divider />
           <div className="row">
             <SectionTitleWrapper className="col-12">
@@ -171,7 +167,7 @@ const SettingsPage = () => {
                 value={modifiedData.videoPreview}
               />
             </div>
-          </div>
+          </div> */}
         </div>
       </Wrapper>
     </>

@@ -8,15 +8,17 @@ const Wrapper = styled.div`
   top: 0;
   left: 0;
   display: flex;
-  background-color: ${({ isImg }) => (isImg ? '#333740' : '#F2F3F4')};
+  justify-content: center;
+  align-items: center;
+  background-color: ${({ isFile }) => (isFile ? '#F2F3F4' : '#333740')};
 `;
 
 Wrapper.defaultProps = {
-  isImg: false,
+  isFile: false,
 };
 
 Wrapper.propTypes = {
-  isImg: PropTypes.bool,
+  isFile: PropTypes.bool,
 };
 
 export default Wrapper;

@@ -4,7 +4,7 @@ import { FormattedMessage } from 'react-intl';
 
 import { Select } from '@buffetjs/core';
 import { getFilterType } from 'strapi-helper-plugin';
-import getTrad from '../../../utils/getTrad';
+import { getTrad } from '../../../utils';
 
 import reducer, { initialState } from './reducer';
 
@@ -47,10 +47,20 @@ const FiltersCard = ({ onChange }) => {
     ));
   };
 
+  const renderNamesOptions = () => {
+    return Object.keys(filters).map(key => {
+      return (
+        <option key={key} value={key}>
+          {key === 'mime' ? 'type' : key}
+        </option>
+      );
+    });
+  };
+
   return (
     <Wrapper>
       <InputWrapper>
-        <Select onChange={handleChange} name="name" options={Object.keys(filters)} value={name} />
+        <Select onChange={handleChange} name="name" options={renderNamesOptions()} value={name} />
       </InputWrapper>
       <InputWrapper>
         <Select
@@ -65,7 +75,7 @@ const FiltersCard = ({ onChange }) => {
           type={type}
           onChange={handleChange}
           name="value"
-          options={['image', 'video', 'files']}
+          options={['image', 'video', 'file']}
           value={value}
         />
       </InputWrapper>

@@ -5,11 +5,7 @@ const FileWrapper = styled(CardImgWrapper)`
   height: 401px;
   width: 100%;
   display: flex;
-  > img {
-    width: 100%;
-    object-fit: contain;
-    margin: auto;
-  }
+  position: relative;
 
   .cropper-view-box {
     outline-color: ${({ theme }) => theme.main.colors.white};

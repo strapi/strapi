@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
 import { Carret } from '@buffetjs/icons';
-import getTrad from '../../utils/getTrad';
+import { getTrad } from '../../utils';
 
 import SortList from '../SortList';
 import Picker from '../Picker';

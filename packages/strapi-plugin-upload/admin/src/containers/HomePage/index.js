@@ -1,29 +1,37 @@
 import React, { useReducer, useState, useEffect } from 'react';
-import { includes } from 'lodash';
+import { includes, toString } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
-import { useDebounce } from '@buffetjs/hooks';
+import { useDebounce, useIsMounted } from '@buffetjs/hooks';
 import {
   HeaderSearch,
   PageFooter,
+  PopUpWarning,
+  LoadingIndicatorPage,
   useGlobalContext,
   generateFiltersFromSearch,
   generateSearchFromFilters,
   request,
   useQuery,
 } from 'strapi-helper-plugin';
-
-import getTrad from '../../utils/getTrad';
-import getRequestUrl from '../../utils/getRequestUrl';
+import {
+  formatFileForEditing,
+  getRequestUrl,
+  getTrad,
+  generatePageFromStart,
+  generateStartFromPage,
+} from '../../utils';
+import CheckControl from '../../components/CheckControl';
 import Container from '../../components/Container';
 import ControlsWrapper from '../../components/ControlsWrapper';
+import Padded from '../../components/Padded';
 import SelectAll from '../../components/SelectAll';
 import SortPicker from '../../components/SortPicker';
 import Filters from '../../components/Filters';
 import List from '../../components/List';
 import ListEmpty from '../../components/ListEmpty';
 import ModalStepper from '../ModalStepper';
-import { generatePageFromStart, generateStartFromPage, getHeaderLabel } from './utils';
+import { deleteFilters, generateStringParamsFromQuery, getHeaderLabel } from './utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
@@ -31,12 +39,17 @@ const HomePage = () => {
   const { formatMessage } = useGlobalContext();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const query = useQuery();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [fileToEdit, setFileToEdit] = useState(null);
+  const [shouldRefetch, setShouldRefetch] = useState(false);
+  const [modalInitialStep, setModalInitialStep] = useState('browse');
   const [searchValue, setSearchValue] = useState(query.get('_q') || '');
   const { push } = useHistory();
   const { search } = useLocation();
+  const isMounted = useIsMounted();
 
-  const { data, dataToDelete } = reducerState.toJS();
+  const { data, dataCount, dataToDelete, isLoading } = reducerState.toJS();
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
   const paramsKeys = ['_limit', '_start', '_q', '_sort'];
   const debouncedSearch = useDebounce(searchValue, 300);
@@ -47,25 +60,70 @@ const HomePage = () => {
   }, [debouncedSearch]);
 
   useEffect(() => {
-    fetchData();
+    fetchListData();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
-  const fetchData = async () => {
-    const requestURL = getRequestUrl('files');
+  const deleteMedia = async id => {
+    const requestURL = getRequestUrl(`files/${id}`);
 
     try {
-      const data = await request(`${requestURL}${search}`, {
-        method: 'GET',
+      await request(requestURL, {
+        method: 'DELETE',
       });
+    } catch (err) {
+      if (isMounted) {
+        strapi.notification.error('notification.error');
+      }
+    }
+  };
 
+  const fetchListData = async () => {
+    const [data, count] = await Promise.all([fetchData(), fetchDataCount()]);
+
+    if (isMounted) {
       dispatch({
         type: 'GET_DATA_SUCCEEDED',
         data,
+        count,
       });
+    }
+  };
+
+  const fetchData = async () => {
+    const dataRequestURL = getRequestUrl('files');
+    const params = generateStringParamsFromQuery(query);
+
+    try {
+      const data = await request(`${dataRequestURL}?${params}`, {
+        method: 'GET',
+      });
+
+      return Promise.resolve(data);
     } catch (err) {
       strapi.notification.error('notification.error');
     }
+
+    return [];
+  };
+
+  const fetchDataCount = async () => {
+    const requestURL = getRequestUrl('files/count');
+
+    try {
+      const { count } = await request(requestURL, {
+        method: 'GET',
+      });
+
+      return Promise.resolve(count);
+    } catch (err) {
+      if (isMounted) {
+        strapi.notification.error('notification.error');
+      }
+    }
+
+    return null;
   };
 
   const getSearchParams = () => {
@@ -91,7 +149,7 @@ const HomePage = () => {
   const handleChangeCheck = ({ target: { name, value } }) => {
     dispatch({
       type: 'ON_CHANGE_DATA_TO_DELETE',
-      id: name,
+      id: parseInt(name, 10),
       value,
     });
   };
@@ -117,26 +175,65 @@ const HomePage = () => {
     setSearchValue(value);
   };
 
+  const handleClickEditFile = id => {
+    const file = formatFileForEditing(data.find(file => toString(file.id) === toString(id)));
+
+    setFileToEdit(file);
+    setModalInitialStep('edit');
+    handleClickToggleModal();
+  };
+
   const handleClearSearch = () => {
     setSearchValue('');
   };
 
   const handleClickToggleModal = (refetch = false) => {
-    setIsOpen(prev => !prev);
-
-    if (refetch) {
-      fetchData();
-    }
+    setIsModalOpen(prev => !prev);
+    setShouldRefetch(refetch);
   };
 
-  const handleDeleteFilter = index => {
-    // Remove filter
-    const updatedFilters = generateFiltersFromSearch(search);
-    updatedFilters.splice(index, 1);
+  const handleClickTogglePopup = () => {
+    setIsPopupOpen(prev => !prev);
+  };
+
+  const handleDeleteFilter = filter => {
+    const currentFilters = generateFiltersFromSearch(search);
+    const updatedFilters = deleteFilters(currentFilters, filter);
 
     handleChangeParams({
       target: { name: 'filters', value: updatedFilters },
     });
+  };
+
+  const handleDeleteMedias = async () => {
+    await Promise.all(dataToDelete.map(item => deleteMedia(item.id)));
+
+    dispatch({
+      type: 'CLEAR_DATA_TO_DELETE',
+    });
+
+    setIsPopupOpen(false);
+    fetchListData();
+  };
+
+  const handleModalClose = () => {
+    resetModalState();
+
+    if (shouldRefetch) {
+      fetchListData();
+      setShouldRefetch(false);
+    }
+  };
+
+  const handleSelectAll = () => {
+    dispatch({
+      type: 'TOGGLE_SELECT_ALL',
+    });
+  };
+
+  const resetModalState = () => {
+    setModalInitialStep('browse');
+    setFileToEdit(null);
   };
 
   const headerProps = {
@@ -147,8 +244,7 @@ const HomePage = () => {
       {
         id: getTrad(getHeaderLabel(data)),
       },
-      // Values
-      { number: 1 }
+      { number: dataCount }
     ),
     actions: [
       {
@@ -156,7 +252,7 @@ const HomePage = () => {
         color: 'cancel',
         // TradId from the strapi-admin package
         label: formatMessage({ id: 'app.utils.delete' }),
-        onClick: () => {},
+        onClick: () => setIsPopupOpen(true),
         type: 'button',
       },
       {
@@ -177,6 +273,20 @@ const HomePage = () => {
     _page: generatePageFromStart(start, limit),
   };
 
+  const paginationCount = data.length < limit ? data.length : dataCount;
+
+  const hasSomeCheckboxSelected = data.some(item =>
+    dataToDelete.find(itemToDelete => item.id === itemToDelete.id)
+  );
+
+  const areAllCheckboxesSelected =
+    data.every(item => dataToDelete.find(itemToDelete => item.id === itemToDelete.id)) &&
+    hasSomeCheckboxSelected;
+
+  if (isLoading) {
+    return <LoadingIndicatorPage />;
+  }
+
   return (
     <Container>
       <Header {...headerProps} />
@@ -189,7 +299,11 @@ const HomePage = () => {
         value={searchValue}
       />
       <ControlsWrapper>
-        <SelectAll />
+        <SelectAll
+          onChange={handleSelectAll}
+          checked={areAllCheckboxesSelected}
+          someChecked={hasSomeCheckboxSelected && !areAllCheckboxesSelected}
+        />
         <SortPicker onChange={handleChangeParams} value={query.get('_sort') || null} />
         <Filters
           onChange={handleChangeParams}
@@ -197,15 +311,40 @@ const HomePage = () => {
           onClick={handleDeleteFilter}
         />
       </ControlsWrapper>
-      <List onChange={handleChangeCheck} selectedItems={dataToDelete} />
-      <ListEmpty onClick={() => handleClickToggleModal()} />
-      <PageFooter
-        context={{ emitEvent: () => {} }}
-        count={50}
-        onChangeParams={handleChangeListParams}
-        params={params}
+      {dataCount > 0 ? (
+        <>
+          <List
+            data={data}
+            onChange={handleChangeCheck}
+            onClickEditFile={handleClickEditFile}
+            selectedItems={dataToDelete}
+          />
+          <PageFooter
+            context={{ emitEvent: () => {} }}
+            count={paginationCount}
+            onChangeParams={handleChangeListParams}
+            params={params}
+          />
+        </>
+      ) : (
+        <ListEmpty onClick={handleClickToggleModal} />
+      )}
+      <ModalStepper
+        initialFileToEdit={fileToEdit}
+        initialStep={modalInitialStep}
+        isOpen={isModalOpen}
+        onClosed={handleModalClose}
+        onToggle={handleClickToggleModal}
       />
-      <ModalStepper isOpen={isOpen} onToggle={handleClickToggleModal} />
+      <PopUpWarning
+        isOpen={isPopupOpen}
+        toggleModal={handleClickTogglePopup}
+        popUpWarningType="danger"
+        onConfirm={handleDeleteMedias}
+      />
+      <Padded bottom size="sm" />
+      <Padded bottom size="md" />
+      <CheckControl />
     </Container>
   );
 };
