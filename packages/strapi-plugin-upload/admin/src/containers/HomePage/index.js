@@ -92,10 +92,6 @@ const HomePage = () => {
   };
 
   const fetchData = async () => {
-    dispatch({
-      type: 'GET_DATA',
-    });
-
     const dataRequestURL = getRequestUrl('files');
     const params = generateStringParamsFromQuery(query);
 
@@ -107,12 +103,6 @@ const HomePage = () => {
       return Promise.resolve(data);
     } catch (err) {
       strapi.notification.error('notification.error');
-
-      if (isMounted) {
-        dispatch({
-          type: 'GET_DATA_ERROR',
-        });
-      }
     }
 
     return [];
@@ -200,11 +190,6 @@ const HomePage = () => {
   const handleClickToggleModal = (refetch = false) => {
     setIsModalOpen(prev => !prev);
     setShouldRefetch(refetch);
-
-    // if (refetch) {
-    //   fetchListData();
-    //   resetModalState();
-    // }
   };
 
   const handleClickTogglePopup = () => {

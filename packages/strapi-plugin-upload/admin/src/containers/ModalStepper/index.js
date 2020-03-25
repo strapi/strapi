@@ -189,7 +189,6 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
     const requestURL = shouldDuplicateMedia ? `/${pluginId}` : `/${pluginId}?id=${id}`;
 
     if (didCropFile) {
-      console.log('set');
       formData.append('files', file);
     }
 

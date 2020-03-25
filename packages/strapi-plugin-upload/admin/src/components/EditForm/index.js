@@ -161,6 +161,7 @@ const EditForm = forwardRef(
     const getCroppedResult = () => {
       return new Promise(resolve => {
         const canvas = cropper.current.getCroppedCanvas();
+
         canvas.toBlob(async blob => {
           const {
             file: { lastModifiedDate, lastModified, name },
@@ -199,12 +200,10 @@ const EditForm = forwardRef(
     const handleSubmit = e => {
       e.preventDefault();
 
-      // onSubmitEdit(e);
+      onSubmitEdit(e);
     };
 
-    const Check = components.CheckControl;
-
-    console.log('f', fileToEdit);
+    const CheckButton = components.CheckControl;
 
     return (
       <form onSubmit={handleSubmit}>
@@ -263,7 +262,7 @@ const EditForm = forwardRef(
                               color="#F64D0A"
                               onClick={handleToggleCropMode}
                             />
-                            <Check
+                            <CheckButton
                               type="check"
                               color="#6DBB1A"
                               onClick={handleClick}
