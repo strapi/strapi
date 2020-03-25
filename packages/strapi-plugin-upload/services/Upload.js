@@ -260,6 +260,10 @@ module.exports = {
     return strapi.query('file', 'upload').search(params);
   },
 
+  countSearch(params) {
+    return strapi.query('file', 'upload').countSearch(params);
+  },
+
   count(params) {
     return strapi.query('file', 'upload').count(params);
   },
