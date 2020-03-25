@@ -4,9 +4,9 @@ import PropTypes from 'prop-types';
 import InputModalStepper from './InputModalStepper';
 import InputModalStepperProvider from '../InputModalStepperProvider';
 
-const ModalStepper = ({ isOpen, onToggle, onInputMediaChange, multiple }) => {
+const ModalStepper = ({ isOpen, onToggle, onInputMediaChange, multiple, selectedFiles }) => {
   return (
-    <InputModalStepperProvider multiple={multiple} isOpen={isOpen}>
+    <InputModalStepperProvider selectedFiles={selectedFiles} multiple={multiple} isOpen={isOpen}>
       <InputModalStepper
         isOpen={isOpen}
         onToggle={onToggle}
@@ -19,6 +19,7 @@ const ModalStepper = ({ isOpen, onToggle, onInputMediaChange, multiple }) => {
 ModalStepper.defaultProps = {
   onInputMediaChange: () => {},
   onToggle: () => {},
+  selectedFiles: null,
 };
 
 ModalStepper.propTypes = {
@@ -26,6 +27,7 @@ ModalStepper.propTypes = {
   multiple: PropTypes.bool.isRequired,
   onInputMediaChange: PropTypes.func,
   onToggle: PropTypes.func,
+  selectedFiles: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
 };
 
 export default ModalStepper;

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Pencil } from '@buffetjs/icons';
+import { Pencil, Plus } from '@buffetjs/icons';
 import { ClearIcon } from 'strapi-helper-plugin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import DownloadIcon from '../../icons/Download';
@@ -11,8 +11,9 @@ const CardControl = ({ color, onClick, small, type }) => {
     <Wrapper onClick={onClick} color={color} type={type} small={small}>
       {type === 'pencil' && <Pencil fill={color} />}
       {type === 'clear' && <ClearIcon fill={color} />}
+      {type === 'plus' && <Plus fill={color} />}
       {type === 'download' && <DownloadIcon fdill={color} />}
-      {!['pencil', 'clear', 'download'].includes(type) && <FontAwesomeIcon icon={type} />}
+      {!['pencil', 'clear', 'plus', 'download'].includes(type) && <FontAwesomeIcon icon={type} />}
     </Wrapper>
   );
 };
