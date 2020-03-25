@@ -21,7 +21,6 @@ import {
   generatePageFromStart,
   generateStartFromPage,
 } from '../../utils';
-import CheckControl from '../../components/CheckControl';
 import Container from '../../components/Container';
 import ControlsWrapper from '../../components/ControlsWrapper';
 import Padded from '../../components/Padded';
@@ -344,7 +343,6 @@ const HomePage = () => {
       />
       <Padded bottom size="sm" />
       <Padded bottom size="md" />
-      <CheckControl />
     </Container>
   );
 };
