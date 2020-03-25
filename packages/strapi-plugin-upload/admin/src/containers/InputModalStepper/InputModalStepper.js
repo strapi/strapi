@@ -7,7 +7,7 @@ import stepper from './stepper';
 import getTrad from '../../utils/getTrad';
 import useModalContext from '../../hooks/useModalContext';
 
-const InputModalStepper = ({ isOpen, onToggle }) => {
+const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
   const { formatMessage } = useGlobalContext();
   const {
     addFilesToUpload,
@@ -25,7 +25,6 @@ const InputModalStepper = ({ isOpen, onToggle }) => {
     handleResetFileToEdit,
     handleSetCropResult,
     handleUploadFiles,
-    onInputMediaChange,
     selectedFiles,
   } = useModalContext();
   const { Component, headerBreadcrumbs, next, prev, withBackButton, HeaderComponent } = stepper[
@@ -66,9 +65,12 @@ const InputModalStepper = ({ isOpen, onToggle }) => {
 
   const handleSubmitEditNewFile = e => {
     e.preventDefault();
+    goNext();
+  };
 
-    onInputMediaChange({ target: { value: selectedFiles } });
-
+  const handleSubmit = e => {
+    e.preventDefault();
+    onInputMediaChange(selectedFiles);
     goNext();
   };
 
@@ -147,7 +149,7 @@ const InputModalStepper = ({ isOpen, onToggle }) => {
               )}
             </Button>
           ) : (
-            <Button color="success" type="button" onClick={handleSubmitEditNewFile}>
+            <Button color="success" type="button" onClick={handleSubmit}>
               {formatMessage({ id: 'form.button.finish' })}
             </Button>
           )}
@@ -163,6 +165,7 @@ InputModalStepper.defaultProps = {
 
 InputModalStepper.propTypes = {
   isOpen: PropTypes.bool.isRequired,
+  onInputMediaChange: PropTypes.func.isRequired,
   onToggle: PropTypes.func,
 };
 

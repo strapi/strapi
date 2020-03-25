@@ -10,6 +10,7 @@
   "filter.add": "Add filter",
   "input.label-bold": "Drag & drop",
   "input.label-normal": "to upload or",
+  "input.placeholder": "Click to select an asset or drag & drop a file in this area",
   "input.button.label": "Browse files",
   "list.assets-empty.title": "There is no asset yet",
   "list.assets-empty.subtitle": "Add a first one to the list.",
