@@ -9,7 +9,6 @@ const CardImgWrapper = styled.div`
   ${({ small }) => !small && 'margin-bottom: 7px'};
   border-radius: 2px;
   background-color: #f6f6f6;
-  // overflow: hidden;
 
   .card-control-wrapper {
     display: none;
