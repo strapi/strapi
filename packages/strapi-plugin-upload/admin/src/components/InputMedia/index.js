@@ -51,7 +51,7 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
           <CardControl color="#9EA7B8" type="plus" onClick={() => handleClickToggleModal(value)} />
         </CardControlWrapper>
         {hasNoValue ? (
-          <EmptyInputMedia>
+          <EmptyInputMedia onClick={() => handleClickToggleModal(value)}>
             <IconUpload />
             <EmptyText id={getTrad('input.placeholder')} />
           </EmptyInputMedia>

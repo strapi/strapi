@@ -10,6 +10,7 @@ const EmptyInputMedia = styled.div`
   justify-content: center;
   align-items: center;
   background-color: ${({ theme }) => theme.main.colors.black};
+  cursor: pointer;
 `;
 
 export default EmptyInputMedia;

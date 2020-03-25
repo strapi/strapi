@@ -7,7 +7,6 @@ const IconUpload = () => {
       height="84"
       xmlns="http://www.w3.org/2000/svg"
       xmlnsXlink="http://www.w3.org/1999/xlink"
-      style={{ margin: 'auto' }}
     >
       <defs>
         <rect id="a" y="1.354" width="77.333" height="62.292" rx="4" />
