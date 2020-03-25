@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { themePropTypes } from 'strapi-helper-plugin';
@@ -21,6 +22,31 @@ const Wrapper = styled.div`
     `
     transform: rotate(90deg)
   `};
+
+  &:hover {
+    ${({ type }) => {
+      if (type === 'trash-alt' || type === 'clear') {
+        return `
+          background-color: #FFA784;
+          border: 1px solid #FFA784;
+          color: #F64D0A;
+        `;
+      }
+
+      return `
+          background-color: #AED4FB;
+          border: 1px solid  #AED4FB;
+          > svg {
+            > g, path {
+
+              fill: #007EFF;
+            }
+          }
+          color: #007EFF;
+
+        `;
+    }};
+  }
 `;
 
 Wrapper.defaultProps = {
