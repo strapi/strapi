@@ -10,8 +10,6 @@ const Wrapper = styled(props => <Text as="ul" fontSize="md" {...props} />)`
   min-width: 230px;
   list-style-type: none;
   background-color: ${({ theme }) => theme.main.colors.white};
-  border: 1px solid ${({ theme }) => theme.main.colors.darkGrey};
-  box-shadow: 0 2px 4px ${({ theme }) => theme.main.colors.greyAlpha};
 `;
 
 Wrapper.propTypes = {

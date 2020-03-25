@@ -13,7 +13,7 @@ import InputMedia from './components/InputMedia';
 
 import trads from './translations';
 import pluginId from './pluginId';
-import getTrad from './utils/getTrad';
+import { getTrad } from './utils';
 
 export default strapi => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;

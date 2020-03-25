@@ -17,7 +17,7 @@ function reducer(state, action) {
       if (name === 'name') {
         return state
           .update(name, () => value)
-          .update('filter', () => '=')
+          .update('filter', () => filters[value].defaultFilter)
           .update('value', () => filters[value].defaultValue);
       }
 

@@ -29,6 +29,7 @@ const generateFiltersFromSearch = search => {
           '_gte',
           '_contains',
           '_containss',
+          '_ncontains',
           '_in',
           '_nin',
         ].includes(filter)

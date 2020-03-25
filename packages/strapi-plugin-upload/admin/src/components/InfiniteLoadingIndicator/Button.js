@@ -1,10 +1,7 @@
 import styled from 'styled-components';
 
 const Button = styled.button`
-  margin-top: 11px;
-  color: #b3b5b9;
-  font-weight: 500;
-  font-size: 11px;
+  margin-top: 8px;
 
   &:active {
     outline: 0;

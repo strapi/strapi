@@ -1,5 +1,5 @@
 import { fromJS } from 'immutable';
-import createNewFilesToUploadArray from './utils/createNewFilesToUploadArray';
+import createNewFilesToUploadArray from '../../utils/createNewFilesToUploadArray';
 
 const initialState = fromJS({
   currentStep: 'browse',
@@ -25,6 +25,10 @@ const reducer = (state, action) => {
       );
     case 'GO_TO':
       return state.update('currentStep', () => action.to);
+    case 'INIT_FILE_TO_EDIT':
+      return state.update('fileToEdit', () => fromJS(action.fileToEdit));
+    case 'ON_ABORT_UPLOAD':
+      return state.updateIn(['fileToEdit', 'isUploading'], () => false);
     case 'ON_CHANGE':
       return state.updateIn(['fileToEdit', ...action.keys.split('.')], () => action.value);
     case 'ON_SUBMIT_EDIT_NEW_FILE': {
@@ -34,6 +38,8 @@ const reducer = (state, action) => {
         .updateIn(['filesToUpload', originalIndex], () => state.get('fileToEdit'))
         .update('fileToEdit', () => null);
     }
+    case 'ON_SUBMIT_EDIT_EXISTING_FILE':
+      return state.updateIn(['fileToEdit', 'isUploading'], () => true);
     case 'REMOVE_FILE_TO_UPLOAD':
       return state.update('filesToUpload', list => {
         return list.filter(data => data.get('originalIndex') !== action.fileIndex);

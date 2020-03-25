@@ -1,13 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Checkbox } from '@buffetjs/core';
 
-import createMatrix from '../../utils/createMatrix';
+import { createMatrix } from '../../utils';
 
 import Card from '../Card';
+import CardControlsWrapper from '../CardControlsWrapper';
 import Wrapper from './Wrapper';
 
-const List = ({ data, onChange, selectedItems }) => {
+const List = ({ data, onChange, onClickEditFile, selectedItems, canSelect }) => {
   const matrix = createMatrix(data);
+
+  const handleClick = e => {
+    e.stopPropagation();
+  };
 
   return (
     <Wrapper>
@@ -15,14 +21,25 @@ const List = ({ data, onChange, selectedItems }) => {
         return (
           <div className="row" key={key}>
             {rowContent.map(item => {
+              const { id, url } = item;
+
+              const checked = selectedItems.findIndex(file => file.id === id) !== -1;
+              const fileUrl = url.startsWith('/') ? `${strapi.backendURL}${url}` : url;
+
               return (
-                <div className="col-xs-12 col-md-6 col-xl-3" key={JSON.stringify(item)}>
-                  <Card
-                    small
-                    checked={selectedItems.includes(item.id)}
-                    onChange={onChange}
-                    {...item}
-                  />
+                <div className="col-xs-12 col-md-6 col-xl-3" key={id}>
+                  <Card checked={checked} {...item} url={fileUrl} onClick={onClickEditFile}>
+                    {(checked || canSelect) && (
+                      <CardControlsWrapper leftAlign className="card-control-wrapper">
+                        <Checkbox
+                          name={`${id}`}
+                          onChange={onChange}
+                          onClick={handleClick}
+                          value={checked}
+                        />
+                      </CardControlsWrapper>
+                    )}
+                  </Card>
                 </div>
               );
             })}
@@ -34,69 +51,18 @@ const List = ({ data, onChange, selectedItems }) => {
 };
 
 List.defaultProps = {
-  data: [
-    {
-      id: '0',
-      name: 'Chat paysage',
-      size: 17329,
-      type: 'image/png',
-      url:
-        'https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=350',
-    },
-    {
-      id: '1',
-      name: 'Chat portrait',
-      size: 17329,
-      type: 'image/png',
-      url: 'https://emiliedammedumoulin.com/wp-content/uploads/2018/07/contact-chat-accueil.jpg',
-    },
-    {
-      id: '2',
-      name: 'Gif',
-      size: 17329,
-      type: 'image/png',
-      url:
-        'https://user-images.githubusercontent.com/879561/51321923-54024f00-1a64-11e9-8c37-3308350a59c4.gif',
-    },
-    {
-      id: '3',
-      name: 'Paysage',
-      size: 17329,
-      type: 'image/png',
-      url:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcSyHCXO8D0QQrPDuGstvH9dEwhhB7Qv-3mDMWGpLExyY1CF84cL',
-    },
-    {
-      id: '4',
-      name: 'That kitten is so beautiful that I am not sure to have the place to describe it',
-      size: 17329,
-      type: 'image/png',
-      url:
-        'https://images.pexels.com/photos/1643457/pexels-photo-1643457.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',
-    },
-    {
-      id: '5',
-      name: 'pdf file',
-      type: 'pdf',
-    },
-    {
-      id: '6',
-      name: 'Zip file',
-      type: 'zip',
-    },
-    {
-      id: '7',
-      name: 'Doc file',
-      type: 'docx',
-    },
-  ],
+  canSelect: true,
+  data: [],
   onChange: () => {},
+  onClickEditFile: () => {},
   selectedItems: [],
 };
 
 List.propTypes = {
+  canSelect: PropTypes.bool,
   data: PropTypes.array,
   onChange: PropTypes.func,
+  onClickEditFile: PropTypes.func,
   selectedItems: PropTypes.array,
 };
 

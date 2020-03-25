@@ -1,32 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { some } from 'lodash';
-import { useLocation } from 'react-router-dom';
-import moment from 'moment';
 import { FormattedMessage } from 'react-intl';
-import { FilterIcon, generateFiltersFromSearch } from 'strapi-helper-plugin';
+import { FilterIcon } from 'strapi-helper-plugin';
+import generateNewFilters from './utils/generateNewFilters';
 
 import FiltersCard from './FiltersCard';
 import Picker from '../Picker';
 
-const FiltersPicker = ({ onChange }) => {
-  const { search } = useLocation();
-  const filters = generateFiltersFromSearch(search);
-
+const FiltersPicker = ({ onChange, filters }) => {
   const handleChange = ({ target: { value } }) => {
-    let formattedValue = value;
-
-    // moment format if datetime value
-    if (value.value._isAMomentObject === true) {
-      formattedValue.value = moment(value.value).format();
-    }
-
-    // Send updated filters
-    if (!some(filters, formattedValue)) {
-      filters.push(formattedValue);
-
-      onChange({ target: { name: 'filters', value: filters } });
-    }
+    onChange({ target: { name: 'filters', value: generateNewFilters(filters, value) } });
   };
 
   return (
@@ -50,10 +33,18 @@ const FiltersPicker = ({ onChange }) => {
 };
 
 FiltersPicker.defaultProps = {
+  filters: [],
   onChange: () => {},
 };
 
 FiltersPicker.propTypes = {
+  filters: PropTypes.arrayOf(
+    PropTypes.shape({
+      filter: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      value: PropTypes.string.isRequired,
+    })
+  ),
   onChange: PropTypes.func,
 };
 

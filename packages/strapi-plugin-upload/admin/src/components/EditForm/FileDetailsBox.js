@@ -1,10 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { dateFormats, dateToUtcTime } from 'strapi-helper-plugin';
 import { get } from 'lodash';
+
+import { formatBytes } from '../../utils';
+
 import Flex from '../Flex';
 import Text from '../Text';
 import FileDetailsBoxWrapper from './FileDetailsBoxWrapper';
-import formatBytes from './utils/formatBytes';
 
 const FileDetailsBox = ({ file }) => {
   const sections = [
@@ -12,7 +15,10 @@ const FileDetailsBox = ({ file }) => {
       key: 0,
       rows: [
         { label: 'size', value: formatBytes(get(file, 'size', 0), 0) },
-        { label: 'date', value: '-' },
+        {
+          label: 'date',
+          value: file.created_at ? dateToUtcTime(file.created_at).format(dateFormats.date) : '-',
+        },
       ],
     },
     {
@@ -22,8 +28,8 @@ const FileDetailsBox = ({ file }) => {
     {
       key: 2,
       rows: [
-        { label: 'dimensions', value: '-' },
-        { label: 'extension', value: '-' },
+        { label: 'dimensions', value: file.width ? `${file.width}x${file.height}` : '-' },
+        { label: 'extension', value: file.ext ? file.ext.replace('.', '') : '-' },
       ],
     },
   ];
@@ -44,11 +50,7 @@ const FileDetailsBox = ({ file }) => {
             {rows.map(rowItem => {
               return (
                 <Text as="div" key={rowItem.label} style={{ width: '50%' }}>
-                  <Text
-                    color="grey"
-                    fontWeight="bold"
-                    textTransform="capitalize"
-                  >
+                  <Text color="grey" fontWeight="bold" textTransform="capitalize">
                     {rowItem.label}
                   </Text>
                   <Text color="grey">{rowItem.value}</Text>
@@ -70,7 +72,11 @@ FileDetailsBox.defaultProps = {
 
 FileDetailsBox.propTypes = {
   file: PropTypes.shape({
+    created_at: PropTypes.string,
+    ext: PropTypes.string,
+    height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     size: PropTypes.number,
+    width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   }),
 };
 
