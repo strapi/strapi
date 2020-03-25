@@ -1,9 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import { formatBytes, getExtension, getType } from '../../utils';
+
+import Flex from '../Flex';
 import Text from '../Text';
 import CardImgWrapper from '../CardImgWrapper';
 import CardPreview from '../CardPreview';
+import Tag from '../Tag';
 import Wrapper from './Wrapper';
 import Title from './Title';
 import ErrorMessage from './ErrorMessage';
@@ -21,17 +25,23 @@ const Card = ({
   type,
   url,
 }) => {
+  const fileSize = formatBytes(size, 0);
+  const fileType = mime || type;
+
   return (
     <Wrapper>
       <CardImgWrapper checked={checked} small={small}>
-        <CardPreview hasError={hasError} url={url} type={mime || type} />
+        <CardPreview hasError={hasError} url={url} type={fileType} />
         <Border color={hasError ? 'orange' : 'mediumBlue'} shown={checked || hasError} />
         {children}
       </CardImgWrapper>
-      <Title fontSize="md" fontWeight="bold" ellipsis>
-        {name}
-      </Title>
-      <Text color="grey" fontSize="xs" ellipsis>{`${type} - ${size}`}</Text>
+      <Flex>
+        <Title>{name}</Title>
+        <Tag label={getType(fileType)} />
+      </Flex>
+      <Text color="grey" fontSize="xs" ellipsis>
+        {`${getExtension(fileType)} - ${fileSize}`}
+      </Text>
       {hasError && <ErrorMessage>{errorMessage}</ErrorMessage>}
     </Wrapper>
   );

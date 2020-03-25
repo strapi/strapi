@@ -6,7 +6,7 @@ import Wrapper from './Wrapper';
 const CardEmpty = () => {
   return (
     <Wrapper>
-      <CardImgWrapper small />
+      <CardImgWrapper />
       <Bar small />
       <Bar />
     </Wrapper>

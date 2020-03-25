@@ -1,11 +1,12 @@
-import React, { useReducer, useState, useEffect, useRef } from 'react';
+import React, { useReducer, useState, useEffect } from 'react';
 import { includes } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
-import { useDebounce } from '@buffetjs/hooks';
+import { useDebounce, useIsMounted } from '@buffetjs/hooks';
 import {
   HeaderSearch,
   PageFooter,
+  PopUpWarning,
   useGlobalContext,
   generateFiltersFromSearch,
   generateSearchFromFilters,
@@ -17,13 +18,14 @@ import { getRequestUrl, getTrad, generatePageFromStart, generateStartFromPage } 
 
 import Container from '../../components/Container';
 import ControlsWrapper from '../../components/ControlsWrapper';
+import Padded from '../../components/Padded';
 import SelectAll from '../../components/SelectAll';
 import SortPicker from '../../components/SortPicker';
 import Filters from '../../components/Filters';
 import List from '../../components/List';
 import ListEmpty from '../../components/ListEmpty';
 import ModalStepper from '../ModalStepper';
-import getHeaderLabel from './utils/getHeaderLabel';
+import { deleteFilters, generateStringParamsFromQuery, getHeaderLabel } from './utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
@@ -31,13 +33,14 @@ const HomePage = () => {
   const { formatMessage } = useGlobalContext();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const query = useQuery();
-  const [isModalOpen, setModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [searchValue, setSearchValue] = useState(query.get('_q') || '');
   const { push } = useHistory();
   const { search } = useLocation();
-  const isMounted = useRef();
+  const isMounted = useIsMounted();
 
-  const { data, dataToDelete } = reducerState.toJS();
+  const { data, dataCount, dataToDelete } = reducerState.toJS();
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
   const paramsKeys = ['_limit', '_start', '_q', '_sort'];
   const debouncedSearch = useDebounce(searchValue, 300);
@@ -48,12 +51,8 @@ const HomePage = () => {
   }, [debouncedSearch]);
 
   useEffect(() => {
-    isMounted.current = true;
-    fetchData();
+    fetchListData();
 
-    return () => {
-      isMounted.current = false;
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
@@ -65,31 +64,59 @@ const HomePage = () => {
         method: 'DELETE',
       });
     } catch (err) {
-      if (isMounted.current) {
+      if (isMounted) {
         strapi.notification.error('notification.error');
       }
     }
   };
 
+  const fetchListData = async () => {
+    const [data, count] = await Promise.all([fetchData(), fetchDataCount()]);
+
+    if (isMounted) {
+      dispatch({
+        type: 'GET_DATA_SUCCEEDED',
+        data,
+        count,
+      });
+    }
+  };
+
   const fetchData = async () => {
-    const requestURL = getRequestUrl('files');
+    const dataRequestURL = getRequestUrl('files');
+    const params = generateStringParamsFromQuery(query);
 
     try {
-      const data = await request(`${requestURL}${search}`, {
+      const data = await request(`${dataRequestURL}?${params}`, {
         method: 'GET',
       });
 
-      if (isMounted.current) {
-        dispatch({
-          type: 'GET_DATA_SUCCEEDED',
-          data,
-        });
-      }
+      return Promise.resolve(data);
     } catch (err) {
-      if (isMounted.current) {
+      if (isMounted) {
         strapi.notification.error('notification.error');
       }
     }
+
+    return [];
+  };
+
+  const fetchDataCount = async () => {
+    const requestURL = getRequestUrl('files/count');
+
+    try {
+      const { count } = await request(requestURL, {
+        method: 'GET',
+      });
+
+      return Promise.resolve(count);
+    } catch (err) {
+      if (isMounted) {
+        strapi.notification.error('notification.error');
+      }
+    }
+
+    return null;
   };
 
   const getSearchParams = () => {
@@ -146,17 +173,20 @@ const HomePage = () => {
   };
 
   const handleClickToggleModal = (refetch = false) => {
-    setModalOpen(prev => !prev);
+    setIsModalOpen(prev => !prev);
 
     if (refetch) {
-      fetchData();
+      fetchListData();
     }
   };
 
-  const handleDeleteFilter = index => {
-    // Remove filter
-    const updatedFilters = generateFiltersFromSearch(search);
-    updatedFilters.splice(index, 1);
+  const handleClickTogglePopup = () => {
+    setIsPopupOpen(prev => !prev);
+  };
+
+  const handleDeleteFilter = filter => {
+    const currentFilters = generateFiltersFromSearch(search);
+    const updatedFilters = deleteFilters(currentFilters, filter);
 
     handleChangeParams({
       target: { name: 'filters', value: updatedFilters },
@@ -164,9 +194,14 @@ const HomePage = () => {
   };
 
   const handleDeleteMedias = async () => {
-    await Promise.all(dataToDelete.map(id => deleteMedia(id)));
+    await Promise.all(dataToDelete.map(item => deleteMedia(item.id)));
 
-    fetchData();
+    dispatch({
+      type: 'CLEAR_DATA_TO_DELETE',
+    });
+
+    setIsPopupOpen(false);
+    fetchListData();
   };
 
   const handleSelectAll = () => {
@@ -183,8 +218,7 @@ const HomePage = () => {
       {
         id: getTrad(getHeaderLabel(data)),
       },
-      // Values
-      { number: 1 }
+      { number: dataCount }
     ),
     actions: [
       {
@@ -192,7 +226,7 @@ const HomePage = () => {
         color: 'cancel',
         // TradId from the strapi-admin package
         label: formatMessage({ id: 'app.utils.delete' }),
-        onClick: handleDeleteMedias,
+        onClick: () => setIsPopupOpen(true),
         type: 'button',
       },
       {
@@ -213,8 +247,15 @@ const HomePage = () => {
     _page: generatePageFromStart(start, limit),
   };
 
-  const areAllCheckboxesSelected = data.length === dataToDelete.length;
-  const hasSomeCheckboxSelected = dataToDelete.length > 0;
+  const paginationCount = data.length < limit ? data.length : dataCount;
+
+  const hasSomeCheckboxSelected = data.some(item =>
+    dataToDelete.find(itemToDelete => item.id === itemToDelete.id)
+  );
+
+  const areAllCheckboxesSelected =
+    data.every(item => dataToDelete.find(itemToDelete => item.id === itemToDelete.id)) &&
+    hasSomeCheckboxSelected;
 
   return (
     <Container>
@@ -240,15 +281,28 @@ const HomePage = () => {
           onClick={handleDeleteFilter}
         />
       </ControlsWrapper>
-      <List data={data} onChange={handleChangeCheck} selectedItems={dataToDelete} />
-      <ListEmpty onClick={() => handleClickToggleModal()} />
-      <PageFooter
-        context={{ emitEvent: () => {} }}
-        count={50}
-        onChangeParams={handleChangeListParams}
-        params={params}
-      />
+      {dataCount > 0 ? (
+        <>
+          <List data={data} onChange={handleChangeCheck} selectedItems={dataToDelete} />
+          <PageFooter
+            context={{ emitEvent: () => {} }}
+            count={paginationCount}
+            onChangeParams={handleChangeListParams}
+            params={params}
+          />
+        </>
+      ) : (
+        <ListEmpty onClick={handleClickToggleModal} />
+      )}
       <ModalStepper isOpen={isModalOpen} onToggle={handleClickToggleModal} />
+      <PopUpWarning
+        isOpen={isPopupOpen}
+        toggleModal={handleClickTogglePopup}
+        popUpWarningType="danger"
+        onConfirm={handleDeleteMedias}
+      />
+      <Padded bottom size="sm" />
+      <Padded bottom size="md" />
     </Container>
   );
 };

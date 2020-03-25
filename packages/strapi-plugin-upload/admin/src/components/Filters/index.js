@@ -3,13 +3,11 @@ import PropTypes from 'prop-types';
 
 import FiltersList from '../FiltersList';
 import FiltersPicker from '../FiltersPicker';
-import Padded from '../Padded';
 
 const Filters = ({ onChange, onClick, filters }) => {
   return (
     <>
       <FiltersPicker filters={filters} onChange={onChange} />
-      <Padded left size="sm" />
       <FiltersList filters={filters} onClick={onClick} />
     </>
   );

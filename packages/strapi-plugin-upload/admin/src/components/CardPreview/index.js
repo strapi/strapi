@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { getType } from '../../utils';
+import { getExtension, getType } from '../../utils';
 
 import BrokenFile from '../../icons/BrokenFile';
 import FileIcon from '../FileIcon';
@@ -20,7 +20,9 @@ const CardPreview = ({ hasError, url, type }) => {
   }
 
   return (
-    <Wrapper isFile={isFile}>{isFile ? <FileIcon fileType={type} /> : <Image src={url} />}</Wrapper>
+    <Wrapper isFile={isFile}>
+      {isFile ? <FileIcon ext={getExtension(type)} /> : <Image src={url} />}
+    </Wrapper>
   );
 };
 

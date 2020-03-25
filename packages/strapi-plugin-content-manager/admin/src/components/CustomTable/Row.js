@@ -3,7 +3,7 @@ import { withRouter } from 'react-router';
 import PropTypes from 'prop-types';
 import { get, isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import moment from 'moment';
-import { IcoContainer, useGlobalContext } from 'strapi-helper-plugin';
+import { dateToUtcTime, IcoContainer, useGlobalContext } from 'strapi-helper-plugin';
 import useListView from '../../hooks/useListView';
 import dateFormats from '../../utils/dateFormats';
 import CustomInputCheckbox from '../CustomInputCheckbox';
@@ -11,8 +11,6 @@ import MediaPreviewList from '../MediaPreviewList';
 import { ActionContainer, Truncate, Truncated } from './styledComponents';
 
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
-
-const dateToUtcTime = date => moment.parseZone(date).utc();
 
 const getDisplayedValue = (type, value, name) => {
   switch (toLower(type)) {
