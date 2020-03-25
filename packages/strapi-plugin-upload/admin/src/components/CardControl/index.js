@@ -11,7 +11,7 @@ const CardControl = ({ color, onClick, small, type }) => {
     <Wrapper onClick={onClick} color={color} type={type} small={small}>
       {type === 'pencil' && <Pencil fill={color} />}
       {type === 'clear' && <ClearIcon fill={color} />}
-      {type === 'download' && <DownloadIcon fill={color} />}
+      {type === 'download' && <DownloadIcon fdill={color} />}
       {!['pencil', 'clear', 'download'].includes(type) && <FontAwesomeIcon icon={type} />}
     </Wrapper>
   );

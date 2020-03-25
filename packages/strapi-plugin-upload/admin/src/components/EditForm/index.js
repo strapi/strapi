@@ -1,4 +1,12 @@
-import React, { forwardRef, useState, useEffect, useRef, useImperativeHandle } from 'react';
+/* eslint-disable react/jsx-fragments */
+import React, {
+  Fragment,
+  forwardRef,
+  useState,
+  useEffect,
+  useRef,
+  useImperativeHandle,
+} from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
@@ -15,6 +23,7 @@ import {
 import CardControl from '../CardControl';
 import CardControlsWrapper from '../CardControlsWrapper';
 import CardPreview from '../CardPreview';
+import InfiniteLoadingIndicator from '../InfiniteLoadingIndicator';
 import ModalSection from '../ModalSection';
 import Text from '../Text';
 import CropWrapper from './CropWrapper';
@@ -27,7 +36,18 @@ import form from './utils/form';
 import isImageType from './utils/isImageType';
 
 const EditForm = forwardRef(
-  ({ fileToEdit, onChange, onClickDeleteFileToUpload, onSubmitEdit, setCropResult }, ref) => {
+  (
+    {
+      components,
+      fileToEdit,
+      onAbortUpload,
+      onChange,
+      onClickDeleteFileToUpload,
+      onSubmitEdit,
+      setCropResult,
+    },
+    ref
+  ) => {
     const { formatMessage } = useGlobalContext();
     const [isCropping, setIsCropping] = useState(false);
     const [infosCoordinates, setInfosCoordinates] = useState({ top: 0, left: 0 });
@@ -51,6 +71,7 @@ const EditForm = forwardRef(
     useImperativeHandle(ref, () => ({
       click: () => {
         inputRef.current.click();
+        setIsCropping(false);
       },
     }));
 
@@ -95,7 +116,6 @@ const EditForm = forwardRef(
     }, [cropper, isCropping]);
 
     const handleResize = () => {
-      // 130
       const cropBox = cropper.current.getCropBoxData();
       const { width, height } = cropBox;
       const roundedWidth = Math.round(width);
@@ -130,15 +150,23 @@ const EditForm = forwardRef(
       onChange({ target: { name: 'file', value: files[0] } });
     };
 
-    const handleClick = () => {
-      if (cropper) {
+    const handleClick = async () => {
+      const cropResult = await getCroppedResult();
+
+      setCropResult(cropResult);
+
+      setIsCropping(false);
+    };
+
+    const getCroppedResult = () => {
+      return new Promise(resolve => {
         const canvas = cropper.current.getCroppedCanvas();
-        canvas.toBlob(blob => {
+        canvas.toBlob(async blob => {
           const {
             file: { lastModifiedDate, lastModified, name },
           } = fileToEdit;
 
-          setCropResult(
+          resolve(
             new File([blob], name, {
               type: mimeType,
               lastModified,
@@ -146,9 +174,14 @@ const EditForm = forwardRef(
             })
           );
         });
-      }
+      });
+    };
+
+    const handleClickEditCroppedFile = async (e, shouldDuplicate = false) => {
+      const file = await getCroppedResult();
 
       setIsCropping(false);
+      onSubmitEdit(e, shouldDuplicate, file);
     };
 
     const handleClickDelete = () => {
@@ -166,8 +199,12 @@ const EditForm = forwardRef(
     const handleSubmit = e => {
       e.preventDefault();
 
-      onSubmitEdit(e);
+      // onSubmitEdit(e);
     };
+
+    const Check = components.CheckControl;
+
+    console.log('f', fileToEdit);
 
     return (
       <form onSubmit={handleSubmit}>
@@ -176,74 +213,96 @@ const EditForm = forwardRef(
             <div className="row">
               <div className="col-6">
                 <FileWrapper>
-                  <CardControlsWrapper className="card-control-wrapper">
-                    {!isCropping ? (
-                      <>
-                        <CardControl color="#9EA7B8" type="trash-alt" onClick={handleClickDelete} />
-                        {fileURL && (
+                  {fileToEdit.isUploading ? (
+                    <InfiniteLoadingIndicator onClick={onAbortUpload} />
+                  ) : (
+                    <Fragment>
+                      <CardControlsWrapper className="card-control-wrapper">
+                        {!isCropping ? (
                           <>
                             <CardControl
                               color="#9EA7B8"
-                              type="download"
-                              onClick={handleClickDownload}
+                              type="trash-alt"
+                              onClick={handleClickDelete}
                             />
-                            {isFileDownloadable && (
-                              <a
-                                href={fileURL}
-                                title={fileToEdit.fileInfo.name}
-                                download={downloadFileName}
-                                style={{ display: 'none' }}
-                                ref={aRef}
-                              >
-                                hidden
-                              </a>
+                            {fileURL && (
+                              <>
+                                <CardControl
+                                  color="#9EA7B8"
+                                  type="download"
+                                  onClick={handleClickDownload}
+                                />
+                                {isFileDownloadable && (
+                                  <a
+                                    href={fileURL}
+                                    title={fileToEdit.fileInfo.name}
+                                    download={downloadFileName}
+                                    style={{ display: 'none' }}
+                                    ref={aRef}
+                                  >
+                                    hidden
+                                  </a>
+                                )}
+                                <CopyToClipboard onCopy={handleCopy} text={prefixedFileURL}>
+                                  <CardControl color="#9EA7B8" type="link" />
+                                </CopyToClipboard>
+                              </>
                             )}
-                            <CopyToClipboard onCopy={handleCopy} text={prefixedFileURL}>
-                              <CardControl color="#9EA7B8" type="link" />
-                            </CopyToClipboard>
+                            {canCrop && (
+                              <CardControl
+                                type="crop"
+                                color="#9EA7B8"
+                                onClick={handleToggleCropMode}
+                              />
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <CardControl
+                              type="clear"
+                              color="#F64D0A"
+                              onClick={handleToggleCropMode}
+                            />
+                            <Check
+                              type="check"
+                              color="#6DBB1A"
+                              onClick={handleClick}
+                              onSubmitEdit={handleClickEditCroppedFile}
+                            />
                           </>
                         )}
-                        {canCrop && (
-                          <CardControl type="crop" color="#9EA7B8" onClick={handleToggleCropMode} />
-                        )}
-                      </>
-                    ) : (
-                      <>
-                        <CardControl type="clear" color="#F64D0A" onClick={handleToggleCropMode} />
-                        <CardControl type="check" color="#6DBB1A" onClick={handleClick} />
-                      </>
-                    )}
-                  </CardControlsWrapper>
+                      </CardControlsWrapper>
+                      {isImg ? (
+                        <CropWrapper>
+                          <img
+                            src={src}
+                            alt={get(fileToEdit, ['file', 'name'], '')}
+                            ref={isCropping ? imgRef : null}
+                          />
 
-                  {isImg ? (
-                    <CropWrapper>
-                      <img
-                        src={src}
-                        alt={get(fileToEdit, ['file', 'name'], '')}
-                        ref={isCropping ? imgRef : null}
-                      />
-
-                      {isCropping && (
-                        <Text
-                          fontSize="md"
-                          color="white"
-                          as="div"
-                          style={{
-                            position: 'absolute',
-                            top: infosCoordinates.top,
-                            left: infosCoordinates.left,
-                            background: '#333740',
-                            borderRadius: 2,
-                          }}
-                        >
-                          &nbsp;
-                          {infos.width} x {infos.height}
-                          &nbsp;
-                        </Text>
+                          {isCropping && (
+                            <Text
+                              fontSize="md"
+                              color="white"
+                              as="div"
+                              style={{
+                                position: 'absolute',
+                                top: infosCoordinates.top,
+                                left: infosCoordinates.left,
+                                background: '#333740',
+                                borderRadius: 2,
+                              }}
+                            >
+                              &nbsp;
+                              {infos.width} x {infos.height}
+                              &nbsp;
+                            </Text>
+                          )}
+                        </CropWrapper>
+                      ) : (
+                        <CardPreview url={src} />
                       )}
-                    </CropWrapper>
-                  ) : (
-                    <CardPreview url={src} />
+                    </Fragment>
                   )}
                 </FileWrapper>
               </div>
@@ -293,6 +352,10 @@ const EditForm = forwardRef(
 );
 
 EditForm.defaultProps = {
+  onAbortUpload: () => {},
+  components: {
+    CheckControl: CardControl,
+  },
   fileToEdit: null,
   onChange: () => {},
   onClickDeleteFileToUpload: () => {},
@@ -301,6 +364,8 @@ EditForm.defaultProps = {
 };
 
 EditForm.propTypes = {
+  onAbortUpload: PropTypes.func,
+  components: PropTypes.object,
   fileToEdit: PropTypes.object,
   onChange: PropTypes.func,
   onClickDeleteFileToUpload: PropTypes.func,

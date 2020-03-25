@@ -21,7 +21,7 @@ import {
   generatePageFromStart,
   generateStartFromPage,
 } from '../../utils';
-
+import CheckControl from '../../components/CheckControl';
 import Container from '../../components/Container';
 import ControlsWrapper from '../../components/ControlsWrapper';
 import Padded from '../../components/Padded';
@@ -42,6 +42,7 @@ const HomePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [fileToEdit, setFileToEdit] = useState(null);
+  const [shouldRefetch, setShouldRefetch] = useState(false);
   const [modalInitialStep, setModalInitialStep] = useState('browse');
   const [searchValue, setSearchValue] = useState(query.get('_q') || '');
   const { push } = useHistory();
@@ -198,11 +199,12 @@ const HomePage = () => {
 
   const handleClickToggleModal = (refetch = false) => {
     setIsModalOpen(prev => !prev);
+    setShouldRefetch(refetch);
 
-    if (refetch) {
-      fetchListData();
-      resetModalState();
-    }
+    // if (refetch) {
+    //   fetchListData();
+    //   resetModalState();
+    // }
   };
 
   const handleClickTogglePopup = () => {
@@ -231,6 +233,11 @@ const HomePage = () => {
 
   const handleModalClose = () => {
     resetModalState();
+
+    if (shouldRefetch) {
+      fetchListData();
+      setShouldRefetch(false);
+    }
   };
 
   const handleSelectAll = () => {
@@ -352,6 +359,7 @@ const HomePage = () => {
       />
       <Padded bottom size="sm" />
       <Padded bottom size="md" />
+      <CheckControl />
     </Container>
   );
 };

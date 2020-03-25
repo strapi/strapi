@@ -1,4 +1,6 @@
 {
+  "checkControl.crop-original": "Crop the original asset",
+  "checkControl.crop-duplicate": "Duplicate & crop the asset",
   "form.input.label.file-alt": "Alternative text",
   "form.input.decription.file-alt": "This text will be displayed if the asset can’t be shown.",
   "form.input.label.file-caption": "Caption",

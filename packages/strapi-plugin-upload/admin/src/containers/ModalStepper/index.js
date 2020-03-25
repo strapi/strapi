@@ -16,7 +16,9 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
   const [shouldDeleteFile, setShouldDeleteFile] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { currentStep, fileToEdit, filesToUpload } = reducerState.toJS();
-  const { Component, headerBreadcrumbs, next, prev, withBackButton } = stepper[currentStep];
+  const { Component, components, headerBreadcrumbs, next, prev, withBackButton } = stepper[
+    currentStep
+  ];
   const filesToUploadLength = filesToUpload.length;
   const toggleRef = useRef(onToggle);
   const editModalRef = useRef();
@@ -51,6 +53,16 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
     });
 
     goTo(next);
+  };
+
+  const handleAbortUpload = () => {
+    const { abortController } = fileToEdit;
+
+    abortController.abort();
+
+    dispatch({
+      type: 'ON_ABORT_UPLOAD',
+    });
   };
 
   const handleCancelFileToUpload = fileIndex => {
@@ -156,7 +168,11 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
     goNext();
   };
 
-  const handleSubmitEditExistingFile = async (e, shouldDuplicateMedia = false) => {
+  const handleSubmitEditExistingFile = async (
+    e,
+    shouldDuplicateMedia = false,
+    file = fileToEdit.file
+  ) => {
     e.preventDefault();
 
     dispatch({
@@ -168,11 +184,12 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
 
     // If the file has been cropped we need to add it to the formData
     // otherwise we just don't send it
-    const didCropFile = fileToEdit.file instanceof File;
-    const { abortController, id, file, fileInfo } = fileToEdit;
+    const didCropFile = file instanceof File;
+    const { abortController, id, fileInfo } = fileToEdit;
     const requestURL = shouldDuplicateMedia ? `/${pluginId}` : `/${pluginId}?id=${id}`;
 
     if (didCropFile) {
+      console.log('set');
       formData.append('files', file);
     }
 
@@ -190,7 +207,6 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
         false,
         false
       );
-
       // Close the modal and refetch data
       toggleRef.current(true);
     } catch (err) {
@@ -303,9 +319,11 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
         {/* body of the modal */}
         {Component && (
           <Component
+            onAbortUpload={handleAbortUpload}
             addFilesToUpload={addFilesToUpload}
             fileToEdit={fileToEdit}
             filesToUpload={filesToUpload}
+            components={components}
             onChange={handleChange}
             onClickCancelUpload={handleCancelFileToUpload}
             onClickDeleteFileToUpload={

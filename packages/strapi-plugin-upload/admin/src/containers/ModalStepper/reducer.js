@@ -27,6 +27,8 @@ const reducer = (state, action) => {
       return state.update('currentStep', () => action.to);
     case 'INIT_FILE_TO_EDIT':
       return state.update('fileToEdit', () => fromJS(action.fileToEdit));
+    case 'ON_ABORT_UPLOAD':
+      return state.updateIn(['fileToEdit', 'isUploading'], () => false);
     case 'ON_CHANGE':
       return state.updateIn(['fileToEdit', ...action.keys.split('.')], () => action.value);
     case 'ON_SUBMIT_EDIT_NEW_FILE': {
