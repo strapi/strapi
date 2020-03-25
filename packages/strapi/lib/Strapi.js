@@ -220,7 +220,7 @@ class Strapi extends EventEmitter {
         }
 
         // Emit started event.
-        this.emit('server:started');
+        await this.telemetry.send('didStartServer');
 
         if (cb && typeof cb === 'function') {
           cb();

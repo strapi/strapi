@@ -3,44 +3,102 @@
  * Strapi telemetry package.
  * You can learn more at https://strapi.io/documentation/3.0.0-beta.x/global-strapi/usage-information.html#commitment-to-our-users-data-collection
  */
-
-const fetch = require('node-fetch');
 const os = require('os');
+const isDocker = require('is-docker');
+const { machineIdSync } = require('node-machine-id');
+const fetch = require('node-fetch');
+const ciEnv = require('ci-info');
+const scheduleJob = require('node-schedule');
 
-const sendEvent = async (event, payload) => {
-  try {
-    const res = await fetch('https://analytics.strapi.io/track', {
-      method: 'POST',
-      body: JSON.stringify({
-        event,
-        ...payload,
-      }),
-      timeout: 1000,
-      headers: { 'Content-Type': 'application/json' },
-    });
+const createTelemetryInstance = strapi => {
+  const uuid = strapi.config.uuid;
+  const deviceId = machineIdSync();
 
-    return res.ok;
-  } catch (err) {
-    return false;
-  }
-};
+  const isDisabled = !uuid;
 
-const createTelemetryInstance = () => {
-  return {
-    middleware: ctx => {},
-    track(event) {
-      return sendEvent(event, {
-        uuid: process.env.STRAPI_UUID,
-        deviceId: process.env.DEVICE_ID,
-        properties: {
-          os: os.type(),
-          os_platform: os.platform(),
-          os_release: os.release(),
-          node_version: process.version,
-          version: process.env.STRAPI_VERSION,
-          docker: process.env.DOCKER,
-        },
+  const anonymous_metadata = {
+    environment: strapi.config.environment,
+    os: os.type(),
+    osPlatform: os.platform(),
+    osRelease: os.release(),
+    nodeVersion: process.version,
+    docker: process.env.DOCKER || isDocker(),
+    isCI: ciEnv.isCI,
+    version: strapi.config.info.strapi,
+    strapiVersion: strapi.config.info.strapi,
+  };
+
+  const sendEvent = async (event, payload) => {
+    // do not send anything when user has disabled analytics
+    if (isDisabled) return true;
+
+    try {
+      const res = await fetch('https://analytics.strapi.io/track', {
+        method: 'POST',
+        body: JSON.stringify({
+          event,
+          uuid,
+          deviceId,
+          properties: {
+            ...payload,
+            ...anonymous_metadata,
+          },
+        }),
+        timeout: 1000,
+        headers: { 'Content-Type': 'application/json' },
       });
+
+      return res.ok;
+    } catch (err) {
+      return false;
+    }
+  };
+
+  const _state = {
+    currentDay: null,
+    counter: 0,
+  };
+
+  return {
+    initPing() {
+      if (isDisabled) {
+        return;
+      }
+
+      scheduleJob('0 0 12 * * *', () => sendEvent('ping'));
+    },
+    middleware: async (ctx, next) => {
+      if (isDisabled) {
+        return next();
+      }
+
+      const { url, method } = ctx.request;
+
+      if (!url.includes('.') && ['GET', 'PUT', 'POST', 'DELETE'].includes(method)) {
+        const dayOfMonth = new Date().getDate();
+
+        if (dayOfMonth !== _state.currentDay) {
+          _state.currentDay = dayOfMonth;
+          _state.counter = 0;
+        }
+
+        // Send max. 1000 events per day.
+        if (_state.counter < 1000) {
+          await sendEvent('didReceiveRequest', { url: ctx.request.url });
+
+          // Increase counter.
+          _state.counter++;
+        }
+      }
+
+      await next();
+    },
+    async send(event, properties) {
+      if (isDisabled) {
+        return true;
+      }
+
+      await sendEvent(event, properties);
     },
   };
 };

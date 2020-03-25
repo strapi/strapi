@@ -72,9 +72,9 @@ module.exports = {
       });
 
       if (_.isEmpty(strapi.api)) {
-        strapi.emit('didCreateFirstContentType');
+        await strapi.telemetry.send('didCreateFirstContentType');
       } else {
-        strapi.emit('didCreateContentType');
+        await strapi.telemetry.send('didCreateContentType');
       }
 
       setImmediate(() => strapi.reload());
@@ -82,7 +82,7 @@ module.exports = {
       ctx.send({ data: { uid: component.uid } }, 201);
     } catch (error) {
       strapi.log.error(error);
-      strapi.emit('didNotCreateContentType', error);
+      await strapi.telemetry.send('didNotCreateContentType', { error: error.message });
       ctx.send({ error: error.message }, 400);
     }
   },
