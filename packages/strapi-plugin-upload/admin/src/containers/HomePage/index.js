@@ -1,5 +1,5 @@
 import React, { useReducer, useState, useEffect } from 'react';
-import { includes } from 'lodash';
+import { includes, toString } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
 import { useDebounce, useIsMounted } from '@buffetjs/hooks';
@@ -7,15 +7,21 @@ import {
   HeaderSearch,
   PageFooter,
   PopUpWarning,
+  LoadingIndicatorPage,
   useGlobalContext,
   generateFiltersFromSearch,
   generateSearchFromFilters,
   request,
   useQuery,
 } from 'strapi-helper-plugin';
-
-import { getRequestUrl, getTrad, generatePageFromStart, generateStartFromPage } from '../../utils';
-
+import {
+  formatFileForEditing,
+  getRequestUrl,
+  getTrad,
+  generatePageFromStart,
+  generateStartFromPage,
+} from '../../utils';
+import CheckControl from '../../components/CheckControl';
 import Container from '../../components/Container';
 import ControlsWrapper from '../../components/ControlsWrapper';
 import Padded from '../../components/Padded';
@@ -35,12 +41,15 @@ const HomePage = () => {
   const query = useQuery();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [fileToEdit, setFileToEdit] = useState(null);
+  const [shouldRefetch, setShouldRefetch] = useState(false);
+  const [modalInitialStep, setModalInitialStep] = useState('browse');
   const [searchValue, setSearchValue] = useState(query.get('_q') || '');
   const { push } = useHistory();
   const { search } = useLocation();
   const isMounted = useIsMounted();
 
-  const { data, dataCount, dataToDelete } = reducerState.toJS();
+  const { data, dataCount, dataToDelete, isLoading } = reducerState.toJS();
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
   const paramsKeys = ['_limit', '_start', '_q', '_sort'];
   const debouncedSearch = useDebounce(searchValue, 300);
@@ -93,9 +102,7 @@ const HomePage = () => {
 
       return Promise.resolve(data);
     } catch (err) {
-      if (isMounted) {
-        strapi.notification.error('notification.error');
-      }
+      strapi.notification.error('notification.error');
     }
 
     return [];
@@ -168,16 +175,21 @@ const HomePage = () => {
     setSearchValue(value);
   };
 
+  const handleClickEditFile = id => {
+    const file = formatFileForEditing(data.find(file => toString(file.id) === toString(id)));
+
+    setFileToEdit(file);
+    setModalInitialStep('edit');
+    handleClickToggleModal();
+  };
+
   const handleClearSearch = () => {
     setSearchValue('');
   };
 
   const handleClickToggleModal = (refetch = false) => {
     setIsModalOpen(prev => !prev);
-
-    if (refetch) {
-      fetchListData();
-    }
+    setShouldRefetch(refetch);
   };
 
   const handleClickTogglePopup = () => {
@@ -204,10 +216,24 @@ const HomePage = () => {
     fetchListData();
   };
 
+  const handleModalClose = () => {
+    resetModalState();
+
+    if (shouldRefetch) {
+      fetchListData();
+      setShouldRefetch(false);
+    }
+  };
+
   const handleSelectAll = () => {
     dispatch({
       type: 'TOGGLE_SELECT_ALL',
     });
+  };
+
+  const resetModalState = () => {
+    setModalInitialStep('browse');
+    setFileToEdit(null);
   };
 
   const headerProps = {
@@ -257,6 +283,10 @@ const HomePage = () => {
     data.every(item => dataToDelete.find(itemToDelete => item.id === itemToDelete.id)) &&
     hasSomeCheckboxSelected;
 
+  if (isLoading) {
+    return <LoadingIndicatorPage />;
+  }
+
   return (
     <Container>
       <Header {...headerProps} />
@@ -283,7 +313,12 @@ const HomePage = () => {
       </ControlsWrapper>
       {dataCount > 0 ? (
         <>
-          <List data={data} onChange={handleChangeCheck} selectedItems={dataToDelete} />
+          <List
+            data={data}
+            onChange={handleChangeCheck}
+            onClickEditFile={handleClickEditFile}
+            selectedItems={dataToDelete}
+          />
           <PageFooter
             context={{ emitEvent: () => {} }}
             count={paginationCount}
@@ -294,7 +329,13 @@ const HomePage = () => {
       ) : (
         <ListEmpty onClick={handleClickToggleModal} />
       )}
-      <ModalStepper isOpen={isModalOpen} onToggle={handleClickToggleModal} />
+      <ModalStepper
+        initialFileToEdit={fileToEdit}
+        initialStep={modalInitialStep}
+        isOpen={isModalOpen}
+        onClosed={handleModalClose}
+        onToggle={handleClickToggleModal}
+      />
       <PopUpWarning
         isOpen={isPopupOpen}
         toggleModal={handleClickTogglePopup}
@@ -303,6 +344,7 @@ const HomePage = () => {
       />
       <Padded bottom size="sm" />
       <Padded bottom size="md" />
+      <CheckControl />
     </Container>
   );
 };

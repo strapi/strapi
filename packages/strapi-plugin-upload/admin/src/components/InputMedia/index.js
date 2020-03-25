@@ -26,16 +26,18 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
   };
 
   const handleFilesNavigation = displayNext => {
-    if (displayNext && fileToDisplay === value.length - 1) {
-      setFileToDisplay(0);
+    if (attribute.multiple) {
+      if (displayNext && fileToDisplay === value.length - 1) {
+        setFileToDisplay(0);
 
-      return;
-    }
+        return;
+      }
 
-    if (!displayNext && fileToDisplay === 0) {
-      setFileToDisplay(value.length - 1);
-    } else {
-      setFileToDisplay(prev => (displayNext ? prev + 1 : prev - 1));
+      if (!displayNext && fileToDisplay === 0) {
+        setFileToDisplay(value.length - 1);
+      } else {
+        setFileToDisplay(prev => (displayNext ? prev + 1 : prev - 1));
+      }
     }
   };
 
@@ -48,17 +50,17 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
 
       <CardPreviewWrapper>
         <CardControlWrapper>
-          <CardControl color="#9EA7B8" type="plus" onClick={() => handleClickToggleModal(value)} />
+          <CardControl color="#9EA7B8" type="plus" onClick={handleClickToggleModal} />
         </CardControlWrapper>
         {hasNoValue ? (
-          <EmptyInputMedia onClick={() => handleClickToggleModal(value)}>
+          <EmptyInputMedia onClick={handleClickToggleModal}>
             <IconUpload />
             <EmptyText id={getTrad('input.placeholder')} />
           </EmptyInputMedia>
         ) : (
           <InputFilePreview
             isSlider={attribute.multiple && value.length > 1}
-            file={value[fileToDisplay]}
+            file={attribute.multiple ? value[fileToDisplay] : value}
             onClick={handleFilesNavigation}
           />
         )}
@@ -69,6 +71,7 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
           isOpen={isModalOpen}
           multiple={attribute.multiple}
           onInputMediaChange={handleChange}
+          selectedFiles={value}
           onToggle={handleClickToggleModal}
         />
       )}
@@ -86,7 +89,7 @@ InputMedia.propTypes = {
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   type: PropTypes.string.isRequired,
-  value: PropTypes.array,
+  value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
 };
 InputMedia.defaultProps = {
   label: '',

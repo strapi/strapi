@@ -9,8 +9,19 @@ import InputModalStepperContext from '../../contexts/InputModal/InputModalDataMa
 import pluginId from '../../pluginId';
 import reducer, { initialState } from './reducer';
 
-const InputModalStepperProvider = ({ isOpen, multiple, children, onInputMediaChange }) => {
-  const [reducerState, dispatch] = useReducer(reducer, initialState, init);
+const InputModalStepperProvider = ({
+  isOpen,
+  multiple,
+  children,
+  onInputMediaChange,
+  selectedFiles,
+}) => {
+  const [reducerState, dispatch] = useReducer(reducer, initialState, state =>
+    init({
+      ...state,
+      selectedFiles: Array.isArray(selectedFiles) ? selectedFiles : [selectedFiles],
+    })
+  );
   const { params, filesToUpload } = reducerState;
 
   useEffect(() => {
@@ -244,11 +255,13 @@ InputModalStepperProvider.propTypes = {
   isOpen: PropTypes.bool,
   multiple: PropTypes.bool.isRequired,
   onInputMediaChange: PropTypes.func,
+  selectedFiles: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
 };
 
 InputModalStepperProvider.defaultProps = {
   isOpen: false,
   onInputMediaChange: () => {},
+  selectedFiles: null,
 };
 
 export default InputModalStepperProvider;

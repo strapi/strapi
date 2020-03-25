@@ -1,3 +1,4 @@
+import CheckControl from '../../components/CheckControl';
 import EditForm from '../../components/EditForm';
 import UploadForm from '../../components/UploadForm';
 import UploadList from '../../components/UploadList';
@@ -28,6 +29,16 @@ const stepper = {
     next: 'upload',
     prev: 'upload',
     withBackButton: true,
+  },
+  edit: {
+    Component: EditForm,
+    components: {
+      CheckControl,
+    },
+    headerBreadcrumbs: [getTrad('modal.header.file-detail')],
+    next: null,
+    prev: null,
+    withBackButton: false,
   },
 };
 

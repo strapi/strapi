@@ -14,24 +14,36 @@ import ErrorMessage from './ErrorMessage';
 import Border from './Border';
 
 const Card = ({
+  id,
   checked,
   children,
   errorMessage,
   hasError,
   mime,
   name,
+  onClick,
   small,
   size,
   type,
   url,
+  withFileCaching,
 }) => {
   const fileSize = formatBytes(size, 0);
   const fileType = mime || type;
 
+  const handleClick = () => {
+    onClick(id);
+  };
+
   return (
-    <Wrapper>
+    <Wrapper onClick={handleClick}>
       <CardImgWrapper checked={checked} small={small}>
-        <CardPreview hasError={hasError} url={url} type={fileType} />
+        <CardPreview
+          hasError={hasError}
+          url={url}
+          type={fileType}
+          withFileCaching={withFileCaching}
+        />
         <Border color={hasError ? 'orange' : 'mediumBlue'} shown={checked || hasError} />
         {children}
       </CardImgWrapper>
@@ -51,26 +63,32 @@ Card.defaultProps = {
   checked: false,
   children: null,
   errorMessage: null,
+  id: null,
   hasError: false,
   mime: null,
   name: null,
+  onClick: () => {},
   size: 0,
   small: false,
   type: null,
   url: null,
+  withFileCaching: true,
 };
 
 Card.propTypes = {
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   checked: PropTypes.bool,
   children: PropTypes.node,
   errorMessage: PropTypes.string,
   hasError: PropTypes.bool,
   mime: PropTypes.string,
   name: PropTypes.string,
+  onClick: PropTypes.func,
   size: PropTypes.number,
   small: PropTypes.bool,
   type: PropTypes.string,
   url: PropTypes.string,
+  withFileCaching: PropTypes.bool,
 };
 
 export default Card;

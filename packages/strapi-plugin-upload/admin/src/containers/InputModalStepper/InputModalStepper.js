@@ -16,6 +16,7 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
     filesToUpload,
     fileToEdit,
     goTo,
+    multiple,
     handleCancelFileToUpload,
     handleCleanFilesError,
     handleClose,
@@ -70,7 +71,7 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
 
   const handleSubmit = e => {
     e.preventDefault();
-    onInputMediaChange(selectedFiles);
+    onInputMediaChange(multiple ? selectedFiles : selectedFiles[0]);
     goNext();
   };
 

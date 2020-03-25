@@ -14,6 +14,7 @@ import ListTitle from './ListTitle';
 const UploadList = ({
   filesToUpload,
   onClickCancelUpload,
+  onClickDeleteFileToUpload,
   onClickEditNewFile,
   onGoToAddBrowseFiles,
 }) => {
@@ -55,6 +56,7 @@ const UploadList = ({
                     <RowItem
                       {...data}
                       onClick={onClickCancelUpload}
+                      onClickDeleteFileToUpload={onClickDeleteFileToUpload}
                       onClickEdit={onClickEditNewFile}
                       key={data.originalIndex}
                     />
@@ -72,6 +74,7 @@ const UploadList = ({
 UploadList.defaultProps = {
   filesToUpload: [],
   onClickCancelUpload: () => {},
+  onClickDeleteFileToUpload: () => {},
   onClickEditNewFile: () => {},
   onGoToAddBrowseFiles: () => {},
 };
@@ -79,6 +82,7 @@ UploadList.defaultProps = {
 UploadList.propTypes = {
   filesToUpload: PropTypes.array,
   onClickCancelUpload: PropTypes.func,
+  onClickDeleteFileToUpload: PropTypes.func,
   onClickEditNewFile: PropTypes.func,
   onGoToAddBrowseFiles: PropTypes.func,
 };

@@ -1,4 +1,6 @@
 {
+  "checkControl.crop-original": "Crop the original asset",
+  "checkControl.crop-duplicate": "Duplicate & crop the asset",
   "form.input.label.file-alt": "Alternative text",
   "form.input.decription.file-alt": "This text will be displayed if the asset can’t be shown.",
   "form.input.label.file-caption": "Caption",
@@ -28,6 +30,7 @@
   "modal.upload-list.sub-header.button": "Add more assets",
   "modal.upload-list.footer.button.singular": "Upload {number} asset to the library",
   "modal.upload-list.footer.button.plural": "Upload {number} assets to the library",
+  "notification.link-copied": "Link copied into the clipboard",
   "plugin.name": "Media Library",
   "plugin.description.long": "Media file management.",
   "plugin.description.short": "Media file management.",
