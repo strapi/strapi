@@ -9,7 +9,7 @@ import VideoPreview from '../VideoPreview';
 import Wrapper from './Wrapper';
 import Image from './Image';
 
-const CardPreview = ({ hasError, url, type }) => {
+const CardPreview = ({ hasError, url, type, withFileCaching }) => {
   const isFile = getType(type) === 'file';
   const isVideo = getType(type) === 'video';
 
@@ -32,15 +32,9 @@ const CardPreview = ({ hasError, url, type }) => {
   return (
     <Wrapper>
       {isVideo ? (
-        <VideoPreview
-          src={url}
-          thumebnailHandler={thumbnail => console.log(thumbnail)}
-          // width={120}
-          // height={80}
-          snapshotAtTime={0}
-        />
+        <VideoPreview src={url} />
       ) : (
-        <Image src={url} />
+        <Image src={`${url}${withFileCaching ? `?${performance.now()}` : ''}`} />
       )}
     </Wrapper>
   );
@@ -50,12 +44,14 @@ CardPreview.defaultProps = {
   hasError: false,
   url: null,
   type: '',
+  withFileCaching: true,
 };
 
 CardPreview.propTypes = {
   hasError: PropTypes.bool,
   url: PropTypes.string,
   type: PropTypes.string,
+  withFileCaching: PropTypes.bool,
 };
 
 export default CardPreview;

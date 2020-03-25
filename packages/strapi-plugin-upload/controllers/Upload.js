@@ -98,9 +98,11 @@ module.exports = {
   },
 
   async find(ctx) {
-    const data = await strapi.plugins['upload'].services.upload.fetchAll(ctx.query);
-
-    ctx.body = data;
+    if (ctx.query._q) {
+      ctx.body = await strapi.plugins['upload'].services.upload.search(ctx.query);
+    } else {
+      ctx.body = await strapi.plugins['upload'].services.upload.fetchAll(ctx.query);
+    }
   },
 
   async findOne(ctx) {
@@ -115,9 +117,14 @@ module.exports = {
   },
 
   async count(ctx) {
-    const data = await strapi.plugins['upload'].services.upload.count(ctx.query);
+    let count;
+    if (ctx.query._q) {
+      count = await strapi.plugins['upload'].services.upload.countSearch(ctx.query);
+    } else {
+      count = await strapi.plugins['upload'].services.upload.count(ctx.query);
+    }
 
-    ctx.body = { count: data };
+    ctx.body = { count };
   },
 
   async destroy(ctx) {

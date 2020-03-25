@@ -13,6 +13,7 @@ const RowItem = ({
   errorMessage,
   isUploading,
   onClick,
+  onClickDeleteFileToUpload,
   onClickEdit,
   originalIndex,
 }) => {
@@ -20,6 +21,10 @@ const RowItem = ({
 
   const handleClick = () => {
     onClick(originalIndex);
+  };
+
+  const handleClickDelete = () => {
+    onClickDeleteFileToUpload(originalIndex);
   };
 
   const handleClickEdit = () => {
@@ -36,11 +41,13 @@ const RowItem = ({
         size={file.size}
         url={url}
         {...fileInfo}
+        withFileCaching={false}
       >
         {isUploading && <InfiniteLoadingIndicator onClick={handleClick} />}
         {!isUploading && (
           <CardControlsWrapper className="card-control-wrapper">
-            <CardControl onClick={handleClickEdit} />
+            <CardControl onClick={handleClickDelete} type="trash-alt" small />
+            <CardControl onClick={handleClickEdit} small />
           </CardControlsWrapper>
         )}
       </Card>
@@ -61,6 +68,7 @@ RowItem.propTypes = {
   errorMessage: PropTypes.string,
   isUploading: PropTypes.bool.isRequired,
   onClick: PropTypes.func.isRequired,
+  onClickDeleteFileToUpload: PropTypes.func.isRequired,
   onClickEdit: PropTypes.func.isRequired,
   originalIndex: PropTypes.number.isRequired,
 };
