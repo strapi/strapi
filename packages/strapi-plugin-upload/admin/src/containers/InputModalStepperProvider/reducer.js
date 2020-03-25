@@ -1,7 +1,7 @@
 import produce from 'immer';
-import { intersectionWith, differenceWith, unionWith } from 'lodash';
+import { intersectionWith, differenceWith, unionWith, set } from 'lodash';
 
-import createNewFilesToUploadArray from '../../utils/createNewFilesToUploadArray';
+import { createNewFilesToUploadArray, createFileToEdit } from '../../utils';
 
 const initialState = {
   selectedFiles: [],
@@ -16,14 +16,17 @@ const initialState = {
     filters: [],
   },
   currentStep: 'list',
+  isFormDisabled: false,
+  isWarningDeleteOpen: false,
 };
 
 const reducer = (state, action) =>
   // eslint-disable-next-line consistent-return
   produce(state, draftState => {
+    // console.log(action.type, action);
     switch (action.type) {
       case 'ON_CHANGE': {
-        draftState.fileToEdit[action.keys.split('.')] = action.value;
+        set(draftState.fileToEdit, action.keys.split('.'), action.value);
         break;
       }
       case 'GET_DATA_SUCCEEDED': {
@@ -161,8 +164,40 @@ const reducer = (state, action) =>
         });
         break;
       }
-      case 'SET_FILE_TO_EDIT': {
+      case 'SET_NEW_FILE_TO_EDIT': {
         draftState.fileToEdit = draftState.filesToUpload[action.fileIndex];
+        break;
+      }
+      case 'SET_FILE_TO_EDIT': {
+        draftState.fileToEdit = createFileToEdit(
+          state.files.find(file => file.id === action.fileId)
+        );
+        break;
+      }
+      case 'SET_FORM_DISABLED': {
+        draftState.isFormDisabled = action.isFormDisabled;
+        break;
+      }
+      case 'ON_ABORT_UPLOAD': {
+        draftState.fileToEdit.isUploading = false;
+        break;
+      }
+      case 'TOGGLE_MODAL_WARNING': {
+        draftState.isWarningDeleteOpen = !state.isWarningDeleteOpen;
+        break;
+      }
+      case 'ON_SUBMIT_EDIT_EXISTING_FILE': {
+        draftState.fileToEdit.isUploading = true;
+        break;
+      }
+      case 'EDIT_EXISTING_FILE': {
+        const index = draftState.selectedFiles.findIndex(
+          selectedFile => selectedFile.id === action.file.id
+        );
+
+        if (index !== -1) {
+          draftState.selectedFiles[index] = action.file;
+        }
         break;
       }
 

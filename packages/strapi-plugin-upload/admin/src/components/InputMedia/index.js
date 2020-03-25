@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { get } from 'lodash';
 
-import { getTrad } from '../../utils';
+import { getTrad, prefixFileUrlWithBackendUrl, createFileToEdit } from '../../utils';
 import CardControl from '../CardControl';
 import CardControlWrapper from './CardControlWrapper';
 import CardPreviewWrapper from './CardPreviewWrapper';
@@ -14,12 +16,21 @@ import Name from './Name';
 import Wrapper from './Wrapper';
 
 const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modal, setModal] = useState({
+    isOpen: false,
+    step: null,
+  });
   const [fileToDisplay, setFileToDisplay] = useState(0);
+  const hasNoValue = value !== null && Array.isArray(value) && value.length === 0;
+  const currentFile = attribute.multiple ? value[fileToDisplay] : value;
+  const fileURL = get(currentFile, ['url'], null);
+  const prefixedFileURL = fileURL ? prefixFileUrlWithBackendUrl(fileURL) : null;
+  const displaySlidePagination =
+    attribute.multiple && value.length > 1 ? ` (${fileToDisplay + 1}/${value.length})` : '';
+
   const handleClickToggleModal = () => {
-    setIsModalOpen(prev => !prev);
+    setModal(prev => ({ isOpen: !prev.isOpen }));
   };
-  const hasNoValue = Array.isArray(value) && value.length === 0;
 
   const handleChange = v => {
     onChange({ target: { name, type, value: v } });
@@ -41,8 +52,24 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
     }
   };
 
-  const displaySlidePagination =
-    attribute.multiple && value.length > 1 ? ` (${fileToDisplay + 1}/${value.length})` : '';
+  const handleRemoveFile = () => {
+    const newValue = attribute.multiple
+      ? value.filter((file, index) => index !== fileToDisplay)
+      : null;
+
+    if (fileToDisplay === newValue.length) {
+      setFileToDisplay(fileToDisplay > 0 ? fileToDisplay - 1 : fileToDisplay);
+    }
+    handleChange(newValue);
+  };
+
+  const handleEditFile = () => {
+    setModal(() => ({ isOpen: true, step: 'edit', fileToEdit: createFileToEdit(currentFile) }));
+  };
+
+  const handleCopy = () => {
+    strapi.notification.info(getTrad('notification.link-copied'));
+  };
 
   return (
     <Wrapper>
@@ -51,6 +78,15 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
       <CardPreviewWrapper>
         <CardControlWrapper>
           <CardControl color="#9EA7B8" type="plus" onClick={handleClickToggleModal} />
+          {!hasNoValue && (
+            <>
+              <CardControl color="#9EA7B8" type="pencil" onClick={handleEditFile} />
+              <CopyToClipboard onCopy={handleCopy} text={prefixedFileURL}>
+                <CardControl color="#9EA7B8" type="link" />
+              </CopyToClipboard>
+              <CardControl color="#9EA7B8" type="trash-alt" onClick={handleRemoveFile} />
+            </>
+          )}
         </CardControlWrapper>
         {hasNoValue ? (
           <EmptyInputMedia onClick={handleClickToggleModal}>
@@ -60,15 +96,17 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
         ) : (
           <InputFilePreview
             isSlider={attribute.multiple && value.length > 1}
-            file={attribute.multiple ? value[fileToDisplay] : value}
+            file={currentFile}
             onClick={handleFilesNavigation}
           />
         )}
       </CardPreviewWrapper>
 
-      {isModalOpen && (
+      {modal.isOpen && (
         <InputModalStepper
-          isOpen={isModalOpen}
+          isOpen={modal.isOpen}
+          step={modal.step}
+          fileToEdit={modal.fileToEdit}
           multiple={attribute.multiple}
           onInputMediaChange={handleChange}
           selectedFiles={value}

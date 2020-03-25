@@ -26,7 +26,6 @@ const CardImgWrapper = styled.div`
     `
       .card-control-wrapper {
         display: flex;
-        z-index: 1050;
       }
   `}
 `;

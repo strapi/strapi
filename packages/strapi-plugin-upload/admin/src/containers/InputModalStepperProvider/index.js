@@ -9,19 +9,23 @@ import init from './init';
 import reducer, { initialState } from './reducer';
 
 const InputModalStepperProvider = ({
+  children,
+  initialFileToEdit,
   isOpen,
   multiple,
-  children,
   onInputMediaChange,
   selectedFiles,
+  step,
 }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, state =>
     init({
       ...state,
+      currentStep: step,
+      fileToEdit: initialFileToEdit,
       selectedFiles: Array.isArray(selectedFiles) ? selectedFiles : [selectedFiles],
     })
   );
-  const { params, filesToUpload } = reducerState;
+  const { params, filesToUpload, fileToEdit } = reducerState;
 
   useEffect(() => {
     if (isOpen) {
@@ -50,6 +54,25 @@ const InputModalStepperProvider = ({
       type: 'MOVE_ASSET',
       dragIndex,
       hoverIndex,
+    });
+  };
+
+  const toggleModalWarning = () => {
+    dispatch({
+      type: 'TOGGLE_MODAL_WARNING',
+    });
+  };
+
+  const submitEditExistingFile = () => {
+    dispatch({
+      type: 'ON_SUBMIT_EDIT_EXISTING_FILE',
+    });
+  };
+
+  const handleEditExistingFile = file => {
+    dispatch({
+      type: 'EDIT_EXISTING_FILE',
+      file,
     });
   };
 
@@ -102,11 +125,20 @@ const InputModalStepperProvider = ({
 
   const handleGoToEditNewFile = fileIndex => {
     dispatch({
-      type: 'SET_FILE_TO_EDIT',
+      type: 'SET_NEW_FILE_TO_EDIT',
       fileIndex,
     });
 
     goTo('edit-new');
+  };
+
+  const handleGoToEditFile = fileId => {
+    dispatch({
+      type: 'SET_FILE_TO_EDIT',
+      fileId,
+    });
+
+    goTo('edit');
   };
 
   const handleCleanFilesError = () => {
@@ -119,6 +151,23 @@ const InputModalStepperProvider = ({
     dispatch({
       type: 'SET_CROP_RESULT',
       blob,
+    });
+  };
+
+  const handleFormDisabled = isFormDisabled => {
+    dispatch({
+      type: 'SET_FORM_DISABLED',
+      isFormDisabled,
+    });
+  };
+
+  const handleAbortUpload = () => {
+    const { abortController } = fileToEdit;
+
+    abortController.abort();
+
+    dispatch({
+      type: 'ON_ABORT_UPLOAD',
     });
   };
 
@@ -235,12 +284,16 @@ const InputModalStepperProvider = ({
         addFilesToUpload,
         fetchMediaLib,
         goTo,
+        handleAbortUpload,
         handleAllFilesSelection,
         handleCancelFileToUpload,
         handleCleanFilesError,
         handleClose,
+        handleEditExistingFile,
         handleFileSelection,
         handleFileToEditChange,
+        handleFormDisabled,
+        handleGoToEditFile,
         handleGoToEditNewFile,
         handleRemoveFileToUpload,
         handleResetFileToEdit,
@@ -251,6 +304,8 @@ const InputModalStepperProvider = ({
         onInputMediaChange,
         removeFilter,
         setParam,
+        submitEditExistingFile,
+        toggleModalWarning,
       }}
     >
       {children}
@@ -260,13 +315,16 @@ const InputModalStepperProvider = ({
 
 InputModalStepperProvider.propTypes = {
   children: PropTypes.node.isRequired,
+  initialFileToEdit: PropTypes.object,
   isOpen: PropTypes.bool,
   multiple: PropTypes.bool.isRequired,
   onInputMediaChange: PropTypes.func,
   selectedFiles: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  step: PropTypes.string.isRequired,
 };
 
 InputModalStepperProvider.defaultProps = {
+  initialFileToEdit: null,
   isOpen: false,
   onInputMediaChange: () => {},
   selectedFiles: null,

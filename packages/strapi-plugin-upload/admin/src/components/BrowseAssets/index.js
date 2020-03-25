@@ -12,6 +12,7 @@ import SelectAll from '../SelectAll';
 import SortPicker from '../SortPicker';
 import useModalContext from '../../hooks/useModalContext';
 import Wrapper from './Wrapper';
+import CardControl from '../CardControl';
 
 const BrowseAssets = () => {
   const {
@@ -20,12 +21,12 @@ const BrowseAssets = () => {
     goTo,
     handleAllFilesSelection,
     handleFileSelection,
+    handleGoToEditFile,
     multiple,
     params,
     removeFilter,
     selectedFiles,
     setParam,
-    sort,
   } = useModalContext();
 
   const handleChangeParams = ({ target: { name, value } }) => {
@@ -53,6 +54,12 @@ const BrowseAssets = () => {
   const limit = parseInt(params._limit, 10) || 10;
   const start = parseInt(params._start, 10) || 0;
 
+  const handleListCardClick = id => {
+    handleFileSelection({
+      target: { name: parseInt(id, 10), value: selectedFiles.findIndex(file => file.id === id) },
+    });
+  };
+
   const paginationParams = {
     _limit: parseInt(params._limit, 10) || 10,
     _page: generatePageFromStart(start, limit),
@@ -79,7 +86,7 @@ const BrowseAssets = () => {
               />
             </Padded>
           )}
-          <SortPicker onChange={handleChangeParams} value={sort} />
+          <SortPicker onChange={handleChangeParams} value={params._sort} />
           <Padded left size="sm" />
           <Filters
             filters={params.filters}
@@ -97,6 +104,15 @@ const BrowseAssets = () => {
             data={files}
             onChange={handleFileSelection}
             selectedItems={selectedFiles}
+            onCardClick={handleListCardClick}
+            renderCardControl={id => (
+              <CardControl
+                small
+                color="#9EA7B8"
+                type="pencil"
+                onClick={() => handleGoToEditFile(id)}
+              />
+            )}
           />
           <Padded left right>
             <PageFooter

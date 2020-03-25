@@ -6,7 +6,7 @@ import Flex from '../Flex';
 import Chevron from './Chevron';
 
 const InputFilePreview = ({ file, onClick, isSlider }) => {
-  const fileUrl = file.url.startsWith('/') ? `${strapi.backendURL}${file.url}` : file.url;
+  const fileUrl = file && file.url.startsWith('/') ? `${strapi.backendURL}${file.url}` : file.url;
 
   return (
     <Flex
@@ -23,12 +23,13 @@ const InputFilePreview = ({ file, onClick, isSlider }) => {
 };
 
 InputFilePreview.propTypes = {
-  file: PropTypes.object.isRequired,
+  file: PropTypes.object,
   isSlider: PropTypes.bool,
   onClick: PropTypes.func.isRequired,
 };
 InputFilePreview.defaultProps = {
   isSlider: false,
+  file: null,
 };
 
 export default InputFilePreview;
