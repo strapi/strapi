@@ -14,6 +14,7 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
   const { formatMessage } = useGlobalContext();
   const [isWarningDeleteOpen, setIsWarningDeleteOpen] = useState(false);
   const [shouldDeleteFile, setShouldDeleteFile] = useState(false);
+  const [isFormDisabled, setIsFormDisabled] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { currentStep, fileToEdit, filesToUpload } = reducerState.toJS();
   const { Component, components, headerBreadcrumbs, next, prev, withBackButton } = stepper[
@@ -111,6 +112,7 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
 
   const handleClose = () => {
     onClosed();
+    setIsFormDisabled(false);
 
     dispatch({
       type: 'RESET_PROPS',
@@ -323,6 +325,8 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
             fileToEdit={fileToEdit}
             filesToUpload={filesToUpload}
             components={components}
+            isEditingUploadedFile={currentStep === 'edit'}
+            isFormDisabled={isFormDisabled}
             onChange={handleChange}
             onClickCancelUpload={handleCancelFileToUpload}
             onClickDeleteFileToUpload={
@@ -334,6 +338,7 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
               currentStep === 'edit-new' ? handleSubmitEditNewFile : handleSubmitEditExistingFile
             }
             onToggle={handleToggle}
+            toggleDisableForm={setIsFormDisabled}
             ref={currentStep === 'edit' ? editModalRef : null}
             setCropResult={handleSetCropResult}
             withBackButton={withBackButton}
@@ -367,7 +372,7 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
             {currentStep === 'edit' && (
               <div style={{ margin: 'auto 0' }}>
                 <Button
-                  key="replace"
+                  disabled={isFormDisabled}
                   color="primary"
                   onClick={handleReplaceMedia}
                   style={{ marginRight: 10 }}
@@ -376,7 +381,7 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
                 </Button>
 
                 <Button
-                  key="success"
+                  disabled={isFormDisabled}
                   color="success"
                   type="button"
                   onClick={handleSubmitEditExistingFile}

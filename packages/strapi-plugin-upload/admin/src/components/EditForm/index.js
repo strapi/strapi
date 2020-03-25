@@ -40,11 +40,14 @@ const EditForm = forwardRef(
     {
       components,
       fileToEdit,
+      isEditingUploadedFile,
+      isFormDisabled,
       onAbortUpload,
       onChange,
       onClickDeleteFileToUpload,
       onSubmitEdit,
       setCropResult,
+      toggleDisableForm,
     },
     ref
   ) => {
@@ -105,6 +108,8 @@ const EditForm = forwardRef(
         });
       } else if (cropper.current) {
         cropper.current.destroy();
+
+        toggleDisableForm(false);
       }
 
       return () => {
@@ -143,7 +148,13 @@ const EditForm = forwardRef(
     };
 
     const handleToggleCropMode = () => {
-      setIsCropping(prev => !prev);
+      setIsCropping(prev => {
+        if (!prev && isEditingUploadedFile) {
+          toggleDisableForm(true);
+        }
+
+        return !prev;
+      });
     };
 
     const handleChange = ({ target: { files } }) => {
@@ -316,6 +327,7 @@ const EditForm = forwardRef(
                             <div className="col-12" key={input.name}>
                               <Inputs
                                 {...input}
+                                disabled={isFormDisabled}
                                 description={
                                   input.description ? formatMessage(input.description) : null
                                 }
@@ -351,27 +363,31 @@ const EditForm = forwardRef(
 );
 
 EditForm.defaultProps = {
-  onAbortUpload: () => {},
   components: {
     CheckControl: CardControl,
   },
   fileToEdit: null,
+  isEditingUploadedFile: false,
+  isFormDisabled: false,
+  onAbortUpload: () => {},
   onChange: () => {},
   onClickDeleteFileToUpload: () => {},
   onSubmitEdit: e => e.preventDefault(),
   setCropResult: () => {},
+  toggleDisableForm: () => {},
 };
 
 EditForm.propTypes = {
   onAbortUpload: PropTypes.func,
   components: PropTypes.object,
   fileToEdit: PropTypes.object,
+  isEditingUploadedFile: PropTypes.bool,
+  isFormDisabled: PropTypes.bool,
   onChange: PropTypes.func,
   onClickDeleteFileToUpload: PropTypes.func,
   onSubmitEdit: PropTypes.func,
   setCropResult: PropTypes.func,
+  toggleDisableForm: PropTypes.func,
 };
-
-// const EditFormRef = forwardRef(EditForm);
 
 export default EditForm;
