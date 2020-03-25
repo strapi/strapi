@@ -97,46 +97,19 @@ function generateCollectionTypeRoutes({ route, name }) {
  */
 
 module.exports = scope => {
-  const routes =
-    scope.contentTypeKind === 'singleType'
-      ? generateSingleTypeRoutes({
-          route: scope.route,
-          name: scope.name,
-        })
-      : generateCollectionTypeRoutes({
-          route: scope.route,
-          name: scope.name,
-        });
+  let routes = [];
+  if (!scope.args.plugin) {
+    routes =
+      scope.contentTypeKind === 'singleType'
+        ? generateSingleTypeRoutes({ route: scope.route, name: scope.name })
+        : generateCollectionTypeRoutes({ route: scope.route, name: scope.name });
+  }
 
-  // We have to delete current file
+  // if routes.json already exists, then merge
   if (fs.existsSync(scope.rootPath)) {
-    let current;
-
-    try {
-      // Copy current routes.json
-      current = require(scope.rootPath);
-
-      // Remove current routes.json
-      fs.unlinkSync(scope.rootPath);
-    } catch (e) {
-      console.error(e);
-      current = {
-        routes: [],
-      };
-    }
-
-    try {
-      _.set(
-        current,
-        'routes',
-        _.concat(routes, _.differenceWith(current.routes, routes, _.isEqual))
-      );
-
-      return current;
-    } catch (e) {
-      console.error(e);
-      return;
-    }
+    let current = require(scope.rootPath);
+    fs.unlinkSync(scope.rootPath);
+    routes = _.concat(routes, _.differenceWith(current.routes, routes, _.isEqual));
   }
 
   return { routes };
