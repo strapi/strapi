@@ -274,6 +274,103 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
     });
   });
 
+  describe('INIT_FILE_TO_EDIT', () => {
+    it('should set the fileToEdit object correctly', () => {
+      const action = {
+        type: 'INIT_FILE_TO_EDIT',
+        fileToEdit: {
+          test: 'test',
+        },
+      };
+      const state = fromJS({
+        fileToEdit: null,
+        currentStep: 'test',
+      });
+      const expected = fromJS({
+        fileToEdit: {
+          test: 'test',
+        },
+        currentStep: 'test',
+      });
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
+  describe('ON_ABORT_UPLOAD', () => {
+    it('should set the isUploading key to false', () => {
+      const action = {
+        type: 'ON_ABORT_UPLOAD',
+      };
+      const state = fromJS({
+        fileToEdit: {
+          test: 'test',
+          isUploading: true,
+        },
+        currentStep: 'test',
+      });
+      const expected = fromJS({
+        fileToEdit: {
+          test: 'test',
+          isUploading: false,
+        },
+        currentStep: 'test',
+      });
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
+  describe('ON_CHANGE', () => {
+    it('should change the data correctly', () => {
+      const action = {
+        type: 'ON_CHANGE',
+        keys: 'test',
+        value: 'test 1',
+      };
+      const state = fromJS({
+        fileToEdit: {
+          test: 'test',
+          isUploading: true,
+        },
+        currentStep: 'test',
+      });
+      const expected = fromJS({
+        fileToEdit: {
+          test: 'test 1',
+          isUploading: true,
+        },
+        currentStep: 'test',
+      });
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
+  describe('ON_SUBMIT_EDIT_EXISTING_FILE', () => {
+    it('should set the isUploading key to false', () => {
+      const action = {
+        type: 'ON_SUBMIT_EDIT_EXISTING_FILE',
+      };
+      const state = fromJS({
+        fileToEdit: {
+          test: 'test',
+          isUploading: false,
+        },
+        currentStep: 'test',
+      });
+      const expected = fromJS({
+        fileToEdit: {
+          test: 'test',
+          isUploading: true,
+        },
+        currentStep: 'test',
+      });
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
   describe('ON_SUBMIT_EDIT_NEW_FILE', () => {
     it('should update the filesToUploadList with the fileToEdit data', () => {
       const action = {
