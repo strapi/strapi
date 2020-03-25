@@ -1,28 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import moment from 'moment';
+import { FilterButton } from 'strapi-helper-plugin';
 
-import { dateFormats, FilterButton } from 'strapi-helper-plugin';
+import formatFilter from './utils/formatFilter';
 
 const FiltersList = ({ filters, onClick }) => {
-  return filters.map((filter, index) => {
-    const dateToUtcTime = date => moment.parseZone(date).utc();
-    const { value } = filter;
-
-    let displayedValue = filter;
-
-    if (dateToUtcTime(value)._isUTC === true) {
-      displayedValue = {
-        ...filter,
-        value: dateToUtcTime(value).format(dateFormats.datetime),
-      };
-    }
+  return filters.map(item => {
+    const formattedValue = formatFilter(item);
+    const { name, filter, value } = formattedValue;
 
     return (
       <FilterButton
-        onClick={() => onClick(index)}
-        key={JSON.stringify(filter)}
-        label={displayedValue}
+        onClick={() => onClick(item)}
+        key={`${name}${filter}${value}`}
+        label={formattedValue}
       />
     );
   });

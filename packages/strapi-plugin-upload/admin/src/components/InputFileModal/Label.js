@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
+import { themePropTypes } from 'strapi-helper-plugin';
 
 const Label = styled.label`
   position: relative;
@@ -8,9 +9,10 @@ const Label = styled.label`
   margin-top: 36px;
   margin-bottom: 18px;
   padding-top: 46px;
-  border: 2px dashed #e3e9f3;
-  border-radius: 2px;
   text-align: center;
+  border-radius: ${({ theme }) => theme.main.sizes.borderRadius};
+  border: 2px dashed ${({ theme }) => theme.main.colors.darkGrey};
+  background-color: ${({ theme }) => theme.main.colors.lightGrey};
 
   .dragzone {
     position: absolute;
@@ -33,6 +35,7 @@ Label.defaultProps = {
 };
 
 Label.propTypes = {
+  ...themePropTypes,
   isDragging: PropTypes.bool,
 };
 

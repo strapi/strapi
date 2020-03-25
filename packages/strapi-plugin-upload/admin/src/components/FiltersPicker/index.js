@@ -1,26 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { some } from 'lodash';
-import moment from 'moment';
 import { FormattedMessage } from 'react-intl';
 import { FilterIcon } from 'strapi-helper-plugin';
+import generateNewFilters from './utils/generateNewFilters';
 
 import FiltersCard from './FiltersCard';
 import Picker from '../Picker';
 
 const FiltersPicker = ({ onChange, filters }) => {
   const handleChange = ({ target: { value } }) => {
-    let formattedValue = value;
-
-    // moment format if datetime value
-    if (value.value._isAMomentObject === true) {
-      formattedValue.value = moment(value.value).format();
-    }
-
-    // Send updated filters
-    if (!some(filters, formattedValue)) {
-      onChange({ target: { name: 'filters', value } });
-    }
+    onChange({ target: { name: 'filters', value: generateNewFilters(filters, value) } });
   };
 
   return (

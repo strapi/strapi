@@ -18,12 +18,13 @@ const List = ({ data, onChange, selectedItems, canSelect }) => {
           <div className="row" key={key}>
             {rowContent.map(item => {
               const { id, url } = item;
+
               const checked = selectedItems.findIndex(file => file.id === id) !== -1;
               const fileUrl = url.startsWith('/') ? `${strapi.backendURL}${url}` : url;
 
               return (
-                <div className="col-xs-12 col-md-6 col-xl-3" key={item.id}>
-                  <Card small checked={checked} {...item} url={fileUrl}>
+                <div className="col-xs-12 col-md-6 col-xl-3" key={id}>
+                  <Card checked={checked} {...item} url={fileUrl}>
                     {(checked || canSelect) && (
                       <CardControlsWrapper leftAlign className="card-control-wrapper">
                         <Checkbox name={`${id}`} onChange={onChange} value={checked} />

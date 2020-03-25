@@ -57,8 +57,8 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
           </EmptyInputMedia>
         ) : (
           <InputFilePreview
+            isSlider={attribute.multiple && value.length > 1}
             file={value[fileToDisplay]}
-            multiple={attribute.multiple}
             onClick={handleFilesNavigation}
           />
         )}

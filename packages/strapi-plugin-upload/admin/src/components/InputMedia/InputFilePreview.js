@@ -5,7 +5,7 @@ import CardPreview from '../CardPreview';
 import Flex from '../Flex';
 import Chevron from './Chevron';
 
-const InputFilePreview = ({ file, onClick, multiple }) => {
+const InputFilePreview = ({ file, onClick, isSlider }) => {
   const fileUrl = file.url.startsWith('/') ? `${strapi.backendURL}${file.url}` : file.url;
 
   return (
@@ -15,20 +15,20 @@ const InputFilePreview = ({ file, onClick, multiple }) => {
       alignItems="center"
       justifyContent="space-between"
     >
-      {multiple && <Chevron side="left" onClick={() => onClick(false)} />}
+      {isSlider && <Chevron side="left" onClick={() => onClick(false)} />}
       <CardPreview url={fileUrl} type={file.mime} />
-      {multiple && <Chevron side="right" onClick={() => onClick(true)} />}
+      {isSlider && <Chevron side="right" onClick={() => onClick(true)} />}
     </Flex>
   );
 };
 
 InputFilePreview.propTypes = {
   file: PropTypes.object.isRequired,
-  multiple: PropTypes.bool,
+  isSlider: PropTypes.bool,
   onClick: PropTypes.func.isRequired,
 };
 InputFilePreview.defaultProps = {
-  multiple: false,
+  isSlider: false,
 };
 
 export default InputFilePreview;

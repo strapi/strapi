@@ -1,10 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
+
+import { formatBytes } from '../../utils';
+
 import Flex from '../Flex';
 import Text from '../Text';
 import FileDetailsBoxWrapper from './FileDetailsBoxWrapper';
-import formatBytes from './utils/formatBytes';
 
 const FileDetailsBox = ({ file }) => {
   const sections = [
@@ -44,11 +46,7 @@ const FileDetailsBox = ({ file }) => {
             {rows.map(rowItem => {
               return (
                 <Text as="div" key={rowItem.label} style={{ width: '50%' }}>
-                  <Text
-                    color="grey"
-                    fontWeight="bold"
-                    textTransform="capitalize"
-                  >
+                  <Text color="grey" fontWeight="bold" textTransform="capitalize">
                     {rowItem.label}
                   </Text>
                   <Text color="grey">{rowItem.value}</Text>
