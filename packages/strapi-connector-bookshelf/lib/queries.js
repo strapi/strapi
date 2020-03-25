@@ -675,6 +675,10 @@ const buildSearchQuery = (qb, model, params) => {
 
   // Search in columns with text using index.
   switch (model.client) {
+    case 'sqlite3': {
+      searchText.forEach(attr => qb.orWhereRaw(`${attr} LIKE ?`, `%${query}%`));
+      break;
+    }
     case 'mysql':
       qb.orWhereRaw(`MATCH(${searchText.join(',')}) AGAINST(? IN BOOLEAN MODE)`, `*${query}*`);
       break;

@@ -256,6 +256,10 @@ module.exports = {
     return strapi.query('file', 'upload').find(params);
   },
 
+  search(params) {
+    return strapi.query('file', 'upload').search(params);
+  },
+
   count(params) {
     return strapi.query('file', 'upload').count(params);
   },
