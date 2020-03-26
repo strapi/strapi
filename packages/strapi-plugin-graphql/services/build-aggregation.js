@@ -180,7 +180,7 @@ const createAggregationFieldsResolver = function(model, fields, operation, typeC
         ...convertToQuery(obj.where),
       });
 
-      if (model.orm == 'mongoose') {
+      if (model.orm === 'mongoose') {
         return buildQuery({ model, filters, aggregate: true })
           .group({
             _id: null,
@@ -200,9 +200,7 @@ const createAggregationFieldsResolver = function(model, fields, operation, typeC
             qb[operation](`${fieldKey} as ${operation}_${fieldKey}`);
           })
           .fetch()
-          .then(result => {
-            return _.get(result, [`attributes`, `${operation}_${fieldKey}`]);
-          });
+          .then(result => result.get(`${operation}_${fieldKey}`));
       }
     },
     typeCheck
@@ -284,7 +282,7 @@ const createGroupByFieldsResolver = function(model, fields) {
         .fetchAll()
         .then(result => {
           let values = result.models
-            .map(m => _.get(m, ['attributes', fieldKey])) // extract aggregate field
+            .map(m => m.get(fieldKey)) // extract aggregate field
             .filter(v => !!v) // remove null
             .map(v => '' + v); // convert to string
           return values.map(v => ({
