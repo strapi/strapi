@@ -313,6 +313,7 @@ const HomePage = () => {
       {dataCount > 0 ? (
         <>
           <List
+            clickable
             data={data}
             onChange={handleChangeCheck}
             onClickEditFile={handleClickEditFile}

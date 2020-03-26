@@ -18,6 +18,7 @@ const Card = ({
   children,
   errorMessage,
   hasError,
+  hasIcon,
   mime,
   name,
   onClick,
@@ -40,6 +41,7 @@ const Card = ({
       <CardImgWrapper checked={checked} small={small}>
         <CardPreview
           hasError={hasError}
+          hasIcon={hasIcon}
           previewUrl={previewUrl}
           url={url}
           type={fileType}
@@ -66,6 +68,7 @@ Card.defaultProps = {
   errorMessage: null,
   id: null,
   hasError: false,
+  hasIcon: false,
   mime: null,
   name: null,
   onClick: () => {},
@@ -83,6 +86,7 @@ Card.propTypes = {
   children: PropTypes.node,
   errorMessage: PropTypes.string,
   hasError: PropTypes.bool,
+  hasIcon: PropTypes.bool,
   mime: PropTypes.string,
   name: PropTypes.string,
   onClick: PropTypes.func,

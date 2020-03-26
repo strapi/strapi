@@ -12,10 +12,6 @@ const VideoPlayer = ({ src }) => {
 
   const videoRef = useRef();
 
-  const toggleHover = () => {
-    setIsHover(prev => !prev);
-  };
-
   const togglePlay = () => {
     if (isPlaying) {
       videoRef.current.pause();
@@ -27,7 +23,11 @@ const VideoPlayer = ({ src }) => {
   };
 
   return (
-    <Wrapper onMouseEnter={toggleHover} onMouseLeave={toggleHover} onClick={togglePlay}>
+    <Wrapper
+      onMouseEnter={() => setIsHover(true)}
+      onMouseLeave={() => setIsHover(false)}
+      onClick={togglePlay}
+    >
       <video
         controls={isPlaying}
         ref={videoRef}

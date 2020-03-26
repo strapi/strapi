@@ -1,15 +1,16 @@
 import React, { useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
 
+import Duration from '../Duration';
 import LoadingIndicator from '../LoadingIndicator';
 import PlayIcon from '../PlayIcon';
 import Wrapper from './Wrapper';
 import CanvasWrapper from './CanvasWrapper';
-import Duration from '../Duration';
+import Thumbnail from './Thumbnail';
 
 import reducer, { initialState } from './reducer';
 
-const VideoPreview = ({ src }) => {
+const VideoPreview = ({ hasIcon, previewUrl, src }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const { duration, dataLoaded, isHover, metadataLoaded, snapshot, seeked } = reducerState.toJS();
 
@@ -56,43 +57,53 @@ const VideoPreview = ({ src }) => {
 
   return (
     <Wrapper onMouseEnter={toggleHover} onMouseLeave={toggleHover}>
-      <video
-        muted
-        ref={videoRef}
-        src={src}
-        crossOrigin="anonymous"
-        onLoadedMetadata={() => {
-          dispatch({
-            type: 'METADATA_LOADED',
-          });
-        }}
-        onLoadedData={({ target: { duration } }) => {
-          dispatch({
-            type: 'DATA_LOADED',
-            duration,
-          });
-        }}
-        onSeeked={() => {
-          dispatch({
-            type: 'SEEKED',
-          });
-        }}
-      />
       {!snapshot && <LoadingIndicator />}
       <CanvasWrapper>
-        <canvas ref={canvasRef} />
+        {previewUrl ? (
+          <Thumbnail src={previewUrl} />
+        ) : (
+          <>
+            <video
+              muted
+              ref={videoRef}
+              src={src}
+              crossOrigin="anonymous"
+              onLoadedMetadata={() => {
+                dispatch({
+                  type: 'METADATA_LOADED',
+                });
+              }}
+              onLoadedData={({ target: { duration } }) => {
+                dispatch({
+                  type: 'DATA_LOADED',
+                  duration,
+                });
+              }}
+              onSeeked={() => {
+                dispatch({
+                  type: 'SEEKED',
+                });
+              }}
+            />
+            <canvas ref={canvasRef} />
+          </>
+        )}
         <Duration duration={duration} />
-        {isHover && <PlayIcon small />}
+        {hasIcon && isHover && <PlayIcon small />}
       </CanvasWrapper>
     </Wrapper>
   );
 };
 
 VideoPreview.defaultProps = {
+  hasIcon: false,
+  previewUrl: null,
   src: null,
 };
 
 VideoPreview.propTypes = {
+  hasIcon: PropTypes.bool,
+  previewUrl: PropTypes.string,
   src: PropTypes.string,
 };
 

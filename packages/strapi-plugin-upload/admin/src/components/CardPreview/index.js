@@ -5,11 +5,11 @@ import { getExtension, getType } from '../../utils';
 
 import BrokenFile from '../../icons/BrokenFile';
 import FileIcon from '../FileIcon';
+import VideoPreview from '../VideoPreview';
 import Wrapper from './Wrapper';
 import Image from './Image';
-import Video from './Video';
 
-const CardPreview = ({ hasError, url, previewUrl, type, withFileCaching }) => {
+const CardPreview = ({ hasError, hasIcon, url, previewUrl, type, withFileCaching }) => {
   const isFile = getType(type) === 'file';
   const isVideo = getType(type) === 'video';
 
@@ -32,7 +32,7 @@ const CardPreview = ({ hasError, url, previewUrl, type, withFileCaching }) => {
   return (
     <Wrapper>
       {isVideo ? (
-        <Video previewUrl={previewUrl} src={url} />
+        <VideoPreview src={url} previewUrl={previewUrl} hasIcon={hasIcon} />
       ) : (
         // Adding performance.now forces the browser no to cache the img
         // https://stackoverflow.com/questions/126772/how-to-force-a-web-browser-not-to-cache-images
@@ -44,6 +44,7 @@ const CardPreview = ({ hasError, url, previewUrl, type, withFileCaching }) => {
 
 CardPreview.defaultProps = {
   hasError: false,
+  hasIcon: false,
   previewUrl: null,
   url: null,
   type: '',
@@ -52,6 +53,7 @@ CardPreview.defaultProps = {
 
 CardPreview.propTypes = {
   hasError: PropTypes.bool,
+  hasIcon: PropTypes.bool,
   previewUrl: PropTypes.string,
   url: PropTypes.string,
   type: PropTypes.string,
