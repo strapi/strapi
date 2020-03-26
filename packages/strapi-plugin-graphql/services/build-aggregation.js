@@ -185,13 +185,31 @@ const createAggregationFieldsResolver = function(
         ...convertToQuery(obj.where),
       });
 
-      return buildQuery({ model, filters, aggregate: true })
-        .group({
-          _id: null,
-          [fieldKey]: { [`$${operation}`]: `$${fieldKey}` },
-        })
-        .exec()
-        .then(result => _.get(result, [0, fieldKey]));
+      if (model.orm == 'mongoose') {
+        return buildQuery({ model, filters, aggregate: true })
+          .group({
+            _id: null,
+            [fieldKey]: { [`$${operation}`]: `$${fieldKey}` },
+          })
+          .exec()
+          .then(result => _.get(result, [0, fieldKey]));
+      }
+
+      if (model.orm === "bookshelf") {
+        let { limit, ...aggFilters } = filters;
+        return model
+          .query(qb => {
+            // apply filters without pagination limit
+            buildQuery({ model, filters: aggFilters })(qb);
+
+            // `sum, avg, min, max` pass nicely to knex :->
+            qb[operation](`${fieldKey} as ${operation}_${fieldKey}`);
+          })
+          .fetch()
+          .then(result => {
+            return _.get(result, [`attributes`, `${operation}_${fieldKey}`])
+          });
+      }
     },
     typeCheck
   );
@@ -252,19 +270,52 @@ const createGroupByFieldsResolver = function(model, fields) {
       ...convertToQuery(filters.where),
     };
 
-    const result = await buildQuery({
-      model,
-      filters: convertRestQueryParams(params),
-      aggregate: true,
-    }).group({
-      _id: `$${fieldKey === 'id' ? model.primaryKey : fieldKey}`,
-    });
+    if (model.orm === 'mongoose') {
+      const result = await buildQuery({
+        model,
+        filters: convertRestQueryParams(params),
+        aggregate: true,
+      }).group({
+        _id: `$${fieldKey === 'id' ? model.primaryKey : fieldKey}`,
+      });
 
-    return preProcessGroupByData({
-      result,
-      fieldKey,
-      filters,
-    });
+      return preProcessGroupByData({
+        result,
+        fieldKey,
+        filters,
+      });
+    }
+
+    if (model.orm === 'bookshelf') {
+      let { limit, ...aggFilters } = filters;
+      return model
+        .query(qb => {
+          // apply filters without pagination limit
+          buildQuery({ model, filters: aggFilters })(qb);
+          qb.groupBy(fieldKey);
+          qb.select(fieldKey);
+        })
+        .fetchAll()
+        .then(result => {
+          let values = result.models
+            .map(m => _.get(m, ['attributes', fieldKey])) // extract aggregate field
+            .filter(v => !!v) // remove null
+            .map(v => '' + v); // convert to string
+          return values.map(v => ({
+            key: v,
+            connection: () => {
+              return {
+                ...filters,
+                where: {
+                  ...(filters.where || {}),
+                  [fieldKey]: v,
+                },
+              };
+            }
+          }));
+        });
+    }
+
   };
 
   return createFieldsResolver(fields, resolver, () => true);
