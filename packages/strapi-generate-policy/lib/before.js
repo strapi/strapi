@@ -6,6 +6,7 @@
 
 // Public node modules.
 const _ = require('lodash');
+const { nameToSlug } = require('strapi-utils');
 
 /**
  * This `before` function is run before generating targets.
@@ -18,8 +19,13 @@ const _ = require('lodash');
 /* eslint-disable prefer-template */
 module.exports = (scope, cb) => {
   if (!scope.rootPath || !scope.id) {
-    return cb.invalid('Usage: `$ strapi generate:policy policyName --api apiName --plugin pluginName`');
+    return cb.invalid(
+      'Usage: `$ strapi generate:policy policyName --api apiName --plugin pluginName`'
+    );
   }
+
+  // Format `id`.
+  const name = scope.name || nameToSlug(scope.id);
 
   let filePath;
   if (scope.args.api) {
@@ -30,21 +36,11 @@ module.exports = (scope, cb) => {
     filePath = './config/policies';
   }
 
-  // Determine default values based on the available scope.
-  _.defaults(scope, {
-    ext: '.js'
-  });
-
   // Take another pass to take advantage of the defaults absorbed in previous passes.
   _.defaults(scope, {
+    name,
     filePath,
-    filename: scope.id + scope.ext
-  });
-
-  // Humanize output.
-  _.defaults(scope, {
-    humanizeId: scope.id,
-    humanizedPath: '`' + scope.filePath + '`'
+    filename: `${name}.js`,
   });
 
   // Trigger callback with no error to proceed.

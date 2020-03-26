@@ -56,14 +56,8 @@ module.exports = function(id, cliArguments) {
 
       if (scope.generatorType !== 'new') {
         logger.info(
-          'Generated a new ' +
-            scope.generatorType +
-            ' `' +
-            scope.humanizeId +
-            '` at ' +
-            scope.humanizedPath +
-            '.'
-        ); // eslint-disable-line prefer-template
+          `Generated a new ${scope.generatorType} \`${scope.name}\` at \`${scope.filePath}\`.`
+        );
       }
 
       process.exit(0);
