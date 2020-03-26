@@ -29,7 +29,11 @@ const FileDetailsBox = ({ file }) => {
       key: 2,
       rows: [
         { label: 'dimensions', value: file.width ? `${file.width}x${file.height}` : '-' },
-        { label: 'extension', value: file.ext ? file.ext.replace('.', '') : '-' },
+        {
+          label: 'extension',
+          value: file.ext ? file.ext.replace('.', '') : '-',
+          textTransform: 'uppercase',
+        },
       ],
     },
   ];
@@ -40,7 +44,7 @@ const FileDetailsBox = ({ file }) => {
         if (type === 'spacer') {
           return (
             <Text as="section" key={key}>
-              <Text>&nbsp;</Text>
+              <Text lineHeight="18px">&nbsp;</Text>
             </Text>
           );
         }
@@ -50,10 +54,12 @@ const FileDetailsBox = ({ file }) => {
             {rows.map(rowItem => {
               return (
                 <Text as="div" key={rowItem.label} style={{ width: '50%' }}>
-                  <Text color="grey" fontWeight="bold" textTransform="capitalize">
+                  <Text color="grey" fontWeight="bold" textTransform="capitalize" lineHeight="18px">
                     {rowItem.label}
                   </Text>
-                  <Text color="grey">{rowItem.value}</Text>
+                  <Text color="grey" textTransform={rowItem.textTransform || ''} lineHeight="18px">
+                    {rowItem.value}
+                  </Text>
                 </Text>
               );
             })}
