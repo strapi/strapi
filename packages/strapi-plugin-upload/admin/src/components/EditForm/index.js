@@ -50,7 +50,7 @@ const EditForm = forwardRef(
   ) => {
     const { formatMessage } = useGlobalContext();
     const [isCropping, setIsCropping] = useState(false);
-    const [infosCoordinates, setInfosCoordinates] = useState({ top: 0, left: 0 });
+    const [infosCoordinates, setInfosCoordinates] = useState({ top: null, left: 0 });
     const [infos, setInfos] = useState({ width: 0, height: 0 });
     const [src, setSrc] = useState(null);
 
@@ -105,7 +105,7 @@ const EditForm = forwardRef(
         });
       } else if (cropper.current) {
         cropper.current.destroy();
-
+        setInfosCoordinates({ top: null, left: null });
         toggleDisableForm(false);
       }
 
@@ -299,7 +299,7 @@ const EditForm = forwardRef(
                             ref={isCropping ? imgRef : null}
                           />
 
-                          {isCropping && (
+                          {isCropping && infosCoordinates.top && (
                             <Text
                               fontSize="md"
                               color="white"
