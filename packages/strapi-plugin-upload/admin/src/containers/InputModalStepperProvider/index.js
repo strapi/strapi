@@ -2,11 +2,10 @@ import React, { useReducer, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { request, generateSearchFromFilters } from 'strapi-helper-plugin';
 import { get } from 'lodash';
-
-import { getRequestUrl, compactParams } from '../../utils';
-import init from './init';
-import InputModalStepperContext from '../../contexts/InputModal/InputModalDataManager';
 import pluginId from '../../pluginId';
+import { getRequestUrl, compactParams } from '../../utils';
+import InputModalStepperContext from '../../contexts/InputModal/InputModalDataManager';
+import init from './init';
 import reducer, { initialState } from './reducer';
 
 const InputModalStepperProvider = ({
@@ -43,6 +42,14 @@ const InputModalStepperProvider = ({
       type: 'ON_CHANGE',
       keys: name,
       value,
+    });
+  };
+
+  const handleMoveAsset = (dragIndex, hoverIndex) => {
+    dispatch({
+      type: 'MOVE_ASSET',
+      dragIndex,
+      hoverIndex,
     });
   };
 
@@ -239,6 +246,7 @@ const InputModalStepperProvider = ({
         handleResetFileToEdit,
         handleSetCropResult,
         handleUploadFiles,
+        moveAsset: handleMoveAsset,
         multiple,
         onInputMediaChange,
         removeFilter,
