@@ -53,6 +53,7 @@ const FormModal = () => {
   const { emitEvent, formatMessage } = useGlobalContext();
   const query = useQuery();
   const attributeOptionRef = useRef();
+
   const {
     addAttribute,
     addCreatedComponentToDynamicZone,
@@ -1197,6 +1198,8 @@ const FormModal = () => {
                             value = retrievedValue.join('\n');
                           } else if (input.name === 'uid') {
                             value = input.value;
+                          } else if (input.name === 'allowedTypes' && retrievedValue === '') {
+                            value = null;
                           } else {
                             value = retrievedValue;
                           }

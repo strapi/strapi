@@ -15,8 +15,9 @@ const AllowedTypesSelect = ({ name, changeMediaAllowedTypes, styles, value }) =>
   const ref = useRef();
 
   /* eslint-disable indent */
+
   const displayedValue =
-    value.length === 0
+    value === null || value.length === 0
       ? formatMessage({ id: getTrad('form.attribute.media.allowed-types.none') })
       : value
           .sort()
@@ -35,16 +36,20 @@ const AllowedTypesSelect = ({ name, changeMediaAllowedTypes, styles, value }) =>
       ref={ref}
       refState={ref}
       styles={styles}
-      value={{ label: displayedValue, value }}
+      value={{ label: displayedValue, value: value || '' }}
     />
   );
+};
+
+AllowedTypesSelect.defaultProps = {
+  value: null,
 };
 
 AllowedTypesSelect.propTypes = {
   changeMediaAllowedTypes: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
   styles: PropTypes.object.isRequired,
-  value: PropTypes.array.isRequired,
+  value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
 };
 
 export default AllowedTypesSelect;
