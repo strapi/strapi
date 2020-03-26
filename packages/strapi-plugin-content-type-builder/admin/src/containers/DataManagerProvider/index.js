@@ -419,8 +419,8 @@ const DataManagerProvider = ({ allIcons, children }) => {
       if (!isInContentTypeView) {
         emitEvent('didNotSaveComponent');
       }
-      console.error({ err });
-      strapi.notification.error(err.response.payload.error || 'notification.error');
+      console.error({ err: err.response });
+      strapi.notification.error('notification.error');
     }
   };
 
