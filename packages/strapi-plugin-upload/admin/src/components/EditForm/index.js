@@ -22,13 +22,13 @@ import CardControlsWrapper from '../CardControlsWrapper';
 import CardPreview from '../CardPreview';
 import InfiniteLoadingIndicator from '../InfiniteLoadingIndicator';
 import ModalSection from '../ModalSection';
-import Text from '../Text';
 import VideoPlayer from '../VideoPlayer';
 import CropWrapper from './CropWrapper';
 import FileDetailsBox from './FileDetailsBox';
 import FileWrapper from './FileWrapper';
 import FormWrapper from './FormWrapper';
 import Row from './Row';
+import SizeBox from './SizeBox';
 import Wrapper from './Wrapper';
 import form from './utils/form';
 import isImageType from './utils/isImageType';
@@ -284,23 +284,12 @@ const EditForm = forwardRef(
                         <>{isVideo ? <VideoPlayer src={src} /> : <CardPreview url={src} />}</>
                       )}
 
-                      {isCropping && infos.width && (
-                        <Text
-                          fontSize="md"
-                          color="white"
-                          as="div"
-                          style={{
-                            position: 'absolute',
-                            bottom: 0,
-                            right: 0,
-                            background: '#333740',
-                            borderRadius: 2,
-                          }}
-                        >
+                      {isCropping && infos.width !== null && (
+                        <SizeBox>
                           &nbsp;
                           {infos.width} x {infos.height}
                           &nbsp;
-                        </Text>
+                        </SizeBox>
                       )}
                     </Fragment>
                   )}
