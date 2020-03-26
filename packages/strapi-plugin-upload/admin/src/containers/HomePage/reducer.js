@@ -52,15 +52,10 @@ const reducer = (state, action) => {
         return dataToDelete.concat(newItems);
       });
     }
-    case 'ON_DELETE_MEDIA':
-      return state.update('isLoading', () => true);
-    case 'ON_DELETE_MEDIA_ERROR':
-      return state.update('isLoading', () => false);
     case 'ON_DELETE_MEDIA_SUCCEEDED':
       return state
         .update('data', list => list.filter(item => item.get('id') !== action.mediaId))
-        .update('dataCount', count => count - 1)
-        .update('isLoading', () => false);
+        .update('dataCount', count => count - 1);
     default:
       return state;
   }
