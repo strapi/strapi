@@ -21,8 +21,7 @@ const List = ({ data, onChange, onClickEditFile, selectedItems, canSelect }) => 
           <div className="row" key={key}>
             {rowContent.map(item => {
               const { id } = item;
-              const url = get(item, ['formats', 'thumbnail', 'url'], '');
-
+              const url = get(item, ['formats', 'thumbnail', 'url'], item.url);
               const checked = selectedItems.findIndex(file => file.id === id) !== -1;
               const fileUrl = url.startsWith('/') ? `${strapi.backendURL}${url}` : url;
 
