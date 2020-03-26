@@ -44,7 +44,7 @@ describe('UPLOAD | utils | formatFileForEditing', () => {
         width: 110,
         height: 110,
         created_at: '2020-03-23T11:43:46.729Z',
-        url: '/uploads/thumbnail_Screenshot_2020-03-26_at_13.09.24.png_df7f56f901.png',
+        url: '/uploads/Screenshot_2020-03-09_at_17.52.42.png_edbdfb6446.png',
         mime: 'image/png',
       },
       fileInfo: {
@@ -102,7 +102,7 @@ describe('UPLOAD | utils | formatFileForEditing', () => {
         width: 110,
         height: 110,
         created_at: '2020-03-23T11:43:46.729Z',
-        url: '/uploads/thumbnail_Screenshot_2020-03-26_at_13.09.24.png_df7f56f901.png',
+        url: '/uploads/Screenshot_2020-03-09_at_17.52.42.png_edbdfb6446.png',
         mime: 'image/png',
       },
       fileInfo: {
