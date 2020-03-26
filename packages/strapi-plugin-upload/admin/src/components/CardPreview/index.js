@@ -32,8 +32,10 @@ const CardPreview = ({ hasError, url, previewUrl, type, withFileCaching }) => {
   return (
     <Wrapper>
       {isVideo ? (
-        <Video src={url} previewUrl={previewUrl} />
+        <Video previewUrl={previewUrl} src={url} />
       ) : (
+        // Adding performance.now forces the browser no to cache the img
+        // https://stackoverflow.com/questions/126772/how-to-force-a-web-browser-not-to-cache-images
         <Image src={`${url}${withFileCaching ? `?${performance.now()}` : ''}`} />
       )}
     </Wrapper>

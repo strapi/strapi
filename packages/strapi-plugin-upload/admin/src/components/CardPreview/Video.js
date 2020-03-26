@@ -4,9 +4,7 @@ import PropTypes from 'prop-types';
 import VideoPreview from '../VideoPreview';
 import Image from './Image';
 
-const Video = ({ src, previewUrl }) => {
-  console.log(previewUrl);
-
+const Video = ({ previewUrl, src }) => {
   if (previewUrl) {
     return <Image src={previewUrl} />;
   }

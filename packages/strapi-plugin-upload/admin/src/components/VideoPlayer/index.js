@@ -19,6 +19,7 @@ const VideoPlayer = ({ src }) => {
   const togglePlay = () => {
     if (isPlaying) {
       videoRef.current.pause();
+      // Change isPlaying here too because onPause handler is only called on controls click
       setIsPlaying(false);
     } else {
       videoRef.current.play();
