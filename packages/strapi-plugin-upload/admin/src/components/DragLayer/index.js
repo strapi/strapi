@@ -5,17 +5,8 @@ import { ItemTypes } from '../../utils';
 import CardControlsWrapper from '../CardControlsWrapper';
 import CardImgWrapper from '../CardImgWrapper';
 import CardPreview from '../CardPreview';
-import Border from '../Card/Border';
-
-const layerStyles = {
-  position: 'fixed',
-  pointerEvents: 'none',
-  zIndex: 1051,
-  left: 0,
-  top: 0,
-  width: '100%',
-  height: '100%',
-};
+import Border from '../CardBorder';
+import Wrapper from './Wrapper';
 
 function getItemStyles(initialOffset, currentOffset, mouseOffset) {
   if (!initialOffset || !currentOffset) {
@@ -66,11 +57,11 @@ const DragLayer = () => {
   }
 
   return (
-    <div style={layerStyles}>
+    <Wrapper>
       <div style={getItemStyles(initialOffset, currentOffset, mouseOffset)} className="col-md-2">
         {renderItem()}
       </div>
-    </div>
+    </Wrapper>
   );
 };
 

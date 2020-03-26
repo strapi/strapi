@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Checkbox } from '@buffetjs/core';
-import Card from '../Card';
+import DraggableCard from './DraggableCard';
 import CardControlsWrapper from '../CardControlsWrapper';
 import ListWrapper from '../ListWrapper';
 
@@ -20,7 +20,7 @@ const SortableList = ({ data, moveAsset, onChange, onClickEditFile, selectedItem
 
           return (
             <div className="col-xs-12 col-md-6 col-xl-3" key={id}>
-              <Card
+              <DraggableCard
                 checked={checked}
                 {...item}
                 url={fileUrl}
@@ -39,7 +39,7 @@ const SortableList = ({ data, moveAsset, onChange, onClickEditFile, selectedItem
                     />
                   </CardControlsWrapper>
                 )}
-              </Card>
+              </DraggableCard>
             </div>
           );
         })}
