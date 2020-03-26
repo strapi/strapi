@@ -4,13 +4,20 @@ import { get } from 'lodash';
 import { Modal, ModalFooter, PopUpWarning, useGlobalContext, request } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
 import pluginId from '../../pluginId';
-import { getRequestUrl, getTrad } from '../../utils';
+import { getTrad } from '../../utils';
 import ModalHeader from '../../components/ModalHeader';
 import stepper from './stepper';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
-const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onToggle }) => {
+const ModalStepper = ({
+  initialFileToEdit,
+  initialStep,
+  isOpen,
+  onClosed,
+  onDeleteMedia,
+  onToggle,
+}) => {
   const { formatMessage } = useGlobalContext();
   const [isWarningDeleteOpen, setIsWarningDeleteOpen] = useState(false);
   const [shouldDeleteFile, setShouldDeleteFile] = useState(false);
@@ -66,15 +73,15 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
     });
   };
 
-  const handleCancelFileToUpload = fileIndex => {
-    const fileToCancel = get(filesToUpload, fileIndex, {});
+  const handleCancelFileToUpload = fileOriginalIndex => {
+    const fileToCancel = filesToUpload.find(file => file.originalIndex === fileOriginalIndex);
 
     // Cancel upload
     fileToCancel.abortController.abort();
 
     dispatch({
       type: 'REMOVE_FILE_TO_UPLOAD',
-      fileIndex,
+      fileIndex: fileOriginalIndex,
     });
   };
 
@@ -123,16 +130,7 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
     if (shouldDeleteFile) {
       const { id } = fileToEdit;
 
-      try {
-        const requestURL = getRequestUrl(`files/${id}`);
-
-        await request(requestURL, { method: 'DELETE' });
-
-        setShouldDeleteFile(false);
-        toggleRef.current(true);
-      } catch (err) {
-        console.log(err);
-      }
+      onDeleteMedia(id);
     }
   };
 
@@ -268,11 +266,13 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
             null
           );
 
-          dispatch({
-            type: 'SET_FILE_ERROR',
-            fileIndex: originalIndex,
-            errorMessage,
-          });
+          if (errorMessage) {
+            dispatch({
+              type: 'SET_FILE_ERROR',
+              fileIndex: originalIndex,
+              errorMessage,
+            });
+          }
         }
       }
     );
@@ -330,12 +330,12 @@ const ModalStepper = ({ initialFileToEdit, initialStep, isOpen, onClosed, onTogg
             onChange={handleChange}
             onClickCancelUpload={handleCancelFileToUpload}
             onClickDeleteFileToUpload={
-              currentStep === 'edit-new' ? handleClickDeleteFileToUpload : handleClickDeleteFile
+              currentStep === 'edit' ? handleClickDeleteFile : handleClickDeleteFileToUpload
             }
             onClickEditNewFile={handleGoToEditNewFile}
             onGoToAddBrowseFiles={handleGoToAddBrowseFiles}
             onSubmitEdit={
-              currentStep === 'edit-new' ? handleSubmitEditNewFile : handleSubmitEditExistingFile
+              currentStep === 'edit' ? handleSubmitEditExistingFile : handleSubmitEditNewFile
             }
             onToggle={handleToggle}
             toggleDisableForm={setIsFormDisabled}
@@ -408,6 +408,7 @@ ModalStepper.defaultProps = {
   initialFileToEdit: null,
   initialStep: 'browse',
   onClosed: () => {},
+  onDeleteMedia: () => {},
   onToggle: () => {},
 };
 
@@ -416,6 +417,7 @@ ModalStepper.propTypes = {
   initialStep: PropTypes.string,
   isOpen: PropTypes.bool.isRequired,
   onClosed: PropTypes.func,
+  onDeleteMedia: PropTypes.func,
   onToggle: PropTypes.func,
 };
 

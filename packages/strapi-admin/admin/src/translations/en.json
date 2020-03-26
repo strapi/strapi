@@ -273,5 +273,6 @@
   "notification.contentType.relations.conflict": "Content type has conflicting relations",
   "notification.form.error.fields": "The form contains some errors",
   "notification.form.success.fields": "Changes saved",
+  "notification.success.delete": "The item has been deleted",
   "global.prompt.unsaved": "Are you sure you want to leave this page? All your modifications will be lost"
 }

@@ -71,6 +71,7 @@ const HomePage = () => {
       await request(requestURL, {
         method: 'DELETE',
       });
+      strapi.notification.success('notification.success.delete');
     } catch (err) {
       if (isMounted) {
         strapi.notification.error('notification.error');
@@ -79,6 +80,8 @@ const HomePage = () => {
   };
 
   const fetchListData = async () => {
+    dispatch({ type: 'GET_DATA' });
+
     const [data, count] = await Promise.all([fetchData(), fetchDataCount()]);
 
     if (isMounted) {
@@ -101,7 +104,10 @@ const HomePage = () => {
 
       return Promise.resolve(data);
     } catch (err) {
-      strapi.notification.error('notification.error');
+      if (isMounted) {
+        dispatch({ type: 'GET_DATA_ERROR' });
+        strapi.notification.error('notification.error');
+      }
     }
 
     return [];
@@ -118,6 +124,7 @@ const HomePage = () => {
       return Promise.resolve(count);
     } catch (err) {
       if (isMounted) {
+        dispatch({ type: 'GET_DATA_ERROR' });
         strapi.notification.error('notification.error');
       }
     }
@@ -202,6 +209,28 @@ const HomePage = () => {
     handleChangeParams({
       target: { name: 'filters', value: updatedFilters },
     });
+  };
+
+  const handleDeleteMediaFromModal = async id => {
+    handleClickToggleModal();
+    const overlayblockerParams = {
+      children: <div />,
+      noGradient: true,
+    };
+    strapi.lockApp(overlayblockerParams);
+
+    try {
+      await deleteMedia(id);
+
+      dispatch({
+        type: 'ON_DELETE_MEDIA_SUCCEEDED',
+        mediaId: id,
+      });
+    } catch (err) {
+      // Silent
+    } finally {
+      strapi.unlockApp();
+    }
   };
 
   const handleDeleteMedias = async () => {
@@ -333,7 +362,9 @@ const HomePage = () => {
         initialStep={modalInitialStep}
         isOpen={isModalOpen}
         onClosed={handleModalClose}
+        onDeleteMedia={handleDeleteMediaFromModal}
         onToggle={handleClickToggleModal}
+        refetchData={fetchListData}
       />
       <PopUpWarning
         isOpen={isPopupOpen}
