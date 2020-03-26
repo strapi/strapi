@@ -66,7 +66,6 @@ const Card = ({
     canDrag: () => isDraggable,
     collect: monitor => ({
       isDragging: monitor.isDragging(),
-      // getItem: monitor.getItem(),
     }),
   });
 

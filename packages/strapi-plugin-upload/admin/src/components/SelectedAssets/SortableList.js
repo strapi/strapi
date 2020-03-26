@@ -15,7 +15,6 @@ const SortableList = ({ data, moveAsset, onChange, onClickEditFile, selectedItem
       <div className="row">
         {data.map((item, index) => {
           const { id, url } = item;
-
           const checked = selectedItems.findIndex(file => file.id === id) !== -1;
           const fileUrl = url.startsWith('/') ? `${strapi.backendURL}${url}` : url;
 
