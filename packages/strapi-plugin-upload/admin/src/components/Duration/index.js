@@ -3,9 +3,12 @@ import styled from 'styled-components';
 import { themePropTypes } from 'strapi-helper-plugin';
 
 import Text from '../Text';
+import formatDuration from './utils/formatDuration';
 
-const Duration = styled(props => (
-  <Text {...props} color="white" fontSize="md" fontWeight="semiBold" />
+const Duration = styled(({ duration, ...rest }) => (
+  <Text {...rest} color="white" fontSize="md" fontWeight="semiBold">
+    {formatDuration(duration)}
+  </Text>
 ))`
   position: absolute;
   bottom: 10px;

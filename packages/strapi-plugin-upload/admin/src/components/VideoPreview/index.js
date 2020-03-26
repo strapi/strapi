@@ -1,19 +1,18 @@
-import React, { useEffect, useReducer, useRef, useState } from 'react';
+import React, { useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
 
 import LoadingIndicator from '../LoadingIndicator';
 import PlayIcon from '../PlayIcon';
 import Wrapper from './Wrapper';
 import CanvasWrapper from './CanvasWrapper';
-import Duration from './Duration';
+import Duration from '../Duration';
 
 import reducer, { initialState } from './reducer';
-import formatDuration from './utils/formatDuration';
 
 const VideoPreview = ({ src }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState);
-  const { duration, dataLoaded, metadataLoaded, snapshot, seeked } = reducerState.toJS();
-  const [isHover, setIsHover] = useState(false);
+  const { duration, dataLoaded, isHover, metadataLoaded, snapshot, seeked } = reducerState.toJS();
+
   const canvasRef = useRef();
   const videoRef = useRef();
 
@@ -50,7 +49,9 @@ const VideoPreview = ({ src }) => {
   }, [dataLoaded, metadataLoaded, seeked, snapshot]);
 
   const toggleHover = () => {
-    setIsHover(prev => !prev);
+    dispatch({
+      type: 'SET_IS_HOVER',
+    });
   };
 
   return (
@@ -68,7 +69,7 @@ const VideoPreview = ({ src }) => {
         onLoadedData={({ target: { duration } }) => {
           dispatch({
             type: 'DATA_LOADED',
-            duration: formatDuration(duration),
+            duration,
           });
         }}
         onSeeked={() => {
@@ -80,7 +81,7 @@ const VideoPreview = ({ src }) => {
       {!snapshot && <LoadingIndicator />}
       <CanvasWrapper>
         <canvas ref={canvasRef} />
-        <Duration>{duration}</Duration>
+        <Duration duration={duration} />
         {isHover && <PlayIcon small />}
       </CanvasWrapper>
     </Wrapper>

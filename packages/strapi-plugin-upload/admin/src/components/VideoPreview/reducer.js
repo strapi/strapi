@@ -3,6 +3,7 @@ import { fromJS } from 'immutable';
 const initialState = fromJS({
   dataLoaded: false,
   duration: 0,
+  isHover: false,
   metadataLoaded: false,
   seeked: false,
   snapshot: false,
@@ -16,6 +17,8 @@ const videoReducer = (state, action) => {
       return state.update('metadataLoaded', () => true);
     case 'SEEKED':
       return state.update('seeked', () => true);
+    case 'SET_IS_HOVER':
+      return state.update('isHover', isHover => !isHover);
     case 'SET_SNAPSHOT':
       return state.update('snapshot', () => action.snapshot);
     default:
