@@ -46,6 +46,15 @@ const reducer = (state, action) =>
         draftState.params[name] = value;
         break;
       }
+      case 'MOVE_ASSET': {
+        const { dragIndex, hoverIndex } = action;
+        const dragMedia = state.selectedFiles[dragIndex];
+
+        draftState.selectedFiles.splice(dragIndex, 1);
+        draftState.selectedFiles.splice(hoverIndex, 0, dragMedia);
+
+        break;
+      }
       case 'ON_FILE_SELECTION': {
         const { value, id } = action;
 
