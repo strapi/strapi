@@ -16,12 +16,7 @@ import { Inputs } from '@buffetjs/custom';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
-import {
-  canDownloadFile,
-  createFileToDownloadName,
-  getTrad,
-  prefixFileUrlWithBackendUrl,
-} from '../../utils';
+import { createFileToDownloadName, getTrad, prefixFileUrlWithBackendUrl } from '../../utils';
 import CardControl from '../CardControl';
 import CardControlsWrapper from '../CardControlsWrapper';
 import CardPreview from '../CardPreview';
@@ -60,9 +55,9 @@ const EditForm = forwardRef(
     const [src, setSrc] = useState(null);
 
     const fileURL = get(fileToEdit, ['file', 'url'], null);
-    const isFileDownloadable = canDownloadFile(fileURL);
+
     const prefixedFileURL = fileURL ? prefixFileUrlWithBackendUrl(fileURL) : null;
-    const downloadFileName = isFileDownloadable ? createFileToDownloadName(fileToEdit) : null;
+    const downloadFileName = createFileToDownloadName(fileToEdit);
     const mimeType =
       get(fileToEdit, ['file', 'type'], null) || get(fileToEdit, ['file', 'mime'], '');
     const isImg = isImageType(mimeType);

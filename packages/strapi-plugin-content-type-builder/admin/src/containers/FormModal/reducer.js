@@ -103,13 +103,21 @@ const reducer = (state, action) => {
             return fromJS(['images', 'videos', 'files']);
           }
 
-          return fromJS([]);
+          return null;
         });
       }
 
-      return state.updateIn(['modifiedData', 'allowedTypes'], list => {
+      return state.updateIn(['modifiedData', 'allowedTypes'], currentList => {
+        let list = currentList || fromJS([]);
+
         if (list.includes(action.name)) {
-          return list.filter(v => v !== action.name);
+          list = list.filter(v => v !== action.name);
+
+          if (list.size === 0) {
+            return null;
+          }
+
+          return list;
         }
 
         return list.push(action.name);

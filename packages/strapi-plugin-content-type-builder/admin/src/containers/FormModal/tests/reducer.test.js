@@ -248,7 +248,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
         value: false,
         type: 'ON_CHANGE_ALLOWED_TYPE',
       };
-      const expected = state.setIn(['modifiedData', 'allowedTypes'], fromJS([]));
+      const expected = state.setIn(['modifiedData', 'allowedTypes'], null);
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -271,7 +271,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
       expect(reducer(state, action)).toEqual(expected);
     });
 
-    it('Shoul remove the type', () => {
+    it('Should remove the type', () => {
       const state = initialState.setIn(
         ['modifiedData', 'allowedTypes'],
         fromJS(['videos', 'images', 'files'])
@@ -282,6 +282,18 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
         type: 'ON_CHANGE_ALLOWED_TYPE',
       };
       const expected = state.setIn(['modifiedData', 'allowedTypes'], fromJS(['videos', 'files']));
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should remove set the allowedTypes to null if removing the last type', () => {
+      const state = initialState.setIn(['modifiedData', 'allowedTypes'], fromJS(['videos']));
+      const action = {
+        name: 'videos',
+        value: null,
+        type: 'ON_CHANGE_ALLOWED_TYPE',
+      };
+      const expected = state.setIn(['modifiedData', 'allowedTypes'], null);
 
       expect(reducer(state, action)).toEqual(expected);
     });

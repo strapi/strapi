@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Checkbox } from '@buffetjs/core';
+import { get } from 'lodash';
 import { createMatrix } from '../../utils';
 import Card from '../Card';
 import CardControlsWrapper from '../CardControlsWrapper';
@@ -19,7 +20,8 @@ const List = ({ data, onChange, onClickEditFile, selectedItems, canSelect }) => 
         return (
           <div className="row" key={key}>
             {rowContent.map(item => {
-              const { id, url } = item;
+              const { id } = item;
+              const url = get(item, ['formats', 'thumbnail', 'url'], '');
 
               const checked = selectedItems.findIndex(file => file.id === id) !== -1;
               const fileUrl = url.startsWith('/') ? `${strapi.backendURL}${url}` : url;

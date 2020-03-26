@@ -1,4 +1,5 @@
 {
+  "kind": "collectionType",
   "connection": "default",
   "collectionName": "addresses",
   "info": {
@@ -7,14 +8,13 @@
   },
   "options": {
     "increments": true,
-    "timestamps": ["created_at", "updated_at"],
+    "timestamps": [
+      "created_at",
+      "updated_at"
+    ],
     "comment": ""
   },
   "attributes": {
-    "geolocation": {
-      "type": "json",
-      "required": true
-    },
     "city": {
       "type": "string",
       "required": true
@@ -30,16 +30,22 @@
     "cover": {
       "model": "file",
       "via": "related",
+      "allowedTypes": [
+        "files",
+        "images",
+        "videos"
+      ],
       "plugin": "upload",
-      "required": false,
-      "allowedTypes": ["images", "cover"]
+      "required": false
     },
     "images": {
       "collection": "file",
       "via": "related",
+      "allowedTypes": [
+        "images"
+      ],
       "plugin": "upload",
-      "required": false,
-      "allowedTypes": []
+      "required": false
     },
     "full_name": {
       "type": "string",
