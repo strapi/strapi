@@ -2,17 +2,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { ClearIcon } from 'strapi-helper-plugin';
 
+import LoadingIndicator from '../LoadingIndicator';
 import IntlText from '../IntlText';
 import Button from './Button';
 import Container from './Container';
-import Indicator from './Indicator';
 import Wrapper from './Wrapper';
 
 const InfiniteLoadingIndicator = ({ onClick }) => {
   return (
     <Wrapper>
       <Container>
-        <Indicator />
+        <LoadingIndicator />
         <Button type="button" onClick={onClick}>
           <IntlText
             as="span"

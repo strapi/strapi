@@ -22,14 +22,13 @@ to {
 }
 `;
 
-const Indicator = styled.div`
+const LoadingIndicator = styled.div`
   position: relative;
-  width: 100%;
+  width: 44%;
   height: 4px;
   overflow: hidden;
   background-color: #515764;
   border-radius: 2px;
-  margin-top: 32px;
   &:before {
     content: '';
     display: block;
@@ -42,4 +41,4 @@ const Indicator = styled.div`
   }
 `;
 
-export default Indicator;
+export default LoadingIndicator;

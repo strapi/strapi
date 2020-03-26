@@ -23,6 +23,7 @@ import CardPreview from '../CardPreview';
 import InfiniteLoadingIndicator from '../InfiniteLoadingIndicator';
 import ModalSection from '../ModalSection';
 import Text from '../Text';
+import VideoPlayer from '../VideoPlayer';
 import CropWrapper from './CropWrapper';
 import FileDetailsBox from './FileDetailsBox';
 import FileWrapper from './FileWrapper';
@@ -31,6 +32,7 @@ import Row from './Row';
 import Wrapper from './Wrapper';
 import form from './utils/form';
 import isImageType from './utils/isImageType';
+import isVideoType from './utils/isVideoType';
 
 const EditForm = forwardRef(
   (
@@ -61,6 +63,7 @@ const EditForm = forwardRef(
     const mimeType =
       get(fileToEdit, ['file', 'type'], null) || get(fileToEdit, ['file', 'mime'], '');
     const isImg = isImageType(mimeType);
+    const isVideo = isVideoType(mimeType);
     const canCrop = isImg && !mimeType.includes('svg');
 
     const aRef = useRef();
@@ -76,7 +79,7 @@ const EditForm = forwardRef(
     }));
 
     useEffect(() => {
-      if (isImg) {
+      if (isImg || isVideo) {
         if (prefixedFileURL) {
           setSrc(prefixedFileURL);
         } else {
@@ -89,7 +92,7 @@ const EditForm = forwardRef(
           reader.readAsDataURL(fileToEdit.file);
         }
       }
-    }, [isImg, fileToEdit, prefixedFileURL]);
+    }, [isImg, isVideo, fileToEdit, prefixedFileURL]);
 
     useEffect(() => {
       if (isCropping) {
@@ -319,7 +322,7 @@ const EditForm = forwardRef(
                           )}
                         </CropWrapper>
                       ) : (
-                        <CardPreview url={src} />
+                        <>{isVideo ? <VideoPlayer src={src} /> : <CardPreview url={src} />}</>
                       )}
                     </Fragment>
                   )}
