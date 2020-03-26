@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Checkbox } from '@buffetjs/core';
+import { get } from 'lodash';
 import DraggableCard from './DraggableCard';
 import CardControlsWrapper from '../CardControlsWrapper';
 import ListWrapper from '../ListWrapper';
@@ -14,7 +15,8 @@ const SortableList = ({ data, moveAsset, onChange, onClickEditFile, selectedItem
     <ListWrapper>
       <div className="row">
         {data.map((item, index) => {
-          const { id, url } = item;
+          const { id } = item;
+          const url = get(item, ['formats', 'thumbnail', 'url'], '');
           const checked = selectedItems.findIndex(file => file.id === id) !== -1;
           const fileUrl = url.startsWith('/') ? `${strapi.backendURL}${url}` : url;
 

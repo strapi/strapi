@@ -19,8 +19,18 @@ describe('UPLOAD | utils | formatFileForEditing', () => {
       updated_at: '2020-03-23T11:43:46.729Z',
       alternativeText: 'test',
       id: 12,
-      formats: null,
       provider_metadata: null,
+      formats: {
+        thumbnail: {
+          hash: 'thumbnail_Screenshot_2020-03-26_at_13.09.24.png_df7f56f901',
+          ext: '.png',
+          mime: 'image/png',
+          width: 245,
+          height: 23,
+          size: 4.09,
+          url: '/uploads/thumbnail_Screenshot_2020-03-26_at_13.09.24.png_df7f56f901.png',
+        },
+      },
     };
     const abortController = new AbortController();
 
@@ -34,7 +44,7 @@ describe('UPLOAD | utils | formatFileForEditing', () => {
         width: 110,
         height: 110,
         created_at: '2020-03-23T11:43:46.729Z',
-        url: '/uploads/Screenshot_2020-03-09_at_17.52.42.png_edbdfb6446.png',
+        url: '/uploads/thumbnail_Screenshot_2020-03-26_at_13.09.24.png_df7f56f901.png',
         mime: 'image/png',
       },
       fileInfo: {
@@ -68,7 +78,17 @@ describe('UPLOAD | utils | formatFileForEditing', () => {
       updated_at: '2020-03-23T11:43:46.729Z',
       alternativeText: 'test',
       id: 12,
-      formats: null,
+      formats: {
+        thumbnail: {
+          hash: 'thumbnail_Screenshot_2020-03-26_at_13.09.24.png_df7f56f901',
+          ext: '.png',
+          mime: 'image/png',
+          width: 245,
+          height: 23,
+          size: 4.09,
+          url: '/uploads/thumbnail_Screenshot_2020-03-26_at_13.09.24.png_df7f56f901.png',
+        },
+      },
       provider_metadata: null,
     };
     const abortController = new AbortController();
@@ -82,7 +102,7 @@ describe('UPLOAD | utils | formatFileForEditing', () => {
         width: 110,
         height: 110,
         created_at: '2020-03-23T11:43:46.729Z',
-        url: '/uploads/Screenshot_2020-03-09_at_17.52.42.png_edbdfb6446.png',
+        url: '/uploads/thumbnail_Screenshot_2020-03-26_at_13.09.24.png_df7f56f901.png',
         mime: 'image/png',
       },
       fileInfo: {

@@ -1,4 +1,4 @@
-import { pick } from 'lodash';
+import { get, pick } from 'lodash';
 
 const formatFileForEditing = file => {
   const abortController = new AbortController();
@@ -7,7 +7,8 @@ const formatFileForEditing = file => {
     abortController,
     id: file.id,
     file: {
-      ...pick(file, ['size', 'ext', 'width', 'height', 'url', 'mime', 'name']),
+      ...pick(file, ['size', 'ext', 'width', 'height', 'mime', 'name']),
+      url: get(file, ['formats', 'thumbnail', 'url']),
       created_at: file.created_at || file.createdAt,
     },
     fileInfo: pick(file, ['alternativeText', 'caption', 'name']),
