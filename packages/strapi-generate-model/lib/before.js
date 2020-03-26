@@ -11,6 +11,7 @@ const path = require('path');
 // Public node modules.
 const _ = require('lodash');
 const pluralize = require('pluralize');
+const { nameToSlug, nameToCollectionName } = require('strapi-utils');
 
 // Fetch stub attribute template on initial load.
 const attributeTemplate = fs.readFileSync(
@@ -34,41 +35,31 @@ module.exports = (scope, cb) => {
     );
   }
 
+  // Format `id`.
+  const name = scope.name || nameToSlug(scope.id);
+
   // `scope.args` are the raw command line arguments.
   _.defaults(scope, {
-    id: _.trim(_.deburr(scope.id)),
-    idPluralized: pluralize.plural(_.trim(_.deburr(scope.id))),
+    name,
     environment: process.env.NODE_ENV || 'development',
-  });
-
-  // Determine default values based on the available scope.
-  _.defaults(scope, {
-    globalID: _.upperFirst(_.camelCase(scope.id)),
-    ext: '.js',
   });
 
   // Determine the destination path.
   let filePath;
   if (scope.args.api) {
-    filePath = `./api/${scope.args.api}`;
+    filePath = `./api/${scope.args.api}/models`;
   } else if (scope.args.plugin) {
     filePath = `./plugins/${scope.args.plugin}/models`;
   } else {
-    filePath = `./api/${scope.id}`;
+    filePath = `./api/${name}/models`;
   }
 
   // Take another pass to take advantage of the defaults absorbed in previous passes.
   _.defaults(scope, {
     rootPath: scope.rootPath,
     filePath,
-    filename: scope.globalID + scope.ext,
-    filenameSettings: scope.globalID + '.settings.json',
-  });
-
-  // Humanize output.
-  _.defaults(scope, {
-    humanizeId: _.camelCase(scope.id).toLowerCase(),
-    humanizedPath: '`' + scope.filePath + '`',
+    filename: `${name}.js`,
+    filenameSettings: `${name}.settings.json`,
   });
 
   // Validate optional attribute arguments.
@@ -82,9 +73,7 @@ module.exports = (scope, cb) => {
 
     // Handle invalid attributes.
     if (!parts[1] || !parts[0]) {
-      invalidAttributes.push(
-        'Error: Invalid attribute notation `' + attribute + '`.'
-      );
+      invalidAttributes.push('Error: Invalid attribute notation `' + attribute + '`.');
       return;
     }
 
@@ -97,12 +86,10 @@ module.exports = (scope, cb) => {
   // Set collectionName
   scope.collectionName = _.has(scope.args, 'collectionName')
     ? scope.args.collectionName
-    : undefined;
+    : nameToCollectionName(pluralize(scope.id));
 
   // Set description
-  scope.description = _.has(scope.args, 'description')
-    ? scope.args.description
-    : undefined;
+  scope.description = _.has(scope.args, 'description') ? scope.args.description : undefined;
 
   // Handle invalid action arguments.
   // Send back invalidActions.
@@ -141,13 +128,7 @@ module.exports = (scope, cb) => {
       scope.args.connection ||
       JSON.parse(
         fs.readFileSync(
-          path.resolve(
-            scope.rootPath,
-            'config',
-            'environments',
-            scope.environment,
-            'database.json'
-          )
+          path.resolve(scope.rootPath, 'config', 'environments', scope.environment, 'database.json')
         )
       ).defaultConnection ||
       '';

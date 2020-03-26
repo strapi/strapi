@@ -5,7 +5,7 @@ const _ = require('lodash');
 const pluralize = require('pluralize');
 
 const { isRelation, toUID, isConfigurable } = require('../../utils/attributes');
-const { nameToSlug, nameToCollectionName } = require('../../utils/helpers');
+const { nameToSlug, nameToCollectionName } = require('strapi-utils');
 const { typeKinds } = require('../../controllers/validation/constants');
 const createSchemaHandler = require('./schema-handler');
 
