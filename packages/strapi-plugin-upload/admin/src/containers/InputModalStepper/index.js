@@ -1,18 +1,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
+import { DndProvider } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
 import InputModalStepper from './InputModalStepper';
 import InputModalStepperProvider from '../InputModalStepperProvider';
 
 const ModalStepper = ({ isOpen, onToggle, onInputMediaChange, multiple, selectedFiles }) => {
   return (
-    <InputModalStepperProvider selectedFiles={selectedFiles} multiple={multiple} isOpen={isOpen}>
-      <InputModalStepper
-        isOpen={isOpen}
-        onToggle={onToggle}
-        onInputMediaChange={onInputMediaChange}
-      />
-    </InputModalStepperProvider>
+    <DndProvider backend={HTML5Backend}>
+      <InputModalStepperProvider selectedFiles={selectedFiles} multiple={multiple} isOpen={isOpen}>
+        <InputModalStepper
+          isOpen={isOpen}
+          onToggle={onToggle}
+          onInputMediaChange={onInputMediaChange}
+        />
+      </InputModalStepperProvider>
+    </DndProvider>
   );
 };
 
