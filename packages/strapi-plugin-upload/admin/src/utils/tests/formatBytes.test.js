@@ -6,6 +6,10 @@ describe('UPLOAD | components | EditForm | utils', () => {
       expect(formatBytes(0)).toEqual('0B');
     });
 
+    it('should return 0B if less than 1 bytes is passed', () => {
+      expect(formatBytes(0.9)).toEqual('0B');
+    });
+
     it('should return 1KB if 1024 Bytes is passed', () => {
       expect(formatBytes(1024)).toEqual('1KB');
     });
