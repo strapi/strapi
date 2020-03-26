@@ -53,7 +53,7 @@ const FileDetailsBox = ({ file }) => {
           <Flex justifyContent="space-between" key={key}>
             {rows.map(rowItem => {
               return (
-                <Text as="div" key={rowItem.label} style={{ width: '50%' }} lineHeight="18px">
+                <Text as="div" key={rowItem.label} style={{ width: '50%' }}>
                   <Text color="grey" fontWeight="bold" textTransform="capitalize" lineHeight="18px">
                     {rowItem.label}
                   </Text>
