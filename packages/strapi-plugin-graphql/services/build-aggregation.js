@@ -171,12 +171,7 @@ const extractType = function(_type, attributeType) {
  *   age: function ageResolver() { .... }
  * }
  */
-const createAggregationFieldsResolver = function(
-  model,
-  fields,
-  operation,
-  typeCheck
-) {
+const createAggregationFieldsResolver = function(model, fields, operation, typeCheck) {
   return createFieldsResolver(
     fields,
     async (obj, options, context, fieldResolver, fieldKey) => {
@@ -195,19 +190,18 @@ const createAggregationFieldsResolver = function(
           .then(result => _.get(result, [0, fieldKey]));
       }
 
-      if (model.orm === "bookshelf") {
-        let { limit, ...aggFilters } = filters;
+      if (model.orm === 'bookshelf') {
         return model
           .query(qb => {
             // apply filters without pagination limit
-            buildQuery({ model, filters: aggFilters })(qb);
+            buildQuery({ model, filters: _.omit(filters, ['limit']) })(qb);
 
             // `sum, avg, min, max` pass nicely to knex :->
             qb[operation](`${fieldKey} as ${operation}_${fieldKey}`);
           })
           .fetch()
           .then(result => {
-            return _.get(result, [`attributes`, `${operation}_${fieldKey}`])
+            return _.get(result, [`attributes`, `${operation}_${fieldKey}`]);
           });
       }
     },
@@ -258,13 +252,7 @@ const preProcessGroupByData = function({ result, fieldKey, filters }) {
  * }
  */
 const createGroupByFieldsResolver = function(model, fields) {
-  const resolver = async (
-    filters,
-    options,
-    context,
-    fieldResolver,
-    fieldKey
-  ) => {
+  const resolver = async (filters, options, context, fieldResolver, fieldKey) => {
     const params = {
       ...convertToParams(_.omit(filters, 'where')),
       ...convertToQuery(filters.where),
@@ -287,11 +275,9 @@ const createGroupByFieldsResolver = function(model, fields) {
     }
 
     if (model.orm === 'bookshelf') {
-      let { limit, ...aggFilters } = filters;
       return model
         .query(qb => {
-          // apply filters without pagination limit
-          buildQuery({ model, filters: aggFilters })(qb);
+          buildQuery({ model, filters })(qb);
           qb.groupBy(fieldKey);
           qb.select(fieldKey);
         })
@@ -305,17 +291,16 @@ const createGroupByFieldsResolver = function(model, fields) {
             key: v,
             connection: () => {
               return {
-                ...filters,
+                ..._.omit(filters, ['limit']), // we shouldn't carry limit to sub-field
                 where: {
                   ...(filters.where || {}),
                   [fieldKey]: v,
                 },
               };
-            }
+            },
           }));
         });
     }
-
   };
 
   return createFieldsResolver(fields, resolver, () => true);
@@ -327,10 +312,8 @@ const createGroupByFieldsResolver = function(model, fields) {
  */
 const generateConnectionFieldsTypes = function(fields, model) {
   const { globalId, attributes } = model;
-  const primitiveFields = getFieldsByTypes(
-    fields,
-    isNotOfTypeArray,
-    (type, name) => extractType(type, (attributes[name] || {}).type)
+  const primitiveFields = getFieldsByTypes(fields, isNotOfTypeArray, (type, name) =>
+    extractType(type, (attributes[name] || {}).type)
   );
 
   const connectionFields = _.mapValues(primitiveFields, fieldType => ({
@@ -341,9 +324,7 @@ const generateConnectionFieldsTypes = function(fields, model) {
   return Object.keys(primitiveFields)
     .map(
       fieldKey =>
-        `type ${globalId}Connection${_.upperFirst(fieldKey)} {${toSDL(
-          connectionFields[fieldKey]
-        )}}`
+        `type ${globalId}Connection${_.upperFirst(fieldKey)} {${toSDL(connectionFields[fieldKey])}}`
     )
     .join('\n\n');
 };
@@ -356,8 +337,7 @@ const formatConnectionGroupBy = function(fields, model) {
   const groupByFields = getFieldsByTypes(
     fields,
     isNotOfTypeArray,
-    (fieldType, fieldName) =>
-      `[${globalId}Connection${_.upperFirst(fieldName)}]`
+    (fieldType, fieldName) => `[${globalId}Connection${_.upperFirst(fieldName)}]`
   );
 
   // Get the generated field types
@@ -394,9 +374,7 @@ const formatConnectionAggregator = function(fields, model, modelName) {
   }
 
   const gqlNumberFormat = toSDL(numericFields);
-  let aggregatorTypes = `type ${aggregatorGlobalId} {${toSDL(
-    initialFields
-  )}}\n\n`;
+  let aggregatorTypes = `type ${aggregatorGlobalId} {${toSDL(initialFields)}}\n\n`;
 
   let resolvers = {
     [aggregatorGlobalId]: {
@@ -531,9 +509,7 @@ const formatModelConnectionsGQL = function({ fields, model, name, resolver }) {
   };
   const pluralName = pluralize.plural(_.camelCase(name));
 
-  let modelConnectionTypes = `type ${connectionGlobalId} {${toSDL(
-    connectionFields
-  )}}\n\n`;
+  let modelConnectionTypes = `type ${connectionGlobalId} {${toSDL(connectionFields)}}\n\n`;
   if (aggregatorFormat) {
     modelConnectionTypes += aggregatorFormat.type;
   }
@@ -541,10 +517,7 @@ const formatModelConnectionsGQL = function({ fields, model, name, resolver }) {
 
   const queryName = `${pluralName}Connection(sort: String, limit: Int, start: Int, where: JSON)`;
 
-  const connectionResolver = buildQueryResolver(
-    `${pluralName}Connection.values`,
-    resolver
-  );
+  const connectionResolver = buildQueryResolver(`${pluralName}Connection.values`, resolver);
 
   const connectionQueryName = `${pluralName}Connection`;
 
