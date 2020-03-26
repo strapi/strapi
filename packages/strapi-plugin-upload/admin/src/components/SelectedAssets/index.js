@@ -10,7 +10,7 @@ import SortableList from './SortableList';
 import Wrapper from './Wrapper';
 
 const SelectedAssets = () => {
-  const { selectedFiles, handleFileSelection } = useModalContext();
+  const { selectedFiles, handleFileSelection, moveAsset } = useModalContext();
   const filesToUploadLength = selectedFiles.length;
   const titleId = `modal.upload-list.sub-header-title.${
     filesToUploadLength > 1 ? 'plural' : 'singular'
@@ -31,6 +31,7 @@ const SelectedAssets = () => {
       </Flex>
       <SortableList
         data={selectedFiles}
+        moveAsset={moveAsset}
         onChange={handleFileSelection}
         selectedItems={selectedFiles}
       />

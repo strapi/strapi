@@ -46,6 +46,14 @@ const InputModalStepperProvider = ({
     });
   };
 
+  const handleMoveAsset = (dragIndex, hoverIndex) => {
+    dispatch({
+      type: 'MOVE_ASSET',
+      dragIndex,
+      hoverIndex,
+    });
+  };
+
   const handleResetFileToEdit = () => {
     dispatch({
       type: 'RESET_FILE_TO_EDIT',
@@ -239,6 +247,7 @@ const InputModalStepperProvider = ({
         handleResetFileToEdit,
         handleSetCropResult,
         handleUploadFiles,
+        moveAsset: handleMoveAsset,
         multiple,
         onInputMediaChange,
         removeFilter,

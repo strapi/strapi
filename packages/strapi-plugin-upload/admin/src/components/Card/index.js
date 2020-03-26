@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useRef } from 'react';
+import { useDrag, useDrop } from 'react-dnd';
 import PropTypes from 'prop-types';
-
-import { formatBytes, getExtension, getType } from '../../utils';
+import { formatBytes, getExtension, getType, ItemTypes } from '../../utils';
 
 import Flex from '../Flex';
 import Text from '../Text';
@@ -19,7 +19,10 @@ const Card = ({
   children,
   errorMessage,
   hasError,
+  index,
+  isDraggable,
   mime,
+  moveAsset,
   name,
   onClick,
   small,
@@ -28,6 +31,59 @@ const Card = ({
   url,
   withFileCaching,
 }) => {
+  const ref = useRef(null);
+  const [, drop] = useDrop({
+    accept: ItemTypes.MEDIA_CARD,
+    hover(item, monitor) {
+      if (!ref.current) {
+        return;
+      }
+      const dragIndex = item.index;
+      const hoverIndex = index;
+
+      // Don't replace items with themselves
+      if (dragIndex === hoverIndex) {
+        return;
+      }
+      // Determine rectangle on screen
+      const hoverBoundingRect = ref.current.getBoundingClientRect();
+      // Get vertical middle
+      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      // Determine mouse position
+      const clientOffset = monitor.getClientOffset();
+      // Get pixels to the top
+      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+
+      // Only perform the move when the mouse has crossed half of the items height
+      // When dragging downwards, only move when the cursor is below 50%
+      // When dragging upwards, only move when the cursor is above 50%
+      // Dragging downwards
+      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
+        return;
+      }
+      // Dragging upwards
+      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
+        return;
+      }
+      // Time to actually perform the action
+      moveAsset(dragIndex, hoverIndex);
+      // Note: we're mutating the monitor item here!
+      // Generally it's better to avoid mutations,
+      // but it's good here for the sake of performance
+      // to avoid expensive index searches.
+      item.index = hoverIndex;
+    },
+  });
+  const [{ isDragging }, drag] = useDrag({
+    item: { type: ItemTypes.MEDIA_CARD, id, index },
+    canDrag: () => isDraggable,
+    collect: monitor => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
+  const opacity = isDragging ? 0.2 : 1;
+  drag(drop(ref));
+
   const fileSize = formatBytes(size, 0);
   const fileType = mime || type;
 
@@ -36,7 +92,7 @@ const Card = ({
   };
 
   return (
-    <Wrapper onClick={handleClick}>
+    <Wrapper onClick={handleClick} isDraggable={isDraggable} ref={ref} style={{ opacity }}>
       <CardImgWrapper checked={checked} small={small}>
         <CardPreview
           hasError={hasError}
@@ -64,8 +120,11 @@ Card.defaultProps = {
   children: null,
   errorMessage: null,
   id: null,
+  index: 0,
+  isDraggable: false,
   hasError: false,
   mime: null,
+  moveAsset: () => {},
   name: null,
   onClick: () => {},
   size: 0,
@@ -81,7 +140,10 @@ Card.propTypes = {
   children: PropTypes.node,
   errorMessage: PropTypes.string,
   hasError: PropTypes.bool,
+  index: PropTypes.number,
+  isDraggable: PropTypes.bool,
   mime: PropTypes.string,
+  moveAsset: PropTypes.func,
   name: PropTypes.string,
   onClick: PropTypes.func,
   size: PropTypes.number,
