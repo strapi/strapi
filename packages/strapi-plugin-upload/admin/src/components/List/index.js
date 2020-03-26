@@ -59,7 +59,7 @@ List.defaultProps = {
   canSelect: true,
   data: [],
   onChange: () => {},
-  onClickEditFile: null,
+  onClickEditFile: () => {},
   selectedItems: [],
 };
 
