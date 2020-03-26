@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable react/jsx-fragments */
 import React, {
   Fragment,
@@ -8,6 +9,7 @@ import React, {
   useImperativeHandle,
 } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import axios from 'axios';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { Inputs } from '@buffetjs/custom';
@@ -205,7 +207,22 @@ const EditForm = forwardRef(
     };
 
     const handleClickDownload = () => {
-      aRef.current.click();
+      axios
+        .get(prefixedFileURL, {
+          headers: new Headers({ Origin: window.location.origin, mode: 'cors' }),
+          responseType: 'blob',
+        })
+        .then(({ data }) => {
+          const blobUrl = URL.createObjectURL(data);
+
+          aRef.current.download = downloadFileName;
+          aRef.current.href = blobUrl;
+
+          aRef.current.click();
+        })
+        .catch(err => {
+          console.error(err);
+        });
     };
 
     const handleSubmit = e => {
@@ -242,17 +259,14 @@ const EditForm = forwardRef(
                                   type="download"
                                   onClick={handleClickDownload}
                                 />
-                                {isFileDownloadable && (
-                                  <a
-                                    href={fileURL}
-                                    title={fileToEdit.fileInfo.name}
-                                    download={downloadFileName}
-                                    style={{ display: 'none' }}
-                                    ref={aRef}
-                                  >
-                                    hidden
-                                  </a>
-                                )}
+                                <a
+                                  title={fileToEdit.fileInfo.name}
+                                  style={{ display: 'none' }}
+                                  ref={aRef}
+                                >
+                                  hidden
+                                </a>
+
                                 <CopyToClipboard onCopy={handleCopy} text={prefixedFileURL}>
                                   <CardControl color="#9EA7B8" type="link" />
                                 </CopyToClipboard>
