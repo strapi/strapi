@@ -59,7 +59,7 @@ module.exports = {
             };
           }
         } catch (error) {
-          throw error.error;
+          throw new Error(error.error);
         }
       },
     };
