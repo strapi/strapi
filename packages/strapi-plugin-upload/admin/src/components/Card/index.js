@@ -1,6 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import PropTypes from 'prop-types';
+import { getEmptyImage } from 'react-dnd-html5-backend';
 import { formatBytes, getExtension, getType, ItemTypes } from '../../utils';
 
 import Flex from '../Flex';
@@ -34,7 +35,7 @@ const Card = ({
   const ref = useRef(null);
   const [, drop] = useDrop({
     accept: ItemTypes.MEDIA_CARD,
-    hover(item, monitor) {
+    hover(item) {
       if (!ref.current) {
         return;
       }
@@ -45,27 +46,9 @@ const Card = ({
       if (dragIndex === hoverIndex) {
         return;
       }
-      // Determine rectangle on screen
-      const hoverBoundingRect = ref.current.getBoundingClientRect();
-      // Get vertical middle
-      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      // Determine mouse position
-      const clientOffset = monitor.getClientOffset();
-      // Get pixels to the top
-      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
 
-      // Only perform the move when the mouse has crossed half of the items height
-      // When dragging downwards, only move when the cursor is below 50%
-      // When dragging upwards, only move when the cursor is above 50%
-      // Dragging downwards
-      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-        return;
-      }
-      // Dragging upwards
-      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-        return;
-      }
-      // Time to actually perform the action
+      // Directly move the asset for faster reorder
+      // It doing so makes lot of computations though
       moveAsset(dragIndex, hoverIndex);
       // Note: we're mutating the monitor item here!
       // Generally it's better to avoid mutations,
@@ -74,22 +57,32 @@ const Card = ({
       item.index = hoverIndex;
     },
   });
-  const [{ isDragging }, drag] = useDrag({
-    item: { type: ItemTypes.MEDIA_CARD, id, index },
-    canDrag: () => isDraggable,
-    collect: monitor => ({
-      isDragging: monitor.isDragging(),
-    }),
-  });
-  const opacity = isDragging ? 0.2 : 1;
-  drag(drop(ref));
 
   const fileSize = formatBytes(size, 0);
   const fileType = mime || type;
 
+  const [{ isDragging }, drag, preview] = useDrag({
+    item: { type: ItemTypes.MEDIA_CARD, id, index, checked, url, fileType },
+    canDrag: () => isDraggable,
+    collect: monitor => ({
+      isDragging: monitor.isDragging(),
+      // getItem: monitor.getItem(),
+    }),
+  });
+
+  // Remove the default preview when the item is being dragged
+  // The preview is handled by the DragLayer
+  useEffect(() => {
+    preview(getEmptyImage(), { captureDraggingState: true });
+  }, [preview]);
+
+  const opacity = isDragging ? 0.2 : 1;
+
   const handleClick = () => {
     onClick(id);
   };
+
+  drag(drop(ref));
 
   return (
     <Wrapper onClick={handleClick} isDraggable={isDraggable} ref={ref} style={{ opacity }}>
