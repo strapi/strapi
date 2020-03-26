@@ -7,7 +7,7 @@ import Card from '../Card';
 import CardControlsWrapper from '../CardControlsWrapper';
 import ListWrapper from '../ListWrapper';
 
-const List = ({ data, onChange, onClickEditFile, selectedItems, canSelect }) => {
+const List = ({ clickable, data, onChange, onClickEditFile, selectedItems, canSelect }) => {
   const matrix = createMatrix(data);
 
   const handleClick = e => {
@@ -28,7 +28,13 @@ const List = ({ data, onChange, onClickEditFile, selectedItems, canSelect }) => 
 
               return (
                 <div className="col-xs-12 col-md-6 col-xl-3" key={id}>
-                  <Card checked={checked} {...item} url={fileUrl} onClick={onClickEditFile}>
+                  <Card
+                    checked={checked}
+                    {...item}
+                    hasIcon={clickable}
+                    url={fileUrl}
+                    onClick={onClickEditFile}
+                  >
                     {(checked || canSelect) && (
                       <CardControlsWrapper leftAlign className="card-control-wrapper">
                         <Checkbox
@@ -51,6 +57,7 @@ const List = ({ data, onChange, onClickEditFile, selectedItems, canSelect }) => 
 };
 
 List.defaultProps = {
+  clickable: false,
   canSelect: true,
   data: [],
   onChange: () => {},
@@ -59,6 +66,7 @@ List.defaultProps = {
 };
 
 List.propTypes = {
+  clickable: PropTypes.bool,
   canSelect: PropTypes.bool,
   data: PropTypes.array,
   onChange: PropTypes.func,

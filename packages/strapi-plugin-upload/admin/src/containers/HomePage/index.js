@@ -342,6 +342,7 @@ const HomePage = () => {
       {dataCount > 0 ? (
         <>
           <List
+            clickable
             data={data}
             onChange={handleChangeCheck}
             onClickEditFile={handleClickEditFile}
@@ -372,7 +373,7 @@ const HomePage = () => {
         popUpWarningType="danger"
         onConfirm={handleDeleteMedias}
       />
-      <Padded bottom size="sm" />
+      <Padded bottom size="md" />
       <Padded bottom size="md" />
     </Container>
   );
