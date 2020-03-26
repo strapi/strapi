@@ -48,8 +48,8 @@ module.exports = {
         return new Promise((resolve, reject) => {
           // Default values.
           options = _.isObject(options) ? options : {};
-          options.from = options.from || config.amazon_ses_default_from;
-          options.replyTo = options.replyTo || config.amazon_ses_default_replyto;
+          options.from = config.amazon_ses_default_from || options.from;
+          options.replyTo = config.amazon_ses_default_replyto || options.replyTo;
           options.text = options.text || options.html;
           options.html = options.html || options.text;
 

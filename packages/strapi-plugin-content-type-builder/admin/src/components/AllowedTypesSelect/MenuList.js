@@ -13,8 +13,8 @@ import Text from './Text';
 const MenuList = ({ selectProps: { changeMediaAllowedTypes, value }, ...rest }) => {
   const { formatMessage } = useGlobalContext();
   const Component = components.MenuList;
-  const areAllAllowedTypesSelected = value.value.length === 3;
-  const someChecked = !areAllAllowedTypesSelected && value.value.length > 0;
+  const areAllAllowedTypesSelected = value.value && value.value.length === 3;
+  const someChecked = value.value && !areAllAllowedTypesSelected && value.value.length > 0;
   const options = [
     {
       name: 'images',
@@ -58,7 +58,7 @@ const MenuList = ({ selectProps: { changeMediaAllowedTypes, value }, ...rest }) 
           </div>
           <SubUl tad="ul" isOpen>
             {options.map(({ name, infos }) => {
-              const isChecked = value.value.includes(name);
+              const isChecked = value.value && value.value.includes(name);
               const target = { name, value: !isChecked };
 
               return (

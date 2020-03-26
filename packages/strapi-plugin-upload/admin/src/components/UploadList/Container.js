@@ -7,12 +7,7 @@ const Container = styled(ContainerFluid)`
   max-height: 339px;
   overflow: auto;
   overflow-x: hidden;
-  .col-xl-3 {
-    padding-right: 6px;
-    &:last-of-type {
-      padding-right: 15px;
-    }
-  }
+  padding-right: 6px;
 `;
 
 export default Container;

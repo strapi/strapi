@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable react/jsx-fragments */
 import React, {
   Fragment,
@@ -8,24 +9,21 @@ import React, {
   useImperativeHandle,
 } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import axios from 'axios';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { Inputs } from '@buffetjs/custom';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
-import {
-  canDownloadFile,
-  createFileToDownloadName,
-  getTrad,
-  prefixFileUrlWithBackendUrl,
-} from '../../utils';
+import { createFileToDownloadName, getTrad, prefixFileUrlWithBackendUrl } from '../../utils';
 import CardControl from '../CardControl';
 import CardControlsWrapper from '../CardControlsWrapper';
 import CardPreview from '../CardPreview';
 import InfiniteLoadingIndicator from '../InfiniteLoadingIndicator';
 import ModalSection from '../ModalSection';
 import Text from '../Text';
+import VideoPlayer from '../VideoPlayer';
 import CropWrapper from './CropWrapper';
 import FileDetailsBox from './FileDetailsBox';
 import FileWrapper from './FileWrapper';
@@ -34,6 +32,7 @@ import Row from './Row';
 import Wrapper from './Wrapper';
 import form from './utils/form';
 import isImageType from './utils/isImageType';
+import isVideoType from './utils/isVideoType';
 
 const EditForm = forwardRef(
   (
@@ -58,12 +57,13 @@ const EditForm = forwardRef(
     const [src, setSrc] = useState(null);
 
     const fileURL = get(fileToEdit, ['file', 'url'], null);
-    const isFileDownloadable = canDownloadFile(fileURL);
+
     const prefixedFileURL = fileURL ? prefixFileUrlWithBackendUrl(fileURL) : null;
-    const downloadFileName = isFileDownloadable ? createFileToDownloadName(fileToEdit) : null;
+    const downloadFileName = createFileToDownloadName(fileToEdit);
     const mimeType =
       get(fileToEdit, ['file', 'type'], null) || get(fileToEdit, ['file', 'mime'], '');
     const isImg = isImageType(mimeType);
+    const isVideo = isVideoType(mimeType);
     const canCrop = isImg && !mimeType.includes('svg');
 
     const aRef = useRef();
@@ -79,7 +79,7 @@ const EditForm = forwardRef(
     }));
 
     useEffect(() => {
-      if (isImg) {
+      if (isImg || isVideo) {
         if (prefixedFileURL) {
           setSrc(prefixedFileURL);
         } else {
@@ -92,7 +92,7 @@ const EditForm = forwardRef(
           reader.readAsDataURL(fileToEdit.file);
         }
       }
-    }, [isImg, fileToEdit, prefixedFileURL]);
+    }, [isImg, isVideo, fileToEdit, prefixedFileURL]);
 
     useEffect(() => {
       if (isCropping) {
@@ -205,7 +205,22 @@ const EditForm = forwardRef(
     };
 
     const handleClickDownload = () => {
-      aRef.current.click();
+      axios
+        .get(prefixedFileURL, {
+          headers: new Headers({ Origin: window.location.origin, mode: 'cors' }),
+          responseType: 'blob',
+        })
+        .then(({ data }) => {
+          const blobUrl = URL.createObjectURL(data);
+
+          aRef.current.download = downloadFileName;
+          aRef.current.href = blobUrl;
+
+          aRef.current.click();
+        })
+        .catch(err => {
+          console.error(err);
+        });
     };
 
     const handleSubmit = e => {
@@ -242,17 +257,14 @@ const EditForm = forwardRef(
                                   type="download"
                                   onClick={handleClickDownload}
                                 />
-                                {isFileDownloadable && (
-                                  <a
-                                    href={fileURL}
-                                    title={fileToEdit.fileInfo.name}
-                                    download={downloadFileName}
-                                    style={{ display: 'none' }}
-                                    ref={aRef}
-                                  >
-                                    hidden
-                                  </a>
-                                )}
+                                <a
+                                  title={fileToEdit.fileInfo.name}
+                                  style={{ display: 'none' }}
+                                  ref={aRef}
+                                >
+                                  hidden
+                                </a>
+
                                 <CopyToClipboard onCopy={handleCopy} text={prefixedFileURL}>
                                   <CardControl color="#9EA7B8" type="link" />
                                 </CopyToClipboard>
@@ -310,7 +322,7 @@ const EditForm = forwardRef(
                           )}
                         </CropWrapper>
                       ) : (
-                        <CardPreview url={src} />
+                        <>{isVideo ? <VideoPlayer src={src} /> : <CardPreview url={src} />}</>
                       )}
                     </Fragment>
                   )}

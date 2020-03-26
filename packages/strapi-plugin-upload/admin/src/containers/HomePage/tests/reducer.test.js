@@ -2,6 +2,44 @@ import { fromJS } from 'immutable';
 import reducer, { initialState } from '../reducer';
 
 describe('Upload | containers | HomePage | reducer', () => {
+  describe('GET_DATA', () => {
+    it('should set isLoading to true', () => {
+      const state = fromJS({
+        isLoading: false,
+        test: true,
+      });
+      const action = {
+        type: 'GET_DATA',
+      };
+
+      const expected = fromJS({
+        isLoading: true,
+        test: true,
+      });
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
+  describe('GET_DATA_ERROR', () => {
+    it('should set isLoading to false', () => {
+      const state = fromJS({
+        isLoading: true,
+        test: true,
+      });
+      const action = {
+        type: 'GET_DATA_ERROR',
+      };
+
+      const expected = fromJS({
+        isLoading: false,
+        test: true,
+      });
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
   it('should update data with received data', () => {
     const state = initialState;
 

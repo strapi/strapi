@@ -117,9 +117,14 @@ module.exports = {
   },
 
   async count(ctx) {
-    const data = await strapi.plugins['upload'].services.upload.count(ctx.query);
+    let count;
+    if (ctx.query._q) {
+      count = await strapi.plugins['upload'].services.upload.countSearch(ctx.query);
+    } else {
+      count = await strapi.plugins['upload'].services.upload.count(ctx.query);
+    }
 
-    ctx.body = { count: data };
+    ctx.body = { count };
   },
 
   async destroy(ctx) {

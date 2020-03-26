@@ -1,17 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
 import { formatBytes, getExtension, getType } from '../../utils';
 
 import Flex from '../Flex';
 import Text from '../Text';
+import Border from '../CardBorder';
 import CardImgWrapper from '../CardImgWrapper';
 import CardPreview from '../CardPreview';
+import ErrorMessage from '../CardErrorMessage';
+import Title from '../CardTitle';
 import Tag from '../Tag';
-import Wrapper from './Wrapper';
-import Title from './Title';
-import ErrorMessage from './ErrorMessage';
-import Border from './Border';
+import Wrapper from '../CardWrapper';
 
 const Card = ({
   id,
@@ -19,9 +18,11 @@ const Card = ({
   children,
   errorMessage,
   hasError,
+  hasIcon,
   mime,
   name,
   onClick,
+  previewUrl,
   small,
   size,
   type,
@@ -40,6 +41,8 @@ const Card = ({
       <CardImgWrapper checked={checked} small={small}>
         <CardPreview
           hasError={hasError}
+          hasIcon={hasIcon}
+          previewUrl={previewUrl}
           url={url}
           type={fileType}
           withFileCaching={withFileCaching}
@@ -65,9 +68,11 @@ Card.defaultProps = {
   errorMessage: null,
   id: null,
   hasError: false,
+  hasIcon: false,
   mime: null,
   name: null,
   onClick: () => {},
+  previewUrl: null,
   size: 0,
   small: false,
   type: null,
@@ -81,9 +86,11 @@ Card.propTypes = {
   children: PropTypes.node,
   errorMessage: PropTypes.string,
   hasError: PropTypes.bool,
+  hasIcon: PropTypes.bool,
   mime: PropTypes.string,
   name: PropTypes.string,
   onClick: PropTypes.func,
+  previewUrl: PropTypes.string,
   size: PropTypes.number,
   small: PropTypes.bool,
   type: PropTypes.string,

@@ -1,12 +1,13 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
+  position: fixed;
+  left: 0;
+  top: 0;
   width: 100%;
-  margin-bottom: 34px;
-  overflow: hidden;
-  &:hover {
-    cursor: pointer;
-  }
+  height: 100%;
+  z-index: 1051;
+  pointer-events: none;
 `;
 
 export default Wrapper;

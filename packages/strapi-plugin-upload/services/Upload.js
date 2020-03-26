@@ -197,6 +197,9 @@ module.exports = {
 
     await strapi.plugins.upload.provider.upload(fileData);
 
+    // clear old formats
+    _.set(fileData, 'formats', {});
+
     const thumbnailFile = await generateThumbnail(fileData);
     if (thumbnailFile) {
       await strapi.plugins.upload.provider.upload(thumbnailFile);
@@ -258,6 +261,10 @@ module.exports = {
 
   search(params) {
     return strapi.query('file', 'upload').search(params);
+  },
+
+  countSearch(params) {
+    return strapi.query('file', 'upload').countSearch(params);
   },
 
   count(params) {

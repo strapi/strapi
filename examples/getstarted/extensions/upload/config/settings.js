@@ -1,8 +1,8 @@
 module.exports = {
-  // provider: 'aws-s3',
+  // provider: 'cloudinary',
   // providerOptions: {
-  //   cloud_name: '',
-  //   api_key: '',
-  //   api_secret: '',
+  //   cloud_name: 'cloud-name',
+  //   api_key: 'api-key',
+  //   api_secret: 'api-secret',
   // },
 };

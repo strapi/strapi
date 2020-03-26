@@ -6,11 +6,11 @@ import Flex from '../Flex';
 import IntlText from '../IntlText';
 import ListTitle from '../UploadList/ListTitle';
 import useModalContext from '../../hooks/useModalContext';
-import List from '../List';
+import SortableList from './SortableList';
 import Wrapper from './Wrapper';
 
 const SelectedAssets = () => {
-  const { selectedFiles, handleFileSelection } = useModalContext();
+  const { selectedFiles, handleFileSelection, moveAsset } = useModalContext();
   const filesToUploadLength = selectedFiles.length;
   const titleId = `modal.upload-list.sub-header-title.${
     filesToUploadLength > 1 ? 'plural' : 'singular'
@@ -29,7 +29,12 @@ const SelectedAssets = () => {
           />
         </div>
       </Flex>
-      <List data={selectedFiles} onChange={handleFileSelection} selectedItems={selectedFiles} />
+      <SortableList
+        data={selectedFiles}
+        moveAsset={moveAsset}
+        onChange={handleFileSelection}
+        selectedItems={selectedFiles}
+      />
     </Wrapper>
   );
 };
