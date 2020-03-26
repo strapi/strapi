@@ -341,7 +341,7 @@ const HomePage = () => {
         popUpWarningType="danger"
         onConfirm={handleDeleteMedias}
       />
-      <Padded bottom size="sm" />
+      <Padded bottom size="md" />
       <Padded bottom size="md" />
     </Container>
   );

@@ -22,6 +22,7 @@ const Card = ({
   mime,
   name,
   onClick,
+  previewUrl,
   small,
   size,
   type,
@@ -40,6 +41,7 @@ const Card = ({
       <CardImgWrapper checked={checked} small={small}>
         <CardPreview
           hasError={hasError}
+          previewUrl={previewUrl}
           url={url}
           type={fileType}
           withFileCaching={withFileCaching}
@@ -68,6 +70,7 @@ Card.defaultProps = {
   mime: null,
   name: null,
   onClick: () => {},
+  previewUrl: null,
   size: 0,
   small: false,
   type: null,
@@ -84,6 +87,7 @@ Card.propTypes = {
   mime: PropTypes.string,
   name: PropTypes.string,
   onClick: PropTypes.func,
+  previewUrl: PropTypes.string,
   size: PropTypes.number,
   small: PropTypes.bool,
   type: PropTypes.string,

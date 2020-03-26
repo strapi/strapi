@@ -5,11 +5,11 @@ import { getExtension, getType } from '../../utils';
 
 import BrokenFile from '../../icons/BrokenFile';
 import FileIcon from '../FileIcon';
-import VideoPreview from '../VideoPreview';
 import Wrapper from './Wrapper';
 import Image from './Image';
+import Video from './Video';
 
-const CardPreview = ({ hasError, url, type, withFileCaching }) => {
+const CardPreview = ({ hasError, url, previewUrl, type, withFileCaching }) => {
   const isFile = getType(type) === 'file';
   const isVideo = getType(type) === 'video';
 
@@ -32,7 +32,7 @@ const CardPreview = ({ hasError, url, type, withFileCaching }) => {
   return (
     <Wrapper>
       {isVideo ? (
-        <VideoPreview src={url} />
+        <Video src={url} previewUrl={previewUrl} />
       ) : (
         <Image src={`${url}${withFileCaching ? `?${performance.now()}` : ''}`} />
       )}
@@ -42,6 +42,7 @@ const CardPreview = ({ hasError, url, type, withFileCaching }) => {
 
 CardPreview.defaultProps = {
   hasError: false,
+  previewUrl: null,
   url: null,
   type: '',
   withFileCaching: true,
@@ -49,6 +50,7 @@ CardPreview.defaultProps = {
 
 CardPreview.propTypes = {
   hasError: PropTypes.bool,
+  previewUrl: PropTypes.string,
   url: PropTypes.string,
   type: PropTypes.string,
   withFileCaching: PropTypes.bool,
