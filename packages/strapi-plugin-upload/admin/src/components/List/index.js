@@ -1,12 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Checkbox } from '@buffetjs/core';
-
 import { createMatrix } from '../../utils';
-
 import Card from '../Card';
 import CardControlsWrapper from '../CardControlsWrapper';
-import Wrapper from './Wrapper';
+import ListWrapper from '../ListWrapper';
 
 const List = ({ data, onChange, onClickEditFile, selectedItems, canSelect }) => {
   const matrix = createMatrix(data);
@@ -16,7 +14,7 @@ const List = ({ data, onChange, onClickEditFile, selectedItems, canSelect }) => 
   };
 
   return (
-    <Wrapper>
+    <ListWrapper>
       {matrix.map(({ key, rowContent }) => {
         return (
           <div className="row" key={key}>
@@ -46,7 +44,7 @@ const List = ({ data, onChange, onClickEditFile, selectedItems, canSelect }) => 
           </div>
         );
       })}
-    </Wrapper>
+    </ListWrapper>
   );
 };
 

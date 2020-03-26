@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { themePropTypes } from 'strapi-helper-plugin';
 
-const Border = styled.div`
+const CardBorder = styled.div`
   width: 100%;
   height: 100%;
   position: absolute;
@@ -13,15 +13,15 @@ const Border = styled.div`
   border: 2px solid ${({ theme, color }) => theme.main.colors[color] || color};
 `;
 
-Border.defaultProps = {
+CardBorder.defaultProps = {
   color: 'mediumBlue',
   shown: false,
 };
 
-Border.propTypes = {
+CardBorder.propTypes = {
   color: PropTypes.string,
   shown: PropTypes.bool,
   ...themePropTypes,
 };
 
-export default Border;
+export default CardBorder;
