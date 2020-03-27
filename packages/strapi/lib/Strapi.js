@@ -311,9 +311,6 @@ class Strapi {
 
     await bootstrap(this);
 
-    // Usage.
-    await utils.usage(this.config);
-
     // init webhook runner
     this.webhookRunner = createWebhookRunner({
       eventHub: this.eventHub,
