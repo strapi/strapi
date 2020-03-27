@@ -1,16 +1,12 @@
 'use strict';
 
-const createMiddleware = ({ sendEvent, isDisabled }) => {
+const createMiddleware = ({ sendEvent }) => {
   const _state = {
     currentDay: null,
     counter: 0,
   };
 
   return async (ctx, next) => {
-    if (isDisabled) {
-      return next();
-    }
-
     const { url, method } = ctx.request;
 
     if (!url.includes('.') && ['GET', 'PUT', 'POST', 'DELETE'].includes(method)) {

@@ -58,18 +58,13 @@ const createTelemetryInstance = strapi => {
     }
   };
 
-  const initPing = () => {
-    if (isDisabled) {
-      return;
-    }
-
+  if (!isDisabled) {
     scheduleJob('0 0 12 * * *', () => sendEvent('ping'));
-  };
+    strapi.app.use(createMiddleware({ sendEvent }));
+  }
 
   return {
-    initPing,
     send: sendEvent,
-    middleware: createMiddleware({ sendEvent, isDisabled }),
   };
 };
 
