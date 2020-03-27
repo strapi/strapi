@@ -196,7 +196,7 @@ function SelectWrapper({
         }}
         onInputChange={onInputChange}
         onMenuClose={() => {
-          setState(prevState => ({ ...prevState, _q: '', _start: 0 }));
+          setState(prevState => ({ ...prevState, _q: '' }));
         }}
         onMenuScrollToBottom={onMenuScrollToBottom}
         onRemove={onRemoveRelation}
