@@ -33,7 +33,6 @@ export { default as InputDescription } from './components/InputDescription';
 export { default as InputEmail } from './components/InputEmail';
 export { default as InputEmailWithErrors } from './components/InputEmailWithErrors';
 export { default as InputErrors } from './components/InputErrors';
-export { default as InputFile } from './components/InputFile';
 export { default as InputNumber } from './components/InputNumber';
 export { default as InputNumberWithErrors } from './components/InputNumberWithErrors';
 export { default as InputPassword } from './components/InputPassword';
