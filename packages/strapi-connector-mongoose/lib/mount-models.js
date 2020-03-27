@@ -15,7 +15,7 @@ const isPolymorphicAssoc = assoc => {
 module.exports = ({ models, target }, ctx) => {
   const { instance } = ctx;
 
-  async function mountModel(model) {
+  function mountModel(model) {
     const definition = models[model];
     definition.orm = 'mongoose';
     definition.associations = [];
@@ -279,18 +279,18 @@ module.exports = ({ models, target }, ctx) => {
     const Model = instance.model(definition.globalId, schema, definition.collectionName);
 
     // Ensure indexes are synced with the model, prevent duplicate index errors
-    await Model.syncIndexes();
-
-    Model.on('index', error => {
-      if (error) {
-        if (error.code === 11000) {
-          strapi.log.error(
-            `Unique constraint fails, make sure to update your data and restart to apply the unique constraint.\n\t- ${error.message}`
-          );
-        } else {
-          strapi.log.error(`An index error happened, it wasn't applied.\n\t- ${error.message}`);
+    Model.syncIndexes(null, () => {
+      Model.on('index', error => {
+        if (error) {
+          if (error.code === 11000) {
+            strapi.log.error(
+              `Unique constraint fails, make sure to update your data and restart to apply the unique constraint.\n\t- ${error.message}`
+            );
+          } else {
+            strapi.log.error(`An index error happened, it wasn't applied.\n\t- ${error.message}`);
+          }
         }
-      }
+      });
     });
 
     // Expose ORM functions through the `target` object.
@@ -302,9 +302,7 @@ module.exports = ({ models, target }, ctx) => {
   }
 
   // Parse every authenticated model.
-  const promises = Object.keys(models).map(mountModel);
-
-  return Promise.all(promises);
+  Object.keys(models).map(mountModel);
 };
 
 const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, definition }) => {
