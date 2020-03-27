@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Checkbox } from '@buffetjs/core';
 import { get } from 'lodash';
-import { prefixFileUrlWithBackendUrl } from '../../utils';
+import { prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
 import DraggableCard from './DraggableCard';
 import CardControlsWrapper from '../CardControlsWrapper';
 import ListWrapper from '../ListWrapper';

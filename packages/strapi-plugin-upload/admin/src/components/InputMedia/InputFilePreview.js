@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { prefixFileUrlWithBackendUrl } from '../../utils';
+import { prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
 
 import CardPreview from '../CardPreview';
 import Flex from '../Flex';
