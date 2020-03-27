@@ -162,7 +162,7 @@
   "HomePage.greetings": "Hallo {name}!",
 
   "Auth.advanced.allow_register": "",
-  "Auth.privacy-policy-agreement.terms": "Begriffe",
+  "Auth.privacy-policy-agreement.terms": "Nutzungsbedingungen",
   "Auth.privacy-policy-agreement.policy": "Datenschutzerklärung",
   "Auth.form.button.forgot-password": "E-Mail versenden",
   "Auth.form.button.forgot-password.success": "Erneut schicken",
