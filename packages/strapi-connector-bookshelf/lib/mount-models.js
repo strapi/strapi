@@ -236,6 +236,7 @@ module.exports = ({ models, target }, ctx) => {
 
             if (otherKey === foreignKey) {
               otherKey = `related_${otherKey}`;
+              details.attribute = `related_${details.attribute}`;
             }
 
             loadedModel[name] = function() {

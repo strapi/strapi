@@ -15,6 +15,7 @@ const models = require('./models');
 const policy = require('./policy');
 const templateConfiguration = require('./templateConfiguration');
 const { yup, formatYupErrors } = require('./validators');
+const { nameToSlug, nameToCollectionName } = require('./stringFormatting');
 
 module.exports = {
   yup,
@@ -29,4 +30,6 @@ module.exports = {
   parseMultipartData,
   sanitizeEntity,
   parseType,
+  nameToSlug,
+  nameToCollectionName,
 };

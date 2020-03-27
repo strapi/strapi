@@ -1,6 +1,6 @@
 # Logging
 
-Strapi relies on an extremely fast Node.js logger called Pino that includes a shell utility to pretty-print its log files. It provides great performances and doesn't slow down your app. The logger is accessible through the global variable `strapi.log` or the request's context `ctx.log` if enabled.
+Strapi relies on an extremely fast Node.js logger called Pino that includes a shell utility to pretty-print its log files. It provides great performance and doesn't slow down your app. The logger is accessible through the global variable `strapi.log` or the request's context `ctx.log` if enabled.
 
 ```js
 // Folder.js controller

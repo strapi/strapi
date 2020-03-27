@@ -101,7 +101,12 @@ Here are the file that needs to be created in order to change the documentation 
   },
   "x-strapi-config": {
     "path": "/documentation",
-    "showGeneratedFiles": true
+    "showGeneratedFiles": true",
+    "pluginsForWhichToGenerateDoc": [
+      "email",
+      "upload",
+      "users-permissions"
+    ]
   },
   "servers": [
     {
@@ -170,6 +175,59 @@ To access your documentation on a custom path, you will have to update the `path
   }
 }
 ```
+
+### Indicate which plugins' documentation to generate
+
+To generate documentation for specific plugins, you will need to indicate the list of all the plugins for which you wish to generate documentation. In order to do that you need to update the `pluginsForWhichToGenerateDoc` key. Leaving this key with an empty array `[]` means that not any plugin documentation will be generated. If you wish to generate documentation for all plugins, you just have to remove the key from the `settings.json` file.
+
+```
+{
+  "x-strapi-config": {
+    "pluginsForWhichToGenerateDoc": [
+      "email",
+      "upload",
+      "users-permissions"
+    ],
+  }
+}
+```
+
+In the previous example, you will generate documentation for the upload, email and users permissions (permissions and roles) plugins.
+
+### Default Response
+
+Sometimes, an operation can return multiple errors with different HTTP status codes, but all of them have the same response structure. You can use the default response to describe these errors collectively, not individually. “Default” means this response is used for all HTTP codes that are not covered individually for this operation.
+
+This is how it would looks like
+
+```
+responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        # Definition of all error statuses
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+```
+
+You can set the generation of the default response with the following attribute `generateDefaultResponse`
+
+```
+{
+  "x-strapi-config": {
+    "generateDefaultResponse": true
+  }
+}
+```
+
+Note: this is configurable as some API Gateways does not support a default response.
 
 ## File structure
 

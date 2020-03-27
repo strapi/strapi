@@ -506,6 +506,7 @@ module.exports = ({ model, modelKey, strapi }) => {
     const filters = modelUtils.convertParams(modelKey, params);
 
     const $or = buildSearchOr(model, params._q);
+    if ($or.length === 0) return Promise.resolve([]);
 
     return model
       .find({ $or })
@@ -518,6 +519,7 @@ module.exports = ({ model, modelKey, strapi }) => {
 
   function countSearch(params) {
     const $or = buildSearchOr(model, params._q);
+    if ($or.length === 0) return Promise.resolve(0);
     return model.find({ $or }).countDocuments();
   }
 
@@ -547,6 +549,7 @@ const buildSearchOr = (model, query) => {
       case 'string':
       case 'text':
       case 'password':
+      case 'uid':
         return acc.concat({ [curr]: { $regex: query, $options: 'i' } });
       case 'boolean':
         if (query === 'true' || query === 'false') {

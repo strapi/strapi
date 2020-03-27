@@ -44,6 +44,10 @@ module.exports = {
       jwt: String!
       user: UsersPermissionsMe!
     }
+    
+    type ForgotPassword {
+      ok: Boolean
+    }
   `,
   query: `
     me: UsersPermissionsMe
@@ -51,6 +55,9 @@ module.exports = {
   mutation: `
     login(input: UsersPermissionsLoginInput!): UsersPermissionsLoginPayload!
     register(input: UserInput!): UsersPermissionsLoginPayload!
+    forgotPassword(email: String!): ForgotPassword
+    changePassword(password: String!, passwordConfirmation: String!, code: String!): UsersPermissionsLoginPayload
+    emailConfirmation(confirmation: String!): UsersPermissionsLoginPayload
   `,
   resolver: {
     Query: {
@@ -199,6 +206,56 @@ module.exports = {
           };
         },
       },
+      forgotPassword: {
+        description: 'Request a reset password token',
+        resolverOf: 'plugins::users-permissions.auth.forgotPassword',
+        resolver: async (obj, options, { context }) => {
+          context.request.body = _.toPlainObject(options);
+
+          await strapi.plugins['users-permissions'].controllers.auth.forgotPassword(context);
+          let output = context.body.toJSON ? context.body.toJSON() : context.body;
+
+          checkBadRequest(output);
+
+          return {
+            ok: output.ok || output
+          };
+        }
+      },
+      changePassword: {
+        description: 'Change your password based on a code',
+        resolverOf: 'plugins::users-permissions.auth.changePassword',
+        resolver: async (obj, options, { context }) => {
+          context.request.body = _.toPlainObject(options);
+
+          await strapi.plugins['users-permissions'].controllers.auth.changePassword(context);
+          let output = context.body.toJSON ? context.body.toJSON() : context.body;
+
+          checkBadRequest(output);
+
+          return {
+            user: output.user || output,
+            jwt: output.jwt
+          };
+        }
+      },
+      emailConfirmation: {
+        description: 'Confirm an email users email address',
+        resolverOf: 'plugins::users-permissions.auth.emailConfirmation',
+        resolver: async (obj, options, { context }) => {
+          context.query = _.toPlainObject(options);
+
+          await strapi.plugins['users-permissions'].controllers.auth.emailConfirmation(context, true);
+          let output = context.body.toJSON ? context.body.toJSON() : context.body;
+
+          checkBadRequest(output);
+
+          return {
+            user: output.user || output,
+            jwt: output.jwt
+          };
+        }
+      }
     },
   },
 };
