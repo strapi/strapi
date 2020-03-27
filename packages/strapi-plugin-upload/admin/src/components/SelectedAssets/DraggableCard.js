@@ -33,6 +33,7 @@ const DraggableCard = ({
   withFileCaching,
 }) => {
   const ref = useRef(null);
+  // Adapted from https://react-dnd.github.io/react-dnd/examples/sortable/simple
   const [, drop] = useDrop({
     accept: ItemTypes.MEDIA_CARD,
     hover(item) {

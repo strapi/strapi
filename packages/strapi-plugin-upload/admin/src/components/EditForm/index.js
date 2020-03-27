@@ -22,13 +22,13 @@ import CardControlsWrapper from '../CardControlsWrapper';
 import CardPreview from '../CardPreview';
 import InfiniteLoadingIndicator from '../InfiniteLoadingIndicator';
 import ModalSection from '../ModalSection';
-import Text from '../Text';
 import VideoPlayer from '../VideoPlayer';
 import CropWrapper from './CropWrapper';
 import FileDetailsBox from './FileDetailsBox';
 import FileWrapper from './FileWrapper';
 import FormWrapper from './FormWrapper';
 import Row from './Row';
+import SizeBox from './SizeBox';
 import Wrapper from './Wrapper';
 import form from './utils/form';
 import isImageType from './utils/isImageType';
@@ -52,12 +52,10 @@ const EditForm = forwardRef(
   ) => {
     const { formatMessage } = useGlobalContext();
     const [isCropping, setIsCropping] = useState(false);
-    const [infosCoordinates, setInfosCoordinates] = useState({ top: 0, left: 0 });
-    const [infos, setInfos] = useState({ width: 0, height: 0 });
+    const [infos, setInfos] = useState({ width: null, height: null });
     const [src, setSrc] = useState(null);
 
     const fileURL = get(fileToEdit, ['file', 'url'], null);
-
     const prefixedFileURL = fileURL ? prefixFileUrlWithBackendUrl(fileURL) : null;
     const downloadFileName = createFileToDownloadName(fileToEdit);
     const mimeType =
@@ -69,7 +67,7 @@ const EditForm = forwardRef(
     const aRef = useRef();
     const imgRef = useRef();
     const inputRef = useRef();
-    let cropper = useRef();
+    const cropper = useRef();
 
     useImperativeHandle(ref, () => ({
       click: () => {
@@ -103,12 +101,12 @@ const EditForm = forwardRef(
           zoomable: false,
           cropBoxResizable: true,
           background: false,
-          ready: handleResize,
-          cropmove: handleResize,
+          crop: handleResize,
         });
       } else if (cropper.current) {
         cropper.current.destroy();
 
+        setInfos({ width: null, height: null });
         toggleDisableForm(false);
       }
 
@@ -120,31 +118,11 @@ const EditForm = forwardRef(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [cropper, isCropping]);
 
-    const handleResize = () => {
-      const cropBox = cropper.current.getCropBoxData();
-      const { width, height } = cropBox;
-      const roundedWidth = Math.round(width);
-      const roundedHeight = Math.round(height);
-      const xSignWidth = 3;
-      const margin = 15;
-      const pixelWidth = 13;
+    const handleResize = ({ detail: { height, width } }) => {
+      const roundedDataHeight = Math.round(height);
+      const roundedDataWidth = Math.round(width);
 
-      let left =
-        cropBox.left +
-        width -
-        margin -
-        ((roundedHeight.toString().length + roundedWidth.toString().length + xSignWidth) *
-          pixelWidth) /
-          2;
-      let top = cropBox.top + height - pixelWidth - margin;
-
-      if (width < 130) {
-        top = cropBox.top + height + 10;
-        left = cropBox.left + width + 10;
-      }
-
-      setInfosCoordinates({ top, left });
-      setInfos({ width: roundedWidth, height: roundedHeight });
+      setInfos({ width: roundedDataWidth, height: roundedDataHeight });
     };
 
     const handleToggleCropMode = () => {
@@ -301,28 +279,17 @@ const EditForm = forwardRef(
                             alt={get(fileToEdit, ['file', 'name'], '')}
                             ref={isCropping ? imgRef : null}
                           />
-
-                          {isCropping && (
-                            <Text
-                              fontSize="md"
-                              color="white"
-                              as="div"
-                              style={{
-                                position: 'absolute',
-                                top: infosCoordinates.top,
-                                left: infosCoordinates.left,
-                                background: '#333740',
-                                borderRadius: 2,
-                              }}
-                            >
-                              &nbsp;
-                              {infos.width} x {infos.height}
-                              &nbsp;
-                            </Text>
-                          )}
                         </CropWrapper>
                       ) : (
                         <>{isVideo ? <VideoPlayer src={src} /> : <CardPreview url={src} />}</>
+                      )}
+
+                      {isCropping && infos.width !== null && (
+                        <SizeBox>
+                          &nbsp;
+                          {infos.width} x {infos.height}
+                          &nbsp;
+                        </SizeBox>
                       )}
                     </Fragment>
                   )}

@@ -71,7 +71,6 @@ const HomePage = () => {
       await request(requestURL, {
         method: 'DELETE',
       });
-      strapi.notification.success('notification.success.delete');
     } catch (err) {
       if (isMounted) {
         strapi.notification.error('notification.error');
@@ -221,6 +220,8 @@ const HomePage = () => {
 
     try {
       await deleteMedia(id);
+
+      strapi.notification.success('notification.success.delete');
 
       dispatch({
         type: 'ON_DELETE_MEDIA_SUCCEEDED',
