@@ -1110,6 +1110,8 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
           filters: [],
         },
         currentStep: 'list',
+        isFormDisabled: false,
+        isWarningDeleteOpen: false,
       };
 
       expect(reducer(state, action)).toEqual(expected);
@@ -1214,10 +1216,10 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
     });
   });
 
-  describe('SET_FILE_TO_EDIT', () => {
+  describe('SET_NEW_FILE_TO_EDIT', () => {
     it('should set the fileToEdit key with the file at the passed index from the filesToUpload list', () => {
       const action = {
-        type: 'SET_FILE_TO_EDIT',
+        type: 'SET_NEW_FILE_TO_EDIT',
         fileIndex: 1,
       };
       const state = {
