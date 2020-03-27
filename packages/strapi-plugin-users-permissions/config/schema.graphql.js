@@ -7,9 +7,11 @@ const _ = require('lodash');
  */
 function checkBadRequest(contextBody) {
   if (_.get(contextBody, 'statusCode', 200) !== 200) {
-    const statusCode = _.get(contextBody, 'statusCode', 400);
-    const message = _.get(contextBody, 'message[0].messages[0].message', 'Bad Request');
-    throw new Error(message, statusCode, contextBody);
+    const message = _.get(contextBody, 'error', 'Bad Request');
+    const exception = new Error(message);
+    exception.code = _.get(contextBody, 'statusCode', 400);
+    exception.data = contextBody;
+    throw exception;
   }
 }
 
