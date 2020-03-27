@@ -149,11 +149,11 @@ module.exports = {
       throw strapi.errors.notFound('file not found');
     }
 
-    const newInfos = _.assign({}, dbFile, {
+    const newInfos = {
       name: _.isNil(name) ? dbFile.name : name,
       alternativeText: _.isNil(alternativeText) ? dbFile.alternativeText : alternativeText,
       caption: _.isNil(caption) ? dbFile.caption : caption,
-    });
+    };
 
     return this.update({ id }, newInfos);
   },
