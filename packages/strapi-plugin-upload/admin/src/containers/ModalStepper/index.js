@@ -263,7 +263,7 @@ const ModalStepper = ({
           const errorMessage = get(
             err,
             ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
-            null
+            get(err, ['response', 'payload', 'message'], null)
           );
 
           if (errorMessage) {
