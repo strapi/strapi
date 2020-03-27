@@ -41,7 +41,7 @@ const createComponent = async ({ component, components = [] }) => {
   const uidMap = builder.createNewComponentUIDMap(components);
   const replaceTmpUIDs = replaceTemporaryUIDs(uidMap);
 
-  const newComponent = await builder.createComponent(replaceTmpUIDs(component));
+  const newComponent = builder.createComponent(replaceTmpUIDs(component));
 
   components.forEach(component => {
     if (!_.has(component, 'uid')) {
