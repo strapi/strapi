@@ -14,6 +14,8 @@ const VideoPreview = ({ hasIcon, previewUrl, src }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const { duration, dataLoaded, isHover, metadataLoaded, snapshot, seeked } = reducerState.toJS();
 
+  // Adapted from https://github.com/brothatru/react-video-thumbnail/blob/master/src/components/VideoThumbnail.js
+  // And from https://github.com/soupette/poc-video-preview
   const canvasRef = useRef();
   const videoRef = useRef();
 
