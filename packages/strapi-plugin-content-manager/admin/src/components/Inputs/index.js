@@ -7,7 +7,6 @@ import { useStrapi } from 'strapi-helper-plugin';
 
 import useDataManager from '../../hooks/useDataManager';
 import InputJSONWithErrors from '../InputJSONWithErrors';
-// import InputFileWithErrors from '../InputFileWithErrors';
 import SelectWrapper from '../SelectWrapper';
 import WysiwygWithErrors from '../WysiwygWithErrors';
 import InputUID from '../InputUID';
