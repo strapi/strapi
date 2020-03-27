@@ -6,7 +6,7 @@ const Overlay = styled.div`
   right: 0;
   bottom: 0;
   left: 0;
-  z-index: 1040;
+  z-index: 1140;
   &:before {
     content: '';
     position: fixed;

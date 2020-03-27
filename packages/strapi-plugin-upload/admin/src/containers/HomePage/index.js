@@ -212,11 +212,8 @@ const HomePage = () => {
 
   const handleDeleteMediaFromModal = async id => {
     handleClickToggleModal();
-    const overlayblockerParams = {
-      children: <div />,
-      noGradient: true,
-    };
-    strapi.lockApp(overlayblockerParams);
+
+    lockAppWithOverlay();
 
     try {
       await deleteMedia(id);
@@ -235,14 +232,22 @@ const HomePage = () => {
   };
 
   const handleDeleteMedias = async () => {
-    await Promise.all(dataToDelete.map(item => deleteMedia(item.id)));
-
-    dispatch({
-      type: 'CLEAR_DATA_TO_DELETE',
-    });
-
     setIsPopupOpen(false);
-    fetchListData();
+
+    lockAppWithOverlay();
+
+    await Promise.all(dataToDelete.map(item => deleteMedia(item.id)))
+      .then(() => {
+        dispatch({
+          type: 'CLEAR_DATA_TO_DELETE',
+        });
+
+        fetchListData();
+        strapi.unlockApp();
+      })
+      .catch(() => {
+        strapi.unlockApp();
+      });
   };
 
   const handleModalClose = () => {
@@ -258,6 +263,15 @@ const HomePage = () => {
     dispatch({
       type: 'TOGGLE_SELECT_ALL',
     });
+  };
+
+  const lockAppWithOverlay = () => {
+    const overlayblockerParams = {
+      children: <div />,
+      noGradient: true,
+    };
+
+    strapi.lockApp(overlayblockerParams);
   };
 
   const resetModalState = () => {
