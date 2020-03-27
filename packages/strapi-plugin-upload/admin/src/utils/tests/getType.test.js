@@ -1,6 +1,13 @@
 import getType from '../getType';
 
 describe('UPLOAD | utils | getType', () => {
+  it('should return file if mime does not exits', () => {
+    const mime = undefined;
+    const expected = 'file';
+
+    expect(getType(mime)).toEqual(expected);
+  });
+
   it('should return image if mime string contains image', () => {
     const mime = 'image/png';
     const expected = 'image';
