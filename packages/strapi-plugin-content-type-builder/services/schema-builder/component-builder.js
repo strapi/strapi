@@ -30,7 +30,7 @@ module.exports = function createComponentBuilder() {
     /**
      * create a component in the tmpComponent map
      */
-    async createComponent(infos) {
+    createComponent(infos) {
       const uid = this.createComponentUID(infos);
 
       if (this.components.has(uid)) {

@@ -11,18 +11,8 @@ const fetch = require('node-fetch');
 const ciEnv = require('ci-info');
 const { scheduleJob } = require('node-schedule');
 
-const isTruthyEnvVar = val => {
-  if (val === null || val === undefined) return false;
-
-  if (val === true) return true;
-
-  if (val.toString().toLowerCase() === 'true') return true;
-  if (val.toString().toLowerCase() === 'false') return false;
-
-  if (val === 1) return true;
-
-  return false;
-};
+const createMiddleware = require('./middleware');
+const isTruthyEnvVar = require('./truthy-var');
 
 const createTelemetryInstance = strapi => {
   const uuid = strapi.config.uuid;
@@ -68,52 +58,18 @@ const createTelemetryInstance = strapi => {
     }
   };
 
-  const _state = {
-    currentDay: null,
-    counter: 0,
+  const initPing = () => {
+    if (isDisabled) {
+      return;
+    }
+
+    scheduleJob('0 0 12 * * *', () => sendEvent('ping'));
   };
 
   return {
-    initPing() {
-      if (isDisabled) {
-        return;
-      }
-
-      scheduleJob('0 0 12 * * *', () => sendEvent('ping'));
-    },
-    middleware: async (ctx, next) => {
-      if (isDisabled) {
-        return next();
-      }
-
-      const { url, method } = ctx.request;
-
-      if (!url.includes('.') && ['GET', 'PUT', 'POST', 'DELETE'].includes(method)) {
-        const dayOfMonth = new Date().getDate();
-
-        if (dayOfMonth !== _state.currentDay) {
-          _state.currentDay = dayOfMonth;
-          _state.counter = 0;
-        }
-
-        // Send max. 1000 events per day.
-        if (_state.counter < 1000) {
-          await sendEvent('didReceiveRequest', { url: ctx.request.url });
-
-          // Increase counter.
-          _state.counter++;
-        }
-      }
-
-      await next();
-    },
-    async send(event, properties) {
-      if (isDisabled) {
-        return true;
-      }
-
-      await sendEvent(event, properties);
-    },
+    initPing,
+    send: sendEvent,
+    middleware: createMiddleware({ sendEvent, isDisabled }),
   };
 };
 
