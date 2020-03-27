@@ -3,7 +3,6 @@
 // Dependencies.
 const http = require('http');
 const path = require('path');
-const { EventEmitter } = require('events');
 const fse = require('fs-extra');
 const Koa = require('koa');
 const Router = require('koa-router');
@@ -27,6 +26,7 @@ const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const createEntityService = require('./services/entity-service');
 const createEntityValidator = require('./services/entity-validator');
 const { createDatabaseManager } = require('strapi-database');
+const createStrapiTelemetry = require('strapi-telemetry');
 
 const CONFIG_PATHS = {
   admin: 'admin',
@@ -49,12 +49,8 @@ const CONFIG_PATHS = {
  * @constructor
  */
 
-class Strapi extends EventEmitter {
+class Strapi {
   constructor(opts = {}) {
-    super();
-
-    this.setMaxListeners(100);
-
     this.reload = this.reload();
 
     // Expose `koa`.
@@ -195,9 +191,6 @@ class Strapi extends EventEmitter {
 
   async start(cb) {
     try {
-      // Emit starting event.
-      this.emit('server:starting');
-
       await this.load();
 
       // Run bootstrap function.
@@ -354,6 +347,10 @@ class Strapi extends EventEmitter {
       eventHub: this.eventHub,
       entityValidator: this.entityValidator,
     });
+
+    this.telemetry = createStrapiTelemetry(this);
+    this.telemetry.initPing();
+    this.app.use(this.telemetry.middleware);
 
     // Initialize hooks and middlewares.
     await initializeMiddlewares.call(this);

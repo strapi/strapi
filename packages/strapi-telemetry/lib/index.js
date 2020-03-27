@@ -4,17 +4,31 @@
  * You can learn more at https://strapi.io/documentation/3.0.0-beta.x/global-strapi/usage-information.html#commitment-to-our-users-data-collection
  */
 const os = require('os');
+
 const isDocker = require('is-docker');
 const { machineIdSync } = require('node-machine-id');
 const fetch = require('node-fetch');
 const ciEnv = require('ci-info');
-const scheduleJob = require('node-schedule');
+const { scheduleJob } = require('node-schedule');
+
+const isTruthyEnvVar = val => {
+  if (val === null || val === undefined) return false;
+
+  if (val === true) return true;
+
+  if (val.toString().toLowerCase() === 'true') return true;
+  if (val.toString().toLowerCase() === 'false') return false;
+
+  if (val === 1) return true;
+
+  return false;
+};
 
 const createTelemetryInstance = strapi => {
   const uuid = strapi.config.uuid;
   const deviceId = machineIdSync();
 
-  const isDisabled = !uuid;
+  const isDisabled = !uuid || isTruthyEnvVar(process.env.STRAPI_TELEMETRY_DISABLED);
 
   const anonymous_metadata = {
     environment: strapi.config.environment,
@@ -103,4 +117,4 @@ const createTelemetryInstance = strapi => {
   };
 };
 
-module.exports = createTelemetryInstance();
+module.exports = createTelemetryInstance;
