@@ -14,4 +14,11 @@ describe('UPLOAD | utils | prefixFileUrlWithBackendUrl', () => {
 
     expect(prefixFileUrlWithBackendUrl(data)).toEqual(expected);
   });
+
+  it("should return the data if the url is not a string'", () => {
+    const data = null;
+    const expected = null;
+
+    expect(prefixFileUrlWithBackendUrl(data)).toEqual(expected);
+  });
 });

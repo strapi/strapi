@@ -1,12 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { prefixFileUrlWithBackendUrl } from '../../utils';
 
 import CardPreview from '../CardPreview';
 import Flex from '../Flex';
 import Chevron from './Chevron';
 
 const InputFilePreview = ({ file, onClick, isSlider }) => {
-  const fileUrl = file.url.startsWith('/') ? `${strapi.backendURL}${file.url}` : file.url;
+  const fileUrl = prefixFileUrlWithBackendUrl(file.url);
 
   return (
     <Flex
