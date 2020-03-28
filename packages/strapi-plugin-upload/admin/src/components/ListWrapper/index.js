@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 const ListWrapper = styled.div`
-  margin-top: 2px;
+  margin-top: 20px;
 `;
 
 export default ListWrapper;
