@@ -91,6 +91,7 @@ const VideoPreview = ({ hasIcon, previewUrl, src }) => {
           </>
         )}
         <Duration duration={duration} />
+        <PlayIcon small />
         {hasIcon && isHover && <PlayIcon small />}
       </CanvasWrapper>
     </Wrapper>

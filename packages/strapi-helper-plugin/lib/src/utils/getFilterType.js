@@ -102,6 +102,21 @@ const getFilterType = type => {
           value: '_ncontains',
         },
       ];
+    case 'size':
+      return [
+        {
+          id: 'components.FilterOptions.FILTER_TYPES.=',
+          value: '_contains',
+        },
+        {
+          id: 'components.FilterOptions.FILTER_TYPES._lte',
+          value: '_lte',
+        },
+        {
+          id: 'components.FilterOptions.FILTER_TYPES._gte',
+          value: '_gte',
+        },
+      ];
     default:
       return [
         {
