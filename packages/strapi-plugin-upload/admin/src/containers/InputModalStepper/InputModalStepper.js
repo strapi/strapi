@@ -226,10 +226,10 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
             onChange={handleFileToEditChange}
             onClickCancelUpload={handleCancelFileToUpload}
             onClickDeleteFileToUpload={
-              currentStep === 'edit-new' ? handleClickDeleteFileToUpload : handleClickDeleteFile
+              currentStep === 'edit' ? handleClickDeleteFile : handleClickDeleteFileToUpload
             }
             onSubmitEdit={
-              currentStep === 'edit-new' ? handleSubmitEditNewFile : handleSubmitEditExistingFile
+              currentStep === 'edit' ? handleSubmitEditExistingFile : handleSubmitEditNewFile
             }
             onClickEditNewFile={handleGoToEditNewFile}
             onGoToAddBrowseFiles={handleGoToAddBrowseFiles}

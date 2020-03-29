@@ -8,6 +8,7 @@ import InputModalStepperProvider from '../InputModalStepperProvider';
 
 const InputModal = ({
   allowedTypes,
+  filesToUpload,
   fileToEdit,
   isOpen,
   multiple,
@@ -17,8 +18,8 @@ const InputModal = ({
   step,
 }) => {
   const singularTypes = allowedTypes.map(type => type.substring(0, type.length - 1));
-  const typeToDisable = ['video', 'image', 'file'].filter(f => !singularTypes.includes(f));
-  const nContainsFilters = typeToDisable.map(type => ({
+  const typesToDisable = ['video', 'image', 'file'].filter(f => !singularTypes.includes(f));
+  const nContainsFilters = typesToDisable.map(type => ({
     name: 'mime',
     filter: '_ncontains',
     value: type,
@@ -29,12 +30,14 @@ const InputModal = ({
     <DndProvider backend={HTML5Backend}>
       <DragLayer />
       <InputModalStepperProvider
+        initialFilesToUpload={filesToUpload}
         initialFileToEdit={fileToEdit}
         initialFilters={nContainsFilters}
         isOpen={isOpen}
         multiple={multiple}
         selectedFiles={selectedFiles}
         step={step}
+        allowedTypes={singularTypes}
       >
         <InputModalStepper
           isOpen={isOpen}
@@ -48,6 +51,7 @@ const InputModal = ({
 
 InputModal.defaultProps = {
   allowedTypes: [],
+  filesToUpload: null,
   fileToEdit: null,
   onInputMediaChange: () => {},
   onToggle: () => {},
@@ -57,6 +61,7 @@ InputModal.defaultProps = {
 
 InputModal.propTypes = {
   allowedTypes: PropTypes.arrayOf(PropTypes.string),
+  filesToUpload: PropTypes.object,
   fileToEdit: PropTypes.object,
   isOpen: PropTypes.bool.isRequired,
   multiple: PropTypes.bool.isRequired,
