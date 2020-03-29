@@ -7,23 +7,34 @@ import InputModalStepper from './InputModalStepper';
 import InputModalStepperProvider from '../InputModalStepperProvider';
 
 const InputModal = ({
+  allowedTypes,
   fileToEdit,
   isOpen,
-  onToggle,
-  onInputMediaChange,
   multiple,
+  onInputMediaChange,
+  onToggle,
   selectedFiles,
   step,
 }) => {
+  const singularTypes = allowedTypes.map(type => type.substring(0, type.length - 1));
+  const typeToDisable = ['video', 'image', 'file'].filter(f => !singularTypes.includes(f));
+  const nContainsFilters = typeToDisable.map(type => ({
+    name: 'mime',
+    filter: '_ncontains',
+    value: type,
+    isDisabled: true,
+  }));
+
   return (
     <DndProvider backend={HTML5Backend}>
       <DragLayer />
       <InputModalStepperProvider
-        step={step}
-        selectedFiles={selectedFiles}
-        multiple={multiple}
-        isOpen={isOpen}
         initialFileToEdit={fileToEdit}
+        initialFilters={nContainsFilters}
+        isOpen={isOpen}
+        multiple={multiple}
+        selectedFiles={selectedFiles}
+        step={step}
       >
         <InputModalStepper
           isOpen={isOpen}
@@ -36,6 +47,7 @@ const InputModal = ({
 };
 
 InputModal.defaultProps = {
+  allowedTypes: [],
   fileToEdit: null,
   onInputMediaChange: () => {},
   onToggle: () => {},
@@ -44,6 +56,7 @@ InputModal.defaultProps = {
 };
 
 InputModal.propTypes = {
+  allowedTypes: PropTypes.arrayOf(PropTypes.string),
   fileToEdit: PropTypes.object,
   isOpen: PropTypes.bool.isRequired,
   multiple: PropTypes.bool.isRequired,
