@@ -3,13 +3,15 @@ import PropTypes from 'prop-types';
 import { request, generateSearchFromFilters } from 'strapi-helper-plugin';
 import { get } from 'lodash';
 import pluginId from '../../pluginId';
-import { getRequestUrl, compactParams } from '../../utils';
+import { getRequestUrl, compactParams, createNewFilesToUploadArray } from '../../utils';
 import InputModalStepperContext from '../../contexts/InputModal/InputModalDataManager';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
 const InputModalStepperProvider = ({
+  allowedTypes,
   children,
+  initialFilesToUpload,
   initialFileToEdit,
   initialFilters,
   isOpen,
@@ -24,6 +26,12 @@ const InputModalStepperProvider = ({
       currentStep: step,
       fileToEdit: initialFileToEdit,
       selectedFiles: Array.isArray(selectedFiles) ? selectedFiles : [selectedFiles],
+      filesToUpload: initialFilesToUpload
+        ? createNewFilesToUploadArray(initialFilesToUpload).map((file, index) => ({
+          ...file,
+          originalIndex: index,
+        }))
+        : [],
       params: {
         ...state.params,
         filters: initialFilters,
@@ -244,7 +252,7 @@ const InputModalStepperProvider = ({
         formData.append('fileInfo', JSON.stringify(fileInfo));
 
         try {
-          const data = await request(
+          const uploadedFile = await request(
             `/${pluginId}`,
             {
               method: 'POST',
@@ -256,10 +264,20 @@ const InputModalStepperProvider = ({
             false
           );
 
+          const filesToSelect = uploadedFile.filter(file => {
+            const fileType = file.mime.split('/')[0];
+
+            if (allowedTypes.includes('file') && !['video', 'image'].includes(fileType)) {
+              return true;
+            }
+
+            return allowedTypes.includes(fileType);
+          });
+
           dispatch({
             type: 'REMOVE_FILE_TO_UPLOAD',
             fileIndex: originalIndex,
-            addToSelectedFiles: data,
+            addToSelectedFiles: filesToSelect,
             multiple,
           });
         } catch (err) {
@@ -321,19 +339,23 @@ InputModalStepperProvider.propTypes = {
   children: PropTypes.node.isRequired,
   initialFileToEdit: PropTypes.object,
   initialFilters: PropTypes.arrayOf(PropTypes.object),
+  initialFilesToUpload: PropTypes.object,
   isOpen: PropTypes.bool,
   multiple: PropTypes.bool.isRequired,
   onInputMediaChange: PropTypes.func,
   selectedFiles: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   step: PropTypes.string.isRequired,
+  allowedTypes: PropTypes.arrayOf(PropTypes.string),
 };
 
 InputModalStepperProvider.defaultProps = {
   initialFileToEdit: null,
   initialFilters: [],
+  initialFilesToUpload: null,
   isOpen: false,
   onInputMediaChange: () => {},
   selectedFiles: null,
+  allowedTypes: [],
 };
 
 export default InputModalStepperProvider;
