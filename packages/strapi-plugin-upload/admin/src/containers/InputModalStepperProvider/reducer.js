@@ -23,7 +23,6 @@ const initialState = {
 const reducer = (state, action) =>
   // eslint-disable-next-line consistent-return
   produce(state, draftState => {
-    // console.log(action.type, action);
     switch (action.type) {
       case 'ON_CHANGE': {
         set(draftState.fileToEdit, action.keys.split('.'), action.value);
