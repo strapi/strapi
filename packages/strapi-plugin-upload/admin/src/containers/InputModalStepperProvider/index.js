@@ -11,6 +11,7 @@ import reducer, { initialState } from './reducer';
 const InputModalStepperProvider = ({
   children,
   initialFileToEdit,
+  initialFilters,
   isOpen,
   multiple,
   onInputMediaChange,
@@ -23,6 +24,10 @@ const InputModalStepperProvider = ({
       currentStep: step,
       fileToEdit: initialFileToEdit,
       selectedFiles: Array.isArray(selectedFiles) ? selectedFiles : [selectedFiles],
+      params: {
+        ...state.params,
+        filters: initialFilters,
+      },
     })
   );
   const { params, filesToUpload, fileToEdit } = reducerState;
@@ -315,6 +320,7 @@ const InputModalStepperProvider = ({
 InputModalStepperProvider.propTypes = {
   children: PropTypes.node.isRequired,
   initialFileToEdit: PropTypes.object,
+  initialFilters: PropTypes.arrayOf(PropTypes.object),
   isOpen: PropTypes.bool,
   multiple: PropTypes.bool.isRequired,
   onInputMediaChange: PropTypes.func,
@@ -324,6 +330,7 @@ InputModalStepperProvider.propTypes = {
 
 InputModalStepperProvider.defaultProps = {
   initialFileToEdit: null,
+  initialFilters: [],
   isOpen: false,
   onInputMediaChange: () => {},
   selectedFiles: null,

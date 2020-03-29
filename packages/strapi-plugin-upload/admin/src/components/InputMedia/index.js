@@ -118,6 +118,7 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
           onInputMediaChange={handleChange}
           selectedFiles={value}
           onToggle={handleClickToggleModal}
+          allowedTypes={attribute.allowedTypes}
         />
       )}
     </Wrapper>
@@ -126,6 +127,7 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
 
 InputMedia.propTypes = {
   attribute: PropTypes.shape({
+    allowedTypes: PropTypes.arrayOf(PropTypes.string),
     multiple: PropTypes.bool,
     required: PropTypes.bool,
     type: PropTypes.string,

@@ -32,8 +32,6 @@
       "collection": "file",
       "via": "related",
       "allowedTypes": [
-        "images",
-        "files",
         "videos"
       ],
       "plugin": "upload",
