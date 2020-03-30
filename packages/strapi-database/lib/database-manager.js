@@ -4,6 +4,7 @@ const _ = require('lodash');
 
 const requireConnector = require('./require-connector');
 const { createQuery } = require('./queries');
+const { checkDuplicatedTableNames } = require('./validation/before-mounting-models');
 
 class DatabaseManager {
   constructor(strapi) {
@@ -14,59 +15,6 @@ class DatabaseManager {
     this.queries = new Map();
     this.connectors = new Map();
     this.models = new Map();
-  }
-
-  // Check if all collection names are unique
-  checkForDuplicates() {
-    const createErrorMessage = (
-      collectionA,
-      collectionB
-    ) => `Duplicated collection name: \`${collectionA.collectionName}\`.
-The same collection name can't be used for two different models.
-First found in ${collectionA.origin} \`${collectionA.apiOrPluginName}\`, model \`${collectionA.modelName}\`.
-Second found in ${collectionB.origin} \`${collectionB.apiOrPluginName}\`, model \`${collectionB.modelName}\`.`;
-
-    const collections = [];
-    _.forIn(this.strapi.admin.models, (model, modelName) => {
-      collections.push({
-        origin: 'Strapi internal',
-        collectionName: model.collectionName || `${modelName}`.toLocaleLowerCase(),
-        apiOrPluginName: 'admin',
-        modelName,
-      });
-    });
-
-    _.forIn(this.strapi.api, (api, apiName) => {
-      _.forIn(api.models, (model, modelName) => {
-        collections.push({
-          origin: 'API',
-          collectionName: model.collectionName || `${modelName}`.toLocaleLowerCase(),
-          apiOrPluginName: apiName,
-          modelName,
-        });
-      });
-    });
-
-    _.forIn(this.strapi.plugins, (plugin, pluginName) => {
-      _.forIn(plugin.models, (model, modelName) => {
-        collections.push({
-          origin: 'Plugin',
-          collectionName: model.collectionName || `${modelName}`.toLocaleLowerCase(),
-          apiOrPluginName: pluginName,
-          modelName,
-        });
-      });
-    });
-
-    collections.forEach((collectionA, indexA) => {
-      const similarCollectionFound = collections
-        .slice(indexA + 1)
-        .find(colB => colB.collectionName === collectionA.collectionName);
-
-      if (similarCollectionFound) {
-        strapi.stopWithError(new Error(createErrorMessage(collectionA, similarCollectionFound)));
-      }
-    });
   }
 
   async initialize() {
@@ -84,7 +32,7 @@ Second found in ${collectionB.origin} \`${collectionB.apiOrPluginName}\`, model 
       }
     }
 
-    this.checkForDuplicates();
+    checkDuplicatedTableNames(this.strapi);
 
     for (const connectorToInitialize of connectorsToInitialize) {
       const connector = requireConnector(connectorToInitialize)(strapi);
