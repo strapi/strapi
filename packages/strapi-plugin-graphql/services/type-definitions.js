@@ -404,19 +404,16 @@ const buildCollectionType = model => {
       },
     });
 
-    // TODO: Add support for Graphql Aggregation in Bookshelf ORM
-    if (model.orm === 'mongoose') {
-      // Generation the aggregation for the given model
-      const aggregationSchema = formatModelConnectionsGQL({
-        fields: typeDefObj,
-        model,
-        name: modelName,
-        resolver: resolverOpts,
-        plugin,
-      });
+    // Generation the aggregation for the given model
+    const aggregationSchema = formatModelConnectionsGQL({
+      fields: typeDefObj,
+      model,
+      name: modelName,
+      resolver: resolverOpts,
+      plugin,
+    });
 
-      mergeSchemas(localSchema, aggregationSchema);
-    }
+    mergeSchemas(localSchema, aggregationSchema);
   }
 
   // Add model Input definition.
