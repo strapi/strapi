@@ -43,51 +43,6 @@ module.exports = function(strapi) {
 
   strapi.contentTypes = {};
 
-  // Check if all collection names are unique
-  const createErrorMessage = (
-    indexA,
-    indexB,
-    name
-  ) => `The same collection name can't be used for two different ${name}.
-First found in ${collectionNames[indexA].origin} \`${collectionNames[indexA].apiOrPluginName}\`, model \`${collectionNames[indexA].modelName}\`.
-Second found in ${collectionNames[indexB].origin} \`${collectionNames[indexB].apiOrPluginName}\`, model \`${collectionNames[indexB].modelName}\`.
-If you just created a relation between 2 content type, just rename one
-`;
-
-  const collectionNames = [];
-  _.forIn(strapi.api, (api, apiName) => {
-    _.forIn(api.models, (model, modelName) => {
-      collectionNames.push({
-        origin: 'API',
-        collectionName: model.collectionName || `${modelName}`.toLocaleLowerCase(),
-        apiOrPluginName: apiName,
-        modelName,
-      });
-    });
-  });
-
-  _.forIn(strapi.plugins, (plugin, pluginName) => {
-    _.forIn(plugin.models, (model, modelName) => {
-      collectionNames.push({
-        origin: 'Plugin',
-        collectionName: model.collectionName || `${modelName}`.toLocaleLowerCase(),
-        apiOrPluginName: pluginName,
-        modelName,
-      });
-    });
-  });
-
-  for (let indexA = 0; indexA < collectionNames.length; indexA += 1) {
-    for (let indexB = indexA + 1; indexB < collectionNames.length; indexB += 1) {
-      if (collectionNames[indexA].collectionName === collectionNames[indexB].collectionName) {
-        strapi.stopWithError(
-          new Error(`Duplicated collection name: \`${collectionNames[indexA].collectionName}\`.`),
-          createErrorMessage(indexA, indexB, 'model')
-        );
-      }
-    }
-  }
-
   // Set models.
   strapi.models = Object.keys(strapi.api || []).reduce((acc, apiName) => {
     const api = strapi.api[apiName];
