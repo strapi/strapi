@@ -50,7 +50,7 @@ const checkDuplicatedTableNames = strapi => {
     );
 
     if (similarModelFound) {
-      strapi.stopWithError(new Error(createErrorMessage(modelA, similarModelFound)));
+      throw new Error(createErrorMessage(modelA, similarModelFound));
     }
   });
 };
