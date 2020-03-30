@@ -11,7 +11,7 @@ const pluralize = require('pluralize');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
 const { buildQuery: buildQueryResolver } = require('./resolvers-builder');
-const { convertToParams, convertToQuery, noRequired } = require('./utils');
+const { convertToParams, convertToQuery, nonRequired } = require('./utils');
 const { toSDL } = require('./schema-definitions');
 
 /**
@@ -20,7 +20,7 @@ const { toSDL } = require('./schema-definitions');
  * @returns {Boolean}
  */
 const isPrimitiveType = _type => {
-  const type = noRequired(_type);
+  const type = nonRequired(_type);
   return (
     type === 'Int' ||
     type === 'Float' ||
@@ -60,7 +60,7 @@ const isNotOfTypeArray = type => {
  * Returns all fields of type Integer or float
  */
 const isNumberType = _type => {
-  const type = noRequired(_type);
+  const type = nonRequired(_type);
   return type === 'Int' || type === 'Float';
 };
 
