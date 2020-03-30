@@ -174,10 +174,12 @@ const HomePage = () => {
 
     if (name === 'filters') {
       const filters = [...generateFiltersFromSearch(search), value];
+
       updatedQueryParams = generateNewSearch({ [name]: filters });
     } else {
       updatedQueryParams = generateNewSearch({ [name]: value });
     }
+
     const newSearch = generateSearchFromFilters(updatedQueryParams);
 
     push({ search: encodeURI(newSearch) });
@@ -212,8 +214,6 @@ const HomePage = () => {
     const filters = generateFiltersFromSearch(search).filter(
       (filter, filterIndex) => filterIndex !== index
     );
-    // const currentFilters = generateFiltersFromSearch(search);
-    // const updatedFilters = deleteFilters(currentFilters, index);
     const updatedQueryParams = generateNewSearch({ filters });
 
     const newSearch = generateSearchFromFilters(updatedQueryParams);

@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { get } from 'lodash';
+import { prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
 
-import { getTrad, prefixFileUrlWithBackendUrl, createFileToEdit } from '../../utils';
+import { getTrad, formatFileForEditing } from '../../utils';
 import CardControl from '../CardControl';
 import CardControlWrapper from './CardControlWrapper';
 import CardPreviewWrapper from './CardPreviewWrapper';
@@ -21,7 +22,7 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
     step: null,
   });
   const [fileToDisplay, setFileToDisplay] = useState(0);
-  const hasNoValue = value !== null && Array.isArray(value) && value.length === 0;
+  const hasNoValue = !!value && Array.isArray(value) && value.length === 0;
   const currentFile = attribute.multiple ? value[fileToDisplay] : value;
   const fileURL = get(currentFile, ['url'], null);
   const prefixedFileURL = fileURL ? prefixFileUrlWithBackendUrl(fileURL) : null;
@@ -60,11 +61,12 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
     if (fileToDisplay === newValue.length) {
       setFileToDisplay(fileToDisplay > 0 ? fileToDisplay - 1 : fileToDisplay);
     }
+
     handleChange(newValue);
   };
 
   const handleEditFile = () => {
-    setModal(() => ({ isOpen: true, step: 'edit', fileToEdit: createFileToEdit(currentFile) }));
+    setModal(() => ({ isOpen: true, step: 'edit', fileToEdit: formatFileForEditing(currentFile) }));
   };
 
   const handleCopy = () => {

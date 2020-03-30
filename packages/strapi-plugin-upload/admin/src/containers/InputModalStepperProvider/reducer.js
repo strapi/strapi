@@ -1,7 +1,7 @@
 import produce from 'immer';
 import { intersectionWith, differenceWith, unionWith, set } from 'lodash';
 
-import { createNewFilesToUploadArray, createFileToEdit } from '../../utils';
+import { createNewFilesToUploadArray, formatFileForEditing } from '../../utils';
 
 const initialState = {
   selectedFiles: [],
@@ -23,7 +23,6 @@ const initialState = {
 const reducer = (state, action) =>
   // eslint-disable-next-line consistent-return
   produce(state, draftState => {
-    // console.log(action.type, action);
     switch (action.type) {
       case 'ON_CHANGE': {
         set(draftState.fileToEdit, action.keys.split('.'), action.value);
@@ -169,8 +168,8 @@ const reducer = (state, action) =>
         break;
       }
       case 'SET_FILE_TO_EDIT': {
-        draftState.fileToEdit = createFileToEdit(
-          state.files.find(file => file.id === action.fileId)
+        draftState.fileToEdit = formatFileForEditing(
+          state.files.find(file => file.id.toString() === action.fileId.toString())
         );
         break;
       }
