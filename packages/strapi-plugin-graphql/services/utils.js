@@ -85,7 +85,7 @@ const amountLimiting = (params = {}) => {
   return params;
 };
 
-const noRequired = type => type.replace('!', '');
+const nonRequired = type => type.replace('!', '');
 
 module.exports = {
   diffResolvers,
@@ -94,5 +94,5 @@ module.exports = {
   convertToParams,
   convertToQuery,
   amountLimiting,
-  noRequired,
+  nonRequired,
 };
