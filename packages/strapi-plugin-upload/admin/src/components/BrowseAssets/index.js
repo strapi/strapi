@@ -56,7 +56,9 @@ const BrowseAssets = () => {
 
   const handleListCardClick = id => {
     handleFileSelection({
-      target: { name: parseInt(id, 10), value: selectedFiles.findIndex(file => file.id === id) },
+      target: {
+        name: id,
+      },
     });
   };
 

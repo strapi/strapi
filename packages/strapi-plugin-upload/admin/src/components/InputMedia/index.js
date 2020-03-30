@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { get } from 'lodash';
@@ -20,6 +20,7 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
   const [modal, setModal] = useState({
     isOpen: false,
     step: null,
+    fileToEdit: null,
   });
   const [fileToDisplay, setFileToDisplay] = useState(0);
   const hasNoValue = !!value && Array.isArray(value) && value.length === 0;
@@ -29,8 +30,12 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
   const displaySlidePagination =
     attribute.multiple && value.length > 1 ? ` (${fileToDisplay + 1}/${value.length})` : '';
 
+  useEffect(() => {
+    console.log(modal);
+  }, [modal]);
+
   const handleClickToggleModal = () => {
-    setModal(prev => ({ isOpen: !prev.isOpen }));
+    setModal(prev => ({ step: 'list', isOpen: !prev.isOpen, fileToEdit: null }));
   };
 
   const handleChange = v => {

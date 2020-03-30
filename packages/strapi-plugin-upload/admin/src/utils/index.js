@@ -1,8 +1,8 @@
 export { default as canDownloadFile } from './canDownloadFile';
 export { default as compactParams } from './compactParams';
 export { default as createFileToDownloadName } from './createFileToDownloadName';
-export { default as createNewFilesToUploadArray } from './createNewFilesToUploadArray';
 export { default as createMatrix } from './createMatrix';
+export { default as createNewFilesToUploadArray } from './createNewFilesToUploadArray';
 export { default as formatBytes } from './formatBytes';
 export { default as formatFileForEditing } from './formatFileForEditing';
 export { default as generatePageFromStart } from './generatePageFromStart';

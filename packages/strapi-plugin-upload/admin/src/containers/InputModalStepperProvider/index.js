@@ -95,11 +95,10 @@ const InputModalStepperProvider = ({
     });
   };
 
-  const handleFileSelection = ({ target: { name, value } }) => {
+  const handleFileSelection = ({ target: { name } }) => {
     dispatch({
       type: 'ON_FILE_SELECTION',
-      id: parseInt(name, 10),
-      value,
+      id: name,
     });
   };
 

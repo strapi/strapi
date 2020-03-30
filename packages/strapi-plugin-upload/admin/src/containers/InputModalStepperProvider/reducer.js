@@ -58,16 +58,17 @@ const reducer = (state, action) =>
         break;
       }
       case 'ON_FILE_SELECTION': {
-        const { value, id } = action;
+        const { id } = action;
+        const stringId = id.toString();
+        const fileIndex = state.selectedFiles.findIndex(file => file.id.toString() === stringId);
 
-        if (value) {
-          const fileToStore = state.files.find(file => file.id === id);
-          draftState.selectedFiles.push(fileToStore);
+        if (fileIndex !== -1) {
+          draftState.selectedFiles.splice(fileIndex, 1);
           break;
         }
 
-        const index = draftState.selectedFiles.findIndex(item => item.id === id);
-        draftState.selectedFiles.splice(index, 1);
+        const fileToStore = state.files.find(file => file.id.toString() === stringId);
+        draftState.selectedFiles.push(fileToStore);
         break;
       }
       case 'TOGGLE_SELECT_ALL': {

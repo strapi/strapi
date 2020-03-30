@@ -151,11 +151,10 @@ const HomePage = () => {
     };
   };
 
-  const handleChangeCheck = ({ target: { name, value } }) => {
+  const handleChangeCheck = ({ target: { name } }) => {
     dispatch({
       type: 'ON_CHANGE_DATA_TO_DELETE',
-      id: parseInt(name, 10),
-      value,
+      id: name,
     });
   };
 
@@ -316,12 +315,13 @@ const HomePage = () => {
   const paginationCount = data.length < limit ? data.length : dataCount;
 
   const hasSomeCheckboxSelected = data.some(item =>
-    dataToDelete.find(itemToDelete => item.id === itemToDelete.id)
+    dataToDelete.find(itemToDelete => item.id.toString() === itemToDelete.id.toString())
   );
 
   const areAllCheckboxesSelected =
-    data.every(item => dataToDelete.find(itemToDelete => item.id === itemToDelete.id)) &&
-    hasSomeCheckboxSelected;
+    data.every(item =>
+      dataToDelete.find(itemToDelete => item.id.toString() === itemToDelete.id.toString())
+    ) && hasSomeCheckboxSelected;
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
