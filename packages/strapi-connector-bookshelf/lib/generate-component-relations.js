@@ -53,7 +53,7 @@ const createComponentModels = async ({ model, definition, ORM, GLOBALS }) => {
 
     componentAttributes.forEach(name => {
       model[name] = function relation() {
-        return this.hasMany(joinModel).query(qb => {
+        return this.hasMany(joinModel, joinColumn).query(qb => {
           qb.where('field', name)
             .whereIn(
               'component_type',
