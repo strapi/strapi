@@ -3,14 +3,14 @@
 // Dependencies.
 const http = require('http');
 const path = require('path');
-const { EventEmitter } = require('events');
 const fse = require('fs-extra');
 const Koa = require('koa');
 const Router = require('koa-router');
 const _ = require('lodash');
-const { logger, models } = require('strapi-utils');
 const chalk = require('chalk');
 const CLITable = require('cli-table3');
+const { logger, models } = require('strapi-utils');
+const { createDatabaseManager } = require('strapi-database');
 
 const utils = require('./utils');
 const loadModules = require('./core/load-modules');
@@ -19,14 +19,13 @@ const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
 const createStrapiFs = require('./core/fs');
 const getPrefixedDeps = require('./utils/get-prefixed-dependencies');
-
 const createEventHub = require('./services/event-hub');
 const createWebhookRunner = require('./services/webhook-runner');
 const { webhookModel, createWebhookStore } = require('./services/webhook-store');
 const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const createEntityService = require('./services/entity-service');
 const createEntityValidator = require('./services/entity-validator');
-const { createDatabaseManager } = require('strapi-database');
+const createTelemetry = require('./services/metrics');
 
 const CONFIG_PATHS = {
   admin: 'admin',
@@ -49,12 +48,8 @@ const CONFIG_PATHS = {
  * @constructor
  */
 
-class Strapi extends EventEmitter {
+class Strapi {
   constructor(opts = {}) {
-    super();
-
-    this.setMaxListeners(100);
-
     this.reload = this.reload();
 
     // Expose `koa`.
@@ -195,9 +190,6 @@ class Strapi extends EventEmitter {
 
   async start(cb) {
     try {
-      // Emit starting event.
-      this.emit('server:starting');
-
       await this.load();
 
       // Run bootstrap function.
@@ -220,7 +212,7 @@ class Strapi extends EventEmitter {
         }
 
         // Emit started event.
-        this.emit('server:started');
+        await this.telemetry.send('didStartServer');
 
         if (cb && typeof cb === 'function') {
           cb();
@@ -319,9 +311,6 @@ class Strapi extends EventEmitter {
 
     await bootstrap(this);
 
-    // Usage.
-    await utils.usage(this.config);
-
     // init webhook runner
     this.webhookRunner = createWebhookRunner({
       eventHub: this.eventHub,
@@ -354,6 +343,8 @@ class Strapi extends EventEmitter {
       eventHub: this.eventHub,
       entityValidator: this.entityValidator,
     });
+
+    this.telemetry = createTelemetry(this);
 
     // Initialize hooks and middlewares.
     await initializeMiddlewares.call(this);
