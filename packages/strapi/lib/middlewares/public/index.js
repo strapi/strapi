@@ -24,65 +24,12 @@ module.exports = strapi => {
      */
 
     async initialize() {
-      const { maxAge } = strapi.config.middleware.settings.public;
-
-      const staticDir = path.resolve(
-        strapi.dir,
-        strapi.config.middleware.settings.public.path ||
-          strapi.config.paths.static
-      );
-
-      // Open the file.
-      const filename =
-        strapi.config.environment === 'development' ? 'index' : 'production';
-
-      const index = fs.readFileSync(
-        path.join(staticDir, `${filename}.html`),
-        'utf8'
-      );
-
-      // Is the project initialized?
-      const renderer = _.template(index);
-
-      const renderIndexPage = async () => {
-        const isInitialised = await utils.isInitialised(strapi);
-
-        const data = {
-          serverTime: new Date().toUTCString(),
-          isInitialised,
-          ..._.pick(strapi, [
-            'config.info.version',
-            'config.info.name',
-            'config.admin.url',
-            'config.environment',
-          ]),
-        };
-
-        return renderer(data);
-      };
-
-      const serveIndexPage = async ctx => {
-        ctx.url = path.basename(`${ctx.url}/${filename}.html`);
-
-        const content = await renderIndexPage();
-        const body = stream.Readable({
-          read() {
-            this.push(Buffer.from(content));
-            this.push(null);
-          },
-        });
-        // Serve static.
-        ctx.type = 'html';
-        ctx.body = body;
-      };
-
-      // Serve /public index page.
-      strapi.router.get('/', serveIndexPage);
-      strapi.router.get('/(index.html|production.html)', serveIndexPage);
+      const { defaultIndex, maxAge, path: publicPath } = strapi.config.middleware.settings.public;
+      const staticDir = path.resolve(strapi.dir, publicPath || strapi.config.paths.static);
 
       // Match every route with an extension.
       // The file without extension will not be served.
-      // Note: This route could be override by the user.
+      // Note: This route can be overriden by the user.
       strapi.router.get(
         '/*',
         async (ctx, next) => {
@@ -93,16 +40,45 @@ module.exports = strapi => {
         },
         koaStatic(staticDir, {
           maxage: maxAge,
-          defer: true,
+          defer: false,
         })
       );
 
+      if (defaultIndex === true) {
+        const index = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+
+        const serveIndexPage = async ctx => {
+          ctx.url = 'index.html';
+          const isInitialised = await utils.isInitialised(strapi);
+          const data = {
+            serverTime: new Date().toUTCString(),
+            isInitialised,
+            ..._.pick(strapi, [
+              'config.info.version',
+              'config.info.name',
+              'config.admin.url',
+              'config.environment',
+            ]),
+          };
+          const content = _.template(index)(data);
+          const body = stream.Readable({
+            read() {
+              this.push(Buffer.from(content));
+              this.push(null);
+            },
+          });
+          // Serve static.
+          ctx.type = 'html';
+          ctx.body = body;
+        };
+
+        strapi.router.get('/', serveIndexPage);
+        strapi.router.get('/index.html', serveIndexPage);
+      }
+
       if (!strapi.config.serveAdminPanel) return;
 
-      const basename = _.get(
-        strapi.config.currentEnvironment.server,
-        'admin.path'
-      )
+      const basename = _.get(strapi.config.currentEnvironment.server, 'admin.path')
         ? strapi.config.currentEnvironment.server.admin.path
         : '/admin';
 

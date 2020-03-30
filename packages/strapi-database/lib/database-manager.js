@@ -4,6 +4,7 @@ const _ = require('lodash');
 
 const requireConnector = require('./require-connector');
 const { createQuery } = require('./queries');
+const { checkDuplicatedTableNames } = require('./validation/before-mounting-models');
 
 class DatabaseManager {
   constructor(strapi) {
@@ -30,6 +31,8 @@ class DatabaseManager {
         connectorsToInitialize.push(connector);
       }
     }
+
+    checkDuplicatedTableNames(this.strapi);
 
     for (const connectorToInitialize of connectorsToInitialize) {
       const connector = requireConnector(connectorToInitialize)(strapi);

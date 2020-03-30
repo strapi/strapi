@@ -7,13 +7,7 @@ import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 
 import { DateTime } from '@buffetjs/custom';
-import {
-  DatePicker,
-  InputText,
-  InputNumber,
-  Select,
-  TimePicker,
-} from '@buffetjs/core';
+import { DatePicker, InputText, InputNumber, Select, TimePicker } from '@buffetjs/core';
 import { InputWrapperDate } from './components';
 
 const getInputType = attrType => {
@@ -26,6 +20,8 @@ const getInputType = attrType => {
       return DatePicker;
     case 'datetime':
       return DateTime;
+    case 'enumeration':
+      return Select;
     case 'integer':
     case 'biginteger':
     case 'decimal':
@@ -45,11 +41,9 @@ function Input({ type, ...rest }) {
   if (['integer', 'biginteger', 'float', 'decimal'].includes(type)) {
     style = { marginRight: '20px' };
   }
-  const styles =
-    type === 'boolean' ? { minWidth: '100px', maxWidth: '200px' } : style;
+  const styles = type === 'boolean' ? { minWidth: '100px', maxWidth: '200px' } : style;
   const wrapperStyle =
-    type === 'boolean' ||
-    ['date', 'timestamp', 'time', 'datetime'].includes(type)
+    type === 'boolean' || ['date', 'timestamp', 'time', 'datetime'].includes(type)
       ? { marginRight: '20px' }
       : { marginRight: '10px' };
 
