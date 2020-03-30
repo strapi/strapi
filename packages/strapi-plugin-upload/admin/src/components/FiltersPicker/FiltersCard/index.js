@@ -96,8 +96,8 @@ FiltersCard.defaultProps = {
 };
 
 FiltersCard.propTypes = {
-  onChange: PropTypes.func,
   filters: PropTypes.arrayOf(PropTypes.object),
+  onChange: PropTypes.func,
 };
 
 export default FiltersCard;

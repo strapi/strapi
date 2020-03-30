@@ -1,4 +1,4 @@
-import React, { useState, createRef } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { get } from 'lodash';
@@ -15,7 +15,7 @@ import InputFilePreview from './InputFilePreview';
 import InputModalStepper from '../../containers/InputModalStepper';
 import Name from './Name';
 import Wrapper from './Wrapper';
-import Input from './Input';
+import Input from '../InputFileModal/Input';
 
 const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
   const [modal, setModal] = useState({
@@ -23,7 +23,6 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
     step: null,
     fileToEdit: null,
   });
-  const ref = createRef();
   const [fileToDisplay, setFileToDisplay] = useState(0);
   const hasNoValue = !!value && Array.isArray(value) && value.length === 0;
   const currentFile = attribute.multiple ? value[fileToDisplay] : value;
@@ -116,7 +115,7 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
             onClick={handleFilesNavigation}
           />
         )}
-        <Input ref={ref} type="file" name={name} />
+        <Input type="file" name={name} />
       </CardPreviewWrapper>
 
       {modal.isOpen && (
