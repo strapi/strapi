@@ -44,16 +44,6 @@ const reducer = (state, action) => {
     case 'SET_PARAM': {
       const { name, value } = action;
 
-      if (name === 'filters') {
-        return state.updateIn(['searchParams', 'filters'], filters => {
-          return filters.push(value);
-        });
-      }
-
-      if (name === '_limit') {
-        return state.updateIn(['searchParams', name], () => value);
-      }
-
       return state.updateIn(['searchParams', name], () => value);
     }
     case 'SET_PARAMS': {

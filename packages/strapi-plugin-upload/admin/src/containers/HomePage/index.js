@@ -13,7 +13,6 @@ import {
   generateSearchFromFilters,
   request,
   useQuery,
-  generateSearchFromObject,
 } from 'strapi-helper-plugin';
 import {
   formatFileForEditing,
@@ -31,7 +30,7 @@ import Filters from '../../components/Filters';
 import List from '../../components/List';
 import ListEmpty from '../../components/ListEmpty';
 import ModalStepper from '../ModalStepper';
-import { deleteFilters, getHeaderLabel } from './utils';
+import { deleteFilters, getHeaderLabel, generateStringParamsFromQuery } from './utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
@@ -112,7 +111,7 @@ const HomePage = () => {
 
   const fetchData = async () => {
     const dataRequestURL = getRequestUrl('files');
-    const params = generateSearchFromObject(searchParams);
+    const params = generateStringParamsFromQuery(searchParams);
 
     try {
       const data = await request(`${dataRequestURL}?${params}`, {
