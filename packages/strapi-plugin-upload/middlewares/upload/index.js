@@ -22,6 +22,6 @@ module.exports = strapi => ({
       strapi.app.onerror(err);
     });
 
-    strapi.router.get('/uploads/(.*)', range, koaStatic(staticDir));
+    strapi.router.get('/uploads/(.*)', range, koaStatic(staticDir, { defer: true }));
   },
 });
