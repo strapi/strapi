@@ -6,6 +6,8 @@ const EmptyText = styled(IntlText)`
   width: 17rem;
   text-align: center;
   color: ${({ theme }) => theme.main.colors.white};
+  line-height: 1.8rem;
+  margin-top: -0.3rem;
 `;
 
 export default EmptyText;

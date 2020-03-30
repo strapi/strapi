@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import IntlText from '../IntlText';
 
 const ListTitle = styled(props => <IntlText fontSize="md" fontWeight="bold" {...props} />)`
-  margin-top: 34px;
   margin-bottom: 3px;
 `;
 

@@ -1,9 +1,8 @@
 import styled from 'styled-components';
 
-import Padded from '../Padded';
-
-const Wrapper = styled(Padded)`
+const Wrapper = styled.div`
   width: 100%;
+  padding-top: 0.6rem;
 `;
 
 export default Wrapper;

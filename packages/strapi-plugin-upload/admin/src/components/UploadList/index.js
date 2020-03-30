@@ -10,6 +10,7 @@ import Container from './Container';
 import ButtonWrapper from './ButtonWrapper';
 import RowItem from './RowItem';
 import ListTitle from './ListTitle';
+import ListTitleWrapper from './ListTitleWrapper';
 
 const UploadList = ({
   filesToUpload,
@@ -27,7 +28,7 @@ const UploadList = ({
   return (
     <>
       <ModalSection justifyContent="space-between">
-        <div>
+        <ListTitleWrapper>
           <ListTitle id={getTrad(titleId)} values={{ number: filesToUploadLength }} />
           <IntlText
             id={getTrad('modal.upload-list.sub-header-subtitle')}
@@ -35,7 +36,7 @@ const UploadList = ({
             fontSize="sm"
             color="grey"
           />
-        </div>
+        </ListTitleWrapper>
         <ButtonWrapper>
           <Button type="button" color="primary" onClick={onGoToAddBrowseFiles}>
             <IntlText
