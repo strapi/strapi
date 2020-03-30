@@ -397,7 +397,7 @@ You are now ready to add a third field, another **Text** field for the **Closing
 ![Hours of Operation Closing Hours](../assets/getting-started/tutorial/hours-of-operation-closing-hours.png 'Hours of Operation Closing Hours')
 
 - Click on the `Text` field.
-- In the **Name** field, type `closing_hours.
+- In the **Name** field, type `closing_hours`.
 
 ![Hours of Operation Closing Hours Name](../assets/getting-started/tutorial/hours-of-operation-closing-hours-name.png 'Hours of Operation Closing Hours Name')
 
