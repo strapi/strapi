@@ -41,11 +41,9 @@ function MediaPreviewList({ hoverable, files }) {
     return (
       <MediaPreviewFile className={hoverable ? 'hoverable' : ''}>
         {fileType ? (
-          <>
-            <div>
-              <span>{fileType}</span>
-            </div>
-          </>
+          <div>
+            <span>{fileType}</span>
+          </div>
         ) : (
           <MediaPreviewItem>
             <DefaultIcon />
