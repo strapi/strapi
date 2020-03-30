@@ -362,7 +362,7 @@ module.exports = {
           obj.type === 'users-permissions' &&
           role.type === 'public';
         const isNewPassword =
-          obj.action === 'changepassword' &&
+          obj.action === 'resetpassword' &&
           obj.controller === 'auth' &&
           obj.type === 'users-permissions' &&
           role.type === 'public';

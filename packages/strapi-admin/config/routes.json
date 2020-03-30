@@ -72,7 +72,7 @@
     {
       "method": "POST",
       "path": "/auth/reset-password",
-      "handler": "Auth.changePassword"
+      "handler": "Auth.resetPassword"
     },
     {
       "method": "GET",
