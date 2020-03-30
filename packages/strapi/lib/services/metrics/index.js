@@ -12,13 +12,13 @@ const ciEnv = require('ci-info');
 const { scheduleJob } = require('node-schedule');
 
 const createMiddleware = require('./middleware');
-const isTruthyEnvVar = require('./truthy-var');
+const isTruthy = require('./is-truthy');
 
 const createTelemetryInstance = strapi => {
   const uuid = strapi.config.uuid;
   const deviceId = machineIdSync();
 
-  const isDisabled = !uuid || isTruthyEnvVar(process.env.STRAPI_TELEMETRY_DISABLED);
+  const isDisabled = !uuid || isTruthy(process.env.STRAPI_TELEMETRY_DISABLED);
 
   const anonymous_metadata = {
     environment: strapi.config.environment,

@@ -1,4 +1,4 @@
-const isTruthyEnvVar = require('../truthy-var');
+const isTruthyEnvVar = require('../is-truthy');
 
 describe('isTruthyEnvVar', () => {
   test('Handles boolean strings', () => {
