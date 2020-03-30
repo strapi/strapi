@@ -2,7 +2,7 @@ import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { capitalize, get, sortBy } from 'lodash';
+import { get, sortBy } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Header } from '@buffetjs/custom';
 import {
@@ -21,7 +21,6 @@ import Container from '../../components/Container';
 import CustomTable from '../../components/CustomTable';
 import FilterPicker from '../../components/FilterPicker';
 import Search from '../../components/Search';
-
 import ListViewProvider from '../ListViewProvider';
 import { onChangeListLabels, resetListLabels } from '../Main/actions';
 import { AddFilterCta, FilterIcon, Wrapper } from './components';
@@ -100,16 +99,14 @@ function ListView({
   const getSearchParams = useCallback(
     (updatedParams = {}) => {
       return {
-        _limit:
-          getQueryParameters(search, '_limit') ||
-          getLayoutSettingRef.current('pageSize'),
+        _limit: getQueryParameters(search, '_limit') || getLayoutSettingRef.current('pageSize'),
         _page: getQueryParameters(search, '_page') || 1,
         _q: getQueryParameters(search, '_q') || '',
         _sort:
           getQueryParameters(search, '_sort') ||
-          `${getLayoutSettingRef.current(
-            'defaultSortBy'
-          )}:${getLayoutSettingRef.current('defaultSortOrder')}`,
+          `${getLayoutSettingRef.current('defaultSortBy')}:${getLayoutSettingRef.current(
+            'defaultSortOrder'
+          )}`,
         filters: generateFiltersFromSearch(search),
         ...updatedParams,
       };
@@ -176,11 +173,9 @@ function ListView({
   };
 
   // Helpers
-  const getMetaDatas = (path = []) =>
-    get(layouts, [...contentTypePath, 'metadatas', ...path], {});
+  const getMetaDatas = (path = []) => get(layouts, [...contentTypePath, 'metadatas', ...path], {});
 
-  const getListLayout = () =>
-    get(layouts, [...contentTypePath, 'layouts', 'list'], []);
+  const getListLayout = () => get(layouts, [...contentTypePath, 'layouts', 'list'], []);
 
   const getListSchema = () => get(layouts, [...contentTypePath, 'schema'], {});
 
@@ -193,13 +188,9 @@ function ListView({
       Object.keys(getMetaDatas())
         .filter(
           key =>
-            ![
-              'json',
-              'component',
-              'dynamiczone',
-              'relation',
-              'richtext',
-            ].includes(get(getListSchema(), ['attributes', key, 'type'], ''))
+            !['json', 'component', 'dynamiczone', 'relation', 'richtext'].includes(
+              get(getListSchema(), ['attributes', key, 'type'], '')
+            )
         )
         .map(label => ({
           name: label,
@@ -227,9 +218,7 @@ function ListView({
     const currentSort = getSearchParams()._sort;
 
     if (value && getListLayout().length === 1) {
-      strapi.notification.error(
-        'content-manager.notification.error.displayedFields'
-      );
+      strapi.notification.error('content-manager.notification.error.displayedFields');
 
       return;
     }
@@ -298,7 +287,7 @@ function ListView({
           id: 'content-manager.containers.List.addAnEntry',
         },
         {
-          entity: capitalize(getName()) || 'Content Manager',
+          entity: getName() || 'Content Manager',
         }
       ),
       onClick: () => {
@@ -376,10 +365,7 @@ function ListView({
                 <div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
                   {getLayoutSettingRef.current('filterable') && (
                     <>
-                      <AddFilterCta
-                        type="button"
-                        onClick={toggleFilterPickerState}
-                      >
+                      <AddFilterCta type="button" onClick={toggleFilterPickerState}>
                         <FilterIcon />
                         <FormattedMessage id="app.utils.filters" />
                       </AddFilterCta>

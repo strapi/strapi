@@ -1,7 +1,8 @@
 import { fromJS } from 'immutable';
 import { getFilterType } from 'strapi-helper-plugin';
+import { get } from 'lodash';
 
-function init(initialState, { name, type }) {
+function init(initialState, { name, type, options }) {
   // Create the first filter
   const [filter] = getFilterType(type);
   let value = '';
@@ -10,6 +11,8 @@ function init(initialState, { name, type }) {
     value = 'true';
   } else if (type === 'number') {
     value = 0;
+  } else if (type === 'enumeration') {
+    value = get(options, [0], '');
   }
 
   const initialFilter = { name, filter: filter.value, value };

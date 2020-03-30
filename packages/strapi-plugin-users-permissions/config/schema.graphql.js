@@ -6,10 +6,12 @@ const _ = require('lodash');
  * @throws ApolloError if the body is a bad request
  */
 function checkBadRequest(contextBody) {
-  if (_.get(contextBody, 'output.payload.statusCode', 200) !== 200) {
-    const statusCode = _.get(contextBody, 'output.payload.statusCode', 400);
-    const message = _.get(contextBody, 'output.payload.message', 'Bad Request');
-    throw new Error(message, statusCode, _.omit(contextBody, ['output']));
+  if (_.get(contextBody, 'statusCode', 200) !== 200) {
+    const message = _.get(contextBody, 'error', 'Bad Request');
+    const exception = new Error(message);
+    exception.code = _.get(contextBody, 'statusCode', 400);
+    exception.data = contextBody;
+    throw exception;
   }
 }
 
@@ -44,7 +46,7 @@ module.exports = {
       jwt: String!
       user: UsersPermissionsMe!
     }
-    
+
     type ForgotPassword {
       ok: Boolean
     }
@@ -218,9 +220,9 @@ module.exports = {
           checkBadRequest(output);
 
           return {
-            ok: output.ok || output
+            ok: output.ok || output,
           };
-        }
+        },
       },
       changePassword: {
         description: 'Change your password based on a code',
@@ -235,9 +237,9 @@ module.exports = {
 
           return {
             user: output.user || output,
-            jwt: output.jwt
+            jwt: output.jwt,
           };
-        }
+        },
       },
       emailConfirmation: {
         description: 'Confirm an email users email address',
@@ -245,17 +247,20 @@ module.exports = {
         resolver: async (obj, options, { context }) => {
           context.query = _.toPlainObject(options);
 
-          await strapi.plugins['users-permissions'].controllers.auth.emailConfirmation(context, true);
+          await strapi.plugins['users-permissions'].controllers.auth.emailConfirmation(
+            context,
+            true
+          );
           let output = context.body.toJSON ? context.body.toJSON() : context.body;
 
           checkBadRequest(output);
 
           return {
             user: output.user || output,
-            jwt: output.jwt
+            jwt: output.jwt,
           };
-        }
-      }
+        },
+      },
     },
   },
 };

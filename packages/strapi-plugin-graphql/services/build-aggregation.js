@@ -180,13 +180,28 @@ const createAggregationFieldsResolver = function(model, fields, operation, typeC
         ...convertToQuery(obj.where),
       });
 
-      return buildQuery({ model, filters, aggregate: true })
-        .group({
-          _id: null,
-          [fieldKey]: { [`$${operation}`]: `$${fieldKey}` },
-        })
-        .exec()
-        .then(result => _.get(result, [0, fieldKey]));
+      if (model.orm === 'mongoose') {
+        return buildQuery({ model, filters, aggregate: true })
+          .group({
+            _id: null,
+            [fieldKey]: { [`$${operation}`]: `$${fieldKey}` },
+          })
+          .exec()
+          .then(result => _.get(result, [0, fieldKey]));
+      }
+
+      if (model.orm === 'bookshelf') {
+        return model
+          .query(qb => {
+            // apply filters without pagination limit
+            buildQuery({ model, filters: _.omit(filters, ['limit']) })(qb);
+
+            // `sum, avg, min, max` pass nicely to knex :->
+            qb[operation](`${fieldKey} as ${operation}_${fieldKey}`);
+          })
+          .fetch()
+          .then(result => result.get(`${operation}_${fieldKey}`));
+      }
     },
     typeCheck
   );
@@ -241,19 +256,49 @@ const createGroupByFieldsResolver = function(model, fields) {
       ...convertToQuery(filters.where),
     };
 
-    const result = await buildQuery({
-      model,
-      filters: convertRestQueryParams(params),
-      aggregate: true,
-    }).group({
-      _id: `$${fieldKey === 'id' ? model.primaryKey : fieldKey}`,
-    });
+    if (model.orm === 'mongoose') {
+      const result = await buildQuery({
+        model,
+        filters: convertRestQueryParams(params),
+        aggregate: true,
+      }).group({
+        _id: `$${fieldKey === 'id' ? model.primaryKey : fieldKey}`,
+      });
 
-    return preProcessGroupByData({
-      result,
-      fieldKey,
-      filters,
-    });
+      return preProcessGroupByData({
+        result,
+        fieldKey,
+        filters,
+      });
+    }
+
+    if (model.orm === 'bookshelf') {
+      return model
+        .query(qb => {
+          buildQuery({ model, filters })(qb);
+          qb.groupBy(fieldKey);
+          qb.select(fieldKey);
+        })
+        .fetchAll()
+        .then(result => {
+          let values = result.models
+            .map(m => m.get(fieldKey)) // extract aggregate field
+            .filter(v => !!v) // remove null
+            .map(v => '' + v); // convert to string
+          return values.map(v => ({
+            key: v,
+            connection: () => {
+              return {
+                ..._.omit(filters, ['limit']), // we shouldn't carry limit to sub-field
+                where: {
+                  ...(filters.where || {}),
+                  [fieldKey]: v,
+                },
+              };
+            },
+          }));
+        });
+    }
   };
 
   return createFieldsResolver(fields, resolver, () => true);
