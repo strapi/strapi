@@ -46,9 +46,7 @@ module.exports = {
       };
 
       if (_.isUndefined(models)) {
-        models = association.plugin
-          ? strapi.plugins[association.plugin].models
-          : strapi.models;
+        models = association.plugin ? strapi.plugins[association.plugin].models : strapi.models;
       }
 
       if (
@@ -61,17 +59,13 @@ module.exports = {
           types.current = 'morphTo';
         }
 
-        const flattenedPluginsModels = Object.keys(strapi.plugins).reduce(
-          (acc, current) => {
-            Object.keys(strapi.plugins[current].models).forEach(model => {
-              acc[`${current}_${model}`] =
-                strapi.plugins[current].models[model];
-            });
+        const flattenedPluginsModels = Object.keys(strapi.plugins).reduce((acc, current) => {
+          Object.keys(strapi.plugins[current].models).forEach(model => {
+            acc[`${current}_${model}`] = strapi.plugins[current].models[model];
+          });
 
-            return acc;
-          },
-          {}
-        );
+          return acc;
+        }, {});
 
         const allModels = _.merge({}, strapi.models, flattenedPluginsModels);
 
@@ -97,22 +91,14 @@ module.exports = {
             }
           });
         });
-      } else if (
-        _.has(association, 'via') &&
-        _.has(association, 'collection')
-      ) {
-        const relatedAttribute =
-          models[association.collection].attributes[association.via];
+      } else if (_.has(association, 'via') && _.has(association, 'collection')) {
+        const relatedAttribute = models[association.collection].attributes[association.via];
 
         if (!relatedAttribute) {
           throw new Error(
-            `The attribute \`${
-              association.via
-            }\` is missing in the model ${_.upperFirst(
+            `The attribute \`${association.via}\` is missing in the model ${_.upperFirst(
               association.collection
-            )} ${
-              association.plugin ? '(plugin - ' + association.plugin + ')' : ''
-            }`
+            )} ${association.plugin ? '(plugin - ' + association.plugin + ')' : ''}`
           );
         }
 
@@ -130,15 +116,9 @@ module.exports = {
           !_.has(relatedAttribute, 'via')
         ) {
           types.other = 'collectionD';
-        } else if (
-          _.has(relatedAttribute, 'model') &&
-          relatedAttribute.model !== '*'
-        ) {
+        } else if (_.has(relatedAttribute, 'model') && relatedAttribute.model !== '*') {
           types.other = 'model';
-        } else if (
-          _.has(relatedAttribute, 'collection') ||
-          _.has(relatedAttribute, 'model')
-        ) {
+        } else if (_.has(relatedAttribute, 'collection') || _.has(relatedAttribute, 'model')) {
           types.other = 'morphTo';
         }
       } else if (_.has(association, 'via') && _.has(association, 'model')) {
@@ -158,10 +138,7 @@ module.exports = {
           types.other = 'collection';
         } else if (_.has(attribute, 'model') && attribute.model !== '*') {
           types.other = 'model';
-        } else if (
-          _.has(attribute, 'collection') ||
-          _.has(attribute, 'model')
-        ) {
+        } else if (_.has(attribute, 'collection') || _.has(attribute, 'model')) {
           types.other = 'morphTo';
         }
       } else if (_.has(association, 'model')) {
@@ -171,18 +148,12 @@ module.exports = {
         _.forIn(models, model => {
           _.forIn(model.attributes, attribute => {
             if (_.has(attribute, 'via') && attribute.via === key) {
-              if (
-                _.has(attribute, 'collection') &&
-                attribute.collection === currentModelName
-              ) {
+              if (_.has(attribute, 'collection') && attribute.collection === currentModelName) {
                 types.other = 'collection';
 
                 // Break loop
                 return false;
-              } else if (
-                _.has(attribute, 'model') &&
-                attribute.model === currentModelName
-              ) {
+              } else if (_.has(attribute, 'model') && attribute.model === currentModelName) {
                 types.other = 'modelD';
 
                 // Break loop
@@ -198,18 +169,12 @@ module.exports = {
         _.forIn(models, model => {
           _.forIn(model.attributes, attribute => {
             if (_.has(attribute, 'via') && attribute.via === key) {
-              if (
-                _.has(attribute, 'collection') &&
-                attribute.collection === currentModelName
-              ) {
+              if (_.has(attribute, 'collection') && attribute.collection === currentModelName) {
                 types.other = 'collection';
 
                 // Break loop
                 return false;
-              } else if (
-                _.has(attribute, 'model') &&
-                attribute.model === currentModelName
-              ) {
+              } else if (_.has(attribute, 'model') && attribute.model === currentModelName) {
                 types.other = 'modelD';
 
                 // Break loop
@@ -294,10 +259,7 @@ module.exports = {
           nature: 'oneToMany',
           verbose: 'hasMany',
         };
-      } else if (
-        types.current === 'collection' &&
-        types.other === 'collection'
-      ) {
+      } else if (types.current === 'collection' && types.other === 'collection') {
         return {
           nature: 'manyToMany',
           verbose: 'belongsToMany',
@@ -338,6 +300,14 @@ module.exports = {
    * Return table name for a collection many-to-many
    */
   getCollectionName: (associationA, associationB) => {
+    if (associationA.dominant && _.has(associationA, 'collectionName')) {
+      return associationA.collectionName;
+    }
+
+    if (associationB.dominant && _.has(associationB, 'collectionName')) {
+      return associationB.collectionName;
+    }
+
     return [associationA, associationB]
       .sort((a, b) => {
         if (a.collection === b.collection) {
@@ -347,9 +317,7 @@ module.exports = {
         return a.collection < b.collection ? -1 : 1;
       })
       .map(table =>
-        _.snakeCase(
-          `${pluralize.plural(table.collection)} ${pluralize.plural(table.via)}`
-        )
+        _.snakeCase(`${pluralize.plural(table.collection)} ${pluralize.plural(table.via)}`)
       )
       .join('__');
   },
@@ -373,32 +341,17 @@ module.exports = {
       // Get relation nature
       let details;
       const targetName = association.model || association.collection || '';
-      const infos = this.getNature(
-        association,
-        key,
-        undefined,
-        model.toLowerCase()
-      );
+      const infos = this.getNature(association, key, undefined, model.toLowerCase());
 
       if (targetName !== '*') {
         if (association.plugin) {
           details = _.get(
             strapi.plugins,
-            [
-              association.plugin,
-              'models',
-              targetName,
-              'attributes',
-              association.via,
-            ],
+            [association.plugin, 'models', targetName, 'attributes', association.via],
             {}
           );
         } else {
-          details = _.get(
-            strapi.models,
-            [targetName, 'attributes', association.via],
-            {}
-          );
+          details = _.get(strapi.models, [targetName, 'attributes', association.via], {});
         }
       }
 
@@ -417,17 +370,14 @@ module.exports = {
         };
 
         if (infos.nature === 'manyToMany' && definition.orm === 'bookshelf') {
-          ast.tableCollectionName =
-            _.get(association, 'collectionName') ||
-            this.getCollectionName(details, association);
+          ast.tableCollectionName = this.getCollectionName(details, association);
         }
 
         if (infos.nature === 'manyWay' && definition.orm === 'bookshelf') {
-          ast.tableCollectionName = `${
-            definition.collectionName
-          }__${_.snakeCase(key)}`;
+          ast.tableCollectionName =
+            _.get(association, 'collectionName') ||
+            `${definition.collectionName}__${_.snakeCase(key)}`;
         }
-
         definition.associations.push(ast);
         return;
       }
@@ -447,37 +397,25 @@ module.exports = {
         return;
       }
 
-      const pluginsModels = Object.keys(strapi.plugins).reduce(
-        (acc, current) => {
-          Object.keys(strapi.plugins[current].models).forEach(entity => {
-            Object.keys(
-              strapi.plugins[current].models[entity].attributes
-            ).forEach(attribute => {
-              const attr =
-                strapi.plugins[current].models[entity].attributes[attribute];
+      const pluginsModels = Object.keys(strapi.plugins).reduce((acc, current) => {
+        Object.keys(strapi.plugins[current].models).forEach(entity => {
+          Object.keys(strapi.plugins[current].models[entity].attributes).forEach(attribute => {
+            const attr = strapi.plugins[current].models[entity].attributes[attribute];
 
-              if (
-                (attr.collection || attr.model || '').toLowerCase() ===
-                model.toLowerCase()
-              ) {
-                acc.push(strapi.plugins[current].models[entity].globalId);
-              }
-            });
+            if ((attr.collection || attr.model || '').toLowerCase() === model.toLowerCase()) {
+              acc.push(strapi.plugins[current].models[entity].globalId);
+            }
           });
+        });
 
-          return acc;
-        },
-        []
-      );
+        return acc;
+      }, []);
 
       const appModels = Object.keys(strapi.models).reduce((acc, entity) => {
         Object.keys(strapi.models[entity].attributes).forEach(attribute => {
           const attr = strapi.models[entity].attributes[attribute];
 
-          if (
-            (attr.collection || attr.model || '').toLowerCase() ===
-            model.toLowerCase()
-          ) {
+          if ((attr.collection || attr.model || '').toLowerCase() === model.toLowerCase()) {
             acc.push(strapi.models[entity].globalId);
           }
         });
@@ -485,29 +423,19 @@ module.exports = {
         return acc;
       }, []);
 
-      const componentModels = Object.keys(strapi.components).reduce(
-        (acc, entity) => {
-          Object.keys(strapi.components[entity].attributes).forEach(
-            attribute => {
-              const attr = strapi.components[entity].attributes[attribute];
+      const componentModels = Object.keys(strapi.components).reduce((acc, entity) => {
+        Object.keys(strapi.components[entity].attributes).forEach(attribute => {
+          const attr = strapi.components[entity].attributes[attribute];
 
-              if (
-                (attr.collection || attr.model || '').toLowerCase() ===
-                model.toLowerCase()
-              ) {
-                acc.push(strapi.components[entity].globalId);
-              }
-            }
-          );
+          if ((attr.collection || attr.model || '').toLowerCase() === model.toLowerCase()) {
+            acc.push(strapi.components[entity].globalId);
+          }
+        });
 
-          return acc;
-        },
-        []
-      );
+        return acc;
+      }, []);
 
-      const models = _.uniq(
-        appModels.concat(pluginsModels).concat(componentModels)
-      );
+      const models = _.uniq(appModels.concat(pluginsModels).concat(componentModels));
 
       definition.associations.push({
         alias: key,
@@ -519,9 +447,7 @@ module.exports = {
       });
     } catch (e) {
       strapi.log.error(
-        `Something went wrong in the model \`${_.upperFirst(
-          model
-        )}\` with the attribute \`${key}\``
+        `Something went wrong in the model \`${_.upperFirst(model)}\` with the attribute \`${key}\``
       );
       strapi.log.error(e);
       strapi.stop();
@@ -559,9 +485,7 @@ module.exports = {
     const connector = models[model].orm;
 
     if (!connector) {
-      throw new Error(
-        `Impossible to determine the ORM used for the model ${model}.`
-      );
+      throw new Error(`Impossible to determine the ORM used for the model ${model}.`);
     }
 
     const convertor = strapi.db.connectors.get(connector).getQueryParams;
@@ -614,17 +538,7 @@ module.exports = {
 
         if (
           _.includes(
-            [
-              'ne',
-              'lt',
-              'gt',
-              'lte',
-              'gte',
-              'contains',
-              'containss',
-              'in',
-              'nin',
-            ],
+            ['ne', 'lt', 'gt', 'lte', 'gte', 'contains', 'containss', 'in', 'nin'],
             _.last(suffix)
           )
         ) {
