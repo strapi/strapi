@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useRef } from 'react';
 import PropTypes from 'prop-types';
 
 import { getExtension, getType } from '../../utils';
@@ -12,6 +12,7 @@ import Image from './Image';
 const CardPreview = ({ hasError, hasIcon, url, previewUrl, type, withFileCaching }) => {
   const isFile = getType(type) === 'file';
   const isVideo = getType(type) === 'video';
+  const cacheRef = useRef(performance.now());
 
   if (hasError) {
     return (
@@ -36,7 +37,7 @@ const CardPreview = ({ hasError, hasIcon, url, previewUrl, type, withFileCaching
       ) : (
         // Adding performance.now forces the browser no to cache the img
         // https://stackoverflow.com/questions/126772/how-to-force-a-web-browser-not-to-cache-images
-        <Image src={`${url}${withFileCaching ? `?${performance.now()}` : ''}`} />
+        <Image src={`${url}${withFileCaching ? `?${cacheRef.current}` : ''}`} />
       )}
     </Wrapper>
   );
@@ -60,4 +61,4 @@ CardPreview.propTypes = {
   withFileCaching: PropTypes.bool,
 };
 
-export default CardPreview;
+export default memo(CardPreview);
