@@ -261,14 +261,14 @@ const HomePage = () => {
     lockAppWithOverlay();
 
     try {
-      await dataToDelete.map(item => deleteMedia(item.id));
+      await Promise.all(dataToDelete.map(item => deleteMedia(item.id)));
 
       dispatch({
         type: 'CLEAR_DATA_TO_DELETE',
       });
 
       fetchListData();
-    } catch (err) {
+    } catch (error) {
       // Silent
     } finally {
       strapi.unlockApp();
