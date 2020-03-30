@@ -1,12 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { get } from 'lodash';
+import { prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
 
 import CardPreview from '../CardPreview';
 import Flex from '../Flex';
 import Chevron from './Chevron';
 
 const InputFilePreview = ({ file, onClick, isSlider }) => {
-  const fileUrl = file && file.url.startsWith('/') ? `${strapi.backendURL}${file.url}` : file.url;
+  const fileUrl = prefixFileUrlWithBackendUrl(get(file, ['formats', 'thumbnail', 'url'], file.url));
 
   return (
     <Flex

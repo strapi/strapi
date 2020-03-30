@@ -1,3 +1,3 @@
-const getExtension = mime => mime.split(/[\s/]+/)[1];
+const getExtension = mime => (mime ? mime.split(/[\s/]+/)[1] : 'undefined');
 
 export default getExtension;
