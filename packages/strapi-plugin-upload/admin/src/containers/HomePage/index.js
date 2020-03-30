@@ -1,5 +1,5 @@
-import React, { useReducer, useState, useEffect } from 'react';
-import { includes, toString } from 'lodash';
+import React, { useReducer, useState, useEffect, useRef } from 'react';
+import { isEqual, includes, toString } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
 import { useDebounce, useIsMounted } from '@buffetjs/hooks';
@@ -13,6 +13,7 @@ import {
   generateSearchFromFilters,
   request,
   useQuery,
+  generateSearchFromObject,
 } from 'strapi-helper-plugin';
 import {
   formatFileForEditing,
@@ -30,7 +31,7 @@ import Filters from '../../components/Filters';
 import List from '../../components/List';
 import ListEmpty from '../../components/ListEmpty';
 import ModalStepper from '../ModalStepper';
-import { deleteFilters, generateStringParamsFromQuery, getHeaderLabel } from './utils';
+import { deleteFilters, getHeaderLabel } from './utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
@@ -48,7 +49,7 @@ const HomePage = () => {
   const { search } = useLocation();
   const isMounted = useIsMounted();
 
-  const { data, dataCount, dataToDelete, isLoading } = reducerState.toJS();
+  const { data, dataCount, dataToDelete, isLoading, searchParams } = reducerState.toJS();
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
   const paramsKeys = ['_limit', '_start', '_q', '_sort'];
   const debouncedSearch = useDebounce(searchValue, 300);
@@ -59,10 +60,27 @@ const HomePage = () => {
   }, [debouncedSearch]);
 
   useEffect(() => {
-    fetchListData();
+    const params = generateNewSearch();
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
+    dispatch({
+      type: 'SET_PARAMS',
+      params,
+    });
+  }, []);
+
+  const useDeepCompareMemoize = value => {
+    const ref = useRef();
+
+    if (!isEqual(value, ref.current)) {
+      ref.current = value;
+    }
+
+    return ref.current;
+  };
+
+  useEffect(() => {
+    fetchListData();
+  }, [useDeepCompareMemoize(searchParams)]);
 
   const deleteMedia = async id => {
     const requestURL = getRequestUrl(`files/${id}`);
@@ -94,7 +112,7 @@ const HomePage = () => {
 
   const fetchData = async () => {
     const dataRequestURL = getRequestUrl('files');
-    const params = generateStringParamsFromQuery(query);
+    const params = generateSearchFromObject(searchParams);
 
     try {
       const data = await request(`${dataRequestURL}?${params}`, {
@@ -143,7 +161,7 @@ const HomePage = () => {
     return params;
   };
 
-  const generateNewSearch = updatedParams => {
+  const generateNewSearch = (updatedParams = {}) => {
     return {
       ...getSearchParams(),
       filters: generateFiltersFromSearch(search),
@@ -172,6 +190,12 @@ const HomePage = () => {
   const handleChangeParams = ({ target: { name, value } }) => {
     const updatedQueryParams = generateNewSearch({ [name]: value });
     const newSearch = generateSearchFromFilters(updatedQueryParams);
+
+    dispatch({
+      type: 'SET_PARAM',
+      name,
+      value,
+    });
 
     push({ search: encodeURI(newSearch) });
   };
@@ -236,18 +260,19 @@ const HomePage = () => {
 
     lockAppWithOverlay();
 
-    await Promise.all(dataToDelete.map(item => deleteMedia(item.id)))
-      .then(() => {
-        dispatch({
-          type: 'CLEAR_DATA_TO_DELETE',
-        });
+    try {
+      await dataToDelete.map(item => deleteMedia(item.id));
 
-        fetchListData();
-        strapi.unlockApp();
-      })
-      .catch(() => {
-        strapi.unlockApp();
+      dispatch({
+        type: 'CLEAR_DATA_TO_DELETE',
       });
+
+      fetchListData();
+    } catch (err) {
+      // Silent
+    } finally {
+      strapi.unlockApp();
+    }
   };
 
   const handleModalClose = () => {
@@ -312,7 +337,7 @@ const HomePage = () => {
   const start = parseInt(query.get('_start'), 10) || 0;
 
   const params = {
-    _limit: parseInt(query.get('_limit'), 10) || 10,
+    _limit: limit,
     _page: generatePageFromStart(start, limit),
   };
 
