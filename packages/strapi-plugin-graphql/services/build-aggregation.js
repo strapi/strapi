@@ -19,15 +19,15 @@ const { toSDL } = require('./schema-definitions');
  *
  * @returns {Boolean}
  */
-const isPrimitiveType = _type => {
-  const type = nonRequired(_type);
+const isPrimitiveType = type => {
+  const nonRequiredType = nonRequired(type);
   return (
-    type === 'Int' ||
-    type === 'Float' ||
-    type === 'String' ||
-    type === 'Boolean' ||
-    type === 'DateTime' ||
-    type === 'JSON'
+    nonRequiredType === 'Int' ||
+    nonRequiredType === 'Float' ||
+    nonRequiredType === 'String' ||
+    nonRequiredType === 'Boolean' ||
+    nonRequiredType === 'DateTime' ||
+    nonRequiredType === 'JSON'
   );
 };
 
@@ -59,9 +59,9 @@ const isNotOfTypeArray = type => {
 /**
  * Returns all fields of type Integer or float
  */
-const isNumberType = _type => {
-  const type = nonRequired(_type);
-  return type === 'Int' || type === 'Float';
+const isNumberType = type => {
+  const nonRequiredType = nonRequired(type);
+  return nonRequiredType === 'Int' || nonRequiredType === 'Float';
 };
 
 /**
