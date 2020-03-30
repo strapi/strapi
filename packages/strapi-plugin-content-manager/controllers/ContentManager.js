@@ -111,7 +111,7 @@ module.exports = {
         ctx.body = await contentManagerService.create(ctx.request.body, { model });
       }
 
-      strapi.emit('didCreateFirstContentTypeEntry', { model });
+      await strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
     } catch (error) {
       strapi.log.error(error);
       ctx.badRequest(null, [
