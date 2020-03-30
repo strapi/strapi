@@ -7,7 +7,15 @@ import Card from '../Card';
 import CardControlsWrapper from '../CardControlsWrapper';
 import ListWrapper from '../ListWrapper';
 
-const List = ({ clickable, data, onChange, onClickEditFile, selectedItems, canSelect }) => {
+const List = ({
+  clickable,
+  data,
+  onChange,
+  onCardClick,
+  selectedItems,
+  canSelect,
+  renderCardControl,
+}) => {
   const matrix = createMatrix(data);
 
   const handleClick = e => {
@@ -32,17 +40,24 @@ const List = ({ clickable, data, onChange, onClickEditFile, selectedItems, canSe
                     {...item}
                     hasIcon={clickable}
                     url={fileUrl}
-                    onClick={onClickEditFile}
+                    onClick={onCardClick}
                   >
                     {(checked || canSelect) && (
-                      <CardControlsWrapper leftAlign className="card-control-wrapper">
-                        <Checkbox
-                          name={`${id}`}
-                          onChange={onChange}
-                          onClick={handleClick}
-                          value={checked}
-                        />
-                      </CardControlsWrapper>
+                      <>
+                        <CardControlsWrapper leftAlign className="card-control-wrapper">
+                          <Checkbox
+                            name={`${id}`}
+                            onChange={onChange}
+                            onClick={handleClick}
+                            value={checked}
+                          />
+                        </CardControlsWrapper>
+                        {renderCardControl && (
+                          <CardControlsWrapper className="card-control-wrapper">
+                            {renderCardControl(id)}
+                          </CardControlsWrapper>
+                        )}
+                      </>
                     )}
                   </Card>
                 </div>
@@ -60,7 +75,8 @@ List.defaultProps = {
   canSelect: true,
   data: [],
   onChange: () => {},
-  onClickEditFile: () => {},
+  onCardClick: () => {},
+  renderCardControl: null,
   selectedItems: [],
 };
 
@@ -69,7 +85,8 @@ List.propTypes = {
   canSelect: PropTypes.bool,
   data: PropTypes.array,
   onChange: PropTypes.func,
-  onClickEditFile: PropTypes.func,
+  onCardClick: PropTypes.func,
+  renderCardControl: PropTypes.func,
   selectedItems: PropTypes.array,
 };
 

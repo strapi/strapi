@@ -43,6 +43,10 @@ module.exports = function createSchemaHandler(infos) {
       return initialState.category;
     },
 
+    get kind() {
+      return _.get(state.schema, 'kind', 'collectionType');
+    },
+
     get uid() {
       return state.uid;
     },

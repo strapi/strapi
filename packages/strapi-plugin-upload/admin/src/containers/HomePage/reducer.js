@@ -27,17 +27,22 @@ const reducer = (state, action) => {
         .update('dataCount', () => action.count)
         .update('isLoading', () => false);
     case 'ON_CHANGE_DATA_TO_DELETE': {
-      const { value, id } = action;
+      const { id } = action;
+      const isSelected = state
+        .get('dataToDelete')
+        .find(item => item.get('id').toString() === id.toString());
 
-      if (value) {
-        const item = state.get('data').find(item => item.get('id') === id);
+      if (!isSelected) {
+        const item = state.get('data').find(item => item.get('id').toString() === id.toString());
 
         return state.update('dataToDelete', dataToDelete => {
           return dataToDelete.push(item);
         });
       }
 
-      const index = state.get('dataToDelete').findIndex(item => item.get('id') === id);
+      const index = state
+        .get('dataToDelete')
+        .findIndex(item => item.get('id').toString() === id.toString());
 
       return state.removeIn(['dataToDelete', index]);
     }

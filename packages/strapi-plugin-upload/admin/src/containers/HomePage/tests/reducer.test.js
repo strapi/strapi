@@ -110,7 +110,6 @@ describe('Upload | containers | HomePage | reducer', () => {
 
     const action = {
       type: 'ON_CHANGE_DATA_TO_DELETE',
-      value: true,
       id: 2,
     };
 

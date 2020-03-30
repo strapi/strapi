@@ -165,14 +165,7 @@ module.exports = function(strapi) {
 
   // Flatten middlewares configurations.
   const flattenMiddlewaresConfig = middlewareCategories.reduce((acc, index) => {
-    const current = _.merge(strapi.config.currentEnvironment[index], {
-      public: _.defaults(strapi.config.public, {
-        enabled: true,
-      }),
-      favicon: _.defaults(strapi.config.favicon, {
-        enabled: true,
-      }),
-    });
+    const current = strapi.config.currentEnvironment[index];
 
     if (_.isObject(current)) {
       acc = _.merge(acc, current);
@@ -243,9 +236,9 @@ module.exports = function(strapi) {
     // Try to find the settings in the current environment, then in the main configurations.
     const currentSettings = _.merge(
       _.get(_.cloneDeep(strapi.middleware[current]), ['defaults', current], {}),
-      flattenMiddlewaresConfig[current] ||
-        strapi.config.currentEnvironment[current] ||
-        strapi.config[current]
+      strapi.config[current],
+      strapi.config.currentEnvironment[current],
+      flattenMiddlewaresConfig[current]
     );
     acc[current] = !_.isObject(currentSettings) ? {} : currentSettings;
 
