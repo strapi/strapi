@@ -33,15 +33,14 @@ function FilterPickerOption({
   type,
 }) {
   const filtersOptions = getFilterType(type);
+  const currentFilterName = get(modifiedData, [index, 'name']);
+  const currentFilterData = allowedAttributes.find(attr => attr.name === currentFilterName);
+  const options = get(currentFilterData, ['options'], null) || ['true', 'false'];
 
   return (
     <Wrapper borderLeft={!isEmpty(value)}>
       <InputWrapper>
-        <CircleButton
-          type="button"
-          isRemoveButton
-          onClick={() => onRemoveFilter(index)}
-        />
+        <CircleButton type="button" isRemoveButton onClick={() => onRemoveFilter(index)} />
         <Select
           onChange={e => {
             // Change the attribute
@@ -67,12 +66,10 @@ function FilterPickerOption({
           type={type}
           name={`${index}.value`}
           value={get(modifiedData, [index, 'value'], '')}
-          options={['true', 'false']}
+          options={options}
           onChange={onChange}
         />
-        {showAddButton && (
-          <CircleButton type="button" onClick={onClickAddFilter} />
-        )}
+        {showAddButton && <CircleButton type="button" onClick={onClickAddFilter} />}
       </InputWrapper>
     </Wrapper>
   );

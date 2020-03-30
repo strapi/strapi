@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { formatBytes, getExtension, getType } from '../../utils';
 
@@ -98,4 +98,4 @@ Card.propTypes = {
   withFileCaching: PropTypes.bool,
 };
 
-export default Card;
+export default memo(Card);

@@ -110,6 +110,7 @@ export { default as getYupInnerErrors } from './utils/getYupInnerErrors';
 export { default as generateFiltersFromSearch } from './utils/generateFiltersFromSearch';
 export { default as generateSearchFromFilters } from './utils/generateSearchFromFilters';
 export { default as generateSearchFromObject } from './utils/generateSearchFromObject';
+export { default as prefixFileUrlWithBackendUrl } from './utils/prefixFileUrlWithBackendUrl';
 
 // SVGS
 export { default as LayoutIcon } from './svgs/Layout';

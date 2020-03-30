@@ -1,6 +1,13 @@
 import getExtension from '../getExtension';
 
 describe('UPLOAD | utils | getExtension', () => {
+  it('should return undefined if mime does not exits', () => {
+    const mime = null;
+    const expected = 'undefined';
+
+    expect(getExtension(mime)).toEqual(expected);
+  });
+
   it('should return png if mime string is image/png', () => {
     const mime = 'image/png';
     const expected = 'png';
