@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { get } from 'lodash';
 import { prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
 
 import CardPreview from '../CardPreview';
@@ -7,7 +8,7 @@ import Flex from '../Flex';
 import Chevron from './Chevron';
 
 const InputFilePreview = ({ file, onClick, isSlider }) => {
-  const fileUrl = prefixFileUrlWithBackendUrl(file.url);
+  const fileUrl = prefixFileUrlWithBackendUrl(get(file, ['formats', 'thumbnail', 'url'], file.url));
 
   return (
     <Flex
@@ -24,12 +25,13 @@ const InputFilePreview = ({ file, onClick, isSlider }) => {
 };
 
 InputFilePreview.propTypes = {
-  file: PropTypes.object.isRequired,
+  file: PropTypes.object,
   isSlider: PropTypes.bool,
   onClick: PropTypes.func.isRequired,
 };
 InputFilePreview.defaultProps = {
   isSlider: false,
+  file: null,
 };
 
 export default InputFilePreview;

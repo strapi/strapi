@@ -5,6 +5,7 @@ const generateNewFilters = (currentFilters, newFilter) => {
   const { value } = newFilter;
 
   let formattedValue = newFilter;
+  let filtersToReturn = currentFilters;
 
   // moment format if datetime value
   if (value._isAMomentObject === true) {
@@ -13,10 +14,10 @@ const generateNewFilters = (currentFilters, newFilter) => {
 
   // Add new filter
   if (!some(currentFilters, formattedValue)) {
-    currentFilters.push(formattedValue);
+    filtersToReturn = [...currentFilters, formattedValue];
   }
 
-  return currentFilters;
+  return filtersToReturn;
 };
 
 export default generateNewFilters;

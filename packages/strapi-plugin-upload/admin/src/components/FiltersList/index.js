@@ -5,13 +5,13 @@ import { FilterButton } from 'strapi-helper-plugin';
 import formatFilter from './utils/formatFilter';
 
 const FiltersList = ({ filters, onClick }) => {
-  return filters.map(item => {
+  return filters.map((item, index) => {
     const formattedValue = formatFilter(item);
     const { name, filter, value } = formattedValue;
 
     return (
       <FilterButton
-        onClick={() => onClick(item)}
+        onClick={() => onClick(index)}
         key={`${name}${filter}${value}`}
         label={formattedValue}
       />
@@ -26,13 +26,7 @@ FiltersList.defaultProps = {
 
 FiltersList.propTypes = {
   onClick: PropTypes.func,
-  filters: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      filter: PropTypes.string.isRequired,
-      value: PropTypes.string.isRequired,
-    })
-  ),
+  filters: PropTypes.arrayOf(PropTypes.object),
 };
 
 export default FiltersList;

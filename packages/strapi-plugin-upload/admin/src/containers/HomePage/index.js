@@ -30,7 +30,7 @@ import Filters from '../../components/Filters';
 import List from '../../components/List';
 import ListEmpty from '../../components/ListEmpty';
 import ModalStepper from '../ModalStepper';
-import { deleteFilters, generateStringParamsFromQuery, getHeaderLabel } from './utils';
+import { generateStringParamsFromQuery, getHeaderLabel } from './utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
@@ -151,11 +151,10 @@ const HomePage = () => {
     };
   };
 
-  const handleChangeCheck = ({ target: { name, value } }) => {
+  const handleChangeCheck = ({ target: { name } }) => {
     dispatch({
       type: 'ON_CHANGE_DATA_TO_DELETE',
-      id: parseInt(name, 10),
-      value,
+      id: name,
     });
   };
 
@@ -170,7 +169,16 @@ const HomePage = () => {
   };
 
   const handleChangeParams = ({ target: { name, value } }) => {
-    const updatedQueryParams = generateNewSearch({ [name]: value });
+    let updatedQueryParams;
+
+    if (name === 'filters') {
+      const filters = [...generateFiltersFromSearch(search), value];
+
+      updatedQueryParams = generateNewSearch({ [name]: filters });
+    } else {
+      updatedQueryParams = generateNewSearch({ [name]: value });
+    }
+
     const newSearch = generateSearchFromFilters(updatedQueryParams);
 
     push({ search: encodeURI(newSearch) });
@@ -201,13 +209,15 @@ const HomePage = () => {
     setIsPopupOpen(prev => !prev);
   };
 
-  const handleDeleteFilter = filter => {
-    const currentFilters = generateFiltersFromSearch(search);
-    const updatedFilters = deleteFilters(currentFilters, filter);
+  const handleDeleteFilter = index => {
+    const filters = generateFiltersFromSearch(search).filter(
+      (filter, filterIndex) => filterIndex !== index
+    );
+    const updatedQueryParams = generateNewSearch({ filters });
 
-    handleChangeParams({
-      target: { name: 'filters', value: updatedFilters },
-    });
+    const newSearch = generateSearchFromFilters(updatedQueryParams);
+
+    push({ search: encodeURI(newSearch) });
   };
 
   const handleDeleteMediaFromModal = async id => {
@@ -305,12 +315,13 @@ const HomePage = () => {
   const paginationCount = data.length < limit ? data.length : dataCount;
 
   const hasSomeCheckboxSelected = data.some(item =>
-    dataToDelete.find(itemToDelete => item.id === itemToDelete.id)
+    dataToDelete.find(itemToDelete => item.id.toString() === itemToDelete.id.toString())
   );
 
   const areAllCheckboxesSelected =
-    data.every(item => dataToDelete.find(itemToDelete => item.id === itemToDelete.id)) &&
-    hasSomeCheckboxSelected;
+    data.every(item =>
+      dataToDelete.find(itemToDelete => item.id.toString() === itemToDelete.id.toString())
+    ) && hasSomeCheckboxSelected;
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
@@ -346,7 +357,7 @@ const HomePage = () => {
             clickable
             data={data}
             onChange={handleChangeCheck}
-            onClickEditFile={handleClickEditFile}
+            onCardClick={handleClickEditFile}
             selectedItems={dataToDelete}
           />
           <PageFooter
