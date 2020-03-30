@@ -15,7 +15,7 @@ const getInputType = type => {
   switch (type) {
     case 'datetime':
       return DateTime;
-    case 'size':
+    case 'integer':
       return SizeInput;
     case 'enum':
       return Select;

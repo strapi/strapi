@@ -68,6 +68,7 @@ const EditForm = forwardRef(
     const imgRef = useRef();
     const inputRef = useRef();
     const cropper = useRef();
+    const cacheRef = useRef(performance.now());
 
     useImperativeHandle(ref, () => ({
       click: () => {
@@ -81,7 +82,7 @@ const EditForm = forwardRef(
         if (prefixedFileURL) {
           // Adding performance.now forces the browser no to cache the img
           // https://stackoverflow.com/questions/126772/how-to-force-a-web-browser-not-to-cache-images
-          setSrc(`${prefixedFileURL}?${performance.now()}`);
+          setSrc(`${prefixedFileURL}?${cacheRef.current}`);
         } else {
           const reader = new FileReader();
 
