@@ -321,4 +321,50 @@ describe('Upload | containers | HomePage | reducer', () => {
 
     expect(reducer(state, action)).toEqual(expectedState);
   });
+
+  it('should update searchParams with given params', () => {
+    const state = initialState;
+
+    const params = {
+      _limit: 50,
+      _start: 10,
+      _q: '',
+      filters: [],
+    };
+
+    const action = {
+      type: 'SET_PARAMS',
+      params,
+    };
+
+    const expectedState = state.set('searchParams', fromJS(params));
+
+    expect(reducer(state, action)).toEqual(expectedState);
+  });
+
+  it('should update searchParams with given value', () => {
+    const state = initialState;
+
+    const initialSearchParams = {
+      _limit: 10,
+      _start: 0,
+      _q: '',
+      filters: [],
+    };
+
+    const action = {
+      type: 'SET_PARAM',
+      name: '_q',
+      value: 'hello',
+    };
+
+    const expectedSearchParams = {
+      ...initialSearchParams,
+      _q: 'hello',
+    };
+
+    const expectedState = state.set('searchParams', fromJS(expectedSearchParams));
+
+    expect(reducer(state, action)).toEqual(expectedState);
+  });
 });
