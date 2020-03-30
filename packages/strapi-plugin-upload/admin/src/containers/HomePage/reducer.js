@@ -49,13 +49,19 @@ const reducer = (state, action) => {
     case 'SET_PARAM': {
       const { name, value } = action;
 
+      if (name === '_limit') {
+        return state
+          .updateIn(['searchParams', name], () => value)
+          .updateIn(['searchParams', '_start'], () => 0);
+      }
+
       return state.updateIn(['searchParams', name], () => value);
     }
     case 'SET_PARAMS': {
       const { params } = action;
 
       return state.update('searchParams', searchParams => {
-        return searchParams.mergeDeep(params);
+        return searchParams.mergeDeep(fromJS(params));
       });
     }
     case 'TOGGLE_SELECT_ALL': {

@@ -1,5 +1,5 @@
-import React, { useReducer, useState, useEffect, useRef } from 'react';
-import { isEqual, includes, toString } from 'lodash';
+import React, { useReducer, useState, useEffect } from 'react';
+import { includes, toString } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
 import { useDebounce, useIsMounted } from '@buffetjs/hooks';
@@ -21,6 +21,7 @@ import {
   generatePageFromStart,
   generateStartFromPage,
 } from '../../utils';
+import useDeepCompareMemoize from '../../hooks/useDeepCompareMemoize';
 import Container from '../../components/Container';
 import ControlsWrapper from '../../components/ControlsWrapper';
 import Padded from '../../components/Padded';
@@ -55,6 +56,7 @@ const HomePage = () => {
 
   useEffect(() => {
     handleChangeParams({ target: { name: '_q', value: searchValue } });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch]);
 
@@ -65,20 +67,14 @@ const HomePage = () => {
       type: 'SET_PARAMS',
       params,
     });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const useDeepCompareMemoize = value => {
-    const ref = useRef();
-
-    if (!isEqual(value, ref.current)) {
-      ref.current = value;
-    }
-
-    return ref.current;
-  };
 
   useEffect(() => {
     fetchListData();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [useDeepCompareMemoize(searchParams)]);
 
   const deleteMedia = async id => {
@@ -186,23 +182,27 @@ const HomePage = () => {
   };
 
   const handleChangeParams = ({ target: { name, value } }) => {
-    let updatedQueryParams;
+    let updatedQueryParams = generateNewSearch({ [name]: value });
+    let paramsValue = value;
 
     if (name === 'filters') {
       const filters = [...generateFiltersFromSearch(search), value];
 
       updatedQueryParams = generateNewSearch({ [name]: filters });
-    } else {
-      updatedQueryParams = generateNewSearch({ [name]: value });
+      paramsValue = filters;
     }
 
-    const newSearch = generateSearchFromFilters(updatedQueryParams);
+    if (name === '_limit') {
+      updatedQueryParams = generateNewSearch({ [name]: value, _start: 0 });
+    }
 
     dispatch({
       type: 'SET_PARAM',
       name,
-      value,
+      value: paramsValue,
     });
+
+    const newSearch = generateSearchFromFilters(updatedQueryParams);
 
     push({ search: encodeURI(newSearch) });
   };
@@ -236,6 +236,13 @@ const HomePage = () => {
     const filters = generateFiltersFromSearch(search).filter(
       (filter, filterIndex) => filterIndex !== index
     );
+
+    dispatch({
+      type: 'SET_PARAM',
+      name: 'filters',
+      value: filters,
+    });
+
     const updatedQueryParams = generateNewSearch({ filters });
 
     const newSearch = generateSearchFromFilters(updatedQueryParams);

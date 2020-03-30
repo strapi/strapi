@@ -3,10 +3,11 @@ import { isEmpty, toString } from 'lodash';
 const generateStringParamsFromQuery = query => {
   let params = '';
 
-  Object.keys(query).forEach(key => {
-    const value = query[key];
+  Object.keys(query)
+    .filter(key => !isEmpty(toString(query[key])))
+    .forEach(key => {
+      const value = query[key];
 
-    if (!isEmpty(toString(query[key]))) {
       if (key === 'filters') {
         value.forEach(item => {
           if (item.name.includes('mime') && item.value === 'file') {
@@ -24,8 +25,7 @@ const generateStringParamsFromQuery = query => {
       } else {
         params += `&${key}=${value}`;
       }
-    }
-  });
+    });
 
   return params.substring(1);
 };
