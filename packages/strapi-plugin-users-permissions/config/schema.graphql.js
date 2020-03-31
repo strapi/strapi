@@ -59,6 +59,7 @@ module.exports = {
     register(input: UserInput!): UsersPermissionsLoginPayload!
     forgotPassword(email: String!): UserPersmissionsPasswordPayload
     changePassword(password: String!, passwordConfirmation: String!, currentPassword: String!): UserPersmissionsPasswordPayload
+    resetPassword(password: String!, passwordConfirmation: String!, code: String!): UsersPermissionsLoginPayload
     emailConfirmation(confirmation: String!): UsersPermissionsLoginPayload
   `,
   resolver: {
@@ -224,8 +225,25 @@ module.exports = {
           };
         },
       },
+      resetPassword: {
+        description: 'Reset user password. Confirm with a code (resetToken from forgotPassword)',
+        resolverOf: 'plugins::users-permissions.auth.resetPassword',
+        resolver: async (obj, options, { context }) => {
+          context.request.body = _.toPlainObject(options);
+
+          await strapi.plugins['users-permissions'].controllers.auth.resetPassword(context);
+          let output = context.body.toJSON ? context.body.toJSON() : context.body;
+
+          checkBadRequest(output);
+
+          return {
+            user: output.user || output,
+            jwt: output.jwt,
+          };
+        },
+      },
       changePassword: {
-        description: 'Change your password based on a code',
+        description: 'Change your password. Verified by current password.',
         resolverOf: 'plugins::users-permissions.auth.changePassword',
         resolver: async (obj, options, { context }) => {
           context.request.body = _.toPlainObject(options);
@@ -236,8 +254,7 @@ module.exports = {
           checkBadRequest(output);
 
           return {
-            user: output.user || output,
-            jwt: output.jwt,
+            ok: output.ok,
           };
         },
       },
