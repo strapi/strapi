@@ -30,6 +30,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             errorMessage: null,
             isUploading: false,
             originalIndex: 0,
+            tempId: null,
           },
           {
             abortController: new AbortController(),
@@ -43,6 +44,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             errorMessage: null,
             isUploading: false,
             originalIndex: 1,
+            tempId: null,
           },
         ],
       };
@@ -74,6 +76,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             errorMessage: null,
             isUploading: false,
             originalIndex: 0,
+            tempId: null,
           },
         ],
       };
@@ -92,6 +95,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             errorMessage: null,
             isUploading: false,
             originalIndex: 0,
+            tempId: null,
           },
           {
             abortController: new AbortController(),
@@ -105,6 +109,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             errorMessage: null,
             isUploading: false,
             originalIndex: 1,
+            tempId: null,
           },
           {
             abortController: new AbortController(),
@@ -118,6 +123,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             errorMessage: null,
             isUploading: false,
             originalIndex: 2,
+            tempId: null,
           },
         ],
       };
@@ -141,6 +147,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             errorMessage: null,
             isUploading: false,
             originalIndex: 0,
+            tempId: null,
           },
         ],
       };
@@ -154,6 +161,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             errorMessage: null,
             isUploading: false,
             originalIndex: 0,
+            tempId: null,
           },
         ],
       };

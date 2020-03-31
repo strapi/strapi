@@ -161,6 +161,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             errorMessage: null,
             isUploading: false,
             originalIndex: 0,
+            tempId: null,
           },
         ],
       });
@@ -174,6 +175,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             errorMessage: null,
             isUploading: false,
             originalIndex: 0,
+            tempId: null,
           },
         ],
       });
