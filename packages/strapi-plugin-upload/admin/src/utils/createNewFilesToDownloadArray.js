@@ -1,4 +1,4 @@
-// import axios from 'axios';
+import axios from 'axios';
 import { isEmpty } from 'lodash';
 
 const getTempsIds = alreadyUploadedFiles => {
@@ -18,11 +18,15 @@ const createNewFilesToDownloadArray = (filesURLArray, alreadyUploadedFiles) => {
       return acc;
     }
 
+    const CancelToken = axios.CancelToken;
+
     // TODO change with axios cancel request
     const abortController = new AbortController();
+    const source = CancelToken.source();
 
     acc.push({
       abortController,
+      source,
       file: null,
       fileInfo: {
         alternativeText: '',

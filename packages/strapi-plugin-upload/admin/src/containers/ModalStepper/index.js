@@ -78,10 +78,13 @@ const ModalStepper = ({
     try {
       await Promise.all(
         files.map(file => {
+          const { source } = file;
+
           return axios
             .get(file.fileURL, {
               headers: new Headers({ Origin: window.location.origin, mode: 'cors' }),
               responseType: 'blob',
+              cancelToken: source.token,
             })
             .then(({ data }) => {
               const createdFile = new File([data], file.fileURL, {
@@ -123,9 +126,14 @@ const ModalStepper = ({
 
   const handleCancelFileToUpload = fileOriginalIndex => {
     const fileToCancel = filesToUpload.find(file => file.originalIndex === fileOriginalIndex);
+    const { source } = fileToCancel;
 
-    // Cancel upload
-    fileToCancel.abortController.abort();
+    if (source) {
+      source.cancel('Operation canceled by the user.');
+    } else {
+      // Cancel upload
+      fileToCancel.abortController.abort();
+    }
 
     dispatch({
       type: 'REMOVE_FILE_TO_UPLOAD',
