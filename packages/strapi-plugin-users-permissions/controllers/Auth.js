@@ -177,6 +177,75 @@ module.exports = {
     }
   },
 
+  async changePassword(ctx) {
+    const params = _.assign({}, ctx.request.body, ctx.params);
+
+    if (
+      params.password &&
+      params.passwordConfirmation &&
+      params.password === params.passwordConfirmation &&
+      params.currentPassword
+    ) {
+      const id = ctx.state.user && ctx.state.user.id;
+      if (!id) {
+        return ctx.badRequest(
+          null,
+          formatError({
+            id: 'Auth.form.error.user.not-exist',
+            message: 'Must be logged in.',
+          })
+        );
+      }
+
+      const user = await strapi.plugins['users-permissions'].services.user.fetch({ id });
+
+      const validPassword = await strapi.plugins[
+        'users-permissions'
+      ].services.user.validatePassword(params.currentPassword, user.password);
+
+      if (!validPassword) {
+        return ctx.badRequest(
+          null,
+          formatError({
+            id: 'Auth.form.error.invalid',
+            message: 'Identifier or password invalid.',
+          })
+        );
+      } else {
+        // Hash and Replace current password with the new one in the user object.
+        user.password = await strapi.plugins['users-permissions'].services.user.hashPassword({
+          password: params.password,
+        });
+
+        // Update the user.
+        await strapi.query('user', 'users-permissions').update({ id: user.id }, user);
+
+        ctx.send({
+          ok: true,
+        });
+      }
+    } else if (
+      params.password &&
+      params.passwordConfirmation &&
+      params.password !== params.passwordConfirmation
+    ) {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'Auth.form.error.password.matching',
+          message: 'Passwords do not match.',
+        })
+      );
+    } else {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'Auth.form.error.params.provide',
+          message: 'Incorrect params provided.',
+        })
+      );
+    }
+  },
   async resetPassword(ctx) {
     const params = _.assign({}, ctx.request.body, ctx.params);
 
@@ -580,14 +649,14 @@ module.exports = {
       { confirmed: true }
     );
 
-    if(returnUser) {
+    if (returnUser) {
       ctx.send({
         jwt: strapi.plugins['users-permissions'].services.jwt.issue({
-          id: user.id
+          id: user.id,
         }),
         user: sanitizeEntity(user.toJSON ? user.toJSON() : user, {
-          model: strapi.query('user', 'users-permissions').model
-        })
+          model: strapi.query('user', 'users-permissions').model,
+        }),
       });
     } else {
       const settings = await strapi
