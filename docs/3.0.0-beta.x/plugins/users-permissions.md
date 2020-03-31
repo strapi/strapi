@@ -490,14 +490,15 @@ axios
   });
 ```
 
-This action will send the user an email that contains a URL with the needed code for the [reset password](#password-reset).
+This action will send the user an email that contains a URL with the needed code for the [reset password](#reset-password).
 The URL must link to your reset password form in your frontend application.
 
 To configure it you will have to go in the Roles & Permissions settings and navigate to the Advanced Settings tab.
 
-### Password reset
+### Reset Password
 
 This action will reset the user password.
+Also works with the [GraphQL Plugin](https://strapi.io/documentation/3.0.0-beta.x/plugins/graphql.html), exposes `resetPassword` mutation.
 
 #### Usage
 
@@ -510,6 +511,35 @@ import axios from 'axios';
 axios
   .post('http://localhost:1337/auth/reset-password', {
     code: 'privateCode',
+    password: 'myNewPassword',
+    passwordConfirmation: 'myNewPassword',
+  })
+  .then(response => {
+    // Handle success.
+    console.log("Your user's password has been reset.");
+  })
+  .catch(error => {
+    // Handle error.
+    console.log('An error occurred:', error);
+  });
+```
+
+### Change Password
+
+This action will change the user's password.
+Also works with the [GraphQL Plugin](https://strapi.io/documentation/3.0.0-beta.x/plugins/graphql.html), exposes `changePassword` mutation.
+
+#### Usage
+
+- `currentPassword` is the user's current password to confirm the action
+
+```js
+import axios from 'axios';
+
+// Request API.
+axios
+  .post('http://localhost:1337/auth/change-password', {
+    currentPassword: 'myCurrentPassword',
     password: 'myNewPassword',
     passwordConfirmation: 'myNewPassword',
   })
