@@ -32,6 +32,12 @@ const RowItem = ({
     onClickEdit(originalIndex);
   };
 
+  let fileSize = null;
+
+  if (file) {
+    fileSize = file.mime ? file.type : file.size / 1000;
+  }
+
   return (
     <div className="col-xs-12 col-md-6 col-xl-3" key={originalIndex}>
       <Card
@@ -40,7 +46,7 @@ const RowItem = ({
         hasError={hasError}
         hasIcon
         type={file ? file.type : null}
-        size={file ? file.size : null}
+        size={fileSize}
         url={url}
         {...fileInfo}
         withFileCaching={false}
@@ -49,8 +55,8 @@ const RowItem = ({
         {(isUploading || isDownloading) && <InfiniteLoadingIndicator onClick={handleClick} />}
         {!isUploading && !isDownloading && (
           <CardControlsWrapper className="card-control-wrapper">
-            <CardControl onClick={handleClickDelete} type="trash-alt" small />
-            <CardControl onClick={handleClickEdit} small />
+            <CardControl title="delete" onClick={handleClickDelete} type="trash-alt" small />
+            <CardControl title="edit" onClick={handleClickEdit} small />
           </CardControlsWrapper>
         )}
       </Card>
