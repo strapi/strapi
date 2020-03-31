@@ -194,8 +194,8 @@ const createAggregationFieldsResolver = function(model, fields, operation, typeC
       if (model.orm === 'bookshelf') {
         return model
           .query(qb => {
-            // apply filters without pagination limit
-            buildQuery({ model, filters: _.omit(filters, ['limit']) })(qb);
+            // apply filters
+            buildQuery({ model, filters })(qb);
 
             // `sum, avg, min, max` pass nicely to knex :->
             qb[operation](`${fieldKey} as ${operation}_${fieldKey}`);
@@ -252,15 +252,15 @@ const preProcessGroupByData = function({ result, fieldKey, filters }) {
  */
 const createGroupByFieldsResolver = function(model, fields) {
   const resolver = async (filters, options, context, fieldResolver, fieldKey) => {
-    const params = {
+    const params = convertRestQueryParams({
       ...convertToParams(_.omit(filters, 'where')),
       ...convertToQuery(filters.where),
-    };
+    });
 
     if (model.orm === 'mongoose') {
       const result = await buildQuery({
         model,
-        filters: convertRestQueryParams(params),
+        filters: params,
         aggregate: true,
       }).group({
         _id: `$${fieldKey === 'id' ? model.primaryKey : fieldKey}`,
@@ -276,7 +276,7 @@ const createGroupByFieldsResolver = function(model, fields) {
     if (model.orm === 'bookshelf') {
       return model
         .query(qb => {
-          buildQuery({ model, filters })(qb);
+          buildQuery({ model, filters: params })(qb);
           qb.groupBy(fieldKey);
           qb.select(fieldKey);
         })
