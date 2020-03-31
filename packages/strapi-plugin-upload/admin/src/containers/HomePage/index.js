@@ -21,7 +21,6 @@ import {
   generatePageFromStart,
   generateStartFromPage,
 } from '../../utils';
-import useDeepCompareMemoize from '../../hooks/useDeepCompareMemoize';
 import Container from '../../components/Container';
 import ControlsWrapper from '../../components/ControlsWrapper';
 import Padded from '../../components/Padded';
@@ -31,7 +30,7 @@ import Filters from '../../components/Filters';
 import List from '../../components/List';
 import ListEmpty from '../../components/ListEmpty';
 import ModalStepper from '../ModalStepper';
-import { generateStringParamsFromQuery, getHeaderLabel } from './utils';
+import { generateStringFromParams, getHeaderLabel } from './utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
@@ -48,7 +47,6 @@ const HomePage = () => {
   const { push } = useHistory();
   const { search } = useLocation();
   const isMounted = useIsMounted();
-
   const { data, dataCount, dataToDelete, isLoading, searchParams } = reducerState.toJS();
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
   const paramsKeys = ['_limit', '_start', '_q', '_sort'];
@@ -75,7 +73,7 @@ const HomePage = () => {
     fetchListData();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [useDeepCompareMemoize(searchParams)]);
+  }, [JSON.stringify(searchParams)]);
 
   const deleteMedia = async id => {
     const requestURL = getRequestUrl(`files/${id}`);
@@ -107,7 +105,7 @@ const HomePage = () => {
 
   const fetchData = async () => {
     const dataRequestURL = getRequestUrl('files');
-    const params = generateStringParamsFromQuery(searchParams);
+    const params = generateStringFromParams(searchParams);
 
     try {
       const data = await request(`${dataRequestURL}?${params}`, {

@@ -1,6 +1,6 @@
 import { isEmpty, toString } from 'lodash';
 
-const generateStringParamsFromQuery = query => {
+const generateStringFromParams = query => {
   let params = '';
 
   Object.keys(query)
@@ -30,4 +30,4 @@ const generateStringParamsFromQuery = query => {
   return params.substring(1);
 };
 
-export default generateStringParamsFromQuery;
+export default generateStringFromParams;

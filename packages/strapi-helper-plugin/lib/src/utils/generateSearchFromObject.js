@@ -2,13 +2,10 @@ import { clone, set, unset } from 'lodash';
 
 const generateSearchFromObject = params => {
   const clonedParams = clone(params);
+  const _start = (clonedParams._page - 1) * parseInt(clonedParams._limit, 10);
 
-  if (clonedParams._page) {
-    const _start = (clonedParams._page - 1) * parseInt(clonedParams._limit, 10);
-
-    set(clonedParams, '_start', _start);
-    unset(clonedParams, '_page');
-  }
+  set(clonedParams, '_start', _start);
+  unset(clonedParams, '_page');
 
   if (clonedParams._q === '') {
     unset(clonedParams, '_q');
