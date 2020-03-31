@@ -200,9 +200,10 @@ const InputModalStepperProvider = ({
         method: 'GET',
       });
     } catch (err) {
+      console.error(err);
       strapi.notification.error('notification.error');
 
-      return err;
+      return 0;
     }
   };
 
@@ -226,9 +227,10 @@ const InputModalStepperProvider = ({
         method: 'GET',
       });
     } catch (err) {
+      console.error(err);
       strapi.notification.error('notification.error');
 
-      return err;
+      return [];
     }
   };
 
