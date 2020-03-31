@@ -53,7 +53,7 @@ const RowItem = ({
         withoutFileInfo={isDownloading || (file === null && hasError)}
       >
         {(isUploading || isDownloading) && <InfiniteLoadingIndicator onClick={handleClick} />}
-        {!isUploading && !isDownloading && (
+        {!isUploading && !isDownloading && file !== null && (
           <CardControlsWrapper className="card-control-wrapper">
             <CardControl title="delete" onClick={handleClickDelete} type="trash-alt" small />
             <CardControl title="edit" onClick={handleClickEdit} small />

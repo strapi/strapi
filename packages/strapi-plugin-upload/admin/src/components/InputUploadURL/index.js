@@ -15,6 +15,7 @@ const InputUploadURL = ({ onChange, value }) => {
       <div className="row">
         <div className="col-12">
           <Inputs
+            autoFocus
             type="textarea"
             name="url"
             onChange={onChange}
