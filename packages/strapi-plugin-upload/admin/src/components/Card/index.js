@@ -58,7 +58,7 @@ const Card = ({
       <Text color="grey" fontSize="xs" ellipsis>
         {!withoutFileInfo && `${getExtension(fileType)} - ${fileSize}`}
       </Text>
-      {hasError && <ErrorMessage>{errorMessage}</ErrorMessage>}
+      {hasError && <ErrorMessage title={errorMessage}>{errorMessage}</ErrorMessage>}
     </Wrapper>
   );
 };
