@@ -7,14 +7,16 @@ import formatFilter from './utils/formatFilter';
 const FiltersList = ({ filters, onClick }) => {
   return filters.map((item, index) => {
     const formattedValue = formatFilter(item);
-    const { name, filter, value } = formattedValue;
+    const { name, filter, value, isDisabled } = formattedValue;
 
     return (
-      <FilterButton
-        onClick={() => onClick(index)}
-        key={`${name}${filter}${value}`}
-        label={formattedValue}
-      />
+      !isDisabled && (
+        <FilterButton
+          onClick={() => onClick(index)}
+          key={`${name}${filter}${value}`}
+          label={formattedValue}
+        />
+      )
     );
   });
 };

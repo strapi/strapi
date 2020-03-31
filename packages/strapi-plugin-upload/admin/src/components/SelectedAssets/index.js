@@ -8,6 +8,8 @@ import ListTitle from '../UploadList/ListTitle';
 import useModalContext from '../../hooks/useModalContext';
 import SortableList from './SortableList';
 import Wrapper from './Wrapper';
+import ListTitleWrapper from './ListTitleWrapper';
+import ListWrapper from './ListWrapper';
 
 const SelectedAssets = () => {
   const { selectedFiles, handleFileSelection, moveAsset } = useModalContext();
@@ -19,7 +21,7 @@ const SelectedAssets = () => {
   return (
     <Wrapper>
       <Flex justifyContent="space-between">
-        <div>
+        <ListTitleWrapper>
           <ListTitle id={getTrad(titleId)} values={{ number: filesToUploadLength }} />
           <IntlText
             id={getTrad('modal.upload-list.sub-header-subtitle')}
@@ -27,14 +29,16 @@ const SelectedAssets = () => {
             fontSize="sm"
             color="grey"
           />
-        </div>
+        </ListTitleWrapper>
       </Flex>
-      <SortableList
-        data={selectedFiles}
-        moveAsset={moveAsset}
-        onChange={handleFileSelection}
-        selectedItems={selectedFiles}
-      />
+      <ListWrapper>
+        <SortableList
+          data={selectedFiles}
+          moveAsset={moveAsset}
+          onChange={handleFileSelection}
+          selectedItems={selectedFiles}
+        />
+      </ListWrapper>
     </Wrapper>
   );
 };

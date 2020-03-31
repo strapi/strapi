@@ -1,7 +1,6 @@
 import React from 'react';
-
+import { isEmpty } from 'lodash';
 import { PageFooter } from 'strapi-helper-plugin';
-
 import { generatePageFromStart, generateStartFromPage } from '../../utils';
 import Filters from '../Filters';
 import Flex from '../Flex';
@@ -12,6 +11,7 @@ import SelectAll from '../SelectAll';
 import SortPicker from '../SortPicker';
 import useModalContext from '../../hooks/useModalContext';
 import Wrapper from './Wrapper';
+import ListWrapper from './ListWrapper';
 import CardControl from '../CardControl';
 
 const BrowseAssets = () => {
@@ -75,8 +75,12 @@ const BrowseAssets = () => {
     hasSomeCheckboxSelected;
   const canSelectFile = multiple === true || (selectedFiles.length < 1 && !multiple);
 
+  const hasFilters = !isEmpty(params.filters.filter(filter => !filter.isDisabled));
+  const hasSearch = !isEmpty(params._q);
+  const areResultsEmptyWithSearchOrFilters = isEmpty(files) && (hasSearch || hasFilters);
+
   return (
-    <Wrapper top size="sm">
+    <Wrapper>
       <Padded top bottom>
         <Flex flexWrap="wrap">
           {multiple && (
@@ -98,9 +102,13 @@ const BrowseAssets = () => {
         </Flex>
       </Padded>
       {!files || files.length === 0 ? (
-        <ListEmpty numberOfRows={2} onClick={handleGoToUpload} />
+        <ListEmpty
+          numberOfRows={2}
+          onClick={handleGoToUpload}
+          hasSearchApplied={areResultsEmptyWithSearchOrFilters}
+        />
       ) : (
-        <>
+        <ListWrapper>
           <List
             canSelect={canSelectFile}
             data={files}
@@ -124,7 +132,7 @@ const BrowseAssets = () => {
               params={paginationParams}
             />
           </Padded>
-        </>
+        </ListWrapper>
       )}
     </Wrapper>
   );

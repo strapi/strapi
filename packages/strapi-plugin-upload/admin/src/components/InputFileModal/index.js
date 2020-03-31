@@ -5,7 +5,7 @@ import { useGlobalContext } from 'strapi-helper-plugin';
 import { getTrad } from '../../utils';
 import Cloud from '../../icons/Cloud';
 import Label from './Label';
-import Input from './Input';
+import Input from '../Input';
 import P from './P';
 
 const InputFileModal = ({ name, onChange }) => {

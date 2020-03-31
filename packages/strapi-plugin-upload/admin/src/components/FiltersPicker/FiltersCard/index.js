@@ -8,26 +8,30 @@ import { getTrad } from '../../../utils';
 
 import reducer, { initialState } from './reducer';
 
-import filters from './utils/filtersForm';
+import filtersForm from './utils/filtersForm';
 
 import Wrapper from './Wrapper';
 import InputWrapper from './InputWrapper';
 import FilterButton from './FilterButton';
 import FilterInput from './FilterInput';
 
-const FiltersCard = ({ onChange }) => {
+const FiltersCard = ({ onChange, filters }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const { name, filter, value } = state.toJS();
 
-  const type = filters[name].type;
+  const type = filtersForm[name].type;
   const filtersOptions = getFilterType(type);
+  const options = ['image', 'video', 'file'].filter(
+    f => !filters.find(e => e.value === f && e.isDisabled)
+  );
 
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
       type: 'ON_CHANGE',
       name,
       value,
+      defaultValue: value === 'mime' ? options[0] : null,
     });
   };
 
@@ -48,7 +52,7 @@ const FiltersCard = ({ onChange }) => {
   };
 
   const renderNamesOptions = () => {
-    return Object.keys(filters).map(key => {
+    return Object.keys(filtersForm).map(key => {
       return (
         <option key={key} value={key}>
           {key === 'mime' ? 'type' : key}
@@ -75,7 +79,7 @@ const FiltersCard = ({ onChange }) => {
           type={type}
           onChange={handleChange}
           name="value"
-          options={['image', 'video', 'file']}
+          options={options}
           value={value}
         />
       </InputWrapper>
@@ -87,10 +91,12 @@ const FiltersCard = ({ onChange }) => {
 };
 
 FiltersCard.defaultProps = {
+  filters: [],
   onChange: () => {},
 };
 
 FiltersCard.propTypes = {
+  filters: PropTypes.arrayOf(PropTypes.object),
   onChange: PropTypes.func,
 };
 

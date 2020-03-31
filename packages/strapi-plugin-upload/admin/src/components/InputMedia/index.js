@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { get } from 'lodash';
@@ -15,6 +15,7 @@ import InputFilePreview from './InputFilePreview';
 import InputModalStepper from '../../containers/InputModalStepper';
 import Name from './Name';
 import Wrapper from './Wrapper';
+import Input from '../Input';
 
 const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
   const [modal, setModal] = useState({
@@ -29,10 +30,6 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
   const prefixedFileURL = fileURL ? prefixFileUrlWithBackendUrl(fileURL) : null;
   const displaySlidePagination =
     attribute.multiple && value.length > 1 ? ` (${fileToDisplay + 1}/${value.length})` : '';
-
-  useEffect(() => {
-    console.log(modal);
-  }, [modal]);
 
   const handleClickToggleModal = () => {
     setModal(prev => ({ step: 'list', isOpen: !prev.isOpen, fileToEdit: null }));
@@ -63,7 +60,7 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
       ? value.filter((file, index) => index !== fileToDisplay)
       : null;
 
-    if (fileToDisplay === newValue.length) {
+    if (Array.isArray(newValue) && fileToDisplay === newValue.length) {
       setFileToDisplay(fileToDisplay > 0 ? fileToDisplay - 1 : fileToDisplay);
     }
 
@@ -78,11 +75,22 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
     strapi.notification.info(getTrad('notification.link-copied'));
   };
 
+  const handleAllowDrop = e => e.preventDefault();
+
+  const handleDrop = e => {
+    e.preventDefault();
+    e.persist();
+
+    if (e.dataTransfer) {
+      setModal(() => ({ isOpen: true, step: 'upload', filesToUpload: e.dataTransfer.files }));
+    }
+  };
+
   return (
     <Wrapper>
       <Name htmlFor={name}>{`${label}${displaySlidePagination}`}</Name>
 
-      <CardPreviewWrapper>
+      <CardPreviewWrapper onDragOver={handleAllowDrop} onDrop={handleDrop}>
         <CardControlWrapper>
           <CardControl color="#9EA7B8" type="plus" onClick={handleClickToggleModal} />
           {!hasNoValue && (
@@ -107,6 +115,7 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
             onClick={handleFilesNavigation}
           />
         )}
+        <Input type="file" name={name} />
       </CardPreviewWrapper>
 
       {modal.isOpen && (
@@ -114,10 +123,12 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
           isOpen={modal.isOpen}
           step={modal.step}
           fileToEdit={modal.fileToEdit}
+          filesToUpload={modal.filesToUpload}
           multiple={attribute.multiple}
           onInputMediaChange={handleChange}
           selectedFiles={value}
           onToggle={handleClickToggleModal}
+          allowedTypes={attribute.allowedTypes}
         />
       )}
     </Wrapper>
@@ -126,6 +137,7 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
 
 InputMedia.propTypes = {
   attribute: PropTypes.shape({
+    allowedTypes: PropTypes.arrayOf(PropTypes.string),
     multiple: PropTypes.bool,
     required: PropTypes.bool,
     type: PropTypes.string,

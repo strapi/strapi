@@ -1,5 +1,5 @@
 import React, { useReducer, useState, useEffect } from 'react';
-import { includes, toString } from 'lodash';
+import { includes, isEmpty, toString } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
 import { useDebounce, useIsMounted } from '@buffetjs/hooks';
@@ -370,6 +370,11 @@ const HomePage = () => {
     return <LoadingIndicatorPage />;
   }
 
+  const filters = generateFiltersFromSearch(search);
+  const hasFilters = !isEmpty(filters);
+  const hasSearch = !isEmpty(searchValue);
+  const areResultsEmptyWithSearchOrFilters = isEmpty(data) && (hasSearch || hasFilters);
+
   return (
     <Container>
       <Header {...headerProps} />
@@ -388,13 +393,9 @@ const HomePage = () => {
           someChecked={hasSomeCheckboxSelected && !areAllCheckboxesSelected}
         />
         <SortPicker onChange={handleChangeParams} value={query.get('_sort') || null} />
-        <Filters
-          onChange={handleChangeParams}
-          filters={generateFiltersFromSearch(search)}
-          onClick={handleDeleteFilter}
-        />
+        <Filters onChange={handleChangeParams} filters={filters} onClick={handleDeleteFilter} />
       </ControlsWrapper>
-      {dataCount > 0 ? (
+      {dataCount > 0 && !areResultsEmptyWithSearchOrFilters ? (
         <>
           <List
             clickable
@@ -411,7 +412,10 @@ const HomePage = () => {
           />
         </>
       ) : (
-        <ListEmpty onClick={handleClickToggleModal} />
+        <ListEmpty
+          onClick={handleClickToggleModal}
+          hasSearchApplied={areResultsEmptyWithSearchOrFilters}
+        />
       )}
       <ModalStepper
         initialFileToEdit={fileToEdit}
