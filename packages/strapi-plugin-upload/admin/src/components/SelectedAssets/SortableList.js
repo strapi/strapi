@@ -13,7 +13,7 @@ const SortableList = ({ data, moveAsset, onChange, onClickEditFile, selectedItem
   };
 
   return (
-    <ListWrapper>
+    <ListWrapper small>
       <div className="row">
         {data.map((item, index) => {
           const { id } = item;

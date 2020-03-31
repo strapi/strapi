@@ -1,33 +1,25 @@
 import { isEmpty, toString } from 'lodash';
+import generateParamsFromQuery from './generateParamsFromQuery';
 
 const generateStringFromParams = query => {
-  let params = '';
+  let paramsString = '';
+  const paramsObject = generateParamsFromQuery(query);
 
-  Object.keys(query)
-    .filter(key => !isEmpty(toString(query[key])))
+  Object.keys(paramsObject)
+    .filter(key => !isEmpty(toString(paramsObject[key])))
     .forEach(key => {
-      const value = query[key];
+      const value = paramsObject[key];
 
-      if (key === 'filters') {
-        value.forEach(item => {
-          if (item.name.includes('mime') && item.value === 'file') {
-            const revertedKey = item.filter.includes('_ncontains')
-              ? 'mime_contains'
-              : 'mime_ncontains';
-            const filterValue = `${revertedKey}=image&${revertedKey}=video`;
+      if (key.includes('mime') && value === 'file') {
+        const revertedKey = key.includes('_ncontains') ? 'mime_contains' : 'mime_ncontains';
 
-            params += `&${filterValue}`;
-          } else {
-            const name = item.filter === '=' ? item.name : `${item.name}${item.filter}`;
-            params += `&${name}=${item.value}`;
-          }
-        });
+        paramsString += `&${revertedKey}=image&${revertedKey}=video`;
       } else {
-        params += `&${key}=${value}`;
+        paramsString += `&${key}=${value}`;
       }
     });
 
-  return params.substring(1);
+  return paramsString.substring(1);
 };
 
 export default generateStringFromParams;

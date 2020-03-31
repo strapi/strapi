@@ -47,33 +47,22 @@ const HomePage = () => {
   const { push } = useHistory();
   const { search } = useLocation();
   const isMounted = useIsMounted();
-  const { data, dataCount, dataToDelete, isLoading, searchParams } = reducerState.toJS();
+  const { data, dataCount, dataToDelete, isLoading } = reducerState.toJS();
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
   const paramsKeys = ['_limit', '_start', '_q', '_sort'];
   const debouncedSearch = useDebounce(searchValue, 300);
 
   useEffect(() => {
-    handleChangeParams({ target: { name: '_q', value: searchValue } });
+    handleChangeParams({ target: { name: '_q', value: debouncedSearch } });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch]);
 
   useEffect(() => {
-    const params = generateNewSearch();
-
-    dispatch({
-      type: 'SET_PARAMS',
-      params,
-    });
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
     fetchListData();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(searchParams)]);
+  }, [search]);
 
   const deleteMedia = async id => {
     const requestURL = getRequestUrl(`files/${id}`);
@@ -105,7 +94,7 @@ const HomePage = () => {
 
   const fetchData = async () => {
     const dataRequestURL = getRequestUrl('files');
-    const params = generateStringFromParams(searchParams);
+    const params = generateStringFromParams(query);
 
     try {
       const data = await request(`${dataRequestURL}?${params}`, {
@@ -181,24 +170,16 @@ const HomePage = () => {
 
   const handleChangeParams = ({ target: { name, value } }) => {
     let updatedQueryParams = generateNewSearch({ [name]: value });
-    let paramsValue = value;
 
     if (name === 'filters') {
       const filters = [...generateFiltersFromSearch(search), value];
 
       updatedQueryParams = generateNewSearch({ [name]: filters });
-      paramsValue = filters;
     }
 
     if (name === '_limit') {
       updatedQueryParams = generateNewSearch({ [name]: value, _start: 0 });
     }
-
-    dispatch({
-      type: 'SET_PARAM',
-      name,
-      value: paramsValue,
-    });
 
     const newSearch = generateSearchFromFilters(updatedQueryParams);
 
@@ -234,12 +215,6 @@ const HomePage = () => {
     const filters = generateFiltersFromSearch(search).filter(
       (filter, filterIndex) => filterIndex !== index
     );
-
-    dispatch({
-      type: 'SET_PARAM',
-      name: 'filters',
-      value: filters,
-    });
 
     const updatedQueryParams = generateNewSearch({ filters });
 
@@ -380,8 +355,8 @@ const HomePage = () => {
       <Header {...headerProps} />
       <HeaderSearch
         label={pluginName}
-        onChange={handleChangeSearchValue}
-        onClear={handleClearSearch}
+        onChange={e => handleChangeSearchValue(e)}
+        onClear={() => handleClearSearch()}
         placeholder={formatMessage({ id: getTrad('search.placeholder') })}
         name="_q"
         value={searchValue}

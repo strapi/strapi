@@ -5,12 +5,6 @@ const initialState = fromJS({
   dataCount: 0,
   dataToDelete: [],
   isLoading: true,
-  searchParams: {
-    _limit: 10,
-    _start: 0,
-    _q: '',
-    filters: [],
-  },
 });
 
 const reducer = (state, action) => {
@@ -45,24 +39,6 @@ const reducer = (state, action) => {
         .findIndex(item => item.get('id').toString() === id.toString());
 
       return state.removeIn(['dataToDelete', index]);
-    }
-    case 'SET_PARAM': {
-      const { name, value } = action;
-
-      if (name === '_limit') {
-        return state
-          .updateIn(['searchParams', name], () => value)
-          .updateIn(['searchParams', '_start'], () => 0);
-      }
-
-      return state.updateIn(['searchParams', name], () => value);
-    }
-    case 'SET_PARAMS': {
-      const { params } = action;
-
-      return state.update('searchParams', searchParams => {
-        return searchParams.mergeDeep(fromJS(params));
-      });
     }
     case 'TOGGLE_SELECT_ALL': {
       const isSelected = state.get('data').every(item => state.get('dataToDelete').includes(item));

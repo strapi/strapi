@@ -81,7 +81,7 @@ const BrowseAssets = () => {
 
   return (
     <Wrapper>
-      <Padded top bottom>
+      <Padded top>
         <Flex flexWrap="wrap">
           {multiple && (
             <Padded right size="sm">
@@ -101,6 +101,7 @@ const BrowseAssets = () => {
           />
         </Flex>
       </Padded>
+      <Padded top size="xs" />
       {!files || files.length === 0 ? (
         <ListEmpty
           numberOfRows={2}
