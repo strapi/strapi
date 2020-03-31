@@ -1108,6 +1108,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
       const expected = {
         selectedFiles: [],
         files: [],
+        filesToDownload: [],
         filesToUpload: [],
         fileToEdit: null,
         currentTab: null,
