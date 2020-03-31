@@ -76,10 +76,10 @@ yup.addMethod(yup.array, 'matchesEnumRegex', function(message) {
 });
 
 yup.addMethod(yup.string, 'isValidRegExpPattern', function(message) {
-              return this.test('isValidRegExpPattern', message, function(string) {
-                               return new RegExp(string) !== null;
-                               });
-              });
+  return this.test('isValidRegExpPattern', message, function(string) {
+    return new RegExp(string) !== null;
+  });
+});
 yup.addMethod(yup.string, 'isValidRegExpPattern', function(message) {
   return this.test('isValidRegExpPattern', message, function(string) {
     return new RegExp(string) !== null;
@@ -415,14 +415,11 @@ const forms = {
               type: 'text',
               validations: {},
               description: {
-                id: getTrad(
-                  'form.attribute.item.text.regex.description'
-                ),
+                id: getTrad('form.attribute.item.text.regex.description'),
               },
             },
           ]);
-        }
-        else if (type === 'media') {
+        } else if (type === 'media') {
           items.splice(0, 1);
         } else if (type === 'boolean') {
           items.splice(0, 1, [
