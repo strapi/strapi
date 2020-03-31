@@ -118,6 +118,7 @@ const BrowseAssets = () => {
             renderCardControl={id => (
               <CardControl
                 small
+                title="edit"
                 color="#9EA7B8"
                 type="pencil"
                 onClick={() => handleGoToEditFile(id)}
