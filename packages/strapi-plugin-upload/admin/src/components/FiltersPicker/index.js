@@ -6,7 +6,7 @@ import { FilterIcon } from 'strapi-helper-plugin';
 import FiltersCard from './FiltersCard';
 import Picker from '../Picker';
 
-const FiltersPicker = ({ onChange }) => {
+const FiltersPicker = ({ onChange, filters }) => {
   const handleChange = ({ target: { value } }) => {
     onChange({ target: { name: 'filters', value } });
   };
@@ -21,6 +21,7 @@ const FiltersPicker = ({ onChange }) => {
       )}
       renderSectionContent={onToggle => (
         <FiltersCard
+          filters={filters}
           onChange={e => {
             handleChange(e);
             onToggle();
@@ -32,10 +33,12 @@ const FiltersPicker = ({ onChange }) => {
 };
 
 FiltersPicker.defaultProps = {
+  filters: [],
   onChange: () => {},
 };
 
 FiltersPicker.propTypes = {
+  filters: PropTypes.arrayOf(PropTypes.object),
   onChange: PropTypes.func,
 };
 

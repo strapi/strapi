@@ -12,13 +12,13 @@ const initialState = fromJS({
 function reducer(state, action) {
   switch (action.type) {
     case 'ON_CHANGE': {
-      const { name, value } = action;
+      const { name, value, defaultValue } = action;
 
       if (name === 'name') {
         return state
           .update(name, () => value)
           .update('filter', () => filters[value].defaultFilter)
-          .update('value', () => filters[value].defaultValue);
+          .update('value', () => defaultValue || filters[value].defaultValue);
       }
 
       return state.update(name, () => value);

@@ -6,7 +6,7 @@ import Wrapper from './Wrapper';
 
 const Count = ({ count }) => (
   <Wrapper justifyContent="center" alignItems="center">
-    <Text fontWeight="bold" color="grey" fontSize="xs">
+    <Text lineHeight="none" fontWeight="bold" color="grey" fontSize="xs">
       {count}
     </Text>
   </Wrapper>
