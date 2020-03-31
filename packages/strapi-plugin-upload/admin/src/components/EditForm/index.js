@@ -227,13 +227,15 @@ const EditForm = forwardRef(
                               color="#9EA7B8"
                               type="trash-alt"
                               onClick={handleClickDelete}
+                              title="delete"
                             />
                             {fileURL && (
                               <>
                                 <CardControl
                                   color="#9EA7B8"
-                                  type="download"
                                   onClick={handleClickDownload}
+                                  type="download"
+                                  title="download"
                                 />
                                 <a
                                   title={fileToEdit.fileInfo.name}
@@ -244,30 +246,33 @@ const EditForm = forwardRef(
                                 </a>
 
                                 <CopyToClipboard onCopy={handleCopy} text={prefixedFileURL}>
-                                  <CardControl color="#9EA7B8" type="link" />
+                                  <CardControl color="#9EA7B8" type="link" title="copy-link" />
                                 </CopyToClipboard>
                               </>
                             )}
                             {canCrop && (
                               <CardControl
-                                type="crop"
                                 color="#9EA7B8"
                                 onClick={handleToggleCropMode}
+                                type="crop"
+                                title="crop"
                               />
                             )}
                           </>
                         ) : (
                           <>
                             <CardControl
-                              type="clear"
                               color="#F64D0A"
                               onClick={handleToggleCropMode}
+                              type="clear"
+                              title="cancel"
                             />
                             <CheckButton
-                              type="check"
                               color="#6DBB1A"
                               onClick={handleClick}
                               onSubmitEdit={handleClickEditCroppedFile}
+                              type="check"
+                              title="save"
                             />
                           </>
                         )}
