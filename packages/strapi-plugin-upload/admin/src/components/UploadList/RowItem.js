@@ -31,6 +31,8 @@ const RowItem = ({
     onClickEdit(originalIndex);
   };
 
+  const fileSize = file.mime ? file.type : file.size / 1000;
+
   return (
     <div className="col-xs-12 col-md-6 col-xl-3" key={originalIndex}>
       <Card
@@ -39,7 +41,7 @@ const RowItem = ({
         hasError={hasError}
         hasIcon
         type={file.type}
-        size={file.size}
+        size={fileSize}
         url={url}
         {...fileInfo}
         withFileCaching={false}
