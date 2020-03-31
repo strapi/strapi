@@ -52,11 +52,11 @@ const Card = ({
         {children}
       </CardImgWrapper>
       <Flex>
-        <Title>{withoutFileInfo ? '' : name}</Title>
+        <Title>{!withoutFileInfo && name}&nbsp;</Title>
         {!withoutFileInfo && <Tag label={getType(fileType)} />}
       </Flex>
       <Text color="grey" fontSize="xs" ellipsis>
-        {withoutFileInfo ? '' : `${getExtension(fileType)} - ${fileSize}`}
+        {!withoutFileInfo && `${getExtension(fileType)} - ${fileSize}`}
       </Text>
       {hasError && <ErrorMessage>{errorMessage}</ErrorMessage>}
     </Wrapper>

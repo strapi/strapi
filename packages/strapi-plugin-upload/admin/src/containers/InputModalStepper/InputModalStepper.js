@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, ModalFooter, PopUpWarning, useGlobalContext, request } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
-
+import { isEmpty } from 'lodash';
 import { getRequestUrl, getTrad } from '../../utils';
 import ModalHeader from '../../components/ModalHeader';
 import pluginId from '../../pluginId';
@@ -12,16 +12,20 @@ import useModalContext from '../../hooks/useModalContext';
 const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
   const { formatMessage } = useGlobalContext();
   const [shouldDeleteFile, setShouldDeleteFile] = useState(false);
+  const [displayNextButton, setDisplayNextButton] = useState(false);
   const {
     addFilesToUpload,
     currentStep,
+    downloadFiles,
     fetchMediaLib,
+    filesToDownload,
     filesToUpload,
     fileToEdit,
     goTo,
     handleAbortUpload,
     handleCancelFileToUpload,
     handleCleanFilesError,
+    handleClickNextButton,
     handleClose,
     handleEditExistingFile,
     handleFileSelection,
@@ -56,27 +60,43 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
   };
 
   useEffect(() => {
-    if (currentStep === 'upload' && filesToUploadLength === 0) {
+    if (currentStep === 'upload') {
       // Go to the modal list view when file uploading is over
-      goToList();
+
+      if (filesToUploadLength === 0) {
+        goToList();
+      } else {
+        downloadFiles();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filesToUploadLength, currentStep]);
-
-  const goToList = () => {
-    fetchMediaLib();
-    goTo('list');
-  };
-
-  const handleConfirmDeleteFile = () => {
-    setShouldDeleteFile(true);
-    toggleModalWarning();
-  };
 
   const addFilesToUploadList = ({ target: { value } }) => {
     addFilesToUpload({ target: { value } });
 
     goNext();
+  };
+
+  const goBack = () => {
+    goTo(prev);
+  };
+
+  // FIXME: when back button needed
+  // eslint-disable-next-line no-unused-vars
+  const goNext = () => {
+    if (next === null) {
+      onToggle();
+
+      return;
+    }
+
+    goTo(next);
+  };
+
+  const goToList = () => {
+    fetchMediaLib();
+    goTo('list');
   };
 
   const handleClickDeleteFile = async () => {
@@ -91,6 +111,16 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
 
       goNext();
     }
+  };
+
+  const handleCloseModal = () => {
+    setDisplayNextButton(false);
+    handleClose();
+  };
+
+  const handleConfirmDeleteFile = () => {
+    setShouldDeleteFile(true);
+    toggleModalWarning();
   };
 
   const handleGoToAddBrowseFiles = () => {
@@ -187,25 +217,12 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
     onToggle();
   };
 
-  const goBack = () => {
-    goTo(prev);
-  };
-
-  // FIXME: when back button needed
-  // eslint-disable-next-line no-unused-vars
-  const goNext = () => {
-    if (next === null) {
-      onToggle();
-
-      return;
-    }
-
-    goTo(next);
-  };
+  const shouldDisplayNextButton = currentStep === 'browse' && displayNextButton;
+  const isFinishButtonDisabled = filesToUpload.some(file => file.isDownloading);
 
   return (
     <>
-      <Modal isOpen={isOpen} onToggle={handleToggle} onClosed={handleClose}>
+      <Modal isOpen={isOpen} onToggle={handleToggle} onClosed={handleCloseModal}>
         {/* header title */}
         <ModalHeader
           goBack={goBack}
@@ -218,6 +235,7 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
           <Component
             addFilesToUpload={addFilesToUploadList}
             components={components}
+            filesToDownload={filesToDownload}
             filesToUpload={filesToUpload}
             fileToEdit={fileToEdit}
             isEditingUploadedFile={currentStep === 'edit'}
@@ -238,6 +256,7 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
             toggleDisableForm={handleFormDisabled}
             onToggle={handleToggle}
             setCropResult={handleSetCropResult}
+            setShouldDisplayNextButton={setDisplayNextButton}
             withBackButton={withBackButton}
           />
         )}
@@ -248,7 +267,12 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
               {formatMessage({ id: 'app.components.Button.cancel' })}
             </Button>
             {currentStep === 'upload' && (
-              <Button type="button" color="success" onClick={handleUploadFiles}>
+              <Button
+                type="button"
+                color="success"
+                onClick={handleUploadFiles}
+                disabled={isFinishButtonDisabled}
+              >
                 {formatMessage(
                   {
                     id: getTrad(
@@ -259,6 +283,16 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
                   },
                   { number: filesToUploadLength }
                 )}
+              </Button>
+            )}
+            {shouldDisplayNextButton && (
+              <Button
+                type="button"
+                color="primary"
+                onClick={handleClickNextButton}
+                disabled={isEmpty(filesToDownload)}
+              >
+                Next
               </Button>
             )}
             {currentStep === 'edit-new' && (

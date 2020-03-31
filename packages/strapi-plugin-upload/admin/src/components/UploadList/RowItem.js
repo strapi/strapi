@@ -38,6 +38,9 @@ const RowItem = ({
     fileSize = file.mime ? file.type : file.size / 1000;
   }
 
+  const shouldDisplayControls = !isUploading && !isDownloading && file !== null;
+  const shouldDisplayTrashIcon = file === null && hasError;
+
   return (
     <div className="col-xs-12 col-md-6 col-xl-3" key={originalIndex}>
       <Card
@@ -53,7 +56,12 @@ const RowItem = ({
         withoutFileInfo={isDownloading || (file === null && hasError)}
       >
         {(isUploading || isDownloading) && <InfiniteLoadingIndicator onClick={handleClick} />}
-        {!isUploading && !isDownloading && file !== null && (
+        {shouldDisplayTrashIcon && (
+          <CardControlsWrapper className="card-control-wrapper">
+            <CardControl title="delete" onClick={handleClickDelete} type="trash-alt" small />
+          </CardControlsWrapper>
+        )}
+        {shouldDisplayControls && (
           <CardControlsWrapper className="card-control-wrapper">
             <CardControl title="delete" onClick={handleClickDelete} type="trash-alt" small />
             <CardControl title="edit" onClick={handleClickEdit} small />

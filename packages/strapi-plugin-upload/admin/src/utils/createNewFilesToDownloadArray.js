@@ -31,7 +31,7 @@ const createNewFilesToDownloadArray = (filesURLArray, alreadyUploadedFiles) => {
       fileInfo: {
         alternativeText: '',
         caption: '',
-        name: '',
+        name: current,
       },
       fileURL: current,
       hasError: false,
