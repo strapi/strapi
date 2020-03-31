@@ -194,8 +194,8 @@ const createAggregationFieldsResolver = function(model, fields, operation, typeC
       if (model.orm === 'bookshelf') {
         return model
           .query(qb => {
-            // apply filters without pagination limit
-            buildQuery({ model, filters: _.omit(filters, ['limit']) })(qb);
+            // apply filters
+            buildQuery({ model, filters })(qb);
 
             // `sum, avg, min, max` pass nicely to knex :->
             qb[operation](`${fieldKey} as ${operation}_${fieldKey}`);
@@ -276,7 +276,7 @@ const createGroupByFieldsResolver = function(model, fields) {
     if (model.orm === 'bookshelf') {
       return model
         .query(qb => {
-          buildQuery({ model, filters })(qb);
+          buildQuery({ model, filters: convertRestQueryParams(params) })(qb);
           qb.groupBy(fieldKey);
           qb.select(fieldKey);
         })
