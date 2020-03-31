@@ -15,7 +15,7 @@ import InputFilePreview from './InputFilePreview';
 import InputModalStepper from '../../containers/InputModalStepper';
 import Name from './Name';
 import Wrapper from './Wrapper';
-import Input from '../InputFileModal/Input';
+import Input from '../Input';
 
 const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
   const [modal, setModal] = useState({
