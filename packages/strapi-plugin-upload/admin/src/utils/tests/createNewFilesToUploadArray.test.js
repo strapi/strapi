@@ -15,6 +15,7 @@ describe('UPLOAD | containers | ModalStepper | utils', () => {
             caption: '',
             name: 'test',
           },
+          tempId: null,
           hasError: false,
           errorMessage: null,
           isUploading: false,

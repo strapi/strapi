@@ -28,6 +28,7 @@ const Card = ({
   type,
   url,
   withFileCaching,
+  withoutFileInfo,
 }) => {
   const fileSize = formatBytes(size, 0);
   const fileType = mime || type;
@@ -51,11 +52,11 @@ const Card = ({
         {children}
       </CardImgWrapper>
       <Flex>
-        <Title>{name}</Title>
-        <Tag label={getType(fileType)} />
+        <Title>{withoutFileInfo ? '' : name}</Title>
+        {!withoutFileInfo && <Tag label={getType(fileType)} />}
       </Flex>
       <Text color="grey" fontSize="xs" ellipsis>
-        {`${getExtension(fileType)} - ${fileSize}`}
+        {withoutFileInfo ? '' : `${getExtension(fileType)} - ${fileSize}`}
       </Text>
       {hasError && <ErrorMessage>{errorMessage}</ErrorMessage>}
     </Wrapper>
@@ -78,6 +79,7 @@ Card.defaultProps = {
   type: null,
   url: null,
   withFileCaching: true,
+  withoutFileInfo: false,
 };
 
 Card.propTypes = {
@@ -96,6 +98,7 @@ Card.propTypes = {
   type: PropTypes.string,
   url: PropTypes.string,
   withFileCaching: PropTypes.bool,
+  withoutFileInfo: PropTypes.bool,
 };
 
 export default memo(Card);

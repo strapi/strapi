@@ -14,6 +14,7 @@ const createNewFilesToUploadArray = filesObject => {
       hasError: false,
       errorMessage: null,
       isUploading: false,
+      tempId: null,
     });
 
     return acc;

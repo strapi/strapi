@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useReducer, useRef } from 'react';
+import axios from 'axios';
 import PropTypes from 'prop-types';
 import { get, isEmpty } from 'lodash';
 import { Modal, ModalFooter, PopUpWarning, useGlobalContext, request } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
 import pluginId from '../../pluginId';
-import { getTrad } from '../../utils';
+import { getFilesToDownload, getTrad } from '../../utils';
 import ModalHeader from '../../components/ModalHeader';
 import stepper from './stepper';
 import init from './init';
@@ -31,12 +32,19 @@ const ModalStepper = ({
   const filesToUploadLength = filesToUpload.length;
   const toggleRef = useRef(onToggle);
   const editModalRef = useRef();
+  const downloadFilesRef = useRef();
 
   useEffect(() => {
-    // if (currentStep === 'upload' && filesToUploadLength === 0) {
-    //   // Passing true to the onToggle prop will refetch the data when the modal closes
-    //   toggleRef.current(true);
-    // }
+    if (currentStep === 'upload') {
+      // Close the modal
+      if (filesToUploadLength === 0) {
+        // Passing true to the onToggle prop will refetch the data when the modal closes
+        toggleRef.current(true);
+      } else {
+        downloadFilesRef.current();
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filesToUploadLength, currentStep]);
 
   useEffect(() => {
@@ -62,6 +70,45 @@ const ModalStepper = ({
     });
 
     goTo(next);
+  };
+
+  downloadFilesRef.current = async () => {
+    const files = getFilesToDownload(filesToUpload);
+
+    try {
+      await Promise.all(
+        files.map(file => {
+          return axios
+            .get(file.fileURL, {
+              headers: new Headers({ Origin: window.location.origin, mode: 'cors' }),
+              responseType: 'blob',
+            })
+            .then(({ data }) => {
+              const createdFile = new File([data], file.fileURL, {
+                type: data.type,
+              });
+
+              dispatch({
+                type: 'FILE_DOWNLOADED',
+                blob: createdFile,
+                originalIndex: file.originalIndex,
+                fileTempId: file.tempId,
+              });
+            })
+            .catch(err => {
+              console.error('fetch file error', err);
+
+              dispatch({
+                type: 'SET_FILE_TO_DOWNLOAD_ERROR',
+                originalIndex: file.originalIndex,
+                fileTempId: file.tempId,
+              });
+            });
+        })
+      );
+    } catch (err) {
+      // Silent
+    }
   };
 
   const handleAbortUpload = () => {
@@ -110,7 +157,10 @@ const ModalStepper = ({
   const handleClickNextButton = () => {
     // Navigate to next step
     // goNext();
-    // validate the form
+    dispatch({
+      type: 'ADD_URLS_TO_FILES_TO_DOWNLOAD',
+      nextStep: next,
+    });
   };
 
   const handleClickDeleteFile = async () => {
@@ -324,6 +374,7 @@ const ModalStepper = ({
   };
 
   const shouldDisplayNextButton = currentStep === 'browse' && displayNextButton;
+  const isFinishButtonDisabled = filesToUpload.some(file => file.isDownloading);
 
   return (
     <>
@@ -381,7 +432,12 @@ const ModalStepper = ({
               </Button>
             )}
             {currentStep === 'upload' && (
-              <Button type="button" color="success" onClick={handleUploadFiles}>
+              <Button
+                type="button"
+                color="success"
+                onClick={handleUploadFiles}
+                disabled={isFinishButtonDisabled}
+              >
                 {formatMessage(
                   {
                     id: getTrad(

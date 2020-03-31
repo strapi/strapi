@@ -11,13 +11,14 @@ const RowItem = ({
   fileInfo,
   hasError,
   errorMessage,
+  isDownloading,
   isUploading,
   onClick,
   onClickDeleteFileToUpload,
   onClickEdit,
   originalIndex,
 }) => {
-  const url = URL.createObjectURL(file);
+  const url = file ? URL.createObjectURL(file) : null;
 
   const handleClick = () => {
     onClick(originalIndex);
@@ -38,14 +39,15 @@ const RowItem = ({
         errorMessage={errorMessage}
         hasError={hasError}
         hasIcon
-        type={file.type}
-        size={file.size}
+        type={file ? file.type : null}
+        size={file ? file.size : null}
         url={url}
         {...fileInfo}
         withFileCaching={false}
+        withoutFileInfo={isDownloading || (file === null && hasError)}
       >
-        {isUploading && <InfiniteLoadingIndicator onClick={handleClick} />}
-        {!isUploading && (
+        {(isUploading || isDownloading) && <InfiniteLoadingIndicator onClick={handleClick} />}
+        {!isUploading && !isDownloading && (
           <CardControlsWrapper className="card-control-wrapper">
             <CardControl onClick={handleClickDelete} type="trash-alt" small />
             <CardControl onClick={handleClickEdit} small />
@@ -57,16 +59,19 @@ const RowItem = ({
 };
 
 RowItem.defaultProps = {
+  file: null,
   errorMessage: null,
+  isDownloading: false,
 };
 
 RowItem.propTypes = {
-  file: PropTypes.object.isRequired,
+  file: PropTypes.object,
   fileInfo: PropTypes.shape({
     name: PropTypes.string.isRequired,
   }).isRequired,
   hasError: PropTypes.bool.isRequired,
   errorMessage: PropTypes.string,
+  isDownloading: PropTypes.bool,
   isUploading: PropTypes.bool.isRequired,
   onClick: PropTypes.func.isRequired,
   onClickDeleteFileToUpload: PropTypes.func.isRequired,
