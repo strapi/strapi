@@ -279,6 +279,14 @@ module.exports = {
    * Return table name for a collection many-to-many
    */
   getCollectionName: (associationA, associationB) => {
+    if (associationA.dominant && _.has(associationA, 'collectionName')) {
+      return associationA.collectionName;
+    }
+
+    if (associationB.dominant && _.has(associationB, 'collectionName')) {
+      return associationB.collectionName;
+    }
+
     return [associationA, associationB]
       .sort((a, b) => {
         if (a.collection === b.collection) {
@@ -345,14 +353,14 @@ module.exports = {
         };
 
         if (infos.nature === 'manyToMany' && definition.orm === 'bookshelf') {
-          ast.tableCollectionName =
-            _.get(association, 'collectionName') || this.getCollectionName(details, association);
+          ast.tableCollectionName = this.getCollectionName(details, association);
         }
 
         if (infos.nature === 'manyWay' && definition.orm === 'bookshelf') {
-          ast.tableCollectionName = `${definition.collectionName}__${_.snakeCase(key)}`;
+          ast.tableCollectionName =
+            _.get(association, 'collectionName') ||
+            `${definition.collectionName}__${_.snakeCase(key)}`;
         }
-
         definition.associations.push(ast);
         return;
       }
