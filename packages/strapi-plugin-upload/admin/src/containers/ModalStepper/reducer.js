@@ -4,6 +4,7 @@ import createNewFilesToUploadArray from '../../utils/createNewFilesToUploadArray
 const initialState = fromJS({
   currentStep: 'browse',
   filesToUpload: [],
+  filesToDownload: [],
   fileToEdit: null,
 });
 
@@ -29,6 +30,8 @@ const reducer = (state, action) => {
       return state.update('fileToEdit', () => fromJS(action.fileToEdit));
     case 'ON_ABORT_UPLOAD':
       return state.updateIn(['fileToEdit', 'isUploading'], () => false);
+    case 'ON_CHANGE_URLS_TO_DOWNLOAD':
+      return state.updateIn(['filesToDownload'], () => fromJS(action.value));
     case 'ON_CHANGE':
       return state.updateIn(['fileToEdit', ...action.keys.split('.')], () => action.value);
     case 'ON_SUBMIT_EDIT_NEW_FILE': {

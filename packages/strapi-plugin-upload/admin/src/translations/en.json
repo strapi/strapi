@@ -14,6 +14,8 @@
   "input.label-normal": "to upload or",
   "input.placeholder": "Click to select an asset or drag & drop a file in this area",
   "input.button.label": "Browse files",
+  "input.url.label": "URL",
+  "input.url.description": "Separate your URL links by a carriage return.",
   "list.assets-empty.title": "There is no asset yet",
   "list.assets-empty.title-withSearch": "There is no asset with the applied filters",
   "list.assets-empty.subtitle": "Add a first one to the list.",

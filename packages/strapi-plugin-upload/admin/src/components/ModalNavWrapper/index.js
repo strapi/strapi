@@ -13,6 +13,10 @@ const ModalNavWrapper = ({ children, links, renderRightContent, initialTab }) =>
 
   const handleGoTo = link => {
     setTo(link.to);
+
+    if (link.onClick) {
+      link.onClick(link.to);
+    }
   };
 
   return (

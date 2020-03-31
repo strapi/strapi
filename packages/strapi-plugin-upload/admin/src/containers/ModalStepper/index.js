@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import { Modal, ModalFooter, PopUpWarning, useGlobalContext, request } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
 import pluginId from '../../pluginId';
@@ -22,8 +22,9 @@ const ModalStepper = ({
   const [isWarningDeleteOpen, setIsWarningDeleteOpen] = useState(false);
   const [shouldDeleteFile, setShouldDeleteFile] = useState(false);
   const [isFormDisabled, setIsFormDisabled] = useState(false);
+  const [displayNextButton, setDisplayNextButton] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
-  const { currentStep, fileToEdit, filesToUpload } = reducerState.toJS();
+  const { currentStep, fileToEdit, filesToDownload, filesToUpload } = reducerState.toJS();
   const { Component, components, headerBreadcrumbs, next, prev, withBackButton } = stepper[
     currentStep
   ];
@@ -32,10 +33,10 @@ const ModalStepper = ({
   const editModalRef = useRef();
 
   useEffect(() => {
-    if (currentStep === 'upload' && filesToUploadLength === 0) {
-      // Passing true to the onToggle prop will refetch the data when the modal closes
-      toggleRef.current(true);
-    }
+    // if (currentStep === 'upload' && filesToUploadLength === 0) {
+    //   // Passing true to the onToggle prop will refetch the data when the modal closes
+    //   toggleRef.current(true);
+    // }
   }, [filesToUploadLength, currentStep]);
 
   useEffect(() => {
@@ -86,16 +87,30 @@ const ModalStepper = ({
   };
 
   const handleChange = ({ target: { name, value } }) => {
+    let val = value;
+    let type = 'ON_CHANGE';
+
+    if (name === 'url') {
+      val = value.split('\n');
+      type = 'ON_CHANGE_URLS_TO_DOWNLOAD';
+    }
+
     dispatch({
-      type: 'ON_CHANGE',
+      type,
       keys: name,
-      value,
+      value: val,
     });
   };
 
   const handleConfirmDeleteFile = () => {
     setShouldDeleteFile(true);
     toggleModalWarning();
+  };
+
+  const handleClickNextButton = () => {
+    // Navigate to next step
+    // goNext();
+    // validate the form
   };
 
   const handleClickDeleteFile = async () => {
@@ -120,6 +135,7 @@ const ModalStepper = ({
   const handleClose = () => {
     onClosed();
     setIsFormDisabled(false);
+    setDisplayNextButton(false);
 
     dispatch({
       type: 'RESET_PROPS',
@@ -307,6 +323,8 @@ const ModalStepper = ({
     setIsWarningDeleteOpen(prev => !prev);
   };
 
+  const shouldDisplayNextButton = currentStep === 'browse' && displayNextButton;
+
   return (
     <>
       <Modal isOpen={isOpen} onToggle={handleToggle} onClosed={handleClose}>
@@ -323,6 +341,7 @@ const ModalStepper = ({
             onAbortUpload={handleAbortUpload}
             addFilesToUpload={addFilesToUpload}
             fileToEdit={fileToEdit}
+            filesToDownload={filesToDownload}
             filesToUpload={filesToUpload}
             components={components}
             isEditingUploadedFile={currentStep === 'edit'}
@@ -341,6 +360,7 @@ const ModalStepper = ({
             toggleDisableForm={setIsFormDisabled}
             ref={currentStep === 'edit' ? editModalRef : null}
             setCropResult={handleSetCropResult}
+            setShouldDisplayNextButton={setDisplayNextButton}
             withBackButton={withBackButton}
           />
         )}
@@ -350,6 +370,16 @@ const ModalStepper = ({
             <Button type="button" color="cancel" onClick={handleToggle}>
               {formatMessage({ id: 'app.components.Button.cancel' })}
             </Button>
+            {shouldDisplayNextButton && (
+              <Button
+                type="button"
+                color="primary"
+                onClick={handleClickNextButton}
+                disabled={isEmpty(filesToDownload)}
+              >
+                Next
+              </Button>
+            )}
             {currentStep === 'upload' && (
               <Button type="button" color="success" onClick={handleUploadFiles}>
                 {formatMessage(
