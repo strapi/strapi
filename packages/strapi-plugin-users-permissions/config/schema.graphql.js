@@ -47,8 +47,8 @@ module.exports = {
       user: UsersPermissionsMe!
     }
 
-    type ForgotPassword {
-      ok: Boolean
+    type UserPersmissionsPasswordPayload {
+      ok: Boolean!
     }
   `,
   query: `
@@ -57,7 +57,7 @@ module.exports = {
   mutation: `
     login(input: UsersPermissionsLoginInput!): UsersPermissionsLoginPayload!
     register(input: UserInput!): UsersPermissionsLoginPayload!
-    forgotPassword(email: String!): ForgotPassword
+    forgotPassword(email: String!): UserPersmissionsPasswordPayload
     resetPassword(password: String!, passwordConfirmation: String!, code: String!): UsersPermissionsLoginPayload
     emailConfirmation(confirmation: String!): UsersPermissionsLoginPayload
   `,
