@@ -58,6 +58,7 @@ module.exports = {
     login(input: UsersPermissionsLoginInput!): UsersPermissionsLoginPayload!
     register(input: UserInput!): UsersPermissionsLoginPayload!
     forgotPassword(email: String!): UserPersmissionsPasswordPayload
+    changePassword(password: String!, passwordConfirmation: String!, currentPassword: String!): UserPersmissionsPasswordPayload
     resetPassword(password: String!, passwordConfirmation: String!, code: String!): UsersPermissionsLoginPayload
     emailConfirmation(confirmation: String!): UsersPermissionsLoginPayload
   `,
@@ -238,6 +239,22 @@ module.exports = {
           return {
             user: output.user || output,
             jwt: output.jwt,
+          };
+        },
+      },
+      changePassword: {
+        description: 'Change your password. Verified by current password.',
+        resolverOf: 'plugins::users-permissions.auth.changePassword',
+        resolver: async (obj, options, { context }) => {
+          context.request.body = _.toPlainObject(options);
+
+          await strapi.plugins['users-permissions'].controllers.auth.changePassword(context);
+          let output = context.body.toJSON ? context.body.toJSON() : context.body;
+
+          checkBadRequest(output);
+
+          return {
+            ok: output.ok,
           };
         },
       },
