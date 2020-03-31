@@ -1,7 +1,6 @@
 import React from 'react';
-
+import { isEmpty } from 'lodash';
 import { PageFooter } from 'strapi-helper-plugin';
-
 import { generatePageFromStart, generateStartFromPage } from '../../utils';
 import Filters from '../Filters';
 import Flex from '../Flex';
@@ -76,6 +75,10 @@ const BrowseAssets = () => {
     hasSomeCheckboxSelected;
   const canSelectFile = multiple === true || (selectedFiles.length < 1 && !multiple);
 
+  const hasFilters = !isEmpty(params.filters.filter(filter => !filter.isDisabled));
+  const hasSearch = !isEmpty(params._q);
+  const areResultsEmptyWithSearchOrFilters = isEmpty(files) && (hasSearch || hasFilters);
+
   return (
     <Wrapper>
       <Padded top bottom>
@@ -99,7 +102,11 @@ const BrowseAssets = () => {
         </Flex>
       </Padded>
       {!files || files.length === 0 ? (
-        <ListEmpty numberOfRows={2} onClick={handleGoToUpload} />
+        <ListEmpty
+          numberOfRows={2}
+          onClick={handleGoToUpload}
+          hasSearchApplied={areResultsEmptyWithSearchOrFilters}
+        />
       ) : (
         <ListWrapper>
           <List
