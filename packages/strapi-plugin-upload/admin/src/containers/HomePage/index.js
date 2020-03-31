@@ -355,8 +355,8 @@ const HomePage = () => {
       <Header {...headerProps} />
       <HeaderSearch
         label={pluginName}
-        onChange={e => handleChangeSearchValue(e)}
-        onClear={() => handleClearSearch()}
+        onChange={handleChangeSearchValue}
+        onClear={handleClearSearch}
         placeholder={formatMessage({ id: getTrad('search.placeholder') })}
         name="_q"
         value={searchValue}

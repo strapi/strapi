@@ -11,7 +11,6 @@ import SelectAll from '../SelectAll';
 import SortPicker from '../SortPicker';
 import useModalContext from '../../hooks/useModalContext';
 import Wrapper from './Wrapper';
-import ListWrapper from './ListWrapper';
 import CardControl from '../CardControl';
 
 const BrowseAssets = () => {
@@ -101,7 +100,7 @@ const BrowseAssets = () => {
           />
         </Flex>
       </Padded>
-      <Padded top size="xs" />
+      <Padded bottom size="xs" />
       {!files || files.length === 0 ? (
         <ListEmpty
           numberOfRows={2}
@@ -109,7 +108,7 @@ const BrowseAssets = () => {
           hasSearchApplied={areResultsEmptyWithSearchOrFilters}
         />
       ) : (
-        <ListWrapper>
+        <>
           <List
             canSelect={canSelectFile}
             data={files}
@@ -133,7 +132,7 @@ const BrowseAssets = () => {
               params={paginationParams}
             />
           </Padded>
-        </ListWrapper>
+        </>
       )}
     </Wrapper>
   );
