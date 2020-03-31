@@ -80,11 +80,6 @@ yup.addMethod(yup.string, 'isValidRegExpPattern', function(message) {
     return new RegExp(string) !== null;
   });
 });
-yup.addMethod(yup.string, 'isValidRegExpPattern', function(message) {
-  return this.test('isValidRegExpPattern', message, function(string) {
-    return new RegExp(string) !== null;
-  });
-});
 
 const ATTRIBUTES_THAT_DONT_HAVE_MIN_MAX_SETTINGS = ['boolean', 'date', 'enumeration', 'media'];
 
