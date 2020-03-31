@@ -21,6 +21,14 @@ const generateFileName = name => {
   return `${baseName}_${randomSuffix()}`;
 };
 
+const combineFilters = params => {
+  // FIXME: until we support boolean operators for querying we need to make mime_ncontains use AND instead of OR
+  if (_.has(params, 'mime_ncontains') && Array.isArray(params.mime_ncontains)) {
+    params._where = params.mime_ncontains.map(val => ({ mime_ncontains: val }));
+    delete params.mime_ncontains;
+  }
+};
+
 module.exports = {
   formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
     const ext = path.extname(filename);
@@ -250,12 +258,7 @@ module.exports = {
   },
 
   fetchAll(params) {
-    // FIXME: until we support boolean operators for querying we need to make mime_ncontains use AND instead of OR
-    if (_.has(params, 'mime_ncontains') && Array.isArray(params.mime_ncontains)) {
-      params._where = params.mime_ncontains.map(val => ({ mime_ncontains: val }));
-      delete params.mime_ncontains;
-    }
-
+    combineFilters(params);
     return strapi.query('file', 'upload').find(params);
   },
 
@@ -268,12 +271,7 @@ module.exports = {
   },
 
   count(params) {
-    // FIXME: until we support boolean operators for querying we need to make mime_ncontains use AND instead of OR
-    if (_.has(params, 'mime_ncontains') && Array.isArray(params.mime_ncontains)) {
-      params._where = params.mime_ncontains.map(val => ({ mime_ncontains: val }));
-      delete params.mime_ncontains;
-    }
-
+    combineFilters(params);
     return strapi.query('file', 'upload').count(params);
   },
 
