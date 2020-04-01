@@ -10,11 +10,12 @@ import Text from '../Text';
 import FileDetailsBoxWrapper from './FileDetailsBoxWrapper';
 
 const FileDetailsBox = ({ file }) => {
+  const fileSize = file.mime ? get(file, 'size', 0) : get(file, 'size', 0) / 1000;
   const sections = [
     {
       key: 0,
       rows: [
-        { label: 'size', value: formatBytes(get(file, 'size', 0), 0) },
+        { label: 'size', value: formatBytes(fileSize, 0) },
         {
           label: 'date',
           value: file.created_at ? dateToUtcTime(file.created_at).format(dateFormats.date) : '-',
@@ -78,6 +79,7 @@ FileDetailsBox.defaultProps = {
 
 FileDetailsBox.propTypes = {
   file: PropTypes.shape({
+    mime: PropTypes.string,
     created_at: PropTypes.string,
     ext: PropTypes.string,
     height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),

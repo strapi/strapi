@@ -12,7 +12,7 @@ import Spacer from './Spacer';
 import StyledCardControl from './StyledCardControl';
 import { getTrad } from '../../utils';
 
-const CheckControl = ({ onSubmitEdit }) => {
+const CheckControl = ({ title, onSubmitEdit }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { formatMessage } = useGlobalContext();
   const dropdownRef = useRef();
@@ -36,7 +36,12 @@ const CheckControl = ({ onSubmitEdit }) => {
   };
 
   return (
-    <StyledCardControl color="#ffffff" ref={dropdownRef} onClick={handleToggle}>
+    <StyledCardControl
+      title={formatMessage({ id: getTrad(`control-card.${title}`) })}
+      color="#ffffff"
+      ref={dropdownRef}
+      onClick={handleToggle}
+    >
       <FontAwesomeIcon icon="check" />
       <DropdownSection isOpen={isOpen}>
         <Padded left right bottom top size="15px">
@@ -57,10 +62,12 @@ const CheckControl = ({ onSubmitEdit }) => {
 
 CheckControl.defaultProps = {
   onSubmitEdit: () => {},
+  title: null,
 };
 
 CheckControl.propTypes = {
   onSubmitEdit: PropTypes.func,
+  title: PropTypes.string,
 };
 
 export default CheckControl;
