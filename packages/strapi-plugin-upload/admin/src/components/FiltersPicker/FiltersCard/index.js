@@ -29,6 +29,7 @@ const FiltersCard = ({ onChange, filters }) => {
   }, [isMounted]);
 
   const { name, filter, filtersForm, value } = state.toJS();
+
   const type = filtersForm[name].type;
   const filtersOptions = getFilterType(type);
   const options = ['image', 'video', 'file'].filter(
