@@ -1,9 +1,11 @@
 import { fromJS } from 'immutable';
-import createNewFilesToUploadArray from '../../utils/createNewFilesToUploadArray';
+
+import { createNewFilesToDownloadArray, createNewFilesToUploadArray } from '../../utils';
 
 const initialState = fromJS({
   currentStep: 'browse',
   filesToUpload: [],
+  filesToDownload: [],
   fileToEdit: null,
 });
 
@@ -17,18 +19,45 @@ const reducer = (state, action) => {
             .map((data, index) => data.set('originalIndex', index))
         )
         .update('currentStep', () => action.nextStep);
+    case 'ADD_URLS_TO_FILES_TO_UPLOAD':
+      return state
+        .update('filesToUpload', list =>
+          list
+            .concat(
+              fromJS(createNewFilesToDownloadArray(state.get('filesToDownload'), list.toJS()))
+            )
+            .map((data, index) => data.set('originalIndex', index))
+        )
+        .update('currentStep', () => action.nextStep)
+        .update('filesToDownload', () => fromJS([]));
     case 'CLEAN_FILES_ERROR':
       return state.update('filesToUpload', list =>
         list.map(data => {
+          if (data.get('tempId')) {
+            return data;
+          }
+
           return data.set('hasError', false).set('errorMessage', null);
         })
       );
+    case 'FILE_DOWNLOADED':
+      return state.updateIn(['filesToUpload'], list => {
+        return list.map(file => {
+          if (file.get('tempId') === action.fileTempId) {
+            return file.update('isDownloading', () => false).update('file', () => action.blob);
+          }
+
+          return file;
+        });
+      });
     case 'GO_TO':
       return state.update('currentStep', () => action.to);
     case 'INIT_FILE_TO_EDIT':
       return state.update('fileToEdit', () => fromJS(action.fileToEdit));
     case 'ON_ABORT_UPLOAD':
       return state.updateIn(['fileToEdit', 'isUploading'], () => false);
+    case 'ON_CHANGE_URLS_TO_DOWNLOAD':
+      return state.updateIn(['filesToDownload'], () => fromJS(action.value));
     case 'ON_CHANGE':
       return state.updateIn(['fileToEdit', ...action.keys.split('.')], () => action.value);
     case 'ON_SUBMIT_EDIT_NEW_FILE': {
@@ -62,6 +91,19 @@ const reducer = (state, action) => {
           }
 
           return data;
+        });
+      });
+    case 'SET_FILE_TO_DOWNLOAD_ERROR':
+      return state.update('filesToUpload', list => {
+        return list.map(file => {
+          if (file.get('tempId') === action.fileTempId) {
+            return file
+              .update('isDownloading', () => false)
+              .update('hasError', () => true)
+              .update('errorMessage', () => file.get('fileURL'));
+          }
+
+          return file;
         });
       });
     case 'SET_FILE_TO_EDIT':

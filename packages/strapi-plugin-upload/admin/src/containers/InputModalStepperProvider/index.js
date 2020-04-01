@@ -2,11 +2,19 @@ import React, { useReducer, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { request, generateSearchFromFilters } from 'strapi-helper-plugin';
 import { get } from 'lodash';
+import axios from 'axios';
 import pluginId from '../../pluginId';
-import { getRequestUrl, compactParams, createNewFilesToUploadArray } from '../../utils';
+import {
+  getFilesToDownload,
+  getRequestUrl,
+  compactParams,
+  createNewFilesToUploadArray,
+} from '../../utils';
 import InputModalStepperContext from '../../contexts/InputModal/InputModalDataManager';
 import init from './init';
 import reducer, { initialState } from './reducer';
+
+/* eslint-disable indent */
 
 const InputModalStepperProvider = ({
   allowedTypes,
@@ -28,9 +36,9 @@ const InputModalStepperProvider = ({
       selectedFiles: Array.isArray(selectedFiles) ? selectedFiles : [selectedFiles],
       filesToUpload: initialFilesToUpload
         ? createNewFilesToUploadArray(initialFilesToUpload).map((file, index) => ({
-          ...file,
-          originalIndex: index,
-        }))
+            ...file,
+            originalIndex: index,
+          }))
         : [],
       params: {
         ...state.params,
@@ -47,6 +55,48 @@ const InputModalStepperProvider = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, params]);
 
+  const downloadFiles = async () => {
+    const files = getFilesToDownload(filesToUpload);
+
+    try {
+      await Promise.all(
+        files.map(file => {
+          const { source } = file;
+
+          return axios
+            .get(file.fileURL, {
+              headers: new Headers({ Origin: window.location.origin, mode: 'cors' }),
+              responseType: 'blob',
+              cancelToken: source.token,
+            })
+            .then(({ data }) => {
+              const createdFile = new File([data], file.fileURL, {
+                type: data.type,
+              });
+
+              dispatch({
+                type: 'FILE_DOWNLOADED',
+                blob: createdFile,
+                originalIndex: file.originalIndex,
+                fileTempId: file.tempId,
+              });
+            })
+            .catch(err => {
+              console.error('fetch file error', err);
+
+              dispatch({
+                type: 'SET_FILE_TO_DOWNLOAD_ERROR',
+                originalIndex: file.originalIndex,
+                fileTempId: file.tempId,
+              });
+            });
+        })
+      );
+    } catch (err) {
+      // Silent
+    }
+  };
+
   const handleRemoveFileToUpload = fileIndex => {
     dispatch({
       type: 'REMOVE_FILE_TO_UPLOAD',
@@ -54,11 +104,26 @@ const InputModalStepperProvider = ({
     });
   };
 
-  const handleFileToEditChange = ({ target: { name, value } }) => {
+  const handleClickNextButton = () => {
     dispatch({
-      type: 'ON_CHANGE',
+      type: 'ADD_URLS_TO_FILES_TO_UPLOAD',
+      nextStep: 'upload',
+    });
+  };
+
+  const handleFileToEditChange = ({ target: { name, value } }) => {
+    let val = value;
+    let type = 'ON_CHANGE';
+
+    if (name === 'url') {
+      val = value.split('\n');
+      type = 'ON_CHANGE_URLS_TO_DOWNLOAD';
+    }
+
+    dispatch({
+      type,
       keys: name,
-      value,
+      value: val,
     });
   };
 
@@ -186,8 +251,16 @@ const InputModalStepperProvider = ({
   const handleCancelFileToUpload = fileIndex => {
     const fileToCancel = get(filesToUpload, fileIndex, {});
 
+    const { source } = fileToCancel;
+
     // Cancel upload
-    fileToCancel.abortController.abort();
+    if (source) {
+      // Cancel dowload file upload with axios
+      source.cancel('Operation canceled by the user.');
+    } else {
+      // Cancel uplodad file with fetch
+      fileToCancel.abortController.abort();
+    }
 
     handleRemoveFileToUpload(fileIndex);
   };
@@ -306,11 +379,13 @@ const InputModalStepperProvider = ({
       value={{
         ...reducerState,
         addFilesToUpload,
+        downloadFiles,
         fetchMediaLib,
         goTo,
         handleAbortUpload,
         handleAllFilesSelection,
         handleCancelFileToUpload,
+        handleClickNextButton,
         handleCleanFilesError,
         handleClose,
         handleEditExistingFile,

@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useReducer, useRef } from 'react';
+import axios from 'axios';
 import PropTypes from 'prop-types';
-import { isEqual, get } from 'lodash';
+import { isEqual, isEmpty, get } from 'lodash';
 import { Modal, ModalFooter, PopUpWarning, useGlobalContext, request } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
 import pluginId from '../../pluginId';
-import { getTrad } from '../../utils';
+import { getFilesToDownload, getTrad } from '../../utils';
 import ModalHeader from '../../components/ModalHeader';
 import stepper from './stepper';
 import init from './init';
@@ -22,20 +23,29 @@ const ModalStepper = ({
   const [isWarningDeleteOpen, setIsWarningDeleteOpen] = useState(false);
   const [shouldDeleteFile, setShouldDeleteFile] = useState(false);
   const [isFormDisabled, setIsFormDisabled] = useState(false);
+  const [displayNextButton, setDisplayNextButton] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
-  const { currentStep, fileToEdit, filesToUpload } = reducerState.toJS();
+  const { currentStep, fileToEdit, filesToDownload, filesToUpload } = reducerState.toJS();
   const { Component, components, headerBreadcrumbs, next, prev, withBackButton } = stepper[
     currentStep
   ];
   const filesToUploadLength = filesToUpload.length;
   const toggleRef = useRef(onToggle);
   const editModalRef = useRef();
+  const downloadFilesRef = useRef();
 
   useEffect(() => {
-    if (currentStep === 'upload' && filesToUploadLength === 0) {
-      // Passing true to the onToggle prop will refetch the data when the modal closes
-      toggleRef.current(true);
+    if (currentStep === 'upload') {
+      // Close the modal
+      if (filesToUploadLength === 0) {
+        // Passing true to the onToggle prop will refetch the data when the modal closes
+        toggleRef.current(true);
+      } else {
+        // Download files from url
+        downloadFilesRef.current();
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filesToUploadLength, currentStep]);
 
   useEffect(() => {
@@ -63,6 +73,49 @@ const ModalStepper = ({
     goTo(next);
   };
 
+  downloadFilesRef.current = async () => {
+    const files = getFilesToDownload(filesToUpload);
+
+    try {
+      await Promise.all(
+        files.map(file => {
+          const { source } = file;
+
+          return axios
+            .get(file.fileURL, {
+              headers: new Headers({ Origin: window.location.origin, mode: 'cors' }),
+              responseType: 'blob',
+              cancelToken: source.token,
+              // Should we add a timeout?
+            })
+            .then(({ data }) => {
+              const createdFile = new File([data], file.fileURL, {
+                type: data.type,
+              });
+
+              dispatch({
+                type: 'FILE_DOWNLOADED',
+                blob: createdFile,
+                originalIndex: file.originalIndex,
+                fileTempId: file.tempId,
+              });
+            })
+            .catch(err => {
+              console.error('fetch file error', err);
+
+              dispatch({
+                type: 'SET_FILE_TO_DOWNLOAD_ERROR',
+                originalIndex: file.originalIndex,
+                fileTempId: file.tempId,
+              });
+            });
+        })
+      );
+    } catch (err) {
+      // Silent
+    }
+  };
+
   const handleAbortUpload = () => {
     const { abortController } = fileToEdit;
 
@@ -75,9 +128,16 @@ const ModalStepper = ({
 
   const handleCancelFileToUpload = fileOriginalIndex => {
     const fileToCancel = filesToUpload.find(file => file.originalIndex === fileOriginalIndex);
+    const { source } = fileToCancel;
 
-    // Cancel upload
-    fileToCancel.abortController.abort();
+    // Cancel
+    if (source) {
+      // Cancel dowload file upload with axios
+      source.cancel('Operation canceled by the user.');
+    } else {
+      // Cancel upload with fetch
+      fileToCancel.abortController.abort();
+    }
 
     dispatch({
       type: 'REMOVE_FILE_TO_UPLOAD',
@@ -86,16 +146,32 @@ const ModalStepper = ({
   };
 
   const handleChange = ({ target: { name, value } }) => {
+    let val = value;
+    let type = 'ON_CHANGE';
+
+    if (name === 'url') {
+      val = value.split('\n');
+      type = 'ON_CHANGE_URLS_TO_DOWNLOAD';
+    }
+
     dispatch({
-      type: 'ON_CHANGE',
+      type,
       keys: name,
-      value,
+      value: val,
     });
   };
 
   const handleConfirmDeleteFile = () => {
     setShouldDeleteFile(true);
     toggleModalWarning();
+  };
+
+  const handleClickNextButton = () => {
+    // Navigate to next step
+    dispatch({
+      type: 'ADD_URLS_TO_FILES_TO_UPLOAD',
+      nextStep: next,
+    });
   };
 
   const handleClickDeleteFile = async () => {
@@ -120,6 +196,7 @@ const ModalStepper = ({
   const handleClose = () => {
     onClosed();
     setIsFormDisabled(false);
+    setDisplayNextButton(false);
 
     dispatch({
       type: 'RESET_PROPS',
@@ -297,8 +374,6 @@ const ModalStepper = ({
     goTo(prev);
   };
 
-  // FIXME: when back button needed
-  // eslint-disable-next-line no-unused-vars
   const goNext = () => {
     if (next === null) {
       onToggle();
@@ -320,6 +395,9 @@ const ModalStepper = ({
     setIsWarningDeleteOpen(prev => !prev);
   };
 
+  const shouldDisplayNextButton = currentStep === 'browse' && displayNextButton;
+  const isFinishButtonDisabled = filesToUpload.some(file => file.isDownloading);
+
   return (
     <>
       <Modal isOpen={isOpen} onToggle={handleToggle} onClosed={handleClose}>
@@ -336,6 +414,7 @@ const ModalStepper = ({
             onAbortUpload={handleAbortUpload}
             addFilesToUpload={addFilesToUpload}
             fileToEdit={fileToEdit}
+            filesToDownload={filesToDownload}
             filesToUpload={filesToUpload}
             components={components}
             isEditingUploadedFile={currentStep === 'edit'}
@@ -354,6 +433,7 @@ const ModalStepper = ({
             toggleDisableForm={setIsFormDisabled}
             ref={currentStep === 'edit' ? editModalRef : null}
             setCropResult={handleSetCropResult}
+            setShouldDisplayNextButton={setDisplayNextButton}
             withBackButton={withBackButton}
           />
         )}
@@ -363,8 +443,23 @@ const ModalStepper = ({
             <Button type="button" color="cancel" onClick={handleToggle}>
               {formatMessage({ id: 'app.components.Button.cancel' })}
             </Button>
+            {shouldDisplayNextButton && (
+              <Button
+                type="button"
+                color="primary"
+                onClick={handleClickNextButton}
+                disabled={isEmpty(filesToDownload)}
+              >
+                {formatMessage({ id: getTrad('button.next') })}
+              </Button>
+            )}
             {currentStep === 'upload' && (
-              <Button type="button" color="success" onClick={handleUploadFiles}>
+              <Button
+                type="button"
+                color="success"
+                onClick={handleUploadFiles}
+                disabled={isFinishButtonDisabled}
+              >
                 {formatMessage(
                   {
                     id: getTrad(

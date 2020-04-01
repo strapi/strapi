@@ -44,6 +44,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             errorMessage: null,
             isUploading: false,
             originalIndex: 0,
+            tempId: null,
           },
           {
             abortController: new AbortController(),
@@ -57,6 +58,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             errorMessage: null,
             isUploading: false,
             originalIndex: 1,
+            tempId: null,
           },
         ],
       });
@@ -88,6 +90,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             errorMessage: null,
             isUploading: false,
             originalIndex: 0,
+            tempId: null,
           },
         ],
       });
@@ -106,6 +109,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             errorMessage: null,
             isUploading: false,
             originalIndex: 0,
+            tempId: null,
           },
           {
             abortController: new AbortController(),
@@ -119,6 +123,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             errorMessage: null,
             isUploading: false,
             originalIndex: 1,
+            tempId: null,
           },
           {
             abortController: new AbortController(),
@@ -132,6 +137,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             errorMessage: null,
             isUploading: false,
             originalIndex: 2,
+            tempId: null,
           },
         ],
       });
@@ -155,6 +161,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             errorMessage: null,
             isUploading: false,
             originalIndex: 0,
+            tempId: null,
           },
         ],
       });
@@ -168,11 +175,194 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             errorMessage: null,
             isUploading: false,
             originalIndex: 0,
+            tempId: null,
           },
         ],
       });
 
       expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
+  describe('ADD_URLS_TO_FILES_TO_UPLOAD', () => {
+    it('should add the files to the empty filesToUpload array and update the current step', () => {
+      const action = {
+        type: 'ADD_URLS_TO_FILES_TO_UPLOAD',
+        nextStep: 'test',
+      };
+      const state = fromJS({
+        currentStep: 'browse',
+        filesToUpload: [],
+        filesToDownload: ['test', 'test1'],
+      });
+      const expected = fromJS({
+        currentStep: 'test',
+        filesToDownload: [],
+        filesToUpload: [
+          {
+            file: null,
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test',
+            },
+            originalIndex: 0,
+            fileURL: 'test',
+            hasError: false,
+            errorMessage: null,
+            isUploading: false,
+            isDownloading: true,
+            tempId: 1,
+          },
+          {
+            file: null,
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test1',
+            },
+            originalIndex: 1,
+            fileURL: 'test1',
+            hasError: false,
+            errorMessage: null,
+            isUploading: false,
+            isDownloading: true,
+            tempId: 2,
+          },
+        ],
+      });
+
+      const received = reducer(state, action);
+
+      expect(received.get('currentStep')).toEqual(expected.get('currentStep'));
+      expect(received.get('filesToDownload')).toEqual(expected.get('filesToDownload'));
+      expect(received.get('filesToUpload').toJS()).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining(expected.getIn(['filesToUpload', '0']).toJS()),
+          expect.objectContaining(expected.getIn(['filesToUpload', '1']).toJS()),
+        ])
+      );
+    });
+
+    it('should add the files to the (not empty) filesToUpload array and update the current step', () => {
+      const state = fromJS({
+        currentStep: 'browse',
+        filesToDownload: ['test2', 'test3'],
+        filesToUpload: [
+          {
+            abortController: new AbortController(),
+            file: { name: 'test1', ok: true },
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test1',
+            },
+            hasError: false,
+            errorMessage: null,
+            isUploading: false,
+            originalIndex: 0,
+            tempId: null,
+          },
+          {
+            file: null,
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test1',
+            },
+            originalIndex: 1,
+            fileURL: 'test1',
+            hasError: false,
+            errorMessage: null,
+            isUploading: false,
+            isDownloading: true,
+            tempId: 2,
+          },
+        ],
+      });
+      const action = {
+        type: 'ADD_URLS_TO_FILES_TO_UPLOAD',
+        nextStep: 'test',
+      };
+
+      const expected = fromJS({
+        currentStep: 'test',
+        filesToDownload: [],
+        filesToUpload: [
+          {
+            abortController: new AbortController(),
+            file: { name: 'test1', ok: true },
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test1',
+            },
+            hasError: false,
+            errorMessage: null,
+            isUploading: false,
+            originalIndex: 0,
+            tempId: null,
+          },
+          {
+            file: null,
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test1',
+            },
+            originalIndex: 1,
+            fileURL: 'test1',
+            hasError: false,
+            errorMessage: null,
+            isUploading: false,
+            isDownloading: true,
+            tempId: 2,
+          },
+          {
+            file: null,
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test2',
+            },
+            originalIndex: 2,
+            fileURL: 'test2',
+            hasError: false,
+            errorMessage: null,
+            isUploading: false,
+            isDownloading: true,
+            tempId: 3,
+          },
+          {
+            file: null,
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test3',
+            },
+            originalIndex: 3,
+            fileURL: 'test3',
+            hasError: false,
+            errorMessage: null,
+            isUploading: false,
+            isDownloading: true,
+            tempId: 4,
+          },
+        ],
+      });
+
+      const received = reducer(state, action);
+
+      expect(received.get('currentStep')).toEqual(expected.get('currentStep'));
+      expect(received.get('filesToDownload')).toEqual(expected.get('filesToDownload'));
+      expect(received.get('filesToUpload').toJS()).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining(expected.getIn(['filesToUpload', '0']).toJS()),
+          expect.objectContaining(expected.getIn(['filesToUpload', '1']).toJS()),
+          expect.objectContaining(expected.getIn(['filesToUpload', '2']).toJS()),
+          expect.objectContaining(expected.getIn(['filesToUpload', '3']).toJS()),
+        ])
+      );
     });
   });
 
@@ -249,6 +439,159 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             errorMessage: null,
             isUploading: false,
             originalIndex: 2,
+          },
+        ],
+      });
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('should not change the data containing a defined tempId key', () => {
+      const action = {
+        type: 'CLEAN_FILES_ERROR',
+      };
+      const state = fromJS({
+        currentStep: 'test',
+        filesToUpload: [
+          {
+            abortController: new AbortController(),
+            file: { ok: true },
+            hasError: true,
+            errorMessage: 'error1',
+            isUploading: false,
+            originalIndex: 0,
+          },
+          {
+            abortController: new AbortController(),
+            file: { test: true },
+            hasError: true,
+            errorMessage: 'error2',
+            isUploading: false,
+            originalIndex: 1,
+            tempId: 1,
+          },
+          {
+            abortController: new AbortController(),
+            file: { test: false },
+            hasError: true,
+            errorMessage: 'error3',
+            isUploading: false,
+            originalIndex: 2,
+          },
+        ],
+      });
+
+      const expected = fromJS({
+        currentStep: 'test',
+        filesToUpload: [
+          {
+            abortController: new AbortController(),
+            file: { ok: true },
+            hasError: false,
+            errorMessage: null,
+            isUploading: false,
+            originalIndex: 0,
+          },
+          {
+            abortController: new AbortController(),
+            file: { test: true },
+            hasError: true,
+            errorMessage: 'error2',
+            isUploading: false,
+            originalIndex: 1,
+            tempId: 1,
+          },
+          {
+            abortController: new AbortController(),
+            file: { test: false },
+            hasError: false,
+            errorMessage: null,
+            isUploading: false,
+            originalIndex: 2,
+          },
+        ],
+      });
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
+  describe('FILE_DOWLOADED', () => {
+    it('should update the corresponding file', () => {
+      const state = fromJS({
+        currentStep: 'browse',
+        filesToDownload: [],
+        filesToUpload: [
+          {
+            abortController: new AbortController(),
+            file: { name: 'test1', ok: true },
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test1',
+            },
+            hasError: false,
+            errorMessage: null,
+            isUploading: false,
+            originalIndex: 0,
+            tempId: null,
+          },
+          {
+            file: null,
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test1',
+            },
+            originalIndex: 1,
+            fileURL: 'test1',
+            hasError: false,
+            errorMessage: null,
+            isUploading: false,
+            isDownloading: true,
+            tempId: 2,
+          },
+        ],
+      });
+
+      const action = {
+        type: 'FILE_DOWNLOADED',
+        fileTempId: 2,
+        blob: 'test',
+      };
+
+      const expected = fromJS({
+        currentStep: 'browse',
+        filesToDownload: [],
+        filesToUpload: [
+          {
+            abortController: new AbortController(),
+            file: { name: 'test1', ok: true },
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test1',
+            },
+            hasError: false,
+            errorMessage: null,
+            isUploading: false,
+            originalIndex: 0,
+            tempId: null,
+          },
+          {
+            file: 'test',
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test1',
+            },
+            originalIndex: 1,
+            fileURL: 'test1',
+            hasError: false,
+            errorMessage: null,
+            isUploading: false,
+            isDownloading: false,
+            tempId: 2,
           },
         ],
       });
@@ -340,6 +683,26 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
           test: 'test 1',
           isUploading: true,
         },
+        currentStep: 'test',
+      });
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
+  describe('ON_CHANGE_URLS_TO_DOWNLOAD', () => {
+    it('should change the data correctly', () => {
+      const action = {
+        type: 'ON_CHANGE_URLS_TO_DOWNLOAD',
+        keys: 'test',
+        value: ['test 1', 'test 2'],
+      };
+      const state = fromJS({
+        filesToDownload: [],
+        currentStep: 'test',
+      });
+      const expected = fromJS({
+        filesToDownload: ['test 1', 'test 2'],
         currentStep: 'test',
       });
 
@@ -521,6 +884,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
       const expected = fromJS({
         currentStep: 'browse',
         filesToUpload: [],
+        filesToDownload: [],
         fileToEdit: null,
       });
 
@@ -549,6 +913,89 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             test: true,
           },
         },
+      });
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
+  describe('SET_FILE_TO_DOWNLOAD_ERROR', () => {
+    it('should update the specified file error', () => {
+      const state = fromJS({
+        currentStep: 'browse',
+        filesToDownload: [],
+        filesToUpload: [
+          {
+            abortController: new AbortController(),
+            file: { name: 'test1', ok: true },
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test1',
+            },
+            hasError: false,
+            errorMessage: null,
+            isUploading: false,
+            originalIndex: 0,
+            tempId: null,
+          },
+          {
+            file: null,
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test1',
+            },
+            originalIndex: 1,
+            fileURL: 'test1',
+            hasError: false,
+            errorMessage: null,
+            isUploading: false,
+            isDownloading: true,
+            tempId: 2,
+          },
+        ],
+      });
+
+      const action = {
+        type: 'SET_FILE_TO_DOWNLOAD_ERROR',
+        fileTempId: 2,
+      };
+
+      const expected = fromJS({
+        currentStep: 'browse',
+        filesToDownload: [],
+        filesToUpload: [
+          {
+            abortController: new AbortController(),
+            file: { name: 'test1', ok: true },
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test1',
+            },
+            hasError: false,
+            errorMessage: null,
+            isUploading: false,
+            originalIndex: 0,
+            tempId: null,
+          },
+          {
+            file: null,
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test1',
+            },
+            originalIndex: 1,
+            fileURL: 'test1',
+            hasError: true,
+            errorMessage: 'test1',
+            isUploading: false,
+            isDownloading: false,
+            tempId: 2,
+          },
+        ],
       });
 
       expect(reducer(state, action)).toEqual(expected);
