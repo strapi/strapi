@@ -844,15 +844,15 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@buffetjs/core@3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@buffetjs/core/-/core-3.0.1.tgz#d508415a34d31f187008245b2e209e242c27e019"
-  integrity sha512-OLtHynNaaUJ03YRundxHRiXVs//IdFwep/fS3Xt8aYJH/xtVhPO5nqLGAkN8T6jyLVn+fxYZ7zy+T9ccrta3TQ==
+"@buffetjs/core@3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@buffetjs/core/-/core-3.0.2.tgz#b7ab4600f142c581b7ec70fca2042168be820f05"
+  integrity sha512-2pqMusTjI3JB9YzPFAya7ixai3cOwolITaPgP6e1xJ/5/nCyJOX1k90Zg2eJvQPRIUWvQrk7dMHiUeBXHuJAZw==
   dependencies:
-    "@buffetjs/hooks" "3.0.0"
-    "@buffetjs/icons" "3.0.0"
-    "@buffetjs/styles" "3.0.0"
-    "@buffetjs/utils" "3.0.0"
+    "@buffetjs/hooks" "3.0.2"
+    "@buffetjs/icons" "3.0.2"
+    "@buffetjs/styles" "3.0.2"
+    "@buffetjs/utils" "3.0.2"
     "@fortawesome/fontawesome-svg-core" "^1.2.25"
     "@fortawesome/free-regular-svg-icons" "^5.11.2"
     "@fortawesome/free-solid-svg-icons" "^5.11.2"
@@ -863,31 +863,31 @@
     react-dates "^21.5.1"
     react-moment-proptypes "^1.7.0"
 
-"@buffetjs/custom@3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@buffetjs/custom/-/custom-3.0.1.tgz#41ced07dc35e0442ecc4ec263e304b181f576e8e"
-  integrity sha512-TmsO8iKsOZPFigwEoJ2xxwzk7w0qT26QbKldmKepV1Y9LZHjWaSjjHEJpSlpzgU1/5FxOhaeQmTJTzWHMrvcUQ==
+"@buffetjs/custom@3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@buffetjs/custom/-/custom-3.0.2.tgz#6bf426b61e98fc8455a225a66657cb055864fd69"
+  integrity sha512-UWuYxusniCih9TM/zfJHjcWiq8qIgto4cJ0NHQHNReDfpNG0DWvbZBrg8yqABrcve8yRBoYVrNiXs9AoapRM/Q==
   dependencies:
-    "@buffetjs/core" "3.0.1"
-    "@buffetjs/styles" "3.0.0"
-    "@buffetjs/utils" "3.0.0"
+    "@buffetjs/core" "3.0.2"
+    "@buffetjs/styles" "3.0.2"
+    "@buffetjs/utils" "3.0.2"
     moment "^2.24.0"
     react-moment-proptypes "^1.7.0"
 
-"@buffetjs/hooks@3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@buffetjs/hooks/-/hooks-3.0.0.tgz#998a502a9acc419b49d0e437d60bc5d6df4727c5"
-  integrity sha512-4fi0DTgDElk5cKr7Z5jmRneasioQVUEWsv2oTXH+HA0IPiZS7Ob1dUcPsRltYcOFg/VygGHmbs0VPb6NCtl6Qw==
+"@buffetjs/hooks@3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@buffetjs/hooks/-/hooks-3.0.2.tgz#8c2530f38124c249606b5dc76bf110890c74cd43"
+  integrity sha512-Sf4PFGXM6CB/lB1qwDWwEyu75j6wsMJsuBheYhPeBHHnQgFS2v5gx3PaC+1Xm8DRxilsY6r6rT+07jntg67mKg==
 
-"@buffetjs/icons@3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@buffetjs/icons/-/icons-3.0.0.tgz#7c210df2cc741a303f3250bbac3e877da3d8bdad"
-  integrity sha512-6SFbizWbsTFzjTfIAK1/9PsnTJ3L5NwA3fqcgIZpGxSIdWH9+RIJXOPUfWaqFVpq9BChlul6HludcuZQex0Ceg==
+"@buffetjs/icons@3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@buffetjs/icons/-/icons-3.0.2.tgz#65b4c98b7f739d3a66f275c32d9bd31b88c953fc"
+  integrity sha512-aYV5drQNfzQk5RzZ7Gwgd4EmorEwJTjHv4lKqFRmEm20URPRsQkDhApE7IENKMw/G+hhKUJHXnAKQxgW8lkGHw==
 
-"@buffetjs/styles@3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@buffetjs/styles/-/styles-3.0.0.tgz#0c453adf264cac62404829d363a8daf953f1b79f"
-  integrity sha512-HSaQkYhkWRKIZq9vHnXrG+oBe43xw73BJd5DfmUdkDXPMQe6x5tkBZf4OhHtUlgemjuamiuR5qw4OYl+mmEp9Q==
+"@buffetjs/styles@3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@buffetjs/styles/-/styles-3.0.2.tgz#9f800460f95b31bdd50832104888d7c9f0973dcc"
+  integrity sha512-dKiNIEmN+eDxoRHU3IxcKgfcKa8C6T74yXekbTEtzUeBSMIly4BbTa2vVAKR89aSXeEg9KhG+F+9brlbi71BOA==
   dependencies:
     "@fortawesome/fontawesome-free" "^5.12.0"
     "@fortawesome/fontawesome-svg-core" "^1.2.22"
@@ -896,10 +896,10 @@
     "@fortawesome/react-fontawesome" "^0.1.4"
     react-dates "^21.1.0"
 
-"@buffetjs/utils@3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@buffetjs/utils/-/utils-3.0.0.tgz#ed78f60996c7486a745bd87669dd8f78add03901"
-  integrity sha512-xO/CQIRyYkWcMuHmGuullpJVUEUhXLq2pF46+x27XXxD3OzuDnoJQP6rKnqi4p2sZOeQSMTgo3yXBA+ZcSJLeA==
+"@buffetjs/utils@3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@buffetjs/utils/-/utils-3.0.2.tgz#dd18a85f50e1668a3e48f4533bd0c677bd026171"
+  integrity sha512-QUTFncBU0hViTDYfwaRi8aQvL/2hDBPStqtVOOe+MuhkeTlv8t1mdu51nA0+X7Z9Q6ygEpboaZT+N0QiBi0V2A==
   dependencies:
     yup "^0.27.0"
 
