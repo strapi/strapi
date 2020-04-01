@@ -20,7 +20,7 @@ import Input from '../Input';
 const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
   const [modal, setModal] = useState({
     isOpen: false,
-    step: null,
+    step: 'list',
     fileToEdit: null,
   });
   const [fileToDisplay, setFileToDisplay] = useState(0);
@@ -123,19 +123,17 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
         <Input type="file" name={name} />
       </CardPreviewWrapper>
 
-      {modal.isOpen && (
-        <InputModalStepper
-          isOpen={modal.isOpen}
-          step={modal.step}
-          fileToEdit={modal.fileToEdit}
-          filesToUpload={modal.filesToUpload}
-          multiple={attribute.multiple}
-          onInputMediaChange={handleChange}
-          selectedFiles={value}
-          onToggle={handleClickToggleModal}
-          allowedTypes={attribute.allowedTypes}
-        />
-      )}
+      <InputModalStepper
+        isOpen={modal.isOpen}
+        step={modal.step}
+        fileToEdit={modal.fileToEdit}
+        filesToUpload={modal.filesToUpload}
+        multiple={attribute.multiple}
+        onInputMediaChange={handleChange}
+        selectedFiles={value}
+        onToggle={handleClickToggleModal}
+        allowedTypes={attribute.allowedTypes}
+      />
     </Wrapper>
   );
 };

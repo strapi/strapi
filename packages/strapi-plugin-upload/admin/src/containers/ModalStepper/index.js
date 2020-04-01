@@ -333,7 +333,7 @@ const ModalStepper = ({
       }
     }
 
-    onToggle();
+    onToggle(true);
   };
 
   const handleUploadFiles = async () => {
