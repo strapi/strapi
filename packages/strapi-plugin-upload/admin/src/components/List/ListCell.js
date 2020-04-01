@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import PropTypes from 'prop-types';
 
 const ListCell = styled.div`
   width: 100%;
@@ -16,13 +15,5 @@ const ListCell = styled.div`
     max-width: 248px;
   }
 `;
-
-ListCell.defaultProps = {
-  small: false,
-};
-
-ListCell.propTypes = {
-  small: PropTypes.bool,
-};
 
 export default ListCell;
