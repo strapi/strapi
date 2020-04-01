@@ -8,6 +8,7 @@ const Wrapper = styled.div`
   align-items: center;
   width: ${({ small }) => (small ? '50px' : '94px')};
   height: ${({ small }) => (small ? '50px' : '94px')};
+  padding-left: 1%;
   border-radius: 50%;
   background-color: rgba(255, 255, 255, 0.5);
 `;

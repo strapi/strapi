@@ -17,8 +17,7 @@ const generateSearchFromObject = params => {
         acc.push(`${current}=${clonedParams[current]}`);
       } else {
         const filters = clonedParams[current].reduce((acc, curr) => {
-          const key =
-            curr.filter === '=' ? curr.name : `${curr.name}${curr.filter}`;
+          const key = curr.filter === '=' ? curr.name : `${curr.name}${curr.filter}`;
           acc.push(`${key}=${curr.value}`);
 
           return acc;
