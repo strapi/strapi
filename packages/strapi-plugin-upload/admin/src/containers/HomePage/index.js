@@ -1,8 +1,8 @@
-import React, { useReducer, useState, useEffect } from 'react';
+import React, { useReducer, useState, useRef, useEffect } from 'react';
 import { includes, isEmpty, toString } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
-import { useDebounce, useIsMounted } from '@buffetjs/hooks';
+import { useDebounce } from '@buffetjs/hooks';
 import {
   HeaderSearch,
   PageFooter,
@@ -46,7 +46,7 @@ const HomePage = () => {
   const [searchValue, setSearchValue] = useState(query.get('_q') || '');
   const { push } = useHistory();
   const { search } = useLocation();
-  const isMounted = useIsMounted();
+  const isMounted = useRef(true);
   const { data, dataCount, dataToDelete, isLoading } = reducerState.toJS();
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
   const paramsKeys = ['_limit', '_start', '_q', '_sort'];
@@ -61,6 +61,7 @@ const HomePage = () => {
   useEffect(() => {
     fetchListData();
 
+    return () => (isMounted.current = false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
@@ -72,7 +73,7 @@ const HomePage = () => {
         method: 'DELETE',
       });
     } catch (err) {
-      if (isMounted) {
+      if (isMounted.current) {
         strapi.notification.error('notification.error');
       }
     }
@@ -83,7 +84,7 @@ const HomePage = () => {
 
     const [data, count] = await Promise.all([fetchData(), fetchDataCount()]);
 
-    if (isMounted) {
+    if (isMounted.current) {
       dispatch({
         type: 'GET_DATA_SUCCEEDED',
         data,
@@ -103,7 +104,7 @@ const HomePage = () => {
 
       return Promise.resolve(data);
     } catch (err) {
-      if (isMounted) {
+      if (isMounted.current) {
         dispatch({ type: 'GET_DATA_ERROR' });
         strapi.notification.error('notification.error');
       }
@@ -122,7 +123,7 @@ const HomePage = () => {
 
       return Promise.resolve(count);
     } catch (err) {
-      if (isMounted) {
+      if (isMounted.current) {
         dispatch({ type: 'GET_DATA_ERROR' });
         strapi.notification.error('notification.error');
       }

@@ -35,14 +35,15 @@ describe('HELPER PLUGIN | utils | getFilterType', () => {
         id: 'components.FilterOptions.FILTER_TYPES._containss',
         value: '_containss',
       },
-      {
-        id: 'components.FilterOptions.FILTER_TYPES._in',
-        value: '_in',
-      },
-      {
-        id: 'components.FilterOptions.FILTER_TYPES._nin',
-        value: '_nin',
-      },
+      // Commenting until we support them
+      // {
+      //   id: 'components.FilterOptions.FILTER_TYPES._in',
+      //   value: '_in',
+      // },
+      // {
+      //   id: 'components.FilterOptions.FILTER_TYPES._nin',
+      //   value: '_nin',
+      // },
     ];
 
     it('should generate the expected array if type is text', () => {

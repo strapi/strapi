@@ -1,14 +1,12 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-
 import { Select } from '@buffetjs/core';
-import { getFilterType } from 'strapi-helper-plugin';
+
+import { getFilterType, request } from 'strapi-helper-plugin';
 import { getTrad } from '../../../utils';
 
 import reducer, { initialState } from './reducer';
-
-import filtersForm from './utils/filtersForm';
 
 import Wrapper from './Wrapper';
 import InputWrapper from './InputWrapper';
@@ -16,10 +14,21 @@ import FilterButton from './FilterButton';
 import FilterInput from './FilterInput';
 
 const FiltersCard = ({ onChange, filters }) => {
+  // Not using the hook from buffet.js because it appears that when the component is closed we the hooks returns false
+  // Until we make a PR on @buffetjs/hooks I rather use this custom one
+  const isMounted = useRef(true);
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const { name, filter, value } = state.toJS();
+  useEffect(() => {
+    if (isMounted.current) {
+      fetchTimestampNames();
+    }
 
+    return () => (isMounted.current = false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMounted]);
+
+  const { name, filter, filtersForm, value } = state.toJS();
   const type = filtersForm[name].type;
   const filtersOptions = getFilterType(type);
   const options = ['image', 'video', 'file'].filter(
@@ -36,7 +45,7 @@ const FiltersCard = ({ onChange, filters }) => {
   };
 
   const addFilter = () => {
-    onChange({ target: { value: state.toJS() } });
+    onChange({ target: { value: { name, filter, value } } });
 
     dispatch({
       type: 'RESET_FORM',
@@ -59,6 +68,25 @@ const FiltersCard = ({ onChange, filters }) => {
         </option>
       );
     });
+  };
+
+  const fetchTimestampNames = async () => {
+    try {
+      const result = await request('/content-manager/content-types/plugins::upload.file', {
+        method: 'GET',
+      });
+
+      if (isMounted.current) {
+        dispatch({
+          type: 'HANDLE_CUSTOM_TIMESTAMPS',
+          timestamps: result.data.contentType.schema.options.timestamps,
+        });
+      }
+    } catch (err) {
+      if (isMounted.current) {
+        strapi.notification.error('notification.error');
+      }
+    }
   };
 
   return (

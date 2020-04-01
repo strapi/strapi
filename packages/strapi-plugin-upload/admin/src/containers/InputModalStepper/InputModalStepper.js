@@ -21,6 +21,7 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
     filesToDownload,
     filesToUpload,
     fileToEdit,
+    formErrors,
     goTo,
     handleAbortUpload,
     handleCancelFileToUpload,
@@ -205,14 +206,16 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
   const handleToggle = () => {
     if (filesToUploadLength > 0 || selectedFiles.length > 0) {
       // eslint-disable-next-line no-alert
-      const confirm = window.confirm(formatMessage({ id: getTrad('window.confirm.close-modal') }));
+      const confirm = window.confirm(
+        formatMessage({ id: getTrad('window.confirm.close-modal.files') })
+      );
 
       if (!confirm) {
         return;
       }
     }
 
-    onToggle();
+    onToggle(true);
   };
 
   const shouldDisplayNextButton = currentStep === 'browse' && displayNextButton;
@@ -236,6 +239,7 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
             filesToDownload={filesToDownload}
             filesToUpload={filesToUpload}
             fileToEdit={fileToEdit}
+            formErrors={formErrors}
             isEditingUploadedFile={currentStep === 'edit'}
             isFormDisabled={isFormDisabled}
             onAbortUpload={handleAbortUpload}

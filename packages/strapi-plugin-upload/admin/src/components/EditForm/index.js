@@ -81,13 +81,7 @@ const EditForm = forwardRef(
         if (prefixedFileURL) {
           setSrc(prefixedFileURL);
         } else {
-          const reader = new FileReader();
-
-          reader.onloadend = () => {
-            setSrc(reader.result);
-          };
-
-          reader.readAsDataURL(fileToEdit.file);
+          setSrc(URL.createObjectURL(fileToEdit.file));
         }
       }
     }, [isImg, isVideo, fileToEdit, prefixedFileURL]);
