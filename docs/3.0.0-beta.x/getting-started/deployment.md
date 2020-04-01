@@ -12,6 +12,9 @@ Manual guides guides for deployment on various platforms, for One-click and dock
 
 <div>
 	<InstallLink link="../deployment/amazon-aws">
+    <template #icon>
+    <svg width="64" height="64" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><g fill="#fff" fill-rule="evenodd"><path d="M15.63 31.388l-7.135-2.56V18.373l7.135 2.43zm1.3 0l7.135-2.56V18.373l-7.135 2.432zm-7.7-13.8l7.2-2.033 6.696 2.16-6.696 2.273zm-2.092-.8L0 14.22V3.75l7.135 2.43zm1.307 0l7.135-2.56V3.75L8.443 6.192zm-7.7-13.8l7.2-2.043 6.696 2.16-6.696 2.273zm23.052 13.8l-7.135-2.56V3.75l7.135 2.43zm1.3 0l7.135-2.56V3.75l-7.135 2.43zm-7.7-13.8l7.2-2.033 6.696 2.16-6.696 2.273z" fill-rule="nonzero"></path></g></svg>
+    </template>
 		<template #title>Amazon AWS</template>
 		<template #description>
 			Step by step guide for deploying on AWS EC2
@@ -30,6 +33,9 @@ Manual guides guides for deployment on various platforms, for One-click and dock
 
 <div>
 	<InstallLink link="../deployment/digitalocean">
+		<template #icon>
+			<svg width="178" height="177" viewBox="0 0 178 177" xmlns="http://www.w3.org/2000/svg"><g fill="#fff" fill-rule="evenodd"><path d="M89 176.5v-34.2c36.2 0 64.3-35.9 50.4-74-5.1-14-16.4-25.3-30.5-30.4-38.1-13.8-74 14.2-74 50.4H.8C.8 30.6 56.6-14.4 117.1 4.5c26.4 8.3 47.5 29.3 55.7 55.7 18.9 60.5-26.1 116.3-83.8 116.3z" fill-rule="nonzero"></path><path d="M89.1 142.5H55v-34.1h34.1zM55 168.6H28.9v-26.1H55zM28.9 142.5H7v-21.9h21.9v21.9z"></path></g></svg>
+		</template>
 		<template #title>DigitalOcean</template>
 		<template #description>
 			Manual step by step guide for deploying on DigitalOcean droplets
@@ -39,6 +45,9 @@ Manual guides guides for deployment on various platforms, for One-click and dock
 
 <div>
 	<InstallLink link="../deployment/heroku">
+    <template #icon>
+    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 5.12 5.12" preserveAspectRatio="xMinYMin meet"><path d="M4.12 5.12H.968a.49.49 0 0 1-.488-.488V.488A.49.49 0 0 1 .968 0H4.12a.49.49 0 0 1 .488.488v4.144a.49.49 0 0 1-.488.488z" fill="#fff"/><path d="M3.068 4.415V2.382s.132-.487-1.63.2C1.436 2.6 1.436.7 1.436.7L2.01.697v1.2s1.61-.635 1.61.48v2.026h-.555zm.328-2.986h-.6c.22-.27.42-.73.42-.73h.63s-.108.3-.44.73zm-1.95 2.982V3.254l.58.58-.58.58z" fill="#3498DB"/></svg>
+    </template>
 		<template #title>Heroku</template>
 		<template #description>
 			Step by step guide for deploying on Heroku
