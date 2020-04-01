@@ -322,7 +322,7 @@ const ModalStepper = ({
       }
     }
 
-    if (!isEqual(initialFileToEdit, fileToEdit)) {
+    if (!isEqual(initialFileToEdit, fileToEdit) && currentStep === 'edit') {
       // eslint-disable-next-line no-alert
       const confirm = window.confirm(
         formatMessage({ id: getTrad('window.confirm.close-modal.file') })

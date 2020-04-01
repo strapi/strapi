@@ -63,7 +63,6 @@ const EditForm = forwardRef(
     const isImg = isImageType(mimeType);
     const isVideo = isVideoType(mimeType);
     const canCrop = isImg && !mimeType.includes('svg');
-
     const aRef = useRef();
     const imgRef = useRef();
     const inputRef = useRef();
@@ -330,6 +329,16 @@ const EditForm = forwardRef(
             multiple={false}
             onChange={handleChange}
             style={{ display: 'none' }}
+            accept={mimeType
+              .split('/')
+              .map((v, i) => {
+                if (i === 1) {
+                  return '*';
+                }
+
+                return v;
+              })
+              .join('/')}
           />
           <button type="submit" style={{ display: 'none' }}>
             hidden button to make to get the native form event
