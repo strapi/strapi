@@ -12,7 +12,7 @@ const filtersForm = {
     defaultValue: moment(),
   },
   size: {
-    type: 'size',
+    type: 'integer',
     defaultFilter: '=',
     defaultValue: '0KB',
   },

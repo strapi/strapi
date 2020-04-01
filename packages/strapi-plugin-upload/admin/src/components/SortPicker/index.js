@@ -10,12 +10,12 @@ import Picker from '../Picker';
 
 const SortPicker = ({ onChange, value }) => {
   const orders = {
-    created_at_asc: 'created_at:ASC',
     created_at_desc: 'created_at:DESC',
+    created_at_asc: 'created_at:ASC',
     name_asc: 'name:ASC',
     name_desc: 'name:DESC',
-    updated_at_asc: 'updated_at:ASC',
     updated_at_desc: 'updated_at:DESC',
+    updated_at_asc: 'updated_at:ASC',
   };
 
   return (

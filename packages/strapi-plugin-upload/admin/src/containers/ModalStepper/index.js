@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useReducer, useRef } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
-import { get, isEmpty } from 'lodash';
+import { isEqual, isEmpty, get } from 'lodash';
 import { Modal, ModalFooter, PopUpWarning, useGlobalContext, request } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
 import pluginId from '../../pluginId';
@@ -297,7 +297,20 @@ const ModalStepper = ({
   const handleToggle = () => {
     if (filesToUploadLength > 0) {
       // eslint-disable-next-line no-alert
-      const confirm = window.confirm(formatMessage({ id: getTrad('window.confirm.close-modal') }));
+      const confirm = window.confirm(
+        formatMessage({ id: getTrad('window.confirm.close-modal.files') })
+      );
+
+      if (!confirm) {
+        return;
+      }
+    }
+
+    if (!isEqual(initialFileToEdit, fileToEdit)) {
+      // eslint-disable-next-line no-alert
+      const confirm = window.confirm(
+        formatMessage({ id: getTrad('window.confirm.close-modal.file') })
+      );
 
       if (!confirm) {
         return;

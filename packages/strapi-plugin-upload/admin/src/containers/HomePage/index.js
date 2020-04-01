@@ -30,7 +30,7 @@ import Filters from '../../components/Filters';
 import List from '../../components/List';
 import ListEmpty from '../../components/ListEmpty';
 import ModalStepper from '../ModalStepper';
-import { generateStringParamsFromQuery, getHeaderLabel } from './utils';
+import { generateStringFromParams, getHeaderLabel } from './utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
@@ -47,14 +47,14 @@ const HomePage = () => {
   const { push } = useHistory();
   const { search } = useLocation();
   const isMounted = useIsMounted();
-
   const { data, dataCount, dataToDelete, isLoading } = reducerState.toJS();
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
   const paramsKeys = ['_limit', '_start', '_q', '_sort'];
   const debouncedSearch = useDebounce(searchValue, 300);
 
   useEffect(() => {
-    handleChangeParams({ target: { name: '_q', value: searchValue } });
+    handleChangeParams({ target: { name: '_q', value: debouncedSearch } });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch]);
 
@@ -94,7 +94,7 @@ const HomePage = () => {
 
   const fetchData = async () => {
     const dataRequestURL = getRequestUrl('files');
-    const params = generateStringParamsFromQuery(query);
+    const params = generateStringFromParams(query);
 
     try {
       const data = await request(`${dataRequestURL}?${params}`, {
@@ -143,7 +143,7 @@ const HomePage = () => {
     return params;
   };
 
-  const generateNewSearch = updatedParams => {
+  const generateNewSearch = (updatedParams = {}) => {
     return {
       ...getSearchParams(),
       filters: generateFiltersFromSearch(search),
@@ -169,14 +169,16 @@ const HomePage = () => {
   };
 
   const handleChangeParams = ({ target: { name, value } }) => {
-    let updatedQueryParams;
+    let updatedQueryParams = generateNewSearch({ [name]: value });
 
     if (name === 'filters') {
       const filters = [...generateFiltersFromSearch(search), value];
 
       updatedQueryParams = generateNewSearch({ [name]: filters });
-    } else {
-      updatedQueryParams = generateNewSearch({ [name]: value });
+    }
+
+    if (name === '_limit') {
+      updatedQueryParams = generateNewSearch({ [name]: value, _start: 0 });
     }
 
     const newSearch = generateSearchFromFilters(updatedQueryParams);
@@ -213,6 +215,7 @@ const HomePage = () => {
     const filters = generateFiltersFromSearch(search).filter(
       (filter, filterIndex) => filterIndex !== index
     );
+
     const updatedQueryParams = generateNewSearch({ filters });
 
     const newSearch = generateSearchFromFilters(updatedQueryParams);
@@ -222,11 +225,8 @@ const HomePage = () => {
 
   const handleDeleteMediaFromModal = async id => {
     handleClickToggleModal();
-    const overlayblockerParams = {
-      children: <div />,
-      noGradient: true,
-    };
-    strapi.lockApp(overlayblockerParams);
+
+    lockAppWithOverlay();
 
     try {
       await deleteMedia(id);
@@ -245,14 +245,23 @@ const HomePage = () => {
   };
 
   const handleDeleteMedias = async () => {
-    await Promise.all(dataToDelete.map(item => deleteMedia(item.id)));
-
-    dispatch({
-      type: 'CLEAR_DATA_TO_DELETE',
-    });
-
     setIsPopupOpen(false);
-    fetchListData();
+
+    lockAppWithOverlay();
+
+    try {
+      await Promise.all(dataToDelete.map(item => deleteMedia(item.id)));
+
+      dispatch({
+        type: 'CLEAR_DATA_TO_DELETE',
+      });
+
+      fetchListData();
+    } catch (error) {
+      // Silent
+    } finally {
+      strapi.unlockApp();
+    }
   };
 
   const handleModalClose = () => {
@@ -268,6 +277,15 @@ const HomePage = () => {
     dispatch({
       type: 'TOGGLE_SELECT_ALL',
     });
+  };
+
+  const lockAppWithOverlay = () => {
+    const overlayblockerParams = {
+      children: <div />,
+      noGradient: true,
+    };
+
+    strapi.lockApp(overlayblockerParams);
   };
 
   const resetModalState = () => {
@@ -308,7 +326,7 @@ const HomePage = () => {
   const start = parseInt(query.get('_start'), 10) || 0;
 
   const params = {
-    _limit: parseInt(query.get('_limit'), 10) || 10,
+    _limit: limit,
     _page: generatePageFromStart(start, limit),
   };
 
