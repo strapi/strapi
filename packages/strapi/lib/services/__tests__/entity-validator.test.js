@@ -217,5 +217,36 @@ describe('Entity validator', () => {
       const data = await entityValidator.validateEntity(model, input);
       expect(data).toEqual(input);
     });
+
+    test('Assign default values', async () => {
+      const errors = {
+        badRequest: jest.fn(),
+      };
+
+      const entityValidator = createEntityValidator({
+        strapi: {
+          errors,
+        },
+      });
+
+      const model = {
+        attributes: {
+          title: {
+            type: 'string',
+            required: true,
+            default: 'New',
+          },
+          type: {
+            type: 'string',
+            default: 'test',
+          },
+        },
+      };
+
+      await expect(entityValidator.validateEntity(model, {})).resolves.toMatchObject({
+        title: 'New',
+        type: 'test',
+      });
+    });
   });
 });
