@@ -51,13 +51,21 @@ const Card = ({
         <Border color={hasError ? 'orange' : 'mediumBlue'} shown={checked || hasError} />
         {children}
       </CardImgWrapper>
-      <Flex>
-        <Title>{!withoutFileInfo && name}&nbsp;</Title>
-        {!withoutFileInfo && <Tag label={getType(fileType)} />}
-      </Flex>
-      <Text color="grey" fontSize="xs" ellipsis>
-        {!withoutFileInfo && `${getExtension(fileType)} - ${fileSize}`}
-      </Text>
+
+      {!withoutFileInfo ? (
+        <>
+          <Flex>
+            <Title>{name}</Title>
+            <Tag label={getType(fileType)} />
+          </Flex>
+          <Text color="grey" fontSize="xs" ellipsis>
+            {!withoutFileInfo && `${getExtension(fileType)} - ${fileSize}`}
+          </Text>
+        </>
+      ) : (
+        <Text lineHeight="13px" />
+      )}
+
       {hasError && <ErrorMessage title={errorMessage}>{errorMessage}</ErrorMessage>}
     </Wrapper>
   );
