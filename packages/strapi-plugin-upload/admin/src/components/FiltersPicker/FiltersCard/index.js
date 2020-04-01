@@ -1,14 +1,13 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
+import { useIsMounted } from '@buffetjs/hooks';
 import { Select } from '@buffetjs/core';
-import { getFilterType } from 'strapi-helper-plugin';
+import { getFilterType, request } from 'strapi-helper-plugin';
 import { getTrad } from '../../../utils';
 
 import reducer, { initialState } from './reducer';
-
-import filtersForm from './utils/filtersForm';
 
 import Wrapper from './Wrapper';
 import InputWrapper from './InputWrapper';
@@ -16,9 +15,9 @@ import FilterButton from './FilterButton';
 import FilterInput from './FilterInput';
 
 const FiltersCard = ({ onChange, filters }) => {
+  const isMounted = useIsMounted();
   const [state, dispatch] = useReducer(reducer, initialState);
-
-  const { name, filter, value } = state.toJS();
+  const { name, filter, filtersForm, value } = state.toJS();
 
   const type = filtersForm[name].type;
   const filtersOptions = getFilterType(type);
@@ -36,7 +35,7 @@ const FiltersCard = ({ onChange, filters }) => {
   };
 
   const addFilter = () => {
-    onChange({ target: { value: state.toJS() } });
+    onChange({ target: { value: { name, filter, value } } });
 
     dispatch({
       type: 'RESET_FORM',
@@ -60,6 +59,28 @@ const FiltersCard = ({ onChange, filters }) => {
       );
     });
   };
+
+  const fetchTimestampNames = async () => {
+    try {
+      const result = await request('/content-manager/content-types/plugins::upload.file', {
+        method: 'GET',
+      });
+
+      dispatch({
+        type: 'HANDLE_CUSTOM_TIMESTAMPS',
+        timestamps: result.data.contentType.schema.options.timestamps,
+      });
+    } catch (err) {
+      if (isMounted) {
+        strapi.notification.error('notification.error');
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchTimestampNames();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Wrapper>
