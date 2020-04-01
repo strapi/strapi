@@ -1,6 +1,5 @@
 import React, { useEffect, useReducer, useRef } from 'react';
 import { Header, Inputs } from '@buffetjs/custom';
-import { useIsMounted } from '@buffetjs/hooks';
 import { isEqual } from 'lodash';
 import { LoadingIndicatorPage, useGlobalContext, request } from 'strapi-helper-plugin';
 
@@ -16,7 +15,7 @@ const SettingsPage = () => {
   const { formatMessage } = useGlobalContext();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { initialData, isLoading, modifiedData } = reducerState.toJS();
-  const isMounted = useIsMounted();
+  const isMounted = useRef(true);
   const getDataRef = useRef();
   const abortController = new AbortController();
 
@@ -25,7 +24,7 @@ const SettingsPage = () => {
       const { signal } = abortController;
       const { data } = await request(getRequestUrl('settings', { method: 'GET', signal }));
 
-      if (isMounted) {
+      if (isMounted.current) {
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
           data,
@@ -37,15 +36,14 @@ const SettingsPage = () => {
   };
 
   useEffect(() => {
-    if (isMounted) {
-      getDataRef.current();
-    }
+    getDataRef.current();
 
     return () => {
       abortController.abort();
+      isMounted.current = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMounted]);
+  }, []);
 
   const handleSubmit = async () => {
     try {
@@ -54,7 +52,7 @@ const SettingsPage = () => {
         body: modifiedData,
       });
 
-      if (isMounted) {
+      if (isMounted.current) {
         dispatch({
           type: 'SUBMIT_SUCCEEDED',
         });
