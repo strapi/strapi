@@ -37,14 +37,15 @@ const getFilterType = type => {
           id: 'components.FilterOptions.FILTER_TYPES._containss',
           value: '_containss',
         },
-        {
-          id: 'components.FilterOptions.FILTER_TYPES._in',
-          value: '_in',
-        },
-        {
-          id: 'components.FilterOptions.FILTER_TYPES._nin',
-          value: '_nin',
-        },
+        // These lines are commented until we support the array in the admin
+        // {
+        //   id: 'components.FilterOptions.FILTER_TYPES._in',
+        //   value: '_in',
+        // },
+        // {
+        //   id: 'components.FilterOptions.FILTER_TYPES._nin',
+        //   value: '_nin',
+        // },
       ];
     case 'integer':
     case 'biginteger':

@@ -186,6 +186,8 @@ const InputModalStepperProvider = ({
   };
 
   const handleClose = () => {
+    setFormErrors(null);
+
     dispatch({
       type: 'RESET_PROPS',
     });
