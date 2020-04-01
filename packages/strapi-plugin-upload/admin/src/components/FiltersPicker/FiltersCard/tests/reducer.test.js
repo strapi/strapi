@@ -30,6 +30,19 @@ describe('Upload | components | FiltersCard | reducer', () => {
 
     expect(actual).toEqual(expected);
   });
+  it('should return the updated filters form with custom timestamps', () => {
+    const state = initialState;
+
+    const action = {
+      type: 'HANDLE_CUSTOM_TIMESTAMPS',
+      timestamps: ['createdAtCustom', 'updatedAtCustom'],
+    };
+
+    const actualFiltersFormKeys = Object.keys(reducer(state, action).toJS().filtersForm);
+    const expectedFiltersFormKeys = ['createdAtCustom', 'updatedAtCustom', 'size', 'mime'];
+
+    expect(actualFiltersFormKeys).toEqual(expectedFiltersFormKeys);
+  });
 
   it('should return the initialState on reset', () => {
     const state = initialState.set('filter', '>');
