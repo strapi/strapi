@@ -48,3 +48,4 @@ const createNewFilesToDownloadArray = (filesURLArray, alreadyUploadedFiles) => {
 };
 
 export default createNewFilesToDownloadArray;
+export { getMax, getTempsIds };
