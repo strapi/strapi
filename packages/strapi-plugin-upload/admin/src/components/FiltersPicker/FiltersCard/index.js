@@ -15,6 +15,7 @@ import FilterButton from './FilterButton';
 import FilterInput from './FilterInput';
 
 const FiltersCard = ({ onChange, filters }) => {
+  return null;
   const isMounted = useIsMounted();
   const [state, dispatch] = useReducer(reducer, initialState);
   const { name, filter, filtersForm, value } = state.toJS();

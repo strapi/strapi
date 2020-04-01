@@ -37,13 +37,15 @@ const SettingsPage = () => {
   };
 
   useEffect(() => {
-    getDataRef.current();
+    if (isMounted) {
+      getDataRef.current();
+    }
 
     return () => {
       abortController.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isMounted]);
 
   const handleSubmit = async () => {
     try {

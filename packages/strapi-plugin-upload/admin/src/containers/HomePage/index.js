@@ -59,10 +59,12 @@ const HomePage = () => {
   }, [debouncedSearch]);
 
   useEffect(() => {
-    fetchListData();
+    if (isMounted) {
+      fetchListData();
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
+  }, [search, isMounted]);
 
   const deleteMedia = async id => {
     const requestURL = getRequestUrl(`files/${id}`);
