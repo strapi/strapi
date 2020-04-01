@@ -4,7 +4,7 @@ import createNewFilesToDownloadArray, {
 } from '../createNewFilesToDownloadArray';
 
 describe('UPLOAD | utils', () => {
-  describe('CreateNewFilesToDownloadArray', () => {
+  describe('createNewFilesToDownloadArray', () => {
     it('should create an array containing the formatted data and filter the empty data', () => {
       const dataURLArray = ['', 'un', undefined, 'deux', null, 'trois'];
       const dataFilesArray = [

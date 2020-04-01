@@ -19,8 +19,6 @@ const createNewFilesToDownloadArray = (filesURLArray, alreadyUploadedFiles) => {
     }
 
     const CancelToken = axios.CancelToken;
-
-    // TODO change with axios cancel request
     const abortController = new AbortController();
     const source = CancelToken.source();
 
