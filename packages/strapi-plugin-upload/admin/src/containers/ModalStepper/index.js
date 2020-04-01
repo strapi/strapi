@@ -5,7 +5,7 @@ import { isEqual, isEmpty, get } from 'lodash';
 import { Modal, ModalFooter, PopUpWarning, useGlobalContext, request } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
 import pluginId from '../../pluginId';
-import { getFilesToDownload, getTrad } from '../../utils';
+import { getFilesToDownload, getTrad, getYupError, urlSchema } from '../../utils';
 import ModalHeader from '../../components/ModalHeader';
 import stepper from './stepper';
 import init from './init';
@@ -23,6 +23,7 @@ const ModalStepper = ({
   const [isWarningDeleteOpen, setIsWarningDeleteOpen] = useState(false);
   const [shouldDeleteFile, setShouldDeleteFile] = useState(false);
   const [isFormDisabled, setIsFormDisabled] = useState(false);
+  const [formErrors, setFormErrors] = useState(null);
   const [displayNextButton, setDisplayNextButton] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { currentStep, fileToEdit, filesToDownload, filesToUpload } = reducerState.toJS();
@@ -150,6 +151,8 @@ const ModalStepper = ({
     let type = 'ON_CHANGE';
 
     if (name === 'url') {
+      setFormErrors(null);
+
       val = value.split('\n');
       type = 'ON_CHANGE_URLS_TO_DOWNLOAD';
     }
@@ -166,12 +169,24 @@ const ModalStepper = ({
     toggleModalWarning();
   };
 
-  const handleClickNextButton = () => {
-    // Navigate to next step
-    dispatch({
-      type: 'ADD_URLS_TO_FILES_TO_UPLOAD',
-      nextStep: next,
-    });
+  const handleClickNextButton = async () => {
+    try {
+      await urlSchema.validate(
+        { filesToDownload: filesToDownload.filter(url => !isEmpty(url)) },
+        { abortEarly: false }
+      );
+
+      setFormErrors(null);
+      // Navigate to next step
+      dispatch({
+        type: 'ADD_URLS_TO_FILES_TO_UPLOAD',
+        nextStep: next,
+      });
+    } catch (err) {
+      const formattedErrors = getYupError(err);
+
+      setFormErrors(formattedErrors.filesToDownload);
+    }
   };
 
   const handleClickDeleteFile = async () => {
@@ -197,6 +212,7 @@ const ModalStepper = ({
     onClosed();
     setIsFormDisabled(false);
     setDisplayNextButton(false);
+    setFormErrors(null);
 
     dispatch({
       type: 'RESET_PROPS',
@@ -416,6 +432,7 @@ const ModalStepper = ({
             fileToEdit={fileToEdit}
             filesToDownload={filesToDownload}
             filesToUpload={filesToUpload}
+            formErrors={formErrors}
             components={components}
             isEditingUploadedFile={currentStep === 'edit'}
             isFormDisabled={isFormDisabled}

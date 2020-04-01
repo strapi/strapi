@@ -21,6 +21,7 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
     filesToDownload,
     filesToUpload,
     fileToEdit,
+    formErrors,
     goTo,
     handleAbortUpload,
     handleCancelFileToUpload,
@@ -236,6 +237,7 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
             filesToDownload={filesToDownload}
             filesToUpload={filesToUpload}
             fileToEdit={fileToEdit}
+            formErrors={formErrors}
             isEditingUploadedFile={currentStep === 'edit'}
             isFormDisabled={isFormDisabled}
             onAbortUpload={handleAbortUpload}
