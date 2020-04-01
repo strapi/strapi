@@ -35,7 +35,7 @@ const urlSchema = yup.object().shape({
       },
     })
     .min(0, errorsTrads.min)
-    .max(3, errorsTrads.max),
+    .max(20, errorsTrads.max),
 });
 
 export default urlSchema;

@@ -132,6 +132,8 @@ const InputModalStepperProvider = ({
     let type = 'ON_CHANGE';
 
     if (name === 'url') {
+      setFormErrors(null);
+
       val = value.split('\n');
       type = 'ON_CHANGE_URLS_TO_DOWNLOAD';
     }
