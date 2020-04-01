@@ -2,19 +2,9 @@
 
 The middlewares are functions which are composed and executed in a stack-like manner upon request. If you are not familiar with the middleware stack in Koa, we highly recommend you to read the [Koa's documentation introduction](http://koajs.com/#introduction).
 
-Enable the middleware in environments settings
+## Structure
 
-**Path —** `config/environments/**/middleware.json`.
-
-```json
-{
-  "responseTime": {
-    "enabled": true
-  }
-}
-```
-
-**Path —** [`strapi/lib/middlewares/responseTime/index.js`](https://github.com/strapi/strapi/blob/master/packages/strapi/lib/middlewares/responseTime/index.js).
+### File structure
 
 ```js
 module.exports = strapi => {
@@ -22,14 +12,11 @@ module.exports = strapi => {
     // can also be async
     initialize() {
       strapi.app.use(async (ctx, next) => {
-        const start = Date.now();
+        // await someAsyncCode()
 
         await next();
 
-        const delta = Math.ceil(Date.now() - start);
-
-        // Set X-Response-Time header
-        ctx.set('X-Response-Time', delta + 'ms');
+        // await someAsyncCode()
       });
     },
   };
@@ -37,6 +24,62 @@ module.exports = strapi => {
 ```
 
 - `initialize` (function): Called during the server boot.
+
+The middlewares are accessible through the `strapi.middleware` variable.
+
+### Node modules
+
+Every folder that follows this name pattern `strapi-middleware-*` in your `./node_modules` folder will be loaded as a middleware.
+
+A middleware needs to follow the structure below:
+
+```
+/middleware
+└─── lib
+     - index.js
+- LICENSE.md
+- package.json
+- README.md
+```
+
+The `index.js` is the entry point to your middleware. It should look like the example above.
+
+### Custom middlewares
+
+The framework allows the application to override the default middlewares and add new ones. You have to create a `./middlewares` folder at the root of your project and put the middlewares into it.
+
+```
+/project
+└─── api
+└─── config
+└─── middlewares
+│   └─── responseTime // It will override the core default responseTime middleware.
+│        - index.js
+│   └─── views // It will be added into the stack of middleware.
+│        - index.js
+└─── public
+- favicon.ico
+- package.json
+- server.js
+```
+
+Every middleware will be injected into the Koa stack. To manage the load order, please refer to the [Middleware order section](#load-order).
+
+## Configuration and activation
+
+To activate and configure your hook with custom options, you need to edit your `./config/environments/**/middleware.json` file in your Strapi app.
+
+```javascript
+{
+  ...
+  "middleware-name": {
+    "enabled": true,
+    ...
+  }
+}
+```
+
+## Core middlewares
 
 The core of Strapi embraces a small list of middlewares for performances, security and great error handling.
 
@@ -64,43 +107,7 @@ The core of Strapi embraces a small list of middlewares for performances, securi
 The following middlewares cannot be disabled: responses, router, logger and boom.
 :::
 
-## Node modules structure
-
-A middleware needs to follow the structure below:
-
-```
-/middleware
-└─── lib
-     - index.js
-- LICENSE.md
-- package.json
-- README.md
-```
-
-The `index.js` is the entry point to your middleware. It should look like the example above.
-
-## Custom middlewares structure
-
-The framework allows the application to override the default middlewares and add new ones. You have to create a `./middlewares` folder at the root of your project and put the middlewares into it.
-
-```
-/project
-└─── api
-└─── config
-└─── middlewares
-│   └─── responseTime // It will override the core default responseTime middleware.
-│        - index.js
-│   └─── views // It will be added into the stack of middleware.
-│        - index.js
-└─── public
-- favicon.ico
-- package.json
-- server.js
-```
-
-Every middleware will be injected into the Koa stack. To manage the load order, please refer to the [Middleware order section](#load-order).
-
-## Load order
+### Load order
 
 The middlewares are injected into the Koa stack asynchronously. Sometimes it happens that some of these middlewares need to be loaded in a specific order. To define a load order, we created a dedicated file located in `./config/middleware.json`.
 
@@ -125,9 +132,43 @@ The middlewares are injected into the Koa stack asynchronously. Sometimes it hap
   - `order`: Array of middlewares that need to be loaded in a specific order.
   - `after`: Array of middlewares that need to be loaded at the end of the stack. The order of this array matters.
 
-#### Examples
+### Examples
 
-**Load a middleware at the very first place**
+Create your custom middleware.
+
+**Path —** `./middlewares/timer/index.js`
+
+```js
+module.exports = strapi => {
+  return {
+    initialize() {
+      strapi.app.use(async (ctx, next) => {
+        const start = Date.now();
+
+        await next();
+
+        const delta = Math.ceil(Date.now() - start);
+
+        ctx.set('X-Response-Time', delta + 'ms');
+      });
+    },
+  };
+};
+```
+
+Enable the middleware in environments settings.
+
+**Path —** `config/environments/**/middleware.json`.
+
+```json
+{
+  "timer": {
+    "enabled": true
+  }
+}
+```
+
+Load a middleware at the very first place
 
 **Path —** `./config/middleware.json`
 
@@ -135,91 +176,11 @@ The middlewares are injected into the Koa stack asynchronously. Sometimes it hap
 {
   "timeout": 100,
   "load": {
-    "before": ["responseTime", "logger"],
-    "order": [],
-    "after": []
-  }
-}
-```
-
-The `responseTime` middleware will be loaded first. Immediately followed by the `logger` middleware. Then, the other middlewares will be loaded asynchronously.
-
-**Load a middleware after another one**
-
-**Path —** `./config/middleware.json`.
-
-```json
-{
-  "timeout": 100,
-  "load": {
-    "before": [],
-    "order": ["p3p", "gzip"],
-    "after": []
-  }
-}
-```
-
-The `gzip` middleware will be loaded after the `p3p` middleware. All the others will be loaded asynchronously.
-
-**Load a middleware at the very end**
-
-**Path —** `./config/middleware.json`.
-
-```json
-  {
-    "timeout": 100,
-    "load": {
-      "before": [
-        ...
-      ],
-      "order": [],
-      "after": [
-        "parser",
-        "router"
-      ]
-    }
-  }
-```
-
-The `router` middleware will be loaded at the very end. The `parser` middleware will be loaded after all the others and just before the `router` middleware.
-
-**Complete example**
-
-For this example, we are going to imagine that we have 10 middlewares to load:
-
-- cors
-- cron
-- favicon
-- gzip
-- logger
-- p3p
-- parser
-- response
-- responseTime
-- router
-
-We assume that we set the `./config/middleware.json` file like this:
-
-```json
-{
-  "timeout": 100,
-  "load": {
-    "before": ["responseTime", "logger", "cors"],
-    "order": ["p3p", "gzip"],
+    "before": ["time", "responseTime", "logger", "cors", "responses", "gzip"],
+    "order": [
+      "Define the middlewares' load order by putting their name in this array is the right order"
+    ],
     "after": ["parser", "router"]
   }
 }
 ```
-
-Here is the loader order:
-
-1. responseTime (loaded at the very first place)
-2. logger
-3. cors
-4. favicon (position order not guaranteed)
-5. p3p
-6. cron (position order not guaranteed)
-7. gzip (loaded after the p3p middlewares)
-8. response (position order not guaranteed)
-9. parser
-10. router (loaded at the very last place)

@@ -6,13 +6,11 @@ sidebarDepth: 2
 
 The main configurations of the project are located in the `./config` directory. Additional configs can be added in the `./api/**/config` folder of each API and plugin by creating JavaScript or JSON files.
 
-::: tip
-Inside the `/config` folder, every folder will be parsed and injected into the global object `strapi.config`. Let's say, you added a folder named `credentials` with two files `stripe.json` and `paypal.json` into it. The content of these files will be accessible through `strapi.config.credentials.stripe` and `strapi.config.credentials.paypal`.
-:::
-
 ## Application
 
 Contains the main configurations relative to your project.
+
+These configurations are accessible through `strapi.config.favicon` and `strapi.config.public`.
 
 **Path —** `./config/application.json`.
 
@@ -40,24 +38,22 @@ Contains the main configurations relative to your project.
 
 Add custom configurations to the project. The content of this file is available through the `strapi.config` object.
 
-#### Example
-
 **Path —** `./config/custom.json`.
 
 ```json
 {
-  "backendURL": "http://www.strapi.io",
+  "providerURL": "https://provider.com",
   "mainColor": "blue"
 }
 ```
 
-These configurations are accessible through `strapi.config.backendURL` and `strapi.config.mainColor`.
+These configurations are accessible through `strapi.config.providerURL` and `strapi.config.mainColor`.
 
 ## Functions
 
 The `./config/functions/` folder contains a set of JavaScript files in order to add dynamic and logic based configurations.
 
-All functions that are exposed in this folder or in your `./config` folder are accessible via `strapi.config.functions['fileName']();`
+All functions that are exposed in this folder are accessible via `strapi.config.functions['fileName']();`
 
 ### Bootstrap
 
@@ -104,7 +100,7 @@ CRON tasks allow you to schedule jobs (arbitrary functions) for execution at spe
 
 This feature is powered by [`node-schedule`](https://www.npmjs.com/package/node-schedule) node modules. Check it for more information.
 
-::: tip
+::: warning
 Make sure the `enabled` cron config is set to `true` in `./config/environments/**/server.json` file.
 :::
 
@@ -140,9 +136,6 @@ module.exports = {
 ```
 
 ### Database ORM customization
-
-- **Path —** `./config/functions/bookshelf.js`.
-- **Path —** `./config/functions/mongoose.js`.
 
 When present, they are loaded to let you customize your database connection instance, for example for adding some plugin, customizing parameters, etc.
 
@@ -188,11 +181,17 @@ module.exports = (bookshelf, connection) => {
 
 Most of the application's configurations are defined by environment. It means that you can specify settings for each environment (`development`, `production`, `test`, etc.).
 
+To start your application in production environement you will have to specify `NODE_ENV=production`.
+
 ::: tip
 You can access the config of the current environment through `strapi.config.currentEnvironment`.
 :::
 
 ## Database
+
+This file let you define database connections that will be used to store your application content.
+
+You can find [supported database and versions](../installation/cli.html#databases) in the local installation process.
 
 **Path —** `./config/environments/**/database.json`.
 
@@ -242,6 +241,7 @@ You can access the config of the current environment through `strapi.config.curr
       - `database` (string): Database name.
       - `username` (string): Username used to establish the connection.
       - `password` (string): Password used to establish the connection.
+      - `uri` (string): This can overide all previous configurations - _optionnal_
     - `options` Options used for database connection.
       - `ssl` (boolean): For ssl database connection.
       - `debug` (boolean): Show database exchanges and errors.
@@ -482,11 +482,11 @@ As an example using this configuration with Nginx your server would respond to `
 
 For security reasons, sometimes it's better to set variables through the server environment. It's also useful to push dynamic values into configuration files. To enable this feature in JSON files, Strapi embraces a JSON-file interpreter into its core to allow dynamic values in the JSON configuration files.
 
-#### Syntax
+### Syntax
 
 The syntax is inspired by the [template literals ES2015 specifications](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals). These dynamic values are indicated by the Dollar sign and curly braces (`${expression}`).
 
-#### Usage
+### Usage
 
 In any JSON configuration file in your project, you can inject dynamic values like this:
 

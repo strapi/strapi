@@ -2,6 +2,8 @@
 
 ## Concept
 
+### Content Type's models
+
 Models are a representation of the database's structure and life cycle. They are split into two separate files. A JavaScript file that contains the life cycle callbacks, and a JSON one that represents the data stored in the database and their format. The models also allow you to define the relationships between them.
 
 **Path —** `./api/restaurant/models/Restaurant.js`.
@@ -24,6 +26,7 @@ module.exports = {
 
 ```json
 {
+  "kind": "collectionType",
   "connection": "default",
   "info": {
     "name": "restaurant",
@@ -49,9 +52,36 @@ module.exports = {
 
 In this example, there is a `Restaurant` model which contains the attributes `cover`, `name` and `description`.
 
+### Component's models
+
+It also exist another type of models named `components`. A component is a data structure that can be used in one or many other API's model. There is no lifecycle related, only a JSON file definition
+
+**Path —** `./components/default/simple.json`
+
+```json
+{
+  "connection": "default",
+  "collectionName": "components_default_simples",
+  "info": {
+    "name": "simple",
+    "icon": "arrow-circle-right"
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    }
+  }
+}
+```
+
+In this example, there is a `Simple` component which contains the attributes `name`. And the component is in the category `default`.
+
 ### Where are the models defined?
 
-The models are defined in each `./api/**/models/` folder. Every JavaScript or JSON file in these folders will be loaded as a model. They are also available through the `strapi.models` and `strapi.api.**.models` global variables. Usable everywhere in the project, they contain the ORM model object that they refer to. By convention, a model's name should be written in lowercase.
+For **Content Types**, models are defined in each `./api/**/models/` folder. Every JavaScript or JSON file in these folders will be loaded as a model. They are also available through the `strapi.models` and `strapi.api.**.models` global variables. Usable everywhere in the project, they contain the ORM model object that they refer to. By convention, a model's name should be written in lowercase.
+
+For **Components**, models are defined in `./components` folder. Every components has to be under a subfolder (the category name of the component). They are also available through the `strapi.components` global variables. Usable everywhere in the project, they contain the ORM model object that they refer to.
 
 ## How to create a model?
 
@@ -59,7 +89,9 @@ The models are defined in each `./api/**/models/` folder. Every JavaScript or JS
 If you are just starting out it is very convenient to generate some models with the Content Type Builder, directly in the admin interface. You can then review the generated model mappings on the code level. The UI takes over a lot of validation tasks and gives you a feeling for available features.
 :::
 
-Use the CLI, and run the following command `strapi generate:model restaurant name:string description:text`. Read the [CLI documentation](../cli/CLI.md) for more information.
+### For Content Types models
+
+Use the CLI, and run the following command `strapi generate:model restaurant name:string description:text`.<br>Read the [CLI documentation](../cli/CLI.md) for more information.
 
 This will create two files located at `./api/restaurant/models`:
 
@@ -70,18 +102,27 @@ This will create two files located at `./api/restaurant/models`:
 When you create a new API using the CLI (`strapi generate:api <name>`), a model is automatically created.
 :::
 
+### For Components models
+
+To create a component you will have to use the Content Type Builder from the Admin panel, there is no generator for components.
+
+Or you can create your component manually by following the file path discribed previously and by following the file structure discribed bellow.
+
 ## Model settings
 
 Additional settings can be set on models:
 
+- `kind` (string) - Define if the model is a Collection Type (`collectionType`) of a Single Type (`singleType`) - _only for Content Types_
 - `connection` (string) - Connection name which must be used. Default value: `default`.
 - `collectionName` (string) - Collection name (or table name) in which the data should be stored.
-- `globalId` (string) -Global variable name for this model (case-sensitive).
+- `globalId` (string) - Global variable name for this model (case-sensitive) - _only for Content Types_
+- `attributes` (object) - Define the data structure of your model. Find available options [bellow](#define-the-attributes).
 
 **Path —** `Restaurant.settings.json`.
 
 ```json
 {
+  "kind": "collectionType",
   "connection": "mongo",
   "collectionName": "Restaurants_v1",
   "globalId": "Restaurants",
@@ -101,7 +142,7 @@ The info key on the model-json states information about the model. This informat
 
 - `name`: The name of the model, as shown in admin interface.
 - `description`: The description of the model.
-- `mainField`: Determines which model-attribute is shown when displaying the model.
+- `icon`: The fontawesome V5 name - _only for Components_
 
 **Path —** `Restaurant.settings.json`.
 
@@ -140,21 +181,19 @@ The following types are currently available:
 - `string`
 - `text`
 - `richtext`
+- `email`
+- `password`
 - `integer`
 - `biginteger`
 - `float`
 - `decimal`
-- `password`
 - `date`
 - `time`
 - `datetime`
-- `timestamp`
 - `boolean`
-- `binary`
-- `uuid`
 - `enumeration`
 - `json`
-- `email`
+- `uid`
 
 ### Validations
 
@@ -173,6 +212,10 @@ To improve the Developer Experience when developing or using the administration 
 
 - `private` (boolean) — If true, the attribute will be removed from the server response (it's useful to hide sensitive data).
 - `configurable` (boolean) - if false, the attribute isn't configurable from the Content Type Builder plugin.
+
+### Exceptions
+
+- `uid` — This field type need a `targetField` key. The value is the name of an attribute thas has `string` of `text` type.
 
 ### Example
 
@@ -193,6 +236,10 @@ To improve the Developer Experience when developing or using the administration 
       "type": "text",
       "required": true
     },
+    "slug": {
+      "type": "uid",
+      "targetField": "title"
+    }
     ...
   }
 }
@@ -579,6 +626,267 @@ CREATE TABLE `image_morph` (
 
 ::::
 
+## Components
+
+Component field let your create a relation between your Content Type and a Component structure.
+
+#### Example
+
+Lets say we created an `openinghours` component in `restaurant` category.
+
+**Path —** `./api/restaurant/models/Restaurant.settings.json`.
+
+```json
+{
+  "attributes": {
+    "openinghours": {
+      "type": "component",
+      "repeatable": true,
+      "component": "restaurant.openinghours"
+    }
+  }
+}
+```
+
+- `repeatable` (boolean): Could be `true` or `false` that let you create a list of data.
+- `component` (string): It follows this format `<category>.<componentName>`.
+
+:::: tabs
+
+::: tab Create
+
+Create a restaurant with non-repeatable component
+
+```js
+const xhr = new XMLHttpRequest();
+xhr.open('POST', '/restaurants', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(
+  JSON.stringify({
+    openinghour: {
+      opening_at: '10am',
+      closing_at: '6pm',
+      day: 'monday',
+    },
+  })
+);
+```
+
+Create a restaurant with repeatable component
+
+```js
+const xhr = new XMLHttpRequest();
+xhr.open('POST', '/restaurants', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(
+  JSON.stringify({
+    openinghours: [
+      {
+        opening_at: '10am',
+        closing_at: '6pm',
+        day: 'monday',
+      },
+      {
+        opening_at: '10am',
+        closing_at: '6pm',
+        day: 'tuesday',
+      },
+    ],
+  })
+);
+```
+
+:::
+
+::: tab Update
+
+Update a restaurant with non-repeatable component
+
+```js
+const xhr = new XMLHttpRequest();
+xhr.open('PUT', '/restaurants/1', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(
+  JSON.stringify({
+    openinghour: {
+      id: 1, // the ID of the entry
+      opening_at: '11am',
+      closing_at: '7pm',
+      day: 'wednesday',
+    },
+  })
+);
+```
+
+Update a restaurant with repeatable component
+
+```js
+const xhr = new XMLHttpRequest();
+xhr.open('PUT', '/restaurants/2', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(
+  JSON.stringify({
+    openinghours: [
+      {
+        "id": 1 // the ID of the entry you want to update
+        "opening_at": "10am",
+        "closing_at": "6pm",
+        "day": "monday"
+      },
+      {
+        "id": 2, // you also have to put the ID of entries you don't want to update
+        "opening_at": "10am",
+        "closing_at": "6pm",
+        "day": "tuesday"
+      }
+    ]
+  })
+);
+```
+
+**NOTE** if you don't specify the `ID` it will delete and re-create the entry the entry, you will see the `ID` value change.
+
+:::
+
+::: tab Delete
+
+Delete a restaurant with non-repeatable component
+
+```js
+const xhr = new XMLHttpRequest();
+xhr.open('PUT', '/restaurants/1', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(
+  JSON.stringify({
+    openinghour: null,
+  })
+);
+```
+
+Delete a restaurant with repeatable component
+
+```js
+const xhr = new XMLHttpRequest();
+xhr.open('PUT', '/restaurants/2', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(
+  JSON.stringify({
+    openinghours: [
+      {
+        "id": 1 // the ID of the entry you want to keep
+        "opening_at": "10am",
+        "closing_at": "6pm",
+        "day": "monday"
+      }
+    ]
+  })
+);
+```
+
+:::
+
+::::
+
+## Dynamic Zone
+
+Dynamic Zone field let your create flexible space to content based on a component list.
+
+#### Example
+
+Lets say we created an `slider` and `content` component in `article` category.
+
+**Path —** `./api/article/models/Article.settings.json`.
+
+```json
+{
+  "attributes": {
+    "body": {
+      "type": "dynamiczone",
+      "components": ["article.slider", "article.content"]
+    }
+  }
+}
+```
+
+- `components` (array): Array of components, that follows this format `<category>.<componentName>`.
+
+:::: tabs
+
+::: tab Create
+
+```js
+const xhr = new XMLHttpRequest();
+xhr.open('POST', '/articles', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(
+  JSON.stringify({
+    body: [
+      {
+        __component: 'article.content',
+        content: 'This is a content',
+      },
+      {
+        __component: 'article.slider',
+        name: 'Slider name',
+      },
+    ],
+  })
+);
+```
+
+:::
+
+::: tab Update
+
+```js
+const xhr = new XMLHttpRequest();
+xhr.open('PUT', '/restaurant/2', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(
+  JSON.stringify({
+    body: [
+      {
+        "id": 1 // the ID of the entry you want to update
+        "__component": "article.content",
+        "content": "This is an updated content",
+      },
+      {
+        "id": 2, // you also have to put the ID of entries you don't want to update
+        "__component": "article.slider",
+        "name": "Slider name",
+      }
+    ]
+  })
+);
+```
+
+**NOTE** if you don't specify the `ID` it will delete and re-create the entry the entry, you will see the `ID` value change.
+
+:::
+
+::: tab Delete
+
+```js
+const xhr = new XMLHttpRequest();
+xhr.open('PUT', '/restaurant/2', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(
+  JSON.stringify({
+    body: [
+      {
+        "id": 1 // the ID of the entry you want to keep
+        "__component": "article.content",
+        "content": "This is an updated content",
+      }
+    ]
+  })
+);
+```
+
+:::
+
+::::
+
 ## Life cycle callbacks
 
 ::: warning
@@ -666,9 +974,7 @@ module.exports = {
    */
   beforeCreate: async model => {
     // Hash password.
-    const passwordHashed = await strapi.api.user.services.user.hashPassword(
-      model.password
-    );
+    const passwordHashed = await strapi.api.user.services.user.hashPassword(model.password);
 
     // Set the password.
     model.password = passwordHashed;
