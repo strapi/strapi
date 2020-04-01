@@ -105,8 +105,6 @@ const InputModalStepperProvider = ({
   };
 
   const handleClickNextButton = () => {
-    // Navigate to next step
-    // goNext();
     dispatch({
       type: 'ADD_URLS_TO_FILES_TO_DOWNLOAD',
       nextStep: 'upload',
@@ -257,8 +255,10 @@ const InputModalStepperProvider = ({
 
     // Cancel upload
     if (source) {
+      // Cancel dowload file upload with axios
       source.cancel('Operation canceled by the user.');
     } else {
+      // Cancel uplodad file with fetch
       fileToCancel.abortController.abort();
     }
 

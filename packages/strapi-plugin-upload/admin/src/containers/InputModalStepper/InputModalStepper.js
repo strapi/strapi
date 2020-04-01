@@ -82,8 +82,6 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
     goTo(prev);
   };
 
-  // FIXME: when back button needed
-  // eslint-disable-next-line no-unused-vars
   const goNext = () => {
     if (next === null) {
       onToggle();
@@ -292,7 +290,7 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
                 onClick={handleClickNextButton}
                 disabled={isEmpty(filesToDownload)}
               >
-                Next
+                {formatMessage({ id: getTrad('button.next') })}
               </Button>
             )}
             {currentStep === 'edit-new' && (

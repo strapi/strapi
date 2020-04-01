@@ -41,6 +41,7 @@ const ModalStepper = ({
         // Passing true to the onToggle prop will refetch the data when the modal closes
         toggleRef.current(true);
       } else {
+        // Download files from url
         downloadFilesRef.current();
       }
     }
@@ -85,6 +86,7 @@ const ModalStepper = ({
               headers: new Headers({ Origin: window.location.origin, mode: 'cors' }),
               responseType: 'blob',
               cancelToken: source.token,
+              // Should we add a timeout?
             })
             .then(({ data }) => {
               const createdFile = new File([data], file.fileURL, {
@@ -128,10 +130,12 @@ const ModalStepper = ({
     const fileToCancel = filesToUpload.find(file => file.originalIndex === fileOriginalIndex);
     const { source } = fileToCancel;
 
+    // Cancel
     if (source) {
+      // Cancel dowload file upload with axios
       source.cancel('Operation canceled by the user.');
     } else {
-      // Cancel upload
+      // Cancel upload with fetch
       fileToCancel.abortController.abort();
     }
 
@@ -164,7 +168,6 @@ const ModalStepper = ({
 
   const handleClickNextButton = () => {
     // Navigate to next step
-    // goNext();
     dispatch({
       type: 'ADD_URLS_TO_FILES_TO_DOWNLOAD',
       nextStep: next,
@@ -358,8 +361,6 @@ const ModalStepper = ({
     goTo(prev);
   };
 
-  // FIXME: when back button needed
-  // eslint-disable-next-line no-unused-vars
   const goNext = () => {
     if (next === null) {
       onToggle();
@@ -436,7 +437,7 @@ const ModalStepper = ({
                 onClick={handleClickNextButton}
                 disabled={isEmpty(filesToDownload)}
               >
-                Next
+                {formatMessage({ id: getTrad('button.next') })}
               </Button>
             )}
             {currentStep === 'upload' && (

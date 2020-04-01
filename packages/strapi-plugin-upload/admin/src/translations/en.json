@@ -1,4 +1,5 @@
 {
+  "button.next": "Next",
   "checkControl.crop-original": "Crop the original asset",
   "checkControl.crop-duplicate": "Duplicate & crop the asset",
   "control-card.add": "Add",
