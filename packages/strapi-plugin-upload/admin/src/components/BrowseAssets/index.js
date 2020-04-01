@@ -100,7 +100,6 @@ const BrowseAssets = () => {
           />
         </Flex>
       </Padded>
-      <Padded bottom size="xs" />
       {!files || files.length === 0 ? (
         <ListEmpty
           numberOfRows={2}

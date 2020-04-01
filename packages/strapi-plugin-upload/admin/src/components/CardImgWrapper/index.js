@@ -6,7 +6,7 @@ const CardImgWrapper = styled.div`
   width: 100%;
   height: 0;
   padding-top: calc(156 / 245 * 100%);
-  ${({ small }) => !small && 'margin-bottom: 7px'};
+  ${({ small }) => (small ? 'margin-bottom: 4px' : 'margin-bottom: 6px')};
   border-radius: 2px;
   background-color: #f6f6f6;
 
