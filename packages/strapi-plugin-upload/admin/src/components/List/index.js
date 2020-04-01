@@ -13,6 +13,7 @@ const List = ({
   onChange,
   onCardClick,
   selectedItems,
+  small,
   canSelect,
   renderCardControl,
 }) => {
@@ -37,6 +38,7 @@ const List = ({
                 hasIcon={clickable}
                 url={fileUrl}
                 onClick={onCardClick}
+                small={small}
               >
                 {(checked || canSelect) && (
                   <>
@@ -72,6 +74,7 @@ List.defaultProps = {
   onCardClick: () => {},
   renderCardControl: null,
   selectedItems: [],
+  small: false,
 };
 
 List.propTypes = {
@@ -82,6 +85,7 @@ List.propTypes = {
   onCardClick: PropTypes.func,
   renderCardControl: PropTypes.func,
   selectedItems: PropTypes.array,
+  small: PropTypes.bool,
 };
 
 export default List;
