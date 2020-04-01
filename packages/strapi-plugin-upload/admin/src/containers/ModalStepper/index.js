@@ -169,7 +169,7 @@ const ModalStepper = ({
   const handleClickNextButton = () => {
     // Navigate to next step
     dispatch({
-      type: 'ADD_URLS_TO_FILES_TO_DOWNLOAD',
+      type: 'ADD_URLS_TO_FILES_TO_UPLOAD',
       nextStep: next,
     });
   };

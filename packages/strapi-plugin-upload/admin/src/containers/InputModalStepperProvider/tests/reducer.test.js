@@ -170,10 +170,10 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
     });
   });
 
-  describe('ADD_URLS_TO_FILES_TO_DOWNLOAD', () => {
+  describe('ADD_URLS_TO_FILES_TO_UPLOAD', () => {
     it('should add the files to the empty filesToUpload array and update the current step', () => {
       const action = {
-        type: 'ADD_URLS_TO_FILES_TO_DOWNLOAD',
+        type: 'ADD_URLS_TO_FILES_TO_UPLOAD',
         nextStep: 'test',
       };
       const state = {
@@ -267,7 +267,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
         ],
       };
       const action = {
-        type: 'ADD_URLS_TO_FILES_TO_DOWNLOAD',
+        type: 'ADD_URLS_TO_FILES_TO_UPLOAD',
         nextStep: 'test',
       };
 

@@ -19,7 +19,7 @@ const reducer = (state, action) => {
             .map((data, index) => data.set('originalIndex', index))
         )
         .update('currentStep', () => action.nextStep);
-    case 'ADD_URLS_TO_FILES_TO_DOWNLOAD':
+    case 'ADD_URLS_TO_FILES_TO_UPLOAD':
       return state
         .update('filesToUpload', list =>
           list

@@ -2,11 +2,11 @@ import styled from 'styled-components';
 import ContainerFluid from '../ContainerFluid';
 
 const Wrapper = styled(ContainerFluid)`
-  margin-bottom: 3px;
-  padding-top: 23px;
+  margin-bottom: 0.3rem;
+  padding-top: 2.3rem;
 
   textarea {
-    height: 101px;
+    height: 10.1rem;
   }
 `;
 

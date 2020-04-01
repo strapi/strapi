@@ -29,7 +29,7 @@ const reducer = (state, action) =>
   // eslint-disable-next-line consistent-return
   produce(state, draftState => {
     switch (action.type) {
-      case 'ADD_URLS_TO_FILES_TO_DOWNLOAD': {
+      case 'ADD_URLS_TO_FILES_TO_UPLOAD': {
         draftState.filesToUpload = [
           ...draftState.filesToUpload,
           ...createNewFilesToDownloadArray(draftState.filesToDownload, draftState.filesToUpload),
@@ -43,15 +43,13 @@ const reducer = (state, action) =>
         break;
       }
       case 'FILE_DOWNLOADED': {
-        draftState.filesToUpload.forEach((file, index) => {
-          if (file.tempId === action.fileTempId) {
-            draftState.filesToUpload[index] = {
-              ...draftState.filesToUpload[index],
-              isDownloading: false,
-              file: action.blob,
-            };
-          }
-        });
+        const index = state.filesToUpload.findIndex(file => file.tempId === action.fileTempId);
+
+        draftState.filesToUpload[index] = {
+          ...draftState.filesToUpload[index],
+          isDownloading: false,
+          file: action.blob,
+        };
 
         break;
       }
@@ -210,16 +208,15 @@ const reducer = (state, action) =>
         break;
       }
       case 'SET_FILE_TO_DOWNLOAD_ERROR': {
-        draftState.filesToUpload.forEach((file, index) => {
-          if (file.tempId === action.fileTempId) {
-            draftState.filesToUpload[index] = {
-              ...draftState.filesToUpload[index],
-              isDownloading: false,
-              hasError: true,
-              errorMessage: draftState.filesToUpload[index].fileURL,
-            };
-          }
-        });
+        const index = state.filesToUpload.findIndex(file => file.tempId === action.fileTempId);
+
+        draftState.filesToUpload[index] = {
+          ...draftState.filesToUpload[index],
+          isDownloading: false,
+          hasError: true,
+          errorMessage: draftState.filesToUpload[index].fileURL,
+        };
+
         break;
       }
       case 'SET_FORM_DISABLED': {

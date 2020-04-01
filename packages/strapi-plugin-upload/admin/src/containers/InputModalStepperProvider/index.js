@@ -106,7 +106,7 @@ const InputModalStepperProvider = ({
 
   const handleClickNextButton = () => {
     dispatch({
-      type: 'ADD_URLS_TO_FILES_TO_DOWNLOAD',
+      type: 'ADD_URLS_TO_FILES_TO_UPLOAD',
       nextStep: 'upload',
     });
   };
