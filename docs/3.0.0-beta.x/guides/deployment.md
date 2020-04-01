@@ -16,7 +16,7 @@ Update the `production` settings with the IP or domain name where the project wi
 
 ```js
 {
-  "host": "domain.io", // IP or domain
+  "host": "domain.io", // IP or domain or 0.0.0.0
   "port": 1337
 }
 ```
@@ -30,7 +30,7 @@ If you are passing a number of configuration item values via environment variabl
 
 ```js
 {
-  "host": "${process.env.APP_HOST || '127.0.0.1'}",
+  "host": "${process.env.APP_HOST || '0.0.0.0'}",
   "port": "${process.env.NODE_PORT || 1337}"
 }
 ```
