@@ -14,6 +14,8 @@
   "form.input.decription.file-alt": "This text will be displayed if the asset can’t be shown.",
   "form.input.label.file-caption": "Caption",
   "form.input.label.file-name": "File name",
+  "form.upload-url.error.url.invalid": "One URL is invalid",
+  "form.upload-url.error.url.invalids": "{number} URLs are invalids",
   "header.actions.upload-assets": "Upload assets",
   "header.content.assets-empty": "No asset",
   "header.content.assets-multiple": "{number} assets",

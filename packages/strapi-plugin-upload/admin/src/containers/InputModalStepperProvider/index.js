@@ -1,14 +1,16 @@
-import React, { useReducer, useEffect } from 'react';
+import React, { useReducer, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { request, generateSearchFromFilters } from 'strapi-helper-plugin';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import axios from 'axios';
 import pluginId from '../../pluginId';
 import {
   getFilesToDownload,
   getRequestUrl,
+  getYupError,
   compactParams,
   createNewFilesToUploadArray,
+  urlSchema,
 } from '../../utils';
 import InputModalStepperContext from '../../contexts/InputModal/InputModalDataManager';
 import init from './init';
@@ -28,6 +30,7 @@ const InputModalStepperProvider = ({
   selectedFiles,
   step,
 }) => {
+  const [formErrors, setFormErrors] = useState(null);
   const [reducerState, dispatch] = useReducer(reducer, initialState, state =>
     init({
       ...state,
@@ -46,7 +49,7 @@ const InputModalStepperProvider = ({
       },
     })
   );
-  const { params, filesToUpload, fileToEdit } = reducerState;
+  const { params, filesToDownload, filesToUpload, fileToEdit } = reducerState;
 
   useEffect(() => {
     if (isOpen) {
@@ -104,11 +107,24 @@ const InputModalStepperProvider = ({
     });
   };
 
-  const handleClickNextButton = () => {
-    dispatch({
-      type: 'ADD_URLS_TO_FILES_TO_UPLOAD',
-      nextStep: 'upload',
-    });
+  const handleClickNextButton = async () => {
+    try {
+      await urlSchema.validate(
+        { filesToDownload: filesToDownload.filter(url => !isEmpty(url)) },
+        { abortEarly: false }
+      );
+
+      setFormErrors(null);
+      // Navigate to next step
+      dispatch({
+        type: 'ADD_URLS_TO_FILES_TO_UPLOAD',
+        nextStep: 'upload',
+      });
+    } catch (err) {
+      const formattedErrors = getYupError(err);
+
+      setFormErrors(formattedErrors.filesToDownload);
+    }
   };
 
   const handleFileToEditChange = ({ target: { name, value } }) => {
@@ -116,6 +132,8 @@ const InputModalStepperProvider = ({
     let type = 'ON_CHANGE';
 
     if (name === 'url') {
+      setFormErrors(null);
+
       val = value.split('\n');
       type = 'ON_CHANGE_URLS_TO_DOWNLOAD';
     }
@@ -381,6 +399,7 @@ const InputModalStepperProvider = ({
         addFilesToUpload,
         downloadFiles,
         fetchMediaLib,
+        formErrors,
         goTo,
         handleAbortUpload,
         handleAllFilesSelection,

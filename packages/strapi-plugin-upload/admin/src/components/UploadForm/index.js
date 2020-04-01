@@ -8,6 +8,7 @@ import ModalSection from '../ModalSection';
 const UploadForm = ({
   addFilesToUpload,
   filesToDownload,
+  formErrors,
   onChange,
   setShouldDisplayNextButton,
 }) => {
@@ -32,7 +33,9 @@ const UploadForm = ({
       {to => (
         <ModalSection>
           {to === 'computer' && <InputFileModal onChange={addFilesToUpload} />}
-          {to === 'url' && <InputUploadURL onChange={onChange} value={filesToDownload} />}
+          {to === 'url' && (
+            <InputUploadURL errors={formErrors} onChange={onChange} value={filesToDownload} />
+          )}
         </ModalSection>
       )}
     </ModalNavWrapper>
@@ -42,6 +45,7 @@ const UploadForm = ({
 UploadForm.defaultProps = {
   addFilesToUpload: () => {},
   filesToDownload: [],
+  formErrors: null,
   onChange: () => {},
   setShouldDisplayNextButton: () => {},
 };
@@ -49,6 +53,7 @@ UploadForm.defaultProps = {
 UploadForm.propTypes = {
   addFilesToUpload: PropTypes.func,
   filesToDownload: PropTypes.arrayOf(PropTypes.string),
+  formErrors: PropTypes.object,
   onChange: PropTypes.func,
   setShouldDisplayNextButton: PropTypes.func,
 };
