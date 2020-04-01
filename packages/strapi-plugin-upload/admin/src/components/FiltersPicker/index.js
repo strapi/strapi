@@ -6,9 +6,11 @@ import { FilterIcon } from 'strapi-helper-plugin';
 import FiltersCard from './FiltersCard';
 import Picker from '../Picker';
 
+import formatFilter from './utils/formatFilter';
+
 const FiltersPicker = ({ onChange, filters }) => {
   const handleChange = ({ target: { value } }) => {
-    onChange({ target: { name: 'filters', value } });
+    onChange({ target: { name: 'filters', value: formatFilter(value) } });
   };
 
   return (
