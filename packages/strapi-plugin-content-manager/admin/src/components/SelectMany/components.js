@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 
 const ListWrapper = styled.div`
-  overflow: hidden;
   max-height: 116px;
 
   > ul {
@@ -39,6 +38,7 @@ const Li = styled.li`
   justify-content: space-between;
   height: 18px;
   margin-top: 9px;
+  line-height: 1;
   &:last-of-type {
     margin-bottom: 0px;
   }

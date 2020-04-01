@@ -1,6 +1,7 @@
 {
+  "kind": "collectionType",
   "connection": "<%= connection %>",
-  "collectionName": "<%= collectionName || '' %>",
+  "collectionName": "<%= collectionName %>",
   "info": {
     "name": "<%= id %>",
     "description": "<%= description %>"

@@ -2,29 +2,19 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { get } from 'lodash';
-import {
-  Dropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
-} from 'reactstrap';
+import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 
 import useDataManager from '../../hooks/useDataManager';
 import Wrapper from './Wrapper';
 
-const RelationTargetPicker = ({
-  onChange,
-  oneThatIsCreatingARelationWithAnother,
-  target,
-}) => {
+const RelationTargetPicker = ({ onChange, oneThatIsCreatingARelationWithAnother, target }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { contentTypes, sortedContentTypesList } = useDataManager();
-
-  const targetFriendlyName = get(
-    contentTypes,
-    [target, 'schema', 'name'],
-    'error'
+  const allowedContentTypesForRelation = sortedContentTypesList.filter(
+    obj => obj.kind === 'collectionType'
   );
+
+  const targetFriendlyName = get(contentTypes, [target, 'schema', 'name'], 'error');
 
   return (
     <Wrapper>
@@ -44,7 +34,7 @@ const RelationTargetPicker = ({
           </p>
         </DropdownToggle>
         <DropdownMenu style={{ paddingTop: '3px' }}>
-          {sortedContentTypesList.map(({ uid, title }) => {
+          {allowedContentTypesForRelation.map(({ uid, title }) => {
             return (
               <DropdownItem
                 key={uid}

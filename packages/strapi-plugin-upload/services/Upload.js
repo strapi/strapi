@@ -33,9 +33,7 @@ module.exports = {
 
     const createBuffer = async stream => {
       const parts = await toArray(fs.createReadStream(stream.path));
-      const buffers = parts.map(part =>
-        _.isBuffer(part) ? part : Buffer.from(part)
-      );
+      const buffers = parts.map(part => (_.isBuffer(part) ? part : Buffer.from(part)));
 
       const buffer = Buffer.concat(buffers);
 
@@ -44,10 +42,7 @@ module.exports = {
         name: stream.name,
         sha256: niceHash(buffer),
         hash: uuid().replace(/-/g, ''),
-        ext:
-          stream.name.split('.').length > 1
-            ? `.${_.last(stream.name.split('.'))}`
-            : '',
+        ext: stream.name.split('.').length > 1 ? `.${_.last(stream.name.split('.'))}` : '',
         buffer,
         mime: stream.type,
         size: (stream.size / 1000).toFixed(2),
@@ -175,5 +170,16 @@ module.exports = {
         return this.upload(enhancedFiles, config);
       })
     );
+  },
+  async getConfig() {
+    const config = await strapi
+      .store({
+        environment: strapi.config.environment,
+        type: 'plugin',
+        name: 'upload',
+      })
+      .get({ key: 'provider' });
+
+    return { ...config, sizeLimit: parseFloat(config.sizeLimit) };
   },
 };

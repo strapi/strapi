@@ -16,7 +16,7 @@ Let's configure the layout of the **edit page** to make it more user friendly fo
 
 - Click on the **Article** link in the left menu.
 - Then on the `+ Add New Article` button.
-- And finally on the `Configure the view` button.
+- And finally on the `Configure the layout` button.
 
 Here we will be able to setup the `slug` field.
 
@@ -102,6 +102,6 @@ module.exports = {
 
 ## Fetch article by `slug`
 
-Then you will have to be able to fetch your **Articles** by this slug.
+Then you will be able to fetch your **Articles** by this slug.
 
 You will be able to find your articles by slug with this request `GET /articles?slug=my-article-slug`

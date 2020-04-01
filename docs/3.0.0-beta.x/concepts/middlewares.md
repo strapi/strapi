@@ -142,7 +142,7 @@ The middlewares are injected into the Koa stack asynchronously. Sometimes it hap
 }
 ```
 
-The `responseTime` middleware will be loaded first. Immediately followed by the `logger` middleware. Then, the others middlewares will be loaded asynchronously.
+The `responseTime` middleware will be loaded first. Immediately followed by the `logger` middleware. Then, the other middlewares will be loaded asynchronously.
 
 **Load a middleware after another one**
 

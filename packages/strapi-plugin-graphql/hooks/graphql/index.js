@@ -10,6 +10,26 @@ const { ApolloServer } = require('apollo-server-koa');
 const depthLimit = require('graphql-depth-limit');
 const loadConfigs = require('./load-config');
 
+const attachMetadataToResolvers = (schema, { api, plugin }) => {
+  const { resolver = {} } = schema;
+  if (_.isEmpty(resolver)) return schema;
+
+  Object.keys(resolver).forEach(type => {
+    if (!_.isPlainObject(resolver[type])) return;
+
+    Object.keys(resolver[type]).forEach(resolverName => {
+      if (!_.isPlainObject(resolver[type][resolverName])) return;
+
+      resolver[type][resolverName]['_metadatas'] = {
+        api,
+        plugin,
+      };
+    });
+  });
+
+  return schema;
+};
+
 module.exports = strapi => {
   const { appPath, installedPlugins } = strapi.config;
 
@@ -32,31 +52,39 @@ module.exports = strapi => {
       /*
        * Create a merge of all the GraphQL configuration.
        */
-      const apisSchemas = Object.keys(strapi.api || {}).map(key =>
-        _.get(strapi.api[key], 'config.schema.graphql', {})
-      );
+      const apisSchemas = Object.keys(strapi.api || {}).map(key => {
+        const schema = _.get(strapi.api[key], 'config.schema.graphql', {});
+        return attachMetadataToResolvers(schema, { api: key });
+      });
 
-      const pluginsSchemas = Object.keys(strapi.plugins || {}).map(key =>
-        _.get(strapi.plugins[key], 'config.schema.graphql', {})
-      );
+      const pluginsSchemas = Object.keys(strapi.plugins || {}).map(key => {
+        const schema = _.get(strapi.plugins[key], 'config.schema.graphql', {});
+        return attachMetadataToResolvers(schema, { plugin: key });
+      });
 
-      const extensionsSchemas = Object.keys(extensions || {}).map(key =>
-        _.get(extensions[key], 'config.schema.graphql', {})
-      );
+      const extensionsSchemas = Object.keys(extensions || {}).map(key => {
+        const schema = _.get(extensions[key], 'config.schema.graphql', {});
+        return attachMetadataToResolvers(schema, { plugin: key });
+      });
+
+      const baseSchema = mergeSchemas([
+        ...apisSchemas,
+        ...pluginsSchemas,
+        ...extensionsSchemas,
+      ]);
 
       // save the final schema in the plugin's config
       _.set(
         strapi,
         ['plugins', 'graphql', 'config', '_schema', 'graphql'],
-        mergeSchemas([...apisSchemas, ...pluginsSchemas, ...extensionsSchemas])
+        baseSchema
       );
     },
 
     initialize() {
-      const {
-        typeDefs,
-        resolvers,
-      } = strapi.plugins.graphql.services.schema.generateSchema();
+      const { typeDefs, resolvers } = strapi.plugins.graphql.services[
+        'schema-generator'
+      ].generateSchema();
 
       if (_.isEmpty(typeDefs)) {
         strapi.log.warn(
@@ -72,7 +100,8 @@ module.exports = strapi => {
         context: ({ ctx }) => {
           // Initiliase loaders for this request.
           // TODO: set loaders in the context not globally
-          strapi.plugins.graphql.services.loaders.initializeLoader();
+
+          strapi.plugins.graphql.services['data-loaders'].initializeLoader();
 
           return {
             context: ctx,

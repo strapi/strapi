@@ -11,14 +11,7 @@ import Wrapper from './Wrapper';
 
 /* eslint-disable jsx-a11y/control-has-associated-label */
 
-const ComponentIconPicker = ({
-  error,
-  isCreating,
-  label,
-  name,
-  onChange,
-  value,
-}) => {
+const ComponentIconPicker = ({ error, isCreating, label, name, onChange, value }) => {
   const { allIcons, allComponentsIconAlreadyTaken } = useDataManager();
   const initialIcons = allIcons.filter(ico => {
     if (isCreating) {
@@ -26,9 +19,7 @@ const ComponentIconPicker = ({
     }
 
     // Edition
-    return !allComponentsIconAlreadyTaken
-      .filter(icon => icon !== originalIcon)
-      .includes(ico);
+    return !allComponentsIconAlreadyTaken.filter(icon => icon !== originalIcon).includes(ico);
   });
   const ref = createRef();
   const [originalIcon] = useState(value);
@@ -85,12 +76,10 @@ const ComponentIconPicker = ({
               ref={ref}
               onChange={({ target: { value } }) => {
                 setSearch(value);
-                setIcons(() =>
-                  initialIcons.filter(icon => icon.includes(value))
-                );
+                setIcons(() => initialIcons.filter(icon => icon.includes(value)));
               }}
               value={search}
-              placeholder="search…"
+              placeholder="Search…"
             />
             <button
               onClick={() => {
@@ -130,11 +119,7 @@ const ComponentIconPicker = ({
           );
         }}
       </AutoSizer>
-      {error && (
-        <ErrorMessage style={{ marginTop: 5, marginBottom: 16 }}>
-          {error}
-        </ErrorMessage>
-      )}
+      {error && <ErrorMessage style={{ marginTop: 5, marginBottom: 16 }}>{error}</ErrorMessage>}
     </Wrapper>
   );
 };

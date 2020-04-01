@@ -6,7 +6,7 @@ Services are a set of reusable functions. They are particularly useful to respec
 
 ## Core services
 
-When you create a new `Content Type` or a new model. You will see a new empty service has been created. It is because Strapi builds a generic service for your models by default and allows you to override and extend it in the generated files.
+When you create a new `Content Type` or a new model, you will see a new empty service has been created. It is because Strapi builds a generic service for your models by default and allows you to override and extend it in the generated files.
 
 ### Extending a Model Service
 
@@ -97,7 +97,9 @@ module.exports = {
 
     if (files) {
       // automatically uploads the files based on the entry and the model
-      await this.uploadFiles(entry, files, { model: strapi.models.restaurant });
+      await strapi.entityService.uploadFiles(entry, files, {
+        model: strapi.models.restaurant,
+      });
       return this.findOne({ id: entry.id });
     }
 
@@ -125,7 +127,9 @@ module.exports = {
 
     if (files) {
       // automatically uploads the files based on the entry and the model
-      await this.uploadFiles(entry, files, { model: strapi.models.restaurant });
+      await strapi.entityService.uploadFiles(entry, files, {
+        model: strapi.models.restaurant,
+      });
       return this.findOne({ id: entry.id });
     }
 
@@ -258,12 +262,7 @@ module.exports = {
     const user = await User.create(ctx.params);
 
     // Send an email to validate his subscriptions.
-    strapi.services.email.send(
-      'welcome@mysite.com',
-      user.email,
-      'Welcome',
-      '...'
-    );
+    strapi.services.email.send('welcome@mysite.com', user.email, 'Welcome', '...');
 
     // Send response to the server.
     ctx.send({
