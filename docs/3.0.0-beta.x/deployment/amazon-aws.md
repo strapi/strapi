@@ -1,6 +1,8 @@
 # Amazon AWS
 
-This is a step-by-step guide for deploying a Strapi project to [Amazon AWS EC2](https://aws.amazon.com/ec2/). This guide will connect to an [Amazon AWS RDS](https://aws.amazon.com/rds/) for managing and hosting the database. Optionally, this guide will show you how to connect host and serve images on [Amazon AWS S3](https://aws.amazon.com/s3/). Prior to starting this guide, you should have created a [Strapi project](../getting-started/quick-start.md), to use for deploying on AWS.
+This is a step-by-step guide for deploying a Strapi project to [Amazon AWS EC2](https://aws.amazon.com/ec2/). This guide will connect to an [Amazon AWS RDS](https://aws.amazon.com/rds/) for managing and hosting the database. Optionally, this guide will show you how to connect host and serve images on [Amazon AWS S3](https://aws.amazon.com/s3/).
+
+Prior to starting this guide, you should have created a [Strapi project](../getting-started/quick-start.md), to use for deploying on AWS. And have read through the [configuration](../installation/deployment.md#configuration) section.
 
 ### Amazon AWS Install Requirement and creating an IAM non-root user
 
@@ -102,7 +104,7 @@ Your instance is now running. Continue to the next steps.
 
 ### Install a PostgreSQL database on AWS RDS
 
-Amazon calls their database hosting services **RDS**. Multiple database options exist and are available. In this guide, **PostgreSQL** is used as the example, and the steps are similar for each of the other database that are supported by Strapi. (**MySQL**, **MondoDB**, **PostgreSQL**, **MariaDB**, **SQLite**). You will set-up an **RDS instance** to host your `postgresql` database.
+Amazon calls their database hosting services **RDS**. Multiple database options exist and are available. In this guide, **PostgreSQL** is used as the example, and the steps are similar for each of the other database that are supported by Strapi. (**MySQL**, **MongoDB**, **PostgreSQL**, **MariaDB**, **SQLite**). You will set-up an **RDS instance** to host your `postgresql` database.
 
 ::: tip
 **Amazon RDS** does **NOT** have a completely free evaluation tier. After finishing this guide, if you are only testing, please remember to [delete the database](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_DeleteInstance.html). Otherwise, you will incur charges.
@@ -205,7 +207,7 @@ ubuntu@ip-12.123.123.11:~$
 
 #### 3. Install **Node.js** with **npm**:
 
-Strapi currently supports `Node.js v10.x.x`. The following steps will install Node.js onto your EC2 server.
+Strapi currently supports `Node.js v12.x.x`. The following steps will install Node.js onto your EC2 server.
 
 ```bash
 cd ~
@@ -216,7 +218,7 @@ sudo apt-get install nodejs
 node -v && npm -v
 ```
 
-The last command `node -v && npm -v` should output two versions numbers, eg. `v10.x.x, 6.x.x`.
+The last command `node -v && npm -v` should output two versions numbers, eg. `v12.x.x, 6.x.x`.
 
 #### 4. Create and change npm's default directory.
 

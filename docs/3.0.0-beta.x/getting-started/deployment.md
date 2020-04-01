@@ -6,7 +6,7 @@ Strapi gives you many possible deployment options for your project or applicatio
 Deploying **databases** along with Strapi is covered in the [Databases Guide](../guides/databases.md).
 :::
 
-## Documented Options
+### Documented Options
 
 Manual guides guides for deployment on various platforms, for One-click and docker please see the [installation](./installation) guides.
 
@@ -55,7 +55,7 @@ Manual guides guides for deployment on various platforms, for One-click and dock
 	</InstallLink>
 </div>
 
-## Configuration
+### Configuration
 
 #### 1. Configure
 
