@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, ModalFooter, PopUpWarning, useGlobalContext, request } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
-import { isEmpty } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import { getRequestUrl, getTrad } from '../../utils';
 import ModalHeader from '../../components/ModalHeader';
 import pluginId from '../../pluginId';
@@ -36,6 +36,7 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
     handleRemoveFileToUpload,
     handleResetFileToEdit,
     handleSetCropResult,
+    handleSetFileToEditError,
     handleUploadFiles,
     isFormDisabled,
     isWarningDeleteOpen,
@@ -199,7 +200,13 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
       handleEditExistingFile(editedFile);
       goToList();
     } catch (err) {
-      console.log(err);
+      const errorMessage = get(
+        err,
+        ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
+        null
+      );
+
+      handleSetFileToEditError(errorMessage);
     }
   };
 

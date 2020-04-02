@@ -304,7 +304,16 @@ const ModalStepper = ({
       // Close the modal and refetch data
       toggleRef.current(true);
     } catch (err) {
-      console.log(err);
+      const errorMessage = get(
+        err,
+        ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
+        null
+      );
+
+      dispatch({
+        type: 'SET_FILE_TO_EDIT_ERROR',
+        errorMessage,
+      });
     }
   };
 

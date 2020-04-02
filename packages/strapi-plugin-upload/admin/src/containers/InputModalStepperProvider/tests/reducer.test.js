@@ -1620,6 +1620,79 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
     });
   });
 
+  describe('SET_FILE_TO_EDIT_ERROR', () => {
+    it('should update the fileToEdit error', () => {
+      const action = {
+        type: 'SET_FILE_TO_EDIT_ERROR',
+        errorMessage: 'size limit exceeded',
+      };
+      const state = {
+        fileToEdit: {
+          originalIndex: 1,
+          file: {
+            name: 'test1',
+          },
+          hasError: false,
+          errorMessage: null,
+          isUploading: true,
+        },
+        filesToUpload: [
+          {
+            originalIndex: 0,
+            file: {
+              name: 'test0',
+            },
+          },
+          {
+            originalIndex: 1,
+            file: {
+              name: 'test1',
+            },
+          },
+          {
+            originalIndex: 2,
+            file: {
+              name: 'test2',
+            },
+          },
+        ],
+      };
+      const expected = {
+        fileToEdit: {
+          originalIndex: 1,
+          file: {
+            name: 'test1',
+          },
+          hasError: true,
+          errorMessage: 'size limit exceeded',
+          isUploading: false,
+        },
+        filesToUpload: [
+          {
+            originalIndex: 0,
+            file: {
+              name: 'test0',
+            },
+          },
+          {
+            originalIndex: 1,
+            file: {
+              name: 'test1',
+            },
+          },
+          {
+            originalIndex: 2,
+            file: {
+              name: 'test2',
+            },
+          },
+        ],
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
   describe('SET_NEW_FILE_TO_EDIT', () => {
     it('should set the fileToEdit key with the file at the passed index from the filesToUpload list', () => {
       const action = {
