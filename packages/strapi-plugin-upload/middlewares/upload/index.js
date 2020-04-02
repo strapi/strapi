@@ -4,6 +4,9 @@ const { join } = require('path');
 const range = require('koa-range');
 const koaStatic = require('koa-static');
 
+const fetch = require('node-fetch');
+const isValidDomain = require('is-valid-domain');
+
 module.exports = strapi => ({
   initialize() {
     const staticDir = join(
@@ -23,5 +26,37 @@ module.exports = strapi => ({
     });
 
     strapi.router.get('/uploads/(.*)', range, koaStatic(staticDir, { defer: true }));
+
+    strapi.router.get('/upload/proxy', async ctx => {
+      try {
+        const url = new URL(ctx.query.url);
+
+        if (!isValidDomain(url.hostname)) {
+          throw new Error('Invalid URL');
+        }
+      } catch (err) {
+        ctx.status = 400;
+        ctx.body = 'Invalid URL';
+        return;
+      }
+
+      try {
+        const res = await fetch(ctx.query.url);
+
+        if (res.ok) {
+          Object.entries(res.headers.raw()).forEach(([key, value]) => {
+            ctx.set(key, value);
+          });
+          ctx.body = res.body;
+        } else {
+          ctx.status = 400;
+          ctx.body = 'Invalid URL';
+        }
+      } catch (err) {
+        strapi.log.error(err);
+        ctx.status = 500;
+        ctx.body = 'Internal Server Error';
+      }
+    });
   },
 });
