@@ -114,7 +114,7 @@ const BrowseAssets = () => {
             onChange={handleFileSelection}
             selectedItems={selectedFiles}
             onCardClick={handleListCardClick}
-            small
+            smallCards
             renderCardControl={id => (
               <CardControl
                 small
