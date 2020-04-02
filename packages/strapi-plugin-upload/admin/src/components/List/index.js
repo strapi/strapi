@@ -2,10 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Checkbox } from '@buffetjs/core';
 import { get } from 'lodash';
-import { createMatrix } from '../../utils';
+import { prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
+
 import Card from '../Card';
 import CardControlsWrapper from '../CardControlsWrapper';
 import ListWrapper from '../ListWrapper';
+import ListCell from './ListCell';
 
 const List = ({
   clickable,
@@ -13,59 +15,55 @@ const List = ({
   onChange,
   onCardClick,
   selectedItems,
+  smallCards,
   canSelect,
   renderCardControl,
 }) => {
-  const matrix = createMatrix(data);
-
   const handleClick = e => {
     e.stopPropagation();
   };
 
   return (
     <ListWrapper>
-      {matrix.map(({ key, rowContent }) => {
-        return (
-          <div className="row" key={key}>
-            {rowContent.map(item => {
-              const { id } = item;
-              const url = get(item, ['formats', 'thumbnail', 'url'], item.url);
-              const checked = selectedItems.findIndex(file => file.id === id) !== -1;
-              const fileUrl = url.startsWith('/') ? `${strapi.backendURL}${url}` : url;
+      <div className="row">
+        {data.map(item => {
+          const { id } = item;
+          const url = get(item, ['formats', 'thumbnail', 'url'], item.url);
+          const checked = selectedItems.findIndex(file => file.id === id) !== -1;
+          const fileUrl = prefixFileUrlWithBackendUrl(url);
 
-              return (
-                <div className="col-xs-12 col-md-6 col-xl-3" key={id}>
-                  <Card
-                    checked={checked}
-                    {...item}
-                    hasIcon={clickable}
-                    url={fileUrl}
-                    onClick={onCardClick}
-                  >
-                    {(checked || canSelect) && (
-                      <>
-                        <CardControlsWrapper leftAlign className="card-control-wrapper">
-                          <Checkbox
-                            name={`${id}`}
-                            onChange={onChange}
-                            onClick={handleClick}
-                            value={checked}
-                          />
-                        </CardControlsWrapper>
-                        {renderCardControl && (
-                          <CardControlsWrapper className="card-control-wrapper">
-                            {renderCardControl(id)}
-                          </CardControlsWrapper>
-                        )}
-                      </>
+          return (
+            <ListCell key={id}>
+              <Card
+                checked={checked}
+                {...item}
+                hasIcon={clickable}
+                url={fileUrl}
+                onClick={onCardClick}
+                small={smallCards}
+              >
+                {(checked || canSelect) && (
+                  <>
+                    <CardControlsWrapper leftAlign className="card-control-wrapper">
+                      <Checkbox
+                        name={`${id}`}
+                        onChange={onChange}
+                        onClick={handleClick}
+                        value={checked}
+                      />
+                    </CardControlsWrapper>
+                    {renderCardControl && (
+                      <CardControlsWrapper className="card-control-wrapper">
+                        {renderCardControl(id)}
+                      </CardControlsWrapper>
                     )}
-                  </Card>
-                </div>
-              );
-            })}
-          </div>
-        );
-      })}
+                  </>
+                )}
+              </Card>
+            </ListCell>
+          );
+        })}
+      </div>
     </ListWrapper>
   );
 };
@@ -78,6 +76,7 @@ List.defaultProps = {
   onCardClick: () => {},
   renderCardControl: null,
   selectedItems: [],
+  smallCards: false,
 };
 
 List.propTypes = {
@@ -88,6 +87,7 @@ List.propTypes = {
   onCardClick: PropTypes.func,
   renderCardControl: PropTypes.func,
   selectedItems: PropTypes.array,
+  smallCards: PropTypes.bool,
 };
 
 export default List;
