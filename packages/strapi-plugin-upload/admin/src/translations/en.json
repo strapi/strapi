@@ -31,7 +31,7 @@
   "list.assets-empty.title-withSearch": "There is no asset with the applied filters",
   "list.assets-empty.subtitle": "Add a first one to the list.",
   "modal.header.browse": "Upload assets",
-  "modal.header.select-files": "Selected files",
+  "modal.header.select-files": "Pending assets",
   "modal.header.file-detail": "Details",
   "modal.nav.browse": "browse",
   "modal.nav.computer": "from computer",

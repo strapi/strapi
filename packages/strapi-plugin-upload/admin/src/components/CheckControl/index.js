@@ -36,13 +36,14 @@ const CheckControl = ({ title, onSubmitEdit }) => {
   };
 
   return (
-    <StyledCardControl
-      title={formatMessage({ id: getTrad(`control-card.${title}`) })}
-      color="#ffffff"
-      ref={dropdownRef}
-      onClick={handleToggle}
-    >
-      <FontAwesomeIcon icon="check" />
+    <div ref={dropdownRef}>
+      <StyledCardControl
+        title={formatMessage({ id: getTrad(`control-card.${title}`) })}
+        color="#ffffff"
+        onClick={handleToggle}
+      >
+        <FontAwesomeIcon icon="check" />
+      </StyledCardControl>
       <DropdownSection isOpen={isOpen}>
         <Padded left right bottom top size="15px">
           <Button onClick={handleClick}>
@@ -56,7 +57,7 @@ const CheckControl = ({ title, onSubmitEdit }) => {
           </Button>
         </Padded>
       </DropdownSection>
-    </StyledCardControl>
+    </div>
   );
 };
 

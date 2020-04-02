@@ -33,12 +33,24 @@ const Wrapper = styled.div`
         `;
       }
 
+      if (type === 'plus') {
+        return `
+          background-color: #AED4FB;
+          border: 1px solid  #AED4FB;
+          > svg {
+            > g, path {
+              stroke: #007EFF;
+            }
+          }
+          color: #007EFF;
+        `;
+      }
+
       return `
           background-color: #AED4FB;
           border: 1px solid  #AED4FB;
           > svg {
             > g, path {
-
               fill: #007EFF;
             }
           }

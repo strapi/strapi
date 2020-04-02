@@ -35,7 +35,7 @@ const ModalTab = ({ isDisabled, label, to, isActive, onClick, count }) => {
             fontWeight={isActive ? 'bold' : 'semiBold'}
             color={isActive ? 'mediumBlue' : 'grey'}
           />
-          {typeof count === 'number' && <Count count={count} />}
+          {typeof count === 'number' && <Count count={count} isActive={isActive} />}
         </Flex>
       </Wrapper>
     </Padded>

@@ -6,7 +6,7 @@ const DropdownSection = styled.div`
   display: none;
   position: absolute;
   top: 38px;
-  left: 0;
+  left: 38px;
   z-index: 1;
   background-color: ${({ theme }) => theme.main.colors.white};
   border-radius: ${({ theme }) => theme.main.sizes.borderRadius};
