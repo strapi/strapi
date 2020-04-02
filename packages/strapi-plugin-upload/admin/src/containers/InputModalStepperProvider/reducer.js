@@ -19,6 +19,7 @@ const initialState = {
     _start: 0,
     _q: '',
     filters: [],
+    _sort: null,
   },
   currentStep: 'list',
   isFormDisabled: false,
@@ -142,7 +143,8 @@ const reducer = (state, action) =>
         break;
       }
       case 'RESET_PROPS': {
-        return initialState;
+        draftState.params._sort = action.defaultSort;
+        break;
       }
       case 'SET_FILES_UPLOADING_STATE': {
         draftState.filesToUpload.forEach((fileToUpload, index) => {
