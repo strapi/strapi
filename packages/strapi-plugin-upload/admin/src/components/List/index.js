@@ -30,7 +30,7 @@ const List = ({
           const { id } = item;
           const url = get(item, ['formats', 'thumbnail', 'url'], item.url);
           const checked = selectedItems.findIndex(file => file.id === id) !== -1;
-          const fileUrl = url.startsWith('/') ? prefixFileUrlWithBackendUrl(url) : url;
+          const fileUrl = prefixFileUrlWithBackendUrl(url);
 
           return (
             <ListCell key={id}>
