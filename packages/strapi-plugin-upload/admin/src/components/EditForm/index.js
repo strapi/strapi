@@ -62,7 +62,7 @@ const EditForm = forwardRef(
       get(fileToEdit, ['file', 'type'], null) || get(fileToEdit, ['file', 'mime'], '');
     const isImg = isImageType(mimeType);
     const isVideo = isVideoType(mimeType);
-    const canCrop = isImg && !mimeType.includes('svg');
+    const canCrop = isImg && !mimeType.includes('svg') && !mimeType.includes('gif');
     const aRef = useRef();
     const imgRef = useRef();
     const inputRef = useRef();
