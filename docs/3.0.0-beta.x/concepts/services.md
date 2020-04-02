@@ -259,7 +259,7 @@ module.exports = {
   // GET /hello
   signup: async ctx => {
     // Store the new user in database.
-    const user = await User.create(ctx.params);
+    const user = await User.create(ctx.query);
 
     // Send an email to validate his subscriptions.
     strapi.services.email.send('welcome@mysite.com', user.email, 'Welcome', '...');
