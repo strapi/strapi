@@ -377,7 +377,10 @@ const HomePage = () => {
           checked={areAllCheckboxesSelected}
           someChecked={hasSomeCheckboxSelected && !areAllCheckboxesSelected}
         />
-        <SortPicker onChange={handleChangeParams} value={query.get('_sort') || null} />
+        <SortPicker
+          onChange={handleChangeParams}
+          value={query.get('_sort') || `${updated_at}:DESC`}
+        />
         <Filters onChange={handleChangeParams} filters={filters} onClick={handleDeleteFilter} />
       </ControlsWrapper>
       {dataCount > 0 && !areResultsEmptyWithSearchOrFilters ? (

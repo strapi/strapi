@@ -143,7 +143,11 @@ const reducer = (state, action) =>
         break;
       }
       case 'RESET_PROPS': {
-        draftState.params._sort = action.defaultSort;
+        if (action.defaultSort) {
+          draftState.params._sort = action.defaultSort;
+        } else {
+          return initialState;
+        }
         break;
       }
       case 'SET_FILES_UPLOADING_STATE': {
