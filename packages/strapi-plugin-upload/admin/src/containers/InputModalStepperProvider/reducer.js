@@ -232,7 +232,7 @@ const reducer = (state, action) =>
         break;
       }
       case 'ON_SUBMIT_EDIT_EXISTING_FILE': {
-        draftState.fileToEdit.isUploading = false;
+        draftState.fileToEdit.isUploading = true;
         break;
       }
       case 'SET_FILE_TO_EDIT_ERROR': {
