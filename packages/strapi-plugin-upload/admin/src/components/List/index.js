@@ -2,6 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Checkbox } from '@buffetjs/core';
 import { get } from 'lodash';
+import { prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
+
 import Card from '../Card';
 import CardControlsWrapper from '../CardControlsWrapper';
 import ListWrapper from '../ListWrapper';
@@ -28,7 +30,7 @@ const List = ({
           const { id } = item;
           const url = get(item, ['formats', 'thumbnail', 'url'], item.url);
           const checked = selectedItems.findIndex(file => file.id === id) !== -1;
-          const fileUrl = url.startsWith('/') ? `${strapi.backendURL}${url}` : url;
+          const fileUrl = url.startsWith('/') ? prefixFileUrlWithBackendUrl(url) : url;
 
           return (
             <ListCell key={id}>
