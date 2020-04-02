@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
 const ListWrapper = styled.div`
-  margin-top: ${({ small }) => (small ? '2px' : '20px')};
+  margin-top: ${({ small }) => (small ? '2px' : '26px')};
 `;
 
 ListWrapper.defaultProps = {

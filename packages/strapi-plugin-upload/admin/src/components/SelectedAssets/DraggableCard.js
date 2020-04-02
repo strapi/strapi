@@ -26,7 +26,6 @@ const DraggableCard = ({
   moveAsset,
   name,
   onClick,
-  small,
   size,
   type,
   url,
@@ -86,7 +85,7 @@ const DraggableCard = ({
 
   return (
     <Wrapper onClick={handleClick} isDraggable={isDraggable} ref={ref} style={{ opacity }}>
-      <CardImgWrapper checked={checked} small={small}>
+      <CardImgWrapper checked={checked} small>
         <CardPreview
           hasError={hasError}
           url={url}
@@ -121,7 +120,6 @@ DraggableCard.defaultProps = {
   name: null,
   onClick: () => {},
   size: 0,
-  small: false,
   type: null,
   url: null,
   withFileCaching: true,
@@ -140,7 +138,6 @@ DraggableCard.propTypes = {
   name: PropTypes.string,
   onClick: PropTypes.func,
   size: PropTypes.number,
-  small: PropTypes.bool,
   type: PropTypes.string,
   url: PropTypes.string,
   withFileCaching: PropTypes.bool,
