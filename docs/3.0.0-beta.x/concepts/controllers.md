@@ -67,9 +67,7 @@ module.exports = {
       entities = await strapi.services.restaurant.find(ctx.query);
     }
 
-    return entities.map(entity =>
-      sanitizeEntity(entity, { model: strapi.models.restaurant })
-    );
+    return entities.map(entity => sanitizeEntity(entity, { model: strapi.models.restaurant }));
   },
 };
 ```
@@ -91,7 +89,9 @@ module.exports = {
    */
 
   async findOne(ctx) {
-    const entity = await strapi.services.restaurant.findOne(ctx.params);
+    const { id } = ctx.params;
+
+    const entity = await strapi.services.restaurant.findOne({ id });
     return sanitizeEntity(entity, { model: strapi.models.restaurant });
   },
 };
@@ -166,17 +166,16 @@ module.exports = {
    */
 
   async update(ctx) {
+    const { id } = ctx.params;
+
     let entity;
     if (ctx.is('multipart')) {
       const { data, files } = parseMultipartData(ctx);
-      entity = await strapi.services.restaurant.update(ctx.params, data, {
+      entity = await strapi.services.restaurant.update({ id }, data, {
         files,
       });
     } else {
-      entity = await strapi.services.restaurant.update(
-        ctx.params,
-        ctx.request.body
-      );
+      entity = await strapi.services.restaurant.update({ id }, ctx.request.body);
     }
 
     return sanitizeEntity(entity, { model: strapi.models.restaurant });
@@ -201,7 +200,9 @@ module.exports = {
    */
 
   async delete(ctx) {
-    const entity = await strapi.services.restaurant.delete(ctx.params);
+    const { id } = ctx.params;
+
+    const entity = await strapi.services.restaurant.delete({ id });
     return sanitizeEntity(entity, { model: strapi.models.restaurant });
   },
 };
