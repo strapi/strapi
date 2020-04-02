@@ -8,6 +8,7 @@
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import App from './containers/App';
+import Initializer from './containers/Initializer';
 import SettingsPage from './containers/SettingsPage';
 import InputMedia from './components/InputMedia';
 
@@ -21,11 +22,12 @@ export default strapi => {
     blockerComponent: null,
     blockerComponentProps: {},
     description: pluginDescription,
+    fileModel: null,
     icon: pluginPkg.strapi.icon,
     id: pluginId,
-    initializer: null,
+    initializer: Initializer,
     injectedComponents: [],
-    isReady: true,
+    isReady: false,
     isRequired: pluginPkg.strapi.required || false,
     layout: null,
     lifecycles: null,

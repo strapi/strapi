@@ -53,6 +53,10 @@ const HomePage = () => {
   const debouncedSearch = useDebounce(searchValue, 300);
 
   useEffect(() => {
+    return () => (isMounted.current = false);
+  }, []);
+
+  useEffect(() => {
     handleChangeParams({ target: { name: '_q', value: debouncedSearch } });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -61,7 +65,6 @@ const HomePage = () => {
   useEffect(() => {
     fetchListData();
 
-    return () => (isMounted.current = false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 

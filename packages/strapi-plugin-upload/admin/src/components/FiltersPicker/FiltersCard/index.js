@@ -1,11 +1,10 @@
-import React, { useReducer, useEffect, useRef } from 'react';
+import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Select } from '@buffetjs/core';
-
-import { getFilterType, request } from 'strapi-helper-plugin';
-import { getTrad } from '../../../utils';
-
+import { getFilterType, useGlobalContext } from 'strapi-helper-plugin';
+import { getTrad, getFileModelTimestamps } from '../../../utils';
+import init from './init';
 import reducer, { initialState } from './reducer';
 
 import Wrapper from './Wrapper';
@@ -14,21 +13,11 @@ import FilterButton from './FilterButton';
 import FilterInput from './FilterInput';
 
 const FiltersCard = ({ onChange, filters }) => {
-  // Not using the hook from buffet.js because it appears that when the component is closed we the hooks returns false
-  // Until we make a PR on @buffetjs/hooks I rather use this custom one
-  const isMounted = useRef(true);
-  const [state, dispatch] = useReducer(reducer, initialState);
-
-  useEffect(() => {
-    if (isMounted.current) {
-      fetchTimestampNames();
-    }
-
-    return () => (isMounted.current = false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMounted]);
-
+  const { plugins } = useGlobalContext();
+  const timestamps = getFileModelTimestamps(plugins);
+  const [state, dispatch] = useReducer(reducer, initialState, () => init(initialState, timestamps));
   const { name, filter, filtersForm, value } = state.toJS();
+
   const type = filtersForm[name].type;
   const filtersOptions = getFilterType(type);
   const options = ['image', 'video', 'file'].filter(
@@ -68,25 +57,6 @@ const FiltersCard = ({ onChange, filters }) => {
         </option>
       );
     });
-  };
-
-  const fetchTimestampNames = async () => {
-    try {
-      const result = await request('/content-manager/content-types/plugins::upload.file', {
-        method: 'GET',
-      });
-
-      if (isMounted.current) {
-        dispatch({
-          type: 'HANDLE_CUSTOM_TIMESTAMPS',
-          timestamps: result.data.contentType.schema.options.timestamps,
-        });
-      }
-    } catch (err) {
-      if (isMounted.current) {
-        strapi.notification.error('notification.error');
-      }
-    }
   };
 
   return (

@@ -24,6 +24,7 @@ const ModalStepper = ({
   const [shouldDeleteFile, setShouldDeleteFile] = useState(false);
   const [isFormDisabled, setIsFormDisabled] = useState(false);
   const [formErrors, setFormErrors] = useState(null);
+  const [shouldRefetch, setShouldRefetch] = useState(false);
   const [displayNextButton, setDisplayNextButton] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { currentStep, fileToEdit, filesToDownload, filesToUpload } = reducerState.toJS();
@@ -213,6 +214,7 @@ const ModalStepper = ({
     setIsFormDisabled(false);
     setDisplayNextButton(false);
     setFormErrors(null);
+    setShouldRefetch(false);
 
     dispatch({
       type: 'RESET_PROPS',
@@ -322,7 +324,7 @@ const ModalStepper = ({
       }
     }
 
-    if (!isEqual(initialFileToEdit, fileToEdit)) {
+    if (!isEqual(initialFileToEdit, fileToEdit) && currentStep === 'edit') {
       // eslint-disable-next-line no-alert
       const confirm = window.confirm(
         formatMessage({ id: getTrad('window.confirm.close-modal.file') })
@@ -333,7 +335,7 @@ const ModalStepper = ({
       }
     }
 
-    onToggle(true);
+    onToggle(shouldRefetch);
   };
 
   const handleUploadFiles = async () => {
@@ -360,6 +362,8 @@ const ModalStepper = ({
             false,
             false
           );
+
+          setShouldRefetch(true);
 
           dispatch({
             type: 'REMOVE_FILE_TO_UPLOAD',
