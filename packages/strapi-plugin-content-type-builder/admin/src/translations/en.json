@@ -94,8 +94,7 @@
   "form.attribute.media.option.single.description": "Best for avatar, profile picture or cover",
   "form.attribute.media.option.single": "Single media",
   "form.attribute.settings.default": "Default value",
-  "form.attribute.text.option.long-text.description": "Best for descriptions, biography. 
-Exact search is disabled.",
+  "form.attribute.text.option.long-text.description": "Best for descriptions, biography. Exact search is disabled.",
   "form.attribute.text.option.long-text": "Long text",
   "form.attribute.text.option.short-text.description": "Best for titles, names, links (URL). It also enables exact search on the field.",
   "form.attribute.text.option.short-text": "Short text",
