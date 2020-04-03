@@ -294,6 +294,14 @@ module.exports = function(strapi) {
   strapi.config.port = _.get(strapi.config.currentEnvironment, 'server.port') || strapi.config.port;
   strapi.config.host = _.get(strapi.config.currentEnvironment, 'server.host') || strapi.config.host;
 
+  let hostname = strapi.config.host;
+  if (
+    strapi.config.environment === 'development' &&
+    ['127.0.0.1', '0.0.0.0'].includes(strapi.config.host)
+  ) {
+    hostname = 'localhost';
+  }
+
   // proxy settings
   const proxy = _.get(strapi.config.currentEnvironment, 'server.proxy', {});
   strapi.config.proxy = proxy;
@@ -306,7 +314,7 @@ module.exports = function(strapi) {
         ssl: proxy.ssl,
       })
     : getURLFromSegments({
-        hostname: strapi.config.host,
+        hostname,
         port: strapi.config.port,
       });
 
