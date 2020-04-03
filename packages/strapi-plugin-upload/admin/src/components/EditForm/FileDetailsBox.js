@@ -29,7 +29,7 @@ const FileDetailsBox = ({ file }) => {
     {
       key: 2,
       rows: [
-        { label: 'dimensions', value: file.width ? `${file.width}x${file.height}` : '-' },
+        { label: 'dimensions', value: file.width ? `${file.width}×${file.height}` : '-' },
         {
           label: 'extension',
           value: file.ext ? file.ext.replace('.', '') : '-',

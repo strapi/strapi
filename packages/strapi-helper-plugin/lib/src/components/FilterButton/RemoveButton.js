@@ -7,8 +7,10 @@ const RemoveButton = styled.button`
   padding-left: 10px;
   padding-right: 10px;
   margin-left: 10px;
-  border-left: 2px solid rgba(0, 126, 255, 0.1);
-  outline: 0;
+  border-left: 1px solid rgba(0, 126, 255, 0.1);
+  &:focus {
+    outline: 0;
+  }
 `;
 
 export default RemoveButton;
