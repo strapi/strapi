@@ -1,4 +1,5 @@
 import { fromJS } from 'immutable';
+import { dateToUtcTime } from 'strapi-helper-plugin';
 import moment from 'moment';
 
 import filtersForm from './utils/filtersForm';
@@ -6,7 +7,7 @@ import filtersForm from './utils/filtersForm';
 const initialState = fromJS({
   name: 'created_at',
   filter: '=',
-  value: moment(),
+  value: dateToUtcTime(moment()),
   filtersForm,
 });
 
