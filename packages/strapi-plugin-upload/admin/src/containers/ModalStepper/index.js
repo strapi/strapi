@@ -2,7 +2,14 @@ import React, { useEffect, useState, useReducer, useRef } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
 import { isEqual, isEmpty, get, set } from 'lodash';
-import { Modal, ModalFooter, PopUpWarning, useGlobalContext, request } from 'strapi-helper-plugin';
+import {
+  Modal,
+  ModalFooter,
+  PopUpWarning,
+  useGlobalContext,
+  auth,
+  request,
+} from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
 import pluginId from '../../pluginId';
 import { getFilesToDownload, getTrad, getYupError, urlSchema } from '../../utils';
@@ -85,6 +92,7 @@ const ModalStepper = ({
 
           return axios
             .get(file.fileURL, {
+              headers: { Authorization: `Bearer ${auth.getToken()}` },
               responseType: 'blob',
               cancelToken: source.token,
               timeout: 30000,

@@ -1,6 +1,6 @@
 import React, { useReducer, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { request, generateSearchFromFilters, useGlobalContext } from 'strapi-helper-plugin';
+import { auth, request, generateSearchFromFilters, useGlobalContext } from 'strapi-helper-plugin';
 import { clone, get, isEmpty, set } from 'lodash';
 import axios from 'axios';
 import pluginId from '../../pluginId';
@@ -72,6 +72,7 @@ const InputModalStepperProvider = ({
 
           return axios
             .get(file.fileURL, {
+              headers: { Authorization: `Bearer ${auth.getToken()}` },
               responseType: 'blob',
               cancelToken: source.token,
               timeout: 30000,
@@ -360,8 +361,6 @@ const InputModalStepperProvider = ({
         if (originalName === infos.name) {
           set(infos, 'name', null);
         }
-
-        console.log(infos);
 
         formData.append('files', file);
         formData.append('fileInfo', JSON.stringify(infos));

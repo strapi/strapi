@@ -13,7 +13,6 @@ const urlSchema = yup.object().shape({
       message: '${path}',
       test(values) {
         const filtered = values.filter(val => {
-          // return !val.startsWith('http');
           try {
             // eslint-disable-next-line no-new
             new URL(val);
