@@ -91,7 +91,8 @@ const ModalStepper = ({
               // Should we add a timeout?
             })
             .then(({ data }) => {
-              const createdFile = new File([data], file.fileURL, {
+              const fileName = file.fileInfo.name;
+              const createdFile = new File([data], fileName, {
                 type: data.type,
               });
 
