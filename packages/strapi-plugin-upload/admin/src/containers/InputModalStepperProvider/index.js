@@ -1,7 +1,7 @@
 import React, { useReducer, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { request, generateSearchFromFilters, useGlobalContext } from 'strapi-helper-plugin';
-import { get, isEmpty } from 'lodash';
+import { auth, request, generateSearchFromFilters, useGlobalContext } from 'strapi-helper-plugin';
+import { clone, get, isEmpty, set } from 'lodash';
 import axios from 'axios';
 import pluginId from '../../pluginId';
 import {
@@ -71,10 +71,11 @@ const InputModalStepperProvider = ({
           const { source } = file;
 
           return axios
-            .get(file.fileURL, {
-              headers: new Headers({ Origin: window.location.origin, mode: 'cors' }),
+            .get(`${strapi.backendURL}/${pluginId}/proxy?url=${file.fileURL}`, {
+              headers: { Authorization: `Bearer ${auth.getToken()}` },
               responseType: 'blob',
               cancelToken: source.token,
+              timeout: 30000,
             })
             .then(({ data }) => {
               const createdFile = new File([data], file.fileURL, {
@@ -339,6 +340,12 @@ const InputModalStepperProvider = ({
     });
   };
 
+  const handleClearFilesToUploadAndDownload = () => {
+    dispatch({
+      type: 'CLEAR_FILES_TO_UPLOAD_AND_DOWNLOAD',
+    });
+  };
+
   const handleSetFileToEditError = errorMessage => {
     dispatch({
       type: 'SET_FILE_TO_EDIT_ERROR',
@@ -352,11 +359,17 @@ const InputModalStepperProvider = ({
     });
 
     const requests = filesToUpload.map(
-      async ({ file, fileInfo, originalIndex, abortController }) => {
+      async ({ file, fileInfo, originalIndex, originalName, abortController }) => {
         const formData = new FormData();
         const headers = {};
+        const infos = clone(fileInfo);
+
+        if (originalName === infos.name) {
+          set(infos, 'name', null);
+        }
+
         formData.append('files', file);
-        formData.append('fileInfo', JSON.stringify(fileInfo));
+        formData.append('fileInfo', JSON.stringify(infos));
 
         try {
           const uploadedFile = await request(
@@ -420,6 +433,7 @@ const InputModalStepperProvider = ({
         handleCancelFileToUpload,
         handleClickNextButton,
         handleCleanFilesError,
+        handleClearFilesToUploadAndDownload,
         handleClose,
         handleEditExistingFile,
         handleFileSelection,

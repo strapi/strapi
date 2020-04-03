@@ -93,6 +93,14 @@
           "name": "File"
         }
       }
+    },
+    {
+      "method": "GET",
+      "path": "/proxy",
+      "handler": "proxy.uploadProxy",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }

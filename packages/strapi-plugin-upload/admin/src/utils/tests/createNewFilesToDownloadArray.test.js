@@ -6,7 +6,14 @@ import createNewFilesToDownloadArray, {
 describe('UPLOAD | utils', () => {
   describe('createNewFilesToDownloadArray', () => {
     it('should create an array containing the formatted data and filter the empty data', () => {
-      const dataURLArray = ['', 'un', undefined, 'deux', null, 'trois'];
+      const dataURLArray = [
+        '',
+        'http://www.un.com/photo-1',
+        undefined,
+        'http://www.deux.com/photo-2',
+        null,
+        'http://www.trois.com/photo-3',
+      ];
       const dataFilesArray = [
         {
           abortController: new AbortController(),
@@ -16,6 +23,7 @@ describe('UPLOAD | utils', () => {
             caption: '',
             name: 'test',
           },
+          originalName: 'test',
           tempId: null,
           hasError: false,
           errorMessage: null,
@@ -29,6 +37,7 @@ describe('UPLOAD | utils', () => {
             caption: '',
             name: 'test',
           },
+          originalName: 'test',
           tempId: 121,
           hasError: false,
           errorMessage: null,
@@ -37,6 +46,18 @@ describe('UPLOAD | utils', () => {
       ];
 
       const received = createNewFilesToDownloadArray(dataURLArray, dataFilesArray);
+      const firstURL = new URL('http://www.un.com/photo-1');
+      const firstURLName = decodeURIComponent(
+        firstURL.pathname.substring(firstURL.pathname.lastIndexOf('/') + 1)
+      );
+      const secondURL = new URL('http://www.deux.com/photo-2');
+      const secondURLName = decodeURIComponent(
+        secondURL.pathname.substring(secondURL.pathname.lastIndexOf('/') + 1)
+      );
+      const thirdURL = new URL('http://www.trois.com/photo-3');
+      const thirdURLName = decodeURIComponent(
+        thirdURL.pathname.substring(thirdURL.pathname.lastIndexOf('/') + 1)
+      );
 
       expect(received).toEqual(
         expect.arrayContaining([
@@ -45,9 +66,10 @@ describe('UPLOAD | utils', () => {
             fileInfo: {
               alternativeText: '',
               caption: '',
-              name: 'un',
+              name: firstURLName,
             },
-            fileURL: 'un',
+            fileURL: firstURL,
+            originalName: firstURLName,
             hasError: false,
             errorMessage: null,
             isUploading: false,
@@ -59,9 +81,10 @@ describe('UPLOAD | utils', () => {
             fileInfo: {
               alternativeText: '',
               caption: '',
-              name: 'deux',
+              name: secondURLName,
             },
-            fileURL: 'deux',
+            fileURL: secondURL,
+            originalName: secondURLName,
             hasError: false,
             errorMessage: null,
             isUploading: false,
@@ -73,9 +96,10 @@ describe('UPLOAD | utils', () => {
             fileInfo: {
               alternativeText: '',
               caption: '',
-              name: 'trois',
+              name: thirdURLName,
             },
-            fileURL: 'trois',
+            fileURL: thirdURL,
+            originalName: thirdURLName,
             hasError: false,
             errorMessage: null,
             isUploading: false,

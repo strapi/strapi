@@ -1,3 +1,4 @@
+import moment from 'moment';
 import { dateFormats, dateToUtcTime } from 'strapi-helper-plugin';
 
 const formatFilter = filterToFormat => {
@@ -13,7 +14,7 @@ const formatFilter = filterToFormat => {
   }
 
   // Format date to readable format
-  if (dateToUtcTime(value)._isUTC === true) {
+  if (moment(value)._isValid === true) {
     return {
       ...filterToFormat,
       value: dateToUtcTime(value).format(dateFormats.datetime),

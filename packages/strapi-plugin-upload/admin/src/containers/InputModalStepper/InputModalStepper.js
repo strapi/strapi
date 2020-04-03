@@ -26,6 +26,7 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
     handleAbortUpload,
     handleCancelFileToUpload,
     handleCleanFilesError,
+    handleClearFilesToUploadAndDownload,
     handleClickNextButton,
     handleClose,
     handleEditExistingFile,
@@ -46,6 +47,7 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
     toggleModalWarning,
   } = useModalContext();
   const {
+    backButtonDestination,
     Component,
     components,
     headerBreadcrumbs,
@@ -80,7 +82,39 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
     goNext();
   };
 
-  const goBack = () => {
+  const goBack = (elementName = null) => {
+    const hasFilesToUpload = !isEmpty(filesToUpload);
+
+    // Redirect the user to the list modal from the upload one
+    if (elementName === 'backButton' && backButtonDestination && currentStep === 'upload') {
+      if (hasFilesToUpload) {
+        // eslint-disable-next-line no-alert
+        const confirm = window.confirm(
+          formatMessage({ id: getTrad('window.confirm.close-modal.files') })
+        );
+
+        if (!confirm) {
+          return;
+        }
+      }
+
+      goTo(backButtonDestination);
+      handleClearFilesToUploadAndDownload();
+
+      return;
+    }
+
+    if (
+      elementName === 'backButton' &&
+      backButtonDestination &&
+      currentStep === 'browse' &&
+      hasFilesToUpload
+    ) {
+      goTo(backButtonDestination);
+
+      return;
+    }
+
     goTo(prev);
   };
 
