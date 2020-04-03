@@ -22,17 +22,9 @@ module.exports = strapi => {
     initialize() {
       locale(strapi.app);
 
-      const {
-        defaultLocale,
-        modes,
-        cookieName,
-      } = strapi.config.middleware.settings.language;
+      const { defaultLocale, modes, cookieName } = strapi.config.middleware.settings.language;
 
-      const directory = resolve(
-        strapi.config.appPath,
-        strapi.config.paths.config,
-        'locales'
-      );
+      const directory = resolve(strapi.config.appPath, strapi.config.paths.config, 'locales');
 
       strapi.app.use(
         i18n(strapi.app, {
