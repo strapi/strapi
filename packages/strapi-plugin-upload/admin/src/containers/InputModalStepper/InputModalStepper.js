@@ -203,10 +203,12 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
       const errorMessage = get(
         err,
         ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
-        null
+        get(err, ['response', 'payload', 'message'], null)
       );
 
-      handleSetFileToEditError(errorMessage);
+      if (errorMessage) {
+        handleSetFileToEditError(errorMessage);
+      }
     }
   };
 

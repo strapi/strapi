@@ -307,13 +307,15 @@ const ModalStepper = ({
       const errorMessage = get(
         err,
         ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
-        null
+        get(err, ['response', 'payload', 'message'], null)
       );
 
-      dispatch({
-        type: 'SET_FILE_TO_EDIT_ERROR',
-        errorMessage,
-      });
+      if (errorMessage) {
+        dispatch({
+          type: 'SET_FILE_TO_EDIT_ERROR',
+          errorMessage,
+        });
+      }
     }
   };
 
