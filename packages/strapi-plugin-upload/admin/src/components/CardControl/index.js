@@ -22,7 +22,7 @@ const CardControl = ({ title, color, onClick, small, type }) => {
       {type === 'pencil' && <Pencil fill={color} />}
       {type === 'clear' && <ClearIcon fill={color} />}
       {type === 'plus' && <Plus fill={color} />}
-      {type === 'download' && <DownloadIcon fdill={color} />}
+      {type === 'download' && <DownloadIcon fill={color} />}
       {!['pencil', 'clear', 'plus', 'download'].includes(type) && <FontAwesomeIcon icon={type} />}
     </Wrapper>
   );

@@ -5,11 +5,11 @@ import { useClickAwayListener } from '@buffetjs/hooks';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import DoubleFile from '../../icons/DoubleFile';
 import File from '../../icons/File';
-import DropdownSection from '../DropdownSection';
 import Padded from '../Padded';
 import Button from './Button';
 import Spacer from './Spacer';
 import StyledCardControl from './StyledCardControl';
+import CustomDropdownSection from './CustomDropdownSection';
 import { getTrad } from '../../utils';
 
 const CheckControl = ({ title, onSubmitEdit }) => {
@@ -36,14 +36,15 @@ const CheckControl = ({ title, onSubmitEdit }) => {
   };
 
   return (
-    <StyledCardControl
-      title={formatMessage({ id: getTrad(`control-card.${title}`) })}
-      color="#ffffff"
-      ref={dropdownRef}
-      onClick={handleToggle}
-    >
-      <FontAwesomeIcon icon="check" />
-      <DropdownSection isOpen={isOpen}>
+    <div ref={dropdownRef}>
+      <StyledCardControl
+        title={formatMessage({ id: getTrad(`control-card.${title}`) })}
+        color="#ffffff"
+        onClick={handleToggle}
+      >
+        <FontAwesomeIcon icon="check" />
+      </StyledCardControl>
+      <CustomDropdownSection isOpen={isOpen}>
         <Padded left right bottom top size="15px">
           <Button onClick={handleClick}>
             <File />
@@ -55,8 +56,8 @@ const CheckControl = ({ title, onSubmitEdit }) => {
             {formatMessage({ id: getTrad('checkControl.crop-duplicate') })}
           </Button>
         </Padded>
-      </DropdownSection>
-    </StyledCardControl>
+      </CustomDropdownSection>
+    </div>
   );
 };
 

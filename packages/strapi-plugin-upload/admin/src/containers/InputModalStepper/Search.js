@@ -10,7 +10,6 @@ const Search = () => {
   const [value, setValue] = useState('');
   const { setParam } = useModalContext();
   const { formatMessage } = useGlobalContext();
-  const pluginName = formatMessage({ id: getTrad('plugin.name') });
   const debouncedSearch = useDebounce(value, 300);
 
   useEffect(() => {
@@ -28,7 +27,6 @@ const Search = () => {
 
   return (
     <HeaderSearch
-      label={pluginName}
       onChange={handleSearchChange}
       onClear={handleClear}
       placeholder={formatMessage({ id: getTrad('search.placeholder') })}
