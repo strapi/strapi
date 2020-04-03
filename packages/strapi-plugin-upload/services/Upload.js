@@ -12,6 +12,8 @@ const crypto = require('crypto');
 const _ = require('lodash');
 const util = require('util');
 const filenamify = require('filenamify');
+const mime = require('mime-types');
+
 const { bytesToKbytes } = require('../utils/file');
 
 const randomSuffix = () => crypto.randomBytes(5).toString('hex');
@@ -31,8 +33,8 @@ const combineFilters = params => {
 
 module.exports = {
   formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
-    const ext = path.extname(filename);
-    const baseName = path.basename(filename, ext);
+    const ext = '.' + mime.extension(type);
+    const baseName = path.basename(filename, path.extname(filename));
 
     const usedName = fileInfo.name || baseName;
 

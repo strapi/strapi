@@ -71,7 +71,7 @@ const InputModalStepperProvider = ({
           const { source } = file;
 
           return axios
-            .get(file.fileURL, {
+            .get(`${strapi.backendURL}/${pluginId}/proxy?url=${file.fileURL}`, {
               headers: { Authorization: `Bearer ${auth.getToken()}` },
               responseType: 'blob',
               cancelToken: source.token,
