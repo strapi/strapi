@@ -100,7 +100,7 @@ const reducer = (state, action) => {
             return file
               .update('isDownloading', () => false)
               .update('hasError', () => true)
-              .update('errorMessage', () => file.get('fileOriginalURL'));
+              .update('errorMessage', () => file.get('fileOriginalName'));
           }
 
           return file;
