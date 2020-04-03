@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useReducer, useRef } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
-import { isEqual, isEmpty, get } from 'lodash';
+import { isEqual, isEmpty, get, set } from 'lodash';
 import { Modal, ModalFooter, PopUpWarning, useGlobalContext, request } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
 import pluginId from '../../pluginId';
@@ -85,10 +85,9 @@ const ModalStepper = ({
 
           return axios
             .get(file.fileURL, {
-              headers: new Headers({ Origin: window.location.origin, mode: 'cors' }),
               responseType: 'blob',
               cancelToken: source.token,
-              // Should we add a timeout?
+              timeout: 30000,
             })
             .then(({ data }) => {
               const fileName = file.fileInfo.name;
@@ -356,9 +355,14 @@ const ModalStepper = ({
     });
 
     const requests = filesToUpload.map(
-      async ({ file, fileInfo, originalIndex, abortController }) => {
+      async ({ file, fileInfo, originalName, originalIndex, abortController }) => {
         const formData = new FormData();
         const headers = {};
+
+        if (originalName === fileInfo.name) {
+          set(fileInfo, 'name', null);
+        }
+
         formData.append('files', file);
         formData.append('fileInfo', JSON.stringify(fileInfo));
 

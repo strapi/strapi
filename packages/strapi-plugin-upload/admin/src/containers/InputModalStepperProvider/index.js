@@ -1,7 +1,7 @@
 import React, { useReducer, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { request, generateSearchFromFilters, useGlobalContext } from 'strapi-helper-plugin';
-import { get, isEmpty } from 'lodash';
+import { clone, get, isEmpty, set } from 'lodash';
 import axios from 'axios';
 import pluginId from '../../pluginId';
 import {
@@ -72,9 +72,9 @@ const InputModalStepperProvider = ({
 
           return axios
             .get(file.fileURL, {
-              headers: new Headers({ Origin: window.location.origin, mode: 'cors' }),
               responseType: 'blob',
               cancelToken: source.token,
+              timeout: 30000,
             })
             .then(({ data }) => {
               const createdFile = new File([data], file.fileURL, {
@@ -352,11 +352,19 @@ const InputModalStepperProvider = ({
     });
 
     const requests = filesToUpload.map(
-      async ({ file, fileInfo, originalIndex, abortController }) => {
+      async ({ file, fileInfo, originalIndex, originalName, abortController }) => {
         const formData = new FormData();
         const headers = {};
+        const infos = clone(fileInfo);
+
+        if (originalName === infos.name) {
+          set(infos, 'name', null);
+        }
+
+        console.log(infos);
+
         formData.append('files', file);
-        formData.append('fileInfo', JSON.stringify(fileInfo));
+        formData.append('fileInfo', JSON.stringify(infos));
 
         try {
           const uploadedFile = await request(
