@@ -318,9 +318,15 @@ class Strapi {
       configuration: this.config.get('currentEnvironment.server.webhooks', {}),
     });
 
+    const ensureDefaultConnection = model =>
+      _.merge(
+        { connection: this.config.get('currentEnvironment.database.defaultConnection') },
+        model
+      );
+
     // Init core store
-    this.models['core_store'] = coreStoreModel;
-    this.models['strapi_webhooks'] = webhookModel;
+    this.models['core_store'] = ensureDefaultConnection(coreStoreModel);
+    this.models['strapi_webhooks'] = ensureDefaultConnection(webhookModel);
 
     this.db = createDatabaseManager(this);
     await this.db.initialize();

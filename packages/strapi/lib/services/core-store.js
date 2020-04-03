@@ -3,7 +3,6 @@
 const coreStoreModel = {
   uid: 'strapi::core-store',
   internal: true,
-  connection: 'default',
   info: {
     name: 'core_store',
     description: '',
@@ -32,13 +31,11 @@ const coreStoreModel = {
 const createCoreStore = ({ environment: defaultEnv, db }) => {
   return (source = {}) => {
     async function get(params = {}) {
-      const {
-        key,
-        environment = defaultEnv,
-        type = 'core',
-        name = '',
-        tag = '',
-      } = Object.assign({}, source, params);
+      const { key, environment = defaultEnv, type = 'core', name = '', tag = '' } = Object.assign(
+        {},
+        source,
+        params
+      );
 
       const prefix = `${type}${name ? `_${name}` : ''}`;
 
@@ -54,11 +51,7 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
         return null;
       }
 
-      if (
-        data.type === 'object' ||
-        data.type === 'array' ||
-        data.type === 'boolean'
-      ) {
+      if (data.type === 'object' || data.type === 'array' || data.type === 'boolean') {
         try {
           return JSON.parse(data.value);
         } catch (err) {
@@ -72,14 +65,11 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
     }
 
     async function set(params = {}) {
-      const {
-        key,
-        value,
-        environment = defaultEnv,
-        type,
-        name,
-        tag = '',
-      } = Object.assign({}, source, params);
+      const { key, value, environment = defaultEnv, type, name, tag = '' } = Object.assign(
+        {},
+        source,
+        params
+      );
 
       const prefix = `${type}${name ? `_${name}` : ''}`;
 

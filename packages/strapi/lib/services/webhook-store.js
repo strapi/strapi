@@ -6,7 +6,6 @@
 const webhookModel = {
   uid: 'strapi::webhooks',
   internal: true,
-  connection: 'default',
   globalId: 'StrapiWebhooks',
   collectionName: 'strapi_webhooks',
   info: {
@@ -69,9 +68,7 @@ const createWebhookStore = ({ db }) => {
     },
 
     createWebhook(data) {
-      return webhookQueries
-        .create(toDBObject({ ...data, isEnabled: true }))
-        .then(fromDBObject);
+      return webhookQueries.create(toDBObject({ ...data, isEnabled: true })).then(fromDBObject);
     },
 
     async updateWebhook(id, data) {
