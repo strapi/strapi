@@ -3,7 +3,7 @@
 ## What is a webhook
 
 A webhook is a way for an application to notify other applications that an event occurred.
-Using a webhook is a good way to tell third party providers to start some processing (CI, build, deployment...).
+Using a webhook is a good way to tell third party providers to start some processing (CI, build, deployment ...).
 
 The way a webhook works is by delivering information to a receiving application through HTTP requests (typically POST requests).
 
@@ -21,7 +21,7 @@ Click on `Add new webhook` and fill in the form.
 
 ### Trigger a webhook
 
-You can test out a webhook with a test event: `trigger-test`. Open the webhook you want to trigger:
+You can test out a webhook with a test event: `trigger-test`. Open the webhook you want to trigger.
 
 ![Trigger ](../assets/concepts/webhooks/trigger_start.png)
 
@@ -33,9 +33,9 @@ You will see the trigger request appear and get the result.
 
 ![Trigger result](../assets/concepts/webhooks/trigger_result.png)
 
-### Enable and disable a webhook
+### Enable or disable a webhook
 
-You can enable or disable a webhook from the list view directly
+You can enable or disable a webhook from the list view directly.
 
 ![Disable webhook](../assets/concepts/webhooks/disable.png)
 
@@ -211,7 +211,7 @@ This event is triggered only when you delete a media through the media interface
 
 ### Available configurations
 
-You can set webhooks configurations inside the file `./config/environments/{env}/server.json`.
+You can set webhook configurations inside the file `./config/environments/{env}/server.json`.
 
 - `webhooks`
   - `defaultHeaders`: You can set default headers to use for your webhook requests. This option is overwritten by the headers set in the webhook itself.
@@ -245,7 +245,7 @@ You can configure these global headers by updating the file at `./config/environ
 {
   "webhooks": {
     "defaultHeaders": {
-      "Authroization": "Bearer my-very-secured-token"
+      "Authorization": "Bearer my-very-secured-token"
     }
   }
 }
@@ -259,7 +259,7 @@ You can configure these global headers by updating the file at `./config/environ
 {
   "webhooks": {
     "defaultHeaders": {
-      "Authroization": "Bearer ${ process.env.WEBHOOK_TOKEN }"
+      "Authorization": "Bearer ${ process.env.WEBHOOK_TOKEN }"
     }
   }
 }

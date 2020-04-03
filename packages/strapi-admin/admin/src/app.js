@@ -24,12 +24,7 @@ import { BrowserRouter } from 'react-router-dom';
 
 import { merge } from 'lodash';
 import { Fonts } from '@buffetjs/styles';
-import {
-  freezeApp,
-  pluginLoaded,
-  unfreezeApp,
-  updatePlugin,
-} from './containers/App/actions';
+import { freezeApp, pluginLoaded, unfreezeApp, updatePlugin } from './containers/App/actions';
 import { showNotification } from './containers/NotificationProvider/actions';
 
 import basename from './utils/basename';
@@ -42,6 +37,7 @@ import App from './containers/App';
 import LanguageProvider from './containers/LanguageProvider';
 
 import configureStore from './configureStore';
+import { SETTINGS_BASE_URL } from './config';
 
 // Import i18n messages
 import { translationMessages, languages } from './i18n';
@@ -54,24 +50,27 @@ import plugins from './plugins';
 const initialState = {};
 const store = configureStore(initialState, history);
 const { dispatch } = store;
-const MOUNT_NODE =
-  document.getElementById('app') || document.createElement('div');
+const MOUNT_NODE = document.getElementById('app') || document.createElement('div');
 
-Object.keys(plugins).forEach(plugin => {
-  const currentPlugin = plugins[plugin];
+Object.keys(plugins).forEach(current => {
+  const registerPlugin = plugin => {
+    return plugin;
+  };
+  const currentPluginFn = plugins[current];
+  const plugin = currentPluginFn({
+    registerPlugin,
+    settingsBaseURL: SETTINGS_BASE_URL || '/settings',
+  });
 
   const pluginTradsPrefixed = languages.reduce((acc, lang) => {
-    const currentLocale = currentPlugin.trads[lang];
+    const currentLocale = plugin.trads[lang];
 
     if (currentLocale) {
-      const localeprefixedWithPluginId = Object.keys(currentLocale).reduce(
-        (acc2, current) => {
-          acc2[`${plugins[plugin].id}.${current}`] = currentLocale[current];
+      const localeprefixedWithPluginId = Object.keys(currentLocale).reduce((acc2, current) => {
+        acc2[`${plugin.id}.${current}`] = currentLocale[current];
 
-          return acc2;
-        },
-        {}
-      );
+        return acc2;
+      }, {});
 
       acc[lang] = localeprefixedWithPluginId;
     }
@@ -81,7 +80,7 @@ Object.keys(plugins).forEach(plugin => {
 
   try {
     merge(translationMessages, pluginTradsPrefixed);
-    dispatch(pluginLoaded(currentPlugin));
+    dispatch(pluginLoaded(plugin));
   } catch (err) {
     console.log({ err });
   }
@@ -131,9 +130,7 @@ window.strapi = Object.assign(window.strapi || {}, {
       render(merge({}, translationMessages, translationMessagesUpdated));
     },
     leftMenuSections: leftMenuSectionsUpdated => {
-      store.dispatch(
-        updatePlugin(pluginId, 'leftMenuSections', leftMenuSectionsUpdated)
-      );
+      store.dispatch(updatePlugin(pluginId, 'leftMenuSections', leftMenuSectionsUpdated));
     },
   }),
   router: history,

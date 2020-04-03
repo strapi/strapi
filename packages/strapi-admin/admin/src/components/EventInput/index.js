@@ -1,17 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { FormattedMessage } from 'react-intl';
 
+import formatValue from './utils/formatValue';
 import Wrapper from './Wrapper';
 import EventRow from './EventRow';
 
 const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
-  const { formatMessage } = useGlobalContext();
-
   const headersName = [
-    formatMessage({ id: 'Settings.webhooks.events.create' }),
-    formatMessage({ id: 'Settings.webhooks.events.edit' }),
-    formatMessage({ id: 'Settings.webhooks.events.delete' }),
+    'Settings.webhooks.events.create',
+    'Settings.webhooks.events.edit',
+    'Settings.webhooks.events.delete',
   ];
 
   const events = {
@@ -22,16 +21,7 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
   // Media update disabled for now - until the media libray is ready
   const disabledEvents = ['media.update'];
 
-  const formatValue = inputValue.reduce((acc, curr) => {
-    const key = curr.split('.')[0];
-
-    if (!acc[key]) {
-      acc[key] = [];
-    }
-    acc[key].push(curr);
-
-    return acc;
-  }, {});
+  const formattedValue = formatValue(inputValue);
 
   const handleChange = ({ target: { name, value } }) => {
     let set = new Set(inputValue);
@@ -66,7 +56,11 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
           <tr>
             <td />
             {headersName.map(header => {
-              return <td key={header}>{header}</td>;
+              return (
+                <td key={header}>
+                  <FormattedMessage id={header} />
+                </td>
+              );
             })}
           </tr>
         </thead>
@@ -78,7 +72,7 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
                 key={event}
                 name={event}
                 events={events[event]}
-                inputValue={formatValue[event]}
+                inputValue={formattedValue[event]}
                 handleChange={handleChange}
                 handleChangeAll={handleChangeAll}
               />
@@ -89,8 +83,6 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
     </Wrapper>
   );
 };
-
-EventInput.defaultProps = {};
 
 EventInput.propTypes = {
   name: PropTypes.string.isRequired,

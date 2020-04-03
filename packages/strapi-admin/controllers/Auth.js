@@ -145,9 +145,7 @@ module.exports = {
     }
 
     // First, check if their is at least one admin
-    const admins = await strapi
-      .query('administrator', 'admin')
-      .find({ _limit: 1 });
+    const admins = await strapi.query('administrator', 'admin').find({ _limit: 1 });
 
     if (admins.length > 0) {
       return ctx.badRequest(
@@ -159,9 +157,7 @@ module.exports = {
       );
     }
 
-    params.password = await strapi.admin.services.auth.hashPassword(
-      params.password
-    );
+    params.password = await strapi.admin.services.auth.hashPassword(params.password);
 
     const admin = await strapi.query('administrator', 'admin').findOne({
       email: params.email,
@@ -184,7 +180,7 @@ module.exports = {
 
       const jwt = strapi.admin.services.auth.createJwtToken(admin);
 
-      strapi.emit('didCreateFirstAdmin');
+      await strapi.telemetry.send('didCreateFirstAdmin');
 
       ctx.send({
         jwt,
@@ -300,9 +296,7 @@ module.exports = {
     }
 
     // Find the admin thanks to his email.
-    const admin = await strapi
-      .query('administrator', 'admin')
-      .findOne({ email });
+    const admin = await strapi.query('administrator', 'admin').findOne({ email });
 
     // admin not found.
     if (!admin) {
@@ -355,9 +349,7 @@ module.exports = {
     }
 
     // Update the admin.
-    await strapi
-      .query('administrator', 'admin')
-      .update({ id: admin.id }, { resetPasswordToken });
+    await strapi.query('administrator', 'admin').update({ id: admin.id }, { resetPasswordToken });
 
     ctx.send({ ok: true });
   },

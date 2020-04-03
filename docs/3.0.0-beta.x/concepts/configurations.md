@@ -24,7 +24,8 @@ Contains the main configurations relative to your project.
   },
   "public": {
     "path": "./public",
-    "maxAge": 60000
+    "maxAge": 60000,
+    "defaultIndex": true
   }
 }
 ```
@@ -35,6 +36,7 @@ Contains the main configurations relative to your project.
 - `public`
   - `path` (string): Path to the public folder. Default value: `./public`.
   - `maxAge` (integer): Cache-control max-age directive in ms. Default value: `60000`.
+  - `defaultIndex` (boolean): Display default index page at `/` and `/index.html`. Default value: `true`.
 
 ## Custom
 
@@ -70,9 +72,9 @@ Here are some use cases:
 - Create an admin user if there isn't one.
 - Fill the database with some necessary data.
 - Check that the database is up-and-running.
-- Load some environments variables.
+- Load some environment variables.
 
-The bootstrap function can be synchronous or asynchronous
+The bootstrap function can be synchronous or asynchronous.
 
 **Synchronous**
 
@@ -90,7 +92,7 @@ module.exports = () => {
 };
 ```
 
-**Be async**
+**Asynchronous**
 
 ```js
 module.exports = async () => {
@@ -134,7 +136,7 @@ module.exports = {
    */
 
   '0 0 1 * * 1': () => {
-    // Add your own logic here (eg. send a queue of email, create a database backup, etc.).
+    // Add your own logic here (e.g. send a queue of email, create a database backup, etc.).
   },
 };
 ```
@@ -213,7 +215,7 @@ You can access the config of the current environment through `strapi.config.curr
       - `password` (string): Password used to establish the connection.
       - `options` (object): List of additional options used by the connector.
       - `timezone` (string): Set the default behavior for local time. Default value: `utc` [Timezone options](https://www.php.net/manual/en/timezones.php).
-      - `schema` (string): Set the default database schema. **Used only for Postgres DB**
+      - `schema` (string): Set the default database schema. **Used only for Postgres DB.**
       - `ssl` (boolean): For ssl database connection.
     - `options` Options used for database connection.
       - `debug` (boolean): Show database exchanges and errors.
@@ -442,15 +444,15 @@ The session doesn't work with `mongo` as a client. The package that we should us
 - `emitErrors` (boolean): Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services.
 - `proxy`
   - `enabled` (boolean): Enable proxy support such as Apache or Nginx. Default value: `false`.
-  - `ssl` (boolean): Enable proxy SSL support
+  - `ssl` (boolean): Enable proxy SSL support.
   - `host` (string): Host name your proxy service uses for Strapi.
   - `port` (integer): Port that your proxy service accepts connections on.
 - [`cron`](https://en.wikipedia.org/wiki/Cron)
   - `enabled` (boolean): Enable or disable CRON tasks to schedule jobs at specific dates. Default value: `false`.
 - `admin`
-  - `autoOpen` (boolean): Enable or disabled administration opening on start (default: `true`)
-  - `path` (string): Allow to change the URL to access the admin (default: `/admin`).
-  - `watchIgnoreFiles` (array): Add custom files that should not be watched during development. See more [here](https://github.com/paulmillr/chokidar#path-filtering) (property `ignored`). Default value: `[]`
+  - `autoOpen` (boolean): Enable or disabled administration opening on start. Default value: `true`.
+  - `path` (string): Allow to change the URL to access the admin panel. Default value: `/admin`.
+  - `watchIgnoreFiles` (array): Add custom files that should not be watched during development. See more [here](https://github.com/paulmillr/chokidar#path-filtering) (property `ignored`). Default value: `[]`.
   - `build`
     - `backend` (string): URL that the admin panel and plugins will request (default: `http://localhost:1337`).
 
@@ -458,7 +460,7 @@ The session doesn't work with `mongo` as a client. The package that we should us
 
 **Path —** `./config/environments/**/server.json`.
 
-As an example using this configuration with Nginx your server would respond to `https://example.com:8443` instead of `http://localhost:1337`
+As an example using this configuration with Nginx your server would respond to `https://example.com:8443` instead of `http://localhost:1337`.
 
 **Note:** you will need to configure Nginx or Apache as a proxy before configuring this example.
 
@@ -480,7 +482,7 @@ As an example using this configuration with Nginx your server would respond to `
 
 ## Dynamic configurations
 
-For security reasons, sometimes it's better to set variables through the server environment. It's also useful to push dynamics values into configurations files. To enable this feature into JSON files, Strapi embraces a JSON-file interpreter into his core to allow dynamic value in the JSON configurations files.
+For security reasons, sometimes it's better to set variables through the server environment. It's also useful to push dynamic values into configuration files. To enable this feature in JSON files, Strapi embraces a JSON-file interpreter into its core to allow dynamic values in the JSON configuration files.
 
 #### Syntax
 
@@ -488,7 +490,7 @@ The syntax is inspired by the [template literals ES2015 specifications](https://
 
 #### Usage
 
-In any JSON configurations files in your project, you can inject dynamic values like this:
+In any JSON configuration file in your project, you can inject dynamic values like this:
 
 **Path —** `./config/environments/production/database.json`.
 

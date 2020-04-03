@@ -1,17 +1,36 @@
 import React, { isValidElement, useState } from 'react';
 import PropTypes from 'prop-types';
-import { isEmpty } from 'lodash';
+import { get, isEmpty, isObject } from 'lodash';
+import { useGlobalContext } from '../../contexts/GlobalContext';
 import matchSorter from 'match-sorter';
-
-import Wrapper from './Wrapper';
-import List from './List';
-
 import LeftMenuLink from '../LeftMenuLink';
 import LeftMenuSubList from '../LeftMenuSubList';
 import LeftMenuHeader from '../LeftMenuHeader';
+import List from './List';
+import Wrapper from './Wrapper';
 
-function LeftMenuList({ customLink, links, title, searchable }) {
+function LeftMenuList({ customLink, links, title, searchable, numberOfVisibleItems }) {
   const [search, setSearch] = useState('');
+  const { formatMessage } = useGlobalContext();
+
+  const getLabel = message => {
+    if (isObject(message) && message.id) {
+      return formatMessage({
+        ...message,
+        defaultMessage: message.defaultMessage || message.id,
+      });
+    }
+
+    return message;
+  };
+
+  const formatTitleWithIntl = title => {
+    if (isObject(title) && title.id) {
+      return { ...title, defaultMessage: title.defaultMessage || title.id };
+    }
+
+    return { id: title, defaultMessage: title };
+  };
 
   const { Component, componentProps } = customLink || {
     Component: null,
@@ -23,9 +42,10 @@ function LeftMenuList({ customLink, links, title, searchable }) {
   const getCount = () => {
     if (hasChildObject()) {
       return links.reduce((acc, current) => {
-        return acc + current.links.length;
+        return acc + get(current, 'links', []).length;
       }, 0);
     }
+
     return links.length;
   };
 
@@ -38,6 +58,7 @@ function LeftMenuList({ customLink, links, title, searchable }) {
         };
       });
     }
+
     return matchSorter(links, search, { keys: ['title'] });
   };
 
@@ -60,7 +81,7 @@ function LeftMenuList({ customLink, links, title, searchable }) {
 
     return (
       <li key={name}>
-        <LeftMenuLink {...link}>{title}</LeftMenuLink>
+        <LeftMenuLink {...link}>{getLabel(title)}</LeftMenuLink>
       </li>
     );
   };
@@ -70,7 +91,7 @@ function LeftMenuList({ customLink, links, title, searchable }) {
     search,
     searchable,
     setSearch,
-    title,
+    title: formatTitleWithIntl(title),
   };
 
   return (
@@ -79,10 +100,10 @@ function LeftMenuList({ customLink, links, title, searchable }) {
         <LeftMenuHeader {...headerProps} />
       </div>
       <div>
-        <List>{getList().map((link, i) => renderCompo(link, i))}</List>
-        {Component && isValidElement(<Component />) && (
-          <Component {...componentProps} />
-        )}
+        <List numberOfVisibleItems={numberOfVisibleItems}>
+          {getList().map((link, i) => renderCompo(link, i))}
+        </List>
+        {Component && isValidElement(<Component />) && <Component {...componentProps} />}
       </div>
     </Wrapper>
   );
@@ -93,6 +114,7 @@ LeftMenuList.defaultProps = {
   links: [],
   title: null,
   searchable: false,
+  numberOfVisibleItems: null,
 };
 
 LeftMenuList.propTypes = {
@@ -108,6 +130,7 @@ LeftMenuList.propTypes = {
     id: PropTypes.string,
   }),
   searchable: PropTypes.bool,
+  numberOfVisibleItems: PropTypes.number,
 };
 
 export default LeftMenuList;

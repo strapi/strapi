@@ -120,7 +120,7 @@ module.exports = {
           : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
         if (!controller) {
-          return new Error(
+          throw new Error(
             `Cannot find the controller's action ${name}.${action}`
           );
         }
@@ -157,7 +157,7 @@ module.exports = {
         : _.get(controllers, `${name}.find`);
 
       if (!controller) {
-        return new Error(
+        throw new Error(
           `Cannot find the controller's action ${name}.${
             isSingular ? 'findOne' : 'find'
           }`
@@ -210,7 +210,7 @@ module.exports = {
         : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
       if (!controller) {
-        return new Error(
+        throw new Error(
           `Cannot find the controller's action ${name}.${action}`
         );
       }
@@ -223,19 +223,19 @@ module.exports = {
     }
 
     if (strapi.plugins['users-permissions']) {
-      policies.unshift('plugins.users-permissions.permissions');
+      policies.unshift('plugins::users-permissions.permissions');
     }
 
     // Populate policies.
-    policies.forEach(policy =>
-      policyUtils.get(
-        policy,
-        plugin,
-        policiesFn,
-        `GraphQL query "${queryName}"`,
-        name
-      )
-    );
+    policies.forEach(policyName => {
+      try {
+        policiesFn.push(policyUtils.get(policyName, plugin, name));
+      } catch (error) {
+        strapi.stopWithError(
+          `Error building graphql query "${queryName}": ${error.message}`
+        );
+      }
+    });
 
     return async (obj, options = {}, graphqlContext) => {
       const { context } = graphqlContext;
@@ -246,6 +246,7 @@ module.exports = {
         request: Object.assign(_.clone(context.request), {
           graphql: null,
         }),
+        response: _.clone(context.response),
       });
 
       // Note: we've to used the Object.defineProperties to reset the prototype. It seems that the cloning the context

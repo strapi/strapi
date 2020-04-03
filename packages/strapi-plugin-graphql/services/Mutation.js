@@ -63,7 +63,7 @@ module.exports = {
           : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
         if (!controller) {
-          return new Error(
+          throw new Error(
             `Cannot find the controller's action ${name}.${action}`
           );
         }
@@ -98,7 +98,7 @@ module.exports = {
       const controller = _.get(controllers, `${name}.${action}`);
 
       if (!controller) {
-        return new Error(
+        throw new Error(
           `Cannot find the controller's action ${name}.${action}`
         );
       }
@@ -138,7 +138,7 @@ module.exports = {
         : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
       if (!controller) {
-        return new Error(
+        throw new Error(
           `Cannot find the controller's action ${name}.${action}`
         );
       }
@@ -151,19 +151,19 @@ module.exports = {
     }
 
     if (strapi.plugins['users-permissions']) {
-      policies.unshift('plugins.users-permissions.permissions');
+      policies.unshift('plugins::users-permissions.permissions');
     }
 
     // Populate policies.
-    policies.forEach(policy =>
-      policyUtils.get(
-        policy,
-        plugin,
-        policiesFn,
-        `GraphQL query "${queryName}"`,
-        name
-      )
-    );
+    policies.forEach(policyName => {
+      try {
+        policiesFn.push(policyUtils.get(policyName, plugin, name));
+      } catch (error) {
+        strapi.stopWithError(
+          `Error building graphql mutation "${queryName}": ${error.message}`
+        );
+      }
+    });
 
     return async (obj, options, graphqlCtx) => {
       const { context } = graphqlCtx;
@@ -185,6 +185,7 @@ module.exports = {
         request: Object.assign(_.clone(context.request), {
           graphql: null,
         }),
+        response: _.clone(context.response),
       });
 
       // Execute policies stack.

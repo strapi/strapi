@@ -10,13 +10,13 @@ Deploying **databases** along with Strapi is covered in the [Databases Guide](..
 
 #### 1. Configure
 
-Update the `production` settings with the IP and domain name where the project will be running.
+Update the `production` settings with the IP or domain name where the project will be running.
 
 **Path —** `./config/environments/production/server.json`.
 
 ```js
 {
-  "host": "domain.io", // IP or domain
+  "host": "domain.io", // IP or domain or 0.0.0.0
   "port": 1337
 }
 ```
@@ -24,13 +24,13 @@ Update the `production` settings with the IP and domain name where the project w
 In case your database is not running on the same server, make sure that the environment of your production
 database (`./config/environments/production/database.json`) is set properly.
 
-If you are passing a number of configuration item values via environment variables which is always encouraged for production environment, read the section for [Dynamic Configuration](../concepts/configurations.md#dynamic-configurations). Here is an example:
+If you are passing a number of configuration item values via environment variables, which is always encouraged for production environment, read the section for [Dynamic Configuration](../concepts/configurations.md#dynamic-configurations). Here is an example:
 
 **Path —** `./config/environments/production/server.json`.
 
 ```js
 {
-  "host": "${process.env.APP_HOST || '127.0.0.1'}",
+  "host": "${process.env.APP_HOST || '0.0.0.0'}",
   "port": "${process.env.NODE_PORT || 1337}"
 }
 ```

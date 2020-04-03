@@ -2,7 +2,7 @@
 
 This **tutorial** is written for developers to **teach and explain** a step-by-step introduction to Strapi. (The [Quick Start Guide](quick-start.md) is a more concise **How-to** version.) This tutorial takes you through the beginning steps of how you start a project like **"FoodAdvisor"** ([Github](https://github.com/strapi/foodadvisor/))([Demo](https://foodadvisor.strapi.io/)).
 
-You get a good overview of the features developers love found in Strapi.
+You get a good overview of the features found in Strapi that developers love.
 
 <iframe width="800" height="450" src="https://www.youtube.com/embed/vulcVRQ4X8A" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
@@ -149,11 +149,11 @@ The first step is to create an **Administrator** (or "root user") for your proje
 
 You need to complete the following fields:
 
-- **Username**, create a username for login access to your project, e.g., `paulbocuse`
-- **Password**, create a unique password for logging into your project
-- **Email address**, this is used for recovery
-- Check **Receive news**, this is optional but **recommended**
-- Click the **Ready to Start** button
+- **Username**, create a username for login access to your project, e.g. `paulbocuse`.
+- **Password**, create a unique password for logging into your project.
+- **Email address**, this is used for recovery.
+- Check **Receive news**, this is optional but **recommended**.
+- Click the **Ready to Start** button.
 
 ![Completed Registration Page](../assets/getting-started/tutorial/completed-registration-page.png 'Completed Registration Page')
 
@@ -175,22 +175,24 @@ It is not necessary to always create a front-end **User** for your **Administrat
 
 :::
 
-- Click on `Users` located under **CONTENT TYPES** in the left-hand menu
-- Click the blue **+ Add New User** button in the top right corner
-- Next, complete the `Username`, `Email`, and `Password` fields
-- Select `ON` for the **Confirmed** toggle field
-- To the right, under **Role**, select `Authenticated`
-- Save the new user by clicking the blue **Save** button (top right)
+- Click on `Users` located under **COLLECTION TYPES** in the left-hand menu.
+- Click the blue **+ Add New User** button in the top right corner.
+- Next, complete the `Username`, `Email`, and `Password` fields.
+- Select `ON` for the **Confirmed** toggle field.
+- To the right, under **Role**, select `Authenticated`.
+- Save the new user by clicking the blue **Save** button (top right).
 
 ![New front-end User](../assets/getting-started/tutorial/new-front-end-user.png 'New front-end User')
 
-You are now ready to create your first **Content Type**.
+You are now ready to create your first **Collection Type**.
 
-## 3. Create a new Content Type called "Restaurant"
-
-**Content Types** are a collection of entered data represented by fields. For example, a **Content Type** called `Restaurant` may be intended to display information regarding restaurants. A `restaurant` **Content Type** could have fields that include a `name`, the main `image`, and a `description` - _at a minimum_. However, a `restaurant` could also have a `category` or multiple `categories`, and a `restaurant` could perhaps need to show `hoursofoperation`.
+## 3. Create a new Collection Type called "Restaurant"
 
 A **Content Type** can be considered a sort of _blueprint_ for the data created. In other words, a **Content Type** is the schema of the data structure.
+
+Both **Collection Type** and **Single Type** are types of **Content Type**. **Collection Type** is used for content that repeats such as restaurants, or blog posts (hence "collection"). **Single Type** is used to manage content that will have only one instance - for example, your menu, a static page, or a footer.
+
+**Content Type** can hold data represented by fields. For example, a **Collection Type** called `Restaurant` may be intended to display information regarding restaurants. A `restaurant` **Collection Type** could have fields that include a `name`, the main `image`, and a `description` - _at a minimum_. However, a `restaurant` could also have a `category` or multiple `categories`, and a `restaurant` could perhaps need to show `hoursofoperation`.
 
 The next section guides you through the steps needed for each of these above **Content Type** fields.
 
@@ -210,11 +212,11 @@ You are now able to see the three available **Content Types**. At this point, th
 
 You need to create a new **Content Type** for `Restaurants`.
 
-1. Complete these steps to **Add a Restaurant Content Type**
+1. Complete these steps to **Add a Restaurant Content Type**.
 
-- Click the `+ Create new content-type` link (under existing **CONTENT TYPES**)
-- Enter a **Name** for your new **Content Type** (call this `restaurant`)
-- Click the `Continue` button
+- Click the `+ Create new collection type` link (under existing **CONTENT TYPES**).
+- Enter a **Name** for your new **Content Type** (call this `restaurant`).
+- Click the `Continue` button.
 
 ![Singular Name Entries for Content Type](../assets/getting-started/tutorial/singular-name-entry.png 'Singular Name Entries or Content Type')
 
@@ -224,61 +226,61 @@ The Content Type **Name** is always **singular**. For example, `restaurant` not 
 
 :::
 
-2. You are now at the **Field Selection** panel
+2. You are now at the **Field Selection** panel.
 
 You may add your first field, a **Text** field for the **Restaurant** name.
 
 ![Field Section Panel](../assets/getting-started/tutorial/field-selection-panel.png 'Field Selection Panel')
 
-- Click on the `Text` field
-- In the **Name** field, type `name`
+- Click on the `Text` field.
+- In the **Name** field, type `name`.
 
 ![Restaurant Name Input Field](../assets/getting-started/tutorial/restaurant-name-input-field.png 'Restuarant Name Input Field')
 
-- Click on the `ADVANCED SETTINGS` tab
-- Check the `Required field` checkbox
-- Check the `Unique field` checkbox
+- Click on the `ADVANCED SETTINGS` tab.
+- Check the `Required field` checkbox.
+- Check the `Unique field` checkbox.
 
 ![Restaurant Name Advanced Settings](../assets/getting-started/tutorial/restaurant-name-advanced-settings.png 'Restuarant Name Advanced Settings')
 
-- Click the `+ Add another field` button
+- Click the `+ Add another field` button.
 
 You are now ready to add the second field, a **Rich Text** field for the **Restaurant** description.
 
 ![Field Section Panel](../assets/getting-started/tutorial/field-selection-panel-after-restaurant-name.png 'Field Selection Panel')
 
-- Click the `Rich Text` field
+- Click the `Rich Text` field.
 
-- In the **Name** field, type `description`
+- In the **Name** field, type `description`.
 
 ![Restaurant Rich Text Field](../assets/getting-started/tutorial/restaurant-rich-text-field.png 'Restuarant Rich Text Field')
 
-- Click the `+ Add another field` button
+- Click the `+ Add another field` button.
 
 You are now ready to add the third field, a **Media** field for the **Restaurant** thumbnail image.
 
 ![Field Section Panel](../assets/getting-started/tutorial/field-selection-panel-after-restaurant-description.png 'Field Selection Panel')
 
-- Click the `Media` field
+- Click the `Media` field.
 
-- In the **Name** field, type `image`
+- In the **Name** field, type `image`.
 
 ![Restaurant Rich Image Field](../assets/getting-started/tutorial/restaurant-image-field.png 'Restuarant Rich Image Field')
 
-- Click on the **ADVANCED SETTINGS** tab
-- Check the `Required field` checkbox
+- Click on the **ADVANCED SETTINGS** tab.
+- Check the `Required field` checkbox.
 
 ![Restaurant Rich Image Field Advanced Settings](../assets/getting-started/tutorial/restaurant-image-field-advanced-settings.png 'Restuarant Rich Image Field Advanced Settings')
 
-- Click the `Finish` button
+- Click the `Finish` button.
 
 Your new Content Type called **Restaurant** is ready to be **Saved**.
 
 ![Restaurant Save Screen](../assets/getting-started/tutorial/restaurant-save-screen.png 'Restuarant Save Screen')
 
-- Click the `Save` button
+- Click the `Save` button.
 
-- Wait for Strapi to restart
+- Wait for Strapi to restart.
 
 ![Strapi Restart](../assets/getting-started/tutorial/restaurant-strapi-restart.png 'Strapi Restart')
 
@@ -292,35 +294,35 @@ The `Category` **Content Type** will have a **Text** field named `category`, and
 
 ![Category Add Content Type](../assets/getting-started/tutorial/category-add-content-type.png 'Category Add Content Type')
 
-1. Complete these steps to **add a Category Content Type**:
+1. Complete these steps to **add a Category Content Type**.
 
-- Click the `+ Create new content-type` link
-- Enter a **Name** for your new **Content Type** (call this `category`)
+- Click the `+ Create new collection type` link.
+- Enter a **Name** for your new **Content Type** (call this `category`).
 
 ![Category Name Field](../assets/getting-started/tutorial/category-name-field.png 'Category Name Field')
 
-- Click the `Continue` button
+- Click the `Continue` button.
 
-2. Now, you are ready to add fields to your **Category**:
+2. Now, you are ready to add fields to your **Category**.
 
 ![Category Fields](../assets/getting-started/tutorial/category-fields.png 'Category Fields')
 
-- Click on the `Text` field
-- In the **Name** field, type `name`
+- Click on the `Text` field.
+- In the **Name** field, type `name`.
 
 ![Category Name Entry Field](../assets/getting-started/tutorial/category-name-entry-field.png 'Category Name Entry Fields')
 
-- Click on the `ADVANCED SETTINGS` tab
-- Check the `Required field` checkbox
-- Check the `Unique field` checkbox
+- Click on the `ADVANCED SETTINGS` tab.
+- Check the `Required field` checkbox.
+- Check the `Unique field` checkbox.
 
 ![Category Advanced Settings](../assets/getting-started/tutorial/category-advanced-settings.png 'Category Advanced Settings')
 
-- Click the `+ Add another field` button
+- Click the `+ Add another field` button.
 
 You are now ready to add the second field, a **Relation** field for creating a **Many to Many** relationship between the **Category** and **Restaurant** Content Types.
 
-- Click on the `Relation` field
+- Click on the `Relation` field.
 
 ![Category Add Field Panel](../assets/getting-started/tutorial/category-add-field-panel-after-category-name.png 'Category Add Field Panel')
 
@@ -328,85 +330,85 @@ This brings you to the **Add New Relation** screen.
 
 ![Category New Relation Field](../assets/getting-started/tutorial/category-new-relation-field.png 'Category New Relation Field')
 
-- Click on _right dropdown_ with `Permission (Users-Permissions)` and change it to `Restaurant`
+- Click on the _right dropdown_ with `Permission (Users-Permissions)` and change it to `Restaurant`.
 
 ![Category Relation Dropdown](../assets/getting-started/tutorial/category-relation-dropdown.png 'Category Relation Dropdown')
 
-- Click the `Many to Many` icon (from the middle icon choices). It should now read, **"Categories has and belongs to many Restaurants"**
+- Click the `Many to Many` icon (from the middle icon choices). It should now read, **"Categories has and belongs to many Restaurants"**.
 
 ![Category Relation Many to Many](../assets/getting-started/tutorial/category-relation-many-to-many.png 'Category Relation Many to Many')
 
-- Click the `Finish` button
+- Click the `Finish` button.
 
 ![Category Save](../assets/getting-started/tutorial/category-save.png 'Category Save')
 
-- Click the `Save` button
+- Click the `Save` button.
 
-- Wait for Strapi to restart
+- Wait for Strapi to restart.
 
 ![Category Save Strapi Restart](../assets/getting-started/tutorial/categor-create-strapi-restart.png 'Category Save Strapi Restart')
 
-After Strapi has restarted, you are ready to create a `Component` called **"Hours of Operations."**
+After Strapi has restarted, you are ready to create a `Component` called **"Hours of Operations"**.
 
 ## 5. Create a new Component called, "Hours of Operation"
 
 ### The Hours of Operation Component
 
-The `Restaurant` Content Type has a **Component** field named `Hours_of_operation`. This Component is **Repeatable** and for displaying the **Opening hours** and **Closing hours** of a **Restaurant**.
+The `Restaurant` Content Type has a **Component** field named `hours_of_operation`. This Component is **Repeatable** and for displaying the **Opening hours** and **Closing hours** of a **Restaurant**.
 
-1. Complete these steps to **add a new Component**:
+1. Complete these steps to **add a new Component**.
 
-- Click the `+ Create new component` link to add a new **Component**
-- Enter a **Name** for your new **Component** (call this `hours_of_operation`)
-- Select the icon of your choice
-- Create a new category for your **Component** (call it `hours`)
+- Click the `+ Create new component` link to add a new **Component**.
+- Enter a **Name** for your new **Component** (call this `hours_of_operation`).
+- Select the icon of your choice.
+- Create a new category for your **Component** (call it `hours`).
 
 ![Hours of Operation Add Component](../assets/getting-started/tutorial/hours-of-operation-add-compo.png 'Hours of Operation Add Component')
 
-- Click the `continue` button
+- Click the `continue` button.
 
-2. Now, you are ready to add fields to your **Component**:
+2. Now, you are ready to add fields to your **Component**.
 
 ![Hours of Operation Add Fields](../assets/getting-started/tutorial/hours-of-operation-add-fields.png 'Hours of Operation Add Fields')
 
-- Click on the `Text` field
-- In the **Name** field, type `day_interval`. This is to enter the **Day (or Days)** with **Hours of Operation**
+- Click on the `Text` field.
+- In the **Name** field, type `day_interval`. This is to enter the **Day (or Days)** with **Hours of Operation**.
 
 ![Hours of Operation Days](../assets/getting-started/tutorial/hours-of-operation-days.png 'Hours of Operation Days')
 
-- Click on the `ADVANCED SETTINGS` tab
-- Check the `Required field` checkbox
+- Click on the `ADVANCED SETTINGS` tab.
+- Check the `Required field` checkbox.
 
 ![Hours of Operation Days Advanced Settings](../assets/getting-started/tutorial/hours-of-operation-days-advanced-settings.png 'Hours of Operation Days Advanced Settings')
 
-- Click the `+ Add another field`
+- Click the `+ Add another field`.
 
 You are now ready to add a second field, another **Text** field for the **Opening Hours**.
 
 ![Hours of Operation Opening Hours](../assets/getting-started/tutorial/hours-of-operation-opening-hours.png 'Hours of Operation Opening Hours')
 
-- Click on the `Text` field
-- In the **Name** field, type `opening_hours`
+- Click on the `Text` field.
+- In the **Name** field, type `opening_hours`.
 
 ![Hours of Operation Opening Hours Name](../assets/getting-started/tutorial/hours-of-operation-opening-hours-name.png 'Hours of Operation Opening Hours Name')
 
-- Click the `+ Add another field` button
+- Click the `+ Add another field` button.
 
 You are now ready to add a third field, another **Text** field for the **Closing Hours**.
 
 ![Hours of Operation Closing Hours](../assets/getting-started/tutorial/hours-of-operation-closing-hours.png 'Hours of Operation Closing Hours')
 
-- Click on the `Text` field
-- In the **Name** field, type `closing_hours`
+- Click on the `Text` field.
+- In the **Name** field, type `closing_hours`.
 
 ![Hours of Operation Closing Hours Name](../assets/getting-started/tutorial/hours-of-operation-closing-hours-name.png 'Hours of Operation Closing Hours Name')
 
-- Click the `Finish` button
+- Click the `Finish` button.
 
 ![Hours of Operation Save](../assets/getting-started/tutorial/hours-of-operation-save.png 'Hours of Operation Save')
 
-- Click the `Save` button
-- Wait for Strapi to restart
+- Click the `Save` button.
+- Wait for Strapi to restart.
 
 ![Hours of Operation Strapi Restart](../assets/getting-started/tutorial/hours-of-operation-strapi-restart.png 'Hours of Operation Strapi Restart')
 
@@ -422,86 +424,86 @@ It would be possible to assign the **Hours_of_operation** Component to another *
 
 To access the **Hours_of_operation** Component from within the **Restaurant** Content Type, you need to **edit** the **Restaurant** Content Type in the **Content Type Builder**.
 
-- If needed, navigate back to the **Content Type Builder**
+- If needed, navigate back to the **Content Type Builder**.
 
 ![Edit Restaurant Content Type](../assets/getting-started/tutorial/edit-restaurant-content-type.png 'Edit Restaurant Content Type')
 
-- Click on the `Restaurant` Content Type, under **CONTENT TYPES**
+- Click on the `Restaurant` Content Type, under **CONTENT TYPES**.
 
 ![Edit Restaurant Add Another Field](../assets/getting-started/tutorial/edit-restaurant-add-another-field.png 'Edit Restaurant Add Another Field')
 
-- Click one of the `+ Add another field` button, to add the **Component**
+- Click on the `+ Add another field` button to add the **Component**
 
 ![Edit Restaurant Component Field](../assets/getting-started/tutorial/edit-restaurant-group-field.png 'Edit Restaurant Component Field')
 
-- Click on the `Component` field
-- Select `Use an existing component` option
-- Click on the `Select a component` button
+- Click on the `Component` field.
+- Select `Use an existing component` option.
+- Click on the `Select a component` button.
 
 ![Restaurant Component Inputs](../assets/getting-started/tutorial/restaurant-group-inputs-use.png 'Restaurant Component Inputs')
 
-- Ensure `hours_of_operation` is displayed in the **Select a component** dropdown
-- Provide a **name** for this component in the **Restaurant** Content Type. E.g., `restaurant_hours`
-- Select the `Repeatable component` option
+- Ensure `hours_of_operation` is displayed in the **Select a component** dropdown.
+- Provide a **name** for this component in the **Restaurant** Content Type. E.g. `restaurant_hours`
+- Select the `Repeatable component` option.
 
 ![Restaurant Component Inputs](../assets/getting-started/tutorial/restaurant-group-inputs.png 'Restaurant Component Inputs')
 
-- Click on the `ADVANCED SETTINGS` tab
-- Check the `Required field` checkbox
+- Click on the `ADVANCED SETTINGS` tab.
+- Check the `Required field` checkbox.
 
 ![Restaurant Component Advanced Settings](../assets/getting-started/tutorial/restaurant-group-advanced-settings.png 'Restaurant Component Advanced Settings')
 
-- Click the `Finish` button
+- Click the `Finish` button.
 
 ![Restaurant Component Save](../assets/getting-started/tutorial/restaurant-group-save.png 'Restaurant Component save')
 
-- Click the `Save` button
+- Click the `Save` button.
 
-- Wait for Strapi to restart
+- Wait for Strapi to restart.
 
 ![Restaurant Component Strapi Restart](../assets/getting-started/tutorial/restaurant-group-strapi-restart.png 'Restaurant Component Strapi Restart')
 
 After Strapi has restarted, you are ready to continue to the next section where you customize the user-interface of your **Restaurant** Content Type.
 
-4. Next, you edit the **View Settings** for the new **Hoursofoperation Component** from within the **Content Manager**.
+4. Next, you will edit the **View Settings** for the new **Hoursofoperation Component** from within the **Content Manager**.
 
-You can _drag and drop_ fields into a different layout, as well as, _rename the labels_ as two examples of how you can customize the user interface for your **Content Types**.
+You can _drag and drop_ fields into a different layout and _rename the labels_. This are two examples of how you can customize the user interface for your **Content Types**.
 
-- Click on the `Configure the view`, button
+- Click on the `Configure the view`, button.
 
 ![Content Manager](../assets/getting-started/tutorial/content-manager-restaurant.png 'Content Manager')
 
-- Click on the `Set the component's layout`
+- Click on the `Set the component's layout`.
 
 ![Content Manager Components Tab](../assets/getting-started/tutorial/content-manager-restaurant-group.png 'Content Manager Components Tab')
 
-- Rearrange the fields and make them more user friendly. Grab the `opening_hours` and slide it next to `closing_hours`
+- Rearrange the fields and make them more user friendly. Grab the `opening_hours` and slide it next to `closing_hours`.
 
 ![Content Manager Hoursofoperation Rearrange Fields](../assets/getting-started/tutorial/content-manager-hoursofoperation-rearrange-fields.png 'Content Manager Hoursofoperation Rearrange Fields')
 
-Next, you will change the **field labels** to make them easier to understand:
+Next, you will change the **field labels** to make them easier to understand.
 
-- Click on the `day_interval` field
-- Edit the **Label** to read, `Day (or Days)`
-- Add a **Description**, `You can type in one day or a series of days to complete this field. E.g. "Tuesday" or "Tues - Wed"`
+- Click on the `day_interval` field.
+- Edit the **Label** to read, `Day (or Days)`.
+- Add a **Description**, `You can type in one day or a series of days to complete this field. E.g. "Tuesday" or "Tues - Wed"`.
 
 ![Content Manager Hoursofoperation Day Interval](../assets/getting-started/tutorial/content-manager-hoursofoperation-day-interval.png 'Content Manager Hoursofoperation Day Interval')
 
-- Click on the `opening_hours` field
-- Edit the **Label** to read, `Opening Hours`
+- Click on the `opening_hours` field.
+- Edit the **Label** to read, `Opening Hours`.
 
 ![Content Manager Hoursofoperation Opening Hours](../assets/getting-started/tutorial/content-manager-hoursofoperation-day-opening-hours.png 'Content Manager Hoursofoperation Day Opening Hours')
 
-- Click on `closing_hours` field
-- Edit the **Label** to read, `Closing Hours`
+- Click on `closing_hours` field.
+- Edit the **Label** to read, `Closing Hours`.
 
 ![Content Manager Hoursofoperation Closing Hours](../assets/getting-started/tutorial/content-manager-hoursofoperation-day-closing-hours.png 'Content Manager Hoursofoperation Day Closing Hours')
 
-- Click the `Save` button, and then the `Confirm` button to save your settings
+- Click the `Save` button, and then the `Confirm` button to save your settings.
 
 Your settings have now saved.
 
-Whenever anyone enters in information for a **Restaurant**, the entry form is clear. With Strapi you can modify these and more settings to provide the best experience possible.
+Whenever anyone enters in information for a **Restaurant**, the entry form is cleared. With Strapi you can modify these and more settings to provide the best experience possible.
 
 You are ready to start inputting actual content.
 
@@ -509,67 +511,67 @@ You are ready to start inputting actual content.
 
 You are now ready to add some **Restaurants** and **Categories**.
 
-1. You are now going to enter a new **Restaurant**
+1. You are now going to enter a new **Restaurant**.
 
-- Navigate to and click on the `Restaurants`, under **CONTENT TYPES** in the left-hand menu
+- Navigate to and click on the `Restaurants`, under **CONTENT TYPES** in the left-hand menu.
 
 ![Restaurants Content Type](../assets/getting-started/tutorial/restaurants-content-type.png 'Restaurants Content Type')
 
-- Next, click on the **+ Add new Restaurant** button (in the top right corner)
-- Enter in the following information for your first **Restaurant** called **Biscotte Restaurant**
-  - In the **Name** field, enter `Biscotte Restaurant`
-  - In the **Description** field, enter `Welcome to Biscotte restaurant! Restaurant Biscotte offers a cuisine based on fresh, quality products, often local, organic when possible, and always produced by passionate producers.`
-  - Upload an **Image** to represent the **Restaurant**
+- Next, click on the **+ Add new Restaurant** button (in the top right corner).
+- Enter in the following information for your first **Restaurant** called **Biscotte Restaurant**.
+  - In the **Name** field, enter `Biscotte Restaurant`.
+  - In the **Description** field, enter `Welcome to Biscotte restaurant! Restaurant Biscotte offers a cuisine based on fresh, quality products, often local, organic when possible, and always produced by passionate producers.`.
+  - Upload an **Image** to represent the **Restaurant**.
 
 **Note:** At this point, you would generally select the **Categories** for this **Restaurant**. You have not entered any **Categories**, so you do this step after entering this first **Restaurant**.
 
 ![Restaurant Content Type Basic Data](../assets/getting-started/tutorial/restaurant-content-type-basic-data.png 'Restaurant Content Type Basic Data')
 
-- Next scroll down to **RestaurantHours|(0)** and click the `+ ADD NEW ENTRY` button
-  - In the **Create an Entry** section, enter the following details:
-    - In the **Days (or Days)** field, enter `Sun - Mon`
-    - In the **Opening Hours** field, enter `Closed`
-    - **Skip** the **Closing Hours** field, as this **Restaurant** is closed all day
-  - Click the `+ ADD NEW ENTRY` button to create another new entry
-    - In the **Days (or Days)** field, enter `Tues - Fri`
-    - In the **Opening Hours** field, enter `12:00`
-    - In the **Closing Hours** field, enter `22:30`
-  - Click the `+ ADD NEW ENTRY` button to create the last entry
-    - In the **Days (or Days)** field, enter `Sat`
-    - In the **Opening Hours** field, enter `11:30`
-    - In the **Closing Hours** field, enter `16:00`
+- Next scroll down to **RestaurantHours|(0)** and click the `+ ADD NEW ENTRY` button.
+  - In the **Create an Entry** section, enter the following details.
+    - In the **Day (or Days)** field, enter `Sun - Mon`.
+    - In the **Opening Hours** field, enter `Closed`.
+    - **Skip** the **Closing Hours** field, as this **Restaurant** is closed all day.
+  - Click the `+ ADD NEW ENTRY` button to create another new entry.
+    - In the **Day (or Days)** field, enter `Tues - Fri`.
+    - In the **Opening Hours** field, enter `12:00`.
+    - In the **Closing Hours** field, enter `22:30`.
+  - Click the `+ ADD NEW ENTRY` button to create the last entry.
+    - In the **Day (or Days)** field, enter `Sat`.
+    - In the **Opening Hours** field, enter `11:30`.
+    - In the **Closing Hours** field, enter `16:00`.
 
-You have now entered in all the information necessary, for your first **Restaurant**.
+You have now entered in all the information necessary for your first **Restaurant**.
 
 ![Restaurants Entry](../assets/getting-started/tutorial/restaurants-entry.png 'Restaurants Entry')
 
-- **Scroll up** and click the `Save` button
+- **Scroll up** and click the `Save` button.
 
 Next, you need to enter in some **Categories** that can relate to the above and other **Restaurants**.
 
-- Navigate to and click on the `Categories`, under **CONTENT TYPES** in the left-hand menu
+- Navigate to and click on `Categories`, under **CONTENT TYPES** in the left-hand menu.
 
 ![Categories Entry](../assets/getting-started/tutorial/categories-content-type.png 'Categories Entry')
 
-You are going to enter two **Categories**, but you could add as many **Categories** as you need to. Later, you can add additional **Categories** and assign them to existing and new **Restaurants**.
+You are going to enter two **Categories**, but you could add as many **Categories** as you need. Later, you can add additional **Categories** and assign them to existing and new **Restaurants**.
 
-- Click on the `+ Add New Category` button
-  - In the **Name** field, enter `French food`
-  - In the **Restaurants(0)** dropdown, select `Biscotte Restaurant`
+- Click on the `+ Add New Category` button.
+  - In the **Name** field, enter `French food`.
+  - In the **Restaurants(0)** dropdown, select `Biscotte Restaurant`.
 
 ![Categories Entry 1](../assets/getting-started/tutorial/categories-entry-1.png 'Categories Entry 1')
 
-- Click the `Save` button
+- Click the `Save` button.
 
 You now enter your second **Category**.
 
-- Click on the `+ Add New Category` button
-  - In the **Name** field, enter `Brunch`
-  - In the **Restaurants(0)** dropdown, select `Biscotte Restaurant`
+- Click on the `+ Add New Category` button.
+  - In the **Name** field, enter `Brunch`.
+  - In the **Restaurants(0)** dropdown, select `Biscotte Restaurant`.
 
 ![Categories Entry 2](../assets/getting-started/tutorial/categories-entry-2.png 'Categories Entry 2')
 
-- Click the `Save` button
+- Click the `Save` button.
 
 You have now entered your first **Restaurant** Content Type. You have also assigned two **Categories** to this **Restaurant**. Your next step is to set the **Roles and Permissions**.
 
@@ -577,42 +579,41 @@ You have now entered your first **Restaurant** Content Type. You have also assig
 
 By default, Strapi publishes all **Content Types** with restricted permissions. Which means you have to explicitly give permissions to each **Content Type** you create. You are going to give **Public** API (or URL) access to both the **Restaurant** Content Type and **Category** Content Type.
 
-- Click on the `Roles & Permissions` menu item, under **PLUGINS** in the left-hand-menu
-- Locate and click on the **Roles & Permissions** menu item under **PLUGINS** on the left menu
+- Click on the `Roles & Permissions` menu item, under **PLUGINS** in the left-hand-menu.
 
 ![Roles and Permissions](../assets/getting-started/tutorial/roles-and-permissions.png 'Roles And Permissions')
 
-- Next, click on the **Public** Role
+- Next, click on the **Public** Role.
 
 ![Roles and Permissions Public Role](../assets/getting-started/tutorial/roles-and-permissions-public-role.png 'Roles And Permissions Public Role')
 
-- Next, scroll down under **Permissions** and locate the **Restaurant** and **Category** Content Types
-- Click the checkbox for **find** and **findone** in the **Restaurant** Content Type
-- Click the checkbox for **find** and **findone** in the **Category** Content Type
+- Next, scroll down under **Permissions** and locate the **Restaurant** and **Category** Content Types.
+- Click the checkbox for **find** and **findone** in the **Restaurant** Content Type.
+- Click the checkbox for **find** and **findone** in the **Category** Content Type.
 
 ![Roles and Permissions Find Permissions](../assets/getting-started/tutorial/roles-and-permissions-find-permissions.png 'Roles And Permissions Find Permissions')
 
-- Scroll back to the top, and click the **Save** button
+- Scroll back to the top, and click the **Save** button.
 
-You have now opened the API and are ready to consume your content.
+You have now opened the API and are ready to consume the content.
 
 ## 8. Consume the Content Type API
 
 Each of your **Content Types** are accessible by following their automatically generated routes.
 
-Both your **Restaurant** and **Category** Content Types can now be accessed:
+Both your **Restaurant** and **Category** Content Types can now be accessed.
 
 - In your browser, follow `http://localhost:1337/restaurants` to return the data for the allowed **Find** value of your **Restaurant** Content Type
 
 ![Restaurant Api](../assets/getting-started/tutorial/restaurant-api.png 'Restaurant API')
 
-- In your browser, follow `http://localhost:1337/categories` to return the data for the allowed **Find** value of your **Category** Content Type
+- In your browser, follow `http://localhost:1337/categories` to return the data for the allowed **Find** value of your **Category** Content Type.
 
 ![Category Api](../assets/getting-started/tutorial/category-api.png 'Category API')
 
 ::: tip NOTE
 
-If you have incorrectly or not set permissions to your content type, you get a **"403"** permission error. See the below example.
+If you have incorrectly (or not at all) set the permissions of your content type, you get a **"403"** permission error. See the below example.
 
 Forbidden Access Looks like this:
 
@@ -631,9 +632,9 @@ If you would like to see the route of any specific **Content Type**, you need to
 👏 Congratulations, you have now completed the **Strapi Getting Started Tutorial**. Where to go next?
 
 - Learn how to use Strapi with React ([Gatsby](https://blog.strapi.io/building-a-static-website-using-gatsby-and-strapi) or [Next.js](https://blog.strapi.io/strapi-next-setup/)) or Vue.js ([Nuxt.js](https://blog.strapi.io/cooking-a-deliveroo-clone-with-nuxt-vue-js-graphql-strapi-and-stripe-setup-part-1-7/)).
-- Read the **concepts** to deep dive into Strapi
-- Get help on [StackOverflow](https://stackoverflow.com/questions/tagged/strapi)
-- Read the [source code](https://github.com/strapi/strapi), [contribute](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) or [give a star](https://github.com/strapi/strapi) on GitHub
-- Follow us on [Twitter](https://twitter.com/strapijs) to get the latest news
-- [Join the vibrant and active Strapi community](https://slack.strapi.io) on Slack
+- Read the **concepts** to deep dive into Strapi.
+- Get help on [StackOverflow](https://stackoverflow.com/questions/tagged/strapi).
+- Read the [source code](https://github.com/strapi/strapi), [contribute](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) or [give a star](https://github.com/strapi/strapi) on GitHub.
+- Follow us on [Twitter](https://twitter.com/strapijs) to get the latest news.
+- [Join the vibrant and active Strapi community](https://slack.strapi.io) on Slack.
   :::

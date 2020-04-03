@@ -1,6 +1,6 @@
 # Upload
 
-Thanks to the plugin `Upload`, you can upload any kind of files on your server or externals providers such as **AWS S3**.
+Thanks to the plugin `Upload`, you can upload any kind of file on your server or external providers such as **AWS S3**.
 
 ## Endpoints
 
@@ -76,7 +76,7 @@ You have to send FormData in your request body
 
 ## Upload files related to an entry
 
-To upload files that will be linked to an specific entry.
+To upload files that will be linked to a specific entry.
 
 ### Request parameters
 
@@ -207,13 +207,13 @@ Code
 </script>
 ```
 
-You entry data have to be contained in a `data` key. You have to `JSON.stringify` your data object.
+Your entry data has to be contained in a `data` key. You have to `JSON.stringify` your data object.
 
 And for your files, they have to be prefixed by `files`.
 Example here with cover attribute `files.cover`.
 
 ::: tip
-If you want to upload files for a component, you will have to specify the inidex of the item you wan to add the file.
+If you want to upload files for a component, you will have to specify the index of the item you want to add the file to.
 Example `files.my_component_name[the_index].attribute_name`
 :::
 
@@ -289,6 +289,10 @@ If the provider is not in the mono repo, you probably don't need `@beta` dependi
 :::
 
 Then, visit [http://localhost:1337/admin/plugins/upload/configurations/development](http://localhost:1337/admin/plugins/upload/configurations/development) on your web browser and configure the provider.
+
+::: tip
+Some providers may have additional settings such as the AWS S3 needs an API endpoint URL. You can find a list of these for AWS [here](https://docs.aws.amazon.com/general/latest/gr/ses.html)
+:::
 
 ## Create providers
 

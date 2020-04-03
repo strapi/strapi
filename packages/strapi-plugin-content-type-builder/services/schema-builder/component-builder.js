@@ -5,7 +5,7 @@ const _ = require('lodash');
 const pluralize = require('pluralize');
 
 const { isConfigurable } = require('../../utils/attributes');
-const { nameToSlug, nameToCollectionName } = require('../../utils/helpers');
+const { nameToSlug, nameToCollectionName } = require('strapi-utils');
 const createSchemaHandler = require('./schema-handler');
 
 module.exports = function createComponentBuilder() {
@@ -62,9 +62,9 @@ module.exports = function createComponentBuilder() {
         .setAttributes(this.convertAttributes(infos.attributes));
 
       if (this.components.size === 0) {
-        strapi.emit('didCreateFirstComponent');
+        strapi.telemetry.send('didCreateFirstComponent');
       } else {
-        strapi.emit('didCreateComponent');
+        strapi.telemetry.send('didCreateComponent');
       }
 
       this.components.set(uid, handler);

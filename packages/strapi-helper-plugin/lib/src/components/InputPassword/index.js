@@ -40,7 +40,7 @@ class InputPassword extends React.Component {
       : { color: '#9EA7B8' };
 
     return (
-      <Fragment>
+      <>
         <FormattedMessage
           id={formattedPlaceholder}
           defaultMessage={formattedPlaceholder}
@@ -77,7 +77,7 @@ class InputPassword extends React.Component {
             <i className="fa fa-eye" />
           </div>
         </EyeWrapper>
-      </Fragment>
+      </>
     );
   }
 }

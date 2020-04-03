@@ -31,7 +31,7 @@ If applicable, add screenshots to help explain your problem.
 If applicable, add code samples to help explain your problem.
 
 **System**
-- Node.js version: <!-- Please ensure you are using the Node LTS version (v10) -->
+- Node.js version: <!-- Please ensure you are using the Node LTS version (v12) -->
 - NPM version:
 - Strapi version: <!-- Please make sure you are on the latest version -->
 - Database:

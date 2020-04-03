@@ -15,6 +15,29 @@ const Wrapper = styled.div`
   height: 100vh;
   width: ${props => props.theme.main.sizes.leftMenu.width};
   background: ${props => props.theme.main.colors.strapi['blue-darker']};
+
+  // scrollbar overrides
+  * {
+    ::-webkit-scrollbar {
+      width: 7px;
+    }
+
+    ::-webkit-scrollbar-track,
+    ::-webkit-scrollbar-track:hover {
+      background-color: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: ${props => props.theme.main.colors.leftMenu['title-color']};
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: ${props => props.theme.main.colors.leftMenu['link-color']};
+    }
+
+    // firefox
+    scrollbar-color: ${props => props.theme.main.colors.leftMenu['title-color']} transparent;
+  }
 `;
 
 Wrapper.defaultProps = {
