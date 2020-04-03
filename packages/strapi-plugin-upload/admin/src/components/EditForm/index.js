@@ -30,6 +30,7 @@ import FormWrapper from './FormWrapper';
 import Row from './Row';
 import SizeBox from './SizeBox';
 import Wrapper from './Wrapper';
+import ErrorMessage from './ErrorMessage';
 import form from './utils/form';
 import isImageType from './utils/isImageType';
 import isVideoType from './utils/isVideoType';
@@ -178,7 +179,6 @@ const EditForm = forwardRef(
     const handleClickDownload = () => {
       axios
         .get(prefixedFileURL, {
-          headers: new Headers({ Origin: window.location.origin, mode: 'cors' }),
           responseType: 'blob',
         })
         .then(({ data }) => {
@@ -208,7 +208,7 @@ const EditForm = forwardRef(
           <Wrapper>
             <div className="row">
               <div className="col-6">
-                <FileWrapper>
+                <FileWrapper hasError={fileToEdit.hasError}>
                   {fileToEdit.isUploading ? (
                     <InfiniteLoadingIndicator onClick={onAbortUpload} />
                   ) : (
@@ -298,6 +298,11 @@ const EditForm = forwardRef(
                     </Fragment>
                   )}
                 </FileWrapper>
+                {fileToEdit.hasError && (
+                  <ErrorMessage title={fileToEdit.errorMessage}>
+                    {fileToEdit.errorMessage}
+                  </ErrorMessage>
+                )}
               </div>
               <div className="col-6">
                 <FileDetailsBox file={fileToEdit.file} />

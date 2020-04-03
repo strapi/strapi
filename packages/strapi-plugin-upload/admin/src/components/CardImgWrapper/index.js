@@ -33,13 +33,11 @@ const CardImgWrapper = styled.div`
 CardImgWrapper.defaultProps = {
   checked: false,
   hasError: false,
-  small: false,
 };
 
 CardImgWrapper.propTypes = {
   checked: PropTypes.bool,
   hasError: PropTypes.bool,
-  small: PropTypes.bool,
 };
 
 export default CardImgWrapper;

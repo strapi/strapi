@@ -241,6 +241,12 @@ const reducer = (state, action) =>
         draftState.fileToEdit.isUploading = true;
         break;
       }
+      case 'SET_FILE_TO_EDIT_ERROR': {
+        draftState.fileToEdit.isUploading = false;
+        draftState.fileToEdit.hasError = true;
+        draftState.fileToEdit.errorMessage = action.errorMessage;
+        break;
+      }
       case 'EDIT_EXISTING_FILE': {
         const index = draftState.selectedFiles.findIndex(
           selectedFile => selectedFile.id === action.file.id

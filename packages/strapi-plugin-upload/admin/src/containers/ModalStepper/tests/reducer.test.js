@@ -1135,6 +1135,79 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
     });
   });
 
+  describe('SET_FILE_TO_EDIT_ERROR', () => {
+    it('should set the specified file error to fileToEdit', () => {
+      const action = {
+        type: 'SET_FILE_TO_EDIT_ERROR',
+        errorMessage: 'Bad request',
+      };
+      const state = fromJS({
+        fileToEdit: {
+          originalIndex: 1,
+          file: {
+            name: 'test1',
+          },
+          hasError: false,
+          errorMessage: null,
+          isUploading: true,
+        },
+        filesToUpload: [
+          {
+            originalIndex: 0,
+            file: {
+              name: 'test0',
+            },
+          },
+          {
+            originalIndex: 1,
+            file: {
+              name: 'test1',
+            },
+          },
+          {
+            originalIndex: 2,
+            file: {
+              name: 'test2',
+            },
+          },
+        ],
+      });
+      const expected = fromJS({
+        fileToEdit: {
+          originalIndex: 1,
+          file: {
+            name: 'test1',
+          },
+          hasError: true,
+          errorMessage: 'Bad request',
+          isUploading: false,
+        },
+        filesToUpload: [
+          {
+            originalIndex: 0,
+            file: {
+              name: 'test0',
+            },
+          },
+          {
+            originalIndex: 1,
+            file: {
+              name: 'test1',
+            },
+          },
+          {
+            originalIndex: 2,
+            file: {
+              name: 'test2',
+            },
+          },
+        ],
+      });
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
   describe('SET_FILES_UPLOADING_STATE', () => {
     it('should change all the isUploading keys of the filesToUpload to true', () => {
       const action = {

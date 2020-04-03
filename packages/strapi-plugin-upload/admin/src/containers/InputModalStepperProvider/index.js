@@ -339,6 +339,13 @@ const InputModalStepperProvider = ({
     });
   };
 
+  const handleSetFileToEditError = errorMessage => {
+    dispatch({
+      type: 'SET_FILE_TO_EDIT_ERROR',
+      errorMessage,
+    });
+  };
+
   const handleUploadFiles = async () => {
     dispatch({
       type: 'SET_FILES_UPLOADING_STATE',
@@ -424,6 +431,7 @@ const InputModalStepperProvider = ({
         handleResetFileToEdit,
         handleSetCropResult,
         handleUploadFiles,
+        handleSetFileToEditError,
         moveAsset: handleMoveAsset,
         multiple,
         onInputMediaChange,

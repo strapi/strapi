@@ -1,4 +1,7 @@
 import styled from 'styled-components';
+import PropTypes from 'prop-types';
+import { themePropTypes } from 'strapi-helper-plugin';
+
 import CardImgWrapper from '../CardImgWrapper';
 
 const FileWrapper = styled(CardImgWrapper)`
@@ -7,6 +10,7 @@ const FileWrapper = styled(CardImgWrapper)`
   display: flex;
   position: relative;
   background-color: ${({ theme }) => theme.main.colors.black};
+  ${({ hasError, theme }) => hasError && `border: 2px solid ${theme.main.colors.orange};`}
 
   .cropper-view-box {
     outline-color: ${({ theme }) => theme.main.colors.white};
@@ -24,5 +28,14 @@ const FileWrapper = styled(CardImgWrapper)`
     width: 5px;
   }
 `;
+
+FileWrapper.defaultProps = {
+  hasError: false,
+};
+
+FileWrapper.propTypes = {
+  hasError: PropTypes.bool,
+  ...themePropTypes,
+};
 
 export default FileWrapper;

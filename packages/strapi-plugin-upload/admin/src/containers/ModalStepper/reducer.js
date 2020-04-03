@@ -108,6 +108,11 @@ const reducer = (state, action) => {
       });
     case 'SET_FILE_TO_EDIT':
       return state.update('fileToEdit', () => state.getIn(['filesToUpload', action.fileIndex]));
+    case 'SET_FILE_TO_EDIT_ERROR':
+      return state
+        .updateIn(['fileToEdit', 'hasError'], () => true)
+        .updateIn(['fileToEdit', 'errorMessage'], () => action.errorMessage)
+        .updateIn(['fileToEdit', 'isUploading'], () => false);
     case 'SET_FILES_UPLOADING_STATE':
       return state.update('filesToUpload', list =>
         list.map(data =>
