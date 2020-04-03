@@ -20,6 +20,7 @@ import {
   getTrad,
   generatePageFromStart,
   generateStartFromPage,
+  getFileModelTimestamps,
 } from '../../utils';
 import Container from '../../components/Container';
 import ControlsWrapper from '../../components/ControlsWrapper';
@@ -35,7 +36,8 @@ import init from './init';
 import reducer, { initialState } from './reducer';
 
 const HomePage = () => {
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage, plugins } = useGlobalContext();
+  const [, updated_at] = getFileModelTimestamps(plugins);
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const query = useQuery();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -100,8 +102,12 @@ const HomePage = () => {
     const dataRequestURL = getRequestUrl('files');
     const params = generateStringFromParams(query);
 
+    const paramsToSend = params.includes('_sort')
+      ? params
+      : params.concat(`&_sort=${updated_at}:DESC`);
+
     try {
-      const data = await request(`${dataRequestURL}?${params}`, {
+      const data = await request(`${dataRequestURL}?${paramsToSend}`, {
         method: 'GET',
       });
 
@@ -372,7 +378,10 @@ const HomePage = () => {
           someChecked={hasSomeCheckboxSelected && !areAllCheckboxesSelected}
         />
         <Padded right />
-        <SortPicker onChange={handleChangeParams} value={query.get('_sort') || null} />
+        <SortPicker
+          onChange={handleChangeParams}
+          value={query.get('_sort') || `${updated_at}:DESC`}
+        />
         <Padded right />
         <Filters onChange={handleChangeParams} filters={filters} onClick={handleDeleteFilter} />
       </ControlsWrapper>

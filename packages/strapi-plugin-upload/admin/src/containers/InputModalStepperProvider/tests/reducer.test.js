@@ -1512,6 +1512,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
           _start: 0,
           _q: '',
           filters: [],
+          _sort: null,
         },
         currentStep: 'list',
         isFormDisabled: false,

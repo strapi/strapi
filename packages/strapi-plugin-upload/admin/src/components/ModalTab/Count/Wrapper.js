@@ -12,7 +12,8 @@ const Wrapper = styled(Flex)`
   margin-top: 0.2rem;
   margin-left: ${({ theme }) => theme.main.sizes.paddings.xs};
   border-radius: ${({ theme }) => theme.main.sizes.borderRadius};
-  background-color: #e9eaeb;
+  background-color: ${({ theme, isActive }) =>
+    isActive ? theme.main.colors.lightBlue : '#e9eaeb'};
 `;
 
 export default Wrapper;

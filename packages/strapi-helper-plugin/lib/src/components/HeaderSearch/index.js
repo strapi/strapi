@@ -26,7 +26,7 @@ const HeaderSearch = ({ label, name, onChange, onClear, placeholder, value, clas
           </Clear>
         )}
       </div>
-      <SearchInfo label={label} />
+      {label && <SearchInfo label={label} />}
     </Wrapper>
   );
 };

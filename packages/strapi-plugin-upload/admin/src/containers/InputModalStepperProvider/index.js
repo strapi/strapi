@@ -1,6 +1,6 @@
 import React, { useReducer, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { request, generateSearchFromFilters } from 'strapi-helper-plugin';
+import { request, generateSearchFromFilters, useGlobalContext } from 'strapi-helper-plugin';
 import { get, isEmpty } from 'lodash';
 import axios from 'axios';
 import pluginId from '../../pluginId';
@@ -11,6 +11,7 @@ import {
   compactParams,
   createNewFilesToUploadArray,
   urlSchema,
+  getFileModelTimestamps,
 } from '../../utils';
 import InputModalStepperContext from '../../contexts/InputModal/InputModalDataManager';
 import init from './init';
@@ -31,6 +32,8 @@ const InputModalStepperProvider = ({
   step,
 }) => {
   const [formErrors, setFormErrors] = useState(null);
+  const { plugins } = useGlobalContext();
+  const [, updated_at] = getFileModelTimestamps(plugins);
   const [reducerState, dispatch] = useReducer(reducer, initialState, state =>
     init({
       ...state,
@@ -46,6 +49,7 @@ const InputModalStepperProvider = ({
       params: {
         ...state.params,
         filters: initialFilters,
+        _sort: `${updated_at}:DESC`,
       },
     })
   );
@@ -190,6 +194,7 @@ const InputModalStepperProvider = ({
 
     dispatch({
       type: 'RESET_PROPS',
+      defaultSort: `${updated_at}:DESC`,
     });
   };
 

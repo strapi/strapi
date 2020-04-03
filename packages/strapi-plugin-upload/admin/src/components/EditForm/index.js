@@ -280,7 +280,13 @@ const EditForm = forwardRef(
                           />
                         </CropWrapper>
                       ) : (
-                        <>{isVideo ? <VideoPlayer src={src} /> : <CardPreview url={src} />}</>
+                        <>
+                          {isVideo ? (
+                            <VideoPlayer src={src} />
+                          ) : (
+                            <CardPreview type={mimeType} url={src} />
+                          )}
+                        </>
                       )}
 
                       {isCropping && infos.width !== null && (

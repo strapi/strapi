@@ -16,6 +16,7 @@ const BackButton = styled.button`
   color: #81848a;
   border-right: 1px solid #f3f4f4;
   &:before {
+    line-height: normal;
     content: '\f053';
     font-family: 'FontAwesome';
     font-size: ${({ theme }) => theme.main.sizes.fonts.lg};
@@ -23,6 +24,9 @@ const BackButton = styled.button`
   }
   &:hover {
     background-color: #f3f4f4;
+  }
+  &:focus {
+    outline: none;
   }
 `;
 
