@@ -13,6 +13,7 @@ const createNewFilesToUploadArray = filesObject => {
       },
       hasError: false,
       errorMessage: null,
+      originalName: currentFile.name,
       isUploading: false,
       tempId: null,
     });

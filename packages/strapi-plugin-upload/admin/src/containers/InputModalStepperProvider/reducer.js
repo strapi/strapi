@@ -220,7 +220,7 @@ const reducer = (state, action) =>
           ...draftState.filesToUpload[index],
           isDownloading: false,
           hasError: true,
-          errorMessage: draftState.filesToUpload[index].fileURL,
+          errorMessage: draftState.filesToUpload[index].fileOriginalName,
         };
 
         break;
