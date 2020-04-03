@@ -178,7 +178,6 @@ const EditForm = forwardRef(
     const handleClickDownload = () => {
       axios
         .get(prefixedFileURL, {
-          headers: new Headers({ Origin: window.location.origin, mode: 'cors' }),
           responseType: 'blob',
         })
         .then(({ data }) => {

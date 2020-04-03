@@ -84,8 +84,7 @@ const ModalStepper = ({
           const { source } = file;
 
           return axios
-            .get(file.fileURL, {
-              headers: new Headers({ Origin: window.location.origin, mode: 'cors' }),
+            .get(`${strapi.backendURL}/${pluginId}/proxy?url=${file.fileURL}`, {
               responseType: 'blob',
               cancelToken: source.token,
               // Should we add a timeout?
