@@ -31,6 +31,10 @@ module.exports = strapi => ({
       try {
         const url = new URL(ctx.query.url);
 
+        if (!['http:', 'https:'].includes(url.protocol)) {
+          throw new Error('Invalid URL');
+        }
+
         if (!isValidDomain(url.hostname)) {
           throw new Error('Invalid URL');
         }
