@@ -464,6 +464,25 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
     });
   });
 
+  describe('CLEAR_FILES_TO_UPLOAD_AND_DOWNLOAD', () => {
+    it('should empty the filesToDownload and filesToUpload arrays', () => {
+      const state = {
+        filesToDownload: ['1', '2'],
+        filesToUpload: ['3', '4'],
+      };
+      const action = {
+        type: 'CLEAR_FILES_TO_UPLOAD_AND_DOWNLOAD',
+      };
+
+      const expected = {
+        filesToDownload: [],
+        filesToUpload: [],
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
   describe('FILE_DOWLOADED', () => {
     it('should update the corresponding file', () => {
       const state = {

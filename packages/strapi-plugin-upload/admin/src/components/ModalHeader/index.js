@@ -24,11 +24,15 @@ const ModalHeader = ({ goBack, headerBreadcrumbs, withBackButton, HeaderComponen
     }))
     : null;
 
+  const handleClick = () => {
+    goBack('backButton');
+  };
+
   return (
     <Wrapper>
       <ModalSection>
         <HeaderModalTitle>
-          {withBackButton && <BackButton onClick={goBack} type="button" />}
+          {withBackButton && <BackButton onClick={handleClick} type="button" />}
           {HeaderComponent && <HeaderComponent />}
           {translatedHeaders &&
             translatedHeaders.map(({ key, element }, index) => {

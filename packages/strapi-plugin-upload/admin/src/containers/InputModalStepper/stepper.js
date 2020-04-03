@@ -19,12 +19,16 @@ const stepper = {
     prev: 'list',
     next: 'upload',
     withBackButton: true,
+    backButtonDestination: 'upload',
   },
   upload: {
     Component: UploadList,
     headerBreadcrumbs: [getTrad('modal.header.select-files')],
     next: null,
     prev: 'browse',
+    withBackButton: true,
+    // Exception in order to not update the entire code
+    backButtonDestination: 'list',
   },
   'edit-new': {
     Component: EditForm,
