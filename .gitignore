@@ -124,6 +124,7 @@ packages/strapi-generate-new/files/public/
 # Example app
 ############################
 
+.dev
 # *.cache
 
 ############################

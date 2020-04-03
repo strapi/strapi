@@ -74,6 +74,19 @@ module.exports = function(strapi) {
     return acc;
   }, {});
 
+  // Set components
+  strapi.components = Object.keys(strapi.components).reduce((acc, componentName) => {
+    const component = strapi.components[componentName];
+    return {
+      ...acc,
+      [componentName]: _.merge(
+        // Ensure each component has a valid connection
+        { connection: component.connection || defaultConnection },
+        component
+      ),
+    };
+  }, {});
+
   // Set controllers.
   strapi.controllers = Object.keys(strapi.api || []).reduce((acc, key) => {
     for (let index in strapi.api[key].controllers) {
