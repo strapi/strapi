@@ -339,6 +339,12 @@ const InputModalStepperProvider = ({
     });
   };
 
+  const handleClearFilesToUploadAndDownload = () => {
+    dispatch({
+      type: 'CLEAR_FILES_TO_UPLOAD_AND_DOWNLOAD',
+    });
+  };
+
   const handleSetFileToEditError = errorMessage => {
     dispatch({
       type: 'SET_FILE_TO_EDIT_ERROR',
@@ -420,6 +426,7 @@ const InputModalStepperProvider = ({
         handleCancelFileToUpload,
         handleClickNextButton,
         handleCleanFilesError,
+        handleClearFilesToUploadAndDownload,
         handleClose,
         handleEditExistingFile,
         handleFileSelection,
