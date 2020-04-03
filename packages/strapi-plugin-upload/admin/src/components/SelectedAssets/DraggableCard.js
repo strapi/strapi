@@ -100,7 +100,7 @@ const DraggableCard = ({
         <Tag label={getType(fileType)} />
       </Flex>
       <Text color="grey" fontSize="xs" ellipsis>
-        {`${getExtension(fileType)} - ${fileSize}`}
+        {getExtension(fileType).toUpperCase()}&nbsp;&mdash;&nbsp;{fileSize}
       </Text>
       {hasError && <ErrorMessage>{errorMessage}</ErrorMessage>}
     </Wrapper>

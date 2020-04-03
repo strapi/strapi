@@ -59,7 +59,11 @@ const Card = ({
             <Tag label={getType(fileType)} />
           </Flex>
           <Text color="grey" fontSize="xs" ellipsis>
-            {!withoutFileInfo && `${getExtension(fileType)} - ${fileSize}`}
+            {!withoutFileInfo && (
+              <>
+                {getExtension(fileType).toUpperCase()}&nbsp;&mdash;&nbsp;{fileSize}
+              </>
+            )}
           </Text>
         </>
       ) : (
