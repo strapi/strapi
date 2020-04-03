@@ -6,7 +6,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { InputText, Select } from '@buffetjs/core';
-import DateTime from './DateTime';
+import { DateTime } from '@buffetjs/custom';
 import SizeInput from './SizeInput';
 
 const getInputType = type => {

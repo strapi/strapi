@@ -18,26 +18,34 @@ const createNewFilesToDownloadArray = (filesURLArray, alreadyUploadedFiles) => {
       return acc;
     }
 
-    const CancelToken = axios.CancelToken;
-    const abortController = new AbortController();
-    const source = CancelToken.source();
+    try {
+      const url = new URL(current);
+      const name = decodeURIComponent(url.pathname.substring(url.pathname.lastIndexOf('/') + 1));
+      const CancelToken = axios.CancelToken;
+      const abortController = new AbortController();
+      const source = CancelToken.source();
 
-    acc.push({
-      abortController,
-      source,
-      file: null,
-      fileInfo: {
-        alternativeText: '',
-        caption: '',
-        name: current,
-      },
-      fileURL: current,
-      hasError: false,
-      errorMessage: null,
-      isUploading: false,
-      isDownloading: true,
-      tempId: max + index,
-    });
+      acc.push({
+        abortController,
+        source,
+        file: null,
+        fileInfo: {
+          alternativeText: '',
+          caption: '',
+          name,
+        },
+        fileURL: url,
+        fileOriginalURL: current,
+        originalName: name,
+        hasError: false,
+        errorMessage: null,
+        isUploading: false,
+        isDownloading: true,
+        tempId: max + index,
+      });
+    } catch (err) {
+      // invalid url
+    }
 
     return acc;
   }, []);
