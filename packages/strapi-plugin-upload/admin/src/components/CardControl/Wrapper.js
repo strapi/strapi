@@ -35,26 +35,26 @@ const Wrapper = styled.div`
 
       if (type === 'plus') {
         return `
-          background-color: #AED4FB;
-          border: 1px solid  #AED4FB;
+          background-color: ${({ theme }) => theme.main.colors.darkBlue};
+          border: 1px solid  ${({ theme }) => theme.main.colors.darkBlue};
           > svg {
             > g, path {
-              stroke: #007EFF;
+              stroke: ${({ theme }) => theme.main.colors.mediumBlue};
             }
           }
-          color: #007EFF;
+          color: ${({ theme }) => theme.main.colors.mediumBlue};
         `;
       }
 
       return `
-          background-color: #AED4FB;
-          border: 1px solid  #AED4FB;
+          background-color: ${({ theme }) => theme.main.colors.darkBlue};
+          border: 1px solid  ${({ theme }) => theme.main.colors.darkBlue};
           > svg {
             > g, path {
-              fill: #007EFF;
+              fill: ${({ theme }) => theme.main.colors.mediumBlue};
             }
           }
-          color: #007EFF;
+          color: ${({ theme }) => theme.main.colors.mediumBlue};
 
         `;
     }};
