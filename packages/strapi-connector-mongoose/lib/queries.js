@@ -476,7 +476,7 @@ module.exports = ({ model, modelKey, strapi }) => {
       return null;
     }
 
-    const entries = await find(params, null, session);
+    const entries = await find(params, null, { session });
     return Promise.all(entries.map(entry => deleteOne(entry[model.primaryKey], { session })));
   }
 
