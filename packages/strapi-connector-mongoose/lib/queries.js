@@ -316,7 +316,7 @@ module.exports = ({ model, modelKey, strapi }) => {
 
     // verify the provided ids are related to this entity.
     idsToKeep.forEach(id => {
-      if (allIds.findIndex(currentId => currentId.toString() === id) === -1) {
+      if (allIds.findIndex(currentId => currentId.toString() === id.toString()) === -1) {
         const err = new Error(
           `Some of the provided components in ${key} are not related to the entity`
         );
