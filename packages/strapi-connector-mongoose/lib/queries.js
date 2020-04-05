@@ -430,7 +430,8 @@ module.exports = ({ model, modelKey, strapi }) => {
     const data = omitExernalValues(values);
 
     // Create entry with no-relational data.
-    const entry = await model.create(session ? [data] : data, { session });
+    // When specify options, data must be an array.
+    const [entry] = await model.create([data], { session });
 
     await createComponents(entry, values, { session });
 
@@ -476,7 +477,7 @@ module.exports = ({ model, modelKey, strapi }) => {
     }
 
     const entries = await find(params, null, session);
-    return Promise.all(entries.map(entry => deleteOne(entry[model.primaryKey])));
+    return Promise.all(entries.map(entry => deleteOne(entry[model.primaryKey], { session })));
   }
 
   async function deleteOne(id, { session = null } = {}) {

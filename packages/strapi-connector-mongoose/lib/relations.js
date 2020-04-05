@@ -190,14 +190,18 @@ module.exports = {
                   const refModel = strapi.getModel(obj.ref, obj.source);
 
                   const createRelation = () => {
-                    return module.exports.addRelationMorph.call(this, {
-                      id: entry[this.primaryKey],
-                      alias: association.alias,
-                      ref: obj.kind || refModel.globalId,
-                      refId: new mongoose.Types.ObjectId(obj.refId),
-                      field: obj.field,
-                      filter: association.filter,
-                    });
+                    return module.exports.addRelationMorph.call(
+                      this,
+                      {
+                        id: entry[this.primaryKey],
+                        alias: association.alias,
+                        ref: obj.kind || refModel.globalId,
+                        refId: new mongoose.Types.ObjectId(obj.refId),
+                        field: obj.field,
+                        filter: association.filter,
+                      },
+                      { session }
+                    );
                   };
 
                   // Clear relations to refModel
