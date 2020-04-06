@@ -316,7 +316,7 @@ const HomePage = () => {
     actions: [
       {
         disabled: dataToDelete.length === 0,
-        color: 'cancel',
+        color: 'delete',
         // TradId from the strapi-admin package
         label: formatMessage({ id: 'app.utils.delete' }),
         onClick: () => setIsPopupOpen(true),

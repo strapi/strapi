@@ -7,8 +7,8 @@ const Wrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: ${({ small }) => (small ? '24px' : '30px')};
-  height: ${({ small }) => (small ? '24px' : '30px')};
+  width: ${({ small }) => (small ? '25px' : '30px')};
+  height: ${({ small }) => (small ? '25px' : '30px')};
   margin-left: 5px;
   background-color: ${({ theme }) => theme.main.colors.white};
   border: 1px solid ${({ theme }) => theme.main.colors.darkGrey};
