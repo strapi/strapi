@@ -240,12 +240,30 @@ describe('Entity validator', () => {
             type: 'string',
             default: 'test',
           },
+          testDate: {
+            type: 'date',
+            required: true,
+            default: '2020-04-01T04:00:00.000Z',
+          },
+          testJSON: {
+            type: 'date',
+            required: true,
+            default: {
+              foo: 1,
+              bar: 2,
+            },
+          },
         },
       };
 
       await expect(entityValidator.validateEntity(model, {})).resolves.toMatchObject({
         title: 'New',
         type: 'test',
+        testDate: '2020-04-01T04:00:00.000Z',
+        testJSON: {
+          foo: 1,
+          bar: 2,
+        },
       });
     });
   });
