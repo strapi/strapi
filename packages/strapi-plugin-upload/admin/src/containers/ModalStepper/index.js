@@ -440,7 +440,7 @@ const ModalStepper = ({
   };
 
   const shouldDisplayNextButton = currentStep === 'browse' && displayNextButton;
-  const isFinishButtonDisabled = filesToUpload.some(file => file.isDownloading);
+  const isFinishButtonDisabled = filesToUpload.some(file => file.isDownloading || file.isUploading);
 
   return (
     <>
