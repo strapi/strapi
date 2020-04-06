@@ -1,10 +1,14 @@
 # Digital Ocean
 
-This is a step-by-step guide for deploying a Strapi project to [Digital Ocean](https://www.digitalocean.com/). Databases can be on a [Digital Ocean Droplet](https://www.digitalocean.com/docs/droplets/) or hosted externally as a service. Prior to starting this guide, you should have created a [Strapi project](../getting-started/quick-start.md).
+This is a step-by-step guide for deploying a Strapi project to [Digital Ocean](https://www.digitalocean.com/). Databases can be on a [Digital Ocean Droplet](https://www.digitalocean.com/docs/droplets/) or hosted externally as a service. Prior to starting this guide, you should have created a [Strapi project](../getting-started/quick-start.md). And have read through the [configuration](../getting-started/deployment.md#configuration) section.
+
+::: tip
+Strapi does have a [One-Click](../installation/digitalocean-one-click) deployment option for DigitalOcean
+:::
 
 ### Digital Ocean Install Requirements
 
-- You must have a [Digital Ocean account](https://cloud.digitalocean.com/registrations/new) before doing these steps.
+- You must have a [Digital Ocean account](https://m.do.co/c/30986c1ff595) before doing these steps.
 
 ### Create a "Droplet"
 
