@@ -80,7 +80,7 @@ const generateSchema = () => {
     `;
 
   // // Build schema.
-  if (!strapi.config.environment === 'production') {
+  if (strapi.config.environment !== 'production') {
     // Write schema.
     const schema = makeExecutableSchema({
       typeDefs,
