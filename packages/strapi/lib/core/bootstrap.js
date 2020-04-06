@@ -174,28 +174,20 @@ module.exports = function(strapi) {
     return acc;
   }, {});
 
-  // strapi.config.hook.settings = Object.keys(strapi.hook).reduce((acc, current) => {
-  //   // Try to find the settings in the current environment, then in the main configurations.
-  //   const currentSettings = _.merge(
-  //     _.get(_.cloneDeep(strapi.hook[current]), ['defaults', current], {}),
-  //     flattenHooksConfig[current] ||
-  //       _.get(strapi.config.currentEnvironment, ['hook', current]) ||
-  //       _.get(strapi.config, ['hook', current])
-  //   );
+  strapi.config.hook.settings = Object.keys(strapi.hook).reduce((acc, current) => {
+    // Try to find the settings in the current environment, then in the main configurations.
+    const currentSettings = _.merge(
+      _.cloneDeep(_.get(strapi.hook[current], ['defaults', current], {})),
+      strapi.config.get(['hook', 'settings', current], {})
+    );
 
-  //   acc[current] = !_.isObject(currentSettings) ? {} : currentSettings;
+    acc[current] = !_.isObject(currentSettings) ? {} : currentSettings;
 
-  //   if (!_.has(acc[current], 'enabled')) {
-  //     strapi.log.warn(
-  //       `(hook:${current}) wasn't loaded due to missing key \`enabled\` in the configuration`
-  //     );
-  //   }
+    // Ensure that enabled key exist by forcing to false.
+    _.defaults(acc[current], { enabled: false });
 
-  //   // Ensure that enabled key exist by forcing to false.
-  //   _.defaults(acc[current], { enabled: false });
-
-  //   return acc;
-  // }, {});
+    return acc;
+  }, {});
 
   // default settings
   const port = strapi.config.get('server.port');

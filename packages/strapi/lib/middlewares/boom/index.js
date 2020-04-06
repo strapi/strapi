@@ -75,7 +75,7 @@ module.exports = strapi => {
           await next();
         } catch (error) {
           // emit error if configured
-          if (strapi.config('server.emitErrors', false)) {
+          if (strapi.config.get('server.emitErrors', false)) {
             strapi.app.emit('error', error, ctx);
           }
 

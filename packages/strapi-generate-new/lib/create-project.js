@@ -52,16 +52,10 @@ module.exports = async function createProject(scope, { connection, dependencies 
     // ensure node_modules is created
     await fse.ensureDir(join(rootPath, 'node_modules'));
 
-    await Promise.all(
-      ['development', 'staging', 'production'].map(env => {
-        return fse.writeJSON(
-          join(rootPath, `config/environments/${env}/database.json`),
-          databaseJSON({
-            connection,
-            env,
-          }),
-          { spaces: 2 }
-        );
+    await fse.writeFile(
+      join(rootPath, `config/database.js`),
+      databaseJSON({
+        connection,
       })
     );
 

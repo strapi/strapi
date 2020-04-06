@@ -5,9 +5,6 @@
  *
  * @description: A set of functions called "actions" of the `email` plugin.
  */
-
-const _ = require('lodash');
-
 module.exports = {
   send: async ctx => {
     // Retrieve provider configuration.
@@ -24,9 +21,7 @@ module.exports = {
       strapi.log.error('Email is disabled');
       return ctx.badRequest(null, [
         {
-          messages: [
-            { id: 'Email.status.disabled', message: 'Emails disabled' },
-          ],
+          messages: [{ id: 'Email.status.disabled', message: 'Emails disabled' }],
         },
       ]);
     }
@@ -45,17 +40,7 @@ module.exports = {
   },
 
   getEnvironments: async ctx => {
-    const environments = _.map(
-      _.keys(strapi.config.environments),
-      environment => {
-        return {
-          name: environment,
-          active: strapi.config.environment === environment,
-        };
-      }
-    );
-
-    ctx.send({ environments });
+    ctx.send({ environments: [] });
   },
 
   getSettings: async ctx => {

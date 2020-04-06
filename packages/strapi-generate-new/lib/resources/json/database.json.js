@@ -1,35 +1,28 @@
 'use strict';
 
-module.exports = ({ connection, env }) => {
-  // Production/Staging Template
-  if (['production', 'staging'].includes(env)) {
-    const settingsBase = {
-      client: connection.settings.client,
-      host: "${process.env.DATABASE_HOST || '127.0.0.1'}",
-      port: '${process.env.DATABASE_PORT || 27017}',
-      database: "${process.env.DATABASE_NAME || 'strapi'}",
-      username: "${process.env.DATABASE_USERNAME || ''}",
-      password: "${process.env.DATABASE_PASSWORD || ''}",
-    };
+const _ = require('lodash');
 
-    const optionsBase = {};
+const fs = require('fs');
+const path = require('path');
 
-    return {
-      defaultConnection: 'default',
-      connections: {
-        default: {
-          connector: connection.connector,
-          settings: settingsBase,
-          options: optionsBase,
-        },
-      },
-    };
-  }
+module.exports = ({ connection }) => {
+  const client = _.get(connection, 'settings.client');
 
-  return {
-    defaultConnection: 'default',
-    connections: {
-      default: connection,
+  const tmpl = fs.readFileSync(path.join(__dirname, 'database-templates', `${client}.template`));
+  const compile = _.template(tmpl);
+
+  const { settings, options } = connection;
+
+  return compile({
+    settings: {
+      ...settings,
+      srv: settings.srv || false,
+      ssl: settings.ssl || false,
     },
-  };
+    options: {
+      ...options,
+      ssl: settings.ssl || false,
+      authenticationDatabase: settings.authenticationDatabase || null,
+    },
+  });
 };
