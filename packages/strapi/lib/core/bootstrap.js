@@ -77,7 +77,7 @@ module.exports = function(strapi) {
   // Set components
   Object.keys(strapi.components).forEach(componentName => {
     const component = strapi.components[componentName];
-    strapi.components[componentName].connection = component.connection || defaultConnection;
+    component.connection = component.connection || defaultConnection;
   });
 
   // Set controllers.
