@@ -158,7 +158,7 @@ module.exports = {
 
       $('form').attr(
         'action',
-        `${strapi.plugins.documentation.config['x-strapi-config'].path}/login`
+        `${backendUrl}${strapi.plugins.documentation.config['x-strapi-config'].path}/login`
       );
       $('.error').text(_.isEmpty(error) ? '' : 'Wrong password...');
 
