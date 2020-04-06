@@ -1,20 +1,20 @@
-# Digital Ocean
+# DigitalOcean
 
-This is a step-by-step guide for deploying a Strapi project to [Digital Ocean](https://www.digitalocean.com/). Databases can be on a [Digital Ocean Droplet](https://www.digitalocean.com/docs/droplets/) or hosted externally as a service. Prior to starting this guide, you should have created a [Strapi project](../getting-started/quick-start.md). And have read through the [configuration](../getting-started/deployment.md#configuration) section.
+This is a step-by-step guide for deploying a Strapi project to [DigitalOcean](https://www.digitalocean.com/). Databases can be on a [DigitalOcean Droplet](https://www.digitalocean.com/docs/droplets/) or hosted externally as a service. Prior to starting this guide, you should have created a [Strapi project](../getting-started/quick-start.md). And have read through the [configuration](../getting-started/deployment.md#configuration) section.
 
 ::: tip
 Strapi does have a [One-Click](../installation/digitalocean-one-click) deployment option for DigitalOcean
 :::
 
-### Digital Ocean Install Requirements
+### DigitalOcean Install Requirements
 
-- You must have a [Digital Ocean account](https://m.do.co/c/30986c1ff595) before doing these steps.
+- You must have a [DigitalOcean account](https://m.do.co/c/30986c1ff595) before doing these steps.
 
 ### Create a "Droplet"
 
-Digital Ocean calls a virtual private server, a [Droplet](https://www.digitalocean.com/docs/droplets/). You need to create a new `Droplet` to host your Strapi project.
+DigitalOcean calls a virtual private server, a [Droplet](https://www.digitalocean.com/docs/droplets/). You need to create a new `Droplet` to host your Strapi project.
 
-#### 1. Log in to your [Digital Ocean account](https://cloud.digitalocean.com/login).
+#### 1. Log in to your [DigitalOcean account](https://cloud.digitalocean.com/login).
 
 #### 2. `Create a Droplet` by clicking on `New Droplet`.
 
@@ -38,13 +38,13 @@ Choose these options:
 - **OPTIONAL:** `Choose a hostname` or leave as-is.
 - Click the green `Create` button.
 
-**Digital Ocean** will create your **Droplet** and indicate the progress with a percentage bar. Once this is complete, you may continue to the next steps.
+**DigitalOcean** will create your **Droplet** and indicate the progress with a percentage bar. Once this is complete, you may continue to the next steps.
 
 ### Setup production server and install Node.js
 
 These next steps will help you to _set up a production server_ and _set up a non-root user_ for managing your server.
 
-Follow the official [Digital Ocean docs for initial server set-up using Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04). These docs will have you complete the following actions:
+Follow the official [DigitalOcean docs for initial server set-up using Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04). These docs will have you complete the following actions:
 
 #### 1. [Logging and set up root user access to your server with SSH](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04#step-1-%E2%80%94-logging-in-as-root).
 
@@ -60,7 +60,7 @@ Next, install `Node.js`:
 
 #### 6. You will install `Node.js`.
 
-Use the instructions in section **Install Node using a PPA** from the official [Digital Ocean docs for installing a production ready Node.js server](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-18-04#installing-using-a-ppa).
+Use the instructions in section **Install Node using a PPA** from the official [DigitalOcean docs for installing a production ready Node.js server](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-18-04#installing-using-a-ppa).
 
 After completing the steps to **install Node.js, NPM and the "build-essential package"**, you will manually change npm's default directory. The following steps are based on [how to resolve access permissions from npmjs.com](https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally):
 
@@ -119,7 +119,7 @@ After installing and configuring Git on your Droplet. Please continue to the nex
 
 ### Install the database for your project
 
-Digital Ocean has excellent documentation regarding the installation and use of the major databases that work with Strapi. The previous steps above should all be completed prior to continuing. You can find links, and any further instructions, below:
+DigitalOcean has excellent documentation regarding the installation and use of the major databases that work with Strapi. The previous steps above should all be completed prior to continuing. You can find links, and any further instructions, below:
 
 :::: tabs
 
@@ -302,7 +302,7 @@ Earlier, `Port 1337` was allowed access for **testing and setup** purposes. Afte
 Follow the steps below to have your app launch on system startup.
 
 ::: tip
-These steps are modified from the Digital Ocean [documentation for setting up PM2](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-18-04#step-3-%E2%80%94-installing-pm2).
+These steps are modified from the DigitalOcean [documentation for setting up PM2](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-18-04#step-3-%E2%80%94-installing-pm2).
 :::
 
 - Generate and configure a startup script to launch PM2, it will generate a Startup Script to copy/paste, do so:
@@ -350,9 +350,9 @@ pm2 save
 
 Continue below to configure the `webhook`.
 
-### Set up a webhook on Digital Ocean / GitHub
+### Set up a webhook on DigitalOcean / GitHub
 
-Providing that your project is set-up on GitHub, you will need to configure your **Strapi Project Repository** with a webhook. The following articles provide additional information to the steps below: [GitHub Creating Webhooks Guide](https://developer.github.com/webhooks/creating/) and [Digital Ocean Guide to GitHub WebHooks](https://www.digitalocean.com/community/tutorials/how-to-use-node-js-and-github-webhooks-to-keep-remote-projects-in-sync).
+Providing that your project is set-up on GitHub, you will need to configure your **Strapi Project Repository** with a webhook. The following articles provide additional information to the steps below: [GitHub Creating Webhooks Guide](https://developer.github.com/webhooks/creating/) and [DigitalOcean Guide to GitHub WebHooks](https://www.digitalocean.com/community/tutorials/how-to-use-node-js-and-github-webhooks-to-keep-remote-projects-in-sync).
 
 - You will need to access the `Settings` tab for your `Strapi Project Repository`:
 
@@ -491,4 +491,4 @@ sudo ufw deny 1337
 - To **install SSL**, you will need to [install and run Certbot by Let's Encrypt](https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-18-04).
 - Set-up [Nginx with HTTP/2 Support](https://www.digitalocean.com/community/tutorials/how-to-set-up-nginx-with-http-2-support-on-ubuntu-18-04) for Ubuntu 18.04.
 
-Your `Strapi` project has been installed on a **Digital Ocean Droplet** using **Ubuntu 18.04**.
+Your `Strapi` project has been installed on a **DigitalOcean Droplet** using **Ubuntu 18.04**.

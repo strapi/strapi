@@ -22,14 +22,14 @@ Manual guides for deployment on various platforms and additonal software options
 	</InstallLink>
 </div>
 
-<!-- <div>
+<div>
 	<InstallLink link="../deployment/azure">
 		<template #title>Azure</template>
 		<template #description>
 			Step by step guide for deploying on Azure web app
 		</template>
 	</InstallLink>
-</div> -->
+</div>
 
 <div>
 	<InstallLink link="../deployment/digitalocean">
