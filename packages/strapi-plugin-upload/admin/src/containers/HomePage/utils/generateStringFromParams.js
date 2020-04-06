@@ -1,12 +1,14 @@
 import { isEmpty, toString } from 'lodash';
 import generateParamsFromQuery from './generateParamsFromQuery';
 
-const generateStringFromParams = query => {
+const generateStringFromParams = (query, paramsToFilter = []) => {
   let paramsString = '';
   const paramsObject = generateParamsFromQuery(query);
 
   Object.keys(paramsObject)
-    .filter(key => !isEmpty(toString(paramsObject[key])))
+    .filter(key => {
+      return !paramsToFilter.includes(key) && !isEmpty(toString(paramsObject[key]));
+    })
     .forEach(key => {
       const value = paramsObject[key];
 

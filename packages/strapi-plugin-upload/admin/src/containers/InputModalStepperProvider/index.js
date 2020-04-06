@@ -293,9 +293,11 @@ const InputModalStepperProvider = ({
 
   const fetchMediaLibFilesCount = async () => {
     const requestURL = getRequestUrl('files/count');
+    const compactedParams = compactParams(params);
+    const paramsToSend = generateSearchFromFilters(compactedParams, ['_limit', '_sort', '_start']);
 
     try {
-      return await request(`${requestURL}`, {
+      return await request(`${requestURL}?${paramsToSend}`, {
         method: 'GET',
       });
     } catch (err) {
@@ -317,7 +319,6 @@ const InputModalStepperProvider = ({
 
   const fetchMediaLibFiles = async () => {
     const requestURL = getRequestUrl('files');
-
     const compactedParams = compactParams(params);
     const paramsToSend = generateSearchFromFilters(compactedParams);
 
