@@ -5,11 +5,11 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import { formatBytes, getExtension, getType, ItemTypes } from '../../utils';
 
 import Flex from '../Flex';
-import Text from '../Text';
 import Border from '../CardBorder';
 import CardImgWrapper from '../CardImgWrapper';
 import CardPreview from '../CardPreview';
 import ErrorMessage from '../CardErrorMessage';
+import FileInfos from '../FileInfos';
 import Title from '../CardTitle';
 import Tag from '../Tag';
 import Wrapper from '../CardWrapper';
@@ -99,9 +99,7 @@ const DraggableCard = ({
         <Title>{name}</Title>
         <Tag label={getType(fileType)} />
       </Flex>
-      <Text color="grey" fontSize="xs" ellipsis>
-        {getExtension(fileType).toUpperCase()}&nbsp;&mdash;&nbsp;{fileSize}
-      </Text>
+      <FileInfos extension={getExtension(fileType)} size={fileSize} />
       {hasError && <ErrorMessage>{errorMessage}</ErrorMessage>}
     </Wrapper>
   );
