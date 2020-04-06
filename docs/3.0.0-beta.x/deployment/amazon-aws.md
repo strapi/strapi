@@ -2,11 +2,11 @@
 
 This is a step-by-step guide for deploying a Strapi project to [Amazon AWS EC2](https://aws.amazon.com/ec2/). This guide will connect to an [Amazon AWS RDS](https://aws.amazon.com/rds/) for managing and hosting the database. Optionally, this guide will show you how to connect host and serve images on [Amazon AWS S3](https://aws.amazon.com/s3/).
 
-Prior to starting this guide, you should have created a [Strapi project](../getting-started/quick-start.md), to use for deploying on AWS. And have read through the [configuration](../installation/deployment.md#configuration) section.
+Prior to starting this guide, you should have created a [Strapi project](../getting-started/quick-start.md), to use for deploying on AWS. And have read through the [configuration](../getting-started/deployment.md#configuration) section.
 
-### Amazon AWS Install Requirement and creating an IAM non-root user
+### Amazon AWS Install Requirements and creating an IAM non-root user
 
-- You must have a free [Amazon AWS](aws.amazon.com/free) before doing these steps.
+- You must have an [Amazon AWS](aws.amazon.com/free) account before doing these steps.
 
 Best practices for using **AWS Amazon** services state to not use your root account user and to use instead the [IAM (AWS Identity and Access Management) service](https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html). Your root user is therefore only used for a very few [select tasks](https://docs.aws.amazon.com/general/latest/gr/aws_tasks-that-require-root.html). For example, for **billing**, you create an **Administrator user and Group** for such things. And other, more routine tasks are done with a **regular IAM User**.
 
