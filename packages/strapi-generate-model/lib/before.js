@@ -89,7 +89,7 @@ module.exports = (scope, cb) => {
     : nameToCollectionName(pluralize(scope.id));
 
   // Set description
-  scope.description = _.has(scope.args, 'description') ? scope.args.description : '';
+  scope.description = _.has(scope.args, 'description') ? scope.args.description : undefined;
 
   // Set connection
   scope.connection = _.get(scope.args, 'connection', undefined);
