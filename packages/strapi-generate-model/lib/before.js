@@ -89,7 +89,10 @@ module.exports = (scope, cb) => {
     : nameToCollectionName(pluralize(scope.id));
 
   // Set description
-  scope.description = _.has(scope.args, 'description') ? scope.args.description : undefined;
+  scope.description = _.has(scope.args, 'description') ? scope.args.description : '';
+
+  // Set connection
+  scope.connection = _.get(scope.args, 'connection', undefined);
 
   // Handle invalid action arguments.
   // Send back invalidActions.
@@ -121,6 +124,28 @@ module.exports = (scope, cb) => {
       );
     })
     .join(',\n');
+
+  scope.schema = JSON.stringify(
+    {
+      kind: 'collectionType',
+      connection: scope.connection,
+      collectionName: scope.collectionName,
+      info: {
+        name: scope.id,
+        description: scope.description,
+      },
+      options: {
+        timestamps: true,
+        increments: true,
+        comment: '',
+      },
+      attributes: {
+        ...scope.attributes,
+      },
+    },
+    null,
+    2
+  );
 
   // Trigger callback with no error to proceed.
   return cb();
