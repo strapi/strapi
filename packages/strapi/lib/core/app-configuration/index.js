@@ -13,6 +13,7 @@ const loadConfigDir = require('./config-loader');
 
 const getPrefixedDeps = require('../../utils/get-prefixed-dependencies');
 const loadPolicies = require('../load-policies');
+const loadFunctions = require('../load-functions');
 
 const CONFIG_PATHS = {
   admin: 'admin',
@@ -34,6 +35,8 @@ module.exports = (dir, initialConfig = {}) => {
 
   const pkgJSON = require(path.resolve(dir, 'package.json'));
 
+  const configDir = path.resolve(dir || process.cwd(), 'config');
+
   const defaultConfig = {
     launchedAt: Date.now(),
     appPath: dir,
@@ -48,16 +51,15 @@ module.exports = (dir, initialConfig = {}) => {
     paths: CONFIG_PATHS,
     middleware: { load: {}, settings: {} },
     hook: { load: {}, settings: {} },
-    functions: {},
     routes: {},
     info: pkgJSON,
-    policies: loadPolicies(path.resolve(dir, 'config', 'policies')),
+    policies: loadPolicies(path.resolve(configDir, 'policies')),
+    functions: loadFunctions(path.resolve(configDir, 'functions')),
     installedPlugins: getPrefixedDeps('strapi-plugin', pkgJSON),
     installedMiddlewares: getPrefixedDeps('strapi-middleware', pkgJSON),
     installedHooks: getPrefixedDeps('strapi-hook', pkgJSON),
   };
 
-  const configDir = path.resolve(dir || process.cwd(), 'config');
   const baseConfig = loadConfigDir(configDir);
 
   const envDir = path.resolve(configDir, 'env', process.env.NODE_ENV);
