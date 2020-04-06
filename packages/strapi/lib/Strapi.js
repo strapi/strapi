@@ -14,6 +14,7 @@ const { createDatabaseManager } = require('strapi-database');
 
 const utils = require('./utils');
 const loadModules = require('./core/load-modules');
+const loadConfiguration = require('./core/app-configuration');
 const bootstrap = require('./core/bootstrap');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
@@ -25,7 +26,6 @@ const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const createEntityService = require('./services/entity-service');
 const createEntityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
-const loadConfiguration = require('./services/configuration-loader');
 
 /**
  * Construct an Strapi instance.
@@ -202,7 +202,7 @@ class Strapi {
 
       if (
         (this.config.environment === 'development' &&
-          _.get(this.config.currentEnvironment, 'server.admin.autoOpen', true) !== false) ||
+          this.config.get('server.admin.autoOpen', true) !== false) ||
         !isInitialised
       ) {
         await utils.openBrowser.call(this);

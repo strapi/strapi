@@ -10,7 +10,9 @@ const path = require('path');
 
 const createConfigProvider = require('./config-provider');
 const loadConfigDir = require('./config-loader');
+
 const getPrefixedDeps = require('../../utils/get-prefixed-dependencies');
+const loadPolicies = require('../load-policies');
 
 const CONFIG_PATHS = {
   admin: 'admin',
@@ -49,6 +51,7 @@ module.exports = (dir, initialConfig = {}) => {
     functions: {},
     routes: {},
     info: pkgJSON,
+    policies: loadPolicies(path.resolve(dir, 'config', 'policies')),
     installedPlugins: getPrefixedDeps('strapi-plugin', pkgJSON),
     installedMiddlewares: getPrefixedDeps('strapi-middleware', pkgJSON),
     installedHooks: getPrefixedDeps('strapi-hook', pkgJSON),

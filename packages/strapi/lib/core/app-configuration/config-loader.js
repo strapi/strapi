@@ -44,7 +44,7 @@ const loadJsFile = file => {
 
     return jsModule;
   } catch (error) {
-    throw new Error(`Imposibble to load js config file ${file}: ${error.message}`);
+    throw new Error(`Could not load js config file ${file}: ${error.message}`);
   }
 };
 
@@ -52,6 +52,6 @@ const loadJSONFile = file => {
   try {
     return JSON.parse(fs.readFileSync(file));
   } catch (error) {
-    throw new Error(`Imposibble to load json config file ${file}: ${error.message}`);
+    throw new Error(`Could not load json config file ${file}: ${error.message}`);
   }
 };

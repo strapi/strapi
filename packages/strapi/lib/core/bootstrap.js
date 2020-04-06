@@ -162,9 +162,10 @@ module.exports = function(strapi) {
   strapi.config.middleware.settings = Object.keys(strapi.middleware).reduce((acc, current) => {
     // Try to find the settings in the current environment, then in the main configurations.
     const currentSettings = _.merge(
-      _.get(_.cloneDeep(strapi.middleware[current]), ['defaults', current], {}),
+      _.cloneDeep(_.get(strapi.middleware[current], ['defaults', current], {})),
       strapi.config.get(['middleware', 'settings', current], {})
     );
+
     acc[current] = !_.isObject(currentSettings) ? {} : currentSettings;
 
     // Ensure that enabled key exist by forcing to false.
