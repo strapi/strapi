@@ -14,7 +14,7 @@ const Wrapper = styled.div`
   border: 1px solid ${({ theme }) => theme.main.colors.darkGrey};
   border-radius: ${({ theme }) => theme.main.sizes.borderRadius};
   cursor: pointer;
-  font-size: 11px;
+  font-size: ${({ small }) => (small ? '11px' : '13px')};
   color: ${({ color }) => color};
 
   ${({ type }) =>
