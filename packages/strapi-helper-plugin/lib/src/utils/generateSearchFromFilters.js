@@ -1,16 +1,15 @@
 import { isEmpty, toString } from 'lodash';
 
-const generateSearchFromFilters = filters => {
+const generateSearchFromFilters = (filters, paramsToFilter = []) => {
   return Object.keys(filters)
-    .filter(key => !isEmpty(toString(filters[key])))
+    .filter(key => !paramsToFilter.includes(key) && !isEmpty(toString(filters[key])))
     .map(key => {
       let ret = `${key}=${filters[key]}`;
 
       if (key === 'filters') {
         const formattedFilters = filters[key]
           .reduce((acc, curr) => {
-            const key =
-              curr.filter === '=' ? curr.name : `${curr.name}${curr.filter}`;
+            const key = curr.filter === '=' ? curr.name : `${curr.name}${curr.filter}`;
             acc.push(`${key}=${curr.value}`);
 
             return acc;

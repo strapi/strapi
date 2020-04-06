@@ -40,6 +40,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
               caption: '',
               name: 'test1',
             },
+            originalName: 'test1',
             hasError: false,
             errorMessage: null,
             isUploading: false,
@@ -54,6 +55,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
               caption: '',
               name: 'test2',
             },
+            originalName: 'test2',
             hasError: false,
             errorMessage: null,
             isUploading: false,
@@ -86,6 +88,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
               caption: '',
               name: 'test1',
             },
+            originalName: 'test1',
             hasError: false,
             errorMessage: null,
             isUploading: false,
@@ -105,6 +108,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
               caption: '',
               name: 'test1',
             },
+            originalName: 'test1',
             hasError: false,
             errorMessage: null,
             isUploading: false,
@@ -119,6 +123,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
               caption: '',
               name: 'test2',
             },
+            originalName: 'test2',
             hasError: false,
             errorMessage: null,
             isUploading: false,
@@ -133,6 +138,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
               caption: '',
               name: 'test3',
             },
+            originalName: 'test3',
             hasError: false,
             errorMessage: null,
             isUploading: false,
@@ -193,8 +199,16 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
       const state = fromJS({
         currentStep: 'browse',
         filesToUpload: [],
-        filesToDownload: ['test', 'test1'],
+        filesToDownload: ['http://www.un.com/photo-1', 'http://www.deux.com/photo-2'],
       });
+      const firstURL = new URL('http://www.un.com/photo-1');
+      const firstURLName = decodeURIComponent(
+        firstURL.pathname.substring(firstURL.pathname.lastIndexOf('/') + 1)
+      );
+      const secondURL = new URL('http://www.deux.com/photo-2');
+      const secondURLName = decodeURIComponent(
+        secondURL.pathname.substring(secondURL.pathname.lastIndexOf('/') + 1)
+      );
       const expected = fromJS({
         currentStep: 'test',
         filesToDownload: [],
@@ -204,10 +218,11 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             fileInfo: {
               alternativeText: '',
               caption: '',
-              name: 'test',
+              name: firstURLName,
             },
+            originalName: firstURLName,
             originalIndex: 0,
-            fileURL: 'test',
+            fileURL: firstURL,
             hasError: false,
             errorMessage: null,
             isUploading: false,
@@ -219,10 +234,11 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             fileInfo: {
               alternativeText: '',
               caption: '',
-              name: 'test1',
+              name: secondURLName,
             },
+            originalName: secondURLName,
             originalIndex: 1,
-            fileURL: 'test1',
+            fileURL: secondURL,
             hasError: false,
             errorMessage: null,
             isUploading: false,
@@ -247,7 +263,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
     it('should add the files to the (not empty) filesToUpload array and update the current step', () => {
       const state = fromJS({
         currentStep: 'browse',
-        filesToDownload: ['test2', 'test3'],
+        filesToDownload: ['http://www.trois.com/photo-3', 'http://www.quatre.com/photo-4'],
         filesToUpload: [
           {
             abortController: new AbortController(),
@@ -257,6 +273,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
               caption: '',
               name: 'test1',
             },
+            originalName: 'test1',
             hasError: false,
             errorMessage: null,
             isUploading: false,
@@ -270,6 +287,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
               caption: '',
               name: 'test1',
             },
+            originalName: 'test1',
             originalIndex: 1,
             fileURL: 'test1',
             hasError: false,
@@ -284,7 +302,14 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
         type: 'ADD_URLS_TO_FILES_TO_UPLOAD',
         nextStep: 'test',
       };
-
+      const firstURL = new URL('http://www.trois.com/photo-3');
+      const firstURLName = decodeURIComponent(
+        firstURL.pathname.substring(firstURL.pathname.lastIndexOf('/') + 1)
+      );
+      const secondURL = new URL('http://www.quatre.com/photo-4');
+      const secondURLName = decodeURIComponent(
+        secondURL.pathname.substring(secondURL.pathname.lastIndexOf('/') + 1)
+      );
       const expected = fromJS({
         currentStep: 'test',
         filesToDownload: [],
@@ -297,6 +322,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
               caption: '',
               name: 'test1',
             },
+            originalName: 'test1',
             hasError: false,
             errorMessage: null,
             isUploading: false,
@@ -310,6 +336,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
               caption: '',
               name: 'test1',
             },
+            originalName: 'test1',
             originalIndex: 1,
             fileURL: 'test1',
             hasError: false,
@@ -323,10 +350,11 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             fileInfo: {
               alternativeText: '',
               caption: '',
-              name: 'test2',
+              name: firstURLName,
             },
+            originalName: firstURLName,
             originalIndex: 2,
-            fileURL: 'test2',
+            fileURL: firstURL,
             hasError: false,
             errorMessage: null,
             isUploading: false,
@@ -338,10 +366,11 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             fileInfo: {
               alternativeText: '',
               caption: '',
-              name: 'test3',
+              name: secondURLName,
             },
+            originalName: secondURLName,
             originalIndex: 3,
-            fileURL: 'test3',
+            fileURL: secondURL,
             hasError: false,
             errorMessage: null,
             isUploading: false,
@@ -946,6 +975,8 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
               caption: '',
               name: 'test1',
             },
+            fileOriginalName: 'test1-test',
+            originalName: 'test1',
             originalIndex: 1,
             fileURL: 'test1',
             hasError: false,
@@ -988,9 +1019,11 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
               name: 'test1',
             },
             originalIndex: 1,
+            originalName: 'test1',
+            fileOriginalName: 'test1-test',
             fileURL: 'test1',
             hasError: true,
-            errorMessage: 'test1',
+            errorMessage: 'test1-test',
             isUploading: false,
             isDownloading: false,
             tempId: 2,

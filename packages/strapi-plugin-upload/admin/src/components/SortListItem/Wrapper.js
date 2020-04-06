@@ -5,7 +5,6 @@ import { themePropTypes } from 'strapi-helper-plugin';
 const SortListItem = styled.li`
   padding: 0 14px;
   height: 27px;
-  line-height: 27px;
   &:hover {
     cursor: pointer;
     background-color: ${({ theme }) => theme.main.colors.mediumGrey};

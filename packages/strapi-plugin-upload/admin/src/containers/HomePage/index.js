@@ -123,10 +123,11 @@ const HomePage = () => {
   };
 
   const fetchDataCount = async () => {
+    const params = generateStringFromParams(query, ['_limit', '_sort', '_start']);
     const requestURL = getRequestUrl('files/count');
 
     try {
-      const { count } = await request(requestURL, {
+      const { count } = await request(`${requestURL}?${params}`, {
         method: 'GET',
       });
 
@@ -316,7 +317,7 @@ const HomePage = () => {
     actions: [
       {
         disabled: dataToDelete.length === 0,
-        color: 'cancel',
+        color: 'delete',
         // TradId from the strapi-admin package
         label: formatMessage({ id: 'app.utils.delete' }),
         onClick: () => setIsPopupOpen(true),

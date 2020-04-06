@@ -8,8 +8,9 @@ const stepper = {
   browse: {
     Component: UploadForm,
     headerBreadcrumbs: [getTrad('modal.header.browse')],
-    prev: null,
+    prev: 'upload',
     next: 'upload',
+    withBackButton: true,
   },
   upload: {
     Component: UploadList,

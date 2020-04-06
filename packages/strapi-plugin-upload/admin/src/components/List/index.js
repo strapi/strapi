@@ -3,11 +3,13 @@ import PropTypes from 'prop-types';
 import { Checkbox } from '@buffetjs/core';
 import { get } from 'lodash';
 import { prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
-
+import { getTrad } from '../../utils';
 import Card from '../Card';
 import CardControlsWrapper from '../CardControlsWrapper';
 import ListWrapper from '../ListWrapper';
+import IntlText from '../IntlText';
 import ListCell from './ListCell';
+import ListRow from './ListRow';
 
 const List = ({
   clickable,
@@ -19,13 +21,22 @@ const List = ({
   canSelect,
   renderCardControl,
 }) => {
+  const selectedAssets = selectedItems.length;
+
   const handleClick = e => {
     e.stopPropagation();
   };
 
   return (
     <ListWrapper>
-      <div className="row">
+      {selectedAssets > 0 && (
+        <IntlText
+          id={getTrad(`list.assets.selected.${selectedAssets > 1 ? 'plural' : 'singular'}`)}
+          values={{ number: selectedAssets }}
+          lineHeight="18px"
+        />
+      )}
+      <ListRow>
         {data.map(item => {
           const { id } = item;
           const url = get(item, ['formats', 'thumbnail', 'url'], item.url);
@@ -63,7 +74,7 @@ const List = ({
             </ListCell>
           );
         })}
-      </div>
+      </ListRow>
     </ListWrapper>
   );
 };

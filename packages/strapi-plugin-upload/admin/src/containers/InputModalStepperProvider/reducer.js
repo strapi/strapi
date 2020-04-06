@@ -43,6 +43,12 @@ const reducer = (state, action) =>
 
         break;
       }
+      case 'CLEAR_FILES_TO_UPLOAD_AND_DOWNLOAD': {
+        draftState.filesToUpload = [];
+        draftState.filesToDownload = [];
+
+        break;
+      }
       case 'FILE_DOWNLOADED': {
         const index = state.filesToUpload.findIndex(file => file.tempId === action.fileTempId);
 
@@ -220,7 +226,7 @@ const reducer = (state, action) =>
           ...draftState.filesToUpload[index],
           isDownloading: false,
           hasError: true,
-          errorMessage: draftState.filesToUpload[index].fileURL,
+          errorMessage: draftState.filesToUpload[index].fileOriginalName,
         };
 
         break;

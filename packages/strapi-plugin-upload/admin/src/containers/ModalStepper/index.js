@@ -1,8 +1,15 @@
 import React, { useEffect, useState, useReducer, useRef } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
-import { isEqual, isEmpty, get } from 'lodash';
-import { Modal, ModalFooter, PopUpWarning, useGlobalContext, request } from 'strapi-helper-plugin';
+import { isEqual, isEmpty, get, set } from 'lodash';
+import {
+  Modal,
+  ModalFooter,
+  PopUpWarning,
+  useGlobalContext,
+  auth,
+  request,
+} from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
 import pluginId from '../../pluginId';
 import { getFilesToDownload, getTrad, getYupError, urlSchema } from '../../utils';
@@ -84,14 +91,15 @@ const ModalStepper = ({
           const { source } = file;
 
           return axios
-            .get(file.fileURL, {
-              headers: new Headers({ Origin: window.location.origin, mode: 'cors' }),
+            .get(`${strapi.backendURL}/${pluginId}/proxy?url=${file.fileURL}`, {
+              headers: { Authorization: `Bearer ${auth.getToken()}` },
               responseType: 'blob',
               cancelToken: source.token,
-              // Should we add a timeout?
+              timeout: 30000,
             })
             .then(({ data }) => {
-              const createdFile = new File([data], file.fileURL, {
+              const fileName = file.fileInfo.name;
+              const createdFile = new File([data], fileName, {
                 type: data.type,
               });
 
@@ -355,9 +363,14 @@ const ModalStepper = ({
     });
 
     const requests = filesToUpload.map(
-      async ({ file, fileInfo, originalIndex, abortController }) => {
+      async ({ file, fileInfo, originalName, originalIndex, abortController }) => {
         const formData = new FormData();
         const headers = {};
+
+        if (originalName === fileInfo.name) {
+          set(fileInfo, 'name', null);
+        }
+
         formData.append('files', file);
         formData.append('fileInfo', JSON.stringify(fileInfo));
 

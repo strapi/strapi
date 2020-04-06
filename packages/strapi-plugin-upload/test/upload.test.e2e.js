@@ -72,7 +72,7 @@ describe('Upload plugin end to end tests', () => {
         expect.objectContaining({
           id: expect.anything(),
           name: 'rec',
-          ext: '.jpg',
+          ext: '.jpeg',
           mime: 'image/jpeg',
           hash: expect.any(String),
           size: expect.any(Number),

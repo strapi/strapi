@@ -8,6 +8,7 @@ import Border from '../CardBorder';
 import CardImgWrapper from '../CardImgWrapper';
 import CardPreview from '../CardPreview';
 import ErrorMessage from '../CardErrorMessage';
+import FileInfos from '../FileInfos';
 import Title from '../CardTitle';
 import Tag from '../Tag';
 import Wrapper from '../CardWrapper';
@@ -58,9 +59,7 @@ const Card = ({
             <Title>{name}</Title>
             <Tag label={getType(fileType)} />
           </Flex>
-          <Text color="grey" fontSize="xs" ellipsis>
-            {!withoutFileInfo && `${getExtension(fileType)} - ${fileSize}`}
-          </Text>
+          {!withoutFileInfo && <FileInfos extension={getExtension(fileType)} size={fileSize} />}
         </>
       ) : (
         <Text lineHeight="13px" />
