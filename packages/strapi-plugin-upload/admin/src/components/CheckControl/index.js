@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useClickAwayListener } from '@buffetjs/hooks';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import DoubleFile from '../../icons/DoubleFile';
@@ -8,7 +7,7 @@ import File from '../../icons/File';
 import Padded from '../Padded';
 import Button from './Button';
 import Spacer from './Spacer';
-import StyledCardControl from './StyledCardControl';
+import CardControl from '../CardControl';
 import CustomDropdownSection from './CustomDropdownSection';
 import { getTrad } from '../../utils';
 
@@ -37,22 +36,22 @@ const CheckControl = ({ title, onSubmitEdit }) => {
 
   return (
     <div ref={dropdownRef}>
-      <StyledCardControl
-        title={formatMessage({ id: getTrad(`control-card.${title}`) })}
-        color="#ffffff"
+      <CardControl
+        color="#6DBB1A"
         onClick={handleToggle}
-      >
-        <FontAwesomeIcon icon="check" />
-      </StyledCardControl>
+        type="check"
+        title={formatMessage({ id: getTrad(`control-card.${title}`) })}
+        iconStyle={{ height: '1.4rem', width: '1.4rem' }}
+      />
       <CustomDropdownSection isOpen={isOpen}>
         <Padded left right bottom top size="15px">
           <Button onClick={handleClick}>
-            <File />
+            <File style={{ height: '2rem' }} />
             {formatMessage({ id: getTrad('checkControl.crop-original') })}
           </Button>
           <Spacer />
           <Button onClick={handleClickDuplicate}>
-            <DoubleFile />
+            <DoubleFile style={{ height: '1.8rem' }} />
             {formatMessage({ id: getTrad('checkControl.crop-duplicate') })}
           </Button>
         </Padded>

@@ -52,8 +52,13 @@ const BrowseAssets = () => {
 
   const limit = parseInt(params._limit, 10) || 10;
   const start = parseInt(params._start, 10) || 0;
+  const canSelectFile = multiple === true || (selectedFiles.length < 1 && !multiple);
 
   const handleListCardClick = id => {
+    if (!canSelectFile) {
+      return;
+    }
+
     handleFileSelection({
       target: {
         name: id,
@@ -72,7 +77,6 @@ const BrowseAssets = () => {
   const areAllCheckboxesSelected =
     files.every(file => selectedFiles.find(selectedFile => file.id === selectedFile.id)) &&
     hasSomeCheckboxSelected;
-  const canSelectFile = multiple === true || (selectedFiles.length < 1 && !multiple);
 
   const hasFilters = !isEmpty(params.filters.filter(filter => !filter.isDisabled));
   const hasSearch = !isEmpty(params._q);

@@ -92,14 +92,27 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
 
       <CardPreviewWrapper onDragOver={handleAllowDrop} onDrop={handleDrop}>
         <CardControlWrapper>
-          <CardControl title="add" color="#9EA7B8" type="plus" onClick={handleClickToggleModal} />
+          <CardControl
+            small
+            title="add"
+            color="#9EA7B8"
+            type="plus"
+            onClick={handleClickToggleModal}
+          />
           {!hasNoValue && (
             <>
-              <CardControl title="edit" color="#9EA7B8" type="pencil" onClick={handleEditFile} />
+              <CardControl
+                small
+                title="edit"
+                color="#9EA7B8"
+                type="pencil"
+                onClick={handleEditFile}
+              />
               <CopyToClipboard onCopy={handleCopy} text={prefixedFileURL}>
-                <CardControl title="copy-link" color="#9EA7B8" type="link" />
+                <CardControl small title="copy-link" color="#9EA7B8" type="link" />
               </CopyToClipboard>
               <CardControl
+                small
                 title="delete"
                 color="#9EA7B8"
                 type="trash-alt"

@@ -89,7 +89,7 @@ const EditForm = forwardRef(
     useEffect(() => {
       if (isCropping) {
         cropper.current = new Cropper(imgRef.current, {
-          modal: false,
+          modal: true,
           initialAspectRatio: 16 / 9,
           movable: true,
           zoomable: false,
@@ -257,8 +257,9 @@ const EditForm = forwardRef(
                             <CardControl
                               color="#F64D0A"
                               onClick={handleToggleCropMode}
-                              type="clear"
+                              type="times"
                               title="cancel"
+                              iconStyle={{ height: '1.4rem', width: '1.4rem' }}
                             />
                             <CheckButton
                               color="#6DBB1A"
