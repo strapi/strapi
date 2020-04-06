@@ -3,7 +3,8 @@
  */
 'use strict';
 
-const webhookModel = {
+const webhookModel = config => ({
+  connection: config.get('currentEnvironment.database.defaultConnection'),
   uid: 'strapi::webhooks',
   internal: true,
   globalId: 'StrapiWebhooks',
@@ -29,7 +30,7 @@ const webhookModel = {
       type: 'boolean',
     },
   },
-};
+});
 
 const toDBObject = data => {
   return {

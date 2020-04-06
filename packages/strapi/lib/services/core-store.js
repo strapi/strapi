@@ -1,6 +1,7 @@
 'use strict';
 
-const coreStoreModel = {
+const coreStoreModel = config => ({
+  connection: config.get('currentEnvironment.database.defaultConnection'),
   uid: 'strapi::core-store',
   internal: true,
   info: {
@@ -26,7 +27,7 @@ const coreStoreModel = {
   },
   globalId: 'StrapiConfigs',
   collectionName: 'core_store',
-};
+});
 
 const createCoreStore = ({ environment: defaultEnv, db }) => {
   return (source = {}) => {
