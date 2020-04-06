@@ -3,12 +3,12 @@ import PropTypes from 'prop-types';
 
 import Text from '../Text';
 
-const FileInfos = ({ height, extension, size, width }) => {
+const FileInfos = ({ extension, height, size, width }) => {
   return (
     <Text color="grey" fontSize="xs" ellipsis>
       {extension.toUpperCase()}
-      {width && height && `\u00A0\u2014\u00A0${width}×${height}`}
       &nbsp;&mdash;&nbsp;
+      {width && height && `${width}×${height}\u00A0\u2014\u00A0`}
       {size}
     </Text>
   );
