@@ -451,10 +451,12 @@ The session doesn't work with `mongo` as a client. The package that we should us
   - `enabled` (boolean): Enable or disable CRON tasks to schedule jobs at specific dates. Default value: `false`.
 - `admin`
   - `autoOpen` (boolean): Enable or disabled administration opening on start. Default value: `true`.
-  - `path` (string): Allow to change the URL to access the admin panel. Default value: `/admin`.
   - `watchIgnoreFiles` (array): Add custom files that should not be watched during development. See more [here](https://github.com/paulmillr/chokidar#path-filtering) (property `ignored`). Default value: `[]`.
+  - `server`
+    - `path` (string): The relative path were the admin panel is served. Default value: `/admin`.
   - `build`
     - `backend` (string): URL that the admin panel and plugins will request (default: `http://localhost:1337`).
+    - `publicPath` (string): Allow to change the URL to access the admin panel. Default value: `/admin`. Note: In most cases it is also needed to change the `admin.server.path` value.
 
 #### Example
 

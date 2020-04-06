@@ -16,17 +16,9 @@ module.exports = async function() {
   const host = _.get(serverConfig, 'host', 'localhost');
   const adminPort = _.get(serverConfig, 'admin.port', 8000);
   const adminHost = _.get(serverConfig, 'admin.host', 'localhost');
-  const adminBackend = _.get(
-    serverConfig,
-    'admin.build.backend',
-    `http://${host}:${port}`
-  );
-  const adminPath = _.get(serverConfig, 'admin.path', '/admin');
-  const adminWatchIgnoreFiles = _.get(
-    serverConfig,
-    'admin.watchIgnoreFiles',
-    []
-  );
+  const adminBackend = _.get(serverConfig, 'admin.build.backend', `http://${host}:${port}`);
+  const adminPath = _.get(serverConfig, 'admin.build.publicPath', '/admin');
+  const adminWatchIgnoreFiles = _.get(serverConfig, 'admin.watchIgnoreFiles', []);
 
   strapiAdmin.watchAdmin({
     dir,

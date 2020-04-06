@@ -42,11 +42,16 @@ module.exports = {
     // Read layout file.
 
     try {
-      const layout = fs.readFileSync(
-        path.resolve(__dirname, '..', 'public', 'index.html'),
-        'utf8'
+      const backendUrl = _.get(
+        strapi.config.currentEnvironment.server,
+        'admin.build.backend',
+        strapi.config.url
       );
-      const $ = cheerio.load(layout);
+      const layout = fs.readFileSync(path.resolve(__dirname, '..', 'public', 'index.html'), 'utf8');
+
+      const filledLayout = _.template(layout)({ backendUrl });
+
+      const $ = cheerio.load(filledLayout);
 
       /**
        * We don't expose the specs using koa-static or something else due to security reasons.
@@ -140,10 +145,16 @@ module.exports = {
     const { error } = ctx.query;
 
     try {
-      const layout = fs.readFileSync(
-        path.join(__dirname, '..', 'public', 'login.html')
+      const backendUrl = _.get(
+        strapi.config.currentEnvironment.server,
+        'admin.build.backend',
+        strapi.config.url
       );
-      const $ = cheerio.load(layout);
+      const layout = fs.readFileSync(path.join(__dirname, '..', 'public', 'login.html'));
+
+      const filledLayout = _.template(layout)({ backendUrl });
+
+      const $ = cheerio.load(filledLayout);
 
       $('form').attr(
         'action',
@@ -197,9 +208,10 @@ module.exports = {
       })
       .get();
 
-    const isValid = strapi.plugins[
-      'users-permissions'
-    ].services.user.validatePassword(password, storedPassword);
+    const isValid = strapi.plugins['users-permissions'].services.user.validatePassword(
+      password,
+      storedPassword
+    );
     let querystring = '?error=password';
 
     if (isValid) {
@@ -207,18 +219,20 @@ module.exports = {
       querystring = '';
     }
 
+    const backendUrl = _.get(
+      strapi.config.currentEnvironment.server,
+      'admin.build.backend',
+      strapi.config.url
+    );
+
     ctx.redirect(
-      `${
-        strapi.plugins.documentation.config['x-strapi-config'].path
-      }${querystring}`
+      `${backendUrl}${strapi.plugins.documentation.config['x-strapi-config'].path}${querystring}`
     );
   },
 
   regenerateDoc: async ctx => {
     const service = strapi.plugins.documentation.services.documentation;
-    const documentationVersions = service
-      .retrieveDocumentationVersions()
-      .map(el => el.version);
+    const documentationVersions = service.retrieveDocumentationVersions().map(el => el.version);
     const {
       request: {
         body: { version },
@@ -254,10 +268,7 @@ module.exports = {
       );
       ctx.send({ ok: true });
     } catch (err) {
-      ctx.badRequest(
-        null,
-        admin ? 'documentation.error.regenerateDoc' : 'An error occured'
-      );
+      ctx.badRequest(null, admin ? 'documentation.error.regenerateDoc' : 'An error occured');
     } finally {
       strapi.reload.isWatching = true;
     }
@@ -266,9 +277,7 @@ module.exports = {
   deleteDoc: async ctx => {
     strapi.reload.isWatching = false;
     const service = strapi.plugins.documentation.services.documentation;
-    const documentationVersions = service
-      .retrieveDocumentationVersions()
-      .map(el => el.version);
+    const documentationVersions = service.retrieveDocumentationVersions().map(el => el.version);
     const {
       request: {
         params: { version },
@@ -318,14 +327,11 @@ module.exports = {
     if (restrictedAccess && _.isEmpty(password)) {
       return ctx.badRequest(
         null,
-        admin
-          ? 'users-permissions.Auth.form.error.password.provide'
-          : 'Please provide a password'
+        admin ? 'users-permissions.Auth.form.error.password.provide' : 'Please provide a password'
       );
     }
 
-    const isNewPassword =
-      !_.isEmpty(password) && password !== prevConfig.password;
+    const isNewPassword = !_.isEmpty(password) && password !== prevConfig.password;
 
     if (isNewPassword && usersPermService.user.isHashed(password)) {
       // Throw an error if the password selected by the user

@@ -110,8 +110,14 @@ module.exports = strapi => {
         strapi.config.environment !== 'production' ||
         strapi.plugins.graphql.config.playgroundAlways
       ) {
+        const backendUrl = _.get(
+          strapi.config.currentEnvironment.server,
+          'admin.build.backend',
+          strapi.config.url
+        );
+
         serverParams.playground = {
-          endpoint: strapi.plugins.graphql.config.endpoint,
+          endpoint: `${backendUrl}${strapi.plugins.graphql.config.endpoint}`,
           shareEnabled: strapi.plugins.graphql.config.shareEnabled,
         };
       }

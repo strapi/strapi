@@ -74,9 +74,16 @@ module.exports = strapi => {
 
       if (!strapi.config.serveAdminPanel) return;
 
-      const basename = _.get(strapi.config.currentEnvironment.server, 'admin.path')
-        ? strapi.config.currentEnvironment.server.admin.path
-        : '/admin';
+      let basename;
+
+      if (_.has(strapi.config.currentEnvironment.server, 'admin.server.path')) {
+        basename = strapi.config.currentEnvironment.server.admin.server.path;
+      } else if (_.has(strapi.config.currentEnvironment.server, 'admin.path')) {
+        // For retrocompatibility
+        basename = strapi.config.currentEnvironment.server.admin.path;
+      } else {
+        basename = '/admin';
+      }
 
       const buildDir = path.resolve(strapi.dir, 'build');
 

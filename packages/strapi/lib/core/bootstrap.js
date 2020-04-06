@@ -297,7 +297,11 @@ module.exports = function(strapi) {
         port: strapi.config.port,
       });
 
-  const adminPath = _.get(strapi.config.currentEnvironment.server, 'admin.path', 'admin');
+  const adminPath = _.get(
+    strapi.config.currentEnvironment.server,
+    'admin.build.publicPath',
+    'admin'
+  );
 
   // check if we should serve admin panel
   const shouldServeAdmin = _.get(
