@@ -41,5 +41,25 @@ describe('MEDIA LIBRARY | containers | HomePage | utils', () => {
         expect(generateStringFromParams(query)).toEqual(expected);
       });
     });
+
+    describe('it should filter the defined params', () => {
+      it('should return _ncontains instead of _contains', () => {
+        const search = '?mime_ncontains=file&test=true';
+        const query = new URLSearchParams(search);
+
+        const expected = '_limit=10&_start=0&mime_contains=image&mime_contains=video&test=true';
+
+        expect(generateStringFromParams(query, [])).toEqual(expected);
+      });
+
+      it('should not return the _limit param', () => {
+        const search = '?mime_ncontains=file';
+        const query = new URLSearchParams(search);
+
+        const expected = '_start=0&mime_contains=image&mime_contains=video';
+
+        expect(generateStringFromParams(query, ['_limit'])).toEqual(expected);
+      });
+    });
   });
 });
