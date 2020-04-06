@@ -394,12 +394,16 @@ const HomePage = () => {
             onCardClick={handleClickEditFile}
             selectedItems={dataToDelete}
           />
-          <PageFooter
-            context={{ emitEvent: () => {} }}
-            count={paginationCount}
-            onChangeParams={handleChangeListParams}
-            params={params}
-          />
+          <Padded left right size="sm">
+            <Padded left right size="xs">
+              <PageFooter
+                context={{ emitEvent: () => {} }}
+                count={paginationCount}
+                onChangeParams={handleChangeListParams}
+                params={params}
+              />
+            </Padded>
+          </Padded>
         </>
       ) : (
         <ListEmpty
