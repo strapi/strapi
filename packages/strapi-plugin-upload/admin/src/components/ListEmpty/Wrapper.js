@@ -6,7 +6,7 @@ const Wrapper = styled.div`
   padding: 0;
   .btn-wrapper {
     position: absolute;
-    top: 109px;
+    top: 115px;
     width: 100%;
     text-align: center;
   }

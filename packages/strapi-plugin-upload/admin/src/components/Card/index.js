@@ -20,6 +20,7 @@ const Card = ({
   errorMessage,
   hasError,
   hasIcon,
+  height,
   mime,
   name,
   onClick,
@@ -28,6 +29,7 @@ const Card = ({
   size,
   type,
   url,
+  width,
   withFileCaching,
   withoutFileInfo,
 }) => {
@@ -59,7 +61,14 @@ const Card = ({
             <Title>{name}</Title>
             <Tag label={getType(fileType)} />
           </Flex>
-          {!withoutFileInfo && <FileInfos extension={getExtension(fileType)} size={fileSize} />}
+          {!withoutFileInfo && (
+            <FileInfos
+              extension={getExtension(fileType)}
+              size={fileSize}
+              width={width}
+              height={height}
+            />
+          )}
         </>
       ) : (
         <Text lineHeight="13px" />
@@ -77,6 +86,7 @@ Card.defaultProps = {
   id: null,
   hasError: false,
   hasIcon: false,
+  height: null,
   mime: null,
   name: null,
   onClick: () => {},
@@ -85,6 +95,7 @@ Card.defaultProps = {
   small: false,
   type: null,
   url: null,
+  width: null,
   withFileCaching: true,
   withoutFileInfo: false,
 };
@@ -96,6 +107,7 @@ Card.propTypes = {
   errorMessage: PropTypes.string,
   hasError: PropTypes.bool,
   hasIcon: PropTypes.bool,
+  height: PropTypes.number,
   mime: PropTypes.string,
   name: PropTypes.string,
   onClick: PropTypes.func,
@@ -104,6 +116,7 @@ Card.propTypes = {
   small: PropTypes.bool,
   type: PropTypes.string,
   url: PropTypes.string,
+  width: PropTypes.number,
   withFileCaching: PropTypes.bool,
   withoutFileInfo: PropTypes.bool,
 };
