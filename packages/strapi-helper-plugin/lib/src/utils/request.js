@@ -37,7 +37,10 @@ function checkStatus(response, checkToken = true) {
       throw error;
     })
     .catch(() => {
-      throw response;
+      const error = new Error(response.statusText);
+      error.response = response;
+
+      throw error;
     });
 }
 
