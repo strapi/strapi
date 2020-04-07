@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 const Wrapper = styled.div`
   width: 100%;
-  margin-bottom: 34px;
+  margin-bottom: 17px;
   overflow: hidden;
   &:hover {
     cursor: ${({ isDraggable }) => (isDraggable ? 'move' : 'pointer')};

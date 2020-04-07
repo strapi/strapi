@@ -7,7 +7,7 @@
 import styled from 'styled-components';
 
 const BackButton = styled.button`
-  height: 6rem;
+  height: 5.9rem;
   width: 6.5rem;
   margin-right: 20px;
   margin-left: -30px;
