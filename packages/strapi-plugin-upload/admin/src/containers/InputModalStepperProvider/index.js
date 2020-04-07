@@ -402,12 +402,12 @@ const InputModalStepperProvider = ({
             multiple,
           });
         } catch (err) {
-          console.error(err);
-          const status = get(err, 'response.status', null);
+          const status = get(err, 'response.status', get(err, 'status', null));
+          const statusText = get(err, 'response.statusText', get(err, 'statusText', null));
           const errorMessage = get(
             err,
             ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
-            'An error occured'
+            get(err, ['response', 'payload', 'message'], statusText)
           );
 
           if (status) {
