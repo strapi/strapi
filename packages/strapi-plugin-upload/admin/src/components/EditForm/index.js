@@ -135,6 +135,7 @@ const EditForm = forwardRef(
     };
 
     const handleClick = async () => {
+      console.log('click');
       const cropResult = await getCroppedResult();
 
       setCropResult(cropResult);
@@ -143,30 +144,39 @@ const EditForm = forwardRef(
     };
 
     const getCroppedResult = () => {
-      return new Promise(resolve => {
-        const canvas = cropper.current.getCroppedCanvas();
+      return new Promise((resolve, reject) => {
+        try {
+          const canvas = cropper.current.getCroppedCanvas();
 
-        canvas.toBlob(async blob => {
-          const {
-            file: { lastModifiedDate, lastModified, name },
-          } = fileToEdit;
+          canvas.toBlob(async blob => {
+            const {
+              file: { lastModifiedDate, lastModified, name },
+            } = fileToEdit;
 
-          resolve(
-            new File([blob], name, {
-              type: mimeType,
-              lastModified,
-              lastModifiedDate,
-            })
-          );
-        });
+            resolve(
+              new File([blob], name, {
+                type: mimeType,
+                lastModified,
+                lastModifiedDate,
+              })
+            );
+          });
+        } catch (err) {
+          reject();
+        }
       });
     };
 
     const handleClickEditCroppedFile = async (e, shouldDuplicate = false) => {
-      const file = await getCroppedResult();
+      try {
+        const file = await getCroppedResult();
 
-      setIsCropping(false);
-      onSubmitEdit(e, shouldDuplicate, file);
+        onSubmitEdit(e, shouldDuplicate, file);
+      } catch (err) {
+        // Silent
+      } finally {
+        setIsCropping(false);
+      }
     };
 
     const handleClickDelete = () => {
