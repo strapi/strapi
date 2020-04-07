@@ -257,7 +257,7 @@ Then fill the informations:
 
 - **Enable**: `ON`
 - **Client ID**: 226437944084-o2mojv5i4lfnng9q8kq3jkf5v03avemk.apps.googleusercontent.com
-- **Client ID**: aiTbMoiuJQflSBy6uQrfgsni
+- **Client Secret**: aiTbMoiuJQflSBy6uQrfgsni
 - **The redirect URL to your front-end app**: `http://localhost:3000/connect/google`
 
 :::
