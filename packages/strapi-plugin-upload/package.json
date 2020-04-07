@@ -11,6 +11,7 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
+    "byte-size": "^6.2.0",
     "cropperjs": "^1.5.6",
     "filenamify": "4.1.0",
     "immer": "^6.0.2",
