@@ -315,7 +315,7 @@ const ModalStepper = ({
       const errorMessage = get(
         err,
         ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
-        get(err, ['response', 'payload', 'message'], null)
+        get(err, ['response', 'payload', 'message'], 'An error occurred')
       );
 
       if (errorMessage) {
@@ -441,6 +441,8 @@ const ModalStepper = ({
 
   const shouldDisplayNextButton = currentStep === 'browse' && displayNextButton;
   const isFinishButtonDisabled = filesToUpload.some(file => file.isDownloading || file.isUploading);
+  const areButtonsDisabledOnEditExistingFile =
+    currentStep === 'edit' && fileToEdit.isUploading === true;
 
   return (
     <>
@@ -525,7 +527,7 @@ const ModalStepper = ({
             {currentStep === 'edit' && (
               <div style={{ margin: 'auto 0' }}>
                 <Button
-                  disabled={isFormDisabled}
+                  disabled={isFormDisabled || areButtonsDisabledOnEditExistingFile}
                   color="primary"
                   onClick={handleReplaceMedia}
                   style={{ marginRight: 10 }}
@@ -534,7 +536,7 @@ const ModalStepper = ({
                 </Button>
 
                 <Button
-                  disabled={isFormDisabled}
+                  disabled={isFormDisabled || areButtonsDisabledOnEditExistingFile}
                   color="success"
                   type="button"
                   onClick={handleSubmitEditExistingFile}

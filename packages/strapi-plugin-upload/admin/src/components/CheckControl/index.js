@@ -40,7 +40,7 @@ const CheckControl = ({ title, onSubmitEdit }) => {
         color="#6DBB1A"
         onClick={handleToggle}
         type="check"
-        title={formatMessage({ id: getTrad(`control-card.${title}`) })}
+        title={title}
         iconStyle={{ height: '1.4rem', width: '1.4rem' }}
       />
       <CustomDropdownSection isOpen={isOpen}>

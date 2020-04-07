@@ -55,6 +55,7 @@ const EditForm = forwardRef(
     const [isCropping, setIsCropping] = useState(false);
     const [infos, setInfos] = useState({ width: null, height: null });
     const [src, setSrc] = useState(null);
+    const cacheRef = useRef(performance.now());
 
     const fileURL = get(fileToEdit, ['file', 'url'], null);
     const prefixedFileURL = fileURL ? prefixFileUrlWithBackendUrl(fileURL) : null;
@@ -274,7 +275,7 @@ const EditForm = forwardRef(
                       {isImg ? (
                         <CropWrapper>
                           <img
-                            src={src}
+                            src={`${src}?${cacheRef.current}`}
                             alt={get(fileToEdit, ['file', 'name'], '')}
                             ref={isCropping ? imgRef : null}
                           />
