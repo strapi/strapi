@@ -20,7 +20,7 @@ options: [--no-run|--use-npm|--debug|--quickstart|--dbclient=<dbclient> --dbhost
 
 - **strapi new &#60;name&#62; --quickstart**<br/>
   Use the quickstart system to create your app.
-  
+
 - **strapi new &#60;name&#62; --quickstart --no-run**<br/>
   Use the quickstart system to create your app, and do not start the application after creation.
 
@@ -93,7 +93,7 @@ Scaffold a complete API with its configurations, controller, model and service.
 ```bash
 strapi generate:api <name> [<attribute:type>]
 
-options: [--tpl <name>|--plugin <name>]
+options: [--plugin <name>]
 ```
 
 - **strapi generate:api &#60;name&#62;**<br/>
@@ -108,11 +108,6 @@ options: [--tpl <name>|--plugin <name>]
   Generates an API called **&#60;name&#62;** in the `./plugins/<plugin>` folder.
 
   Example: `strapi generate:api product --plugin content-manager`
-
-- **strapi generate:api &#60;name&#62; --tpl &#60;template&#62;**<br/>
-  Generates an API called **&#60;name&#62;** in the `./api` folder which works with the given **&#60;template&#62;**. By default, the generated APIs are based on Mongoose.
-
-  Example: `strapi generate:api product --tpl bookshelf`
 
 ::: tip
 The first letter of the filename will be uppercase.
