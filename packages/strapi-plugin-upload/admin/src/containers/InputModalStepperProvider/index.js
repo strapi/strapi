@@ -75,7 +75,7 @@ const InputModalStepperProvider = ({
               headers: { Authorization: `Bearer ${auth.getToken()}` },
               responseType: 'blob',
               cancelToken: source.token,
-              timeout: 30000,
+              timeout: 60000,
             })
             .then(({ data }) => {
               const createdFile = new File([data], file.fileURL, {
@@ -402,17 +402,21 @@ const InputModalStepperProvider = ({
             multiple,
           });
         } catch (err) {
+          const status = get(err, 'response.status', get(err, 'status', null));
+          const statusText = get(err, 'response.statusText', get(err, 'statusText', null));
           const errorMessage = get(
             err,
             ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
-            null
+            get(err, ['response', 'payload', 'message'], statusText)
           );
 
-          dispatch({
-            type: 'SET_FILE_ERROR',
-            fileIndex: originalIndex,
-            errorMessage,
-          });
+          if (status) {
+            dispatch({
+              type: 'SET_FILE_ERROR',
+              fileIndex: originalIndex,
+              errorMessage,
+            });
+          }
         }
       }
     );
