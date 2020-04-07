@@ -9,6 +9,7 @@ const {
   isValidName,
   isValidEnum,
   isValidUID,
+  isValidRegExpPattern,
 } = require('./common');
 const { hasComponent } = require('../../utils/attributes');
 const { modelTypes, VALID_UID_TARGETS } = require('./constants');
@@ -98,6 +99,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
         unique: validators.unique,
         minLength: validators.minLength,
         maxLength: validators.maxLength,
+        regex: yup.string().test(isValidRegExpPattern),
       };
     }
     case 'richtext': {

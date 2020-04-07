@@ -1,6 +1,5 @@
 {
   "kind": "collectionType",
-  "connection": "default",
   "collectionName": "categories",
   "info": {
     "name": "category",
