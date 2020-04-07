@@ -312,13 +312,15 @@ const ModalStepper = ({
       // Close the modal and refetch data
       toggleRef.current(true);
     } catch (err) {
+      console.error(err);
+      const status = get(err, 'response.status', null);
       const errorMessage = get(
         err,
         ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
         get(err, ['response', 'payload', 'message'], 'An error occurred')
       );
 
-      if (errorMessage) {
+      if (status) {
         dispatch({
           type: 'SET_FILE_TO_EDIT_ERROR',
           errorMessage,
@@ -394,13 +396,15 @@ const ModalStepper = ({
             fileIndex: originalIndex,
           });
         } catch (err) {
+          console.error(err);
+          const status = get(err, 'response.status', null);
           const errorMessage = get(
             err,
             ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
-            get(err, ['response', 'payload', 'message'], null)
+            get(err, ['response', 'payload', 'message'], 'An error occured')
           );
 
-          if (errorMessage) {
+          if (status) {
             dispatch({
               type: 'SET_FILE_ERROR',
               fileIndex: originalIndex,

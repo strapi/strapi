@@ -402,17 +402,21 @@ const InputModalStepperProvider = ({
             multiple,
           });
         } catch (err) {
+          console.error(err);
+          const status = get(err, 'response.status', null);
           const errorMessage = get(
             err,
             ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
-            null
+            'An error occured'
           );
 
-          dispatch({
-            type: 'SET_FILE_ERROR',
-            fileIndex: originalIndex,
-            errorMessage,
-          });
+          if (status) {
+            dispatch({
+              type: 'SET_FILE_ERROR',
+              fileIndex: originalIndex,
+              errorMessage,
+            });
+          }
         }
       }
     );

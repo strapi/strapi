@@ -234,13 +234,15 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
       handleEditExistingFile(editedFile);
       goToList();
     } catch (err) {
+      console.error(err);
+      const status = get(err, 'response.status', null);
       const errorMessage = get(
         err,
         ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
         get(err, ['response', 'payload', 'message'], 'An error occurred')
       );
 
-      if (errorMessage) {
+      if (status) {
         handleSetFileToEditError(errorMessage);
       }
     }
