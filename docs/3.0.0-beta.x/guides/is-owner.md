@@ -97,6 +97,8 @@ module.exports = {
    */
 
   async update(ctx) {
+    const { id } = ctx.params;
+
     let entity;
 
     const [article] = await strapi.services.article.find({
@@ -110,14 +112,11 @@ module.exports = {
 
     if (ctx.is('multipart')) {
       const { data, files } = parseMultipartData(ctx);
-      entity = await strapi.services.article.update(ctx.params, data, {
+      entity = await strapi.services.article.update({ id }, data, {
         files,
       });
     } else {
-      entity = await strapi.services.article.update(
-        ctx.params,
-        ctx.request.body
-      );
+      entity = await strapi.services.article.update({ id }, ctx.request.body);
     }
 
     return sanitizeEntity(entity, { model: strapi.models.article });

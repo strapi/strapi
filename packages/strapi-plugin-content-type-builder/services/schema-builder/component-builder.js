@@ -42,19 +42,12 @@ module.exports = function createComponentBuilder() {
         filename: `${nameToSlug(infos.name)}.json`,
       });
 
-      const defaultConnection = _.get(
-        strapi,
-        ['config', 'currentEnvironment', 'database', 'defaultConnection'],
-        'default'
-      );
-
       const defaultCollectionName = `components_${nameToCollectionName(
         infos.category
       )}_${nameToCollectionName(pluralize(infos.name))}`;
 
       handler
         .setUID(uid)
-        .set('connection', infos.connection || defaultConnection)
         .set('collectionName', infos.collectionName || defaultCollectionName)
         .set(['info', 'name'], infos.name)
         .set(['info', 'icon'], infos.icon)
@@ -104,7 +97,6 @@ module.exports = function createComponentBuilder() {
       component
         .setUID(newUID)
         .setDir(newDir)
-        .set('connection', infos.connection)
         .set('collectionName', infos.collectionName)
         .set(['info', 'name'], infos.name)
         .set(['info', 'icon'], infos.icon)

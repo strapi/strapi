@@ -3,10 +3,10 @@
  */
 'use strict';
 
-const webhookModel = {
+const webhookModel = config => ({
+  connection: config.get('currentEnvironment.database.defaultConnection'),
   uid: 'strapi::webhooks',
   internal: true,
-  connection: 'default',
   globalId: 'StrapiWebhooks',
   collectionName: 'strapi_webhooks',
   info: {
@@ -30,7 +30,7 @@ const webhookModel = {
       type: 'boolean',
     },
   },
-};
+});
 
 const toDBObject = data => {
   return {
@@ -69,9 +69,7 @@ const createWebhookStore = ({ db }) => {
     },
 
     createWebhook(data) {
-      return webhookQueries
-        .create(toDBObject({ ...data, isEnabled: true }))
-        .then(fromDBObject);
+      return webhookQueries.create(toDBObject({ ...data, isEnabled: true })).then(fromDBObject);
     },
 
     async updateWebhook(id, data) {
