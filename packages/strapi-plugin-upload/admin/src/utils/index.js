@@ -16,4 +16,5 @@ export { default as getTrad } from './getTrad';
 export { default as getType } from './getType';
 export { default as getYupError } from './getYupError';
 export { default as ItemTypes } from './ItemTypes';
+export { default as unformatBytes } from './unformatBytes';
 export { default as urlSchema } from './urlYupSchema';
