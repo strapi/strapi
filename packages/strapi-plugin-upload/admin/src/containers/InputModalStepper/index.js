@@ -12,6 +12,7 @@ const InputModal = ({
   fileToEdit,
   isOpen,
   multiple,
+  onClosed,
   onInputMediaChange,
   onToggle,
   selectedFiles,
@@ -30,6 +31,7 @@ const InputModal = ({
     <DndProvider backend={HTML5Backend}>
       <DragLayer />
       <InputModalStepperProvider
+        onClosed={onClosed}
         initialFilesToUpload={filesToUpload}
         initialFileToEdit={fileToEdit}
         initialFilters={nContainsFilters}
@@ -65,6 +67,7 @@ InputModal.propTypes = {
   fileToEdit: PropTypes.object,
   isOpen: PropTypes.bool.isRequired,
   multiple: PropTypes.bool.isRequired,
+  onClosed: PropTypes.func.isRequired,
   onInputMediaChange: PropTypes.func,
   onToggle: PropTypes.func,
   selectedFiles: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),

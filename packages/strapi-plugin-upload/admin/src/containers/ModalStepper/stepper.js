@@ -14,7 +14,7 @@ const stepper = {
   },
   upload: {
     Component: UploadList,
-    headerBreadcrumbs: [getTrad('modal.header.select-files')],
+    headerBreadcrumbs: [getTrad('modal.header.pending-assets')],
     next: null,
     prev: 'browse',
   },
