@@ -2,21 +2,24 @@
 
 const assert = require('assert');
 const path = require('path');
-const fs = require('fs');
+const fse = require('fs-extra');
 
 module.exports = dir => {
-  if (!fs.existsSync(dir)) return {};
+  if (!fse.existsSync(dir)) return {};
 
-  return fs
-    .readdirSync(dir, { withFileTypes: true })
-    .filter(file => file.isFile())
-    .reduce((acc, file) => {
-      const key = path.basename(file.name, path.extname(file.name));
+  const root = {};
+  const paths = fse.readdirSync(dir, { withFileTypes: true }).filter(fd => fd.isFile());
 
-      acc[key] = loadPolicy(path.resolve(dir, file.name));
+  for (let fd of paths) {
+    const { name } = fd;
+    const fullPath = dir + path.sep + name;
 
-      return acc;
-    }, {});
+    const ext = path.extname(name);
+    const key = path.basename(name, ext);
+    root[key] = loadPolicy(fullPath);
+  }
+
+  return root;
 };
 
 const loadPolicy = file => {
