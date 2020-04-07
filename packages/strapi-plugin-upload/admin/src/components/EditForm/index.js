@@ -55,6 +55,7 @@ const EditForm = forwardRef(
     const [isCropping, setIsCropping] = useState(false);
     const [infos, setInfos] = useState({ width: null, height: null });
     const [src, setSrc] = useState(null);
+    const cacheRef = useRef(performance.now());
 
     const fileURL = get(fileToEdit, ['file', 'url'], null);
     const prefixedFileURL = fileURL ? prefixFileUrlWithBackendUrl(fileURL) : null;
@@ -142,30 +143,39 @@ const EditForm = forwardRef(
     };
 
     const getCroppedResult = () => {
-      return new Promise(resolve => {
-        const canvas = cropper.current.getCroppedCanvas();
+      return new Promise((resolve, reject) => {
+        try {
+          const canvas = cropper.current.getCroppedCanvas();
 
-        canvas.toBlob(async blob => {
-          const {
-            file: { lastModifiedDate, lastModified, name },
-          } = fileToEdit;
+          canvas.toBlob(async blob => {
+            const {
+              file: { lastModifiedDate, lastModified, name },
+            } = fileToEdit;
 
-          resolve(
-            new File([blob], name, {
-              type: mimeType,
-              lastModified,
-              lastModifiedDate,
-            })
-          );
-        });
+            resolve(
+              new File([blob], name, {
+                type: mimeType,
+                lastModified,
+                lastModifiedDate,
+              })
+            );
+          });
+        } catch (err) {
+          reject();
+        }
       });
     };
 
     const handleClickEditCroppedFile = async (e, shouldDuplicate = false) => {
-      const file = await getCroppedResult();
+      try {
+        const file = await getCroppedResult();
 
-      setIsCropping(false);
-      onSubmitEdit(e, shouldDuplicate, file);
+        onSubmitEdit(e, shouldDuplicate, file);
+      } catch (err) {
+        // Silent
+      } finally {
+        setIsCropping(false);
+      }
     };
 
     const handleClickDelete = () => {
@@ -213,7 +223,7 @@ const EditForm = forwardRef(
                     <InfiniteLoadingIndicator onClick={onAbortUpload} />
                   ) : (
                     <Fragment>
-                      <CardControlsWrapper className="card-control-wrapper">
+                      <CardControlsWrapper className="card-control-wrapper-displayed">
                         {!isCropping ? (
                           <>
                             <CardControl
@@ -259,7 +269,7 @@ const EditForm = forwardRef(
                               onClick={handleToggleCropMode}
                               type="times"
                               title="cancel"
-                              iconStyle={{ height: '1.4rem', width: '1.4rem' }}
+                              iconStyle={{ height: '1.6rem', width: '1.6rem' }}
                             />
                             <CheckButton
                               color="#6DBB1A"
@@ -274,7 +284,7 @@ const EditForm = forwardRef(
                       {isImg ? (
                         <CropWrapper>
                           <img
-                            src={src}
+                            src={`${src}?${cacheRef.current}`}
                             alt={get(fileToEdit, ['file', 'name'], '')}
                             ref={isCropping ? imgRef : null}
                           />

@@ -5,11 +5,15 @@ const CardImgWrapper = styled.div`
   position: relative;
   width: 100%;
   height: 0;
-  overflow: hidden;
   padding-top: ${({ small }) => (small ? '62.8%' : '63.8%')};
   margin-bottom: 6px;
   border-radius: 2px;
   background-color: #f6f6f6;
+
+  .card-control-wrapper-displayed {
+    display: flex;
+    z-index: 1045;
+  }
 
   .card-control-wrapper {
     display: none;

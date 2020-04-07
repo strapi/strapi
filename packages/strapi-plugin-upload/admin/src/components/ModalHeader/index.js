@@ -10,13 +10,14 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { HeaderModalTitle } from 'strapi-helper-plugin';
+import { HeaderModalTitle, useGlobalContext } from 'strapi-helper-plugin';
 import ModalSection from '../ModalSection';
 import Text from '../Text';
 import BackButton from './BackButton';
 import Wrapper from './Wrapper';
 
 const ModalHeader = ({ goBack, headerBreadcrumbs, withBackButton, HeaderComponent }) => {
+  const { emitEvent } = useGlobalContext();
   const translatedHeaders = headerBreadcrumbs
     ? headerBreadcrumbs.map(headerTrad => ({
       key: headerTrad,
@@ -25,6 +26,9 @@ const ModalHeader = ({ goBack, headerBreadcrumbs, withBackButton, HeaderComponen
     : null;
 
   const handleClick = () => {
+    // Emit event on backButton with hardcoded upload location
+    emitEvent('didGoBack', { location: 'upload' });
+
     goBack('backButton');
   };
 

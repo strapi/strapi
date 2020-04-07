@@ -4,6 +4,7 @@ import { FormattedMessage } from 'react-intl';
 import { FilterIcon } from 'strapi-helper-plugin';
 
 import FiltersCard from './FiltersCard';
+import Wrapper from './Wrapper';
 import Picker from '../Picker';
 
 import formatFilter from './utils/formatFilter';
@@ -14,23 +15,25 @@ const FiltersPicker = ({ onChange, filters }) => {
   };
 
   return (
-    <Picker
-      renderButtonContent={() => (
-        <>
-          <FilterIcon />
-          <FormattedMessage id="app.utils.filters" />
-        </>
-      )}
-      renderSectionContent={onToggle => (
-        <FiltersCard
-          filters={filters}
-          onChange={e => {
-            handleChange(e);
-            onToggle();
-          }}
-        />
-      )}
-    />
+    <Wrapper>
+      <Picker
+        renderButtonContent={() => (
+          <>
+            <FilterIcon />
+            <FormattedMessage id="app.utils.filters" />
+          </>
+        )}
+        renderSectionContent={onToggle => (
+          <FiltersCard
+            filters={filters}
+            onChange={e => {
+              handleChange(e);
+              onToggle();
+            }}
+          />
+        )}
+      />
+    </Wrapper>
   );
 };
 

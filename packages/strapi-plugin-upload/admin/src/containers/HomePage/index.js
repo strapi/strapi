@@ -123,10 +123,11 @@ const HomePage = () => {
   };
 
   const fetchDataCount = async () => {
+    const params = generateStringFromParams(query, ['_limit', '_sort', '_start']);
     const requestURL = getRequestUrl('files/count');
 
     try {
-      const { count } = await request(requestURL, {
+      const { count } = await request(`${requestURL}?${params}`, {
         method: 'GET',
       });
 
@@ -394,12 +395,16 @@ const HomePage = () => {
             onCardClick={handleClickEditFile}
             selectedItems={dataToDelete}
           />
-          <PageFooter
-            context={{ emitEvent: () => {} }}
-            count={paginationCount}
-            onChangeParams={handleChangeListParams}
-            params={params}
-          />
+          <Padded left right size="sm">
+            <Padded left right size="xs">
+              <PageFooter
+                context={{ emitEvent: () => {} }}
+                count={paginationCount}
+                onChangeParams={handleChangeListParams}
+                params={params}
+              />
+            </Padded>
+          </Padded>
         </>
       ) : (
         <ListEmpty
