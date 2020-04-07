@@ -135,7 +135,6 @@ const EditForm = forwardRef(
     };
 
     const handleClick = async () => {
-      console.log('click');
       const cropResult = await getCroppedResult();
 
       setCropResult(cropResult);
