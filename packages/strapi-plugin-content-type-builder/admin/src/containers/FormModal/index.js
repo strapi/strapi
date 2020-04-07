@@ -505,7 +505,14 @@ const FormModal = () => {
   };
 
   const handleChange = ({ target: { name, value, type, ...rest } }) => {
-    const namesThatCanResetToNullValue = ['enumName', 'max', 'min', 'maxLength', 'minLength'];
+    const namesThatCanResetToNullValue = [
+      'enumName',
+      'max',
+      'min',
+      'maxLength',
+      'minLength',
+      'regex',
+    ];
     let val;
 
     if (['default', ...namesThatCanResetToNullValue].includes(name) && value === '') {
