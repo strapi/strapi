@@ -22,6 +22,7 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
     isOpen: false,
     step: 'list',
     fileToEdit: null,
+    isDisplayed: false,
   });
   const [fileToDisplay, setFileToDisplay] = useState(0);
   const hasNoValue = !!value && Array.isArray(value) && value.length === 0;
@@ -32,8 +33,10 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
     attribute.multiple && value.length > 1 ? ` (${fileToDisplay + 1}/${value.length})` : '';
 
   const handleClickToggleModal = () => {
-    setModal(prev => ({ step: 'list', isOpen: !prev.isOpen, fileToEdit: null }));
+    setModal(prev => ({ isDisplayed: true, step: 'list', isOpen: !prev.isOpen, fileToEdit: null }));
   };
+
+  const handleClosed = () => setModal(prev => ({ ...prev, isDisplayed: false }));
 
   const handleChange = v => {
     onChange({ target: { name, type, value: v } });
@@ -68,7 +71,12 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
   };
 
   const handleEditFile = () => {
-    setModal(() => ({ isOpen: true, step: 'edit', fileToEdit: formatFileForEditing(currentFile) }));
+    setModal(() => ({
+      isDisplayed: true,
+      isOpen: true,
+      step: 'edit',
+      fileToEdit: formatFileForEditing(currentFile),
+    }));
   };
 
   const handleCopy = () => {
@@ -82,7 +90,12 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
     e.persist();
 
     if (e.dataTransfer) {
-      setModal(() => ({ isOpen: true, step: 'upload', filesToUpload: e.dataTransfer.files }));
+      setModal(() => ({
+        isDisplayed: true,
+        isOpen: true,
+        step: 'upload',
+        filesToUpload: e.dataTransfer.files,
+      }));
     }
   };
 
@@ -135,18 +148,20 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
         )}
         <Input type="file" name={name} />
       </CardPreviewWrapper>
-
-      <InputModalStepper
-        isOpen={modal.isOpen}
-        step={modal.step}
-        fileToEdit={modal.fileToEdit}
-        filesToUpload={modal.filesToUpload}
-        multiple={attribute.multiple}
-        onInputMediaChange={handleChange}
-        selectedFiles={value}
-        onToggle={handleClickToggleModal}
-        allowedTypes={attribute.allowedTypes}
-      />
+      {modal.isDisplayed && (
+        <InputModalStepper
+          isOpen={modal.isOpen}
+          onClosed={handleClosed}
+          step={modal.step}
+          fileToEdit={modal.fileToEdit}
+          filesToUpload={modal.filesToUpload}
+          multiple={attribute.multiple}
+          onInputMediaChange={handleChange}
+          selectedFiles={value}
+          onToggle={handleClickToggleModal}
+          allowedTypes={attribute.allowedTypes}
+        />
+      )}
     </Wrapper>
   );
 };

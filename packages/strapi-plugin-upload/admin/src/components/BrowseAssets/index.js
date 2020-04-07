@@ -55,7 +55,7 @@ const BrowseAssets = () => {
   const canSelectFile = multiple === true || (selectedFiles.length < 1 && !multiple);
 
   const handleListCardClick = id => {
-    if (!canSelectFile) {
+    if (!canSelectFile && id !== selectedFiles[0].id) {
       return;
     }
 

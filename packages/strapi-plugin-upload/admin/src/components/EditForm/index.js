@@ -213,7 +213,7 @@ const EditForm = forwardRef(
                     <InfiniteLoadingIndicator onClick={onAbortUpload} />
                   ) : (
                     <Fragment>
-                      <CardControlsWrapper className="card-control-wrapper">
+                      <CardControlsWrapper className="card-control-wrapper-displayed">
                         {!isCropping ? (
                           <>
                             <CardControl
@@ -259,7 +259,7 @@ const EditForm = forwardRef(
                               onClick={handleToggleCropMode}
                               type="times"
                               title="cancel"
-                              iconStyle={{ height: '1.4rem', width: '1.4rem' }}
+                              iconStyle={{ height: '1.6rem', width: '1.6rem' }}
                             />
                             <CheckButton
                               color="#6DBB1A"

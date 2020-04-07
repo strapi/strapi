@@ -27,6 +27,7 @@ const InputModalStepperProvider = ({
   initialFilters,
   isOpen,
   multiple,
+  onClosed,
   onInputMediaChange,
   selectedFiles,
   step,
@@ -197,6 +198,7 @@ const InputModalStepperProvider = ({
       type: 'RESET_PROPS',
       defaultSort: `${updated_at}:DESC`,
     });
+    onClosed();
   };
 
   const handleFileSelection = ({ target: { name } }) => {
@@ -462,16 +464,17 @@ const InputModalStepperProvider = ({
 };
 
 InputModalStepperProvider.propTypes = {
+  allowedTypes: PropTypes.arrayOf(PropTypes.string),
   children: PropTypes.node.isRequired,
+  initialFilesToUpload: PropTypes.object,
   initialFileToEdit: PropTypes.object,
   initialFilters: PropTypes.arrayOf(PropTypes.object),
-  initialFilesToUpload: PropTypes.object,
   isOpen: PropTypes.bool,
   multiple: PropTypes.bool.isRequired,
+  onClosed: PropTypes.func.isRequired,
   onInputMediaChange: PropTypes.func,
   selectedFiles: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   step: PropTypes.string.isRequired,
-  allowedTypes: PropTypes.arrayOf(PropTypes.string),
 };
 
 InputModalStepperProvider.defaultProps = {
