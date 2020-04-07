@@ -3,10 +3,8 @@ import ContainerFluid from '../ContainerFluid';
 
 const Container = styled(ContainerFluid)`
   margin-bottom: 4px;
-  padding-top: 15px;
-  max-height: 339px;
-  overflow: overlay;
-  overflow-x: hidden;
+  padding-top: 17px;
+  max-height: 360px;
 `;
 
 export default Container;
