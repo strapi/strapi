@@ -75,7 +75,7 @@ const InputModalStepperProvider = ({
               headers: { Authorization: `Bearer ${auth.getToken()}` },
               responseType: 'blob',
               cancelToken: source.token,
-              timeout: 30000,
+              timeout: 60000,
             })
             .then(({ data }) => {
               const createdFile = new File([data], file.fileURL, {

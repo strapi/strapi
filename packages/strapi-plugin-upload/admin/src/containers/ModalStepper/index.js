@@ -95,7 +95,7 @@ const ModalStepper = ({
               headers: { Authorization: `Bearer ${auth.getToken()}` },
               responseType: 'blob',
               cancelToken: source.token,
-              timeout: 30000,
+              timeout: 60000,
             })
             .then(({ data }) => {
               const fileName = file.fileInfo.name;
