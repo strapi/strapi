@@ -58,7 +58,9 @@ const EditForm = forwardRef(
     const cacheRef = useRef(performance.now());
 
     const fileURL = get(fileToEdit, ['file', 'url'], null);
-    const prefixedFileURL = fileURL ? prefixFileUrlWithBackendUrl(fileURL) : null;
+    const prefixedFileURL = fileURL
+      ? prefixFileUrlWithBackendUrl(`${fileURL}?${cacheRef.current}`)
+      : null;
     const downloadFileName = createFileToDownloadName(fileToEdit);
     const mimeType =
       get(fileToEdit, ['file', 'type'], null) || get(fileToEdit, ['file', 'mime'], '');
@@ -284,7 +286,7 @@ const EditForm = forwardRef(
                       {isImg ? (
                         <CropWrapper>
                           <img
-                            src={`${src}?${cacheRef.current}`}
+                            src={src}
                             alt={get(fileToEdit, ['file', 'name'], '')}
                             ref={isCropping ? imgRef : null}
                           />
