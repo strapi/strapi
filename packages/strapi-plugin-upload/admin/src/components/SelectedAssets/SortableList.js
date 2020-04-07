@@ -17,7 +17,7 @@ const SortableList = ({ data, moveAsset, onChange, onClickEditFile, selectedItem
       <div className="row">
         {data.map((item, index) => {
           const { id } = item;
-          const url = get(item, ['formats', 'thumbnail', 'url'], '');
+          const url = get(item, ['formats', 'thumbnail', 'url'], item.url);
           const checked = selectedItems.findIndex(file => file.id === id) !== -1;
           const fileUrl = prefixFileUrlWithBackendUrl(url);
 
