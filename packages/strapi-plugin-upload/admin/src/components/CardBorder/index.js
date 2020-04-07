@@ -11,6 +11,7 @@ const CardBorder = styled.div`
   display: none;
   ${({ shown }) => shown && 'display: block;'}
   border: 2px solid ${({ theme, color }) => theme.main.colors[color] || color};
+  border-radius: 2px;
 `;
 
 CardBorder.defaultProps = {
