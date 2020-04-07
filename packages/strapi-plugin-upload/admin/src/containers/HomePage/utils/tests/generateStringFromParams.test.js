@@ -2,24 +2,22 @@ import generateStringFromParams from '../generateStringFromParams';
 
 describe('MEDIA LIBRARY | containers | HomePage | utils', () => {
   describe('generateStringFromParams', () => {
-    describe('return a string with query params', () => {
-      it('if query is empty', () => {
-        const search = '';
-        const query = new URLSearchParams(search);
+    it('should return a string with query params if query is empty', () => {
+      const search = '';
+      const query = new URLSearchParams(search);
 
-        const expected = '_limit=10&_start=0';
+      const expected = '_limit=10&_start=0';
 
-        expect(generateStringFromParams(query)).toEqual(expected);
-      });
+      expect(generateStringFromParams(query)).toEqual(expected);
+    });
 
-      it('if search is not empty', () => {
-        const search = '_limit=20&_start=0&mime_contains=image';
-        const query = new URLSearchParams(search);
+    it('should return a string with query params if search is not empty', () => {
+      const search = '_limit=20&_start=0&mime_contains=image';
+      const query = new URLSearchParams(search);
 
-        const expected = '_limit=20&_start=0&mime_contains=image';
+      const expected = '_limit=20&_start=0&mime_contains=image';
 
-        expect(generateStringFromParams(query)).toEqual(expected);
-      });
+      expect(generateStringFromParams(query)).toEqual(expected);
     });
 
     describe('return a string with converted filters if value is file', () => {

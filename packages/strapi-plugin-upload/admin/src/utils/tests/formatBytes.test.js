@@ -11,15 +11,19 @@ describe('UPLOAD | components | EditForm | utils', () => {
     });
 
     it("should return 1KB if '1024' Bytes is passed", () => {
-      expect(formatBytes('1024')).toEqual('1000KB');
+      expect(formatBytes('1024')).toEqual('1MB');
     });
 
     it('should return 1.18MB if 1034 Bytes is passed', () => {
-      expect(formatBytes(1234)).toEqual('1.18MB');
+      expect(formatBytes(1234)).toEqual('1MB');
+    });
+
+    it('should return 1.18MB if 1034 Bytes is passed', () => {
+      expect(formatBytes(1234, 2)).toEqual('1.23MB');
     });
 
     it('should return 1.177MB if 1234 Bytes is passed with 3 decimals', () => {
-      expect(formatBytes(1234, 3)).toEqual('1.177MB');
+      expect(formatBytes(1234, 3)).toEqual('1.234MB');
     });
 
     it('should return 1 GB if 1.1e+6 Bytes is passed', () => {
