@@ -19,7 +19,7 @@ const DynamicComponentCard = ({
         onClick(componentUid);
       }}
     >
-      <button className="component-icon">
+      <button className="component-icon" type="button">
         <FontAwesomeIcon icon={icon} />
       </button>
 

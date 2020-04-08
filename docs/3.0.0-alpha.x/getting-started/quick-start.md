@@ -1,5 +1,11 @@
 # Quick Start Guide
 
+::: danger
+
+The Alpha version of Strapi is no longer supported, please use the Beta version. You can find the relevant [documentation here](https://strapi.io/documentation/).
+
+:::
+
 Get ready to make Strapi up and running in **less than 5 minutes** 🚀
 
 <div class="video-container">

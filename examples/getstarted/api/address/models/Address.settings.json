@@ -1,5 +1,4 @@
 {
-  "connection": "default",
   "collectionName": "addresses",
   "info": {
     "name": "address",
@@ -25,8 +24,10 @@
     "postal_coder": {
       "type": "string"
     },
-    "category": {
-      "model": "category"
+    "categories": {
+      "collection": "category",
+      "via": "addresses",
+      "dominant": true
     },
     "cover": {
       "model": "file",

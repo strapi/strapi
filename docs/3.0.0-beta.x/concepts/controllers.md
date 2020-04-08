@@ -17,11 +17,11 @@ In this example, any time a web browser is pointed to the `/hello` URL on your a
 
 ### Where are the controllers defined?
 
-The controllers are defined in each `./api/**/controllers/` folders. Every JavaScript file put in these folders will be loaded as a controller. They are also available through the `strapi.controllers` and `strapi.api.**.controllers` global variables. By convention, controllers' names should be Pascal-cased, so that every word in the file (include the first one) is capitalized `User.js`, `LegalEntity.js`.
+The controllers are defined in each `./api/**/controllers/` folder. Every JavaScript file put in these folders will be loaded as a controller. They are also available through the `strapi.controllers` and `strapi.api.**.controllers` global variables. By convention, controllers' names should be Pascal-cased, so that every word in the file (including the first one) is capitalized `User.js`, `LegalEntity.js`.
 
 ## Core controllers
 
-When you create a new Content type or a new model. You will see a new empty controller has been created. It is because Strapi builds a generic controller for your models by default and allows you to override and extend it in the generated files.
+When you create a new `Content Type` or a new model. You will see a new empty controller has been created. It is because Strapi builds a generic controller for your models by default and allows you to override and extend it in the generated files.
 
 ### Extending a Model Controller
 
@@ -29,7 +29,7 @@ Here are the core methods (and their current implementation).
 You can simply copy and paste this code in your own controller file to customize the methods.
 
 ::: warning
-In the following example we will consider your controller, service and model is named `restaurant`
+In the following example we will assume your controller, service and model are named `restaurant`
 :::
 
 #### Utils
@@ -67,9 +67,7 @@ module.exports = {
       entities = await strapi.services.restaurant.find(ctx.query);
     }
 
-    return entities.map(entity =>
-      sanitizeEntity(entity, { model: strapi.models.restaurant })
-    );
+    return entities.map(entity => sanitizeEntity(entity, { model: strapi.models.restaurant }));
   },
 };
 ```
@@ -91,7 +89,9 @@ module.exports = {
    */
 
   async findOne(ctx) {
-    const entity = await strapi.services.restaurant.findOne(ctx.params);
+    const { id } = ctx.params;
+
+    const entity = await strapi.services.restaurant.findOne({ id });
     return sanitizeEntity(entity, { model: strapi.models.restaurant });
   },
 };
@@ -166,17 +166,16 @@ module.exports = {
    */
 
   async update(ctx) {
+    const { id } = ctx.params;
+
     let entity;
     if (ctx.is('multipart')) {
       const { data, files } = parseMultipartData(ctx);
-      entity = await strapi.services.restaurant.update(ctx.params, data, {
+      entity = await strapi.services.restaurant.update({ id }, data, {
         files,
       });
     } else {
-      entity = await strapi.services.restaurant.update(
-        ctx.params,
-        ctx.request.body
-      );
+      entity = await strapi.services.restaurant.update({ id }, ctx.request.body);
     }
 
     return sanitizeEntity(entity, { model: strapi.models.restaurant });
@@ -201,7 +200,9 @@ module.exports = {
    */
 
   async delete(ctx) {
-    const entity = await strapi.services.restaurant.delete(ctx.params);
+    const { id } = ctx.params;
+
+    const entity = await strapi.services.restaurant.delete({ id });
     return sanitizeEntity(entity, { model: strapi.models.restaurant });
   },
 };

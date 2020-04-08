@@ -60,18 +60,12 @@ function createSchemaBuilder({ components, contentTypes }) {
 
   // init temporary ContentTypes
   Object.keys(contentTypes).forEach(key => {
-    tmpContentTypes.set(
-      contentTypes[key].uid,
-      createSchemaHandler(contentTypes[key])
-    );
+    tmpContentTypes.set(contentTypes[key].uid, createSchemaHandler(contentTypes[key]));
   });
 
   // init temporary components
   Object.keys(components).forEach(key => {
-    tmpComponents.set(
-      components[key].uid,
-      createSchemaHandler(components[key])
-    );
+    tmpComponents.set(components[key].uid, createSchemaHandler(components[key]));
   });
 
   return {
@@ -119,12 +113,16 @@ function createSchemaBuilder({ components, contentTypes }) {
             targetAttribute,
             columnName,
             dominant,
+            autoPopulate,
+            private: isPrivate,
           } = attribute;
 
           const attr = {
             unique: unique === true ? true : undefined,
             columnName: columnName || undefined,
             configurable: configurable === false ? false : undefined,
+            private: isPrivate === true ? true : undefined,
+            autoPopulate,
           };
 
           if (!this.contentTypes.has(target)) {

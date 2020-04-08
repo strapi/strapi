@@ -1,25 +1,97 @@
 'use strict';
 
-const uploadFiles = require('./utils/upload-files');
-
 /**
  * default service
  *
  */
 
 module.exports = ({ model, strapi }) => {
+  if (model.kind === 'singleType') {
+    return createSingleTypeService({ model, strapi });
+  }
+
+  return createCollectionTypeService({ model, strapi });
+};
+
+/**
+ * Returns a single type service to handle default core-api actions
+ */
+const createSingleTypeService = ({ model, strapi }) => {
+  const { modelName } = model;
+
   return {
     /**
-     * expose some utils so the end users can use them
+     * Returns single type content
+     *
+     * @return {Promise}
      */
-    uploadFiles,
+    find(populate) {
+      return strapi.entityService.find({ populate }, { model: modelName });
+    },
+
+    /**
+     * Creates or update the single- type content
+     *
+     * @return {Promise}
+     */
+    async createOrUpdate(data, { files } = {}) {
+      const entity = await this.find();
+
+      if (!entity) {
+        return strapi.entityService.create(
+          { data, files },
+          { model: modelName }
+        );
+      } else {
+        return strapi.entityService.update(
+          {
+            params: {
+              id: entity.id,
+            },
+            data,
+            files,
+          },
+          { model: modelName }
+        );
+      }
+    },
+
+    /**
+     * Deletes the single type content
+     *
+     * @return {Promise}
+     */
+    async delete() {
+      const entity = await this.find();
+
+      if (!entity) return;
+
+      return strapi.entityService.delete(
+        { params: { id: entity.id } },
+        { model: modelName }
+      );
+    },
+  };
+};
+
+/**
+ *
+ * Returns a collection type service to handle default core-api actions
+ */
+const createCollectionTypeService = ({ model, strapi }) => {
+  const { modelName } = model;
+
+  return {
     /**
      * Promise to fetch all records
      *
      * @return {Promise}
      */
     find(params, populate) {
-      return strapi.query(model).find(params, populate);
+      return strapi.entityService.find(
+        { params, populate },
+        { model: modelName }
+      );
     },
 
     /**
@@ -29,7 +101,10 @@ module.exports = ({ model, strapi }) => {
      */
 
     findOne(params, populate) {
-      return strapi.query(model).findOne(params, populate);
+      return strapi.entityService.findOne(
+        { params, populate },
+        { model: modelName }
+      );
     },
 
     /**
@@ -39,7 +114,7 @@ module.exports = ({ model, strapi }) => {
      */
 
     count(params) {
-      return strapi.query(model).count(params);
+      return strapi.entityService.count({ params }, { model: modelName });
     },
 
     /**
@@ -48,15 +123,8 @@ module.exports = ({ model, strapi }) => {
      * @return {Promise}
      */
 
-    async create(data, { files } = {}) {
-      const entry = await strapi.query(model).create(data);
-
-      if (files) {
-        await this.uploadFiles(entry, files, { model });
-        return this.findOne({ id: entry.id });
-      }
-
-      return entry;
+    create(data, { files } = {}) {
+      return strapi.entityService.create({ data, files }, { model: modelName });
     },
 
     /**
@@ -65,15 +133,11 @@ module.exports = ({ model, strapi }) => {
      * @return {Promise}
      */
 
-    async update(params, data, { files } = {}) {
-      const entry = await strapi.query(model).update(params, data);
-
-      if (files) {
-        await this.uploadFiles(entry, files, { model });
-        return this.findOne({ id: entry.id });
-      }
-
-      return entry;
+    update(params, data, { files } = {}) {
+      return strapi.entityService.update(
+        { params, data, files },
+        { model: modelName }
+      );
     },
 
     /**
@@ -83,7 +147,7 @@ module.exports = ({ model, strapi }) => {
      */
 
     delete(params) {
-      return strapi.query(model).delete(params);
+      return strapi.entityService.delete({ params }, { model: modelName });
     },
 
     /**
@@ -93,7 +157,7 @@ module.exports = ({ model, strapi }) => {
      */
 
     search(params) {
-      return strapi.query(model).search(params);
+      return strapi.entityService.search({ params }, { model: modelName });
     },
 
     /**
@@ -102,7 +166,7 @@ module.exports = ({ model, strapi }) => {
      * @return {Promise}
      */
     countSearch(params) {
-      return strapi.query(model).countSearch(params);
+      return strapi.entityService.countSearch({ params }, { model: modelName });
     },
   };
 };

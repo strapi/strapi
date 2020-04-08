@@ -9,14 +9,9 @@ import Search from './Search';
 import SearchWrapper from './SearchWrapper';
 import Wrapper from './Wrapper';
 
-const ComponentIconPicker = ({
-  error,
-  isCreating,
-  label,
-  name,
-  onChange,
-  value,
-}) => {
+/* eslint-disable jsx-a11y/control-has-associated-label */
+
+const ComponentIconPicker = ({ error, isCreating, label, name, onChange, value }) => {
   const { allIcons, allComponentsIconAlreadyTaken } = useDataManager();
   const initialIcons = allIcons.filter(ico => {
     if (isCreating) {
@@ -24,9 +19,7 @@ const ComponentIconPicker = ({
     }
 
     // Edition
-    return !allComponentsIconAlreadyTaken
-      .filter(icon => icon !== originalIcon)
-      .includes(ico);
+    return !allComponentsIconAlreadyTaken.filter(icon => icon !== originalIcon).includes(ico);
   });
   const ref = createRef();
   const [originalIcon] = useState(value);
@@ -78,17 +71,15 @@ const ComponentIconPicker = ({
         ) : (
           <SearchWrapper>
             <FontAwesomeIcon icon="search" />
-            <button onClick={toggleSearch}></button>
+            <button onClick={toggleSearch} type="button" />
             <Search
               ref={ref}
               onChange={({ target: { value } }) => {
                 setSearch(value);
-                setIcons(() =>
-                  initialIcons.filter(icon => icon.includes(value))
-                );
+                setIcons(() => initialIcons.filter(icon => icon.includes(value)));
               }}
               value={search}
-              placeholder="search…"
+              placeholder="Search…"
             />
             <button
               onClick={() => {
@@ -128,13 +119,13 @@ const ComponentIconPicker = ({
           );
         }}
       </AutoSizer>
-      {error && (
-        <ErrorMessage style={{ marginTop: 5, marginBottom: 16 }}>
-          {error}
-        </ErrorMessage>
-      )}
+      {error && <ErrorMessage style={{ marginTop: 5, marginBottom: 16 }}>{error}</ErrorMessage>}
     </Wrapper>
   );
+};
+
+ComponentIconPicker.defaultProps = {
+  error: null,
 };
 
 ComponentIconPicker.propTypes = {

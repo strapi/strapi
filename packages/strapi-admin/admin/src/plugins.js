@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 const injectReducer = require('./utils/injectReducer').default;
 const useInjectReducer = require('./utils/injectReducer').useInjectReducer;
 const injectSaga = require('./utils/injectSaga').default;
@@ -32,5 +34,7 @@ module.exports = {
   'strapi-plugin-email': require('../../../strapi-plugin-email/admin/src')
     .default,
   'strapi-plugin-upload': require('../../../strapi-plugin-upload/admin/src')
+    .default,
+  'strapi-plugin-graphql': require('../../../strapi-plugin-graphql/admin/src')
     .default,
 };

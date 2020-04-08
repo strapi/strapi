@@ -3,34 +3,44 @@
 // Dependencies.
 const http = require('http');
 const path = require('path');
-const { EventEmitter } = require('events');
 const fse = require('fs-extra');
 const Koa = require('koa');
 const Router = require('koa-router');
 const _ = require('lodash');
-const { logger, models } = require('strapi-utils');
 const chalk = require('chalk');
 const CLITable = require('cli-table3');
+const { logger, models } = require('strapi-utils');
+const { createDatabaseManager } = require('strapi-database');
 
 const utils = require('./utils');
-const {
-  loadConfig,
-  loadApis,
-  loadAdmin,
-  loadPlugins,
-  loadMiddlewares,
-  loadHooks,
-  bootstrap,
-  loadExtensions,
-  initCoreStore,
-  loadComponents,
-} = require('./core');
+const loadModules = require('./core/load-modules');
+const bootstrap = require('./core/bootstrap');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
 const createStrapiFs = require('./core/fs');
 const getPrefixedDeps = require('./utils/get-prefixed-dependencies');
+const createEventHub = require('./services/event-hub');
+const createWebhookRunner = require('./services/webhook-runner');
+const { webhookModel, createWebhookStore } = require('./services/webhook-store');
+const { createCoreStore, coreStoreModel } = require('./services/core-store');
+const createEntityService = require('./services/entity-service');
+const createEntityValidator = require('./services/entity-validator');
+const createTelemetry = require('./services/metrics');
 
-const { createDatabaseManager } = require('strapi-database');
+const CONFIG_PATHS = {
+  admin: 'admin',
+  api: 'api',
+  config: 'config',
+  controllers: 'controllers',
+  models: 'models',
+  plugins: 'plugins',
+  policies: 'policies',
+  tmp: '.tmp',
+  services: 'services',
+  static: 'public',
+  validators: 'validators',
+  views: 'views',
+};
 
 /**
  * Construct an Strapi instance.
@@ -38,12 +48,8 @@ const { createDatabaseManager } = require('strapi-database');
  * @constructor
  */
 
-class Strapi extends EventEmitter {
-  constructor({ dir, autoReload = false, serveAdminPanel = true } = {}) {
-    super();
-
-    this.setMaxListeners(100);
-
+class Strapi {
+  constructor(opts = {}) {
     this.reload = this.reload();
 
     // Expose `koa`.
@@ -61,20 +67,22 @@ class Strapi extends EventEmitter {
       models,
     };
 
-    // Exclude EventEmitter, Koa and HTTP server to be freezed.
-    this.propertiesToNotFreeze = Object.keys(this);
-
-    // Expose `admin`.
+    this.dir = opts.dir || process.cwd();
     this.admin = {};
-
-    // Expose `plugin`.
     this.plugins = {};
+    this.config = this.initConfig(opts);
 
-    this.dir = dir || process.cwd();
+    // internal services.
+    this.fs = createStrapiFs(this);
+    this.eventHub = createEventHub();
+
+    this.requireProjectBootstrap();
+  }
+
+  initConfig({ autoReload = false, serveAdminPanel = true } = {}) {
     const pkgJSON = require(path.resolve(this.dir, 'package.json'));
 
-    // Default configurations.
-    this.config = {
+    const config = {
       serveAdminPanel,
       launchedAt: Date.now(),
       appPath: this.dir,
@@ -84,20 +92,7 @@ class Strapi extends EventEmitter {
       environment: _.toLower(process.env.NODE_ENV) || 'development',
       environments: {},
       admin: {},
-      paths: {
-        admin: 'admin',
-        api: 'api',
-        config: 'config',
-        controllers: 'controllers',
-        models: 'models',
-        plugins: 'plugins',
-        policies: 'policies',
-        tmp: '.tmp',
-        services: 'services',
-        static: 'public',
-        validators: 'validators',
-        views: 'views',
-      },
+      paths: CONFIG_PATHS,
       middleware: {},
       hook: {},
       functions: {},
@@ -108,15 +103,29 @@ class Strapi extends EventEmitter {
       installedHooks: getPrefixedDeps('strapi-hook', pkgJSON),
     };
 
-    this.fs = createStrapiFs(this);
-    this.requireProjectBootstrap();
+    Object.defineProperty(config, 'get', {
+      value(path, defaultValue = null) {
+        return _.get(config, path, defaultValue);
+      },
+      enumerable: false,
+      configurable: false,
+      writable: false,
+    });
+
+    Object.defineProperty(config, 'set', {
+      value(path, value) {
+        return _.set(config, path, value);
+      },
+      enumerable: false,
+      configurable: false,
+      writable: false,
+    });
+
+    return config;
   }
 
   requireProjectBootstrap() {
-    const bootstrapPath = path.resolve(
-      this.dir,
-      'config/functions/bootstrap.js'
-    );
+    const bootstrapPath = path.resolve(this.dir, 'config/functions/bootstrap.js');
 
     if (fse.existsSync(bootstrapPath)) {
       require(bootstrapPath);
@@ -139,10 +148,7 @@ class Strapi extends EventEmitter {
       [chalk.blue('Launched in'), Date.now() - this.config.launchedAt + ' ms'],
       [chalk.blue('Environment'), this.config.environment],
       [chalk.blue('Process PID'), process.pid],
-      [
-        chalk.blue('Version'),
-        `${this.config.info.strapi} (node v${this.config.info.node})`,
-      ]
+      [chalk.blue('Version'), `${this.config.info.strapi} (node v${this.config.info.node})`]
     );
 
     console.log(infoTable.toString());
@@ -156,9 +162,7 @@ class Strapi extends EventEmitter {
 
     console.log(chalk.bold('One more thing...'));
     console.log(
-      chalk.grey(
-        'Create your first administrator 💻 by going to the administration panel at:'
-      )
+      chalk.grey('Create your first administrator 💻 by going to the administration panel at:')
     );
     console.log();
 
@@ -174,11 +178,7 @@ class Strapi extends EventEmitter {
     console.log(chalk.bold('Welcome back!'));
 
     if (this.config.serveAdminPanel === true) {
-      console.log(
-        chalk.grey(
-          'To manage your project 🚀, go to the administration panel at:'
-        )
-      );
+      console.log(chalk.grey('To manage your project 🚀, go to the administration panel at:'));
       console.log(chalk.bold(this.config.admin.url));
       console.log();
     }
@@ -190,9 +190,6 @@ class Strapi extends EventEmitter {
 
   async start(cb) {
     try {
-      // Emit starting event.
-      this.emit('server:starting');
-
       await this.load();
 
       // Run bootstrap function.
@@ -205,7 +202,7 @@ class Strapi extends EventEmitter {
       this.app.use(this.router.routes()).use(this.router.allowedMethods());
 
       // Launch server.
-      this.server.listen(this.config.port, async err => {
+      this.server.listen(this.config.port, this.config.host, async err => {
         if (err) return this.stopWithError(err);
 
         if (!isInitialised) {
@@ -215,7 +212,7 @@ class Strapi extends EventEmitter {
         }
 
         // Emit started event.
-        this.emit('server:started');
+        await this.telemetry.send('didStartServer');
 
         if (cb && typeof cb === 'function') {
           cb();
@@ -223,11 +220,7 @@ class Strapi extends EventEmitter {
 
         if (
           (this.config.environment === 'development' &&
-            _.get(
-              this.config.currentEnvironment,
-              'server.admin.autoOpen',
-              true
-            ) !== false) ||
+            _.get(this.config.currentEnvironment, 'server.admin.autoOpen', true) !== false) ||
           !isInitialised
         ) {
           await utils.openBrowser.call(this);
@@ -245,9 +238,7 @@ class Strapi extends EventEmitter {
     // handle port in use cleanly
     this.server.on('error', err => {
       if (err.code === 'EADDRINUSE') {
-        return this.stopWithError(
-          `The port ${err.port} is already used by another application.`
-        );
+        return this.stopWithError(`The port ${err.port} is already used by another application.`);
       }
 
       this.log.error(err);
@@ -274,13 +265,16 @@ class Strapi extends EventEmitter {
     };
   }
 
-  stopWithError(err) {
+  stopWithError(err, customMessage) {
     this.log.debug(`⛔️ Server wasn't able to start properly.`);
+    if (customMessage) {
+      this.log.error(customMessage);
+    }
     this.log.error(err);
     return this.stop();
   }
 
-  stop() {
+  stop(exitCode = 1) {
     // Destroy server and available connections.
     this.server.destroy();
 
@@ -289,7 +283,7 @@ class Strapi extends EventEmitter {
     }
 
     // Kill process.
-    process.exit(1);
+    process.exit(exitCode);
   }
 
   async load() {
@@ -304,66 +298,62 @@ class Strapi extends EventEmitter {
       }
     });
 
-    const [
-      config,
-      api,
-      admin,
-      plugins,
-      middlewares,
-      hook,
-      extensions,
-      components,
-    ] = await Promise.all([
-      loadConfig(this),
-      loadApis(this),
-      loadAdmin(this),
-      loadPlugins(this),
-      loadMiddlewares(this),
-      loadHooks(this.config),
-      loadExtensions(this.config),
-      loadComponents(this),
-    ]);
+    const modules = await loadModules(this);
 
-    _.merge(this.config, config);
+    _.merge(this.config, modules.config);
 
-    this.api = api;
-    this.admin = admin;
-    this.components = components;
-    this.plugins = plugins;
-    this.middleware = middlewares;
-    this.hook = hook;
-
-    /**
-     * Handle plugin extensions
-     */
-    // merge extensions config folders
-    _.mergeWith(this.plugins, extensions.merges, (objValue, srcValue, key) => {
-      // concat routes
-      if (_.isArray(srcValue) && _.isArray(objValue) && key === 'routes') {
-        return srcValue.concat(objValue);
-      }
-    });
-    // overwrite plugins with extensions overwrites
-    extensions.overwrites.forEach(({ path, mod }) => {
-      _.assign(_.get(this.plugins, path), mod);
-    });
-
-    // Populate AST with configurations.
+    this.api = modules.api;
+    this.admin = modules.admin;
+    this.components = modules.components;
+    this.plugins = modules.plugins;
+    this.middleware = modules.middlewares;
+    this.hook = modules.hook;
 
     await bootstrap(this);
 
-    // Usage.
-    await utils.usage(this.config);
+    // init webhook runner
+    this.webhookRunner = createWebhookRunner({
+      eventHub: this.eventHub,
+      logger: this.log,
+      configuration: this.config.get('currentEnvironment.server.webhooks', {}),
+    });
 
     // Init core store
-    initCoreStore(this);
+    this.models['core_store'] = coreStoreModel(this.config);
+    this.models['strapi_webhooks'] = webhookModel(this.config);
 
     this.db = createDatabaseManager(this);
     await this.db.initialize();
 
+    this.store = createCoreStore({
+      environment: this.config.environment,
+      db: this.db,
+    });
+
+    this.webhookStore = createWebhookStore({ db: this.db });
+
+    await this.startWebhooks();
+
+    this.entityValidator = createEntityValidator({
+      strapi: this,
+    });
+
+    this.entityService = createEntityService({
+      db: this.db,
+      eventHub: this.eventHub,
+      entityValidator: this.entityValidator,
+    });
+
+    this.telemetry = createTelemetry(this);
+
     // Initialize hooks and middlewares.
     await initializeMiddlewares.call(this);
     await initializeHooks.call(this);
+  }
+
+  async startWebhooks() {
+    const webhooks = await this.webhookStore.findWebhooks();
+    webhooks.forEach(webhook => this.webhookRunner.add(webhook));
   }
 
   reload() {
@@ -428,9 +418,7 @@ class Strapi extends EventEmitter {
     }
 
     const pluginBoostraps = Object.keys(this.plugins).map(plugin => {
-      return execBootstrap(
-        _.get(this.plugins[plugin], 'config.functions.bootstrap')
-      ).catch(err => {
+      return execBootstrap(_.get(this.plugins[plugin], 'config.functions.bootstrap')).catch(err => {
         strapi.log.error(`Bootstrap function in plugin "${plugin}" failed`);
         strapi.log.error(err);
         strapi.stop();
@@ -443,16 +431,11 @@ class Strapi extends EventEmitter {
   }
 
   async freeze() {
-    const propertiesToNotFreeze = this.propertiesToNotFreeze || [];
-
-    // Remove object from tree.
-    delete this.propertiesToNotFreeze;
-
-    return Object.keys(this)
-      .filter(x => !_.includes(propertiesToNotFreeze, x))
-      .forEach(key => {
-        Object.freeze(this[key]);
-      });
+    Object.freeze(this.config);
+    Object.freeze(this.dir);
+    Object.freeze(this.admin);
+    Object.freeze(this.plugins);
+    Object.freeze(this.api);
   }
 
   getModel(modelKey, plugin) {

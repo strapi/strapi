@@ -26,5 +26,7 @@
   "notification.dropFile.success": "ファイルがアップロードされました",
   "notification.dropFiles.success": "{number}個のファイルがアップロードされました",
   "Upload.status.sizeLimit": "{file}は設定された制限サイズよりも大きいです",
-  "Upload.status.disabled" : "ファイルのアップロードが無効になっています"
+  "Upload.status.disabled" : "ファイルのアップロードが無効になっています",
+  "plugin.description.long": "マルチメディアファイル管理.",
+  "plugin.description.short": "マルチメディアファイル管理."
 }

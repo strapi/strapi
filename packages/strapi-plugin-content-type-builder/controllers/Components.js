@@ -6,7 +6,6 @@ const {
   validateComponentInput,
   validateUpdateComponentInput,
 } = require('./validation/component');
-const componentService = require('../services/Components');
 
 /**
  * Components controller
@@ -19,6 +18,9 @@ module.exports = {
    * @param {Object} ctx - koa context
    */
   async getComponents(ctx) {
+    const componentService =
+      strapi.plugins['content-type-builder'].services.components;
+
     const data = Object.keys(strapi.components).map(uid => {
       return componentService.formatComponent(strapi.components[uid]);
     });
@@ -40,6 +42,9 @@ module.exports = {
       return ctx.send({ error: 'component.notFound' }, 404);
     }
 
+    const componentService =
+      strapi.plugins['content-type-builder'].services.components;
+
     ctx.send({ data: componentService.formatComponent(component) });
   },
 
@@ -59,6 +64,9 @@ module.exports = {
 
     try {
       strapi.reload.isWatching = false;
+
+      const componentService =
+        strapi.plugins['content-type-builder'].services.components;
 
       const component = await componentService.createComponent({
         component: body.component,
@@ -96,6 +104,9 @@ module.exports = {
     try {
       strapi.reload.isWatching = false;
 
+      const componentService =
+        strapi.plugins['content-type-builder'].services.components;
+
       const component = await componentService.editComponent(uid, {
         component: body.component,
         components: body.components,
@@ -124,6 +135,9 @@ module.exports = {
 
     try {
       strapi.reload.isWatching = false;
+
+      const componentService =
+        strapi.plugins['content-type-builder'].services.components;
 
       const component = await componentService.deleteComponent(uid);
 

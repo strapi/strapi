@@ -1,8 +1,8 @@
 'use strict';
 
 const path = require('path');
-const glob = require('./glob');
 const _ = require('lodash');
+const glob = require('./glob');
 const filePathToPath = require('./filepath-to-prop-path');
 
 /**

@@ -9,6 +9,7 @@ import InputJSONWithErrors from '../InputJSONWithErrors';
 import InputFileWithErrors from '../InputFileWithErrors';
 import SelectWrapper from '../SelectWrapper';
 import WysiwygWithErrors from '../WysiwygWithErrors';
+import InputUID from '../InputUID';
 
 const getInputType = (type = '') => {
   switch (toLower(type)) {
@@ -42,32 +43,20 @@ const getInputType = (type = '') => {
     case 'WYSIWYG':
     case 'richtext':
       return 'wysiwyg';
+    case 'uid':
+      return 'uid';
     default:
       return 'text';
   }
 };
 
 function Inputs({ autoFocus, keys, layout, name, onBlur }) {
-  const {
-    didCheckErrors,
-    formErrors,
-    modifiedData,
-    onChange,
-  } = useDataManager();
-
-  const attribute = useMemo(
-    () => get(layout, ['schema', 'attributes', name], {}),
-    [layout, name]
-  );
-  const metadatas = useMemo(
-    () => get(layout, ['metadatas', name, 'edit'], {}),
-    [layout, name]
-  );
-  const disabled = useMemo(() => !get(metadatas, 'editable', true), [
-    metadatas,
-  ]);
+  const { didCheckErrors, formErrors, modifiedData, onChange } = useDataManager();
+  const attribute = useMemo(() => get(layout, ['schema', 'attributes', name], {}), [layout, name]);
+  const metadatas = useMemo(() => get(layout, ['metadatas', name, 'edit'], {}), [layout, name]);
+  const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
   const type = useMemo(() => get(attribute, 'type', null), [attribute]);
-
+  const regexpString = useMemo(() => get(attribute, 'regex', null), [attribute]);
   const validations = omit(attribute, [
     'type',
     'model',
@@ -76,24 +65,34 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
     'default',
     'plugin',
     'enum',
+    'regex',
   ]);
+
+  if (regexpString) {
+    const regexp = new RegExp(regexpString);
+
+    if (regexp) {
+      validations.regex = regexp;
+    }
+  }
+
   const { description, visible } = metadatas;
   const value = get(modifiedData, keys, null);
 
   if (visible === false) {
     return null;
   }
-  const temporaryErrorIdUntilBuffetjsSupportsFormattedMessage =
-    'app.utils.defaultMessage';
+  const temporaryErrorIdUntilBuffetjsSupportsFormattedMessage = 'app.utils.defaultMessage';
   const errorId = get(
     formErrors,
     [keys, 'id'],
     temporaryErrorIdUntilBuffetjsSupportsFormattedMessage
   );
+  const isRequired = get(validations, ['required'], false);
 
   if (type === 'relation') {
     return (
-      <div className="col-6" key={keys}>
+      <div key={keys}>
         <SelectWrapper
           {...metadatas}
           name={keys}
@@ -117,9 +116,30 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
 
   if (type === 'float' || type === 'decimal') {
     step = 'any';
+  } else if (type === 'time' || type === 'datetime') {
+    step = 30;
   } else {
     step = '1';
   }
+
+  const options = get(attribute, 'enum', []).map(v => {
+    return (
+      <option key={v} value={v}>
+        {v}
+      </option>
+    );
+  });
+
+  const enumOptions = [
+    <FormattedMessage id="components.InputSelect.option.placeholder" key="__enum_option_null">
+      {msg => (
+        <option disabled={isRequired} hidden={isRequired} value="">
+          {msg}
+        </option>
+      )}
+    </FormattedMessage>,
+    ...options,
+  ];
 
   return (
     <FormattedMessage id={errorId}>
@@ -127,27 +147,30 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
         return (
           <InputsIndex
             {...metadatas}
+            autoComplete="new-password"
             autoFocus={autoFocus}
             didCheckErrors={didCheckErrors}
             disabled={disabled}
             error={
-              isEmpty(error) ||
-              errorId === temporaryErrorIdUntilBuffetjsSupportsFormattedMessage
+              isEmpty(error) || errorId === temporaryErrorIdUntilBuffetjsSupportsFormattedMessage
                 ? null
                 : error
             }
             inputDescription={description}
             description={description}
+            contentTypeUID={layout.uid}
             customInputs={{
               media: InputFileWithErrors,
               json: InputJSONWithErrors,
               wysiwyg: WysiwygWithErrors,
+              uid: InputUID,
             }}
             multiple={get(attribute, 'multiple', false)}
+            attribute={attribute}
             name={keys}
             onBlur={onBlur}
             onChange={onChange}
-            options={get(attribute, 'enum', [])}
+            options={enumOptions}
             step={step}
             type={getInputType(type)}
             validations={validations}

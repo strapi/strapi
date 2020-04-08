@@ -44,7 +44,24 @@ const AttributeOption = forwardRef(({ tabIndex, type }, ref) => {
   const handleClick = () => {
     const forTarget = query.get('forTarget');
     const targetUid = query.get('targetUid');
-    const headerDisplayName = query.get('headerDisplayName');
+    const header_label_1 = query.get('header_label_1');
+    const header_info_category_1 = query.get('header_info_category_1');
+    const header_info_name_1 = query.get('header_info_name_1');
+    const header_label_2 = query.get('header_label_2');
+    const header_icon_name_2 = query.get('header_icon_name_2');
+    const header_icon_isCustom_2 = query.get('header_icon_isCustom_2');
+    const header_info_category_2 = query.get('header_info_category_2');
+    const header_info_name_2 = query.get('header_info_name_2');
+    const header_label_3 = query.get('header_label_3');
+    const header_icon_name_3 = query.get('header_icon_name_3');
+    const header_icon_isCustom_3 = query.get('header_icon_isCustom_3');
+    const header_info_category_3 = query.get('header_info_category_3');
+    const header_info_name_3 = query.get('header_info_name_3');
+    const header_label_4 = query.get('header_label_4');
+    const header_icon_name_4 = query.get('header_icon_name_4');
+    const header_icon_isCustom_4 = query.get('header_icon_isCustom_4');
+    const header_info_category_4 = query.get('header_info_category_4');
+    const header_info_name_4 = query.get('header_info_name_4');
 
     const search = makeSearch({
       modalType: 'attribute',
@@ -53,11 +70,28 @@ const AttributeOption = forwardRef(({ tabIndex, type }, ref) => {
       forTarget,
       targetUid,
       attributeType: type,
-      headerDisplayName,
       step: type === 'component' ? '1' : null,
-      headerDisplayCategory: query.get('headerDisplayCategory'),
-      headerDisplaySubCategory: query.get('headerDisplaySubCategory'),
-      subTargetUid: query.get('subTargetUid'),
+
+      header_label_1,
+      header_info_name_1,
+      header_info_category_1,
+      header_label_2,
+      header_icon_name_2,
+      header_icon_isCustom_2,
+      header_info_name_2,
+      header_info_category_2,
+      header_label_3,
+      header_icon_name_3,
+      header_icon_isCustom_3,
+      header_info_name_3,
+      header_info_category_3,
+      header_label_4,
+      header_icon_name_4,
+      header_icon_isCustom_4,
+      header_info_name_4,
+      header_info_category_4,
+      header_icon_isCustom_1: false,
+      header_icon_name_1: type,
     });
 
     if (forTarget === 'contentType') {

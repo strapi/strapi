@@ -28,11 +28,11 @@ You might want to change the path to access to the administration panel. Here th
 }
 ```
 
-**You have to rebuild the administration panel to make this work.** [Build instructions](#build).
+**You have to rebuild the administration panel to make this work.** [Build instructions](./customization.md#build).
 
 ## Deploy the administration panel on another server (AWS S3, Azure, etc) than the API.
 
-It's very common to deploy the front-end and the back-end on different servers. Here the required configurations to handle this case:
+It's very common to deploy the front-end and the back-end on different servers. Here are the required configurations to handle this case:
 
 **Path —** `./config/environment/**/server.json`.
 
@@ -45,6 +45,7 @@ It's very common to deploy the front-end and the back-end on different servers. 
   },
   "admin": {
     "path": "/", // Note: The administration will be accessible from the root of the domain (ex: http//yourfrontend.com/)
+    "serveAdminPanel": false, // http://yourbackend.com will not serve any static admin files
     "build": {
       "backend": "http://yourbackend.com"
     }

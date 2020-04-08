@@ -1,4 +1,12 @@
 {
+  "collectionType": {
+    "id": "app.components.LeftMenuLinkContainer.collectionTypes",
+    "defaultMessage": "Collection Types"
+  },
+  "singleType": {
+    "id": "app.components.LeftMenuLinkContainer.singleTypes",
+    "defaultMessage": "Single Types"
+  },
   "listPlugins": {
     "id": "app.components.LeftMenuLinkContainer.listPlugins",
     "defaultMessage": "Plugins"
@@ -22,5 +30,9 @@
   "noPluginsInstalled": {
     "id": "app.components.LeftMenuLinkContainer.noPluginsInstalled",
     "defaultMessage": "No plugins installed yet"
+  },
+  "settings": {
+    "id": "app.components.LeftMenuLinkContainer.settings",
+    "defaultMessage": "Settings"
   }
 }

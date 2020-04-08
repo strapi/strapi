@@ -24,18 +24,14 @@ function SelectWrapper({
   placeholder,
 }) {
   const { pathname, search } = useLocation();
-  const {
-    addRelation,
-    modifiedData,
-    moveRelation,
-    onChange,
-    onRemoveRelation,
-  } = useDataManager();
+  // Disable the input in case of a polymorphic relation
+  const isMorph = relationType.toLowerCase().includes('morph');
+  const { addRelation, modifiedData, moveRelation, onChange, onRemoveRelation } = useDataManager();
   const { isDraggingComponent } = useEditView();
 
   const value = get(modifiedData, name, null);
   const [state, setState] = useState({
-    _q: '',
+    _contains: '',
     _limit: 20,
     _start: 0,
   });
@@ -45,21 +41,29 @@ function SelectWrapper({
   const { signal } = abortController;
   const ref = useRef();
   const startRef = useRef();
+
   startRef.current = state._start;
 
   ref.current = async () => {
+    if (isMorph) {
+      setIsLoading(false);
+
+      return;
+    }
+
     if (!isDraggingComponent) {
       try {
-        const params = cloneDeep(state);
         const requestUrl = `/${pluginId}/explorer/${targetModel}`;
 
-        if (isEmpty(params._q)) {
-          delete params._q;
-        }
+        const containsKey = `${mainField}_contains`;
+        const { _contains, ...restState } = cloneDeep(state);
+        const params = isEmpty(state._contains)
+          ? restState
+          : { [containsKey]: _contains, ...restState };
 
         const data = await request(requestUrl, {
           method: 'GET',
-          params: params,
+          params,
           signal,
         });
 
@@ -67,24 +71,15 @@ function SelectWrapper({
           return { value: obj, label: obj[mainField] };
         });
 
-        if (!isEmpty(params._q)) {
-          setOptions(formattedData);
-
-          return;
-        }
-
         setOptions(prevState =>
           prevState.concat(formattedData).filter((obj, index) => {
-            const objIndex = prevState.findIndex(
-              el => el.value.id === obj.value.id
-            );
+            const objIndex = prevState.findIndex(el => el.value.id === obj.value.id);
 
             if (objIndex === -1) {
               return true;
             }
-            return (
-              prevState.findIndex(el => el.value.id === obj.value.id) === index
-            );
+
+            return prevState.findIndex(el => el.value.id === obj.value.id) === index;
           })
         );
         setIsLoading(false);
@@ -97,22 +92,20 @@ function SelectWrapper({
   };
 
   useEffect(() => {
+    if (state._contains !== '') {
+      let timer = setTimeout(() => {
+        ref.current();
+      }, 300);
+
+      return () => clearTimeout(timer);
+    }
+
     ref.current();
 
     return () => {
       abortController.abort();
     };
-  }, [ref]);
-
-  useEffect(() => {
-    if (state._q !== '') {
-      ref.current();
-    }
-
-    return () => {
-      abortController.abort();
-    };
-  }, [state._q]);
+  }, [state._contains]);
 
   useEffect(() => {
     if (state._start !== 0) {
@@ -127,10 +120,11 @@ function SelectWrapper({
   const onInputChange = (inputValue, { action }) => {
     if (action === 'input-change') {
       setState(prevState => {
-        if (prevState._q === inputValue) {
+        if (prevState._contains === inputValue) {
           return prevState;
         }
-        return { ...prevState, _q: inputValue };
+
+        return { ...prevState, _contains: inputValue, _start: 0 };
       });
     }
 
@@ -138,24 +132,22 @@ function SelectWrapper({
   };
 
   const onMenuScrollToBottom = () => {
-    setState(prevState => ({ ...prevState, _start: prevState._start + 1 }));
+    setState(prevState => ({ ...prevState, _start: prevState._start + 20 }));
   };
 
-  const isSingle = [
-    'oneWay',
-    'oneToOne',
-    'manyToOne',
-    'oneToManyMorph',
-    'oneToOneMorph',
-  ].includes(relationType);
+  const isSingle = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'].includes(
+    relationType
+  );
   const nextSearch = `${pathname}${search}`;
-  const to = `/plugins/${pluginId}/${targetModel}/${
+  const to = `/plugins/${pluginId}/collectionType/${targetModel}/${
     value ? value.id : null
   }?redirectUrl=${nextSearch}`;
   const link =
     value === null ||
     value === undefined ||
-    ['role', 'permission'].includes(targetModel) ? null : (
+    ['plugins::users-permissions.role', 'plugins::users-permissions.permission'].includes(
+      targetModel
+    ) ? null : (
       <Link to={to}>
         <FormattedMessage id="content-manager.containers.Edit.seeDetails" />
       </Link>
@@ -170,9 +162,7 @@ function SelectWrapper({
           <label htmlFor={name}>
             {label}
             {!isSingle && (
-              <span style={{ fontWeight: 400, fontSize: 12 }}>
-                &nbsp;({associationsLength})
-              </span>
+              <span style={{ fontWeight: 400, fontSize: 12 }}>&nbsp;({associationsLength})</span>
             )}
           </label>
           {isSingle && link}
@@ -184,7 +174,7 @@ function SelectWrapper({
           addRelation({ target: { name, value } });
         }}
         id={name}
-        isDisabled={!editable}
+        isDisabled={!editable || isMorph}
         isLoading={isLoading}
         isClearable
         mainField={mainField}
@@ -197,7 +187,7 @@ function SelectWrapper({
         }}
         onInputChange={onInputChange}
         onMenuClose={() => {
-          setState(prevState => ({ ...prevState, _q: '', _start: 0 }));
+          setState(prevState => ({ ...prevState, _contains: '' }));
         }}
         onMenuScrollToBottom={onMenuScrollToBottom}
         onRemove={onRemoveRelation}
@@ -220,7 +210,6 @@ SelectWrapper.defaultProps = {
   editable: true,
   description: '',
   label: '',
-  plugin: '',
   placeholder: '',
 };
 
@@ -231,7 +220,6 @@ SelectWrapper.propTypes = {
   mainField: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
-  plugin: PropTypes.string,
   relationType: PropTypes.string.isRequired,
   targetModel: PropTypes.string.isRequired,
 };

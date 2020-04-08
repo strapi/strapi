@@ -4,6 +4,7 @@
  *
  */
 
+/* eslint-disable import/no-cycle */
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
@@ -12,9 +13,9 @@ import { Plus } from '@buffetjs/icons';
 import useDataManager from '../../hooks/useDataManager';
 import getTrad from '../../utils/getTrad';
 import ComponentList from '../ComponentList';
-import ComponentButton from './ComponentButton';
 import ComponentCard from '../ComponentCard';
 import Td from '../Td';
+import ComponentButton from './ComponentButton';
 
 function DynamicZoneList({
   customRowComponent,
@@ -28,7 +29,9 @@ function DynamicZoneList({
   const [activeTab, setActiveTab] = useState('0');
 
   const toggle = tab => {
-    if (activeTab !== tab) setActiveTab(tab);
+    if (activeTab !== tab) {
+      setActiveTab(tab);
+    }
   };
 
   const handleClickAdd = () => {
@@ -74,8 +77,8 @@ function DynamicZoneList({
           <TabContent activeTab={activeTab}>
             {components.map((component, index) => {
               const props = {
-                customRowComponent: customRowComponent,
-                component: component,
+                customRowComponent,
+                component,
               };
 
               return (
@@ -85,6 +88,7 @@ function DynamicZoneList({
                       <ComponentList
                         {...props}
                         isFromDynamicZone
+                        dzName={name}
                         mainTypeName={mainTypeName}
                         targetUid={targetUid}
                         key={component}

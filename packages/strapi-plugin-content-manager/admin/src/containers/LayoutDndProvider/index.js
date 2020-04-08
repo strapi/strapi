@@ -46,7 +46,6 @@ LayoutDndProvider.defaultProps = {
   buttonData: [],
   goTo: () => {},
   layout: [],
-  isDraggingSibling: true,
   metadatas: {},
   moveItem: () => {},
   moveRow: () => {},
@@ -55,7 +54,6 @@ LayoutDndProvider.defaultProps = {
   removeField: () => {},
   selectedItemName: null,
   setEditFieldToSelect: () => {},
-  setIsDraggingSibling: () => {},
 };
 
 LayoutDndProvider.propTypes = {

@@ -20,6 +20,8 @@ import reducer from './reducer';
 import saga from './saga';
 import selectConfigPage from './selectors';
 
+/* eslint-disable */
+
 class ConfigPage extends React.Component {
   static contextType = GlobalContext;
 
@@ -39,11 +41,16 @@ class ConfigPage extends React.Component {
     }
   }
 
-  getSelectedProviderIndex = () =>
-    findIndex(this.props.settings.providers, [
+  getSelectedProviderIndex = () => {
+    const selectedProviderIndex = findIndex(this.props.settings.providers, [
       'provider',
       get(this.props.modifiedData, 'provider'),
     ]);
+    if (selectedProviderIndex === -1) {
+      return 0;
+    }
+    return selectedProviderIndex;
+  };
 
   /**
    * Get Settings depending on the props
@@ -188,10 +195,7 @@ function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = selectConfigPage();
 
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps
-);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
 const withReducer = strapi.injectReducer({
   key: 'configPage',
@@ -200,8 +204,4 @@ const withReducer = strapi.injectReducer({
 });
 const withSaga = strapi.injectSaga({ key: 'configPage', saga, pluginId });
 
-export default compose(
-  withReducer,
-  withSaga,
-  withConnect
-)(ConfigPage);
+export default compose(withReducer, withSaga, withConnect)(ConfigPage);

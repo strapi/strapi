@@ -1,3 +1,4 @@
+// eslint-disable-next-line node/no-extraneous-require
 const loadUtils = require('strapi/lib/load');
 const _ = require('lodash');
 
@@ -14,6 +15,7 @@ const loadPluginsGraphqlConfig = async installedPlugins => {
       pluginDir,
       'config/*.graphql?(.js)'
     );
+
     _.set(root, ['plugins', pluginName], result);
   }
 

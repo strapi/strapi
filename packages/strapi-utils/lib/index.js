@@ -9,16 +9,27 @@ const buildQuery = require('./buildQuery');
 const parseMultipartData = require('./parse-multipart');
 const sanitizeEntity = require('./sanitize-entity');
 const parseType = require('./parse-type');
+const finder = require('./finder');
+const logger = require('./logger');
+const models = require('./models');
+const policy = require('./policy');
+const templateConfiguration = require('./templateConfiguration');
+const { yup, formatYupErrors } = require('./validators');
+const { nameToSlug, nameToCollectionName } = require('./stringFormatting');
 
 module.exports = {
-  finder: require('./finder'),
-  logger: require('./logger'),
-  models: require('./models'),
-  policy: require('./policy'),
-  templateConfiguration: require('./templateConfiguration'),
+  yup,
+  formatYupErrors,
+  finder,
+  logger,
+  models,
+  policy,
+  templateConfiguration,
   convertRestQueryParams,
   buildQuery,
   parseMultipartData,
   sanitizeEntity,
   parseType,
+  nameToSlug,
+  nameToCollectionName,
 };

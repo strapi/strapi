@@ -4,6 +4,7 @@
  *
  */
 
+/* eslint-disable import/no-cycle */
 import { dispatch } from '../../app';
 
 import { SHOW_NOTIFICATION, HIDE_NOTIFICATION } from './constants';

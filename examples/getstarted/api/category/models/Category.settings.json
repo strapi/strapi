@@ -1,5 +1,4 @@
 {
-  "connection": "default",
   "collectionName": "categories",
   "info": {
     "name": "category",
@@ -13,6 +12,10 @@
   "attributes": {
     "name": {
       "type": "string"
+    },
+    "addresses": {
+      "via": "categories",
+      "collection": "address"
     }
   }
 }

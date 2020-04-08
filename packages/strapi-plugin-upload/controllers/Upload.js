@@ -13,13 +13,7 @@ module.exports = {
     const uploadService = strapi.plugins.upload.services.upload;
 
     // Retrieve provider configuration.
-    const config = await strapi
-      .store({
-        environment: strapi.config.environment,
-        type: 'plugin',
-        name: 'upload',
-      })
-      .get({ key: 'provider' });
+    const config = await uploadService.getConfig();
 
     // Verify if the file upload is enable.
     if (config.enabled === false) {
@@ -101,29 +95,14 @@ module.exports = {
     const uploadedFiles = await uploadService.upload(enhancedFiles, config);
 
     // Send 200 `ok`
-    ctx.send(
-      uploadedFiles.map(file => {
-        // If is local server upload, add backend host as prefix
-        if (file.url && file.url[0] === '/') {
-          file.url = strapi.config.url + file.url;
-        }
-
-        if (_.isArray(file.related)) {
-          file.related = file.related.map(obj => obj.ref || obj);
-        }
-
-        return file;
-      })
-    );
+    ctx.send(uploadedFiles);
   },
 
   async getEnvironments(ctx) {
-    const environments = Object.keys(strapi.config.environments).map(
-      environment => ({
-        name: environment,
-        active: strapi.config.environment === environment,
-      })
-    );
+    const environments = Object.keys(strapi.config.environments).map(environment => ({
+      name: environment,
+      active: strapi.config.environment === environment,
+    }));
 
     ctx.send({ environments });
   },
@@ -144,56 +123,43 @@ module.exports = {
   },
 
   async updateSettings(ctx) {
+    const {
+      request: { body: newSettings },
+    } = ctx;
     await strapi
       .store({
         environment: ctx.params.environment,
         type: 'plugin',
         name: 'upload',
       })
-      .set({ key: 'provider', value: ctx.request.body });
+      .set({
+        key: 'provider',
+        value: { ...newSettings, sizeLimit: parseFloat(newSettings.sizeLimit) },
+      });
 
     ctx.send({ ok: true });
   },
 
   async find(ctx) {
-    const data = await strapi.plugins['upload'].services.upload.fetchAll(
-      ctx.query
-    );
+    const data = await strapi.plugins['upload'].services.upload.fetchAll(ctx.query);
 
     // Send 200 `ok`
-    ctx.send(
-      data.map(file => {
-        // if is local server upload, add backend host as prefix
-        if (file.url[0] === '/') {
-          file.url = strapi.config.url + file.url;
-        }
-
-        return file;
-      })
-    );
+    ctx.send(data);
   },
 
   async findOne(ctx) {
-    const data = await strapi.plugins['upload'].services.upload.fetch(
-      ctx.params
-    );
+    const { id } = ctx.params;
+    const data = await strapi.plugins['upload'].services.upload.fetch({ id });
 
     if (!data) {
       return ctx.notFound('file.notFound');
-    }
-
-    // if is local server upload, add backend host as prefix
-    if (data.url[0] === '/') {
-      data.url = strapi.config.url + data.url;
     }
 
     ctx.send(data);
   },
 
   async count(ctx) {
-    const data = await strapi.plugins['upload'].services.upload.count(
-      ctx.query
-    );
+    const data = await strapi.plugins['upload'].services.upload.count(ctx.query);
 
     ctx.send({ count: data });
   },
@@ -235,10 +201,9 @@ const searchQueries = {
     return ({ id }) => {
       return model
         .query(qb => {
-          qb.whereRaw('LOWER(hash) LIKE ?', [`%${id}%`]).orWhereRaw(
-            'LOWER(name) LIKE ?',
-            [`%${id}%`]
-          );
+          qb.whereRaw('LOWER(hash) LIKE ?', [`%${id}%`]).orWhereRaw('LOWER(name) LIKE ?', [
+            `%${id}%`,
+          ]);
         })
         .fetchAll()
         .then(results => results.toJSON());
@@ -248,9 +213,11 @@ const searchQueries = {
     return ({ id }) => {
       const re = new RegExp(id, 'i');
 
-      return model.find({
-        $or: [{ hash: re }, { name: re }],
-      });
+      return model
+        .find({
+          $or: [{ hash: re }, { name: re }],
+        })
+        .lean();
     };
   },
 };

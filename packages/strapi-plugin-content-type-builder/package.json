@@ -1,17 +1,14 @@
 {
   "name": "strapi-plugin-content-type-builder",
-  "version": "3.0.0-beta.18.3",
+  "version": "3.0.0-beta.19.5",
   "description": "Strapi plugin to create content type (API).",
   "strapi": {
     "name": "Content Type Builder",
     "icon": "paint-brush",
     "description": "content-type-builder.plugin.description"
   },
-  "scripts": {
-    "test": "jest --verbose --config=jest.config.unit.js"
-  },
   "dependencies": {
-    "@sindresorhus/slugify": "^0.9.1",
+    "@sindresorhus/slugify": "0.9.1",
     "classnames": "^2.2.6",
     "fs-extra": "^7.0.0",
     "immutable": "^3.8.2",
@@ -29,9 +26,10 @@
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^3.0.1",
-    "strapi-generate": "3.0.0-beta.18.3",
-    "strapi-generate-api": "3.0.0-beta.18.3",
-    "strapi-helper-plugin": "3.0.0-beta.18.3",
+    "strapi-generate": "3.0.0-beta.19.5",
+    "strapi-generate-api": "3.0.0-beta.19.5",
+    "strapi-helper-plugin": "3.0.0-beta.19.5",
+    "strapi-utils": "3.0.0-beta.19.5",
     "yup": "^0.27.0"
   },
   "author": {

@@ -1,14 +1,7 @@
-import React, {
-  memo,
-  useCallback,
-  useMemo,
-  useEffect,
-  useReducer,
-  useRef,
-} from 'react';
+import React, { memo, useCallback, useMemo, useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
 import { BackHeader, LiLink } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import Container from '../../components/Container';
@@ -17,40 +10,33 @@ import FormWrapper from '../../components/FormWrapper';
 import FieldComponent from '../../components/FieldComponent';
 import Inputs from '../../components/Inputs';
 import SelectWrapper from '../../components/SelectWrapper';
+import getInjectedComponents from '../../utils/getComponents';
 import EditViewDataManagerProvider from '../EditViewDataManagerProvider';
 import EditViewProvider from '../EditViewProvider';
 import Header from './Header';
 import createAttributesLayout from './utils/createAttributesLayout';
 import { LinkWrapper, SubWrapper } from './components';
-import getInjectedComponents from '../../utils/getComponents';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
-const EditView = ({
-  components,
-  currentEnvironment,
-  layouts,
-  plugins,
-  slug,
-}) => {
+/* eslint-disable  react/no-array-index-key */
+
+const EditView = ({ components, currentEnvironment, layouts, plugins, slug }) => {
   const formatLayoutRef = useRef();
   formatLayoutRef.current = createAttributesLayout;
   // Retrieve push to programmatically navigate between views
   const { push } = useHistory();
-  // Retrieve the search
-  const { search } = useLocation();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
-    init(initialState)
-  );
-  const allLayoutData = useMemo(() => get(layouts, [slug], {}), [
-    layouts,
-    slug,
+  // Retrieve the search and the pathname
+  const { search, pathname } = useLocation();
+  const {
+    params: { contentType },
+  } = useRouteMatch('/plugins/content-manager/:contentType');
+  const isSingleType = contentType === 'singleType';
+  const [reducerState, dispatch] = useReducer(reducer, initialState, () => init(initialState));
+  const allLayoutData = useMemo(() => get(layouts, [slug], {}), [layouts, slug]);
+  const currentContentTypeLayoutData = useMemo(() => get(allLayoutData, ['contentType'], {}), [
+    allLayoutData,
   ]);
-  const currentContentTypeLayoutData = useMemo(
-    () => get(allLayoutData, ['contentType'], {}),
-    [allLayoutData]
-  );
   const currentContentTypeLayout = useMemo(
     () => get(currentContentTypeLayoutData, ['layouts', 'edit'], []),
     [currentContentTypeLayoutData]
@@ -66,11 +52,7 @@ const EditView = ({
 
   const getFieldMetas = useCallback(
     fieldName => {
-      return get(
-        currentContentTypeLayoutData,
-        ['metadatas', fieldName, 'edit'],
-        {}
-      );
+      return get(currentContentTypeLayoutData, ['metadatas', fieldName, 'edit'], {});
     },
     [currentContentTypeLayoutData]
   );
@@ -115,17 +97,15 @@ const EditView = ({
     });
   }, [currentContentTypeLayout, currentContentTypeSchema.attributes]);
 
-  const {
-    formattedContentTypeLayout,
-    isDraggingComponent,
-  } = reducerState.toJS();
+  const { formattedContentTypeLayout, isDraggingComponent } = reducerState.toJS();
 
   // We can't use the getQueryParameters helper here because the search
   // can contain 'redirectUrl' several times since we can navigate between documents
   const redirectURL = search
     .split('redirectUrl=')
     .filter((_, index) => index !== 0)
-    .join('');
+    .join('redirectUrl=');
+
   const redirectToPreviousPage = () => push(redirectURL);
 
   return (
@@ -150,7 +130,7 @@ const EditView = ({
         redirectToPreviousPage={redirectToPreviousPage}
         slug={slug}
       >
-        <BackHeader onClick={() => redirectToPreviousPage()} />
+        <BackHeader onClick={redirectToPreviousPage} />
         <Container className="container-fluid">
           <Header />
           <div className="row" style={{ paddingTop: 3 }}>
@@ -164,14 +144,7 @@ const EditView = ({
                   } = block;
                   const { max, min } = getField(name);
 
-                  return (
-                    <DynamicZone
-                      key={blockIndex}
-                      name={name}
-                      max={max}
-                      min={min}
-                    />
-                  );
+                  return <DynamicZone key={blockIndex} name={name} max={max} min={min} />;
                 }
 
                 return (
@@ -180,23 +153,14 @@ const EditView = ({
                       return (
                         <div className="row" key={fieldsBlockIndex}>
                           {fieldsBlock.map(({ name, size }, fieldIndex) => {
-                            const isComponent =
-                              getFieldType(name) === 'component';
+                            const isComponent = getFieldType(name) === 'component';
 
                             if (isComponent) {
                               const componentUid = getFieldComponentUid(name);
-                              const isRepeatable = get(
-                                getField(name),
-                                'repeatable',
-                                false
-                              );
+                              const isRepeatable = get(getField(name), 'repeatable', false);
                               const { max, min } = getField(name);
 
-                              const label = get(
-                                getFieldMetas(name),
-                                'label',
-                                componentUid
-                              );
+                              const label = get(getFieldMetas(name), 'label', componentUid);
 
                               return (
                                 <FieldComponent
@@ -215,9 +179,7 @@ const EditView = ({
                               <div className={`col-${size}`} key={name}>
                                 <Inputs
                                   autoFocus={
-                                    blockIndex === 0 &&
-                                    fieldsBlockIndex === 0 &&
-                                    fieldIndex === 0
+                                    blockIndex === 0 && fieldsBlockIndex === 0 && fieldIndex === 0
                                   }
                                   keys={name}
                                   layout={currentContentTypeLayoutData}
@@ -237,9 +199,7 @@ const EditView = ({
 
             <div className="col-md-12 col-lg-3">
               {currentContentTypeLayoutRelations.length > 0 && (
-                <SubWrapper
-                  style={{ padding: '0 20px 1px', marginBottom: '25px' }}
-                >
+                <SubWrapper style={{ padding: '0 20px 1px', marginBottom: '25px' }}>
                   <div style={{ paddingTop: '22px' }}>
                     {currentContentTypeLayoutRelations.map(relationName => {
                       const relation = get(
@@ -274,7 +234,9 @@ const EditView = ({
                     }}
                     icon="layout"
                     key={`${pluginId}.link`}
-                    url={`ctm-configurations/edit-settings/content-types`}
+                    url={`${
+                      isSingleType ? `${pathname}/` : ''
+                    }ctm-configurations/edit-settings/content-types`}
                     onClick={() => {
                       // emitEvent('willEditContentTypeLayoutFromEditView');
                     }}

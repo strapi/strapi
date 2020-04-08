@@ -3,14 +3,17 @@ import PropTypes from 'prop-types';
 
 const OneWay = ({ isSelected, ...rest }) => {
   const stroke = isSelected ? '#1C5DE7' : '#919BAE';
-  const rectProps = isSelected
-    ? {
-        stroke: '#1C5DE7',
-      }
-    : {
-        strokeOpacity: '.1',
-        stroke: '#101622',
-      };
+  let rectProps = {
+    strokeOpacity: '.1',
+    stroke: '#101622',
+  };
+
+  if (isSelected) {
+    rectProps = {
+      stroke: '#1C5DE7',
+    };
+  }
+
   return (
     <svg {...rest} width="41" height="41" xmlns="http://www.w3.org/2000/svg">
       <g fill="none" fillRule="evenodd">

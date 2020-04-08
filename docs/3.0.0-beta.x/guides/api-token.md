@@ -9,7 +9,7 @@ This guide is a workaround to achieve this feature before we support it natively
 
 The goal is to be able to request API endpoints with a query parameter `token` that authenticates as a user. `eg. /restaurants?token=my-secret-token`.
 
-To achieve this feature development, we will have to customize the `users-permissions` plugin. To do so we will use the [customization concept](../concepts/customization.md), this documentation will help you understand how to customize all your applications
+To achieve this feature in development, we will have to customize the `users-permissions` plugin. To do so we will use the [customization concept](../concepts/customization.md), this documentation will help you understand how to customize all your applications
 
 ## Create the Token Content Type
 
@@ -24,7 +24,7 @@ Then add some users and create some token linked to these users.
 
 We now have to customize the function that verifies the `token` token. Strapi has an Authentication process that uses `JWT` tokens, we will reuse this function to customize the verification.
 
-[Here is the function](https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-users-permissions/config/policies/permissions.js) that manage the JWT validation.
+[Here is the function](https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-users-permissions/config/policies/permissions.js) that manages the JWT validation.
 
 To be able to customize it, you will have to create a new file in your application `./extensions/users-permissions/config/policies/permissions.js`.
 

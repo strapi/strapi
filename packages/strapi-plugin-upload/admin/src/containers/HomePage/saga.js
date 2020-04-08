@@ -2,8 +2,9 @@ import { Map } from 'immutable';
 import { isEmpty, get, isObject } from 'lodash';
 import { all, call, fork, put, select, takeLatest } from 'redux-saga/effects';
 import { request } from 'strapi-helper-plugin';
-
 import pluginId from '../../pluginId';
+
+/* eslint-disable */
 
 import {
   deleteSuccess,
@@ -65,12 +66,12 @@ function* uploadFiles(action) {
 
     if (newFiles.length > 1) {
       strapi.notification.success({
-        id: 'upload.notification.dropFile.success',
+        id: 'upload.notification.dropFiles.success',
+        values: { number: newFiles.length },
       });
     } else {
       strapi.notification.success({
-        id: 'upload.notification.dropFiles.success',
-        values: { number: newFiles.length },
+        id: 'upload.notification.dropFile.success',
       });
     }
   } catch (error) {

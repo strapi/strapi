@@ -1,46 +1,40 @@
-import React, { createRef, isValidElement, useEffect, useState } from 'react';
+import React, { isValidElement, useState } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
-import { isEmpty } from 'lodash';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { get, isEmpty, isObject } from 'lodash';
+import { useGlobalContext } from '../../contexts/GlobalContext';
 import matchSorter from 'match-sorter';
-
-import Wrapper from './Wrapper';
-import List from './List';
-import Search from './Search';
-
 import LeftMenuLink from '../LeftMenuLink';
 import LeftMenuSubList from '../LeftMenuSubList';
+import LeftMenuHeader from '../LeftMenuHeader';
+import List from './List';
+import Wrapper from './Wrapper';
 
-function LeftMenuList({ customLink, links, title }) {
+function LeftMenuList({ customLink, links, title, searchable, numberOfVisibleItems }) {
   const [search, setSearch] = useState('');
-  const [showSearch, setShowSearch] = useState(false);
-  const ref = createRef();
+  const { formatMessage } = useGlobalContext();
 
-  useEffect(() => {
-    if (showSearch && ref.current) {
-      ref.current.focus();
+  const getLabel = message => {
+    if (isObject(message) && message.id) {
+      return formatMessage({
+        ...message,
+        defaultMessage: message.defaultMessage || message.id,
+      });
     }
-  }, [ref, showSearch]);
+
+    return message;
+  };
+
+  const formatTitleWithIntl = title => {
+    if (isObject(title) && title.id) {
+      return { ...title, defaultMessage: title.defaultMessage || title.id };
+    }
+
+    return { id: title, defaultMessage: title };
+  };
 
   const { Component, componentProps } = customLink || {
     Component: null,
     componentProps: {},
-  };
-
-  const toggleSearch = () => setShowSearch(!showSearch);
-
-  const handleClose = () => {
-    clearSearch();
-    toggleSearch();
-  };
-
-  const clearSearch = () => {
-    setSearch('');
-  };
-
-  const handleChange = ({ target: { value } }) => {
-    setSearch(value);
   };
 
   const hasChildObject = () => links.some(link => !isEmpty(link.links));
@@ -48,9 +42,10 @@ function LeftMenuList({ customLink, links, title }) {
   const getCount = () => {
     if (hasChildObject()) {
       return links.reduce((acc, current) => {
-        return acc + current.links.length;
+        return acc + get(current, 'links', []).length;
       }, 0);
     }
+
     return links.length;
   };
 
@@ -63,11 +58,9 @@ function LeftMenuList({ customLink, links, title }) {
         };
       });
     }
+
     return matchSorter(links, search, { keys: ['title'] });
   };
-
-  const getTitle = () =>
-    getCount() > 1 ? `${title.id}plural` : `${title.id}singular`;
 
   const renderCompo = (link, i) => {
     const { links, name, title, ...rest } = link;
@@ -88,48 +81,29 @@ function LeftMenuList({ customLink, links, title }) {
 
     return (
       <li key={name}>
-        <LeftMenuLink {...link}>{title}</LeftMenuLink>
+        <LeftMenuLink {...link}>{getLabel(title)}</LeftMenuLink>
       </li>
     );
+  };
+
+  const headerProps = {
+    count: getCount(),
+    search,
+    searchable,
+    setSearch,
+    title: formatTitleWithIntl(title),
   };
 
   return (
     <Wrapper>
       <div className="list-header">
-        {!showSearch ? (
-          <div className="title-wrapper">
-            <h3>
-              <FormattedMessage id={getTitle()} />
-              &nbsp;&nbsp;
-              <span className="count-info" datadescr={getCount()}>
-                {getCount()}
-              </span>
-            </h3>
-            <button onClick={toggleSearch}>
-              <FontAwesomeIcon icon="search" />
-            </button>
-          </div>
-        ) : (
-          <div className="search-wrapper">
-            <FontAwesomeIcon icon="search" />
-            <button onClick={toggleSearch}></button>
-            <Search
-              ref={ref}
-              onChange={handleChange}
-              value={search}
-              placeholder="search…"
-            />
-            <button onClick={handleClose}>
-              <FontAwesomeIcon icon="times" />
-            </button>
-          </div>
-        )}
+        <LeftMenuHeader {...headerProps} />
       </div>
       <div>
-        <List>{getList().map((link, i) => renderCompo(link, i))}</List>
-        {Component && isValidElement(<Component />) && (
-          <Component {...componentProps} />
-        )}
+        <List numberOfVisibleItems={numberOfVisibleItems}>
+          {getList().map((link, i) => renderCompo(link, i))}
+        </List>
+        {Component && isValidElement(<Component />) && <Component {...componentProps} />}
       </div>
     </Wrapper>
   );
@@ -138,7 +112,9 @@ function LeftMenuList({ customLink, links, title }) {
 LeftMenuList.defaultProps = {
   customLink: null,
   links: [],
-  title: 'models',
+  title: null,
+  searchable: false,
+  numberOfVisibleItems: null,
 };
 
 LeftMenuList.propTypes = {
@@ -150,7 +126,11 @@ LeftMenuList.propTypes = {
     }),
   }),
   links: PropTypes.array,
-  title: PropTypes.string,
+  title: PropTypes.shape({
+    id: PropTypes.string,
+  }),
+  searchable: PropTypes.bool,
+  numberOfVisibleItems: PropTypes.number,
 };
 
 export default LeftMenuList;

@@ -6,29 +6,29 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 
+import { DateTime } from '@buffetjs/custom';
+import { DatePicker, InputText, InputNumber, Select, TimePicker } from '@buffetjs/core';
 import { InputWrapperDate } from './components';
-
-import {
-  InputDate,
-  InputNumber,
-  InputSelect,
-  InputText,
-} from 'strapi-helper-plugin';
 
 const getInputType = attrType => {
   switch (attrType) {
     case 'boolean':
-      return InputSelect;
+      return Select;
     case 'date':
-    case 'datetime':
     case 'timestamp':
     case 'timestampUpdate':
-      return InputDate;
+      return DatePicker;
+    case 'datetime':
+      return DateTime;
+    case 'enumeration':
+      return Select;
     case 'integer':
     case 'biginteger':
     case 'decimal':
     case 'float':
       return InputNumber;
+    case 'time':
+      return TimePicker;
     default:
       return InputText;
   }
@@ -36,10 +36,16 @@ const getInputType = attrType => {
 
 function Input({ type, ...rest }) {
   const Component = getInputType(type);
-  const style = { width: '210px', paddingTop: '4px' };
-  const styles =
-    type === 'boolean' ? { minWidth: '100px', maxWidth: '200px' } : style;
-  const wrapperStyle = type == 'boolean' ? { marginRight: '20px' } : {};
+  let style = type !== 'time' ? { width: '210px', paddingTop: '4px' } : {};
+
+  if (['integer', 'biginteger', 'float', 'decimal'].includes(type)) {
+    style = { marginRight: '20px' };
+  }
+  const styles = type === 'boolean' ? { minWidth: '100px', maxWidth: '200px' } : style;
+  const wrapperStyle =
+    type === 'boolean' || ['date', 'timestamp', 'time', 'datetime'].includes(type)
+      ? { marginRight: '20px' }
+      : { marginRight: '10px' };
 
   return (
     <InputWrapperDate type={type || 'text'} style={wrapperStyle}>

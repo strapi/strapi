@@ -21,6 +21,8 @@ const Button = styled.button`
         border-radius: 2px;
       `;
     }
+
+    return '';
   }}
 
   ${({ hasMinError }) => {
@@ -30,6 +32,8 @@ const Button = styled.button`
         border-top-color: rgba(227, 233, 243, 0.75);
       `;
     }
+
+    return '';
   }}
 
   color: #007eff;

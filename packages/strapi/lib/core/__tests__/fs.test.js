@@ -1,6 +1,7 @@
 const fs = require('../fs');
+const fse = require('fs-extra');
+
 jest.mock('fs-extra');
-const fsExtra = require('fs-extra');
 
 describe('Strapi fs utils', () => {
   const strapi = {
@@ -22,8 +23,8 @@ describe('Strapi fs utils', () => {
 
       await strapiFS.writeAppFile('test', content);
 
-      expect(fsExtra.ensureFile).toHaveBeenCalledWith('/tmp/test');
-      expect(fsExtra.writeFile).toHaveBeenCalledWith('/tmp/test', content);
+      expect(fse.ensureFile).toHaveBeenCalledWith('/tmp/test');
+      expect(fse.writeFile).toHaveBeenCalledWith('/tmp/test', content);
     });
 
     test('Normalize the path to avoid relative access to folders in parent directories', async () => {
@@ -33,8 +34,8 @@ describe('Strapi fs utils', () => {
 
       await strapiFS.writeAppFile('../../test', content);
 
-      expect(fsExtra.ensureFile).toHaveBeenCalledWith('/tmp/test');
-      expect(fsExtra.writeFile).toHaveBeenCalledWith('/tmp/test', content);
+      expect(fse.ensureFile).toHaveBeenCalledWith('/tmp/test');
+      expect(fse.writeFile).toHaveBeenCalledWith('/tmp/test', content);
     });
 
     test('Works with array path', async () => {
@@ -44,11 +45,8 @@ describe('Strapi fs utils', () => {
 
       await strapiFS.writeAppFile(['test', 'sub', 'path'], content);
 
-      expect(fsExtra.ensureFile).toHaveBeenCalledWith('/tmp/test/sub/path');
-      expect(fsExtra.writeFile).toHaveBeenCalledWith(
-        '/tmp/test/sub/path',
-        content
-      );
+      expect(fse.ensureFile).toHaveBeenCalledWith('/tmp/test/sub/path');
+      expect(fse.writeFile).toHaveBeenCalledWith('/tmp/test/sub/path', content);
     });
   });
 

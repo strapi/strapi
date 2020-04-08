@@ -1,3 +1,4 @@
+/* eslint-disable  import/no-cycle */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get, size } from 'lodash';
@@ -20,6 +21,7 @@ const FieldComponent = ({
   icon,
   isFromDynamicZone,
   isRepeatable,
+  isNested,
   label,
   max,
   min,
@@ -87,6 +89,7 @@ const FieldComponent = ({
           componentUid={componentUid}
           fields={displayedFields}
           isFromDynamicZone={isFromDynamicZone}
+          isNested={isNested}
           max={max}
           min={min}
           name={name}
@@ -102,6 +105,7 @@ FieldComponent.defaultProps = {
   icon: 'smile',
   isFromDynamicZone: false,
   isRepeatable: false,
+  isNested: false,
   max: Infinity,
   min: -Infinity,
 };
@@ -112,6 +116,7 @@ FieldComponent.propTypes = {
   icon: PropTypes.string,
   isFromDynamicZone: PropTypes.bool,
   isRepeatable: PropTypes.bool,
+  isNested: PropTypes.bool,
   label: PropTypes.string.isRequired,
   max: PropTypes.number,
   min: PropTypes.number,

@@ -6,7 +6,7 @@ const Wrapper = styled(TransitionGroup)`
   top: 72px;
   left: 240px;
   right: 0;
-  z-index: 1000;
+  z-index: 1100;
   list-style: none;
   width: 300px;
   margin: 0 auto;

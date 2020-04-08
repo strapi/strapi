@@ -11,6 +11,8 @@ import { CSSTransition } from 'react-transition-group';
 import Notification from '../Notification';
 import Wrapper from './Wrapper';
 
+/* eslint-disable */
+
 const NotificationsContainer = ({ notifications, onHideNotification }) => {
   if (notifications.length === 0) {
     return false;

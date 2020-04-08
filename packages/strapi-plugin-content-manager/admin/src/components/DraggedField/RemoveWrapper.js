@@ -30,6 +30,8 @@ const RemoveWrapper = styled.div`
         }
     `;
     }
+
+    return '';
   }}
 `;
 

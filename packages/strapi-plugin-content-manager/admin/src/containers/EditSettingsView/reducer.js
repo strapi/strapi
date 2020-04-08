@@ -104,7 +104,7 @@ const reducer = (state, action) => {
       // Delete the entire row if length is one or if lenght is equal to 2 and the second element is the hidden div used to make the dnd exp smoother
       if (
         row.size === 1 ||
-        (row.size == 2 && row.getIn([1, 'name']) === '_TEMP_')
+        (row.size === 2 && row.getIn([1, 'name']) === '_TEMP_')
       ) {
         newState = state.updateIn(layoutPathEdit, list =>
           list.delete(action.rowIndex)

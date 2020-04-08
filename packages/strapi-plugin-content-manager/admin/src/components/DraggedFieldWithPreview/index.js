@@ -1,12 +1,14 @@
 import React, { forwardRef, useState } from 'react';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
-import Carret from './Carret';
 import DraggedField from '../DraggedField';
-import DynamicZoneWrapper from './DynamicZoneWrapper';
 import PreviewCarret from '../PreviewCarret';
+import Carret from './Carret';
+import DynamicZoneWrapper from './DynamicZoneWrapper';
 import Wrapper from './Wrapper';
 import DynamicComponent from './DynamicComponent';
+
+/* eslint-disable react/no-array-index-key */
 
 const DraggedFieldWithPreview = forwardRef(
   (
@@ -136,7 +138,7 @@ const DraggedFieldWithPreview = forwardRef(
                                 withLongerHeight={higherFields.includes(
                                   fieldType
                                 )}
-                              ></DraggedField>
+                              />
                             </div>
                           );
                         })}

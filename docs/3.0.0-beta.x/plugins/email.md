@@ -20,7 +20,7 @@ await strapi.plugins['email'].services.email.send({
 
 ## Configure the plugin
 
-The plugin provide you a setting page to be able to define the email provider you want to use.
+The plugin provides you a settings page where you can define the email provider you want to use.
 You will also be able to add some configuration.
 
 - Click on **Plugins** in the left menu
@@ -86,8 +86,8 @@ module.exports = {
 
 In the `send` function you will have access to:
 
-- `config` that contain configuration you setup in your admin panel
-- `options` that contain option your send when you called the `send` function from the email plugin service
+- `config` that contains configurations you setup in your admin panel
+- `options` that contains options you send when you call the `send` function from the email plugin service
 
 To use it you will have to publish it on **npm**.
 
@@ -111,3 +111,42 @@ If you want to create your own provider without publishing it on **npm** you can
 ```
 
 - Finally, run `yarn install` or `npm install` to install your new custom provider.
+
+## Trouble shooting
+
+You received an `Auth.form.error.email.invalid` error even though the email is valid and exists in the database.
+
+Here is the error response you get from the API.
+
+```json
+{
+  "statusCode": 400,
+  "error": "Bad Request",
+  "message": [
+    {
+      "messages": [
+        {
+          "id": "Auth.form.error.email.invalid"
+        }
+      ]
+    }
+  ]
+}
+```
+
+This error is due to your IP connection. By default, Strapi uses the [`sendmail`](https://github.com/guileen/node-sendmail) package.
+
+This package sends an email from the server it runs on. Depending on the network you are on, the connection to the SMTP server could fail.
+
+Here is the `sendmail` error.
+
+```
+Error: SMTP code:550 msg:550-5.7.1 [87.88.179.13] The IP you're using to send mail is not authorized to
+550-5.7.1 send email directly to our servers. Please use the SMTP relay at your
+550-5.7.1 service provider instead. Learn more at
+550 5.7.1  https://support.google.com/mail/?p=NotAuthorizedError 30si2132728pjz.75 - gsmtp
+```
+
+To fix it, I suggest you to use another email provider that uses third party to send emails.
+
+When using a third party provider, you avoid having to setup a mail server on your server and get extra features such as email analytics.

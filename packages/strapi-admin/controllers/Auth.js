@@ -145,9 +145,7 @@ module.exports = {
     }
 
     // First, check if their is at least one admin
-    const admins = await strapi
-      .query('administrator', 'admin')
-      .find({ _limit: 1 });
+    const admins = await strapi.query('administrator', 'admin').find({ _limit: 1 });
 
     if (admins.length > 0) {
       return ctx.badRequest(
@@ -159,9 +157,7 @@ module.exports = {
       );
     }
 
-    params.password = await strapi.admin.services.auth.hashPassword(
-      params.password
-    );
+    params.password = await strapi.admin.services.auth.hashPassword(params.password);
 
     const admin = await strapi.query('administrator', 'admin').findOne({
       email: params.email,
@@ -184,7 +180,7 @@ module.exports = {
 
       const jwt = strapi.admin.services.auth.createJwtToken(admin);
 
-      strapi.emit('didCreateFirstAdmin');
+      await strapi.telemetry.send('didCreateFirstAdmin');
 
       ctx.send({
         jwt,
@@ -300,14 +296,15 @@ module.exports = {
     }
 
     // Find the admin thanks to his email.
-    const admin = await strapi
-      .query('administrator', 'admin')
-      .findOne({ email });
+    const admin = await strapi.query('administrator', 'admin').findOne({ email });
 
     // admin not found.
     if (!admin) {
       return ctx.badRequest(
         null,
+        // FIXME it's not a good security practice to let user know if the email address is registered
+        // it'd better to say something like "Email was sent to xyz@xyz.com"
+        // this way potential hacker doesn't know if email is registered or not
         formatError({
           id: 'Auth.form.error.user.not-exist',
           message: 'This email does not exit',
@@ -324,7 +321,7 @@ module.exports = {
         email: 'no-reply@strapi.io',
       },
       response_email: '',
-      object: '­Reset password',
+      object: 'Reset password',
       message: `<p>We heard that you lost your password. Sorry about that!</p>
 
 <p>But don’t worry! You can use the following link to reset your password:</p>
@@ -340,7 +337,7 @@ module.exports = {
         to: admin.email,
         from:
           settings.from.email || settings.from.name
-            ? `"${settings.from.name}" <${settings.from.email}>`
+            ? `${settings.from.name} <${settings.from.email}>`
             : undefined,
         replyTo: settings.response_email,
         subject: settings.object,
@@ -352,9 +349,7 @@ module.exports = {
     }
 
     // Update the admin.
-    await strapi
-      .query('administrator', 'admin')
-      .update({ id: admin.id }, { resetPasswordToken });
+    await strapi.query('administrator', 'admin').update({ id: admin.id }, { resetPasswordToken });
 
     ctx.send({ ok: true });
   },

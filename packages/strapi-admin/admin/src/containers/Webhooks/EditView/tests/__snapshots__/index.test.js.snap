@@ -1,0 +1,1306 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Admin | containers | EditView should match the snapshot 1`] = `
+<DocumentFragment>
+  .c1 {
+  position: fixed;
+  top: 0;
+  height: 6rem;
+  width: 6.5rem;
+  line-height: 6rem;
+  z-index: 1050;
+  text-align: center;
+  background-color: #ffffff;
+  color: #81848a;
+  border-top: 1px solid #f3f4f4;
+  border-right: 1px solid #f3f4f4;
+  border-left: 1px solid #f3f4f4;
+  cursor: pointer;
+}
+
+.c1:before {
+  content: '\\f053';
+  font-family: 'FontAwesome';
+  font-size: 1.8rem;
+  font-weight: bolder;
+}
+
+.c1:hover {
+  background-color: #f3f4f4;
+}
+
+.c15 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 20px;
+  width: 20px;
+  margin: 8px 5px 0px 0px;
+  border-radius: 50%;
+  border: 1px solid #e3e9f3;
+  cursor: pointer;
+}
+
+.c15:focus {
+  outline: 0;
+}
+
+.c15:after {
+  content: '\\f068';
+  font-family: FontAwesome;
+  font-size: 9px;
+  line-height: 18px;
+  color: #007eff;
+}
+
+.c5 {
+  height: 30px;
+  padding: 0 15px;
+  font-weight: 500;
+  font-size: 1.3rem;
+  line-height: normal;
+  border-radius: 2px;
+  cursor: pointer;
+  outline: 0;
+  background-color: #ffffff;
+  background-color: #007EFF;
+  border: 1px solid #007EFF;
+  color: #ffffff;
+}
+
+.c5:hover {
+  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  box-shadow: inset 0 0 30px [object Object];
+}
+
+.c5:active {
+  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  box-shadow: inset 0 0 30px [object Object];
+}
+
+.c5:focus {
+  outline: 0;
+}
+
+.c5 > svg {
+  margin-right: 10px;
+  vertical-align: initial;
+}
+
+.c7 {
+  height: 30px;
+  padding: 0 15px;
+  font-weight: 500;
+  font-size: 1.3rem;
+  line-height: normal;
+  border-radius: 2px;
+  cursor: pointer;
+  outline: 0;
+  background-color: #ffffff;
+  background-color: transparent;
+  border: 1px solid #9ea7b8;
+  color: #9ea7b8;
+}
+
+.c7:hover {
+  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  box-shadow: inset 0 0 30px [object Object];
+}
+
+.c7:active {
+  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  box-shadow: inset 0 0 30px [object Object];
+}
+
+.c7:focus {
+  outline: 0;
+}
+
+.c7 > svg {
+  margin-right: 10px;
+  vertical-align: initial;
+}
+
+.c7:hover {
+  box-shadow: none;
+  cursor: initial;
+}
+
+.c8 {
+  height: 30px;
+  padding: 0 15px;
+  font-weight: 500;
+  font-size: 1.3rem;
+  line-height: normal;
+  border-radius: 2px;
+  cursor: pointer;
+  outline: 0;
+  background-color: #ffffff;
+  background-color: #6DBB1A;
+  border: 1px solid #6DBB1A;
+  color: #ffffff;
+  min-width: 140px;
+}
+
+.c8:hover {
+  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  box-shadow: inset 0 0 30px [object Object];
+}
+
+.c8:active {
+  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  box-shadow: inset 0 0 30px [object Object];
+}
+
+.c8:focus {
+  outline: 0;
+}
+
+.c8 > svg {
+  margin-right: 10px;
+  vertical-align: initial;
+}
+
+.c8:hover {
+  box-shadow: none;
+  cursor: initial;
+}
+
+.c8:disabled {
+  background-color: #E9EAEB;
+  border: 1px solid #B4B6BA;
+  color: #B4B6BA;
+}
+
+.c18 {
+  cursor: pointer;
+  margin: 0;
+  position: relative;
+  width: 14px;
+  font-weight: 100;
+}
+
+.c18:focus,
+.c18:active {
+  outline: 0;
+}
+
+.c18:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  margin-top: calc(-14px / 2);
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(16,22,34,0.15);
+  background-color: #fdfdfd;
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+
+.c18:after {
+  display: none;
+  content: '\\f00c';
+  font-family: 'FontAwesome';
+  position: absolute;
+  left: 0px;
+  top: 55%;
+  margin-top: calc(-14px / 2);
+  width: 14px;
+  height: 14px;
+  text-align: center;
+  font-size: 9px;
+  font-weight: 400;
+  color: #1C5DE7;
+  line-height: 14px;
+}
+
+.c18:checked:after {
+  display: block;
+}
+
+.c18:disabled {
+  background-color: #FAFAFB;
+  cursor: initial;
+}
+
+.c18 + label {
+  display: inline-block;
+  font-weight: 400;
+  font-size: 1.3rem;
+}
+
+.c17 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  height: 18px;
+  line-height: 18px;
+}
+
+.c17 input label {
+  cursor: pointer;
+  margin-bottom: 0 !important;
+}
+
+.c17 input + label {
+  margin-left: 10px;
+  margin-bottom: 0;
+}
+
+.c12 {
+  width: 100%;
+  height: 3.4rem;
+  padding: 0 1rem;
+  font-weight: 400;
+  font-size: 1.3rem;
+  cursor: text;
+  outline: 0;
+  border: 1px solid #E3E9F3;
+  border-radius: 2px;
+  color: #333740;
+  background-color: transparent;
+}
+
+.c12::-webkit-input-placeholder {
+  color: #919BAE;
+}
+
+.c12:focus {
+  border-color: #78caff;
+}
+
+.c12:disabled {
+  background-color: #FAFAFB;
+}
+
+.c11 {
+  position: relative;
+  background-color: #ffffff;
+}
+
+.c11 button[type='button'] {
+  width: 3.4rem;
+  height: 3.4rem;
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  cursor: pointer;
+  outline: 0;
+  border: 0;
+  background: transparent;
+}
+
+.c11 button[type='button']:hover span::before {
+  color: #000000;
+}
+
+.c11 button[type='button'].shown span::before {
+  color: #000000;
+}
+
+.c11 button[type='button'].shown + input[type='text'] {
+  padding-right: calc(3.4rem + 1rem);
+}
+
+.c11 span {
+  z-index: 0;
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
+}
+
+.c11 input {
+  position: relative;
+  z-index: 1;
+}
+
+.c2 {
+  margin-bottom: 30px;
+  position: relative;
+  width: 100%;
+  height: 50px;
+}
+
+.c2 .justify-content-end {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.c2 .header-title p {
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 1.3rem;
+  font-weight: 400;
+  line-height: normal;
+  color: #787e8f;
+}
+
+.c2 .sticky {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 1050;
+  background-color: white;
+  width: calc(100vw - 30.5rem);
+  padding-right: 15px;
+  height: 60px;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.c2 .sticky .row {
+  width: 100%;
+  margin: auto;
+}
+
+.c2 .sticky .row > div > div {
+  padding-top: 0;
+}
+
+.c2 .sticky .row > div > div button {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.c4 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+  -webkit-justify-content: flex-end;
+  -ms-flex-pack: end;
+  justify-content: flex-end;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  max-width: 100%;
+  padding-top: 1rem;
+}
+
+.c4 > button {
+  margin-right: 0;
+  margin-left: 1rem;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  outline: 0;
+}
+
+.c3 {
+  position: relative;
+  padding-top: 0.8rem;
+}
+
+.c3 h1 {
+  position: relative;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 2.4rem;
+  font-weight: 600;
+  margin-bottom: 1px;
+  padding-right: 18px;
+}
+
+.c3 svg {
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin-top: 11px;
+  font-size: 12px;
+  color: rgba(16,22,34,0.35);
+  cursor: pointer;
+  outline: 0;
+}
+
+.c10 {
+  width: 100%;
+  font-weight: 500;
+  font-size: 1.3rem;
+  color: #333740;
+}
+
+.c6 {
+  margin-right: 10px;
+  font-size: 0.94em;
+}
+
+.c9 {
+  position: relative;
+  padding-bottom: 23px;
+}
+
+.c9 label {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.c9 > p {
+  width: 100%;
+  padding-top: 10px;
+  font-size: 13px;
+  line-height: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: -8px;
+}
+
+.c14 {
+  margin-top: 12px;
+  padding: 23px 24px 26px 24px;
+  background-color: #fafafb;
+  border-radius: 2px;
+}
+
+.c14 > ul {
+  margin-bottom: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+.c14 > ul + button {
+  padding: 0;
+  color: #007eff;
+  font-size: 13px;
+  font-weight: 500;
+  outline: 0;
+}
+
+.c14 > ul + button svg,
+.c14 > ul + button span {
+  vertical-align: middle;
+}
+
+.c14 > ul + button svg {
+  margin-right: 10px;
+}
+
+.c14 > ul li {
+  position: relative;
+  padding-right: 30px;
+}
+
+.c14 > ul li:not(:first-of-type) {
+  margin-bottom: 20px;
+}
+
+.c14 > ul li:last-of-type {
+  margin-bottom: 6px;
+}
+
+.c14 > ul li > section {
+  display: inline-block;
+  width: 50%;
+  vertical-align: top;
+}
+
+.c14 > ul li > section:nth-child(odd) {
+  padding-right: 15px;
+}
+
+.c14 > ul li > section:nth-child(even) {
+  padding-left: 15px;
+}
+
+.c14 > ul li > section > p {
+  font-size: 13px;
+  color: #333740;
+  font-weight: 500;
+}
+
+.c14 > ul li > section > div:first-of-type {
+  height: 34px;
+}
+
+.c14 > ul li > section > div:first-of-type > div:first-of-type {
+  height: 34px;
+  min-height: 34px;
+  border: 1px solid #e3e9f3;
+  border-radius: 2px;
+  font-size: 13px;
+  color: #333740;
+  -webkit-align-items: normal;
+  -webkit-box-align: normal;
+  -ms-flex-align: normal;
+  align-items: normal;
+}
+
+.c14 > ul li > section > div:first-of-type > div:first-of-type > div:first-of-type {
+  height: 32px;
+  padding: 0 1rem;
+}
+
+.c14 > ul li > section > div:first-of-type > div:first-of-type > div:last-of-type {
+  display: none;
+}
+
+.c14 > ul li > section > div:first-of-type > div:first-of-type:hover {
+  cursor: text;
+}
+
+.c14 > ul li > section > div:first-of-type > span + div:first-of-type {
+  border-color: #78caff;
+  box-shadow: none;
+}
+
+.c14 > ul li > section + div {
+  position: absolute;
+  top: 7px;
+  right: 0;
+}
+
+.c14 > ul li > section + div button {
+  margin: 0;
+}
+
+.c14 .bordered input {
+  border: 1px solid #f64d0a;
+}
+
+.c16 {
+  padding-top: 3px;
+  padding-bottom: 8px;
+}
+
+.c16 table {
+  width: 100%;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.c16 tr:before {
+  content: '-';
+  position: absolute;
+  left: 20px;
+  display: inline-block;
+  width: calc(100% - 40px);
+  height: 1px;
+  margin-top: -1px;
+  line-height: 1.1em;
+  color: transparent;
+  background-color: #f6f6f6;
+}
+
+.c16 tr:first-of-type:before {
+  left: 0;
+  height: 2px;
+  width: 100%;
+  background-color: #fafafb;
+  z-index: 1;
+}
+
+.c16 thead {
+  background-color: #fafafb;
+}
+
+.c16 thead td {
+  height: 41px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.c16 tbody {
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+  box-shadow: inset 0px 0px 0px 1px #f6f6f6;
+}
+
+.c16 tbody td {
+  height: 54px;
+  padding-bottom: 3px;
+}
+
+.c16 tbody td input[type='checkbox']:disabled:before {
+  background-color: #e8e5e5;
+}
+
+.c16 tbody td:first-of-type {
+  width: 200px;
+  padding-left: 30px;
+  text-transform: capitalize;
+}
+
+.c16 tbody td:first-of-type label {
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  margin-top: -1px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.c16 tbody td:not(:first-of-type) > div {
+  display: block;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+.c13 {
+  position: relative;
+  padding-bottom: 23px;
+}
+
+.c13 label {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.c13 > p {
+  width: 100%;
+  margin-bottom: -8px;
+  padding-top: 10px;
+  font-size: 13px;
+  line-height: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.c13 .hasError input {
+  border-color: #F64D0A;
+}
+
+.c0 > div:first-of-type {
+  left: 24rem;
+}
+
+.c0 .header-title h1 {
+  text-transform: none;
+}
+
+.c0 .header-title + div button:first-of-type {
+  position: relative;
+  margin-right: 30px;
+  overflow: initial;
+}
+
+.c0 .header-title + div button:first-of-type::after {
+  content: '-';
+  position: absolute;
+  top: 5px;
+  right: -20px;
+  width: 1px;
+  height: 20px;
+  background-color: #e9eaeb;
+  color: transparent;
+}
+
+.c0 .header-title + div button:first-of-type span svg {
+  margin-top: -2px;
+  margin-right: -10px;
+  margin-bottom: -5px;
+}
+
+.c0 .form-wrapper {
+  padding-top: 4px;
+}
+
+.c0 .form-card {
+  margin-bottom: 30px;
+  padding: 21px 25px 0px 25px;
+  background-color: #ffffff;
+  border-radius: 2px;
+  box-shadow: 0 2px 4px 0 #e3e9f3;
+}
+
+.c0 .row > div {
+  position: relative;
+  z-index: 0;
+  margin-bottom: 4px;
+}
+
+.c0 .row > div:nth-of-type(3) {
+  z-index: 1;
+}
+
+.c0 .row > div:nth-of-type(4) {
+  margin-bottom: 0;
+}
+
+<div
+    class="c0"
+  >
+    <div
+      class="c1"
+    />
+    <form>
+      <div
+        class="c2"
+      >
+        <div
+          class="sticky-wrapper"
+        >
+          <div
+            class="row"
+          >
+            <div
+              class="col-sm-6 header-title"
+            >
+              <div
+                class="c3"
+              >
+                <h1 />
+              </div>
+              <p />
+            </div>
+            <div
+              class="col-sm-6 justify-content-end"
+            >
+              <div
+                class="c4"
+              >
+                <button
+                  class="c5"
+                  color="primary"
+                  style="padding: 0px 15px;"
+                  type="button"
+                >
+                  <span
+                    class="c6"
+                  >
+                    <svg
+                      height="14px"
+                      viewBox="0 0 14 14"
+                      width="14px"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <g
+                        fill="none"
+                        fill-rule="evenodd"
+                        stroke="none"
+                        stroke-width="1"
+                      >
+                        <g
+                          fill="#ffffff"
+                          fill-rule="nonzero"
+                          transform="translate(-1018.000000, -100.000000)"
+                        >
+                          <g
+                            transform="translate(537.000000, 85.000000)"
+                          >
+                            <g
+                              transform="translate(461.000000, 4.000000)"
+                            >
+                              <g
+                                transform="translate(20.000000, 11.000000)"
+                              >
+                                <path
+                                  d="M5.90191898,3.63963964 L0.23880597,6.96396396 C0.173418621,7.003003 0.117270789,7.00750751 0.0703624733,6.97747748 C0.0234541578,6.94744745 0,6.89339339 0,6.81531532 L0,0.184684685 C0,0.106606607 0.0234541578,0.0525525526 0.0703624733,0.0225225225 C0.117270789,-0.00750750751 0.173418621,-0.003003003 0.23880597,0.036036036 L5.90191898,3.36036036 C5.96730633,3.3993994 6,3.44594595 6,3.5 C6,3.55405405 5.96730633,3.6006006 5.90191898,3.63963964 Z"
+                                />
+                              </g>
+                            </g>
+                          </g>
+                        </g>
+                      </g>
+                    </svg>
+                  </span>
+                  Trigger
+                </button>
+                <button
+                  class="c7"
+                  color="cancel"
+                  disabled=""
+                  style="padding: 0px 20px;"
+                  type="button"
+                >
+                  Reset
+                </button>
+                <button
+                  class="c8"
+                  color="success"
+                  disabled=""
+                  style="min-width: 140px;"
+                  type="submit"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="form-wrapper"
+      >
+        <div
+          class="form-card"
+        >
+          <div
+            class="row"
+          >
+            <div
+              class="col-6"
+            >
+              <div
+                class="c9"
+              >
+                <label
+                  class="c10"
+                  for="name"
+                >
+                  Name
+                </label>
+                <div
+                  class="c11"
+                >
+                  <input
+                    aria-describedby=" "
+                    aria-invalid="false"
+                    autocomplete="off"
+                    class="c12"
+                    id="name"
+                    name="name"
+                    tabindex="0"
+                    type="text"
+                    value=""
+                  />
+                </div>
+              </div>
+              <span
+                style="display: none;"
+              />
+            </div>
+            <div
+              class="col-12"
+            >
+              <div
+                class="c9"
+              >
+                <label
+                  class="c10"
+                  for="url"
+                >
+                  Url
+                </label>
+                <div
+                  class="c11"
+                >
+                  <input
+                    aria-describedby=" "
+                    aria-invalid="false"
+                    autocomplete="off"
+                    class="c12"
+                    id="url"
+                    name="url"
+                    tabindex="0"
+                    type="text"
+                    value=""
+                  />
+                </div>
+              </div>
+              <span
+                style="display: none;"
+              />
+            </div>
+            <div
+              class="col-12"
+            >
+              <div
+                class="c13"
+              >
+                <label
+                  class="c10"
+                  for="headers"
+                >
+                  Headers
+                </label>
+                <div
+                  class="c14"
+                >
+                  <ul>
+                    <li>
+                      <section>
+                        <p>
+                          <span>
+                            Key
+                          </span>
+                        </p>
+                      </section>
+                      <section>
+                        <p>
+                          <span>
+                            Value
+                          </span>
+                        </p>
+                      </section>
+                    </li>
+                    <li>
+                      <section>
+                        <div
+                          class=" css-2b097c-container"
+                        >
+                          <div
+                            class=" css-1w9ejix-control"
+                          >
+                            <div
+                              class=" css-1hwfws3"
+                            >
+                              <div
+                                class=" css-1uccc91-singleValue"
+                              />
+                              <div
+                                class="css-b8ldur-Input"
+                              >
+                                <div
+                                  class=""
+                                  style="display: inline-block;"
+                                >
+                                  <input
+                                    aria-autocomplete="list"
+                                    autocapitalize="none"
+                                    autocomplete="off"
+                                    autocorrect="off"
+                                    id="react-select-2-input"
+                                    spellcheck="false"
+                                    style="box-sizing: content-box; width: 2px; border: 0px; font-size: inherit; opacity: 1; outline: 0; padding: 0px;"
+                                    tabindex="0"
+                                    type="text"
+                                    value=""
+                                  />
+                                  <div
+                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-size: inherit; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              class=" css-1hb7zxy-IndicatorsContainer"
+                            >
+                              <div
+                                aria-hidden="true"
+                                class=" css-tlfecz-indicatorContainer"
+                              >
+                                <svg
+                                  aria-hidden="true"
+                                  class="css-6q0nyr-Svg"
+                                  focusable="false"
+                                  height="20"
+                                  viewBox="0 0 20 20"
+                                  width="20"
+                                >
+                                  <path
+                                    d="M14.348 14.849c-0.469 0.469-1.229 0.469-1.697 0l-2.651-3.030-2.651 3.029c-0.469 0.469-1.229 0.469-1.697 0-0.469-0.469-0.469-1.229 0-1.697l2.758-3.15-2.759-3.152c-0.469-0.469-0.469-1.228 0-1.697s1.228-0.469 1.697 0l2.652 3.031 2.651-3.031c0.469-0.469 1.228-0.469 1.697 0s0.469 1.229 0 1.697l-2.758 3.152 2.758 3.15c0.469 0.469 0.469 1.229 0 1.698z"
+                                  />
+                                </svg>
+                              </div>
+                              <span
+                                class=" css-1okebmr-indicatorSeparator"
+                              />
+                              <div
+                                aria-hidden="true"
+                                class=" css-tlfecz-indicatorContainer"
+                              >
+                                <svg
+                                  aria-hidden="true"
+                                  class="css-6q0nyr-Svg"
+                                  focusable="false"
+                                  height="20"
+                                  viewBox="0 0 20 20"
+                                  width="20"
+                                >
+                                  <path
+                                    d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-4.695 4.502-0.217 0.223-0.502 0.335-0.787 0.335s-0.57-0.112-0.789-0.335c0 0-4.287-4.084-4.695-4.502s-0.436-1.17 0-1.615z"
+                                  />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+                          <input
+                            name="headers.0.key"
+                            type="hidden"
+                            value=""
+                          />
+                        </div>
+                      </section>
+                      <section>
+                        <div
+                          class="c11"
+                        >
+                          <input
+                            autocomplete="off"
+                            class="c12"
+                            id="headers.0.value"
+                            name="headers.0.value"
+                            tabindex="0"
+                            type="text"
+                            value=""
+                          />
+                        </div>
+                      </section>
+                      <div>
+                        <button
+                          class="c15"
+                          type="button"
+                        />
+                      </div>
+                    </li>
+                  </ul>
+                  <button
+                    type="button"
+                  >
+                    <svg
+                      fill="#007eff"
+                      height="13px"
+                      viewBox="0 0 13 13"
+                      width="10px"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <g
+                        data-name="Layer 2"
+                      >
+                        <path
+                          d="M6.5.5v12m6-6H.5"
+                          fill="none"
+                          stroke="#007eff"
+                          stroke-linecap="round"
+                        />
+                      </g>
+                    </svg>
+                    <span>
+                      Create a new header
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div
+              class="col-12"
+            >
+              <div
+                class="c13"
+              >
+                <label
+                  class="c10"
+                  for="events"
+                >
+                  Events
+                </label>
+                <div
+                  class="c16"
+                >
+                  <table>
+                    <thead>
+                      <tr>
+                        <td />
+                        <td>
+                          <span>
+                            Create
+                          </span>
+                        </td>
+                        <td>
+                          <span>
+                            Edit
+                          </span>
+                        </td>
+                        <td>
+                          <span>
+                            Delete
+                          </span>
+                        </td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <div
+                            class="c17"
+                          >
+                            <input
+                              autocomplete="off"
+                              class="c18"
+                              id="entry"
+                              name="entry"
+                              tabindex="0"
+                              type="checkbox"
+                            />
+                            <label
+                              class="c10"
+                              for="entry"
+                            >
+                              entry
+                            </label>
+                          </div>
+                        </td>
+                        <td>
+                          <div
+                            class="c17"
+                          >
+                            <input
+                              autocomplete="off"
+                              class="c18"
+                              id="entry.create"
+                              name="entry.create"
+                              tabindex="0"
+                              type="checkbox"
+                            />
+                            <label
+                              class="c10"
+                              for="entry.create"
+                            />
+                          </div>
+                        </td>
+                        <td>
+                          <div
+                            class="c17"
+                          >
+                            <input
+                              autocomplete="off"
+                              class="c18"
+                              id="entry.update"
+                              name="entry.update"
+                              tabindex="0"
+                              type="checkbox"
+                            />
+                            <label
+                              class="c10"
+                              for="entry.update"
+                            />
+                          </div>
+                        </td>
+                        <td>
+                          <div
+                            class="c17"
+                          >
+                            <input
+                              autocomplete="off"
+                              class="c18"
+                              id="entry.delete"
+                              name="entry.delete"
+                              tabindex="0"
+                              type="checkbox"
+                            />
+                            <label
+                              class="c10"
+                              for="entry.delete"
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <div
+                            class="c17"
+                          >
+                            <input
+                              autocomplete="off"
+                              class="c18"
+                              id="media"
+                              name="media"
+                              tabindex="0"
+                              type="checkbox"
+                            />
+                            <label
+                              class="c10"
+                              for="media"
+                            >
+                              media
+                            </label>
+                          </div>
+                        </td>
+                        <td>
+                          <div
+                            class="c17"
+                          >
+                            <input
+                              autocomplete="off"
+                              class="c18"
+                              id="media.create"
+                              name="media.create"
+                              tabindex="0"
+                              type="checkbox"
+                            />
+                            <label
+                              class="c10"
+                              for="media.create"
+                            />
+                          </div>
+                        </td>
+                        <td>
+                          <div
+                            class="c17"
+                          >
+                            <input
+                              autocomplete="off"
+                              class="c18"
+                              disabled=""
+                              id="media.update"
+                              name="media.update"
+                              tabindex="0"
+                              type="checkbox"
+                            />
+                            <label
+                              class="c10"
+                              for="media.update"
+                            />
+                          </div>
+                        </td>
+                        <td>
+                          <div
+                            class="c17"
+                          >
+                            <input
+                              autocomplete="off"
+                              class="c18"
+                              id="media.delete"
+                              name="media.delete"
+                              tabindex="0"
+                              type="checkbox"
+                            />
+                            <label
+                              class="c10"
+                              for="media.delete"
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <span
+                  style="display: none;"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</DocumentFragment>
+`;

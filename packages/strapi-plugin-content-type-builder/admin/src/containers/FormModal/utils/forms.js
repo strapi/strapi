@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import * as yup from 'yup';
 import { get, isEmpty, toLower, trim, toNumber } from 'lodash';
 import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
@@ -8,19 +8,14 @@ import getTrad from '../../../utils/getTrad';
 import { createComponentUid, createUid, nameToSlug } from './createUid';
 import componentForm from './componentForm';
 import fields from './staticFields';
-import {
-  NAME_REGEX,
-  ENUM_REGEX,
-  CATEGORY_NAME_REGEX,
-} from './attributesRegexes';
+import { NAME_REGEX, ENUM_REGEX, CATEGORY_NAME_REGEX } from './attributesRegexes';
 import RESERVED_NAMES from './reservedNames';
 
+/* eslint-disable indent */
+/* eslint-disable prefer-arrow-callback */
+
 yup.addMethod(yup.mixed, 'defined', function() {
-  return this.test(
-    'defined',
-    errorsTrads.required,
-    value => value !== undefined
-  );
+  return this.test('defined', errorsTrads.required, value => value !== undefined);
 });
 
 yup.addMethod(yup.string, 'unique', function(
@@ -42,7 +37,9 @@ yup.addMethod(yup.string, 'unique', function(
 
 yup.addMethod(yup.array, 'hasNotEmptyValues', function(message) {
   return this.test('hasNotEmptyValues', message, function(array) {
-    return !array.some(value => isEmpty(value));
+    return !array.some(value => {
+      return isEmpty(value);
+    });
   });
 });
 
@@ -70,12 +67,21 @@ yup.addMethod(yup.string, 'isInferior', function(message, max) {
   });
 });
 
-const ATTRIBUTES_THAT_DONT_HAVE_MIN_MAX_SETTINGS = [
-  'boolean',
-  'date',
-  'enumeration',
-  'media',
-];
+yup.addMethod(yup.array, 'matchesEnumRegex', function(message) {
+  return this.test('matchesEnumRegex', message, function(array) {
+    return array.every(value => {
+      return ENUM_REGEX.test(value);
+    });
+  });
+});
+
+yup.addMethod(yup.string, 'isValidRegExpPattern', function(message) {
+  return this.test('isValidRegExpPattern', message, function(string) {
+    return new RegExp(string) !== null;
+  });
+});
+
+const ATTRIBUTES_THAT_DONT_HAVE_MIN_MAX_SETTINGS = ['boolean', 'date', 'enumeration', 'media'];
 
 const forms = {
   attribute: {
@@ -85,8 +91,8 @@ const forms = {
       dataToValidate,
       isEditing,
       attributeToEditName,
-      initialData
-      // componentCategory
+      initialData,
+      alreadyTakenTargetContentTypeAttributes
     ) {
       const alreadyTakenAttributes = Object.keys(
         get(currentSchema, ['schema', 'attributes'], {})
@@ -163,9 +169,9 @@ const forms = {
             .when('max', (max, schema) => {
               if (max) {
                 return schema.max(max, getTrad('error.validation.minSupMax'));
-              } else {
-                return schema;
               }
+
+              return schema;
             })
             .nullable();
         }),
@@ -180,13 +186,10 @@ const forms = {
           .integer()
           .when('maxLength', (maxLength, schema) => {
             if (maxLength) {
-              return schema.max(
-                maxLength,
-                getTrad('error.validation.minSupMax')
-              );
-            } else {
-              return schema;
+              return schema.max(maxLength, getTrad('error.validation.minSupMax'));
             }
+
+            return schema;
           })
           .nullable(),
       };
@@ -218,11 +221,27 @@ const forms = {
               .array()
               .of(yup.string())
               .min(1, errorsTrads.min)
-              .hasNotEmptyValues(
-                'Empty strings are not allowed',
-                dataToValidate.enum
-              ),
+              .test({
+                name: 'areEnumValuesUnique',
+                message: getTrad('error.validation.enum-duplicate'),
+                test: values => {
+                  const filtered = [...new Set(values)];
+
+                  return filtered.length === values.length;
+                },
+              })
+              .matchesEnumRegex(errorsTrads.regex)
+              .hasNotEmptyValues('Empty strings are not allowed', dataToValidate.enum),
             enumName: yup.string().nullable(),
+          });
+        case 'text':
+          return yup.object().shape({
+            ...commonShape,
+            ...fieldsThatSupportMaxAndMinLengthShape,
+            regex: yup
+              .string()
+              .isValidRegExpPattern(getTrad('error.validation.regex'))
+              .nullable(),
           });
         case 'number':
         case 'integer':
@@ -242,13 +261,10 @@ const forms = {
                 .matches(/^\d*$/)
                 .when('max', (max, schema) => {
                   if (max) {
-                    return schema.isInferior(
-                      getTrad('error.validation.minSupMax'),
-                      max
-                    );
-                  } else {
-                    return schema;
+                    return schema.isInferior(getTrad('error.validation.minSupMax'), max);
                   }
+
+                  return schema;
                 }),
 
               max: yup
@@ -261,9 +277,7 @@ const forms = {
           let defaultType = yup.number();
 
           if (dataToValidate.type === 'integer') {
-            defaultType = yup
-              .number()
-              .integer('component.Input.error.validation.integer');
+            defaultType = yup.number().integer('component.Input.error.validation.integer');
           }
 
           return yup.object().shape({
@@ -285,8 +299,13 @@ const forms = {
               if (!['oneWay', 'manyWay'].includes(dataToValidate.nature)) {
                 schema = schema.matches(NAME_REGEX, errorsTrads.regex);
               }
+
               return schema
                 .unique(errorsTrads.unique, targetAttributeAlreadyTakenValue)
+                .unique(
+                  getTrad('error.validation.relation.targetAttribute-taken'),
+                  alreadyTakenTargetContentTypeAttributes
+                )
                 .required(errorsTrads.required);
             }),
             target: yup.string().required(errorsTrads.required),
@@ -325,8 +344,7 @@ const forms = {
             },
             {
               autoFocus: false,
-              disabled:
-                targetAttributeValue === null || targetAttributeValue === '-',
+              disabled: targetAttributeValue === null || targetAttributeValue === '-',
               name: 'targetColumnName',
               label: '',
               type: 'addon',
@@ -343,35 +361,29 @@ const forms = {
             },
           ],
           [fields.divider],
+          [fields.private],
           [fields.required],
           [fields.unique],
         ];
-        const dynamiczoneItems = [
-          [fields.required],
-          [fields.divider],
-          [fields.max],
-          [fields.min],
-        ];
+        const dynamiczoneItems = [[fields.required], [fields.divider], [fields.max], [fields.min]];
 
         if (type === 'component') {
           if (step === '1') {
             return {
               items: componentForm.advanced('componentToCreate.'),
             };
-          } else {
-            const requiredItem = [[fields.required]];
-
-            return {
-              items: data.repeatable ? [...dynamiczoneItems] : requiredItem,
-            };
           }
+          const requiredItem = [[fields.required]];
+
+          return {
+            items: data.repeatable ? [...dynamiczoneItems] : requiredItem,
+          };
         }
 
-        const items = defaultItems.slice();
+        let items = defaultItems.slice();
 
         if (type === 'number' && data.type !== 'biginteger') {
-          const step =
-            data.type === 'decimal' || data.type === 'float' ? 'any' : '1';
+          const step = data.type === 'decimal' || data.type === 'float' ? 'any' : '1';
 
           items.splice(0, 1, [
             {
@@ -387,7 +399,22 @@ const forms = {
           ]);
         }
 
-        if (type === 'media') {
+        if (type === 'text') {
+          items.splice(1, 0, [
+            {
+              autoFocus: false,
+              label: {
+                id: getTrad('form.attribute.item.text.regex'),
+              },
+              name: 'regex',
+              type: 'text',
+              validations: {},
+              description: {
+                id: getTrad('form.attribute.item.text.regex.description'),
+              },
+            },
+          ]);
+        } else if (type === 'media') {
           items.splice(0, 1);
         } else if (type === 'boolean') {
           items.splice(0, 1, [
@@ -415,17 +442,14 @@ const forms = {
               options: [
                 <FormattedMessage
                   key="hidden___value__placeholder"
-                  id={'components.InputSelect.option.placeholder'}
+                  id="components.InputSelect.option.placeholder"
                 >
                   {msg => <option value="">{msg}</option>}
                 </FormattedMessage>,
               ].concat(
                 data.enum
                   ? data.enum
-                      .filter(
-                        (val, index) =>
-                          data.enum.indexOf(val) === index && !isEmpty(val)
-                      )
+                      .filter((val, index) => data.enum.indexOf(val) === index && !isEmpty(val))
                       .map(val => (
                         <option key={val} value={val}>
                           {val}
@@ -444,9 +468,7 @@ const forms = {
               type: 'text',
               validations: {},
               description: {
-                id: getTrad(
-                  'form.attribute.item.enumeration.graphql.description'
-                ),
+                id: getTrad('form.attribute.item.enumeration.graphql.description'),
               },
             },
           ]);
@@ -454,13 +476,22 @@ const forms = {
           items.splice(0, 1, [
             {
               ...fields.default,
-              // type: data.type || 'date',
               type: 'date',
               value: null,
               withDefaultValue: false,
               disabled: data.type !== 'date',
             },
           ]);
+        } else if (type === 'richtext') {
+          items.splice(4, 1);
+        } else if (type === 'uid') {
+          const uidItems = [
+            [{ ...fields.default, disabled: Boolean(data.targetField), type: 'text' }],
+            [fields.divider],
+            [fields.required],
+          ];
+
+          items = uidItems;
         }
 
         if (!ATTRIBUTES_THAT_DONT_HAVE_MIN_MAX_SETTINGS.includes(type)) {
@@ -471,11 +502,7 @@ const forms = {
                 name: type === 'number' ? 'max' : 'maxLength',
                 type: 'customCheckboxWithChildren',
                 label: {
-                  id: getTrad(
-                    `form.attribute.item.maximum${
-                      type === 'number' ? '' : 'Length'
-                    }`
-                  ),
+                  id: getTrad(`form.attribute.item.maximum${type === 'number' ? '' : 'Length'}`),
                 },
 
                 validations: {},
@@ -487,11 +514,7 @@ const forms = {
                 name: type === 'number' ? 'min' : 'minLength',
                 type: 'customCheckboxWithChildren',
                 label: {
-                  id: getTrad(
-                    `form.attribute.item.minimum${
-                      type === 'number' ? '' : 'Length'
-                    }`
-                  ),
+                  id: getTrad(`form.attribute.item.minimum${type === 'number' ? '' : 'Length'}`),
                 },
                 validations: {},
               },
@@ -515,7 +538,7 @@ const forms = {
           items,
         };
       },
-      base(data, type, step) {
+      base(data, type, step, actionType, attributes) {
         if (type === 'relation') {
           return {
             items: [
@@ -533,9 +556,7 @@ const forms = {
         if (type === 'component' && step === '1') {
           const itemsToConcat =
             data.createComponent === true
-              ? [[{ type: 'spacer' }]].concat(
-                  componentForm.base('componentToCreate.')
-                )
+              ? [[{ type: 'spacer' }]].concat(componentForm.base('componentToCreate.'))
               : [[{ type: 'spacer' }]];
 
           return {
@@ -562,19 +583,13 @@ const forms = {
               size: 12,
               options: [
                 {
-                  headerId: getTrad(
-                    `form.attribute.component.option.repeatable`
-                  ),
-                  descriptionId: getTrad(
-                    `form.attribute.component.option.repeatable.description`
-                  ),
+                  headerId: getTrad('form.attribute.component.option.repeatable'),
+                  descriptionId: getTrad('form.attribute.component.option.repeatable.description'),
                   value: true,
                 },
                 {
-                  headerId: getTrad(`form.attribute.component.option.single`),
-                  descriptionId: getTrad(
-                    `form.attribute.component.option.single.description`
-                  ),
+                  headerId: getTrad('form.attribute.component.option.single'),
+                  descriptionId: getTrad('form.attribute.component.option.single.description'),
                   value: false,
                 },
               ],
@@ -596,9 +611,7 @@ const forms = {
               options: [
                 {
                   headerId: getTrad(
-                    `form.attribute.${type}.option.${
-                      type === 'text' ? 'short-text' : 'multiple'
-                    }`
+                    `form.attribute.${type}.option.${type === 'text' ? 'short-text' : 'multiple'}`
                   ),
                   descriptionId: getTrad(
                     `form.attribute.${type}.option.${
@@ -609,9 +622,7 @@ const forms = {
                 },
                 {
                   headerId: getTrad(
-                    `form.attribute.${type}.option.${
-                      type === 'text' ? 'long-text' : 'single'
-                    }`
+                    `form.attribute.${type}.option.${type === 'text' ? 'long-text' : 'single'}`
                   ),
                   descriptionId: getTrad(
                     `form.attribute.${type}.option.${
@@ -732,6 +743,47 @@ const forms = {
           ]);
         }
 
+        if (type === 'uid') {
+          const options = Object.keys(attributes)
+            .filter(key => ['string', 'text'].includes(attributes[key].type))
+            .map(key => ({ id: key, value: key }));
+
+          return {
+            items: [
+              [
+                {
+                  ...fields.name,
+                  placeholder: {
+                    id: getTrad('modalForm.attribute.form.base.name.placeholder'),
+                  },
+                },
+                {
+                  label: {
+                    id: getTrad('modalForm.attribute.target-field'),
+                  },
+                  name: 'targetField',
+                  type: 'select',
+                  options: [{ id: getTrad('none'), value: '' }, ...options].map((option, index) => (
+                    // eslint-disable-next-line react/no-array-index-key
+                    <Fragment key={index}>
+                      {index === 0 ? (
+                        <FormattedMessage id={option.id}>
+                          {msg => <option value={option.value}>{msg}</option>}
+                        </FormattedMessage>
+                      ) : (
+                        <option value={option.value}>{option.value}</option>
+                      )}
+                    </Fragment>
+                  )),
+                  validations: {
+                    required: true,
+                  },
+                },
+              ],
+            ],
+          };
+        }
+
         return {
           items,
         };
@@ -751,6 +803,7 @@ const forms = {
           .isAllowed(getTrad('error.contentTypeName.reserved-name'))
           .required(errorsTrads.required),
         collectionName: yup.string(),
+        kind: yup.string().oneOf(['singleType', 'collectionType']),
       });
     },
     form: {
@@ -785,6 +838,32 @@ const forms = {
           });
         }
 
+        if (actionType === 'edit') {
+          items[0].push({
+            label: {
+              id: getTrad('modalForm.attribute.text.type-selection'),
+            },
+            name: 'kind',
+            type: 'booleanBox',
+            size: 12,
+            onChangeCallback: () =>
+              strapi.notification.info(getTrad('contentType.kind.change.warning')),
+            options: [
+              {
+                headerId: getTrad('menu.section.models.name.singular'),
+                descriptionId: getTrad('form.button.collection-type.description'),
+                value: 'collectionType',
+              },
+              {
+                headerId: getTrad('menu.section.single-types.name.singular'),
+                descriptionId: getTrad('form.button.single-type.description'),
+                value: 'singleType',
+              },
+            ],
+            validations: {},
+          });
+        }
+
         return { items };
       },
       advanced() {
@@ -810,12 +889,7 @@ const forms = {
     },
   },
   component: {
-    schema(
-      alreadyTakenAttributes,
-      componentCategory,
-      isEditing = false,
-      compoUid = null
-    ) {
+    schema(alreadyTakenAttributes, componentCategory, isEditing = false, compoUid = null) {
       const takenNames = isEditing
         ? alreadyTakenAttributes.filter(uid => uid !== compoUid)
         : alreadyTakenAttributes;
@@ -823,12 +897,7 @@ const forms = {
       return yup.object().shape({
         name: yup
           .string()
-          .unique(
-            errorsTrads.unique,
-            takenNames,
-            createComponentUid,
-            componentCategory
-          )
+          .unique(errorsTrads.unique, takenNames, createComponentUid, componentCategory)
           .isAllowed(getTrad('error.contentTypeName.reserved-name'))
           .required(errorsTrads.required),
         category: yup
@@ -861,9 +930,7 @@ const forms = {
         const isCreatingComponent = get(data, 'createComponent', false);
 
         const itemsToConcat = isCreatingComponent
-          ? [[{ type: 'spacer' }]].concat(
-              componentForm.base('componentToCreate.')
-            )
+          ? [[{ type: 'spacer' }]].concat(componentForm.base('componentToCreate.'))
           : [
               [{ type: 'spacer' }],
               [

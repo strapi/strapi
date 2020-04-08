@@ -11,19 +11,6 @@ const _ = require('lodash');
 const uuid = require('uuid/v4');
 
 module.exports = async () => {
-  if (!_.get(strapi.plugins['users-permissions'], 'config.jwtSecret')) {
-    const jwtSecret = uuid();
-    _.set(strapi.plugins['users-permissions'], 'config.jwtSecret', jwtSecret);
-
-    strapi.reload.isWatching = false;
-    await strapi.fs.writePluginFile(
-      'users-permissions',
-      'config/jwt.json',
-      JSON.stringify({ jwtSecret }, null, 2)
-    );
-    strapi.reload.isWatching = true;
-  }
-
   const pluginStore = strapi.store({
     environment: '',
     type: 'plugin',
@@ -126,7 +113,7 @@ module.exports = async () => {
             email: 'no-reply@strapi.io',
           },
           response_email: '',
-          object: '­Reset password',
+          object: 'Reset password',
           message: `<p>We heard that you lost your password. Sorry about that!</p>
 
 <p>But don’t worry! You can use the following link to reset your password:</p>
@@ -173,7 +160,22 @@ module.exports = async () => {
     await pluginStore.set({ key: 'advanced', value });
   }
 
-  return strapi.plugins[
+  await strapi.plugins[
     'users-permissions'
   ].services.userspermissions.initialize();
+
+  if (!_.get(strapi.plugins['users-permissions'], 'config.jwtSecret')) {
+    const jwtSecret = uuid();
+    _.set(strapi.plugins['users-permissions'], 'config.jwtSecret', jwtSecret);
+
+    strapi.reload.isWatching = false;
+
+    await strapi.fs.writePluginFile(
+      'users-permissions',
+      'config/jwt.json',
+      JSON.stringify({ jwtSecret }, null, 2)
+    );
+
+    strapi.reload.isWatching = true;
+  }
 };

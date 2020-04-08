@@ -1,10 +1,12 @@
 import React, { memo } from 'react';
 import { get, isEmpty } from 'lodash';
 import PropTypes from 'prop-types';
+import { CircleButton } from 'strapi-helper-plugin';
+import { Select } from '@buffetjs/core';
 
-import { InputSelect } from 'strapi-helper-plugin';
-import { Button, InputWrapper, Wrapper } from './components';
+import { InputWrapper, Wrapper } from './components';
 import Input from './Input';
+import Option from './Option';
 import getFilters from './utils';
 
 const styles = {
@@ -37,16 +39,15 @@ function FilterPickerOption({
   type,
 }) {
   const filtersOptions = getFilters(type);
+  const currentFilterName = get(modifiedData, [index, 'name']);
+  const currentFilterData = allowedAttributes.find(attr => attr.name === currentFilterName);
+  const options = get(currentFilterData, ['options'], null) || ['true', 'false'];
 
   return (
     <Wrapper borderLeft={!isEmpty(value)}>
       <InputWrapper>
-        <Button
-          type="button"
-          isRemoveButton
-          onClick={() => onRemoveFilter(index)}
-        />
-        <InputSelect
+        <CircleButton type="button" isRemoveButton onClick={() => onRemoveFilter(index)} />
+        <Select
           onChange={e => {
             // Change the attribute
             onChange(e);
@@ -55,13 +56,15 @@ function FilterPickerOption({
           }}
           name={`${index}.name`}
           value={get(modifiedData, [index, 'name'], '')}
-          selectOptions={allowedAttributes.map(attr => attr.name)}
+          options={allowedAttributes.map(attr => attr.name)}
           style={styles.select}
         />
-        <InputSelect
+        <Select
           onChange={onChange}
           name={`${index}.filter`}
-          selectOptions={filtersOptions}
+          options={filtersOptions.map(option => (
+            <Option {...option} key={option.value} />
+          ))}
           style={styles.selectMiddle}
           value={get(modifiedData, [index, 'filter'], '')}
         />
@@ -69,10 +72,10 @@ function FilterPickerOption({
           type={type}
           name={`${index}.value`}
           value={get(modifiedData, [index, 'value'], '')}
-          selectOptions={['true', 'false']}
+          options={options}
           onChange={onChange}
         />
-        {showAddButton && <Button type="button" onClick={onClickAddFilter} />}
+        {showAddButton && <CircleButton type="button" onClick={onClickAddFilter} />}
       </InputWrapper>
     </Wrapper>
   );

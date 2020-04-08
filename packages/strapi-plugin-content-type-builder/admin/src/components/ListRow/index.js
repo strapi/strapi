@@ -6,6 +6,7 @@ import { AttributeIcon } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
+import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
 import getTrad from '../../utils/getTrad';
 import Curve from '../../icons/Curve';
 import UpperFist from '../UpperFirst';
@@ -14,6 +15,7 @@ import Wrapper from './Wrapper';
 function ListRow({
   configurable,
   name,
+  dzName,
   nature,
   onClick,
   plugin,
@@ -28,41 +30,143 @@ function ListRow({
   repeatable,
   secondLoopComponentName,
   secondLoopComponentUid,
+  isNestedInDZComponent,
 }) {
-  const {
-    contentTypes,
-    isInDevelopmentMode,
-    removeAttribute,
-  } = useDataManager();
-  const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type)
-    ? 'number'
-    : type;
+  const { contentTypes, isInDevelopmentMode, modifiedData, removeAttribute } = useDataManager();
+  const isMorph = target === '*';
+  const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type) ? 'number' : type;
 
   let readableType = type;
+
   if (['integer', 'biginteger', 'float', 'decimal'].includes(type)) {
     readableType = 'number';
   } else if (['string'].includes(type)) {
     readableType = 'text';
   }
 
-  const contentTypeFriendlyName = get(
-    contentTypes,
-    [target, 'schema', 'name'],
-    ''
-  );
+  const contentTypeFriendlyName = get(contentTypes, [target, 'schema', 'name'], '');
   const src = target ? 'relation' : ico;
 
   const handleClick = () => {
+    if (isMorph) {
+      return;
+    }
+
     if (configurable !== false) {
+      const firstComponentCategory = get(
+        modifiedData,
+        ['components', firstLoopComponentUid, 'category'],
+        null
+      );
+      const secondComponentCategory = get(
+        modifiedData,
+        ['components', secondLoopComponentUid, 'category'],
+        null
+      );
+
       const attrType = nature ? 'relation' : type;
-      let headerDisplayName = mainTypeName;
+      const icoType = getAttributeDisplayedType(attrType);
+
+      let firstHeaderObject = {
+        header_label_1: mainTypeName,
+        header_icon_name_1: icoType,
+        header_icon_isCustom_1: false,
+        header_info_category_1: null,
+        header_info_name_1: null,
+      };
+      let secondHeaderObject = {
+        header_label_2: name,
+        header_icon_name_2: null,
+        header_icon_isCustom_2: false,
+        header_info_category_2: null,
+        header_info_name_2: null,
+      };
+      let thirdHeaderObject = {
+        header_icon_name_3: 'component',
+        header_icon_isCustom_3: false,
+        header_info_category_3: null,
+        header_info_name_3: null,
+      };
+      let fourthHeaderObject = {
+        header_icon_name_4: null,
+        header_icon_isCustom_4: false,
+        header_info_category_4: null,
+        header_info_name_4: null,
+      };
+      let fifthHeaderObject = {
+        header_icon_name_5: null,
+        header_icon_isCustom_5: false,
+        header_info_category_5: null,
+        header_info_name_5: null,
+      };
 
       if (firstLoopComponentName) {
-        headerDisplayName = firstLoopComponentName;
+        secondHeaderObject = {
+          header_label_2: firstLoopComponentName,
+          header_icon_name_2: 'component',
+          header_icon_isCustom_2: false,
+          header_info_category_2: firstComponentCategory,
+          header_info_name_2: firstLoopComponentName,
+        };
+
+        thirdHeaderObject = {
+          ...thirdHeaderObject,
+          header_label_3: name,
+          header_icon_name_3: null,
+        };
       }
 
       if (secondLoopComponentUid) {
-        headerDisplayName = secondLoopComponentName;
+        thirdHeaderObject = {
+          ...thirdHeaderObject,
+          header_label_3: secondLoopComponentName,
+          header_icon_name_3: 'component',
+          header_info_category_3: secondComponentCategory,
+          header_info_name_3: secondLoopComponentName,
+        };
+        fourthHeaderObject = {
+          ...fourthHeaderObject,
+          header_label_4: name,
+          header_icon_name_4: null,
+        };
+      }
+
+      if (isFromDynamicZone || isNestedInDZComponent) {
+        secondHeaderObject = {
+          header_label_2: dzName,
+          header_icon_name_2: 'dynamiczone',
+          header_icon_isCustom_2: false,
+          header_info_name_2: null,
+          header_info_category_2: null,
+        };
+        thirdHeaderObject = {
+          header_icon_name_3: 'component',
+          header_label_3: firstLoopComponentName,
+          header_info_name_3: firstComponentCategory,
+          header_info_category_3: firstComponentCategory,
+        };
+
+        if (!isNestedInDZComponent) {
+          fourthHeaderObject = {
+            header_icon_name_4: null,
+            header_icon_isCustom_4: false,
+            header_info_category_4: null,
+            header_label_4: name,
+          };
+        } else {
+          fourthHeaderObject = {
+            header_icon_name_4: 'components',
+            header_icon_isCustom_4: false,
+            header_info_category_4: secondComponentCategory,
+            header_info_name_4: secondLoopComponentName,
+            header_label_4: secondLoopComponentName,
+          };
+
+          fifthHeaderObject = {
+            ...fifthHeaderObject,
+            header_label_5: name,
+          };
+        }
       }
 
       onClick(
@@ -74,10 +178,11 @@ function ListRow({
         name,
         // Type of the attribute
         attrType,
-        headerDisplayName,
-        firstLoopComponentUid ? mainTypeName : null,
-        secondLoopComponentName ? firstLoopComponentName : null,
-        secondLoopComponentUid ? firstLoopComponentUid : null
+        firstHeaderObject,
+        secondHeaderObject,
+        thirdHeaderObject,
+        fourthHeaderObject,
+        fifthHeaderObject
       );
     }
   };
@@ -94,10 +199,7 @@ function ListRow({
   return (
     <Wrapper
       onClick={handleClick}
-      className={[
-        target ? 'relation-row' : '',
-        configurable ? 'clickable' : '',
-      ]}
+      className={[target ? 'relation-row' : '', configurable ? 'clickable' : '']}
       loopNumber={loopNumber}
     >
       <td>
@@ -111,7 +213,9 @@ function ListRow({
         {target ? (
           <div>
             <FormattedMessage
-              id={`${pluginId}.modelPage.attribute.relationWith`}
+              id={`${pluginId}.modelPage.attribute.${
+                isMorph ? 'relation-polymorphic' : 'relationWith'
+              }`}
             />
             &nbsp;
             <FormattedMessage id={`${pluginId}.from`}>
@@ -128,9 +232,7 @@ function ListRow({
           <>
             <FormattedMessage id={`${pluginId}.attribute.${readableType}`} />
             &nbsp;
-            {repeatable && (
-              <FormattedMessage id={getTrad('component.repeatable')} />
-            )}
+            {repeatable && <FormattedMessage id={getTrad('component.repeatable')} />}
           </>
         )}
       </td>
@@ -139,9 +241,11 @@ function ListRow({
           <>
             {configurable ? (
               <>
-                <button type="button" onClick={handleClick}>
-                  <FontAwesomeIcon className="link-icon" icon="pencil-alt" />
-                </button>
+                {!isMorph && (
+                  <button type="button" onClick={handleClick}>
+                    <FontAwesomeIcon className="link-icon" icon="pencil-alt" />
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={e => {
@@ -171,12 +275,13 @@ function ListRow({
 
 ListRow.defaultProps = {
   configurable: true,
+  dzName: null,
   firstLoopComponentName: null,
   firstLoopComponentUid: null,
   isFromDynamicZone: false,
+  isNestedInDZComponent: false,
   nature: null,
   onClick: () => {},
-  onClickDelete: () => {},
   plugin: null,
   repeatable: false,
   secondLoopComponentName: null,
@@ -188,10 +293,12 @@ ListRow.defaultProps = {
 
 ListRow.propTypes = {
   configurable: PropTypes.bool,
+  dzName: PropTypes.string,
   editTarget: PropTypes.string.isRequired,
   firstLoopComponentName: PropTypes.string,
   firstLoopComponentUid: PropTypes.string,
   isFromDynamicZone: PropTypes.bool,
+  isNestedInDZComponent: PropTypes.bool,
   mainTypeName: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   nature: PropTypes.string,

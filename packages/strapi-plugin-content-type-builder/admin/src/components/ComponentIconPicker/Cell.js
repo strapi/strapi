@@ -25,6 +25,8 @@ const Cell = styled.div`
         }
       `;
     }
+
+    return '';
   }}
 
   > svg {

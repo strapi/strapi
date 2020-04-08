@@ -1,4 +1,4 @@
-import { fromJS } from 'immutable';
+import { fromJS, List } from 'immutable';
 import pluralize from 'pluralize';
 import { snakeCase } from 'lodash';
 import makeUnique from '../../utils/makeUnique';
@@ -22,15 +22,17 @@ const reducer = (state, action) => {
       const { name, components, shouldAddComponents } = action;
 
       return state.updateIn(['modifiedData', name], list => {
+        let updatedList = list;
+
         if (shouldAddComponents) {
-          return makeUnique(list.concat(components));
+          updatedList = list.concat(components);
         } else {
-          return makeUnique(
-            list.filter(comp => {
-              return components.indexOf(comp) === -1;
-            })
-          );
+          updatedList = list.filter(comp => {
+            return components.indexOf(comp) === -1;
+          });
         }
+
+        return List(makeUnique(updatedList.toJS()));
       });
     }
     case 'ON_CHANGE':

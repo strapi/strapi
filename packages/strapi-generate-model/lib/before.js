@@ -4,19 +4,11 @@
  * Module dependencies
  */
 
-// Node.js core.
-const fs = require('fs');
-const path = require('path');
-
 // Public node modules.
 const _ = require('lodash');
 const pluralize = require('pluralize');
+const { nameToSlug, nameToCollectionName } = require('strapi-utils');
 
-// Fetch stub attribute template on initial load.
-const attributeTemplate = fs.readFileSync(
-  path.resolve(__dirname, '..', 'templates', 'attribute.template'),
-  'utf8'
-);
 /* eslint-disable prefer-template */
 
 /**
@@ -34,126 +26,118 @@ module.exports = (scope, cb) => {
     );
   }
 
+  // Format `id`.
+  const name = scope.name || nameToSlug(scope.id);
+
   // `scope.args` are the raw command line arguments.
   _.defaults(scope, {
-    id: _.trim(_.deburr(scope.id)),
-    idPluralized: pluralize.plural(_.trim(_.deburr(scope.id))),
+    name,
     environment: process.env.NODE_ENV || 'development',
-  });
-
-  // Determine default values based on the available scope.
-  _.defaults(scope, {
-    globalID: _.upperFirst(_.camelCase(scope.id)),
-    ext: '.js',
   });
 
   // Determine the destination path.
   let filePath;
   if (scope.args.api) {
-    filePath = `./api/${scope.args.api}`;
+    filePath = `./api/${scope.args.api}/models`;
   } else if (scope.args.plugin) {
     filePath = `./plugins/${scope.args.plugin}/models`;
   } else {
-    filePath = `./api/${scope.id}`;
+    filePath = `./api/${name}/models`;
   }
 
   // Take another pass to take advantage of the defaults absorbed in previous passes.
   _.defaults(scope, {
     rootPath: scope.rootPath,
     filePath,
-    filename: scope.globalID + scope.ext,
-    filenameSettings: scope.globalID + '.settings.json',
-  });
-
-  // Humanize output.
-  _.defaults(scope, {
-    humanizeId: _.camelCase(scope.id).toLowerCase(),
-    humanizedPath: '`' + scope.filePath + '`',
+    filename: `${name}.js`,
+    filenameSettings: `${name}.settings.json`,
   });
 
   // Validate optional attribute arguments.
   const invalidAttributes = [];
 
-  // Map attributes and split them.
-  scope.attributes = scope.args.attributes.map(attribute => {
-    const parts = attribute.split(':');
+  if (_.isPlainObject(scope.args.attributes)) {
+    scope.attributes = scope.args.attributes;
+  } else {
+    // Map attributes and split them for CLI.
+    scope.attributes = scope.args.attributes.map(attribute => {
+      if (_.isString(attribute)) {
+        const parts = attribute.split(':');
 
-    parts[1] = parts[1] ? parts[1] : 'string';
+        parts[1] = parts[1] || 'string';
 
-    // Handle invalid attributes.
-    if (!parts[1] || !parts[0]) {
-      invalidAttributes.push(
-        'Error: Invalid attribute notation `' + attribute + '`.'
-      );
-      return;
+        // Handle invalid attributes.
+        if (!parts[1] || !parts[0]) {
+          invalidAttributes.push('Error: Invalid attribute notation `' + attribute + '`.');
+          return;
+        }
+
+        return {
+          name: _.trim(_.deburr(parts[0].toLowerCase())),
+          params: {
+            type: _.trim(_.deburr(parts[1].toLowerCase())),
+          },
+        };
+      } else {
+        return _.has(attribute, 'params.type') ? attribute : undefined;
+      }
+    });
+
+    scope.attributes = _.compact(scope.attributes);
+
+    // Handle invalid action arguments.
+    // Send back invalidActions.
+    if (invalidAttributes.length) {
+      return cb.invalid(invalidAttributes);
     }
 
-    return {
-      name: _.trim(_.deburr(_.camelCase(parts[0]).toLowerCase())),
-      type: _.trim(_.deburr(_.camelCase(parts[1]).toLowerCase())),
-    };
-  });
+    // Make sure there aren't duplicates.
+    if (
+      _(scope.attributes.map(attribute => attribute.name))
+        .uniq()
+        .valueOf().length !== scope.attributes.length
+    ) {
+      return cb.invalid('Duplicate attributes not allowed!');
+    }
+
+    // Render some stringified code from the action template
+    // and make it available in our scope for use later on.
+    scope.attributes = scope.attributes.reduce((acc, attribute) => {
+      acc[attribute.name] = attribute.params;
+      return acc;
+    }, {});
+  }
 
   // Set collectionName
   scope.collectionName = _.has(scope.args, 'collectionName')
     ? scope.args.collectionName
-    : undefined;
+    : nameToCollectionName(pluralize(scope.id));
 
   // Set description
-  scope.description = _.has(scope.args, 'description')
-    ? scope.args.description
-    : undefined;
+  scope.description = _.has(scope.args, 'description') ? scope.args.description : undefined;
 
-  // Handle invalid action arguments.
-  // Send back invalidActions.
-  if (invalidAttributes.length) {
-    return cb.invalid(invalidAttributes);
-  }
+  // Set connection
+  scope.connection = _.get(scope.args, 'connection', undefined);
 
-  // Make sure there aren't duplicates.
-  if (
-    _(scope.attributes.map(attribute => attribute.name))
-      .uniq()
-      .valueOf().length !== scope.attributes.length
-  ) {
-    return cb.invalid('Duplicate attributes not allowed!');
-  }
-
-  // Render some stringified code from the action template
-  // and make it available in our scope for use later on.
-  scope.attributes = scope.attributes
-    .map(attribute => {
-      const compiled = _.template(attributeTemplate);
-      return _.trimEnd(
-        _.unescape(
-          compiled({
-            name: attribute.name,
-            type: attribute.type,
-          })
-        )
-      );
-    })
-    .join(',\n');
-
-  // Get default connection
-  try {
-    scope.connection =
-      scope.args.connection ||
-      JSON.parse(
-        fs.readFileSync(
-          path.resolve(
-            scope.rootPath,
-            'config',
-            'environments',
-            scope.environment,
-            'database.json'
-          )
-        )
-      ).defaultConnection ||
-      '';
-  } catch (err) {
-    return cb.invalid(err);
-  }
+  scope.schema = JSON.stringify(
+    {
+      kind: 'collectionType',
+      connection: scope.connection,
+      collectionName: scope.collectionName,
+      info: {
+        name: scope.id,
+        description: scope.description,
+      },
+      options: {
+        timestamps: true,
+        increments: true,
+        comment: '',
+      },
+      attributes: scope.attributes,
+    },
+    null,
+    2
+  );
 
   // Trigger callback with no error to proceed.
   return cb();

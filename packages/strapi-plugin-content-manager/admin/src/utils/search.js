@@ -63,6 +63,7 @@ const generateSearchFromFilters = filters => {
             const key =
               curr.filter === '=' ? curr.name : `${curr.name}${curr.filter}`;
             acc.push(`${key}=${curr.value}`);
+
             return acc;
           }, [])
           .join('&');

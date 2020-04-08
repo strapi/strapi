@@ -20,9 +20,8 @@ const populateFetch = (definition, options) => {
   } else if (_.isEmpty(options.withRelated)) {
     options.withRelated = populateComponents(definition);
   } else {
-    options.withRelated = formatPopulateOptions(
-      definition,
-      options.withRelated
+    options.withRelated = formatPopulateOptions(definition, options.withRelated).concat(
+      populateComponents(definition)
     );
   }
 };
@@ -44,7 +43,7 @@ const populateAssociations = (definition, { prefix = '' } = {}) => {
 };
 
 const populateBareAssociations = (definition, { prefix = '' } = {}) => {
-  return definition.associations
+  return (definition.associations || [])
     .filter(ast => ast.autoPopulate !== false)
     .map(assoc => {
       if (isPolymorphic({ assoc })) {
@@ -54,8 +53,21 @@ const populateBareAssociations = (definition, { prefix = '' } = {}) => {
         });
       }
 
-      return `${prefix}${assoc.alias}`;
-    });
+      const path = `${prefix}${assoc.alias}`;
+      const assocModel = findModelByAssoc({ assoc });
+
+      const polyAssocs = assocModel.associations
+        .filter(assoc => isPolymorphic({ assoc }))
+        .map(assoc =>
+          formatPolymorphicPopulate({
+            assoc,
+            prefix: `${path}.`,
+          })
+        );
+
+      return [path, ...polyAssocs];
+    })
+    .reduce((acc, val) => acc.concat(val), []);
 };
 
 const formatAssociationPopulate = ({ assoc, prefix = '' }) => {
@@ -160,9 +172,7 @@ const formatPopulateOptions = (definition, withRelated) => {
         continue;
       }
 
-      const assoc = tmpModel.associations.find(
-        association => association.alias === part
-      );
+      const assoc = tmpModel.associations.find(association => association.alias === part);
 
       if (!assoc) return acc;
 

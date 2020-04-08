@@ -1,6 +1,6 @@
 # Logging
 
-Strapi relies on an extremely fast Node.js logger called Pino that includes a shell utility to pretty-print its log files. It provides great performances and doesn't slow down your app. The logger is accessible through the global variable `strapi.log` or the request's context `ctx.log` if enabled.
+Strapi relies on an extremely fast Node.js logger called Pino that includes a shell utility to pretty-print its log files. It provides great performance and doesn't slow down your app. The logger is accessible through the global variable `strapi.log` or the request's context `ctx.log` if enabled.
 
 ```js
 // Folder.js controller
@@ -34,9 +34,9 @@ module.exports = {
 The global logger is configured by environment variables.
 
 - `STRAPI_LOG_LEVEL`: Can be fatal, error, warn, info, debug or trace.
-- `STRAPI_LOG_TIMESTAMP`: Can be true/false
-- `STRAPI_LOG_PRETTY_PRINT`: Can be true/false
-- `STRAPI_LOG_FORCE_COLOR`: Can be true/false
+- `STRAPI_LOG_TIMESTAMP`: Can be true/false.
+- `STRAPI_LOG_PRETTY_PRINT`: Can be true/false.
+- `STRAPI_LOG_FORCE_COLOR`: Can be true/false.
 
 ## Request logging middleware
 
@@ -54,8 +54,8 @@ To configure the request-logger middleware, you have to edit the following file 
 }
 ```
 
-- `level`: defines the desired logging level (fatal, error, warn, info, debug, trace).
-- `exposeInContext`: allows access to the logger through the context.
-- `requests`: incoming HTTP requests will be logged.
+- `level`: Defines the desired logging level (fatal, error, warn, info, debug, trace).
+- `exposeInContext`: Allows access to the logger through the context.
+- `requests`: Incoming HTTP requests will be logged.
 
 To find more details about the logger API, please refer to the [Pino documentation](http://getpino.io/#/).

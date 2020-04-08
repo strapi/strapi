@@ -1,11 +1,13 @@
 'use strict';
 
-module.exports = function createQuery({ connectorQuery, model }) {
-  return new Query(connectorQuery, model);
+const { replaceIdByPrimaryKey } = require('../utils/primary-key');
+
+module.exports = function createQuery(opts) {
+  return new Query(opts);
 };
 
 class Query {
-  constructor(connectorQuery, model) {
+  constructor({ model, connectorQuery }) {
     this.connectorQuery = connectorQuery;
     this.model = model;
   }
@@ -35,43 +37,49 @@ class Query {
     }
 
     if (typeof mapping[this.orm] !== 'function') {
-      throw new Error(
-        `Custom queries must be functions received ${typeof mapping[this.orm]}`
-      );
+      throw new Error(`Custom queries must be functions received ${typeof mapping[this.orm]}`);
     }
 
     return mapping[this.model.orm].call(this, { model: this.model });
   }
 
-  async find(...args) {
-    return this.connectorQuery.find(...args);
+  find(params = {}, ...args) {
+    const newParams = replaceIdByPrimaryKey(params, this.model);
+    return this.connectorQuery.find(newParams, ...args);
   }
 
-  async findOne(...args) {
-    return this.connectorQuery.findOne(...args);
+  findOne(params = {}, ...args) {
+    const newParams = replaceIdByPrimaryKey(params, this.model);
+    return this.connectorQuery.findOne(newParams, ...args);
   }
 
-  async create(...args) {
-    return this.connectorQuery.create(...args);
+  create(params = {}, ...args) {
+    const newParams = replaceIdByPrimaryKey(params, this.model);
+    return this.connectorQuery.create(newParams, ...args);
   }
 
-  async update(...args) {
-    return this.connectorQuery.update(...args);
+  update(params = {}, ...args) {
+    const newParams = replaceIdByPrimaryKey(params, this.model);
+    return this.connectorQuery.update(newParams, ...args);
   }
 
-  async delete(...args) {
-    return this.connectorQuery.delete(...args);
+  delete(params = {}, ...args) {
+    const newParams = replaceIdByPrimaryKey(params, this.model);
+    return this.connectorQuery.delete(newParams, ...args);
   }
 
-  async count(...args) {
-    return this.connectorQuery.count(...args);
+  count(params = {}, ...args) {
+    const newParams = replaceIdByPrimaryKey(params, this.model);
+    return this.connectorQuery.count(newParams, ...args);
   }
 
-  async search(...args) {
-    return this.connectorQuery.search(...args);
+  search(params = {}, ...args) {
+    const newParams = replaceIdByPrimaryKey(params, this.model);
+    return this.connectorQuery.search(newParams, ...args);
   }
 
-  async countSearch(...args) {
-    return this.connectorQuery.countSearch(...args);
+  countSearch(params = {}, ...args) {
+    const newParams = replaceIdByPrimaryKey(params, this.model);
+    return this.connectorQuery.countSearch(newParams, ...args);
   }
 }

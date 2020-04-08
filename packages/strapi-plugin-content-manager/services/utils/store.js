@@ -29,24 +29,24 @@ const getModelConfiguration = async key => {
 };
 
 const setModelConfiguration = async (key, value) => {
-  const config = (await getStore().get({ key: configurationKey(key) })) || {};
-
+  const storedConfig = (await getStore().get({ key: configurationKey(key) })) || {};
+  const currentConfig = { ...storedConfig };
   Object.keys(value).forEach(key => {
     if (value[key] !== null && value[key] !== undefined) {
-      _.set(config, key, value[key]);
+      _.set(currentConfig, key, value[key]);
     }
   });
 
-  return getStore().set({
-    key: configurationKey(key),
-    value: config,
-  });
+  if (!_.isEqual(currentConfig, storedConfig)) {
+    return getStore().set({
+      key: configurationKey(key),
+      value: currentConfig,
+    });
+  }
 };
 
 const deleteKey = key => {
-  return strapi
-    .query('core_store')
-    .delete({ key: `plugin_content_manager_configuration_${key}` });
+  return strapi.query('core_store').delete({ key: `plugin_content_manager_configuration_${key}` });
 };
 
 function findByKeyQuery({ model }, key) {
@@ -79,8 +79,7 @@ const moveKey = (oldKey, newKey) => {
   );
 };
 
-const getAllConfigurations = () =>
-  findByKey('plugin_content_manager_configuration');
+const getAllConfigurations = () => findByKey('plugin_content_manager_configuration');
 
 module.exports = {
   getAllConfigurations,

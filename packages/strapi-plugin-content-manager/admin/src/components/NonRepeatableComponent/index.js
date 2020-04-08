@@ -1,3 +1,6 @@
+/* eslint-disable react/no-array-index-key */
+/* eslint-disable import/no-cycle */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';

@@ -43,6 +43,10 @@ module.exports = function createSchemaHandler(infos) {
       return initialState.category;
     },
 
+    get kind() {
+      return _.get(state.schema, 'kind', 'collectionType');
+    },
+
     get uid() {
       return state.uid;
     },
@@ -162,9 +166,7 @@ module.exports = function createSchemaHandler(infos) {
           Array.isArray(attr.components) &&
           attr.components.includes(uid)
         ) {
-          const updatedComponentList = attributes[key].components.filter(
-            val => val !== uid
-          );
+          const updatedComponentList = attributes[key].components.filter(val => val !== uid);
           this.set(['attributes', key, 'components'], updatedComponentList);
         }
       });
@@ -187,9 +189,7 @@ module.exports = function createSchemaHandler(infos) {
           Array.isArray(attr.components) &&
           attr.components.includes(uid)
         ) {
-          const updatedComponentList = attr.components.map(val =>
-            val === uid ? newUID : val
-          );
+          const updatedComponentList = attr.components.map(val => (val === uid ? newUID : val));
 
           this.set(['attributes', key, 'components'], updatedComponentList);
         }
@@ -213,7 +213,19 @@ module.exports = function createSchemaHandler(infos) {
       }
       if (modified === true) {
         await fse.ensureFile(filePath);
-        await fse.writeJSON(filePath, state.schema, { spaces: 2 });
+
+        await fse.writeJSON(
+          filePath,
+          {
+            kind: state.schema.kind,
+            connection: state.schema.connection,
+            collectionName: state.schema.collectionName,
+            info: state.schema.info,
+            options: state.schema.options,
+            attributes: state.schema.attributes,
+          },
+          { spaces: 2 }
+        );
 
         // remove from oldPath
         if (initialPath !== filePath) {

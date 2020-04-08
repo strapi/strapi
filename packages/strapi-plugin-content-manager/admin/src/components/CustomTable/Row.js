@@ -5,11 +5,14 @@ import { get, isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import moment from 'moment';
 import { IcoContainer, useGlobalContext } from 'strapi-helper-plugin';
 import useListView from '../../hooks/useListView';
-
+import DATE_FORMATS from '../../utils/DATE_FORMATS';
 import CustomInputCheckbox from '../CustomInputCheckbox';
 import MediaPreviewList from '../MediaPreviewList';
-
 import { ActionContainer, Truncate, Truncated } from './styledComponents';
+
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+
+const dateToUtcTime = date => moment.parseZone(date).utc();
 
 const getDisplayedValue = (type, value, name) => {
   switch (toLower(type)) {
@@ -17,9 +20,8 @@ const getDisplayedValue = (type, value, name) => {
     case 'text':
     case 'email':
     case 'enumeration':
-      return (value && !isEmpty(toString(value))) || name === 'id'
-        ? toString(value)
-        : '-';
+    case 'uid':
+      return (value && !isEmpty(toString(value))) || name === 'id' ? toString(value) : '-';
     case 'float':
     case 'integer':
     case 'biginteger':
@@ -28,7 +30,6 @@ const getDisplayedValue = (type, value, name) => {
     case 'boolean':
       return value !== null ? toString(value) : '-';
     case 'date':
-    case 'time':
     case 'datetime':
     case 'timestamp': {
       if (value == null) {
@@ -36,14 +37,9 @@ const getDisplayedValue = (type, value, name) => {
       }
 
       const date =
-        value && isObject(value) && value._isAMomentObject === true
-          ? JSON.stringify(value)
-          : value;
+        value && isObject(value) && value._isAMomentObject === true ? JSON.stringify(value) : value;
 
-      return moment
-        .parseZone(date)
-        .utc()
-        .format('dddd, MMMM Do YYYY');
+      return dateToUtcTime(date).format(DATE_FORMATS[type]);
     }
     case 'password':
       return '••••••••';
@@ -51,18 +47,28 @@ const getDisplayedValue = (type, value, name) => {
     case 'file':
     case 'files':
       return value;
+    case 'time': {
+      if (!value) {
+        return '-';
+      }
+
+      const [hour, minute, second] = value.split(':');
+      const timeObj = {
+        hour,
+        minute,
+        second,
+      };
+      const date = moment().set(timeObj);
+
+      return date.format(DATE_FORMATS.time);
+    }
     default:
       return '-';
   }
 };
 
 function Row({ goTo, isBulkable, row, headers }) {
-  const {
-    entriesToDelete,
-    onChangeBulk,
-    onClickDelete,
-    schema,
-  } = useListView();
+  const { entriesToDelete, onChangeBulk, onClickDelete, schema } = useListView();
 
   const memoizedDisplayedValue = useCallback(
     name => {
@@ -82,10 +88,7 @@ function Row({ goTo, isBulkable, row, headers }) {
           <CustomInputCheckbox
             name={row.id}
             onChange={onChangeBulk}
-            value={
-              entriesToDelete.filter(id => toString(id) === toString(row.id))
-                .length > 0
-            }
+            value={entriesToDelete.filter(id => toString(id) === toString(row.id)).length > 0}
           />
         </td>
       )}
@@ -97,9 +100,7 @@ function Row({ goTo, isBulkable, row, headers }) {
                 <Truncated>{memoizedDisplayedValue(header.name)}</Truncated>
               </Truncate>
             ) : (
-              <MediaPreviewList
-                files={memoizedDisplayedValue(header.name)}
-              ></MediaPreviewList>
+              <MediaPreviewList files={memoizedDisplayedValue(header.name)} />
             )}
           </td>
         );

@@ -1,5 +1,7 @@
 import styled from 'styled-components';
 
+/* eslint-disable */
+
 const BannerWrapper = styled.button`
   display: flex;
   height: 36px;
@@ -44,7 +46,6 @@ const BannerWrapper = styled.button`
   }}
 
   border-bottom: 0;
-  line-height: 36px;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -91,14 +92,11 @@ const BannerWrapper = styled.button`
   &:focus {
     outline: 0;;
   }
-  span, div, button {
-    line-height: 16px;
-  }
+
 
   .img-wrapper {
     width: 19px;
     height: 19px;
-    align-self: center;
     margin-right: 19px;
     border-radius: 50%;
     background-color: ${({ hasErrors, isOpen }) => {
@@ -109,16 +107,14 @@ const BannerWrapper = styled.button`
       } else {
         return '#F3F4F4';
       }
-    }}
+    }};
     text-align: center;
-    line-height: 19px;
 
-    ${({ isOpen }) => !isOpen && 'transform: rotate(180deg)'}
-
-
+    ${({ isOpen }) => !isOpen && 'transform: rotate(180deg)'};
   }
 
   .cta-wrapper {
+    display: flex;
     margin-left: auto;
     > button {
       padding: 0;
@@ -128,7 +124,6 @@ const BannerWrapper = styled.button`
       svg {
         font-size: 10px;
         path {
-          // fill: #292b2c;
           fill: #4B515A;
         }
       }
@@ -140,7 +135,6 @@ const BannerWrapper = styled.button`
   }
 
   ${({ hasErrors, isOpen }) => {
-    // let fill = '#B4B6BA';
     let fill = '#ABB3C2';
     let trashFill = '#4B515A';
 
@@ -150,7 +144,7 @@ const BannerWrapper = styled.button`
     }
 
     if (hasErrors) {
-      fill = '#FAA684';
+      fill = '#F64D0A';
       trashFill = '#F64D0A';
     }
 
@@ -171,6 +165,11 @@ const BannerWrapper = styled.button`
   }}
 
   webkit-font-smoothing: antialiased;
+
+  > div {
+    align-self: center;
+    margin-top: -2px;
+  }
 `;
 
 export default BannerWrapper;

@@ -1,13 +1,12 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
+import { OverlayBlocker } from 'strapi-helper-plugin';
 import {
   disableGlobalOverlayBlocker,
   enableGlobalOverlayBlocker,
   updatePlugin,
 } from '../../App/actions';
-
-import { OverlayBlocker } from 'strapi-helper-plugin';
 
 import { Admin, mapDispatchToProps } from '../index';
 import { setAppError } from '../actions';
@@ -89,12 +88,12 @@ describe('<Admin />', () => {
     });
   });
 
-  describe('renderMarketPlace instance', () => {
-    it('should return the MarketPlace container', () => {
+  describe('renderRoute instance', () => {
+    it('should render the routes', () => {
       const renderedComponent = shallow(<Admin {...props} />);
-      const { renderMarketPlace } = renderedComponent.instance();
+      const { renderRoute } = renderedComponent.instance();
 
-      expect(renderMarketPlace()).not.toBeNull();
+      expect(renderRoute({}, () => null)).not.toBeNull();
     });
   });
 

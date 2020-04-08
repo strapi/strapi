@@ -1,7 +1,9 @@
 import styled, { css } from 'styled-components';
 
+/* eslint-disable */
+
 const SelectWrapper = styled.div`
-  min-width: ${({ isFullScreen }) => (isFullScreen ? '161px' : '115px')}
+  min-width: ${({ isFullScreen }) => (isFullScreen ? '161px' : '115px')};
   margin-left: 15px;
   > select {
     ${({ isFullScreen }) => {

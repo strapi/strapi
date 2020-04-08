@@ -2,15 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Prompt, useHistory, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { get, has, isEqual } from 'lodash';
-import {
-  BackHeader,
-  ListWrapper,
-  useGlobalContext,
-  LayoutIcon,
-} from 'strapi-helper-plugin';
+import { BackHeader, ListWrapper, useGlobalContext, LayoutIcon } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
 import ListViewContext from '../../contexts/ListViewContext';
 import convertAttrObjToArray from '../../utils/convertAttrObjToArray';
+import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
 import ListRow from '../../components/ListRow';
@@ -22,6 +18,8 @@ import pluginId from '../../pluginId';
 import ListHeader from '../../components/ListHeader';
 import LeftMenu from '../LeftMenu';
 import Wrapper from './Wrapper';
+
+/* eslint-disable indent */
 
 const ListView = () => {
   const {
@@ -53,59 +51,60 @@ const ListView = () => {
   }, []);
 
   const firstMainDataPath = isInContentTypeView ? 'contentType' : 'component';
-  const mainDataTypeAttributesPath = [
-    firstMainDataPath,
-    'schema',
-    'attributes',
-  ];
+  const mainDataTypeAttributesPath = [firstMainDataPath, 'schema', 'attributes'];
   const targetUid = get(modifiedData, [firstMainDataPath, 'uid']);
+  const contentTypeKind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], null);
 
   const attributes = get(modifiedData, mainDataTypeAttributesPath, {});
   const attributesLength = Object.keys(attributes).length;
-  const currentDataName = get(
-    initialData,
-    [firstMainDataPath, 'schema', 'name'],
-    ''
-  );
+  const currentDataName = get(initialData, [firstMainDataPath, 'schema', 'name'], '');
   const isFromPlugin = has(initialData, [firstMainDataPath, 'plugin']);
   const hasModelBeenModified = !isEqual(modifiedData, initialData);
   const forTarget = isInContentTypeView ? 'contentType' : 'component';
 
-  const handleClickOpenModalAddField = async (
+  const handleClickAddField = async (
     forTarget,
     targetUid,
-    headerDisplayName,
-    headerDisplayCategory = null,
-    headerDisplaySubCategory = null,
-    subTargetUid = null
+    firstHeaderObj,
+    secondHeaderObj,
+    thirdHeaderObj,
+    fourthHeaderObj
   ) => {
+    // disable the prompt
+    await wait();
+
     const searchObj = {
       modalType: 'chooseAttribute',
       forTarget,
       targetUid,
-      headerDisplayName,
-      headerDisplayCategory,
-      headerDisplaySubCategory,
-      subTargetUid,
+      ...firstHeaderObj,
+      ...secondHeaderObj,
+      ...thirdHeaderObj,
+      ...fourthHeaderObj,
     };
 
-    // Disable the prompt
-    await wait();
-
-    push({ search: makeSearch(searchObj, true) });
+    push({ search: makeSearch(searchObj) });
   };
 
   const handleClickAddComponentToDZ = async dzName => {
+    const firstHeaderObject = {
+      header_label_1: currentDataName,
+      header_icon_name_1: 'dynamiczone',
+      header_icon_isCustom_1: false,
+    };
+    const secondHeaderObj = {
+      header_label_2: dzName,
+    };
     const search = {
       modalType: 'addComponentToDynamicZone',
       forTarget: 'contentType',
       targetUid,
-      headerDisplayCategory: currentDataName,
       dynamicZoneTarget: dzName,
       settingType: 'base',
       step: '1',
       actionType: 'edit',
-      headerDisplayName: dzName,
+      ...firstHeaderObject,
+      ...secondHeaderObj,
     };
 
     await wait();
@@ -118,30 +117,13 @@ const ListView = () => {
     targetUid,
     attributeName,
     type,
-    headerDisplayName,
-    headerDisplayCategory = null,
-    headerDisplaySubCategory = null,
-    subTargetUid = null
+    firstHeaderObj,
+    secondHeaderObj,
+    thirdHeaderObj,
+    fourthHeaderObj,
+    fifthHeaderObj
   ) => {
-    let attributeType;
-
-    switch (type) {
-      case 'integer':
-      case 'biginteger':
-      case 'decimal':
-      case 'float':
-        attributeType = 'number';
-        break;
-      case 'string':
-      case 'text':
-        attributeType = 'text';
-        break;
-      case '':
-        attributeType = 'relation';
-        break;
-      default:
-        attributeType = type;
-    }
+    const attributeType = getAttributeDisplayedType(type);
 
     await wait();
 
@@ -153,11 +135,12 @@ const ListView = () => {
       targetUid,
       attributeName,
       attributeType,
-      headerDisplayName,
-      headerDisplayCategory,
-      headerDisplaySubCategory,
       step: type === 'component' ? '2' : null,
-      subTargetUid,
+      ...firstHeaderObj,
+      ...secondHeaderObj,
+      ...thirdHeaderObj,
+      ...fourthHeaderObj,
+      ...fifthHeaderObj,
     };
 
     await wait();
@@ -166,24 +149,23 @@ const ListView = () => {
   };
 
   const getDescription = () => {
-    const description = get(
-      modifiedData,
-      [firstMainDataPath, 'schema', 'description'],
-      null
-    );
+    const description = get(modifiedData, [firstMainDataPath, 'schema', 'description'], null);
 
-    return description
-      ? description
-      : formatMessage({
-          id: `${pluginId}.modelPage.contentHeader.emptyDescription.description`,
-        });
+    return (
+      description ||
+      formatMessage({
+        id: `${pluginId}.modelPage.contentHeader.emptyDescription.description`,
+      })
+    );
   };
 
   const wait = async () => {
     togglePrompt(false);
+
     return new Promise(resolve => setTimeout(resolve, 100));
   };
   const label = get(modifiedData, [firstMainDataPath, 'schema', 'name'], '');
+  const kind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], '');
 
   const headerProps = {
     actions: isInDevelopmentMode
@@ -193,21 +175,21 @@ const ListView = () => {
             onClick: () => {
               toggleModalCancel();
             },
-            title: formatMessage({
+            label: formatMessage({
               id: `${pluginId}.form.button.cancel`,
             }),
             type: 'button',
-            disabled: isEqual(modifiedData, initialData) ? true : false,
+            disabled: isEqual(modifiedData, initialData),
           },
           {
             className: 'button-submit',
             color: 'success',
             onClick: () => submitData(),
-            title: formatMessage({
+            label: formatMessage({
               id: `${pluginId}.form.button.save`,
             }),
             type: 'submit',
-            disabled: isEqual(modifiedData, initialData) ? true : false,
+            disabled: isEqual(modifiedData, initialData),
           },
         ]
       : [],
@@ -220,8 +202,13 @@ const ListView = () => {
               onClick: async () => {
                 await wait();
 
-                if (firstMainDataPath === 'contentType') {
+                const contentType = kind || firstMainDataPath;
+
+                if (contentType === 'collectionType') {
                   emitEvent('willEditNameOfContentType');
+                }
+                if (contentType === 'singleType') {
+                  emitEvent('willEditNameOfSingleType');
                 }
 
                 push({
@@ -231,7 +218,11 @@ const ListView = () => {
                     settingType: 'base',
                     forTarget: firstMainDataPath,
                     targetUid,
-                    headerDisplayName: label,
+                    header_label_1: label,
+                    header_icon_isCustom_1: false,
+                    header_icon_name_1:
+                      contentType === 'singleType' ? contentType : firstMainDataPath,
+                    headerId: getTrad('modalForm.header-edit'),
                   }),
                 });
               },
@@ -244,9 +235,7 @@ const ListView = () => {
   const listTitle = [
     formatMessage(
       {
-        id: `${pluginId}.table.attributes.title.${
-          attributesLength > 1 ? 'plural' : 'singular'
-        }`,
+        id: `${pluginId}.table.attributes.title.${attributesLength > 1 ? 'plural' : 'singular'}`,
       },
       { number: attributesLength }
     ),
@@ -258,13 +247,19 @@ const ListView = () => {
     color: 'primary',
     label: formatMessage({ id: `${pluginId}.button.attributes.add.another` }),
     onClick: () => {
-      handleClickOpenModalAddField(forTarget, targetUid, currentDataName);
+      const headerDisplayObject = {
+        header_label_1: currentDataName,
+        header_icon_name_1: forTarget === 'contentType' ? contentTypeKind : forTarget,
+        header_icon_isCustom_1: false,
+      };
+      handleClickAddField(forTarget, targetUid, headerDisplayObject);
     },
   };
   const goToCMSettingsPage = () => {
     const endPoint = isInContentTypeView
-      ? `/plugins/content-manager/${targetUid}/ctm-configurations/edit-settings/content-types`
+      ? `/plugins/content-manager/${contentTypeKind}/${targetUid}/ctm-configurations/edit-settings/content-types`
       : `/plugins/content-manager/ctm-configurations/edit-settings/components/${targetUid}/`;
+
     push(endPoint);
   };
 
@@ -281,20 +276,10 @@ const ListView = () => {
     ? [{ ...configureButtonProps }, { ...addButtonProps }]
     : [configureButtonProps];
 
-  const handleClickOnTrashIcon = () => {};
-
   const CustomRow = props => {
     const { name } = props;
 
-    return (
-      <ListRow
-        {...props}
-        attributeName={name}
-        name={name}
-        onClick={handleClickEditField}
-        onClickDelete={handleClickOnTrashIcon}
-      />
-    );
+    return <ListRow {...props} attributeName={name} name={name} onClick={handleClickEditField} />;
   };
 
   CustomRow.defaultProps = {
@@ -306,9 +291,7 @@ const ListView = () => {
   };
 
   return (
-    <ListViewContext.Provider
-      value={{ openModalAddField: handleClickOpenModalAddField }}
-    >
+    <ListViewContext.Provider value={{ openModalAddField: handleClickAddField }}>
       <Wrapper>
         <BackHeader onClick={goBack} />
         <Prompt
@@ -318,10 +301,7 @@ const ListView = () => {
         <div className="container-fluid">
           <div className="row">
             <LeftMenu wait={wait} />
-            <div
-              className="col-md-9 content"
-              style={{ paddingLeft: '30px', paddingRight: '30px' }}
-            >
+            <div className="col-md-9 content" style={{ paddingLeft: '30px', paddingRight: '30px' }}>
               <Header {...headerProps} />
 
               <ListWrapper style={{ marginBottom: 80 }}>
@@ -336,7 +316,7 @@ const ListView = () => {
                   mainTypeName={currentDataName}
                   editTarget={forTarget}
                   isMain
-                ></List>
+                />
               </ListWrapper>
             </div>
           </div>
