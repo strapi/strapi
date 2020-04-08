@@ -194,10 +194,7 @@ module.exports = function(strapi) {
   const host = strapi.config.get('server.host');
 
   let hostname = host;
-  if (
-    strapi.config.environment === 'development' &&
-    ['127.0.0.1', '0.0.0.0'].includes(strapi.config.host)
-  ) {
+  if (strapi.config.environment === 'development' && ['127.0.0.1', '0.0.0.0'].includes(host)) {
     hostname = 'localhost';
   }
 

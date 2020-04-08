@@ -46,11 +46,26 @@ module.exports = (dir, initialConfig = {}) => {
     server: {
       host: process.env.HOST || process.env.HOSTNAME || 'localhost',
       port: process.env.PORT || 1337,
+      proxy: { enabled: false },
+      cron: { enabled: false },
+      admin: { autoOpen: false },
     },
     admin: {},
     paths: CONFIG_PATHS,
-    middleware: { load: {}, settings: {} },
-    hook: { load: {}, settings: {} },
+    middleware: {
+      timeout: 1000,
+      load: {
+        before: ['responseTime', 'logger', 'cors', 'responses', 'gzip'],
+        order: [],
+        after: ['parser', 'router'],
+      },
+      settings: {},
+    },
+    hook: {
+      timeout: 1000,
+      load: { before: [], order: [], after: [] },
+      settings: {},
+    },
     routes: {},
     info: pkgJSON,
     policies: loadPolicies(path.resolve(configDir, 'policies')),

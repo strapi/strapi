@@ -54,8 +54,6 @@ class Strapi {
     this.plugins = {};
     this.config = loadConfiguration(this.dir, opts);
 
-    // this.config._dump();
-
     // internal services.
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
