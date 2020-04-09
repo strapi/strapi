@@ -174,7 +174,7 @@ const computePopulatedPaths = ({ model, populate = [], where = [] }) => {
 		.map(el => (Array.isArray(el) 
 			? el.join('.') 
 			: (el.path) 
-				? pathObjToPathString(el)
+				? utils.pathObjToPathString(el)
 				: el))
     .map(path => findModelPath({ rootModel: model, path }))
     .map(path => {
