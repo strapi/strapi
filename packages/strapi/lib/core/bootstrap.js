@@ -25,11 +25,6 @@ module.exports = function(strapi) {
   // Set current connections.
   strapi.config.connections = strapi.config.get('database.connections', {});
 
-  // FIXME:
-  if (_.get(strapi.config, 'language.enabled')) {
-    strapi.config.language.locales = Object.keys(_.get(strapi.config, 'locales', {}));
-  }
-
   strapi.contentTypes = {};
 
   // Set models.
