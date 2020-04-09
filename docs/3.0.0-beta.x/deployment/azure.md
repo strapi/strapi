@@ -449,6 +449,14 @@ Below are some optional additions to secure your virtual machine and Strapi serv
 
 #### 1. Securing your virtual machine with a firewall
 
+Azure virtual machines come with a firewall at the host level (see previous instructions [here](#_5-networking)). However it is recommended that you use the built in Ubuntu firewall as well known as UFW or Uncomplicated Firewall.
+
+See the following [DigitalOcean guide](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-firewall-with-ufw-on-ubuntu-18-04) to see some examples of using UFW.
+
 #### 2. Installing a proxy for SSL
 
+There are many different types of proxy services you could use, anything from load balancing, offloading SSL, to fault tolerance. You can view a few [examples](./proxy) based around Strapi and basic SSL offloading.
+
 #### 3. File upload providers
+
+There are many options for storing files outside of your virtual machine, Strapi have built a few and the community is constantly building new ones. See the [following guide](../plugins/upload.md#install-providers) on searching for options as well as installing them.
