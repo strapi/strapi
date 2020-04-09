@@ -16,11 +16,8 @@ import {
 import PropTypes from 'prop-types';
 import { isEmpty, isNaN, replace, words } from 'lodash';
 import cn from 'classnames';
-
-import { request } from 'strapi-helper-plugin';
 import WysiwygProvider from '../../containers/WysiwygProvider';
 import Controls from '../WysiwygInlineControls';
-import Drop from '../WysiwygDropUpload';
 import WysiwygBottomControls from '../WysiwygBottomControls';
 import WysiwygEditor from '../WysiwygEditor';
 import MediaLib from './MediaLib';
@@ -52,18 +49,21 @@ class Wysiwyg extends React.Component {
     super(props);
     this.state = {
       editorState: EditorState.createEmpty(),
-      isDraging: false,
       isFocused: false,
       isFullscreen: false,
+      isMediaLibraryOpened: false,
       isPreviewMode: false,
       headerValue: '',
+      selection: null,
     };
     this.focus = () => {
       this.setState({ isFocused: true });
+
       return this.domEditor.focus();
     };
     this.blur = () => {
       this.setState({ isFocused: false });
+
       return this.domEditor.blur();
     };
   }
@@ -91,10 +91,6 @@ class Wysiwyg extends React.Component {
       return true;
     }
 
-    if (nextState.isDraging !== this.state.isDraging) {
-      return true;
-    }
-
     if (nextState.isFocused !== this.state.isFocused) {
       return true;
     }
@@ -114,6 +110,12 @@ class Wysiwyg extends React.Component {
     if (nextProps.error !== this.props.error) {
       return true;
     }
+
+    if (nextState.isMediaLibraryOpened !== this.state.isMediaLibraryOpened) {
+      return true;
+    }
+
+    // if (nextState.selecti)
 
     return false;
   }
@@ -144,6 +146,7 @@ class Wysiwyg extends React.Component {
     const editorState = this.state.isFocused
       ? EditorState.moveFocusToEnd(newEditorState)
       : newEditorState;
+
     return this.setState({ editorState });
   };
 
@@ -292,6 +295,7 @@ class Wysiwyg extends React.Component {
         );
         newEditorState = EditorState.push(newEditorState, newContentState);
       });
+
       const updatedSelection = updateSelection(this.getSelection(), nextBlocks, 2);
 
       return this.setState({
@@ -335,12 +339,43 @@ class Wysiwyg extends React.Component {
     );
   };
 
+  addLink = ({ alt, url }) => {
+    const { selection } = this.state;
+    const link = `![${alt}](${url})`;
+    const newBlock = createNewBlock(link);
+    const newContentState = this.createNewContentStateFromBlock(newBlock);
+    const anchorOffset = link.length;
+    const focusOffset = link.length;
+    let newEditorState = this.createNewEditorState(newContentState, link);
+
+    const updatedSelection =
+      getOffSets(selection).start === 0
+        ? this.getSelection().merge({ anchorOffset, focusOffset })
+        : new SelectionState({
+            anchorKey: newBlock.getKey(),
+            anchorOffset,
+            focusOffset,
+            focusKey: newBlock.getKey(),
+            isBackward: false,
+          });
+
+    newEditorState = EditorState.forceSelection(newEditorState, updatedSelection);
+
+    this.setState({ isFocused: true });
+    this.sendData(newEditorState);
+
+    return this.setState({
+      editorState: newEditorState,
+    });
+  };
+
   /**
    * Handler used for code block and Img controls
    * @param {String} content the text that will be added
    * @param {String} style   the type
    */
   addSimpleBlockWithSelection = (content, style) => {
+    // Retrieve the selected text by the user
     const selectedText = this.getSelectedText();
     const { innerContent, endReplacer, startReplacer } = getBlockContent(style);
     const defaultContent =
@@ -354,6 +389,7 @@ class Wysiwyg extends React.Component {
       startReplacer,
       endReplacer
     );
+
     let newEditorState = this.createNewEditorState(newContentState, defaultContent);
     const updatedSelection =
       getOffSets(this.getSelection()).start === 0
@@ -370,6 +406,7 @@ class Wysiwyg extends React.Component {
 
     return this.setState({
       editorState: EditorState.forceSelection(newEditorState, newEditorState.getSelection()),
+      // editorState: newEditorState,
     });
   };
 
@@ -475,33 +512,6 @@ class Wysiwyg extends React.Component {
 
   handleClickPreview = () => this.setState({ isPreviewMode: !this.state.isPreviewMode });
 
-  handleDragEnter = e => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!this.state.isDraging) {
-      this.setState({ isDraging: true });
-    }
-  };
-
-  handleDragLeave = () => this.setState({ isDraging: false });
-
-  handleDragOver = e => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  handleDrop = e => {
-    e.preventDefault();
-
-    if (this.state.isPreviewMode) {
-      return this.setState({ isDraging: false });
-    }
-
-    const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
-    return this.uploadFile(files);
-  };
-
   /**
    * Handler that listens for specific key commands
    * @param  {String} command
@@ -525,12 +535,9 @@ class Wysiwyg extends React.Component {
     return false;
   };
 
-  /**
-   * Handler to upload files on paste
-   * @param  {Array<Blob>} files [description]
-   * @return {}                  DraftHandleValue
-   */
-  handlePastedFiles = files => this.uploadFile(files);
+  handleOpenMediaLibrary = () => {
+    return this.setState({ isMediaLibraryOpened: true, selection: this.getSelection() });
+  };
 
   handleReturn = (e, editorState) => {
     const selection = editorState.getSelection();
@@ -586,6 +593,17 @@ class Wysiwyg extends React.Component {
   };
 
   /**
+   * Toggle the medialibrary modal
+   */
+
+  handleToggle = () => {
+    this.setState(prevState => ({
+      ...prevState,
+      isMediaLibraryOpened: !prevState.isMediaLibraryOpened,
+    }));
+  };
+
+  /**
    * Update the parent reducer
    * @param  {Map} editorState [description]
    */
@@ -612,70 +630,8 @@ class Wysiwyg extends React.Component {
     });
   };
 
-  uploadFile = files => {
-    const formData = new FormData();
-    formData.append('files', files[0]);
-    const headers = {};
-
-    let newEditorState = this.getEditorState();
-
-    const nextBlocks = getNextBlocksList(newEditorState, this.getSelection().getStartKey());
-    // Loop to update each block after the inserted li
-    nextBlocks.map((block, index) => {
-      // Update the current block
-      const nextBlockText =
-        index === 0 ? `![Uploading ${files[0].name}]()` : nextBlocks.get(index - 1).getText();
-      const newBlock = createNewBlock(nextBlockText, 'unstyled', block.getKey());
-      // Update the contentState
-      const newContentState = this.createNewContentStateFromBlock(
-        newBlock,
-        newEditorState.getCurrentContent()
-      );
-      newEditorState = EditorState.push(newEditorState, newContentState);
-    });
-
-    const offset = `![Uploading ${files[0].name}]()`.length;
-    const updatedSelection = updateSelection(this.getSelection(), nextBlocks, offset);
-    this.setState({
-      editorState: EditorState.acceptSelection(newEditorState, updatedSelection),
-    });
-
-    return request('/upload', { method: 'POST', headers, body: formData }, false, false)
-      .then(response => {
-        const nextBlockKey = newEditorState
-          .getCurrentContent()
-          .getKeyAfter(newEditorState.getSelection().getStartKey());
-        const content = `![text](${response[0].url})`;
-        const newContentState = this.createNewContentStateFromBlock(
-          createNewBlock(content, 'unstyled', nextBlockKey)
-        );
-
-        newEditorState = EditorState.push(newEditorState, newContentState);
-        const updatedSelection = updateSelection(this.getSelection(), nextBlocks, 2);
-
-        this.sendData(newEditorState);
-        this.setState({
-          editorState: EditorState.acceptSelection(newEditorState, updatedSelection),
-        });
-      })
-      .catch(() => {
-        this.setState({ editorState: EditorState.undo(this.getEditorState()) });
-      })
-      .finally(() => {
-        this.setState({ isDraging: false });
-      });
-  };
-
-  renderDrop = () => (
-    <Drop
-      onDrop={this.handleDrop}
-      onDragOver={this.handleDragOver}
-      onDragLeave={this.handleDragLeave}
-    />
-  );
-
   render() {
-    const { editorState, isPreviewMode, isFullscreen } = this.state;
+    const { editorState, isMediaLibraryOpened, isPreviewMode, isFullscreen } = this.state;
     const editorStyle = isFullscreen ? { marginTop: '0' } : this.props.style;
 
     return (
@@ -701,11 +657,8 @@ class Wysiwyg extends React.Component {
                 e.stopPropagation();
               }
             }}
-            onDragEnter={this.handleDragEnter}
-            onDragOver={this.handleDragOver}
             style={editorStyle}
           >
-            {this.state.isDraging && this.renderDrop()}
             <div className="controlsContainer">
               <CustomSelect />
               {CONTROLS.map((value, key) => (
@@ -719,6 +672,7 @@ class Wysiwyg extends React.Component {
                     addOlBlock: this.addOlBlock,
                     addSimpleBlockWithSelection: this.addSimpleBlockWithSelection,
                     addUlBlock: this.addUlBlock,
+                    handleOpenMediaLibrary: this.handleOpenMediaLibrary,
                   }}
                   onToggle={this.toggleInlineStyle}
                   onToggleBlock={this.toggleBlockType}
@@ -742,7 +696,6 @@ class Wysiwyg extends React.Component {
                   blockStyleFn={getBlockStyle}
                   editorState={editorState}
                   handleKeyCommand={this.handleKeyCommand}
-                  handlePastedFiles={this.handlePastedFiles}
                   handleReturn={this.handleReturn}
                   keyBindingFn={this.mapKeyToEditorCommand}
                   onBlur={this.handleBlur}
@@ -782,7 +735,11 @@ class Wysiwyg extends React.Component {
             </div>
           )}
         </EditorWrapper>
-        <MediaLib />
+        <MediaLib
+          onToggle={this.handleToggle}
+          isOpen={isMediaLibraryOpened}
+          onChange={this.addLink}
+        />
       </WysiwygProvider>
     );
   }

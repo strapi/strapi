@@ -11,6 +11,12 @@
   "attributes": {
     "text": {
       "type": "richtext"
+    },
+    "rr": {
+      "type": "string"
+    },
+    "grtez": {
+      "type": "string"
     }
   }
 }

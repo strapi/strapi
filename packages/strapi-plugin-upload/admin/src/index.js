@@ -47,7 +47,6 @@ export default strapi => {
           },
           name: 'media-library',
           to: `${strapi.settingsBaseURL}/media-library`,
-          // TODO
           Component: SettingsPage,
         },
       ],
