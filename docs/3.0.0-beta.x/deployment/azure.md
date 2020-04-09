@@ -390,7 +390,62 @@ Then use the following command to start the Strapi service:
 pm2 start ecosystem.config.js
 ```
 
+The Strapi PM2 service is now set-up to use an `ecosystem.config.js` to manage your application.
+
+**OPTIONAL:** You may see your project and set-up your first administrator user, by [creating an admin user](../getting-started/quick-start.md#_3-create-an-admin-user).
+
+#### 4. Starting Strapi on boot and persisting service between reboots
+
+Follow the steps below to have your app launch on system startup.
+
+- Generate and configure a startup script to launch PM2, it will generate a Startup Script to copy/paste, do so:
+
+```bash
+pm2 startup systemd
+
+[PM2] Init System found: systemd
+[PM2] To setup the Startup Script, copy/paste the following command:
+sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u your-name --hp /home/your-name
+```
+
+For the following command we want to be using your virtual machine admin user **not the service user**, to exit from the service user you can simply run the command `exit` to return to your admin user.
+
+- Copy/paste the generated command as the virtual machine admin user (**DO NOT** use the below command as you need to replace the service user name, the previous command will give you exactly what you need):
+
+```bash
+sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u your-name --hp /home/your-name
+
+[PM2] Init System found: systemd
+Platform systemd
+
+. . .
+
+
+[PM2] [v] Command successfully executed.
++---------------------------------------+
+[PM2] Freeze a process list on reboot via:
+   $ pm2 save
+
+[PM2] Remove init script via:
+   $ pm2 unstartup systemd
+```
+
+Now as the service user run the following (again use `sudo su yourserviceuser` to change back)
+
+- Next, `Save` the new PM2 process list and environment.
+
+```bash
+pm2 save
+
+[PM2] Saving current process list...
+[PM2] Successfully saved in /home/your-name/.pm2/dump.pm2
+```
+
+- **OPTIONAL**: You can test to see if the script above works whenever your system reboots with the `sudo reboot` command. You will need to login again with your **service user** and then run `pm2 list` and `systemctl status pm2-your-name` to verify everything is working.
+
 ### Optional additions
+
+Below are some optional additions to secure your virtual machine and Strapi service.
 
 #### 1. Securing your virtual machine with a firewall
 
