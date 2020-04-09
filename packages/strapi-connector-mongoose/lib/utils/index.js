@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const Mongoose = require('mongoose');
 const { parseType } = require('strapi-utils');
-
+const { pathObjToPathString } = require('./pathObjToPathString')
 /**
  * Module dependencies
  */
@@ -122,5 +122,6 @@ module.exports = (mongoose = Mongoose) => {
     convertType,
     valueToId,
     isMongoId,
+    pathObjToPathString,
   };
 };
