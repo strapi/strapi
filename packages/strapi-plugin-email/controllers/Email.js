@@ -40,7 +40,14 @@ module.exports = {
   },
 
   getEnvironments: async ctx => {
-    ctx.send({ environments: [] });
+    const envs = ['development', 'staging', 'production'];
+
+    ctx.send({
+      environments: envs.map(env => ({
+        name: env,
+        active: env === strapi.config.environment,
+      })),
+    });
   },
 
   getSettings: async ctx => {
