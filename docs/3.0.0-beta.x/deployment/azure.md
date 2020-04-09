@@ -21,22 +21,22 @@ Virtual machines are listed under the `Compute` category. You will need the foll
 
 Project Details:
 
-- Subscription: Can be left as the default
-- Resource Group: If you have none, simply hit `Create new`
+- **Subscription**: Can be left as the default
+- **Resource Group**: If you have none, simply hit `Create new`
 
 Instance Details:
 
-- Virtual machine name: This name is used as a resource identifier and the VM's hostname so try to keep it simple
-- Region: Select the nearest region to you, or your target area
-- Availability options: Leave as default
-- Image: Ubuntu Server 18.04 LTS
-- Azure Spot instance: No
-- Size: B1ms (1vCPU / 2 GiB of Ram) is the recommended minimum as you need at least 2 GiB of RAM to build the Admin panel
+- **Virtual machine name**: This name is used as a resource identifier and the VM's hostname so try to keep it simple
+- **Region**: Select the nearest region to you, or your target area
+- **Availability options**: Leave as default
+- **Image**: Ubuntu Server 18.04 LTS
+- **Azure Spot instance**: No
+- **Size**: B1ms (1vCPU / 2 GiB of Ram) is the recommended minimum as you need at least 2 GiB of RAM to build the Admin panel
 
 Administrator Account:
 
-- Authentication type: It's recommended you use `SSH public key`
-- Username: This is the SSH user, it can be set to whatever you like except `root`
+- **Authentication type**: It's recommended you use `SSH public key`
+- **Username**: This is the SSH user, it can be set to whatever you like except `root`
 
 Inbound port rules:
 
@@ -65,14 +65,14 @@ However for the NIC network security group we will want to slect `Advanced` and 
 
 For each of the ports to allow, you will hit create new and enter the following information:
 
-- Source: Any
-- Source port ranges: `*`
-- Destination: Any
-- Destination port ranges: The port from above (80, 443, or 1337)
-- Protocol: Any
-- Action: Allow
-- Priority: This should be auto-filled for you
-- Name: something to easily describe this rule such as `HTTPS_Port` or `Strapi_Port`
+- **Source**: Any
+- **Source port ranges**: `*`
+- **Destination**: Any
+- **Destination port ranges**: The port from above (80, 443, or 1337)
+- **Protocol**: Any
+- **Action**: Allow
+- **Priority**: This should be auto-filled for you
+- **Name**: something to easily describe this rule such as `HTTPS_Port` or `Strapi_Port`
 
 #### 6. Management
 
@@ -254,14 +254,14 @@ yarn create strapi-app mystrapiapp
 
 This will bring you to an interactive command shell to enter the following information:
 
-- **Choose your installation type** - Custom (manual settings)
-- **Choose your default database client** - mysql
-- **Database name** - `strapi_dev`
-- **Host** - Keep the default of `127.0.0.1`
-- **Port** - Keep the default of `3306`
-- **Username** - `strapi`
-- **Password** - `mysecurepassword`
-- **Enable SSL connection** - Keep the default of `N`
+- **Choose your installation type**: Custom (manual settings)
+- **Choose your default database client**: mysql
+- **Database name**: `strapi_dev`
+- **Host**: Keep the default of `127.0.0.1`
+- **Port**: Keep the default of `3306`
+- **Username**: `strapi`
+- **Password**: `mysecurepassword`
+- **Enable SSL connection**: Keep the default of `N`
 
 Yarn will now install the project and install all the Node.js dependencies, we can now change directory again and start the project.
 
