@@ -1,19 +1,25 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useStrapi, prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
 import PropTypes from 'prop-types';
 
-const MediaLib = ({ isOpen, onChange, onClosed, onToggle }) => {
+const MediaLib = ({ isOpen, onChange, onToggle }) => {
   const {
     strapi: {
       componentApi: { getComponent },
     },
   } = useStrapi();
   const [data, setData] = useState(null);
+  const [isDisplayed, setIsDisplayed] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsDisplayed(true);
+    }
+  }, [isOpen]);
 
   const Component = getComponent('media-library').Component;
-  const handleInputChange = data => {
-    console.log(data);
 
+  const handleInputChange = data => {
     if (data) {
       const { name, alternativeText, url } = data;
       const alt = alternativeText === '' ? name : alternativeText;
@@ -28,15 +34,16 @@ const MediaLib = ({ isOpen, onChange, onClosed, onToggle }) => {
     }
 
     setData(null);
-    onClosed();
+    setIsDisplayed(false);
   };
 
-  if (Component) {
+  if (Component && isDisplayed) {
     return (
       <Component
         allowedTypes={['images', 'videos', 'files']}
         isOpen={isOpen}
         multiple={false}
+        noNavigation
         onClosed={handleClosed}
         onInputMediaChange={handleInputChange}
         onToggle={onToggle}
@@ -49,7 +56,6 @@ const MediaLib = ({ isOpen, onChange, onClosed, onToggle }) => {
 
 MediaLib.defaultProps = {
   isOpen: false,
-  onClosed: () => {},
   onChange: () => {},
   onToggle: () => {},
 };
@@ -57,7 +63,6 @@ MediaLib.defaultProps = {
 MediaLib.propTypes = {
   isOpen: PropTypes.bool,
   onChange: PropTypes.func,
-  onClosed: PropTypes.func,
   onToggle: PropTypes.func,
 };
 

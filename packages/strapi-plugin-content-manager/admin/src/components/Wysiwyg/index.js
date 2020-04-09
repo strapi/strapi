@@ -115,8 +115,6 @@ class Wysiwyg extends React.Component {
       return true;
     }
 
-    // if (nextState.selecti)
-
     return false;
   }
 
@@ -406,7 +404,6 @@ class Wysiwyg extends React.Component {
 
     return this.setState({
       editorState: EditorState.forceSelection(newEditorState, newEditorState.getSelection()),
-      // editorState: newEditorState,
     });
   };
 
@@ -536,7 +533,11 @@ class Wysiwyg extends React.Component {
   };
 
   handleOpenMediaLibrary = () => {
-    return this.setState({ isMediaLibraryOpened: true, selection: this.getSelection() });
+    return this.setState({
+      isMediaLibraryOpened: true,
+      isFullscreen: false,
+      selection: this.getSelection(),
+    });
   };
 
   handleReturn = (e, editorState) => {

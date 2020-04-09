@@ -9,7 +9,7 @@ import pluginId from '../../pluginId';
 import stepper from './stepper';
 import useModalContext from '../../hooks/useModalContext';
 
-const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
+const InputModalStepper = ({ isOpen, onToggle, noNavigation, onInputMediaChange }) => {
   const { formatMessage } = useGlobalContext();
   const [shouldDeleteFile, setShouldDeleteFile] = useState(false);
   const [displayNextButton, setDisplayNextButton] = useState(false);
@@ -289,6 +289,7 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
             formErrors={formErrors}
             isEditingUploadedFile={currentStep === 'edit'}
             isFormDisabled={isFormDisabled}
+            noNavigation={noNavigation}
             onAbortUpload={handleAbortUpload}
             onChange={handleFileToEditChange}
             onClickCancelUpload={handleCancelFileToUpload}
@@ -390,11 +391,13 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
 };
 
 InputModalStepper.defaultProps = {
+  noNavigation: false,
   onToggle: () => {},
 };
 
 InputModalStepper.propTypes = {
   isOpen: PropTypes.bool.isRequired,
+  noNavigation: PropTypes.bool,
   onInputMediaChange: PropTypes.func.isRequired,
   onToggle: PropTypes.func,
 };
