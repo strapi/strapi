@@ -171,7 +171,11 @@ const applyQueryParams = ({ query, filters }) => {
  */
 const computePopulatedPaths = ({ model, populate = [], where = [] }) => {
   const castedPopulatePaths = populate
-    .map(el => (Array.isArray(el) ? el.join('.') : el))
+		.map(el => (Array.isArray(el) 
+			? el.join('.') 
+			: (el.path) 
+				? pathObjToPathString(el)
+				: el))
     .map(path => findModelPath({ rootModel: model, path }))
     .map(path => {
       const assocModel = findModelByPath({ rootModel: model, path });
