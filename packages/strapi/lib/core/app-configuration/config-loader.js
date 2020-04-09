@@ -2,6 +2,7 @@
 
 const path = require('path');
 const fs = require('fs');
+const { templateConfiguration } = require('strapi-utils');
 
 const env = require('./env-helper');
 
@@ -50,7 +51,7 @@ const loadJsFile = file => {
 
 const loadJSONFile = file => {
   try {
-    return JSON.parse(fs.readFileSync(file));
+    return templateConfiguration(JSON.parse(fs.readFileSync(file)));
   } catch (error) {
     throw new Error(`Could not load json config file ${file}: ${error.message}`);
   }

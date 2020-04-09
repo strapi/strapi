@@ -2,31 +2,379 @@
 sidebarDepth: 2
 ---
 
-# Configurations
+# Configuration
 
-The main configurations of the project are located in the `./config` directory. Additional configs can be added in the `./api/**/config` folder of each API and plugin by creating JavaScript or JSON files.
+Your application configuration lives in the `config` folder. All the configuration files are loaded on startup and can be accessed through the configuration provider.
 
-## Application
+When you have a file `./config/server.js` with the following config:
 
-Contains the main configurations relative to your project.
-
-These configurations are accessible through `strapi.config.favicon` and `strapi.config.public`.
-
-**Path —** `./config/application.json`.
-
-```json
-{
-  "favicon": {
-    "path": "favicon.ico",
-    "maxAge": 86400000
-  },
-  "public": {
-    "path": "./public",
-    "maxAge": 60000,
-    "defaultIndex": true
-  }
-}
+```js
+module.exports = {
+  host: '0.0.0.0',
+};
 ```
+
+You can access it as
+
+```js
+strapi.config.get('server.host', 'defaultValueIfUndefined');
+```
+
+Nested keys are accessible with `dot-notation`.
+
+:::tip NOTE
+You can notice the filename is used as prefix to access the configurations.
+:::
+
+## Formats
+
+You can either use `.js` or `.json` files to configure your application.
+
+When using a `.js` you can either export an object:
+
+```js
+module.exports = {
+  mySecret: 'someValue',
+};
+```
+
+or a function returning a configuration object (Recommended usage). The function will get access to the [`env` utility](#casting-envrionement-variables).
+
+```js
+module.exports = ({ env }) => {
+  return {
+    mySecret: 'someValue',
+  };
+};
+```
+
+## Environment variables
+
+In most usecases you will have different configurations between your envrionments. For example: your database credentials.
+
+Instead of writting those credentials into your configuration files, you can define those variables in a `.env` file at the root of your application.
+
+**Example**
+
+```
+DATABASE_PASSWORD=acme
+```
+
+if you want to customize the path of the `.env` file to load you can set an envrionement variable called `ENV_PATH` before starting your application:
+
+```sh
+$ ENV_PATH=/absolute/path/to/.env npm run start
+```
+
+Now you can access those variables in your configuration files and application. You can use `process.env.{varName}` to access those variables anywhere.
+
+In your configuration files you will have access to a `env` utility that allows definiing defaults and casting values.
+
+`config/database.js`
+
+```js
+module.exports = ({ env }) => ({
+  connections: {
+    default: {
+      settings: {
+        password: env('DATABASE_PASSWORD'),
+      },
+    },
+  },
+});
+```
+
+### Casting envrionement variables
+
+```js
+// Returns the env if defined withot casting it
+env('NAME', 'default');
+
+// Cast int (using parseInt)
+env.int('NAME', 0);
+
+// Cast to float (using parseFloat)
+env.float('NAME', 3.14);
+
+// Cast to boolean (check if the value is equal to 'true')
+env.bool('NAME', true);
+
+// Cast to js object (using JSON.parse)
+env.json('NAME', { key: 'value' });
+
+// Cast to an array (syntax: ENV_VAR=[value1, value2, value3] | ENV_VAR=["value1", "value2", "value3"])
+env.array('NAME', [1, 2, 3]);
+
+// Case to date (using new Date(value))
+env.date('NAME', new Date());
+```
+
+## Environments
+
+WHat if you need to specific static configuration sfor specific environments anv using environement variables becomes tedious ?
+
+Strapi configurations can also be create per envrionement in `./config/env/{env}/{filename}`. These configurations will be merged into the base ones define in the `./config` folder.
+The envrionement is based on the `NODE_ENV` envrionement variable (defaults to `development`).
+
+When starting strapi with `NODE_ENV` = `production` it will load the configuration from `./config/*` and `./config/env/production/*`.Everything defined in the production config will override the default config.
+
+In combination with envrionement variables the becomes really powerfull:
+
+**Example**
+
+`./config/server.js`
+
+```js
+module.exports = {
+  host: '127.0.0.1',
+};
+```
+
+`./config/env/production/server.js`
+
+```js
+module.exports = ({ env }) => ({
+  host: env('HOST', '0.0.0.0'),
+});
+```
+
+When you start your application
+
+```bash
+yarn start
+# uses host 127.0.0.0
+```
+
+```bash
+NODE_ENV=production yarn start
+# uses host 0.0.0.0
+```
+
+```bash
+HOST=10.0.0.1 NODE_ENV=production yarn start
+# uses host 10.0.0.1
+```
+
+## Server configurations
+
+**Path —** `./config/server.js`.
+
+```js
+module.exports = ({ env }) => ({
+  host: env('HOST', '0.0.0.0'),
+  port: env.int('PORT', 1337),
+});
+```
+
+**Available options**
+
+| Property                                     | Description                                                                                                                                                 | Type          | Default     |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ----------- |
+| `host`                                       | Host name                                                                                                                                                   | string        | `localhost` |
+| `port`                                       | Port on which the server should be running.                                                                                                                 | integer       | `1337`      |
+| `emitErrors`                                 | Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services.                                      | boolean       |             |
+| `proxy`                                      | Proxy configuration                                                                                                                                         | Object        |             |
+| `proxy.enabled`                              | Enable proxy support such as Apache or Nginx.                                                                                                               | boolean       | `false`     |
+| `proxy.ssl`                                  | Enable proxy SSL support.                                                                                                                                   | boolean       |             |
+| `proxy.host`                                 | Host name your proxy service uses for Strapi.                                                                                                               | string        |             |
+| `proxy.port`                                 | Port that your proxy service accepts connections on.                                                                                                        | integer       |             |
+| [`cron`](https://en.wikipedia.org/wiki/Cron) | Cron configuration                                                                                                                                          | Object        |             |
+| `cron.enabled`                               | Enable or disable CRON tasks to schedule jobs at specific dates.                                                                                            | boolean       | false       |
+| `admin`                                      | Admin panel configuration                                                                                                                                   | Object        |             |
+| `admin.autoOpen`                             | Enable or disabled administration opening on start.                                                                                                         | boolean       | `true`      |
+| `admin.path`                                 | Allow to change the URL to access the admin panel.                                                                                                          | string        | `/admin`    |
+| `admin.watchIgnoreFiles`                     | Add custom files that should not be watched during development. See more [here](https://github.com/paulmillr/chokidar#path-filtering) (property `ignored`). | Array(string) | `[]`.       |
+| `admin.build`                                | Admin panel build configuration                                                                                                                             |               |             |
+| `admin.build.backend`                        | URL that the admin panel and plugins will request                                                                                                           | string        |             |
+
+## Database
+
+This file lets you define database connections that will be used to store your application content.
+
+You can find [supported database and versions](../installation/cli.html#databases) in the local installation process.
+
+**Path —** `./config/database.js`.
+
+:::: tabs
+
+::: tab Bookshelf
+
+- `defaultConnection` (string): Connection by default for models which are not related to a specific `connection`. Default value: `default`.
+- `connections` List of all available connections.
+  - `default`
+    - `connector` (string): Connector used by the current connection. Will be `bookshelf`.
+    - `settings` Useful for external session stores such as Redis.
+      - `client` (string): Database client to create the connection. `sqlite` or `postgres` or `mysql`.
+      - `host` (string): Database host name. Default value: `localhost`.
+      - `port` (integer): Database port.
+      - `database` (string): Database name.
+      - `username` (string): Username used to establish the connection.
+      - `password` (string): Password used to establish the connection.
+      - `options` (object): List of additional options used by the connector.
+      - `timezone` (string): Set the default behavior for local time. Default value: `utc` [Timezone options](https://www.php.net/manual/en/timezones.php).
+      - `schema` (string): Set the default database schema. **Used only for Postgres DB.**
+      - `ssl` (boolean): For ssl database connection.
+    - `options` Options used for database connection.
+      - `debug` (boolean): Show database exchanges and errors.
+      - `autoMigration` (boolean): To disable auto tables/columns creation for SQL database.
+      - `pool` Options used for database connection pooling. For more information look at [Knex's pool config documentation](https://knexjs.org/#Installation-pooling).
+        - `min` (integer): Minimum number of connections to keep in the pool. Default value: `0`.
+        - `max` (integer): Maximum number of connections to keep in the pool. Default value: `10`.
+        - `acquireTimeoutMillis` (integer): Maximum time in milliseconds to wait for acquiring a connection from the pool. Default value: `2000` (2 seconds).
+        - `createTimeoutMillis` (integer): Maximum time in milliseconds to wait for creating a connection to be added to the pool. Default value: `2000` (2 seconds).
+        - `idleTimeoutMillis` (integer): Number of milliseconds to wait before destroying idle connections. Default value: `30000` (30 seconds).
+        - `reapIntervalMillis` (integer): How often to check for idle connections in milliseconds. Default value: `1000` (1 second).
+        - `createRetryIntervalMillis` (integer): How long to idle after a failed create before trying again in milliseconds. Default value: `200`.
+
+:::
+
+::: tab Mongoose
+
+- `defaultConnection` (string): Connection by default for models which are not related to a specific `connection`. Default value: `default`.
+- `connections` List of all available connections.
+  - `default`
+    - `connector` (string): Connector used by the current connection. Will be `mongoose`.
+    - `settings` Useful for external session stores such as Redis.
+      - `client` (string): Database client to create the connection. Will be `mongo`.
+      - `host` (string): Database host name. Default value: `localhost`.
+      - `port` (integer): Database port. Default value: `27017`.
+      - `database` (string): Database name.
+      - `username` (string): Username used to establish the connection.
+      - `password` (string): Password used to establish the connection.
+      - `uri` (string): This can overide all previous configurations - _optional_
+    - `options` Options used for database connection.
+      - `ssl` (boolean): For ssl database connection.
+      - `debug` (boolean): Show database exchanges and errors.
+      - `authenticationDatabase` (string): Connect with authentication.
+
+:::
+
+::::
+
+#### Example
+
+**Path —** `./config/database.js`.
+
+:::: tabs
+
+::: tab Postgres
+
+```js
+module.exports = ({ env }) => ({
+  defaultConnection: 'default',
+  connections: {
+    default: {
+      connector: 'bookshelf',
+      settings: {
+        client: 'postgres',
+        host: env('DATABASE_HOST', 'localhost'),
+        port: env.int('DATABASE_PORT', 5432),
+        database: env('DATABASE_NAME', 'strapi'),
+        username: env('DATABASE_USERNAME', 'strapi'),
+        password: env('DATABASE_PASSWORD', 'strapi'),
+        schema: 'public',
+      },
+      options: {
+        debug: true,
+      },
+    },
+  },
+});
+```
+
+:::
+
+::: tab MySQL
+
+```js
+module.exports = ({ env }) => ({
+  defaultConnection: 'default',
+  connections: {
+    default: {
+      connector: 'bookshelf',
+      settings: {
+        client: 'mysql',
+        host: env('DATABASE_HOST', 'localhost'),
+        port: env.int('DATABASE_PORT', 3306),
+        database: env('DATABASE_NAME', 'strapi'),
+        username: env('DATABASE_USERNAME', 'strapi'),
+        password: env('DATABASE_PASSWORD', 'strapi'),
+      },
+      options: {},
+    },
+  },
+});
+```
+
+:::
+
+::: tab SQLite
+
+```js
+module.exports = ({ env }) => ({
+  defaultConnection: 'default',
+  connections: {
+    default: {
+      connector: 'bookshelf',
+      settings: {
+        client: 'sqlite',
+        filename: env('DATABASE_FILENAME', '.tmp/data.db'),
+      },
+      options: {
+        useNullAsDefault: true,
+      },
+    },
+  },
+});
+```
+
+:::
+
+::: tab Mongo
+
+```js
+module.exports = ({ env }) => ({
+  defaultConnection: 'default',
+  connections: {
+    default: {
+      connector: 'mongoose',
+      settings: {
+        client: 'mongo',
+        host: env('DATABASE_HOST', 'localhost'),
+        port: env.int('DATABASE_PORT', 27017),
+        database: env('DATABASE_NAME', 'strapi'),
+        username: env('DATABASE_USERNAME', 'strapi'),
+        password: env('DATABASE_PASSWORD', 'strapi'),
+      },
+      options: {
+        authenticationDatabase: '',
+        ssl: true,
+      },
+    },
+  },
+});
+```
+
+:::
+
+::::
+
+::: tip
+Take a look at the [database's guide](../guides/databases.md) for more details.
+:::
+
+## Middlewares
+
+You can configure your middlewares in the `./config/middleware.js` file.
+
+- `timeout` (integer): Timeout before throw
+- `load`
+  - `before`
+  - `order`
+  - `after`
+- `settings`
+
+### Global
 
 - `favicon`
   - `path` (string): Path to the favicon file. Default value: `favicon.ico`.
@@ -36,20 +384,45 @@ These configurations are accessible through `strapi.config.favicon` and `strapi.
   - `maxAge` (integer): Cache-control max-age directive in ms. Default value: `60000`.
   - `defaultIndex` (boolean): Display default index page at `/` and `/index.html`. Default value: `true`.
 
-## Custom
+### Response
 
-Add custom configurations to the project. The content of this file is available through the `strapi.config` object.
+- [`gzip`](https://en.wikipedia.org/wiki/Gzip)
+  - `enabled` (boolean): Enable or not GZIP response compression.
+- `responseTime`
+  - `enabled` (boolean): Enable or not `X-Response-Time header` to response. Default value: `false`.
+- `poweredBy`
+  - `enabled` (boolean): Enable or not `X-Powered-By` header to response. Default value: `true`.
+  - `value` (string): The value of the header. Default value: `Strapi <strapi.io>`
 
-**Path —** `./config/custom.json`.
+### Security
 
-```json
-{
-  "providerURL": "https://provider.com",
-  "mainColor": "blue"
-}
-```
+**Path —** `./config/environments/**/security.json`.
 
-These configurations are accessible through `strapi.config.providerURL` and `strapi.config.mainColor`.
+- [`csp`](https://en.wikipedia.org/wiki/Content_Security_Policy)
+  - `enabled` (boolean): Enable or disable CSP to avoid Cross Site Scripting (XSS) and data injection attacks.
+- [`p3p`](https://en.wikipedia.org/wiki/P3P)
+  - `enabled` (boolean): Enable or disable p3p.
+- [`hsts`](https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security)
+  - `enabled` (boolean): Enable or disable HSTS.
+  - `maxAge` (integer): Number of seconds HSTS is in effect. Default value: `31536000`.
+  - `includeSubDomains` (boolean): Applies HSTS to all subdomains of the host. Default value: `true`.
+- [`xframe`](https://en.wikipedia.org/wiki/Clickjacking)
+  - `enabled` (boolean): Enable or disable `X-FRAME-OPTIONS` headers in response.
+  - `value` (string): The value for the header, e.g. DENY, SAMEORIGIN or ALLOW-FROM uri. Default value: `SAMEORIGIN`.
+- [`xss`](https://en.wikipedia.org/wiki/Cross-site_scripting)
+  - `enabled` (boolean): Enable or disable XSS to prevent Cross Site Scripting (XSS) attacks in older IE browsers (IE8).
+- [`cors`](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
+  - `enabled` (boolean): Enable or disable CORS to prevent your server to be requested from another domain.
+  - `origin` (string): Allowed URLs (`http://example1.com, http://example2.com` or allows everyone `*`). Default value: `http://localhost`.
+  - `expose` (array): Configures the `Access-Control-Expose-Headers` CORS header. If not specified, no custom headers are exposed. Default value: `["WWW-Authenticate", "Server-Authorization"]`.
+  - `maxAge` (integer): Configures the `Access-Control-Max-Age` CORS header. Default value: `31536000`.
+  - `credentials` (boolean): Configures the `Access-Control-Allow-Credentials` CORS header. Default value: `true`.
+  - `methods` (array)|String - Configures the `Access-Control-Allow-Methods` CORS header. Default value: `["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"]`.
+  - `headers` (array): Configures the `Access-Control-Allow-Headers` CORS header. If not specified, defaults to reflecting the headers specified in the request's Access-Control-Request-Headers header. Default value: `["Content-Type", "Authorization", "X-Frame-Options"]`.
+- `ip`
+  - `enabled` (boolean): Enable or disable IP blocker. Default value: `false`.
+  - `whiteList` (array): Whitelisted IPs. Default value: `[]`.
+  - `blackList` (array): Blacklisted IPs. Default value: `[]`.
 
 ## Functions
 
@@ -178,346 +551,6 @@ module.exports = (bookshelf, connection) => {
 :::
 
 ::::
-
-## Environments
-
-Most of the application's configurations are defined by environment. It means that you can specify settings for each environment (`development`, `production`, `test`, etc.).
-
-To start your application in production environement you will have to specify `NODE_ENV=production`.
-
-::: tip
-You can access the config of the current environment through `strapi.config.currentEnvironment`.
-:::
-
-## Database
-
-This file lets you define database connections that will be used to store your application content.
-
-You can find [supported database and versions](../installation/cli.html#databases) in the local installation process.
-
-**Path —** `./config/environments/**/database.json`.
-
-:::: tabs
-
-::: tab Bookshelf
-
-- `defaultConnection` (string): Connection by default for models which are not related to a specific `connection`. Default value: `default`.
-- `connections` List of all available connections.
-  - `default`
-    - `connector` (string): Connector used by the current connection. Will be `bookshelf`.
-    - `settings` Useful for external session stores such as Redis.
-      - `client` (string): Database client to create the connection. `sqlite` or `postgres` or `mysql`.
-      - `host` (string): Database host name. Default value: `localhost`.
-      - `port` (integer): Database port.
-      - `database` (string): Database name.
-      - `username` (string): Username used to establish the connection.
-      - `password` (string): Password used to establish the connection.
-      - `options` (object): List of additional options used by the connector.
-      - `timezone` (string): Set the default behavior for local time. Default value: `utc` [Timezone options](https://www.php.net/manual/en/timezones.php).
-      - `schema` (string): Set the default database schema. **Used only for Postgres DB.**
-      - `ssl` (boolean): For ssl database connection.
-    - `options` Options used for database connection.
-      - `debug` (boolean): Show database exchanges and errors.
-      - `autoMigration` (boolean): To disable auto tables/columns creation for SQL database.
-      - `pool` Options used for database connection pooling. For more information look at [Knex's pool config documentation](https://knexjs.org/#Installation-pooling).
-        - `min` (integer): Minimum number of connections to keep in the pool. Default value: `0`.
-        - `max` (integer): Maximum number of connections to keep in the pool. Default value: `10`.
-        - `acquireTimeoutMillis` (integer): Maximum time in milliseconds to wait for acquiring a connection from the pool. Default value: `2000` (2 seconds).
-        - `createTimeoutMillis` (integer): Maximum time in milliseconds to wait for creating a connection to be added to the pool. Default value: `2000` (2 seconds).
-        - `idleTimeoutMillis` (integer): Number of milliseconds to wait before destroying idle connections. Default value: `30000` (30 seconds).
-        - `reapIntervalMillis` (integer): How often to check for idle connections in milliseconds. Default value: `1000` (1 second).
-        - `createRetryIntervalMillis` (integer): How long to idle after a failed create before trying again in milliseconds. Default value: `200`.
-
-:::
-
-::: tab Mongoose
-
-- `defaultConnection` (string): Connection by default for models which are not related to a specific `connection`. Default value: `default`.
-- `connections` List of all available connections.
-  - `default`
-    - `connector` (string): Connector used by the current connection. Will be `mongoose`.
-    - `settings` Useful for external session stores such as Redis.
-      - `client` (string): Database client to create the connection. Will be `mongo`.
-      - `host` (string): Database host name. Default value: `localhost`.
-      - `port` (integer): Database port. Default value: `27017`.
-      - `database` (string): Database name.
-      - `username` (string): Username used to establish the connection.
-      - `password` (string): Password used to establish the connection.
-      - `uri` (string): This can overide all previous configurations - _optional_
-    - `options` Options used for database connection.
-      - `ssl` (boolean): For ssl database connection.
-      - `debug` (boolean): Show database exchanges and errors.
-      - `authenticationDatabase` (string): Connect with authentication.
-
-:::
-
-::::
-
-#### Example
-
-**Path —** `./config/environments/**/database.json`.
-
-:::: tabs
-
-::: tab Postgres
-
-```json
-{
-  "defaultConnection": "default",
-  "connections": {
-    "default": {
-      "connector": "bookshelf",
-      "settings": {
-        "client": "postgres",
-        "host": "localhost",
-        "port": 5432,
-        "username": "${process.env.USERNAME}",
-        "password": "${process.env.PASSWORD}",
-        "database": "strapi",
-        "schema": "public"
-      },
-      "options": {
-        "debug": true
-      }
-    }
-  }
-}
-```
-
-:::
-
-::: tab MySQL
-
-```json
-{
-  "defaultConnection": "default",
-  "connections": {
-    "default": {
-      "connector": "bookshelf",
-      "settings": {
-        "client": "mysql",
-        "host": "localhost",
-        "port": 5432,
-        "username": "strapi",
-        "password": "root",
-        "database": "strapi"
-      },
-      "options": {}
-    }
-  }
-}
-```
-
-:::
-
-::: tab SQLite
-
-```json
-{
-  "defaultConnection": "default",
-  "connections": {
-    "default": {
-      "connector": "bookshelf",
-      "settings": {
-        "client": "sqlite",
-        "filename": ".tmp/data.db"
-      },
-      "options": {
-        "useNullAsDefault": true
-      }
-    }
-  }
-}
-```
-
-:::
-
-::: tab Mongo
-
-```json
-{
-  "defaultConnection": "default",
-  "connections": {
-    "default": {
-      "connector": "mongoose",
-      "settings": {
-        "client": "mongo",
-        "host": "localhost",
-        "port": 27017,
-        "database": "strapi",
-        "username": "",
-        "password": ""
-      },
-      "options": {
-        "authenticationDatabase": "",
-        "ssl": true
-      }
-    }
-  }
-}
-```
-
-:::
-
-::::
-
-::: tip
-Please refer to the [dynamic configurations section](#dynamic-configurations) to use global environment variable to configure the databases.
-:::
-
-::: tip
-Take a look at the [database's guide](../guides/databases.md) for more details.
-:::
-
-## Request
-
-**Path —** `./config/environments/**/request.json`.
-
-- `session`
-  - `enabled` (boolean): Enable or disable sessions. Default value: `false`.
-  - `client` (string): Client used to persist sessions. Default value: `redis`.
-  - `settings`
-    - `host` (string): Client host name. Default value: `localhost`.
-    - `port` (integer): Client port. Default value: `6379`.
-    - `database`(integer)|String - Client database name. Default value: `10`.
-    - `password` (string): Client password. Default value: ``.
-- `logger`
-  - `level` (string): Default log level. Default value: `debug`.
-  - `exposeInContext` (boolean): Expose logger in context so it can be used through `strapi.log.info(‘my log’)`. Default value: `true`.
-  - `requests` (boolean): Enable or disable requests logs. Default value: `false`.
-- `parser`
-  - `enabled`(boolean): Enable or disable parser. Default value: `true`.
-  - `multipart` (boolean): Enable or disable multipart bodies parsing. Default value: `true`.
-
-::: tip
-The session doesn't work with `mongo` as a client. The package that we should use is broken for now.
-:::
-
-## Response
-
-**Path —** `./config/environments/**/response.json`.
-
-- [`gzip`](https://en.wikipedia.org/wiki/Gzip)
-  - `enabled` (boolean): Enable or not GZIP response compression.
-- `responseTime`
-  - `enabled` (boolean): Enable or not `X-Response-Time header` to response. Default value: `false`.
-- `poweredBy`
-  - `enabled` (boolean): Enable or not `X-Powered-By` header to response. Default value: `true`.
-  - `value` (string): The value of the header. Default value: `Strapi <strapi.io>`
-
-## Security
-
-**Path —** `./config/environments/**/security.json`.
-
-- [`csp`](https://en.wikipedia.org/wiki/Content_Security_Policy)
-  - `enabled` (boolean): Enable or disable CSP to avoid Cross Site Scripting (XSS) and data injection attacks.
-- [`p3p`](https://en.wikipedia.org/wiki/P3P)
-  - `enabled` (boolean): Enable or disable p3p.
-- [`hsts`](https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security)
-  - `enabled` (boolean): Enable or disable HSTS.
-  - `maxAge` (integer): Number of seconds HSTS is in effect. Default value: `31536000`.
-  - `includeSubDomains` (boolean): Applies HSTS to all subdomains of the host. Default value: `true`.
-- [`xframe`](https://en.wikipedia.org/wiki/Clickjacking)
-  - `enabled` (boolean): Enable or disable `X-FRAME-OPTIONS` headers in response.
-  - `value` (string): The value for the header, e.g. DENY, SAMEORIGIN or ALLOW-FROM uri. Default value: `SAMEORIGIN`.
-- [`xss`](https://en.wikipedia.org/wiki/Cross-site_scripting)
-  - `enabled` (boolean): Enable or disable XSS to prevent Cross Site Scripting (XSS) attacks in older IE browsers (IE8).
-- [`cors`](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
-  - `enabled` (boolean): Enable or disable CORS to prevent your server to be requested from another domain.
-  - `origin` (string): Allowed URLs (`http://example1.com, http://example2.com` or allows everyone `*`). Default value: `http://localhost`.
-  - `expose` (array): Configures the `Access-Control-Expose-Headers` CORS header. If not specified, no custom headers are exposed. Default value: `["WWW-Authenticate", "Server-Authorization"]`.
-  - `maxAge` (integer): Configures the `Access-Control-Max-Age` CORS header. Default value: `31536000`.
-  - `credentials` (boolean): Configures the `Access-Control-Allow-Credentials` CORS header. Default value: `true`.
-  - `methods` (array)|String - Configures the `Access-Control-Allow-Methods` CORS header. Default value: `["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"]`.
-  - `headers` (array): Configures the `Access-Control-Allow-Headers` CORS header. If not specified, defaults to reflecting the headers specified in the request's Access-Control-Request-Headers header. Default value: `["Content-Type", "Authorization", "X-Frame-Options"]`.
-- `ip`
-  - `enabled` (boolean): Enable or disable IP blocker. Default value: `false`.
-  - `whiteList` (array): Whitelisted IPs. Default value: `[]`.
-  - `blackList` (array): Blacklisted IPs. Default value: `[]`.
-
-## Server
-
-**Path —** `./config/environments/**/server.json`.
-
-- `host` (string): Host name. Default value: `localhost`.
-- `port` (integer): Port on which the server should be running. Default value: `1337`.
-- `emitErrors` (boolean): Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services.
-- `proxy`
-  - `enabled` (boolean): Enable proxy support such as Apache or Nginx. Default value: `false`.
-  - `ssl` (boolean): Enable proxy SSL support.
-  - `host` (string): Host name your proxy service uses for Strapi.
-  - `port` (integer): Port that your proxy service accepts connections on.
-- [`cron`](https://en.wikipedia.org/wiki/Cron)
-  - `enabled` (boolean): Enable or disable CRON tasks to schedule jobs at specific dates. Default value: `false`.
-- `admin`
-  - `autoOpen` (boolean): Enable or disabled administration opening on start. Default value: `true`.
-  - `path` (string): Allow to change the URL to access the admin panel. Default value: `/admin`.
-  - `watchIgnoreFiles` (array): Add custom files that should not be watched during development. See more [here](https://github.com/paulmillr/chokidar#path-filtering) (property `ignored`). Default value: `[]`.
-  - `build`
-    - `backend` (string): URL that the admin panel and plugins will request (default: `http://localhost:1337`).
-
-#### Example
-
-**Path —** `./config/environments/**/server.json`.
-
-As an example using this configuration with Nginx your server would respond to `https://example.com:8443` instead of `http://localhost:1337`.
-
-**Note:** you will need to configure Nginx or Apache as a proxy before configuring this example.
-
-```json
-{
-  "host": "localhost",
-  "port": 1337,
-  "proxy": {
-    "enabled": true,
-    "ssl": true,
-    "host": "example.com",
-    "port": 8443
-  },
-  "cron": {
-    "enabled": true
-  }
-}
-```
-
-## Dynamic configurations
-
-For security reasons, sometimes it's better to set variables through the server environment. It's also useful to push dynamic values into configuration files. To enable this feature in JSON files, Strapi embraces a JSON-file interpreter into its core to allow dynamic values in the JSON configuration files.
-
-### Syntax
-
-The syntax is inspired by the [template literals ES2015 specifications](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals). These dynamic values are indicated by the Dollar sign and curly braces (`${expression}`).
-
-### Usage
-
-In any JSON configuration file in your project, you can inject dynamic values like this:
-
-**Path —** `./config/environments/production/database.json`.
-
-```json
-{
-  "defaultConnection": "default",
-  "connections": {
-    "default": {
-      "connector": "mongoose",
-      "settings": {
-        "client": "mongo",
-        "uri": "${process.env.DATABASE_URI || ''}",
-        "host": "${process.env.DATABASE_HOST || '127.0.0.1'}",
-        "port": "${process.env.DATABASE_PORT || 27017}",
-        "database": "${process.env.DATABASE_NAME || 'production'}",
-        "username": "${process.env.DATABASE_USERNAME || ''}",
-        "password": "${process.env.DATABASE_PASSWORD || ''}"
-      },
-      "options": {}
-    }
-  }
-}
-```
-
-::: tip
-You can't execute functions inside the curly braces. Only strings are allowed.
-:::
 
 ## Configuration in database
 
