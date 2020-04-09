@@ -11,7 +11,7 @@ const pluralize = require('pluralize');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
 const { buildQuery: buildQueryResolver } = require('./resolvers-builder');
-const { convertToParams, convertToQuery } = require('./utils');
+const { convertToParams, convertToQuery, nonRequired } = require('./utils');
 const { toSDL } = require('./schema-definitions');
 
 /**
@@ -19,15 +19,15 @@ const { toSDL } = require('./schema-definitions');
  *
  * @returns {Boolean}
  */
-const isPrimitiveType = _type => {
-  const type = _type.replace('!', '');
+const isPrimitiveType = type => {
+  const nonRequiredType = nonRequired(type);
   return (
-    type === 'Int' ||
-    type === 'Float' ||
-    type === 'String' ||
-    type === 'Boolean' ||
-    type === 'DateTime' ||
-    type === 'JSON'
+    nonRequiredType === 'Int' ||
+    nonRequiredType === 'Float' ||
+    nonRequiredType === 'String' ||
+    nonRequiredType === 'Boolean' ||
+    nonRequiredType === 'DateTime' ||
+    nonRequiredType === 'JSON'
   );
 };
 
@@ -60,7 +60,8 @@ const isNotOfTypeArray = type => {
  * Returns all fields of type Integer or float
  */
 const isNumberType = type => {
-  return type === 'Int' || type === 'Float';
+  const nonRequiredType = nonRequired(type);
+  return nonRequiredType === 'Int' || nonRequiredType === 'Float';
 };
 
 /**
@@ -193,8 +194,8 @@ const createAggregationFieldsResolver = function(model, fields, operation, typeC
       if (model.orm === 'bookshelf') {
         return model
           .query(qb => {
-            // apply filters without pagination limit
-            buildQuery({ model, filters: _.omit(filters, ['limit']) })(qb);
+            // apply filters
+            buildQuery({ model, filters })(qb);
 
             // `sum, avg, min, max` pass nicely to knex :->
             qb[operation](`${fieldKey} as ${operation}_${fieldKey}`);
@@ -251,15 +252,15 @@ const preProcessGroupByData = function({ result, fieldKey, filters }) {
  */
 const createGroupByFieldsResolver = function(model, fields) {
   const resolver = async (filters, options, context, fieldResolver, fieldKey) => {
-    const params = {
+    const params = convertRestQueryParams({
       ...convertToParams(_.omit(filters, 'where')),
       ...convertToQuery(filters.where),
-    };
+    });
 
     if (model.orm === 'mongoose') {
       const result = await buildQuery({
         model,
-        filters: convertRestQueryParams(params),
+        filters: params,
         aggregate: true,
       }).group({
         _id: `$${fieldKey === 'id' ? model.primaryKey : fieldKey}`,
@@ -275,7 +276,7 @@ const createGroupByFieldsResolver = function(model, fields) {
     if (model.orm === 'bookshelf') {
       return model
         .query(qb => {
-          buildQuery({ model, filters })(qb);
+          buildQuery({ model, filters: params })(qb);
           qb.groupBy(fieldKey);
           qb.select(fieldKey);
         })

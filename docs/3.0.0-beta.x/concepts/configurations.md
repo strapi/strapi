@@ -22,7 +22,8 @@ These configurations are accessible through `strapi.config.favicon` and `strapi.
   },
   "public": {
     "path": "./public",
-    "maxAge": 60000
+    "maxAge": 60000,
+    "defaultIndex": true
   }
 }
 ```
@@ -33,6 +34,7 @@ These configurations are accessible through `strapi.config.favicon` and `strapi.
 - `public`
   - `path` (string): Path to the public folder. Default value: `./public`.
   - `maxAge` (integer): Cache-control max-age directive in ms. Default value: `60000`.
+  - `defaultIndex` (boolean): Display default index page at `/` and `/index.html`. Default value: `true`.
 
 ## Custom
 
