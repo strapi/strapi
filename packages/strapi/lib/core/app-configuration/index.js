@@ -15,6 +15,8 @@ const getPrefixedDeps = require('../../utils/get-prefixed-dependencies');
 const loadPolicies = require('../load-policies');
 const loadFunctions = require('../load-functions');
 
+const { version: strapiVersion } = require(path.join(__dirname, '../../../package.json'));
+
 const CONFIG_PATHS = {
   admin: 'admin',
   api: 'api',
@@ -30,6 +32,34 @@ const CONFIG_PATHS = {
   views: 'views',
 };
 
+const defaultConfig = {
+  server: {
+    host: process.env.HOST || process.env.HOSTNAME || 'localhost',
+    port: process.env.PORT || 1337,
+    proxy: { enabled: false },
+    cron: { enabled: false },
+    admin: { autoOpen: false },
+  },
+  admin: {},
+  middleware: {
+    timeout: 1000,
+    load: {
+      before: ['responseTime', 'logger', 'cors', 'responses', 'gzip'],
+      order: [],
+      after: ['parser', 'router'],
+    },
+    settings: {},
+  },
+  hook: {
+    timeout: 1000,
+    load: { before: [], order: [], after: [] },
+    settings: {},
+  },
+  routes: {},
+  functions: {},
+  policies: {},
+};
+
 module.exports = (dir, initialConfig = {}) => {
   const { autoReload = false, serveAdminPanel = true } = initialConfig;
 
@@ -37,48 +67,31 @@ module.exports = (dir, initialConfig = {}) => {
 
   const configDir = path.resolve(dir || process.cwd(), 'config');
 
-  const defaultConfig = {
+  const rootConfig = {
     launchedAt: Date.now(),
     appPath: dir,
+    paths: CONFIG_PATHS,
     serveAdminPanel,
     autoReload,
     environment: process.env.NODE_ENV,
-    server: {
-      host: process.env.HOST || process.env.HOSTNAME || 'localhost',
-      port: process.env.PORT || 1337,
-      proxy: { enabled: false },
-      cron: { enabled: false },
-      admin: { autoOpen: false },
+    uuid: _.get(pkgJSON, 'strapi.uuid'),
+    info: {
+      ...pkgJSON,
+      strapi: strapiVersion,
     },
-    admin: {},
-    paths: CONFIG_PATHS,
-    middleware: {
-      timeout: 1000,
-      load: {
-        before: ['responseTime', 'logger', 'cors', 'responses', 'gzip'],
-        order: [],
-        after: ['parser', 'router'],
-      },
-      settings: {},
-    },
-    hook: {
-      timeout: 1000,
-      load: { before: [], order: [], after: [] },
-      settings: {},
-    },
-    routes: {},
-    info: pkgJSON,
-    policies: loadPolicies(path.resolve(configDir, 'policies')),
-    functions: loadFunctions(path.resolve(configDir, 'functions')),
     installedPlugins: getPrefixedDeps('strapi-plugin', pkgJSON),
     installedMiddlewares: getPrefixedDeps('strapi-middleware', pkgJSON),
     installedHooks: getPrefixedDeps('strapi-hook', pkgJSON),
   };
 
-  const baseConfig = loadConfigDir(configDir);
+  const baseConfig = {
+    ...loadConfigDir(configDir),
+    policies: loadPolicies(path.resolve(configDir, 'policies')),
+    functions: loadFunctions(path.resolve(configDir, 'functions')),
+  };
 
   const envDir = path.resolve(configDir, 'env', process.env.NODE_ENV);
   const envConfig = loadConfigDir(envDir);
 
-  return createConfigProvider(_.merge(defaultConfig, baseConfig, envConfig));
+  return createConfigProvider(_.merge(rootConfig, defaultConfig, baseConfig, envConfig));
 };

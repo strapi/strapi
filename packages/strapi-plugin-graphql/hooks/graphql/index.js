@@ -36,7 +36,7 @@ module.exports = strapi => {
   return {
     async beforeInitialize() {
       // Try to inject this hook just after the others hooks to skip the router processing.
-      if (!_.get(strapi.config.hook.load, 'after')) {
+      if (!strapi.config.get('hook.load.after')) {
         _.set(strapi.config.hook.load, 'after', []);
       }
 

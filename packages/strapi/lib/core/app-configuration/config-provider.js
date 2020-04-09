@@ -21,6 +21,10 @@ module.exports = (initialConfig = {}) => {
       return this;
     },
 
+    has(path) {
+      return _.has(_config, path);
+    },
+
     merge(...args) {
       _.merge(_config, ...args);
       return this;

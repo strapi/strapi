@@ -8,7 +8,7 @@ module.exports = strapi => {
       strapi.app.use(async (ctx, next) => {
         await next();
 
-        const responseFn = _.get(strapi.functions, ['responses', ctx.status]);
+        const responseFn = strapi.config.get(['functions', 'responses', ctx.status]);
         if (_.isFunction(responseFn)) {
           await responseFn(ctx);
         }

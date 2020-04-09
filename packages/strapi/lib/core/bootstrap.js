@@ -17,18 +17,15 @@ const pickSchema = model => {
 };
 
 module.exports = function(strapi) {
-  // Retrieve Strapi version.
-  strapi.config.uuid = _.get(strapi.config.info, 'strapi.uuid', '');
-  strapi.config.info.strapi = require(__dirname + '/../../package.json').version;
-
   // Set connections.
   strapi.connections = {};
 
-  const defaultConnection = strapi.config.database.defaultConnection;
+  const defaultConnection = strapi.config.get('database.defaultConnection');
 
   // Set current connections.
-  strapi.config.connections = _.get(strapi.config, 'database.connections', {});
+  strapi.config.connections = strapi.config.get('database.connections', {});
 
+  // FIXME:
   if (_.get(strapi.config, 'language.enabled')) {
     strapi.config.language.locales = Object.keys(_.get(strapi.config, 'locales', {}));
   }
