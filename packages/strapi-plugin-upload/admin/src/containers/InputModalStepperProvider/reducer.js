@@ -1,5 +1,5 @@
 import produce from 'immer';
-import { intersectionWith, differenceWith, unionWith, set } from 'lodash';
+import { intersectionWith, differenceWith, unionWith, set, isEqual } from 'lodash';
 
 import {
   createNewFilesToDownloadArray,
@@ -30,6 +30,17 @@ const reducer = (state, action) =>
   // eslint-disable-next-line consistent-return
   produce(state, draftState => {
     switch (action.type) {
+      case 'ADD_FILES_TO_UPLOAD': {
+        draftState.filesToUpload = [
+          ...draftState.filesToUpload,
+          ...createNewFilesToUploadArray(action.filesToUpload),
+        ].map((fileToUpload, index) => ({
+          ...fileToUpload,
+          originalIndex: index,
+        }));
+        draftState.currentStep = action.nextStep;
+        break;
+      }
       case 'ADD_URLS_TO_FILES_TO_UPLOAD': {
         draftState.filesToUpload = [
           ...draftState.filesToUpload,
@@ -43,10 +54,30 @@ const reducer = (state, action) =>
 
         break;
       }
+      case 'CLEAN_FILES_ERROR': {
+        draftState.filesToUpload.forEach((fileToUpload, index) => {
+          draftState.filesToUpload[index] = {
+            ...fileToUpload,
+            hasError: false,
+            errorMessage: null,
+          };
+        });
+        break;
+      }
       case 'CLEAR_FILES_TO_UPLOAD_AND_DOWNLOAD': {
         draftState.filesToUpload = [];
         draftState.filesToDownload = [];
 
+        break;
+      }
+      case 'EDIT_EXISTING_FILE': {
+        const index = draftState.selectedFiles.findIndex(
+          selectedFile => selectedFile.id === action.file.id
+        );
+
+        if (index !== -1) {
+          draftState.selectedFiles[index] = action.file;
+        }
         break;
       }
       case 'FILE_DOWNLOADED': {
@@ -60,32 +91,13 @@ const reducer = (state, action) =>
 
         break;
       }
-      case 'ON_CHANGE': {
-        set(draftState.fileToEdit, action.keys.split('.'), action.value);
-        break;
-      }
-      case 'ON_CHANGE_URLS_TO_DOWNLOAD': {
-        set(draftState, ['filesToDownload'], action.value);
-        break;
-      }
       case 'GET_DATA_SUCCEEDED': {
         draftState.files = action.files;
         draftState.count = action.countData.count;
         break;
       }
-      case 'SET_PARAM': {
-        const { name, value } = action.param;
-
-        if (name === 'filters') {
-          draftState.params.filters.push(value);
-          break;
-        }
-
-        if (name === '_limit') {
-          draftState.params._start = 0;
-        }
-
-        draftState.params[name] = value;
+      case 'GO_TO': {
+        draftState.currentStep = action.to;
         break;
       }
       case 'MOVE_ASSET': {
@@ -95,6 +107,18 @@ const reducer = (state, action) =>
         draftState.selectedFiles.splice(dragIndex, 1);
         draftState.selectedFiles.splice(hoverIndex, 0, dragMedia);
 
+        break;
+      }
+      case 'ON_ABORT_UPLOAD': {
+        draftState.fileToEdit.isUploading = false;
+        break;
+      }
+      case 'ON_CHANGE': {
+        set(draftState.fileToEdit, action.keys.split('.'), action.value);
+        break;
+      }
+      case 'ON_CHANGE_URLS_TO_DOWNLOAD': {
+        set(draftState, ['filesToDownload'], action.value);
         break;
       }
       case 'ON_FILE_SELECTION': {
@@ -111,71 +135,8 @@ const reducer = (state, action) =>
         draftState.selectedFiles.push(fileToStore);
         break;
       }
-      case 'TOGGLE_SELECT_ALL': {
-        const comparator = (first, second) => first.id === second.id;
-        const isSelected =
-          intersectionWith(state.selectedFiles, state.files, comparator).length ===
-          state.files.length;
-
-        if (isSelected) {
-          draftState.selectedFiles = differenceWith(state.selectedFiles, state.files, comparator);
-          break;
-        }
-
-        draftState.selectedFiles = unionWith(state.selectedFiles, state.files, comparator);
-        break;
-      }
-      case 'SET_FILE_ERROR': {
-        draftState.filesToUpload.forEach((fileToUpload, index) => {
-          if (fileToUpload.originalIndex === action.fileIndex) {
-            draftState.filesToUpload[index] = {
-              ...draftState.filesToUpload[index],
-              isUploading: false,
-              hasError: true,
-              errorMessage: action.errorMessage,
-            };
-          }
-        });
-        break;
-      }
-      case 'REMOVE_FILTER': {
-        const { filterToRemove } = action;
-
-        draftState.params.filters.splice(filterToRemove, 1);
-        break;
-      }
-      case 'GO_TO': {
-        draftState.currentStep = action.to;
-        break;
-      }
-      case 'RESET_PROPS': {
-        if (action.defaultSort) {
-          draftState.params._sort = action.defaultSort;
-        } else {
-          return initialState;
-        }
-        break;
-      }
-      case 'SET_FILES_UPLOADING_STATE': {
-        draftState.filesToUpload.forEach((fileToUpload, index) => {
-          draftState.filesToUpload[index] = {
-            ...fileToUpload,
-            isUploading: true,
-            hasError: false,
-            errorMessage: null,
-          };
-        });
-        break;
-      }
-      case 'ADD_FILES_TO_UPLOAD': {
-        draftState.filesToUpload = [
-          ...draftState.filesToUpload,
-          ...createNewFilesToUploadArray(action.filesToUpload),
-        ].map((fileToUpload, index) => ({
-          ...fileToUpload,
-          originalIndex: index,
-        }));
-        draftState.currentStep = action.nextStep;
+      case 'ON_SUBMIT_EDIT_EXISTING_FILE': {
+        draftState.fileToEdit.isUploading = true;
         break;
       }
       case 'REMOVE_FILE_TO_UPLOAD': {
@@ -195,28 +156,35 @@ const reducer = (state, action) =>
         draftState.filesToUpload.splice(index, 1);
         break;
       }
+      case 'REMOVE_FILTER': {
+        const { filterToRemove } = action;
+
+        draftState.params.filters.splice(filterToRemove, 1);
+        break;
+      }
+      case 'RESET_PROPS': {
+        if (action.defaultSort) {
+          draftState.params._sort = action.defaultSort;
+        } else {
+          return initialState;
+        }
+        break;
+      }
       case 'SET_CROP_RESULT': {
         draftState.fileToEdit.file = action.blob;
         break;
       }
-      case 'CLEAN_FILES_ERROR': {
+      case 'SET_FILE_ERROR': {
         draftState.filesToUpload.forEach((fileToUpload, index) => {
-          draftState.filesToUpload[index] = {
-            ...fileToUpload,
-            hasError: false,
-            errorMessage: null,
-          };
+          if (fileToUpload.originalIndex === action.fileIndex) {
+            draftState.filesToUpload[index] = {
+              ...draftState.filesToUpload[index],
+              isUploading: false,
+              hasError: true,
+              errorMessage: action.errorMessage,
+            };
+          }
         });
-        break;
-      }
-      case 'SET_NEW_FILE_TO_EDIT': {
-        draftState.fileToEdit = draftState.filesToUpload[action.fileIndex];
-        break;
-      }
-      case 'SET_FILE_TO_EDIT': {
-        draftState.fileToEdit = formatFileForEditing(
-          state.files.find(file => file.id.toString() === action.fileId.toString())
-        );
         break;
       }
       case 'SET_FILE_TO_DOWNLOAD_ERROR': {
@@ -231,20 +199,10 @@ const reducer = (state, action) =>
 
         break;
       }
-      case 'SET_FORM_DISABLED': {
-        draftState.isFormDisabled = action.isFormDisabled;
-        break;
-      }
-      case 'ON_ABORT_UPLOAD': {
-        draftState.fileToEdit.isUploading = false;
-        break;
-      }
-      case 'TOGGLE_MODAL_WARNING': {
-        draftState.isWarningDeleteOpen = !state.isWarningDeleteOpen;
-        break;
-      }
-      case 'ON_SUBMIT_EDIT_EXISTING_FILE': {
-        draftState.fileToEdit.isUploading = true;
+      case 'SET_FILE_TO_EDIT': {
+        draftState.fileToEdit = formatFileForEditing(
+          state.files.find(file => file.id.toString() === action.fileId.toString())
+        );
         break;
       }
       case 'SET_FILE_TO_EDIT_ERROR': {
@@ -253,14 +211,61 @@ const reducer = (state, action) =>
         draftState.fileToEdit.errorMessage = action.errorMessage;
         break;
       }
-      case 'EDIT_EXISTING_FILE': {
-        const index = draftState.selectedFiles.findIndex(
-          selectedFile => selectedFile.id === action.file.id
-        );
+      case 'SET_FILES_UPLOADING_STATE': {
+        draftState.filesToUpload.forEach((fileToUpload, index) => {
+          draftState.filesToUpload[index] = {
+            ...fileToUpload,
+            isUploading: true,
+            hasError: false,
+            errorMessage: null,
+          };
+        });
+        break;
+      }
+      case 'SET_FORM_DISABLED': {
+        draftState.isFormDisabled = action.isFormDisabled;
+        break;
+      }
+      case 'SET_NEW_FILE_TO_EDIT': {
+        draftState.fileToEdit = draftState.filesToUpload[action.fileIndex];
+        break;
+      }
+      case 'SET_PARAM': {
+        const { name, value } = action.param;
 
-        if (index !== -1) {
-          draftState.selectedFiles[index] = action.file;
+        if (name === 'filters') {
+          const canAddFilter =
+            intersectionWith(state.params.filters, [value], isEqual).length === 0;
+
+          if (canAddFilter) {
+            draftState.params.filters.push(value);
+          }
+          break;
         }
+
+        if (name === '_limit') {
+          draftState.params._start = 0;
+        }
+
+        draftState.params[name] = value;
+        break;
+      }
+      case 'TOGGLE_MODAL_WARNING': {
+        draftState.isWarningDeleteOpen = !state.isWarningDeleteOpen;
+        break;
+      }
+      case 'TOGGLE_SELECT_ALL': {
+        const comparator = (first, second) => first.id === second.id;
+        const isSelected =
+          intersectionWith(state.selectedFiles, state.files, comparator).length ===
+          state.files.length;
+
+        if (isSelected) {
+          draftState.selectedFiles = differenceWith(state.selectedFiles, state.files, comparator);
+          break;
+        }
+
+        draftState.selectedFiles = unionWith(state.selectedFiles, state.files, comparator);
         break;
       }
 

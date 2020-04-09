@@ -15,6 +15,7 @@ import CardControl from '../CardControl';
 
 const BrowseAssets = () => {
   const {
+    allowedTypes,
     count,
     files,
     goTo,
@@ -118,6 +119,7 @@ const BrowseAssets = () => {
             onChange={handleFileSelection}
             selectedItems={selectedFiles}
             onCardClick={handleListCardClick}
+            allowedTypes={allowedTypes}
             smallCards
             renderCardControl={id => (
               <CardControl
