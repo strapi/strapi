@@ -29,7 +29,7 @@ const CardImgWrapper = styled.div`
   ${({ checked }) =>
     checked &&
     `
-      .card-control-wrapper {
+      .card-control-wrapper:not(.card-control-wrapper-hidden) {
         display: flex;
       }
   `}

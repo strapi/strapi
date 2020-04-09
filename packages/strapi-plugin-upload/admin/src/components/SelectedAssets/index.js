@@ -12,7 +12,7 @@ import ListTitleWrapper from './ListTitleWrapper';
 import ListWrapper from './ListWrapper';
 
 const SelectedAssets = () => {
-  const { selectedFiles, handleFileSelection, moveAsset } = useModalContext();
+  const { selectedFiles, handleFileSelection, handleGoToEditFile, moveAsset } = useModalContext();
   const filesToUploadLength = selectedFiles.length;
   const titleId = `modal.upload-list.sub-header-title.${
     filesToUploadLength > 1 ? 'plural' : 'singular'
@@ -36,6 +36,7 @@ const SelectedAssets = () => {
           data={selectedFiles}
           moveAsset={moveAsset}
           onChange={handleFileSelection}
+          onClickEditFile={handleGoToEditFile}
           selectedItems={selectedFiles}
         />
       </ListWrapper>

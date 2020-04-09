@@ -29,7 +29,7 @@ const List = ({
 
   return (
     <ListWrapper>
-      {selectedAssets > 0 && (
+      {!smallCards && selectedAssets > 0 && (
         <IntlText
           id={getTrad(`list.assets.selected.${selectedAssets > 1 ? 'plural' : 'singular'}`)}
           values={{ number: selectedAssets }}

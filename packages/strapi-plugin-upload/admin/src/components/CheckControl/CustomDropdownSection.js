@@ -2,7 +2,8 @@ import styled from 'styled-components';
 import DropdownSection from '../DropdownSection';
 
 const CustomDropdownSection = styled(DropdownSection)`
-  left: 38px;
+  top: 34px;
+  left: 40px;
 `;
 
 export default CustomDropdownSection;

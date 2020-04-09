@@ -6,6 +6,7 @@ import { prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
 import DraggableCard from './DraggableCard';
 import CardControlsWrapper from '../CardControlsWrapper';
 import ListWrapper from '../ListWrapper';
+import CardControl from '../CardControl';
 
 const SortableList = ({ data, moveAsset, onChange, onClickEditFile, selectedItems, canSelect }) => {
   const handleClick = e => {
@@ -20,6 +21,10 @@ const SortableList = ({ data, moveAsset, onChange, onClickEditFile, selectedItem
           const url = get(item, ['formats', 'thumbnail', 'url'], item.url);
           const checked = selectedItems.findIndex(file => file.id === id) !== -1;
           const fileUrl = prefixFileUrlWithBackendUrl(url);
+          const handleEditClick = e => {
+            e.stopPropagation();
+            onClickEditFile(id);
+          };
 
           return (
             <div className="col-xs-12 col-md-6 col-xl-3" key={id || index}>
@@ -28,12 +33,11 @@ const SortableList = ({ data, moveAsset, onChange, onClickEditFile, selectedItem
                 {...item}
                 url={fileUrl}
                 moveAsset={moveAsset}
-                onClick={onClickEditFile}
                 isDraggable
                 index={index}
               >
                 {(checked || canSelect) && (
-                  <CardControlsWrapper leftAlign className="card-control-wrapper">
+                  <CardControlsWrapper leftAlign displayed className="card-control-wrapper">
                     <Checkbox
                       name={`${id}`}
                       onChange={onChange}
@@ -42,6 +46,15 @@ const SortableList = ({ data, moveAsset, onChange, onClickEditFile, selectedItem
                     />
                   </CardControlsWrapper>
                 )}
+                <CardControlsWrapper className="card-control-wrapper card-control-wrapper-hidden">
+                  <CardControl
+                    small
+                    title="edit"
+                    color="#9EA7B8"
+                    type="pencil"
+                    onClick={e => handleEditClick(e)}
+                  />
+                </CardControlsWrapper>
               </DraggableCard>
             </div>
           );
