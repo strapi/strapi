@@ -1,6 +1,5 @@
 {
   "kind": "singleType",
-  "connection": "default",
   "collectionName": "homepages",
   "info": {
     "name": "Homepage"
