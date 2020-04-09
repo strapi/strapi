@@ -19,11 +19,9 @@ In this example, any time a web browser is pointed to the `/hello` URL on your a
 
 The controllers are defined in each `./api/**/controllers/` folder. Every JavaScript file put in these folders will be loaded as a controller. They are also available through the `strapi.controllers` and `strapi.api.**.controllers` global variables.
 
-By convention, controllers' names should be Pascal-cased, so that every word in the file (including the first one) is capitalized `User.js`, `LegalEntity.js`.
-
 ## Core controllers
 
-When you create a new `Content Type` you will see a new empty controller has been created. It is because Strapi builds a generic controller for your models by default and allows you to override and extend it in the generated files.
+When you create a new `Content Type` you will see a new empty controller has been created. This is because Strapi builds a generic controller for your models by default and allows you to override and extend it in the generated files.
 
 ### Extending a Model Controller
 
@@ -217,7 +215,7 @@ You can also create custom controllers to build your own business logic and API 
 There are two ways to create a controller:
 
 - Using the CLI `strapi generate:controller restaurant`.<br>Read the [CLI documentation](../cli/CLI.md#strapi-generatecontroller) for more information.
-- Manually create a JavaScript file in `./api/**/controllers` respecting the Pascal-cased format.
+- Manually create a JavaScript file in `./api/**/controllers`.
 
 ### Adding Endpoints
 

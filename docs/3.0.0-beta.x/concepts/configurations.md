@@ -189,7 +189,7 @@ You can access the config of the current environment through `strapi.config.curr
 
 ## Database
 
-This file let you define database connections that will be used to store your application content.
+This file lets you define database connections that will be used to store your application content.
 
 You can find [supported database and versions](../installation/cli.html#databases) in the local installation process.
 
@@ -241,7 +241,7 @@ You can find [supported database and versions](../installation/cli.html#database
       - `database` (string): Database name.
       - `username` (string): Username used to establish the connection.
       - `password` (string): Password used to establish the connection.
-      - `uri` (string): This can overide all previous configurations - _optionnal_
+      - `uri` (string): This can overide all previous configurations - _optional_
     - `options` Options used for database connection.
       - `ssl` (boolean): For ssl database connection.
       - `debug` (boolean): Show database exchanges and errors.

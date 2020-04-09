@@ -81,7 +81,7 @@ In this example, there is a `Simple` component which contains the attributes `na
 
 For **Content Types**, models are defined in each `./api/**/models/` folder. Every JavaScript or JSON file in these folders will be loaded as a model. They are also available through the `strapi.models` and `strapi.api.**.models` global variables. Usable everywhere in the project, they contain the ORM model object that they refer to. By convention, a model's name should be written in lowercase.
 
-For **Components**, models are defined in `./components` folder. Every components has to be under a subfolder (the category name of the component). They are also available through the `strapi.components` global variables. Usable everywhere in the project, they contain the ORM model object that they refer to.
+For **Components**, models are defined in `./components` folder. Every components has to be under a subfolder (the category name of the component).
 
 ## How to create a model?
 
@@ -215,7 +215,7 @@ To improve the Developer Experience when developing or using the administration 
 
 ### Exceptions
 
-- `uid` — This field type need a `targetField` key. The value is the name of an attribute thas has `string` of `text` type.
+- `uid` — This field type allows a `targetField` key. The value is the name of an attribute thas has `string` of `text` type.
 
 ### Example
 

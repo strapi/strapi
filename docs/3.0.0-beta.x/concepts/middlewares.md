@@ -69,6 +69,8 @@ Every middleware will be injected into the Koa stack. To manage the load order, 
 
 To activate and configure your hook with custom options, you need to edit your `./config/environments/**/middleware.json` file in your Strapi app.
 
+By default this file doesn't exist, you will have to create it.
+
 ```javascript
 {
   ...
