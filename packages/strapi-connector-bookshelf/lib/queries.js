@@ -704,7 +704,7 @@ const buildSearchQuery = (qb, model, params) => {
           : `to_tsvector(coalesce("${attribute}", ''))`
       );
 
-      qb.orWhereRaw(`${searchQuery.join(' || ')} @@ plainto_tsquery(?)`, `${query}:*`);
+      qb.orWhereRaw(`${searchQuery.join(' || ')} @@ to_tsquery(?)`, `${query}:*`);
       break;
     }
   }
