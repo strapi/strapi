@@ -11,6 +11,7 @@ import App from './containers/App';
 import Initializer from './containers/Initializer';
 import SettingsPage from './containers/SettingsPage';
 import InputMedia from './components/InputMedia';
+import InputModalStepper from './containers/InputModalStepper';
 
 import trads from './translations';
 import pluginId from './pluginId';
@@ -54,6 +55,7 @@ export default strapi => {
     trads,
   };
 
+  strapi.registerComponent({ name: 'media-library', Component: InputModalStepper });
   strapi.registerField({ type: 'media', Component: InputMedia });
 
   return strapi.registerPlugin(plugin);

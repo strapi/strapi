@@ -17,7 +17,13 @@ class FieldApi {
   };
 
   getFields = () => {
-    return cloneDeep(this.fields);
+    const fields = cloneDeep(this.fields);
+
+    return Object.keys(fields).reduce((acc, current) => {
+      acc[current] = fields[current].Component;
+
+      return acc;
+    }, {});
   };
 
   registerField = field => {
@@ -27,7 +33,7 @@ class FieldApi {
     invariant(type, 'A type must be provided');
     invariant(this.fields[type] === undefined, 'A similar field already exists');
 
-    this.fields[type] = Component;
+    this.fields[type] = { Component };
   };
 
   removeField = type => {

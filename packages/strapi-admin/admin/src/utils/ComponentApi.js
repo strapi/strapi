@@ -11,7 +11,13 @@ class ComponentApi {
   };
 
   getComponents = () => {
-    return cloneDeep(this.components);
+    const components = cloneDeep(this.components);
+
+    return Object.keys(components).reduce((acc, current) => {
+      acc[current] = components[current].Component;
+
+      return acc;
+    }, {});
   };
 
   registerComponent = component => {
@@ -21,7 +27,7 @@ class ComponentApi {
     invariant(name, 'A name must be provided');
     invariant(this.components[name] === undefined, 'A similar field already exists');
 
-    this.components[name] = Component;
+    this.components[name] = { Component };
   };
 
   removeComponent = name => {

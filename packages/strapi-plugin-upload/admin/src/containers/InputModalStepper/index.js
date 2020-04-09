@@ -57,7 +57,7 @@ InputModal.defaultProps = {
   fileToEdit: null,
   onInputMediaChange: () => {},
   onToggle: () => {},
-  selectedFiles: null,
+  selectedFiles: [],
   step: 'list',
 };
 
