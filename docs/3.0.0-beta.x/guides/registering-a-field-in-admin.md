@@ -151,8 +151,6 @@ const Wysiwyg = ({
   }
 
   const handleChange = data => {
-    console.log(data);
-
     if (data.mime.includes('image')) {
       const imgTag = `<p><img src="${data.url}" caption="${data.caption}" alt="${data.alternativeText}"></img></p>`;
       const newValue = value ? `${value}${imgTag}` : imgTag;
@@ -160,7 +158,7 @@ const Wysiwyg = ({
       onChange({ target: { name, value: newValue } });
     }
 
-    // Handle videos and other type of files
+    // Handle videos and other type of files by adding some code
   };
 
   const handleToggle = () => setIsOpen(prev => !prev);

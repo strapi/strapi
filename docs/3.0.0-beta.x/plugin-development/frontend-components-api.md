@@ -93,8 +93,8 @@ const Initializer = ({ updatePlugin }) => {
   ref.current = updatePlugin;
 
   useEffect(() => {
-    // Register the new field
-    strapi.componentApi.registerComponent({ name: 'm-component', Component: MyComponent });
+    // Register the new component
+    strapi.componentApi.registerComponent({ name: 'my-component', Component: MyComponent });
 
     ref.current(pluginId, 'isReady', true);
   }, []);

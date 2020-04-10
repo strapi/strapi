@@ -22,7 +22,7 @@ const MediaLib = ({ isOpen, onChange, onToggle }) => {
   const handleInputChange = data => {
     if (data) {
       const { name, alternativeText, url } = data;
-      const alt = alternativeText === '' ? name : alternativeText;
+      const alt = alternativeText || name;
 
       setData({ alt, url: prefixFileUrlWithBackendUrl(url) });
     }
