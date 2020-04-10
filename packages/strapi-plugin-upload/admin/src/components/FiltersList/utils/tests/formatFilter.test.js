@@ -50,17 +50,17 @@ describe('UPLOAD | components | FiltersList | utils', () => {
       expect(formatFilter(filter)).toEqual(expected);
     });
 
-    it('should return initial filter is name is not mime and value is not a date', () => {
+    it('should return formatted value if name is size', () => {
       const filter = {
         name: 'size',
         filter: '=',
-        value: '0KB',
+        value: 1000,
       };
 
       const expected = {
         name: 'size',
         filter: '=',
-        value: '0KB',
+        value: '1MB',
       };
 
       expect(formatFilter(filter)).toEqual(expected);

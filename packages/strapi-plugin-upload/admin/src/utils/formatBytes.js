@@ -1,17 +1,13 @@
-// Source: https://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-bytes-to-kb-mb-gb-in-javascript
-function formatBytes(receivedBytes, decimals) {
-  const bytes = receivedBytes * 1000;
+import byteSize from 'byte-size';
 
-  if (bytes < 1) {
+function formatBytes(receivedBytes, decimals = 0) {
+  const { value, unit } = byteSize(receivedBytes * 1000, { precision: decimals });
+
+  if (!unit) {
     return '0B';
   }
 
-  const k = 1024;
-  const dm = decimals <= 0 ? 0 : decimals || 2;
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return `${parseFloat((bytes / k ** i).toFixed(dm))}${sizes[i]}`;
+  return `${value}${unit.toUpperCase()}`;
 }
 
 export default formatBytes;

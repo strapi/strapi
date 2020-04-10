@@ -1,6 +1,5 @@
 {
   "kind": "singleType",
-  "connection": "default",
   "collectionName": "homepages",
   "info": {
     "name": "Homepage"
@@ -21,7 +20,7 @@
       "model": "file",
       "via": "related",
       "allowedTypes": [
-        "images",
+        "images",	
         "files",
         "videos"
       ],

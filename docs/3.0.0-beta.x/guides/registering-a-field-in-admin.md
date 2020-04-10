@@ -36,25 +36,103 @@ cd my-app
 yarn develop --watch-admin
 ```
 
-Once this step is over all we need to do is to create our new WYSIWYG which will replace the current one the **Content Manager** plugin.
+Once this step is over all we need to do is to create our new WYSIWYG which will replace the default one in the **Content Manager** plugin.
 
 ### Creating the WYSIWYG
 
-In this part we will create two components:
+In this part we will create three components:
 
+- MediaLib which will be used to insert media in the editor
 - Wysiwyg which will wrap the CKEditor with a label and the errors
 - CKEditor which will be the implementation of the new WYSIWYG
+
+### Creating the MediaLib
+
+**Path —** `./plugins/wysiwyg/admin/src/components/MediaLib/index.js`
+
+```js
+import React, { useEffect, useState } from 'react';
+import { useStrapi, prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
+import PropTypes from 'prop-types';
+
+const MediaLib = ({ isOpen, onChange, onToggle }) => {
+  const {
+    strapi: {
+      componentApi: { getComponent },
+    },
+  } = useStrapi();
+  const [data, setData] = useState(null);
+  const [isDisplayed, setIsDisplayed] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsDisplayed(true);
+    }
+  }, [isOpen]);
+
+  const Component = getComponent('media-library').Component;
+
+  const handleInputChange = data => {
+    if (data) {
+      const { url } = data;
+
+      setData({ ...data, url: prefixFileUrlWithBackendUrl(url) });
+    }
+  };
+
+  const handleClosed = () => {
+    if (data) {
+      onChange(data);
+    }
+
+    setData(null);
+    setIsDisplayed(false);
+  };
+
+  if (Component && isDisplayed) {
+    return (
+      <Component
+        allowedTypes={['images', 'videos', 'files']}
+        isOpen={isOpen}
+        multiple={false}
+        noNavigation
+        onClosed={handleClosed}
+        onInputMediaChange={handleInputChange}
+        onToggle={onToggle}
+      />
+    );
+  }
+
+  return null;
+};
+
+MediaLib.defaultProps = {
+  isOpen: false,
+  onChange: () => {},
+  onToggle: () => {},
+};
+
+MediaLib.propTypes = {
+  isOpen: PropTypes.bool,
+  onChange: PropTypes.func,
+  onToggle: PropTypes.func,
+};
+
+export default MediaLib;
+```
 
 #### Creating the WYSIWYG Wrapper
 
 **Path —** `./plugins/wysiwyg/admin/src/components/Wysiwyg/index.js`
 
 ```js
-import React from 'react';
+iimport React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
+import { Button } from '@buffetjs/core';
 import { Label, InputDescription, InputErrors } from 'strapi-helper-plugin';
 import Editor from '../CKEditor';
+import MediaLib from '../MediaLib';
 
 const Wysiwyg = ({
   inputDescription,
@@ -65,11 +143,25 @@ const Wysiwyg = ({
   onChange,
   value,
 }) => {
+  const [isOpen, setIsOpen] = useState(false);
   let spacer = !isEmpty(inputDescription) ? <div style={{ height: '.4rem' }} /> : <div />;
 
   if (!noErrorsDescription && !isEmpty(errors)) {
     spacer = <div />;
   }
+
+  const handleChange = data => {
+    if (data.mime.includes('image')) {
+      const imgTag = `<p><img src="${data.url}" caption="${data.caption}" alt="${data.alternativeText}"></img></p>`;
+      const newValue = value ? `${value}${imgTag}` : imgTag;
+
+      onChange({ target: { name, value: newValue } });
+    }
+
+    // Handle videos and other type of files by adding some code
+  };
+
+  const handleToggle = () => setIsOpen(prev => !prev);
 
   return (
     <div
@@ -80,6 +172,11 @@ const Wysiwyg = ({
       }}
     >
       <Label htmlFor={name} message={label} style={{ marginBottom: 10 }} />
+      <div>
+        <Button color="primary" onClick={handleToggle}>
+          MediaLib
+        </Button>
+      </div>
       <Editor name={name} onChange={onChange} value={value} />
       <InputDescription
         message={inputDescription}
@@ -87,6 +184,7 @@ const Wysiwyg = ({
       />
       <InputErrors errors={(!noErrorsDescription && errors) || []} name={name} />
       {spacer}
+      <MediaLib onToggle={handleToggle} isOpen={isOpen} onChange={handleChange} />
     </div>
   );
 };
@@ -124,6 +222,7 @@ Wysiwyg.propTypes = {
 };
 
 export default Wysiwyg;
+
 ```
 
 #### Implementing CKEditor
@@ -146,11 +245,33 @@ const Wrapper = styled.div`
   }
 `;
 
+const configuration = {
+  toolbar: [
+    'heading',
+    '|',
+    'bold',
+    'italic',
+    'link',
+    'bulletedList',
+    'numberedList',
+    '|',
+    'indent',
+    'outdent',
+    '|',
+    'blockQuote',
+    'insertTable',
+    'mediaEmbed',
+    'undo',
+    'redo',
+  ],
+};
+
 const Editor = ({ onChange, name, value }) => {
   return (
     <Wrapper>
       <CKEditor
         editor={ClassicEditor}
+        config={configuration}
         data={value}
         onChange={(event, editor) => {
           const data = editor.getData();
@@ -164,7 +285,7 @@ const Editor = ({ onChange, name, value }) => {
 Editor.propTypes = {
   onChange: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
-  value: PropTypes.string.isRequired,
+  value: PropTypes.string,
 };
 
 export default Editor;
@@ -174,7 +295,7 @@ At this point we have simply created a new plugin which is mounted in our projec
 
 ### Registering a our new Field
 
-Since the goal of our plugin is to override the current WYSIWYG we don't want it to be displayed in the administration panel but we need it to register our new **Field**. In order to do so we will simply modify the front-end entry point of our plugin:
+Since the goal of our plugin is to override the current WYSIWYG we don't want it to be displayed in the administration panel but we need it to register our new **Field**. In order to do so, we will simply modify the front-end entry point of our plugin:
 
 **Path —** `./plugins/wysiwyg/admin/src/index.js`
 

@@ -9,7 +9,7 @@ import pluginId from '../../pluginId';
 import stepper from './stepper';
 import useModalContext from '../../hooks/useModalContext';
 
-const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
+const InputModalStepper = ({ isOpen, onToggle, noNavigation, onInputMediaChange }) => {
   const { formatMessage } = useGlobalContext();
   const [shouldDeleteFile, setShouldDeleteFile] = useState(false);
   const [displayNextButton, setDisplayNextButton] = useState(false);
@@ -234,13 +234,15 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
       handleEditExistingFile(editedFile);
       goToList();
     } catch (err) {
+      const status = get(err, 'response.status', get(err, 'status', null));
+      const statusText = get(err, 'response.statusText', get(err, 'statusText', null));
       const errorMessage = get(
         err,
         ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
-        get(err, ['response', 'payload', 'message'], null)
+        get(err, ['response', 'payload', 'message'], statusText)
       );
 
-      if (errorMessage) {
+      if (status) {
         handleSetFileToEditError(errorMessage);
       }
     }
@@ -262,7 +264,9 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
   };
 
   const shouldDisplayNextButton = currentStep === 'browse' && displayNextButton;
-  const isFinishButtonDisabled = filesToUpload.some(file => file.isDownloading);
+  const isFinishButtonDisabled = filesToUpload.some(file => file.isDownloading || file.isUploading);
+  const areButtonsDisabledOnEditExistingFile =
+    currentStep === 'edit' && fileToEdit.isUploading === true;
 
   return (
     <>
@@ -285,6 +289,7 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
             formErrors={formErrors}
             isEditingUploadedFile={currentStep === 'edit'}
             isFormDisabled={isFormDisabled}
+            noNavigation={noNavigation}
             onAbortUpload={handleAbortUpload}
             onChange={handleFileToEditChange}
             onClickCancelUpload={handleCancelFileToUpload}
@@ -348,7 +353,7 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
             {currentStep === 'edit' && (
               <div style={{ margin: 'auto 0' }}>
                 <Button
-                  disabled={isFormDisabled}
+                  disabled={isFormDisabled || areButtonsDisabledOnEditExistingFile}
                   color="primary"
                   onClick={handleReplaceMedia}
                   style={{ marginRight: 10 }}
@@ -357,7 +362,7 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
                 </Button>
 
                 <Button
-                  disabled={isFormDisabled}
+                  disabled={isFormDisabled || areButtonsDisabledOnEditExistingFile}
                   color="success"
                   type="button"
                   onClick={handleSubmitEditExistingFile}
@@ -386,11 +391,13 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
 };
 
 InputModalStepper.defaultProps = {
+  noNavigation: false,
   onToggle: () => {},
 };
 
 InputModalStepper.propTypes = {
   isOpen: PropTypes.bool.isRequired,
+  noNavigation: PropTypes.bool,
   onInputMediaChange: PropTypes.func.isRequired,
   onToggle: PropTypes.func,
 };

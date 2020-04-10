@@ -63,12 +63,6 @@ module.exports = function createComponentBuilder() {
 
       this.contentTypes.set(uid, contentType);
 
-      const defaultConnection = _.get(
-        strapi,
-        ['config', 'currentEnvironment', 'database', 'defaultConnection'],
-        'default'
-      );
-
       const defaultCollectionName = `${nameToCollectionName(pluralize(infos.name))}`;
 
       // support self referencing content type relation
@@ -81,7 +75,6 @@ module.exports = function createComponentBuilder() {
 
       contentType
         .setUID(uid)
-        .set('connection', infos.connection || defaultConnection)
         .set('kind', infos.kind || typeKinds.COLLECTION_TYPE)
         .set('collectionName', infos.collectionName || defaultCollectionName)
         .set(['info', 'name'], infos.name)
@@ -187,7 +180,6 @@ module.exports = function createComponentBuilder() {
       });
 
       contentType
-        .set('connection', infos.connection)
         .set('collectionName', infos.collectionName)
         .set('kind', infos.kind || contentType.schema.kind)
         .set(['info', 'name'], infos.name)

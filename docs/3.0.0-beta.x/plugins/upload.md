@@ -274,7 +274,7 @@ In our second example, you can upload and attach multiple pictures to the restau
 
 ## Using a provider
 
-By default Strapi provides a provider that upload files to a local directory. You might want to upload your files to another provider like AWS S3.
+By default Strapi provides a provider that uploads files to a local directory. You might want to upload your files to another provider like AWS S3.
 
 You can check all the available providers developed by the community on npmjs.org - [Providers list](https://www.npmjs.com/search?q=strapi-provider-upload-)
 

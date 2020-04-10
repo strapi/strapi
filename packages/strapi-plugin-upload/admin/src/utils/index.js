@@ -6,6 +6,7 @@ export { default as createNewFilesToDownloadArray } from './createNewFilesToDown
 export { default as createNewFilesToUploadArray } from './createNewFilesToUploadArray';
 export { default as formatBytes } from './formatBytes';
 export { default as formatFileForEditing } from './formatFileForEditing';
+export { default as formatFilters } from './formatFilters';
 export { default as generatePageFromStart } from './generatePageFromStart';
 export { default as generateStartFromPage } from './generateStartFromPage';
 export { default as getExtension } from './getExtension';
@@ -16,4 +17,5 @@ export { default as getTrad } from './getTrad';
 export { default as getType } from './getType';
 export { default as getYupError } from './getYupError';
 export { default as ItemTypes } from './ItemTypes';
+export { default as unformatBytes } from './unformatBytes';
 export { default as urlSchema } from './urlYupSchema';

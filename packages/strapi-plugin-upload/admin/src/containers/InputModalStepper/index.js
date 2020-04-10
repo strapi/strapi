@@ -12,35 +12,32 @@ const InputModal = ({
   fileToEdit,
   isOpen,
   multiple,
+  noNavigation,
+  onClosed,
   onInputMediaChange,
   onToggle,
   selectedFiles,
   step,
 }) => {
   const singularTypes = allowedTypes.map(type => type.substring(0, type.length - 1));
-  const typesToDisable = ['video', 'image', 'file'].filter(f => !singularTypes.includes(f));
-  const nContainsFilters = typesToDisable.map(type => ({
-    name: 'mime',
-    filter: '_ncontains',
-    value: type,
-    isDisabled: true,
-  }));
 
   return (
     <DndProvider backend={HTML5Backend}>
       <DragLayer />
       <InputModalStepperProvider
+        onClosed={onClosed}
         initialFilesToUpload={filesToUpload}
         initialFileToEdit={fileToEdit}
-        initialFilters={nContainsFilters}
         isOpen={isOpen}
         multiple={multiple}
+        noNavigation={noNavigation}
         selectedFiles={selectedFiles}
         step={step}
         allowedTypes={singularTypes}
       >
         <InputModalStepper
           isOpen={isOpen}
+          noNavigation={noNavigation}
           onToggle={onToggle}
           onInputMediaChange={onInputMediaChange}
         />
@@ -53,9 +50,10 @@ InputModal.defaultProps = {
   allowedTypes: [],
   filesToUpload: null,
   fileToEdit: null,
+  noNavigation: false,
   onInputMediaChange: () => {},
   onToggle: () => {},
-  selectedFiles: null,
+  selectedFiles: [],
   step: 'list',
 };
 
@@ -65,6 +63,8 @@ InputModal.propTypes = {
   fileToEdit: PropTypes.object,
   isOpen: PropTypes.bool.isRequired,
   multiple: PropTypes.bool.isRequired,
+  noNavigation: PropTypes.bool,
+  onClosed: PropTypes.func.isRequired,
   onInputMediaChange: PropTypes.func,
   onToggle: PropTypes.func,
   selectedFiles: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),

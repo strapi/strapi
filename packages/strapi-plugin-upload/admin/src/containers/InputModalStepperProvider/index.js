@@ -12,6 +12,7 @@ import {
   createNewFilesToUploadArray,
   urlSchema,
   getFileModelTimestamps,
+  formatFilters,
 } from '../../utils';
 import InputModalStepperContext from '../../contexts/InputModal/InputModalDataManager';
 import init from './init';
@@ -24,9 +25,10 @@ const InputModalStepperProvider = ({
   children,
   initialFilesToUpload,
   initialFileToEdit,
-  initialFilters,
   isOpen,
   multiple,
+  noNavigation,
+  onClosed,
   onInputMediaChange,
   selectedFiles,
   step,
@@ -37,6 +39,7 @@ const InputModalStepperProvider = ({
   const [reducerState, dispatch] = useReducer(reducer, initialState, state =>
     init({
       ...state,
+      allowedTypes,
       currentStep: step,
       fileToEdit: initialFileToEdit,
       selectedFiles: Array.isArray(selectedFiles) ? selectedFiles : [selectedFiles],
@@ -48,7 +51,6 @@ const InputModalStepperProvider = ({
         : [],
       params: {
         ...state.params,
-        filters: initialFilters,
         _sort: `${updated_at}:DESC`,
       },
     })
@@ -75,7 +77,7 @@ const InputModalStepperProvider = ({
               headers: { Authorization: `Bearer ${auth.getToken()}` },
               responseType: 'blob',
               cancelToken: source.token,
-              timeout: 30000,
+              timeout: 60000,
             })
             .then(({ data }) => {
               const createdFile = new File([data], file.fileURL, {
@@ -197,6 +199,7 @@ const InputModalStepperProvider = ({
       type: 'RESET_PROPS',
       defaultSort: `${updated_at}:DESC`,
     });
+    onClosed();
   };
 
   const handleFileSelection = ({ target: { name } }) => {
@@ -291,10 +294,16 @@ const InputModalStepperProvider = ({
     handleRemoveFileToUpload(fileIndex);
   };
 
+  const getFilters = () => {
+    const compactedParams = compactParams(params);
+    const searchParams = generateSearchFromFilters(compactedParams, ['_limit', '_sort', '_start']);
+
+    return formatFilters(searchParams);
+  };
+
   const fetchMediaLibFilesCount = async () => {
     const requestURL = getRequestUrl('files/count');
-    const compactedParams = compactParams(params);
-    const paramsToSend = generateSearchFromFilters(compactedParams, ['_limit', '_sort', '_start']);
+    const paramsToSend = getFilters();
 
     try {
       return await request(`${requestURL}?${paramsToSend}`, {
@@ -319,8 +328,7 @@ const InputModalStepperProvider = ({
 
   const fetchMediaLibFiles = async () => {
     const requestURL = getRequestUrl('files');
-    const compactedParams = compactParams(params);
-    const paramsToSend = generateSearchFromFilters(compactedParams);
+    const paramsToSend = getFilters();
 
     try {
       return await request(`${requestURL}?${paramsToSend}`, {
@@ -402,17 +410,21 @@ const InputModalStepperProvider = ({
             multiple,
           });
         } catch (err) {
+          const status = get(err, 'response.status', get(err, 'status', null));
+          const statusText = get(err, 'response.statusText', get(err, 'statusText', null));
           const errorMessage = get(
             err,
             ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
-            null
+            get(err, ['response', 'payload', 'message'], statusText)
           );
 
-          dispatch({
-            type: 'SET_FILE_ERROR',
-            fileIndex: originalIndex,
-            errorMessage,
-          });
+          if (status) {
+            dispatch({
+              type: 'SET_FILE_ERROR',
+              fileIndex: originalIndex,
+              errorMessage,
+            });
+          }
         }
       }
     );
@@ -449,6 +461,7 @@ const InputModalStepperProvider = ({
         handleSetFileToEditError,
         moveAsset: handleMoveAsset,
         multiple,
+        noNavigation,
         onInputMediaChange,
         removeFilter,
         setParam,
@@ -462,23 +475,24 @@ const InputModalStepperProvider = ({
 };
 
 InputModalStepperProvider.propTypes = {
+  allowedTypes: PropTypes.arrayOf(PropTypes.string),
   children: PropTypes.node.isRequired,
-  initialFileToEdit: PropTypes.object,
-  initialFilters: PropTypes.arrayOf(PropTypes.object),
   initialFilesToUpload: PropTypes.object,
+  initialFileToEdit: PropTypes.object,
   isOpen: PropTypes.bool,
   multiple: PropTypes.bool.isRequired,
+  noNavigation: PropTypes.bool,
+  onClosed: PropTypes.func.isRequired,
   onInputMediaChange: PropTypes.func,
   selectedFiles: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   step: PropTypes.string.isRequired,
-  allowedTypes: PropTypes.arrayOf(PropTypes.string),
 };
 
 InputModalStepperProvider.defaultProps = {
   initialFileToEdit: null,
-  initialFilters: [],
   initialFilesToUpload: null,
   isOpen: false,
+  noNavigation: false,
   onInputMediaChange: () => {},
   selectedFiles: null,
   allowedTypes: [],

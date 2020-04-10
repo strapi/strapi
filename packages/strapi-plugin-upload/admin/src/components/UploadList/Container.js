@@ -2,11 +2,9 @@ import styled from 'styled-components';
 import ContainerFluid from '../ContainerFluid';
 
 const Container = styled(ContainerFluid)`
-  margin-bottom: 4px;
+  margin-bottom: 3px;
   padding-top: 15px;
-  max-height: 339px;
-  overflow: overlay;
-  overflow-x: hidden;
+  max-height: 357px;
 `;
 
 export default Container;

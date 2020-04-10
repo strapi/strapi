@@ -11,6 +11,7 @@ import ButtonWrapper from './ButtonWrapper';
 import RowItem from './RowItem';
 import ListTitle from './ListTitle';
 import ListTitleWrapper from './ListTitleWrapper';
+import CustomModalSection from './CustomModalSection';
 
 const UploadList = ({
   filesToUpload,
@@ -47,7 +48,7 @@ const UploadList = ({
           </Button>
         </ButtonWrapper>
       </ModalSection>
-      <ModalSection>
+      <CustomModalSection>
         <Container>
           {matrix.map(({ key, rowContent }) => {
             return (
@@ -67,7 +68,7 @@ const UploadList = ({
             );
           })}
         </Container>
-      </ModalSection>
+      </CustomModalSection>
     </>
   );
 };

@@ -15,6 +15,7 @@ import CardControl from '../CardControl';
 
 const BrowseAssets = () => {
   const {
+    allowedTypes,
     count,
     files,
     goTo,
@@ -22,6 +23,7 @@ const BrowseAssets = () => {
     handleFileSelection,
     handleGoToEditFile,
     multiple,
+    noNavigation,
     params,
     removeFilter,
     selectedFiles,
@@ -55,7 +57,7 @@ const BrowseAssets = () => {
   const canSelectFile = multiple === true || (selectedFiles.length < 1 && !multiple);
 
   const handleListCardClick = id => {
-    if (!canSelectFile) {
+    if (!canSelectFile && id !== selectedFiles[0].id) {
       return;
     }
 
@@ -65,6 +67,23 @@ const BrowseAssets = () => {
       },
     });
   };
+
+  /* eslint-disable indent */
+  /* eslint-disable react/jsx-indent */
+  const renderCardControl = noNavigation
+    ? null
+    : id => (
+        <CardControl
+          small
+          title="edit"
+          color="#9EA7B8"
+          type="pencil"
+          onClick={() => handleGoToEditFile(id)}
+        />
+      );
+
+  /* eslint-enable indent */
+  /* eslint-enable react/jsx-indent */
 
   const paginationParams = {
     _limit: parseInt(params._limit, 10) || 10,
@@ -118,16 +137,9 @@ const BrowseAssets = () => {
             onChange={handleFileSelection}
             selectedItems={selectedFiles}
             onCardClick={handleListCardClick}
+            allowedTypes={allowedTypes}
             smallCards
-            renderCardControl={id => (
-              <CardControl
-                small
-                title="edit"
-                color="#9EA7B8"
-                type="pencil"
-                onClick={() => handleGoToEditFile(id)}
-              />
-            )}
+            renderCardControl={renderCardControl}
           />
           <Padded left right>
             <PageFooter

@@ -14,7 +14,7 @@ const Wrapper = styled.div`
   border: 1px solid ${({ theme }) => theme.main.colors.darkGrey};
   border-radius: ${({ theme }) => theme.main.sizes.borderRadius};
   cursor: pointer;
-  font-size: 11px;
+  font-size: ${({ small }) => (small ? '11px' : '13px')};
   color: ${({ color }) => color};
 
   ${({ type }) =>
@@ -24,8 +24,34 @@ const Wrapper = styled.div`
   `};
 
   &:hover {
-    ${({ type }) => {
-      if (type === 'trash-alt' || type === 'clear') {
+    ${({ type, theme, color }) => {
+      if (type === 'plus') {
+        return `
+          background-color: ${theme.main.colors.darkBlue};
+          border: 1px solid  ${theme.main.colors.darkBlue};
+            > svg {
+              > g, path {
+                stroke: ${theme.main.colors.mediumBlue};
+            }
+          }
+          color: ${theme.main.colors.mediumBlue};
+        `;
+      }
+
+      if (type === 'check' || type === 'times') {
+        return `
+          background-color: ${color};
+          border: 1px solid  ${color};
+          > svg {
+            > g, path {
+              fill: ${theme.main.colors.white};
+            }
+          }
+          color: ${theme.main.colors.white};
+        `;
+      }
+
+      if (type === 'trash-alt') {
         return `
           background-color: #FFA784;
           border: 1px solid #FFA784;
@@ -33,29 +59,15 @@ const Wrapper = styled.div`
         `;
       }
 
-      if (type === 'plus') {
-        return `
-          background-color: ${({ theme }) => theme.main.colors.darkBlue};
-          border: 1px solid  ${({ theme }) => theme.main.colors.darkBlue};
-          > svg {
-            > g, path {
-              stroke: ${({ theme }) => theme.main.colors.mediumBlue};
-            }
-          }
-          color: ${({ theme }) => theme.main.colors.mediumBlue};
-        `;
-      }
-
       return `
-          background-color: ${({ theme }) => theme.main.colors.darkBlue};
-          border: 1px solid  ${({ theme }) => theme.main.colors.darkBlue};
+          background-color: ${theme.main.colors.darkBlue};
+          border: 1px solid  ${theme.main.colors.darkBlue};
           > svg {
             > g, path {
-              fill: ${({ theme }) => theme.main.colors.mediumBlue};
+              fill: ${theme.main.colors.mediumBlue};
             }
           }
-          color: ${({ theme }) => theme.main.colors.mediumBlue};
-
+          color: ${theme.main.colors.mediumBlue};
         `;
     }};
   }

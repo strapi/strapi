@@ -4,17 +4,17 @@ import formatFilter from '../formatFilter';
 
 describe('UPLOAD | components | FiltersPicker | utils', () => {
   describe('formatFilter', () => {
-    it('should return current filter if value is not a moment object', () => {
+    it('should return formatted filter value if name is size', () => {
       const filter = {
         name: 'size',
         filter: '=',
-        value: '10KB',
+        value: '10MB',
       };
 
       const expected = {
         name: 'size',
         filter: '=',
-        value: '10KB',
+        value: 10000,
       };
 
       expect(formatFilter(filter)).toEqual(expected);
