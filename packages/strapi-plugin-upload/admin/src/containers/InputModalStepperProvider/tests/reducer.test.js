@@ -1933,4 +1933,105 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
       expect(reducer(state, action)).toEqual(expected);
     });
   });
+
+  describe('SET_PARAM', () => {
+    it('should set the _start param to 0 if the pagination limit changed', () => {
+      const action = {
+        type: 'SET_PARAM',
+        param: {
+          name: '_limit',
+          value: 50,
+        },
+      };
+      const state = {
+        params: {
+          _start: 10,
+        },
+      };
+      const expected = {
+        params: {
+          _start: 0,
+          _limit: 50,
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('should add filter to params', () => {
+      const action = {
+        type: 'SET_PARAM',
+        param: {
+          name: 'filters',
+          value: {
+            name: 'mime',
+            filter: '_contains',
+            value: 'image',
+          },
+        },
+      };
+      const state = {
+        params: {
+          _start: 0,
+          filters: [],
+        },
+      };
+      const expected = {
+        params: {
+          _start: 0,
+          filters: [
+            {
+              name: 'mime',
+              filter: '_contains',
+              value: 'image',
+            },
+          ],
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('should not add filter to params if it is already exist', () => {
+      const action = {
+        type: 'SET_PARAM',
+        param: {
+          name: 'filters',
+          value: {
+            name: 'mime',
+            filter: '_contains',
+            value: 'image',
+          },
+        },
+      };
+      const state = {
+        params: {
+          _start: 0,
+          _limit: 50,
+          filters: [
+            {
+              name: 'mime',
+              filter: '_contains',
+              value: 'image',
+            },
+          ],
+        },
+      };
+      const expected = {
+        params: {
+          _start: 0,
+          _limit: 50,
+          filters: [
+            {
+              name: 'mime',
+              filter: '_contains',
+              value: 'image',
+            },
+          ],
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
 });

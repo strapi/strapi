@@ -12,6 +12,7 @@ import {
   createNewFilesToUploadArray,
   urlSchema,
   getFileModelTimestamps,
+  formatFilters,
 } from '../../utils';
 import InputModalStepperContext from '../../contexts/InputModal/InputModalDataManager';
 import init from './init';
@@ -24,7 +25,6 @@ const InputModalStepperProvider = ({
   children,
   initialFilesToUpload,
   initialFileToEdit,
-  initialFilters,
   isOpen,
   multiple,
   noNavigation,
@@ -39,6 +39,7 @@ const InputModalStepperProvider = ({
   const [reducerState, dispatch] = useReducer(reducer, initialState, state =>
     init({
       ...state,
+      allowedTypes,
       currentStep: step,
       fileToEdit: initialFileToEdit,
       selectedFiles: Array.isArray(selectedFiles) ? selectedFiles : [selectedFiles],
@@ -50,7 +51,6 @@ const InputModalStepperProvider = ({
         : [],
       params: {
         ...state.params,
-        filters: initialFilters,
         _sort: `${updated_at}:DESC`,
       },
     })
@@ -294,10 +294,16 @@ const InputModalStepperProvider = ({
     handleRemoveFileToUpload(fileIndex);
   };
 
+  const getFilters = () => {
+    const compactedParams = compactParams(params);
+    const searchParams = generateSearchFromFilters(compactedParams, ['_limit', '_sort', '_start']);
+
+    return formatFilters(searchParams);
+  };
+
   const fetchMediaLibFilesCount = async () => {
     const requestURL = getRequestUrl('files/count');
-    const compactedParams = compactParams(params);
-    const paramsToSend = generateSearchFromFilters(compactedParams, ['_limit', '_sort', '_start']);
+    const paramsToSend = getFilters();
 
     try {
       return await request(`${requestURL}?${paramsToSend}`, {
@@ -322,8 +328,7 @@ const InputModalStepperProvider = ({
 
   const fetchMediaLibFiles = async () => {
     const requestURL = getRequestUrl('files');
-    const compactedParams = compactParams(params);
-    const paramsToSend = generateSearchFromFilters(compactedParams);
+    const paramsToSend = getFilters();
 
     try {
       return await request(`${requestURL}?${paramsToSend}`, {
@@ -474,7 +479,6 @@ InputModalStepperProvider.propTypes = {
   children: PropTypes.node.isRequired,
   initialFilesToUpload: PropTypes.object,
   initialFileToEdit: PropTypes.object,
-  initialFilters: PropTypes.arrayOf(PropTypes.object),
   isOpen: PropTypes.bool,
   multiple: PropTypes.bool.isRequired,
   noNavigation: PropTypes.bool,
@@ -486,7 +490,6 @@ InputModalStepperProvider.propTypes = {
 
 InputModalStepperProvider.defaultProps = {
   initialFileToEdit: null,
-  initialFilters: [],
   initialFilesToUpload: null,
   isOpen: false,
   noNavigation: false,

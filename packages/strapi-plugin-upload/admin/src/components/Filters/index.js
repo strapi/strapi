@@ -8,7 +8,7 @@ import Padded from '../Padded';
 const Filters = ({ onChange, onClick, filters }) => {
   return (
     <>
-      <FiltersPicker filters={filters} onChange={onChange} />
+      <FiltersPicker onChange={onChange} />
       <Padded left size="sm" />
       <FiltersList filters={filters} onClick={onClick} />
     </>

@@ -9,7 +9,7 @@ import Picker from '../Picker';
 
 import formatFilter from './utils/formatFilter';
 
-const FiltersPicker = ({ onChange, filters }) => {
+const FiltersPicker = ({ onChange }) => {
   const handleChange = ({ target: { value } }) => {
     onChange({ target: { name: 'filters', value: formatFilter(value) } });
   };
@@ -25,7 +25,6 @@ const FiltersPicker = ({ onChange, filters }) => {
         )}
         renderSectionContent={onToggle => (
           <FiltersCard
-            filters={filters}
             onChange={e => {
               handleChange(e);
               onToggle();
@@ -38,12 +37,10 @@ const FiltersPicker = ({ onChange, filters }) => {
 };
 
 FiltersPicker.defaultProps = {
-  filters: [],
   onChange: () => {},
 };
 
 FiltersPicker.propTypes = {
-  filters: PropTypes.arrayOf(PropTypes.object),
   onChange: PropTypes.func,
 };
 

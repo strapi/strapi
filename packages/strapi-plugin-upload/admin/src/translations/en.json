@@ -30,6 +30,7 @@
   "list.assets-empty.title": "There is no asset yet",
   "list.assets-empty.title-withSearch": "There is no asset with the applied filters",
   "list.assets-empty.subtitle": "Add a first one to the list.",
+  "list.assets.type-not-allowed": "This type of file is not allowed.",
   "list.assets.selected.plural": "{number} assets selected",
   "list.assets.selected.singular": "{number} asset selected",
   "modal.header.browse": "Upload assets",

@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { formatBytes, getExtension, getType } from '../../utils';
+import { useGlobalContext } from 'strapi-helper-plugin';
+import { formatBytes, getExtension, getType, getTrad } from '../../utils';
 
 import Flex from '../Flex';
 import Text from '../Text';
@@ -15,6 +16,7 @@ import Wrapper from '../CardWrapper';
 
 const Card = ({
   id,
+  isDisabled,
   checked,
   children,
   errorMessage,
@@ -33,15 +35,21 @@ const Card = ({
   withFileCaching,
   withoutFileInfo,
 }) => {
+  const { formatMessage } = useGlobalContext();
   const fileSize = formatBytes(size, 0);
   const fileType = mime || type;
 
   const handleClick = () => {
-    onClick(id);
+    if (!isDisabled) {
+      onClick(id);
+    }
   };
 
   return (
-    <Wrapper onClick={handleClick}>
+    <Wrapper
+      title={isDisabled ? formatMessage({ id: getTrad('list.assets.type-not-allowed') }) : null}
+      onClick={handleClick}
+    >
       <CardImgWrapper checked={checked} small={small}>
         <CardPreview
           hasError={hasError}
@@ -84,6 +92,7 @@ Card.defaultProps = {
   children: null,
   errorMessage: null,
   id: null,
+  isDisabled: false,
   hasError: false,
   hasIcon: false,
   height: null,
@@ -102,6 +111,7 @@ Card.defaultProps = {
 
 Card.propTypes = {
   id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  isDisabled: PropTypes.bool,
   checked: PropTypes.bool,
   children: PropTypes.node,
   errorMessage: PropTypes.string,

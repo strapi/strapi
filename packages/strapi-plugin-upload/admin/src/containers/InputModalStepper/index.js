@@ -20,13 +20,6 @@ const InputModal = ({
   step,
 }) => {
   const singularTypes = allowedTypes.map(type => type.substring(0, type.length - 1));
-  const typesToDisable = ['video', 'image', 'file'].filter(f => !singularTypes.includes(f));
-  const nContainsFilters = typesToDisable.map(type => ({
-    name: 'mime',
-    filter: '_ncontains',
-    value: type,
-    isDisabled: true,
-  }));
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -35,7 +28,6 @@ const InputModal = ({
         onClosed={onClosed}
         initialFilesToUpload={filesToUpload}
         initialFileToEdit={fileToEdit}
-        initialFilters={nContainsFilters}
         isOpen={isOpen}
         multiple={multiple}
         noNavigation={noNavigation}
