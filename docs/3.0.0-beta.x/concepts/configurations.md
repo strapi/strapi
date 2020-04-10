@@ -442,21 +442,14 @@ The session doesn't work with `mongo` as a client. The package that we should us
 - `host` (string): Host name. Default value: `localhost`.
 - `port` (integer): Port on which the server should be running. Default value: `1337`.
 - `emitErrors` (boolean): Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services.
-- `proxy`
-  - `enabled` (boolean): Enable proxy support such as Apache or Nginx. Default value: `false`.
-  - `ssl` (boolean): Enable proxy SSL support.
-  - `host` (string): Host name your proxy service uses for Strapi.
-  - `port` (integer): Port that your proxy service accepts connections on.
-- [`cron`](https://en.wikipedia.org/wiki/Cron)
-  - `enabled` (boolean): Enable or disable CRON tasks to schedule jobs at specific dates. Default value: `false`.
+- `server`
+  - `url` (string): Url of the server. Enable proxy support such as Apache or Nginx. Default value: `http://${host}:${port}`.
 - `admin`
-  - `autoOpen` (boolean): Enable or disabled administration opening on start. Default value: `true`.
+  - `url` (string): Url of your admin panel. Default value: `/admin`. Note: If the url is relative, it will be concatenate with `server.url`.
+  - `autoOpen` (boolean): Enable or disable administration opening on start. Default value: `true`.
   - `watchIgnoreFiles` (array): Add custom files that should not be watched during development. See more [here](https://github.com/paulmillr/chokidar#path-filtering) (property `ignored`). Default value: `[]`.
-  - `server`
-    - `path` (string): The relative path were the admin panel is served. Default value: `/admin`.
-  - `build`
-    - `backend` (string): URL that the admin panel and plugins will request (default: `http://localhost:1337`).
-    - `publicPath` (string): Allow to change the URL to access the admin panel. Default value: `/admin`. Note: In most cases it is also needed to change the `admin.server.path` value.
+  - [`cron`](https://en.wikipedia.org/wiki/Cron)
+    - `enabled` (boolean): Enable or disable CRON tasks to schedule jobs at specific dates. Default value: `false`.
 
 #### Example
 
@@ -470,12 +463,9 @@ As an example using this configuration with Nginx your server would respond to `
 {
   "host": "localhost",
   "port": 1337,
-  "proxy": {
-    "enabled": true,
-    "ssl": true,
-    "host": "example.com",
-    "port": 8443
-  },
+  "server": {
+    "url": "https://example.com:8443"
+  }
   "cron": {
     "enabled": true
   }
