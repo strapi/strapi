@@ -70,11 +70,11 @@ export default strapi => {
 };
 ```
 
-By doing so, all the plugins from your project will be able to use the newly register **Field** type.
+By doing so, all the plugins from your project will be able to use the newly registered **Field** type.
 
 ### Registering a field inside a React Component
 
-The other way to register a **Field** is to use the provided `react-hook`: **`useStrapi`** it can be done in the `Initializer` Component so it is accessible directly when the user is logged in, if you decide to register your plugin in another component than the `Initializer` the **Field** will only be registered in the administration panel once component is mounted (the user has navigated to the view where the **Field** is registered).
+The other way to register a **Field** is to use the provided `react-hook`: **`useStrapi`** it can be done in the `Initializer` Component so it is accessible directly when the user is logged in, if you decide to register your plugin in another component than the `Initializer` the **Field** will only be registered in the administration panel once the component is mounted (the user has navigated to the view where the **Field** is registered).
 
 1. Register the **Field** in the `Initializer` Component:
 
