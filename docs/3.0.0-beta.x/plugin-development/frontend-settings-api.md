@@ -186,7 +186,7 @@ export default strapi => {
 
 ## Adding a setting into the global section
 
-In order to add a link into the global section of the settings view you need to create a global array containing the links you want to add;
+In order to add a link into the global section of the settings view you need to create a global array containing the links you want to add:
 
 **Path —** `plugins/my-plugin/admin/src/index.js`.
 
