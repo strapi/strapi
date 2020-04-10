@@ -130,7 +130,7 @@ Additional settings can be set on models:
 }
 ```
 
-In this example, the model `Restaurant` will be accessible through the `Restaurants` global variable. The data will be stored in the `Restaurants_v1` collection or table and the model will use the `mongo` connection defined in `./config/environments/**/database.json`
+In this example, the model `Restaurant` will be accessible through the `Restaurants` global variable. The data will be stored in the `Restaurants_v1` collection or table and the model will use the `mongo` connection defined in `./config/database.js`
 
 ::: warning
 If not set manually in the JSON file, Strapi will adopt the filename as `globalId`.

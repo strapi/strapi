@@ -313,23 +313,29 @@ Please note the `<password>` after your `username`. In this example, after `mong
 
 Replace the contents of `/database.json` with the following and replace **< password >** with the password of the user of your database you created earlier:
 
-`Path: ./config/environments/(development|production)/database.json`.
+`Path: ./config/database.js`.
 
-```json
-{
-  "defaultConnection": "default",
-  "connections": {
-    "default": {
-      "connector": "mongoose",
-      "settings": {
-        "uri": "mongodb://paulbocuse:<password>@strapidatabase-shard-00-00-fxxx6c.mongodb.net:27017,strapidatabase-shard-00-01-fxxxc.mongodb.net:27017,strapidatabase-shard-00-02-fxxxc.mongodb.net:27017/test?ssl=true&replicaSet=strapidatabase-shard-0&authSource=admin&retryWrites=true&w=majority"
+```js
+module.exports = ({ env }) => ({
+  defaultConnection: 'default',
+  connections: {
+    default: {
+      connector: 'mongoose',
+      settings: {
+        uri: env('DATABASE_URI'),
       },
-      "options": {
-        "ssl": true
-      }
-    }
-  }
-}
+      options: {
+        ssl: true,
+      },
+    },
+  },
+});
+```
+
+`Path: .env`
+
+```
+DATABASE_URI=mongodb://paulbocuse:<password>@strapidatabase-shard-00-00-fxxx6c.mongodb.net:27017,strapidatabase-shard-00-01-fxxxc.mongodb.net:27017,strapidatabase-shard-00-02-fxxxc.mongodb.net:27017/test?ssl=true&replicaSet=strapidatabase-shard-0&authSource=admin&retryWrites=true&w=majority
 ```
 
 ::: warning NOTE

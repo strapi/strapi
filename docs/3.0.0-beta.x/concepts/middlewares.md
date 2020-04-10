@@ -119,8 +119,6 @@ The following middlewares cannot be disabled: responses, router, logger and boom
 
 ### Request middlewares
 
-**Path —** `./config/environments/**/request.json`.
-
 - `session`
   - `enabled` (boolean): Enable or disable sessions. Default value: `false`.
   - `client` (string): Client used to persist sessions. Default value: `redis`.
@@ -143,8 +141,6 @@ The session doesn't work with `mongo` as a client. The package that we should us
 
 ## Response middlewares
 
-**Path —** `./config/environments/**/response.json`.
-
 - [`gzip`](https://en.wikipedia.org/wiki/Gzip)
   - `enabled` (boolean): Enable or not GZIP response compression.
 - `responseTime`
@@ -154,8 +150,6 @@ The session doesn't work with `mongo` as a client. The package that we should us
   - `value` (string): The value of the header. Default value: `Strapi <strapi.io>`
 
 ### Security middlewares
-
-**Path —** `./config/environments/**/security.json`.
 
 - [`csp`](https://en.wikipedia.org/wiki/Content_Security_Policy)
   - `enabled` (boolean): Enable or disable CSP to avoid Cross Site Scripting (XSS) and data injection attacks.
@@ -185,7 +179,7 @@ The session doesn't work with `mongo` as a client. The package that we should us
 
 ### Load order
 
-The middlewares are injected into the Koa stack asynchronously. Sometimes it happens that some of these middlewares need to be loaded in a specific order. To define a load order, we created a dedicated file located in `./config/middleware.json`.
+The middlewares are injected into the Koa stack asynchronously. Sometimes it happens that some of these middlewares need to be loaded in a specific order. To define a load order, we created a dedicated file located in `./config/middleware.js`.
 
 **Path —** `./config/middleware.js`.
 

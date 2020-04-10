@@ -187,6 +187,134 @@ module.exports = ({ env }) => ({
 | `admin.build`                                | Admin panel build configuration                                                                                                                             |               |             |
 | `admin.build.backend`                        | URL that the admin panel and plugins will request                                                                                                           | string        |             |
 
+## Functions
+
+The `./config/functions/` folder contains a set of JavaScript files in order to add dynamic and logic based configurations.
+
+All functions that are exposed in this folder are accessible via `strapi.config.functions['fileName']();`
+
+### Bootstrap
+
+**Path —** `./config/functions/bootstrap.js`.
+
+The `bootstrap` function is called at every server start. You can use it to add a specific logic at this moment of your server's lifecycle.
+
+Here are some use cases:
+
+- Create an admin user if there isn't one.
+- Fill the database with some necessary data.
+- Check that the database is up-and-running.
+- Load some environment variables.
+
+The bootstrap function can be synchronous or asynchronous.
+
+**Synchronous**
+
+```js
+module.exports = () => {
+  // some sync code
+};
+```
+
+**Return a promise**
+
+```js
+module.exports = () => {
+  return new Promise(/* some code */);
+};
+```
+
+**Asynchronous**
+
+```js
+module.exports = async () => {
+  await someSetup();
+};
+```
+
+### CRON tasks
+
+CRON tasks allow you to schedule jobs (arbitrary functions) for execution at specific dates, with optional recurrence rules. It only uses a single timer at any given time (rather than reevaluating upcoming jobs every second/minute).
+
+This feature is powered by [`node-schedule`](https://www.npmjs.com/package/node-schedule) node modules. Check it for more information.
+
+::: warning
+Make sure the `enabled` cron config is set to `true` in `./config/server.js` file.
+:::
+
+The cron format consists of:
+
+```
+*    *    *    *    *    *
+┬    ┬    ┬    ┬    ┬    ┬
+│    │    │    │    │    |
+│    │    │    │    │    └ day of week (0 - 7) (0 or 7 is Sun)
+│    │    │    │    └───── month (1 - 12)
+│    │    │    └────────── day of month (1 - 31)
+│    │    └─────────────── hour (0 - 23)
+│    └──────────────────── minute (0 - 59)
+└───────────────────────── second (0 - 59, OPTIONAL)
+```
+
+To define a CRON job, add your logic like below:
+
+**Path —** `./config/functions/cron.js`.
+
+```js
+module.exports = {
+  /**
+   * Simple example.
+   * Every monday at 1am.
+   */
+
+  '0 0 1 * * 1': () => {
+    // Add your own logic here (e.g. send a queue of email, create a database backup, etc.).
+  },
+};
+```
+
+### Database ORM customization
+
+When present, they are loaded to let you customize your database connection instance, for example for adding some plugin, customizing parameters, etc.
+
+:::: tabs
+
+::: tab Mongoose
+
+As an example, for using the `mongoose-simple-random` plugin for MongoDB, you can register it like this:
+
+**Path —** `./config/functions/mongoose.js`.
+
+```js
+'use strict';
+
+const random = require('mongoose-simple-random');
+
+module.exports = (mongoose, connection) => {
+  mongoose.plugin(random);
+};
+```
+
+:::
+
+::: tab Bookshelf
+
+Another example would be using the `bookshelf-uuid` plugin for MySQL, you can register it like this:
+
+**Path —** `./config/functions/bookshelf.js`.
+
+```js
+'use strict';
+
+module.exports = (bookshelf, connection) => {
+  bookshelf.plugin(require('bookshelf-uuid'));
+};
+```
+
+:::
+
+::::
+
 ## Database
 
 This file lets you define database connections that will be used to store your application content.
@@ -362,134 +490,6 @@ module.exports = ({ env }) => ({
 ::: tip
 Take a look at the [database's guide](../guides/databases.md) for more details.
 :::
-
-## Functions
-
-The `./config/functions/` folder contains a set of JavaScript files in order to add dynamic and logic based configurations.
-
-All functions that are exposed in this folder are accessible via `strapi.config.functions['fileName']();`
-
-### Bootstrap
-
-**Path —** `./config/functions/bootstrap.js`.
-
-The `bootstrap` function is called at every server start. You can use it to add a specific logic at this moment of your server's lifecycle.
-
-Here are some use cases:
-
-- Create an admin user if there isn't one.
-- Fill the database with some necessary data.
-- Check that the database is up-and-running.
-- Load some environment variables.
-
-The bootstrap function can be synchronous or asynchronous.
-
-**Synchronous**
-
-```js
-module.exports = () => {
-  // some sync code
-};
-```
-
-**Return a promise**
-
-```js
-module.exports = () => {
-  return new Promise(/* some code */);
-};
-```
-
-**Asynchronous**
-
-```js
-module.exports = async () => {
-  await someSetup();
-};
-```
-
-### CRON tasks
-
-CRON tasks allow you to schedule jobs (arbitrary functions) for execution at specific dates, with optional recurrence rules. It only uses a single timer at any given time (rather than reevaluating upcoming jobs every second/minute).
-
-This feature is powered by [`node-schedule`](https://www.npmjs.com/package/node-schedule) node modules. Check it for more information.
-
-::: warning
-Make sure the `enabled` cron config is set to `true` in `./config/environments/**/server.json` file.
-:::
-
-The cron format consists of:
-
-```
-*    *    *    *    *    *
-┬    ┬    ┬    ┬    ┬    ┬
-│    │    │    │    │    |
-│    │    │    │    │    └ day of week (0 - 7) (0 or 7 is Sun)
-│    │    │    │    └───── month (1 - 12)
-│    │    │    └────────── day of month (1 - 31)
-│    │    └─────────────── hour (0 - 23)
-│    └──────────────────── minute (0 - 59)
-└───────────────────────── second (0 - 59, OPTIONAL)
-```
-
-To define a CRON job, add your logic like below:
-
-**Path —** `./config/functions/cron.js`.
-
-```js
-module.exports = {
-  /**
-   * Simple example.
-   * Every monday at 1am.
-   */
-
-  '0 0 1 * * 1': () => {
-    // Add your own logic here (e.g. send a queue of email, create a database backup, etc.).
-  },
-};
-```
-
-### Database ORM customization
-
-When present, they are loaded to let you customize your database connection instance, for example for adding some plugin, customizing parameters, etc.
-
-:::: tabs
-
-::: tab Mongoose
-
-As an example, for using the `mongoose-simple-random` plugin for MongoDB, you can register it like this:
-
-**Path —** `./config/functions/mongoose.js`.
-
-```js
-'use strict';
-
-const random = require('mongoose-simple-random');
-
-module.exports = (mongoose, connection) => {
-  mongoose.plugin(random);
-};
-```
-
-:::
-
-::: tab Bookshelf
-
-Another example would be using the `bookshelf-uuid` plugin for MySQL, you can register it like this:
-
-**Path —** `./config/functions/bookshelf.js`.
-
-```js
-'use strict';
-
-module.exports = (bookshelf, connection) => {
-  bookshelf.plugin(require('bookshelf-uuid'));
-};
-```
-
-:::
-
-::::
 
 ## Configuration in database
 
