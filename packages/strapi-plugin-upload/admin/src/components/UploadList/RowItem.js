@@ -47,7 +47,6 @@ const RowItem = ({
         small
         errorMessage={errorMessage}
         hasError={hasError}
-        hasIcon
         type={file ? file.type : null}
         size={fileSize}
         url={url}

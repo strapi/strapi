@@ -12,7 +12,6 @@ import ListCell from './ListCell';
 import ListRow from './ListRow';
 
 const List = ({
-  clickable,
   data,
   onChange,
   onCardClick,
@@ -48,7 +47,6 @@ const List = ({
               <Card
                 checked={checked}
                 {...item}
-                hasIcon={clickable}
                 url={fileUrl}
                 onClick={onCardClick}
                 small={smallCards}
@@ -80,7 +78,6 @@ const List = ({
 };
 
 List.defaultProps = {
-  clickable: false,
   canSelect: true,
   data: [],
   onChange: () => {},
@@ -91,7 +88,6 @@ List.defaultProps = {
 };
 
 List.propTypes = {
-  clickable: PropTypes.bool,
   canSelect: PropTypes.bool,
   data: PropTypes.array,
   onChange: PropTypes.func,

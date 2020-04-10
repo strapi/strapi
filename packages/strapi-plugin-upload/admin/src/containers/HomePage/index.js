@@ -389,7 +389,6 @@ const HomePage = () => {
       {dataCount > 0 && !areResultsEmptyWithSearchOrFilters ? (
         <>
           <List
-            clickable
             data={data}
             onChange={handleChangeCheck}
             onCardClick={handleClickEditFile}

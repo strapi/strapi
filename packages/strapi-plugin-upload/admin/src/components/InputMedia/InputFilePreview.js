@@ -18,7 +18,7 @@ const InputFilePreview = ({ file, onClick, isSlider }) => {
       justifyContent="space-between"
     >
       {isSlider && <Chevron side="left" onClick={() => onClick(false)} />}
-      <CardPreview url={fileUrl} type={file.mime} />
+      <CardPreview hasIcon url={fileUrl} type={file.mime} />
       {isSlider && <Chevron side="right" onClick={() => onClick(true)} />}
     </Flex>
   );
