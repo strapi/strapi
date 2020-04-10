@@ -190,7 +190,7 @@ You are now ready to create your first **Collection Type**.
 
 A **Content Type** can be considered a sort of _blueprint_ for the data created. In other words, a **Content Type** is the schema of the data structure.
 
-Both **Collection Type** and **Single Type** are types of **Collection Type**. **Collection Type** is used for content that repeats such as restaurants, or blog posts (hence "collection"). **Single Type** is used to manage content that will have only one instance - for example, your menu, a static page, or a footer.
+Both **Collection Type** and **Single Type** are types of **Content Type**. **Collection Type** is used for content that repeats such as restaurants, or blog posts (hence "collection"). **Single Type** is used to manage content that will have only one instance - for example, your menu, a static page, or a footer.
 
 **Content Type** can hold data represented by fields. For example, a **Collection Type** called `Restaurant` may be intended to display information regarding restaurants. A `restaurant` **Collection Type** could have fields that include a `name`, the main `image`, and a `description` - _at a minimum_. However, a `restaurant` could also have a `category` or multiple `categories`, and a `restaurant` could perhaps need to show `Hours Of Operation`.
 
@@ -578,7 +578,7 @@ You have now entered your first **Restaurant** Content Type. You have also assig
 
 ## 7. Set Roles and Permissions
 
-By default, Strapi publishes all **Collection Types** with restricted permissions. Which means you have to explicitly give permissions to each **Collection Type** you create. You are going to give **Public** API (or URL) access to both the **Restaurant** Collection Type and **Category** Collection Type.
+By default, Strapi publishes all **Content Types** with restricted permissions. That means you have to explicitly give permissions to each **Content Type** you create. You are going to give **Public** API (or URL) access to both the **Restaurant** Collection Type and **Category** Collection Type.
 
 - Click on the `Roles & Permissions` menu item, under **PLUGINS** in the left-hand-menu.
 
@@ -623,7 +623,7 @@ Forbidden Access Looks like this:
 
 ::: tip NOTE
 
-If you would like to see the route of any specific **Collection Type**, you need to navigate to the **Collection Type** under the **Roles and Permissions** plugin and click the ⚙️ next to the value. On the right, you see the route:
+If you would like to see the route of any specific **Content Type**, you need to navigate to the **Content Type** under the **Roles and Permissions** plugin and click the ⚙️ next to the value. On the right, you see the route:
 
 ![Permission Routes](../assets/getting-started/tutorial/permission-routes.png 'Permission Routes')
 
