@@ -36,7 +36,7 @@ cd my-app
 yarn develop --watch-admin
 ```
 
-Once this step is over all we need to do is to create our new WYSIWYG which will replace the current one the **Content Manager** plugin.
+Once this step is over all we need to do is to create our new WYSIWYG which will replace the default one in the **Content Manager** plugin.
 
 ### Creating the WYSIWYG
 
@@ -295,7 +295,7 @@ At this point we have simply created a new plugin which is mounted in our projec
 
 ### Registering a our new Field
 
-Since the goal of our plugin is to override the current WYSIWYG we don't want it to be displayed in the administration panel but we need it to register our new **Field**. In order to do so we will simply modify the front-end entry point of our plugin:
+Since the goal of our plugin is to override the current WYSIWYG we don't want it to be displayed in the administration panel but we need it to register our new **Field**. In order to do so, we will simply modify the front-end entry point of our plugin:
 
 **Path —** `./plugins/wysiwyg/admin/src/index.js`
 

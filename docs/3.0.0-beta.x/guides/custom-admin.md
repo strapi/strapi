@@ -99,13 +99,13 @@ const dateFormats = {
   ...defaultDateFormats,
   // Customise the format by uncommenting the one you wan to override it corresponds to the type of your field
   // date: 'dddd, MMMM Do YYYY',
-  //  datetime: 'dddd, MMMM Do YYYY HH:mm',
+  // datetime: 'dddd, MMMM Do YYYY HH:mm',
   // time: 'HH:mm A',
   // timestamp: 'dddd, MMMM Do YYYY HH:mm',
 };
 ```
 
-Now let's replace `data: 'dddd, MMMM Do YYYY'` by `date: 'YYYY/MM/DD';`
+Now let's replace `date: 'dddd, MMMM Do YYYY'` by `date: 'YYYY/MM/DD';`
 
 And tada, the date will now display with the new format.
 
