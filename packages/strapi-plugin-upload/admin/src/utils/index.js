@@ -6,6 +6,7 @@ export { default as createNewFilesToDownloadArray } from './createNewFilesToDown
 export { default as createNewFilesToUploadArray } from './createNewFilesToUploadArray';
 export { default as formatBytes } from './formatBytes';
 export { default as formatFileForEditing } from './formatFileForEditing';
+export { default as formatFilters } from './formatFilters';
 export { default as generatePageFromStart } from './generatePageFromStart';
 export { default as generateStartFromPage } from './generateStartFromPage';
 export { default as getExtension } from './getExtension';
