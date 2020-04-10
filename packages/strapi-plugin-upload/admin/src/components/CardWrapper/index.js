@@ -11,10 +11,12 @@ const Wrapper = styled.div`
 `;
 
 Wrapper.defaultProps = {
+  isDisabled: false,
   isDraggable: false,
 };
 
 Wrapper.propTypes = {
+  isDisabled: PropTypes.bool,
   isDraggable: PropTypes.bool,
 };
 

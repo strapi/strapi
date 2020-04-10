@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Checkbox } from '@buffetjs/core';
 import { get } from 'lodash';
 import { prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
-import { getTrad } from '../../utils';
+import { getTrad, getType } from '../../utils';
 import Card from '../Card';
 import CardControlsWrapper from '../CardControlsWrapper';
 import ListWrapper from '../ListWrapper';
@@ -12,6 +12,7 @@ import ListCell from './ListCell';
 import ListRow from './ListRow';
 
 const List = ({
+  allowedTypes,
   data,
   onChange,
   onCardClick,
@@ -22,7 +23,7 @@ const List = ({
 }) => {
   const selectedAssets = selectedItems.length;
 
-  const handleClick = e => {
+  const handleCheckboxClick = e => {
     e.stopPropagation();
   };
 
@@ -39,12 +40,15 @@ const List = ({
         {data.map(item => {
           const { id } = item;
           const url = get(item, ['formats', 'thumbnail', 'url'], item.url);
+          const isAllowed =
+            allowedTypes.length > 0 ? allowedTypes.includes(getType(item.mime)) : true;
           const checked = selectedItems.findIndex(file => file.id === id) !== -1;
           const fileUrl = prefixFileUrlWithBackendUrl(url);
 
           return (
             <ListCell key={id}>
               <Card
+                isDisabled={!isAllowed}
                 checked={checked}
                 {...item}
                 url={fileUrl}
@@ -53,14 +57,16 @@ const List = ({
               >
                 {(checked || canSelect) && (
                   <>
-                    <CardControlsWrapper leftAlign className="card-control-wrapper">
-                      <Checkbox
-                        name={`${id}`}
-                        onChange={onChange}
-                        onClick={handleClick}
-                        value={checked}
-                      />
-                    </CardControlsWrapper>
+                    {isAllowed && (
+                      <CardControlsWrapper leftAlign className="card-control-wrapper">
+                        <Checkbox
+                          name={`${id}`}
+                          onChange={onChange}
+                          onClick={handleCheckboxClick}
+                          value={checked}
+                        />
+                      </CardControlsWrapper>
+                    )}
                     {renderCardControl && (
                       <CardControlsWrapper className="card-control-wrapper card-control-wrapper-hidden">
                         {renderCardControl(id)}
@@ -78,6 +84,7 @@ const List = ({
 };
 
 List.defaultProps = {
+  allowedTypes: [],
   canSelect: true,
   data: [],
   onChange: () => {},
@@ -88,6 +95,7 @@ List.defaultProps = {
 };
 
 List.propTypes = {
+  allowedTypes: PropTypes.array,
   canSelect: PropTypes.bool,
   data: PropTypes.array,
   onChange: PropTypes.func,

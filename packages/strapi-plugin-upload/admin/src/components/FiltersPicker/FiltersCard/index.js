@@ -12,7 +12,7 @@ import InputWrapper from './InputWrapper';
 import FilterButton from './FilterButton';
 import FilterInput from './FilterInput';
 
-const FiltersCard = ({ onChange, filters }) => {
+const FiltersCard = ({ onChange }) => {
   const { plugins } = useGlobalContext();
   const timestamps = getFileModelTimestamps(plugins);
   const [state, dispatch] = useReducer(reducer, initialState, () => init(initialState, timestamps));
@@ -20,9 +20,7 @@ const FiltersCard = ({ onChange, filters }) => {
 
   const type = filtersForm[name].type;
   const filtersOptions = getFilterType(type);
-  const options = ['image', 'video', 'file'].filter(
-    f => !filters.find(e => e.value === f && e.isDisabled)
-  );
+  const options = ['image', 'video', 'file'];
 
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
@@ -89,12 +87,10 @@ const FiltersCard = ({ onChange, filters }) => {
 };
 
 FiltersCard.defaultProps = {
-  filters: [],
   onChange: () => {},
 };
 
 FiltersCard.propTypes = {
-  filters: PropTypes.arrayOf(PropTypes.object),
   onChange: PropTypes.func,
 };
 

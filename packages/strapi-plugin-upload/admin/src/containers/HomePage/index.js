@@ -1,5 +1,5 @@
 import React, { useReducer, useState, useRef, useEffect } from 'react';
-import { includes, isEmpty, toString } from 'lodash';
+import { includes, isEmpty, toString, isEqual, intersectionWith } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
 import { useDebounce } from '@buffetjs/hooks';
@@ -183,9 +183,15 @@ const HomePage = () => {
     let updatedQueryParams = generateNewSearch({ [name]: value });
 
     if (name === 'filters') {
-      const filters = [...generateFiltersFromSearch(search), value];
+      const existingFilters = generateFiltersFromSearch(search);
+      const canAddFilter = intersectionWith(existingFilters, [value], isEqual).length === 0;
+      updatedQueryParams = generateNewSearch({ [name]: existingFilters });
 
-      updatedQueryParams = generateNewSearch({ [name]: filters });
+      if (canAddFilter) {
+        const filters = [...existingFilters, value];
+
+        updatedQueryParams = generateNewSearch({ [name]: filters });
+      }
     }
 
     if (name === '_limit') {
