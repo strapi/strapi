@@ -64,7 +64,7 @@ const List = ({
                       />
                     </CardControlsWrapper>
                     {renderCardControl && (
-                      <CardControlsWrapper className="card-control-wrapper">
+                      <CardControlsWrapper className="card-control-wrapper card-control-wrapper-hidden">
                         {renderCardControl(id)}
                       </CardControlsWrapper>
                     )}
