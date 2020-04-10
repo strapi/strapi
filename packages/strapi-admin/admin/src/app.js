@@ -73,6 +73,7 @@ Object.keys(plugins).forEach(current => {
   // to load a plugin you need to update this file
   // strapi-generate-plugins/files/admin/src/index.js needs to be updated
   const plugin = currentPluginFn({
+    registerComponent: strapi.componentApi.registerComponent,
     registerField: strapi.fieldApi.registerField,
     registerPlugin,
     settingsBaseURL: SETTINGS_BASE_URL || '/settings',

@@ -1,6 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Button } from '@buffetjs/core';
-
 import useModalContext from '../../hooks/useModalContext';
 import { getTrad } from '../../utils';
 import BrowseAssets from '../BrowseAssets';
@@ -10,7 +10,7 @@ import SelectedAssets from '../SelectedAssets';
 import IntlText from '../IntlText';
 import BaselineAlignmentWrapper from './BaselineAlignmentWrapper';
 
-const ListModal = () => {
+const ListModal = ({ noNavigation }) => {
   const { selectedFiles, goTo, currentTab } = useModalContext();
   const links = [
     { to: 'browse', label: 'browse', isDisabled: false },
@@ -33,12 +33,10 @@ const ListModal = () => {
     </BaselineAlignmentWrapper>
   );
 
+  const renderRightContent = noNavigation ? null : renderUploadModalButton;
+
   return (
-    <ModalNavWrapper
-      initialTab={currentTab}
-      links={links}
-      renderRightContent={renderUploadModalButton}
-    >
+    <ModalNavWrapper initialTab={currentTab} links={links} renderRightContent={renderRightContent}>
       {to => (
         <ModalSection>
           {to === 'browse' && <BrowseAssets />}
@@ -47,6 +45,14 @@ const ListModal = () => {
       )}
     </ModalNavWrapper>
   );
+};
+
+ListModal.defaultProps = {
+  noNavigation: false,
+};
+
+ListModal.propTypes = {
+  noNavigation: PropTypes.bool,
 };
 
 export default ListModal;
