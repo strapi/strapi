@@ -1,5 +1,3 @@
-const _ = require('lodash');
-
 module.exports = async (ctx, next) => {
   const pluginStore = strapi.store({
     environment: '',
@@ -15,14 +13,8 @@ module.exports = async (ctx, next) => {
   if (!ctx.session.documentation) {
     const querystring = ctx.querystring ? `?${ctx.querystring}` : '';
 
-    const backendUrl = _.get(
-      strapi.config.currentEnvironment.server,
-      'admin.build.backend',
-      strapi.config.url
-    );
-
     return ctx.redirect(
-      `${backendUrl}${strapi.plugins.documentation.config['x-strapi-config'].path}/login${querystring}`
+      `${strapi.config.server.url}${strapi.plugins.documentation.config['x-strapi-config'].path}/login${querystring}`
     );
   }
   const isValid = strapi.plugins['users-permissions'].services.user.validatePassword(

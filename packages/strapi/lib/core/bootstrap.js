@@ -281,27 +281,25 @@ module.exports = function(strapi) {
   strapi.config.port = _.get(strapi.config.currentEnvironment, 'server.port') || strapi.config.port;
   strapi.config.host = _.get(strapi.config.currentEnvironment, 'server.host') || strapi.config.host;
 
-  // proxy settings
-  const proxy = _.get(strapi.config.currentEnvironment, 'server.proxy', {});
-  strapi.config.proxy = proxy;
-
-  // check if proxy is enabled and construct url
-  strapi.config.url = proxy.enabled
-    ? getURLFromSegments({
-        hostname: proxy.host,
-        port: proxy.port,
-        ssl: proxy.ssl,
-      })
-    : getURLFromSegments({
-        hostname: strapi.config.host,
-        port: strapi.config.port,
-      });
-
-  const adminPath = _.get(
-    strapi.config.currentEnvironment.server,
-    'admin.build.publicPath',
-    'admin'
+  let serverUrl = _.trim(
+    _.get(
+      strapi.config.currentEnvironment,
+      'server.server.url',
+      getURLFromSegments({ hostname: strapi.config.host, port: strapi.config.port })
+    ),
+    '/'
   );
+  serverUrl = _.trim(new URL(serverUrl).toString(), '/');
+
+  let adminUrl = _.get(strapi.config.currentEnvironment, 'server.admin.url', '/admin');
+  adminUrl = _.trim(adminUrl, '/');
+  if (!adminUrl.startsWith('http')) {
+    adminUrl = `${serverUrl}/${adminUrl}`;
+  }
+
+  strapi.config.server = strapi.config.server || {};
+  strapi.config.server.url = serverUrl;
+  strapi.config.admin.url = _.trim(new URL(adminUrl).toString(), '/');
 
   // check if we should serve admin panel
   const shouldServeAdmin = _.get(
@@ -312,8 +310,6 @@ module.exports = function(strapi) {
   if (!shouldServeAdmin) {
     strapi.config.serveAdminPanel = false;
   }
-
-  strapi.config.admin.url = new URL(adminPath, strapi.config.url).toString();
 };
 
 const enableHookNestedDependencies = function(strapi, name, flattenHooksConfig, force = false) {

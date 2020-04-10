@@ -181,7 +181,7 @@ class Strapi {
     }
 
     console.log(chalk.grey('To access the server ⚡️, go to:'));
-    console.log(chalk.bold(this.config.url));
+    console.log(chalk.bold(this.config.server.url));
     console.log();
   }
 

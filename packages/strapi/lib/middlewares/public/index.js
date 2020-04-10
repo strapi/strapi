@@ -74,22 +74,19 @@ module.exports = strapi => {
 
       if (!strapi.config.serveAdminPanel) return;
 
-      let basename;
-
-      if (_.has(strapi.config.currentEnvironment.server, 'admin.server.path')) {
-        basename = strapi.config.currentEnvironment.server.admin.server.path;
-      } else if (_.has(strapi.config.currentEnvironment.server, 'admin.path')) {
-        // For retrocompatibility
-        basename = strapi.config.currentEnvironment.server.admin.path;
-      } else {
-        basename = '/admin';
-      }
-
       const buildDir = path.resolve(strapi.dir, 'build');
 
       // Serve admin assets.
+      let adminPath;
+      const adminUrl = new URL(strapi.config.admin.url);
+      const serverUrl = new URL(strapi.config.server.url);
+      if (adminUrl.origin === serverUrl.origin) {
+        adminPath = strapi.config.admin.url.replace(strapi.config.server.url, '');
+      } else {
+        adminPath = new URL(strapi.config.admin.url).pathname;
+      }
       strapi.router.get(
-        `${basename}/*`,
+        `${adminPath}/*`,
         async (ctx, next) => {
           ctx.url = path.basename(ctx.url);
           await next();
@@ -101,7 +98,7 @@ module.exports = strapi => {
         })
       );
 
-      strapi.router.get(`${basename}*`, ctx => {
+      strapi.router.get(`${adminPath}*`, ctx => {
         ctx.type = 'html';
         ctx.body = fs.createReadStream(path.join(buildDir + '/index.html'));
       });

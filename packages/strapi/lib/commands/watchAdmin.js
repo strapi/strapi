@@ -10,22 +10,30 @@ const addSlash = require('../utils/addSlash');
 module.exports = async function() {
   const dir = process.cwd();
   const envConfigDir = path.join(dir, 'config', 'environments', 'development');
-  const serverConfig = await loadConfigFile(envConfigDir, 'server.+(js|json)');
+  const conf = await loadConfigFile(envConfigDir, 'server.+(js|json)');
 
-  const port = _.get(serverConfig, 'port', 1337);
-  const host = _.get(serverConfig, 'host', 'localhost');
-  const adminPort = _.get(serverConfig, 'admin.port', 8000);
-  const adminHost = _.get(serverConfig, 'admin.host', 'localhost');
-  const adminBackend = _.get(serverConfig, 'admin.build.backend', `http://${host}:${port}`);
-  const adminPath = _.get(serverConfig, 'admin.build.publicPath', '/admin');
-  const adminWatchIgnoreFiles = _.get(serverConfig, 'admin.watchIgnoreFiles', []);
+  let serverUrl = _.get(conf, 'server.url', `http://${conf.host}:${conf.port}`);
+  serverUrl = _.trim(serverUrl, '/');
+  serverUrl = new URL(serverUrl).toString();
+
+  let adminPath = _.get(conf, 'admin.url', '/admin');
+  adminPath = _.trim(adminPath, '/');
+  if (adminPath.startsWith('http')) {
+    adminPath = new URL(adminPath).pathname;
+  } else {
+    adminPath = new URL(`${serverUrl}/${adminPath}`).pathname;
+  }
+
+  const adminPort = _.get(conf, 'admin.port', 8000);
+  const adminHost = _.get(conf, 'admin.host', 'localhost');
+  const adminWatchIgnoreFiles = _.get(conf, 'admin.watchIgnoreFiles', []);
 
   strapiAdmin.watchAdmin({
     dir,
     port: adminPort,
     host: adminHost,
     options: {
-      backend: adminBackend,
+      backend: serverUrl,
       publicPath: addSlash(adminPath),
       watchIgnoreFiles: adminWatchIgnoreFiles,
     },

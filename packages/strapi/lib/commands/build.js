@@ -26,10 +26,19 @@ module.exports = async ({ optimization }) => {
     process.exit(1);
   }
 
-  const serverConfig = await loadConfigFile(envConfigDir, 'server.+(js|json)');
+  const conf = await loadConfigFile(envConfigDir, 'server.+(js|json)');
 
-  const adminPath = _.get(serverConfig, 'admin.build.publicPath', '/admin');
-  const adminBackend = _.get(serverConfig, 'admin.build.backend', '/');
+  let serverUrl = _.get(conf, 'server.url', `http://${conf.host}:${conf.port}`);
+  serverUrl = new URL(serverUrl).toString();
+  serverUrl = _.trim(serverUrl, '/');
+
+  let adminPath = _.get(conf, 'admin.url', '/admin');
+  adminPath = _.trim(adminPath, '/');
+  if (adminPath.startsWith('http')) {
+    adminPath = new URL(adminPath).pathname;
+  } else {
+    adminPath = new URL(`${serverUrl}/${adminPath}`).pathname;
+  }
 
   console.log(`Building your admin UI with ${green(env)} configuration ...`);
 
@@ -40,7 +49,7 @@ module.exports = async ({ optimization }) => {
       env: 'production',
       optimize: optimization,
       options: {
-        backend: adminBackend,
+        backend: serverUrl,
         publicPath: addSlash(adminPath),
       },
     })

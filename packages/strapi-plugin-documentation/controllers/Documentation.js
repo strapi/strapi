@@ -18,11 +18,6 @@ const koaStatic = require('koa-static');
 module.exports = {
   getInfos: async ctx => {
     try {
-      const prefix = _.get(
-        strapi.plugins,
-        ['documentation', 'config', 'x-strapi-config', 'path'],
-        '/documentation'
-      );
       const service = strapi.plugins.documentation.services.documentation;
       const docVersions = service.retrieveDocumentationVersions();
       const form = await service.retrieveFrontForm();
@@ -30,7 +25,7 @@ module.exports = {
       ctx.send({
         docVersions,
         currentVersion: service.getDocumentationVersion(),
-        prefix: `/${prefix}`.replace('//', '/'),
+        prefix: strapi.plugins.documentation.config['x-strapi-config'].path,
         form,
       });
     } catch (err) {
@@ -42,14 +37,9 @@ module.exports = {
     // Read layout file.
 
     try {
-      const backendUrl = _.get(
-        strapi.config.currentEnvironment.server,
-        'admin.build.backend',
-        strapi.config.url
-      );
       const layout = fs.readFileSync(path.resolve(__dirname, '..', 'public', 'index.html'), 'utf8');
 
-      const filledLayout = _.template(layout)({ backendUrl });
+      const filledLayout = _.template(layout)({ backendUrl: strapi.config.server.url });
 
       const $ = cheerio.load(filledLayout);
 
@@ -145,21 +135,12 @@ module.exports = {
     const { error } = ctx.query;
 
     try {
-      const backendUrl = _.get(
-        strapi.config.currentEnvironment.server,
-        'admin.build.backend',
-        strapi.config.url
-      );
       const layout = fs.readFileSync(path.join(__dirname, '..', 'public', 'login.html'));
-
-      const filledLayout = _.template(layout)({ backendUrl });
-
+      const filledLayout = _.template(layout)({
+        actionUrl: `${strapi.config.server.url}${strapi.plugins.documentation.config['x-strapi-config'].path}/login`,
+      });
       const $ = cheerio.load(filledLayout);
 
-      $('form').attr(
-        'action',
-        `${backendUrl}${strapi.plugins.documentation.config['x-strapi-config'].path}/login`
-      );
       $('.error').text(_.isEmpty(error) ? '' : 'Wrong password...');
 
       try {
@@ -219,14 +200,8 @@ module.exports = {
       querystring = '';
     }
 
-    const backendUrl = _.get(
-      strapi.config.currentEnvironment.server,
-      'admin.build.backend',
-      strapi.config.url
-    );
-
     ctx.redirect(
-      `${backendUrl}${strapi.plugins.documentation.config['x-strapi-config'].path}${querystring}`
+      `${strapi.config.server.url}${strapi.plugins.documentation.config['x-strapi-config'].path}${querystring}`
     );
   },
 

@@ -17,12 +17,6 @@ module.exports = async () => {
     name: 'users-permissions',
   });
 
-  const backendUrl = _.get(
-    strapi.config.currentEnvironment.server,
-    'admin.build.backend',
-    strapi.config.url
-  );
-
   const grantConfig = {
     email: {
       enabled: true,
@@ -33,7 +27,7 @@ module.exports = async () => {
       icon: 'discord',
       key: '',
       secret: '',
-      callback: `${backendUrl}/auth/discord/callback`,
+      callback: `${strapi.config.server.url}/auth/discord/callback`,
       scope: ['identify', 'email'],
     },
     facebook: {
@@ -41,7 +35,7 @@ module.exports = async () => {
       icon: 'facebook-square',
       key: '',
       secret: '',
-      callback: `${backendUrl}/auth/facebook/callback`,
+      callback: `${strapi.config.server.url}/auth/facebook/callback`,
       scope: ['email'],
     },
     google: {
@@ -49,7 +43,7 @@ module.exports = async () => {
       icon: 'google',
       key: '',
       secret: '',
-      callback: `${backendUrl}/auth/google/callback`,
+      callback: `${strapi.config.server.url}/auth/google/callback`,
       scope: ['email'],
     },
     github: {
@@ -57,7 +51,7 @@ module.exports = async () => {
       icon: 'github',
       key: '',
       secret: '',
-      redirect_uri: `${backendUrl}/auth/github/callback`,
+      redirect_uri: `${strapi.config.server.url}/auth/github/callback`,
       scope: ['user', 'user:email'],
     },
     microsoft: {
@@ -65,7 +59,7 @@ module.exports = async () => {
       icon: 'windows',
       key: '',
       secret: '',
-      callback: `${backendUrl}/auth/microsoft/callback`,
+      callback: `${strapi.config.server.url}/auth/microsoft/callback`,
       scope: ['user.read'],
     },
     twitter: {
@@ -73,21 +67,21 @@ module.exports = async () => {
       icon: 'twitter',
       key: '',
       secret: '',
-      callback: `${backendUrl}/auth/twitter/callback`,
+      callback: `${strapi.config.server.url}/auth/twitter/callback`,
     },
     instagram: {
       enabled: false,
       icon: 'instagram',
       key: '',
       secret: '',
-      callback: `${backendUrl}/auth/instagram/callback`,
+      callback: `${strapi.config.server.url}/auth/instagram/callback`,
     },
     vk: {
       enabled: false,
       icon: 'vk',
       key: '',
       secret: '',
-      callback: `${backendUrl}/auth/vk/callback`,
+      callback: `${strapi.config.server.url}/auth/vk/callback`,
       scope: ['email'],
     },
   };
@@ -155,8 +149,8 @@ module.exports = async () => {
       unique_email: true,
       allow_register: true,
       email_confirmation: false,
-      email_confirmation_redirection: `${backendUrl}/admin`,
-      email_reset_password: `${backendUrl}/admin`,
+      email_confirmation_redirection: `${strapi.config.server.url}/admin`,
+      email_reset_password: `${strapi.config.server.url}/admin`,
       default_role: 'authenticated',
     };
 
