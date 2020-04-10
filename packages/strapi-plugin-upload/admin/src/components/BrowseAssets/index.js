@@ -130,12 +130,14 @@ const BrowseAssets = () => {
             )}
           />
           <Padded left right>
-            <PageFooter
-              context={{ emitEvent: () => {} }}
-              count={count}
-              onChangeParams={handleChangeListParams}
-              params={paginationParams}
-            />
+            <Padded left right size="xs">
+              <PageFooter
+                context={{ emitEvent: () => {} }}
+                count={count}
+                onChangeParams={handleChangeListParams}
+                params={paginationParams}
+              />
+            </Padded>
           </Padded>
         </>
       )}

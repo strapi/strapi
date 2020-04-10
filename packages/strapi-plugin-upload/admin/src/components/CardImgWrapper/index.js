@@ -5,10 +5,14 @@ const CardImgWrapper = styled.div`
   position: relative;
   width: 100%;
   height: 0;
+  margin-bottom: 7px;
   padding-top: ${({ small }) => (small ? '62.8%' : '63.8%')};
-  margin-bottom: 6px;
   border-radius: 2px;
   background-color: #f6f6f6;
+
+  @media only screen and (min-width: 1280px) {
+    padding-top: ${({ small }) => (small ? '120px' : '138px')};
+  }
 
   .card-control-wrapper-displayed {
     display: flex;
