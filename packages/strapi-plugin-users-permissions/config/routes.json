@@ -259,20 +259,6 @@
     },
     {
       "method": "POST",
-      "path": "/auth/change-password",
-      "handler": "Auth.changePassword",
-      "config": {
-        "policies": ["plugins::users-permissions.ratelimit"],
-        "prefix": "",
-        "description": "Change user password. Verifies with current password",
-        "tag": {
-          "plugin": "users-permissions",
-          "name": "User"
-        }
-      }
-    },
-    {
-      "method": "POST",
       "path": "/auth/reset-password",
       "handler": "Auth.resetPassword",
       "config": {

@@ -524,34 +524,7 @@ axios
   });
 ```
 
-### Change Password
 
-This action will change the user's password.
-Also works with the [GraphQL Plugin](https://strapi.io/documentation/3.0.0-beta.x/plugins/graphql.html), exposes `changePassword` mutation.
-
-#### Usage
-
-- `currentPassword` is the user's current password to confirm the action
-
-```js
-import axios from 'axios';
-
-// Request API.
-axios
-  .post('http://localhost:1337/auth/change-password', {
-    currentPassword: 'myCurrentPassword',
-    password: 'myNewPassword',
-    passwordConfirmation: 'myNewPassword',
-  })
-  .then(response => {
-    // Handle success.
-    console.log("Your user's password has been changed.");
-  })
-  .catch(error => {
-    // Handle error.
-    console.log('An error occurred:', error);
-  });
-```
 
 ### Email validation
 
