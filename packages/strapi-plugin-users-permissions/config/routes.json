@@ -264,7 +264,7 @@
       "config": {
         "policies": ["plugins::users-permissions.ratelimit"],
         "prefix": "",
-        "description": "Reset a user's password with a code (resetToken)",
+        "description": "Reset user password with a code (resetToken)",
         "tag": {
           "plugin": "users-permissions",
           "name": "User"
