@@ -40,7 +40,9 @@ const InputModalStepperProvider = ({
       ...state,
       allowedTypes,
       currentStep: step,
+      initialFileToEdit,
       fileToEdit: initialFileToEdit,
+      initialSelectedFiles: Array.isArray(selectedFiles) ? selectedFiles : [selectedFiles],
       selectedFiles: Array.isArray(selectedFiles) ? selectedFiles : [selectedFiles],
       filesToUpload: initialFilesToUpload
         ? createNewFilesToUploadArray(initialFilesToUpload).map((file, index) => ({

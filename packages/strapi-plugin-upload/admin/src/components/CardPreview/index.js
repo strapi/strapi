@@ -14,8 +14,6 @@ const CardPreview = ({ hasError, hasIcon, url, previewUrl, type, withFileCaching
   const isVideo = getType(type) === 'video';
   const cacheRef = useRef(performance.now());
 
-  console.log(type);
-
   if (hasError) {
     return (
       <Wrapper isFile>
