@@ -8,8 +8,7 @@
 
 const _ = require('lodash');
 const jwt = require('jsonwebtoken');
-
-const defaultJwtOptions = { expiresIn: '30d' };
+const defaultJwtOptions = require('../config/jwt.json');
 
 module.exports = {
   getToken(ctx) {
