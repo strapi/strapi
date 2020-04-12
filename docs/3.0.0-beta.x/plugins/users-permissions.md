@@ -48,6 +48,11 @@ To change the default role, go to the `Advanced settings` tab and update the `De
 
 A jwt token may be used for making permission-restricted API requests. To make an API request as a user, place the jwt token into an `Authorization` header of the GET request. A request without a token, will assume the `public` role permissions by default. Modify the permissions of each user's role in admin dashboard. Authentication failures return a 401 (unauthorized) error.
 
+### JWT Configuration
+
+You can fully configure the JWT Configuration options by modifying the file in `strapi-plugin-users-permissions/config/jwt.json`.
+For example you can change the expiration date of the JWT token, or you can set the time when the JWT token will start to be valid.
+
 #### Usage
 
 - The `token` variable is the `data.jwt` received when logging in or registering.
