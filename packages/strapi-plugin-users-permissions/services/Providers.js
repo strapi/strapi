@@ -345,7 +345,8 @@ const getProfile = async (provider, query, callback) => {
 
       vk.query()
         .get('users.get')
-        .qs({ access_token, id: query.raw.user_id, v: '5.013' })
+        .auth(access_token)
+        .qs({ id: query.raw.user_id, v: '5.013' })
         .request((err, res, body) => {
           if (err) {
             callback(err);
