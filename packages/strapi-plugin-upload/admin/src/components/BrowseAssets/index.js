@@ -23,6 +23,7 @@ const BrowseAssets = () => {
     handleFileSelection,
     handleGoToEditFile,
     multiple,
+    noNavigation,
     params,
     removeFilter,
     selectedFiles,
@@ -66,6 +67,26 @@ const BrowseAssets = () => {
       },
     });
   };
+
+  /* eslint-disable indent */
+  /* eslint-disable react/jsx-indent */
+  const renderCardControl = noNavigation
+    ? null
+    : id => (
+        <CardControl
+          small
+          title="edit"
+          color="#9EA7B8"
+          type="pencil"
+          onClick={e => {
+            e.stopPropagation();
+            handleGoToEditFile(id);
+          }}
+        />
+      );
+
+  /* eslint-enable indent */
+  /* eslint-enable react/jsx-indent */
 
   const paginationParams = {
     _limit: parseInt(params._limit, 10) || 10,
@@ -121,18 +142,7 @@ const BrowseAssets = () => {
             onCardClick={handleListCardClick}
             allowedTypes={allowedTypes}
             smallCards
-            renderCardControl={id => (
-              <CardControl
-                small
-                title="edit"
-                color="#9EA7B8"
-                type="pencil"
-                onClick={e => {
-                  e.stopPropagation();
-                  handleGoToEditFile(id);
-                }}
-              />
-            )}
+            renderCardControl={renderCardControl}
           />
           <Padded left right>
             <Padded left right size="xs">

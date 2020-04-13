@@ -12,6 +12,7 @@ const InputModal = ({
   fileToEdit,
   isOpen,
   multiple,
+  noNavigation,
   onClosed,
   onInputMediaChange,
   onToggle,
@@ -29,12 +30,14 @@ const InputModal = ({
         initialFileToEdit={fileToEdit}
         isOpen={isOpen}
         multiple={multiple}
+        noNavigation={noNavigation}
         selectedFiles={selectedFiles}
         step={step}
         allowedTypes={singularTypes}
       >
         <InputModalStepper
           isOpen={isOpen}
+          noNavigation={noNavigation}
           onToggle={onToggle}
           onInputMediaChange={onInputMediaChange}
         />
@@ -47,9 +50,10 @@ InputModal.defaultProps = {
   allowedTypes: [],
   filesToUpload: null,
   fileToEdit: null,
+  noNavigation: false,
   onInputMediaChange: () => {},
   onToggle: () => {},
-  selectedFiles: null,
+  selectedFiles: [],
   step: 'list',
 };
 
@@ -59,6 +63,7 @@ InputModal.propTypes = {
   fileToEdit: PropTypes.object,
   isOpen: PropTypes.bool.isRequired,
   multiple: PropTypes.bool.isRequired,
+  noNavigation: PropTypes.bool,
   onClosed: PropTypes.func.isRequired,
   onInputMediaChange: PropTypes.func,
   onToggle: PropTypes.func,
