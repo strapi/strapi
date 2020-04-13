@@ -56,9 +56,17 @@ const BrowseAssets = () => {
   const start = parseInt(params._start, 10) || 0;
   const canSelectFile = multiple === true || (selectedFiles.length < 1 && !multiple);
 
+  const handleCheckboxChange = ({ target: { name } }) => {
+    handleListCardClick(name);
+  };
+
   const handleListCardClick = id => {
     if (!canSelectFile && id !== selectedFiles[0].id) {
-      return;
+      handleFileSelection({
+        target: {
+          name: selectedFiles[0].id,
+        },
+      });
     }
 
     handleFileSelection({
@@ -135,9 +143,8 @@ const BrowseAssets = () => {
       ) : (
         <>
           <List
-            canSelect={canSelectFile}
             data={files}
-            onChange={handleFileSelection}
+            onChange={handleCheckboxChange}
             selectedItems={selectedFiles}
             onCardClick={handleListCardClick}
             allowedTypes={allowedTypes}
