@@ -278,7 +278,8 @@ module.exports = ({ models, target }, ctx) => {
     // Instantiate model.
     const Model = instance.model(definition.globalId, schema, definition.collectionName);
 
-    const handleIndexesErrors = () => {
+    // Ensure indexes are synced with the model, prevent duplicate index errors
+    Model.syncIndexes(null, () => {
       Model.on('index', error => {
         if (error) {
           if (error.code === 11000) {
@@ -290,17 +291,7 @@ module.exports = ({ models, target }, ctx) => {
           }
         }
       });
-    };
-
-    // Only sync indexes in development env while it's not possible to create complex indexes directly from models
-    // In other environments it will simply create missing indexes (those defined in the models but not present in db)
-    if (strapi.app.env === 'development') {
-      // Ensure indexes are synced with the model, prevent duplicate index errors
-      // Side-effect: Delete all the indexes not present in the model.json
-      Model.syncIndexes(null, handleIndexesErrors);
-    } else {
-      handleIndexesErrors();
-    }
+    });
 
     // Expose ORM functions through the `target` object.
     target[model] = _.assign(Model, target[model]);

@@ -38,22 +38,6 @@ module.exports = {
 };
 ```
 
-- `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
-
-```json
-{
-  "name": "Tokyo Sushi"
-}
-// or
-{
-  "_limit": 20,
-  "name_contains": "sushi"
-}
-```
-
-- `populate` (array): you have to mention data you want populate `["author", "author.name", "comment", "comment.content"]`
-
 :::
 
 ::: tab findOne
@@ -74,21 +58,6 @@ module.exports = {
 };
 ```
 
-- `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
-
-```json
-{
-  "name": "Tokyo Sushi"
-}
-// or
-{
-  "name_contains": "sushi"
-}
-```
-
-- `populate` (array): you have to mention data you want populate `["author", "author.name", "comment", "comment.content"]`
-
 :::
 
 ::: tab count
@@ -107,19 +76,6 @@ module.exports = {
     return strapi.query('restaurant').count(params);
   },
 };
-```
-
-- `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
-
-```json
-{
-  "name": "Tokyo Sushi"
-}
-// or
-{
-  "name_contains": "sushi"
-}
 ```
 
 :::
@@ -182,8 +138,6 @@ module.exports = {
 };
 ```
 
-- `params` (object): if should looks like this `{id: 1}`
-
 :::
 
 ::: tab delete
@@ -203,8 +157,6 @@ module.exports = {
   },
 };
 ```
-
-- `params` (object): if should looks like this `{id: 1}`
 
 :::
 
@@ -226,19 +178,6 @@ module.exports = {
 };
 ```
 
-- `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
-
-```json
-{
-  "name": "Tokyo Sushi"
-}
-// or
-{
-  "name_contains": "sushi"
-}
-```
-
 :::
 
 ::: tab countSearch
@@ -258,19 +197,6 @@ module.exports = {
 };
 ```
 
-- `params` (object): this represent filters for your find request.<br>
-  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
-
-```json
-{
-  "name": "Tokyo Sushi"
-}
-// or
-{
-  "name_contains": "sushi"
-}
-```
-
 :::
 
 ::::
@@ -283,7 +209,7 @@ You can also create custom services to build your own business logic.
 
 There are two ways to create a service.
 
-- Using the CLI `strapi generate:service restaurant`.<br>Read the [CLI documentation](../cli/CLI.md) for more information.
+- Using the CLI `strapi generate:service restaurant`. Read the [CLI documentation](../cli/CLI.md) for more information.
 - Manually create a JavaScript file named in `./api/**/services/`.
 
 #### Example

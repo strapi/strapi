@@ -304,7 +304,11 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
 
         const allAttrs = ['id', ...attrs];
 
-        await trx.insert(qb => qb.select(allAttrs).from(tmpTable)).into(table);
+        await trx.raw(`INSERT INTO ?? (${allAttrs.join(', ')}) ??`, [
+          table,
+          trx.select(allAttrs).from(tmpTable),
+        ]);
+
         await trx.schema.dropTableIfExists(tmpTable);
       };
 
