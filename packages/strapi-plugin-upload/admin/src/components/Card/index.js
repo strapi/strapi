@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { useGlobalContext } from 'strapi-helper-plugin';
-import { formatBytes, getExtension, getType, getTrad } from '../../utils';
+import { getFileExtension, useGlobalContext } from 'strapi-helper-plugin';
+import { formatBytes, getType, getTrad } from '../../utils';
 
 import Flex from '../Flex';
 import Text from '../Text';
@@ -69,7 +69,7 @@ const Card = ({
           </Flex>
           {!withoutFileInfo && (
             <FileInfos
-              extension={getExtension(fileType)}
+              extension={getFileExtension(fileType)}
               size={fileSize}
               width={width}
               height={height}

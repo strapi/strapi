@@ -2,7 +2,8 @@ import React, { useRef, useEffect } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import PropTypes from 'prop-types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
-import { formatBytes, getExtension, getType, ItemTypes } from '../../utils';
+import { getFileExtension } from 'strapi-helper-plugin';
+import { formatBytes, getType, ItemTypes } from '../../utils';
 
 import Flex from '../Flex';
 import Border from '../CardBorder';
@@ -99,7 +100,7 @@ const DraggableCard = ({
         <Title>{name}</Title>
         <Tag label={getType(fileType)} />
       </Flex>
-      <FileInfos extension={getExtension(fileType)} size={fileSize} />
+      <FileInfos extension={getFileExtension(fileType)} size={fileSize} />
       {hasError && <ErrorMessage>{errorMessage}</ErrorMessage>}
     </Wrapper>
   );

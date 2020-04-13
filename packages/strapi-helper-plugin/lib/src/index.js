@@ -98,6 +98,7 @@ export { default as dateFormats } from './utils/dateFormats';
 export { default as dateToUtcTime } from './utils/dateToUtcTime';
 export { default as translatedErrors } from './utils/translatedErrors';
 export { darken } from './utils/colors';
+export { default as getFileExtension } from './utils/getFileExtension';
 export { default as getFilterType } from './utils/getFilterType';
 export { default as getQueryParameters } from './utils/getQueryParameters';
 export { default as injectHooks } from './utils/injectHooks';
