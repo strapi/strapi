@@ -127,7 +127,10 @@ const BrowseAssets = () => {
                 title="edit"
                 color="#9EA7B8"
                 type="pencil"
-                onClick={() => handleGoToEditFile(id)}
+                onClick={e => {
+                  e.stopPropagation();
+                  handleGoToEditFile(id);
+                }}
               />
             )}
           />

@@ -117,6 +117,10 @@ const reducer = (state, action) =>
         set(draftState.fileToEdit, action.keys.split('.'), action.value);
         break;
       }
+      case 'ON_CHANGE_MODAL_TAB': {
+        draftState.currentTab = action.to;
+        break;
+      }
       case 'ON_CHANGE_URLS_TO_DOWNLOAD': {
         set(draftState, ['filesToDownload'], action.value);
         break;

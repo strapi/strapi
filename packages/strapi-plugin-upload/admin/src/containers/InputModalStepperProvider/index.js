@@ -115,6 +115,13 @@ const InputModalStepperProvider = ({
     });
   };
 
+  const handleModalTabChange = to => {
+    dispatch({
+      type: 'ON_CHANGE_MODAL_TAB',
+      to,
+    });
+  };
+
   const handleClickNextButton = async () => {
     try {
       await urlSchema.validate(
@@ -455,6 +462,7 @@ const InputModalStepperProvider = ({
         handleFormDisabled,
         handleGoToEditFile,
         handleGoToEditNewFile,
+        handleModalTabChange,
         handleRemoveFileToUpload,
         handleResetFileToEdit,
         handleSetCropResult,

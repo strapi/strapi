@@ -264,7 +264,8 @@ const InputModalStepper = ({ isOpen, onToggle, onInputMediaChange }) => {
 
     if (
       (currentStep === 'list' && !isEqual(selectedFiles, initialSelectedFiles)) ||
-      (currentStep === 'edit' && !isEqual(fileToEdit, initialFileToEdit))
+      (currentStep === 'edit' && initialFileToEdit && !isEqual(fileToEdit, initialFileToEdit)) ||
+      (currentStep === 'edit' && selectedFiles.length > 0)
     ) {
       // eslint-disable-next-line no-alert
       const confirm = window.confirm(

@@ -11,11 +11,11 @@ import IntlText from '../IntlText';
 import BaselineAlignmentWrapper from './BaselineAlignmentWrapper';
 
 const ListModal = () => {
-  const { selectedFiles, goTo, currentTab } = useModalContext();
-  const links = [
-    { to: 'browse', label: 'browse', isDisabled: false },
-    { to: 'selected', label: 'selected', count: selectedFiles.length, isDisabled: false },
-  ];
+  const { handleModalTabChange, selectedFiles, goTo, currentTab } = useModalContext();
+
+  const handleClick = to => {
+    handleModalTabChange(to);
+  };
 
   const handleGoToUpload = () => {
     goTo('browse');
@@ -32,6 +32,17 @@ const ListModal = () => {
       </Button>
     </BaselineAlignmentWrapper>
   );
+
+  const links = [
+    { to: 'browse', label: 'browse', isDisabled: false, onClick: handleClick },
+    {
+      to: 'selected',
+      label: 'selected',
+      count: selectedFiles.length,
+      isDisabled: false,
+      onClick: handleClick,
+    },
+  ];
 
   return (
     <ModalNavWrapper
