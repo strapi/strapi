@@ -39,7 +39,7 @@ const List = ({
       <ListRow>
         {data.map(item => {
           const { id } = item;
-          const url = get(item, ['formats', 'thumbnail', 'url'], item.url);
+          const url = get(item, ['formats', 'small', 'url'], item.url);
           const isAllowed =
             allowedTypes.length > 0 ? allowedTypes.includes(getType(item.mime)) : true;
           const checked = selectedItems.findIndex(file => file.id === id) !== -1;
