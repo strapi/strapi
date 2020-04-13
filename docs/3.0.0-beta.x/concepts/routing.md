@@ -48,7 +48,6 @@ You have to edit the `routes.json` file in one of your APIs folders (`./api/**/c
 - `handler` (string): Action to execute when the route is hit following this syntax `<Controller>.<action>`.
 - `config`
   - `policies` (array): Array of policy names or paths ([see more](./policies.md))
-  - `prefix` (string): Set a prefix to this route. Also, it will be loaded into the main router (useful feature for a plugin).
 
 ## Dynamic parameters
 
@@ -77,21 +76,33 @@ The router used by Strapi allows you to create dynamic routes where you can use 
 }
 ```
 
-## Override default route
+### Example
 
-By default, the main route of the server `/` is pointed to the `/public/index.html` file. To override this behavior, you need to create a route with an empty path `/` in one of the `routes.json` files of your API folder (`/api/**/config/routes.json`).
+Route definition with URL params
 
 ```json
 {
   "routes": [
     {
       "method": "GET",
-      "path": "/",
-      "handler": "Controller.name",
+      "path": "/restaurants/:id",
+      "handler": "Restaurant.findOne",
       "config": {
         "policies": []
       }
     }
   ]
 }
+```
+
+Get the URL param in the controller
+
+```js
+module.exports = {
+  findOne: async ctx => {
+    // const id = ctx.params.id;
+    const { id } = ctx.params;
+    return id;
+  },
+};
 ```
