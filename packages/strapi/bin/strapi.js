@@ -181,6 +181,7 @@ program
 
 program
   .command('build')
+  .option('--clean', 'Remove the build and .cache folders', false)
   .option('--no-optimization', 'Build the Administration without assets optimization', false)
   .description('Builds the strapi admin app')
   .action(getLocalScript('build'));

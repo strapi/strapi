@@ -53,6 +53,14 @@ module.exports = {
   return fs.writeFile(path.resolve(dest, 'admin', 'src', 'plugins.js'), content);
 }
 
+async function clean({ dir }) {
+  const buildDir = path.join(dir, 'build');
+  const cacheDir = path.join(dir, '.cache');
+
+  fs.removeSync(buildDir);
+  fs.removeSync(cacheDir);
+}
+
 async function copyPlugin(name, dest) {
   const pkgFilePath = getPkgPath(name);
 
@@ -328,6 +336,7 @@ async function watchFiles(dir, ignoreFiles = []) {
 }
 
 module.exports = {
+  clean,
   build,
   watchAdmin,
 };
