@@ -20,7 +20,6 @@ const SortableList = ({
   const handleClick = e => {
     e.stopPropagation();
   };
-  console.log(noNavigation);
 
   return (
     <ListWrapper small>
