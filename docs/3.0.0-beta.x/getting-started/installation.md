@@ -49,3 +49,7 @@
 		</template>
 	</InstallLink>
 </div>
+
+### Deployment guides
+
+For a more detailed overview of deployment please see the [related documentation](./deployment).
