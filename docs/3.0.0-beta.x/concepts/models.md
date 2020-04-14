@@ -289,7 +289,7 @@ xhr.send(
 
 ::: tab "One-to-One" id="one-to-one"
 
-One-to-One relationships are usefull when you have one entity that could be linked to only one other entity. And vice versa.
+One-to-One relationships are useful when you have one entity that could be linked to only one other entity. And vice versa.
 
 #### Example
 
@@ -338,7 +338,7 @@ xhr.send(
 
 ::: tab "One-to-Many" id="one-to-many"
 
-One-to-Many relationships are usefull when an entry can be liked to multiple entries of another Content Type. And an entry of the other Content Type can be linked to only one entry.
+One-to-Many relationships are useful when an entry can be liked to multiple entries of another Content Type. And an entry of the other Content Type can be linked to only one entry.
 
 #### Example
 
@@ -397,7 +397,7 @@ xhr.send(
 
 ::: tab "Many-to-Many" id="many-to-many"
 
-Many-to-Many relationships are usefull when an entry can be liked to multiple entries of another Content Type. And an entry of the other Content Type can be linked to many entries.
+Many-to-Many relationships are useful when an entry can be liked to multiple entries of another Content Type. And an entry of the other Content Type can be linked to many entries.
 
 #### Example
 
