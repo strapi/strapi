@@ -32,9 +32,9 @@ Then run either `yarn install` or `npm install`.
 
 ## Route syntax changes
 
-In order to stay database agnostic, we decided that the identifier in url params always has to be named `id` instead of `_id` or else.
+In order to stay database agnostic, we decided that the identifier in url params should always be named `id`.
 
-If your routes use something else that `id`, please modify all of them as in following example.
+If your routes configuration still use something else than `id`, please modify all of them as in the following example.
 
 ### Example
 
