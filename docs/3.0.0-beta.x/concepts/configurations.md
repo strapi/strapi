@@ -441,15 +441,16 @@ The session doesn't work with `mongo` as a client. The package that we should us
 
 - `host` (string): Host name. Default value: `localhost`.
 - `port` (integer): Port on which the server should be running. Default value: `1337`.
-- `emitErrors` (boolean): Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services.
-- `server`
-  - `url` (string): Url of the server. Enable proxy support such as Apache or Nginx. Default value: `http://${host}:${port}`.
+- `url` (string): Url of the server. Enable proxy support such as Apache or Nginx, example: `https://mywebsite.com/api`. Default value: `http://${host}:${port}`.
 - `admin`
-  - `url` (string): Url of your admin panel. Default value: `/admin`. Note: If the url is relative, it will be concatenate with `server.url`.
+  - `url` (string): Url of your admin panel. Default value: `/admin`. Note: If the url is relative, it will be concatenated with `url`.
   - `autoOpen` (boolean): Enable or disable administration opening on start. Default value: `true`.
   - `watchIgnoreFiles` (array): Add custom files that should not be watched during development. See more [here](https://github.com/paulmillr/chokidar#path-filtering) (property `ignored`). Default value: `[]`.
-  - [`cron`](https://en.wikipedia.org/wiki/Cron)
-    - `enabled` (boolean): Enable or disable CRON tasks to schedule jobs at specific dates. Default value: `false`.
+- `emitErrors` (boolean): Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services. Default value: `false`.
+- [`cron`](https://en.wikipedia.org/wiki/Cron)
+  - `enabled` (boolean): Enable or disable CRON tasks to schedule jobs at specific dates. Default value: `false`.
+
+**Note:** if you edit `url` or `admin.url`, don't forget to run `yarn build` in order to rebuild the admin panel.
 
 #### Example
 
@@ -463,9 +464,7 @@ As an example using this configuration with Nginx your server would respond to `
 {
   "host": "localhost",
   "port": 1337,
-  "server": {
-    "url": "https://example.com:8443"
-  }
+  "url": "https://example.com:8443"
   "cron": {
     "enabled": true
   }

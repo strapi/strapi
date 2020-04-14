@@ -28,7 +28,7 @@ module.exports = async ({ optimization }) => {
 
   const conf = await loadConfigFile(envConfigDir, 'server.+(js|json)');
 
-  let serverUrl = _.get(conf, 'server.url', `http://${conf.host}:${conf.port}`);
+  let serverUrl = _.get(conf, 'url', `http://${conf.host}:${conf.port}`);
   serverUrl = new URL(serverUrl).toString();
   serverUrl = _.trim(serverUrl, '/');
 

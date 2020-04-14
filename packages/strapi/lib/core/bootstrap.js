@@ -298,7 +298,7 @@ module.exports = function(strapi) {
   let serverUrl = _.trim(
     _.get(
       strapi.config.currentEnvironment,
-      'server.server.url',
+      'server.url',
       getURLFromSegments({ hostname, port: strapi.config.port })
     ),
     '/'
