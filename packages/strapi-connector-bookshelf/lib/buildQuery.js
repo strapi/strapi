@@ -79,6 +79,11 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
    * @param {Object} destinationInfo - destination with which we are making a join
    */
   const buildJoin = (qb, assoc, originInfo, destinationInfo) => {
+    const db = strapi.connections[model.connection];
+    let dbPrefix = `${originInfo.model.databaseName}.`;
+    if (_.get(db, 'context.client.config.client') === 'mssql') {
+      dbPrefix = '';
+    }
     if (['manyToMany', 'manyWay'].includes(assoc.nature)) {
       const joinTableAlias = generateAlias(assoc.tableCollectionName);
 
@@ -94,13 +99,13 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
       }
 
       qb.leftJoin(
-        `${originInfo.model.databaseName}.${assoc.tableCollectionName} AS ${joinTableAlias}`,
+        `${dbPrefix}${assoc.tableCollectionName} AS ${joinTableAlias}`,
         originColumnNameInJoinTable,
         `${originInfo.alias}.${originInfo.model.primaryKey}`
       );
 
       qb.leftJoin(
-        `${destinationInfo.model.databaseName}.${destinationInfo.model.collectionName} AS ${destinationInfo.alias}`,
+        `${dbPrefix}${destinationInfo.model.collectionName} AS ${destinationInfo.alias}`,
         `${joinTableAlias}.${singular(originInfo.model.attributes[assoc.alias].attribute)}_${
           originInfo.model.attributes[assoc.alias].column
         }`,
@@ -118,7 +123,7 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
           : `${originInfo.alias}.${assoc.alias}`;
 
       qb.leftJoin(
-        `${destinationInfo.model.databaseName}.${destinationInfo.model.collectionName} AS ${destinationInfo.alias}`,
+        `${dbPrefix}${destinationInfo.model.collectionName} AS ${destinationInfo.alias}`,
         externalKey,
         internalKey
       );
