@@ -61,7 +61,15 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
   const type = useMemo(() => get(attribute, 'type', null), [attribute]);
   const regexpString = useMemo(() => get(attribute, 'regex', null), [attribute]);
-  const validations = omit(attribute, [
+  const value = get(modifiedData, keys, null);
+  const temporaryErrorIdUntilBuffetjsSupportsFormattedMessage = 'app.utils.defaultMessage';
+  const errorId = get(
+    formErrors,
+    [keys, 'id'],
+    temporaryErrorIdUntilBuffetjsSupportsFormattedMessage
+  );
+
+  let validationsToOmit = [
     'type',
     'model',
     'via',
@@ -70,7 +78,20 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
     'plugin',
     'enum',
     'regex',
-  ]);
+  ];
+
+  // Remove the required validation for the password type unless the form is already submitted
+  // So the error is properly displayed in the password input
+  if (type === 'password' && errorId !== 'components.Input.error.validation.required') {
+    validationsToOmit = [...validationsToOmit, 'required'];
+  }
+
+  // Remove the minLength validation when the user clears the input so it is not displayed
+  if (type === 'password' && !value) {
+    validationsToOmit = [...validationsToOmit, 'minLength'];
+  }
+
+  const validations = omit(attribute, validationsToOmit);
 
   if (regexpString) {
     const regexp = new RegExp(regexpString);
@@ -81,17 +102,11 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
   }
 
   const { description, visible } = metadatas;
-  const value = get(modifiedData, keys, null);
 
   if (visible === false) {
     return null;
   }
-  const temporaryErrorIdUntilBuffetjsSupportsFormattedMessage = 'app.utils.defaultMessage';
-  const errorId = get(
-    formErrors,
-    [keys, 'id'],
-    temporaryErrorIdUntilBuffetjsSupportsFormattedMessage
-  );
+
   const isRequired = get(validations, ['required'], false);
 
   if (type === 'relation') {

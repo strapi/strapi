@@ -212,7 +212,7 @@ module.exports = {
             '/3.0.0-beta.x/guides/scheduled-publication',
             '/3.0.0-beta.x/guides/slug',
             '/3.0.0-beta.x/guides/send-email',
-            '/3.0.0-beta.x/guides/registering-field-in-admin',
+            '/3.0.0-beta.x/guides/registering-a-field-in-admin',
             '/3.0.0-beta.x/guides/count-graphql',
           ],
         },
