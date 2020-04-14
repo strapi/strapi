@@ -34,7 +34,7 @@ Then run either `yarn install` or `npm install`.
 
 In order to stay database agnostic, we decided that the identifier in url params should always be named `id`.
 
-If your routes configuration still use something else than `id`, please modify all of them as in the following example.
+If your routes configuration still uses something else than `id`, please modify all of them as in the following example.
 
 ### Example
 
