@@ -8,10 +8,19 @@ import CardControlsWrapper from '../CardControlsWrapper';
 import ListWrapper from '../ListWrapper';
 import CardControl from '../CardControl';
 
-const SortableList = ({ data, moveAsset, onChange, onClickEditFile, selectedItems, canSelect }) => {
+const SortableList = ({
+  canSelect,
+  data,
+  moveAsset,
+  noNavigation,
+  onChange,
+  onClickEditFile,
+  selectedItems,
+}) => {
   const handleClick = e => {
     e.stopPropagation();
   };
+  console.log(noNavigation);
 
   return (
     <ListWrapper small>
@@ -46,15 +55,17 @@ const SortableList = ({ data, moveAsset, onChange, onClickEditFile, selectedItem
                     />
                   </CardControlsWrapper>
                 )}
-                <CardControlsWrapper className="card-control-wrapper card-control-wrapper-hidden">
-                  <CardControl
-                    small
-                    title="edit"
-                    color="#9EA7B8"
-                    type="pencil"
-                    onClick={e => handleEditClick(e)}
-                  />
-                </CardControlsWrapper>
+                {!noNavigation && (
+                  <CardControlsWrapper className="card-control-wrapper card-control-wrapper-hidden">
+                    <CardControl
+                      small
+                      title="edit"
+                      color="#9EA7B8"
+                      type="pencil"
+                      onClick={e => handleEditClick(e)}
+                    />
+                  </CardControlsWrapper>
+                )}
               </DraggableCard>
             </div>
           );
@@ -68,6 +79,7 @@ SortableList.defaultProps = {
   canSelect: true,
   data: [],
   moveAsset: () => {},
+  noNavigation: false,
   onChange: () => {},
   onClickEditFile: () => {},
   selectedItems: [],
@@ -77,6 +89,7 @@ SortableList.propTypes = {
   canSelect: PropTypes.bool,
   data: PropTypes.array,
   moveAsset: PropTypes.func,
+  noNavigation: PropTypes.bool,
   onChange: PropTypes.func,
   onClickEditFile: PropTypes.func,
   selectedItems: PropTypes.array,
