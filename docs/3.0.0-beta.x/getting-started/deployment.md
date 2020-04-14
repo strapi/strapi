@@ -6,9 +6,9 @@ Strapi gives you many possible deployment options for your project or applicatio
 Deploying **databases** along with Strapi is covered in the [Databases Guide](../guides/databases.md).
 :::
 
-### Documented Options
+## Hosting Provider Guides
 
-Manual guides for deployment on various platforms and additonal software options, for One-click and docker please see the [installation](./installation) guides.
+Manual guides for deployment on various platforms, for One-click and docker please see the [installation](./installation) guides.
 
 <div>
 	<InstallLink link="../deployment/amazon-aws">
@@ -58,21 +58,25 @@ Manual guides for deployment on various platforms and additonal software options
 	</InstallLink>
 </div>
 
+## Optional Software Guides
+
+Additional guides for optional software additions that compliment or improve the deployment process when using Strapi in a production or production-like environment.
+
 <div>
-	<InstallLink link="../deployment/proxy">
+	<InstallLink link="../deployment/nginx-proxy">
     <template #icon>
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="-35.5 26 32 32" width="64" height="64"><path d="M-33.442 42.023v-7.637a.68.68 0 0 1 .385-.651l13.173-7.608c.237-.148.503-.178.74-.03l13.232 7.637a.71.71 0 0 1 .355.651V49.63a.71.71 0 0 1-.355.651l-11.367 6.57a56.27 56.27 0 0 1-1.806 1.036c-.266.148-.533.148-.8 0l-13.202-7.608c-.237-.148-.355-.326-.355-.622v-7.637z" fill="#fff"/><path d="M-24.118 39.18v8.9c0 1.006-.8 1.894-1.865 1.865-.65-.03-1.154-.296-1.5-.858-.178-.266-.237-.562-.237-.888V35.836c0-.83.503-1.42 1.154-1.687s1.302-.207 1.954 0c.622.178 1.095.562 1.5 1.036l7.874 9.443c.03.03.06.09.118.148v-9c0-.947.65-1.687 1.57-1.776 1.154-.148 1.924.68 2.042 1.54v12.6c0 .7-.326 1.214-.918 1.54-.444.237-.918.296-1.42.266a3.23 3.23 0 0 1-1.954-.829c-.296-.266-.503-.592-.77-.888l-7.49-8.97c0-.03-.03-.06-.06-.09z" fill="#3498DB"/></svg>
     </template>
-		<template #title>Proxy</template>
+		<template #title>Nginx</template>
 		<template #description>
-			Overview of various Proxy options and sample configurations
+			Overview of proxying Strapi with Nginx
 		</template>
 	</InstallLink>
 </div>
 
-### Configuration
+## Application Configuration
 
-#### 1. Configure
+### 1. Configure
 
 Update the `production` settings with the IP or domain name where the project will be running.
 
@@ -99,7 +103,7 @@ If you are passing a number of configuration item values via environment variabl
 }
 ```
 
-#### 2. Launch the server
+### 2. Launch the server
 
 Before running your server in production you need to build your admin panel for production
 
