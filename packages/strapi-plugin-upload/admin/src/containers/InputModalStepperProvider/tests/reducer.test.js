@@ -1991,7 +1991,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
       };
       const state = {
         params: {
-          _start: 0,
+          _start: 10,
           filters: [],
         },
       };

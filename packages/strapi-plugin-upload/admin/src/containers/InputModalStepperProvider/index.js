@@ -305,7 +305,7 @@ const InputModalStepperProvider = ({
 
   const getFilters = () => {
     const compactedParams = compactParams(params);
-    const searchParams = generateSearchFromFilters(compactedParams, ['_limit', '_sort', '_start']);
+    const searchParams = generateSearchFromFilters(compactedParams);
 
     return formatFilters(searchParams);
   };
