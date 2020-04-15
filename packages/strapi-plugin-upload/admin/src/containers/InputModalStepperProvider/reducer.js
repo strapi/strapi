@@ -242,6 +242,7 @@ const reducer = (state, action) =>
             intersectionWith(state.params.filters, [value], isEqual).length === 0;
 
           if (canAddFilter) {
+            draftState.params._start = 0;
             draftState.params.filters.push(value);
           }
           break;
