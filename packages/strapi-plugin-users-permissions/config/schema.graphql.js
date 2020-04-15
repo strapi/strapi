@@ -249,6 +249,7 @@ module.exports = {
 
           await strapi.plugins['users-permissions'].controllers.auth.emailConfirmation(
             context,
+            null,
             true
           );
           let output = context.body.toJSON ? context.body.toJSON() : context.body;
