@@ -9,6 +9,49 @@ const chokidar = require('chokidar');
 
 const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
 
+async function build({ dir, env, options, optimize }) {
+  // Create the cache dir containing the front-end files.
+  await createCacheDir(dir);
+
+  const cacheDir = path.resolve(dir, '.cache');
+  const entry = path.resolve(cacheDir, 'admin', 'src', 'app.js');
+  const dest = path.resolve(dir, 'build');
+  const config = getWebpackConfig({ entry, dest, env, options, optimize });
+
+  const compiler = webpack(config);
+
+  return new Promise((resolve, reject) => {
+    compiler.run((err, stats) => {
+      let messages;
+      if (err) {
+        if (!err.message) {
+          return reject(err);
+        }
+        messages = {
+          errors: [err.message],
+          warnings: [],
+        };
+      } else {
+        messages = stats.toJson({ all: false, warnings: true, errors: true });
+      }
+
+      if (messages.errors.length) {
+        // Only keep the first error. Others are often indicative
+        // of the same problem, but confuse the reader with noise.
+        if (messages.errors.length > 1) {
+          messages.errors.length = 1;
+        }
+        return reject(new Error(messages.errors.join('\n\n')));
+      }
+
+      return resolve({
+        stats,
+        warnings: messages.warnings,
+      });
+    });
+  });
+}
+
 async function createPluginsJs(plugins, localPlugins, dest) {
   const content = `
 const injectReducer = require('./utils/injectReducer').default;
@@ -151,49 +194,6 @@ async function createCacheDir(dir) {
       )
     )
   );
-}
-
-async function build({ dir, env, options, optimize }) {
-  // Create the cache dir containing the front-end files.
-  await createCacheDir(dir);
-
-  const cacheDir = path.resolve(dir, '.cache');
-  const entry = path.resolve(cacheDir, 'admin', 'src', 'app.js');
-  const dest = path.resolve(dir, 'build');
-  const config = getWebpackConfig({ entry, dest, env, options, optimize });
-
-  const compiler = webpack(config);
-
-  return new Promise((resolve, reject) => {
-    compiler.run((err, stats) => {
-      let messages;
-      if (err) {
-        if (!err.message) {
-          return reject(err);
-        }
-        messages = {
-          errors: [err.message],
-          warnings: [],
-        };
-      } else {
-        messages = stats.toJson({ all: false, warnings: true, errors: true });
-      }
-
-      if (messages.errors.length) {
-        // Only keep the first error. Others are often indicative
-        // of the same problem, but confuse the reader with noise.
-        if (messages.errors.length > 1) {
-          messages.errors.length = 1;
-        }
-        return reject(new Error(messages.errors.join('\n\n')));
-      }
-
-      return resolve({
-        stats,
-        warnings: messages.warnings,
-      });
-    });
-  });
 }
 
 async function watchAdmin({ dir, host, port, options }) {
