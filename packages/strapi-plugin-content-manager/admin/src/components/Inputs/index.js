@@ -80,17 +80,6 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
     'regex',
   ];
 
-  // Remove the required validation for the password type unless the form is already submitted
-  // So the error is properly displayed in the password input
-  if (type === 'password' && errorId !== 'components.Input.error.validation.required') {
-    validationsToOmit = [...validationsToOmit, 'required'];
-  }
-
-  // Remove the minLength validation when the user clears the input so it is not displayed
-  if (type === 'password' && !value) {
-    validationsToOmit = [...validationsToOmit, 'minLength'];
-  }
-
   const validations = omit(attribute, validationsToOmit);
 
   if (regexpString) {
