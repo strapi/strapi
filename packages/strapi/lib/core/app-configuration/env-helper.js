@@ -2,14 +2,14 @@
 
 const _ = require('lodash');
 
-function env(key, defaultValue) {
+function env(key, defaultValue = undefined) {
   return _.has(process.env, key) ? process.env[key] : defaultValue;
 }
 
 const utils = {
   int(...args) {
     const value = env(...args);
-    return parseInt(value, 10);
+    return typeof value === 'undefined' ? value : parseInt(value, 10);
   },
 
   bool(...args) {
@@ -19,13 +19,13 @@ const utils = {
 
   float(...args) {
     const value = env(...args);
-    return parseFloat(value);
+    return typeof value === 'undefined' ? value : parseFloat(value);
   },
 
   json(key, val) {
     const value = env(key, val);
     try {
-      return JSON.parse(value);
+      return typeof value === 'undefined' ? value : JSON.parse(value);
     } catch (error) {
       throw new Error(`Imposibble to parse json environment variable ${key}: ${error.message}`);
     }
@@ -33,6 +33,10 @@ const utils = {
 
   array(...args) {
     let value = env(...args);
+
+    if (typeof value === 'undefined') {
+      return value;
+    }
 
     if (value.startsWith('[') && value.endsWith(']')) {
       value = value.substring(1, value.length - 1);
@@ -45,7 +49,7 @@ const utils = {
 
   date(...args) {
     const value = env(...args);
-    return new Date(value);
+    return typeof value === 'undefined' ? value : new Date(value);
   },
 };
 

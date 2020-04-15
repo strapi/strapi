@@ -5,8 +5,9 @@ const dotenv = require('dotenv');
 dotenv.config({ path: process.env.ENV_PATH });
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
-const _ = require('lodash');
+const os = require('os');
 const path = require('path');
+const _ = require('lodash');
 
 const createConfigProvider = require('./config-provider');
 const loadConfigDir = require('./config-loader');
@@ -34,11 +35,11 @@ const CONFIG_PATHS = {
 
 const defaultConfig = {
   server: {
-    host: process.env.HOST || process.env.HOSTNAME || 'localhost',
+    host: process.env.HOST || os.hostname() || 'localhost',
     port: process.env.PORT || 1337,
     proxy: { enabled: false },
     cron: { enabled: false },
-    admin: { autoOpen: false },
+    admin: { autoOpen: true },
   },
   admin: {},
   middleware: {
