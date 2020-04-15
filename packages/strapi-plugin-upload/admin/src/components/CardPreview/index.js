@@ -1,7 +1,7 @@
 import React, { memo, useRef } from 'react';
 import PropTypes from 'prop-types';
 
-import { getExtension, getType } from '../../utils';
+import { getType } from '../../utils';
 
 import BrokenFile from '../../icons/BrokenFile';
 import FileIcon from '../FileIcon';
@@ -9,7 +9,7 @@ import VideoPreview from '../VideoPreview';
 import Wrapper from './Wrapper';
 import Image from './Image';
 
-const CardPreview = ({ hasError, hasIcon, url, previewUrl, type, withFileCaching }) => {
+const CardPreview = ({ extension, hasError, hasIcon, url, previewUrl, type, withFileCaching }) => {
   const isFile = getType(type) === 'file';
   const isVideo = getType(type) === 'video';
   const cacheRef = useRef(performance.now());
@@ -25,7 +25,7 @@ const CardPreview = ({ hasError, hasIcon, url, previewUrl, type, withFileCaching
   if (isFile) {
     return (
       <Wrapper isFile>
-        <FileIcon ext={getExtension(type)} />
+        <FileIcon ext={extension} />
       </Wrapper>
     );
   }
@@ -44,6 +44,7 @@ const CardPreview = ({ hasError, hasIcon, url, previewUrl, type, withFileCaching
 };
 
 CardPreview.defaultProps = {
+  extension: null,
   hasError: false,
   hasIcon: false,
   previewUrl: null,
@@ -53,6 +54,7 @@ CardPreview.defaultProps = {
 };
 
 CardPreview.propTypes = {
+  extension: PropTypes.string,
   hasError: PropTypes.bool,
   hasIcon: PropTypes.bool,
   previewUrl: PropTypes.string,

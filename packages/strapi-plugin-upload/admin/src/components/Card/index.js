@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { useGlobalContext } from 'strapi-helper-plugin';
-import { formatBytes, getExtension, getType, getTrad } from '../../utils';
+import { getFileExtension, useGlobalContext } from 'strapi-helper-plugin';
+import { formatBytes, getType, getTrad } from '../../utils';
 
 import Flex from '../Flex';
 import Text from '../Text';
@@ -20,8 +20,8 @@ const Card = ({
   checked,
   children,
   errorMessage,
+  ext,
   hasError,
-  hasIcon,
   height,
   mime,
   name,
@@ -38,6 +38,10 @@ const Card = ({
   const { formatMessage } = useGlobalContext();
   const fileSize = formatBytes(size, 0);
   const fileType = mime || type;
+  const generatedExtension =
+    !ext && name.lastIndexOf('.') !== -1
+      ? name.substr(name.lastIndexOf('.') + 1, name.length)
+      : getFileExtension(ext);
 
   const handleClick = () => {
     if (!isDisabled) {
@@ -52,8 +56,8 @@ const Card = ({
     >
       <CardImgWrapper checked={checked} small={small}>
         <CardPreview
+          extension={generatedExtension}
           hasError={hasError}
-          hasIcon={hasIcon}
           previewUrl={previewUrl}
           url={url}
           type={fileType}
@@ -71,7 +75,7 @@ const Card = ({
           </Flex>
           {!withoutFileInfo && (
             <FileInfos
-              extension={getExtension(fileType)}
+              extension={generatedExtension}
               size={fileSize}
               width={width}
               height={height}
@@ -91,10 +95,10 @@ Card.defaultProps = {
   checked: false,
   children: null,
   errorMessage: null,
+  ext: null,
   id: null,
   isDisabled: false,
   hasError: false,
-  hasIcon: false,
   height: null,
   mime: null,
   name: null,
@@ -115,8 +119,8 @@ Card.propTypes = {
   checked: PropTypes.bool,
   children: PropTypes.node,
   errorMessage: PropTypes.string,
+  ext: PropTypes.string,
   hasError: PropTypes.bool,
-  hasIcon: PropTypes.bool,
   height: PropTypes.number,
   mime: PropTypes.string,
   name: PropTypes.string,

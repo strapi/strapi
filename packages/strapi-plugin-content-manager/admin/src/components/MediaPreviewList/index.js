@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get, isArray, includes, isEmpty } from 'lodash';
-import { prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
+import { getFileExtension, prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
 import DefaultIcon from '../../icons/Na';
 import {
   StyledMediaPreviewList,
@@ -14,8 +14,6 @@ import {
 const IMAGE_PREVIEW_COUNT = 3;
 
 function MediaPreviewList({ hoverable, files }) {
-  const getFileType = fileName => (fileName ? fileName.split('.').slice(-1)[0] : null);
-
   const renderImage = image => {
     const { name, size, url } = image;
     const fileUrl = get(image, ['formats', 'thumbnail', 'url'], url);
@@ -35,14 +33,14 @@ function MediaPreviewList({ hoverable, files }) {
   };
 
   const renderFile = file => {
-    const { mime, name } = file;
-    const fileType = includes(mime, 'image') ? 'image' : getFileType(name);
+    const { ext, name } = file;
+    const fileExtension = getFileExtension(ext);
 
     return (
       <MediaPreviewFile className={hoverable ? 'hoverable' : ''}>
-        {fileType ? (
+        {fileExtension ? (
           <div>
-            <span>{fileType}</span>
+            <span>{fileExtension}</span>
           </div>
         ) : (
           <MediaPreviewItem>

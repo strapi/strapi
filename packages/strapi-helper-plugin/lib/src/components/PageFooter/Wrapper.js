@@ -9,7 +9,6 @@ const Wrapper = styled.div`
 
   .pageFooterLabel {
     margin-left: 1rem;
-    padding-top: 1px;
     color: #787e8f;
     font-size: 13px;
     font-style: italic;

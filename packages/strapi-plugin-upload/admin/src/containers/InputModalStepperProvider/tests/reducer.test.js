@@ -593,6 +593,25 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
     });
   });
 
+  describe('ON_CHANGE_MODAL_TAB', () => {
+    it('should change the data correctly', () => {
+      const action = {
+        type: 'ON_CHANGE_MODAL_TAB',
+        to: 'selected',
+      };
+      const state = {
+        currentStep: 'list',
+        currentTab: 'browse',
+      };
+      const expected = {
+        currentStep: 'list',
+        currentTab: 'selected',
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
   describe('ON_CHANGE_URLS_TO_DOWNLOAD', () => {
     it('should change the data correctly', () => {
       const action = {
@@ -1972,7 +1991,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
       };
       const state = {
         params: {
-          _start: 0,
+          _start: 10,
           filters: [],
         },
       };

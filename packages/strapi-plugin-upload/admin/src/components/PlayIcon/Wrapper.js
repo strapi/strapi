@@ -6,9 +6,9 @@ const Wrapper = styled.div`
   position: absolute;
   justify-content: center;
   align-items: center;
-  width: ${({ small }) => (small ? '50px' : '94px')};
-  height: ${({ small }) => (small ? '50px' : '94px')};
-  padding-left: 1%;
+  width: ${({ small }) => (small ? '45px' : '94px')};
+  height: ${({ small }) => (small ? '45px' : '94px')};
+  padding-left: ${({ small }) => (small ? '5px' : '9px')};
   border-radius: 50%;
   background-color: rgba(255, 255, 255, 0.5);
 `;

@@ -13,7 +13,6 @@ import ListRow from './ListRow';
 
 const List = ({
   allowedTypes,
-  clickable,
   data,
   onChange,
   onCardClick,
@@ -30,7 +29,7 @@ const List = ({
 
   return (
     <ListWrapper>
-      {selectedAssets > 0 && (
+      {!smallCards && selectedAssets > 0 && (
         <IntlText
           id={getTrad(`list.assets.selected.${selectedAssets > 1 ? 'plural' : 'singular'}`)}
           values={{ number: selectedAssets }}
@@ -40,7 +39,7 @@ const List = ({
       <ListRow>
         {data.map(item => {
           const { id } = item;
-          const url = get(item, ['formats', 'thumbnail', 'url'], item.url);
+          const url = get(item, ['formats', 'small', 'url'], item.url);
           const isAllowed =
             allowedTypes.length > 0 ? allowedTypes.includes(getType(item.mime)) : true;
           const checked = selectedItems.findIndex(file => file.id === id) !== -1;
@@ -52,7 +51,6 @@ const List = ({
                 isDisabled={!isAllowed}
                 checked={checked}
                 {...item}
-                hasIcon={clickable}
                 url={fileUrl}
                 onClick={onCardClick}
                 small={smallCards}
@@ -70,7 +68,7 @@ const List = ({
                       </CardControlsWrapper>
                     )}
                     {renderCardControl && (
-                      <CardControlsWrapper className="card-control-wrapper">
+                      <CardControlsWrapper className="card-control-wrapper card-control-wrapper-hidden">
                         {renderCardControl(id)}
                       </CardControlsWrapper>
                     )}
@@ -87,7 +85,6 @@ const List = ({
 
 List.defaultProps = {
   allowedTypes: [],
-  clickable: false,
   canSelect: true,
   data: [],
   onChange: () => {},
@@ -99,7 +96,6 @@ List.defaultProps = {
 
 List.propTypes = {
   allowedTypes: PropTypes.array,
-  clickable: PropTypes.bool,
   canSelect: PropTypes.bool,
   data: PropTypes.array,
   onChange: PropTypes.func,

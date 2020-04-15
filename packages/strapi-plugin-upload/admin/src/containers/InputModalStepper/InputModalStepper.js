@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, ModalFooter, PopUpWarning, useGlobalContext, request } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
-import { get, isEmpty } from 'lodash';
+import { get, isEmpty, isEqual } from 'lodash';
 import { getRequestUrl, getTrad } from '../../utils';
 import ModalHeader from '../../components/ModalHeader';
 import pluginId from '../../pluginId';
@@ -39,6 +39,8 @@ const InputModalStepper = ({ isOpen, onToggle, noNavigation, onInputMediaChange 
     handleSetCropResult,
     handleSetFileToEditError,
     handleUploadFiles,
+    initialFileToEdit,
+    initialSelectedFiles,
     isFormDisabled,
     isWarningDeleteOpen,
     multiple,
@@ -249,10 +251,25 @@ const InputModalStepper = ({ isOpen, onToggle, noNavigation, onInputMediaChange 
   };
 
   const handleToggle = () => {
-    if (filesToUploadLength > 0 || selectedFiles.length > 0) {
+    if (filesToUploadLength > 0) {
       // eslint-disable-next-line no-alert
       const confirm = window.confirm(
         formatMessage({ id: getTrad('window.confirm.close-modal.files') })
+      );
+
+      if (!confirm) {
+        return;
+      }
+    }
+
+    if (
+      (currentStep === 'list' && !isEqual(selectedFiles, initialSelectedFiles)) ||
+      (currentStep === 'edit' && initialFileToEdit && !isEqual(fileToEdit, initialFileToEdit)) ||
+      (currentStep === 'edit' && selectedFiles.length > 0)
+    ) {
+      // eslint-disable-next-line no-alert
+      const confirm = window.confirm(
+        formatMessage({ id: getTrad('window.confirm.close-modal.file') })
       );
 
       if (!confirm) {

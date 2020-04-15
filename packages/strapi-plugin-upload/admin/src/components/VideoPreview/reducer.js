@@ -18,7 +18,7 @@ const videoReducer = (state, action) => {
     case 'SEEKED':
       return state.update('seeked', () => true);
     case 'SET_IS_HOVER':
-      return state.update('isHover', isHover => !isHover);
+      return state.update('isHover', () => action.isHover);
     case 'SET_SNAPSHOT':
       return state.update('snapshot', () => action.snapshot);
     default:
