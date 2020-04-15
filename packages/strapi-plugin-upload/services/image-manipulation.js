@@ -13,7 +13,7 @@ const getMetadatas = buffer =>
 
 const getDimensions = buffer =>
   getMetadatas(buffer)
-    .then(({ width, height }) => ({ width, height }))
+    .then(({ width = null, height = null }) => ({ width, height }))
     .catch(() => ({})); // ignore errors
 
 const THUMBNAIL_RESIZE_OPTIONS = {
