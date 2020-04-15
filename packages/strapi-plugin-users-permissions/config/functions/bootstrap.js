@@ -149,8 +149,8 @@ module.exports = async () => {
       unique_email: true,
       allow_register: true,
       email_confirmation: false,
-      email_confirmation_redirection: `${strapi.config.server.url}/admin`,
-      email_reset_password: `${strapi.config.server.url}/admin`,
+      email_confirmation_redirection: `${strapi.config.admin.url}/admin`,
+      email_reset_password: `${strapi.config.admin.url}/admin`,
       default_role: 'authenticated',
     };
 

@@ -295,15 +295,17 @@ module.exports = function(strapi) {
     hostname = 'localhost';
   }
 
-  let serverUrl = _.trim(
-    _.get(
-      strapi.config.currentEnvironment,
-      'server.url',
-      getURLFromSegments({ hostname, port: strapi.config.port })
-    ),
-    '/'
-  );
-  serverUrl = _.trim(new URL(serverUrl).toString(), '/');
+  let serverUrl = getURLFromSegments({ hostname, port: strapi.config.port });
+  if (_.has(strapi.config.currentEnvironment, 'server.url')) {
+    try {
+      serverUrl = _.trim(new URL(strapi.config.currentEnvironment.server.url).toString(), '/');
+    } catch (e) {
+      strapi.stopWithError(
+        e,
+        'Invalid server url config. Make sure the url defined in server.js is valid.'
+      );
+    }
+  }
 
   let adminUrl = _.get(strapi.config.currentEnvironment, 'server.admin.url', '/admin');
   adminUrl = _.trim(adminUrl, '/');
