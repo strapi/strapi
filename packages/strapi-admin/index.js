@@ -1,5 +1,6 @@
 /* eslint-disable no-useless-escape */
 const path = require('path');
+const _ = require('lodash');
 const fs = require('fs-extra');
 const webpack = require('webpack');
 const getWebpackConfig = require('./webpack.config.js');
@@ -8,6 +9,71 @@ const chalk = require('chalk');
 const chokidar = require('chokidar');
 
 const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
+
+function getCustomWebpackConfig(dir, config) {
+  const adminConfigPath = path.join(dir, 'admin', 'admin.config.js');
+  let webpackConfig = getWebpackConfig(config);
+
+  if (fs.existsSync(adminConfigPath)) {
+    const adminConfig = require(path.resolve(adminConfigPath));
+
+    if (_.isFunction(adminConfig.webpack)) {
+      webpackConfig = adminConfig.webpack(webpackConfig, webpack);
+
+      if (!webpackConfig) {
+        console.error(
+          `${chalk.red('Error:')} Nothing was returned from your custom webpack configuration`
+        );
+        process.exit(1);
+      }
+    }
+  }
+
+  return webpackConfig;
+}
+
+async function build({ dir, env, options, optimize }) {
+  // Create the cache dir containing the front-end files.
+  await createCacheDir(dir);
+
+  const cacheDir = path.resolve(dir, '.cache');
+  const entry = path.resolve(cacheDir, 'admin', 'src', 'app.js');
+  const dest = path.resolve(dir, 'build');
+  const config = getCustomWebpackConfig(dir, { entry, dest, env, options, optimize });
+
+  const compiler = webpack(config);
+
+  return new Promise((resolve, reject) => {
+    compiler.run((err, stats) => {
+      let messages;
+      if (err) {
+        if (!err.message) {
+          return reject(err);
+        }
+        messages = {
+          errors: [err.message],
+          warnings: [],
+        };
+      } else {
+        messages = stats.toJson({ all: false, warnings: true, errors: true });
+      }
+
+      if (messages.errors.length) {
+        // Only keep the first error. Others are often indicative
+        // of the same problem, but confuse the reader with noise.
+        if (messages.errors.length > 1) {
+          messages.errors.length = 1;
+        }
+        return reject(new Error(messages.errors.join('\n\n')));
+      }
+
+      return resolve({
+        stats,
+        warnings: messages.warnings,
+      });
+    });
+  });
+}
 
 async function createPluginsJs(plugins, localPlugins, dest) {
   const content = `
@@ -153,49 +219,6 @@ async function createCacheDir(dir) {
   );
 }
 
-async function build({ dir, env, options, optimize }) {
-  // Create the cache dir containing the front-end files.
-  await createCacheDir(dir);
-
-  const cacheDir = path.resolve(dir, '.cache');
-  const entry = path.resolve(cacheDir, 'admin', 'src', 'app.js');
-  const dest = path.resolve(dir, 'build');
-  const config = getWebpackConfig({ entry, dest, env, options, optimize });
-
-  const compiler = webpack(config);
-
-  return new Promise((resolve, reject) => {
-    compiler.run((err, stats) => {
-      let messages;
-      if (err) {
-        if (!err.message) {
-          return reject(err);
-        }
-        messages = {
-          errors: [err.message],
-          warnings: [],
-        };
-      } else {
-        messages = stats.toJson({ all: false, warnings: true, errors: true });
-      }
-
-      if (messages.errors.length) {
-        // Only keep the first error. Others are often indicative
-        // of the same problem, but confuse the reader with noise.
-        if (messages.errors.length > 1) {
-          messages.errors.length = 1;
-        }
-        return reject(new Error(messages.errors.join('\n\n')));
-      }
-
-      return resolve({
-        stats,
-        warnings: messages.warnings,
-      });
-    });
-  });
-}
-
 async function watchAdmin({ dir, host, port, options }) {
   // Create the cache dir containing the front-end files.
   await createCacheDir(dir);
@@ -223,7 +246,8 @@ async function watchAdmin({ dir, host, port, options }) {
     },
   };
 
-  const server = new WebpackDevServer(webpack(getWebpackConfig(args)), opts);
+  const webpackConfig = getCustomWebpackConfig(dir, args);
+  const server = new WebpackDevServer(webpack(webpackConfig), opts);
 
   server.listen(port, host, function(err) {
     if (err) {
