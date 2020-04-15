@@ -327,6 +327,7 @@ const InputModalStepperProvider = ({
   };
 
   const fetchMediaLib = async () => {
+    console.log('fetch');
     const [files, count] = await Promise.all([fetchMediaLibFiles(), fetchMediaLibFilesCount()]);
     dispatch({
       type: 'GET_DATA_SUCCEEDED',

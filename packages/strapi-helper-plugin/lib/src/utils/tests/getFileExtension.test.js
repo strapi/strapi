@@ -1,38 +1,38 @@
 import getFileExtension from '../getFileExtension';
 
 describe('HELPER PLUGIN | utils | getFileExtension', () => {
-  it('should return undefined if mime does not exits', () => {
-    const mime = null;
-    const expected = 'undefined';
+  it('should return undefined if ext does not exits', () => {
+    const ext = null;
+    const expected = null;
 
-    expect(getFileExtension(mime)).toEqual(expected);
+    expect(getFileExtension(ext)).toEqual(expected);
   });
 
-  it('should return png if mime string is image/png', () => {
-    const mime = 'image/png';
+  it('should return png if ext string is image/png', () => {
+    const ext = '.png';
     const expected = 'png';
 
-    expect(getFileExtension(mime)).toEqual(expected);
+    expect(getFileExtension(ext)).toEqual(expected);
   });
 
-  it('should return mp4 if mime string is video/mp4', () => {
-    const mime = 'video/mp4';
+  it('should return mp4 if ext string is video/mp4', () => {
+    const ext = '.mp4';
     const expected = 'mp4';
 
-    expect(getFileExtension(mime)).toEqual(expected);
+    expect(getFileExtension(ext)).toEqual(expected);
   });
 
-  it('should return html if mime string is text/html', () => {
-    const mime = 'text/html';
-    const expected = 'html';
+  it('should return html if ext string is text/html', () => {
+    const ext = '.bin';
+    const expected = 'bin';
 
-    expect(getFileExtension(mime)).toEqual(expected);
+    expect(getFileExtension(ext)).toEqual(expected);
   });
 
-  it('should return pdf if mime string is application/pdf', () => {
-    const mime = 'application/pdf';
+  it('should return pdf if ext string is application/pdf', () => {
+    const ext = '.pdf';
     const expected = 'pdf';
 
-    expect(getFileExtension(mime)).toEqual(expected);
+    expect(getFileExtension(ext)).toEqual(expected);
   });
 });
