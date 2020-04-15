@@ -347,8 +347,6 @@ const HomePage = () => {
     _page: generatePageFromStart(start, limit),
   };
 
-  const paginationCount = data.length < limit ? data.length : dataCount;
-
   const hasSomeCheckboxSelected = data.some(item =>
     dataToDelete.find(itemToDelete => item.id.toString() === itemToDelete.id.toString())
   );
@@ -404,7 +402,7 @@ const HomePage = () => {
             <Padded left right size="xs">
               <PageFooter
                 context={{ emitEvent: () => {} }}
-                count={paginationCount}
+                count={dataCount}
                 onChangeParams={handleChangeListParams}
                 params={params}
               />
