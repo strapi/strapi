@@ -2,7 +2,7 @@
 
 Upgrading your Strapi application to `v3.0.0-beta.20`.
 
-**Make sure your server is not running until then end of the migration**
+**Make sure your server is not running until the end of the migration**
 
 ## Upgrading your dependencies
 
@@ -38,7 +38,7 @@ To allow customizations, the server will now serve the files in your `./public` 
 
 From now on, if you don't have any `index.html` file in your `./public` folder, the server will render the default Strapi homepage.
 
-You can now also disable this behavior this the `public.defaultIndex` option. Read the documentation [here](../concepts/configurations.md#application).
+You can now also disable this behavior with the `public.defaultIndex` option. Read the documentation [here](../concepts/configurations.md#application).
 
 ## Upload plugin settings
 
@@ -51,9 +51,9 @@ This means that you now have to configure your provider directly in the files. Y
 In the media library features, We wanted to make sure media would keep their ordering. To implement this in mongo we had to change the way the media relation was built.
 
 Previously, the `upload_file` collection was the one keeping track of the relations and the entity related to the file had not reference to it.
-Implementing ordering without cahnges the relations proved unfeasible. FInally we decided to add the reverse reference in the entities so it would make accessing the files really easy.
+Implementing ordering without changes the relations proved unfeasible. Finally we decided to add the reverse reference in the entities so it would make accessing the files really easy.
 
-You will hence need to migrate your `mongo` database to avoid loosing references to your files.
+You will hence need to migrate your `mongo` database to avoid losing references to your files.
 
 ### Backup your database
 
@@ -61,7 +61,7 @@ When running in production, you should always backup your database before runnin
 
 ### Export model metadatas
 
-First of create a export.js file at the root of your project with the following content:
+First create a `export.js` file at the root of your project with the following content:
 
 ```js
 const fs = require('fs');
@@ -204,6 +204,10 @@ var models = {
 
 Finally you can load this script in your mongo shell and run it.
 
+Once your migration is done you can delete the `export.js` and `models.json` files from your project. You are all set !
+
 ## Rebuilding your administration panel
 
-Now delete the `.cache` and `build` folders. Then run `yarn develop`.
+You can run `yarn build --clean` or `npm run build -- --clean` to rebuild your admin panel with the newly installed version of strapi.
+
+Finally restart your server: `yarn develop` or `npm run develop`.
