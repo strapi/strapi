@@ -56,6 +56,7 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
   const metadatas = useMemo(() => get(layout, ['metadatas', name, 'edit'], {}), [layout, name]);
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
   const type = useMemo(() => get(attribute, 'type', null), [attribute]);
+  const regexpString = useMemo(() => get(attribute, 'regex', null), [attribute]);
   const validations = omit(attribute, [
     'type',
     'model',
@@ -64,7 +65,17 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
     'default',
     'plugin',
     'enum',
+    'regex',
   ]);
+
+  if (regexpString) {
+    const regexp = new RegExp(regexpString);
+
+    if (regexp) {
+      validations.regex = regexp;
+    }
+  }
+
   const { description, visible } = metadatas;
   const value = get(modifiedData, keys, null);
 

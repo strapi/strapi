@@ -74,6 +74,12 @@ const areEnumValuesUnique = {
   },
 };
 
+const isValidRegExpPattern = {
+  name: 'isValidRegExpPattern',
+  message: '${path} must be a valid RexExp pattern string',
+  test: val => val === '' || new RegExp(val),
+};
+
 module.exports = {
   validators,
   areEnumValuesUnique,
@@ -84,4 +90,5 @@ module.exports = {
   isValidKey,
   isValidEnum,
   isValidUID,
+  isValidRegExpPattern,
 };
