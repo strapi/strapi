@@ -303,16 +303,16 @@ const InputModalStepperProvider = ({
     handleRemoveFileToUpload(fileIndex);
   };
 
-  const getFilters = () => {
+  const getFilters = (filtersToOmit = []) => {
     const compactedParams = compactParams(params);
-    const searchParams = generateSearchFromFilters(compactedParams);
+    const searchParams = generateSearchFromFilters(compactedParams, filtersToOmit);
 
     return formatFilters(searchParams);
   };
 
   const fetchMediaLibFilesCount = async () => {
     const requestURL = getRequestUrl('files/count');
-    const paramsToSend = getFilters();
+    const paramsToSend = getFilters(['_limit', '_sort', '_start']);
 
     try {
       return await request(`${requestURL}?${paramsToSend}`, {
