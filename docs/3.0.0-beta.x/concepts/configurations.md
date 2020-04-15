@@ -424,12 +424,12 @@ The session doesn't work with `mongo` as a client. The package that we should us
   - `enabled` (boolean): Enable or disable XSS to prevent Cross Site Scripting (XSS) attacks in older IE browsers (IE8).
 - [`cors`](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
   - `enabled` (boolean): Enable or disable CORS to prevent your server to be requested from another domain.
-  - `origin` (string): Allowed URLs (`http://example1.com, http://example2.com` or allows everyone `*`). Default value: `http://localhost`.
+  - `origin` (string): Allowed URLs (`http://example1.com, http://example2.com` or allows everyone `*`). Default value: `*`.
   - `expose` (array): Configures the `Access-Control-Expose-Headers` CORS header. If not specified, no custom headers are exposed. Default value: `["WWW-Authenticate", "Server-Authorization"]`.
   - `maxAge` (integer): Configures the `Access-Control-Max-Age` CORS header. Default value: `31536000`.
   - `credentials` (boolean): Configures the `Access-Control-Allow-Credentials` CORS header. Default value: `true`.
-  - `methods` (array)|String - Configures the `Access-Control-Allow-Methods` CORS header. Default value: `["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"]`.
-  - `headers` (array): Configures the `Access-Control-Allow-Headers` CORS header. If not specified, defaults to reflecting the headers specified in the request's Access-Control-Request-Headers header. Default value: `["Content-Type", "Authorization", "X-Frame-Options"]`.
+  - `methods` (array)|String - Configures the `Access-Control-Allow-Methods` CORS header. Default value: `['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']`.
+  - `headers` (array): Configures the `Access-Control-Allow-Headers` CORS header. If not specified, defaults to reflecting the headers specified in the request's Access-Control-Request-Headers header. Default value: `['Content-Type', 'Authorization', 'Origin', 'Accept']`.
 - `ip`
   - `enabled` (boolean): Enable or disable IP blocker. Default value: `false`.
   - `whiteList` (array): Whitelisted IPs. Default value: `[]`.
