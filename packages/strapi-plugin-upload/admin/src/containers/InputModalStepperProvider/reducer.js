@@ -127,16 +127,20 @@ const reducer = (state, action) =>
       }
       case 'ON_FILE_SELECTION': {
         const { id } = action;
-        const stringId = id.toString();
-        const fileIndex = state.selectedFiles.findIndex(file => file.id.toString() === stringId);
+        const stringId = toString(id);
+        const fileIndex = state.selectedFiles.findIndex(file => toString(file.id) === stringId);
 
         if (fileIndex !== -1) {
           draftState.selectedFiles.splice(fileIndex, 1);
           break;
         }
-
         const fileToStore = state.files.find(file => file.id.toString() === stringId);
-        draftState.selectedFiles.push(fileToStore);
+
+        if (fileToStore) {
+          draftState.selectedFiles.push(fileToStore);
+        }
+        // Clean
+        draftState.selectedFiles = draftState.selectedFiles.filter(file => file && file.id);
         break;
       }
       case 'ON_SUBMIT_EDIT_EXISTING_FILE': {
