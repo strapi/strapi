@@ -29,6 +29,10 @@ const resizeTo = (buffer, options) =>
     .catch(() => null);
 
 const generateThumbnail = async file => {
+  if (!(await canBeProccessed(file.buffer))) {
+    return null;
+  }
+
   const { width, height } = await getDimensions(file.buffer);
 
   if (width > THUMBNAIL_RESIZE_OPTIONS.width || height > THUMBNAIL_RESIZE_OPTIONS.height) {
@@ -57,6 +61,10 @@ const optimize = async buffer => {
 
   if (!sizeOptimization) return { buffer };
 
+  if (!(await canBeProccessed(buffer))) {
+    return { buffer };
+  }
+
   return sharp(buffer)
     .toBuffer({ resolveWithObject: true })
     .then(({ data, info }) => ({
@@ -82,6 +90,10 @@ const generateResponsiveFormats = async file => {
   } = await strapi.plugins.upload.services.upload.getSettings();
 
   if (!responsiveDimensions) return [];
+
+  if (!(await canBeProccessed(file.buffer))) {
+    return [];
+  }
 
   const originalDimensions = await getDimensions(file.buffer);
 
@@ -123,6 +135,12 @@ const generateBreakpoint = async (key, { file, breakpoint }) => {
 
 const breakpointSmallerThan = (breakpoint, { width, height }) => {
   return breakpoint < width || breakpoint < height;
+};
+
+const formatsToProccess = ['jpeg', 'png', 'webp', 'tiff'];
+const canBeProccessed = async buffer => {
+  const { format } = await getMetadatas(buffer);
+  return format && formatsToProccess.includes(format);
 };
 
 module.exports = {
