@@ -18,7 +18,7 @@ function getCustomWebpackConfig(dir, config) {
     const adminConfig = require(path.resolve(adminConfigPath));
 
     if (_.isFunction(adminConfig.webpack)) {
-      webpackConfig = adminConfig.webpack(webpackConfig);
+      webpackConfig = adminConfig.webpack(webpackConfig, webpack);
     }
   }
 

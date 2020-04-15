@@ -220,7 +220,11 @@ module.exports = {
         {
           collapsable: true,
           title: '⚙️️ Admin Panel',
-          children: ['/3.0.0-beta.x/admin-panel/customization', '/3.0.0-beta.x/admin-panel/deploy'],
+          children: [
+            '/3.0.0-beta.x/admin-panel/customization',
+            '/3.0.0-beta.x/admin-panel/custom-webpack-config',
+            '/3.0.0-beta.x/admin-panel/deploy',
+          ],
         },
         {
           collapsable: true,
