@@ -34,9 +34,7 @@ class ImgPreview extends React.Component {
       ? get(this.props.files, ['0', 'name'], '')
       : get(this.props.files, 'name');
     this.setState({
-      imgURL:
-        get(this.props.files, ['0', 'url'], '') ||
-        get(this.props.files, 'url', ''),
+      imgURL: get(this.props.files, ['0', 'url'], '') || get(this.props.files, 'url', ''),
       isImg: this.isPictureType(file),
     });
   }
@@ -56,8 +54,7 @@ class ImgPreview extends React.Component {
     if (
       nextProps.didDeleteFile !== this.props.didDeleteFile ||
       nextProps.position !== this.props.position ||
-      (size(nextProps.files) !== size(this.props.files) &&
-        !this.state.isInitValue)
+      (size(nextProps.files) !== size(this.props.files) && !this.state.isInitValue)
     ) {
       const file = nextProps.files[nextProps.position] || nextProps.files || '';
       this.generateImgURL(file);
@@ -96,8 +93,7 @@ class ImgPreview extends React.Component {
       reader.readAsDataURL(file);
     } else if (has(file, 'url')) {
       const isImg = this.isPictureType(file.name);
-      const imgURL =
-        file.url[0] === '/' ? `${strapi.backendURL}${file.url}` : file.url;
+      const imgURL = file.url[0] === '/' ? `${strapi.backendURL}${file.url}` : file.url;
 
       this.setState({ isImg, imgURL });
     } else {
@@ -150,7 +146,7 @@ class ImgPreview extends React.Component {
   };
 
   // TODO change logic to depend on the type
-  isPictureType = fileName => /\.(jpe?g|png|gif)$/i.test(fileName);
+  isPictureType = fileName => /\.(jpe?g|png|svg|gif)$/i.test(fileName);
 
   updateFilePosition = newPosition => {
     this.props.updateFilePosition(newPosition);
