@@ -20,6 +20,7 @@ const Card = ({
   checked,
   children,
   errorMessage,
+  ext,
   hasError,
   height,
   mime,
@@ -37,6 +38,7 @@ const Card = ({
   const { formatMessage } = useGlobalContext();
   const fileSize = formatBytes(size, 0);
   const fileType = mime || type;
+  const extension = getFileExtension(ext) || name.split('.').slice(-1)[0] || null;
 
   const handleClick = () => {
     if (!isDisabled) {
@@ -51,6 +53,7 @@ const Card = ({
     >
       <CardImgWrapper checked={checked} small={small}>
         <CardPreview
+          extension={extension}
           hasError={hasError}
           previewUrl={previewUrl}
           url={url}
@@ -68,12 +71,7 @@ const Card = ({
             <Tag label={getType(fileType)} />
           </Flex>
           {!withoutFileInfo && (
-            <FileInfos
-              extension={getFileExtension(fileType)}
-              size={fileSize}
-              width={width}
-              height={height}
-            />
+            <FileInfos extension={extension} size={fileSize} width={width} height={height} />
           )}
         </>
       ) : (
@@ -89,6 +87,7 @@ Card.defaultProps = {
   checked: false,
   children: null,
   errorMessage: null,
+  ext: null,
   id: null,
   isDisabled: false,
   hasError: false,
@@ -112,6 +111,7 @@ Card.propTypes = {
   checked: PropTypes.bool,
   children: PropTypes.node,
   errorMessage: PropTypes.string,
+  ext: PropTypes.string,
   hasError: PropTypes.bool,
   height: PropTypes.number,
   mime: PropTypes.string,

@@ -33,8 +33,8 @@ function MediaPreviewList({ hoverable, files }) {
   };
 
   const renderFile = file => {
-    const { mime, name } = file;
-    const fileExtension = getFileExtension(mime);
+    const { ext, name } = file;
+    const fileExtension = getFileExtension(ext);
 
     return (
       <MediaPreviewFile className={hoverable ? 'hoverable' : ''}>
