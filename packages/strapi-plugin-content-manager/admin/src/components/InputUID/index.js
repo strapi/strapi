@@ -61,7 +61,7 @@ const InputUID = ({
   const initialValue = initialData[name];
   const isCreation = isEmpty(initialData);
 
-  generateUid.current = async () => {
+  generateUid.current = async (changeInitialData = false) => {
     setIsLoading(true);
     const requestURL = getRequestUrl('explorer/uid/generate');
     try {
@@ -73,7 +73,8 @@ const InputUID = ({
           data: modifiedData,
         },
       });
-      onChange({ target: { name, value: data, type: 'text' } });
+
+      onChange({ target: { name, value: data, type: 'text' } }, changeInitialData);
       setIsLoading(false);
     } catch (err) {
       console.error({ err });
@@ -107,7 +108,7 @@ const InputUID = ({
 
   useEffect(() => {
     if (!value && required) {
-      generateUid.current();
+      generateUid.current(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -143,7 +144,7 @@ const InputUID = ({
   }, [availability]);
 
   useEffect(() => {
-    if (!isCustomized && isCreation && debouncedTargetFieldValue !== null) {
+    if (!isCustomized && isCreation && debouncedTargetFieldValue) {
       generateUid.current();
     }
   }, [debouncedTargetFieldValue, isCustomized, isCreation]);

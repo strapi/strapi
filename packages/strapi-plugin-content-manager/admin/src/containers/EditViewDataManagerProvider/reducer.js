@@ -135,11 +135,21 @@ const reducer = (state, action) => {
       let newState = state;
       const [nonRepeatableComponentKey] = action.keys;
 
+      // This is used to set the initialData for inputs
+      // that needs an asynchronous initial value like the UID field
+      // This is just a temporary patch.
+      // TODO : Refactor the default form creation (workflow) to accept async default values.
+      if (action.initialValue) {
+        newState = state.updateIn(['initialData', ...action.keys], () => {
+          return action.value;
+        });
+      }
+
       if (
         action.keys.length === 2 &&
         state.getIn(['modifiedData', nonRepeatableComponentKey]) === null
       ) {
-        newState = state.updateIn(['modifiedData', nonRepeatableComponentKey], () => fromJS({}));
+        newState = newState.updateIn(['modifiedData', nonRepeatableComponentKey], () => fromJS({}));
       }
 
       return newState.updateIn(['modifiedData', ...action.keys], () => {
