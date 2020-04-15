@@ -57,7 +57,7 @@ You will hence need to migrate your `mongo` database to avoid loosing references
 
 ### Backup your database
 
-WHen running in production, you should always backup your database before running migrations. To backup a `mongo` database, look at the documentation [here](https://docs.mongodb.com/manual/core/backups/)
+When running in production, you should always backup your database before running migrations. To backup a `mongo` database, look at the documentation [here](https://docs.mongodb.com/manual/core/backups/)
 
 ### Export model metadatas
 
