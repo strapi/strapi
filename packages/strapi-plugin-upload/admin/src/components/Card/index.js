@@ -38,7 +38,10 @@ const Card = ({
   const { formatMessage } = useGlobalContext();
   const fileSize = formatBytes(size, 0);
   const fileType = mime || type;
-  const extension = getFileExtension(ext) || name.split('.').slice(-1)[0] || null;
+  const generatedExtension =
+    !ext && name.lastIndexOf('.') !== -1
+      ? name.substr(name.lastIndexOf('.') + 1, name.length)
+      : getFileExtension(ext);
 
   const handleClick = () => {
     if (!isDisabled) {
@@ -53,7 +56,7 @@ const Card = ({
     >
       <CardImgWrapper checked={checked} small={small}>
         <CardPreview
-          extension={extension}
+          extension={generatedExtension}
           hasError={hasError}
           previewUrl={previewUrl}
           url={url}
@@ -71,7 +74,12 @@ const Card = ({
             <Tag label={getType(fileType)} />
           </Flex>
           {!withoutFileInfo && (
-            <FileInfos extension={extension} size={fileSize} width={width} height={height} />
+            <FileInfos
+              extension={generatedExtension}
+              size={fileSize}
+              width={width}
+              height={height}
+            />
           )}
         </>
       ) : (
