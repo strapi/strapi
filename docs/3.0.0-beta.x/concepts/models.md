@@ -132,6 +132,12 @@ Additional settings can be set on models:
 
 In this example, the model `Restaurant` will be accessible through the `Restaurants` global variable. The data will be stored in the `Restaurants_v1` collection or table and the model will use the `mongo` connection defined in `./config/environments/**/database.json`
 
+::: warning
+If not set manually in the JSON file, Strapi will adopt the filename as `globalId`.
+The `globalId` serves as a reference to your model within relations and Strapi APIs. If you chose to rename it (either by renaming your file or by changing the value of the `globalId`), you'd have to migrate your tables manually and update the references.
+Please note that you should not alter Strapi's models `globalId` (plugins and core ones) since it is used directly within Strapi APIs and other models' relations.
+:::
+
 ::: tip
 The `connection` value can be changed whenever you want, but you should be aware that there is no automatic data migration process. Also if the new connection doesn't use the same ORM you will have to rewrite your queries.
 :::
