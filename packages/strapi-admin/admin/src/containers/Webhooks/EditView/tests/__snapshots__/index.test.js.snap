@@ -1258,7 +1258,6 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                             <input
                               autocomplete="off"
                               class="c18"
-                              disabled=""
                               id="media.update"
                               name="media.update"
                               tabindex="0"
