@@ -7,14 +7,7 @@ import Enumeration from './Enumeration';
 import EnumerationWrapper from './EnumerationWrapper';
 import Wrapper from './Wrapper';
 
-const BooleanBox = ({
-  label,
-  name,
-  onChange,
-  onChangeCallback,
-  options,
-  value,
-}) => {
+const BooleanBox = ({ label, name, onChange, onChangeCallback, options, value }) => {
   const { formatMessage } = useGlobalContext();
 
   const handleChange = e => {
@@ -46,9 +39,7 @@ const BooleanBox = ({
             htmlFor={option.value.toString()}
           >
             <span className="option__indicator" />
-            <span className="option__title">
-              {formatMessage({ id: option.headerId })}
-            </span>
+            <span className="option__title">{formatMessage({ id: option.headerId })}</span>
             <p>{formatMessage({ id: option.descriptionId })}</p>
           </EnumerationWrapper>
         ))}

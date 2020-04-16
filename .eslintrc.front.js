@@ -47,7 +47,7 @@ module.exports = {
     'no-console': 0,
     'require-atomic-updates': 0,
     'react-hooks/rules-of-hooks': 'error',
-    'react-hooks/exhaustive-deps': 'warn',
+    'react-hooks/exhaustive-deps': 'error',
     'arrow-body-style': 0,
     'arrow-parens': 0,
     camelcase: 0,
@@ -64,10 +64,7 @@ module.exports = {
       {
         flatTernaryExpressions: false,
         SwitchCase: 1,
-        ignoredNodes: [
-          'ConditionalExpression',
-          "VariableDeclarator[kind='const']",
-        ],
+        ignoredNodes: ['ConditionalExpression', "VariableDeclarator[kind='const']"],
       },
     ],
     'func-names': ['error', 'never'],
@@ -97,10 +94,7 @@ module.exports = {
     'no-plusplus': 0,
     'no-shadow': 0,
     'no-underscore-dangle': 0,
-    'no-use-before-define': [
-      'error',
-      { functions: false, classes: false, variables: false },
-    ],
+    'no-use-before-define': ['error', { functions: false, classes: false, variables: false }],
     'object-curly-newline': [2, { multiline: true, consistent: true }],
     'operator-linebreak': 0,
     'padding-line-between-statements': [

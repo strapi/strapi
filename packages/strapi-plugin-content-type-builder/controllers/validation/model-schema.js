@@ -3,11 +3,7 @@
 const _ = require('lodash');
 const yup = require('yup');
 
-const {
-  modelTypes,
-  FORBIDDEN_ATTRIBUTE_NAMES,
-  typeKinds,
-} = require('./constants');
+const { modelTypes, FORBIDDEN_ATTRIBUTE_NAMES, typeKinds } = require('./constants');
 const { isValidCollectionName, isValidKey } = require('./common');
 const getTypeValidator = require('./types');
 const getRelationValidator = require('./relations');
@@ -71,9 +67,7 @@ const isForbiddenKey = key => FORBIDDEN_ATTRIBUTE_NAMES.includes(key);
 
 const forbiddenValidator = yup.object().test({
   name: 'forbiddenKeys',
-  message: `Attribute keys cannot be one of ${FORBIDDEN_ATTRIBUTE_NAMES.join(
-    ', '
-  )}`,
+  message: `Attribute keys cannot be one of ${FORBIDDEN_ATTRIBUTE_NAMES.join(', ')}`,
   test: () => false,
 });
 

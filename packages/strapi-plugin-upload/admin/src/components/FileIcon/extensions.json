@@ -1,9 +1,0 @@
-{
-  "archive":  ["rar", "zip"],
-  "code": ["js", "json", "rb", "erb", "txt", "css", "scss", "html", "jsx", "svg"],
-  "img": ["jpg", "jpeg", "png", "gif", "ico"],
-  "pdf": ["pdf"],
-  "powerpoint": ["ppt", "key", "xls"],
-  "video": ["mov", "avi", "mpg", "mp4", "m4v"],
-  "word": ["doc", "pages"]
-}

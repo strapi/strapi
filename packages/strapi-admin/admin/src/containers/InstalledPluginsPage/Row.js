@@ -9,8 +9,7 @@ import Text from '../../components/Text';
 import CustomRow from './CustomRow';
 import LogoContainer from './Logo';
 
-// TODO: remove the upload plugin when the media lib feature is merged.
-const PLUGINS_WITH_CONFIG = ['email', 'upload'];
+const PLUGINS_WITH_CONFIG = ['email'];
 
 const Row = ({ logo, name, description, isRequired, id, icon, onConfirm }) => {
   const { currentEnvironment, formatMessage } = useGlobalContext();

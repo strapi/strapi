@@ -16,13 +16,10 @@ const useFetchPluginsFromMarketPlace = () => {
 
     const getData = async () => {
       try {
-        const { data } = await axios.get(
-          'https://marketplace.strapi.io/plugins',
-          {
-            cancelToken: source.token,
-            params: { lang: currentLocale },
-          }
-        );
+        const { data } = await axios.get('https://marketplace.strapi.io/plugins', {
+          cancelToken: source.token,
+          params: { lang: currentLocale },
+        });
 
         setState({
           isLoading: false,

@@ -142,9 +142,13 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPrevio
   };
 
   const checkFormErrors = async (dataToSet = {}) => {
-    const schema = createYupSchema(currentContentTypeLayout, {
-      components: get(allLayoutData, 'components', {}),
-    });
+    const schema = createYupSchema(
+      currentContentTypeLayout,
+      {
+        components: get(allLayoutData, 'components', {}),
+      },
+      isCreatingEntry
+    );
     let errors = {};
     const updatedData = cloneDeep(modifiedData);
 
@@ -186,6 +190,15 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPrevio
       inputValue = null;
     }
 
+    if (type === 'password' && !value) {
+      dispatch({
+        type: 'REMOVE_PASSWORD_FIELD',
+        keys: name.split('.'),
+      });
+
+      return;
+    }
+
     // Allow to reset enum
     if (type === 'select-one' && value === '') {
       inputValue = null;
@@ -207,9 +220,13 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPrevio
     e.preventDefault();
 
     // Create yup schema
-    const schema = createYupSchema(currentContentTypeLayout, {
-      components: get(allLayoutData, 'components', {}),
-    });
+    const schema = createYupSchema(
+      currentContentTypeLayout,
+      {
+        components: get(allLayoutData, 'components', {}),
+      },
+      isCreatingEntry
+    );
 
     try {
       // Validate the form using yup
