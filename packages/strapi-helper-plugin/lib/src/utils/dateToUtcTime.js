@@ -1,5 +1,5 @@
 import moment from 'moment';
 
-const dateToUtcTime = date => moment(date).utc();
+const dateToUtcTime = date => moment.parseZone(date).utc();
 
 export default dateToUtcTime;
