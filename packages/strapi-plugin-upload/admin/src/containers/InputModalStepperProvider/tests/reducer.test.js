@@ -1088,12 +1088,12 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
       };
       expect(reducer(state, action)).toEqual(expected);
     });
-    it('should deselect all files of the current page only', () => {
+    it('should deselect all files of the current page only event if not allowed', () => {
       const action = {
         type: 'TOGGLE_SELECT_ALL',
       };
       const state = {
-        allowedTypes: [],
+        allowedTypes: ['video'],
         selectedFiles: [
           {
             id: 1,
@@ -1160,7 +1160,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
         ],
       };
       const expected = {
-        allowedTypes: [],
+        allowedTypes: ['video'],
         selectedFiles: [
           {
             id: 1,

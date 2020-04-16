@@ -276,7 +276,7 @@ const reducer = (state, action) =>
           allowedFiles.length;
 
         if (isSelected) {
-          draftState.selectedFiles = differenceWith(state.selectedFiles, allowedFiles, comparator);
+          draftState.selectedFiles = differenceWith(state.selectedFiles, state.files, comparator);
           break;
         }
 
