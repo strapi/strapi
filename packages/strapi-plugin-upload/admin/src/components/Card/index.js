@@ -44,7 +44,7 @@ const Card = ({
       : getFileExtension(ext);
 
   const handleClick = () => {
-    if (!isDisabled) {
+    if (!isDisabled || checked) {
       onClick(id);
     }
   };
