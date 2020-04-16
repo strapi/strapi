@@ -7,7 +7,7 @@ import Play from './Play';
 const PlayIcon = ({ small }) => {
   return (
     <Wrapper small={small}>
-      <Play fill="#000000" width={small ? '20px' : '40px'} />
+      <Play fill="#000000" width={small ? '23px' : '49px'} height={small ? '25px' : '52px'} />
     </Wrapper>
   );
 };

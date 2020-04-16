@@ -8,7 +8,7 @@ import Flex from '../Flex';
 import Chevron from './Chevron';
 
 const InputFilePreview = ({ file, onClick, isSlider }) => {
-  const fileUrl = prefixFileUrlWithBackendUrl(get(file, ['formats', 'thumbnail', 'url'], file.url));
+  const fileUrl = prefixFileUrlWithBackendUrl(get(file, ['formats', 'small', 'url'], file.url));
 
   return (
     <Flex
@@ -18,7 +18,7 @@ const InputFilePreview = ({ file, onClick, isSlider }) => {
       justifyContent="space-between"
     >
       {isSlider && <Chevron side="left" onClick={() => onClick(false)} />}
-      <CardPreview url={fileUrl} type={file.mime} />
+      <CardPreview hasIcon url={fileUrl} type={file.mime} />
       {isSlider && <Chevron side="right" onClick={() => onClick(true)} />}
     </Flex>
   );

@@ -20,7 +20,7 @@
       "model": "file",
       "via": "related",
       "allowedTypes": [
-        "images",	
+        "images",
         "files",
         "videos"
       ],

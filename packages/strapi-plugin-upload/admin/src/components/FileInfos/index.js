@@ -1,12 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { upperCase } from 'lodash';
 
 import Text from '../Text';
 
 const FileInfos = ({ extension, height, size, width }) => {
   return (
     <Text color="grey" fontSize="xs" ellipsis>
-      {extension.toUpperCase()}
+      {upperCase(extension)}
       &nbsp;&mdash;&nbsp;
       {width && height && `${width}×${height}\u00A0\u2014\u00A0`}
       {size}

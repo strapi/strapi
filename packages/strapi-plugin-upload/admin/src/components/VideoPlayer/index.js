@@ -6,7 +6,6 @@ import Duration from '../Duration';
 import Wrapper from './Wrapper';
 
 const VideoPlayer = ({ src }) => {
-  const [isHover, setIsHover] = useState(false);
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -23,11 +22,7 @@ const VideoPlayer = ({ src }) => {
   };
 
   return (
-    <Wrapper
-      onMouseEnter={() => setIsHover(true)}
-      onMouseLeave={() => setIsHover(false)}
-      onClick={togglePlay}
-    >
+    <Wrapper onClick={togglePlay}>
       <video
         controls={isPlaying}
         ref={videoRef}
@@ -45,7 +40,7 @@ const VideoPlayer = ({ src }) => {
       >
         <track default kind="captions" srcLang="en" src="" />
       </video>
-      {isHover && !isPlaying && <PlayIcon />}
+      {!isPlaying && <PlayIcon />}
       <Duration duration={duration} />
     </Wrapper>
   );

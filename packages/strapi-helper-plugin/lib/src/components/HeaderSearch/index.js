@@ -14,6 +14,7 @@ const HeaderSearch = ({ label, name, onChange, onClear, placeholder, value, clas
       </div>
       <div>
         <input
+          autoComplete="off"
           name={name}
           onChange={onChange}
           placeholder={placeholder}

@@ -3,7 +3,7 @@ import { withRouter } from 'react-router';
 import PropTypes from 'prop-types';
 import { get, isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import moment from 'moment';
-import { dateToUtcTime, IcoContainer, useGlobalContext } from 'strapi-helper-plugin';
+import { IcoContainer, useGlobalContext } from 'strapi-helper-plugin';
 import useListView from '../../hooks/useListView';
 import dateFormats from '../../utils/dateFormats';
 import CustomInputCheckbox from '../CustomInputCheckbox';
@@ -37,7 +37,7 @@ const getDisplayedValue = (type, value, name) => {
       const date =
         value && isObject(value) && value._isAMomentObject === true ? JSON.stringify(value) : value;
 
-      return dateToUtcTime(date).format(dateFormats[type]);
+      return moment(date).format(dateFormats[type]);
     }
     case 'password':
       return '••••••••';

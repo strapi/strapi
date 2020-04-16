@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { get } from 'lodash';
@@ -31,6 +31,10 @@ const InputMedia = ({ label, onChange, name, attribute, value, type }) => {
   const prefixedFileURL = fileURL ? prefixFileUrlWithBackendUrl(fileURL) : null;
   const displaySlidePagination =
     attribute.multiple && value.length > 1 ? ` (${fileToDisplay + 1}/${value.length})` : '';
+
+  useEffect(() => {
+    setFileToDisplay(0);
+  }, [modal.isOpen]);
 
   const handleClickToggleModal = () => {
     setModal(prev => ({ isDisplayed: true, step: 'list', isOpen: !prev.isOpen, fileToEdit: null }));

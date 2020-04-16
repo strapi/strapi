@@ -51,14 +51,22 @@ const VideoPreview = ({ hasIcon, previewUrl, src }) => {
     }
   }, [dataLoaded, metadataLoaded, seeked, snapshot]);
 
-  const toggleHover = () => {
-    dispatch({
-      type: 'SET_IS_HOVER',
-    });
-  };
-
   return (
-    <Wrapper onMouseEnter={toggleHover} onMouseLeave={toggleHover}>
+    <Wrapper
+      // Specify isHover to prevent bad behavior when compo is under the cursor on modal open
+      onMouseEnter={() => {
+        dispatch({
+          type: 'SET_IS_HOVER',
+          isHover: true,
+        });
+      }}
+      onMouseLeave={() => {
+        dispatch({
+          type: 'SET_IS_HOVER',
+          isHover: false,
+        });
+      }}
+    >
       {!snapshot && <LoadingIndicator />}
       <CanvasWrapper>
         {previewUrl ? (
@@ -91,7 +99,7 @@ const VideoPreview = ({ hasIcon, previewUrl, src }) => {
           </>
         )}
         <Duration duration={duration} />
-        {hasIcon && isHover && <PlayIcon small />}
+        {(hasIcon || isHover) && <PlayIcon small />}
       </CanvasWrapper>
     </Wrapper>
   );

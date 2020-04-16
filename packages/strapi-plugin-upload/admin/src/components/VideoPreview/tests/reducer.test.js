@@ -1,6 +1,6 @@
 import reducer, { initialState } from '../reducer';
 
-describe('Upload | containers | HomePage | reducer', () => {
+describe('Upload | components | VideoPreview | reducer', () => {
   it('should update duration and set dataLoaded to true', () => {
     const state = initialState;
 
@@ -38,11 +38,12 @@ describe('Upload | containers | HomePage | reducer', () => {
     expect(reducer(state, action)).toEqual(expectedState);
   });
 
-  it('should set isHover to true if initial isHover is false', () => {
+  it('should set isHover to true if passed value is true', () => {
     const state = initialState;
 
     const action = {
       type: 'SET_IS_HOVER',
+      isHover: true,
     };
 
     const expectedState = state.set('isHover', true);
@@ -50,11 +51,12 @@ describe('Upload | containers | HomePage | reducer', () => {
     expect(reducer(state, action)).toEqual(expectedState);
   });
 
-  it('should set isHover to false if initial isHover is true', () => {
+  it('should set isHover to false if passed value is false', () => {
     const state = initialState.set('isHover', true);
 
     const action = {
       type: 'SET_IS_HOVER',
+      isHover: false,
     };
 
     const expectedState = state.set('isHover', false);

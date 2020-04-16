@@ -1,13 +1,15 @@
 import produce from 'immer';
-import { intersectionWith, differenceWith, unionWith, set, isEqual } from 'lodash';
+import { intersectionWith, differenceWith, unionWith, set, isEqual, toString } from 'lodash';
 
 import {
   createNewFilesToDownloadArray,
   createNewFilesToUploadArray,
   formatFileForEditing,
+  getType,
 } from '../../utils';
 
 const initialState = {
+  allowedTypes: [],
   selectedFiles: [],
   files: [],
   filesToUpload: [],
@@ -117,22 +119,30 @@ const reducer = (state, action) =>
         set(draftState.fileToEdit, action.keys.split('.'), action.value);
         break;
       }
+      case 'ON_CHANGE_MODAL_TAB': {
+        draftState.currentTab = action.to;
+        break;
+      }
       case 'ON_CHANGE_URLS_TO_DOWNLOAD': {
         set(draftState, ['filesToDownload'], action.value);
         break;
       }
       case 'ON_FILE_SELECTION': {
         const { id } = action;
-        const stringId = id.toString();
-        const fileIndex = state.selectedFiles.findIndex(file => file.id.toString() === stringId);
+        const stringId = toString(id);
+        const fileIndex = state.selectedFiles.findIndex(file => toString(file.id) === stringId);
 
         if (fileIndex !== -1) {
           draftState.selectedFiles.splice(fileIndex, 1);
           break;
         }
-
         const fileToStore = state.files.find(file => file.id.toString() === stringId);
-        draftState.selectedFiles.push(fileToStore);
+
+        if (fileToStore) {
+          draftState.selectedFiles.push(fileToStore);
+        }
+        // Clean
+        draftState.selectedFiles = draftState.selectedFiles.filter(file => file && file.id);
         break;
       }
       case 'ON_SUBMIT_EDIT_EXISTING_FILE': {
@@ -238,6 +248,7 @@ const reducer = (state, action) =>
             intersectionWith(state.params.filters, [value], isEqual).length === 0;
 
           if (canAddFilter) {
+            draftState.params._start = 0;
             draftState.params.filters.push(value);
           }
           break;
@@ -255,17 +266,21 @@ const reducer = (state, action) =>
         break;
       }
       case 'TOGGLE_SELECT_ALL': {
+        const allowedFiles =
+          state.allowedTypes.length > 0
+            ? state.files.filter(file => state.allowedTypes.includes(getType(file.mime)))
+            : state.files;
         const comparator = (first, second) => first.id === second.id;
         const isSelected =
-          intersectionWith(state.selectedFiles, state.files, comparator).length ===
-          state.files.length;
+          intersectionWith(state.selectedFiles, allowedFiles, comparator).length ===
+          allowedFiles.length;
 
         if (isSelected) {
           draftState.selectedFiles = differenceWith(state.selectedFiles, state.files, comparator);
           break;
         }
 
-        draftState.selectedFiles = unionWith(state.selectedFiles, state.files, comparator);
+        draftState.selectedFiles = unionWith(state.selectedFiles, allowedFiles, comparator);
         break;
       }
 

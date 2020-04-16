@@ -593,6 +593,25 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
     });
   });
 
+  describe('ON_CHANGE_MODAL_TAB', () => {
+    it('should change the data correctly', () => {
+      const action = {
+        type: 'ON_CHANGE_MODAL_TAB',
+        to: 'selected',
+      };
+      const state = {
+        currentStep: 'list',
+        currentTab: 'browse',
+      };
+      const expected = {
+        currentStep: 'list',
+        currentTab: 'selected',
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
   describe('ON_CHANGE_URLS_TO_DOWNLOAD', () => {
     it('should change the data correctly', () => {
       const action = {
@@ -706,6 +725,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
         type: 'TOGGLE_SELECT_ALL',
       };
       const state = {
+        allowedTypes: [],
         selectedFiles: [],
         files: [
           {
@@ -731,6 +751,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
         ],
       };
       const expected = {
+        allowedTypes: [],
         selectedFiles: [
           {
             id: 1,
@@ -783,6 +804,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
         type: 'TOGGLE_SELECT_ALL',
       };
       const state = {
+        allowedTypes: [],
         selectedFiles: [
           {
             id: 1,
@@ -829,6 +851,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
         ],
       };
       const expected = {
+        allowedTypes: [],
         selectedFiles: [],
         files: [
           {
@@ -860,6 +883,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
         type: 'TOGGLE_SELECT_ALL',
       };
       const state = {
+        allowedTypes: [],
         selectedFiles: [
           {
             id: 1,
@@ -896,6 +920,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
         ],
       };
       const expected = {
+        allowedTypes: [],
         selectedFiles: [
           {
             id: 1,
@@ -948,6 +973,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
         type: 'TOGGLE_SELECT_ALL',
       };
       const state = {
+        allowedTypes: [],
         selectedFiles: [
           {
             id: 1,
@@ -994,6 +1020,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
         ],
       };
       const expected = {
+        allowedTypes: [],
         selectedFiles: [
           {
             id: 1,
@@ -1061,11 +1088,12 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
       };
       expect(reducer(state, action)).toEqual(expected);
     });
-    it('should deselect all files of the current page only', () => {
+    it('should deselect all files of the current page only event if not allowed', () => {
       const action = {
         type: 'TOGGLE_SELECT_ALL',
       };
       const state = {
+        allowedTypes: ['video'],
         selectedFiles: [
           {
             id: 1,
@@ -1132,6 +1160,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
         ],
       };
       const expected = {
+        allowedTypes: ['video'],
         selectedFiles: [
           {
             id: 1,
@@ -1171,6 +1200,135 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
             ext: '.png',
             mime: 'image/png',
             size: 3.44,
+            url: '/uploads/ba0c3352c4b14132aed3fcf3110b481c.png',
+            created_at: '2020-03-04T09:45:32.444Z',
+            updated_at: '2020-03-04T09:45:32.444Z',
+          },
+        ],
+      };
+      expect(reducer(state, action)).toEqual(expected);
+    });
+    it('should select the allowed files', () => {
+      const action = {
+        type: 'TOGGLE_SELECT_ALL',
+      };
+      const state = {
+        allowedTypes: ['image', 'file'],
+        selectedFiles: [],
+        files: [
+          {
+            id: 1,
+            name: 'myImage',
+            ext: '.png',
+            mime: 'image/png',
+            size: 146.25,
+            url: '/uploads/ba0c3352c4b14132aed3fcf3110b481c.png',
+            created_at: '2020-03-04T09:45:32.444Z',
+            updated_at: '2020-03-04T09:45:32.444Z',
+          },
+          {
+            id: 2,
+            name: 'myFile',
+            ext: '.png',
+            mime: 'application/pdf',
+            size: 2.24,
+            url: '/uploads/ba0c3352c4b14132aed3fcf3110b481c.png',
+            created_at: '2020-03-04T09:45:32.444Z',
+            updated_at: '2020-03-04T09:45:32.444Z',
+          },
+          {
+            id: 3,
+            name: 'myVideo',
+            ext: '.png',
+            mime: 'video/mp4',
+            size: 146.25,
+            url: '/uploads/ba0c3352c4b14132aed3fcf3110b481c.png',
+            created_at: '2020-03-04T09:45:32.444Z',
+            updated_at: '2020-03-04T09:45:32.444Z',
+          },
+          {
+            id: 4,
+            name: 'mySecondImage',
+            ext: '.png',
+            mime: 'image/jpg',
+            size: 146.25,
+            url: '/uploads/ba0c3352c4b14132aed3fcf3110b481c.png',
+            created_at: '2020-03-04T09:45:32.444Z',
+            updated_at: '2020-03-04T09:45:32.444Z',
+          },
+        ],
+      };
+      const expected = {
+        selectedFiles: [
+          {
+            id: 1,
+            name: 'myImage',
+            ext: '.png',
+            mime: 'image/png',
+            size: 146.25,
+            url: '/uploads/ba0c3352c4b14132aed3fcf3110b481c.png',
+            created_at: '2020-03-04T09:45:32.444Z',
+            updated_at: '2020-03-04T09:45:32.444Z',
+          },
+          {
+            id: 2,
+            name: 'myFile',
+            ext: '.png',
+            mime: 'application/pdf',
+            size: 2.24,
+            url: '/uploads/ba0c3352c4b14132aed3fcf3110b481c.png',
+            created_at: '2020-03-04T09:45:32.444Z',
+            updated_at: '2020-03-04T09:45:32.444Z',
+          },
+          {
+            id: 4,
+            name: 'mySecondImage',
+            ext: '.png',
+            mime: 'image/jpg',
+            size: 146.25,
+            url: '/uploads/ba0c3352c4b14132aed3fcf3110b481c.png',
+            created_at: '2020-03-04T09:45:32.444Z',
+            updated_at: '2020-03-04T09:45:32.444Z',
+          },
+        ],
+        allowedTypes: ['image', 'file'],
+        files: [
+          {
+            id: 1,
+            name: 'myImage',
+            ext: '.png',
+            mime: 'image/png',
+            size: 146.25,
+            url: '/uploads/ba0c3352c4b14132aed3fcf3110b481c.png',
+            created_at: '2020-03-04T09:45:32.444Z',
+            updated_at: '2020-03-04T09:45:32.444Z',
+          },
+          {
+            id: 2,
+            name: 'myFile',
+            ext: '.png',
+            mime: 'application/pdf',
+            size: 2.24,
+            url: '/uploads/ba0c3352c4b14132aed3fcf3110b481c.png',
+            created_at: '2020-03-04T09:45:32.444Z',
+            updated_at: '2020-03-04T09:45:32.444Z',
+          },
+          {
+            id: 3,
+            name: 'myVideo',
+            ext: '.png',
+            mime: 'video/mp4',
+            size: 146.25,
+            url: '/uploads/ba0c3352c4b14132aed3fcf3110b481c.png',
+            created_at: '2020-03-04T09:45:32.444Z',
+            updated_at: '2020-03-04T09:45:32.444Z',
+          },
+          {
+            id: 4,
+            name: 'mySecondImage',
+            ext: '.png',
+            mime: 'image/jpg',
+            size: 146.25,
             url: '/uploads/ba0c3352c4b14132aed3fcf3110b481c.png',
             created_at: '2020-03-04T09:45:32.444Z',
             updated_at: '2020-03-04T09:45:32.444Z',
@@ -1555,6 +1713,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
       const action = { type: 'RESET_PROPS' };
       const state = { test: true };
       const expected = {
+        allowedTypes: [],
         selectedFiles: [],
         files: [],
         filesToDownload: [],
@@ -1972,7 +2131,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
       };
       const state = {
         params: {
-          _start: 0,
+          _start: 10,
           filters: [],
         },
       };

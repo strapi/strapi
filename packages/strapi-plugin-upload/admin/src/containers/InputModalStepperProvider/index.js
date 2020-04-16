@@ -41,7 +41,9 @@ const InputModalStepperProvider = ({
       ...state,
       allowedTypes,
       currentStep: step,
+      initialFileToEdit,
       fileToEdit: initialFileToEdit,
+      initialSelectedFiles: Array.isArray(selectedFiles) ? selectedFiles : [selectedFiles],
       selectedFiles: Array.isArray(selectedFiles) ? selectedFiles : [selectedFiles],
       filesToUpload: initialFilesToUpload
         ? createNewFilesToUploadArray(initialFilesToUpload).map((file, index) => ({
@@ -111,6 +113,13 @@ const InputModalStepperProvider = ({
     dispatch({
       type: 'REMOVE_FILE_TO_UPLOAD',
       fileIndex,
+    });
+  };
+
+  const handleModalTabChange = to => {
+    dispatch({
+      type: 'ON_CHANGE_MODAL_TAB',
+      to,
     });
   };
 
@@ -294,16 +303,16 @@ const InputModalStepperProvider = ({
     handleRemoveFileToUpload(fileIndex);
   };
 
-  const getFilters = () => {
+  const getFilters = (filtersToOmit = []) => {
     const compactedParams = compactParams(params);
-    const searchParams = generateSearchFromFilters(compactedParams, ['_limit', '_sort', '_start']);
+    const searchParams = generateSearchFromFilters(compactedParams, filtersToOmit);
 
     return formatFilters(searchParams);
   };
 
   const fetchMediaLibFilesCount = async () => {
     const requestURL = getRequestUrl('files/count');
-    const paramsToSend = getFilters();
+    const paramsToSend = getFilters(['_limit', '_sort', '_start']);
 
     try {
       return await request(`${requestURL}?${paramsToSend}`, {
@@ -454,6 +463,7 @@ const InputModalStepperProvider = ({
         handleFormDisabled,
         handleGoToEditFile,
         handleGoToEditNewFile,
+        handleModalTabChange,
         handleRemoveFileToUpload,
         handleResetFileToEdit,
         handleSetCropResult,

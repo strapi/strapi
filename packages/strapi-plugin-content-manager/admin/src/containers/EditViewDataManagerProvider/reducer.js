@@ -161,6 +161,9 @@ const reducer = (state, action) => {
 
       return state.updateIn(componentPathToRemove, () => null);
     }
+    case 'REMOVE_PASSWORD_FIELD': {
+      return state.removeIn(['modifiedData', ...action.keys]);
+    }
     case 'REMOVE_REPEATABLE_FIELD': {
       const componentPathToRemove = ['modifiedData', ...action.keys];
 

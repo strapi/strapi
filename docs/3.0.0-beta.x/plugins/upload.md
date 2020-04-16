@@ -2,6 +2,26 @@
 
 Thanks to the plugin `Upload`, you can upload any kind of file on your server or external providers such as **AWS S3**.
 
+## Configuration
+
+Currently the strapi middleware in charge of parsing request needs to be configured to support bigger file sizes if you need to upload file with a size greater than 200MB.
+
+The library we use is [`koa-body`](https://github.com/dlau/koa-body), and itself uses the [`node-formidable`](https://github.com/felixge/node-formidable) library to process files.
+
+You can pass configuration to the middleware directly by setting it in the `parser` middleware configuration:
+
+```json
+{
+  "parser": {
+    "enabled": true,
+    "multipart": true,
+    "formidable": {
+      "maxFileSize": 20000000 // defaults to 200mb
+    }
+  }
+}
+```
+
 ## Endpoints
 
 <style lang="stylus">

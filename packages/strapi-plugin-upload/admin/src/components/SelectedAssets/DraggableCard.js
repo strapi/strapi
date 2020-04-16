@@ -2,7 +2,8 @@ import React, { useRef, useEffect } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import PropTypes from 'prop-types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
-import { formatBytes, getExtension, getType, ItemTypes } from '../../utils';
+import { getFileExtension } from 'strapi-helper-plugin';
+import { formatBytes, getType, ItemTypes } from '../../utils';
 
 import Flex from '../Flex';
 import Border from '../CardBorder';
@@ -19,6 +20,7 @@ const DraggableCard = ({
   checked,
   children,
   errorMessage,
+  ext,
   hasError,
   index,
   isDraggable,
@@ -87,6 +89,7 @@ const DraggableCard = ({
     <Wrapper onClick={handleClick} isDraggable={isDraggable} ref={ref} style={{ opacity }}>
       <CardImgWrapper checked={checked} small>
         <CardPreview
+          extension={getFileExtension(ext)}
           hasError={hasError}
           url={url}
           type={fileType}
@@ -99,7 +102,7 @@ const DraggableCard = ({
         <Title>{name}</Title>
         <Tag label={getType(fileType)} />
       </Flex>
-      <FileInfos extension={getExtension(fileType)} size={fileSize} />
+      <FileInfos extension={getFileExtension(ext)} size={fileSize} />
       {hasError && <ErrorMessage>{errorMessage}</ErrorMessage>}
     </Wrapper>
   );
@@ -109,6 +112,7 @@ DraggableCard.defaultProps = {
   checked: false,
   children: null,
   errorMessage: null,
+  ext: null,
   id: null,
   index: 0,
   isDraggable: false,
@@ -128,6 +132,7 @@ DraggableCard.propTypes = {
   checked: PropTypes.bool,
   children: PropTypes.node,
   errorMessage: PropTypes.string,
+  ext: PropTypes.string,
   hasError: PropTypes.bool,
   index: PropTypes.number,
   isDraggable: PropTypes.bool,
