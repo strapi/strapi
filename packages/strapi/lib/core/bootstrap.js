@@ -1,9 +1,9 @@
 'use strict';
 
 const _ = require('lodash');
+const { getCommonBeginning } = require('strapi-utils');
 
 const { createCoreApi } = require('../core-api');
-const getURLFromSegments = require('../utils/url-from-segments');
 
 const getKind = obj => obj.kind || 'collectionType';
 
@@ -287,35 +287,60 @@ module.exports = function(strapi) {
   strapi.config.port = _.get(strapi.config.currentEnvironment, 'server.port') || strapi.config.port;
   strapi.config.host = _.get(strapi.config.currentEnvironment, 'server.host') || strapi.config.host;
 
-  let hostname = strapi.config.host;
-  if (
-    strapi.config.environment === 'development' &&
-    ['127.0.0.1', '0.0.0.0'].includes(strapi.config.host)
-  ) {
-    hostname = 'localhost';
+  // Defines serverUrl value
+  let serverUrl = _.get(strapi.config.currentEnvironment, 'server.url', '');
+  serverUrl = _.trim(serverUrl, '/ ');
+  if (typeof serverUrl !== 'string') {
+    console.log('Invalid server url config. Make sure the url is a string.');
+    process.exit(1);
   }
-
-  let serverUrl = getURLFromSegments({ hostname, port: strapi.config.port });
-  if (_.has(strapi.config.currentEnvironment, 'server.url')) {
+  if (serverUrl.startsWith('http')) {
     try {
       serverUrl = _.trim(new URL(strapi.config.currentEnvironment.server.url).toString(), '/');
     } catch (e) {
-      strapi.stopWithError(
-        e,
-        'Invalid server url config. Make sure the url defined in server.js is valid.'
-      );
+      console.log('Invalid server url config. Make sure the url defined in server.js is valid.');
+      process.exit(1);
     }
+  } else if (serverUrl !== '') {
+    serverUrl = `/${serverUrl}`;
   }
 
+  // Defines adminUrl value
   let adminUrl = _.get(strapi.config.currentEnvironment, 'server.admin.url', '/admin');
-  adminUrl = _.trim(adminUrl, '/');
-  if (!adminUrl.startsWith('http')) {
+  adminUrl = _.trim(adminUrl, '/ ');
+  if (typeof adminUrl !== 'string' || adminUrl === '') {
+    throw new Error('Invalid admin url config. Make sure the url is a non-empty string.');
+  }
+  if (adminUrl.startsWith('http')) {
+    try {
+      adminUrl = _.trim(new URL(adminUrl).toString(), '/');
+    } catch (e) {
+      strapi.stopWithError(
+        e,
+        'Invalid admin url config. Make sure the url defined in server.js is valid.'
+      );
+    }
+  } else {
     adminUrl = `${serverUrl}/${adminUrl}`;
+  }
+
+  // Defines adminPath value
+  let adminPath = adminUrl;
+  if (
+    serverUrl.startsWith('http') &&
+    adminUrl.startsWith('http') &&
+    new URL(adminUrl).origin === new URL(serverUrl).origin
+  ) {
+    adminPath = adminUrl.replace(getCommonBeginning(serverUrl, adminUrl), '');
+    adminPath = `/${_.trim(adminPath, '/')}`;
+  } else if (adminUrl.startsWith('http')) {
+    adminPath = new URL(adminUrl).pathname;
   }
 
   strapi.config.server = strapi.config.server || {};
   strapi.config.server.url = serverUrl;
-  strapi.config.admin.url = _.trim(new URL(adminUrl).toString(), '/');
+  strapi.config.admin.url = adminUrl;
+  strapi.config.admin.path = adminPath;
 
   // check if we should serve admin panel
   const shouldServeAdmin = _.get(

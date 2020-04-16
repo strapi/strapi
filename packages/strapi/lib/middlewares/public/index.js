@@ -76,17 +76,8 @@ module.exports = strapi => {
 
       const buildDir = path.resolve(strapi.dir, 'build');
 
-      // Serve admin assets.
-      let adminPath;
-      const adminUrl = new URL(strapi.config.admin.url);
-      const serverUrl = new URL(strapi.config.server.url);
-      if (adminUrl.origin === serverUrl.origin) {
-        adminPath = strapi.config.admin.url.replace(strapi.config.server.url, '');
-      } else {
-        adminPath = new URL(strapi.config.admin.url).pathname;
-      }
       strapi.router.get(
-        `${adminPath}/*`,
+        `${strapi.config.admin.path}/*`,
         async (ctx, next) => {
           ctx.url = path.basename(ctx.url);
           await next();
@@ -98,7 +89,7 @@ module.exports = strapi => {
         })
       );
 
-      strapi.router.get(`${adminPath}*`, ctx => {
+      strapi.router.get(`${strapi.config.admin.path}*`, ctx => {
         ctx.type = 'html';
         ctx.body = fs.createReadStream(path.join(buildDir + '/index.html'));
       });
