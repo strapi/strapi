@@ -16,9 +16,10 @@ const IMAGE_PREVIEW_COUNT = 3;
 function MediaPreviewList({ hoverable, files }) {
   const renderImage = image => {
     const { name, size, url } = image;
-    const fileUrl = get(image, ['formats', 'thumbnail', 'url'], url);
+    const thumbnail = get(image, ['formats', 'thumbnail', 'url'], null);
+    const fileUrl = thumbnail || url;
 
-    if (size > 2000) {
+    if (!thumbnail && size > 20000) {
       return renderFile(image);
     }
 
