@@ -27,27 +27,14 @@ module.exports = strapi => {
       const { defaultIndex, maxAge, path: publicPath } = strapi.config.middleware.settings.public;
       const staticDir = path.resolve(strapi.dir, publicPath || strapi.config.paths.static);
 
-      // Match every route with an extension.
-      // The file without extension will not be served.
-      // Note: This route can be overriden by the user.
-      strapi.router.get(
-        '/*',
-        async (ctx, next) => {
-          const parse = path.parse(ctx.url);
-          ctx.url = path.join(parse.dir, parse.base);
-
-          await next();
-        },
-        koaStatic(staticDir, {
-          maxage: maxAge,
-          defer: false,
-        })
-      );
-
       if (defaultIndex === true) {
         const index = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 
-        const serveIndexPage = async ctx => {
+        const serveIndexPage = async (ctx, next) => {
+          // defer rendering of strapi index page
+          await next();
+          if (ctx.body != null || ctx.status !== 404) return;
+
           ctx.url = 'index.html';
           const isInitialised = await utils.isInitialised(strapi);
           const data = {
@@ -75,6 +62,15 @@ module.exports = strapi => {
         strapi.router.get('/', serveIndexPage);
         strapi.router.get('/index.html', serveIndexPage);
       }
+
+      // serve files in public folder unless a sub router renders something else
+      strapi.router.get(
+        '/(.*)',
+        koaStatic(staticDir, {
+          maxage: maxAge,
+          defer: true,
+        })
+      );
 
       if (!strapi.config.serveAdminPanel) return;
 

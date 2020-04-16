@@ -1,4 +1,5 @@
 {
+  "kind": "collectionType",
   "collectionName": "addresses",
   "info": {
     "name": "address",
@@ -13,10 +14,6 @@
     "comment": ""
   },
   "attributes": {
-    "geolocation": {
-      "type": "json",
-      "required": true
-    },
     "city": {
       "type": "string",
       "required": true
@@ -32,12 +29,20 @@
     "cover": {
       "model": "file",
       "via": "related",
+      "allowedTypes": [
+        "files",
+        "images",
+        "videos"
+      ],
       "plugin": "upload",
       "required": false
     },
     "images": {
       "collection": "file",
       "via": "related",
+      "allowedTypes": [
+        "images"
+      ],
       "plugin": "upload",
       "required": false
     },

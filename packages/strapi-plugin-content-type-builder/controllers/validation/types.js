@@ -50,6 +50,10 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
         multiple: yup.boolean(),
         required: validators.required,
         unique: validators.unique,
+        allowedTypes: yup
+          .array()
+          .of(yup.string().oneOf(['images', 'videos', 'files']))
+          .min(1),
       };
     }
 

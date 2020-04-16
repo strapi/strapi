@@ -1,7 +1,4 @@
-const {
-  validateKind,
-  validateUpdateContentTypeInput,
-} = require('../content-type');
+const { validateKind, validateUpdateContentTypeInput } = require('../content-type');
 
 describe('Content type validator', () => {
   describe('validateKind', () => {
@@ -11,9 +8,7 @@ describe('Content type validator', () => {
 
     it('allows singleType and collectionType', async () => {
       await expect(validateKind('singleType')).resolves.toBe('singleType');
-      await expect(validateKind('collectionType')).resolves.toBe(
-        'collectionType'
-      );
+      await expect(validateKind('collectionType')).resolves.toBe('collectionType');
     });
 
     it('allows undefined', async () => {

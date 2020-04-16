@@ -89,10 +89,7 @@ module.exports = async () => {
   // store grant auth config to db
   // when plugin_users-permissions_grant is not existed in db
   // or we have added/deleted provider here.
-  if (
-    !prevGrantConfig ||
-    !_.isEqual(_.keys(prevGrantConfig), _.keys(grantConfig))
-  ) {
+  if (!prevGrantConfig || !_.isEqual(_.keys(prevGrantConfig), _.keys(grantConfig))) {
     // merge with the previous provider config.
     _.keys(grantConfig).forEach(key => {
       if (key in prevGrantConfig) {
@@ -160,9 +157,7 @@ module.exports = async () => {
     await pluginStore.set({ key: 'advanced', value });
   }
 
-  await strapi.plugins[
-    'users-permissions'
-  ].services.userspermissions.initialize();
+  await strapi.plugins['users-permissions'].services.userspermissions.initialize();
 
   if (!_.get(strapi.plugins['users-permissions'], 'config.jwtSecret')) {
     const jwtSecret = uuid();

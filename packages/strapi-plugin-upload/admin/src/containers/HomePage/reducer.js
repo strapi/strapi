@@ -1,64 +1,70 @@
-/*
- *
- * HomePage reducer
- *
- */
-
-import { fromJS, List, Map } from 'immutable';
-
-import {
-  CHANGE_PARAMS,
-  DELETE_SUCCESS,
-  DROP_SUCCESS,
-  GET_DATA_SUCCESS,
-  ON_SEARCH,
-  ON_SEARCH_SUCCESS,
-  SET_LOADING,
-  SET_PARAMS,
-  UNSET_LOADING,
-} from './constants';
+import { fromJS } from 'immutable';
 
 const initialState = fromJS({
-  deleteSuccess: false,
-  dataToDelete: '',
-  entriesNumber: 0,
-  uploadFilesLoading: false,
-  search: '',
-  uploadedFiles: List([]),
-  params: Map({
-    _sort: 'hash:ASC',
-    _limit: 10,
-    _page: 1,
-  }),
+  data: [],
+  dataCount: 0,
+  dataToDelete: [],
+  isLoading: true,
 });
 
-function homePageReducer(state = initialState, action) {
+const reducer = (state, action) => {
   switch (action.type) {
-    case CHANGE_PARAMS:
-      return state.updateIn(action.keys, () => action.value);
-    case DELETE_SUCCESS:
-      return state.update('deleteSuccess', v => (v = !v));
-    case DROP_SUCCESS:
-      return state.update('uploadedFiles', list =>
-        List(action.newFiles).concat(list)
-      );
-    case GET_DATA_SUCCESS:
+    case 'CLEAR_DATA_TO_DELETE':
+      return state.update('dataToDelete', () => fromJS([]));
+    case 'GET_DATA':
+      return state.update('isLoading', () => true);
+    case 'GET_DATA_ERROR':
+      return state.update('isLoading', () => false);
+    case 'GET_DATA_SUCCEEDED':
       return state
-        .update('uploadedFiles', () => List(action.data))
-        .update('entriesNumber', () => action.entriesNumber);
-    case ON_SEARCH:
-      return state.update('search', () => action.value);
-    case ON_SEARCH_SUCCESS:
-      return state.update('uploadedFiles', () => List(action.data));
-    case SET_LOADING:
-      return state.update('uploadFilesLoading', () => true);
-    case SET_PARAMS:
-      return state.set('params', Map(action.params));
-    case UNSET_LOADING:
-      return state.update('uploadFilesLoading', () => false);
+        .update('data', () => fromJS(action.data))
+        .update('dataCount', () => action.count)
+        .update('isLoading', () => false);
+    case 'ON_CHANGE_DATA_TO_DELETE': {
+      const { id } = action;
+      const isSelected = state
+        .get('dataToDelete')
+        .find(item => item.get('id').toString() === id.toString());
+
+      if (!isSelected) {
+        const item = state.get('data').find(item => item.get('id').toString() === id.toString());
+
+        return state.update('dataToDelete', dataToDelete => {
+          return dataToDelete.push(item);
+        });
+      }
+
+      const index = state
+        .get('dataToDelete')
+        .findIndex(item => item.get('id').toString() === id.toString());
+
+      return state.removeIn(['dataToDelete', index]);
+    }
+    case 'TOGGLE_SELECT_ALL': {
+      const isSelected = state.get('data').every(item => state.get('dataToDelete').includes(item));
+
+      if (isSelected) {
+        return state.update('dataToDelete', dataToDelete =>
+          dataToDelete.filter(item => !state.get('data').includes(item))
+        );
+      }
+
+      return state.update('dataToDelete', dataToDelete => {
+        const newItems = state.get('data').filter(item => {
+          return !state.get('dataToDelete').includes(item);
+        });
+
+        return dataToDelete.concat(newItems);
+      });
+    }
+    case 'ON_DELETE_MEDIA_SUCCEEDED':
+      return state
+        .update('data', list => list.filter(item => item.get('id') !== action.mediaId))
+        .update('dataCount', count => count - 1);
     default:
       return state;
   }
-}
+};
 
-export default homePageReducer;
+export default reducer;
+export { initialState };

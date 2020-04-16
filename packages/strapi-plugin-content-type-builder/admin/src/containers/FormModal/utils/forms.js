@@ -416,6 +416,17 @@ const forms = {
           ]);
         } else if (type === 'media') {
           items.splice(0, 1);
+          items.push([
+            {
+              label: {
+                id: getTrad('form.attribute.media.allowed-types'),
+              },
+              name: 'allowedTypes',
+              type: 'allowedTypesSelect',
+              value: '',
+              validations: {},
+            },
+          ]);
         } else if (type === 'boolean') {
           items.splice(0, 1, [
             {
