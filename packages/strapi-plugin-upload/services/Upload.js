@@ -33,7 +33,7 @@ const combineFilters = params => {
 
 module.exports = {
   formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
-    const ext = '.' + mime.extension(type);
+    const ext = '.' + mime.extension(type) || path.extname(filename);
     const baseName = path.basename(filename, path.extname(filename));
 
     const usedName = fileInfo.name || baseName;
