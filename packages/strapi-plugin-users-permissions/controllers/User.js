@@ -53,6 +53,18 @@ module.exports = {
   },
 
   /**
+   * Retrieve user count.
+   * @return {Number}
+   */
+
+  async count(ctx) {
+    if (ctx.query._q) {
+      return await strapi.plugins['users-permissions'].services.user.countSearch(ctx.query);
+    }
+    return await strapi.plugins['users-permissions'].services.user.count(ctx.query);
+  },
+
+  /**
    * Retrieve a user record.
    * @return {Object}
    */

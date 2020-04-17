@@ -11,14 +11,24 @@ const _ = require('lodash');
 
 module.exports = {
   /**
+   * Promise to count users
+   *
+   * @return {Promise}
+   */
+
+  count(params) {
+    return strapi.query('user', 'users-permissions').count(params);
+  },
+
+  /**
    * Promise to add a/an user.
    * @return {Promise}
    */
   async add(values) {
     if (values.password) {
-      values.password = await strapi.plugins[
-        'users-permissions'
-      ].services.user.hashPassword(values);
+      values.password = await strapi.plugins['users-permissions'].services.user.hashPassword(
+        values
+      );
     }
 
     return strapi.query('user', 'users-permissions').create(values);
@@ -33,9 +43,9 @@ module.exports = {
     // To get the updated object, you have to execute the `findOne()` method
     // or use the `findOneOrUpdate()` method with `{ new:true }` option.
     if (values.password) {
-      values.password = await strapi.plugins[
-        'users-permissions'
-      ].services.user.hashPassword(values);
+      values.password = await strapi.plugins['users-permissions'].services.user.hashPassword(
+        values
+      );
     }
 
     return strapi.query('user', 'users-permissions').update(params, values);
