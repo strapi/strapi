@@ -43,7 +43,6 @@
       "max": 35.12
     },
     "address": {
-      "required": true,
       "model": "address"
     },
     "cover": {

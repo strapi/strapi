@@ -25,9 +25,7 @@ const generateSchema = () => {
   const shadowCRUDEnabled = strapi.plugins.graphql.config.shadowCRUD !== false;
 
   // Generate type definition and query/mutation for models.
-  const shadowCRUD = shadowCRUDEnabled
-    ? buildModelsShadowCRUD()
-    : createDefaultSchema();
+  const shadowCRUD = shadowCRUDEnabled ? buildModelsShadowCRUD() : createDefaultSchema();
 
   const _schema = strapi.plugins.graphql.config._schema.graphql;
 
@@ -35,15 +33,9 @@ const generateSchema = () => {
   const { definition, query, mutation, resolver = {} } = _schema;
 
   // Polymorphic.
-  const polymorphicSchema = Types.addPolymorphicUnionType(
-    definition + shadowCRUD.definition
-  );
+  const polymorphicSchema = Types.addPolymorphicUnionType(definition + shadowCRUD.definition);
 
-  const builtResolvers = _.merge(
-    {},
-    shadowCRUD.resolvers,
-    polymorphicSchema.resolvers
-  );
+  const builtResolvers = _.merge({}, shadowCRUD.resolvers, polymorphicSchema.resolvers);
 
   const extraResolvers = diffResolvers(_schema.resolver, builtResolvers);
 
@@ -54,12 +46,10 @@ const generateSchema = () => {
     return {};
   }
 
-  const queryFields =
-    shadowCRUD.query && toSDL(shadowCRUD.query, resolver.Query, null, 'query');
+  const queryFields = shadowCRUD.query && toSDL(shadowCRUD.query, resolver.Query, null, 'query');
 
   const mutationFields =
-    shadowCRUD.mutation &&
-    toSDL(shadowCRUD.mutation, resolver.Mutation, null, 'mutation');
+    shadowCRUD.mutation && toSDL(shadowCRUD.mutation, resolver.Mutation, null, 'mutation');
 
   const scalars = Types.getScalars();
 
@@ -120,9 +110,7 @@ const writeGenerateSchema = schema => {
 };
 
 const buildModelsShadowCRUD = () => {
-  const models = Object.values(strapi.models).filter(
-    model => model.internal !== true
-  );
+  const models = Object.values(strapi.models).filter(model => model.internal !== true);
 
   const pluginModels = Object.values(strapi.plugins)
     .map(plugin => Object.values(plugin.models) || [])
@@ -155,20 +143,12 @@ const buildResolvers = resolvers => {
 
       switch (type) {
         case 'Mutation': {
-          _.set(
-            acc,
-            [type, resolverName],
-            buildMutation(resolverName, resolverObj)
-          );
+          _.set(acc, [type, resolverName], buildMutation(resolverName, resolverObj));
 
           break;
         }
         default: {
-          _.set(
-            acc,
-            [type, resolverName],
-            buildQuery(resolverName, resolverObj)
-          );
+          _.set(acc, [type, resolverName], buildQuery(resolverName, resolverObj));
           break;
         }
       }

@@ -1,4 +1,5 @@
 {
+  "kind": "collectionType",
   "collectionName": "categories",
   "info": {
     "name": "category",

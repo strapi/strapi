@@ -107,6 +107,9 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
   background-color: transparent;
   border: 1px solid #9ea7b8;
   color: #9ea7b8;
+  background-color: #E9EAEB;
+  border: 1px solid #E9EAEB;
+  color: #B4B6BA;
 }
 
 .c7:hover {
@@ -148,6 +151,9 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
   background-color: #6DBB1A;
   border: 1px solid #6DBB1A;
   color: #ffffff;
+  background-color: #E9EAEB;
+  border: 1px solid #E9EAEB;
+  color: #B4B6BA;
   min-width: 140px;
 }
 
@@ -175,12 +181,6 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
 .c8:hover {
   box-shadow: none;
   cursor: initial;
-}
-
-.c8:disabled {
-  background-color: #E9EAEB;
-  border: 1px solid #B4B6BA;
-  color: #B4B6BA;
 }
 
 .c18 {
@@ -1258,7 +1258,6 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                             <input
                               autocomplete="off"
                               class="c18"
-                              disabled=""
                               id="media.update"
                               name="media.update"
                               tabindex="0"

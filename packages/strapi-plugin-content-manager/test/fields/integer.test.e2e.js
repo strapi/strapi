@@ -20,14 +20,11 @@ describe('Test type integer', () => {
   }, 60000);
 
   test('Create entry with value input JSON', async () => {
-    const res = await rq.post(
-      '/content-manager/explorer/application::withinteger.withinteger',
-      {
-        body: {
-          field: 123456,
-        },
-      }
-    );
+    const res = await rq.post('/content-manager/explorer/application::withinteger.withinteger', {
+      body: {
+        field: 123456,
+      },
+    });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
@@ -36,14 +33,11 @@ describe('Test type integer', () => {
   });
 
   test('Create entry with value input Fromdata', async () => {
-    const res = await rq.post(
-      '/content-manager/explorer/application::withinteger.withinteger',
-      {
-        formData: {
-          data: JSON.stringify({ field: 123456 }),
-        },
-      }
-    );
+    const res = await rq.post('/content-manager/explorer/application::withinteger.withinteger', {
+      formData: {
+        data: JSON.stringify({ field: 123456 }),
+      },
+    });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
@@ -53,14 +47,11 @@ describe('Test type integer', () => {
 
   // I don't think it will work everywhere ...
   test('Create entry with a string should cast the value', async () => {
-    const res = await rq.post(
-      '/content-manager/explorer/application::withinteger.withinteger',
-      {
-        body: {
-          field: '123456',
-        },
-      }
-    );
+    const res = await rq.post('/content-manager/explorer/application::withinteger.withinteger', {
+      body: {
+        field: '123456',
+      },
+    });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
@@ -69,9 +60,7 @@ describe('Test type integer', () => {
   });
 
   test('Reading entry, returns correct value', async () => {
-    const res = await rq.get(
-      '/content-manager/explorer/application::withinteger.withinteger'
-    );
+    const res = await rq.get('/content-manager/explorer/application::withinteger.withinteger');
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
@@ -81,14 +70,11 @@ describe('Test type integer', () => {
   });
 
   test('Updating entry sets the right value and format', async () => {
-    const res = await rq.post(
-      '/content-manager/explorer/application::withinteger.withinteger',
-      {
-        body: {
-          field: 123,
-        },
-      }
-    );
+    const res = await rq.post('/content-manager/explorer/application::withinteger.withinteger', {
+      body: {
+        field: 123,
+      },
+    });
 
     const updatedRes = await rq.put(
       `/content-manager/explorer/application::withinteger.withinteger/${res.body.id}`,

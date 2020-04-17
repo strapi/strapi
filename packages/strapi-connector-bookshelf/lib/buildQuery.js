@@ -8,7 +8,7 @@ const { singular } = require('pluralize');
  * @param {Object} options.filters - Filters params (start, limit, sort, where)
  */
 const buildQuery = ({ model, filters }) => qb => {
-  if (_.has(filters, 'where') && Array.isArray(filters.where)) {
+  if (_.has(filters, 'where') && Array.isArray(filters.where) && filters.where.length > 0) {
     qb.distinct();
     buildJoinsAndFilter(qb, model, filters.where);
   }

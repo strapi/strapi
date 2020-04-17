@@ -74,15 +74,15 @@ To be able to see the update, you will need to have a Content Type that has a `d
 
 Then you will have to investigate into the [`strapi-plugin-content-manager`](https://github.com/strapi/strapi/tree/master/packages/strapi-plugin-content-manager) package to find the file that is used to format the date for the list view.
 
-Here is the [Row component](https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-content-manager/admin/src/components/CustomTable/Row.js) you will have to update.
+Here is the [Row component](https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-content-manager/admin/src/components/CustomTable/Row.js) which requires a [dedicated file](https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-content-manager/admin/src/utils/dateFormats.js) to modify the date display.
 
 ### Eject the file
 
 Let's eject the file to be able to customize it.
 
-**Path —** `./extensions/content-manager/admin/src/components/CustomTable/Row.js`
+**Path —** `./extensions/content-manager/admin/src/utils/dateFormats.js`
 
-In this new file, paste the current [Row component](https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-content-manager/admin/src/components/CustomTable/Row.js) code.
+In this new file, paste the current [dateFormats](https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-content-manager/admin/src/utils/dateFormats.js) code.
 
 To run your application, you will have to run the `yarn develop --watch-admin` command.
 
@@ -95,13 +95,17 @@ In our example, we want to change the format of the date. We have to find in thi
 Here is the code you have to find:
 
 ```js
-return moment
-  .parseZone(date)
-  .utc()
-  .format('dddd, MMMM Do YYYY');
+const dateFormats = {
+  ...defaultDateFormats,
+  // Customise the format by uncommenting the one you wan to override it corresponds to the type of your field
+  // date: 'dddd, MMMM Do YYYY',
+  // datetime: 'dddd, MMMM Do YYYY HH:mm',
+  // time: 'HH:mm A',
+  // timestamp: 'dddd, MMMM Do YYYY HH:mm',
+};
 ```
 
-Now let's replace `.format('dddd, MMMM Do YYYY');` by `.format('YYYY/MM/DD');`
+Now let's replace `date: 'dddd, MMMM Do YYYY'` by `date: 'YYYY/MM/DD';`
 
 And tada, the date will now display with the new format.
 
