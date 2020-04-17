@@ -104,9 +104,11 @@ module.exports = {
         description: 'Update an existing role',
         resolverOf: 'plugins::users-permissions.userspermissions.updateRole',
         resolver: async (obj, options, { context }) => {
+          context.params = { ...context.params, ...options.input };
+          context.params.role = context.params.id;
+
           await strapi.plugins['users-permissions'].controllers.userspermissions.updateRole(
-            context.params,
-            context.body
+            context
           );
 
           return { ok: true };
@@ -116,6 +118,9 @@ module.exports = {
         description: 'Delete an existing role',
         resolverOf: 'plugins::users-permissions.userspermissions.deleteRole',
         resolver: async (obj, options, { context }) => {
+          context.params = { ...context.params, ...options.input };
+          context.params.role = context.params.id;
+
           await strapi.plugins['users-permissions'].controllers.userspermissions.deleteRole(
             context
           );
