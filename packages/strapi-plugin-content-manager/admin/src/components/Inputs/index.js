@@ -46,7 +46,7 @@ const getInputType = (type = '') => {
     case 'uid':
       return 'uid';
     default:
-      return 'text';
+      return type || 'text';
   }
 };
 

@@ -22,8 +22,7 @@ const Logout = ({ history: { push } }) => {
 
     push({
       pathname: `/plugins/content-manager/collectionType/strapi::administrator/${id}`,
-      search:
-        '?redirectUrl=/plugins/content-manager/collectionType/strapi::administrator/&_page=0&_limit=0&_sort=id',
+      search: '?redirectUrl=/plugins/content-manager/collectionType/strapi::administrator',
     });
   };
   const handleGoToAdministrator = () => {
