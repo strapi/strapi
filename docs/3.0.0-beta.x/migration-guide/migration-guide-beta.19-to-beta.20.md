@@ -48,6 +48,10 @@ This means that you now have to configure your provider directly in the files. Y
 
 ## MongoDB Media relation changes
 
+::: tip
+The guide below only applies if you are using MongoDB/Mongoose, if you are using a Bookshelf database you can simply skip to the [rebuilding step](#rebuilding-your-administration-panel)
+:::
+
 In the media library features, We wanted to make sure media would keep their ordering. To implement this in mongo we had to change the way the media relation was built.
 
 Previously, the `upload_file` collection was the one keeping track of the relations and the entity related to the file had not reference to it.
