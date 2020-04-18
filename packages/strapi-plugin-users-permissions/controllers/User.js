@@ -48,7 +48,12 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'No authorization header was found' }] }]);
     }
 
-    const data = sanitizeUser(user);
+    const { id } = user;
+    let data = await strapi.plugins['users-permissions'].services.user.fetch({
+        id
+    });
+
+    data = sanitizeUser(data);
     ctx.send(data);
   },
 
