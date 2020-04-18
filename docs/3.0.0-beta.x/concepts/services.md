@@ -214,7 +214,7 @@ module.exports = {
 
 #### `search`
 
-```jsgit s
+```js
 module.exports = {
   /**
    * Promise to search records
