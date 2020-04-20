@@ -36,6 +36,7 @@ import { freezeApp, pluginLoaded, unfreezeApp, updatePlugin } from './containers
 import { showNotification } from './containers/NotificationProvider/actions';
 
 import basename from './utils/basename';
+import getInjectors from './utils/reducerInjectors';
 import injectReducer from './utils/injectReducer';
 import injectSaga from './utils/injectSaga';
 import Strapi from './utils/Strapi';
@@ -94,6 +95,13 @@ Object.keys(plugins).forEach(current => {
 
     return acc;
   }, {});
+
+  // Inject plugins reducers
+  const pluginReducers = plugin.reducers || {};
+
+  Object.keys(pluginReducers).forEach(reducerName => {
+    getInjectors(store).injectReducer(reducerName, pluginReducers[reducerName]);
+  });
 
   try {
     merge(translationMessages, pluginTradsPrefixed);
