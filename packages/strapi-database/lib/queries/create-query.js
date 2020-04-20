@@ -1,5 +1,7 @@
 'use strict';
 
+const _ = require('lodash');
+
 const { replaceIdByPrimaryKey } = require('../utils/primary-key');
 
 module.exports = function createQuery(opts) {
@@ -43,29 +45,60 @@ class Query {
     return mapping[this.model.orm].call(this, { model: this.model });
   }
 
-  find(params = {}, ...args) {
+  async find(params = {}, ...args) {
     const newParams = replaceIdByPrimaryKey(params, this.model);
-    return this.connectorQuery.find(newParams, ...args);
+
+    await this.executeHook('beforeFetchAll', newParams, ...args);
+    const results = await this.connectorQuery.find(newParams, ...args);
+    await this.executeHook('afterFetchAll', results);
+
+    return results;
   }
 
-  findOne(params = {}, ...args) {
+  async findOne(params = {}, ...args) {
     const newParams = replaceIdByPrimaryKey(params, this.model);
-    return this.connectorQuery.findOne(newParams, ...args);
+
+    await this.executeHook('beforeFetch', newParams, ...args);
+    const result = await this.connectorQuery.findOne(newParams, ...args);
+    await this.executeHook('afterFetch', result);
+
+    return result;
   }
 
-  create(params = {}, ...args) {
-    const newParams = replaceIdByPrimaryKey(params, this.model);
-    return this.connectorQuery.create(newParams, ...args);
+  async executeHook(hook, ...args) {
+    if (_.has(this.model, hook)) {
+      await this.model[hook](...args);
+    }
   }
 
-  update(params = {}, ...args) {
+  async create(params = {}, ...args) {
     const newParams = replaceIdByPrimaryKey(params, this.model);
-    return this.connectorQuery.update(newParams, ...args);
+
+    await this.executeHook('beforeCreate', newParams, ...args);
+    const entry = await this.connectorQuery.create(newParams, ...args);
+    await this.executeHook('afterCreate', entry);
+
+    return entry;
   }
 
-  delete(params = {}, ...args) {
+  async update(params = {}, ...args) {
     const newParams = replaceIdByPrimaryKey(params, this.model);
-    return this.connectorQuery.delete(newParams, ...args);
+
+    await this.executeHook('beforeUpdate', newParams, ...args);
+    const entry = await this.connectorQuery.update(newParams, ...args);
+    await this.executeHook('afterUpdate', entry);
+
+    return entry;
+  }
+
+  async delete(params = {}, ...args) {
+    const newParams = replaceIdByPrimaryKey(params, this.model);
+
+    await this.executeHook('beforeDestroy', newParams, ...args);
+    const entry = await this.connectorQuery.delete(newParams, ...args);
+    await this.executeHook('afterDestroy', entry);
+
+    return entry;
   }
 
   count(params = {}, ...args) {
