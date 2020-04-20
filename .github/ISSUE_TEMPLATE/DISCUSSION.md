@@ -1,32 +1,17 @@
 ---
-name: 💬 Discussion
-about: Create a discussion topic. This is used to discuss changes before an RFC is made.
+name: 💬 Discussions & Questions
+about: Create a discussion topic.
 ---
 
 <!--
-Hello 👋 Thank you for submitting a discussion topic.
 
-To make your topic readable make sure you use valid Markdown syntax.
+Hello 👋.
 
-https://guides.github.com/features/mastering-markdown/
+Can you please use GitHub Discussions instead of GitHub Issues for questions.
+It helps us to keep the GitHub repo readable and clean. It's important.
 
-DO NOT USE THIS TEMPLATE for issues that are not related RFCs, for bug reports/feature requests please use the proper template.
+Thank you.
+
+https://github.com/strapi/strapi/discussions
+
 -->
-
-- [ ] I have created an RFC on the [Strapi RFC Repo](https://github.com/strapi/rfcs)
-- [ ] I have checked for existing RFCs before creating this discussion topic
-
-**Describe the topic**
-A clear and concise description of what the topic is.
-
-**Your suggestions for this topic**
-Clear and simple suggestions for how you think this should be handled.
-
-**Screenshots**
-If applicable, add screenshots to help explain your points.
-
-**Code snippets**
-If applicable, add code samples to help explain your points.
-
-**Additional context**
-Add any other context about the problem here.
