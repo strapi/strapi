@@ -9,7 +9,7 @@ const request = require('request');
  * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
 
-const defaultsEnable = [
+const DEFAULT_PERMISSIONS = [
   { action: 'admincallback', controller: 'auth', type: 'users-permissions', roleType: 'public' },
   { action: 'adminregister', controller: 'auth', type: 'users-permissions', roleType: 'public' },
   { action: 'callback', controller: 'auth', type: 'users-permissions', roleType: 'public' },
@@ -28,13 +28,13 @@ const defaultsEnable = [
   { action: 'autoreload', controller: null, type: null, roleType: null },
 ];
 
-const getDefaultEnable = (permission, role) =>
-  defaultsEnable.some(
-    defaultEnable =>
-      (defaultEnable.action === null || permission.action === defaultEnable.action) &&
-      (defaultEnable.controller === null || permission.controller === defaultEnable.controller) &&
-      (defaultEnable.type === null || permission.type === defaultEnable.type) &&
-      (defaultEnable.roleType === null || role.type === defaultEnable.roleType)
+const isPermissionEnabled = (permission, role) =>
+  DEFAULT_PERMISSIONS.some(
+    defaultPerm =>
+      (defaultPerm.action === null || permission.action === defaultPerm.action) &&
+      (defaultPerm.controller === null || permission.controller === defaultPerm.controller) &&
+      (defaultPerm.type === null || permission.type === defaultPerm.type) &&
+      (defaultPerm.roleType === null || role.type === defaultPerm.roleType)
   );
 
 module.exports = {
@@ -325,7 +325,7 @@ module.exports = {
               type: permission.type,
               controller: permission.controller,
               action: permission.action,
-              enabled: getDefaultEnable(permission, rolesMap[permission.roleId]),
+              enabled: isPermissionEnabled(permission, rolesMap[permission.roleId]),
               policy: '',
               role: permission.roleId,
             })
