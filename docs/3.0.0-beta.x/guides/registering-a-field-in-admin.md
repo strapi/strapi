@@ -19,7 +19,7 @@ yarn create strapi-app my-app --quickstart --no-run
 2. Generate a plugin:
 
 ```bash
-strapi generate:plugin wysiwyg
+yarn run strapi generate:plugin wysiwyg
 ```
 
 3. Install the needed dependencies:
@@ -126,7 +126,7 @@ export default MediaLib;
 **Path —** `./plugins/wysiwyg/admin/src/components/Wysiwyg/index.js`
 
 ```js
-iimport React, { useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
 import { Button } from '@buffetjs/core';
@@ -332,4 +332,4 @@ export default strapi => {
 };
 ```
 
-And VOILA, if you create a new `collectionType` or a `singleType` with a `richtext` field you will see the implementation of [CKEditor]((https://ckeditor.com/ckeditor-5/) instead of the default WYSIWYG.
+And VOILA, if you create a new `collectionType` or a `singleType` with a `richtext` field you will see the implementation of [CKEditor](https://ckeditor.com/ckeditor-5/) instead of the default WYSIWYG.
