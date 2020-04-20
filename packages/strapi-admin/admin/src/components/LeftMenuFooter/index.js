@@ -48,12 +48,7 @@ const LeftMenuFooter = ({ version }) => {
           defaultMessage={messages.poweredBy.defaultMessage}
           key="poweredBy"
         />
-        <a
-          key="website"
-          href="https://strapi.io"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a key="website" href="https://strapi.io" target="_blank" rel="noopener noreferrer">
           Strapi
         </a>
         &nbsp;

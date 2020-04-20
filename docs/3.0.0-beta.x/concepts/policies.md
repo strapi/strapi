@@ -13,7 +13,7 @@ The policies are defined in each `./api/**/config/policies/` folders and plugins
 
 There are several ways to create a policy.
 
-- Using the CLI `strapi generate:policy isAuthenticated`. Read the [CLI documentation](../cli/CLI.md) for more information.
+- Using the CLI `strapi generate:policy isAuthenticated`.<br>Read the [CLI documentation](../cli/CLI.md) for more information.
 - Manually create a JavaScript file named `isAuthenticated.js` in `./config/policies/`.
 
 **Path —** `./config/policies/isAuthenticated.js`.
@@ -30,10 +30,6 @@ module.exports = async (ctx, next) => {
 ```
 
 In this example, we are verifying that a session is open. If it is the case, we call the `next()` method that will execute the next policy or controller's action. Otherwise, a 401 error is returned.
-
-::: tip
-You can access any controller, service, or model thanks to the global variable `strapi` in a policy.
-:::
 
 ## Usage
 
@@ -93,9 +89,9 @@ Plugins can add and expose policies into your app. For example, the plugin **Use
 
 The policy `isAuthenticated` located in the `users-permissions` plugin will be executed before the `find` action in the `Restaurant.js` controller.
 
-### Api Policies
+### API policies
 
-The api policies can be associated to the routes defined in the API where they have been declared.
+The API policies can be associated to the routes defined in the API where they have been declared.
 
 **Path —** `./api/restaurant/config/policies/isAdmin.js`.
 

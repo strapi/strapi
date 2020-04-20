@@ -1,6 +1,22 @@
 {
   "routes": [
     {
+      "method": "GET",
+      "path": "/settings",
+      "handler": "Upload.getSettings",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/settings",
+      "handler": "Upload.updateSettings",
+      "config": {
+        "policies": []
+      }
+    },
+    {
       "method": "POST",
       "path": "/",
       "handler": "Upload.upload",
@@ -11,30 +27,6 @@
           "plugin": "upload",
           "name": "File"
         }
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/environments",
-      "handler": "Upload.getEnvironments",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/settings/:environment",
-      "handler": "Upload.getSettings",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "PUT",
-      "path": "/settings/:environment",
-      "handler": "Upload.updateSettings",
-      "config": {
-        "policies": []
       }
     },
     {
@@ -100,6 +92,14 @@
           "plugin": "upload",
           "name": "File"
         }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/proxy",
+      "handler": "proxy.uploadProxy",
+      "config": {
+        "policies": []
       }
     }
   ]

@@ -75,6 +75,12 @@ yup.addMethod(yup.array, 'matchesEnumRegex', function(message) {
   });
 });
 
+yup.addMethod(yup.string, 'isValidRegExpPattern', function(message) {
+  return this.test('isValidRegExpPattern', message, function(string) {
+    return new RegExp(string) !== null;
+  });
+});
+
 const ATTRIBUTES_THAT_DONT_HAVE_MIN_MAX_SETTINGS = ['boolean', 'date', 'enumeration', 'media'];
 
 const forms = {
@@ -227,6 +233,15 @@ const forms = {
               .matchesEnumRegex(errorsTrads.regex)
               .hasNotEmptyValues('Empty strings are not allowed', dataToValidate.enum),
             enumName: yup.string().nullable(),
+          });
+        case 'text':
+          return yup.object().shape({
+            ...commonShape,
+            ...fieldsThatSupportMaxAndMinLengthShape,
+            regex: yup
+              .string()
+              .isValidRegExpPattern(getTrad('error.validation.regex'))
+              .nullable(),
           });
         case 'number':
         case 'integer':
@@ -384,8 +399,34 @@ const forms = {
           ]);
         }
 
-        if (type === 'media') {
+        if (type === 'text') {
+          items.splice(1, 0, [
+            {
+              autoFocus: false,
+              label: {
+                id: getTrad('form.attribute.item.text.regex'),
+              },
+              name: 'regex',
+              type: 'text',
+              validations: {},
+              description: {
+                id: getTrad('form.attribute.item.text.regex.description'),
+              },
+            },
+          ]);
+        } else if (type === 'media') {
           items.splice(0, 1);
+          items.push([
+            {
+              label: {
+                id: getTrad('form.attribute.media.allowed-types'),
+              },
+              name: 'allowedTypes',
+              type: 'allowedTypesSelect',
+              value: '',
+              validations: {},
+            },
+          ]);
         } else if (type === 'boolean') {
           items.splice(0, 1, [
             {
@@ -462,6 +503,8 @@ const forms = {
           ];
 
           items = uidItems;
+        } else if (type === 'json') {
+          items.splice(0, 1);
         }
 
         if (!ATTRIBUTES_THAT_DONT_HAVE_MIN_MAX_SETTINGS.includes(type)) {

@@ -33,7 +33,7 @@ const diffResolvers = (object, base) => {
 
   Object.keys(object).forEach(type => {
     Object.keys(object[type]).forEach(resolver => {
-      if(type === 'Query' || type === 'Mutation') {
+      if (type === 'Query' || type === 'Mutation') {
         if (!_.has(base, [type, resolver])) {
           _.set(newObj, [type, resolver], _.get(object, [type, resolver]));
         }
@@ -85,6 +85,8 @@ const amountLimiting = (params = {}) => {
   return params;
 };
 
+const nonRequired = type => type.replace('!', '');
+
 module.exports = {
   diffResolvers,
   mergeSchemas,
@@ -92,4 +94,5 @@ module.exports = {
   convertToParams,
   convertToQuery,
   amountLimiting,
+  nonRequired,
 };

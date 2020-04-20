@@ -175,7 +175,7 @@ It is not necessary to always create a front-end **User** for your **Administrat
 
 :::
 
-- Click on `Users` located under **CONTENT TYPES** in the left-hand menu.
+- Click on `Users` located under **COLLECTION TYPES** in the left-hand menu.
 - Click the blue **+ Add New User** button in the top right corner.
 - Next, complete the `Username`, `Email`, and `Password` fields.
 - Select `ON` for the **Confirmed** toggle field.
@@ -184,13 +184,15 @@ It is not necessary to always create a front-end **User** for your **Administrat
 
 ![New front-end User](../assets/getting-started/tutorial/new-front-end-user.png 'New front-end User')
 
-You are now ready to create your first **Content Type**.
+You are now ready to create your first **Collection Type**.
 
-## 3. Create a new Content Type called "Restaurant"
-
-**Content Types** are a collection of entered data represented by fields. For example, a **Content Type** called `Restaurant` may be intended to display information regarding restaurants. A `restaurant` **Content Type** could have fields that include a `name`, the main `image`, and a `description` - _at a minimum_. However, a `restaurant` could also have a `category` or multiple `categories`, and a `restaurant` could perhaps need to show `hoursofoperation`.
+## 3. Create a new Collection Type called "Restaurant"
 
 A **Content Type** can be considered a sort of _blueprint_ for the data created. In other words, a **Content Type** is the schema of the data structure.
+
+Both **Collection Type** and **Single Type** are types of **Content Type**. **Collection Type** is used for content that repeats such as restaurants, or blog posts (hence "collection"). **Single Type** is used to manage content that will have only one instance - for example, your menu, a static page, or a footer.
+
+**Content Type** can hold data represented by fields. For example, a **Collection Type** called `Restaurant` may be intended to display information regarding restaurants. A `restaurant` **Collection Type** could have fields that include a `name`, the main `image`, and a `description` - _at a minimum_. However, a `restaurant` could also have a `category` or multiple `categories`, and a `restaurant` could perhaps need to show `hoursofoperation`.
 
 The next section guides you through the steps needed for each of these above **Content Type** fields.
 
@@ -212,7 +214,7 @@ You need to create a new **Content Type** for `Restaurants`.
 
 1. Complete these steps to **Add a Restaurant Content Type**.
 
-- Click the `+ Create new content-type` link (under existing **CONTENT TYPES**).
+- Click the `+ Create new collection type` link (under existing **CONTENT TYPES**).
 - Enter a **Name** for your new **Content Type** (call this `restaurant`).
 - Click the `Continue` button.
 
@@ -294,7 +296,7 @@ The `Category` **Content Type** will have a **Text** field named `category`, and
 
 1. Complete these steps to **add a Category Content Type**.
 
-- Click the `+ Create new content-type` link.
+- Click the `+ Create new collection type` link.
 - Enter a **Name** for your new **Content Type** (call this `category`).
 
 ![Category Name Field](../assets/getting-started/tutorial/category-name-field.png 'Category Name Field')
@@ -397,7 +399,7 @@ You are now ready to add a third field, another **Text** field for the **Closing
 ![Hours of Operation Closing Hours](../assets/getting-started/tutorial/hours-of-operation-closing-hours.png 'Hours of Operation Closing Hours')
 
 - Click on the `Text` field.
-- In the **Name** field, type `closing_hours.
+- In the **Name** field, type `closing_hours`.
 
 ![Hours of Operation Closing Hours Name](../assets/getting-started/tutorial/hours-of-operation-closing-hours-name.png 'Hours of Operation Closing Hours Name')
 

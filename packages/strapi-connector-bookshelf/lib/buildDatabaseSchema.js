@@ -304,11 +304,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
 
         const allAttrs = ['id', ...attrs];
 
-        await trx.raw(`INSERT INTO ?? (${allAttrs.join(', ')}) ??`, [
-          table,
-          trx.select(allAttrs).from(tmpTable),
-        ]);
-
+        await trx.insert(qb => qb.select(allAttrs).from(tmpTable)).into(table);
         await trx.schema.dropTableIfExists(tmpTable);
       };
 
@@ -416,6 +412,9 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
       [definition.attributes[morphRelation.alias].filter]: {
         type: 'text',
       },
+      order: {
+        type: 'integer',
+      },
     };
 
     if (connection.options && connection.options.autoMigration !== false) {
@@ -423,7 +422,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
     }
   }
 
-  // Equilize many to many releations
+  // Equilize many to many relations
   const manyRelations = definition.associations.filter(({ nature }) =>
     ['manyToMany', 'manyWay'].includes(nature)
   );

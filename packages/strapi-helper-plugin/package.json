@@ -1,6 +1,6 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.0.0-beta.19.3",
+  "version": "3.0.0-beta.20",
   "description": "Helper for Strapi plugins development",
   "files": [
     "dist"
@@ -62,7 +62,7 @@
     "react-intl": "^2.8.0",
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
-    "reactstrap": "^8.0.1",
+    "reactstrap": "8.4.1",
     "styled-components": "^5.0.0",
     "whatwg-fetch": "^2.0.3"
   },
