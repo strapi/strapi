@@ -68,7 +68,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   /**
    * Count entries based on filters
    */
-  async function count(params = {}) {
+  function count(params = {}) {
     const { where } = convertRestQueryParams(params);
 
     return model
