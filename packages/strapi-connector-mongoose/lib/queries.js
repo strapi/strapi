@@ -316,7 +316,7 @@ module.exports = ({ model, modelKey, strapi }) => {
 
     // verify the provided ids are related to this entity.
     idsToKeep.forEach(id => {
-      if (allIds.findIndex(currentId => currentId.toString() === id) === -1) {
+      if (allIds.findIndex(currentId => currentId.toString() === id.toString()) === -1) {
         const err = new Error(
           `Some of the provided components in ${key} are not related to the entity`
         );
@@ -474,29 +474,7 @@ module.exports = ({ model, modelKey, strapi }) => {
 
     await deleteComponents(entry);
 
-    await Promise.all(
-      model.associations.map(async association => {
-        if (!association.via || !entry._id || association.dominant) {
-          return true;
-        }
-
-        const search =
-          _.endsWith(association.nature, 'One') || association.nature === 'oneToMany'
-            ? { [association.via]: entry._id }
-            : { [association.via]: { $in: [entry._id] } };
-        const update =
-          _.endsWith(association.nature, 'One') || association.nature === 'oneToMany'
-            ? { [association.via]: null }
-            : { $pull: { [association.via]: entry._id } };
-
-        // Retrieve model.
-        const model = association.plugin
-          ? strapi.plugins[association.plugin].models[association.model || association.collection]
-          : strapi.models[association.model || association.collection];
-
-        return model.updateMany(search, update);
-      })
-    );
+    await model.deleteRelations(entry);
 
     return entry.toObject ? entry.toObject() : null;
   }

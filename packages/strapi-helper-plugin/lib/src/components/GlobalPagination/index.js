@@ -11,8 +11,7 @@ import cn from 'classnames';
 import Wrapper from './Wrapper';
 
 class GlobalPagination extends React.Component {
-  getLastPageNumber = () =>
-    Math.ceil(this.props.count / this.props.params._limit) || 1;
+  getLastPageNumber = () => Math.ceil(this.props.count / this.props.params._limit) || 1;
 
   handleDotsClick = e => e.preventDefault();
 
@@ -62,8 +61,7 @@ class GlobalPagination extends React.Component {
 
   isLastPage = () => this.props.params._page === this.getLastPageNumber();
 
-  needAfterLinksDots = () =>
-    this.props.params._page < this.getLastPageNumber() - 1;
+  needAfterLinksDots = () => this.props.params._page < this.getLastPageNumber() - 1;
 
   needPreviousLinksDots = () => this.props.params._page > 3;
 
@@ -115,11 +113,7 @@ class GlobalPagination extends React.Component {
     // Generate links
     return map(linksOptions, (linksOption, key) => (
       <li className={cn(linksOption.isActive && 'navLiActive')} key={key}>
-        <a
-          href=""
-          disabled={linksOption.isActive}
-          onClick={linksOption.handleClick}
-        >
+        <a href="" disabled={linksOption.isActive} onClick={linksOption.handleClick}>
           {linksOption.value}
         </a>
       </li>
@@ -136,7 +130,7 @@ class GlobalPagination extends React.Component {
             onClick={this.handlePreviousPageClick}
             disabled={this.isFirstPage()}
           >
-            <i className="fa fa-angle-left" aria-hidden="true" />
+            <i className="fa fa-chevron-left" aria-hidden="true" />
           </a>
           <nav className="navWrapper">
             <ul className="navUl">{this.renderLinks()}</ul>
@@ -147,7 +141,7 @@ class GlobalPagination extends React.Component {
             onClick={this.handleNextPageClick}
             disabled={this.isLastPage()}
           >
-            <i className="fa fa-angle-right" aria-hidden="true" />
+            <i className="fa fa-chevron-right" aria-hidden="true" />
           </a>
         </div>
       </Wrapper>

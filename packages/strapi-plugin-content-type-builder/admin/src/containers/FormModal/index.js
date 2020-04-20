@@ -8,6 +8,7 @@ import {
   ModalForm,
   getYupInnerErrors,
   useGlobalContext,
+  useQuery,
   InputsIndex,
 } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
@@ -16,7 +17,6 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { get, has, isEmpty, set, toLower, toString, upperFirst } from 'lodash';
 import pluginId from '../../pluginId';
-import useQuery from '../../hooks/useQuery';
 import useDataManager from '../../hooks/useDataManager';
 import AttributeOption from '../../components/AttributeOption';
 import BooleanBox from '../../components/BooleanBox';
@@ -53,6 +53,7 @@ const FormModal = () => {
   const { emitEvent, formatMessage } = useGlobalContext();
   const query = useQuery();
   const attributeOptionRef = useRef();
+
   const {
     addAttribute,
     addCreatedComponentToDynamicZone,
@@ -492,6 +493,14 @@ const FormModal = () => {
       name,
       components,
       shouldAddComponents,
+    });
+  };
+
+  const handleChangeMediaAllowedTypes = ({ target: { name, value } }) => {
+    dispatch({
+      type: 'ON_CHANGE_ALLOWED_TYPE',
+      name,
+      value,
     });
   };
 
@@ -1008,7 +1017,10 @@ const FormModal = () => {
       onOpened={onOpened}
       onClosed={onClosed}
       onToggle={handleToggle}
-      withoverflow={toString(state.modalType === 'addComponentToDynamicZone')}
+      withoverflow={toString(
+        state.modalType === 'addComponentToDynamicZone' ||
+          (state.modalType === 'attribute' && state.attributeType === 'media')
+      )}
     >
       <HeaderModal>
         <ModalHeader headerId={state.headerId} headers={headers} />
@@ -1193,6 +1205,8 @@ const FormModal = () => {
                             value = retrievedValue.join('\n');
                           } else if (input.name === 'uid') {
                             value = input.value;
+                          } else if (input.name === 'allowedTypes' && retrievedValue === '') {
+                            value = null;
                           } else {
                             value = retrievedValue;
                           }
@@ -1219,7 +1233,9 @@ const FormModal = () => {
                                 {...input}
                                 modifiedData={modifiedData}
                                 addComponentsToDynamicZone={handleClickAddComponentsToDynamicZone}
+                                changeMediaAllowedTypes={handleChangeMediaAllowedTypes}
                                 customInputs={{
+                                  allowedTypesSelect: WrapperSelect,
                                   componentIconPicker: ComponentIconPicker,
                                   componentSelect: WrapperSelect,
                                   creatableSelect: WrapperSelect,

@@ -23,6 +23,7 @@ function SelectMany({
   onRemove,
   options,
   placeholder,
+  styles,
   targetModel,
   value,
 }) {
@@ -62,8 +63,7 @@ function SelectMany({
         id={name}
         filterOption={(candidate, input) => {
           if (!isEmpty(value)) {
-            const isSelected =
-              value.findIndex(item => item.id === candidate.value.id) !== -1;
+            const isSelected = value.findIndex(item => item.id === candidate.value.id) !== -1;
 
             if (isSelected) {
               return false;
@@ -85,6 +85,7 @@ function SelectMany({
         onMenuClose={onMenuClose}
         onMenuScrollToBottom={onMenuScrollToBottom}
         placeholder={placeholder}
+        styles={styles}
         value={[]}
       />
 
@@ -130,6 +131,7 @@ SelectMany.propTypes = {
   onRemove: PropTypes.func.isRequired,
   options: PropTypes.array.isRequired,
   placeholder: PropTypes.node.isRequired,
+  styles: PropTypes.object.isRequired,
   targetModel: PropTypes.string.isRequired,
   value: PropTypes.array,
 };

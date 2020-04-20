@@ -15,7 +15,7 @@ const Wrapper = styled.div`
     margin-bottom: 1rem;
   }
   > p {
-    width 100%;
+    width: 100%;
     margin-bottom: -8px;
     padding-top: 10px;
     font-size: 13px;

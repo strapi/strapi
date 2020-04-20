@@ -15,6 +15,7 @@ function SelectOne({
   onMenuScrollToBottom,
   options,
   placeholder,
+  styles,
   value,
 }) {
   return (
@@ -29,9 +30,8 @@ function SelectOne({
       onMenuClose={onMenuClose}
       onMenuScrollToBottom={onMenuScrollToBottom}
       placeholder={placeholder}
-      value={
-        isNull(value) ? null : { label: get(value, [mainField], ''), value }
-      }
+      styles={styles}
+      value={isNull(value) ? null : { label: get(value, [mainField], ''), value }}
     />
   );
 }
@@ -51,6 +51,7 @@ SelectOne.propTypes = {
   onMenuScrollToBottom: PropTypes.func.isRequired,
   options: PropTypes.array.isRequired,
   placeholder: PropTypes.node.isRequired,
+  styles: PropTypes.object.isRequired,
   value: PropTypes.object,
 };
 

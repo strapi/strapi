@@ -36,7 +36,7 @@ const getInputType = attrType => {
 
 function Input({ type, ...rest }) {
   const Component = getInputType(type);
-  let style = type !== 'time' ? { width: '210px', paddingTop: '4px' } : {};
+  let style = type !== 'time' ? { width: '210px' } : {};
 
   if (['integer', 'biginteger', 'float', 'decimal'].includes(type)) {
     style = { marginRight: '20px' };

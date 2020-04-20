@@ -1,6 +1,7 @@
 **/node_modules/**
 **/build/**
 **/dist/**
+**/OLD/**
 testApp/**
 examples/**
 packages/strapi-generate-plugin/files/admin/src/**

@@ -1,23 +1,20 @@
 import styled from 'styled-components';
+import PropTypes from 'prop-types';
+import { themePropTypes } from 'strapi-helper-plugin';
 
 const Wrapper = styled.div`
-  font-size: 20px;
-  color: ${({ type }) => {
-    switch (type) {
-      case 'file-pdf':
-        return '#E26D6D';
-      case 'file-image':
-        return '#8AA066';
-      case 'file-video':
-        return '#77C69E';
-      case 'file-code':
-        return '#515A6D';
-      case 'file-archive':
-        return '#715A31';
-      default:
-        return '#BDBFC2';
-    }
-  }};
+  font-size: 54px;
+  color: ${({ theme, colored }) =>
+    colored ? theme.main.colors.lightOrange : theme.main.colors.grey};
 `;
+
+Wrapper.defaultProps = {
+  colored: false,
+};
+
+Wrapper.propTypes = {
+  colored: PropTypes.bool,
+  ...themePropTypes,
+};
 
 export default Wrapper;

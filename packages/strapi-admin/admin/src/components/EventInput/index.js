@@ -18,8 +18,7 @@ const EventInput = ({ onChange, name: inputName, value: inputValue }) => {
     media: ['media.create', 'media.update', 'media.delete'],
   };
 
-  // Media update disabled for now - until the media libray is ready
-  const disabledEvents = ['media.update'];
+  const disabledEvents = [];
 
   const formattedValue = formatValue(inputValue);
 

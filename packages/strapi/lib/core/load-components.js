@@ -37,6 +37,7 @@ module.exports = async strapi => {
         globalId: schema.globalId || _.upperFirst(_.camelCase(`component_${uid}`)),
       });
     });
+
     return acc;
   }, {});
 };

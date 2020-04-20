@@ -11,7 +11,7 @@ const addSlash = require('../utils/addSlash');
 /**
  * `$ strapi build`
  */
-module.exports = async ({ optimization }) => {
+module.exports = async ({ clean, optimization }) => {
   const dir = process.cwd();
   const env = process.env.NODE_ENV || 'development';
 
@@ -19,9 +19,7 @@ module.exports = async ({ optimization }) => {
 
   if (!fs.existsSync(envConfigDir)) {
     console.log(
-      `Missing environment config for env: ${green(
-        env
-      )}.\nMake sure the directory ${yellow(
+      `Missing environment config for env: ${green(env)}.\nMake sure the directory ${yellow(
         `./config/environments/${env}`
       )} exists`
     );
@@ -34,6 +32,10 @@ module.exports = async ({ optimization }) => {
   const adminBackend = _.get(serverConfig, 'admin.build.backend', '/');
 
   console.log(`Building your admin UI with ${green(env)} configuration ...`);
+
+  if (clean) {
+    await strapiAdmin.clean({ dir });
+  }
 
   return strapiAdmin
     .build({

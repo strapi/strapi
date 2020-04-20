@@ -1,46 +1,54 @@
 'use strict';
-
 /**
- * An asynchronous bootstrap function that runs before
- * your application gets started.
+ * Upload plugin bootstrapi.
  *
- * This gives you an opportunity to set up your data model,
- * run jobs, or perform some special logic.
+ * It initializes the provider and sets the default settings in db.
  */
-const _ = require('lodash');
 
 module.exports = async () => {
   // set plugin store
-  const pluginStore = strapi.store({
-    environment: strapi.config.environment,
+  const configurator = strapi.store({
     type: 'plugin',
     name: 'upload',
+    key: 'settings',
   });
 
-  strapi.plugins.upload.config.providers = [];
-
-  const installedProviders = Object.keys(strapi.config.info.dependencies)
-    .filter(d => d.includes('strapi-provider-upload-'))
-    .concat('strapi-provider-upload-local');
-
-  for (let installedProvider of _.uniq(installedProviders)) {
-    strapi.plugins.upload.config.providers.push(require(installedProvider));
-  }
+  strapi.plugins.upload.provider = createProvider(strapi.plugins.upload.config || {});
 
   // if provider config does not exist set one by default
-  const config = await pluginStore.get({ key: 'provider' });
+  const config = await configurator.get();
 
   if (!config) {
-    const provider = _.find(strapi.plugins.upload.config.providers, {
-      provider: 'local',
+    await configurator.set({
+      value: {
+        sizeOptimization: true,
+        responsiveDimensions: true,
+      },
     });
-
-    const value = _.assign({}, provider, {
-      enabled: true,
-      // by default limit size to 1 GB
-      sizeLimit: 1000000,
-    });
-
-    await pluginStore.set({ key: 'provider', value });
   }
+};
+
+const createProvider = ({ provider, providerOptions }) => {
+  try {
+    const providerInstance = require(`strapi-provider-upload-${provider}`).init(providerOptions);
+
+    return Object.assign(Object.create(baseProvider), providerInstance);
+  } catch (err) {
+    strapi.log.error(err);
+    throw new Error(
+      `The provider package isn't installed. Please run \`npm install strapi-provider-upload-${provider}\``
+    );
+  }
+};
+
+const baseProvider = {
+  extend(obj) {
+    Object.assign(this, obj);
+  },
+  upload() {
+    throw new Error('Provider upload method is not implemented');
+  },
+  delete() {
+    throw new Error('Provider delete method is not implemented');
+  },
 };
