@@ -71,7 +71,10 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   function count(params = {}) {
     const { where } = convertRestQueryParams(params);
 
-    return model.query(buildQuery({ model, filters: { where } })).count();
+    return model
+      .query(buildQuery({ model, filters: { where } }))
+      .count()
+      .then(Number);
   }
 
   async function create(values, { transacting } = {}) {
@@ -187,7 +190,8 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       .query(qb => {
         buildSearchQuery(qb, model, params);
       })
-      .count();
+      .count()
+      .then(Number);
   }
 
   async function createComponents(entry, values, { transacting }) {
