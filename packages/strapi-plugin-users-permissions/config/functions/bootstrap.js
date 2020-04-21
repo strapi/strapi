@@ -172,8 +172,8 @@ module.exports = async () => {
 
     await strapi.fs.writePluginFile(
       'users-permissions',
-      'config/jwt.json',
-      JSON.stringify({ jwtSecret }, null, 2)
+      'config/jwt.js',
+      `module.exports = {\n  jwtSecret: process.env.JWT_SECRET || '${jwtSecret}'\n};`
     );
 
     strapi.reload.isWatching = true;

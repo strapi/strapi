@@ -111,14 +111,14 @@ env.date('NAME', new Date());
 
 ## Environments
 
-WHat if you need to specific static configuration sfor specific environments anv using environement variables becomes tedious ?
+What if you need to specific static configurations for specific environments and using environement variables becomes tedious ?
 
-Strapi configurations can also be create per envrionement in `./config/env/{env}/{filename}`. These configurations will be merged into the base ones define in the `./config` folder.
+Strapi configurations can also be created per envrionement in `./config/env/{env}/{filename}`. These configurations will be merged into the base ones defined in the `./config` folder.
 The envrionement is based on the `NODE_ENV` envrionement variable (defaults to `development`).
 
-When starting strapi with `NODE_ENV` = `production` it will load the configuration from `./config/*` and `./config/env/production/*`.Everything defined in the production config will override the default config.
+When starting strapi with `NODE_ENV=production` it will load the configuration from `./config/*` and `./config/env/production/*`. Everything defined in the production config will override the default config.
 
-In combination with envrionement variables the becomes really powerfull:
+In combination with environment variables this pattern becomes really powerfull:
 
 **Example**
 

@@ -346,7 +346,7 @@ The above configuration will create a database called `strapi`, the _default dat
 :::
 
 ::: danger WARNING
-We recommend replacing sensitive (eg. "URI string" above) information in your database.json files before uploading your project to a public repository such as GitHub. For more information about using environment variables, please read [dynamic configurations](../concepts/configurations.md#dynamic-configurations).
+We recommend replacing sensitive (eg. "URI string" above) information in your database configuration files before uploading your project to a public repository such as GitHub. For more information about using environment variables, please read [configurations](../concepts/configurations.md).
 
 :::
 
