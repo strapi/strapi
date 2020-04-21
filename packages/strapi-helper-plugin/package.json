@@ -59,7 +59,7 @@
     "react": "^16.9.0",
     "react-datetime": "^2.16.3",
     "react-dom": "^16.9.0",
-    "react-intl": "^2.8.0",
+    "react-intl": "^4.5.0",
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
     "reactstrap": "8.4.1",

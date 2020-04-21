@@ -22,6 +22,7 @@ const alias = [
   'react-dom',
   'react-helmet',
   'react-is',
+  'react-intl',
   'react-loadable',
   'react-redux',
   'react-router',
