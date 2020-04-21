@@ -90,7 +90,7 @@ Additional guides for optional software additions that compliment or improve the
 
 ### 1. Configure
 
-We always recommend you use envrionement variables to configure your application based on the envrionement. Here is an example:
+We always recommend you use environment variables to configure your application based on the environment. Here is an example:
 
 **Path —** `./config/server.js`.
 
@@ -101,7 +101,7 @@ module.exports = ({ env }) => ({
 });
 ```
 
-Then you can create a `.env` file or directly use the deployment platform you use to set envrionement variables:
+Then you can create a `.env` file or directly use the deployment platform you use to set environment variables:
 
 **Path —** `.env`.
 

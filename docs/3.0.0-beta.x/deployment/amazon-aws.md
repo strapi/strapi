@@ -310,7 +310,7 @@ module.exports = ({ env }) => ({
       settings: {
         client: 'postgres',
         host: env('DATABASE_HOST', '127.0.0.1'),
-        port: env.int('DATABASE_PORT', 27017),
+        port: env.int('DATABASE_PORT', 5432),
         database: env('DATABASE_NAME', 'strapi'),
         username: env('DATABASE_USERNAME', ''),
         password: env('DATABASE_PASSWORD', ''),
@@ -407,7 +407,7 @@ module.exports = {
 };
 ```
 
-You can also set your envrionement variables in a `.env` file in your project like so:
+You can also set your environment variables in a `.env` file in your project like so:
 
 ```
 DATABASE_HOST=your-unique-url.rds.amazonaws.com

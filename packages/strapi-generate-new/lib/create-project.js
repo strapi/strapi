@@ -12,7 +12,7 @@ const { trackUsage, captureStderr } = require('./utils/usage');
 const packageJSON = require('./resources/json/package.json');
 const databaseJSON = require('./resources/json/database.json.js');
 
-module.exports = async function createProject(scope, { connection, dependencies }) {
+module.exports = async function createProject(scope, { client, connection, dependencies }) {
   console.log('Creating files.');
 
   const { rootPath } = scope;
@@ -55,6 +55,7 @@ module.exports = async function createProject(scope, { connection, dependencies 
     await fse.writeFile(
       join(rootPath, `config/database.js`),
       databaseJSON({
+        client,
         connection,
       })
     );

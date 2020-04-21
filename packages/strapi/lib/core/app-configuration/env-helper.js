@@ -14,7 +14,7 @@ const utils = {
 
   bool(...args) {
     const value = env(...args);
-    return value === 'true';
+    return typeof value === 'undefined' ? value : value === 'true';
   },
 
   float(...args) {
@@ -27,7 +27,7 @@ const utils = {
     try {
       return typeof value === 'undefined' ? value : JSON.parse(value);
     } catch (error) {
-      throw new Error(`Imposibble to parse json environment variable ${key}: ${error.message}`);
+      throw new Error(`Invalid json environment variable ${key}: ${error.message}`);
     }
   },
 
@@ -43,7 +43,7 @@ const utils = {
     }
 
     return value.split(',').map(v => {
-      return _.trim(v, '" ');
+      return _.trim(_.trim(v, ' '), '"');
     });
   },
 

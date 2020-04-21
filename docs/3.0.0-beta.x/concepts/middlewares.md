@@ -67,7 +67,7 @@ Every middleware will be injected into the Koa stack. To manage the load order, 
 
 ## Configuration and activation
 
-To configure the middlewares of your application, you need to the `./config/middleware.js` file in your Strapi app.
+To configure the middlewares of your application, you need to edit the `./config/middleware.js` file in your Strapi app.
 
 By default this file doesn't exist, you will have to create it.
 

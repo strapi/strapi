@@ -277,7 +277,7 @@ Now you should be able to access your Strapi application on the public IP of you
 
 #### 2. Modifying configurations to be more secure
 
-By default Strapi will predefine envrionement variables to use with your database config.
+By default Strapi will predefine environment variables to use with your database config.
 
 If we edit the `./config/database.js` file using `nano` we can replace a few key settings:
 
@@ -374,7 +374,7 @@ module.exports = {
 };
 ```
 
-You can also set your envrionement variables in a `.env` file in your project like so:
+You can also set your environment variables in a `.env` file in your project like so:
 
 ```
 DB_HOST=localhost

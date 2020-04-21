@@ -744,7 +744,7 @@ You can update these templates under **Plugins** > **Roles & Permissions** > **E
 
 JWT tokens can be verified and trusted because the information is digitally signed. To sign a token a _secret_ is required. By default Strapi generates one that is stored in `./extensions/users-permissions/config/jwt.js`. This is useful during development but for security reasons it is **recommended** to set a custom token via an environment variable `JWT_SECRET` when deploying to production.
 
-By default you can set a `JWT_SECRET` envrionement variable and it will be used as secret. If you want to use another variable you can update the configuration file.
+By default you can set a `JWT_SECRET` environment variable and it will be used as secret. If you want to use another variable you can update the configuration file.
 
 **Path -** `./extensions/users-permissions/config/jwt.js`.
 

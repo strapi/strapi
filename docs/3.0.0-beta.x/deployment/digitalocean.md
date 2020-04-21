@@ -284,7 +284,7 @@ module.exports = {
 };
 ```
 
-You can also set your envrionement variables in a `.env` file in your project like so:
+You can also set your environment variables in a `.env` file in your project like so:
 
 ```
 DATABASE_HOST=your-unique-url.rds.amazonaws.com

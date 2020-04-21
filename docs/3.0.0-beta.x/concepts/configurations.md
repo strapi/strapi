@@ -38,7 +38,7 @@ module.exports = {
 };
 ```
 
-or a function returning a configuration object (Recommended usage). The function will get access to the [`env` utility](#casting-envrionement-variables).
+or a function returning a configuration object (recommended usage). The function will get access to the [`env` utility](#casting-environment-variables).
 
 ```js
 module.exports = ({ env }) => {
@@ -50,7 +50,7 @@ module.exports = ({ env }) => {
 
 ## Environment variables
 
-In most usecases you will have different configurations between your envrionments. For example: your database credentials.
+In most usecases you will have different configurations between your environments. For example: your database credentials.
 
 Instead of writting those credentials into your configuration files, you can define those variables in a `.env` file at the root of your application.
 
@@ -60,7 +60,7 @@ Instead of writting those credentials into your configuration files, you can def
 DATABASE_PASSWORD=acme
 ```
 
-if you want to customize the path of the `.env` file to load you can set an envrionement variable called `ENV_PATH` before starting your application:
+If you want to customize the path of the `.env` file to load you can set an environment variable called `ENV_PATH` before starting your application:
 
 ```sh
 $ ENV_PATH=/absolute/path/to/.env npm run start
@@ -68,7 +68,7 @@ $ ENV_PATH=/absolute/path/to/.env npm run start
 
 Now you can access those variables in your configuration files and application. You can use `process.env.{varName}` to access those variables anywhere.
 
-In your configuration files you will have access to a `env` utility that allows definiing defaults and casting values.
+In your configuration files you will have access to a `env` utility that allows defining defaults and casting values.
 
 `config/database.js`
 
@@ -84,37 +84,37 @@ module.exports = ({ env }) => ({
 });
 ```
 
-### Casting envrionement variables
+### Casting environment variables
 
 ```js
-// Returns the env if defined withot casting it
-env('NAME', 'default');
+// Returns the env if defined without casting it
+env('VAR', 'default');
 
-// Cast int (using parseInt)
-env.int('NAME', 0);
+// Cast to int (using parseInt)
+env.int('VAR', 0);
 
 // Cast to float (using parseFloat)
-env.float('NAME', 3.14);
+env.float('VAR', 3.14);
 
 // Cast to boolean (check if the value is equal to 'true')
-env.bool('NAME', true);
+env.bool('VAR', true);
 
 // Cast to js object (using JSON.parse)
-env.json('NAME', { key: 'value' });
+env.json('VAR', { key: 'value' });
 
 // Cast to an array (syntax: ENV_VAR=[value1, value2, value3] | ENV_VAR=["value1", "value2", "value3"])
-env.array('NAME', [1, 2, 3]);
+env.array('VAR', [1, 2, 3]);
 
 // Case to date (using new Date(value))
-env.date('NAME', new Date());
+env.date('VAR', new Date());
 ```
 
 ## Environments
 
 What if you need to specific static configurations for specific environments and using environement variables becomes tedious ?
 
-Strapi configurations can also be created per envrionement in `./config/env/{env}/{filename}`. These configurations will be merged into the base ones defined in the `./config` folder.
-The envrionement is based on the `NODE_ENV` envrionement variable (defaults to `development`).
+Strapi configurations can also be created per environment in `./config/env/{env}/{filename}`. These configurations will be merged into the base ones defined in the `./config` folder.
+The environment is based on the `NODE_ENV` environment variable (defaults to `development`).
 
 When starting strapi with `NODE_ENV=production` it will load the configuration from `./config/*` and `./config/env/production/*`. Everything defined in the production config will override the default config.
 
@@ -168,24 +168,24 @@ module.exports = ({ env }) => ({
 
 **Available options**
 
-| Property                                     | Description                                                                                                                                                 | Type          | Default     |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ----------- |
-| `host`                                       | Host name                                                                                                                                                   | string        | `localhost` |
-| `port`                                       | Port on which the server should be running.                                                                                                                 | integer       | `1337`      |
-| `emitErrors`                                 | Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services.                                      | boolean       |             |
-| `proxy`                                      | Proxy configuration                                                                                                                                         | Object        |             |
-| `proxy.enabled`                              | Enable proxy support such as Apache or Nginx.                                                                                                               | boolean       | `false`     |
-| `proxy.ssl`                                  | Enable proxy SSL support.                                                                                                                                   | boolean       |             |
-| `proxy.host`                                 | Host name your proxy service uses for Strapi.                                                                                                               | string        |             |
-| `proxy.port`                                 | Port that your proxy service accepts connections on.                                                                                                        | integer       |             |
-| [`cron`](https://en.wikipedia.org/wiki/Cron) | Cron configuration                                                                                                                                          | Object        |             |
-| `cron.enabled`                               | Enable or disable CRON tasks to schedule jobs at specific dates.                                                                                            | boolean       | false       |
-| `admin`                                      | Admin panel configuration                                                                                                                                   | Object        |             |
-| `admin.autoOpen`                             | Enable or disabled administration opening on start.                                                                                                         | boolean       | `true`      |
-| `admin.path`                                 | Allow to change the URL to access the admin panel.                                                                                                          | string        | `/admin`    |
-| `admin.watchIgnoreFiles`                     | Add custom files that should not be watched during development. See more [here](https://github.com/paulmillr/chokidar#path-filtering) (property `ignored`). | Array(string) | `[]`.       |
-| `admin.build`                                | Admin panel build configuration                                                                                                                             |               |             |
-| `admin.build.backend`                        | URL that the admin panel and plugins will request                                                                                                           | string        |             |
+| Property                 | Description                                                                                                                                                 | Type          | Default     |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ----------- |
+| `host`                   | Host name                                                                                                                                                   | string        | `localhost` |
+| `port`                   | Port on which the server should be running.                                                                                                                 | integer       | `1337`      |
+| `emitErrors`             | Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services.                                      | boolean       |             |
+| `proxy`                  | Proxy configuration                                                                                                                                         | Object        |             |
+| `proxy.enabled`          | Enable proxy support such as Apache or Nginx.                                                                                                               | boolean       | `false`     |
+| `proxy.ssl`              | Enable proxy SSL support.                                                                                                                                   | boolean       |             |
+| `proxy.host`             | Host name your proxy service uses for Strapi.                                                                                                               | string        |             |
+| `proxy.port`             | Port that your proxy service accepts connections on.                                                                                                        | integer       |             |
+| `cron`                   | Cron configuration (powered by [`node-schedule`](https://github.com/node-schedule/node-schedule))                                                           | Object        |             |
+| `cron.enabled`           | Enable or disable CRON tasks to schedule jobs at specific dates.                                                                                            | boolean       | false       |
+| `admin`                  | Admin panel configuration                                                                                                                                   | Object        |             |
+| `admin.autoOpen`         | Enable or disabled administration opening on start.                                                                                                         | boolean       | `true`      |
+| `admin.path`             | Allow to change the URL to access the admin panel.                                                                                                          | string        | `/admin`    |
+| `admin.watchIgnoreFiles` | Add custom files that should not be watched during development. See more [here](https://github.com/paulmillr/chokidar#path-filtering) (property `ignored`). | Array(string) | `[]`.       |
+| `admin.build`            | Admin panel build configuration                                                                                                                             | Object        |             |
+| `admin.build.backend`    | URL that the admin panel and plugins will request                                                                                                           | string        |             |
 
 ## Functions
 

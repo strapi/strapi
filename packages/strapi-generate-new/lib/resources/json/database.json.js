@@ -5,13 +5,11 @@ const _ = require('lodash');
 const fs = require('fs');
 const path = require('path');
 
-module.exports = ({ connection }) => {
-  const client = _.get(connection, 'settings.client');
+module.exports = ({ connection, client }) => {
+  const { settings, options } = connection;
 
   const tmpl = fs.readFileSync(path.join(__dirname, 'database-templates', `${client}.template`));
   const compile = _.template(tmpl);
-
-  const { settings, options } = connection;
 
   return compile({
     settings: {
@@ -21,8 +19,8 @@ module.exports = ({ connection }) => {
     },
     options: {
       ...options,
-      ssl: settings.ssl || false,
-      authenticationDatabase: settings.authenticationDatabase || null,
+      ssl: options.ssl || false,
+      authenticationDatabase: options.authenticationDatabase || null,
     },
   });
 };
