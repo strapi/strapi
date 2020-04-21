@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-manager",
-  "version": "3.0.0-beta.19.5",
+  "version": "3.0.0-beta.20",
   "description": "A powerful UI to easily manage your data.",
   "strapi": {
     "name": "Content Manager",
@@ -25,13 +25,13 @@
     "react-router-dom": "^5.0.0",
     "react-select": "^3.0.4",
     "react-transition-group": "^2.5.0",
-    "reactstrap": "^5.0.0",
+    "reactstrap": "8.4.1",
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^3.0.1",
     "showdown": "^1.9.0",
-    "strapi-helper-plugin": "3.0.0-beta.19.5",
-    "strapi-utils": "3.0.0-beta.19.5",
+    "strapi-helper-plugin": "3.0.0-beta.20",
+    "strapi-utils": "3.0.0-beta.20",
     "yup": "^0.27.0"
   },
   "author": {

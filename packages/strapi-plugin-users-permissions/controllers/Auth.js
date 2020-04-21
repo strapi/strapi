@@ -568,7 +568,7 @@ module.exports = {
     }
   },
 
-  async emailConfirmation(ctx, returnUser) {
+  async emailConfirmation(ctx, next, returnUser) {
     const params = ctx.query;
 
     const decodedToken = await strapi.plugins['users-permissions'].services.jwt.verify(

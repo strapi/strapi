@@ -8,7 +8,7 @@ import Flex from '../Flex';
 import Chevron from './Chevron';
 
 const InputFilePreview = ({ file, onClick, isSlider }) => {
-  const fileUrl = prefixFileUrlWithBackendUrl(get(file, ['formats', 'thumbnail', 'url'], file.url));
+  const fileUrl = prefixFileUrlWithBackendUrl(get(file, ['formats', 'small', 'url'], file.url));
 
   return (
     <Flex
