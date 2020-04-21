@@ -163,30 +163,30 @@ You will need the **database name**, **username** and **password** for later use
 - You must have [Git installed and set-up locally](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup).
 - You must have created a repository for your Strapi project and have your development project initialized to this repository.
 
-In your code editor, you will need to edit a file called `database.json`. Replace the contents of the file with the following.
+In your code editor, you will need to edit a file called `database.js`. Replace the contents of the file with the following.
 
-`Path: ./config/environments/production`
+`Path: ./config/database.js`
 
-```json
-{
-  "defaultConnection": "default",
-  "connections": {
-    "default": {
-      "connector": "bookshelf",
-      "settings": {
-        "client": "postgres",
-        "host": "${process.env.DATABASE_HOST || '127.0.0.1'}",
-        "port": "${process.env.DATABASE_PORT || 27017}",
-        "database": "${process.env.DATABASE_NAME || 'strapi'}",
-        "username": "${process.env.DATABASE_USERNAME || ''}",
-        "password": "${process.env.DATABASE_PASSWORD || ''}"
+```js
+module.exports = ({ env }) => ({
+  defaultConnection: 'default',
+  connections: {
+    default: {
+      connector: 'bookshelf',
+      settings: {
+        client: 'postgres',
+        host: env('DATABASE_HOST', '127.0.0.1'),
+        port: env.int('DATABASE_PORT', 27017),
+        database: env('DATABASE_NAME', 'strapi'),
+        username: env('DATABASE_USERNAME', ''),
+        password: env('DATABASE_PASSWORD', ''),
       },
-      "options": {
-        "ssl": false
-      }
-    }
-  }
-}
+      options: {
+        ssl: false,
+      },
+    },
+  },
+});
 ```
 
 You are now ready to push these changes to Github:
@@ -283,6 +283,18 @@ module.exports = {
   ],
 };
 ```
+
+You can also set your envrionement variables in a `.env` file in your project like so:
+
+```
+DATABASE_HOST=your-unique-url.rds.amazonaws.com
+DATABASE_PORT=5432
+DATABASE_NAME=strapi
+DATABASE_USERNAME=postgres
+DATABASE_PASSWORD=Password
+```
+
+We recommend you continue setting the `NODE_ENV` variable in the `ecosystem.config.js` file.
 
 Use the following command to start `pm2`:
 

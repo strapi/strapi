@@ -309,7 +309,7 @@ MongoDB Atlas automatically exposes the database credentials into a single envir
 Please note the `<password>` after your `username`. In this example, after `mongodb://paulbocuse:`. You will need to replace the `<password>` with the password you created earlier for this user in your **MongoDB Atlas** account.
 :::
 
-#### 5. Update and replace your existing `/database.json` config file for the appropriate environment (development | production).
+#### 5. Update and replace your existing `/database.js` config file for the appropriate environment (development | production).
 
 Replace the contents of `/database.json` with the following and replace **< password >** with the password of the user of your database you created earlier:
 

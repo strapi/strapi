@@ -275,6 +275,10 @@ You can access the config of the current environment through `strapi.config.curr
 }
 ```
 
+::: tip
+Please refer to the [dynamic configurations section](#dynamic-configurations) to use global environment variable to configure the databases.
+:::
+
 #### MLab Example
 
 **Path —** `./config/environments/**/database.json`.

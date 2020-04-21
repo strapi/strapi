@@ -295,32 +295,32 @@ On your development machine, navigate to your Strapi project root directory:
 npm install pg
 ```
 
-#### 2. Edit the `database.json` file.
+#### 2. Edit the `./config/database.js` file.
 
 Copy/paste the following:
 
-`Path: ./my-project/config/environments/production/database.json`:
+`Path: ./my-project/config/database.js`:
 
-```json
-{
-  "defaultConnection": "default",
-  "connections": {
-    "default": {
-      "connector": "bookshelf",
-      "settings": {
-        "client": "postgres",
-        "host": "${process.env.DATABASE_HOST || '127.0.0.1'}",
-        "port": "${process.env.DATABASE_PORT || 27017}",
-        "database": "${process.env.DATABASE_NAME || 'strapi'}",
-        "username": "${process.env.DATABASE_USERNAME || ''}",
-        "password": "${process.env.DATABASE_PASSWORD || ''}"
+```js
+module.exports = ({ env }) => ({
+  defaultConnection: 'default',
+  connections: {
+    default: {
+      connector: 'bookshelf',
+      settings: {
+        client: 'postgres',
+        host: env('DATABASE_HOST', '127.0.0.1'),
+        port: env.int('DATABASE_PORT', 27017),
+        database: env('DATABASE_NAME', 'strapi'),
+        username: env('DATABASE_USERNAME', ''),
+        password: env('DATABASE_PASSWORD', ''),
       },
-      "options": {
-        "ssl": false
-      }
-    }
-  }
-}
+      options: {
+        ssl: false,
+      },
+    },
+  },
+});
 ```
 
 #### 3. Install the **Strapi Provider Upload AWS S3 Plugin**:
@@ -391,7 +391,7 @@ module.exports = {
   apps: [
     {
       name: 'your-app-name',
-      cwd: '/home/ubuntu/my-strapi-project/my-project',
+      cwd: '/home/ubuntu/my-project',
       script: 'npm',
       args: 'start',
       env: {
@@ -406,6 +406,18 @@ module.exports = {
   ],
 };
 ```
+
+You can also set your envrionement variables in a `.env` file in your project like so:
+
+```
+DATABASE_HOST=your-unique-url.rds.amazonaws.com
+DATABASE_PORT=5432
+DATABASE_NAME=strapi
+DATABASE_USERNAME=postgres
+DATABASE_PASSWORD=Password
+```
+
+We recommend you continue setting the `NODE_ENV` variable in the `ecosystem.config.js` file.
 
 Use the following command to start `pm2`:
 
