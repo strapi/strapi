@@ -1,5 +1,7 @@
 # Migrations guides
 
+Please also refer to the following [documentation](../guides/update-version.md) for a better understanding of how to update your project
+
 ## Migrating from Alpha ?
 
 Read the [Migration guide from alpha.26 to beta](migration-guide-alpha.26-to-beta.md) first then read the [Beta migration guides](#beta-guides)
