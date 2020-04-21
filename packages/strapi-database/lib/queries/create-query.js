@@ -26,6 +26,12 @@ class Query {
     return this.model.associations;
   }
 
+  async executeHook(hook, ...args) {
+    if (_.has(this.model, hook)) {
+      await this.model[hook](...args);
+    }
+  }
+
   /**
    * Run custom database logic
    */
@@ -65,12 +71,6 @@ class Query {
     return result;
   }
 
-  async executeHook(hook, ...args) {
-    if (_.has(this.model, hook)) {
-      await this.model[hook](...args);
-    }
-  }
-
   async create(params = {}, ...args) {
     const newParams = replaceIdByPrimaryKey(params, this.model);
 
@@ -101,18 +101,33 @@ class Query {
     return entry;
   }
 
-  count(params = {}, ...args) {
+  async count(params = {}, ...args) {
     const newParams = replaceIdByPrimaryKey(params, this.model);
-    return this.connectorQuery.count(newParams, ...args);
+
+    await this.executeHook('beforeCount', newParams, ...args);
+    const count = await this.connectorQuery.count(newParams, ...args);
+    await this.executeHook('afterCount', count);
+
+    return count;
   }
 
-  search(params = {}, ...args) {
+  async search(params = {}, ...args) {
     const newParams = replaceIdByPrimaryKey(params, this.model);
-    return this.connectorQuery.search(newParams, ...args);
+
+    await this.executeHook('beforeSearch', newParams, ...args);
+    const results = await this.connectorQuery.search(newParams, ...args);
+    await this.executeHook('afterSearch', results);
+
+    return results;
   }
 
-  countSearch(params = {}, ...args) {
+  async countSearch(params = {}, ...args) {
     const newParams = replaceIdByPrimaryKey(params, this.model);
-    return this.connectorQuery.countSearch(newParams, ...args);
+
+    await this.executeHook('beforeCountSearch', newParams, ...args);
+    const count = await this.connectorQuery.countSearch(newParams, ...args);
+    await this.executeHook('afterCountSearch', count);
+
+    return count;
   }
 }
