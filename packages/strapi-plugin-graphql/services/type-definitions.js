@@ -16,6 +16,7 @@ const { mergeSchemas, convertToParams, convertToQuery, amountLimiting } = requir
 const { toSDL, getTypeDescription } = require('./schema-definitions');
 const { toSingular, toPlural } = require('./naming');
 const { buildQuery, buildMutation } = require('./resolvers-builder');
+const { actionExists } = require('./utils');
 
 const isQueryEnabled = (schema, name) => {
   return _.get(schema, ['resolver', 'Query', name]) !== false;
@@ -320,9 +321,9 @@ const buildSingleType = model => {
 
   // build every mutation
   ['update', 'delete'].forEach(action => {
-    const mutationScheam = buildMutationTypeDef({ model, action }, { _schema });
+    const mutationSchema = buildMutationTypeDef({ model, action }, { _schema });
 
-    mergeSchemas(localSchema, mutationScheam);
+    mergeSchemas(localSchema, mutationSchema);
   });
 
   return localSchema;
@@ -370,50 +371,52 @@ const buildCollectionType = model => {
   }
 
   if (isQueryEnabled(_schema, singularName)) {
-    _.merge(localSchema, {
-      query: {
-        [`${singularName}(id: ID!)`]: model.globalId,
-      },
-      resolvers: {
-        Query: {
-          [singularName]: buildQuery(singularName, {
-            resolver: `${uid}.findOne`,
-            ..._.get(_schema, ['resolver', 'Query', singularName], {}),
-          }),
+    const resolverOpts = {
+      resolver: `${uid}.findOne`,
+      ..._.get(_schema, `resolver.Query.${pluralName}`, {}),
+    };
+    if (actionExists(resolverOpts)) {
+      _.merge(localSchema, {
+        query: {
+          [`${singularName}(id: ID!)`]: model.globalId,
         },
-      },
-    });
+        resolvers: {
+          Query: {
+            [singularName]: buildQuery(singularName, resolverOpts),
+          },
+        },
+      });
+    }
   }
 
   if (isQueryEnabled(_schema, pluralName)) {
     const resolverOpts = {
       resolver: `${uid}.find`,
-      ..._.get(_schema, ['resolver', 'Query', pluralName], {}),
+      ..._.get(_schema, `resolver.Query.${pluralName}`, {}),
     };
-
-    const resolverFn = buildQuery(pluralName, resolverOpts);
-
-    _.merge(localSchema, {
-      query: {
-        [`${pluralName}(sort: String, limit: Int, start: Int, where: JSON)`]: `[${model.globalId}]`,
-      },
-      resolvers: {
-        Query: {
-          [pluralName]: resolverFn,
+    if (actionExists(resolverOpts)) {
+      _.merge(localSchema, {
+        query: {
+          [`${pluralName}(sort: String, limit: Int, start: Int, where: JSON)`]: `[${model.globalId}]`,
         },
-      },
-    });
+        resolvers: {
+          Query: {
+            [pluralName]: buildQuery(pluralName, resolverOpts),
+          },
+        },
+      });
 
-    // Generation the aggregation for the given model
-    const aggregationSchema = formatModelConnectionsGQL({
-      fields: typeDefObj,
-      model,
-      name: modelName,
-      resolver: resolverOpts,
-      plugin,
-    });
+      // Generate the aggregation for the given model
+      const aggregationSchema = formatModelConnectionsGQL({
+        fields: typeDefObj,
+        model,
+        name: modelName,
+        resolver: resolverOpts,
+        plugin,
+      });
 
-    mergeSchemas(localSchema, aggregationSchema);
+      mergeSchemas(localSchema, aggregationSchema);
+    }
   }
 
   // Add model Input definition.
@@ -421,9 +424,16 @@ const buildCollectionType = model => {
 
   // build every mutation
   ['create', 'update', 'delete'].forEach(action => {
-    const mutationScheam = buildMutationTypeDef({ model, action }, { _schema });
+    const mutationName = `${action}${_.upperFirst(toSingular(model.modelName))}`;
+    const resolverOpts = {
+      resolver: `${uid}.${action}`,
+      ..._.get(_schema, `resolver.Mutation.${mutationName}`, {}),
+    };
 
-    mergeSchemas(localSchema, mutationScheam);
+    if (actionExists(resolverOpts)) {
+      const mutationSchema = buildMutationTypeDef({ model, action }, { _schema });
+      mergeSchemas(localSchema, mutationSchema);
+    }
   });
 
   return localSchema;
