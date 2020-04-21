@@ -3,7 +3,6 @@ import styled from 'styled-components';
 const Wrapper = styled.div`
   position: relative;
   margin-bottom: 27px;
-
   label {
     width: 100%;
     overflow: hidden;
@@ -95,6 +94,10 @@ const Wrapper = styled.div`
           div {
             height: 36px;
             cursor: pointer;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
         }
       }
