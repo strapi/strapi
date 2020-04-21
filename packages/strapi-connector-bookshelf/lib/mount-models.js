@@ -64,7 +64,7 @@ module.exports = ({ models, target }, ctx) => {
     definition.client = _.get(connection.settings, 'client');
     _.defaults(definition, {
       primaryKey: 'id',
-      primaryKeyType: _.get(definition, 'options.idAttributeType', 'integer'),
+      primaryKeyType: _.get(definition, 'options.idAttributeType', _.get(connection.options, 'idAttributeType', 'integer')),
     });
 
     // Use default timestamp column names if value is `true`
