@@ -29,6 +29,7 @@ const alias = [
   'react-transition-group',
   'react-virtualized',
   'reactstrap',
+  'react-select',
   'redux',
   'redux-immutable',
   'remove-markdown',
@@ -37,8 +38,17 @@ const alias = [
   'yup',
 ];
 
-module.exports = alias.reduce((acc, curr) => {
-  acc[curr] = require.resolve(curr);
+module.exports = alias.reduce(
+  (acc, curr) => {
+    acc[curr] = require.resolve(curr);
 
-  return acc;
-}, {});
+    return acc;
+  },
+  {
+    'react-select/animated': require.resolve('react-select/animated'),
+    'react-select/async': require.resolve('react-select/async'),
+    'react-select/async-creatable': require.resolve('react-select/async-creatable'),
+    'react-select/base': require.resolve('react-select/base'),
+    'react-select/creatable': require.resolve('react-select/creatable'),
+  }
+);

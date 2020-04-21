@@ -23,7 +23,6 @@
     "react-redux": "^7.0.2",
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
-    "react-select": "^3.0.4",
     "react-transition-group": "^2.5.0",
     "reactstrap": "8.4.1",
     "redux": "^4.0.1",
