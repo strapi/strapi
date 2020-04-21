@@ -503,6 +503,8 @@ const forms = {
           ];
 
           items = uidItems;
+        } else if (type === 'json') {
+          items.splice(0, 1);
         }
 
         if (!ATTRIBUTES_THAT_DONT_HAVE_MIN_MAX_SETTINGS.includes(type)) {

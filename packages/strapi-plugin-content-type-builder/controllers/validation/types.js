@@ -6,6 +6,7 @@ const yup = require('yup');
 const {
   validators,
   areEnumValuesUnique,
+  isValidDefaultJSON,
   isValidName,
   isValidEnum,
   isValidUID,
@@ -112,6 +113,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
     }
     case 'json': {
       return {
+        default: yup.mixed().test(isValidDefaultJSON),
         required: validators.required,
         unique: validators.unique,
       };

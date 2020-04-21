@@ -57,7 +57,7 @@ const List = ({
               >
                 {(checked || canSelect) && (
                   <>
-                    {isAllowed && (
+                    {(checked || isAllowed) && (
                       <CardControlsWrapper leftAlign className="card-control-wrapper">
                         <Checkbox
                           name={`${id}`}

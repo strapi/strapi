@@ -5,9 +5,11 @@ import {
   createNewFilesToDownloadArray,
   createNewFilesToUploadArray,
   formatFileForEditing,
+  getType,
 } from '../../utils';
 
 const initialState = {
+  allowedTypes: [],
   selectedFiles: [],
   files: [],
   filesToUpload: [],
@@ -264,17 +266,21 @@ const reducer = (state, action) =>
         break;
       }
       case 'TOGGLE_SELECT_ALL': {
+        const allowedFiles =
+          state.allowedTypes.length > 0
+            ? state.files.filter(file => state.allowedTypes.includes(getType(file.mime)))
+            : state.files;
         const comparator = (first, second) => first.id === second.id;
         const isSelected =
-          intersectionWith(state.selectedFiles, state.files, comparator).length ===
-          state.files.length;
+          intersectionWith(state.selectedFiles, allowedFiles, comparator).length ===
+          allowedFiles.length;
 
         if (isSelected) {
           draftState.selectedFiles = differenceWith(state.selectedFiles, state.files, comparator);
           break;
         }
 
-        draftState.selectedFiles = unionWith(state.selectedFiles, state.files, comparator);
+        draftState.selectedFiles = unionWith(state.selectedFiles, allowedFiles, comparator);
         break;
       }
 
