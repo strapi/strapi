@@ -2,7 +2,7 @@
   "private": true,
   "dependencies": {},
   "devDependencies": {
-    "@babel/plugin-transform-modules-commonjs": "^7.8.3",
+    "@babel/plugin-transform-modules-commonjs": "^7.9.0",
     "@testing-library/jest-dom": "^4.0.0",
     "@testing-library/react": "^9.1.0",
     "@testing-library/react-hooks": "^2.0.0",
