@@ -2,7 +2,7 @@
 
 module.exports = ({ connection, env }) => {
   // Production/Staging Template
-  if (['production', 'staging'].includes(env)) {
+  if (['production', 'staging', 'development'].includes(env)) {
     const settingsBase = {
       client: connection.settings.client,
       host: "${process.env.DATABASE_HOST || '127.0.0.1'}",
