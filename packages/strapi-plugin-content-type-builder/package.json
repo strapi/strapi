@@ -16,7 +16,7 @@
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "react-intl": "^4.5.0",
-    "react-redux": "7.0.2",
+    "react-redux": "7.2.0",
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
     "reactstrap": "8.4.1",
