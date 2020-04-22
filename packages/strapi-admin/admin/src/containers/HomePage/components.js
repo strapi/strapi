@@ -105,8 +105,8 @@ const ALink = styled.a`
   }
 
   &:hover,
-  focus,
-  active {
+  :focus,
+  :active {
     text-decoration: none;
     outline: 0;
   }
@@ -179,8 +179,8 @@ const LinkWrapper = styled.a`
   background-color: #f7f8f8;
 
   &:hover,
-  focus,
-  active {
+  :focus,
+  :active {
     text-decoration: none;
     outline: 0;
   }

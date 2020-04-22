@@ -1,21 +1,21 @@
 import styled from 'styled-components';
 import getColor from './utils/getColor';
 
+/* eslint-disable indent */
+
 const RemoveWrapper = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
   position: absolute;
-  width: 30px;
-  text-align: center;
-  background-color: ${({ isOverEditBlock, isOverRemove, isSelected }) =>
-  getColor(isOverRemove, isSelected, isOverEditBlock)};
-  cursor: pointer;
-
-  position: absolute;
   top: 0px;
   bottom: 0px;
   right: 0;
+  width: 30px;
+  text-align: center;
+  background-color: ${({ isOverEditBlock, isOverRemove, isSelected }) =>
+    getColor(isOverRemove, isSelected, isOverEditBlock)};
+  cursor: pointer;
 
   svg {
     align-self: center;

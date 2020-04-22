@@ -1,6 +1,8 @@
 import styled, { createGlobalStyle } from 'styled-components';
 import PropTypes from 'prop-types';
 
+/* eslint-disable indent */
+
 const GlobalNotification = createGlobalStyle`
 .notificationIcon {
   position: relative;
@@ -64,7 +66,7 @@ const GlobalNotification = createGlobalStyle`
 
 .notificationSuccess{
   background: linear-gradient(100deg , #FFFFFF 50%, rgba(39, 183, 15, .05)), ${props =>
-  props.theme.main.colors.white};
+    props.theme.main.colors.white};
 }
 
 .notificationWarning {
@@ -83,7 +85,7 @@ const GlobalNotification = createGlobalStyle`
 
   .notificationIcon:before {
     padding-top: 4px;
-    border-color: $brand-danger; // red
+    border-color: $brand-danger;
     border-color: ${props => props.theme.main.colors.red};
     color: ${props => props.theme.main.colors.red};
   }
@@ -91,15 +93,13 @@ const GlobalNotification = createGlobalStyle`
 
 .notificationInfo {
   background: linear-gradient(100deg , #FFFFFF 50%, rgba(28, 93, 231, .05)), ${props =>
-      props.theme.main.colors.white};
+    props.theme.main.colors.white};
 
   .notificationIcon:before {
     border-color: ${props => props.theme.main.colors.blue};
     color: ${props => props.theme.main.colors.blue};
   }
 }
-
-
 `;
 
 const Li = styled.li`
@@ -118,8 +118,6 @@ const Li = styled.li`
   z-index: 10;
   padding: 1rem;
 
-  // The last notification must appear from
-  // the background of the previous one.
   &:last-child {
     z-index: 1;
   }
