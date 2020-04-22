@@ -969,7 +969,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                             class=" css-1w9ejix-control"
                           >
                             <div
-                              class=" css-1hwfws3"
+                              class=" css-g1d714-ValueContainer"
                             >
                               <div
                                 class=" css-1uccc91-singleValue"
