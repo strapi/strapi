@@ -64,7 +64,7 @@ const GlobalNotification = createGlobalStyle`
 
 .notificationSuccess{
   background: linear-gradient(100deg , #FFFFFF 50%, rgba(39, 183, 15, .05)), ${props =>
-    props.theme.main.colors.white};
+  props.theme.main.colors.white};
 }
 
 .notificationWarning {
@@ -91,7 +91,7 @@ const GlobalNotification = createGlobalStyle`
 
 .notificationInfo {
   background: linear-gradient(100deg , #FFFFFF 50%, rgba(28, 93, 231, .05)), ${props =>
-    props.theme.main.colors.white};
+      props.theme.main.colors.white};
 
   .notificationIcon:before {
     border-color: ${props => props.theme.main.colors.blue};

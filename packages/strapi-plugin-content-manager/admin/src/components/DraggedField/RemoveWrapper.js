@@ -9,7 +9,7 @@ const RemoveWrapper = styled.div`
   width: 30px;
   text-align: center;
   background-color: ${({ isOverEditBlock, isOverRemove, isSelected }) =>
-    getColor(isOverRemove, isSelected, isOverEditBlock)};
+  getColor(isOverRemove, isSelected, isOverEditBlock)};
   cursor: pointer;
 
   position: absolute;
