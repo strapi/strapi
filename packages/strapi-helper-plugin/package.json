@@ -57,7 +57,6 @@
     "lodash": "^4.17.5",
     "moment": "^2.16.0",
     "react": "^16.9.0",
-    "react-datetime": "^2.16.3",
     "react-dom": "^16.9.0",
     "react-intl": "^4.5.0",
     "react-router": "^5.0.0",
