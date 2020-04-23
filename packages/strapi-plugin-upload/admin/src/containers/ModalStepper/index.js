@@ -26,7 +26,7 @@ const ModalStepper = ({
   onDeleteMedia,
   onToggle,
 }) => {
-  const { formatMessage } = useGlobalContext();
+  const { emitEvent, formatMessage } = useGlobalContext();
   const [isWarningDeleteOpen, setIsWarningDeleteOpen] = useState(false);
   const [shouldDeleteFile, setShouldDeleteFile] = useState(false);
   const [isFormDisabled, setIsFormDisabled] = useState(false);
@@ -74,6 +74,8 @@ const ModalStepper = ({
   }, [isOpen]);
 
   const addFilesToUpload = ({ target: { value } }) => {
+    emitEvent('didSelectFile', { source: 'computer', location: 'upload' });
+
     dispatch({
       type: 'ADD_FILES_TO_UPLOAD',
       filesToUpload: value,
@@ -84,6 +86,11 @@ const ModalStepper = ({
 
   downloadFilesRef.current = async () => {
     const files = getFilesToDownload(filesToUpload);
+
+    // Emit event when the users download files from url
+    if (files.length > 0) {
+      emitEvent('didSelectFile', { source: 'url', location: 'upload' });
+    }
 
     try {
       await Promise.all(
@@ -255,6 +262,9 @@ const ModalStepper = ({
   };
 
   const handleSetCropResult = blob => {
+    // Emit event : the user cropped a file that is not uploaded
+    emitEvent('didCropFile', { duplicatedFile: null, location: 'upload' });
+
     dispatch({
       type: 'SET_CROP_RESULT',
       blob,
@@ -274,9 +284,14 @@ const ModalStepper = ({
   const handleSubmitEditExistingFile = async (
     e,
     shouldDuplicateMedia = false,
-    file = fileToEdit.file
+    file = fileToEdit.file,
+    isSubmittingAfterCrop = false
   ) => {
     e.preventDefault();
+
+    if (isSubmittingAfterCrop) {
+      emitEvent('didCropFile', { duplicatedFile: shouldDuplicateMedia, location: 'upload' });
+    }
 
     dispatch({
       type: 'ON_SUBMIT_EDIT_EXISTING_FILE',
@@ -331,6 +346,7 @@ const ModalStepper = ({
   };
 
   const handleReplaceMedia = () => {
+    emitEvent('didReplaceMedia', { location: 'upload' });
     editModalRef.current.click();
   };
 

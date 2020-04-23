@@ -172,7 +172,7 @@ const EditForm = forwardRef(
       try {
         const file = await getCroppedResult();
 
-        onSubmitEdit(e, shouldDuplicate, file);
+        onSubmitEdit(e, shouldDuplicate, file, true);
       } catch (err) {
         // Silent
       } finally {
