@@ -1,28 +1,42 @@
 'use strict';
 
 const body = require('koa-body');
+//const qs = require('koa-qs');
+var merge = require('merge-descriptors');
 const qs = require('qs');
 
 /**
  * Body parser hook
  */
-const addQsParser = app => {
-  Object.defineProperty(app.request, 'query', {
-    configurable: false,
-    enumerable: true,
-    /*
+
+const addParser = app => {
+  merge(app.request, {
+    /**
      * Get parsed query-string.
+     *
+     * @return {Object}
+     * @api public
      */
-    get() {
-      const qstr = this.querystring;
-      const cache = (this._querycache = this._querycache || {});
-      return cache[qstr] || (cache[qstr] = qs.parse(qstr));
+    get query() {
+      var str = this.querystring;
+      if (!str) return {};
+
+      var c = (this._querycache = this._querycache || {});
+      var query = c[str];
+      if (!query) {
+        c[str] = query = qs.parse(str);
+      }
+      return query;
     },
 
-    /*
+    /**
      * Set query-string as an object.
+     *
+     * @param {Object} obj
+     * @api public
      */
-    set(obj) {
+
+    set query(obj) {
       this.querystring = qs.stringify(obj);
     },
   });
@@ -47,7 +61,7 @@ module.exports = strapi => {
         })(ctx, next);
       });
 
-      addQsParser(strapi.app);
+      addParser(strapi.app);
     },
   };
 };
