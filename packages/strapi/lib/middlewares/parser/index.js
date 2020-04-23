@@ -1,8 +1,7 @@
 'use strict';
 
 const body = require('koa-body');
-//const qs = require('koa-qs');
-var merge = require('merge-descriptors');
+const merge = require('merge-descriptors');
 const qs = require('qs');
 
 /**
