@@ -182,7 +182,7 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPrevio
     });
   };
 
-  const handleChange = ({ target: { name, value, type } }, initialValue = false) => {
+  const handleChange = ({ target: { name, value, type } }, shouldSetInitialValue = false) => {
     let inputValue = value;
 
     // Empty string is not a valid date,
@@ -214,7 +214,7 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPrevio
       type: 'ON_CHANGE',
       keys: name.split('.'),
       value: inputValue,
-      initialValue,
+      shouldSetInitialValue,
     });
   };
 

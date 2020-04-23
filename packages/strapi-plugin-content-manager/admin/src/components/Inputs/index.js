@@ -184,7 +184,6 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
             validations={validations}
             value={inputValue}
             withDefaultValue={false}
-            required={isRequired}
           />
         );
       }}

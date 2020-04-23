@@ -139,7 +139,7 @@ const reducer = (state, action) => {
       // that needs an asynchronous initial value like the UID field
       // This is just a temporary patch.
       // TODO : Refactor the default form creation (workflow) to accept async default values.
-      if (action.initialValue) {
+      if (action.shouldSetInitialValue) {
         newState = state.updateIn(['initialData', ...action.keys], () => {
           return action.value;
         });
