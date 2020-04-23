@@ -1,133 +1,74 @@
 'use strict';
 
-const _ = require('lodash');
-
 const { replaceIdByPrimaryKey } = require('../utils/primary-key');
+const { executeBeforeHook, executeAfterHook } = require('../utils/hooks');
 
 module.exports = function createQuery(opts) {
-  return new Query(opts);
+  const { model, connectorQuery } = opts;
+
+  return {
+    get model() {
+      return model;
+    },
+
+    get orm() {
+      return model.orm;
+    },
+
+    get primaryKey() {
+      return model.primaryKey;
+    },
+
+    get associations() {
+      return model.associations;
+    },
+
+    /**
+     * Run custom database logic
+     */
+    custom(mapping) {
+      if (typeof mapping === 'function') {
+        return mapping.bind(this, { model: this.model });
+      }
+
+      if (!mapping[this.orm]) {
+        throw new Error(`Missing mapping for orm ${this.orm}`);
+      }
+
+      if (typeof mapping[this.orm] !== 'function') {
+        throw new Error(`Custom queries must be functions received ${typeof mapping[this.orm]}`);
+      }
+
+      return mapping[this.model.orm].call(this, { model: this.model });
+    },
+
+    create: wrapQuery({ hook: 'create', model, connectorQuery }),
+    update: wrapQuery({ hook: 'update', model, connectorQuery }),
+    delete: wrapQuery({ hook: 'delete', model, connectorQuery }),
+    find: wrapQuery({ hook: 'find', model, connectorQuery }),
+    findOne: wrapQuery({ hook: 'findOne', model, connectorQuery }),
+    count: wrapQuery({ hook: 'count', model, connectorQuery }),
+    search: wrapQuery({ hook: 'search', model, connectorQuery }),
+    countSearch: wrapQuery({ hook: 'countSearch', model, connectorQuery }),
+  };
 };
 
-class Query {
-  constructor({ model, connectorQuery }) {
-    this.connectorQuery = connectorQuery;
-    this.model = model;
-  }
+// wraps a connectorQuery call with:
+// - param substitution
+// - lifecycle hooks
+const wrapQuery = ({ hook, model, connectorQuery }) => async (params, ...rest) => {
+  // substite id for primaryKey value in params
+  const newParams = replaceIdByPrimaryKey(params, model);
 
-  get orm() {
-    return this.model.orm;
-  }
+  // execute before hook
+  await executeBeforeHook(hook, model, newParams, ...rest);
 
-  get primaryKey() {
-    return this.model.primaryKey;
-  }
+  // execute query
+  const result = await connectorQuery[hook](newParams, ...rest);
 
-  get associations() {
-    return this.model.associations;
-  }
+  // execute after hook
+  await executeAfterHook(hook, model, result);
 
-  async executeHook(hook, ...args) {
-    if (_.has(this.model, hook)) {
-      await this.model[hook](...args);
-    }
-  }
-
-  /**
-   * Run custom database logic
-   */
-  custom(mapping) {
-    if (typeof mapping === 'function') {
-      return mapping.bind(this, { model: this.model });
-    }
-
-    if (!mapping[this.orm]) {
-      throw new Error(`Missing mapping for orm ${this.orm}`);
-    }
-
-    if (typeof mapping[this.orm] !== 'function') {
-      throw new Error(`Custom queries must be functions received ${typeof mapping[this.orm]}`);
-    }
-
-    return mapping[this.model.orm].call(this, { model: this.model });
-  }
-
-  async find(params = {}, ...args) {
-    const newParams = replaceIdByPrimaryKey(params, this.model);
-
-    await this.executeHook('beforeFetchAll', newParams, ...args);
-    const results = await this.connectorQuery.find(newParams, ...args);
-    await this.executeHook('afterFetchAll', results);
-
-    return results;
-  }
-
-  async findOne(params = {}, ...args) {
-    const newParams = replaceIdByPrimaryKey(params, this.model);
-
-    await this.executeHook('beforeFetch', newParams, ...args);
-    const result = await this.connectorQuery.findOne(newParams, ...args);
-    await this.executeHook('afterFetch', result);
-
-    return result;
-  }
-
-  async create(params = {}, ...args) {
-    const newParams = replaceIdByPrimaryKey(params, this.model);
-
-    await this.executeHook('beforeCreate', newParams, ...args);
-    const entry = await this.connectorQuery.create(newParams, ...args);
-    await this.executeHook('afterCreate', entry);
-
-    return entry;
-  }
-
-  async update(params = {}, ...args) {
-    const newParams = replaceIdByPrimaryKey(params, this.model);
-
-    await this.executeHook('beforeUpdate', newParams, ...args);
-    const entry = await this.connectorQuery.update(newParams, ...args);
-    await this.executeHook('afterUpdate', entry);
-
-    return entry;
-  }
-
-  async delete(params = {}, ...args) {
-    const newParams = replaceIdByPrimaryKey(params, this.model);
-
-    await this.executeHook('beforeDestroy', newParams, ...args);
-    const entry = await this.connectorQuery.delete(newParams, ...args);
-    await this.executeHook('afterDestroy', entry);
-
-    return entry;
-  }
-
-  async count(params = {}, ...args) {
-    const newParams = replaceIdByPrimaryKey(params, this.model);
-
-    await this.executeHook('beforeCount', newParams, ...args);
-    const count = await this.connectorQuery.count(newParams, ...args);
-    await this.executeHook('afterCount', count);
-
-    return count;
-  }
-
-  async search(params = {}, ...args) {
-    const newParams = replaceIdByPrimaryKey(params, this.model);
-
-    await this.executeHook('beforeSearch', newParams, ...args);
-    const results = await this.connectorQuery.search(newParams, ...args);
-    await this.executeHook('afterSearch', results);
-
-    return results;
-  }
-
-  async countSearch(params = {}, ...args) {
-    const newParams = replaceIdByPrimaryKey(params, this.model);
-
-    await this.executeHook('beforeCountSearch', newParams, ...args);
-    const count = await this.connectorQuery.countSearch(newParams, ...args);
-    await this.executeHook('afterCountSearch', count);
-
-    return count;
-  }
-}
+  // return result
+  return result;
+};
