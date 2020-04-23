@@ -59,15 +59,16 @@ module.exports = function createQuery(opts) {
 const wrapQuery = ({ hook, model, connectorQuery }) => async (params, ...rest) => {
   // substite id for primaryKey value in params
   const newParams = replaceIdByPrimaryKey(params, model);
+  const queryArguments = [newParams, ...rest];
 
   // execute before hook
-  await executeBeforeHook(hook, model, newParams, ...rest);
+  await executeBeforeHook(hook, model, ...queryArguments);
 
   // execute query
-  const result = await connectorQuery[hook](newParams, ...rest);
+  const result = await connectorQuery[hook](...queryArguments);
 
-  // execute after hook
-  await executeAfterHook(hook, model, result);
+  // execute after hook with result and arguments
+  await executeAfterHook(hook, model, result, ...queryArguments);
 
   // return result
   return result;
