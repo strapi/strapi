@@ -13,7 +13,7 @@ const addQsParser = app => {
     /*
      * Get parsed query-string.
      */
-    get: () => {
+    get() {
       const qstr = this.querystring;
       const cache = (this._querycache = this._querycache || {});
       return cache[qstr] || (cache[qstr] = qs.parse(qstr));
@@ -22,7 +22,7 @@ const addQsParser = app => {
     /*
      * Set query-string as an object.
      */
-    set: obj => {
+    set(obj) {
       this.querystring = qs.stringify(obj);
     },
   });
