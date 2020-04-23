@@ -1,41 +1,28 @@
 'use strict';
 
 const body = require('koa-body');
-const merge = require('merge-descriptors');
 const qs = require('qs');
 
 /**
  * Body parser hook
  */
-
-const addParser = app => {
-  merge(app.request, {
-    /**
+const addQsParser = app => {
+  Object.defineProperty(app.request, 'query', {
+    configurable: false,
+    enumerable: true,
+    /*
      * Get parsed query-string.
-     *
-     * @return {Object}
-     * @api public
      */
-    get query() {
-      var str = this.querystring;
-      if (!str) return {};
-
-      var c = (this._querycache = this._querycache || {});
-      var query = c[str];
-      if (!query) {
-        c[str] = query = qs.parse(str);
-      }
-      return query;
+    get: () => {
+      const qstr = this.querystring;
+      const cache = (this._querycache = this._querycache || {});
+      return cache[qstr] || (cache[qstr] = qs.parse(qstr));
     },
 
-    /**
+    /*
      * Set query-string as an object.
-     *
-     * @param {Object} obj
-     * @api public
      */
-
-    set query(obj) {
+    set: obj => {
       this.querystring = qs.stringify(obj);
     },
   });
@@ -48,7 +35,6 @@ module.exports = strapi => {
     /**
      * Initialize the hook
      */
-
     initialize() {
       strapi.app.use((ctx, next) => {
         // disable for graphql
@@ -61,7 +47,7 @@ module.exports = strapi => {
         })(ctx, next);
       });
 
-      addParser(strapi.app);
+      addQsParser(strapi.app);
     },
   };
 };
