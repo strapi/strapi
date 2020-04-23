@@ -60,7 +60,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
 
 .c5 {
   height: 30px;
-  padding: 0 15px;
+  padding: 0 14px;
   font-weight: 500;
   font-size: 1.3rem;
   line-height: normal;
@@ -96,7 +96,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
 
 .c7 {
   height: 30px;
-  padding: 0 15px;
+  padding: 0 14px;
   font-weight: 500;
   font-size: 1.3rem;
   line-height: normal;
@@ -140,7 +140,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
 
 .c8 {
   height: 30px;
-  padding: 0 15px;
+  padding: 0 14px;
   font-weight: 500;
   font-size: 1.3rem;
   line-height: normal;
