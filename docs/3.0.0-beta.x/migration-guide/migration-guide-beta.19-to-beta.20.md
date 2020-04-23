@@ -212,6 +212,6 @@ Once your migration is done you can delete the `export.js` and `models.json` fil
 
 ## Rebuilding your administration panel
 
-You can run `yarn build --clean` or `npm run build -- --clean` to rebuild your admin panel with the newly installed version of strapi.
+You can run `yarn build --clean` or `npm run build --clean` to rebuild your admin panel with the newly installed version of strapi.
 
 Finally restart your server: `yarn develop` or `npm run develop`.
