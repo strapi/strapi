@@ -8,8 +8,9 @@ const RemoveWrapper = styled.div`
   position: absolute;
   width: 30px;
   text-align: center;
-  background-color: ${({ isOverEditBlock, isOverRemove, isSelected }) =>
-    getColor(isOverRemove, isSelected, isOverEditBlock)};
+  background-color: ${({ isOverEditBlock, isOverRemove, isSelected }) => {
+    return getColor(isOverRemove, isSelected, isOverEditBlock);
+  }};
   cursor: pointer;
 
   position: absolute;
@@ -22,17 +23,13 @@ const RemoveWrapper = styled.div`
     color: #b4b6ba;
   }
 
-  ${({ isOverRemove }) => {
-    if (isOverRemove) {
-      return `
-        path {
-          fill: #f64d0a;
-        }
-    `;
+  ${({ isOverRemove }) =>
+    isOverRemove &&
+    `
+    path {
+      fill: #f64d0a;
     }
-
-    return '';
-  }}
+  `};
 `;
 
 export default RemoveWrapper;
