@@ -64,9 +64,14 @@ module.exports = {
       {
         flatTernaryExpressions: false,
         SwitchCase: 1,
-        ignoredNodes: ['ConditionalExpression', "VariableDeclarator[kind='const']"],
+        ignoredNodes: [
+          'ConditionalExpression',
+          "VariableDeclarator[kind='const']",
+          'TemplateLiteral',
+        ],
       },
     ],
+    'template-curly-spacing': 0,
     'func-names': ['error', 'never'],
     'function-paren-newline': 0,
     'implicit-arrow-linebreak': 0,

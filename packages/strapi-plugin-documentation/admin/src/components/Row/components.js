@@ -35,8 +35,8 @@ const StyledButton = styled(Button)`
   font-size: 13px;
   font-weight: 500;
   ${({ type }) => {
-    if (type === 'openDocumentation') {
-      return css`
+  if (type === 'openDocumentation') {
+    return css`
         margin-right: 10px;
         border: 1px solid #dfe0e1;
         &:before {
@@ -46,9 +46,9 @@ const StyledButton = styled(Button)`
           font-size: 10px;
         }
       `;
-    }
-    if (type === 'generateDocumentation') {
-      return css`
+  }
+  if (type === 'generateDocumentation') {
+    return css`
         background: #e6f0fb;
         border: 1px solid #aed4fb;
         color: #007eff;
@@ -59,9 +59,9 @@ const StyledButton = styled(Button)`
           font-size: 10px;
         }
       `;
-    }
-    if (type === 'trash') {
-      return css`
+  }
+  if (type === 'trash') {
+    return css`
         margin-left: 25px;
         font-weight: 400;
         &:before {
@@ -71,13 +71,13 @@ const StyledButton = styled(Button)`
           font-size: 12 px;
         }
       `;
-    }
+  }
 
-    return css`
+  return css`
       margin-left: 45px;
       font-weight: 400;
     `;
-  }}
+}}
 `;
 
 export { Wrapper, StyledButton };

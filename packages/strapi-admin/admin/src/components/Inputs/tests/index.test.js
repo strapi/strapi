@@ -9,7 +9,7 @@ import Inputs from '../index';
 
 const renderWithIntl = (Compo, props) => {
   return renderer.create(
-    <IntlProvider locale="en" messages={translationMessages}>
+    <IntlProvider locale="en" messages={translationMessages} textComponent="span">
       <Compo {...props} />
     </IntlProvider>
   );
