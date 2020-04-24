@@ -132,6 +132,12 @@ Additional settings can be set on models:
 
 In this example, the model `Restaurant` will be accessible through the `Restaurants` global variable. The data will be stored in the `Restaurants_v1` collection or table and the model will use the `mongo` connection defined in `./config/environments/**/database.json`
 
+::: warning
+If not set manually in the JSON file, Strapi will adopt the filename as `globalId`.
+The `globalId` serves as a reference to your model within relations and Strapi APIs. If you chose to rename it (either by renaming your file or by changing the value of the `globalId`), you'd have to migrate your tables manually and update the references.
+Please note that you should not alter Strapi's models `globalId` (plugins and core ones) since it is used directly within Strapi APIs and other models' relations.
+:::
+
 ::: tip
 The `connection` value can be changed whenever you want, but you should be aware that there is no automatic data migration process. Also if the new connection doesn't use the same ORM you will have to rewrite your queries.
 :::
@@ -159,10 +165,7 @@ The info key on the model-json states information about the model. This informat
 
 The options key on the model-json states.
 
-- `idAttribute`: This tells the model which attribute to expect as the unique identifier for each database row (typically an auto-incrementing primary key named 'id'). _Only valid for bookshelf._
-- `idAttributeType`: Data type of `idAttribute`, accepted list of value below. _Only valid for bookshelf._
 - `timestamps`: This tells the model which attributes to use for timestamps. Accepts either `boolean` or `Array` of strings where first element is create date and second element is update date. Default value when set to `true` for Bookshelf is `["created_at", "updated_at"]` and for MongoDB is `["createdAt", "updatedAt"]`.
-- `uuid` : Boolean to enable UUID support on MySQL, you will need to set the `idAttributeType` to `uuid` as well and install the `bookshelf-uuid` package. To load the package you can see [this example](./configurations.md#bookshelf-mongoose).
 
 **Path —** `User.settings.json`.
 

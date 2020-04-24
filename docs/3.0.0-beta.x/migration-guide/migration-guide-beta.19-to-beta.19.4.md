@@ -74,7 +74,7 @@ In some cases (with Heroku, Docker...), listening to `localhost` won't work. In 
 
 ### Example
 
-**After -** `./config/environments/**/server.js`
+**Before -** `./config/environments/**/server.js`
 
 ```json
 {
