@@ -10,7 +10,7 @@ import stepper from './stepper';
 import useModalContext from '../../hooks/useModalContext';
 
 const InputModalStepper = ({ isOpen, onToggle, noNavigation, onInputMediaChange }) => {
-  const { formatMessage } = useGlobalContext();
+  const { emitEvent, formatMessage } = useGlobalContext();
   const [shouldDeleteFile, setShouldDeleteFile] = useState(false);
   const [displayNextButton, setDisplayNextButton] = useState(false);
   const {
@@ -62,6 +62,8 @@ const InputModalStepper = ({ isOpen, onToggle, noNavigation, onInputMediaChange 
   const editModalRef = useRef();
 
   const handleReplaceMedia = () => {
+    emitEvent('didReplaceMedia', { location: 'upload' });
+
     editModalRef.current.click();
   };
 
@@ -199,11 +201,19 @@ const InputModalStepper = ({ isOpen, onToggle, noNavigation, onInputMediaChange 
   const handleSubmitEditExistingFile = async (
     e,
     shouldDuplicateMedia = false,
-    file = fileToEdit.file
+    file = fileToEdit.file,
+    isSubmittingAfterCrop = false
   ) => {
     e.preventDefault();
 
     submitEditExistingFile();
+
+    if (isSubmittingAfterCrop) {
+      emitEvent('didCropFile', {
+        duplicatedFile: shouldDuplicateMedia,
+        location: 'content-manager',
+      });
+    }
 
     const headers = {};
     const formData = new FormData();
