@@ -77,6 +77,7 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPrevio
 
       return acc;
     }, {});
+
     const contentTypeDataStructure = createDefaultForm(
       currentContentTypeLayout.schema.attributes,
       allLayoutData.components
@@ -181,7 +182,7 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPrevio
     });
   };
 
-  const handleChange = ({ target: { name, value, type } }) => {
+  const handleChange = ({ target: { name, value, type } }, shouldSetInitialValue = false) => {
     let inputValue = value;
 
     // Empty string is not a valid date,
@@ -213,6 +214,7 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPrevio
       type: 'ON_CHANGE',
       keys: name.split('.'),
       value: inputValue,
+      shouldSetInitialValue,
     });
   };
 
