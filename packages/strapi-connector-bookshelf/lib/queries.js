@@ -4,7 +4,12 @@
  */
 
 const _ = require('lodash');
-const { convertRestQueryParams, buildQuery, models: modelUtils } = require('strapi-utils');
+const {
+  convertRestQueryParams,
+  buildQuery,
+  models: modelUtils,
+  escapeQuery,
+} = require('strapi-utils');
 
 module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   /* Utils */
@@ -650,52 +655,41 @@ const buildSearchQuery = (qb, model, params) => {
   const query = params._q;
 
   const associations = model.associations.map(x => x.alias);
+  const stringTypes = ['string', 'text', 'uid', 'email', 'enumeration', 'richtext', 'password'];
+  const numberTypes = ['biginteger', 'integer', 'decimal', 'float'];
 
-  const searchText = Object.keys(model._attributes)
-    .filter(attribute => attribute !== model.primaryKey && !associations.includes(attribute))
-    .filter(attribute => ['string', 'text'].includes(model._attributes[attribute].type));
-
-  const searchInt = Object.keys(model._attributes)
-    .filter(attribute => attribute !== model.primaryKey && !associations.includes(attribute))
-    .filter(attribute =>
-      ['integer', 'decimal', 'float'].includes(model._attributes[attribute].type)
-    );
-
-  const searchBool = Object.keys(model._attributes)
-    .filter(attribute => attribute !== model.primaryKey && !associations.includes(attribute))
-    .filter(attribute => ['boolean'].includes(model._attributes[attribute].type));
+  const searchColumns = Object.keys(model._attributes)
+    .filter(attribute => !associations.includes(attribute))
+    .filter(attribute => stringTypes.includes(model._attributes[attribute].type));
 
   if (!_.isNaN(_.toNumber(query))) {
-    searchInt.forEach(attribute => {
-      qb.orWhere(attribute, _.toNumber(query));
-    });
+    const numberColumns = Object.keys(model._attributes)
+      .filter(attribute => !associations.includes(attribute))
+      .filter(attribute => numberTypes.includes(model._attributes[attribute].type));
+    searchColumns.push(...numberColumns);
   }
 
-  if (query === 'true' || query === 'false') {
-    searchBool.forEach(attribute => {
-      qb.orWhere(attribute, _.toNumber(query === 'true'));
-    });
+  if ([...numberTypes, ...stringTypes].includes(model.primaryKeyType)) {
+    searchColumns.push(model.primaryKey);
   }
 
   // Search in columns with text using index.
   switch (model.client) {
-    case 'sqlite3': {
-      searchText.forEach(attr => qb.orWhereRaw(`${attr} LIKE ?`, `%${query}%`));
-      break;
-    }
-    case 'mysql':
-      qb.orWhereRaw(`MATCH(${searchText.join(',')}) AGAINST(? IN BOOLEAN MODE)`, `*${query}*`);
-      break;
-    case 'pg': {
-      const searchQuery = searchText.map(attribute =>
-        _.toLower(attribute) === attribute
-          ? `to_tsvector(coalesce(${attribute}, ''))`
-          : `to_tsvector(coalesce("${attribute}", ''))`
+    case 'pg':
+      searchColumns.forEach(attr =>
+        qb.orWhereRaw(`"${attr}"::text ILIKE ?`, `%${escapeQuery(query, '*%\\')}%`)
       );
-
-      qb.orWhereRaw(`${searchQuery.join(' || ')} @@ plainto_tsquery(?)`, query);
       break;
-    }
+    case 'sqlite3':
+      searchColumns.forEach(attr =>
+        qb.orWhereRaw(`"${attr}" LIKE ? ESCAPE '\\'`, `%${escapeQuery(query, '*%\\')}%`)
+      );
+      break;
+    case 'mysql':
+      searchColumns.forEach(attr =>
+        qb.orWhereRaw(`\`${attr}\` LIKE ?`, `%${escapeQuery(query, '*%\\')}%`)
+      );
+      break;
   }
 };
 

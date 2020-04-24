@@ -37,8 +37,8 @@ const databases = {
   },
 };
 
-const test = async args => {
-  return execa('yarn', ['-s', 'test:e2e', ...args.split(' ')], {
+const test = async (databaseName, args) => {
+  return execa('yarn', ['-s', 'test:e2e', ...args.split(' '), `--database=${databaseName}`], {
     stdio: 'inherit',
     cwd: path.resolve(__dirname, '..'),
     env: {
@@ -47,7 +47,7 @@ const test = async args => {
   });
 };
 
-const main = async (database, args) => {
+const main = async (databaseName, database, args) => {
   try {
     await cleanTestApp(appName);
     await generateTestApp({ appName, database });
@@ -55,7 +55,7 @@ const main = async (database, args) => {
 
     await waitOn({ resources: ['http://localhost:1337'] });
 
-    await test(args).catch(() => {
+    await test(databaseName, args).catch(() => {
       testAppProcess.kill();
       process.stdout.write('Tests failed\n', () => {
         process.exit(1);
@@ -87,7 +87,7 @@ yargs
     argv => {
       const { database, _: args } = argv;
 
-      main(databases[database], args.join(' '));
+      main(database, databases[database], args.join(' '));
     }
   )
   .help().argv;
