@@ -77,7 +77,7 @@
     "react-router-dom": "^5.0.0",
     "react-transition-group": "^2.9.0",
     "react-virtualized": "^9.21.2",
-    "reactstrap": "^5.0.0",
+    "reactstrap": "8.4.1",
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "redux-saga": "^0.16.0",

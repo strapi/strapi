@@ -137,12 +137,13 @@ module.exports = {
    */
 
   async create(data, { files } = {}) {
-    const entry = await strapi.query(model).create(data);
+    const entry = await strapi.query('restaurant').create(data);
 
     if (files) {
       // automatically uploads the files based on the entry and the model
       await strapi.entityService.uploadFiles(entry, files, {
-        model: strapi.models.restaurant,
+        model: 'restaurant',
+        // if you are using a plugin's model you will have to add the `plugin` key (plugin: 'users-permissions')
       });
       return this.findOne({ id: entry.id });
     }
@@ -167,12 +168,13 @@ module.exports = {
    */
 
   async update(params, data, { files } = {}) {
-    const entry = await strapi.query(model).update(params, data);
+    const entry = await strapi.query('restaurant').update(params, data);
 
     if (files) {
       // automatically uploads the files based on the entry and the model
       await strapi.entityService.uploadFiles(entry, files, {
-        model: strapi.models.restaurant,
+        model: 'restaurant',
+        // if you are using a plugin's model you will have to add the `plugin` key (plugin: 'users-permissions')
       });
       return this.findOne({ id: entry.id });
     }
