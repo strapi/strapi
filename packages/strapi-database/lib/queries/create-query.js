@@ -42,33 +42,33 @@ module.exports = function createQuery(opts) {
       return mapping[this.model.orm].call(this, { model: this.model });
     },
 
-    create: wrapQuery({ hook: 'create', model, connectorQuery }),
-    update: wrapQuery({ hook: 'update', model, connectorQuery }),
-    delete: wrapQuery({ hook: 'delete', model, connectorQuery }),
-    find: wrapQuery({ hook: 'find', model, connectorQuery }),
-    findOne: wrapQuery({ hook: 'findOne', model, connectorQuery }),
-    count: wrapQuery({ hook: 'count', model, connectorQuery }),
-    search: wrapQuery({ hook: 'search', model, connectorQuery }),
-    countSearch: wrapQuery({ hook: 'countSearch', model, connectorQuery }),
+    create: createQueryWithHooks({ query: 'create', model, connectorQuery }),
+    update: createQueryWithHooks({ query: 'update', model, connectorQuery }),
+    delete: createQueryWithHooks({ query: 'delete', model, connectorQuery }),
+    find: createQueryWithHooks({ query: 'find', model, connectorQuery }),
+    findOne: createQueryWithHooks({ query: 'findOne', model, connectorQuery }),
+    count: createQueryWithHooks({ query: 'count', model, connectorQuery }),
+    search: createQueryWithHooks({ query: 'search', model, connectorQuery }),
+    countSearch: createQueryWithHooks({ query: 'countSearch', model, connectorQuery }),
   };
 };
 
 // wraps a connectorQuery call with:
 // - param substitution
 // - lifecycle hooks
-const wrapQuery = ({ hook, model, connectorQuery }) => async (params, ...rest) => {
+const createQueryWithHooks = ({ query, model, connectorQuery }) => async (params, ...rest) => {
   // substite id for primaryKey value in params
   const newParams = replaceIdByPrimaryKey(params, model);
   const queryArguments = [newParams, ...rest];
 
   // execute before hook
-  await executeBeforeHook(hook, model, ...queryArguments);
+  await executeBeforeHook(query, model, ...queryArguments);
 
   // execute query
-  const result = await connectorQuery[hook](...queryArguments);
+  const result = await connectorQuery[query](...queryArguments);
 
   // execute after hook with result and arguments
-  await executeAfterHook(hook, model, result, ...queryArguments);
+  await executeAfterHook(query, model, result, ...queryArguments);
 
   // return result
   return result;
