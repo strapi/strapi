@@ -31,7 +31,7 @@ const CardImgWrapper = styled.div`
   }
 
   ${({ checked }) =>
-    checked &&
+  checked &&
     `
       .card-control-wrapper:not(.card-control-wrapper-hidden) {
         display: flex;

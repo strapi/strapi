@@ -13,7 +13,6 @@ const PreviewWysiwygWrapper = styled.div`
   font-family: 'Lato';
   cursor: text;
 
-  // TODO define rules for header's margin
   h1,
   h2,
   h3,
@@ -71,7 +70,6 @@ const PreviewWysiwygWrapper = styled.div`
     padding-left: 20px;
   }
 
-  // NOTE: we might need this later
   span {
     white-space: pre-line;
   }
