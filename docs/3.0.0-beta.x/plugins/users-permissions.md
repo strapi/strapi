@@ -712,6 +712,10 @@ Add the language translation in `packages/strapi-plugin-users-permissions/admin/
 
 These two change will set up the popup message that appears in the UI. That's it, now you should be able to use your new provider.
 
+### Rebuild the Admin Panel
+
+Please see the following [documentation](../admin-panel/customization.md#build) on rebuilding the admin panel.
+
 ## Templating emails
 
 By default, this plugin comes with only two templates (reset password and email address confirmation) at the moment. More templates will come later. The templates use Lodash's template() method to populate the variables.

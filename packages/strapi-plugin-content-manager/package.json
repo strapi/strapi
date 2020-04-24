@@ -25,7 +25,7 @@
     "react-router-dom": "^5.0.0",
     "react-select": "^3.0.4",
     "react-transition-group": "^2.5.0",
-    "reactstrap": "^5.0.0",
+    "reactstrap": "8.4.1",
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^3.0.1",
