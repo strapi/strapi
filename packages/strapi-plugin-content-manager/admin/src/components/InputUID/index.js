@@ -58,7 +58,7 @@ const InputUID = ({
   const wrapperRef = useRef(null);
   const generateUid = useRef();
   const initialValue = initialData[name];
-  const createdAtName = get(layout, ['schema', 'options', 'timestamps'], ['created_at'])[0];
+  const createdAtName = get(layout, ['schema', 'options', 'timestamps', 0]);
   const isCreation = !initialData[createdAtName];
 
   generateUid.current = async (shouldSetInitialValue = false) => {
@@ -271,7 +271,6 @@ InputUID.propTypes = {
   error: PropTypes.string,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
-  required: PropTypes.bool,
   validations: PropTypes.object,
   value: PropTypes.string,
 };
@@ -280,7 +279,6 @@ InputUID.defaultProps = {
   description: '',
   editable: false,
   error: null,
-  required: false,
   validations: {},
   value: '',
 };
