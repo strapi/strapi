@@ -60,7 +60,7 @@ Each plugin exports all its configurations in an object. This object is located 
 
 Here are its properties:
 
-| key                       | type    | value                                                                                                   |
+| key                       | type    | Description                                                                                             |
 | ------------------------- | ------- | :------------------------------------------------------------------------------------------------------ |
 | blockerComponent          | node    | can be either `null` or React node (e.g. `() => <div />`)                                               |
 | blockerComponentProps     | object  | `{}`                                                                                                    |
@@ -71,10 +71,10 @@ Here are its properties:
 | isReady                   | boolean | The app will load until this proprety is true                                                           |
 | leftMenuLinks             | array   | `[]`                                                                                                    |
 | mainComponent             | node    | The plugin's App container, setting it to null will prevent the plugin from being displayed in the menu |
-| name                      | string  | The plugin's name retrieved from the package.json.                                                      |
+| name                      | string  | The plugin's name retrieved from the package.json                                                       |
 | pluginLogo                | file    | The plugin's logo                                                                                       |
-| preventComponentRendering | boolean | Wheter or not display the plugin's blockerComponent instead of the main component                       |
-| settings                  | object  | Refer to ther [Plugins settings API](./frontend-settings-api.md)                                        |
+| preventComponentRendering | boolean | Whether or not display the plugin's blockerComponent instead of the main component                      |
+| settings                  | object  | Refer to the [Plugins settings API](./frontend-settings-api.md)                                         |
 | reducers                  | object  | The plugin's redux reducers                                                                             |
 | trads                     | object  | The plugin's translation files                                                                          |
 
