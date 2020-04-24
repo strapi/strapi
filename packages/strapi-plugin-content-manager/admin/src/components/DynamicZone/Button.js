@@ -14,17 +14,17 @@ const Button = styled(PlusButton)`
   }
 
   ${({ hasError }) => {
-    if (hasError) {
-      return `
+  if (hasError) {
+    return `
         background-color: #FAA684;
         :before, :after {
           background-color: #F64D0A;
         }
       `;
-    }
+  }
 
-    return '';
-  }}
+  return '';
+}}
   &.isOpen {
     transform: rotate(-45deg);
   }

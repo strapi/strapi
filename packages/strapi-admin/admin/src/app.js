@@ -18,7 +18,6 @@ import '@babel/polyfill';
 import 'sanitize.css/sanitize.css';
 
 // Third party css library needed
-import 'react-datetime/css/react-datetime.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'font-awesome/css/font-awesome.min.css';
 import '@fortawesome/fontawesome-free/css/all.css';
@@ -36,6 +35,7 @@ import { freezeApp, pluginLoaded, unfreezeApp, updatePlugin } from './containers
 import { showNotification } from './containers/NotificationProvider/actions';
 
 import basename from './utils/basename';
+import getInjectors from './utils/reducerInjectors';
 import injectReducer from './utils/injectReducer';
 import injectSaga from './utils/injectSaga';
 import Strapi from './utils/Strapi';
@@ -94,6 +94,13 @@ Object.keys(plugins).forEach(current => {
 
     return acc;
   }, {});
+
+  // Inject plugins reducers
+  const pluginReducers = plugin.reducers || {};
+
+  Object.keys(pluginReducers).forEach(reducerName => {
+    getInjectors(store).injectReducer(reducerName, pluginReducers[reducerName]);
+  });
 
   try {
     merge(translationMessages, pluginTradsPrefixed);
@@ -189,24 +196,7 @@ if (module.hot) {
 }
 
 if (NODE_ENV !== 'test') {
-  // Chunked polyfill for browsers without Intl support
-  if (!window.Intl) {
-    new Promise(resolve => {
-      resolve(import('intl'));
-    })
-      .then(() =>
-        Promise.all([
-          import('intl/locale-data/jsonp/en.js'),
-          import('intl/locale-data/jsonp/de.js'),
-        ])
-      )
-      .then(() => render(translationMessages))
-      .catch(err => {
-        throw err;
-      });
-  } else {
-    render(translationMessages);
-  }
+  render(translationMessages);
 }
 
 // @Pierre Burgy exporting dispatch for the notifications...

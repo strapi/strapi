@@ -12,7 +12,7 @@ const ComponentsPicker = styled.div`
   }
 
   ${({ isOpen }) =>
-    isOpen &&
+  isOpen &&
     css`
       max-height: 260px;
     `}

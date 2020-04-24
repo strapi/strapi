@@ -1,6 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<Inputs /> should match the snapshot if type is events 1`] = `
+.c1 {
+  width: 100%;
+  font-weight: 500;
+  font-size: 1.3rem;
+  color: #333740;
+}
+
 .c4 {
   cursor: pointer;
   margin: 0;
@@ -60,7 +67,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
   font-size: 1.3rem;
 }
 
-.c5 {
+.c6 {
   cursor: pointer;
   margin: 0;
   position: relative;
@@ -68,12 +75,12 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
   font-weight: 100;
 }
 
-.c5:focus,
-.c5:active {
+.c6:focus,
+.c6:active {
   outline: 0;
 }
 
-.c5:before {
+.c6:before {
   content: '';
   position: absolute;
   left: 0;
@@ -87,7 +94,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
   box-sizing: border-box;
 }
 
-.c5:after {
+.c6:after {
   display: none;
   content: '\\f00c';
   font-family: 'FontAwesome';
@@ -104,23 +111,23 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
   line-height: 14px;
 }
 
-.c5:checked:after {
+.c6:checked:after {
   display: block;
 }
 
-.c5:after {
+.c6:after {
   content: '\\f068';
   display: block;
   top: 50%;
   font-size: 10px;
 }
 
-.c5:disabled {
+.c6:disabled {
   background-color: #FAFAFB;
   cursor: initial;
 }
 
-.c5 + label {
+.c6 + label {
   display: inline-block;
   font-weight: 400;
   font-size: 1.3rem;
@@ -149,7 +156,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
   margin-bottom: 0;
 }
 
-.c1 {
+.c5 {
   width: 100%;
   font-weight: 500;
   font-size: 1.3rem;
@@ -314,7 +321,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
                 type="checkbox"
               />
               <label
-                className="c1"
+                className="c5"
                 htmlFor="entry"
               >
                 entry
@@ -339,7 +346,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
                 type="checkbox"
               />
               <label
-                className="c1"
+                className="c5"
                 htmlFor="entry.create"
               />
             </div>
@@ -362,7 +369,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
                 type="checkbox"
               />
               <label
-                className="c1"
+                className="c5"
                 htmlFor="entry.update"
               />
             </div>
@@ -385,7 +392,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
                 type="checkbox"
               />
               <label
-                className="c1"
+                className="c5"
                 htmlFor="entry.delete"
               />
             </div>
@@ -400,7 +407,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
                 autoComplete="off"
                 autoFocus={false}
                 checked={false}
-                className="c5"
+                className="c6"
                 id="media"
                 name="media"
                 onChange={[Function]}
@@ -409,7 +416,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
                 type="checkbox"
               />
               <label
-                className="c1"
+                className="c5"
                 htmlFor="media"
               >
                 media
@@ -434,7 +441,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
                 type="checkbox"
               />
               <label
-                className="c1"
+                className="c5"
                 htmlFor="media.create"
               />
             </div>
@@ -457,7 +464,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
                 type="checkbox"
               />
               <label
-                className="c1"
+                className="c5"
                 htmlFor="media.update"
               />
             </div>
@@ -480,7 +487,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
                 type="checkbox"
               />
               <label
-                className="c1"
+                className="c5"
                 htmlFor="media.delete"
               />
             </div>
@@ -500,6 +507,13 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
 `;
 
 exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
+.c1 {
+  width: 100%;
+  font-weight: 500;
+  font-size: 1.3rem;
+  color: #333740;
+}
+
 .c4 {
   width: 100%;
   height: 3.4rem;
@@ -565,13 +579,6 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
 .c3 input {
   position: relative;
   z-index: 1;
-}
-
-.c1 {
-  width: 100%;
-  font-weight: 500;
-  font-size: 1.3rem;
-  color: #333740;
 }
 
 .c5 {
@@ -781,7 +788,7 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
               onTouchEnd={[Function]}
             >
               <div
-                className=" css-1hwfws3"
+                className=" css-g1d714-ValueContainer"
               >
                 <div
                   className=" css-1uccc91-singleValue"
