@@ -58,6 +58,23 @@ const createTelemetryInstance = strapi => {
     }
   };
 
+  let currentDay = new Date().getDate();
+  const eventCache = new Map();
+
+  const sendOncePerDay = async (event, payload) => {
+    if (new Date().getDate() !== currentDay) {
+      eventCache.clear();
+      currentDay = new Date().getDate();
+    }
+
+    if (eventCache.has(event)) {
+      return true;
+    }
+
+    eventCache.set(event, true);
+    return sendEvent(event, payload);
+  };
+
   if (!isDisabled) {
     scheduleJob('0 0 12 * * *', () => sendEvent('ping'));
     strapi.app.use(createMiddleware({ sendEvent }));
@@ -65,6 +82,7 @@ const createTelemetryInstance = strapi => {
 
   return {
     send: sendEvent,
+    sendOncePerDay,
   };
 };
 
