@@ -208,9 +208,6 @@ config/environments/production/server.json
   "host": "${process.env.HOST}",
   "port": "${process.env.PORT || 1337}",
   "production": true,
-  "proxy": {
-    "enabled": false
-  },
   "cron": {
     "enabled": false
   },

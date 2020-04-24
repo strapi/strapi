@@ -291,15 +291,15 @@ module.exports = function(strapi) {
   let serverUrl = _.get(strapi.config.currentEnvironment, 'server.url', '');
   serverUrl = _.trim(serverUrl, '/ ');
   if (typeof serverUrl !== 'string') {
-    console.log('Invalid server url config. Make sure the url is a string.');
-    process.exit(1);
+    strapi.stopWithError(new Error('Invalid server url config. Make sure the url is a string.'));
   }
   if (serverUrl.startsWith('http')) {
     try {
       serverUrl = _.trim(new URL(strapi.config.currentEnvironment.server.url).toString(), '/');
     } catch (e) {
-      console.log('Invalid server url config. Make sure the url defined in server.js is valid.');
-      process.exit(1);
+      strapi.stopWithError(
+        new Error('Invalid server url config. Make sure the url defined in server.js is valid.')
+      );
     }
   } else if (serverUrl !== '') {
     serverUrl = `/${serverUrl}`;
@@ -308,7 +308,7 @@ module.exports = function(strapi) {
   // Defines adminUrl value
   let adminUrl = _.get(strapi.config.currentEnvironment, 'server.admin.url', '/admin');
   adminUrl = _.trim(adminUrl, '/ ');
-  if (typeof adminUrl !== 'string' || adminUrl === '') {
+  if (typeof adminUrl !== 'string') {
     throw new Error('Invalid admin url config. Make sure the url is a non-empty string.');
   }
   if (adminUrl.startsWith('http')) {

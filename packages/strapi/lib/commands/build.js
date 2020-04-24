@@ -49,7 +49,7 @@ module.exports = async ({ clean, optimization }) => {
   // Defines adminUrl value
   let adminUrl = _.get(conf, 'admin.url', '/admin');
   adminUrl = _.trim(adminUrl, '/ ');
-  if (typeof adminUrl !== 'string' || adminUrl === '') {
+  if (typeof adminUrl !== 'string') {
     throw new Error('Invalid admin url config. Make sure the url is a non-empty string.');
   }
   if (adminUrl.startsWith('http')) {
