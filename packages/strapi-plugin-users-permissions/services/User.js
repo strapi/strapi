@@ -21,6 +21,16 @@ module.exports = {
   },
 
   /**
+   * Promise to search count users
+   *
+   * @return {Promise}
+   */
+
+  countSearch(params) {
+    return strapi.query('user', 'users-permissions').countSearch(params);
+  },
+
+  /**
    * Promise to add a/an user.
    * @return {Promise}
    */
