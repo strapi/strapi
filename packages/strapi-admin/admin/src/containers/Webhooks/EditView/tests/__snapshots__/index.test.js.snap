@@ -715,7 +715,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
 
 .c18 tbody td {
   height: 54px;
-  padding-bottom: 3px;
+  padding-top: 3px;
 }
 
 .c18 tbody td input[type='checkbox']:disabled:before {
@@ -732,7 +732,6 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
   width: -webkit-fit-content;
   width: -moz-fit-content;
   width: fit-content;
-  margin-top: -1px;
   font-weight: 500;
   cursor: pointer;
 }
@@ -747,7 +746,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
 
 .c13 {
   position: relative;
-  padding-bottom: 23px;
+  padding-bottom: 27px;
 }
 
 .c13 label {
@@ -816,15 +815,10 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
 .c0 .row > div {
   position: relative;
   z-index: 0;
-  margin-bottom: 4px;
 }
 
 .c0 .row > div:nth-of-type(3) {
   z-index: 1;
-}
-
-.c0 .row > div:nth-of-type(4) {
-  margin-bottom: 0;
 }
 
 <div
@@ -862,16 +856,15 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                 <button
                   class="c5"
                   color="primary"
-                  style="padding: 0px 15px;"
                   type="button"
                 >
                   <span
                     class="c6"
                   >
                     <svg
-                      height="14px"
+                      height="10px"
                       viewBox="0 0 14 14"
-                      width="14px"
+                      width="8px"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <g
@@ -910,7 +903,7 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
                   class="c7"
                   color="cancel"
                   disabled=""
-                  style="padding: 0px 20px;"
+                  style="padding-left: 20px; padding-right: 20px;"
                   type="button"
                 >
                   Reset
