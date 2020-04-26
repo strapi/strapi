@@ -47,6 +47,15 @@ class DatabaseManager {
     return this;
   }
 
+  getDefaultConnector() {
+    const defaultConnectionName = this.strapi.config.currentEnvironment.database.defaultConnection;
+    const defaultConnector = this.strapi.config.currentEnvironment.database.connections[
+      defaultConnectionName
+    ].connector;
+
+    return this.connectors.get(defaultConnector);
+  }
+
   initializeModelsMap() {
     Object.keys(this.strapi.models).forEach(modelKey => {
       const model = this.strapi.models[modelKey];

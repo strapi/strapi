@@ -2,6 +2,14 @@
   "routes": [
     {
       "method": "GET",
+      "path": "/restricted-names",
+      "handler": "Builder.getRestrictedNames",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
       "path": "/connections",
       "handler": "Connections.getConnections",
       "config": {
