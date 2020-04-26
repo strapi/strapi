@@ -52,7 +52,7 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
         return null;
       }
 
-      if (data.type === 'object' || data.type === 'array' || data.type === 'boolean') {
+      if (data.type === 'object' || data.type === 'array' || data.type === 'boolean' || data.type === 'string') {
         try {
           return JSON.parse(data.value);
         } catch (err) {
@@ -60,8 +60,6 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
         }
       } else if (data.type === 'number') {
         return parseFloat(data.value);
-      } else if (data.type === 'string') {
-        return data.value;
       } else {
         return null;
       }
