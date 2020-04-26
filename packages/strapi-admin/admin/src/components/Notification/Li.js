@@ -42,16 +42,16 @@ const GlobalNotification = createGlobalStyle`
   }
 
   .notificationClose {
-    cursor: pointer;
-    opacity: 0.6;
     position: relative;
     display: flex;
     width: 20px;
+    margin-right: 15px;
+    cursor: pointer;
+    opacity: 0.6;
     font-size: 1.4rem;
     color: #BBC2BF;
     transition: opacity 0.1s ease;
     -webkit-font-smoothing: antialiased;
-    margin-right: 15px
 
     &:hover {
       opacity: 1;
@@ -68,9 +68,8 @@ const GlobalNotification = createGlobalStyle`
     background: linear-gradient(
       100deg, 
       #FFFFFF 50%,
-      rgba(39, 183, 15, .05)
-    ),
-    ${props => props.theme.main.colors.white};
+      rgba(39, 183, 15, .05)),
+      ${props => props.theme.main.colors.white};
     .notificationIcon {
       div {
         border-color: ${props => props.theme.main.colors.green};
@@ -85,8 +84,8 @@ const GlobalNotification = createGlobalStyle`
     background: linear-gradient(
       100deg,
       #FFFFFF 50%,
-      rgba(250, 156, 0, .05)
-    ), ${props => props.theme.main.colors.white};
+      rgba(250, 156, 0, .05)),
+      ${props => props.theme.main.colors.white};
     .notificationIcon {
       div {
         border-color: ${props => props.theme.main.colors.orange};
@@ -98,11 +97,8 @@ const GlobalNotification = createGlobalStyle`
   }
 
   .notificationError {
-    background: linear-gradient(
-      100deg,
-      #FFFFFF 50%,
-      rgba(255, 93, 0, .05)
-    ), $white;
+    background: linear-gradient(100deg , #FFFFFF 50%, rgba(255, 93, 0, .05)), $white;
+
     .notificationIcon {
       div {
         border-color: ${props => props.theme.main.colors.red};
@@ -117,8 +113,8 @@ const GlobalNotification = createGlobalStyle`
     background: linear-gradient(
       100deg,
       #FFFFFF 50%,
-      rgba(28, 93, 231, .05)
-    ), ${props => props.theme.main.colors.white};
+      rgba(28, 93, 231, .05)),
+      ${props => props.theme.main.colors.white};
     .notificationIcon {
       div {
         border-color: ${props => props.theme.main.colors.blue};

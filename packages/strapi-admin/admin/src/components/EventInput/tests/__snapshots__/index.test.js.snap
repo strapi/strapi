@@ -52,7 +52,7 @@ exports[`<EventInput /> should match the snapshot 1`] = `
 
 .c0 tbody td {
   height: 54px;
-  padding-bottom: 3px;
+  padding-top: 3px;
 }
 
 .c0 tbody td input[type='checkbox']:disabled:before {
@@ -69,7 +69,6 @@ exports[`<EventInput /> should match the snapshot 1`] = `
   width: -webkit-fit-content;
   width: -moz-fit-content;
   width: fit-content;
-  margin-top: -1px;
   font-weight: 500;
   cursor: pointer;
 }
@@ -237,89 +236,6 @@ exports[`<EventInput /> should match the snapshot 1`] = `
   color: #333740;
 }
 
-<<<<<<< HEAD
-=======
-.c0 {
-  padding-top: 3px;
-  padding-bottom: 8px;
-}
-
-.c0 table {
-  width: 100%;
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.c0 tr:before {
-  content: '-';
-  position: absolute;
-  left: 20px;
-  display: inline-block;
-  width: calc(100% - 40px);
-  height: 1px;
-  margin-top: -1px;
-  line-height: 1.1em;
-  color: transparent;
-  background-color: #f6f6f6;
-}
-
-.c0 tr:first-of-type:before {
-  left: 0;
-  height: 2px;
-  width: 100%;
-  background-color: #fafafb;
-  z-index: 1;
-}
-
-.c0 thead {
-  background-color: #fafafb;
-}
-
-.c0 thead td {
-  height: 41px;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.c0 tbody {
-  border-bottom-left-radius: 2px;
-  border-bottom-right-radius: 2px;
-  box-shadow: inset 0px 0px 0px 1px #f6f6f6;
-}
-
-.c0 tbody td {
-  height: 54px;
-  padding-top: 3px;
-}
-
-.c0 tbody td input[type='checkbox']:disabled:before {
-  background-color: #e8e5e5;
-}
-
-.c0 tbody td:first-of-type {
-  width: 200px;
-  padding-left: 30px;
-  text-transform: capitalize;
-}
-
-.c0 tbody td:first-of-type label {
-  width: -webkit-fit-content;
-  width: -moz-fit-content;
-  width: fit-content;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.c0 tbody td:not(:first-of-type) > div {
-  display: block;
-  width: -webkit-fit-content;
-  width: -moz-fit-content;
-  width: fit-content;
-  margin: 0 auto;
-}
-
->>>>>>> a5718f9eb7ba4476e23ebc9b9d4682aeb6360768
 <div
   className="c0"
 >

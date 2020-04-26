@@ -2,7 +2,48 @@
 
 exports[`Admin | containers | ListView should match the snapshot 1`] = `
 <DocumentFragment>
-  .c6 button {
+  .c7 {
+  height: 30px;
+  padding: 0 15px;
+  font-weight: 500;
+  font-size: 1.3rem;
+  line-height: normal;
+  border-radius: 2px;
+  cursor: pointer;
+  outline: 0;
+  background-color: #ffffff;
+  background-color: #007EFF;
+  border: 1px solid #007EFF;
+  color: #ffffff;
+}
+
+.c7:hover {
+  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  box-shadow: inset 0 0 30px [object Object];
+}
+
+.c7:active {
+  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  box-shadow: inset 0 0 30px [object Object];
+}
+
+.c7:focus {
+  outline: 0;
+}
+
+.c7 > svg {
+  margin-right: 10px;
+  vertical-align: initial;
+}
+
+.c8 {
+  margin-right: 10px;
+  font-size: 0.94em;
+}
+
+.c6 button {
   width: 100%;
   height: 54px;
   border: 0;
@@ -30,7 +71,7 @@ exports[`Admin | containers | ListView should match the snapshot 1`] = `
 }
 
 .c9 {
-  width: 37.5rem !important;
+  width: 41.6rem !important;
   -webkit-font-smoothing: antialiased !important;
 }
 
@@ -181,47 +222,6 @@ exports[`Admin | containers | ListView should match the snapshot 1`] = `
   color: rgba(16,22,34,0.35);
   cursor: pointer;
   outline: 0;
-}
-
-.c7 {
-  height: 30px;
-  padding: 0 15px;
-  font-weight: 500;
-  font-size: 1.3rem;
-  line-height: normal;
-  border-radius: 2px;
-  cursor: pointer;
-  outline: 0;
-  background-color: #ffffff;
-  background-color: #007EFF;
-  border: 1px solid #007EFF;
-  color: #ffffff;
-}
-
-.c7:hover {
-  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
-  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
-  box-shadow: inset 0 0 30px [object Object];
-}
-
-.c7:active {
-  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
-  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
-  box-shadow: inset 0 0 30px [object Object];
-}
-
-.c7:focus {
-  outline: 0;
-}
-
-.c7 > svg {
-  margin-right: 10px;
-  vertical-align: initial;
-}
-
-.c8 {
-  margin-right: 10px;
-  font-size: 0.94em;
 }
 
 .c5 {

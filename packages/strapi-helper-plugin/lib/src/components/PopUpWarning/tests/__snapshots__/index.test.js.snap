@@ -207,9 +207,7 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
               <h5
                 class="modal-title"
               >
-                <span>
-                  Please confirm
-                </span>
+                Please confirm
               </h5>
               <button
                 aria-label="Close"
@@ -232,9 +230,7 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
                   src="IMAGE_MOCK"
                 />
                 <p>
-                  <span>
-                    Are you sure you want to delete this?
-                  </span>
+                  Are you sure you want to delete this?
                 </p>
               </div>
             </div>
@@ -246,18 +242,14 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
                 color="cancel"
                 type="button"
               >
-                <span>
-                  Cancel
-                </span>
+                Cancel
               </button>
               <button
                 class="c7"
                 color="delete"
                 type="button"
               >
-                <span>
-                  Confirm
-                </span>
+                Confirm
               </button>
             </div>
           </div>
@@ -442,9 +434,7 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
               <h5
                 class="modal-title"
               >
-                <span>
-                  Please confirm
-                </span>
+                Please confirm
               </h5>
               <button
                 aria-label="Close"
@@ -467,9 +457,7 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
                   src="IMAGE_MOCK"
                 />
                 <p>
-                  <span>
-                    Are you sure you want to delete this?
-                  </span>
+                  Are you sure you want to delete this?
                 </p>
               </div>
             </div>
@@ -482,9 +470,7 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
                 style="width: 100%;"
                 type="button"
               >
-                <span>
-                  Confirm
-                </span>
+                Confirm
               </button>
             </div>
           </div>

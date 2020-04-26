@@ -2,7 +2,163 @@
 
 exports[`Admin | containers | EditView should match the snapshot 1`] = `
 <DocumentFragment>
-  .c1 {
+  .c20 {
+  cursor: pointer;
+  margin: 0;
+  position: relative;
+  width: 14px;
+  font-weight: 100;
+}
+
+.c20:focus,
+.c20:active {
+  outline: 0;
+}
+
+.c20:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  margin-top: calc(-14px / 2);
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(16,22,34,0.15);
+  background-color: #fdfdfd;
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+
+.c20:after {
+  display: none;
+  content: '\\f00c';
+  font-family: 'FontAwesome';
+  position: absolute;
+  left: 0px;
+  top: 55%;
+  margin-top: calc(-14px / 2);
+  width: 14px;
+  height: 14px;
+  text-align: center;
+  font-size: 9px;
+  font-weight: 400;
+  color: #1C5DE7;
+  line-height: 14px;
+}
+
+.c20:checked:after {
+  display: block;
+}
+
+.c20:disabled {
+  background-color: #FAFAFB;
+  cursor: initial;
+}
+
+.c20 + label {
+  display: inline-block;
+  font-weight: 400;
+  font-size: 1.3rem;
+}
+
+.c19 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  height: 18px;
+  line-height: 18px;
+}
+
+.c19 input label {
+  cursor: pointer;
+  margin-bottom: 0 !important;
+}
+
+.c19 input + label {
+  margin-left: 10px;
+  margin-bottom: 0;
+}
+
+.c16 {
+  width: 100%;
+  height: 3.4rem;
+  padding: 0 1rem;
+  font-weight: 400;
+  font-size: 1.3rem;
+  cursor: text;
+  outline: 0;
+  border: 1px solid #E3E9F3;
+  border-radius: 2px;
+  color: #333740;
+  background-color: transparent;
+}
+
+.c16::-webkit-input-placeholder {
+  color: #919BAE;
+}
+
+.c16:focus {
+  border-color: #78caff;
+}
+
+.c16:disabled {
+  background-color: #FAFAFB;
+}
+
+.c15 {
+  position: relative;
+  background-color: #ffffff;
+}
+
+.c15 button[type='button'] {
+  width: 3.4rem;
+  height: 3.4rem;
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  cursor: pointer;
+  outline: 0;
+  border: 0;
+  background: transparent;
+}
+
+.c15 button[type='button']:hover span::before {
+  color: #000000;
+}
+
+.c15 button[type='button'].shown span::before {
+  color: #000000;
+}
+
+.c15 button[type='button'].shown + input[type='text'] {
+  padding-right: calc(3.4rem + 1rem);
+}
+
+.c15 span {
+  z-index: 0;
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
+}
+
+.c15 input {
+  position: relative;
+  z-index: 1;
+}
+
+.c21 {
+  width: 100%;
+  font-weight: 500;
+  font-size: 1.3rem;
+  color: #333740;
+}
+
+.c1 {
   position: fixed;
   top: 0;
   height: 6rem;
@@ -394,162 +550,6 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
   overflow: hidden;
   text-overflow: ellipsis;
   margin-bottom: -8px;
-}
-
-.c20 {
-  cursor: pointer;
-  margin: 0;
-  position: relative;
-  width: 14px;
-  font-weight: 100;
-}
-
-.c20:focus,
-.c20:active {
-  outline: 0;
-}
-
-.c20:before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  margin-top: calc(-14px / 2);
-  width: 14px;
-  height: 14px;
-  border: 1px solid rgba(16,22,34,0.15);
-  background-color: #fdfdfd;
-  border-radius: 3px;
-  box-sizing: border-box;
-}
-
-.c20:after {
-  display: none;
-  content: '\\f00c';
-  font-family: 'FontAwesome';
-  position: absolute;
-  left: 0px;
-  top: 55%;
-  margin-top: calc(-14px / 2);
-  width: 14px;
-  height: 14px;
-  text-align: center;
-  font-size: 9px;
-  font-weight: 400;
-  color: #1C5DE7;
-  line-height: 14px;
-}
-
-.c20:checked:after {
-  display: block;
-}
-
-.c20:disabled {
-  background-color: #FAFAFB;
-  cursor: initial;
-}
-
-.c20 + label {
-  display: inline-block;
-  font-weight: 400;
-  font-size: 1.3rem;
-}
-
-.c19 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  height: 18px;
-  line-height: 18px;
-}
-
-.c19 input label {
-  cursor: pointer;
-  margin-bottom: 0 !important;
-}
-
-.c19 input + label {
-  margin-left: 10px;
-  margin-bottom: 0;
-}
-
-.c16 {
-  width: 100%;
-  height: 3.4rem;
-  padding: 0 1rem;
-  font-weight: 400;
-  font-size: 1.3rem;
-  cursor: text;
-  outline: 0;
-  border: 1px solid #E3E9F3;
-  border-radius: 2px;
-  color: #333740;
-  background-color: transparent;
-}
-
-.c16::-webkit-input-placeholder {
-  color: #919BAE;
-}
-
-.c16:focus {
-  border-color: #78caff;
-}
-
-.c16:disabled {
-  background-color: #FAFAFB;
-}
-
-.c15 {
-  position: relative;
-  background-color: #ffffff;
-}
-
-.c15 button[type='button'] {
-  width: 3.4rem;
-  height: 3.4rem;
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 2;
-  cursor: pointer;
-  outline: 0;
-  border: 0;
-  background: transparent;
-}
-
-.c15 button[type='button']:hover span::before {
-  color: #000000;
-}
-
-.c15 button[type='button'].shown span::before {
-  color: #000000;
-}
-
-.c15 button[type='button'].shown + input[type='text'] {
-  padding-right: calc(3.4rem + 1rem);
-}
-
-.c15 span {
-  z-index: 0;
-  border-top-left-radius: 2px;
-  border-bottom-left-radius: 2px;
-}
-
-.c15 input {
-  position: relative;
-  z-index: 1;
-}
-
-.c21 {
-  width: 100%;
-  font-weight: 500;
-  font-size: 1.3rem;
-  color: #333740;
 }
 
 .c14 {
