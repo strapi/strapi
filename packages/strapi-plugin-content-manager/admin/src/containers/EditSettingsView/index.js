@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useReducer,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useParams } from 'react-router-dom';
 import { cloneDeep, get, set } from 'lodash';
@@ -74,9 +68,9 @@ const EditSettingsView = ({
   }, [modifiedData]);
 
   const getForm = () =>
-    Object.keys(
-      get(modifiedData, ['metadatas', metaToEdit, 'edit'], {})
-    ).filter(meta => meta !== 'visible');
+    Object.keys(get(modifiedData, ['metadatas', metaToEdit, 'edit'], {})).filter(
+      meta => meta !== 'visible'
+    );
 
   const getRelationsLayout = useCallback(() => {
     return get(modifiedData, ['layouts', 'editRelations'], []);
@@ -94,10 +88,7 @@ const EditSettingsView = ({
   const getEditRemainingFields = () => {
     const attributes = getAttributes;
     const metadatas = get(modifiedData, ['metadatas'], {});
-    const displayedFields = getEditLayout().reduce(
-      (acc, curr) => [...acc, ...curr.rowContent],
-      []
-    );
+    const displayedFields = getEditLayout().reduce((acc, curr) => [...acc, ...curr.rowContent], []);
 
     return Object.keys(attributes)
       .filter(attr => get(attributes, [attr, 'type'], '') !== 'relation')
@@ -114,11 +105,7 @@ const EditSettingsView = ({
       }
 
       const targetKey = formType === 'component' ? 'component' : 'targetModel';
-      const key = get(
-        modifiedData,
-        ['schema', 'attributes', metaToEdit, targetKey],
-        ''
-      );
+      const key = get(modifiedData, ['schema', 'attributes', metaToEdit, targetKey], '');
 
       return get(componentsAndModelsMainPossibleMainFields, [key], []);
     },
@@ -129,13 +116,10 @@ const EditSettingsView = ({
   useEffect(() => {
     const getData = async () => {
       try {
-        const { data } = await request(
-          getRequestUrl(`${type}/${slug || componentSlug}`),
-          {
-            method: 'GET',
-            signal,
-          }
-        );
+        const { data } = await request(getRequestUrl(`${type}/${slug || componentSlug}`), {
+          method: 'GET',
+          signal,
+        });
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
@@ -176,6 +160,7 @@ const EditSettingsView = ({
   const handleConfirm = async () => {
     try {
       const body = cloneDeep(modifiedData);
+
       // We need to send the unformated edit layout
       set(body, 'layouts.edit', unformatLayout(body.layouts.edit));
 
@@ -183,6 +168,7 @@ const EditSettingsView = ({
       delete body.uid;
       delete body.isComponent;
       delete body.category;
+      delete body.apiID;
 
       await request(getRequestUrl(`${type}/${slug || componentSlug}`), {
         method: 'PUT',
@@ -252,24 +238,15 @@ const EditSettingsView = ({
     getForm().map((meta, index) => {
       const formType = get(getAttributes, [metaToEdit, 'type']);
 
-      if (
-        formType === 'dynamiczone' &&
-        !['label', 'description'].includes(meta)
-      ) {
+      if (formType === 'dynamiczone' && !['label', 'description'].includes(meta)) {
         return null;
       }
 
-      if (
-        (formType === 'component' || formType === 'media') &&
-        meta !== 'label'
-      ) {
+      if ((formType === 'component' || formType === 'media') && meta !== 'label') {
         return null;
       }
 
-      if (
-        (formType === 'json' || formType === 'boolean') &&
-        meta === 'placeholder'
-      ) {
+      if ((formType === 'json' || formType === 'boolean') && meta === 'placeholder') {
         return null;
       }
 
@@ -284,11 +261,7 @@ const EditSettingsView = ({
           >
             {description => (
               <FormattedMessage
-                id={get(
-                  getInputProps(meta),
-                  'label.id',
-                  'app.utils.defaultMessage'
-                )}
+                id={get(getInputProps(meta), 'label.id', 'app.utils.defaultMessage')}
               >
                 {label => (
                   <Input

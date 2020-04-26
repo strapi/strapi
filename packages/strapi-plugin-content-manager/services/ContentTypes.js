@@ -15,7 +15,12 @@ const toUID = (name, plugin) => {
   return model.uid;
 };
 
-const formatContentTypeLabel = label => _.upperFirst(pluralize(label));
+const formatContentTypeLabel = contentType => {
+  const { kind } = contentType;
+  const name = _.get(contentType, ['info', 'name'], contentType.modelName);
+
+  return kind === 'singleType' ? _.upperFirst(name) : _.upperFirst(pluralize(name));
+};
 
 const HIDDEN_CONTENT_TYPES = [
   'strapi::admin',
@@ -50,11 +55,13 @@ const formatContentType = contentType => {
   return {
     uid: contentType.uid,
     name: _.get(contentType, ['info', 'name']),
-    label: formatContentTypeLabel(
-      _.get(contentType, ['info', 'name'], contentType.modelName)
-    ),
+    apiID: contentType.modelName,
+    label: formatContentTypeLabel(contentType),
     isDisplayed: HIDDEN_CONTENT_TYPES.includes(contentType.uid) ? false : true,
-    schema: formatContentTypeSchema(contentType),
+    schema: {
+      ...formatContentTypeSchema(contentType),
+      kind: contentType.kind || 'collectionType',
+    },
   };
 };
 
@@ -69,9 +76,7 @@ const formatAttribute = (key, attribute, { model }) => {
   if (_.has(attribute, 'type')) return attribute;
 
   // format relations
-  const relation = (model.associations || []).find(
-    assoc => assoc.alias === key
-  );
+  const relation = (model.associations || []).find(assoc => assoc.alias === key);
 
   const { plugin } = attribute;
   let targetEntity = attribute.model || attribute.collection;
@@ -81,6 +86,7 @@ const formatAttribute = (key, attribute, { model }) => {
       type: 'media',
       multiple: attribute.collection ? true : false,
       required: attribute.required ? true : false,
+      allowedTypes: attribute.allowedTypes,
     };
   } else {
     return {
@@ -110,10 +116,7 @@ const createTimestampsSchema = contentType => {
     return {};
   }
 
-  const [createdAtAttribute, updatedAtAttribute] = _.get(contentType, [
-    'options',
-    'timestamps',
-  ]);
+  const [createdAtAttribute, updatedAtAttribute] = _.get(contentType, ['options', 'timestamps']);
 
   return {
     [createdAtAttribute]: {

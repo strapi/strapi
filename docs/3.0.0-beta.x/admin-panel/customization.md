@@ -1,6 +1,6 @@
 # Customization
 
-The administration panel can be customized according to your needs, so you can make it reflects your identity.
+The administration panel can be customized according to your needs, so you can make it reflect your identity.
 
 ::: warning
 To apply your changes you need to [rebuild](#build) your admin panel
@@ -25,6 +25,8 @@ By default, the administration panel is exposed via [http://localhost:1337/admin
 }
 ```
 
+The panel will be available through [http://localhost:1337/dashboard](http://localhost:1337/dashboard) with the configurations above.
+
 ## Change the host
 
 By default, the administration panel client host name is `localhost`. However, you can change this setting by updating the `admin` configuration:
@@ -43,8 +45,6 @@ By default, the administration panel client host name is `localhost`. However, y
   }
 }
 ```
-
-The panel will be available through [http://localhost:1337/dashboard](http://localhost:1337/dashboard) with the configurations above.
 
 ## Development mode
 
@@ -84,43 +84,6 @@ const trads = {
 };
 
 export default trads;
-```
-
-**Path --** `my-app/admin/src/i18n.js`
-
-```js
-import { addLocaleData } from 'react-intl';
-import { reduce } from 'lodash';
-import en from 'react-intl/locale-data/en';
-import fr from 'react-intl/locale-data/fr';
-import trads from './translations';
-
-// We dismiss pt-BR and zh-Hans locales since they are not supported by react-intl
-const locales = {
-  en,
-  fr,
-};
-const languages = Object.keys(trads);
-
-/**
- * Dynamically generate `translationsMessages object`.
- */
-const translationMessages = reduce(
-  languages,
-  (result, language) => {
-    const obj = result;
-    obj[language] = trads[language];
-
-    if (locales[language]) {
-      addLocaleData(locales[language]);
-    }
-
-    return obj;
-  },
-  {}
-);
-
-export { languages, translationMessages };
 ```
 
 ::: tip
@@ -186,7 +149,9 @@ To disable the information box containing the tutorial videos, create a file at 
 Add the following configuration:
 
 ```js
+export const LOGIN_LOGO = null;
 export const SHOW_TUTORIALS = false;
+export const SETTINGS_BASE_URL = '/settings';
 ```
 
 ### Changing the port

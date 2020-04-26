@@ -5,8 +5,18 @@ import colors from '../../assets/styles/colors';
 const List = styled.ul`
   margin-bottom: 0;
   padding-left: 0;
-  max-height: 251px;
-  overflow-y: scroll;
+  max-height: 178px;
+  overflow-y: auto;
+  ::-webkit-scrollbar {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+    &:hover {
+      background: transparent;
+    }
+  }
+
   li {
     position: relative;
     margin-bottom: 2px;
@@ -19,19 +29,6 @@ const List = styled.ul`
     padding-left: 30px;
     height: 34px;
     border-radius: 2px;
-    &::before {
-      content: '•';
-      position: absolute;
-      top: calc(50% - 2px);
-      left: 15px;
-      font-weight: bold;
-      display: block;
-      width: 0.5em;
-      height: 0.5em;
-      color: ${colors.leftMenu.darkGrey};
-      line-height: 5px;
-      font-size: 10px;
-    }
     p {
       color: ${colors.leftMenu.black};
       font-size: 13px;
@@ -45,7 +42,7 @@ const List = styled.ul`
       p {
         font-weight: 600;
       }
-      &::before {
+      svg {
         color: ${colors.leftMenu.black};
       }
     }

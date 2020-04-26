@@ -13,10 +13,7 @@ module.exports = async ({ dir, config }) => {
     installedPlugins: config.installedPlugins,
   });
 
-  const pluginsIntersection = _.intersection(
-    Object.keys(localPlugins),
-    Object.keys(plugins)
-  );
+  const pluginsIntersection = _.intersection(Object.keys(localPlugins), Object.keys(plugins));
 
   if (pluginsIntersection.length > 0) {
     throw new Error(
@@ -51,7 +48,7 @@ const loadPlugins = async ({ installedPlugins }) => {
 
     const files = await loadFiles(
       pluginPath,
-      '{!(config|node_modules|test)//*.*(js|json),package.json}'
+      '{!(config|node_modules|test)/*.*(js|json),package.json}'
     );
 
     const conf = await loadConfig(pluginPath);

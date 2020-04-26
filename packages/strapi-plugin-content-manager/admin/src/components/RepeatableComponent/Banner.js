@@ -1,12 +1,12 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { forwardRef } from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Grab } from '@buffetjs/icons';
+import { Carret, Grab } from '@buffetjs/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import pluginId from '../../pluginId';
 import PreviewCarret from '../PreviewCarret';
 import BannerWrapper from './BannerWrapper';
-import CarretTop from './CarretTop';
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 
@@ -30,9 +30,7 @@ const Banner = forwardRef(
 
     return (
       <BannerWrapper
-        doesPreviousFieldContainErrorsAndIsOpen={
-          doesPreviousFieldContainErrorsAndIsOpen
-        }
+        doesPreviousFieldContainErrorsAndIsOpen={doesPreviousFieldContainErrorsAndIsOpen}
         type="button"
         hasMinError={hasMinError}
         hasErrors={hasErrors}
@@ -44,19 +42,17 @@ const Banner = forwardRef(
       >
         {isDragging && <PreviewCarret isComponent />}
         <>
-          <span className="img-wrapper" style={{ display }}>
-            <CarretTop isOpen={isOpen} hasErrors={hasErrors} />
-          </span>
+          <div className="img-wrapper" style={{ display }}>
+            <Carret />
+          </div>
 
-          <FormattedMessage
-            id={`${pluginId}.containers.Edit.pluginHeader.title.new`}
-          >
+          <FormattedMessage id={`${pluginId}.containers.Edit.pluginHeader.title.new`}>
             {msg => {
-              return <span style={{ display }}>{displayedValue || msg}</span>;
+              return <div style={{ display }}>{displayedValue || msg}</div>;
             }}
           </FormattedMessage>
           <div className="cta-wrapper" style={{ display }}>
-            <span
+            <div
               className="trash-icon"
               style={{ marginRight: 10, padding: '0 5px' }}
               onClick={e => {
@@ -66,10 +62,10 @@ const Banner = forwardRef(
               }}
             >
               <FontAwesomeIcon icon="trash" />
-            </span>
-            <span className="grab" ref={refs ? refs.dragRef : null}>
+            </div>
+            <div className="grab" ref={refs ? refs.dragRef : null}>
               <Grab />
-            </span>
+            </div>
           </div>
         </>
       </BannerWrapper>
@@ -91,11 +87,7 @@ Banner.defaultProps = {
 };
 
 Banner.propTypes = {
-  displayedValue: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.number,
-    PropTypes.object,
-  ]),
+  displayedValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.object]),
   doesPreviousFieldContainErrorsAndIsOpen: PropTypes.bool,
   hasErrors: PropTypes.bool,
   hasMinError: PropTypes.bool,

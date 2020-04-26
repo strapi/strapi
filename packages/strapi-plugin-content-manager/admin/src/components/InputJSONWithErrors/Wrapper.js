@@ -18,7 +18,7 @@ const Wrapper = styled.div`
     }
   }
   > p {
-    width 100%;
+    width: 100%;
     padding-top: 14px;
     font-size: 1.2rem;
     line-height: normal;

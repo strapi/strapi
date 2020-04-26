@@ -6,17 +6,17 @@ Services are a set of reusable functions. They are particularly useful to respec
 
 ## Core services
 
-When you create a new Content type or a new model. You will see a new empty service has been created. It is because Strapi builds a generic service for your models by default and allows you to override and extend it in the generated files.
+When you create a new `Content Type` or a new model, you will see a new empty service has been created. It is because Strapi builds a generic service for your models by default and allows you to override and extend it in the generated files.
 
 ### Extending a Model Service
 
 Here are the core methods (and their current implementation).
 You can simply copy and paste this code to your own service file to customize the methods.
 
-You can read about `strapi.query` calls [here](./queries.md)
+You can read about `strapi.query` calls [here](./queries.md).
 
 ::: tip
-In the following example your controller, service and model is named `restaurant`
+In the following example your controller, service and model are named `restaurant`.
 :::
 
 :::: tabs
@@ -38,6 +38,22 @@ module.exports = {
 };
 ```
 
+- `params` (object): this represent filters for your find request.<br>
+  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
+
+```json
+{
+  "name": "Tokyo Sushi"
+}
+// or
+{
+  "_limit": 20,
+  "name_contains": "sushi"
+}
+```
+
+- `populate` (array): you have to mention data you want populate `["author", "author.name", "comment", "comment.content"]`
+
 :::
 
 ::: tab findOne
@@ -57,6 +73,21 @@ module.exports = {
   },
 };
 ```
+
+- `params` (object): this represent filters for your find request.<br>
+  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
+
+```json
+{
+  "name": "Tokyo Sushi"
+}
+// or
+{
+  "name_contains": "sushi"
+}
+```
+
+- `populate` (array): you have to mention data you want populate `["author", "author.name", "comment", "comment.content"]`
 
 :::
 
@@ -78,6 +109,19 @@ module.exports = {
 };
 ```
 
+- `params` (object): this represent filters for your find request.<br>
+  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
+
+```json
+{
+  "name": "Tokyo Sushi"
+}
+// or
+{
+  "name_contains": "sushi"
+}
+```
+
 :::
 
 ::: tab create
@@ -93,11 +137,14 @@ module.exports = {
    */
 
   async create(data, { files } = {}) {
-    const entry = await strapi.query(model).create(data);
+    const entry = await strapi.query('restaurant').create(data);
 
     if (files) {
       // automatically uploads the files based on the entry and the model
-      await this.uploadFiles(entry, files, { model: strapi.models.restaurant });
+      await strapi.entityService.uploadFiles(entry, files, {
+        model: 'restaurant',
+        // if you are using a plugin's model you will have to add the `plugin` key (plugin: 'users-permissions')
+      });
       return this.findOne({ id: entry.id });
     }
 
@@ -121,11 +168,14 @@ module.exports = {
    */
 
   async update(params, data, { files } = {}) {
-    const entry = await strapi.query(model).update(params, data);
+    const entry = await strapi.query('restaurant').update(params, data);
 
     if (files) {
       // automatically uploads the files based on the entry and the model
-      await this.uploadFiles(entry, files, { model: strapi.models.restaurant });
+      await strapi.entityService.uploadFiles(entry, files, {
+        model: 'restaurant',
+        // if you are using a plugin's model you will have to add the `plugin` key (plugin: 'users-permissions')
+      });
       return this.findOne({ id: entry.id });
     }
 
@@ -133,6 +183,8 @@ module.exports = {
   },
 };
 ```
+
+- `params` (object): if should looks like this `{id: 1}`
 
 :::
 
@@ -154,6 +206,8 @@ module.exports = {
 };
 ```
 
+- `params` (object): if should looks like this `{id: 1}`
+
 :::
 
 ::: tab search
@@ -172,6 +226,19 @@ module.exports = {
     return strapi.query('restaurant').search(params);
   },
 };
+```
+
+- `params` (object): this represent filters for your find request.<br>
+  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
+
+```json
+{
+  "name": "Tokyo Sushi"
+}
+// or
+{
+  "name_contains": "sushi"
+}
 ```
 
 :::
@@ -193,6 +260,19 @@ module.exports = {
 };
 ```
 
+- `params` (object): this represent filters for your find request.<br>
+  The object follow the URL query format, [refer to this documentation.](content-api/parameters.html).
+
+```json
+{
+  "name": "Tokyo Sushi"
+}
+// or
+{
+  "name_contains": "sushi"
+}
+```
+
 :::
 
 ::::
@@ -205,7 +285,7 @@ You can also create custom services to build your own business logic.
 
 There are two ways to create a service.
 
-- Using the CLI `strapi generate:service restaurant`. Read the [CLI documentation](../cli/CLI.md) for more information.
+- Using the CLI `strapi generate:service restaurant`.<br>Read the [CLI documentation](../cli/CLI.md) for more information.
 - Manually create a JavaScript file named in `./api/**/services/`.
 
 #### Example
@@ -255,15 +335,10 @@ module.exports = {
   // GET /hello
   signup: async ctx => {
     // Store the new user in database.
-    const user = await User.create(ctx.params);
+    const user = await User.create(ctx.query);
 
     // Send an email to validate his subscriptions.
-    strapi.services.email.send(
-      'welcome@mysite.com',
-      user.email,
-      'Welcome',
-      '...'
-    );
+    strapi.services.email.send('welcome@mysite.com', user.email, 'Welcome', '...');
 
     // Send response to the server.
     ctx.send({

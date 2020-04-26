@@ -1,5 +1,5 @@
 import styled, { createGlobalStyle } from 'styled-components';
-import PropTypes from 'prop-types';
+import { themePropTypes } from 'strapi-helper-plugin';
 
 const GlobalNotification = createGlobalStyle`
   .notificationIcon {
@@ -65,9 +65,12 @@ const GlobalNotification = createGlobalStyle`
   }
 
   .notificationSuccess{
-    background: linear-gradient(100deg , #FFFFFF 50%, rgba(39, 183, 15, .05)), ${props =>
-    props.theme.main.colors.white};
-    
+    background: linear-gradient(
+      100deg, 
+      #FFFFFF 50%,
+      rgba(39, 183, 15, .05)
+    ),
+    ${props => props.theme.main.colors.white};
     .notificationIcon {
       div {
         border-color: ${props => props.theme.main.colors.green};
@@ -79,9 +82,11 @@ const GlobalNotification = createGlobalStyle`
   }
 
   .notificationWarning {
-    background: linear-gradient(100deg , #FFFFFF 50%, rgba(250, 156, 0, .05)), ${props =>
-    props.theme.main.colors.white};
-
+    background: linear-gradient(
+      100deg,
+      #FFFFFF 50%,
+      rgba(250, 156, 0, .05)
+    ), ${props => props.theme.main.colors.white};
     .notificationIcon {
       div {
         border-color: ${props => props.theme.main.colors.orange};
@@ -93,8 +98,11 @@ const GlobalNotification = createGlobalStyle`
   }
 
   .notificationError {
-    background: linear-gradient(100deg , #FFFFFF 50%, rgba(255, 93, 0, .05)), $white;
-
+    background: linear-gradient(
+      100deg,
+      #FFFFFF 50%,
+      rgba(255, 93, 0, .05)
+    ), $white;
     .notificationIcon {
       div {
         border-color: ${props => props.theme.main.colors.red};
@@ -106,9 +114,11 @@ const GlobalNotification = createGlobalStyle`
   }
 
   .notificationInfo {
-    background: linear-gradient(100deg , #FFFFFF 50%, rgba(28, 93, 231, .05)), ${props =>
-    props.theme.main.colors.white};
-
+    background: linear-gradient(
+      100deg,
+      #FFFFFF 50%,
+      rgba(28, 93, 231, .05)
+    ), ${props => props.theme.main.colors.white};
     .notificationIcon {
       div {
         border-color: ${props => props.theme.main.colors.blue};
@@ -123,7 +133,7 @@ const GlobalNotification = createGlobalStyle`
 const Li = styled.li`
   position: relative;
   display: flex;
-  align-items: stretch;
+  align-items: center;
   width: 300px;
   min-height: 60px;
   margin-bottom: 14px;
@@ -134,6 +144,7 @@ const Li = styled.li`
   transition: all 0.15s ease;
   overflow: hidden;
   z-index: 10;
+  padding: 1rem;
   border-left: 2px solid ${props => props.theme.main.colors.green};
   &.notificationError {
     border-color: ${props => props.theme.main.colors.red};
@@ -145,8 +156,6 @@ const Li = styled.li`
     border-color: ${props => props.theme.main.colors.blue};
   }
 
-  // The last notification must appear from
-  // the background of the previous one.
   &:last-child {
     z-index: 1;
   }
@@ -172,7 +181,7 @@ Li.defaultProps = {
 };
 
 Li.propTypes = {
-  theme: PropTypes.object,
+  ...themePropTypes,
 };
 
 export default Li;

@@ -31,7 +31,7 @@ describe('Admin | components | HeadersInput', () => {
 
     it('should match the snapshot', () => {
       const { asFragment } = render(
-        <IntlProvider locale="en">
+        <IntlProvider locale="en" textComponent="span">
           <HeadersInput {...props} />
         </IntlProvider>
       );
@@ -62,9 +62,7 @@ describe('Admin | components | HeadersInput', () => {
           value: 'Basic YWxhZGRpbjpvcGVuc2VzYW1l',
         },
       ];
-      const renderedComponent = shallow(
-        <HeadersInput {...props} value={headers} />
-      );
+      const renderedComponent = shallow(<HeadersInput {...props} value={headers} />);
 
       const removeButton = renderedComponent.find(CircleButton).at(0);
       removeButton.simulate('click');

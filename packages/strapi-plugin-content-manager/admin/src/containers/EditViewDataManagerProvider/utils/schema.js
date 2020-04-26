@@ -13,11 +13,7 @@ import * as yup from 'yup';
 import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
 
 yup.addMethod(yup.mixed, 'defined', function() {
-  return this.test(
-    'defined',
-    errorsTrads.required,
-    value => value !== undefined
-  );
+  return this.test('defined', errorsTrads.required, value => value !== undefined);
 });
 
 yup.addMethod(yup.array, 'notEmptyMin', function(min) {
@@ -60,7 +56,7 @@ yup.addMethod(yup.string, 'isSuperior', function(message, min) {
 
 const getAttributes = data => get(data, ['schema', 'attributes'], {});
 
-const createYupSchema = (model, { components }) => {
+const createYupSchema = (model, { components }, isCreatingEntry = true) => {
   const attributes = getAttributes(model);
 
   return yup.object().shape(
@@ -72,7 +68,7 @@ const createYupSchema = (model, { components }) => {
         attribute.type !== 'component' &&
         attribute.type !== 'dynamiczone'
       ) {
-        const formatted = createYupSchemaAttribute(attribute.type, attribute);
+        const formatted = createYupSchemaAttribute(attribute.type, attribute, isCreatingEntry);
         acc[current] = formatted;
       }
 
@@ -89,12 +85,9 @@ const createYupSchema = (model, { components }) => {
       }
 
       if (attribute.type === 'component') {
-        const componentFieldSchema = createYupSchema(
-          components[attribute.component],
-          {
-            components,
-          }
-        );
+        const componentFieldSchema = createYupSchema(components[attribute.component], {
+          components,
+        });
 
         if (attribute.repeatable === true) {
           const { min, max, required } = attribute;
@@ -129,9 +122,7 @@ const createYupSchema = (model, { components }) => {
               : componentFieldSchema.nullable();
           }
 
-          return attribute.required === true
-            ? yup.object().defined()
-            : yup.object().nullable();
+          return attribute.required === true ? yup.object().defined() : yup.object().nullable();
         });
 
         acc[current] = componentSchema;
@@ -175,14 +166,17 @@ const createYupSchema = (model, { components }) => {
   );
 };
 
-const createYupSchemaAttribute = (type, validations) => {
+const createYupSchemaAttribute = (type, validations, isCreatingEntry) => {
   let schema = yup.mixed();
 
-  if (
-    ['string', 'text', 'richtext', 'email', 'password', 'enumeration'].includes(
-      type
-    )
-  ) {
+  let regex = get(validations, 'regex', null);
+  delete validations.regex;
+
+  if (regex) {
+    validations.regex = new RegExp(regex);
+  }
+
+  if (['string', 'uid', 'text', 'richtext', 'email', 'password', 'enumeration'].includes(type)) {
     schema = yup.string();
   }
 
@@ -194,12 +188,7 @@ const createYupSchemaAttribute = (type, validations) => {
           return true;
         }
 
-        if (
-          isNumber(value) ||
-          isNull(value) ||
-          isObject(value) ||
-          isArray(value)
-        ) {
+        if (isNumber(value) || isNull(value) || isObject(value) || isArray(value)) {
           return true;
         }
 
@@ -238,14 +227,22 @@ const createYupSchemaAttribute = (type, validations) => {
 
     if (
       !!validationValue ||
-      ((!isBoolean(validationValue) &&
-        Number.isInteger(Math.floor(validationValue))) ||
-        validationValue === 0)
+      (!isBoolean(validationValue) && Number.isInteger(Math.floor(validationValue))) ||
+      validationValue === 0
     ) {
       switch (validation) {
-        case 'required':
-          schema = schema.required(errorsTrads.required);
+        case 'required': {
+          if (type === 'password' && isCreatingEntry) {
+            schema = schema.required(errorsTrads.required);
+          }
+
+          if (type !== 'password') {
+            schema = schema.required(errorsTrads.required);
+          }
+
           break;
+        }
+
         case 'max': {
           if (type === 'biginteger') {
             schema = schema.isInferior(errorsTrads.max, validationValue);
@@ -282,16 +279,12 @@ const createYupSchemaAttribute = (type, validations) => {
           }
           break;
         case 'positive':
-          if (
-            ['number', 'integer', 'bigint', 'float', 'decimal'].includes(type)
-          ) {
+          if (['number', 'integer', 'bigint', 'float', 'decimal'].includes(type)) {
             schema = schema.positive();
           }
           break;
         case 'negative':
-          if (
-            ['number', 'integer', 'bigint', 'float', 'decimal'].includes(type)
-          ) {
+          if (['number', 'integer', 'bigint', 'float', 'decimal'].includes(type)) {
             schema = schema.negative();
           }
           break;

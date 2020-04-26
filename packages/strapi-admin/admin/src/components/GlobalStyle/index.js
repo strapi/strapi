@@ -12,10 +12,6 @@ const GlobalStyle = createGlobalStyle`
     color: #292b2c;
   }
 
-  // ::-webkit-scrollbar {
-  //   width: 0;
-  // }
-
   * {
     -webkit-font-smoothing: antialiased;
     box-sizing: border-box;
@@ -137,6 +133,38 @@ const GlobalStyle = createGlobalStyle`
   }
 
 
+  ::-webkit-scrollbar {
+    width: 9px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: #eee;
+  }
+
+  ::-webkit-scrollbar-track:hover {
+    background-color: #ddd;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 0.5rem;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #bbb;
+  }
+
+  ::-webkit-scrollbar-button {
+    display: none;
+  }
+
+  /* firefox scrollbar */
+  /* stylelint-disable */
+  * {
+    scrollbar-color: #bbb #eee;
+    scrollbar-width: thin;
+  }
+  /* stylelint-enable */
 `;
 
 export default GlobalStyle;

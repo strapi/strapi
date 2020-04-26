@@ -1,10 +1,10 @@
 # Draft system
 
-This guide will explain how to create draft system. That will you manage draft, published, archive status.
+This guide will explain how to create a draft system that will allow you to manage draft, published, and archive status.
 
 ## Introduction
 
-What we want here is to fetch only data that have a `published` status.
+What we want here is to fetch only data that has a `published` status.
 
 But we don't want to use [parameters](../content-api/parameters.md) (eg. /articles?status=published) because you can easily fake the params.
 
@@ -20,12 +20,12 @@ And that is what we will do to filter to `published` status by default.
 
 ## Example
 
-In our example we will use an Article content type. By default when you fetch articles, you will got all articles.
+In our example we will use an Article content type. By default, when you fetch articles you will get all articles.
 Let's consider you don't want to expose articles that are in `draft` or `archive` status.
 
-To enforce this rule we will customize the action that fetchs all articles to just fetch `published` articles.
+To enforce this rule we will customize the action that fetches all articles to just fetch `published` articles.
 
-To follow the example your will have to create a content type `articles` and add the following field definition:
+To follow the example you will have to create a content type `articles` and add the following field definitions:
 
 - `string` attribute named `title`
 - `text` attribute named `content`
@@ -35,7 +35,7 @@ Then add some data with different `status`.
 
 ## Override controller action
 
-To customize the function that fetch all our articles we will have to override the `find` function.
+To customize the function that fetches all our articles we will have to override the `find` function.
 
 First, to see the difference, let's request `GET /articles`. You will see all the data you created.
 Now let's start the customization.
@@ -56,7 +56,7 @@ After saving the new function, let's restart the `GET /articles` request. We wil
 
 We now know the function we have to update, but we just want to customize the returned article values.
 
-In the [controller documentation](../concepts/controllers.html#extending-a-model-controller) you will find the default implementation of every actions. It will help you overwrite the fetch logic.
+In the [controller documentation](../concepts/controllers.html#extending-a-model-controller) you will find the default implementation of every action. It will help you overwrite the fetch logic.
 
 **Path —** `./api/article/controller/Article.js`
 
@@ -72,9 +72,7 @@ module.exports = {
       entities = await strapi.services.article.find(ctx.query);
     }
 
-    return entities.map(entity =>
-      sanitizeEntity(entity, { model: strapi.models.article })
-    );
+    return entities.map(entity => sanitizeEntity(entity, { model: strapi.models.article }));
   },
 };
 ```
@@ -83,7 +81,7 @@ And now the data is back on `GET /articles`
 
 ## Apply our changes
 
-Here we want force to fetch articles that have status equal to `published`.
+Here we want to force it to fetch articles that have status equal to `published`.
 
 The way to do that is to set `ctx.query.status` to `published`.
 It will force the filter of the query.
@@ -99,7 +97,7 @@ module.exports = {
 
     ctx.query = {
       ...ctx.query,
-      status: 'published'
+      status: 'published',
     };
 
     if (ctx.query._q) {
@@ -108,16 +106,13 @@ module.exports = {
       entities = await strapi.services.article.find(ctx.query);
     }
 
-    return entities.map(entity =>
-      sanitizeEntity(entity, { model: strapi.models.article })
-    );
+    return entities.map(entity => sanitizeEntity(entity, { model: strapi.models.article }));
   },
 };
 ```
 
-And tada! Draft and archived articles disapeared.
+And tada! Draft and archived articles disappeared.
 
 ::: tip
 This guide can be applied to any other controller action.
 :::
-

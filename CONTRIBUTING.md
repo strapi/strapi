@@ -79,16 +79,9 @@ cd strapi && yarn setup
 
 #### 4. Start the example application
 
-**Go to the getstarted application**
+Read the `getstarted` application README [here](./examples/getstarted/README.md).
 
-```bash
-cd strapi/examples/getstarted
-yarn develop
-```
-
-The server (API) is available at http://localhost:1337
-
-The built administration panel is available at http://localhost:1337/admin
+#### 5. Running the administration panel in development mode
 
 **Start the administration panel server for development**
 

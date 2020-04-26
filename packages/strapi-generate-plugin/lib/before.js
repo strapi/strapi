@@ -8,6 +8,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 const _ = require('lodash');
+const { nameToSlug } = require('strapi-utils');
 
 /**
  * This `before` function is run before generating targets.
@@ -22,20 +23,12 @@ module.exports = (scope, cb) => {
     return cb.invalid('Usage: `$ strapi generate:plugin pluginName`');
   }
 
-  // `scope.args` are the raw command line arguments.
-  _.defaults(scope, {
-    id: _.trim(_.deburr(scope.id)),
-  });
-
-  // Determine default values based on the available scope.
-  _.defaults(scope, {
-    globalID: _.upperFirst(_.camelCase(scope.id)),
-    ext: '.js',
-  });
+  // Format `id`.
+  const name = scope.name || nameToSlug(scope.id);
 
   // Plugin info.
   _.defaults(scope, {
-    name: scope.args.name || scope.id,
+    name,
     author: scope.author || 'A Strapi developer',
     email: scope.email || '',
     year: new Date().getFullYear(),
@@ -44,23 +37,15 @@ module.exports = (scope, cb) => {
 
   // Take another pass to take advantage of the defaults absorbed in previous passes.
   _.defaults(scope, {
-    filename: `${scope.globalID}${scope.ext}`,
-  });
-
-  // Humanize output.
-  _.defaults(scope, {
-    humanizeId: scope.id.toLowerCase(),
-    humanizedPath: '`./plugins`',
+    filename: `${name}.js`,
+    filePath: './plugins',
   });
 
   const pluginDir = path.resolve(scope.rootPath, 'plugins');
   fs.ensureDirSync(pluginDir);
 
   // Copy the admin files.
-  fs.copySync(
-    path.resolve(__dirname, '..', 'files'),
-    path.resolve(pluginDir, scope.humanizeId)
-  );
+  fs.copySync(path.resolve(__dirname, '..', 'files'), path.resolve(pluginDir, name));
 
   // Trigger callback with no error to proceed.
   return cb.success();

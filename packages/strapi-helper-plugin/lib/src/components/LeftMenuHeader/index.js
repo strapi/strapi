@@ -23,11 +23,12 @@ function LeftMenuHeader({ count, search, searchable, setSearch, title }) {
       return (
         <FormattedMessage
           id={`${title.id}${count > 1 ? 'plural' : 'singular'}`}
+          defaultMessage={title.defaultMessage}
         />
       );
     }
 
-    return <FormattedMessage id={title.id} />;
+    return <FormattedMessage id={title.id} defaultMessage={title.defaultMessage} />;
   };
 
   const handleClose = () => {
@@ -64,12 +65,7 @@ function LeftMenuHeader({ count, search, searchable, setSearch, title }) {
     <div className="search-wrapper">
       <FontAwesomeIcon icon="search" />
       <button onClick={toggleSearch} />
-      <Search
-        ref={ref}
-        onChange={handleChange}
-        value={search}
-        placeholder="search…"
-      />
+      <Search ref={ref} onChange={handleChange} value={search} placeholder="search…" />
       <button onClick={handleClose}>
         <FontAwesomeIcon icon="times" />
       </button>
@@ -88,6 +84,7 @@ LeftMenuHeader.propTypes = {
   count: PropTypes.number,
   title: PropTypes.shape({
     id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string,
   }).isRequired,
   search: PropTypes.string,
   searchable: PropTypes.bool,

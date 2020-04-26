@@ -12,10 +12,7 @@ const { trackUsage, captureStderr } = require('./utils/usage');
 const packageJSON = require('./resources/json/package.json');
 const databaseJSON = require('./resources/json/database.json.js');
 
-module.exports = async function createProject(
-  scope,
-  { connection, dependencies }
-) {
+module.exports = async function createProject(scope, { connection, dependencies }) {
   console.log('Creating files.');
 
   const { rootPath } = scope;
@@ -29,12 +26,11 @@ module.exports = async function createProject(
     const dotFiles = await fse.readdir(join(resources, 'dot-files'));
     await Promise.all(
       dotFiles.map(name => {
-        return fse.copy(
-          join(resources, 'dot-files', name),
-          join(rootPath, `.${name}`)
-        );
+        return fse.copy(join(resources, 'dot-files', name), join(rootPath, `.${name}`));
       })
     );
+
+    await trackUsage({ event: 'didCopyProjectFiles', scope });
 
     // copy templates
     await fse.writeJSON(
@@ -51,6 +47,8 @@ module.exports = async function createProject(
       }
     );
 
+    await trackUsage({ event: 'didWritePackageJSON', scope });
+
     // ensure node_modules is created
     await fse.ensureDir(join(rootPath, 'node_modules'));
 
@@ -66,10 +64,14 @@ module.exports = async function createProject(
         );
       })
     );
+
+    await trackUsage({ event: 'didCopyConfigurationFiles', scope });
   } catch (err) {
     await fse.remove(scope.rootPath);
     throw err;
   }
+
+  await trackUsage({ event: 'willInstallProjectDependencies', scope });
 
   const installPrefix = chalk.yellow('Installing dependencies:');
   const loader = ora(installPrefix).start();
@@ -93,6 +95,8 @@ module.exports = async function createProject(
 
     loader.stop();
     console.log(`Dependencies installed ${chalk.green('successfully')}.`);
+
+    await trackUsage({ event: 'didInstallProjectDependencies', scope });
   } catch (error) {
     loader.stop();
     await trackUsage({
@@ -119,9 +123,7 @@ module.exports = async function createProject(
     );
     console.log();
     console.log(
-      `cd ${chalk.green(rootPath)} && ${chalk.cyan(
-        scope.useYarn ? 'yarn' : 'npm'
-      )} install`
+      `cd ${chalk.green(rootPath)} && ${chalk.cyan(scope.useYarn ? 'yarn' : 'npm')} install`
     );
     console.log();
 

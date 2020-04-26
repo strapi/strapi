@@ -10,12 +10,7 @@ import { FormattedMessage } from 'react-intl';
 import { withRouter } from 'react-router-dom';
 import { get } from 'lodash';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  ButtonDropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
-} from 'reactstrap';
+import { ButtonDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap';
 import { auth } from 'strapi-helper-plugin';
 import Wrapper from './components';
 
@@ -26,14 +21,13 @@ const Logout = ({ history: { push } }) => {
     const id = get(auth.getUserInfo(), 'id');
 
     push({
-      pathname: `/plugins/content-manager/strapi::administrator/${id}`,
-      search:
-        '?redirectUrl=/plugins/content-manager/strapi::administrator/&_page=0&_limit=0&_sort=id',
+      pathname: `/plugins/content-manager/collectionType/strapi::administrator/${id}`,
+      search: '?redirectUrl=/plugins/content-manager/collectionType/strapi::administrator',
     });
   };
   const handleGoToAdministrator = () => {
     push({
-      pathname: '/plugins/content-manager/strapi::administrator',
+      pathname: '/plugins/content-manager/collectionType/strapi::administrator',
     });
   };
   const handleLogout = () => {

@@ -4,7 +4,7 @@
 
 `./api/**/config/routes.json` files define all available endpoints for the clients.
 
-By default Strapi generate endpoints for all your Content Type. More information in the [Content API](../content-api/api-endpoints.md) documentation.
+By default, Strapi generates endpoints for all your Content Types. More information is in the [Content API](../content-api/api-endpoints.md) documentation.
 
 ## How to create a route?
 
@@ -43,12 +43,11 @@ You have to edit the `routes.json` file in one of your APIs folders (`./api/**/c
 }
 ```
 
-- `method` (string): Method or array of methods to hit the route (ex: `GET`, `POST`, `PUT`, `HEAD`, `DELETE`, `PATCH`)
-- `path` (string): URL starting with `/` (ex: `/restaurants`)
-- `handler` (string): Action to executed when the route is hit following this syntax `<Controller>.<action>`
+- `method` (string): Method or array of methods to hit the route (e.g. `GET`, `POST`, `PUT`, `HEAD`, `DELETE`, `PATCH`).
+- `path` (string): URL starting with `/` (e.g. `/restaurants`).
+- `handler` (string): Action to execute when the route is hit following this syntax `<Controller>.<action>`.
 - `config`
-  - `policies` (array): Array of policies names or path ([see more](./policies.md))
-  - `prefix` (string): Set a prefix to this route. Also, it will be loaded into the main router (useful feature for plugin)
+  - `policies` (array): Array of policy names or paths ([see more](./policies.md))
 
 ## Dynamic parameters
 
@@ -77,21 +76,33 @@ The router used by Strapi allows you to create dynamic routes where you can use 
 }
 ```
 
-## Override default route
+### Example
 
-By default, the main route of the server `/` is pointed to the `/public/index.html` file. To override this behavior, you need to create a route with an empty path `/` in one of your API folder (`/api/**/config/routes.json`).
+Route definition with URL params
 
 ```json
 {
   "routes": [
     {
       "method": "GET",
-      "path": "/",
-      "handler": "Controller.name",
+      "path": "/restaurants/:id",
+      "handler": "Restaurant.findOne",
       "config": {
         "policies": []
       }
     }
   ]
 }
+```
+
+Get the URL param in the controller
+
+```js
+module.exports = {
+  findOne: async ctx => {
+    // const id = ctx.params.id;
+    const { id } = ctx.params;
+    return id;
+  },
+};
 ```

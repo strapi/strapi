@@ -1,6 +1,6 @@
 {
   "name": "strapi-utils",
-  "version": "3.0.0-beta.18.7",
+  "version": "3.0.0-beta.20",
   "description": "Shared utilities for the Strapi packages",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -14,12 +14,13 @@
   },
   "main": "./lib",
   "dependencies": {
+    "@sindresorhus/slugify": "^0.11.0",
     "date-fns": "^2.8.1",
-    "lodash": "^4.17.11",
+    "lodash": "4.17.12",
     "pino": "^4.7.1",
     "pluralize": "^7.0.0",
     "shelljs": "^0.8.3",
-    "yup": "^0.28.0"
+    "yup": "0.28.1"
   },
   "author": {
     "email": "hi@strapi.io",

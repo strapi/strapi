@@ -2,7 +2,9 @@
 
 ## Concept
 
-Models are a representation of the database's structure and lifecycle. They are split into two separate files. A JavaScript file that contains the lifecycle callbacks, and a JSON one that represents the data stored in the database and their format. The models also allow you to define the relationships between them.
+### Content Type's models
+
+Models are a representation of the database's structure and life cycle. They are split into two separate files. A JavaScript file that contains the life cycle callbacks, and a JSON one that represents the data stored in the database and their format. The models also allow you to define the relationships between them.
 
 **Path —** `./api/restaurant/models/Restaurant.js`.
 
@@ -24,6 +26,7 @@ module.exports = {
 
 ```json
 {
+  "kind": "collectionType",
   "connection": "default",
   "info": {
     "name": "restaurant",
@@ -47,41 +50,79 @@ module.exports = {
 }
 ```
 
-In this example, there is a `Restaurant` model which contains two attributes `cover`, `name` and `description`.
+In this example, there is a `Restaurant` model which contains the attributes `cover`, `name` and `description`.
+
+### Component's models
+
+It also exist another type of models named `components`. A component is a data structure that can be used in one or many other API's model. There is no lifecycle related, only a JSON file definition
+
+**Path —** `./components/default/simple.json`
+
+```json
+{
+  "connection": "default",
+  "collectionName": "components_default_simples",
+  "info": {
+    "name": "simple",
+    "icon": "arrow-circle-right"
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    }
+  }
+}
+```
+
+In this example, there is a `Simple` component which contains the attributes `name`. And the component is in the category `default`.
 
 ### Where are the models defined?
 
-The models are defined in each `./api/**/models/` folder. Every JavaScript or JSON file in these folders will be loaded as a model. They are also available through the `strapi.models` and `strapi.api.**.models` global variables. Usable everywhere in the project, they contain the ORM model object that they are refer to. By convention, models' names should be written in lowercase.
+For **Content Types**, models are defined in each `./api/**/models/` folder. Every JavaScript or JSON file in these folders will be loaded as a model. They are also available through the `strapi.models` and `strapi.api.**.models` global variables. Usable everywhere in the project, they contain the ORM model object that they refer to. By convention, a model's name should be written in lowercase.
+
+For **Components**, models are defined in `./components` folder. Every components has to be under a subfolder (the category name of the component).
 
 ## How to create a model?
 
 ::: tip
-If you are just starting out it is very convenient to generate some models with the Content Type Builder, directly in the admin interface. You can then review the generated model mappings on the code level. The UI takes over a lot of validation tasks and gives you a fast feeling for available features.
+If you are just starting out it is very convenient to generate some models with the Content Type Builder, directly in the admin interface. You can then review the generated model mappings on the code level. The UI takes over a lot of validation tasks and gives you a feeling for available features.
 :::
 
-Use the CLI, and run the following command `strapi generate:model restaurant name:string description:text`. Read the [CLI documentation](../cli/CLI.md) for more information.
+### For Content Types models
+
+Use the CLI, and run the following command `strapi generate:model restaurant name:string description:text`.<br>Read the [CLI documentation](../cli/CLI.md) for more information.
 
 This will create two files located at `./api/restaurant/models`:
 
 - `Restaurant.settings.json`: contains the list of attributes and settings. The JSON format makes the file easily editable.
-- `Restaurant.js`: imports `Restaurant.settings.json` and extends it with additional settings and lifecycle callbacks.
+- `Restaurant.js`: imports `Restaurant.settings.json` and extends it with additional settings and life cycle callbacks.
 
 ::: tip
-when you create a new API using the CLI (`strapi generate:api <name>`), a model is automatically created.
+When you create a new API using the CLI (`strapi generate:api <name>`), a model is automatically created.
 :::
+
+### For Components models
+
+To create a component you will have to use the Content Type Builder from the Admin panel, there is no generator for components.
+
+Or you can create your component manually by following the file path discribed previously and by following the file structure discribed bellow.
 
 ## Model settings
 
 Additional settings can be set on models:
 
-- `connection` (string) - Connection's name which must be used. Default value: `default`.
-- `collectionName` (string) - Collection's name (or table's name) in which the data should be stored.
-- `globalId` (string) -Global variable name for this model (case-sensitive).
+- `kind` (string) - Define if the model is a Collection Type (`collectionType`) of a Single Type (`singleType`) - _only for Content Types_
+- `connection` (string) - Connection name which must be used. Default value: `default`.
+- `collectionName` (string) - Collection name (or table name) in which the data should be stored.
+- `globalId` (string) - Global variable name for this model (case-sensitive) - _only for Content Types_
+- `attributes` (object) - Define the data structure of your model. Find available options [bellow](#define-the-attributes).
 
 **Path —** `Restaurant.settings.json`.
 
 ```json
 {
+  "kind": "collectionType",
   "connection": "mongo",
   "collectionName": "Restaurants_v1",
   "globalId": "Restaurants",
@@ -90,6 +131,12 @@ Additional settings can be set on models:
 ```
 
 In this example, the model `Restaurant` will be accessible through the `Restaurants` global variable. The data will be stored in the `Restaurants_v1` collection or table and the model will use the `mongo` connection defined in `./config/environments/**/database.json`
+
+::: warning
+If not set manually in the JSON file, Strapi will adopt the filename as `globalId`.
+The `globalId` serves as a reference to your model within relations and Strapi APIs. If you chose to rename it (either by renaming your file or by changing the value of the `globalId`), you'd have to migrate your tables manually and update the references.
+Please note that you should not alter Strapi's models `globalId` (plugins and core ones) since it is used directly within Strapi APIs and other models' relations.
+:::
 
 ::: tip
 The `connection` value can be changed whenever you want, but you should be aware that there is no automatic data migration process. Also if the new connection doesn't use the same ORM you will have to rewrite your queries.
@@ -101,7 +148,7 @@ The info key on the model-json states information about the model. This informat
 
 - `name`: The name of the model, as shown in admin interface.
 - `description`: The description of the model.
-- `mainField`: Determines which model-attribute is shown when displaying the model.
+- `icon`: The fontawesome V5 name - _only for Components_
 
 **Path —** `Restaurant.settings.json`.
 
@@ -118,10 +165,7 @@ The info key on the model-json states information about the model. This informat
 
 The options key on the model-json states.
 
-- `idAttribute`: This tells the model which attribute to expect as the unique identifier for each database row (typically an auto-incrementing primary key named 'id'). _Only valid for bookshelf_
-- `idAttributeType`: Data type of `idAttribute`, accepted list of value below. _Only valid for bookshelf_
 - `timestamps`: This tells the model which attributes to use for timestamps. Accepts either `boolean` or `Array` of strings where first element is create date and second element is update date. Default value when set to `true` for Bookshelf is `["created_at", "updated_at"]` and for MongoDB is `["createdAt", "updatedAt"]`.
-- `uuid` : Boolean to enable UUID support on MySQL, you will need to set the `idAttributeType` to `uuid` as well and install the `bookshelf-uuid` package. To load the package you can see [this example](./configurations.md#bookshelf-mongoose).
 
 **Path —** `User.settings.json`.
 
@@ -140,38 +184,41 @@ The following types are currently available:
 - `string`
 - `text`
 - `richtext`
+- `email`
+- `password`
 - `integer`
 - `biginteger`
 - `float`
 - `decimal`
-- `password`
 - `date`
 - `time`
 - `datetime`
-- `timestamp`
 - `boolean`
-- `binary`
-- `uuid`
 - `enumeration`
 - `json`
-- `email`
+- `uid`
 
 ### Validations
 
 You can apply basic validations to the attributes. The following supported validations are _only supported by MongoDB_ connection.
 If you're using SQL databases, you should use the native SQL constraints to apply them.
 
-- `required` (boolean) — if true adds a required validator for this property.
-- `unique` (boolean) — whether to define a unique index on this property.
-- `index` (boolean) — adds an index on this property, this will create a [single field index](https://docs.mongodb.com/manual/indexes/#single-field) that will run in the background (_only supported by MongoDB_).
-- `max` (integer) — checks if the value is greater than or equal to the given minimum.
-- `min` (integer) — checks if the value is less than or equal to the given maximum.
+- `required` (boolean) — If true, adds a required validator for this property.
+- `unique` (boolean) — Whether to define a unique index on this property.
+- `index` (boolean) — Adds an index on this property, this will create a [single field index](https://docs.mongodb.com/manual/indexes/#single-field) that will run in the background. _Only supported by MongoDB._
+- `max` (integer) — Checks if the value is greater than or equal to the given maximum.
+- `min` (integer) — Checks if the value is less than or equal to the given minimum.
 
 **Security validations**
-To improve the Developer eXperience when developing or using the administration panel, the framework enhances the attributes with these "security validations":
 
-- `private` (boolean) — if true, the attribute will be removed from the server response (it's useful to hide sensitive data).
+To improve the Developer Experience when developing or using the administration panel, the framework enhances the attributes with these "security validations":
+
+- `private` (boolean) — If true, the attribute will be removed from the server response (it's useful to hide sensitive data).
 - `configurable` (boolean) - if false, the attribute isn't configurable from the Content Type Builder plugin.
+
+### Exceptions
+
+- `uid` — This field type allows a `targetField` key. The value is the name of an attribute thas has `string` of `text` type.
 
 ### Example
 
@@ -188,10 +235,14 @@ To improve the Developer eXperience when developing or using the administration 
       "unique": true
     },
     "description": {
-      "default": "My descrioption",
+      "default": "My description",
       "type": "text",
       "required": true
     },
+    "slug": {
+      "type": "uid",
+      "targetField": "title"
+    }
     ...
   }
 }
@@ -199,7 +250,7 @@ To improve the Developer eXperience when developing or using the administration 
 
 ## Relations
 
-Relations let your create links (relations) between your Content Types.
+Relations let you create links (relations) between your Content Types.
 
 :::: tabs
 
@@ -241,7 +292,7 @@ xhr.send(
 
 ::: tab "One-to-One" id="one-to-one"
 
-One-to-One relationships are usefull when you have one entity that could be linked to only one other entity. And vis versa.
+One-to-One relationships are useful when you have one entity that could be linked to only one other entity. And vice versa.
 
 #### Example
 
@@ -290,7 +341,7 @@ xhr.send(
 
 ::: tab "One-to-Many" id="one-to-many"
 
-One-to-Many relationships are usefull when an entry can be liked to multiple entries of an other Content Type. And an entry of the other Content Type can be linked to only one entry.
+One-to-Many relationships are useful when an entry can be liked to multiple entries of another Content Type. And an entry of the other Content Type can be linked to only one entry.
 
 #### Example
 
@@ -349,7 +400,7 @@ xhr.send(
 
 ::: tab "Many-to-Many" id="many-to-many"
 
-Many-to-Many relationships are usefull when an entry can be liked to multiple entries of an other Content Type. And an entry of the other Content Type can be linked to many entries.
+Many-to-Many relationships are useful when an entry can be liked to multiple entries of another Content Type. And an entry of the other Content Type can be linked to many entries.
 
 #### Example
 
@@ -363,14 +414,18 @@ A `product` can be related to many `categories`, so a `category` can have many `
     "categories": {
       "collection": "category",
       "via": "products",
-      "dominant": true
+      "dominant": true,
+      "collectionName": "products_categories__categories_products" // optional
     }
   }
 }
 ```
 
 **NOTE**:
-(NoSQL databases only) The `dominant` key defines which table/collection should store the array that defines the relationship. Because there are no join tables in NoSQL, this key is required for NoSQL databases (ex: MongoDB).
+(NoSQL databases only) The `dominant` key defines which table/collection should store the array that defines the relationship. Because there are no join tables in NoSQL, this key is required for NoSQL databases (e.g. MongoDB).
+
+**NOTE**:
+(NoSQL databases only) The `collectionName` key defines the name of the join table. It has to be specified once, in the `dominant` attribute of the relation. If it is not specified, Strapi will use a generated default one. It is useful to define the name of the join table when the name generated by Strapi is too long for the database you use.
 
 **Path —** `./api/category/models/Category.settings.json`.
 
@@ -394,7 +449,7 @@ xhr.open('PUT', '/products/5c151d9d5b1d55194d3209be', true);
 xhr.setRequestHeader('Content-Type', 'application/json');
 xhr.send(
   JSON.stringify({
-    categories: ['5c151d51eb28fd19457189f6', '5c151d51eb28fd19457189f8'], // Set of ALL categories linked to the product (existing categories + new category or - removed category)
+    categories: ['5c151d51eb28fd19457189f6', '5c151d51eb28fd19457189f8'], // Set of ALL categories linked to the product (existing categories + new category or - removed category).
   })
 );
 ```
@@ -403,11 +458,11 @@ xhr.send(
 
 ::: tab "Polymorphic" id="polymorphic"
 
-The polymorphic relationships are the solution when you don't know which kind of model will be associated to your entry. A common use case is an `Image` model that can be associated to many others kind of models (Article, Product, User, etc).
+The polymorphic relationships are the solution when you don't know which kind of model will be associated to your entry. A common use case is an `Image` model that can be associated to many others kind of models (Article, Product, User, etc.).
 
 #### Single vs Many
 
-Let's stay with our `Image` model which might belongs to **a single `Article` or `Product` entry**.
+Let's stay with our `Image` model which might belong to **a single `Article` or `Product` entry**.
 
 **NOTE**:
 In other words, it means that an `Image` entry can be associated to one entry. This entry can be a `Article` or `Product` entry.
@@ -578,10 +633,271 @@ CREATE TABLE `image_morph` (
 
 ::::
 
-## Lifecycle callbacks
+## Components
+
+Component field let your create a relation between your Content Type and a Component structure.
+
+#### Example
+
+Lets say we created an `openinghours` component in `restaurant` category.
+
+**Path —** `./api/restaurant/models/Restaurant.settings.json`.
+
+```json
+{
+  "attributes": {
+    "openinghours": {
+      "type": "component",
+      "repeatable": true,
+      "component": "restaurant.openinghours"
+    }
+  }
+}
+```
+
+- `repeatable` (boolean): Could be `true` or `false` that let you create a list of data.
+- `component` (string): It follows this format `<category>.<componentName>`.
+
+:::: tabs
+
+::: tab Create
+
+Create a restaurant with non-repeatable component
+
+```js
+const xhr = new XMLHttpRequest();
+xhr.open('POST', '/restaurants', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(
+  JSON.stringify({
+    openinghour: {
+      opening_at: '10am',
+      closing_at: '6pm',
+      day: 'monday',
+    },
+  })
+);
+```
+
+Create a restaurant with repeatable component
+
+```js
+const xhr = new XMLHttpRequest();
+xhr.open('POST', '/restaurants', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(
+  JSON.stringify({
+    openinghours: [
+      {
+        opening_at: '10am',
+        closing_at: '6pm',
+        day: 'monday',
+      },
+      {
+        opening_at: '10am',
+        closing_at: '6pm',
+        day: 'tuesday',
+      },
+    ],
+  })
+);
+```
+
+:::
+
+::: tab Update
+
+Update a restaurant with non-repeatable component
+
+```js
+const xhr = new XMLHttpRequest();
+xhr.open('PUT', '/restaurants/1', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(
+  JSON.stringify({
+    openinghour: {
+      id: 1, // the ID of the entry
+      opening_at: '11am',
+      closing_at: '7pm',
+      day: 'wednesday',
+    },
+  })
+);
+```
+
+Update a restaurant with repeatable component
+
+```js
+const xhr = new XMLHttpRequest();
+xhr.open('PUT', '/restaurants/2', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(
+  JSON.stringify({
+    openinghours: [
+      {
+        "id": 1 // the ID of the entry you want to update
+        "opening_at": "10am",
+        "closing_at": "6pm",
+        "day": "monday"
+      },
+      {
+        "id": 2, // you also have to put the ID of entries you don't want to update
+        "opening_at": "10am",
+        "closing_at": "6pm",
+        "day": "tuesday"
+      }
+    ]
+  })
+);
+```
+
+**NOTE** if you don't specify the `ID` it will delete and re-create the entry the entry, you will see the `ID` value change.
+
+:::
+
+::: tab Delete
+
+Delete a restaurant with non-repeatable component
+
+```js
+const xhr = new XMLHttpRequest();
+xhr.open('PUT', '/restaurants/1', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(
+  JSON.stringify({
+    openinghour: null,
+  })
+);
+```
+
+Delete a restaurant with repeatable component
+
+```js
+const xhr = new XMLHttpRequest();
+xhr.open('PUT', '/restaurants/2', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(
+  JSON.stringify({
+    openinghours: [
+      {
+        "id": 1 // the ID of the entry you want to keep
+        "opening_at": "10am",
+        "closing_at": "6pm",
+        "day": "monday"
+      }
+    ]
+  })
+);
+```
+
+:::
+
+::::
+
+## Dynamic Zone
+
+Dynamic Zone field let your create flexible space to content based on a component list.
+
+#### Example
+
+Lets say we created an `slider` and `content` component in `article` category.
+
+**Path —** `./api/article/models/Article.settings.json`.
+
+```json
+{
+  "attributes": {
+    "body": {
+      "type": "dynamiczone",
+      "components": ["article.slider", "article.content"]
+    }
+  }
+}
+```
+
+- `components` (array): Array of components, that follows this format `<category>.<componentName>`.
+
+:::: tabs
+
+::: tab Create
+
+```js
+const xhr = new XMLHttpRequest();
+xhr.open('POST', '/articles', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(
+  JSON.stringify({
+    body: [
+      {
+        __component: 'article.content',
+        content: 'This is a content',
+      },
+      {
+        __component: 'article.slider',
+        name: 'Slider name',
+      },
+    ],
+  })
+);
+```
+
+:::
+
+::: tab Update
+
+```js
+const xhr = new XMLHttpRequest();
+xhr.open('PUT', '/restaurant/2', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(
+  JSON.stringify({
+    body: [
+      {
+        "id": 1 // the ID of the entry you want to update
+        "__component": "article.content",
+        "content": "This is an updated content",
+      },
+      {
+        "id": 2, // you also have to put the ID of entries you don't want to update
+        "__component": "article.slider",
+        "name": "Slider name",
+      }
+    ]
+  })
+);
+```
+
+**NOTE** if you don't specify the `ID` it will delete and re-create the entry the entry, you will see the `ID` value change.
+
+:::
+
+::: tab Delete
+
+```js
+const xhr = new XMLHttpRequest();
+xhr.open('PUT', '/restaurant/2', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(
+  JSON.stringify({
+    body: [
+      {
+        "id": 1 // the ID of the entry you want to keep
+        "__component": "article.content",
+        "content": "This is an updated content",
+      }
+    ]
+  })
+);
+```
+
+:::
+
+::::
+
+## Life cycle callbacks
 
 ::: warning
-The life cycle functions are based on the ORM life cycle and not on the strapi request.
+The life cycle functions are based on the ORM life cycle and not on the Strapi request.
 We are currently working on it to make it easier to use and understand.
 Please check [this issue](https://github.com/strapi/strapi/issues/1443) on GitHub.
 :::
@@ -654,7 +970,7 @@ Callbacks on:
 
 #### Mongoose
 
-The entry is available through the `model` parameter
+The entry is available through the `model` parameter.
 
 **Path —** `./api/user/models/User.js`.
 
@@ -665,9 +981,7 @@ module.exports = {
    */
   beforeCreate: async model => {
     // Hash password.
-    const passwordHashed = await strapi.api.user.services.user.hashPassword(
-      model.password
-    );
+    const passwordHashed = await strapi.api.user.services.user.hashPassword(model.password);
 
     // Set the password.
     model.password = passwordHashed;
@@ -681,7 +995,7 @@ module.exports = {
 
 #### Bookshelf
 
-Each of these functions receives a three parameters `model`, `attrs` and `options`. You have to return a Promise.
+Each of these functions receives three parameters `model`, `attrs` and `options`. You have to return a Promise.
 
 **Path —** `./api/user/models/User.js`.
 

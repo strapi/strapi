@@ -1,18 +1,31 @@
 'use strict';
 
-const { createModelConfigurationSchema } = require('./validation');
+const _ = require('lodash');
+
+const { createModelConfigurationSchema, validateKind } = require('./validation');
 
 module.exports = {
   /**
    * Returns the list of available content types
    */
-  listContentTypes(ctx) {
+  async listContentTypes(ctx) {
+    const { kind } = ctx.query;
+
+    try {
+      await validateKind(kind);
+    } catch (error) {
+      return ctx.send({ error }, 400);
+    }
+
     const service = strapi.plugins['content-manager'].services.contenttypes;
 
     const contentTypes = Object.keys(strapi.contentTypes)
       .filter(uid => {
         if (uid.startsWith('strapi::')) return false;
-        if (uid === 'plugins::upload.file') return false;
+
+        if (kind && _.get(strapi.contentTypes[uid], 'kind', 'collectionType') !== kind) {
+          return false;
+        }
 
         return true;
       })
@@ -43,14 +56,14 @@ module.exports = {
     }
 
     const service = strapi.plugins['content-manager'].services.contenttypes;
-    const componentService =
-      strapi.plugins['content-manager'].services.components;
+    const componentService = strapi.plugins['content-manager'].services.components;
 
     const contentTypeConfigurations = await service.getConfiguration(uid);
 
     const data = {
       contentType: {
         uid,
+        apiID: contentType.modelName,
         schema: service.formatContentTypeSchema(contentType),
         ...contentTypeConfigurations,
       },
@@ -84,10 +97,7 @@ module.exports = {
 
     let input;
     try {
-      input = await createModelConfigurationSchema(
-        contentType,
-        schema
-      ).validate(body, {
+      input = await createModelConfigurationSchema(contentType, schema).validate(body, {
         abortEarly: false,
         stripUnknown: true,
         strict: true,
@@ -101,7 +111,6 @@ module.exports = {
 
     await service.setConfiguration(uid, input);
     const contentTypeConfigurations = await service.getConfiguration(uid);
-
     const data = {
       uid,
       schema,

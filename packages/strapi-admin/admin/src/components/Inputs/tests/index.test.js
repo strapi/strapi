@@ -7,20 +7,20 @@ import translationMessages from '../../../translations/en.json';
 
 import Inputs from '../index';
 
+const renderWithIntl = (Compo, props) => {
+  return renderer.create(
+    <IntlProvider locale="en" messages={translationMessages} textComponent="span">
+      <Compo {...props} />
+    </IntlProvider>
+  );
+};
+
 describe('<Inputs />', () => {
   const props = {
     name: 'events',
     value: ['media.create, media.delete'],
     onChange: jest.fn(),
     type: 'events',
-  };
-
-  const renderWithIntl = (Compo, props) => {
-    return renderer.create(
-      <IntlProvider locale="en" messages={translationMessages}>
-        <Compo {...props} />
-      </IntlProvider>
-    );
   };
 
   it('should not crash', () => {

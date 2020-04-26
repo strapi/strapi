@@ -95,8 +95,7 @@ const Wrapper = styled.div`
   }
 
   .bordered {
-    border-top: 2px solid
-      ${({ withSucessBorder }) => (withSucessBorder ? '#5a9e06' : '#1c5de7')};
+    border-top: 2px solid ${({ withSuccessBorder }) => (withSuccessBorder ? '#5a9e06' : '#1c5de7')};
   }
 
   .borderedSuccess {

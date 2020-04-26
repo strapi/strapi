@@ -9,7 +9,7 @@ Create a new project.
 ```bash
 strapi new <name>
 
-options: [--debug|--quickstart|--dbclient=<dbclient> --dbhost=<dbhost> --dbport=<dbport> --dbname=<dbname> --dbusername=<dbusername> --dbpassword=<dbpassword> --dbssl=<dbssl> --dbauth=<dbauth> --dbforce]
+options: [--no-run|--use-npm|--debug|--quickstart|--dbclient=<dbclient> --dbhost=<dbhost> --dbport=<dbport> --dbname=<dbname> --dbusername=<dbusername> --dbpassword=<dbpassword> --dbssl=<dbssl> --dbauth=<dbauth> --dbforce]
 ```
 
 - **strapi new &#60;name&#62;**<br/>
@@ -20,6 +20,9 @@ options: [--debug|--quickstart|--dbclient=<dbclient> --dbhost=<dbhost> --dbport=
 
 - **strapi new &#60;name&#62; --quickstart**<br/>
   Use the quickstart system to create your app.
+
+- **strapi new &#60;name&#62; --quickstart --no-run**<br/>
+  Use the quickstart system to create your app, and do not start the application after creation.
 
 - **strapi new &#60;name&#62; --dbclient=&#60;dbclient&#62; --dbhost=&#60;dbhost&#62; --dbport=&#60;dbport&#62; --dbname=&#60;dbname&#62; --dbusername=&#60;dbusername&#62; --dbpassword=&#60;dbpassword&#62; --dbssl=&#60;dbssl&#62; --dbauth=&#60;dbauth&#62; --dbforce**<br/>
 
@@ -74,9 +77,11 @@ options: [--no-optimization]
 ```
 
 - **strapi build**<br/>
-  Builds the administration panel without minimizing the assets
+  Builds the administration panel and minimizing the assets
+- **strapi build --clean**<br/>
+  Builds the administration panel and delete the previous build and .cache folders
 - **strapi build --no-optimization**<br/>
-  Builds the administration panel without minizing the assets. The build duration is faster.
+  Builds the administration panel without minimizing the assets. The build duration is faster.
 
 ::: tip
 You can specify a NODE_ENV to use the configurations in the `./config/environments/[development|staging|production]` folder.
@@ -90,7 +95,7 @@ Scaffold a complete API with its configurations, controller, model and service.
 ```bash
 strapi generate:api <name> [<attribute:type>]
 
-options: [--tpl <name>|--plugin <name>]
+options: [--plugin <name>]
 ```
 
 - **strapi generate:api &#60;name&#62;**<br/>
@@ -105,11 +110,6 @@ options: [--tpl <name>|--plugin <name>]
   Generates an API called **&#60;name&#62;** in the `./plugins/<plugin>` folder.
 
   Example: `strapi generate:api product --plugin content-manager`
-
-- **strapi generate:api &#60;name&#62; --tpl &#60;template&#62;**<br/>
-  Generates an API called **&#60;name&#62;** in the `./api` folder which works with the given **&#60;template&#62;**. By default, the generated APIs are based on Mongoose.
-
-  Example: `strapi generate:api product --tpl bookshelf`
 
 ::: tip
 The first letter of the filename will be uppercase.
@@ -278,7 +278,7 @@ options [--delete-files]
 - **strapi uninstall &#60;name&#62; --delete-files**<br/>
   Uninstalls a plugin called **&#60;name&#62;** and removes the files in `./extensions/name/`
 
-  Example: `strapi uninstall graphql` will remove the plugin `strapi-plugin-graphql` and all the files in `./extensions/graphql`
+  Example: `strapi uninstall graphql --delete-files` will remove the plugin `strapi-plugin-graphql` and all the files in `./extensions/graphql`
 
 ::: warning
 Some plugins have admin panel integrations, your admin panel might have to be rebuilt. This can take some time.
@@ -286,7 +286,7 @@ Some plugins have admin panel integrations, your admin panel might have to be re
 
 ## strapi console
 
-Start the server and let you eval commands into your application in real time.
+Start the server and eval commands in your application in real time.
 
 ```bash
 strapi console

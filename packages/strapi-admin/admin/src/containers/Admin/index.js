@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import axios from 'axios';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
@@ -19,18 +20,18 @@ import {
   LoadingIndicatorPage,
   OverlayBlocker,
 } from 'strapi-helper-plugin';
-import { SHOW_TUTORIALS } from '../../config';
+import { SETTINGS_BASE_URL, SHOW_TUTORIALS } from '../../config';
 
 import Header from '../../components/Header/index';
 import Logout from '../../components/Logout';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import LeftMenu from '../LeftMenu';
-import ListPluginsPage from '../ListPluginsPage';
+import InstalledPluginsPage from '../InstalledPluginsPage';
 import LocaleToggle from '../LocaleToggle';
 import HomePage from '../HomePage';
-import Marketplace from '../Marketplace';
+import MarketplacePage from '../MarketplacePage';
 import NotFoundPage from '../NotFoundPage';
-import Onboarding from '../Onboarding';
+import OnboardingVideos from '../Onboarding';
 import SettingsPage from '../SettingsPage';
 import PluginDispatcher from '../PluginDispatcher';
 import {
@@ -39,13 +40,8 @@ import {
   updatePlugin,
 } from '../App/actions';
 import makeSelecApp from '../App/selectors';
-import injectSaga from '../../utils/injectSaga';
-import injectReducer from '../../utils/injectReducer';
-
-import { emitEvent, setAppError } from './actions';
+import { setAppError } from './actions';
 import makeSelectAdmin from './selectors';
-import reducer from './reducer';
-import saga from './saga';
 import Wrapper from './Wrapper';
 import Content from './Content';
 
@@ -57,7 +53,7 @@ export class Admin extends React.Component {
   };
 
   componentDidMount() {
-    this.props.emitEvent('didAccessAuthenticatedAdministration');
+    this.emitEvent('didAccessAuthenticatedAdministration');
   }
 
   shouldComponentUpdate(prevProps) {
@@ -78,14 +74,30 @@ export class Admin extends React.Component {
     this.props.setAppError();
   }
 
+  emitEvent = async (event, properties) => {
+    const {
+      global: { uuid },
+    } = this.props;
+
+    if (uuid) {
+      try {
+        await axios.post('https://analytics.strapi.io/track', {
+          event,
+          properties,
+          uuid,
+        });
+      } catch (err) {
+        // Silent
+      }
+    }
+  };
+
   hasApluginNotReady = props => {
     const {
       global: { plugins },
     } = props;
 
-    return !Object.keys(plugins).every(
-      plugin => plugins[plugin].isReady === true
-    );
+    return !Object.keys(plugins).every(plugin => plugins[plugin].isReady === true);
   };
 
   /**
@@ -103,11 +115,12 @@ export class Admin extends React.Component {
 
     return Object.keys(plugins).reduce((acc, current) => {
       const InitializerComponent = plugins[current].initializer;
-      const key = plugins[current].id;
 
-      acc.push(
-        <InitializerComponent key={key} {...this.props} {...this.helpers} />
-      );
+      if (InitializerComponent) {
+        const key = plugins[current].id;
+
+        acc.push(<InitializerComponent key={key} {...this.props} {...this.helpers} />);
+      }
 
       return acc;
     }, []);
@@ -133,9 +146,8 @@ export class Admin extends React.Component {
         strapiVersion,
       },
       disableGlobalOverlayBlocker,
-      emitEvent,
       enableGlobalOverlayBlocker,
-      intl: { formatMessage },
+      intl: { formatMessage, locale },
       updatePlugin,
     } = this.props;
 
@@ -152,12 +164,14 @@ export class Admin extends React.Component {
     return (
       <GlobalContextProvider
         autoReload={autoReload}
-        emitEvent={emitEvent}
+        emitEvent={this.emitEvent}
         currentEnvironment={currentEnvironment}
+        currentLocale={locale}
         disableGlobalOverlayBlocker={disableGlobalOverlayBlocker}
         enableGlobalOverlayBlocker={enableGlobalOverlayBlocker}
         formatMessage={formatMessage}
         plugins={plugins}
+        settingsBaseURL={SETTINGS_BASE_URL || '/settings'}
         updatePlugin={updatePlugin}
       >
         <Wrapper>
@@ -171,27 +185,25 @@ export class Admin extends React.Component {
             <Header />
             <Content>
               <Switch>
-                <Route
-                  path="/"
-                  render={props => this.renderRoute(props, HomePage)}
-                  exact
-                />
-                <Route
-                  path="/plugins/:pluginId"
-                  render={this.renderPluginDispatcher}
-                />
+                <Route path="/" render={props => this.renderRoute(props, HomePage)} exact />
+                <Route path="/plugins/:pluginId" render={this.renderPluginDispatcher} />
                 <Route
                   path="/list-plugins"
-                  render={props => this.renderRoute(props, ListPluginsPage)}
+                  render={props => this.renderRoute(props, InstalledPluginsPage)}
                   exact
                 />
                 <Route
                   path="/marketplace"
-                  render={props => this.renderRoute(props, Marketplace)}
+                  render={props => this.renderRoute(props, MarketplacePage)}
                 />
                 <Route
-                  path="/settings"
+                  path={`${SETTINGS_BASE_URL || '/settings'}/:settingId`}
                   render={props => this.renderRoute(props, SettingsPage)}
+                />
+                <Route
+                  path={SETTINGS_BASE_URL || '/settings'}
+                  render={props => this.renderRoute(props, SettingsPage)}
+                  exact
                 />
                 <Route key="7" path="" component={NotFoundPage} />
                 <Route key="8" path="404" component={NotFoundPage} />
@@ -203,7 +215,7 @@ export class Admin extends React.Component {
             isOpen={blockApp && showGlobalAppBlocker}
             {...overlayBlockerData}
           />
-          {SHOW_TUTORIALS && <Onboarding />}
+          {SHOW_TUTORIALS && <OnboardingVideos />}
         </Wrapper>
       </GlobalContextProvider>
     );
@@ -213,6 +225,7 @@ export class Admin extends React.Component {
 Admin.defaultProps = {
   intl: {
     formatMessage: () => {},
+    locale: 'en',
   },
 };
 
@@ -221,7 +234,6 @@ Admin.propTypes = {
     appError: PropTypes.bool,
   }).isRequired,
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,
-  emitEvent: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
   global: PropTypes.shape({
     autoReload: PropTypes.bool,
@@ -231,9 +243,11 @@ Admin.propTypes = {
     plugins: PropTypes.object,
     showGlobalAppBlocker: PropTypes.bool,
     strapiVersion: PropTypes.string,
+    uuid: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
   }).isRequired,
   intl: PropTypes.shape({
     formatMessage: PropTypes.func,
+    locale: PropTypes.string,
   }),
   location: PropTypes.object.isRequired,
   setAppError: PropTypes.func.isRequired,
@@ -249,7 +263,6 @@ export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       disableGlobalOverlayBlocker,
-      emitEvent,
       enableGlobalOverlayBlocker,
       setAppError,
       updatePlugin,
@@ -258,16 +271,6 @@ export function mapDispatchToProps(dispatch) {
   );
 }
 
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps
-);
-const withReducer = injectReducer({ key: 'admin', reducer });
-const withSaga = injectSaga({ key: 'admin', saga });
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
-export default compose(
-  injectIntl,
-  withReducer,
-  withSaga,
-  withConnect
-)(Admin);
+export default compose(injectIntl, withConnect)(Admin);

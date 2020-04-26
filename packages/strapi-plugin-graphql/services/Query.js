@@ -82,9 +82,7 @@ module.exports = {
     if (isSingular === 'force') {
       queryName = name;
     } else {
-      queryName = isSingular
-        ? pluralize.singular(name)
-        : pluralize.plural(name);
+      queryName = isSingular ? pluralize.singular(name) : pluralize.plural(name);
     }
 
     // Retrieve policies.
@@ -105,24 +103,17 @@ module.exports = {
       const resolver = _.get(handler, `Query.${queryName}.resolver`);
 
       if (_.isString(resolver) || _.isPlainObject(resolver)) {
-        const { handler = resolver } = _.isPlainObject(resolver)
-          ? resolver
-          : {};
+        const { handler = resolver } = _.isPlainObject(resolver) ? resolver : {};
 
         // Retrieve the controller's action to be executed.
         const [name, action] = handler.split('.');
 
         const controller = plugin
-          ? _.get(
-              strapi.plugins,
-              `${plugin}.controllers.${_.toLower(name)}.${action}`
-            )
+          ? _.get(strapi.plugins, `${plugin}.controllers.${_.toLower(name)}.${action}`)
           : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
         if (!controller) {
-          return new Error(
-            `Cannot find the controller's action ${name}.${action}`
-          );
+          throw new Error(`Cannot find the controller's action ${name}.${action}`);
         }
 
         // We're going to return a controller instead.
@@ -147,9 +138,7 @@ module.exports = {
       // We're going to return a controller instead.
       isController = true;
 
-      const controllers = plugin
-        ? strapi.plugins[plugin].controllers
-        : strapi.controllers;
+      const controllers = plugin ? strapi.plugins[plugin].controllers : strapi.controllers;
 
       // Try to find the controller that should be related to this model.
       const controller = isSingular
@@ -157,10 +146,8 @@ module.exports = {
         : _.get(controllers, `${name}.find`);
 
       if (!controller) {
-        return new Error(
-          `Cannot find the controller's action ${name}.${
-            isSingular ? 'findOne' : 'find'
-          }`
+        throw new Error(
+          `Cannot find the controller's action ${name}.${isSingular ? 'findOne' : 'find'}`
         );
       }
 
@@ -203,16 +190,11 @@ module.exports = {
       const [name, action] = resolverOf.split('.');
 
       const controller = plugin
-        ? _.get(
-            strapi.plugins,
-            `${plugin}.controllers.${_.toLower(name)}.${action}`
-          )
+        ? _.get(strapi.plugins, `${plugin}.controllers.${_.toLower(name)}.${action}`)
         : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
       if (!controller) {
-        return new Error(
-          `Cannot find the controller's action ${name}.${action}`
-        );
+        throw new Error(`Cannot find the controller's action ${name}.${action}`);
       }
 
       policiesFn[0] = policyUtils.globalPolicy({
@@ -223,19 +205,17 @@ module.exports = {
     }
 
     if (strapi.plugins['users-permissions']) {
-      policies.unshift('plugins.users-permissions.permissions');
+      policies.unshift('plugins::users-permissions.permissions');
     }
 
     // Populate policies.
-    policies.forEach(policy =>
-      policyUtils.get(
-        policy,
-        plugin,
-        policiesFn,
-        `GraphQL query "${queryName}"`,
-        name
-      )
-    );
+    policies.forEach(policyName => {
+      try {
+        policiesFn.push(policyUtils.get(policyName, plugin, name));
+      } catch (error) {
+        strapi.stopWithError(`Error building graphql query "${queryName}": ${error.message}`);
+      }
+    });
 
     return async (obj, options = {}, graphqlContext) => {
       const { context } = graphqlContext;
@@ -274,10 +254,7 @@ module.exports = {
       const policy = await compose(policiesFn)(ctx);
 
       // Policy doesn't always return errors but they update the current context.
-      if (
-        _.isError(ctx.request.graphql) ||
-        _.get(ctx.request.graphql, 'isBoom')
-      ) {
+      if (_.isError(ctx.request.graphql) || _.get(ctx.request.graphql, 'isBoom')) {
         return ctx.request.graphql;
       }
 

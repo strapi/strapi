@@ -1,219 +1,132 @@
-/**
- *
- * Onboarding
- *
- */
-
-import React from 'react';
-import PropTypes from 'prop-types';
-import cn from 'classnames';
-import { connect } from 'react-redux';
-import { bindActionCreators, compose } from 'redux';
+import React, { useEffect, useReducer, memo } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { GlobalContext } from 'strapi-helper-plugin';
-import injectSaga from '../../utils/injectSaga';
-import injectReducer from '../../utils/injectReducer';
-import OnboardingVideo from '../../components/OnboardingVideo';
+import axios from 'axios';
+import cn from 'classnames';
+import { useGlobalContext } from 'strapi-helper-plugin';
+
+import formatVideoArray from './utils/formatAndStoreVideoArray';
+
 import StaticLinks from '../../components/StaticLinks';
+import Video from './Video';
 import Wrapper from './Wrapper';
-import {
-  getVideos,
-  onClick,
-  removeVideos,
-  setVideoDuration,
-  setVideoEnd,
-  updateVideoStartTime,
-} from './actions';
-import makeSelectOnboarding from './selectors';
-import reducer from './reducer';
-import saga from './saga';
+import init from './init';
+import reducer, { initialState } from './reducer';
 
-/* eslint-disable react/no-array-index-key */
+const OnboardingVideos = () => {
+  const { emitEvent } = useGlobalContext();
+  const [reducerState, dispatch] = useReducer(reducer, initialState, init);
+  const { isLoading, isOpen, videos } = reducerState.toJS();
 
-export class Onboarding extends React.Component {
-  state = { showVideos: false };
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const { data } = await axios.get('https://strapi.io/videos', {
+          timeout: 1000,
+        });
+        const { didWatchVideos, videos } = formatVideoArray(data);
 
-  componentDidMount() {
-    this.props.getVideos();
+        dispatch({
+          type: 'GET_DATA_SUCCEEDED',
+          didWatchVideos,
+          videos,
+        });
+      } catch (err) {
+        console.error(err);
+        dispatch({
+          type: 'HIDE_VIDEO_ONBOARDING',
+        });
+      }
+    };
+
+    getData();
+  }, []);
+
+  // Hide the player in case of request error
+  if (isLoading) {
+    return null;
   }
 
-  componentDidUpdate(prevProps) {
-    const { shouldOpenModal } = this.props;
-
-    if (shouldOpenModal !== prevProps.shouldOpenModal && shouldOpenModal) {
-      this.handleOpenModal();
-    }
-  }
-
-  componentWillUnmount() {
-    this.props.removeVideos();
-  }
-
-  setVideoEnd = () => {
-    this.setVideoEnd();
-  };
-
-  didPlayVideo = (index, currTime) => {
-    const eventName = `didPlay${index}GetStartedVideo`;
-    this.context.emitEvent(eventName, { timestamp: currTime });
-  };
-
-  didStopVideo = (index, currTime) => {
-    const eventName = `didStop${index}Video`;
-    this.context.emitEvent(eventName, { timestamp: currTime });
-  };
-
-  handleOpenModal = () => this.setState({ showVideos: true });
-
-  handleVideosToggle = () => {
-    this.setState(prevState => ({ showVideos: !prevState.showVideos }));
-
-    const { showVideos } = this.state;
-    const eventName = showVideos
+  const handleClick = () => {
+    const eventName = isOpen
       ? 'didOpenGetStartedVideoContainer'
       : 'didCloseGetStartedVideoContainer';
 
-    this.context.emitEvent(eventName);
+    dispatch({ type: 'SET_IS_OPEN' });
+    emitEvent(eventName);
+  };
+  const handleClickOpenVideo = videoIndexToOpen => {
+    dispatch({
+      type: 'TOGGLE_VIDEO_MODAL',
+      videoIndexToOpen,
+    });
+  };
+  const handleUpdateVideoStartTime = (videoIndex, elapsedTime) => {
+    dispatch({
+      type: 'UPDATE_VIDEO_STARTED_TIME_AND_PLAYED_INFOS',
+      videoIndex,
+      elapsedTime,
+    });
+  };
+  const setVideoDuration = (videoIndex, duration) => {
+    dispatch({
+      type: 'SET_VIDEO_DURATION',
+      duration,
+      videoIndex,
+    });
   };
 
-  updateCurrentTime = (index, current, duration) => {
-    this.props.updateVideoStartTime(index, current);
+  const hasVideos = videos.length > 0;
+  const className = hasVideos ? 'visible' : 'hidden';
 
-    const percent = (current * 100) / duration;
-    const video = this.props.videos[index];
-
-    if (percent >= 80) {
-      if (video.end === false) {
-        this.updateEnd(index);
-      }
-    }
-  };
-
-  updateEnd = index => {
-    this.props.setVideoEnd(index, true);
-  };
-
-  static contextType = GlobalContext;
-
-  render() {
-    const { videos, onClick, setVideoDuration } = this.props;
-    const { showVideos } = this.state;
-    const style = showVideos ? {} : { maxWidth: 0 };
-
-    return (
-      <Wrapper
-        style={style}
-        className={cn(videos.length > 0 ? 'visible' : 'hidden')}
-      >
-        <div
-          style={style}
-          className={cn(
-            'videosContent',
-            this.state.showVideos ? 'shown' : 'hide'
-          )}
-        >
-          <div className="videosHeader">
-            <p>
-              <FormattedMessage id="app.components.Onboarding.title" />
-            </p>
-            {videos.length && (
-              <p>
-                {Math.floor(
-                  (videos.filter(v => v.end).length * 100) / videos.length
-                )}
-                <FormattedMessage id="app.components.Onboarding.label.completed" />
-              </p>
-            )}
-          </div>
-          <ul className="onboardingList">
-            {videos.map((video, i) => {
-              return (
-                <OnboardingVideo
-                  key={i}
-                  id={i}
-                  video={video}
-                  onClick={onClick}
-                  setVideoDuration={setVideoDuration}
-                  getVideoCurrentTime={this.updateCurrentTime}
-                  didPlayVideo={this.didPlayVideo}
-                  didStopVideo={this.didStopVideo}
-                />
-              );
-            })}
-          </ul>
-          <StaticLinks />
+  return (
+    <Wrapper className={className} isOpen={isOpen}>
+      <div className={cn('videosContent', isOpen ? 'shown' : 'hide')}>
+        <div className="videosHeader">
+          <p>
+            <FormattedMessage id="app.components.Onboarding.title" />
+          </p>
+          <p>
+            {Math.floor((videos.filter(v => v.end).length * 100) / videos.length)}
+            <FormattedMessage id="app.components.Onboarding.label.completed" />
+          </p>
         </div>
+        <ul className="onboardingList">
+          {videos.map((video, index) => (
+            <Video
+              key={video.id || index}
+              id={index}
+              video={video}
+              onClick={() => handleClickOpenVideo(index)}
+              setVideoDuration={(_, duration) => {
+                setVideoDuration(index, duration);
+              }}
+              getVideoCurrentTime={(_, elapsedTime) => {
+                handleUpdateVideoStartTime(index, elapsedTime);
+              }}
+              didPlayVideo={(_, elapsedTime) => {
+                const eventName = `didPlay${index}GetStartedVideo`;
 
-        <div className="openBtn">
-          <button
-            onClick={this.handleVideosToggle}
-            className={this.state.showVideos ? 'active' : ''}
-            type="button"
-          >
-            <i className="fa fa-question" />
-            <i className="fa fa-times" />
-            <span />
-          </button>
-        </div>
-      </Wrapper>
-    );
-  }
-}
+                emitEvent(eventName, { timestamp: elapsedTime });
+              }}
+              didStopVideo={(_, elapsedTime) => {
+                const eventName = `didStop${index}Video`;
 
-Onboarding.defaultProps = {
-  onClick: () => {},
-  removeVideos: () => {},
-  setVideoDuration: () => {},
-  setVideoEnd: () => {},
-  shouldOpenModal: false,
-  videos: [],
-  updateVideoStartTime: () => {},
-};
-
-Onboarding.propTypes = {
-  getVideos: PropTypes.func.isRequired,
-  onClick: PropTypes.func,
-  removeVideos: PropTypes.func,
-  setVideoDuration: PropTypes.func,
-  setVideoEnd: PropTypes.func,
-  shouldOpenModal: PropTypes.bool,
-  updateVideoStartTime: PropTypes.func,
-  videos: PropTypes.array,
-};
-
-const mapStateToProps = makeSelectOnboarding();
-
-function mapDispatchToProps(dispatch) {
-  return bindActionCreators(
-    {
-      getVideos,
-      onClick,
-      setVideoDuration,
-      updateVideoStartTime,
-      setVideoEnd,
-      removeVideos,
-    },
-    dispatch
+                emitEvent(eventName, { timestamp: elapsedTime });
+              }}
+            />
+          ))}
+        </ul>
+        <StaticLinks />
+      </div>
+      <div className="openBtn">
+        <button onClick={handleClick} className={isOpen ? 'active' : ''} type="button">
+          <i className="fa fa-question" />
+          <i className="fa fa-times" />
+          <span />
+        </button>
+      </div>
+    </Wrapper>
   );
-}
+};
 
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps
-);
-
-/* Remove this line if the container doesn't have a route and
- *  check the documentation to see how to create the container's store
- */
-const withReducer = injectReducer({ key: 'onboarding', reducer });
-
-/* Remove the line below the container doesn't have a route and
- *  check the documentation to see how to create the container's store
- */
-const withSaga = injectSaga({ key: 'onboarding', saga });
-
-export default compose(
-  withReducer,
-  withSaga,
-  withConnect
-)(Onboarding);
+export default memo(OnboardingVideos);

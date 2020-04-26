@@ -4,7 +4,7 @@ const waitRestart = require('../../../test/helpers/waitRestart');
 
 let rq;
 
-describe.only('Content Type Builder - Components', () => {
+describe('Content Type Builder - Components', () => {
   beforeAll(async () => {
     const token = await registerAndLogin();
     rq = createAuthRequest(token);

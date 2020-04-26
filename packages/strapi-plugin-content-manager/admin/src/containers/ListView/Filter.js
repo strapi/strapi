@@ -1,10 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
-import { get, toString, upperFirst } from 'lodash';
+import { get, toString } from 'lodash';
 import moment from 'moment';
-import pluginId from '../../pluginId';
-import { FilterWrapper, Remove, Separator } from './components';
+import { FilterButton } from 'strapi-helper-plugin';
+import dateFormats from '../../utils/dateFormats';
 
 function Filter({
   changeParams,
@@ -20,35 +19,42 @@ function Filter({
   const type = get(schema, ['attributes', name, 'type'], 'string');
   let displayedValue = toString(value);
 
-  if (type.includes('date')) {
-    const date = moment(value.slice(0, -1), moment.ISO_8601);
-    const format =
-      date.valueOf() === date.startOf('day').valueOf()
-        ? 'MMMM Do YYYY'
-        : 'MMMM Do YYYY, h:mm:ss a';
+  if (type.includes('date') || type.includes('timestamp')) {
+    const date = moment(value, moment.ISO_8601);
 
-    displayedValue = date.format(format);
+    let format;
+
+    if (type === 'date' || type === 'timestamp') {
+      format = dateFormats.date;
+    } else {
+      format = dateFormats.datetime;
+    }
+
+    displayedValue = moment
+      .parseZone(date)
+      .utc()
+      .format(format);
   }
 
-  return (
-    <FilterWrapper>
-      <span>{upperFirst(name)}&nbsp;</span>
-      <FormattedMessage
-        id={`${pluginId}.components.FilterOptions.FILTER_TYPES.${filter}`}
-      />
-      <span>&nbsp;{displayedValue}</span>
-      <Separator />
-      <Remove
-        onClick={() => {
-          const updatedFilters = filters.slice().filter((_, i) => i !== index);
+  const label = {
+    name,
+    filter,
+    value: displayedValue,
+  };
 
-          if (isFilterPickerOpen) {
-            toggleFilterPickerState();
-          }
-          changeParams({ target: { name: 'filters', value: updatedFilters } });
-        }}
-      />
-    </FilterWrapper>
+  return (
+    <FilterButton
+      onClick={() => {
+        const updatedFilters = filters.slice().filter((_, i) => i !== index);
+
+        if (isFilterPickerOpen) {
+          toggleFilterPickerState();
+        }
+        changeParams({ target: { name: 'filters', value: updatedFilters } });
+      }}
+      label={label}
+      type={type}
+    />
   );
 }
 

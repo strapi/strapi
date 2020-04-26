@@ -7,14 +7,16 @@
 module.exports = scope => {
   function generateRoutes() {
     return {
-      routes: [{
-        method: 'GET',
-        path: '/',
-        handler: scope.globalID + '.index',
-        config: {
-          policies: []
-        }
-      }]
+      routes: [
+        {
+          method: 'GET',
+          path: '/',
+          handler: scope.name + '.index',
+          config: {
+            policies: [],
+          },
+        },
+      ],
     };
   }
 

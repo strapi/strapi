@@ -25,8 +25,7 @@ const Button = styled.button`
       return css`
         border: 0;
         background: rgba(16, 22, 34, 0);
-        box-shadow: inset 0 -1px 0 0 rgba(16, 22, 34, 0.04),
-          inset 0 1px 0 0 rgba(16, 22, 34, 0.04);
+        box-shadow: inset 0 -1px 0 0 rgba(16, 22, 34, 0.04), inset 0 1px 0 0 rgba(16, 22, 34, 0.04);
       `;
     }
 

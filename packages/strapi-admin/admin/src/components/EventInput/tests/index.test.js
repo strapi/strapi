@@ -2,17 +2,12 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { IntlProvider } from 'react-intl';
 import renderer from 'react-test-renderer';
-
 import translationMessages from '../../../translations/en.json';
-
 import EventInput from '../index';
 import EventRow from '../EventRow';
 
-const intlProvider = new IntlProvider(
-  { locale: 'en', message: translationMessages },
-  {}
-);
-const { intl } = intlProvider.getChildContext();
+const intlProvider = new IntlProvider({ locale: 'en', message: translationMessages }, {});
+const { intl } = intlProvider.state;
 
 function nodeWithIntlProp(node) {
   return React.cloneElement(node, { intl });
@@ -31,7 +26,7 @@ describe('<EventInput />', () => {
 
   it('should match the snapshot', () => {
     const tree = renderer.create(
-      <IntlProvider locale="en" messages={translationMessages}>
+      <IntlProvider locale="en" messages={translationMessages} textComponent="span">
         <EventInput {...props} />
       </IntlProvider>
     );
@@ -106,13 +101,7 @@ describe('<EventInput />', () => {
     const formattedEvent = {
       target: {
         name: 'events',
-        value: [
-          'media.create',
-          'media.delete',
-          'entry.create',
-          'entry.update',
-          'entry.delete',
-        ],
+        value: ['media.create', 'media.delete', 'entry.create', 'entry.update', 'entry.delete'],
       },
     };
 
