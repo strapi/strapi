@@ -60,6 +60,8 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
         }
       } else if (data.type === 'number') {
         return parseFloat(data.value);
+      } else if (data.type === 'string') {
+        return data.value;
       } else {
         return null;
       }
