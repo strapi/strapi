@@ -7,7 +7,7 @@ import {
   HeaderSearch,
   PageFooter,
   PopUpWarning,
-  LoadingIndicatorPage,
+  LoadingIndicator,
   useGlobalContext,
   generateFiltersFromSearch,
   generateSearchFromFilters,
@@ -356,10 +356,6 @@ const HomePage = () => {
       dataToDelete.find(itemToDelete => item.id.toString() === itemToDelete.id.toString())
     ) && hasSomeCheckboxSelected;
 
-  if (isLoading) {
-    return <LoadingIndicatorPage />;
-  }
-
   const filters = generateFiltersFromSearch(search);
   const hasFilters = !isEmpty(filters);
   const hasSearch = !isEmpty(searchValue);
@@ -367,53 +363,63 @@ const HomePage = () => {
 
   return (
     <Container>
-      <Header {...headerProps} />
-      <HeaderSearch
-        label={pluginName}
-        onChange={handleChangeSearchValue}
-        onClear={handleClearSearch}
-        placeholder={formatMessage({ id: getTrad('search.placeholder') })}
-        name="_q"
-        value={searchValue}
-      />
-      <ControlsWrapper>
-        <SelectAll
-          onChange={handleSelectAll}
-          checked={areAllCheckboxesSelected}
-          someChecked={hasSomeCheckboxSelected && !areAllCheckboxesSelected}
-        />
-        <Padded right />
-        <SortPicker
-          onChange={handleChangeParams}
-          value={query.get('_sort') || `${updated_at}:DESC`}
-        />
-        <Padded right />
-        <Filters onChange={handleChangeParams} filters={filters} onClick={handleDeleteFilter} />
-      </ControlsWrapper>
-      {dataCount > 0 && !areResultsEmptyWithSearchOrFilters ? (
+      <Header {...headerProps} isLoading={isLoading} />
+      {isLoading && (
         <>
-          <List
-            data={data}
-            onChange={handleChangeCheck}
-            onCardClick={handleClickEditFile}
-            selectedItems={dataToDelete}
-          />
-          <Padded left right size="sm">
-            <Padded left right size="xs">
-              <PageFooter
-                context={{ emitEvent: () => {} }}
-                count={dataCount}
-                onChangeParams={handleChangeListParams}
-                params={params}
-              />
-            </Padded>
-          </Padded>
+          <Padded top bottom size="lg" />
+          <LoadingIndicator />
         </>
-      ) : (
-        <ListEmpty
-          onClick={handleClickToggleModal}
-          hasSearchApplied={areResultsEmptyWithSearchOrFilters}
-        />
+      )}
+      {!isLoading && (
+        <>
+          <HeaderSearch
+            label={pluginName}
+            onChange={handleChangeSearchValue}
+            onClear={handleClearSearch}
+            placeholder={formatMessage({ id: getTrad('search.placeholder') })}
+            name="_q"
+            value={searchValue}
+          />
+          <ControlsWrapper>
+            <SelectAll
+              onChange={handleSelectAll}
+              checked={areAllCheckboxesSelected}
+              someChecked={hasSomeCheckboxSelected && !areAllCheckboxesSelected}
+            />
+            <Padded right />
+            <SortPicker
+              onChange={handleChangeParams}
+              value={query.get('_sort') || `${updated_at}:DESC`}
+            />
+            <Padded right />
+            <Filters onChange={handleChangeParams} filters={filters} onClick={handleDeleteFilter} />
+          </ControlsWrapper>
+          {dataCount > 0 && !areResultsEmptyWithSearchOrFilters ? (
+            <>
+              <List
+                data={data}
+                onChange={handleChangeCheck}
+                onCardClick={handleClickEditFile}
+                selectedItems={dataToDelete}
+              />
+              <Padded left right size="sm">
+                <Padded left right size="xs">
+                  <PageFooter
+                    context={{ emitEvent: () => {} }}
+                    count={dataCount}
+                    onChangeParams={handleChangeListParams}
+                    params={params}
+                  />
+                </Padded>
+              </Padded>
+            </>
+          ) : (
+            <ListEmpty
+              onClick={handleClickToggleModal}
+              hasSearchApplied={areResultsEmptyWithSearchOrFilters}
+            />
+          )}
+        </>
       )}
       <ModalStepper
         initialFileToEdit={fileToEdit}
