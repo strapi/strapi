@@ -1,6 +1,158 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<EventInput /> should match the snapshot 1`] = `
+.c2 {
+  cursor: pointer;
+  margin: 0;
+  position: relative;
+  width: 14px;
+}
+
+.c2:focus,
+.c2:active {
+  outline: 0;
+}
+
+.c2:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  margin-top: calc(-14px / 2);
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(16,22,34,0.15);
+  background-color: #fdfdfd;
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+
+.c2:after {
+  display: none;
+  content: '\\f00c';
+  font-family: 'FontAwesome';
+  position: absolute;
+  left: 0px;
+  top: 55%;
+  margin-top: calc(-14px / 2);
+  width: 14px;
+  height: 14px;
+  text-align: center;
+  font-size: 9px;
+  color: #1C5DE7;
+  line-height: 14px;
+}
+
+.c2:checked:after {
+  display: block;
+}
+
+.c2:disabled {
+  background-color: #FAFAFB;
+  cursor: initial;
+}
+
+.c2 + label {
+  display: inline-block;
+  font-weight: 400;
+  font-size: 1.3rem;
+}
+
+.c4 {
+  cursor: pointer;
+  margin: 0;
+  position: relative;
+  width: 14px;
+}
+
+.c4:focus,
+.c4:active {
+  outline: 0;
+}
+
+.c4:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  margin-top: calc(-14px / 2);
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(16,22,34,0.15);
+  background-color: #fdfdfd;
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+
+.c4:after {
+  display: none;
+  content: '\\f00c';
+  font-family: 'FontAwesome';
+  position: absolute;
+  left: 0px;
+  top: 55%;
+  margin-top: calc(-14px / 2);
+  width: 14px;
+  height: 14px;
+  text-align: center;
+  font-size: 9px;
+  color: #1C5DE7;
+  line-height: 14px;
+}
+
+.c4:checked:after {
+  display: block;
+}
+
+.c4:after {
+  content: '\\f068';
+  display: block;
+  top: 50%;
+  font-size: 10px;
+}
+
+.c4:disabled {
+  background-color: #FAFAFB;
+  cursor: initial;
+}
+
+.c4 + label {
+  display: inline-block;
+  font-weight: 400;
+  font-size: 1.3rem;
+}
+
+.c1 input,
+.c1 label {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.c1 input {
+  margin-top: 4px;
+  width: 14px;
+  height: 12px;
+}
+
+.c1 input + label {
+  display: inline-block;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  max-width: calc(100% - 14px);
+  margin-left: 10px;
+  margin-bottom: 0;
+  line-height: 18px;
+  cursor: pointer;
+}
+
+.c3 {
+  width: 100%;
+  font-weight: 500;
+  font-size: 1.3rem;
+  color: #333740;
+}
+
 .c0 {
   padding-top: 3px;
   padding-bottom: 8px;
@@ -79,161 +231,6 @@ exports[`<EventInput /> should match the snapshot 1`] = `
   width: -moz-fit-content;
   width: fit-content;
   margin: 0 auto;
-}
-
-.c2 {
-  cursor: pointer;
-  margin: 0;
-  position: relative;
-  width: 14px;
-  font-weight: 100;
-}
-
-.c2:focus,
-.c2:active {
-  outline: 0;
-}
-
-.c2:before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  margin-top: calc(-14px / 2);
-  width: 14px;
-  height: 14px;
-  border: 1px solid rgba(16,22,34,0.15);
-  background-color: #fdfdfd;
-  border-radius: 3px;
-  box-sizing: border-box;
-}
-
-.c2:after {
-  display: none;
-  content: '\\f00c';
-  font-family: 'FontAwesome';
-  position: absolute;
-  left: 0px;
-  top: 55%;
-  margin-top: calc(-14px / 2);
-  width: 14px;
-  height: 14px;
-  text-align: center;
-  font-size: 9px;
-  font-weight: 400;
-  color: #1C5DE7;
-  line-height: 14px;
-}
-
-.c2:checked:after {
-  display: block;
-}
-
-.c2:disabled {
-  background-color: #FAFAFB;
-  cursor: initial;
-}
-
-.c2 + label {
-  display: inline-block;
-  font-weight: 400;
-  font-size: 1.3rem;
-}
-
-.c4 {
-  cursor: pointer;
-  margin: 0;
-  position: relative;
-  width: 14px;
-  font-weight: 100;
-}
-
-.c4:focus,
-.c4:active {
-  outline: 0;
-}
-
-.c4:before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  margin-top: calc(-14px / 2);
-  width: 14px;
-  height: 14px;
-  border: 1px solid rgba(16,22,34,0.15);
-  background-color: #fdfdfd;
-  border-radius: 3px;
-  box-sizing: border-box;
-}
-
-.c4:after {
-  display: none;
-  content: '\\f00c';
-  font-family: 'FontAwesome';
-  position: absolute;
-  left: 0px;
-  top: 55%;
-  margin-top: calc(-14px / 2);
-  width: 14px;
-  height: 14px;
-  text-align: center;
-  font-size: 9px;
-  font-weight: 400;
-  color: #1C5DE7;
-  line-height: 14px;
-}
-
-.c4:checked:after {
-  display: block;
-}
-
-.c4:after {
-  content: '\\f068';
-  display: block;
-  top: 50%;
-  font-size: 10px;
-}
-
-.c4:disabled {
-  background-color: #FAFAFB;
-  cursor: initial;
-}
-
-.c4 + label {
-  display: inline-block;
-  font-weight: 400;
-  font-size: 1.3rem;
-}
-
-.c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  height: 18px;
-  line-height: 18px;
-}
-
-.c1 input label {
-  cursor: pointer;
-  margin-bottom: 0 !important;
-}
-
-.c1 input + label {
-  margin-left: 10px;
-  margin-bottom: 0;
-}
-
-.c3 {
-  width: 100%;
-  font-weight: 500;
-  font-size: 1.3rem;
-  color: #333740;
 }
 
 <div

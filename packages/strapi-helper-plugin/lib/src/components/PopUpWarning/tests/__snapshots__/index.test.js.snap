@@ -4,8 +4,8 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
 <DocumentFragment>
   .c6 {
   height: 30px;
-  padding: 0 15px;
-  font-weight: 500;
+  padding: 0 15px 2px;
+  font-weight: 600;
   font-size: 1.3rem;
   line-height: normal;
   border-radius: 2px;
@@ -17,12 +17,7 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
   color: #9ea7b8;
 }
 
-.c6:hover {
-  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
-  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
-  box-shadow: inset 0 0 30px [object Object];
-}
-
+.c6:hover,
 .c6:active {
   -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
   -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
@@ -33,15 +28,22 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
   outline: 0;
 }
 
-.c6 > svg {
-  margin-right: 10px;
+.c6 > span svg {
+  font-size: 10px;
   vertical-align: initial;
+}
+
+.c6 > svg {
+  height: 10px;
+  width: auto;
+  margin-right: 10px;
+  vertical-align: baseline;
 }
 
 .c7 {
   height: 30px;
-  padding: 0 15px;
-  font-weight: 500;
+  padding: 0 15px 2px;
+  font-weight: 600;
   font-size: 1.3rem;
   line-height: normal;
   border-radius: 2px;
@@ -51,15 +53,9 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
   background-color: #F64D0A;
   border: 1px solid #F64D0A;
   color: #ffffff;
-  padding: 0 15px;
 }
 
-.c7:hover {
-  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
-  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
-  box-shadow: inset 0 0 30px [object Object];
-}
-
+.c7:hover,
 .c7:active {
   -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
   -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
@@ -70,9 +66,16 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
   outline: 0;
 }
 
-.c7 > svg {
-  margin-right: 10px;
+.c7 > span svg {
+  font-size: 10px;
   vertical-align: initial;
+}
+
+.c7 > svg {
+  height: 10px;
+  width: auto;
+  margin-right: 10px;
+  vertical-align: baseline;
 }
 
 .c2 {
@@ -267,8 +270,8 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
 <DocumentFragment>
   .c6 {
   height: 30px;
-  padding: 0 15px;
-  font-weight: 500;
+  padding: 0 15px 2px;
+  font-weight: 600;
   font-size: 1.3rem;
   line-height: normal;
   border-radius: 2px;
@@ -278,15 +281,9 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
   background-color: #F64D0A;
   border: 1px solid #F64D0A;
   color: #ffffff;
-  padding: 0 15px;
 }
 
-.c6:hover {
-  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
-  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
-  box-shadow: inset 0 0 30px [object Object];
-}
-
+.c6:hover,
 .c6:active {
   -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
   -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
@@ -297,9 +294,16 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
   outline: 0;
 }
 
-.c6 > svg {
-  margin-right: 10px;
+.c6 > span svg {
+  font-size: 10px;
   vertical-align: initial;
+}
+
+.c6 > svg {
+  height: 10px;
+  width: auto;
+  margin-right: 10px;
+  vertical-align: baseline;
 }
 
 .c2 {
