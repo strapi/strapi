@@ -328,9 +328,27 @@ To enable the provider, create or edit the file at `./extensions/upload/config/s
 
 Make sure to read the provider's `README` to know what are the possible parameters.
 
-::: tip
-Some providers may have additional settings such as the AWS S3 needs an API endpoint URL. You can find a list of these for AWS [here](https://docs.aws.amazon.com/general/latest/gr/ses.html)
-:::
+### Configuration per envrionment
+
+When configuring your upload provider you might want to change the configuration based on the `NODE_ENV` environment variable or use environment specific credentials.
+
+You can do so using a `settings.js` file:
+
+```js
+if (process.env.NODE_ENV === 'production') {
+  module.exports = {
+    provider: 'providerName',
+    providerOptions: {
+      cloud_name: process.env.PROVIDER_CLOUD_NAME,
+      api_key: process.env.PROVIDER_API_KEY,
+      api_secret: process.env.PROVIDER_API_SECRET,
+    },
+  };
+} else {
+  // to use the default local provider you can return an empty configuration
+  module.exports = {};
+}
+```
 
 ## Create providers
 
