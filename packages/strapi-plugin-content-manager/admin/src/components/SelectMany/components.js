@@ -92,13 +92,11 @@ const Li = styled.li`
   > div {
     width: 90%;
     > a {
+      max-width: 100%;
       color: rgb(35, 56, 77);
     }
     > a:hover {
       text-decoration: none;
-    }
-    > a {
-      max-width: 100%;
     }
 
     &:first-of-type {
