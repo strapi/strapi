@@ -1,7 +1,7 @@
 'use strict';
 
 const { replaceIdByPrimaryKey } = require('../utils/primary-key');
-const { executeBeforeHook, executeAfterHook } = require('../utils/hooks');
+const { executeBeforeLifecycleHook, executeAfterLifecycleHook } = require('../utils/lifecycles');
 
 module.exports = function createQuery(opts) {
   const { model, connectorQuery } = opts;
@@ -62,13 +62,13 @@ const createQueryWithHooks = ({ query, model, connectorQuery }) => async (params
   const queryArguments = [newParams, ...rest];
 
   // execute before hook
-  await executeBeforeHook(query, model, ...queryArguments);
+  await executeBeforeLifecycleHook(query, model, ...queryArguments);
 
   // execute query
   const result = await connectorQuery[query](...queryArguments);
 
   // execute after hook with result and arguments
-  await executeAfterHook(query, model, result, ...queryArguments);
+  await executeAfterLifecycleHook(query, model, result, ...queryArguments);
 
   // return result
   return result;
