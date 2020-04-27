@@ -57,9 +57,13 @@ describe('Env helper', () => {
       expect(envHelper.bool('NOT_TRUE')).toEqual(false);
     });
 
-    test('Returns true when using "true" ', () => {
+    test('Returns true when using "true"', () => {
       process.env.TRUE_VAR = 'true';
       expect(envHelper.bool('TRUE_VAR')).toEqual(true);
+    });
+
+    test('Returns true when using boolean true default Value', () => {
+      expect(envHelper.bool('TRUE_VAR', true)).toEqual(true);
     });
   });
 

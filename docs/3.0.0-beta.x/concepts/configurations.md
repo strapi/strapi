@@ -179,7 +179,7 @@ module.exports = ({ env }) => ({
 | `proxy.host`             | Host name your proxy service uses for Strapi.                                                                                                               | string        |             |
 | `proxy.port`             | Port that your proxy service accepts connections on.                                                                                                        | integer       |             |
 | `cron`                   | Cron configuration (powered by [`node-schedule`](https://github.com/node-schedule/node-schedule))                                                           | Object        |             |
-| `cron.enabled`           | Enable or disable CRON tasks to schedule jobs at specific dates.                                                                                            | boolean       | false       |
+| `cron.enabled`           | Enable or disable CRON tasks to schedule jobs at specific dates.                                                                                            | boolean       | `false`     |
 | `admin`                  | Admin panel configuration                                                                                                                                   | Object        |             |
 | `admin.autoOpen`         | Enable or disabled administration opening on start.                                                                                                         | boolean       | `true`      |
 | `admin.path`             | Allow to change the URL to access the admin panel.                                                                                                          | string        | `/admin`    |
