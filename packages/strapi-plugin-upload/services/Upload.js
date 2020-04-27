@@ -43,10 +43,9 @@ const combineFilters = params => {
 
 module.exports = {
   formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
-    const ext = '.' + mime.extension(type) || path.extname(filename);
-    const baseName = path.basename(filename, path.extname(filename));
+    const ext = path.extname(filename);
 
-    const usedName = fileInfo.name || baseName;
+    const usedName = fileInfo.name || filename;
 
     const entity = {
       name: usedName,
