@@ -70,7 +70,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error);
+    console.log('An error occurred:', error.response);
   });
 ```
 
@@ -99,7 +99,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error);
+    console.log('An error occurred:', error.response);
   });
 ```
 
@@ -128,7 +128,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error);
+    console.log('An error occurred:', error.response);
   });
 ```
 
@@ -486,7 +486,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error);
+    console.log('An error occurred:', error.response);
   });
 ```
 
@@ -519,7 +519,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error);
+    console.log('An error occurred:', error.response);
   });
 ```
 
@@ -545,7 +545,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.err('An error occured:', err);
+    console.error('An error occured:', error.response);
   });
 ```
 
