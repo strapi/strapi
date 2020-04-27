@@ -4,7 +4,8 @@ const _ = require('lodash');
 
 const requireConnector = require('./require-connector');
 const { createQuery } = require('./queries');
-const { checkDuplicatedTableNames } = require('./validation/before-mounting-models');
+const constants = require('./constants');
+const { validateModelSchemas } = require('./validation');
 
 class DatabaseManager {
   constructor(strapi) {
@@ -32,7 +33,7 @@ class DatabaseManager {
       }
     }
 
-    checkDuplicatedTableNames(this.strapi);
+    validateModelSchemas(this.strapi);
 
     for (const connectorToInitialize of connectorsToInitialize) {
       const connector = requireConnector(connectorToInitialize)(strapi);
@@ -134,6 +135,16 @@ class DatabaseManager {
     return Array.from(this.models.values()).find(model => {
       return model.globalId === globalId;
     });
+  }
+
+  getRestrictedNames() {
+    return {
+      model: constants.RESERVED_MODEL_NAMES,
+      attributes: [
+        ...constants.RESERVED_ATTRIBUTE_NAMES,
+        ...(strapi.db.getDefaultConnector().defaultTimestamps || []),
+      ],
+    };
   }
 }
 

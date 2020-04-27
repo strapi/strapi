@@ -2,8 +2,8 @@
   "routes": [
     {
       "method": "GET",
-      "path": "/restricted-names",
-      "handler": "Builder.getRestrictedNames",
+      "path": "/reserved-names",
+      "handler": "Builder.getReservedNames",
       "config": {
         "policies": []
       }
