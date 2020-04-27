@@ -28,7 +28,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error);
+    console.log('An error occurred:', error.response);
   });
 ```
 
@@ -57,7 +57,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error);
+    console.log('An error occurred:', error.response);
   });
 ```
 
@@ -86,7 +86,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error);
+    console.log('An error occurred:', error.response);
   });
 ```
 
@@ -148,7 +148,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error);
+    console.log('An error occurred:', error.response);
   });
 ```
 
@@ -176,7 +176,7 @@ axios
   })
   .catch(error => {
     // Handle error.
-    console.log('An error occurred:', error);
+    console.log('An error occurred:', error.response);
   });
 });
 ```
