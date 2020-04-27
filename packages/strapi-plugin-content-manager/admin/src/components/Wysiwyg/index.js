@@ -582,8 +582,8 @@ class Wysiwyg extends React.Component {
     Modifier.replaceText(contentState, this.getSelection(), text);
 
   onChange = editorState => {
-    this.setState({ editorState });
     this.sendData(editorState);
+    this.setState({ editorState });
   };
 
   handleTab = e => {
