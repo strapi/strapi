@@ -7,14 +7,14 @@ const Wrapper = styled.div`
   }
 
   ${({ isFromDynamicZone }) => {
-    if (isFromDynamicZone) {
-      return `
+  if (isFromDynamicZone) {
+    return `
         background-color: #fff;
       `;
-    }
+  }
 
-    return '';
-  }}
+  return '';
+}}
 `;
 
 export default Wrapper;

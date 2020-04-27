@@ -40,10 +40,8 @@ import {
   updatePlugin,
 } from '../App/actions';
 import makeSelecApp from '../App/selectors';
-import injectReducer from '../../utils/injectReducer';
 import { setAppError } from './actions';
 import makeSelectAdmin from './selectors';
-import reducer from './reducer';
 import Wrapper from './Wrapper';
 import Content from './Content';
 
@@ -274,6 +272,5 @@ export function mapDispatchToProps(dispatch) {
 }
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-const withReducer = injectReducer({ key: 'admin', reducer });
 
-export default compose(injectIntl, withReducer, withConnect)(Admin);
+export default compose(injectIntl, withConnect)(Admin);

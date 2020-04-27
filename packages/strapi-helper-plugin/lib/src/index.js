@@ -27,8 +27,6 @@ export { default as InputAddon } from './components/InputAddon';
 export { default as InputAddonWithErrors } from './components/InputAddonWithErrors';
 export { default as InputCheckbox } from './components/InputCheckbox';
 export { default as InputCheckboxWithErrors } from './components/InputCheckboxWithErrors';
-export { default as InputDate } from './components/InputDate';
-export { default as InputDateWithErrors } from './components/InputDateWithErrors';
 export { default as InputDescription } from './components/InputDescription';
 export { default as InputEmail } from './components/InputEmail';
 export { default as InputEmailWithErrors } from './components/InputEmailWithErrors';
