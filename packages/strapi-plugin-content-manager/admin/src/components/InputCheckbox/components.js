@@ -42,8 +42,8 @@ const Label = styled.label`
   }
 
   ${({ value }) => {
-    if (value === true) {
-      return css`
+  if (value === true) {
+    return css`
         font-weight: 500;
         &:after {
           content: '\f00c';
@@ -57,10 +57,10 @@ const Label = styled.label`
           transition: all 0.2s;
         }
       `;
-    }
+  }
 
-    return '';
-  }}
+  return '';
+}}
 `;
 
 export { Div, Label };

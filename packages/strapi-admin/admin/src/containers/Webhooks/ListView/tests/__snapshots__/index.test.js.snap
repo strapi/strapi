@@ -29,14 +29,14 @@ exports[`Admin | containers | ListView should match the snapshot 1`] = `
   outline: 0;
 }
 
-.c8 {
+.c9 {
   width: 37.5rem !important;
   -webkit-font-smoothing: antialiased !important;
 }
 
 .c4 {
   height: 30px;
-  padding: 0 15px;
+  padding: 0 14px;
   font-weight: 500;
   font-size: 1.3rem;
   line-height: normal;
@@ -184,6 +184,42 @@ exports[`Admin | containers | ListView should match the snapshot 1`] = `
 }
 
 .c7 {
+  height: 30px;
+  padding: 0 15px;
+  font-weight: 500;
+  font-size: 1.3rem;
+  line-height: normal;
+  border-radius: 2px;
+  cursor: pointer;
+  outline: 0;
+  background-color: #ffffff;
+  background-color: #007EFF;
+  border: 1px solid #007EFF;
+  color: #ffffff;
+}
+
+.c7:hover {
+  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  box-shadow: inset 0 0 30px [object Object];
+}
+
+.c7:active {
+  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  box-shadow: inset 0 0 30px [object Object];
+}
+
+.c7:focus {
+  outline: 0;
+}
+
+.c7 > svg {
+  margin-right: 10px;
+  vertical-align: initial;
+}
+
+.c8 {
   margin-right: 10px;
   font-size: 0.94em;
 }
@@ -323,12 +359,12 @@ exports[`Admin | containers | ListView should match the snapshot 1`] = `
         class="c6"
       >
         <button
-          class="c4"
+          class="c7"
           color="primary"
           type="button"
         >
           <span
-            class="c7"
+            class="c8"
           >
             <svg
               fill="#007eff"
@@ -354,7 +390,7 @@ exports[`Admin | containers | ListView should match the snapshot 1`] = `
       </div>
     </div>
     <div
-      class="c8"
+      class="c9"
     />
   </div>
 </DocumentFragment>

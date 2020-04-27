@@ -104,7 +104,7 @@
   "app.components.listPlugins.title.singular": "{number} Plugin ist installiert",
   "app.components.listPluginsPage.deletePlugin.error": "Bei der Entfernung des Plugins ist ein Fehler aufgetreten",
   "app.utils.SelectOption.defaultMessage": " ",
-  "app.utils.defaultMessage": "",
+  "app.utils.defaultMessage": " ",
   "app.utils.placeholder.defaultMessage": " ",
   "components.AutoReloadBlocker.description": "Führen Sie Strapi mit einem der folgenden Befehle aus:",
   "components.AutoReloadBlocker.header": "Dieses Plugin benötigt das Neuladen-Feature.",

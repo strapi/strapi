@@ -8,15 +8,15 @@ const Wrapper = styled.div`
   width: 100%;
   padding: 0 5px;
   ${({ isComponent }) => {
-    if (isComponent) {
-      return css`
+  if (isComponent) {
+    return css`
         height: 34px;
         padding: 0;
       `;
-    }
+  }
 
-    return '';
-  }}
+  return '';
+}}
   border-radius: 2px;
   > div {
     width: 100%;
