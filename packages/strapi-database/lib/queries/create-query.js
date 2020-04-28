@@ -3,6 +3,11 @@
 const { replaceIdByPrimaryKey } = require('../utils/primary-key');
 const { executeBeforeLifecycleHook, executeAfterLifecycleHook } = require('../utils/lifecycles');
 
+/**
+ * @param {Object} opts options
+ * @param {Object} opts.model The ORM model
+ * @param {Object} opts.connectorQuery The ORM queries implementation
+ */
 module.exports = function createQuery(opts) {
   const { model, connectorQuery } = opts;
 
