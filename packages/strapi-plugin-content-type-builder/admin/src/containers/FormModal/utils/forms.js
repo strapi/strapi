@@ -10,6 +10,7 @@ import componentForm from './componentForm';
 import fields from './staticFields';
 import { NAME_REGEX, ENUM_REGEX, CATEGORY_NAME_REGEX } from './attributesRegexes';
 import RESERVED_NAMES from './reservedNames';
+import RESERVED_ATTRIBUTE_NAMES from './reservedAttributeNames';
 
 /* eslint-disable indent */
 /* eslint-disable prefer-arrow-callback */
@@ -30,7 +31,7 @@ yup.addMethod(yup.string, 'unique', function(
     }
 
     return !alreadyTakenAttributes.includes(
-      typeof validator === 'function' ? validator(string, category) : string
+      typeof validator === 'function' ? validator(string, category) : string.toLowerCase()
     );
   });
 });
@@ -43,13 +44,13 @@ yup.addMethod(yup.array, 'hasNotEmptyValues', function(message) {
   });
 });
 
-yup.addMethod(yup.string, 'isAllowed', function(message) {
+yup.addMethod(yup.string, 'isAllowed', function(message, reservedStrings) {
   return this.test('isAllowed', message, function(string) {
     if (!string) {
       return false;
     }
 
-    return !RESERVED_NAMES.includes(toLower(trim(string)));
+    return !reservedStrings.includes(toLower(trim(string)));
   });
 });
 
@@ -125,6 +126,7 @@ const forms = {
           .string()
           .unique(errorsTrads.unique, alreadyTakenAttributes)
           .matches(NAME_REGEX, errorsTrads.regex)
+          .isAllowed(getTrad('error.attribute.reserved-name'), RESERVED_ATTRIBUTE_NAMES)
           .required(errorsTrads.required),
         type: yup.string().required(errorsTrads.required),
         default: yup.string().nullable(),
@@ -813,7 +815,7 @@ const forms = {
         name: yup
           .string()
           .unique(errorsTrads.unique, takenNames, createUid)
-          .isAllowed(getTrad('error.contentTypeName.reserved-name'))
+          .isAllowed(getTrad('error.contentTypeName.reserved-name'), RESERVED_NAMES)
           .required(errorsTrads.required),
         collectionName: yup.string(),
         kind: yup.string().oneOf(['singleType', 'collectionType']),
@@ -911,7 +913,7 @@ const forms = {
         name: yup
           .string()
           .unique(errorsTrads.unique, takenNames, createComponentUid, componentCategory)
-          .isAllowed(getTrad('error.contentTypeName.reserved-name'))
+          .isAllowed(getTrad('error.contentTypeName.reserved-name'), RESERVED_NAMES)
           .required(errorsTrads.required),
         category: yup
           .string()
