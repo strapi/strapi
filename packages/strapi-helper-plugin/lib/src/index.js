@@ -109,9 +109,6 @@ export { default as generateSearchFromFilters } from './utils/generateSearchFrom
 export { default as generateSearchFromObject } from './utils/generateSearchFromObject';
 export { default as prefixFileUrlWithBackendUrl } from './utils/prefixFileUrlWithBackendUrl';
 
-// Test Utils
-export { default as renderWithIntl } from './testUtils/renderWithIntl';
-
 // SVGS
 export { default as LayoutIcon } from './svgs/Layout';
 export { default as ClearIcon } from './svgs/Clear';
