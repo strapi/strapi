@@ -4,7 +4,7 @@ import { ModalBody } from 'reactstrap';
 const StyledBody = styled(ModalBody)`
   padding: 0;
   > div {
-    padding: 21px 30px 15px 30px !important;
+    padding: 2.1rem 3rem 1.5rem 3rem !important;
     color: #f64d0a;
     text-align: center;
     font-family: Lato;

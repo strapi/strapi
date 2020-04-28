@@ -1,6 +1,8 @@
 import React, { useEffect, useReducer, memo } from 'react';
 import { FormattedMessage } from 'react-intl';
 import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faQuestion, faTimes } from '@fortawesome/free-solid-svg-icons';
 import cn from 'classnames';
 import { useGlobalContext } from 'strapi-helper-plugin';
 
@@ -120,8 +122,8 @@ const OnboardingVideos = () => {
       </div>
       <div className="openBtn">
         <button onClick={handleClick} className={isOpen ? 'active' : ''} type="button">
-          <i className="fa fa-question" />
-          <i className="fa fa-times" />
+          <FontAwesomeIcon icon={faQuestion} />
+          <FontAwesomeIcon icon={faTimes} />
           <span />
         </button>
       </div>

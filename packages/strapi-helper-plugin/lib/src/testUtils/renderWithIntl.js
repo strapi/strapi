@@ -4,7 +4,7 @@ import { IntlProvider } from 'react-intl';
 
 const renderWithIntl = (componentToRender, pluginTrads) => {
   return render(
-    <IntlProvider locale="en" defaultLocale="en" messages={pluginTrads}>
+    <IntlProvider locale="en" defaultLocale="en" messages={pluginTrads} textComponent="span">
       {componentToRender}
     </IntlProvider>
   );

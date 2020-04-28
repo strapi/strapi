@@ -1143,7 +1143,7 @@ const FormModal = () => {
 
                           // The spacer type is used mainly to align the icon picker...
                           if (input.type === 'spacer') {
-                            return <div key={`${index}.${i}`} style={{ height: 8 }} />;
+                            return <div key="spacer" style={{ height: 8 }} />;
                           }
 
                           // The spacer type is used mainly to align the icon picker...
@@ -1164,7 +1164,7 @@ const FormModal = () => {
                           if (input.type === 'relation') {
                             return (
                               <RelationForm
-                                key={`${index}.${i}`}
+                                key="relation"
                                 mainBoxHeader={get(headers, [0, 'label'], '')}
                                 modifiedData={modifiedData}
                                 naturePickerType={state.forTarget}
