@@ -3,10 +3,6 @@ const { registerAndLogin } = require('../../../test/helpers/auth');
 const createModelsUtils = require('../../../test/helpers/models');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
-const databaseName = process.argv
-  .find(arg => arg.startsWith('--database='))
-  .replace('--database=', '');
-
 let rq;
 let modelsUtils;
 let data = {
@@ -151,13 +147,11 @@ describe('Search query', () => {
   }, 60000);
 
   test('search for "id"', async () => {
-    if (databaseName === 'mongo') return; // functionnality not available for mongo, we skip test
-
     const res = await rq({
       method: 'GET',
       url: '/content-manager/explorer/application::bed.bed',
       qs: {
-        _q: 3,
+        _q: data.beds[2].id,
       },
     });
 

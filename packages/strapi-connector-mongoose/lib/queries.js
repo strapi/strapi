@@ -8,6 +8,7 @@ var semver = require('semver');
 const { convertRestQueryParams, buildQuery, models: modelUtils } = require('strapi-utils');
 
 const { findComponentByGlobalId } = require('./utils/helpers');
+const utils = require('./utils')();
 
 const hasPK = (obj, model) => _.has(obj, model.primaryKey) || _.has(obj, 'id');
 const getPK = (obj, model) => (_.has(obj, model.primaryKey) ? obj[model.primaryKey] : obj.id);
@@ -515,7 +516,7 @@ module.exports = ({ model, modelKey, strapi }) => {
 };
 
 const buildSearchOr = (model, query) => {
-  return Object.keys(model.attributes).reduce((acc, curr) => {
+  const searchOr = Object.keys(model.attributes).reduce((acc, curr) => {
     switch (model.attributes[curr].type) {
       case 'biginteger':
       case 'integer':
@@ -549,6 +550,12 @@ const buildSearchOr = (model, query) => {
         return acc;
     }
   }, []);
+
+  if (utils.isMongoId(query)) {
+    searchOr.push({ _id: query });
+  }
+
+  return searchOr;
 };
 
 function validateRepeatableInput(value, { key, min, max, required }) {
