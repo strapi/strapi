@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { themePropTypes } from 'strapi-helper-plugin';
 
 const Wrapper = styled.div`
   min-height: 100%;
@@ -9,8 +10,12 @@ const Header = styled.div`
   margin-bottom: 1.1rem;
   padding-top: 2.8rem;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
   line-height: 3.6rem;
 `;
+
+Header.propTypes = {
+  ...themePropTypes,
+};
 
 export { Header, Wrapper };
