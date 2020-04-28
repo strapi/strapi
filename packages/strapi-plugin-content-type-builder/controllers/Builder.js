@@ -2,6 +2,6 @@
 
 module.exports = {
   getReservedNames(ctx) {
-    ctx.body = strapi.db.getRestrictedNames();
+    ctx.body = strapi.plugins['content-type-builder'].services.builder.getReservedNames();
   },
 };

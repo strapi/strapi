@@ -2,8 +2,8 @@
 
 const _ = require('lodash');
 
-const requireConnector = require('./require-connector');
 const { createQuery } = require('./queries');
+const createConnectorRegistry = require('./connector-registry');
 const constants = require('./constants');
 const { validateModelSchemas } = require('./validation');
 
@@ -13,8 +13,12 @@ class DatabaseManager {
 
     this.initialized = false;
 
+    this.connectors = createConnectorRegistry({
+      connections: strapi.config.connections,
+      defaultConnection: strapi.config.currentEnvironment.database.defaultConnection,
+    });
+
     this.queries = new Map();
-    this.connectors = new Map();
     this.models = new Map();
   }
 
@@ -25,36 +29,15 @@ class DatabaseManager {
 
     this.initialized = true;
 
-    const connectorsToInitialize = [];
-    for (const connection of Object.values(this.strapi.config.connections)) {
-      const { connector } = connection;
-      if (!connectorsToInitialize.includes(connector)) {
-        connectorsToInitialize.push(connector);
-      }
-    }
+    this.connectors.load();
 
-    validateModelSchemas(this.strapi);
+    validateModelSchemas({ strapi: this.strapi, manager: this });
 
-    for (const connectorToInitialize of connectorsToInitialize) {
-      const connector = requireConnector(connectorToInitialize)(strapi);
-
-      this.connectors.set(connectorToInitialize, connector);
-
-      await connector.initialize();
-    }
+    await this.connectors.initialize();
 
     this.initializeModelsMap();
 
     return this;
-  }
-
-  getDefaultConnector() {
-    const defaultConnectionName = this.strapi.config.currentEnvironment.database.defaultConnection;
-    const defaultConnector = this.strapi.config.currentEnvironment.database.connections[
-      defaultConnectionName
-    ].connector;
-
-    return this.connectors.get(defaultConnector);
   }
 
   initializeModelsMap() {
@@ -137,12 +120,12 @@ class DatabaseManager {
     });
   }
 
-  getRestrictedNames() {
+  getReservedNames() {
     return {
       model: constants.RESERVED_MODEL_NAMES,
       attributes: [
         ...constants.RESERVED_ATTRIBUTE_NAMES,
-        ...(strapi.db.getDefaultConnector().defaultTimestamps || []),
+        ...(strapi.db.connectors.default.defaultTimestamps || []),
       ],
     };
   }

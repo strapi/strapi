@@ -11,7 +11,7 @@ First found in ${modelA.origin} \`${modelA.apiOrPluginName}\`, model \`${modelA.
 Second found in ${modelB.origin} \`${modelB.apiOrPluginName}\`, model \`${modelB.modelName}\`.`;
 
 // Check if all collection names are unique
-const checkDuplicatedTableNames = strapi => {
+const checkDuplicatedTableNames = ({ strapi }) => {
   const modelsWithInfo = [];
   _.forIn(strapi.admin.models, (model, modelName) => {
     modelsWithInfo.push({
