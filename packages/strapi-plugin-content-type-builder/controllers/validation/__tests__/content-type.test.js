@@ -1,6 +1,23 @@
 const { validateKind, validateUpdateContentTypeInput } = require('../content-type');
 
 describe('Content type validator', () => {
+  global.strapi = {
+    plugins: {
+      'content-type-builder': {
+        services: {
+          builder: {
+            getReservedNames() {
+              return {
+                models: [],
+                attributes: ['thisIsReserved'],
+              };
+            },
+          },
+        },
+      },
+    },
+  };
+
   describe('validateKind', () => {
     it('Only allows for single and collection types', async () => {
       await expect(validateKind('wrong')).rejects.toBeDefined();
@@ -13,6 +30,30 @@ describe('Content type validator', () => {
 
     it('allows undefined', async () => {
       await expect(validateKind()).resolves.toBeUndefined();
+    });
+  });
+
+  describe('Prevents use of reservedNames', () => {
+    test('Throws when resverd names are used', async () => {
+      const data = {
+        contentType: {
+          name: 'test',
+          attributes: {
+            thisIsReserved: {
+              type: 'string',
+              default: '',
+            },
+          },
+        },
+      };
+
+      await validateUpdateContentTypeInput(data).catch(err => {
+        expect(err).toMatchObject({
+          'contentType.attributes.thisIsReserved': [
+            expect.stringMatching('Attribute keys cannot be one of'),
+          ],
+        });
+      });
     });
   });
 
