@@ -14,8 +14,8 @@ class DatabaseManager {
     this.initialized = false;
 
     this.connectors = createConnectorRegistry({
-      connections: strapi.config.connections,
-      defaultConnection: strapi.config.currentEnvironment.database.defaultConnection,
+      connections: strapi.config.get('database.connections'),
+      defaultConnection: strapi.config.get('database.defaultConnection'),
     });
 
     this.queries = new Map();

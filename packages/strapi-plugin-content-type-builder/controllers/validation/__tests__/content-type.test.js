@@ -35,7 +35,7 @@ describe('Content type validator', () => {
   });
 
   describe('Prevents use of reservedNames', () => {
-    test('Throws when resverd names are used', async () => {
+    test('Throws when reserved names are used', async () => {
       const data = {
         contentType: {
           name: 'test',
