@@ -67,11 +67,11 @@ Every middleware will be injected into the Koa stack. To manage the load order, 
 
 ## Configuration and activation
 
-To configure the middlewares of your application, you need to edit the `./config/middleware.js` file in your Strapi app.
+To configure the middlewares of your application, you need to create or edit the `./config/middleware.js` file in your Strapi app.
 
 By default this file doesn't exist, you will have to create it.
 
-**Avaialbe options**
+**Availabe options**
 
 - `timeout` (integer): Defines the maximum allowed milliseconds to load a middleware.
 - `load` (Object): Configuration middleware loading. See details [here](#load-order)
@@ -194,7 +194,7 @@ module.exports = {
 
 ### Load order
 
-The middlewares are injected into the Koa stack asynchronously. Sometimes it happens that some of these middlewares need to be loaded in a specific order. To define a load order, we created a dedicated file located in `./config/middleware.js`.
+The middlewares are injected into the Koa stack asynchronously. Sometimes it happens that some of these middlewares need to be loaded in a specific order. To define a load order, create or edit the file `./config/middleware.js`.
 
 **Path —** `./config/middleware.js`.
 

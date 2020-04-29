@@ -402,9 +402,7 @@ module.exports = ({ env }) => ({
         password: env('DATABASE_PASSWORD', 'strapi'),
         schema: 'public',
       },
-      options: {
-        debug: true,
-      },
+      options: {},
     },
   },
 });
@@ -475,8 +473,8 @@ module.exports = ({ env }) => ({
         password: env('DATABASE_PASSWORD', 'strapi'),
       },
       options: {
-        authenticationDatabase: '',
-        ssl: true,
+        authenticationDatabase: env('AUTHENTICATION_DATABASE'),
+        ssl: env('DATABASE_SSL'),
       },
     },
   },
