@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { getCommonBeginning } = require('strapi-utils');
+const { getConfigUrls } = require('strapi-utils');
 
 const { createCoreApi } = require('../core-api');
 
@@ -287,55 +287,7 @@ module.exports = function(strapi) {
   strapi.config.port = _.get(strapi.config.currentEnvironment, 'server.port') || strapi.config.port;
   strapi.config.host = _.get(strapi.config.currentEnvironment, 'server.host') || strapi.config.host;
 
-  // Defines serverUrl value
-  let serverUrl = _.get(strapi.config.currentEnvironment, 'server.url', '');
-  serverUrl = _.trim(serverUrl, '/ ');
-  if (typeof serverUrl !== 'string') {
-    strapi.stopWithError(new Error('Invalid server url config. Make sure the url is a string.'));
-  }
-  if (serverUrl.startsWith('http')) {
-    try {
-      serverUrl = _.trim(new URL(strapi.config.currentEnvironment.server.url).toString(), '/');
-    } catch (e) {
-      strapi.stopWithError(
-        new Error('Invalid server url config. Make sure the url defined in server.js is valid.')
-      );
-    }
-  } else if (serverUrl !== '') {
-    serverUrl = `/${serverUrl}`;
-  }
-
-  // Defines adminUrl value
-  let adminUrl = _.get(strapi.config.currentEnvironment, 'server.admin.url', '/admin');
-  adminUrl = _.trim(adminUrl, '/ ');
-  if (typeof adminUrl !== 'string') {
-    throw new Error('Invalid admin url config. Make sure the url is a non-empty string.');
-  }
-  if (adminUrl.startsWith('http')) {
-    try {
-      adminUrl = _.trim(new URL(adminUrl).toString(), '/');
-    } catch (e) {
-      strapi.stopWithError(
-        e,
-        'Invalid admin url config. Make sure the url defined in server.js is valid.'
-      );
-    }
-  } else {
-    adminUrl = `${serverUrl}/${adminUrl}`;
-  }
-
-  // Defines adminPath value
-  let adminPath = adminUrl;
-  if (
-    serverUrl.startsWith('http') &&
-    adminUrl.startsWith('http') &&
-    new URL(adminUrl).origin === new URL(serverUrl).origin
-  ) {
-    adminPath = adminUrl.replace(getCommonBeginning(serverUrl, adminUrl), '');
-    adminPath = `/${_.trim(adminPath, '/')}`;
-  } else if (adminUrl.startsWith('http')) {
-    adminPath = new URL(adminUrl).pathname;
-  }
+  const { serverUrl, adminUrl, adminPath } = getConfigUrls(strapi.config.currentEnvironment.server);
 
   strapi.config.server = strapi.config.server || {};
   strapi.config.server.url = serverUrl;

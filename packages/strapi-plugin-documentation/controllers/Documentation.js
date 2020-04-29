@@ -34,15 +34,7 @@ module.exports = {
   },
 
   async index(ctx, next) {
-    // Read layout file.
-
     try {
-      const layout = fs.readFileSync(path.resolve(__dirname, '..', 'public', 'index.html'), 'utf8');
-
-      const filledLayout = _.template(layout)({ backendUrl: strapi.config.server.url });
-
-      const $ = cheerio.load(filledLayout);
-
       /**
        * We don't expose the specs using koa-static or something else due to security reasons.
        * That's why, we need to read the file localy and send the specs through it when we serve the Swagger UI.
@@ -63,39 +55,16 @@ module.exports = {
 
       try {
         const documentation = fs.readFileSync(openAPISpecsPath, 'utf8');
-
-        // Remove previous Swagger configuration.
-        $('.custom-swagger-ui').remove();
-        // Set new Swagger configuration
-        $('body').append(`
-          <script class="custom-swagger-ui">
-            window.onload = function() {
-
-              // Build a system
-              const ui = SwaggerUIBundle({
-                url: "https://petstore.swagger.io/v2/swagger.json",
-                spec: ${JSON.stringify(JSON.parse(documentation))},
-                dom_id: '#swagger-ui',
-                docExpansion: "none",
-                deepLinking: true,
-                presets: [
-                  SwaggerUIBundle.presets.apis,
-                  SwaggerUIStandalonePreset
-                ],
-                plugins: [
-                  SwaggerUIBundle.plugins.DownloadUrl
-                ],
-                layout: "StandaloneLayout"
-              })
-
-              window.ui = ui
-            }
-          </script>
-        `);
+        const layout = fs.readFileSync(
+          path.resolve(__dirname, '..', 'public', 'index.html'),
+          'utf8'
+        );
+        const filledLayout = _.template(layout)({
+          backendUrl: strapi.config.server.url,
+          spec: JSON.stringify(JSON.parse(documentation)),
+        });
 
         try {
-          // Write the layout with the new Swagger configuration.
-          // fs.writeFileSync(layoutPath, $.html());
           const layoutPath = path.resolve(
             strapi.config.appPath,
             'extensions',
@@ -104,7 +73,7 @@ module.exports = {
             'index.html'
           );
           await fs.ensureFile(layoutPath);
-          await fs.writeFile(layoutPath, $.html());
+          await fs.writeFile(layoutPath, filledLayout);
 
           // Serve the file.
           ctx.url = path.basename(`${ctx.url}/index.html`);
