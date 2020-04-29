@@ -894,6 +894,28 @@ xhr.send(
 
 ::::
 
+## Hidden Fields
+
+Hidden Field configuration allows to remove a set of fields (not defined as attributes) from the response via the sanitizeEntity from strapi-utils. E.g. `_v` when using Mongodb or timestamps like `created_at`, `updated_at` can be hidden by adding them to this array.
+The hidden fields defined in the model are merged with the hidden fields defined in the global strapi configuration.
+
+#### Example
+
+**Path —** `./api/restaurant/models/Restaurant.settings.json`.
+
+```json
+{
+  "attributes": {
+    ...
+  },
+  "hiddenFields":["__v","v", "_id", "createdAt"]
+}
+```
+
+:::
+
+::::
+
 ## Life cycle callbacks
 
 ::: warning
