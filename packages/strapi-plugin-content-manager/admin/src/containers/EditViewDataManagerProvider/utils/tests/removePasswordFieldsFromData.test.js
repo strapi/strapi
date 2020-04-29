@@ -1,5 +1,5 @@
 import removePasswordFieldsFromData from '../removePasswordFieldsFromData';
-import testData from './testData.json';
+import testData from './testData';
 
 describe('CONTENT MANAGER | containers | EditViewDataManager | utils', () => {
   describe('removePasswordFieldsFromData', () => {
