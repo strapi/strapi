@@ -35,13 +35,13 @@ const createConnectorRegistry = ({ defaultConnection, connections }) => {
       return _connectors.get(key);
     },
 
-    set(key) {
-      return _connectors.get(key);
+    set(key, val) {
+      _connectors.set(key, val);
+      return this;
     },
 
     get default() {
       const defaultConnector = connections[defaultConnection].connector;
-
       return _connectors.get(defaultConnector);
     },
 

@@ -51,27 +51,14 @@ const checkReservedModelName = model => {
   }
 };
 
+const getModelsFrom = source => _.flatMap(source, iteratee => _.values(iteratee.models));
+
 /**
  * Checks that there are no model using reserved names (content type, component, attributes)
  */
 module.exports = ({ strapi, manager }) => {
-  Object.keys(strapi.api).forEach(apiName => {
-    const api = strapi.api[apiName];
-
-    const models = api.models ? Object.values(api.models) : [];
-    models.forEach(model => {
-      checkReservedModelName(model);
-      checkReservedAttributeNames(model, { manager });
-    });
-  });
-
-  Object.keys(strapi.plugins).forEach(pluginName => {
-    const plugin = strapi.plugins[pluginName];
-
-    const models = plugin.models ? Object.values(plugin.models) : [];
-    models.forEach(model => {
-      checkReservedModelName(model);
-      checkReservedAttributeNames(model, { manager });
-    });
+  [...getModelsFrom(strapi.api), ...getModelsFrom(strapi.plugins)].forEach(model => {
+    checkReservedModelName(model);
+    checkReservedAttributeNames(model, { manager });
   });
 };
