@@ -105,7 +105,7 @@ module.exports = function(strapi) {
         }
 
         try {
-          const version = (await instance.connection.db.admin().serverInfo()).version;
+          const { version } = await instance.connection.db.admin().serverInfo();
           instance.mongoDBVersion = version;
         } catch {
           instance.mongoDBVersion = null;

@@ -540,7 +540,6 @@ const buildSearchOr = (model, query) => {
         return acc;
       case 'string':
       case 'text':
-      case 'password':
       case 'richtext':
       case 'email':
       case 'enumeration':

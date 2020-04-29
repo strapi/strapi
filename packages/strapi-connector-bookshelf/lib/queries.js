@@ -655,7 +655,7 @@ const buildSearchQuery = (qb, model, params) => {
   const query = params._q;
 
   const associations = model.associations.map(x => x.alias);
-  const stringTypes = ['string', 'text', 'uid', 'email', 'enumeration', 'richtext', 'password'];
+  const stringTypes = ['string', 'text', 'uid', 'email', 'enumeration', 'richtext'];
   const numberTypes = ['biginteger', 'integer', 'decimal', 'float'];
 
   const searchColumns = Object.keys(model._attributes)
