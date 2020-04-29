@@ -71,6 +71,7 @@ const FormModal = () => {
     setModifiedData,
     sortedContentTypesList,
     updateSchema,
+    reservedNames,
   } = useDataManager();
   const {
     componentToCreate,
@@ -343,7 +344,8 @@ const FormModal = () => {
         Object.keys(contentTypes),
         state.actionType === 'edit',
         // currentUID
-        get(allDataSchema, [...state.pathToSchema, 'uid'], null)
+        get(allDataSchema, [...state.pathToSchema, 'uid'], null),
+        reservedNames
       );
 
       // Check form validity for component
@@ -352,6 +354,7 @@ const FormModal = () => {
       schema = forms.component.schema(
         Object.keys(components),
         modifiedData.category || '',
+        reservedNames,
         state.actionType === 'edit',
         get(allDataSchema, [...state.pathToSchema, 'uid'], null)
       );
@@ -363,7 +366,8 @@ const FormModal = () => {
     } else if (isComponentAttribute && isCreatingComponentFromAView && isInFirstComponentStep) {
       schema = forms.component.schema(
         Object.keys(components),
-        get(modifiedData, 'componentToCreate.category', '')
+        get(modifiedData, 'componentToCreate.category', ''),
+        reservedNames
       );
 
       // Check form validity for creating a 'common attribute'
@@ -403,7 +407,8 @@ const FormModal = () => {
         state.actionType === 'edit',
         state.attributeName,
         initialData,
-        alreadyTakenTargetContentTypeAttributes
+        alreadyTakenTargetContentTypeAttributes,
+        reservedNames
       );
     } else if (isEditingCategory) {
       schema = forms.editCategory.schema(allComponentsCategories, initialData);
@@ -415,7 +420,8 @@ const FormModal = () => {
       if (isInFirstComponentStep && isCreatingComponentFromAView) {
         schema = forms.component.schema(
           Object.keys(components),
-          get(modifiedData, 'componentToCreate.category', '')
+          get(modifiedData, 'componentToCreate.category', ''),
+          reservedNames
         );
       } else {
         // The form is valid
