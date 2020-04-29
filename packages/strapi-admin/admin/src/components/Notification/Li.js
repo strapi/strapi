@@ -5,14 +5,14 @@ const GlobalNotification = createGlobalStyle`
   .notificationIcon {
     position: relative;
     display: block;
-    width: 60px;
-    height: 60px;
+    width: 40px;
+    height: 40px;
     > div {
       position: absolute;
       width: 20px;
       height: 20px;
-      top: 19px;
-      left:20px;
+      top: 10px;
+      left: 5px;
       border-radius: 10px;
       border: 1px solid ${props => props.theme.main.colors.green};
       display: flex;
@@ -65,11 +65,6 @@ const GlobalNotification = createGlobalStyle`
   }
 
   .notificationSuccess{
-    background: linear-gradient(
-      100deg, 
-      #FFFFFF 50%,
-      rgba(39, 183, 15, .05)),
-      ${props => props.theme.main.colors.white};
     .notificationIcon {
       div {
         border-color: ${props => props.theme.main.colors.green};
@@ -81,11 +76,6 @@ const GlobalNotification = createGlobalStyle`
   }
 
   .notificationWarning {
-    background: linear-gradient(
-      100deg,
-      #FFFFFF 50%,
-      rgba(250, 156, 0, .05)),
-      ${props => props.theme.main.colors.white};
     .notificationIcon {
       div {
         border-color: ${props => props.theme.main.colors.orange};
@@ -97,8 +87,6 @@ const GlobalNotification = createGlobalStyle`
   }
 
   .notificationError {
-    background: linear-gradient(100deg , #FFFFFF 50%, rgba(255, 93, 0, .05)), $white;
-
     .notificationIcon {
       div {
         border-color: ${props => props.theme.main.colors.red};
@@ -110,11 +98,6 @@ const GlobalNotification = createGlobalStyle`
   }
 
   .notificationInfo {
-    background: linear-gradient(
-      100deg,
-      #FFFFFF 50%,
-      rgba(28, 93, 231, .05)),
-      ${props => props.theme.main.colors.white};
     .notificationIcon {
       div {
         border-color: ${props => props.theme.main.colors.blue};

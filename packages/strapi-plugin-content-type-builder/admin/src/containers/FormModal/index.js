@@ -1130,7 +1130,7 @@ const FormModal = () => {
                                   lineHeight: 'normal',
                                   fontWeight: 500,
                                 }}
-                                key={`${index}.${i}`}
+                                key="divider"
                               >
                                 <Label htmlFor="divider-no-for">
                                   <FormattedMessage

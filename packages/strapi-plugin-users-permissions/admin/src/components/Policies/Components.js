@@ -10,7 +10,7 @@ const Header = styled.div`
   margin-bottom: 1.1rem;
   padding-top: 2.8rem;
   font-size: 18px;
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  font-weight: ${({ theme }) => theme.main.fontWeights.bold};
   line-height: 3.6rem;
 `;
 

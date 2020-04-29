@@ -14,17 +14,17 @@ const Header = styled.div`
   padding-top: 1.1rem;
   color: #333740;
   font-size: 18px;
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  font-weight: ${({ theme }) => theme.main.fontWeights.bold};
 
   > span:not(:first-child) {
     color: #787e8f;
     font-size: 16px;
-    font-weight: ${({ theme }) => theme.fontWeights.semiBold};
+    font-weight: ${({ theme }) => theme.main.fontWeights.semiBold};
   }
 
   > span:last-child {
     color: #1642e1;
-    font-weight: ${({ theme }) => theme.fontWeights.bold};
+    font-weight: ${({ theme }) => theme.main.fontWeights.bold};
   }
 `;
 
@@ -35,7 +35,7 @@ Header.propTypes = {
 const Path = styled.div`
   padding: 0 1rem;
   font-size: 13px;
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  font-weight: ${({ theme }) => theme.main.fontWeights.bold};
   color: #333740;
 `;
 
@@ -48,7 +48,7 @@ const Verb = styled.div`
   border-radius: 3px;
   color: #ffffff;
   font-size: 12px;
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  font-weight: ${({ theme }) => theme.main.fontWeights.bold};
   text-transform: uppercase;
   letter-spacing: 0.5px;
   &.get {
