@@ -5,6 +5,7 @@ const Wrapper = styled.div`
   justify-content: space-between;
   position: relative;
   margin-top: 8px;
+  margin-bottom: 10px;
 
   .option {
     border-radius: 2px;
