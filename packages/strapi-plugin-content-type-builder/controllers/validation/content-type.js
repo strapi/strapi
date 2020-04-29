@@ -34,7 +34,7 @@ const VALID_TYPES = [...DEFAULT_TYPES, 'uid', 'component', 'dynamiczone'];
  * Returns a yup schema to validate a content type payload
  * @param {Object} data payload
  */
-const createContentTypeSchema = data => {
+const createContentTypeSchema = (data, { isEdition = false } = {}) => {
   const kind = _.get(data, 'contentType.kind', typeKinds.COLLECTION_TYPE);
 
   const contentTypeSchema = createSchema(VALID_TYPES, VALID_RELATIONS[kind] || [], {
@@ -42,7 +42,7 @@ const createContentTypeSchema = data => {
   }).shape({
     name: yup
       .string()
-      .test(alreadyUsedContentTypeName())
+      .test(alreadyUsedContentTypeName(isEdition))
       .test(forbiddenContentTypeNameValidator())
       .min(1)
       .required(),
@@ -86,7 +86,7 @@ const validateUpdateContentTypeInput = data => {
 
   removeDeletedUIDTargetFields(data.contentType);
 
-  return createContentTypeSchema(data)
+  return createContentTypeSchema(data, { isEdition: true })
     .validate(data, {
       strict: true,
       abortEarly: false,
@@ -110,13 +110,16 @@ const forbiddenContentTypeNameValidator = () => {
   };
 };
 
-const alreadyUsedContentTypeName = () => {
+const alreadyUsedContentTypeName = isEdition => {
   const usedNames = Object.values(strapi.contentTypes).map(ct => ct.modelName);
 
   return {
     name: 'nameAlreadyUsed',
     message: 'Content Type name `${value}` is already being used.',
     test: value => {
+      // don't check on edition
+      if (isEdition) return true;
+
       if (usedNames.includes(nameToSlug(value))) {
         return false;
       }
