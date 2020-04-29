@@ -430,21 +430,19 @@ sudo nano ecosystem.config.js
 
 ```js
 module.exports = {
-  apps: [
-    {
-      name: 'strapi',
-      cwd: '/home/ubuntu/path-to/your-strapi-root-folder',
-      script: 'server.js',
-      env: {
-        NODE_ENV: 'production',
-        DATABASE_HOST: 'your-unique-url.rds.amazonaws.com', // database Endpoint under 'Connectivity & Security' tab
-        DATABASE_PORT: '5432',
-        DATABASE_NAME: 'strapi', // DB name under 'Configuration' tab
-        DATABASE_USERNAME: 'postgres', // default username
-        DATABASE_PASSWORD: 'Password',
-      },
+  apps : [{
+    name: 'strapi',
+    cwd: '/home/ubuntu/path-to/your-strapi-root-folder'
+    script: 'server.js',
+    env: {
+      NODE_ENV: 'production',
+      DATABASE_HOST: 'your-unique-url.rds.amazonaws.com', // database Endpoint under 'Connectivity & Security' tab
+      DATABASE_PORT: '5432',
+      DATABASE_NAME: 'strapi',  // DB name under 'Configuration' tab
+      DATABASE_USERNAME: 'postgres', // default username
+      DATABASE_PASSWORD: 'Password',
     },
-  ],
+  }],
 };
 ```
 
@@ -589,14 +587,17 @@ http
           .digest('hex');
 
       if (req.headers['x-hub-signature'] == sig) {
-        exec(`cd ${repo} && git pull && ${PM2_CMD}`, (error, stdout, stderr) => {
-          if (error) {
-            console.error(`exec error: ${error}`);
-            return;
+        exec(
+          `cd ${repo} && git pull && ${PM2_CMD}`,
+          (error, stdout, stderr) => {
+            if (error) {
+              console.error(`exec error: ${error}`);
+              return;
+            }
+            console.log(`stdout: ${stdout}`);
+            console.log(`stderr: ${stderr}`);
           }
-          console.log(`stdout: ${stdout}`);
-          console.log(`stderr: ${stderr}`);
-        });
+        );
       }
     });
 
@@ -918,23 +919,22 @@ sudo nano ecosystem.config.js
 - Next, replace the boilerplate content in the file, with the following:
 
 ```js
-module.exports = {
-  apps: [
-    {
-      name: 'strapi',
-      cwd: '/home/path-to/strapi-project-folder',
-      script: 'server.js',
-      env: {
-        NODE_ENV: 'production',
-        DATABASE_HOST: 'localhost', // database endpoint
-        DATABASE_PORT: '5432',
-        DATABASE_NAME: 'strapi', // DB name
-        DATABASE_USERNAME: 'your-name', // your username for psql
-        DATABASE_PASSWORD: 'password', // your password for psql
-      },
+      module.exports = {
+  apps : [{
+    name: 'strapi',
+    cwd: '/home/path-to/strapi-project-folder'
+    script: 'server.js',
+    env: {
+      NODE_ENV: 'production',
+      DATABASE_HOST: 'localhost', // database endpoint
+      DATABASE_PORT: '5432',
+      DATABASE_NAME: 'strapi',  // DB name
+      DATABASE_USERNAME: 'your-name', // your username for psql
+      DATABASE_PASSWORD: 'password', // your password for psql
     },
-  ],
+  }],
 };
+
 ```
 
 Use the following command to start `pm2`:
@@ -1045,14 +1045,17 @@ http
           .digest('hex');
 
       if (req.headers['x-hub-signature'] == sig) {
-        exec(`cd ${repo} && git pull && ${PM2_CMD}`, (error, stdout, stderr) => {
-          if (error) {
-            console.error(`exec error: ${error}`);
-            return;
+        exec(
+          `cd ${repo} && git pull && ${PM2_CMD}`,
+          (error, stdout, stderr) => {
+            if (error) {
+              console.error(`exec error: ${error}`);
+              return;
+            }
+            console.log(`stdout: ${stdout}`);
+            console.log(`stderr: ${stderr}`);
           }
-          console.log(`stdout: ${stdout}`);
-          console.log(`stderr: ${stderr}`);
-        });
+        );
       }
     });
 
