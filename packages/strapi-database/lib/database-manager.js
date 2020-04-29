@@ -122,7 +122,7 @@ class DatabaseManager {
 
   getReservedNames() {
     return {
-      model: constants.RESERVED_MODEL_NAMES,
+      models: constants.RESERVED_MODEL_NAMES,
       attributes: [
         ...constants.RESERVED_ATTRIBUTE_NAMES,
         ...(strapi.db.connectors.default.defaultTimestamps || []),

@@ -8,6 +8,7 @@ const createSchema = require('./model-schema');
 const { removeEmptyDefaults, removeDeletedUIDTargetFields } = require('./data-transform');
 const { nestedComponentSchema } = require('./component');
 const { modelTypes, DEFAULT_TYPES, typeKinds } = require('./constants');
+const { nameToSlug } = require('strapi-utils');
 
 /**
  * Allowed relation per type kind
@@ -38,6 +39,13 @@ const createContentTypeSchema = data => {
 
   const contentTypeSchema = createSchema(VALID_TYPES, VALID_RELATIONS[kind] || [], {
     modelType: modelTypes.CONTENT_TYPE,
+  }).shape({
+    name: yup
+      .string()
+      .test(alreadyUsedContentTypeName())
+      .test(forbiddenContentTypeNameValidator())
+      .min(1)
+      .required(),
   });
 
   return yup
@@ -84,6 +92,37 @@ const validateUpdateContentTypeInput = data => {
       abortEarly: false,
     })
     .catch(error => Promise.reject(formatYupErrors(error)));
+};
+
+const forbiddenContentTypeNameValidator = () => {
+  const reservedNames = strapi.plugins['content-type-builder'].services.builder.getReservedNames()
+    .models;
+
+  return {
+    name: 'forbiddenContentTypeName',
+    message: `Content Type name cannot be one of ${reservedNames.join(', ')}`,
+    test: value => {
+      if (reservedNames.includes(nameToSlug(value))) {
+        return false;
+      }
+      return true;
+    },
+  };
+};
+
+const alreadyUsedContentTypeName = () => {
+  const usedNames = Object.values(strapi.contentTypes).map(ct => ct.modelName);
+
+  return {
+    name: 'nameAlreadyUsed',
+    message: 'Content Type name `${value}` is already being used.',
+    test: value => {
+      if (usedNames.includes(nameToSlug(value))) {
+        return false;
+      }
+      return true;
+    },
+  };
 };
 
 /**

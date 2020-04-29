@@ -2,6 +2,7 @@ const { validateKind, validateUpdateContentTypeInput } = require('../content-typ
 
 describe('Content type validator', () => {
   global.strapi = {
+    contentTypes: {},
     plugins: {
       'content-type-builder': {
         services: {
