@@ -1,5 +1,7 @@
 'use strict';
 
+const _ = require('lodash');
+
 module.exports = function sanitizeEntity(data, { model, withPrivate = false }) {
   if (typeof data !== 'object' || data == null) return data;
 
@@ -8,20 +10,24 @@ module.exports = function sanitizeEntity(data, { model, withPrivate = false }) {
   if (typeof plainData !== 'object') return plainData;
 
   const attributes = model.attributes;
+
+  const hiddenFields = _.union(
+    _.get(strapi, ['config', 'currentEnvironment', 'response', 'hiddenFields'], []),
+    _.get(model, 'hiddenFields', [])
+  );
+
   return Object.keys(plainData).reduce((acc, key) => {
     const attribute = attributes[key];
-    if (attribute && attribute.private === true && withPrivate !== true) {
+
+    if (
+      (hiddenFields.includes(key) && withPrivate !== true) ||
+      (attribute && attribute.private === true && withPrivate !== true)
+    ) {
       return acc;
     }
 
-    if (
-      attribute &&
-      (attribute.model ||
-        attribute.collection ||
-        attribute.type === 'component')
-    ) {
-      const targetName =
-        attribute.model || attribute.collection || attribute.component;
+    if (attribute && (attribute.model || attribute.collection || attribute.type === 'component')) {
+      const targetName = attribute.model || attribute.collection || attribute.component;
 
       const targetModel = strapi.getModel(targetName, attribute.plugin);
 
