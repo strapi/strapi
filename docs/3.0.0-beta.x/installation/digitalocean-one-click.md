@@ -27,7 +27,7 @@ To create a project head over to the Strapi [listing on the marketplace](https:/
 
 ### Step 3: Visit your app
 
-Please note that it may take anywhere from 30 seconds to a few minutes for the droplet to startup, when it does you should see it in your [droplets list](https://cloud.digitalocean.com/droplets). 
+Please note that it may take anywhere from 30 seconds to a few minutes for the droplet to startup, when it does you should see it in your [droplets list](https://cloud.digitalocean.com/droplets).
 
 ::: warning
 After the droplet has started, it will take a few more minutes to finish the Strapi installation.
@@ -151,19 +151,10 @@ pm2 stop strapi-develop
 psql -c "ALTER USER strapi with password 'your-new-password';"
 ```
 
-- Update the `/srv/strapi/strapi/config/environments/development/database.json` file with the new password.
+- Update the `/srv/strapi/strapi/config/.env` file with the new password.
 
-```json
-...
-"settings": {
-  "client": "postgres",
-  "host": "127.0.0.1",
-  "port": "5432",
-  "database": "strapi",
-  "username": "strapi",
-  "password": "your-new-password"
-},
-...
+```
+DATABASE_PASSWORD=your-new-password
 ```
 
 - Restart Strapi and confirm the password change was successful
