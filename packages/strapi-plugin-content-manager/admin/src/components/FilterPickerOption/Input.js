@@ -39,10 +39,10 @@ function Input({ type, ...rest }) {
   let style = type !== 'time' ? { width: '210px' } : {};
 
   if (['integer', 'biginteger', 'float', 'decimal'].includes(type)) {
-    style = { marginRight: '20px' };
+    style = { marginRight: '15px' };
   }
   const styles = type === 'boolean' ? { minWidth: '100px', maxWidth: '200px' } : style;
-  const wrapperStyle = { marginRight: '20px' };
+  const wrapperStyle = { marginRight: '15px' };
 
   return (
     <InputWrapperDate type={type || 'text'} style={wrapperStyle}>
