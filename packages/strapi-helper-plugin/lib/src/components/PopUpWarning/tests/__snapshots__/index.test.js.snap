@@ -127,7 +127,7 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
 }
 
 .c4 > div {
-  padding: 21px 30px 15px 30px !important;
+  padding: 2.1rem 3rem 1.5rem 3rem !important;
   color: #f64d0a;
   text-align: center;
   font-family: Lato;
@@ -210,7 +210,9 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
               <h5
                 class="modal-title"
               >
-                Please confirm
+                <span>
+                  Please confirm
+                </span>
               </h5>
               <button
                 aria-label="Close"
@@ -233,7 +235,9 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
                   src="IMAGE_MOCK"
                 />
                 <p>
-                  Are you sure you want to delete this?
+                  <span>
+                    Are you sure you want to delete this?
+                  </span>
                 </p>
               </div>
             </div>
@@ -245,14 +249,18 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
                 color="cancel"
                 type="button"
               >
-                Cancel
+                <span>
+                  Cancel
+                </span>
               </button>
               <button
                 class="c7"
                 color="delete"
                 type="button"
               >
-                Confirm
+                <span>
+                  Confirm
+                </span>
               </button>
             </div>
           </div>
@@ -355,7 +363,7 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
 }
 
 .c4 > div {
-  padding: 21px 30px 15px 30px !important;
+  padding: 2.1rem 3rem 1.5rem 3rem !important;
   color: #f64d0a;
   text-align: center;
   font-family: Lato;
@@ -438,7 +446,9 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
               <h5
                 class="modal-title"
               >
-                Please confirm
+                <span>
+                  Please confirm
+                </span>
               </h5>
               <button
                 aria-label="Close"
@@ -461,7 +471,9 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
                   src="IMAGE_MOCK"
                 />
                 <p>
-                  Are you sure you want to delete this?
+                  <span>
+                    Are you sure you want to delete this?
+                  </span>
                 </p>
               </div>
             </div>
@@ -474,7 +486,9 @@ exports[`<PopUpWarning /> should render properly should match snapshot if onlyCo
                 style="width: 100%;"
                 type="button"
               >
-                Confirm
+                <span>
+                  Confirm
+                </span>
               </button>
             </div>
           </div>
