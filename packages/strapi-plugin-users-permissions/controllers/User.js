@@ -218,7 +218,7 @@ module.exports = {
 
     const data = await strapi.plugins['users-permissions'].services.user.edit({ id }, updateData);
 
-    ctx.send(data);
+    ctx.send(sanitizeUser(data));
   },
 
   /**
