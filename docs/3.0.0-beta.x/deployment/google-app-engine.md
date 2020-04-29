@@ -172,52 +172,27 @@ yarn add pg
 
 [Google App Engine requires](https://cloud.google.com/sql/docs/postgres/connect-app-engine) to connect to the database using the unix socket path, not an IP and port.
 
-Edit `database.json`, and use the socket path as `host`.
+Edit `database.js`, and use the socket path as `host`.
 
-```
-config/environments/production/database.json
-```
+`Path: ./config/env/production/database.js`.
 
-```json
-{
-  "defaultConnection": "default",
-  "connections": {
-    "default": {
-      "connector": "bookshelf",
-      "settings": {
-        "client": "postgres",
-        "host": "/cloudsql/${process.env.INSTANCE_CONNECTION_NAME}",
-        "database": "${process.env.DATABASE_NAME}",
-        "username": "${process.env.DATABASE_USERNAME}",
-        "password": "${process.env.DATABASE_PASSWORD}"
+```js
+module.exports = ({ env }) => ({
+  defaultConnection: 'default',
+  connections: {
+    default: {
+      connector: 'bookshelf',
+      settings: {
+        client: 'postgres',
+        host: `/cloudsql/${env('INSTANCE_CONNECTION_NAME')}`,
+        database: env('DATABASE_NAME'),
+        username: env('DATABASE_USERNAME'),
+        password: env('DATABASE_PASSWORD'),
       },
-      "options": {}
-    }
-  }
-}
-```
-
-Edit `server.json` to pick up the deployed hostname from the `HOST` variable in `app.yaml`.
-
-```
-config/environments/production/server.json
-```
-
-```json
-{
-  "host": "${process.env.HOST}",
-  "port": "${process.env.PORT || 1337}",
-  "production": true,
-  "proxy": {
-    "enabled": false
+      options: {},
+    },
   },
-  "cron": {
-    "enabled": false
-  },
-  "admin": {
-    "autoOpen": false
-  }
-}
+});
 ```
 
 ### Auto-build after deploy
@@ -288,20 +263,18 @@ Click `Save`, and it's ready to go!
 
 CORS is enabled by default, allowing `*` origin. You may want to limit the allowed origins.
 
-```
-config/environments/production/security.json
-```
+Read the documentation [here](../concepts/middlewares.md)
 
 **Changing the admin url**
 
 ```
-config/environments/production/server.json
+config/env/production/server.js
 ```
 
-```json
-{
-  "admin": {
-    "path": "/dashboard"
-  }
-}
+```js
+module.exports = {
+  admin: {
+    path: '/dashboard',
+  },
+};
 ```

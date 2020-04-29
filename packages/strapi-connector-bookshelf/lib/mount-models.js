@@ -62,10 +62,8 @@ module.exports = ({ models, target }, ctx) => {
     definition.orm = 'bookshelf';
     definition.databaseName = getDatabaseName(connection);
     definition.client = _.get(connection.settings, 'client');
-    _.defaults(definition, {
-      primaryKey: 'id',
-      primaryKeyType: _.get(definition, 'options.idAttributeType', 'integer'),
-    });
+    definition.primaryKey = 'id';
+    definition.primaryKeyType = 'integer';
 
     // Use default timestamp column names if value is `true`
     if (_.get(definition, 'options.timestamps', false) === true) {
@@ -85,7 +83,6 @@ module.exports = ({ models, target }, ctx) => {
         requireFetch: false,
         tableName: definition.collectionName,
         hasTimestamps: _.get(definition, 'options.timestamps', false),
-        idAttribute: _.get(definition, 'options.idAttribute', 'id'),
         associations: [],
         defaults: Object.keys(definition.attributes).reduce((acc, current) => {
           if (definition.attributes[current].type && definition.attributes[current].default) {
