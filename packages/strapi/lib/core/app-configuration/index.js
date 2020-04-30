@@ -39,7 +39,7 @@ const defaultConfig = {
     port: process.env.PORT || 1337,
     proxy: { enabled: false },
     cron: { enabled: false },
-    admin: { autoOpen: true },
+    admin: { autoOpen: false },
   },
   admin: {},
   middleware: {
