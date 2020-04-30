@@ -44,9 +44,6 @@ const bedModel = {
     fabricThickness: {
       type: 'float',
     },
-    editPassword: {
-      type: 'password',
-    },
   },
 };
 
@@ -63,7 +60,6 @@ const bedFixtures = [
     serialNumber: 2908199405091998,
     peopleNumber: 5,
     fabricThickness: 1.54567,
-    editPassword: 'secretpassword',
   },
   {
     // will have id=2
@@ -77,7 +73,6 @@ const bedFixtures = [
     serialNumber: 1111111111111111,
     peopleNumber: 1,
     fabricThickness: 1.0001,
-    editPassword: 'subtileandhiddenpassword',
   },
   {
     // will have id=3
@@ -92,7 +87,6 @@ const bedFixtures = [
     serialNumber: null,
     peopleNumber: null,
     fabricThickness: null,
-    editPassword: null,
   },
   {
     // will have id=4
@@ -106,7 +100,6 @@ const bedFixtures = [
     serialNumber: null,
     peopleNumber: null,
     fabricThickness: null,
-    editPassword: null,
   },
 ];
 
