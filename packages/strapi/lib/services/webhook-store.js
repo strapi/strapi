@@ -4,7 +4,7 @@
 'use strict';
 
 const webhookModel = config => ({
-  connection: config.get('currentEnvironment.database.defaultConnection'),
+  connection: config.get('database.defaultConnection'),
   uid: 'strapi::webhooks',
   internal: true,
   globalId: 'StrapiWebhooks',
