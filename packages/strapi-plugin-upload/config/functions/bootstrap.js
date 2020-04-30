@@ -1,15 +1,18 @@
 'use strict';
 /**
- * Upload plugin bootstrapi.
+ * Upload plugin bootstrap.
  *
  * It initializes the provider and sets the default settings in db.
  */
 
 module.exports = async () => {
+  const type = 'plugin';
+  const name = 'upload';
+
   // set plugin store
   const configurator = strapi.store({
-    type: 'plugin',
-    name: 'upload',
+    type,
+    name,
     key: 'settings',
   });
 
@@ -26,6 +29,8 @@ module.exports = async () => {
       },
     });
   }
+
+  await pruneObsoleteRelations(name);
 };
 
 const createProvider = ({ provider, providerOptions }) => {
@@ -51,4 +56,24 @@ const baseProvider = {
   delete() {
     throw new Error('Provider delete method is not implemented');
   },
+};
+
+const pruneObsoleteRelations = async name => {
+  const { orm } = strapi.plugins[name].models.file;
+
+  if (orm !== 'mongoose') {
+    return;
+  }
+
+  await strapi.query('file', 'upload').custom(pruneObsoleteRelationsQuery)();
+};
+
+const pruneObsoleteRelationsQuery = ({ model }) => {
+  const models = Array.from(strapi.db.models.values());
+  const modelsId = models.map(model => model.globalId);
+
+  return model.updateMany(
+    { related: { $elemMatch: { kind: { $nin: modelsId } } } },
+    { $pull: { related: { kind: { $nin: modelsId } } } }
+  );
 };
