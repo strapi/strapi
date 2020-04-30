@@ -6,12 +6,11 @@
  */
 
 module.exports = async () => {
-  const type = 'plugin';
   const name = 'upload';
 
   // set plugin store
   const configurator = strapi.store({
-    type,
+    type: 'plugin',
     name,
     key: 'settings',
   });
