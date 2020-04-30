@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { isObject } from 'lodash';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Remove } from '@buffetjs/icons';
 import Li, { GlobalNotification } from './Li';
 class Notification extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
@@ -73,7 +74,7 @@ class Notification extends React.Component {
             <p className="notificationTitle">{content}</p>
           </div>
           <div className={`notificationClose`}>
-            <FontAwesomeIcon icon="times" onClick={this.handleCloseClicked} />
+            <Remove onClick={this.handleCloseClicked} />
           </div>
         </Li>
       </>
