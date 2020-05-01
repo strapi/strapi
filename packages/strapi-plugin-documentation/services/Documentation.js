@@ -319,6 +319,16 @@ module.exports = {
     return `${formattedPluginName} - ${formattedName}`;
   },
 
+  // Get property : type and format
+  getProperty: function(type) {
+    const validTypes = ['string', 'integer', 'number', 'boolean'];
+    if (validTypes.includes(type)) {
+      return { type: this.getType(type) };
+    } else {
+      return { type: 'string', format: this.getType(type) };
+    }
+  },
+
   generateAssociationSchema: function(attributes, getter) {
     return Object.keys(attributes).reduce(
       (acc, curr) => {
@@ -330,7 +340,7 @@ module.exports = {
         }
 
         if (isField) {
-          acc.properties[curr] = { type: this.getType(attribute.type) };
+          acc.properties[curr] = this.getProperty(attribute.type);
         } else {
           const newGetter = getter.slice();
           newGetter.splice(newGetter.length - 1, 1, 'associations');
