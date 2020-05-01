@@ -402,6 +402,7 @@ module.exports = {
       }
 
       const verbObject = {
+        operationId: controllerMethod + controllerName,
         deprecated: false,
         description: this.generateVerbDescription(
           verb,
