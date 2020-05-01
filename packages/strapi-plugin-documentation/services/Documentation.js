@@ -466,9 +466,9 @@ module.exports = {
           _.set(acc, [key, 'paths', endPoint, verb, 'requestBody'], requestBody);
         }
       }
-
+      // Retrieve all content types
       // Refer to https://swagger.io/specification/#pathItemObject
-      const parameters = this.generateVerbParameters(verb, controllerMethod, current.path);
+      const parameters = this.generateVerbParameters(verb, controllerMethod, current.path, key);
 
       if (!verb.includes('post')) {
         if (Array.isArray(verb)) {
@@ -1265,7 +1265,7 @@ module.exports = {
    * @param {String} controllerMethod
    * @param {String} endPoint
    */
-  generateVerbParameters: function(verb, controllerMethod, endPoint) {
+  generateVerbParameters: function(verb, controllerMethod, endPoint, model) {
     const params = pathToRegexp
       .parse(endPoint)
       .filter(token => _.isObject(token))
@@ -1284,8 +1284,20 @@ module.exports = {
 
     if (verb === 'get' && controllerMethod === 'find') {
       // parametersOptions corresponds to this section
+      // Generate complete list of parameters
+      let endPointParameters = [];
+      Object.keys(strapi.contentTypes).forEach(item => {
+        const fullModel = strapi.contentTypes[item];
+        if (fullModel.modelName == model) {
+          const attributes = ['id', ...Object.keys(fullModel.attributes)];
+          const result = attributes.reduce((acc, val) => {
+            return JSON.stringify(parametersOptions).replace(/_/g, val + '_');
+          });
+          endPointParameters = endPointParameters.concat(JSON.parse(result));
+        }
+      });
       // of the documentation https://strapi.io/documentation/guides/filters.html
-      return [...params, ...parametersOptions];
+      return [...params, ...endPointParameters];
     }
 
     return params;
