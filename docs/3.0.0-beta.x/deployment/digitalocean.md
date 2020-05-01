@@ -344,6 +344,7 @@ pm2 save
 [PM2] Saving current process list...
 [PM2] Successfully saved in /home/your-name/.pm2/dump.pm2
 
+systemctl start pm2-your-name
 ```
 
 - **OPTIONAL**: You can test to see if the script above works whenever your system reboots with the `sudo reboot` command. You will need to login again with your **non-root user** and then run `pm2 list` and `systemctl status pm2-your-name` to verify everything is working.
