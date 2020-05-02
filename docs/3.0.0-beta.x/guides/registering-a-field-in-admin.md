@@ -1,3 +1,4 @@
+
 # Creating a new Field in the administration panel
 
 In this guide we will see how you can create a new Field for your administration panel.
@@ -331,5 +332,17 @@ export default strapi => {
   return strapi.registerPlugin(plugin);
 };
 ```
+
+Finally you will have to rebuild strapi so the new plugin is loaded correctly
+
+```bash
+yarn build
+# or
+npm run build
+```
+
+::: tip
+If the plugin sillt doesn't show up, you should probably empty the `.cache` folder too.
+:::
 
 And VOILA, if you create a new `collectionType` or a `singleType` with a `richtext` field you will see the implementation of [CKEditor](https://ckeditor.com/ckeditor-5/) instead of the default WYSIWYG.
