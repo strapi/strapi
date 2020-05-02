@@ -218,7 +218,17 @@ To improve the Developer Experience when developing or using the administration 
 
 ### Exceptions
 
-- `uid` — This field type allows a `targetField` key. The value is the name of an attribute thas has `string` of `text` type.
+**`uid`**
+
+This field type allows a `targetField` key. The value is the name of an attribute thas has `string` of `text` type.
+
+The field type also allows an `options` key. The value is an `object` of options passed to the `uid` generator.
+
+- `separator` (string) — Specify the string to be used for word separation. Allowed separators are: `"-"`, `"_"`, `"."`, and `"~"`. Default: `"-"`
+- `lowercase` (boolean) — Make the `uid` lowercase. Default: `true`
+- `decamelize` (boolean) — Convert camelcase to separate words. E.g. `fooBar` -> `foo-bar`. Default: `true`
+- `customReplacements` (Array<[string, string]>) — Specify a list of custom replacements. The list contains couples, where the first element is the string to match, and the second is the string to replace. Adding and leading and trailing space to the replacement, ensures it's separated by the separator. Default: `[['&', ' and '], ['🦄', ' unicorn '], ['♥', ' love ']]`
+- `preserveLeadingUnderscore` (boolean) — If the string leads with an underscore. Setting this to true, preserves said underscore. Default: `false`.
 
 ### Example
 
@@ -241,7 +251,13 @@ To improve the Developer Experience when developing or using the administration 
     },
     "slug": {
       "type": "uid",
-      "targetField": "title"
+      "targetField": "title",
+      "options": {
+        "separator": "_",
+        "customReplacements": [
+          ["@", " at "]
+        ]
+      }
     }
     ...
   }
