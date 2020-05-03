@@ -111,7 +111,7 @@ runtime: nodejs10
 instance_class: F2
 
 env_variables:
-  HOST: '<project_id>.appspot.com'
+  HOST: '0.0.0.0'
   NODE_ENV: 'production'
   DATABASE_NAME: 'strapi'
   DATABASE_USERNAME: 'postgres'
@@ -132,7 +132,7 @@ runtime: nodejs10
 env: flex
 
 env_variables:
-  HOST: '<project_id>.appspot.com'
+  HOST: '0.0.0.0'
   NODE_ENV: 'production'
   DATABASE_NAME: 'strapi'
   DATABASE_USERNAME: 'postgres'
