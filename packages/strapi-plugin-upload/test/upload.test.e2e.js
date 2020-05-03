@@ -29,7 +29,7 @@ describe('Upload plugin end to end tests', () => {
   });
 
   describe('PUT /upload/settings/:environment', () => {
-    test('Updates an envrionment config correctly', async () => {
+    test('Updates an environment config correctly', async () => {
       const updateRes = await rq.put('/upload/settings', {
         body: {
           sizeOptimization: true,
