@@ -4,82 +4,86 @@
 
 ### Content Type's models
 
-Models are a representation of the database's structure and life cycle. They are split into two separate files. A JavaScript file that contains the life cycle callbacks, and a JSON one that represents the data stored in the database and their format. The models also allow you to define the relationships between them.
+Models are a representation of the database's structure and lifecycle. They are split into two separate files. A JavaScript file that contains the life cycle callbacks, and a JSON one that represents the data stored in the database and their format. The models also allow you to define the relationships between them.
 
-**Path —** `./api/restaurant/models/Restaurant.js`.
+**Path —** `/api/restaurant/models/restaurant.js`
 
 ```js
 module.exports = {
   // Before saving a value.
   // Fired before an `insert` or `update` query.
-  beforeSave: (model, attrs, options) => {},
+  beforeSave: async (model, attrs, options) => {},
 
   // After saving a value.
   // Fired after an `insert` or `update` query.
-  afterSave: (model, attrs, options) => {},
+  afterSave: async (model, response, options) => {},
 
-  // ... and more
+  // ...and 10 more
 };
 ```
 
-**Path —** `./api/restaurant/models/Restaurant.settings.json`.
+**Path —** `/api/restaurant/models/restaurant.settings.json`
 
 ```json
 {
   "kind": "collectionType",
-  "connection": "default",
+  "collectionName": "restaurants",
   "info": {
-    "name": "restaurant",
+    "name": "Restaurant",
     "description": "This represents the Restaurant Model"
   },
+  "options": {
+    "increments": true,
+    "timestamps": true
+  },
   "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
     "cover": {
       "collection": "file",
       "via": "related",
       "plugin": "upload"
-    },
-    "name": {
-      "default": "",
-      "type": "string"
-    },
-    "description": {
-      "default": "",
-      "type": "text"
     }
   }
 }
 ```
 
-In this example, there is a `Restaurant` model which contains the attributes `cover`, `name` and `description`.
+In this example, there is a `restaurant` model which contains the attributes `name`, `description` and `cover`.
 
 ### Component's models
 
-It also exist another type of models named `components`. A component is a data structure that can be used in one or many other API's model. There is no lifecycle related, only a JSON file definition
+A Component is a self contained database structure that can be reused in one or more Content Type. There is no lifecycle related, only a JSON file definition.
 
-**Path —** `./components/default/simple.json`
+**Path —** `/components/default/meta.json`
 
 ```json
 {
-  "connection": "default",
-  "collectionName": "components_default_simples",
+  "collectionName": "components_seo_metas",
   "info": {
-    "name": "simple",
+    "name": "Meta",
     "icon": "arrow-circle-right"
   },
   "options": {},
   "attributes": {
-    "name": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
       "type": "string"
     }
   }
 }
 ```
 
-In this example, there is a `Simple` component which contains the attributes `name`. And the component is in the category `default`.
+In this example, there is a `Meta` component which contains the attributes `title` and `description` which are of type text. For better organization and easier attachment multiple components to a Content Type they are stored within categories. Above one lives in the `seo` category.
 
 ### Where are the models defined?
 
-For **Content Types**, models are defined in each `./api/**/models/` folder. Every JavaScript or JSON file in these folders will be loaded as a model. They are also available through the `strapi.models` and `strapi.api.**.models` global variables. Usable everywhere in the project, they contain the ORM model object that they refer to. By convention, a model's name should be written in lowercase.
+For **Content Types**, models are defined in each `/api/**/models/` folder. Every JavaScript or JSON file in these folders will be loaded as a model. They are also available through the `strapi.models` and `strapi.api.**.models` global variables. Usable everywhere in the project, they contain the ORM model object that they refer to. By convention, a model's name should be written in lowercase.
 
 For **Components**, models are defined in `./components` folder. Every components has to be under a subfolder (the category name of the component).
 
@@ -91,12 +95,16 @@ If you are just starting out it is very convenient to generate some models with 
 
 ### For Content Types models
 
-Use the CLI, and run the following command `strapi generate:model restaurant name:string description:text`.<br>Read the [CLI documentation](../cli/CLI.md) for more information.
+Use the CLI, and run the following command:
 
-This will create two files located at `./api/restaurant/models`:
+`strapi generate:model restaurant name:string description:text`
 
-- `Restaurant.settings.json`: contains the list of attributes and settings. The JSON format makes the file easily editable.
-- `Restaurant.js`: imports `Restaurant.settings.json` and extends it with additional settings and life cycle callbacks.
+Read the [CLI documentation](../cli/CLI.md) for more information.
+
+This will create two files located at `/api/restaurant/models`:
+
+- `restaurant.settings.json` — contains the list of attributes and settings. The JSON format makes the file easily editable.
+- `restaurant.js` — imports `restaurant.settings.json` and extends it with additional settings and lifecycle callbacks.
 
 ::: tip
 When you create a new API using the CLI (`strapi generate:api <name>`), a model is automatically created.
@@ -106,31 +114,34 @@ When you create a new API using the CLI (`strapi generate:api <name>`), a model 
 
 To create a component you will have to use the Content Type Builder from the Admin panel, there is no generator for components.
 
-Or you can create your component manually by following the file path discribed previously and by following the file structure discribed bellow.
+Or you can create your component manually by following the file path discribed previously and by following the file structure discribed below.
 
 ## Model settings
 
-Additional settings can be set on models:
+Following settings are applied on models. `connection` and `globalId` are optional.
 
-- `kind` (string) - Define if the model is a Collection Type (`collectionType`) of a Single Type (`singleType`) - _only for Content Types_
-- `connection` (string) - Connection name which must be used. Default value: `default`.
-- `collectionName` (string) - Collection name (or table name) in which the data should be stored.
-- `globalId` (string) - Global variable name for this model (case-sensitive) - _only for Content Types_
-- `attributes` (object) - Define the data structure of your model. Find available options [bellow](#define-the-attributes).
+- `kind` (string) — Define if the model is a Collection Type (`collectionType`) or a Single Type (`singleType`) - _only for Content Types_.
+- `connection` (string) — Connection name which must be used. Default value: `default`.
+- `collectionName` (string) — Collection name (or table name) in which the data should be stored.
+- `globalId` (string) — Global variable name for this model (case-sensitive) - _only for Content Types_.
+- `attributes` (object) — Define the data structure of your model. Find available options [below](#define-the-attributes).
 
-**Path —** `Restaurant.settings.json`.
+**Path —** `restaurant.settings.json`
 
 ```json
 {
   "kind": "collectionType",
+  "collectionName": "restaurants_v2",
+  "info": {
+    "name": "Restaurants V2"
+  },
   "connection": "mongo",
-  "collectionName": "Restaurants_v1",
-  "globalId": "Restaurants",
+  "globalId": "restaurantsV2",
   "attributes": {}
 }
 ```
 
-In this example, the model `Restaurant` will be accessible through the `Restaurants` global variable. The data will be stored in the `Restaurants_v1` collection or table and the model will use the `mongo` connection defined in `./config/environments/**/database.json`
+In this example, the model `Restaurants V2` will be accessible through the `restaurantsV2` global variable. The data will be stored in the `restaurants_v2` collection (mongoDB) or table (SQL) and the model will use the `mongo` connection defined in `./config/environments/**/database.json`.
 
 ::: warning
 If not set manually in the JSON file, Strapi will adopt the filename as `globalId`.
@@ -146,17 +157,17 @@ The `connection` value can be changed whenever you want, but you should be aware
 
 The info key on the model-json states information about the model. This information is used in the admin interface, when showing the model.
 
-- `name`: The name of the model, as shown in admin interface.
-- `description`: The description of the model.
-- `icon`: The fontawesome V5 name - _only for Components_
+- `name` — The name of the model, as shown in admin interface.
+- `description` — The description of the model.
+- `icon` — The fontawesome V5 name - _only for Components_.
 
-**Path —** `Restaurant.settings.json`.
+**Path —** `restaurant.settings.json`
 
 ```json
 {
   "info": {
-    "name": "restaurant",
-    "description": ""
+    "name": "Restaurant",
+    "description": "Restaurants data collection"
   }
 }
 ```
@@ -165,9 +176,9 @@ The info key on the model-json states information about the model. This informat
 
 The options key on the model-json states.
 
-- `timestamps`: This tells the model which attributes to use for timestamps. Accepts either `boolean` or `Array` of strings where first element is create date and second element is update date. Default value when set to `true` for Bookshelf is `["created_at", "updated_at"]` and for MongoDB is `["createdAt", "updatedAt"]`.
+- `timestamps` - This tells the model which attributes to use for timestamps. Accepts either `boolean` or `Array` of strings where first element is create date and second element is update date. Default value when set to `true` for Bookshelf is `["created_at", "updated_at"]` and for MongoDB is `["createdAt", "updatedAt"]`.
 
-**Path —** `User.settings.json`.
+**Path —** `restaurant.settings.json`
 
 ```json
 {
@@ -214,7 +225,7 @@ If you're using SQL databases, you should use the native SQL constraints to appl
 To improve the Developer Experience when developing or using the administration panel, the framework enhances the attributes with these "security validations":
 
 - `private` (boolean) — If true, the attribute will be removed from the server response (it's useful to hide sensitive data).
-- `configurable` (boolean) - if false, the attribute isn't configurable from the Content Type Builder plugin.
+- `configurable` (boolean) — if false, the attribute isn't configurable from the Content Type Builder plugin.
 
 ### Exceptions
 
@@ -222,7 +233,7 @@ To improve the Developer Experience when developing or using the administration 
 
 ### Example
 
-**Path —** `Restaurant.settings.json`.
+**Path —** `restaurant.settings.json`
 
 ```json
 {
@@ -262,7 +273,7 @@ One-way relationships are useful to link an entry to another. However, only one 
 
 A `pet` can be owned by someone (a `user`).
 
-**Path —** `./api/pet/models/Pet.settings.json`.
+**Path —** `./api/pet/models/pet.settings.json`
 
 ```json
 {
@@ -298,7 +309,7 @@ One-to-One relationships are useful when you have one entity that could be linke
 
 A `user` can have one `address`. And this address is only related to this `user`.
 
-**Path —** `./api/user/models/User.settings.json`.
+**Path —** `./api/user/models/user.settings.json`
 
 ```json
 {
@@ -311,7 +322,7 @@ A `user` can have one `address`. And this address is only related to this `user`
 }
 ```
 
-**Path —** `./api/address/models/Address.settings.json`.
+**Path —** `./api/address/models/address.settings.json`
 
 ```json
 {
@@ -347,7 +358,7 @@ One-to-Many relationships are useful when an entry can be liked to multiple entr
 
 A `user` can have many `articles`, and an `article` can be related to one `user` (author).
 
-**Path —** `./api/user/models/User.settings.json`.
+**Path —** `./api/user/models/user.settings.json`
 
 ```json
 {
@@ -360,7 +371,7 @@ A `user` can have many `articles`, and an `article` can be related to one `user`
 }
 ```
 
-**Path —** `./api/article/models/Article.settings.json`.
+**Path —** `./api/article/models/article.settings.json`
 
 ```json
 {
@@ -800,9 +811,9 @@ Dynamic Zone field let your create flexible space to content based on a componen
 
 #### Example
 
-Lets say we created an `slider` and `content` component in `article` category.
+Let's say we created a `slider` and a `content` component in an `article` category.
 
-**Path —** `./api/article/models/Article.settings.json`.
+**Path —** `/api/article/models/article.settings.json`.
 
 ```json
 {
@@ -815,7 +826,7 @@ Lets say we created an `slider` and `content` component in `article` category.
 }
 ```
 
-- `components` (array): Array of components, that follows this format `<category>.<componentName>`.
+- `components` (array) — An array of components, that follows this format `<category>.<componentName>`.
 
 :::: tabs
 
@@ -894,7 +905,7 @@ xhr.send(
 
 ::::
 
-## Life cycle callbacks
+## Lifecycle callbacks
 
 ::: warning
 The life cycle functions are based on the ORM life cycle and not on the Strapi request.
@@ -972,7 +983,7 @@ Callbacks on:
 
 The entry is available through the `model` parameter.
 
-**Path —** `./api/user/models/User.js`.
+**Path —** `/api/user/models/user.js`.
 
 ```js
 module.exports = {
@@ -997,7 +1008,7 @@ module.exports = {
 
 Each of these functions receives three parameters `model`, `attrs` and `options`. You have to return a Promise.
 
-**Path —** `./api/user/models/User.js`.
+**Path —** `/api/user/models/user.js`.
 
 ```js
 module.exports = {
