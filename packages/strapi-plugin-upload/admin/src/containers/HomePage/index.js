@@ -364,13 +364,12 @@ const HomePage = () => {
   return (
     <Container>
       <Header {...headerProps} isLoading={isLoading} />
-      {isLoading && (
+      {isLoading ? (
         <>
           <Padded top bottom size="lg" />
           <LoadingIndicator />
         </>
-      )}
-      {!isLoading && (
+      ) : (
         <>
           <HeaderSearch
             label={pluginName}
