@@ -46,7 +46,7 @@ const HomePageContent = ({
         onSelectAll={onSelectAll}
       />
       <HomePageList
-        areResultsEmpty={areResultsEmptyWithSearchOrFilters}
+        areResultsEmptyWithSettings={areResultsEmptyWithSearchOrFilters}
         data={data}
         dataCount={dataCount}
         dataToDelete={dataToDelete}

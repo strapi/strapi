@@ -8,7 +8,7 @@ import ListEmpty from '../ListEmpty';
 import Padded from '../Padded';
 
 const HomePageList = ({
-  areResultsEmpty,
+  areResultsEmptyWithSettings,
   data,
   dataCount,
   dataToDelete,
@@ -37,7 +37,7 @@ const HomePageList = ({
     }
   };
 
-  if (dataCount > 0 && !areResultsEmpty) {
+  if (dataCount > 0 && !areResultsEmptyWithSettings) {
     return (
       <>
         <List
@@ -60,11 +60,11 @@ const HomePageList = ({
     );
   }
 
-  return <ListEmpty onClick={onClick} hasSearchApplied={areResultsEmpty} />;
+  return <ListEmpty onClick={onClick} hasSearchApplied={areResultsEmptyWithSettings} />;
 };
 
 HomePageList.defaultProps = {
-  areResultsEmpty: false,
+  areResultsEmptyWithSettings: false,
   data: [],
   dataCount: 0,
   dataToDelete: [],
@@ -75,7 +75,7 @@ HomePageList.defaultProps = {
 };
 
 HomePageList.propTypes = {
-  areResultsEmpty: PropTypes.bool,
+  areResultsEmptyWithSettings: PropTypes.bool,
   data: PropTypes.array,
   dataCount: PropTypes.number,
   dataToDelete: PropTypes.array,
