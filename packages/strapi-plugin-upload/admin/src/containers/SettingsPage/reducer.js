@@ -24,10 +24,7 @@ const reducer = (state, action) => {
         .update('initialData', () => fromJS(action.data))
         .update('modifiedData', () => fromJS(action.data));
     case 'ON_CHANGE':
-      return state.updateIn(
-        ['modifiedData', ...action.keys.split('.')],
-        () => action.value
-      );
+      return state.updateIn(['modifiedData', ...action.keys.split('.')], () => action.value);
     case 'SUBMIT_SUCCEEDED':
       return state.update('initialData', () => state.get('modifiedData'));
     default:
