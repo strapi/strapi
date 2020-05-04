@@ -20,8 +20,21 @@ const getCommonBeginning = (str1 = '', str2 = '') => {
   return common;
 };
 
+const escapeQuery = (query, charsToEscape, escapeChar = '\\') => {
+  return query
+    .split('')
+    .reduce(
+      (escapedQuery, char) =>
+        charsToEscape.includes(char)
+          ? `${escapedQuery}${escapeChar}${char}`
+          : `${escapedQuery}${char}`,
+      ''
+    );
+};
+
 module.exports = {
   nameToSlug,
   nameToCollectionName,
   getCommonBeginning,
+  escapeQuery,
 };
