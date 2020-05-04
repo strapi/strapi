@@ -6,12 +6,10 @@
  */
 
 module.exports = async () => {
-  const name = 'upload';
-
   // set plugin store
   const configurator = strapi.store({
     type: 'plugin',
-    name,
+    name: 'upload',
     key: 'settings',
   });
 
@@ -29,7 +27,7 @@ module.exports = async () => {
     });
   }
 
-  await pruneObsoleteRelations(name);
+  await pruneObsoleteRelations();
 };
 
 const createProvider = ({ provider, providerOptions }) => {
@@ -57,10 +55,11 @@ const baseProvider = {
   },
 };
 
-const pruneObsoleteRelations = async name => {
-  const { orm } = strapi.plugins[name].models.file;
+const pruneObsoleteRelations = async () => {
+  const { upload: plugin } = strapi.plugins;
+  const modelIsNotDefined = !plugin || !plugin.models || !plugin.models.file;
 
-  if (orm !== 'mongoose') {
+  if (modelIsNotDefined || plugin.models.file.orm !== 'mongoose') {
     return;
   }
 
