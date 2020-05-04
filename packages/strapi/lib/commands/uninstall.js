@@ -1,7 +1,7 @@
 'use strict';
 
 const { join } = require('path');
-const { existsSync, rmdirSync } = require('fs-extra');
+const { existsSync, removeSync } = require('fs-extra');
 const ora = require('ora');
 const execa = require('execa');
 const inquirer = require('inquirer');
@@ -21,7 +21,7 @@ module.exports = async (plugins, { deleteFiles }) => {
   const loader = ora();
   const dir = process.cwd();
 
-  const pluginArgs = plugins.map(name => `strapi-plugin-${name}`);
+  const pluginArgs = plugins.map((name) => `strapi-plugin-${name}`);
 
   try {
     // verify should rebuild before removing the pacakge
@@ -49,7 +49,7 @@ module.exports = async (plugins, { deleteFiles }) => {
       for (let name of plugins) {
         const pluginDir = join(dir, 'extensions', name);
         if (existsSync(pluginDir)) {
-          rmdirSync();
+          removeSync(pluginDir);
         }
       }
       loader.succeed();
