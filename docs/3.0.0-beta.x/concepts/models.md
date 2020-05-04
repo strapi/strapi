@@ -1142,3 +1142,28 @@ module.exports = {
 ```
 
 :::
+
+### Custom use
+
+When you are building custom ORM specific queries the lifecycles will not be triggered. You can however call a lifecycle function directly if you wish.
+
+**Bookshelf example**
+
+**Path -** `./api/{apiName}/services/{serviceName}.js`
+
+```js
+module.exports = {
+  async createCustomEntry() {
+    const ORMModel = strapi.query(modelName).model;
+
+    const newCustomEntry = await ORMModel.forge().save();
+
+    // trigger manually
+    ORMModel.lifecycles.afterCreate(newCustomEntry.toJSON());
+  },
+};
+```
+
+::: tip
+When calling a lifecycle function directly, you will need to make sur you call it with the expected parameters.
+:::
