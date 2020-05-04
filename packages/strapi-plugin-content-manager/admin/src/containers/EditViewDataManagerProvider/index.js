@@ -8,11 +8,12 @@ import pluginId from '../../pluginId';
 import init from './init';
 import reducer, { initialState } from './reducer';
 import {
+  cleanData,
+  createDefaultForm,
   createYupSchema,
   getYupInnerErrors,
   getFilesToUpload,
-  createDefaultForm,
-  cleanData,
+  removePasswordFieldsFromData,
 } from './utils';
 
 const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
@@ -57,7 +58,11 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPrevio
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
-          data,
+          data: removePasswordFieldsFromData(
+            data,
+            allLayoutData.contentType,
+            allLayoutData.components
+          ),
         });
       } catch (err) {
         if (id && err.code !== 20) {
