@@ -488,10 +488,11 @@ const forms = {
           items.splice(0, 1, [
             {
               ...fields.default,
-              type: 'date',
+              type: data.type || 'date',
               value: null,
               withDefaultValue: false,
-              disabled: data.type !== 'date',
+              disabled: !data.type,
+              autoFocus: false,
             },
           ]);
         } else if (type === 'richtext') {

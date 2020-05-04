@@ -217,6 +217,49 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
 
       expect(reducer(state, action)).toEqual(expected);
     });
+
+    it('should remove the default value if the type of date input type has been changed', () => {
+      const state = initialState.setIn(
+        ['modifiedData'],
+        fromJS({
+          name: 'short_movie_time',
+          type: 'time',
+          default: '00:30:00',
+        })
+      );
+      const action = {
+        type: 'ON_CHANGE',
+        keys: ['type'],
+        value: 'datetime',
+      };
+      const expected = state
+        .setIn(['modifiedData', 'name'], 'short_movie_time')
+        .setIn(['modifiedData', 'type'], 'datetime')
+        .removeIn(['modifiedData', 'default']);
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('should not remove the default value if the type of another input type has been changed', () => {
+      const state = initialState.setIn(
+        ['modifiedData'],
+        fromJS({
+          name: 'number_of_movies',
+          type: 'integer',
+          default: '0',
+        })
+      );
+      const action = {
+        type: 'ON_CHANGE',
+        keys: ['type'],
+        value: 'biginteger',
+      };
+      const expected = state
+        .setIn(['modifiedData', 'name'], 'number_of_movies')
+        .setIn(['modifiedData', 'type'], 'biginteger');
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
   });
 
   describe('ON_CHANGE_ALLOWED_TYPE', () => {
