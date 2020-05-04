@@ -59,14 +59,18 @@ const pruneObsoleteRelations = async () => {
   const { upload: plugin } = strapi.plugins;
   const modelIsNotDefined = !plugin || !plugin.models || !plugin.models.file;
 
-  if (modelIsNotDefined || plugin.models.file.orm !== 'mongoose') {
-    return;
+  if (modelIsNotDefined) {
+    return Promise.resolve();
   }
 
   await strapi.query('file', 'upload').custom(pruneObsoleteRelationsQuery)();
 };
 
 const pruneObsoleteRelationsQuery = ({ model }) => {
+  if (model.orm !== 'mongoose') {
+    return Promise.resolve();
+  }
+
   const models = Array.from(strapi.db.models.values());
   const modelsId = models.map(model => model.globalId);
 
