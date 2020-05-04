@@ -1,11 +1,9 @@
-import React, { useReducer, useState, useRef, useEffect } from 'react';
-import { includes, isEmpty, toString, isEqual, intersectionWith } from 'lodash';
+import React, { useReducer, useState, useEffect } from 'react';
+import { includes, toString, isEqual, intersectionWith } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
+import { useIsMounted } from '@buffetjs/hooks';
 import { Header } from '@buffetjs/custom';
-import { useDebounce } from '@buffetjs/hooks';
 import {
-  HeaderSearch,
-  PageFooter,
   PopUpWarning,
   LoadingIndicator,
   useGlobalContext,
@@ -14,22 +12,10 @@ import {
   request,
   useQuery,
 } from 'strapi-helper-plugin';
-import {
-  formatFileForEditing,
-  getRequestUrl,
-  getTrad,
-  generatePageFromStart,
-  generateStartFromPage,
-  getFileModelTimestamps,
-} from '../../utils';
+import { formatFileForEditing, getRequestUrl, getTrad, getFileModelTimestamps } from '../../utils';
 import Container from '../../components/Container';
-import ControlsWrapper from '../../components/ControlsWrapper';
+import HomePageContent from '../../components/HomePageContent';
 import Padded from '../../components/Padded';
-import SelectAll from '../../components/SelectAll';
-import SortPicker from '../../components/SortPicker';
-import Filters from '../../components/Filters';
-import List from '../../components/List';
-import ListEmpty from '../../components/ListEmpty';
 import ModalStepper from '../ModalStepper';
 import { generateStringFromParams, getHeaderLabel } from './utils';
 import init from './init';
@@ -45,24 +31,12 @@ const HomePage = () => {
   const [fileToEdit, setFileToEdit] = useState(null);
   const [shouldRefetch, setShouldRefetch] = useState(false);
   const [modalInitialStep, setModalInitialStep] = useState('browse');
-  const [searchValue, setSearchValue] = useState(query.get('_q') || '');
   const { push } = useHistory();
   const { search } = useLocation();
-  const isMounted = useRef(true);
+  const isMounted = useIsMounted();
   const { data, dataCount, dataToDelete, isLoading } = reducerState.toJS();
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
   const paramsKeys = ['_limit', '_start', '_q', '_sort'];
-  const debouncedSearch = useDebounce(searchValue, 300);
-
-  useEffect(() => {
-    return () => (isMounted.current = false);
-  }, []);
-
-  useEffect(() => {
-    handleChangeParams({ target: { name: '_q', value: debouncedSearch } });
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch]);
 
   useEffect(() => {
     fetchListData();
@@ -78,23 +52,9 @@ const HomePage = () => {
         method: 'DELETE',
       });
     } catch (err) {
-      if (isMounted.current) {
+      if (isMounted) {
         strapi.notification.error('notification.error');
       }
-    }
-  };
-
-  const fetchListData = async () => {
-    dispatch({ type: 'GET_DATA' });
-
-    const [data, count] = await Promise.all([fetchData(), fetchDataCount()]);
-
-    if (isMounted.current) {
-      dispatch({
-        type: 'GET_DATA_SUCCEEDED',
-        data,
-        count,
-      });
     }
   };
 
@@ -113,7 +73,7 @@ const HomePage = () => {
 
       return Promise.resolve(data);
     } catch (err) {
-      if (isMounted.current) {
+      if (isMounted) {
         dispatch({ type: 'GET_DATA_ERROR' });
         strapi.notification.error('notification.error');
       }
@@ -133,13 +93,35 @@ const HomePage = () => {
 
       return Promise.resolve(count);
     } catch (err) {
-      if (isMounted.current) {
+      if (isMounted) {
         dispatch({ type: 'GET_DATA_ERROR' });
         strapi.notification.error('notification.error');
       }
     }
 
     return null;
+  };
+
+  const fetchListData = async () => {
+    dispatch({ type: 'GET_DATA' });
+
+    const [data, count] = await Promise.all([fetchData(), fetchDataCount()]);
+
+    if (isMounted) {
+      dispatch({
+        type: 'GET_DATA_SUCCEEDED',
+        data,
+        count,
+      });
+    }
+  };
+
+  const generateNewSearch = (updatedParams = {}) => {
+    return {
+      ...getSearchParams(),
+      filters: generateFiltersFromSearch(search),
+      ...updatedParams,
+    };
   };
 
   const getSearchParams = () => {
@@ -154,29 +136,11 @@ const HomePage = () => {
     return params;
   };
 
-  const generateNewSearch = (updatedParams = {}) => {
-    return {
-      ...getSearchParams(),
-      filters: generateFiltersFromSearch(search),
-      ...updatedParams,
-    };
-  };
-
   const handleChangeCheck = ({ target: { name } }) => {
     dispatch({
       type: 'ON_CHANGE_DATA_TO_DELETE',
       id: name,
     });
-  };
-
-  const handleChangeListParams = ({ target: { name, value } }) => {
-    if (name.includes('_page')) {
-      handleChangeParams({
-        target: { name: '_start', value: generateStartFromPage(value, limit) },
-      });
-    } else {
-      handleChangeParams({ target: { name: '_limit', value } });
-    }
   };
 
   const handleChangeParams = ({ target: { name, value } }) => {
@@ -203,20 +167,12 @@ const HomePage = () => {
     push({ search: encodeURI(newSearch) });
   };
 
-  const handleChangeSearchValue = ({ target: { value } }) => {
-    setSearchValue(value);
-  };
-
   const handleClickEditFile = id => {
     const file = formatFileForEditing(data.find(file => toString(file.id) === toString(id)));
 
     setFileToEdit(file);
     setModalInitialStep('edit');
     handleClickToggleModal();
-  };
-
-  const handleClearSearch = () => {
-    setSearchValue('');
   };
 
   const handleClickToggleModal = (refetch = false) => {
@@ -339,28 +295,6 @@ const HomePage = () => {
     ],
   };
 
-  const limit = parseInt(query.get('_limit'), 10) || 10;
-  const start = parseInt(query.get('_start'), 10) || 0;
-
-  const params = {
-    _limit: limit,
-    _page: generatePageFromStart(start, limit),
-  };
-
-  const hasSomeCheckboxSelected = data.some(item =>
-    dataToDelete.find(itemToDelete => item.id.toString() === itemToDelete.id.toString())
-  );
-
-  const areAllCheckboxesSelected =
-    data.every(item =>
-      dataToDelete.find(itemToDelete => item.id.toString() === itemToDelete.id.toString())
-    ) && hasSomeCheckboxSelected;
-
-  const filters = generateFiltersFromSearch(search);
-  const hasFilters = !isEmpty(filters);
-  const hasSearch = !isEmpty(searchValue);
-  const areResultsEmptyWithSearchOrFilters = isEmpty(data) && (hasSearch || hasFilters);
-
   return (
     <Container>
       <Header {...headerProps} isLoading={isLoading} />
@@ -370,55 +304,17 @@ const HomePage = () => {
           <LoadingIndicator />
         </>
       ) : (
-        <>
-          <HeaderSearch
-            label={pluginName}
-            onChange={handleChangeSearchValue}
-            onClear={handleClearSearch}
-            placeholder={formatMessage({ id: getTrad('search.placeholder') })}
-            name="_q"
-            value={searchValue}
-          />
-          <ControlsWrapper>
-            <SelectAll
-              onChange={handleSelectAll}
-              checked={areAllCheckboxesSelected}
-              someChecked={hasSomeCheckboxSelected && !areAllCheckboxesSelected}
-            />
-            <Padded right />
-            <SortPicker
-              onChange={handleChangeParams}
-              value={query.get('_sort') || `${updated_at}:DESC`}
-            />
-            <Padded right />
-            <Filters onChange={handleChangeParams} filters={filters} onClick={handleDeleteFilter} />
-          </ControlsWrapper>
-          {dataCount > 0 && !areResultsEmptyWithSearchOrFilters ? (
-            <>
-              <List
-                data={data}
-                onChange={handleChangeCheck}
-                onCardClick={handleClickEditFile}
-                selectedItems={dataToDelete}
-              />
-              <Padded left right size="sm">
-                <Padded left right size="xs">
-                  <PageFooter
-                    context={{ emitEvent: () => {} }}
-                    count={dataCount}
-                    onChangeParams={handleChangeListParams}
-                    params={params}
-                  />
-                </Padded>
-              </Padded>
-            </>
-          ) : (
-            <ListEmpty
-              onClick={handleClickToggleModal}
-              hasSearchApplied={areResultsEmptyWithSearchOrFilters}
-            />
-          )}
-        </>
+        <HomePageContent
+          data={data}
+          dataCount={dataCount}
+          dataToDelete={dataToDelete}
+          onCardCheck={handleChangeCheck}
+          onCardClick={handleClickEditFile}
+          onClick={handleClickToggleModal}
+          onFilterDelete={handleDeleteFilter}
+          onParamsChange={handleChangeParams}
+          onSelectAll={handleSelectAll}
+        />
       )}
       <ModalStepper
         initialFileToEdit={fileToEdit}
