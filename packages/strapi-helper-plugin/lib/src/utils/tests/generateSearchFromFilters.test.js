@@ -47,6 +47,13 @@ describe('HELPER PLUGIN | utils | generateSearchFromFilters', () => {
 
     const expected =
       '_limit=10&_sort=id:ASC&_page=2&bool=true&big_number_ne=1&created_at_lt=2019-08-01T00:00:00Z&date_lte=2019-08-02T00:00:00Z&decimal_number_gt=2&enum_ne=noon&float_number_gte=3';
-    expect(generateSearchFromFilters(data)).toEqual(expected);
+    const encoded = expected
+      .split('&')
+      .map(pair => {
+        const parts = pair.split('=');
+        return `${parts[0]}=${encodeURIComponent(parts[1])}`;
+      })
+      .join('&');
+    expect(generateSearchFromFilters(data)).toEqual(encoded);
   });
 });
