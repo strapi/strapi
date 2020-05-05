@@ -213,7 +213,7 @@ Replace the contents of `database.json` with the following:
         "database": "${process.env.DATABASE_NAME}",
         "username": "${process.env.DATABASE_USERNAME}",
         "password": "${process.env.DATABASE_PASSWORD}",
-        "ssl": true
+        "ssl": { "rejectUnauthorized": false }
       },
       "options": {}
     }
