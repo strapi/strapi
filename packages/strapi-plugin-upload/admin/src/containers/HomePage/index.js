@@ -275,7 +275,7 @@ const HomePage = () => {
     },
     content: formatMessage(
       {
-        id: getTrad(getHeaderLabel(data)),
+        id: getTrad(getHeaderLabel(dataCount)),
       },
       { number: dataCount }
     ),
