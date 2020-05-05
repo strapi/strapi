@@ -248,7 +248,7 @@ function ListView({
       emitEvent('willChangeNumberOfEntriesPerPage');
     }
 
-    push({ search: encodeURIComponent(newSearch) });
+    push({ search: newSearch });
     resetProps();
     getDataRef.current(slug, updatedSearch);
   };
