@@ -394,9 +394,13 @@ module.exports = {
       );
     }
 
-    const params = _.assign(ctx.request.body, {
+    let params = _.assign(ctx.request.body, {
       provider: 'local',
     });
+
+    if (!ctx.state.admin) {
+      params = _.pick(params, ['username', 'email', 'password', 'provider']);
+    }
 
     // Password is required.
     if (!params.password) {
@@ -580,14 +584,14 @@ module.exports = {
       { confirmed: true }
     );
 
-    if(returnUser) {
+    if (returnUser) {
       ctx.send({
         jwt: strapi.plugins['users-permissions'].services.jwt.issue({
-          id: user.id
+          id: user.id,
         }),
         user: sanitizeEntity(user.toJSON ? user.toJSON() : user, {
-          model: strapi.query('user', 'users-permissions').model
-        })
+          model: strapi.query('user', 'users-permissions').model,
+        }),
       });
     } else {
       const settings = await strapi
