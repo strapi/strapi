@@ -394,13 +394,9 @@ module.exports = {
       );
     }
 
-    let params = _.assign(ctx.request.body, {
+    const params = _.assign(_.pick(ctx.request.body, ['username', 'email', 'password']), {
       provider: 'local',
     });
-
-    if (!ctx.state.admin) {
-      params = _.pick(params, ['username', 'email', 'password', 'provider']);
-    }
 
     // Password is required.
     if (!params.password) {
