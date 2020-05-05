@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDebounce } from '@buffetjs/hooks';
 import { HeaderSearch, useGlobalContext, useQuery } from 'strapi-helper-plugin';
-import { getTrad, getFileModelTimestamps } from '../../utils';
+import { getTrad, getFileModelTimestamps } from '../../../utils';
 
-import ControlsWrapper from '../ControlsWrapper';
-import Filters from '../Filters';
-import Padded from '../Padded';
-import SelectAll from '../SelectAll';
-import SortPicker from '../SortPicker';
+import ControlsWrapper from '../../../components/ControlsWrapper';
+import Filters from '../../../components/Filters';
+import Padded from '../../../components/Padded';
+import SelectAll from '../../../components/SelectAll';
+import SortPicker from '../../../components/SortPicker';
 
 const HomePageSettings = ({
   areAllCheckboxesSelected,
