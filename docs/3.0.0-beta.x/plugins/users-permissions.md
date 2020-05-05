@@ -162,7 +162,7 @@ Then fill the informations:
 - **Application name**: Strapi GitHub auth
 - **Homepage URL**: `https://65e60559.ngrok.io`
 - **Application description**: Strapi provider auth description
-- **Authorization callback URL**: `https://65e60559.ngrok.io/connect/github`
+- **Authorization callback URL**: `https://65e60559.ngrok.io/auth/github/callback`
 
 #### Strapi configuration
 
@@ -198,7 +198,7 @@ ngrok http 1337
 
 Then fill the informations:
 
-- **Valid OAuth Redirect URIs**: `https://559394cd.ngrok.io/connect/facebook/callback`
+- **Valid OAuth Redirect URIs**: `https://559394cd.ngrok.io/auth/facebook/callback`
 
 To access the Application ID and secret:
 
@@ -242,7 +242,7 @@ Wait a few seconds while the application is created.
 Then fill the informations:
 
 - **Name**: `Strapi Auth`
-- **Authorized redirect URIs**: `http://localhost:1337/connect/google/callback`
+- **Authorized redirect URIs**: `http://localhost:1337/auth/google/callback`
 
 To access the Client ID and secret:
 
@@ -282,7 +282,7 @@ Then fill the informations:
 - **App name**: Strapi Twitter auth
 - **Application description**: This is an demo app for Strapi auth
 - **Website URL**: `https://65e60559.ngrok.io`
-- **Callback URLs**: `https://65e60559.ngrok.io/connect/twitter`
+- **Callback URLs**: `https://65e60559.ngrok.io/auth/twitter/callback`
 - **Tell us how this app will be used**: - here write a message enough long -
 
 To access the Consumer API keys:
@@ -312,7 +312,7 @@ Then fill the informations:
 - Fill the **name** and create
 - Click on **OAuth2** in the left menu
 - And click on **Add redirect** button
-- Fill the **Redirect** input with `http://localhost:1337/connect/discord/callback` URL and save
+- Fill the **Redirect** input with `http://localhost:1337/auth/discord/callback` URL and save
 
 To access the Consumer API keys:
 
@@ -342,7 +342,7 @@ Then fill the informations:
 Then fill the informations:
 
 - **Name**: Strapi auth
-- **OAuth Redirect URLs**: `http://localhost:1337/connect/twitch/callback`
+- **OAuth Redirect URLs**: `http://localhost:1337/auth/twitch/callback`
 - **Category**: Chose a category
 
 To access the Consumer API keys:
@@ -385,7 +385,7 @@ ngrok http 1337
 
 Then fill the informations:
 
-- **Valid OAuth Redirect URIs**: `https://c6a8cc7c.ngrok.io/connect/instagram/callback`
+- **Valid OAuth Redirect URIs**: `https://c6a8cc7c.ngrok.io/auth/instagram/callback`
 - **Deauthorize**: `https://c6a8cc7c.ngrok.io`
 - **Data Deletion Requests**: `https://c6a8cc7c.ngrok.io`
 
@@ -428,7 +428,7 @@ Then setup OAuth seetings:
 
 Then fill the informations:
 
-- **Authorized redirect UR**: `http://localhost:1337/connect/vk/callback`
+- **Authorized redirect UR**: `http://localhost:1337/auth/vk/callback`
 
 #### Strapi configuration
 
