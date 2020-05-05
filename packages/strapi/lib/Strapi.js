@@ -53,6 +53,7 @@ class Strapi {
     this.admin = {};
     this.plugins = {};
     this.config = loadConfiguration(this.dir, opts);
+    this.isLoaded = false;
 
     // internal services.
     this.fs = createStrapiFs(this);
@@ -127,12 +128,9 @@ class Strapi {
 
   async start(cb) {
     try {
-      await this.load();
-
-      // Run bootstrap function.
-      await this.runBootstrapFunctions();
-      // Freeze object.
-      await this.freeze();
+      if (!this.isLoaded) {
+        await this.load();
+      }
 
       this.app.use(this.router.routes()).use(this.router.allowedMethods());
 
@@ -236,6 +234,8 @@ class Strapi {
   }
 
   async load() {
+    this.isLoaded = true;
+
     this.app.use(async (ctx, next) => {
       if (ctx.request.url === '/_health' && ctx.request.method === 'HEAD') {
         ctx.set('strapi', 'You are so French!');
@@ -294,6 +294,9 @@ class Strapi {
     // Initialize hooks and middlewares.
     await initializeMiddlewares.call(this);
     await initializeHooks.call(this);
+
+    await this.runBootstrapFunctions();
+    await this.freeze();
   }
 
   async startWebhooks() {

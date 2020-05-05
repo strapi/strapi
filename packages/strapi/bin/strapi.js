@@ -205,6 +205,11 @@ program
   .description('Starts the admin dev server')
   .action(getLocalScript('watchAdmin'));
 
+program
+  .command('configuration:dump')
+  .option('-f, --file <file>', 'file to output to')
+  .action(getLocalScript('configurationDump'));
+
 /**
  * Normalize help argument
  */
