@@ -108,11 +108,11 @@ class DatabaseManager {
       return _.get(strapi.admin, ['models', key]);
     }
 
-    return (
-      _.get(strapi.plugins, [plugin, 'models', key]) ||
-      _.get(strapi, ['models', key]) ||
-      _.get(strapi, ['components', key])
-    );
+    if (plugin) {
+      return _.get(strapi.plugins, [plugin, 'models', key]);
+    }
+
+    return _.get(strapi, ['models', key]) || _.get(strapi, ['components', key]);
   }
 
   getModelByCollectionName(collectionName) {
