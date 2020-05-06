@@ -123,6 +123,7 @@ describe('Upload plugin end to end tests', () => {
               width: expect.any(Number),
               height: expect.any(Number),
               url: expect.any(String),
+              path: null,
             },
           },
         })

@@ -60,5 +60,25 @@ describe('Upload service', () => {
         size: 1000,
       });
     });
+
+    test('Set a path folder', () => {
+      const fileData = {
+        filename: 'File Name.png',
+        type: 'image/png',
+        size: 1000 * 1000,
+      };
+
+      const fileMetas = {
+        path: 'folder',
+      };
+
+      expect(uploadService.formatFileInfo(fileData, {}, fileMetas)).toMatchObject({
+        name: 'File Name',
+        ext: '.png',
+        mime: 'image/png',
+        size: 1000,
+        path: expect.stringContaining('folder'),
+      });
+    });
   });
 });
