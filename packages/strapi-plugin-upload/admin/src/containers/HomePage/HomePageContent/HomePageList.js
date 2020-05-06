@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { PageFooter, useQuery } from 'strapi-helper-plugin';
-import { generatePageFromStart, generateStartFromPage } from '../../utils';
+import { generatePageFromStart, generateStartFromPage } from '../../../utils';
 
-import List from '../List';
-import ListEmpty from '../ListEmpty';
-import Padded from '../Padded';
+import List from '../../../components/List';
+import ListEmpty from '../../../components/ListEmpty';
+import Padded from '../../../components/Padded';
 
 const HomePageList = ({
   areResultsEmptyWithSettings,

@@ -1,7 +1,6 @@
-import React, { useReducer, useState, useEffect } from 'react';
+import React, { useReducer, useRef, useState, useEffect } from 'react';
 import { includes, toString, isEqual, intersectionWith } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useIsMounted } from '@buffetjs/hooks';
 import { Header } from '@buffetjs/custom';
 import {
   PopUpWarning,
@@ -14,7 +13,7 @@ import {
 } from 'strapi-helper-plugin';
 import { formatFileForEditing, getRequestUrl, getTrad, getFileModelTimestamps } from '../../utils';
 import Container from '../../components/Container';
-import HomePageContent from '../../components/HomePageContent';
+import HomePageContent from './HomePageContent';
 import Padded from '../../components/Padded';
 import ModalStepper from '../ModalStepper';
 import { generateStringFromParams, getHeaderLabel } from './utils';
@@ -33,10 +32,14 @@ const HomePage = () => {
   const [modalInitialStep, setModalInitialStep] = useState('browse');
   const { push } = useHistory();
   const { search } = useLocation();
-  const isMounted = useIsMounted();
+  const isMounted = useRef(true);
   const { data, dataCount, dataToDelete, isLoading } = reducerState.toJS();
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
   const paramsKeys = ['_limit', '_start', '_q', '_sort'];
+
+  useEffect(() => {
+    return () => (isMounted.current = false);
+  }, []);
 
   useEffect(() => {
     fetchListData();
@@ -52,7 +55,7 @@ const HomePage = () => {
         method: 'DELETE',
       });
     } catch (err) {
-      if (isMounted) {
+      if (isMounted.current) {
         strapi.notification.error('notification.error');
       }
     }
@@ -73,7 +76,7 @@ const HomePage = () => {
 
       return Promise.resolve(data);
     } catch (err) {
-      if (isMounted) {
+      if (isMounted.current) {
         dispatch({ type: 'GET_DATA_ERROR' });
         strapi.notification.error('notification.error');
       }
@@ -93,7 +96,7 @@ const HomePage = () => {
 
       return Promise.resolve(count);
     } catch (err) {
-      if (isMounted) {
+      if (isMounted.current) {
         dispatch({ type: 'GET_DATA_ERROR' });
         strapi.notification.error('notification.error');
       }
@@ -107,7 +110,7 @@ const HomePage = () => {
 
     const [data, count] = await Promise.all([fetchData(), fetchDataCount()]);
 
-    if (isMounted) {
+    if (isMounted.current) {
       dispatch({
         type: 'GET_DATA_SUCCEEDED',
         data,
@@ -272,7 +275,7 @@ const HomePage = () => {
     },
     content: formatMessage(
       {
-        id: getTrad(getHeaderLabel(data)),
+        id: getTrad(getHeaderLabel(dataCount)),
       },
       { number: dataCount }
     ),
