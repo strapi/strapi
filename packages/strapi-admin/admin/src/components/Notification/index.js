@@ -41,18 +41,13 @@ class Notification extends React.Component {
   };
 
   render() {
-    const options =
-      this.options[this.props.notification.status] || this.options.info;
+    const options = this.options[this.props.notification.status] || this.options.info;
     const {
       notification: { message },
     } = this.props;
     const content =
       isObject(message) && message.id ? (
-        <FormattedMessage
-          id={message.id}
-          defaultMessage={message.id}
-          values={message.values}
-        />
+        <FormattedMessage id={message.id} defaultMessage={message.id} values={message.values} />
       ) : (
         <FormattedMessage id={message} defaultMessage={message} />
       );

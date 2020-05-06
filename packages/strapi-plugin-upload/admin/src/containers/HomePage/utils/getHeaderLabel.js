@@ -1,9 +1,9 @@
-const getHeaderLabel = array => {
+const getHeaderLabel = count => {
   let headerLabel = 'header.content.assets-single';
 
-  if (array.length === 0) {
+  if (count === 0) {
     headerLabel = 'header.content.assets-empty';
-  } else if (array.length > 1) {
+  } else if (count > 1) {
     headerLabel = 'header.content.assets-multiple';
   }
 

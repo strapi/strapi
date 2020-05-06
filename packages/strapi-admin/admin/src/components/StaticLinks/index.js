@@ -31,11 +31,7 @@ function StaticLinks() {
 
         return (
           <li key={label}>
-            <StyledLink
-              href={destination}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <StyledLink href={destination} target="_blank" rel="noopener noreferrer">
               <FontAwesomeIcon icon={icon} />
               <FormattedMessage id={`app.components.LeftMenuFooter.${label}`} />
             </StyledLink>
