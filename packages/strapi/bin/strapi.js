@@ -49,7 +49,16 @@ const getLocalScript = name => (...args) => {
     process.exit(1);
   }
 
-  return require(cmdPath)(...args);
+  const script = require(cmdPath);
+
+  Promise.resolve()
+    .then(() => {
+      return script(...args);
+    })
+    .catch(error => {
+      console.error(`Error while running command ${name}: ${error.message}`);
+      process.exit(1);
+    });
 };
 
 /**
@@ -207,8 +216,14 @@ program
 
 program
   .command('configuration:dump')
-  .option('-f, --file <file>', 'file to output to')
+  .option('-f, --file <file>', 'Output file, default output is stdout')
   .action(getLocalScript('configurationDump'));
+
+program
+  .command('configuration:restore')
+  .option('-f, --file <file>', 'Input file, default input is stdin')
+  .option('-s, --strategy <strategy>', 'Strategy name, one of: "replace", "merge", "keep"')
+  .action(getLocalScript('configurationRestore'));
 
 /**
  * Normalize help argument
