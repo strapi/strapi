@@ -2,13 +2,13 @@
 
 const _ = require('lodash');
 const yup = require('yup');
-const { formatYupErrors } = require('strapi-utils');
+const { formatYupErrors, nameToSlug } = require('strapi-utils');
+const pluralize = require('pluralize');
 
 const createSchema = require('./model-schema');
 const { removeEmptyDefaults, removeDeletedUIDTargetFields } = require('./data-transform');
 const { nestedComponentSchema } = require('./component');
 const { modelTypes, DEFAULT_TYPES, typeKinds } = require('./constants');
-const { nameToSlug } = require('strapi-utils');
 
 /**
  * Allowed relation per type kind
@@ -42,6 +42,7 @@ const createContentTypeSchema = (data, { isEdition = false } = {}) => {
   }).shape({
     name: yup
       .string()
+      .test(hasPluralName)
       .test(alreadyUsedContentTypeName(isEdition))
       .test(forbiddenContentTypeNameValidator())
       .min(1)
@@ -105,9 +106,23 @@ const forbiddenContentTypeNameValidator = () => {
       if (reservedNames.includes(nameToSlug(value))) {
         return false;
       }
+
       return true;
     },
   };
+};
+
+const hasPluralName = {
+  name: 'hasPluralName',
+  message:
+    'Content Type name `${value}` cannot be pluralized. \nSuggestion: add Item after the name (e.g News -> NewsItem).',
+  test: value => {
+    if (pluralize.singular(value) === pluralize(value)) {
+      return false;
+    }
+
+    return true;
+  },
 };
 
 const alreadyUsedContentTypeName = isEdition => {
