@@ -51,7 +51,7 @@ module.exports = async () => {
       icon: 'github',
       key: '',
       secret: '',
-      redirect_uri: `${strapi.config.server.url}/auth/github/callback`,
+      callback: `${strapi.config.server.url}/auth/github/callback`,
       scope: ['user', 'user:email'],
     },
     microsoft: {
