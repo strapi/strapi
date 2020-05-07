@@ -18,9 +18,9 @@ const Toggle = styled(DropdownToggle)`
   }
 
   ${({ isopen }) => {
-    // Fix react warning
-    if (isopen === 'true') {
-      return `
+  // Fix react warning
+  if (isopen === 'true') {
+    return `
         background: #e6f0fb;
         border: 1px solid #aed4fb !important;
         border-radius: 2px;
@@ -52,9 +52,9 @@ const Toggle = styled(DropdownToggle)`
           border: 1px solid #aed4fb;
         }
       `;
-    }
+  }
 
-    return `
+  return `
       background: #ffffff !important;
       border: 1px solid #e3e9f3;
       border-radius: 2px !important;
@@ -81,7 +81,7 @@ const Toggle = styled(DropdownToggle)`
         border: 1px solid #e3e9f3;
       }
     `;
-  }}
+}}
 `;
 
 export default Toggle;

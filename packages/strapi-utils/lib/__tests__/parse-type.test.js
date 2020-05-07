@@ -1,4 +1,5 @@
 const parseType = require('../parse-type');
+const format = require('date-fns/format');
 
 describe('parseType', () => {
   describe('boolean', () => {
@@ -50,7 +51,10 @@ describe('parseType', () => {
 
       expect(parseType({ type: 'date', value: '2018-11-02' })).toBe('2018-11-02');
 
-      expect(parseType({ type: 'date', value: '2019-04-21T00:00:00.000Z' })).toBe('2019-04-21');
+      const isoDateFormat = new Date().toISOString();
+      const expectedDateFormat = format(new Date(isoDateFormat), 'yyyy-MM-dd');
+
+      expect(parseType({ type: 'date', value: isoDateFormat })).toBe(expectedDateFormat);
     });
 
     it('Throws on invalid formator dates', () => {

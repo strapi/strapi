@@ -3,7 +3,6 @@ import styled from 'styled-components';
 const Wrapper = styled.div`
   position: relative;
   margin-bottom: 27px;
-
   label {
     width: 100%;
     overflow: hidden;
@@ -26,7 +25,7 @@ const Wrapper = styled.div`
       flex-wrap: initial;
       padding: 0 10px;
 
-      // Arrow
+      /* Arrow */
       &:before {
         content: '\f0d7';
         position: absolute;
@@ -40,7 +39,7 @@ const Wrapper = styled.div`
       > div {
         padding: 0;
         &:first-of-type {
-          // Placeholder
+          /* Placeholder */
           > div span {
             color: #aaa;
           }

@@ -36,7 +36,7 @@ import {
   toggleModalDelete,
   toggleModalDeleteAll,
 } from './actions';
-import reducer from './reducer';
+
 import makeSelectListView from './selectors';
 import getRequestUrl from '../../utils/getRequestUrl';
 
@@ -65,8 +65,6 @@ function ListView({
   showWarningDeleteAll,
   toggleModalDeleteAll,
 }) {
-  strapi.useInjectReducer({ key: 'listView', reducer, pluginId });
-
   const { formatMessage } = useGlobalContext();
   const getLayoutSettingRef = useRef();
   const getDataRef = useRef();
