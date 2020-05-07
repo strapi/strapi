@@ -20,12 +20,6 @@ module.exports = async strapi => {
 
       const filePath = join(componentsDir, category, schema.__filename__);
 
-      if (!schema.connection) {
-        return strapi.stopWithError(
-          `Component ${key} is missing a "connection" property.\nVerify file ${filePath}.`
-        );
-      }
-
       if (!schema.collectionName) {
         return strapi.stopWithError(
           `Component ${key} is missing a "collectionName" property.\nVerify file ${filePath}.`
@@ -43,6 +37,7 @@ module.exports = async strapi => {
         globalId: schema.globalId || _.upperFirst(_.camelCase(`component_${uid}`)),
       });
     });
+
     return acc;
   }, {});
 };

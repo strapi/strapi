@@ -11,7 +11,7 @@ import { Button, PopUpWarning } from 'strapi-helper-plugin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Wrapper from './Wrapper';
 
-const PLUGINS_WITH_CONFIG = ['email', 'upload'];
+const PLUGINS_WITH_CONFIG = ['email'];
 
 /* eslint-disable react/no-unused-state */
 class PluginCard extends React.Component {
@@ -87,17 +87,13 @@ class PluginCard extends React.Component {
   };
 
   render() {
-    const buttonClass = !this.props.isAlreadyInstalled
-      ? 'primary'
-      : 'secondary';
+    const buttonClass = !this.props.isAlreadyInstalled ? 'primary' : 'secondary';
     const buttonLabel = this.props.isAlreadyInstalled
       ? 'app.components.PluginCard.Button.label.install'
       : 'app.components.PluginCard.Button.label.download';
 
     // Display settings link for a selection of plugins.
-    const settingsComponent = PLUGINS_WITH_CONFIG.includes(
-      this.props.plugin.id
-    ) && (
+    const settingsComponent = PLUGINS_WITH_CONFIG.includes(this.props.plugin.id) && (
       <div className="settings" onClick={this.handleClickSettings}>
         <FontAwesomeIcon icon="cog" />
         <FormattedMessage id="app.components.PluginCard.settings" />
@@ -114,14 +110,10 @@ class PluginCard extends React.Component {
       long:
         this.props.plugin.id === 'support-us' ? (
           <FormattedMessage
-            id={
-              this.props.plugin.description.long ||
-              this.props.plugin.description.short
-            }
+            id={this.props.plugin.description.long || this.props.plugin.description.short}
           />
         ) : (
-          this.props.plugin.description.long ||
-          this.props.plugin.description.short
+          this.props.plugin.description.long || this.props.plugin.description.short
         ),
     };
 
@@ -170,11 +162,7 @@ class PluginCard extends React.Component {
               settingsComponent
             ) : (
               <div className="compatible">
-                <i
-                  className={`fa fa-${
-                    this.props.plugin.isCompatible ? 'check' : 'times'
-                  }`}
-                />
+                <i className={`fa fa-${this.props.plugin.isCompatible ? 'check' : 'times'}`} />
                 <FormattedMessage
                   id={`app.components.PluginCard.compatible${
                     this.props.plugin.id === 'support-us' ? 'Community' : ''
@@ -187,12 +175,9 @@ class PluginCard extends React.Component {
 
         <PopUpWarning
           content={{
-            message:
-              'app.components.PluginCard.PopUpWarning.install.impossible.autoReload.needed',
-            title:
-              'app.components.PluginCard.PopUpWarning.install.impossible.title',
-            confirm:
-              'app.components.PluginCard.PopUpWarning.install.impossible.confirm',
+            message: 'app.components.PluginCard.PopUpWarning.install.impossible.autoReload.needed',
+            title: 'app.components.PluginCard.PopUpWarning.install.impossible.title',
+            confirm: 'app.components.PluginCard.PopUpWarning.install.impossible.confirm',
           }}
           isOpen={this.state.showModalAutoReload}
           onlyConfirmButton
@@ -201,12 +186,9 @@ class PluginCard extends React.Component {
         />
         <PopUpWarning
           content={{
-            message:
-              'app.components.PluginCard.PopUpWarning.install.impossible.environment',
-            title:
-              'app.components.PluginCard.PopUpWarning.install.impossible.title',
-            confirm:
-              'app.components.PluginCard.PopUpWarning.install.impossible.confirm',
+            message: 'app.components.PluginCard.PopUpWarning.install.impossible.environment',
+            title: 'app.components.PluginCard.PopUpWarning.install.impossible.title',
+            confirm: 'app.components.PluginCard.PopUpWarning.install.impossible.confirm',
           }}
           isOpen={this.state.showModalEnv}
           onlyConfirmButton

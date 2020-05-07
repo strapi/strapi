@@ -1,6 +1,6 @@
 # 💬 Troubleshooting
 
-Below are solutions to some common issues that you may experience when working with Strapi. You can also post questions to [StackOverflow](https://stackoverflow.com/questions/tagged/strapi) or reach out to the members of our [Slack](https://slack.strapi.io) community!
+Below are solutions to some common issues that you may experience when working with Strapi. You can also post questions to [Github Discussions](https://github.com/strapi/strapi/discussions) or reach out to the members of our [Slack](https://slack.strapi.io) community!
 
 [[toc]]
 
@@ -10,7 +10,7 @@ Strapi is offered as free and open-source for users who wish to self-host the so
 
 ### Community Support
 
-[StackOverflow](https://stackoverflow.com/search?q=strapi) is great first place to reach out for help. Our community and Core developers often check this platform and answer posts tagged with `strapi`.
+[Github Discussions](https://github.com/strapi/strapi/discussions) is great first place to reach out for help. Our community and Core developers often check this platform and answer posts.
 
 Another option to get help is our [Community Slack](https://slack.strapi.io). Please keep all questions on the `#help` channel, be considerate, and remember that _you are getting free help for a free product_.
 
@@ -21,6 +21,19 @@ Looking for enterprise support?
 Fill out the form on the [Support page](https://strapi.io/support) of the Strapi website.
 
 ## Frequently Asked Questions
+
+### Why can't I create or update content-types in production/staging?
+
+Strapi stores model configuration files (what defines the model schema) in files such as `api/restaurant/models/restaurant.settings.json`. Due to how Node.js works, in order for changes to take effect, that would require Node to restart the server. This could potentionally cause downtime of your production service and likewise these changes should be tracked in some kind of source control.
+
+Generally your "flow" of development would follow the following path:
+
+- Development - Develop your Strapi application locally on your host machine, then push changes into source control
+- Staging - Deploy changes from source control to a "production-like" environment for testing
+- Production - If no other changes are needed, deploy into production
+- Repeat as needed, it is recommended that you properly version and test your application as you go
+
+At this time and in the future there is no plan to allow model creating or updating while in a production environment, and there is currently no plans to move model settings into the database. There is no known nor recommended workarounds for this.
 
 ### Does Strapi handle deploying or migrating of content?
 

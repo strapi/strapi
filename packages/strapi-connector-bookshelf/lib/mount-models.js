@@ -16,21 +16,6 @@ const populateFetch = require('./populate');
 
 const PIVOT_PREFIX = '_pivot_';
 
-const LIFECYCLES = {
-  creating: 'beforeCreate',
-  created: 'afterCreate',
-  destroying: 'beforeDestroy',
-  destroyed: 'afterDestroy',
-  updating: 'beforeUpdate',
-  updated: 'afterUpdate',
-  fetching: 'beforeFetch',
-  'fetching:collection': 'beforeFetchAll',
-  fetched: 'afterFetch',
-  'fetched:collection': 'afterFetchAll',
-  saving: 'beforeSave',
-  saved: 'afterSave',
-};
-
 const getDatabaseName = connection => {
   const dbName = _.get(connection.settings, 'database');
   const dbSchema = _.get(connection.settings, 'schema', 'public');
@@ -62,10 +47,8 @@ module.exports = ({ models, target }, ctx) => {
     definition.orm = 'bookshelf';
     definition.databaseName = getDatabaseName(connection);
     definition.client = _.get(connection.settings, 'client');
-    _.defaults(definition, {
-      primaryKey: 'id',
-      primaryKeyType: _.get(definition, 'options.idAttributeType', 'integer'),
-    });
+    definition.primaryKey = 'id';
+    definition.primaryKeyType = 'integer';
 
     // Use default timestamp column names if value is `true`
     if (_.get(definition, 'options.timestamps', false) === true) {
@@ -85,7 +68,6 @@ module.exports = ({ models, target }, ctx) => {
         requireFetch: false,
         tableName: definition.collectionName,
         hasTimestamps: _.get(definition, 'options.timestamps', false),
-        idAttribute: _.get(definition, 'options.idAttribute', 'id'),
         associations: [],
         defaults: Object.keys(definition.attributes).reduce((acc, current) => {
           if (definition.attributes[current].type && definition.attributes[current].default) {
@@ -142,7 +124,11 @@ module.exports = ({ models, target }, ctx) => {
       }
 
       const { nature, verbose } =
-        utilsModels.getNature(details, name, undefined, model.toLowerCase()) || {};
+        utilsModels.getNature({
+          attribute: details,
+          attributeName: name,
+          modelName: model.toLowerCase(),
+        }) || {};
 
       // Build associations key
       utilsModels.defineAssociations(model.toLowerCase(), definition, details, name);
@@ -305,6 +291,7 @@ module.exports = ({ models, target }, ctx) => {
             : strapi.models[details.model];
 
           const globalId = `${model.collectionName}_morph`;
+          const filter = _.get(model, ['attributes', details.via, 'filter'], 'field');
 
           loadedModel[name] = function() {
             return this.morphOne(
@@ -312,7 +299,7 @@ module.exports = ({ models, target }, ctx) => {
               details.via,
               `${definition.collectionName}`
             ).query(qb => {
-              qb.where(_.get(model, ['attributes', details.via, 'filter'], 'field'), name);
+              qb.where(filter, name);
             });
           };
           break;
@@ -323,6 +310,7 @@ module.exports = ({ models, target }, ctx) => {
             : strapi.models[details.collection];
 
           const globalId = `${collection.collectionName}_morph`;
+          const filter = _.get(model, ['attributes', details.via, 'filter'], 'field');
 
           loadedModel[name] = function() {
             return this.morphMany(
@@ -330,7 +318,7 @@ module.exports = ({ models, target }, ctx) => {
               details.via,
               `${definition.collectionName}`
             ).query(qb => {
-              qb.where(_.get(model, ['attributes', details.via, 'filter'], 'field'), name);
+              qb.where(filter, name).orderBy('order');
             });
           };
           break;
@@ -563,28 +551,12 @@ module.exports = ({ models, target }, ctx) => {
         // Load bookshelf plugin arguments from model options
         this.constructor.__super__.initialize.apply(this, arguments);
 
-        _.forEach(LIFECYCLES, (fn, key) => {
-          if (_.isFunction(target[model.toLowerCase()][fn])) {
-            this.on(key, target[model.toLowerCase()][fn]);
-          }
-        });
-
-        // Update withRelated level to bypass many-to-many association for polymorphic relationshiips.
-        // Apply only during fetching.
         this.on('fetching fetching:collection', (instance, attrs, options) => {
           populateFetch(definition, options);
-
-          return _.isFunction(target[model.toLowerCase()]['beforeFetchAll'])
-            ? target[model.toLowerCase()]['beforeFetchAll']
-            : Promise.resolve();
         });
 
         this.on('saving', (instance, attrs) => {
           instance.attributes = _.assign(instance.attributes, mapper(attrs));
-
-          return _.isFunction(target[model.toLowerCase()]['beforeSave'])
-            ? target[model.toLowerCase()]['beforeSave']
-            : Promise.resolve();
         });
 
         const formatValue = createFormatter(definition.client);
@@ -595,37 +567,12 @@ module.exports = ({ models, target }, ctx) => {
           });
         }
 
-        function formatOutput(instance) {
+        this.on('saved fetched fetched:collection', instance => {
           if (Array.isArray(instance.models)) {
             instance.models.forEach(entry => formatEntry(entry));
           } else {
             formatEntry(instance);
           }
-        }
-
-        const events = [
-          {
-            name: 'saved',
-            target: 'afterSave',
-          },
-          {
-            name: 'fetched',
-            target: 'afterFetch',
-          },
-          {
-            name: 'fetched:collection',
-            target: 'afterFetchAll',
-          },
-        ];
-
-        events.forEach(event => {
-          this.on(event.name, instance => {
-            formatOutput(instance);
-
-            return _.isFunction(target[model.toLowerCase()][event.target])
-              ? target[model.toLowerCase()][event.target]
-              : Promise.resolve();
-          });
         });
       };
 
@@ -652,6 +599,7 @@ module.exports = ({ models, target }, ctx) => {
       // Push attributes to be aware of model schema.
       target[model]._attributes = definition.attributes;
       target[model].updateRelations = relations.update;
+      target[model].deleteRelations = relations.deleteRelations;
 
       await buildDatabaseSchema({
         ORM,

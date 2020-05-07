@@ -1,39 +1,25 @@
 'use strict';
 
-const path = require('path');
-const fs = require('fs-extra');
-const _ = require('lodash');
-const { green, yellow } = require('chalk');
+const { green } = require('chalk');
 // eslint-disable-next-line node/no-extraneous-require
 const strapiAdmin = require('strapi-admin');
-const loadConfigFile = require('../load/load-config-files');
+const loadConfiguration = require('../core/app-configuration');
 const addSlash = require('../utils/addSlash');
 /**
  * `$ strapi build`
  */
-module.exports = async ({ optimization }) => {
+module.exports = async ({ clean, optimization }) => {
   const dir = process.cwd();
-  const env = process.env.NODE_ENV || 'development';
+  const config = loadConfiguration(dir);
 
-  const envConfigDir = path.join(dir, 'config', 'environments', env);
+  const adminPath = config.get('server.admin.path', '/admin');
+  const adminBackend = config.get('server.admin.build.backend', '/');
 
-  if (!fs.existsSync(envConfigDir)) {
-    console.log(
-      `Missing environment config for env: ${green(
-        env
-      )}.\nMake sure the directory ${yellow(
-        `./config/environments/${env}`
-      )} exists`
-    );
-    process.exit(1);
+  console.log(`Building your admin UI with ${green(config.environment)} configuration ...`);
+
+  if (clean) {
+    await strapiAdmin.clean({ dir });
   }
-
-  const serverConfig = await loadConfigFile(envConfigDir, 'server.+(js|json)');
-
-  const adminPath = _.get(serverConfig, 'admin.path', '/admin');
-  const adminBackend = _.get(serverConfig, 'admin.build.backend', '/');
-
-  console.log(`Building your admin UI with ${green(env)} configuration ...`);
 
   return strapiAdmin
     .build({

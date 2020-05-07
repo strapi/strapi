@@ -43,8 +43,8 @@ Navigate to [**http://localhost:1337/admin**](http://localhost:1337/admin).
 
 Navigate to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/admin/plugins/content-type-builder), in the left-hand menu.
 
-- Click the **"+ Create new content-type"** link
-- Enter `restaurant`, and click `Done`
+- Click the **"+ Create new collection type"** link
+- Enter `restaurant`, and click `Continue`
 - A window opens with fields options:
   - Click the **Text** field
   - Type `name` in the **Name** field
@@ -59,7 +59,7 @@ Navigate to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/admin
 
 Navigate back to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/admin/plugins/content-type-builder), in the left-hand menu.
 
-- Click the **"+ Create new content-type"** link
+- Click the **"+ Create new collection type"** link
 - Enter `category`, and click `Continue`
 - A window opens with fields options:
   - Click the **Text** field
@@ -74,7 +74,7 @@ Navigate back to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/
 
 ## 5. Add content to "Restaurant" Content Type
 
-Navigate to [**CONTENT TYPES** - **Restaurants**](http://localhost:1337/admin/plugins/content-manager/restaurant?source=content-manager), in the left-hand menu.
+Navigate to [**COLLECTION TYPES** - **Restaurants**](http://localhost:1337/admin/plugins/content-manager/restaurant?source=content-manager), in the left-hand menu.
 
 - Click on **+ Add New Restaurant** button. Type `Biscotte Restaurant` in the **Restaurant** field. Type `Welcome to Biscotte restaurant! Restaurant Biscotte offers a cuisine based on fresh, quality products, often local, organic when possible, and always produced by passionate producers.` into the **Description** field.
 - Click **Save**.
@@ -83,7 +83,7 @@ You will see your restaurant listed in the entries.
 
 ## 6. Add categories to the "Category" Content Type
 
-Navigate to [**CONTENT TYPES** - **Categories**](http://localhost:1337/admin/plugins/content-manager/category?source=content-manager).
+Navigate to [**COLLECTION TYPES** - **Categories**](http://localhost:1337/admin/plugins/content-manager/category?source=content-manager).
 
 - Click on **+ Add New Category** button. Type `French Food` in the **Category** field. Select `Biscotte Restaurant`, on the right from **Restaurant (0)**.
 - Click **Save**.
@@ -95,7 +95,7 @@ You will see the **French Food** category listed in the entries.
 
 You will see the **Brunch** category listed in the entries.
 
-Navigate back to [**CONTENT TYPES** - **Restaurants**](http://localhost:1337/admin/plugins/content-manager/restaurant?source=content-manager).
+Navigate back to [**COLLECTION TYPES** - **Restaurants**](http://localhost:1337/admin/plugins/content-manager/restaurant?source=content-manager).
 
 - Click on `Biscotte Restaurant`.
 - On the right, under **Categories(1)**, `select` the `Add an item...`, and add **Brunch** as a category for this restaurant, and click the **Save** button.
@@ -120,7 +120,7 @@ Here we are! The list of **restaurants** is accessible at [`http://localhost:133
 
 - Learn how to use Strapi with React ([Gatsby](https://blog.strapi.io/building-a-static-website-using-gatsby-and-strapi) or [Next.js](https://blog.strapi.io/strapi-next-setup/)) or Vue.js ([Nuxt.js](https://blog.strapi.io/cooking-a-deliveroo-clone-with-nuxt-vue-js-graphql-strapi-and-stripe-setup-part-1-7/)).
 - Read the **concepts** and do the [Tutorial](quick-start-tutorial.md) to deep dive into Strapi.
-- Get help on [StackOverflow](https://stackoverflow.com/questions/tagged/strapi).
+- Get help on [Github Discussions](https://github.com/strapi/strapi/discussions).
 - Read the [source code](https://github.com/strapi/strapi), [contribute](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) or [give a star](https://github.com/strapi/strapi) on GitHub.
 - Follow us on [Twitter](https://twitter.com/strapijs) to get the latest news.
 - [Join the vibrant and active Strapi community](https://slack.strapi.io) on Slack.

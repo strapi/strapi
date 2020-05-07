@@ -89,10 +89,7 @@ module.exports = async () => {
   // store grant auth config to db
   // when plugin_users-permissions_grant is not existed in db
   // or we have added/deleted provider here.
-  if (
-    !prevGrantConfig ||
-    !_.isEqual(_.keys(prevGrantConfig), _.keys(grantConfig))
-  ) {
+  if (!prevGrantConfig || !_.isEqual(_.keys(prevGrantConfig), _.keys(grantConfig))) {
     // merge with the previous provider config.
     _.keys(grantConfig).forEach(key => {
       if (key in prevGrantConfig) {
@@ -148,21 +145,24 @@ module.exports = async () => {
   }
 
   if (!(await pluginStore.get({ key: 'advanced' }))) {
+    const host = strapi.config.get('server.host');
+    const port = strapi.config.get('server.port');
+
+    const uri = `http://${host}:${port}/admin`;
+
     const value = {
       unique_email: true,
       allow_register: true,
       email_confirmation: false,
-      email_confirmation_redirection: `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}/admin`,
-      email_reset_password: `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}/admin`,
+      email_confirmation_redirection: uri,
+      email_reset_password: uri,
       default_role: 'authenticated',
     };
 
     await pluginStore.set({ key: 'advanced', value });
   }
 
-  await strapi.plugins[
-    'users-permissions'
-  ].services.userspermissions.initialize();
+  await strapi.plugins['users-permissions'].services.userspermissions.initialize();
 
   if (!_.get(strapi.plugins['users-permissions'], 'config.jwtSecret')) {
     const jwtSecret = uuid();
@@ -172,8 +172,8 @@ module.exports = async () => {
 
     await strapi.fs.writePluginFile(
       'users-permissions',
-      'config/jwt.json',
-      JSON.stringify({ jwtSecret }, null, 2)
+      'config/jwt.js',
+      `module.exports = {\n  jwtSecret: process.env.JWT_SECRET || '${jwtSecret}'\n};`
     );
 
     strapi.reload.isWatching = true;

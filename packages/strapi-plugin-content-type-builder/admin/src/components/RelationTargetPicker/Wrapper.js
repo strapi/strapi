@@ -43,7 +43,7 @@ const Wrapper = styled.div`
         }
       }
     }
-    // Dropdown List
+    /* Dropdown List */
     > button + div {
       max-width: 100%;
       max-height: 180px;
@@ -58,7 +58,6 @@ const Wrapper = styled.div`
         font-size: 1.3rem;
         font-family: Lato;
         font-weight: 400;
-        font-family: Lato;
         text-transform: capitalize;
         -webkit-font-smoothing: antialiased;
         cursor: pointer;

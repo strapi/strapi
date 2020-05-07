@@ -394,9 +394,10 @@ module.exports = {
       );
     }
 
-    const params = _.assign(ctx.request.body, {
+    const params = {
+      ..._.pick(ctx.request.body, ['username', 'email', 'password']),
       provider: 'local',
-    });
+    };
 
     // Password is required.
     if (!params.password) {
@@ -568,7 +569,7 @@ module.exports = {
     }
   },
 
-  async emailConfirmation(ctx, returnUser) {
+  async emailConfirmation(ctx, next, returnUser) {
     const params = ctx.query;
 
     const decodedToken = await strapi.plugins['users-permissions'].services.jwt.verify(
