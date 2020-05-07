@@ -11,15 +11,15 @@ const MenuDropdown = styled(DropdownMenu)`
   transform: translate3d(-178px, 28px, 0px) !important;
 
   ${({ isopen }) => {
-    if (isopen === 'true') {
-      return `
+  if (isopen === 'true') {
+    return `
         border-top-color: #aed4fb !important;
         border-top-right-radius: 0;
       `;
-    }
+  }
 
-    return '';
-  }}
+  return '';
+}}
 `;
 
 export default MenuDropdown;

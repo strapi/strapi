@@ -178,8 +178,7 @@ module.exports = strapi => {
 
           if (_.isString(_.get(options.connection, 'schema'))) {
             options.pool = {
-              min: _.get(connection.options, 'pool.min') || 0,
-              max: _.get(connection.options, 'pool.max') || 10,
+              ...options.pool,
               afterCreate: (conn, cb) => {
                 conn.query(
                   `SET SESSION SCHEMA '${options.connection.schema}';`,
