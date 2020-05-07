@@ -111,7 +111,7 @@ runtime: nodejs10
 instance_class: F2
 
 env_variables:
-  HOST: '0.0.0.0'
+  HOST: '0.0.0.0' - this is correct, but this is not what is visible on the page. The page displays: '<project_id>.appspot.com'
   NODE_ENV: 'production'
   DATABASE_NAME: 'strapi'
   DATABASE_USERNAME: 'postgres'
@@ -268,7 +268,7 @@ Create a Google service account key.
 
 Save the JSON credentials file.
 
-Plugins > File Upload > Settings > Production tab
+Plugins > File Upload > Settings > Production tab - Can this be more clearly defined? I cannot find these settings.
 
 By default `localhost` is selected. Select the `Google Cloud Storage` plugin.
 
