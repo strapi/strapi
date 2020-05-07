@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import Gh from '../../assets/images/social_gh.png';
 import Slack from '../../assets/images/social_slack.png';
 import Medium from '../../assets/images/social_medium.png';
-import So from '../../assets/images/social_so.png';
 import Twitter from '../../assets/images/social_twitter.png';
 import Reddit from '../../assets/images/social_reddit.png';
 
@@ -25,8 +24,6 @@ function getSrc(name) {
       return Medium;
     case 'Slack':
       return Slack;
-    case 'Stack Overflow':
-      return So;
     case 'Twitter':
       return Twitter;
     default:

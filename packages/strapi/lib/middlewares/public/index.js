@@ -74,10 +74,7 @@ module.exports = strapi => {
 
       if (!strapi.config.serveAdminPanel) return;
 
-      const basename = _.get(strapi.config.currentEnvironment.server, 'admin.path')
-        ? strapi.config.currentEnvironment.server.admin.path
-        : '/admin';
-
+      const basename = strapi.config.get('server.admin.path', '/admin');
       const buildDir = path.resolve(strapi.dir, 'build');
 
       // Serve admin assets.

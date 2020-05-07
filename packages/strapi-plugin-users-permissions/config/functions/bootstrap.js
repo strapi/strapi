@@ -145,12 +145,17 @@ module.exports = async () => {
   }
 
   if (!(await pluginStore.get({ key: 'advanced' }))) {
+    const host = strapi.config.get('server.host');
+    const port = strapi.config.get('server.port');
+
+    const uri = `http://${host}:${port}/admin`;
+
     const value = {
       unique_email: true,
       allow_register: true,
       email_confirmation: false,
-      email_confirmation_redirection: `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}/admin`,
-      email_reset_password: `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}/admin`,
+      email_confirmation_redirection: uri,
+      email_reset_password: uri,
       default_role: 'authenticated',
     };
 
@@ -167,8 +172,8 @@ module.exports = async () => {
 
     await strapi.fs.writePluginFile(
       'users-permissions',
-      'config/jwt.json',
-      JSON.stringify({ jwtSecret }, null, 2)
+      'config/jwt.js',
+      `module.exports = {\n  jwtSecret: process.env.JWT_SECRET || '${jwtSecret}'\n};`
     );
 
     strapi.reload.isWatching = true;
