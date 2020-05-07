@@ -297,6 +297,7 @@ class Strapi {
 
     await this.runBootstrapFunctions();
     await this.freeze();
+    return this;
   }
 
   async startWebhooks() {

@@ -12,8 +12,7 @@ const strapi = require('../index');
 module.exports = async function({ file, strategy = 'replace' }) {
   const input = file ? fs.readFileSync(file) : await readStdin(process.stdin);
 
-  const app = strapi();
-  await app.load();
+  const app = await strapi().load();
 
   let dataToImport;
   try {
