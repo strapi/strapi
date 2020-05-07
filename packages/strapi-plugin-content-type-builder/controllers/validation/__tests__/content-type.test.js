@@ -1,4 +1,8 @@
-const { validateKind, validateUpdateContentTypeInput } = require('../content-type');
+const {
+  validateKind,
+  validateUpdateContentTypeInput,
+  validateContentTypeInput,
+} = require('../content-type');
 
 describe('Content type validator', () => {
   global.strapi = {
@@ -53,6 +57,27 @@ describe('Content type validator', () => {
           'contentType.attributes.thisIsReserved': [
             expect.stringMatching('Attribute keys cannot be one of'),
           ],
+        });
+      });
+    });
+  });
+
+  describe('Prevents use of names without plural form', () => {
+    test('Throws when using name without plural form', async () => {
+      const data = {
+        contentType: {
+          name: 'news',
+          attributes: {
+            title: {
+              type: 'string',
+            },
+          },
+        },
+      };
+
+      await validateContentTypeInput(data).catch(err => {
+        expect(err).toMatchObject({
+          'contentType.name': [expect.stringMatching('cannot be pluralized')],
         });
       });
     });
