@@ -10,7 +10,7 @@ describe('metrics', () => {
     metrics({
       config: {
         uuid: 'test',
-        envrionment: 'dev',
+        environment: 'dev',
         info: {
           strapi: '0.0.0',
         },
@@ -29,7 +29,7 @@ describe('metrics', () => {
     metrics({
       config: {
         uuid: false,
-        envrionment: 'dev',
+        environment: 'dev',
         info: {
           strapi: '0.0.0',
         },
@@ -46,7 +46,7 @@ describe('metrics', () => {
     const { send } = metrics({
       config: {
         uuid: 'test',
-        envrionment: 'dev',
+        environment: 'dev',
         info: {
           strapi: '0.0.0',
         },
@@ -66,7 +66,7 @@ describe('metrics', () => {
     const { send } = metrics({
       config: {
         uuid: false,
-        envrionment: 'dev',
+        environment: 'dev',
         info: {
           strapi: '0.0.0',
         },

@@ -61,7 +61,7 @@ const Banner = forwardRef(
                 onClickRemove();
               }}
             >
-              <FontAwesomeIcon icon="trash" />
+              <FontAwesomeIcon icon="trash-alt" />
             </div>
             <div className="grab" ref={refs ? refs.dragRef : null}>
               <Grab />
