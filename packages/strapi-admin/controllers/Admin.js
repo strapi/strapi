@@ -246,16 +246,6 @@ module.exports = {
       );
     }
 
-    if (!password) {
-      return ctx.badRequest(
-        null,
-        formatError({
-          id: 'missing.password',
-          message: 'Missing password',
-          field: ['password'],
-        })
-      );
-    }
     const admin = await strapi.query('administrator', 'admin').findOne({ id });
 
     // check the user exists
@@ -301,7 +291,7 @@ module.exports = {
       blocked: blocked === true ? true : false,
     };
 
-    if (password !== admin.password) {
+    if (password && password !== admin.password) {
       user.password = await strapi.admin.services.auth.hashPassword(password);
     }
 
