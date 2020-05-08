@@ -37,7 +37,6 @@ const defaultConfig = {
   server: {
     host: process.env.HOST || os.hostname() || 'localhost',
     port: process.env.PORT || 1337,
-    proxy: { enabled: false },
     cron: { enabled: false },
     admin: { autoOpen: false },
   },
