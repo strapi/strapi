@@ -97,6 +97,14 @@ class Strapi {
   logFirstStartupMessage() {
     this.logStats();
 
+    let hostname = strapi.config.host;
+    if (
+      strapi.config.environment === 'development' &&
+      ['127.0.0.1', '0.0.0.0'].includes(strapi.config.host)
+    ) {
+      hostname = 'localhost';
+    }
+
     console.log(chalk.bold('One more thing...'));
     console.log(
       chalk.grey('Create your first administrator 💻 by going to the administration panel at:')
@@ -104,7 +112,13 @@ class Strapi {
     console.log();
 
     const addressTable = new CLITable();
-    addressTable.push([chalk.bold(this.config.admin.url)]);
+    if (this.config.admin.url.startsWith('http')) {
+      addressTable.push([chalk.bold(this.config.admin.url)]);
+    } else {
+      addressTable.push([
+        chalk.bold(`http://${hostname}:${strapi.config.port}${this.config.admin.url}`),
+      ]);
+    }
     console.log(`${addressTable.toString()}`);
     console.log();
   }
@@ -112,16 +126,32 @@ class Strapi {
   logStartupMessage() {
     this.logStats();
 
+    let hostname = strapi.config.host;
+    if (
+      strapi.config.environment === 'development' &&
+      ['127.0.0.1', '0.0.0.0'].includes(strapi.config.host)
+    ) {
+      hostname = 'localhost';
+    }
+
     console.log(chalk.bold('Welcome back!'));
 
     if (this.config.serveAdminPanel === true) {
       console.log(chalk.grey('To manage your project 🚀, go to the administration panel at:'));
-      console.log(chalk.bold(this.config.admin.url));
+      if (this.config.admin.url.startsWith('http')) {
+        console.log(chalk.bold(this.config.admin.url));
+      } else {
+        console.log(chalk.bold(`http://${hostname}:${strapi.config.port}${this.config.admin.url}`));
+      }
       console.log();
     }
 
     console.log(chalk.grey('To access the server ⚡️, go to:'));
-    console.log(chalk.bold(this.config.url));
+    if (this.config.admin.url.startsWith('http')) {
+      console.log(chalk.bold(this.config.server.url));
+    } else {
+      console.log(chalk.bold(`http://${hostname}:${strapi.config.port}${this.config.server.url}`));
+    }
     console.log();
   }
 

@@ -1,5 +1,5 @@
 module.exports = path => {
-  if (typeof path !== 'string') throw new Error('admin.path must be a string');
+  if (typeof path !== 'string') throw new Error('admin.url must be a string');
   if (path === '' || path === '/') return '/';
 
   if (path[0] != '/') path = '/' + path;
