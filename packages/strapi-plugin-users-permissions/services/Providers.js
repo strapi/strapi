@@ -55,10 +55,7 @@ exports.connect = (provider, query) => {
           })
           .get();
 
-        if (
-          _.isEmpty(_.find(users, { provider })) &&
-          !advanced.allow_register
-        ) {
+        if (_.isEmpty(_.find(users, { provider })) && !advanced.allow_register) {
           return resolve([
             null,
             [{ messages: [{ id: 'Auth.advanced.allow_register' }] }],
@@ -95,9 +92,7 @@ exports.connect = (provider, query) => {
           confirmed: true,
         });
 
-        const createdUser = await strapi
-          .query('user', 'users-permissions')
-          .create(params);
+        const createdUser = await strapi.query('user', 'users-permissions').create(params);
 
         return resolve([createdUser, null]);
       } catch (err) {
@@ -217,53 +212,41 @@ const getProfile = async (provider, query, callback) => {
         },
       });
 
-      request.post(
-        {
-          url: 'https://github.com/login/oauth/access_token',
-          form: {
-            client_id: grant.github.key,
-            client_secret: grant.github.secret,
-            code: access_token,
-          },
-        },
-        (err, res, body) => {
+      github
+        .query()
+        .get('user')
+        .auth(access_token)
+        .request((err, res, userbody) => {
+          if (err) {
+            return callback(err);
+          }
+
+          // This is the public email on the github profile
+          if (userbody.email) {
+            return callback(null, {
+              username: userbody.login,
+              email: userbody.email,
+            });
+          }
+
+          // Get the email with Github's user/emails API
           github
             .query()
-            .get('user')
-            .auth(body.split('&')[0].split('=')[1])
-            .request((err, res, userbody) => {
+            .get('user/emails')
+            .auth(access_token)
+            .request((err, res, emailsbody) => {
               if (err) {
                 return callback(err);
               }
 
-              // This is the public email on the github profile
-              if (userbody.email) {
-                return callback(null, {
-                  username: userbody.login,
-                  email: userbody.email,
-                });
-              }
-
-              // Get the email with Github's user/emails API
-              github
-                .query()
-                .get('user/emails')
-                .auth(body.split('&')[0].split('=')[1])
-                .request((err, res, emailsbody) => {
-                  if (err) {
-                    return callback(err);
-                  }
-
-                  return callback(null, {
-                    username: userbody.login,
-                    email: Array.isArray(emailsbody)
-                      ? emailsbody.find(email => email.primary === true).email
-                      : null,
-                  });
-                });
+              return callback(null, {
+                username: userbody.login,
+                email: Array.isArray(emailsbody)
+                  ? emailsbody.find(email => email.primary === true).email
+                  : null,
+              });
             });
-        }
-      );
+        });
       break;
     }
     case 'microsoft': {
