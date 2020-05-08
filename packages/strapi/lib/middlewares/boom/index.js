@@ -67,6 +67,7 @@ module.exports = strapi => {
     initialize() {
       this.delegator = delegate(strapi.app.context, 'response');
       this.createResponses();
+      const mongooseError = this.getMongooseError()
 
       strapi.errors = Boom;
       strapi.app.use(async (ctx, next) => {
@@ -74,17 +75,24 @@ module.exports = strapi => {
           // App logic.
           await next();
         } catch (error) {
+          
           // emit error if configured
           if (strapi.config.get('server.emitErrors', false)) {
             strapi.app.emit('error', error, ctx);
           }
 
+          let err = error
+
+          if(mongooseError && error instanceof mongooseError.CastError){  
+            err = Boom.boomify(error, { statusCode: 404 })
+          }
+
           // Log error.
 
-          const { status, body } = formatBoomPayload(error);
+          const { status, body } = formatBoomPayload(err);
 
           if (status >= 500) {
-            strapi.log.error(error);
+            strapi.log.error(err);
           }
 
           ctx.body = body;
@@ -132,5 +140,21 @@ module.exports = strapi => {
 
       this.delegator.method('send').method('created');
     },
+
+    // Function to get mongoose errors if present in config
+    getMongooseError(){
+
+      var mongooseError = null;
+      const isMongooseConnection = ({ connector }) => connector === 'mongoose';
+      const { connections } = strapi.config;
+      
+      const connectionNames = Object.keys(connections)
+      .filter(key => isMongooseConnection(connections[key]))
+      
+      if(connectionNames.length > 0){
+        mongooseError  = strapi.connections[connectionNames[0]].error
+      }
+      return mongooseError
+    }
   };
 };
