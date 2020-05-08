@@ -27,7 +27,7 @@ module.exports = async () => {
       icon: 'discord',
       key: '',
       secret: '',
-      callback: '/auth/discord/callback',
+      callback: `${strapi.config.server.url}/auth/discord/callback`,
       scope: ['identify', 'email'],
     },
     facebook: {
@@ -35,7 +35,7 @@ module.exports = async () => {
       icon: 'facebook-square',
       key: '',
       secret: '',
-      callback: '/auth/facebook/callback',
+      callback: `${strapi.config.server.url}/auth/facebook/callback`,
       scope: ['email'],
     },
     google: {
@@ -43,7 +43,7 @@ module.exports = async () => {
       icon: 'google',
       key: '',
       secret: '',
-      callback: '/auth/google/callback',
+      callback: `${strapi.config.server.url}/auth/google/callback`,
       scope: ['email'],
     },
     github: {
@@ -51,7 +51,7 @@ module.exports = async () => {
       icon: 'github',
       key: '',
       secret: '',
-      redirect_uri: '/auth/github/callback',
+      callback: `${strapi.config.server.url}/auth/github/callback`,
       scope: ['user', 'user:email'],
     },
     microsoft: {
@@ -59,7 +59,7 @@ module.exports = async () => {
       icon: 'windows',
       key: '',
       secret: '',
-      callback: '/auth/microsoft/callback',
+      callback: `${strapi.config.server.url}/auth/microsoft/callback`,
       scope: ['user.read'],
     },
     twitter: {
@@ -67,21 +67,21 @@ module.exports = async () => {
       icon: 'twitter',
       key: '',
       secret: '',
-      callback: '/auth/twitter/callback',
+      callback: `${strapi.config.server.url}/auth/twitter/callback`,
     },
     instagram: {
       enabled: false,
       icon: 'instagram',
       key: '',
       secret: '',
-      callback: '/auth/instagram/callback',
+      callback: `${strapi.config.server.url}/auth/instagram/callback`,
     },
     vk: {
       enabled: false,
       icon: 'vk',
       key: '',
       secret: '',
-      callback: '/auth/vk/callback',
+      callback: `${strapi.config.server.url}/auth/vk/callback`,
       scope: ['email'],
     },
   };
@@ -145,17 +145,12 @@ module.exports = async () => {
   }
 
   if (!(await pluginStore.get({ key: 'advanced' }))) {
-    const host = strapi.config.get('server.host');
-    const port = strapi.config.get('server.port');
-
-    const uri = `http://${host}:${port}/admin`;
-
     const value = {
       unique_email: true,
       allow_register: true,
       email_confirmation: false,
-      email_confirmation_redirection: uri,
-      email_reset_password: uri,
+      email_confirmation_redirection: `${strapi.config.admin.url}/admin`,
+      email_reset_password: `${strapi.config.admin.url}/admin`,
       default_role: 'authenticated',
     };
 
