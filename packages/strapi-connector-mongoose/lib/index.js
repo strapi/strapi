@@ -44,6 +44,7 @@ module.exports = function(strapi) {
       .map(async connectionName => {
         const connection = connections[connectionName];
         const instance = new Mongoose();
+        instance.error = mongoose.Error;
 
         _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
 
