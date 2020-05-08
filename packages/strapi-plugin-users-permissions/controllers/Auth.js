@@ -395,7 +395,7 @@ module.exports = {
     }
 
     const params = {
-      ..._.pick(ctx.request.body, ['username', 'email', 'password']),
+      ..._.omit(ctx.request.body, ['confirmed', 'resetPasswordToken']),
       provider: 'local',
     };
 
