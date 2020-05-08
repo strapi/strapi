@@ -1,5 +1,6 @@
 // eslint-disable-next-line node/no-extraneous-require
 const strapiAdmin = require('strapi-admin');
+const { getConfigUrls } = require('strapi-utils');
 
 const loadConfiguration = require('../core/app-configuration');
 const addSlash = require('../utils/addSlash');
@@ -9,14 +10,10 @@ module.exports = async function() {
 
   const config = loadConfiguration(dir);
 
-  const port = config.get('server.port', 1337);
-  const host = config.get('server.host', 'localhost');
+  const { serverUrl, adminPath } = getConfigUrls(config.get('server'), true);
 
   const adminPort = config.get('server.admin.port', 8000);
   const adminHost = config.get('server.admin.host', 'localhost');
-
-  const adminBackend = config.get('server.admin.build.backend', `http://${host}:${port}`);
-  const adminPath = config.get('server.admin.path', '/admin');
   const adminWatchIgnoreFiles = config.get('server.admin.watchIgnoreFiles', []);
 
   strapiAdmin.watchAdmin({
@@ -24,7 +21,7 @@ module.exports = async function() {
     port: adminPort,
     host: adminHost,
     options: {
-      backend: adminBackend,
+      backend: serverUrl,
       publicPath: addSlash(adminPath),
       watchIgnoreFiles: adminWatchIgnoreFiles,
     },
