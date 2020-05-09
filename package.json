@@ -85,7 +85,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/shaheinm/strapi.git"
+    "url": "git://github.com/strapi/strapi.git"
   },
   "bugs": {
     "url": "https://github.com/strapi/strapi/issues"
