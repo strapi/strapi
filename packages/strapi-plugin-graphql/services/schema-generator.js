@@ -90,8 +90,10 @@ const generateSchema = () => {
     writeGenerateSchema(graphql.printSchema(schema));
   }
 
-  // Remove custom scalar (like Upload);
-  typeDefs = Types.removeCustomScalar(typeDefs, resolvers);
+  // Remove custom scalar (like Upload), if not using Federation
+  if (!strapi.plugins.graphql.config.federation) {
+    typeDefs = Types.removeCustomScalar(typeDefs, resolvers);
+  }
 
   return {
     typeDefs: gql(typeDefs),

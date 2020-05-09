@@ -7,6 +7,7 @@
 // Public node modules.
 const _ = require('lodash');
 const { ApolloServer } = require('apollo-server-koa');
+const { buildFederatedSchema } = require('@apollo/federation');
 const depthLimit = require('graphql-depth-limit');
 const loadConfigs = require('./load-config');
 
@@ -84,9 +85,18 @@ module.exports = strapi => {
         return;
       }
 
+      // Get federation config
+      const isFederated = _.get(strapi.plugins.graphql, 'config.federation', false);
+      const schemaDef = {};
+      if (isFederated) {
+        schemaDef.schema = buildFederatedSchema([{ typeDefs, resolvers }]);
+      } else {
+        schemaDef.typeDefs = typeDefs;
+        schemaDef.resolvers = resolvers;
+      }
+
       const serverParams = {
-        typeDefs,
-        resolvers,
+        ...schemaDef,
         context: ({ ctx }) => {
           // Initiliase loaders for this request.
           // TODO: set loaders in the context not globally
