@@ -48,6 +48,8 @@ Security limits on maximum number of items in your response by default is limite
 
 You can also enable the Apollo server tracing feature, which is supported by the playground to track the response time of each part of your query. To enable this feature just change/add the `"tracing": true` option in the GraphQL settings file. You can read more about the tracing feature from Apollo [here](https://www.apollographql.com/docs/apollo-server/federation/metrics/).
 
+You can also enable Strapi as an implementing service for Apollo Federation, which allows you to set up Strapi as a service behind an Apollo Federation API gateway and allows you to add Strapi to a single exposed data graph across your organization. You can read more about Apollo Federation [here](https://www.apollographql.com/docs/apollo-server/federation/introduction/).
+
 You can edit these configurations by creating following file.
 
 **Path —** `./extensions/graphql/config/settings.json`.
@@ -59,7 +61,8 @@ You can edit these configurations by creating following file.
   "shadowCRUD": true,
   "playgroundAlways": false,
   "depthLimit": 7,
-  "amountLimit": 100
+  "amountLimit": 100,
+  "federation": false
 }
 ```
 
