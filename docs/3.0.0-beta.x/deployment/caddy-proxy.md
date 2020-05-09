@@ -1,12 +1,12 @@
 # Caddy Proxying
 
-As Strapi does not handle SSL directly and hosting a Node.js service on the "edge" network is not a secure solution it is recommended that you use some sort of proxy application such as Nginx, Apache, HAProxy, Traefik, or others. Below you will find some sample configurations for Caddy, naturally these configs may not suit all environments and you will likely need to adjust them to fit your needs. You should review the [Caddy documentation](https://caddyserver.com/docs/) for further information.
+As Strapi does not handle SSL directly and hosting a Node.js service on the "edge" network is not a secure solution it is recommended that you use some sort of proxy application such as Nginx, Apache, HAProxy, Traefik, or others. Below you will find some sample configurations for Caddy, naturally these configs may not suit all environments and you will likely need to adjust them to fit your needs.
 
 Caddy has some very easy to use options relating to Let's encrypt and automated SSL certificate issuing/renewing, while it is certainly the "newer" web server market, it is quickly becoming a great "non-technical" user application for proxying. **Please do note that Caddy is still very much in development** and as such is evolving often, this guide is based on Caddy v2.0.0.
 
 ## Configuration
 
-The below configuration is based on "Caddy File" type, this is a single file config that Caddy will use to run the web server. There are multiple other options such as the Caddy REST API that this guide will not cover, you should review the Caddy documentation for further information on alternatives. You can also visit the [Caddy Community](https://caddy.community/) to speak with others relating to configuration questions.
+The below configuration is based on "Caddy File" type, this is a single file config that Caddy will use to run the web server. There are multiple other options such as the Caddy REST API that this guide will not cover, you should review the [Caddy documentation](https://caddyserver.com/docs/) for further information on alternatives. You can also visit the [Caddy Community](https://caddy.community/) to speak with others relating to configuration questions.
 
 ### Caddy file
 
