@@ -91,7 +91,7 @@ npx create-strapi-app my-project --quickstart
 ::::
 
 ::: tip
-When you use `--quickstart` to create a Strapi project locally, a **SQLite database** is used which is not compatible with Heroku. Therefore, another database option [must be chosen](#_6-heroku-database-set-up).
+When you use `--quickstart` to create a Strapi project locally, a **SQLite database** is used which is not compatible with Heroku. Therefore, another database option [must be chosen](#_7-heroku-database-set-up).
 :::
 
 #### 4. Update `.gitignore`
