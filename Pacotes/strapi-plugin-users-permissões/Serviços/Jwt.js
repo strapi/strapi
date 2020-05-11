@@ -9,21 +9,6 @@
 const _ = require('lodash');
 const jwt = require('jsonwebtoken');
 
-/*
-Exemple: ../../../config/application.json
-{
-  "favicon": {
-      "path": "favicon.ico",
-      "maxAge": 86400000
-  },
-  "public": {
-      "path": "./public",
-      "maxAge": 60000
-  },
-  "jwtExpiresIn": "2h"
-}
-*/
-
 const { jwtExpiresIn } = require('../../../config/application.json');
 
 const defaultJwtOptions = { expiresIn: jwtExpiresIn == null ? '30d' : jwtExpiresIn };
