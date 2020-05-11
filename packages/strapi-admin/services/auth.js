@@ -1,11 +1,22 @@
+'use strict';
+
 const _ = require('lodash');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const sanitizeUser = user => {
-  return _.omit(user.toJSON ? user.toJSON() : user, [
-    'password',
-    'resetPasswordToken',
-  ]);
+  return _.omit(user, ['password', 'resetPasswordToken']);
+};
+
+const defaultOptions = { expiresIn: '30d' };
+
+const getJWTOptions = () => {
+  const { options, secret } = strapi.config.get('server.admin.jwt', {});
+
+  return {
+    secret,
+    options: _.merge(options, defaultOptions),
+  };
 };
 
 /**
@@ -13,10 +24,16 @@ const sanitizeUser = user => {
  * @param {object} admon - admin user
  */
 const createJwtToken = admin => {
-  return strapi.plugins['users-permissions'].services.jwt.issue({
-    id: admin.id,
-    isAdmin: true,
-  });
+  const { options, secret } = getJWTOptions();
+
+  return jwt.sign(
+    {
+      id: admin.id,
+      isAdmin: true,
+    },
+    secret,
+    options
+  );
 };
 
 /**
@@ -34,9 +51,38 @@ const hashPassword = password => bcrypt.hash(password, 10);
  */
 const validatePassword = (password, hash) => bcrypt.compare(password, hash);
 
+/**
+ * Check login credentials
+ * @param {Object} options
+ * @param {string} options.email
+ * @param {string} options.password
+ */
+const checkCredentials = async ({ email, password }) => {
+  const user = await strapi.query('administrator', 'admin').findOne({ email });
+
+  if (!user) {
+    return [null, false, { error: 'Invalid credentials' }];
+  }
+
+  const isValid = await strapi.admin.services.auth.validatePassword(password, user.password);
+
+  if (!isValid) {
+    return [null, false, { error: 'Invalid credentials' }];
+  }
+
+  // TODO: change to isActive
+  if (user.blocked === true) {
+    return [null, false, { error: 'User not active' }];
+  }
+
+  return [null, user];
+};
+
 module.exports = {
+  checkCredentials,
   createJwtToken,
   sanitizeUser,
   validatePassword,
   hashPassword,
+  getJWTOptions,
 };
