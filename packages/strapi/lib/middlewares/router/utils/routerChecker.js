@@ -30,7 +30,7 @@ module.exports = strapi =>
       controller = strapi.controllers[controllerKey] || strapi.admin.controllers[controllerKey];
     }
 
-    const action = controller[actionName].bind(controller);
+    const action = controller[actionName];
 
     // Retrieve the API's name where the controller is located
     // to access to the right validators
