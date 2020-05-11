@@ -30,6 +30,24 @@ Here is the file we will have to customize: [permission.js](https://github.com/s
 
 Now we are ready to create our custom validation code.
 
+
+## JWT ExpiresIn
+To configure the JWT expiration time add the parameter jwtExpiresIn in 'config/application.json'
+```json
+{
+  "favicon": {
+      "path": "favicon.ico",
+      "maxAge": 86400000
+  },
+  "public": {
+      "path": "./public",
+      "maxAge": 60000
+  },
+  "jwtExpiresIn": "2h"
+}
+```
+- jwtExpiresIn: `30d` time in days or `2h` time in hours
+
 ## Write our own logic
 
 First we have to define where we write our code.
