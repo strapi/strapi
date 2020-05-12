@@ -13,7 +13,7 @@ const ModalHeader = ({ headerBreadcrumbs, onClickGoBack, withBackButton, HeaderC
   const translatedHeaders = headerBreadcrumbs
     ? headerBreadcrumbs.map(headerTrad => ({
         key: headerTrad,
-        element: <FormattedMessage id={headerTrad} />,
+        element: <FormattedMessage id={headerTrad} defaultMessage={headerTrad} />,
       }))
     : null;
   /* eslint-enable indent */
