@@ -32,8 +32,9 @@ module.exports = async function({ file: filePath, strategy = 'replace' }) {
   }
 
   console.log(
-    `Successfully imported ${dataToImport.length} configuration entries using the "${strategy}" strategy.`
+    `Successfully imported configuration with ${strategy} strategy. Statistics: ${importer.printStatistics()}.`
   );
+
   process.exit(0);
 };
 
@@ -78,12 +79,23 @@ const createImporter = (db, strategy) => {
  * @param {Object} db - DatabaseManager instance
  */
 const createReplaceImporter = db => {
+  const stats = {
+    created: 0,
+    replaced: 0,
+  };
+
   return {
+    printStatistics() {
+      return `${stats.created} created, ${stats.replaced} replaced`;
+    },
+
     async import(conf) {
       const matching = await db.query('core_store').count({ key: conf.key });
       if (matching > 0) {
+        stats.replaced += 1;
         await db.query('core_store').update({ key: conf.key }, conf);
       } else {
+        stats.created += 1;
         await db.query('core_store').create(conf);
       }
     },
@@ -95,12 +107,23 @@ const createReplaceImporter = db => {
  * @param {Object} db - DatabaseManager instance
  */
 const createMergeImporter = db => {
+  const stats = {
+    created: 0,
+    merged: 0,
+  };
+
   return {
+    printStatistics() {
+      return `${stats.created} created, ${stats.merged} merged`;
+    },
+
     async import(conf) {
       const existingConf = await db.query('core_store').find({ key: conf.key });
       if (existingConf) {
+        stats.merged += 1;
         await db.query('core_store').update({ key: conf.key }, _.merge(existingConf, conf));
       } else {
+        stats.created += 1;
         await db.query('core_store').create(conf);
       }
     },
@@ -112,14 +135,25 @@ const createMergeImporter = db => {
  * @param {Object} db - DatabaseManager instance
  */
 const createKeepImporter = db => {
+  const stats = {
+    created: 0,
+    untouched: 0,
+  };
+
   return {
+    printStatistics() {
+      return `${stats.created} created, ${stats.untouched} untouched`;
+    },
+
     async import(conf) {
       const matching = await db.query('core_store').count({ key: conf.key });
       if (matching > 0) {
+        stats.untouched += 1;
         // if configuration already exists do not overwrite it
         return;
       }
 
+      stats.created += 1;
       await db.query('core_store').create(conf);
     },
   };
