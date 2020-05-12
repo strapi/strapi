@@ -1,15 +1,40 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { useGlobalContext } from 'strapi-helper-plugin';
+import { Header } from '@buffetjs/custom';
 
 const ListPage = () => {
-  const { settingsBaseURL } = useGlobalContext();
+  // TODO when API ready
+  const usersCount = 1;
+  const { formatMessage } = useGlobalContext();
+  const tradBaseId = 'Settings.permissions.users.listview.';
+  const headerDescriptionSuffix =
+    usersCount > 1 ? 'header.description.plural' : 'header.description.singular';
+  const headerProps = {
+    actions: [
+      {
+        label: formatMessage({ id: 'app.utils.delete' }),
+        color: 'delete',
+        type: 'button',
+        disabled: true,
+      },
+
+      {
+        label: formatMessage({ id: `${tradBaseId}button-create` }),
+        color: 'primary',
+        type: 'button',
+        icon: true,
+      },
+    ],
+    content: formatMessage(
+      { id: `${tradBaseId}${headerDescriptionSuffix}` },
+      { number: usersCount }
+    ),
+    title: { label: formatMessage({ id: `${tradBaseId}header.title` }) },
+  };
 
   return (
     <div>
-      <h1>Users list page</h1>
-      <p>Coming soon</p>
-      <Link to={`${settingsBaseURL}/users/1`}>Edit user 1</Link>
+      <Header {...headerProps} />
     </div>
   );
 };
