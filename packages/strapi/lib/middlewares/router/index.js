@@ -49,22 +49,13 @@ module.exports = strapi => {
             prefix: `/${pluginName}`,
           });
 
-          // Exclude routes with prefix.
-          const excludedRoutes = _.omitBy(plugin.config.routes, o => !_.has(o.config, 'prefix'));
-
-          _.forEach(_.omit(plugin.config.routes, _.keys(excludedRoutes)), value => {
-            composeEndpoint(value, { plugin: pluginName, router });
-          });
-
-          // /!\ Could override main router's routes.
-          if (!_.isEmpty(excludedRoutes)) {
-            _.forEach(excludedRoutes, value => {
-              composeEndpoint(value, {
-                plugin: pluginName,
-                router: strapi.router,
-              });
+          (plugin.config.routes || []).forEach(route => {
+            const hasPrefix = _.has(route.config, 'prefix');
+            composeEndpoint(route, {
+              plugin: pluginName,
+              router: hasPrefix ? strapi.router : router,
             });
-          }
+          });
 
           // Mount plugin router
           strapi.app.use(router.routes()).use(router.allowedMethods());

@@ -992,15 +992,15 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@buffetjs/core@3.1.0-next.2":
-  version "3.1.0-next.2"
-  resolved "https://registry.yarnpkg.com/@buffetjs/core/-/core-3.1.0-next.2.tgz#4c18ce545badf8803fea47080a274c932bcd0c87"
-  integrity sha512-TaCat7SN+NZPvTh2ly+mo/7Xbub1Q5ASqgmeFkLzZxWliONwy1YV4zIFELXSXug3Tw7b5VI/a1v1Qrrm7qwzSg==
+"@buffetjs/core@3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@buffetjs/core/-/core-3.1.1.tgz#b0d47d0cdcbe6eb35eba3d4f8190196b519026b9"
+  integrity sha512-NVcPBurN3AhDv7J565Qyqf6ES9/E9ILJkCtAXc+oHazJW0Q8EN2/ag84GFStP7RC09UZrS9isAM0OePwBTa8xA==
   dependencies:
-    "@buffetjs/hooks" "3.0.6"
-    "@buffetjs/icons" "3.1.0-next.2"
-    "@buffetjs/styles" "3.1.0-next.2"
-    "@buffetjs/utils" "3.0.6"
+    "@buffetjs/hooks" "3.1.1"
+    "@buffetjs/icons" "3.1.1"
+    "@buffetjs/styles" "3.1.1"
+    "@buffetjs/utils" "3.1.1"
     "@fortawesome/fontawesome-svg-core" "^1.2.25"
     "@fortawesome/free-regular-svg-icons" "^5.11.2"
     "@fortawesome/free-solid-svg-icons" "^5.11.2"
@@ -1011,31 +1011,31 @@
     react-dates "^21.5.1"
     react-moment-proptypes "^1.7.0"
 
-"@buffetjs/custom@3.1.0-next.2":
-  version "3.1.0-next.2"
-  resolved "https://registry.yarnpkg.com/@buffetjs/custom/-/custom-3.1.0-next.2.tgz#41d83cdd2fbdb64119062b3250b2d587970d87dd"
-  integrity sha512-UmY6FN0CrlQw4LaOLVHjfyb6v7Q9keHAcCNePyQtmA1S2rGm0USwG0DDRNFnFbHKcnysnISfSRMoyHW5VS1v5g==
+"@buffetjs/custom@3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@buffetjs/custom/-/custom-3.1.1.tgz#755d1c2b6108b17d943a6e71fce3a8bf16154af7"
+  integrity sha512-wtfTfH105gPBv+Q3SgUVqt3YE+6T+bIpyLBsC+tpIQzcvTeiEHXajGz6G5wsUFTk1tdvYpy57BTo2jpjdYmPsw==
   dependencies:
-    "@buffetjs/core" "3.1.0-next.2"
-    "@buffetjs/styles" "3.1.0-next.2"
-    "@buffetjs/utils" "3.0.6"
+    "@buffetjs/core" "3.1.1"
+    "@buffetjs/styles" "3.1.1"
+    "@buffetjs/utils" "3.1.1"
     moment "^2.24.0"
     react-moment-proptypes "^1.7.0"
 
-"@buffetjs/hooks@3.0.6":
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/@buffetjs/hooks/-/hooks-3.0.6.tgz#98b3780fa005193a06f32af2b23e0782358ce5a6"
-  integrity sha512-boxLYVT/4RauTQmgLkdZWrwdMPS624/91rk4TqWARRmnXeP4+99MErHwqz5z3Bk8aBa3yNWpayu1p25fdoti6A==
+"@buffetjs/hooks@3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@buffetjs/hooks/-/hooks-3.1.1.tgz#03c3c5550fb95786f7d0b2fcfc617c4f9b01a558"
+  integrity sha512-myoJlP60GY/dYjaYV723kDq5Jg0yGnfZUS1gnsSCSt7++zwLuiPefxjuFb+vlRj8LPAImlL4kNU5ZAA+2OLIWg==
 
-"@buffetjs/icons@3.1.0-next.2":
-  version "3.1.0-next.2"
-  resolved "https://registry.yarnpkg.com/@buffetjs/icons/-/icons-3.1.0-next.2.tgz#08134a31aa367f7bef454fda4e5a88a7064319f1"
-  integrity sha512-C3kHl4dRo5vYjcJZlKxiEMVe/gPRyJJEiGQESqpq6oACaiz1TBz3o0GNAIi17dOJuOEqYadVXCogz2u2Ef64+g==
+"@buffetjs/icons@3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@buffetjs/icons/-/icons-3.1.1.tgz#c2f8977df82e955533ad0b56d700221a7822b802"
+  integrity sha512-l0bgzjP9LsxCmUVvj2NKTacXkgeMd7cykzVO1zsG49Qco0UjyKF1IOLM8wkX5nrZ6Gy+FIPx9hkVPQGspYBxyQ==
 
-"@buffetjs/styles@3.1.0-next.2":
-  version "3.1.0-next.2"
-  resolved "https://registry.yarnpkg.com/@buffetjs/styles/-/styles-3.1.0-next.2.tgz#d1e9f7b1b69b6987f3baa9791b5ef0541e8a5435"
-  integrity sha512-r4+cLqAmvIlN2rBw2imEcxAlWkO3DNTZ8RWPzmsufBhoImsN1ebuL1zcYVSGAttZnI4G80uyDxNywe9Di9iHcw==
+"@buffetjs/styles@3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@buffetjs/styles/-/styles-3.1.1.tgz#b1e232108622877944231895d52054df6014cc02"
+  integrity sha512-zf6oxwl48GIUs1/VWHavXZPtzwXdwazFkVN4Yd4DZYf6t4xJxT0C3GGB1w/RJTOp9n+SYhjCQ/9e05GuaJaOfw==
   dependencies:
     "@fortawesome/fontawesome-free" "^5.12.0"
     "@fortawesome/fontawesome-svg-core" "^1.2.22"
@@ -1044,10 +1044,10 @@
     "@fortawesome/react-fontawesome" "^0.1.4"
     react-dates "^21.1.0"
 
-"@buffetjs/utils@3.0.6":
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/@buffetjs/utils/-/utils-3.0.6.tgz#87f7e0822d907397ae62b4764edcddc516e3ad27"
-  integrity sha512-DfYrHtmta2KXTc8iy892uGzbs1ygZ37hiXLAYmSWZfJNNk8pamAqnRLcfjVDA/SgTQIVO8unmaPxi3141xfe/Q==
+"@buffetjs/utils@3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@buffetjs/utils/-/utils-3.1.1.tgz#90867850c8bc9d0bc28ef938ca3ee6cc849dbf41"
+  integrity sha512-WKM6G2G53W3HOZwMVNfAs8lvyx3g69Ku+Gw1hVbM2uuGRxo9Pf27By2lYUyOug8tnxTf5An+mw3oTCsdYgzpAA==
   dependencies:
     yup "^0.27.0"
 
@@ -8842,21 +8842,21 @@ graceful-fs@^4.1.11, graceful-fs@^4.1.15, graceful-fs@^4.1.2, graceful-fs@^4.1.6
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.3.tgz#4a12ff1b60376ef09862c2093edd908328be8423"
   integrity sha512-a30VEBm4PEdx1dRB7MFK7BejejvCvBronbLjht+sHuGYj8PHs7M/5Z+rt5lw551vZ7yfTCj4Vuyy3mSJytDWRQ==
 
-grant-koa@^4.6.0:
-  version "4.7.0"
-  resolved "https://registry.yarnpkg.com/grant-koa/-/grant-koa-4.7.0.tgz#4c7b2e23afe492988cd6a5874d5592f6a813ca50"
-  integrity sha512-dvu6FgtFOXncHM3faiJKehMN+4cRajb68E0FtmT5uMUUHZ4LZifv6ihANH9l0pvl0t+7UjEIosMrhnE73bhjpQ==
+grant-koa@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/grant-koa/-/grant-koa-5.0.1.tgz#6606b762d999855ae3bc3b2ecc222cf21154324f"
+  integrity sha512-/vemHxSbyw8PNB04zqMMSSOiVhjercOZj1LL0AFIJGFZvdzBDiwmQEX2ioOmeaOBCLVCAdhQ0EfkEaln540Agg==
   dependencies:
-    grant "4.7.0"
+    grant "5.0.1"
 
-grant@4.7.0:
-  version "4.7.0"
-  resolved "https://registry.yarnpkg.com/grant/-/grant-4.7.0.tgz#ab879a38ced7860df668db6c66012aa02402f49b"
-  integrity sha512-QGPjCYDrBnb/OIiTRxbK3TnNOE6Ycgfc/GcgPzI4vyNIr+b7yisEexYp7VM74zj6bxr+mDTzfGONRLzzsVPJIA==
+grant@5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/grant/-/grant-5.0.1.tgz#86d8c970fc54e860b5ad97a6544d3c7bc87c2fc2"
+  integrity sha512-ZYlnlzMA9f9SielWBDSwGZ34XcB2BL8wktDE5T2OcM13T7GFirjLWI0oasqrigPcLetazRbCUIBqqsy2Mvl8Zw==
   dependencies:
-    qs "^6.9.1"
-    request-compose "^1.2.1"
-    request-oauth "0.0.3"
+    qs "^6.9.3"
+    request-compose "^2.0.0"
+    request-oauth "^1.0.0"
 
 graphlib@^2.1.1, graphlib@^2.1.5:
   version "2.1.8"
@@ -13104,15 +13104,15 @@ nwsapi@^2.0.7:
   resolved "https://registry.yarnpkg.com/nwsapi/-/nwsapi-2.2.0.tgz#204879a9e3d068ff2a55139c2c772780681a38b7"
   integrity sha512-h2AatdwYH+JHiZpv7pt/gSX1XoRGb7L/qSIeuqA6GwYoF9w1vP1cw42TO0aI2pNyshRK5893hNSl+1//vHK7hQ==
 
-oauth-sign@^0.8.2, oauth-sign@~0.8.2:
-  version "0.8.2"
-  resolved "https://registry.yarnpkg.com/oauth-sign/-/oauth-sign-0.8.2.tgz#46a6ab7f0aead8deae9ec0565780b7d4efeb9d43"
-  integrity sha1-Rqarfwrq2N6unsBWV4C31O/rnUM=
-
-oauth-sign@~0.9.0:
+oauth-sign@^0.9.0, oauth-sign@~0.9.0:
   version "0.9.0"
   resolved "https://registry.yarnpkg.com/oauth-sign/-/oauth-sign-0.9.0.tgz#47a7b016baa68b5fa0ecf3dee08a85c679ac6455"
   integrity sha512-fexhUFFPTGV8ybAtSIGbV6gOkSv8UtRbDBnAyLQw4QPKkgNlsH2ByPGtMUqdWkos6YCRmAqViwgZrJc/mRDzZQ==
+
+oauth-sign@~0.8.2:
+  version "0.8.2"
+  resolved "https://registry.yarnpkg.com/oauth-sign/-/oauth-sign-0.8.2.tgz#46a6ab7f0aead8deae9ec0565780b7d4efeb9d43"
+  integrity sha1-Rqarfwrq2N6unsBWV4C31O/rnUM=
 
 object-assign@4.x, object-assign@^4.0.1, object-assign@^4.1.0, object-assign@^4.1.1:
   version "4.1.1"
@@ -14836,7 +14836,7 @@ qs@6.7.0:
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.7.0.tgz#41dc1a015e3d581f1621776be31afb2876a9b1bc"
   integrity sha512-VCdBRNFTX1fyE7Nb6FYoURo/SPe62QCaAyzJvUjwRaIsc+NePBEniHlvxFmmX56+HZphIGtV0XeCirBtpDrTyQ==
 
-qs@^6.4.0, qs@^6.5.1, qs@^6.5.2, qs@^6.9.1:
+qs@^6.4.0, qs@^6.5.2:
   version "6.9.1"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.9.1.tgz#20082c65cb78223635ab1a9eaca8875a29bf8ec9"
   integrity sha512-Cxm7/SS/y/Z3MHWSxXb8lIFqgqBowP5JMlTUFyJN88y0SGQhVmZnqFK/PeuMX9LzUyWsqqhNxIyg0jlzq946yA==
@@ -15774,19 +15774,19 @@ reportback@^2.0.2:
     captains-log "^2.0.2"
     switchback "^2.0.1"
 
-request-compose@^1.2.1:
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/request-compose/-/request-compose-1.2.2.tgz#9bd2ec8c8f52d154cff3302f637d81b73b371d49"
-  integrity sha512-aXA7l8fGSp4ZUeM/7pcMh3rvor7vKMptT7kPnTQfbzLOW4wy/hJgMzVhz9l2YZYgsbVj4ZgAc9JMI02V4nZgsA==
+request-compose@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/request-compose/-/request-compose-2.0.0.tgz#064121f8c52087d33c6b487eb14f32bc4af99548"
+  integrity sha512-+R9ka4bd3PH7A6B4iHn5SwAesGOUyPP2uCO6YJg6Ct/odLO0h9a7eWDPLXF1fws2us8sboGY0TtBl1wTpx60OA==
 
-request-oauth@0.0.3:
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/request-oauth/-/request-oauth-0.0.3.tgz#b3ea1ff857b9add3b0d49e42993a88e256d791ab"
-  integrity sha512-q7WdJlpIcPaIDac0FZSy/yH37FO3UkUuPDIsiLALiLjuC6vzvuKIU14YIC3Lm0wtQRXS9GqvSo/fCYj8n75xSw==
+request-oauth@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/request-oauth/-/request-oauth-1.0.0.tgz#c8ebe047fb4ff4d5aa4ddb33e98b9ac74c625674"
+  integrity sha512-wsDzIq1Qu2itLDlcpFph8xh5Q+FVyUj4os5zdQTlZL/JvZYF/qOyaawVPsxxhDG4QwCB3tzSFprj6dkjqR+e8w==
   dependencies:
-    oauth-sign "^0.8.2"
-    qs "^6.5.1"
-    uuid "^3.2.1"
+    oauth-sign "^0.9.0"
+    qs "^6.9.3"
+    uuid "^3.4.0"
 
 request-progress@0.3.1:
   version "0.3.1"
@@ -18692,7 +18692,7 @@ uuid@3.3.2:
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.3.2.tgz#1b4af4955eb3077c501c23872fc6513811587131"
   integrity sha512-yXJmeNaw3DnnKAOKJE51sL/ZaYfWJRl1pK9dr19YFCu0ObS231AB1/LbqTKRAQ5kw8A90rA6fr4riOUpTZvQZA==
 
-uuid@^3.0.1, uuid@^3.1.0, uuid@^3.2.1, uuid@^3.3.2, uuid@^3.3.3:
+uuid@^3.0.1, uuid@^3.1.0, uuid@^3.2.1, uuid@^3.3.2, uuid@^3.3.3, uuid@^3.4.0:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.4.0.tgz#b23e4358afa8a202fe7a100af1f5f883f02007ee"
   integrity sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==

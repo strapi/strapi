@@ -402,7 +402,6 @@ exports[`Admin | containers | EditView should match the snapshot 1`] = `
   font-size: 2.4rem;
   line-height: normal;
   font-weight: 600;
-  text-transform: capitalize;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
