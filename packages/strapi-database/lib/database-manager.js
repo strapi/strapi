@@ -120,6 +120,14 @@ class DatabaseManager {
     });
   }
 
+  getModelsByPluginName(pluginName) {
+    if (!pluginName) {
+      return strapi.models;
+    }
+
+    return pluginName === 'admin' ? strapi.admin.models : strapi.plugins[pluginName].models;
+  }
+
   getReservedNames() {
     return {
       models: constants.RESERVED_MODEL_NAMES,

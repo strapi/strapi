@@ -43,11 +43,7 @@ module.exports = {
       other: '',
     };
 
-    const models = attribute.plugin
-      ? attribute.plugin === 'admin'
-        ? strapi.admin.models
-        : strapi.plugins[attribute.plugin].models
-      : strapi.models;
+    const models = strapi.db.getModelsByPluginName(attribute.plugin);
 
     const pluginModels = Object.values(strapi.plugins).reduce((acc, plugin) => {
       return acc.concat(Object.values(plugin.models));
@@ -331,15 +327,8 @@ module.exports = {
       });
 
       if (targetName !== '*') {
-        if (association.plugin) {
-          const models =
-            association.plugin === 'admin'
-              ? strapi.admin.models
-              : strapi.plugins[association.plugin].models || {};
-          details = _.get(models, [targetName, 'attributes', association.via]);
-        } else {
-          details = _.get(strapi.models, [targetName, 'attributes', association.via], {});
-        }
+        const models = strapi.db.getModelsByPluginName(association.plugin);
+        details = _.get(models, [targetName, 'attributes', association.via], {});
       }
 
       // Build associations object

@@ -8,18 +8,20 @@
     "firstname": {
       "type": "string",
       "unique": false,
+      "minLength": 1,
       "configurable": false,
       "required": false
     },
     "lastname": {
       "type": "string",
       "unique": false,
+      "minLength": 1,
       "configurable": false,
       "required": false
     },
     "username": {
       "type": "string",
-      "unique": true,
+      "unique": false,
       "configurable": false,
       "required": false
     },
