@@ -28,10 +28,7 @@ function TableHeader({ headers, isBulkable }) {
               isAll
               name="all"
               onChange={onChangeBulkSelectall}
-              value={
-                data.length === entriesToDelete.length &&
-                entriesToDelete.length > 0
-              }
+              value={data.length === entriesToDelete.length && entriesToDelete.length > 0}
             />
           </th>
         )}
@@ -42,8 +39,7 @@ function TableHeader({ headers, isBulkable }) {
               onClick={() => {
                 if (header.sortable) {
                   const isCurrentSort = header.name === sortBy;
-                  const nextOrder =
-                    isCurrentSort && sortOrder === 'ASC' ? 'DESC' : 'ASC';
+                  const nextOrder = isCurrentSort && sortOrder === 'ASC' ? 'DESC' : 'ASC';
                   let value = `${header.name}:${nextOrder}`;
 
                   if (isCurrentSort && sortOrder === 'DESC') {

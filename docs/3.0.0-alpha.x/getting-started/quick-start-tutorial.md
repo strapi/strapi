@@ -388,7 +388,7 @@ Forbidden Access Looks like this:
 
 - Learn how to use Strapi with React ([Gatsby](https://blog.strapi.io/building-a-static-website-using-gatsby-and-strapi) or [Next.js](https://blog.strapi.io/strapi-next-setup/)) or Vue.js ([Nuxt.js](https://blog.strapi.io/cooking-a-deliveroo-clone-with-nuxt-vue-js-graphql-strapi-and-stripe-setup-part-1-7/)).
 - Read the [concepts](../concepts/concepts.html) and [articles](../articles/) to deep dive into Strapi.
-- Get help on [StackOverflow](https://stackoverflow.com/questions/tagged/strapi).
+- Get help on [Github Discussions](https://github.com/strapi/strapi/discussions).
 - Read the [source code](https://github.com/strapi/strapi), [contribute](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) or [give a star](https://github.com/strapi/strapi) on GitHub.
 - Follow us on [Twitter](https://twitter.com/strapijs) to get the latest news.
 - [Join the vibrant and active Strapi community](https://slack.strapi.io) on Slack.

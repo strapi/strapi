@@ -74,17 +74,10 @@ describe('CONTENT MANAGER | containers | Main | utils', () => {
           'created_at',
           'updated_at',
         ],
-        'application::menusection.menusection': [
-          'id',
-          'name',
-          'created_at',
-          'updated_at',
-        ],
+        'application::menusection.menusection': ['id', 'name', 'created_at', 'updated_at'],
       };
 
-      expect(createPossibleMainFieldsForModelsAndComponents(models)).toEqual(
-        expected
-      );
+      expect(createPossibleMainFieldsForModelsAndComponents(models)).toEqual(expected);
     });
   });
 });
