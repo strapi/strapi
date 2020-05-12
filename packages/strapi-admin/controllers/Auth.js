@@ -91,7 +91,10 @@ module.exports = {
     }
 
     try {
-      const admin = await strapi.query('user', 'admin').create(params);
+      const admin = await strapi.query('user', 'admin').create({
+        ...params,
+        isActive: true,
+      });
 
       admin.isAdmin = true;
 
