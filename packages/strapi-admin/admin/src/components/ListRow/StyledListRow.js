@@ -18,6 +18,9 @@ const StyledListRow = styled(Row)`
     &:first-of-type {
       width: 65px;
       padding-left: 30px;
+      > div {
+        height: 16px;
+      }
     }
     &:nth-of-type(2) {
       max-width: 158px;

@@ -1,5 +1,7 @@
 import styled from 'styled-components';
 
+/* stylelint-disable */
+
 const Wrapper = styled.div`
   min-width: 200px;
   margin-bottom: 1.5rem;

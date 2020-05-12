@@ -3,7 +3,6 @@ import { DropdownMenu } from 'reactstrap';
 
 const MenuDropdown = styled(DropdownMenu)`
   max-height: 180px;
-  // min-width: calc(100% + 2px);
   min-width: 230px;
   margin-left: -1px;
   margin-top: -1px;

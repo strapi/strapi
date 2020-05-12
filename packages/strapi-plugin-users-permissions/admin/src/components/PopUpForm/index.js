@@ -47,10 +47,7 @@ class PopUpForm extends React.Component {
   UNSAFE_componentWillReceiveProps(nextProps) {
     const { values } = nextProps;
 
-    if (
-      get(values, 'enabled') &&
-      get(values, 'enabled') !== get(this.props.values, 'enabled')
-    ) {
+    if (get(values, 'enabled') && get(values, 'enabled') !== get(this.props.values, 'enabled')) {
       this.setState({ enabled: get(values, 'enabled') });
     }
   }
@@ -65,7 +62,7 @@ class PopUpForm extends React.Component {
       case 'google':
         return `${strapi.backendURL}/connect/google/callback`;
       case 'github':
-        return get(this.props.values, 'redirect_uri', '');
+        return `${strapi.backendURL}/connect/github/callback`;
       case 'microsoft':
         return `${strapi.backendURL}/connect/microsoft/callback`;
       case 'twitter':
@@ -77,17 +74,13 @@ class PopUpForm extends React.Component {
       default: {
         const value = get(this.props.values, 'callback', '');
 
-        return startsWith(value, 'http')
-          ? value
-          : `${strapi.backendURL}${value}`;
+        return startsWith(value, 'http') ? value : `${strapi.backendURL}${value}`;
       }
     }
   };
 
   generateRedirectURL = url => {
-    return startsWith(url, 'https://') ||
-      startsWith(url, 'http://') ||
-      this.state.isEditing
+    return startsWith(url, 'https://') || startsWith(url, 'http://') || this.state.isEditing
       ? url
       : `${strapi.backendURL}${startsWith(url, '/') ? '' : '/'}${url}`;
   };
@@ -113,36 +106,26 @@ class PopUpForm extends React.Component {
   handleFocus = () => this.setState({ isEditing: true });
 
   renderForm = () => {
-    const {
-      dataToEdit,
-      didCheckErrors,
-      formErrors,
-      settingType,
-      values,
-    } = this.props;
-    const form = Object.keys(values.options || values || {}).reduce(
-      (acc, current) => {
-        const path =
-          settingType === 'email-templates' ? ['options', current] : [current];
-        const name = settingType === 'email-templates' ? 'options.' : '';
+    const { dataToEdit, didCheckErrors, formErrors, settingType, values } = this.props;
+    const form = Object.keys(values.options || values || {}).reduce((acc, current) => {
+      const path = settingType === 'email-templates' ? ['options', current] : [current];
+      const name = settingType === 'email-templates' ? 'options.' : '';
 
-        if (isObject(get(values, path)) && !isArray(get(values, path))) {
-          return Object.keys(get(values, path, {}))
-            .reduce((acc, curr) => {
-              acc.push(`${name}${current}.${curr}`);
+      if (isObject(get(values, path)) && !isArray(get(values, path))) {
+        return Object.keys(get(values, path, {}))
+          .reduce((acc, curr) => {
+            acc.push(`${name}${current}.${curr}`);
 
-              return acc;
-            }, [])
-            .concat(acc);
-        }
-        if (current !== 'icon' && current !== 'scope') {
-          acc.push(`${name}${current}`);
-        }
+            return acc;
+          }, [])
+          .concat(acc);
+      }
+      if (current !== 'icon' && current !== 'scope') {
+        acc.push(`${name}${current}`);
+      }
 
-        return acc;
-      },
-      []
-    );
+      return acc;
+    }, []);
 
     if (settingType === 'providers') {
       return (
@@ -166,11 +149,7 @@ class PopUpForm extends React.Component {
               autoFocus={key === 0}
               customBootstrapClass="col-md-12"
               didCheckErrors={didCheckErrors}
-              errors={get(
-                formErrors,
-                [findIndex(formErrors, ['name', value]), 'errors'],
-                []
-              )}
+              errors={get(formErrors, [findIndex(formErrors, ['name', value]), 'errors'], [])}
               key={value}
               label={{
                 id: `users-permissions.PopUpForm.Providers.${
@@ -248,9 +227,7 @@ class PopUpForm extends React.Component {
             placeholder={`users-permissions.PopUpForm.Email.${value}.placeholder`}
             type={includes(value, 'email') ? 'email' : 'text'}
             value={get(values, value)}
-            validations={
-              value !== 'options.response_email' ? { required: true } : {}
-            }
+            validations={value !== 'options.response_email' ? { required: true } : {}}
           />
         ))}
         <div className="col-md-6" />
@@ -278,9 +255,7 @@ class PopUpForm extends React.Component {
             validations={{ required: true }}
             value={get(values, value)}
             inputStyle={
-              !includes(value, 'object')
-                ? { height: '16rem', marginBottom: '-0.8rem' }
-                : {}
+              !includes(value, 'object') ? { height: '16rem', marginBottom: '-0.8rem' } : {}
             }
           />
         ))}
@@ -290,13 +265,7 @@ class PopUpForm extends React.Component {
 
   render() {
     const { display } = this.props.values;
-    const {
-      actionType,
-      dataToEdit,
-      isOpen,
-      onSubmit,
-      settingType,
-    } = this.props;
+    const { actionType, dataToEdit, isOpen, onSubmit, settingType } = this.props;
 
     let header = <span>{dataToEdit}</span>;
 
@@ -338,11 +307,7 @@ class PopUpForm extends React.Component {
                 onClick={this.context.unsetDataToEdit}
                 isSecondary
               />
-              <ButtonModal
-                message="form.button.done"
-                onClick={onSubmit}
-                type="submit"
-              />
+              <ButtonModal message="form.button.done" onClick={onSubmit} type="submit" />
             </section>
           </ModalFooter>
         </form>

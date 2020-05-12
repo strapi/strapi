@@ -1,0 +1,4 @@
+{
+  "archive": ["rar", "tar", "zip"],
+  "pdf": ["pdf"]
+}

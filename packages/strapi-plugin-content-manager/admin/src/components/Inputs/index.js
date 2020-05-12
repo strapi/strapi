@@ -3,10 +3,10 @@ import PropTypes from 'prop-types';
 import { get, isEmpty, omit, toLower } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Inputs as InputsIndex } from '@buffetjs/custom';
+import { useStrapi } from 'strapi-helper-plugin';
 
 import useDataManager from '../../hooks/useDataManager';
 import InputJSONWithErrors from '../InputJSONWithErrors';
-import InputFileWithErrors from '../InputFileWithErrors';
 import SelectWrapper from '../SelectWrapper';
 import WysiwygWithErrors from '../WysiwygWithErrors';
 import InputUID from '../InputUID';
@@ -15,6 +15,8 @@ const getInputType = (type = '') => {
   switch (toLower(type)) {
     case 'boolean':
       return 'bool';
+    case 'biginteger':
+      return 'text';
     case 'decimal':
     case 'float':
     case 'integer':
@@ -46,17 +48,30 @@ const getInputType = (type = '') => {
     case 'uid':
       return 'uid';
     default:
-      return 'text';
+      return type || 'text';
   }
 };
 
 function Inputs({ autoFocus, keys, layout, name, onBlur }) {
+  const {
+    strapi: { fieldApi },
+  } = useStrapi();
+
   const { didCheckErrors, formErrors, modifiedData, onChange } = useDataManager();
   const attribute = useMemo(() => get(layout, ['schema', 'attributes', name], {}), [layout, name]);
   const metadatas = useMemo(() => get(layout, ['metadatas', name, 'edit'], {}), [layout, name]);
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
   const type = useMemo(() => get(attribute, 'type', null), [attribute]);
-  const validations = omit(attribute, [
+  const regexpString = useMemo(() => get(attribute, 'regex', null), [attribute]);
+  const value = get(modifiedData, keys, null);
+  const temporaryErrorIdUntilBuffetjsSupportsFormattedMessage = 'app.utils.defaultMessage';
+  const errorId = get(
+    formErrors,
+    [keys, 'id'],
+    temporaryErrorIdUntilBuffetjsSupportsFormattedMessage
+  );
+
+  let validationsToOmit = [
     'type',
     'model',
     'via',
@@ -64,19 +79,25 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
     'default',
     'plugin',
     'enum',
-  ]);
+    'regex',
+  ];
+
+  const validations = omit(attribute, validationsToOmit);
+
+  if (regexpString) {
+    const regexp = new RegExp(regexpString);
+
+    if (regexp) {
+      validations.regex = regexp;
+    }
+  }
+
   const { description, visible } = metadatas;
-  const value = get(modifiedData, keys, null);
 
   if (visible === false) {
     return null;
   }
-  const temporaryErrorIdUntilBuffetjsSupportsFormattedMessage = 'app.utils.defaultMessage';
-  const errorId = get(
-    formErrors,
-    [keys, 'id'],
-    temporaryErrorIdUntilBuffetjsSupportsFormattedMessage
-  );
+
   const isRequired = get(validations, ['required'], false);
 
   if (type === 'relation') {
@@ -149,10 +170,10 @@ function Inputs({ autoFocus, keys, layout, name, onBlur }) {
             description={description}
             contentTypeUID={layout.uid}
             customInputs={{
-              media: InputFileWithErrors,
               json: InputJSONWithErrors,
               wysiwyg: WysiwygWithErrors,
               uid: InputUID,
+              ...fieldApi.getFields(),
             }}
             multiple={get(attribute, 'multiple', false)}
             attribute={attribute}

@@ -123,9 +123,7 @@ describe('Single type Graphql support', () => {
       expect(res.body.errors).toMatchObject(
         expect.arrayContaining([
           expect.objectContaining({
-            message: expect.stringMatching(
-              'Cannot query field "createHomePage"'
-            ),
+            message: expect.stringMatching('Cannot query field "createHomePage"'),
           }),
         ])
       );

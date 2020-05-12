@@ -1,8 +1,10 @@
 **/node_modules/**
 **/build/**
 **/dist/**
+**/OLD/**
 testApp/**
 examples/**
+cypress/**
 packages/strapi-generate-plugin/files/admin/src/**
 packages/strapi-helper-plugin/**
 packages/strapi-plugin-users-permissions/admin/**
