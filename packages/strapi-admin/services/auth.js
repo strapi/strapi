@@ -58,24 +58,24 @@ const validatePassword = (password, hash) => bcrypt.compare(password, hash);
  * @param {string} options.password
  */
 const checkCredentials = async ({ email, password }) => {
-  const user = await strapi.query('administrator', 'admin').findOne({ email });
+  const admin = await strapi.query('user', 'admin').findOne({ email });
 
-  if (!user) {
+  if (!admin) {
     return [null, false, { message: 'Invalid credentials' }];
   }
 
-  const isValid = await strapi.admin.services.auth.validatePassword(password, user.password);
+  const isValid = await strapi.admin.services.auth.validatePassword(password, admin.password);
 
   if (!isValid) {
     return [null, false, { message: 'Invalid credentials' }];
   }
 
   // TODO: change to isActive
-  if (user.blocked === true) {
+  if (!(admin.isActive === true)) {
     return [null, false, { message: 'User not active' }];
   }
 
-  return [null, user];
+  return [null, admin];
 };
 
 const decodeToken = token => {

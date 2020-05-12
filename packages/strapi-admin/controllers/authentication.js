@@ -35,13 +35,13 @@ module.exports = {
     const { token } = ctx.request.body;
 
     if (token === undefined) {
-      return ctx.badRequest('Token is required.');
+      return ctx.badRequest('Missing token');
     }
 
     const { isValid, payload } = strapi.admin.services.auth.decodeToken(token);
 
     if (!isValid) {
-      return ctx.badRequest('Invalid token.');
+      return ctx.badRequest('Invalid token');
     }
 
     ctx.body = {
