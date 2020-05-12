@@ -64,8 +64,10 @@ export { default as LoadingIndicatorPage } from './components/LoadingIndicatorPa
 
 export { default as Modal } from './components/Modal';
 export { default as ModalBody } from './components/BodyModal';
+export { default as ModalHeader } from './components/ModalHeader';
 export { default as ModalFooter } from './components/FooterModal';
 export { default as ModalForm } from './components/FormModal';
+export { default as ModalSection } from './components/ModalSection';
 export { default as NotFound } from './components/NotFound';
 export { default as OverlayBlocker } from './components/OverlayBlocker';
 export { default as PageFooter } from './components/PageFooter';

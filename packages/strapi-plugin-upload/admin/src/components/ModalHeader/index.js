@@ -6,24 +6,12 @@
  *
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { HeaderModalTitle, useGlobalContext } from 'strapi-helper-plugin';
-import ModalSection from '../ModalSection';
-import Text from '../Text';
-import BackButton from './BackButton';
-import Wrapper from './Wrapper';
+import { ModalHeader as HeaderModal, useGlobalContext } from 'strapi-helper-plugin';
 
 const ModalHeader = ({ goBack, headerBreadcrumbs, withBackButton, HeaderComponent }) => {
   const { emitEvent } = useGlobalContext();
-  const translatedHeaders = headerBreadcrumbs
-    ? headerBreadcrumbs.map(headerTrad => ({
-      key: headerTrad,
-      element: <FormattedMessage id={headerTrad} />,
-    }))
-    : null;
 
   const handleClick = () => {
     // Emit event on backButton with hardcoded upload location
@@ -33,29 +21,12 @@ const ModalHeader = ({ goBack, headerBreadcrumbs, withBackButton, HeaderComponen
   };
 
   return (
-    <Wrapper>
-      <ModalSection>
-        <HeaderModalTitle>
-          {withBackButton && <BackButton onClick={handleClick} type="button" />}
-          {HeaderComponent && <HeaderComponent />}
-          {translatedHeaders &&
-            translatedHeaders.map(({ key, element }, index) => {
-              const shouldDisplayChevron = index < translatedHeaders.length - 1;
-
-              return (
-                <Fragment key={key}>
-                  {element}
-                  {shouldDisplayChevron && (
-                    <Text as="span" fontSize="xs" color="#919bae">
-                      <FontAwesomeIcon icon="chevron-right" style={{ margin: '0 10px' }} />
-                    </Text>
-                  )}
-                </Fragment>
-              );
-            })}
-        </HeaderModalTitle>
-      </ModalSection>
-    </Wrapper>
+    <HeaderModal
+      headerBreadcrumbs={headerBreadcrumbs}
+      onClickGoBack={handleClick}
+      withBackButton={withBackButton}
+      HeaderComponent={HeaderComponent}
+    />
   );
 };
 
