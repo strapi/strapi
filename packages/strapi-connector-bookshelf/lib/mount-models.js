@@ -138,9 +138,7 @@ module.exports = ({ models, target }, ctx) => {
 
       // Exclude polymorphic association.
       if (globalName !== '*') {
-        globalId = details.plugin
-          ? _.get(strapi.plugins, `${details.plugin}.models.${globalName.toLowerCase()}.globalId`)
-          : _.get(strapi.models, `${globalName.toLowerCase()}.globalId`);
+        globalId = strapi.db.getModel(globalName.toLowerCase(), details.plugin).globalId;
       }
 
       switch (verbose) {
@@ -202,9 +200,7 @@ module.exports = ({ models, target }, ctx) => {
           break;
         }
         case 'belongsToMany': {
-          const targetModel = details.plugin
-            ? strapi.plugins[details.plugin].models[details.collection]
-            : strapi.models[details.collection];
+          const targetModel = strapi.db.getModel(details.collection, details.plugin);
 
           // Force singular foreign key
           details.attribute = singular(details.collection);
