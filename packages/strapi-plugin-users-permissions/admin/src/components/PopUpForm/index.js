@@ -155,9 +155,7 @@ class PopUpForm extends React.Component {
               key={value}
               label={{
                 id: `users-permissions.PopUpForm.Providers.${
-                  includes(value, 'callback') ||
-                  includes(value, 'redirect_uri') ||
-                  includes(value, 'authorize_url')
+                  includes(value, 'callback') || includes(value, 'redirect_uri')
                     ? 'redirectURL.front-end'
                     : value
                 }.label`,
