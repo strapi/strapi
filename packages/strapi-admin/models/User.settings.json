@@ -1,16 +1,30 @@
 {
   "collectionName": "strapi_administrator",
   "info": {
-    "name": "Administrator",
+    "name": "User",
     "description": ""
   },
   "attributes": {
+    "firstname": {
+      "type": "string",
+      "minLength": 3,
+      "unique": false,
+      "configurable": false,
+      "required": false
+    },
+    "lastname": {
+      "type": "string",
+      "minLength": 3,
+      "unique": false,
+      "configurable": false,
+      "required": false
+    },
     "username": {
       "type": "string",
       "minLength": 3,
       "unique": true,
       "configurable": false,
-      "required": true
+      "required": false
     },
     "email": {
       "type": "email",
@@ -30,10 +44,21 @@
       "configurable": false,
       "private": true
     },
-    "blocked": {
+    "registrationToken": {
+      "type": "string",
+      "configurable": false
+    },
+    "isActive": {
       "type": "boolean",
       "default": false,
       "configurable": false
+    },
+    "roles": {
+      "collection": "role",
+      "collectionName": "strapi_users_roles",
+      "via": "users",
+      "dominant": true,
+      "plugin": "admin"
     }
   }
 }
