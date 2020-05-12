@@ -61,6 +61,11 @@
     },
     {
       "method": "POST",
+      "path": "/renew-token",
+      "handler": "authentication.renewToken"
+    },
+    {
+      "method": "POST",
       "path": "/auth/local/register",
       "handler": "Auth.register"
     },
