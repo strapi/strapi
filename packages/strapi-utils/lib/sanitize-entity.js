@@ -10,17 +10,16 @@ module.exports = function sanitizeEntity(data, { model, withPrivate = false }) {
   if (typeof plainData !== 'object') return plainData;
 
   const attributes = model.attributes;
-
-  const hiddenFields = _.union(
-    _.get(strapi, ['config', 'currentEnvironment', 'response', 'hiddenFields'], []),
-    _.get(model, 'hiddenFields', [])
+  const privateAttributes = _.union(
+    strapi.config.get('api.responses.privateAttributes', []),
+    _.get(model, 'options.privateAttributes', [])
   );
 
   return Object.keys(plainData).reduce((acc, key) => {
     const attribute = attributes[key];
 
     if (
-      (hiddenFields.includes(key) && withPrivate !== true) ||
+      (privateAttributes.includes(key) && withPrivate !== true) ||
       (attribute && attribute.private === true && withPrivate !== true)
     ) {
       return acc;
