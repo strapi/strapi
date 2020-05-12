@@ -167,7 +167,7 @@ const HomePage = () => {
 
     const newSearch = generateSearchFromFilters(updatedQueryParams);
 
-    push({ search: encodeURI(newSearch) });
+    push({ search: newSearch });
   };
 
   const handleClickEditFile = id => {
@@ -196,7 +196,7 @@ const HomePage = () => {
 
     const newSearch = generateSearchFromFilters(updatedQueryParams);
 
-    push({ search: encodeURI(newSearch) });
+    push({ search: newSearch });
   };
 
   const handleDeleteMediaFromModal = async id => {
