@@ -216,11 +216,13 @@ program
 
 program
   .command('configuration:dump')
+  .alias('config:dump')
   .option('-f, --file <file>', 'Output file, default output is stdout')
   .action(getLocalScript('configurationDump'));
 
 program
   .command('configuration:restore')
+  .alias('config:restore')
   .option('-f, --file <file>', 'Input file, default input is stdin')
   .option('-s, --strategy <strategy>', 'Strategy name, one of: "replace", "merge", "keep"')
   .action(getLocalScript('configurationRestore'));
