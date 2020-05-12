@@ -9,20 +9,20 @@ const strapi = require('../index');
  * @param {string} file filepath to use as input
  * @param {string} strategy import strategy. one of (replace, merge, keep, default: replace)
  */
-module.exports = async function({ file, strategy = 'replace' }) {
-  const input = file ? fs.readFileSync(file) : await readStdin(process.stdin);
+module.exports = async function({ file: filePath, strategy = 'replace' }) {
+  const input = filePath ? fs.readFileSync(filePath) : await readStdin(process.stdin);
 
   const app = await strapi().load();
 
   let dataToImport;
   try {
     dataToImport = JSON.parse(input);
-
-    if (!Array.isArray(dataToImport)) {
-      throw new Error(`Invalid input data. Expected a valid JSON array.`);
-    }
   } catch (error) {
     throw new Error(`Invalid input data: ${error.message}. Expected a valid JSON array.`);
+  }
+
+  if (!Array.isArray(dataToImport)) {
+    throw new Error(`Invalid input data. Expected a valid JSON array.`);
   }
 
   const importer = createImporter(app.db, strategy);
@@ -31,7 +31,9 @@ module.exports = async function({ file, strategy = 'replace' }) {
     await importer.import(config);
   }
 
-  console.log(`Successfully imported ${dataToImport.length} configuration entries`);
+  console.log(
+    `Successfully imported ${dataToImport.length} configuration entries using the "${strategy}" strategy.`
+  );
   process.exit(0);
 };
 
@@ -61,17 +63,21 @@ const readStdin = () => {
 const createImporter = (db, strategy) => {
   switch (strategy) {
     case 'replace':
-      return new ReplaceImporter(db);
+      return createReplaceImporter(db);
     case 'merge':
-      return new MergeImporter(db);
+      return createMergeImporter(db);
     case 'keep':
-      return new KeepImporter(db);
+      return createKeepImporter(db);
     default:
       throw new Error(`No importer available for strategy "${strategy}"`);
   }
 };
 
-function ReplaceImporter(db) {
+/**
+ * Replace importer. Will replace the keys that already exist and create the new ones
+ * @param {Object} db - DatabaseManager instance
+ */
+const createReplaceImporter = db => {
   return {
     async import(conf) {
       const matching = await db.query('core_store').count({ key: conf.key });
@@ -82,9 +88,13 @@ function ReplaceImporter(db) {
       }
     },
   };
-}
+};
 
-function MergeImporter(db) {
+/**
+ * Merge importer. Will merge the keys that already exist with their new value and create the new ones
+ * @param {Object} db - DatabaseManager instance
+ */
+const createMergeImporter = db => {
   return {
     async import(conf) {
       const existingConf = await db.query('core_store').find({ key: conf.key });
@@ -95,9 +105,13 @@ function MergeImporter(db) {
       }
     },
   };
-}
+};
 
-function KeepImporter(db) {
+/**
+ * Merge importer. Will keep the keys that already exist without changing them and create the new ones
+ * @param {Object} db - DatabaseManager instance
+ */
+const createKeepImporter = db => {
   return {
     async import(conf) {
       const matching = await db.query('core_store').count({ key: conf.key });
@@ -109,4 +123,4 @@ function KeepImporter(db) {
       await db.query('core_store').create(conf);
     },
   };
-}
+};

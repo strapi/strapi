@@ -234,8 +234,6 @@ class Strapi {
   }
 
   async load() {
-    this.isLoaded = true;
-
     this.app.use(async (ctx, next) => {
       if (ctx.request.url === '/_health' && ctx.request.method === 'HEAD') {
         ctx.set('strapi', 'You are so French!');
@@ -297,6 +295,9 @@ class Strapi {
 
     await this.runBootstrapFunctions();
     await this.freeze();
+
+    this.isLoaded = true;
+
     return this;
   }
 
