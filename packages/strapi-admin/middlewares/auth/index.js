@@ -2,7 +2,6 @@
 
 const passport = require('koa-passport');
 const { Strategy: LocalStrategy } = require('passport-local');
-const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt');
 
 const createLocalStrategy = strapi => {
   return new LocalStrategy(
@@ -20,38 +19,38 @@ const createLocalStrategy = strapi => {
   );
 };
 
-const createJWTStrategy = strapi => {
-  const { options, secret } = strapi.admin.services.auth.getJWTOptions();
-
-  const opts = {
-    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    secretOrKey: secret,
-    jsonWebTokenOptions: options,
-  };
-
-  return new JwtStrategy(opts, function({ id }, done) {
-    strapi
-      .query('administrator', 'admin')
-      .findOne({ id })
-      .then(user => {
-        if (user) {
-          return done(null, user);
-        } else {
-          return done(null, false);
-        }
-      })
-      .catch(err => {
-        return done(err, false);
-      });
-  });
-};
-
 module.exports = strapi => ({
   initialize() {
     passport.use(createLocalStrategy(strapi));
-    passport.use(createJWTStrategy(strapi));
 
-    // strapi.app.use(passport.authenticate('jwt', { session: false }));
     strapi.app.use(passport.initialize());
+
+    strapi.app.use(async (ctx, next) => {
+      if (
+        ctx.request.header.authorization &&
+        ctx.request.header.authorization.split(' ')[0] === 'Bearer'
+      ) {
+        const token = ctx.request.header.authorization.split(' ')[1];
+
+        const { payload, isValid } = strapi.admin.services.auth.decodeToken(token);
+
+        if (isValid) {
+          // request is made by an admin
+          const admin = await strapi
+            .query('administrator', 'admin')
+            .findOne({ id: payload.id }, []);
+
+          if (!admin || admin.blocked === true) {
+            return ctx.forbidden('Invalid credentials');
+          }
+
+          ctx.state.admin = admin;
+          ctx.state.user = admin;
+          return next();
+        }
+      }
+
+      return next();
+    });
   },
 });

@@ -61,7 +61,7 @@ const buildMutation = (mutationName, config) => {
 const buildMutationContext = ({ options, graphqlContext }) => {
   const { context } = graphqlContext;
 
-  const ctx = context.app.createContext(_.clone(context.req), _.clone(context.res));
+  const ctx = cloneKoaContext(context);
 
   if (options.input && options.input.where) {
     ctx.params = convertToParams(options.input.where || {});
@@ -134,11 +134,19 @@ const validateResolverOption = config => {
   return true;
 };
 
+const cloneKoaContext = ctx => {
+  return Object.assign(ctx.app.createContext(_.clone(ctx.req), _.clone(ctx.res)), {
+    state: {
+      ...ctx.state,
+    },
+  });
+};
+
 const buildQueryContext = ({ options, graphqlContext }) => {
   const { context } = graphqlContext;
   const _options = _.cloneDeep(options);
 
-  const ctx = context.app.createContext(_.clone(context.req), _.clone(context.res));
+  const ctx = cloneKoaContext(context);
 
   // Note: we've to used the Object.defineProperties to reset the prototype. It seems that the cloning the context
   // cause a lost of the Object prototype.

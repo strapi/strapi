@@ -12,7 +12,7 @@ module.exports = {
         }
 
         if (!user) {
-          return ctx.badRequest(info.error);
+          return ctx.badRequest(info.message);
         }
 
         ctx.state.user = user;
