@@ -138,11 +138,7 @@ module.exports = ({ models, target }, ctx) => {
 
       // Exclude polymorphic association.
       if (globalName !== '*') {
-        globalId = details.plugin
-          ? details.plugin === 'admin'
-            ? _.get(strapi.admin, `models.${globalName.toLowerCase()}.globalId`)
-            : _.get(strapi.plugins, `${details.plugin}.models.${globalName.toLowerCase()}.globalId`)
-          : _.get(strapi.models, `${globalName.toLowerCase()}.globalId`);
+        globalId = strapi.db.getModel(globalName.toLowerCase(), details.plugin).globalId;
       }
 
       switch (verbose) {
