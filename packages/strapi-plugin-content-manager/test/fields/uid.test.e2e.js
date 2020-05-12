@@ -30,14 +30,11 @@ describe('Test type UID', () => {
     }, 60000);
 
     test('Creates an entry successfully', async () => {
-      const res = await rq.post(
-        '/content-manager/explorer/application::withuid.withuid',
-        {
-          body: {
-            slug: 'valid-uid',
-          },
-        }
-      );
+      const res = await rq.post('/content-manager/explorer/application::withuid.withuid', {
+        body: {
+          slug: 'valid-uid',
+        },
+      });
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject({
@@ -46,41 +43,32 @@ describe('Test type UID', () => {
     });
 
     test('Throws error on duplicate value', async () => {
-      const res = await rq.post(
-        '/content-manager/explorer/application::withuid.withuid',
-        {
-          body: {
-            slug: 'duplicate-uid',
-          },
-        }
-      );
+      const res = await rq.post('/content-manager/explorer/application::withuid.withuid', {
+        body: {
+          slug: 'duplicate-uid',
+        },
+      });
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject({
         slug: 'duplicate-uid',
       });
 
-      const conflicting = await rq.post(
-        '/content-manager/explorer/application::withuid.withuid',
-        {
-          body: {
-            slug: 'duplicate-uid',
-          },
-        }
-      );
+      const conflicting = await rq.post('/content-manager/explorer/application::withuid.withuid', {
+        body: {
+          slug: 'duplicate-uid',
+        },
+      });
 
       expect(conflicting.statusCode).toBe(400);
     });
 
     test('Can set value to be null', async () => {
-      const res = await rq.post(
-        '/content-manager/explorer/application::withuid.withuid',
-        {
-          body: {
-            slug: null,
-          },
-        }
-      );
+      const res = await rq.post('/content-manager/explorer/application::withuid.withuid', {
+        body: {
+          slug: null,
+        },
+      });
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject({

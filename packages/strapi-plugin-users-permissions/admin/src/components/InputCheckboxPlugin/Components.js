@@ -71,7 +71,6 @@ const Label = styled.label`
       left: 17px;
       font-size: 10px;
       font-family: 'FontAwesome';
-      font-weight: 100;
       color: #1c5de7;
       transition: all 0.2s;
     }

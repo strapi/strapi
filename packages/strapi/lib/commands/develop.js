@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
 const path = require('path');
 const cluster = require('cluster');
 const fs = require('fs-extra');
@@ -8,8 +7,7 @@ const chokidar = require('chokidar');
 const execa = require('execa');
 
 const { logger } = require('strapi-utils');
-const loadConfigFile = require('../load/load-config-files');
-
+const loadConfiguration = require('../core/app-configuration');
 const strapi = require('../index');
 
 /**
@@ -18,13 +16,9 @@ const strapi = require('../index');
  */
 module.exports = async function({ build, watchAdmin }) {
   const dir = process.cwd();
-  const envConfigDir = path.join(dir, 'config', 'environments', 'development');
-  const serverConfig = await loadConfigFile(envConfigDir, 'server.+(js|json)');
-  const adminWatchIgnoreFiles = _.get(
-    serverConfig,
-    'admin.watchIgnoreFiles',
-    []
-  );
+  const config = loadConfiguration(dir);
+
+  const adminWatchIgnoreFiles = config.get('server.admin.watchIgnoreFiles', []);
 
   // Don't run the build process if the admin is in watch mode
   if (build && !watchAdmin && !fs.existsSync(path.join(dir, 'build'))) {
@@ -38,14 +32,7 @@ module.exports = async function({ build, watchAdmin }) {
   }
 
   try {
-    const strapiInstance = strapi({
-      dir,
-      autoReload: true,
-      serveAdminPanel: watchAdmin ? false : true,
-    });
-
     if (cluster.isMaster) {
-      //  Start the front-end dev server
       if (watchAdmin) {
         try {
           execa('npm', ['run', '-s', 'strapi', 'watch-admin'], {
@@ -59,7 +46,7 @@ module.exports = async function({ build, watchAdmin }) {
       cluster.on('message', (worker, message) => {
         switch (message) {
           case 'reload':
-            strapiInstance.log.info('The server is restarting\n');
+            logger.info('The server is restarting\n');
             worker.send('isKilled');
             break;
           case 'kill':
@@ -78,6 +65,12 @@ module.exports = async function({ build, watchAdmin }) {
     }
 
     if (cluster.isWorker) {
+      const strapiInstance = strapi({
+        dir,
+        autoReload: true,
+        serveAdminPanel: watchAdmin ? false : true,
+      });
+
       watchFileChanges({
         dir,
         strapiInstance,
@@ -113,10 +106,7 @@ module.exports = async function({ build, watchAdmin }) {
  */
 function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles }) {
   const restart = () => {
-    if (
-      strapiInstance.reload.isWatching &&
-      !strapiInstance.reload.isReloading
-    ) {
+    if (strapiInstance.reload.isWatching && !strapiInstance.reload.isReloading) {
       strapiInstance.reload.isReloading = true;
       strapiInstance.reload();
     }

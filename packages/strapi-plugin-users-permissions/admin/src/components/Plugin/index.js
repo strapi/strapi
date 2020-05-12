@@ -13,15 +13,7 @@ import { FormattedMessage } from 'react-intl';
 import { EditPageContext } from '../../contexts/EditPage';
 import Controller from '../Controller';
 
-import {
-  Banner,
-  Chevron,
-  ControllerWrapper,
-  Description,
-  Icon,
-  Name,
-  Wrapper,
-} from './Components';
+import { Banner, Chevron, ControllerWrapper, Description, Icon, Name, Wrapper } from './Components';
 
 class Plugin extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
@@ -31,10 +23,7 @@ class Plugin extends React.Component {
 
   componentDidMount() {
     // Open the application's permissions section if there are APIs
-    if (
-      this.props.name === 'application' &&
-      !isEmpty(get(this.props.plugin, 'controllers'))
-    ) {
+    if (this.props.name === 'application' && !isEmpty(get(this.props.plugin, 'controllers'))) {
       this.props.changePluginSelected('application');
       this.setState({ collapse: !this.state.collapse });
     }
@@ -107,19 +96,16 @@ class Plugin extends React.Component {
         <Collapse isOpen={this.state.collapse}>
           <div />
           <ControllerWrapper>
-            {map(
-              get(this.props.plugin, 'controllers'),
-              (controllerActions, key) => (
-                <Controller
-                  inputNamePath={`permissions.${this.props.name}`}
-                  isOpen={this.state.collapse}
-                  key={key}
-                  name={key}
-                  actions={controllerActions}
-                  resetInputBackground={this.state.resetInputBackground}
-                />
-              )
-            )}
+            {map(get(this.props.plugin, 'controllers'), (controllerActions, key) => (
+              <Controller
+                inputNamePath={`permissions.${this.props.name}`}
+                isOpen={this.state.collapse}
+                key={key}
+                name={key}
+                actions={controllerActions}
+                resetInputBackground={this.state.resetInputBackground}
+              />
+            ))}
           </ControllerWrapper>
         </Collapse>
       </Wrapper>
