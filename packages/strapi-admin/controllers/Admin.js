@@ -173,11 +173,9 @@ module.exports = {
       );
     }
 
-    const adminsWithSameEmail = await strapi.query('administrator', 'admin').findOne({ email });
+    const adminsWithSameEmail = await strapi.query('user', 'admin').findOne({ email });
 
-    const adminsWithSameUsername = await strapi
-      .query('administrator', 'admin')
-      .findOne({ username });
+    const adminsWithSameUsername = await strapi.query('user', 'admin').findOne({ username });
 
     if (adminsWithSameEmail) {
       return ctx.badRequest(
@@ -208,7 +206,7 @@ module.exports = {
       password: await strapi.admin.services.auth.hashPassword(password),
     };
 
-    const data = await strapi.query('administrator', 'admin').create(user);
+    const data = await strapi.query('user', 'admin').create(user);
 
     // Send 201 `created`
     ctx.created(strapi.admin.services.auth.sanitizeUser(data));
@@ -246,14 +244,14 @@ module.exports = {
       );
     }
 
-    const admin = await strapi.query('administrator', 'admin').findOne({ id });
+    const admin = await strapi.query('user', 'admin').findOne({ id });
 
     // check the user exists
     if (!admin) return ctx.notFound('Administrator not found');
 
     // check there are not user with requested email
     if (email !== admin.email) {
-      const adminsWithSameEmail = await strapi.query('administrator', 'admin').findOne({ email });
+      const adminsWithSameEmail = await strapi.query('user', 'admin').findOne({ email });
 
       if (adminsWithSameEmail && adminsWithSameEmail.id !== admin.id) {
         return ctx.badRequest(
@@ -269,9 +267,7 @@ module.exports = {
 
     // check there are not user with requested username
     if (username !== admin.username) {
-      const adminsWithSameUsername = await strapi
-        .query('administrator', 'admin')
-        .findOne({ username });
+      const adminsWithSameUsername = await strapi.query('user', 'admin').findOne({ username });
 
       if (adminsWithSameUsername && adminsWithSameUsername.id !== admin.id) {
         return ctx.badRequest(
@@ -295,7 +291,7 @@ module.exports = {
       user.password = await strapi.admin.services.auth.hashPassword(password);
     }
 
-    const data = await strapi.query('administrator', 'admin').update({ id }, user);
+    const data = await strapi.query('user', 'admin').update({ id }, user);
 
     // Send 200 `ok`
     ctx.send(data);
