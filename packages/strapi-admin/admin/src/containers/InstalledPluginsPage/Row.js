@@ -4,7 +4,7 @@ import { IconLinks } from '@buffetjs/core';
 import { useGlobalContext, PopUpWarning } from 'strapi-helper-plugin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useHistory } from 'react-router-dom';
-import { faTrash, faCog } from '@fortawesome/free-solid-svg-icons';
+import { faTrashAlt, faCog } from '@fortawesome/free-solid-svg-icons';
 import Text from '../../components/Text';
 import CustomRow from './CustomRow';
 import LogoContainer from './Logo';
@@ -39,7 +39,7 @@ const Row = ({ logo, name, description, isRequired, id, icon, onConfirm }) => {
 
   if (!isRequired) {
     links.push({
-      icon: <FontAwesomeIcon icon={faTrash} />,
+      icon: <FontAwesomeIcon icon={faTrashAlt} />,
       onClick: handleToggle,
     });
   }

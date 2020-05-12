@@ -12,7 +12,6 @@ export { default as Button } from './components/Button';
 export { default as ButtonModal } from './components/ButtonModal';
 export { default as CircleButton } from './components/CircleButton';
 export { default as ContainerFluid } from './components/ContainerFluid';
-export { default as EmptyAttributesBlock } from './components/EmptyAttributesBlock';
 export { default as ErrorBoundary } from './components/ErrorBoundary';
 export { default as ExtendComponent } from './components/ExtendComponent';
 export { default as FilterButton } from './components/FilterButton';
@@ -75,7 +74,6 @@ export { default as PopUpWarning } from './components/PopUpWarning';
 export { default as SearchInfo } from './components/SearchInfo';
 export { default as SelectNav } from './components/SelectNav';
 export { default as SelectWrapper } from './components/SelectWrapper';
-export { default as TrashButton } from './components/TrashButton';
 export { default as ViewContainer } from './components/ViewContainer';
 
 // Contexts

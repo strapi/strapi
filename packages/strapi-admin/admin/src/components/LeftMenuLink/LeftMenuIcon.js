@@ -7,7 +7,8 @@ const FaIcon = styled(({ small, ...props }) => <FontAwesomeIcon {...props} />)`
   position: absolute;
   top: ${({ small }) => (small ? 'calc(50% - 0.3rem)' : 'calc(50% - 0.9rem + 0.3rem)')};
   left: ${({ small }) => (small ? '2.2rem' : '1.6rem')};
-  font-size: ${({ small }) => (small ? '.5rem' : '1.2rem')};
+  width: ${({ small }) => (small ? 'auto' : '1.3rem')} !important;
+  font-size: ${({ small }) => (small ? '.5rem' : '1.3rem')};
 `;
 
 const LeftMenuIcon = ({ icon }) => <FaIcon small={icon === 'circle'} icon={icon} />;

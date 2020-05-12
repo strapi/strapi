@@ -1,9 +1,14 @@
 import React, { useEffect, useReducer, memo } from 'react';
 import { FormattedMessage } from 'react-intl';
 import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faQuestion, faTimes } from '@fortawesome/free-solid-svg-icons';
 import cn from 'classnames';
 import { useGlobalContext } from 'strapi-helper-plugin';
+
 import formatVideoArray from './utils/formatAndStoreVideoArray';
+
+import StaticLinks from '../../components/StaticLinks';
 import Video from './Video';
 import Wrapper from './Wrapper';
 import init from './init';
@@ -83,9 +88,7 @@ const OnboardingVideos = () => {
             <FormattedMessage id="app.components.Onboarding.title" />
           </p>
           <p>
-            {Math.floor(
-              (videos.filter(v => v.end).length * 100) / videos.length
-            )}
+            {Math.floor((videos.filter(v => v.end).length * 100) / videos.length)}
             <FormattedMessage id="app.components.Onboarding.label.completed" />
           </p>
         </div>
@@ -115,15 +118,12 @@ const OnboardingVideos = () => {
             />
           ))}
         </ul>
+        <StaticLinks />
       </div>
       <div className="openBtn">
-        <button
-          onClick={handleClick}
-          className={isOpen ? 'active' : ''}
-          type="button"
-        >
-          <i className="fa fa-question" />
-          <i className="fa fa-times" />
+        <button onClick={handleClick} className={isOpen ? 'active' : ''} type="button">
+          <FontAwesomeIcon icon={faQuestion} />
+          <FontAwesomeIcon icon={faTimes} />
           <span />
         </button>
       </div>

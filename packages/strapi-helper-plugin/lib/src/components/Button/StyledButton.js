@@ -25,7 +25,7 @@ const primary = css`
   min-width: 14rem;
   font-weight: 500;
   border: 1px solid;
-  background: linear-gradient(315deg, #0097f6 0%, #005eea 100%);
+  background-color: #007eff;
   -webkit-font-smoothing: antialiased;
   color: white;
   &:active {
@@ -144,7 +144,7 @@ const StyledButton = styled.button`
       border-radius: 0.3rem;
       white-space: nowrap;
       margin-right: 1.8rem;
-      line-height: 26px;
+      line-height: 25px;
       font-size: 13px;
       cursor: pointer;
       font-family: Lato;

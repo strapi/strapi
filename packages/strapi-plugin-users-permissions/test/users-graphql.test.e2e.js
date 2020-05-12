@@ -31,7 +31,7 @@ describe('Test Graphql Users API End to End', () => {
     test('Register a user', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
-          mutation register($input: UserInput!) {
+          mutation register($input: UsersPermissionsRegisterInput!) {
             register(input: $input) {
               jwt
               user {

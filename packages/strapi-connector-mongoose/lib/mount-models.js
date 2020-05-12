@@ -82,19 +82,6 @@ module.exports = ({ models, target }, ctx) => {
       _.omitBy(definition.loadedModel, ({ type }) => type === 'virtual')
     );
 
-    // Initialize lifecycle callbacks.
-    const preLifecycle = {
-      validate: 'beforeCreate',
-      find: 'beforeFetchAll',
-      findOne: 'beforeFetch',
-      findOneAndUpdate: 'beforeUpdate',
-      findOneAndRemove: 'beforeDestroy',
-      remove: 'beforeDestroy',
-      update: 'beforeUpdate',
-      updateOne: 'beforeUpdate',
-      save: 'beforeSave',
-    };
-
     const findLifecycles = ['find', 'findOne', 'findOneAndUpdate', 'findOneAndRemove'];
 
     /*
@@ -102,7 +89,6 @@ module.exports = ({ models, target }, ctx) => {
         It allows us to make Upload.find().populate('related')
         instead of Upload.find().populate('related.item')
       */
-
     const morphAssociations = definition.associations.filter(isPolymorphicAssoc);
 
     const populateFn = createOnFetchPopulateFn({
@@ -113,45 +99,6 @@ module.exports = ({ models, target }, ctx) => {
 
     findLifecycles.forEach(key => {
       schema.pre(key, populateFn);
-    });
-
-    Object.keys(preLifecycle).forEach(key => {
-      const fn = preLifecycle[key];
-
-      if (_.isFunction(target[model.toLowerCase()][fn])) {
-        schema.pre(key, function() {
-          return target[model.toLowerCase()][fn](this);
-        });
-      }
-    });
-
-    const postLifecycle = {
-      validate: 'afterCreate',
-      findOneAndRemove: 'afterDestroy',
-      remove: 'afterDestroy',
-      update: 'afterUpdate',
-      updateOne: 'afterUpdate',
-      find: 'afterFetchAll',
-      findOne: 'afterFetch',
-      save: 'afterSave',
-    };
-
-    // Mongoose doesn't allow post 'remove' event on model.
-    // See https://github.com/Automattic/mongoose/issues/3054
-    Object.keys(postLifecycle).forEach(key => {
-      const fn = postLifecycle[key];
-
-      if (_.isFunction(target[model.toLowerCase()][fn])) {
-        schema.post(key, function(doc, next) {
-          target[model.toLowerCase()]
-            [fn](this, doc)
-            .then(next)
-            .catch(err => {
-              strapi.log.error(err);
-              next(err);
-            });
-        });
-      }
     });
 
     // Add virtual key to provide populate and reverse populate
