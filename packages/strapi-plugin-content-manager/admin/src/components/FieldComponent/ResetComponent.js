@@ -31,8 +31,8 @@ const ResetComponent = styled.div`
     text-align: center;
     border-radius: 2px;
     &:after {
-      content: '\f1f8';
-      font-size: 14px;
+      content: '\f2ed';
+      font-size: 10px;
       font-family: FontAwesome;
     }
   }

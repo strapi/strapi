@@ -29,7 +29,7 @@ const createDefaultForm = (attributes, allComponentsSchema) => {
       );
 
       if (required === true) {
-        acc[current] = repeatable === true ? [] : {};
+        acc[current] = repeatable === true ? [] : currentComponentDefaultForm;
       }
 
       if (min && repeatable === true && required) {

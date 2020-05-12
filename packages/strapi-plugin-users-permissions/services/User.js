@@ -16,9 +16,9 @@ module.exports = {
    */
   async add(values) {
     if (values.password) {
-      values.password = await strapi.plugins[
-        'users-permissions'
-      ].services.user.hashPassword(values);
+      values.password = await strapi.plugins['users-permissions'].services.user.hashPassword(
+        values
+      );
     }
 
     return strapi.query('user', 'users-permissions').create(values);
@@ -29,13 +29,10 @@ module.exports = {
    * @return {Promise}
    */
   async edit(params, values) {
-    // Note: The current method will return the full response of Mongo.
-    // To get the updated object, you have to execute the `findOne()` method
-    // or use the `findOneOrUpdate()` method with `{ new:true }` option.
     if (values.password) {
-      values.password = await strapi.plugins[
-        'users-permissions'
-      ].services.user.hashPassword(values);
+      values.password = await strapi.plugins['users-permissions'].services.user.hashPassword(
+        values
+      );
     }
 
     return strapi.query('user', 'users-permissions').update(params, values);

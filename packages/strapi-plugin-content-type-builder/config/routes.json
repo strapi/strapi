@@ -2,6 +2,14 @@
   "routes": [
     {
       "method": "GET",
+      "path": "/reserved-names",
+      "handler": "Builder.getReservedNames",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
       "path": "/connections",
       "handler": "Connections.getConnections",
       "config": {
