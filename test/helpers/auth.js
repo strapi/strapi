@@ -21,15 +21,15 @@ const register = async () => {
 
 const login = async () => {
   const { body } = await rq({
-    url: '/admin/auth/local',
+    url: '/admin/login',
     method: 'POST',
     body: {
-      identifier: auth.email,
+      email: auth.email,
       password: auth.password,
     },
   });
 
-  return body;
+  return body.data;
 };
 
 module.exports = {
@@ -38,7 +38,7 @@ module.exports = {
     await register();
 
     // login
-    const { jwt } = await login();
-    return jwt;
+    const { token } = await login();
+    return token;
   },
 };
