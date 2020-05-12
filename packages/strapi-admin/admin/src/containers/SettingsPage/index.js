@@ -10,11 +10,17 @@
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 
 import React, { memo } from 'react';
-import { useGlobalContext, LeftMenu, LeftMenuList } from 'strapi-helper-plugin';
+import { useGlobalContext, LeftMenuList } from 'strapi-helper-plugin';
 import { Switch, Redirect, Route, useParams } from 'react-router-dom';
+import RolesListPage from '../Roles/ListPage';
+import RolesCreatePage from '../Roles/CreatePage';
+import RolesEditPage from '../Roles/EditPage';
+import UsersEditPage from '../Users/EditPage';
+import UsersListPage from '../Users/ListPage';
 import EditView from '../Webhooks/EditView';
 import ListView from '../Webhooks/ListView';
 import SettingDispatcher from './SettingDispatcher';
+import LeftMenu from './StyledLeftMenu';
 import Wrapper from './Wrapper';
 import retrieveGlobalLinks from './utils/retrieveGlobalLinks';
 import retrievePluginsMenu from './utils/retrievePluginsMenu';
@@ -49,6 +55,22 @@ function SettingsPage() {
         ...globalLinks,
       ],
     },
+    {
+      id: 'permissions',
+      title: 'Settings.permissions',
+      links: [
+        {
+          title: formatMessage({ id: 'Settings.permissions.menu.link.roles.label' }),
+          to: `${settingsBaseURL}/roles`,
+          name: 'roles',
+        },
+        {
+          title: formatMessage({ id: 'Settings.permissions.menu.link.users.label' }),
+          to: `${settingsBaseURL}/users`,
+          name: 'users',
+        },
+      ],
+    },
     ...pluginsMenu,
   ];
 
@@ -71,6 +93,11 @@ function SettingsPage() {
         </div>
         <div className="col-md-9">
           <Switch>
+            <Route exact path={`${settingsBaseURL}/roles`} component={RolesListPage} />
+            <Route exact path={`${settingsBaseURL}/roles/new`} component={RolesCreatePage} />
+            <Route exact path={`${settingsBaseURL}/roles/:id`} component={RolesEditPage} />
+            <Route exact path={`${settingsBaseURL}/users`} component={UsersListPage} />
+            <Route exact path={`${settingsBaseURL}/users/:id`} component={UsersEditPage} />
             <Route exact path={`${settingsBaseURL}/webhooks`} component={ListView} />
             <Route exact path={`${settingsBaseURL}/webhooks/:id`} component={EditView} />
             {createdRoutes}
