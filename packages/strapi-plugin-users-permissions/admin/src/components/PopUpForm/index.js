@@ -71,6 +71,8 @@ class PopUpForm extends React.Component {
         return `${strapi.backendURL}/connect/instagram/callback`;
       case 'vk':
         return `${strapi.backendURL}/connect/vk/callback`;
+      case 'twitch':
+        return `${strapi.backendURL}/connect/twitch/callback`;
       default: {
         const value = get(this.props.values, 'callback', '');
 
@@ -153,7 +155,9 @@ class PopUpForm extends React.Component {
               key={value}
               label={{
                 id: `users-permissions.PopUpForm.Providers.${
-                  includes(value, 'callback') || includes(value, 'redirect_uri')
+                  includes(value, 'callback') ||
+                  includes(value, 'redirect_uri') ||
+                  includes(value, 'authorize_url')
                     ? 'redirectURL.front-end'
                     : value
                 }.label`,
