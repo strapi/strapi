@@ -8,7 +8,7 @@ const sanitizeUser = user => {
   return _.omit(user, ['password', 'resetPasswordToken']);
 };
 
-const defaultOptions = { expiresIn: '1s' };
+const defaultOptions = { expiresIn: '30d' };
 
 const getJWTOptions = () => {
   const { options, secret } = strapi.config.get('server.admin.jwt', {});
@@ -61,18 +61,18 @@ const checkCredentials = async ({ email, password }) => {
   const user = await strapi.query('administrator', 'admin').findOne({ email });
 
   if (!user) {
-    return [null, false, { error: 'Invalid credentials' }];
+    return [null, false, { message: 'Invalid credentials' }];
   }
 
   const isValid = await strapi.admin.services.auth.validatePassword(password, user.password);
 
   if (!isValid) {
-    return [null, false, { error: 'Invalid credentials' }];
+    return [null, false, { message: 'Invalid credentials' }];
   }
 
   // TODO: change to isActive
   if (user.blocked === true) {
-    return [null, false, { error: 'User not active' }];
+    return [null, false, { message: 'User not active' }];
   }
 
   return [null, user];

@@ -3,36 +3,23 @@ const _ = require('lodash');
 module.exports = async (ctx, next) => {
   let role;
 
+  if (ctx.state.user) {
+    // request is already authenticated in a different way
+    return next();
+  }
+
   if (ctx.request && ctx.request.header && ctx.request.header.authorization) {
     try {
-      const { id, isAdmin = false } = await strapi.plugins[
-        'users-permissions'
-      ].services.jwt.getToken(ctx);
+      const { id } = await strapi.plugins['users-permissions'].services.jwt.getToken(ctx);
 
       if (id === undefined) {
         throw new Error('Invalid token: Token did not contain required fields');
       }
 
-      if (isAdmin) {
-        ctx.state.admin = await strapi.query('user', 'admin').findOne({ id }, []);
-      } else {
-        ctx.state.user = await strapi.plugins['users-permissions'].services.user.fetch({ id });
-      }
+      ctx.state.user = await strapi.plugins['users-permissions'].services.user.fetch({ id });
+
     } catch (err) {
       return handleErrors(ctx, err, 'unauthorized');
-    }
-
-    if (ctx.state.admin) {
-      if (ctx.state.admin.blocked === true) {
-        return handleErrors(
-          ctx,
-          'Your account has been blocked by the administrator.',
-          'unauthorized'
-        );
-      }
-
-      ctx.state.user = ctx.state.admin;
-      return await next();
     }
 
     if (!ctx.state.user) {

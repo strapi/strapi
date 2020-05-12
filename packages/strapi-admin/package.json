@@ -64,8 +64,6 @@
     "match-sorter": "^4.0.2",
     "mini-css-extract-plugin": "^0.6.0",
     "moment": "^2.24.0",
-    "passport": "0.4.1",
-    "passport-jwt": "4.0.0",
     "passport-local": "1.0.0",
     "prop-types": "^15.7.2",
     "react": "^16.9.0",
