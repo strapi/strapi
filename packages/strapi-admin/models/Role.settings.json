@@ -1,0 +1,21 @@
+{
+  "collectionName": "strapi_role",
+  "info": {
+    "name": "Role",
+    "description": ""
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "minLength": 3,
+      "unique": false,
+      "configurable": false,
+      "required": true
+    },
+    "users": {
+      "collection": "user",
+      "via": "roles",
+      "plugin": "admin"
+    }
+  }
+}
