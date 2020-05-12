@@ -7,21 +7,18 @@
   "attributes": {
     "firstname": {
       "type": "string",
-      "minLength": 3,
       "unique": false,
       "configurable": false,
       "required": false
     },
     "lastname": {
       "type": "string",
-      "minLength": 3,
       "unique": false,
       "configurable": false,
       "required": false
     },
     "username": {
       "type": "string",
-      "minLength": 3,
       "unique": true,
       "configurable": false,
       "required": false
