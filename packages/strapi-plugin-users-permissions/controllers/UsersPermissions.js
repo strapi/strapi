@@ -144,7 +144,7 @@ module.exports = {
   },
 
   async init(ctx) {
-    const admins = await strapi.query('administrator', 'admin').find({ _limit: 1 });
+    const admins = await strapi.query('user', 'admin').find({ _limit: 1 });
 
     ctx.send({ hasAdmin: admins.length > 0 });
   },
